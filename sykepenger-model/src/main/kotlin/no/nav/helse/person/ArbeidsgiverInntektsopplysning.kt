@@ -18,7 +18,7 @@ internal class ArbeidsgiverInntektsopplysning(private val orgnummer: String, pri
             val grunnlagForSykepengegrunnlagPerArbeidsgiver = this
                 .associateBy { it.orgnummer }
                 .mapValues { it.value.inntektsopplysning.grunnlagForSykepengegrunnlag() }
-            subsumsjonObserver.`§8-30 ledd 1`(grunnlagForSykepengegrunnlagPerArbeidsgiver, grunnlagForSykepengegrunnlag)
+            subsumsjonObserver.`§ 8-30 ledd 1`(grunnlagForSykepengegrunnlagPerArbeidsgiver, grunnlagForSykepengegrunnlag)
             return grunnlagForSykepengegrunnlag
         }
         internal fun List<ArbeidsgiverInntektsopplysning>.sammenligningsgrunnlag(): Inntekt {

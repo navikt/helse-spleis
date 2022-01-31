@@ -62,7 +62,7 @@ internal class MaksimumSykepengedagerfilter(
         beregnetTidslinje.accept(this)
         if (::sakensStartdato.isInitialized) {
             val avvisteDager = avvisteDager.filter { sakensStartdato <= it }
-            subsumsjonObserver.`§8-12 ledd 1 punktum 1`(
+            subsumsjonObserver.`§ 8-12 ledd 1 punktum 1`(
                 avvisteDager !in periode,
                 this.avvisteDager.firstOrNull() ?: sakensStartdato,
                 this.avvisteDager.lastOrNull() ?: sisteBetalteDag,
@@ -172,7 +172,7 @@ internal class MaksimumSykepengedagerfilter(
 
     private fun nextState(dagen: LocalDate): State? {
         if (opphold >= TILSTREKKELIG_OPPHOLD_I_SYKEDAGER) {
-            subsumsjonObserver.`§8-12 ledd 2`(
+            subsumsjonObserver.`§ 8-12 ledd 2`(
                 true,
                 dagen,
                 TILSTREKKELIG_OPPHOLD_I_SYKEDAGER,
@@ -187,7 +187,7 @@ internal class MaksimumSykepengedagerfilter(
 
         teller.hvisGrensenErNådd(
             hvis248Dager = {
-                subsumsjonObserver.`§8-12 ledd 1 punktum 1`(
+                subsumsjonObserver.`§ 8-12 ledd 1 punktum 1`(
                     true,
                     sakensStartdato,
                     sisteBetalteDag,

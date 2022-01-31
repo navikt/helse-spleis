@@ -69,7 +69,7 @@ internal class Alder(private val fødselsdato: LocalDate) {
 
     private fun førFylte70(periode: Periode, jurist: SubsumsjonObserver) {
         if (periode.start >= syttiårsdagen) return
-        jurist.`§8-3 ledd 1 punktum 2`(
+        jurist.`§ 8-3 ledd 1 punktum 2`(
             oppfylt = true,
             syttiårsdagen = syttiårsdagen,
             utfallFom = periode.start,
@@ -84,7 +84,7 @@ internal class Alder(private val fødselsdato: LocalDate) {
         val avvisteDagerFraOgMedSøtti = avvisteDager.filter { it >= syttiårsdagen }
         if (avvisteDagerFraOgMedSøtti.isEmpty()) return
         aktivitetslogg.info("Utbetaling stoppet etter $syttiårsdagen, søker fylte 70 år.")
-        jurist.`§8-3 ledd 1 punktum 2`(
+        jurist.`§ 8-3 ledd 1 punktum 2`(
             oppfylt = false,
             syttiårsdagen = syttiårsdagen,
             utfallFom = maxOf(syttiårsdagen, periode.start),

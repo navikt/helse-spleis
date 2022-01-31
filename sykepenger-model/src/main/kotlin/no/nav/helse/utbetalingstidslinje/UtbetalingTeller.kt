@@ -103,7 +103,7 @@ internal class UtbetalingTeller private constructor(
     }
 
     internal fun `§8-51 ledd 3`(maksdato: LocalDate) {
-        subsumsjonObserver.`§8-51 ledd 3`(
+        subsumsjonObserver.`§ 8-51 ledd 3`(
             oppfylt = false,
             maksSykepengedagerOver67 = arbeidsgiverRegler.maksSykepengedagerOver67(),
             gjenståendeSykedager = 0,
@@ -113,7 +113,7 @@ internal class UtbetalingTeller private constructor(
     }
 
     private fun `§8-51 ledd 3 - beregning`(forbrukteSykedager: Int, gjenståendeSykedager: Int, maksdato: LocalDate) {
-        subsumsjonObserver.`§8-51 ledd 3`(
+        subsumsjonObserver.`§ 8-51 ledd 3`(
             oppfylt = true,
             maksSykepengedagerOver67 = arbeidsgiverRegler.maksSykepengedagerOver67(),
             gjenståendeSykedager = gjenståendeSykedager,

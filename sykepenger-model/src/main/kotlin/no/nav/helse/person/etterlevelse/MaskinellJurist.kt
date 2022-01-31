@@ -38,11 +38,11 @@ class MaskinellJurist private constructor(
     fun medVedtaksperiode(vedtaksperiodeId: UUID, hendelseIder: List<UUID>) = kopierMedKontekst(mapOf("vedtaksperiode" to vedtaksperiodeId.toString()))
     private fun kopierMedKontekst(kontekster: Map<String, String>) = MaskinellJurist(this, this.kontekster + kontekster)
 
-    override fun `§2`(oppfylt: Boolean) {
-        super.`§2`(oppfylt)
+    override fun `§ 2`(oppfylt: Boolean) {
+        super.`§ 2`(oppfylt)
     }
 
-    override fun `§8-2 ledd 1`(
+    override fun `§ 8-2 ledd 1`(
         oppfylt: Boolean,
         skjæringstidspunkt: LocalDate,
         tilstrekkeligAntallOpptjeningsdager: Int,
@@ -66,7 +66,7 @@ class MaskinellJurist private constructor(
         )
     }
 
-    override fun `§8-3 ledd 1 punktum 2`(
+    override fun `§ 8-3 ledd 1 punktum 2`(
         oppfylt: Boolean,
         syttiårsdagen: LocalDate,
         utfallFom: LocalDate,
@@ -95,7 +95,7 @@ class MaskinellJurist private constructor(
         )
     }
 
-    override fun `§8-3 ledd 2 punktum 1`(oppfylt: Boolean, skjæringstidspunkt: LocalDate, grunnlagForSykepengegrunnlag: Inntekt, minimumInntekt: Inntekt) {
+    override fun `§ 8-3 ledd 2 punktum 1`(oppfylt: Boolean, skjæringstidspunkt: LocalDate, grunnlagForSykepengegrunnlag: Inntekt, minimumInntekt: Inntekt) {
         leggTil(
             EnkelSubsumsjon(
                 utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
@@ -114,7 +114,7 @@ class MaskinellJurist private constructor(
         )
     }
 
-    override fun `§8-10 ledd 2 punktum 1`(
+    override fun `§ 8-10 ledd 2 punktum 1`(
         erBegrenset: Boolean,
         maksimaltSykepengegrunnlag: Inntekt,
         skjæringstidspunkt: LocalDate,
@@ -140,15 +140,15 @@ class MaskinellJurist private constructor(
         )
     }
 
-    override fun `§8-10 ledd 3`(oppfylt: Boolean) {
-        super.`§8-10 ledd 3`(oppfylt)
+    override fun `§ 8-10 ledd 3`(oppfylt: Boolean) {
+        super.`§ 8-10 ledd 3`(oppfylt)
     }
 
-    override fun `§8-11 første ledd`() {
-        super.`§8-11 første ledd`()
+    override fun `§ 8-11 første ledd`() {
+        super.`§ 8-11 første ledd`()
     }
 
-    override fun `§8-12 ledd 1 punktum 1`(
+    override fun `§ 8-12 ledd 1 punktum 1`(
         oppfylt: Boolean,
         fom: LocalDate,
         tom: LocalDate,
@@ -183,7 +183,7 @@ class MaskinellJurist private constructor(
         )
     }
 
-    override fun `§8-12 ledd 2`(
+    override fun `§ 8-12 ledd 2`(
         oppfylt: Boolean,
         dato: LocalDate,
         tilstrekkeligOppholdISykedager: Int,
@@ -210,7 +210,7 @@ class MaskinellJurist private constructor(
         )
     }
 
-    override fun `§8-13 ledd 1`(oppfylt: Boolean, avvisteDager: List<LocalDate>) {
+    override fun `§ 8-13 ledd 1`(oppfylt: Boolean, avvisteDager: List<LocalDate>) {
         leggTil(
             EnkelSubsumsjon(
                 utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
@@ -224,7 +224,7 @@ class MaskinellJurist private constructor(
         )
     }
 
-    override fun `§8-16 ledd 1`(dato: LocalDate, dekningsgrad: Double, inntekt: Double, dekningsgrunnlag: Double) {
+    override fun `§ 8-16 ledd 1`(dato: LocalDate, dekningsgrad: Double, inntekt: Double, dekningsgrunnlag: Double) {
         leggTil(
             GrupperbarSubsumsjon(
                 dato = dato,
@@ -239,7 +239,7 @@ class MaskinellJurist private constructor(
         )
     }
 
-    override fun `§8-17 ledd 1 bokstav a`(arbeidsgiverperiode: List<LocalDate>, førsteNavdag: LocalDate) {
+    override fun `§ 8-17 ledd 1 bokstav a`(arbeidsgiverperiode: List<LocalDate>, førsteNavdag: LocalDate) {
         leggTil(
             EnkelSubsumsjon(
                 VILKAR_BEREGNET,
@@ -260,15 +260,15 @@ class MaskinellJurist private constructor(
         )
     }
 
-    override fun `§8-17 ledd 2`(oppfylt: Boolean) {
-        super.`§8-17 ledd 2`(oppfylt)
+    override fun `§ 8-17 ledd 2`(oppfylt: Boolean) {
+        super.`§ 8-17 ledd 2`(oppfylt)
     }
 
-    override fun `§8-28 ledd 3 bokstav a`(oppfylt: Boolean, grunnlagForSykepengegrunnlag: Inntekt) {
-        super.`§8-28 ledd 3 bokstav a`(oppfylt, grunnlagForSykepengegrunnlag)
+    override fun `§ 8-28 ledd 3 bokstav a`(oppfylt: Boolean, grunnlagForSykepengegrunnlag: Inntekt) {
+        super.`§ 8-28 ledd 3 bokstav a`(oppfylt, grunnlagForSykepengegrunnlag)
     }
 
-    override fun `§8-30 ledd 1`(grunnlagForSykepengegrunnlagPerArbeidsgiver: Map<String, Inntekt>, grunnlagForSykepengegrunnlag: Inntekt) {
+    override fun `§ 8-30 ledd 1`(grunnlagForSykepengegrunnlagPerArbeidsgiver: Map<String, Inntekt>, grunnlagForSykepengegrunnlag: Inntekt) {
         val beregnetMånedsinntektPerArbeidsgiver = grunnlagForSykepengegrunnlagPerArbeidsgiver
             .mapValues { it.value.reflection { _, månedlig, _, _ -> månedlig } }
         leggTil(
@@ -288,7 +288,7 @@ class MaskinellJurist private constructor(
         )
     }
 
-    override fun `§8-30 ledd 2 punktum 1`(
+    override fun `§ 8-30 ledd 2 punktum 1`(
         oppfylt: Boolean,
         maksimaltTillattAvvikPåÅrsinntekt: Prosent,
         grunnlagForSykepengegrunnlag: Inntekt,
@@ -315,15 +315,15 @@ class MaskinellJurist private constructor(
         )
     }
 
-    override fun `§8-33 ledd 1`() {
-        super.`§8-33 ledd 1`()
+    override fun `§ 8-33 ledd 1`() {
+        super.`§ 8-33 ledd 1`()
     }
 
-    override fun `§8-33 ledd 3`(grunnlagForFeriepenger: Int, opptjeningsår: Year, prosentsats: Double, alder: Int, feriepenger: Double) {
-        super.`§8-33 ledd 3`(grunnlagForFeriepenger, opptjeningsår, prosentsats, alder, feriepenger)
+    override fun `§ 8-33 ledd 3`(grunnlagForFeriepenger: Int, opptjeningsår: Year, prosentsats: Double, alder: Int, feriepenger: Double) {
+        super.`§ 8-33 ledd 3`(grunnlagForFeriepenger, opptjeningsår, prosentsats, alder, feriepenger)
     }
 
-    override fun `§8-51 ledd 2`(
+    override fun `§ 8-51 ledd 2`(
         oppfylt: Boolean,
         skjæringstidspunkt: LocalDate,
         alderPåSkjæringstidspunkt: Int,
@@ -348,7 +348,7 @@ class MaskinellJurist private constructor(
         )
     }
 
-    override fun `§8-51 ledd 3`(oppfylt: Boolean, maksSykepengedagerOver67: Int, gjenståendeSykedager: Int, forbrukteSykedager: Int, maksdato: LocalDate) {
+    override fun `§ 8-51 ledd 3`(oppfylt: Boolean, maksSykepengedagerOver67: Int, gjenståendeSykedager: Int, forbrukteSykedager: Int, maksdato: LocalDate) {
         leggTil(
             EnkelSubsumsjon(
                 utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,

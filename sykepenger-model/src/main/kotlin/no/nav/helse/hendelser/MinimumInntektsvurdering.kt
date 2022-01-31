@@ -20,9 +20,9 @@ internal fun validerMinimumInntekt(
     val alderPåSkjæringstidspunkt = alder.alderPåDato(skjæringstidspunkt)
 
     if (alder.forhøyetInntektskrav(skjæringstidspunkt))
-        subsumsjonObserver.`§8-51 ledd 2`(oppfylt, skjæringstidspunkt, alderPåSkjæringstidspunkt, grunnlag, minimumInntekt)
+        subsumsjonObserver.`§ 8-51 ledd 2`(oppfylt, skjæringstidspunkt, alderPåSkjæringstidspunkt, grunnlag, minimumInntekt)
     else
-        subsumsjonObserver.`§8-3 ledd 2 punktum 1`(oppfylt, skjæringstidspunkt, grunnlag, minimumInntekt)
+        subsumsjonObserver.`§ 8-3 ledd 2 punktum 1`(oppfylt, skjæringstidspunkt, grunnlag, minimumInntekt)
 
     if (oppfylt) aktivitetslogg.info("Krav til minste sykepengegrunnlag er oppfylt")
     else aktivitetslogg.warn("Perioden er avslått på grunn av at inntekt er under krav til minste sykepengegrunnlag")

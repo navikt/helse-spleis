@@ -21,7 +21,7 @@ internal class Sykdomsgradfilter(
         avvis(tidslinjer, dagerUnderGrensen.grupperSammenhengendePerioder(), listOf(Begrunnelse.MinimumSykdomsgrad))
         val avvisteDager = avvisteDager(tidslinjer, periode, Begrunnelse.MinimumSykdomsgrad)
         val harAvvisteDager = avvisteDager.isNotEmpty()
-        subsumsjonObserver.`§8-13 ledd 1`(oppfylt = !harAvvisteDager, avvisteDager.map { it.dato })
+        subsumsjonObserver.`§ 8-13 ledd 1`(oppfylt = !harAvvisteDager, avvisteDager.map { it.dato })
         if (harAvvisteDager)
             return aktivitetslogg.warn("Minst én dag uten utbetaling på grunn av sykdomsgrad under 20 %%. Vurder å sende vedtaksbrev fra Infotrygd")
         aktivitetslogg.info("Ingen avviste dager på grunn av 20 %% samlet sykdomsgrad-regel for denne perioden")

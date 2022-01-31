@@ -19,7 +19,7 @@ interface SubsumsjonObserver {
      * @param oppfylt hvorvidt sykmeldte har oppfylt krav til medlemskap i folketrygden
      */
     @Suppress("UNUSED_PARAMETER")
-    fun `§2`(oppfylt: Boolean) {
+    fun `§ 2`(oppfylt: Boolean) {
     }
 
     /**
@@ -33,7 +33,7 @@ interface SubsumsjonObserver {
      * @param arbeidsforhold hvilke arbeidsforhold det er tatt utgangspunkt i ved beregning av opptjeningstid
      * @param antallOpptjeningsdager antall opptjeningsdager sykmeldte faktisk har på [skjæringstidspunkt]
      */
-    fun `§8-2 ledd 1`(
+    fun `§ 8-2 ledd 1`(
         oppfylt: Boolean,
         skjæringstidspunkt: LocalDate,
         tilstrekkeligAntallOpptjeningsdager: Int,
@@ -56,7 +56,7 @@ interface SubsumsjonObserver {
      * @param tidslinjeTom til-og-med-dato vurderingen gjøres for
      * @param avvisteDager alle dager vurderingen ikke er [oppfylt] for. Tom dersom sykmeldte ikke fyller 70 år mellom [tidslinjeFom] og [tidslinjeTom]
      */
-    fun `§8-3 ledd 1 punktum 2`(
+    fun `§ 8-3 ledd 1 punktum 2`(
         oppfylt: Boolean,
         syttiårsdagen: LocalDate,
         utfallFom: LocalDate,
@@ -78,7 +78,7 @@ interface SubsumsjonObserver {
      * @param grunnlagForSykepengegrunnlag total inntekt på tvers av alle relevante arbeidsgivere
      * @param minimumInntekt minimum beløp [grunnlagForSykepengegrunnlag] må være lik eller større enn for at vilkåret skal være [oppfylt]
      */
-    fun `§8-3 ledd 2 punktum 1`(
+    fun `§ 8-3 ledd 2 punktum 1`(
         oppfylt: Boolean,
         skjæringstidspunkt: LocalDate,
         grunnlagForSykepengegrunnlag: Inntekt,
@@ -99,7 +99,7 @@ interface SubsumsjonObserver {
      * @param skjæringstidspunkt dato [maksimaltSykepengegrunnlag] settes ut fra
      * @param grunnlagForSykepengegrunnlag total inntekt på tvers av alle relevante arbeidsgivere
      */
-    fun `§8-10 ledd 2 punktum 1`(
+    fun `§ 8-10 ledd 2 punktum 1`(
         erBegrenset: Boolean,
         maksimaltSykepengegrunnlag: Inntekt,
         skjæringstidspunkt: LocalDate,
@@ -110,10 +110,10 @@ interface SubsumsjonObserver {
 
     //TODO: Hvordan skal denne kunne legges inn???
     @Suppress("UNUSED_PARAMETER")
-    fun `§8-10 ledd 3`(oppfylt: Boolean) {
+    fun `§ 8-10 ledd 3`(oppfylt: Boolean) {
     }
 
-    fun `§8-11 første ledd`() {
+    fun `§ 8-11 første ledd`() {
         // versjon = FOLKETRYGDLOVENS_OPPRINNELSESDATO
     }
 
@@ -131,7 +131,7 @@ interface SubsumsjonObserver {
      * @param maksdato dato for opphør av rett til sykepenger
      * @param avvisteDager dager vilkåret ikke er [oppfylt] for
      */
-    fun `§8-12 ledd 1 punktum 1`(
+    fun `§ 8-12 ledd 1 punktum 1`(
         oppfylt: Boolean,
         fom: LocalDate,
         tom: LocalDate,
@@ -157,7 +157,7 @@ interface SubsumsjonObserver {
      * @param tidslinjegrunnlag alle tidslinjer det tas utgangspunkt i ved bygging av [beregnetTidslinje]
      * @param beregnetTidslinje tidslinje det tas utgangspunkt i ved utbetaling for aktuell vedtaksperiode
      */
-    fun `§8-12 ledd 2`(
+    fun `§ 8-12 ledd 2`(
         oppfylt: Boolean,
         dato: LocalDate,
         tilstrekkeligOppholdISykedager: Int,
@@ -175,7 +175,7 @@ interface SubsumsjonObserver {
      * @param oppfylt **true** dersom uføregraden er minst 20%
      * @param avvisteDager dager som ikke møter kriterie for [oppfylt]
      */
-    fun `§8-13 ledd 1`(oppfylt: Boolean, avvisteDager: List<LocalDate>) {
+    fun `§ 8-13 ledd 1`(oppfylt: Boolean, avvisteDager: List<LocalDate>) {
         // punktum = (1..2).punktum,
         // versjon = FOLKETRYGDLOVENS_OPPRINNELSESDATO,
     }
@@ -190,7 +190,7 @@ interface SubsumsjonObserver {
      * @param inntekt inntekt for aktuell arbeidsgiver
      * @param dekningsgrunnlag maks dagsats før reduksjon til 6G og reduksjon for sykmeldingsgrad
      */
-    fun `§8-16 ledd 1`(dato: LocalDate, dekningsgrad: Double, inntekt: Double, dekningsgrunnlag: Double) {}
+    fun `§ 8-16 ledd 1`(dato: LocalDate, dekningsgrad: Double, inntekt: Double, dekningsgrunnlag: Double) {}
 
     /**
      * Vurdering av når utbetaling av sykepenger tidligst skal starte
@@ -200,14 +200,14 @@ interface SubsumsjonObserver {
      * @param arbeidsgiverperiode alle arbeidsgiverperiode-dager
      * @param førsteNavdag første dag NAV skal utbetale
      */
-    fun `§8-17 ledd 1 bokstav a`(arbeidsgiverperiode: List<LocalDate>, førsteNavdag: LocalDate) {}
+    fun `§ 8-17 ledd 1 bokstav a`(arbeidsgiverperiode: List<LocalDate>, førsteNavdag: LocalDate) {}
 
     @Suppress("UNUSED_PARAMETER")
-    fun `§8-17 ledd 2`(oppfylt: Boolean) {
+    fun `§ 8-17 ledd 2`(oppfylt: Boolean) {
     } //Legges inn på ferie/permisjonsdager i utbetalingstidslinje, med periodene av ferie/permisjon som input
 
     @Suppress("UNUSED_PARAMETER")
-    fun `§8-28 ledd 3 bokstav a`(
+    fun `§ 8-28 ledd 3 bokstav a`(
         oppfylt: Boolean,
         //inntekter: List<Inntektshistorikk.Skatt>,
         //inntekterSisteTreMåneder: List<Inntektshistorikk.Skatt>,
@@ -225,7 +225,7 @@ interface SubsumsjonObserver {
      * @param grunnlagForSykepengegrunnlagPerArbeidsgiver beregnet inntekt per arbeidsgiver
      * @param grunnlagForSykepengegrunnlag beregnet inntekt på tvers av arbeidsgivere
      */
-    fun `§8-30 ledd 1`(
+    fun `§ 8-30 ledd 1`(
         grunnlagForSykepengegrunnlagPerArbeidsgiver: Map<String, Inntekt>,
         grunnlagForSykepengegrunnlag: Inntekt
     ) {
@@ -235,7 +235,7 @@ interface SubsumsjonObserver {
             .mapValues { it.value.reflection { _, månedlig, _, _ -> månedlig } }
     }
 
-    fun `§8-30 ledd 2 punktum 1`(
+    fun `§ 8-30 ledd 2 punktum 1`(
         oppfylt: Boolean,
         maksimaltTillattAvvikPåÅrsinntekt: Prosent,
         grunnlagForSykepengegrunnlag: Inntekt,
@@ -246,10 +246,10 @@ interface SubsumsjonObserver {
         // punktum = 1.punktum
     }
 
-    fun `§8-33 ledd 1`() {}
+    fun `§ 8-33 ledd 1`() {}
 
     @Suppress("UNUSED_PARAMETER")
-    fun `§8-33 ledd 3`(
+    fun `§ 8-33 ledd 3`(
         grunnlagForFeriepenger: Int,
         opptjeningsår: Year,
         prosentsats: Double,
@@ -269,7 +269,7 @@ interface SubsumsjonObserver {
      * @param grunnlagForSykepengegrunnlag total inntekt på tvers av alle relevante arbeidsgivere
      * @param minimumInntekt minimum beløp [grunnlagForSykepengegrunnlag] må være lik eller større enn for at vilkåret skal være [oppfylt]
      */
-    fun `§8-51 ledd 2`(
+    fun `§ 8-51 ledd 2`(
         oppfylt: Boolean,
         skjæringstidspunkt: LocalDate,
         alderPåSkjæringstidspunkt: Int,
@@ -288,7 +288,7 @@ interface SubsumsjonObserver {
      * @param forbrukteSykedager antall forbrukte sykedager
      * @param maksdato siste utbetalingsdag av sykepenger
      */
-    fun `§8-51 ledd 3`(oppfylt: Boolean, maksSykepengedagerOver67: Int, gjenståendeSykedager: Int, forbrukteSykedager: Int, maksdato: LocalDate) {}
+    fun `§ 8-51 ledd 3`(oppfylt: Boolean, maksSykepengedagerOver67: Int, gjenståendeSykedager: Int, forbrukteSykedager: Int, maksdato: LocalDate) {}
 
     private class UtbetalingstidslinjeVisitor(utbetalingstidslinje: Utbetalingstidslinje) : UtbetalingsdagVisitor {
         private val navdager = mutableListOf<Periode>()
@@ -340,7 +340,6 @@ interface SubsumsjonObserver {
 
     companion object {
         internal fun List<Utbetalingstidslinje>.toSubsumsjonFormat(): List<List<Map<String, Any>>> = map { it.toSubsumsjonFormat() }
-
         internal fun Utbetalingstidslinje.toSubsumsjonFormat(): List<Map<String, Any>> = UtbetalingstidslinjeVisitor(this).dager()
     }
 }

@@ -19,7 +19,7 @@ internal class MaskinellJuristTest {
             .medOrganisasjonsnummer("123456789")
             .medVedtaksperiode(UUID.fromString("6bce6c83-28ab-4a8c-b7f6-8402988bc8fc"), emptyList())
 
-        vedtaksperiodeJurist.`§8-2 ledd 1`(true, LocalDate.now(), 1, emptyList(), 1)
+        vedtaksperiodeJurist.`§ 8-2 ledd 1`(true, LocalDate.now(), 1, emptyList(), 1)
 
         assertKontekster(
             vedtaksperiodeJurist.subsumsjoner()[0],
@@ -36,7 +36,7 @@ internal class MaskinellJuristTest {
             .medOrganisasjonsnummer("123456789")
             .medOrganisasjonsnummer("987654321")
 
-        arbeidsgiverJurist.`§8-2 ledd 1`(true, LocalDate.now(), 1, emptyList(), 1)
+        arbeidsgiverJurist.`§ 8-2 ledd 1`(true, LocalDate.now(), 1, emptyList(), 1)
 
         assertKontekster(
             arbeidsgiverJurist.subsumsjoner()[0],
