@@ -486,6 +486,13 @@ class Person private constructor(
 
     internal fun ghostPeriode(skjæringstidspunkt: LocalDate) = arbeidsgivere.ghostPeriode(skjæringstidspunkt)
 
+    internal fun <T> hentArbeidsforhold(creator: (orgnummer: String, ansattFom: LocalDate, ansattTom: LocalDate?, erAktiv: Boolean) -> T) =
+        skjæringstidspunkter().associateWith { skjæringstidspunkt ->
+            arbeidsgivere.flatMap { arbeidsgiver ->
+                arbeidsgiver.arbeidsforhold(skjæringstidspunkt, creator)
+            }
+        }
+
     internal fun harNærliggendeUtbetaling(periode: Periode): Boolean {
         val arbeidsgiverperiode = 16L
         val farligOmråde = periode.let { it.start.minusDays(arbeidsgiverperiode) til it.endInclusive.plusYears(3) }

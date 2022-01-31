@@ -1,10 +1,11 @@
 package no.nav.helse.serde.api.builders
 
 import no.nav.helse.Fødselsnummer
+import no.nav.helse.person.*
 import no.nav.helse.person.Arbeidsgiver
-import no.nav.helse.person.Person
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.serde.AbstractBuilder
+import no.nav.helse.serde.api.ArbeidsforholdDTO
 import no.nav.helse.serde.api.PersonDTO
 import no.nav.helse.serde.api.v2.HendelseDTO
 import no.nav.helse.serde.api.v2.buildere.OppsamletSammenligningsgrunnlagBuilder
@@ -38,7 +39,7 @@ internal class PersonBuilder(
             inntektsgrunnlag = inntektshistorikkBuilder.build(),
             dødsdato = dødsdato,
             versjon = versjon,
-            arbeidsforholdPerSkjæringstidspunkt = emptyMap()
+            arbeidsforholdPerSkjæringstidspunkt = person.hentArbeidsforhold(::ArbeidsforholdDTO)
         )
     }
 

@@ -1078,6 +1078,11 @@ internal class Arbeidsgiver private constructor(
         tilstøtendeBak(vedtaksperiode)?.tidligerePeriodeRebehandles(hendelse)
     }
 
+    fun <T> arbeidsforhold(skjæringstidspunkt: LocalDate, creator: (orgnummer: String, ansattFom: LocalDate, ansattTom: LocalDate?, erAktiv: Boolean) -> T) =
+        arbeidsforholdhistorikk.sisteArbeidsforhold(skjæringstidspunkt) { ansattFom: LocalDate, ansattTom: LocalDate?, erAktiv: Boolean ->
+            creator(organisasjonsnummer, ansattFom, ansattTom, erAktiv)
+        }
+
     internal class JsonRestorer private constructor() {
         internal companion object {
             internal fun restore(

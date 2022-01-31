@@ -2,6 +2,7 @@ package no.nav.helse.person
 
 import no.nav.helse.person.Arbeidsforholdhistorikk.Arbeidsforhold.Companion.harAktivtArbeidsforhold
 import no.nav.helse.person.Arbeidsforholdhistorikk.Arbeidsforhold.Companion.harArbeidsforholdSomErNyereEnnTreMåneder
+import no.nav.helse.person.Arbeidsforholdhistorikk.Arbeidsforhold.Companion.create
 import java.time.LocalDate
 import java.util.*
 
@@ -45,9 +46,10 @@ internal class Arbeidsforholdhistorikk private constructor(
     }
 
     private fun sisteInnslag(skjæringstidspunkt: LocalDate) = historikk.lastOrNull { it.gjelder(skjæringstidspunkt) }
+    internal fun <T> sisteArbeidsforhold(skjæringstidspunkt: LocalDate, creator: (LocalDate, LocalDate?, Boolean) -> T) =
+        sisteInnslag(skjæringstidspunkt)?.arbeidsforhold?.create(creator) ?: emptyList()
 
-
-    internal class Innslag(private val id: UUID, private val arbeidsforhold: List<Arbeidsforhold>, private val skjæringstidspunkt: LocalDate) {
+    internal class Innslag(private val id: UUID, val arbeidsforhold: List<Arbeidsforhold>, private val skjæringstidspunkt: LocalDate) {
         internal fun accept(visitor: ArbeidsforholdhistorikkVisitor) {
             visitor.preVisitArbeidsforholdinnslag(this, id, skjæringstidspunkt)
             arbeidsforhold.forEach { it.accept(visitor) }
@@ -110,6 +112,9 @@ internal class Arbeidsforholdhistorikk private constructor(
                 any { it.harArbeidetMindreEnnTreMåneder(skjæringstidspunkt) && it.erAktivt }
 
             internal fun Collection<Arbeidsforhold>.harAktivtArbeidsforhold() = any { it.erAktivt }
+
+            internal fun <T> List<Arbeidsforhold>.create(creator: (LocalDate, LocalDate?, Boolean) -> T) =
+                map { creator(it.ansattFom, it.ansattTom, it.erAktivt) }
         }
 
     }
