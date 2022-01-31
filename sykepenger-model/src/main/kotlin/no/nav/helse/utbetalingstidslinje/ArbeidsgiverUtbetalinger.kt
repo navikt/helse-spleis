@@ -17,7 +17,7 @@ internal class ArbeidsgiverUtbetalinger(
     private val vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk,
     private val subsumsjonObserver: SubsumsjonObserver
 ) {
-    internal lateinit var sykepengerettighet: Sykepengerettighet
+    internal lateinit var maksimumSykepenger: Alder.MaksimumSykepenger
 
     internal fun beregn(
         aktivitetslogg: IAktivitetslogg,
@@ -45,7 +45,7 @@ internal class ArbeidsgiverUtbetalinger(
         Sykdomsgradfilter(tidslinjer, periode, aktivitetslogg, subsumsjonObserver).filter()
         AvvisDagerEtterDødsdatofilter(tidslinjer, periode, dødsdato, aktivitetslogg).filter()
         vilkårsgrunnlagHistorikk.avvisInngangsvilkår(tidslinjer, alder)
-        sykepengerettighet = MaksimumSykepengedagerfilter(alder, regler, periode, aktivitetslogg, subsumsjonObserver).filter(
+        maksimumSykepenger = MaksimumSykepengedagerfilter(alder, regler, periode, aktivitetslogg, subsumsjonObserver).filter(
             tidslinjer,
             infotrygdhistorikk.utbetalingstidslinje().kutt(periode.endInclusive)
         )

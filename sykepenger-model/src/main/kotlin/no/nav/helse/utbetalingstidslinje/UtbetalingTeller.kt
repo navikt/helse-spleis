@@ -2,7 +2,8 @@ package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.utbetalingstidslinje.Begrunnelse.SykepengedagerOppbrukt
-import java.time.DayOfWeek
+import java.time.DayOfWeek.SATURDAY
+import java.time.DayOfWeek.SUNDAY
 import java.time.LocalDate
 import kotlin.math.max
 
@@ -15,7 +16,6 @@ internal class UtbetalingTeller private constructor(
 ) {
     private companion object {
         private const val HISTORISK_PERIODE_I_ÅR: Long = 3
-
     }
     private lateinit var startdatoSykepengerettighet: LocalDate
     private lateinit var startdatoTreårsvindu: LocalDate
@@ -23,7 +23,6 @@ internal class UtbetalingTeller private constructor(
 
     internal constructor(alder: Alder, arbeidsgiverRegler: ArbeidsgiverRegler, subsumsjonObserver: SubsumsjonObserver) :
         this(alder, arbeidsgiverRegler, 0, 0, subsumsjonObserver)
-
 
     internal fun begrunnelse(dato: LocalDate): Begrunnelse {
         // avslag skal begrunnes med SykepengedagerOppbrukt (§ 8-15) så lenge man har brukt ordinær kvote;
@@ -112,16 +111,6 @@ internal class UtbetalingTeller private constructor(
         )
     }
 
-    private fun `§8-51 ledd 3 - beregning`(forbrukteSykedager: Int, gjenståendeSykedager: Int, maksdato: LocalDate) {
-        subsumsjonObserver.`§ 8-51 ledd 3`(
-            oppfylt = true,
-            maksSykepengedagerOver67 = arbeidsgiverRegler.maksSykepengedagerOver67(),
-            gjenståendeSykedager = gjenståendeSykedager,
-            forbrukteSykedager = forbrukteSykedager,
-            maksdato = maksdato
-        )
-    }
-
     internal fun erFørMaksdato(dato: LocalDate): Boolean {
         val harNåddMaksSykepengedager = forbrukteDager >= arbeidsgiverRegler.maksSykepengedager()
         val harNåddMaksSykepengedagerOver67 = gammelPersonDager >= arbeidsgiverRegler.maksSykepengedagerOver67()
@@ -135,44 +124,17 @@ internal class UtbetalingTeller private constructor(
         return !harNåddMaksSykepengedager && !harNåddMaksSykepengedagerOver67 && !harFylt70
     }
 
-    private var forrigeResultat: Pair<Int, LocalDate>? = null
+    internal fun maksimumSykepenger(sisteUtbetalingsdag: LocalDate, sisteKjenteDag: LocalDate = sisteUtbetalingsdag): Alder.MaksimumSykepenger {
+        val gjenståendeSykepengedager = arbeidsgiverRegler.maksSykepengedager() - forbrukteDager
+        val gjenståendeSykepengedagerOver67 = arbeidsgiverRegler.maksSykepengedagerOver67() - gammelPersonDager
+        // dersom personen har gjenstående sykedager brukes sisteKjenteDag fordi personen kan ha ferie/annen kjent informasjon på slutten av tidslinjen, og ikke
+        // nødvendigvis en utbetalingsdag.
+        val perspektiv = if (gjenståendeSykepengedager == 0 || gjenståendeSykepengedagerOver67 == 0) sisteUtbetalingsdag else sisteKjenteDag.minusDays(when (sisteKjenteDag.dayOfWeek) {
+            SATURDAY -> 1
+            SUNDAY -> 2
+            else -> 0
+        })
 
-    internal fun maksdato(sisteUtbetalingsdag: LocalDate): LocalDate {
-        beregnGjenståendeSykepengedager(minOf(alder.sisteVirkedagFørFylte70år, sisteUtbetalingsdag))
-        return forrigeResultat!!.let { (_, maksdato) -> maksdato }
-    }
-
-    internal fun forbrukteDager() = forbrukteDager
-
-    internal fun gjenståendeSykepengedager(sisteUtbetalingsdag: LocalDate): Int {
-        beregnGjenståendeSykepengedager(sisteUtbetalingsdag)
-        return forrigeResultat!!.let { (gjenståendeSykedager, _) -> gjenståendeSykedager }
-    }
-
-    private fun beregnGjenståendeSykepengedager(sisteUtbetalingsdag: LocalDate) {
-        val faktiskeDagerTeller = this
-        val gjenståendeDagerTeller = UtbetalingTeller(alder, arbeidsgiverRegler, forbrukteDager, gammelPersonDager, subsumsjonObserver)
-        var result = sisteUtbetalingsdag
-        var teller = 0
-        while (gjenståendeDagerTeller.erFørMaksdato(result)) {
-            result = result.plusDays(
-                when (result.dayOfWeek) {
-                    DayOfWeek.FRIDAY -> 3
-                    DayOfWeek.SATURDAY -> 2
-                    else -> 1
-                }
-            )
-            teller += 1
-            gjenståendeDagerTeller.inkrementer(result)
-        }
-        val nyttResultat = teller to result
-        if (nyttResultat != faktiskeDagerTeller.forrigeResultat) {
-            faktiskeDagerTeller.forrigeResultat = nyttResultat
-            gjenståendeDagerTeller.hvisGrensenErNådd(
-                hvis67År = {
-                    gjenståendeDagerTeller.`§8-51 ledd 3 - beregning`(faktiskeDagerTeller.forbrukteDager, teller, result)
-                }
-            )
-        }
+        return alder.maksimumSykepenger(perspektiv, forbrukteDager, gjenståendeSykepengedager, gjenståendeSykepengedagerOver67)
     }
 }

@@ -7,12 +7,13 @@ import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Ledd.LEDD_1
 import no.nav.helse.person.Paragraf.PARAGRAF_8_3
 import no.nav.helse.person.Punktum.Companion.punktum
+import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall.VILKAR_IKKE_OPPFYLT
 import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall.VILKAR_OPPFYLT
-import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 
 internal class AlderTest {
 
@@ -139,6 +140,56 @@ internal class AlderTest {
             jurist = jurist
         )
         SubsumsjonInspektør(jurist).assertParagraf(PARAGRAF_8_3, LEDD_1, 16.desember(2011), 2.punktum)
+    }
+
+    @Test
+    fun `siste dag med sykepenger 70 år`() {
+        assertSisteDagMedSykepenger(9.januar, Hjemmelbegrunnelse.OVER_70, 10.januar, FYLLER_70_ÅR_10_JANUAR_2018, 248, 60)
+        assertSisteDagMedSykepenger(9.januar, Hjemmelbegrunnelse.OVER_70, 1.januar, FYLLER_70_ÅR_10_JANUAR_2018, 248, 60)
+    }
+
+    @Test
+    fun `siste dag med sykepenger 67 år`() {
+        assertSisteDagMedSykepenger(1.januar + 60.ukedager, Hjemmelbegrunnelse.OVER_67, 1.januar, FYLLER_67_ÅR_1_JANUAR_2018, 248, 60)
+        assertSisteDagMedSykepenger(1.januar + 20.ukedager, Hjemmelbegrunnelse.UNDER_67, 1.januar, FYLLER_67_ÅR_1_JANUAR_2018, 20, 60)
+        assertSisteDagMedSykepenger(1.januar + 60.ukedager, Hjemmelbegrunnelse.OVER_67, 1.desember(2017), FYLLER_67_ÅR_1_JANUAR_2018, 200, 60)
+        assertSisteDagMedSykepenger(1.mars + 40.ukedager, Hjemmelbegrunnelse.OVER_67, 1.mars, FYLLER_67_ÅR_1_JANUAR_2018, 248, 40)
+    }
+
+    @Test
+    fun `siste dag med sykepenger under 67 år`() {
+        assertSisteDagMedSykepenger(1.januar + 248.ukedager, Hjemmelbegrunnelse.UNDER_67, 1.januar, FYLLER_18_ÅR_2_NOVEMBER_2018, 248, 60)
+        assertSisteDagMedSykepenger(1.januar, Hjemmelbegrunnelse.UNDER_67, 1.januar, FYLLER_18_ÅR_2_NOVEMBER_2018, 0, 60)
+    }
+
+    @Test
+    fun `siste dag med sykepenger under 67 år faller på samme dag som over 67`() {
+        assertSisteDagMedSykepenger(1.januar + 60.ukedager, Hjemmelbegrunnelse.UNDER_67, 1.januar, FYLLER_18_ÅR_2_NOVEMBER_2018, 60, 60)
+    }
+
+    @Test
+    fun `siste dag med sykepenger over 67 år faller på samme dag som over 70`() {
+        assertSisteDagMedSykepenger(9.januar, Hjemmelbegrunnelse.OVER_67, 1.januar, FYLLER_70_ÅR_10_JANUAR_2018, 248, 6)
+    }
+
+    private enum class Hjemmelbegrunnelse { UNDER_67, OVER_67, OVER_70 }
+
+    private fun assertSisteDagMedSykepenger(forventet: LocalDate, begrunnelse: Hjemmelbegrunnelse, sisteBetalteDag: LocalDate, alder: Alder, gjenståendeSykepengedager: Int, gjenståendeSykepengedagerOver67: Int) {
+        lateinit var hjemmel: Hjemmelbegrunnelse
+        assertEquals(forventet, alder.maksimumSykepenger(sisteBetalteDag, 0, gjenståendeSykepengedager, gjenståendeSykepengedagerOver67).sisteDag(object : Alder.MaksimumSykepenger.Begrunnelse {
+            override fun `§ 8-12 ledd 1 punktum 1`(dato: LocalDate, gjenståendeSykepengedager: Int) {
+                hjemmel = Hjemmelbegrunnelse.UNDER_67
+            }
+
+            override fun `§ 8-51 ledd 3`(dato: LocalDate, gjenståendeSykepengedager: Int) {
+                hjemmel = Hjemmelbegrunnelse.OVER_67
+            }
+
+            override fun `§ 8-3 ledd 1 punktum 2`(dato: LocalDate, gjenståendeSykepengedager: Int) {
+                hjemmel = Hjemmelbegrunnelse.OVER_70
+            }
+        }))
+        assertEquals(begrunnelse, hjemmel)
     }
 
     @Test

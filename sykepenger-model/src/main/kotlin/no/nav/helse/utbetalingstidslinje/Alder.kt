@@ -6,7 +6,11 @@ import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Etterlevelse.Vurderingsresultat.Companion.`§8-33 ledd 3`
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
+import no.nav.helse.plus
+import no.nav.helse.ukedager
 import java.time.DayOfWeek
+import java.time.DayOfWeek.SATURDAY
+import java.time.DayOfWeek.SUNDAY
 import java.time.LocalDate
 import java.time.Year
 import java.time.temporal.ChronoUnit.YEARS
@@ -18,6 +22,7 @@ internal class Alder(private val fødselsdato: LocalDate) {
     private val forhøyetInntektskravAlder: LocalDate = fødselsdato.plusYears(67)
 
     private companion object {
+        private const val MAKS_SYKEPENGEDAGER_OVER_67 = 60
         private const val ALDER_FOR_FORHØYET_FERIEPENGESATS = 59
         private const val MINSTEALDER_UTEN_FULLMAKT_FRA_VERGE = 18
         private fun LocalDate.sisteVirkedagFør(): LocalDate = this.minusDays(
@@ -93,5 +98,61 @@ internal class Alder(private val fødselsdato: LocalDate) {
             tidslinjeTom = periode.endInclusive,
             avvisteDager = avvisteDagerFraOgMedSøtti
         )
+    }
+
+    internal fun maksimumSykepenger(dato: LocalDate, forbrukteDager: Int, gjenståendeSykepengedager: Int, gjenståendeSykepengedagerOver67: Int): MaksimumSykepenger {
+        val maksdatoOrdinærRett = MaksimumSykepenger.ordinærRett(dato, forbrukteDager, gjenståendeSykepengedager)
+        val maksdatoBegrensetRett = MaksimumSykepenger.begrensetRett(dato, forbrukteDager, this, gjenståendeSykepengedagerOver67)
+        val absoluttSisteDagMedSykepenger = MaksimumSykepenger.absoluttSisteDagMedSykepenger(dato, forbrukteDager, sisteVirkedagFørFylte70år)
+        return MaksimumSykepenger.minsteAv(maksdatoOrdinærRett, maksdatoBegrensetRett, absoluttSisteDagMedSykepenger)
+    }
+
+    internal class MaksimumSykepenger private constructor(
+        beregningFom: LocalDate,
+        private val forbrukteDager: Int,
+        private val sisteDag: LocalDate,
+        private val hjemmelstrategi: Begrunnelse.(LocalDate, Int) -> Unit
+    ) {
+        private val gjenståendeDager = if (sisteDag <= beregningFom) 0 else beregningFom.datesUntil(sisteDag)
+            .filter { it.dayOfWeek !in setOf(SATURDAY, SUNDAY) }
+            .count()
+            .toInt()
+
+        internal fun sisteDag(begrunnelse: Begrunnelse? = null): LocalDate {
+            sporBegrunnelse(begrunnelse)
+            return sisteDag
+        }
+
+        internal fun forbrukteDager() = forbrukteDager
+
+        internal fun gjenståendeDager(begrunnelse: Begrunnelse? = null): Int {
+            sporBegrunnelse(begrunnelse)
+            return gjenståendeDager
+        }
+
+        private fun sporBegrunnelse(begrunnelse: Begrunnelse?) {
+            if (begrunnelse == null) return
+            hjemmelstrategi(begrunnelse, sisteDag, gjenståendeDager)
+        }
+
+        interface Begrunnelse {
+            fun `§ 8-12 ledd 1 punktum 1`(dato: LocalDate, gjenståendeSykepengedager: Int) {}
+            fun `§ 8-51 ledd 3`(dato: LocalDate, gjenståendeSykepengedager: Int) {}
+            fun `§ 8-3 ledd 1 punktum 2`(dato: LocalDate, gjenståendeSykepengedager: Int) {}
+        }
+
+        internal companion object {
+            internal fun ordinærRett(dato: LocalDate, forbrukteDager: Int, gjenståendeSykepengedager: Int) =
+                MaksimumSykepenger(dato,forbrukteDager, dato + gjenståendeSykepengedager.ukedager, Begrunnelse::`§ 8-12 ledd 1 punktum 1`)
+
+            internal fun begrensetRett(dato: LocalDate, forbrukteDager: Int, alder: Alder, gjenståendeSykepengedagerOver67: Int) =
+                MaksimumSykepenger(dato, forbrukteDager, if (alder.innenfor67årsgrense(dato)) alder.redusertYtelseAlder + MAKS_SYKEPENGEDAGER_OVER_67.ukedager else dato + gjenståendeSykepengedagerOver67.ukedager, Begrunnelse::`§ 8-51 ledd 3`)
+
+            internal fun absoluttSisteDagMedSykepenger(dato: LocalDate, forbrukteDager: Int, sisteDag: LocalDate) =
+                MaksimumSykepenger(dato, forbrukteDager, sisteDag, Begrunnelse::`§ 8-3 ledd 1 punktum 2`)
+
+            internal fun minsteAv(vararg dato: MaksimumSykepenger) =
+                dato.minByOrNull { it.sisteDag }!!
+        }
     }
 }

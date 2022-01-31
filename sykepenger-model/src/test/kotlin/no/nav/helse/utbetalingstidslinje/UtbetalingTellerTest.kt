@@ -1,10 +1,6 @@
 package no.nav.helse.utbetalingstidslinje
 
-import no.nav.helse.somFødselsnummer
-import no.nav.helse.desember
-import no.nav.helse.februar
-import no.nav.helse.januar
-import no.nav.helse.mai
+import no.nav.helse.*
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -84,7 +80,7 @@ internal class UtbetalingTellerTest {
 
     private fun undersøke(expected: LocalDate, alder: Alder, dager: Int, sisteUtbetalingsdag: LocalDate) {
         grense(alder, dager, sisteUtbetalingsdag.minusDays(dager.toLong() - 1))
-        assertEquals(expected, grense.maksdato(sisteUtbetalingsdag))
+        assertEquals(expected, grense.maksimumSykepenger(sisteUtbetalingsdag).sisteDag())
     }
 
     private fun grense(alder: Alder, dager: Int, dato: LocalDate = 1.januar) {

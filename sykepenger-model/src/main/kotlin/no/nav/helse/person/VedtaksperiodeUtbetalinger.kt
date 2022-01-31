@@ -11,7 +11,7 @@ import no.nav.helse.person.filter.Brukerutbetalingfilter
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.harId
-import no.nav.helse.utbetalingstidslinje.Sykepengerettighet
+import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.time.LocalDate
 import java.util.*
@@ -63,28 +63,28 @@ internal class VedtaksperiodeUtbetalinger(private val arbeidsgiver: Arbeidsgiver
         return nyUtbetaling(hendelse, periode) { utbetaling }
     }
 
-    internal fun lagUtbetaling(fødselsnummer: String, periode: Periode, sykepengerettighet: Sykepengerettighet, hendelse: ArbeidstakerHendelse): Utbetalingstidslinje {
+    internal fun lagUtbetaling(fødselsnummer: String, periode: Periode, maksimumSykepenger: Alder.MaksimumSykepenger, hendelse: ArbeidstakerHendelse): Utbetalingstidslinje {
         return nyUtbetaling(hendelse, periode) {
             arbeidsgiver.lagUtbetaling(
                 aktivitetslogg = hendelse,
                 fødselsnummer = fødselsnummer,
-                maksdato = sykepengerettighet.maksdato,
-                forbrukteSykedager = sykepengerettighet.forbrukteSykedager,
-                gjenståendeSykedager = sykepengerettighet.gjenståendeSykedager,
+                maksdato = maksimumSykepenger.sisteDag(),
+                forbrukteSykedager = maksimumSykepenger.forbrukteDager(),
+                gjenståendeSykedager = maksimumSykepenger.gjenståendeDager(),
                 periode = periode,
                 forrige = siste
             )
         }
     }
 
-    internal fun lagRevurdering(fødselsnummer: String, periode: Periode, sykepengerettighet: Sykepengerettighet, hendelse: ArbeidstakerHendelse): Utbetalingstidslinje {
+    internal fun lagRevurdering(fødselsnummer: String, periode: Periode, maksimumSykepenger: Alder.MaksimumSykepenger, hendelse: ArbeidstakerHendelse): Utbetalingstidslinje {
         return nyUtbetaling(hendelse, periode) {
             arbeidsgiver.lagRevurdering(
                 aktivitetslogg = hendelse,
                 fødselsnummer = fødselsnummer,
-                maksdato = sykepengerettighet.maksdato,
-                forbrukteSykedager = sykepengerettighet.forbrukteSykedager,
-                gjenståendeSykedager = sykepengerettighet.gjenståendeSykedager,
+                maksdato = maksimumSykepenger.sisteDag(),
+                forbrukteSykedager = maksimumSykepenger.forbrukteDager(),
+                gjenståendeSykedager = maksimumSykepenger.gjenståendeDager(),
                 periode = periode,
                 forrige = utbetalinger
             ).also { arbeidsgiver.fordelRevurdertUtbetaling(hendelse, it) }
