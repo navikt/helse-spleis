@@ -37,7 +37,8 @@ internal class PersonBuilder(
             vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk.toDTO(),
             inntektsgrunnlag = inntektshistorikkBuilder.build(),
             dødsdato = dødsdato,
-            versjon = versjon
+            versjon = versjon,
+            arbeidsforholdPerSkjæringstidspunkt = emptyMap()
         )
     }
 

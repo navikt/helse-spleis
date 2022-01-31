@@ -3,7 +3,6 @@ package no.nav.helse.serde.api
 import no.nav.helse.person.ForlengelseFraInfotrygd
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.Periodetype
-import no.nav.helse.serde.PersonData
 import no.nav.helse.serde.api.dto.UtbetalingshistorikkElementDTO
 import no.nav.helse.serde.api.v2.Generasjon
 import no.nav.helse.serde.api.v2.HendelseDTO
@@ -22,8 +21,16 @@ data class PersonDTO(
     val arbeidsgivere: List<ArbeidsgiverDTO>,
     val inntektsgrunnlag: List<InntektsgrunnlagDTO>,
     val vilkårsgrunnlagHistorikk: Map<UUID, Map<LocalDate, Vilkårsgrunnlag>>,
+    val arbeidsforholdPerSkjæringstidspunkt: Map<LocalDate, List<ArbeidsforholdDTO>>,
     val dødsdato: LocalDate?,
     val versjon: Int
+)
+
+data class ArbeidsforholdDTO(
+    val orgnummer: String,
+    val ansattFom: LocalDate,
+    val ansattTom: LocalDate?,
+    val erAktivt: Boolean
 )
 
 data class AktivitetDTO(
