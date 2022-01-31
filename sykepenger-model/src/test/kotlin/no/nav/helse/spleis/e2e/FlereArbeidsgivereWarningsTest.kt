@@ -1,11 +1,11 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.ForventetFeil
+import no.nav.helse.desember
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.desember
-import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.januar
+import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -75,7 +75,7 @@ internal class FlereArbeidsgivereWarningsTest : AbstractEndToEndTest() {
                     grunnlag(a2, 1.januar(2021), 1000.månedlig.repeat(3))
                 )
             , arbeidsforhold = emptyList()),
-            arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(a1.toString(), LocalDate.EPOCH, null), Vilkårsgrunnlag.Arbeidsforhold(a2.toString(), LocalDate.EPOCH, null))
+            arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null), Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null))
         )
         håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
@@ -128,7 +128,7 @@ internal class FlereArbeidsgivereWarningsTest : AbstractEndToEndTest() {
                     grunnlag(a2, 1.januar(2021), 1000.månedlig.repeat(3))
                 )
             , arbeidsforhold = emptyList()),
-            arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(a1.toString(), LocalDate.EPOCH, null), Vilkårsgrunnlag.Arbeidsforhold(a2.toString(), LocalDate.EPOCH, null))
+            arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null), Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null))
         )
         håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)

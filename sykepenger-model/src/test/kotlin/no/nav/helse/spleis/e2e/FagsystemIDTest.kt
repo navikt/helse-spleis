@@ -29,9 +29,9 @@ internal class FagsystemIDTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(30.mai, 23.juni, 100.prosent))
         håndterSøknad(Sykdom(30.mai, 23.juni, 100.prosent))
         val historie1 = listOf(
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 19.mai,  29.mai, 100.prosent, 1000.daglig)
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 19.mai,  29.mai, 100.prosent, 1000.daglig)
         )
-        val inntekter1 = listOf(Inntektsopplysning(ORGNUMMER.toString(), 19.mai(2018), 1000.daglig, true))
+        val inntekter1 = listOf(Inntektsopplysning(ORGNUMMER, 19.mai(2018), 1000.daglig, true))
         håndterUtbetalingshistorikk(1.vedtaksperiode, *historie1.toTypedArray(), inntektshistorikk = inntekter1)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -39,11 +39,11 @@ internal class FagsystemIDTest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode, Oppdragstatus.AKSEPTERT)
 
         val historie2 = historie1 + listOf(
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 24.juni,  12.juli, 100.prosent, 1000.daglig),
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 24.juni,  12.juli, 100.prosent, 1000.daglig),
         )
 
         val inntekter2 = inntekter1 + listOf(
-            Inntektsopplysning(ORGNUMMER.toString(), 24.juni(2018), 1000.daglig, true)
+            Inntektsopplysning(ORGNUMMER, 24.juni(2018), 1000.daglig, true)
         )
         håndterSykmelding(Sykmeldingsperiode(13.juli, 31.juli, 100.prosent))
         håndterSøknad(Sykdom(13.juli, 31.juli, 100.prosent))
@@ -80,10 +80,10 @@ internal class FagsystemIDTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(30.mai, 23.juni, 100.prosent))
         håndterSøknad(Sykdom(30.mai, 23.juni, 100.prosent))
         val historie1 = listOf(
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 19.mai,  29.mai, 100.prosent, 1000.daglig)
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 19.mai,  29.mai, 100.prosent, 1000.daglig)
         )
         val inntekter1 = listOf(
-            Inntektsopplysning(ORGNUMMER.toString(), 19.mai(2018), 1000.daglig, true)
+            Inntektsopplysning(ORGNUMMER, 19.mai(2018), 1000.daglig, true)
         )
         håndterUtbetalingshistorikk(1.vedtaksperiode, *historie1.toTypedArray(), inntektshistorikk = inntekter1)
         håndterYtelser(1.vedtaksperiode)
@@ -92,11 +92,11 @@ internal class FagsystemIDTest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode, Oppdragstatus.AKSEPTERT)
 
         val historie2 = historie1 + listOf(
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 24.juni,  12.juli, 100.prosent, 1000.daglig),
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 24.juni,  12.juli, 100.prosent, 1000.daglig),
         )
         val inntekter2 = listOf(
-            Inntektsopplysning(ORGNUMMER.toString(), 24.juni(2018), 1000.daglig, true),
-            Inntektsopplysning(ORGNUMMER.toString(), 19.mai(2018), 1000.daglig, true)
+            Inntektsopplysning(ORGNUMMER, 24.juni(2018), 1000.daglig, true),
+            Inntektsopplysning(ORGNUMMER, 19.mai(2018), 1000.daglig, true)
         )
         håndterSykmelding(Sykmeldingsperiode(13.juli, 31.juli, 100.prosent))
         håndterSøknad(Sykdom(13.juli, 31.juli, 100.prosent))
@@ -137,10 +137,10 @@ internal class FagsystemIDTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
         val historie1 = listOf(
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 1.januar,  31.januar, 100.prosent, 1000.daglig)
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar,  31.januar, 100.prosent, 1000.daglig)
         )
         val inntekter1 = listOf(
-            Inntektsopplysning(ORGNUMMER.toString(), 1.januar(2018), 1000.daglig, true)
+            Inntektsopplysning(ORGNUMMER, 1.januar(2018), 1000.daglig, true)
         )
         håndterUtbetalingshistorikk(1.vedtaksperiode, *historie1.toTypedArray(), inntektshistorikk = inntekter1)
         håndterYtelser(1.vedtaksperiode)
@@ -149,11 +149,11 @@ internal class FagsystemIDTest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode, Oppdragstatus.AKSEPTERT)
         val historie2 = historie1 + listOf(
             // [ nok gap til ny arbeidsgiverperiode ]
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 5.april,  30.april, 100.prosent, 1000.daglig)
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 5.april,  30.april, 100.prosent, 1000.daglig)
         )
         val inntekter2 = listOf(
-            Inntektsopplysning(ORGNUMMER.toString(), 1.januar(2018), 1000.daglig, true),
-            Inntektsopplysning(ORGNUMMER.toString(), 5.april(2018), 1000.daglig, true)
+            Inntektsopplysning(ORGNUMMER, 1.januar(2018), 1000.daglig, true),
+            Inntektsopplysning(ORGNUMMER, 5.april(2018), 1000.daglig, true)
         )
         håndterSykmelding(Sykmeldingsperiode(1.mai, 31.mai, 100.prosent))
         håndterSøknad(Sykdom(1.mai, 31.mai, 100.prosent))
@@ -190,9 +190,9 @@ internal class FagsystemIDTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
         val historie1 = listOf(
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 1.januar,  31.januar, 100.prosent, 1000.daglig)
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar,  31.januar, 100.prosent, 1000.daglig)
         )
-        val inntekter1 = listOf(Inntektsopplysning(ORGNUMMER.toString(), 1.januar(2018), 1000.daglig, true))
+        val inntekter1 = listOf(Inntektsopplysning(ORGNUMMER, 1.januar(2018), 1000.daglig, true))
         håndterUtbetalingshistorikk(1.vedtaksperiode, *historie1.toTypedArray(), inntektshistorikk = inntekter1)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -200,13 +200,13 @@ internal class FagsystemIDTest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode, Oppdragstatus.AKSEPTERT)
         val historie2 = historie1 + listOf(
             // [ nok gap til ny arbeidsgiverperiode ]
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 5.april,  10.april, 100.prosent, 1000.daglig)
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 5.april,  10.april, 100.prosent, 1000.daglig)
         )
         håndterSykmelding(Sykmeldingsperiode(11.april, 30.april, 100.prosent))
         håndterSøknad(Sykdom(11.april, 30.april, 100.prosent))
         håndterUtbetalingshistorikk(2.vedtaksperiode, *historie2.toTypedArray(), inntektshistorikk = listOf(
-            Inntektsopplysning(ORGNUMMER.toString(), 5.april(2018), 1000.daglig, true),
-            Inntektsopplysning(ORGNUMMER.toString(), 1.januar(2018), 1000.daglig, true)
+            Inntektsopplysning(ORGNUMMER, 5.april(2018), 1000.daglig, true),
+            Inntektsopplysning(ORGNUMMER, 1.januar(2018), 1000.daglig, true)
         ))
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
@@ -245,7 +245,7 @@ internal class FagsystemIDTest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode, Oppdragstatus.AKSEPTERT)
 
         val historie1 = listOf(
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 1.mai,  29.mai, 100.prosent, 1000.daglig)
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.mai,  29.mai, 100.prosent, 1000.daglig)
         )
 
         håndterSykmelding(Sykmeldingsperiode(30.mai, 30.juni, 100.prosent))
@@ -253,7 +253,7 @@ internal class FagsystemIDTest : AbstractEndToEndTest() {
         håndterUtbetalingshistorikk(
             2.vedtaksperiode,
             *historie1.toTypedArray(),
-            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER.toString(), 1.mai, INNTEKT, true))
+            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.mai, INNTEKT, true))
         )
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
@@ -300,14 +300,14 @@ internal class FagsystemIDTest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode, Oppdragstatus.AKSEPTERT)
 
         val historie1 = listOf(
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 1.mai,  29.mai, 100.prosent, 1000.daglig)
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.mai,  29.mai, 100.prosent, 1000.daglig)
         )
         håndterSykmelding(Sykmeldingsperiode(30.mai, 30.juni, 100.prosent))
         håndterSøknad(Sykdom(30.mai, 30.juni, 100.prosent))
         håndterUtbetalingshistorikk(
             2.vedtaksperiode,
             *historie1.toTypedArray(),
-            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER.toString(), 1.mai, INNTEKT, true))
+            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.mai, INNTEKT, true))
         )
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)

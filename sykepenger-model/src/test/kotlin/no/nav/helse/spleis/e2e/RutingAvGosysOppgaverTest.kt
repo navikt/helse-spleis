@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.*
-import no.nav.helse.ForventetFeil
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.*
 import no.nav.helse.hendelser.til
@@ -52,8 +51,8 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
         nyttVedtak(1.januar, 31.januar)
         håndterSykmelding(Sykmeldingsperiode(17.februar, 25.februar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(17.februar, 20.februar, 80.prosent))
-        håndterUtbetalingshistorikk(2.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 1.februar, 3.februar, 100.prosent, 2000.daglig), inntektshistorikk = listOf(
-            Inntektsopplysning(ORGNUMMER.toString(), 1.februar, 2000.daglig, true)
+        håndterUtbetalingshistorikk(2.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.februar, 3.februar, 100.prosent, 2000.daglig), inntektshistorikk = listOf(
+            Inntektsopplysning(ORGNUMMER, 1.februar, 2000.daglig, true)
         ))
         val søknadHendelseId = håndterSøknad(Sykdom(17.februar, 20.februar, 80.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), 17.februar)

@@ -76,7 +76,7 @@ internal class InntektsmeldingHendelseTest : AbstractPersonTest() {
         val inntektsmelding = Inntektsmelding(
             meldingsreferanseId = UUID.randomUUID(),
             refusjon = Inntektsmelding.Refusjon(INNTEKT_PR_MÅNED, null, emptyList()),
-            orgnummer = ORGNUMMER.toString(),
+            orgnummer = ORGNUMMER,
             fødselsnummer = UNG_PERSON_FNR_2018.toString(),
             aktørId = AKTØRID,
             førsteFraværsdag = 1.januar,
@@ -115,7 +115,7 @@ internal class InntektsmeldingHendelseTest : AbstractPersonTest() {
         meldingsreferanseId = UUID.randomUUID(),
         fnr = UNG_PERSON_FNR_2018.toString(),
         aktørId = AKTØRID,
-        orgnummer = orgnr.toString(),
+        orgnummer = orgnr,
         sykeperioder = sykeperioder.toList(),
         sykmeldingSkrevet = Sykmeldingsperiode.periode(sykeperioder.toList())?.start?.atStartOfDay() ?: LocalDateTime.now(),
         mottatt = Sykmeldingsperiode.periode(sykeperioder.toList())!!.endInclusive.atStartOfDay()
@@ -126,7 +126,7 @@ internal class InntektsmeldingHendelseTest : AbstractPersonTest() {
             meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018.toString(),
             aktørId = "12345",
-            orgnummer = orgnummer.toString(),
+            orgnummer = orgnummer,
             perioder = listOf(*perioder),
             andreInntektskilder = emptyList(),
             sendtTilNAVEllerArbeidsgiver = Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive.atStartOfDay(),

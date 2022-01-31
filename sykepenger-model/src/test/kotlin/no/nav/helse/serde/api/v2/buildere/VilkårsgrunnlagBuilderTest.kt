@@ -1,19 +1,18 @@
 package no.nav.helse.serde.api.v2.buildere
 
 import no.nav.helse.ForventetFeil
-
+import no.nav.helse.desember
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.Vilkårsgrunnlag.*
+import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold
+import no.nav.helse.januar
+import no.nav.helse.mars
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.serde.api.v2.*
 import no.nav.helse.serde.api.v2.Vilkårsgrunnlag
 import no.nav.helse.spleis.e2e.*
-import no.nav.helse.desember
-import no.nav.helse.januar
-import no.nav.helse.mars
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -280,8 +279,8 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
     @Test
     fun `har ikke sammenligningsgrunnlag etter overgang fra Infotrygd`() {
         val skjæringstidspunkt = 1.desember(2017)
-        val infotrygdperioder = arrayOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), skjæringstidspunkt, 31.desember(2017), 100.prosent, inntekt))
-        val inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER.toString(), skjæringstidspunkt, inntekt, true))
+        val infotrygdperioder = arrayOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, skjæringstidspunkt, 31.desember(2017), 100.prosent, inntekt))
+        val inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, skjæringstidspunkt, inntekt, true))
 
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
@@ -409,7 +408,7 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
         omregnetÅrsinntektMånedsbeløp: Double,
         inntektFraAOrdningen: List<InntekterFraAOrdningen>? = null
     ) {
-        assertEquals(orgnummer.toString(), inntekt.organisasjonsnummer)
+        assertEquals(orgnummer, inntekt.organisasjonsnummer)
         assertEquals(sammenligningsgrunnlag, inntekt.sammenligningsgrunnlag)
         assertEquals(omregnetÅrsinntekt, inntekt.omregnetÅrsinntekt?.beløp)
         assertEquals(inntektskilde, inntekt.omregnetÅrsinntekt?.kilde)

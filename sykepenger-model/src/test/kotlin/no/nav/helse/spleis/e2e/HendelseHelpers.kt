@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e
 
 
+import no.nav.helse.desember
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode
 import no.nav.helse.person.*
@@ -10,7 +11,6 @@ import no.nav.helse.serde.api.v2.HendelseDTO
 import no.nav.helse.serde.api.v2.InntektsmeldingDTO
 import no.nav.helse.serde.api.v2.SykmeldingDTO
 import no.nav.helse.serde.api.v2.SøknadNavDTO
-import no.nav.helse.desember
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import java.time.LocalDate
@@ -71,7 +71,7 @@ internal fun AbstractEndToEndTest.tellArbeidsforholdhistorikkinnslag(orgnummer: 
     person.accept(object : PersonVisitor {
 
         override fun preVisitArbeidsgiver(arbeidsgiver: Arbeidsgiver, id: UUID, organisasjonsnummer: String) {
-            erIRiktigArbeidsgiver = orgnummer == null || orgnummer.toString() == organisasjonsnummer
+            erIRiktigArbeidsgiver = orgnummer == null || orgnummer == organisasjonsnummer
         }
 
         override fun preVisitArbeidsforholdinnslag(arbeidsforholdinnslag: Arbeidsforholdhistorikk.Innslag, id: UUID, skjæringstidspunkt: LocalDate) {
@@ -92,7 +92,7 @@ internal fun AbstractEndToEndTest.tellArbeidsforholdINyesteHistorikkInnslag(orgn
     person.accept(object : PersonVisitor {
 
         override fun preVisitArbeidsgiver(arbeidsgiver: Arbeidsgiver, id: UUID, organisasjonsnummer: String) {
-            erIRiktigArbeidsgiver = orgnummer.toString() == organisasjonsnummer
+            erIRiktigArbeidsgiver = orgnummer == organisasjonsnummer
         }
 
         override fun visitArbeidsforhold(ansattFom: LocalDate, ansattTom: LocalDate?, erAktivt: Boolean) {
@@ -124,7 +124,7 @@ private fun utbetalinger(dagTeller: Int, orgnummer: String): List<ArbeidsgiverUt
             (dagTeller / 5 * 7) + dagTeller % 5
             ).toLong()
     )
-    return listOf(ArbeidsgiverUtbetalingsperiode(orgnummer.toString(), førsteDato, 1.desember(2017), 100.prosent, 100.daglig))
+    return listOf(ArbeidsgiverUtbetalingsperiode(orgnummer, førsteDato, 1.desember(2017), 100.prosent, 100.daglig))
 }
 
 internal fun AbstractEndToEndTest.finnSkjæringstidspunkt(orgnummer: String, vedtaksperiodeIdInnhenter: IdInnhenter) =

@@ -484,10 +484,10 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
         val inntektshistorikk = listOf(
-            Inntektsopplysning(a1.toString(), 1.januar(2021), INNTEKT, true)
+            Inntektsopplysning(a1, 1.januar(2021), INNTEKT, true)
         )
         val utbetalinger = arrayOf(
-            ArbeidsgiverUtbetalingsperiode(a1.toString(), 1.januar(2021), 31.januar(2021), 100.prosent, INNTEKT)
+            ArbeidsgiverUtbetalingsperiode(a1, 1.januar(2021), 31.januar(2021), 100.prosent, INNTEKT)
         )
         håndterUtbetalingshistorikk(1.vedtaksperiode, *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1, inntektshistorikk = inntektshistorikk)
@@ -672,11 +672,11 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         //3/5/21	20/5/21	 BS     14	     248	        0	        32
 
         val inntektshistorikkA1 = listOf(
-            Inntektsopplysning(a1.toString(), 1.januar, INNTEKT, true),
+            Inntektsopplysning(a1, 1.januar, INNTEKT, true),
         )
         val inntektshistorikkA2 = listOf(
-            Inntektsopplysning(a1.toString(), 1.januar, INNTEKT, true),
-            Inntektsopplysning(a2.toString(), 1.juli, INNTEKT, true),
+            Inntektsopplysning(a1, 1.januar, INNTEKT, true),
+            Inntektsopplysning(a2, 1.juli, INNTEKT, true),
         )
         val ITPeriodeA1 = 1.januar til 31.januar
         val ITPeriodeA2 = 1.juli til 31.juli
@@ -684,11 +684,11 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         val spleisPeriodeA1 = 1.februar til 28.februar
         val spleisPeriodeA2 = 1.august til 31.august
         val utbetalingerA1 = arrayOf(
-            ArbeidsgiverUtbetalingsperiode(a1.toString(), ITPeriodeA1.start, ITPeriodeA1.endInclusive, 100.prosent, INNTEKT),
+            ArbeidsgiverUtbetalingsperiode(a1, ITPeriodeA1.start, ITPeriodeA1.endInclusive, 100.prosent, INNTEKT),
         )
         val utbetalingerA2 = arrayOf(
-            ArbeidsgiverUtbetalingsperiode(a1.toString(), ITPeriodeA1.start, ITPeriodeA1.endInclusive, 100.prosent, INNTEKT),
-            ArbeidsgiverUtbetalingsperiode(a2.toString(), ITPeriodeA2.start, ITPeriodeA2.endInclusive, 100.prosent, INNTEKT),
+            ArbeidsgiverUtbetalingsperiode(a1, ITPeriodeA1.start, ITPeriodeA1.endInclusive, 100.prosent, INNTEKT),
+            ArbeidsgiverUtbetalingsperiode(a2, ITPeriodeA2.start, ITPeriodeA2.endInclusive, 100.prosent, INNTEKT),
         )
 
         håndterSykmelding(Sykmeldingsperiode(spleisPeriodeA1.start, spleisPeriodeA1.endInclusive, 100.prosent), orgnummer = a1)
@@ -854,10 +854,10 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode, orgnummer = a2)
 
         inspektør(a1).utbetalinger.forEach {
-            assertEquals(a1.toString(), it.inspektør.arbeidsgiverOppdrag.inspektør.mottaker)
+            assertEquals(a1, it.inspektør.arbeidsgiverOppdrag.inspektør.mottaker)
         }
         inspektør(a2).utbetalinger.forEach {
-            assertEquals(a2.toString(), it.inspektør.arbeidsgiverOppdrag.inspektør.mottaker)
+            assertEquals(a2, it.inspektør.arbeidsgiverOppdrag.inspektør.mottaker)
         }
     }
 

@@ -7,8 +7,8 @@ import no.nav.helse.hendelser.InntektForSykepengegrunnlag.Arbeidsforhold
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
-import no.nav.helse.person.TilstandType.*
 import no.nav.helse.januar
+import no.nav.helse.person.TilstandType.*
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Test
 import java.time.YearMonth
@@ -24,7 +24,7 @@ internal class FrilanserTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(
             1.vedtaksperiode, inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
                 inntekter = listOf(
-                    ArbeidsgiverInntekt(ORGNUMMER.toString(), (10..12).map {
+                    ArbeidsgiverInntekt(ORGNUMMER, (10..12).map {
                         ArbeidsgiverInntekt.MånedligInntekt.Sykepengegrunnlag(
                             yearMonth = YearMonth.of(2017, it),
                             type = LØNNSINNTEKT,
@@ -36,7 +36,7 @@ internal class FrilanserTest : AbstractEndToEndTest() {
                 ),
                 arbeidsforhold = listOf(
                     Arbeidsforhold(
-                        ORGNUMMER.toString(), listOf(
+                        ORGNUMMER, listOf(
                             InntektForSykepengegrunnlag.MånedligArbeidsforhold(
                                 yearMonth = YearMonth.of(2017, 10),
                                 erFrilanser = true
@@ -67,7 +67,7 @@ internal class FrilanserTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(
             1.vedtaksperiode, inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
                 inntekter = listOf(
-                    ArbeidsgiverInntekt(a1.toString(), (10..12).map {
+                    ArbeidsgiverInntekt(a1, (10..12).map {
                         ArbeidsgiverInntekt.MånedligInntekt.Sykepengegrunnlag(
                             yearMonth = YearMonth.of(2017, it),
                             type = LØNNSINNTEKT,
@@ -76,7 +76,7 @@ internal class FrilanserTest : AbstractEndToEndTest() {
                             beskrivelse = "beskrivelse"
                         )
                     }),
-                    ArbeidsgiverInntekt(a2.toString(), (10..12).map {
+                    ArbeidsgiverInntekt(a2, (10..12).map {
                         ArbeidsgiverInntekt.MånedligInntekt.Sykepengegrunnlag(
                             yearMonth = YearMonth.of(2017, it),
                             type = LØNNSINNTEKT,
@@ -88,7 +88,7 @@ internal class FrilanserTest : AbstractEndToEndTest() {
                 ),
                 arbeidsforhold = listOf(
                     Arbeidsforhold(
-                        a3.toString(), listOf(
+                        a3, listOf(
                             InntektForSykepengegrunnlag.MånedligArbeidsforhold(
                                 yearMonth = YearMonth.of(2017, 1),
                                 erFrilanser = true

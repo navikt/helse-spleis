@@ -1,10 +1,13 @@
 package no.nav.helse.serde.api
 
+import no.nav.helse.desember
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
+import no.nav.helse.januar
+import no.nav.helse.oktober
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.Person
@@ -13,10 +16,7 @@ import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.serde.api.builders.InntektshistorikkBuilder
 import no.nav.helse.spleis.e2e.*
-import no.nav.helse.desember
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
-import no.nav.helse.januar
-import no.nav.helse.oktober
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
@@ -81,7 +81,7 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
             assertEquals(INNTEKT.reflection { årlig, _, _, _ -> årlig }, inntektsgrunnlaget.sammenligningsgrunnlag)
             assertEquals(0.0, inntektsgrunnlaget.avviksprosent)
             assertEquals(1430.7692307692307, inntektsgrunnlaget.maksUtbetalingPerDag)
-            requireNotNull(inntektsgrunnlaget.inntekter.single { it.arbeidsgiver == ORGNUMMER.toString() }.omregnetÅrsinntekt).also { omregnetÅrsinntekt ->
+            requireNotNull(inntektsgrunnlaget.inntekter.single { it.arbeidsgiver == ORGNUMMER }.omregnetÅrsinntekt).also { omregnetÅrsinntekt ->
                 assertEquals(InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO.Saksbehandler, omregnetÅrsinntekt.kilde)
                 assertEquals(INNTEKT.reflection { årlig, _, _, _ -> årlig }, omregnetÅrsinntekt.beløp)
                 assertEquals(INNTEKT.reflection { _, mnd, _, _ -> mnd }, omregnetÅrsinntekt.månedsbeløp)
@@ -123,13 +123,13 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
             assertEquals(INNTEKT.reflection { _, mnd, _, _ -> mnd } * 13, inntektsgrunnlaget.sammenligningsgrunnlag)
             assertEquals(7.7, inntektsgrunnlaget.avviksprosent)
             assertEquals(1430.7692307692307, inntektsgrunnlaget.maksUtbetalingPerDag)
-            requireNotNull(inntektsgrunnlaget.inntekter.single { it.arbeidsgiver == ORGNUMMER.toString() }.omregnetÅrsinntekt).also { omregnetÅrsinntekt ->
+            requireNotNull(inntektsgrunnlaget.inntekter.single { it.arbeidsgiver == ORGNUMMER }.omregnetÅrsinntekt).also { omregnetÅrsinntekt ->
                 assertEquals(InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO.Inntektsmelding, omregnetÅrsinntekt.kilde)
                 assertEquals(INNTEKT.reflection { årlig, _, _, _ -> årlig }, omregnetÅrsinntekt.beløp)
                 assertEquals(INNTEKT.reflection { _, mnd, _, _ -> mnd }, omregnetÅrsinntekt.månedsbeløp)
             }
         }
-        inntektsgrunnlag.single { it.skjæringstidspunkt == 1.januar }.inntekter.single { it.arbeidsgiver == ORGNUMMER.toString() }.sammenligningsgrunnlag.also { sammenligningsgrunnlag ->
+        inntektsgrunnlag.single { it.skjæringstidspunkt == 1.januar }.inntekter.single { it.arbeidsgiver == ORGNUMMER }.sammenligningsgrunnlag.also { sammenligningsgrunnlag ->
             requireNotNull(sammenligningsgrunnlag)
             assertEquals(INNTEKT.reflection { _, mnd, _, _ -> mnd } * 13, sammenligningsgrunnlag.beløp)
             sammenligningsgrunnlag.inntekterFraAOrdningen.also {
@@ -145,8 +145,8 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar, 31.januar, 100.prosent))
 
-        val historikk = ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 1.oktober(2017),  31.desember(2017), 100.prosent, 1000.daglig)
-        val inntekter = listOf(Inntektsopplysning(ORGNUMMER.toString(), 1.oktober(2017), INNTEKT, true))
+        val historikk = ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.oktober(2017),  31.desember(2017), 100.prosent, 1000.daglig)
+        val inntekter = listOf(Inntektsopplysning(ORGNUMMER, 1.oktober(2017), INNTEKT, true))
         håndterUtbetalingshistorikk(1.vedtaksperiode, historikk, inntektshistorikk = inntekter)
         håndterYtelser(1.vedtaksperiode)
 
@@ -163,13 +163,13 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
             assertNull(inntektsgrunnlaget.sammenligningsgrunnlag)
             assertNull(inntektsgrunnlaget.avviksprosent)
             assertEquals(1430.7692307692307, inntektsgrunnlaget.maksUtbetalingPerDag)
-            requireNotNull(inntektsgrunnlaget.inntekter.single { it.arbeidsgiver == ORGNUMMER.toString() }.omregnetÅrsinntekt).also { omregnetÅrsinntekt ->
+            requireNotNull(inntektsgrunnlaget.inntekter.single { it.arbeidsgiver == ORGNUMMER }.omregnetÅrsinntekt).also { omregnetÅrsinntekt ->
                 assertEquals(InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO.Infotrygd, omregnetÅrsinntekt.kilde)
                 assertEquals(INNTEKT.reflection { årlig, _, _, _ -> årlig }, omregnetÅrsinntekt.beløp)
                 assertEquals(INNTEKT.reflection { _, mnd, _, _ -> mnd }, omregnetÅrsinntekt.månedsbeløp)
             }
         }
-        assertNull(inntektsgrunnlag.single { it.skjæringstidspunkt == 1.oktober(2017) }.inntekter.single { it.arbeidsgiver == ORGNUMMER.toString() }.sammenligningsgrunnlag)
+        assertNull(inntektsgrunnlag.single { it.skjæringstidspunkt == 1.oktober(2017) }.inntekter.single { it.arbeidsgiver == ORGNUMMER }.sammenligningsgrunnlag)
     }
 
     @Test
@@ -182,8 +182,8 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
         håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(25.januar, 31.januar, 100.prosent))
         håndterYtelser(
             2.vedtaksperiode,
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 17.januar,  24.januar, 100.prosent, 1000.daglig),
-            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER.toString(), 17.januar, INNTEKT, true))
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar,  24.januar, 100.prosent, 1000.daglig),
+            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 17.januar, INNTEKT, true))
         )
 
         val builder = InntektshistorikkBuilder(person)
@@ -199,12 +199,12 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
             assertNull(inntektsgrunnlaget.sammenligningsgrunnlag)
             assertNull(inntektsgrunnlaget.avviksprosent)
             assertEquals(1430.7692307692307, inntektsgrunnlaget.maksUtbetalingPerDag)
-            requireNotNull(inntektsgrunnlaget.inntekter.single { it.arbeidsgiver == ORGNUMMER.toString() }.omregnetÅrsinntekt).also { omregnetÅrsinntekt ->
+            requireNotNull(inntektsgrunnlaget.inntekter.single { it.arbeidsgiver == ORGNUMMER }.omregnetÅrsinntekt).also { omregnetÅrsinntekt ->
                 assertEquals(InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO.Infotrygd, omregnetÅrsinntekt.kilde)
                 assertEquals(INNTEKT.reflection { årlig, _, _, _ -> årlig }, omregnetÅrsinntekt.beløp)
                 assertEquals(INNTEKT.reflection { _, mnd, _, _ -> mnd }, omregnetÅrsinntekt.månedsbeløp)
             }
         }
-        assertNull(inntektsgrunnlag.single { it.skjæringstidspunkt == 1.januar }.inntekter.single { it.arbeidsgiver == ORGNUMMER.toString() }.sammenligningsgrunnlag)
+        assertNull(inntektsgrunnlag.single { it.skjæringstidspunkt == 1.januar }.inntekter.single { it.arbeidsgiver == ORGNUMMER }.sammenligningsgrunnlag)
     }
 }

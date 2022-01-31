@@ -83,10 +83,10 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
         val inntektshistorikk = listOf(
-            Inntektsopplysning(a1.toString(), 1.januar(2021), INNTEKT, true)
+            Inntektsopplysning(a1, 1.januar(2021), INNTEKT, true)
         )
         val utbetalinger = arrayOf(
-            ArbeidsgiverUtbetalingsperiode(a1.toString(), 1.januar(2021), 31.januar(2021), 100.prosent, INNTEKT)
+            ArbeidsgiverUtbetalingsperiode(a1, 1.januar(2021), 31.januar(2021), 100.prosent, INNTEKT)
         )
         håndterUtbetalingshistorikk(1.vedtaksperiode, *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1, inntektshistorikk = inntektshistorikk)
@@ -366,8 +366,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 26.januar, 100.prosent))
         håndterUtbetalingshistorikk(
             1.vedtaksperiode,
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 1.desember(2017), 15.desember(2017), 100.prosent, 15000.daglig),
-            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER.toString(), 1.desember(2017), INNTEKT, true))
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.desember(2017), 15.desember(2017), 100.prosent, 15000.daglig),
+            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.desember(2017), INNTEKT, true))
         )
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
         håndterYtelser(1.vedtaksperiode)
@@ -407,8 +407,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 26.januar, 100.prosent))
         håndterUtbetalingshistorikk(
             1.vedtaksperiode,
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 1.desember(2017), 16.desember(2017), 100.prosent, 15000.daglig),
-            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER.toString(), 1.desember(2017), INNTEKT, true))
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.desember(2017), 16.desember(2017), 100.prosent, 15000.daglig),
+            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.desember(2017), INNTEKT, true))
         )
         inspektør.also {
             assertNoErrors(it)
@@ -439,11 +439,11 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
         håndterUtbetalingshistorikk(
             1.vedtaksperiode,
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 27.juli(2020), 20.august(2020), 100.prosent, 2077.daglig),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 21.august(2020), 19.september(2020), 100.prosent, 2077.daglig),
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 27.juli(2020), 20.august(2020), 100.prosent, 2077.daglig),
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 21.august(2020), 19.september(2020), 100.prosent, 2077.daglig),
             ArbeidsgiverUtbetalingsperiode("12345789", 21.august(2019), 19.september(2019), 100.prosent, 1043.daglig),
             inntektshistorikk = listOf(
-                Inntektsopplysning(ORGNUMMER.toString(), 27.juli(2020), 45000.månedlig, true),
+                Inntektsopplysning(ORGNUMMER, 27.juli(2020), 45000.månedlig, true),
                 Inntektsopplysning("12345789", 21.august(2019), 22600.månedlig, true)
             )
         )
@@ -863,8 +863,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     fun `forlengelse av infotrygd`() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 23.februar, 100.prosent))
         håndterSøknad(Sykdom(1.februar, 23.februar, 100.prosent))
-        val historikk = ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 1.januar, 31.januar, 100.prosent, INNTEKT)
-        val inntekter = listOf(Inntektsopplysning(ORGNUMMER.toString(), 1.januar(2018), INNTEKT, true))
+        val historikk = ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 31.januar, 100.prosent, INNTEKT)
+        val inntekter = listOf(Inntektsopplysning(ORGNUMMER, 1.januar(2018), INNTEKT, true))
         håndterUtbetalingshistorikk(1.vedtaksperiode, historikk, inntektshistorikk = inntekter)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -945,8 +945,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     fun `To forlengelser som forlenger utbetaling fra infotrygd skal ha samme maksdato`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(3.januar, 31.januar, 100.prosent))
-        val historie = ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 1.januar, 2.januar, 100.prosent, INNTEKT)
-        val inntekter = listOf(Inntektsopplysning(ORGNUMMER.toString(), 1.januar(2018), INNTEKT, true))
+        val historie = ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 2.januar, 100.prosent, INNTEKT)
+        val inntekter = listOf(Inntektsopplysning(ORGNUMMER, 1.januar(2018), INNTEKT, true))
         håndterUtbetalingshistorikk(1.vedtaksperiode, historie, inntektshistorikk = inntekter)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -968,8 +968,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     fun `fortsettelse av Infotrygd-perioder skal ikke generere utbetalingslinjer for Infotrygd-periode`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(3.januar, 31.januar, 100.prosent))
-        val historie = ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 1.januar, 2.januar, 100.prosent, INNTEKT)
-        val inntekter = listOf(Inntektsopplysning(ORGNUMMER.toString(), 1.januar, INNTEKT, true))
+        val historie = ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 2.januar, 100.prosent, INNTEKT)
+        val inntekter = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true))
         håndterUtbetalingshistorikk(1.vedtaksperiode, historie, inntektshistorikk = inntekter)
         håndterYtelser(1.vedtaksperiode)
 
@@ -1420,18 +1420,18 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(22.juni(2020), 11.juli(2020), 100.prosent), Permisjon(4.juli(2020), 5.juli(2020)), Ferie(6.juli(2020), 11.juli(2020)))
         håndterUtbetalingshistorikk(
             1.vedtaksperiode,
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 7.august(2019), 7.august(2019), 100.prosent, 2304.daglig),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 8.august(2019), 4.september(2019), 100.prosent, 2304.daglig),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 5.september(2019), 20.september(2019), 100.prosent, 2304.daglig),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 21.september(2019), 2.november(2019), 100.prosent, 2304.daglig),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 3.november(2019), 3.februar(2020), 100.prosent, 2304.daglig),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 4.februar(2020), 28.februar(2020), 100.prosent, 2304.daglig),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 29.februar(2020), 27.mars(2020), 100.prosent, 2304.daglig),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 28.mars(2020), 26.april(2020), 100.prosent, 2304.daglig),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 27.april(2020), 25.mai(2020), 100.prosent, 2304.daglig),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 26.mai(2020), 21.juni(2020), 100.prosent, 2304.daglig),
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 7.august(2019), 7.august(2019), 100.prosent, 2304.daglig),
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 8.august(2019), 4.september(2019), 100.prosent, 2304.daglig),
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 5.september(2019), 20.september(2019), 100.prosent, 2304.daglig),
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 21.september(2019), 2.november(2019), 100.prosent, 2304.daglig),
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 3.november(2019), 3.februar(2020), 100.prosent, 2304.daglig),
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 4.februar(2020), 28.februar(2020), 100.prosent, 2304.daglig),
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 29.februar(2020), 27.mars(2020), 100.prosent, 2304.daglig),
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 28.mars(2020), 26.april(2020), 100.prosent, 2304.daglig),
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 27.april(2020), 25.mai(2020), 100.prosent, 2304.daglig),
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 26.mai(2020), 21.juni(2020), 100.prosent, 2304.daglig),
             inntektshistorikk = listOf(
-                Inntektsopplysning(ORGNUMMER.toString(), 7.august(2019), 50005.månedlig, true)
+                Inntektsopplysning(ORGNUMMER, 7.august(2019), 50005.månedlig, true)
             )
         )
         håndterYtelser(1.vedtaksperiode)
@@ -1442,8 +1442,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
     @Test
     fun `Perioder hvor søknaden til vedtaksperiode 1 har dannet gap (friskmeldt) skal regnes som gap til påfølgende vedtaksperiode`() {
-        val historikk = ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 1.mai, 31.mai, 100.prosent, 1000.daglig)
-        val inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER.toString(), 1.mai, INNTEKT, true))
+        val historikk = ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.mai, 31.mai, 100.prosent, 1000.daglig)
+        val inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.mai, INNTEKT, true))
 
         håndterSykmelding(Sykmeldingsperiode(1.juni, 30.juni, 100.prosent))
         håndterSøknad(Sykdom(1.juni, 30.juni, 100.prosent), Arbeid(20.juni, 30.juni))
@@ -1479,8 +1479,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     @Test
     fun `Perioder hvor søknaden til vedtaksperiode 1 har dannet gap (friskmeldt) for hele perioden skal regnes som gap til påfølgende vedtaksperiode`() {
         håndterInntektsmelding(listOf(16.april til 30.april))
-        val historikk = ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 1.mai, 31.mai, 100.prosent, 1000.daglig)
-        val inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER.toString(), 1.mai, INNTEKT, true))
+        val historikk = ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.mai, 31.mai, 100.prosent, 1000.daglig)
+        val inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.mai, INNTEKT, true))
 
         håndterSykmelding(Sykmeldingsperiode(1.juni, 30.juni, 100.prosent))
         håndterSøknad(Sykdom(1.juni, 30.juni, 100.prosent), Arbeid(1.juni, 30.juni))
@@ -1515,8 +1515,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         // Dette skyldes for at vi ikke sjekker for følgende arbeidsdager/ferie i slutten av forrige periode (som gjør at det egentlig skal være gap)
         håndterSykmelding(Sykmeldingsperiode(9.juni, 30.juni, 100.prosent))
         håndterSøknad(Sykdom(9.juni, 30.juni, 100.prosent), Ferie(28.juni, 30.juni))
-        val historikk = ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 3.juni, 8.juni, 100.prosent, 15000.daglig)
-        val inntekter = listOf(Inntektsopplysning(ORGNUMMER.toString(), 3.juni(2018), 15000.daglig, true))
+        val historikk = ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 3.juni, 8.juni, 100.prosent, 15000.daglig)
+        val inntekter = listOf(Inntektsopplysning(ORGNUMMER, 3.juni(2018), 15000.daglig, true))
         håndterUtbetalingshistorikk(1.vedtaksperiode, historikk, inntektshistorikk = inntekter)
         håndterYtelser(1.vedtaksperiode)
 
@@ -1547,8 +1547,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         // Dette skyldes for at vi ikke sjekker for følgende arbeidsdager/permisjon i slutten av forrige periode (som gjør at det egentlig skal være gap)
         håndterSykmelding(Sykmeldingsperiode(9.juni, 30.juni, 100.prosent))
         håndterSøknad(Sykdom(9.juni, 30.juni, 100.prosent), Permisjon(28.juni, 30.juni))
-        val historikk = ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 3.juni, 8.juni, 100.prosent, 15000.daglig)
-        val inntekter = listOf(Inntektsopplysning(ORGNUMMER.toString(), 3.juni(2018), 15000.daglig, true))
+        val historikk = ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 3.juni, 8.juni, 100.prosent, 15000.daglig)
+        val inntekter = listOf(Inntektsopplysning(ORGNUMMER, 3.juni(2018), 15000.daglig, true))
         håndterUtbetalingshistorikk(1.vedtaksperiode, historikk, inntektshistorikk = inntekter)
         håndterYtelser(1.vedtaksperiode)
 
@@ -1822,11 +1822,11 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     @Test
     fun `Ny utbetalingsbuilder feiler ikke når sykdomshistorikk inneholder arbeidsgiverperiode som hører til infotrygdperiode`() {
         val utbetalinger = arrayOf(
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 3.september(2020), 7.september(2020), 30.prosent, 200.daglig),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 8.september(2020), 27.september(2020), 30.prosent, 200.daglig)
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 3.september(2020), 7.september(2020), 30.prosent, 200.daglig),
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 8.september(2020), 27.september(2020), 30.prosent, 200.daglig)
         )
         val inntektshistorikk = listOf(
-            Inntektsopplysning(ORGNUMMER.toString(), 3.september(2020), 20000.månedlig, true)
+            Inntektsopplysning(ORGNUMMER, 3.september(2020), 20000.månedlig, true)
         )
         håndterSykmelding(Sykmeldingsperiode(28.september(2020), 14.oktober(2020), 30.prosent))
         håndterSøknad(Sykdom(28.september(2020), 14.oktober(2020), 30.prosent))
@@ -1863,13 +1863,13 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(28.september(2020), 18.oktober(2020), 100.prosent))
         håndterUtbetalingshistorikk(
             1.vedtaksperiode,
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 1.januar(2019), 22.februar(2019), 100.prosent, 200.daglig),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 23.mars(2020), 5.juli(2020), 100.prosent, 200.daglig),
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar(2019), 22.februar(2019), 100.prosent, 200.daglig),
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 23.mars(2020), 5.juli(2020), 100.prosent, 200.daglig),
             Friperiode(6.juli(2020), 27.september(2020)),
             ArbeidsgiverUtbetalingsperiode("123455433", 5.desember(2018), 31.desember(2018), 100.prosent, 200.daglig),
             inntektshistorikk = listOf(
-                Inntektsopplysning(ORGNUMMER.toString(), 1.januar(2019), 20000.månedlig, true),
-                Inntektsopplysning(ORGNUMMER.toString(), 23.mars(2020), 21000.månedlig, true),
+                Inntektsopplysning(ORGNUMMER, 1.januar(2019), 20000.månedlig, true),
+                Inntektsopplysning(ORGNUMMER, 23.mars(2020), 21000.månedlig, true),
                 Inntektsopplysning("123455433", 5.desember(2018), 18000.månedlig, true)
             )
         )
@@ -1882,9 +1882,9 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.november(2020), 10.november(2020), 100.prosent))
         håndterUtbetalingshistorikk(
             1.vedtaksperiode,
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 20.oktober(2020), 31.oktober(2020), 100.prosent, 1000.daglig),
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 20.oktober(2020), 31.oktober(2020), 100.prosent, 1000.daglig),
             inntektshistorikk = listOf(
-                Inntektsopplysning(ORGNUMMER.toString(), 20.oktober(2020), inntekt, true)
+                Inntektsopplysning(ORGNUMMER, 20.oktober(2020), inntekt, true)
             )
         )
         håndterSøknad(Sykdom(1.november(2020), 10.november(2020), 100.prosent))
@@ -1903,7 +1903,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(23.oktober(2020), 18.november(2020), 100.prosent))
         håndterSøknad(Sykdom(23.oktober(2020), 18.november(2020), 100.prosent), Ferie(23.oktober(2020), 18.november(2020)))
         val inntektsopplysning = listOf(
-            Inntektsopplysning(ORGNUMMER.toString(), 3.september(2020), INNTEKT, true)
+            Inntektsopplysning(ORGNUMMER, 3.september(2020), INNTEKT, true)
         )
         håndterUtbetalingshistorikk(1.vedtaksperiode, inntektshistorikk = inntektsopplysning)
 
@@ -1943,8 +1943,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterUtbetalingshistorikk(1.vedtaksperiode, besvart = LocalDateTime.now().minusHours(24))
         håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
         håndterUtbetalingshistorikk(
-            1.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 1.januar, 31.januar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
-                Inntektsopplysning(ORGNUMMER.toString(), 1.januar, INNTEKT, true)
+            1.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 31.januar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
+                Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true)
             )
         )
         assertTilstander(
@@ -2133,11 +2133,11 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     @Test
     fun `Tar hensyn til forkastede perioder ved beregning av maks dato`() {
         val inntektshistorikkA1 = listOf(
-            Inntektsopplysning(ORGNUMMER.toString(), 1.januar, INNTEKT, true),
+            Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true),
         )
         val inntektshistorikkA2 = listOf(
-            Inntektsopplysning(ORGNUMMER.toString(), 1.januar, INNTEKT, true),
-            Inntektsopplysning(ORGNUMMER.toString(), 1.juli, INNTEKT, true),
+            Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true),
+            Inntektsopplysning(ORGNUMMER, 1.juli, INNTEKT, true),
         )
         val ITPeriode1 = 1.januar til 31.januar
         val ITPeriode2 = 1.juli til 31.juli
@@ -2145,11 +2145,11 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         val spleisPeriode1 = 1.februar til 28.februar
         val spleisPeriode2 = 1.august til 31.august
         val utbetalinger1 = arrayOf(
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), ITPeriode1.start, ITPeriode1.endInclusive, 100.prosent, INNTEKT),
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, ITPeriode1.start, ITPeriode1.endInclusive, 100.prosent, INNTEKT),
         )
         val utbetalinger2 = arrayOf(
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), ITPeriode1.start, ITPeriode1.endInclusive, 100.prosent, INNTEKT),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), ITPeriode2.start, ITPeriode2.endInclusive, 100.prosent, INNTEKT),
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, ITPeriode1.start, ITPeriode1.endInclusive, 100.prosent, INNTEKT),
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, ITPeriode2.start, ITPeriode2.endInclusive, 100.prosent, INNTEKT),
         )
 
 
@@ -2251,8 +2251,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar(2020), 31.januar(2020), 100.prosent))
         håndterInntektsmelding(listOf(1.januar(2020) til 16.januar(2020)))
 
-        val utbetalinger = ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 1.januar, 28.desember, 100.prosent, INNTEKT)
-        val inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER.toString(), 1.januar, INNTEKT, true))
+        val utbetalinger = ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 28.desember, 100.prosent, INNTEKT)
+        val inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true))
 
         håndterYtelser(1.vedtaksperiode, utbetalinger, inntektshistorikk = inntektshistorikk)
         håndterVilkårsgrunnlag(1.vedtaksperiode)

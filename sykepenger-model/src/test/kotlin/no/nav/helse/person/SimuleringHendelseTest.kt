@@ -6,7 +6,8 @@ import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
-import no.nav.helse.testhelpers.*
+import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
+import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.utbetalingslinjer.Fagområde
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -100,13 +101,13 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
             meldingsreferanseId = meldingsreferanseId,
             aktørId = "aktørId",
             fødselsnummer = UNG_PERSON_FNR_2018.toString(),
-            organisasjonsnummer = ORGNUMMER.toString(),
+            organisasjonsnummer = ORGNUMMER,
             vedtaksperiodeId = "${1.vedtaksperiode.id(ORGNUMMER)}",
             utbetalingshistorikk = Utbetalingshistorikk(
                 meldingsreferanseId = meldingsreferanseId,
                 aktørId = "aktørId",
                 fødselsnummer = UNG_PERSON_FNR_2018.toString(),
-                organisasjonsnummer = ORGNUMMER.toString(),
+                organisasjonsnummer = ORGNUMMER,
                 vedtaksperiodeId = "${1.vedtaksperiode.id(ORGNUMMER)}",
                 arbeidskategorikoder = emptyMap(),
                 harStatslønn = false,
@@ -151,7 +152,7 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
             meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018.toString(),
             aktørId = "aktørId",
-            orgnummer = ORGNUMMER.toString(),
+            orgnummer = ORGNUMMER,
             sykeperioder = listOf(Sykmeldingsperiode(førsteSykedag, sisteSykedag, 100.prosent)),
             sykmeldingSkrevet = førsteSykedag.atStartOfDay(),
             mottatt = sisteSykedag.atStartOfDay()
@@ -164,7 +165,7 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
             meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR_2018.toString(),
             aktørId = "aktørId",
-            orgnummer = ORGNUMMER.toString(),
+            orgnummer = ORGNUMMER,
             perioder = listOf(Sykdom(førsteSykedag, sisteSykedag, 100.prosent)),
             andreInntektskilder = emptyList(),
             sendtTilNAVEllerArbeidsgiver = sisteSykedag.atStartOfDay(),
@@ -181,7 +182,7 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
         Inntektsmelding(
             meldingsreferanseId = UUID.randomUUID(),
             refusjon = refusjon,
-            orgnummer = ORGNUMMER.toString(),
+            orgnummer = ORGNUMMER,
             fødselsnummer = UNG_PERSON_FNR_2018.toString(),
             aktørId = "aktørId",
             førsteFraværsdag = førsteSykedag,
@@ -200,7 +201,7 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
             vedtaksperiodeId = "${1.vedtaksperiode.id(ORGNUMMER)}",
             aktørId = "aktørId",
             fødselsnummer = UNG_PERSON_FNR_2018,
-            orgnummer = ORGNUMMER.toString(),
+            orgnummer = ORGNUMMER,
             inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
                 1.januar(2017) til 1.desember(2017) inntekter {
                     ORGNUMMER inntekt 31000.månedlig
@@ -210,7 +211,7 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
             opptjeningvurdering = Opptjeningvurdering(
                 listOf(
                     Vilkårsgrunnlag.Arbeidsforhold(
-                        ORGNUMMER.toString(),
+                        ORGNUMMER,
                         1.januar(2017)
                     )
                 )
@@ -224,7 +225,7 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
             ),
             arbeidsforhold = listOf(
                 Vilkårsgrunnlag.Arbeidsforhold(
-                    ORGNUMMER.toString(),
+                    ORGNUMMER,
                     1.januar(2017)
                 )
             )
@@ -254,7 +255,7 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
             vedtaksperiodeId = "${1.vedtaksperiode.id(ORGNUMMER)}",
             aktørId = "aktørId",
             fødselsnummer = UNG_PERSON_FNR_2018.toString(),
-            orgnummer = ORGNUMMER.toString(),
+            orgnummer = ORGNUMMER,
             fagsystemId = fagsystemId,
             fagområde = fagområde.verdi,
             simuleringOK = simuleringOK,
@@ -283,7 +284,7 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
                                         utbetalingstype = "YTELSE",
                                         tilbakeføring = false,
                                         sats = Simulering.Sats(dagsats, 11, "DAGLIG"),
-                                        refunderesOrgnummer = ORGNUMMER.toString()
+                                        refunderesOrgnummer = ORGNUMMER
                                     )
                                 )
                             )
@@ -309,7 +310,7 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
                                         utbetalingstype = "YTELSE",
                                         tilbakeføring = false,
                                         sats = Simulering.Sats(dagsats, 20, "DAGLIG"),
-                                        refunderesOrgnummer = ORGNUMMER.toString()
+                                        refunderesOrgnummer = ORGNUMMER
                                     )
                                 )
                             )

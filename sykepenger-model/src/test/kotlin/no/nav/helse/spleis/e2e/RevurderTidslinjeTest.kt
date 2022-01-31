@@ -1271,10 +1271,10 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
 
         håndterYtelser(
             1.vedtaksperiode,
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 17.januar, 31.januar, 100.prosent, 1000.daglig),
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 31.januar, 100.prosent, 1000.daglig),
             inntektshistorikk = listOf(
                 Inntektsopplysning(
-                    ORGNUMMER.toString(),
+                    ORGNUMMER,
                     17.januar, INNTEKT, true
                 )
             )
@@ -1304,10 +1304,10 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
 
         håndterYtelser(
             1.vedtaksperiode,
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 1.februar, 28.februar, 100.prosent, 1000.daglig),
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.februar, 28.februar, 100.prosent, 1000.daglig),
             inntektshistorikk = listOf(
                 Inntektsopplysning(
-                    ORGNUMMER.toString(),
+                    ORGNUMMER,
                     1.februar, INNTEKT, true
                 )
             )
@@ -1434,10 +1434,10 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
 
         håndterYtelser(
             1.vedtaksperiode,
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 1.november(2017), 30.november(2017), 100.prosent, 32000.månedlig),
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.november(2017), 30.november(2017), 100.prosent, 32000.månedlig),
             inntektshistorikk = listOf(
                 Inntektsopplysning(
-                    orgnummer = ORGNUMMER.toString(), sykepengerFom = 1.november, 32000.månedlig, refusjonTilArbeidsgiver = true
+                    orgnummer = ORGNUMMER, sykepengerFom = 1.november, 32000.månedlig, refusjonTilArbeidsgiver = true
                 )
             )
         )

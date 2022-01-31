@@ -272,7 +272,7 @@ internal class ArbeidsgiverUtbetalingerTest {
                 meldingsreferanseId = UUID.randomUUID(),
                 fnr = UNG_PERSON_FNR_2018.toString(),
                 aktørId = "",
-                orgnummer = ORGNUMMER.toString(),
+                orgnummer = ORGNUMMER,
                 sykeperioder = listOf(Sykmeldingsperiode(1.januar, 2.januar, 100.prosent)),
                 sykmeldingSkrevet = 1.januar.atStartOfDay(),
                 mottatt = 1.januar.atStartOfDay()
@@ -301,7 +301,7 @@ internal class ArbeidsgiverUtbetalingerTest {
             inntektsmelding = Inntektsmelding(
                 meldingsreferanseId = UUID.randomUUID(),
                 refusjon = Inntektsmelding.Refusjon(30000.månedlig, null),
-                orgnummer = ORGNUMMER.toString(),
+                orgnummer = ORGNUMMER,
                 fødselsnummer = AbstractPersonTest.UNG_PERSON_FNR_2018.toString(),
                 aktørId = AbstractPersonTest.AKTØRID,
                 førsteFraværsdag = 1.januar,

@@ -1,24 +1,24 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.april
+import no.nav.helse.desember
+import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
+import no.nav.helse.januar
 import no.nav.helse.person.Periodetype
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
-import no.nav.helse.testhelpers.*
+import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import no.nav.helse.januar
-import no.nav.helse.februar
-import no.nav.helse.desember
 
 internal class PeriodetypeTest : AbstractEndToEndTest() {
 
@@ -114,8 +114,8 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
 
     @Test
     fun `periodetype er overgang fra Infotrygd hvis foregående ble behandlet i Infotrygd`() {
-        val historikk = ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 3.januar,  26.januar, 100.prosent, 1000.daglig)
-        val inntekter = listOf(Inntektsopplysning(ORGNUMMER.toString(), 3.januar(2018), 1000.daglig, true))
+        val historikk = ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 3.januar,  26.januar, 100.prosent, 1000.daglig)
+        val inntekter = listOf(Inntektsopplysning(ORGNUMMER, 3.januar(2018), 1000.daglig, true))
         håndterSykmelding(Sykmeldingsperiode(29.januar, 23.februar, 100.prosent))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(29.januar, 23.februar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode, historikk, inntektshistorikk = inntekter)
@@ -139,8 +139,8 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
 
     @Test
     fun `periodetype er forlengelse fra Infotrygd hvis førstegangsbehandlingen skjedde i Infotrygd`() {
-        val historikk = ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 3.januar,  26.januar, 100.prosent, 1000.daglig)
-        val inntekter = listOf(Inntektsopplysning(ORGNUMMER.toString(), 3.januar(2018), 1000.daglig, true))
+        val historikk = ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 3.januar,  26.januar, 100.prosent, 1000.daglig)
+        val inntekter = listOf(Inntektsopplysning(ORGNUMMER, 3.januar(2018), 1000.daglig, true))
         håndterSykmelding(Sykmeldingsperiode(29.januar, 23.februar, 100.prosent))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(29.januar, 23.februar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode, historikk, inntektshistorikk = inntekter)

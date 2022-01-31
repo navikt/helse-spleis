@@ -364,19 +364,19 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
     @Test
     fun `revurdering ved skjæringstidspunkt hos infotrygd`() {
         val historikk1 = listOf(
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 29.januar(2018), 18.februar(2018), 100.prosent, 1000.daglig),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 19.februar(2018), 18.mars(2018), 100.prosent, 1000.daglig),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 19.mars(2018), 2.april(2018), 100.prosent, 1000.daglig),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 3.april(2018), 14.mai(2018), 100.prosent, 1000.daglig),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 15.mai(2018), 3.juni(2018), 100.prosent, 1000.daglig),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 4.juni(2018), 22.juni(2018), 100.prosent, 1000.daglig),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 18.mars(2020), 31.mars(2020), 100.prosent, 1000.daglig),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 1.april(2020), 30.april(2020), 100.prosent, 1000.daglig),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 1.mai(2020), 31.mai(2020), 100.prosent, 1000.daglig)
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 29.januar(2018), 18.februar(2018), 100.prosent, 1000.daglig),
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 19.februar(2018), 18.mars(2018), 100.prosent, 1000.daglig),
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 19.mars(2018), 2.april(2018), 100.prosent, 1000.daglig),
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 3.april(2018), 14.mai(2018), 100.prosent, 1000.daglig),
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 15.mai(2018), 3.juni(2018), 100.prosent, 1000.daglig),
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 4.juni(2018), 22.juni(2018), 100.prosent, 1000.daglig),
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 18.mars(2020), 31.mars(2020), 100.prosent, 1000.daglig),
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.april(2020), 30.april(2020), 100.prosent, 1000.daglig),
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.mai(2020), 31.mai(2020), 100.prosent, 1000.daglig)
         )
         val inntektsopplysning1 = listOf(
-            Inntektsopplysning(ORGNUMMER.toString(), 18.mars(2020), INNTEKT, true),
-            Inntektsopplysning(ORGNUMMER.toString(), 29.januar(2018), INNTEKT, true)
+            Inntektsopplysning(ORGNUMMER, 18.mars(2020), INNTEKT, true),
+            Inntektsopplysning(ORGNUMMER, 29.januar(2018), INNTEKT, true)
         )
 
         håndterSykmelding(Sykmeldingsperiode(1.juni(2020), 30.juni(2020), 100.prosent))
@@ -499,8 +499,8 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         )
 
         val arbeidsforhold = listOf(
-            Vilkårsgrunnlag.Arbeidsforhold(a1.toString(), LocalDate.EPOCH, null),
-            Vilkårsgrunnlag.Arbeidsforhold(a2.toString(), LocalDate.EPOCH, null)
+            Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null),
+            Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null)
         )
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)

@@ -38,7 +38,7 @@ internal class AvstemmingTest : AbstractEndToEndTest() {
         val forkastede = arbeidsgivere[0]["forkastedeVedtaksperioder"].castAsList<Map<String, Any>>()
         val aktive = arbeidsgivere[0]["vedtaksperioder"].castAsList<Map<String, Any>>()
         val utbetalinger = arbeidsgivere[0]["utbetalinger"].castAsList<Map<String, Any>>()
-        assertEquals(ORGNUMMER.toString(), arbeidsgivere[0]["organisasjonsnummer"])
+        assertEquals(ORGNUMMER, arbeidsgivere[0]["organisasjonsnummer"])
         assertEquals(1, forkastede.size)
         assertEquals(3, aktive.size)
         assertEquals(3, utbetalinger.size)

@@ -14,7 +14,7 @@ import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.serde.api.BegrunnelseDTO
 import no.nav.helse.serde.reflection.Utbetalingstatus
-import no.nav.helse.testhelpers.*
+import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.aktive
@@ -388,8 +388,8 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
             håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent))
             håndterSøknad(Sykdom(fom, tom, 100.prosent))
         }
-        val historikk = ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 1.juli, 31.juli, 100.prosent, 1000.daglig)
-        val inntekter = listOf(Inntektsopplysning(ORGNUMMER.toString(), 1.juli, INNTEKT, true))
+        val historikk = ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.juli, 31.juli, 100.prosent, 1000.daglig)
+        val inntekter = listOf(Inntektsopplysning(ORGNUMMER, 1.juli, INNTEKT, true))
         håndterUtbetalingshistorikk(3.vedtaksperiode, historikk, inntektshistorikk = inntekter)
         håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)

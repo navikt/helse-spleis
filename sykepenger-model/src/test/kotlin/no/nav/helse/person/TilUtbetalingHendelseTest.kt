@@ -1,16 +1,20 @@
 package no.nav.helse.person
 
+import no.nav.helse.desember
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.UtbetalingOverført
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.inspectors.inspektør
+import no.nav.helse.januar
+import no.nav.helse.oktober
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.UTBETALING_FEILET
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
-import no.nav.helse.testhelpers.*
+import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
+import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -19,9 +23,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.util.*
-import no.nav.helse.januar
-import no.nav.helse.oktober
-import no.nav.helse.desember
 
 internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
     private val SAKSBEHANDLER_IDENT = "O123456"
@@ -47,7 +48,7 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
             utbetalingId = observatør.utbetaltEventer.first().utbetalingId,
             oppdrag = listOf(
                 PersonObserver.UtbetaltEvent.Utbetalt(
-                    mottaker = ORGNUMMER.toString(),
+                    mottaker = ORGNUMMER,
                     fagområde = "SPREF",
                     fagsystemId = observatør.utbetaltEventer.first().oppdrag[0].fagsystemId,
                     totalbeløp = 11 * 1431,
@@ -99,7 +100,7 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
             utbetalingId = observatør.utbetaltEventer.first().utbetalingId,
             oppdrag = listOf(
                 PersonObserver.UtbetaltEvent.Utbetalt(
-                    mottaker = ORGNUMMER.toString(),
+                    mottaker = ORGNUMMER,
                     fagområde = "SPREF",
                     fagsystemId = observatør.utbetaltEventer.first().oppdrag[0].fagsystemId,
                     totalbeløp = 11 * 1431,
@@ -163,7 +164,7 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
             meldingsreferanseId = UUID.randomUUID(),
             aktørId = AKTØRID,
             fødselsnummer = UNG_PERSON_FNR_2018.toString(),
-            orgnummer = ORGNUMMER.toString(),
+            orgnummer = ORGNUMMER,
             fagsystemId = inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.fagsystemId(),
             utbetalingId = inspektør.sisteBehov(Behovtype.Utbetaling).kontekst().getValue("utbetalingId").toString(),
             avstemmingsnøkkel = 123456L,
@@ -177,7 +178,7 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
             meldingsreferanseId = UUID.randomUUID(),
             aktørId = AKTØRID,
             fødselsnummer = UNG_PERSON_FNR_2018.toString(),
-            orgnummer = ORGNUMMER.toString(),
+            orgnummer = ORGNUMMER,
             fagsystemId = inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.fagsystemId(),
             utbetalingId = inspektør.sisteBehov(Behovtype.Utbetaling).kontekst().getValue("utbetalingId").toString(),
             status = status,
@@ -197,7 +198,7 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
         meldingsreferanseId = UUID.randomUUID(),
         aktørId = AKTØRID,
         fødselsnummer = UNG_PERSON_FNR_2018.toString(),
-        organisasjonsnummer = ORGNUMMER.toString(),
+        organisasjonsnummer = ORGNUMMER,
         utbetalingId = UUID.fromString(inspektør.sisteBehov(Behovtype.Godkjenning).kontekst()["utbetalingId"] ?: throw IllegalStateException("Finner ikke utbetalingId i: ${inspektør.sisteBehov(
             Behovtype.Godkjenning
         ).kontekst()}")),
@@ -222,13 +223,13 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
             meldingsreferanseId = meldingsreferanseId,
             aktørId = AKTØRID,
             fødselsnummer = UNG_PERSON_FNR_2018.toString(),
-            organisasjonsnummer = ORGNUMMER.toString(),
+            organisasjonsnummer = ORGNUMMER,
             vedtaksperiodeId = "${vedtaksperiodeIdInnhenter.id(ORGNUMMER)}",
             utbetalingshistorikk = Utbetalingshistorikk(
                 meldingsreferanseId = meldingsreferanseId,
                 aktørId = AKTØRID,
                 fødselsnummer = UNG_PERSON_FNR_2018.toString(),
-                organisasjonsnummer = ORGNUMMER.toString(),
+                organisasjonsnummer = ORGNUMMER,
                 vedtaksperiodeId = "${vedtaksperiodeIdInnhenter.id(ORGNUMMER)}",
                 arbeidskategorikoder = emptyMap(),
                 harStatslønn = false,
@@ -273,7 +274,7 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
             meldingsreferanseId = sykmeldingHendelseId,
             fnr = UNG_PERSON_FNR_2018.toString(),
             aktørId = AKTØRID,
-            orgnummer = ORGNUMMER.toString(),
+            orgnummer = ORGNUMMER,
             sykeperioder = listOf(Sykmeldingsperiode(førsteSykedag, sisteSykedag, 100.prosent)),
             sykmeldingSkrevet = førsteSykedag.atStartOfDay(),
             mottatt = sisteSykedag.atStartOfDay()
@@ -286,7 +287,7 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
             meldingsreferanseId = søknadHendelseId,
             fnr = UNG_PERSON_FNR_2018.toString(),
             aktørId = AKTØRID,
-            orgnummer = ORGNUMMER.toString(),
+            orgnummer = ORGNUMMER,
             perioder = listOf(Sykdom(førsteSykedag, sisteSykedag, 100.prosent)),
             andreInntektskilder = emptyList(),
             sendtTilNAVEllerArbeidsgiver = sisteSykedag.atStartOfDay(),
@@ -301,7 +302,7 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
         Inntektsmelding(
             meldingsreferanseId = inntektsmeldingHendelseId,
             refusjon = Inntektsmelding.Refusjon(INNTEKT, null, emptyList()),
-            orgnummer = ORGNUMMER.toString(),
+            orgnummer = ORGNUMMER,
             fødselsnummer = UNG_PERSON_FNR_2018.toString(),
             aktørId = AKTØRID,
             førsteFraværsdag = førsteSykedag,
@@ -320,7 +321,7 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
             vedtaksperiodeId = "${vedtaksperiodeIdInnhenter.id(ORGNUMMER)}",
             aktørId = AKTØRID,
             fødselsnummer = UNG_PERSON_FNR_2018,
-            orgnummer = ORGNUMMER.toString(),
+            orgnummer = ORGNUMMER,
             inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
                 1.januar(2017) til 1.desember(2017) inntekter {
                     ORGNUMMER inntekt INNTEKT
@@ -330,7 +331,7 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
             opptjeningvurdering = Opptjeningvurdering(
                 listOf(
                     Vilkårsgrunnlag.Arbeidsforhold(
-                        ORGNUMMER.toString(),
+                        ORGNUMMER,
                         1.januar(2017)
                     )
                 )
@@ -344,7 +345,7 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
             ),
             arbeidsforhold = listOf(
                 Vilkårsgrunnlag.Arbeidsforhold(
-                    ORGNUMMER.toString(),
+                    ORGNUMMER,
                     1.januar(2017)
                 )
             )
@@ -358,7 +359,7 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
             vedtaksperiodeId = "${vedtaksperiodeIdInnhenter.id(ORGNUMMER)}",
             aktørId = AKTØRID,
             fødselsnummer = UNG_PERSON_FNR_2018.toString(),
-            orgnummer = ORGNUMMER.toString(),
+            orgnummer = ORGNUMMER,
             fagsystemId = hendelse.behov().first { it.type == Behovtype.Simulering }.detaljer().getValue("fagsystemId") as String,
             fagområde = hendelse.behov().first { it.type == Behovtype.Simulering }.detaljer().getValue("fagområde") as String,
             simuleringOK = true,

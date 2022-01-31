@@ -24,12 +24,12 @@ internal class BrukerutbetalingerTest : AbstractEndToEndTest() {
     @Test
     fun `maksdato blir riktig når person har brukerutbetaling på samme arbeidsgiver`() {
         val historikk = listOf(
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 17.januar,  17.mai, 100.prosent, INNTEKT),
-            PersonUtbetalingsperiode(ORGNUMMER.toString(), 18.mai,  30.mai, 100.prosent, INNTEKT)
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar,  17.mai, 100.prosent, INNTEKT),
+            PersonUtbetalingsperiode(ORGNUMMER, 18.mai,  30.mai, 100.prosent, INNTEKT)
         )
         val inntektsopplysning = listOf(
-            Inntektsopplysning(ORGNUMMER.toString(), 17.januar, INNTEKT, true),
-            Inntektsopplysning(ORGNUMMER.toString(), 18.mai, INNTEKT, false)
+            Inntektsopplysning(ORGNUMMER, 17.januar, INNTEKT, true),
+            Inntektsopplysning(ORGNUMMER, 18.mai, INNTEKT, false)
         )
 
         håndterSykmelding(Sykmeldingsperiode(1.juni, 30.juni, 100.prosent))
@@ -54,13 +54,13 @@ internal class BrukerutbetalingerTest : AbstractEndToEndTest() {
     @Test
     fun `maksdato blir riktig når person har gammel brukerutbetaling som selvstendig næringsdrivende`() {
         val historikk = listOf(
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 17.januar,  30.mai, 100.prosent, INNTEKT),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 1.september(2017),  1.september(2017), 100.prosent, INNTEKT),
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar,  30.mai, 100.prosent, INNTEKT),
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.september(2017),  1.september(2017), 100.prosent, INNTEKT),
             PersonUtbetalingsperiode("0", 18.mai(2017),  30.mai(2017), 100.prosent, INNTEKT)
         )
         val inntektsopplysning = listOf(
-            Inntektsopplysning(ORGNUMMER.toString(), 17.januar, INNTEKT, true),
-            Inntektsopplysning(ORGNUMMER.toString(), 1.september(2017), INNTEKT, true),
+            Inntektsopplysning(ORGNUMMER, 17.januar, INNTEKT, true),
+            Inntektsopplysning(ORGNUMMER, 1.september(2017), INNTEKT, true),
             Inntektsopplysning("0", 18.mai(2017), INNTEKT, false)
         )
 

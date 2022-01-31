@@ -1,12 +1,12 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.Fødselsnummer
-
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
+import no.nav.helse.januar
 import no.nav.helse.person.AbstractPersonTest
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.IdInnhenter
@@ -15,7 +15,6 @@ import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.testhelpers.Inntektperioder
-import no.nav.helse.januar
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Inntekt
 import org.junit.jupiter.api.fail
@@ -36,7 +35,7 @@ internal fun AbstractEndToEndTest.utbetaling(
         meldingsreferanseId = meldingsreferanseId,
         aktørId = AbstractPersonTest.AKTØRID,
         fødselsnummer = fnr.toString(),
-        orgnummer = orgnummer.toString(),
+        orgnummer = orgnummer,
         fagsystemId = fagsystemId,
         utbetalingId = inspektør.sisteBehov(Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling).kontekst().getValue("utbetalingId"),
         status = status,
@@ -58,7 +57,7 @@ internal fun AbstractEndToEndTest.feriepengeutbetaling(
         meldingsreferanseId = meldingsreferanseId,
         aktørId = AbstractPersonTest.AKTØRID,
         fødselsnummer = fnr.toString(),
-        orgnummer = orgnummer.toString(),
+        orgnummer = orgnummer,
         fagsystemId = fagsystemId,
         utbetalingId = inspektør.sisteBehov(Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling).kontekst().getValue("utbetalingId"),
         status = status,
@@ -81,7 +80,7 @@ internal fun AbstractEndToEndTest.sykmelding(
         meldingsreferanseId = id,
         fnr = fnr.toString(),
         aktørId = AbstractPersonTest.AKTØRID,
-        orgnummer = orgnummer.toString(),
+        orgnummer = orgnummer,
         sykeperioder = listOf(*sykeperioder),
         sykmeldingSkrevet = sykmeldingSkrevet ?: Sykmeldingsperiode.periode(sykeperioder.toList())?.start?.atStartOfDay() ?: LocalDateTime.now(),
         mottatt = mottatt ?: Sykmeldingsperiode.periode(sykeperioder.toList())?.start?.atStartOfDay() ?: LocalDateTime.now()
@@ -99,7 +98,7 @@ internal fun AbstractEndToEndTest.sentSykmelding(
         meldingsreferanseId = UUID.randomUUID(),
         fnr = fnr.toString(),
         aktørId = AbstractPersonTest.AKTØRID,
-        orgnummer = orgnummer.toString(),
+        orgnummer = orgnummer,
         sykeperioder = sykeperioder.toList(),
         sykmeldingSkrevet = Sykmeldingsperiode.periode(sykeperioder.toList())?.start?.atStartOfDay() ?: LocalDateTime.now(),
         mottatt = Sykmeldingsperiode.periode(sykeperioder.toList())?.start?.plusMonths(7)?.atStartOfDay() ?: LocalDateTime.now()
@@ -121,7 +120,7 @@ internal fun AbstractEndToEndTest.søknad(
         meldingsreferanseId = id,
         fnr = fnr.toString(),
         aktørId = AbstractPersonTest.AKTØRID,
-        orgnummer = orgnummer.toString(),
+        orgnummer = orgnummer,
         perioder = listOf(*perioder),
         andreInntektskilder = andreInntektskilder,
         sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver.atStartOfDay(),
@@ -161,7 +160,7 @@ internal fun AbstractEndToEndTest.inntektsmelding(
         Inntektsmelding(
             meldingsreferanseId = id,
             refusjon = refusjon,
-            orgnummer = orgnummer.toString(),
+            orgnummer = orgnummer,
             fødselsnummer = fnr.toString(),
             aktørId = AbstractPersonTest.AKTØRID,
             førsteFraværsdag = førsteFraværsdag,
@@ -183,7 +182,7 @@ internal fun AbstractEndToEndTest.vilkårsgrunnlag(
     vedtaksperiodeIdInnhenter: IdInnhenter,
     medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
     orgnummer: String = AbstractPersonTest.ORGNUMMER,
-    arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold> = listOf(Vilkårsgrunnlag.Arbeidsforhold(orgnummer.toString(), 1.januar(2017))),
+    arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold> = listOf(Vilkårsgrunnlag.Arbeidsforhold(orgnummer, 1.januar(2017))),
     opptjening: Opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),
     inntektsvurdering: Inntektsvurdering,
     inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag,
@@ -194,7 +193,7 @@ internal fun AbstractEndToEndTest.vilkårsgrunnlag(
         vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer).toString(),
         aktørId = AbstractPersonTest.AKTØRID,
         fødselsnummer = fnr,
-        orgnummer = orgnummer.toString(),
+        orgnummer = orgnummer,
         inntektsvurdering = inntektsvurdering,
         inntektsvurderingForSykepengegrunnlag = inntektsvurderingForSykepengegrunnlag,
         medlemskapsvurdering = Medlemskapsvurdering(medlemskapstatus),
@@ -216,7 +215,7 @@ internal fun utbetalingpåminnelse(
         meldingsreferanseId = UUID.randomUUID(),
         aktørId = AbstractPersonTest.AKTØRID,
         fødselsnummer = fnr.toString(),
-        organisasjonsnummer = orgnummer.toString(),
+        organisasjonsnummer = orgnummer,
         utbetalingId = utbetalingId,
         antallGangerPåminnet = 0,
         status = status,
@@ -236,7 +235,7 @@ internal fun påminnelse(
         meldingsreferanseId = UUID.randomUUID(),
         aktørId = AbstractPersonTest.AKTØRID,
         fødselsnummer = fnr.toString(),
-        organisasjonsnummer = orgnummer.toString(),
+        organisasjonsnummer = orgnummer,
         vedtaksperiodeId = vedtaksperiodeId.toString(),
         antallGangerPåminnet = 0,
         tilstand = påminnetTilstand,
@@ -259,7 +258,7 @@ internal fun AbstractEndToEndTest.utbetalingshistorikk(
         meldingsreferanseId = UUID.randomUUID(),
         aktørId = AbstractPersonTest.AKTØRID,
         fødselsnummer = fnr.toString(),
-        organisasjonsnummer = orgnummer.toString(),
+        organisasjonsnummer = orgnummer,
         vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer).toString(),
         arbeidskategorikoder = emptyMap(),
         harStatslønn = harStatslønn,
@@ -357,7 +356,7 @@ internal fun AbstractEndToEndTest.ytelser(
             meldingsreferanseId = meldingsreferanseId,
             aktørId = AbstractPersonTest.AKTØRID,
             fødselsnummer = fnr.toString(),
-            organisasjonsnummer = orgnummer.toString(),
+            organisasjonsnummer = orgnummer,
             vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer).toString(),
             arbeidskategorikoder = arbeidskategorikoder,
             harStatslønn = statslønn,
@@ -370,7 +369,7 @@ internal fun AbstractEndToEndTest.ytelser(
         meldingsreferanseId = meldingsreferanseId,
         aktørId = AbstractPersonTest.AKTØRID,
         fødselsnummer = fnr.toString(),
-        organisasjonsnummer = orgnummer.toString(),
+        organisasjonsnummer = orgnummer,
         vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer).toString(),
         utbetalingshistorikk = utbetalingshistorikk,
         foreldrepermisjon = Foreldrepermisjon(
@@ -421,7 +420,7 @@ internal fun AbstractEndToEndTest.simulering(
         vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer).toString(),
         aktørId = AbstractPersonTest.AKTØRID,
         fødselsnummer = fnr.toString(),
-        orgnummer = orgnummer.toString(),
+        orgnummer = orgnummer,
         fagsystemId = simuleringsBehov.detaljer().getValue("fagsystemId") as String,
         fagområde = simuleringsBehov.detaljer().getValue("fagområde") as String,
         simuleringOK = simuleringOK,
@@ -442,7 +441,7 @@ internal fun standardSimuleringsresultat(orgnummer: String) = Simulering.Simuler
                 Simulering.SimulertUtbetaling(
                     forfallsdato = 21.januar,
                     utbetalesTil = Simulering.Mottaker(
-                        id = orgnummer.toString(),
+                        id = orgnummer,
                         navn = "Org Orgesen AS"
                     ),
                     feilkonto = false,
@@ -463,7 +462,7 @@ internal fun standardSimuleringsresultat(orgnummer: String) = Simulering.Simuler
                                 antall = 2,
                                 type = "DAG"
                             ),
-                            refunderesOrgnummer = orgnummer.toString()
+                            refunderesOrgnummer = orgnummer
                         )
                     )
                 )
@@ -490,7 +489,7 @@ internal fun AbstractEndToEndTest.utbetalingsgodkjenning(
     meldingsreferanseId = UUID.randomUUID(),
     aktørId = AbstractPersonTest.AKTØRID,
     fødselsnummer = fnr.toString(),
-    organisasjonsnummer = orgnummer.toString(),
+    organisasjonsnummer = orgnummer,
     utbetalingId = utbetalingId,
     vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer).toString(),
     saksbehandler = "Ola Nordmann",
@@ -520,7 +519,7 @@ private fun lagMånedsinntekter(
     inntekter: List<Inntekt>,
     creator: InntektCreator
 ) = ArbeidsgiverInntekt(
-    orgnummer.toString(), inntekter.mapIndexed { index, inntekt ->
+    orgnummer, inntekter.mapIndexed { index, inntekt ->
         val sluttMnd = YearMonth.from(skjæringstidspunkt)
         creator(
             sluttMnd.minusMonths((inntekter.size - index).toLong()),

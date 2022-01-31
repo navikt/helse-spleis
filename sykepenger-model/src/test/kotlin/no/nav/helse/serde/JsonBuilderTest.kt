@@ -20,7 +20,8 @@ import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.person.infotrygdhistorikk.UgyldigPeriode
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.testhelpers.*
+import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
+import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Utbetaling
@@ -345,8 +346,8 @@ class JsonBuilderTest {
         }
 
     private fun personMedInfotrygdForlengelse(søknadhendelseId: UUID = UUID.randomUUID()): Person {
-        val refusjoner = listOf(ArbeidsgiverUtbetalingsperiode(orgnummer.toString(), 1.desember(2017), 31.desember(2017), 100.prosent, 31000.månedlig))
-        val inntektshistorikk = listOf(Inntektsopplysning(orgnummer.toString(), 1.desember(2017), 31000.månedlig, true))
+        val refusjoner = listOf(ArbeidsgiverUtbetalingsperiode(orgnummer, 1.desember(2017), 31.desember(2017), 100.prosent, 31000.månedlig))
+        val inntektshistorikk = listOf(Inntektsopplysning(orgnummer, 1.desember(2017), 31000.månedlig, true))
         return Person(aktørId, fnr, MaskinellJurist()).apply {
             håndter(sykmelding(fom = 1.januar, tom = 31.januar))
             fangeVedtaksperiode()
@@ -356,7 +357,7 @@ class JsonBuilderTest {
                 ytelser(
                     hendelseId = søknadhendelseId,
                     vedtaksperiodeId = vedtaksperiodeId,
-                    inntektshistorikk = listOf(Inntektsopplysning(orgnummer.toString(), 1.desember(2017), 31000.månedlig, true)),
+                    inntektshistorikk = listOf(Inntektsopplysning(orgnummer, 1.desember(2017), 31000.månedlig, true)),
                     utbetalinger = refusjoner
                 )
             )
@@ -369,8 +370,8 @@ class JsonBuilderTest {
     }
 
     private fun personMedUgyldigPeriodeIHistorikken(søknadhendelseId: UUID = UUID.randomUUID()): Person {
-        val refusjoner = listOf(ArbeidsgiverUtbetalingsperiode(orgnummer.toString(), 1.desember(2017), 24.desember(2017), 100.prosent, 31000.månedlig))
-        val inntektshistorikk = listOf(Inntektsopplysning(orgnummer.toString(), 1.desember(2017), 31000.månedlig, true))
+        val refusjoner = listOf(ArbeidsgiverUtbetalingsperiode(orgnummer, 1.desember(2017), 24.desember(2017), 100.prosent, 31000.månedlig))
+        val inntektshistorikk = listOf(Inntektsopplysning(orgnummer, 1.desember(2017), 31000.månedlig, true))
         val ugyldigePerioder = listOf(UgyldigPeriode(1.mai(2017), 20.mai(2017), 0), UgyldigPeriode(1.februar(2017), 31.januar(2017), 100))
         return Person(aktørId, fnr, MaskinellJurist()).apply {
             håndter(sykmelding(fom = 1.januar, tom = 31.januar))
@@ -413,14 +414,14 @@ class JsonBuilderTest {
                     opptjeningsår = Year.of(2018),
                     utbetalinger = listOf(
                         Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(
-                            orgnummer.toString(),
+                            orgnummer,
                             1.mars,
                             31.mars,
                             1431,
                             31.mars
                         )
                     ),
-                    feriepengehistorikk = listOf(Feriepenger(orgnummer.toString(), 3211, 1.mai(2019), 31.mai(2019)))
+                    feriepengehistorikk = listOf(Feriepenger(orgnummer, 3211, 1.mai(2019), 31.mai(2019)))
                 )
             )
             håndter(
@@ -428,7 +429,7 @@ class JsonBuilderTest {
                     opptjeningsår = Year.of(2020),
                     utbetalinger = listOf(
                         Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(
-                            orgnummer.toString(),
+                            orgnummer,
                             1.februar(2020),
                             28.februar(2020),
                             1800,
@@ -442,7 +443,7 @@ class JsonBuilderTest {
                             31.mars(2020)
                         )
                     ),
-                    feriepengehistorikk = listOf(Feriepenger(orgnummer.toString(), 3211, 1.mai(2021), 31.mai(2021)))
+                    feriepengehistorikk = listOf(Feriepenger(orgnummer, 3211, 1.mai(2021), 31.mai(2021)))
                 )
             )
         }
@@ -483,7 +484,7 @@ class JsonBuilderTest {
                         }
                     },
                     arbeidsforhold = listOf(
-                        Vilkårsgrunnlag.Arbeidsforhold(orgnummer.toString(), LocalDate.EPOCH, null),
+                        Vilkårsgrunnlag.Arbeidsforhold(orgnummer, LocalDate.EPOCH, null),
                         Vilkårsgrunnlag.Arbeidsforhold("654321987", LocalDate.EPOCH, null)
                     )
                 )
@@ -565,7 +566,7 @@ class JsonBuilderTest {
         meldingsreferanseId = hendelseId,
         fnr = fnr.toString(),
         aktørId = aktørId,
-        orgnummer = orgnummer.toString(),
+        orgnummer = orgnummer,
         sykeperioder = listOf(Sykmeldingsperiode(fom, tom, 100.prosent)),
         sykmeldingSkrevet = fom.atStartOfDay(),
         mottatt = tom.atStartOfDay()
@@ -582,7 +583,7 @@ class JsonBuilderTest {
         meldingsreferanseId = hendelseId,
         fnr = fnr.toString(),
         aktørId = aktørId,
-        orgnummer = orgnummer.toString(),
+        orgnummer = orgnummer,
         perioder = perioder,
         andreInntektskilder = andreInntektsKilder,
         sendtTilNAVEllerArbeidsgiver = sendtSøknad,
@@ -599,7 +600,7 @@ class JsonBuilderTest {
     ) = Inntektsmelding(
         meldingsreferanseId = hendelseId,
         refusjon = refusjon,
-        orgnummer = orgnummer.toString(),
+        orgnummer = orgnummer,
         fødselsnummer = fnr.toString(),
         aktørId = aktørId,
         førsteFraværsdag = fom,
@@ -622,13 +623,13 @@ class JsonBuilderTest {
                 orgnummer inntekt 31000.månedlig
             }
         },
-        arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold> = listOf(Vilkårsgrunnlag.Arbeidsforhold(orgnummer.toString(), 1.januar(2017)))
+        arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold> = listOf(Vilkårsgrunnlag.Arbeidsforhold(orgnummer, 1.januar(2017)))
     ) = Vilkårsgrunnlag(
         meldingsreferanseId = UUID.randomUUID(),
         vedtaksperiodeId = vedtaksperiodeId,
         aktørId = aktørId,
         fødselsnummer = fnr,
-        orgnummer = orgnummer.toString(),
+        orgnummer = orgnummer,
         inntektsvurdering = Inntektsvurdering(inntektsvurdering),
         inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntektsvurderingForSykepengegrunnlag, arbeidsforhold = emptyList()),
         opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),
@@ -645,7 +646,7 @@ class JsonBuilderTest {
         meldingsreferanseId = UUID.randomUUID(),
         aktørId = aktørId,
         fødselsnummer = fnr.toString(),
-        organisasjonsnummer = orgnummer.toString(),
+        organisasjonsnummer = orgnummer,
         vedtaksperiodeId = vedtaksperiodeId,
         arbeidskategorikoder = emptyMap(),
         harStatslønn = false,
@@ -667,13 +668,13 @@ class JsonBuilderTest {
             meldingsreferanseId = hendelseId,
             aktørId = aktørId,
             fødselsnummer = fnr.toString(),
-            organisasjonsnummer = orgnummer.toString(),
+            organisasjonsnummer = orgnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             utbetalingshistorikk = Utbetalingshistorikk(
                 meldingsreferanseId = hendelseId,
                 aktørId = aktørId,
                 fødselsnummer = fnr.toString(),
-                organisasjonsnummer = orgnummer.toString(),
+                organisasjonsnummer = orgnummer,
                 vedtaksperiodeId = vedtaksperiodeId,
                 arbeidskategorikoder = emptyMap(),
                 harStatslønn = false,
@@ -741,7 +742,7 @@ class JsonBuilderTest {
         meldingsreferanseId = UUID.randomUUID(),
         aktørId = aktørId,
         fødselsnummer = fnr.toString(),
-        organisasjonsnummer = orgnummer.toString(),
+        organisasjonsnummer = orgnummer,
         utbetalingId = UUID.fromString(this.aktivitetslogg.behov().last { it.type == Behovtype.Godkjenning }.kontekst().getValue("utbetalingId")),
         vedtaksperiodeId = vedtaksperiodeId,
         saksbehandler = "en_saksbehandler_ident",
@@ -756,7 +757,7 @@ class JsonBuilderTest {
         vedtaksperiodeId = vedtaksperiodeId,
         aktørId = aktørId,
         fødselsnummer = fnr.toString(),
-        orgnummer = orgnummer.toString(),
+        orgnummer = orgnummer,
         fagsystemId = TestArbeidsgiverInspektør(this, orgnummer).sisteBehov(Behovtype.Simulering).detaljer().getValue("fagsystemId") as String,
         fagområde = TestArbeidsgiverInspektør(this, orgnummer).sisteBehov(Behovtype.Simulering).detaljer().getValue("fagområde") as String,
         simuleringOK = true,
@@ -772,7 +773,7 @@ class JsonBuilderTest {
         meldingsreferanseId = UUID.randomUUID(),
         aktørId = aktørId,
         fødselsnummer = fnr.toString(),
-        organisasjonsnummer = orgnummer.toString(),
+        organisasjonsnummer = orgnummer,
         saksbehandlerIdent = "Z999999",
         saksbehandlerEpost = "tbd@nav.no",
         opprettet = LocalDateTime.now(),
@@ -783,7 +784,7 @@ class JsonBuilderTest {
         meldingsreferanseId = UUID.randomUUID(),
         aktørId = aktørId,
         fødselsnummer = fnr.toString(),
-        orgnummer = orgnummer.toString(),
+        orgnummer = orgnummer,
         fagsystemId = utbetalingsliste.getValue(orgnummer).last().inspektør.arbeidsgiverOppdrag.fagsystemId(),
         utbetalingId = this.aktivitetslogg.behov().last { it.type == Behovtype.Utbetaling }.kontekst().getValue("utbetalingId"),
         avstemmingsnøkkel = 123456L,
@@ -794,7 +795,7 @@ class JsonBuilderTest {
         meldingsreferanseId = UUID.randomUUID(),
         aktørId = aktørId,
         fødselsnummer = fnr.toString(),
-        orgnummer = orgnummer.toString(),
+        orgnummer = orgnummer,
         fagsystemId = utbetalingsliste.getValue(orgnummer).last().inspektør.arbeidsgiverOppdrag.fagsystemId(),
         utbetalingId = this.aktivitetslogg.behov().last { it.type == Behovtype.Utbetaling }.kontekst().getValue("utbetalingId"),
         status = Oppdragstatus.AKSEPTERT,

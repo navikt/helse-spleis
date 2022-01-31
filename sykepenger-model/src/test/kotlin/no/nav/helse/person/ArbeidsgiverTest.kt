@@ -27,7 +27,7 @@ internal class ArbeidsgiverTest {
                 beløp = 12000.månedlig,
                 opphørsdato = null
             ),
-            orgnummer = ORGNUMMER.toString(),
+            orgnummer = ORGNUMMER,
             fødselsnummer = "fnr",
             aktørId = "aktørId",
             førsteFraværsdag = 1.januar,
@@ -52,7 +52,7 @@ internal class ArbeidsgiverTest {
             meldingsreferanseId = UUID.randomUUID(),
             fnr = "fnr",
             aktørId = "aktørId",
-            orgnummer = ORGNUMMER.toString(),
+            orgnummer = ORGNUMMER,
             sykeperioder = sykeperioder.toList(),
             sykmeldingSkrevet = periode?.start!!.atStartOfDay(),
             mottatt = periode.endInclusive.atStartOfDay()

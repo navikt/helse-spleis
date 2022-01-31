@@ -52,11 +52,11 @@ internal class YtelserHendelseTest : AbstractEndToEndTest() {
         val sisteHistoriskeSykedag = førsteSykedag.plusMonths(2)
         håndterYtelser(
             utbetalinger = listOf(
-                ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), sisteHistoriskeSykedag.minusDays(14),  sisteHistoriskeSykedag, 100.prosent, 1000.daglig)
+                ArbeidsgiverUtbetalingsperiode(ORGNUMMER, sisteHistoriskeSykedag.minusDays(14),  sisteHistoriskeSykedag, 100.prosent, 1000.daglig)
             ),
             inntektshistorikk = listOf(
                 Inntektsopplysning(
-                    ORGNUMMER.toString(),
+                    ORGNUMMER,
                     sisteHistoriskeSykedag.minusDays(30),
                     20000.månedlig,
                     true
@@ -177,13 +177,13 @@ internal class YtelserHendelseTest : AbstractEndToEndTest() {
             meldingsreferanseId = meldingsreferanseId,
             aktørId = "aktørId",
             fødselsnummer = UNG_PERSON_FNR_2018.toString(),
-            organisasjonsnummer = ORGNUMMER.toString(),
+            organisasjonsnummer = ORGNUMMER,
             vedtaksperiodeId = "${vedtaksperiodeIdInnhenter.id(ORGNUMMER)}",
             utbetalingshistorikk = Utbetalingshistorikk(
                 meldingsreferanseId = meldingsreferanseId,
                 aktørId = "aktørId",
                 fødselsnummer = UNG_PERSON_FNR_2018.toString(),
-                organisasjonsnummer = ORGNUMMER.toString(),
+                organisasjonsnummer = ORGNUMMER,
                 vedtaksperiodeId = "${vedtaksperiodeIdInnhenter.id(ORGNUMMER)}",
                 arbeidskategorikoder = emptyMap(),
                 harStatslønn = false,

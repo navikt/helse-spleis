@@ -83,7 +83,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.januar til 16.januar), id = inntektsmeldingId)
 
         håndterYtelser(1.vedtaksperiode)
-        håndterVilkårsgrunnlag(1.vedtaksperiode, arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNUMMER.toString(), 1.januar(2017), null)))
+        håndterVilkårsgrunnlag(1.vedtaksperiode, arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNUMMER, 1.januar(2017), null)))
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -96,7 +96,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         assertEquals(1, personDTO.arbeidsgivere.size)
 
         val arbeidsgiver = personDTO.arbeidsgivere.first()
-        assertEquals(ORGNUMMER.toString(), arbeidsgiver.organisasjonsnummer)
+        assertEquals(ORGNUMMER, arbeidsgiver.organisasjonsnummer)
         assertEquals(1, arbeidsgiver.vedtaksperioder.size)
 
         val vedtaksperiode = arbeidsgiver.vedtaksperioder.first() as VedtaksperiodeDTO
@@ -505,13 +505,13 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         val skjæringstidspunktFraInfotrygd = 1.desember(2017)
         val fom2Periode = 1.februar
         val tom2Periode = 14.februar
-        val inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER.toString(), skjæringstidspunktFraInfotrygd, INNTEKT, true))
+        val inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, skjæringstidspunktFraInfotrygd, INNTEKT, true))
 
         håndterSykmelding(Sykmeldingsperiode(fom1Periode, tom1Periode, 100.prosent))
         // Til infotrygd pga overlapp
         håndterUtbetalingshistorikk(
             1.vedtaksperiode,
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), skjæringstidspunktFraInfotrygd, 4.januar, 100.prosent, INNTEKT),
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, skjæringstidspunktFraInfotrygd, 4.januar, 100.prosent, INNTEKT),
             inntektshistorikk = inntektshistorikk,
             besvart = 16.februar.atStartOfDay()
         )
@@ -520,7 +520,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(fom2Periode, tom2Periode, 100.prosent))
         håndterUtbetalingshistorikk(
             2.vedtaksperiode,
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), skjæringstidspunktFraInfotrygd, tom1Periode, 100.prosent, INNTEKT),
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, skjæringstidspunktFraInfotrygd, tom1Periode, 100.prosent, INNTEKT),
             inntektshistorikk = inntektshistorikk
         )
         håndterSøknad(Sykdom(fom2Periode, tom2Periode, 100.prosent))
@@ -553,8 +553,8 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
 
         håndterUtbetalingshistorikk(
             1.vedtaksperiode,
-            utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), skjæringstidspunktFraInfotrygd, 31.desember(2017), 100.prosent, INNTEKT)),
-            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER.toString(), skjæringstidspunktFraInfotrygd, INNTEKT, true))
+            utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, skjæringstidspunktFraInfotrygd, 31.desember(2017), 100.prosent, INNTEKT)),
+            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, skjæringstidspunktFraInfotrygd, INNTEKT, true))
         )
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -934,7 +934,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         assertEquals(31000.0 * 12 / 260, inntektsgrunnlag?.maksUtbetalingPerDag)
         assertEquals(1, inntektsgrunnlag?.inntekter?.size)
         inntektsgrunnlag?.inntekter?.forEach { arbeidsgiverinntekt ->
-            assertEquals(ORGNUMMER.toString(), arbeidsgiverinntekt.arbeidsgiver)
+            assertEquals(ORGNUMMER, arbeidsgiverinntekt.arbeidsgiver)
 
             assertEquals(InntektkildeDTO.Inntektsmelding, arbeidsgiverinntekt.omregnetÅrsinntekt?.kilde)
             assertEquals(31000.0 * 12, arbeidsgiverinntekt.omregnetÅrsinntekt?.beløp)
@@ -1008,13 +1008,13 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 50.prosent), orgnummer = a1)
         val inntektshistorikk = listOf(
-            Inntektsopplysning(a1.toString(), 20.januar(2021), inntekt, true),
-            Inntektsopplysning(a2.toString(), 20.januar(2021), inntekt, true)
+            Inntektsopplysning(a1, 20.januar(2021), inntekt, true),
+            Inntektsopplysning(a2, 20.januar(2021), inntekt, true)
         )
 
         val utbetalinger = arrayOf(
-            ArbeidsgiverUtbetalingsperiode(a1.toString(), 20.januar(2021), 26.januar(2021), 100.prosent, inntekt),
-            ArbeidsgiverUtbetalingsperiode(a2.toString(), 20.januar(2021), 26.januar(2021), 100.prosent, inntekt)
+            ArbeidsgiverUtbetalingsperiode(a1, 20.januar(2021), 26.januar(2021), 100.prosent, inntekt),
+            ArbeidsgiverUtbetalingsperiode(a2, 20.januar(2021), 26.januar(2021), 100.prosent, inntekt)
         )
 
         håndterUtbetalingshistorikk(1.vedtaksperiode, utbetalinger = utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
@@ -1083,13 +1083,13 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         val periode = 27.januar(2021) til 31.januar(2021)
         val inntekt = 30000.månedlig
         val inntektshistorikk = listOf(
-            Inntektsopplysning(a1.toString(), 20.januar(2021), inntekt, true),
-            Inntektsopplysning(a2.toString(), 20.januar(2021), inntekt, true)
+            Inntektsopplysning(a1, 20.januar(2021), inntekt, true),
+            Inntektsopplysning(a2, 20.januar(2021), inntekt, true)
         )
 
         val utbetalinger = arrayOf(
-            ArbeidsgiverUtbetalingsperiode(a1.toString(), 20.januar(2021), 26.januar(2021), 100.prosent, inntekt),
-            ArbeidsgiverUtbetalingsperiode(a2.toString(), 20.januar(2021), 26.januar(2021), 100.prosent, inntekt)
+            ArbeidsgiverUtbetalingsperiode(a1, 20.januar(2021), 26.januar(2021), 100.prosent, inntekt),
+            ArbeidsgiverUtbetalingsperiode(a2, 20.januar(2021), 26.januar(2021), 100.prosent, inntekt)
         )
 
         håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 50.prosent), orgnummer = a1)
@@ -1245,7 +1245,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
                     a2 inntekt 400.månedlig
                 }
             }, arbeidsforhold = emptyList()),
-            arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(a1.toString(), LocalDate.EPOCH), Vilkårsgrunnlag.Arbeidsforhold(a2.toString(), LocalDate.EPOCH)),
+            arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH), Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH)),
             orgnummer = a1
         )
 
@@ -1260,7 +1260,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
             .values
             .first()
             .inntekter
-            .first { it.organisasjonsnummer == a2.toString() }
+            .first { it.organisasjonsnummer == a2 }
             .omregnetÅrsinntekt!!
             .inntekterFraAOrdningen!!
         assertEquals(3, inntekterFraAOrdningenFraVilkårsgrunnlag.size)
@@ -1270,7 +1270,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
             .inntektsgrunnlag
             .first()
             .inntekter
-            .first { it.arbeidsgiver == a2.toString() }
+            .first { it.arbeidsgiver == a2 }
             .omregnetÅrsinntekt!!
             .inntekterFraAOrdningen!!
         assertEquals(3, inntekterFraAOrdningenFraInntektsgrunnlag.size)
@@ -1364,9 +1364,9 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
 
         val gamleITPerioder = arrayOf(
-            ArbeidsgiverUtbetalingsperiode(a5.toString(), 1.januar(2009), 31.januar(2009), 100.prosent, 20000.månedlig)
+            ArbeidsgiverUtbetalingsperiode(a5, 1.januar(2009), 31.januar(2009), 100.prosent, 20000.månedlig)
         )
-        val gamleITInntekter = listOf(Inntektsopplysning(a5.toString(), 1.januar(2009), 20000.månedlig, true))
+        val gamleITInntekter = listOf(Inntektsopplysning(a5, 1.januar(2009), 20000.månedlig, true))
         håndterYtelser(
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
             orgnummer = a1,
@@ -1393,10 +1393,10 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
             , arbeidsforhold = emptyList()
             ),
             arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1.toString(), LocalDate.EPOCH, null),
-                Vilkårsgrunnlag.Arbeidsforhold(a2.toString(), LocalDate.EPOCH, null),
-                Vilkårsgrunnlag.Arbeidsforhold(a3.toString(), LocalDate.EPOCH, null),
-                Vilkårsgrunnlag.Arbeidsforhold(a4.toString(), LocalDate.EPOCH, 1.desember(2017))
+                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null),
+                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null),
+                Vilkårsgrunnlag.Arbeidsforhold(a3, LocalDate.EPOCH, null),
+                Vilkårsgrunnlag.Arbeidsforhold(a4, LocalDate.EPOCH, 1.desember(2017))
             )
         )
         håndterYtelser(vedtaksperiodeIdInnhenter = 1.vedtaksperiode, orgnummer = a1)
@@ -1407,7 +1407,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         val personDto = serializePersonForSpeil(person)
         val inntekterFraAordningen = personDto.inntektsgrunnlag
             .single().inntekter
-            .single { it.arbeidsgiver == a2.toString() }.omregnetÅrsinntekt!!.inntekterFraAOrdningen!!
+            .single { it.arbeidsgiver == a2 }.omregnetÅrsinntekt!!.inntekterFraAOrdningen!!
 
         assertEquals(listOf(a1, a2).map(String::toString), personDto.arbeidsgivere.map { it.organisasjonsnummer })
         assertEquals(listOf(a1, a2, a4).map(String::toString), personDto.inntektsgrunnlag.single().inntekter.map { it.arbeidsgiver })
@@ -1440,8 +1440,8 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
             , arbeidsforhold = emptyList()
             ),
             arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1.toString(), LocalDate.EPOCH, null),
-                Vilkårsgrunnlag.Arbeidsforhold(a2.toString(), 25.november(2017), null),
+                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null),
+                Vilkårsgrunnlag.Arbeidsforhold(a2, 25.november(2017), null),
             )
         )
         håndterYtelser(vedtaksperiodeIdInnhenter = 1.vedtaksperiode, orgnummer = a1)
@@ -1454,7 +1454,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         assertEquals(listOf(a1, a2).map(String::toString), personDto.arbeidsgivere.map { it.organisasjonsnummer })
         assertEquals(listOf(a1, a2).map(String::toString), personDto.inntektsgrunnlag.single().inntekter.map { it.arbeidsgiver })
 
-        val arbeidsgiverInntektA2 = personDto.vilkårsgrunnlagHistorikk.values.last()[1.januar]?.inntekter?.first { it.organisasjonsnummer == a2.toString() }
+        val arbeidsgiverInntektA2 = personDto.vilkårsgrunnlagHistorikk.values.last()[1.januar]?.inntekter?.first { it.organisasjonsnummer == a2 }
 
         assertEquals(0.0, arbeidsgiverInntektA2?.omregnetÅrsinntekt?.beløp)
         assertEquals(Inntektkilde.IkkeRapportert, arbeidsgiverInntektA2?.omregnetÅrsinntekt?.kilde)

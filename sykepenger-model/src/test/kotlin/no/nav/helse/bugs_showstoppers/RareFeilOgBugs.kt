@@ -1,14 +1,14 @@
 package no.nav.helse.bugs_showstoppers
 
+import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
+import no.nav.helse.januar
+import no.nav.helse.mars
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.spleis.e2e.*
-import no.nav.helse.februar
-import no.nav.helse.januar
-import no.nav.helse.mars
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Test
 
@@ -19,14 +19,14 @@ internal class RareFeilOgBugs : AbstractEndToEndTest() {
     @Test
     fun `perioder som feilaktig er stuck i AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE blir unstuck når vi får oppdatert historikk`() {
         val inntektshistorikk = listOf(
-            Inntektsopplysning(ORGNUMMER.toString(), 1.januar, INNTEKT, true),
+            Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true),
         )
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent))
         håndterUtbetalingshistorikk(
             1.vedtaksperiode,
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER.toString(), 1.januar, 31.januar, 100.prosent, INNTEKT),
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 31.januar, 100.prosent, INNTEKT),
             inntektshistorikk = inntektshistorikk
         )
         håndterYtelser(1.vedtaksperiode)

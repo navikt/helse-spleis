@@ -13,7 +13,10 @@ import no.nav.helse.person.infotrygdhistorikk.Friperiode
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
-import no.nav.helse.testhelpers.*
+import no.nav.helse.testhelpers.ARB
+import no.nav.helse.testhelpers.FRI
+import no.nav.helse.testhelpers.NAV
+import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -152,7 +155,7 @@ internal class HistoriePeriodetypeTest {
     }
 
     private fun utbetaling(fom: LocalDate, tom: LocalDate, inntekt: Inntekt = 1000.daglig, grad: Prosentdel = 100.prosent, orgnr: String = AG1) =
-        ArbeidsgiverUtbetalingsperiode(orgnr.toString(), fom,  tom, grad, inntekt)
+        ArbeidsgiverUtbetalingsperiode(orgnr, fom,  tom, grad, inntekt)
 
     private fun ferie(fom: LocalDate, tom: LocalDate) =
         Friperiode(fom,  tom)

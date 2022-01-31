@@ -1,14 +1,19 @@
 package no.nav.helse.person
 
+import no.nav.helse.april
+import no.nav.helse.desember
 import no.nav.helse.etterspurtBehov
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.inspectors.GrunnlagsdataInspektør
+import no.nav.helse.januar
+import no.nav.helse.mai
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
-import no.nav.helse.testhelpers.*
+import no.nav.helse.september
+import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
@@ -17,11 +22,6 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.util.*
-import no.nav.helse.januar
-import no.nav.helse.april
-import no.nav.helse.mai
-import no.nav.helse.september
-import no.nav.helse.desember
 
 internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
     private lateinit var hendelse: ArbeidstakerHendelse
@@ -150,7 +150,7 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
     }
 
     private fun ansattSidenStart2017() =
-        listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNUMMER.toString(), 1.januar(2017)))
+        listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNUMMER, 1.januar(2017)))
 
 
     private fun tolvMånederMedInntekt(beregnetInntekt: Inntekt) = inntektperioderForSammenligningsgrunnlag {
@@ -178,7 +178,7 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
         meldingsreferanseId = UUID.randomUUID(),
         fnr = UNG_PERSON_FNR_2018.toString(),
         aktørId = "aktørId",
-        orgnummer = ORGNUMMER.toString(),
+        orgnummer = ORGNUMMER,
         sykeperioder = perioder,
         sykmeldingSkrevet = Sykmeldingsperiode.periode(perioder)?.start?.atStartOfDay() ?: LocalDateTime.now(),
         mottatt = Sykmeldingsperiode.periode(perioder.toList())!!.endInclusive.atStartOfDay()
@@ -192,7 +192,7 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
         meldingsreferanseId = UUID.randomUUID(),
         fnr = UNG_PERSON_FNR_2018.toString(),
         aktørId = "aktørId",
-        orgnummer = ORGNUMMER.toString(),
+        orgnummer = ORGNUMMER,
         perioder = perioder,
         andreInntektskilder = emptyList(),
         sendtTilNAVEllerArbeidsgiver = 31.januar.atStartOfDay(),
@@ -210,7 +210,7 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
         Inntektsmelding(
             meldingsreferanseId = UUID.randomUUID(),
             refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
-            orgnummer = ORGNUMMER.toString(),
+            orgnummer = ORGNUMMER,
             fødselsnummer = UNG_PERSON_FNR_2018.toString(),
             aktørId = "aktørId",
             førsteFraværsdag = 1.januar,
@@ -233,7 +233,7 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
             vedtaksperiodeId = "${1.vedtaksperiode.id(ORGNUMMER)}",
             aktørId = "aktørId",
             fødselsnummer = UNG_PERSON_FNR_2018,
-            orgnummer = ORGNUMMER.toString(),
+            orgnummer = ORGNUMMER,
             inntektsvurdering = Inntektsvurdering(inntekter),
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
             opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),
@@ -247,13 +247,13 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
         meldingsreferanseId = UUID.randomUUID(),
         aktørId = "aktørId",
         fødselsnummer = UNG_PERSON_FNR_2018.toString(),
-        organisasjonsnummer = ORGNUMMER.toString(),
+        organisasjonsnummer = ORGNUMMER,
         vedtaksperiodeId = "${1.vedtaksperiode.id(ORGNUMMER)}",
         utbetalingshistorikk = Utbetalingshistorikk(
             meldingsreferanseId = UUID.randomUUID(),
             aktørId = "aktørId",
             fødselsnummer = UNG_PERSON_FNR_2018.toString(),
-            organisasjonsnummer = ORGNUMMER.toString(),
+            organisasjonsnummer = ORGNUMMER,
             vedtaksperiodeId = "${1.vedtaksperiode.id(ORGNUMMER)}",
             arbeidskategorikoder = emptyMap(),
             harStatslønn = false,

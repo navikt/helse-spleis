@@ -378,7 +378,7 @@ internal fun AbstractEndToEndTest.håndterVilkårsgrunnlag(
     ),
     inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag = InntektForSykepengegrunnlag(
         inntekter = listOf(
-            ArbeidsgiverInntekt(orgnummer.toString(), (0..2).map {
+            ArbeidsgiverInntekt(orgnummer, (0..2).map {
                 val yearMonth = YearMonth.from(inspektør(orgnummer).skjæringstidspunkt(vedtaksperiodeIdInnhenter)).minusMonths(3L - it)
                 ArbeidsgiverInntekt.MånedligInntekt.Sykepengegrunnlag(
                     yearMonth = yearMonth,
@@ -440,7 +440,7 @@ internal fun AbstractEndToEndTest.håndterSimulering(
         vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer).toString(),
         aktørId = AbstractPersonTest.AKTØRID,
         fødselsnummer = fnr.toString(),
-        orgnummer = orgnummer.toString(),
+        orgnummer = orgnummer,
         fagsystemId = fagsystemId,
         fagområde = fagområde.toString(),
         simuleringOK = simuleringOK,
@@ -584,7 +584,7 @@ internal fun AbstractEndToEndTest.håndterUtbetalt(
             meldingsreferanseId = UUID.randomUUID(),
             aktørId = AbstractPersonTest.AKTØRID,
             fødselsnummer = fnr.toString(),
-            orgnummer = orgnummer.toString(),
+            orgnummer = orgnummer,
             fagsystemId = fagsystemId,
             utbetalingId = inspektør.sisteBehov(Behovtype.Utbetaling).kontekst()["utbetalingId"]
                 ?: throw IllegalStateException("Finner ikke utbetalingId i: ${inspektør.sisteBehov(Behovtype.Utbetaling).kontekst()}"),
@@ -610,7 +610,7 @@ internal fun AbstractEndToEndTest.håndterGrunnbeløpsregulering(
         meldingsreferanseId = UUID.randomUUID(),
         aktørId = AbstractPersonTest.AKTØRID,
         fødselsnummer = AbstractPersonTest.UNG_PERSON_FNR_2018.toString(),
-        organisasjonsnummer = orgnummer.toString(),
+        organisasjonsnummer = orgnummer,
         gyldighetsdato = gyldighetsdato,
         fagsystemId = fagsystemId,
         aktivitetslogg = Aktivitetslogg()
@@ -626,7 +626,7 @@ internal fun AbstractEndToEndTest.håndterAnnullerUtbetaling(
         meldingsreferanseId = UUID.randomUUID(),
         aktørId = AbstractPersonTest.AKTØRID,
         fødselsnummer = AbstractPersonTest.UNG_PERSON_FNR_2018.toString(),
-        organisasjonsnummer = orgnummer.toString(),
+        organisasjonsnummer = orgnummer,
         fagsystemId = fagsystemId,
         saksbehandlerIdent = "Ola Nordmann",
         saksbehandlerEpost = "tbd@nav.no",
@@ -644,7 +644,7 @@ internal fun AbstractEndToEndTest.håndterOverstyrInntekt(
         meldingsreferanseId = meldingsreferanseId,
         fødselsnummer = AbstractPersonTest.UNG_PERSON_FNR_2018.toString(),
         aktørId = AbstractPersonTest.AKTØRID,
-        organisasjonsnummer = orgnummer.toString(),
+        organisasjonsnummer = orgnummer,
         inntekt = inntekt,
         skjæringstidspunkt = skjæringstidspunkt
     ).håndter(Person::håndter)
@@ -659,7 +659,7 @@ internal fun AbstractEndToEndTest.håndterOverstyrTidslinje(
         meldingsreferanseId = meldingsreferanseId,
         fødselsnummer = AbstractPersonTest.UNG_PERSON_FNR_2018.toString(),
         aktørId = AbstractPersonTest.AKTØRID,
-        organisasjonsnummer = orgnummer.toString(),
+        organisasjonsnummer = orgnummer,
         dager = overstyringsdager,
         opprettet = LocalDateTime.now()
     ).håndter(Person::håndter)
@@ -839,7 +839,7 @@ internal fun AbstractEndToEndTest.betale(orgnummer: String) {
             meldingsreferanseId = UUID.randomUUID(),
             aktørId = AbstractPersonTest.AKTØRID,
             fødselsnummer = AbstractPersonTest.UNG_PERSON_FNR_2018.toString(),
-            orgnummer = orgnummer.toString(),
+            orgnummer = orgnummer,
             fagsystemId = inspektør(orgnummer).fagsystemId(1.vedtaksperiode),
             utbetalingId = hendelselogg.behov().first { it.type == Behovtype.Utbetaling }.kontekst().getValue("utbetalingId"),
             avstemmingsnøkkel = 123456L,
