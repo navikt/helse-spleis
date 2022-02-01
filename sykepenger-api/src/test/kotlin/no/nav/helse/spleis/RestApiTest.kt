@@ -200,6 +200,11 @@ internal class RestApiTest {
     }
 
     @Test
+    fun `sporingapi`() {
+        "/api/vedtaksperioder".httpGet(HttpStatusCode.OK, mapOf("fnr" to UNG_PERSON_FNR))
+    }
+
+    @Test
     fun `hent personJson med fnr`() {
         "/api/person-json".httpGet(HttpStatusCode.OK, mapOf("fnr" to UNG_PERSON_FNR))
     }

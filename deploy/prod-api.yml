@@ -50,6 +50,9 @@ spec:
         - application: spanner
           namespace: tbd
           cluster: prod-gcp
+        - application: sporing
+          namespace: tbd
+          cluster: prod-gcp
   vault:
     enabled: true
   secureLogs:

@@ -12,6 +12,7 @@ import io.ktor.util.pipeline.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import no.nav.helse.person.etterlevelse.MaskinellJurist
+import no.nav.helse.serde.api.serializePersonForSporing
 import no.nav.helse.serde.serialize
 import no.nav.helse.spleis.dao.HendelseDao
 import no.nav.helse.spleis.dao.PersonDao
@@ -81,6 +82,23 @@ internal fun Application.spannerApi(dataSource: DataSource, authProviderName: St
 
 
                     call.respondText(hendelse, ContentType.Application.Json)
+                }
+            }
+        }
+    }
+}
+
+internal fun Application.sporingApi(dataSource: DataSource, authProviderName: String) {
+    val hendelseDao = HendelseDao(dataSource)
+    val personDao = PersonDao(dataSource)
+
+    routing {
+        authenticate(authProviderName) {
+            get("/api/vedtaksperioder") {
+                withContext(Dispatchers.IO) {
+                    val fnr = fnr(personDao)
+                    val person = personDao.hentPersonFraFnr(fnr) ?: throw NotFoundException("Kunne ikke finne person for fødselsnummer")
+                    call.respond(serializePersonForSporing(person.deserialize(MaskinellJurist()) { hendelseDao.hentAlleHendelser(fnr) }))
                 }
             }
         }
