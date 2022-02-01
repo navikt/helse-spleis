@@ -134,16 +134,13 @@ interface SubsumsjonObserver {
      * @param avvisteDager dager vilkåret ikke er [oppfylt] for
      */
     fun `§ 8-12 ledd 1 punktum 1`(
-        oppfylt: Boolean,
         periode: Periode,
-        fom: LocalDate,
-        tom: LocalDate,
         tidslinjegrunnlag: List<List<Map<String, Any>>>,
         beregnetTidslinje: List<Map<String, Any>>,
         gjenståendeSykedager: Int,
         forbrukteSykedager: Int,
         maksdato: LocalDate,
-        avvisteDager: List<LocalDate>
+        startdatoSykepengerettighet: LocalDate
     ) {
 
         // versjon = LocalDate.of(2021, 5, 21)
@@ -293,7 +290,15 @@ interface SubsumsjonObserver {
      * @param forbrukteSykedager antall forbrukte sykedager
      * @param maksdato siste utbetalingsdag av sykepenger
      */
-    fun `§ 8-51 ledd 3`(oppfylt: Boolean, maksSykepengedagerOver67: Int, gjenståendeSykedager: Int, forbrukteSykedager: Int, maksdato: LocalDate) {}
+    fun `§ 8-51 ledd 3`(
+        periode: Periode,
+        tidslinjegrunnlag: List<List<Map<String, Any>>>,
+        beregnetTidslinje: List<Map<String, Any>>,
+        gjenståendeSykedager: Int,
+        forbrukteSykedager: Int,
+        maksdato: LocalDate,
+        startdatoSykepengerettighet: LocalDate
+    ) {}
 
     private class UtbetalingstidslinjeVisitor(utbetalingstidslinje: Utbetalingstidslinje) : UtbetalingsdagVisitor {
         private val navdager = mutableListOf<Periode>()

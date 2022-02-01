@@ -362,6 +362,8 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             punktum = 1.punktum,
             versjon = 21.mai(2021),
             input = mapOf(
+                "fom" to 3.januar,
+                "tom" to 26.januar,
                 "utfallFom" to 19.januar,
                 "utfallTom" to 26.januar,
                 "tidslinjegrunnlag" to listOf(listOf(mapOf("fom" to 19.januar, "tom" to 26.januar, "dagtype" to "NAVDAG"))),
@@ -370,8 +372,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             output = mapOf(
                 "gjenståendeSykedager" to 242,
                 "forbrukteSykedager" to 6,
-                "maksdato" to 1.januar(2019),
-                "avvisteDager" to emptyList<Periode>()
+                "maksdato" to 1.januar(2019)
             )
         )
     }
@@ -395,6 +396,8 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             punktum = 1.punktum,
             versjon = 21.mai(2021),
             input = mapOf(
+                "fom" to 3.januar,
+                "tom" to 11.januar(2019),
                 "utfallFom" to 19.januar,
                 "utfallTom" to 1.januar(2019),
                 "tidslinjegrunnlag" to listOf(listOf(mapOf("fom" to 19.januar, "tom" to 11.januar(2019), "dagtype" to "NAVDAG"))),
@@ -403,8 +406,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             output = mapOf(
                 "gjenståendeSykedager" to 0,
                 "forbrukteSykedager" to 248,
-                "maksdato" to 1.januar(2019),
-                "avvisteDager" to emptyList<Periode>()
+                "maksdato" to 1.januar(2019)
             )
         )
 
@@ -414,6 +416,8 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             punktum = 1.punktum,
             versjon = 21.mai(2021),
             input = mapOf(
+                "fom" to 3.januar,
+                "tom" to 11.januar(2019),
                 "utfallFom" to 2.januar(2019),
                 "utfallTom" to 11.januar(2019),
                 "tidslinjegrunnlag" to listOf(listOf(mapOf("fom" to 19.januar, "tom" to 11.januar(2019), "dagtype" to "NAVDAG"))),
@@ -422,8 +426,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             output = mapOf(
                 "gjenståendeSykedager" to 0,
                 "forbrukteSykedager" to 248,
-                "maksdato" to 1.januar(2019),
-                "avvisteDager" to listOf(2.januar(2019) til 4.januar(2019), 7.januar(2019) til 11.januar(2019))
+                "maksdato" to 1.januar(2019)
             )
         )
     }
@@ -736,7 +739,8 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             ledd = 1.ledd,
             versjon = 1.januar(2019),
             input = mapOf("beregnetMånedsinntektPerArbeidsgiver" to mapOf(ORGNUMMER to 60000.0)),
-            output = mapOf("grunnlagForSykepengegrunnlag" to 720000.0))
+            output = mapOf("grunnlagForSykepengegrunnlag" to 720000.0)
+        )
     }
 
     @Test
@@ -768,7 +772,8 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                         ag1 inntekt inntekt
                         ag2 inntekt inntekt
                     }
-                }, arbeidsforhold = emptyList())
+                }, arbeidsforhold = emptyList()
+            )
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = ag1)
 
@@ -955,93 +960,6 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         SubsumsjonInspektør(jurist).assertIkkeVurdert(PARAGRAF_8_3, ledd = LEDD_2, 1.punktum)
     }
 
-    @ForventetFeil("Venter på avklaring ang logging av beregning")
-    @Test
-    fun `§ 8-51 ledd 3 - 60 sykedager etter fylte 67 år - syk 61 dager etter fylte 67 år`() {
-        val personOver67år = "01025100065".somFødselsnummer()
-        createTestPerson(personOver67år)
-        nyttVedtak(1.januar, 31.januar, fnr = personOver67år)
-        forlengVedtak(1.februar, 28.februar, fnr = personOver67år)
-        forlengVedtak(1.mars, 31.mars, fnr = personOver67år)
-        forlengVedtak(1.april, 27.april, fnr = personOver67år)
-
-        SubsumsjonInspektør(jurist).assertOppfylt(
-            paragraf = PARAGRAF_8_51,
-            ledd = LEDD_3,
-            versjon = 16.desember(2011),
-            input = mapOf(
-                "maksSykepengedagerOver67" to 60
-            ),
-            output = mapOf(
-                "gjenståendeSykedager" to 61,
-                "forbrukteSykedager" to 11,
-                "maksdato" to 26.april
-            ),
-            vedtaksperiodeId = 1.vedtaksperiode
-        )
-
-        SubsumsjonInspektør(jurist).assertOppfylt(
-            paragraf = PARAGRAF_8_51,
-            ledd = LEDD_3,
-            versjon = 16.desember(2011),
-            input = mapOf(
-                "maksSykepengedagerOver67" to 60
-            ),
-            output = mapOf(
-                "gjenståendeSykedager" to 41,
-                "forbrukteSykedager" to 31,
-                "maksdato" to 26.april
-            ),
-            vedtaksperiodeId = 2.vedtaksperiode
-        )
-
-        SubsumsjonInspektør(jurist).assertOppfylt(
-            paragraf = PARAGRAF_8_51,
-            ledd = LEDD_3,
-            versjon = 16.desember(2011),
-            input = mapOf(
-                "maksSykepengedagerOver67" to 60
-            ),
-            output = mapOf(
-                "gjenståendeSykedager" to 19,
-                "forbrukteSykedager" to 53,
-                "maksdato" to 26.april
-            ),
-            vedtaksperiodeId = 3.vedtaksperiode
-        )
-
-        SubsumsjonInspektør(jurist).assertIkkeOppfylt(
-            paragraf = PARAGRAF_8_51,
-            ledd = LEDD_3,
-            versjon = 16.desember(2011),
-            input = mapOf(
-                "maksSykepengedagerOver67" to 60
-            ),
-            output = mapOf(
-                "gjenståendeSykedager" to 0,
-                "forbrukteSykedager" to 72,
-                "maksdato" to 26.april
-            ),
-            vedtaksperiodeId = 4.vedtaksperiode
-        )
-
-        SubsumsjonInspektør(jurist).assertOppfylt(
-            paragraf = PARAGRAF_8_51,
-            ledd = LEDD_3,
-            versjon = 16.desember(2011),
-            input = mapOf(
-                "maksSykepengedagerOver67" to 60
-            ),
-            output = mapOf(
-                "gjenståendeSykedager" to 0,
-                "forbrukteSykedager" to 72,
-                "maksdato" to 26.april
-            ),
-             vedtaksperiodeId = 4.vedtaksperiode
-        )
-    }
-
-    @ForventetFeil("Venter på avklaring ang logging av beregning")
     @Test
     fun `§ 8-51 ledd 3 - 60 sykedager etter fylte 67 år - frisk på 60-årsdagen så total sykedager blir en dag mindre uten at maksdato endres`() {
         val personOver67år = "01025100065".somFødselsnummer()
@@ -1072,7 +990,12 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             ledd = LEDD_3,
             versjon = 16.desember(2011),
             input = mapOf(
-                "maksSykepengedagerOver67" to 60
+                "fom" to 1.januar,
+                "tom" to 31.januar,
+                "utfallFom" to 17.januar,
+                "utfallTom" to 31.januar,
+                "tidslinjegrunnlag" to listOf(listOf(mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG"))),
+                "beregnetTidslinje" to listOf(mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG"))
             ),
             output = mapOf(
                 "gjenståendeSykedager" to 61,
@@ -1087,7 +1010,20 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             ledd = LEDD_3,
             versjon = 16.desember(2011),
             input = mapOf(
-                "maksSykepengedagerOver67" to 60
+                "fom" to 2.februar,
+                "tom" to 28.februar,
+                "utfallFom" to 2.februar,
+                "utfallTom" to 28.februar,
+                "tidslinjegrunnlag" to listOf(
+                    listOf(
+                        mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG"),
+                        mapOf("fom" to 2.februar, "tom" to 28.februar, "dagtype" to "NAVDAG")
+                    )
+                ),
+                "beregnetTidslinje" to listOf(
+                    mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG"),
+                    mapOf("fom" to 2.februar, "tom" to 28.februar, "dagtype" to "NAVDAG")
+                )
             ),
             output = mapOf(
                 "gjenståendeSykedager" to 41,
@@ -1098,7 +1034,6 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         )
     }
 
-    @ForventetFeil("Venter på avklaring ang logging av beregning")
     @Test
     fun `§ 8-51 ledd 3 - 60 sykedager etter fylte 67 år - frisk dagen etter 67-årsdagen så maksdato flyttes en dag`() {
         val personOver67år = "01025100065".somFødselsnummer()
@@ -1129,7 +1064,12 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             ledd = LEDD_3,
             versjon = 16.desember(2011),
             input = mapOf(
-                "maksSykepengedagerOver67" to 60
+                "fom" to 1.januar,
+                "tom" to 1.februar,
+                "utfallFom" to 17.januar,
+                "utfallTom" to 1.februar,
+                "tidslinjegrunnlag" to listOf(listOf(mapOf("fom" to 17.januar, "tom" to 1.februar, "dagtype" to "NAVDAG"))),
+                "beregnetTidslinje" to listOf(mapOf("fom" to 17.januar, "tom" to 1.februar, "dagtype" to "NAVDAG"))
             ),
             output = mapOf(
                 "gjenståendeSykedager" to 60,
@@ -1144,7 +1084,20 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             ledd = LEDD_3,
             versjon = 16.desember(2011),
             input = mapOf(
-                "maksSykepengedagerOver67" to 60
+                "fom" to 3.februar,
+                "tom" to 28.februar,
+                "utfallFom" to 3.februar,
+                "utfallTom" to 28.februar,
+                "tidslinjegrunnlag" to listOf(
+                    listOf(
+                        mapOf("fom" to 17.januar, "tom" to 1.februar, "dagtype" to "NAVDAG"),
+                        mapOf("fom" to 3.februar, "tom" to 28.februar, "dagtype" to "NAVDAG")
+                    )
+                ),
+                "beregnetTidslinje" to listOf(
+                    mapOf("fom" to 17.januar, "tom" to 1.februar, "dagtype" to "NAVDAG"),
+                    mapOf("fom" to 3.februar, "tom" to 28.februar, "dagtype" to "NAVDAG")
+                )
             ),
             output = mapOf(
                 "gjenståendeSykedager" to 42,
@@ -1155,7 +1108,6 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         )
     }
 
-    @ForventetFeil("Venter på avklaring ang logging av beregning")
     @Test
     fun `§ 8-51 ledd 3 - 60 sykedager etter fylte 67 år - syk 60 dager etter fylte 67 år`() {
         val personOver67år = "01025100065".somFødselsnummer()
@@ -1170,7 +1122,12 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             ledd = LEDD_3,
             versjon = 16.desember(2011),
             input = mapOf(
-                "maksSykepengedagerOver67" to 60
+                "fom" to 1.januar,
+                "tom" to 31.januar,
+                "utfallFom" to 17.januar,
+                "utfallTom" to 31.januar,
+                "tidslinjegrunnlag" to listOf(listOf(mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG"))),
+                "beregnetTidslinje" to listOf(mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG"))
             ),
             output = mapOf(
                 "gjenståendeSykedager" to 61,
@@ -1185,7 +1142,12 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             ledd = LEDD_3,
             versjon = 16.desember(2011),
             input = mapOf(
-                "maksSykepengedagerOver67" to 60
+                "fom" to 1.februar,
+                "tom" to 28.februar,
+                "utfallFom" to 1.februar,
+                "utfallTom" to 28.februar,
+                "tidslinjegrunnlag" to listOf(listOf(mapOf("fom" to 17.januar, "tom" to 28.februar, "dagtype" to "NAVDAG"))),
+                "beregnetTidslinje" to listOf(mapOf("fom" to 17.januar, "tom" to 28.februar, "dagtype" to "NAVDAG"))
             ),
             output = mapOf(
                 "gjenståendeSykedager" to 41,
@@ -1200,7 +1162,12 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             ledd = LEDD_3,
             versjon = 16.desember(2011),
             input = mapOf(
-                "maksSykepengedagerOver67" to 60
+                "fom" to 1.mars,
+                "tom" to 31.mars,
+                "utfallFom" to 1.mars,
+                "utfallTom" to 31.mars,
+                "tidslinjegrunnlag" to listOf(listOf(mapOf("fom" to 17.januar, "tom" to 31.mars, "dagtype" to "NAVDAG"))),
+                "beregnetTidslinje" to listOf(mapOf("fom" to 17.januar, "tom" to 31.mars, "dagtype" to "NAVDAG"))
             ),
             output = mapOf(
                 "gjenståendeSykedager" to 19,
@@ -1215,7 +1182,122 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             ledd = LEDD_3,
             versjon = 16.desember(2011),
             input = mapOf(
-                "maksSykepengedagerOver67" to 60
+                "fom" to 1.april,
+                "tom" to 26.april,
+                "utfallFom" to 1.april,
+                "utfallTom" to 26.april,
+                "tidslinjegrunnlag" to listOf(listOf(mapOf("fom" to 17.januar, "tom" to 26.april, "dagtype" to "NAVDAG"))),
+                "beregnetTidslinje" to listOf(mapOf("fom" to 17.januar, "tom" to 26.april, "dagtype" to "NAVDAG"))
+            ),
+            output = mapOf(
+                "gjenståendeSykedager" to 0,
+                "forbrukteSykedager" to 72,
+                "maksdato" to 26.april
+            ),
+            vedtaksperiodeId = 4.vedtaksperiode
+        )
+    }
+
+    @Test
+    fun `§ 8-51 ledd 3 - 60 sykedager etter fylte 67 år - syk 61 dager etter fylte 67 år`() {
+        val personOver67år = "01025100065".somFødselsnummer()
+        createTestPerson(personOver67år)
+        nyttVedtak(1.januar, 31.januar, fnr = personOver67år)
+        forlengVedtak(1.februar, 28.februar, fnr = personOver67år)
+        forlengVedtak(1.mars, 31.mars, fnr = personOver67år)
+        forlengVedtak(1.april, 27.april, fnr = personOver67år)
+
+        SubsumsjonInspektør(jurist).assertOppfylt(
+            paragraf = PARAGRAF_8_51,
+            ledd = LEDD_3,
+            versjon = 16.desember(2011),
+            input = mapOf(
+                "fom" to 1.januar,
+                "tom" to 31.januar,
+                "utfallFom" to 17.januar,
+                "utfallTom" to 31.januar,
+                "tidslinjegrunnlag" to listOf(listOf(mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG"))),
+                "beregnetTidslinje" to listOf(mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG"))
+            ),
+            output = mapOf(
+                "gjenståendeSykedager" to 61,
+                "forbrukteSykedager" to 11,
+                "maksdato" to 26.april
+            ),
+            vedtaksperiodeId = 1.vedtaksperiode
+        )
+
+        SubsumsjonInspektør(jurist).assertOppfylt(
+            paragraf = PARAGRAF_8_51,
+            ledd = LEDD_3,
+            versjon = 16.desember(2011),
+            input = mapOf(
+                "fom" to 1.februar,
+                "tom" to 28.februar,
+                "utfallFom" to 1.februar,
+                "utfallTom" to 28.februar,
+                "tidslinjegrunnlag" to listOf(listOf(mapOf("fom" to 17.januar, "tom" to 28.februar, "dagtype" to "NAVDAG"))),
+                "beregnetTidslinje" to listOf(mapOf("fom" to 17.januar, "tom" to 28.februar, "dagtype" to "NAVDAG"))
+            ),
+            output = mapOf(
+                "gjenståendeSykedager" to 41,
+                "forbrukteSykedager" to 31,
+                "maksdato" to 26.april
+            ),
+            vedtaksperiodeId = 2.vedtaksperiode
+        )
+
+        SubsumsjonInspektør(jurist).assertOppfylt(
+            paragraf = PARAGRAF_8_51,
+            ledd = LEDD_3,
+            versjon = 16.desember(2011),
+            input = mapOf(
+                "fom" to 1.mars,
+                "tom" to 31.mars,
+                "utfallFom" to 1.mars,
+                "utfallTom" to 31.mars,
+                "tidslinjegrunnlag" to listOf(listOf(mapOf("fom" to 17.januar, "tom" to 31.mars, "dagtype" to "NAVDAG"))),
+                "beregnetTidslinje" to listOf(mapOf("fom" to 17.januar, "tom" to 31.mars, "dagtype" to "NAVDAG"))
+            ),
+            output = mapOf(
+                "gjenståendeSykedager" to 19,
+                "forbrukteSykedager" to 53,
+                "maksdato" to 26.april
+            ),
+            vedtaksperiodeId = 3.vedtaksperiode
+        )
+
+        SubsumsjonInspektør(jurist).assertOppfylt(
+            paragraf = PARAGRAF_8_51,
+            ledd = LEDD_3,
+            versjon = 16.desember(2011),
+            input = mapOf(
+                "fom" to 1.april,
+                "tom" to 27.april,
+                "utfallFom" to 1.april,
+                "utfallTom" to 26.april,
+                "tidslinjegrunnlag" to listOf(listOf(mapOf("fom" to 17.januar, "tom" to 27.april, "dagtype" to "NAVDAG"))),
+                "beregnetTidslinje" to listOf(mapOf("fom" to 17.januar, "tom" to 27.april, "dagtype" to "NAVDAG"))
+            ),
+            output = mapOf(
+                "gjenståendeSykedager" to 0,
+                "forbrukteSykedager" to 72,
+                "maksdato" to 26.april
+            ),
+            vedtaksperiodeId = 4.vedtaksperiode
+        )
+
+        SubsumsjonInspektør(jurist).assertIkkeOppfylt(
+            paragraf = PARAGRAF_8_51,
+            ledd = LEDD_3,
+            versjon = 16.desember(2011),
+            input = mapOf(
+                "fom" to 1.april,
+                "tom" to 27.april,
+                "utfallFom" to 27.april,
+                "utfallTom" to 27.april,
+                "tidslinjegrunnlag" to listOf(listOf(mapOf("fom" to 17.januar, "tom" to 27.april, "dagtype" to "NAVDAG"))),
+                "beregnetTidslinje" to listOf(mapOf("fom" to 17.januar, "tom" to 27.april, "dagtype" to "NAVDAG"))
             ),
             output = mapOf(
                 "gjenståendeSykedager" to 0,

@@ -155,9 +155,9 @@ internal class Alder(private val fødselsdato: LocalDate) {
         }
 
         interface Begrunnelse {
-            fun `§ 8-12 ledd 1 punktum 1`(dato: LocalDate, forbrukteDager: Int, gjenståendeDager: Int) {}
-            fun `§ 8-51 ledd 3`(dato: LocalDate, forbrukteDager: Int, gjenståendeDager: Int) {}
-            fun `§ 8-3 ledd 1 punktum 2`(dato: LocalDate, forbrukteDager: Int, gjenståendeDager: Int) {}
+            fun `§ 8-12 ledd 1 punktum 1`(sisteDag: LocalDate, forbrukteDager: Int, gjenståendeDager: Int) {}
+            fun `§ 8-51 ledd 3`(sisteDag: LocalDate, forbrukteDager: Int, gjenståendeDager: Int) {}
+            fun `§ 8-3 ledd 1 punktum 2`(sisteDag: LocalDate, forbrukteDager: Int, gjenståendeDager: Int) {}
         }
 
         internal companion object {

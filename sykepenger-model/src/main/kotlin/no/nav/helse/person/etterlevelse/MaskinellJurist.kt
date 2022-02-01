@@ -3,7 +3,6 @@ package no.nav.helse.person.etterlevelse
 import no.nav.helse.Fødselsnummer
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
-import no.nav.helse.hendelser.til
 import no.nav.helse.person.Bokstav.BOKSTAV_A
 import no.nav.helse.person.FOLKETRYGDLOVENS_OPPRINNELSESDATO
 import no.nav.helse.person.Ledd
@@ -12,6 +11,7 @@ import no.nav.helse.person.Paragraf
 import no.nav.helse.person.Paragraf.PARAGRAF_8_17
 import no.nav.helse.person.Paragraf.PARAGRAF_8_51
 import no.nav.helse.person.Punktum.Companion.punktum
+import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall
 import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall.*
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosent
@@ -151,40 +151,46 @@ class MaskinellJurist private constructor(
     }
 
     override fun `§ 8-12 ledd 1 punktum 1`(
-        oppfylt: Boolean,
         periode: Periode,
-        fom: LocalDate,
-        tom: LocalDate,
         tidslinjegrunnlag: List<List<Map<String, Any>>>,
         beregnetTidslinje: List<Map<String, Any>>,
         gjenståendeSykedager: Int,
         forbrukteSykedager: Int,
         maksdato: LocalDate,
-        avvisteDager: List<LocalDate>
+        startdatoSykepengerettighet: LocalDate
     ) {
-        leggTil(
-            BetingetSubsumsjon(
-                funnetRelevant = periode.overlapperMed(fom til tom),
-                utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
-                versjon = LocalDate.of(2021, 5, 21),
-                paragraf = Paragraf.PARAGRAF_8_12,
-                ledd = 1.ledd,
-                punktum = 1.punktum,
-                input = mapOf(
-                    "utfallFom" to fom,
-                    "utfallTom" to tom,
-                    "tidslinjegrunnlag" to tidslinjegrunnlag,
-                    "beregnetTidslinje" to beregnetTidslinje
-                ),
-                output = mapOf(
-                    "gjenståendeSykedager" to gjenståendeSykedager,
-                    "forbrukteSykedager" to forbrukteSykedager,
-                    "maksdato" to maksdato,
-                    "avvisteDager" to avvisteDager.grupperSammenhengendePerioder()
-                ),
-                kontekster = kontekster()
+        val (dagerOppfylt, dagerIkkeOppfylt) =
+            periode
+                .filter { it >= startdatoSykepengerettighet }
+                .partition { it <= maksdato }
+
+        fun logg(utfall: Utfall, utfallFom: LocalDate, utfallTom: LocalDate) {
+            leggTil(
+                EnkelSubsumsjon(
+                    utfall = utfall,
+                    versjon = LocalDate.of(2021, 5, 21),
+                    paragraf = Paragraf.PARAGRAF_8_12,
+                    ledd = 1.ledd,
+                    punktum = 1.punktum,
+                    input = mapOf(
+                        "fom" to periode.start,
+                        "tom" to periode.endInclusive,
+                        "utfallFom" to utfallFom,
+                        "utfallTom" to utfallTom,
+                        "tidslinjegrunnlag" to tidslinjegrunnlag,
+                        "beregnetTidslinje" to beregnetTidslinje
+                    ),
+                    output = mapOf(
+                        "gjenståendeSykedager" to gjenståendeSykedager,
+                        "forbrukteSykedager" to forbrukteSykedager,
+                        "maksdato" to maksdato,
+                    ),
+                    kontekster = kontekster()
+                )
             )
-        )
+        }
+        if (dagerOppfylt.isNotEmpty()) logg(VILKAR_OPPFYLT, dagerOppfylt.first(), dagerOppfylt.last())
+        if (dagerIkkeOppfylt.isNotEmpty()) logg(VILKAR_IKKE_OPPFYLT, dagerIkkeOppfylt.first(), dagerIkkeOppfylt.last())
     }
 
     override fun `§ 8-12 ledd 2`(
@@ -198,7 +204,7 @@ class MaskinellJurist private constructor(
     ) {
         leggTil(
             BetingetSubsumsjon(
-            funnetRelevant = oppfylt || gjenståendeSykepengedager == 0, // Bare relevant om det er ny rett på sykepenger eller om vilkåret ikke er oppfylt
+                funnetRelevant = oppfylt || gjenståendeSykepengedager == 0, // Bare relevant om det er ny rett på sykepenger eller om vilkåret ikke er oppfylt
                 utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
                 versjon = LocalDate.of(2021, 5, 21),
                 paragraf = Paragraf.PARAGRAF_8_12,
@@ -355,24 +361,46 @@ class MaskinellJurist private constructor(
         )
     }
 
-    override fun `§ 8-51 ledd 3`(oppfylt: Boolean, maksSykepengedagerOver67: Int, gjenståendeSykedager: Int, forbrukteSykedager: Int, maksdato: LocalDate) {
-        leggTil(
-            EnkelSubsumsjon(
-                utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
-                versjon = LocalDate.of(2011, 12, 16),
-                paragraf = PARAGRAF_8_51,
-                ledd = Ledd.LEDD_3,
-                input = mapOf(
-                    "maksSykepengedagerOver67" to maksSykepengedagerOver67
-                ),
-                output = mapOf(
-                    "gjenståendeSykedager" to gjenståendeSykedager,
-                    "forbrukteSykedager" to forbrukteSykedager,
-                    "maksdato" to maksdato
-                ),
-                kontekster = kontekster()
+    override fun `§ 8-51 ledd 3`(
+        periode: Periode,
+        tidslinjegrunnlag: List<List<Map<String, Any>>>,
+        beregnetTidslinje: List<Map<String, Any>>,
+        gjenståendeSykedager: Int,
+        forbrukteSykedager: Int,
+        maksdato: LocalDate,
+        startdatoSykepengerettighet: LocalDate
+    ) {
+        val (dagerOppfylt, dagerIkkeOppfylt) =
+            periode
+                .filter { it >= startdatoSykepengerettighet }
+                .partition { it <= maksdato }
+
+        fun logg(utfall: Utfall, utfallFom: LocalDate, utfallTom: LocalDate) {
+            leggTil(
+                EnkelSubsumsjon(
+                    utfall = utfall,
+                    versjon = LocalDate.of(2011, 12, 16),
+                    paragraf = PARAGRAF_8_51,
+                    ledd = Ledd.LEDD_3,
+                    input = mapOf(
+                        "fom" to periode.start,
+                        "tom" to periode.endInclusive,
+                        "utfallFom" to utfallFom,
+                        "utfallTom" to utfallTom,
+                        "tidslinjegrunnlag" to tidslinjegrunnlag,
+                        "beregnetTidslinje" to beregnetTidslinje
+                    ),
+                    output = mapOf(
+                        "gjenståendeSykedager" to gjenståendeSykedager,
+                        "forbrukteSykedager" to forbrukteSykedager,
+                        "maksdato" to maksdato,
+                    ),
+                    kontekster = kontekster()
+                )
             )
-        )
+        }
+        if (dagerOppfylt.isNotEmpty()) logg(VILKAR_OPPFYLT, dagerOppfylt.first(), dagerOppfylt.last())
+        if (dagerIkkeOppfylt.isNotEmpty()) logg(VILKAR_IKKE_OPPFYLT, dagerIkkeOppfylt.first(), dagerIkkeOppfylt.last())
     }
 
     fun subsumsjoner() = subsumsjoner.toList()

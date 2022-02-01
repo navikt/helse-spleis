@@ -177,15 +177,15 @@ internal class AlderTest {
     private fun assertSisteDagMedSykepenger(forventet: LocalDate, begrunnelse: Hjemmelbegrunnelse, sisteBetalteDag: LocalDate, alder: Alder, gjenståendeSykepengedager: Int, gjenståendeSykepengedagerOver67: Int) {
         lateinit var hjemmel: Hjemmelbegrunnelse
         assertEquals(forventet, alder.maksimumSykepenger(sisteBetalteDag, 0, gjenståendeSykepengedager, gjenståendeSykepengedagerOver67).sisteDag(object : Alder.MaksimumSykepenger.Begrunnelse {
-            override fun `§ 8-12 ledd 1 punktum 1`(dato: LocalDate, forbrukteDager: Int, gjenståendeDager: Int) {
+            override fun `§ 8-12 ledd 1 punktum 1`(sisteDag: LocalDate, forbrukteDager: Int, gjenståendeDager: Int) {
                 hjemmel = Hjemmelbegrunnelse.UNDER_67
             }
 
-            override fun `§ 8-51 ledd 3`(dato: LocalDate, forbrukteDager: Int, gjenståendeDager: Int) {
+            override fun `§ 8-51 ledd 3`(sisteDag: LocalDate, forbrukteDager: Int, gjenståendeDager: Int) {
                 hjemmel = Hjemmelbegrunnelse.OVER_67
             }
 
-            override fun `§ 8-3 ledd 1 punktum 2`(dato: LocalDate, forbrukteDager: Int, gjenståendeDager: Int) {
+            override fun `§ 8-3 ledd 1 punktum 2`(sisteDag: LocalDate, forbrukteDager: Int, gjenståendeDager: Int) {
                 hjemmel = Hjemmelbegrunnelse.OVER_70
             }
         }))
