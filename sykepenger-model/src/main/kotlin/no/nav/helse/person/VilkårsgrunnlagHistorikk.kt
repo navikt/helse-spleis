@@ -47,7 +47,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
     internal fun inntektsopplysningPerSkjæringstidspunktPerArbeidsgiver() = historikk.firstOrNull()?.inntektsopplysningPerSkjæringstidspunktPerArbeidsgiver()
 
-    internal fun skjæringstidspunkterFraSpleis(orgnummer: String) = historikk.firstOrNull()?.skjæringstidspunkterFraSpleis(orgnummer) ?: emptySet()
+    internal fun skjæringstidspunkterFraSpleis() = historikk.firstOrNull()?.skjæringstidspunkterFraSpleis() ?: emptySet()
 
     internal fun erRelevant(organisasjonsnummer: String, skjæringstidspunkter: List<LocalDate>) = historikk.firstOrNull()?.erRelevant(organisasjonsnummer, skjæringstidspunkter) ?: false
 
@@ -81,9 +81,8 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                 vilkårsgrunnlagElement.inntektsopplysningPerArbeidsgiver()
             }
 
-        internal fun skjæringstidspunkterFraSpleis(orgnummer: String) = vilkårsgrunnlag
+        internal fun skjæringstidspunkterFraSpleis() = vilkårsgrunnlag
             .filterValues { it is Grunnlagsdata }
-            .filterValues { it.inntektsopplysningPerArbeidsgiver().containsKey(orgnummer) }
             .keys
 
         internal fun erRelevant(organisasjonsnummer: String, skjæringstidspunkter: List<LocalDate>) =

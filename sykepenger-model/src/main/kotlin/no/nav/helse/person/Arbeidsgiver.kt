@@ -186,13 +186,14 @@ internal class Arbeidsgiver private constructor(
         internal fun Iterable<Arbeidsgiver>.harUtbetaltPeriode(skjæringstidspunkt: LocalDate) =
             flatMap { it.vedtaksperioder }.medSkjæringstidspunkt(skjæringstidspunkt).harUtbetaling()
 
-        internal fun Iterable<Arbeidsgiver>.ghostPeriode(skjæringstidspunkt: LocalDate): GhostPerioder.GhostPeriode? {
+        internal fun Iterable<Arbeidsgiver>.ghostPeriode(skjæringstidspunkt: LocalDate, deaktivert: Boolean): GhostPerioder.GhostPeriode? {
             val relevanteVedtaksperioder = flatMap { it.vedtaksperioder.medSkjæringstidspunkt(skjæringstidspunkt) }
             if (relevanteVedtaksperioder.isEmpty()) return null
             return GhostPerioder.GhostPeriode(
                 fom = relevanteVedtaksperioder.minOf { it.periode().start },
                 tom = relevanteVedtaksperioder.maxOf { it.periode().endInclusive },
-                skjæringstidspunkt = skjæringstidspunkt
+                skjæringstidspunkt = skjæringstidspunkt,
+                deaktivert = deaktivert
             )
         }
 
@@ -735,9 +736,13 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun ghostPerioder(): GhostPerioder? {
-        val perioder = person.skjæringstidspunkterFraSpleis(organisasjonsnummer)
+        val perioder = person.skjæringstidspunkterFraSpleis()
             .filter { skjæringstidspunkt -> vedtaksperioder.none { it.gjelder(skjæringstidspunkt) } }
-            .mapNotNull { skjæringstidspunkt -> person.ghostPeriode(skjæringstidspunkt) }
+            .filter { skjæringstidspunkt ->
+                arbeidsforholdhistorikk.harRelevantArbeidsforhold(skjæringstidspunkt)
+                    || arbeidsforholdhistorikk.harInaktivtArbeidsforhold(skjæringstidspunkt)
+            }
+            .mapNotNull { skjæringstidspunkt -> person.ghostPeriode(skjæringstidspunkt, arbeidsforholdhistorikk.harInaktivtArbeidsforhold(skjæringstidspunkt)) }
         if (perioder.isEmpty()) return null
         return GhostPerioder(
             historikkInnslagId = person.nyesteIdForVilkårsgrunnlagHistorikk(),

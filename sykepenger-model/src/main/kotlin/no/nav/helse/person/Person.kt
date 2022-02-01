@@ -411,7 +411,7 @@ class Person private constructor(
     internal fun skjæringstidspunkter() =
         Arbeidsgiver.skjæringstidspunkter(arbeidsgivere, infotrygdhistorikk)
 
-    internal fun skjæringstidspunkterFraSpleis(orgnummer: String) = vilkårsgrunnlagHistorikk.skjæringstidspunkterFraSpleis(orgnummer)
+    internal fun skjæringstidspunkterFraSpleis() = vilkårsgrunnlagHistorikk.skjæringstidspunkterFraSpleis()
 
     internal fun kanOverskriveVilkårsgrunnlag(skjæringstidspunkt: LocalDate) = !arbeidsgivere.harUtbetaltPeriode(skjæringstidspunkt)
 
@@ -484,7 +484,7 @@ class Person private constructor(
 
     internal fun nåværendeVedtaksperioder(filter: VedtaksperiodeFilter) = arbeidsgivere.nåværendeVedtaksperioder(filter).sorted()
 
-    internal fun ghostPeriode(skjæringstidspunkt: LocalDate) = arbeidsgivere.ghostPeriode(skjæringstidspunkt)
+    internal fun ghostPeriode(skjæringstidspunkt: LocalDate, deaktivert: Boolean) = arbeidsgivere.ghostPeriode(skjæringstidspunkt, deaktivert)
 
     internal fun <T> hentArbeidsforhold(creator: (orgnummer: String, ansattFom: LocalDate, ansattTom: LocalDate?, erAktiv: Boolean) -> T) =
         skjæringstidspunkter().associateWith { skjæringstidspunkt ->

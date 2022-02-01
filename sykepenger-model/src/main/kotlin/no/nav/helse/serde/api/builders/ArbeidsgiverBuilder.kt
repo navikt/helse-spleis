@@ -59,7 +59,7 @@ internal class ArbeidsgiverBuilder(
                     tom = it.tom,
                     skjæringstidspunkt = it.skjæringstidspunkt,
                     vilkårsgrunnlagHistorikkInnslagId = ghostPerioder.historikkInnslagId,
-                    deaktivert = false
+                    deaktivert = it.deaktivert
                 )
             } ?: emptyList()
         )
