@@ -58,7 +58,8 @@ internal class ArbeidsgiverBuilder(
                     fom = it.fom.coerceAtLeast(it.skjæringstidspunkt),
                     tom = it.tom,
                     skjæringstidspunkt = it.skjæringstidspunkt,
-                    vilkårsgrunnlagHistorikkInnslagId = ghostPerioder.historikkInnslagId
+                    vilkårsgrunnlagHistorikkInnslagId = ghostPerioder.historikkInnslagId,
+                    deaktivert = false
                 )
             } ?: emptyList()
         )

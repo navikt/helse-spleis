@@ -1502,6 +1502,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         assertEquals(listOf(a1, a2), personDto.arbeidsforholdPerSkjæringstidspunkt[1.januar]?.map { it.orgnummer })
     }
 
+    @ForventetFeil("må implementeres")
     @Test
     fun `tar med deaktiverte arbeidsforhold som gjelder skjæringstidspunktet`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
@@ -1542,6 +1543,10 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
                 )
             ),
             personDto.arbeidsforholdPerSkjæringstidspunkt
+        )
+        assertEquals(
+            listOf(GhostPeriodeDTO(1.januar, 31.januar, 1.januar, person.nyesteIdForVilkårsgrunnlagHistorikk(), true)),
+            personDto.arbeidsgivere.find { it.organisasjonsnummer == a2 }?.ghostPerioder
         )
     }
 
