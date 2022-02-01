@@ -51,6 +51,10 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
     internal fun erRelevant(organisasjonsnummer: String, skjæringstidspunkter: List<LocalDate>) = historikk.firstOrNull()?.erRelevant(organisasjonsnummer, skjæringstidspunkter) ?: false
 
+    internal fun sisteIdMedAktivertArbeidsforhold(orgnummer: String, skjæringstidspunkt: LocalDate) = historikk
+        .filter { it.erRelevant(orgnummer, listOf(skjæringstidspunkt)) }
+        .sisteId()
+
     internal class Innslag(private val id: UUID, private val opprettet: LocalDateTime) {
         private val vilkårsgrunnlag = mutableMapOf<LocalDate, VilkårsgrunnlagElement>()
 

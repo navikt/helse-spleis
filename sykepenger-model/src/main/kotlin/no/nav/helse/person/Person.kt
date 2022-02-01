@@ -484,7 +484,8 @@ class Person private constructor(
 
     internal fun nåværendeVedtaksperioder(filter: VedtaksperiodeFilter) = arbeidsgivere.nåværendeVedtaksperioder(filter).sorted()
 
-    internal fun ghostPeriode(skjæringstidspunkt: LocalDate, deaktivert: Boolean) = arbeidsgivere.ghostPeriode(skjæringstidspunkt, deaktivert)
+    internal fun ghostPeriode(skjæringstidspunkt: LocalDate, orgnummer: String, deaktivert: Boolean) =
+        arbeidsgivere.ghostPeriode(skjæringstidspunkt, vilkårsgrunnlagHistorikk.sisteIdMedAktivertArbeidsforhold(orgnummer, skjæringstidspunkt), deaktivert)
 
     internal fun <T> hentArbeidsforhold(creator: (orgnummer: String, ansattFom: LocalDate, ansattTom: LocalDate?, erAktiv: Boolean) -> T) =
         skjæringstidspunkter().associateWith { skjæringstidspunkt ->

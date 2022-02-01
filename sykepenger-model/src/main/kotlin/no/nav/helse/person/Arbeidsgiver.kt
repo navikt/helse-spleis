@@ -186,13 +186,14 @@ internal class Arbeidsgiver private constructor(
         internal fun Iterable<Arbeidsgiver>.harUtbetaltPeriode(skjæringstidspunkt: LocalDate) =
             flatMap { it.vedtaksperioder }.medSkjæringstidspunkt(skjæringstidspunkt).harUtbetaling()
 
-        internal fun Iterable<Arbeidsgiver>.ghostPeriode(skjæringstidspunkt: LocalDate, deaktivert: Boolean): GhostPerioder.GhostPeriode? {
+        internal fun Iterable<Arbeidsgiver>.ghostPeriode(skjæringstidspunkt: LocalDate, vilkårsgrunnlagHistorikkInnslagId: UUID?, deaktivert: Boolean): GhostPeriode? {
             val relevanteVedtaksperioder = flatMap { it.vedtaksperioder.medSkjæringstidspunkt(skjæringstidspunkt) }
             if (relevanteVedtaksperioder.isEmpty()) return null
-            return GhostPerioder.GhostPeriode(
+            return GhostPeriode(
                 fom = relevanteVedtaksperioder.minOf { it.periode().start },
                 tom = relevanteVedtaksperioder.maxOf { it.periode().endInclusive },
                 skjæringstidspunkt = skjæringstidspunkt,
+                vilkårsgrunnlagHistorikkInnslagId = vilkårsgrunnlagHistorikkInnslagId,
                 deaktivert = deaktivert
             )
         }
@@ -735,20 +736,13 @@ internal class Arbeidsgiver private constructor(
         return ForkastetVedtaksperiode.arbeidsgiverperiodeFor(person, forkastede, organisasjonsnummer, sykdomstidslinje, periode)
     }
 
-    internal fun ghostPerioder(): GhostPerioder? {
-        val perioder = person.skjæringstidspunkterFraSpleis()
-            .filter { skjæringstidspunkt -> vedtaksperioder.none { it.gjelder(skjæringstidspunkt) } }
-            .filter { skjæringstidspunkt ->
-                arbeidsforholdhistorikk.harRelevantArbeidsforhold(skjæringstidspunkt)
-                    || arbeidsforholdhistorikk.harInaktivtArbeidsforhold(skjæringstidspunkt)
-            }
-            .mapNotNull { skjæringstidspunkt -> person.ghostPeriode(skjæringstidspunkt, arbeidsforholdhistorikk.harInaktivtArbeidsforhold(skjæringstidspunkt)) }
-        if (perioder.isEmpty()) return null
-        return GhostPerioder(
-            historikkInnslagId = person.nyesteIdForVilkårsgrunnlagHistorikk(),
-            ghostPerioder = perioder
-        )
-    }
+    internal fun ghostPerioder(): List<GhostPeriode> = person.skjæringstidspunkterFraSpleis()
+        .filter { skjæringstidspunkt -> vedtaksperioder.none { it.gjelder(skjæringstidspunkt) } }
+        .filter { skjæringstidspunkt ->
+            arbeidsforholdhistorikk.harRelevantArbeidsforhold(skjæringstidspunkt)
+                || arbeidsforholdhistorikk.harInaktivtArbeidsforhold(skjæringstidspunkt)
+        }
+        .mapNotNull { skjæringstidspunkt -> person.ghostPeriode(skjæringstidspunkt, organisasjonsnummer, arbeidsforholdhistorikk.harInaktivtArbeidsforhold(skjæringstidspunkt)) }
 
     internal fun infotrygdUtbetalingstidslinje() = person.infotrygdUtbetalingstidslinje(organisasjonsnummer)
 
