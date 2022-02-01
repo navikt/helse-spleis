@@ -56,7 +56,8 @@ internal abstract class AbstractEndToEndMediatorTest {
             rapidsConnection = testRapid,
             personRepository = PersonPostgresRepository(dataSource),
             hendelseRepository = HendelseRepository(dataSource),
-            lagrePersonDao = LagrePersonDao(dataSource)
+            lagrePersonDao = LagrePersonDao(dataSource),
+            versjonAvKode = "test-versjon"
         )
 
         messageMediator = MessageMediator(

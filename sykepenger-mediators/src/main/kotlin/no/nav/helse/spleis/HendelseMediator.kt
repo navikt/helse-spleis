@@ -21,7 +21,8 @@ internal class HendelseMediator(
     private val rapidsConnection: RapidsConnection,
     private val personRepository: PersonRepository,
     private val hendelseRepository: HendelseRepository,
-    private val lagrePersonDao: LagrePersonDao
+    private val lagrePersonDao: LagrePersonDao,
+    private val versjonAvKode: String
 ) : IHendelseMediator {
     private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
 
@@ -202,9 +203,10 @@ internal class HendelseMediator(
         val jurist = MaskinellJurist()
         val person = person(hendelse, jurist)
         val personMediator = PersonMediator(person, message, hendelse, hendelseRepository)
+        val subsumsjonMediator = SubsumsjonMediator(jurist, hendelse, message, versjonAvKode)
         person.addObserver(VedtaksperiodeProbe)
         handler(person)
-        finalize(personMediator, message, hendelse)
+        finalize(personMediator, subsumsjonMediator , message, hendelse)
     }
 
     private fun person(hendelse: PersonHendelse, jurist: MaskinellJurist): Person {
@@ -213,8 +215,9 @@ internal class HendelseMediator(
             ?: Person(aktørId = hendelse.aktørId(), fødselsnummer = hendelse.fødselsnummer().somFødselsnummer(), jurist = jurist)
     }
 
-    private fun finalize(personMediator: PersonMediator, message: HendelseMessage, hendelse: PersonHendelse) {
+    private fun finalize(personMediator: PersonMediator, subsumsjonMediator: SubsumsjonMediator, message: HendelseMessage, hendelse: PersonHendelse) {
         personMediator.finalize(rapidsConnection, lagrePersonDao)
+        subsumsjonMediator.finalize(rapidsConnection)
         if (!hendelse.hasActivities()) return
         if (hendelse.hasErrorsOrWorse()) sikkerLogg.info("aktivitetslogg inneholder errors:\n${hendelse.toLogString()}")
         else sikkerLogg.info("aktivitetslogg inneholder meldinger:\n${hendelse.toLogString()}")

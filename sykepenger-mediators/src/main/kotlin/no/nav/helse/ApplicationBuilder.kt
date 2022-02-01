@@ -23,7 +23,8 @@ class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.StatusList
         rapidsConnection = rapidsConnection,
         personRepository = personRepository,
         hendelseRepository = hendelseRepository,
-        lagrePersonDao = lagrePersonDao
+        lagrePersonDao = lagrePersonDao,
+        versjonAvKode = versjonAvKode(env)
     )
 
     init {
@@ -40,6 +41,10 @@ class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.StatusList
 
     override fun onStartup(rapidsConnection: RapidsConnection) {
         dataSourceBuilder.migrate()
+    }
+
+    fun versjonAvKode(env: Map<String, String>): String {
+        return env.get("NAIS_APP_IMAGE") ?: throw IllegalArgumentException("NAIS_APP_IMAGE env variable is missing")
     }
 
 }

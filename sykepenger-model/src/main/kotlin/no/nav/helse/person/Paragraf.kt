@@ -2,7 +2,7 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 
-enum class Paragraf(private val ref: String) {
+enum class Paragraf(internal val ref: String) {
     PARAGRAF_2("2"),
     PARAGRAF_8_2("8-2"),
     PARAGRAF_8_3("8-3"),
@@ -21,7 +21,7 @@ enum class Paragraf(private val ref: String) {
     }
 }
 
-enum class Ledd(private val nummer: Int) {
+enum class Ledd(internal val nummer: Int) {
     LEDD_1(1),
     LEDD_2(2),
     LEDD_3(3),
@@ -38,7 +38,7 @@ enum class Ledd(private val nummer: Int) {
     }
 }
 
-enum class Punktum(private val nummer: Int) {
+enum class Punktum(internal val nummer: Int) {
     PUNKTUM_1(1),
     PUNKTUM_2(2),
     PUNKTUM_3(3),
@@ -57,9 +57,9 @@ enum class Punktum(private val nummer: Int) {
     }
 }
 
-enum class Bokstav {
-    BOKSTAV_A,
-    BOKSTAV_B
+enum class Bokstav(internal val ref: String) {
+    BOKSTAV_A("a"),
+    BOKSTAV_B("b")
 }
 
 val FOLKETRYGDLOVENS_OPPRINNELSESDATO: LocalDate = LocalDate.of(1997, 2, 28)

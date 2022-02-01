@@ -3,11 +3,9 @@ package no.nav.helse.person.etterlevelse
 import no.nav.helse.Fødselsnummer
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
+import no.nav.helse.person.*
 import no.nav.helse.person.Bokstav.BOKSTAV_A
-import no.nav.helse.person.FOLKETRYGDLOVENS_OPPRINNELSESDATO
-import no.nav.helse.person.Ledd
 import no.nav.helse.person.Ledd.Companion.ledd
-import no.nav.helse.person.Paragraf
 import no.nav.helse.person.Paragraf.PARAGRAF_8_17
 import no.nav.helse.person.Paragraf.PARAGRAF_8_51
 import no.nav.helse.person.Punktum.Companion.punktum
@@ -17,6 +15,7 @@ import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosent
 import java.time.LocalDate
 import java.time.Year
+import java.time.format.DateTimeFormatter
 import java.util.*
 
 class MaskinellJurist private constructor(
@@ -403,5 +402,67 @@ class MaskinellJurist private constructor(
         if (dagerIkkeOppfylt.isNotEmpty()) logg(VILKAR_IKKE_OPPFYLT, dagerIkkeOppfylt.first(), dagerIkkeOppfylt.last())
     }
 
-    fun subsumsjoner() = subsumsjoner.toList()
+    internal fun subsumsjoner() = subsumsjoner.toList()
+
+    fun events() = subsumsjoner.map(SubsumsjonEvent.Companion::fraSubsumsjon)
+
+    data class SubsumsjonEvent(
+        val id: UUID = UUID.randomUUID(),
+        val sporing: Map<String, String>,
+        val lovverk: String,
+        val ikrafttredelse: String,
+        val paragraf: String,
+        val ledd: Int?,
+        val punktum: Int?,
+        val bokstav: String?,
+        val input: Map<String, Any>,
+        val output: Map<String, Any>,
+        val utfall: String,
+    ) {
+
+        init {
+            bokstav?.run { require(this.length == 1) }
+            punktum?.run { require(this > 0) }
+        }
+
+        companion object {
+
+            private val paragrafVersjonFormaterer = DateTimeFormatter.ISO_DATE
+
+            internal fun fraSubsumsjon(juridiskVurdering: Subsumsjon): SubsumsjonEvent {
+                return object: SubsumsjonVisitor {
+                    lateinit var event: SubsumsjonEvent
+
+                    init {
+                        juridiskVurdering.accept(this)
+                    }
+
+                    override fun preVisitSubsumsjon(
+                        utfall: Utfall,
+                        versjon: LocalDate,
+                        paragraf: Paragraf,
+                        ledd: Ledd,
+                        punktum: List<Punktum>,
+                        bokstaver: List<Bokstav>,
+                        input: Map<String, Any>,
+                        output: Map<String, Any>,
+                        kontekster: Map<String, String>
+                    ) {
+                        event = SubsumsjonEvent(
+                            sporing = kontekster,
+                            lovverk = "folketrygdloven",
+                            ikrafttredelse = paragrafVersjonFormaterer.format(versjon),
+                            paragraf = paragraf.ref,
+                            ledd = ledd.nummer,
+                            punktum = punktum.map { it.nummer }.firstOrNull(), // Bryter encap?
+                            bokstav = bokstaver.map { it.ref }.firstOrNull(),
+                            input = input,
+                            output = output,
+                            utfall = utfall.name
+                        )
+                    }
+                }.event
+            }
+        }
+    }
 }
