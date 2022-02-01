@@ -64,3 +64,5 @@ spec:
     value: "true"
   - name: DELVIS_REFUSJON
     value: "true"
+  - name: SUBSUMSJON_HENDELSER
+    value: "true"
