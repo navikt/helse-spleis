@@ -208,7 +208,7 @@ class MaskinellJurist private constructor(
                 versjon = LocalDate.of(2021, 5, 21),
                 paragraf = Paragraf.PARAGRAF_8_12,
                 ledd = 2.ledd,
-                punktum = emptyList(),
+                punktum = null,
                 bokstav = null,
                 input = mapOf(
                     "dato" to dato,
@@ -441,7 +441,7 @@ class MaskinellJurist private constructor(
                         versjon: LocalDate,
                         paragraf: Paragraf,
                         ledd: Ledd,
-                        punktum: List<Punktum>,
+                        punktum: Punktum?,
                         bokstav: Bokstav?,
                         input: Map<String, Any>,
                         output: Map<String, Any>,
@@ -453,7 +453,7 @@ class MaskinellJurist private constructor(
                             ikrafttredelse = paragrafVersjonFormaterer.format(versjon),
                             paragraf = paragraf.ref,
                             ledd = ledd.nummer,
-                            punktum = punktum.map { it.nummer }.firstOrNull(), // Bryter encap?
+                            punktum = punktum?.toJson(), // Bryter encap?
                             bokstav = bokstav?.toJson(),
                             input = input,
                             output = output,

@@ -561,7 +561,7 @@ class Aktivitetslogg(
                                 versjon = LocalDate.of(2020, 6, 12),
                                 paragraf = PARAGRAF_8_2,
                                 ledd = 1.ledd,
-                                punktum = 1.punktum,
+                                punktum = listOf(1.punktum),
                                 inputdata = mapOf(
                                     "skjæringstidspunkt" to skjæringstidspunkt,
                                     "tilstrekkeligAntallOpptjeningsdager" to tilstrekkeligAntallOpptjeningsdager,
@@ -603,7 +603,7 @@ class Aktivitetslogg(
                                 versjon = LocalDate.of(2011, 12, 16),
                                 paragraf = PARAGRAF_8_3,
                                 ledd = 1.ledd,
-                                punktum = 2.punktum,
+                                punktum = listOf(2.punktum),
                                 inputdata = mapOf(
                                     "syttiårsdagen" to syttiårsdagen,
                                     "vurderingFom" to vurderingFom,
@@ -640,7 +640,7 @@ class Aktivitetslogg(
                                 versjon = LocalDate.of(2011, 12, 16),
                                 paragraf = PARAGRAF_8_3,
                                 ledd = 2.ledd,
-                                punktum = 1.punktum,
+                                punktum = listOf(1.punktum),
                                 inputdata = mapOf(
                                     "skjæringstidspunkt" to skjæringstidspunkt,
                                     "grunnlagForSykepengegrunnlag" to grunnlagForSykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
@@ -676,7 +676,7 @@ class Aktivitetslogg(
                                 versjon = LocalDate.of(2020, 1, 1),
                                 PARAGRAF_8_10,
                                 LEDD_2,
-                                1.punktum,
+                                listOf(1.punktum),
                                 inputdata = mapOf(
                                     "maksimaltSykepengegrunnlag" to maksimaltSykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
                                     "skjæringstidspunkt" to skjæringstidspunkt,
@@ -700,7 +700,7 @@ class Aktivitetslogg(
                                 oppfylt = true,
                                 paragraf = PARAGRAF_8_11,
                                 ledd = LEDD_1,
-                                punktum = 1.punktum,
+                                punktum = listOf(1.punktum),
                                 versjon = FOLKETRYGDLOVENS_OPPRINNELSESDATO,
                                 inputdata = emptyMap(),
                                 outputdata = emptyMap()
@@ -740,7 +740,7 @@ class Aktivitetslogg(
                                 versjon = LocalDate.of(2021, 5, 21),
                                 paragraf = PARAGRAF_8_12,
                                 ledd = 1.ledd,
-                                punktum = 1.punktum,
+                                punktum = listOf(1.punktum),
                                 inputdata = mapOf(
                                     "fom" to fom,
                                     "tom" to tom,
@@ -839,7 +839,7 @@ class Aktivitetslogg(
                                 versjon = FOLKETRYGDLOVENS_OPPRINNELSESDATO,
                                 paragraf = PARAGRAF_8_16,
                                 ledd = LEDD_1,
-                                punktum = 1.punktum,
+                                punktum = listOf(1.punktum),
                                 inputdata = mapOf(
                                     "dekningsgrad" to dekningsgrad,
                                     "inntekt" to inntekt
@@ -872,7 +872,7 @@ class Aktivitetslogg(
                                 versjon = LocalDate.of(2018, 1, 1),
                                 paragraf = PARAGRAF_8_17,
                                 ledd = LEDD_1,
-                                punktum = 1.punktum,
+                                punktum = listOf(1.punktum),
                                 bokstaver = listOf(BOKSTAV_A),
                                 inputdata = mapOf(
                                     "førsteNavdag" to førsteNavdag,
@@ -920,7 +920,7 @@ class Aktivitetslogg(
                                 versjon = LocalDate.of(2019, 1, 1),
                                 paragraf = PARAGRAF_8_30,
                                 ledd = LEDD_1,
-                                punktum = 1.punktum,
+                                punktum = listOf(1.punktum),
                                 inputdata = mapOf(
                                     "beregnetMånedsinntektPerArbeidsgiver" to beregnetMånedsinntektPerArbeidsgiver
                                 ),
@@ -944,7 +944,7 @@ class Aktivitetslogg(
                                 versjon = LocalDate.of(2017, 4, 5),
                                 paragraf = PARAGRAF_8_30,
                                 ledd = 2.ledd,
-                                punktum = 1.punktum,
+                                punktum = listOf(1.punktum),
                                 inputdata = mapOf(
                                     "maksimaltTillattAvvikPåÅrsinntekt" to maksimaltTillattAvvikPåÅrsinntekt.prosent(),
                                     "grunnlagForSykepengegrunnlag" to grunnlagForSykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
@@ -980,7 +980,7 @@ class Aktivitetslogg(
                                 versjon = LocalDate.of(2011, 12, 16),
                                 paragraf = PARAGRAF_8_51,
                                 ledd = LEDD_2,
-                                punktum = 1.punktum,
+                                punktum = listOf(1.punktum),
                                 inputdata = mapOf(
                                     "skjæringstidspunkt" to skjæringstidspunkt,
                                     "grunnlagForSykepengegrunnlag" to grunnlagForSykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
@@ -1005,7 +1005,7 @@ class Aktivitetslogg(
                                 versjon = LocalDate.of(2011, 12, 16),
                                 paragraf = PARAGRAF_8_51,
                                 ledd = LEDD_3,
-                                punktum = 1.punktum,
+                                punktum = listOf(1.punktum),
                                 inputdata = mapOf(
                                     "maksSykepengedagerOver67" to maksSykepengedagerOver67
                                 ),

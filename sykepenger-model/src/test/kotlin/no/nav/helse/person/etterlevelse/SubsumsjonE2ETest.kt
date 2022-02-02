@@ -562,7 +562,6 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         SubsumsjonInspektør(jurist).assertIkkeOppfylt(
             paragraf = PARAGRAF_8_12,
             ledd = LEDD_2,
-            punktum = emptyList(),
             versjon = 21.mai(2021),
             input = mapOf(
                 "dato" to 28.desember,

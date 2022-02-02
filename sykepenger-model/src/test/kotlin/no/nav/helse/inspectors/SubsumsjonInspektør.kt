@@ -21,7 +21,7 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
     private data class Subsumsjon(
         val paragraf: Paragraf,
         val ledd: Ledd,
-        val punktum: List<Punktum>,
+        val punktum: Punktum?,
         val bokstav: Bokstav?,
         val versjon: LocalDate,
         val sporing: Map<String, String>,
@@ -36,7 +36,7 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
         jurist.subsumsjoner().forEach { it.accept(this) }
     }
 
-    private fun finnSubsumsjon(paragraf: Paragraf, versjon: LocalDate?, ledd: Ledd?, punktum: List<Punktum>?, bokstav: Bokstav?, utfall: Utfall? = null, vedtaksperiodeId: UUID? = null) =
+    private fun finnSubsumsjon(paragraf: Paragraf, versjon: LocalDate?, ledd: Ledd?, punktum: Punktum?, bokstav: Bokstav?, utfall: Utfall? = null, vedtaksperiodeId: UUID? = null) =
         subsumsjoner.filter {
             it.paragraf == paragraf
                 && versjon?.equals(it.versjon) ?: true
@@ -54,7 +54,7 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
         paragraf: Paragraf,
         versjon: LocalDate,
         ledd: Ledd,
-        punktum: List<Punktum> = emptyList(),
+        punktum: Punktum? = null,
         bokstav: Bokstav? = null,
         input: Map<String, Any>,
         output: Map<String, Any>,
@@ -68,7 +68,7 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
         paragraf: Paragraf,
         versjon: LocalDate,
         ledd: Ledd,
-        punktum: List<Punktum> = emptyList(),
+        punktum: Punktum? = null,
         bokstav: Bokstav? = null,
         input: Map<String, Any>,
         output: Map<String, Any>,
@@ -84,7 +84,7 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
         paragraf: Paragraf,
         versjon: LocalDate,
         ledd: Ledd,
-        punktum: List<Punktum> = emptyList(),
+        punktum: Punktum? = null,
         bokstav: Bokstav? = null,
         input: Map<String, Any>,
         output: Map<String, Any>,
@@ -99,7 +99,7 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
     internal fun assertVurdert(
         paragraf: Paragraf,
         ledd: Ledd? = null,
-        punktum: List<Punktum>? = null,
+        punktum: Punktum? = null,
         bokstav: Bokstav? = null,
         vedtaksperiodeId: IdInnhenter? = null,
         versjon: LocalDate? = null,
@@ -113,7 +113,7 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
     internal fun assertIkkeVurdert(
         paragraf: Paragraf,
         ledd: Ledd? = null,
-        punktum: List<Punktum>? = null,
+        punktum: Punktum? = null,
         bokstav: Bokstav? = null,
         vedtaksperiodeId: IdInnhenter? = null,
         versjon: LocalDate? = null,
@@ -128,7 +128,7 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
         expectedParagraf: Paragraf,
         expectedLedd: Ledd,
         expectedVersjon: LocalDate,
-        expectedPunktum: List<Punktum> = emptyList(),
+        expectedPunktum: Punktum? = null,
         expectedBokstav: Bokstav? = null,
         utfall: Utfall? = null
     ) {
@@ -145,7 +145,7 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
         versjon: LocalDate,
         paragraf: Paragraf,
         ledd: Ledd,
-        punktum: List<Punktum>,
+        punktum: Punktum?,
         bokstav: Bokstav?,
         input: Map<String, Any>,
         output: Map<String, Any>,

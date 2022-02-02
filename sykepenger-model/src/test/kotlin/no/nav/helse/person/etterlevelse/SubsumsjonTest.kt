@@ -29,7 +29,7 @@ internal class SubsumsjonTest {
             paragraf = PARAGRAF_2,
             ledd = 1.ledd,
             bokstav = BOKSTAV_A,
-            punktum = listOf(PUNKTUM_1),
+            punktum = PUNKTUM_1,
             input = mapOf("a" to "a"),
             output = mapOf("b" to "b")
         )
@@ -39,7 +39,7 @@ internal class SubsumsjonTest {
             paragraf = PARAGRAF_2,
             ledd = 1.ledd,
             bokstav = BOKSTAV_A,
-            punktum = listOf(PUNKTUM_1),
+            punktum = PUNKTUM_1,
             input = mapOf("a" to "a"),
             output = mapOf("b" to "b")
         )
@@ -103,8 +103,8 @@ internal class SubsumsjonTest {
 
     @Test
     fun `ulik når punktum varierer`() {
-        val paragraf1 = testParagraf(VILKAR_OPPFYLT, LocalDate.MIN, paragraf = PARAGRAF_2, ledd = 1.ledd, punktum = listOf(PUNKTUM_1))
-        val paragraf2 = testParagraf(VILKAR_OPPFYLT, LocalDate.MIN, paragraf = PARAGRAF_2, ledd = 1.ledd, punktum = listOf(PUNKTUM_2))
+        val paragraf1 = testParagraf(VILKAR_OPPFYLT, LocalDate.MIN, paragraf = PARAGRAF_2, ledd = 1.ledd, punktum = PUNKTUM_1)
+        val paragraf2 = testParagraf(VILKAR_OPPFYLT, LocalDate.MIN, paragraf = PARAGRAF_2, ledd = 1.ledd, punktum = PUNKTUM_2)
         assertNotEquals(paragraf1, paragraf2)
     }
 
@@ -114,7 +114,7 @@ internal class SubsumsjonTest {
         paragraf: Paragraf,
         ledd: Ledd,
         bokstav: Bokstav? = null,
-        punktum: List<Punktum> = listOf(),
+        punktum: Punktum? = null,
         input: Map<String, Any> = mapOf(),
         output: Map<String, Any> = mapOf(),
         kontekster: Map<String, String> = mapOf()
@@ -124,7 +124,7 @@ internal class SubsumsjonTest {
         override val paragraf = paragraf
         override val ledd = ledd
         override val bokstav: Bokstav? = bokstav
-        override val punktum = punktum
+        override val punktum: Punktum? = punktum
         override val input = input
         override val output = output
         override val kontekster = kontekster

@@ -38,7 +38,7 @@ enum class Ledd(internal val nummer: Int) {
     }
 }
 
-enum class Punktum(internal val nummer: Int) {
+enum class Punktum(private val nummer: Int) {
     PUNKTUM_1(1),
     PUNKTUM_2(2),
     PUNKTUM_3(3),
@@ -51,8 +51,10 @@ enum class Punktum(internal val nummer: Int) {
         return "$nummer. punktum"
     }
 
+    fun toJson(): Int = nummer
+
     internal companion object {
-        val Int.punktum get() = enumValues<Punktum>().filter { it.nummer == this }
+        val Int.punktum get() = enumValues<Punktum>().first { it.nummer == this }
         val IntRange.punktum get() = enumValues<Punktum>().filter { it.nummer in this }
     }
 }

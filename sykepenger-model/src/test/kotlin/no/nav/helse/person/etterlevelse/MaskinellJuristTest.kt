@@ -58,7 +58,7 @@ internal class MaskinellJuristTest {
                 versjon: LocalDate,
                 paragraf: Paragraf,
                 ledd: Ledd,
-                punktum: List<Punktum>,
+                punktum: Punktum?,
                 bokstav: Bokstav?,
                 input: Map<String, Any>,
                 output: Map<String, Any>,

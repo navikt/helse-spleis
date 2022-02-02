@@ -20,7 +20,7 @@ abstract class Subsumsjon {
     abstract val versjon: LocalDate
     abstract val paragraf: Paragraf
     abstract val ledd: Ledd
-    open val punktum: List<Punktum> = emptyList()
+    open val punktum: Punktum? = null
     open val bokstav: Bokstav? = null
 
     abstract val input: Map<String, Any>
@@ -75,7 +75,7 @@ abstract class Subsumsjon {
     }
 
     override fun toString(): String {
-        return "$paragraf $ledd ${if (punktum.isEmpty()) "" else punktum[0]} ${if (bokstav == null) "" else bokstav} [$utfall]"
+        return "$paragraf $ledd ${if (punktum == null) "" else punktum} ${if (bokstav == null) "" else bokstav} [$utfall]"
     }
 
     internal companion object {
@@ -93,7 +93,7 @@ class EnkelSubsumsjon(
     override val versjon: LocalDate,
     override val paragraf: Paragraf,
     override val ledd: Ledd,
-    override val punktum: List<Punktum> = emptyList(),
+    override val punktum: Punktum? = null,
     override val bokstav: Bokstav? = null,
     override val input: Map<String, Any>,
     override val output: Map<String, Any>,
@@ -112,7 +112,7 @@ class GrupperbarSubsumsjon private constructor(
     override val versjon: LocalDate,
     override val paragraf: Paragraf,
     override val ledd: Ledd,
-    override val punktum: List<Punktum> = emptyList(),
+    override val punktum: Punktum? = null,
     override val bokstav: Bokstav? = null,
     override val input: Map<String, Any>,
     override val output: Map<String, Any>,
@@ -126,7 +126,7 @@ class GrupperbarSubsumsjon private constructor(
         versjon: LocalDate,
         paragraf: Paragraf,
         ledd: Ledd,
-        punktum: List<Punktum> = emptyList(),
+        punktum: Punktum? = null,
         bokstav: Bokstav? = null,
         kontekster: Map<String, String>
     ) : this(dato, dato, utfall, versjon, paragraf, ledd, punktum, bokstav, input, output, kontekster)
@@ -153,7 +153,7 @@ class BetingetSubsumsjon(
     override val versjon: LocalDate,
     override val paragraf: Paragraf,
     override val ledd: Ledd,
-    override val punktum: List<Punktum> = emptyList(),
+    override val punktum: Punktum? = null,
     override val bokstav: Bokstav? = null,
     override val input: Map<String, Any>,
     override val output: Map<String, Any>,

@@ -48,7 +48,7 @@ internal class BetingetSubsumsjonTest {
         versjon: LocalDate = LocalDate.MAX,
         paragraf: Paragraf = Paragraf.PARAGRAF_8_2,
         ledd: Ledd = 1.ledd,
-        punktum: List<Punktum> = emptyList(),
+        punktum: Punktum? = null,
         bokstav: Bokstav? = null,
         input: Map<String, Any> = emptyMap(),
         output: Map<String, Any> = emptyMap(),
