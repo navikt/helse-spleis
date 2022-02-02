@@ -112,7 +112,7 @@ class Vilkårsgrunnlag(
         internal fun tilDomeneobjekt() = Arbeidsforholdhistorikk.Arbeidsforhold(
             ansattFom = ansattFom,
             ansattTom = ansattTom,
-            erAktivt = true
+            deaktivert = false
         )
 
         fun erSøppel() =

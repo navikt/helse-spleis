@@ -1,8 +1,8 @@
 package no.nav.helse.person
 
-import no.nav.helse.person.Arbeidsforholdhistorikk.Arbeidsforhold.Companion.harAktivtArbeidsforhold
-import no.nav.helse.person.Arbeidsforholdhistorikk.Arbeidsforhold.Companion.harArbeidsforholdSomErNyereEnnTreMåneder
 import no.nav.helse.person.Arbeidsforholdhistorikk.Arbeidsforhold.Companion.create
+import no.nav.helse.person.Arbeidsforholdhistorikk.Arbeidsforhold.Companion.erDeaktivert
+import no.nav.helse.person.Arbeidsforholdhistorikk.Arbeidsforhold.Companion.harArbeidsforholdSomErNyereEnnTreMåneder
 import java.time.LocalDate
 import java.util.*
 
@@ -25,7 +25,10 @@ internal class Arbeidsforholdhistorikk private constructor(
         visitor.postVisitArbeidsforholdhistorikk(this)
     }
 
-    internal fun harRelevantArbeidsforhold(skjæringstidspunkt: LocalDate) = sisteInnslag(skjæringstidspunkt)?.erAktivt() ?: false
+    internal fun harRelevantArbeidsforhold(skjæringstidspunkt: LocalDate): Boolean {
+        val siste = sisteInnslag(skjæringstidspunkt)
+        return siste != null && !siste.erDeaktivert()
+    }
 
     internal fun harArbeidsforholdNyereEnnTreMåneder(skjæringstidspunkt: LocalDate) =
         sisteInnslag(skjæringstidspunkt)?.harArbeidsforholdSomErNyereEnnTreMåneder(skjæringstidspunkt) ?: false
@@ -40,9 +43,9 @@ internal class Arbeidsforholdhistorikk private constructor(
         lagre(nåværendeInnslag.deaktiverArbeidsforhold(), skjæringstidspunkt)
     }
 
-    internal fun harInaktivtArbeidsforhold(skjæringstidspunkt: LocalDate): Boolean {
+    internal fun harDeaktivertArbeidsforhold(skjæringstidspunkt: LocalDate): Boolean {
         val innslag = sisteInnslag(skjæringstidspunkt) ?: return false
-        return !innslag.erAktivt()
+        return innslag.erDeaktivert()
     }
 
     private fun sisteInnslag(skjæringstidspunkt: LocalDate) = historikk.lastOrNull { it.gjelder(skjæringstidspunkt) }
@@ -69,52 +72,46 @@ internal class Arbeidsforholdhistorikk private constructor(
 
         internal fun aktiverArbeidsforhold() = arbeidsforhold.map { it.aktiver() }
 
-        internal fun erAktivt() = arbeidsforhold.harAktivtArbeidsforhold()
+        internal fun erDeaktivert() = arbeidsforhold.erDeaktivert()
     }
 
-    /**
-     * Noen begreper:
-     *
-     * Aktivt -> Et aktivt arbeidsforhold er et arbeidsforhold som skal taes med i beregning for skjæringstidspunkt
-     * Inaktiv -> Et inaktivt arbeidsforhold blir markert av en saksbehandler som at det ikke skal være med i beregning for skjæringstidspunkt
-     */
     internal class Arbeidsforhold(
         private val ansattFom: LocalDate,
         private val ansattTom: LocalDate?,
-        private val erAktivt: Boolean
+        private val deaktivert: Boolean
     ) {
         internal fun gjelder(skjæringstidspunkt: LocalDate) = ansattFom <= skjæringstidspunkt && (ansattTom == null || ansattTom >= skjæringstidspunkt)
 
         override fun equals(other: Any?) = other is Arbeidsforhold
             && ansattFom == other.ansattFom
             && ansattTom == other.ansattTom
-            && erAktivt == other.erAktivt
+            && deaktivert == other.deaktivert
 
         internal fun harArbeidetMindreEnnTreMåneder(skjæringstidspunkt: LocalDate) = ansattFom > skjæringstidspunkt.withDayOfMonth(1).minusMonths(3)
 
         override fun hashCode(): Int {
             var result = ansattFom.hashCode()
             result = 31 * result + (ansattTom?.hashCode() ?: 0)
-            result = 31 * result + erAktivt.hashCode()
+            result = 31 * result + deaktivert.hashCode()
             return result
         }
 
         internal fun accept(visitor: ArbeidsforholdhistorikkVisitor) {
-            visitor.visitArbeidsforhold(ansattFom = ansattFom, ansattTom = ansattTom, erAktivt = erAktivt)
+            visitor.visitArbeidsforhold(ansattFom = ansattFom, ansattTom = ansattTom, erAktivt = deaktivert)
         }
 
-        internal fun deaktiver() = Arbeidsforhold(ansattFom = ansattFom, ansattTom = ansattTom, erAktivt = false)
+        internal fun deaktiver() = Arbeidsforhold(ansattFom = ansattFom, ansattTom = ansattTom, deaktivert = true)
 
-        internal fun aktiver() = Arbeidsforhold(ansattFom = ansattFom, ansattTom = ansattTom, erAktivt = true)
+        internal fun aktiver() = Arbeidsforhold(ansattFom = ansattFom, ansattTom = ansattTom, deaktivert = false)
 
         companion object {
             internal fun List<Arbeidsforhold>.harArbeidsforholdSomErNyereEnnTreMåneder(skjæringstidspunkt: LocalDate) =
-                any { it.harArbeidetMindreEnnTreMåneder(skjæringstidspunkt) && it.erAktivt }
+                any { it.harArbeidetMindreEnnTreMåneder(skjæringstidspunkt) && !it.deaktivert }
 
-            internal fun Collection<Arbeidsforhold>.harAktivtArbeidsforhold() = any { it.erAktivt }
+            internal fun Collection<Arbeidsforhold>.erDeaktivert() = any { it.deaktivert }
 
             internal fun <T> List<Arbeidsforhold>.create(creator: (LocalDate, LocalDate?, Boolean) -> T) =
-                map { creator(it.ansattFom, it.ansattTom, it.erAktivt) }
+                map { creator(it.ansattFom, it.ansattTom, it.deaktivert) }
         }
 
     }

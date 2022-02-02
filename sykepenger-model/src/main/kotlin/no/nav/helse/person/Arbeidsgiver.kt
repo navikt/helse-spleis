@@ -738,7 +738,7 @@ internal class Arbeidsgiver private constructor(
     internal fun ghostPerioder(): List<GhostPeriode> = person.skjæringstidspunkterFraSpleis()
         .filter { skjæringstidspunkt -> vedtaksperioder.none { it.gjelder(skjæringstidspunkt) } }
         .filter(::erGhost)
-        .mapNotNull { skjæringstidspunkt -> person.ghostPeriode(skjæringstidspunkt, organisasjonsnummer, arbeidsforholdhistorikk.harInaktivtArbeidsforhold(skjæringstidspunkt)) }
+        .mapNotNull { skjæringstidspunkt -> person.ghostPeriode(skjæringstidspunkt, organisasjonsnummer, arbeidsforholdhistorikk.harDeaktivertArbeidsforhold(skjæringstidspunkt)) }
 
     private fun erGhost(skjæringstidspunkt: LocalDate): Boolean {
         val førsteFraværsdag = finnFørsteFraværsdag(skjæringstidspunkt)
@@ -848,7 +848,7 @@ internal class Arbeidsgiver private constructor(
         }
     }
 
-    private fun harInaktivtArbeidsforhold(skjæringstidspunkt: LocalDate) = arbeidsforholdhistorikk.harInaktivtArbeidsforhold(skjæringstidspunkt)
+    private fun harInaktivtArbeidsforhold(skjæringstidspunkt: LocalDate) = arbeidsforholdhistorikk.harDeaktivertArbeidsforhold(skjæringstidspunkt)
 
     internal fun kanReberegnes(vedtaksperiode: Vedtaksperiode) = vedtaksperioder.all { it.kanReberegne(vedtaksperiode) }
 

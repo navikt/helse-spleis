@@ -30,7 +30,7 @@ data class ArbeidsforholdDTO(
     val orgnummer: String,
     val ansattFom: LocalDate,
     val ansattTom: LocalDate?,
-    val erAktivt: Boolean
+    val deaktivert: Boolean
 )
 
 data class AktivitetDTO(

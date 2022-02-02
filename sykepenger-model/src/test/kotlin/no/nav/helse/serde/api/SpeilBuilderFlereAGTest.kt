@@ -381,8 +381,8 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
         assertEquals(
             mapOf(
                 1.januar to listOf(
-                    ArbeidsforholdDTO(a1, LocalDate.EPOCH, null, true),
-                    ArbeidsforholdDTO(a2, LocalDate.EPOCH, null, false)
+                    ArbeidsforholdDTO(a1, LocalDate.EPOCH, null, false),
+                    ArbeidsforholdDTO(a2, LocalDate.EPOCH, null, true)
                 )
             ),
             personDto.arbeidsforholdPerSkjæringstidspunkt
