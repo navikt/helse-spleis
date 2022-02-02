@@ -17,6 +17,9 @@ spec:
         retentionHours: 168  # -1 means unlimited
     acl:
         - team: tbd
+          application: spre-subsumsjon
+          access: read
+        - team: tbd
           application: spennende
           access: readwrite
         - team: tbd
@@ -174,4 +177,5 @@ spec:
           access: read
         - team: default
           application: sparenaproxy
-          access: read
+          access: read   
+          
