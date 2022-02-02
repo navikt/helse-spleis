@@ -558,31 +558,6 @@ class Aktivitetslogg(
                     ) {
                     }
 
-                    internal fun IAktivitetslogg.`§8-30 ledd 2 punktum 1`(
-                        oppfylt: Boolean,
-                        maksimaltTillattAvvikPåÅrsinntekt: Prosent,
-                        grunnlagForSykepengegrunnlag: Inntekt,
-                        sammenligningsgrunnlag: Inntekt,
-                        avvik: Prosent
-                    ) {
-                        juridiskVurdering("Vurdering av avviksprosent ved inntektsvurdering",
-                            Vurderingsresultat(
-                                oppfylt = oppfylt,
-                                versjon = LocalDate.of(2017, 4, 5),
-                                paragraf = PARAGRAF_8_30,
-                                ledd = 2.ledd,
-                                punktum = listOf(1.punktum),
-                                inputdata = mapOf(
-                                    "maksimaltTillattAvvikPåÅrsinntekt" to maksimaltTillattAvvikPåÅrsinntekt.prosent(),
-                                    "grunnlagForSykepengegrunnlag" to grunnlagForSykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
-                                    "sammenligningsgrunnlag" to sammenligningsgrunnlag.reflection { årlig, _, _, _ -> årlig }
-                                ),
-                                outputdata = mapOf(
-                                    "avvik" to avvik.prosent()
-                                )
-                            ))
-                    }
-
                     internal fun IAktivitetslogg.`§8-33 ledd 1`() {}
 
                     @Suppress("UNUSED_PARAMETER")

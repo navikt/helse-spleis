@@ -39,10 +39,6 @@ class MaskinellJurist private constructor(
     fun medVedtaksperiode(vedtaksperiodeId: UUID, hendelseIder: List<UUID>) = kopierMedKontekst(mapOf("vedtaksperiode" to vedtaksperiodeId.toString()))
     private fun kopierMedKontekst(kontekster: Map<String, String>) = MaskinellJurist(this, this.kontekster + kontekster)
 
-    override fun `§ 2`(oppfylt: Boolean) {
-        super.`§ 2`(oppfylt)
-    }
-
     override fun `§ 8-2 ledd 1`(
         oppfylt: Boolean,
         skjæringstidspunkt: LocalDate,

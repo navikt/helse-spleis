@@ -13,17 +13,6 @@ import java.time.Year
 interface SubsumsjonObserver {
 
     /**
-     * Vurdering av medlemskap
-     *
-     * Lovdata: [lenke](https://lovdata.no/dokument/NL/lov/1997-02-28-19/KAPITTEL_2-2#KAPITTEL_2-2)
-     *
-     * @param oppfylt hvorvidt sykmeldte har oppfylt krav til medlemskap i folketrygden
-     */
-    @Suppress("UNUSED_PARAMETER")
-    fun `§ 2`(oppfylt: Boolean) {
-    }
-
-    /**
      * Vurdering av opptjeningstid
      *
      * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-2)
