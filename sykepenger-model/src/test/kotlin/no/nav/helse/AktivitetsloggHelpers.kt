@@ -6,6 +6,9 @@ import no.nav.helse.person.TilstandType
 import no.nav.helse.serde.reflection.castAsList
 import java.util.*
 
+internal fun IAktivitetslogg.harBehov(behov: Aktivitetslogg.Aktivitet.Behov.Behovtype) =
+    this.behov().any { it.type == behov }
+
 internal fun IAktivitetslogg.antallEtterspurteBehov(vedtaksperiodeId: UUID, behov: Aktivitetslogg.Aktivitet.Behov.Behovtype) =
     this.behov().filter {
         it.kontekst()["vedtaksperiodeId"] == vedtaksperiodeId.toString()

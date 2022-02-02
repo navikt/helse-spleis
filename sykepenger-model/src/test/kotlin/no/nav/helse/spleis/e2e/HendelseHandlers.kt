@@ -452,6 +452,11 @@ internal fun AbstractEndToEndTest.håndterSimulering(
     }.håndter(Person::håndter)
 }
 
+internal fun AbstractEndToEndTest.håndterInfotrygdendring() {
+    Infotrygdendring(UUID.randomUUID(), AbstractPersonTest.UNG_PERSON_FNR_2018.toString(), AbstractPersonTest.AKTØRID)
+        .håndter(Person::håndter)
+}
+
 internal fun AbstractEndToEndTest.håndterUtbetalingshistorikk(
     vedtaksperiodeIdInnhenter: IdInnhenter,
     vararg utbetalinger: Infotrygdperiode,

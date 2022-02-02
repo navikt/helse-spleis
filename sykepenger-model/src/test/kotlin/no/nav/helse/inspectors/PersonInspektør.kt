@@ -10,6 +10,7 @@ import java.time.LocalDateTime
 import java.util.*
 
 internal val Person.inspektør get() = PersonInspektør(this)
+internal val Person.personLogg get() = inspektør.aktivitetslogg
 
 internal class PersonInspektør(person: Person): PersonVisitor {
     internal lateinit var vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk

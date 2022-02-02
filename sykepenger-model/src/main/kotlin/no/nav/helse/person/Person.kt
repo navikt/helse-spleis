@@ -88,6 +88,10 @@ class Person private constructor(
         hendelse.fortsettÅBehandle(arbeidsgiver)
     }
 
+    fun håndter(infotrygdendring: Infotrygdendring) {
+        infotrygdendring.kontekst(this)
+    }
+
     fun håndter(utbetalingshistorikk: Utbetalingshistorikk) {
         utbetalingshistorikk.kontekst(this)
         utbetalingshistorikk.oppdaterHistorikk(infotrygdhistorikk)
