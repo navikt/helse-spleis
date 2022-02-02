@@ -198,7 +198,6 @@ internal class Arbeidsgiver private constructor(
             )
         }
 
-
         internal fun Iterable<Arbeidsgiver>.beregnFeriepengerForAlleArbeidsgivere(
             aktørId: String,
             feriepengeberegner: Feriepengeberegner,
@@ -738,11 +737,15 @@ internal class Arbeidsgiver private constructor(
 
     internal fun ghostPerioder(): List<GhostPeriode> = person.skjæringstidspunkterFraSpleis()
         .filter { skjæringstidspunkt -> vedtaksperioder.none { it.gjelder(skjæringstidspunkt) } }
-        .filter { skjæringstidspunkt ->
-            arbeidsforholdhistorikk.harRelevantArbeidsforhold(skjæringstidspunkt)
-                || arbeidsforholdhistorikk.harInaktivtArbeidsforhold(skjæringstidspunkt)
-        }
+        .filter(::erGhost)
         .mapNotNull { skjæringstidspunkt -> person.ghostPeriode(skjæringstidspunkt, organisasjonsnummer, arbeidsforholdhistorikk.harInaktivtArbeidsforhold(skjæringstidspunkt)) }
+
+    private fun erGhost(skjæringstidspunkt: LocalDate): Boolean {
+        val førsteFraværsdag = finnFørsteFraværsdag(skjæringstidspunkt)
+        val inntektsopplysning = inntektshistorikk.grunnlagForSykepengegrunnlag(skjæringstidspunkt, førsteFraværsdag)
+        val harArbeidsforholdNyereEnnTreMåneder = arbeidsforholdhistorikk.harArbeidsforholdNyereEnnTreMåneder(skjæringstidspunkt)
+        return inntektsopplysning is Inntektshistorikk.SkattComposite || harArbeidsforholdNyereEnnTreMåneder
+    }
 
     internal fun infotrygdUtbetalingstidslinje() = person.infotrygdUtbetalingstidslinje(organisasjonsnummer)
 

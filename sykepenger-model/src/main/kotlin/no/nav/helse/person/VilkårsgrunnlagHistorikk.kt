@@ -53,8 +53,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
     internal fun sisteIdMedAktivertArbeidsforhold(orgnummer: String, skjæringstidspunkt: LocalDate) = historikk
         .filter { it.erRelevant(orgnummer, listOf(skjæringstidspunkt)) }
-        .takeIf { it.isNotEmpty() }
-        ?.sisteId()
+        .sisteId()
 
     internal class Innslag(private val id: UUID, private val opprettet: LocalDateTime) {
         private val vilkårsgrunnlag = mutableMapOf<LocalDate, VilkårsgrunnlagElement>()
