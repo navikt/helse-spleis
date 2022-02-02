@@ -433,7 +433,7 @@ internal class Vedtaksperiode private constructor(
     private fun håndterInntektsmelding(hendelse: Inntektsmelding, hvisIngenErrors: () -> Unit = {}, nesteTilstand: () -> Vedtaksperiodetilstand) {
         periode = hendelse.oppdaterFom(periode)
         oppdaterHistorikk(hendelse)
-        inntektsmeldingInfo = arbeidsgiver.addInntektsmelding(skjæringstidspunkt, hendelse)
+        inntektsmeldingInfo = arbeidsgiver.addInntektsmelding(skjæringstidspunkt, hendelse, jurist)
 
         hendelse.validerFørsteFraværsdag(skjæringstidspunkt)
         finnArbeidsgiverperiode()?.also { hendelse.validerArbeidsgiverperiode(it) }

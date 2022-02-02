@@ -229,7 +229,8 @@ internal class HistoriePeriodetypeTest {
                 harOpphørAvNaturalytelser = false,
                 mottatt = LocalDateTime.now()
             ),
-            skjæringstidspunkt = 1.januar
+            skjæringstidspunkt = 1.januar,
+            subsumsjonObserver = MaskinellJurist()
         )
         MaksimumUtbetaling(listOf(utbetalingstidslinje), Aktivitetslogg(), 1.januar).betal()
         arbeidsgiver.lagreUtbetalingstidslinjeberegning(arbeidsgiver.organisasjonsnummer(), utbetalingstidslinje, vilkårsgrunnlagHistorikk)

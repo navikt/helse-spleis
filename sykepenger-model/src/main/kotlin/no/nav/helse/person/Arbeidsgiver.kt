@@ -765,15 +765,15 @@ internal class Arbeidsgiver private constructor(
     internal fun grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate, periodeStart: LocalDate) =
         inntektshistorikk.grunnlagForSykepengegrunnlag(skjæringstidspunkt, periodeStart, finnFørsteFraværsdag(skjæringstidspunkt))?.grunnlagForSykepengegrunnlag()
 
-    internal fun addInntekt(inntektsmelding: Inntektsmelding, skjæringstidspunkt: LocalDate) {
-        inntektsmelding.addInntekt(inntektshistorikk, skjæringstidspunkt)
+    internal fun addInntekt(inntektsmelding: Inntektsmelding, skjæringstidspunkt: LocalDate, subsumsjonObserver: SubsumsjonObserver) {
+        inntektsmelding.addInntekt(inntektshistorikk, skjæringstidspunkt, subsumsjonObserver)
     }
 
     internal fun finnTidligereInntektsmeldinginfo(skjæringstidspunkt: LocalDate) = inntektsmeldingInfo.finn(skjæringstidspunkt)
 
-    internal fun addInntektsmelding(skjæringstidspunkt: LocalDate, inntektsmelding: Inntektsmelding): InntektsmeldingInfo {
+    internal fun addInntektsmelding(skjæringstidspunkt: LocalDate, inntektsmelding: Inntektsmelding, subsumsjonObserver: SubsumsjonObserver): InntektsmeldingInfo {
         val førsteFraværsdag = finnFørsteFraværsdag(skjæringstidspunkt)
-        if (førsteFraværsdag != null) addInntekt(inntektsmelding, førsteFraværsdag)
+        if (førsteFraværsdag != null) addInntekt(inntektsmelding, førsteFraværsdag, subsumsjonObserver)
         return inntektsmeldingInfo.opprett(skjæringstidspunkt, inntektsmelding)
     }
 

@@ -3,11 +3,11 @@ package no.nav.helse.person.etterlevelse
 import no.nav.helse.Fødselsnummer
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
+import no.nav.helse.januar
 import no.nav.helse.person.*
 import no.nav.helse.person.Bokstav.BOKSTAV_A
 import no.nav.helse.person.Ledd.Companion.ledd
-import no.nav.helse.person.Paragraf.PARAGRAF_8_17
-import no.nav.helse.person.Paragraf.PARAGRAF_8_51
+import no.nav.helse.person.Paragraf.*
 import no.nav.helse.person.Punktum.Companion.punktum
 import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall
 import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall.*
@@ -137,8 +137,18 @@ class MaskinellJurist private constructor(
         )
     }
 
-    override fun `§ 8-10 ledd 3`(oppfylt: Boolean) {
-        super.`§ 8-10 ledd 3`(oppfylt)
+    override fun `§ 8-10 ledd 3`(årsinntekt: Double, inntektOmregnetTilDaglig: Double) {
+        leggTil(
+            EnkelSubsumsjon(
+                utfall = VILKAR_BEREGNET,
+                versjon = 1.januar(2020),
+                paragraf = PARAGRAF_8_10,
+                ledd = 3.ledd,
+                input = mapOf("årligInntekt" to årsinntekt),
+                output = mapOf("dagligInntekt" to inntektOmregnetTilDaglig),
+                kontekster = kontekster()
+            )
+        )
     }
 
     override fun `§ 8-11 første ledd`() {

@@ -7,6 +7,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.Inntektsinspektør
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Inntektshistorikk
+import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -81,7 +82,7 @@ internal class InfotrygdInntektsopplysningTest {
 
     @Test
     fun `Bruker inntekt fra infotrygd fremfor inntekt fra inntektsmelding for å beregne sykepengegrunnlaget`() {
-        inntektsmelding(beregnetInntekt = 20000.månedlig).addInntekt(historikk, 1.januar)
+        inntektsmelding(beregnetInntekt = 20000.månedlig).addInntekt(historikk, 1.januar, MaskinellJurist())
         Inntektsopplysning.lagreInntekter(
             listOf(Inntektsopplysning(ORGNR, 1.januar, 25000.månedlig, true)),
             historikk,
@@ -137,7 +138,7 @@ internal class InfotrygdInntektsopplysningTest {
 
     @Test
     fun `Inntekt for samme dato og annen kilde erstatter ikke eksisterende`() {
-        inntektsmelding().addInntekt(historikk, 1.januar)
+        inntektsmelding().addInntekt(historikk, 1.januar, MaskinellJurist())
         Inntektsopplysning.lagreInntekter(
             listOf(Inntektsopplysning(ORGNR, 1.januar, INNTEKT, true)),
             historikk,

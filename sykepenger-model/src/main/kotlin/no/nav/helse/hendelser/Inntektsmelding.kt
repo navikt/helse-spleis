@@ -4,6 +4,7 @@ import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon.Companio
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon.Companion.endrerRefusjon
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon.Companion.minOf
 import no.nav.helse.person.*
+import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
@@ -147,7 +148,7 @@ class Inntektsmelding(
 
     override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) = arbeidsgiver.håndter(this)
 
-    internal fun addInntekt(inntektshistorikk: Inntektshistorikk, skjæringstidspunktVedtaksperiode: LocalDate) {
+    internal fun addInntekt(inntektshistorikk: Inntektshistorikk, skjæringstidspunktVedtaksperiode: LocalDate, subsumsjonObserver: SubsumsjonObserver) {
         val skjæringstidspunkt = (sykdomstidslinje.sisteSkjæringstidspunkt() ?: return).takeUnless {
             førsteFraværsdagErEtterArbeidsgiverperioden() && it > skjæringstidspunktVedtaksperiode
         } ?: skjæringstidspunktVedtaksperiode
@@ -156,6 +157,8 @@ class Inntektsmelding(
             warn("Første fraværsdag i inntektsmeldingen er ulik skjæringstidspunktet. Kontrollér at inntektsmeldingen er knyttet til riktig periode.")
         }
 
+        val (årligInntekt, dagligInntekt) = beregnetInntekt.reflection { årlig, _, daglig, _ -> årlig to daglig }
+        subsumsjonObserver.`§ 8-10 ledd 3`(årligInntekt, dagligInntekt)
         inntektshistorikk.append {
             addInntektsmelding(
                 skjæringstidspunkt,

@@ -82,26 +82,22 @@ interface SubsumsjonObserver {
      *
      * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-10)
      *
-     * Merk: er alltid oppfylt
-     *
      * @param erBegrenset dersom hjemlen slår inn ved at [grunnlagForSykepengegrunnlag] blir begrenset til [maksimaltSykepengegrunnlag]
      * @param maksimaltSykepengegrunnlag maksimalt årlig beløp utbetaling skal beregnes ut fra
      * @param skjæringstidspunkt dato [maksimaltSykepengegrunnlag] settes ut fra
      * @param grunnlagForSykepengegrunnlag total inntekt på tvers av alle relevante arbeidsgivere
      */
-    fun `§ 8-10 ledd 2 punktum 1`(
-        erBegrenset: Boolean,
-        maksimaltSykepengegrunnlag: Inntekt,
-        skjæringstidspunkt: LocalDate,
-        grunnlagForSykepengegrunnlag: Inntekt
-    ) {
-        // versjon = LocalDate.of(2020, 1, 1)
-    }
+    fun `§ 8-10 ledd 2 punktum 1`(erBegrenset: Boolean, maksimaltSykepengegrunnlag: Inntekt, skjæringstidspunkt: LocalDate, grunnlagForSykepengegrunnlag: Inntekt) {}
 
-    //TODO: Hvordan skal denne kunne legges inn???
-    @Suppress("UNUSED_PARAMETER")
-    fun `§ 8-10 ledd 3`(oppfylt: Boolean) {
-    }
+    /**
+     * Vurdering av maksimalt sykepengegrunnlag
+     *
+     * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-10)
+     *
+     * @param årsinntekt inntekt oppgitt fra inntektsmelding omregnet til årlig
+     * @param inntektOmregnetTilDaglig årsinntekt omregnet til daglig inntekt
+     */
+    fun `§ 8-10 ledd 3`(årsinntekt: Double, inntektOmregnetTilDaglig: Double) {}
 
     fun `§ 8-11 første ledd`() {
         // versjon = FOLKETRYGDLOVENS_OPPRINNELSESDATO
