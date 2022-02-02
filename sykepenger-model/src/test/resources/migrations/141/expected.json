@@ -1,0 +1,41 @@
+{
+    "arbeidsgivere": [
+        {
+            "arbeidsforholdhistorikk": [
+                {
+                    "id": "ddc904b9-146c-4721-b409-db1055bd007c",
+                    "skjæringstidspunkt": "2018-01-01",
+                    "arbeidsforhold": [
+
+                        {
+                            "ansattFom": "1970-01-01",
+                            "ansattTom": null,
+                            "deaktivert": true
+                        },
+                        {
+                            "ansattFom": "1970-01-01",
+                            "ansattTom": null,
+                            "deaktivert": false
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "arbeidsforholdhistorikk": [
+                {
+                    "id": "81965a4f-ce33-44c3-8646-f9bfad0f8d07",
+                    "skjæringstidspunkt": "2018-01-01",
+                    "arbeidsforhold": [
+                        {
+                            "ansattFom": "2017-12-01",
+                            "ansattTom": null,
+                            "deaktivert": false
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "skjemaVersjon": 141
+}
