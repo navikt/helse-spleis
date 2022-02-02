@@ -1,6 +1,5 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.person.Aktivitetslogg.Aktivitet.Etterlevelse.Vurderingsresultat.Companion.`§2`
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.Periodetype
 import no.nav.helse.person.Periodetype.FORLENGELSE
@@ -12,13 +11,11 @@ class Medlemskapsvurdering(
     internal fun valider(aktivitetslogg: IAktivitetslogg, periodetype: Periodetype): Boolean {
         return when (medlemskapstatus) {
             Medlemskapstatus.Ja -> {
-                aktivitetslogg.`§2`(true)
                 aktivitetslogg.info("Bruker er medlem av Folketrygden")
                 true
             }
             Medlemskapstatus.VetIkke -> {
                 val melding = "Vurder lovvalg og medlemskap"
-                aktivitetslogg.`§2`(false)
                 if (periodetype in listOf(INFOTRYGDFORLENGELSE, FORLENGELSE)) {
                     aktivitetslogg.info(melding)
                 }
@@ -26,7 +23,6 @@ class Medlemskapsvurdering(
                 true
             }
             Medlemskapstatus.Nei -> {
-                aktivitetslogg.`§2`(false)
                 aktivitetslogg.warn("Perioden er avslått på grunn av at den sykmeldte ikke er medlem av Folketrygden")
                 false
             }
