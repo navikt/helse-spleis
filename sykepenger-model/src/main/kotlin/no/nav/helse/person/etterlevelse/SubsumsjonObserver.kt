@@ -90,7 +90,7 @@ interface SubsumsjonObserver {
     fun `§ 8-10 ledd 2 punktum 1`(erBegrenset: Boolean, maksimaltSykepengegrunnlag: Inntekt, skjæringstidspunkt: LocalDate, grunnlagForSykepengegrunnlag: Inntekt) {}
 
     /**
-     * Vurdering av maksimalt sykepengegrunnlag
+     * Beregning av inntekt pr. dag
      *
      * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-10)
      *
