@@ -25,10 +25,7 @@ internal class Arbeidsforholdhistorikk private constructor(
         visitor.postVisitArbeidsforholdhistorikk(this)
     }
 
-    internal fun harRelevantArbeidsforhold(skjæringstidspunkt: LocalDate): Boolean {
-        val siste = sisteInnslag(skjæringstidspunkt)
-        return siste != null && !siste.erDeaktivert()
-    }
+    internal fun harRelevantArbeidsforhold(skjæringstidspunkt: LocalDate) = sisteInnslag(skjæringstidspunkt)?.erDeaktivert()?.not() ?: false
 
     internal fun harArbeidsforholdNyereEnnTreMåneder(skjæringstidspunkt: LocalDate) =
         sisteInnslag(skjæringstidspunkt)?.harArbeidsforholdSomErNyereEnnTreMåneder(skjæringstidspunkt) ?: false
