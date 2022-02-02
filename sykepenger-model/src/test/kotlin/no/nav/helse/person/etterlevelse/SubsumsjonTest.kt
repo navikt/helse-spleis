@@ -28,7 +28,7 @@ internal class SubsumsjonTest {
             LocalDate.MIN,
             paragraf = PARAGRAF_2,
             ledd = 1.ledd,
-            bokstav = listOf(BOKSTAV_A),
+            bokstav = BOKSTAV_A,
             punktum = listOf(PUNKTUM_1),
             input = mapOf("a" to "a"),
             output = mapOf("b" to "b")
@@ -38,7 +38,7 @@ internal class SubsumsjonTest {
             LocalDate.MIN,
             paragraf = PARAGRAF_2,
             ledd = 1.ledd,
-            bokstav = listOf(BOKSTAV_A),
+            bokstav = BOKSTAV_A,
             punktum = listOf(PUNKTUM_1),
             input = mapOf("a" to "a"),
             output = mapOf("b" to "b")
@@ -96,8 +96,8 @@ internal class SubsumsjonTest {
 
     @Test
     fun `ulik når bokstav varierer`() {
-        val paragraf1 = testParagraf(VILKAR_OPPFYLT, LocalDate.MIN, paragraf = PARAGRAF_2, ledd = 1.ledd, bokstav = listOf(BOKSTAV_A))
-        val paragraf2 = testParagraf(VILKAR_OPPFYLT, LocalDate.MIN, paragraf = PARAGRAF_2, ledd = 1.ledd, bokstav = listOf(BOKSTAV_B))
+        val paragraf1 = testParagraf(VILKAR_OPPFYLT, LocalDate.MIN, paragraf = PARAGRAF_2, ledd = 1.ledd, bokstav = BOKSTAV_A)
+        val paragraf2 = testParagraf(VILKAR_OPPFYLT, LocalDate.MIN, paragraf = PARAGRAF_2, ledd = 1.ledd, bokstav = BOKSTAV_B)
         assertNotEquals(paragraf1, paragraf2)
     }
 
@@ -113,7 +113,7 @@ internal class SubsumsjonTest {
         versjon: LocalDate,
         paragraf: Paragraf,
         ledd: Ledd,
-        bokstav: List<Bokstav> = listOf(),
+        bokstav: Bokstav? = null,
         punktum: List<Punktum> = listOf(),
         input: Map<String, Any> = mapOf(),
         output: Map<String, Any> = mapOf(),
@@ -123,7 +123,7 @@ internal class SubsumsjonTest {
         override val versjon = versjon
         override val paragraf = paragraf
         override val ledd = ledd
-        override val bokstaver = bokstav
+        override val bokstav: Bokstav? = bokstav
         override val punktum = punktum
         override val input = input
         override val output = output

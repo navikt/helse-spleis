@@ -22,7 +22,7 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
         val paragraf: Paragraf,
         val ledd: Ledd,
         val punktum: List<Punktum>,
-        val bokstaver: List<Bokstav>,
+        val bokstav: Bokstav?,
         val versjon: LocalDate,
         val sporing: Map<String, String>,
         val utfall: Utfall,
@@ -36,14 +36,14 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
         jurist.subsumsjoner().forEach { it.accept(this) }
     }
 
-    private fun finnSubsumsjon(paragraf: Paragraf, versjon: LocalDate?, ledd: Ledd?, punktum: List<Punktum>?, bokstav: List<Bokstav>?, utfall: Utfall? = null, vedtaksperiodeId: UUID? = null) =
+    private fun finnSubsumsjon(paragraf: Paragraf, versjon: LocalDate?, ledd: Ledd?, punktum: List<Punktum>?, bokstav: Bokstav?, utfall: Utfall? = null, vedtaksperiodeId: UUID? = null) =
         subsumsjoner.filter {
             it.paragraf == paragraf
                 && versjon?.equals(it.versjon) ?: true
                 && utfall?.equals(it.utfall) ?: true
                 && ledd?.equals(it.ledd) ?: true
                 && punktum?.equals(it.punktum) ?: true
-                && bokstav?.equals(it.bokstaver) ?: true
+                && bokstav?.equals(it.bokstav) ?: true
                 && vedtaksperiodeId?.equals(it.vedtaksperiodeIdFraSporing()) ?: true
         }.let {
             assertEquals(1, it.size, "Forventer en, og kun en subsumsjon for vilkåret. Subsumsjoner funnet: $it")
@@ -55,11 +55,11 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
         versjon: LocalDate,
         ledd: Ledd,
         punktum: List<Punktum> = emptyList(),
-        bokstaver: List<Bokstav> = emptyList(),
+        bokstav: Bokstav? = null,
         input: Map<String, Any>,
         output: Map<String, Any>,
     ) {
-        val resultat = finnSubsumsjon(paragraf, versjon, ledd, punktum, bokstaver, VILKAR_BEREGNET)
+        val resultat = finnSubsumsjon(paragraf, versjon, ledd, punktum, bokstav, VILKAR_BEREGNET)
         assertEquals(VILKAR_BEREGNET, resultat.utfall) { "Forventet oppfylt $paragraf $ledd $punktum" }
         assertResultat(input, output, resultat)
     }
@@ -69,13 +69,13 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
         versjon: LocalDate,
         ledd: Ledd,
         punktum: List<Punktum> = emptyList(),
-        bokstaver: List<Bokstav> = emptyList(),
+        bokstav: Bokstav? = null,
         input: Map<String, Any>,
         output: Map<String, Any>,
         vedtaksperiodeId: IdInnhenter? = null,
         organisasjonsnummer: String = ORGNUMMER
     ) {
-        val resultat = finnSubsumsjon(paragraf, versjon, ledd, punktum, bokstaver, VILKAR_OPPFYLT, vedtaksperiodeId = vedtaksperiodeId?.id(organisasjonsnummer))
+        val resultat = finnSubsumsjon(paragraf, versjon, ledd, punktum, bokstav, VILKAR_OPPFYLT, vedtaksperiodeId = vedtaksperiodeId?.id(organisasjonsnummer))
         assertEquals(VILKAR_OPPFYLT, resultat.utfall) { "Forventet oppfylt $paragraf $ledd $punktum" }
         assertResultat(input, output, resultat)
     }
@@ -85,13 +85,13 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
         versjon: LocalDate,
         ledd: Ledd,
         punktum: List<Punktum> = emptyList(),
-        bokstaver: List<Bokstav> = emptyList(),
+        bokstav: Bokstav? = null,
         input: Map<String, Any>,
         output: Map<String, Any>,
         vedtaksperiodeId: IdInnhenter? = null,
         organisasjonsnummer: String = ORGNUMMER
     ) {
-        val resultat = finnSubsumsjon(paragraf, versjon, ledd, punktum, bokstaver, VILKAR_IKKE_OPPFYLT, vedtaksperiodeId = vedtaksperiodeId?.id(organisasjonsnummer))
+        val resultat = finnSubsumsjon(paragraf, versjon, ledd, punktum, bokstav, VILKAR_IKKE_OPPFYLT, vedtaksperiodeId = vedtaksperiodeId?.id(organisasjonsnummer))
         assertEquals(VILKAR_IKKE_OPPFYLT, resultat.utfall) { "Forventet ikke oppfylt $paragraf $ledd $punktum" }
         assertResultat(input, output, resultat)
     }
@@ -100,13 +100,13 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
         paragraf: Paragraf,
         ledd: Ledd? = null,
         punktum: List<Punktum>? = null,
-        bokstaver: List<Bokstav>? = null,
+        bokstav: Bokstav? = null,
         vedtaksperiodeId: IdInnhenter? = null,
         versjon: LocalDate? = null,
         organisasjonsnummer: String = ORGNUMMER
     ) {
         assertDoesNotThrow("Forventet at $paragraf $ledd $punktum er vurdert") {
-            finnSubsumsjon(paragraf, versjon, ledd, punktum, bokstaver, null, vedtaksperiodeId?.id(organisasjonsnummer))
+            finnSubsumsjon(paragraf, versjon, ledd, punktum, bokstav, null, vedtaksperiodeId?.id(organisasjonsnummer))
         }
     }
 
@@ -114,7 +114,7 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
         paragraf: Paragraf,
         ledd: Ledd? = null,
         punktum: List<Punktum>? = null,
-        bokstav: List<Bokstav>? = null,
+        bokstav: Bokstav? = null,
         vedtaksperiodeId: IdInnhenter? = null,
         versjon: LocalDate? = null,
         organisasjonsnummer: String = ORGNUMMER
@@ -129,10 +129,10 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
         expectedLedd: Ledd,
         expectedVersjon: LocalDate,
         expectedPunktum: List<Punktum> = emptyList(),
-        expectedBokstaver: List<Bokstav> = emptyList(),
+        expectedBokstav: Bokstav? = null,
         utfall: Utfall? = null
     ) {
-        finnSubsumsjon(expectedParagraf, expectedVersjon, expectedLedd, expectedPunktum, expectedBokstaver, utfall)
+        finnSubsumsjon(expectedParagraf, expectedVersjon, expectedLedd, expectedPunktum, expectedBokstav, utfall)
     }
 
     private fun assertResultat(inputdata: Map<String, Any>, outputdata: Map<String, Any>, resultat: Subsumsjon) {
@@ -146,11 +146,11 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
         paragraf: Paragraf,
         ledd: Ledd,
         punktum: List<Punktum>,
-        bokstaver: List<Bokstav>,
+        bokstav: Bokstav?,
         input: Map<String, Any>,
         output: Map<String, Any>,
         kontekster: Map<String, String>
     ) {
-        subsumsjoner.add(Subsumsjon(paragraf, ledd, punktum, bokstaver, versjon, kontekster, utfall, input, output))
+        subsumsjoner.add(Subsumsjon(paragraf, ledd, punktum, bokstav, versjon, kontekster, utfall, input, output))
     }
 }

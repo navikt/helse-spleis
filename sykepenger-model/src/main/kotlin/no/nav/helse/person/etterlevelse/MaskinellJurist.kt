@@ -209,7 +209,7 @@ class MaskinellJurist private constructor(
                 paragraf = Paragraf.PARAGRAF_8_12,
                 ledd = 2.ledd,
                 punktum = emptyList(),
-                bokstaver = emptyList(),
+                bokstav = null,
                 input = mapOf(
                     "dato" to dato,
                     "tilstrekkeligOppholdISykedager" to tilstrekkeligOppholdISykedager,
@@ -258,7 +258,7 @@ class MaskinellJurist private constructor(
                 LocalDate.of(2018, 1, 1),
                 paragraf = PARAGRAF_8_17,
                 ledd = 1.ledd,
-                bokstaver = listOf(BOKSTAV_A),
+                bokstav = BOKSTAV_A,
                 input = mapOf(
                     "arbeidsgiverperioder" to arbeidsgiverperiode.grupperSammenhengendePerioder().map {
                         mapOf("fom" to it.start, "tom" to it.endInclusive)
@@ -421,7 +421,6 @@ class MaskinellJurist private constructor(
     ) {
 
         init {
-            bokstav?.run { require(this.length == 1) }
             punktum?.run { require(this > 0) }
         }
 
@@ -443,7 +442,7 @@ class MaskinellJurist private constructor(
                         paragraf: Paragraf,
                         ledd: Ledd,
                         punktum: List<Punktum>,
-                        bokstaver: List<Bokstav>,
+                        bokstav: Bokstav?,
                         input: Map<String, Any>,
                         output: Map<String, Any>,
                         kontekster: Map<String, String>
@@ -455,7 +454,7 @@ class MaskinellJurist private constructor(
                             paragraf = paragraf.ref,
                             ledd = ledd.nummer,
                             punktum = punktum.map { it.nummer }.firstOrNull(), // Bryter encap?
-                            bokstav = bokstaver.map { it.ref }.firstOrNull(),
+                            bokstav = bokstav?.toJson(),
                             input = input,
                             output = output,
                             utfall = utfall.name

@@ -49,12 +49,12 @@ internal class BetingetSubsumsjonTest {
         paragraf: Paragraf = Paragraf.PARAGRAF_8_2,
         ledd: Ledd = 1.ledd,
         punktum: List<Punktum> = emptyList(),
-        bokstaver: List<Bokstav> = emptyList(),
+        bokstav: Bokstav? = null,
         input: Map<String, Any> = emptyMap(),
         output: Map<String, Any> = emptyMap(),
         kontekster: Map<String, String> = emptyMap()
     ) {
-        vurderinger = BetingetSubsumsjon(funnetRelevant, utfall, versjon, paragraf, ledd, punktum, bokstaver, input, output, kontekster).sammenstill(vurderinger)
+        vurderinger = BetingetSubsumsjon(funnetRelevant, utfall, versjon, paragraf, ledd, punktum, bokstav, input, output, kontekster).sammenstill(vurderinger)
     }
 
     private class SubsumsjonObservatør : SubsumsjonVisitor {

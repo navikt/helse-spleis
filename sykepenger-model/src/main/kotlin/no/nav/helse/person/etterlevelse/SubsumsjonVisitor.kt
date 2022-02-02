@@ -13,7 +13,7 @@ interface SubsumsjonVisitor {
         paragraf: Paragraf,
         ledd: Ledd,
         punktum: List<Punktum>,
-        bokstaver: List<Bokstav>,
+        bokstav: Bokstav?,
         input: Map<String, Any>,
         output: Map<String, Any>,
         kontekster: Map<String, String>
@@ -28,7 +28,7 @@ interface SubsumsjonVisitor {
         paragraf: Paragraf,
         ledd: Ledd,
         punktum: List<Punktum>,
-        bokstaver: List<Bokstav>,
+        bokstav: Bokstav?,
         input: Map<String, Any>,
         output: Map<String, Any>,
         kontekster: Map<String, String>

@@ -663,7 +663,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         SubsumsjonInspektør(jurist).assertBeregnet(
             paragraf = PARAGRAF_8_17,
             ledd = 1.ledd,
-            bokstaver = listOf(BOKSTAV_A),
+            bokstav = BOKSTAV_A,
             versjon = 1.januar,
             input = mapOf(
                 "arbeidsgiverperioder" to listOf(
@@ -686,7 +686,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         SubsumsjonInspektør(jurist).assertBeregnet(
             paragraf = PARAGRAF_8_17,
             ledd = 1.ledd,
-            bokstaver = listOf(BOKSTAV_A),
+            bokstav = BOKSTAV_A,
             versjon = 1.januar,
             input = mapOf(
                 "arbeidsgiverperioder" to listOf(
@@ -703,7 +703,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 16.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
         assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET_UTEN_UTBETALING)
-        SubsumsjonInspektør(jurist).assertIkkeVurdert(paragraf = PARAGRAF_8_17, ledd = 1.ledd, bokstav = listOf(BOKSTAV_A))
+        SubsumsjonInspektør(jurist).assertIkkeVurdert(paragraf = PARAGRAF_8_17, ledd = 1.ledd, bokstav = BOKSTAV_A)
     }
 
     @Test

@@ -21,16 +21,16 @@ abstract class Subsumsjon {
     abstract val paragraf: Paragraf
     abstract val ledd: Ledd
     open val punktum: List<Punktum> = emptyList()
-    open val bokstaver: List<Bokstav> = emptyList()
+    open val bokstav: Bokstav? = null
 
     abstract val input: Map<String, Any>
     abstract val output: Map<String, Any>
     protected abstract val kontekster: Map<String, String>
 
     internal fun accept(visitor: SubsumsjonVisitor) {
-        visitor.preVisitSubsumsjon(utfall, versjon, paragraf, ledd, punktum, bokstaver, input, output, kontekster)
+        visitor.preVisitSubsumsjon(utfall, versjon, paragraf, ledd, punktum, bokstav, input, output, kontekster)
         acceptSpesifikk(visitor)
-        visitor.postVisitSubsumsjon(utfall, versjon, paragraf, ledd, punktum, bokstaver, input, output, kontekster)
+        visitor.postVisitSubsumsjon(utfall, versjon, paragraf, ledd, punktum, bokstav, input, output, kontekster)
     }
 
     abstract fun acceptSpesifikk(visitor: SubsumsjonVisitor)
@@ -55,7 +55,7 @@ abstract class Subsumsjon {
             paragraf == other.paragraf &&
             ledd == other.ledd &&
             punktum == other.punktum &&
-            bokstaver == other.bokstaver &&
+            bokstav == other.bokstav &&
             input == other.input &&
             output == other.output &&
             kontekster == other.kontekster
@@ -67,7 +67,7 @@ abstract class Subsumsjon {
         result = 31 * result + paragraf.hashCode()
         result = 31 * result + ledd.hashCode()
         result = 31 * result + punktum.hashCode()
-        result = 31 * result + bokstaver.hashCode()
+        result = 31 * result + bokstav.hashCode()
         result = 31 * result + input.hashCode()
         result = 31 * result + output.hashCode()
         result = 31 * result + kontekster.hashCode()
@@ -75,7 +75,7 @@ abstract class Subsumsjon {
     }
 
     override fun toString(): String {
-        return "$paragraf $ledd ${if (punktum.isEmpty()) "" else punktum[0]} ${if (bokstaver.isEmpty()) "" else bokstaver[0]} [$utfall]"
+        return "$paragraf $ledd ${if (punktum.isEmpty()) "" else punktum[0]} ${if (bokstav == null) "" else bokstav} [$utfall]"
     }
 
     internal companion object {
@@ -94,7 +94,7 @@ class EnkelSubsumsjon(
     override val paragraf: Paragraf,
     override val ledd: Ledd,
     override val punktum: List<Punktum> = emptyList(),
-    override val bokstaver: List<Bokstav> = emptyList(),
+    override val bokstav: Bokstav? = null,
     override val input: Map<String, Any>,
     override val output: Map<String, Any>,
     override val kontekster: Map<String, String>
@@ -113,7 +113,7 @@ class GrupperbarSubsumsjon private constructor(
     override val paragraf: Paragraf,
     override val ledd: Ledd,
     override val punktum: List<Punktum> = emptyList(),
-    override val bokstaver: List<Bokstav> = emptyList(),
+    override val bokstav: Bokstav? = null,
     override val input: Map<String, Any>,
     override val output: Map<String, Any>,
     override val kontekster: Map<String, String>
@@ -127,7 +127,7 @@ class GrupperbarSubsumsjon private constructor(
         paragraf: Paragraf,
         ledd: Ledd,
         punktum: List<Punktum> = emptyList(),
-        bokstav: List<Bokstav> = emptyList(),
+        bokstav: Bokstav? = null,
         kontekster: Map<String, String>
     ) : this(dato, dato, utfall, versjon, paragraf, ledd, punktum, bokstav, input, output, kontekster)
 
@@ -141,7 +141,7 @@ class GrupperbarSubsumsjon private constructor(
             .filter { it == this }
             .map { it.fom til it.tom }
             .grupperSammenhengendePerioderMedHensynTilHelg()
-            .map { GrupperbarSubsumsjon(it.start, it.endInclusive, utfall, versjon, paragraf, ledd, punktum, bokstaver, input, output, kontekster) }
+            .map { GrupperbarSubsumsjon(it.start, it.endInclusive, utfall, versjon, paragraf, ledd, punktum, bokstav, input, output, kontekster) }
 
         return subsumsjoner.filter { it != this } + sammenstilt
     }
@@ -154,7 +154,7 @@ class BetingetSubsumsjon(
     override val paragraf: Paragraf,
     override val ledd: Ledd,
     override val punktum: List<Punktum> = emptyList(),
-    override val bokstaver: List<Bokstav> = emptyList(),
+    override val bokstav: Bokstav? = null,
     override val input: Map<String, Any>,
     override val output: Map<String, Any>,
     override val kontekster: Map<String, String>

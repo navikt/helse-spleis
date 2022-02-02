@@ -57,9 +57,11 @@ enum class Punktum(internal val nummer: Int) {
     }
 }
 
-enum class Bokstav(internal val ref: String) {
+enum class Bokstav(private val ref: String) {
     BOKSTAV_A("a"),
-    BOKSTAV_B("b")
+    BOKSTAV_B("b");
+
+    internal fun toJson() = ref
 }
 
 val FOLKETRYGDLOVENS_OPPRINNELSESDATO: LocalDate = LocalDate.of(1997, 2, 28)
