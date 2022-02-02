@@ -527,10 +527,6 @@ class Aktivitetslogg(
                         return aktiviteter.filterIsInstance<Etterlevelse>()
                     }
 
-                    //TODO: Hvordan skal denne kunne legges inn???
-                    @Suppress("UNUSED_PARAMETER")
-                    internal fun IAktivitetslogg.`§8-10 ledd 3`(oppfylt: Boolean) {}
-
                     internal fun IAktivitetslogg.`§8-11 første ledd`() {
                         juridiskVurdering(
                             "",
@@ -545,9 +541,6 @@ class Aktivitetslogg(
                             )
                         )
                     }
-
-                    @Suppress("UNUSED_PARAMETER")
-                    internal fun IAktivitetslogg.`§8-17 ledd 2`(oppfylt: Boolean) {} //Legges inn på ferie/permisjonsdager i utbetalingstidslinje, med periodene av ferie/permisjon som input
 
                     @Suppress("UNUSED_PARAMETER")
                     internal fun IAktivitetslogg.`§8-28 ledd 3 bokstav a`(

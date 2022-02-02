@@ -1,8 +1,11 @@
 package no.nav.helse.person.etterlevelse
 
 import no.nav.helse.januar
+import no.nav.helse.person.Bokstav
+import no.nav.helse.person.Ledd
 import no.nav.helse.person.Ledd.Companion.ledd
 import no.nav.helse.person.Paragraf
+import no.nav.helse.person.Punktum
 import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall.VILKAR_OPPFYLT
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -168,6 +171,7 @@ internal class GrupperbarSubsumsjonTest {
     private class SubsumsjonObservatør : SubsumsjonVisitor {
         private lateinit var fom: LocalDate
         private lateinit var tom: LocalDate
+        private lateinit var input: Map<String, Any>
         override fun visitGrupperbarSubsumsjon(fom: LocalDate, tom: LocalDate) {
             this.fom = fom
             this.tom = tom
@@ -178,6 +182,24 @@ internal class GrupperbarSubsumsjonTest {
             subsumsjon.accept(this)
             assertEquals(fom, this.fom)
             assertEquals(tom, this.tom)
+            assertEquals(mapOf(
+                "utfallFom" to fom,
+                "utfallTom" to tom
+            ), input)
+        }
+
+        override fun preVisitSubsumsjon(
+            utfall: Subsumsjon.Utfall,
+            versjon: LocalDate,
+            paragraf: Paragraf,
+            ledd: Ledd,
+            punktum: Punktum?,
+            bokstav: Bokstav?,
+            input: Map<String, Any>,
+            output: Map<String, Any>,
+            kontekster: Map<String, String>
+        ) {
+            this.input = input
         }
     }
 }

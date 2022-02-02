@@ -7,6 +7,7 @@ import no.nav.helse.januar
 import no.nav.helse.person.*
 import no.nav.helse.person.Bokstav.BOKSTAV_A
 import no.nav.helse.person.Ledd.Companion.ledd
+import no.nav.helse.person.Ledd.LEDD_2
 import no.nav.helse.person.Paragraf.*
 import no.nav.helse.person.Punktum.Companion.punktum
 import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall
@@ -278,8 +279,19 @@ class MaskinellJurist private constructor(
         )
     }
 
-    override fun `§ 8-17 ledd 2`(oppfylt: Boolean) {
-        super.`§ 8-17 ledd 2`(oppfylt)
+    override fun `§ 8-17 ledd 2`(dato: LocalDate) {
+        leggTil(
+            GrupperbarSubsumsjon(
+                dato = dato,
+                versjon = LocalDate.of(2018, 1, 1),
+                utfall = VILKAR_IKKE_OPPFYLT,
+                paragraf = PARAGRAF_8_17,
+                ledd = LEDD_2,
+                input = emptyMap(),
+                output = emptyMap(),
+                kontekster = kontekster()
+            )
+        )
     }
 
     override fun `§ 8-28 ledd 3 bokstav a`(oppfylt: Boolean, grunnlagForSykepengegrunnlag: Inntekt) {
@@ -353,7 +365,7 @@ class MaskinellJurist private constructor(
                 utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
                 versjon = LocalDate.of(2011, 12, 16),
                 paragraf = PARAGRAF_8_51,
-                ledd = Ledd.LEDD_2,
+                ledd = LEDD_2,
                 input = mapOf(
                     "skjæringstidspunkt" to skjæringstidspunkt,
                     "alderPåSkjæringstidspunkt" to alderPåSkjæringstidspunkt,
@@ -431,7 +443,7 @@ class MaskinellJurist private constructor(
             private val paragrafVersjonFormaterer = DateTimeFormatter.ISO_DATE
 
             internal fun fraSubsumsjon(juridiskVurdering: Subsumsjon): SubsumsjonEvent {
-                return object: SubsumsjonVisitor {
+                return object : SubsumsjonVisitor {
                     lateinit var event: SubsumsjonEvent
 
                     init {
@@ -455,7 +467,7 @@ class MaskinellJurist private constructor(
                             ikrafttredelse = paragrafVersjonFormaterer.format(versjon),
                             paragraf = paragraf.ref,
                             ledd = ledd.nummer,
-                            punktum = punktum?.toJson(), // Bryter encap?
+                            punktum = punktum?.toJson(),
                             bokstav = bokstav?.toJson(),
                             input = input,
                             output = output,

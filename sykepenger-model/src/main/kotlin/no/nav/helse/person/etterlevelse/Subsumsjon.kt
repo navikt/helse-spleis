@@ -114,7 +114,7 @@ class GrupperbarSubsumsjon private constructor(
     override val ledd: Ledd,
     override val punktum: Punktum? = null,
     override val bokstav: Bokstav? = null,
-    override val input: Map<String, Any>,
+    private val originalInput: Map<String, Any>,
     override val output: Map<String, Any>,
     override val kontekster: Map<String, String>
 ) : Subsumsjon() {
@@ -131,19 +131,36 @@ class GrupperbarSubsumsjon private constructor(
         kontekster: Map<String, String>
     ) : this(dato, dato, utfall, versjon, paragraf, ledd, punktum, bokstav, input, output, kontekster)
 
+    override val input: Map<String, Any> = originalInput.toMutableMap().apply {
+        this["utfallFom"] = fom
+        this["utfallTom"] = tom
+    }
+
     override fun acceptSpesifikk(visitor: SubsumsjonVisitor) {
         visitor.visitGrupperbarSubsumsjon(fom, tom)
     }
 
+    private fun harSammeDatagrunnlag(other: GrupperbarSubsumsjon) =
+        paragraf == other.paragraf &&
+            ledd == other.ledd &&
+            punktum == other.punktum &&
+            bokstav == other.bokstav &&
+            kontekster == other.kontekster &&
+            output == other.output &&
+            originalInput == other.originalInput
+
     override fun sammenstill(subsumsjoner: List<Subsumsjon>): List<Subsumsjon> {
         val sammenstilt = (subsumsjoner + this)
             .filterIsInstance<GrupperbarSubsumsjon>()
-            .filter { it == this }
+            .filter { it.harSammeDatagrunnlag(this) }
             .map { it.fom til it.tom }
             .grupperSammenhengendePerioderMedHensynTilHelg()
-            .map { GrupperbarSubsumsjon(it.start, it.endInclusive, utfall, versjon, paragraf, ledd, punktum, bokstav, input, output, kontekster) }
+            .map { GrupperbarSubsumsjon(it.start, it.endInclusive, utfall, versjon, paragraf, ledd, punktum, bokstav, originalInput, output, kontekster) }
 
-        return subsumsjoner.filter { it != this } + sammenstilt
+        return subsumsjoner.toMutableList().let { it ->
+            it.removeAll { subsumsjon -> subsumsjon is GrupperbarSubsumsjon && subsumsjon.harSammeDatagrunnlag(this) }
+            it + sammenstilt
+        }
     }
 }
 

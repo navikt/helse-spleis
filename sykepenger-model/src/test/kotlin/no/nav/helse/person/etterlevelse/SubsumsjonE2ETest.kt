@@ -658,7 +658,9 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             versjon = FOLKETRYGDLOVENS_OPPRINNELSESDATO,
             input = mapOf(
                 "dekningsgrad" to 1.0,
-                "inntekt" to 372000.0
+                "inntekt" to 372000.0,
+                "utfallFom" to 1.januar,
+                "utfallTom" to 31.januar,
             ),
             output = mapOf(
                 "dekningsgrunnlag" to 372000.0
@@ -719,6 +721,26 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
         assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET_UTEN_UTBETALING)
         SubsumsjonInspektør(jurist).assertIkkeVurdert(paragraf = PARAGRAF_8_17, ledd = 1.ledd, bokstav = BOKSTAV_A)
+    }
+
+    @Test
+    fun `§ 8-17 ledd 2 - trygden yter ikke sykepenger for feriedager og permisjonsdager`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), Søknad.Søknadsperiode.Ferie(30.januar, 31.januar))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)
+        SubsumsjonInspektør(jurist).assertIkkeOppfylt(
+            versjon = 1.januar(2018),
+            paragraf = PARAGRAF_8_17,
+            ledd = 2.ledd,
+            input = mapOf(
+                "utfallFom" to 30.januar,
+                "utfallTom" to 31.januar,
+            ),
+            output = emptyMap()
+        )
     }
 
     @Test

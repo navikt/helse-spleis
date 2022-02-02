@@ -168,9 +168,14 @@ interface SubsumsjonObserver {
      */
     fun `§ 8-17 ledd 1 bokstav a`(arbeidsgiverperiode: List<LocalDate>, førsteNavdag: LocalDate) {}
 
-    @Suppress("UNUSED_PARAMETER")
-    fun `§ 8-17 ledd 2`(oppfylt: Boolean) {
-    } //Legges inn på ferie/permisjonsdager i utbetalingstidslinje, med periodene av ferie/permisjon som input
+    /**
+     * Trygden yter ikke sykepenger for lovpålagt ferie og permisjon
+     *
+     * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-17)
+     *
+     * @param dato dagen vilkåret blir vurdert for
+     */
+    fun `§ 8-17 ledd 2`(dato: LocalDate) {}
 
     @Suppress("UNUSED_PARAMETER")
     fun `§ 8-28 ledd 3 bokstav a`(

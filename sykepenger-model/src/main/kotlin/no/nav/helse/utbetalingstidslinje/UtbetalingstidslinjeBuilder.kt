@@ -86,6 +86,7 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
 
     override fun fridagUtenforArbeidsgiverperioden(arbeidsgiverperiode: Arbeidsgiverperiode?, dato: LocalDate) {
         val økonomi = Økonomi.ikkeBetalt(arbeidsgiverperiode)
+        subsumsjonObserver.`§ 8-17 ledd 2`(dato)
         addFridag(dato, økonomi)
     }
 
