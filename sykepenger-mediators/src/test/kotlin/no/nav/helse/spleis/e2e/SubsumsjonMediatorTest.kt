@@ -32,7 +32,7 @@ internal class SubsumsjonMediatorTest : AbstractEndToEndMediatorTest() {
         sendYtelser(0)
 
         assertTrue(testRapid.inspektør.meldinger("subsumsjon").isNotEmpty())
-        val subsumsjon = testRapid.inspektør.meldinger("subsumsjon").filter { it["paragraf"].asText() == "8-17" }.first()
+        val subsumsjon = testRapid.inspektør.meldinger("subsumsjon").first { it["paragraf"].asText() == "8-17" }
         assertEquals(subsumsjon["bokstav"].asText(), "a")
         assertTrue(subsumsjon["ledd"].isInt)
         assertEquals(subsumsjon["ledd"].asInt(), 1)

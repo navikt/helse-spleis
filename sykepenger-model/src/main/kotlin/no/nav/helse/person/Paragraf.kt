@@ -47,6 +47,10 @@ enum class Punktum(private val nummer: Int) {
     PUNKTUM_6(6),
     PUNKTUM_7(7);
 
+    init {
+        require(nummer > 0) { "Et punktum på være et tall større enn 0" }
+    }
+
     override fun toString(): String {
         return "$nummer. punktum"
     }
@@ -59,9 +63,14 @@ enum class Punktum(private val nummer: Int) {
     }
 }
 
-enum class Bokstav(private val ref: String) {
-    BOKSTAV_A("a"),
-    BOKSTAV_B("b");
+enum class Bokstav(private val ref: Char) {
+    BOKSTAV_A('a'),
+    BOKSTAV_B('b');
+
+    init {
+        val regex = "[a-zæøå]".toRegex()
+        require(regex.matches(ref.toString())) { "En bokstav må være en bokstav i det norske alfabetet" }
+    }
 
     internal fun toJson() = ref
 }

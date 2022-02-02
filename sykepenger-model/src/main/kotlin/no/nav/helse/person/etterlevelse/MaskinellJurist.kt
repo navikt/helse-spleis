@@ -414,15 +414,11 @@ class MaskinellJurist private constructor(
         val paragraf: String,
         val ledd: Int?,
         val punktum: Int?,
-        val bokstav: String?,
+        val bokstav: Char?,
         val input: Map<String, Any>,
         val output: Map<String, Any>,
         val utfall: String,
     ) {
-
-        init {
-            punktum?.run { require(this > 0) }
-        }
 
         companion object {
 
