@@ -18,7 +18,7 @@ spec:
     acl:
         - team: tbd
           application: spre-subsumsjon
-          access: read
+          access: readwrite
         - team: tbd
           application: spennende
           access: readwrite
