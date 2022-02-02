@@ -29,9 +29,7 @@ interface SubsumsjonObserver {
         tilstrekkeligAntallOpptjeningsdager: Int,
         arbeidsforhold: List<Map<String, Any?>>,
         antallOpptjeningsdager: Int
-    ) {
-        // versjon = LocalDate.of(2020, 6, 12)
-    }
+    ) {}
 
     /**
      * Vurdering av rett til sykepenger ved fylte 70 år
@@ -54,9 +52,7 @@ interface SubsumsjonObserver {
         tidslinjeFom: LocalDate,
         tidslinjeTom: LocalDate,
         avvisteDager: List<LocalDate>
-    ) {
-        // versjon = LocalDate.of(2011, 12, 16)
-    }
+    ) {}
 
     /**
      * Vurdering av krav til minimum inntekt
@@ -68,14 +64,7 @@ interface SubsumsjonObserver {
      * @param grunnlagForSykepengegrunnlag total inntekt på tvers av alle relevante arbeidsgivere
      * @param minimumInntekt minimum beløp [grunnlagForSykepengegrunnlag] må være lik eller større enn for at vilkåret skal være [oppfylt]
      */
-    fun `§ 8-3 ledd 2 punktum 1`(
-        oppfylt: Boolean,
-        skjæringstidspunkt: LocalDate,
-        grunnlagForSykepengegrunnlag: Inntekt,
-        minimumInntekt: Inntekt
-    ) {
-        // versjon = LocalDate.of(2011, 12, 16)
-    }
+    fun `§ 8-3 ledd 2 punktum 1`(oppfylt: Boolean, skjæringstidspunkt: LocalDate, grunnlagForSykepengegrunnlag: Inntekt, minimumInntekt: Inntekt) {}
 
     /**
      * Vurdering av maksimalt sykepengegrunnlag
@@ -108,15 +97,13 @@ interface SubsumsjonObserver {
      *
      * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-12)
      *
-     * @param oppfylt **true** dersom vedtaksperioden ikke inneholder [avvisteDager] som følge av at man har nådd [maksdato]
      * @param periode aktuell periode som vilkårsprøves
-     * @param fom første NAV-dag i et helt sykepengeforløp dersom vilkåret er [oppfylt], ellers første avviste dag
-     * @param tom hittil siste NAV-dag i et helt sykepengeforløp dersom vilkåret er [oppfylt], ellers siste avviste dag
-     * @param tidslinjegrunnlag tidslinje det tas utgangspunkt i når man beregner [gjenståendeSykedager], [forbrukteSykedager] og [maksdato]
-     * @param gjenståendeSykedager antall gjenstående sykepengedager ved siste utbetalte dag. 0 dersom vilkåret ikke er [oppfylt]
-     * @param forbrukteSykedager antall forbrukte sykepengedager
+     * @param tidslinjegrunnlag alle tidslinjer det tas utgangspunkt i inklusiv potensielt utbetalte dager fra Infotrygd
+     * @param beregnetTidslinje sammenslått tidslinje det tas utgangspunkt i når man beregner [gjenståendeSykedager], [forbrukteSykedager] og [maksdato]
+     * @param gjenståendeSykedager antall gjenstående sykepengedager ved siste utbetalte dag i [periode].
+     * @param forbrukteSykedager antall forbrukte sykepengedager ved siste utbetalte dag i [periode].
      * @param maksdato dato for opphør av rett til sykepenger
-     * @param avvisteDager dager vilkåret ikke er [oppfylt] for
+     * @param startdatoSykepengerettighet første NAV-dag i siste 248-dagers sykeforløp
      */
     fun `§ 8-12 ledd 1 punktum 1`(
         periode: Periode,
@@ -126,10 +113,7 @@ interface SubsumsjonObserver {
         forbrukteSykedager: Int,
         maksdato: LocalDate,
         startdatoSykepengerettighet: LocalDate
-    ) {
-
-        // versjon = LocalDate.of(2021, 5, 21)
-    }
+    ) {}
 
     /**
      * Vurdering av ny rett til sykepenger
@@ -150,9 +134,7 @@ interface SubsumsjonObserver {
         tilstrekkeligOppholdISykedager: Int,
         tidslinjegrunnlag: List<List<Map<String, Any>>>,
         beregnetTidslinje: List<Map<String, Any>>
-    ) {
-        // versjon = LocalDate.of(2021, 5, 21)
-    }
+    ) {}
 
     /**
      * Vurdering av graderte sykepenger
@@ -162,10 +144,7 @@ interface SubsumsjonObserver {
      * @param oppfylt **true** dersom uføregraden er minst 20%
      * @param avvisteDager dager som ikke møter kriterie for [oppfylt]
      */
-    fun `§ 8-13 ledd 1`(oppfylt: Boolean, avvisteDager: List<LocalDate>) {
-        // punktum = (1..2).punktum,
-        // versjon = FOLKETRYGDLOVENS_OPPRINNELSESDATO,
-    }
+    fun `§ 8-13 ledd 1`(oppfylt: Boolean, avvisteDager: List<LocalDate>) {}
 
     /**
      * Fastsettelse av dekningsgrunnlag
@@ -212,15 +191,7 @@ interface SubsumsjonObserver {
      * @param grunnlagForSykepengegrunnlagPerArbeidsgiver beregnet inntekt per arbeidsgiver
      * @param grunnlagForSykepengegrunnlag beregnet inntekt på tvers av arbeidsgivere
      */
-    fun `§ 8-30 ledd 1`(
-        grunnlagForSykepengegrunnlagPerArbeidsgiver: Map<String, Inntekt>,
-        grunnlagForSykepengegrunnlag: Inntekt
-    ) {
-        // versjon = LocalDate.of(2019, 1, 1),
-        // punktum = 1.punktum
-        val beregnetMånedsinntektPerArbeidsgiver = grunnlagForSykepengegrunnlagPerArbeidsgiver
-            .mapValues { it.value.reflection { _, månedlig, _, _ -> månedlig } }
-    }
+    fun `§ 8-30 ledd 1`(grunnlagForSykepengegrunnlagPerArbeidsgiver: Map<String, Inntekt>, grunnlagForSykepengegrunnlag: Inntekt) {}
 
     fun `§ 8-30 ledd 2 punktum 1`(
         oppfylt: Boolean,
@@ -228,22 +199,12 @@ interface SubsumsjonObserver {
         grunnlagForSykepengegrunnlag: Inntekt,
         sammenligningsgrunnlag: Inntekt,
         avvik: Prosent
-    ) {
-        // versjon = LocalDate.of(2017, 4, 5),
-        // punktum = 1.punktum
-    }
+    ) {}
 
     fun `§ 8-33 ledd 1`() {}
 
     @Suppress("UNUSED_PARAMETER")
-    fun `§ 8-33 ledd 3`(
-        grunnlagForFeriepenger: Int,
-        opptjeningsår: Year,
-        prosentsats: Double,
-        alder: Int,
-        feriepenger: Double
-    ) {
-    }
+    fun `§ 8-33 ledd 3`(grunnlagForFeriepenger: Int, opptjeningsår: Year, prosentsats: Double, alder: Int, feriepenger: Double) {}
 
     /**
      * Vurdering av krav til minimum inntekt ved alder mellom 67 og 70 år
@@ -269,11 +230,13 @@ interface SubsumsjonObserver {
      *
      * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-51)
      *
-     * @param oppfylt dersom vedkommende ikke har brukt opp alle sykepengedagene sine. Det er en forutsetning at vedkommende er mellom 67 og 70 år
-     * @param maksSykepengedagerOver67 maksimalt antall sykepengedager ved fylte 67 år
-     * @param gjenståendeSykedager antall gjenstående sykedager
-     * @param forbrukteSykedager antall forbrukte sykedager
-     * @param maksdato siste utbetalingsdag av sykepenger
+     * @param periode aktuell periode som vilkårsprøves
+     * @param tidslinjegrunnlag alle tidslinjer det tas utgangspunkt i inklusiv potensielt utbetalte dager fra Infotrygd
+     * @param beregnetTidslinje sammenslått tidslinje det tas utgangspunkt i når man beregner [gjenståendeSykedager], [forbrukteSykedager] og [maksdato]
+     * @param gjenståendeSykedager antall gjenstående sykepengedager ved siste utbetalte dag i [periode].
+     * @param forbrukteSykedager antall forbrukte sykepengedager ved siste utbetalte dag i [periode].
+     * @param maksdato dato for opphør av rett til sykepenger
+     * @param startdatoSykepengerettighet første NAV-dag i siste 248-dagers sykeforløp
      */
     fun `§ 8-51 ledd 3`(
         periode: Periode,
