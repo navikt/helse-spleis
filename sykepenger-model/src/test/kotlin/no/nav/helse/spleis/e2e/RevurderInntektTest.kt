@@ -271,7 +271,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
             TIL_UTBETALING,
             AVSLUTTET
         )
-        assertErrorTekst(inspektør, "Kan kun revurdere siste skjæringstidspunkt")
+        assertErrorTekst(person, "Kan kun revurdere siste skjæringstidspunkt")
     }
 
     @Test
@@ -295,7 +295,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
             AVVENTER_HISTORIKK_REVURDERING
         )
 
-        assertWarningTekst(inspektør, "Har mer enn 25 % avvik. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene.")
+        assertWarningTekst(person, "Har mer enn 25 % avvik. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene.")
         assertEquals(1, inspektør.utbetalinger.size)
     }
 
@@ -320,7 +320,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
             AVVENTER_HISTORIKK_REVURDERING
         )
 
-        assertWarningTekst(inspektør, "Har mer enn 25 % avvik. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene.")
+        assertWarningTekst(person, "Har mer enn 25 % avvik. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene.")
         assertEquals(1, inspektør.utbetalinger.size)
     }
 
@@ -354,7 +354,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         assertEquals(-15741, utbetalingTilRevurdering.inspektør.arbeidsgiverOppdrag.nettoBeløp())
 
         assertWarningTekst(
-            inspektør,
+            person,
             "Har mer enn 25 % avvik. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene.",
             "Perioden er avslått på grunn av at inntekt er under krav til minste sykepengegrunnlag"
         )
@@ -412,7 +412,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
             TIL_UTBETALING,
             AVSLUTTET,
         )
-        assertErrors(inspektør)
+        assertErrors(person)
     }
 
     @Test
@@ -479,7 +479,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         håndterOverstyrInntekt(inntekt = 32000.månedlig, a1, 1.januar)
 
         assertEquals(1, observatør.avvisteRevurderinger.size)
-        assertErrorTekst(inspektør, "Forespurt overstyring av inntekt hvor personen har flere arbeidsgivere (inkl. ghosts)")
+        assertErrorTekst(person, "Forespurt overstyring av inntekt hvor personen har flere arbeidsgivere (inkl. ghosts)")
     }
 
     @Test
@@ -523,7 +523,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
 
         håndterOverstyrInntekt(32000.månedlig, a1, 1.januar)
         assertEquals(1, observatør.avvisteRevurderinger.size)
-        assertErrorTekst(inspektør, "Forespurt overstyring av inntekt hvor personen har flere arbeidsgivere (inkl. ghosts)")
+        assertErrorTekst(person, "Forespurt overstyring av inntekt hvor personen har flere arbeidsgivere (inkl. ghosts)")
     }
 
     @Test
@@ -607,7 +607,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
             assertEquals(1, size)
             first().assertUtbetalingslinje(Endringskode.NY, 2, 1, fagsystemId())
         }
-        assertWarningTekst(inspektør, WARN_FORLENGER_OPPHØRT_OPPDRAG)
+        assertWarningTekst(person, WARN_FORLENGER_OPPHØRT_OPPDRAG)
     }
 
     @Test

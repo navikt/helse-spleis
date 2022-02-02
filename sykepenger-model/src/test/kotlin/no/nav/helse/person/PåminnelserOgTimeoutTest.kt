@@ -1,14 +1,12 @@
 package no.nav.helse.person
 
-import no.nav.helse.desember
-import no.nav.helse.etterspurteBehov
+import no.nav.helse.*
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
-import no.nav.helse.januar
-import no.nav.helse.oktober
+import no.nav.helse.inspectors.personLogg
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
@@ -328,11 +326,11 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
             aktørId = "aktørId",
             fødselsnummer = UNG_PERSON_FNR_2018.toString(),
             orgnummer = ORGNUMMER,
-            fagsystemId = inspektør(ORGNUMMER).sisteBehov(Behovtype.Simulering).detaljer().getValue("fagsystemId") as String,
-            fagområde = inspektør(ORGNUMMER).sisteBehov(Behovtype.Simulering).detaljer().getValue("fagområde") as String,
+            fagsystemId = person.personLogg.sisteBehov(Behovtype.Simulering).detaljer().getValue("fagsystemId") as String,
+            fagområde = person.personLogg.sisteBehov(Behovtype.Simulering).detaljer().getValue("fagområde") as String,
             simuleringOK = true,
             melding = "",
-            utbetalingId = UUID.fromString(inspektør(ORGNUMMER).sisteBehov(Behovtype.Simulering).kontekst().getValue("utbetalingId")),
+            utbetalingId = UUID.fromString(person.personLogg.sisteBehov(Behovtype.Simulering).kontekst().getValue("utbetalingId")),
             simuleringResultat = Simulering.SimuleringResultat(
                 totalbeløp = 2000,
                 perioder = listOf(
@@ -434,7 +432,7 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
         aktørId = "aktørId",
         fødselsnummer = UNG_PERSON_FNR_2018.toString(),
         organisasjonsnummer = ORGNUMMER,
-        utbetalingId = UUID.fromString(inspektør.sisteBehov(Behovtype.Godkjenning).kontekst()["utbetalingId"] ?: throw IllegalStateException("Finner ikke utbetalingId i: ${inspektør.sisteBehov(
+        utbetalingId = UUID.fromString(person.personLogg.sisteBehov(Behovtype.Godkjenning).kontekst()["utbetalingId"] ?: throw IllegalStateException("Finner ikke utbetalingId i: ${person.personLogg.sisteBehov(
             Behovtype.Godkjenning
         ).kontekst()}")),
         vedtaksperiodeId = "${1.vedtaksperiode.id(ORGNUMMER)}",

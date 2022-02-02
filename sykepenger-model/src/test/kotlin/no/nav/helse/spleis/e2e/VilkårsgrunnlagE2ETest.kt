@@ -145,7 +145,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
             }
         ))
 
-        assertErrorTekst(inspektør, "Har mer enn 25 % avvik")
+        assertErrorTekst(person, "Har mer enn 25 % avvik")
     }
 
     @ForventetFeil("https://trello.com/c/edYRnoPm")

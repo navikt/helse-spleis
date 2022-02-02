@@ -7,12 +7,14 @@ import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.UtbetalingOverført
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.inspectors.inspektør
+import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
 import no.nav.helse.oktober
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.UTBETALING_FEILET
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
+import no.nav.helse.sisteBehov
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
@@ -166,7 +168,7 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
             fødselsnummer = UNG_PERSON_FNR_2018.toString(),
             orgnummer = ORGNUMMER,
             fagsystemId = inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.fagsystemId(),
-            utbetalingId = inspektør.sisteBehov(Behovtype.Utbetaling).kontekst().getValue("utbetalingId").toString(),
+            utbetalingId = person.personLogg.sisteBehov(Behovtype.Utbetaling).kontekst().getValue("utbetalingId").toString(),
             avstemmingsnøkkel = 123456L,
             overføringstidspunkt = LocalDateTime.now()
         )
@@ -180,7 +182,7 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
             fødselsnummer = UNG_PERSON_FNR_2018.toString(),
             orgnummer = ORGNUMMER,
             fagsystemId = inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.fagsystemId(),
-            utbetalingId = inspektør.sisteBehov(Behovtype.Utbetaling).kontekst().getValue("utbetalingId").toString(),
+            utbetalingId = person.personLogg.sisteBehov(Behovtype.Utbetaling).kontekst().getValue("utbetalingId").toString(),
             status = status,
             melding = "hei",
             avstemmingsnøkkel = 123456L,
@@ -199,7 +201,7 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
         aktørId = AKTØRID,
         fødselsnummer = UNG_PERSON_FNR_2018.toString(),
         organisasjonsnummer = ORGNUMMER,
-        utbetalingId = UUID.fromString(inspektør.sisteBehov(Behovtype.Godkjenning).kontekst()["utbetalingId"] ?: throw IllegalStateException("Finner ikke utbetalingId i: ${inspektør.sisteBehov(
+        utbetalingId = UUID.fromString(person.personLogg.sisteBehov(Behovtype.Godkjenning).kontekst()["utbetalingId"] ?: throw IllegalStateException("Finner ikke utbetalingId i: ${person.personLogg.sisteBehov(
             Behovtype.Godkjenning
         ).kontekst()}")),
         vedtaksperiodeId = "${vedtaksperiodeIdInnhenter.id(ORGNUMMER)}",

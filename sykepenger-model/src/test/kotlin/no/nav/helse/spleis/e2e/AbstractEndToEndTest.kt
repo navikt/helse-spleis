@@ -52,6 +52,4 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
             inspektør = this
         )
     }
-
-    internal fun TestArbeidsgiverInspektør.assertHasNoErrors() = assertNoErrors(this)
 }

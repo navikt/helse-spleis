@@ -35,7 +35,6 @@ internal class VilkårsgrunnlagTest {
 
     private lateinit var person: Person
     private val observatør = TestObservatør()
-    private fun inspektør() = TestArbeidsgiverInspektør(person, orgnummer)
 
     @BeforeEach
     fun setup() {
@@ -107,7 +106,7 @@ internal class VilkårsgrunnlagTest {
         person.håndter(vilkårsgrunnlag)
         assertGrunnlagsdata(INNTEKT, Prosent.ratio(0.0), 28, true)
         assertEquals(TilstandType.AVVENTER_HISTORIKK, hentTilstand()?.type)
-        assertWarningTekst(inspektør(), "Arbeidsgiver er ikke registrert i Aa-registeret.")
+        assertWarningTekst(person, "Arbeidsgiver er ikke registrert i Aa-registeret.")
     }
 
     @Test

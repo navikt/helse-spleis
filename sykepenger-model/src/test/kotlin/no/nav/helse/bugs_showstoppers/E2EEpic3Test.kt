@@ -5,6 +5,7 @@ import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.*
 import no.nav.helse.inspectors.inspektør
+import no.nav.helse.inspectors.personLogg
 import no.nav.helse.person.ForlengelseFraInfotrygd
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.etterlevelse.MaskinellJurist
@@ -116,10 +117,8 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
 
         håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(8.januar, 9.januar, 100.prosent))
 
-        inspektør.also {
-            assertNoErrors(it)
-            assertActivities(it)
-        }
+        assertNoErrors(person)
+        assertActivities(person)
         assertTilstander(
             2.vedtaksperiode,
             START,
@@ -638,7 +637,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 10.januar, 100.prosent))
         håndterInntektsmelding(listOf(3.januar til 4.januar, 9.januar til 10.januar), 3.januar)
         håndterSøknad(Sykdom(3.januar, 10.januar, 100.prosent))
-        assertTrue(inspektør.personLogg.hasWarningsOrWorse())
+        assertTrue(person.personLogg.hasWarningsOrWorse())
         inspektør.also {
             assertEquals(4, it.sykdomstidslinje.inspektør.dagteller[Sykedag::class])
             assertEquals(2, it.sykdomstidslinje.inspektør.dagteller[FriskHelgedag::class])
@@ -873,8 +872,8 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             AVSLUTTET
         )
 
+        assertTrue(person.personLogg.hasWarningsOrWorse())
         inspektør.also {
-            assertTrue(it.personLogg.hasWarningsOrWorse())
             it.utbetalingstidslinjer(1.vedtaksperiode).inspektør.also { tidslinjeInspektør ->
                 assertEquals(16, tidslinjeInspektør.arbeidsgiverperiodeDagTeller)
                 assertEquals(4, tidslinjeInspektør.navHelgDagTeller)
@@ -918,8 +917,8 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             AVSLUTTET
         )
 
+        assertFalse(person.personLogg.hasWarningsOrWorse())
         inspektør.also {
-            assertFalse(it.personLogg.hasWarningsOrWorse())
             it.utbetalingstidslinjer(1.vedtaksperiode).inspektør.also { tidslinjeInspektør ->
                 assertEquals(16, tidslinjeInspektør.arbeidsgiverperiodeDagTeller)
                 assertEquals(4, tidslinjeInspektør.navHelgDagTeller)
@@ -962,8 +961,8 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             AVSLUTTET
         )
 
+        assertTrue(person.personLogg.hasWarningsOrWorse())
         inspektør.also {
-            assertTrue(it.personLogg.hasWarningsOrWorse())
             it.utbetalingstidslinjer(2.vedtaksperiode).inspektør.also { tidslinjeInspektør ->
                 assertEquals(16, tidslinjeInspektør.arbeidsgiverperiodeDagTeller)
                 assertEquals(4, tidslinjeInspektør.navHelgDagTeller)
@@ -1010,8 +1009,8 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             AVSLUTTET
         )
 
+        assertTrue(person.personLogg.hasWarningsOrWorse())
         inspektør.also {
-            assertTrue(it.personLogg.hasWarningsOrWorse())
             it.utbetalingstidslinjer(1.vedtaksperiode).inspektør.also { tidslinjeInspektør ->
                 assertEquals(16, tidslinjeInspektør.arbeidsgiverperiodeDagTeller)
                 assertEquals(4, tidslinjeInspektør.navHelgDagTeller)
@@ -1054,8 +1053,8 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             AVSLUTTET
         )
 
+        assertTrue(person.personLogg.hasWarningsOrWorse())
         inspektør.also {
-            assertTrue(it.personLogg.hasWarningsOrWorse())
             it.utbetalingstidslinjer(2.vedtaksperiode).inspektør.also { tidslinjeInspektør ->
                 assertEquals(16, tidslinjeInspektør.arbeidsgiverperiodeDagTeller)
                 assertEquals(4, tidslinjeInspektør.navHelgDagTeller)
@@ -1110,8 +1109,8 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             AVSLUTTET
         )
 
+        assertTrue(person.personLogg.hasWarningsOrWorse())
         inspektør.also {
-            assertTrue(it.personLogg.hasWarningsOrWorse())
             it.utbetalingstidslinjer(1.vedtaksperiode).inspektør.also { tidslinjeInspektør ->
                 assertEquals(16, tidslinjeInspektør.arbeidsgiverperiodeDagTeller)
                 assertEquals(4, tidslinjeInspektør.navHelgDagTeller)
@@ -1157,8 +1156,8 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             AVSLUTTET
         )
 
+        assertTrue(person.personLogg.hasWarningsOrWorse())
         inspektør.also {
-            assertTrue(it.personLogg.hasWarningsOrWorse())
             it.utbetalingstidslinjer(2.vedtaksperiode).inspektør.also { tidslinjeInspektør ->
                 assertEquals(16, tidslinjeInspektør.arbeidsgiverperiodeDagTeller)
                 assertEquals(4, tidslinjeInspektør.navHelgDagTeller)
@@ -1206,8 +1205,8 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             AVSLUTTET
         )
 
+        assertTrue(person.personLogg.hasWarningsOrWorse())
         inspektør.also {
-            assertTrue(it.personLogg.hasWarningsOrWorse())
             it.utbetalingstidslinjer(1.vedtaksperiode).inspektør.also { tidslinjeInspektør ->
                 assertEquals(16, tidslinjeInspektør.arbeidsgiverperiodeDagTeller)
                 assertEquals(4, tidslinjeInspektør.navHelgDagTeller)
@@ -1277,8 +1276,8 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             AVSLUTTET
         )
 
+        assertTrue(person.personLogg.hasWarningsOrWorse())
         inspektør.also {
-            assertTrue(it.personLogg.hasWarningsOrWorse())
             it.utbetalingstidslinjer(3.vedtaksperiode).inspektør.also { tidslinjeInspektør ->
                 assertEquals(16, tidslinjeInspektør.arbeidsgiverperiodeDagTeller)
                 assertEquals(4, tidslinjeInspektør.navHelgDagTeller)
@@ -1315,7 +1314,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         ))
         håndterYtelser(1.vedtaksperiode)
         assertEquals(ForlengelseFraInfotrygd.NEI, inspektør.forlengelseFraInfotrygd(1.vedtaksperiode))
-        assertFalse(inspektør.personLogg.hasWarningsOrWorse())
+        assertFalse(person.personLogg.hasWarningsOrWorse())
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -1534,7 +1533,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING
         )
-        assertTrue(inspektør.personLogg.warn().toString().contains("Første utbetalingsdag er i Infotrygd og mellom 1. og 16. mai. Kontroller at riktig grunnbeløp er brukt."))
+        assertTrue(person.personLogg.warn().toString().contains("Første utbetalingsdag er i Infotrygd og mellom 1. og 16. mai. Kontroller at riktig grunnbeløp er brukt."))
     }
 
     @Test
@@ -1551,6 +1550,6 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterUtbetalingshistorikk(1.vedtaksperiode, utbetalinger = utbetlinger, inntektshistorikk = inntektshistorikk)
         håndterYtelser(1.vedtaksperiode)
 
-        assertFalse(inspektør.personLogg.warn().toString().contains("Første utbetalingsdag er i Infotrygd og mellom 1. og 16. mai. Kontroller at riktig grunnbeløp er brukt."))
+        assertFalse(person.personLogg.warn().toString().contains("Første utbetalingsdag er i Infotrygd og mellom 1. og 16. mai. Kontroller at riktig grunnbeløp er brukt."))
     }
 }

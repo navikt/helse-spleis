@@ -1,8 +1,5 @@
 package no.nav.helse.inspectors
 
-import no.nav.helse.antallEtterspurteBehov
-import no.nav.helse.etterspurteBehov
-import no.nav.helse.etterspurteBehovFinnes
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.person.*
@@ -36,7 +33,6 @@ internal class TestArbeidsgiverInspektør(
     private val fagsystemIder = mutableMapOf<Int, String>()
     private val vedtaksperiodeForkastet = mutableMapOf<Int, Boolean>()
     val utbetalingstidslinjeberegningData = mutableListOf<UtbetalingstidslinjeberegningData>()
-    internal val personLogg get() = personInspektør.aktivitetslogg
     internal lateinit var arbeidsgiver: Arbeidsgiver
     internal val inntektInspektør get() = InntektshistorikkInspektør(arbeidsgiver)
     internal lateinit var sykdomshistorikk: Sykdomshistorikk
@@ -402,24 +398,6 @@ internal class TestArbeidsgiverInspektør(
     internal fun periodeErForkastet(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperiodeIdInnhenter.finn(vedtaksperiodeForkastet)
 
     internal fun periodeErIkkeForkastet(vedtaksperiodeIdInnhenter: IdInnhenter) = !periodeErForkastet(vedtaksperiodeIdInnhenter)
-
-    internal fun antallEtterspurteBehov(vedtaksperiodeIdInnhenter: IdInnhenter, behovtype: Aktivitetslogg.Aktivitet.Behov.Behovtype) =
-        personLogg.antallEtterspurteBehov(vedtaksperiodeIdInnhenter.id(orgnummer), behovtype)
-
-    internal fun etterspurteBehov(vedtaksperiodeIdInnhenter: IdInnhenter, behovtype: Aktivitetslogg.Aktivitet.Behov.Behovtype) =
-        personLogg.etterspurteBehovFinnes(vedtaksperiodeIdInnhenter.id(orgnummer), behovtype)
-
-    internal fun etterspurteBehov(vedtaksperiodeId: UUID, tilstand: TilstandType, behovtype: Aktivitetslogg.Aktivitet.Behov.Behovtype) =
-        personLogg.etterspurteBehovFinnes(vedtaksperiodeId, tilstand, behovtype)
-
-    internal fun etterspurteBehov(vedtaksperiodeIdInnhenter: IdInnhenter) =
-        personLogg.etterspurteBehov(vedtaksperiodeIdInnhenter.id(orgnummer))
-
-    internal fun sisteBehov(vedtaksperiodeIdInnhenter: IdInnhenter) =
-        personLogg.behov().last { it.kontekst()["vedtaksperiodeId"] == vedtaksperiodeIdInnhenter.id(orgnummer).toString() }
-
-    internal fun sisteBehov(type: Aktivitetslogg.Aktivitet.Behov.Behovtype) =
-        personLogg.behov().last { it.type == type }
 
     internal fun maksdato(indeks: Int) = maksdatoer[indeks]
     internal fun maksdatoVedSisteVedtak() = utbetalinger.indexOfLast(Utbetaling::erAvsluttet).takeIf { it > -1 }?.let { index -> maksdato(index) }

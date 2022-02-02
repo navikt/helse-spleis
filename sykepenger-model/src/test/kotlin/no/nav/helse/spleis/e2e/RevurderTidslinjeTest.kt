@@ -6,6 +6,7 @@ import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.inspectors.inspektør
+import no.nav.helse.inspectors.personLogg
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.TilstandType.*
@@ -113,7 +114,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
         håndterUtbetalt(2.vedtaksperiode)
 
-        assertNoErrors(inspektør)
+        assertNoErrors(person)
 
         assertTilstander(
             1.vedtaksperiode,
@@ -162,7 +163,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
         håndterUtbetalt(2.vedtaksperiode)
 
-        assertNoErrors(inspektør)
+        assertNoErrors(person)
         assertEquals(3, inspektør.sykdomstidslinje.inspektør.dagteller[Dag.Feriedag::class])
         assertNull(inspektør.vedtaksperiodeSykdomstidslinje(1.vedtaksperiode).inspektør.dagteller[Dag.Feriedag::class])
         assertNull(inspektør.vedtaksperiodeSykdomstidslinje(2.vedtaksperiode).inspektør.dagteller[Dag.Feriedag::class])
@@ -179,7 +180,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
         håndterUtbetalt(2.vedtaksperiode)
 
-        assertNoErrors(inspektør)
+        assertNoErrors(person)
         assertTilstander(
             0,
             START,
@@ -227,7 +228,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
         håndterUtbetalt(2.vedtaksperiode)
 
-        assertNoErrors(inspektør)
+        assertNoErrors(person)
 
         assertTilstander(
             0,
@@ -332,7 +333,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             AVVENTER_HISTORIKK
         )
 
-        assertNoErrors(inspektør)
+        assertNoErrors(person)
         assertEquals(3, inspektør.utbetalinger.size)
         assertFalse(inspektør.utbetaling(2).harUtbetalinger())
 
@@ -382,7 +383,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             AVVENTER_HISTORIKK
         )
         val revurdering = inspektør.utbetaling(2)
-        assertNoErrors(inspektør)
+        assertNoErrors(person)
         assertEquals(2, revurdering.inspektør.arbeidsgiverOppdrag.size)
         assertEquals(19.januar, revurdering.inspektør.arbeidsgiverOppdrag[0].datoStatusFom())
         assertEquals(23.januar til 26.januar, revurdering.inspektør.arbeidsgiverOppdrag[1].periode)
@@ -421,7 +422,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
             MOTTATT_SYKMELDING_FERDIG_FORLENGELSE
         )
-        assertNoErrors(inspektør)
+        assertNoErrors(person)
     }
 
     @Test
@@ -736,7 +737,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             AVSLUTTET,
         )
 
-        assertNoErrors(inspektør)
+        assertNoErrors(person)
         assertEquals(2, inspektør.utbetalinger.size)
         assertEquals(6, inspektør.forbrukteSykedager(0))
         assertEquals(0, inspektør.forbrukteSykedager(1))
@@ -915,7 +916,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             AVVENTER_UFERDIG,
             AVVENTER_HISTORIKK
         )
-        assertNoErrors(inspektør)
+        assertNoErrors(person)
     }
 
     @Test
@@ -958,7 +959,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             AVSLUTTET
         )
 
-        assertNoErrors(inspektør)
+        assertNoErrors(person)
         assertEquals(6, inspektør.forbrukteSykedager(0))
         assertEquals(5, inspektør.forbrukteSykedager(1))
         assertEquals(4, inspektør.forbrukteSykedager(2))
@@ -1009,7 +1010,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             AVSLUTTET,
             AVVENTER_ARBEIDSGIVERE_REVURDERING
         )
-        assertNoErrors(inspektør)
+        assertNoErrors(person)
     }
 
     @Test
@@ -1069,7 +1070,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             TIL_UTBETALING,
             AVSLUTTET
         )
-        assertNoErrors(inspektør)
+        assertNoErrors(person)
         assertEquals(0, inspektør.ikkeUtbetalteUtbetalingerForVedtaksperiode(1.vedtaksperiode).size)
         assertEquals(0, inspektør.ikkeUtbetalteUtbetalingerForVedtaksperiode(2.vedtaksperiode).size)
         assertEquals(0, inspektør.ikkeUtbetalteUtbetalingerForVedtaksperiode(3.vedtaksperiode).size)
@@ -1248,11 +1249,11 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
 
         håndterYtelser(1.vedtaksperiode)
         håndterPåminnelse(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
-        assertEquals(3, inspektør.antallEtterspurteBehov(1.vedtaksperiode, Aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering))
+        assertEquals(3, person.personLogg.antallEtterspurteBehov(1.vedtaksperiode, Aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering))
 
         håndterSimulering(1.vedtaksperiode)
         håndterPåminnelse(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
-        assertEquals(3, inspektør.antallEtterspurteBehov(1.vedtaksperiode, Aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning))
+        assertEquals(3, person.personLogg.antallEtterspurteBehov(1.vedtaksperiode, Aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning))
     }
 
     @Test
@@ -1282,7 +1283,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
 
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
         assertWarningTekst(
-            inspektør,
+            person,
             "Opplysninger fra Infotrygd har endret seg etter at vedtaket ble fattet. Undersøk om det er overlapp med periode fra Infotrygd.",
             "Utbetaling i Infotrygd overlapper med vedtaksperioden"
         )
@@ -1315,7 +1316,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
 
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
         assertWarningTekst(
-            inspektør,
+            person,
             "Opplysninger fra Infotrygd har endret seg etter at vedtaket ble fattet. Undersøk om det er overlapp med periode fra Infotrygd.",
             "Det er utbetalt en periode i Infotrygd etter perioden du skal revurdere nå. Undersøk at antall forbrukte dager og grunnlag i Infotrygd er riktig"
         )
@@ -1498,14 +1499,14 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
     }
 
     private fun assertEtterspurteYtelser(expected: Int, vedtaksperiodeIdInnhenter: IdInnhenter) {
-        assertEquals(expected, inspektør.antallEtterspurteBehov(vedtaksperiodeIdInnhenter, Aktivitetslogg.Aktivitet.Behov.Behovtype.Foreldrepenger))
-        assertEquals(expected, inspektør.antallEtterspurteBehov(vedtaksperiodeIdInnhenter, Aktivitetslogg.Aktivitet.Behov.Behovtype.Pleiepenger))
-        assertEquals(expected, inspektør.antallEtterspurteBehov(vedtaksperiodeIdInnhenter, Aktivitetslogg.Aktivitet.Behov.Behovtype.Omsorgspenger))
-        assertEquals(expected, inspektør.antallEtterspurteBehov(vedtaksperiodeIdInnhenter, Aktivitetslogg.Aktivitet.Behov.Behovtype.Opplæringspenger))
-        assertEquals(expected, inspektør.antallEtterspurteBehov(vedtaksperiodeIdInnhenter, Aktivitetslogg.Aktivitet.Behov.Behovtype.Arbeidsavklaringspenger))
-        assertEquals(expected, inspektør.antallEtterspurteBehov(vedtaksperiodeIdInnhenter, Aktivitetslogg.Aktivitet.Behov.Behovtype.Dagpenger))
-        assertEquals(expected, inspektør.antallEtterspurteBehov(vedtaksperiodeIdInnhenter, Aktivitetslogg.Aktivitet.Behov.Behovtype.Institusjonsopphold))
-        assertEquals(expected, inspektør.antallEtterspurteBehov(vedtaksperiodeIdInnhenter, Aktivitetslogg.Aktivitet.Behov.Behovtype.Dødsinfo))
+        assertEquals(expected, person.personLogg.antallEtterspurteBehov(vedtaksperiodeIdInnhenter, Aktivitetslogg.Aktivitet.Behov.Behovtype.Foreldrepenger))
+        assertEquals(expected, person.personLogg.antallEtterspurteBehov(vedtaksperiodeIdInnhenter, Aktivitetslogg.Aktivitet.Behov.Behovtype.Pleiepenger))
+        assertEquals(expected, person.personLogg.antallEtterspurteBehov(vedtaksperiodeIdInnhenter, Aktivitetslogg.Aktivitet.Behov.Behovtype.Omsorgspenger))
+        assertEquals(expected, person.personLogg.antallEtterspurteBehov(vedtaksperiodeIdInnhenter, Aktivitetslogg.Aktivitet.Behov.Behovtype.Opplæringspenger))
+        assertEquals(expected, person.personLogg.antallEtterspurteBehov(vedtaksperiodeIdInnhenter, Aktivitetslogg.Aktivitet.Behov.Behovtype.Arbeidsavklaringspenger))
+        assertEquals(expected, person.personLogg.antallEtterspurteBehov(vedtaksperiodeIdInnhenter, Aktivitetslogg.Aktivitet.Behov.Behovtype.Dagpenger))
+        assertEquals(expected, person.personLogg.antallEtterspurteBehov(vedtaksperiodeIdInnhenter, Aktivitetslogg.Aktivitet.Behov.Behovtype.Institusjonsopphold))
+        assertEquals(expected, person.personLogg.antallEtterspurteBehov(vedtaksperiodeIdInnhenter, Aktivitetslogg.Aktivitet.Behov.Behovtype.Dødsinfo))
     }
 
 

@@ -1,15 +1,15 @@
 package no.nav.helse.spleis.e2e.korrigering
 
+import no.nav.helse.desember
+import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.*
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
+import no.nav.helse.januar
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.spleis.e2e.*
 import no.nav.helse.sykdomstidslinje.Dag.*
-import no.nav.helse.desember
-import no.nav.helse.februar
-import no.nav.helse.januar
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -63,7 +63,7 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
     fun `Støtter ikke korrigerende søknad på utbetalt vedtaksperiode`() {
         nyttVedtak(1.januar, 31.januar)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(31.januar, 31.januar))
-        assertErrors(inspektør)
+        assertErrors(person)
     }
 
     @Test

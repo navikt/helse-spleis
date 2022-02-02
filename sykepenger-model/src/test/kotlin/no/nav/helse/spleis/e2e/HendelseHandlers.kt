@@ -1,12 +1,10 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.Fødselsnummer
-import no.nav.helse.desember
+import no.nav.helse.*
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode
 import no.nav.helse.hendelser.utbetaling.*
-import no.nav.helse.januar
-import no.nav.helse.oktober
+import no.nav.helse.inspectors.personLogg
 import no.nav.helse.person.*
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.TilstandType.*
@@ -248,7 +246,7 @@ internal fun AbstractEndToEndTest.forlengTilGodkjentVedtak(
     val id: IdInnhenter = observatør.sisteVedtaksperiode()
     håndterSøknadMedValidering(id, Søknadsperiode.Sykdom(fom, tom, grad), fnr = fnr, orgnummer = orgnummer)
     håndterYtelser(id, fnr = fnr, orgnummer = orgnummer)
-    if (inspektør.etterspurteBehov(id, Behovtype.Simulering)) håndterSimulering(id, fnr = fnr, orgnummer = orgnummer)
+    if (person.personLogg.etterspurteBehov(id, Behovtype.Simulering)) håndterSimulering(id, fnr = fnr, orgnummer = orgnummer)
     håndterUtbetalingsgodkjenning(id, true, fnr = fnr, orgnummer = orgnummer)
 }
 
@@ -464,7 +462,7 @@ internal fun AbstractEndToEndTest.håndterUtbetalingshistorikk(
     orgnummer: String = AbstractPersonTest.ORGNUMMER,
     besvart: LocalDateTime = LocalDateTime.now()
 ) {
-    val bedtOmSykepengehistorikk = inspektør(orgnummer).etterspurteBehov(vedtaksperiodeIdInnhenter, Behovtype.Sykepengehistorikk)
+    val bedtOmSykepengehistorikk = person.personLogg.etterspurteBehov(vedtaksperiodeIdInnhenter, Behovtype.Sykepengehistorikk, orgnummer)
     if (bedtOmSykepengehistorikk) assertEtterspurt(Utbetalingshistorikk::class, Behovtype.Sykepengehistorikk, vedtaksperiodeIdInnhenter, orgnummer)
     utbetalingshistorikk(
         vedtaksperiodeIdInnhenter = vedtaksperiodeIdInnhenter,
@@ -567,8 +565,8 @@ internal fun AbstractEndToEndTest.håndterUtbetalingsgodkjenning(
     orgnummer: String = AbstractPersonTest.ORGNUMMER,
     automatiskBehandling: Boolean = false,
     utbetalingId: UUID = UUID.fromString(
-        inspektør.sisteBehov(Behovtype.Godkjenning).kontekst()["utbetalingId"]
-            ?: throw IllegalStateException("Finner ikke utbetalingId i: ${inspektør.sisteBehov(Behovtype.Godkjenning).kontekst()}")
+        person.personLogg.sisteBehov(Behovtype.Godkjenning).kontekst()["utbetalingId"]
+            ?: throw IllegalStateException("Finner ikke utbetalingId i: ${person.personLogg.sisteBehov(Behovtype.Godkjenning).kontekst()}")
     ),
 ) {
     assertEtterspurt(Utbetalingsgodkjenning::class, Behovtype.Godkjenning, vedtaksperiodeIdInnhenter, orgnummer)
@@ -591,8 +589,8 @@ internal fun AbstractEndToEndTest.håndterUtbetalt(
             fødselsnummer = fnr.toString(),
             orgnummer = orgnummer,
             fagsystemId = fagsystemId,
-            utbetalingId = inspektør.sisteBehov(Behovtype.Utbetaling).kontekst()["utbetalingId"]
-                ?: throw IllegalStateException("Finner ikke utbetalingId i: ${inspektør.sisteBehov(Behovtype.Utbetaling).kontekst()}"),
+            utbetalingId = person.personLogg.sisteBehov(Behovtype.Utbetaling).kontekst()["utbetalingId"]
+                ?: throw IllegalStateException("Finner ikke utbetalingId i: ${person.personLogg.sisteBehov(Behovtype.Utbetaling).kontekst()}"),
             avstemmingsnøkkel = 123456L,
             overføringstidspunkt = LocalDateTime.now()
         ).håndter(Person::håndter)
@@ -846,7 +844,7 @@ internal fun AbstractEndToEndTest.betale(orgnummer: String) {
             fødselsnummer = AbstractPersonTest.UNG_PERSON_FNR_2018.toString(),
             orgnummer = orgnummer,
             fagsystemId = inspektør(orgnummer).fagsystemId(1.vedtaksperiode),
-            utbetalingId = hendelselogg.behov().first { it.type == Behovtype.Utbetaling }.kontekst().getValue("utbetalingId"),
+            utbetalingId = person.personLogg.sisteBehov(Behovtype.Utbetaling).kontekst().getValue("utbetalingId"),
             avstemmingsnøkkel = 123456L,
             overføringstidspunkt = LocalDateTime.now()
         )

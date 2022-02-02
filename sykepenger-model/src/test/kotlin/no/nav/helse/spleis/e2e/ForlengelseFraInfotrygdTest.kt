@@ -5,6 +5,7 @@ import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.inspectors.inspektør
+import no.nav.helse.inspectors.personLogg
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.ForlengelseFraInfotrygd
 import no.nav.helse.person.TilstandType.*
@@ -459,8 +460,8 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         håndterUtbetalingshistorikk(2.vedtaksperiode, *historikk, inntektshistorikk = inntektshistorikk)
         håndterYtelser(2.vedtaksperiode)
 
+        assertTrue(person.personLogg.etterspurteBehov(2.vedtaksperiode, Aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering))
         inspektør.apply {
-            assertTrue(etterspurteBehov(2.vedtaksperiode, Aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering))
             assertTrue(
                 utbetalingstidslinjer(1.vedtaksperiode)
                     .filterIsInstance<ArbeidsgiverperiodeDag>().isEmpty()
@@ -517,8 +518,8 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         )
         assertFalse(inspektør.periodeErForkastet(1.vedtaksperiode))
         assertFalse(inspektør.periodeErForkastet(2.vedtaksperiode))
+        assertTrue(person.personLogg.etterspurteBehov(1.vedtaksperiode, Aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering))
         inspektør.apply {
-            assertTrue(etterspurteBehov(1.vedtaksperiode, Aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering))
             assertTrue(
                 utbetalingstidslinjer(2.vedtaksperiode)
                     .filterIsInstance<ArbeidsgiverperiodeDag>().isEmpty()

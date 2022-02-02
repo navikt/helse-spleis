@@ -10,8 +10,8 @@ import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.UtbetalingOverført
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
-import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.inspectors.inspektør
+import no.nav.helse.inspectors.personLogg
 import no.nav.helse.person.*
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.etterlevelse.MaskinellJurist
@@ -758,11 +758,11 @@ class JsonBuilderTest {
         aktørId = aktørId,
         fødselsnummer = fnr.toString(),
         orgnummer = orgnummer,
-        fagsystemId = TestArbeidsgiverInspektør(this, orgnummer).sisteBehov(Behovtype.Simulering).detaljer().getValue("fagsystemId") as String,
-        fagområde = TestArbeidsgiverInspektør(this, orgnummer).sisteBehov(Behovtype.Simulering).detaljer().getValue("fagområde") as String,
+        fagsystemId = personLogg.sisteBehov(Behovtype.Simulering).detaljer().getValue("fagsystemId") as String,
+        fagområde = personLogg.sisteBehov(Behovtype.Simulering).detaljer().getValue("fagområde") as String,
         simuleringOK = true,
         melding = "Hei Aron",
-        utbetalingId = UUID.fromString(TestArbeidsgiverInspektør(this, orgnummer).sisteBehov(Behovtype.Simulering).kontekst().getValue("utbetalingId")),
+        utbetalingId = UUID.fromString(personLogg.sisteBehov(Behovtype.Simulering).kontekst().getValue("utbetalingId")),
         simuleringResultat = Simulering.SimuleringResultat(
             totalbeløp = 1000,
             perioder = emptyList()

@@ -2,6 +2,7 @@ package no.nav.helse.person
 
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode
+import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -48,7 +49,7 @@ internal class InntektsmeldingHendelseTest : AbstractPersonTest() {
         person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 20.januar, 100.prosent)))
         person.håndter(inntektsmelding())
         person.håndter(søknad(Søknadsperiode.Sykdom(6.januar,  20.januar, 100.prosent)))
-        assertFalse(inspektør.personLogg.hasErrorsOrWorse(), inspektør.personLogg.toString())
+        assertFalse(person.personLogg.hasErrorsOrWorse(), person.personLogg.toString())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.AVVENTER_HISTORIKK, inspektør.sisteTilstand(1.vedtaksperiode))
     }
@@ -56,7 +57,7 @@ internal class InntektsmeldingHendelseTest : AbstractPersonTest() {
     @Test
     fun `mangler sykmelding`() {
         person.håndter(inntektsmelding())
-        assertTrue(inspektør.personLogg.hasWarningsOrWorse())
+        assertTrue(person.personLogg.hasWarningsOrWorse())
         assertEquals(0, inspektør.vedtaksperiodeTeller)
     }
 
@@ -65,8 +66,8 @@ internal class InntektsmeldingHendelseTest : AbstractPersonTest() {
         person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 20.januar, 100.prosent)))
         person.håndter(inntektsmelding())
         person.håndter(inntektsmelding())
-        assertTrue(inspektør.personLogg.hasWarningsOrWorse())
-        assertFalse(inspektør.personLogg.hasErrorsOrWorse())
+        assertTrue(person.personLogg.hasWarningsOrWorse())
+        assertFalse(person.personLogg.hasErrorsOrWorse())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.AVVENTER_SØKNAD_FERDIG_GAP, inspektør.sisteTilstand(1.vedtaksperiode))
     }

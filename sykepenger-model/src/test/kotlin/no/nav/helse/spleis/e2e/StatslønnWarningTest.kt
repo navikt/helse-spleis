@@ -5,6 +5,7 @@ import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
@@ -27,7 +28,7 @@ internal class StatslønnWarningTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(1.vedtaksperiode, Oppdragstatus.AKSEPTERT)
 
-        assertTrue(inspektør.personLogg.warn().isEmpty())
+        assertTrue(person.personLogg.warn().isEmpty())
     }
 
     @Test
@@ -38,7 +39,7 @@ internal class StatslønnWarningTest : AbstractEndToEndTest() {
         val historikk = arrayOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.desember(2017),  31.desember(2017), 100.prosent, 15000.daglig))
         håndterYtelser(1.vedtaksperiode, *historikk, statslønn = true)
 
-        assertTrue(inspektør.personLogg.hasErrorsOrWorse())
+        assertTrue(person.personLogg.hasErrorsOrWorse())
     }
 
 }

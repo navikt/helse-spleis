@@ -27,8 +27,8 @@ internal class EnTilEnOverlappendeSykmeldingE2ETest : AbstractEndToEndTest() {
         inspektør.sykdomstidslinje.inspektør.also { sykdomstidslinjeInspektør ->
             assertTrue(sykdomstidslinjeInspektør.grader.all { it.value == 100 })
         }
-        assertNoErrors(inspektør)
-        assertWarningTekst(inspektør, "Korrigert sykmelding er lagt til grunn - kontroller dagene i sykmeldingsperioden")
+        assertNoErrors(person)
+        assertWarningTekst(person, "Korrigert sykmelding er lagt til grunn - kontroller dagene i sykmeldingsperioden")
     }
 
     @Test
@@ -42,8 +42,8 @@ internal class EnTilEnOverlappendeSykmeldingE2ETest : AbstractEndToEndTest() {
         inspektør.sykdomstidslinje.inspektør.also { sykdomstidslinjeInspektør ->
             assertTrue(sykdomstidslinjeInspektør.grader.all { it.value == 90 })
         }
-        assertNoErrors(inspektør)
-        assertWarningTekst(inspektør, "Mottatt en sykmelding som er skrevet tidligere enn den som er lagt til grunn, vurder sykmeldingene og gjør eventuelle justeringer")
+        assertNoErrors(person)
+        assertWarningTekst(person, "Mottatt en sykmelding som er skrevet tidligere enn den som er lagt til grunn, vurder sykmeldingene og gjør eventuelle justeringer")
     }
 
     @Test
@@ -61,7 +61,7 @@ internal class EnTilEnOverlappendeSykmeldingE2ETest : AbstractEndToEndTest() {
         )
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP)
         assertEquals(3.januar til 20.januar, inspektør.periode(1.vedtaksperiode))
-        assertNoWarnings(inspektør)
+        assertNoWarnings(person)
     }
 
     @Test
@@ -79,7 +79,7 @@ internal class EnTilEnOverlappendeSykmeldingE2ETest : AbstractEndToEndTest() {
         )
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP)
         assertEquals(3.januar til 20.januar, inspektør.periode(1.vedtaksperiode))
-        assertWarningTekst(inspektør, "Korrigert sykmelding er lagt til grunn - kontroller dagene i sykmeldingsperioden")
+        assertWarningTekst(person, "Korrigert sykmelding er lagt til grunn - kontroller dagene i sykmeldingsperioden")
     }
 
     @Test
@@ -92,8 +92,8 @@ internal class EnTilEnOverlappendeSykmeldingE2ETest : AbstractEndToEndTest() {
         inspektør.sykdomstidslinje.inspektør.also { sykdomstidslinjeInspektør ->
             assertTrue(sykdomstidslinjeInspektør.grader.filterKeys { it.isAfter(20.januar) }.all { it.value == 90 })
         }
-        assertNoErrors(inspektør)
-        assertWarningTekst(inspektør, "Korrigert sykmelding er lagt til grunn - kontroller dagene i sykmeldingsperioden")
+        assertNoErrors(person)
+        assertWarningTekst(person, "Korrigert sykmelding er lagt til grunn - kontroller dagene i sykmeldingsperioden")
     }
 
     @Test
@@ -106,8 +106,8 @@ internal class EnTilEnOverlappendeSykmeldingE2ETest : AbstractEndToEndTest() {
         inspektør.sykdomstidslinje.inspektør.also { sykdomstidslinjeInspektør ->
             assertTrue(sykdomstidslinjeInspektør.grader.filterKeys { it.isAfter(15.januar) }.all { it.value == 90 })
         }
-        assertNoErrors(inspektør)
-        assertWarningTekst(inspektør, "Korrigert sykmelding er lagt til grunn - kontroller dagene i sykmeldingsperioden")
+        assertNoErrors(person)
+        assertWarningTekst(person, "Korrigert sykmelding er lagt til grunn - kontroller dagene i sykmeldingsperioden")
     }
 
     @Test
@@ -120,8 +120,8 @@ internal class EnTilEnOverlappendeSykmeldingE2ETest : AbstractEndToEndTest() {
         inspektør.sykdomstidslinje.inspektør.also { sykdomstidslinjeInspektør ->
             assertTrue(sykdomstidslinjeInspektør.grader.filterKeys { it.isAfter(15.januar) }.all { it.value == 90 })
         }
-        assertNoErrors(inspektør)
-        assertWarningTekst(inspektør, "Korrigert sykmelding er lagt til grunn - kontroller dagene i sykmeldingsperioden")
+        assertNoErrors(person)
+        assertWarningTekst(person, "Korrigert sykmelding er lagt til grunn - kontroller dagene i sykmeldingsperioden")
     }
 
     @Test

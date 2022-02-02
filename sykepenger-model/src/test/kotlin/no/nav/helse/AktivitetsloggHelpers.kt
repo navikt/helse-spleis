@@ -1,10 +1,26 @@
 package no.nav.helse
 
+import no.nav.helse.person.AbstractPersonTest
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.IAktivitetslogg
-import no.nav.helse.person.TilstandType
+import no.nav.helse.person.IdInnhenter
 import no.nav.helse.serde.reflection.castAsList
 import java.util.*
+
+internal fun IAktivitetslogg.antallEtterspurteBehov(vedtaksperiodeIdInnhenter: IdInnhenter, behovtype: Aktivitetslogg.Aktivitet.Behov.Behovtype, orgnummer: String = AbstractPersonTest.ORGNUMMER) =
+    antallEtterspurteBehov(vedtaksperiodeIdInnhenter.id(orgnummer), behovtype)
+
+internal fun IAktivitetslogg.etterspurteBehov(vedtaksperiodeIdInnhenter: IdInnhenter, behovtype: Aktivitetslogg.Aktivitet.Behov.Behovtype, orgnummer: String = AbstractPersonTest.ORGNUMMER) =
+    etterspurteBehovFinnes(vedtaksperiodeIdInnhenter.id(orgnummer), behovtype)
+
+internal fun IAktivitetslogg.etterspurteBehov(vedtaksperiodeIdInnhenter: IdInnhenter, orgnummer: String = AbstractPersonTest.ORGNUMMER) =
+    etterspurteBehov(vedtaksperiodeIdInnhenter.id(orgnummer))
+
+internal fun IAktivitetslogg.sisteBehov(vedtaksperiodeIdInnhenter: IdInnhenter, orgnummer: String = AbstractPersonTest.ORGNUMMER) =
+    behov().last { it.kontekst()["vedtaksperiodeId"] == vedtaksperiodeIdInnhenter.id(orgnummer).toString() }
+
+internal fun IAktivitetslogg.sisteBehov(type: Aktivitetslogg.Aktivitet.Behov.Behovtype) =
+    behov().last { it.type == type }
 
 internal fun IAktivitetslogg.harBehov(behov: Aktivitetslogg.Aktivitet.Behov.Behovtype) =
     this.behov().any { it.type == behov }
@@ -12,18 +28,12 @@ internal fun IAktivitetslogg.harBehov(behov: Aktivitetslogg.Aktivitet.Behov.Beho
 internal fun IAktivitetslogg.antallEtterspurteBehov(vedtaksperiodeId: UUID, behov: Aktivitetslogg.Aktivitet.Behov.Behovtype) =
     this.behov().filter {
         it.kontekst()["vedtaksperiodeId"] == vedtaksperiodeId.toString()
-    }.filter { it.type == behov }.size
+    }.count { it.type == behov }
 
 internal fun IAktivitetslogg.etterspurteBehovFinnes(vedtaksperiodeId: UUID, behov: Aktivitetslogg.Aktivitet.Behov.Behovtype) =
     this.behov().filter {
         it.kontekst()["vedtaksperiodeId"] == vedtaksperiodeId.toString()
-    }.filter { it.type == behov }.isNotEmpty()
-
-internal fun IAktivitetslogg.etterspurteBehovFinnes(vedtaksperiodeId: UUID, tilstandType: TilstandType, behov: Aktivitetslogg.Aktivitet.Behov.Behovtype) =
-    this.behov().filter {
-        it.kontekst()["vedtaksperiodeId"] == vedtaksperiodeId.toString()
-            && it.kontekst()["tilstand"] == tilstandType.name
-    }.filter { it.type == behov }.isNotEmpty()
+    }.any { it.type == behov }
 
 internal fun IAktivitetslogg.etterspurteBehov(vedtaksperiodeId: UUID) =
     this.behov().filter {

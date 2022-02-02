@@ -7,6 +7,7 @@ import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.inspectors.inspektør
+import no.nav.helse.inspectors.personLogg
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.TilstandType.*
@@ -267,10 +268,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING
         )
-        assertWarningTekst(
-            inspektør,
-            "Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt."
-        )
+        assertWarningTekst(person, "Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.")
     }
 
     @Test
@@ -1096,7 +1094,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
-        val godkjenningsbehov = inspektør.sisteBehov(Aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning)
+        val godkjenningsbehov = person.personLogg.sisteBehov(Aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning)
         assertEquals(arbeidsforholdId, godkjenningsbehov.detaljer()["arbeidsforholdId"])
     }
 
@@ -1110,7 +1108,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
-        val godkjenningsbehov = inspektør.sisteBehov(Aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning)
+        val godkjenningsbehov = person.personLogg.sisteBehov(Aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning)
         assertNull(godkjenningsbehov.detaljer()["arbeidsforholdId"])
     }
 
@@ -1388,7 +1386,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             listOf(Periode(3.januar, 18.januar)),
             3.januar
         )
-        inspektør.also { assertFalse(it.personLogg.hasWarningsOrWorse()) }
+        assertFalse(person.personLogg.hasWarningsOrWorse())
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP)
         assertTilstander(
             2.vedtaksperiode,
@@ -1438,10 +1436,8 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
         håndterUtbetalt(2.vedtaksperiode, Oppdragstatus.AKSEPTERT)
 
-        inspektør.also {
-            assertNoErrors(it)
-            assertActivities(it)
-        }
+        assertNoErrors(person)
+        assertActivities(person)
         assertNotNull(inspektør.sisteMaksdato(2.vedtaksperiode))
         assertTilstander(
             1.vedtaksperiode,
@@ -1476,10 +1472,8 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         )
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 7.januar, 100.prosent))
 
-        inspektør.also {
-            assertNoErrors(it)
-            assertActivities(it)
-        }
+        assertNoErrors(person)
+        assertActivities(person)
         assertTilstander(
             1.vedtaksperiode,
             START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING
@@ -1513,11 +1507,8 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
         håndterUtbetalt(2.vedtaksperiode, Oppdragstatus.AKSEPTERT)
 
-
-        inspektør.also {
-            assertNoErrors(it)
-            assertActivities(it)
-        }
+        assertNoErrors(person)
+        assertActivities(person)
         assertNotNull(inspektør.sisteMaksdato(1.vedtaksperiode))
         assertNotNull(inspektør.sisteMaksdato(2.vedtaksperiode))
         assertTilstander(
@@ -1549,10 +1540,8 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     fun `Inntektsmelding vil ikke utvide vedtaksperiode til tidligere vedtaksperiode`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(3.januar til 18.januar), 3.januar)
-        inspektør.also {
-            assertNoErrors(it)
-            assertNoWarnings(it)
-        }
+        assertNoErrors(person)
+        assertNoWarnings(person)
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 26.januar, 100.prosent))
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
@@ -1568,7 +1557,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             listOf(3.januar til 18.januar),
             førsteFraværsdag = 1.februar
         ) // Touches prior periode
-        assertNoErrors(inspektør)
+        assertNoErrors(person)
 
         håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(1.februar, 23.februar, 100.prosent))
         håndterYtelser(2.vedtaksperiode)
@@ -1577,7 +1566,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
         håndterUtbetalt(2.vedtaksperiode, Oppdragstatus.AKSEPTERT)
-        assertNoErrors(inspektør)
+        assertNoErrors(person)
 
         assertNotNull(inspektør.sisteMaksdato(1.vedtaksperiode))
         assertNotNull(inspektør.sisteMaksdato(2.vedtaksperiode))

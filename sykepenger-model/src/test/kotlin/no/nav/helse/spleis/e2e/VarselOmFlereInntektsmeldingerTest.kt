@@ -6,6 +6,7 @@ import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
+import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
@@ -43,7 +44,7 @@ internal class VarselOmFlereInntektsmeldingerTest : AbstractEndToEndTest() {
         håndterSimulering(3.vedtaksperiode)
 
         håndterSykmelding(Sykmeldingsperiode(17.april(2021), 30.april(2021), 20.prosent))
-        assertTrue(inspektør.personLogg.warn().none { w ->
+        assertTrue(person.personLogg.warn().none { w ->
             w.toString().contains("Mottatt flere inntektsmeldinger")
         })
     }
@@ -64,7 +65,7 @@ internal class VarselOmFlereInntektsmeldingerTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.mars, 20.mars, 50.prosent))
         håndterInntektsmelding(arbeidsgiverperioder = listOf(1.mars til 16.mars), førsteFraværsdag = 1.mars)
 
-        assertTrue(inspektør.personLogg.warn().any { w ->
+        assertTrue(person.personLogg.warn().any { w ->
             w.toString().contains("Mottatt flere inntektsmeldinger")
         })
     }
@@ -89,7 +90,7 @@ internal class VarselOmFlereInntektsmeldingerTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.mars, 20.mars, 50.prosent))
         håndterInntektsmelding(arbeidsgiverperioder = listOf(1.mars til 16.mars), førsteFraværsdag = 1.mars)
 
-        assertTrue(inspektør.personLogg.warn().any { w ->
+        assertTrue(person.personLogg.warn().any { w ->
             w.toString().contains("Mottatt flere inntektsmeldinger")
         })
     }

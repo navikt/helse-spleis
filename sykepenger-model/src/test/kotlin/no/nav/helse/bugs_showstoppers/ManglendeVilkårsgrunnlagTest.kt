@@ -4,6 +4,7 @@ import no.nav.helse.*
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.*
 import no.nav.helse.hendelser.til
+import no.nav.helse.inspectors.personLogg
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.*
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
@@ -99,9 +100,9 @@ internal class ManglendeVilkårsgrunnlagTest : AbstractEndToEndTest() {
                 AVVENTER_VILKÅRSPRØVING
             )
             assertTilstander(4.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE, AVVENTER_UFERDIG)
-            assertTrue(inspektør.etterspurteBehov(3.vedtaksperiode).map { it.type }
+            assertTrue(person.personLogg.etterspurteBehov(3.vedtaksperiode).map { it.type }
                 .containsAll(listOf(InntekterForSammenligningsgrunnlag, Medlemskap, InntekterForSykepengegrunnlag, ArbeidsforholdV2)))
-            assertTrue(inspektør.etterspurteBehov(4.vedtaksperiode).isEmpty())
+            assertTrue(person.personLogg.etterspurteBehov(4.vedtaksperiode).isEmpty())
         } else {
             assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
             assertTilstander(
@@ -112,13 +113,13 @@ internal class ManglendeVilkårsgrunnlagTest : AbstractEndToEndTest() {
                 AVVENTER_HISTORIKK,
                 AVVENTER_VILKÅRSPRØVING
             )
-            assertTrue(inspektør.etterspurteBehov(3.vedtaksperiode).isEmpty())
-            assertTrue(inspektør.etterspurteBehov(4.vedtaksperiode).map { it.type }
+            assertTrue(person.personLogg.etterspurteBehov(3.vedtaksperiode).isEmpty())
+            assertTrue(person.personLogg.etterspurteBehov(4.vedtaksperiode).map { it.type }
                 .containsAll(listOf(InntekterForSammenligningsgrunnlag, Medlemskap, InntekterForSykepengegrunnlag, ArbeidsforholdV2)))
         }
 
-        assertTrue(inspektør.etterspurteBehov(1.vedtaksperiode).isEmpty())
-        assertTrue(inspektør.etterspurteBehov(2.vedtaksperiode).isEmpty())
+        assertTrue(person.personLogg.etterspurteBehov(1.vedtaksperiode).isEmpty())
+        assertTrue(person.personLogg.etterspurteBehov(2.vedtaksperiode).isEmpty())
     }
 
     @Test
@@ -160,9 +161,9 @@ internal class ManglendeVilkårsgrunnlagTest : AbstractEndToEndTest() {
             AVVENTER_VILKÅRSPRØVING
         )
 
-        assertTrue(inspektør.etterspurteBehov(1.vedtaksperiode).isEmpty())
-        assertTrue(inspektør.etterspurteBehov(2.vedtaksperiode).isEmpty())
-        assertTrue(inspektør.etterspurteBehov(3.vedtaksperiode).map { it.type }
+        assertTrue(person.personLogg.etterspurteBehov(1.vedtaksperiode).isEmpty())
+        assertTrue(person.personLogg.etterspurteBehov(2.vedtaksperiode).isEmpty())
+        assertTrue(person.personLogg.etterspurteBehov(3.vedtaksperiode).map { it.type }
             .containsAll(listOf(InntekterForSammenligningsgrunnlag, Medlemskap, InntekterForSykepengegrunnlag, ArbeidsforholdV2)))
     }
 

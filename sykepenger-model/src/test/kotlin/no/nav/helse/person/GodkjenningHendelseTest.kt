@@ -4,12 +4,14 @@ import no.nav.helse.desember
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
+import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
 import no.nav.helse.oktober
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
+import no.nav.helse.sisteBehov
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -89,9 +91,9 @@ internal class GodkjenningHendelseTest : AbstractPersonTest() {
         fødselsnummer = UNG_PERSON_FNR_2018.toString(),
         organisasjonsnummer = ORGNUMMER,
         utbetalingId = UUID.fromString(
-            inspektør.sisteBehov(Behovtype.Godkjenning).kontekst()["utbetalingId"] ?: throw IllegalStateException(
+            person.personLogg.sisteBehov(Behovtype.Godkjenning).kontekst()["utbetalingId"] ?: throw IllegalStateException(
                 "Finner ikke utbetalingId i: ${
-                    inspektør.sisteBehov(
+                    person.personLogg.sisteBehov(
                         Behovtype.Godkjenning
                     ).kontekst()
                 }"
@@ -255,15 +257,15 @@ internal class GodkjenningHendelseTest : AbstractPersonTest() {
             aktørId = "aktørId",
             fødselsnummer = UNG_PERSON_FNR_2018.toString(),
             orgnummer = ORGNUMMER,
-            fagsystemId = inspektør.sisteBehov(Behovtype.Simulering).detaljer().getValue("fagsystemId") as String,
-            fagområde = inspektør.sisteBehov(Behovtype.Simulering).detaljer().getValue("fagområde") as String,
+            fagsystemId = person.personLogg.sisteBehov(Behovtype.Simulering).detaljer().getValue("fagsystemId") as String,
+            fagområde = person.personLogg.sisteBehov(Behovtype.Simulering).detaljer().getValue("fagområde") as String,
             simuleringOK = true,
             melding = "",
             simuleringResultat = Simulering.SimuleringResultat(
                 totalbeløp = 1000,
                 perioder = emptyList()
             ),
-            utbetalingId = UUID.fromString(inspektør.sisteBehov(Behovtype.Simulering).kontekst().getValue("utbetalingId"))
+            utbetalingId = UUID.fromString(person.personLogg.sisteBehov(Behovtype.Simulering).kontekst().getValue("utbetalingId"))
         ).apply {
             hendelse = this
         }

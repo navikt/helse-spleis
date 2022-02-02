@@ -5,6 +5,7 @@ import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.inspectors.inspektør
+import no.nav.helse.inspectors.personLogg
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
@@ -149,12 +150,12 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
     fun `overlappende arbeidsgivere ikke sendt til infotrygd`() {
         gapPeriode(1.januar til 31.januar, a1)
         gapPeriode(15.januar til 15.februar, a2)
-        assertNoErrors(inspektør(a1))
-        assertNoErrors(inspektør(a2))
+        assertNoErrors(person)
+        assertNoErrors(person)
 
         historikk(a1)
-        assertNoErrors(inspektør(a1))
-        assertNoErrors(inspektør(a2))
+        assertNoErrors(person)
+        assertNoErrors(person)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
     }
@@ -162,11 +163,11 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
     @Test
     fun `vedtaksperioder atskilt med betydelig tid`() {
         prosessperiode(1.januar til 31.januar, a1)
-        assertNoErrors(inspektør(a1))
+        assertNoErrors(person)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
 
         prosessperiode(1.mars til 31.mars, a2)
-        assertNoErrors(inspektør(a2))
+        assertNoErrors(person)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
     }
 
@@ -608,16 +609,16 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
 
+        assertTrue(person.personLogg.hasWarningsOrWorse())
         inspektør(a1).also {
-            assertTrue(it.personLogg.hasWarningsOrWorse())
             it.utbetalingstidslinjer(1.vedtaksperiode).inspektør.also { tidslinjeInspektør ->
                 assertEquals(16, tidslinjeInspektør.arbeidsgiverperiodeDagTeller)
                 assertEquals(4, tidslinjeInspektør.navHelgDagTeller)
                 assertEquals(11, tidslinjeInspektør.avvistDagTeller)
             }
         }
+        assertTrue(person.personLogg.hasWarningsOrWorse())
         inspektør(a2).also {
-            assertTrue(it.personLogg.hasWarningsOrWorse())
             it.utbetalingstidslinjer(1.vedtaksperiode).inspektør.also { tidslinjeInspektør ->
                 assertEquals(16, tidslinjeInspektør.arbeidsgiverperiodeDagTeller)
                 assertEquals(4, tidslinjeInspektør.navHelgDagTeller)
@@ -655,8 +656,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true, orgnummer = a2)
         håndterUtbetalt(1.vedtaksperiode, orgnummer = a2)
 
-        assertNoWarnings(inspektør(a1))
-        assertNoWarnings(inspektør(a2))
+        assertNoWarnings(person)
     }
 
     @Test
@@ -790,7 +790,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
                 AVVENTER_SIMULERING,
                 AVVENTER_GODKJENNING
             )
-            assertHasNoErrors()
+            assertNoErrors(person)
             assertEquals(1, avsluttedeUtbetalingerForVedtaksperiode(1.vedtaksperiode).size)
             assertEquals(0, ikkeUtbetalteUtbetalingerForVedtaksperiode(1.vedtaksperiode).size)
             assertEquals(0, avsluttedeUtbetalingerForVedtaksperiode(2.vedtaksperiode).size)
@@ -817,7 +817,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
                 AVVENTER_HISTORIKK,
                 AVVENTER_ARBEIDSGIVERE
             )
-            assertHasNoErrors()
+            assertNoErrors(person)
             assertEquals(1, avsluttedeUtbetalingerForVedtaksperiode(1.vedtaksperiode).size)
             assertEquals(0, ikkeUtbetalteUtbetalingerForVedtaksperiode(1.vedtaksperiode).size)
             assertEquals(0, avsluttedeUtbetalingerForVedtaksperiode(2.vedtaksperiode).size)

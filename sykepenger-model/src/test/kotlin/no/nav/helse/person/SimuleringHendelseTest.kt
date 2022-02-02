@@ -4,6 +4,7 @@ import no.nav.helse.*
 import no.nav.helse.Toggle.Companion.enable
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.inspectors.personLogg
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
@@ -30,7 +31,7 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
         håndterYtelser()
         håndterSimuleringer()
         assertEquals(AVVENTER_GODKJENNING, inspektør.sisteTilstand(1.vedtaksperiode))
-        assertFalse(inspektør.personLogg.hasWarningsOrWorse())
+        assertFalse(person.personLogg.hasWarningsOrWorse())
     }
 
     @Test
@@ -38,7 +39,7 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
         håndterYtelser()
         håndterSimuleringer(mapOf(Fagområde.SykepengerRefusjon to Pair(true, 500)))
         assertEquals(AVVENTER_GODKJENNING, inspektør.sisteTilstand(1.vedtaksperiode))
-        assertTrue(inspektør.personLogg.warn().toString().contains("Simulering"))
+        assertTrue(person.personLogg.warn().toString().contains("Simulering"))
     }
 
     @Test
@@ -57,7 +58,7 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
             Fagområde.Sykepenger to Pair(true, 1431)
         ))
         assertEquals(AVVENTER_GODKJENNING, inspektør.sisteTilstand(1.vedtaksperiode))
-        assertFalse(inspektør.personLogg.hasWarningsOrWorse())
+        assertFalse(person.personLogg.hasWarningsOrWorse())
     }
 
     @Test
@@ -67,7 +68,7 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
             Fagområde.SykepengerRefusjon to Pair(true, 1431)
         ))
         assertEquals(AVVENTER_SIMULERING, inspektør.sisteTilstand(1.vedtaksperiode))
-        assertFalse(inspektør.personLogg.hasWarningsOrWorse())
+        assertFalse(person.personLogg.hasWarningsOrWorse())
     }
 
     @Test
@@ -77,7 +78,7 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
             Fagområde.Sykepenger to Pair(true, 1431)
         ))
         assertEquals(AVVENTER_GODKJENNING, inspektør.sisteTilstand(1.vedtaksperiode))
-        assertFalse(inspektør.personLogg.hasWarningsOrWorse())
+        assertFalse(person.personLogg.hasWarningsOrWorse())
     }
 
     private fun håndterYtelser(

@@ -1,15 +1,15 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.desember
+import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
-import no.nav.helse.person.TilstandType.*
-import no.nav.helse.desember
-import no.nav.helse.februar
-import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.januar
+import no.nav.helse.person.TilstandType.*
+import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -99,7 +99,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
                 TIL_UTBETALING,
                 AVSLUTTET
             )
-            assertHasNoErrors()
+            assertNoErrors(person)
             assertEquals(3, utbetalinger.filter { it.erAvsluttet() }.size)
         }
 
@@ -116,7 +116,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
                 TIL_UTBETALING,
                 AVSLUTTET
             )
-            assertHasNoErrors()
+            assertNoErrors(person)
             assertEquals(3, utbetalinger.filter { it.erAvsluttet() }.size)
         }
     }
@@ -178,7 +178,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
                 TIL_UTBETALING,
                 AVSLUTTET
             )
-            assertHasNoErrors()
+            assertNoErrors(person)
             assertEquals(2, utbetalinger.filter { it.erAvsluttet() }.size)
         }
 
@@ -191,7 +191,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
                 AVVENTER_GODKJENNING_REVURDERING,
                 AVSLUTTET
             )
-            assertHasNoErrors()
+            assertNoErrors(person)
             assertEquals(2, utbetalinger.filter { it.erAvsluttet() }.size)
         }
     }
@@ -262,7 +262,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
                 MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
                 MOTTATT_SYKMELDING_FERDIG_FORLENGELSE
             )
-            assertHasNoErrors()
+            assertNoErrors(person)
             assertEquals(2, utbetalinger.filter { it.erAvsluttet() }.size)
         }
 
@@ -275,7 +275,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
                 AVVENTER_GODKJENNING_REVURDERING,
                 AVSLUTTET
             )
-            assertHasNoErrors()
+            assertNoErrors(person)
             assertEquals(2, utbetalinger.filter { it.erAvsluttet() }.size)
         }
     }
@@ -367,7 +367,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
                 TIL_UTBETALING,
                 AVSLUTTET
             )
-            assertHasNoErrors()
+            assertNoErrors(person)
             assertEquals(2, avsluttedeUtbetalingerForVedtaksperiode(1.vedtaksperiode).size)
             assertEquals(2, avsluttedeUtbetalingerForVedtaksperiode(2.vedtaksperiode).size)
         }
@@ -389,7 +389,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
                 AVVENTER_GODKJENNING_REVURDERING,
                 AVSLUTTET
             )
-            assertHasNoErrors()
+            assertNoErrors(person)
             assertEquals(2, avsluttedeUtbetalingerForVedtaksperiode(1.vedtaksperiode).size)
             assertEquals(2, avsluttedeUtbetalingerForVedtaksperiode(2.vedtaksperiode).size)
         }
@@ -404,7 +404,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
         håndterYtelser(1.vedtaksperiode, orgnummer = haandtverkerne)
         håndterSimulering(1.vedtaksperiode, orgnummer = haandtverkerne)
         håndterOverstyrTidslinje((29.januar til 29.januar).map { manuellFeriedag(it) }, orgnummer = aadvokatene)
-        assertErrorTekst(inspektør(haandtverkerne), "Kan ikke overstyre en pågående behandling der én eller flere perioder er behandlet ferdig")
+        assertErrorTekst(person, "Kan ikke overstyre en pågående behandling der én eller flere perioder er behandlet ferdig")
     }
 
     @Test
@@ -486,7 +486,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
                 AVVENTER_SIMULERING_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING
             )
-            assertHasNoErrors()
+            assertNoErrors(person)
             assertEquals(1, avsluttedeUtbetalingerForVedtaksperiode(1.vedtaksperiode).size)
             assertEquals(1, ikkeUtbetalteUtbetalingerForVedtaksperiode(1.vedtaksperiode).size)
             assertEquals(1, avsluttedeUtbetalingerForVedtaksperiode(2.vedtaksperiode).size)
@@ -506,7 +506,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
                 *TIL_AVSLUTTET_FORLENGELSE(false),
                 AVVENTER_ARBEIDSGIVERE_REVURDERING
             )
-            assertHasNoErrors()
+            assertNoErrors(person)
             assertEquals(1, avsluttedeUtbetalingerForVedtaksperiode(1.vedtaksperiode).size)
             assertEquals(1, ikkeUtbetalteUtbetalingerForVedtaksperiode(1.vedtaksperiode).size)
             assertEquals(1, avsluttedeUtbetalingerForVedtaksperiode(2.vedtaksperiode).size)

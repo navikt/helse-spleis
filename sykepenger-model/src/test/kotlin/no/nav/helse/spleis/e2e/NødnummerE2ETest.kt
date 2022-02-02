@@ -5,6 +5,7 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
+import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
@@ -50,7 +51,7 @@ internal class NødnummerE2ETest : AbstractEndToEndTest() {
             Inntektsopplysning(nødnummer, 17.januar, 500.daglig, false),
             Inntektsopplysning(ORGNUMMER, 17.januar, 500.daglig, true)
         ))
-        assertFalse(inspektør.periodeErForkastet(1.vedtaksperiode)) { inspektør.personLogg.toString() }
+        assertFalse(inspektør.periodeErForkastet(1.vedtaksperiode)) { person.personLogg.toString() }
     }
 
     @Test
@@ -61,7 +62,7 @@ internal class NødnummerE2ETest : AbstractEndToEndTest() {
             Inntektsopplysning(nødnummer, 17.januar, 500.daglig, false),
             Inntektsopplysning(ORGNUMMER, 17.januar, 500.daglig, true)
         ))
-        assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode)) { inspektør.personLogg.toString() }
+        assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode)) { person.personLogg.toString() }
         assertError(1.vedtaksperiode, "Det er registrert bruk av på nødnummer")
     }
 
@@ -71,7 +72,7 @@ internal class NødnummerE2ETest : AbstractEndToEndTest() {
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.februar, 28.februar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(1.januar til 16.januar), førsteFraværsdag = 1.februar)
         håndterYtelser(1.vedtaksperiode, PersonUtbetalingsperiode(nødnummer, 17.januar, 18.januar, 100.prosent, 500.daglig), inntektshistorikk = listOf(Inntektsopplysning(nødnummer, 17.januar, 500.daglig, false)))
-        assertFalse(inspektør.periodeErForkastet(1.vedtaksperiode)) { inspektør.personLogg.toString() }
+        assertFalse(inspektør.periodeErForkastet(1.vedtaksperiode)) { person.personLogg.toString() }
         assertFalse(person.inspektør.harArbeidsgiver(nødnummer))
     }
 

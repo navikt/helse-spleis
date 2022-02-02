@@ -110,7 +110,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
-        assertWarnings(inspektør(a1))
+        assertWarnings(person)
         assertWarning(1.vedtaksperiode, "Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold", orgnummer = a1)
         assertNoWarning(1.vedtaksperiode, "Den sykmeldte har skiftet arbeidsgiver, og det er beregnet at den nye arbeidsgiveren mottar refusjon lik forrige. Kontroller at dagsatsen blir riktig.", orgnummer = a1)
         assertEquals(
@@ -411,7 +411,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             orgnummer = a1
         )
 
-        assertNoErrors(inspektør(a1))
+        assertNoErrors(person)
     }
 
     @Test
@@ -424,7 +424,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             orgnummer = a1
         )
 
-        assertErrors(inspektør(a1))
+        assertErrors(person)
     }
 
     @Test

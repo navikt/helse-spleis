@@ -1,11 +1,13 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.Fødselsnummer
+import no.nav.helse.etterspurteBehov
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
+import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
 import no.nav.helse.person.AbstractPersonTest
 import no.nav.helse.person.Aktivitetslogg
@@ -14,6 +16,7 @@ import no.nav.helse.person.TilstandType
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.serde.reflection.Utbetalingstatus
+import no.nav.helse.sisteBehov
 import no.nav.helse.testhelpers.Inntektperioder
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Inntekt
@@ -37,7 +40,7 @@ internal fun AbstractEndToEndTest.utbetaling(
         fødselsnummer = fnr.toString(),
         orgnummer = orgnummer,
         fagsystemId = fagsystemId,
-        utbetalingId = inspektør.sisteBehov(Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling).kontekst().getValue("utbetalingId"),
+        utbetalingId = person.personLogg.sisteBehov(Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling).kontekst().getValue("utbetalingId"),
         status = status,
         melding = "hei",
         avstemmingsnøkkel = 123456L,
@@ -59,7 +62,7 @@ internal fun AbstractEndToEndTest.feriepengeutbetaling(
         fødselsnummer = fnr.toString(),
         orgnummer = orgnummer,
         fagsystemId = fagsystemId,
-        utbetalingId = inspektør.sisteBehov(Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling).kontekst().getValue("utbetalingId"),
+        utbetalingId = person.personLogg.sisteBehov(Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling).kontekst().getValue("utbetalingId"),
         status = status,
         melding = "hey",
         avstemmingsnøkkel = 654321L,
@@ -345,7 +348,7 @@ internal fun AbstractEndToEndTest.ytelser(
                 "\nTrenger ikke sende inn utbetalinger og inntektsopplysninger da." +
                 "\nEnten ta bort overflødig historikk, eller sett 'besvart'-tidspunktet tilbake i tid " +
                 "på forrige Ytelser-innsending" +
-                "\n\n${inspektør.personLogg}"
+                "\n\n${person.personLogg}"
         )
     }
 
@@ -414,7 +417,7 @@ internal fun AbstractEndToEndTest.simulering(
     fnr: Fødselsnummer = AbstractPersonTest.UNG_PERSON_FNR_2018,
     orgnummer: String = AbstractPersonTest.ORGNUMMER,
     simuleringsresultat: Simulering.SimuleringResultat? = standardSimuleringsresultat(orgnummer)
-) = inspektør(orgnummer).etterspurteBehov(vedtaksperiodeIdInnhenter).filter { it.type == Aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering }.map { simuleringsBehov ->
+) = person.personLogg.etterspurteBehov(vedtaksperiodeIdInnhenter, orgnummer).filter { it.type == Aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering }.map { simuleringsBehov ->
     Simulering(
         meldingsreferanseId = UUID.randomUUID(),
         vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer).toString(),
@@ -478,10 +481,10 @@ internal fun AbstractEndToEndTest.utbetalingsgodkjenning(
     orgnummer: String,
     automatiskBehandling: Boolean,
     utbetalingId: UUID = UUID.fromString(
-        inspektør.sisteBehov(Aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning).kontekst()["utbetalingId"]
+        person.personLogg.sisteBehov(Aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning).kontekst()["utbetalingId"]
             ?: throw IllegalStateException(
                 "Finner ikke utbetalingId i: ${
-                    inspektør.sisteBehov(Aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning).kontekst()
+                    person.personLogg.sisteBehov(Aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning).kontekst()
                 }"
             )
     ),

@@ -7,6 +7,7 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
+import no.nav.helse.inspectors.personLogg
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.TilstandType.*
@@ -338,7 +339,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         assertTrue(inspektør.utbetalinger.last().inspektør.erAnnullering)
         assertEquals(1, observatør.annulleringer.size)
         assertEquals(2,
-            inspektør.personLogg.behov()
+            person.personLogg.behov()
                 .filter { it.detaljer()["fagsystemId"] == inspektør.fagsystemId(1.vedtaksperiode) }
                 .filter { it.type == Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling }
                 .size

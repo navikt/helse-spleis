@@ -4,19 +4,16 @@ import no.nav.helse.ForventetFeil
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.inspectors.inspektør
-import no.nav.helse.person.Aktivitetskontekst
-import no.nav.helse.person.IdInnhenter
-import no.nav.helse.person.SpesifikkKontekst
-import no.nav.helse.person.TilstandType.*
 import no.nav.helse.januar
 import no.nav.helse.mars
+import no.nav.helse.person.TilstandType.*
 import no.nav.helse.utbetalingslinjer.Utbetaling.GodkjentUtenUtbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Sendt
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class SamletSykdomsgradE2ETest: AbstractEndToEndTest() {
@@ -110,7 +107,7 @@ internal class SamletSykdomsgradE2ETest: AbstractEndToEndTest() {
             TIL_UTBETALING,
             AVSLUTTET
         )
-        assertNoWarnings(inspektør)
+        assertNoWarnings(person)
     }
 
     @Test
@@ -131,13 +128,7 @@ internal class SamletSykdomsgradE2ETest: AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-        assertTrue(inspektør.vedtaksperiodeLogg(1.vedtaksperiode).hasWarningsOrWorse())
-        assertFalse(inspektør.vedtaksperiodeLogg(2.vedtaksperiode).hasWarningsOrWorse())
+        assertWarning(1.vedtaksperiode, "Minst én dag uten utbetaling på grunn av sykdomsgrad under 20 %. Vurder å sende vedtaksbrev fra Infotrygd")
+        assertNoWarnings(2.vedtaksperiode)
     }
-
-    private fun TestArbeidsgiverInspektør.vedtaksperiodeLogg(vedtaksperiodeIdInnhenter: IdInnhenter) = personLogg.logg(object : Aktivitetskontekst {
-        override fun toSpesifikkKontekst() = SpesifikkKontekst("Vedtaksperiode", mapOf(
-            "vedtaksperiodeId" to "${this@vedtaksperiodeLogg.vedtaksperiodeId(vedtaksperiodeIdInnhenter)}"
-        ))
-    })
 }

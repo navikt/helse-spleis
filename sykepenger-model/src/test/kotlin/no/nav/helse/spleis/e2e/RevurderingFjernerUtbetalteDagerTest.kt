@@ -1,16 +1,18 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.april
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
-import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.april
-import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
+import no.nav.helse.inspectors.personLogg
 import no.nav.helse.mai
 import no.nav.helse.mars
+import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.sisteBehov
+import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -52,7 +54,7 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
-        val behov = inspektør.sisteBehov(Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling)
+        val behov = person.personLogg.sisteBehov(Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling)
         assertEquals(2, (behov.detaljer()["linjer"] as List<*>).size)
 
         assertEquals("2021-04-24", (behov.detaljer()["linjer"] as List<Map<String, Any>>)[0]["fom"])
@@ -61,7 +63,7 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
         assertEquals("OPPH", (behov.detaljer()["linjer"] as List<Map<String, Any>>)[0]["statuskode"])
         assertEquals("2021-04-28", (behov.detaljer()["linjer"] as List<Map<String, Any>>)[1]["fom"])
         assertEquals("2021-05-07", (behov.detaljer()["linjer"] as List<Map<String, Any>>)[1]["tom"])
-        assertWarnings(inspektør)
+        assertWarnings(person)
     }
 
     @Test
@@ -94,7 +96,7 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
-        val behov = inspektør.sisteBehov(Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling)
+        val behov = person.personLogg.sisteBehov(Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling)
         assertEquals(2, (behov.detaljer()["linjer"] as List<*>).size)
 
         assertEquals("2021-04-17", (behov.detaljer()["linjer"] as List<Map<String, Any>>)[0]["fom"])
@@ -140,7 +142,7 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
         val oppdrag = inspektør.arbeidsgiverOppdrag.last()
         assertEquals(0, oppdrag.linjerUtenOpphør().size)
 
-        val behov = inspektør.sisteBehov(Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling)
+        val behov = person.personLogg.sisteBehov(Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling)
         assertEquals(1, (behov.detaljer()["linjer"] as List<*>).size)
 
         assertEquals("2021-04-17", (behov.detaljer()["linjer"] as List<Map<String, Any>>)[0]["datoStatusFom"])
@@ -184,7 +186,7 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
         val oppdrag = inspektør.arbeidsgiverOppdrag.last()
         assertEquals(1, oppdrag.linjerUtenOpphør().size)
 
-        val behov = inspektør.sisteBehov(Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling)
+        val behov = person.personLogg.sisteBehov(Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling)
         assertEquals(1, (behov.detaljer()["linjer"] as List<*>).size)
 
         assertEquals("2021-04-17", (behov.detaljer()["linjer"] as List<Map<String, Any>>)[0]["fom"])
@@ -226,7 +228,7 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
         val oppdrag = inspektør.arbeidsgiverOppdrag.last()
         assertEquals(0, oppdrag.linjerUtenOpphør().size)
 
-        val behov = inspektør.sisteBehov(Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling)
+        val behov = person.personLogg.sisteBehov(Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling)
         assertEquals(1, (behov.detaljer()["linjer"] as List<*>).size)
 
         assertEquals("2021-04-17", (behov.detaljer()["linjer"] as List<Map<String, Any>>)[0]["datoStatusFom"])
@@ -400,13 +402,13 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
 
-        val behov = inspektør.sisteBehov(Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling)
+        val behov = person.personLogg.sisteBehov(Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling)
         assertEquals(2, (behov.detaljer()["linjer"] as List<*>).size)
 
         assertEquals("2021-04-17", (behov.detaljer()["linjer"] as List<Map<String, Any>>)[0]["datoStatusFom"])
         assertEquals("OPPH", (behov.detaljer()["linjer"] as List<Map<String, Any>>)[0]["statuskode"])
         assertEquals("2021-04-21", (behov.detaljer()["linjer"] as List<Map<String, Any>>)[1]["fom"])
         assertEquals("2021-04-23", (behov.detaljer()["linjer"] as List<Map<String, Any>>)[1]["tom"])
-        assertWarnings(inspektør)
+        assertWarnings(person)
     }
 }
