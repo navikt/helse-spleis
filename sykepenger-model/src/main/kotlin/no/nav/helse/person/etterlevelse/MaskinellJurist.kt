@@ -484,7 +484,7 @@ class MaskinellJurist private constructor(
                         kontekster: Map<String, String>
                     ) {
                         event = SubsumsjonEvent(
-                            sporing = kontekster,
+                            sporing = kontekster.toMutableMap().apply { remove("fødselsnummer") },
                             lovverk = "folketrygdloven",
                             ikrafttredelse = paragrafVersjonFormaterer.format(versjon),
                             paragraf = paragraf.ref,

@@ -206,7 +206,7 @@ internal class HendelseMediator(
         val subsumsjonMediator = SubsumsjonMediator(jurist, hendelse, message, versjonAvKode)
         person.addObserver(VedtaksperiodeProbe)
         handler(person)
-        finalize(personMediator, subsumsjonMediator , message, hendelse)
+        finalize(personMediator, subsumsjonMediator, message, hendelse)
     }
 
     private fun person(hendelse: PersonHendelse, jurist: MaskinellJurist): Person {

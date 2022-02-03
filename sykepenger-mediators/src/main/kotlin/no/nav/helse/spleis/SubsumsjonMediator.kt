@@ -9,7 +9,12 @@ import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime.now
 
-internal class SubsumsjonMediator(private val jurist: MaskinellJurist, private val hendelse: PersonHendelse, private val message: HendelseMessage, private val versjonAvKode: String) {
+internal class SubsumsjonMediator(
+    private val jurist: MaskinellJurist,
+    private val hendelse: PersonHendelse,
+    private val message: HendelseMessage,
+    private val versjonAvKode: String
+) {
 
     private companion object {
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
@@ -20,9 +25,14 @@ internal class SubsumsjonMediator(private val jurist: MaskinellJurist, private v
         val events = jurist.events()
         if (events.isEmpty() || Toggle.SubsumsjonHendelser.disabled) return
         logg.info("som følge av hendelse id=${message.id} sendes ${events.size} subsumsjonsmeldinger på rapid")
-        jurist.events().map { subsumsjonMelding(fødselsnummer = hendelse.fødselsnummer(), event = it) }.forEach {
-            rapidsConnection.publish(key = hendelse.fødselsnummer(), message = it.toJson().also {sikkerLogg.info("som følge av hendelse id=${message.id} sender subsumsjon: $it") })
-        }
+        jurist
+            .events()
+            .map { subsumsjonMelding(fødselsnummer = hendelse.fødselsnummer(), event = it) }
+            .forEach {
+                rapidsConnection.publish(key = hendelse.fødselsnummer(), message = it.toJson().also { message ->
+                    sikkerLogg.info("som følge av hendelse id=${this.message.id} sender subsumsjon: $message")
+                })
+            }
     }
 
     private fun subsumsjonMelding(fødselsnummer: String, event: MaskinellJurist.SubsumsjonEvent) =
