@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.ForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
@@ -22,6 +23,14 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
     fun `avslutter søknad utenfor arbeidsgiverperioden dersom det kun er helg`() {
         håndterSykmelding(Sykmeldingsperiode(4.januar, 21.januar, 100.prosent))
         håndterSøknad(Sykdom(4.januar, 21.januar, 100.prosent))
+        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
+    }
+
+    @ForventetFeil("skal være innenfor agp")
+    @Test
+    fun `søknad med utdanning`() {
+        håndterSykmelding(Sykmeldingsperiode(2.januar, 7.januar, 100.prosent))
+        håndterSøknad(Sykdom(2.januar, 7.januar, 100.prosent), Utdanning(1.januar, 7.januar))
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
     }
 
