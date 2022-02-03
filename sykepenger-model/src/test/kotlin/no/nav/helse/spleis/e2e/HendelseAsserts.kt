@@ -205,6 +205,11 @@ internal fun AbstractEndToEndTest.assertInfo(idInnhenter: IdInnhenter, forventet
     assertEquals(1, info.count { it == forventet }, "fant ikke ett tilfelle av info for $orgnummer. Info:\n${info.joinToString("\n")}")
 }
 
+internal fun AbstractEndToEndTest.assertNoInfo(idInnhenter: IdInnhenter, forventet: String, orgnummer: String = AbstractPersonTest.ORGNUMMER) {
+    val info = collectInfo(idInnhenter, orgnummer)
+    assertEquals(0, info.count { it == forventet }, "fant uventet info for $orgnummer. Info:\n${info.joinToString("\n")}")
+}
+
 private fun AbstractEndToEndTest.collectInfo(idInnhenter: IdInnhenter, orgnummer: String): MutableList<String> {
     val info = mutableListOf<String>()
     person.personLogg.accept(object : AktivitetsloggVisitor {

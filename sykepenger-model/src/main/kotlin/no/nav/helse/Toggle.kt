@@ -137,6 +137,7 @@ abstract class Toggle internal constructor(enabled: Boolean = false, private val
     object DelvisRefusjon : Toggle("DELVIS_REFUSJON",false)
     object GjenopptaAvsluttetUtenUtbetaling : Toggle(false)
     object SubsumsjonHendelser : Toggle("SUBSUMSJON_HENDELSER", false)
+    object ForkastForlengelseAvForkastetPeriode : Toggle(false)
 
     object LageBrukerutbetaling : Toggle("LAGE_BRUKERUTBETALING") {
         internal fun kanIkkeFortsette(aktivitetslogg: IAktivitetslogg, utbetaling: Utbetaling, harBrukerutbetaling: Boolean): Boolean {

@@ -1076,6 +1076,9 @@ internal class Vedtaksperiode private constructor(
             if (vedtaksperiode.harArbeidsgivereMedOverlappendeUtbetaltePerioder(vedtaksperiode.periode)) {
                 sykmelding.warn("Denne personen har en utbetaling for samme periode for en annen arbeidsgiver. Kontroller at beregningene for begge arbeidsgiverne er korrekte.")
             }
+
+            håndterForlengelseAvForkastetPeriode(vedtaksperiode, sykmelding)
+
             if (sykmelding.valider(vedtaksperiode.periode).hasErrorsOrWorse())
                 return vedtaksperiode.tilstand(sykmelding, TilInfotrygd)
 
@@ -1090,6 +1093,15 @@ internal class Vedtaksperiode private constructor(
                 )
             )
             sykmelding.info("Fullført behandling av sykmelding")
+        }
+
+        private fun håndterForlengelseAvForkastetPeriode(vedtaksperiode: Vedtaksperiode, sykmelding: Sykmelding) {
+            if (vedtaksperiode.arbeidsgiver.finnForkastetSykeperiodeRettFør(vedtaksperiode) != null) {
+                "Perioden forlenger en forkastet periode".let { when {
+                    Toggle.ForkastForlengelseAvForkastetPeriode.enabled -> sykmelding.error(it)
+                    else -> sykmelding.info(it)
+                }}
+            }
         }
 
         private fun avgjørNesteTilstand(
