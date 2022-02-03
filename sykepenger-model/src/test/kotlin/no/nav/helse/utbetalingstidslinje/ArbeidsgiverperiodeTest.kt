@@ -48,7 +48,7 @@ internal class ArbeidsgiverperiodeTest {
         assertTrue(arbeidsgiverperiode.dekker(periode))
         assertTrue(arbeidsgiverperiode.dekker(3.januar til 4.januar))
         assertFalse(arbeidsgiverperiode.dekker(2.januar til 6.januar))
-        assertFalse(arbeidsgiverperiode.dekker(1.januar til 5.januar))
+        assertTrue(arbeidsgiverperiode.dekker(1.januar til 5.januar))
         assertFalse(arbeidsgiverperiode.dekker(1.januar til 6.januar))
     }
 

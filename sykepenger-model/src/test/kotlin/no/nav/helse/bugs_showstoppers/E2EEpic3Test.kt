@@ -19,7 +19,6 @@ import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
-import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -369,51 +368,6 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         assertForkastetPeriodeTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
         assertForkastetPeriodeTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, TIL_INFOTRYGD)
         assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP)
-    }
-
-    @Test
-    fun `ferie inni arbeidsgiverperioden`() {
-        håndterSykmelding(Sykmeldingsperiode(21.desember(2019), 5.januar(2020), 80.prosent))
-        håndterSøknad(
-            Egenmelding(18.september(2019), 20.september(2019)),
-            Sykdom(21.desember(2019), 8.januar(2020), 80.prosent),
-            Ferie(21.desember(2019), 23.desember(2019)),
-            Ferie(27.desember(2019), 27.desember(2019)),
-            Ferie(30.desember(2019), 30.desember(2019))
-        )
-        håndterInntektsmelding(
-            arbeidsgiverperioder = listOf(
-                24.desember(2019) til 26.desember(2019),
-                28.desember(2019) til 29.desember(2019),
-                31.desember(2019) til 8.januar(2020)
-            ),
-            førsteFraværsdag = 31.desember(2019)
-        )
-        håndterYtelser(1.vedtaksperiode)
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioderForSammenligningsgrunnlag {
-                1.desember(2018) til 1.november(2019) inntekter {
-                    ORGNUMMER inntekt INNTEKT
-                }
-            }
-        ))
-        håndterYtelser(1.vedtaksperiode)
-
-        assertEquals(31.desember(2019), inspektør.skjæringstidspunkt(1.vedtaksperiode))
-        assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertNotNull(inspektør.sisteMaksdato(1.vedtaksperiode))
-        assertTrue(inspektør.utbetalingslinjer(0).isEmpty())
-        assertEquals(Utbetaling.GodkjentUtenUtbetaling, inspektør.utbetalingtilstand(0))
-        assertTilstander(
-            1.vedtaksperiode,
-            START,
-            MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            AVVENTER_HISTORIKK,
-            AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK,
-            AVSLUTTET
-        )
     }
 
     @Test
