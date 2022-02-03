@@ -198,6 +198,17 @@ interface SubsumsjonObserver {
      */
     fun `§ 8-30 ledd 1`(grunnlagForSykepengegrunnlagPerArbeidsgiver: Map<String, Inntekt>, grunnlagForSykepengegrunnlag: Inntekt) {}
 
+    /**
+     * Vurdering av avvik mellom omregnet årsinntekt og innrapportert inntekt til a-ordningen
+     *
+     * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-30)
+     *
+     * @param oppfylt dersom avviket er innenfor gitt margin
+     * @param maksimaltTillattAvvikPåÅrsinntekt margin
+     * @param grunnlagForSykepengegrunnlag beregnet inntekt på tvers av arbeidsgivere
+     * @param sammenligningsgrunnlag innrapportert inntekt til a-ordningen
+     * @param avvik beregnet avvik mellom omregnet årsinntekt og innrapportert inntekt til a-ordningen
+     */
     fun `§ 8-30 ledd 2 punktum 1`(
         oppfylt: Boolean,
         maksimaltTillattAvvikPåÅrsinntekt: Prosent,
