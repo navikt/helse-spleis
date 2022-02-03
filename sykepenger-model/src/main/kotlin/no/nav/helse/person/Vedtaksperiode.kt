@@ -499,7 +499,7 @@ internal class Vedtaksperiode private constructor(
     private fun håndter(vilkårsgrunnlag: Vilkårsgrunnlag, nesteTilstand: Vedtaksperiodetilstand) {
         vilkårsgrunnlag.lagreInntekter(person, skjæringstidspunkt)
 
-        val grunnlagForSykepengegrunnlag = person.beregnSykepengegrunnlag(skjæringstidspunkt, vilkårsgrunnlag, jurist)
+        val grunnlagForSykepengegrunnlag = person.beregnSykepengegrunnlag(skjæringstidspunkt, jurist)
         val sammenligningsgrunnlag = person.beregnSammenligningsgrunnlag(skjæringstidspunkt)
 
         vilkårsgrunnlag.valider(

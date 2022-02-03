@@ -126,9 +126,10 @@ internal class Arbeidsgiver private constructor(
                 else inntektsopplysninger + ArbeidsgiverInntektsopplysning(arbeidsgiver.organisasjonsnummer, inntektsopplysning)
             }
 
-        internal fun List<Arbeidsgiver>.beregnSykepengegrunnlag(skjæringstidspunkt: LocalDate) = mapNotNull { arbeidsgiver ->
+        internal fun List<Arbeidsgiver>.beregnSykepengegrunnlag(skjæringstidspunkt: LocalDate, subsumsjonObserver: SubsumsjonObserver) = mapNotNull { arbeidsgiver ->
             val førsteFraværsdag = arbeidsgiver.finnFørsteFraværsdag(skjæringstidspunkt)
             val inntektsopplysning = arbeidsgiver.inntektshistorikk.grunnlagForSykepengegrunnlag(skjæringstidspunkt, førsteFraværsdag)
+            inntektsopplysning?.subsumsjon(subsumsjonObserver)
             when {
                 arbeidsgiver.harInaktivtArbeidsforhold(skjæringstidspunkt) -> null
                 inntektsopplysning == null && arbeidsgiver.harArbeidsforholdNyereEnnTreMåneder(skjæringstidspunkt) -> {
@@ -851,13 +852,6 @@ internal class Arbeidsgiver private constructor(
     private fun harInaktivtArbeidsforhold(skjæringstidspunkt: LocalDate) = arbeidsforholdhistorikk.harDeaktivertArbeidsforhold(skjæringstidspunkt)
 
     internal fun kanReberegnes(vedtaksperiode: Vedtaksperiode) = vedtaksperioder.all { it.kanReberegne(vedtaksperiode) }
-
-    internal fun periodeReberegnet(hendelse: ArbeidstakerHendelse, vedtaksperiode: Vedtaksperiode) {
-        håndter(hendelse) { periodeReberegnetFør(vedtaksperiode, hendelse) }
-        if (!hendelse.hasErrorsOrWorse()) return
-        hendelse.info("Reberegning blokkeres, gjenopptar behandling")
-        person.gjenopptaBehandling(hendelse)
-    }
 
     // Fredet funksjonsnavn
     internal fun tidligereOgEttergølgende(segSelv: Periode): VedtaksperiodeFilter {

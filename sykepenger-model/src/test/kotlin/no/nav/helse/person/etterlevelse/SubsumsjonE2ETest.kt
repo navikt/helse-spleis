@@ -22,6 +22,7 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Test
 import java.time.DayOfWeek
 import java.time.LocalDate
+import java.time.YearMonth
 import java.time.temporal.TemporalAdjusters
 
 internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
@@ -740,6 +741,70 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                 "utfallTom" to 31.januar,
             ),
             output = emptyMap()
+        )
+    }
+
+    @Test
+    fun `§ 8-28 tredje ledd bokstav a - legger tre siste innraporterte inntekter til grunn for andre arbeidsgivere`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 15.mars, 100.prosent), orgnummer = a1)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 15.mars, 100.prosent), orgnummer = a1)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            førsteFraværsdag = 1.januar,
+            refusjon = Inntektsmelding.Refusjon(31000.månedlig, null, emptyList()),
+            orgnummer = a1
+        )
+
+        val inntekter = listOf(
+            grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 31000.månedlig.repeat(3)),
+            grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 32000.månedlig.repeat(3))
+        )
+
+        val arbeidsforhold = listOf(
+            Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null),
+            Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null)
+        )
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterVilkårsgrunnlag(
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            inntektsvurdering = Inntektsvurdering(
+                listOf(
+                    sammenligningsgrunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 31000.månedlig.repeat(12)),
+                    sammenligningsgrunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 32000.månedlig.repeat(12))
+                )
+            ),
+            orgnummer = a1,
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter, arbeidsforhold = emptyList()),
+            arbeidsforhold = arbeidsforhold
+        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        SubsumsjonInspektør(jurist).assertBeregnet(
+            versjon = 1.januar(2019),
+            paragraf = PARAGRAF_8_28,
+            ledd = 3.ledd,
+            bokstav = BOKSTAV_A,
+            input = mapOf(
+                "inntekterSisteTreMåneder" to listOf(
+                    mapOf(
+                        "årMåned" to YearMonth.of(2017, 10),
+                        "beløp" to 32000.0
+                    ),
+                    mapOf(
+                        "årMåned" to YearMonth.of(2017, 11),
+                        "beløp" to 32000.0
+                    ),
+                    mapOf(
+                        "årMåned" to YearMonth.of(2017, 12),
+                        "beløp" to 32000.0
+                    )
+                ),
+                "resterendeInntekter" to emptyList<Map<String, Any>>()
+            ),
+            output = mapOf(
+                "beregnetGrunnlagForSykepengegrunnlagPrÅr" to 384000.0,
+                "beregnetGrunnlagForSykepengegrunnlagPrMåned" to 32000.0
+            )
         )
     }
 

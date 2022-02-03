@@ -1,6 +1,8 @@
 package no.nav.helse.person.etterlevelse
 
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.person.InntekthistorikkVisitor
+import no.nav.helse.person.Inntektshistorikk.Skatt
 import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.UtbetalingstidslinjeVisitor.Periode.Companion.dager
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -8,7 +10,10 @@ import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosent
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.Year
+import java.time.YearMonth
+import java.util.*
 
 interface SubsumsjonObserver {
 
@@ -177,11 +182,19 @@ interface SubsumsjonObserver {
      */
     fun `§ 8-17 ledd 2`(dato: LocalDate) {}
 
-    @Suppress("UNUSED_PARAMETER")
+    /**
+     * Inntekt som legges til grunn dersom sykdom ved en arbeidsgiver starter senere enn skjæringstidspunktet tilsvarer
+     * innrapportert inntekt til a-ordningen for de tre siste månedene før skjæringstidspunktet
+     *
+     * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-28)
+     *
+     * @param inntekterSisteTreMåneder månedlig inntekt for de tre siste måneder før skjæringstidspunktet
+     * @param resterendeInntekter alle andre innrapporterte inntekter fra a-ordningen
+     * @param grunnlagForSykepengegrunnlag beregnet grunnlag basert på [inntekterSisteTreMåneder]
+     */
     fun `§ 8-28 ledd 3 bokstav a`(
-        oppfylt: Boolean,
-        //inntekter: List<Inntektshistorikk.Skatt>,
-        //inntekterSisteTreMåneder: List<Inntektshistorikk.Skatt>,
+        inntekterSisteTreMåneder: List<Map<String, Any>>,
+        resterendeInntekter: List<Map<String, Any>>,
         grunnlagForSykepengegrunnlag: Inntekt
     ) {
     }
@@ -312,8 +325,33 @@ interface SubsumsjonObserver {
         }
     }
 
+    private class SkattVisitor(skatt: Skatt) : InntekthistorikkVisitor {
+        private lateinit var inntekt: Map<String, Any>
+
+        init {
+            skatt.accept(this)
+        }
+
+        fun inntekt() = inntekt
+
+        override fun visitSkattSykepengegrunnlag(
+            sykepengegrunnlag: Skatt.Sykepengegrunnlag,
+            dato: LocalDate,
+            hendelseId: UUID,
+            beløp: Inntekt,
+            måned: YearMonth,
+            type: Skatt.Inntekttype,
+            fordel: String,
+            beskrivelse: String,
+            tidsstempel: LocalDateTime
+        ) {
+            inntekt = mapOf("årMåned" to måned, "beløp" to beløp.reflection { _, månedlig, _, _ -> månedlig })
+        }
+    }
+
     companion object {
         internal fun List<Utbetalingstidslinje>.toSubsumsjonFormat(): List<List<Map<String, Any>>> = map { it.toSubsumsjonFormat() }.filter { it.isNotEmpty() }
         internal fun Utbetalingstidslinje.toSubsumsjonFormat(): List<Map<String, Any>> = UtbetalingstidslinjeVisitor(this).dager()
+        internal fun Iterable<Skatt>.toSubsumsjonFormat(): List<Map<String, Any>> = map { SkattVisitor(it).inntekt() }
     }
 }

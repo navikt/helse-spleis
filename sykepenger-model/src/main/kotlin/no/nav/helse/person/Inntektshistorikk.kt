@@ -3,8 +3,9 @@ package no.nav.helse.person
 
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
-import no.nav.helse.person.Aktivitetslogg.Aktivitet.Etterlevelse.Vurderingsresultat.Companion.`§8-28 ledd 3 bokstav a`
 import no.nav.helse.person.Inntektshistorikk.Innslag.Companion.nyesteId
+import no.nav.helse.person.etterlevelse.SubsumsjonObserver
+import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.toSubsumsjonFormat
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.summer
 import java.time.LocalDate
@@ -109,6 +110,7 @@ internal class Inntektshistorikk {
         fun grunnlagForSammenligningsgrunnlag(dato: LocalDate): Inntektsopplysning? = null
         fun grunnlagForSammenligningsgrunnlag(): Inntekt
         fun skalErstattesAv(other: Inntektsopplysning): Boolean
+        fun subsumsjon(subsumsjonObserver: SubsumsjonObserver) = run {}
         override fun compareTo(other: Inntektsopplysning) =
             (-this.dato.compareTo(other.dato)).takeUnless { it == 0 } ?: -this.prioritet.compareTo(other.prioritet)
 
@@ -202,6 +204,9 @@ internal class Inntektshistorikk {
         override val dato = inntektsopplysninger.first().dato
         override val prioritet = inntektsopplysninger.first().prioritet
 
+        private val inntekterSisteTreMåneder = inntektsopplysninger.filter { it.erRelevant(3) }
+        private val resterendeInntekter = inntektsopplysninger.filter { !it.erRelevant(3) }
+
         override fun accept(visitor: InntekthistorikkVisitor) {
             visitor.preVisitSkatt(this, id, dato)
             inntektsopplysninger.forEach { it.accept(visitor) }
@@ -212,15 +217,10 @@ internal class Inntektshistorikk {
             takeIf { inntektsopplysninger.any { it.grunnlagForSykepengegrunnlag(skjæringstidspunkt, førsteFraværsdag) != null } }
 
         override fun grunnlagForSykepengegrunnlag(): Inntekt {
-            val (inntekterSisteTreMåneder, alleAndre) = inntektsopplysninger.partition { it.erRelevant(3) }
             return inntekterSisteTreMåneder
                 .map(Skatt::grunnlagForSykepengegrunnlag)
                 .summer()
                 .div(3)
-                .also {
-                    //TODO: fix aktivitetslogg
-                    Aktivitetslogg().`§8-28 ledd 3 bokstav a`(true, alleAndre, inntekterSisteTreMåneder, it)
-                }
         }
 
         override fun grunnlagForSammenligningsgrunnlag(dato: LocalDate) =
@@ -234,6 +234,15 @@ internal class Inntektshistorikk {
                 .div(12)
 
         internal fun sammenligningsgrunnlag() = grunnlagForSammenligningsgrunnlag(dato)?.grunnlagForSammenligningsgrunnlag()
+
+        override fun subsumsjon(subsumsjonObserver: SubsumsjonObserver) {
+            subsumsjonObserver.`§ 8-28 ledd 3 bokstav a`(
+                inntekterSisteTreMåneder = inntekterSisteTreMåneder.toSubsumsjonFormat(),
+                resterendeInntekter = resterendeInntekter.toSubsumsjonFormat(),
+                grunnlagForSykepengegrunnlag = grunnlagForSykepengegrunnlag()
+            )
+
+        }
 
         override fun skalErstattesAv(other: Inntektsopplysning): Boolean =
             this.inntektsopplysninger.any { it.skalErstattesAv(other) }

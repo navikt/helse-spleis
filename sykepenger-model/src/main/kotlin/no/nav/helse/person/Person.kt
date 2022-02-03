@@ -521,7 +521,7 @@ class Person private constructor(
         subsumsjonObserver: SubsumsjonObserver
     ) {
         infotrygdhistorikk.lagreVilkårsgrunnlag(skjæringstidspunkt, vilkårsgrunnlagHistorikk, ::kanOverskriveVilkårsgrunnlag) {
-            beregnSykepengegrunnlagForInfotrygd(it, periode.start, hendelse, subsumsjonObserver)
+            beregnSykepengegrunnlagForInfotrygd(it, periode.start, subsumsjonObserver)
         }
     }
 
@@ -560,16 +560,14 @@ class Person private constructor(
 
     internal fun beregnSykepengegrunnlag(
         skjæringstidspunkt: LocalDate,
-        aktivitetslogg: IAktivitetslogg,
         subsumsjonObserver: SubsumsjonObserver
     ): Sykepengegrunnlag {
-        return Sykepengegrunnlag.opprett(arbeidsgivere.beregnSykepengegrunnlag(skjæringstidspunkt), skjæringstidspunkt, subsumsjonObserver)
+        return Sykepengegrunnlag.opprett(arbeidsgivere.beregnSykepengegrunnlag(skjæringstidspunkt, subsumsjonObserver), skjæringstidspunkt, subsumsjonObserver)
     }
 
     private fun beregnSykepengegrunnlagForInfotrygd(
         skjæringstidspunkt: LocalDate,
         personensSisteKjenteSykedagIDenSammenhengdendeSykeperioden: LocalDate,
-        hendelse: IAktivitetslogg,
         subsumsjonObserver: SubsumsjonObserver
     ) =
         Sykepengegrunnlag.opprettForInfotrygd(
@@ -737,7 +735,7 @@ class Person private constructor(
     }
 
     internal fun vilkårsprøvEtterNyInntekt(hendelse: PersonHendelse, skjæringstidspunkt: LocalDate, subsumsjonObserver: SubsumsjonObserver) {
-        val sykepengegrunnlag = beregnSykepengegrunnlag(skjæringstidspunkt, hendelse, subsumsjonObserver)
+        val sykepengegrunnlag = beregnSykepengegrunnlag(skjæringstidspunkt, subsumsjonObserver)
         val sammenligningsgrunnlag = beregnSammenligningsgrunnlag(skjæringstidspunkt)
         val avviksprosent = sykepengegrunnlag.avviksprosent(sammenligningsgrunnlag.sammenligningsgrunnlag)
 

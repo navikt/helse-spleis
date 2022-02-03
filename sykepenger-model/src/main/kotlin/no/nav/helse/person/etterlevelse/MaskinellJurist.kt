@@ -8,6 +8,7 @@ import no.nav.helse.person.*
 import no.nav.helse.person.Bokstav.BOKSTAV_A
 import no.nav.helse.person.Ledd.Companion.ledd
 import no.nav.helse.person.Ledd.LEDD_2
+import no.nav.helse.person.Ledd.LEDD_3
 import no.nav.helse.person.Paragraf.*
 import no.nav.helse.person.Punktum.Companion.punktum
 import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall
@@ -51,7 +52,7 @@ class MaskinellJurist private constructor(
             EnkelSubsumsjon(
                 utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
                 versjon = LocalDate.of(2020, 6, 12),
-                paragraf = Paragraf.PARAGRAF_8_2,
+                paragraf = PARAGRAF_8_2,
                 ledd = 1.ledd,
                 input = mapOf(
                     "skjæringstidspunkt" to skjæringstidspunkt,
@@ -77,7 +78,7 @@ class MaskinellJurist private constructor(
             EnkelSubsumsjon(
                 utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
                 versjon = LocalDate.of(2011, 12, 16),
-                paragraf = Paragraf.PARAGRAF_8_3,
+                paragraf = PARAGRAF_8_3,
                 ledd = 1.ledd,
                 punktum = 2.punktum,
                 input = mapOf(
@@ -98,7 +99,7 @@ class MaskinellJurist private constructor(
             EnkelSubsumsjon(
                 utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
                 versjon = LocalDate.of(2011, 12, 16),
-                paragraf = Paragraf.PARAGRAF_8_3,
+                paragraf = PARAGRAF_8_3,
                 ledd = 2.ledd,
                 punktum = 1.punktum,
                 input = mapOf(
@@ -121,10 +122,10 @@ class MaskinellJurist private constructor(
         leggTil(
             EnkelSubsumsjon(
                 utfall = VILKAR_BEREGNET,
-                LocalDate.of(2020, 1, 1),
-                Paragraf.PARAGRAF_8_10,
-                2.ledd,
-                1.punktum,
+                versjon = LocalDate.of(2020, 1, 1),
+                paragraf = PARAGRAF_8_10,
+                ledd = 2.ledd,
+                punktum = 1.punktum,
                 input = mapOf(
                     "maksimaltSykepengegrunnlag" to maksimaltSykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
                     "skjæringstidspunkt" to skjæringstidspunkt,
@@ -175,7 +176,7 @@ class MaskinellJurist private constructor(
                 EnkelSubsumsjon(
                     utfall = utfall,
                     versjon = LocalDate.of(2021, 5, 21),
-                    paragraf = Paragraf.PARAGRAF_8_12,
+                    paragraf = PARAGRAF_8_12,
                     ledd = 1.ledd,
                     punktum = 1.punktum,
                     input = mapOf(
@@ -213,7 +214,7 @@ class MaskinellJurist private constructor(
                 funnetRelevant = oppfylt || gjenståendeSykepengedager == 0, // Bare relevant om det er ny rett på sykepenger eller om vilkåret ikke er oppfylt
                 utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
                 versjon = LocalDate.of(2021, 5, 21),
-                paragraf = Paragraf.PARAGRAF_8_12,
+                paragraf = PARAGRAF_8_12,
                 ledd = 2.ledd,
                 punktum = null,
                 bokstav = null,
@@ -233,7 +234,7 @@ class MaskinellJurist private constructor(
         leggTil(
             EnkelSubsumsjon(
                 utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
-                paragraf = Paragraf.PARAGRAF_8_13,
+                paragraf = PARAGRAF_8_13,
                 ledd = Ledd.LEDD_1,
                 versjon = FOLKETRYGDLOVENS_OPPRINNELSESDATO,
                 input = mapOf("avvisteDager" to avvisteDager),
@@ -250,7 +251,7 @@ class MaskinellJurist private constructor(
                 input = mapOf("dekningsgrad" to dekningsgrad, "inntekt" to inntekt),
                 output = mapOf("dekningsgrunnlag" to dekningsgrunnlag),
                 utfall = VILKAR_BEREGNET,
-                paragraf = Paragraf.PARAGRAF_8_16,
+                paragraf = PARAGRAF_8_16,
                 ledd = 1.ledd,
                 versjon = FOLKETRYGDLOVENS_OPPRINNELSESDATO,
                 kontekster = kontekster()
@@ -294,8 +295,29 @@ class MaskinellJurist private constructor(
         )
     }
 
-    override fun `§ 8-28 ledd 3 bokstav a`(oppfylt: Boolean, grunnlagForSykepengegrunnlag: Inntekt) {
-        super.`§ 8-28 ledd 3 bokstav a`(oppfylt, grunnlagForSykepengegrunnlag)
+    override fun `§ 8-28 ledd 3 bokstav a`(
+        inntekterSisteTreMåneder: List<Map<String, Any>>,
+        resterendeInntekter: List<Map<String, Any>>,
+        grunnlagForSykepengegrunnlag: Inntekt
+    ) {
+        leggTil(
+            EnkelSubsumsjon(
+                utfall = VILKAR_BEREGNET,
+                versjon = LocalDate.of(2019, 1, 1),
+                paragraf = PARAGRAF_8_28,
+                ledd = LEDD_3,
+                bokstav = BOKSTAV_A,
+                input = mapOf(
+                    "inntekterSisteTreMåneder" to inntekterSisteTreMåneder,
+                    "resterendeInntekter" to resterendeInntekter
+                ),
+                output = mapOf(
+                    "beregnetGrunnlagForSykepengegrunnlagPrÅr" to grunnlagForSykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
+                    "beregnetGrunnlagForSykepengegrunnlagPrMåned" to grunnlagForSykepengegrunnlag.reflection { _, månedlig, _, _ -> månedlig }
+                ),
+                kontekster = kontekster()
+            )
+        )
     }
 
     override fun `§ 8-30 ledd 1`(grunnlagForSykepengegrunnlagPerArbeidsgiver: Map<String, Inntekt>, grunnlagForSykepengegrunnlag: Inntekt) {
@@ -305,7 +327,7 @@ class MaskinellJurist private constructor(
             EnkelSubsumsjon(
                 utfall = VILKAR_BEREGNET,
                 versjon = LocalDate.of(2019, 1, 1),
-                paragraf = Paragraf.PARAGRAF_8_30,
+                paragraf = PARAGRAF_8_30,
                 ledd = Ledd.LEDD_1,
                 input = mapOf(
                     "beregnetMånedsinntektPerArbeidsgiver" to beregnetMånedsinntektPerArbeidsgiver
@@ -329,7 +351,7 @@ class MaskinellJurist private constructor(
             EnkelSubsumsjon(
                 utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
                 versjon = LocalDate.of(2017, 4, 5),
-                paragraf = Paragraf.PARAGRAF_8_30,
+                paragraf = PARAGRAF_8_30,
                 ledd = 2.ledd,
                 punktum = 1.punktum,
                 input = mapOf(
@@ -398,7 +420,7 @@ class MaskinellJurist private constructor(
                     utfall = utfall,
                     versjon = LocalDate.of(2011, 12, 16),
                     paragraf = PARAGRAF_8_51,
-                    ledd = Ledd.LEDD_3,
+                    ledd = LEDD_3,
                     input = mapOf(
                         "fom" to periode.start,
                         "tom" to periode.endInclusive,
