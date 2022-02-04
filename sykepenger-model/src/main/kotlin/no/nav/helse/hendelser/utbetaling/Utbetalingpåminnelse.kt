@@ -9,15 +9,15 @@ import java.util.*
 
 class Utbetalingpåminnelse(
     meldingsreferanseId: UUID,
-    private val aktørId: String,
-    private val fødselsnummer: String,
-    private val organisasjonsnummer: String,
+    aktørId: String,
+    fødselsnummer: String,
+    organisasjonsnummer: String,
     private val utbetalingId: UUID,
     private val antallGangerPåminnet: Int,
     private val status: Utbetalingstatus,
     private val endringstidspunkt: LocalDateTime,
     private val påminnelsestidspunkt: LocalDateTime
-) : ArbeidstakerHendelse(meldingsreferanseId, Aktivitetslogg()) {
+) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer, aktørId, organisasjonsnummer, Aktivitetslogg()) {
 
     internal fun erRelevant(utbetalingId: UUID) = utbetalingId == this.utbetalingId
 
@@ -31,8 +31,4 @@ class Utbetalingpåminnelse(
 
     internal fun harOversteget(makstid: Duration) =
         LocalDateTime.now() >= endringstidspunkt.plus(makstid)
-
-    override fun aktørId() = aktørId
-    override fun fødselsnummer() = fødselsnummer
-    override fun organisasjonsnummer() = organisasjonsnummer
 }

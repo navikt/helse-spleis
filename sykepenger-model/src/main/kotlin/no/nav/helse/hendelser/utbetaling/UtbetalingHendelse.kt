@@ -1,26 +1,23 @@
 package no.nav.helse.hendelser.utbetaling
 
-import no.nav.helse.utbetalingslinjer.Oppdragstatus.*
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
+import no.nav.helse.utbetalingslinjer.Oppdragstatus.*
 import java.time.LocalDateTime
 import java.util.*
 
 class UtbetalingHendelse(
     meldingsreferanseId: UUID,
-    private val aktørId: String,
-    private val fødselsnummer: String,
-    private val orgnummer: String,
+    aktørId: String,
+    fødselsnummer: String,
+    orgnummer: String,
     private val fagsystemId: String,
     private val utbetalingId: String,
     internal val status: Oppdragstatus,
     private val melding: String,
     internal val avstemmingsnøkkel: Long,
     internal val overføringstidspunkt: LocalDateTime
-) : ArbeidstakerHendelse(meldingsreferanseId) {
-    override fun aktørId() = aktørId
-    override fun fødselsnummer() = fødselsnummer
-    override fun organisasjonsnummer() = orgnummer
+) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer, aktørId, orgnummer) {
 
     internal fun valider() = this.apply {
         if (status == AVVIST || status == FEIL) {

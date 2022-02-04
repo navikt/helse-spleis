@@ -23,9 +23,5 @@ internal class ArbeidstakerHendelseTest {
         ), Testhendelse().toSpesifikkKontekst().kontekstMap)
     }
 
-    private class Testhendelse : ArbeidstakerHendelse(MELDINGSREFERANSE) {
-        override fun aktørId() = AKTØR
-        override fun fødselsnummer() = FØDSELSNUMMER
-        override fun organisasjonsnummer() = ORGNR
-    }
+    private class Testhendelse : ArbeidstakerHendelse(MELDINGSREFERANSE, FØDSELSNUMMER, AKTØR, ORGNR)
 }

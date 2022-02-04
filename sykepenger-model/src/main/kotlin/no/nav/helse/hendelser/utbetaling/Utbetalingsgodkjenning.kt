@@ -8,9 +8,9 @@ import java.util.*
 
 class Utbetalingsgodkjenning(
     meldingsreferanseId: UUID,
-    private val aktørId: String,
-    private val fødselsnummer: String,
-    private val organisasjonsnummer: String,
+    aktørId: String,
+    fødselsnummer: String,
+    organisasjonsnummer: String,
     private val utbetalingId: UUID,
     private val vedtaksperiodeId: String,
     private val saksbehandler: String,
@@ -18,7 +18,7 @@ class Utbetalingsgodkjenning(
     private val utbetalingGodkjent: Boolean,
     private val godkjenttidspunkt: LocalDateTime,
     private val automatiskBehandling: Boolean
-) : ArbeidstakerHendelse(meldingsreferanseId) {
+) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer, aktørId, organisasjonsnummer) {
 
     internal fun erRelevant(vedtaksperiodeId: String) = vedtaksperiodeId == this.vedtaksperiodeId
     internal fun erRelevant(utbetalingId: UUID) = utbetalingId == this.utbetalingId
@@ -49,8 +49,5 @@ class Utbetalingsgodkjenning(
         return this
     }
 
-    override fun aktørId() = aktørId
-    override fun fødselsnummer() = fødselsnummer
-    override fun organisasjonsnummer() = organisasjonsnummer
     override fun melding(klassName: String) = "Utbetalingsgodkjenning"
 }

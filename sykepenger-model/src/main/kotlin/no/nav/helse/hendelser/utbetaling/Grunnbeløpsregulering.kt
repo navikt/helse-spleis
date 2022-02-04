@@ -7,17 +7,13 @@ import java.util.*
 
 class Grunnbeløpsregulering(
     meldingsreferanseId: UUID,
-    private val aktørId: String,
-    private val fødselsnummer: String,
-    private val organisasjonsnummer: String,
+    aktørId: String,
+    fødselsnummer: String,
+    organisasjonsnummer: String,
     private val gyldighetsdato: LocalDate,
     private val fagsystemId: String,
     aktivitetslogg: Aktivitetslogg = Aktivitetslogg()
-) : ArbeidstakerHendelse(meldingsreferanseId, aktivitetslogg) {
-
-    override fun aktørId() = aktørId
-    override fun fødselsnummer() = fødselsnummer
-    override fun organisasjonsnummer() = organisasjonsnummer
+) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer, aktørId, organisasjonsnummer, aktivitetslogg) {
 
     internal fun erRelevant(fagsystemId: String) = this.fagsystemId == fagsystemId
 }

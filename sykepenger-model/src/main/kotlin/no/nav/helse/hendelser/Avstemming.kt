@@ -6,10 +6,6 @@ import java.util.*
 
 class Avstemming(
     meldingsreferanseId: UUID,
-    private val aktørId: String,
-    private val fødselsnummer: String
-) : PersonHendelse(meldingsreferanseId, Aktivitetslogg()) {
-
-    override fun aktørId() = aktørId
-    override fun fødselsnummer() = fødselsnummer
-}
+    aktørId: String,
+    fødselsnummer: String
+) : PersonHendelse(meldingsreferanseId, fødselsnummer, aktørId, Aktivitetslogg())

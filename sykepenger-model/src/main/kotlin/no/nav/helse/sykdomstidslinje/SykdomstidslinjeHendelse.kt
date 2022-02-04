@@ -15,12 +15,15 @@ internal typealias Melding = KClass<out SykdomstidslinjeHendelse>
 
 abstract class SykdomstidslinjeHendelse(
     meldingsreferanseId: UUID,
+    fødselsnummer: String,
+    aktørId: String,
+    organisasjonsnummer: String,
     private val opprettet: LocalDateTime,
     melding: Melding? = null,
     private val aktivitetslogg: Aktivitetslogg = Aktivitetslogg()
-) : ArbeidstakerHendelse(meldingsreferanseId, aktivitetslogg) {
+) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer, aktørId, organisasjonsnummer, aktivitetslogg) {
 
-    protected constructor(meldingsreferanseId: UUID, other: SykdomstidslinjeHendelse) : this(meldingsreferanseId, other.opprettet, null, other.aktivitetslogg)
+    protected constructor(meldingsreferanseId: UUID, other: SykdomstidslinjeHendelse) : this(meldingsreferanseId, other.fødselsnummer, other.aktørId, other.organisasjonsnummer, other.opprettet, null, other.aktivitetslogg)
 
     private var nesteFom: LocalDate? = null
 

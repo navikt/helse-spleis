@@ -13,10 +13,7 @@ import no.nav.helse.person.infotrygdhistorikk.Friperiode
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
-import no.nav.helse.testhelpers.ARB
-import no.nav.helse.testhelpers.FRI
-import no.nav.helse.testhelpers.NAV
-import no.nav.helse.testhelpers.tidslinjeOf
+import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -192,14 +189,7 @@ internal class HistoriePeriodetypeTest {
         Sykdomstidslinje.sykedager(fom, tom, grad, kilde)
 
     private fun addTidligereUtbetalinger(utbetalingstidslinje: Utbetalingstidslinje) {
-        arbeidsgiver.oppdaterSykdom(object : SykdomstidslinjeHendelse(UUID.randomUUID(), LocalDateTime.now()) {
-            override fun organisasjonsnummer() = AG1
-            override fun aktørId() = aktørId
-            override fun fødselsnummer() = UNG_PERSON_FNR_2018.toString()
-            override fun sykdomstidslinje() = Utbetalingstidslinje.konverter(utbetalingstidslinje)
-            override fun valider(periode: Periode): IAktivitetslogg { return this }
-            override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) {}
-        })
+        arbeidsgiver.oppdaterSykdom(TestHendelse(Utbetalingstidslinje.konverter(utbetalingstidslinje)))
         val vilkårsgrunnlagHistorikk = VilkårsgrunnlagHistorikk()
         vilkårsgrunnlagHistorikk.lagre(1.januar, VilkårsgrunnlagHistorikk.Grunnlagsdata(
             skjæringstidspunkt = 1.januar,
@@ -253,14 +243,7 @@ internal class HistoriePeriodetypeTest {
     }
 
     private fun addSykdomshistorikk(sykdomstidslinje: Sykdomstidslinje) {
-        arbeidsgiver.oppdaterSykdom(object : SykdomstidslinjeHendelse(UUID.randomUUID(), LocalDateTime.now()) {
-            override fun organisasjonsnummer() = AG1
-            override fun aktørId() = aktørId
-            override fun fødselsnummer() = UNG_PERSON_FNR_2018.toString()
-            override fun sykdomstidslinje() = sykdomstidslinje
-            override fun valider(periode: Periode): IAktivitetslogg { return this }
-            override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) {}
-        })
+        arbeidsgiver.oppdaterSykdom(TestHendelse(sykdomstidslinje))
     }
 
     private fun sykepengegrunnlag(inntekt: Inntekt) = Sykepengegrunnlag(

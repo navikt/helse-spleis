@@ -10,9 +10,9 @@ import java.util.*
 
 class Ytelser(
     meldingsreferanseId: UUID,
-    private val aktørId: String,
-    private val fødselsnummer: String,
-    private val organisasjonsnummer: String,
+    aktørId: String,
+    fødselsnummer: String,
+    organisasjonsnummer: String,
     private val vedtaksperiodeId: String,
     private val utbetalingshistorikk: Utbetalingshistorikk?,
     private val foreldrepermisjon: Foreldrepermisjon,
@@ -24,7 +24,7 @@ class Ytelser(
     private val arbeidsavklaringspenger: Arbeidsavklaringspenger,
     private val dagpenger: Dagpenger,
     aktivitetslogg: Aktivitetslogg
-) : ArbeidstakerHendelse(meldingsreferanseId, aktivitetslogg) {
+) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer, aktørId, organisasjonsnummer, aktivitetslogg) {
 
     internal fun erRelevant(other: UUID) = other.toString() == vedtaksperiodeId
 
@@ -47,17 +47,5 @@ class Ytelser(
         if (institusjonsopphold.overlapper(periode)) error("Har overlappende institusjonsopphold med syketilfelle")
 
         return !hasErrorsOrWorse()
-    }
-
-    override fun aktørId(): String {
-        return aktørId
-    }
-
-    override fun fødselsnummer(): String {
-        return fødselsnummer
-    }
-
-    override fun organisasjonsnummer(): String {
-        return organisasjonsnummer
     }
 }

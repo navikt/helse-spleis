@@ -12,13 +12,11 @@ import java.util.*
 
 class OverstyrArbeidsforhold(
     meldingsreferanseId: UUID,
-    private val fødselsnummer: String,
-    private val aktørId: String,
+    fødselsnummer: String,
+    aktørId: String,
     private val skjæringstidspunkt: LocalDate,
     private val overstyrteArbeidsforhold: List<ArbeidsforholdOverstyrt>
-) : PersonHendelse(meldingsreferanseId, Aktivitetslogg()) {
-    override fun fødselsnummer() = fødselsnummer
-    override fun aktørId() = aktørId
+) : PersonHendelse(meldingsreferanseId, fødselsnummer, aktørId, Aktivitetslogg()) {
 
     internal fun erRelevant(skjæringstidspunkt: LocalDate) = this.skjæringstidspunkt == skjæringstidspunkt
 

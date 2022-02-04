@@ -9,26 +9,22 @@ import java.util.*
 class Simulering(
     meldingsreferanseId: UUID,
     private val vedtaksperiodeId: String,
-    private val aktørId: String,
-    private val fødselsnummer: String,
-    private val orgnummer: String,
+    aktørId: String,
+    fødselsnummer: String,
+    orgnummer: String,
     private val fagsystemId: String,
     fagområde: String,
     private val simuleringOK: Boolean,
     private val melding: String,
     internal val simuleringResultat: SimuleringResultat?,
     private val utbetalingId: UUID
-) : ArbeidstakerHendelse(meldingsreferanseId) {
+) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer, aktørId, orgnummer) {
 
     private val fagområde = Fagområde.from(fagområde)
 
     internal fun erRelevant(other: UUID) = other.toString() == vedtaksperiodeId
     internal fun erRelevantForUtbetaling(utbetalingId: UUID) = this.utbetalingId == utbetalingId
     internal fun erRelevantFor(fagområde: Fagområde, fagsystemId: String) = this.fagområde == fagområde && this.fagsystemId == fagsystemId
-
-    override fun aktørId() = aktørId
-    override fun fødselsnummer() = fødselsnummer
-    override fun organisasjonsnummer() = orgnummer
 
     internal fun valider(oppdrag: Oppdrag) = this.apply {
         if (!oppdrag.erRelevant(fagsystemId, fagområde)) return@apply

@@ -13,22 +13,18 @@ import java.util.*
 
 class UtbetalingshistorikkForFeriepenger(
     meldingsreferanseId: UUID,
-    private val aktørId: String,
-    private val fødselsnummer: String,
+    aktørId: String,
+    fødselsnummer: String,
     private val utbetalinger: List<Utbetalingsperiode>,
     private val feriepengehistorikk: List<Feriepenger>,
     private val arbeidskategorikoder: Arbeidskategorikoder,
     internal val opptjeningsår: Year,
     internal val skalBeregnesManuelt: Boolean,
     internal val aktivitetslogg: Aktivitetslogg = Aktivitetslogg()
-) : PersonHendelse(meldingsreferanseId, aktivitetslogg) {
+) : PersonHendelse(meldingsreferanseId, fødselsnummer, aktørId, aktivitetslogg) {
     private companion object {
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
     }
-
-    override fun aktørId() = aktørId
-
-    override fun fødselsnummer() = fødselsnummer
 
     internal fun accept(visitor: FeriepengeutbetalingsperiodeVisitor) {
         utbetalinger.forEach { it.accept(visitor) }

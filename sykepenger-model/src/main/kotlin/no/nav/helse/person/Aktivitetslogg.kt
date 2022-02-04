@@ -2,20 +2,16 @@ package no.nav.helse.person
 
 import no.nav.helse.hendelser.Hendelseskontekst
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Etterlevelse
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Etterlevelse.TidslinjegrunnlagVisitor.Periode.Companion.dager
-import no.nav.helse.person.Bokstav.BOKSTAV_A
-import no.nav.helse.person.Ledd.*
-import no.nav.helse.person.Ledd.Companion.ledd
-import no.nav.helse.person.Paragraf.*
+import no.nav.helse.person.Ledd.LEDD_1
+import no.nav.helse.person.Paragraf.PARAGRAF_8_11
 import no.nav.helse.person.Punktum.Companion.punktum
 import no.nav.helse.serde.reflection.AktivitetsloggMap
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
-import no.nav.helse.økonomi.Prosent
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -85,7 +81,15 @@ class Aktivitetslogg(
     override fun aktivitetsteller() = aktiviteter.size
 
     override fun kontekst(kontekst: Aktivitetskontekst) {
+        val spesifikkKontekst = kontekst.toSpesifikkKontekst()
+        val index = kontekster.indexOfFirst { spesifikkKontekst.sammeType(it) }
+        if (index >= 0) fjernKonteksterFraOgMed(index)
         kontekster.add(kontekst)
+    }
+
+    private fun fjernKonteksterFraOgMed(indeks: Int) {
+        val antall = kontekster.size - indeks
+        repeat(antall) { kontekster.removeLast() }
     }
 
     override fun kontekst(person: Person) {
@@ -736,6 +740,8 @@ interface Aktivitetskontekst {
 class SpesifikkKontekst(internal val kontekstType: String, internal val kontekstMap: Map<String, String> = mapOf()) {
     internal fun melding() =
         kontekstType + kontekstMap.entries.joinToString(separator = "") { " ${it.key}: ${it.value}" }
+
+    internal fun sammeType(other: Aktivitetskontekst) = this.kontekstType == other.toSpesifikkKontekst().kontekstType
 
     override fun equals(other: Any?) =
         this === other || other is SpesifikkKontekst && this.kontekstMap == other.kontekstMap

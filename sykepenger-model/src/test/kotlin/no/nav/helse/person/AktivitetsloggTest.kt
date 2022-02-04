@@ -49,6 +49,42 @@ internal class AktivitetsloggTest {
     }
 
     @Test
+    fun `overskriver like kontekster`() {
+        val arbeidsgiver1 = TestKontekst(" Arbeidsgiver", "Arbeidsgiver 1")
+        val vedtaksperiode1 = TestKontekst("Vedtaksperiode", "Vedtaksperiode 1")
+        val vedtaksperiode2 = TestKontekst("Vedtaksperiode", "Vedtaksperiode 2")
+
+        val hendelse = TestHendelse("Hendelse1", aktivitetslogg.barn())
+        hendelse.kontekst(person)
+        hendelse.kontekst(arbeidsgiver1)
+        hendelse.kontekst(vedtaksperiode1)
+        hendelse.kontekst(vedtaksperiode2)
+        hendelse.info("Hei på deg")
+        assertEquals(1, aktivitetslogg.aktiviteter.size)
+        val aktivitet = aktivitetslogg.aktiviteter.first()
+        assertEquals(4, aktivitet.kontekster.size)
+        assertEquals(1, aktivitet.kontekster.filter { it.kontekstType == "Vedtaksperiode" }.size)
+        assertEquals("Vedtaksperiode 2", aktivitet.kontekster.first { it.kontekstType == "Vedtaksperiode" }.kontekstMap.getValue("Vedtaksperiode"))
+    }
+
+    @Test
+    fun `fjerner kontekster etter overskriving`() {
+        val arbeidsgiver1 = TestKontekst("Arbeidsgiver", "Arbeidsgiver 1")
+        val arbeidsgiver2 = TestKontekst("Arbeidsgiver", "Arbeidsgiver 2")
+        val vedtaksperiode1 = TestKontekst("Vedtaksperiode", "Vedtaksperiode 1")
+
+        val hendelse = TestHendelse("Hendelse1", aktivitetslogg.barn())
+        hendelse.kontekst(person)
+        hendelse.kontekst(arbeidsgiver1)
+        hendelse.kontekst(vedtaksperiode1)
+        hendelse.kontekst(arbeidsgiver2) // arbeidsgiver 2 overskriver arbeidsgiver 1 over. Vedtaksperiode-kontekst forsvinner, siden de er lagt på etter arbeidsgiver-typen
+        hendelse.info("Hei på deg")
+        assertEquals(1, aktivitetslogg.aktiviteter.size)
+        val aktivitet = aktivitetslogg.aktiviteter.first()
+        assertEquals("TestHendelse, Person 1, Arbeidsgiver 2", aktivitet.kontekster.joinToString { it.kontekstMap[it.kontekstType] ?: it.kontekstType })
+    }
+
+    @Test
     fun `kontekster`() {
         val hendelse1 = TestHendelse("Hendelse1", aktivitetslogg.barn())
         hendelse1.kontekst(person)

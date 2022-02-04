@@ -183,17 +183,7 @@ class BehovMediatorTest {
     private class TestHendelse(
         private val melding: String,
         val logg: Aktivitetslogg
-    ) : ArbeidstakerHendelse(UUID.randomUUID(), logg), Aktivitetskontekst {
-
-        override fun aktørId(): String {
-            return aktørId
-        }
-
-        override fun fødselsnummer(): String {
-            return fødselsnummer
-        }
-
-        override fun organisasjonsnummer() = "not_relevant"
+    ) : ArbeidstakerHendelse(UUID.randomUUID(), fødselsnummer, aktørId, "not_relevant", logg), Aktivitetskontekst {
 
         override fun kontekst(kontekst: Aktivitetskontekst) {
             logg.kontekst(kontekst)

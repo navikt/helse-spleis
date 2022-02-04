@@ -48,7 +48,7 @@ internal class TurneringsnøkkelTest {
         assertEquals(SykHelgedag_SØ, fraDag(SykHelgedag(enDag, økonomi, søknad)))
     }
 
-    private sealed class TestHendelse() : SykdomstidslinjeHendelse(UUID.randomUUID(), LocalDateTime.now()) {
+    private sealed class TestHendelse() : SykdomstidslinjeHendelse(UUID.randomUUID(), "fnr", "aktør", "orgnr", LocalDateTime.now()) {
         companion object {
             val søknad = Søknad.kilde
             val inntektsmelding = Inntektsmelding.kilde
@@ -65,8 +65,5 @@ internal class TurneringsnøkkelTest {
         override fun sykdomstidslinje(): Sykdomstidslinje = throw RuntimeException("Brukes ikke i testene")
         override fun valider(periode: Periode): Aktivitetslogg = throw RuntimeException("Brukes ikke i testene")
         override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) = throw RuntimeException("Brukes ikke i testene")
-        override fun aktørId(): String = throw RuntimeException("Brukes ikke i testene")
-        override fun fødselsnummer(): String = throw RuntimeException("Brukes ikke i testene")
-        override fun organisasjonsnummer(): String = throw RuntimeException("Brukes ikke i testene")
     }
 }

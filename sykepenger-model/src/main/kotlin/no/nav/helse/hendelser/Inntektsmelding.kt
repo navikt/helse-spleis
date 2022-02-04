@@ -21,9 +21,9 @@ import java.util.*
 class Inntektsmelding(
     meldingsreferanseId: UUID,
     private val refusjon: Refusjon,
-    private val orgnummer: String,
-    private val fødselsnummer: String,
-    private val aktørId: String,
+    orgnummer: String,
+    fødselsnummer: String,
+    aktørId: String,
     private val førsteFraværsdag: LocalDate?,
     private val beregnetInntekt: Inntekt,
     private val arbeidsgiverperioder: List<Periode>,
@@ -31,7 +31,7 @@ class Inntektsmelding(
     private val begrunnelseForReduksjonEllerIkkeUtbetalt: String?,
     private val harOpphørAvNaturalytelser: Boolean = false,
     mottatt: LocalDateTime
-) : SykdomstidslinjeHendelse(meldingsreferanseId, mottatt) {
+) : SykdomstidslinjeHendelse(meldingsreferanseId, fødselsnummer, aktørId, orgnummer, mottatt) {
 
     internal companion object {
         internal const val WARN_UENIGHET_ARBEIDSGIVERPERIODE = "Inntektsmeldingen og vedtaksløsningen er uenige om beregningen av arbeidsgiverperioden. Undersøk hva som er riktig arbeidsgiverperiode."
@@ -139,12 +139,6 @@ class Inntektsmelding(
         if (førsteFraværsdagErEtterArbeidsgiverperioden() || arbeidsgiverperiode.sammenlign(arbeidsgiverperioder)) return
         warn(WARN_UENIGHET_ARBEIDSGIVERPERIODE)
     }
-
-    override fun aktørId() = aktørId
-
-    override fun fødselsnummer() = fødselsnummer
-
-    override fun organisasjonsnummer() = orgnummer
 
     override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) = arbeidsgiver.håndter(this)
 

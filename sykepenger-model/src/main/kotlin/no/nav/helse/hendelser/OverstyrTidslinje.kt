@@ -1,7 +1,8 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.person.*
+import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
+import no.nav.helse.person.PersonObserver
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -21,12 +22,12 @@ enum class Dagtype {
 
 class OverstyrTidslinje(
     meldingsreferanseId: UUID,
-    private val fødselsnummer: String,
-    private val aktørId: String,
-    private val organisasjonsnummer: String,
+    fødselsnummer: String,
+    aktørId: String,
+    organisasjonsnummer: String,
     dager: List<ManuellOverskrivingDag>,
     opprettet: LocalDateTime
-) : SykdomstidslinjeHendelse(meldingsreferanseId, opprettet) {
+) : SykdomstidslinjeHendelse(meldingsreferanseId, fødselsnummer, aktørId, organisasjonsnummer, opprettet) {
 
     private val sykdomstidslinje: Sykdomstidslinje
     private var håndtert: Boolean = false
@@ -80,10 +81,7 @@ class OverstyrTidslinje(
         arbeidsgiver.håndter(this)
     }
 
-    override fun aktørId() = aktørId
-    override fun fødselsnummer() = fødselsnummer
-    override fun organisasjonsnummer() = organisasjonsnummer
-    fun tilRevurderingAvvistEvent(): PersonObserver.RevurderingAvvistEvent =
+    internal fun tilRevurderingAvvistEvent(): PersonObserver.RevurderingAvvistEvent =
         PersonObserver.RevurderingAvvistEvent(
             fødselsnummer = fødselsnummer,
             errors = this.errorsAndWorse()

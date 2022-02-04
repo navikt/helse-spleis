@@ -9,9 +9,9 @@ import java.util.*
 
 class Utbetalingshistorikk(
     meldingsreferanseId: UUID,
-    private val aktørId: String,
-    private val fødselsnummer: String,
-    private val organisasjonsnummer: String,
+    aktørId: String,
+    fødselsnummer: String,
+    organisasjonsnummer: String,
     private val vedtaksperiodeId: String,
     arbeidskategorikoder: Map<String, LocalDate>,
     harStatslønn: Boolean,
@@ -20,7 +20,7 @@ class Utbetalingshistorikk(
     ugyldigePerioder: List<UgyldigPeriode>,
     aktivitetslogg: Aktivitetslogg = Aktivitetslogg(),
     besvart: LocalDateTime
-) : ArbeidstakerHendelse(meldingsreferanseId, aktivitetslogg) {
+) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer, aktørId, organisasjonsnummer, aktivitetslogg) {
     private val element = InfotrygdhistorikkElement.opprett(
         oppdatert = besvart,
         hendelseId = meldingsreferanseId(),
@@ -30,10 +30,6 @@ class Utbetalingshistorikk(
         ugyldigePerioder = ugyldigePerioder,
         harStatslønn = harStatslønn
     )
-
-    override fun aktørId() = aktørId
-    override fun fødselsnummer() = fødselsnummer
-    override fun organisasjonsnummer() = organisasjonsnummer
 
     internal fun oppdaterHistorikk(historikk: Infotrygdhistorikk) {
         info("Oppdaterer Infotrygdhistorikk")

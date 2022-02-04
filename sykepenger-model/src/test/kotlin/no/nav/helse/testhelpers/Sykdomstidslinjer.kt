@@ -29,7 +29,7 @@ internal val Int.S
         dagensDato,
         dagensDato.plusDays(this.toLong() - 1),
         100.prosent,
-        TestHendelse.kilde
+        SykdomstidslinjeHendelse.Hendelseskilde.INGEN
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
 internal val Int.U
@@ -37,7 +37,7 @@ internal val Int.U
         dagensDato,
         dagensDato.plusDays(this.toLong() - 1),
         100.prosent,
-        TestHendelse.kilde
+        SykdomstidslinjeHendelse.Hendelseskilde.INGEN
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
 internal val Int.K
@@ -46,14 +46,14 @@ internal val Int.K
         dagensDato.plusDays(this.toLong() - 1),
         dagensDato.plusMonths(4),
         100.prosent,
-        TestHendelse.kilde
+        SykdomstidslinjeHendelse.Hendelseskilde.INGEN
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
 internal val Int.A
     get() = Sykdomstidslinje.arbeidsdager(
         dagensDato,
         dagensDato.plusDays(this.toLong() - 1),
-        TestHendelse.kilde
+        SykdomstidslinjeHendelse.Hendelseskilde.INGEN
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
 internal val Int.opphold
@@ -64,42 +64,39 @@ internal val Int.F
     get() = Sykdomstidslinje.feriedager(
         dagensDato,
         dagensDato.plusDays(this.toLong() - 1),
-        TestHendelse.kilde
+        SykdomstidslinjeHendelse.Hendelseskilde.INGEN
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
 internal val Int.H
     get() = Sykdomstidslinje(
         dagensDato.datesUntil(dagensDato.plusDays(this.toLong() - 1).plusDays(1))
-            .collect(Collectors.toMap<LocalDate, LocalDate, Dag>({ it }, { SykHelgedag(it, Økonomi.sykdomsgrad(100.prosent), TestHendelse.kilde) }))
+            .collect(Collectors.toMap<LocalDate, LocalDate, Dag>({ it }, { SykHelgedag(it, Økonomi.sykdomsgrad(100.prosent), SykdomstidslinjeHendelse.Hendelseskilde.INGEN) }))
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
 internal val Int.P
     get() = Sykdomstidslinje(
         dagensDato.datesUntil(dagensDato.plusDays(this.toLong() - 1).plusDays(1))
-            .collect(Collectors.toMap<LocalDate, LocalDate, Dag>({ it }, { Permisjonsdag(it, TestHendelse.kilde) }))
+            .collect(Collectors.toMap<LocalDate, LocalDate, Dag>({ it }, { Permisjonsdag(it, SykdomstidslinjeHendelse.Hendelseskilde.INGEN) }))
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
 internal val Int.R
     get() = Sykdomstidslinje(
         dagensDato.datesUntil(dagensDato.plusDays(this.toLong() - 1).plusDays(1))
-            .collect(Collectors.toMap<LocalDate, LocalDate, Dag>({ it }, { FriskHelgedag(it, TestHendelse.kilde) }))
+            .collect(Collectors.toMap<LocalDate, LocalDate, Dag>({ it }, { FriskHelgedag(it, SykdomstidslinjeHendelse.Hendelseskilde.INGEN) }))
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
 internal val Int.UK
     get() = Sykdomstidslinje(
         dagensDato.datesUntil(dagensDato.plusDays(this.toLong() - 1).plusDays(1))
-            .collect(Collectors.toMap<LocalDate, LocalDate, Dag>({ it }, { UkjentDag(it, TestHendelse.kilde) }))
+            .collect(Collectors.toMap<LocalDate, LocalDate, Dag>({ it }, { UkjentDag(it, SykdomstidslinjeHendelse.Hendelseskilde.INGEN) }))
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
-private object TestHendelse : SykdomstidslinjeHendelse(UUID.randomUUID(), LocalDateTime.now()) {
-    private const val UNG_PERSON_FNR_2018 = "12029240045"
-    private const val AKTØRID = "42"
-    private const val ORGNUMMER = "987654321"
+private const val UNG_PERSON_FNR_2018 = "12029240045"
+private const val AKTØRID = "42"
+private const val ORGNUMMER = "987654321"
 
-    override fun sykdomstidslinje() = Sykdomstidslinje()
+internal class TestHendelse(private val tidslinje: Sykdomstidslinje = Sykdomstidslinje()) : SykdomstidslinjeHendelse(UUID.randomUUID(), UNG_PERSON_FNR_2018, AKTØRID, ORGNUMMER, LocalDateTime.now()) {
+    override fun sykdomstidslinje() = tidslinje
     override fun valider(periode: Periode) = Aktivitetslogg()
     override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) = Unit
-    override fun aktørId() = AKTØRID
-    override fun fødselsnummer() = UNG_PERSON_FNR_2018
-    override fun organisasjonsnummer() = ORGNUMMER
 }

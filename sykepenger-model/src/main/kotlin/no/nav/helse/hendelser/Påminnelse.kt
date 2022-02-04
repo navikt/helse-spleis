@@ -9,16 +9,16 @@ import java.util.*
 
 class Påminnelse(
     meldingsreferanseId: UUID,
-    private val aktørId: String,
-    private val fødselsnummer: String,
-    private val organisasjonsnummer: String,
+    aktørId: String,
+    fødselsnummer: String,
+    organisasjonsnummer: String,
     private val vedtaksperiodeId: String,
     private val antallGangerPåminnet: Int,
     private val tilstand: TilstandType,
     private val tilstandsendringstidspunkt: LocalDateTime,
     private val påminnelsestidspunkt: LocalDateTime,
     private val nestePåminnelsestidspunkt: LocalDateTime
-) : ArbeidstakerHendelse(meldingsreferanseId, Aktivitetslogg()) {
+) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer, aktørId, organisasjonsnummer, Aktivitetslogg()) {
 
     fun antallGangerPåminnet() = antallGangerPåminnet
     fun tilstand() = tilstand
@@ -33,10 +33,6 @@ class Påminnelse(
             info("Påminnelse var ikke aktuell i tilstand: ${tilstandType.name} da den gjaldt: ${tilstand.name}")
         }
     }
-
-    override fun aktørId() = aktørId
-    override fun fødselsnummer() = fødselsnummer
-    override fun organisasjonsnummer() = organisasjonsnummer
 
     internal fun vedtaksperiodeIkkeFunnet(observer: PersonObserver) {
         observer.vedtaksperiodeIkkeFunnet(

@@ -16,16 +16,16 @@ import java.util.*
 
 class Søknad(
     meldingsreferanseId: UUID,
-    private val fnr: String,
-    private val aktørId: String,
-    private val orgnummer: String,
+    fnr: String,
+    aktørId: String,
+    orgnummer: String,
     private val perioder: List<Søknadsperiode>,
     private val andreInntektskilder: List<Inntektskilde>,
     private val sendtTilNAVEllerArbeidsgiver: LocalDateTime,
     private val permittert: Boolean,
     private val merknaderFraSykmelding: List<Merknad>,
     sykmeldingSkrevet: LocalDateTime
-) : SykdomstidslinjeHendelse(meldingsreferanseId, sykmeldingSkrevet, Søknad::class) {
+) : SykdomstidslinjeHendelse(meldingsreferanseId, fnr, aktørId, orgnummer, sykmeldingSkrevet, Søknad::class) {
 
     private val sykdomsperiode: Periode
     private val sykdomstidslinje: Sykdomstidslinje
@@ -52,12 +52,6 @@ class Søknad(
 
     override fun sykdomstidslinje() = sykdomstidslinje
 
-    override fun fødselsnummer() = fnr
-
-    override fun organisasjonsnummer() = orgnummer
-
-    override fun aktørId() = aktørId
-
     override fun validerIkkeOppgittFlereArbeidsforholdMedSykmelding(): IAktivitetslogg {
         andreInntektskilder.forEach { it.validerIkkeSykmeldt(this) }
         return this
@@ -73,7 +67,7 @@ class Søknad(
     override fun valider(periode: Periode): IAktivitetslogg {
         perioder.forEach { it.valider(this) }
         andreInntektskilder.forEach { it.valider(this) }
-        forUng(fnr.somFødselsnummer().alder())
+        forUng(fødselsnummer.somFødselsnummer().alder())
         if (permittert) warn("Søknaden inneholder permittering. Vurder om permittering har konsekvens for rett til sykepenger")
         merknaderFraSykmelding.forEach { it.valider(this) }
         if (sykdomstidslinje.any { it is Dag.ForeldetSykedag }) warn("Minst én dag er avslått på grunn av foreldelse. Vurder å sende vedtaksbrev fra Infotrygd")

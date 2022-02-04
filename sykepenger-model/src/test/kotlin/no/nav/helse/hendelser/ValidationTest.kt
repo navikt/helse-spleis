@@ -43,14 +43,5 @@ internal class ValidationTest {
     private fun Validation.successBlock() = valider("feilmelding") { true }
     private fun Validation.failureBlock() = valider("feilmelding") { false }
 
-    private inner class TestHendelse(aktivitetslogg: Aktivitetslogg) : ArbeidstakerHendelse(
-        meldingsreferanseId = UUID.randomUUID(), aktivitetslogg = aktivitetslogg
-    ) {
-
-        override fun aktørId() = "aktørId"
-
-        override fun fødselsnummer() = "fnr"
-
-        override fun organisasjonsnummer() = "orgnr"
-    }
+    private inner class TestHendelse(aktivitetslogg: Aktivitetslogg) : ArbeidstakerHendelse(UUID.randomUUID(), "fnr", "aktørId", "orgnr", aktivitetslogg)
 }

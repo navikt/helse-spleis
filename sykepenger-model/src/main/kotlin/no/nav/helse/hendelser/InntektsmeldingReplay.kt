@@ -13,8 +13,4 @@ class InntektsmeldingReplay(
         info("Replayer inntektsmelding for vedtaksperiode $vedtaksperiodeId og påfølgende som overlapper")
         arbeidsgiver.håndter(wrapped, vedtaksperiodeId)
     }
-
-    override fun organisasjonsnummer() = wrapped.organisasjonsnummer()
-    override fun aktørId() = wrapped.aktørId()
-    override fun fødselsnummer() = wrapped.fødselsnummer()
 }

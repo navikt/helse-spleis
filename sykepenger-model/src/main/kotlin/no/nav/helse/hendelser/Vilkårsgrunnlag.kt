@@ -4,6 +4,7 @@ import no.nav.helse.Fødselsnummer
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Companion.grupperArbeidsforholdPerOrgnummer
 import no.nav.helse.person.*
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
+import no.nav.helse.somFødselsnummer
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.util.*
@@ -11,25 +12,21 @@ import java.util.*
 class Vilkårsgrunnlag(
     meldingsreferanseId: UUID,
     private val vedtaksperiodeId: String,
-    private val aktørId: String,
-    private val fødselsnummer: Fødselsnummer,
-    private val orgnummer: String,
+    aktørId: String,
+    fødselsnummer: Fødselsnummer,
+    orgnummer: String,
     private val inntektsvurdering: Inntektsvurdering,
     private val opptjeningvurdering: Opptjeningvurdering,
     private val medlemskapsvurdering: Medlemskapsvurdering,
     private val inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag,
     arbeidsforhold: List<Arbeidsforhold>
-) : ArbeidstakerHendelse(meldingsreferanseId) {
+) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer.toString(), aktørId, orgnummer) {
     private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
     private var grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata? = null
     private val arbeidsforhold = arbeidsforhold.filter { it.orgnummer.isNotBlank() }
 
 
     internal fun erRelevant(other: UUID) = other.toString() == vedtaksperiodeId
-
-    override fun aktørId() = aktørId
-    override fun fødselsnummer() = fødselsnummer.toString()
-    override fun organisasjonsnummer() = orgnummer
 
     internal fun valider(
         grunnlagForSykepengegrunnlag: Sykepengegrunnlag,
@@ -54,7 +51,7 @@ class Vilkårsgrunnlag(
         )
         val opptjeningvurderingOk = opptjeningvurdering.valider(this, skjæringstidspunkt, subsumsjonObserver)
         val medlemskapsvurderingOk = medlemskapsvurdering.valider(this, periodetype)
-        val minimumInntektvurderingOk = validerMinimumInntekt(this, fødselsnummer, skjæringstidspunkt, grunnlagForSykepengegrunnlag, subsumsjonObserver)
+        val minimumInntektvurderingOk = validerMinimumInntekt(this, fødselsnummer.somFødselsnummer(), skjæringstidspunkt, grunnlagForSykepengegrunnlag, subsumsjonObserver)
 
         grunnlagsdata = VilkårsgrunnlagHistorikk.Grunnlagsdata(
             skjæringstidspunkt = skjæringstidspunkt,

@@ -9,21 +9,15 @@ import java.util.*
 
 class Utbetalingsgrunnlag(
     meldingsreferanseId: UUID,
-    private val aktørId: String,
-    private val fødselsnummer: String,
-    private val orgnummer: String,
+    aktørId: String,
+    fødselsnummer: String,
+    orgnummer: String,
     private val vedtaksperiodeId: UUID,
     private val inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag,
     arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold>
-) : ArbeidstakerHendelse(meldingsreferanseId) {
+) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer, aktørId, orgnummer) {
     private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
     private val arbeidsforhold = arbeidsforhold.filter { it.orgnummer.isNotBlank() }
-
-    override fun organisasjonsnummer() = orgnummer
-
-    override fun aktørId() = aktørId
-
-    override fun fødselsnummer() = fødselsnummer
 
     internal fun lagreInntekter(person: Person, skjæringstidspunkt: LocalDate) {
         inntektsvurderingForSykepengegrunnlag.lagreInntekter(person, skjæringstidspunkt, this)

@@ -9,19 +9,16 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
-import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.TilstandType
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
-import no.nav.helse.testhelpers.*
+import no.nav.helse.testhelpers.TestEvent
+import no.nav.helse.testhelpers.TestHendelse
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
-import java.time.LocalDateTime
-import java.util.*
 
 internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
 
@@ -188,14 +185,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
-        inspektør.arbeidsgiver.oppdaterSykdom(object : SykdomstidslinjeHendelse(UUID.randomUUID(), LocalDateTime.now()) {
-            override fun sykdomstidslinje() = Sykdomstidslinje.ukjent(2.januar, 9.januar, TestEvent.testkilde)
-            override fun valider(periode: Periode) = throw RuntimeException("Brukes ikke i testene")
-            override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) = throw RuntimeException("Brukes ikke i testene")
-            override fun aktørId() = throw RuntimeException("Brukes ikke i testene")
-            override fun fødselsnummer() = throw RuntimeException("Brukes ikke i testene")
-            override fun organisasjonsnummer() = throw RuntimeException("Brukes ikke i testene")
-        })
+        inspektør.arbeidsgiver.oppdaterSykdom(TestHendelse(Sykdomstidslinje.ukjent(2.januar, 9.januar, TestEvent.testkilde)))
         håndterOverstyringSykedag(2.januar til 9.januar)
         håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)

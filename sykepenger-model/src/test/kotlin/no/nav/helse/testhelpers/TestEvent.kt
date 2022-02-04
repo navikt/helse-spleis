@@ -8,11 +8,10 @@ import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import java.time.LocalDateTime
 import java.util.*
 
-internal sealed class TestEvent(opprettet: LocalDateTime) : SykdomstidslinjeHendelse(UUID.randomUUID(), opprettet) {
-    private val UNG_PERSON_FNR_2018 = "12029240045"
-    private val AKTØRID = "42"
-    private val ORGNUMMER = "987654321"
-
+private const val UNG_PERSON_FNR_2018 = "12029240045"
+private const val AKTØRID = "42"
+private const val ORGNUMMER = "987654321"
+internal sealed class TestEvent(opprettet: LocalDateTime) : SykdomstidslinjeHendelse(UUID.randomUUID(), UNG_PERSON_FNR_2018, AKTØRID, ORGNUMMER, opprettet) {
     companion object {
         val søknad = Søknad(LocalDateTime.now()).kilde
         val inntektsmelding = Inntektsmelding(LocalDateTime.now()).kilde
@@ -31,7 +30,4 @@ internal sealed class TestEvent(opprettet: LocalDateTime) : SykdomstidslinjeHend
     override fun sykdomstidslinje() = Sykdomstidslinje()
     override fun valider(periode: Periode) = Aktivitetslogg()
     override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) = Unit
-    override fun aktørId() = AKTØRID
-    override fun fødselsnummer() = UNG_PERSON_FNR_2018
-    override fun organisasjonsnummer() = ORGNUMMER
 }

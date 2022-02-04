@@ -1382,14 +1382,6 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `avvis sykmelding over 6 måneder gammel`() {
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 15.februar, 100.prosent))
-        person.håndter(sentSykmelding(Sykmeldingsperiode(1.januar, 15.januar, 100.prosent)))
-        assertTrue(person.personLogg.hasErrorsOrWorse())
-        assertEquals(1, inspektør.sykdomshistorikk.size)
-    }
-
-    @Test
     fun `Maksdato og antall gjenstående dager beregnes riktig når det er fravær sist i perioden`() {
         håndterSykmelding(Sykmeldingsperiode(22.juni(2020), 11.juli(2020), 100.prosent))
         håndterSøknad(Sykdom(22.juni(2020), 11.juli(2020), 100.prosent), Permisjon(4.juli(2020), 5.juli(2020)), Ferie(6.juli(2020), 11.juli(2020)))

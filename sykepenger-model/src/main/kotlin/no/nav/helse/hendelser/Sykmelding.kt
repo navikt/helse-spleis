@@ -14,13 +14,13 @@ import java.util.*
 
 class Sykmelding(
     meldingsreferanseId: UUID,
-    private val fnr: String,
-    private val aktørId: String,
-    private val orgnummer: String,
+    fnr: String,
+    aktørId: String,
+    orgnummer: String,
     sykeperioder: List<Sykmeldingsperiode>,
     private val sykmeldingSkrevet: LocalDateTime,
     private val mottatt: LocalDateTime
-) : SykdomstidslinjeHendelse(meldingsreferanseId, sykmeldingSkrevet) {
+) : SykdomstidslinjeHendelse(meldingsreferanseId, fnr, aktørId, orgnummer, sykmeldingSkrevet) {
 
     private val sykdomstidslinje: Sykdomstidslinje
     private val periode: Periode
@@ -47,12 +47,6 @@ class Sykmelding(
     override fun melding(klassName: String) = "Sykmelding"
 
     override fun sykdomstidslinje() = sykdomstidslinje
-
-    override fun fødselsnummer() = fnr
-
-    override fun organisasjonsnummer() = orgnummer
-
-    override fun aktørId() = aktørId
 
     override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) {
         arbeidsgiver.håndter(this)

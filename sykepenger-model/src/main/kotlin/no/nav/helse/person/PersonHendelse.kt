@@ -4,6 +4,8 @@ import java.util.*
 
 abstract class PersonHendelse protected constructor(
     private val meldingsreferanseId: UUID,
+    protected val fødselsnummer: String,
+    protected val aktørId: String,
     private val aktivitetslogg: IAktivitetslogg
 ) : IAktivitetslogg by aktivitetslogg, Aktivitetskontekst {
 
@@ -11,8 +13,8 @@ abstract class PersonHendelse protected constructor(
         aktivitetslogg.kontekst(this)
     }
 
-    abstract fun aktørId(): String
-    abstract fun fødselsnummer(): String
+    fun aktørId() = aktørId
+    fun fødselsnummer() = fødselsnummer
 
     internal fun meldingsreferanseId() = meldingsreferanseId
 

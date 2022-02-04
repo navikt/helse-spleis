@@ -11,16 +11,12 @@ import java.util.*
 
 class OverstyrInntekt(
     meldingsreferanseId: UUID,
-    private val fødselsnummer: String,
-    private val aktørId: String,
-    private val organisasjonsnummer: String,
+    fødselsnummer: String,
+    aktørId: String,
+    organisasjonsnummer: String,
     internal val inntekt: Inntekt,
     internal val skjæringstidspunkt: LocalDate
-) : ArbeidstakerHendelse(meldingsreferanseId) {
-
-    override fun aktørId() = aktørId
-    override fun fødselsnummer() = fødselsnummer
-    override fun organisasjonsnummer() = organisasjonsnummer
+) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer, aktørId, organisasjonsnummer) {
 
     internal fun addInntekt(inntektshistorikk: Inntektshistorikk) {
         inntektshistorikk.append { addSaksbehandler(skjæringstidspunkt, meldingsreferanseId(), inntekt) }
