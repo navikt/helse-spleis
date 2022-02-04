@@ -50,6 +50,7 @@ internal class ArbeidsgiverperiodeTest {
         assertFalse(arbeidsgiverperiode.dekker(2.januar til 6.januar))
         assertTrue(arbeidsgiverperiode.dekker(1.januar til 5.januar))
         assertFalse(arbeidsgiverperiode.dekker(1.januar til 6.januar))
+        assertFalse(arbeidsgiverperiode.dekker(1.januar til 1.januar))
     }
 
     @Test

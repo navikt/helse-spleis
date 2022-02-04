@@ -24,7 +24,7 @@ internal class Arbeidsgiverperiode(private val perioder: List<Periode>) : Iterab
         periode.overlapperMed(hele)
 
     internal fun dekker(periode: Periode) =
-        hele.slutterEtter(periode.endInclusive)
+        periode in this && hele.slutterEtter(periode.endInclusive)
 
     internal fun hørerTil(periode: Periode, sisteKjente: LocalDate) =
         periode.overlapperMed(første til sisteKjente)
