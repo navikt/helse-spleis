@@ -361,8 +361,8 @@ internal class Arbeidsgiver private constructor(
         )
         if (kanIkkeBehandle(sykmelding)) return registrerForkastetVedtaksperiode(vedtaksperiode, sykmelding)
         if (noenHarHåndtert(sykmelding, Vedtaksperiode::håndter)) return
-        sykmelding.info("Lager ny vedtaksperiode")
         registrerNyVedtaksperiode(vedtaksperiode)
+        sykmelding.nyVedtaksperiode()
         vedtaksperiode.håndter(sykmelding)
         håndter(sykmelding) { nyPeriode(vedtaksperiode, sykmelding) }
     }

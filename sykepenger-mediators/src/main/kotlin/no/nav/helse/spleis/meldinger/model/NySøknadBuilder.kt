@@ -7,6 +7,7 @@ import java.time.LocalDate
 
 internal class NySøknadBuilder : SøknadBuilder() {
     private val sykemeldingsperioder = mutableListOf<Sykmeldingsperiode>()
+    private var fremtidigSøknad = false
 
     override fun periode(fom: LocalDate, tom: LocalDate, grad: Int, arbeidshelse: Int?) = apply {
         sykemeldingsperioder.add(Sykmeldingsperiode(
@@ -16,6 +17,10 @@ internal class NySøknadBuilder : SøknadBuilder() {
         ))
     }
 
+    internal fun fremtidigSøknad(erFremtidig: Boolean) {
+        fremtidigSøknad = erFremtidig
+    }
+
     internal fun build() = Sykmelding(
         meldingsreferanseId = meldingsreferanseId,
         fnr = fnr,
@@ -23,6 +28,7 @@ internal class NySøknadBuilder : SøknadBuilder() {
         orgnummer = organisasjonsnummer,
         sykeperioder = sykemeldingsperioder,
         sykmeldingSkrevet = sykmeldingSkrevet,
-        mottatt = opprettet
+        mottatt = opprettet,
+        erFremtidig = fremtidigSøknad
     )
 }

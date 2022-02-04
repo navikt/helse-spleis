@@ -27,7 +27,6 @@ abstract class PersonHendelse protected constructor(
     }
 
     protected open fun kontekst(): Map<String, String> = emptyMap()
-    internal open fun melding(klassName: String) = klassName
 
     fun toLogString() = aktivitetslogg.toString()
 }

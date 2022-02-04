@@ -7,7 +7,7 @@ import no.nav.helse.spleis.IHendelseMediator
 // Understands a JSON message representing a Søknad that is sent to NAV
 internal class SendtSøknadNavMessage(private val packet: JsonMessage, private val builder: SendtSøknadBuilder = SendtSøknadBuilder()) : SøknadMessage(packet, builder) {
 
-    override fun _behandle(mediator: IHendelseMediator) {
+    override fun _behandle(mediator: IHendelseMediator, packet: JsonMessage) {
         builder.sendt(packet["sendtNav"].asLocalDateTime())
         byggSendtSøknad(builder, packet)
         mediator.behandle(this, builder.build())

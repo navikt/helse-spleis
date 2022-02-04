@@ -48,8 +48,6 @@ class Søknad(
         arbeidsgiver.håndter(this)
     }
 
-    override fun melding(klassName: String) = "Søknad"
-
     override fun sykdomstidslinje() = sykdomstidslinje
 
     override fun validerIkkeOppgittFlereArbeidsforholdMedSykmelding(): IAktivitetslogg {

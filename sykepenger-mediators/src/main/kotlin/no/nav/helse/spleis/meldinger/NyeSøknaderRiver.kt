@@ -15,6 +15,7 @@ internal class NyeSøknaderRiver(
     override fun validate(message: JsonMessage) {
         message.requireKey("sykmeldingId")
         message.requireValue("status", "NY")
+        message.interestedIn("fremtidig_søknad")
     }
 
     override fun createMessage(packet: JsonMessage) = NySøknadMessage(packet)

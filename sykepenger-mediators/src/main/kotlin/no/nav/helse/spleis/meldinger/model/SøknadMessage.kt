@@ -15,10 +15,10 @@ internal abstract class SøknadMessage(private val packet: JsonMessage, private 
 
     final override fun behandle(mediator: IHendelseMediator) {
         bygg()
-        _behandle(mediator)
+        _behandle(mediator, packet)
     }
 
-    protected abstract fun _behandle(mediator: IHendelseMediator)
+    protected abstract fun _behandle(mediator: IHendelseMediator, packet: JsonMessage)
 
     private fun bygg() {
         builder.meldingsreferanseId(this.id)

@@ -48,6 +48,4 @@ class Utbetalingsgodkjenning(
         }
         return this
     }
-
-    override fun melding(klassName: String) = "Utbetalingsgodkjenning"
 }

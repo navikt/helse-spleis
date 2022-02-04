@@ -19,7 +19,8 @@ class Sykmelding(
     orgnummer: String,
     sykeperioder: List<Sykmeldingsperiode>,
     private val sykmeldingSkrevet: LocalDateTime,
-    private val mottatt: LocalDateTime
+    private val mottatt: LocalDateTime,
+    private val erFremtidig: Boolean = false
 ) : SykdomstidslinjeHendelse(meldingsreferanseId, fnr, aktørId, orgnummer, sykmeldingSkrevet) {
 
     private val sykdomstidslinje: Sykdomstidslinje
@@ -44,7 +45,9 @@ class Sykmelding(
         if (it) error(ERRORTEKST_FOR_GAMMEL)
     }
 
-    override fun melding(klassName: String) = "Sykmelding"
+    internal fun nyVedtaksperiode() {
+        info("Lager ny vedtaksperiode fra ${if (erFremtidig) "Fremtidig" else "Ny"} søknad")
+    }
 
     override fun sykdomstidslinje() = sykdomstidslinje
 
