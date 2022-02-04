@@ -49,7 +49,7 @@ class Inntektsvurdering(private val inntekter: List<ArbeidsgiverInntekt>) {
             onFailure: IAktivitetslogg.(melding: String, tillattAvvik: Double) -> Unit
         ): Boolean {
             val harAkseptabeltAvvik = sjekkAvvik(avvik, aktivitetslogg, onFailure)
-            subsumsjonObserver.`§ 8-30 ledd 2 punktum 1`(harAkseptabeltAvvik, MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT, grunnlagForSykepengegrunnlag, sammenligningsgrunnlag, avvik)
+            subsumsjonObserver.`§ 8-30 ledd 2 punktum 1`(MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT, grunnlagForSykepengegrunnlag, sammenligningsgrunnlag, avvik)
             return harAkseptabeltAvvik
         }
 

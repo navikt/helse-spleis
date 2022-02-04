@@ -341,7 +341,6 @@ class MaskinellJurist private constructor(
     }
 
     override fun `§ 8-30 ledd 2 punktum 1`(
-        oppfylt: Boolean,
         maksimaltTillattAvvikPåÅrsinntekt: Prosent,
         grunnlagForSykepengegrunnlag: Inntekt,
         sammenligningsgrunnlag: Inntekt,
@@ -349,7 +348,7 @@ class MaskinellJurist private constructor(
     ) {
         leggTil(
             EnkelSubsumsjon(
-                utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
+                utfall = VILKAR_BEREGNET,
                 versjon = LocalDate.of(2017, 4, 5),
                 paragraf = PARAGRAF_8_30,
                 ledd = 2.ledd,

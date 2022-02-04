@@ -907,7 +907,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt(1.vedtaksperiode)
 
-        SubsumsjonInspektør(jurist).assertOppfylt(
+        SubsumsjonInspektør(jurist).assertBeregnet(
             paragraf = PARAGRAF_8_30,
             ledd = 2.ledd,
             punktum = 1.punktum,
@@ -937,7 +937,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt(1.vedtaksperiode)
 
-        SubsumsjonInspektør(jurist).assertOppfylt(
+        SubsumsjonInspektør(jurist).assertBeregnet(
             paragraf = PARAGRAF_8_30,
             ledd = 2.ledd,
             punktum = 1.punktum,
@@ -963,7 +963,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, sammenligningsgrunnlag.månedlig)
 
-        SubsumsjonInspektør(jurist).assertIkkeOppfylt(
+        SubsumsjonInspektør(jurist).assertBeregnet(
             paragraf = PARAGRAF_8_30,
             ledd = 2.ledd,
             punktum = 1.punktum,
