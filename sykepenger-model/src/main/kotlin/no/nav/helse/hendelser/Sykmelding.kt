@@ -40,7 +40,7 @@ class Sykmelding(
         return this
     }
 
-    internal fun forGammel() = (periode.endInclusive < mottatt.toLocalDate().minusMonths(6)).also {
+    private fun forGammel() = (periode.endInclusive < mottatt.toLocalDate().minusMonths(6)).also {
         if (it) error(ERRORTEKST_FOR_GAMMEL)
     }
 

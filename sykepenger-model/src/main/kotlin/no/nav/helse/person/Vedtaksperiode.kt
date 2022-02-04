@@ -100,7 +100,9 @@ internal class Vedtaksperiode private constructor(
         inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
         opprettet = LocalDateTime.now(),
         jurist = jurist.medVedtaksperiode(id, mutableListOf())
-    )
+    ) {
+        kontekst(hendelse)
+    }
 
     internal fun accept(visitor: VedtaksperiodeVisitor) {
         visitor.preVisitVedtaksperiode(
@@ -1077,8 +1079,6 @@ internal class Vedtaksperiode private constructor(
                 sykmelding.warn("Denne personen har en utbetaling for samme periode for en annen arbeidsgiver. Kontroller at beregningene for begge arbeidsgiverne er korrekte.")
             }
 
-            håndterForlengelseAvForkastetPeriode(vedtaksperiode, sykmelding)
-
             if (sykmelding.valider(vedtaksperiode.periode).hasErrorsOrWorse())
                 return vedtaksperiode.tilstand(sykmelding, TilInfotrygd)
 
@@ -1093,15 +1093,6 @@ internal class Vedtaksperiode private constructor(
                 )
             )
             sykmelding.info("Fullført behandling av sykmelding")
-        }
-
-        private fun håndterForlengelseAvForkastetPeriode(vedtaksperiode: Vedtaksperiode, sykmelding: Sykmelding) {
-            if (vedtaksperiode.arbeidsgiver.finnForkastetSykeperiodeRettFør(vedtaksperiode) != null) {
-                "Perioden forlenger en forkastet periode".let { when {
-                    Toggle.ForkastForlengelseAvForkastetPeriode.enabled -> sykmelding.error(it)
-                    else -> sykmelding.info(it)
-                }}
-            }
         }
 
         private fun avgjørNesteTilstand(
@@ -2630,8 +2621,21 @@ internal class Vedtaksperiode private constructor(
             forkastede
                 .filter { it.periode.overlapperMed(sykmelding.periode()) }
                 .forEach {
-                    sykmelding.error("${sykmelding.kilde} overlapper med forkastet vedtaksperiode")
-                    sykmelding.info("${sykmelding.kilde} overlapper med forkastet vedtaksperiode ${it.id}, hendelse sykmeldingsperiode: ${sykmelding.periode()}, vedtaksperiode sykmeldingsperiode: ${it.periode}")
+                    sykmelding.error("Sykmelding overlapper med forkastet vedtaksperiode")
+                    sykmelding.info("Sykmelding overlapper med forkastet vedtaksperiode ${it.id}, hendelse sykmeldingsperiode: ${sykmelding.periode()}, vedtaksperiode sykmeldingsperiode: ${it.periode}")
+                }
+        }
+
+        internal fun forlengerForkastet(forkastede: Iterable<Vedtaksperiode>, sykmelding: Sykmelding) {
+            forkastede
+                .filter { it.sykdomstidslinje.erRettFør(sykmelding.sykdomstidslinje()) }
+                .forEach {
+                    if (Toggle.ForkastForlengelseAvForkastetPeriode.enabled) {
+                        sykmelding.error("Sykmelding forlenger en forkastet periode")
+                        sykmelding.info("Sykmelding forlenger forkastet vedtaksperiode ${it.id}, hendelse sykmeldingsperiode: ${sykmelding.periode()}, vedtaksperiode sykmeldingsperiode: ${it.periode}")
+                    } else {
+                        sykmelding.info("Sykmelding forlenger forkastet vedtaksperiode")
+                    }
                 }
         }
 

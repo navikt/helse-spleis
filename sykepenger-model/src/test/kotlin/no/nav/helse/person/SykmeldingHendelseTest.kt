@@ -5,8 +5,10 @@ import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
+import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
+import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
@@ -19,7 +21,7 @@ internal class SykmeldingHendelseTest : AbstractEndToEndTest() {
     @Test
     fun `avvis sykmelding over 6 måneder gammel`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 15.januar, 100.prosent), mottatt = 1.august.atStartOfDay())
-        assertEquals(0, inspektør.vedtaksperiodeTeller)
+        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, TIL_INFOTRYGD)
     }
 
     @Test

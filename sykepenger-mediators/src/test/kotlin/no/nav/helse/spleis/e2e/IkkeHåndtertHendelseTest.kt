@@ -34,15 +34,10 @@ internal class IkkeHåndtertHendelseTest: AbstractEndToEndMediatorTest() {
     }
 
     @Test
-    fun `sender hendelse_ikke_håndtert når sykmelding er for gammel`() {
+    fun `oppretter forkastet periode dersom sykmelding er for gammel`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100), meldingOpprettet = 5.desember.atStartOfDay())
-
-        val hendelseIkkeHåndtert = testRapid.inspektør.siste("hendelse_ikke_håndtert")
-        assertNotNull(hendelseIkkeHåndtert)
-        assertEquals(
-            listOf("Søknadsperioden kan ikke være eldre enn 6 måneder fra mottattidspunkt"),
-            hendelseIkkeHåndtert["årsaker"].toList().map { it.textValue() }
-        )
+        assertEquals(0, testRapid.inspektør.meldinger("hendelse_ikke_håndtert").size)
+        assertTilstander(0, "TIL_INFOTRYGD")
     }
 
     @Test

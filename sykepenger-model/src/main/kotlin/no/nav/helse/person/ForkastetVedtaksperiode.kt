@@ -27,6 +27,9 @@ internal class ForkastetVedtaksperiode(
         internal fun overlapperMedForkastet(forkastede: Iterable<ForkastetVedtaksperiode>, sykmelding: Sykmelding) {
             Vedtaksperiode.overlapperMedForkastet(forkastede.perioder(), sykmelding)
         }
+        internal fun forlengerForkastet(forkastede: Iterable<ForkastetVedtaksperiode>, sykmelding: Sykmelding) {
+            Vedtaksperiode.forlengerForkastet(forkastede.perioder(), sykmelding)
+        }
 
         internal fun arbeidsgiverperiodeFor(
             person: Person,

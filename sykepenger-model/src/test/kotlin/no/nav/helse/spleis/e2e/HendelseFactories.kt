@@ -92,24 +92,6 @@ internal fun AbstractEndToEndTest.sykmelding(
     }
 }
 
-internal fun AbstractEndToEndTest.sentSykmelding(
-    vararg sykeperioder: Sykmeldingsperiode,
-    fnr: Fødselsnummer = AbstractPersonTest.UNG_PERSON_FNR_2018,
-    orgnummer: String = AbstractPersonTest.ORGNUMMER
-): Sykmelding {
-    return Sykmelding(
-        meldingsreferanseId = UUID.randomUUID(),
-        fnr = fnr.toString(),
-        aktørId = AbstractPersonTest.AKTØRID,
-        orgnummer = orgnummer,
-        sykeperioder = sykeperioder.toList(),
-        sykmeldingSkrevet = Sykmeldingsperiode.periode(sykeperioder.toList())?.start?.atStartOfDay() ?: LocalDateTime.now(),
-        mottatt = Sykmeldingsperiode.periode(sykeperioder.toList())?.start?.plusMonths(7)?.atStartOfDay() ?: LocalDateTime.now()
-    ).apply {
-        hendelselogg = this
-    }
-}
-
 internal fun AbstractEndToEndTest.søknad(
     id: UUID,
     vararg perioder: Søknadsperiode,

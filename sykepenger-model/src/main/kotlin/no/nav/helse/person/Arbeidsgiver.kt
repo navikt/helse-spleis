@@ -353,17 +353,24 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun håndter(sykmelding: Sykmelding) {
+        val vedtaksperiode = Vedtaksperiode(
+            person = person,
+            arbeidsgiver = this,
+            hendelse = sykmelding,
+            jurist = jurist
+        )
+        if (kanIkkeBehandle(sykmelding)) return registrerForkastetVedtaksperiode(vedtaksperiode, sykmelding)
+        if (noenHarHåndtert(sykmelding, Vedtaksperiode::håndter)) return
+        sykmelding.info("Lager ny vedtaksperiode")
+        registrerNyVedtaksperiode(vedtaksperiode)
+        vedtaksperiode.håndter(sykmelding)
+        håndter(sykmelding) { nyPeriode(vedtaksperiode, sykmelding) }
+    }
+
+    private fun kanIkkeBehandle(sykmelding: Sykmelding): Boolean {
         ForkastetVedtaksperiode.overlapperMedForkastet(forkastede, sykmelding)
-        if (!sykmelding.forGammel() && !sykmelding.hasErrorsOrWorse()) {
-            if (!noenHarHåndtert(sykmelding, Vedtaksperiode::håndter)) {
-                if (!sykmelding.hasErrorsOrWorse()) {
-                    sykmelding.info("Lager ny vedtaksperiode")
-                    val ny = nyVedtaksperiode(sykmelding).also { it.håndter(sykmelding) }
-                    håndter(sykmelding) { nyPeriode(ny, sykmelding) }
-                }
-            }
-        }
-        if (sykmelding.hasErrorsOrWorse()) person.emitHendelseIkkeHåndtert(sykmelding)
+        ForkastetVedtaksperiode.forlengerForkastet(forkastede, sykmelding)
+        return sykmelding.hasErrorsOrWorse()
     }
 
     internal fun håndter(søknad: Søknad) {
@@ -861,16 +868,15 @@ internal class Arbeidsgiver private constructor(
 
     internal fun overlappendePerioder(hendelse: SykdomstidslinjeHendelse) = vedtaksperioder.filter { hendelse.erRelevant(it.periode()) }
 
-    private fun nyVedtaksperiode(hendelse: Sykmelding): Vedtaksperiode {
-        return Vedtaksperiode(
-            person = person,
-            arbeidsgiver = this,
-            hendelse = hendelse,
-            jurist = jurist
-        ).also {
-            vedtaksperioder.add(it)
-            vedtaksperioder.sort()
-        }
+    private fun registrerNyVedtaksperiode(vedtaksperiode: Vedtaksperiode) {
+        vedtaksperioder.add(vedtaksperiode)
+        vedtaksperioder.sort()
+    }
+
+    private fun registrerForkastetVedtaksperiode(vedtaksperiode: Vedtaksperiode, hendelse: Sykmelding) {
+        hendelse.info("Oppretter forkastet vedtaksperiode ettersom Sykmelding inneholder errors")
+        vedtaksperiode.forkast(hendelse, ForkastetÅrsak.IKKE_STØTTET)
+        forkastede.add(ForkastetVedtaksperiode(vedtaksperiode, ForkastetÅrsak.IKKE_STØTTET))
     }
 
     internal fun finnSykeperiodeRettFør(vedtaksperiode: Vedtaksperiode) =
