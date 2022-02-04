@@ -1,7 +1,8 @@
-package no.nav.helse.spleis.e2e
+package no.nav.helse.spleis.etterlevelse
 
 import no.nav.helse.Toggle
 import no.nav.helse.januar
+import no.nav.helse.spleis.e2e.AbstractEndToEndMediatorTest
 import no.nav.inntektsmeldingkontrakt.Periode
 import no.nav.syfo.kafka.felles.SoknadsperiodeDTO
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -31,8 +32,9 @@ internal class SubsumsjonMediatorTest : AbstractEndToEndMediatorTest() {
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
 
-        assertTrue(testRapid.inspektør.meldinger("subsumsjon").isNotEmpty())
-        val subsumsjon = testRapid.inspektør.meldinger("subsumsjon").first { it["paragraf"].asText() == "8-17" }
+        val subsumsjoner = testRapid.inspektør.meldinger("subsumsjon").map { it["subsumsjon"] }
+        assertTrue(subsumsjoner.isNotEmpty())
+        val subsumsjon = subsumsjoner.first { it["paragraf"].asText() == "8-17" }
         assertEquals(subsumsjon["bokstav"].asText(), "a")
         assertTrue(subsumsjon["ledd"].isInt)
         assertEquals(subsumsjon["ledd"].asInt(), 1)

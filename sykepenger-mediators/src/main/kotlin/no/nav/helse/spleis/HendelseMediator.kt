@@ -203,7 +203,7 @@ internal class HendelseMediator(
         val jurist = MaskinellJurist()
         val person = person(hendelse, jurist)
         val personMediator = PersonMediator(person, message, hendelse, hendelseRepository)
-        val subsumsjonMediator = SubsumsjonMediator(jurist, hendelse, message, versjonAvKode)
+        val subsumsjonMediator = SubsumsjonMediator(jurist, hendelse.fødselsnummer(), message, versjonAvKode)
         person.addObserver(VedtaksperiodeProbe)
         handler(person)
         finalize(personMediator, subsumsjonMediator, message, hendelse)
