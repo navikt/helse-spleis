@@ -66,3 +66,5 @@ spec:
     value: spleis2
   - name: VAULT_MOUNTPATH
     value: postgresql/prod-fss/
+  - name: SPEIL_API_V2
+    value: "true"
