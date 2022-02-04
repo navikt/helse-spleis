@@ -1,6 +1,9 @@
 package no.nav.helse.spleis.etterlevelse
 
-import no.nav.helse.ForventetFeil
+import com.fasterxml.jackson.databind.JsonNode
+import com.networknt.schema.JsonSchemaFactory
+import com.networknt.schema.SpecVersion
+import com.networknt.schema.ValidationMessage
 import no.nav.helse.Toggle
 import no.nav.helse.januar
 import no.nav.helse.person.etterlevelse.MaskinellJurist
@@ -8,8 +11,11 @@ import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.somFødselsnummer
 import no.nav.helse.spleis.SubsumsjonMediator
 import no.nav.helse.spleis.TestHendelseMessage
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.slf4j.LoggerFactory
+import java.net.URI
 import java.util.*
 
 internal class SubsumsjonsmeldingTest {
@@ -36,5 +42,19 @@ internal class SubsumsjonsmeldingTest {
         jurist.`§ 8-17 ledd 2`(1.januar(2018))
         subsumsjonMediator.finalize(testRapid)
         assertSubsumsjonsmelding(testRapid.inspektør.message(0)["subsumsjon"])
+    }
+
+    private val schema by lazy {
+        JsonSchemaFactory
+            .getInstance(SpecVersion.VersionFlag.V7)
+            .getSchema(URI("https://raw.githubusercontent.com/navikt/helse/c53bc453251b7878135f31d5d1070e5406ae4af1/subsumsjon/json-schema-1.0.0.json"))
+    }
+
+    private fun assertSubsumsjonsmelding(melding: JsonNode) {
+        try {
+            assertEquals(emptySet<ValidationMessage>(), schema.validate(melding))
+        } catch (_: Exception) {
+            LoggerFactory.getLogger(SubsumsjonsmeldingTest::class.java).warn("Kunne ikke kjøre kontrakttest for subsumsjoner. Mangler du internett?")
+        }
     }
 }
