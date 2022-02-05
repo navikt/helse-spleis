@@ -331,6 +331,7 @@ internal class Vedtaksperiode private constructor(
     private fun harInntekt() = harInntektsmelding() || arbeidsgiver.grunnlagForSykepengegrunnlag(skjæringstidspunkt, periode.start) != null
     private fun harInntektsmelding() = arbeidsgiver.harInntektsmelding(skjæringstidspunkt)
     private fun avgjørTilstandForInntekt(): Vedtaksperiodetilstand {
+        if (erInnenforArbeidsgiverperioden()) return AvsluttetUtenUtbetaling
         val rettFør = arbeidsgiver.finnSykeperiodeRettFør(this)
         if (harInntekt() || rettFør?.harInntekt() == true) return AvventerHistorikk
         return AvventerInntektsmeldingFerdigForlengelse

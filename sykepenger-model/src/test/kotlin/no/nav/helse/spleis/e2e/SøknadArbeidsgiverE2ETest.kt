@@ -26,6 +26,55 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `avslutter uferdig forlengelseperiode som bare strekkes inn i helg`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 5.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(6.januar, 19.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(20.januar, 21.januar, 100.prosent))
+        håndterSøknad(Sykdom(6.januar, 19.januar, 100.prosent))
+        håndterSøknad(Sykdom(20.januar, 21.januar, 100.prosent))
+        håndterInntektsmelding(listOf(
+            1.januar til 5.januar,
+            6.januar til 9.januar, // lager et tredagers opphold (10. januar - 12. januar) som forskyver agp
+            13.januar til 19.januar // til å slutte 19. januar. Periode nr 3. forlenger derfor kun helg, og skal også avsluttes uten utbetaling
+        ), førsteFraværsdag = 13.januar)
+        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+    }
+
+    @Test
+    fun `avslutter uferdig forlengelseperiode som dekkes av arbeidsgiverperioden etter IM`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 5.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(6.januar, 19.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(20.januar, 23.januar, 100.prosent))
+        håndterSøknad(Sykdom(6.januar, 19.januar, 100.prosent))
+        håndterSøknad(Sykdom(20.januar, 23.januar, 100.prosent))
+        håndterInntektsmelding(listOf(
+            1.januar til 7.januar, // inntektsmeldingen oppgir nok opphold til at periode nr 3
+            15.januar til 23.januar  // haver innenfor arbeidsgiverperioden likevel
+        ), førsteFraværsdag = 15.januar)
+        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+    }
+
+    @Test
+    fun `avslutter ferdig forlengelseperiode som dekkes av arbeidsgiverperioden etter IM`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(17.januar, 21.januar, 100.prosent))
+        håndterSøknad(Sykdom(17.januar, 21.januar, 100.prosent))
+        håndterInntektsmelding(listOf(
+            1.januar til 8.januar, // inntektsmeldingen oppgir nok opphold til at periode nr 2
+            12.januar til 19.januar  // haver innenfor arbeidsgiverperioden likevel
+        ), førsteFraværsdag = 12.januar)
+        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE, AVSLUTTET_UTEN_UTBETALING)
+    }
+
+    @Test
     fun `starter med utdanning`() {
         håndterSykmelding(Sykmeldingsperiode(2.januar, 7.januar, 100.prosent))
         håndterSøknad(Sykdom(2.januar, 7.januar, 100.prosent), Utdanning(1.januar, 7.januar))

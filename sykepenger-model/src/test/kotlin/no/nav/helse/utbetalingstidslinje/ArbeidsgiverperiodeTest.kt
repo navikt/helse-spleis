@@ -42,14 +42,29 @@ internal class ArbeidsgiverperiodeTest {
     }
 
     @Test
+    fun `inneholder dager`() {
+        val periode = 2.januar til 5.januar
+        val arbeidsgiverperiode = agp(periode)
+        assertFalse(1.januar in arbeidsgiverperiode)
+        assertTrue(2.januar in arbeidsgiverperiode)
+        assertTrue(5.januar in arbeidsgiverperiode)
+        assertFalse(6.januar in arbeidsgiverperiode) // lørdag
+        assertFalse(7.januar in arbeidsgiverperiode) // søndag
+        assertFalse(8.januar in arbeidsgiverperiode) // søndag
+    }
+
+    @Test
     fun `dekker hele perioden`() {
         val periode = 2.januar til 5.januar
         val arbeidsgiverperiode = agp(periode)
         assertTrue(arbeidsgiverperiode.dekker(periode))
         assertTrue(arbeidsgiverperiode.dekker(3.januar til 4.januar))
-        assertFalse(arbeidsgiverperiode.dekker(2.januar til 6.januar))
+        assertTrue(arbeidsgiverperiode.dekker(2.januar til 6.januar))
+        assertFalse(arbeidsgiverperiode.dekker(2.januar til 8.januar))
         assertTrue(arbeidsgiverperiode.dekker(1.januar til 5.januar))
-        assertFalse(arbeidsgiverperiode.dekker(1.januar til 6.januar))
+        assertTrue(arbeidsgiverperiode.dekker(6.januar til 7.januar))
+        assertTrue(arbeidsgiverperiode.dekker(1.januar til 6.januar))
+        assertFalse(arbeidsgiverperiode.dekker(1.januar til 8.januar))
         assertFalse(arbeidsgiverperiode.dekker(1.januar til 1.januar))
     }
 

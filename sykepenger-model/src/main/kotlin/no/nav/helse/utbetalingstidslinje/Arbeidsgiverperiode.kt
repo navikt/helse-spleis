@@ -4,6 +4,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.sykdomstidslinje.erRettFør
+import java.time.DayOfWeek
 import java.time.LocalDate
 
 internal class Arbeidsgiverperiode(private val perioder: List<Periode>) : Iterable<LocalDate>, Comparable<LocalDate> {
@@ -23,8 +24,10 @@ internal class Arbeidsgiverperiode(private val perioder: List<Periode>) : Iterab
     operator fun contains(periode: Periode) =
         periode.overlapperMed(hele)
 
-    internal fun dekker(periode: Periode) =
-        periode in this && hele.slutterEtter(periode.endInclusive)
+    internal fun dekker(periode: Periode): Boolean {
+        val heleInklHelg = hele.justerForHelg()
+        return (periode.overlapperMed(heleInklHelg) && heleInklHelg.slutterEtter(periode.endInclusive))
+    }
 
     internal fun hørerTil(periode: Periode, sisteKjente: LocalDate) =
         periode.overlapperMed(første til sisteKjente)
@@ -54,6 +57,14 @@ internal class Arbeidsgiverperiode(private val perioder: List<Periode>) : Iterab
             override fun next(): LocalDate {
                 return current?.next() ?: throw NoSuchElementException()
             }
+        }
+    }
+
+    private companion object {
+        private fun Periode.justerForHelg() = when (endInclusive.dayOfWeek) {
+            DayOfWeek.SATURDAY -> start til endInclusive.plusDays(1)
+            DayOfWeek.FRIDAY -> start til endInclusive.plusDays(2)
+            else -> this
         }
     }
 }
