@@ -331,7 +331,6 @@ internal class Vedtaksperiode private constructor(
     private fun harInntekt() = harInntektsmelding() || arbeidsgiver.grunnlagForSykepengegrunnlag(skjæringstidspunkt, periode.start) != null
     private fun harInntektsmelding() = arbeidsgiver.harInntektsmelding(skjæringstidspunkt)
     private fun avgjørTilstandForInntekt(): Vedtaksperiodetilstand {
-        if (erInnenforArbeidsgiverperioden()) return AvsluttetUtenUtbetaling
         val rettFør = arbeidsgiver.finnSykeperiodeRettFør(this)
         if (harInntekt() || rettFør?.harInntekt() == true) return AvventerHistorikk
         return AvventerInntektsmeldingFerdigForlengelse
@@ -1179,7 +1178,11 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
-            vedtaksperiode.håndterSøknad(søknad, vedtaksperiode.avgjørTilstandForGap(AvventerInntektsmeldingUferdigForlengelse, AvventerInntektsmeldingUferdigGap))
+            val nesteForlengelsetilstand = when {
+                vedtaksperiode.harInntekt() -> AvventerUferdig
+                else -> AvventerInntektsmeldingUferdigForlengelse
+            }
+            vedtaksperiode.håndterSøknad(søknad, vedtaksperiode.avgjørTilstandForGap(nesteForlengelsetilstand, AvventerInntektsmeldingUferdigGap))
             søknad.info("Fullført behandling av søknad")
         }
 
@@ -1572,7 +1575,11 @@ internal class Vedtaksperiode private constructor(
         }
 
         private fun fortsett(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            vedtaksperiode.håndterMuligForlengelse(hendelse, vedtaksperiode.avgjørTilstandForInntekt(), AvventerInntektsmeldingEllerHistorikkFerdigGap)
+            val nesteForlengelsetilstand = when {
+                vedtaksperiode.erInnenforArbeidsgiverperioden() -> AvsluttetUtenUtbetaling
+                else -> vedtaksperiode.avgjørTilstandForInntekt()
+            }
+            vedtaksperiode.håndterMuligForlengelse(hendelse, nesteForlengelsetilstand, AvventerInntektsmeldingEllerHistorikkFerdigGap)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {

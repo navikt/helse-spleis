@@ -272,7 +272,7 @@ internal class FlereArbeidsgivereInfotrygdTest : AbstractEndToEndTest()  {
 
         håndterSøknad(Sykdom(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING, orgnummer = a1)
-        assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, orgnummer = a1)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_UFERDIG, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
     }
 

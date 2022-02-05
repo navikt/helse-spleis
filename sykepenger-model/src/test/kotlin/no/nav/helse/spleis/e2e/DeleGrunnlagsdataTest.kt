@@ -206,7 +206,6 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
             2.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
-            AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
             AVVENTER_UFERDIG,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING

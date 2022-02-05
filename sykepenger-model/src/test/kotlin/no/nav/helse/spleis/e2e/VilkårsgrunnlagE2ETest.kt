@@ -125,7 +125,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
             2.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
-            AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE
+            AVVENTER_UFERDIG
         )
     }
 

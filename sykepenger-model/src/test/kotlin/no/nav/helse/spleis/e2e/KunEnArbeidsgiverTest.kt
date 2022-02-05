@@ -1303,7 +1303,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         )
         assertTilstander(
             2.vedtaksperiode,
-            START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE
+            START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_UFERDIG
         )
     }
 
@@ -1504,7 +1504,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             1,
             START,
             MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
-            AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE
+            AVVENTER_UFERDIG
         )
     }
 
@@ -1536,7 +1536,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             1,
             START,
             MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
-            AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE
+            AVVENTER_UFERDIG
         )
     }
 
