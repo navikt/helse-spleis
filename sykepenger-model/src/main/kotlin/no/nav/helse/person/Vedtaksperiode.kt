@@ -1903,7 +1903,8 @@ internal class Vedtaksperiode private constructor(
 
     private fun loggInnenforArbeidsgiverperiode() {
         if (!erInnenforArbeidsgiverperioden()) return
-        sikkerlogg.info("Vedtaksperioden {} er egentlig innenfor arbeidsgiverperioden ved {}", keyValue("vedtaksperiodeId", id), keyValue("tilstand", tilstand))
+        sikkerlogg.info("Vedtaksperioden {} for {} er egentlig innenfor arbeidsgiverperioden ved {}",
+            keyValue("vedtaksperiodeId", id), keyValue("fnr", fødselsnummer), keyValue("tilstand", tilstand.type))
     }
 
     private fun kopierManglende(other: InntektsmeldingInfo) {
