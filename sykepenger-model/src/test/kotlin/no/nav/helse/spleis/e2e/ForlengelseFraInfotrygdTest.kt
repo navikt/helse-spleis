@@ -78,6 +78,21 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `oppdager forlengelse`() {
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 19.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(20.februar, 25.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(26.februar, 28.februar, 100.prosent))
+        håndterSøknad(Sykdom(1.februar, 19.februar, 100.prosent))
+        håndterSøknad(Sykdom(20.februar, 25.februar, 100.prosent))
+        håndterUtbetalingshistorikk(1.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 31.januar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
+            Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true)
+        ))
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_UFERDIG)
+        assertSisteTilstand(3.vedtaksperiode, AVVENTER_SØKNAD_UFERDIG_FORLENGELSE)
+    }
+
+    @Test
     fun `forlenger vedtaksperiode som har gått til infotrygd`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
         val historikk = ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 3.januar, 26.januar, 100.prosent, 1000.daglig)
