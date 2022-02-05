@@ -1173,10 +1173,6 @@ internal class Vedtaksperiode private constructor(
         override fun håndterTidligereUferdigPeriode(vedtaksperiode: Vedtaksperiode, tidligere: Vedtaksperiode, hendelse: IAktivitetslogg) {}
         override fun håndterTidligereTilstøtendeUferdigPeriode(vedtaksperiode: Vedtaksperiode, tidligere: Vedtaksperiode, hendelse: IAktivitetslogg) {}
 
-        override fun periodeErFerdig(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            vedtaksperiode.tilstand(hendelse, vedtaksperiode.avgjørTilstandForGap(MottattSykmeldingFerdigForlengelse, MottattSykmeldingFerdigGap))
-        }
-
         override fun håndter(vedtaksperiode: Vedtaksperiode, sykmelding: Sykmelding) {
             håndterOverlappendeSykmelding(vedtaksperiode, sykmelding)
         }
@@ -1248,10 +1244,6 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndterTidligereTilstøtendeUferdigPeriode(vedtaksperiode: Vedtaksperiode, tidligere: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.tilstand(hendelse, MottattSykmeldingUferdigForlengelse)
-        }
-
-        override fun periodeErFerdig(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            vedtaksperiode.tilstand(hendelse, MottattSykmeldingFerdigGap)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, sykmelding: Sykmelding) {
@@ -1507,10 +1499,6 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.tilstand(hendelse, AvventerInntektsmeldingUferdigForlengelse)
         }
 
-        override fun periodeErFerdig(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            vedtaksperiode.tilstand(hendelse, AvventerInntektsmeldingEllerHistorikkFerdigGap)
-        }
-
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
             vedtaksperiode.håndterInntektsmelding(inntektsmelding, AvventerUferdig)
         }
@@ -1573,10 +1561,6 @@ internal class Vedtaksperiode private constructor(
         override val type = AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE
 
         override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Sykmelding) {}
-
-        override fun periodeErFerdig(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            fortsett(vedtaksperiode, hendelse)
-        }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
             vedtaksperiode.håndterOverlappendeSøknad(søknad)
@@ -1668,10 +1652,6 @@ internal class Vedtaksperiode private constructor(
                 vedtaksperiode.trengerInntektsmelding(hendelse.hendelseskontekst())
             }
             vedtaksperiode.trengerHistorikkFraInfotrygd(hendelse)
-        }
-
-        override fun periodeErUferdig(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            ventPåTidligere(vedtaksperiode, hendelse)
         }
 
         override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Sykmelding) {}
@@ -1774,10 +1754,6 @@ internal class Vedtaksperiode private constructor(
         override val type = AVVENTER_UFERDIG
 
         override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Sykmelding) {}
-
-        override fun periodeErFerdig(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            fortsett(vedtaksperiode, hendelse)
-        }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
             vedtaksperiode.håndterOverlappendeSøknad(søknad)
