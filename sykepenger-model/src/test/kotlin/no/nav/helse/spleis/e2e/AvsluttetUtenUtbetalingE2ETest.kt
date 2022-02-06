@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.ForventetFeil
 import no.nav.helse.Toggle
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -9,6 +8,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.TilstandType.*
+import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -133,17 +133,20 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
         assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
     }
 
-    @ForventetFeil("TODO")
     @Test
-    fun `ikke ignorer første fraværsdag om en inntektsmelding treffer en periode i AvsluttetUtenUtbetaling, mens første fraværsdag er etter perioden`() {
+    fun `inntektsmelding forteller om arbeidsdager etter arbeidsgiverperioden`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 10.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent))
-
         val imId = håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 23.januar)
-
         håndterSykmelding(Sykmeldingsperiode(11.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(11.januar, 31.januar, 100.prosent))
         håndterInntektsmeldingReplay(imId, 2.vedtaksperiode.id(ORGNUMMER))
-        assertEquals(23.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+
+        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE, AVVENTER_HISTORIKK)
+        assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+        assertEquals(23.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
+        assertTrue(inspektør.sykdomstidslinje[17.januar] is Dag.Arbeidsdag)
+        assertTrue(inspektør.sykdomstidslinje[22.januar] is Dag.Arbeidsdag)
     }
 }

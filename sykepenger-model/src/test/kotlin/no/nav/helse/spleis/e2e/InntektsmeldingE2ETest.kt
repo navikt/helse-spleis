@@ -1271,19 +1271,15 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     @Test
     fun `Når inntektsmeldingens første fraværsdag er midt i en vedtaksperiode lagres inntekten på vedtaksperiodens skjæringstidspunkt`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent))
-        håndterSøknad(Sykdom(1.januar, 12.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
 
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 12.februar, 100.prosent))
-        håndterSøknad(Sykdom(1.februar, 12.februar, 100.prosent))
-        håndterUtbetalingshistorikk(
-            2.vedtaksperiode,
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.november(2017), 20.november(2017), 100.prosent, 200.daglig),
-            inntektshistorikk = listOf(
-                Inntektsopplysning(ORGNUMMER, 1.november(2017), 20000.månedlig, true)
-            )
-        )
-        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), 3.februar)
+        håndterSykmelding(Sykmeldingsperiode(30.januar, 12.februar, 100.prosent))
+        håndterSøknad(Sykdom(30.januar, 12.februar, 100.prosent))
 
+        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), 1.februar)
+        assertTrue(inspektør.sykdomstidslinje[30.januar] is Dag.Arbeidsdag)
+        assertTrue(inspektør.sykdomstidslinje[31.januar] is Dag.Arbeidsdag)
+        assertInntektForDato(INNTEKT, 1.februar, inspektør=inspektør)
         assertTilstander(
             2.vedtaksperiode,
             START,
@@ -1291,7 +1287,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
             AVVENTER_HISTORIKK
         )
-        assertInntektForDato(INNTEKT, 1.februar, inspektør=inspektør)
     }
 
     @Test
