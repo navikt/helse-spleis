@@ -9,6 +9,7 @@ import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -201,5 +202,22 @@ internal class FlereArbeidsgivereForlengelserTest : AbstractEndToEndTest() {
         håndterUtbetalt(2.vedtaksperiode, orgnummer = a1)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD, orgnummer = a2)
+    }
+
+    @ForventetFeil("TODO")
+    @Test
+    fun `forlengelse av AvsluttetUtenUtbetaling for flere arbeidsgivere skal ikke gå til AvventerHistorikk uten IM for begge arbeidsgivere`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 12.januar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 12.januar, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(1.januar, 12.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(1.januar, 12.januar, 100.prosent), orgnummer = a2)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
+
+        håndterSykmelding(Sykmeldingsperiode(13.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(13.januar, 31.januar, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(13.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(13.januar, 31.januar, 100.prosent), orgnummer = a2)
+
+        Assertions.assertNotEquals(AVVENTER_HISTORIKK, observatør.tilstandsendringer[2.vedtaksperiode.id(a2)]?.last())
     }
 }
