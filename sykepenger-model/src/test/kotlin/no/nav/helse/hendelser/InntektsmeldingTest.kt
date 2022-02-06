@@ -1,15 +1,11 @@
 package no.nav.helse.hendelser
 
+import no.nav.helse.*
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon
-import no.nav.helse.hentErrors
-import no.nav.helse.hentInfo
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Inntektshistorikk
-import no.nav.helse.sykdomstidslinje.Dag.*
-import no.nav.helse.februar
-import no.nav.helse.januar
-import no.nav.helse.mars
 import no.nav.helse.person.etterlevelse.MaskinellJurist
+import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
@@ -67,6 +63,61 @@ internal class InntektsmeldingTest {
         val nyTidslinje = inntektsmelding.sykdomstidslinje()
         assertEquals(1.januar, nyTidslinje.periode()?.start)
         assertEquals(2.januar, nyTidslinje.periode()?.endInclusive)
+    }
+
+    @Test
+    fun `padder med arbeidsdager i forkant av arbeidsgiverperiode`() {
+        inntektsmelding(listOf(3.januar til 18.januar), førsteFraværsdag = 3.januar)
+        inntektsmelding.padLeft(1.januar)
+        val tidslinje = inntektsmelding.sykdomstidslinje()
+        assertEquals(1.januar, tidslinje.førsteDag())
+        assertTrue(tidslinje[1.januar] is Arbeidsdag)
+        assertTrue(tidslinje[2.januar] is Arbeidsdag)
+        assertTrue(tidslinje[3.januar] is Arbeidsgiverdag)
+    }
+
+    @Test
+    fun `padder ikke med arbeidsdager i forkant av første fraværsdag uten arbeidsgiverperiode`() {
+        inntektsmelding(emptyList(), førsteFraværsdag = 3.januar)
+        inntektsmelding.padLeft(1.januar)
+        val tidslinje = inntektsmelding.sykdomstidslinje()
+        assertEquals(3.januar, tidslinje.førsteDag())
+        assertTrue(tidslinje[3.januar] is Arbeidsgiverdag)
+    }
+
+    @ForventetFeil("trenger fiks")
+    @Test
+    fun `padder med arbeidsdager mellom siste arbeidsgiverperiode og første fraværsdag`() {
+        inntektsmelding(listOf(
+            1.januar til 7.januar,
+            10.januar til 18.januar
+        ), førsteFraværsdag = 25.januar)
+        inntektsmelding.padLeft(1.januar)
+        val tidslinje = inntektsmelding.sykdomstidslinje()
+        assertEquals(1.januar, tidslinje.førsteDag())
+        assertEquals(25.januar, tidslinje.sisteDag())
+        assertTrue(tidslinje[1.januar] is Arbeidsgiverdag)
+        assertTrue(tidslinje[19.januar] is Arbeidsdag)
+        assertTrue(tidslinje[24.januar] is Arbeidsdag)
+        assertTrue(tidslinje[25.januar] is Arbeidsgiverdag)
+    }
+
+    @ForventetFeil("trenger fiks")
+    @Test
+    fun `padder med arbeidsdager mellom dato og første fraværsdag`() {
+        inntektsmelding(listOf(
+            1.januar til 7.januar,
+            10.januar til 18.januar
+        ), førsteFraværsdag = 25.januar)
+        inntektsmelding.padLeft(20.januar)
+        val tidslinje = inntektsmelding.sykdomstidslinje()
+        assertEquals(1.januar, tidslinje.førsteDag())
+        assertEquals(25.januar, tidslinje.sisteDag())
+        assertTrue(tidslinje[1.januar] is Arbeidsgiverdag)
+        assertFalse(tidslinje[19.januar] is Arbeidsdag)
+        assertTrue(tidslinje[20.januar] is FriskHelgedag)
+        assertTrue(tidslinje[24.januar] is Arbeidsdag)
+        assertTrue(tidslinje[25.januar] is Arbeidsgiverdag)
     }
 
     @Test
