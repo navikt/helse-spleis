@@ -1181,12 +1181,6 @@ internal class Vedtaksperiode private constructor(
             håndterOverlappendeSykmelding(vedtaksperiode, sykmelding)
         }
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            val erForlengelse = vedtaksperiode.arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode) != null
-            if (erForlengelse && vedtaksperiode.harInntekt()) return vedtaksperiode.tilstand(påminnelse, AvventerSøknadUferdigForlengelse)
-            super.håndter(vedtaksperiode, påminnelse)
-        }
-
         override fun forlengerInfotrygd(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.tilstand(hendelse, AvventerSøknadUferdigForlengelse)
         }
@@ -1579,11 +1573,6 @@ internal class Vedtaksperiode private constructor(
         override val type = AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE
 
         override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Sykmelding) {}
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            if (vedtaksperiode.harInntekt()) return vedtaksperiode.tilstand(påminnelse, AvventerUferdig)
-            super.håndter(vedtaksperiode, påminnelse)
-        }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
             vedtaksperiode.håndterOverlappendeSøknad(søknad)
