@@ -706,4 +706,47 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
 
         assertNotEquals(AVVENTER_HISTORIKK, observatør.tilstandsendringer[1.vedtaksperiode.id(a2)]?.last())
     }
+
+    @ForventetFeil("TODO")
+    @Test
+    fun `forlengelse av ghost med IM som har første fraværsdag på annen måned enn skjæringstidspunkt skal ikke vente på IM`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 12.februar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 12.februar, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(1.februar, 12.februar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(1.februar, 12.februar, 100.prosent), orgnummer = a2)
+        håndterInntektsmelding(listOf(1.februar til 16.februar), orgnummer = a2)
+
+        håndterSykmelding(Sykmeldingsperiode(13.februar, 28.februar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(13.februar, 28.februar, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(13.februar, 28.februar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(13.februar, 28.februar, 100.prosent), orgnummer = a2)
+
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a2)
+        assertNotEquals(AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE, observatør.tilstandsendringer[2.vedtaksperiode.id(a2)]?.last())
+    }
+
+    @ForventetFeil("TODO")
+    @Test
+    fun `forlengelse av ghost med IM som har første fraværsdag på annen måned enn skjæringstidspunkt skal ikke vente på IM (uferdig)`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 20.februar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 20.februar, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(1.februar, 20.februar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(1.februar, 20.februar, 100.prosent), orgnummer = a2)
+        håndterInntektsmelding(listOf(1.februar til 16.februar), orgnummer = a2)
+
+        håndterSykmelding(Sykmeldingsperiode(21.februar, 28.februar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(21.februar, 28.februar, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(21.februar, 28.februar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(21.februar, 28.februar, 100.prosent), orgnummer = a2)
+
+        // TODO: Denne asserten må fjernes når vi håndterer overlapp ved flere AG mer riktig
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a2)
+        assertNotEquals(AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, observatør.tilstandsendringer[2.vedtaksperiode.id(a2)]?.last())
+    }
 }
