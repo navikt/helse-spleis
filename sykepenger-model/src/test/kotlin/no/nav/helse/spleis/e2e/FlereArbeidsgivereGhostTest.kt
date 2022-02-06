@@ -7,12 +7,13 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.Inntektshistorikk.Skatt.Inntekttype.LØNNSINNTEKT
 import no.nav.helse.person.Inntektskilde
+import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.YearMonth
@@ -689,5 +690,20 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             inspektør(a1).inntektskilde(1.vedtaksperiode)
         )
         assertWarning(1.vedtaksperiode, "Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold", orgnummer = a1)
+    }
+
+    @ForventetFeil("TODO")
+    @Test
+    fun `skal ikke gå til AvventerHistorikk uten IM fra alle arbeidsgivere om vi ikke overlapper med første vedtaksperiode`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 17.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(1.januar, 17.januar, 100.prosent), orgnummer = a1)
+
+        håndterSykmelding(Sykmeldingsperiode(18.januar, 10.februar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(18.januar, 10.februar, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(18.januar, 10.februar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(18.januar, 10.februar, 100.prosent), orgnummer = a2)
+        håndterInntektsmelding(listOf(18.januar til 2.februar), orgnummer = a2)
+
+        assertNotEquals(AVVENTER_HISTORIKK, observatør.tilstandsendringer[1.vedtaksperiode.id(a2)]?.last())
     }
 }
