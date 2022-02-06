@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.ForventetFeil
 import no.nav.helse.Toggle
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -130,5 +131,19 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
 
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
+    }
+
+    @ForventetFeil("TODO")
+    @Test
+    fun `ikke ignorer første fraværsdag om en inntektsmelding treffer en periode i AvsluttetUtenUtbetaling, mens første fraværsdag er etter perioden`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 10.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent))
+
+        val imId = håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 23.januar)
+
+        håndterSykmelding(Sykmeldingsperiode(11.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(11.januar, 31.januar, 100.prosent))
+        håndterInntektsmeldingReplay(imId, 2.vedtaksperiode.id(ORGNUMMER))
+        assertEquals(23.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
     }
 }
