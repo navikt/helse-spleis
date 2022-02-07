@@ -3,6 +3,7 @@ package no.nav.helse.sykdomstidslinje
 import no.nav.helse.*
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.sykdomstidslinje.Dag.Companion.default
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
@@ -40,15 +41,15 @@ internal class SykdomstidslinjeTest {
 
     @Test
     fun `er innenfor arbeidsgiverperiode`() {
-        assertTrue(16.S.erInnenforArbeidsgiverperiode(Arbeidsgiverperiode(listOf(1.januar til 16.januar)), 1.januar til 16.januar))
+        assertTrue(16.S.erInnenforArbeidsgiverperiode(Arbeidsgiverperiode(listOf(1.januar til 16.januar)), 1.januar til 16.januar, MaskinellJurist()))
         resetSeed()
-        assertTrue((16.S + 1.A).erInnenforArbeidsgiverperiode(Arbeidsgiverperiode(listOf(1.januar til 16.januar)), 1.januar til 17.januar))
+        assertTrue((16.S + 1.A).erInnenforArbeidsgiverperiode(Arbeidsgiverperiode(listOf(1.januar til 16.januar)), 1.januar til 17.januar, MaskinellJurist()))
         resetSeed()
-        assertFalse(17.S.erInnenforArbeidsgiverperiode(Arbeidsgiverperiode(listOf(1.januar til 16.januar)), 1.januar til 17.januar))
+        assertFalse(17.S.erInnenforArbeidsgiverperiode(Arbeidsgiverperiode(listOf(1.januar til 16.januar)), 1.januar til 17.januar, MaskinellJurist()))
         resetSeed(4.januar)
-        assertTrue(18.S.erInnenforArbeidsgiverperiode(Arbeidsgiverperiode(listOf(4.januar til 19.januar)), 4.januar til 21.januar))
+        assertTrue(18.S.erInnenforArbeidsgiverperiode(Arbeidsgiverperiode(listOf(4.januar til 19.januar)), 4.januar til 21.januar, MaskinellJurist()))
         resetSeed(4.januar)
-        assertFalse(19.S.erInnenforArbeidsgiverperiode(Arbeidsgiverperiode(listOf(4.januar til 19.januar)), 4.januar til 22.januar))
+        assertFalse(19.S.erInnenforArbeidsgiverperiode(Arbeidsgiverperiode(listOf(4.januar til 19.januar)), 4.januar til 22.januar, MaskinellJurist()))
     }
 
     @Test

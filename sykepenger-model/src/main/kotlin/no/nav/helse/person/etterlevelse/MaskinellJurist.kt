@@ -275,6 +275,12 @@ class MaskinellJurist private constructor(
         )
     }
 
+    override fun `§ 8-17 ledd 1 bokstav a - arbeidsgiversøknad`(periode: Iterable<LocalDate>) {
+        periode.forEach {
+            `§ 8-17 ledd 1 bokstav a`(false, it)
+        }
+    }
+
     override fun `§ 8-17 ledd 2`(dato: LocalDate) {
         leggTil(
             GrupperbarSubsumsjon(

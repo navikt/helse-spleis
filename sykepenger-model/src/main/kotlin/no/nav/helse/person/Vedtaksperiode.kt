@@ -841,7 +841,7 @@ internal class Vedtaksperiode private constructor(
     private fun finnArbeidsgiverperiode() =
         arbeidsgiver.arbeidsgiverperiode(periode)
 
-    private fun erInnenforArbeidsgiverperioden() = finnArbeidsgiverperiode()?.let { sykdomstidslinje.erInnenforArbeidsgiverperiode(it, periode) } ?: false
+    private fun erInnenforArbeidsgiverperioden() = finnArbeidsgiverperiode()?.let { sykdomstidslinje.erInnenforArbeidsgiverperiode(it, periode, jurist) } ?: false
 
     // Gang of four State pattern
     internal interface Vedtaksperiodetilstand : Aktivitetskontekst {

@@ -6,6 +6,7 @@ import no.nav.helse.hendelser.contains
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.SykdomstidslinjeVisitor
+import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.sykdomstidslinje.Dag.Companion.default
 import no.nav.helse.sykdomstidslinje.Dag.Companion.sammenhengendeSykdom
@@ -158,8 +159,10 @@ internal class Sykdomstidslinje private constructor(
     internal fun førsteSykedagEtter(dato: LocalDate) =
         periode?.firstOrNull { it >= dato && erEnSykedag(this[it]) }
 
-    internal fun erInnenforArbeidsgiverperiode(arbeidsgiverperiode: Arbeidsgiverperiode, periode: Periode): Boolean {
-        return arbeidsgiverperiode.dekker(sisteIkkeOppholdsdag(periode))
+    internal fun erInnenforArbeidsgiverperiode(arbeidsgiverperiode: Arbeidsgiverperiode, periode: Periode, subsumsjonObserver: SubsumsjonObserver): Boolean {
+        return arbeidsgiverperiode.dekker(sisteIkkeOppholdsdag(periode)).also { innenforAGP ->
+            if (innenforAGP) subsumsjonObserver.`§ 8-17 ledd 1 bokstav a - arbeidsgiversøknad`(arbeidsgiverperiode)
+        }
     }
 
     private fun sisteIkkeOppholdsdag(periode: Periode): Periode {
@@ -390,7 +393,7 @@ internal class Sykdomstidslinje private constructor(
             ferieperiode.any { sykdomstidslinje[it] !is Feriedag }
 
         internal fun gammelTidslinje(tidslinjer: List<Sykdomstidslinje>) =
-            tidslinjer.map { Sykdomstidslinje(it.dager.filter { it.value !is ProblemDag }.toSortedMap(), it.periode) }.merge(Dag.sammenhengendeSykdom)
+            tidslinjer.map { Sykdomstidslinje(it.dager.filter { it.value !is ProblemDag }.toSortedMap(), it.periode) }.merge(sammenhengendeSykdom)
     }
 }
 

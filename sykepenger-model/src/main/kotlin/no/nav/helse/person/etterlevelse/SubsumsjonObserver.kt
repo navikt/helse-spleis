@@ -174,6 +174,15 @@ interface SubsumsjonObserver {
     fun `§ 8-17 ledd 1 bokstav a`(oppfylt: Boolean, dagen: LocalDate) {}
 
     /**
+     * Vurdering av når utbetaling av sykepenger tidligst skal starte
+     *
+     * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-17)
+     *
+     * @param periode arbeidsgiversøknad-perioden
+     */
+    fun `§ 8-17 ledd 1 bokstav a - arbeidsgiversøknad`(periode: Iterable<LocalDate>) {}
+
+    /**
      * Trygden yter ikke sykepenger for lovpålagt ferie og permisjon
      *
      * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-17)

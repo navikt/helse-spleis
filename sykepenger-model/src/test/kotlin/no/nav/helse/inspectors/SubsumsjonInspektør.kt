@@ -36,7 +36,17 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
         jurist.subsumsjoner().forEach { it.accept(this) }
     }
 
-    private fun finnSubsumsjon(paragraf: Paragraf, versjon: LocalDate?, ledd: Ledd?, punktum: Punktum?, bokstav: Bokstav?, utfall: Utfall? = null, vedtaksperiodeId: UUID? = null) =
+    private fun finnSubsumsjon(
+        paragraf: Paragraf,
+        versjon: LocalDate?,
+        ledd: Ledd?,
+        punktum: Punktum?,
+        bokstav: Bokstav?,
+        utfall: Utfall? = null,
+        inputdata: Map<String, Any>? = null,
+        outputdata: Map<String, Any>? = null,
+        vedtaksperiodeId: UUID? = null
+    ) =
         subsumsjoner.filter {
             it.paragraf == paragraf
                 && versjon?.equals(it.versjon) ?: true
@@ -44,6 +54,8 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
                 && ledd?.equals(it.ledd) ?: true
                 && punktum?.equals(it.punktum) ?: true
                 && bokstav?.equals(it.bokstav) ?: true
+                && inputdata?.equals(it.input) ?: true
+                && outputdata?.equals(it.output) ?: true
                 && vedtaksperiodeId?.equals(it.vedtaksperiodeIdFraSporing()) ?: true
         }.let {
             assertEquals(1, it.size, "Forventer en, og kun en subsumsjon for vilkåret. Subsumsjoner funnet: $it")
@@ -75,7 +87,7 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
         vedtaksperiodeId: IdInnhenter? = null,
         organisasjonsnummer: String = ORGNUMMER
     ) {
-        val resultat = finnSubsumsjon(paragraf, versjon, ledd, punktum, bokstav, VILKAR_OPPFYLT, vedtaksperiodeId = vedtaksperiodeId?.id(organisasjonsnummer))
+        val resultat = finnSubsumsjon(paragraf, versjon, ledd, punktum, bokstav, VILKAR_OPPFYLT, input, output, vedtaksperiodeId = vedtaksperiodeId?.id(organisasjonsnummer))
         assertEquals(VILKAR_OPPFYLT, resultat.utfall) { "Forventet oppfylt $paragraf $ledd $punktum" }
         assertResultat(input, output, resultat)
     }
@@ -91,7 +103,8 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
         vedtaksperiodeId: IdInnhenter? = null,
         organisasjonsnummer: String = ORGNUMMER
     ) {
-        val resultat = finnSubsumsjon(paragraf, versjon, ledd, punktum, bokstav, VILKAR_IKKE_OPPFYLT, vedtaksperiodeId = vedtaksperiodeId?.id(organisasjonsnummer))
+        val resultat =
+            finnSubsumsjon(paragraf, versjon, ledd, punktum, bokstav, VILKAR_IKKE_OPPFYLT, input, output, vedtaksperiodeId = vedtaksperiodeId?.id(organisasjonsnummer))
         assertEquals(VILKAR_IKKE_OPPFYLT, resultat.utfall) { "Forventet ikke oppfylt $paragraf $ledd $punktum" }
         assertResultat(input, output, resultat)
     }
@@ -106,7 +119,7 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
         organisasjonsnummer: String = ORGNUMMER
     ) {
         assertDoesNotThrow("Forventet at $paragraf $ledd $punktum er vurdert") {
-            finnSubsumsjon(paragraf, versjon, ledd, punktum, bokstav, null, vedtaksperiodeId?.id(organisasjonsnummer))
+            finnSubsumsjon(paragraf, versjon, ledd, punktum, bokstav, null, null, null, vedtaksperiodeId?.id(organisasjonsnummer))
         }
     }
 
@@ -120,7 +133,7 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
         organisasjonsnummer: String = ORGNUMMER
     ) {
         assertThrows<AssertionFailedError> {
-            finnSubsumsjon(paragraf, versjon, ledd, punktum, bokstav, null, vedtaksperiodeId?.id(organisasjonsnummer))
+            finnSubsumsjon(paragraf, versjon, ledd, punktum, bokstav, null, null, null, vedtaksperiodeId?.id(organisasjonsnummer))
         }
     }
 
