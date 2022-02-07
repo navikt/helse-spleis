@@ -1,13 +1,14 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.ForventetFeil
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.TilstandType
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
@@ -15,7 +16,7 @@ import java.time.LocalDate
  * Disse testene er klokkesensitive fordi makstidsjekken i håndter påminnelse bruker LocalDateTime.now()
  */
 
-internal class SykmeldingMakstidE2ETest : AbstractEndToEndTest() {
+internal class FjerneBlokkerendePeriodeE2ETest : AbstractEndToEndTest() {
 
     private val TIDLIGST_MULIGE_UTBETALINGSDAG = LocalDate.now().withDayOfMonth(1).minusMonths(3)
 
@@ -44,7 +45,6 @@ internal class SykmeldingMakstidE2ETest : AbstractEndToEndTest() {
         assertSisteTilstand(2.vedtaksperiode, TilstandType.AVSLUTTET)
     }
 
-    @ForventetFeil("Timingfeil?")
     @Test
     fun `perioder venter på søknad ut måneden og tre måneder frem i tid - perioden fordelt over to måneder`() {
         val tom = TIDLIGST_MULIGE_UTBETALINGSDAG
@@ -55,7 +55,7 @@ internal class SykmeldingMakstidE2ETest : AbstractEndToEndTest() {
             TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
         )
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(fom, tom, 100.prosent), sendtTilNAVEllerArbeidsgiver = LocalDate.now())
-        håndterInntektsmelding(listOf(fom til fom.plusDays(16)))
+        håndterInntektsmelding(listOf(fom til fom.plusDays(15)))
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
@@ -67,7 +67,7 @@ internal class SykmeldingMakstidE2ETest : AbstractEndToEndTest() {
         val fom2 = fom.plusMonths(2)
         håndterSykmelding(Sykmeldingsperiode(fom2, tom2, 100.prosent))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(fom2, tom2, 100.prosent))
-        håndterInntektsmelding(listOf(fom2 til fom2.plusDays(16)))
+        håndterInntektsmelding(listOf(fom2 til fom2.plusDays(15)))
 
         håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
@@ -77,7 +77,11 @@ internal class SykmeldingMakstidE2ETest : AbstractEndToEndTest() {
         håndterUtbetalt(2.vedtaksperiode)
 
         val utbetalingstidslinje = inspektør.utbetalingstidslinjer(1.vedtaksperiode)
-        assertEquals(1, utbetalingstidslinje.inspektør.navDagTeller)
-        assertEquals(4, utbetalingstidslinje.inspektør.foreldetDagTeller)
+        utbetalingstidslinje[tom].let {
+            assertTrue(it is Utbetalingstidslinje.Utbetalingsdag.NavDag || it is Utbetalingstidslinje.Utbetalingsdag.NavHelgDag)
+        }
+
+        val utenNavDager = utbetalingstidslinje.kutt(tom.minusDays(1))
+        assertEquals(4, utenNavDager.inspektør.foreldetDagTeller + utenNavDager.inspektør.navHelgDagTeller)
     }
 }
