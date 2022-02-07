@@ -1730,6 +1730,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
+            vedtaksperiode.loggInnenforArbeidsgiverperiode()
             vedtaksperiode.trengerHistorikkFraInfotrygd(påminnelse)
         }
 
@@ -1787,6 +1788,11 @@ internal class Vedtaksperiode private constructor(
         override val type = AVVENTER_UFERDIG
 
         override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Sykmelding) {}
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
+            vedtaksperiode.loggInnenforArbeidsgiverperiode()
+            super.håndter(vedtaksperiode, påminnelse)
+        }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
             vedtaksperiode.håndterOverlappendeSøknad(søknad)
