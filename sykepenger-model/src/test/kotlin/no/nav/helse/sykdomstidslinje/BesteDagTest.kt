@@ -31,7 +31,7 @@ internal class BesteDagTest {
         assertWinnerBidirectional(ferieFraSøknad, arbeidsdagFraSøknad, ferieFraSøknad, Dag.sammenhengendeSykdom)
         assertWinnerBidirectional(sykedagFraSøknad, ferieFraSøknad, sykedagFraSøknad, Dag.sammenhengendeSykdom)
         assertWinnerBidirectional(sykedagFraSøknad, permisjonFraSøknad, sykedagFraSøknad, Dag.sammenhengendeSykdom)
-        assertWinnerBidirectional(permisjonFraSøknad, permisjonFraSøknad, arbeidsdagFraSøknad, Dag.sammenhengendeSykdom)
+        assertWinnerBidirectional(permisjonFraSøknad, arbeidsdagFraSøknad, permisjonFraSøknad, Dag.sammenhengendeSykdom)
         assertWinnerBidirectional(sykedagFraSøknad, arbeidsdagFraSøknad, sykedagFraSøknad, Dag.sammenhengendeSykdom)
     }
 
