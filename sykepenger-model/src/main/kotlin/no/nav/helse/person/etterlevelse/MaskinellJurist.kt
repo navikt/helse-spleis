@@ -259,22 +259,17 @@ class MaskinellJurist private constructor(
         )
     }
 
-    override fun `§ 8-17 ledd 1 bokstav a`(arbeidsgiverperiode: List<LocalDate>, førsteNavdag: LocalDate) {
+    override fun `§ 8-17 ledd 1 bokstav a`(oppfylt: Boolean, dagen: LocalDate) {
         leggTil(
-            EnkelSubsumsjon(
-                VILKAR_BEREGNET,
-                LocalDate.of(2018, 1, 1),
+            GrupperbarSubsumsjon(
+                utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
+                versjon = LocalDate.of(2018, 1, 1),
+                dato = dagen,
                 paragraf = PARAGRAF_8_17,
                 ledd = 1.ledd,
                 bokstav = BOKSTAV_A,
-                input = mapOf(
-                    "arbeidsgiverperioder" to arbeidsgiverperiode.grupperSammenhengendePerioder().map {
-                        mapOf("fom" to it.start, "tom" to it.endInclusive)
-                    }
-                ),
-                output = mapOf(
-                    "førsteUtbetalingsdag" to førsteNavdag
-                ),
+                input = emptyMap(),
+                output = emptyMap(),
                 kontekster = kontekster()
             )
         )

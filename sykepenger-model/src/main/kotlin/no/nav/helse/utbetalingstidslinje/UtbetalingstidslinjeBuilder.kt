@@ -105,12 +105,13 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
     }
 
     private fun addArbeidsgiverdag(dato: LocalDate, arbeidsgiverperiode: Arbeidsgiverperiode) {
+        subsumsjonObserver.`§ 8-17 ledd 1 bokstav a`(false, dagen = dato)
         tidslinje.addArbeidsgiverperiodedag(dato, Økonomi.ikkeBetalt(arbeidsgiverperiode).inntektIfNotNull(dato))
     }
 
     private fun addNAVdag(dato: LocalDate, arbeidsgiverperiode: Arbeidsgiverperiode?, økonomi: Økonomi) {
         if (harArbeidsgiverperiode) {
-            subsumsjonObserver.`§ 8-17 ledd 1 bokstav a`(arbeidsgiverperiode?.toList() ?: emptyList(), førsteNavdag = dato)
+            subsumsjonObserver.`§ 8-17 ledd 1 bokstav a`(true, dagen = dato)
             harArbeidsgiverperiode = false
         }
 

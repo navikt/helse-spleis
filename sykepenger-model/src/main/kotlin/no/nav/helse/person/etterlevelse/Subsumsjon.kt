@@ -147,7 +147,8 @@ class GrupperbarSubsumsjon private constructor(
             bokstav == other.bokstav &&
             kontekster == other.kontekster &&
             output == other.output &&
-            originalInput == other.originalInput
+            originalInput == other.originalInput &&
+            utfall == other.utfall
 
     override fun sammenstill(subsumsjoner: List<Subsumsjon>): List<Subsumsjon> {
         val sammenstilt = (subsumsjoner + this)

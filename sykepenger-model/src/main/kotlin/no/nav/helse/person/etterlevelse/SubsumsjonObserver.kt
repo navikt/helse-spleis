@@ -168,10 +168,10 @@ interface SubsumsjonObserver {
      *
      * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-17)
      *
-     * @param arbeidsgiverperiode alle arbeidsgiverperiode-dager
-     * @param førsteNavdag første dag NAV skal utbetale
+     * @param oppfylt **true** dersom [dagen] er etter arbeidsgiverperioden
+     * @param dagen aktuelle dagen for vurdering
      */
-    fun `§ 8-17 ledd 1 bokstav a`(arbeidsgiverperiode: List<LocalDate>, førsteNavdag: LocalDate) {}
+    fun `§ 8-17 ledd 1 bokstav a`(oppfylt: Boolean, dagen: LocalDate) {}
 
     /**
      * Trygden yter ikke sykepenger for lovpålagt ferie og permisjon
