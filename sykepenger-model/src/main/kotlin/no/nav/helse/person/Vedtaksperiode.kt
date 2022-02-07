@@ -1126,7 +1126,7 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
-    private fun makstidForMottattSykemeldingTilstander(vedtaksperiode: Vedtaksperiode) =
+    private fun makstidForIkkeMottattSøknadTilstander(vedtaksperiode: Vedtaksperiode) =
         vedtaksperiode.periode.endInclusive
             .plusMonths(3)
             .plusMonths(1)
@@ -1137,7 +1137,7 @@ internal class Vedtaksperiode private constructor(
     internal object MottattSykmeldingFerdigForlengelse : Vedtaksperiodetilstand {
         override val type = MOTTATT_SYKMELDING_FERDIG_FORLENGELSE
         override fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime) =
-            vedtaksperiode.makstidForMottattSykemeldingTilstander(vedtaksperiode)
+            vedtaksperiode.makstidForIkkeMottattSøknadTilstander(vedtaksperiode)
 
         override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Sykmelding) {}
 
@@ -1171,7 +1171,7 @@ internal class Vedtaksperiode private constructor(
     internal object MottattSykmeldingUferdigForlengelse : Vedtaksperiodetilstand {
         override val type = MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE
         override fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime) =
-            vedtaksperiode.makstidForMottattSykemeldingTilstander(vedtaksperiode)
+            vedtaksperiode.makstidForIkkeMottattSøknadTilstander(vedtaksperiode)
 
         override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Sykmelding) {}
         override fun håndterTidligereUferdigPeriode(vedtaksperiode: Vedtaksperiode, tidligere: Vedtaksperiode, hendelse: IAktivitetslogg) {}
@@ -1212,7 +1212,7 @@ internal class Vedtaksperiode private constructor(
     internal object MottattSykmeldingFerdigGap : Vedtaksperiodetilstand {
         override val type = MOTTATT_SYKMELDING_FERDIG_GAP
         override fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime): LocalDateTime =
-            vedtaksperiode.makstidForMottattSykemeldingTilstander(vedtaksperiode)
+            vedtaksperiode.makstidForIkkeMottattSøknadTilstander(vedtaksperiode)
 
         override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Sykmelding) {}
 
@@ -1250,7 +1250,7 @@ internal class Vedtaksperiode private constructor(
     internal object MottattSykmeldingUferdigGap : Vedtaksperiodetilstand {
         override val type = MOTTATT_SYKMELDING_UFERDIG_GAP
         override fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime) =
-            vedtaksperiode.makstidForMottattSykemeldingTilstander(vedtaksperiode)
+            vedtaksperiode.makstidForIkkeMottattSøknadTilstander(vedtaksperiode)
 
         override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Sykmelding) {}
 
@@ -1289,6 +1289,9 @@ internal class Vedtaksperiode private constructor(
 
     internal object AvventerSøknadFerdigGap : Vedtaksperiodetilstand {
         override val type = AVVENTER_SØKNAD_FERDIG_GAP
+
+        override fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime) =
+            vedtaksperiode.makstidForIkkeMottattSøknadTilstander(vedtaksperiode)
 
         override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Sykmelding) {}
 
@@ -1594,6 +1597,9 @@ internal class Vedtaksperiode private constructor(
     internal object AvventerSøknadUferdigForlengelse : Vedtaksperiodetilstand {
         override val type = AVVENTER_SØKNAD_UFERDIG_FORLENGELSE
 
+        override fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime) =
+            vedtaksperiode.makstidForIkkeMottattSøknadTilstander(vedtaksperiode)
+
         override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Sykmelding) {}
 
         override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, gjenopptaBehandling: IAktivitetslogg) {
@@ -1618,6 +1624,9 @@ internal class Vedtaksperiode private constructor(
     internal object AvventerSøknadFerdigForlengelse : Vedtaksperiodetilstand {
         override val type = AVVENTER_SØKNAD_FERDIG_FORLENGELSE
 
+        override fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime) =
+            vedtaksperiode.makstidForIkkeMottattSøknadTilstander(vedtaksperiode)
+
         override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Sykmelding) {}
 
         override fun håndterTidligereUferdigPeriode(vedtaksperiode: Vedtaksperiode, tidligere: Vedtaksperiode, hendelse: IAktivitetslogg) {
@@ -1637,6 +1646,9 @@ internal class Vedtaksperiode private constructor(
 
     internal object AvventerSøknadUferdigGap : Vedtaksperiodetilstand {
         override val type = AVVENTER_SØKNAD_UFERDIG_GAP
+
+        override fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime) =
+            vedtaksperiode.makstidForIkkeMottattSøknadTilstander(vedtaksperiode)
 
         override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Sykmelding) {}
 

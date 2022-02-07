@@ -30,9 +30,10 @@ internal class FjerneBlokkerendePeriodeE2ETest : AbstractEndToEndTest() {
         val fom2 = fom.plusMonths(2)
         håndterSykmelding(Sykmeldingsperiode(fom2, tom2, 100.prosent))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(fom2, tom2, 100.prosent))
-        håndterInntektsmelding(listOf(fom2 til fom2.plusDays(16)))
+        håndterInntektsmelding(listOf(fom2 til fom2.plusDays(15)))
 
         håndterPåminnelse(1.vedtaksperiode, TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP)
+        assertTilstand(1.vedtaksperiode, TilstandType.TIL_INFOTRYGD)
 
         håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
@@ -83,5 +84,28 @@ internal class FjerneBlokkerendePeriodeE2ETest : AbstractEndToEndTest() {
 
         val utenNavDager = utbetalingstidslinje.kutt(tom.minusDays(1))
         assertEquals(4, utenNavDager.inspektør.foreldetDagTeller + utenNavDager.inspektør.navHelgDagTeller)
+    }
+
+    @Test
+    fun `gamle perioder som ikke har mottatt søknad kastes ut når ingen dager lenger kan bli utbetalt`() {
+        val tom = TIDLIGST_MULIGE_UTBETALINGSDAG.minusDays(5)
+        val fom = tom.minusDays(20)
+        håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent))
+        håndterInntektsmelding(listOf(fom til fom.plusDays(15)))
+        håndterPåminnelse(1.vedtaksperiode, TilstandType.AVVENTER_SØKNAD_FERDIG_GAP)
+        assertTilstand(1.vedtaksperiode, TilstandType.TIL_INFOTRYGD)
+
+        val fom2 = fom.plusMonths(2)
+        val tom2 = tom.plusMonths(2)
+        håndterSykmelding(Sykmeldingsperiode(fom2, tom2, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(fom2, tom2, 100.prosent))
+        håndterInntektsmelding(listOf(fom2 til fom2.plusDays(15)))
+
+        håndterYtelser(2.vedtaksperiode)
+        håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
+        håndterYtelser(2.vedtaksperiode)
+
+        val utbetalingstidslinje = inspektør.utbetalingstidslinjer(2.vedtaksperiode)
+        assertEquals(5, (utbetalingstidslinje.inspektør.navDagTeller + utbetalingstidslinje.inspektør.navHelgDagTeller))
     }
 }
