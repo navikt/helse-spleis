@@ -199,7 +199,7 @@ internal class InfotrygdhistorikkElementTest {
     }
 
     @Test
-    fun `historikk for overskriver ikke`() {
+    fun `historikk for overskriver`() {
         val sykdomstidslinje = 10.A + 5.opphold + 5.S
         val element = historikkelement(
             listOf(
@@ -208,11 +208,11 @@ internal class InfotrygdhistorikkElementTest {
             )
         )
         val inspektør = element.historikkFor("ag1", sykdomstidslinje).inspektør
-        assertEquals(8, inspektør.dager.filter { it.value is Dag.Arbeidsdag }.size)
-        assertEquals(2, inspektør.dager.filter { it.value is Dag.FriskHelgedag }.size)
+        assertEquals(0, inspektør.dager.filter { it.value is Dag.Arbeidsdag }.size)
+        assertEquals(0, inspektør.dager.filter { it.value is Dag.FriskHelgedag }.size)
         assertEquals(5, inspektør.dager.filter { it.value is Dag.Feriedag }.size)
-        assertEquals(4, inspektør.dager.filter { it.value is Dag.Sykedag }.size)
-        assertEquals(1, inspektør.dager.filter { it.value is Dag.SykHelgedag }.size)
+        assertEquals(12, inspektør.dager.filter { it.value is Dag.Sykedag }.size)
+        assertEquals(3, inspektør.dager.filter { it.value is Dag.SykHelgedag }.size)
     }
 
     @Test

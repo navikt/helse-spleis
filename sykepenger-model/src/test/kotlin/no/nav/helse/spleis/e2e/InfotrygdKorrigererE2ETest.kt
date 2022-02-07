@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.ForventetFeil
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
@@ -16,7 +15,6 @@ import org.junit.jupiter.api.Test
 
 internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
 
-    @ForventetFeil("Infotrygd korrigerer arbeidsdager til sykdom")
     @Test
     fun `infotrygd korrigerer arbeid gjenopptatt`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))

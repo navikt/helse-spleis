@@ -23,7 +23,7 @@ abstract class Infotrygdperiode(fom: LocalDate, tom: LocalDate) : Periode(fom, t
 
     internal fun historikkFor(orgnummer: String, sykdomstidslinje: Sykdomstidslinje, kilde: SykdomstidslinjeHendelse.Hendelseskilde): Sykdomstidslinje {
         if (!gjelder(orgnummer)) return sykdomstidslinje
-        return sykdomstidslinje(kilde).merge(sykdomstidslinje, replace)
+        return sykdomstidslinje.merge(sykdomstidslinje(kilde), replace)
     }
 
     internal open fun gjelder(nødnummer: Nødnummer) = false

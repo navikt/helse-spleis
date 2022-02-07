@@ -26,6 +26,16 @@ internal class BesteDagTest {
     }
 
     @Test
+    fun `sammenhengende sykdom`() {
+        assertWinnerBidirectional(sykedagFraSøknad, arbeidsdagFraSøknad, sykedagFraSøknad, Dag.sammenhengendeSykdom)
+        assertWinnerBidirectional(ferieFraSøknad, arbeidsdagFraSøknad, ferieFraSøknad, Dag.sammenhengendeSykdom)
+        assertWinnerBidirectional(sykedagFraSøknad, ferieFraSøknad, sykedagFraSøknad, Dag.sammenhengendeSykdom)
+        assertWinnerBidirectional(sykedagFraSøknad, permisjonFraSøknad, sykedagFraSøknad, Dag.sammenhengendeSykdom)
+        assertWinnerBidirectional(permisjonFraSøknad, permisjonFraSøknad, arbeidsdagFraSøknad, Dag.sammenhengendeSykdom)
+        assertWinnerBidirectional(sykedagFraSøknad, arbeidsdagFraSøknad, sykedagFraSøknad, Dag.sammenhengendeSykdom)
+    }
+
+    @Test
     fun `inntektsmelding sier ferie, søknad sier syk blir feriedag`() {
         assertWinnerBidirectional(sykedagFraSøknad, ferieFraInntektsmelding, ferieFraInntektsmelding)
     }
@@ -66,18 +76,20 @@ internal class BesteDagTest {
     private fun assertWinner(
         dag1: Dag,
         dag2: Dag,
-        expectedWinner: Dag
+        expectedWinner: Dag,
+        turnering: (Dag, Dag) -> Dag = Dagturnering.TURNERING::beste
     ) {
-        val winner = Dagturnering.TURNERING.beste(dag1, dag2)
+        val winner = turnering(dag1, dag2)
         assertEquals(expectedWinner, winner)
     }
 
     private fun assertWinnerBidirectional(
         dag1: Dag,
         dag2: Dag,
-        expectedWinner: Dag
+        expectedWinner: Dag,
+        turnering: (Dag, Dag) -> Dag = Dagturnering.TURNERING::beste
     ) {
-        assertWinner(dag1, dag2, expectedWinner)
-        assertWinner(dag2, dag1, expectedWinner)
+        assertWinner(dag1, dag2, expectedWinner, turnering)
+        assertWinner(dag2, dag1, expectedWinner, turnering)
     }
 }
