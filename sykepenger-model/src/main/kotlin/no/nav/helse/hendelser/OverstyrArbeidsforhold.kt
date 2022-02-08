@@ -1,12 +1,9 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.hendelser.OverstyrArbeidsforhold.ArbeidsforholdOverstyrt.Companion.overstyringFor
-import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.Arbeidsforholdhistorikk
-import no.nav.helse.person.Arbeidsgiver
+import no.nav.helse.person.*
 import no.nav.helse.person.Arbeidsgiver.Companion.finn
 import no.nav.helse.person.Arbeidsgiver.Companion.harPeriodeSomBlokkererOverstyrArbeidsforhold
-import no.nav.helse.person.PersonHendelse
 import java.time.LocalDate
 import java.util.*
 
@@ -38,6 +35,10 @@ class OverstyrArbeidsforhold(
         if (overstyring != null) {
             arbeidsgiver.lagreOverstyrArbeidsforhold(skjæringstidspunkt, overstyring)
         }
+    }
+
+    internal fun leggTil(hendelseIder: MutableSet<Sporing>) {
+        hendelseIder.add(Sporing(meldingsreferanseId(), Sporing.Type.OverstyrArbeidsforhold))
     }
 
     class ArbeidsforholdOverstyrt(internal val orgnummer: String, private val deaktivert: Boolean) {

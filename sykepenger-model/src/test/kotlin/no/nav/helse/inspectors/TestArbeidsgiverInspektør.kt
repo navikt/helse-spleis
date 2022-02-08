@@ -3,6 +3,7 @@ package no.nav.helse.inspectors
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.person.*
+import no.nav.helse.person.Sporing.Companion.ider
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.*
@@ -58,7 +59,7 @@ internal class TestArbeidsgiverInspektør(
     private var inUtbetaling = false
     private var inFeriepengeutbetaling = false
     private val forlengelserFraInfotrygd = mutableMapOf<Int, ForlengelseFraInfotrygd>()
-    private val hendelseIder = mutableMapOf<Int, Set<UUID>>()
+    private val hendelseIder = mutableMapOf<Int, Set<Sporing>>()
     private val inntektskilder = mutableMapOf<Int, Inntektskilde>()
     private val periodetyper = mutableMapOf<Int, Periodetype>()
 
@@ -83,7 +84,7 @@ internal class TestArbeidsgiverInspektør(
         }
 
         override fun preVisitArbeidsgiver(arbeidsgiver: Arbeidsgiver, id: UUID, organisasjonsnummer: String) {
-            if (organisasjonsnummer == valgfriOrgnummer?.toString()) this.arbeidsgiver = arbeidsgiver
+            if (organisasjonsnummer == valgfriOrgnummer) this.arbeidsgiver = arbeidsgiver
             if (this::arbeidsgiver.isInitialized) return
             this.arbeidsgiver = arbeidsgiver
         }
@@ -140,7 +141,7 @@ internal class TestArbeidsgiverInspektør(
         skjæringstidspunktFraInfotrygd: LocalDate?,
         periodetype: Periodetype,
         forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
-        hendelseIder: Set<UUID>,
+        hendelseIder: Set<Sporing>,
         inntektsmeldingInfo: InntektsmeldingInfo?,
         inntektskilde: Inntektskilde
     ) {
@@ -176,7 +177,7 @@ internal class TestArbeidsgiverInspektør(
         skjæringstidspunktFraInfotrygd: LocalDate?,
         periodetype: Periodetype,
         forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
-        hendelseIder: Set<UUID>,
+        hendelseIder: Set<Sporing>,
         inntektsmeldingInfo: InntektsmeldingInfo?,
         inntektskilde: Inntektskilde
     ) {
@@ -364,7 +365,7 @@ internal class TestArbeidsgiverInspektør(
             skjæringstidspunktFraInfotrygd: LocalDate?,
             periodetype: Periodetype,
             forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
-            hendelseIder: Set<UUID>,
+            hendelseIder: Set<Sporing>,
             inntektsmeldingInfo: InntektsmeldingInfo?,
             inntektskilde: Inntektskilde
         ) {
@@ -429,7 +430,7 @@ internal class TestArbeidsgiverInspektør(
 
     internal fun vedtaksperioder(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperiodeIdInnhenter.finn(vedtaksperioder)
 
-    internal fun hendelseIder(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperiodeIdInnhenter.finn(hendelseIder)
+    internal fun hendelseIder(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperiodeIdInnhenter.finn(hendelseIder).ider()
 
     internal fun fagsystemId(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperiodeIdInnhenter.finn(fagsystemIder)
 

@@ -746,7 +746,8 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
         assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET_UTEN_UTBETALING)
-        SubsumsjonInspektør(jurist).assertIkkeOppfylt(
+        SubsumsjonInspektør(jurist).assertFlereIkkeOppfylt(
+            antall = 2,
             paragraf = PARAGRAF_8_17,
             ledd = 1.ledd,
             bokstav = BOKSTAV_A,

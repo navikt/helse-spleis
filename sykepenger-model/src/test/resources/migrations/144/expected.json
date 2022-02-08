@@ -3,6 +3,7 @@
         {
             "vedtaksperioder": [
                 {
+                    "id": "AC36B236-0DE9-4CAE-8F5F-5468DC56407A",
                     "hendelseIder": {
                         "791D9EA4-D1FD-4605-838B-AE4EE07B09D8": "Sykmelding",
                         "1E235A89-7C1E-49C8-8B05-1E3F4DB70417": "Inntektsmelding"
@@ -14,6 +15,7 @@
         {
             "vedtaksperioder": [
                 {
+                    "id": "4D7DDD95-3A23-4D7A-9E9A-62D01E86A3AD",
                     "hendelseIder": {
                         "9C404C60-B696-4E49-B66F-621E308F7D3A": "Søknad",
                         "387AF1E4-8667-4648-8980-5B444DEF43E6": "Søknad",
@@ -24,6 +26,7 @@
             "forkastede": [
                 {
                     "vedtaksperiode": {
+                        "id": "87D32FF1-07F2-445E-B35E-D88B56715861",
                         "hendelseIder": {
                                 "4594D999-2D43-4C90-AEAE-F710B57130EE": "OverstyrInntekt",
                                 "29B6E217-49B7-4B1F-8C31-DC9EBB6E5F46": "OverstyrArbeidsforhold"

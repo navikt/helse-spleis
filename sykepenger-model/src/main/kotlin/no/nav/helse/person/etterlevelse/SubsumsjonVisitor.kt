@@ -7,7 +7,7 @@ import no.nav.helse.person.Paragraf
 import no.nav.helse.person.Punktum
 import java.time.LocalDate
 
-interface SubsumsjonVisitor {
+internal interface SubsumsjonVisitor {
     fun preVisitSubsumsjon(
         utfall: Subsumsjon.Utfall,
         versjon: LocalDate,
@@ -17,7 +17,7 @@ interface SubsumsjonVisitor {
         bokstav: Bokstav?,
         input: Map<String, Any>,
         output: Map<String, Any>,
-        kontekster: Map<String, String>
+        kontekster: Map<String, KontekstType>
     ) {}
 
     fun visitGrupperbarSubsumsjon(perioder: List<Periode>) {}
@@ -32,6 +32,6 @@ interface SubsumsjonVisitor {
         bokstav: Bokstav?,
         input: Map<String, Any>,
         output: Map<String, Any>,
-        kontekster: Map<String, String>
+        kontekster: Map<String, KontekstType>
     ) {}
 }

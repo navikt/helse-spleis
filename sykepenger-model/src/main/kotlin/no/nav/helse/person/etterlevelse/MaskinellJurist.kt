@@ -11,6 +11,7 @@ import no.nav.helse.person.Ledd.*
 import no.nav.helse.person.Ledd.Companion.ledd
 import no.nav.helse.person.Paragraf.*
 import no.nav.helse.person.Punktum.Companion.punktum
+import no.nav.helse.person.Sporing.Companion.toMap
 import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall
 import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall.*
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Tidslinjedag.Companion.dager
@@ -23,7 +24,7 @@ import java.util.*
 
 class MaskinellJurist private constructor(
     private val parent: MaskinellJurist?,
-    private val kontekster: Map<String, String>,
+    private val kontekster: Map<String, KontekstType>,
     private var periode: Periode? = null
 ) : SubsumsjonObserver {
 
@@ -36,14 +37,21 @@ class MaskinellJurist private constructor(
         parent?.leggTil(subsumsjon)
     }
 
-    private fun kontekster(): Map<String, String> = this.kontekster.toMap()
+    private fun kontekster(): Map<String, KontekstType> = this.kontekster.toMap()
 
-    fun medFødselsnummer(fødselsnummer: Fødselsnummer) = kopierMedKontekst(mapOf("fødselsnummer" to fødselsnummer.toString()))
-    fun medOrganisasjonsnummer(organisasjonsnummer: String) = kopierMedKontekst(mapOf("organisasjonsnummer" to organisasjonsnummer))
-    fun medVedtaksperiode(vedtaksperiodeId: UUID, hendelseIder: List<UUID>, periode: Periode) =
-        kopierMedKontekst(mapOf("vedtaksperiode" to vedtaksperiodeId.toString()), periode)
+    fun medFødselsnummer(fødselsnummer: Fødselsnummer) =
+        kopierMedKontekst(mapOf(fødselsnummer.toString() to KontekstType.Fødselsnummer) + kontekster.filterNot { it.value == KontekstType.Fødselsnummer })
 
-    private fun kopierMedKontekst(kontekster: Map<String, String>, periode: Periode? = null) = MaskinellJurist(this, this.kontekster + kontekster, periode)
+    fun medOrganisasjonsnummer(organisasjonsnummer: String) =
+        kopierMedKontekst(mapOf(organisasjonsnummer to KontekstType.Organisasjonsnummer) + kontekster.filterNot { it.value == KontekstType.Organisasjonsnummer })
+
+    internal fun medVedtaksperiode(vedtaksperiodeId: UUID, hendelseIder: Set<Sporing>, periode: Periode) =
+        kopierMedKontekst(
+            mapOf(vedtaksperiodeId.toString() to KontekstType.Vedtaksperiode) + hendelseIder.toMap().map { it.key.toString() to it.value.tilKontekst() } + kontekster,
+            periode
+        )
+
+    private fun kopierMedKontekst(kontekster: Map<String, KontekstType>, periode: Periode? = null) = MaskinellJurist(this, kontekster, periode)
 
     override fun `§ 8-2 ledd 1`(
         oppfylt: Boolean,
@@ -478,7 +486,7 @@ class MaskinellJurist private constructor(
 
     data class SubsumsjonEvent(
         val id: UUID = UUID.randomUUID(),
-        val sporing: Map<String, String>,
+        val sporing: Map<KontekstType, List<String>>,
         val lovverk: String,
         val ikrafttredelse: String,
         val paragraf: String,
@@ -511,10 +519,20 @@ class MaskinellJurist private constructor(
                         bokstav: Bokstav?,
                         input: Map<String, Any>,
                         output: Map<String, Any>,
-                        kontekster: Map<String, String>
+                        kontekster: Map<String, KontekstType>
                     ) {
                         event = SubsumsjonEvent(
-                            sporing = kontekster.toMutableMap().apply { remove("fødselsnummer") },
+                            sporing = kontekster.toMutableMap()
+                                .filterNot { it.value == KontekstType.Fødselsnummer }
+                                .toList()
+                                .fold(mutableMapOf()) { acc, kontekst ->
+                                    acc.compute(kontekst.second) { _, value ->
+                                        value?.plus(
+                                            kontekst.first
+                                        ) ?: mutableListOf(kontekst.first)
+                                    }
+                                    acc
+                                },
                             lovverk = "folketrygdloven",
                             ikrafttredelse = paragrafVersjonFormaterer.format(versjon),
                             paragraf = paragraf.ref,
@@ -530,4 +548,26 @@ class MaskinellJurist private constructor(
             }
         }
     }
+}
+
+
+internal fun Sporing.Type.tilKontekst() = when (this) {
+    Sporing.Type.Sykmelding -> KontekstType.Sykmelding
+    Sporing.Type.Søknad -> KontekstType.Søknad
+    Sporing.Type.Inntektsmelding -> KontekstType.Inntektsmelding
+    Sporing.Type.OverstyrTidslinje -> KontekstType.OverstyrTidslinje
+    Sporing.Type.OverstyrInntekt -> KontekstType.OverstyrInntekt
+    Sporing.Type.OverstyrArbeidsforhold -> KontekstType.OverstyrArbeidsforhold
+}
+
+enum class KontekstType {
+    Fødselsnummer,
+    Organisasjonsnummer,
+    Vedtaksperiode,
+    Sykmelding,
+    Søknad,
+    Inntektsmelding,
+    OverstyrTidslinje,
+    OverstyrInntekt,
+    OverstyrArbeidsforhold,
 }

@@ -1,6 +1,7 @@
 package no.nav.helse.spleis
 
 import no.nav.helse.Toggle
+import no.nav.helse.person.etterlevelse.KontekstType
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -48,7 +49,7 @@ internal class SubsumsjonMediator(
                     "kilde" to "spleis",
                     "versjonAvKode" to versjonAvKode,
                     "fodselsnummer" to fødselsnummer,
-                    "sporing" to event.sporing.mapValues { listOf(it.value) },
+                    "sporing" to event.sporing.map { it.key.tilEkstern() to it.value }.toMap(),
                     "lovverk" to event.lovverk,
                     "lovverksversjon" to event.ikrafttredelse,
                     "paragraf" to event.paragraf,
@@ -62,5 +63,17 @@ internal class SubsumsjonMediator(
                 }
             )
         )
+    }
+
+    private fun KontekstType.tilEkstern() = when(this) {
+        KontekstType.Fødselsnummer -> "fodselsnummer"
+        KontekstType.Organisasjonsnummer -> "organisasjonsnummer"
+        KontekstType.Vedtaksperiode -> "vedtaksperiode"
+        KontekstType.Sykmelding -> "sykmelding"
+        KontekstType.Søknad -> "soknad"
+        KontekstType.Inntektsmelding -> "inntektsmelding"
+        KontekstType.OverstyrTidslinje -> "overstyrTidslinje"
+        KontekstType.OverstyrInntekt -> "overstyrInntekt"
+        KontekstType.OverstyrArbeidsforhold -> "overstyrArbeidsforhold"
     }
 }

@@ -19,15 +19,15 @@ internal class MaskinellJuristTest {
         val vedtaksperiodeJurist = MaskinellJurist()
             .medFødselsnummer("10052088033".somFødselsnummer())
             .medOrganisasjonsnummer("123456789")
-            .medVedtaksperiode(UUID.fromString("6bce6c83-28ab-4a8c-b7f6-8402988bc8fc"), emptyList(), Periode(1.januar, 31.januar))
+            .medVedtaksperiode(UUID.fromString("6bce6c83-28ab-4a8c-b7f6-8402988bc8fc"), emptySet(), Periode(1.januar, 31.januar))
 
         vedtaksperiodeJurist.`§ 8-2 ledd 1`(true, LocalDate.now(), 1, emptyList(), 1)
 
         assertKontekster(
             vedtaksperiodeJurist.subsumsjoner()[0],
-            "fødselsnummer" to "10052088033",
-            "organisasjonsnummer" to "123456789",
-            "vedtaksperiode" to "6bce6c83-28ab-4a8c-b7f6-8402988bc8fc"
+             "10052088033" to KontekstType.Fødselsnummer,
+            "123456789" to KontekstType.Organisasjonsnummer,
+            "6bce6c83-28ab-4a8c-b7f6-8402988bc8fc" to KontekstType.Vedtaksperiode
         )
     }
 
@@ -42,14 +42,14 @@ internal class MaskinellJuristTest {
 
         assertKontekster(
             arbeidsgiverJurist.subsumsjoner()[0],
-            "fødselsnummer" to "10052088033",
-            "organisasjonsnummer" to "987654321",
+            "10052088033" to KontekstType.Fødselsnummer,
+            "987654321" to KontekstType.Organisasjonsnummer,
         )
     }
 
-    private fun assertKontekster(subsumsjon: Subsumsjon, vararg kontekster: Pair<String, String>) {
+    private fun assertKontekster(subsumsjon: Subsumsjon, vararg kontekster: Pair<String, KontekstType>) {
         val inspektør = object : SubsumsjonVisitor {
-            lateinit var kontekster: Map<String, String>
+            lateinit var kontekster: Map<String, KontekstType>
 
             init {
                 subsumsjon.accept(this)
@@ -64,7 +64,7 @@ internal class MaskinellJuristTest {
                 bokstav: Bokstav?,
                 input: Map<String, Any>,
                 output: Map<String, Any>,
-                kontekster: Map<String, String>
+                kontekster: Map<String, KontekstType>
             ) {
                 this.kontekster = kontekster
             }

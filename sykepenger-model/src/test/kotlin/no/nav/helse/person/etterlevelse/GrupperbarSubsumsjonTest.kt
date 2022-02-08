@@ -231,7 +231,7 @@ internal class GrupperbarSubsumsjonTest {
             bokstav: Bokstav?,
             input: Map<String, Any>,
             output: Map<String, Any>,
-            kontekster: Map<String, String>
+            kontekster: Map<String, KontekstType>
         ) {
             this.output = output
         }

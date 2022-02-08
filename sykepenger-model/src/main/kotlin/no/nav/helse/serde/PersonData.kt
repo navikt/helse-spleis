@@ -6,6 +6,7 @@ import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.person.*
+import no.nav.helse.person.Sporing.Companion.tilSporing
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.infotrygdhistorikk.*
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.ArbeidsforholdhistorikkInnslagData.Companion.tilArbeidsforholdhistorikk
@@ -809,7 +810,7 @@ internal data class PersonData(
             private val skjæringstidspunktFraInfotrygd: LocalDate?,
             private val skjæringstidspunkt: LocalDate?,
             private val sykdomstidslinje: SykdomstidslinjeData,
-            private val hendelseIder: MutableSet<UUID>,
+            private val hendelseIder: Map<UUID, Sporing.Type>,
             private val inntektsmeldingInfo: InntektsmeldingInfoHistorikkElementData.InntektsmeldingInfoData?,
             private val fom: LocalDate,
             private val tom: LocalDate,
@@ -823,7 +824,6 @@ internal data class PersonData(
             private val opprettet: LocalDateTime,
             private val oppdatert: LocalDateTime
         ) {
-
             internal fun createVedtaksperiode(
                 person: Person,
                 arbeidsgiver: Arbeidsgiver,
@@ -834,6 +834,7 @@ internal data class PersonData(
                 inntektsmeldingInfoHistorikk: List<InntektsmeldingInfoHistorikkElementData>,
                 jurist: MaskinellJurist
             ): Vedtaksperiode {
+                val sporingIder = hendelseIder.tilSporing()
                 val sykmeldingsperiode = Periode(sykmeldingFom, sykmeldingTom)
                 return Vedtaksperiode::class.primaryConstructor!!
                     .apply { isAccessible = true }
@@ -847,7 +848,7 @@ internal data class PersonData(
                         parseTilstand(this.tilstand),
                         skjæringstidspunktFraInfotrygd,
                         sykdomstidslinje.createSykdomstidslinje(),
-                        hendelseIder,
+                        sporingIder.toMutableSet(),
                         inntektsmeldingInfo?.let { inntektsmeldingInfoHistorikk.finn(skjæringstidspunktFraInfotrygd ?: skjæringstidspunkt, it) },
                         Periode(fom, tom),
                         sykmeldingsperiode,
@@ -857,7 +858,7 @@ internal data class PersonData(
                         inntektskilde,
                         opprettet,
                         oppdatert,
-                        jurist.medVedtaksperiode(id, hendelseIder.toList(), sykmeldingsperiode)
+                        jurist.medVedtaksperiode(id, sporingIder, sykmeldingsperiode)
                     )
             }
 

@@ -2,6 +2,7 @@ package no.nav.helse.inspectors
 
 import no.nav.helse.person.*
 import no.nav.helse.person.AbstractPersonTest.Companion.ORGNUMMER
+import no.nav.helse.person.etterlevelse.KontekstType
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall
 import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall.*
@@ -24,12 +25,12 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
         val punktum: Punktum?,
         val bokstav: Bokstav?,
         val versjon: LocalDate,
-        val sporing: Map<String, String>,
+        val sporing: Map<String, KontekstType>,
         val utfall: Utfall,
         val input: Map<String, Any>,
         val output: Map<String, Any>
     ) {
-        fun vedtaksperiodeIdFraSporing(): UUID = UUID.fromString(sporing["vedtaksperiode"])
+        fun vedtaksperiodeIdFraSporing(): UUID = UUID.fromString(sporing.filter { it.value == KontekstType.Vedtaksperiode }.keys.first())
     }
 
     init {
@@ -109,6 +110,38 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
         assertResultat(input, output, resultat)
     }
 
+    internal fun assertFlereIkkeOppfylt(
+        antall: Int,
+        paragraf: Paragraf,
+        versjon: LocalDate,
+        ledd: Ledd,
+        punktum: Punktum? = null,
+        bokstav: Bokstav? = null,
+        input: Map<String, Any>,
+        output: Map<String, Any>,
+        vedtaksperiodeId: IdInnhenter? = null,
+        organisasjonsnummer: String = ORGNUMMER
+    ) {
+        val resultat = subsumsjoner.filter {
+            it.paragraf == paragraf
+                && (versjon == it.versjon) ?: true
+                && (VILKAR_IKKE_OPPFYLT == it.utfall) ?: true
+                && (ledd == it.ledd) ?: true
+                && punktum?.equals(it.punktum) ?: true
+                && bokstav?.equals(it.bokstav) ?: true
+                && (input == it.input) ?: true
+                && (output == it.output) ?: true
+                && vedtaksperiodeId?.id(organisasjonsnummer)?.equals(it.vedtaksperiodeIdFraSporing()) ?: true
+        }.let {
+            assertEquals(antall, it.size, "Forventer $antall subsumsjoner for vilkåret. Subsumsjoner funnet: $it")
+            it
+        }
+        resultat.forEach {
+            assertEquals(VILKAR_IKKE_OPPFYLT, it.utfall) { "Forventet ikke oppfylt $paragraf $ledd $punktum" }
+            assertResultat(input, output, it)
+        }
+    }
+
     internal fun assertVurdert(
         paragraf: Paragraf,
         ledd: Ledd? = null,
@@ -162,7 +195,7 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
         bokstav: Bokstav?,
         input: Map<String, Any>,
         output: Map<String, Any>,
-        kontekster: Map<String, String>
+        kontekster: Map<String, KontekstType>
     ) {
         subsumsjoner.add(Subsumsjon(paragraf, ledd, punktum, bokstav, versjon, kontekster, utfall, input, output))
     }

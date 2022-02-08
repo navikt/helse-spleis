@@ -1068,9 +1068,9 @@ internal class Arbeidsgiver private constructor(
     internal fun søknadsperioder(hendelseIder: Set<UUID>) = sykdomshistorikk.søknadsperioder(hendelseIder)
 
 
-    internal fun loggførHendelsesreferanse(organisasjonsnummer: String, skjæringstidspunkt: LocalDate, meldingsreferanseId: UUID) {
+    internal fun loggførHendelsesreferanse(organisasjonsnummer: String, skjæringstidspunkt: LocalDate, overstyrInntekt: OverstyrInntekt) {
         if (this.organisasjonsnummer != organisasjonsnummer) return
-        vedtaksperioder.filter { it.gjelder(skjæringstidspunkt) }.forEach { it.loggførHendelsesreferanse(meldingsreferanseId) }
+        vedtaksperioder.filter { it.gjelder(skjæringstidspunkt) }.forEach { it.loggførHendelsesreferanse(overstyrInntekt) }
     }
 
     fun harFerdigstiltPeriode() = vedtaksperioder.any(ER_ELLER_HAR_VÆRT_AVSLUTTET) || forkastede.harAvsluttedePerioder()

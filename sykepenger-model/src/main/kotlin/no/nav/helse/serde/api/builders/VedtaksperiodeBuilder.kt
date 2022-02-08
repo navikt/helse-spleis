@@ -4,6 +4,7 @@ import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.*
+import no.nav.helse.person.Sporing.Companion.ider
 import no.nav.helse.serde.api.*
 import no.nav.helse.serde.api.dto.UtbetalingshistorikkElementDTO
 import no.nav.helse.serde.api.v2.HendelseDTO
@@ -32,7 +33,7 @@ internal class VedtaksperiodeBuilder(
     private val sykepengegrunnlag: Inntekt?,
     private val gruppeId: UUID,
     private val fødselsnummer: String,
-    private val hendelseIder: Set<UUID>,
+    private val hendelseIder: Set<Sporing>,
     private val vilkårsgrunnlagInntektBuilder: VilkårsgrunnlagInntektBuilder,
     private val forkastet: Boolean
 ) : BuilderState() {
@@ -64,7 +65,7 @@ internal class VedtaksperiodeBuilder(
     private var utbetalingId: UUID? = null
 
     internal fun build(hendelser: List<HendelseDTO>, utbetalinger: List<UtbetalingshistorikkElementDTO>): VedtaksperiodeDTOBase {
-        val relevanteHendelser = hendelser.filter { it.id in hendelseIder.map { id -> id.toString() } }
+        val relevanteHendelser = hendelser.filter { it.id in hendelseIder.ider().map(UUID::toString) }
 
         val utbetaling = utbetalingId?.let { UtbetalingshistorikkElementDTO.UtbetalingDTO.utbetalingFor(utbetalinger, it) }
 
@@ -295,7 +296,7 @@ internal class VedtaksperiodeBuilder(
         skjæringstidspunktFraInfotrygd: LocalDate?,
         periodetype: Periodetype,
         forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
-        hendelseIder: Set<UUID>,
+        hendelseIder: Set<Sporing>,
         inntektsmeldingInfo: InntektsmeldingInfo?,
         inntektskilde: Inntektskilde
     ) {

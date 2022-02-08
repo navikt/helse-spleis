@@ -307,7 +307,7 @@ internal interface VedtaksperiodeVisitor : UtbetalingVisitor, SykdomstidslinjeVi
         skjæringstidspunktFraInfotrygd: LocalDate?,
         periodetype: Periodetype,
         forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
-        hendelseIder: Set<UUID>,
+        hendelseIder: Set<Sporing>,
         inntektsmeldingInfo: InntektsmeldingInfo?,
         inntektskilde: Inntektskilde
     ) {
@@ -328,7 +328,7 @@ internal interface VedtaksperiodeVisitor : UtbetalingVisitor, SykdomstidslinjeVi
         skjæringstidspunktFraInfotrygd: LocalDate?,
         periodetype: Periodetype,
         forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
-        hendelseIder: Set<UUID>,
+        hendelseIder: Set<Sporing>,
         inntektsmeldingInfo: InntektsmeldingInfo?,
         inntektskilde: Inntektskilde
     ) {

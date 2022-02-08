@@ -1,9 +1,6 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.person.ArbeidstakerHendelse
-import no.nav.helse.person.Inntektshistorikk
-import no.nav.helse.person.Person
-import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.*
 import no.nav.helse.økonomi.Inntekt
 import java.time.LocalDate
 import java.util.*
@@ -29,6 +26,10 @@ class OverstyrInntekt(
         )
 
     internal fun loggførHendelsesreferanse(person: Person) {
-        person.loggførHendelsesreferanse(organisasjonsnummer, skjæringstidspunkt, meldingsreferanseId())
+        person.loggførHendelsesreferanse(organisasjonsnummer, skjæringstidspunkt, this)
+    }
+
+    internal fun leggTil(hendelseIder: MutableSet<Sporing>) {
+        hendelseIder.add(Sporing(meldingsreferanseId(), Sporing.Type.OverstyrInntekt))
     }
 }

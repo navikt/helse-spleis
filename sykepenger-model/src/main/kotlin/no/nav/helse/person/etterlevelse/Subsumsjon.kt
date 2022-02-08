@@ -9,9 +9,9 @@ import no.nav.helse.person.Paragraf
 import no.nav.helse.person.Punktum
 import java.time.LocalDate
 
-typealias SammenstillingStrategi<T> = (other: T) -> List<Subsumsjon>
+internal typealias SammenstillingStrategi<T> = (other: T) -> List<Subsumsjon>
 
-abstract class Subsumsjon {
+internal abstract class Subsumsjon {
 
     enum class Utfall {
         VILKAR_OPPFYLT, VILKAR_IKKE_OPPFYLT, VILKAR_UAVKLART, VILKAR_BEREGNET
@@ -26,7 +26,7 @@ abstract class Subsumsjon {
 
     abstract val input: Map<String, Any>
     abstract val output: Map<String, Any>
-    protected abstract val kontekster: Map<String, String>
+    protected abstract val kontekster: Map<String, KontekstType>
 
     internal fun accept(visitor: SubsumsjonVisitor) {
         visitor.preVisitSubsumsjon(utfall, versjon, paragraf, ledd, punktum, bokstav, input, output, kontekster)
@@ -89,7 +89,7 @@ abstract class Subsumsjon {
     }
 }
 
-class EnkelSubsumsjon(
+internal class EnkelSubsumsjon(
     override val utfall: Utfall,
     override val versjon: LocalDate,
     override val paragraf: Paragraf,
@@ -98,7 +98,7 @@ class EnkelSubsumsjon(
     override val bokstav: Bokstav? = null,
     override val input: Map<String, Any>,
     override val output: Map<String, Any>,
-    override val kontekster: Map<String, String>
+    override val kontekster: Map<String, KontekstType>
 ) : Subsumsjon() {
     override fun sammenstill(subsumsjoner: List<Subsumsjon>) =
         sammenstill<EnkelSubsumsjon>(subsumsjoner) { subsumsjoner.erstatt(it, this) }
@@ -106,7 +106,7 @@ class EnkelSubsumsjon(
     override fun acceptSpesifikk(visitor: SubsumsjonVisitor) {}
 }
 
-class GrupperbarSubsumsjon private constructor(
+internal class GrupperbarSubsumsjon private constructor(
     private val perioder: List<Periode>,
     override val utfall: Utfall,
     override val versjon: LocalDate,
@@ -116,7 +116,7 @@ class GrupperbarSubsumsjon private constructor(
     override val bokstav: Bokstav? = null,
     private val originalOutput: Map<String, Any>,
     override val input: Map<String, Any>,
-    override val kontekster: Map<String, String>
+    override val kontekster: Map<String, KontekstType>
 ) : Subsumsjon() {
     internal constructor(
         dato: LocalDate,
@@ -128,7 +128,7 @@ class GrupperbarSubsumsjon private constructor(
         ledd: Ledd,
         punktum: Punktum? = null,
         bokstav: Bokstav? = null,
-        kontekster: Map<String, String>
+        kontekster: Map<String, KontekstType>
     ) : this(listOf(dato til dato), utfall, versjon, paragraf, ledd, punktum, bokstav, output, input, kontekster)
 
     override val output: Map<String, Any> = originalOutput.toMutableMap().apply {
@@ -170,7 +170,7 @@ class GrupperbarSubsumsjon private constructor(
     }
 }
 
-class BetingetSubsumsjon(
+internal class BetingetSubsumsjon(
     private val funnetRelevant: Boolean,
     override val utfall: Utfall,
     override val versjon: LocalDate,
@@ -180,7 +180,7 @@ class BetingetSubsumsjon(
     override val bokstav: Bokstav? = null,
     override val input: Map<String, Any>,
     override val output: Map<String, Any>,
-    override val kontekster: Map<String, String>
+    override val kontekster: Map<String, KontekstType>
 ) : Subsumsjon() {
     override fun sammenstill(subsumsjoner: List<Subsumsjon>): List<Subsumsjon> {
         if (!funnetRelevant) return subsumsjoner

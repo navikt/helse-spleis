@@ -2,11 +2,17 @@ package no.nav.helse.serde.migration
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
+import no.nav.helse.person.Sporing
 import no.nav.helse.serde.serdeObjectMapper
+import org.slf4j.LoggerFactory
 import java.util.*
 
 internal class V144TyperPåHendelserIVedtaksperiode : JsonMigration(version = 144) {
     override val description: String = "Legger til typer på hendelses-ider i vedtaksperioden"
+
+    private companion object {
+        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
+    }
 
     override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         val meldinger: Map<UUID, Pair<Navn, Json>> = meldingerSupplier.hentMeldinger()
@@ -21,14 +27,34 @@ internal class V144TyperPåHendelserIVedtaksperiode : JsonMigration(version = 14
     }
 
 
-    fun List<JsonNode>.migrerInnHendelseNavn(meldinger: Map<UUID, Pair<Navn, Json>>) {
+    private fun List<JsonNode>.migrerInnHendelseNavn(meldinger: Map<UUID, Pair<Navn, Json>>) {
         this.map { it as ObjectNode }
             .forEach {
+                val vedtaksperiodeId = UUID.fromString(it["id"].asText())
                 val hendelser: ObjectNode = it.remove("hendelseIder").fold(serdeObjectMapper.createObjectNode()) { acc, idNode ->
-                    val type = meldinger[UUID.fromString(idNode.asText())]?.let { (type, _) -> type } ?: "UKJENT"
-                    acc.put(idNode.asText(), type)
+                    val id = UUID.fromString(idNode.asText())
+                    val hendelseType = meldinger[id]
+                        ?.let { (type, _) -> type }
+                        ?: return sikkerlogg.warn("Fjerner hendelse med id=$id fra vedtaksperiode med id=$vedtaksperiodeId, da hendelsen ikke finnes i meldingstabellen i spleisdb")
+                    val sporingsType = hendelseTypeTilSporing(hendelseType, vedtaksperiodeId)
+                    acc.put(idNode.asText(), sporingsType.name)
+                    acc
                 }
                 it.set<ObjectNode>("hendelseIder", hendelser)
             }
     }
+
+    private fun hendelseTypeTilSporing(hendelseType: String, vedtaksperiodeId: UUID): Sporing.Type {
+        return when (hendelseType) {
+            "NY_SØKNAD" -> Sporing.Type.Sykmelding
+            "SENDT_SØKNAD_ARBEIDSGIVER" -> Sporing.Type.Søknad
+            "SENDT_SØKNAD_NAV" -> Sporing.Type.Søknad
+            "INNTEKTSMELDING" -> Sporing.Type.Inntektsmelding
+            "OVERSTYRTIDSLINJE" -> Sporing.Type.OverstyrTidslinje
+            "OVERSTYRINNTEKT" -> Sporing.Type.OverstyrInntekt
+            "OVERSTYRARBEIDSFORHOLD" -> Sporing.Type.OverstyrArbeidsforhold
+            else -> throw IllegalArgumentException("Hendelse med type=$hendelseType var ikke forventet i migrering. VedtaksperiodeId=$vedtaksperiodeId")
+        }
+    }
 }
+

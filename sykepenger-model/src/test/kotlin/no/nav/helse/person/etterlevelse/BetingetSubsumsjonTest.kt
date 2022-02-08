@@ -52,7 +52,7 @@ internal class BetingetSubsumsjonTest {
         bokstav: Bokstav? = null,
         input: Map<String, Any> = emptyMap(),
         output: Map<String, Any> = emptyMap(),
-        kontekster: Map<String, String> = emptyMap()
+        kontekster: Map<String, KontekstType> = emptyMap()
     ) {
         vurderinger = BetingetSubsumsjon(funnetRelevant, utfall, versjon, paragraf, ledd, punktum, bokstav, input, output, kontekster).sammenstill(vurderinger)
     }

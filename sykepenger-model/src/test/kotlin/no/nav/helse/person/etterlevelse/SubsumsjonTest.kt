@@ -117,7 +117,7 @@ internal class SubsumsjonTest {
         punktum: Punktum? = null,
         input: Map<String, Any> = mapOf(),
         output: Map<String, Any> = mapOf(),
-        kontekster: Map<String, String> = mapOf()
+        kontekster: Map<String, KontekstType> = mapOf()
     ) = object : Subsumsjon() {
         override val utfall = utfall
         override val versjon = versjon

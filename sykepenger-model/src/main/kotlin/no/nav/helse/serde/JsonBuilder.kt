@@ -6,6 +6,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.person.*
+import no.nav.helse.person.Sporing.Companion.toMap
 import no.nav.helse.person.infotrygdhistorikk.Friperiode
 import no.nav.helse.person.infotrygdhistorikk.UgyldigPeriode
 import no.nav.helse.person.infotrygdhistorikk.UkjentInfotrygdperiode
@@ -28,7 +29,6 @@ import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinjeberegning
 import no.nav.helse.økonomi.*
@@ -193,7 +193,7 @@ internal class JsonBuilder : AbstractBuilder() {
             skjæringstidspunktFraInfotrygd: LocalDate?,
             periodetype: Periodetype,
             forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
-            hendelseIder: Set<UUID>,
+            hendelseIder: Set<Sporing>,
             inntektsmeldingInfo: InntektsmeldingInfo?,
             inntektskilde: Inntektskilde
         ) {
@@ -1017,7 +1017,7 @@ internal class JsonBuilder : AbstractBuilder() {
             skjæringstidspunktFraInfotrygd: LocalDate?,
             periodetype: Periodetype,
             forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
-            hendelseIder: Set<UUID>,
+            hendelseIder: Set<Sporing>,
             inntektsmeldingInfo: InntektsmeldingInfo?,
             inntektskilde: Inntektskilde
         ) {
@@ -1366,7 +1366,7 @@ internal class JsonBuilder : AbstractBuilder() {
             skjæringstidspunktFraInfotrygd: LocalDate?,
             periodetype: Periodetype,
             forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
-            hendelseIder: Set<UUID>,
+            hendelseIder: Set<Sporing>,
             inntektsmeldingInfo: InntektsmeldingInfo?,
             inntektskilde: Inntektskilde
         ) {
@@ -1376,7 +1376,7 @@ internal class JsonBuilder : AbstractBuilder() {
                 "tom" to periode.endInclusive,
                 "sykmeldingFom" to opprinneligPeriode.start,
                 "sykmeldingTom" to opprinneligPeriode.endInclusive,
-                "hendelseIder" to hendelseIder,
+                "hendelseIder" to hendelseIder.toMap(),
                 "periodetype" to periodetype,
                 "inntektskilde" to inntektskilde,
                 "tilstand" to tilstand.type.name,
@@ -1410,7 +1410,7 @@ internal class JsonBuilder : AbstractBuilder() {
             leggTilDag(dato, UtbetalingsdagJsonBuilder(TypeData.NavHelgDag).økonomi(økonomi))
         }
 
-        override fun visit(dag: Utbetalingsdag.Arbeidsdag, dato: LocalDate, økonomi: Økonomi) {
+        override fun visit(dag: Arbeidsdag, dato: LocalDate, økonomi: Økonomi) {
             leggTilDag(dato, UtbetalingsdagJsonBuilder(TypeData.Arbeidsdag).økonomi(økonomi))
         }
 

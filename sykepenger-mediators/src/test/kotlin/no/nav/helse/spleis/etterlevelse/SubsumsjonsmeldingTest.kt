@@ -34,7 +34,6 @@ internal class SubsumsjonsmeldingTest {
         jurist = MaskinellJurist()
             .medFødselsnummer(fnr.somFødselsnummer())
             .medOrganisasjonsnummer("123456789")
-            .medVedtaksperiode(UUID.randomUUID(), emptyList(), Periode(1.januar, 31.januar))
         subsumsjonMediator = SubsumsjonMediator(jurist, fnr, TestHendelseMessage(fnr), versjonAvKode)
         testRapid = TestRapid()
     }

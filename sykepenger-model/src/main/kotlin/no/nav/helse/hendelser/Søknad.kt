@@ -2,6 +2,7 @@ package no.nav.helse.hendelser
 
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.IAktivitetslogg
+import no.nav.helse.person.Sporing
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.somFødselsnummer
 import no.nav.helse.sykdomstidslinje.Dag
@@ -78,6 +79,10 @@ class Søknad(
         if (it) error(ERRORTEKST_PERSON_UNDER_18_ÅR)
     }
     private fun avskjæringsdato(): LocalDate = sendtTilNAVEllerArbeidsgiver.toLocalDate().minusMonths(3).withDayOfMonth(1)
+
+    internal fun leggTil(hendelseIder: MutableSet<Sporing>) {
+        hendelseIder.add(Sporing(meldingsreferanseId(), Sporing.Type.Søknad))
+    }
 
     class Merknad(private val type: String, beskrivelse: String?) {
         private val beskrivelse = beskrivelse.takeUnless { it.isNullOrBlank() }
