@@ -142,11 +142,13 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
         håndterSøknad(Sykdom(11.januar, 31.januar, 100.prosent))
         håndterInntektsmeldingReplay(imId, 2.vedtaksperiode.id(ORGNUMMER))
 
-        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE, AVVENTER_HISTORIKK)
         assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
         assertEquals(23.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
-        assertTrue(inspektør.sykdomstidslinje[17.januar] is Dag.Arbeidsdag)
-        assertTrue(inspektør.sykdomstidslinje[22.januar] is Dag.Arbeidsdag)
+        val tidslinje = inspektør.sykdomstidslinje
+        assertTrue((1.januar til 10.januar).all { tidslinje[it] is Dag.Sykedag || tidslinje[it] is Dag.SykHelgedag })
+        assertTrue((17.januar til 22.januar).all { tidslinje[it] is Dag.Arbeidsdag || tidslinje[it] is Dag.FriskHelgedag })
+        assertTrue((23.januar til 31.januar).all { tidslinje[it] is Dag.Sykedag || tidslinje[it] is Dag.SykHelgedag })
     }
 }

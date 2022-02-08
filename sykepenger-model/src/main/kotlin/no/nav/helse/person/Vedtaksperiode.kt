@@ -162,7 +162,8 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun håndter(inntektsmelding: Inntektsmelding, other: UUID?, vedtaksperioder: List<Vedtaksperiode>): Boolean {
-        val overlapper = overlapperMedSammenhengende(inntektsmelding, other, vedtaksperioder)
+        val sammenhengendePerioder = arbeidsgiver.finnSammenhengendePeriode(skjæringstidspunkt)
+        val overlapper = overlapperMedSammenhengende(inntektsmelding, sammenhengendePerioder, other, vedtaksperioder)
         return overlapper.also {
             if (it) hendelseIder.add(inntektsmelding.meldingsreferanseId())
             if (arbeidsgiver.harRefusjonOpphørt(periode.endInclusive) && !erAvsluttet()) {
@@ -170,7 +171,15 @@ internal class Vedtaksperiode private constructor(
                 inntektsmelding.info("Ville tidligere blitt kastet ut på grunn av refusjon: Refusjon opphører i perioden")
             }
             if (!it) return@also inntektsmelding.trimLeft(periode.endInclusive)
+            val relevantePerioder = sammenhengendePerioder.dropWhile { vedtaksperiode -> !inntektsmelding.erRelevant(vedtaksperiode.periode) }
             kontekst(inntektsmelding)
+            if (this !in relevantePerioder) {
+                inntektsmelding.padLeft(periode.start)
+                return@also inntektsmelding.trimLeft(periode.endInclusive)
+            }
+            if (sammenhengendePerioder.size != relevantePerioder.size) {
+                inntektsmelding.warn("Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.")
+            }
             tilstand.håndter(this, inntektsmelding)
         }
     }
@@ -399,8 +408,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun overlapperMed(hendelse: SykdomstidslinjeHendelse) = hendelse.erRelevant(this.periode)
 
-    private fun overlapperMedSammenhengende(inntektsmelding: Inntektsmelding, other: UUID?, vedtaksperioder: List<Vedtaksperiode>): Boolean {
-        val perioder = arbeidsgiver.finnSammenhengendePeriode(skjæringstidspunkt)
+    private fun overlapperMedSammenhengende(inntektsmelding: Inntektsmelding, perioder: List<Vedtaksperiode>, other: UUID?, vedtaksperioder: List<Vedtaksperiode>): Boolean {
         return inntektsmelding.erRelevant(perioder.periode()) && relevantForReplay(other, perioder, vedtaksperioder)
     }
 

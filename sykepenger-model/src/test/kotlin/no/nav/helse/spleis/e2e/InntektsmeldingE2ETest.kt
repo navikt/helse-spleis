@@ -1005,6 +1005,11 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(8.januar, 20.januar, 100.prosent))
         håndterInntektsmelding(listOf(8.januar til 23.januar), førsteFraværsdag = 8.januar)
         assertNoErrors(2.vedtaksperiode)
+        val tidslinje = inspektør.sykdomstidslinje
+        assertTrue((1.januar til 7.januar).all { tidslinje[it] is Dag.Arbeidsdag || tidslinje[it] is Dag.FriskHelgedag })
+        assertTrue((8.januar til 23.januar).all { tidslinje[it] is Dag.Sykedag || tidslinje[it] is Dag.SykHelgedag || tidslinje[it] is Dag.Arbeidsgiverdag || tidslinje[it] is Dag.ArbeidsgiverHelgedag })
+        assertNoWarning(1.vedtaksperiode, "Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.")
+        assertWarning(2.vedtaksperiode, "Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.")
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertEquals(8.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
@@ -1287,6 +1292,58 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
             AVVENTER_HISTORIKK
         )
+    }
+
+    //@ForventetFeil("1. februar til 11. februar blir ikke mappet som arbeidsdager fordi perioden er i Avventer Uferdig, som ikke håndterer Inntektsmelding. Det lages istedenfor en warning")
+    @Test
+    fun `inntektsmelding oppgir første fraværsdag i en periode med ferie etter sykdom`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Ferie(1.februar, 11.februar))
+        // med denne inntektsmeldingen forteller arbeidsgiver én av to ting:
+        // det er arbeidsdager mellom 1. februar og 11. februar (siden det kun er februar-perioden som overlapper med inntektsmelding)
+        // ELLER at det skal være arbeidsdager i januar også. Arbeidsgiver har sendt inntektsmelding for januar, men arbeidsgiver har ingen mulighet til
+        // å fortelle oss om arbeidsdager etter gjennomført arbeidsgiverperiode: det er kun bruker som kan opplyse om det i søknaden.
+        // Dersom bruker egentlig har gjenopptatt arbeid 25. januar (f.eks.) vil ikke vi få vite om dette før inntektsmeldingen som blir sendt under.
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 12.februar)
+        val tidslinje = inspektør.sykdomstidslinje
+        assertTrue((17.januar til 31.januar).all { tidslinje[it] is Dag.Sykedag || tidslinje[it] is Dag.SykHelgedag })
+        assertFalse((1.februar til 11.februar).all { tidslinje[it] is Dag.Arbeidsdag || tidslinje[it] is Dag.FriskHelgedag })
+        assertTrue((12.februar til 28.februar).all { tidslinje[it] is Dag.Sykedag || tidslinje[it] is Dag.SykHelgedag  })
+        assertNoWarning(1.vedtaksperiode, "Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.")
+        assertWarning(2.vedtaksperiode, "Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.")
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_UFERDIG)
+    }
+
+    @Test
+    fun `inntektsmelding oppgir første fraværsdag i en periode med ferie etter sykdom med kort periode først`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(17.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
+        håndterSøknad(Sykdom(17.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Ferie(1.februar, 11.februar))
+        // med denne inntektsmeldingen forteller arbeidsgiver én av to ting:
+        // det er arbeidsdager mellom 1. februar og 11. februar (siden det kun er februar-perioden som overlapper med inntektsmelding)
+        // ELLER at det skal være arbeidsdager i januar også. Arbeidsgiver har sendt inntektsmelding for januar, men arbeidsgiver har ingen mulighet til
+        // å fortelle oss om arbeidsdager etter gjennomført arbeidsgiverperiode: det er kun bruker som kan opplyse om det i søknaden.
+        // Dersom bruker egentlig har gjenopptatt arbeid 25. januar (f.eks.) vil ikke vi få vite om dette før inntektsmeldingen som blir sendt under.
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 12.februar)
+
+        val tidslinje = inspektør.sykdomstidslinje
+        assertTrue((17.januar til 31.januar).all { tidslinje[it] is Dag.Sykedag || tidslinje[it] is Dag.SykHelgedag })
+        assertFalse((1.februar til 11.februar).all { tidslinje[it] is Dag.Arbeidsdag || tidslinje[it] is Dag.FriskHelgedag })
+        assertTrue((12.februar til 28.februar).all { tidslinje[it] is Dag.Sykedag || tidslinje[it] is Dag.SykHelgedag  })
+        assertNoWarning(1.vedtaksperiode, "Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.")
+        assertNoWarning(2.vedtaksperiode, "Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.")
+        assertWarning(3.vedtaksperiode, "Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.")
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK)
+        assertSisteTilstand(3.vedtaksperiode, AVVENTER_UFERDIG)
     }
 
     @Test
@@ -1608,6 +1665,9 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)
         håndterUtbetalingsgodkjenning(3.vedtaksperiode)
+
+        assertNoWarning(1.vedtaksperiode, "Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.")
+        assertWarning(2.vedtaksperiode, "Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.")
         assertEquals(17.januar til 31.mars, inspektør.utbetalinger.last().periode)
     }
 
