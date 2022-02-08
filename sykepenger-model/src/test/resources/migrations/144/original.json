@@ -1,0 +1,37 @@
+{
+    "arbeidsgivere": [
+        {
+            "vedtaksperioder": [
+                {
+                    "hendelseIder": [
+                        "791D9EA4-D1FD-4605-838B-AE4EE07B09D8",
+                        "1E235A89-7C1E-49C8-8B05-1E3F4DB70417"
+                    ]
+                }
+            ],
+            "forkastede": []
+        },
+        {
+            "vedtaksperioder": [
+                {
+                    "hendelseIder": [
+                        "9C404C60-B696-4E49-B66F-621E308F7D3A",
+                        "387AF1E4-8667-4648-8980-5B444DEF43E6",
+                        "14965CD7-70F6-4C9E-AF41-BB852928CE2E"
+                    ]
+                }
+            ],
+            "forkastede": [
+                {
+                    "vedtaksperiode": {
+                        "hendelseIder": [
+                            "4594D999-2D43-4C90-AEAE-F710B57130EE",
+                            "29B6E217-49B7-4B1F-8C31-DC9EBB6E5F46"
+                        ]
+                    }
+                }
+            ]
+        }
+    ],
+    "skjemaVersjon": 143
+}

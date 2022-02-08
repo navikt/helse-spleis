@@ -74,8 +74,7 @@ internal class JsonBuilder : AbstractBuilder() {
 
         private val arbeidsgivere = mutableListOf<MutableMap<String, Any?>>()
 
-        fun build() =
-            SerialisertPerson.medSkjemaversjon(serdeObjectMapper.valueToTree(personMap))
+        fun build() = SerialisertPerson.medSkjemaversjon(serdeObjectMapper.valueToTree(personMap))
 
         override fun visitPersonAktivitetslogg(aktivitetslogg: Aktivitetslogg) {
             personMap["aktivitetslogg"] = AktivitetsloggMap(aktivitetslogg).toMap()

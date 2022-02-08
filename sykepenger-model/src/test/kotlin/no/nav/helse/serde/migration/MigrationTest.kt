@@ -7,9 +7,10 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.skyscreamer.jsonassert.JSONAssert
 
 internal abstract class MigrationTest(private val migration: JsonMigration) {
+    open fun meldingerSupplier() = MeldingerSupplier.empty
 
     protected fun toNode(json: String): JsonNode = serdeObjectMapper.readTree(json)
-    protected fun migrer(json: String) = listOf(migration).migrate(toNode(json))
+    protected fun migrer(json: String) = listOf(migration).migrate(toNode(json), meldingerSupplier())
 
     protected fun assertMigration(expectedJson: String, originalJson: String) {
         assertMigrationRaw(expectedJson.readResource(), originalJson.readResource())

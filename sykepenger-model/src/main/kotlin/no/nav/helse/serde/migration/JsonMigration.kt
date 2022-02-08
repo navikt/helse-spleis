@@ -38,7 +38,7 @@ internal abstract class JsonMigration(private val version: Int) {
             sortedMigrations.forEach { it.migrate(this, supplier) }
         }
 
-        internal fun medSkjemaversjon(migrations: List<JsonMigration>, jsonNode: JsonNode) =
+        internal fun medSkjemaversjon(migrations: List<JsonMigration>, jsonNode: JsonNode): ObjectNode =
             (jsonNode as ObjectNode).put(SkjemaversjonKey, gjeldendeVersjon(migrations))
 
         internal fun skjemaVersjon(jsonNode: JsonNode) =
