@@ -8,6 +8,8 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.helse.Fødselsnummer
+import no.nav.helse.serde.migration.Json
+import no.nav.helse.serde.migration.Navn
 import no.nav.helse.spleis.PostgresProbe
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.*
 import no.nav.helse.spleis.meldinger.model.*
@@ -114,14 +116,17 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         else -> null.also { log.warn("ukjent meldingstype ${melding::class.simpleName}: melding lagres ikke") }
     }
 
-    internal fun hentAlleHendelser(fødselsnummer: Fødselsnummer): Map<UUID, String> {
+    internal fun hentAlleHendelser(fødselsnummer: Fødselsnummer): Map<UUID, Pair<Navn, Json>> {
         return using(sessionOf(dataSource)) { session ->
             session.run(
                 queryOf(
-                    "SELECT melding_id,data FROM melding WHERE fnr = ? AND melding_type IN (?, ?, ?, ?, ?, ?)",
+                    "SELECT melding_id, melding_type, data FROM melding WHERE fnr = ? AND melding_type IN (?, ?, ?, ?, ?, ?)",
                     fødselsnummer.toLong(), NY_SØKNAD.name, SENDT_SØKNAD_ARBEIDSGIVER.name, SENDT_SØKNAD_NAV.name, INNTEKTSMELDING.name, OVERSTYRTIDSLINJE.name, OVERSTYRINNTEKT.name
                 ).map {
-                    UUID.fromString(it.string("melding_id")) to it.string("data")
+                    UUID.fromString(it.string("melding_id")) to Pair<Navn, Json>(
+                        it.string("melding_type"),
+                        it.string("data")
+                    )
                 }.asList).toMap()
         }
     }

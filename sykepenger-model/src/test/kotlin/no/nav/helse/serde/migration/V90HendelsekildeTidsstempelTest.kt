@@ -9,13 +9,34 @@ import java.util.*
 internal class V90HendelsekildeTidsstempelTest {
     private val meldingerSupplier = MeldingerSupplier {
         mapOf(
-            UUID.fromString("e878d0ab-a739-412c-a990-a2f2d75171f3") to """{ "sykmeldingSkrevet": "2021-03-20T12:00:00.100022738" }""", // Sykmelding
-            UUID.fromString("05e30169-070a-4c05-bab1-ad3825260e98") to """{ "sykmeldingSkrevet": "2021-03-02T12:00:00.100022738" }""", // Sykmelding
-            UUID.fromString("debff1f8-f721-4506-8f80-7e89078cb85a") to """{ "sykmeldingSkrevet": "2021-03-10T12:00:00.100022738" }""", // Sykmelding
-            UUID.fromString("66c0e3cf-8773-4c5c-bc3c-54d94cdf323f") to """{ "sykmeldingSkrevet": "2021-03-15T12:00:00.100022738" }""", // Søknad
-            UUID.fromString("282bedc2-3cbc-4c34-9e59-1dc04ec33da9") to """{ "sykmeldingSkrevet": "2021-03-05T12:00:00.100022738" }""", // Søknad
-            UUID.fromString("df41b72d-0fa5-4e3f-b39d-360585d88f4c") to """{ "mottattDato": "2021-03-01T12:00:00.100022738" }""", // Inntektsmelding
-            UUID.fromString("376c35a1-8be7-4a69-8eda-8a4881bbcf84") to """{ "@opprettet": "2021-02-20T12:00:00.100022738" }""" // Inntektsmelding
+            UUID.fromString("e878d0ab-a739-412c-a990-a2f2d75171f3") to Pair<Navn, Json>(
+                "sykmelding",
+                """{ "sykmeldingSkrevet": "2021-03-20T12:00:00.100022738" }"""
+            ), // Sykmelding
+            UUID.fromString("05e30169-070a-4c05-bab1-ad3825260e98") to Pair<Navn, Json>(
+                "sykmelding",
+                """{ "sykmeldingSkrevet": "2021-03-02T12:00:00.100022738" }"""
+            ), // Sykmelding
+            UUID.fromString("debff1f8-f721-4506-8f80-7e89078cb85a") to Pair<Navn, Json>(
+                "sykmelding",
+                """{ "sykmeldingSkrevet": "2021-03-10T12:00:00.100022738" }"""
+            ), // Sykmelding
+            UUID.fromString("66c0e3cf-8773-4c5c-bc3c-54d94cdf323f") to Pair<Navn, Json>(
+                "søknad",
+                """{ "sykmeldingSkrevet": "2021-03-15T12:00:00.100022738" }"""
+            ), // Søknad
+            UUID.fromString("282bedc2-3cbc-4c34-9e59-1dc04ec33da9") to Pair<Navn, Json>(
+                "søknad",
+                """{ "sykmeldingSkrevet": "2021-03-05T12:00:00.100022738" }"""
+            ), // Søknad
+            UUID.fromString("df41b72d-0fa5-4e3f-b39d-360585d88f4c") to Pair<Navn, Json>(
+                "inntektsmelding",
+                """{ "mottattDato": "2021-03-01T12:00:00.100022738" }"""
+            ), // Inntektsmelding
+            UUID.fromString("376c35a1-8be7-4a69-8eda-8a4881bbcf84") to Pair<Navn, Json>(
+                "inntektsmelding",
+                """{ "@opprettet": "2021-02-20T12:00:00.100022738" }"""
+            ) // Inntektsmelding
         )
     }
 

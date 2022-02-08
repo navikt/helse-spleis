@@ -3,6 +3,8 @@ package no.nav.helse.spleis.dao
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
+import no.nav.helse.serde.migration.Json
+import no.nav.helse.serde.migration.Navn
 import java.util.*
 import javax.sql.DataSource
 
@@ -42,14 +44,17 @@ internal class HendelseDao(private val dataSource: DataSource) {
         }
     }
 
-    fun hentAlleHendelser(fødselsnummer: Long): Map<UUID, String> {
+    fun hentAlleHendelser(fødselsnummer: Long): Map<UUID, Pair<Navn, Json>> {
         return using(sessionOf(dataSource)) { session ->
             session.run(
                 queryOf(
-                    "SELECT melding_id,data FROM melding WHERE fnr = ? AND melding_type IN (${Meldingstype.values().joinToString { "?" }})",
+                    "SELECT melding_id, melding_type, data FROM melding WHERE fnr = ? AND melding_type IN (${Meldingstype.values().joinToString { "?" }})",
                     fødselsnummer, *Meldingstype.values().map(Enum<*>::name).toTypedArray()
                 ).map {
-                    UUID.fromString(it.string("melding_id")) to it.string("data")
+                    UUID.fromString(it.string("melding_id")) to Pair(
+                        it.string("melding_type"),
+                        it.string("data")
+                    )
                 }.asList
             ).toMap()
         }

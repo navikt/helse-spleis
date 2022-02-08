@@ -10,7 +10,9 @@ internal class V116LeggTilRefusjonshistorikk : JsonMigration(version = 116) {
 
     override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         val inntektsmeldinger = meldingerSupplier.hentMeldinger()
-            .mapValues { (_, melding) -> serdeObjectMapper.readTree(melding) }
+            .mapValues { (_, melding) ->
+                val (_, json) = melding
+                serdeObjectMapper.readTree(json) }
             .filterValues { melding -> "inntektsmelding" == melding["@event_name"].asText() }
             .filterValues { melding -> melding.hasNonNull("virksomhetsnummer") }
             .values

@@ -9,16 +9,19 @@ fun interface MeldingerSupplier {
     companion object {
         internal val empty = MeldingerSupplier { emptyMap() }
     }
-    fun hentMeldinger(): Map<UUID, String>
+    fun hentMeldinger(): Map<UUID, Pair<Navn, Json>>
 }
+
+typealias Navn = String
+typealias Json = String
 
 internal fun List<JsonMigration>.migrate(jsonNode: JsonNode, meldingerSupplier: MeldingerSupplier = MeldingerSupplier.empty) =
     JsonMigration.migrate(this, jsonNode, MemoizedMeldingerSupplier(meldingerSupplier))
 
 private class MemoizedMeldingerSupplier(private val supplier: MeldingerSupplier): MeldingerSupplier {
-    private val meldinger: Map<UUID, String> by lazy { supplier.hentMeldinger() }
+    private val meldinger: Map<UUID, Pair<Navn, Json>> by lazy { supplier.hentMeldinger() }
 
-    override fun hentMeldinger(): Map<UUID, String> = meldinger
+    override fun hentMeldinger(): Map<UUID, Pair<Navn, Json>> = meldinger
 }
 
 // Implements GoF Command Pattern to perform migration

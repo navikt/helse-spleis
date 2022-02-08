@@ -80,7 +80,12 @@ internal class V116LeggTilRefusjonshistorikkTest {
     @Test
     fun `filtrerer bort hendelser som ikke mer inntektsmeldinger`() {
         val migrert = migrer(originalIkkeRelevanteHendelser) {
-            mapOf(meldingsreferanseId1 to """{"@event_name":"test"}""")
+            mapOf(
+                meldingsreferanseId1 to Pair(
+                    "test",
+                    """{"@event_name":"test"}"""
+                )
+            )
         }
 
         val expected = toNode(expectedIkkeRelevanteHendelser)
@@ -102,13 +107,15 @@ internal class V116LeggTilRefusjonshistorikkTest {
     @Test
     fun `første fraværsdag, opphørsdato og beløp ikke satt`() {
         val migrert = migrer(originalOptionalFelt) {
-            mapOf(meldingsreferanseId1 to inntektsmelding(
-                virksomhetsnummer = organisasjonsnummer1,
-                meldingsreferanseId = meldingsreferanseId1,
-                refusjonsbeløp = null,
-                opphørsdato = null,
-                førsteFraværsdag = null
-            ))
+            mapOf(
+                meldingsreferanseId1 to inntektsmelding(
+                    virksomhetsnummer = organisasjonsnummer1,
+                    meldingsreferanseId = meldingsreferanseId1,
+                    refusjonsbeløp = null,
+                    opphørsdato = null,
+                    førsteFraværsdag = null
+                )
+            )
         }
 
         val expected = toNode(expectedOptionalFelt)
@@ -120,13 +127,15 @@ internal class V116LeggTilRefusjonshistorikkTest {
 
     private fun migrer(json: String, meldingSupplier: MeldingerSupplier) = listOf(V116LeggTilRefusjonshistorikk()).migrate(toNode(json), meldingSupplier)
 
-    @Language("JSON")
+
     private fun inntektsmelding(
         virksomhetsnummer: String?,
         meldingsreferanseId: UUID,
         refusjonsbeløp: Double? = beløp,
         opphørsdato: LocalDate? = sisteRefusjonsdag,
-        førsteFraværsdag: LocalDate? = Companion.førsteFraværsdag) = """
+        førsteFraværsdag: LocalDate? = Companion.førsteFraværsdag
+    ) = Pair(
+        "inntektsmelding", """
         {
             "inntektsmeldingId": "innteksmeldingId",
             "arbeidstakerFnr": "20046913337",
@@ -154,13 +163,14 @@ internal class V116LeggTilRefusjonshistorikkTest {
                     "tom": "2021-10-15"
                 }
             ],
-            ${førsteFraværsdag?.let { """"foersteFravaersdag": "$førsteFraværsdag",""" }?:""}
+            ${førsteFraværsdag?.let { """"foersteFravaersdag": "$førsteFraværsdag",""" } ?: ""}
             "mottattDato": "2021-10-15T15:10:58.961689",
             "@id": "$meldingsreferanseId",
             "@event_name": "inntektsmelding",
             "@opprettet": "2021-10-15T15:11:01.262131"
         }
     """
+    )
 
     @Language("JSON")
     private val originalToArbeidsgivereEnInntektsmelding = """{

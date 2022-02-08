@@ -57,8 +57,8 @@ internal class V90HendelsekildeTidsstempel : JsonMigration(version = 90) {
 
     private fun finnTidsstempel(meldingerSupplier: MeldingerSupplier, elementtidsstempler: Map<UUID, LocalDateTime>, elementtidsstempel: LocalDateTime, id: UUID, type: String): LocalDateTime {
         if (id in tidsstempler) return tidsstempler.getValue(id)
-        val tidsstempel = meldingerSupplier.hentMeldinger()[id]?.let {
-            tidsstempelFraMelding(type, serdeObjectMapper.readTree(it))?.let { LocalDateTime.parse(it) }
+        val tidsstempel = meldingerSupplier.hentMeldinger()[id]?.let { (_, json) ->
+            tidsstempelFraMelding(type, serdeObjectMapper.readTree(json))?.let { LocalDateTime.parse(it) }
         } ?: elementtidsstempler[id] ?: elementtidsstempel
         tidsstempler[id] = tidsstempel
         return tidsstempel
@@ -66,8 +66,8 @@ internal class V90HendelsekildeTidsstempel : JsonMigration(version = 90) {
 
     private fun finnTidsstempel(meldingerSupplier: MeldingerSupplier, id: UUID, type: String): LocalDateTime {
         if (id in tidsstempler) return tidsstempler.getValue(id)
-        val tidsstempel = meldingerSupplier.hentMeldinger()[id]?.let {
-            tidsstempelFraMelding(type, serdeObjectMapper.readTree(it))?.let { LocalDateTime.parse(it) }
+        val tidsstempel = meldingerSupplier.hentMeldinger()[id]?.let { (_, json) ->
+            tidsstempelFraMelding(type, serdeObjectMapper.readTree(json))?.let { LocalDateTime.parse(it) }
         } ?: LocalDateTime.now()
         tidsstempler[id] = tidsstempel
         return tidsstempel
