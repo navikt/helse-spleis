@@ -515,5 +515,6 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
             ),
             vilkårsgrunnlag?.inntekter?.find { it.organisasjonsnummer == a2 }
         )
+        assertEquals(listOf(a1, a2), personDto.arbeidsgivere.map { it.organisasjonsnummer })
     }
 }

@@ -1409,7 +1409,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
             .single().inntekter
             .single { it.arbeidsgiver == a2 }.omregnetÅrsinntekt!!.inntekterFraAOrdningen!!
 
-        assertEquals(listOf(a1, a2).map(String::toString), personDto.arbeidsgivere.map { it.organisasjonsnummer })
+        assertEquals(listOf(a1, a2, a4).map(String::toString), personDto.arbeidsgivere.map { it.organisasjonsnummer })
         assertEquals(listOf(a1, a2, a4).map(String::toString), personDto.inntektsgrunnlag.single().inntekter.map { it.arbeidsgiver })
         assertEquals(3, inntekterFraAordningen.size)
         assertEquals(listOf(33000.0, 32000.0, 31000.0), inntekterFraAordningen.map { it.sum })

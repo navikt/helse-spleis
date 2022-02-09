@@ -51,8 +51,8 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
     internal fun erRelevant(organisasjonsnummer: String, skjæringstidspunkter: List<LocalDate>) = historikk.firstOrNull()?.erRelevant(organisasjonsnummer, skjæringstidspunkter) ?: false
 
-    internal fun sisteIdMedAktivertArbeidsforhold(orgnummer: String, skjæringstidspunkt: LocalDate) = historikk
-        .filter { it.erRelevant(orgnummer, listOf(skjæringstidspunkt)) }
+    internal fun sisteIdMedSykepengegrunnlagForArbeidsforhold(orgnummer: String, skjæringstidspunkt: LocalDate) = historikk
+        .filter { it.harSykepengegrunnlag(orgnummer, skjæringstidspunkt) }
         .takeIf { it.isNotEmpty() }
         ?.sisteId()
 
@@ -92,7 +92,13 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
         internal fun erRelevant(organisasjonsnummer: String, skjæringstidspunkter: List<LocalDate>) =
             skjæringstidspunkter.mapNotNull(vilkårsgrunnlag::get)
-                .any { it.inntektsopplysningPerArbeidsgiver().containsKey(organisasjonsnummer) }
+                .any {
+                    it.inntektsopplysningPerArbeidsgiver().containsKey(organisasjonsnummer)
+                        || it.sammenligningsgrunnlagPerArbeidsgiver().containsKey(organisasjonsnummer)
+                }
+
+        internal fun harSykepengegrunnlag(organisasjonsnummer: String, skjæringstidspunkt: LocalDate) =
+            vilkårsgrunnlag[skjæringstidspunkt]?.inntektsopplysningPerArbeidsgiver()?.containsKey(organisasjonsnummer) ?: false
 
         internal fun avvis(tidslinjer: List<Utbetalingstidslinje>, alder: Alder) {
             vilkårsgrunnlag.forEach { (skjæringstidspunkt, element) ->
