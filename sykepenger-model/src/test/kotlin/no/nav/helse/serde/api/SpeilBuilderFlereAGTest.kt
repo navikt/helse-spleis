@@ -495,8 +495,8 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
                 arbeidsforhold = emptyList()
             ),
             arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, 30.september(2017)),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, 1.oktober(2017), null)
+                Vilkårsgrunnlag.Arbeidsforhold(a1, 1.oktober(2017), null),
+                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, 30.september(2017))
             ),
             orgnummer = a1
         )
