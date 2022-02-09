@@ -5,6 +5,7 @@ import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
+import no.nav.helse.serde.api.v2.Arbeidsgiverinntekt
 import no.nav.helse.spleis.e2e.*
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
@@ -424,5 +425,51 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
 
         val personDto = serializePersonForSpeil(person)
         assertEquals(listOf(a1, a2), personDto.arbeidsforholdPerSkjæringstidspunkt[1.januar]?.map { it.orgnummer })
+    }
+
+    @ForventetFeil("TODO")
+    @Test
+    fun `legger ved sammenlignignsgrunnlag for deaktiverte arbeidsforhold`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode,
+            inntektsvurdering = Inntektsvurdering(
+                listOf(
+                    sammenligningsgrunnlag(a1, 1.januar, INNTEKT.repeat(12)),
+                    sammenligningsgrunnlag(a2, 1.januar, 1000.månedlig.repeat(12))
+                )
+            ),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
+                listOf(
+                    grunnlag(a1, 1.januar, INNTEKT.repeat(3)),
+                    grunnlag(a2, 1.januar, 1000.månedlig.repeat(3))
+                ),
+                arbeidsforhold = emptyList()
+            ),
+            arbeidsforhold = listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null),
+                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null)
+            ),
+            orgnummer = a1
+        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+
+        håndterOverstyrArbeidsforhold(1.januar, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, false)))
+
+        val personDto = serializePersonForSpeil(person)
+        val vilkårsgrunnlag = personDto.vilkårsgrunnlagHistorikk[person.nyesteIdForVilkårsgrunnlagHistorikk()]?.get(1.januar)
+        assertEquals(listOf(a1, a2), vilkårsgrunnlag?.inntekter?.map { it.organisasjonsnummer })
+        assertEquals(
+            Arbeidsgiverinntekt(
+                organisasjonsnummer = a2,
+                omregnetÅrsinntekt = null,
+                sammenligningsgrunnlag = 12000.0
+            ),
+            vilkårsgrunnlag?.inntekter?.find { it.organisasjonsnummer == a2 }
+        )
     }
 }
