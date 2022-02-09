@@ -12,6 +12,7 @@ import java.util.*
 // Samler opp hver arbeidsgivers siste generasjon av sammenligningsgrunnlag per skjæringstidspunkt
 internal class OppsamletSammenligningsgrunnlagBuilder(person: Person) : PersonVisitor {
     private val akkumulator: MutableMap<String, NyesteInnslag> = mutableMapOf()
+    internal fun orgnumre() = akkumulator.keys
 
     init {
         person.accept(this)
@@ -68,13 +69,15 @@ internal class OppsamletSammenligningsgrunnlagBuilder(person: Person) : PersonVi
 internal data class IArbeidsgiverinntekt(
     val arbeidsgiver: String,
     val omregnetÅrsinntekt: IOmregnetÅrsinntekt?,
-    val sammenligningsgrunnlag: Double? = null
+    val sammenligningsgrunnlag: Double? = null,
+    val deaktivert: Boolean
 ) {
     internal fun toDTO(): Arbeidsgiverinntekt {
         return Arbeidsgiverinntekt(
             organisasjonsnummer = arbeidsgiver,
             omregnetÅrsinntekt = omregnetÅrsinntekt?.toDTO(),
-            sammenligningsgrunnlag = sammenligningsgrunnlag
+            sammenligningsgrunnlag = sammenligningsgrunnlag,
+            deaktivert = deaktivert
         )
     }
 }

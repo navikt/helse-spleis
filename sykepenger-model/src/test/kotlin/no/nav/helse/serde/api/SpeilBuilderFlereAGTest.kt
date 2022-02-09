@@ -467,13 +467,13 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
             Arbeidsgiverinntekt(
                 organisasjonsnummer = a2,
                 omregnetÅrsinntekt = null,
-                sammenligningsgrunnlag = 12000.0
+                sammenligningsgrunnlag = 12000.0,
+                deaktivert = true
             ),
             vilkårsgrunnlag?.inntekter?.find { it.organisasjonsnummer == a2 }
         )
     }
 
-    @ForventetFeil("TODO")
     @Test
     fun `legger ved sammenligningsgrunnlag ved manglende sykepengegrunnlag`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
@@ -510,7 +510,8 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
             Arbeidsgiverinntekt(
                 organisasjonsnummer = a2,
                 omregnetÅrsinntekt = null,
-                sammenligningsgrunnlag = 9000.0
+                sammenligningsgrunnlag = 9000.0,
+                deaktivert = false
             ),
             vilkårsgrunnlag?.inntekter?.find { it.organisasjonsnummer == a2 }
         )

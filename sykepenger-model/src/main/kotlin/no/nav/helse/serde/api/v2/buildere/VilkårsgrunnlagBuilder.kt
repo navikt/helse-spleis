@@ -164,7 +164,7 @@ internal class VilkårsgrunnlagBuilder(
             meldingsreferanseId: UUID?,
             vilkårsgrunnlagId: UUID
         ) {
-            val compositeSykepengegrunnlag = SykepengegrunnlagBuilder(sykepengegrunnlag, sammenligningsgrunnlagBuilder).build()
+            val compositeSykepengegrunnlag = SykepengegrunnlagBuilder(sykepengegrunnlag, sammenligningsgrunnlagBuilder, skjæringstidspunkt).build()
             val minimumInntekt = InntektBuilder(person.minimumInntekt(skjæringstidspunkt)).build()
             val grunnbeløp = InntektBuilder(Grunnbeløp.`1G`.beløp(skjæringstidspunkt)).build()
             val oppfyllerKravOmMedlemskap = when (medlemskapstatus) {
@@ -197,7 +197,7 @@ internal class VilkårsgrunnlagBuilder(
             sykepengegrunnlag: Sykepengegrunnlag,
             vilkårsgrunnlagId: UUID
         ) {
-            val byggetSykepengegrunnlag = SykepengegrunnlagBuilder(sykepengegrunnlag, sammenligningsgrunnlagBuilder).build()
+            val byggetSykepengegrunnlag = SykepengegrunnlagBuilder(sykepengegrunnlag, sammenligningsgrunnlagBuilder, skjæringstidspunkt).build()
             vilkårsgrunnlag.putIfAbsent(
                 skjæringstidspunkt, IInfotrygdGrunnlag(
                     skjæringstidspunkt = skjæringstidspunkt,
@@ -211,7 +211,8 @@ internal class VilkårsgrunnlagBuilder(
 
         private class SykepengegrunnlagBuilder(
             sykepengegrunnlag: Sykepengegrunnlag,
-            private val sammenligningsgrunnlagBuilder: OppsamletSammenligningsgrunnlagBuilder
+            private val sammenligningsgrunnlagBuilder: OppsamletSammenligningsgrunnlagBuilder,
+            private val skjæringstidspunkt: LocalDate
         ) :
             VilkårsgrunnlagHistorikkVisitor {
             private val inntekterPerArbeidsgiver = mutableListOf<IArbeidsgiverinntekt>()
@@ -222,7 +223,23 @@ internal class VilkårsgrunnlagBuilder(
                 sykepengegrunnlag.accept(this)
             }
 
-            fun build() = ISykepengegrunnlag(inntekterPerArbeidsgiver.toList(), sykepengegrunnlag.årlig, sykepengegrunnlag.daglig, omregnetÅrsinntekt)
+            fun build() = ISykepengegrunnlag(
+                inntekterPerArbeidsgiver = inntekterPerArbeidsgiver.toList() + sammenligningsgrunnlagForArbeidsgivereUtenSykepengegrunnlag(),
+                sykepengegrunnlag = sykepengegrunnlag.årlig,
+                maksUtbetalingPerDag = sykepengegrunnlag.daglig,
+                omregnetÅrsinntekt = omregnetÅrsinntekt
+            )
+
+            private fun sammenligningsgrunnlagForArbeidsgivereUtenSykepengegrunnlag() = sammenligningsgrunnlagBuilder.orgnumre()
+                .filter { it !in inntekterPerArbeidsgiver.map { inntekt -> inntekt.arbeidsgiver } }
+                .map {
+                    IArbeidsgiverinntekt(
+                        arbeidsgiver = it,
+                        omregnetÅrsinntekt = null,
+                        sammenligningsgrunnlag = sammenligningsgrunnlagBuilder.sammenligningsgrunnlag(it, skjæringstidspunkt),
+                        deaktivert = false
+                    )
+                }
 
             override fun preVisitSykepengegrunnlag(
                 sykepengegrunnlag1: Sykepengegrunnlag,
@@ -235,7 +252,6 @@ internal class VilkårsgrunnlagBuilder(
             }
 
             override fun preVisitArbeidsgiverInntektsopplysning(arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning, orgnummer: String) {
-
                 inntekterPerArbeidsgiver.add(InntektsopplysningBuilder(orgnummer, arbeidsgiverInntektsopplysning, sammenligningsgrunnlagBuilder).build())
             }
         }
@@ -262,7 +278,8 @@ internal class VilkårsgrunnlagBuilder(
             ) = IArbeidsgiverinntekt(
                 organisasjonsnummer,
                 IOmregnetÅrsinntekt(kilde, inntekt.årlig, inntekt.månedlig, inntekterFraAOrdningen),
-                sammenligningsgrunnlag = sammenligningsgrunnlagBuilder.sammenligningsgrunnlag(organisasjonsnummer, skjæringstidspunkt)
+                sammenligningsgrunnlag = sammenligningsgrunnlagBuilder.sammenligningsgrunnlag(organisasjonsnummer, skjæringstidspunkt),
+                deaktivert = false
             )
 
             override fun visitInfotrygd(infotrygd: Infotrygd, id: UUID, dato: LocalDate, hendelseId: UUID, beløp: Inntekt, tidsstempel: LocalDateTime) {

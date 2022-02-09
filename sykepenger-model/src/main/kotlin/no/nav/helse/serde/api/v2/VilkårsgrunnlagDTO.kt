@@ -47,7 +47,8 @@ data class InfotrygdVilkårsgrunnlag(
 data class Arbeidsgiverinntekt(
     val organisasjonsnummer: String,
     val omregnetÅrsinntekt: OmregnetÅrsinntekt?,
-    val sammenligningsgrunnlag: Double? = null
+    val sammenligningsgrunnlag: Double? = null,
+    val deaktivert: Boolean
 )
 
 enum class Inntektkilde {
