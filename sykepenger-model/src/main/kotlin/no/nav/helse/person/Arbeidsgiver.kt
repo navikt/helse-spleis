@@ -26,6 +26,7 @@ import no.nav.helse.person.Vedtaksperiode.Companion.periode
 import no.nav.helse.person.builders.UtbetalingsdagerBuilder
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
+import no.nav.helse.person.filter.Brukerutbetalingfilter
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.serde.reflection.Utbetalingstatus
@@ -1089,6 +1090,10 @@ internal class Arbeidsgiver private constructor(
         arbeidsforholdhistorikk.sisteArbeidsforhold(skjæringstidspunkt) { ansattFom: LocalDate, ansattTom: LocalDate?, erAktiv: Boolean ->
             creator(organisasjonsnummer, ansattFom, ansattTom, erAktiv)
         }
+
+    internal fun build(filter: Brukerutbetalingfilter.Builder, inntektsmeldingId: UUID) {
+        inntektshistorikk.build(filter, inntektsmeldingId)
+    }
 
     internal class JsonRestorer private constructor() {
         internal companion object {

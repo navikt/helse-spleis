@@ -31,6 +31,7 @@ import no.nav.helse.person.builders.UtbetaltEventBuilder
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
+import no.nav.helse.person.filter.Brukerutbetalingfilter
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
@@ -687,6 +688,7 @@ internal class Vedtaksperiode private constructor(
         val filter = person.brukerutbetalingfilter()
             .periodetype(periodetype)
             .also { utbetalinger.build(it) }
+            .also { inntektsmeldingInfo?.build(it, arbeidsgiver) }
             .inntektkilde(inntektskilde())
             .build()
 
@@ -2766,6 +2768,10 @@ internal class InntektsmeldingInfo(
     override fun equals(other: Any?): Boolean {
         if (other !is InntektsmeldingInfo) return false
         return this.id == other.id && this.arbeidsforholdId == other.arbeidsforholdId
+    }
+
+    internal fun build(filter: Brukerutbetalingfilter.Builder, arbeidsgiver: Arbeidsgiver) {
+        arbeidsgiver.build(filter, id)
     }
 
     override fun hashCode() = Objects.hash(id, arbeidsforholdId)

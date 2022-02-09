@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 internal class BrukerutbetalingfilterTest {
@@ -28,34 +29,39 @@ internal class BrukerutbetalingfilterTest {
 
     @Test
     fun `refusjon passer filter`() {
-        assertTrue(Brukerutbetalingfilter(Fødselsnummer.tilFødselsnummer("31108512345"), Periodetype.FØRSTEGANGSBEHANDLING, lagUtbetaling(), Inntektskilde.EN_ARBEIDSGIVER))
+        assertTrue(Brukerutbetalingfilter(Fødselsnummer.tilFødselsnummer("31108512345"), Periodetype.FØRSTEGANGSBEHANDLING, lagUtbetaling(), Inntektskilde.EN_ARBEIDSGIVER, LocalDateTime.now()))
+    }
+
+    @Test
+    fun `inntektsmelding er for gammel`() {
+        assertFalse(Brukerutbetalingfilter(Fødselsnummer.tilFødselsnummer("31108512345"), Periodetype.FØRSTEGANGSBEHANDLING, lagUtbetaling(), Inntektskilde.EN_ARBEIDSGIVER, LocalDateTime.now().minusHours(25)))
     }
 
     @Test
     fun `ingen refusjon passer filter`() {
         val ingenRefusjon = lagUtbetaling(tidslinjeOf(16.AP, 15.NAV.copyWith(arbeidsgiverbeløp = 0)))
-        assertTrue(Brukerutbetalingfilter(Fødselsnummer.tilFødselsnummer("31108512345"), Periodetype.FØRSTEGANGSBEHANDLING, ingenRefusjon, Inntektskilde.EN_ARBEIDSGIVER))
+        assertTrue(Brukerutbetalingfilter(Fødselsnummer.tilFødselsnummer("31108512345"), Periodetype.FØRSTEGANGSBEHANDLING, ingenRefusjon, Inntektskilde.EN_ARBEIDSGIVER, LocalDateTime.now()))
     }
 
     @Test
     fun `feil periodetype`() {
-        assertFalse(Brukerutbetalingfilter(Fødselsnummer.tilFødselsnummer("31108512345"), Periodetype.FORLENGELSE, lagUtbetaling(), Inntektskilde.EN_ARBEIDSGIVER))
+        assertFalse(Brukerutbetalingfilter(Fødselsnummer.tilFødselsnummer("31108512345"), Periodetype.FORLENGELSE, lagUtbetaling(), Inntektskilde.EN_ARBEIDSGIVER, LocalDateTime.now()))
     }
 
     @Test
     fun `feil fødselsdato passer ikke`() {
-        assertFalse(Brukerutbetalingfilter(Fødselsnummer.tilFødselsnummer("02108512345"), Periodetype.FØRSTEGANGSBEHANDLING, lagUtbetaling(), Inntektskilde.EN_ARBEIDSGIVER))
+        assertFalse(Brukerutbetalingfilter(Fødselsnummer.tilFødselsnummer("02108512345"), Periodetype.FØRSTEGANGSBEHANDLING, lagUtbetaling(), Inntektskilde.EN_ARBEIDSGIVER, LocalDateTime.now()))
     }
 
     @Test
     fun `delvis refusjon passer ikke`() {
         val delvisRefusjon = lagUtbetaling(tidslinjeOf(16.AP, 15.NAV.copyWith(arbeidsgiverbeløp = 600)))
-        assertFalse(Brukerutbetalingfilter(Fødselsnummer.tilFødselsnummer("31108512345"), Periodetype.FØRSTEGANGSBEHANDLING, delvisRefusjon, Inntektskilde.EN_ARBEIDSGIVER))
+        assertFalse(Brukerutbetalingfilter(Fødselsnummer.tilFødselsnummer("31108512345"), Periodetype.FØRSTEGANGSBEHANDLING, delvisRefusjon, Inntektskilde.EN_ARBEIDSGIVER, LocalDateTime.now()))
     }
 
     @Test
     fun `inntektskilde fra flere arbeidsgivere passer ikke`() {
-        assertFalse(Brukerutbetalingfilter(Fødselsnummer.tilFødselsnummer("31108512345"), Periodetype.FØRSTEGANGSBEHANDLING, lagUtbetaling(), Inntektskilde.FLERE_ARBEIDSGIVERE))
+        assertFalse(Brukerutbetalingfilter(Fødselsnummer.tilFødselsnummer("31108512345"), Periodetype.FØRSTEGANGSBEHANDLING, lagUtbetaling(), Inntektskilde.FLERE_ARBEIDSGIVERE, LocalDateTime.now()))
     }
 
     private fun assertTrue(filter: Featurefilter) {

@@ -6,6 +6,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.person.Inntektshistorikk.Innslag.Companion.nyesteId
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.toSubsumsjonFormat
+import no.nav.helse.person.filter.Brukerutbetalingfilter
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.summer
 import java.time.LocalDate
@@ -96,6 +97,10 @@ internal class Inntektshistorikk {
                 .mapNotNull { it.grunnlagForSykepengegrunnlag(periode) }
                 .firstOrNull()
 
+        internal fun build(filter: Brukerutbetalingfilter.Builder, inntektsmeldingId: UUID) {
+            inntekter.forEach { it.build(filter, inntektsmeldingId) }
+        }
+
         internal companion object {
             internal fun List<Innslag>.nyesteId() = this.first().id
         }
@@ -116,6 +121,7 @@ internal class Inntektshistorikk {
 
         fun kanLagres(other: Inntektsopplysning) = true
         fun harInntektsmelding(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate) = false
+        fun build(filter: Brukerutbetalingfilter.Builder, inntektsmeldingId: UUID) {}
     }
 
     internal class Saksbehandler(
@@ -174,6 +180,11 @@ internal class Inntektshistorikk {
         private val tidsstempel: LocalDateTime = LocalDateTime.now()
     ) : Inntektsopplysning {
         override val prioritet = 60
+
+        override fun build(filter: Brukerutbetalingfilter.Builder, inntektsmeldingId: UUID) {
+            if (hendelseId != inntektsmeldingId) return
+            filter.inntektsmeldingtidsstempel(tidsstempel)
+        }
 
         override fun accept(visitor: InntekthistorikkVisitor) {
             visitor.visitInntektsmelding(this, id, dato, hendelseId, beløp, tidsstempel)
@@ -423,6 +434,10 @@ internal class Inntektshistorikk {
 
     internal fun restore(block: RestoreJsonMode.() -> Unit) {
         RestoreJsonMode(this).apply(block)
+    }
+
+    internal fun build(filter: Brukerutbetalingfilter.Builder, inntektsmeldingId: UUID) {
+        historikk.firstOrNull()?.build(filter, inntektsmeldingId)
     }
 
     internal class RestoreJsonMode(private val inntektshistorikk: Inntektshistorikk) {
