@@ -678,7 +678,7 @@ internal class Vedtaksperiode private constructor(
     private fun høstingsresultater(hendelse: ArbeidstakerHendelse, andreVedtaksperioder: List<Vedtaksperiode>) {
         val ingenUtbetaling = !utbetalinger.harUtbetalinger()
         val kunArbeidsgiverdager = utbetalingstidslinje.kunArbeidsgiverdager()
-        val ingenWarnings = !person.aktivitetslogg.logg(this).hasWarningsOrWorse()
+        val vedtaksperiodeHarWarnings = person.aktivitetslogg.logg(this).hasWarningsOrWorse()
         val harBrukerutbetaling = harBrukerutbetaling(andreVedtaksperioder)
 
         if (!harBrukerutbetaling && villeTidligereBlittKastetUtPåGrunnAvRefusjon()) {
@@ -690,6 +690,7 @@ internal class Vedtaksperiode private constructor(
             .also { utbetalinger.build(it) }
             .also { inntektsmeldingInfo?.build(it, arbeidsgiver) }
             .inntektkilde(inntektskilde())
+            .vedtaksperiodeHarWarnings(vedtaksperiodeHarWarnings)
             .build()
 
         if (filter.filtrer(hendelse)) {
@@ -700,7 +701,7 @@ internal class Vedtaksperiode private constructor(
             utbetalinger.kanIkkeFortsette(hendelse, harBrukerutbetaling) -> {
                 person.invaliderAllePerioder(hendelse, "Kan ikke fortsette på grunn av manglende funksjonalitet for utbetaling til bruker")
             }
-            ingenUtbetaling && kunArbeidsgiverdager && ingenWarnings -> {
+            ingenUtbetaling && kunArbeidsgiverdager && !vedtaksperiodeHarWarnings -> {
                 tilstand(hendelse, Avsluttet) {
                     hendelse.info("""Saken inneholder ingen utbetalingsdager for Nav og avsluttes""")
                 }

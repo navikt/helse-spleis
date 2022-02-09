@@ -11,12 +11,13 @@ internal interface Featurefilter {
     fun filtrer(aktivitetslogg: IAktivitetslogg): Boolean
 }
 
-internal class Brukerutbetalingfilter(
+internal class Brukerutbetalingfilter private constructor(
     private val fødselsnummer: Fødselsnummer,
     private val periodetype: Periodetype,
     private val utbetaling: Utbetaling,
     private val inntektskilde: Inntektskilde,
-    private val inntektsmeldingtidsstempel: LocalDateTime
+    private val inntektsmeldingtidsstempel: LocalDateTime,
+    private val vedtaksperiodeHarWarnings: Boolean
 ) : Featurefilter {
 
     override fun filtrer(aktivitetslogg: IAktivitetslogg): Boolean {
@@ -25,6 +26,7 @@ internal class Brukerutbetalingfilter(
         if (utbetaling.harDelvisRefusjon()) return nei(aktivitetslogg, "Utbetalingen består av delvis refusjon")
         if (inntektskilde != Inntektskilde.EN_ARBEIDSGIVER) return nei(aktivitetslogg, "Inntektskilden er ikke for en arbeidsgiver")
         if (inntektsmeldingtidsstempel < LocalDateTime.now().minusHours(24)) return nei(aktivitetslogg, "Inntektsmelding ble mottatt for mer enn 24 timer siden")
+        if (vedtaksperiodeHarWarnings) return nei(aktivitetslogg, "Vedtaksperioden har warnings")
         return true
     }
 
@@ -37,6 +39,7 @@ internal class Brukerutbetalingfilter(
         private lateinit var utbetaling: Utbetaling
         private lateinit var inntektskilde: Inntektskilde
         private var inntektsmeldingtidsstempel = LocalDateTime.MIN
+        private var vedtaksperiodeHarWarnings: Boolean = true
 
         internal fun periodetype(periodetype: Periodetype) = this.apply {
             this.periodetype = periodetype
@@ -50,10 +53,14 @@ internal class Brukerutbetalingfilter(
             this.inntektskilde = inntektskilde
         }
 
-        internal fun inntektsmeldingtidsstempel(tidsstempel: LocalDateTime) {
+        internal fun inntektsmeldingtidsstempel(tidsstempel: LocalDateTime) = this.apply {
             this.inntektsmeldingtidsstempel = tidsstempel
         }
 
-        internal fun build() = Brukerutbetalingfilter(fødselsnummer, periodetype, utbetaling, inntektskilde, inntektsmeldingtidsstempel)
+        internal fun vedtaksperiodeHarWarnings(vedtaksperiodeHarWarnings: Boolean) = this.apply {
+            this.vedtaksperiodeHarWarnings = vedtaksperiodeHarWarnings
+        }
+
+        internal fun build() = Brukerutbetalingfilter(fødselsnummer, periodetype, utbetaling, inntektskilde, inntektsmeldingtidsstempel, vedtaksperiodeHarWarnings)
     }
 }
