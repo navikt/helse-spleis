@@ -723,7 +723,7 @@ class Person private constructor(
         arbeidsgivere.any { it.harVedtaksperiodeMedUkjentArbeidsforhold(skjæringstidspunkt) }
 
     internal fun orgnummereMedRelevanteArbeidsforhold(skjæringstidspunkt: LocalDate) = arbeidsgivere
-        .filter { it.harRelevantArbeidsforhold(skjæringstidspunkt) }
+        .filter { vilkårsgrunnlagHistorikk.erRelevant(it.organisasjonsnummer(), listOf(skjæringstidspunkt)) }
         .map { it.organisasjonsnummer() }
 
     internal fun harFlereArbeidsforholdMedUlikStartdato(skjæringstidspunkt: LocalDate) =
