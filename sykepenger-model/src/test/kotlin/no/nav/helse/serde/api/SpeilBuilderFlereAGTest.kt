@@ -472,4 +472,47 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
             vilkårsgrunnlag?.inntekter?.find { it.organisasjonsnummer == a2 }
         )
     }
+
+    @ForventetFeil("TODO")
+    @Test
+    fun `legger ved sammenligningsgrunnlag ved manglende sykepengegrunnlag`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode,
+            inntektsvurdering = Inntektsvurdering(
+                listOf(
+                    sammenligningsgrunnlag(a1, 1.januar, INNTEKT.repeat(12)),
+                    sammenligningsgrunnlag(a2, 1.oktober(2017), 1000.månedlig.repeat(9))
+                )
+            ),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
+                listOf(
+                    grunnlag(a1, 1.januar, INNTEKT.repeat(3))
+                ),
+                arbeidsforhold = emptyList()
+            ),
+            arbeidsforhold = listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, 30.september(2017)),
+                Vilkårsgrunnlag.Arbeidsforhold(a2, 1.oktober(2017), null)
+            ),
+            orgnummer = a1
+        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+
+        val personDto = serializePersonForSpeil(person)
+        val vilkårsgrunnlag = personDto.vilkårsgrunnlagHistorikk[person.nyesteIdForVilkårsgrunnlagHistorikk()]?.get(1.januar)
+        assertEquals(listOf(a1, a2), vilkårsgrunnlag?.inntekter?.map { it.organisasjonsnummer })
+        assertEquals(
+            Arbeidsgiverinntekt(
+                organisasjonsnummer = a2,
+                omregnetÅrsinntekt = null,
+                sammenligningsgrunnlag = 9000.0
+            ),
+            vilkårsgrunnlag?.inntekter?.find { it.organisasjonsnummer == a2 }
+        )
+    }
 }
