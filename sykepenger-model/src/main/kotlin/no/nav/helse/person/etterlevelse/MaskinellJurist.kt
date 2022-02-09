@@ -298,7 +298,6 @@ class MaskinellJurist private constructor(
 
     override fun `§ 8-28 ledd 3 bokstav a`(
         inntekterSisteTreMåneder: List<Map<String, Any>>,
-        resterendeInntekter: List<Map<String, Any>>,
         grunnlagForSykepengegrunnlag: Inntekt
     ) {
         leggTil(
@@ -309,8 +308,7 @@ class MaskinellJurist private constructor(
                 ledd = LEDD_3,
                 bokstav = BOKSTAV_A,
                 input = mapOf(
-                    "inntekterSisteTreMåneder" to inntekterSisteTreMåneder,
-                    "resterendeInntekter" to resterendeInntekter
+                    "inntekterSisteTreMåneder" to inntekterSisteTreMåneder
                 ),
                 output = mapOf(
                     "beregnetGrunnlagForSykepengegrunnlagPrÅr" to grunnlagForSykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },

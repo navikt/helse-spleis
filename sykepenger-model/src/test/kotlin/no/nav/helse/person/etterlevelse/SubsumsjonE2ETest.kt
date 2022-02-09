@@ -859,8 +859,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                         "årMåned" to YearMonth.of(2017, 12),
                         "beløp" to 32000.0
                     )
-                ),
-                "resterendeInntekter" to emptyList<Map<String, Any>>()
+                )
             ),
             output = mapOf(
                 "beregnetGrunnlagForSykepengegrunnlagPrÅr" to 384000.0,

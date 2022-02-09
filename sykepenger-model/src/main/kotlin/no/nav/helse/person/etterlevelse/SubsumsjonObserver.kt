@@ -198,12 +198,10 @@ interface SubsumsjonObserver {
      * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-28)
      *
      * @param inntekterSisteTreMåneder månedlig inntekt for de tre siste måneder før skjæringstidspunktet
-     * @param resterendeInntekter alle andre innrapporterte inntekter fra a-ordningen
      * @param grunnlagForSykepengegrunnlag beregnet grunnlag basert på [inntekterSisteTreMåneder]
      */
     fun `§ 8-28 ledd 3 bokstav a`(
         inntekterSisteTreMåneder: List<Map<String, Any>>,
-        resterendeInntekter: List<Map<String, Any>>,
         grunnlagForSykepengegrunnlag: Inntekt
     ) {
     }

@@ -216,7 +216,6 @@ internal class Inntektshistorikk {
         override val prioritet = inntektsopplysninger.first().prioritet
 
         private val inntekterSisteTreMåneder = inntektsopplysninger.filter { it.erRelevant(3) }
-        private val resterendeInntekter = inntektsopplysninger.filter { !it.erRelevant(3) }
 
         override fun accept(visitor: InntekthistorikkVisitor) {
             visitor.preVisitSkatt(this, id, dato)
@@ -249,7 +248,6 @@ internal class Inntektshistorikk {
         override fun subsumsjon(subsumsjonObserver: SubsumsjonObserver) {
             subsumsjonObserver.`§ 8-28 ledd 3 bokstav a`(
                 inntekterSisteTreMåneder = inntekterSisteTreMåneder.toSubsumsjonFormat(),
-                resterendeInntekter = resterendeInntekter.toSubsumsjonFormat(),
                 grunnlagForSykepengegrunnlag = grunnlagForSykepengegrunnlag()
             )
 
@@ -320,17 +318,7 @@ internal class Inntektshistorikk {
             override val prioritet = 40
 
             override fun accept(visitor: InntekthistorikkVisitor) {
-                visitor.visitSkattSykepengegrunnlag(
-                    this,
-                    dato,
-                    hendelseId,
-                    beløp,
-                    måned,
-                    type,
-                    fordel,
-                    beskrivelse,
-                    tidsstempel
-                )
+                visitor.visitSkattSykepengegrunnlag(this, dato, hendelseId, beløp, måned, type, fordel, beskrivelse, tidsstempel)
             }
 
             override fun grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?) =
