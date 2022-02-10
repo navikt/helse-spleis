@@ -235,7 +235,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
             arbeidsforhold = arbeidsforhold
         ).håndter(Person::håndter)
 
-        assertEquals(552000.årlig, person.vilkårsgrunnlagFor(1.januar)?.sykepengegrunnlag())
+        assertEquals(552000.årlig, person.vilkårsgrunnlagFor(1.januar)?.sykepengegrunnlag()?.sykepengegrunnlag)
         assertEquals(528000.årlig, person.beregnSammenligningsgrunnlag(1.januar).sammenligningsgrunnlag)
 
     }

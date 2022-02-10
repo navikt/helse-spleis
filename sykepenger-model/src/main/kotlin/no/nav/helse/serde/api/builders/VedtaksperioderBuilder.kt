@@ -55,7 +55,7 @@ internal class VedtaksperioderBuilder(
             forlengelseFraInfotrygd = forlengelseFraInfotrygd,
             tilstand = tilstand,
             inntektskilde = inntektskilde,
-            sykepengegrunnlag = sykepengegrunnlag,
+            sykepengegrunnlag = sykepengegrunnlag?.sykepengegrunnlag,
             gruppeId = gruppeId(vedtaksperiode),
             fødselsnummer = fødselsnummer,
             hendelseIder = hendelseIder,

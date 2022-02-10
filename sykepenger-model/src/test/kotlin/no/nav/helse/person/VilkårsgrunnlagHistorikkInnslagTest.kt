@@ -135,7 +135,7 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
         get() = object : VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement {
             override fun accept(skjæringstidspunkt: LocalDate, vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor) {}
 
-            override fun sykepengegrunnlag() = Inntekt.INGEN
+            override fun sykepengegrunnlag() = Sykepengegrunnlag(Inntekt.INGEN, emptyList(), Inntekt.INGEN, Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET)
 
             override fun grunnlagsBegrensning() = Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
 

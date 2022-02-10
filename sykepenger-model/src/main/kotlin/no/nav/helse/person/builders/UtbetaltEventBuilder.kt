@@ -23,7 +23,7 @@ internal class UtbetaltEventBuilder(
 ) {
     private val sykepengegrunnlag = vilkårsgrunnlag.sykepengegrunnlag()
     private val inntekt = vilkårsgrunnlag.grunnlagForSykepengegrunnlag()
-    private val dagsats = sykepengegrunnlag.reflection { _, _, _, daglig -> daglig }
+    private val dagsats = sykepengegrunnlag.sykepengegrunnlag.reflection { _, _, _, daglig -> daglig }
 
     private var forbrukteSykedager: Int = -1
     private var gjenståendeSykedager: Int = -1
@@ -68,7 +68,7 @@ internal class UtbetaltEventBuilder(
             godkjentAv = godkjentAv,
             automatiskBehandling = automatiskBehandling,
             opprettet = opprettet,
-            sykepengegrunnlag = sykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
+            sykepengegrunnlag = sykepengegrunnlag.sykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
             månedsinntekt = inntekt.reflection { _, månedlig, _, _ -> månedlig },
             maksdato = maksdato
         )

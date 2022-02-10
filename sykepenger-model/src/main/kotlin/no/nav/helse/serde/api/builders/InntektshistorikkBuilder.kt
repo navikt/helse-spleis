@@ -26,7 +26,7 @@ internal class InntektshistorikkBuilder(private val person: Person) {
         .mapNotNull { nøkkeldata -> person.vilkårsgrunnlagFor(nøkkeldata.skjæringstidspunkt)?.let { nøkkeldata to it } }
         .map { (nøkkeldata, vilkårsgrunnlag) ->
             val vilkårsgrunnlagVisitor = VilkårsgrunnlagVisitor(vilkårsgrunnlag, nøkkeldata.skjæringstidspunkt)
-            val sykepengegrunnlag = vilkårsgrunnlag.sykepengegrunnlag()
+            val sykepengegrunnlag = vilkårsgrunnlag.sykepengegrunnlag().sykepengegrunnlag
             val grunnlagForSykepengegrunnlag = vilkårsgrunnlag.grunnlagForSykepengegrunnlag()
             val sammenligningsgrunnlag = vilkårsgrunnlag.sammenligningsgrunnlag()
             // Vi har ikke sammenligningsgrunnlag på vilkårsgrunnlag fastsatt i infotrygd

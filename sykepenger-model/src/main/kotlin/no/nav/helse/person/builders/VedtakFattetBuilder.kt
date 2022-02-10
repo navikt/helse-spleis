@@ -15,7 +15,7 @@ internal class VedtakFattetBuilder(
     private val skjæringstidspunkt: LocalDate,
     vilkårsgrunnlag: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?
 ) {
-    private val sykepengegrunnlag = vilkårsgrunnlag?.sykepengegrunnlag() ?: Inntekt.INGEN
+    private val sykepengegrunnlag = vilkårsgrunnlag?.sykepengegrunnlag()?.sykepengegrunnlag ?: Inntekt.INGEN
     private val grunnlagForSykepengegrunnlag = vilkårsgrunnlag?.grunnlagForSykepengegrunnlag() ?: Inntekt.INGEN
     private val begrensning = vilkårsgrunnlag?.grunnlagsBegrensning()
 
