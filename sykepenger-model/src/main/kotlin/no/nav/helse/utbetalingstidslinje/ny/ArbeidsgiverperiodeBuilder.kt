@@ -6,6 +6,7 @@ import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.erHelg
+import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 
@@ -74,7 +75,7 @@ internal class ArbeidsgiverperiodeBuilder(private val arbeidsgiverperiodeteller:
     override fun visitDag(dag: Dag.Arbeidsgiverdag, dato: LocalDate, økonomi: Økonomi, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
         fridager.somSykedager()
         arbeidsgiverperiodeteller.inc()
-        tilstand.sykdomsdag(this, dato, økonomi)
+        tilstand.egenmeldingsdag(this, dato, økonomi)
     }
 
     override fun visitDag(dag: Dag.ArbeidsgiverHelgedag, dato: LocalDate, økonomi: Økonomi, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
@@ -122,6 +123,8 @@ internal class ArbeidsgiverperiodeBuilder(private val arbeidsgiverperiodeteller:
         fun sykdomsdag(builder: ArbeidsgiverperiodeBuilder, dato: LocalDate, økonomi: Økonomi) {
             builder.mediator.utbetalingsdag(dato, økonomi)
         }
+        fun egenmeldingsdag(builder: ArbeidsgiverperiodeBuilder, dato: LocalDate, økonomi: Økonomi) =
+            sykdomsdag(builder, dato, økonomi)
         fun sykdomshelg(builder: ArbeidsgiverperiodeBuilder, dato: LocalDate, økonomi: Økonomi) {
             builder.mediator.utbetalingsdag(dato, økonomi)
         }
@@ -188,6 +191,10 @@ internal class ArbeidsgiverperiodeBuilder(private val arbeidsgiverperiodeteller:
             // enten som følge av at vi nettopp har fullført å telle arbeidsgiverperioden,
             // eller fordi vi skal gå rett på utbetaling (arbeidsgiverperioden er unnagjort i Infotrygd, eller antall arbeidsgiverperiodedager skal være 0)
             builder.mediator.arbeidsgiverperiodeFerdig()
+        }
+
+        override fun egenmeldingsdag(builder: ArbeidsgiverperiodeBuilder, dato: LocalDate, økonomi: Økonomi) {
+            builder.mediator.avvistDag(dato, Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode)
         }
 
         override fun feriedag(builder: ArbeidsgiverperiodeBuilder, dato: LocalDate) {

@@ -14,6 +14,7 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
+import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Økonomi
@@ -285,6 +286,26 @@ internal class UtbetalingstidslinjeBuilderTest {
     }
 
     @Test
+    fun `avviser egenmeldingsdager utenfor arbeidsgiverperioden`() {
+        undersøke(15.U + 1.F + 1.U)
+        assertEquals(17, inspektør.size)
+        assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
+        assertEquals(1, inspektør.avvistDagTeller)
+        assertEquals(listOf(1.januar til 16.januar), perioder.first())
+    }
+
+    @Test
+    fun `avviser ikke egenmeldingsdager utenfor arbeidsgiverperioden som faller på helg`() {
+        undersøke(3.A + 15.U + 1.F + 1.U)
+        assertEquals(20, inspektør.size)
+        assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
+        assertEquals(0, inspektør.avvistDagTeller)
+        assertEquals(1, inspektør.navHelgDagTeller)
+        assertEquals(3, inspektør.arbeidsdagTeller)
+        assertEquals(listOf(4.januar til 19.januar), perioder.first())
+    }
+
+    @Test
     fun `frisk helg gir opphold i arbeidsgiverperiode`() {
         undersøke(4.U + 8.S + 2.R + 2.F + 2.S)
         assertEquals(18, inspektør.size)
@@ -426,6 +447,10 @@ internal class UtbetalingstidslinjeBuilderTest {
 
         override fun foreldetDag(dato: LocalDate, økonomi: Økonomi) {
             mediators.forEach { it.foreldetDag(dato, økonomi) }
+        }
+
+        override fun avvistDag(dato: LocalDate, begrunnelse: Begrunnelse) {
+            mediators.forEach { it.avvistDag(dato, begrunnelse) }
         }
     }
 

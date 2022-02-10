@@ -2,6 +2,7 @@ package no.nav.helse.utbetalingstidslinje.ny
 
 import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
+import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
@@ -36,6 +37,10 @@ internal class UtbetalingstidslinjeBuilder(private val inntekter: Inntekter) : A
 
     override fun foreldetDag(dato: LocalDate, økonomi: Økonomi) {
         tidslinje.addForeldetDag(dato, inntekter.medInntekt(dato, økonomi, nåværendeArbeidsgiverperiode))
+    }
+
+    override fun avvistDag(dato: LocalDate, begrunnelse: Begrunnelse) {
+        tidslinje.addAvvistDag(dato, inntekter.medFrivilligInntekt(dato, Økonomi.ikkeBetalt(nåværendeArbeidsgiverperiode)), listOf(begrunnelse))
     }
 
     override fun arbeidsgiverperiodeAvbrutt() {

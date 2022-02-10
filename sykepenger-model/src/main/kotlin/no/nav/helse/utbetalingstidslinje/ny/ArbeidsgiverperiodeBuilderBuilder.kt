@@ -3,6 +3,7 @@ package no.nav.helse.utbetalingstidslinje.ny
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
+import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 
@@ -33,6 +34,7 @@ internal class ArbeidsgiverperiodeBuilderBuilder() : ArbeidsgiverperiodeMediator
     override fun arbeidsdag(dato: LocalDate) {}
     override fun utbetalingsdag(dato: LocalDate, økonomi: Økonomi) {}
     override fun foreldetDag(dato: LocalDate, økonomi: Økonomi) {}
+    override fun avvistDag(dato: LocalDate, begrunnelse: Begrunnelse) {}
 
     private fun nyDag(dagen: LocalDate) {
         if (perioder.isNotEmpty() && siste.endInclusive.plusDays(1) == dagen) {
