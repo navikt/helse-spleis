@@ -1005,7 +1005,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                 "sammenligningsgrunnlag" to sammenligningsgrunnlag * 12
             ),
             output = mapOf(
-                "avvik" to 0.0
+                "avviksprosent" to 0.0
             )
         )
     }
@@ -1035,7 +1035,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                 "sammenligningsgrunnlag" to sammenligningsgrunnlag * 12
             ),
             output = mapOf(
-                "avvik" to 25.0
+                "avviksprosent" to 25.0
             )
         )
     }
@@ -1061,7 +1061,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                 "sammenligningsgrunnlag" to sammenligningsgrunnlag * 12
             ),
             output = mapOf(
-                "avvik" to 25.1
+                "avviksprosent" to 25.1
             )
         )
     }

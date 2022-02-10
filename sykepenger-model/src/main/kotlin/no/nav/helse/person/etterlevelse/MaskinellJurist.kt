@@ -374,9 +374,7 @@ class MaskinellJurist private constructor(
                     "grunnlagForSykepengegrunnlag" to grunnlagForSykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
                     "sammenligningsgrunnlag" to sammenligningsgrunnlag.reflection { årlig, _, _, _ -> årlig }
                 ),
-                output = mapOf(
-                    "avvik" to avvik.prosent()
-                ),
+                output = mapOf("avviksprosent" to avvik.prosent()),
                 kontekster = kontekster()
             )
         )
