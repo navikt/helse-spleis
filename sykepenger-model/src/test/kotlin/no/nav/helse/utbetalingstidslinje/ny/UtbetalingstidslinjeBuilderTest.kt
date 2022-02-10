@@ -265,6 +265,36 @@ internal class UtbetalingstidslinjeBuilderTest {
     }
 
     @Test
+    fun `ferie mellom egenmeldingsdager`() {
+        undersøke(1.U + 14.F + 1.F + 10.S)
+        assertEquals(26, inspektør.size)
+        assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
+        assertEquals(8, inspektør.navDagTeller)
+        assertEquals(2, inspektør.navHelgDagTeller)
+        assertEquals(listOf(1.januar til 16.januar), perioder.first())
+    }
+
+    @Test
+    fun `egenmeldingsdager med frisk helg gir opphold i arbeidsgiverperiode`() {
+        undersøke(12.U + 2.R + 2.F + 2.U)
+        assertEquals(18, inspektør.size)
+        assertEquals(14, inspektør.arbeidsgiverperiodeDagTeller)
+        assertEquals(2, inspektør.arbeidsdagTeller)
+        assertEquals(2, inspektør.fridagTeller)
+        assertEquals(listOf(1.januar til 12.januar, 17.januar til 18.januar), perioder.first())
+    }
+
+    @Test
+    fun `frisk helg gir opphold i arbeidsgiverperiode`() {
+        undersøke(4.U + 8.S + 2.R + 2.F + 2.S)
+        assertEquals(18, inspektør.size)
+        assertEquals(14, inspektør.arbeidsgiverperiodeDagTeller)
+        assertEquals(2, inspektør.arbeidsdagTeller)
+        assertEquals(2, inspektør.fridagTeller)
+        assertEquals(listOf(1.januar til 12.januar, 17.januar til 18.januar), perioder.first())
+    }
+
+    @Test
     fun `spredt arbeidsgiverperiode`() {
         undersøke(10.S + 15.A + 7.S)
         assertEquals(32, inspektør.size)

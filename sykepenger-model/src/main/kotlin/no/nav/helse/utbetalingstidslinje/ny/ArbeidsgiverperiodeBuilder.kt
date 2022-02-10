@@ -71,6 +71,18 @@ internal class ArbeidsgiverperiodeBuilder(private val arbeidsgiverperiodeteller:
         tilstand.sykdomshelg(this, dato, økonomi)
     }
 
+    override fun visitDag(dag: Dag.Arbeidsgiverdag, dato: LocalDate, økonomi: Økonomi, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
+        fridager.somSykedager()
+        arbeidsgiverperiodeteller.inc()
+        tilstand.sykdomsdag(this, dato, økonomi)
+    }
+
+    override fun visitDag(dag: Dag.ArbeidsgiverHelgedag, dato: LocalDate, økonomi: Økonomi, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
+        fridager.somSykedager()
+        arbeidsgiverperiodeteller.inc()
+        tilstand.sykdomsdag(this, dato, økonomi)
+    }
+
     override fun visitDag(dag: Dag.Feriedag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
         tilstand.feriedag(this, dato)
     }
