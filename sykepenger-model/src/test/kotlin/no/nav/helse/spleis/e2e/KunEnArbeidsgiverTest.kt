@@ -2060,7 +2060,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(
                 1.januar(2021) til 10.januar(2021),
-                20.januar(2021) til 25.februar(2021)
+                20.januar(2021) til 25.januar(2021)
             ), førsteFraværsdag = 5.februar(2021)
         )
 
