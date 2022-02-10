@@ -81,7 +81,7 @@ internal class ArbeidsgiverperiodeBuilder(private val arbeidsgiverperiodeteller:
         tilstand(Initiell)
         fridager.somFeriedager()
         arbeidsgiverperiodeteller.dec()
-        mediator.fridag(dato)
+        mediator.arbeidsdag(dato)
     }
 
     private val fridager = mutableListOf<LocalDate>()
