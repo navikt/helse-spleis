@@ -5,6 +5,7 @@ import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
+import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 
@@ -78,6 +79,14 @@ internal class ArbeidsgiverperiodeBuilder(private val arbeidsgiverperiodeteller:
     }
 
     override fun visitDag(dag: Dag.FriskHelgedag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
+        tilstand(Initiell)
+        fridager.somFeriedager()
+        arbeidsgiverperiodeteller.dec()
+        mediator.arbeidsdag(dato)
+    }
+
+    override fun visitDag(dag: Dag.UkjentDag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
+        if (dato.erHelg()) return tilstand.feriedag(this, dato)
         tilstand(Initiell)
         fridager.somFeriedager()
         arbeidsgiverperiodeteller.dec()

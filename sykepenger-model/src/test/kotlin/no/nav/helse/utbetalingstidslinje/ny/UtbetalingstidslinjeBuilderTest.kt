@@ -11,10 +11,7 @@ import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.testhelpers.A
-import no.nav.helse.testhelpers.F
-import no.nav.helse.testhelpers.S
-import no.nav.helse.testhelpers.resetSeed
+import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -188,6 +185,38 @@ internal class UtbetalingstidslinjeBuilderTest {
         utbetalingstidslinje.forEach {
             assertNull(it.økonomi.arbeidsgiverperiode)
         }
+    }
+
+    @Test
+    fun `bare ukjent dager`() {
+        undersøke(14.opphold)
+        assertEquals(0, inspektør.size)
+        utbetalingstidslinje.forEach {
+            assertNull(it.økonomi.arbeidsgiverperiode)
+        }
+    }
+
+    @Test
+    fun `fridager med ukjent dager i mellom`() {
+        undersøke(1.F + 12.opphold + 1.F)
+        assertEquals(14, inspektør.size)
+        assertEquals(9, inspektør.arbeidsdagTeller)
+        assertEquals(5, inspektør.fridagTeller)
+        assertEquals(0, perioder.size)
+        utbetalingstidslinje.forEach {
+            assertNull(it.økonomi.arbeidsgiverperiode)
+        }
+    }
+
+    @Test
+    fun `fridager fullfører ikke arbeidsgiverperioden dersom etterfulgt av ukjent dager`() {
+        undersøke(15.S + 1.F + 12.opphold + 1.S)
+        assertEquals(29, inspektør.size)
+        assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
+        assertEquals(8, inspektør.arbeidsdagTeller)
+        assertEquals(5, inspektør.fridagTeller)
+        assertEquals(1, perioder.size)
+        assertEquals(listOf(1.januar til 15.januar, 29.januar til 29.januar), perioder.first())
     }
 
     @Test
