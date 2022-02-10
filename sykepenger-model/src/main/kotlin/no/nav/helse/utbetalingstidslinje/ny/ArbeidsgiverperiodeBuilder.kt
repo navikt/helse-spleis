@@ -97,6 +97,12 @@ internal class ArbeidsgiverperiodeBuilder(private val arbeidsgiverperiodeteller:
         mediator.arbeidsdag(dato)
     }
 
+    override fun visitDag(dag: Dag.ForeldetSykedag, dato: LocalDate, økonomi: Økonomi, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
+        fridager.somSykedager()
+        arbeidsgiverperiodeteller.inc()
+        tilstand.foreldetDag(this, dato, økonomi)
+    }
+
     private val fridager = mutableListOf<LocalDate>()
 
     private interface Tilstand {
@@ -106,6 +112,9 @@ internal class ArbeidsgiverperiodeBuilder(private val arbeidsgiverperiodeteller:
         }
         fun sykdomshelg(builder: ArbeidsgiverperiodeBuilder, dato: LocalDate, økonomi: Økonomi) {
             builder.mediator.utbetalingsdag(dato, økonomi)
+        }
+        fun foreldetDag(builder: ArbeidsgiverperiodeBuilder, dato: LocalDate, økonomi: Økonomi) {
+            builder.mediator.foreldetDag(dato, økonomi)
         }
         fun feriedagSomSyk(builder: ArbeidsgiverperiodeBuilder, dato: LocalDate)
         fun feriedag(builder: ArbeidsgiverperiodeBuilder, dato: LocalDate)
@@ -134,6 +143,9 @@ internal class ArbeidsgiverperiodeBuilder(private val arbeidsgiverperiodeteller:
         override fun feriedag(builder: ArbeidsgiverperiodeBuilder, dato: LocalDate) {
             builder.fridager.add(dato)
         }
+        override fun foreldetDag(builder: ArbeidsgiverperiodeBuilder, dato: LocalDate, økonomi: Økonomi) {
+            builder.mediator.arbeidsgiverperiodedag(dato, økonomi)
+        }
     }
     private object ArbeidsgiverperiodeSisteDag : Tilstand {
         override fun sykdomsdag(builder: ArbeidsgiverperiodeBuilder, dato: LocalDate, økonomi: Økonomi) {
@@ -148,6 +160,12 @@ internal class ArbeidsgiverperiodeBuilder(private val arbeidsgiverperiodeteller:
             builder.mediator.arbeidsgiverperiodedag(dato, Økonomi.ikkeBetalt())
             builder.tilstand(Utbetaling)
         }
+
+        override fun foreldetDag(builder: ArbeidsgiverperiodeBuilder, dato: LocalDate, økonomi: Økonomi) {
+            builder.mediator.arbeidsgiverperiodedag(dato, økonomi)
+            builder.tilstand(Utbetaling)
+        }
+
         override fun feriedag(builder: ArbeidsgiverperiodeBuilder, dato: LocalDate) {
             throw IllegalStateException("kan ikke ha fridag som siste dag i arbeidsgiverperioden")
         }

@@ -47,6 +47,7 @@ internal class UtbetalingstidslinjeInspektør(private val utbetalingstidslinje: 
             fridagTeller +
             navDagTeller +
             navHelgDagTeller +
+            foreldetDagTeller +
             ukjentDagTeller
 
     init {

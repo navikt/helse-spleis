@@ -32,6 +32,7 @@ internal class ArbeidsgiverperiodeBuilderBuilder() : ArbeidsgiverperiodeMediator
     override fun fridag(dato: LocalDate) {}
     override fun arbeidsdag(dato: LocalDate) {}
     override fun utbetalingsdag(dato: LocalDate, økonomi: Økonomi) {}
+    override fun foreldetDag(dato: LocalDate, økonomi: Økonomi) {}
 
     private fun nyDag(dagen: LocalDate) {
         if (perioder.isNotEmpty() && siste.endInclusive.plusDays(1) == dagen) {

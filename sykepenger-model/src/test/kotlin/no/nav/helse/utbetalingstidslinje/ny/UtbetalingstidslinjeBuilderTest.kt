@@ -246,6 +246,25 @@ internal class UtbetalingstidslinjeBuilderTest {
     }
 
     @Test
+    fun `foreldet dager telles som arbeidsgiverperiode`() {
+        undersøke(10.K + 6.S)
+        assertEquals(16, inspektør.size)
+        assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
+        assertEquals(1, perioder.size)
+        assertEquals(listOf(1.januar til 16.januar), perioder.first())
+    }
+
+    @Test
+    fun `foreldet dager etter utbetaling forblir foreldet`() {
+        undersøke(19.K)
+        assertEquals(19, inspektør.size)
+        assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
+        assertEquals(3, inspektør.foreldetDagTeller)
+        assertEquals(1, perioder.size)
+        assertEquals(listOf(1.januar til 16.januar), perioder.first())
+    }
+
+    @Test
     fun `spredt arbeidsgiverperiode`() {
         undersøke(10.S + 15.A + 7.S)
         assertEquals(32, inspektør.size)
@@ -373,6 +392,10 @@ internal class UtbetalingstidslinjeBuilderTest {
 
         override fun arbeidsgiverperiodeFerdig() {
             mediators.forEach { it.arbeidsgiverperiodeFerdig() }
+        }
+
+        override fun foreldetDag(dato: LocalDate, økonomi: Økonomi) {
+            mediators.forEach { it.foreldetDag(dato, økonomi) }
         }
     }
 

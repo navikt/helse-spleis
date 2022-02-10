@@ -34,6 +34,10 @@ internal class UtbetalingstidslinjeBuilder(private val inntekter: Inntekter) : A
         tidslinje.addNAVdag(dato, inntekter.medInntekt(dato, økonomi, nåværendeArbeidsgiverperiode))
     }
 
+    override fun foreldetDag(dato: LocalDate, økonomi: Økonomi) {
+        tidslinje.addForeldetDag(dato, inntekter.medInntekt(dato, økonomi, nåværendeArbeidsgiverperiode))
+    }
+
     override fun arbeidsgiverperiodeAvbrutt() {
         periodebuilder.arbeidsgiverperiodeAvbrutt()
         sisteArbeidsgiverperiode = null
