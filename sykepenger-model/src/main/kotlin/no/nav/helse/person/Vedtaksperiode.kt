@@ -172,15 +172,8 @@ internal class Vedtaksperiode private constructor(
                 inntektsmelding.info("Ville tidligere blitt kastet ut på grunn av refusjon: Refusjon opphører i perioden")
             }
             if (!it) return@also inntektsmelding.trimLeft(periode.endInclusive)
-            val relevantePerioder = sammenhengendePerioder.dropWhile { vedtaksperiode -> !inntektsmelding.erRelevant(vedtaksperiode.periode) }
             kontekst(inntektsmelding)
-            if (this !in relevantePerioder) {
-                inntektsmelding.padLeft(periode.start)
-                return@also inntektsmelding.trimLeft(periode.endInclusive)
-            }
-            if (sammenhengendePerioder.size != relevantePerioder.size) {
-                inntektsmelding.warn("Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.")
-            }
+            if (!inntektsmelding.erRelevant(periode, sammenhengendePerioder.map { it.periode })) return@also
             tilstand.håndter(this, inntektsmelding)
         }
     }
@@ -466,7 +459,6 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun oppdaterHistorikk(hendelse: SykdomstidslinjeHendelse) {
-        hendelse.padLeft(periode.start)
         hendelse.trimLeft(periode.endInclusive)
         sykdomstidslinje = arbeidsgiver.oppdaterSykdom(hendelse).subset(periode)
     }
@@ -1174,7 +1166,11 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
-            vedtaksperiode.arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode)?.inntektsmeldingInfo?.erSamme(inntektsmelding)
+            vedtaksperiode.arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode)?.also { forrige ->
+                forrige.inntektsmeldingInfo?.also { it.erSamme(inntektsmelding) } ?: run {
+                    if (forrige.utbetalinger.erAvsluttet()) inntektsmelding.warn("Vi har mottatt en inntektsmelding i en løpende sykmeldingsperiode med oppgitt første/bestemmende fraværsdag som er ulik tidligere fastsatt skjæringstidspunkt.")
+                }
+            }
             vedtaksperiode.håndterInntektsmelding(inntektsmelding) { AvventerSøknadFerdigForlengelse }
         }
     }

@@ -998,18 +998,18 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `om arbeidsgiverperioden fra IM treffer ikke første vedtaksperiodens burde den fortsatt bli håndtert dersom forlengelsen treffes`() {
+    fun `inntektsmelding oppgir arbeidsgiverperiode senere`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 7.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 7.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(8.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(8.januar, 20.januar, 100.prosent))
-        håndterInntektsmelding(listOf(8.januar til 23.januar), førsteFraværsdag = 8.januar)
+        håndterInntektsmelding(listOf(8.januar til 23.januar))
         assertNoErrors(2.vedtaksperiode)
         val tidslinje = inspektør.sykdomstidslinje
         assertTrue((1.januar til 7.januar).all { tidslinje[it] is Dag.Arbeidsdag || tidslinje[it] is Dag.FriskHelgedag })
         assertTrue((8.januar til 23.januar).all { tidslinje[it] is Dag.Sykedag || tidslinje[it] is Dag.SykHelgedag || tidslinje[it] is Dag.Arbeidsgiverdag || tidslinje[it] is Dag.ArbeidsgiverHelgedag })
         assertNoWarning(1.vedtaksperiode, "Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.")
-        assertWarning(2.vedtaksperiode, "Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.")
+        assertNoWarning(2.vedtaksperiode, "Vi har mottatt en inntektsmelding i en løpende sykmeldingsperiode med oppgitt første/bestemmende fraværsdag som er ulik tidligere fastsatt skjæringstidspunkt.")
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertEquals(8.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
@@ -1307,7 +1307,11 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertFalse((1.februar til 11.februar).all { tidslinje[it] is Dag.Arbeidsdag || tidslinje[it] is Dag.FriskHelgedag })
         assertTrue((12.februar til 28.februar).all { tidslinje[it] is Dag.Sykedag || tidslinje[it] is Dag.SykHelgedag  })
         assertNoWarning(1.vedtaksperiode, "Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.")
+        assertNoWarning(1.vedtaksperiode, "Vi har mottatt en inntektsmelding i en løpende sykmeldingsperiode med oppgitt første/bestemmende fraværsdag som er ulik tidligere fastsatt skjæringstidspunkt.")
+        assertNoWarning(1.vedtaksperiode, "Første fraværsdag i inntektsmeldingen er ulik skjæringstidspunktet. Kontrollér at inntektsmeldingen er knyttet til riktig periode.")
         assertWarning(2.vedtaksperiode, "Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.")
+        assertWarning(2.vedtaksperiode, "Vi har mottatt en inntektsmelding i en løpende sykmeldingsperiode med oppgitt første/bestemmende fraværsdag som er ulik tidligere fastsatt skjæringstidspunkt.")
+        assertNoWarning(2.vedtaksperiode, "Første fraværsdag i inntektsmeldingen er ulik skjæringstidspunktet. Kontrollér at inntektsmeldingen er knyttet til riktig periode.")
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_UFERDIG)
     }
@@ -1329,7 +1333,11 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertTrue((12.februar til 28.februar).all { tidslinje[it] is Dag.Sykedag || tidslinje[it] is Dag.SykHelgedag  })
         assertNoWarning(1.vedtaksperiode, "Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.")
         assertNoWarning(2.vedtaksperiode, "Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.")
+        assertNoWarning(2.vedtaksperiode, "Første fraværsdag i inntektsmeldingen er ulik skjæringstidspunktet. Kontrollér at inntektsmeldingen er knyttet til riktig periode.")
+        assertNoWarning(2.vedtaksperiode, "Vi har mottatt en inntektsmelding i en løpende sykmeldingsperiode med oppgitt første/bestemmende fraværsdag som er ulik tidligere fastsatt skjæringstidspunkt.")
         assertWarning(3.vedtaksperiode, "Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.")
+        assertWarning(3.vedtaksperiode, "Vi har mottatt en inntektsmelding i en løpende sykmeldingsperiode med oppgitt første/bestemmende fraværsdag som er ulik tidligere fastsatt skjæringstidspunkt.")
+        assertNoWarning(3.vedtaksperiode, "Første fraværsdag i inntektsmeldingen er ulik skjæringstidspunktet. Kontrollér at inntektsmeldingen er knyttet til riktig periode.")
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK)
         assertSisteTilstand(3.vedtaksperiode, AVVENTER_UFERDIG)
@@ -1647,7 +1655,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
 
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
-        håndterInntektsmelding(listOf(27.februar til 14.mars), førsteFraværsdag = 27.februar)
+        håndterInntektsmelding(listOf(27.februar til 14.mars))
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
         // Siden vi tidligere fylte ut 2. vedtaksperiode med arbeidsdager ville vi regne ut et ekstra skjæringstidspunkt i den sammenhengende perioden
         assertEquals(listOf(1.januar), person.skjæringstidspunkter())
@@ -1656,7 +1664,12 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(3.vedtaksperiode)
 
         assertNoWarning(1.vedtaksperiode, "Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.")
+        assertNoWarning(2.vedtaksperiode, "Første fraværsdag i inntektsmeldingen er ulik skjæringstidspunktet. Kontrollér at inntektsmeldingen er knyttet til riktig periode.")
+        assertNoWarning(2.vedtaksperiode, "Vi har mottatt en inntektsmelding i en løpende sykmeldingsperiode med oppgitt første/bestemmende fraværsdag som er ulik tidligere fastsatt skjæringstidspunkt.")
         assertWarning(2.vedtaksperiode, "Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.")
+        assertWarning(3.vedtaksperiode, "Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.")
+        assertWarning(3.vedtaksperiode, "Første fraværsdag i inntektsmeldingen er ulik skjæringstidspunktet. Kontrollér at inntektsmeldingen er knyttet til riktig periode.")
+        assertWarning(3.vedtaksperiode, "Inntektsmeldingen og vedtaksløsningen er uenige om beregningen av arbeidsgiverperioden. Undersøk hva som er riktig arbeidsgiverperiode.")
         assertEquals(17.januar til 31.mars, inspektør.utbetalinger.last().periode)
     }
 

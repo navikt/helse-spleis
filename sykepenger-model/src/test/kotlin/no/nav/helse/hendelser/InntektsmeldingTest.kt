@@ -66,6 +66,72 @@ internal class InntektsmeldingTest {
     }
 
     @Test
+    fun `første fraværsdag treffer midt i en sammenhengende periode`() {
+        inntektsmelding(listOf(3.januar til 18.januar), førsteFraværsdag = 5.februar)
+        val førstePeriode = 3.januar til 31.januar
+        val andrePeriode = 1.februar til 16.februar
+        val tredjePeriode = 17.februar til 28.februar
+        val perioder = listOf(førstePeriode, andrePeriode, tredjePeriode)
+        val tidslinjeFør = inntektsmelding.sykdomstidslinje()
+        assertFalse(inntektsmelding.erRelevant(førstePeriode, perioder))
+        assertEquals(tidslinjeFør, inntektsmelding.sykdomstidslinje())
+        assertFalse(inntektsmelding.hasWarningsOrWorse())
+        assertTrue(inntektsmelding.erRelevant(andrePeriode, perioder))
+        assertTrue(inntektsmelding.hasWarningsOrWorse())
+        assertTrue(inntektsmelding.erRelevant(tredjePeriode, perioder))
+        assertEquals(tidslinjeFør, inntektsmelding.sykdomstidslinje())
+    }
+
+    @Test
+    fun `første fraværsdag treffer midt i en sammenhengende periode og arbeidsgiverperioden er forskjøvet`() {
+        inntektsmelding(listOf(3.januar til 18.januar), førsteFraværsdag = 5.februar)
+        val førstePeriode = 1.januar til 31.januar
+        val andrePeriode = 1.februar til 16.februar
+        val tredjePeriode = 17.februar til 28.februar
+        val perioder = listOf(førstePeriode, andrePeriode, tredjePeriode)
+        val tidslinjeFør = inntektsmelding.sykdomstidslinje()
+        assertTrue(tidslinjeFør[1.januar] is UkjentDag)
+        assertTrue(tidslinjeFør[2.januar] is UkjentDag)
+        assertFalse(inntektsmelding.erRelevant(førstePeriode, perioder))
+        val tidslinjeEtter = inntektsmelding.sykdomstidslinje()
+        assertTrue(tidslinjeEtter[1.januar] is Arbeidsdag)
+        assertTrue(tidslinjeEtter[2.januar] is Arbeidsdag)
+        assertFalse(inntektsmelding.hasWarningsOrWorse())
+    }
+
+    @Test
+    fun `arbeidsgiverperioden er forskjøvet`() {
+        inntektsmelding(listOf(3.januar til 18.januar))
+        val førstePeriode = 1.januar til 31.januar
+        val andrePeriode = 1.februar til 16.februar
+        val perioder = listOf(førstePeriode, andrePeriode)
+        val tidslinjeFør = inntektsmelding.sykdomstidslinje()
+        assertTrue(tidslinjeFør[1.januar] is UkjentDag)
+        assertTrue(tidslinjeFør[2.januar] is UkjentDag)
+        assertTrue(inntektsmelding.erRelevant(førstePeriode, perioder))
+        assertTrue(inntektsmelding.erRelevant(andrePeriode, perioder))
+        val tidslinjeEtter = inntektsmelding.sykdomstidslinje()
+        assertTrue(tidslinjeEtter[1.januar] is Arbeidsdag)
+        assertTrue(tidslinjeEtter[2.januar] is Arbeidsdag)
+        assertFalse(inntektsmelding.hasWarningsOrWorse())
+    }
+
+    @Test
+    fun `helt ny arbeidsgiverperiode i en sammenhengende periode`() {
+        inntektsmelding(listOf(1.februar til 16.februar))
+        val førstePeriode = 1.januar til 31.januar
+        val andrePeriode = 1.februar til 28.februar
+        val perioder = listOf(førstePeriode, andrePeriode)
+        val tidslinjeFør = inntektsmelding.sykdomstidslinje()
+        assertFalse(inntektsmelding.erRelevant(førstePeriode, perioder))
+        assertTrue(inntektsmelding.erRelevant(andrePeriode, perioder))
+        val tidslinjeEtter = inntektsmelding.sykdomstidslinje()
+        assertNotEquals(tidslinjeFør, tidslinjeEtter)
+        assertTrue((1.januar til 31.januar).all { tidslinjeEtter[it] is Arbeidsdag || tidslinjeEtter[it] is FriskHelgedag })
+        assertFalse(inntektsmelding.hasWarningsOrWorse())
+    }
+
+    @Test
     fun `padder med arbeidsdager i forkant av arbeidsgiverperiode`() {
         inntektsmelding(listOf(3.januar til 18.januar), førsteFraværsdag = 3.januar)
         inntektsmelding.padLeft(1.januar)
@@ -507,7 +573,7 @@ internal class InntektsmeldingTest {
         arbeidsgiverperioder: List<Periode>,
         refusjonBeløp: Inntekt = 1000.månedlig,
         beregnetInntekt: Inntekt = 1000.månedlig,
-        førsteFraværsdag: LocalDate? = 1.januar,
+        førsteFraværsdag: LocalDate? = arbeidsgiverperioder.maxOfOrNull { it.start } ?: 1.januar,
         refusjonOpphørsdato: LocalDate? = null,
         endringerIRefusjon: List<EndringIRefusjon> = emptyList(),
         arbeidsforholdId: String? = null,

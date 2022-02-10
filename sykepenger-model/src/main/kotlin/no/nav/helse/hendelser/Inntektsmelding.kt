@@ -109,6 +109,21 @@ class Inntektsmelding(
         return arbeidsgiverperiode
     }
 
+    internal fun erRelevant(periode: Periode, perioder: List<Periode>): Boolean {
+        val relevantePerioder = perioder.dropWhile { !erRelevant(it) }
+        if (relevantePerioder.isEmpty()) return false
+
+        padLeft(periode.start)
+        if (periode !in relevantePerioder) {
+            trimLeft(periode.endInclusive)
+            return false
+        }
+
+        if (førsteFraværsdagErEtterArbeidsgiverperioden() && perioder.size != relevantePerioder.size)
+            warn("Vi har mottatt en inntektsmelding i en løpende sykmeldingsperiode med oppgitt første/bestemmende fraværsdag som er ulik tidligere fastsatt skjæringstidspunkt.")
+        return true
+    }
+
     private fun førsteFraværsdagErEtterArbeidsgiverperioden(): Boolean {
         if (førsteFraværsdag == null) return false
         return arbeidsgiverperiode?.slutterEtter(førsteFraværsdag) != true
