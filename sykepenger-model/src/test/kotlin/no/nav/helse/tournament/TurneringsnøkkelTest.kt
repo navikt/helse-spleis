@@ -3,6 +3,7 @@ package no.nav.helse.tournament
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
+import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -63,7 +64,7 @@ internal class TurneringsnøkkelTest {
         object Aareg : TestHendelse() // Dette er ren spekulasjon omkring AAreg som kilde
 
         override fun sykdomstidslinje(): Sykdomstidslinje = throw RuntimeException("Brukes ikke i testene")
-        override fun valider(periode: Periode): Aktivitetslogg = throw RuntimeException("Brukes ikke i testene")
+        override fun valider(periode: Periode, subsumsjonObserver: SubsumsjonObserver): Aktivitetslogg = throw RuntimeException("Brukes ikke i testene")
         override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) = throw RuntimeException("Brukes ikke i testene")
     }
 }

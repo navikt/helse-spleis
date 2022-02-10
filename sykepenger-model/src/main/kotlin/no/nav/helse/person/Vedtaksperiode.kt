@@ -448,7 +448,7 @@ internal class Vedtaksperiode private constructor(
 
         hendelse.validerFørsteFraværsdag(skjæringstidspunkt)
         finnArbeidsgiverperiode()?.also { hendelse.validerArbeidsgiverperiode(it) }
-        hendelse.valider(periode)
+        hendelse.valider(periode, jurist)
         if (hendelse.hasErrorsOrWorse()) return arbeidsgiver.søppelbøtte(hendelse, SENERE_INCLUSIVE(this), IKKE_STØTTET)
         hvisIngenErrors()
         hendelse.info("Fullført behandling av inntektsmelding")
@@ -475,7 +475,7 @@ internal class Vedtaksperiode private constructor(
         periode = periode.oppdaterFom(hendelse.periode())
         oppdaterHistorikk(hendelse)
         if (!person.harFlereArbeidsgivereMedSykdom()) hendelse.validerIkkeOppgittFlereArbeidsforholdMedSykmelding()
-        hendelse.valider(periode)
+        hendelse.valider(periode, jurist)
         if (hendelse.hasErrorsOrWorse()) {
             if (person.harFlereArbeidsgivereMedSykdom()) return person.invaliderAllePerioder(
                 hendelse,
@@ -1094,7 +1094,7 @@ internal class Vedtaksperiode private constructor(
                 sykmelding.warn("Denne personen har en utbetaling for samme periode for en annen arbeidsgiver. Kontroller at beregningene for begge arbeidsgiverne er korrekte.")
             }
 
-            if (sykmelding.valider(vedtaksperiode.periode).hasErrorsOrWorse())
+            if (sykmelding.valider(vedtaksperiode.periode, vedtaksperiode.jurist).hasErrorsOrWorse())
                 return vedtaksperiode.tilstand(sykmelding, TilInfotrygd)
 
             vedtaksperiode.tilstand(

@@ -213,7 +213,7 @@ internal class InntektsmeldingTest {
     fun `inntektsmelding uten arbeidsgiverperiode med førsteFraværsdag satt`() {
         inntektsmelding(emptyList(), førsteFraværsdag = 1.januar)
         val nyTidslinje = inntektsmelding.sykdomstidslinje()
-        assertTrue(inntektsmelding.valider(Periode(1.januar, 31.januar)).hasWarningsOrWorse())
+        assertTrue(inntektsmelding.valider(Periode(1.januar, 31.januar), MaskinellJurist()).hasWarningsOrWorse())
         assertEquals(1.januar, nyTidslinje.periode()?.start)
         assertEquals(1.januar, nyTidslinje.periode()?.endInclusive)
     }
@@ -263,7 +263,7 @@ internal class InntektsmeldingTest {
                 Periode(1.januar, 2.januar), Periode(4.januar, 5.januar), Periode(3.januar, 4.januar)
             )
         )
-        inntektsmelding.valider(Periode(1.januar, 31.januar))
+        inntektsmelding.valider(Periode(1.januar, 31.januar), MaskinellJurist())
         assertFalse(inntektsmelding.hasErrorsOrWorse())
     }
 
@@ -299,7 +299,7 @@ internal class InntektsmeldingTest {
             listOf(Periode(1.januar, 10.januar)),
             begrunnelseForReduksjonEllerIkkeUtbetalt = "begrunnelse"
         )
-        assertTrue(inntektsmelding.valider(Periode(1.januar, 31.januar)).hentErrors().contains("Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden på grunn av: begrunnelse"))
+        assertTrue(inntektsmelding.valider(Periode(1.januar, 31.januar), MaskinellJurist()).hentErrors().contains("Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden på grunn av: begrunnelse"))
     }
 
     @Test
@@ -308,7 +308,7 @@ internal class InntektsmeldingTest {
             listOf(Periode(1.januar, 10.januar)),
             begrunnelseForReduksjonEllerIkkeUtbetalt = ""
         )
-        assertFalse(inntektsmelding.valider(Periode(1.januar, 31.januar)).hasErrorsOrWorse())
+        assertFalse(inntektsmelding.valider(Periode(1.januar, 31.januar), MaskinellJurist()).hasErrorsOrWorse())
     }
 
     @Test
@@ -498,7 +498,7 @@ internal class InntektsmeldingTest {
 
     private fun assertMelding(melding: String, periode: Periode = 1.januar til 31.januar) {
         assertTrue(inntektsmelding
-            .valider(periode)
+            .valider(periode, MaskinellJurist())
             .hentInfo()
             .contains("Ville tidligere blitt kastet ut på grunn av refusjon: $melding")
         )

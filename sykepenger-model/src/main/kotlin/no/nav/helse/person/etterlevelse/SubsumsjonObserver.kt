@@ -71,6 +71,9 @@ interface SubsumsjonObserver {
      */
     fun `§ 8-3 ledd 2 punktum 1`(oppfylt: Boolean, skjæringstidspunkt: LocalDate, grunnlagForSykepengegrunnlag: Inntekt, minimumInntekt: Inntekt) {}
 
+
+    fun `§ 8-9 ledd 1`(oppfylt: Boolean, periode: Periode) {}
+
     /**
      * Vurdering av maksimalt sykepengegrunnlag
      *

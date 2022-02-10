@@ -2,6 +2,7 @@ package no.nav.helse.hendelser
 
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.IAktivitetslogg
+import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.Companion.noOverlap
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -36,7 +37,7 @@ class Sykmelding(
         periode = requireNotNull(sykdomstidslinje.periode())
     }
 
-    override fun valider(periode: Periode): IAktivitetslogg {
+    override fun valider(periode: Periode, subsumsjonObserver: SubsumsjonObserver): IAktivitetslogg {
         forGammel()
         return this
     }

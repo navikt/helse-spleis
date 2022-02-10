@@ -6,7 +6,7 @@ enum class Paragraf(internal val ref: String) {
     PARAGRAF_2("2"),
     PARAGRAF_8_2("8-2"),
     PARAGRAF_8_3("8-3"),
-    PARAGRAF_8_4("8-4"),
+    PARAGRAF_8_9("8-9"),
     PARAGRAF_8_10("8-10"),
     PARAGRAF_8_11("8-11"),
     PARAGRAF_8_12("8-12"),

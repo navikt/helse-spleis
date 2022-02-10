@@ -3,6 +3,7 @@ package no.nav.helse.hendelser
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -75,7 +76,7 @@ class OverstyrTidslinje(
 
     override fun sykdomstidslinje() = sykdomstidslinje
 
-    override fun valider(periode: Periode) = Aktivitetslogg()
+    override fun valider(periode: Periode, subsumsjonObserver: SubsumsjonObserver) = Aktivitetslogg()
 
     override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) {
         arbeidsgiver.håndter(this)

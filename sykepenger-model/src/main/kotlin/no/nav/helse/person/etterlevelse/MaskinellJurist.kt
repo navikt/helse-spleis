@@ -4,11 +4,11 @@ import no.nav.helse.Fødselsnummer
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.januar
+import no.nav.helse.juni
 import no.nav.helse.person.*
 import no.nav.helse.person.Bokstav.BOKSTAV_A
+import no.nav.helse.person.Ledd.*
 import no.nav.helse.person.Ledd.Companion.ledd
-import no.nav.helse.person.Ledd.LEDD_2
-import no.nav.helse.person.Ledd.LEDD_3
 import no.nav.helse.person.Paragraf.*
 import no.nav.helse.person.Punktum.Companion.punktum
 import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall
@@ -111,6 +111,23 @@ class MaskinellJurist private constructor(
                 kontekster = kontekster()
             )
         )
+    }
+
+    override fun `§ 8-9 ledd 1`(oppfylt: Boolean, periode: Periode) {
+        periode.forEach {
+            leggTil(
+                GrupperbarSubsumsjon(
+                    dato = it,
+                    utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
+                    versjon = 1.juni(2021),
+                    paragraf = PARAGRAF_8_9,
+                    ledd = LEDD_1,
+                    input = emptyMap(),
+                    output = emptyMap(),
+                    kontekster = kontekster()
+                )
+            )
+        }
     }
 
     override fun `§ 8-10 ledd 2 punktum 1`(

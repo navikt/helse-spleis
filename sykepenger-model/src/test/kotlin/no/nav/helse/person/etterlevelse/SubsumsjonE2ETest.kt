@@ -2,6 +2,7 @@ package no.nav.helse.person.etterlevelse
 
 import no.nav.helse.*
 import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.*
 import no.nav.helse.inspectors.SubsumsjonInspektør
 import no.nav.helse.person.Bokstav.BOKSTAV_A
 import no.nav.helse.person.FOLKETRYGDLOVENS_OPPRINNELSESDATO
@@ -30,7 +31,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
     @Test
     fun `§ 8-2 ledd 1 - opptjeningstid tilfredstilt`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterYtelser()
         val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNUMMER, 4.desember(2017), 31.januar))
@@ -58,7 +59,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
     @Test
     fun `§ 8-2 ledd 1 - opptjeningstid ikke tilfredstilt`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterYtelser()
         val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNUMMER, 5.desember(2017), 31.januar))
@@ -88,7 +89,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         val fnr = "20014835841".somFødselsnummer()
         createTestPerson(fnr)
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), fnr = fnr)
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), fnr = fnr)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), fnr = fnr)
         håndterInntektsmelding(listOf(1.januar til 16.januar), fnr = fnr)
         håndterYtelser(fnr = fnr)
         håndterVilkårsgrunnlag(fnr = fnr)
@@ -134,7 +135,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         val fnr = "01024835841".somFødselsnummer()
         createTestPerson(fnr)
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), fnr = fnr)
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), fnr = fnr)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), fnr = fnr)
         håndterInntektsmelding(listOf(1.januar til 16.januar), fnr = fnr)
         håndterYtelser(fnr = fnr)
         håndterVilkårsgrunnlag(fnr = fnr)
@@ -163,7 +164,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         val fnr = "01014835841".somFødselsnummer()
         createTestPerson(fnr)
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), fnr = fnr)
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), fnr = fnr)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), fnr = fnr)
         håndterInntektsmelding(listOf(1.januar til 16.januar), fnr = fnr)
         håndterYtelser(fnr = fnr)
         håndterVilkårsgrunnlag(fnr = fnr)
@@ -193,7 +194,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         val fnr = "01014835841".somFødselsnummer()
         createTestPerson(fnr)
         håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent), fnr = fnr)
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 16.januar, 100.prosent), fnr = fnr)
+        håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent), fnr = fnr)
         håndterInntektsmelding(listOf(1.januar til 16.januar), fnr = fnr)
         håndterYtelser(fnr = fnr)
         håndterVilkårsgrunnlag(fnr = fnr)
@@ -220,7 +221,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
     @Test
     fun `§ 8-3 ledd 2 punktum 1 - har minimum inntekt halv G`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 46817.årlig)
         håndterYtelser()
         val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNUMMER, 5.desember(2017), 31.januar))
@@ -244,7 +245,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
     @Test
     fun `§ 8-3 ledd 2 punktum 1 - har inntekt mindre enn en halv G`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 46816.årlig)
         håndterYtelser()
         val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNUMMER, 5.desember(2017), 31.januar))
@@ -265,12 +266,38 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         SubsumsjonInspektør(jurist).assertIkkeVurdert(PARAGRAF_8_51, LEDD_2, 1.punktum)
     }
 
+    @Test
+    fun `§ 8-9 ledd 1 - ikke vurdert dersom det ikke er oppgitt utenlandsopphold`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(20.januar, 31.januar))
+        SubsumsjonInspektør(jurist).assertIkkeVurdert(
+            paragraf = PARAGRAF_8_9,
+            versjon = 1.juni(2021),
+            ledd = LEDD_1,
+        )
+    }
+
+    @Test
+    fun `§ 8-9 ledd 1 - avslag ved utenlandsopphold`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Utlandsopphold(20.januar, 31.januar))
+        SubsumsjonInspektør(jurist).assertIkkeOppfylt(
+            paragraf = PARAGRAF_8_9,
+            versjon = 1.juni(2021),
+            ledd = LEDD_1,
+            input = mapOf(
+                "utfallFom" to 20.januar,
+                "utfallTom" to 31.januar
+            ),
+            output = emptyMap()
+        )
+    }
 
     @Test
     fun `§ 8-10 ledd 2 punktum 1 - inntekt overstiger ikke maksimum sykepengegrunnlag`() {
         val maksimumSykepengegrunnlag2018 = (93634 * 6).årlig // 6G
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = maksimumSykepengegrunnlag2018)
         håndterYtelser()
         håndterVilkårsgrunnlag(inntekt = maksimumSykepengegrunnlag2018)
@@ -295,7 +322,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         val maksimumSykepengegrunnlag2018 = (93634 * 6).årlig // 6G
         val inntekt = maksimumSykepengegrunnlag2018.plus(1.årlig)
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = inntekt)
         håndterYtelser()
         håndterVilkårsgrunnlag(inntekt = inntekt)
@@ -320,7 +347,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         val maksimumSykepengegrunnlag2018 = (93634 * 6).årlig // 6G
         val inntekt = maksimumSykepengegrunnlag2018.plus(1.årlig)
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
         håndterUtbetalingshistorikk(
             1.vedtaksperiode,
             utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 31.januar, 100.prosent, inntekt)),
@@ -352,7 +379,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
     fun `§ 8-10 ledd 3 - årlig inntekt omregnet til daglig`() {
         val inntekt = 260000.årlig
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = inntekt)
 
         SubsumsjonInspektør(jurist).assertBeregnet(
@@ -367,7 +394,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
     @Test
     fun `§ 8-12 ledd 1 punktum 1 - Brukt færre enn 248 dager`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 50.prosent))
-        håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(3.januar, 26.januar, 50.prosent, 50.prosent))
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 26.januar, 50.prosent, 50.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
@@ -399,7 +426,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(3.januar(2018), 11.januar(2019), 50.prosent))
         håndterSøknadMedValidering(
             1.vedtaksperiode,
-            Søknad.Søknadsperiode.Sykdom(3.januar(2018), 11.januar(2019), 50.prosent, 50.prosent),
+            Sykdom(3.januar(2018), 11.januar(2019), 50.prosent, 50.prosent),
             sendtTilNAVEllerArbeidsgiver = 3.januar(2018)
         )
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar(2018), 18.januar(2018))))
@@ -452,7 +479,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
     fun `§8-12 ledd 1 punktum 1 - Blir kun vurdert en gang etter ny periode med ny rett til sykepenger`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar(2018), 31.januar(2018), 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar(2018), 16.januar(2018))))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar(2018), 31.januar(2018), 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.januar(2018))
+        håndterSøknad(Sykdom(1.januar(2018), 31.januar(2018), 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.januar(2018))
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
@@ -465,7 +492,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             val tom = fom.with(TemporalAdjusters.lastDayOfMonth())
 
             håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent))
-            håndterSøknad(Søknad.Søknadsperiode.Sykdom(fom, tom, 100.prosent), sendtTilNAVEllerArbeidsgiver = tom)
+            håndterSøknad(Sykdom(fom, tom, 100.prosent), sendtTilNAVEllerArbeidsgiver = tom)
 
             håndterYtelser((it + 2).vedtaksperiode)
             håndterSimulering((it + 2).vedtaksperiode)
@@ -474,7 +501,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         }
 
         håndterSykmelding(Sykmeldingsperiode(16.juni(2019), 31.juli(2019), 50.prosent))
-        håndterSøknadMedValidering(13.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(16.juni(2019), 31.juli(2019), 50.prosent, 50.prosent))
+        håndterSøknadMedValidering(13.vedtaksperiode, Sykdom(16.juni(2019), 31.juli(2019), 50.prosent, 50.prosent))
         håndterInntektsmeldingMedValidering(13.vedtaksperiode, listOf(Periode(16.juni(2019), 31.juli(2019))))
         håndterYtelser(13.vedtaksperiode)
         håndterVilkårsgrunnlag(13.vedtaksperiode, INNTEKT)
@@ -496,7 +523,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
     @Test
     fun `§ 8-12 ledd 2 - Bruker har vært arbeidsfør i 26 uker`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 50.prosent))
-        håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 50.prosent, 50.prosent))
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar, 31.januar, 50.prosent, 50.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)))
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
@@ -506,7 +533,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode)
 
         håndterSykmelding(Sykmeldingsperiode(17.juli, 31.august, 50.prosent))
-        håndterSøknadMedValidering(2.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(17.juli, 31.august, 50.prosent, 50.prosent))
+        håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(17.juli, 31.august, 50.prosent, 50.prosent))
         håndterInntektsmeldingMedValidering(2.vedtaksperiode, listOf(Periode(17.juli, 1.august)))
         håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
@@ -549,7 +576,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
     fun `§8-12 ledd 2 - Bruker har ikke vært arbeidsfør i 26 uker`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar(2018), 31.januar(2018), 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar(2018), 16.januar(2018))))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar(2018), 31.januar(2018), 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.januar(2018))
+        håndterSøknad(Sykdom(1.januar(2018), 31.januar(2018), 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.januar(2018))
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
@@ -562,7 +589,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             val tom = fom.with(TemporalAdjusters.lastDayOfMonth())
 
             håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent))
-            håndterSøknad(Søknad.Søknadsperiode.Sykdom(fom, tom, 100.prosent), sendtTilNAVEllerArbeidsgiver = tom)
+            håndterSøknad(Sykdom(fom, tom, 100.prosent), sendtTilNAVEllerArbeidsgiver = tom)
 
             håndterYtelser((it + 2).vedtaksperiode)
             håndterSimulering((it + 2).vedtaksperiode)
@@ -571,7 +598,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         }
 
         håndterSykmelding(Sykmeldingsperiode(1.januar(2019), 31.januar(2019), 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar(2019), 31.januar(2019), 100.prosent), sendtTilNAVEllerArbeidsgiver = 31.januar(2019))
+        håndterSøknad(Sykdom(1.januar(2019), 31.januar(2019), 100.prosent), sendtTilNAVEllerArbeidsgiver = 31.januar(2019))
         håndterYtelser(13.vedtaksperiode)
         håndterUtbetalingsgodkjenning(13.vedtaksperiode, true)
         håndterUtbetalt(13.vedtaksperiode)
@@ -599,7 +626,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
     @Test
     fun `§ 8-13 ledd 1 - Sykmeldte har 20 prosent uføregrad`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 20.prosent))
-        håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 20.prosent, 80.prosent))
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar, 31.januar, 20.prosent, 80.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)))
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
@@ -622,7 +649,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
     @Test
     fun `§ 8-13 ledd 1 - Sykmeldte har under 20 prosent uføregrad`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 19.prosent))
-        håndterSøknadMedValidering(1.vedtaksperiode, Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 19.prosent, 81.prosent))
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar, 31.januar, 19.prosent, 81.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)))
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
@@ -647,7 +674,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
     @Test
     fun `§ 8-16 ledd 1 - dekningsgrad`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
@@ -672,7 +699,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
     @Test
     fun `§ 8-17 ledd 1 bokstav a - trygden yter sykepenger ved utløp av arbeidsgiverperioden`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
@@ -694,7 +721,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
     @Test
     fun `§ 8-17 ledd 1 bokstav a - trygden yter sykepenger dersom arbeidsgiverperioden avslutter på en fredag`() {
         håndterSykmelding(Sykmeldingsperiode(4.januar, 22.januar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(4.januar, 22.januar, 100.prosent))
+        håndterSøknad(Sykdom(4.januar, 22.januar, 100.prosent))
         håndterInntektsmelding(listOf(4.januar til 19.januar), beregnetInntekt = INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
@@ -716,7 +743,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
     @Test
     fun `§ 8-17 ledd 1 bokstav a - trygden yter ikke sykepenger dersom arbeidsgiverperioden ikke er fullført`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 16.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
         assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET_UTEN_UTBETALING)
         SubsumsjonInspektør(jurist).assertIkkeOppfylt(
@@ -735,7 +762,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
     @Test
     fun `§ 8-17 ledd 1 bokstav a - ikke-oppfylt innenfor arbeidsgiverperioden`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
@@ -756,7 +783,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
     @Test
     fun `§ 8-17 ledd 1 bokstav a - opphold inne i arbeidsgiverperioden`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 10.januar, 12.januar til 17.januar), beregnetInntekt = INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
@@ -788,7 +815,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
     @Test
     fun `§ 8-17 ledd 2 - trygden yter ikke sykepenger for feriedager og permisjonsdager`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), Søknad.Søknadsperiode.Ferie(30.januar, 31.januar))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(30.januar, 31.januar))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
@@ -808,7 +835,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
     @Test
     fun `§ 8-28 tredje ledd bokstav a - legger tre siste innraporterte inntekter til grunn for andre arbeidsgivere`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 15.mars, 100.prosent), orgnummer = a1)
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 15.mars, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(1.januar, 15.mars, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             førsteFraværsdag = 1.januar,
@@ -871,7 +898,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
     @Test
     fun `§ 8-30 ledd 1 - sykepengegrunnlaget utgjør aktuell månedsinntekt omregnet til årsinntekt i kontekst av § 8-30 ledd 1`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
@@ -890,7 +917,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
     fun `§ 8-30 ledd 1 - sykepengegrunnlaget utgjør aktuell månedsinntekt omregnet til årsinntekt i kontekst av § 8-30 ledd 1 selv om beløpet overstiger 6G`() {
         val inntekt = 60000
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = inntekt.månedlig)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntekt.månedlig)
@@ -912,8 +939,8 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         val inntekt = 60000
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = ag1)
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = ag2)
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = ag1)
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = ag2)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = ag1)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = ag2)
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = inntekt.månedlig, orgnummer = ag1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = inntekt.månedlig, orgnummer = ag2)
         håndterYtelser(1.vedtaksperiode, orgnummer = ag1)
@@ -958,7 +985,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         val beregnetInntekt = 31000.0
         val sammenligningsgrunnlag = 31000.0
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = beregnetInntekt.månedlig)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, sammenligningsgrunnlag.månedlig)
@@ -988,7 +1015,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         val beregnetInntekt = 38750.0
         val sammenligningsgrunnlag = 31000.0
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = beregnetInntekt.månedlig)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, sammenligningsgrunnlag.månedlig)
@@ -1018,7 +1045,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         val beregnetInntekt = 38781.0
         val sammenligningsgrunnlag = 31000.0
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = beregnetInntekt.månedlig)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, sammenligningsgrunnlag.månedlig)
@@ -1042,11 +1069,11 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
     @Test
     fun `§ 8-30 ledd 2 - gjør ikke ny juridisk vurdering ved sjekk av inntektsavvik i forlengelse av kort periode`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 1.januar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 1.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 1.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
 
         håndterSykmelding(Sykmeldingsperiode(2.januar, 31.januar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(2.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(2.januar, 31.januar, 100.prosent))
         håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
@@ -1061,7 +1088,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
     @Test
     fun `§ 8-51 ledd 2 - er ikke over 67 år`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 187268.årlig)
         håndterYtelser()
         val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNUMMER, 5.desember(2017), 31.januar))
@@ -1075,7 +1102,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         val personOver67år = "01014500065".somFødselsnummer()
         createTestPerson(personOver67år)
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), fnr = personOver67år)
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), fnr = personOver67år)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), fnr = personOver67år)
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 187268.årlig, fnr = personOver67år)
         håndterYtelser(fnr = personOver67år)
         val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNUMMER, 5.desember(2017), 31.januar))
@@ -1101,7 +1128,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         val personOver67år = "01014500065".somFødselsnummer()
         createTestPerson(personOver67år)
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), fnr = personOver67år)
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), fnr = personOver67år)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), fnr = personOver67år)
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 187267.årlig, fnr = personOver67år)
         håndterYtelser(fnr = personOver67år)
         val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNUMMER, 5.desember(2017), 31.januar))
@@ -1128,7 +1155,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         createTestPerson(personOver67år)
 
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), fnr = personOver67år)
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), fnr = personOver67år)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), fnr = personOver67år)
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, fnr = personOver67år)
         håndterYtelser(1.vedtaksperiode, fnr = personOver67år)
         håndterVilkårsgrunnlag(1.vedtaksperiode, fnr = personOver67år)
@@ -1138,7 +1165,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode, fnr = personOver67år)
 
         håndterSykmelding(Sykmeldingsperiode(2.februar, 28.februar, 100.prosent), fnr = personOver67år)
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(2.februar, 28.februar, 100.prosent), fnr = personOver67år)
+        håndterSøknad(Sykdom(2.februar, 28.februar, 100.prosent), fnr = personOver67år)
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 2.februar, fnr = personOver67år)
         håndterYtelser(2.vedtaksperiode, fnr = personOver67år)
         håndterVilkårsgrunnlag(2.vedtaksperiode, fnr = personOver67år)
@@ -1202,7 +1229,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         createTestPerson(personOver67år)
 
         håndterSykmelding(Sykmeldingsperiode(1.januar, 1.februar, 100.prosent), fnr = personOver67år)
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 1.februar, 100.prosent), fnr = personOver67år)
+        håndterSøknad(Sykdom(1.januar, 1.februar, 100.prosent), fnr = personOver67år)
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, fnr = personOver67år)
         håndterYtelser(1.vedtaksperiode, fnr = personOver67år)
         håndterVilkårsgrunnlag(1.vedtaksperiode, fnr = personOver67år)
@@ -1212,7 +1239,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode, fnr = personOver67år)
 
         håndterSykmelding(Sykmeldingsperiode(3.februar, 28.februar, 100.prosent), fnr = personOver67år)
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(3.februar, 28.februar, 100.prosent), fnr = personOver67år)
+        håndterSøknad(Sykdom(3.februar, 28.februar, 100.prosent), fnr = personOver67år)
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 3.februar, fnr = personOver67år)
         håndterYtelser(2.vedtaksperiode, fnr = personOver67år)
         håndterVilkårsgrunnlag(2.vedtaksperiode, fnr = personOver67år)

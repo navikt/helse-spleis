@@ -2,6 +2,7 @@ package no.nav.helse.hendelser
 
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.IAktivitetslogg
+import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.somFødselsnummer
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -62,7 +63,8 @@ class Søknad(
 
     internal fun harArbeidsdager() = perioder.filterIsInstance<Søknadsperiode.Arbeid>().isNotEmpty()
 
-    override fun valider(periode: Periode): IAktivitetslogg {
+    override fun valider(periode: Periode, subsumsjonObserver: SubsumsjonObserver): IAktivitetslogg {
+        perioder.forEach { it.subsumsjon(subsumsjonObserver) }
         perioder.forEach { it.valider(this) }
         andreInntektskilder.forEach { it.valider(this) }
         forUng(fødselsnummer.somFødselsnummer().alder())
@@ -115,6 +117,8 @@ class Søknad(
         internal fun valider(søknad: Søknad, beskjed: String) {
             if (periode.utenfor(søknad.sykdomsperiode)) søknad.warn(beskjed)
         }
+
+        internal open fun subsumsjon(subsumsjonObserver: SubsumsjonObserver) {}
 
         class Sykdom(
             fom: LocalDate,
@@ -198,6 +202,10 @@ class Søknad(
 
             override fun valider(søknad: Søknad) {
                 søknad.warn("Utenlandsopphold oppgitt i perioden i søknaden.")
+            }
+
+            override fun subsumsjon(subsumsjonObserver: SubsumsjonObserver) {
+                subsumsjonObserver.`§ 8-9 ledd 1`(false, periode)
             }
         }
     }

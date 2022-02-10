@@ -88,7 +88,7 @@ internal class InntektsmeldingHendelseTest : AbstractPersonTest() {
             begrunnelseForReduksjonEllerIkkeUtbetalt = null,
             mottatt = LocalDateTime.now()
         )
-        assertFalse(inntektsmelding.valider(Periode(1.januar, 31.januar)).hasErrorsOrWorse())
+        assertFalse(inntektsmelding.valider(Periode(1.januar, 31.januar), MaskinellJurist()).hasErrorsOrWorse())
         person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 20.januar, 100.prosent)))
         person.håndter(inntektsmelding)
         assertEquals(TilstandType.AVVENTER_SØKNAD_FERDIG_GAP, inspektør.sisteTilstand(1.vedtaksperiode))

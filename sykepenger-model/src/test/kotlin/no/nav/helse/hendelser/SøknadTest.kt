@@ -6,6 +6,7 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.*
 import no.nav.helse.hentErrors
 import no.nav.helse.hentWarnings
 import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
@@ -29,54 +30,54 @@ internal class SøknadTest {
     @Test
     fun `søknad med bare sykdom`() {
         søknad(Sykdom(1.januar, 10.januar, 100.prosent))
-        assertFalse(søknad.valider(EN_PERIODE).hasErrorsOrWorse())
+        assertFalse(søknad.valider(EN_PERIODE, MaskinellJurist()).hasErrorsOrWorse())
         assertEquals(10, søknad.sykdomstidslinje().count())
     }
 
     @Test
     fun `tillater ikke andre inntektskilder dersom én arbeidsgiver`() {
         søknad(Sykdom(1.januar, 10.januar, 100.prosent), andreInntektskilder = listOf(Inntektskilde(true, "ANDRE_ARBEIDSFORHOLD")))
-        assertFalse(søknad.valider(EN_PERIODE).hasErrorsOrWorse())
+        assertFalse(søknad.valider(EN_PERIODE, MaskinellJurist()).hasErrorsOrWorse())
         assertTrue(søknad.validerIkkeOppgittFlereArbeidsforholdMedSykmelding().hasErrorsOrWorse())
     }
 
     @Test
     fun `søknad med ferie`() {
         søknad(Sykdom(1.januar, 10.januar, 100.prosent), Ferie(2.januar, 4.januar))
-        assertFalse(søknad.valider(EN_PERIODE).hasErrorsOrWorse())
+        assertFalse(søknad.valider(EN_PERIODE, MaskinellJurist()).hasErrorsOrWorse())
         assertEquals(10, søknad.sykdomstidslinje().count())
     }
 
     @Test
     fun `17 år på søknadstidspunkt gir error`() {
         søknad(Sykdom(1.januar, 10.januar, 100.prosent), fnr = FYLLER_18_ÅR_2_NOVEMBER, sendtTilNAVEllerArbeidsgiver = 1.november.atStartOfDay())
-        assertTrue(søknad.valider(EN_PERIODE).hasErrorsOrWorse())
+        assertTrue(søknad.valider(EN_PERIODE, MaskinellJurist()).hasErrorsOrWorse())
     }
 
     @Test
     fun `18 år på søknadstidspunkt gir ikke error`() {
         søknad(Sykdom(1.januar, 10.januar, 100.prosent), fnr = FYLLER_18_ÅR_2_NOVEMBER, sendtTilNAVEllerArbeidsgiver = 2.november.atStartOfDay())
-        assertFalse(søknad.valider(EN_PERIODE).hasErrorsOrWorse())
+        assertFalse(søknad.valider(EN_PERIODE, MaskinellJurist()).hasErrorsOrWorse())
     }
 
     @Test
     fun `søknad med utdanning`() {
         søknad(Sykdom(1.januar, 10.januar, 100.prosent), Utdanning(5.januar, 10.januar))
-        assertTrue(søknad.valider(EN_PERIODE).hasWarningsOrWorse())
+        assertTrue(søknad.valider(EN_PERIODE, MaskinellJurist()).hasWarningsOrWorse())
         assertEquals(10, søknad.sykdomstidslinje().count())
     }
 
     @Test
     fun `søknad med permisjon`() {
         søknad(Sykdom(1.januar, 10.januar, 100.prosent), Permisjon(5.januar, 10.januar))
-        assertTrue(søknad.valider(EN_PERIODE).hasWarningsOrWorse())
+        assertTrue(søknad.valider(EN_PERIODE, MaskinellJurist()).hasWarningsOrWorse())
         assertEquals(10, søknad.sykdomstidslinje().count())
     }
 
     @Test
     fun `søknad med papirsykmelding`() {
         søknad(Sykdom(1.januar, 10.januar, 100.prosent), Papirsykmelding(11.januar, 16.januar))
-        assertTrue(søknad.valider(EN_PERIODE).hasErrorsOrWorse())
+        assertTrue(søknad.valider(EN_PERIODE, MaskinellJurist()).hasErrorsOrWorse())
         assertEquals(16, søknad.sykdomstidslinje().count())
         assertEquals(6, søknad.sykdomstidslinje().filterIsInstance<ProblemDag>().size)
     }
@@ -84,19 +85,19 @@ internal class SøknadTest {
     @Test
     fun `sykdomsgrad under 100 støttes`() {
         søknad(Sykdom(1.januar, 10.januar, 50.prosent))
-        assertFalse(søknad.valider(EN_PERIODE).hasErrorsOrWorse())
+        assertFalse(søknad.valider(EN_PERIODE, MaskinellJurist()).hasErrorsOrWorse())
     }
 
     @Test
     fun `sykdom faktiskgrad under 100 støttes`() {
         søknad(Sykdom(1.januar, 10.januar, 100.prosent, 50.prosent))
-        assertFalse(søknad.valider(EN_PERIODE).hasErrorsOrWorse())
+        assertFalse(søknad.valider(EN_PERIODE, MaskinellJurist()).hasErrorsOrWorse())
     }
 
     @Test
     fun `ferie foran sykdomsvindu`() {
         søknad(Sykdom(1.februar, 10.februar, 100.prosent), Ferie(20.januar, 31.januar))
-        assertFalse(søknad.valider(EN_PERIODE).hasWarningsOrWorse())
+        assertFalse(søknad.valider(EN_PERIODE, MaskinellJurist()).hasWarningsOrWorse())
         assertEquals(1.februar, søknad.sykdomstidslinje().førsteDag())
     }
 
@@ -112,32 +113,32 @@ internal class SøknadTest {
     @Test
     fun `ferie etter sykdomsvindu - ikke et realistisk scenario`() {
         søknad(Sykdom(1.januar, 10.januar, 100.prosent), Ferie(2.januar, 16.januar))
-        assertFalse(søknad.valider(EN_PERIODE).hasWarningsOrWorse())
+        assertFalse(søknad.valider(EN_PERIODE, MaskinellJurist()).hasWarningsOrWorse())
         assertEquals(1.januar til 16.januar, søknad.sykdomstidslinje().periode())
     }
 
     @Test
     fun `utdanning ligger utenfor sykdomsvindu`() {
         søknad(Sykdom(1.januar, 10.januar, 100.prosent), Utdanning(16.januar, 17.januar))
-        assertTrue(søknad.valider(EN_PERIODE).hasWarningsOrWorse())
+        assertTrue(søknad.valider(EN_PERIODE, MaskinellJurist()).hasWarningsOrWorse())
     }
 
     @Test
     fun `permisjon ligger utenfor sykdomsvindu`() {
         søknad(Sykdom(1.januar, 10.januar, 100.prosent), Permisjon(2.januar, 16.januar))
-        assertTrue(søknad.valider(EN_PERIODE).hasWarningsOrWorse())
+        assertTrue(søknad.valider(EN_PERIODE, MaskinellJurist()).hasWarningsOrWorse())
     }
 
     @Test
     fun `arbeidag ligger utenfor sykdomsvindu`() {
         søknad(Sykdom(1.januar, 10.januar, 100.prosent), Arbeid(2.januar, 16.januar))
-        assertTrue(søknad.valider(EN_PERIODE).hasWarningsOrWorse())
+        assertTrue(søknad.valider(EN_PERIODE, MaskinellJurist()).hasWarningsOrWorse())
     }
 
     @Test
     fun `egenmelding ligger utenfor sykdomsvindu`() {
         søknad(Sykdom(5.januar, 12.januar, 100.prosent), Egenmelding(2.januar, 3.januar))
-        assertFalse(søknad.valider(EN_PERIODE).hasErrorsOrWorse())
+        assertFalse(søknad.valider(EN_PERIODE, MaskinellJurist()).hasErrorsOrWorse())
         assertEquals(8, søknad.sykdomstidslinje().count())
         assertEquals(6, søknad.sykdomstidslinje().filterIsInstance<Sykedag>().size)
         assertEquals(2, søknad.sykdomstidslinje().filterIsInstance<SykHelgedag>().size)
@@ -147,7 +148,7 @@ internal class SøknadTest {
     @Test
     fun `egenmelding ligger etter sykdomsvindu`() {
         søknad(Sykdom(5.januar, 12.januar, 100.prosent), Egenmelding(13.januar, 17.januar))
-        assertFalse(søknad.valider(EN_PERIODE).hasErrorsOrWorse())
+        assertFalse(søknad.valider(EN_PERIODE, MaskinellJurist()).hasErrorsOrWorse())
         assertEquals(8, søknad.sykdomstidslinje().count())
         assertEquals(6, søknad.sykdomstidslinje().filterIsInstance<Sykedag>().size)
         assertEquals(2, søknad.sykdomstidslinje().filterIsInstance<SykHelgedag>().size)
@@ -157,14 +158,14 @@ internal class SøknadTest {
     @Test
     fun `egenmelding ligger langt utenfor sykdomsvindu`() {
         søknad(Sykdom(5.januar, 12.januar, 100.prosent), Egenmelding(19.desember(2017), 20.desember(2017)))
-        assertFalse(søknad.valider(EN_PERIODE).hasErrorsOrWorse())
+        assertFalse(søknad.valider(EN_PERIODE, MaskinellJurist()).hasErrorsOrWorse())
         assertEquals(8, søknad.sykdomstidslinje().count())
     }
 
     @Test
     fun `søknad uten andre inntektskilder`() {
         søknad(Sykdom(5.januar, 12.januar, 100.prosent), andreInntektskilder = emptyList())
-        assertFalse(søknad.valider(EN_PERIODE).hasErrorsOrWorse())
+        assertFalse(søknad.valider(EN_PERIODE, MaskinellJurist()).hasErrorsOrWorse())
     }
 
     @Test
@@ -180,49 +181,49 @@ internal class SøknadTest {
     @Test
     fun `angitt arbeidsgrad kan ikke føre til sykegrad høyere enn graden fra sykmelding`() {
         søknad(Sykdom(1.januar, 31.januar, 20.prosent, 79.prosent))
-        søknad.valider(EN_PERIODE)
+        søknad.valider(EN_PERIODE, MaskinellJurist())
         assertTrue(søknad.hasErrorsOrWorse())
     }
 
     @Test
     fun `angitt arbeidsgrad kan føre til lavere sykegrad enn graden fra sykmelding`() {
         søknad(Sykdom(1.januar, 31.januar, 20.prosent, 81.prosent))
-        søknad.valider(EN_PERIODE)
+        søknad.valider(EN_PERIODE, MaskinellJurist())
         assertFalse(søknad.hasErrorsOrWorse())
     }
 
     @Test
     fun `angitt arbeidsgrad kan føre til lik sykegrad som graden fra sykmelding`() {
         søknad(Sykdom(1.januar, 31.januar, 20.prosent, 80.prosent))
-        søknad.valider(EN_PERIODE)
+        søknad.valider(EN_PERIODE, MaskinellJurist())
         assertFalse(søknad.hasErrorsOrWorse())
     }
 
     @Test
     fun `søknad uten permittering får ikke warning`() {
         søknad(Sykdom(1.januar, 31.januar, 20.prosent, 80.prosent))
-        søknad.valider(EN_PERIODE)
+        søknad.valider(EN_PERIODE, MaskinellJurist())
         assertFalse(søknad.hasWarningsOrWorse())
     }
 
     @Test
     fun `søknad med permittering får warning`() {
         søknad(Sykdom(1.januar, 31.januar, 20.prosent, 80.prosent), permittert = true)
-        søknad.valider(EN_PERIODE)
+        søknad.valider(EN_PERIODE, MaskinellJurist())
         assertTrue(søknad.hasWarningsOrWorse())
     }
 
     @Test
     fun `søknad uten tilbakedateringmerknad får ikke warning`() {
         søknad(Sykdom(1.januar, 31.januar, 20.prosent, 80.prosent))
-        søknad.valider(EN_PERIODE)
+        søknad.valider(EN_PERIODE, MaskinellJurist())
         assertFalse(søknad.hasWarningsOrWorse())
     }
 
     @Test
     fun `søknad med tilbakedateringmerknad får warning`() {
         søknad(Sykdom(1.januar, 31.januar, 20.prosent, 80.prosent), merknaderFraSykmelding = listOf(Merknad("UGYLDIG_TILBAKEDATERING", null)))
-        søknad.valider(EN_PERIODE)
+        søknad.valider(EN_PERIODE, MaskinellJurist())
         assertTrue(søknad.hasWarningsOrWorse())
     }
 
@@ -247,7 +248,7 @@ internal class SøknadTest {
     @Test
     fun `legger på warning om søknad inneholder foreldete dager`() {
         søknad(Sykdom(1.januar, 1.mai, 100.prosent))
-        søknad.valider(EN_PERIODE)
+        søknad.valider(EN_PERIODE, MaskinellJurist())
         assertEquals(1, søknad.kontekster().size)
         assertTrue(søknad.hasWarningsOrWorse())
         assertFalse(søknad.hasErrorsOrWorse())
@@ -256,7 +257,7 @@ internal class SøknadTest {
     @Test
     fun `inntektskilde med type ANNET skal gi warning istedenfor error`() {
         søknad(Sykdom(1.januar, 31.januar, 100.prosent), andreInntektskilder = listOf(Inntektskilde(true, "ANNET")))
-        søknad.valider(EN_PERIODE)
+        søknad.valider(EN_PERIODE, MaskinellJurist())
         assertTrue(søknad.hentWarnings().contains("Det er oppgitt annen inntektskilde i søknaden. Vurder inntekt."))
         assertTrue(søknad.hentErrors().isEmpty())
     }
@@ -264,7 +265,7 @@ internal class SøknadTest {
     @Test
     fun `inntektskilde med type FRILANSER skal gi error`() {
         søknad(Sykdom(1.januar, 31.januar, 100.prosent), andreInntektskilder = listOf(Inntektskilde(true, "FRILANSER")))
-        søknad.valider(EN_PERIODE)
+        søknad.valider(EN_PERIODE, MaskinellJurist())
         assertTrue(søknad.hentErrors().contains("Søknaden inneholder andre inntektskilder enn ANDRE_ARBEIDSFORHOLD"))
     }
 

@@ -6,6 +6,7 @@ import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.IAktivitetslogg
+import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -85,7 +86,7 @@ abstract class SykdomstidslinjeHendelse(
 
     internal open fun validerIkkeOppgittFlereArbeidsforholdMedSykmelding(): IAktivitetslogg = this
 
-    internal abstract fun valider(periode: Periode): IAktivitetslogg
+    internal abstract fun valider(periode: Periode, subsumsjonObserver: SubsumsjonObserver): IAktivitetslogg
 
     internal abstract fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver)
 

@@ -4,6 +4,7 @@ import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.januar
 import no.nav.helse.juli
+import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -30,7 +31,7 @@ internal class SykmeldingTest {
     @Test
     fun `sykdomsgrad under 100 prosent støttes`() {
         sykmelding(Sykmeldingsperiode(1.januar, 10.januar, 50.prosent), Sykmeldingsperiode(12.januar, 16.januar, 100.prosent))
-        assertFalse(sykmelding.valider(Periode(1.januar, 31.januar)).hasErrorsOrWorse())
+        assertFalse(sykmelding.valider(Periode(1.januar, 31.januar), MaskinellJurist()).hasErrorsOrWorse())
     }
 
     @Test
@@ -48,13 +49,13 @@ internal class SykmeldingTest {
     @Test
     fun `sykmelding ikke eldre enn 6 måneder får ikke error`() {
         sykmelding(Sykmeldingsperiode(1.januar, 12.januar, 100.prosent), mottatt = 12.juli.atStartOfDay())
-        assertFalse(sykmelding.valider(sykmelding.periode()).hasErrorsOrWorse())
+        assertFalse(sykmelding.valider(sykmelding.periode(), MaskinellJurist()).hasErrorsOrWorse())
     }
 
     @Test
     fun `sykmelding eldre enn 6 måneder får error`() {
         sykmelding(Sykmeldingsperiode(1.januar, 12.januar, 100.prosent), mottatt = 13.juli.atStartOfDay())
-        assertTrue(sykmelding.valider(sykmelding.periode()).hasErrorsOrWorse())
+        assertTrue(sykmelding.valider(sykmelding.periode(), MaskinellJurist()).hasErrorsOrWorse())
     }
 
     private fun sykmelding(vararg sykeperioder: Sykmeldingsperiode, mottatt: LocalDateTime? = null) {

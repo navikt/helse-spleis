@@ -4,6 +4,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.januar
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
+import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -97,6 +98,6 @@ private const val ORGNUMMER = "987654321"
 
 internal class TestHendelse(private val tidslinje: Sykdomstidslinje = Sykdomstidslinje()) : SykdomstidslinjeHendelse(UUID.randomUUID(), UNG_PERSON_FNR_2018, AKTØRID, ORGNUMMER, LocalDateTime.now()) {
     override fun sykdomstidslinje() = tidslinje
-    override fun valider(periode: Periode) = Aktivitetslogg()
+    override fun valider(periode: Periode, subsumsjonObserver: SubsumsjonObserver) = Aktivitetslogg()
     override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) = Unit
 }
