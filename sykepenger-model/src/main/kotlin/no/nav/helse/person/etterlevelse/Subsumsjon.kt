@@ -1,5 +1,6 @@
 package no.nav.helse.person.etterlevelse
 
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioderMedHensynTilHelg
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.Bokstav
@@ -106,16 +107,15 @@ class EnkelSubsumsjon(
 }
 
 class GrupperbarSubsumsjon private constructor(
-    private val fom: LocalDate,
-    private val tom: LocalDate,
+    private val perioder: List<Periode>,
     override val utfall: Utfall,
     override val versjon: LocalDate,
     override val paragraf: Paragraf,
     override val ledd: Ledd,
     override val punktum: Punktum? = null,
     override val bokstav: Bokstav? = null,
-    private val originalInput: Map<String, Any>,
-    override val output: Map<String, Any>,
+    private val originalOutput: Map<String, Any>,
+    override val input: Map<String, Any>,
     override val kontekster: Map<String, String>
 ) : Subsumsjon() {
     internal constructor(
@@ -129,15 +129,19 @@ class GrupperbarSubsumsjon private constructor(
         punktum: Punktum? = null,
         bokstav: Bokstav? = null,
         kontekster: Map<String, String>
-    ) : this(dato, dato, utfall, versjon, paragraf, ledd, punktum, bokstav, input, output, kontekster)
+    ) : this(listOf(dato til dato), utfall, versjon, paragraf, ledd, punktum, bokstav, output, input, kontekster)
 
-    override val input: Map<String, Any> = originalInput.toMutableMap().apply {
-        this["utfallFom"] = fom
-        this["utfallTom"] = tom
+    override val output: Map<String, Any> = originalOutput.toMutableMap().apply {
+        this["perioder"] = perioder.map {
+            mapOf(
+                "fom" to it.start,
+                "tom" to it.endInclusive
+            )
+        }
     }
 
     override fun acceptSpesifikk(visitor: SubsumsjonVisitor) {
-        visitor.visitGrupperbarSubsumsjon(fom, tom)
+        visitor.visitGrupperbarSubsumsjon(perioder)
     }
 
     private fun harSammeDatagrunnlag(other: GrupperbarSubsumsjon) =
@@ -146,21 +150,22 @@ class GrupperbarSubsumsjon private constructor(
             punktum == other.punktum &&
             bokstav == other.bokstav &&
             kontekster == other.kontekster &&
-            output == other.output &&
-            originalInput == other.originalInput &&
+            input == other.input &&
+            originalOutput == other.originalOutput &&
             utfall == other.utfall
 
     override fun sammenstill(subsumsjoner: List<Subsumsjon>): List<Subsumsjon> {
-        val sammenstilt = (subsumsjoner + this)
+        val sammenstiltePerioder = (subsumsjoner + this)
             .filterIsInstance<GrupperbarSubsumsjon>()
             .filter { it.harSammeDatagrunnlag(this) }
-            .map { it.fom til it.tom }
+            .flatMap { it.perioder }
             .grupperSammenhengendePerioderMedHensynTilHelg()
-            .map { GrupperbarSubsumsjon(it.start, it.endInclusive, utfall, versjon, paragraf, ledd, punktum, bokstav, originalInput, output, kontekster) }
+
+        val gruppertSubsumsjon = GrupperbarSubsumsjon(sammenstiltePerioder, utfall, versjon, paragraf, ledd, punktum, bokstav, originalOutput, input, kontekster)
 
         return subsumsjoner.toMutableList().let { it ->
             it.removeAll { subsumsjon -> subsumsjon is GrupperbarSubsumsjon && subsumsjon.harSammeDatagrunnlag(this) }
-            it + sammenstilt
+            it + gruppertSubsumsjon
         }
     }
 }

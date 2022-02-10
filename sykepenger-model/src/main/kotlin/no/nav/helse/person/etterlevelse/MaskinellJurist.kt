@@ -170,8 +170,19 @@ class MaskinellJurist private constructor(
         )
     }
 
-    override fun `§ 8-11 første ledd`() {
-        super.`§ 8-11 første ledd`()
+    override fun `§ 8-11 første ledd`(dato: LocalDate) {
+        leggTil(
+            GrupperbarSubsumsjon(
+                dato = dato,
+                paragraf = PARAGRAF_8_11,
+                ledd = 1.ledd,
+                utfall = VILKAR_IKKE_OPPFYLT,
+                versjon = FOLKETRYGDLOVENS_OPPRINNELSESDATO,
+                input = emptyMap(),
+                output = emptyMap(),
+                kontekster = kontekster()
+            )
+        )
     }
 
     override fun `§ 8-12 ledd 1 punktum 1`(
@@ -252,7 +263,7 @@ class MaskinellJurist private constructor(
             EnkelSubsumsjon(
                 utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
                 paragraf = PARAGRAF_8_13,
-                ledd = Ledd.LEDD_1,
+                ledd = LEDD_1,
                 versjon = FOLKETRYGDLOVENS_OPPRINNELSESDATO,
                 input = mapOf("avvisteDager" to avvisteDager),
                 output = emptyMap(),
@@ -344,7 +355,7 @@ class MaskinellJurist private constructor(
                 utfall = VILKAR_BEREGNET,
                 versjon = LocalDate.of(2019, 1, 1),
                 paragraf = PARAGRAF_8_30,
-                ledd = Ledd.LEDD_1,
+                ledd = LEDD_1,
                 input = mapOf(
                     "beregnetMånedsinntektPerArbeidsgiver" to beregnetMånedsinntektPerArbeidsgiver
                 ),

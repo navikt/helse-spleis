@@ -1,5 +1,7 @@
 package no.nav.helse.person.etterlevelse
 
+import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.Bokstav
 import no.nav.helse.person.Ledd
@@ -29,7 +31,7 @@ internal class GrupperbarSubsumsjonTest {
             nyVurdering(1.januar.plusDays(it.toLong()))
         }
         assertEquals(1, vurderinger.size)
-        observatør.assertVurdering(vurderinger.first(), 1.januar, 10.januar)
+        observatør.assertVurdering(vurderinger.first(), 1.januar til 10.januar)
     }
 
     @Test
@@ -37,7 +39,7 @@ internal class GrupperbarSubsumsjonTest {
         nyVurdering(1.januar)
         nyVurdering(2.januar)
         assertEquals(1, vurderinger.size)
-        observatør.assertVurdering(vurderinger.first(), 1.januar, 2.januar)
+        observatør.assertVurdering(vurderinger.first(), 1.januar til 2.januar)
     }
 
     @Test
@@ -45,25 +47,23 @@ internal class GrupperbarSubsumsjonTest {
         nyVurdering(2.januar)
         nyVurdering(1.januar)
         assertEquals(1, vurderinger.size)
-        observatør.assertVurdering(vurderinger.first(), 1.januar, 2.januar)
+        observatør.assertVurdering(vurderinger.first(), 1.januar til 2.januar)
     }
 
     @Test
-    fun `Grupperer ikke vurderinger som ikke ligger inntil hverandre`() {
+    fun `vurderinger som ikke ligger inntil hverandre blir gruppert som separate perioder`() {
         nyVurdering(1.januar)
         nyVurdering(3.januar)
-        assertEquals(2, vurderinger.size)
-        observatør.assertVurdering(vurderinger.first(), 1.januar, 1.januar)
-        observatør.assertVurdering(vurderinger[1], 3.januar, 3.januar)
+        assertEquals(1, vurderinger.size)
+        observatør.assertVurdering(vurderinger.first(), 1.januar til 1.januar, 3.januar til 3.januar)
     }
 
     @Test
-    fun `Grupperer ikke vurderinger som ikke ligger inntil hverandre - motsatt rekkefølge`() {
+    fun `vurderinger som ikke ligger inntil hverandre blir gruppert som separate perioder - motsatt rekkefølge`() {
         nyVurdering(3.januar)
         nyVurdering(1.januar)
-        assertEquals(2, vurderinger.size)
-        observatør.assertVurdering(vurderinger.first(), 1.januar, 1.januar)
-        observatør.assertVurdering(vurderinger[1], 3.januar, 3.januar)
+        assertEquals(1, vurderinger.size)
+        observatør.assertVurdering(vurderinger.first(), 1.januar til 1.januar, 3.januar til 3.januar)
     }
 
     @Test
@@ -71,7 +71,7 @@ internal class GrupperbarSubsumsjonTest {
         nyVurdering(5.januar)
         nyVurdering(8.januar)
         assertEquals(1, vurderinger.size)
-        observatør.assertVurdering(vurderinger.first(), 5.januar, 8.januar)
+        observatør.assertVurdering(vurderinger.first(), 5.januar til 8.januar)
     }
 
     @Test
@@ -79,7 +79,7 @@ internal class GrupperbarSubsumsjonTest {
         nyVurdering(5.januar)
         nyVurdering(7.januar)
         assertEquals(1, vurderinger.size)
-        observatør.assertVurdering(vurderinger.first(), 5.januar, 7.januar)
+        observatør.assertVurdering(vurderinger.first(), 5.januar til 7.januar)
     }
 
     @Test
@@ -87,7 +87,7 @@ internal class GrupperbarSubsumsjonTest {
         nyVurdering(6.januar)
         nyVurdering(8.januar)
         assertEquals(1, vurderinger.size)
-        observatør.assertVurdering(vurderinger.first(), 6.januar, 8.januar)
+        observatør.assertVurdering(vurderinger.first(), 6.januar til 8.januar)
     }
 
     @Test
@@ -95,7 +95,7 @@ internal class GrupperbarSubsumsjonTest {
         nyVurdering(8.januar)
         nyVurdering(5.januar)
         assertEquals(1, vurderinger.size)
-        observatør.assertVurdering(vurderinger.first(), 5.januar, 8.januar)
+        observatør.assertVurdering(vurderinger.first(), 5.januar til 8.januar)
     }
 
     @Test
@@ -105,7 +105,7 @@ internal class GrupperbarSubsumsjonTest {
         nyVurdering(3.januar)
         nyVurdering(2.januar)
         assertEquals(1, vurderinger.size)
-        observatør.assertVurdering(vurderinger.first(), 1.januar, 3.januar)
+        observatør.assertVurdering(vurderinger.first(), 1.januar til 3.januar)
     }
 
     @Test
@@ -113,7 +113,7 @@ internal class GrupperbarSubsumsjonTest {
         nyVurdering(6.januar)
         nyVurdering(7.januar)
         assertEquals(1, vurderinger.size)
-        observatør.assertVurdering(vurderinger.first(), 6.januar, 7.januar)
+        observatør.assertVurdering(vurderinger.first(), 6.januar til 7.januar)
     }
 
     @Test
@@ -121,7 +121,7 @@ internal class GrupperbarSubsumsjonTest {
         nyVurdering(7.januar)
         nyVurdering(6.januar)
         assertEquals(1, vurderinger.size)
-        observatør.assertVurdering(vurderinger.first(), 6.januar, 7.januar)
+        observatør.assertVurdering(vurderinger.first(), 6.januar til 7.januar)
     }
 
     @Test
@@ -129,9 +129,8 @@ internal class GrupperbarSubsumsjonTest {
         nyVurdering(4.januar)
         nyVurdering(1.januar)
         nyVurdering(2.januar)
-        assertEquals(2, vurderinger.size)
-        observatør.assertVurdering(vurderinger.first(), 1.januar, 2.januar)
-        observatør.assertVurdering(vurderinger[1], 4.januar, 4.januar)
+        assertEquals(1, vurderinger.size)
+        observatør.assertVurdering(vurderinger.first(), 1.januar til 2.januar, 4.januar til 4.januar)
     }
 
     @Test
@@ -141,7 +140,7 @@ internal class GrupperbarSubsumsjonTest {
         nyVurdering(1.januar)
         nyVurdering(3.januar)
         assertEquals(1, vurderinger.size)
-        observatør.assertVurdering(vurderinger.first(), 1.januar, 4.januar)
+        observatør.assertVurdering(vurderinger.first(), 1.januar til 4.januar)
     }
 
     @Test
@@ -152,14 +151,50 @@ internal class GrupperbarSubsumsjonTest {
         nyVurdering(3.januar)
 
         assertEquals(1, vurderinger.size)
-        observatør.assertVurdering(vurderinger.first(), 1.januar, 4.januar)
+        observatør.assertVurdering(vurderinger.first(), 1.januar til 4.januar)
     }
 
-    private fun nyVurdering(dato: LocalDate) {
+    @Test
+    fun `Grupperer ikke ting som har ulik input`() {
+        nyVurdering(1.januar, input = mapOf("key" to "value"))
+        nyVurdering(2.januar, input = mapOf("key" to "other value"))
+        assertEquals(2, vurderinger.size)
+        observatør.assertVurdering(vurderinger[0], 1.januar til 1.januar)
+        observatør.assertVurdering(vurderinger[1], 2.januar til 2.januar)
+    }
+
+    @Test
+    fun `Grupperer ikke ting som har ulik input - motsatt rekkefølge`() {
+        nyVurdering(2.januar, input = mapOf("key" to "value"))
+        nyVurdering(1.januar, input = mapOf("key" to "other value"))
+        assertEquals(2, vurderinger.size)
+        observatør.assertVurdering(vurderinger[0], 2.januar til 2.januar)
+        observatør.assertVurdering(vurderinger[1], 1.januar til 1.januar)
+    }
+
+    @Test
+    fun `Grupperer ikke ting som har ulik  output`() {
+        nyVurdering(1.januar, output = mapOf("key" to "value"))
+        nyVurdering(2.januar, output = mapOf("key" to "other value"))
+        assertEquals(2, vurderinger.size)
+        observatør.assertVurdering(vurderinger[0], 1.januar til 1.januar)
+        observatør.assertVurdering(vurderinger[1], 2.januar til 2.januar)
+    }
+
+    @Test
+    fun `Grupperer ikke ting som har ulik  output - motsatt rekkefølge`() {
+        nyVurdering(2.januar, output = mapOf("key" to "value"))
+        nyVurdering(1.januar, output = mapOf("key" to "other value"))
+        assertEquals(2, vurderinger.size)
+        observatør.assertVurdering(vurderinger[0], 2.januar til 2.januar)
+        observatør.assertVurdering(vurderinger[1], 1.januar til 1.januar)
+    }
+
+    private fun nyVurdering(dato: LocalDate, input: Map<String, Any> = emptyMap(), output: Map<String, Any> = emptyMap()) {
         vurderinger = GrupperbarSubsumsjon(
             dato = dato,
-            input = mapOf(),
-            output = mapOf(),
+            input = input,
+            output = output,
             utfall = VILKAR_OPPFYLT,
             versjon = LocalDate.MAX,
             paragraf = Paragraf.PARAGRAF_8_2,
@@ -169,23 +204,22 @@ internal class GrupperbarSubsumsjonTest {
     }
 
     private class SubsumsjonObservatør : SubsumsjonVisitor {
-        private lateinit var fom: LocalDate
-        private lateinit var tom: LocalDate
-        private lateinit var input: Map<String, Any>
-        override fun visitGrupperbarSubsumsjon(fom: LocalDate, tom: LocalDate) {
-            this.fom = fom
-            this.tom = tom
+        private val perioder: MutableList<Periode> = mutableListOf()
+        private lateinit var output: Map<String, Any>
+        override fun visitGrupperbarSubsumsjon(perioder: List<Periode>) {
+            this.perioder.addAll(perioder)
         }
 
-        fun assertVurdering(subsumsjon: Subsumsjon, fom: LocalDate, tom: LocalDate) {
+        fun assertVurdering(subsumsjon: Subsumsjon, vararg forventedePerioder: Periode) {
             require(subsumsjon is GrupperbarSubsumsjon)
             subsumsjon.accept(this)
-            assertEquals(fom, this.fom)
-            assertEquals(tom, this.tom)
-            assertEquals(mapOf(
-                "utfallFom" to fom,
-                "utfallTom" to tom
-            ), input)
+            assertEquals(forventedePerioder.toList(), this.perioder)
+            assertEquals(forventedePerioder.map {
+                mapOf(
+                    "fom" to it.start,
+                    "tom" to it.endInclusive
+                )
+            }, output["perioder"])
         }
 
         override fun preVisitSubsumsjon(
@@ -199,7 +233,7 @@ internal class GrupperbarSubsumsjonTest {
             output: Map<String, Any>,
             kontekster: Map<String, String>
         ) {
-            this.input = input
+            this.output = output
         }
     }
 }

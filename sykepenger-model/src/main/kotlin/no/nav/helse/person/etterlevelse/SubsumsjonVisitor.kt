@@ -1,5 +1,6 @@
 package no.nav.helse.person.etterlevelse
 
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Bokstav
 import no.nav.helse.person.Ledd
 import no.nav.helse.person.Paragraf
@@ -19,7 +20,7 @@ interface SubsumsjonVisitor {
         kontekster: Map<String, String>
     ) {}
 
-    fun visitGrupperbarSubsumsjon(fom: LocalDate, tom: LocalDate) {}
+    fun visitGrupperbarSubsumsjon(perioder: List<Periode>) {}
     fun visitBetingetSubsumsjon(funnetRelevant: Boolean) {}
 
     fun postVisitSubsumsjon(

@@ -96,9 +96,14 @@ interface SubsumsjonObserver {
      */
     fun `§ 8-10 ledd 3`(årsinntekt: Double, inntektOmregnetTilDaglig: Double) {}
 
-    fun `§ 8-11 første ledd`() {
-        // versjon = FOLKETRYGDLOVENS_OPPRINNELSESDATO
-    }
+    /**
+     * Trygden yter ikke sykepenger i lørdag og søndag
+     *
+     * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-11)
+     *
+     * @param dato dagen vilkåret ikke er oppfylt for
+     */
+    fun `§ 8-11 første ledd`(dato: LocalDate) {}
 
     /**
      * Vurdering av maksimalt antall sykepengedager

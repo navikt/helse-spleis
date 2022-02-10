@@ -73,6 +73,7 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
         addNAVdag(dato, arbeidsgiverperiode, økonomi)
     }
     override fun sykHelgedagEtterArbeidsgiverperioden(arbeidsgiverperiode: Arbeidsgiverperiode?, dato: LocalDate, økonomi: Økonomi) {
+        subsumsjonObserver.`§ 8-11 første ledd`(dato)
         addNAVHelgedag(dato, arbeidsgiverperiode, økonomi)
     }
     override fun foreldetSykedagEtterArbeidsgiverperioden(arbeidsgiverperiode: Arbeidsgiverperiode?, dato: LocalDate, økonomi: Økonomi) {
