@@ -1648,7 +1648,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `IM som treffer periode i AVSLUTTET_UTEN_UTBETALING etter en utbetalt periode skal ikke fylle perioden med arbeidsdager fra fom til skjæringstidspunktet`() {
+    fun `inntektsmelding oppgir ny arbeidsgiverperiode i en sammenhengende periode`() {
         nyttVedtak(1.januar, 31.januar)
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Ferie(1.februar, 28.februar))
@@ -1671,6 +1671,19 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertWarning(3.vedtaksperiode, "Første fraværsdag i inntektsmeldingen er ulik skjæringstidspunktet. Kontrollér at inntektsmeldingen er knyttet til riktig periode.")
         assertWarning(3.vedtaksperiode, "Inntektsmeldingen og vedtaksløsningen er uenige om beregningen av arbeidsgiverperioden. Undersøk hva som er riktig arbeidsgiverperiode.")
         assertEquals(17.januar til 31.mars, inspektør.utbetalinger.last().periode)
+    }
+
+    @Test
+    fun `inntektsmelding oppgir ny arbeidsgiverperiode i en sammenhengende periode, overlapper med mottatt sykmelding ferdig forlengelse`() {
+        nyttVedtak(1.januar, 31.januar)
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterInntektsmelding(listOf(27.februar til 14.mars))
+        assertEquals(listOf(27.februar, 1.januar), person.skjæringstidspunkter())
+
+        assertNoWarning(1.vedtaksperiode, "Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.")
+        assertWarning(2.vedtaksperiode, "Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.")
+        assertNoWarning(2.vedtaksperiode, "Første fraværsdag i inntektsmeldingen er ulik skjæringstidspunktet. Kontrollér at inntektsmeldingen er knyttet til riktig periode.")
+        assertNoWarning(2.vedtaksperiode, "Vi har mottatt en inntektsmelding i en løpende sykmeldingsperiode med oppgitt første/bestemmende fraværsdag som er ulik tidligere fastsatt skjæringstidspunkt.")
     }
 
     @Test
