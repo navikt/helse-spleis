@@ -12,6 +12,7 @@ import java.lang.reflect.Method
 @kotlin.annotation.Target(AnnotationTarget.FUNCTION)
 @kotlin.annotation.Retention(AnnotationRetention.RUNTIME)
 @ExtendWith(ForventetFeilInterceptor::class)
+@Deprecated(message = "Bruk assertForventetFeil istedenfor")
 internal annotation class ForventetFeil(val forklaring: String)
 
 private class ForventetFeilInterceptor: InvocationInterceptor {
