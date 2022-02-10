@@ -1,0 +1,21 @@
+{
+    "vilkårsgrunnlagHistorikk": [
+        {
+            "vilkårsgrunnlag": [
+                {
+                    "sykepengegrunnlag": {
+                    }
+                }
+            ]
+        },
+        {
+            "vilkårsgrunnlag": [
+                {
+                    "sykepengegrunnlag": {
+                    }
+                }
+            ]
+        }
+    ],
+    "skjemaVersjon": 141
+}

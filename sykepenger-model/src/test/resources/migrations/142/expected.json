@@ -1,0 +1,23 @@
+{
+    "vilkårsgrunnlagHistorikk": [
+        {
+            "vilkårsgrunnlag": [
+                {
+                    "sykepengegrunnlag": {
+                        "deaktiverteArbeidsforhold": []
+                    }
+                }
+            ]
+        },
+        {
+            "vilkårsgrunnlag": [
+                {
+                    "sykepengegrunnlag": {
+                        "deaktiverteArbeidsforhold": []
+                    }
+                }
+            ]
+        }
+    ],
+    "skjemaVersjon": 142
+}

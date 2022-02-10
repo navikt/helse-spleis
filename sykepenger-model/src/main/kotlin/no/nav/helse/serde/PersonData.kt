@@ -260,7 +260,7 @@ internal data class PersonData(
             private val arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysningData>,
             private val grunnlagForSykepengegrunnlag: Double,
             private val begrensning: Sykepengegrunnlag.Begrensning,
-            private val deaktiverteArbeidsforhold: List<String> = emptyList()
+            private val deaktiverteArbeidsforhold: List<String>
         ) {
 
             internal fun parseSykepengegrunnlag(): Sykepengegrunnlag = Sykepengegrunnlag(
