@@ -108,6 +108,32 @@ internal class UtbetalingstidslinjeBuilderTest {
     }
 
     @Test
+    fun `ferie umiddelbart etter utbetaling teller ikke som opphold hvis etterfølgt av arbeidsdag`() {
+        undersøke(16.S + 15.F + 1.A + 10.S)
+        assertEquals(42, inspektør.size)
+        assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
+        assertEquals(6, inspektør.navDagTeller)
+        assertEquals(4, inspektør.navHelgDagTeller)
+        assertEquals(15, inspektør.fridagTeller)
+        assertEquals(1, inspektør.arbeidsdagTeller)
+        assertEquals(1, perioder.size)
+        assertEquals(1.januar til 16.januar, perioder.first())
+    }
+
+    @Test
+    fun `ferie etter utbetaling teller ikke som opphold hvis etterfølgt av arbeidsdag`() {
+        undersøke(17.S + 15.F + 1.A + 9.S)
+        assertEquals(42, inspektør.size)
+        assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
+        assertEquals(6, inspektør.navDagTeller)
+        assertEquals(4, inspektør.navHelgDagTeller)
+        assertEquals(15, inspektør.fridagTeller)
+        assertEquals(1, inspektør.arbeidsdagTeller)
+        assertEquals(1, perioder.size)
+        assertEquals(1.januar til 16.januar, perioder.first())
+    }
+
+    @Test
     fun `ferie mellom utbetaling`() {
         undersøke(16.S + 10.F + 5.S)
         assertEquals(31, inspektør.size)
