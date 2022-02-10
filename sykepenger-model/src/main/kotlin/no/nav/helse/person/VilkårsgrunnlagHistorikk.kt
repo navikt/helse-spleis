@@ -83,7 +83,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
         internal fun inntektsopplysningPerSkjæringstidspunktPerArbeidsgiver() =
             vilkårsgrunnlag.mapValues { (_, vilkårsgrunnlagElement) ->
-                vilkårsgrunnlagElement.inntektsopplysningPerArbeidsgiver()
+                vilkårsgrunnlagElement.sykepengegrunnlag().inntektsopplysningPerArbeidsgiver()
             }
 
         internal fun skjæringstidspunkterFraSpleis() = vilkårsgrunnlag
@@ -93,12 +93,12 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         internal fun erRelevant(organisasjonsnummer: String, skjæringstidspunkter: List<LocalDate>) =
             skjæringstidspunkter.mapNotNull(vilkårsgrunnlag::get)
                 .any {
-                    it.inntektsopplysningPerArbeidsgiver().containsKey(organisasjonsnummer)
+                    it.sykepengegrunnlag().inntektsopplysningPerArbeidsgiver().containsKey(organisasjonsnummer)
                         || it.sammenligningsgrunnlagPerArbeidsgiver().containsKey(organisasjonsnummer)
                 }
 
         internal fun harSykepengegrunnlag(organisasjonsnummer: String, skjæringstidspunkt: LocalDate) =
-            vilkårsgrunnlag[skjæringstidspunkt]?.inntektsopplysningPerArbeidsgiver()?.containsKey(organisasjonsnummer) ?: false
+            vilkårsgrunnlag[skjæringstidspunkt]?.sykepengegrunnlag()?.inntektsopplysningPerArbeidsgiver()?.containsKey(organisasjonsnummer) ?: false
 
         internal fun avvis(tidslinjer: List<Utbetalingstidslinje>, alder: Alder) {
             vilkårsgrunnlag.forEach { (skjæringstidspunkt, element) ->
@@ -120,7 +120,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         fun sammenligningsgrunnlagPerArbeidsgiver(): Map<String, Inntektshistorikk.Inntektsopplysning>
         fun grunnlagsBegrensning(): Sykepengegrunnlag.Begrensning
         fun grunnlagForSykepengegrunnlag(): Inntekt
-        fun inntektsopplysningPerArbeidsgiver(): Map<String, Inntektshistorikk.Inntektsopplysning>
         fun gjelderFlereArbeidsgivere(): Boolean
         fun oppdaterManglendeMinimumInntekt(person: Person, skjæringstidspunkt: LocalDate) {}
         fun sjekkAvviksprosent(aktivitetslogg: IAktivitetslogg): Boolean = true
@@ -198,8 +197,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         override fun sammenligningsgrunnlag() = sammenligningsgrunnlag.sammenligningsgrunnlag
         override fun sammenligningsgrunnlagPerArbeidsgiver() = sammenligningsgrunnlag.inntektsopplysningPerArbeidsgiver()
 
-        override fun inntektsopplysningPerArbeidsgiver() = sykepengegrunnlag.inntektsopplysningPerArbeidsgiver()
-        override fun gjelderFlereArbeidsgivere() = inntektsopplysningPerArbeidsgiver().size > 1
+        override fun gjelderFlereArbeidsgivere() = sykepengegrunnlag.inntektsopplysningPerArbeidsgiver().size > 1
 
         override fun avvis(tidslinjer: List<Utbetalingstidslinje>, skjæringstidspunkt: LocalDate, alder: Alder) {
             if (vurdertOk) return
@@ -256,7 +254,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             vilkårsgrunnlagId = UUID.randomUUID()
         )
 
-        fun harInntektFraAOrdningen(): Boolean = inntektsopplysningPerArbeidsgiver().values
+        fun harInntektFraAOrdningen(): Boolean = sykepengegrunnlag.inntektsopplysningPerArbeidsgiver().values
             .any { it is Inntektshistorikk.SkattComposite || it is Inntektshistorikk.IkkeRapportert }
     }
 
@@ -283,8 +281,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
         override fun grunnlagForSykepengegrunnlag() = sykepengegrunnlag.grunnlagForSykepengegrunnlag
 
-        override fun inntektsopplysningPerArbeidsgiver() = sykepengegrunnlag.inntektsopplysningPerArbeidsgiver()
-        override fun gjelderFlereArbeidsgivere() = inntektsopplysningPerArbeidsgiver().size > 1
+        override fun gjelderFlereArbeidsgivere() = sykepengegrunnlag.inntektsopplysningPerArbeidsgiver().size > 1
 
         override fun toSpesifikkKontekst() = SpesifikkKontekst(
             kontekstType = "vilkårsgrunnlag",

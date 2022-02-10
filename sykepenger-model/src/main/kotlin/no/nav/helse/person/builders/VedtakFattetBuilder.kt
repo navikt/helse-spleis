@@ -19,7 +19,7 @@ internal class VedtakFattetBuilder(
     private val grunnlagForSykepengegrunnlag = vilkårsgrunnlag?.grunnlagForSykepengegrunnlag() ?: Inntekt.INGEN
     private val begrensning = vilkårsgrunnlag?.grunnlagsBegrensning()
 
-    private val grunnlagForSykepengegrunnlagPerArbeidsgiver =  vilkårsgrunnlag?.inntektsopplysningPerArbeidsgiver()?.mapValues { (_, inntektsopplysning) ->
+    private val grunnlagForSykepengegrunnlagPerArbeidsgiver =  vilkårsgrunnlag?.sykepengegrunnlag()?.inntektsopplysningPerArbeidsgiver()?.mapValues { (_, inntektsopplysning) ->
         inntektsopplysning.grunnlagForSykepengegrunnlag()
     } ?: emptyMap()
 

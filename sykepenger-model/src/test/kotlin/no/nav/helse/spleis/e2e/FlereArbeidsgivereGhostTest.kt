@@ -682,8 +682,8 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
 
         val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)!!
         assertTrue(vilkårsgrunnlag.gjelderFlereArbeidsgivere())
-        assertEquals(2, vilkårsgrunnlag.inntektsopplysningPerArbeidsgiver().size)
-        assertEquals(setOf(a1, a2), vilkårsgrunnlag.inntektsopplysningPerArbeidsgiver().keys)
+        assertEquals(2, vilkårsgrunnlag.sykepengegrunnlag().inntektsopplysningPerArbeidsgiver().size)
+        assertEquals(setOf(a1, a2), vilkårsgrunnlag.sykepengegrunnlag().inntektsopplysningPerArbeidsgiver().keys)
 
         assertEquals(
             Inntektskilde.FLERE_ARBEIDSGIVERE,

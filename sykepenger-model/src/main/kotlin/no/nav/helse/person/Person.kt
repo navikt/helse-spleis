@@ -709,7 +709,7 @@ class Person private constructor(
     }
 
     internal fun fyllUtPeriodeMedForventedeDager(hendelse: PersonHendelse, periode: Periode, skjæringstidspunkt: LocalDate) {
-        vilkårsgrunnlagFor(skjæringstidspunkt)!!.inntektsopplysningPerArbeidsgiver().keys
+        vilkårsgrunnlagFor(skjæringstidspunkt)!!.sykepengegrunnlag().inntektsopplysningPerArbeidsgiver().keys
             .map { arbeidsgivere.finn(it)!! }
             .forEach { it.fyllUtPeriodeMedForventedeDager(hendelse, periode) }
     }
