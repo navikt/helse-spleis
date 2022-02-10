@@ -611,10 +611,10 @@ internal class OutOfOrderE2ETest : AbstractEndToEndTest() {
         håndterInntektsmeldingReplay(inntektsmelding1, 2.vedtaksperiode.id(ORGNUMMER))
         val inntektsmelding2 = håndterInntektsmelding(listOf(19.februar til 6.mars)) // denne treffer ingen
         håndterSykmelding(Sykmeldingsperiode(19.februar, 6.mars, 100.prosent))
-        håndterSøknad(Sykdom(19.februar, 6.mars, 100.prosent)) // avsluttet uten utbetaling -> ber om replay
-                                                              // samtidig går vedtaksperiode 2 inn i AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE (og ber om replay selv)
-        håndterInntektsmeldingReplay(inntektsmelding1, 3.vedtaksperiode.id(ORGNUMMER))
-        håndterInntektsmeldingReplay(inntektsmelding2, 3.vedtaksperiode.id(ORGNUMMER))
+        håndterSøknad(Sykdom(19.februar, 6.mars, 100.prosent)) // går til avsluttet uten utbetaling; vedtaksperiode 2 blir gjenopptatt og
+                                                              // går inn i AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE (og ber om replay)
+        håndterInntektsmeldingReplay(inntektsmelding1, 2.vedtaksperiode.id(ORGNUMMER))
+        håndterInntektsmeldingReplay(inntektsmelding2, 2.vedtaksperiode.id(ORGNUMMER))
 
         assertFalse(inspektør.periodeErForkastet(1.vedtaksperiode))
         assertTilstander(

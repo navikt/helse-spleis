@@ -2373,7 +2373,6 @@ internal class Vedtaksperiode private constructor(
             check(!vedtaksperiode.utbetalinger.harUtbetaling()) { "Forventet ikke at perioden har fått utbetaling: kun perioder innenfor arbeidsgiverperioden skal sendes hit. " }
             vedtaksperiode.sendVedtakFattet(hendelse)
             vedtaksperiode.person.gjenopptaBehandling(hendelse)
-            vedtaksperiode.person.inntektsmeldingReplay(vedtaksperiode.id)
         }
 
         override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Sykmelding) {}
