@@ -62,7 +62,5 @@ spec:
     value: "true"
   - name: GraphQLPlayground
     value: "true"
-  - name: DELVIS_REFUSJON
-    value: "true"
   - name: SUBSUMSJON_HENDELSER
     value: "true"
