@@ -1274,7 +1274,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Når inntektsmeldingens første fraværsdag er midt i en vedtaksperiode lagres inntekten på vedtaksperiodens skjæringstidspunkt`() {
+    fun `inntektsmelding med oppgitt første fraværsdag treffer midt i en periode`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
 
@@ -1282,9 +1282,9 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(30.januar, 12.februar, 100.prosent))
 
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), 1.februar)
-        assertTrue(inspektør.sykdomstidslinje[30.januar] is Dag.Arbeidsdag)
-        assertTrue(inspektør.sykdomstidslinje[31.januar] is Dag.Arbeidsdag)
-        assertInntektForDato(INNTEKT, 1.februar, inspektør=inspektør)
+        assertFalse(inspektør.sykdomstidslinje[30.januar] is Dag.Arbeidsdag)
+        assertFalse(inspektør.sykdomstidslinje[31.januar] is Dag.Arbeidsdag)
+        assertInntektForDato(INNTEKT, 30.januar, inspektør=inspektør)
         assertTilstander(
             2.vedtaksperiode,
             START,
@@ -1294,7 +1294,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         )
     }
 
-    //@ForventetFeil("1. februar til 11. februar blir ikke mappet som arbeidsdager fordi perioden er i Avventer Uferdig, som ikke håndterer Inntektsmelding. Det lages istedenfor en warning")
     @Test
     fun `inntektsmelding oppgir første fraværsdag i en periode med ferie etter sykdom`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
@@ -1302,11 +1301,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Ferie(1.februar, 11.februar))
-        // med denne inntektsmeldingen forteller arbeidsgiver én av to ting:
-        // det er arbeidsdager mellom 1. februar og 11. februar (siden det kun er februar-perioden som overlapper med inntektsmelding)
-        // ELLER at det skal være arbeidsdager i januar også. Arbeidsgiver har sendt inntektsmelding for januar, men arbeidsgiver har ingen mulighet til
-        // å fortelle oss om arbeidsdager etter gjennomført arbeidsgiverperiode: det er kun bruker som kan opplyse om det i søknaden.
-        // Dersom bruker egentlig har gjenopptatt arbeid 25. januar (f.eks.) vil ikke vi få vite om dette før inntektsmeldingen som blir sendt under.
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 12.februar)
         val tidslinje = inspektør.sykdomstidslinje
         assertTrue((17.januar til 31.januar).all { tidslinje[it] is Dag.Sykedag || tidslinje[it] is Dag.SykHelgedag })
@@ -1327,11 +1321,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Ferie(1.februar, 11.februar))
-        // med denne inntektsmeldingen forteller arbeidsgiver én av to ting:
-        // det er arbeidsdager mellom 1. februar og 11. februar (siden det kun er februar-perioden som overlapper med inntektsmelding)
-        // ELLER at det skal være arbeidsdager i januar også. Arbeidsgiver har sendt inntektsmelding for januar, men arbeidsgiver har ingen mulighet til
-        // å fortelle oss om arbeidsdager etter gjennomført arbeidsgiverperiode: det er kun bruker som kan opplyse om det i søknaden.
-        // Dersom bruker egentlig har gjenopptatt arbeid 25. januar (f.eks.) vil ikke vi få vite om dette før inntektsmeldingen som blir sendt under.
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 12.februar)
 
         val tidslinje = inspektør.sykdomstidslinje

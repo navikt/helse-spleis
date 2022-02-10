@@ -86,7 +86,7 @@ internal class InntektsmeldingTest {
     }
 
     @Test
-    fun `padder med arbeidsdager mellom siste arbeidsgiverperiode og første fraværsdag`() {
+    fun `padder ikke med arbeidsdager mellom siste arbeidsgiverperiode og første fraværsdag`() {
         inntektsmelding(listOf(
             1.januar til 7.januar,
             10.januar til 18.januar
@@ -96,13 +96,13 @@ internal class InntektsmeldingTest {
         assertEquals(1.januar, tidslinje.førsteDag())
         assertEquals(25.januar, tidslinje.sisteDag())
         assertTrue(tidslinje[1.januar] is Arbeidsgiverdag)
-        assertTrue(tidslinje[19.januar] is Arbeidsdag)
-        assertTrue(tidslinje[24.januar] is Arbeidsdag)
+        assertFalse(tidslinje[19.januar] is Arbeidsdag)
+        assertFalse(tidslinje[24.januar] is Arbeidsdag)
         assertTrue(tidslinje[25.januar] is Arbeidsgiverdag)
     }
 
     @Test
-    fun `padder med arbeidsdager mellom dato og første fraværsdag`() {
+    fun `padder ikke med arbeidsdager mellom dato og første fraværsdag`() {
         inntektsmelding(listOf(
             1.januar til 7.januar,
             10.januar til 18.januar
@@ -113,14 +113,13 @@ internal class InntektsmeldingTest {
         assertEquals(25.januar, tidslinje.sisteDag())
         assertTrue(tidslinje[1.januar] is Arbeidsgiverdag)
         assertFalse(tidslinje[19.januar] is Arbeidsdag)
-        assertTrue(tidslinje[20.januar] is FriskHelgedag)
-        assertTrue(tidslinje[24.januar] is Arbeidsdag)
+        assertFalse(tidslinje[20.januar] is FriskHelgedag)
+        assertFalse(tidslinje[24.januar] is Arbeidsdag)
         assertTrue(tidslinje[25.januar] is Arbeidsgiverdag)
     }
 
-
     @Test
-    fun `padder med arbeidsdager før arbeidsgiverperiode og mellom dato og første fraværsdag`() {
+    fun `padder med arbeidsdager før arbeidsgiverperiode, men ikke mellom dato og første fraværsdag`() {
         inntektsmelding(listOf(
             1.januar til 7.januar,
             10.januar til 18.januar
@@ -130,9 +129,9 @@ internal class InntektsmeldingTest {
         assertEquals(31.desember(2017), tidslinje.førsteDag())
         assertEquals(25.januar, tidslinje.sisteDag())
         assertTrue(tidslinje[31.desember(2017)] is FriskHelgedag)
-        assertTrue(tidslinje[19.januar] is Arbeidsdag)
-        assertTrue(tidslinje[20.januar] is FriskHelgedag)
-        assertTrue(tidslinje[24.januar] is Arbeidsdag)
+        assertFalse(tidslinje[19.januar] is Arbeidsdag)
+        assertFalse(tidslinje[20.januar] is FriskHelgedag)
+        assertFalse(tidslinje[24.januar] is Arbeidsdag)
         assertTrue(tidslinje[25.januar] is Arbeidsgiverdag)
     }
 

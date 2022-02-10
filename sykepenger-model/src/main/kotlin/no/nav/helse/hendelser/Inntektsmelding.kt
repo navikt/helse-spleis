@@ -98,26 +98,10 @@ class Inntektsmelding(
     // Pad days prior to employer-paid days with assumed work days
     override fun padLeft(dato: LocalDate) {
         check(dato > LocalDate.MIN)
-        if (arbeidsgiverperiode == null) return  // No justification to pad
-        val førsteArbeidsgiverperiodedag = arbeidsgiverperiode.start
-        val sisteArbeidsgiverperiodedag = arbeidsgiverperiode.endInclusive
-        val sisteDag = sykdomstidslinje.sisteDag()
-        if (dato < førsteArbeidsgiverperiodedag) padFørArbeidsgiverperioden(dato)
-        if (dato >= sisteDag || sisteDag == sisteArbeidsgiverperiodedag) return
-        padMellomSisteArbeidsgiverperiodeDagOgFørsteFraværsdag(dato, sisteArbeidsgiverperiodedag, sisteDag)
-    }
-
-    // dersom vedtaksperioden overlapper med inntektsmelding, og starter før oppgitt
-    // arbeidsgiverperiode medfører det at dagene i forkant skal være arbeidsdager
-    private fun padFørArbeidsgiverperioden(dato: LocalDate) {
-        sykdomstidslinje += Sykdomstidslinje.arbeidsdager(dato, sykdomstidslinje.førsteDag().minusDays(1), this.kilde)
-    }
-
-    // dersom vedtaksperioden overlapper med inntektsmelding, og starter et sted mellom oppgitt
-    // arbeidsgiverperiode og første fraværsdag medfører det at dagene i fra siste arbeidsgiverperiodedag
-    // og frem til første fraværsdag skal være arbeidsdager
-    private fun padMellomSisteArbeidsgiverperiodeDagOgFørsteFraværsdag(dato: LocalDate, sisteArbeidsgiverperiodedag: LocalDate, førsteFraværsdag: LocalDate) {
-        sykdomstidslinje += Sykdomstidslinje.arbeidsdager(maxOf(dato, sisteArbeidsgiverperiodedag.plusDays(1)), førsteFraværsdag.minusDays(1), this.kilde)
+        if (arbeidsgiverperioder.isEmpty()) return  // No justification to pad
+        val førsteDag = sykdomstidslinje.førsteDag()
+        if (dato >= førsteDag) return  // No need to pad if sykdomstidslinje early enough
+        sykdomstidslinje += Sykdomstidslinje.arbeidsdager(dato, førsteDag.minusDays(1), this.kilde)
     }
 
     override fun overlappsperiode(): Periode? {

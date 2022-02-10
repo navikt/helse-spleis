@@ -134,7 +134,7 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
     }
 
     @Test
-    fun `inntektsmelding forteller om arbeidsdager etter arbeidsgiverperioden`() {
+    fun `ny inntektsmelding med første fraværsdag i en sammenhengende periode`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 10.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent))
         val imId = håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 23.januar)
@@ -145,10 +145,8 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE, AVVENTER_HISTORIKK)
         assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
-        assertEquals(23.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
+        assertEquals(1.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
         val tidslinje = inspektør.sykdomstidslinje
-        assertTrue((1.januar til 10.januar).all { tidslinje[it] is Dag.Sykedag || tidslinje[it] is Dag.SykHelgedag })
-        assertTrue((17.januar til 22.januar).all { tidslinje[it] is Dag.Arbeidsdag || tidslinje[it] is Dag.FriskHelgedag })
-        assertTrue((23.januar til 31.januar).all { tidslinje[it] is Dag.Sykedag || tidslinje[it] is Dag.SykHelgedag })
+        assertTrue((1.januar til 31.januar).all { tidslinje[it] is Dag.Sykedag || tidslinje[it] is Dag.SykHelgedag })
     }
 }
