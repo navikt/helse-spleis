@@ -232,6 +232,7 @@ internal class VilkårsgrunnlagBuilder(
 
             private fun sammenligningsgrunnlagForArbeidsgivereUtenSykepengegrunnlag() = sammenligningsgrunnlagBuilder.orgnumre()
                 .filter { it !in inntekterPerArbeidsgiver.map { inntekt -> inntekt.arbeidsgiver } }
+                .filter { sammenligningsgrunnlagBuilder.sammenligningsgrunnlag(it, skjæringstidspunkt) != null}
                 .map {
                     IArbeidsgiverinntekt(
                         arbeidsgiver = it,

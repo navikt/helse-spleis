@@ -517,4 +517,39 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
         )
         assertEquals(listOf(a1, a2), personDto.arbeidsgivere.map { it.organisasjonsnummer })
     }
+
+    @Test
+    fun `Skal ikke ta med inntekt på vilkårsgrunnlaget som mangler både sykepengegrunnlag og sammenligningsgrunnlag på skjæringstidspunktet`() {
+        nyttVedtak(1.januar(2017), 31.januar(2017), orgnummer = a2)
+
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode,
+            inntektsvurdering = Inntektsvurdering(
+                listOf(
+                    sammenligningsgrunnlag(a1, 1.januar, INNTEKT.repeat(12)),
+                )
+            ),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
+                listOf(
+                    grunnlag(a1, 1.januar, INNTEKT.repeat(3))
+                ),
+                arbeidsforhold = emptyList()
+            ),
+            arbeidsforhold = listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(a1, 1.oktober(2017), null),
+            ),
+            orgnummer = a1
+        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+
+        val personDto = serializePersonForSpeil(person)
+        val vilkårsgrunnlag = personDto.vilkårsgrunnlagHistorikk[person.nyesteIdForVilkårsgrunnlagHistorikk()]?.get(1.januar)
+        assertEquals(listOf(a1), vilkårsgrunnlag?.inntekter?.map { it.organisasjonsnummer })
+        assertEquals(listOf(a2, a1), personDto.arbeidsgivere.map { it.organisasjonsnummer })
+    }
 }
