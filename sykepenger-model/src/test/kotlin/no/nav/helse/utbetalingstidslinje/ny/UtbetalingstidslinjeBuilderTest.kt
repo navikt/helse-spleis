@@ -78,6 +78,115 @@ internal class UtbetalingstidslinjeBuilderTest {
     }
 
     @Test
+    fun `arbeidsgiverperioden er ferdig`() {
+        val betalteDager = listOf(1.januar til 1.januar)
+        undersøke(15.S) { teller, other ->
+            Infotrygddekoratør(teller, other, betalteDager)
+        }
+        assertEquals(15, inspektør.size)
+        assertEquals(0, inspektør.arbeidsgiverperiodeDagTeller)
+        assertEquals(11, inspektør.navDagTeller)
+        assertEquals(4, inspektør.navHelgDagTeller)
+        assertEquals(0, perioder.size)
+        utbetalingstidslinje.forEach {
+            assertNull(it.økonomi.arbeidsgiverperiode)
+        }
+    }
+
+    @Test
+    fun `ny arbeidsgiverperiode etter infotrygd`() {
+        val betalteDager = listOf(1.januar til 1.januar)
+        undersøke(1.S + 16.A + 17.S) { teller, other ->
+            Infotrygddekoratør(teller, other, betalteDager)
+        }
+        assertEquals(34, inspektør.size)
+        assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
+        assertEquals(1, inspektør.navDagTeller)
+        assertEquals(1, inspektør.navHelgDagTeller)
+        assertEquals(16, inspektør.arbeidsdagTeller)
+        assertEquals(1, perioder.size)
+        assertEquals(18.januar til 2.februar, perioder.first())
+        utbetalingstidslinje.subset(1.januar til 17.januar).forEach {
+            assertNull(it.økonomi.arbeidsgiverperiode)
+        }
+        utbetalingstidslinje.subset(18.januar til 2.februar).forEach {
+            assertEquals(18.januar til it.dato, it.økonomi.arbeidsgiverperiode)
+        }
+        utbetalingstidslinje.subset(2.februar til utbetalingstidslinje.periode().endInclusive).forEach {
+            assertEquals(18.januar til 2.februar, it.økonomi.arbeidsgiverperiode)
+        }
+    }
+
+    @Test
+    fun `opphold etter infotrygd`() {
+        val betalteDager = listOf(1.januar til 1.januar)
+        undersøke(1.S + 15.A + 18.S) { teller, other ->
+            Infotrygddekoratør(teller, other, betalteDager)
+        }
+        assertEquals(34, inspektør.size)
+        assertEquals(0, inspektør.arbeidsgiverperiodeDagTeller)
+        assertEquals(14, inspektør.navDagTeller)
+        assertEquals(5, inspektør.navHelgDagTeller)
+        assertEquals(15, inspektør.arbeidsdagTeller)
+        assertEquals(0, perioder.size)
+        utbetalingstidslinje.forEach {
+            assertNull(it.økonomi.arbeidsgiverperiode)
+        }
+    }
+
+    @Test
+    fun `infotrygd utbetaler etter vi har startet arbeidsgiverperiodetelling med opphold`() {
+        val betalteDager = listOf(11.januar til 1.februar)
+        undersøke(9.S + 1.A + 22.S) { teller, other ->
+            Infotrygddekoratør(teller, other, betalteDager)
+        }
+        assertEquals(32, inspektør.size)
+        assertEquals(9, inspektør.arbeidsgiverperiodeDagTeller)
+        assertEquals(16, inspektør.navDagTeller)
+        assertEquals(6, inspektør.navHelgDagTeller)
+    }
+
+    @Test
+    fun `kort infotrygdperiode etter utbetalingopphold`() {
+        val betalteDager = listOf(19.februar til 15.mars)
+        undersøke(16.U + 1.S + 32.opphold + 5.S + 20.S) { teller, other ->
+            Infotrygddekoratør(teller, other, betalteDager)
+        }
+        assertEquals(74, inspektør.size)
+        assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
+        assertEquals(22, inspektør.arbeidsdagTeller)
+        assertEquals(10, inspektør.fridagTeller)
+        assertEquals(20, inspektør.navDagTeller)
+        assertEquals(6, inspektør.navHelgDagTeller)
+    }
+
+    @Test
+    fun `infotrygd midt i`() {
+        val betalteDager = listOf(22.februar til 13.mars)
+        undersøke(20.S + 32.A + 20.S) { teller, other ->
+            Infotrygddekoratør(teller, other, betalteDager)
+        }
+        assertEquals(72, inspektør.size)
+        assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
+        assertEquals(32, inspektør.arbeidsdagTeller)
+        assertEquals(17, inspektør.navDagTeller)
+        assertEquals(7, inspektør.navHelgDagTeller)
+    }
+
+    @Test
+    fun `alt infotrygd`() {
+        val betalteDager = listOf(2.januar til 20.januar, 22.februar til 13.mars)
+        undersøke(20.S + 32.A + 20.S) { teller, other ->
+            Infotrygddekoratør(teller, other, betalteDager)
+        }
+        assertEquals(72, inspektør.size)
+        assertEquals(1, inspektør.arbeidsgiverperiodeDagTeller)
+        assertEquals(32, inspektør.arbeidsdagTeller)
+        assertEquals(28, inspektør.navDagTeller)
+        assertEquals(11, inspektør.navHelgDagTeller)
+    }
+
+    @Test
     fun `ferie med i arbeidsgiverperioden`() {
         undersøke(6.S + 6.F + 6.S)
         assertEquals(18, inspektør.size)
