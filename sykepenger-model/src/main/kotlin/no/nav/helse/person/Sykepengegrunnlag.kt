@@ -12,13 +12,15 @@ internal class Sykepengegrunnlag(
     internal val sykepengegrunnlag: Inntekt,
     private val arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
     internal val grunnlagForSykepengegrunnlag: Inntekt,
-    internal val begrensning: Begrensning
+    internal val begrensning: Begrensning,
+    internal val deaktiverteArbeidsforhold: List<String>
 ) {
     internal companion object {
         fun opprett(
             arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
             skjæringstidspunkt: LocalDate,
-            subsumsjonObserver: SubsumsjonObserver
+            subsumsjonObserver: SubsumsjonObserver,
+            deaktiverteArbeidsforhold: List<String>
         ): Sykepengegrunnlag {
             val inntekt = arbeidsgiverInntektsopplysninger.sykepengegrunnlag(subsumsjonObserver)
             val begrensning = if (inntekt > Grunnbeløp.`6G`.beløp(skjæringstidspunkt)) ER_6G_BEGRENSET else ER_IKKE_6G_BEGRENSET
@@ -26,7 +28,8 @@ internal class Sykepengegrunnlag(
                 sykepengegrunnlag(inntekt, skjæringstidspunkt, subsumsjonObserver),
                 arbeidsgiverInntektsopplysninger,
                 inntekt,
-                begrensning
+                begrensning,
+                deaktiverteArbeidsforhold
             )
         }
 
@@ -40,7 +43,8 @@ internal class Sykepengegrunnlag(
                 sykepengegrunnlag(inntekt, skjæringstidspunkt, subsumsjonObserver),
                 arbeidsgiverInntektsopplysninger,
                 inntekt,
-                VURDERT_I_INFOTRYGD
+                VURDERT_I_INFOTRYGD,
+                emptyList()
             )
         }
 
@@ -57,11 +61,11 @@ internal class Sykepengegrunnlag(
     }
 
     internal fun accept(vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor) {
-        vilkårsgrunnlagHistorikkVisitor.preVisitSykepengegrunnlag(this, sykepengegrunnlag, grunnlagForSykepengegrunnlag, begrensning)
+        vilkårsgrunnlagHistorikkVisitor.preVisitSykepengegrunnlag(this, sykepengegrunnlag, grunnlagForSykepengegrunnlag, begrensning, deaktiverteArbeidsforhold)
         vilkårsgrunnlagHistorikkVisitor.preVisitArbeidsgiverInntektsopplysninger()
         arbeidsgiverInntektsopplysninger.forEach { it.accept(vilkårsgrunnlagHistorikkVisitor) }
         vilkårsgrunnlagHistorikkVisitor.postVisitArbeidsgiverInntektsopplysninger()
-        vilkårsgrunnlagHistorikkVisitor.postVisitSykepengegrunnlag(this, sykepengegrunnlag, grunnlagForSykepengegrunnlag, begrensning)
+        vilkårsgrunnlagHistorikkVisitor.postVisitSykepengegrunnlag(this, sykepengegrunnlag, grunnlagForSykepengegrunnlag, begrensning, deaktiverteArbeidsforhold)
     }
 
     internal fun avviksprosent(sammenligningsgrunnlag: Inntekt) = grunnlagForSykepengegrunnlag.avviksprosent(sammenligningsgrunnlag)
@@ -72,7 +76,6 @@ internal class Sykepengegrunnlag(
         val oppfyltKravTilMinimumInntekt = oppfyllerKravTilMinimumInntekt(person.minimumInntekt(skjæringstidspunkt))
         person.oppdaterHarMinimumInntekt(skjæringstidspunkt, grunnlagsdata, oppfyltKravTilMinimumInntekt)
     }
-
     internal fun oppfyllerKravTilMinimumInntekt(minimumInntekt: Inntekt) = grunnlagForSykepengegrunnlag >= minimumInntekt
 
     enum class Begrensning {

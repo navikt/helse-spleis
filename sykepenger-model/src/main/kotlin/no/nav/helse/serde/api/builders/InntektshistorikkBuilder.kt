@@ -77,7 +77,8 @@ internal class InntektshistorikkBuilder(private val person: Person) {
             sykepengegrunnlag1: Sykepengegrunnlag,
             sykepengegrunnlag: Inntekt,
             grunnlagForSykepengegrunnlag: Inntekt,
-            begrensning: Sykepengegrunnlag.Begrensning
+            begrensning: Sykepengegrunnlag.Begrensning,
+            deaktiverteArbeidsforhold: List<String>
         ) {
             this.sykepengegrunnlag = sykepengegrunnlag1
         }

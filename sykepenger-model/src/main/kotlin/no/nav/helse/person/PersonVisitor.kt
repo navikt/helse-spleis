@@ -153,13 +153,15 @@ internal interface VilkårsgrunnlagHistorikkVisitor : InntekthistorikkVisitor {
         sykepengegrunnlag1: Sykepengegrunnlag,
         sykepengegrunnlag: Inntekt,
         grunnlagForSykepengegrunnlag: Inntekt,
-        begrensning: Sykepengegrunnlag.Begrensning
+        begrensning: Sykepengegrunnlag.Begrensning,
+        deaktiverteArbeidsforhold: List<String>
     ) {}
     fun postVisitSykepengegrunnlag(
         sykepengegrunnlag1: Sykepengegrunnlag,
         sykepengegrunnlag: Inntekt,
         grunnlagForSykepengegrunnlag: Inntekt,
-        begrensning: Sykepengegrunnlag.Begrensning
+        begrensning: Sykepengegrunnlag.Begrensning,
+        deaktiverteArbeidsforhold: List<String>
     ) {}
     fun preVisitSammenligningsgrunnlag(
         sammenligningsgrunnlag1: Sammenligningsgrunnlag,

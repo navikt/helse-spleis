@@ -720,7 +720,8 @@ internal class InfotrygdhistorikkElementTest {
             arbeidsgiverInntektsopplysninger = listOf(),
             sykepengegrunnlag = inntekt,
             grunnlagForSykepengegrunnlag = inntekt,
-            begrensning = ER_IKKE_6G_BEGRENSET
+            begrensning = ER_IKKE_6G_BEGRENSET,
+            deaktiverteArbeidsforhold = emptyList()
         )
     }
 }

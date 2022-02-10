@@ -28,7 +28,7 @@ internal class UtbetaltEventBuilderTest {
         val grunnlagForSykepengegrunnlag = 26000.månedlig
         val vilkårsgrunnlag = VilkårsgrunnlagHistorikk.Grunnlagsdata(
             skjæringstidspunkt = 1.januar,
-            sykepengegrunnlag = Sykepengegrunnlag(sykepengegrunnlag, emptyList(), grunnlagForSykepengegrunnlag, Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET),
+            sykepengegrunnlag = Sykepengegrunnlag(sykepengegrunnlag, emptyList(), grunnlagForSykepengegrunnlag, Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET, emptyList()),
             sammenligningsgrunnlag = Sammenligningsgrunnlag(
                 arbeidsgiverInntektsopplysninger = listOf(
                     ArbeidsgiverInntektsopplysning("orgnummer",

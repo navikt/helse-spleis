@@ -6,6 +6,7 @@ import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.utbetaling.*
 import no.nav.helse.person.Arbeidsgiver.Companion.beregnFeriepengerForAlleArbeidsgivere
 import no.nav.helse.person.Arbeidsgiver.Companion.beregnSykepengegrunnlag
+import no.nav.helse.person.Arbeidsgiver.Companion.deaktiverteArbeidsforhold
 import no.nav.helse.person.Arbeidsgiver.Companion.finn
 import no.nav.helse.person.Arbeidsgiver.Companion.ghostPeriode
 import no.nav.helse.person.Arbeidsgiver.Companion.gjenopptaBehandling
@@ -562,7 +563,12 @@ class Person private constructor(
         skjæringstidspunkt: LocalDate,
         subsumsjonObserver: SubsumsjonObserver
     ): Sykepengegrunnlag {
-        return Sykepengegrunnlag.opprett(arbeidsgivere.beregnSykepengegrunnlag(skjæringstidspunkt, subsumsjonObserver), skjæringstidspunkt, subsumsjonObserver)
+        return Sykepengegrunnlag.opprett(
+            arbeidsgivere.beregnSykepengegrunnlag(skjæringstidspunkt, subsumsjonObserver),
+            skjæringstidspunkt,
+            subsumsjonObserver,
+            arbeidsgivere.deaktiverteArbeidsforhold(skjæringstidspunkt).map { it.organisasjonsnummer() }
+        )
     }
 
     private fun beregnSykepengegrunnlagForInfotrygd(

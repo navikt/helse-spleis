@@ -749,4 +749,25 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a2)
         assertNotEquals(AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, observatør.tilstandsendringer[2.vedtaksperiode.id(a2)]?.last())
     }
+
+    @Test
+    fun `deaktivert arbeidsforhold blir med i vilkårsgrunnlag`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode, arbeidsforhold = listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null),
+                Vilkårsgrunnlag.Arbeidsforhold(a2, 1.desember(2017), null)
+            )
+        )
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        val skjæringstidspunkt = inspektør.skjæringstidspunkt(1.vedtaksperiode)
+        assertEquals(listOf(a1, a2).toList(), person.orgnummereMedRelevanteArbeidsforhold(skjæringstidspunkt).toList())
+        håndterOverstyrArbeidsforhold(skjæringstidspunkt, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, false)))
+        assertEquals(listOf(a1), person.orgnummereMedRelevanteArbeidsforhold(skjæringstidspunkt))
+        assertEquals(listOf(a2), person.vilkårsgrunnlagFor(1.januar)?.sykepengegrunnlag()?.deaktiverteArbeidsforhold)
+    }
 }

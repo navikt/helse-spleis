@@ -112,7 +112,7 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
     private fun grunnlagsdata(skjæringstidspunkt: LocalDate, vurdertOk: Boolean = true, harOpptjening: Boolean = true, harMinimumInntekt: Boolean = true, erMedlem: Boolean = true) =
         VilkårsgrunnlagHistorikk.Grunnlagsdata(
             skjæringstidspunkt = skjæringstidspunkt,
-            sykepengegrunnlag = Sykepengegrunnlag.opprett(emptyList(), skjæringstidspunkt, MaskinellJurist()),
+            sykepengegrunnlag = Sykepengegrunnlag.opprett(emptyList(), skjæringstidspunkt, MaskinellJurist(), emptyList()),
             sammenligningsgrunnlag = Sammenligningsgrunnlag(emptyList()),
             avviksprosent = 0.0.prosent,
             antallOpptjeningsdagerErMinst = 28,
@@ -135,7 +135,7 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
         get() = object : VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement {
             override fun accept(skjæringstidspunkt: LocalDate, vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor) {}
 
-            override fun sykepengegrunnlag() = Sykepengegrunnlag(Inntekt.INGEN, emptyList(), Inntekt.INGEN, Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET)
+            override fun sykepengegrunnlag() = Sykepengegrunnlag(Inntekt.INGEN, emptyList(), Inntekt.INGEN, Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET, emptyList())
 
             override fun grunnlagsBegrensning() = Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
 

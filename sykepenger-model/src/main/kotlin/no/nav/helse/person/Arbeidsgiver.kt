@@ -161,6 +161,8 @@ internal class Arbeidsgiver private constructor(
             .filter { it.organisasjonsnummer != orgnummer }
             .any { it.vedtaksperioder.harOverlappendeUtbetaltePerioder(periode) }
 
+        internal fun List<Arbeidsgiver>.deaktiverteArbeidsforhold(skjæringstidspunkt: LocalDate) = this.filter { it.arbeidsforholdhistorikk.harDeaktivertArbeidsforhold(skjæringstidspunkt) }
+
         internal fun kunOvergangFraInfotrygd(
             arbeidsgivere: Iterable<Arbeidsgiver>,
             vedtaksperiode: Vedtaksperiode

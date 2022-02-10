@@ -811,7 +811,8 @@ internal class JsonBuilder : AbstractBuilder() {
             sykepengegrunnlag1: Sykepengegrunnlag,
             sykepengegrunnlag: Inntekt,
             grunnlagForSykepengegrunnlag: Inntekt,
-            begrensning: Sykepengegrunnlag.Begrensning
+            begrensning: Sykepengegrunnlag.Begrensning,
+            deaktiverteArbeidsforhold: List<String>
         ) {
             pushState(SykepengegrunnlagState(sykepengegrunnlagMap))
         }
@@ -866,7 +867,8 @@ internal class JsonBuilder : AbstractBuilder() {
             sykepengegrunnlag1: Sykepengegrunnlag,
             sykepengegrunnlag: Inntekt,
             grunnlagForSykepengegrunnlag: Inntekt,
-            begrensning: Sykepengegrunnlag.Begrensning
+            begrensning: Sykepengegrunnlag.Begrensning,
+            deaktiverteArbeidsforhold: List<String>
         ) {
 
             this.sykepengegrunnlag.putAll(
@@ -874,7 +876,8 @@ internal class JsonBuilder : AbstractBuilder() {
                     "sykepengegrunnlag" to sykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
                     "grunnlagForSykepengegrunnlag" to grunnlagForSykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
                     "arbeidsgiverInntektsopplysninger" to arbeidsgiverInntektsopplysninger,
-                    "begrensning" to begrensning
+                    "begrensning" to begrensning,
+                    "deaktiverteArbeidsforhold" to deaktiverteArbeidsforhold
                 )
             )
             popState()

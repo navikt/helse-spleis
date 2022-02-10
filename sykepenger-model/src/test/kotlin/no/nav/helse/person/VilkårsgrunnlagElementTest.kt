@@ -48,7 +48,7 @@ internal class VilkårsgrunnlagElementTest {
     private fun grunnlagsdata(avviksprosent: Prosent? = null): VilkårsgrunnlagHistorikk.Grunnlagsdata {
         return VilkårsgrunnlagHistorikk.Grunnlagsdata(
             skjæringstidspunkt = 1.januar,
-            sykepengegrunnlag = Sykepengegrunnlag(1000.daglig, emptyList(), 1000.daglig, Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET),
+            sykepengegrunnlag = Sykepengegrunnlag(1000.daglig, emptyList(), 1000.daglig, Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET, emptyList()),
             sammenligningsgrunnlag = sammenligningsgrunnlag(1000.daglig),
             avviksprosent = avviksprosent,
             antallOpptjeningsdagerErMinst = 0,
@@ -62,7 +62,7 @@ internal class VilkårsgrunnlagElementTest {
     }
 
     private fun infotrygdgrunnlag() =
-        VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag(1.januar, Sykepengegrunnlag(1000.daglig, emptyList(), 1000.daglig, Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET))
+        VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag(1.januar, Sykepengegrunnlag(1000.daglig, emptyList(), 1000.daglig, Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET, emptyList()))
 
     private fun sammenligningsgrunnlag(inntekt: Inntekt) = Sammenligningsgrunnlag(
         arbeidsgiverInntektsopplysninger = listOf(

@@ -538,7 +538,8 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         arbeidsgiverInntektsopplysninger = arbeidsgiverInntektsopplysning,
         sykepengegrunnlag = inntekt,
         grunnlagForSykepengegrunnlag = inntekt,
-        begrensning = ER_IKKE_6G_BEGRENSET
+        begrensning = ER_IKKE_6G_BEGRENSET,
+        deaktiverteArbeidsforhold = emptyList()
     )
 
     private fun sammenligningsgrunnlag(inntekt: Inntekt) = Sammenligningsgrunnlag(

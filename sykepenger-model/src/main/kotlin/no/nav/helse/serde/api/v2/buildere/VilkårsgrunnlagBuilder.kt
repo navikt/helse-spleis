@@ -245,7 +245,8 @@ internal class VilkårsgrunnlagBuilder(
                 sykepengegrunnlag1: Sykepengegrunnlag,
                 sykepengegrunnlag: Inntekt,
                 grunnlagForSykepengegrunnlag: Inntekt,
-                begrensning: Sykepengegrunnlag.Begrensning
+                begrensning: Sykepengegrunnlag.Begrensning,
+                deaktiverteArbeidsforhold: List<String>
             ) {
                 this.sykepengegrunnlag = InntektBuilder(sykepengegrunnlag).build()
                 this.omregnetÅrsinntekt = InntektBuilder(grunnlagForSykepengegrunnlag).build().årlig
