@@ -1,4 +1,4 @@
-package no.nav.helse
+package no.nav.helse.utbetalingstidslinje.ny
 
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach

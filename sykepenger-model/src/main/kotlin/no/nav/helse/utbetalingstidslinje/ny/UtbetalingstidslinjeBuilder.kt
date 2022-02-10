@@ -1,4 +1,4 @@
-package no.nav.helse
+package no.nav.helse.utbetalingstidslinje.ny
 
 import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode

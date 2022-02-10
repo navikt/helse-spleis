@@ -1,12 +1,17 @@
-package no.nav.helse
+package no.nav.helse.utbetalingstidslinje.ny
 
+import no.nav.helse.februar
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.UtbetalingstidslinjeInspektør
 import no.nav.helse.inspectors.inspektør
+import no.nav.helse.januar
 import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.testhelpers.*
+import no.nav.helse.testhelpers.A
+import no.nav.helse.testhelpers.F
+import no.nav.helse.testhelpers.S
+import no.nav.helse.testhelpers.resetSeed
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Økonomi
