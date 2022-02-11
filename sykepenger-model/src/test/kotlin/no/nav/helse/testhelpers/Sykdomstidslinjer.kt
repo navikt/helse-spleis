@@ -25,6 +25,11 @@ internal fun resetSeed(frøDato: LocalDate = 1.januar) {
     dagensDato = frøDato
 }
 
+internal fun resetSeed(frøDato: LocalDate = 1.januar, tidslinjegenerator: () -> Sykdomstidslinje): Sykdomstidslinje {
+    resetSeed(frøDato)
+    return tidslinjegenerator()
+}
+
 internal val Int.S
     get() = Sykdomstidslinje.sykedager(
         dagensDato,

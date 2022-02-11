@@ -187,128 +187,139 @@ internal class UtbetalingstidslinjeBuilderTest {
     }
 
     @Test
-    fun `ferie med i arbeidsgiverperioden`() {
-        undersøke(6.S + 6.F + 6.S)
-        assertEquals(18, inspektør.size)
-        assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
-        assertEquals(2, inspektør.navDagTeller)
-        assertEquals(1, perioder.size)
-        assertEquals(1.januar til 16.januar, perioder.first())
+    fun `ferie og permisjon med i arbeidsgiverperioden`() {
+        undersøkeLike({ 6.S + 6.F + 6.S }, { 6.S + 6.P + 6.S }) {
+            assertEquals(18, inspektør.size)
+            assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
+            assertEquals(2, inspektør.navDagTeller)
+            assertEquals(1, perioder.size)
+            assertEquals(1.januar til 16.januar, perioder.first())
+        }
     }
 
     @Test
-    fun `ferie fullfører arbeidsgiverperioden`() {
-        undersøke(1.S + 15.F + 6.S)
-        assertEquals(22, inspektør.size)
-        assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
-        assertEquals(4, inspektør.navDagTeller)
-        assertEquals(2, inspektør.navHelgDagTeller)
-        assertEquals(1, perioder.size)
-        assertEquals(1.januar til 16.januar, perioder.first())
+    fun `ferie og permisjon fullfører arbeidsgiverperioden`() {
+        undersøkeLike({1.S + 15.F + 6.S }, { 1.S + 15.P + 6.S }) {
+            assertEquals(22, inspektør.size)
+            assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
+            assertEquals(4, inspektør.navDagTeller)
+            assertEquals(2, inspektør.navHelgDagTeller)
+            assertEquals(1, perioder.size)
+            assertEquals(1.januar til 16.januar, perioder.first())
+        }
     }
 
     @Test
-    fun `ferie etter utbetaling`() {
-        undersøke(16.S + 15.F)
-        assertEquals(31, inspektør.size)
-        assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
-        assertEquals(15, inspektør.fridagTeller)
-        assertEquals(1, perioder.size)
-        assertEquals(1.januar til 16.januar, perioder.first())
+    fun `ferie og permisjon etter utbetaling`() {
+        undersøkeLike({ 16.S + 15.F }, { 16.S + 15.P }) {
+            assertEquals(31, inspektør.size)
+            assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
+            assertEquals(15, inspektør.fridagTeller)
+            assertEquals(1, perioder.size)
+            assertEquals(1.januar til 16.januar, perioder.first())
+        }
     }
 
     @Test
-    fun `ferie umiddelbart etter utbetaling teller ikke som opphold hvis etterfølgt av arbeidsdag`() {
-        undersøke(16.S + 15.F + 1.A + 10.S)
-        assertEquals(42, inspektør.size)
-        assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
-        assertEquals(6, inspektør.navDagTeller)
-        assertEquals(4, inspektør.navHelgDagTeller)
-        assertEquals(15, inspektør.fridagTeller)
-        assertEquals(1, inspektør.arbeidsdagTeller)
-        assertEquals(1, perioder.size)
-        assertEquals(1.januar til 16.januar, perioder.first())
+    fun `ferie og permisjon umiddelbart etter utbetaling teller ikke som opphold hvis etterfølgt av arbeidsdag`() {
+        undersøkeLike({16.S + 15.F + 1.A + 10.S }, {16.S + 15.P + 1.A + 10.S }) {
+            assertEquals(42, inspektør.size)
+            assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
+            assertEquals(6, inspektør.navDagTeller)
+            assertEquals(4, inspektør.navHelgDagTeller)
+            assertEquals(15, inspektør.fridagTeller)
+            assertEquals(1, inspektør.arbeidsdagTeller)
+            assertEquals(1, perioder.size)
+            assertEquals(1.januar til 16.januar, perioder.first())
+        }
     }
 
     @Test
-    fun `ferie etter utbetaling teller ikke som opphold hvis etterfølgt av arbeidsdag`() {
-        undersøke(17.S + 15.F + 1.A + 9.S)
-        assertEquals(42, inspektør.size)
-        assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
-        assertEquals(6, inspektør.navDagTeller)
-        assertEquals(4, inspektør.navHelgDagTeller)
-        assertEquals(15, inspektør.fridagTeller)
-        assertEquals(1, inspektør.arbeidsdagTeller)
-        assertEquals(1, perioder.size)
-        assertEquals(1.januar til 16.januar, perioder.first())
+    fun `ferie og permisjon etter utbetaling teller ikke som opphold hvis etterfølgt av arbeidsdag`() {
+        undersøkeLike({ 17.S + 15.F + 1.A + 9.S }, { 17.S + 15.P + 1.A + 9.S }) {
+            assertEquals(42, inspektør.size)
+            assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
+            assertEquals(6, inspektør.navDagTeller)
+            assertEquals(4, inspektør.navHelgDagTeller)
+            assertEquals(15, inspektør.fridagTeller)
+            assertEquals(1, inspektør.arbeidsdagTeller)
+            assertEquals(1, perioder.size)
+            assertEquals(1.januar til 16.januar, perioder.first())
+        }
     }
 
     @Test
-    fun `ferie mellom utbetaling`() {
-        undersøke(16.S + 10.F + 5.S)
-        assertEquals(31, inspektør.size)
-        assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
-        assertEquals(3, inspektør.navDagTeller)
-        assertEquals(2, inspektør.navHelgDagTeller)
-        assertEquals(10, inspektør.fridagTeller)
+    fun `ferie og permisjon mellom utbetaling`() {
+        undersøkeLike({ 16.S + 10.F + 5.S }, { 16.S + 10.P + 5.S }) {
+            assertEquals(31, inspektør.size)
+            assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
+            assertEquals(3, inspektør.navDagTeller)
+            assertEquals(2, inspektør.navHelgDagTeller)
+            assertEquals(10, inspektør.fridagTeller)
+        }
     }
 
     @Test
-    fun `ferie før arbeidsdag tilbakestiller arbeidsgiverperioden`() {
-        undersøke(1.S + 15.F + 1.A + 16.S)
-        assertEquals(33, inspektør.size)
-        assertEquals(17, inspektør.arbeidsgiverperiodeDagTeller)
-        assertEquals(15, inspektør.fridagTeller)
-        assertEquals(1, inspektør.arbeidsdagTeller)
-        assertEquals(2, perioder.size)
-        assertEquals(listOf(1.januar til 1.januar), perioder.first())
-        assertEquals(listOf(18.januar til 2.februar), perioder.last())
+    fun `ferie og permisjon før arbeidsdag tilbakestiller arbeidsgiverperioden`() {
+        undersøkeLike({ 1.S + 15.F + 1.A + 16.S }, { 1.S + 15.P + 1.A + 16.S }) {
+            assertEquals(33, inspektør.size)
+            assertEquals(17, inspektør.arbeidsgiverperiodeDagTeller)
+            assertEquals(15, inspektør.fridagTeller)
+            assertEquals(1, inspektør.arbeidsdagTeller)
+            assertEquals(2, perioder.size)
+            assertEquals(listOf(1.januar til 1.januar), perioder.first())
+            assertEquals(listOf(18.januar til 2.februar), perioder.last())
+        }
     }
 
     @Test
-    fun `ferie etter arbeidsdag tilbakestiller arbeidsgiverperioden`() {
-        undersøke(1.S + 1.A + 15.F + 16.S)
-        assertEquals(33, inspektør.size)
-        assertEquals(17, inspektør.arbeidsgiverperiodeDagTeller)
-        assertEquals(15, inspektør.fridagTeller)
-        assertEquals(1, inspektør.arbeidsdagTeller)
-        assertEquals(2, perioder.size)
-        assertEquals(listOf(1.januar til 1.januar), perioder.first())
-        assertEquals(listOf(18.januar til 2.februar), perioder.last())
+    fun `ferie og permisjon etter arbeidsdag tilbakestiller arbeidsgiverperioden`() {
+        undersøkeLike({ 1.S + 1.A + 15.F + 16.S }, { 1.S + 1.A + 15.P + 16.S }) {
+            assertEquals(33, inspektør.size)
+            assertEquals(17, inspektør.arbeidsgiverperiodeDagTeller)
+            assertEquals(15, inspektør.fridagTeller)
+            assertEquals(1, inspektør.arbeidsdagTeller)
+            assertEquals(2, perioder.size)
+            assertEquals(listOf(1.januar til 1.januar), perioder.first())
+            assertEquals(listOf(18.januar til 2.februar), perioder.last())
+        }
     }
 
     @Test
-    fun `ferie etter frisk helg tilbakestiller arbeidsgiverperioden`() {
-        undersøke(6.S + 1.A + 15.F + 16.S)
-        assertEquals(38, inspektør.size)
-        assertEquals(22, inspektør.arbeidsgiverperiodeDagTeller)
-        assertEquals(15, inspektør.fridagTeller)
-        assertEquals(1, inspektør.arbeidsdagTeller)
-        assertEquals(2, perioder.size)
-        assertEquals(listOf(1.januar til 6.januar), perioder.first())
-        assertEquals(listOf(23.januar til 7.februar), perioder.last())
+    fun `ferie og permisjon etter frisk helg tilbakestiller arbeidsgiverperioden`() {
+        undersøkeLike({ 6.S + 1.A + 15.F + 16.S }, { 6.S + 1.A + 15.P + 16.S }) {
+            assertEquals(38, inspektør.size)
+            assertEquals(22, inspektør.arbeidsgiverperiodeDagTeller)
+            assertEquals(15, inspektør.fridagTeller)
+            assertEquals(1, inspektør.arbeidsdagTeller)
+            assertEquals(2, perioder.size)
+            assertEquals(listOf(1.januar til 6.januar), perioder.first())
+            assertEquals(listOf(23.januar til 7.februar), perioder.last())
+        }
     }
 
     @Test
-    fun `ferie før frisk helg tilbakestiller arbeidsgiverperioden`() {
-        undersøke(5.S + 15.F + 1.A + 16.S)
-        assertEquals(37, inspektør.size)
-        assertEquals(21, inspektør.arbeidsgiverperiodeDagTeller)
-        assertEquals(15, inspektør.fridagTeller)
-        assertEquals(1, inspektør.arbeidsdagTeller)
-        assertEquals(2, perioder.size)
-        assertEquals(listOf(1.januar til 5.januar), perioder.first())
-        assertEquals(listOf(22.januar til 6.februar), perioder.last())
+    fun `ferie og permisjon før frisk helg tilbakestiller arbeidsgiverperioden`() {
+        undersøkeLike({ 5.S + 15.F + 1.A + 16.S }, { 5.S + 15.P + 1.A + 16.S }) {
+            assertEquals(37, inspektør.size)
+            assertEquals(21, inspektør.arbeidsgiverperiodeDagTeller)
+            assertEquals(15, inspektør.fridagTeller)
+            assertEquals(1, inspektør.arbeidsdagTeller)
+            assertEquals(2, perioder.size)
+            assertEquals(listOf(1.januar til 5.januar), perioder.first())
+            assertEquals(listOf(22.januar til 6.februar), perioder.last())
+        }
     }
 
     @Test
-    fun `ferie som opphold før arbeidsgiverperioden`() {
-        undersøke(15.F + 16.S)
-        assertEquals(31, inspektør.size)
-        assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
-        assertEquals(15, inspektør.fridagTeller)
-        assertEquals(1, perioder.size)
-        assertEquals(listOf(16.januar til 31.januar), perioder.first())
+    fun `ferie og permisjon som opphold før arbeidsgiverperioden`() {
+        undersøkeLike({ 15.F + 16.S }, { 15.P + 16.S }) {
+            assertEquals(31, inspektør.size)
+            assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
+            assertEquals(15, inspektør.fridagTeller)
+            assertEquals(1, perioder.size)
+            assertEquals(listOf(16.januar til 31.januar), perioder.first())
+        }
     }
 
     @Test
@@ -496,9 +507,7 @@ internal class UtbetalingstidslinjeBuilderTest {
 
     @BeforeEach
     fun setup() {
-        resetSeed()
-        teller = Arbeidsgiverperiodeteller.NormalArbeidstaker
-        perioder.clear()
+        reset()
     }
 
     private lateinit var inspektør: UtbetalingstidslinjeInspektør
@@ -525,6 +534,21 @@ internal class UtbetalingstidslinjeBuilderTest {
         utbetalingstidslinje = builder.result()
         inspektør = utbetalingstidslinje.inspektør
         perioder.addAll(periodebuilder.result())
+    }
+
+    // undersøker forskjellige tidslinjer som skal ha samme funksjonelle betydning
+    private fun undersøkeLike(vararg tidslinje: () -> Sykdomstidslinje, assertBlock: () -> Unit) {
+        tidslinje.forEach {
+            undersøke(resetSeed(tidslinjegenerator = it))
+            assertBlock()
+            reset()
+        }
+    }
+
+    private fun reset() {
+        resetSeed()
+        teller = Arbeidsgiverperiodeteller.NormalArbeidstaker
+        perioder.clear()
     }
 
     private class Komposittmediator(private val mediators: List<ArbeidsgiverperiodeMediator>) : ArbeidsgiverperiodeMediator {
