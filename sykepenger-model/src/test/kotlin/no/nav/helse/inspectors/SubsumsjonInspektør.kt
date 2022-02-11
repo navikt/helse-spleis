@@ -2,8 +2,8 @@ package no.nav.helse.inspectors
 
 import no.nav.helse.person.*
 import no.nav.helse.person.AbstractPersonTest.Companion.ORGNUMMER
-import no.nav.helse.person.etterlevelse.KontekstType
 import no.nav.helse.person.etterlevelse.MaskinellJurist
+import no.nav.helse.person.etterlevelse.MaskinellJurist.KontekstType
 import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall
 import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall.*
 import no.nav.helse.person.etterlevelse.SubsumsjonVisitor
@@ -124,13 +124,13 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
     ) {
         val resultat = subsumsjoner.filter {
             it.paragraf == paragraf
-                && (versjon == it.versjon) ?: true
-                && (VILKAR_IKKE_OPPFYLT == it.utfall) ?: true
-                && (ledd == it.ledd) ?: true
+                && (versjon == it.versjon)
+                && (VILKAR_IKKE_OPPFYLT == it.utfall)
+                && (ledd == it.ledd)
                 && punktum?.equals(it.punktum) ?: true
                 && bokstav?.equals(it.bokstav) ?: true
-                && (input == it.input) ?: true
-                && (output == it.output) ?: true
+                && (input == it.input)
+                && (output == it.output)
                 && vedtaksperiodeId?.id(organisasjonsnummer)?.equals(it.vedtaksperiodeIdFraSporing()) ?: true
         }.let {
             assertEquals(antall, it.size, "Forventer $antall subsumsjoner for vilkåret. Subsumsjoner funnet: $it")

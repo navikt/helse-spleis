@@ -3,7 +3,7 @@ package no.nav.helse.serde.api.v2.buildere
 import no.nav.helse.Fødselsnummer
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.*
-import no.nav.helse.person.Sporing.Companion.ider
+import no.nav.helse.person.Dokumentsporing.Companion.ider
 import no.nav.helse.serde.api.v2.*
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.utbetalingslinjer.Utbetaling
@@ -69,7 +69,7 @@ internal class GenerasjonerBuilder(
         skjæringstidspunktFraInfotrygd: LocalDate?,
         periodetype: Periodetype,
         forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
-        hendelseIder: Set<Sporing>,
+        hendelseIder: Set<Dokumentsporing>,
         inntektsmeldingInfo: InntektsmeldingInfo?,
         inntektskilde: Inntektskilde
     ) {

@@ -6,7 +6,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.person.*
-import no.nav.helse.person.Sporing.Companion.toMap
+import no.nav.helse.person.Dokumentsporing.Companion.toMap
 import no.nav.helse.person.infotrygdhistorikk.Friperiode
 import no.nav.helse.person.infotrygdhistorikk.UgyldigPeriode
 import no.nav.helse.person.infotrygdhistorikk.UkjentInfotrygdperiode
@@ -193,7 +193,7 @@ internal class JsonBuilder : AbstractBuilder() {
             skjæringstidspunktFraInfotrygd: LocalDate?,
             periodetype: Periodetype,
             forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
-            hendelseIder: Set<Sporing>,
+            hendelseIder: Set<Dokumentsporing>,
             inntektsmeldingInfo: InntektsmeldingInfo?,
             inntektskilde: Inntektskilde
         ) {
@@ -1017,7 +1017,7 @@ internal class JsonBuilder : AbstractBuilder() {
             skjæringstidspunktFraInfotrygd: LocalDate?,
             periodetype: Periodetype,
             forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
-            hendelseIder: Set<Sporing>,
+            hendelseIder: Set<Dokumentsporing>,
             inntektsmeldingInfo: InntektsmeldingInfo?,
             inntektskilde: Inntektskilde
         ) {
@@ -1366,7 +1366,7 @@ internal class JsonBuilder : AbstractBuilder() {
             skjæringstidspunktFraInfotrygd: LocalDate?,
             periodetype: Periodetype,
             forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
-            hendelseIder: Set<Sporing>,
+            hendelseIder: Set<Dokumentsporing>,
             inntektsmeldingInfo: InntektsmeldingInfo?,
             inntektskilde: Inntektskilde
         ) {

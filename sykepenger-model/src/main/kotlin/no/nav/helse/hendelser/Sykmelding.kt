@@ -2,7 +2,7 @@ package no.nav.helse.hendelser
 
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.IAktivitetslogg
-import no.nav.helse.person.Sporing
+import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.Companion.noOverlap
@@ -82,8 +82,8 @@ class Sykmelding(
         error("Mottatt overlappende sykmeldinger - $hvorfor")
     }
 
-    internal fun leggTil(hendelseIder: MutableSet<Sporing>) {
-        hendelseIder.add(Sporing(meldingsreferanseId(), Sporing.Type.Sykmelding))
+    internal fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) {
+        hendelseIder.add(Dokumentsporing.sykmelding(meldingsreferanseId()))
     }
 }
 

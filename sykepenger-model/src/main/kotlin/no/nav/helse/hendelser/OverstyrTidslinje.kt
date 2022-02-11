@@ -3,7 +3,7 @@ package no.nav.helse.hendelser
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.PersonObserver
-import no.nav.helse.person.Sporing
+import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
@@ -89,7 +89,7 @@ class OverstyrTidslinje(
             errors = this.errorsAndWorse()
         )
 
-    internal fun leggTil(hendelseIder: MutableSet<Sporing>) {
-        hendelseIder.add(Sporing(meldingsreferanseId(), Sporing.Type.OverstyrTidslinje))
+    internal fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) {
+        hendelseIder.add(Dokumentsporing.overstyrTidslinje(meldingsreferanseId()))
     }
 }

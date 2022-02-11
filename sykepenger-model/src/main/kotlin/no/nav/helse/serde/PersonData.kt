@@ -6,7 +6,7 @@ import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.person.*
-import no.nav.helse.person.Sporing.Companion.tilSporing
+import no.nav.helse.person.Dokumentsporing.Companion.tilSporing
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.infotrygdhistorikk.*
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.ArbeidsforholdhistorikkInnslagData.Companion.tilArbeidsforholdhistorikk
@@ -810,7 +810,7 @@ internal data class PersonData(
             private val skjæringstidspunktFraInfotrygd: LocalDate?,
             private val skjæringstidspunkt: LocalDate?,
             private val sykdomstidslinje: SykdomstidslinjeData,
-            private val hendelseIder: Map<UUID, Sporing.Type>,
+            private val hendelseIder: Map<UUID, Dokumentsporing.Type>,
             private val inntektsmeldingInfo: InntektsmeldingInfoHistorikkElementData.InntektsmeldingInfoData?,
             private val fom: LocalDate,
             private val tom: LocalDate,

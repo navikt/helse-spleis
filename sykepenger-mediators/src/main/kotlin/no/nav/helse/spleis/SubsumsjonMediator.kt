@@ -1,8 +1,8 @@
 package no.nav.helse.spleis
 
 import no.nav.helse.Toggle
-import no.nav.helse.person.etterlevelse.KontekstType
 import no.nav.helse.person.etterlevelse.MaskinellJurist
+import no.nav.helse.person.etterlevelse.MaskinellJurist.KontekstType
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spleis.meldinger.model.HendelseMessage

@@ -11,7 +11,7 @@ import no.nav.helse.person.Ledd.*
 import no.nav.helse.person.Ledd.Companion.ledd
 import no.nav.helse.person.Paragraf.*
 import no.nav.helse.person.Punktum.Companion.punktum
-import no.nav.helse.person.Sporing.Companion.toMap
+import no.nav.helse.person.Dokumentsporing.Companion.toMap
 import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall
 import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall.*
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Tidslinjedag.Companion.dager
@@ -45,7 +45,7 @@ class MaskinellJurist private constructor(
     fun medOrganisasjonsnummer(organisasjonsnummer: String) =
         kopierMedKontekst(mapOf(organisasjonsnummer to KontekstType.Organisasjonsnummer) + kontekster.filterNot { it.value == KontekstType.Organisasjonsnummer })
 
-    internal fun medVedtaksperiode(vedtaksperiodeId: UUID, hendelseIder: Set<Sporing>, periode: Periode) =
+    internal fun medVedtaksperiode(vedtaksperiodeId: UUID, hendelseIder: Set<Dokumentsporing>, periode: Periode) =
         kopierMedKontekst(
             mapOf(vedtaksperiodeId.toString() to KontekstType.Vedtaksperiode) + hendelseIder.toMap().map { it.key.toString() to it.value.tilKontekst() } + kontekster,
             periode
@@ -548,26 +548,25 @@ class MaskinellJurist private constructor(
             }
         }
     }
+    private fun Dokumentsporing.Type.tilKontekst() = when (this) {
+        Dokumentsporing.Type.Sykmelding -> KontekstType.Sykmelding
+        Dokumentsporing.Type.Søknad -> KontekstType.Søknad
+        Dokumentsporing.Type.Inntektsmelding -> KontekstType.Inntektsmelding
+        Dokumentsporing.Type.OverstyrTidslinje -> KontekstType.OverstyrTidslinje
+        Dokumentsporing.Type.OverstyrInntekt -> KontekstType.OverstyrInntekt
+        Dokumentsporing.Type.OverstyrArbeidsforhold -> KontekstType.OverstyrArbeidsforhold
+    }
+
+    enum class KontekstType {
+        Fødselsnummer,
+        Organisasjonsnummer,
+        Vedtaksperiode,
+        Sykmelding,
+        Søknad,
+        Inntektsmelding,
+        OverstyrTidslinje,
+        OverstyrInntekt,
+        OverstyrArbeidsforhold,
+    }
 }
 
-
-internal fun Sporing.Type.tilKontekst() = when (this) {
-    Sporing.Type.Sykmelding -> KontekstType.Sykmelding
-    Sporing.Type.Søknad -> KontekstType.Søknad
-    Sporing.Type.Inntektsmelding -> KontekstType.Inntektsmelding
-    Sporing.Type.OverstyrTidslinje -> KontekstType.OverstyrTidslinje
-    Sporing.Type.OverstyrInntekt -> KontekstType.OverstyrInntekt
-    Sporing.Type.OverstyrArbeidsforhold -> KontekstType.OverstyrArbeidsforhold
-}
-
-enum class KontekstType {
-    Fødselsnummer,
-    Organisasjonsnummer,
-    Vedtaksperiode,
-    Sykmelding,
-    Søknad,
-    Inntektsmelding,
-    OverstyrTidslinje,
-    OverstyrInntekt,
-    OverstyrArbeidsforhold,
-}

@@ -190,8 +190,8 @@ class Inntektsmelding(
 
     internal fun inntektsmeldingsinfo() = InntektsmeldingInfo(id = meldingsreferanseId(), arbeidsforholdId = arbeidsforholdId)
 
-    internal fun leggTil(hendelseIder: MutableSet<Sporing>) {
-        hendelseIder.add(Sporing(meldingsreferanseId(), Sporing.Type.Inntektsmelding))
+    internal fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) {
+        hendelseIder.add(Dokumentsporing.inntektsmelding(meldingsreferanseId()))
     }
 
     class Refusjon(

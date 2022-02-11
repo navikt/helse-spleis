@@ -11,6 +11,7 @@ import no.nav.helse.person.Paragraf.PARAGRAF_8_16
 import no.nav.helse.person.Punktum
 import no.nav.helse.person.Punktum.PUNKTUM_1
 import no.nav.helse.person.Punktum.PUNKTUM_2
+import no.nav.helse.person.etterlevelse.MaskinellJurist.*
 import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall
 import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall.VILKAR_IKKE_OPPFYLT
 import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall.VILKAR_OPPFYLT

@@ -4,7 +4,7 @@ import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.*
-import no.nav.helse.person.Sporing.Companion.ider
+import no.nav.helse.person.Dokumentsporing.Companion.ider
 import no.nav.helse.serde.api.*
 import no.nav.helse.serde.api.dto.UtbetalingshistorikkElementDTO
 import no.nav.helse.serde.api.v2.HendelseDTO
@@ -33,7 +33,7 @@ internal class VedtaksperiodeBuilder(
     private val sykepengegrunnlag: Inntekt?,
     private val gruppeId: UUID,
     private val fødselsnummer: String,
-    private val hendelseIder: Set<Sporing>,
+    private val hendelseIder: Set<Dokumentsporing>,
     private val vilkårsgrunnlagInntektBuilder: VilkårsgrunnlagInntektBuilder,
     private val forkastet: Boolean
 ) : BuilderState() {
@@ -296,7 +296,7 @@ internal class VedtaksperiodeBuilder(
         skjæringstidspunktFraInfotrygd: LocalDate?,
         periodetype: Periodetype,
         forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
-        hendelseIder: Set<Sporing>,
+        hendelseIder: Set<Dokumentsporing>,
         inntektsmeldingInfo: InntektsmeldingInfo?,
         inntektskilde: Inntektskilde
     ) {

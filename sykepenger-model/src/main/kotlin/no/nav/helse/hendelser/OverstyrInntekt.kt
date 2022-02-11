@@ -29,7 +29,7 @@ class OverstyrInntekt(
         person.loggførHendelsesreferanse(organisasjonsnummer, skjæringstidspunkt, this)
     }
 
-    internal fun leggTil(hendelseIder: MutableSet<Sporing>) {
-        hendelseIder.add(Sporing(meldingsreferanseId(), Sporing.Type.OverstyrInntekt))
+    internal fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) {
+        hendelseIder.add(Dokumentsporing.overstyrInntekt(meldingsreferanseId()))
     }
 }

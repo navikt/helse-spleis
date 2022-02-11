@@ -6,6 +6,7 @@ import no.nav.helse.person.Bokstav
 import no.nav.helse.person.Ledd
 import no.nav.helse.person.Paragraf
 import no.nav.helse.person.Punktum
+import no.nav.helse.person.etterlevelse.MaskinellJurist.*
 import no.nav.helse.somFødselsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test

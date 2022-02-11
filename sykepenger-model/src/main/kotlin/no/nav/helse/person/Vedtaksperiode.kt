@@ -26,7 +26,7 @@ import no.nav.helse.person.ForlengelseFraInfotrygd.JA
 import no.nav.helse.person.ForlengelseFraInfotrygd.NEI
 import no.nav.helse.person.InntektsmeldingInfo.Companion.ider
 import no.nav.helse.person.Periodetype.*
-import no.nav.helse.person.Sporing.Companion.ider
+import no.nav.helse.person.Dokumentsporing.Companion.ider
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.builders.UtbetaltEventBuilder
 import no.nav.helse.person.builders.VedtakFattetBuilder
@@ -61,7 +61,7 @@ internal class Vedtaksperiode private constructor(
     private var tilstand: Vedtaksperiodetilstand,
     private var skjæringstidspunktFraInfotrygd: LocalDate?,
     private var sykdomstidslinje: Sykdomstidslinje,
-    private val hendelseIder: MutableSet<Sporing>,
+    private val hendelseIder: MutableSet<Dokumentsporing>,
     private var inntektsmeldingInfo: InntektsmeldingInfo?,
     private var periode: Periode,
     private val sykmeldingsperiode: Periode,
@@ -2794,8 +2794,8 @@ internal class InntektsmeldingInfo(
         inntektsmelding.warn("Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.")
     }
 
-    internal fun leggTil(hendelser: MutableSet<Sporing>) {
-        hendelser.add(Sporing(id, Sporing.Type.Inntektsmelding))
+    internal fun leggTil(hendelser: MutableSet<Dokumentsporing>) {
+        hendelser.add(Dokumentsporing.inntektsmelding(id))
     }
 
     internal fun accept(visitor: InntektsmeldingInfoVisitor) {

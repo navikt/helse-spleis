@@ -3,7 +3,7 @@ package no.nav.helse.inspectors
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.person.*
-import no.nav.helse.person.Sporing.Companion.ider
+import no.nav.helse.person.Dokumentsporing.Companion.ider
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.*
@@ -59,7 +59,7 @@ internal class TestArbeidsgiverInspektør(
     private var inUtbetaling = false
     private var inFeriepengeutbetaling = false
     private val forlengelserFraInfotrygd = mutableMapOf<Int, ForlengelseFraInfotrygd>()
-    private val hendelseIder = mutableMapOf<Int, Set<Sporing>>()
+    private val hendelseIder = mutableMapOf<Int, Set<Dokumentsporing>>()
     private val inntektskilder = mutableMapOf<Int, Inntektskilde>()
     private val periodetyper = mutableMapOf<Int, Periodetype>()
 
@@ -141,7 +141,7 @@ internal class TestArbeidsgiverInspektør(
         skjæringstidspunktFraInfotrygd: LocalDate?,
         periodetype: Periodetype,
         forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
-        hendelseIder: Set<Sporing>,
+        hendelseIder: Set<Dokumentsporing>,
         inntektsmeldingInfo: InntektsmeldingInfo?,
         inntektskilde: Inntektskilde
     ) {
@@ -177,7 +177,7 @@ internal class TestArbeidsgiverInspektør(
         skjæringstidspunktFraInfotrygd: LocalDate?,
         periodetype: Periodetype,
         forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
-        hendelseIder: Set<Sporing>,
+        hendelseIder: Set<Dokumentsporing>,
         inntektsmeldingInfo: InntektsmeldingInfo?,
         inntektskilde: Inntektskilde
     ) {
@@ -365,7 +365,7 @@ internal class TestArbeidsgiverInspektør(
             skjæringstidspunktFraInfotrygd: LocalDate?,
             periodetype: Periodetype,
             forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
-            hendelseIder: Set<Sporing>,
+            hendelseIder: Set<Dokumentsporing>,
             inntektsmeldingInfo: InntektsmeldingInfo?,
             inntektskilde: Inntektskilde
         ) {

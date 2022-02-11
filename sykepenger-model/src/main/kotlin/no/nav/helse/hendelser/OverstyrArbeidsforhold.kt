@@ -37,8 +37,8 @@ class OverstyrArbeidsforhold(
         }
     }
 
-    internal fun leggTil(hendelseIder: MutableSet<Sporing>) {
-        hendelseIder.add(Sporing(meldingsreferanseId(), Sporing.Type.OverstyrArbeidsforhold))
+    internal fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) {
+        hendelseIder.add(Dokumentsporing.overstyrArbeidsforhold(meldingsreferanseId()))
     }
 
     class ArbeidsforholdOverstyrt(internal val orgnummer: String, private val deaktivert: Boolean) {
