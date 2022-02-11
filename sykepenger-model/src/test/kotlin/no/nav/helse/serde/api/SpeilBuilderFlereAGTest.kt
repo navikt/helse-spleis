@@ -380,7 +380,6 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        val vilkårsgrunnlagHistorikkInnslagIdFørOverstyring = person.nyesteIdForVilkårsgrunnlagHistorikk()
         håndterOverstyrArbeidsforhold(1.januar, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, true)))
 
         val personDto = serializePersonForSpeil(person)
@@ -394,7 +393,7 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
             personDto.arbeidsforholdPerSkjæringstidspunkt
         )
         assertEquals(
-            listOf(GhostPeriodeDTO(1.januar, 31.januar, 1.januar, vilkårsgrunnlagHistorikkInnslagIdFørOverstyring, true)),
+            listOf(GhostPeriodeDTO(1.januar, 31.januar, 1.januar, person.nyesteIdForVilkårsgrunnlagHistorikk(), true)),
             personDto.arbeidsgivere.find { it.organisasjonsnummer == a2 }?.ghostPerioder
         )
     }
