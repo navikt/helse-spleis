@@ -3,7 +3,6 @@ package no.nav.helse.person
 
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
-import no.nav.helse.person.Inntektshistorikk.Innslag.Companion.nyesteId
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.toSubsumsjonFormat
 import no.nav.helse.person.filter.Brukerutbetalingfilter
@@ -19,7 +18,7 @@ internal class Inntektshistorikk {
     private val historikk = mutableListOf<Innslag>()
 
     private val innslag
-        get() = (historikk.firstOrNull()?.clone() ?: Innslag(UUID.randomUUID()))
+        get() = (nyesteInnslag()?.clone() ?: Innslag(UUID.randomUUID()))
             .also { historikk.add(0, it) }
 
     internal companion object {
@@ -32,7 +31,9 @@ internal class Inntektshistorikk {
         visitor.postVisitInntekthistorikk(this)
     }
 
-    internal fun nyesteId() = historikk.nyesteId()
+    internal fun nyesteInnslag() = historikk.firstOrNull()
+
+    internal fun nyesteId() = Innslag.nyesteId(this)
 
     internal fun isNotEmpty() = historikk.isNotEmpty()
 
@@ -43,13 +44,13 @@ internal class Inntektshistorikk {
     internal fun grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate, dato: LocalDate, førsteFraværsdag: LocalDate?): Inntektsopplysning? =
         grunnlagForSykepengegrunnlag(skjæringstidspunkt, førsteFraværsdag) ?: skjæringstidspunkt
             .takeIf { it <= dato }
-            ?.let { historikk.firstOrNull()?.grunnlagForSykepengegrunnlagFraInfotrygd(it til dato) }
+            ?.let { nyesteInnslag()?.grunnlagForSykepengegrunnlagFraInfotrygd(it til dato) }
 
     internal fun grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?): Inntektsopplysning? =
-        historikk.firstOrNull()?.grunnlagForSykepengegrunnlag(skjæringstidspunkt, førsteFraværsdag)
+        nyesteInnslag()?.grunnlagForSykepengegrunnlag(skjæringstidspunkt, førsteFraværsdag)
 
     internal fun grunnlagForSammenligningsgrunnlag(dato: LocalDate): Inntektsopplysning? =
-        historikk.firstOrNull()?.grunnlagForSammenligningsgrunnlag(dato)
+        nyesteInnslag()?.grunnlagForSammenligningsgrunnlag(dato)
 
     internal fun sykepengegrunnlagKommerFraSkatt(skjæringstidspunkt: LocalDate) =
         grunnlagForSykepengegrunnlag(skjæringstidspunkt, skjæringstidspunkt).let { it == null || it is SkattComposite }
@@ -102,7 +103,7 @@ internal class Inntektshistorikk {
         }
 
         internal companion object {
-            internal fun List<Innslag>.nyesteId() = this.first().id
+            internal fun nyesteId(inntektshistorikk: Inntektshistorikk) = inntektshistorikk.nyesteInnslag()!!.id
         }
     }
 
@@ -425,7 +426,7 @@ internal class Inntektshistorikk {
     }
 
     internal fun build(filter: Brukerutbetalingfilter.Builder, inntektsmeldingId: UUID) {
-        historikk.firstOrNull()?.build(filter, inntektsmeldingId)
+        nyesteInnslag()?.build(filter, inntektsmeldingId)
     }
 
     internal class RestoreJsonMode(private val inntektshistorikk: Inntektshistorikk) {

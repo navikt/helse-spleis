@@ -9,7 +9,7 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
 
-internal class InntektshistorikkBuilder(private val person: Person) {
+internal class VilkårsgrunnlagInntektBuilder(private val person: Person) {
     private val nøkkeldataOmInntekter = mutableListOf<NøkkeldataOmInntekt>()
 
     internal fun nøkkeldataOmInntekt(nøkkeldataOmInntekt: NøkkeldataOmInntekt) {

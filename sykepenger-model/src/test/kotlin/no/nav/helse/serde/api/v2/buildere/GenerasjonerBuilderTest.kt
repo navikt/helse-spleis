@@ -1,6 +1,6 @@
 package no.nav.helse.serde.api.v2.buildere
 
-import no.nav.helse.Toggle
+import no.nav.helse.*
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -8,15 +8,12 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.arbeidsgiver
+import no.nav.helse.serde.api.builders.InntektshistorikkForAOrdningenBuilder
 import no.nav.helse.serde.api.v2.BeregnetPeriode
 import no.nav.helse.serde.api.v2.Generasjon
 import no.nav.helse.serde.api.v2.Tidslinjeperiode
 import no.nav.helse.serde.api.v2.UberegnetPeriode
 import no.nav.helse.spleis.e2e.*
-import no.nav.helse.desember
-import no.nav.helse.februar
-import no.nav.helse.januar
-import no.nav.helse.mars
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -30,7 +27,8 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
 
     private fun generasjoner(): List<Generasjon> {
         val sammenligningsgrunnlagBuilder = OppsamletSammenligningsgrunnlagBuilder(person)
-        val vilkårsgrunnlagHistorikk = VilkårsgrunnlagBuilder(person, sammenligningsgrunnlagBuilder).build()
+        val inntektshistorikkForAordningenBuilder = InntektshistorikkForAOrdningenBuilder(person)
+        val vilkårsgrunnlagHistorikk = VilkårsgrunnlagBuilder(person, sammenligningsgrunnlagBuilder, inntektshistorikkForAordningenBuilder).build()
         val generasjonerBuilder = GenerasjonerBuilder(søknadDTOer, UNG_PERSON_FNR_2018, vilkårsgrunnlagHistorikk, person.arbeidsgiver(ORGNUMMER))
         return generasjonerBuilder.build()
     }

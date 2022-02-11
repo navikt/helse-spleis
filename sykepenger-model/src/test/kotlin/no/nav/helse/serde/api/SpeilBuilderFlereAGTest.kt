@@ -6,6 +6,9 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.serde.api.v2.Arbeidsgiverinntekt
+import no.nav.helse.serde.api.v2.InntekterFraAOrdningen
+import no.nav.helse.serde.api.v2.Inntektkilde
+import no.nav.helse.serde.api.v2.OmregnetÅrsinntekt
 import no.nav.helse.spleis.e2e.*
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
@@ -17,6 +20,8 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.time.Month
+import java.time.YearMonth
 
 internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
     @BeforeEach
@@ -427,9 +432,8 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
         assertEquals(listOf(a1, a2), personDto.arbeidsforholdPerSkjæringstidspunkt[1.januar]?.map { it.orgnummer })
     }
 
-    @ForventetFeil("TODO")
     @Test
-    fun `legger ved sammenlignignsgrunnlag for deaktiverte arbeidsforhold`() {
+    fun `legger ved sammenlignignsgrunnlag og sykepengegrunnlag for deaktiverte arbeidsforhold`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
@@ -458,7 +462,7 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
 
-        håndterOverstyrArbeidsforhold(1.januar, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, false)))
+        håndterOverstyrArbeidsforhold(1.januar, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, true)))
 
         val personDto = serializePersonForSpeil(person)
         val vilkårsgrunnlag = personDto.vilkårsgrunnlagHistorikk[person.nyesteIdForVilkårsgrunnlagHistorikk()]?.get(1.januar)
@@ -466,7 +470,16 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
         assertEquals(
             Arbeidsgiverinntekt(
                 organisasjonsnummer = a2,
-                omregnetÅrsinntekt = null,
+                omregnetÅrsinntekt = OmregnetÅrsinntekt(
+                    kilde = Inntektkilde.AOrdningen,
+                    beløp = 12000.0,
+                    månedsbeløp = 1000.0,
+                    inntekterFraAOrdningen = listOf(
+                        InntekterFraAOrdningen(YearMonth.of(2017, Month.OCTOBER), 1000.0),
+                        InntekterFraAOrdningen(YearMonth.of(2017, Month.NOVEMBER), 1000.0),
+                        InntekterFraAOrdningen(YearMonth.of(2017, Month.DECEMBER), 1000.0)
+                    )
+                ),
                 sammenligningsgrunnlag = 12000.0,
                 deaktivert = true
             ),

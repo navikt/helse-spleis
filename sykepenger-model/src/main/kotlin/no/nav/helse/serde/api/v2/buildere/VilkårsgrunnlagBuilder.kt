@@ -6,6 +6,7 @@ import no.nav.helse.person.*
 import no.nav.helse.person.Inntektshistorikk.*
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.Grunnlagsdata
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag
+import no.nav.helse.serde.api.builders.InntektshistorikkForAOrdningenBuilder
 import no.nav.helse.serde.api.v2.SpleisVilkårsgrunnlag
 import no.nav.helse.serde.api.v2.Vilkårsgrunnlag
 import no.nav.helse.økonomi.Inntekt
@@ -123,7 +124,8 @@ internal class IVilkårsgrunnlagHistorikk {
 
 internal class VilkårsgrunnlagBuilder(
     private val person: Person,
-    private val sammenligningsgrunnlagBuilder: OppsamletSammenligningsgrunnlagBuilder
+    private val sammenligningsgrunnlagBuilder: OppsamletSammenligningsgrunnlagBuilder,
+    private val inntektshistorikkForAordningenBuilder: InntektshistorikkForAOrdningenBuilder
 ) : PersonVisitor {
     private val historikk = IVilkårsgrunnlagHistorikk()
 
@@ -134,13 +136,14 @@ internal class VilkårsgrunnlagBuilder(
     internal fun build() = historikk
 
     override fun preVisitInnslag(innslag: VilkårsgrunnlagHistorikk.Innslag, id: UUID, opprettet: LocalDateTime) {
-        historikk.leggTil(id, InnslagBuilder(innslag, person, sammenligningsgrunnlagBuilder).build())
+        historikk.leggTil(id, InnslagBuilder(innslag, person, sammenligningsgrunnlagBuilder, inntektshistorikkForAordningenBuilder).build())
     }
 
     internal class InnslagBuilder(
         innslag: VilkårsgrunnlagHistorikk.Innslag,
         private val person: Person,
-        private val sammenligningsgrunnlagBuilder: OppsamletSammenligningsgrunnlagBuilder
+        private val sammenligningsgrunnlagBuilder: OppsamletSammenligningsgrunnlagBuilder,
+        private val inntektshistorikkForAordningenBuilder: InntektshistorikkForAOrdningenBuilder
     ) : VilkårsgrunnlagHistorikkVisitor {
         private val vilkårsgrunnlag = mutableMapOf<LocalDate, IVilkårsgrunnlag>()
 
@@ -164,7 +167,7 @@ internal class VilkårsgrunnlagBuilder(
             meldingsreferanseId: UUID?,
             vilkårsgrunnlagId: UUID
         ) {
-            val compositeSykepengegrunnlag = SykepengegrunnlagBuilder(sykepengegrunnlag, sammenligningsgrunnlagBuilder, skjæringstidspunkt).build()
+            val compositeSykepengegrunnlag = SykepengegrunnlagBuilder(sykepengegrunnlag, sammenligningsgrunnlagBuilder, skjæringstidspunkt, inntektshistorikkForAordningenBuilder).build()
             val minimumInntekt = InntektBuilder(person.minimumInntekt(skjæringstidspunkt)).build()
             val grunnbeløp = InntektBuilder(Grunnbeløp.`1G`.beløp(skjæringstidspunkt)).build()
             val oppfyllerKravOmMedlemskap = when (medlemskapstatus) {
@@ -197,7 +200,7 @@ internal class VilkårsgrunnlagBuilder(
             sykepengegrunnlag: Sykepengegrunnlag,
             vilkårsgrunnlagId: UUID
         ) {
-            val byggetSykepengegrunnlag = SykepengegrunnlagBuilder(sykepengegrunnlag, sammenligningsgrunnlagBuilder, skjæringstidspunkt).build()
+            val byggetSykepengegrunnlag = SykepengegrunnlagBuilder(sykepengegrunnlag, sammenligningsgrunnlagBuilder, skjæringstidspunkt, inntektshistorikkForAordningenBuilder).build()
             vilkårsgrunnlag.putIfAbsent(
                 skjæringstidspunkt, IInfotrygdGrunnlag(
                     skjæringstidspunkt = skjæringstidspunkt,
@@ -212,12 +215,14 @@ internal class VilkårsgrunnlagBuilder(
         private class SykepengegrunnlagBuilder(
             sykepengegrunnlag: Sykepengegrunnlag,
             private val sammenligningsgrunnlagBuilder: OppsamletSammenligningsgrunnlagBuilder,
-            private val skjæringstidspunkt: LocalDate
+            private val skjæringstidspunkt: LocalDate,
+            private val inntektshistorikkForAordningenBuilder: InntektshistorikkForAOrdningenBuilder
         ) :
             VilkårsgrunnlagHistorikkVisitor {
             private val inntekterPerArbeidsgiver = mutableListOf<IArbeidsgiverinntekt>()
             private lateinit var sykepengegrunnlag: IInntekt
             private var omregnetÅrsinntekt by Delegates.notNull<Double>()
+            private lateinit var deaktiverteArbeidsforhold: List<String>
 
             init {
                 sykepengegrunnlag.accept(this)
@@ -233,12 +238,12 @@ internal class VilkårsgrunnlagBuilder(
             private fun sammenligningsgrunnlagForArbeidsgivereUtenSykepengegrunnlag() = sammenligningsgrunnlagBuilder.orgnumre()
                 .filter { it !in inntekterPerArbeidsgiver.map { inntekt -> inntekt.arbeidsgiver } }
                 .filter { sammenligningsgrunnlagBuilder.sammenligningsgrunnlag(it, skjæringstidspunkt) != null}
-                .map {
+                .map { orgnummer ->
                     IArbeidsgiverinntekt(
-                        arbeidsgiver = it,
-                        omregnetÅrsinntekt = null,
-                        sammenligningsgrunnlag = sammenligningsgrunnlagBuilder.sammenligningsgrunnlag(it, skjæringstidspunkt),
-                        deaktivert = false
+                        arbeidsgiver = orgnummer,
+                        omregnetÅrsinntekt = inntektshistorikkForAordningenBuilder.hentInntekt(orgnummer, skjæringstidspunkt),
+                        sammenligningsgrunnlag = sammenligningsgrunnlagBuilder.sammenligningsgrunnlag(orgnummer, skjæringstidspunkt),
+                        deaktivert = deaktiverteArbeidsforhold.contains(orgnummer)
                     )
                 }
 
@@ -251,6 +256,7 @@ internal class VilkårsgrunnlagBuilder(
             ) {
                 this.sykepengegrunnlag = InntektBuilder(sykepengegrunnlag).build()
                 this.omregnetÅrsinntekt = InntektBuilder(grunnlagForSykepengegrunnlag).build().årlig
+                this.deaktiverteArbeidsforhold = deaktiverteArbeidsforhold
             }
 
             override fun preVisitArbeidsgiverInntektsopplysning(arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning, orgnummer: String) {
@@ -262,7 +268,7 @@ internal class VilkårsgrunnlagBuilder(
         private class InntektsopplysningBuilder(
             private val organisasjonsnummer: String,
             inntektsopplysning: ArbeidsgiverInntektsopplysning,
-            private val sammenligningsgrunnlagBuilder: OppsamletSammenligningsgrunnlagBuilder
+            private val sammenligningsgrunnlagBuilder: OppsamletSammenligningsgrunnlagBuilder,
         ) : VilkårsgrunnlagHistorikkVisitor {
             private lateinit var inntekt: IArbeidsgiverinntekt
 
@@ -323,7 +329,7 @@ internal class VilkårsgrunnlagBuilder(
                 this.inntekt = nyArbeidsgiverInntekt(IInntektkilde.AOrdningen, inntekt, dato, inntekterFraAOrdningen)
             }
 
-            private class SkattBuilder(skattComposite: SkattComposite) : VilkårsgrunnlagHistorikkVisitor {
+            internal class SkattBuilder(skattComposite: SkattComposite) : InntekthistorikkVisitor {
                 private val inntekt = InntektBuilder(skattComposite.grunnlagForSykepengegrunnlag()).build()
                 private val inntekterFraAOrdningen = mutableMapOf<YearMonth, Double>()
 

@@ -11,7 +11,7 @@ import java.util.*
 internal class VedtaksperioderBuilder(
     private val arbeidsgiver: Arbeidsgiver,
     private val fødselsnummer: String,
-    private val inntektshistorikkBuilder: InntektshistorikkBuilder,
+    private val vilkårsgrunnlagInntektBuilder: VilkårsgrunnlagInntektBuilder,
     private val gruppeIder: MutableMap<Vedtaksperiode, UUID>,
     private val vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk,
     private val byggerForkastedePerioder: Boolean = false
@@ -59,7 +59,7 @@ internal class VedtaksperioderBuilder(
             gruppeId = gruppeId(vedtaksperiode),
             fødselsnummer = fødselsnummer,
             hendelseIder = hendelseIder,
-            inntektshistorikkBuilder = inntektshistorikkBuilder,
+            vilkårsgrunnlagInntektBuilder = vilkårsgrunnlagInntektBuilder,
             dataForVilkårsvurdering = vilkårsgrunnlag,
             forkastet = byggerForkastedePerioder
         )

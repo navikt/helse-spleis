@@ -33,7 +33,7 @@ internal class VedtaksperiodeBuilder(
     private val gruppeId: UUID,
     private val fødselsnummer: String,
     private val hendelseIder: Set<UUID>,
-    private val inntektshistorikkBuilder: InntektshistorikkBuilder,
+    private val vilkårsgrunnlagInntektBuilder: VilkårsgrunnlagInntektBuilder,
     private val forkastet: Boolean
 ) : BuilderState() {
 
@@ -88,7 +88,7 @@ internal class VedtaksperiodeBuilder(
         sisteUtbetalingFor: UtbetalingshistorikkElementDTO.UtbetalingDTO?,
         forkastet: Boolean
     ): VedtaksperiodeDTO {
-        inntektshistorikkBuilder.nøkkeldataOmInntekt(InntektshistorikkBuilder.NøkkeldataOmInntekt(periode.endInclusive, skjæringstidspunkt, grunnlagsdataBuilder?.avviksprosent))
+        vilkårsgrunnlagInntektBuilder.nøkkeldataOmInntekt(VilkårsgrunnlagInntektBuilder.NøkkeldataOmInntekt(periode.endInclusive, skjæringstidspunkt, grunnlagsdataBuilder?.avviksprosent))
 
         val tom = beregnetSykdomstidslinje.last().dagen
         val vilkår = buildVilkår(utbetaling, relevanteHendelser)

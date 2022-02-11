@@ -14,7 +14,7 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.PersonVisitor
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
-import no.nav.helse.serde.api.builders.InntektshistorikkBuilder
+import no.nav.helse.serde.api.builders.VilkårsgrunnlagInntektBuilder
 import no.nav.helse.spleis.e2e.*
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
@@ -24,9 +24,9 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
 
-internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
+internal class VilkårsgrunnlagInntektBuilderTest : AbstractEndToEndTest() {
 
-    private class FinnInntektshistorikk(person: Person, private val builder: InntektshistorikkBuilder) : PersonVisitor {
+    private class FinnInntektshistorikk(person: Person, private val builder: VilkårsgrunnlagInntektBuilder) : PersonVisitor {
         val inntektshistorikk = mutableMapOf<String, Inntektshistorikk>()
         private lateinit var orgnummer: String
 
@@ -43,14 +43,14 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
         }
     }
 
-    private infix fun LocalDate.og(sisteDato: LocalDate) = InntektshistorikkBuilder.NøkkeldataOmInntekt(sisteDato, skjæringstidspunkt = this)
-    private infix fun InntektshistorikkBuilder.NøkkeldataOmInntekt.avvik(avviksprosent: Double) = this.also { it.avviksprosent = avviksprosent }
+    private infix fun LocalDate.og(sisteDato: LocalDate) = VilkårsgrunnlagInntektBuilder.NøkkeldataOmInntekt(sisteDato, skjæringstidspunkt = this)
+    private infix fun VilkårsgrunnlagInntektBuilder.NøkkeldataOmInntekt.avvik(avviksprosent: Double) = this.also { it.avviksprosent = avviksprosent }
 
     @Test
     fun `Finner inntektsgrunnlag for en arbeidsgiver med inntekt satt av saksbehandler`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
 
-        val builder = InntektshistorikkBuilder(person)
+        val builder = VilkårsgrunnlagInntektBuilder(person)
         FinnInntektshistorikk(person, builder).also {
             (it.inntektshistorikk.getValue(ORGNUMMER)).append {
                 addSaksbehandler(1.januar, UUID.randomUUID(), INNTEKT)
@@ -111,7 +111,7 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
 
         håndterYtelser(1.vedtaksperiode)
 
-        val builder = InntektshistorikkBuilder(person)
+        val builder = VilkårsgrunnlagInntektBuilder(person)
         builder.nøkkeldataOmInntekt(1.januar og 31.januar avvik 7.7)
         FinnInntektshistorikk(person, builder)
         val inntektsgrunnlag = builder.build()
@@ -150,7 +150,7 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
         håndterUtbetalingshistorikk(1.vedtaksperiode, historikk, inntektshistorikk = inntekter)
         håndterYtelser(1.vedtaksperiode)
 
-        val builder = InntektshistorikkBuilder(person)
+        val builder = VilkårsgrunnlagInntektBuilder(person)
         builder.nøkkeldataOmInntekt(1.oktober(2017) og 31.januar)
 
         FinnInntektshistorikk(person, builder)
@@ -186,7 +186,7 @@ internal class InntektsgrunnlagTest : AbstractEndToEndTest() {
             inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 17.januar, INNTEKT, true))
         )
 
-        val builder = InntektshistorikkBuilder(person)
+        val builder = VilkårsgrunnlagInntektBuilder(person)
         builder.nøkkeldataOmInntekt(1.januar og 31.januar)
 
         FinnInntektshistorikk(person, builder)

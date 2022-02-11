@@ -22,7 +22,7 @@ internal class ArbeidsgiverBuilder(
     private val id: UUID,
     private val organisasjonsnummer: String,
     fødselsnummer: String,
-    inntektshistorikkBuilder: InntektshistorikkBuilder
+    vilkårsgrunnlagInntektBuilder: VilkårsgrunnlagInntektBuilder
 ) : BuilderState() {
     private val utbetalingshistorikkBuilder = UtbetalingshistorikkBuilder()
     private val utbetalinger = mutableListOf<Utbetaling>()
@@ -31,14 +31,14 @@ internal class ArbeidsgiverBuilder(
     private val perioderBuilder = VedtaksperioderBuilder(
         arbeidsgiver = arbeidsgiver,
         fødselsnummer = fødselsnummer,
-        inntektshistorikkBuilder = inntektshistorikkBuilder,
+        vilkårsgrunnlagInntektBuilder = vilkårsgrunnlagInntektBuilder,
         gruppeIder = gruppeIder,
         vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk
     )
     private val forkastetPerioderBuilder = VedtaksperioderBuilder(
         arbeidsgiver = arbeidsgiver,
         fødselsnummer = fødselsnummer,
-        inntektshistorikkBuilder = inntektshistorikkBuilder,
+        vilkårsgrunnlagInntektBuilder = vilkårsgrunnlagInntektBuilder,
         gruppeIder = gruppeIder,
         vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk,
         byggerForkastedePerioder = true

@@ -1,8 +1,8 @@
 package no.nav.helse.serde.api.builders
 
 import no.nav.helse.Fødselsnummer
-import no.nav.helse.person.*
 import no.nav.helse.person.Arbeidsgiver
+import no.nav.helse.person.Person
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.serde.AbstractBuilder
 import no.nav.helse.serde.api.ArbeidsforholdDTO
@@ -24,19 +24,20 @@ internal class PersonBuilder(
     private val versjon: Int
 ) : BuilderState(builder) {
     private val arbeidsgivere = mutableListOf<ArbeidsgiverBuilder>()
-    private val inntektshistorikkBuilder = InntektshistorikkBuilder(person)
+    private val vilkårsgrunnlagInntektBuilder = VilkårsgrunnlagInntektBuilder(person)
+    private val inntektshistorikkForAordningenBuilder = InntektshistorikkForAOrdningenBuilder(person)
 
     internal fun build(hendelser: List<HendelseDTO>): PersonDTO {
 
         val sammenligningsgrunnlagBuilder = OppsamletSammenligningsgrunnlagBuilder(person)
-        val vilkårsgrunnlagHistorikk = VilkårsgrunnlagBuilder(person, sammenligningsgrunnlagBuilder).build()
+        val vilkårsgrunnlagHistorikk = VilkårsgrunnlagBuilder(person, sammenligningsgrunnlagBuilder, inntektshistorikkForAordningenBuilder).build()
 
         return PersonDTO(
             fødselsnummer = fødselsnummer.toString(),
             aktørId = aktørId,
             arbeidsgivere = arbeidsgivere.map { it.build(hendelser, fødselsnummer.toString(), vilkårsgrunnlagHistorikk) },
             vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk.toDTO(),
-            inntektsgrunnlag = inntektshistorikkBuilder.build(),
+            inntektsgrunnlag = vilkårsgrunnlagInntektBuilder.build(),
             dødsdato = dødsdato,
             versjon = versjon,
             arbeidsforholdPerSkjæringstidspunkt = person.hentArbeidsforhold(::ArbeidsforholdDTO)
@@ -49,7 +50,7 @@ internal class PersonBuilder(
         organisasjonsnummer: String
     ) {
         val arbeidsgiverBuilder =
-            ArbeidsgiverBuilder(arbeidsgiver, vilkårsgrunnlagHistorikk, id, organisasjonsnummer, fødselsnummer.toString(), inntektshistorikkBuilder)
+            ArbeidsgiverBuilder(arbeidsgiver, vilkårsgrunnlagHistorikk, id, organisasjonsnummer, fødselsnummer.toString(), vilkårsgrunnlagInntektBuilder)
         if (vilkårsgrunnlagHistorikk.erRelevant(organisasjonsnummer, person.skjæringstidspunkter()) || arbeidsgiver.harFerdigstiltPeriode() || arbeidsgiver.harSpleisSykdom()) {
             arbeidsgivere.add(arbeidsgiverBuilder)
         }
