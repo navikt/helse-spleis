@@ -33,12 +33,18 @@ internal class Oppdrag private constructor(
     private var simuleringsResultat: Simulering.SimuleringResultat? = null
 ) : MutableList<Utbetalingslinje> by linjer, Aktivitetskontekst {
     internal companion object {
+
+        val INGEN = object : Periode(LocalDate.MIN, LocalDate.MAX) {
+            override fun overlapperMed(other: Periode) =
+                false
+        }
+
         internal fun periode(vararg oppdrag: Oppdrag): Periode {
             return oppdrag
                 .filter(Oppdrag::isNotEmpty)
                 .takeIf(List<*>::isNotEmpty)
                 ?.let { liste -> Periode(liste.minOf { it.førstedato }, liste.maxOf { it.sistedato }) }
-                ?: Periode(LocalDate.MIN, LocalDate.MAX)
+                ?: INGEN
         }
 
         internal fun stønadsdager(vararg oppdrag: Oppdrag): Int {

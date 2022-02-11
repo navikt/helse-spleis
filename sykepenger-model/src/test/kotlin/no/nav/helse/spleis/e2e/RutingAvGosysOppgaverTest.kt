@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.*
+import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.*
 import no.nav.helse.hendelser.til
@@ -10,6 +11,7 @@ import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -200,7 +202,7 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `søknad med ferie hele perioden + inntektsmelding`() {
+    fun `søknad med ferie hele perioden + inntektsmelding - ingen faktisk utbetaling, ergo ikke speil-relatert`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 17.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 17.januar, 100.prosent), Ferie(1.januar, 17.januar))
         val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar))
@@ -216,8 +218,8 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
 
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
         assertSisteTilstand(2.vedtaksperiode, TIL_INFOTRYGD)
-        assertFalse(observatør.opprettOppgaveEvent().any { inntektsmeldingId in it.hendelser })
-        assertTrue(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().any { inntektsmeldingId in it.hendelser })
+        assertTrue(observatør.opprettOppgaveEvent().any { inntektsmeldingId in it.hendelser })
+        assertTrue(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().isEmpty())
     }
 
     @Test
@@ -291,7 +293,7 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
 
         håndterSykmelding(Sykmeldingsperiode(1.mai, 26.mai, 100.prosent))
-        val inntektsmeldingId = håndterInntektsmelding(listOf(1.mars til 16.mars), førsteFraværsdag = 1.mai)
+        val inntektsmeldingId = håndterInntektsmelding(listOf(1.mars til 16.mars), førsteFraværsdag = 1.mai) // NB - det er kanskje ikke realistisk at AG setter førsteFraværsdag etter ferie?
         håndterSykmelding(Sykmeldingsperiode(1.mai, 27.mai, 100.prosent))
 
         assertNoWarning(1.vedtaksperiode, "Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.")
@@ -302,5 +304,24 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
         assertSisteTilstand(3.vedtaksperiode, TIL_INFOTRYGD)
+    }
+
+    @Test
+    fun `periode med utbetaling_uten_utbetaling teller ikke som nærliggende utbetaling`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 21.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 21.januar, 100.prosent), Ferie(13.januar, 21.januar))
+        val delvisRefusjon = Refusjon(321.årlig, null, emptyList())
+        håndterInntektsmelding(listOf(1.januar til 16.januar), refusjon = delvisRefusjon)
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+
+        håndterSykmelding(Sykmeldingsperiode(22.januar, 22.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(22.januar, 24.januar, 100.prosent))
+        val søknadId = håndterSøknad(Sykdom(22.januar, 22.januar, 100.prosent))
+
+        assertTrue(observatør.opprettOppgaveEvent().any { søknadId in it.hendelser })
+        assertFalse(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().any { søknadId in it.hendelser })
     }
 }
