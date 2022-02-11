@@ -8,7 +8,7 @@ import no.nav.helse.sykdomstidslinje.erRettFør
 import java.time.DayOfWeek
 import java.time.LocalDate
 
-internal class Arbeidsgiverperiode private constructor(private val perioder: List<Periode>, private val førsteUtbetalingsdag: LocalDate?) : Iterable<LocalDate>, Comparable<LocalDate> {
+internal class Arbeidsgiverperiode private constructor(private val perioder: List<Periode>, private var førsteUtbetalingsdag: LocalDate?) : Iterable<LocalDate>, Comparable<LocalDate> {
     constructor(perioder: List<Periode>) : this(perioder, null)
 
     init {
@@ -51,6 +51,7 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
         periode.overlapperMed(første til sisteKjente)
 
     internal fun sammenlign(other: List<Periode>): Boolean {
+        if (fiktiv()) return true
         val otherSiste = other.lastOrNull()?.endInclusive ?: return false
         val thisSiste = this.perioder.last().endInclusive
         return otherSiste == thisSiste || (thisSiste.erHelg() && otherSiste.erRettFør(thisSiste)) || (otherSiste.erHelg() && thisSiste.erRettFør(otherSiste))
@@ -80,10 +81,9 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
         }
     }
 
-    internal fun utbetalingsdag(dato: LocalDate) = if (førsteUtbetalingsdag == null) {
-        Arbeidsgiverperiode(perioder, dato)
-    } else {
-        apply { kjentDag(dato) }
+    internal fun utbetalingsdag(dato: LocalDate) = apply {
+        if (førsteUtbetalingsdag != null) return@apply kjentDag(dato)
+        this.førsteUtbetalingsdag = dato
     }
 
     internal companion object {
