@@ -1049,9 +1049,9 @@ internal data class PersonData(
             data class ArbeidsforholdData(
                 val ansattFom: LocalDate,
                 val ansattTom: LocalDate?,
-                val erAktivt: Boolean
+                val deaktivert: Boolean
             ) {
-                internal fun tilArbeidsforhold() = Arbeidsforholdhistorikk.Arbeidsforhold(ansattFom, ansattTom, erAktivt)
+                internal fun tilArbeidsforhold() = Arbeidsforholdhistorikk.Arbeidsforhold(ansattFom, ansattTom, deaktivert)
             }
         }
     }

@@ -15,7 +15,7 @@ internal class OverstyrArbeidsforholdMessage(val packet: JsonMessage): HendelseM
         .map {
             OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(
                 orgnummer = it["orgnummer"].asText(),
-                erAktivt = it["erAktivt"].asBoolean()
+                deaktivert = it["deaktivert"].asBoolean()
             )
         }
 

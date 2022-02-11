@@ -94,7 +94,7 @@ internal class Arbeidsforholdhistorikk private constructor(
         }
 
         internal fun accept(visitor: ArbeidsforholdhistorikkVisitor) {
-            visitor.visitArbeidsforhold(ansattFom = ansattFom, ansattTom = ansattTom, erAktivt = deaktivert)
+            visitor.visitArbeidsforhold(ansattFom = ansattFom, ansattTom = ansattTom, deaktivert = deaktivert)
         }
 
         internal fun deaktiver() = Arbeidsforhold(ansattFom = ansattFom, ansattTom = ansattTom, deaktivert = true)

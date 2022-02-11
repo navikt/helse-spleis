@@ -371,7 +371,7 @@ internal class TestMessageFactory(
 
     data class ArbeidsforholdOverstyrt(
         val orgnummer: String,
-        val erAktivt: Boolean
+        val deaktivert: Boolean
     )
 
     data class InntekterForSykepengegrunnlagFraLøsning(
@@ -865,7 +865,7 @@ internal class TestMessageFactory(
                 "overstyrteArbeidsforhold" to overstyrteArbeidsforhold.map {
                     mapOf(
                         "orgnummer" to it.orgnummer,
-                        "erAktivt" to it.erAktivt
+                        "deaktivert" to it.deaktivert
                     )
                 }
             ))

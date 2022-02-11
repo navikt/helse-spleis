@@ -349,7 +349,7 @@ internal class FlereArbeidsgivereMediatorTest : AbstractEndToEndMediatorTest() {
         )
         sendYtelser(0, orgnummer = a1)
         sendSimulering(0, orgnummer = a1, status = SimuleringMessage.Simuleringstatus.OK)
-        sendOverstyringArbeidsforhold(1.januar, listOf(TestMessageFactory.ArbeidsforholdOverstyrt(a2, false)))
+        sendOverstyringArbeidsforhold(1.januar, listOf(TestMessageFactory.ArbeidsforholdOverstyrt(a2, true)))
         sendYtelser(0, orgnummer = a1)
         sendSimulering(0, orgnummer = a1, status = SimuleringMessage.Simuleringstatus.OK)
         assertTilstander(

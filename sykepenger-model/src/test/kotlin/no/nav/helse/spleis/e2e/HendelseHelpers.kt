@@ -95,7 +95,7 @@ internal fun AbstractEndToEndTest.tellArbeidsforholdINyesteHistorikkInnslag(orgn
             erIRiktigArbeidsgiver = orgnummer == organisasjonsnummer
         }
 
-        override fun visitArbeidsforhold(ansattFom: LocalDate, ansattTom: LocalDate?, erAktivt: Boolean) {
+        override fun visitArbeidsforhold(ansattFom: LocalDate, ansattTom: LocalDate?, deaktivert: Boolean) {
             if (erIRiktigArbeidsgiver && erIFørsteHistorikkinnslag) antall += 1
         }
 

@@ -397,12 +397,12 @@ internal class JsonBuilder : AbstractBuilder() {
     private class ArbeidsforholdhistorikkState(private val historikk: MutableList<Map<String, Any?>>) : BuilderState() {
         private var arbeidsforholMap: MutableList<Map<String, Any?>> = mutableListOf()
 
-        override fun visitArbeidsforhold(ansattFom: LocalDate, ansattTom: LocalDate?, erAktivt: Boolean) {
+        override fun visitArbeidsforhold(ansattFom: LocalDate, ansattTom: LocalDate?, deaktivert: Boolean) {
             arbeidsforholMap.add(
                 mapOf(
                     "ansattFom" to ansattFom,
                     "ansattTom" to ansattTom,
-                    "erAktivt" to erAktivt
+                    "deaktivert" to deaktivert
                 )
             )
         }

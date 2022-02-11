@@ -27,8 +27,8 @@ internal class OverstyrArbeidsforholdRiverTest: RiverTest() {
     fun `kan mappe melding om overstyring av arbeidsforhold til modell uten feil`() {
         assertNoErrors(
             testMessageFactory.lagOverstyrArbeidsforhold(1.januar, listOf(
-                ArbeidsforholdOverstyrt(ORGNUMMER, true),
-                ArbeidsforholdOverstyrt("987654322", false),
+                ArbeidsforholdOverstyrt(ORGNUMMER, false),
+                ArbeidsforholdOverstyrt("987654322", true),
             ))
         )
     }

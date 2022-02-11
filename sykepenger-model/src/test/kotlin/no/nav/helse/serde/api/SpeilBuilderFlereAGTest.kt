@@ -376,7 +376,7 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         val vilkårsgrunnlagHistorikkInnslagIdFørOverstyring = person.nyesteIdForVilkårsgrunnlagHistorikk()
-        håndterOverstyrArbeidsforhold(1.januar, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, false)))
+        håndterOverstyrArbeidsforhold(1.januar, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, true)))
 
         val personDto = serializePersonForSpeil(person)
         assertEquals(

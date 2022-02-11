@@ -40,17 +40,17 @@ class OverstyrArbeidsforhold(
         }
     }
 
-    class ArbeidsforholdOverstyrt(internal val orgnummer: String, private val erAktivt: Boolean) {
+    class ArbeidsforholdOverstyrt(internal val orgnummer: String, private val deaktivert: Boolean) {
 
         companion object {
             internal fun Iterable<ArbeidsforholdOverstyrt>.overstyringFor(orgnummer: String) = firstOrNull { it.orgnummer == orgnummer }
         }
 
         internal fun lagre(skjæringstidspunkt: LocalDate, arbeidsforholdhistorikk: Arbeidsforholdhistorikk) {
-            if (erAktivt) {
-                arbeidsforholdhistorikk.aktiverArbeidsforhold(skjæringstidspunkt)
-            } else {
+            if (deaktivert) {
                 arbeidsforholdhistorikk.deaktiverArbeidsforhold(skjæringstidspunkt)
+            } else {
+                arbeidsforholdhistorikk.aktiverArbeidsforhold(skjæringstidspunkt)
             }
         }
     }
