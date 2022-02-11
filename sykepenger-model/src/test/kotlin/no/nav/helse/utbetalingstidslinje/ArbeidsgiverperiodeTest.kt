@@ -1,8 +1,10 @@
 package no.nav.helse.utbetalingstidslinje
 
+import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode.Companion.finn
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
@@ -42,6 +44,14 @@ internal class ArbeidsgiverperiodeTest {
     }
 
     @Test
+    fun `har betalt`() {
+        assertFalse(agp(1.januar til 16.januar).harBetalt(17.januar))
+        assertTrue(agp(1.januar til 16.januar).utbetalingsdag(17.januar).harBetalt(17.januar))
+        assertTrue(agp(1.januar til 16.januar).utbetalingsdag(17.januar).harBetalt(18.januar))
+        assertFalse(agp(1.januar til 16.januar).utbetalingsdag(18.januar).harBetalt(17.januar))
+    }
+
+    @Test
     fun `inneholder dager`() {
         val periode = 2.januar til 5.januar
         val arbeidsgiverperiode = agp(periode)
@@ -72,6 +82,21 @@ internal class ArbeidsgiverperiodeTest {
     fun `hører til`() {
         val periode = 2.januar til 5.januar
         val arbeidsgiverperiode = agp(periode)
+        assertTrue(arbeidsgiverperiode.hørerTil(periode))
+        assertTrue(arbeidsgiverperiode.hørerTil(1.januar til 2.januar))
+        assertFalse(arbeidsgiverperiode.hørerTil(6.januar til 9.januar))
+        assertFalse(arbeidsgiverperiode.hørerTil(1.januar til 1.januar))
+        arbeidsgiverperiode.kjentDag(6.januar)
+        assertTrue(arbeidsgiverperiode.hørerTil(6.januar til 9.januar))
+        arbeidsgiverperiode.kjentDag(10.januar)
+        assertTrue(arbeidsgiverperiode.hørerTil(7.januar til 9.januar))
+        assertFalse(arbeidsgiverperiode.hørerTil(11.januar til 12.januar))
+    }
+
+    @Test
+    fun `hører til sist kjente`() {
+        val periode = 2.januar til 5.januar
+        val arbeidsgiverperiode = agp(periode)
         assertTrue(arbeidsgiverperiode.hørerTil(periode, 5.januar))
         assertTrue(arbeidsgiverperiode.hørerTil(1.januar til 2.januar, 5.januar))
         assertFalse(arbeidsgiverperiode.hørerTil(6.januar til 9.januar, 5.januar))
@@ -92,6 +117,19 @@ internal class ArbeidsgiverperiodeTest {
         assertTrue(1.januar til 6.januar in arbeidsgiverperiode)
         assertFalse(1.januar til 1.januar in arbeidsgiverperiode)
         assertFalse(6.januar til 7.januar in arbeidsgiverperiode)
+    }
+
+    @Test
+    fun `finner riktig arbeidsgiverperiode`() {
+        val første = Arbeidsgiverperiode(listOf(1.januar til 16.januar))
+        val andre = Arbeidsgiverperiode.fiktiv(1.februar)
+        val perioder = listOf(første.also { it.kjentDag(17.januar) }, andre)
+
+        assertEquals(første, perioder.finn(1.januar til 16.januar))
+        assertEquals(første, perioder.finn(17.januar til 18.januar))
+        assertNull(perioder.finn(18.januar til 31.januar))
+        assertEquals(andre, perioder.finn(1.februar til 18.februar))
+        assertNull(perioder.finn(2.februar til 18.februar))
     }
 
     private fun agp(vararg periode: Periode) = Arbeidsgiverperiode(periode.toList())
