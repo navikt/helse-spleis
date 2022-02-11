@@ -103,6 +103,12 @@ internal val Int.AV
             .collect(Collectors.toMap<LocalDate, LocalDate, Dag>({ it }, { AvslåttDag(it, SykdomstidslinjeHendelse.Hendelseskilde.INGEN) }))
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
+internal val Int.PROBLEM
+    get() = Sykdomstidslinje(
+        dagensDato.datesUntil(dagensDato.plusDays(this.toLong() - 1).plusDays(1))
+            .collect(Collectors.toMap<LocalDate, LocalDate, Dag>({ it }, { ProblemDag(it, SykdomstidslinjeHendelse.Hendelseskilde.INGEN, "Problemdag") }))
+    ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
+
 private const val UNG_PERSON_FNR_2018 = "12029240045"
 private const val AKTØRID = "42"
 private const val ORGNUMMER = "987654321"

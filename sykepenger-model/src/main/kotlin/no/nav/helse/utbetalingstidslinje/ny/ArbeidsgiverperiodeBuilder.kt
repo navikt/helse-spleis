@@ -7,6 +7,7 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
+import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilderException
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 
@@ -94,6 +95,10 @@ internal class ArbeidsgiverperiodeBuilder(private val arbeidsgiverperiodeteller:
 
     override fun visitDag(dag: Dag.AvslåttDag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
         tilstand.feriedag(this, dato)
+    }
+
+    override fun visitDag(dag: Dag.ProblemDag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde, melding: String) {
+        throw UtbetalingstidslinjeBuilderException.UforventetDagException(dag, melding)
     }
 
     override fun visitDag(dag: Dag.Arbeidsdag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
