@@ -45,7 +45,12 @@ internal class BrukerutbetalingfilterTest {
 
     @Test
     fun `feil periodetype`() {
-        assertFalse(brukerutbetalingfilter(periodetype = Periodetype.FORLENGELSE))
+        assertFalse(brukerutbetalingfilter(periodetype = Periodetype.INFOTRYGDFORLENGELSE))
+    }
+
+    @Test
+    fun `spleis forlengelse passer`() {
+        assertTrue(brukerutbetalingfilter(periodetype = Periodetype.FORLENGELSE))
     }
 
     @Test
@@ -77,13 +82,13 @@ internal class BrukerutbetalingfilterTest {
                 inntektsmeldingtidsstempel = LocalDateTime.now().minusHours(25),
                 vedtaksperiodeHarWarnings = true,
                 utbetaling = lagUtbetaling(tidslinjeOf(16.AP, 15.NAV.copyWith(arbeidsgiverbeløp = 600))),
-                periodetype = Periodetype.FORLENGELSE,
+                periodetype = Periodetype.INFOTRYGDFORLENGELSE,
                 inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE
             )
         )
 
         val forventetMelding =
-            "Ikke kandidat til brukerutbetaling fordi: Fødselsdag passer ikke, Perioden er ikke førstegangsbehandling, Utbetalingen består av delvis refusjon, Inntektskilden er ikke for en arbeidsgiver, Inntektsmelding ble mottatt for mer enn 24 timer siden, Vedtaksperioden har warnings"
+            "Ikke kandidat til brukerutbetaling fordi: Fødselsdag passer ikke, Perioden er ikke førstegangsbehandling eller forlengelse, Utbetalingen består av delvis refusjon, Inntektskilden er ikke for en arbeidsgiver, Inntektsmelding ble mottatt for mer enn 24 timer siden, Vedtaksperioden har warnings"
 
         assertEquals(1, aktivitetslogg.hentInfo().count { it == forventetMelding }) {
             "Forventet melding:\n$forventetMelding\n$aktivitetslogg"

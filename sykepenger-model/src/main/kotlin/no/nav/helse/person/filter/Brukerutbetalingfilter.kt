@@ -23,15 +23,15 @@ internal class Brukerutbetalingfilter private constructor(
     override fun filtrer(aktivitetslogg: IAktivitetslogg): Boolean {
         val årsaker = mutableSetOf<String>()
         if (!Fødselsnummer.brukerutbetalingfilter(fødselsnummer)) årsaker.add("Fødselsdag passer ikke")
-        if (periodetype != Periodetype.FØRSTEGANGSBEHANDLING) årsaker.add("Perioden er ikke førstegangsbehandling")
+        if (periodetype !in setOf(Periodetype.FØRSTEGANGSBEHANDLING, Periodetype.FORLENGELSE)) årsaker.add("Perioden er ikke førstegangsbehandling eller forlengelse")
         if (utbetaling.harDelvisRefusjon()) årsaker.add("Utbetalingen består av delvis refusjon")
         if (inntektskilde != Inntektskilde.EN_ARBEIDSGIVER) årsaker.add("Inntektskilden er ikke for en arbeidsgiver")
         if (inntektsmeldingtidsstempel < LocalDateTime.now().minusHours(24)) årsaker.add("Inntektsmelding ble mottatt for mer enn 24 timer siden")
         if (vedtaksperiodeHarWarnings) årsaker.add("Vedtaksperioden har warnings")
-        return evauler(aktivitetslogg, årsaker)
+        return evaluer(aktivitetslogg, årsaker)
     }
 
-    private fun evauler(aktivitetslogg: IAktivitetslogg, årsaker: Set<String>) = årsaker.isEmpty().also {
+    private fun evaluer(aktivitetslogg: IAktivitetslogg, årsaker: Set<String>) = årsaker.isEmpty().also {
         if (!it) aktivitetslogg.info("Ikke kandidat til brukerutbetaling fordi: ${årsaker.joinToString()}")
     }
 
