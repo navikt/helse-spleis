@@ -8,47 +8,47 @@ import no.nav.helse.sykdomstidslinje.erRettFør
 import java.time.DayOfWeek
 import java.time.LocalDate
 
-internal class Arbeidsgiverperiode private constructor(private val perioder: List<Periode>, private var førsteUtbetalingsdag: LocalDate?) : Iterable<LocalDate>, Comparable<LocalDate> {
+internal class Arbeidsgiverperiode private constructor(private val perioder: List<Periode>, førsteUtbetalingsdag: LocalDate?) : Iterable<LocalDate>, Comparable<LocalDate> {
     constructor(perioder: List<Periode>) : this(perioder, null)
+
+    private val kjenteDager = mutableListOf<Periode>()
+    private val utbetalingsdager = mutableListOf<Periode>()
 
     init {
         check(perioder.isNotEmpty() || førsteUtbetalingsdag != null) {
             "Enten må arbeidsgiverperioden være oppgitt eller så må første utbetalingsdag være oppgitt"
         }
+        førsteUtbetalingsdag?.also { utbetalingsdag(it) }
     }
 
-    private val kjenteDager = mutableListOf<Periode>().also { kjenteDager -> førsteUtbetalingsdag?.let { kjenteDager.add(it.somPeriode()) } }
-    private val første = requireNotNull(perioder.firstOrNull()?.start ?: førsteUtbetalingsdag)
-    private val siste = requireNotNull(perioder.lastOrNull()?.endInclusive ?: førsteUtbetalingsdag)
-    private val hele = første til siste
-    private val sisteKjente get() = kjenteDager.lastOrNull()?.endInclusive?.let { maxOf(it, siste) } ?: siste
+    private val arbeidsgiverperioden get() = perioder.first().start til perioder.last().endInclusive
+    private val førsteKjente get() = listOfNotNull(perioder.firstOrNull()?.start, utbetalingsdager.firstOrNull()?.start, kjenteDager.firstOrNull()?.start).minOf { it }
+    private val sisteKjente get() = listOfNotNull(perioder.lastOrNull()?.endInclusive, utbetalingsdager.lastOrNull()?.endInclusive, kjenteDager.lastOrNull()?.endInclusive).maxOf { it }
+    private val innflytelseperioden get() = førsteKjente til sisteKjente
 
     internal fun fiktiv() = perioder.isEmpty()
 
     internal fun kjentDag(dagen: LocalDate) {
-        if (kjenteDager.isNotEmpty() && kjenteDager.last().endInclusive.plusDays(1) == dagen) {
-            kjenteDager[kjenteDager.size - 1] = kjenteDager.last().oppdaterTom(dagen)
-        } else {
-            kjenteDager.add(dagen.somPeriode())
-        }
+        kjenteDager.add(dagen)
     }
 
     override fun compareTo(other: LocalDate) =
-        første.compareTo(other)
+        førsteKjente.compareTo(other)
 
     operator fun contains(dato: LocalDate) =
-        dato in hele
+        dato in innflytelseperioden
 
     operator fun contains(periode: Periode) =
-        periode.overlapperMed(første til sisteKjente)
+        innflytelseperioden.overlapperMed(periode)
 
     internal fun dekker(periode: Periode): Boolean {
-        val heleInklHelg = hele.justerForHelg()
+        if (fiktiv()) return false
+        val heleInklHelg = arbeidsgiverperioden.justerForHelg()
         return (periode.overlapperMed(heleInklHelg) && heleInklHelg.slutterEtter(periode.endInclusive))
     }
 
     internal fun hørerTil(periode: Periode, sisteKjente: LocalDate = this.sisteKjente) =
-        periode.overlapperMed(første til sisteKjente)
+        periode.overlapperMed(førsteKjente til sisteKjente)
 
     internal fun sammenlign(other: List<Periode>): Boolean {
         if (fiktiv()) return true
@@ -57,10 +57,10 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
         return otherSiste == thisSiste || (thisSiste.erHelg() && otherSiste.erRettFør(thisSiste)) || (otherSiste.erHelg() && thisSiste.erRettFør(otherSiste))
     }
 
-    internal fun harBetalt(dato: LocalDate) = førsteUtbetalingsdag?.let { dato >= it } ?: false
+    internal fun harBetaltFraOgMed(dato: LocalDate) = utbetalingsdager.firstOrNull()?.start?.let { dato >= it } ?: false
 
-    override fun equals(other: Any?) = other is Arbeidsgiverperiode && other.første == this.første
-    override fun hashCode() = første.hashCode()
+    override fun equals(other: Any?) = other is Arbeidsgiverperiode && other.førsteKjente == this.førsteKjente
+    override fun hashCode() = førsteKjente.hashCode()
 
     override fun iterator(): Iterator<LocalDate> {
         return object : Iterator<LocalDate> {
@@ -82,8 +82,8 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
     }
 
     internal fun utbetalingsdag(dato: LocalDate) = apply {
-        if (førsteUtbetalingsdag != null) return@apply kjentDag(dato)
-        this.førsteUtbetalingsdag = dato
+        if (!dato.erHelg()) this.utbetalingsdager.add(dato)
+        kjentDag(dato)
     }
 
     internal companion object {
@@ -97,6 +97,14 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
             DayOfWeek.SATURDAY -> start til endInclusive.plusDays(1)
             DayOfWeek.FRIDAY -> start til endInclusive.plusDays(2)
             else -> this
+        }
+
+        private fun MutableList<Periode>.add(dagen: LocalDate) {
+            if (isNotEmpty() && last().endInclusive.plusDays(1) == dagen) {
+                this[size - 1] = last().oppdaterTom(dagen)
+            } else {
+                add(dagen.somPeriode())
+            }
         }
     }
 }

@@ -29,7 +29,7 @@ internal class ArbeidsgiverperiodeBuilderBuilderTest {
         undersøke(31.S)
         assertEquals(1, perioder.size)
         assertEquals(listOf(1.januar til 16.januar), perioder.first())
-        assertTrue(perioder.first().harBetalt(31.januar))
+        assertTrue(perioder.first().harBetaltFraOgMed(31.januar))
         assertTrue(perioder.first().hørerTil(17.januar til 31.januar))
         assertTrue(17.januar til 31.januar in perioder.first())
     }
@@ -41,7 +41,7 @@ internal class ArbeidsgiverperiodeBuilderBuilderTest {
         }
         assertEquals(1, perioder.size)
         assertEquals(emptyList<LocalDate>(), perioder.first())
-        assertTrue(perioder.first().harBetalt(31.januar))
+        assertTrue(perioder.first().harBetaltFraOgMed(31.januar))
         assertTrue(perioder.first().hørerTil(17.januar til 31.januar))
         assertTrue(17.januar til 31.januar in perioder.first())
     }
@@ -53,7 +53,7 @@ internal class ArbeidsgiverperiodeBuilderBuilderTest {
         }
         assertEquals(1, perioder.size)
         assertEquals(listOf(1.januar til 16.januar), perioder.first())
-        assertTrue(perioder.first().harBetalt(31.januar))
+        assertTrue(perioder.first().harBetaltFraOgMed(31.januar))
         assertTrue(perioder.first().hørerTil(17.januar til 31.januar))
         assertTrue(17.januar til 31.januar in perioder.first())
     }
