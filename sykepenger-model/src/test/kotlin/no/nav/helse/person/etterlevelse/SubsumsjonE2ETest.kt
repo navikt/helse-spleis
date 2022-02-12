@@ -813,7 +813,20 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             versjon = 1.januar(2018),
             paragraf = PARAGRAF_8_17,
             ledd = 2.ledd,
-            input = emptyMap(),
+            input = mapOf(
+                "beregnetTidslinje" to listOf(
+                    mapOf(
+                        "fom" to 1.januar,
+                        "tom" to 29.januar,
+                        "dagtype" to "NAVDAG"
+                    ),
+                    mapOf(
+                        "fom" to 30.januar,
+                        "tom" to 31.januar,
+                        "dagtype" to "FERIEDAG"
+                    ),
+                )
+            ),
             output = mapOf(
                 "perioder" to listOf(mapOf("fom" to 30.januar, "tom" to 31.januar))
             )

@@ -3,8 +3,12 @@ package no.nav.helse.person.etterlevelse
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.InntekthistorikkVisitor
 import no.nav.helse.person.Inntektshistorikk.Skatt
+import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.person.UtbetalingsdagVisitor
-import no.nav.helse.person.etterlevelse.SubsumsjonObserver.UtbetalingstidslinjeVisitor.Periode.Companion.dager
+import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Tidslinjedag.Tidslinjeperiode.Companion.dager
+import no.nav.helse.sykdomstidslinje.Dag
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
+import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosent
@@ -84,7 +88,12 @@ interface SubsumsjonObserver {
      * @param skjæringstidspunkt dato [maksimaltSykepengegrunnlag] settes ut fra
      * @param grunnlagForSykepengegrunnlag total inntekt på tvers av alle relevante arbeidsgivere
      */
-    fun `§ 8-10 ledd 2 punktum 1`(erBegrenset: Boolean, maksimaltSykepengegrunnlag: Inntekt, skjæringstidspunkt: LocalDate, grunnlagForSykepengegrunnlag: Inntekt) {}
+    fun `§ 8-10 ledd 2 punktum 1`(
+        erBegrenset: Boolean,
+        maksimaltSykepengegrunnlag: Inntekt,
+        skjæringstidspunkt: LocalDate,
+        grunnlagForSykepengegrunnlag: Inntekt
+    ) {}
 
     /**
      * Beregning av inntekt pr. dag
@@ -120,8 +129,8 @@ interface SubsumsjonObserver {
      */
     fun `§ 8-12 ledd 1 punktum 1`(
         periode: Periode,
-        tidslinjegrunnlag: List<List<Map<String, Any>>>,
-        beregnetTidslinje: List<Map<String, Any>>,
+        tidslinjegrunnlag: List<List<Tidslinjedag>>,
+        beregnetTidslinje: List<Tidslinjedag>,
         gjenståendeSykedager: Int,
         forbrukteSykedager: Int,
         maksdato: LocalDate,
@@ -145,8 +154,8 @@ interface SubsumsjonObserver {
         gjenståendeSykepengedager: Int,
         beregnetAntallOppholdsdager: Int,
         tilstrekkeligOppholdISykedager: Int,
-        tidslinjegrunnlag: List<List<Map<String, Any>>>,
-        beregnetTidslinje: List<Map<String, Any>>
+        tidslinjegrunnlag: List<List<Tidslinjedag>>,
+        beregnetTidslinje: List<Tidslinjedag>
     ) {}
 
     /**
@@ -197,7 +206,7 @@ interface SubsumsjonObserver {
      *
      * @param dato dagen vilkåret blir vurdert for
      */
-    fun `§ 8-17 ledd 2`(dato: LocalDate) {}
+    fun `§ 8-17 ledd 2`(dato: LocalDate, sykdomstidslinje: List<Tidslinjedag>) {}
 
     /**
      * Inntekt som legges til grunn dersom sykdom ved en arbeidsgiver starter senere enn skjæringstidspunktet tilsvarer
@@ -282,25 +291,51 @@ interface SubsumsjonObserver {
      */
     fun `§ 8-51 ledd 3`(
         periode: Periode,
-        tidslinjegrunnlag: List<List<Map<String, Any>>>,
-        beregnetTidslinje: List<Map<String, Any>>,
+        tidslinjegrunnlag: List<List<Tidslinjedag>>,
+        beregnetTidslinje: List<Tidslinjedag>,
         gjenståendeSykedager: Int,
         forbrukteSykedager: Int,
         maksdato: LocalDate,
         startdatoSykepengerettighet: LocalDate
     ) {}
 
-    private class UtbetalingstidslinjeVisitor(utbetalingstidslinje: Utbetalingstidslinje) : UtbetalingsdagVisitor {
-        private val navdager = mutableListOf<Periode>()
-        private var forrigeDato: LocalDate? = null
+    class Tidslinjedag(
+        private val dato: LocalDate,
+        private val dagtype: String
+    ) {
+        private fun hørerTil(tidslinjeperiode: Tidslinjeperiode) = tidslinjeperiode.hørerTil(dato, dagtype)
 
-        private class Periode(
-            val fom: LocalDate,
-            var tom: LocalDate,
-            val dagtype: String
+        internal fun erRettFør(dato: LocalDate) = this.dato.plusDays(1) == dato
+
+        companion object {
+            fun List<Tidslinjedag>.dager(periode: Periode? = null): List<Map<String, Any>> {
+                return this
+                    .filter { it.dato >= (periode?.start ?: LocalDate.MIN) && it.dato <= (periode?.endInclusive ?: LocalDate.MAX) }
+                    .sortedBy { it.dato }
+                    .fold(mutableListOf<Tidslinjeperiode>()) { acc, nesteDag ->
+                        if (acc.isNotEmpty() && nesteDag.hørerTil(acc.last())) {
+                            acc.last().utvid(nesteDag.dato)
+                        } else {
+                            acc.add(Tidslinjeperiode(nesteDag.dato, nesteDag.dato, nesteDag.dagtype))
+                        }
+                        acc
+                    }.dager()
+            }
+        }
+
+        private class Tidslinjeperiode(
+            private val fom: LocalDate,
+            private var tom: LocalDate,
+            private val dagtype: String
         ) {
+            fun utvid(dato: LocalDate) {
+                this.tom = dato
+            }
+
+            fun hørerTil(dato: LocalDate, dagtype: String) = tom.plusDays(1) == dato && this.dagtype == dagtype
+
             companion object {
-                fun List<Periode>.dager() = map {
+                fun List<Tidslinjeperiode>.dager() = map {
                     mapOf(
                         "fom" to it.fom,
                         "tom" to it.tom,
@@ -309,12 +344,46 @@ interface SubsumsjonObserver {
                 }
             }
         }
+    }
+
+    private class SykdomstidslinjeBuilder(sykdomstidslinje: Sykdomstidslinje) : SykdomstidslinjeVisitor {
+        private val navdager = mutableListOf<Tidslinjedag>()
+
+        init {
+            sykdomstidslinje.accept(this)
+        }
+
+        fun dager() = navdager.toList()
+
+        override fun visitDag(dag: Dag.Sykedag, dato: LocalDate, økonomi: Økonomi, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
+            visit(dato, "NAVDAG")
+        }
+
+        override fun visitDag(dag: Dag.SykHelgedag, dato: LocalDate, økonomi: Økonomi, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
+            visit(dato, "NAVDAG")
+        }
+
+        override fun visitDag(dag: Dag.Feriedag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
+            visit(dato, "FERIEDAG")
+        }
+
+        override fun visitDag(dag: Dag.Permisjonsdag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
+            visit(dato, "PERMISJONSDAG")
+        }
+
+        private fun visit(dato: LocalDate, dagtype: String) {
+            navdager.add(Tidslinjedag(dato, dagtype))
+        }
+    }
+
+    private class UtbetalingstidslinjeBuilder(utbetalingstidslinje: Utbetalingstidslinje) : UtbetalingsdagVisitor {
+        private val navdager = mutableListOf<Tidslinjedag>()
 
         init {
             utbetalingstidslinje.accept(this)
         }
 
-        fun dager() = navdager.dager()
+        fun dager() = navdager.toList()
 
         override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.NavDag, dato: LocalDate, økonomi: Økonomi) {
             visit(dato, "NAVDAG")
@@ -325,20 +394,16 @@ interface SubsumsjonObserver {
         }
 
         override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.Fridag, dato: LocalDate, økonomi: Økonomi) {
-            if (forrigeDato != null && forrigeDato?.plusDays(1) == dato) visit(dato, "FRIDAG")
+            // Dersom vi er inne i en oppholdsperiode ønsker vi ikke å ta med vanlige helger
+            if (navdager.isNotEmpty() && navdager.last().erRettFør(dato)) visit(dato, "FRIDAG")
         }
 
         private fun visit(dato: LocalDate, dagtype: String) {
-            forrigeDato = dato
-            if (navdager.isEmpty() || dagtype != navdager.last().dagtype || navdager.last().tom.plusDays(1) != dato) {
-                navdager.add(Periode(dato, dato, dagtype))
-            } else {
-                navdager.last().tom = dato
-            }
+            navdager.add(Tidslinjedag(dato, dagtype))
         }
     }
 
-    private class SkattVisitor(skatt: Skatt) : InntekthistorikkVisitor {
+    private class SkattBuilder(skatt: Skatt) : InntekthistorikkVisitor {
         private lateinit var inntekt: Map<String, Any>
 
         init {
@@ -363,8 +428,9 @@ interface SubsumsjonObserver {
     }
 
     companion object {
-        internal fun List<Utbetalingstidslinje>.toSubsumsjonFormat(): List<List<Map<String, Any>>> = map { it.toSubsumsjonFormat() }.filter { it.isNotEmpty() }
-        internal fun Utbetalingstidslinje.toSubsumsjonFormat(): List<Map<String, Any>> = UtbetalingstidslinjeVisitor(this).dager()
-        internal fun Iterable<Skatt>.toSubsumsjonFormat(): List<Map<String, Any>> = map { SkattVisitor(it).inntekt() }
+        internal fun List<Utbetalingstidslinje>.subsumsjonsformat(): List<List<Tidslinjedag>> = map { it.subsumsjonsformat() }.filter { it.isNotEmpty() }
+        internal fun Utbetalingstidslinje.subsumsjonsformat(): List<Tidslinjedag> = UtbetalingstidslinjeBuilder(this).dager()
+        internal fun Sykdomstidslinje.subsumsjonsformat(): List<Tidslinjedag> = SykdomstidslinjeBuilder(this).dager()
+        internal fun Iterable<Skatt>.subsumsjonsformat(): List<Map<String, Any>> = map { SkattBuilder(it).inntekt() }
     }
 }

@@ -4,7 +4,7 @@ package no.nav.helse.person
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
-import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.toSubsumsjonFormat
+import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.subsumsjonsformat
 import no.nav.helse.person.filter.Brukerutbetalingfilter
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.summer
@@ -248,7 +248,7 @@ internal class Inntektshistorikk {
 
         override fun subsumsjon(subsumsjonObserver: SubsumsjonObserver) {
             subsumsjonObserver.`§ 8-28 ledd 3 bokstav a`(
-                inntekterSisteTreMåneder = inntekterSisteTreMåneder.toSubsumsjonFormat(),
+                inntekterSisteTreMåneder = inntekterSisteTreMåneder.subsumsjonsformat(),
                 grunnlagForSykepengegrunnlag = grunnlagForSykepengegrunnlag()
             )
 

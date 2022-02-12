@@ -834,6 +834,7 @@ internal data class PersonData(
                 inntektsmeldingInfoHistorikk: List<InntektsmeldingInfoHistorikkElementData>,
                 jurist: MaskinellJurist
             ): Vedtaksperiode {
+                val sykmeldingsperiode = Periode(sykmeldingFom, sykmeldingTom)
                 return Vedtaksperiode::class.primaryConstructor!!
                     .apply { isAccessible = true }
                     .call(
@@ -849,14 +850,14 @@ internal data class PersonData(
                         hendelseIder,
                         inntektsmeldingInfo?.let { inntektsmeldingInfoHistorikk.finn(skjæringstidspunktFraInfotrygd ?: skjæringstidspunkt, it) },
                         Periode(fom, tom),
-                        Periode(sykmeldingFom, sykmeldingTom),
+                        sykmeldingsperiode,
                         VedtaksperiodeUtbetalinger(arbeidsgiver, this.utbetalinger.map { utbetalinger.getValue(it) }),
                         this.utbetalingstidslinje.konverterTilUtbetalingstidslinje(),
                         forlengelseFraInfotrygd,
                         inntektskilde,
                         opprettet,
                         oppdatert,
-                        jurist.medVedtaksperiode(id, hendelseIder.toList())
+                        jurist.medVedtaksperiode(id, hendelseIder.toList(), sykmeldingsperiode)
                     )
             }
 

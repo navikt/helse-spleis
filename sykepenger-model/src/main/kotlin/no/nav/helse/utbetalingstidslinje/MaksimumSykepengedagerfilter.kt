@@ -5,7 +5,7 @@ import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
-import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.toSubsumsjonFormat
+import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.subsumsjonsformat
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.UkjentDag
 import no.nav.helse.økonomi.Økonomi
@@ -43,8 +43,8 @@ internal class MaksimumSykepengedagerfilter(
             val sakensStartdato = teller.startdatoSykepengerettighet() ?: return
             subsumsjonObserver.`§ 8-12 ledd 1 punktum 1`(
                 periode,
-                tidslinjegrunnlag.toSubsumsjonFormat(),
-                beregnetTidslinje.toSubsumsjonFormat(),
+                tidslinjegrunnlag.subsumsjonsformat(),
+                beregnetTidslinje.subsumsjonsformat(),
                 gjenståendeDager,
                 forbrukteDager,
                 sisteDag,
@@ -56,8 +56,8 @@ internal class MaksimumSykepengedagerfilter(
             val sakensStartdato = teller.startdatoSykepengerettighet() ?: return
             subsumsjonObserver.`§ 8-51 ledd 3`(
                 periode,
-                tidslinjegrunnlag.toSubsumsjonFormat(),
-                beregnetTidslinje.toSubsumsjonFormat(),
+                tidslinjegrunnlag.subsumsjonsformat(),
+                beregnetTidslinje.subsumsjonsformat(),
                 gjenståendeDager,
                 forbrukteDager,
                 sisteDag,
@@ -185,8 +185,8 @@ internal class MaksimumSykepengedagerfilter(
                 gjenståendeSykepengedager = maksimumSykepenger.gjenståendeDager(),
                 beregnetAntallOppholdsdager = opphold,
                 tilstrekkeligOppholdISykedager = TILSTREKKELIG_OPPHOLD_I_SYKEDAGER,
-                tidslinjegrunnlag = tidslinjegrunnlag.toSubsumsjonFormat(),
-                beregnetTidslinje = beregnetTidslinje.toSubsumsjonFormat(),
+                tidslinjegrunnlag = tidslinjegrunnlag.subsumsjonsformat(),
+                beregnetTidslinje = beregnetTidslinje.subsumsjonsformat(),
             )
             if (harTilstrekkeligOpphold) {
                 teller.resett()

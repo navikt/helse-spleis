@@ -5,8 +5,10 @@ import com.networknt.schema.JsonSchemaFactory
 import com.networknt.schema.SpecVersion
 import com.networknt.schema.ValidationMessage
 import no.nav.helse.Toggle
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.januar
 import no.nav.helse.person.etterlevelse.MaskinellJurist
+import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Tidslinjedag
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.helse.somFødselsnummer
 import no.nav.helse.spleis.SubsumsjonMediator
@@ -32,14 +34,14 @@ internal class SubsumsjonsmeldingTest {
         jurist = MaskinellJurist()
             .medFødselsnummer(fnr.somFødselsnummer())
             .medOrganisasjonsnummer("123456789")
-            .medVedtaksperiode(UUID.randomUUID(), emptyList())
+            .medVedtaksperiode(UUID.randomUUID(), emptyList(), Periode(1.januar, 31.januar))
         subsumsjonMediator = SubsumsjonMediator(jurist, fnr, TestHendelseMessage(fnr), versjonAvKode)
         testRapid = TestRapid()
     }
 
     @Test
     fun `en melding på gyldig format`() = Toggle.SubsumsjonHendelser.enable {
-        jurist.`§ 8-17 ledd 2`(1.januar(2018))
+        jurist.`§ 8-17 ledd 2`(1.januar(2018), MutableList(31) { Tidslinjedag((it + 1).januar, "NAVDAG") })
         subsumsjonMediator.finalize(testRapid)
         assertSubsumsjonsmelding(testRapid.inspektør.message(0)["subsumsjon"])
     }

@@ -1,5 +1,7 @@
 package no.nav.helse.person.etterlevelse
 
+import no.nav.helse.hendelser.Periode
+import no.nav.helse.januar
 import no.nav.helse.person.Bokstav
 import no.nav.helse.person.Ledd
 import no.nav.helse.person.Paragraf
@@ -17,7 +19,7 @@ internal class MaskinellJuristTest {
         val vedtaksperiodeJurist = MaskinellJurist()
             .medFødselsnummer("10052088033".somFødselsnummer())
             .medOrganisasjonsnummer("123456789")
-            .medVedtaksperiode(UUID.fromString("6bce6c83-28ab-4a8c-b7f6-8402988bc8fc"), emptyList())
+            .medVedtaksperiode(UUID.fromString("6bce6c83-28ab-4a8c-b7f6-8402988bc8fc"), emptyList(), Periode(1.januar, 31.januar))
 
         vedtaksperiodeJurist.`§ 8-2 ledd 1`(true, LocalDate.now(), 1, emptyList(), 1)
 

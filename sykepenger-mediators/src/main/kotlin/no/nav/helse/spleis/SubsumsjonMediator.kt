@@ -24,8 +24,7 @@ internal class SubsumsjonMediator(
         val events = jurist.events()
         if (events.isEmpty() || Toggle.SubsumsjonHendelser.disabled) return
         logg.info("som følge av hendelse id=${message.id} sendes ${events.size} subsumsjonsmeldinger på rapid")
-        jurist
-            .events()
+        events
             .map { subsumsjonMelding(fødselsnummer = fødselsnummer, event = it) }
             .forEach {
                 rapidsConnection.publish(key = fødselsnummer, message = it.toJson().also { message ->

@@ -1,9 +1,12 @@
 package no.nav.helse.utbetalingstidslinje
 
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
+import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.subsumsjonsformat
 import no.nav.helse.sykdomstidslinje.Dag
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilderException.ManglerInntektException
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilderException.NegativDekningsgrunnlagException
@@ -27,11 +30,15 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
 ) : AbstractArbeidsgiverperiodetelling(arbeidsgiverRegler), IUtbetalingstidslinjeBuilder {
     private val tidslinje = Utbetalingstidslinje()
     private var harArbeidsgiverperiode = false
+    private lateinit var sykdomstidslinje: Sykdomstidslinje
 
     override fun arbeidsgiverperiodeFerdig(arbeidsgiverperiode: Arbeidsgiverperiode, dagen: LocalDate) {
         harArbeidsgiverperiode = true
     }
 
+    override fun preVisitSykdomstidslinje(tidslinje: Sykdomstidslinje, låstePerioder: List<Periode>) {
+        sykdomstidslinje = tidslinje
+    }
     override fun result() = tidslinje
 
     private fun inntektForDatoOrNull(dato: LocalDate) =
@@ -87,7 +94,7 @@ internal class UtbetalingstidslinjeBuilder internal constructor(
 
     override fun fridagUtenforArbeidsgiverperioden(arbeidsgiverperiode: Arbeidsgiverperiode?, dato: LocalDate) {
         val økonomi = Økonomi.ikkeBetalt(arbeidsgiverperiode)
-        subsumsjonObserver.`§ 8-17 ledd 2`(dato)
+        subsumsjonObserver.`§ 8-17 ledd 2`(dato, sykdomstidslinje.subsumsjonsformat())
         addFridag(dato, økonomi)
     }
 

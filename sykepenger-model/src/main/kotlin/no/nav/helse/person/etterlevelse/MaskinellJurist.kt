@@ -13,6 +13,7 @@ import no.nav.helse.person.Paragraf.*
 import no.nav.helse.person.Punktum.Companion.punktum
 import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall
 import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall.*
+import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Tidslinjedag.Companion.dager
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosent
 import java.time.LocalDate
@@ -22,7 +23,8 @@ import java.util.*
 
 class MaskinellJurist private constructor(
     private val parent: MaskinellJurist?,
-    private val kontekster: Map<String, String>
+    private val kontekster: Map<String, String>,
+    private var periode: Periode? = null
 ) : SubsumsjonObserver {
 
     private var subsumsjoner = listOf<Subsumsjon>()
@@ -38,8 +40,10 @@ class MaskinellJurist private constructor(
 
     fun medFødselsnummer(fødselsnummer: Fødselsnummer) = kopierMedKontekst(mapOf("fødselsnummer" to fødselsnummer.toString()))
     fun medOrganisasjonsnummer(organisasjonsnummer: String) = kopierMedKontekst(mapOf("organisasjonsnummer" to organisasjonsnummer))
-    fun medVedtaksperiode(vedtaksperiodeId: UUID, hendelseIder: List<UUID>) = kopierMedKontekst(mapOf("vedtaksperiode" to vedtaksperiodeId.toString()))
-    private fun kopierMedKontekst(kontekster: Map<String, String>) = MaskinellJurist(this, this.kontekster + kontekster)
+    fun medVedtaksperiode(vedtaksperiodeId: UUID, hendelseIder: List<UUID>, periode: Periode) =
+        kopierMedKontekst(mapOf("vedtaksperiode" to vedtaksperiodeId.toString()), periode)
+
+    private fun kopierMedKontekst(kontekster: Map<String, String>, periode: Periode? = null) = MaskinellJurist(this, this.kontekster + kontekster, periode)
 
     override fun `§ 8-2 ledd 1`(
         oppfylt: Boolean,
@@ -187,8 +191,8 @@ class MaskinellJurist private constructor(
 
     override fun `§ 8-12 ledd 1 punktum 1`(
         periode: Periode,
-        tidslinjegrunnlag: List<List<Map<String, Any>>>,
-        beregnetTidslinje: List<Map<String, Any>>,
+        tidslinjegrunnlag: List<List<SubsumsjonObserver.Tidslinjedag>>,
+        beregnetTidslinje: List<SubsumsjonObserver.Tidslinjedag>,
         gjenståendeSykedager: Int,
         forbrukteSykedager: Int,
         maksdato: LocalDate,
@@ -212,8 +216,8 @@ class MaskinellJurist private constructor(
                         "tom" to periode.endInclusive,
                         "utfallFom" to utfallFom,
                         "utfallTom" to utfallTom,
-                        "tidslinjegrunnlag" to tidslinjegrunnlag,
-                        "beregnetTidslinje" to beregnetTidslinje
+                        "tidslinjegrunnlag" to tidslinjegrunnlag.map { it.dager(periode) },
+                        "beregnetTidslinje" to beregnetTidslinje.dager(periode)
                     ),
                     output = mapOf(
                         "gjenståendeSykedager" to gjenståendeSykedager,
@@ -234,8 +238,8 @@ class MaskinellJurist private constructor(
         gjenståendeSykepengedager: Int,
         beregnetAntallOppholdsdager: Int,
         tilstrekkeligOppholdISykedager: Int,
-        tidslinjegrunnlag: List<List<Map<String, Any>>>,
-        beregnetTidslinje: List<Map<String, Any>>
+        tidslinjegrunnlag: List<List<SubsumsjonObserver.Tidslinjedag>>,
+        beregnetTidslinje: List<SubsumsjonObserver.Tidslinjedag>
     ) {
         leggTil(
             BetingetSubsumsjon(
@@ -249,8 +253,8 @@ class MaskinellJurist private constructor(
                 input = mapOf(
                     "dato" to dato,
                     "tilstrekkeligOppholdISykedager" to tilstrekkeligOppholdISykedager,
-                    "tidslinjegrunnlag" to tidslinjegrunnlag,
-                    "beregnetTidslinje" to beregnetTidslinje
+                    "tidslinjegrunnlag" to tidslinjegrunnlag.map { it.dager() },
+                    "beregnetTidslinje" to beregnetTidslinje.dager()
                 ),
                 output = emptyMap(),
                 kontekster = kontekster()
@@ -309,7 +313,7 @@ class MaskinellJurist private constructor(
         }
     }
 
-    override fun `§ 8-17 ledd 2`(dato: LocalDate) {
+    override fun `§ 8-17 ledd 2`(dato: LocalDate, sykdomstidslinje: List<SubsumsjonObserver.Tidslinjedag>) {
         leggTil(
             GrupperbarSubsumsjon(
                 dato = dato,
@@ -317,7 +321,9 @@ class MaskinellJurist private constructor(
                 utfall = VILKAR_IKKE_OPPFYLT,
                 paragraf = PARAGRAF_8_17,
                 ledd = LEDD_2,
-                input = emptyMap(),
+                input = mapOf(
+                    "beregnetTidslinje" to sykdomstidslinje.dager(periode)
+                ),
                 output = emptyMap(),
                 kontekster = kontekster()
             )
@@ -426,8 +432,8 @@ class MaskinellJurist private constructor(
 
     override fun `§ 8-51 ledd 3`(
         periode: Periode,
-        tidslinjegrunnlag: List<List<Map<String, Any>>>,
-        beregnetTidslinje: List<Map<String, Any>>,
+        tidslinjegrunnlag: List<List<SubsumsjonObserver.Tidslinjedag>>,
+        beregnetTidslinje: List<SubsumsjonObserver.Tidslinjedag>,
         gjenståendeSykedager: Int,
         forbrukteSykedager: Int,
         maksdato: LocalDate,
@@ -450,8 +456,8 @@ class MaskinellJurist private constructor(
                         "tom" to periode.endInclusive,
                         "utfallFom" to utfallFom,
                         "utfallTom" to utfallTom,
-                        "tidslinjegrunnlag" to tidslinjegrunnlag,
-                        "beregnetTidslinje" to beregnetTidslinje
+                        "tidslinjegrunnlag" to tidslinjegrunnlag.map { it.dager() },
+                        "beregnetTidslinje" to beregnetTidslinje.dager()
                     ),
                     output = mapOf(
                         "gjenståendeSykedager" to gjenståendeSykedager,
@@ -488,12 +494,12 @@ class MaskinellJurist private constructor(
 
             private val paragrafVersjonFormaterer = DateTimeFormatter.ISO_DATE
 
-            internal fun fraSubsumsjon(juridiskVurdering: Subsumsjon): SubsumsjonEvent {
+            internal fun fraSubsumsjon(subsumsjon: Subsumsjon): SubsumsjonEvent {
                 return object : SubsumsjonVisitor {
                     lateinit var event: SubsumsjonEvent
 
                     init {
-                        juridiskVurdering.accept(this)
+                        subsumsjon.accept(this)
                     }
 
                     override fun preVisitSubsumsjon(

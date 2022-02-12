@@ -100,7 +100,7 @@ internal class Vedtaksperiode private constructor(
         utbetalingstidslinje = Utbetalingstidslinje(),
         inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
         opprettet = LocalDateTime.now(),
-        jurist = jurist.medVedtaksperiode(id, mutableListOf())
+        jurist = jurist.medVedtaksperiode(id, mutableListOf(), hendelse.periode())
     ) {
         kontekst(hendelse)
     }
