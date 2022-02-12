@@ -1,6 +1,7 @@
 package no.nav.helse.utbetalingstidslinje.ny
 
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
+import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 
@@ -28,7 +29,8 @@ internal class Arbeidsgiverperiodesubsumsjon(
 
     override fun utbetalingsdag(dato: LocalDate, økonomi: Økonomi) {
         // på første navdag etter fullført agp
-        tilstand.utbetalingsdag(this, dato, økonomi)
+        if (dato.erHelg()) subsumsjonObserver.`§ 8-11 første ledd`(dato)
+        else tilstand.utbetalingsdag(this, dato, økonomi)
         other.utbetalingsdag(dato, økonomi)
     }
 
