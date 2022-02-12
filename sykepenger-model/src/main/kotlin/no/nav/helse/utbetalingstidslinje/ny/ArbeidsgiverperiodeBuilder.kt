@@ -2,6 +2,7 @@ package no.nav.helse.utbetalingstidslinje.ny
 
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.SykdomstidslinjeVisitor
+import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
@@ -11,8 +12,14 @@ import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilderException
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 
-internal class ArbeidsgiverperiodeBuilder(private val arbeidsgiverperiodeteller: Arbeidsgiverperiodeteller, private val mediator: ArbeidsgiverperiodeMediator) : SykdomstidslinjeVisitor,
+internal class ArbeidsgiverperiodeBuilder(
+    private val arbeidsgiverperiodeteller: Arbeidsgiverperiodeteller,
+    mediator: ArbeidsgiverperiodeMediator,
+    subsumsjonObserver: SubsumsjonObserver
+) : SykdomstidslinjeVisitor,
     Arbeidsgiverperiodeteller.Observatør {
+
+    private val mediator = Arbeidsgiverperiodesubsumsjon(mediator, subsumsjonObserver)
 
     init {
         arbeidsgiverperiodeteller.observer(this)

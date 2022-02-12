@@ -77,7 +77,7 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
     }
 
     private fun undersøke(tidslinje: Sykdomstidslinje, delegator: ((Arbeidsgiverperiodeteller, SykdomstidslinjeVisitor) -> SykdomstidslinjeVisitor)? = null) {
-        val arbeidsgiverperiodeBuilder = ArbeidsgiverperiodeBuilder(teller, Arbeidsgiverperiodesubsumsjon(observatør, jurist))
+        val arbeidsgiverperiodeBuilder = ArbeidsgiverperiodeBuilder(teller, observatør, jurist)
         tidslinje.accept(delegator?.invoke(teller, arbeidsgiverperiodeBuilder) ?: arbeidsgiverperiodeBuilder)
     }
 

@@ -545,7 +545,7 @@ internal class UtbetalingstidslinjeBuilderTest {
         )
         val builder = UtbetalingstidslinjeBuilder(inntekter)
         val periodebuilder = ArbeidsgiverperiodeBuilderBuilder()
-        val arbeidsgiverperiodeBuilder = ArbeidsgiverperiodeBuilder(teller, Komposittmediator(periodebuilder, builder))
+        val arbeidsgiverperiodeBuilder = ArbeidsgiverperiodeBuilder(teller, Komposittmediator(periodebuilder, builder), MaskinellJurist())
         tidslinje.accept(delegator?.invoke(teller, arbeidsgiverperiodeBuilder) ?: arbeidsgiverperiodeBuilder)
         utbetalingstidslinje = builder.result()
         inspektør = utbetalingstidslinje.inspektør
