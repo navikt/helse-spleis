@@ -61,7 +61,7 @@ internal class EnTilEnOverlappendeSykmeldingE2ETest : AbstractEndToEndTest() {
         )
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP)
         assertEquals(3.januar til 20.januar, inspektør.periode(1.vedtaksperiode))
-        assertNoWarnings(person)
+        assertNoWarnings()
     }
 
     @Test

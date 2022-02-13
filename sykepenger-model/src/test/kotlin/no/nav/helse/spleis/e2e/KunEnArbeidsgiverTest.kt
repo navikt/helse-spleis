@@ -135,7 +135,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     fun `ingen historie med søknad til arbeidsgiver først`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 8.januar, 100.prosent))
         håndterSøknad(Sykdom(3.januar, 8.januar, 100.prosent))
-        assertNoWarnings(person)
+        assertNoWarnings()
         håndterInntektsmelding(arbeidsgiverperioder = listOf(Periode(3.januar, 18.januar)), førsteFraværsdag = 3.januar)
         assertNoErrors(person)
         assertActivities(person)
@@ -253,7 +253,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     fun `ingen historie med inntektsmelding, så søknad til arbeidsgiver`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 8.januar, 100.prosent))
         håndterInntektsmelding(arbeidsgiverperioder = listOf(Periode(3.januar, 18.januar)), førsteFraværsdag = 3.januar)
-        assertNoWarnings(person)
+        assertNoWarnings()
         håndterSøknad(Sykdom(3.januar, 8.januar, 100.prosent))
         assertNoErrors(person)
         assertActivities(person)
@@ -319,7 +319,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         )
         håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)))
 
-        assertWarnings(person)
+        assertWarnings()
         inspektør.also {
             assertWarning(1.vedtaksperiode, "Utdanning oppgitt i perioden i søknaden.")
             assertWarning(1.vedtaksperiode, "Utenlandsopphold oppgitt i perioden i søknaden.")
@@ -2208,7 +2208,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         val utbetalingstidslinje = inspektør.utbetalingstidslinjer(19.vedtaksperiode)
         val dager = utbetalingstidslinje.filter { it !is AvvistDag && it !is NavHelgDag }
         assertTrue(dager.isEmpty()) { "Forventet at alle dager er avvist: ${dager.joinToString()}"}
-        assertWarnings(person)
+        assertWarnings()
     }
 
     @Test

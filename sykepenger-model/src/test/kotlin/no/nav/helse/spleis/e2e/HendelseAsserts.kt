@@ -164,12 +164,13 @@ internal fun assertNoErrors(person: Person) {
     assertFalse(person.personLogg.hasErrorsOrWorse(), person.personLogg.toString())
 }
 
-internal fun assertNoWarnings(person: Person) {
-    assertFalse(person.personLogg.hasWarningsOrWorse(), person.personLogg.toString())
+internal fun AbstractPersonTest.assertNoWarnings(vararg filtre: AktivitetsloggFilter) {
+    val warnings = collectWarnings(*filtre)
+    assertTrue(warnings.isEmpty(), "Forventet ingen warnings. Warnings:\n${warnings.joinToString("\n")}")
 }
 
-internal fun assertWarnings(person: Person) {
-    assertTrue(person.personLogg.hasWarningsOrWorse(), person.personLogg.toString())
+internal fun AbstractPersonTest.assertWarnings(vararg filtre: AktivitetsloggFilter) {
+    assertTrue(collectWarnings(*filtre).isNotEmpty(), "Forventet warnings, fant ingen")
 }
 
 internal fun AbstractEndToEndTest.assertNoWarnings(idInnhenter: IdInnhenter, orgnummer: String = AbstractPersonTest.ORGNUMMER) {

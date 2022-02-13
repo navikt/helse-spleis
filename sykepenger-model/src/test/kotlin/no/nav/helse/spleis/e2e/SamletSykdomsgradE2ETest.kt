@@ -107,7 +107,7 @@ internal class SamletSykdomsgradE2ETest: AbstractEndToEndTest() {
             TIL_UTBETALING,
             AVSLUTTET
         )
-        assertNoWarnings(person)
+        assertNoWarnings()
     }
 
     @Test

@@ -63,7 +63,7 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
         assertEquals("OPPH", (behov.detaljer()["linjer"] as List<Map<String, Any>>)[0]["statuskode"])
         assertEquals("2021-04-28", (behov.detaljer()["linjer"] as List<Map<String, Any>>)[1]["fom"])
         assertEquals("2021-05-07", (behov.detaljer()["linjer"] as List<Map<String, Any>>)[1]["tom"])
-        assertWarnings(person)
+        assertWarnings()
     }
 
     @Test
@@ -409,6 +409,6 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
         assertEquals("OPPH", (behov.detaljer()["linjer"] as List<Map<String, Any>>)[0]["statuskode"])
         assertEquals("2021-04-21", (behov.detaljer()["linjer"] as List<Map<String, Any>>)[1]["fom"])
         assertEquals("2021-04-23", (behov.detaljer()["linjer"] as List<Map<String, Any>>)[1]["tom"])
-        assertWarnings(person)
+        assertWarnings()
     }
 }

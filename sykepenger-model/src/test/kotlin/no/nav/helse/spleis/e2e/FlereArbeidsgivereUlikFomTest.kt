@@ -915,7 +915,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter, arbeidsforhold = emptyList())
         )
 
-        assertNoWarnings(person)
+        assertNoWarnings()
 
     }
 

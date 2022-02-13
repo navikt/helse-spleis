@@ -234,7 +234,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
-        assertNoWarnings(person)
+        assertNoWarnings()
     }
 
     @Test
@@ -350,7 +350,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         assertEquals(30.mars, a2Linje.tom)
         assertEquals(692, a2Linje.beløp)
 
-        assertNoWarnings(person)
+        assertNoWarnings()
     }
 
     @Test
