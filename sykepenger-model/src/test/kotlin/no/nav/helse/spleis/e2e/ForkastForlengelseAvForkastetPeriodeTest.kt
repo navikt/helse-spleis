@@ -79,7 +79,7 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
         assertSisteForkastetPeriodeTilstand(ORGNUMMER, 1.vedtaksperiode, TIL_INFOTRYGD)
         håndterSykmelding(Sykmeldingsperiode(16.januar, 31.januar, 100.prosent))
         assertSisteTilstand(2.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_GAP)
-        assertInfo(2.vedtaksperiode, "Sykmelding forlenger forkastet vedtaksperiode")
+        assertInfo("Sykmelding forlenger forkastet vedtaksperiode", 2.vedtaksperiode.filter())
     }
 
     @Test
@@ -97,7 +97,7 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
         assertSisteForkastetPeriodeTilstand(ORGNUMMER, 1.vedtaksperiode, TIL_INFOTRYGD)
         håndterSykmelding(Sykmeldingsperiode(22.januar, 31.januar, 100.prosent))
         assertSisteTilstand(2.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_GAP)
-        assertInfo(2.vedtaksperiode, "Sykmelding forlenger forkastet vedtaksperiode")
+        assertInfo("Sykmelding forlenger forkastet vedtaksperiode", 2.vedtaksperiode.filter())
     }
 
     @Test
@@ -115,7 +115,7 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
         assertSisteForkastetPeriodeTilstand(ORGNUMMER, 1.vedtaksperiode, TIL_INFOTRYGD)
         håndterSykmelding(Sykmeldingsperiode(23.januar, 31.januar, 100.prosent))
         assertSisteTilstand(2.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_GAP)
-        assertNoInfo(2.vedtaksperiode, "Sykmelding forlenger en forkastet periode")
+        assertNoInfo("Sykmelding forlenger en forkastet periode", 2.vedtaksperiode.filter())
     }
 
     @Test

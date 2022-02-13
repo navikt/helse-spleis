@@ -870,7 +870,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt(1.vedtaksperiode)
 
-        assertInfo(1.vedtaksperiode, "Refusjon gjelder ikke for hele utbetalingsperioden")
+        assertInfo("Refusjon gjelder ikke for hele utbetalingsperioden", 1.vedtaksperiode.filter())
     }
 
     @Test
@@ -886,7 +886,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt(1.vedtaksperiode)
 
-        assertInfo(1.vedtaksperiode, "Refusjon gjelder ikke for hele utbetalingsperioden")
+        assertInfo("Refusjon gjelder ikke for hele utbetalingsperioden", 1.vedtaksperiode.filter())
         assertWarning("Første fraværsdag i inntektsmeldingen er ulik skjæringstidspunktet. Kontrollér at inntektsmeldingen er knyttet til riktig periode.", 1.vedtaksperiode.filter())
     }
 
@@ -904,7 +904,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt(1.vedtaksperiode)
 
-        assertInfo(1.vedtaksperiode, "Refusjon gjelder ikke for hele utbetalingsperioden")
+        assertInfo("Refusjon gjelder ikke for hele utbetalingsperioden", 1.vedtaksperiode.filter())
         assertWarning("Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.", 1.vedtaksperiode.filter())
     }
 
@@ -929,7 +929,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
 
         assertNoWarnings(1.vedtaksperiode.filter())
         assertNoWarnings(2.vedtaksperiode.filter())
-        assertInfo(2.vedtaksperiode, "Refusjon gjelder ikke for hele utbetalingsperioden")
+        assertInfo("Refusjon gjelder ikke for hele utbetalingsperioden", 2.vedtaksperiode.filter())
     }
 
     @Test
@@ -1043,19 +1043,19 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.desember(2017) til 16.desember(2017)), refusjon = Inntektsmelding.Refusjon(INNTEKT, 17.desember(2017), emptyList()))
-        assertInfo(1.vedtaksperiode, "Ville tidligere blitt kastet ut på grunn av refusjon: Refusjon opphører i perioden")
+        assertInfo("Ville tidligere blitt kastet ut på grunn av refusjon: Refusjon opphører i perioden", 1.vedtaksperiode.filter())
     }
 
     @Test
     fun `Vi logger info om vi tidligere ville kastet ut på grunn av refusjon ved forlengelse`() {
         nyttVedtak(1.januar, 31.januar, refusjon = Inntektsmelding.Refusjon(INNTEKT, 15.februar, emptyList()))
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
-        assertInfo(2.vedtaksperiode, "Ville tidligere blitt kastet ut på grunn av refusjon: Refusjon er opphørt.")
+        assertInfo("Ville tidligere blitt kastet ut på grunn av refusjon: Refusjon er opphørt.", 2.vedtaksperiode.filter())
     }
 
     @Test
     fun `Vi logger info om vi tidligere ville kastet ut på grunn av opphør av refusjon frem i tid`() {
         nyttVedtak(1.januar, 31.januar, refusjon = Inntektsmelding.Refusjon(INNTEKT, 15.februar, emptyList()))
-        assertInfo(1.vedtaksperiode, "Behandlet en vedtaksperiode som tidligere ville blitt kastet ut på grunn av refusjon")
+        assertInfo("Behandlet en vedtaksperiode som tidligere ville blitt kastet ut på grunn av refusjon", 1.vedtaksperiode.filter())
     }
 }
