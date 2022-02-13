@@ -178,9 +178,9 @@ internal fun AbstractPersonTest.assertWarning(warning: String, vararg filtre: Ak
     assertTrue(warnings.contains(warning), "fant ikke forventet warning. Warnings:\n${warnings.joinToString("\n")}")
 }
 
-internal fun AbstractPersonTest.assertNoWarning(idInnhenter: IdInnhenter, warning: String, orgnummer: String = AbstractPersonTest.ORGNUMMER) {
-    val warnings = collectWarnings(AktivitetsloggFilter.vedtaksperiode(idInnhenter, orgnummer))
-    assertFalse(warnings.contains(warning), "fant ikke forventet warning for $orgnummer. Warnings:\n${warnings.joinToString("\n")}")
+internal fun AbstractPersonTest.assertNoWarning(warning: String, vararg filtre: AktivitetsloggFilter) {
+    val warnings = collectWarnings(*filtre)
+    assertFalse(warnings.contains(warning), "fant ikke forventet warning. Warnings:\n${warnings.joinToString("\n")}")
 }
 
 private fun AbstractPersonTest.collectWarnings(vararg filtre: AktivitetsloggFilter): MutableList<String> {
