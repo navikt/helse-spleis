@@ -349,7 +349,7 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterOverstyrArbeidsforhold(1.januar, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, true)))
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        assertWarning(1.vedtaksperiode, "Perioden er avslått på grunn av at inntekt er under krav til minste sykepengegrunnlag", orgnummer = a1)
+        assertWarning("Perioden er avslått på grunn av at inntekt er under krav til minste sykepengegrunnlag", 1.vedtaksperiode.filter(a1))
     }
 
     @Test
@@ -384,7 +384,7 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterOverstyrArbeidsforhold(1.januar, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, true)))
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        assertWarning(1.vedtaksperiode, "Har mer enn 25 % avvik. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene.", orgnummer = a1) // takk dent. (fredet kommentar)
+        assertWarning("Har mer enn 25 % avvik. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene.", 1.vedtaksperiode.filter(a1)) // takk dent. (fredet kommentar)
     }
 
     @ForventetFeil("må implementeres")
@@ -419,9 +419,8 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
         håndterOverstyrArbeidsforhold(1.januar, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, true)))
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         assertWarning(
-            1.vedtaksperiode,
             "Perioden er avslått på grunn av manglende opptjening. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene???",
-            orgnummer = a1
+            1.vedtaksperiode.filter(a1)
         )
         assertInstanceOf(Utbetalingstidslinje.Utbetalingsdag.AvvistDag::class.java, inspektør.sisteUtbetalingUtbetalingstidslinje()[31.januar])
     }

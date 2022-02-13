@@ -321,8 +321,8 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
         assertWarnings()
         inspektør.also {
-            assertWarning(1.vedtaksperiode, "Utdanning oppgitt i perioden i søknaden.")
-            assertWarning(1.vedtaksperiode, "Utenlandsopphold oppgitt i perioden i søknaden.")
+            assertWarning("Utdanning oppgitt i perioden i søknaden.", 1.vedtaksperiode.filter())
+            assertWarning("Utenlandsopphold oppgitt i perioden i søknaden.", 1.vedtaksperiode.filter())
             assertEquals(3, it.sykdomshistorikk.size)
             assertEquals(18, it.sykdomstidslinje.inspektør.dagteller[Sykedag::class])
             assertEquals(6, it.sykdomstidslinje.inspektør.dagteller[SykHelgedag::class])

@@ -111,7 +111,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
         assertWarnings()
-        assertWarning(1.vedtaksperiode, "Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold", orgnummer = a1)
+        assertWarning("Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold", 1.vedtaksperiode.filter(a1))
         assertNoWarning(1.vedtaksperiode, "Den sykmeldte har skiftet arbeidsgiver, og det er beregnet at den nye arbeidsgiveren mottar refusjon lik forrige. Kontroller at dagsatsen blir riktig.", orgnummer = a1)
         assertEquals(
             Inntektskilde.FLERE_ARBEIDSGIVERE,
@@ -538,7 +538,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)
 
         assertWarning(
-            1.vedtaksperiode, "Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold", orgnummer = a1
+            "Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold", 1.vedtaksperiode.filter(a1)
         )
         assertNoWarnings(2.vedtaksperiode.filter(orgnummer = a1))
     }
@@ -589,7 +589,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
 
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)
 
-        assertWarning(1.vedtaksperiode, "Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold", orgnummer = a1)
+        assertWarning("Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold", 1.vedtaksperiode.filter(a1))
         assertNoWarnings(2.vedtaksperiode.filter(orgnummer = a1))
     }
 
@@ -688,7 +688,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             Inntektskilde.FLERE_ARBEIDSGIVERE,
             inspektør(a1).inntektskilde(1.vedtaksperiode)
         )
-        assertWarning(1.vedtaksperiode, "Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold", orgnummer = a1)
+        assertWarning("Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold", 1.vedtaksperiode.filter(a1))
     }
 
     @ForventetFeil("TODO")

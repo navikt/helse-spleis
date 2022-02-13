@@ -128,7 +128,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt(1.vedtaksperiode)
-        assertWarning(1.vedtaksperiode, "Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler.")
+        assertWarning("Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler.", 1.vedtaksperiode.filter())
     }
 
     @Test
@@ -756,7 +756,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt(1.vedtaksperiode)
 
-        assertWarning(1.vedtaksperiode, "Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler.", ORGNUMMER)
+        assertWarning("Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler.", 1.vedtaksperiode.filter())
     }
 
     @Test
@@ -781,8 +781,8 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
 
         forlengVedtak(11.februar, 28.februar)
 
-        assertWarning(1.vedtaksperiode, "Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler.", ORGNUMMER)
-        assertWarning(2.vedtaksperiode, "Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler.", ORGNUMMER)
+        assertWarning("Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler.", 1.vedtaksperiode.filter())
+        assertWarning("Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler.", 2.vedtaksperiode.filter())
     }
 
     @Test
@@ -807,7 +807,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
 
         nyttVedtak(1.mars, 31.mars)
 
-        assertWarning(1.vedtaksperiode, "Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler.", ORGNUMMER)
+        assertWarning("Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler.", 1.vedtaksperiode.filter())
         assertNoWarnings(2.vedtaksperiode.filter(ORGNUMMER))
     }
 
@@ -847,8 +847,8 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalt(1.vedtaksperiode, orgnummer = a2)
 
-        assertWarning(1.vedtaksperiode, "Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler.", a1)
-        assertWarning(1.vedtaksperiode, "Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler.", a2)
+        assertWarning("Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler.", 1.vedtaksperiode.filter(a1))
+        assertWarning("Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler.", 1.vedtaksperiode.filter(a2))
     }
 
     @Test
@@ -887,7 +887,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode)
 
         assertInfo(1.vedtaksperiode, "Refusjon gjelder ikke for hele utbetalingsperioden")
-        assertWarning(1.vedtaksperiode, "Første fraværsdag i inntektsmeldingen er ulik skjæringstidspunktet. Kontrollér at inntektsmeldingen er knyttet til riktig periode.")
+        assertWarning("Første fraværsdag i inntektsmeldingen er ulik skjæringstidspunktet. Kontrollér at inntektsmeldingen er knyttet til riktig periode.", 1.vedtaksperiode.filter())
     }
 
     @Test
@@ -905,7 +905,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode)
 
         assertInfo(1.vedtaksperiode, "Refusjon gjelder ikke for hele utbetalingsperioden")
-        assertWarning(1.vedtaksperiode, "Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.")
+        assertWarning("Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.", 1.vedtaksperiode.filter())
     }
 
     @Test
