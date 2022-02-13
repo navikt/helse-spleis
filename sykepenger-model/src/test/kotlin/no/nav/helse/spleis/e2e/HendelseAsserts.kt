@@ -173,26 +173,30 @@ internal fun assertWarnings(person: Person) {
 }
 
 internal fun AbstractEndToEndTest.assertNoWarnings(idInnhenter: IdInnhenter, orgnummer: String = AbstractPersonTest.ORGNUMMER) {
-    val warnings = collectWarnings(idInnhenter, orgnummer)
+    val warnings = collectWarnings(AktivitetsloggFilter.vedtaksperiode(idInnhenter, orgnummer))
     assertTrue(warnings.isEmpty(), "forventet ingen warnings for orgnummer $orgnummer. Warnings:\n${warnings.joinToString("\n")}")
 }
 
-internal fun AbstractEndToEndTest.assertWarning(idInnhenter: IdInnhenter, warning: String, orgnummer: String = AbstractPersonTest.ORGNUMMER) {
-    val warnings = collectWarnings(idInnhenter, orgnummer)
+internal fun AbstractPersonTest.assertWarning(idInnhenter: IdInnhenter, warning: String, orgnummer: String = AbstractPersonTest.ORGNUMMER) {
+    val warnings = collectWarnings(AktivitetsloggFilter.vedtaksperiode(idInnhenter, orgnummer))
     assertTrue(warnings.contains(warning), "fant ikke forventet warning for $orgnummer. Warnings:\n${warnings.joinToString("\n")}")
 }
 
+internal fun AbstractPersonTest.assertWarning(warning: String, vararg filtre: AktivitetsloggFilter) {
+    val warnings = collectWarnings(*filtre)
+    assertTrue(warnings.contains(warning), "fant ikke forventet warning. Warnings:\n${warnings.joinToString("\n")}")
+}
 
-internal fun AbstractEndToEndTest.assertNoWarning(idInnhenter: IdInnhenter, warning: String, orgnummer: String = AbstractPersonTest.ORGNUMMER) {
-    val warnings = collectWarnings(idInnhenter, orgnummer)
+internal fun AbstractPersonTest.assertNoWarning(idInnhenter: IdInnhenter, warning: String, orgnummer: String = AbstractPersonTest.ORGNUMMER) {
+    val warnings = collectWarnings(AktivitetsloggFilter.vedtaksperiode(idInnhenter, orgnummer))
     assertFalse(warnings.contains(warning), "fant ikke forventet warning for $orgnummer. Warnings:\n${warnings.joinToString("\n")}")
 }
 
-private fun AbstractEndToEndTest.collectWarnings(idInnhenter: IdInnhenter, orgnummer: String): MutableList<String> {
+private fun AbstractPersonTest.collectWarnings(vararg filtre: AktivitetsloggFilter): MutableList<String> {
     val warnings = mutableListOf<String>()
     person.personLogg.accept(object : AktivitetsloggVisitor {
         override fun visitWarn(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Warn, melding: String, tidsstempel: String) {
-            if (kontekster.any { it.kontekstMap["vedtaksperiodeId"] == idInnhenter.id(orgnummer).toString() }) {
+            if (filtre.all { filter -> kontekster.any { filter.filtrer(it) } }) {
                 warnings.add(melding)
             }
         }
@@ -280,18 +284,6 @@ internal fun AbstractEndToEndTest.assertNoErrors(idInnhenter: IdInnhenter, orgnu
         }
     })
     assertTrue(errors.isEmpty(), "forventet ingen errors for orgnummer $orgnummer. Errors:\n${errors.joinToString("\n")}")
-}
-
-internal fun assertWarningTekst(person: Person, vararg warnings: String) {
-    val wantedWarnings = warnings.toMutableList()
-    val actualWarnings:MutableList<String> = mutableListOf()
-    person.personLogg.accept(object : AktivitetsloggVisitor {
-        override fun visitWarn(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Warn, melding: String, tidsstempel: String) {
-            wantedWarnings.remove(melding)
-            actualWarnings.add(melding)
-        }
-    })
-    assertTrue(wantedWarnings.isEmpty(), "forventede warnings mangler: $wantedWarnings, faktiske warnings: $actualWarnings")
 }
 
 internal fun assertErrorTekst(person: Person, vararg errors: String) {

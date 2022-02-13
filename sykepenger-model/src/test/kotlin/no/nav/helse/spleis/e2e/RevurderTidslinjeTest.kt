@@ -1282,10 +1282,13 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         )
 
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
-        assertWarningTekst(
-            person,
+        assertWarning(
             "Opplysninger fra Infotrygd har endret seg etter at vedtaket ble fattet. Undersøk om det er overlapp med periode fra Infotrygd.",
-            "Utbetaling i Infotrygd overlapper med vedtaksperioden"
+            AktivitetsloggFilter.person()
+        )
+        assertWarning(
+            "Utbetaling i Infotrygd overlapper med vedtaksperioden",
+            AktivitetsloggFilter.person()
         )
     }
 
@@ -1315,10 +1318,13 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         )
 
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
-        assertWarningTekst(
-            person,
+        assertWarning(
             "Opplysninger fra Infotrygd har endret seg etter at vedtaket ble fattet. Undersøk om det er overlapp med periode fra Infotrygd.",
-            "Det er utbetalt en periode i Infotrygd etter perioden du skal revurdere nå. Undersøk at antall forbrukte dager og grunnlag i Infotrygd er riktig"
+            AktivitetsloggFilter.person()
+        )
+        assertWarning(
+            "Det er utbetalt en periode i Infotrygd etter perioden du skal revurdere nå. Undersøk at antall forbrukte dager og grunnlag i Infotrygd er riktig",
+            AktivitetsloggFilter.person()
         )
     }
 

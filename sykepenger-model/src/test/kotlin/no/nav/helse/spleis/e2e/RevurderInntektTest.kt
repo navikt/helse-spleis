@@ -295,7 +295,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
             AVVENTER_HISTORIKK_REVURDERING
         )
 
-        assertWarningTekst(person, "Har mer enn 25 % avvik. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene.")
+        assertWarning("Har mer enn 25 % avvik. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene.", AktivitetsloggFilter.person())
         assertEquals(1, inspektør.utbetalinger.size)
     }
 
@@ -320,7 +320,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
             AVVENTER_HISTORIKK_REVURDERING
         )
 
-        assertWarningTekst(person, "Har mer enn 25 % avvik. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene.")
+        assertWarning("Har mer enn 25 % avvik. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene.", AktivitetsloggFilter.person())
         assertEquals(1, inspektør.utbetalinger.size)
     }
 
@@ -353,10 +353,13 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         assertEquals(2, inspektør.utbetalinger.size)
         assertEquals(-15741, utbetalingTilRevurdering.inspektør.arbeidsgiverOppdrag.nettoBeløp())
 
-        assertWarningTekst(
-            person,
+        assertWarning(
             "Har mer enn 25 % avvik. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene.",
-            "Perioden er avslått på grunn av at inntekt er under krav til minste sykepengegrunnlag"
+            AktivitetsloggFilter.person()
+        )
+        assertWarning(
+            "Perioden er avslått på grunn av at inntekt er under krav til minste sykepengegrunnlag",
+            AktivitetsloggFilter.person()
         )
         assertFalse(utbetalingTilRevurdering.utbetalingstidslinje().harUtbetalinger())
     }
@@ -607,7 +610,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
             assertEquals(1, size)
             first().assertUtbetalingslinje(Endringskode.NY, 2, 1, fagsystemId())
         }
-        assertWarningTekst(person, WARN_FORLENGER_OPPHØRT_OPPDRAG)
+        assertWarning(WARN_FORLENGER_OPPHØRT_OPPDRAG, AktivitetsloggFilter.person())
     }
 
     @Test

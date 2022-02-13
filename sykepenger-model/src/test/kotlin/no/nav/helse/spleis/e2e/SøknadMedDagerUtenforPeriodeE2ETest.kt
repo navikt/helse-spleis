@@ -57,7 +57,7 @@ internal class SøknadMedDagerUtenforPeriodeE2ETest: AbstractEndToEndTest() {
         nyttVedtak(1.januar, 19.januar)
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Arbeid(20.januar, 31.januar))
-        assertWarningTekst(person, "Søknaden inneholder Arbeidsdager utenfor sykdomsvindu")
+        assertWarning("Søknaden inneholder Arbeidsdager utenfor sykdomsvindu", AktivitetsloggFilter.person())
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -84,10 +84,13 @@ internal class SøknadMedDagerUtenforPeriodeE2ETest: AbstractEndToEndTest() {
         nyttVedtak(1.januar, 19.januar)
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Permisjon(20.januar, 31.januar))
-        assertWarningTekst(
-            person,
+        assertWarning(
             "Søknaden inneholder Permisjonsdager utenfor sykdomsvindu",
-            "Permisjon oppgitt i perioden i søknaden."
+            AktivitetsloggFilter.person()
+        )
+        assertWarning(
+            "Permisjon oppgitt i perioden i søknaden.",
+            AktivitetsloggFilter.person()
         )
         assertTilstander(
             1.vedtaksperiode,
@@ -184,7 +187,7 @@ internal class SøknadMedDagerUtenforPeriodeE2ETest: AbstractEndToEndTest() {
         assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE)
         assertEquals(null, inspektør.vedtaksperiodeSykdomstidslinje(1.vedtaksperiode).inspektør.dagteller[Feriedag::class])
         assertEquals(null, inspektør.vedtaksperiodeSykdomstidslinje(2.vedtaksperiode).inspektør.dagteller[Feriedag::class])
-        assertWarningTekst(person, "Det er oppgitt ny informasjon om ferie i søknaden som det ikke har blitt opplyst om tidligere. Tidligere periode må revurderes.")
+        assertWarning("Det er oppgitt ny informasjon om ferie i søknaden som det ikke har blitt opplyst om tidligere. Tidligere periode må revurderes.", AktivitetsloggFilter.person())
     }
 
     @Test
@@ -201,7 +204,7 @@ internal class SøknadMedDagerUtenforPeriodeE2ETest: AbstractEndToEndTest() {
         assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
         assertEquals(null, inspektør.vedtaksperiodeSykdomstidslinje(1.vedtaksperiode).inspektør.dagteller[Feriedag::class])
         assertEquals(null, inspektør.vedtaksperiodeSykdomstidslinje(2.vedtaksperiode).inspektør.dagteller[Feriedag::class])
-        assertWarningTekst(person, "Det er oppgitt ny informasjon om ferie i søknaden som det ikke har blitt opplyst om tidligere. Tidligere periode må revurderes.")
+        assertWarning("Det er oppgitt ny informasjon om ferie i søknaden som det ikke har blitt opplyst om tidligere. Tidligere periode må revurderes.", AktivitetsloggFilter.person())
     }
 
     @Test

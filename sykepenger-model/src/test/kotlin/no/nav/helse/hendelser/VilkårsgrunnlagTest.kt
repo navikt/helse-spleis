@@ -8,8 +8,8 @@ import no.nav.helse.person.*
 import no.nav.helse.person.Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
 import no.nav.helse.person.Vedtaksperiode.Vedtaksperiodetilstand
 import no.nav.helse.person.etterlevelse.MaskinellJurist
-import no.nav.helse.spleis.e2e.TestObservatør
-import no.nav.helse.spleis.e2e.assertWarningTekst
+import no.nav.helse.spleis.e2e.AktivitetsloggFilter
+import no.nav.helse.spleis.e2e.assertWarning
 import no.nav.helse.testhelpers.fangeSkjæringstidspunkt
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
@@ -25,16 +25,13 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
 
-internal class VilkårsgrunnlagTest {
+internal class VilkårsgrunnlagTest : AbstractPersonTest() {
     private companion object {
         private const val aktørId = "123"
         private val UNG_PERSON_FNR_2018 = "12029240045".somFødselsnummer()
         private val orgnummer = "987654321"
         private val INNTEKT = 30000.0.månedlig
     }
-
-    private lateinit var person: Person
-    private val observatør = TestObservatør()
 
     @BeforeEach
     fun setup() {
@@ -106,7 +103,7 @@ internal class VilkårsgrunnlagTest {
         person.håndter(vilkårsgrunnlag)
         assertGrunnlagsdata(INNTEKT, Prosent.ratio(0.0), 28, true)
         assertEquals(TilstandType.AVVENTER_HISTORIKK, hentTilstand()?.type)
-        assertWarningTekst(person, "Arbeidsgiver er ikke registrert i Aa-registeret.")
+        assertWarning("Arbeidsgiver er ikke registrert i Aa-registeret.", AktivitetsloggFilter.person())
     }
 
     @Test
