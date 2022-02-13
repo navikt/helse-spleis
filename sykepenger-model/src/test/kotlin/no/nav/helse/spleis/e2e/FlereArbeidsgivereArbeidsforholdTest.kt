@@ -151,9 +151,9 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
 
         assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET, orgnummer = a2)
         assertNoWarnings(1.vedtaksperiode.filter(a1))
-        assertNoErrors(1.vedtaksperiode, a1)
+        assertNoErrors(1.vedtaksperiode.filter(a1))
         assertNoWarnings(1.vedtaksperiode.filter(a2))
-        assertNoErrors(1.vedtaksperiode, a2)
+        assertNoErrors(1.vedtaksperiode.filter(a2))
     }
 
     @Test

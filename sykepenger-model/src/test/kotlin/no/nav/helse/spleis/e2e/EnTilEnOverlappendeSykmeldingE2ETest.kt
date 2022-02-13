@@ -27,7 +27,7 @@ internal class EnTilEnOverlappendeSykmeldingE2ETest : AbstractEndToEndTest() {
         inspektør.sykdomstidslinje.inspektør.also { sykdomstidslinjeInspektør ->
             assertTrue(sykdomstidslinjeInspektør.grader.all { it.value == 100 })
         }
-        assertNoErrors(person)
+        assertNoErrors()
         assertWarning("Korrigert sykmelding er lagt til grunn - kontroller dagene i sykmeldingsperioden", AktivitetsloggFilter.person())
     }
 
@@ -42,7 +42,7 @@ internal class EnTilEnOverlappendeSykmeldingE2ETest : AbstractEndToEndTest() {
         inspektør.sykdomstidslinje.inspektør.also { sykdomstidslinjeInspektør ->
             assertTrue(sykdomstidslinjeInspektør.grader.all { it.value == 90 })
         }
-        assertNoErrors(person)
+        assertNoErrors()
         assertWarning("Mottatt en sykmelding som er skrevet tidligere enn den som er lagt til grunn, vurder sykmeldingene og gjør eventuelle justeringer", AktivitetsloggFilter.person())
     }
 
@@ -92,7 +92,7 @@ internal class EnTilEnOverlappendeSykmeldingE2ETest : AbstractEndToEndTest() {
         inspektør.sykdomstidslinje.inspektør.also { sykdomstidslinjeInspektør ->
             assertTrue(sykdomstidslinjeInspektør.grader.filterKeys { it.isAfter(20.januar) }.all { it.value == 90 })
         }
-        assertNoErrors(person)
+        assertNoErrors()
         assertWarning("Korrigert sykmelding er lagt til grunn - kontroller dagene i sykmeldingsperioden", AktivitetsloggFilter.person())
     }
 
@@ -106,7 +106,7 @@ internal class EnTilEnOverlappendeSykmeldingE2ETest : AbstractEndToEndTest() {
         inspektør.sykdomstidslinje.inspektør.also { sykdomstidslinjeInspektør ->
             assertTrue(sykdomstidslinjeInspektør.grader.filterKeys { it.isAfter(15.januar) }.all { it.value == 90 })
         }
-        assertNoErrors(person)
+        assertNoErrors()
         assertWarning("Korrigert sykmelding er lagt til grunn - kontroller dagene i sykmeldingsperioden", AktivitetsloggFilter.person())
     }
 
@@ -120,7 +120,7 @@ internal class EnTilEnOverlappendeSykmeldingE2ETest : AbstractEndToEndTest() {
         inspektør.sykdomstidslinje.inspektør.also { sykdomstidslinjeInspektør ->
             assertTrue(sykdomstidslinjeInspektør.grader.filterKeys { it.isAfter(15.januar) }.all { it.value == 90 })
         }
-        assertNoErrors(person)
+        assertNoErrors()
         assertWarning("Korrigert sykmelding er lagt til grunn - kontroller dagene i sykmeldingsperioden", AktivitetsloggFilter.person())
     }
 

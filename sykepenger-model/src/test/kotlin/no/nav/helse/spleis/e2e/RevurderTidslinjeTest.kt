@@ -114,7 +114,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
         håndterUtbetalt(2.vedtaksperiode)
 
-        assertNoErrors(person)
+        assertNoErrors()
 
         assertTilstander(
             1.vedtaksperiode,
@@ -163,7 +163,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
         håndterUtbetalt(2.vedtaksperiode)
 
-        assertNoErrors(person)
+        assertNoErrors()
         assertEquals(3, inspektør.sykdomstidslinje.inspektør.dagteller[Dag.Feriedag::class])
         assertNull(inspektør.vedtaksperiodeSykdomstidslinje(1.vedtaksperiode).inspektør.dagteller[Dag.Feriedag::class])
         assertNull(inspektør.vedtaksperiodeSykdomstidslinje(2.vedtaksperiode).inspektør.dagteller[Dag.Feriedag::class])
@@ -180,7 +180,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
         håndterUtbetalt(2.vedtaksperiode)
 
-        assertNoErrors(person)
+        assertNoErrors()
         assertTilstander(
             0,
             START,
@@ -228,7 +228,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
         håndterUtbetalt(2.vedtaksperiode)
 
-        assertNoErrors(person)
+        assertNoErrors()
 
         assertTilstander(
             0,
@@ -333,7 +333,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             AVVENTER_HISTORIKK
         )
 
-        assertNoErrors(person)
+        assertNoErrors()
         assertEquals(3, inspektør.utbetalinger.size)
         assertFalse(inspektør.utbetaling(2).harUtbetalinger())
 
@@ -383,7 +383,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             AVVENTER_HISTORIKK
         )
         val revurdering = inspektør.utbetaling(2)
-        assertNoErrors(person)
+        assertNoErrors()
         assertEquals(2, revurdering.inspektør.arbeidsgiverOppdrag.size)
         assertEquals(19.januar, revurdering.inspektør.arbeidsgiverOppdrag[0].datoStatusFom())
         assertEquals(23.januar til 26.januar, revurdering.inspektør.arbeidsgiverOppdrag[1].periode)
@@ -422,7 +422,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
             MOTTATT_SYKMELDING_FERDIG_FORLENGELSE
         )
-        assertNoErrors(person)
+        assertNoErrors()
     }
 
     @Test
@@ -737,7 +737,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             AVSLUTTET,
         )
 
-        assertNoErrors(person)
+        assertNoErrors()
         assertEquals(2, inspektør.utbetalinger.size)
         assertEquals(6, inspektør.forbrukteSykedager(0))
         assertEquals(0, inspektør.forbrukteSykedager(1))
@@ -916,7 +916,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             AVVENTER_UFERDIG,
             AVVENTER_HISTORIKK
         )
-        assertNoErrors(person)
+        assertNoErrors()
     }
 
     @Test
@@ -959,7 +959,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             AVSLUTTET
         )
 
-        assertNoErrors(person)
+        assertNoErrors()
         assertEquals(6, inspektør.forbrukteSykedager(0))
         assertEquals(5, inspektør.forbrukteSykedager(1))
         assertEquals(4, inspektør.forbrukteSykedager(2))
@@ -1010,7 +1010,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             AVSLUTTET,
             AVVENTER_ARBEIDSGIVERE_REVURDERING
         )
-        assertNoErrors(person)
+        assertNoErrors()
     }
 
     @Test
@@ -1070,7 +1070,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             TIL_UTBETALING,
             AVSLUTTET
         )
-        assertNoErrors(person)
+        assertNoErrors()
         assertEquals(0, inspektør.ikkeUtbetalteUtbetalingerForVedtaksperiode(1.vedtaksperiode).size)
         assertEquals(0, inspektør.ikkeUtbetalteUtbetalingerForVedtaksperiode(2.vedtaksperiode).size)
         assertEquals(0, inspektør.ikkeUtbetalteUtbetalingerForVedtaksperiode(3.vedtaksperiode).size)

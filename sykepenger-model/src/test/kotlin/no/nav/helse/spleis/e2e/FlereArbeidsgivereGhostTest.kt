@@ -411,7 +411,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             orgnummer = a1
         )
 
-        assertNoErrors(person)
+        assertNoErrors()
     }
 
     @Test
@@ -424,7 +424,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             orgnummer = a1
         )
 
-        assertErrors(person)
+        assertErrors()
     }
 
     @Test
@@ -484,7 +484,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
         assertNoWarnings(1.vedtaksperiode.filter(a1))
-        assertNoErrors(1.vedtaksperiode, a1)
+        assertNoErrors(1.vedtaksperiode.filter(a1))
     }
 
     @Test

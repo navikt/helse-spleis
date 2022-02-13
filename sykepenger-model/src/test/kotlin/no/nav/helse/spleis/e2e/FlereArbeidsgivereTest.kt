@@ -150,12 +150,12 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
     fun `overlappende arbeidsgivere ikke sendt til infotrygd`() {
         gapPeriode(1.januar til 31.januar, a1)
         gapPeriode(15.januar til 15.februar, a2)
-        assertNoErrors(person)
-        assertNoErrors(person)
+        assertNoErrors()
+        assertNoErrors()
 
         historikk(a1)
-        assertNoErrors(person)
-        assertNoErrors(person)
+        assertNoErrors()
+        assertNoErrors()
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
     }
@@ -163,11 +163,11 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
     @Test
     fun `vedtaksperioder atskilt med betydelig tid`() {
         prosessperiode(1.januar til 31.januar, a1)
-        assertNoErrors(person)
+        assertNoErrors()
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
 
         prosessperiode(1.mars til 31.mars, a2)
-        assertNoErrors(person)
+        assertNoErrors()
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
     }
 
@@ -790,7 +790,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
                 AVVENTER_SIMULERING,
                 AVVENTER_GODKJENNING
             )
-            assertNoErrors(person)
+            assertNoErrors()
             assertEquals(1, avsluttedeUtbetalingerForVedtaksperiode(1.vedtaksperiode).size)
             assertEquals(0, ikkeUtbetalteUtbetalingerForVedtaksperiode(1.vedtaksperiode).size)
             assertEquals(0, avsluttedeUtbetalingerForVedtaksperiode(2.vedtaksperiode).size)
@@ -817,7 +817,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
                 AVVENTER_HISTORIKK,
                 AVVENTER_ARBEIDSGIVERE
             )
-            assertNoErrors(person)
+            assertNoErrors()
             assertEquals(1, avsluttedeUtbetalingerForVedtaksperiode(1.vedtaksperiode).size)
             assertEquals(0, ikkeUtbetalteUtbetalingerForVedtaksperiode(1.vedtaksperiode).size)
             assertEquals(0, avsluttedeUtbetalingerForVedtaksperiode(2.vedtaksperiode).size)
@@ -1013,7 +1013,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(4.januar til 19.januar), orgnummer = a1)
         håndterYtelser(3.vedtaksperiode, orgnummer = a1)
 
-        assertNoErrors(3.vedtaksperiode, orgnummer = a1)
+        assertNoErrors(3.vedtaksperiode.filter(a1))
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a2)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a1)

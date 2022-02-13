@@ -106,7 +106,7 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
         assertSisteForkastetPeriodeTilstand(ORGNUMMER, 1.vedtaksperiode, TIL_INFOTRYGD)
         håndterSykmelding(Sykmeldingsperiode(23.januar, 31.januar, 100.prosent))
         assertSisteTilstand(2.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_GAP)
-        assertNoErrors(2.vedtaksperiode)
+        assertNoErrors(2.vedtaksperiode.filter())
     }
 
     @Test
@@ -130,7 +130,7 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
         assertError(3.vedtaksperiode, "Sykmelding forlenger en forkastet periode")
         håndterSykmelding(Sykmeldingsperiode(2.mars, 31.mars, 100.prosent))
         assertSisteTilstand(4.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_GAP)
-        assertNoErrors(4.vedtaksperiode)
+        assertNoErrors(4.vedtaksperiode.filter())
     }
 
     private fun Periode.forkast() {

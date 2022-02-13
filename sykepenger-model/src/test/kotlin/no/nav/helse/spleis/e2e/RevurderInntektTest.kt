@@ -415,7 +415,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
             TIL_UTBETALING,
             AVSLUTTET,
         )
-        assertErrors(person)
+        assertErrors()
     }
 
     @Test

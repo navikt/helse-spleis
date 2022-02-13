@@ -99,7 +99,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
                 TIL_UTBETALING,
                 AVSLUTTET
             )
-            assertNoErrors(person)
+            assertNoErrors()
             assertEquals(3, utbetalinger.filter { it.erAvsluttet() }.size)
         }
 
@@ -116,7 +116,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
                 TIL_UTBETALING,
                 AVSLUTTET
             )
-            assertNoErrors(person)
+            assertNoErrors()
             assertEquals(3, utbetalinger.filter { it.erAvsluttet() }.size)
         }
     }
@@ -178,7 +178,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
                 TIL_UTBETALING,
                 AVSLUTTET
             )
-            assertNoErrors(person)
+            assertNoErrors()
             assertEquals(2, utbetalinger.filter { it.erAvsluttet() }.size)
         }
 
@@ -191,7 +191,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
                 AVVENTER_GODKJENNING_REVURDERING,
                 AVSLUTTET
             )
-            assertNoErrors(person)
+            assertNoErrors()
             assertEquals(2, utbetalinger.filter { it.erAvsluttet() }.size)
         }
     }
@@ -262,7 +262,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
                 MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
                 MOTTATT_SYKMELDING_FERDIG_FORLENGELSE
             )
-            assertNoErrors(person)
+            assertNoErrors()
             assertEquals(2, utbetalinger.filter { it.erAvsluttet() }.size)
         }
 
@@ -275,7 +275,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
                 AVVENTER_GODKJENNING_REVURDERING,
                 AVSLUTTET
             )
-            assertNoErrors(person)
+            assertNoErrors()
             assertEquals(2, utbetalinger.filter { it.erAvsluttet() }.size)
         }
     }
@@ -367,7 +367,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
                 TIL_UTBETALING,
                 AVSLUTTET
             )
-            assertNoErrors(person)
+            assertNoErrors()
             assertEquals(2, avsluttedeUtbetalingerForVedtaksperiode(1.vedtaksperiode).size)
             assertEquals(2, avsluttedeUtbetalingerForVedtaksperiode(2.vedtaksperiode).size)
         }
@@ -389,7 +389,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
                 AVVENTER_GODKJENNING_REVURDERING,
                 AVSLUTTET
             )
-            assertNoErrors(person)
+            assertNoErrors()
             assertEquals(2, avsluttedeUtbetalingerForVedtaksperiode(1.vedtaksperiode).size)
             assertEquals(2, avsluttedeUtbetalingerForVedtaksperiode(2.vedtaksperiode).size)
         }
@@ -486,7 +486,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
                 AVVENTER_SIMULERING_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING
             )
-            assertNoErrors(person)
+            assertNoErrors()
             assertEquals(1, avsluttedeUtbetalingerForVedtaksperiode(1.vedtaksperiode).size)
             assertEquals(1, ikkeUtbetalteUtbetalingerForVedtaksperiode(1.vedtaksperiode).size)
             assertEquals(1, avsluttedeUtbetalingerForVedtaksperiode(2.vedtaksperiode).size)
@@ -506,7 +506,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
                 *TIL_AVSLUTTET_FORLENGELSE(false),
                 AVVENTER_ARBEIDSGIVERE_REVURDERING
             )
-            assertNoErrors(person)
+            assertNoErrors()
             assertEquals(1, avsluttedeUtbetalingerForVedtaksperiode(1.vedtaksperiode).size)
             assertEquals(1, ikkeUtbetalteUtbetalingerForVedtaksperiode(1.vedtaksperiode).size)
             assertEquals(1, avsluttedeUtbetalingerForVedtaksperiode(2.vedtaksperiode).size)

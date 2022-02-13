@@ -42,7 +42,7 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
             assertUtbetalingsdag(utbetalingstidslinje[29.januar], expectedDagtype = Fridag::class, 50.0)
             assertUtbetalingsdag(utbetalingstidslinje[30.januar], expectedDagtype = Fridag::class, 50.0)
             assertUtbetalingsdag(utbetalingstidslinje[31.januar], expectedDagtype = Fridag::class, 50.0)
-            assertNoErrors(person)
+            assertNoErrors()
             assertTilstander(
                 1.vedtaksperiode,
                 *TIL_AVSLUTTET_FØRSTEGANGSBEHANDLING(),
@@ -70,7 +70,7 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
 
         inspektør(AG2) {
             val utbetalingstidslinje = sisteUtbetalingUtbetalingstidslinje()
-            assertNoErrors(person)
+            assertNoErrors()
             assertUtbetalingsdag(utbetalingstidslinje[29.januar], expectedDagtype = NavDag::class, 50.0)
             assertUtbetalingsdag(utbetalingstidslinje[30.januar], expectedDagtype = NavDag::class, 50.0)
             assertUtbetalingsdag(utbetalingstidslinje[31.januar], expectedDagtype = NavDag::class, 50.0)
@@ -111,7 +111,7 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
         håndterOverstyrTidslinje((30.januar til 31.januar).map { manuellFeriedag(it) }, orgnummer = AG1)
 
         inspektør(AG1) {
-            assertNoErrors(person)
+            assertNoErrors()
             assertTilstander(
                 1.vedtaksperiode,
                 *TIL_AVSLUTTET_FØRSTEGANGSBEHANDLING(),
@@ -131,7 +131,7 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
         }
 
         inspektør(AG2) {
-            assertNoErrors(person)
+            assertNoErrors()
             assertTilstander(
                 1.vedtaksperiode,
                 *TIL_AVSLUTTET_FØRSTEGANGSBEHANDLING(false),
@@ -167,7 +167,7 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
             assertUtbetalingsdag(utbetalingstidslinje[29.januar], expectedDagtype = Fridag::class, 50.0)
             assertUtbetalingsdag(utbetalingstidslinje[30.januar], expectedDagtype = NavDag::class, 50.0)
             assertUtbetalingsdag(utbetalingstidslinje[31.januar], expectedDagtype = NavDag::class, 50.0)
-            assertNoErrors(person)
+            assertNoErrors()
             assertTilstander(
                 1.vedtaksperiode,
                 *TIL_AVSLUTTET_FØRSTEGANGSBEHANDLING(),
@@ -192,7 +192,7 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
             assertUtbetalingsdag(utbetalingstidslinje[29.januar], expectedDagtype = NavDag::class, 50.0)
             assertUtbetalingsdag(utbetalingstidslinje[30.januar], expectedDagtype = Fridag::class, 50.0)
             assertUtbetalingsdag(utbetalingstidslinje[31.januar], expectedDagtype = Fridag::class, 50.0)
-            assertNoErrors(person)
+            assertNoErrors()
             assertTilstander(
                 1.vedtaksperiode,
                 *TIL_AVSLUTTET_FØRSTEGANGSBEHANDLING(false),
@@ -235,7 +235,7 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
             assertUtbetalingsdag(utbetalingstidslinje[1.februar], expectedDagtype = NavDag::class, 50.0)
             assertUtbetalingsdag(utbetalingstidslinje[2.februar], expectedDagtype = NavDag::class, 50.0)
 
-            assertNoErrors(person)
+            assertNoErrors()
             assertTilstander(
                 1.vedtaksperiode,
                 *TIL_AVSLUTTET_FØRSTEGANGSBEHANDLING(),
@@ -266,7 +266,7 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
             assertUtbetalingsdag(utbetalingstidslinje[1.februar], expectedDagtype = Fridag::class, 50.0)
             assertUtbetalingsdag(utbetalingstidslinje[2.februar], expectedDagtype = Fridag::class, 50.0)
 
-            assertNoErrors(person)
+            assertNoErrors()
             assertTilstander(
                 1.vedtaksperiode,
                 *TIL_AVSLUTTET_FØRSTEGANGSBEHANDLING(false),

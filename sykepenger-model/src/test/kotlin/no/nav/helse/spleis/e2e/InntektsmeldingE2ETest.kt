@@ -1004,7 +1004,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(8.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(8.januar, 20.januar, 100.prosent))
         håndterInntektsmelding(listOf(8.januar til 23.januar))
-        assertNoErrors(2.vedtaksperiode)
+        assertNoErrors(2.vedtaksperiode.filter())
         val tidslinje = inspektør.sykdomstidslinje
         assertTrue((1.januar til 7.januar).all { tidslinje[it] is Dag.Arbeidsdag || tidslinje[it] is Dag.FriskHelgedag })
         assertTrue((8.januar til 23.januar).all { tidslinje[it] is Dag.Sykedag || tidslinje[it] is Dag.SykHelgedag || tidslinje[it] is Dag.Arbeidsgiverdag || tidslinje[it] is Dag.ArbeidsgiverHelgedag })
@@ -1485,7 +1485,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
         håndterUtbetalt(2.vedtaksperiode, Oppdragstatus.AKSEPTERT)
 
-        assertNoErrors(person)
+        assertNoErrors()
         assertActivities(person)
         assertNotNull(inspektør.sisteMaksdato(2.vedtaksperiode))
         assertTilstander(
@@ -1521,7 +1521,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         )
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 7.januar, 100.prosent))
 
-        assertNoErrors(person)
+        assertNoErrors()
         assertActivities(person)
         assertTilstander(
             1.vedtaksperiode,
@@ -1556,7 +1556,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
         håndterUtbetalt(2.vedtaksperiode, Oppdragstatus.AKSEPTERT)
 
-        assertNoErrors(person)
+        assertNoErrors()
         assertActivities(person)
         assertNotNull(inspektør.sisteMaksdato(1.vedtaksperiode))
         assertNotNull(inspektør.sisteMaksdato(2.vedtaksperiode))
@@ -1589,7 +1589,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     fun `Inntektsmelding vil ikke utvide vedtaksperiode til tidligere vedtaksperiode`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(3.januar til 18.januar), 3.januar)
-        assertNoErrors(person)
+        assertNoErrors()
         assertNoWarnings()
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 26.januar, 100.prosent))
         håndterYtelser(1.vedtaksperiode)
@@ -1606,7 +1606,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             listOf(3.januar til 18.januar),
             førsteFraværsdag = 1.februar
         ) // Touches prior periode
-        assertNoErrors(person)
+        assertNoErrors()
 
         håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(1.februar, 23.februar, 100.prosent))
         håndterYtelser(2.vedtaksperiode)
@@ -1615,7 +1615,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
         håndterUtbetalt(2.vedtaksperiode, Oppdragstatus.AKSEPTERT)
-        assertNoErrors(person)
+        assertNoErrors()
 
         assertNotNull(inspektør.sisteMaksdato(1.vedtaksperiode))
         assertNotNull(inspektør.sisteMaksdato(2.vedtaksperiode))
@@ -1699,7 +1699,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
         håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode)
-        assertNoErrors(2.vedtaksperiode, orgnummer = ORGNUMMER)
+        assertNoErrors(2.vedtaksperiode.filter(ORGNUMMER))
     }
 
     @Test

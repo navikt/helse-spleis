@@ -160,10 +160,6 @@ internal fun AbstractEndToEndTest.assertSisteForkastetPeriodeTilstand(orgnummer:
     assertEquals(tilstand, observatør.tilstandsendringer[vedtaksperiodeIdInnhenter.id(orgnummer)]?.last())
 }
 
-internal fun assertNoErrors(person: Person) {
-    assertFalse(person.personLogg.hasErrorsOrWorse(), person.personLogg.toString())
-}
-
 internal fun AbstractPersonTest.assertNoWarnings(vararg filtre: AktivitetsloggFilter) {
     val warnings = collectWarnings(*filtre)
     assertTrue(warnings.isEmpty(), "Forventet ingen warnings. Warnings:\n${warnings.joinToString("\n")}")
@@ -218,8 +214,19 @@ private fun AbstractEndToEndTest.collectInfo(vararg filtre: AktivitetsloggFilter
 }
 
 internal fun AbstractEndToEndTest.assertError(idInnhenter: IdInnhenter, error: String, orgnummer: String = AbstractPersonTest.ORGNUMMER) {
-    val errors = collectErrors(idInnhenter, orgnummer)
+    val errors = collectErrors(idInnhenter.filter(orgnummer))
     assertTrue(errors.contains(error), "fant ikke forventet error for $orgnummer. Errors:\n${errors.joinToString("\n")}")
+}
+
+internal fun AbstractPersonTest.assertErrors(vararg filtre: AktivitetsloggFilter) {
+    val errors = collectErrors(*filtre)
+    assertTrue(errors.isNotEmpty(), "forventet ingen errors. Errors: \n${errors.joinToString("\n")}")
+}
+
+
+internal fun AbstractPersonTest.assertNoErrors(vararg filtre: AktivitetsloggFilter) {
+    val errors = collectErrors(*filtre)
+    assertTrue(errors.isEmpty(), "forventet errors, fant ingen.")
 }
 
 internal fun AbstractEndToEndTest.assertSevere(severe: String, vararg filtre: AktivitetsloggFilter) {
@@ -227,11 +234,11 @@ internal fun AbstractEndToEndTest.assertSevere(severe: String, vararg filtre: Ak
     assertTrue(severes.contains(severe), "fant ikke forventet severe. Severes:\n${severes.joinToString("\n")}")
 }
 
-internal fun AbstractEndToEndTest.collectErrors(idInnhenter: IdInnhenter, orgnummer: String): MutableList<String> {
+internal fun AbstractPersonTest.collectErrors(vararg filtre: AktivitetsloggFilter): MutableList<String> {
     val errors = mutableListOf<String>()
     person.personLogg.accept(object : AktivitetsloggVisitor {
         override fun visitError(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Error, melding: String, tidsstempel: String) {
-            if (kontekster.any { it.kontekstMap["vedtaksperiodeId"] == idInnhenter.id(orgnummer).toString() }) {
+            if (filtre.all { filter -> kontekster.any { filter.filtrer(it) } }) {
                 errors.add(melding)
             }
         }
@@ -265,18 +272,6 @@ internal fun interface AktivitetsloggFilter {
     fun filtrer(kontekst: SpesifikkKontekst): Boolean
 }
 
-internal fun AbstractEndToEndTest.assertNoErrors(idInnhenter: IdInnhenter, orgnummer: String = AbstractPersonTest.ORGNUMMER) {
-    val errors = mutableListOf<String>()
-    person.personLogg.accept(object : AktivitetsloggVisitor {
-        override fun visitError(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Error, melding: String, tidsstempel: String) {
-            if (kontekster.any { it.kontekstMap["vedtaksperiodeId"] == idInnhenter.id(orgnummer).toString() }) {
-                errors.add(melding)
-            }
-        }
-    })
-    assertTrue(errors.isEmpty(), "forventet ingen errors for orgnummer $orgnummer. Errors:\n${errors.joinToString("\n")}")
-}
-
 internal fun assertErrorTekst(person: Person, vararg errors: String) {
     val errorList = errors.toMutableList()
     val actualErrors: MutableList<String> = mutableListOf()
@@ -287,10 +282,6 @@ internal fun assertErrorTekst(person: Person, vararg errors: String) {
         }
     })
     assertTrue(errorList.isEmpty(), "har ikke fått errors $errorList, faktiske errors: $actualErrors")
-}
-
-internal fun assertErrors(person: Person) {
-    assertTrue(person.personLogg.hasErrorsOrWorse(), person.personLogg.toString())
 }
 
 internal fun assertActivities(person: Person) {

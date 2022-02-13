@@ -38,7 +38,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
             orgnummer = a1,
             inntekt = 16000.månedlig,
         )
-        assertNoErrors(person)
+        assertNoErrors()
 
         vilkårsgrunnlag(
             1.vedtaksperiode,
@@ -72,7 +72,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
             )
         ).håndter(Person::håndter)
 
-        assertNoErrors(person)
+        assertNoErrors()
 
         assertInntektForDato(16000.månedlig, 1.januar, inspektør = a1Inspektør)
         assertInntektForDato(null, 1.januar, inspektør = a2Inspektør)

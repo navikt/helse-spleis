@@ -27,7 +27,7 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, dagpenger = listOf(3.januar.minusDays(14) til 5.januar.minusDays(15)))
 
         assertTrue(person.aktivitetslogg.logg(inspektør.vedtaksperioder(1.vedtaksperiode)).hasWarningsOrWorse())
-        assertNoErrors(person)
+        assertNoErrors()
         assertActivities(person)
 
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
@@ -59,7 +59,7 @@ internal class YtelserE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, arbeidsavklaringspenger = listOf(3.januar.minusDays(60) til 5.januar.minusDays(60)))
 
         assertTrue(person.aktivitetslogg.logg(inspektør.vedtaksperioder(1.vedtaksperiode)).hasWarningsOrWorse())
-        assertNoErrors(person)
+        assertNoErrors()
         assertActivities(person)
 
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)

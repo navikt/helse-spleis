@@ -98,7 +98,7 @@ internal class FrilanserTest : AbstractEndToEndTest() {
                 )
             )
         )
-        assertNoErrors(1.vedtaksperiode)
+        assertNoErrors(1.vedtaksperiode.filter())
         assertTilstander(
             1.vedtaksperiode,
             START,

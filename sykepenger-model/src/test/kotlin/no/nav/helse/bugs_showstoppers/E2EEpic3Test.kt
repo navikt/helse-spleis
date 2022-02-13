@@ -116,7 +116,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
 
         håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(8.januar, 9.januar, 100.prosent))
 
-        assertNoErrors(person)
+        assertNoErrors()
         assertActivities(person)
         assertTilstander(
             2.vedtaksperiode,

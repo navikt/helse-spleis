@@ -20,7 +20,7 @@ internal class BerOmInntektsmeldingTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
 
-        assertNoErrors(person)
+        assertNoErrors()
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -36,7 +36,7 @@ internal class BerOmInntektsmeldingTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
 
-        assertNoErrors(person)
+        assertNoErrors()
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP)
         assertTilstander(
             2.vedtaksperiode,
@@ -53,7 +53,7 @@ internal class BerOmInntektsmeldingTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(21.januar, 28.februar, 100.prosent))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
 
-        assertNoErrors(person)
+        assertNoErrors()
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP)
         assertTilstander(
             2.vedtaksperiode,

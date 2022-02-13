@@ -9,7 +9,6 @@ import no.nav.helse.person.TilstandType.*
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.YearMonth
 
@@ -29,7 +28,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
             }
         ))
 
-        assertEquals(listOf("Har mer enn 25 % avvik"), collectErrors(1.vedtaksperiode, ORGNUMMER))
+        assertError(1.vedtaksperiode, "Har mer enn 25 % avvik")
     }
 
     @Test
@@ -41,7 +40,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(emptyList()))
 
-        assertEquals(listOf("Har mer enn 25 % avvik"), collectErrors(1.vedtaksperiode, ORGNUMMER))
+        assertError(1.vedtaksperiode, "Har mer enn 25 % avvik")
     }
 
     @Test

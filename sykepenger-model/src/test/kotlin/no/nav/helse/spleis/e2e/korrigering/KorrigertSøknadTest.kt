@@ -63,7 +63,7 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
     fun `Støtter ikke korrigerende søknad på utbetalt vedtaksperiode`() {
         nyttVedtak(1.januar, 31.januar)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(31.januar, 31.januar))
-        assertErrors(person)
+        assertErrors()
     }
 
     @Test
