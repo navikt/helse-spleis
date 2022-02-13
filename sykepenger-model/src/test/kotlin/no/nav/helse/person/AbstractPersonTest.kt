@@ -4,6 +4,7 @@ import no.nav.helse.Fødselsnummer
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.somFødselsnummer
+import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.TestObservatør
 import org.junit.jupiter.api.BeforeEach
 import java.util.*
@@ -27,6 +28,7 @@ internal abstract class AbstractPersonTest {
     val inspektør get() = inspektør(ORGNUMMER)
 
     val Int.vedtaksperiode: IdInnhenter get() = IdInnhenter { orgnummer -> this@vedtaksperiode.vedtaksperiode(orgnummer) }
+    fun IdInnhenter.filter(orgnummer: String = ORGNUMMER) = AktivitetsloggFilter.vedtaksperiode(this, orgnummer)
 
     @BeforeEach
     internal fun createTestPerson() {

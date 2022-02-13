@@ -173,11 +173,6 @@ internal fun AbstractPersonTest.assertWarnings(vararg filtre: AktivitetsloggFilt
     assertTrue(collectWarnings(*filtre).isNotEmpty(), "Forventet warnings, fant ingen")
 }
 
-internal fun AbstractEndToEndTest.assertNoWarnings(idInnhenter: IdInnhenter, orgnummer: String = AbstractPersonTest.ORGNUMMER) {
-    val warnings = collectWarnings(AktivitetsloggFilter.vedtaksperiode(idInnhenter, orgnummer))
-    assertTrue(warnings.isEmpty(), "forventet ingen warnings for orgnummer $orgnummer. Warnings:\n${warnings.joinToString("\n")}")
-}
-
 internal fun AbstractPersonTest.assertWarning(idInnhenter: IdInnhenter, warning: String, orgnummer: String = AbstractPersonTest.ORGNUMMER) {
     val warnings = collectWarnings(AktivitetsloggFilter.vedtaksperiode(idInnhenter, orgnummer))
     assertTrue(warnings.contains(warning), "fant ikke forventet warning for $orgnummer. Warnings:\n${warnings.joinToString("\n")}")

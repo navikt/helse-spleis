@@ -2,12 +2,12 @@ package no.nav.helse.spleis.e2e
 
 import no.nav.helse.Toggle
 import no.nav.helse.Toggle.Companion.enable
+import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
-import no.nav.helse.februar
 import no.nav.helse.januar
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus.AKSEPTERT
@@ -158,6 +158,6 @@ internal class  FullRefusjonTilNullRefusjonE2ETest : AbstractEndToEndTest() {
         assertTrue(inspektør.utbetaling(1).inspektør.personOppdrag.harUtbetalinger())
         assertTrue(inspektør.utbetaling(1).inspektør.personOppdrag[0].erOpphør())
         assertEquals(17.januar til 28.februar, Oppdrag.periode(inspektør.utbetaling(1).inspektør.arbeidsgiverOppdrag))
-        assertNoWarnings(2.vedtaksperiode)
+        assertNoWarnings(2.vedtaksperiode.filter())
     }
 }

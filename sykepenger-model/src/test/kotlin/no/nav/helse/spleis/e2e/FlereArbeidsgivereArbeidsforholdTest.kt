@@ -101,7 +101,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
 
         assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET, orgnummer = a1)
-        assertNoWarnings(1.vedtaksperiode, a1)
+        assertNoWarnings(1.vedtaksperiode.filter(a1))
     }
 
     @Test
@@ -150,9 +150,9 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         håndterUtbetalt(1.vedtaksperiode, orgnummer = a2)
 
         assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET, orgnummer = a2)
-        assertNoWarnings(1.vedtaksperiode, a1)
+        assertNoWarnings(1.vedtaksperiode.filter(a1))
         assertNoErrors(1.vedtaksperiode, a1)
-        assertNoWarnings(1.vedtaksperiode, a2)
+        assertNoWarnings(1.vedtaksperiode.filter(a2))
         assertNoErrors(1.vedtaksperiode, a2)
     }
 
@@ -273,7 +273,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a1)
 
-        assertNoWarnings(1.vedtaksperiode, orgnummer = a1)
+        assertNoWarnings(1.vedtaksperiode.filter(orgnummer = a1))
         assertEquals(Inntektskilde.EN_ARBEIDSGIVER, inspektør(a1).inntektskilde(2.vedtaksperiode))
     }
 

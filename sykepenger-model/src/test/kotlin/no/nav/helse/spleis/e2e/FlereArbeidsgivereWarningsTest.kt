@@ -21,7 +21,7 @@ internal class FlereArbeidsgivereWarningsTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent), orgnummer = a2)
-        assertNoWarnings(1.vedtaksperiode, orgnummer = a2)
+        assertNoWarnings(1.vedtaksperiode.filter(orgnummer = a2))
     }
 
     @Test

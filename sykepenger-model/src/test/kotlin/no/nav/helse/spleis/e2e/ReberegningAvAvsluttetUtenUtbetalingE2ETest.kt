@@ -1,15 +1,10 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.ForventetFeil
-import no.nav.helse.Toggle
+import no.nav.helse.*
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.TilstandType.*
-import no.nav.helse.februar
-import no.nav.helse.januar
-import no.nav.helse.mai
-import no.nav.helse.mars
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Test
 
@@ -179,8 +174,8 @@ internal class ReberegningAvAvsluttetUtenUtbetalingE2ETest : AbstractEndToEndTes
             håndterSykmelding(Sykmeldingsperiode(19.januar, 31.januar, 100.prosent))
             håndterInntektsmelding(listOf(1.januar til 16.januar))
 
-            assertNoWarnings(1.vedtaksperiode)
-            assertNoWarnings(2.vedtaksperiode)
+            assertNoWarnings(1.vedtaksperiode.filter())
+            assertNoWarnings(2.vedtaksperiode.filter())
 
             assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_HISTORIKK)
             assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE, AVVENTER_SØKNAD_UFERDIG_FORLENGELSE)

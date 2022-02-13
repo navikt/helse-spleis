@@ -110,7 +110,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt(1.vedtaksperiode)
-        assertNoWarnings(1.vedtaksperiode)
+        assertNoWarnings(1.vedtaksperiode.filter())
     }
 
     @Test
@@ -149,7 +149,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt(1.vedtaksperiode)
-        assertNoWarnings(1.vedtaksperiode)
+        assertNoWarnings(1.vedtaksperiode.filter())
     }
 
     @Test
@@ -808,7 +808,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         nyttVedtak(1.mars, 31.mars)
 
         assertWarning(1.vedtaksperiode, "Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler.", ORGNUMMER)
-        assertNoWarnings(2.vedtaksperiode, ORGNUMMER)
+        assertNoWarnings(2.vedtaksperiode.filter(ORGNUMMER))
     }
 
     @Test
@@ -927,8 +927,8 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
         håndterYtelser(2.vedtaksperiode)
 
-        assertNoWarnings(1.vedtaksperiode)
-        assertNoWarnings(2.vedtaksperiode)
+        assertNoWarnings(1.vedtaksperiode.filter())
+        assertNoWarnings(2.vedtaksperiode.filter())
         assertInfo(2.vedtaksperiode, "Refusjon gjelder ikke for hele utbetalingsperioden")
     }
 

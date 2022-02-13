@@ -483,7 +483,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
-        assertNoWarnings(1.vedtaksperiode, a1)
+        assertNoWarnings(1.vedtaksperiode.filter(a1))
         assertNoErrors(1.vedtaksperiode, a1)
     }
 
@@ -540,7 +540,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         assertWarning(
             1.vedtaksperiode, "Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold", orgnummer = a1
         )
-        assertNoWarnings(2.vedtaksperiode, orgnummer = a1)
+        assertNoWarnings(2.vedtaksperiode.filter(orgnummer = a1))
     }
 
     @Test
@@ -590,7 +590,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)
 
         assertWarning(1.vedtaksperiode, "Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold", orgnummer = a1)
-        assertNoWarnings(2.vedtaksperiode, orgnummer = a1)
+        assertNoWarnings(2.vedtaksperiode.filter(orgnummer = a1))
     }
 
     @Test

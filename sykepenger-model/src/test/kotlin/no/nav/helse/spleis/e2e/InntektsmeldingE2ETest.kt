@@ -90,7 +90,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.februar, 28.februar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 1.februar)
-        assertNoWarnings(1.vedtaksperiode)
+        assertNoWarnings(1.vedtaksperiode.filter())
     }
 
     @Test
@@ -686,8 +686,8 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.februar, 10.februar, 100.prosent))
         person.søppelbøtte(hendelselogg, 1.februar til 10.februar) // simulerer feil etter at perioden har bedt om replay; f.eks. ved at Utbetalingshistorikk inneholder feil, etc.
         håndterInntektsmeldingReplay(im, 4.vedtaksperiode.id(ORGNUMMER))
-        assertNoWarnings(1.vedtaksperiode)
-        assertNoWarnings(2.vedtaksperiode)
+        assertNoWarnings(1.vedtaksperiode.filter())
+        assertNoWarnings(2.vedtaksperiode.filter())
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
         assertForkastetPeriodeTilstander(4.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, TIL_INFOTRYGD)
@@ -1022,18 +1022,18 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
         val inntektsmeldingId = håndterInntektsmelding(listOf(10.januar til 25.januar), førsteFraværsdag = 10.januar)
         håndterSykmelding(Sykmeldingsperiode(10.januar, 31.januar, 100.prosent))
-        assertNoWarnings(2.vedtaksperiode)
+        assertNoWarnings(2.vedtaksperiode.filter())
         håndterSøknad(Sykdom(10.januar, 31.januar, 100.prosent))
-        assertNoWarnings(2.vedtaksperiode)
+        assertNoWarnings(2.vedtaksperiode.filter())
         håndterInntektsmeldingReplay(inntektsmeldingId, 2.vedtaksperiode.id(ORGNUMMER))
-        assertNoWarnings(2.vedtaksperiode)
+        assertNoWarnings(2.vedtaksperiode.filter())
         håndterYtelser(2.vedtaksperiode)
-        assertNoWarnings(2.vedtaksperiode)
+        assertNoWarnings(2.vedtaksperiode.filter())
         håndterVilkårsgrunnlag(2.vedtaksperiode)
-        assertNoWarnings(2.vedtaksperiode)
+        assertNoWarnings(2.vedtaksperiode.filter())
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
-        assertNoWarnings(2.vedtaksperiode)
+        assertNoWarnings(2.vedtaksperiode.filter())
     }
 
     @Test
@@ -1048,7 +1048,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
-        assertNoWarnings(1.vedtaksperiode)
+        assertNoWarnings(1.vedtaksperiode.filter())
     }
 
     @Test

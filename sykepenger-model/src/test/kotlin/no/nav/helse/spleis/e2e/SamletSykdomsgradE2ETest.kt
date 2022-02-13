@@ -129,6 +129,6 @@ internal class SamletSykdomsgradE2ETest: AbstractEndToEndTest() {
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         assertWarning(1.vedtaksperiode, "Minst én dag uten utbetaling på grunn av sykdomsgrad under 20 %. Vurder å sende vedtaksbrev fra Infotrygd")
-        assertNoWarnings(2.vedtaksperiode)
+        assertNoWarnings(2.vedtaksperiode.filter())
     }
 }

@@ -123,7 +123,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
                 }
             }
         ))
-        assertNoWarnings(1.vedtaksperiode, a2)
+        assertNoWarnings(1.vedtaksperiode.filter(a2))
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a2, inntektshistorikk = inntektshistorikk)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
@@ -452,7 +452,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
         inspektør.also {
             assertNoErrors(1.vedtaksperiode)
-            assertNoWarnings(1.vedtaksperiode)
+            assertNoWarnings(1.vedtaksperiode.filter())
             assertActivities(person)
             assertInntektForDato(45000.månedlig, 27.juli(2020), inspektør = it)
             assertEquals(2, it.sykdomshistorikk.size)
@@ -1457,7 +1457,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(1.juli, 31.juli, 100.prosent))
 
-        assertNoWarnings(1.vedtaksperiode)
+        assertNoWarnings(1.vedtaksperiode.filter())
         assertNoErrors(1.vedtaksperiode)
         assertEquals(Utbetaling.GodkjentUtenUtbetaling, inspektør.utbetalingtilstand(0))
         assertTilstander(
@@ -2228,7 +2228,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt(1.vedtaksperiode)
 
-        assertNoWarnings(1.vedtaksperiode)
+        assertNoWarnings(1.vedtaksperiode.filter())
     }
 
     @Test
