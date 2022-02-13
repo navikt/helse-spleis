@@ -218,6 +218,11 @@ internal fun AbstractEndToEndTest.assertError(idInnhenter: IdInnhenter, error: S
     assertTrue(errors.contains(error), "fant ikke forventet error for $orgnummer. Errors:\n${errors.joinToString("\n")}")
 }
 
+internal fun AbstractEndToEndTest.assertError(error: String, vararg filtre: AktivitetsloggFilter) {
+    val errors = collectErrors(*filtre)
+    assertTrue(errors.contains(error), "fant ikke forventet error. Errors:\n${errors.joinToString("\n")}")
+}
+
 internal fun AbstractPersonTest.assertErrors(vararg filtre: AktivitetsloggFilter) {
     val errors = collectErrors(*filtre)
     assertTrue(errors.isNotEmpty(), "forventet ingen errors. Errors: \n${errors.joinToString("\n")}")
@@ -270,18 +275,6 @@ internal fun interface AktivitetsloggFilter {
     }
 
     fun filtrer(kontekst: SpesifikkKontekst): Boolean
-}
-
-internal fun assertErrorTekst(person: Person, vararg errors: String) {
-    val errorList = errors.toMutableList()
-    val actualErrors: MutableList<String> = mutableListOf()
-    person.personLogg.accept(object : AktivitetsloggVisitor {
-        override fun visitError(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Error, melding: String, tidsstempel: String) {
-            errorList.remove(melding)
-            actualErrors.add(melding)
-        }
-    })
-    assertTrue(errorList.isEmpty(), "har ikke fått errors $errorList, faktiske errors: $actualErrors")
 }
 
 internal fun assertActivities(person: Person) {

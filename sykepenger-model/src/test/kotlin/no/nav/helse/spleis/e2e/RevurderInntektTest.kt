@@ -271,7 +271,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
             TIL_UTBETALING,
             AVSLUTTET
         )
-        assertErrorTekst(person, "Kan kun revurdere siste skjæringstidspunkt")
+        assertError("Kan kun revurdere siste skjæringstidspunkt")
     }
 
     @Test
@@ -482,7 +482,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         håndterOverstyrInntekt(inntekt = 32000.månedlig, a1, 1.januar)
 
         assertEquals(1, observatør.avvisteRevurderinger.size)
-        assertErrorTekst(person, "Forespurt overstyring av inntekt hvor personen har flere arbeidsgivere (inkl. ghosts)")
+        assertError("Forespurt overstyring av inntekt hvor personen har flere arbeidsgivere (inkl. ghosts)")
     }
 
     @Test
@@ -526,7 +526,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
 
         håndterOverstyrInntekt(32000.månedlig, a1, 1.januar)
         assertEquals(1, observatør.avvisteRevurderinger.size)
-        assertErrorTekst(person, "Forespurt overstyring av inntekt hvor personen har flere arbeidsgivere (inkl. ghosts)")
+        assertError("Forespurt overstyring av inntekt hvor personen har flere arbeidsgivere (inkl. ghosts)")
     }
 
     @Test

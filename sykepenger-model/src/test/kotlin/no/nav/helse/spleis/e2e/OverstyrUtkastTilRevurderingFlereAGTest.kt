@@ -320,7 +320,7 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
             )
         }
         inspektør(AG2) {
-            assertErrorTekst(person, "Kan ikke overstyre en pågående behandling der én eller flere perioder er behandlet ferdig")
+            assertError("Kan ikke overstyre en pågående behandling der én eller flere perioder er behandlet ferdig")
             assertTilstander(
                 1.vedtaksperiode,
                 *TIL_AVSLUTTET_FØRSTEGANGSBEHANDLING(false),
@@ -352,7 +352,7 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
 
         håndterOverstyrTidslinje((1.februar til 2.februar).map { manuellFeriedag(it) }, orgnummer = AG1)
         inspektør(AG1) {
-            assertErrorTekst(person, "Kan ikke overstyre en pågående behandling der én eller flere perioder er behandlet ferdig")
+            assertError("Kan ikke overstyre en pågående behandling der én eller flere perioder er behandlet ferdig")
             assertTilstander(
                 1.vedtaksperiode,
                 *TIL_AVSLUTTET_FØRSTEGANGSBEHANDLING(),

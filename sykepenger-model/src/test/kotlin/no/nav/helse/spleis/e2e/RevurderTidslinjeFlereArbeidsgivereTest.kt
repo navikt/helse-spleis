@@ -404,7 +404,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
         håndterYtelser(1.vedtaksperiode, orgnummer = haandtverkerne)
         håndterSimulering(1.vedtaksperiode, orgnummer = haandtverkerne)
         håndterOverstyrTidslinje((29.januar til 29.januar).map { manuellFeriedag(it) }, orgnummer = aadvokatene)
-        assertErrorTekst(person, "Kan ikke overstyre en pågående behandling der én eller flere perioder er behandlet ferdig")
+        assertError("Kan ikke overstyre en pågående behandling der én eller flere perioder er behandlet ferdig")
     }
 
     @Test

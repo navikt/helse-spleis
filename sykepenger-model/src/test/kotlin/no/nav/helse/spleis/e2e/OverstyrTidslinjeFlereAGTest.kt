@@ -20,7 +20,7 @@ internal class OverstyrTidslinjeFlereAGTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
         håndterOverstyrTidslinje((29.januar til 29.januar).map { manuellFeriedag(it) }, orgnummer = a2)
-        assertErrorTekst(person, "Kan ikke overstyre en pågående behandling der én eller flere perioder er behandlet ferdig")
+        assertError("Kan ikke overstyre en pågående behandling der én eller flere perioder er behandlet ferdig")
     }
 
     @Test
