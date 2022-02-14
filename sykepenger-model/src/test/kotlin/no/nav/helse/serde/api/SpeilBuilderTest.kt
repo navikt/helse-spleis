@@ -367,22 +367,15 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.juni)
         håndterInntektsmelding(listOf(1.januar til 16.januar))
-        håndterYtelser(1.vedtaksperiode)
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
 
         val personDTO = speilApi()
 
         assertEquals(1, personDTO.arbeidsgivere.first().vedtaksperioder.size)
 
-        val vedtaksperiode = personDTO.arbeidsgivere.first().vedtaksperioder.first() as VedtaksperiodeDTO
+        val vedtaksperiode = personDTO.arbeidsgivere.first().vedtaksperioder.first()
+        assertFalse(vedtaksperiode.fullstendig)
         val utbetalingstidslinje = vedtaksperiode.utbetalingstidslinje
-        assertEquals(DagtypeDTO.ArbeidsgiverperiodeDag, utbetalingstidslinje.first().type)
-        assertEquals(DagtypeDTO.ArbeidsgiverperiodeDag, utbetalingstidslinje[15].type)
-        assertEquals(DagtypeDTO.ForeldetDag, utbetalingstidslinje[16].type)
-        assertEquals(DagtypeDTO.ForeldetDag, utbetalingstidslinje.last().type)
-
+        assertTrue(utbetalingstidslinje.isEmpty())
         val sykdomstidslinje = vedtaksperiode.sykdomstidslinje
         assertEquals(SpeilDagtype.FORELDET_SYKEDAG, sykdomstidslinje.first().type)
         assertEquals(SpeilDagtype.FORELDET_SYKEDAG, sykdomstidslinje.last().type)

@@ -59,28 +59,35 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
         assertEquals(1, utbetaling.path("utbetalingsdager").toList().filter { it["type"].asText() == "Permisjonsdag" }.size)
     }
 
-    @Disabled("David og Maxi fikser :kissing-heart:")
     @Test
     fun `Feriedager og permisjonsdager blir mappet riktig fra utbetalingstidslinjen for utbetaling_uten_utbetaling`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(
             0,
             listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
-            fravær = listOf(
-                FravarDTO(fom = 3.januar, tom = 25.januar, FravarstypeDTO.FERIE),
-                FravarDTO(fom = 26.januar, tom = 26.januar, FravarstypeDTO.PERMISJON),
-            )
+            fravær = listOf(FravarDTO(fom = 25.januar, tom = 26.januar, FravarstypeDTO.FERIE))
         )
         sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
         sendYtelser(0)
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
-        sendUtbetalingsgodkjenning(0, true) // todo hvorfor trenger vi denne for perisjon men ikke ved kun feriedager?
+        sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
+        sendUtbetalingsgodkjenning(0)
+        sendUtbetaling()
+
+        sendNySøknad(SoknadsperiodeDTO(fom = 27.januar, tom = 31.januar, sykmeldingsgrad = 100))
+        sendSøknad(
+            1,
+            listOf(SoknadsperiodeDTO(fom = 27.januar, tom = 31.januar, sykmeldingsgrad = 100)),
+            fravær = listOf(FravarDTO(fom = 27.januar, tom = 31.januar, FravarstypeDTO.PERMISJON))
+        )
+        sendYtelserUtenSykepengehistorikk(1)
+        sendUtbetalingsgodkjenning(1)
 
         val utbetaling = testRapid.inspektør.siste("utbetaling_uten_utbetaling")
 
-        assertEquals(7, utbetaling.path("utbetalingsdager").toList().filter { it["type"].asText() == "Feriedag" }.size)
-        assertEquals(1, utbetaling.path("utbetalingsdager").toList().filter { it["type"].asText() == "Permisjonsdag" }.size)
+        assertEquals(2, utbetaling.path("utbetalingsdager").toList().filter { it["type"].asText() == "Feriedag" }.size)
+        assertEquals(5, utbetaling.path("utbetalingsdager").toList().filter { it["type"].asText() == "Permisjonsdag" }.size)
     }
 
     @Test
@@ -100,19 +107,25 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
         assertUtbetaltInkluderAvviste(utbetalt)
     }
 
-    @Disabled("David og Maxi fikser :kissing-heart:")
     @Test
     fun `utbetaling uten utbetaling`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
-        sendSøknad(
-            0,
-            listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
-            fravær = listOf(FravarDTO(fom = 3.januar, tom = 26.januar, FravarstypeDTO.FERIE))
-        )
+        sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
         sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
         sendYtelser(0)
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
+        sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
+        sendUtbetalingsgodkjenning(0)
+        sendUtbetaling()
+
+        sendNySøknad(SoknadsperiodeDTO(fom = 27.januar, tom = 31.januar, sykmeldingsgrad = 100))
+        sendSøknad(
+            1,
+            listOf(SoknadsperiodeDTO(fom = 27.januar, tom = 31.januar, sykmeldingsgrad = 100)),
+            fravær = listOf(FravarDTO(fom = 27.januar, tom = 31.januar, FravarstypeDTO.FERIE))
+        )
+        sendYtelserUtenSykepengehistorikk(1)
         val utbetalt = testRapid.inspektør.siste("utbetaling_uten_utbetaling")
         assertUtbetalt(utbetalt)
     }

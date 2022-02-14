@@ -45,16 +45,16 @@ internal class ArbeidsgiverperiodeTest {
 
     @Test
     fun `har betalt`() {
-        assertFalse(agp(1.januar til 16.januar).harBetaltFraOgMed(17.januar))
-        assertTrue(agp(1.januar til 16.januar).utbetalingsdag(17.januar).harBetaltFraOgMed(17.januar))
-        assertTrue(agp(1.januar til 16.januar).utbetalingsdag(17.januar).harBetaltFraOgMed(18.januar))
-        assertFalse(agp(1.januar til 16.januar).utbetalingsdag(18.januar).harBetaltFraOgMed(17.januar))
+        assertTrue(agp(1.januar til 16.januar).erFørsteUtbetalingsdagEtter(17.januar))
+        assertFalse(agp(1.januar til 16.januar).utbetalingsdag(17.januar).erFørsteUtbetalingsdagEtter(17.januar))
+        assertFalse(agp(1.januar til 16.januar).utbetalingsdag(17.januar).erFørsteUtbetalingsdagEtter(18.januar))
+        assertTrue(agp(1.januar til 16.januar).utbetalingsdag(18.januar).erFørsteUtbetalingsdagEtter(17.januar))
     }
 
     @Test
     fun `helg regnes ikke som betalt`() {
-        assertFalse(agp(1.januar til 16.januar).utbetalingsdag(20.januar).harBetaltFraOgMed(20.januar))
-        assertFalse(Arbeidsgiverperiode.fiktiv(20.januar).harBetaltFraOgMed(20.januar))
+        assertTrue(agp(1.januar til 16.januar).utbetalingsdag(20.januar).erFørsteUtbetalingsdagEtter(20.januar))
+        assertTrue(Arbeidsgiverperiode.fiktiv(20.januar).erFørsteUtbetalingsdagEtter(20.januar))
     }
 
     @Test

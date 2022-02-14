@@ -58,12 +58,12 @@ data class VedtaksperiodeDTO(
     override val tilstand: TilstandstypeDTO,
     override val fullstendig: Boolean = true,
     override val utbetalingstidslinje: List<UtbetalingstidslinjedagDTO>,
+    override val sykdomstidslinje: List<SykdomstidslinjedagDTO>,
     override val inntektskilde: Inntektskilde,
     override val erForkastet: Boolean = false,
     val utbetalingsreferanse: String?,
     val utbetaling: UtbetalingshistorikkElementDTO.UtbetalingDTO?,
     val sisteUtbetaling: UtbetalingshistorikkElementDTO.UtbetalingDTO?,
-    val sykdomstidslinje: List<SykdomstidslinjedagDTO>,
     val vilkår: VilkårDTO,
     val inntektsmeldingId: UUID?,
     val inntektFraInntektsmelding: Double?,
@@ -139,6 +139,7 @@ data class UfullstendigVedtaksperiodeDTO(
     override val tilstand: TilstandstypeDTO,
     override val fullstendig: Boolean = false,
     override val utbetalingstidslinje: List<UtbetalingstidslinjedagDTO>,
+    override val sykdomstidslinje: List<SykdomstidslinjedagDTO>,
     override val inntektskilde: Inntektskilde,
     override val erForkastet: Boolean = false
 ) : VedtaksperiodeDTOBase
@@ -151,6 +152,7 @@ interface VedtaksperiodeDTOBase {
     val tilstand: TilstandstypeDTO
     val fullstendig: Boolean
     val utbetalingstidslinje: List<UtbetalingstidslinjedagDTO>
+    val sykdomstidslinje: List<SykdomstidslinjedagDTO>
     val inntektskilde: Inntektskilde
     val erForkastet: Boolean
 }

@@ -30,6 +30,13 @@ internal class MaksimumSykepengedagerfilterTest {
     }
 
     @Test
+    fun `maksdato med fravær på slutten`() {
+        val tidslinje = tidslinjeOf(16.AP, 10.FRI)
+        assertEquals(emptyList<LocalDate>(), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018))
+        assertEquals(9.januar(2019), maksimumSykepenger.sisteDag())
+    }
+
+    @Test
     fun `riktig antall dager`() {
         val tidslinje = tidslinjeOf(16.AP, 10.NAV)
         assertEquals(emptyList<LocalDate>(), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018))

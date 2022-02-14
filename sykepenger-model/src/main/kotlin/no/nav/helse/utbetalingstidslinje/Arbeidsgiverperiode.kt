@@ -57,7 +57,7 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
         return otherSiste == thisSiste || (thisSiste.erHelg() && otherSiste.erRettFør(thisSiste)) || (otherSiste.erHelg() && thisSiste.erRettFør(otherSiste))
     }
 
-    internal fun harBetaltFraOgMed(dato: LocalDate) = utbetalingsdager.firstOrNull()?.start?.let { dato >= it } ?: false
+    internal fun erFørsteUtbetalingsdagEtter(dato: LocalDate) = utbetalingsdager.firstOrNull()?.start?.let { dato < it } ?: true
 
     override fun equals(other: Any?) = other is Arbeidsgiverperiode && other.førsteKjente == this.førsteKjente
     override fun hashCode() = førsteKjente.hashCode()

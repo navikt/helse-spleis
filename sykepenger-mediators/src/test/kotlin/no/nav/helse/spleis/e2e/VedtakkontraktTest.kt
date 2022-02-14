@@ -38,10 +38,29 @@ internal class VedtakkontraktTest : AbstractEndToEndMediatorTest() {
             fravær = listOf(FravarDTO(19.januar, 26.januar, FravarstypeDTO.FERIE))
         )
         sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
+        assertVedtakUtenUtbetaling()
+    }
+
+    @Test
+    fun `vedtak med utbetaling uten utbetaling`() {
+        sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+        sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
+        sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
         sendYtelser(0)
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
-        assertVedtakUtenUtbetaling()
+        sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
+        sendUtbetalingsgodkjenning(0)
+        sendUtbetaling()
+
+        sendNySøknad(SoknadsperiodeDTO(fom = 27.januar, tom = 31.januar, sykmeldingsgrad = 100))
+        sendSøknad(
+            1,
+            listOf(SoknadsperiodeDTO(fom = 27.januar, tom = 31.januar, sykmeldingsgrad = 100)),
+            fravær = listOf(FravarDTO(fom = 27.januar, tom = 31.januar, FravarstypeDTO.FERIE))
+        )
+        sendYtelserUtenSykepengehistorikk(1)
+        assertVedtakMedUtbetalingUtenUtbetaling()
     }
 
     private fun assertVedtakMedUtbetaling() {
@@ -51,11 +70,18 @@ internal class VedtakkontraktTest : AbstractEndToEndMediatorTest() {
         }
     }
 
+    private fun assertVedtakMedUtbetalingUtenUtbetaling() {
+        testRapid.inspektør.siste("vedtak_fattet").also { melding ->
+            assertVedtak(melding)
+            assertFalse(melding.path("utbetalingId").isMissingOrNull())
+            assertEquals(melding.path("utbetalingId").asText(), testRapid.inspektør.siste("utbetaling_uten_utbetaling").path("utbetalingId").asText())
+        }
+    }
+
     private fun assertVedtakUtenUtbetaling() {
         testRapid.inspektør.siste("vedtak_fattet").also { melding ->
             assertVedtak(melding)
-            assertFalse(melding["utbetalingId"].isMissingOrNull())
-            assertEquals(melding["utbetalingId"].asText(), testRapid.inspektør.siste("utbetaling_uten_utbetaling").path("utbetalingId").asText())
+            assertTrue(melding.path("utbetalingId").isMissingOrNull())
         }
     }
 

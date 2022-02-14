@@ -510,15 +510,10 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(17.januar, 31.januar))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
-        håndterYtelser()
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser()
-
         assertEquals(1, generasjoner.size)
         assertEquals(1, generasjoner[0].perioder.size)
-
         0.generasjon {
-            beregnetPeriode(0) er "GodkjentUtenUtbetaling" avType "UTBETALING" fra (1.januar til 31.januar) medAntallDager 31 forkastet false
+            uberegnetPeriode(0) fra (1.januar til 31.januar) medAntallDager 31 forkastet false
         }
     }
 

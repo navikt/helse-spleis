@@ -26,6 +26,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -334,10 +335,6 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
         håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.mai)
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
-        håndterYtelser(1.vedtaksperiode)
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
-        håndterYtelser(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         assertNoErrors()
         assertActivities(person)
         inspektør.also {
@@ -345,20 +342,10 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             assertEquals(3, it.sykdomshistorikk.size)
             assertNull(it.sykdomstidslinje.inspektør.dagteller[Sykedag::class])
             assertEquals(6, it.sykdomstidslinje.inspektør.dagteller[SykHelgedag::class])
-            assertDoesNotThrow { it.arbeidsgiver.nåværendeTidslinje() }
-            assertTrue(it.utbetalingslinjer(0).isEmpty())
-            it.utbetalingstidslinjer(1.vedtaksperiode).inspektør.also { tidslinjeInspektør ->
-                assertEquals(6, tidslinjeInspektør.foreldetDagTeller)
-                assertEquals(2, tidslinjeInspektør.navHelgDagTeller)
-                assertEquals(16, tidslinjeInspektør.arbeidsgiverperiodeDagTeller)
-            }
+            assertEquals(0, it.utbetalinger(1.vedtaksperiode).size)
+            assertThrows<IllegalStateException> { it.arbeidsgiver.nåværendeTidslinje() }
         }
-        assertNotNull(inspektør.sisteMaksdato(1.vedtaksperiode))
-        assertTilstander(
-            1.vedtaksperiode,
-            START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            AVVENTER_HISTORIKK, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, AVSLUTTET
-        )
+        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
     }
 
     @Test
@@ -542,27 +529,16 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `perioden avsluttes ikke automatisk hvis warnings`() {
-        håndterSykmelding(Sykmeldingsperiode(3.januar, 19.januar, 100.prosent))
-        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 18.januar, 100.prosent), Ferie(19.januar, 19.januar))
-        håndterUtbetalingshistorikk(1.vedtaksperiode)
-        assertNoErrors()
-        assertActivities(person)
-        assertFalse(hendelselogg.hasErrorsOrWorse())
-
-        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)), 3.januar)
-        håndterYtelser(1.vedtaksperiode, arbeidsavklaringspenger = listOf(3.januar.minusDays(60) til 5.januar.minusDays(60)))
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
-        håndterYtelser(1.vedtaksperiode, arbeidsavklaringspenger = listOf(3.januar.minusDays(60) til 5.januar.minusDays(60)))
-
-        assertTrue(person.aktivitetslogg.logg(inspektør.vedtaksperioder(1.vedtaksperiode)).hasWarningsOrWorse())
+    fun `forlengelseperioden avsluttes ikke automatisk hvis warnings`() {
+        nyttVedtak(1.januar, 20.januar, 100.prosent)
+        håndterSykmelding(Sykmeldingsperiode(21.januar, 31.januar, 100.prosent))
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(21.januar, 31.januar, 100.prosent), Ferie(21.januar, 31.januar))
+        håndterYtelser(2.vedtaksperiode, arbeidsavklaringspenger = listOf(3.januar.minusDays(60) til 5.januar.minusDays(60)))
+        assertTrue(person.aktivitetslogg.logg(inspektør.vedtaksperioder(2.vedtaksperiode)).hasWarningsOrWorse())
         assertTilstander(
-            1.vedtaksperiode,
+            2.vedtaksperiode,
             START,
-            MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            AVVENTER_HISTORIKK,
-            AVVENTER_VILKÅRSPRØVING,
+            MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
             AVVENTER_HISTORIKK,
             AVVENTER_GODKJENNING
         )
@@ -1379,32 +1355,6 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             AVVENTER_GODKJENNING,
             TIL_UTBETALING
         )
-    }
-
-    @Test
-    fun `Maksdato og antall gjenstående dager beregnes riktig når det er fravær sist i perioden`() {
-        håndterSykmelding(Sykmeldingsperiode(22.juni(2020), 11.juli(2020), 100.prosent))
-        håndterSøknad(Sykdom(22.juni(2020), 11.juli(2020), 100.prosent), Permisjon(4.juli(2020), 5.juli(2020)), Ferie(6.juli(2020), 11.juli(2020)))
-        håndterUtbetalingshistorikk(
-            1.vedtaksperiode,
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 7.august(2019), 7.august(2019), 100.prosent, 2304.daglig),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 8.august(2019), 4.september(2019), 100.prosent, 2304.daglig),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 5.september(2019), 20.september(2019), 100.prosent, 2304.daglig),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 21.september(2019), 2.november(2019), 100.prosent, 2304.daglig),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 3.november(2019), 3.februar(2020), 100.prosent, 2304.daglig),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 4.februar(2020), 28.februar(2020), 100.prosent, 2304.daglig),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 29.februar(2020), 27.mars(2020), 100.prosent, 2304.daglig),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 28.mars(2020), 26.april(2020), 100.prosent, 2304.daglig),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 27.april(2020), 25.mai(2020), 100.prosent, 2304.daglig),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 26.mai(2020), 21.juni(2020), 100.prosent, 2304.daglig),
-            inntektshistorikk = listOf(
-                Inntektsopplysning(ORGNUMMER, 7.august(2019), 50005.månedlig, true)
-            )
-        )
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        assertEquals(10, inspektør.gjenståendeSykedager(1.vedtaksperiode))
-        assertEquals(24.juli(2020), inspektør.sisteMaksdato(1.vedtaksperiode))
     }
 
     @Test

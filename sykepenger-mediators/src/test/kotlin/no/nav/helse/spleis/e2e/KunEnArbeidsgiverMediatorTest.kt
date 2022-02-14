@@ -65,17 +65,11 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
             fravær = listOf(FravarDTO(19.januar, 26.januar, FravarstypeDTO.FERIE))
         )
         sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
-        sendYtelser(0)
-        sendVilkårsgrunnlag(0)
-        sendYtelser(0)
         assertTilstander(
             0,
             "MOTTATT_SYKMELDING_FERDIG_GAP",
-            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
-            "AVVENTER_HISTORIKK",
-            "AVVENTER_VILKÅRSPRØVING",
-            "AVVENTER_HISTORIKK",
-            "AVSLUTTET"
+            "AVSLUTTET_UTEN_UTBETALING",
+            "AVSLUTTET_UTEN_UTBETALING"
         )
     }
 
@@ -88,19 +82,11 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
             fravær = listOf(FravarDTO(19.januar, 26.januar, FravarstypeDTO.PERMISJON))
         )
         sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
-        sendYtelser(0)
-        sendVilkårsgrunnlag(0)
-        sendYtelser(0)
-        sendUtbetalingsgodkjenning(0, true)
         assertTilstander(
             0,
             "MOTTATT_SYKMELDING_FERDIG_GAP",
-            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
-            "AVVENTER_HISTORIKK",
-            "AVVENTER_VILKÅRSPRØVING",
-            "AVVENTER_HISTORIKK",
-            "AVVENTER_GODKJENNING",
-            "AVSLUTTET"
+            "AVSLUTTET_UTEN_UTBETALING",
+            "AVSLUTTET_UTEN_UTBETALING"
         )
     }
 

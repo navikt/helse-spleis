@@ -310,10 +310,7 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 21.januar, 100.prosent), Ferie(13.januar, 21.januar))
         val delvisRefusjon = Refusjon(321.årlig, null, emptyList())
         håndterInntektsmelding(listOf(1.januar til 16.januar), refusjon = delvisRefusjon)
-        håndterYtelser(1.vedtaksperiode)
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
 
         håndterSykmelding(Sykmeldingsperiode(22.januar, 22.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(22.januar, 24.januar, 100.prosent))

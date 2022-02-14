@@ -129,6 +129,7 @@ internal class VedtaksperiodeBuilder(
             tilstand = tilstandstypeDTO,
             fullstendig = false,
             utbetalingstidslinje = ufullstendingUtbetalingstidslinje,
+            sykdomstidslinje = beregnetSykdomstidslinje,
             inntektskilde = inntektskilde,
             erForkastet = forkastet
         )

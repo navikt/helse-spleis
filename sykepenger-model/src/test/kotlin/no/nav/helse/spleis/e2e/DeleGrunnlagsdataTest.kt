@@ -2,7 +2,8 @@ package no.nav.helse.spleis.e2e
 
 import no.nav.helse.*
 import no.nav.helse.hendelser.*
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.*
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.inspectors.GrunnlagsdataInspektør
 import no.nav.helse.inspectors.PersonInspektør
 import no.nav.helse.inspectors.inspektør
@@ -368,127 +369,6 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
             AVVENTER_GODKJENNING,
             AVSLUTTET
         )
-    }
-
-    @Test
-    fun `når vilkårsgrunnlag mangler sjekk på minimum inntekt gjøres denne sjekken`() {
-        val inntekt = 93634.årlig / 2 - 1.årlig
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 17.januar, 100.prosent))
-        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar, 17.januar, 100.prosent), Ferie(17.januar, 17.januar))
-        håndterInntektsmeldingMedValidering(
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
-            arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
-            beregnetInntekt = inntekt
-        )
-        håndterYtelser(1.vedtaksperiode)
-        håndterVilkårsgrunnlag(1.vedtaksperiode, inntekt)
-        val vilkårsgrunnlagElement = VilkårsgrunnlagHistorikk.Grunnlagsdata(
-            skjæringstidspunkt = 1.januar,
-            sykepengegrunnlag = sykepengegrunnlag(
-                inntekt,
-                listOf(
-                    ArbeidsgiverInntektsopplysning(
-                        ORGNUMMER,
-                        Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), inntekt)
-                    )
-                )
-            ),
-            sammenligningsgrunnlag = sammenligningsgrunnlag(inntekt),
-            avviksprosent = Prosent.prosent(0.0),
-            antallOpptjeningsdagerErMinst = 29,
-            harOpptjening = true,
-            medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
-            harMinimumInntekt = null,
-            vurdertOk = true,
-            meldingsreferanseId = UUID.randomUUID(),
-            vilkårsgrunnlagId = UUID.randomUUID()
-        )
-        håndterYtelser(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-
-        // Gjøres utelukkende for å teste oppførsel som ikke skal kunne skje lenger
-        // (minimumInntekt kan være null i db, men ikke i modellen, mangler en migrering)
-        val vilkårsgrunnlagHistorikk = PersonInspektør(person).vilkårsgrunnlagHistorikk
-        vilkårsgrunnlagHistorikk.lagre(1.januar, vilkårsgrunnlagElement)
-
-        assertTilstander(
-            1.vedtaksperiode,
-            START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, AVVENTER_HISTORIKK, AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, AVSLUTTET
-        )
-        håndterSykmelding(Sykmeldingsperiode(18.januar, 18.februar, 100.prosent))
-        håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(18.januar, 18.februar, 100.prosent))
-        håndterYtelser(2.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-
-        val grunnlagsdataInspektør = inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.let { GrunnlagsdataInspektør(it) }
-        assertEquals(false, grunnlagsdataInspektør?.harMinimumInntekt)
-
-        inspektør.utbetalingUtbetalingstidslinje(1).inspektør.also {
-            assertEquals(0, it.navDagTeller)
-            assertEquals(16, it.arbeidsgiverperiodeDagTeller)
-            assertEquals(22, it.avvistDagTeller)
-        }
-        assertTilstander(
-            2.vedtaksperiode,
-            START,
-            MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
-            AVVENTER_HISTORIKK,
-            AVVENTER_GODKJENNING,
-            AVSLUTTET
-        )
-        assertNotNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
-        assertNotNull(inspektør.vilkårsgrunnlag(2.vedtaksperiode))
-    }
-
-    @Test
-    fun `når vilkårsgrunnlag mangler sjekk på minimum inntekt gjøres denne sjekken - inntekt er lik minimum inntekt`() {
-        val inntekt = 93634.årlig / 2
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 17.januar, 100.prosent))
-        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar, 17.januar, 100.prosent), Ferie(17.januar, 17.januar))
-        håndterInntektsmeldingMedValidering(
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
-            arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
-            beregnetInntekt = inntekt
-        )
-        håndterYtelser(1.vedtaksperiode)
-        håndterVilkårsgrunnlag(1.vedtaksperiode, inntekt)
-        val vilkårsgrunnlagElement = VilkårsgrunnlagHistorikk.Grunnlagsdata(
-            skjæringstidspunkt = 1.januar,
-            sykepengegrunnlag = sykepengegrunnlag(
-                inntekt,
-                listOf(
-                    ArbeidsgiverInntektsopplysning(
-                        ORGNUMMER,
-                        Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), inntekt)
-                    )
-                )
-            ),
-            sammenligningsgrunnlag = sammenligningsgrunnlag(inntekt),
-            avviksprosent = Prosent.prosent(0.0),
-            antallOpptjeningsdagerErMinst = 29,
-            harOpptjening = true,
-            medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
-            harMinimumInntekt = null,
-            vurdertOk = true,
-            meldingsreferanseId = UUID.randomUUID(),
-            vilkårsgrunnlagId = UUID.randomUUID()
-        )
-        håndterYtelser(1.vedtaksperiode)
-
-        // Gjøres utelukkende for å teste oppførsel som ikke skal kunne skje lenger
-        // (minimumInntekt kan være null i db, men ikke i modellen, mangler en migrering)
-        val vilkårsgrunnlagHistorikk = PersonInspektør(person).vilkårsgrunnlagHistorikk
-        vilkårsgrunnlagHistorikk.lagre(1.januar, vilkårsgrunnlagElement)
-
-        håndterSykmelding(Sykmeldingsperiode(18.januar, 18.februar, 100.prosent))
-        håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(18.januar, 18.februar, 100.prosent))
-        håndterYtelser(2.vedtaksperiode)
-        håndterSimulering(2.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-
-        val grunnlagsdataInspektør = inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.let { GrunnlagsdataInspektør(it) }
-        assertEquals(true, grunnlagsdataInspektør?.harMinimumInntekt)
     }
 
     @Test
