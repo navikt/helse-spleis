@@ -13,6 +13,8 @@ import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
+import no.nav.helse.utbetalingstidslinje.ny.Arbeidsgiverperiodeteller
+import no.nav.helse.utbetalingstidslinje.ny.Infotrygddekoratør
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -85,6 +87,11 @@ internal class InfotrygdhistorikkElement private constructor(
     )
 
     private val oppslag = mutableMapOf<Oppslagsnøkkel, Sykdomstidslinje>()
+
+    internal fun build(organisasjonsnummer: String, sykdomstidslinje: Sykdomstidslinje, teller: Arbeidsgiverperiodeteller, builder: SykdomstidslinjeVisitor) {
+        val dekoratør = Infotrygddekoratør(teller, builder, perioder.filterIsInstance<Utbetalingsperiode>().filter { it.gjelder(organisasjonsnummer) })
+        historikkFor(organisasjonsnummer, sykdomstidslinje).accept(dekoratør)
+    }
 
     internal fun historikkFor(orgnummer: String, sykdomstidslinje: Sykdomstidslinje): Sykdomstidslinje {
         return oppslag.computeIfAbsent(Oppslagsnøkkel(orgnummer, sykdomstidslinje)) {
@@ -258,6 +265,5 @@ internal class InfotrygdhistorikkElement private constructor(
     internal fun harEndretHistorikk(utbetaling: Utbetaling): Boolean {
         return utbetaling.erEldreEnn(tidsstempel)
     }
-
     internal fun harBrukerutbetalingerFor(organisasjonsnummer: String, periode: Periode) = perioder.harBrukerutbetalingFor(organisasjonsnummer, periode)
 }

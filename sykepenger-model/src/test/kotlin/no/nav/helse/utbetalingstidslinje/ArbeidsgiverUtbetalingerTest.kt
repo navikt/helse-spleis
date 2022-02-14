@@ -10,13 +10,14 @@ import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
+import no.nav.helse.utbetalingstidslinje.ny.IUtbetalingstidslinjeBuilder
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosent
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import no.nav.helse.økonomi.Økonomi
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -267,13 +268,14 @@ internal class ArbeidsgiverUtbetalingerTest {
     ) {
         val person = Person("aktørid", fnr, MaskinellJurist())
         // seed arbeidsgiver med sykdomshistorikk
+        val førsteDag = arbeidsgiverTidslinje.periode().start
         person.håndter(
             Sykmelding(
                 meldingsreferanseId = UUID.randomUUID(),
                 fnr = UNG_PERSON_FNR_2018.toString(),
                 aktørId = "",
                 orgnummer = ORGNUMMER,
-                sykeperioder = listOf(Sykmeldingsperiode(1.januar, 2.januar, 100.prosent)),
+                sykeperioder = listOf(Sykmeldingsperiode(førsteDag, førsteDag, 100.prosent)),
                 sykmeldingSkrevet = 1.januar.atStartOfDay(),
                 mottatt = 1.januar.atStartOfDay()
             )
@@ -304,7 +306,7 @@ internal class ArbeidsgiverUtbetalingerTest {
                 orgnummer = ORGNUMMER,
                 fødselsnummer = AbstractPersonTest.UNG_PERSON_FNR_2018.toString(),
                 aktørId = AbstractPersonTest.AKTØRID,
-                førsteFraværsdag = 1.januar,
+                førsteFraværsdag = førsteDag,
                 beregnetInntekt = 30000.månedlig,
                 arbeidsgiverperioder = listOf(),
                 arbeidsforholdId = null,
@@ -332,8 +334,13 @@ internal class ArbeidsgiverUtbetalingerTest {
         ArbeidsgiverUtbetalinger(
             NormalArbeidstaker,
             mapOf(person.arbeidsgiver(ORGNUMMER) to object : IUtbetalingstidslinjeBuilder {
-                override fun build(sykdomstidslinje: Sykdomstidslinje, periode: Periode) {}
-                override fun result() = arbeidsgiverTidslinje
+                override fun result() = arbeidsgiverTidslinje.plus(historiskTidslinje)
+                override fun fridag(dato: LocalDate) {}
+                override fun arbeidsdag(dato: LocalDate) {}
+                override fun arbeidsgiverperiodedag(dato: LocalDate, økonomi: Økonomi) {}
+                override fun utbetalingsdag(dato: LocalDate, økonomi: Økonomi) {}
+                override fun foreldetDag(dato: LocalDate, økonomi: Økonomi) {}
+                override fun avvistDag(dato: LocalDate, begrunnelse: Begrunnelse) {}
             }),
             infotrygdhistorikk,
             fnr.alder(),

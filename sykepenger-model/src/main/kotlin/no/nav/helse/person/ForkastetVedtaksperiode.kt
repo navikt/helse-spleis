@@ -5,6 +5,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.person.Vedtaksperiode.Companion.ER_ELLER_HAR_VÆRT_AVSLUTTET
 import no.nav.helse.person.Vedtaksperiode.Companion.iderMedUtbetaling
+import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import java.util.*
@@ -36,8 +37,9 @@ internal class ForkastetVedtaksperiode(
             forkastede: List<ForkastetVedtaksperiode>,
             organisasjonsnummer: String,
             sykdomstidslinje: Sykdomstidslinje,
-            periode: Periode
-        ): Arbeidsgiverperiode? = Vedtaksperiode.arbeidsgiverperiodeFor(person, forkastede.perioder(), organisasjonsnummer, sykdomstidslinje, periode)
+            periode: Periode,
+            subsumsjonObserver: SubsumsjonObserver
+        ): Arbeidsgiverperiode? = Vedtaksperiode.arbeidsgiverperiodeFor(person, forkastede.perioder(), organisasjonsnummer, sykdomstidslinje, periode, subsumsjonObserver)
 
         internal fun sjekkOmOverlapperMedForkastet(forkastede: Iterable<ForkastetVedtaksperiode>, inntektsmelding: Inntektsmelding) =
             Vedtaksperiode.sjekkOmOverlapperMedForkastet(forkastede.perioder(), inntektsmelding)

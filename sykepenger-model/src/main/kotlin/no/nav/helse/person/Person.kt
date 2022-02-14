@@ -27,8 +27,13 @@ import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
-import no.nav.helse.utbetalingstidslinje.*
+import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
+import no.nav.helse.utbetalingstidslinje.ArbeidsgiverUtbetalinger
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode.Companion.finn
+import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
+import no.nav.helse.utbetalingstidslinje.ny.ArbeidsgiverperiodeBuilderBuilder
 import no.nav.helse.økonomi.Inntekt
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -153,10 +158,10 @@ class Person private constructor(
         }
     }
 
-    internal fun arbeidsgiverperiodeFor(orgnummer: String, sykdomstidslinje: Sykdomstidslinje, kuttdato: LocalDate, periode: Periode): Arbeidsgiverperiode? {
-        val builder = ArbeidsgiverperiodeBuilder(NormalArbeidstaker)
-        infotrygdhistorikk.builder(orgnummer, builder).build(sykdomstidslinje, kuttdato til kuttdato)
-        return builder.result(periode)
+    internal fun arbeidsgiverperiodeFor(orgnummer: String, sykdomstidslinje: Sykdomstidslinje, kuttdato: LocalDate, periode: Periode, subsumsjonObserver: SubsumsjonObserver): Arbeidsgiverperiode? {
+        val periodebuilder = ArbeidsgiverperiodeBuilderBuilder()
+        infotrygdhistorikk.build(orgnummer, sykdomstidslinje, periodebuilder, subsumsjonObserver)
+        return periodebuilder.result().finn(periode)
     }
 
     private fun arbeidsgiverUtbetalinger(
@@ -167,15 +172,7 @@ class Person private constructor(
         return ArbeidsgiverUtbetalinger(
             regler = regler,
             arbeidsgivere = arbeidsgivereMedSykdom().associateWith {
-                infotrygdhistorikk.builder(
-                    organisasjonsnummer = it.organisasjonsnummer(),
-                    builder = it.builder(
-                        regler,
-                        skjæringstidspunkter,
-                        vilkårsgrunnlagHistorikk.inntektsopplysningPerSkjæringstidspunktPerArbeidsgiver(),
-                        subsumsjonObserver
-                    )
-                )
+                    it.builder(regler, skjæringstidspunkter, vilkårsgrunnlagHistorikk.inntektsopplysningPerSkjæringstidspunktPerArbeidsgiver(), subsumsjonObserver)
             },
             infotrygdhistorikk = infotrygdhistorikk,
             alder = fødselsnummer.alder(),

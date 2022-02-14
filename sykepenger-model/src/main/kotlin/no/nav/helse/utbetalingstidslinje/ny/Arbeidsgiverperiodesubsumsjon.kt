@@ -1,6 +1,8 @@
 package no.nav.helse.utbetalingstidslinje.ny
 
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
+import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.subsumsjonsformat
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
@@ -13,11 +15,15 @@ internal class Arbeidsgiverperiodesubsumsjon(
     private val other: ArbeidsgiverperiodeMediator,
     private val subsumsjonObserver: SubsumsjonObserver
 ) : ArbeidsgiverperiodeMediator by (other) {
-
+    private var sykdomstidslinje: Sykdomstidslinje = Sykdomstidslinje()
     private var tilstand: Tilstand = Initiell
 
+    internal fun tidslinje(tidslinje: Sykdomstidslinje) {
+        this.sykdomstidslinje = tidslinje
+    }
+
     override fun fridag(dato: LocalDate) {
-        subsumsjonObserver.`§ 8-17 ledd 2`(dato, emptyList()) // TODO trenger sykdomstidslinjedager
+        subsumsjonObserver.`§ 8-17 ledd 2`(dato, sykdomstidslinje.subsumsjonsformat())
         other.fridag(dato)
     }
 

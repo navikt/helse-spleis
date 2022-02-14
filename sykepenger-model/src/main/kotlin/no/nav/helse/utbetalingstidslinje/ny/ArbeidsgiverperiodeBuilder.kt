@@ -27,6 +27,10 @@ internal class ArbeidsgiverperiodeBuilder(
 
     private var tilstand: Tilstand = Initiell
 
+    override fun preVisitSykdomstidslinje(tidslinje: Sykdomstidslinje, låstePerioder: List<Periode>) {
+        mediator.tidslinje(tidslinje)
+    }
+
     override fun postVisitSykdomstidslinje(tidslinje: Sykdomstidslinje, låstePerioder: MutableList<Periode>) {
         fridager.somFeriedager()
     }

@@ -41,6 +41,7 @@ import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.utbetaltTidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
 import no.nav.helse.utbetalingslinjer.UtbetalingObserver
 import no.nav.helse.utbetalingstidslinje.*
+import no.nav.helse.utbetalingstidslinje.ny.Inntekter
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -741,9 +742,9 @@ internal class Arbeidsgiver private constructor(
         return Utbetaling.sykdomstidslinje(utbetalinger, sykdomstidslinje)
     }
 
-    internal fun arbeidsgiverperiode(periode: Periode): Arbeidsgiverperiode? {
+    internal fun arbeidsgiverperiode(periode: Periode, subsumsjonObserver: SubsumsjonObserver): Arbeidsgiverperiode? {
         val sykdomstidslinje = sykdomstidslinje()
-        return ForkastetVedtaksperiode.arbeidsgiverperiodeFor(person, forkastede, organisasjonsnummer, sykdomstidslinje, periode)
+        return ForkastetVedtaksperiode.arbeidsgiverperiodeFor(person, forkastede, organisasjonsnummer, sykdomstidslinje, periode, subsumsjonObserver)
     }
 
     internal fun ghostPerioder(): List<GhostPeriode> = person.skjæringstidspunkterFraSpleis()
@@ -977,15 +978,16 @@ internal class Arbeidsgiver private constructor(
         skjæringstidspunkter: List<LocalDate>,
         inntektsopplysningPerSkjæringstidspunktPerArbeidsgiver: Map<LocalDate, Map<String, Inntektshistorikk.Inntektsopplysning>>?,
         subsumsjonObserver: SubsumsjonObserver
-    ): UtbetalingstidslinjeBuilder {
-        return UtbetalingstidslinjeBuilder(
+    ): no.nav.helse.utbetalingstidslinje.ny.UtbetalingstidslinjeBuilder {
+        val inntekter = Inntekter(
             skjæringstidspunkter = skjæringstidspunkter,
             inntektPerSkjæringstidspunkt = inntektsopplysningPerSkjæringstidspunktPerArbeidsgiver?.mapValues { (_, inntektsopplysningPerArbeidsgiver) ->
                 inntektsopplysningPerArbeidsgiver[organisasjonsnummer]
             },
-            arbeidsgiverRegler = regler,
+            regler = regler,
             subsumsjonObserver = subsumsjonObserver
         )
+        return no.nav.helse.utbetalingstidslinje.ny.UtbetalingstidslinjeBuilder(inntekter)
     }
 
     internal fun lagreArbeidsforhold(arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold>, skjæringstidspunkt: LocalDate) {
@@ -997,8 +999,9 @@ internal class Arbeidsgiver private constructor(
         )
     }
 
-    internal fun build(builder: IArbeidsgiverperiodetelling, periode: Periode) {
-        builder.build(sykdomstidslinje(), periode)
+    internal fun build(subsumsjonObserver: SubsumsjonObserver, infotrygdhistorikk: Infotrygdhistorikk, builder: no.nav.helse.utbetalingstidslinje.ny.IUtbetalingstidslinjeBuilder, periode: Periode): Utbetalingstidslinje {
+        val sykdomstidslinje = sykdomstidslinje().fremTilOgMed(periode.endInclusive).takeUnless { it.count() == 0 } ?: return Utbetalingstidslinje()
+        return infotrygdhistorikk.build(organisasjonsnummer, sykdomstidslinje, builder, subsumsjonObserver)
     }
 
     internal fun beregn(aktivitetslogg: IAktivitetslogg, arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger, periode: Periode): Boolean {
@@ -1064,22 +1067,22 @@ internal class Arbeidsgiver private constructor(
 
     internal fun søknadsperioder(hendelseIder: Set<UUID>) = sykdomshistorikk.søknadsperioder(hendelseIder)
 
+
     internal fun loggførHendelsesreferanse(organisasjonsnummer: String, skjæringstidspunkt: LocalDate, meldingsreferanseId: UUID) {
         if (this.organisasjonsnummer != organisasjonsnummer) return
         vedtaksperioder.filter { it.gjelder(skjæringstidspunkt) }.forEach { it.loggførHendelsesreferanse(meldingsreferanseId) }
     }
-
 
     fun harFerdigstiltPeriode() = vedtaksperioder.any(ER_ELLER_HAR_VÆRT_AVSLUTTET) || forkastede.harAvsluttedePerioder()
 
     internal fun tilstøtendeBak(vedtaksperiode: Vedtaksperiode): Vedtaksperiode? {
         return vedtaksperioder.firstOrNull { it > vedtaksperiode }?.takeIf { vedtaksperiode.erSykeperiodeRettFør(it) }
     }
-
     internal fun harPeriodeBak(vedtaksperiode: Vedtaksperiode) = vedtaksperioder.any { it > vedtaksperiode }
     internal fun erAlleFerdigbehandletBak(vedtaksperiode: Vedtaksperiode) = vedtaksperioder
         .filter { it > vedtaksperiode }
         .all(FERDIG_BEHANDLET)
+
     internal fun erAlleUtenUtbetaling(vedtaksperiode: Vedtaksperiode) = vedtaksperioder
         .filter { it > vedtaksperiode }
         .all(UTEN_UTBETALING)

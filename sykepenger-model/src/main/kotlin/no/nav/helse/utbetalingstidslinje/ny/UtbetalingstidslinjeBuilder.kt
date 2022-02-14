@@ -7,13 +7,17 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 
-internal class UtbetalingstidslinjeBuilder(private val inntekter: Inntekter) : ArbeidsgiverperiodeMediator {
+internal interface IUtbetalingstidslinjeBuilder : ArbeidsgiverperiodeMediator {
+    fun result(): Utbetalingstidslinje
+}
+
+internal class UtbetalingstidslinjeBuilder(private val inntekter: Inntekter) : IUtbetalingstidslinjeBuilder {
     private val tidslinje = Utbetalingstidslinje()
     private val periodebuilder = ArbeidsgiverperiodeBuilderBuilder()
     private var sisteArbeidsgiverperiode: Arbeidsgiverperiode? = null
     private val nåværendeArbeidsgiverperiode: Arbeidsgiverperiode? get() = sisteArbeidsgiverperiode ?: periodebuilder.build()
 
-    internal fun result(): Utbetalingstidslinje {
+    override fun result(): Utbetalingstidslinje {
         return tidslinje
     }
 

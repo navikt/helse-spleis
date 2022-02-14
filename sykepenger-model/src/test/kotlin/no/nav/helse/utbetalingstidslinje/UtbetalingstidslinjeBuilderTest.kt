@@ -12,6 +12,9 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
+import no.nav.helse.utbetalingstidslinje.ny.ArbeidsgiverperiodeBuilder
+import no.nav.helse.utbetalingstidslinje.ny.Infotrygddekoratør
+import no.nav.helse.utbetalingstidslinje.ny.Inntekter
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
@@ -67,14 +70,14 @@ internal class UtbetalingstidslinjeBuilderTest {
 
     @Test
     fun `overgang fra infotrygd`() {
-        2.S.utbetalingslinjer(strategi = infotrygdUtbetaling(listOf(1.januar)))
+        2.S.utbetalingslinjer(betalteInfotrygddager = listOf(1.januar til 2.januar))
         assertEquals(1, tidslinje.inspektør.unikedager.size)
         assertEquals(2, tidslinje.inspektør.navDagTeller)
     }
 
     @Test
     fun `infotrygd utbetaler etter vi har startet arbeidsgiverperiodetelling`() {
-        (31.S).utbetalingslinjer(strategi = infotrygdUtbetaling(listOf(10.januar)))
+        (31.S).utbetalingslinjer(betalteInfotrygddager = listOf(10.januar til 31.januar))
         assertEquals(3, tidslinje.inspektør.unikedager.size)
         assertEquals(9, tidslinje.inspektør.arbeidsgiverperiodeDagTeller)
         assertEquals(16, tidslinje.inspektør.navDagTeller)
@@ -83,7 +86,7 @@ internal class UtbetalingstidslinjeBuilderTest {
 
     @Test
     fun `infotrygd utbetaler etter vi har startet arbeidsgiverperiodetelling med opphold`() {
-        (9.S + 1.A + 22.S).utbetalingslinjer(strategi = infotrygdUtbetaling(listOf(11.januar)))
+        (9.S + 1.A + 22.S).utbetalingslinjer(betalteInfotrygddager = listOf(11.januar til 1.februar))
         assertEquals(4, tidslinje.inspektør.unikedager.size)
         assertEquals(9, tidslinje.inspektør.arbeidsgiverperiodeDagTeller)
         assertEquals(16, tidslinje.inspektør.navDagTeller)
@@ -92,14 +95,14 @@ internal class UtbetalingstidslinjeBuilderTest {
 
     @Test
     fun `sammenblandet infotrygd og spleis`() {
-        (2.S + 15.A + 2.S).utbetalingslinjer(strategi = infotrygdUtbetaling(listOf(1.januar)))
+        (2.S + 15.A + 2.S).utbetalingslinjer(betalteInfotrygddager = listOf(1.januar til 2.januar))
         assertEquals(2, tidslinje.inspektør.unikedager.size)
         assertEquals(4, tidslinje.inspektør.navDagTeller)
     }
 
     @Test
     fun `ny arbeidsgiverperiode i spleis`() {
-        (2.S + 16.A + 20.S).utbetalingslinjer(strategi = infotrygdUtbetaling(listOf(1.januar)))
+        (2.S + 16.A + 20.S).utbetalingslinjer(betalteInfotrygddager = listOf(1.januar til 2.januar))
         assertEquals(4, tidslinje.inspektør.unikedager.size)
         assertEquals(16, tidslinje.inspektør.arbeidsgiverperiodeDagTeller)
         assertEquals(5, tidslinje.inspektør.navDagTeller)
@@ -108,7 +111,7 @@ internal class UtbetalingstidslinjeBuilderTest {
 
     @Test
     fun `infotrygd midt i`() {
-        (20.S + 32.A + 20.S).utbetalingslinjer(strategi = infotrygdUtbetaling(listOf(22.februar)))
+        (20.S + 32.A + 20.S).utbetalingslinjer(betalteInfotrygddager = listOf(22.februar til 13.mars))
         assertEquals(4, tidslinje.inspektør.unikedager.size)
         assertEquals(16, tidslinje.inspektør.arbeidsgiverperiodeDagTeller)
         assertEquals(32, tidslinje.inspektør.arbeidsdagTeller)
@@ -118,7 +121,7 @@ internal class UtbetalingstidslinjeBuilderTest {
 
     @Test
     fun `alt infotrygd`() {
-        (20.S + 32.A + 20.S).utbetalingslinjer(strategi = infotrygdUtbetaling(listOf(2.januar, 22.februar)))
+        (20.S + 32.A + 20.S).utbetalingslinjer(betalteInfotrygddager = listOf(2.januar til 20.januar, 22.februar til 13.mars))
         assertEquals(4, tidslinje.inspektør.unikedager.size)
         assertEquals(1, tidslinje.inspektør.arbeidsgiverperiodeDagTeller)
         assertEquals(32, tidslinje.inspektør.arbeidsdagTeller)
@@ -128,7 +131,7 @@ internal class UtbetalingstidslinjeBuilderTest {
 
     @Test
     fun `kort infotrygdperiode etter utbetalingopphold`() {
-        (16.U + 1.S + 32.opphold + 5.S + 20.S).utbetalingslinjer(strategi = infotrygdUtbetaling(listOf(19.februar)))
+        (16.U + 1.S + 32.opphold + 5.S + 20.S).utbetalingslinjer(betalteInfotrygddager = listOf(19.februar til 15.mars))
         assertEquals(5, tidslinje.inspektør.unikedager.size)
         assertEquals(16, tidslinje.inspektør.arbeidsgiverperiodeDagTeller)
         assertEquals(22, tidslinje.inspektør.arbeidsdagTeller)
@@ -176,7 +179,7 @@ internal class UtbetalingstidslinjeBuilderTest {
 
     @Test
     fun `sykdom fra Infotrygd ellers bare ferie`() {
-        (7.S + 20.F).utbetalingslinjer(strategi = infotrygdUtbetaling(listOf(1.januar)))
+        (7.S + 20.F).utbetalingslinjer(betalteInfotrygddager = listOf(1.januar til 7.januar))
         assertEquals(5, tidslinje.inspektør.navDagTeller)
         assertEquals(2, tidslinje.inspektør.navHelgDagTeller)
         assertEquals(20, tidslinje.inspektør.fridagTeller)
@@ -886,7 +889,6 @@ internal class UtbetalingstidslinjeBuilderTest {
         1.mars to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 1.mars, UUID.randomUUID(), 50000.månedlig),
     )
 
-
     @Test
     fun `Etter sykdom som slutter på fredag starter gap-telling i helgen - helg som friskHelgdag`() { // Fordi vi vet når hen gjenopptok arbeidet, og det var i helgen
         (16.U + 3.S + 2.R + 5.A + 2.R + 5.A + 2.R + 18.S).utbetalingslinjer(
@@ -955,13 +957,20 @@ internal class UtbetalingstidslinjeBuilderTest {
     private fun Sykdomstidslinje.utbetalingslinjer(
         inntektsopplysningPerSkjæringstidspunkt: Map<LocalDate, Inntektshistorikk.Inntektsopplysning?> = this@UtbetalingstidslinjeBuilderTest.inntektsopplysningPerSkjæringstidspunkt,
         skjæringstidspunkter: List<LocalDate> = listOf(1.januar, 1.februar, 1.mars),
-        strategi: Forlengelsestrategi = Forlengelsestrategi.Ingen
+        betalteInfotrygddager: List<Periode> = emptyList()
     ) {
-        tidslinje = UtbetalingstidslinjeBuilder(
+        val teller = no.nav.helse.utbetalingstidslinje.ny.Arbeidsgiverperiodeteller.NormalArbeidstaker
+        val inntekter = Inntekter(
             skjæringstidspunkter = skjæringstidspunkter,
             inntektPerSkjæringstidspunkt = inntektsopplysningPerSkjæringstidspunkt,
+            regler = ArbeidsgiverRegler.Companion.NormalArbeidstaker,
             subsumsjonObserver = MaskinellJurist()
-        ).apply { forlengelsestrategi(strategi) }.also { it.build(this, periode()!!) }.result()
+        )
+        val builder = no.nav.helse.utbetalingstidslinje.ny.UtbetalingstidslinjeBuilder(inntekter)
+        val arbeidsgiverperiodeBuilder = ArbeidsgiverperiodeBuilder(teller, builder, MaskinellJurist())
+        val dekoratør = Infotrygddekoratør(teller, arbeidsgiverperiodeBuilder, betalteInfotrygddager)
+        this.accept(dekoratør)
+        tidslinje = builder.result()
         verifiserRekkefølge(tidslinje)
     }
 

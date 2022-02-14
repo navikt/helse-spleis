@@ -13,6 +13,8 @@ import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde.Companion.INGEN
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
+import no.nav.helse.utbetalingstidslinje.ny.Inntekter
+import no.nav.helse.utbetalingstidslinje.ny.UtbetalingstidslinjeBuilder
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -105,13 +107,14 @@ internal abstract class HistorieTest {
             }
         }
         val sykdomstidslinje = arbeidsgiverSykdomstidslinje.getValue(orgnr)
-        val builder = UtbetalingstidslinjeBuilder(
+        val inntekter = Inntekter(
             skjæringstidspunkter = infotrygdhistorikk.skjæringstidspunkter(arbeidsgiverSykdomstidslinje.values.toList()),
             inntektPerSkjæringstidspunkt = inntektsdatoer.associateWith { Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), it, UUID.randomUUID(), 25000.månedlig) },
-            arbeidsgiverRegler = regler,
+            regler = regler,
             subsumsjonObserver = MaskinellJurist()
         )
-        return infotrygdhistorikk.builder(orgnr, builder).also { it.build(sykdomstidslinje, periode) }.result()
+        val utbetalingstidslinjebuilder = UtbetalingstidslinjeBuilder(inntekter)
+        return infotrygdhistorikk.build(orgnr, sykdomstidslinje, utbetalingstidslinjebuilder, MaskinellJurist())
     }
 
     protected fun skjæringstidspunkt(fom: LocalDate) = infotrygdhistorikk.skjæringstidspunkt(Periode(fom, fom), arbeidsgiverSykdomstidslinje.values.toList())
