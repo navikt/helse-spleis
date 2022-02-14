@@ -10,6 +10,7 @@ import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
+import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
@@ -368,8 +369,9 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         assertEquals(Inntektskilde.FLERE_ARBEIDSGIVERE, inspektør(a1).inntektskilde(1.vedtaksperiode))
     }
 
+    @ForventetFeil("Må implementeres")
     @Test
-    fun `En ghost som er registrert i Aa-reg mer enn 3 måneder før skjæringstidspunkt og ikke har hatt inntekt de siste 3 månedene før skjæringstidspunktet skal ikke markeres som FLERE_ARBEIDSGIVERE`() {
+    fun `Tar ikke med arbeidsforhold dersom personen startet i jobb mer enn 2 måneder før skjæringstidspunktet og ikke har inntekt de 2 siste månedene`() {
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(
@@ -380,6 +382,74 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         )
         val inntekter = listOf(
             grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 10000.månedlig.repeat(3))
+        )
+        val arbeidsforhold = listOf(
+            Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a1, ansattFom = LocalDate.EPOCH, ansattTom = null),
+            Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a2, ansattFom = 31.desember(2017), ansattTom = null)
+        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode,
+            inntektsvurdering = Inntektsvurdering(
+                listOf(sammenligningsgrunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 10000.månedlig.repeat(12)))
+            ),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter, arbeidsforhold = emptyList()),
+            arbeidsforhold = arbeidsforhold,
+            orgnummer = a1
+        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+
+        assertEquals(setOf(a1), inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.sykepengegrunnlag()?.inntektsopplysningPerArbeidsgiver()?.keys)
+        assertEquals(Inntektskilde.EN_ARBEIDSGIVER, inspektør(a1).inntektskilde(1.vedtaksperiode))
+    }
+
+    @Test
+    fun `Tar med arbeidsforhold dersom personen startet i jobb mindre enn 2 måneder før skjæringstidspunktet, selvom det mangler inntekt de 2 siste månedene`() {
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a1)
+        håndterInntektsmelding(
+            listOf(1.mars til 16.mars),
+            førsteFraværsdag = 1.mars,
+            beregnetInntekt = 10000.månedlig,
+            orgnummer = a1
+        )
+        val inntekter = listOf(
+            grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 10000.månedlig.repeat(3))
+        )
+        val arbeidsforhold = listOf(
+            Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a1, ansattFom = LocalDate.EPOCH, ansattTom = null),
+            Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a2, ansattFom = 2.januar, ansattTom = null)
+        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode,
+            inntektsvurdering = Inntektsvurdering(
+                listOf(sammenligningsgrunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 10000.månedlig.repeat(12)))
+            ),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter, arbeidsforhold = emptyList()),
+            arbeidsforhold = arbeidsforhold,
+            orgnummer = a1
+        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+
+        assertEquals(setOf(a1, a2), inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.sykepengegrunnlag()?.inntektsopplysningPerArbeidsgiver()?.keys)
+        assertEquals(Inntektskilde.FLERE_ARBEIDSGIVERE, inspektør(a1).inntektskilde(1.vedtaksperiode))
+    }
+
+    @ForventetFeil("Må implementeres")
+    @Test
+    fun `Tar ikke med arbeidsforhold dersom siste inntekt, større enn 0 kr, var 3 måneder før skjæringstidspunkt`() {
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a1)
+        håndterInntektsmelding(
+            listOf(1.mars til 16.mars),
+            førsteFraværsdag = 1.mars,
+            beregnetInntekt = 10000.månedlig,
+            orgnummer = a1
+        )
+        val inntekter = listOf(
+            grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 10000.månedlig.repeat(3)),
+            grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), listOf(500.månedlig, INGEN, INGEN)),
         )
         val arbeidsforhold = listOf(
             Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a1, ansattFom = LocalDate.EPOCH, ansattTom = null),
@@ -397,8 +467,8 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
+        assertEquals(setOf(a1), inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.sykepengegrunnlag()?.inntektsopplysningPerArbeidsgiver()?.keys)
         assertEquals(Inntektskilde.EN_ARBEIDSGIVER, inspektør(a1).inntektskilde(1.vedtaksperiode))
-
     }
 
     @Test
@@ -642,7 +712,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `tar med arbeidsforhold i vilkårsgrunnlag som startet innen 3 mnd før skjæringstidspunkt, selvom vi ikke har inntekt`() {
+    fun `tar med arbeidsforhold i vilkårsgrunnlag som startet innen 2 mnd før skjæringstidspunkt, selvom vi ikke har inntekt`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
 
@@ -659,7 +729,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
 
         val arbeidsforhold = listOf(
             Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a1, ansattFom = LocalDate.EPOCH, ansattTom = null),
-            Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a2, ansattFom = 1.desember(2017), ansattTom = null)
+            Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a2, ansattFom = 1.november(2017), ansattTom = null)
         )
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
