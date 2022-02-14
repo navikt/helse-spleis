@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e
 
 import no.nav.helse.*
 import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.TilstandType.*
@@ -127,4 +128,26 @@ internal class PingPongTest : AbstractEndToEndTest() {
         assertSisteForkastetPeriodeTilstand(a1, 2.vedtaksperiode, TIL_INFOTRYGD)
     }
 
+    @Test
+    fun `går til Infortrygd dersom det finnes en utbetalt periode i infotrygdhistorikken som starter etter denne perioden`() {
+        håndterSykmelding(Sykmeldingsperiode(12.juli(2021), 1.august(2021), 100.prosent))
+        håndterSøknad(Sykdom(12.juli(2021), 1.august(2021), 100.prosent), Søknad.Søknadsperiode.Ferie(12.juli(2021), 1.august(2021)))
+
+        val inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 2.august(2021), INNTEKT, true), Inntektsopplysning(ORGNUMMER, 22.juni(2021), INNTEKT, true))
+        val utbetlinger = arrayOf(
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 2.august(2021), 28.september(2021), 100.prosent, 1000.daglig),
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 22.juni(2021), 11.juli(2021), 100.prosent, 1000.daglig)
+        )
+        håndterUtbetalingshistorikk(1.vedtaksperiode, utbetalinger = utbetlinger, inntektshistorikk = inntektshistorikk)
+        håndterYtelser(1.vedtaksperiode)
+
+        assertForkastetPeriodeTilstander(
+            1.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_HISTORIKK,
+            TIL_INFOTRYGD
+        )
+    }
 }
