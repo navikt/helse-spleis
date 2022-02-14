@@ -8,8 +8,6 @@ import no.nav.helse.person.Ledd.LEDD_1
 import no.nav.helse.person.Paragraf.PARAGRAF_8_3
 import no.nav.helse.person.Punktum.Companion.punktum
 import no.nav.helse.person.etterlevelse.MaskinellJurist
-import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall.VILKAR_IKKE_OPPFYLT
-import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall.VILKAR_OPPFYLT
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -139,7 +137,7 @@ internal class AlderTest {
             avvisteDager = emptySet(),
             jurist = jurist
         )
-        SubsumsjonInspektør(jurist).assertParagraf(PARAGRAF_8_3, LEDD_1, 16.desember(2011), 2.punktum)
+        SubsumsjonInspektør(jurist).assertVurdert(paragraf = PARAGRAF_8_3, ledd = LEDD_1, punktum = 2.punktum, versjon = 16.desember(2011))
     }
 
     @Test
@@ -201,8 +199,8 @@ internal class AlderTest {
             avvisteDager = setOf(1.januar(2070)),
             jurist = jurist
         )
-        SubsumsjonInspektør(jurist).assertParagraf(PARAGRAF_8_3, LEDD_1, 16.desember(2011), 2.punktum, utfall = VILKAR_OPPFYLT)
-        SubsumsjonInspektør(jurist).assertParagraf(PARAGRAF_8_3, LEDD_1, 16.desember(2011), 2.punktum, utfall = VILKAR_IKKE_OPPFYLT)
+        SubsumsjonInspektør(jurist).assertOppfylt(paragraf = PARAGRAF_8_3, ledd = LEDD_1, versjon = 16.desember(2011), punktum = 2.punktum)
+        SubsumsjonInspektør(jurist).assertIkkeOppfylt(paragraf = PARAGRAF_8_3, ledd = LEDD_1, versjon = 16.desember(2011), punktum = 2.punktum)
     }
 
     @Test
@@ -214,6 +212,6 @@ internal class AlderTest {
             avvisteDager = setOf(1.januar(2070), 2.januar(2070), 3.januar(2070), 4.januar(2070), 5.januar(2070)),
             jurist = jurist
         )
-        SubsumsjonInspektør(jurist).assertParagraf(PARAGRAF_8_3, LEDD_1, 16.desember(2011), 2.punktum, utfall = VILKAR_IKKE_OPPFYLT)
+        SubsumsjonInspektør(jurist).assertIkkeOppfylt(paragraf = PARAGRAF_8_3, ledd = LEDD_1, versjon = 16.desember(2011), punktum = 2.punktum)
     }
 }

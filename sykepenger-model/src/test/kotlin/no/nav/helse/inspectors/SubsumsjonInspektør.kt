@@ -8,9 +8,6 @@ import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall
 import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall.*
 import no.nav.helse.person.etterlevelse.SubsumsjonVisitor
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.assertDoesNotThrow
-import org.junit.jupiter.api.assertThrows
-import org.opentest4j.AssertionFailedError
 import java.time.LocalDate
 import java.util.*
 
@@ -37,15 +34,13 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
         jurist.subsumsjoner().forEach { it.accept(this) }
     }
 
-    private fun finnSubsumsjon(
+    private fun finnSubsumsjoner(
         paragraf: Paragraf,
         versjon: LocalDate?,
         ledd: Ledd?,
         punktum: Punktum?,
         bokstav: Bokstav?,
         utfall: Utfall? = null,
-        inputdata: Map<String, Any>? = null,
-        outputdata: Map<String, Any>? = null,
         vedtaksperiodeId: UUID? = null
     ) =
         subsumsjoner.filter {
@@ -55,12 +50,7 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
                 && ledd?.equals(it.ledd) ?: true
                 && punktum?.equals(it.punktum) ?: true
                 && bokstav?.equals(it.bokstav) ?: true
-                && inputdata?.equals(it.input) ?: true
-                && outputdata?.equals(it.output) ?: true
                 && vedtaksperiodeId?.equals(it.vedtaksperiodeIdFraSporing()) ?: true
-        }.let {
-            assertEquals(1, it.size, "Forventer en, og kun en subsumsjon for vilkåret. Subsumsjoner funnet: $it")
-            it.first()
         }
 
     internal fun assertBeregnet(
@@ -72,9 +62,11 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
         input: Map<String, Any>,
         output: Map<String, Any>,
     ) {
-        val resultat = finnSubsumsjon(paragraf, versjon, ledd, punktum, bokstav, VILKAR_BEREGNET)
-        assertEquals(VILKAR_BEREGNET, resultat.utfall) { "Forventet oppfylt $paragraf $ledd $punktum" }
-        assertResultat(input, output, resultat)
+        val resultat = finnSubsumsjoner(paragraf, versjon, ledd, punktum, bokstav, VILKAR_BEREGNET)
+        assertEquals(1, resultat.size, "Forventer kun en subsumsjon. Subsumsjoner funnet: $resultat")
+        val subsumsjon = resultat.first()
+        assertEquals(VILKAR_BEREGNET, subsumsjon.utfall) { "Forventet oppfylt $paragraf $ledd $punktum" }
+        assertResultat(input, output, subsumsjon)
     }
 
     internal fun assertOppfylt(
@@ -83,14 +75,17 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
         ledd: Ledd,
         punktum: Punktum? = null,
         bokstav: Bokstav? = null,
-        input: Map<String, Any>,
-        output: Map<String, Any>,
+        input: Map<String, Any>? = null,
+        output: Map<String, Any>? = null,
         vedtaksperiodeId: IdInnhenter? = null,
         organisasjonsnummer: String = ORGNUMMER
     ) {
-        val resultat = finnSubsumsjon(paragraf, versjon, ledd, punktum, bokstav, VILKAR_OPPFYLT, input, output, vedtaksperiodeId = vedtaksperiodeId?.id(organisasjonsnummer))
-        assertEquals(VILKAR_OPPFYLT, resultat.utfall) { "Forventet oppfylt $paragraf $ledd $punktum" }
-        assertResultat(input, output, resultat)
+        val resultat = finnSubsumsjoner(paragraf, versjon, ledd, punktum, bokstav, VILKAR_OPPFYLT, vedtaksperiodeId = vedtaksperiodeId?.id(organisasjonsnummer))
+        assertEquals(1, resultat.size, "Forventer kun en subsumsjon. Subsumsjoner funnet: $resultat")
+        val subsumsjon = resultat.first()
+        assertEquals(VILKAR_OPPFYLT, subsumsjon.utfall) { "Forventet oppfylt $paragraf $ledd $punktum" }
+        if (input == null && output == null) return
+        assertResultat(input, output, subsumsjon)
     }
 
     internal fun assertIkkeOppfylt(
@@ -99,15 +94,18 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
         ledd: Ledd,
         punktum: Punktum? = null,
         bokstav: Bokstav? = null,
-        input: Map<String, Any>,
-        output: Map<String, Any>,
+        input: Map<String, Any>? = null,
+        output: Map<String, Any>? = null,
         vedtaksperiodeId: IdInnhenter? = null,
         organisasjonsnummer: String = ORGNUMMER
     ) {
         val resultat =
-            finnSubsumsjon(paragraf, versjon, ledd, punktum, bokstav, VILKAR_IKKE_OPPFYLT, input, output, vedtaksperiodeId = vedtaksperiodeId?.id(organisasjonsnummer))
-        assertEquals(VILKAR_IKKE_OPPFYLT, resultat.utfall) { "Forventet ikke oppfylt $paragraf $ledd $punktum" }
-        assertResultat(input, output, resultat)
+            finnSubsumsjoner(paragraf, versjon, ledd, punktum, bokstav, VILKAR_IKKE_OPPFYLT, vedtaksperiodeId = vedtaksperiodeId?.id(organisasjonsnummer))
+        assertEquals(1, resultat.size, "Forventer kun en subsumsjon. Subsumsjoner funnet: $resultat")
+        val subsumsjon = resultat.first()
+        assertEquals(VILKAR_IKKE_OPPFYLT, subsumsjon.utfall) { "Forventet ikke oppfylt $paragraf $ledd $punktum" }
+        if (input == null && output == null) return
+        assertResultat(input, output, subsumsjon)
     }
 
     internal fun assertFlereIkkeOppfylt(
@@ -151,9 +149,8 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
         versjon: LocalDate? = null,
         organisasjonsnummer: String = ORGNUMMER
     ) {
-        assertDoesNotThrow("Forventet at $paragraf $ledd $punktum er vurdert") {
-            finnSubsumsjon(paragraf, versjon, ledd, punktum, bokstav, null, null, null, vedtaksperiodeId?.id(organisasjonsnummer))
-        }
+        val resultat = finnSubsumsjoner(paragraf, versjon, ledd, punktum, bokstav, null, vedtaksperiodeId?.id(organisasjonsnummer))
+        assertEquals(1, resultat.size, "Forventer kun en subsumsjon. Subsumsjoner funnet: $resultat")
     }
 
     internal fun assertIkkeVurdert(
@@ -165,23 +162,11 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
         versjon: LocalDate? = null,
         organisasjonsnummer: String = ORGNUMMER
     ) {
-        assertThrows<AssertionFailedError> {
-            finnSubsumsjon(paragraf, versjon, ledd, punktum, bokstav, null, null, null, vedtaksperiodeId?.id(organisasjonsnummer))
-        }
+        val resultat = finnSubsumsjoner(paragraf, versjon, ledd, punktum, bokstav, null, vedtaksperiodeId?.id(organisasjonsnummer))
+        assertEquals(0, resultat.size, "Forventer ingen subsumsjoner. Subsumsjoner funnet: $resultat")
     }
 
-    internal fun assertParagraf(
-        expectedParagraf: Paragraf,
-        expectedLedd: Ledd,
-        expectedVersjon: LocalDate,
-        expectedPunktum: Punktum? = null,
-        expectedBokstav: Bokstav? = null,
-        utfall: Utfall? = null
-    ) {
-        finnSubsumsjon(expectedParagraf, expectedVersjon, expectedLedd, expectedPunktum, expectedBokstav, utfall)
-    }
-
-    private fun assertResultat(inputdata: Map<String, Any>, outputdata: Map<String, Any>, resultat: Subsumsjon) {
+    private fun assertResultat(inputdata: Map<String, Any>?, outputdata: Map<String, Any>?, resultat: Subsumsjon) {
         assertEquals(inputdata, resultat.input)
         assertEquals(outputdata, resultat.output)
     }

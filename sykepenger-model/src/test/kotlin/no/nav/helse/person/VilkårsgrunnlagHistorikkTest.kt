@@ -9,6 +9,7 @@ import no.nav.helse.januar
 import no.nav.helse.juni
 import no.nav.helse.person.Inntektshistorikk.Inntektsmelding
 import no.nav.helse.person.Ledd.Companion.ledd
+import no.nav.helse.person.Paragraf.*
 import no.nav.helse.person.Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
@@ -91,7 +92,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             Periodetype.FØRSTEGANGSBEHANDLING,
             jurist
         )
-        SubsumsjonInspektør(jurist).assertParagraf(Paragraf.PARAGRAF_8_2, 1.ledd, 12.juni(2020))
+        SubsumsjonInspektør(jurist).assertVurdert(paragraf = PARAGRAF_8_2, ledd = 1.ledd, versjon = 12.juni(2020))
     }
 
     @Test
