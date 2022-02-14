@@ -393,12 +393,16 @@ interface SubsumsjonObserver {
         }
 
         override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.NavHelgDag, dato: LocalDate, økonomi: Økonomi) {
-            visit(dato, "NAVDAG")
+            if (navdager.isNotEmpty() && navdager.last().erAvvistDag()) visit(dato, "AVVISTDAG") else visit(dato, "NAVDAG")
         }
 
         override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.Fridag, dato: LocalDate, økonomi: Økonomi) {
             // Dersom vi er inne i en oppholdsperiode ønsker vi ikke å ta med vanlige helger
             if (navdager.isNotEmpty() && navdager.last().erRettFør(dato)) visit(dato, "FRIDAG")
+        }
+
+        override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.AvvistDag, dato: LocalDate, økonomi: Økonomi) {
+            visit(dato, "AVVISTDAG")
         }
 
         private fun visit(dato: LocalDate, dagtype: String) {
