@@ -8,6 +8,7 @@ import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.builders.UtbetaltEventBuilder
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.filter.Brukerutbetalingfilter
+import no.nav.helse.person.filter.Featurefilter
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.harId
@@ -107,8 +108,8 @@ internal class VedtaksperiodeUtbetalinger(private val arbeidsgiver: Arbeidsgiver
         builder.utbetaling(siste!!)
     }
 
-    internal fun kanIkkeFortsette(hendelse: IAktivitetslogg, harBrukerutbetaling: Boolean) =
-        Toggle.LageBrukerutbetaling.kanIkkeFortsette(hendelse, siste!!, harBrukerutbetaling)
+    internal fun kanIkkeFortsette(hendelse: IAktivitetslogg, harBrukerutbetaling: Boolean, brukerutbetalingfilter: Featurefilter) =
+        Toggle.LageBrukerutbetaling.kanIkkeFortsette(hendelse, siste!!, harBrukerutbetaling, brukerutbetalingfilter)
 
     internal fun valider(simulering: Simulering) = siste!!.valider(simulering)
     internal fun erKlarForGodkjenning() = siste!!.erKlarForGodkjenning()

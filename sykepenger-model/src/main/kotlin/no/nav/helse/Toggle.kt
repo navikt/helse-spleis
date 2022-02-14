@@ -1,6 +1,7 @@
 package no.nav.helse
 
 import no.nav.helse.person.IAktivitetslogg
+import no.nav.helse.person.filter.Featurefilter
 import no.nav.helse.utbetalingslinjer.Utbetaling
 
 /**
@@ -134,14 +135,16 @@ abstract class Toggle internal constructor(enabled: Boolean = false, private val
     object SpeilApiV2 : Toggle("SPEIL_API_V2")
     object GraphQLPlayground : Toggle("GraphQLPlayground")
     object RevurdereInntektMedFlereArbeidsgivere : Toggle(false)
-    object DelvisRefusjon : Toggle("DELVIS_REFUSJON",false)
     object GjenopptaAvsluttetUtenUtbetaling : Toggle(false)
     object SubsumsjonHendelser : Toggle("SUBSUMSJON_HENDELSER", false)
     object ForkastForlengelseAvForkastetPeriode : Toggle(false)
 
-    object LageBrukerutbetaling : Toggle("LAGE_BRUKERUTBETALING") {
-        internal fun kanIkkeFortsette(aktivitetslogg: IAktivitetslogg, utbetaling: Utbetaling, harBrukerutbetaling: Boolean): Boolean {
+    object BrukerutbetalingFilter : Toggle("BRUKERUTBETALING_FILTER", false)
+    object DelvisRefusjon : Toggle(false)
+    object LageBrukerutbetaling : Toggle(false) {
+        internal fun kanIkkeFortsette(aktivitetslogg: IAktivitetslogg, utbetaling: Utbetaling, harBrukerutbetaling: Boolean, brukerutbetalingfilter: Featurefilter): Boolean {
             if (DelvisRefusjon.disabled && utbetaling.harDelvisRefusjon()) aktivitetslogg.error("Utbetalingen har endringer i både arbeidsgiver- og personoppdrag")
+            else if (brukerutbetalingfilter.filtrer(aktivitetslogg)) return false
             else if (disabled && harBrukerutbetaling) aktivitetslogg.error("Utbetalingstidslinje inneholder brukerutbetaling")
             else if (disabled && utbetaling.harBrukerutbetaling()) aktivitetslogg.error("Utbetaling inneholder brukerutbetaling (men ikke for den aktuelle vedtaksperioden)")
             return aktivitetslogg.hasErrorsOrWorse()

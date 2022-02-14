@@ -33,6 +33,7 @@ import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.filter.Brukerutbetalingfilter
+import no.nav.helse.person.filter.RevurderingBrukerutbetalingfilter
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
@@ -694,14 +695,11 @@ internal class Vedtaksperiode private constructor(
             .also { inntektsmeldingInfo?.build(it, arbeidsgiver) }
             .inntektkilde(inntektskilde())
             .vedtaksperiodeHarWarnings(vedtaksperiodeHarWarnings)
+            .harBrukerutbetaling(harBrukerutbetaling)
             .build()
 
-        if (filter.filtrer(hendelse)) {
-            hendelse.info("Kandidat for brukerutbetaling${if (harBrukerutbetaling) " og perioden er brukerutbetaling" else ", men perioden har ikke brukerutbetaling"}")
-        }
-
         when {
-            utbetalinger.kanIkkeFortsette(hendelse, harBrukerutbetaling) -> {
+            utbetalinger.kanIkkeFortsette(hendelse, harBrukerutbetaling, filter) -> {
                 person.invaliderAllePerioder(hendelse, "Kan ikke fortsette på grunn av manglende funksjonalitet for utbetaling til bruker")
             }
             ingenUtbetaling && kunArbeidsgiverdager && !vedtaksperiodeHarWarnings -> {
@@ -766,7 +764,7 @@ internal class Vedtaksperiode private constructor(
     private fun høstingsresultaterRevurdering(hendelse: ArbeidstakerHendelse, andreVedtaksperioder: List<Vedtaksperiode>) {
         hendelse.info("Videresender utbetaling til alle vedtaksperioder innenfor samme fagsystemid som er til revurdering")
         when {
-            utbetalinger.kanIkkeFortsette(hendelse, harBrukerutbetaling(andreVedtaksperioder)) ->
+            utbetalinger.kanIkkeFortsette(hendelse, harBrukerutbetaling(andreVedtaksperioder), RevurderingBrukerutbetalingfilter) ->
                 tilstand(hendelse, RevurderingFeilet) {
                     hendelse.error("""Saken inneholder brukerutbetalinger etter revurdering, settes til "Revurdering feilet"""")
                 }
