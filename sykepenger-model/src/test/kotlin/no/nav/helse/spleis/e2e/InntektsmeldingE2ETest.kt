@@ -1708,6 +1708,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "begrunnelse")
         assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
-        assertError(1.vedtaksperiode, "Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden på grunn av: begrunnelse")
+        assertError("Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden på grunn av: begrunnelse", 1.vedtaksperiode.filter())
     }
 }

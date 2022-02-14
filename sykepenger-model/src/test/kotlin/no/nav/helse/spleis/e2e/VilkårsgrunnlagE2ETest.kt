@@ -28,7 +28,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
             }
         ))
 
-        assertError(1.vedtaksperiode, "Har mer enn 25 % avvik")
+        assertError("Har mer enn 25 % avvik", 1.vedtaksperiode.filter())
     }
 
     @Test
@@ -40,7 +40,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(emptyList()))
 
-        assertError(1.vedtaksperiode, "Har mer enn 25 % avvik")
+        assertError("Har mer enn 25 % avvik", 1.vedtaksperiode.filter())
     }
 
     @Test

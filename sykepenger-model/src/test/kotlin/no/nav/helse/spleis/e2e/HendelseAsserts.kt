@@ -160,6 +160,16 @@ internal fun AbstractEndToEndTest.assertSisteForkastetPeriodeTilstand(orgnummer:
     assertEquals(tilstand, observatør.tilstandsendringer[vedtaksperiodeIdInnhenter.id(orgnummer)]?.last())
 }
 
+internal fun AbstractEndToEndTest.assertInfo(forventet: String, vararg filtre: AktivitetsloggFilter) {
+    val info = collectInfo(*filtre)
+    assertEquals(1, info.count { it == forventet }, "fant ikke ett tilfelle av info. Info:\n${info.joinToString("\n")}")
+}
+
+internal fun AbstractEndToEndTest.assertNoInfo(forventet: String, vararg filtre: AktivitetsloggFilter) {
+    val info = collectInfo(*filtre)
+    assertEquals(0, info.count { it == forventet }, "fant uventet info. Info:\n${info.joinToString("\n")}")
+}
+
 internal fun AbstractPersonTest.assertNoWarnings(vararg filtre: AktivitetsloggFilter) {
     val warnings = collectWarnings(*filtre)
     assertTrue(warnings.isEmpty(), "Forventet ingen warnings. Warnings:\n${warnings.joinToString("\n")}")
@@ -177,45 +187,6 @@ internal fun AbstractPersonTest.assertWarning(warning: String, vararg filtre: Ak
 internal fun AbstractPersonTest.assertNoWarning(warning: String, vararg filtre: AktivitetsloggFilter) {
     val warnings = collectWarnings(*filtre)
     assertFalse(warnings.contains(warning), "fant ikke forventet warning. Warnings:\n${warnings.joinToString("\n")}")
-}
-
-private fun AbstractPersonTest.collectWarnings(vararg filtre: AktivitetsloggFilter): MutableList<String> {
-    val warnings = mutableListOf<String>()
-    person.personLogg.accept(object : AktivitetsloggVisitor {
-        override fun visitWarn(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Warn, melding: String, tidsstempel: String) {
-            if (filtre.all { filter -> kontekster.any { filter.filtrer(it) } }) {
-                warnings.add(melding)
-            }
-        }
-    })
-    return warnings
-}
-
-internal fun AbstractEndToEndTest.assertInfo(forventet: String, vararg filtre: AktivitetsloggFilter) {
-    val info = collectInfo(*filtre)
-    assertEquals(1, info.count { it == forventet }, "fant ikke ett tilfelle av info. Info:\n${info.joinToString("\n")}")
-}
-
-internal fun AbstractEndToEndTest.assertNoInfo(forventet: String, vararg filtre: AktivitetsloggFilter) {
-    val info = collectInfo(*filtre)
-    assertEquals(0, info.count { it == forventet }, "fant uventet info. Info:\n${info.joinToString("\n")}")
-}
-
-private fun AbstractEndToEndTest.collectInfo(vararg filtre: AktivitetsloggFilter): MutableList<String> {
-    val info = mutableListOf<String>()
-    person.personLogg.accept(object : AktivitetsloggVisitor {
-        override fun visitInfo(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Info, melding: String, tidsstempel: String) {
-            if (filtre.all { filter -> kontekster.any { filter.filtrer(it) } }) {
-                info.add(melding)
-            }
-        }
-    })
-    return info
-}
-
-internal fun AbstractEndToEndTest.assertError(idInnhenter: IdInnhenter, error: String, orgnummer: String = AbstractPersonTest.ORGNUMMER) {
-    val errors = collectErrors(idInnhenter.filter(orgnummer))
-    assertTrue(errors.contains(error), "fant ikke forventet error for $orgnummer. Errors:\n${errors.joinToString("\n")}")
 }
 
 internal fun AbstractEndToEndTest.assertError(error: String, vararg filtre: AktivitetsloggFilter) {
@@ -237,6 +208,30 @@ internal fun AbstractPersonTest.assertNoErrors(vararg filtre: AktivitetsloggFilt
 internal fun AbstractEndToEndTest.assertSevere(severe: String, vararg filtre: AktivitetsloggFilter) {
     val severes = collectSeveres(*filtre)
     assertTrue(severes.contains(severe), "fant ikke forventet severe. Severes:\n${severes.joinToString("\n")}")
+}
+
+private fun AbstractEndToEndTest.collectInfo(vararg filtre: AktivitetsloggFilter): MutableList<String> {
+    val info = mutableListOf<String>()
+    person.personLogg.accept(object : AktivitetsloggVisitor {
+        override fun visitInfo(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Info, melding: String, tidsstempel: String) {
+            if (filtre.all { filter -> kontekster.any { filter.filtrer(it) } }) {
+                info.add(melding)
+            }
+        }
+    })
+    return info
+}
+
+private fun AbstractPersonTest.collectWarnings(vararg filtre: AktivitetsloggFilter): MutableList<String> {
+    val warnings = mutableListOf<String>()
+    person.personLogg.accept(object : AktivitetsloggVisitor {
+        override fun visitWarn(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Warn, melding: String, tidsstempel: String) {
+            if (filtre.all { filter -> kontekster.any { filter.filtrer(it) } }) {
+                warnings.add(melding)
+            }
+        }
+    })
+    return warnings
 }
 
 internal fun AbstractPersonTest.collectErrors(vararg filtre: AktivitetsloggFilter): MutableList<String> {

@@ -63,7 +63,7 @@ internal class NødnummerE2ETest : AbstractEndToEndTest() {
             Inntektsopplysning(ORGNUMMER, 17.januar, 500.daglig, true)
         ))
         assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode)) { person.personLogg.toString() }
-        assertError(1.vedtaksperiode, "Det er registrert bruk av på nødnummer")
+        assertError("Det er registrert bruk av på nødnummer", 1.vedtaksperiode.filter())
     }
 
     @Test
@@ -82,8 +82,8 @@ internal class NødnummerE2ETest : AbstractEndToEndTest() {
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.februar, 28.februar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode, PersonUtbetalingsperiode(nødnummer, 17.januar, 31.januar, 100.prosent, 500.daglig), inntektshistorikk = listOf(Inntektsopplysning(nødnummer, 17.januar, 500.daglig, false)))
         assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
-        assertError(1.vedtaksperiode, "Det er registrert utbetaling på nødnummer")
-        assertError(1.vedtaksperiode, "Det er registrert bruk av på nødnummer")
+        assertError("Det er registrert utbetaling på nødnummer", 1.vedtaksperiode.filter())
+        assertError("Det er registrert bruk av på nødnummer", 1.vedtaksperiode.filter())
     }
 
     @Test
@@ -96,7 +96,7 @@ internal class NødnummerE2ETest : AbstractEndToEndTest() {
             Inntektsopplysning(ORGNUMMER, 20.januar, 500.daglig, true)
         ))
         assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
-        assertError(1.vedtaksperiode, "Det er registrert utbetaling på nødnummer")
-        assertError(1.vedtaksperiode, "Det er registrert bruk av på nødnummer")
+        assertError("Det er registrert utbetaling på nødnummer", 1.vedtaksperiode.filter())
+        assertError("Det er registrert bruk av på nødnummer", 1.vedtaksperiode.filter())
     }
 }

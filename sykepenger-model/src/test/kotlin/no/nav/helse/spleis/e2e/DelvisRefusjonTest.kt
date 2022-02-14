@@ -940,7 +940,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a2)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1, refusjon = Inntektsmelding.Refusjon(INNTEKT, 30.januar, emptyList()))
         assertSisteForkastetPeriodeTilstand(a1, 1.vedtaksperiode, TIL_INFOTRYGD)
-        assertError(1.vedtaksperiode, "Arbeidsgiver opphører refusjon (mistenker brukerutbetaling ved flere arbeidsgivere)", a1)
+        assertError("Arbeidsgiver opphører refusjon (mistenker brukerutbetaling ved flere arbeidsgivere)", 1.vedtaksperiode.filter(a1))
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
         assertSisteForkastetPeriodeTilstand(a2, 1.vedtaksperiode, TIL_INFOTRYGD)
     }
@@ -957,7 +957,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
             refusjon = Inntektsmelding.Refusjon(INNTEKT, null, listOf(EndringIRefusjon(INNTEKT/2, 30.januar)))
         )
         assertSisteForkastetPeriodeTilstand(a1, 1.vedtaksperiode, TIL_INFOTRYGD)
-        assertError(1.vedtaksperiode, "Arbeidsgiver har endringer i refusjon (mistenker brukerutbetaling ved flere arbeidsgivere)", a1)
+        assertError("Arbeidsgiver har endringer i refusjon (mistenker brukerutbetaling ved flere arbeidsgivere)", 1.vedtaksperiode.filter(a1))
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
         assertSisteForkastetPeriodeTilstand(a2, 1.vedtaksperiode, TIL_INFOTRYGD)
     }
@@ -974,7 +974,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
             refusjon = Inntektsmelding.Refusjon(INNTEKT/2, null, emptyList())
         )
         assertSisteForkastetPeriodeTilstand(a1, 1.vedtaksperiode, TIL_INFOTRYGD)
-        assertError(1.vedtaksperiode, "Inntektsmelding inneholder beregnet inntekt og refusjon som avviker med hverandre (mistenker brukerutbetaling ved flere arbeidsgivere)", a1)
+        assertError("Inntektsmelding inneholder beregnet inntekt og refusjon som avviker med hverandre (mistenker brukerutbetaling ved flere arbeidsgivere)", 1.vedtaksperiode.filter(a1))
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
         assertSisteForkastetPeriodeTilstand(a2, 1.vedtaksperiode, TIL_INFOTRYGD)
     }
@@ -991,7 +991,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
             refusjon = Inntektsmelding.Refusjon(INGEN, null, emptyList())
         )
         assertSisteForkastetPeriodeTilstand(a1, 1.vedtaksperiode, TIL_INFOTRYGD)
-        assertError(1.vedtaksperiode, "Arbeidsgiver forskutterer ikke (mistenker brukerutbetaling ved flere arbeidsgivere)", a1)
+        assertError("Arbeidsgiver forskutterer ikke (mistenker brukerutbetaling ved flere arbeidsgivere)", 1.vedtaksperiode.filter(a1))
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
         assertSisteForkastetPeriodeTilstand(a2, 1.vedtaksperiode, TIL_INFOTRYGD)
     }

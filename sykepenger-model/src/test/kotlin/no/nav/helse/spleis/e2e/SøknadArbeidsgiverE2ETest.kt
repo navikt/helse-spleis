@@ -1,11 +1,13 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.*
 import no.nav.helse.assertForventetFeil
+import no.nav.helse.desember
+import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.*
 import no.nav.helse.hendelser.til
+import no.nav.helse.januar
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
@@ -441,7 +443,7 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 18.januar, 100.prosent), Arbeid(17.januar, 18.januar))
         assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
         assertEquals(Utbetaling.Forkastet, inspektør.utbetalingtilstand(0))
-        assertError(1.vedtaksperiode, "Mottatt flere søknader for perioden - siste søknad inneholder arbeidsdag")
+        assertError("Mottatt flere søknader for perioden - siste søknad inneholder arbeidsdag", 1.vedtaksperiode.filter())
     }
 
 }

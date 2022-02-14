@@ -46,7 +46,7 @@ internal class FrilanserTest : AbstractEndToEndTest() {
                 )
             )
         )
-        assertError(1.vedtaksperiode, "Fant frilanserinntekt på en arbeidsgiver de siste 3 månedene")
+        assertError("Fant frilanserinntekt på en arbeidsgiver de siste 3 månedene", 1.vedtaksperiode.filter())
         assertForkastetPeriodeTilstander(
             1.vedtaksperiode,
             START,

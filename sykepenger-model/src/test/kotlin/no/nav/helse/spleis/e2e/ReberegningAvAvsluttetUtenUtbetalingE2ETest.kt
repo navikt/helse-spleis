@@ -216,7 +216,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingE2ETest : AbstractEndToEndTes
 
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
 
-        assertError(1.vedtaksperiode, "Kan ikke flytte en vedtaksperiode i AVSLUTTET_UTEN_UTBETALING ved flere arbeidsgivere", orgnummer = a1)
+        assertError("Kan ikke flytte en vedtaksperiode i AVSLUTTET_UTEN_UTBETALING ved flere arbeidsgivere", 1.vedtaksperiode.filter(a1))
 
         // Asserts for når vi har bedre gjenkjenning av flere AG vedtaksperioder
         //assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, AVVENTER_ARBEIDSGIVERE, orgnummer = a1)
@@ -245,7 +245,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingE2ETest : AbstractEndToEndTes
         håndterInntektsmelding(listOf(3.januar til 18.januar), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
 
-        assertError(1.vedtaksperiode, "Kan ikke flytte en vedtaksperiode i AVSLUTTET_UTEN_UTBETALING ved flere arbeidsgivere", orgnummer = a2)
+        assertError("Kan ikke flytte en vedtaksperiode i AVSLUTTET_UTEN_UTBETALING ved flere arbeidsgivere", 1.vedtaksperiode.filter(a2))
 
         // Asserts for når vi har bedre gjenkjenning av flere AG vedtaksperioder
 //        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, orgnummer = a1)
