@@ -18,6 +18,7 @@ internal class V144TyperPåHendelserIVedtaksperiodeTest : MigrationTest(V144Type
                 UUID.fromString("9C404C60-B696-4E49-B66F-621E308F7D3A") to Pair("SENDT_SØKNAD_NAV", "{}"),
                 UUID.fromString("387AF1E4-8667-4648-8980-5B444DEF43E6") to Pair("SENDT_SØKNAD_ARBEIDSGIVER", "{}"),
                 UUID.fromString("14965CD7-70F6-4C9E-AF41-BB852928CE2E") to Pair("OVERSTYRTIDSLINJE", "{}"),
+                UUID.fromString("70C99C8A-6C4F-456A-B637-C6A12EDAC287") to Pair("OVERSTYRTIDSLINJE", "{}"),
                 UUID.fromString("4594D999-2D43-4C90-AEAE-F710B57130EE") to Pair("OVERSTYRINNTEKT", "{}"),
                 UUID.fromString("29B6E217-49B7-4B1F-8C31-DC9EBB6E5F46") to Pair("OVERSTYRARBEIDSFORHOLD", "{}"),
             )

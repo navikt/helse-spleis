@@ -33,9 +33,12 @@ internal class V144TyperPåHendelserIVedtaksperiode : JsonMigration(version = 14
                 val vedtaksperiodeId = UUID.fromString(it["id"].asText())
                 val hendelser: ObjectNode = it.remove("hendelseIder").fold(serdeObjectMapper.createObjectNode()) { acc, idNode ->
                     val id = UUID.fromString(idNode.asText())
-                    val hendelseType = meldinger[id]
-                        ?.let { (type, _) -> type }
-                        ?: return sikkerlogg.warn("Fjerner hendelse med id=$id fra vedtaksperiode med id=$vedtaksperiodeId, da hendelsen ikke finnes i meldingstabellen i spleisdb")
+                    val hendelseType = meldinger[id]?.let { (type, _) -> type }
+
+                    if (hendelseType == null) {
+                        sikkerlogg.warn("Fjerner hendelse med id=$id fra vedtaksperiode med id=$vedtaksperiodeId, da hendelsen ikke finnes i meldingstabellen i spleisdb")
+                        return@fold acc
+                    }
                     val sporingsType = hendelseTypeTilSporing(hendelseType, vedtaksperiodeId)
                     acc.put(idNode.asText(), sporingsType.name)
                     acc
