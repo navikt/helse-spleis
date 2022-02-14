@@ -2,22 +2,18 @@ package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.Aktivitetslogg.Aktivitet.Etterlevelse.Vurderingsresultat.Companion.`§8-33 ledd 3`
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.plus
 import no.nav.helse.ukedager
-import java.time.DayOfWeek
-import java.time.DayOfWeek.SATURDAY
-import java.time.DayOfWeek.SUNDAY
+import java.time.DayOfWeek.*
 import java.time.LocalDate
 import java.time.Year
 import java.time.temporal.ChronoUnit.YEARS
 
 internal class Alder(private val fødselsdato: LocalDate) {
     private val syttiårsdagen: LocalDate = fødselsdato.plusYears(70)
-    internal val sisteVirkedagFørFylte70år: LocalDate = syttiårsdagen.sisteVirkedagFør()
+    private val sisteVirkedagFørFylte70år: LocalDate = syttiårsdagen.sisteVirkedagFør()
     private val redusertYtelseAlder: LocalDate = fødselsdato.plusYears(67)
     private val forhøyetInntektskravAlder: LocalDate = fødselsdato.plusYears(67)
 
@@ -27,8 +23,8 @@ internal class Alder(private val fødselsdato: LocalDate) {
         private const val MINSTEALDER_UTEN_FULLMAKT_FRA_VERGE = 18
         private fun LocalDate.sisteVirkedagFør(): LocalDate = this.minusDays(
             when (this.dayOfWeek) {
-                DayOfWeek.SUNDAY -> 2
-                DayOfWeek.MONDAY -> 3
+                SUNDAY -> 2
+                MONDAY -> 3
                 else -> 1
             }
         )
@@ -63,7 +59,7 @@ internal class Alder(private val fødselsdato: LocalDate) {
         val alderVedSluttenAvÅret = alderVedSluttenAvÅret(opptjeningsår)
         val prosentsats = if (alderVedSluttenAvÅret < ALDER_FOR_FORHØYET_FERIEPENGESATS) 0.102 else 0.125
         val feriepenger = beløp * prosentsats
-        Aktivitetslogg().`§8-33 ledd 3`(beløp, opptjeningsår, prosentsats, alderVedSluttenAvÅret, feriepenger)
+        //TODO: subsumsjonObserver.`§8-33 ledd 3`(beløp, opptjeningsår, prosentsats, alderVedSluttenAvÅret, feriepenger)
         return feriepenger
     }
 
