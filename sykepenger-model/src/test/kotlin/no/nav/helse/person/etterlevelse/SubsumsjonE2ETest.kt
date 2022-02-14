@@ -21,7 +21,6 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Test
-import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -638,9 +637,25 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             ledd = 1.ledd,
             versjon = FOLKETRYGDLOVENS_OPPRINNELSESDATO,
             input = mapOf(
-                "avvisteDager" to emptyList<LocalDate>()
+                "tidslinjegrunnlag" to listOf(
+                    listOf(
+                        mapOf(
+                            "fom" to 17.januar,
+                            "tom" to 31.januar,
+                            "dagtype" to "NAVDAG"
+                        )
+                    )
+                )
             ),
-            output = emptyMap()
+            output = mapOf(
+                "perioder" to listOf(
+                    mapOf(
+                        "fom" to 1.januar,
+                        "tom" to 31.januar
+                    )
+                )
+
+            )
         )
     }
 
@@ -654,18 +669,29 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
 
-        val avvisteDager = (17..31)
-            .map { it.januar }
-            .filter { it.dayOfWeek != DayOfWeek.SATURDAY && it.dayOfWeek != DayOfWeek.SUNDAY }
-
         SubsumsjonInspektør(jurist).assertIkkeOppfylt(
             paragraf = PARAGRAF_8_13,
             ledd = 1.ledd,
             versjon = FOLKETRYGDLOVENS_OPPRINNELSESDATO,
             input = mapOf(
-                "avvisteDager" to avvisteDager
+                "tidslinjegrunnlag" to listOf(
+                    listOf(
+                        mapOf(
+                            "fom" to 17.januar,
+                            "tom" to 31.januar,
+                            "dagtype" to "NAVDAG"
+                        )
+                    )
+                )
             ),
-            output = emptyMap()
+            output = mapOf(
+                "perioder" to listOf(
+                    mapOf(
+                        "fom" to 17.januar,
+                        "tom" to 31.januar
+                    )
+                )
+            )
         )
     }
 

@@ -7,11 +7,11 @@ import no.nav.helse.januar
 import no.nav.helse.juni
 import no.nav.helse.person.*
 import no.nav.helse.person.Bokstav.BOKSTAV_A
+import no.nav.helse.person.Dokumentsporing.Companion.toMap
 import no.nav.helse.person.Ledd.*
 import no.nav.helse.person.Ledd.Companion.ledd
 import no.nav.helse.person.Paragraf.*
 import no.nav.helse.person.Punktum.Companion.punktum
-import no.nav.helse.person.Dokumentsporing.Companion.toMap
 import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall
 import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall.*
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Tidslinjedag.Companion.dager
@@ -270,18 +270,37 @@ class MaskinellJurist private constructor(
         )
     }
 
-    override fun `§ 8-13 ledd 1`(oppfylt: Boolean, avvisteDager: List<LocalDate>) {
-        leggTil(
-            EnkelSubsumsjon(
-                utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
-                paragraf = PARAGRAF_8_13,
-                ledd = LEDD_1,
-                versjon = FOLKETRYGDLOVENS_OPPRINNELSESDATO,
-                input = mapOf("avvisteDager" to avvisteDager),
-                output = emptyMap(),
-                kontekster = kontekster()
-            )
-        )
+    override fun `§ 8-13 ledd 1`(periode: Periode, avvisteDager: List<LocalDate>, tidslinjer: List<List<SubsumsjonObserver.Tidslinjedag>>) {
+        fun periode(): List<LocalDate> {
+            return if (avvisteDager.isNotEmpty()) {
+                val avvisteDagerPeriode = Periode(avvisteDager.first(), avvisteDager.last())
+                periode.minus(avvisteDagerPeriode)
+            } else periode.toList()
+        }
+
+        fun logg(utfall: Utfall, dager: List<LocalDate>) {
+            dager.forEach { dagen ->
+                leggTil(
+                    GrupperbarSubsumsjon(
+                        dato = dagen,
+                        utfall = utfall,
+                        paragraf = PARAGRAF_8_13,
+                        ledd = LEDD_1,
+                        versjon = FOLKETRYGDLOVENS_OPPRINNELSESDATO,
+                        input = mapOf(
+                            "tidslinjegrunnlag" to tidslinjer.map { it.dager(periode) }
+                        ),
+                        output = emptyMap(),
+                        kontekster = kontekster()
+                    )
+                )
+            }
+        }
+
+        val oppfylteDager = periode()
+
+        if (oppfylteDager.isNotEmpty()) logg(VILKAR_OPPFYLT, oppfylteDager)
+        if (avvisteDager.isNotEmpty()) logg(VILKAR_IKKE_OPPFYLT, avvisteDager)
     }
 
     override fun `§ 8-16 ledd 1`(dato: LocalDate, dekningsgrad: Double, inntekt: Double, dekningsgrunnlag: Double) {

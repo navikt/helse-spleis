@@ -163,10 +163,11 @@ interface SubsumsjonObserver {
      *
      * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-13)
      *
-     * @param oppfylt **true** dersom uføregraden er minst 20%
-     * @param avvisteDager dager som ikke møter kriterie for [oppfylt]
+     * @param periode perioden vilkåret vurderes for
+     * @param avvisteDager dager som vilkåret ikke er oppfylt for, hvis noen
+     * @param tidslinjer alle tidslinjer på tvers av arbeidsgivere
      */
-    fun `§ 8-13 ledd 1`(oppfylt: Boolean, avvisteDager: List<LocalDate>) {}
+    fun `§ 8-13 ledd 1`(periode: Periode, avvisteDager: List<LocalDate>, tidslinjer: List<List<Tidslinjedag>>) {}
 
     /**
      * Fastsettelse av dekningsgrunnlag
@@ -306,6 +307,8 @@ interface SubsumsjonObserver {
         private fun hørerTil(tidslinjeperiode: Tidslinjeperiode) = tidslinjeperiode.hørerTil(dato, dagtype)
 
         internal fun erRettFør(dato: LocalDate) = this.dato.plusDays(1) == dato
+
+        internal fun erAvvistDag() = dagtype == "AVVISTDAG"
 
         companion object {
             fun List<Tidslinjedag>.dager(periode: Periode? = null): List<Map<String, Any>> {
