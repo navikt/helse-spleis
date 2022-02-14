@@ -1,5 +1,6 @@
 package no.nav.helse.økonomi
 
+import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import kotlin.math.absoluteValue
 import kotlin.math.roundToInt
 import kotlin.math.roundToLong
@@ -16,6 +17,10 @@ class Prosentdel private constructor(private val brøkdel: Double): Comparable<P
         private val GRENSE = 20.prosent
 
         internal fun fraRatio(ratio: Double) = Prosentdel(ratio)
+
+        internal fun subsumsjon(subsumsjonObserver: SubsumsjonObserver, block: SubsumsjonObserver.(Double) -> Unit) {
+            subsumsjonObserver.block(GRENSE.toDouble())
+        }
 
         val Number.prosent get() = fraRatio(this.toDouble() / 100.0)
     }

@@ -18,6 +18,7 @@ import java.time.LocalDateTime
 import java.time.Year
 import java.time.YearMonth
 import java.util.*
+import kotlin.math.roundToInt
 
 interface SubsumsjonObserver {
 
@@ -170,6 +171,17 @@ interface SubsumsjonObserver {
     fun `§ 8-13 ledd 1`(periode: Periode, avvisteDager: List<LocalDate>, tidslinjer: List<List<Tidslinjedag>>) {}
 
     /**
+     * Vurdering av sykepengenes størrelse
+     *
+     * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-13)
+     *
+     * @param periode perioden vilkåret vurderes for
+     * @param tidslinjer alle tidslinjer på tvers av arbeidsgivere
+     * @param grense grense brukt til å vurdere [dagerUnderGrensen]
+     * @param dagerUnderGrensen dager som befinner seg under tilstrekkelig uføregrad, gitt av [grense]
+     */
+    fun `§ 8-13 ledd 2`(periode: Periode, tidslinjer: List<List<Tidslinjedag>>, grense: Double, dagerUnderGrensen: List<LocalDate>) {}
+    /**
      * Fastsettelse av dekningsgrunnlag
      *
      * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-16)
@@ -302,16 +314,17 @@ interface SubsumsjonObserver {
 
     class Tidslinjedag(
         private val dato: LocalDate,
-        private val dagtype: String
+        private val dagtype: String,
+        private val grad: Int?
     ) {
-        private fun hørerTil(tidslinjeperiode: Tidslinjeperiode) = tidslinjeperiode.hørerTil(dato, dagtype)
+        private fun hørerTil(tidslinjeperiode: Tidslinjeperiode) = tidslinjeperiode.hørerTil(dato, dagtype, grad)
 
         internal fun erRettFør(dato: LocalDate) = this.dato.plusDays(1) == dato
 
         internal fun erAvvistDag() = dagtype == "AVVISTDAG"
 
         companion object {
-            fun List<Tidslinjedag>.dager(periode: Periode? = null): List<Map<String, Any>> {
+            fun List<Tidslinjedag>.dager(periode: Periode? = null): List<Map<String, Any?>> {
                 return this
                     .filter { it.dato >= (periode?.start ?: LocalDate.MIN) && it.dato <= (periode?.endInclusive ?: LocalDate.MAX) }
                     .sortedBy { it.dato }
@@ -319,7 +332,7 @@ interface SubsumsjonObserver {
                         if (acc.isNotEmpty() && nesteDag.hørerTil(acc.last())) {
                             acc.last().utvid(nesteDag.dato)
                         } else {
-                            acc.add(Tidslinjeperiode(nesteDag.dato, nesteDag.dato, nesteDag.dagtype))
+                            acc.add(Tidslinjeperiode(nesteDag.dato, nesteDag.dato, nesteDag.dagtype, nesteDag.grad))
                         }
                         acc
                     }.dager()
@@ -329,20 +342,22 @@ interface SubsumsjonObserver {
         private class Tidslinjeperiode(
             private val fom: LocalDate,
             private var tom: LocalDate,
-            private val dagtype: String
+            private val dagtype: String,
+            private val grad: Int?
         ) {
             fun utvid(dato: LocalDate) {
                 this.tom = dato
             }
 
-            fun hørerTil(dato: LocalDate, dagtype: String) = tom.plusDays(1) == dato && this.dagtype == dagtype
+            fun hørerTil(dato: LocalDate, dagtype: String, grad: Int?) = tom.plusDays(1) == dato && this.dagtype == dagtype && this.grad == grad
 
             companion object {
                 fun List<Tidslinjeperiode>.dager() = map {
                     mapOf(
                         "fom" to it.fom,
                         "tom" to it.tom,
-                        "dagtype" to it.dagtype
+                        "dagtype" to it.dagtype,
+                        "grad" to it.grad
                     )
                 }
             }
@@ -359,23 +374,24 @@ interface SubsumsjonObserver {
         fun dager() = navdager.toList()
 
         override fun visitDag(dag: Dag.Sykedag, dato: LocalDate, økonomi: Økonomi, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
-            visit(dato, "NAVDAG")
+            visit(dato, "NAVDAG", økonomi)
         }
 
         override fun visitDag(dag: Dag.SykHelgedag, dato: LocalDate, økonomi: Økonomi, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
-            visit(dato, "NAVDAG")
+            visit(dato, "NAVDAG", økonomi)
         }
 
         override fun visitDag(dag: Dag.Feriedag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
-            visit(dato, "FERIEDAG")
+            visit(dato, "FERIEDAG", null)
         }
 
         override fun visitDag(dag: Dag.Permisjonsdag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
-            visit(dato, "PERMISJONSDAG")
+            visit(dato, "PERMISJONSDAG", null)
         }
 
-        private fun visit(dato: LocalDate, dagtype: String) {
-            navdager.add(Tidslinjedag(dato, dagtype))
+        private fun visit(dato: LocalDate, dagtype: String, økonomi: Økonomi?) {
+            val grad = økonomi?.medData { grad, _, _ -> grad }
+            navdager.add(Tidslinjedag(dato, dagtype, grad?.roundToInt()))
         }
     }
 
@@ -389,24 +405,29 @@ interface SubsumsjonObserver {
         fun dager() = navdager.toList()
 
         override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.NavDag, dato: LocalDate, økonomi: Økonomi) {
-            visit(dato, "NAVDAG")
+            visit(dato, "NAVDAG", økonomi)
+        }
+
+        override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag, dato: LocalDate, økonomi: Økonomi) {
+            visit(dato, "AGPDAG", økonomi)
         }
 
         override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.NavHelgDag, dato: LocalDate, økonomi: Økonomi) {
-            if (navdager.isNotEmpty() && navdager.last().erAvvistDag()) visit(dato, "AVVISTDAG") else visit(dato, "NAVDAG")
+            if (navdager.isNotEmpty() && navdager.last().erAvvistDag()) visit(dato, "AVVISTDAG", økonomi) else visit(dato, "NAVDAG", økonomi)
         }
 
         override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.Fridag, dato: LocalDate, økonomi: Økonomi) {
             // Dersom vi er inne i en oppholdsperiode ønsker vi ikke å ta med vanlige helger
-            if (navdager.isNotEmpty() && navdager.last().erRettFør(dato)) visit(dato, "FRIDAG")
+            if (navdager.isNotEmpty() && navdager.last().erRettFør(dato)) visit(dato, "FRIDAG", økonomi)
         }
 
         override fun visit(dag: Utbetalingstidslinje.Utbetalingsdag.AvvistDag, dato: LocalDate, økonomi: Økonomi) {
-            visit(dato, "AVVISTDAG")
+            visit(dato, "AVVISTDAG", økonomi)
         }
 
-        private fun visit(dato: LocalDate, dagtype: String) {
-            navdager.add(Tidslinjedag(dato, dagtype))
+        private fun visit(dato: LocalDate, dagtype: String, økonomi: Økonomi?) {
+            val grad = økonomi?.medData { grad, _, _ -> grad }
+            navdager.add(Tidslinjedag(dato, dagtype, grad?.roundToInt()))
         }
     }
 

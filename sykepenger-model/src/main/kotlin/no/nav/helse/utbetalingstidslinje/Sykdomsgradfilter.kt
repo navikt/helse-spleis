@@ -8,6 +8,7 @@ import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.subsumsjons
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Companion.avvis
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Companion.avvisteDager
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Companion.periode
+import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Økonomi.Companion.totalSykdomsgrad
 
 internal class Sykdomsgradfilter(
@@ -20,6 +21,9 @@ internal class Sykdomsgradfilter(
     internal fun filter() {
         val tidslinjerForSubsumsjon = tidslinjer.subsumsjonsformat()
         val dagerUnderGrensen = periode(tidslinjer).filter { dato -> totalSykdomsgrad(tidslinjer.map { it[dato].økonomi }).erUnderGrensen() }
+        Prosentdel.subsumsjon(subsumsjonObserver) { grense ->
+            `§ 8-13 ledd 2`(periode, tidslinjerForSubsumsjon, grense, dagerUnderGrensen)
+        }
         avvis(tidslinjer, dagerUnderGrensen.grupperSammenhengendePerioder(), listOf(Begrunnelse.MinimumSykdomsgrad))
         val avvisteDager = avvisteDager(tidslinjer, periode, Begrunnelse.MinimumSykdomsgrad)
         val harAvvisteDager = avvisteDager.isNotEmpty()

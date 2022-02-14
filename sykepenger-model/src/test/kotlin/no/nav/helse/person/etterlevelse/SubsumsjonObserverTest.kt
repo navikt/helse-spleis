@@ -20,8 +20,8 @@ internal class SubsumsjonObserverTest {
     fun tidslinjedager() {
         val dager = List(31) { index ->
             val dagen = (index + 1).januar
-            if (dagen < 16.januar) Tidslinjedag(dagen, "NAVDAG")
-            else Tidslinjedag(dagen, "FERIEDAG")
+            if (dagen < 16.januar) Tidslinjedag(dagen, "NAVDAG", 100)
+            else Tidslinjedag(dagen, "FERIEDAG", 100)
         }
 
         assertEquals(
@@ -29,12 +29,14 @@ internal class SubsumsjonObserverTest {
                 mapOf(
                     "fom" to 1.januar,
                     "tom" to 15.januar,
-                    "dagtype" to "NAVDAG"
+                    "dagtype" to "NAVDAG",
+                    "grad" to 100
                 ),
                 mapOf(
                     "fom" to 16.januar,
                     "tom" to 31.januar,
-                    "dagtype" to "FERIEDAG"
+                    "dagtype" to "FERIEDAG",
+                    "grad" to 100
                 )
             ),
             dager.dager()
@@ -45,8 +47,8 @@ internal class SubsumsjonObserverTest {
     fun `tidslinjedager blir cappet til periode`() {
         val dager = List(31) { index ->
             val dagen = (index + 1).januar
-            if (dagen < 16.januar) Tidslinjedag(dagen, "NAVDAG")
-            else Tidslinjedag(dagen, "FERIEDAG")
+            if (dagen < 16.januar) Tidslinjedag(dagen, "NAVDAG", 100)
+            else Tidslinjedag(dagen, "FERIEDAG", 100)
         }
 
         assertEquals(
@@ -54,12 +56,14 @@ internal class SubsumsjonObserverTest {
                 mapOf(
                     "fom" to 10.januar,
                     "tom" to 15.januar,
-                    "dagtype" to "NAVDAG"
+                    "dagtype" to "NAVDAG",
+                    "grad" to 100
                 ),
                 mapOf(
                     "fom" to 16.januar,
                     "tom" to 20.januar,
-                    "dagtype" to "FERIEDAG"
+                    "dagtype" to "FERIEDAG",
+                    "grad" to 100
                 )
             ),
             dager.dager(Periode(10.januar, 20.januar))
@@ -68,8 +72,8 @@ internal class SubsumsjonObserverTest {
 
     @Test
     fun erRettFør() {
-        assertTrue(Tidslinjedag(1.januar, "dagtype").erRettFør(2.januar))
-        assertFalse(Tidslinjedag(1.januar, "dagtype").erRettFør(3.januar))
+        assertTrue(Tidslinjedag(1.januar, "dagtype", 100).erRettFør(2.januar))
+        assertFalse(Tidslinjedag(1.januar, "dagtype", 100).erRettFør(3.januar))
     }
 
     @Test
@@ -79,16 +83,9 @@ internal class SubsumsjonObserverTest {
 
         assertEquals(
             listOf(
-                mapOf(
-                    "fom" to 17.januar,
-                    "tom" to 31.januar,
-                    "dagtype" to "NAVDAG"
-                ),
-                mapOf(
-                    "fom" to 1.februar,
-                    "tom" to 2.februar,
-                    "dagtype" to "FRIDAG"
-                )
+                mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 0),
+                mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG", "grad" to 100),
+                mapOf("fom" to 1.februar, "tom" to 2.februar, "dagtype" to "FRIDAG", "grad" to 0)
             ),
             tidslinjedager
         )
@@ -101,11 +98,8 @@ internal class SubsumsjonObserverTest {
 
         assertEquals(
             listOf(
-                mapOf(
-                    "fom" to 17.januar,
-                    "tom" to 31.januar,
-                    "dagtype" to "NAVDAG"
-                )
+                mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 0),
+                mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG", "grad" to 100)
             ),
             tidslinjedager
         )

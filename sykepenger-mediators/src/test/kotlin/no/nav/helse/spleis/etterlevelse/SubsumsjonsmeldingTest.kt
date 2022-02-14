@@ -5,7 +5,6 @@ import com.networknt.schema.JsonSchemaFactory
 import com.networknt.schema.SpecVersion
 import com.networknt.schema.ValidationMessage
 import no.nav.helse.Toggle
-import no.nav.helse.hendelser.Periode
 import no.nav.helse.januar
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Tidslinjedag
@@ -18,7 +17,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.slf4j.LoggerFactory
 import java.net.URI
-import java.util.*
 
 internal class SubsumsjonsmeldingTest {
     private val fnr = "12029240045"
@@ -40,7 +38,7 @@ internal class SubsumsjonsmeldingTest {
 
     @Test
     fun `en melding på gyldig format`() = Toggle.SubsumsjonHendelser.enable {
-        jurist.`§ 8-17 ledd 2`(1.januar(2018), MutableList(31) { Tidslinjedag((it + 1).januar, "NAVDAG") })
+        jurist.`§ 8-17 ledd 2`(1.januar(2018), MutableList(31) { Tidslinjedag((it + 1).januar, "NAVDAG", 100) })
         subsumsjonMediator.finalize(testRapid)
         assertSubsumsjonsmelding(testRapid.inspektør.message(0)["subsumsjon"])
     }

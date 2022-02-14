@@ -47,7 +47,8 @@ class MaskinellJurist private constructor(
 
     internal fun medVedtaksperiode(vedtaksperiodeId: UUID, hendelseIder: Set<Dokumentsporing>, periode: Periode) =
         kopierMedKontekst(
-            mapOf(vedtaksperiodeId.toString() to KontekstType.Vedtaksperiode) + hendelseIder.toMap().map { it.key.toString() to it.value.tilKontekst() } + kontekster,
+            mapOf(vedtaksperiodeId.toString() to KontekstType.Vedtaksperiode) + hendelseIder.toMap()
+                .map { it.key.toString() to it.value.tilKontekst() } + kontekster,
             periode
         )
 
@@ -301,6 +302,38 @@ class MaskinellJurist private constructor(
 
         if (oppfylteDager.isNotEmpty()) logg(VILKAR_OPPFYLT, oppfylteDager)
         if (avvisteDager.isNotEmpty()) logg(VILKAR_IKKE_OPPFYLT, avvisteDager)
+    }
+
+    override fun `§ 8-13 ledd 2`(
+        periode: Periode,
+        tidslinjer: List<List<SubsumsjonObserver.Tidslinjedag>>,
+        grense: Double,
+        dagerUnderGrensen: List<LocalDate>
+    ) {
+        periode.forEach { dagen ->
+            leggTil(
+                GrupperbarSubsumsjon(
+                    dato = dagen,
+                    utfall = VILKAR_BEREGNET,
+                    paragraf = PARAGRAF_8_13,
+                    ledd = LEDD_2,
+                    versjon = FOLKETRYGDLOVENS_OPPRINNELSESDATO,
+                    input = mapOf(
+                        "tidslinjegrunnlag" to tidslinjer.map { it.dager(periode) },
+                        "grense" to grense
+                    ),
+                    output = mapOf(
+                        "dagerUnderGrensen" to dagerUnderGrensen.grupperSammenhengendePerioder().map {
+                            mapOf(
+                                "fom" to it.start,
+                                "tom" to it.endInclusive
+                            )
+                        }
+                    ),
+                    kontekster = kontekster()
+                )
+            )
+        }
     }
 
     override fun `§ 8-16 ledd 1`(dato: LocalDate, dekningsgrad: Double, inntekt: Double, dekningsgrunnlag: Double) {
@@ -567,6 +600,7 @@ class MaskinellJurist private constructor(
             }
         }
     }
+
     private fun Dokumentsporing.Type.tilKontekst() = when (this) {
         Dokumentsporing.Type.Sykmelding -> KontekstType.Sykmelding
         Dokumentsporing.Type.Søknad -> KontekstType.Søknad

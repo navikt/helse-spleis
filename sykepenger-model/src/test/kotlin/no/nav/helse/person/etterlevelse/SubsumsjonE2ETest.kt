@@ -435,8 +435,16 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                 "tom" to 26.januar,
                 "utfallFom" to 19.januar,
                 "utfallTom" to 26.januar,
-                "tidslinjegrunnlag" to listOf(listOf(mapOf("fom" to 19.januar, "tom" to 26.januar, "dagtype" to "NAVDAG"))),
-                "beregnetTidslinje" to listOf(mapOf("fom" to 19.januar, "tom" to 26.januar, "dagtype" to "NAVDAG"))
+                "tidslinjegrunnlag" to listOf(
+                    listOf(
+                        mapOf("fom" to 3.januar, "tom" to 18.januar, "dagtype" to "AGPDAG", "grad" to 0),
+                        mapOf("fom" to 19.januar, "tom" to 26.januar, "dagtype" to "NAVDAG", "grad" to 50)
+                    )
+                ),
+                "beregnetTidslinje" to listOf(
+                    mapOf("fom" to 3.januar, "tom" to 18.januar, "dagtype" to "AGPDAG", "grad" to 0),
+                    mapOf("fom" to 19.januar, "tom" to 26.januar, "dagtype" to "NAVDAG", "grad" to 50)
+                )
             ),
             output = mapOf(
                 "gjenståendeSykedager" to 242,
@@ -469,8 +477,16 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                 "tom" to 11.januar(2019),
                 "utfallFom" to 19.januar,
                 "utfallTom" to 1.januar(2019),
-                "tidslinjegrunnlag" to listOf(listOf(mapOf("fom" to 19.januar, "tom" to 11.januar(2019), "dagtype" to "NAVDAG"))),
-                "beregnetTidslinje" to listOf(mapOf("fom" to 19.januar, "tom" to 11.januar(2019), "dagtype" to "NAVDAG"))
+                "tidslinjegrunnlag" to listOf(
+                    listOf(
+                        mapOf("fom" to 3.januar, "tom" to 18.januar, "dagtype" to "AGPDAG", "grad" to 0),
+                        mapOf("fom" to 19.januar, "tom" to 11.januar(2019), "dagtype" to "NAVDAG", "grad" to 50)
+                    )
+                ),
+                "beregnetTidslinje" to listOf(
+                    mapOf("fom" to 3.januar, "tom" to 18.januar, "dagtype" to "AGPDAG", "grad" to 0),
+                    mapOf("fom" to 19.januar, "tom" to 11.januar(2019), "dagtype" to "NAVDAG", "grad" to 50)
+                )
             ),
             output = mapOf(
                 "gjenståendeSykedager" to 0,
@@ -489,8 +505,16 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                 "tom" to 11.januar(2019),
                 "utfallFom" to 2.januar(2019),
                 "utfallTom" to 11.januar(2019),
-                "tidslinjegrunnlag" to listOf(listOf(mapOf("fom" to 19.januar, "tom" to 11.januar(2019), "dagtype" to "NAVDAG"))),
-                "beregnetTidslinje" to listOf(mapOf("fom" to 19.januar, "tom" to 11.januar(2019), "dagtype" to "NAVDAG"))
+                "tidslinjegrunnlag" to listOf(
+                    listOf(
+                        mapOf("fom" to 3.januar, "tom" to 18.januar, "dagtype" to "AGPDAG", "grad" to 0),
+                        mapOf("fom" to 19.januar, "tom" to 11.januar(2019), "dagtype" to "NAVDAG", "grad" to 50)
+                    )
+                ),
+                "beregnetTidslinje" to listOf(
+                    mapOf("fom" to 3.januar, "tom" to 18.januar, "dagtype" to "AGPDAG", "grad" to 0),
+                    mapOf("fom" to 19.januar, "tom" to 11.januar(2019), "dagtype" to "NAVDAG", "grad" to 50)
+                )
             ),
             output = mapOf(
                 "gjenståendeSykedager" to 0,
@@ -569,13 +593,17 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                 "tilstrekkeligOppholdISykedager" to 182, //26 uker * 7 dager
                 "tidslinjegrunnlag" to listOf(
                     listOf(
-                        mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG"),
-                        mapOf("fom" to 2.august, "tom" to 31.august, "dagtype" to "NAVDAG")
+                        mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 0),
+                        mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG", "grad" to 50),
+                        mapOf("fom" to 17.juli, "tom" to 1.august, "dagtype" to "AGPDAG", "grad" to 0),
+                        mapOf("fom" to 2.august, "tom" to 31.august, "dagtype" to "NAVDAG", "grad" to 50)
                     )
                 ),
                 "beregnetTidslinje" to listOf(
-                    mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG"),
-                    mapOf("fom" to 2.august, "tom" to 31.august, "dagtype" to "NAVDAG")
+                    mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 0),
+                    mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG", "grad" to 50),
+                    mapOf("fom" to 17.juli, "tom" to 1.august, "dagtype" to "AGPDAG", "grad" to 0),
+                    mapOf("fom" to 2.august, "tom" to 31.august, "dagtype" to "NAVDAG", "grad" to 50)
                 )
             ),
             output = emptyMap(),
@@ -610,10 +638,14 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                 "tilstrekkeligOppholdISykedager" to 182,
                 "tidslinjegrunnlag" to listOf(
                     listOf(
-                        mapOf("fom" to 17.januar, "tom" to 31.januar(2019), "dagtype" to "NAVDAG")
+                        mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 0),
+                        mapOf("fom" to 17.januar, "tom" to 31.januar(2019), "dagtype" to "NAVDAG", "grad" to 100)
                     )
                 ),
-                "beregnetTidslinje" to listOf(mapOf("fom" to 17.januar, "tom" to 31.januar(2019), "dagtype" to "NAVDAG"))
+                "beregnetTidslinje" to listOf(
+                    mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 0),
+                    mapOf("fom" to 17.januar, "tom" to 31.januar(2019), "dagtype" to "NAVDAG", "grad" to 100)
+                )
             ),
             output = emptyMap(),
             vedtaksperiodeId = 2.vedtaksperiode
@@ -639,13 +671,10 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             input = mapOf(
                 "tidslinjegrunnlag" to listOf(
                     listOf(
-                        mapOf(
-                            "fom" to 17.januar,
-                            "tom" to 31.januar,
-                            "dagtype" to "NAVDAG"
-                        )
+                        mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 0),
+                        mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG", "grad" to 20)
                     )
-                )
+                ),
             ),
             output = mapOf(
                 "perioder" to listOf(
@@ -676,18 +705,97 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             input = mapOf(
                 "tidslinjegrunnlag" to listOf(
                     listOf(
-                        mapOf(
-                            "fom" to 17.januar,
-                            "tom" to 31.januar,
-                            "dagtype" to "NAVDAG"
-                        )
+                        mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 0),
+                        mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG", "grad" to 19)
                     )
-                )
+                ),
             ),
             output = mapOf(
                 "perioder" to listOf(
                     mapOf(
                         "fom" to 17.januar,
+                        "tom" to 31.januar
+                    )
+                )
+            )
+        )
+    }
+
+    @Test
+    fun `§ 8-13 ledd 2 - Sykmeldte har 20 prosent uføregrad`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 20.prosent))
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar, 31.januar, 20.prosent, 80.prosent))
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)))
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt(1.vedtaksperiode)
+
+        SubsumsjonInspektør(jurist).assertBeregnet(
+            paragraf = PARAGRAF_8_13,
+            ledd = 2.ledd,
+            versjon = FOLKETRYGDLOVENS_OPPRINNELSESDATO,
+            input = mapOf(
+                "tidslinjegrunnlag" to listOf(
+                    listOf(
+                        mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 0),
+                        mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG", "grad" to 20)
+                    )
+                ),
+                "grense" to 20.0
+            ),
+            output = mapOf(
+                "perioder" to listOf(
+                    mapOf(
+                        "fom" to 1.januar,
+                        "tom" to 31.januar
+                    )
+                ),
+                "dagerUnderGrensen" to listOf(
+                    mapOf(
+                        "fom" to 1.januar,
+                        "tom" to 16.januar
+                    )
+                )
+            )
+        )
+    }
+
+    @Test
+    fun `§ 8-13 ledd 2 - Sykmeldte har under 20 prosent uføregrad`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 19.prosent))
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar, 31.januar, 19.prosent, 81.prosent))
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)))
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+
+        SubsumsjonInspektør(jurist).assertBeregnet(
+            paragraf = PARAGRAF_8_13,
+            ledd = 2.ledd,
+            versjon = FOLKETRYGDLOVENS_OPPRINNELSESDATO,
+            input = mapOf(
+                "tidslinjegrunnlag" to listOf(
+                    listOf(
+                        mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 0),
+                        mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG", "grad" to 19)
+                    )
+                ),
+                "grense" to 20.0
+            ),
+            output = mapOf(
+                "perioder" to listOf(
+                    mapOf(
+                        "fom" to 1.januar,
+                        "tom" to 31.januar
+                    )
+                ),
+                "dagerUnderGrensen" to listOf(
+                    mapOf(
+                        "fom" to 1.januar,
                         "tom" to 31.januar
                     )
                 )
@@ -845,14 +953,16 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                     mapOf(
                         "fom" to 1.januar,
                         "tom" to 29.januar,
-                        "dagtype" to "NAVDAG"
+                        "dagtype" to "NAVDAG",
+                        "grad" to 100
                     ),
                     mapOf(
                         "fom" to 30.januar,
                         "tom" to 31.januar,
-                        "dagtype" to "FERIEDAG"
-                    ),
-                )
+                        "dagtype" to "FERIEDAG",
+                        "grad" to null,
+                    )
+                ),
             ),
             output = mapOf(
                 "perioder" to listOf(mapOf("fom" to 30.januar, "tom" to 31.januar))
@@ -1211,8 +1321,16 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                 "tom" to 31.januar,
                 "utfallFom" to 17.januar,
                 "utfallTom" to 31.januar,
-                "tidslinjegrunnlag" to listOf(listOf(mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG"))),
-                "beregnetTidslinje" to listOf(mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG"))
+                "tidslinjegrunnlag" to listOf(
+                    listOf(
+                        mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 0),
+                        mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG", "grad" to 100)
+                    )
+                ),
+                "beregnetTidslinje" to listOf(
+                    mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 0),
+                    mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG", "grad" to 100)
+                )
             ),
             output = mapOf(
                 "gjenståendeSykedager" to 61,
@@ -1233,13 +1351,15 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                 "utfallTom" to 28.februar,
                 "tidslinjegrunnlag" to listOf(
                     listOf(
-                        mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG"),
-                        mapOf("fom" to 2.februar, "tom" to 28.februar, "dagtype" to "NAVDAG")
+                        mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 0),
+                        mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG", "grad" to 100),
+                        mapOf("fom" to 2.februar, "tom" to 28.februar, "dagtype" to "NAVDAG", "grad" to 100)
                     )
                 ),
                 "beregnetTidslinje" to listOf(
-                    mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG"),
-                    mapOf("fom" to 2.februar, "tom" to 28.februar, "dagtype" to "NAVDAG")
+                    mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 0),
+                    mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG", "grad" to 100),
+                    mapOf("fom" to 2.februar, "tom" to 28.februar, "dagtype" to "NAVDAG", "grad" to 100)
                 )
             ),
             output = mapOf(
@@ -1285,8 +1405,16 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                 "tom" to 1.februar,
                 "utfallFom" to 17.januar,
                 "utfallTom" to 1.februar,
-                "tidslinjegrunnlag" to listOf(listOf(mapOf("fom" to 17.januar, "tom" to 1.februar, "dagtype" to "NAVDAG"))),
-                "beregnetTidslinje" to listOf(mapOf("fom" to 17.januar, "tom" to 1.februar, "dagtype" to "NAVDAG"))
+                "tidslinjegrunnlag" to listOf(
+                    listOf(
+                        mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 0),
+                        mapOf("fom" to 17.januar, "tom" to 1.februar, "dagtype" to "NAVDAG", "grad" to 100)
+                    )
+                ),
+                "beregnetTidslinje" to listOf(
+                    mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 0),
+                    mapOf("fom" to 17.januar, "tom" to 1.februar, "dagtype" to "NAVDAG", "grad" to 100)
+                )
             ),
             output = mapOf(
                 "gjenståendeSykedager" to 60,
@@ -1307,13 +1435,15 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                 "utfallTom" to 28.februar,
                 "tidslinjegrunnlag" to listOf(
                     listOf(
-                        mapOf("fom" to 17.januar, "tom" to 1.februar, "dagtype" to "NAVDAG"),
-                        mapOf("fom" to 3.februar, "tom" to 28.februar, "dagtype" to "NAVDAG")
+                        mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 0),
+                        mapOf("fom" to 17.januar, "tom" to 1.februar, "dagtype" to "NAVDAG", "grad" to 100),
+                        mapOf("fom" to 3.februar, "tom" to 28.februar, "dagtype" to "NAVDAG", "grad" to 100)
                     )
                 ),
                 "beregnetTidslinje" to listOf(
-                    mapOf("fom" to 17.januar, "tom" to 1.februar, "dagtype" to "NAVDAG"),
-                    mapOf("fom" to 3.februar, "tom" to 28.februar, "dagtype" to "NAVDAG")
+                    mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 0),
+                    mapOf("fom" to 17.januar, "tom" to 1.februar, "dagtype" to "NAVDAG", "grad" to 100),
+                    mapOf("fom" to 3.februar, "tom" to 28.februar, "dagtype" to "NAVDAG", "grad" to 100)
                 )
             ),
             output = mapOf(
@@ -1343,8 +1473,16 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                 "tom" to 31.januar,
                 "utfallFom" to 17.januar,
                 "utfallTom" to 31.januar,
-                "tidslinjegrunnlag" to listOf(listOf(mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG"))),
-                "beregnetTidslinje" to listOf(mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG"))
+                "tidslinjegrunnlag" to listOf(
+                    listOf(
+                        mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 0),
+                        mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG", "grad" to 100)
+                    )
+                ),
+                "beregnetTidslinje" to listOf(
+                    mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 0),
+                    mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG", "grad" to 100)
+                )
             ),
             output = mapOf(
                 "gjenståendeSykedager" to 61,
@@ -1363,8 +1501,16 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                 "tom" to 28.februar,
                 "utfallFom" to 1.februar,
                 "utfallTom" to 28.februar,
-                "tidslinjegrunnlag" to listOf(listOf(mapOf("fom" to 17.januar, "tom" to 28.februar, "dagtype" to "NAVDAG"))),
-                "beregnetTidslinje" to listOf(mapOf("fom" to 17.januar, "tom" to 28.februar, "dagtype" to "NAVDAG"))
+                "tidslinjegrunnlag" to listOf(
+                    listOf(
+                        mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 0),
+                        mapOf("fom" to 17.januar, "tom" to 28.februar, "dagtype" to "NAVDAG", "grad" to 100)
+                    )
+                ),
+                "beregnetTidslinje" to listOf(
+                    mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 0),
+                    mapOf("fom" to 17.januar, "tom" to 28.februar, "dagtype" to "NAVDAG", "grad" to 100)
+                )
             ),
             output = mapOf(
                 "gjenståendeSykedager" to 41,
@@ -1383,8 +1529,16 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                 "tom" to 31.mars,
                 "utfallFom" to 1.mars,
                 "utfallTom" to 31.mars,
-                "tidslinjegrunnlag" to listOf(listOf(mapOf("fom" to 17.januar, "tom" to 31.mars, "dagtype" to "NAVDAG"))),
-                "beregnetTidslinje" to listOf(mapOf("fom" to 17.januar, "tom" to 31.mars, "dagtype" to "NAVDAG"))
+                "tidslinjegrunnlag" to listOf(
+                    listOf(
+                        mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 0),
+                        mapOf("fom" to 17.januar, "tom" to 31.mars, "dagtype" to "NAVDAG", "grad" to 100)
+                    )
+                ),
+                "beregnetTidslinje" to listOf(
+                    mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 0),
+                    mapOf("fom" to 17.januar, "tom" to 31.mars, "dagtype" to "NAVDAG", "grad" to 100)
+                )
             ),
             output = mapOf(
                 "gjenståendeSykedager" to 19,
@@ -1403,8 +1557,16 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                 "tom" to 26.april,
                 "utfallFom" to 1.april,
                 "utfallTom" to 26.april,
-                "tidslinjegrunnlag" to listOf(listOf(mapOf("fom" to 17.januar, "tom" to 26.april, "dagtype" to "NAVDAG"))),
-                "beregnetTidslinje" to listOf(mapOf("fom" to 17.januar, "tom" to 26.april, "dagtype" to "NAVDAG"))
+                "tidslinjegrunnlag" to listOf(
+                    listOf(
+                        mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 0),
+                        mapOf("fom" to 17.januar, "tom" to 26.april, "dagtype" to "NAVDAG", "grad" to 100)
+                    )
+                ),
+                "beregnetTidslinje" to listOf(
+                    mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 0),
+                    mapOf("fom" to 17.januar, "tom" to 26.april, "dagtype" to "NAVDAG", "grad" to 100)
+                )
             ),
             output = mapOf(
                 "gjenståendeSykedager" to 0,
@@ -1433,8 +1595,16 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                 "tom" to 31.januar,
                 "utfallFom" to 17.januar,
                 "utfallTom" to 31.januar,
-                "tidslinjegrunnlag" to listOf(listOf(mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG"))),
-                "beregnetTidslinje" to listOf(mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG"))
+                "tidslinjegrunnlag" to listOf(
+                    listOf(
+                        mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 0),
+                        mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG", "grad" to 100)
+                    )
+                ),
+                "beregnetTidslinje" to listOf(
+                    mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 0),
+                    mapOf("fom" to 17.januar, "tom" to 31.januar, "dagtype" to "NAVDAG", "grad" to 100)
+                )
             ),
             output = mapOf(
                 "gjenståendeSykedager" to 61,
@@ -1453,8 +1623,16 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                 "tom" to 28.februar,
                 "utfallFom" to 1.februar,
                 "utfallTom" to 28.februar,
-                "tidslinjegrunnlag" to listOf(listOf(mapOf("fom" to 17.januar, "tom" to 28.februar, "dagtype" to "NAVDAG"))),
-                "beregnetTidslinje" to listOf(mapOf("fom" to 17.januar, "tom" to 28.februar, "dagtype" to "NAVDAG"))
+                "tidslinjegrunnlag" to listOf(
+                    listOf(
+                        mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 0),
+                        mapOf("fom" to 17.januar, "tom" to 28.februar, "dagtype" to "NAVDAG", "grad" to 100)
+                    )
+                ),
+                "beregnetTidslinje" to listOf(
+                    mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 0),
+                    mapOf("fom" to 17.januar, "tom" to 28.februar, "dagtype" to "NAVDAG", "grad" to 100)
+                )
             ),
             output = mapOf(
                 "gjenståendeSykedager" to 41,
@@ -1473,8 +1651,16 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                 "tom" to 31.mars,
                 "utfallFom" to 1.mars,
                 "utfallTom" to 31.mars,
-                "tidslinjegrunnlag" to listOf(listOf(mapOf("fom" to 17.januar, "tom" to 31.mars, "dagtype" to "NAVDAG"))),
-                "beregnetTidslinje" to listOf(mapOf("fom" to 17.januar, "tom" to 31.mars, "dagtype" to "NAVDAG"))
+                "tidslinjegrunnlag" to listOf(
+                    listOf(
+                        mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 0),
+                        mapOf("fom" to 17.januar, "tom" to 31.mars, "dagtype" to "NAVDAG", "grad" to 100)
+                    )
+                ),
+                "beregnetTidslinje" to listOf(
+                    mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 0),
+                    mapOf("fom" to 17.januar, "tom" to 31.mars, "dagtype" to "NAVDAG", "grad" to 100)
+                )
             ),
             output = mapOf(
                 "gjenståendeSykedager" to 19,
@@ -1493,8 +1679,16 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                 "tom" to 27.april,
                 "utfallFom" to 1.april,
                 "utfallTom" to 26.april,
-                "tidslinjegrunnlag" to listOf(listOf(mapOf("fom" to 17.januar, "tom" to 27.april, "dagtype" to "NAVDAG"))),
-                "beregnetTidslinje" to listOf(mapOf("fom" to 17.januar, "tom" to 27.april, "dagtype" to "NAVDAG"))
+                "tidslinjegrunnlag" to listOf(
+                    listOf(
+                        mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 0),
+                        mapOf("fom" to 17.januar, "tom" to 27.april, "dagtype" to "NAVDAG", "grad" to 100)
+                    )
+                ),
+                "beregnetTidslinje" to listOf(
+                    mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 0),
+                    mapOf("fom" to 17.januar, "tom" to 27.april, "dagtype" to "NAVDAG", "grad" to 100)
+                )
             ),
             output = mapOf(
                 "gjenståendeSykedager" to 0,
@@ -1513,8 +1707,16 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                 "tom" to 27.april,
                 "utfallFom" to 27.april,
                 "utfallTom" to 27.april,
-                "tidslinjegrunnlag" to listOf(listOf(mapOf("fom" to 17.januar, "tom" to 27.april, "dagtype" to "NAVDAG"))),
-                "beregnetTidslinje" to listOf(mapOf("fom" to 17.januar, "tom" to 27.april, "dagtype" to "NAVDAG"))
+                "tidslinjegrunnlag" to listOf(
+                    listOf(
+                        mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 0),
+                        mapOf("fom" to 17.januar, "tom" to 27.april, "dagtype" to "NAVDAG", "grad" to 100)
+                    )
+                ),
+                "beregnetTidslinje" to listOf(
+                    mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "AGPDAG", "grad" to 0),
+                    mapOf("fom" to 17.januar, "tom" to 27.april, "dagtype" to "NAVDAG", "grad" to 100)
+                )
             ),
             output = mapOf(
                 "gjenståendeSykedager" to 0,
