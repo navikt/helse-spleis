@@ -380,13 +380,18 @@ internal class TestArbeidsgiverInspektør(
     private val IdInnhenter.indeks get() = id(orgnummer).indeks
 
     private fun <V> UUID.finn(hva: Map<Int, V>) = hva.getValue(this.indeks)
+    private fun <V> UUID.finnOrNull(hva: Map<Int, V>) = hva[this.indeks]
     private val UUID.indeks get() = vedtaksperiodeindekser[this] ?: fail { "Vedtaksperiode $this finnes ikke" }
 
     private val UUID.utbetalingsindeks get() = this.finn(vedtaksperiodeutbetalinger)
+    private val UUID.utbetalingsindeksOrNull get() = this.finnOrNull(vedtaksperiodeutbetalinger)
 
     internal fun gjeldendeUtbetalingForVedtaksperiode(vedtaksperiodeIdInnhenter: IdInnhenter) = avsluttedeUtbetalingerForVedtaksperiode(vedtaksperiodeIdInnhenter).last()
     internal fun ikkeUtbetalteUtbetalingerForVedtaksperiode(vedtaksperiodeIdInnhenter: IdInnhenter) = utbetalinger.filterIndexed { index, _ -> index in vedtaksperiodeIdInnhenter.id(orgnummer).utbetalingsindeks }.filter { it.inspektør.erUbetalt }
     internal fun avsluttedeUtbetalingerForVedtaksperiode(vedtaksperiodeIdInnhenter: IdInnhenter) = utbetalinger.filterIndexed { index, _ -> index in vedtaksperiodeIdInnhenter.id(orgnummer).utbetalingsindeks }.filter { it.erAvsluttet() }
+    internal fun utbetalinger(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperiodeIdInnhenter.id(orgnummer).utbetalingsindeksOrNull?.let { indekser ->
+        utbetalinger.filterIndexed { index, _ -> index in indekser }
+    } ?: emptyList()
     internal fun utbetalingtilstand(indeks: Int) = utbetalingstilstander[indeks]
     internal fun utbetaling(indeks: Int) = utbetalinger[indeks]
     internal fun utbetalingId(indeks: Int) = utbetalingIder[indeks]

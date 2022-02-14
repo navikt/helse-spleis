@@ -5,8 +5,7 @@ import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.*
 import no.nav.helse.hendelser.til
-import no.nav.helse.person.TilstandType.AVSLUTTET
-import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
@@ -206,17 +205,16 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 17.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 17.januar, 100.prosent), Ferie(1.januar, 17.januar))
         val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar))
-        håndterYtelser(1.vedtaksperiode)
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
 
         håndterSykmelding(Sykmeldingsperiode(18.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(18.januar, 20.januar, 100.prosent))
         håndterYtelser(2.vedtaksperiode)
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, false)
 
-        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertSisteTilstand(2.vedtaksperiode, TIL_INFOTRYGD)
         assertTrue(observatør.opprettOppgaveEvent().any { inntektsmeldingId in it.hendelser })
         assertTrue(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().isEmpty())

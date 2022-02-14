@@ -664,48 +664,45 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(1.januar, 31.januar))
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)))
-        håndterYtelser(1.vedtaksperiode)
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+        håndterYtelser(2.vedtaksperiode)
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt(2.vedtaksperiode)
 
         håndterOverstyrInntekt(skjæringstidspunkt = 1.januar)
-        håndterYtelser(1.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt(2.vedtaksperiode)
 
-        assertEquals(Utbetaling.GodkjentUtenUtbetaling, inspektør.utbetalingtilstand(0))
+        assertEquals(2, inspektør.utbetalinger.size)
+        assertEquals(0, inspektør.utbetalinger(1.vedtaksperiode).size)
+        assertEquals(2, inspektør.utbetalinger(2.vedtaksperiode).size)
+        assertEquals(Utbetaling.Utbetalt, inspektør.utbetalingtilstand(0))
+        assertEquals(Utbetaling.GodkjentUtenUtbetaling, inspektør.utbetalingtilstand(1))
         assertTilstander(
             1.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            AVVENTER_HISTORIKK,
-            AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK,
-            AVSLUTTET,
-            AVVENTER_VILKÅRSPRØVING_REVURDERING,
-            AVVENTER_HISTORIKK_REVURDERING,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
-            AVSLUTTET
+            AVSLUTTET_UTEN_UTBETALING,
+            AVSLUTTET_UTEN_UTBETALING
         )
         assertTilstander(
             2.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
             AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
             AVSLUTTET,
-            AVVENTER_ARBEIDSGIVERE_REVURDERING,
+            AVVENTER_VILKÅRSPRØVING_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_GODKJENNING_REVURDERING,
             AVSLUTTET

@@ -1450,10 +1450,9 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         val inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.mai, INNTEKT, true))
 
         håndterSykmelding(Sykmeldingsperiode(1.juni, 30.juni, 100.prosent))
-        håndterSøknad(Sykdom(1.juni, 30.juni, 100.prosent), Arbeid(1.juni, 30.juni))
-
         håndterUtbetalingshistorikk(1.vedtaksperiode, historikk, inntektshistorikk = inntektshistorikk)
-        håndterYtelser()
+        håndterSøknad(Sykdom(1.juni, 30.juni, 100.prosent), Arbeid(1.juni, 30.juni))
+        håndterYtelser(1.vedtaksperiode)
 
         håndterSykmelding(Sykmeldingsperiode(1.juli, 31.juli, 100.prosent))
 
@@ -1873,13 +1872,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             Inntektsopplysning(ORGNUMMER, 3.september(2020), INNTEKT, true)
         )
         håndterUtbetalingshistorikk(1.vedtaksperiode, inntektshistorikk = inntektsopplysning)
-
-        assertTilstander(
-            1.vedtaksperiode,
-            START,
-            MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP
-        )
+        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
     }
 
     @Test

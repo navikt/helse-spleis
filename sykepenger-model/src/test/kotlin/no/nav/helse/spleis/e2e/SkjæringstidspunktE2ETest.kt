@@ -24,6 +24,6 @@ internal class SkjæringstidspunktE2ETest: AbstractEndToEndTest() {
             inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true))
         )
         assertEquals(1.mars, inspektør.skjæringstidspunkt(1.vedtaksperiode))
-        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
+        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
     }
 }
