@@ -391,6 +391,7 @@ class MaskinellJurist private constructor(
     }
 
     override fun `§ 8-28 ledd 3 bokstav a`(
+        organisasjonsnummer: String,
         inntekterSisteTreMåneder: List<Map<String, Any>>,
         grunnlagForSykepengegrunnlag: Inntekt
     ) {
@@ -402,6 +403,7 @@ class MaskinellJurist private constructor(
                 ledd = LEDD_3,
                 bokstav = BOKSTAV_A,
                 input = mapOf(
+                    "organisasjonsnummer" to organisasjonsnummer,
                     "inntekterSisteTreMåneder" to inntekterSisteTreMåneder
                 ),
                 output = mapOf(

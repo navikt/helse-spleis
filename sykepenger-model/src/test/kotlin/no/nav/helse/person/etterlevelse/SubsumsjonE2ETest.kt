@@ -1011,6 +1011,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             ledd = 3.ledd,
             bokstav = BOKSTAV_A,
             input = mapOf(
+                "organisasjonsnummer" to a2,
                 "inntekterSisteTreMåneder" to listOf(
                     mapOf(
                         "årMåned" to YearMonth.of(2017, 10),

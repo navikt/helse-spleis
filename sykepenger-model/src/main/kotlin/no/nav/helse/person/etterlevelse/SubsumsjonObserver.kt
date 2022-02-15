@@ -232,10 +232,12 @@ interface SubsumsjonObserver {
      *
      * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-28)
      *
+     * @param organisasjonsnummer arbeidsgiveren [grunnlagForSykepengegrunnlag] er beregnet for
      * @param inntekterSisteTreMåneder månedlig inntekt for de tre siste måneder før skjæringstidspunktet
      * @param grunnlagForSykepengegrunnlag beregnet grunnlag basert på [inntekterSisteTreMåneder]
      */
     fun `§ 8-28 ledd 3 bokstav a`(
+        organisasjonsnummer: String,
         inntekterSisteTreMåneder: List<Map<String, Any>>,
         grunnlagForSykepengegrunnlag: Inntekt
     ) {
