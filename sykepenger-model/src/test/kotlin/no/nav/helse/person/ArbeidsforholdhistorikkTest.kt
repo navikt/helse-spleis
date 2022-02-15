@@ -140,7 +140,7 @@ internal class ArbeidsforholdhistorikkTest {
     }
 
     @Test
-    fun `har arbeidsforholdNyereEnnTreMåneder fungerer for eldre innslag i arbeidsforholdhistorikken`() {
+    fun `har arbeidsforholdNyereEnn fungerer for eldre innslag i arbeidsforholdhistorikken`() {
         val arbeidsforhold1 = listOf(Arbeidsforhold(ansattFom = 1.januar(2017), ansattTom = null, deaktivert = false))
         val arbeidsforhold2 = listOf(Arbeidsforhold(ansattFom = 1.desember(2020), ansattTom = null, deaktivert = false))
 
@@ -148,7 +148,7 @@ internal class ArbeidsforholdhistorikkTest {
         historikk.lagre(arbeidsforhold1, 1.januar(2018))
         historikk.lagre(arbeidsforhold2, 1.januar(2022))
 
-        assertFalse(historikk.harArbeidsforholdNyereEnnTreMåneder(1.januar(2018)))
+        assertFalse(historikk.harArbeidsforholdNyereEnn(skjæringstidspunkt = 1.januar(2018), antallMåneder = 2L))
     }
 
     @Test

@@ -3,6 +3,7 @@ package no.nav.helse.person
 import no.nav.helse.Toggle
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.utbetaling.*
+import no.nav.helse.person.Arbeidsforholdhistorikk.Arbeidsforhold.Companion.MAKS_INNTEKT_GAP
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.harAvsluttedePerioder
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.iderMedUtbetaling
 import no.nav.helse.person.Inntektshistorikk.IkkeRapportert
@@ -128,7 +129,8 @@ internal class Arbeidsgiver private constructor(
             inntektsopplysning?.subsumsjon(subsumsjonObserver)
             when {
                 arbeidsgiver.harInaktivtArbeidsforhold(skjæringstidspunkt) -> null
-                inntektsopplysning == null && arbeidsgiver.harArbeidsforholdNyereEnnTreMåneder(skjæringstidspunkt) -> {
+                inntektsopplysning is Inntektshistorikk.SkattComposite && inntektsopplysning.harIngenInntektNyereEnn(MAKS_INNTEKT_GAP) -> null
+                inntektsopplysning == null && arbeidsgiver.arbeidsforholdhistorikk.harArbeidsforholdNyereEnn(skjæringstidspunkt, MAKS_INNTEKT_GAP) -> {
                     ArbeidsgiverInntektsopplysning(arbeidsgiver.organisasjonsnummer, IkkeRapportert(UUID.randomUUID(), skjæringstidspunkt))
                 }
                 inntektsopplysning != null -> ArbeidsgiverInntektsopplysning(arbeidsgiver.organisasjonsnummer, inntektsopplysning)
@@ -749,8 +751,8 @@ internal class Arbeidsgiver private constructor(
     private fun erGhost(skjæringstidspunkt: LocalDate): Boolean {
         val førsteFraværsdag = finnFørsteFraværsdag(skjæringstidspunkt)
         val inntektsopplysning = inntektshistorikk.grunnlagForSykepengegrunnlag(skjæringstidspunkt, førsteFraværsdag)
-        val harArbeidsforholdNyereEnnTreMåneder = arbeidsforholdhistorikk.harArbeidsforholdNyereEnnTreMåneder(skjæringstidspunkt)
-        return inntektsopplysning is Inntektshistorikk.SkattComposite || harArbeidsforholdNyereEnnTreMåneder
+        val harArbeidsforholdNyereEnnToMåneder = arbeidsforholdhistorikk.harArbeidsforholdNyereEnn(skjæringstidspunkt, MAKS_INNTEKT_GAP)
+        return inntektsopplysning is Inntektshistorikk.SkattComposite || harArbeidsforholdNyereEnnToMåneder
     }
 
     internal fun infotrygdUtbetalingstidslinje() = person.infotrygdUtbetalingstidslinje(organisasjonsnummer)
@@ -1047,8 +1049,6 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun harRelevantArbeidsforhold(skjæringstidspunkt: LocalDate) = arbeidsforholdhistorikk.harRelevantArbeidsforhold(skjæringstidspunkt)
-
-    internal fun harArbeidsforholdNyereEnnTreMåneder(skjæringstidspunkt: LocalDate) = arbeidsforholdhistorikk.harArbeidsforholdNyereEnnTreMåneder(skjæringstidspunkt)
 
     internal fun grunnlagForSykepengegrunnlagKommerFraSkatt(skjæringstidspunkt: LocalDate) =
         inntektshistorikk.sykepengegrunnlagKommerFraSkatt(skjæringstidspunkt)
