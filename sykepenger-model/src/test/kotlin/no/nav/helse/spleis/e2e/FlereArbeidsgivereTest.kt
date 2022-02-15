@@ -7,6 +7,7 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.inspectors.personLogg
 import no.nav.helse.person.TilstandType.*
+import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
@@ -62,7 +63,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
             orgnummer = a2
 
         )
-        assertEquals(318500.årlig, person.beregnSammenligningsgrunnlag(1.januar).sammenligningsgrunnlag)
+        assertEquals(318500.årlig, person.beregnSammenligningsgrunnlag(1.januar, MaskinellJurist()).sammenligningsgrunnlag)
     }
 
     @Test
@@ -93,7 +94,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList())
         )
         assertForkastetPeriodeTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, AVVENTER_HISTORIKK, AVVENTER_VILKÅRSPRØVING, TIL_INFOTRYGD)
-        assertEquals(282500.årlig, person.beregnSammenligningsgrunnlag(2.februar).sammenligningsgrunnlag)
+        assertEquals(282500.årlig, person.beregnSammenligningsgrunnlag(2.februar, MaskinellJurist()).sammenligningsgrunnlag)
     }
 
     @Test
@@ -142,7 +143,7 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
             )
         )
 
-        assertEquals(318500.årlig, person.beregnSammenligningsgrunnlag(15.januar))
+        assertEquals(318500.årlig, person.beregnSammenligningsgrunnlag(15.januar, MaskinellJurist()))
     }
 
     @Test

@@ -22,6 +22,7 @@ import no.nav.helse.person.Arbeidsgiver.Companion.nåværendeVedtaksperioder
 import no.nav.helse.person.Vedtaksperiode.Companion.ALLE
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
+import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.subsumsjonsformat
 import no.nav.helse.person.filter.Brukerutbetalingfilter
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
@@ -576,8 +577,12 @@ class Person private constructor(
             ), skjæringstidspunkt, subsumsjonObserver
         )
 
-    internal fun beregnSammenligningsgrunnlag(skjæringstidspunkt: LocalDate) =
-        Sammenligningsgrunnlag(arbeidsgivere.grunnlagForSammenligningsgrunnlag(skjæringstidspunkt))
+    internal fun beregnSammenligningsgrunnlag(skjæringstidspunkt: LocalDate, subsumsjonObserver: SubsumsjonObserver): Sammenligningsgrunnlag {
+        val arbeidsgiverInntektsopplysninger = arbeidsgivere.grunnlagForSammenligningsgrunnlag(skjæringstidspunkt)
+        val sammenligningsgrunnlag = Sammenligningsgrunnlag(arbeidsgiverInntektsopplysninger)
+        subsumsjonObserver.`§ 8-30 ledd 2`(skjæringstidspunkt, sammenligningsgrunnlag.subsumsjonsformat())
+        return sammenligningsgrunnlag
+    }
 
     private fun finnArbeidsgiverForInntekter(arbeidsgiver: String, aktivitetslogg: IAktivitetslogg): Arbeidsgiver {
         return arbeidsgivere.finnEllerOpprett(arbeidsgiver) {
@@ -735,7 +740,7 @@ class Person private constructor(
 
     internal fun vilkårsprøvEtterNyInntekt(hendelse: PersonHendelse, skjæringstidspunkt: LocalDate, subsumsjonObserver: SubsumsjonObserver) {
         val sykepengegrunnlag = beregnSykepengegrunnlag(skjæringstidspunkt, subsumsjonObserver)
-        val sammenligningsgrunnlag = beregnSammenligningsgrunnlag(skjæringstidspunkt)
+        val sammenligningsgrunnlag = beregnSammenligningsgrunnlag(skjæringstidspunkt, subsumsjonObserver)
         val avviksprosent = sykepengegrunnlag.avviksprosent(sammenligningsgrunnlag.sammenligningsgrunnlag)
 
         val harAkseptabeltAvvik = Inntektsvurdering.validerAvvik(

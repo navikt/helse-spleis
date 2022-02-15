@@ -1,10 +1,14 @@
 package no.nav.helse.person.etterlevelse
 
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.person.*
 import no.nav.helse.person.InntekthistorikkVisitor
 import no.nav.helse.person.Inntektshistorikk.Skatt
+import no.nav.helse.person.Inntektshistorikk.Skatt.Inntekttype.*
+import no.nav.helse.person.Sammenligningsgrunnlag
 import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.person.UtbetalingsdagVisitor
+import no.nav.helse.person.VilkårsgrunnlagHistorikkVisitor
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Tidslinjedag.Tidslinjeperiode.Companion.dager
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -19,6 +23,7 @@ import java.time.Year
 import java.time.YearMonth
 import java.util.*
 import kotlin.math.roundToInt
+import kotlin.properties.Delegates
 
 interface SubsumsjonObserver {
 
@@ -265,6 +270,10 @@ interface SubsumsjonObserver {
         avvik: Prosent
     ) {}
 
+    fun `§ 8-30 ledd 2`(skjæringstidspunkt: LocalDate, sammenligningsgrunnlag: Map<String, Any>) {
+        //ikr: 1.januar(2019)
+    }
+
     fun `§ 8-33 ledd 1`() {}
 
     @Suppress("UNUSED_PARAMETER")
@@ -455,10 +464,64 @@ interface SubsumsjonObserver {
         }
     }
 
+    private class SammenligningsgrunnlagBuilder(sammenligningsgrunnlag: Sammenligningsgrunnlag): VilkårsgrunnlagHistorikkVisitor {
+        private var sammenligningsgrunnlag by Delegates.notNull<Double>()
+        private val inntekter = mutableMapOf<String, List<Map<String, Any>>>()
+        private lateinit var inntektliste: MutableList<Map<String, Any>>
+
+        init {
+            sammenligningsgrunnlag.accept(this)
+        }
+
+        fun build() = mapOf(
+            "sammenligningsgrunnlag" to sammenligningsgrunnlag,
+            "inntekterFraAordningen" to inntekter
+        )
+
+        override fun preVisitSammenligningsgrunnlag(sammenligningsgrunnlag1: Sammenligningsgrunnlag, sammenligningsgrunnlag: Inntekt) {
+            this.sammenligningsgrunnlag = sammenligningsgrunnlag.reflection { årlig, _, _, _ -> årlig }
+        }
+
+        override fun preVisitArbeidsgiverInntektsopplysning(arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning, orgnummer: String) {
+            inntektliste = mutableListOf()
+            inntekter[orgnummer] = inntektliste
+        }
+
+        override fun visitSkattSammenligningsgrunnlag(
+            sammenligningsgrunnlag: Skatt.Sammenligningsgrunnlag,
+            dato: LocalDate,
+            hendelseId: UUID,
+            beløp: Inntekt,
+            måned: YearMonth,
+            type: Skatt.Inntekttype,
+            fordel: String,
+            beskrivelse: String,
+            tidsstempel: LocalDateTime
+        ) {
+            inntektliste.add(
+                mapOf(
+                    "beløp" to beløp.reflection { _, månedlig, _, _ -> månedlig },
+                    "årMåned" to måned,
+                    "type" to type.fromInntekttype(),
+                    "fordel" to fordel,
+                    "beskrivelse" to beskrivelse
+                )
+            )
+        }
+
+        private fun Skatt.Inntekttype.fromInntekttype() = when (this) {
+            LØNNSINNTEKT -> "LØNNSINNTEKT"
+            NÆRINGSINNTEKT -> "NÆRINGSINNTEKT"
+            PENSJON_ELLER_TRYGD -> "PENSJON_ELLER_TRYGD"
+            YTELSE_FRA_OFFENTLIGE -> "YTELSE_FRA_OFFENTLIGE"
+        }
+     }
+
     companion object {
         internal fun List<Utbetalingstidslinje>.subsumsjonsformat(): List<List<Tidslinjedag>> = map { it.subsumsjonsformat() }.filter { it.isNotEmpty() }
         internal fun Utbetalingstidslinje.subsumsjonsformat(): List<Tidslinjedag> = UtbetalingstidslinjeBuilder(this).dager()
         internal fun Sykdomstidslinje.subsumsjonsformat(): List<Tidslinjedag> = SykdomstidslinjeBuilder(this).dager()
         internal fun Iterable<Skatt>.subsumsjonsformat(): List<Map<String, Any>> = map { SkattBuilder(it).inntekt() }
+        internal fun Sammenligningsgrunnlag.subsumsjonsformat(): Map<String, Any> = SammenligningsgrunnlagBuilder(this).build()
     }
 }

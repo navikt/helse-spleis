@@ -3,16 +3,20 @@ package no.nav.helse.person.etterlevelse
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.januar
-import no.nav.helse.person.etterlevelse.SubsumsjonObserver.*
+import no.nav.helse.person.ArbeidsgiverInntektsopplysning
+import no.nav.helse.person.Inntektshistorikk.Skatt
+import no.nav.helse.person.Inntektshistorikk.SkattComposite
+import no.nav.helse.person.Sammenligningsgrunnlag
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.subsumsjonsformat
+import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Tidslinjedag
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Tidslinjedag.Companion.dager
 import no.nav.helse.testhelpers.*
-import no.nav.helse.testhelpers.AP
-import no.nav.helse.testhelpers.ARB
-import no.nav.helse.testhelpers.NAV
-import no.nav.helse.testhelpers.tidslinjeOf
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import java.time.YearMonth
+import java.util.*
 
 internal class SubsumsjonObserverTest {
 
@@ -103,5 +107,108 @@ internal class SubsumsjonObserverTest {
             ),
             tidslinjedager
         )
+    }
+
+    @Test
+    fun sammenligningsgrunnlag() {
+        val AG1 = "123456789"
+        val AG2 = "987654321"
+        val sammenligningsgrunnlag = Sammenligningsgrunnlag(
+            sammenligningsgrunnlag = 40000.årlig,
+            arbeidsgiverInntektsopplysninger = listOf(
+                ArbeidsgiverInntektsopplysning(
+                    AG1,
+                    SkattComposite(
+                        UUID.randomUUID(),
+                        listOf(
+                            Skatt.Sammenligningsgrunnlag(
+                                dato = 1.januar,
+                                hendelseId = UUID.randomUUID(),
+                                beløp = 20000.månedlig,
+                                måned = YearMonth.of(2069, 12),
+                                type = Skatt.Inntekttype.LØNNSINNTEKT,
+                                fordel = "fordel",
+                                beskrivelse = "beskrivelse"
+                            ),
+                            Skatt.Sammenligningsgrunnlag(
+                                dato = 1.januar,
+                                hendelseId = UUID.randomUUID(),
+                                beløp = 20000.månedlig,
+                                måned = YearMonth.of(2069, 11),
+                                type = Skatt.Inntekttype.LØNNSINNTEKT,
+                                fordel = "fordel",
+                                beskrivelse = "beskrivelse"
+                            )
+                        )
+                    )
+                ),
+                ArbeidsgiverInntektsopplysning(
+                    AG2,
+                    SkattComposite(
+                        UUID.randomUUID(),
+                        listOf(
+                            Skatt.Sammenligningsgrunnlag(
+                                dato = 1.januar,
+                                hendelseId = UUID.randomUUID(),
+                                beløp = 15000.månedlig,
+                                måned = YearMonth.of(2069, 10),
+                                type = Skatt.Inntekttype.LØNNSINNTEKT,
+                                fordel = "fordel",
+                                beskrivelse = "beskrivelse"
+                            ),
+                            Skatt.Sammenligningsgrunnlag(
+                                dato = 1.januar,
+                                hendelseId = UUID.randomUUID(),
+                                beløp = 15000.månedlig,
+                                måned = YearMonth.of(2069, 9),
+                                type = Skatt.Inntekttype.LØNNSINNTEKT,
+                                fordel = "fordel",
+                                beskrivelse = "beskrivelse"
+                            )
+                        )
+                    )
+                )
+            )
+        )
+        assertEquals(
+            mapOf(
+                "sammenligningsgrunnlag" to 40000.0,
+                "inntekterFraAordningen" to mapOf(
+                    "123456789" to listOf(
+                        mapOf(
+                            "beløp" to 20000.0,
+                            "årMåned" to YearMonth.of(2069, 12),
+                            "type" to "LØNNSINNTEKT",
+                            "fordel" to "fordel",
+                            "beskrivelse" to "beskrivelse"
+                        ),
+                        mapOf(
+                            "beløp" to 20000.0,
+                            "årMåned" to YearMonth.of(2069, 11),
+                            "type" to "LØNNSINNTEKT",
+                            "fordel" to "fordel",
+                            "beskrivelse" to "beskrivelse"
+                        )
+                    ),
+                    "987654321" to listOf(
+                        mapOf(
+                            "beløp" to 15000.0,
+                            "årMåned" to YearMonth.of(2069, 10),
+                            "type" to "LØNNSINNTEKT",
+                            "fordel" to "fordel",
+                            "beskrivelse" to "beskrivelse"
+                        ),
+                        mapOf(
+                            "beløp" to 15000.0,
+                            "årMåned" to YearMonth.of(2069, 9),
+                            "type" to "LØNNSINNTEKT",
+                            "fordel" to "fordel",
+                            "beskrivelse" to "beskrivelse"
+                        )
+                    )
+
+                )
+            ),
+            sammenligningsgrunnlag.subsumsjonsformat())
     }
 }

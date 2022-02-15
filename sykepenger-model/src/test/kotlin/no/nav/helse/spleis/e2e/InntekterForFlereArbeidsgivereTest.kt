@@ -9,6 +9,7 @@ import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.Person
 import no.nav.helse.person.TilstandType.AVSLUTTET
+import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
@@ -122,7 +123,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
                 arbeidsforhold = arbeidsforhold
             )
         )
-        assertEquals(300000.årlig, person.beregnSammenligningsgrunnlag(1.januar).sammenligningsgrunnlag)
+        assertEquals(300000.årlig, person.beregnSammenligningsgrunnlag(1.januar, MaskinellJurist()).sammenligningsgrunnlag)
     }
 
     @Test
@@ -236,7 +237,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
         ).håndter(Person::håndter)
 
         assertEquals(552000.årlig, person.vilkårsgrunnlagFor(1.januar)?.sykepengegrunnlag()?.sykepengegrunnlag)
-        assertEquals(528000.årlig, person.beregnSammenligningsgrunnlag(1.januar).sammenligningsgrunnlag)
+        assertEquals(528000.årlig, person.beregnSammenligningsgrunnlag(1.januar, MaskinellJurist()).sammenligningsgrunnlag)
 
     }
 
@@ -271,7 +272,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
         ).håndter(Person::håndter)
 
         assertEquals(552000.årlig, person.vilkårsgrunnlagFor(1.januar)?.sykepengegrunnlag())
-        assertEquals(528000.årlig, person.beregnSammenligningsgrunnlag(1.januar))
+        assertEquals(528000.årlig, person.beregnSammenligningsgrunnlag(1.januar, MaskinellJurist()))
     }
 
     @Test
