@@ -1205,7 +1205,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `§ 8-30 ledd 2 - gjør ikke ny juridisk vurdering ved sjekk av inntektsavvik i forlengelse av kort periode`() {
+    fun `§ 8-30 ledd 2 punktum 1 - gjør ikke ny juridisk vurdering ved sjekk av inntektsavvik i forlengelse av kort periode`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 1.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 1.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
@@ -1219,8 +1219,120 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt(2.vedtaksperiode)
 
-        SubsumsjonInspektør(jurist).assertIkkeVurdert(PARAGRAF_8_30, LEDD_2, vedtaksperiodeId = 1.vedtaksperiode)
-        SubsumsjonInspektør(jurist).assertVurdert(PARAGRAF_8_30, LEDD_2, vedtaksperiodeId = 2.vedtaksperiode)
+        SubsumsjonInspektør(jurist).assertIkkeVurdert(PARAGRAF_8_30, LEDD_2, punktum = 1.punktum, vedtaksperiodeId = 1.vedtaksperiode)
+        SubsumsjonInspektør(jurist).assertVurdert(PARAGRAF_8_30, LEDD_2, punktum = 1.punktum, vedtaksperiodeId = 2.vedtaksperiode)
+    }
+
+    @Test
+    fun `§ 8-30 ledd 2 - beregning av sammenligningsgrunnlaget`() {
+        val beregnetInntekt = 38750.0
+        val sammenligningsgrunnlag = 31000.0
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = beregnetInntekt.månedlig)
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, sammenligningsgrunnlag.månedlig)
+        håndterYtelser(1.vedtaksperiode)
+
+        SubsumsjonInspektør(jurist).assertBeregnet(
+            paragraf = PARAGRAF_8_30,
+            ledd = 2.ledd,
+            versjon = 1.januar(2019),
+            input = mapOf(
+                "skjæringstidspunkt" to 1.januar(2018),
+                "inntekterFraAOrdningen" to mapOf(
+                    ORGNUMMER to listOf(
+                        mapOf(
+                            "beløp" to 31000.0,
+                            "årMåned" to YearMonth.of(2017, 1),
+                            "type" to "LØNNSINNTEKT",
+                            "fordel" to "kontantytelse",
+                            "beskrivelse" to "fastloenn"
+                        ),
+                        mapOf(
+                            "beløp" to 31000.0,
+                            "årMåned" to YearMonth.of(2017, 2),
+                            "type" to "LØNNSINNTEKT",
+                            "fordel" to "kontantytelse",
+                            "beskrivelse" to "fastloenn"
+                        ),
+                        mapOf(
+                            "beløp" to 31000.0,
+                            "årMåned" to YearMonth.of(2017, 3),
+                            "type" to "LØNNSINNTEKT",
+                            "fordel" to "kontantytelse",
+                            "beskrivelse" to "fastloenn"
+                        ),
+                        mapOf(
+                            "beløp" to 31000.0,
+                            "årMåned" to YearMonth.of(2017, 4),
+                            "type" to "LØNNSINNTEKT",
+                            "fordel" to "kontantytelse",
+                            "beskrivelse" to "fastloenn"
+                        ),
+                        mapOf(
+                            "beløp" to 31000.0,
+                            "årMåned" to YearMonth.of(2017, 5),
+                            "type" to "LØNNSINNTEKT",
+                            "fordel" to "kontantytelse",
+                            "beskrivelse" to "fastloenn"
+                        ),
+                        mapOf(
+                            "beløp" to 31000.0,
+                            "årMåned" to YearMonth.of(2017, 6),
+                            "type" to "LØNNSINNTEKT",
+                            "fordel" to "kontantytelse",
+                            "beskrivelse" to "fastloenn"
+                        ),
+                        mapOf(
+                            "beløp" to 31000.0,
+                            "årMåned" to YearMonth.of(2017, 7),
+                            "type" to "LØNNSINNTEKT",
+                            "fordel" to "kontantytelse",
+                            "beskrivelse" to "fastloenn"
+                        ),
+                        mapOf(
+                            "beløp" to 31000.0,
+                            "årMåned" to YearMonth.of(2017, 8),
+                            "type" to "LØNNSINNTEKT",
+                            "fordel" to "kontantytelse",
+                            "beskrivelse" to "fastloenn"
+                        ),
+                        mapOf(
+                            "beløp" to 31000.0,
+                            "årMåned" to YearMonth.of(2017, 9),
+                            "type" to "LØNNSINNTEKT",
+                            "fordel" to "kontantytelse",
+                            "beskrivelse" to "fastloenn"
+                        ),
+                        mapOf(
+                            "beløp" to 31000.0,
+                            "årMåned" to YearMonth.of(2017, 10),
+                            "type" to "LØNNSINNTEKT",
+                            "fordel" to "kontantytelse",
+                            "beskrivelse" to "fastloenn"
+                        ),
+                        mapOf(
+                            "beløp" to 31000.0,
+                            "årMåned" to YearMonth.of(2017, 11),
+                            "type" to "LØNNSINNTEKT",
+                            "fordel" to "kontantytelse",
+                            "beskrivelse" to "fastloenn"
+                        ),
+                        mapOf(
+                            "beløp" to 31000.0,
+                            "årMåned" to YearMonth.of(2017, 12),
+                            "type" to "LØNNSINNTEKT",
+                            "fordel" to "kontantytelse",
+                            "beskrivelse" to "fastloenn"
+                        )
+                    )
+                )
+            ),
+            output = mapOf(
+                "sammenligningsgrunnlag" to 372000.0
+            )
+        )
     }
 
     @Test

@@ -170,45 +170,44 @@ internal class SubsumsjonObserverTest {
                 )
             )
         )
+        val subsumsjonsformat = sammenligningsgrunnlag.subsumsjonsformat()
+        assertEquals(40000.0, subsumsjonsformat.sammenligningsgrunnlag)
         assertEquals(
             mapOf(
-                "sammenligningsgrunnlag" to 40000.0,
-                "inntekterFraAordningen" to mapOf(
-                    "123456789" to listOf(
-                        mapOf(
-                            "beløp" to 20000.0,
-                            "årMåned" to YearMonth.of(2069, 12),
-                            "type" to "LØNNSINNTEKT",
-                            "fordel" to "fordel",
-                            "beskrivelse" to "beskrivelse"
-                        ),
-                        mapOf(
-                            "beløp" to 20000.0,
-                            "årMåned" to YearMonth.of(2069, 11),
-                            "type" to "LØNNSINNTEKT",
-                            "fordel" to "fordel",
-                            "beskrivelse" to "beskrivelse"
-                        )
+                "123456789" to listOf(
+                    mapOf(
+                        "beløp" to 20000.0,
+                        "årMåned" to YearMonth.of(2069, 12),
+                        "type" to "LØNNSINNTEKT",
+                        "fordel" to "fordel",
+                        "beskrivelse" to "beskrivelse"
                     ),
-                    "987654321" to listOf(
-                        mapOf(
-                            "beløp" to 15000.0,
-                            "årMåned" to YearMonth.of(2069, 10),
-                            "type" to "LØNNSINNTEKT",
-                            "fordel" to "fordel",
-                            "beskrivelse" to "beskrivelse"
-                        ),
-                        mapOf(
-                            "beløp" to 15000.0,
-                            "årMåned" to YearMonth.of(2069, 9),
-                            "type" to "LØNNSINNTEKT",
-                            "fordel" to "fordel",
-                            "beskrivelse" to "beskrivelse"
-                        )
+                    mapOf(
+                        "beløp" to 20000.0,
+                        "årMåned" to YearMonth.of(2069, 11),
+                        "type" to "LØNNSINNTEKT",
+                        "fordel" to "fordel",
+                        "beskrivelse" to "beskrivelse"
                     )
-
+                ),
+                "987654321" to listOf(
+                    mapOf(
+                        "beløp" to 15000.0,
+                        "årMåned" to YearMonth.of(2069, 10),
+                        "type" to "LØNNSINNTEKT",
+                        "fordel" to "fordel",
+                        "beskrivelse" to "beskrivelse"
+                    ),
+                    mapOf(
+                        "beløp" to 15000.0,
+                        "årMåned" to YearMonth.of(2069, 9),
+                        "type" to "LØNNSINNTEKT",
+                        "fordel" to "fordel",
+                        "beskrivelse" to "beskrivelse"
+                    )
                 )
             ),
-            sammenligningsgrunnlag.subsumsjonsformat())
+            subsumsjonsformat.inntekterFraAOrdningen
+        )
     }
 }

@@ -270,9 +270,16 @@ interface SubsumsjonObserver {
         avvik: Prosent
     ) {}
 
-    fun `§ 8-30 ledd 2`(skjæringstidspunkt: LocalDate, sammenligningsgrunnlag: Map<String, Any>) {
-        //ikr: 1.januar(2019)
-    }
+    /**
+     * Beregning av sammenligningsgrunnlaget
+     *
+     * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-30)
+     *
+     * @param skjæringstidspunkt dato inntekter fra a-ordningen er hentet relativt til
+     * @param sammenligningsgrunnlag inneholder beregnet sammenligningsgrunnlag samt hver enkelt inntekt som er innregnet i sammenligningsgrunnlaget
+     */
+    fun `§ 8-30 ledd 2`(skjæringstidspunkt: LocalDate, sammenligningsgrunnlag: SammenligningsgrunnlagDTO) {}
+
 
     fun `§ 8-33 ledd 1`() {}
 
@@ -473,10 +480,7 @@ interface SubsumsjonObserver {
             sammenligningsgrunnlag.accept(this)
         }
 
-        fun build() = mapOf(
-            "sammenligningsgrunnlag" to sammenligningsgrunnlag,
-            "inntekterFraAordningen" to inntekter
-        )
+        fun build() = SammenligningsgrunnlagDTO(sammenligningsgrunnlag, inntekter)
 
         override fun preVisitSammenligningsgrunnlag(sammenligningsgrunnlag1: Sammenligningsgrunnlag, sammenligningsgrunnlag: Inntekt) {
             this.sammenligningsgrunnlag = sammenligningsgrunnlag.reflection { årlig, _, _, _ -> årlig }
@@ -517,11 +521,16 @@ interface SubsumsjonObserver {
         }
      }
 
+    class SammenligningsgrunnlagDTO(
+        val sammenligningsgrunnlag: Double,
+        val inntekterFraAOrdningen: Map<String, List<Map<String, Any>>>
+    )
+
     companion object {
         internal fun List<Utbetalingstidslinje>.subsumsjonsformat(): List<List<Tidslinjedag>> = map { it.subsumsjonsformat() }.filter { it.isNotEmpty() }
         internal fun Utbetalingstidslinje.subsumsjonsformat(): List<Tidslinjedag> = UtbetalingstidslinjeBuilder(this).dager()
         internal fun Sykdomstidslinje.subsumsjonsformat(): List<Tidslinjedag> = SykdomstidslinjeBuilder(this).dager()
         internal fun Iterable<Skatt>.subsumsjonsformat(): List<Map<String, Any>> = map { SkattBuilder(it).inntekt() }
-        internal fun Sammenligningsgrunnlag.subsumsjonsformat(): Map<String, Any> = SammenligningsgrunnlagBuilder(this).build()
+        internal fun Sammenligningsgrunnlag.subsumsjonsformat(): SammenligningsgrunnlagDTO = SammenligningsgrunnlagBuilder(this).build()
     }
 }

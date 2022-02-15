@@ -457,6 +457,25 @@ class MaskinellJurist private constructor(
         )
     }
 
+    override fun `§ 8-30 ledd 2`(skjæringstidspunkt: LocalDate, sammenligningsgrunnlag: SubsumsjonObserver.SammenligningsgrunnlagDTO) {
+        leggTil(
+            EnkelSubsumsjon(
+                utfall = VILKAR_BEREGNET,
+                versjon = LocalDate.of(2019, 1, 1),
+                paragraf = PARAGRAF_8_30,
+                ledd = LEDD_2,
+                input = mapOf(
+                    "skjæringstidspunkt" to skjæringstidspunkt,
+                    "inntekterFraAOrdningen" to sammenligningsgrunnlag.inntekterFraAOrdningen
+                ),
+                output = mapOf(
+                    "sammenligningsgrunnlag" to sammenligningsgrunnlag.sammenligningsgrunnlag
+                ),
+                kontekster = kontekster()
+            )
+        )
+    }
+
     override fun `§ 8-33 ledd 1`() {
         super.`§ 8-33 ledd 1`()
     }
