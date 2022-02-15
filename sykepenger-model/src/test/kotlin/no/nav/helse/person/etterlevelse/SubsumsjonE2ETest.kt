@@ -953,7 +953,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                     mapOf(
                         "fom" to 1.januar,
                         "tom" to 29.januar,
-                        "dagtype" to "NAVDAG",
+                        "dagtype" to "SYKEDAG",
                         "grad" to 100
                     ),
                     mapOf(
@@ -966,6 +966,35 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             ),
             output = mapOf(
                 "perioder" to listOf(mapOf("fom" to 30.januar, "tom" to 31.januar))
+            )
+        )
+    }
+
+    @Test
+    fun `§ 8-19 første ledd - arbeidsgiverperioden varer i 16 dager`() {
+        håndterSykmelding(Sykmeldingsperiode(4.januar, 22.januar, 100.prosent))
+        håndterSøknad(Sykdom(4.januar, 22.januar, 100.prosent))
+        håndterInntektsmelding(listOf(4.januar til 19.januar), beregnetInntekt = INNTEKT)
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)
+
+        SubsumsjonInspektør(jurist).assertBeregnet(
+            paragraf = PARAGRAF_8_19,
+            versjon = 1.januar(2001),
+            ledd = 1.ledd,
+            input = mapOf(
+                "beregnetTidslinje" to listOf(
+                    mapOf(
+                        "fom" to 4.januar,
+                        "tom" to 22.januar,
+                        "dagtype" to "SYKEDAG",
+                        "grad" to 100
+                    ),
+                ),
+            ),
+            output = mapOf(
+                "sisteDagIArbeidsgiverperioden" to 19.januar,
             )
         )
     }

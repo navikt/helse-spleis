@@ -228,6 +228,21 @@ interface SubsumsjonObserver {
     fun `§ 8-17 ledd 2`(dato: LocalDate, sykdomstidslinje: List<Tidslinjedag>) {}
 
     /**
+     * Arbeidsgiverperioden teller 16 sykedager
+     *
+     * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-19)
+     *
+     * @param dato dagen vilkåret blir vurdert for
+     * @param beregnetTidslinje tidslinje som ligger til grunn for beregning av agp
+     */
+    fun `§ 8-19 første ledd`(dato: LocalDate, beregnetTidslinje: List<Tidslinjedag>) {}
+
+    fun `§ 8-19 andre ledd - beregning`(
+        dato: LocalDate
+    ) {
+    }
+
+    /**
      * Inntekt som legges til grunn dersom sykdom ved en arbeidsgiver starter senere enn skjæringstidspunktet tilsvarer
      * innrapportert inntekt til a-ordningen for de tre siste månedene før skjæringstidspunktet
      *
@@ -349,16 +364,6 @@ interface SubsumsjonObserver {
         startdatoSykepengerettighet: LocalDate
     ) {}
 
-    fun `§ 8-19 første ledd - beregning`(
-        dato: LocalDate
-    ) {
-    }
-
-    fun `§ 8-19 andre ledd - beregning`(
-        dato: LocalDate
-    ) {
-    }
-
     class Tidslinjedag(
         private val dato: LocalDate,
         private val dagtype: String,
@@ -421,11 +426,11 @@ interface SubsumsjonObserver {
         fun dager() = navdager.toList()
 
         override fun visitDag(dag: Dag.Sykedag, dato: LocalDate, økonomi: Økonomi, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
-            visit(dato, "NAVDAG", økonomi)
+            visit(dato, "SYKEDAG", økonomi)
         }
 
         override fun visitDag(dag: Dag.SykHelgedag, dato: LocalDate, økonomi: Økonomi, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
-            visit(dato, "NAVDAG", økonomi)
+            visit(dato, "SYKEDAG", økonomi)
         }
 
         override fun visitDag(dag: Dag.Feriedag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {

@@ -61,7 +61,7 @@ internal class Arbeidsgiverperiodesubsumsjon(
         }
 
         override fun arbeidsgiverperiodedag(parent: Arbeidsgiverperiodesubsumsjon, dato: LocalDate, økonomi: Økonomi) {
-            parent.subsumsjonObserver.`§ 8-19 første ledd - beregning`(dato)
+            parent.subsumsjonObserver.`§ 8-19 første ledd`(dato, parent.sykdomstidslinje.subsumsjonsformat())
         }
     }
 }

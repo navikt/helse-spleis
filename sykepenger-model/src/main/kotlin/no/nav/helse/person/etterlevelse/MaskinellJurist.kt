@@ -390,6 +390,24 @@ class MaskinellJurist private constructor(
         )
     }
 
+    override fun `§ 8-19 første ledd`(dato: LocalDate, beregnetTidslinje: List<SubsumsjonObserver.Tidslinjedag>) {
+        leggTil(
+            EnkelSubsumsjon(
+                utfall = VILKAR_BEREGNET,
+                versjon = 1.januar(2001),
+                paragraf = PARAGRAF_8_19,
+                ledd = 1.ledd,
+                input = mapOf(
+                    "beregnetTidslinje" to beregnetTidslinje.dager()
+                ),
+                output = mapOf(
+                    "sisteDagIArbeidsgiverperioden" to dato
+                ),
+                kontekster = kontekster()
+            )
+        )
+    }
+
     override fun `§ 8-28 ledd 3 bokstav a`(
         organisasjonsnummer: String,
         inntekterSisteTreMåneder: List<Map<String, Any>>,
