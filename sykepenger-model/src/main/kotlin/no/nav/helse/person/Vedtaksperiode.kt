@@ -1530,6 +1530,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, gjenopptaBehandling: IAktivitetslogg) {
+            if (vedtaksperiode.ingenUtbetaling()) return vedtaksperiode.tilstand(gjenopptaBehandling, AvsluttetUtenUtbetaling)
             vedtaksperiode.tilstand(gjenopptaBehandling, AvventerInntektsmeldingEllerHistorikkFerdigGap)
         }
 
@@ -1598,6 +1599,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, gjenopptaBehandling: IAktivitetslogg) {
+            if (vedtaksperiode.ingenUtbetaling()) return vedtaksperiode.tilstand(gjenopptaBehandling, AvsluttetUtenUtbetaling)
             vedtaksperiode.håndterMuligForlengelse(
                 gjenopptaBehandling,
                 AvventerInntektsmeldingFerdigForlengelse,
