@@ -1,6 +1,5 @@
-package no.nav.helse.utbetalingstidslinje.ny
+package no.nav.helse.utbetalingstidslinje
 
-import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 

@@ -1,9 +1,7 @@
-package no.nav.helse.utbetalingstidslinje.ny
+package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
-import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
-import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilderException.ManglerInntektException
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilderException.NegativDekningsgrunnlagException
 import no.nav.helse.økonomi.Inntekt

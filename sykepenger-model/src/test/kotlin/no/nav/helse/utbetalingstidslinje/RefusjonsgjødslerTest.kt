@@ -139,10 +139,9 @@ internal class RefusjonsgjødslerTest {
 
     @Test
     fun `Logger i aktivitetsloggen når vi bruker '16 dagers hopp'`() {
-        val utbetalingstidslinje = (31.opphold + 15.S).utbetalingstidslinje(
-            inntektsopplysning(1.februar, 2308.daglig),
-            strategi = { true }
-        )
+        val utbetalingstidslinje = (31.opphold + 15.S).utbetalingstidslinje(inntektsopplysning(1.februar, 2308.daglig)) { teller, other ->
+            Infotrygddekoratør(teller, other, listOf(1.februar til 15.februar))
+        }
         val refusjonsgjødsler = refusjonsgjødsler(
             utbetalingstidslinje, refusjonshistorikk(
                 refusjon(
@@ -346,13 +345,20 @@ internal class RefusjonsgjødslerTest {
 
         private fun Sykdomstidslinje.utbetalingstidslinje(
             inntektsopplysning: Map<LocalDate, Inntektshistorikk.Inntektsopplysning?>,
-            strategi: Forlengelsestrategi = Forlengelsestrategi.Ingen
+            delegator: ((Arbeidsgiverperiodeteller, SykdomstidslinjeVisitor) -> SykdomstidslinjeVisitor)? = null
         ): Utbetalingstidslinje {
-            val tidslinje = UtbetalingstidslinjeBuilder(
+            val tidslinjebuilder = UtbetalingstidslinjeBuilder(
+                Inntekter(
                 skjæringstidspunkter = inntektsopplysning.keys.toList(),
                 inntektPerSkjæringstidspunkt = inntektsopplysning,
+                regler = ArbeidsgiverRegler.Companion.NormalArbeidstaker,
                 subsumsjonObserver = MaskinellJurist()
-            ).apply { forlengelsestrategi(strategi)}.also { it.build(this, periode()!!) }.result()
+            )
+            )
+            val teller = Arbeidsgiverperiodeteller.NormalArbeidstaker
+            val builder = ArbeidsgiverperiodeBuilder(teller, tidslinjebuilder, MaskinellJurist())
+            this.accept(delegator?.invoke(teller, builder) ?: builder)
+            val tidslinje = tidslinjebuilder.result()
             verifiserRekkefølge(tidslinje)
             return tidslinje
         }

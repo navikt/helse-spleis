@@ -1,4 +1,4 @@
-package no.nav.helse.utbetalingstidslinje.ny
+package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.subsumsjonsformat

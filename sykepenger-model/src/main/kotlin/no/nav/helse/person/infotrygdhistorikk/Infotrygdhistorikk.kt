@@ -7,11 +7,7 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.utbetalingsh
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import no.nav.helse.utbetalingstidslinje.ny.ArbeidsgiverperiodeBuilder
-import no.nav.helse.utbetalingstidslinje.ny.ArbeidsgiverperiodeMediator
-import no.nav.helse.utbetalingstidslinje.ny.Arbeidsgiverperiodeteller
-import no.nav.helse.utbetalingstidslinje.ny.IUtbetalingstidslinjeBuilder
+import no.nav.helse.utbetalingstidslinje.*
 import java.time.LocalDate
 import java.time.LocalDateTime
 

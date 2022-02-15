@@ -11,10 +11,10 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.utbetalingslinjer.Utbetaling
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiodeteller
+import no.nav.helse.utbetalingstidslinje.Infotrygddekoratør
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
-import no.nav.helse.utbetalingstidslinje.ny.Arbeidsgiverperiodeteller
-import no.nav.helse.utbetalingstidslinje.ny.Infotrygddekoratør
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*

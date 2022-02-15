@@ -6,7 +6,6 @@ import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
-import no.nav.helse.utbetalingstidslinje.ny.IUtbetalingstidslinjeBuilder
 import java.time.LocalDate
 
 internal class ArbeidsgiverUtbetalinger(

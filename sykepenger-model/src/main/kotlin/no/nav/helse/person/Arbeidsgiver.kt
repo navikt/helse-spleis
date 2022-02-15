@@ -39,7 +39,6 @@ import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.utbetaltTidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
 import no.nav.helse.utbetalingslinjer.UtbetalingObserver
 import no.nav.helse.utbetalingstidslinje.*
-import no.nav.helse.utbetalingstidslinje.ny.Inntekter
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -973,7 +972,7 @@ internal class Arbeidsgiver private constructor(
         skjæringstidspunkter: List<LocalDate>,
         inntektsopplysningPerSkjæringstidspunktPerArbeidsgiver: Map<LocalDate, Map<String, Inntektshistorikk.Inntektsopplysning>>?,
         subsumsjonObserver: SubsumsjonObserver
-    ): no.nav.helse.utbetalingstidslinje.ny.UtbetalingstidslinjeBuilder {
+    ): UtbetalingstidslinjeBuilder {
         val inntekter = Inntekter(
             skjæringstidspunkter = skjæringstidspunkter,
             inntektPerSkjæringstidspunkt = inntektsopplysningPerSkjæringstidspunktPerArbeidsgiver?.mapValues { (_, inntektsopplysningPerArbeidsgiver) ->
@@ -982,7 +981,7 @@ internal class Arbeidsgiver private constructor(
             regler = regler,
             subsumsjonObserver = subsumsjonObserver
         )
-        return no.nav.helse.utbetalingstidslinje.ny.UtbetalingstidslinjeBuilder(inntekter)
+        return UtbetalingstidslinjeBuilder(inntekter)
     }
 
     internal fun lagreArbeidsforhold(arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold>, skjæringstidspunkt: LocalDate) {
@@ -994,7 +993,7 @@ internal class Arbeidsgiver private constructor(
         )
     }
 
-    internal fun build(subsumsjonObserver: SubsumsjonObserver, infotrygdhistorikk: Infotrygdhistorikk, builder: no.nav.helse.utbetalingstidslinje.ny.IUtbetalingstidslinjeBuilder, periode: Periode): Utbetalingstidslinje {
+    internal fun build(subsumsjonObserver: SubsumsjonObserver, infotrygdhistorikk: Infotrygdhistorikk, builder: IUtbetalingstidslinjeBuilder, periode: Periode): Utbetalingstidslinje {
         val sykdomstidslinje = sykdomstidslinje().fremTilOgMed(periode.endInclusive).takeUnless { it.count() == 0 } ?: return Utbetalingstidslinje()
         return infotrygdhistorikk.build(organisasjonsnummer, sykdomstidslinje, builder, subsumsjonObserver)
     }

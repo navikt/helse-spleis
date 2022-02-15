@@ -1,9 +1,7 @@
-package no.nav.helse.utbetalingstidslinje.ny
+package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.somPeriode
-import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
-import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 

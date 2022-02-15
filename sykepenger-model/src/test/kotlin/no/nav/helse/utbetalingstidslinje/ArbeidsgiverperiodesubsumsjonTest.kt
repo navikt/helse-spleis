@@ -1,4 +1,4 @@
-package no.nav.helse.utbetalingstidslinje.ny
+package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
@@ -9,7 +9,6 @@ import no.nav.helse.testhelpers.A
 import no.nav.helse.testhelpers.S
 import no.nav.helse.testhelpers.opphold
 import no.nav.helse.testhelpers.resetSeed
-import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.økonomi.Økonomi
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach

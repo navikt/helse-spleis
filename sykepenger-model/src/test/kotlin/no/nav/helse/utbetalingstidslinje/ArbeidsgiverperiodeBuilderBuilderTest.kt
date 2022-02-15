@@ -1,4 +1,4 @@
-package no.nav.helse.utbetalingstidslinje.ny
+package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
@@ -9,7 +9,6 @@ import no.nav.helse.testhelpers.A
 import no.nav.helse.testhelpers.S
 import no.nav.helse.testhelpers.opphold
 import no.nav.helse.testhelpers.resetSeed
-import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
