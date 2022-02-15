@@ -186,7 +186,6 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         )
     }
 
-    @ForventetFeil("Perioden avsluttes automatisk -- usikker på hva vi ønsker av etterlevelse da")
     @Test
     fun `§ 8-3 ledd 1 punktum 2 - er alltid 70 uten NAVdager`() {
         val fnr = "01014835841".somFødselsnummer()
@@ -194,25 +193,35 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent), fnr = fnr)
         håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent), fnr = fnr)
         håndterInntektsmelding(listOf(1.januar til 16.januar), fnr = fnr)
-        håndterYtelser(fnr = fnr)
-        håndterVilkårsgrunnlag(fnr = fnr)
-        håndterYtelser(fnr = fnr)
 
-        SubsumsjonInspektør(jurist).assertIkkeOppfylt(
-            paragraf = PARAGRAF_8_3,
-            ledd = LEDD_1,
-            punktum = 2.punktum,
-            versjon = 16.desember(2011),
-            input = mapOf(
-                "syttiårsdagen" to 1.januar,
-                "utfallFom" to 1.januar,
-                "utfallTom" to 16.januar,
-                "tidslinjeFom" to 1.januar,
-                "tidslinjeTom" to 16.januar
-            ),
-            output = mapOf(
-                "avvisteDager" to emptyList<Periode>()
-            )
+        assertForventetFeil(
+            forklaring = "Perioden avsluttes automatisk -- usikker på hva vi ønsker av etterlevelse da",
+            nå = {
+                assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET_UTEN_UTBETALING)
+                SubsumsjonInspektør(jurist).assertIkkeVurdert(paragraf = PARAGRAF_8_3)
+            },
+            ønsket = {
+                håndterYtelser(fnr = fnr)
+                håndterVilkårsgrunnlag(fnr = fnr)
+                håndterYtelser(fnr = fnr)
+
+                SubsumsjonInspektør(jurist).assertIkkeOppfylt(
+                    paragraf = PARAGRAF_8_3,
+                    ledd = LEDD_1,
+                    punktum = 2.punktum,
+                    versjon = 16.desember(2011),
+                    input = mapOf(
+                        "syttiårsdagen" to 1.januar,
+                        "utfallFom" to 1.januar,
+                        "utfallTom" to 16.januar,
+                        "tidslinjeFom" to 1.januar,
+                        "tidslinjeTom" to 16.januar
+                    ),
+                    output = mapOf(
+                        "avvisteDager" to emptyList<Periode>()
+                    )
+                )
+            }
         )
     }
 

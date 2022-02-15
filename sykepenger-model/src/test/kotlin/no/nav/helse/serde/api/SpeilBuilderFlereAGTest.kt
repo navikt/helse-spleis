@@ -398,7 +398,6 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
         )
     }
 
-    @ForventetFeil("må implementeres")
     @Test
     fun `tar med arbeidsforhold som var med i beregning av opptjening, men ikke gjelder skjæringstidspunktet`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
@@ -428,7 +427,12 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
 
         val personDto = serializePersonForSpeil(person)
-        assertEquals(listOf(a1, a2), personDto.arbeidsforholdPerSkjæringstidspunkt[1.januar]?.map { it.orgnummer })
+
+        assertForventetFeil(
+            forklaring = "må implementeres",
+            nå = { assertEquals(listOf(a1), personDto.arbeidsforholdPerSkjæringstidspunkt[1.januar]?.map { it.orgnummer }) },
+            ønsket = { assertEquals(listOf(a1, a2), personDto.arbeidsforholdPerSkjæringstidspunkt[1.januar]?.map { it.orgnummer }) }
+        )
     }
 
     @Test

@@ -1,6 +1,6 @@
 package no.nav.helse.serde.api.v2.buildere
 
-import no.nav.helse.ForventetFeil
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
@@ -154,7 +154,6 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
     }
 
     @Test
-    @ForventetFeil("Vi støtter ikke revurdering av inntekt på flere arbeidsgivere. Vi overstyrer begge arbeidsgiverne")
     fun `revurdering av inntekt flere AG`() {
         nyeVedtak(1.januar, 31.januar, AG1, AG2) {
             lagInntektperioder(fom = 1.januar, inntekt = 19000.månedlig, orgnummer = AG1)
@@ -165,7 +164,6 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
 
         val innslag = inspektør.vilkårsgrunnlagHistorikkInnslag()
         val generasjoner = vilkårsgrunnlag.build().toDTO()
-        assertEquals(2, generasjoner.size)
 
         val førsteGenerasjon = requireNotNull(generasjoner[innslag.last().id]?.vilkårsgrunnlagSpleis(1.januar))
         assertSpleisVilkårsprøving(
@@ -203,32 +201,61 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
         )
 
         val andreGenerasjon = requireNotNull(generasjoner[innslag.first().id]?.vilkårsgrunnlagSpleis(1.januar))
-        assertSpleisVilkårsprøving(
-            vilkårsgrunnlag = andreGenerasjon,
-            sammenligningsgrunnlag = 480000.0,
-            grunnbeløp = 93634,
-            avviksprosent = 5.3,
-            omregnetÅrsinntekt = 456000.0,
-            skjæringstidspunkt = 1.januar,
-            sykepengegrunnlag = 456000.0,
-            oppfyllerKravOmMinstelønn = true,
-            oppfyllerKravOmOpptjening = true,
-            oppfyllerKravOmMedlemskap = true
-        )
 
         assertEquals(2, andreGenerasjon.inntekter.size)
-        val inntekt2Ag1 = andreGenerasjon.inntekter.first { it.organisasjonsnummer == AG1.toString() }
-        assertInntekt(
-            inntekt2Ag1,
-            sammenligningsgrunnlag = 228000.0,
-            orgnummer = AG1,
-            omregnetÅrsinntekt = 216000.0,
-            inntektskilde = Inntektkilde.Saksbehandler,
-            omregnetÅrsinntektMånedsbeløp = 18000.0
-        )
-
-        val inntekt2Ag2 = andreGenerasjon.inntekter.first { it.organisasjonsnummer == AG2.toString() }
+        val inntekt2Ag1 = andreGenerasjon.inntekter.first { it.organisasjonsnummer == AG1 }
+        val inntekt2Ag2 = andreGenerasjon.inntekter.first { it.organisasjonsnummer == AG2 }
         assertEquals(inntektAg2, inntekt2Ag2)
+
+        assertForventetFeil(
+            forklaring = "Vi støtter ikke revurdering av inntekt på flere arbeidsgivere. Vi overstyrer begge arbeidsgiverne",
+            nå = {
+                assertEquals(1, generasjoner.size)
+                assertSpleisVilkårsprøving(
+                    vilkårsgrunnlag = andreGenerasjon,
+                    sammenligningsgrunnlag = 480000.0,
+                    grunnbeløp = 93634,
+                    avviksprosent = 0.0,
+                    omregnetÅrsinntekt = 480000.0,
+                    skjæringstidspunkt = 1.januar,
+                    sykepengegrunnlag = 480000.0,
+                    oppfyllerKravOmMinstelønn = true,
+                    oppfyllerKravOmOpptjening = true,
+                    oppfyllerKravOmMedlemskap = true
+                )
+                assertInntekt(
+                    inntekt2Ag1,
+                    sammenligningsgrunnlag = 228000.0,
+                    orgnummer = AG1,
+                    omregnetÅrsinntekt = 240000.0,
+                    inntektskilde = Inntektkilde.Inntektsmelding,
+                    omregnetÅrsinntektMånedsbeløp = 20000.0
+                )
+            },
+            ønsket = {
+                assertEquals(2, generasjoner.size)
+                assertSpleisVilkårsprøving(
+                    vilkårsgrunnlag = andreGenerasjon,
+                    sammenligningsgrunnlag = 480000.0,
+                    grunnbeløp = 93634,
+                    avviksprosent = 5.3,
+                    omregnetÅrsinntekt = 456000.0,
+                    skjæringstidspunkt = 1.januar,
+                    sykepengegrunnlag = 456000.0,
+                    oppfyllerKravOmMinstelønn = true,
+                    oppfyllerKravOmOpptjening = true,
+                    oppfyllerKravOmMedlemskap = true
+                )
+                assertInntekt(
+                    inntekt2Ag1,
+                    sammenligningsgrunnlag = 228000.0,
+                    orgnummer = AG1,
+                    omregnetÅrsinntekt = 216000.0,
+                    inntektskilde = Inntektkilde.Saksbehandler,
+                    omregnetÅrsinntektMånedsbeløp = 18000.0
+                )
+            }
+        )
     }
 
     @Test
