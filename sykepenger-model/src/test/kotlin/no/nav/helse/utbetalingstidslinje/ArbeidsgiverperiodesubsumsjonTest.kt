@@ -32,11 +32,12 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
         assertEquals(31, observatør.dager)
         assertEquals(16, observatør.arbeidsgiverperiodedager)
         assertEquals(15, observatør.utbetalingsdager)
-        assertEquals(21, jurist.subsumsjoner)
+        assertEquals(37, jurist.subsumsjoner)
         assertEquals(0, jurist.`§ 8-17 ledd 2`)
         assertEquals(16, jurist.`§ 8-17 første ledd bokstav a - ikke oppfylt`)
         assertEquals(1, jurist.`§ 8-17 første ledd bokstav a - oppfylt`)
         assertEquals(4, jurist.`§ 8-11 første ledd`)
+        assertEquals(16, jurist.`§ 8-19 andre ledd - beregning`)
     }
 
     @Test
@@ -45,11 +46,13 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
         assertEquals(18, observatør.dager)
         assertEquals(16, observatør.arbeidsgiverperiodedager)
         assertEquals(2, observatør.utbetalingsdager)
-        assertEquals(18, jurist.subsumsjoner)
+        assertEquals(34, jurist.subsumsjoner)
         assertEquals(0, jurist.`§ 8-17 ledd 2`)
         assertEquals(16, jurist.`§ 8-17 første ledd bokstav a - ikke oppfylt`)
         assertEquals(0, jurist.`§ 8-17 første ledd bokstav a - oppfylt`)
         assertEquals(2, jurist.`§ 8-11 første ledd`)
+        assertEquals(16, jurist.`§ 8-19 andre ledd - beregning`)
+
     }
 
     @Test
@@ -72,11 +75,13 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
         assertEquals(31, observatør.dager)
         assertEquals(16, observatør.arbeidsgiverperiodedager)
         assertEquals(15, observatør.utbetalingsdager)
-        assertEquals(21, jurist.subsumsjoner)
+        assertEquals(37, jurist.subsumsjoner)
         assertEquals(0, jurist.`§ 8-17 ledd 2`)
         assertEquals(16, jurist.`§ 8-17 første ledd bokstav a - ikke oppfylt`)
         assertEquals(1, jurist.`§ 8-17 første ledd bokstav a - oppfylt`)
         assertEquals(4, jurist.`§ 8-11 første ledd`)
+        assertEquals(16, jurist.`§ 8-19 andre ledd - beregning`)
+
     }
 
     private lateinit var jurist: Subsumsjonobservatør
@@ -102,6 +107,7 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
         var `§ 8-17 første ledd bokstav a - oppfylt` = 0
         var `§ 8-17 ledd 2` = 0
         var `§ 8-11 første ledd` = 0
+        var `§ 8-19 andre ledd - beregning` = 0
 
         override fun `§ 8-17 ledd 1 bokstav a`(oppfylt: Boolean, dagen: LocalDate) {
             subsumsjoner += 1
@@ -117,6 +123,11 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
         override fun `§ 8-11 første ledd`(dato: LocalDate) {
             subsumsjoner += 1
             `§ 8-11 første ledd` += 1
+        }
+
+        override fun `§ 8-19 andre ledd - beregning`(dato: LocalDate) {
+            subsumsjoner += 1
+            `§ 8-19 andre ledd - beregning` += 1
         }
     }
 

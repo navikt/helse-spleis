@@ -328,6 +328,11 @@ interface SubsumsjonObserver {
         startdatoSykepengerettighet: LocalDate
     ) {}
 
+    fun `§ 8-19 andre ledd - beregning`(
+        dato: LocalDate
+    ) {
+    }
+
     class Tidslinjedag(
         private val dato: LocalDate,
         private val dagtype: String,
