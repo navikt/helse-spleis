@@ -28,7 +28,7 @@ internal class Arbeidsgiverperiodesubsumsjon(
     override fun arbeidsgiverperiodedag(dato: LocalDate, økonomi: Økonomi) {
         tilstand.arbeidsgiverperiodedag(this, dato, økonomi)
         subsumsjonObserver.`§ 8-17 ledd 1 bokstav a`(false, dagen = dato)
-        subsumsjonObserver.`§ 8-19 andre ledd - beregning`(dato)
+        subsumsjonObserver.`§ 8-19 andre ledd`(dato, sykdomstidslinje.subsumsjonsformat())
         other.arbeidsgiverperiodedag(dato, økonomi)
     }
 

@@ -132,7 +132,7 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
             `§ 8-11 første ledd` += 1
         }
 
-        override fun `§ 8-19 andre ledd - beregning`(dato: LocalDate) {
+        override fun `§ 8-19 andre ledd`(dato: LocalDate, beregnetTidslinje: List<SubsumsjonObserver.Tidslinjedag>) {
             subsumsjoner += 1
             `§ 8-19 andre ledd - beregning` += 1
         }

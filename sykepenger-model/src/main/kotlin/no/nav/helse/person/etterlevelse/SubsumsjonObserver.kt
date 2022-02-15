@@ -237,10 +237,15 @@ interface SubsumsjonObserver {
      */
     fun `§ 8-19 første ledd`(dato: LocalDate, beregnetTidslinje: List<Tidslinjedag>) {}
 
-    fun `§ 8-19 andre ledd - beregning`(
-        dato: LocalDate
-    ) {
-    }
+    /**
+     * Arbeidsgiverperioden regnes fra og med første hele fraværsdag
+     *
+     * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-19)
+     *
+     * @param dato for en dag som anses som en agp-dag
+     * @param beregnetTidslinje tidslinje som ligger til grunn for beregning av agp
+     */
+    fun `§ 8-19 andre ledd`(dato: LocalDate, beregnetTidslinje: List<Tidslinjedag>) {}
 
     /**
      * Inntekt som legges til grunn dersom sykdom ved en arbeidsgiver starter senere enn skjæringstidspunktet tilsvarer
