@@ -10,11 +10,9 @@ import no.nav.helse.person.Vedtaksperiode.*
 import no.nav.helse.person.Vedtaksperiode.Companion.ALLE
 import no.nav.helse.person.Vedtaksperiode.Companion.AVVENTER_GODKJENT_REVURDERING
 import no.nav.helse.person.Vedtaksperiode.Companion.ER_ELLER_HAR_VÆRT_AVSLUTTET
-import no.nav.helse.person.Vedtaksperiode.Companion.FERDIG_BEHANDLET
 import no.nav.helse.person.Vedtaksperiode.Companion.IKKE_FERDIG_REVURDERT
 import no.nav.helse.person.Vedtaksperiode.Companion.KLAR_TIL_BEHANDLING
 import no.nav.helse.person.Vedtaksperiode.Companion.REVURDERING_IGANGSATT
-import no.nav.helse.person.Vedtaksperiode.Companion.UTEN_UTBETALING
 import no.nav.helse.person.Vedtaksperiode.Companion.harNødvendigInntekt
 import no.nav.helse.person.Vedtaksperiode.Companion.harOverlappendeUtbetaling
 import no.nav.helse.person.Vedtaksperiode.Companion.harOverlappendeUtbetaltePerioder
@@ -112,9 +110,6 @@ internal class Arbeidsgiver private constructor(
 
         internal fun Iterable<Arbeidsgiver>.nåværendeVedtaksperioder(filter: VedtaksperiodeFilter) =
             mapNotNull { it.vedtaksperioder.nåværendeVedtaksperiode(filter) }
-
-        internal fun List<Arbeidsgiver>.antallMedVedtaksperioder(skjæringstidspunkt: LocalDate) =
-            this.count { arbeidsgiver -> arbeidsgiver.vedtaksperioder.any { vedtaksperiode -> vedtaksperiode.gjelder(skjæringstidspunkt) } }
 
         internal fun List<Arbeidsgiver>.beregnSykepengegrunnlag(skjæringstidspunkt: LocalDate, periodeStart: LocalDate) =
             fold(emptyList<ArbeidsgiverInntektsopplysning>()) { inntektsopplysninger, arbeidsgiver ->
@@ -1073,25 +1068,17 @@ internal class Arbeidsgiver private constructor(
         vedtaksperioder.filter { it.gjelder(skjæringstidspunkt) }.forEach { it.loggførHendelsesreferanse(overstyrInntekt) }
     }
 
-    fun harFerdigstiltPeriode() = vedtaksperioder.any(ER_ELLER_HAR_VÆRT_AVSLUTTET) || forkastede.harAvsluttedePerioder()
+    internal fun harFerdigstiltPeriode() = vedtaksperioder.any(ER_ELLER_HAR_VÆRT_AVSLUTTET) || forkastede.harAvsluttedePerioder()
 
-    internal fun tilstøtendeBak(vedtaksperiode: Vedtaksperiode): Vedtaksperiode? {
+    private fun tilstøtendeBak(vedtaksperiode: Vedtaksperiode): Vedtaksperiode? {
         return vedtaksperioder.firstOrNull { it > vedtaksperiode }?.takeIf { vedtaksperiode.erSykeperiodeRettFør(it) }
     }
-    internal fun harPeriodeBak(vedtaksperiode: Vedtaksperiode) = vedtaksperioder.any { it > vedtaksperiode }
-    internal fun erAlleFerdigbehandletBak(vedtaksperiode: Vedtaksperiode) = vedtaksperioder
-        .filter { it > vedtaksperiode }
-        .all(FERDIG_BEHANDLET)
-
-    internal fun erAlleUtenUtbetaling(vedtaksperiode: Vedtaksperiode) = vedtaksperioder
-        .filter { it > vedtaksperiode }
-        .all(UTEN_UTBETALING)
 
     internal fun tidligerePeriodeRebehandles(vedtaksperiode: Vedtaksperiode, hendelse: PersonHendelse) {
         tilstøtendeBak(vedtaksperiode)?.tidligerePeriodeRebehandles(hendelse)
     }
 
-    fun <T> arbeidsforhold(skjæringstidspunkt: LocalDate, creator: (orgnummer: String, ansattFom: LocalDate, ansattTom: LocalDate?, erAktiv: Boolean) -> T) =
+    internal fun <T> arbeidsforhold(skjæringstidspunkt: LocalDate, creator: (orgnummer: String, ansattFom: LocalDate, ansattTom: LocalDate?, erAktiv: Boolean) -> T) =
         arbeidsforholdhistorikk.sisteArbeidsforhold(skjæringstidspunkt) { ansattFom: LocalDate, ansattTom: LocalDate?, erAktiv: Boolean ->
             creator(organisasjonsnummer, ansattFom, ansattTom, erAktiv)
         }

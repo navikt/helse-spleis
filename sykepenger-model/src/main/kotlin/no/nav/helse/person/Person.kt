@@ -158,7 +158,7 @@ class Person private constructor(
         }
     }
 
-    internal fun arbeidsgiverperiodeFor(orgnummer: String, sykdomstidslinje: Sykdomstidslinje, kuttdato: LocalDate, periode: Periode, subsumsjonObserver: SubsumsjonObserver): Arbeidsgiverperiode? {
+    internal fun arbeidsgiverperiodeFor(orgnummer: String, sykdomstidslinje: Sykdomstidslinje, periode: Periode, subsumsjonObserver: SubsumsjonObserver): Arbeidsgiverperiode? {
         val periodebuilder = ArbeidsgiverperiodeBuilderBuilder()
         infotrygdhistorikk.build(orgnummer, sykdomstidslinje, periodebuilder, subsumsjonObserver)
         return periodebuilder.result().finn(periode)
@@ -301,7 +301,7 @@ class Person private constructor(
         vedtaksperiode.revurder(hendelse)
     }
 
-    internal fun igangsettRevurdering(hendelse: Påminnelse, vedtaksperiode: Vedtaksperiode) {
+    private fun igangsettRevurdering(hendelse: Påminnelse, vedtaksperiode: Vedtaksperiode) {
         arbeidsgivere.forEach { it.startRevurderingForAlleBerørtePerioder(hendelse, vedtaksperiode) }
         if (hendelse.hasErrorsOrWorse()) return
         vedtaksperiode.revurder(hendelse)
@@ -415,7 +415,7 @@ class Person private constructor(
 
     internal fun skjæringstidspunkterFraSpleis() = vilkårsgrunnlagHistorikk.skjæringstidspunkterFraSpleis()
 
-    internal fun kanOverskriveVilkårsgrunnlag(skjæringstidspunkt: LocalDate) = !arbeidsgivere.harUtbetaltPeriode(skjæringstidspunkt)
+    private fun kanOverskriveVilkårsgrunnlag(skjæringstidspunkt: LocalDate) = !arbeidsgivere.harUtbetaltPeriode(skjæringstidspunkt)
 
     internal fun trengerHistorikkFraInfotrygd(hendelse: IAktivitetslogg, cutoff: LocalDateTime? = null): Boolean {
         val tidligsteDato = arbeidsgivereMedSykdom().minOf { it.tidligsteDato() }
@@ -775,8 +775,4 @@ class Person private constructor(
 
     internal fun loggførHendelsesreferanse(orgnummer: String, skjæringstidspunkt: LocalDate, hendelse: OverstyrInntekt) =
         arbeidsgivere.forEach { it.loggførHendelsesreferanse(orgnummer, skjæringstidspunkt, hendelse) }
-
-    internal fun tidligerePerioderFerdigBehandlet(vedtaksperiode: Vedtaksperiode): Boolean {
-        return arbeidsgivere.all { it.tidligerePerioderFerdigBehandlet(vedtaksperiode) }
-    }
 }

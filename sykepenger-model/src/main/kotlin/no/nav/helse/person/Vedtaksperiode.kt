@@ -289,10 +289,6 @@ internal class Vedtaksperiode private constructor(
 
     internal fun blokkererOverstyring() = !(tilstand.kanReberegnes || tilstand.type == AVVENTER_GODKJENNING)
 
-    internal fun periodeReberegnetFør(ny: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
-        håndterEndringIEldrePeriode(ny, Vedtaksperiodetilstand::reberegnetPeriodeFør, hendelse)
-    }
-
     internal fun nyRevurderingFør(revurdert: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
         håndterEndringIEldrePeriode(revurdert, Vedtaksperiodetilstand::nyRevurderingFør, hendelse)
     }
@@ -843,14 +839,6 @@ internal class Vedtaksperiode private constructor(
                 påminnelse.tilstandsendringstidspunkt()
             )
         ) return håndterMakstid(vedtaksperiode, påminnelse)
-        if (this.type.name.contains("_UFERDIG") && arbeidsgiver.tidligerePerioderFerdigBehandlet(vedtaksperiode)) return periodeErFerdig(
-            this@Vedtaksperiode,
-            påminnelse
-        )
-        else if (this.type.name.contains("_FERDIG") && !arbeidsgiver.tidligerePerioderFerdigBehandlet(vedtaksperiode)) return periodeErUferdig(
-            this@Vedtaksperiode,
-            påminnelse
-        )
         håndter(vedtaksperiode, påminnelse)
     }
 
@@ -891,22 +879,6 @@ internal class Vedtaksperiode private constructor(
                 "Tilstand", mapOf(
                     "tilstand" to type.name
                 )
-            )
-        }
-
-        fun periodeErFerdig(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            sikkerlogg.warn(
-                "Vedtaksperioden ${vedtaksperiode.id} er i $type, men alle perioder foran er ferdigbehandlet",
-                keyValue("vedtaksperiodeId", vedtaksperiode.id),
-                keyValue("tilstand", type)
-            )
-        }
-
-        fun periodeErUferdig(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            sikkerlogg.warn(
-                "Vedtaksperioden ${vedtaksperiode.id} er i $type, men det er perioder foran som er under behandling",
-                keyValue("vedtaksperiodeId", vedtaksperiode.id),
-                keyValue("tilstand", type)
             )
         }
 
@@ -2751,7 +2723,7 @@ internal class Vedtaksperiode private constructor(
             subsumsjonObserver: SubsumsjonObserver
         ): Arbeidsgiverperiode? {
             val samletSykdomstidslinje = Sykdomstidslinje.gammelTidslinje(perioder.map { it.sykdomstidslinje }).merge(sykdomstidslinje, replace)
-            return person.arbeidsgiverperiodeFor(organisasjonsnummer, samletSykdomstidslinje, samletSykdomstidslinje.sisteDag(), periode, subsumsjonObserver)
+            return person.arbeidsgiverperiodeFor(organisasjonsnummer, samletSykdomstidslinje, periode, subsumsjonObserver)
         }
     }
 }

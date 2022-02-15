@@ -6,14 +6,12 @@ import no.nav.helse.hendelser.contains
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.SykdomstidslinjeVisitor
-import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.sykdomstidslinje.Dag.Companion.default
 import no.nav.helse.sykdomstidslinje.Dag.Companion.sammenhengendeSykdom
 import no.nav.helse.sykdomstidslinje.Dag.Companion.sykmeldingSkrevet
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde.Companion.INGEN
-import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Økonomi
 import java.time.DayOfWeek
@@ -158,21 +156,6 @@ internal class Sykdomstidslinje private constructor(
 
     internal fun førsteSykedagEtter(dato: LocalDate) =
         periode?.firstOrNull { it >= dato && erEnSykedag(this[it]) }
-
-    internal fun erInnenforArbeidsgiverperiode(arbeidsgiverperiode: Arbeidsgiverperiode, periode: Periode, subsumsjonObserver: SubsumsjonObserver): Boolean {
-        return arbeidsgiverperiode.dekker(sisteIkkeOppholdsdag(periode)).also { innenforAGP ->
-            if (innenforAGP) subsumsjonObserver.`§ 8-17 ledd 1 bokstav a - arbeidsgiversøknad`(arbeidsgiverperiode)
-        }
-    }
-
-    private fun sisteIkkeOppholdsdag(periode: Periode): Periode {
-        val siste = this.periode?.lastOrNull { it >= periode.start && !erOppholdsdag(it) } ?: periode.endInclusive
-        val justert = siste.takeUnless { it.erHelg() } ?: siste.minusDays(when (siste.dayOfWeek) {
-            DayOfWeek.SUNDAY -> 2
-            else -> 1
-        }).coerceAtLeast(periode.start)
-        return periode.start til justert
-    }
 
     internal fun harDagUtenSøknad(periode: Periode) = subset(periode).any { it.kommerFra(Sykmelding::class) }
 
@@ -393,7 +376,7 @@ internal class Sykdomstidslinje private constructor(
             ferieperiode.any { sykdomstidslinje[it] !is Feriedag }
 
         internal fun gammelTidslinje(tidslinjer: List<Sykdomstidslinje>) =
-            tidslinjer.map { Sykdomstidslinje(it.dager.filter { it.value !is ProblemDag }.toSortedMap(), it.periode) }.merge(sammenhengendeSykdom)
+            tidslinjer.map { Sykdomstidslinje(it.dager.filter { (_, dag ) -> dag !is ProblemDag }.toSortedMap(), it.periode) }.merge(sammenhengendeSykdom)
     }
 }
 
