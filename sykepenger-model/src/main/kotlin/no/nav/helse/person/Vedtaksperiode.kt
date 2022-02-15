@@ -20,13 +20,13 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.medlemskap
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.omsorgspenger
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.opplæringspenger
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.pleiepenger
+import no.nav.helse.person.Dokumentsporing.Companion.ider
 import no.nav.helse.person.ForkastetÅrsak.ERSTATTES
 import no.nav.helse.person.ForkastetÅrsak.IKKE_STØTTET
 import no.nav.helse.person.ForlengelseFraInfotrygd.JA
 import no.nav.helse.person.ForlengelseFraInfotrygd.NEI
 import no.nav.helse.person.InntektsmeldingInfo.Companion.ider
 import no.nav.helse.person.Periodetype.*
-import no.nav.helse.person.Dokumentsporing.Companion.ider
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.builders.UtbetaltEventBuilder
 import no.nav.helse.person.builders.VedtakFattetBuilder
@@ -465,7 +465,7 @@ internal class Vedtaksperiode private constructor(
             if (!alleAndreAvventerArbeidsgivere()) hendelse.validerMuligBrukerutbetaling()
             if (hendelse.hasErrorsOrWorse()) person.invaliderAllePerioder(hendelse, null)
         }) {
-            if (erInnenforArbeidsgiverperioden()) AvsluttetUtenUtbetaling else hvisUtenforArbeidsgiverperioden
+            if (ingenUtbetaling()) AvsluttetUtenUtbetaling else hvisUtenforArbeidsgiverperioden
         }
     }
 
@@ -487,7 +487,7 @@ internal class Vedtaksperiode private constructor(
             hendelse.error("Invaliderer alle perioder for arbeidsgiver pga feil i søknad")
             return tilstand(hendelse, TilInfotrygd)
         }
-        val tilstand = if (erInnenforArbeidsgiverperioden()) AvsluttetUtenUtbetaling else nesteTilstand
+        val tilstand = if (ingenUtbetaling()) AvsluttetUtenUtbetaling else nesteTilstand
         tilstand?.also { tilstand(hendelse, it) }
     }
 
@@ -859,11 +859,7 @@ internal class Vedtaksperiode private constructor(
     private fun finnArbeidsgiverperiode() =
         arbeidsgiver.arbeidsgiverperiode(periode, MaskinellJurist()) // TODO: skal vi logge ved beregning av agp?
 
-    private fun erInnenforArbeidsgiverperioden() = finnArbeidsgiverperiode()?.let { arbeidsgiverperiode ->
-        (arbeidsgiverperiode.dekker(periode) || arbeidsgiverperiode.erFørsteUtbetalingsdagEtter(periode.endInclusive)).also { innenforAGP ->
-            if (innenforAGP) jurist().`§ 8-17 ledd 1 bokstav a - arbeidsgiversøknad`(arbeidsgiverperiode)
-        }
-    } ?: true
+    private fun ingenUtbetaling() = Arbeidsgiverperiode.ingenUtbetaling(finnArbeidsgiverperiode(), periode, jurist())
 
     // Gang of four State pattern
     internal interface Vedtaksperiodetilstand : Aktivitetskontekst {
@@ -1984,7 +1980,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun loggInnenforArbeidsgiverperiode() {
-        if (!erInnenforArbeidsgiverperioden()) return
+        if (!ingenUtbetaling()) return
         sikkerlogg.info(
             "Vedtaksperioden {} for {} er egentlig innenfor arbeidsgiverperioden ved {}",
             keyValue("vedtaksperiodeId", id), keyValue("fnr", fødselsnummer), keyValue("tilstand", tilstand.type)
@@ -2416,12 +2412,12 @@ internal class Vedtaksperiode private constructor(
         override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Sykmelding) {}
 
         override fun håndterTidligereUferdigPeriode(vedtaksperiode: Vedtaksperiode, tidligere: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            if (vedtaksperiode.erInnenforArbeidsgiverperioden()) return
+            if (vedtaksperiode.ingenUtbetaling()) return
             vedtaksperiode.tilstand(hendelse, AvventerInntektsmeldingUferdigGap)
         }
 
         override fun håndterTidligereTilstøtendeUferdigPeriode(vedtaksperiode: Vedtaksperiode, tidligere: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            if (vedtaksperiode.erInnenforArbeidsgiverperioden()) return
+            if (vedtaksperiode.ingenUtbetaling()) return
             vedtaksperiode.tilstand(hendelse, AvventerInntektsmeldingUferdigForlengelse)
         }
 
@@ -2438,7 +2434,7 @@ internal class Vedtaksperiode private constructor(
                         "inntektsmelding i auu: har ikke arbeidsgiverperiode etter mottak av im for {} {} {}. Perioden er mest sannsynlig erstattet med arbeidsdager",
                         *debugkeys
                     )
-                    vedtaksperiode.erInnenforArbeidsgiverperioden() -> sikkerlogg.info(
+                    vedtaksperiode.ingenUtbetaling() -> sikkerlogg.info(
                         "inntektsmelding i auu: er fortsatt innenfor arbeidsgiverperioden etter mottak av im for {} {} {}",
                         *debugkeys
                     )
@@ -2449,7 +2445,7 @@ internal class Vedtaksperiode private constructor(
                     else -> sikkerlogg.info("inntektsmelding i auu: vil reberegne vedtaksperiode {} for {} {}", *debugkeys)
                 }
             }) {
-                if (vedtaksperiode.erInnenforArbeidsgiverperioden() || !vedtaksperiode.sykdomstidslinje.harSykedager()) {
+                if (vedtaksperiode.ingenUtbetaling() || !vedtaksperiode.sykdomstidslinje.harSykedager()) {
                     AvsluttetUtenUtbetaling
                 } else if (!vedtaksperiode.arbeidsgiver.kanReberegnes(vedtaksperiode)) {
                     inntektsmelding.error("Kan ikke reberegne perioden fordi det er en nyere periode som er ferdig behandlet")

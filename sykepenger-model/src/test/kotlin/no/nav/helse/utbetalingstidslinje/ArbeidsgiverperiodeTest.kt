@@ -1,9 +1,11 @@
 package no.nav.helse.utbetalingstidslinje
 
+import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
+import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode.Companion.finn
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -55,6 +57,15 @@ internal class ArbeidsgiverperiodeTest {
     fun `helg regnes ikke som betalt`() {
         assertTrue(agp(1.januar til 16.januar).utbetalingsdag(20.januar).erFørsteUtbetalingsdagEtter(20.januar))
         assertTrue(Arbeidsgiverperiode.fiktiv(20.januar).erFørsteUtbetalingsdagEtter(20.januar))
+    }
+
+    @Test
+    fun `ingen utbetaling dersom perioden er innenfor arbeidsgiverperioden eller før det utbetales noe`() {
+        agp(1.januar til 16.januar).utbetalingsdag(23.januar).also { agp ->
+            assertTrue(agp.ingenUtbetaling(31.desember(2017) til 5.januar, MaskinellJurist()))
+            assertTrue(agp.ingenUtbetaling(15.januar til 22.januar, MaskinellJurist()))
+            assertFalse(agp.ingenUtbetaling(15.januar til 23.januar, MaskinellJurist()))
+        }
     }
 
     @Test

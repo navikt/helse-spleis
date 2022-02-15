@@ -3,6 +3,7 @@ package no.nav.helse.utbetalingstidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
+import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.sykdomstidslinje.erRettFør
 import java.time.DayOfWeek
@@ -40,6 +41,12 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
 
     operator fun contains(periode: Periode) =
         innflytelseperioden.overlapperMed(periode)
+
+    internal fun ingenUtbetaling(periode: Periode, subsumsjonObserver: SubsumsjonObserver): Boolean {
+        if (!dekker(periode)) return erFørsteUtbetalingsdagEtter(periode.endInclusive)
+        subsumsjonObserver.`§ 8-17 ledd 1 bokstav a - arbeidsgiversøknad`(this)
+        return true
+    }
 
     internal fun dekker(periode: Periode): Boolean {
         if (fiktiv()) return false
@@ -88,6 +95,9 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
 
     internal companion object {
         internal fun fiktiv(førsteUtbetalingsdag: LocalDate) = Arbeidsgiverperiode(emptyList(), førsteUtbetalingsdag)
+
+        internal fun ingenUtbetaling(arbeidsgiverperiode: Arbeidsgiverperiode?, periode: Periode, subsumsjonObserver: SubsumsjonObserver) =
+            arbeidsgiverperiode?.ingenUtbetaling(periode, subsumsjonObserver) ?: true
 
         internal fun List<Arbeidsgiverperiode>.finn(periode: Periode) = firstOrNull { arbeidsgiverperiode ->
             periode in arbeidsgiverperiode
