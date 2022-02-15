@@ -108,6 +108,7 @@ internal class Utbetaling private constructor(
         observers.add(observer)
     }
 
+    internal fun gyldig() = tilstand != Forkastet
     internal fun erUbetalt() = tilstand == Ubetalt
     internal fun erUtbetalt() = tilstand == Utbetalt || tilstand == Annullert
     private fun erAktiv() = erAvsluttet() || erInFlight()

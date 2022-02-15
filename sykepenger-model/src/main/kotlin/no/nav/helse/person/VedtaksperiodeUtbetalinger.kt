@@ -29,7 +29,7 @@ internal class VedtaksperiodeUtbetalinger(private val arbeidsgiver: Arbeidsgiver
         visitor.postVisitVedtakserperiodeUtbetalinger(utbetalinger)
     }
 
-    internal fun harUtbetaling() = siste != null
+    internal fun harUtbetaling() = siste != null && siste!!.gyldig()
 
     private fun erSiste(other: Utbetaling) = siste == other
     internal fun erSiste(other: VedtaksperiodeUtbetalinger) = erSiste(other.siste!!)

@@ -1564,6 +1564,11 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.tilstand(hendelse, AvventerInntektsmeldingUferdigForlengelse)
         }
 
+        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
+            if (vedtaksperiode.ingenUtbetaling()) return vedtaksperiode.tilstand(påminnelse, AvsluttetUtenUtbetaling)
+            super.håndter(vedtaksperiode, påminnelse)
+        }
+
         // TODO: kan fjernes nå https://trello.com/c/Eoug7QnR er gjort
         override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, gjenopptaBehandling: IAktivitetslogg) {
             if (!vedtaksperiode.harInntektsmelding()) return
@@ -1741,7 +1746,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            vedtaksperiode.loggInnenforArbeidsgiverperiode()
+            if (vedtaksperiode.ingenUtbetaling()) return vedtaksperiode.tilstand(påminnelse, AvsluttetUtenUtbetaling)
             vedtaksperiode.trengerHistorikkFraInfotrygd(påminnelse)
         }
 
@@ -1814,6 +1819,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         private fun fortsett(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+            if (vedtaksperiode.ingenUtbetaling()) return vedtaksperiode.tilstand(hendelse, AvsluttetUtenUtbetaling)
             if (!vedtaksperiode.harInntekt()) return vedtaksperiode.tilstand(hendelse, AvventerInntektsmeldingEllerHistorikkFerdigGap)
             vedtaksperiode.tilstand(hendelse, AvventerHistorikk)
         }
@@ -2102,6 +2108,11 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
+            if (vedtaksperiode.ingenUtbetaling()) {
+                vedtaksperiode.utbetalinger.forkast(påminnelse)
+                vedtaksperiode.emitVedtaksperiodeReberegnet(påminnelse.hendelseskontekst())
+                return vedtaksperiode.tilstand(påminnelse, AvsluttetUtenUtbetaling)
+            }
             vedtaksperiode.trengerHistorikkFraInfotrygd(påminnelse)
         }
 
