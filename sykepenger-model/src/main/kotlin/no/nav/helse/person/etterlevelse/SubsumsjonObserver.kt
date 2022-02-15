@@ -328,6 +328,11 @@ interface SubsumsjonObserver {
         startdatoSykepengerettighet: LocalDate
     ) {}
 
+    fun `§ 8-19 første ledd - beregning`(
+        dato: LocalDate
+    ) {
+    }
+
     fun `§ 8-19 andre ledd - beregning`(
         dato: LocalDate
     ) {

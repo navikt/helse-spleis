@@ -7,8 +7,6 @@ import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 
-//TODO: Logge 8-19 første ledd når går ut av første arbeidsgiverperiode - BEREGNING
-//TODO: Logge 8-19 andre ledd for hver dag i arbeidsgiverperioden - BEREGNING
 //TODO: Logge 8-19 tredje ledd når vi teller første arbeidsgiverperiode - BEREGNING
 //TODO: Logge 8-19 fjerde ledd når vi teller neste arbeidsgiverperiode - BEREGNING
 internal class Arbeidsgiverperiodesubsumsjon(
@@ -46,19 +44,24 @@ internal class Arbeidsgiverperiodesubsumsjon(
         other.arbeidsgiverperiodeAvbrutt()
     }
 
+    override fun arbeidsgiverperiodeSistedag() {
+        tilstand = SisteDagIArbeidsgiverperioden
+        other.arbeidsgiverperiodeSistedag()
+    }
+
     private interface Tilstand {
         fun arbeidsgiverperiodedag(parent: Arbeidsgiverperiodesubsumsjon, dato: LocalDate, økonomi: Økonomi) {}
         fun utbetalingsdag(parent: Arbeidsgiverperiodesubsumsjon, dato: LocalDate, økonomi: Økonomi) {}
     }
-    private object Initiell : Tilstand {
-        override fun arbeidsgiverperiodedag(parent: Arbeidsgiverperiodesubsumsjon, dato: LocalDate, økonomi: Økonomi) {
-            parent.tilstand = PåbegyntArbeidsgiverperiode
-        }
-    }
-    private object PåbegyntArbeidsgiverperiode : Tilstand {
+    private object Initiell : Tilstand {}
+    private object SisteDagIArbeidsgiverperioden : Tilstand {
         override fun utbetalingsdag(parent: Arbeidsgiverperiodesubsumsjon, dato: LocalDate, økonomi: Økonomi) {
             parent.subsumsjonObserver.`§ 8-17 ledd 1 bokstav a`(true, dagen = dato)
             parent.tilstand = Initiell
+        }
+
+        override fun arbeidsgiverperiodedag(parent: Arbeidsgiverperiodesubsumsjon, dato: LocalDate, økonomi: Økonomi) {
+            parent.subsumsjonObserver.`§ 8-19 første ledd - beregning`(dato)
         }
     }
 }

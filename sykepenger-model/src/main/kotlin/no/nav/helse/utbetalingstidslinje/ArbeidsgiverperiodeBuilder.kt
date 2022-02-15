@@ -185,6 +185,10 @@ internal class ArbeidsgiverperiodeBuilder(
         }
     }
     private object ArbeidsgiverperiodeSisteDag : Tilstand {
+        override fun entering(builder: ArbeidsgiverperiodeBuilder) {
+            builder.mediator.arbeidsgiverperiodeSistedag()
+        }
+
         override fun sykdomsdag(builder: ArbeidsgiverperiodeBuilder, dato: LocalDate, økonomi: Økonomi) {
             builder.mediator.arbeidsgiverperiodedag(dato, økonomi)
             builder.tilstand(Utbetaling)

@@ -12,4 +12,5 @@ internal interface ArbeidsgiverperiodeMediator {
     fun avvistDag(dato: LocalDate, begrunnelse: Begrunnelse)
     fun arbeidsgiverperiodeAvbrutt() {}
     fun arbeidsgiverperiodeFerdig() {}
+    fun arbeidsgiverperiodeSistedag() {}
 }

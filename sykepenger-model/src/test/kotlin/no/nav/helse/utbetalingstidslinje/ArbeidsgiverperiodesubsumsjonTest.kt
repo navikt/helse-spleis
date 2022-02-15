@@ -32,12 +32,13 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
         assertEquals(31, observatør.dager)
         assertEquals(16, observatør.arbeidsgiverperiodedager)
         assertEquals(15, observatør.utbetalingsdager)
-        assertEquals(37, jurist.subsumsjoner)
+        assertEquals(38, jurist.subsumsjoner)
         assertEquals(0, jurist.`§ 8-17 ledd 2`)
         assertEquals(16, jurist.`§ 8-17 første ledd bokstav a - ikke oppfylt`)
         assertEquals(1, jurist.`§ 8-17 første ledd bokstav a - oppfylt`)
         assertEquals(4, jurist.`§ 8-11 første ledd`)
         assertEquals(16, jurist.`§ 8-19 andre ledd - beregning`)
+        assertEquals(1, jurist.`§ 8-19 første ledd - beregning`)
     }
 
     @Test
@@ -46,12 +47,13 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
         assertEquals(18, observatør.dager)
         assertEquals(16, observatør.arbeidsgiverperiodedager)
         assertEquals(2, observatør.utbetalingsdager)
-        assertEquals(34, jurist.subsumsjoner)
+        assertEquals(35, jurist.subsumsjoner)
         assertEquals(0, jurist.`§ 8-17 ledd 2`)
         assertEquals(16, jurist.`§ 8-17 første ledd bokstav a - ikke oppfylt`)
         assertEquals(0, jurist.`§ 8-17 første ledd bokstav a - oppfylt`)
         assertEquals(2, jurist.`§ 8-11 første ledd`)
         assertEquals(16, jurist.`§ 8-19 andre ledd - beregning`)
+        assertEquals(1, jurist.`§ 8-19 første ledd - beregning`)
 
     }
 
@@ -65,6 +67,9 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
         assertEquals(31, observatør.utbetalingsdager)
         assertEquals(8, jurist.subsumsjoner)
         assertEquals(8, jurist.`§ 8-11 første ledd`)
+        assertEquals(0, jurist.`§ 8-19 første ledd - beregning`)
+        assertEquals(0, jurist.`§ 8-19 andre ledd - beregning`)
+        assertEquals(0, jurist.`§ 8-17 første ledd bokstav a - oppfylt`)
     }
 
     @Test
@@ -75,12 +80,13 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
         assertEquals(31, observatør.dager)
         assertEquals(16, observatør.arbeidsgiverperiodedager)
         assertEquals(15, observatør.utbetalingsdager)
-        assertEquals(37, jurist.subsumsjoner)
+        assertEquals(38, jurist.subsumsjoner)
         assertEquals(0, jurist.`§ 8-17 ledd 2`)
         assertEquals(16, jurist.`§ 8-17 første ledd bokstav a - ikke oppfylt`)
         assertEquals(1, jurist.`§ 8-17 første ledd bokstav a - oppfylt`)
         assertEquals(4, jurist.`§ 8-11 første ledd`)
         assertEquals(16, jurist.`§ 8-19 andre ledd - beregning`)
+        assertEquals(1, jurist.`§ 8-19 første ledd - beregning`)
 
     }
 
@@ -108,6 +114,7 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
         var `§ 8-17 ledd 2` = 0
         var `§ 8-11 første ledd` = 0
         var `§ 8-19 andre ledd - beregning` = 0
+        var `§ 8-19 første ledd - beregning`= 0
 
         override fun `§ 8-17 ledd 1 bokstav a`(oppfylt: Boolean, dagen: LocalDate) {
             subsumsjoner += 1
@@ -128,6 +135,11 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
         override fun `§ 8-19 andre ledd - beregning`(dato: LocalDate) {
             subsumsjoner += 1
             `§ 8-19 andre ledd - beregning` += 1
+        }
+
+        override fun `§ 8-19 første ledd - beregning`(dato: LocalDate) {
+            subsumsjoner += 1
+            `§ 8-19 første ledd - beregning` += 1
         }
     }
 
