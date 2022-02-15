@@ -7,7 +7,8 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import org.slf4j.LoggerFactory
-import java.time.LocalDateTime.now
+import java.time.LocalDateTime
+import java.time.ZonedDateTime
 
 internal class SubsumsjonMediator(
     private val jurist: MaskinellJurist,
@@ -35,16 +36,15 @@ internal class SubsumsjonMediator(
     }
 
     private fun subsumsjonMelding(fødselsnummer: String, event: MaskinellJurist.SubsumsjonEvent): JsonMessage {
-        val tidsstempel = now()
         return JsonMessage.newMessage(
             mapOf(
                 "@id" to event.id,
                 "@event_name" to "subsumsjon",
-                "@opprettet" to tidsstempel,
+                "@opprettet" to LocalDateTime.now(),
                 "subsumsjon" to mutableMapOf(
                     "id" to event.id,
                     "eventName" to "subsumsjon",
-                    "tidsstempel" to tidsstempel,
+                    "tidsstempel" to ZonedDateTime.now(),
                     "versjon" to "1.0.0",
                     "kilde" to "spleis",
                     "versjonAvKode" to versjonAvKode,
