@@ -123,7 +123,7 @@ internal class SubsumsjonTest {
         override val utfall = utfall
         override val versjon = versjon
         override val paragraf = paragraf
-        override val ledd = ledd
+        override val ledd: Ledd? = ledd
         override val bokstav: Bokstav? = bokstav
         override val punktum: Punktum? = punktum
         override val input = input

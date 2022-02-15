@@ -393,7 +393,8 @@ class MaskinellJurist private constructor(
     override fun `§ 8-28 ledd 3 bokstav a`(
         organisasjonsnummer: String,
         inntekterSisteTreMåneder: List<Map<String, Any>>,
-        grunnlagForSykepengegrunnlag: Inntekt
+        grunnlagForSykepengegrunnlag: Inntekt,
+        skjæringstidspunkt: LocalDate
     ) {
         leggTil(
             EnkelSubsumsjon(
@@ -404,11 +405,37 @@ class MaskinellJurist private constructor(
                 bokstav = BOKSTAV_A,
                 input = mapOf(
                     "organisasjonsnummer" to organisasjonsnummer,
-                    "inntekterSisteTreMåneder" to inntekterSisteTreMåneder
+                    "inntekterSisteTreMåneder" to inntekterSisteTreMåneder,
+                    "skjæringstidspunkt" to skjæringstidspunkt
                 ),
                 output = mapOf(
                     "beregnetGrunnlagForSykepengegrunnlagPrÅr" to grunnlagForSykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
                     "beregnetGrunnlagForSykepengegrunnlagPrMåned" to grunnlagForSykepengegrunnlag.reflection { _, månedlig, _, _ -> månedlig }
+                ),
+                kontekster = kontekster()
+            )
+        )
+    }
+
+    override fun `§ 8-29`(
+        skjæringstidspunkt: LocalDate,
+        grunnlagForSykepengegrunnlag: Inntekt,
+        inntektsopplysninger: List<Map<String, Any>>,
+        organisasjonsnummer: String
+    ) {
+        leggTil(
+            EnkelSubsumsjon(
+                utfall = VILKAR_BEREGNET,
+                versjon = LocalDate.of(2019, 1, 1),
+                paragraf = PARAGRAF_8_29,
+                ledd = null,
+                input = mapOf(
+                    "skjæringstidspunkt" to skjæringstidspunkt,
+                    "organisasjonsnummer" to organisasjonsnummer,
+                    "inntektsopplysninger" to inntektsopplysninger
+                ),
+                output = mapOf(
+                    "grunnlagForSykepengegrunnlag" to grunnlagForSykepengegrunnlag.reflection { årlig, _, _, _ -> årlig }
                 ),
                 kontekster = kontekster()
             )
@@ -587,7 +614,7 @@ class MaskinellJurist private constructor(
                         utfall: Utfall,
                         versjon: LocalDate,
                         paragraf: Paragraf,
-                        ledd: Ledd,
+                        ledd: Ledd?,
                         punktum: Punktum?,
                         bokstav: Bokstav?,
                         input: Map<String, Any>,
@@ -609,7 +636,7 @@ class MaskinellJurist private constructor(
                             lovverk = "folketrygdloven",
                             ikrafttredelse = paragrafVersjonFormaterer.format(versjon),
                             paragraf = paragraf.ref,
-                            ledd = ledd.nummer,
+                            ledd = ledd?.nummer,
                             punktum = punktum?.toJson(),
                             bokstav = bokstav?.toJson(),
                             input = input,

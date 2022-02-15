@@ -186,6 +186,7 @@ interface SubsumsjonObserver {
      * @param dagerUnderGrensen dager som befinner seg under tilstrekkelig uføregrad, gitt av [grense]
      */
     fun `§ 8-13 ledd 2`(periode: Periode, tidslinjer: List<List<Tidslinjedag>>, grense: Double, dagerUnderGrensen: List<LocalDate>) {}
+
     /**
      * Fastsettelse av dekningsgrunnlag
      *
@@ -234,14 +235,32 @@ interface SubsumsjonObserver {
      *
      * @param organisasjonsnummer arbeidsgiveren [grunnlagForSykepengegrunnlag] er beregnet for
      * @param inntekterSisteTreMåneder månedlig inntekt for de tre siste måneder før skjæringstidspunktet
+     * @param skjæringstidspunkt dato som [grunnlagForSykepengegrunnlag] beregnes relativt til
      * @param grunnlagForSykepengegrunnlag beregnet grunnlag basert på [inntekterSisteTreMåneder]
      */
     fun `§ 8-28 ledd 3 bokstav a`(
         organisasjonsnummer: String,
         inntekterSisteTreMåneder: List<Map<String, Any>>,
-        grunnlagForSykepengegrunnlag: Inntekt
-    ) {
-    }
+        grunnlagForSykepengegrunnlag: Inntekt,
+        skjæringstidspunkt: LocalDate
+    ) {}
+
+    /**
+     * Inntekter som legges til grunn for beregning av sykepengegrunnlag
+     *
+     * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-29)
+     *
+     * @param organisasjonsnummer arbeidsgiveren [grunnlagForSykepengegrunnlag] er beregnet for
+     * @param inntektsopplysninger inntekter som ligger til grunn for beregning av [grunnlagForSykepengegrunnlag]
+     * @param skjæringstidspunkt dato som [grunnlagForSykepengegrunnlag] beregnes relativt til
+     * @param grunnlagForSykepengegrunnlag beregnet grunnlag basert på [inntektsopplysninger]
+     */
+    fun `§ 8-29`(
+        skjæringstidspunkt: LocalDate,
+        grunnlagForSykepengegrunnlag: Inntekt,
+        inntektsopplysninger: List<Map<String, Any>>,
+        organisasjonsnummer: String
+    ) {}
 
     /**
      * Fastsettelse av sykepengegrunnlaget
@@ -479,11 +498,24 @@ interface SubsumsjonObserver {
             beskrivelse: String,
             tidsstempel: LocalDateTime
         ) {
-            inntekt = mapOf("årMåned" to måned, "beløp" to beløp.reflection { _, månedlig, _, _ -> månedlig })
+            inntekt = mapOf(
+                "beløp" to beløp.reflection { _, månedlig, _, _ -> månedlig },
+                "årMåned" to måned,
+                "type" to type.fromInntekttype(),
+                "fordel" to fordel,
+                "beskrivelse" to beskrivelse
+            )
+        }
+
+        private fun Skatt.Inntekttype.fromInntekttype() = when (this) {
+            LØNNSINNTEKT -> "LØNNSINNTEKT"
+            NÆRINGSINNTEKT -> "NÆRINGSINNTEKT"
+            PENSJON_ELLER_TRYGD -> "PENSJON_ELLER_TRYGD"
+            YTELSE_FRA_OFFENTLIGE -> "YTELSE_FRA_OFFENTLIGE"
         }
     }
 
-    private class SammenligningsgrunnlagBuilder(sammenligningsgrunnlag: Sammenligningsgrunnlag): VilkårsgrunnlagHistorikkVisitor {
+    private class SammenligningsgrunnlagBuilder(sammenligningsgrunnlag: Sammenligningsgrunnlag) : VilkårsgrunnlagHistorikkVisitor {
         private var sammenligningsgrunnlag by Delegates.notNull<Double>()
         private val inntekter = mutableMapOf<String, List<Map<String, Any>>>()
         private lateinit var inntektliste: MutableList<Map<String, Any>>
@@ -531,7 +563,7 @@ interface SubsumsjonObserver {
             PENSJON_ELLER_TRYGD -> "PENSJON_ELLER_TRYGD"
             YTELSE_FRA_OFFENTLIGE -> "YTELSE_FRA_OFFENTLIGE"
         }
-     }
+    }
 
     class SammenligningsgrunnlagDTO(
         val sammenligningsgrunnlag: Double,

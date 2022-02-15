@@ -60,7 +60,7 @@ internal class MaskinellJuristTest {
                 utfall: Subsumsjon.Utfall,
                 versjon: LocalDate,
                 paragraf: Paragraf,
-                ledd: Ledd,
+                ledd: Ledd?,
                 punktum: Punktum?,
                 bokstav: Bokstav?,
                 input: Map<String, Any>,

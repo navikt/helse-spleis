@@ -1012,24 +1012,106 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             bokstav = BOKSTAV_A,
             input = mapOf(
                 "organisasjonsnummer" to a2,
+                "skjæringstidspunkt" to 1.januar,
                 "inntekterSisteTreMåneder" to listOf(
                     mapOf(
                         "årMåned" to YearMonth.of(2017, 10),
-                        "beløp" to 32000.0
+                        "beløp" to 32000.0,
+                        "type" to "LØNNSINNTEKT",
+                        "fordel" to "Juidy inntekt",
+                        "beskrivelse" to "Juidy fordel"
                     ),
                     mapOf(
                         "årMåned" to YearMonth.of(2017, 11),
-                        "beløp" to 32000.0
+                        "beløp" to 32000.0,
+                        "type" to "LØNNSINNTEKT",
+                        "fordel" to "Juidy inntekt",
+                        "beskrivelse" to "Juidy fordel"
                     ),
                     mapOf(
                         "årMåned" to YearMonth.of(2017, 12),
-                        "beløp" to 32000.0
+                        "beløp" to 32000.0,
+                        "type" to "LØNNSINNTEKT",
+                        "fordel" to "Juidy inntekt",
+                        "beskrivelse" to "Juidy fordel"
                     )
                 )
             ),
             output = mapOf(
                 "beregnetGrunnlagForSykepengegrunnlagPrÅr" to 384000.0,
                 "beregnetGrunnlagForSykepengegrunnlagPrMåned" to 32000.0
+            )
+        )
+    }
+
+    @Test
+    fun `§ 8-29 - filter for inntekter som skal medregnes ved beregning av sykepengegrunnlaget for arbeidsforhold hvor sykdom ikke starter på skjæringstidspunktet`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 15.mars, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(1.januar, 15.mars, 100.prosent), orgnummer = a1)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            førsteFraværsdag = 1.januar,
+            refusjon = Inntektsmelding.Refusjon(31000.månedlig, null, emptyList()),
+            orgnummer = a1
+        )
+
+        val inntekter = listOf(
+            grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 31000.månedlig.repeat(3)),
+            grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 32000.månedlig.repeat(3))
+        )
+
+        val arbeidsforhold = listOf(
+            Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null),
+            Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null)
+        )
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterVilkårsgrunnlag(
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            inntektsvurdering = Inntektsvurdering(
+                listOf(
+                    sammenligningsgrunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 31000.månedlig.repeat(12)),
+                    sammenligningsgrunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 32000.månedlig.repeat(12))
+                )
+            ),
+            orgnummer = a1,
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter, arbeidsforhold = emptyList()),
+            arbeidsforhold = arbeidsforhold
+        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        SubsumsjonInspektør(jurist).assertBeregnet(
+            versjon = 1.januar(2019),
+            paragraf = PARAGRAF_8_29,
+            ledd = null,
+            input = mapOf(
+                "skjæringstidspunkt" to 1.januar,
+                "organisasjonsnummer" to a2,
+                "inntektsopplysninger" to listOf(
+                    mapOf(
+                        "årMåned" to YearMonth.of(2017, 10),
+                        "beløp" to 32000.0,
+                        "type" to "LØNNSINNTEKT",
+                        "fordel" to "Juidy inntekt",
+                        "beskrivelse" to "Juidy fordel"
+                    ),
+                    mapOf(
+                        "årMåned" to YearMonth.of(2017, 11),
+                        "beløp" to 32000.0,
+                        "type" to "LØNNSINNTEKT",
+                        "fordel" to "Juidy inntekt",
+                        "beskrivelse" to "Juidy fordel"
+                    ),
+                    mapOf(
+                        "årMåned" to YearMonth.of(2017, 12),
+                        "beløp" to 32000.0,
+                        "type" to "LØNNSINNTEKT",
+                        "fordel" to "Juidy inntekt",
+                        "beskrivelse" to "Juidy fordel"
+                    )
+                )
+            ),
+            output = mapOf(
+                "grunnlagForSykepengegrunnlag" to 384000.0
             )
         )
     }

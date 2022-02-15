@@ -18,7 +18,7 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
 
     private data class Subsumsjon(
         val paragraf: Paragraf,
-        val ledd: Ledd,
+        val ledd: Ledd?,
         val punktum: Punktum?,
         val bokstav: Bokstav?,
         val versjon: LocalDate,
@@ -56,7 +56,7 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
     internal fun assertBeregnet(
         paragraf: Paragraf,
         versjon: LocalDate,
-        ledd: Ledd,
+        ledd: Ledd?,
         punktum: Punktum? = null,
         bokstav: Bokstav? = null,
         input: Map<String, Any>,
@@ -175,7 +175,7 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
         utfall: Utfall,
         versjon: LocalDate,
         paragraf: Paragraf,
-        ledd: Ledd,
+        ledd: Ledd?,
         punktum: Punktum?,
         bokstav: Bokstav?,
         input: Map<String, Any>,

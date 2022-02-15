@@ -21,7 +21,7 @@ internal abstract class Subsumsjon {
     abstract val utfall: Utfall
     abstract val versjon: LocalDate
     abstract val paragraf: Paragraf
-    abstract val ledd: Ledd
+    abstract val ledd: Ledd?
     open val punktum: Punktum? = null
     open val bokstav: Bokstav? = null
 
@@ -94,7 +94,7 @@ internal class EnkelSubsumsjon(
     override val utfall: Utfall,
     override val versjon: LocalDate,
     override val paragraf: Paragraf,
-    override val ledd: Ledd,
+    override val ledd: Ledd?,
     override val punktum: Punktum? = null,
     override val bokstav: Bokstav? = null,
     override val input: Map<String, Any>,
@@ -112,7 +112,7 @@ internal class GrupperbarSubsumsjon private constructor(
     override val utfall: Utfall,
     override val versjon: LocalDate,
     override val paragraf: Paragraf,
-    override val ledd: Ledd,
+    override val ledd: Ledd?,
     override val punktum: Punktum? = null,
     override val bokstav: Bokstav? = null,
     private val originalOutput: Map<String, Any>,
@@ -176,7 +176,7 @@ internal class BetingetSubsumsjon(
     override val utfall: Utfall,
     override val versjon: LocalDate,
     override val paragraf: Paragraf,
-    override val ledd: Ledd,
+    override val ledd: Ledd?,
     override val punktum: Punktum? = null,
     override val bokstav: Bokstav? = null,
     override val input: Map<String, Any>,

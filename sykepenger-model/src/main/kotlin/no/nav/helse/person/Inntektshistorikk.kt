@@ -116,7 +116,7 @@ internal class Inntektshistorikk {
         fun grunnlagForSammenligningsgrunnlag(dato: LocalDate): Inntektsopplysning? = null
         fun grunnlagForSammenligningsgrunnlag(): Inntekt
         fun skalErstattesAv(other: Inntektsopplysning): Boolean
-        fun subsumsjon(subsumsjonObserver: SubsumsjonObserver, organisasjonsnummer: String) = run {}
+        fun subsumsjon(subsumsjonObserver: SubsumsjonObserver, skjæringstidspunkt: LocalDate, organisasjonsnummer: String) = run {}
         override fun compareTo(other: Inntektsopplysning) =
             (-this.dato.compareTo(other.dato)).takeUnless { it == 0 } ?: -this.prioritet.compareTo(other.prioritet)
 
@@ -246,13 +246,14 @@ internal class Inntektshistorikk {
 
         internal fun sammenligningsgrunnlag() = grunnlagForSammenligningsgrunnlag(dato)?.grunnlagForSammenligningsgrunnlag()
 
-        override fun subsumsjon(subsumsjonObserver: SubsumsjonObserver, organisasjonsnummer: String) {
+        override fun subsumsjon(subsumsjonObserver: SubsumsjonObserver, skjæringstidspunkt: LocalDate, organisasjonsnummer: String) {
             subsumsjonObserver.`§ 8-28 ledd 3 bokstav a`(
                 organisasjonsnummer = organisasjonsnummer,
+                skjæringstidspunkt = skjæringstidspunkt,
                 inntekterSisteTreMåneder = inntekterSisteTreMåneder.subsumsjonsformat(),
                 grunnlagForSykepengegrunnlag = grunnlagForSykepengegrunnlag()
             )
-
+            subsumsjonObserver.`§ 8-29`(skjæringstidspunkt, grunnlagForSykepengegrunnlag(), inntektsopplysninger.subsumsjonsformat(), organisasjonsnummer)
         }
 
         override fun skalErstattesAv(other: Inntektsopplysning): Boolean =
