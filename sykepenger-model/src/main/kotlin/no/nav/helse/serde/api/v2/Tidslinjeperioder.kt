@@ -16,6 +16,7 @@ import no.nav.helse.serde.api.v2.HendelseDTO.Companion.finn
 import no.nav.helse.serde.api.v2.Tidslinjeberegninger.ITidslinjeberegning
 import no.nav.helse.serde.api.v2.buildere.BeregningId
 import no.nav.helse.serde.api.v2.buildere.IVilkårsgrunnlagHistorikk
+import no.nav.helse.serde.api.v2.buildere.InntektsmeldingId
 import no.nav.helse.serde.api.v2.buildere.VedtaksperiodeVarslerBuilder
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -100,6 +101,7 @@ internal class Tidslinjeperioder(
     private val fødselsnummer: Fødselsnummer,
     private val forkastetVedtaksperiodeIder: List<UUID>,
     private val vilkårsgrunnlagHistorikk: IVilkårsgrunnlagHistorikk,
+    private val refusjoner: Map<InntektsmeldingId, Refusjon>,
     vedtaksperioder: List<IVedtaksperiode>,
     tidslinjeberegninger: Tidslinjeberegninger
 ) {
@@ -113,7 +115,14 @@ internal class Tidslinjeperioder(
                 periode.utbetalinger.isEmpty() -> listOf(uberegnetPeriode(periode, erForkastet(periode.vedtaksperiodeId)))
                 else -> periode.utbetalinger.map { utbetaling ->
                     val tidslinjeberegning = tidslinjeberegninger.finn(utbetaling.beregningId)
-                    beregnetPeriode(periode, utbetaling, tidslinjeberegning, erForkastet(periode.vedtaksperiodeId))
+                    val refusjon = refusjoner[periode.inntektsmeldingId()]
+                    beregnetPeriode(
+                        periode = periode,
+                        utbetaling = utbetaling,
+                        tidslinjeberegning = tidslinjeberegning,
+                        erForkastet = erForkastet(periode.vedtaksperiodeId),
+                        refusjon = refusjon
+                    )
                 }
             }
         }.sortedBy { it.opprettet }
@@ -141,10 +150,12 @@ internal class Tidslinjeperioder(
         periode: IVedtaksperiode,
         utbetaling: IUtbetaling,
         tidslinjeberegning: ITidslinjeberegning,
-        erForkastet: Boolean
+        erForkastet: Boolean,
+        refusjon: Refusjon?
     ): BeregnetPeriode {
         val sammenslåttTidslinje = tidslinjeberegning.sammenslåttTidslinje(utbetaling.utbetalingstidslinje, periode.fom, periode.tom)
-        val meldingsreferanseId = vilkårsgrunnlagHistorikk.spleisgrunnlag(tidslinjeberegning.vilkårsgrunnlagshistorikkId, periode.skjæringstidspunkt)?.meldingsreferanseId
+        val meldingsreferanseId =
+            vilkårsgrunnlagHistorikk.spleisgrunnlag(tidslinjeberegning.vilkårsgrunnlagshistorikkId, periode.skjæringstidspunkt)?.meldingsreferanseId
         val varsler = VedtaksperiodeVarslerBuilder(
             periode.vedtaksperiodeId,
             periode.aktivitetsloggForPeriode,
@@ -170,7 +181,8 @@ internal class Tidslinjeperioder(
             forbrukteSykedager = utbetaling.forbrukteSykedager,
             utbetaling = utbetaling.toDTO(),
             vilkårsgrunnlagshistorikkId = tidslinjeberegning.vilkårsgrunnlagshistorikkId,
-            aktivitetslogg = varsler
+            aktivitetslogg = varsler,
+            refusjon = refusjon
         )
     }
 
@@ -231,6 +243,9 @@ internal class IVedtaksperiode(
             }
         }
     }
+
+    fun inntektsmeldingId(): InntektsmeldingId? =
+        hendelser.find { it.type == "INNTEKTSMELDING" }?.let { UUID.fromString(it.id) }
 
     private fun fagsystemId() = utbetalinger.firstOrNull()?.fagsystemId()
 }

@@ -46,9 +46,8 @@ data class ArbeidsgiverDTO(
     val vedtaksperioder: List<VedtaksperiodeDTOBase>,
     val ghostPerioder: List<GhostPeriodeDTO>,
     val utbetalingshistorikk: List<UtbetalingshistorikkElementDTO>,
-    val generasjoner: List<Generasjon>?
+    val generasjoner: List<Generasjon>
 )
-
 
 data class VedtaksperiodeDTO(
     override val id: UUID,
@@ -76,8 +75,10 @@ data class VedtaksperiodeDTO(
 ) : VedtaksperiodeDTOBase {
     @Deprecated("Speil må lese fra utbetaling.vurdering")
     val godkjentAv: String? = utbetaling?.vurdering?.ident
+
     @Deprecated("Speil må lese fra utbetaling.vurdering")
     val godkjenttidspunkt: LocalDateTime? = utbetaling?.vurdering?.tidsstempel
+
     @Deprecated("Speil må lese fra utbetaling.vurdering")
     val automatiskBehandlet: Boolean = utbetaling?.vurdering?.automatisk ?: false
 
@@ -102,6 +103,7 @@ data class VedtaksperiodeDTO(
             )
         }
     )
+
     @Deprecated("Speil må bytte til sisteUtbetaling")
     val utbetalteUtbetalinger: UtbetalingerDTO = utbetalinger
 }
@@ -355,12 +357,6 @@ data class SøknadsfristDTO(
     val søknadFom: LocalDate,
     val søknadTom: LocalDate,
     val oppfylt: Boolean
-)
-
-data class SykepengegrunnlagDTO(
-    val sykepengegrunnlag: Double?,
-    val grunnbeløp: Int,
-    val oppfylt: Boolean?
 )
 
 data class InntektsgrunnlagDTO(

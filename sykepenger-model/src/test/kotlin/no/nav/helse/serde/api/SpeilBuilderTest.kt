@@ -5,6 +5,7 @@ import no.nav.helse.*
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Dagtype.Feriedag
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.*
+import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.ForlengelseFraInfotrygd
 import no.nav.helse.person.Inntektskilde
@@ -13,10 +14,7 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.serde.api.InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO
-import no.nav.helse.serde.api.v2.Inntektkilde
-import no.nav.helse.serde.api.v2.InntektsmeldingDTO
-import no.nav.helse.serde.api.v2.SykmeldingDTO
-import no.nav.helse.serde.api.v2.SøknadNavDTO
+import no.nav.helse.serde.api.v2.*
 import no.nav.helse.serde.mapping.SpeilDagtype
 import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.spleis.e2e.*
@@ -1382,8 +1380,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
                     grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 31000.månedlig.repeat(3)),
                     grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), listOf(31000.månedlig, 32000.månedlig, 33000.månedlig)),
                     grunnlag(a4, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 1000.månedlig.repeat(2)),
-                )
-            , arbeidsforhold = emptyList()
+                ), arbeidsforhold = emptyList()
             ),
             arbeidsforhold = listOf(
                 Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null),
@@ -1429,8 +1426,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
                 inntekter = listOf(
                     grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 31000.månedlig.repeat(3)),
-                )
-            , arbeidsforhold = emptyList()
+                ), arbeidsforhold = emptyList()
             ),
             arbeidsforhold = listOf(
                 Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null),
@@ -1459,6 +1455,33 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
 
         val personDto = serializePersonForSpeil(person)
         assertEquals(listOf(ORGNUMMER), personDto.arbeidsforholdPerSkjæringstidspunkt[1.januar]?.map { it.orgnummer })
+    }
+
+    @Test
+    fun `tar med refusjonshistorikk pr arbeidsgiver`() {
+        nyttVedtak(
+            fom = 1.januar,
+            tom = 31.januar,
+            grad = 100.prosent,
+            refusjon = Inntektsmelding.Refusjon(
+                beløp = INNTEKT,
+                opphørsdato = null,
+                endringerIRefusjon = listOf(
+                    Inntektsmelding.Refusjon.EndringIRefusjon(beløp = INNTEKT.plus(1000.månedlig), 19.januar),
+                    Inntektsmelding.Refusjon.EndringIRefusjon(beløp = INNTEKT.plus(2000.månedlig), 23.januar),
+                )
+            )
+        )
+
+        val personDto = speilApi()
+        val periode: BeregnetPeriode = personDto.arbeidsgivere.first().generasjoner.first().perioder.first() as BeregnetPeriode
+        val refusjon = requireNotNull(periode.refusjon)
+
+        assertEquals(2, refusjon.endringer.size)
+        assertEquals(32000.0, refusjon.endringer.first().beløp)
+        assertEquals(19.januar, refusjon.endringer.first().dato)
+        assertEquals(33000.0, refusjon.endringer.last().beløp)
+        assertEquals(23.januar, refusjon.endringer.last().dato)
     }
 
     private fun <T> Collection<T>.assertOnNonEmptyCollection(func: (T) -> Unit) {

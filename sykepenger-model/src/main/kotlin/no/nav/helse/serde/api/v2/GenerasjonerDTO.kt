@@ -3,7 +3,6 @@ package no.nav.helse.serde.api.v2
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.Periodetype
 import no.nav.helse.serde.api.AktivitetDTO
-import no.nav.helse.serde.api.SimuleringsdataDTO
 import no.nav.helse.serde.api.v2.Behandlingstype.VENTER
 import no.nav.helse.serde.api.v2.buildere.BeregningId
 import java.time.LocalDate
@@ -18,8 +17,10 @@ data class Generasjon(
 enum class Behandlingstype {
     // Perioder som aldri har blitt beregnet hos oss
     UBEREGNET,
+
     // Perioder som har blitt beregnet - dvs har fått en utbetaling av noe slag
     BEHANDLET,
+
     // Perioder som venter på beregning
     VENTER
 }
@@ -84,7 +85,8 @@ data class BeregnetPeriode(
     val hendelser: List<HendelseDTO>,
     val vilkårsgrunnlagshistorikkId: UUID,
     val periodevilkår: Vilkår,
-    val aktivitetslogg: List<AktivitetDTO>
+    val aktivitetslogg: List<AktivitetDTO>,
+    val refusjon: Refusjon?
 ) : Tidslinjeperiode {
     override val tidslinjeperiodeId: UUID = UUID.randomUUID()
 
@@ -140,5 +142,20 @@ data class Utbetaling(
     )
 }
 
+data class Refusjon(
+    val arbeidsgiverperioder: List<Periode>,
+    val endringer: List<Endring>,
+    val førsteFraværsdag: LocalDate?,
+    val sisteRefusjonsdag: LocalDate?,
+    val beløp: Double?,
+) {
+    data class Periode(
+        val fom: LocalDate,
+        val tom: LocalDate
+    )
 
-
+    data class Endring(
+        val beløp: Double,
+        val dato: LocalDate
+    )
+}

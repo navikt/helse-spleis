@@ -22,6 +22,7 @@ internal typealias BeregningId = UUID
 internal typealias SykdomshistorikkId = UUID
 internal typealias VilkårsgrunnlagshistorikkId = UUID
 internal typealias FagsystemId = String
+internal typealias InntektsmeldingId = UUID
 
 // Besøker hele arbeidsgiver-treet
 internal class GenerasjonerBuilder(
@@ -35,6 +36,7 @@ internal class GenerasjonerBuilder(
     private val generasjonIderAkkumulator = GenerasjonIderAkkumulator()
     private val sykdomshistorikkAkkumulator = SykdomshistorikkAkkumulator()
     private val annulleringer = AnnulleringerAkkumulator()
+    private val refusjonerAkkumulator = RefusjonerAkkumulator()
 
     init {
         arbeidsgiver.accept(this)
@@ -44,11 +46,12 @@ internal class GenerasjonerBuilder(
         vedtaksperiodeAkkumulator.supplerMedAnnulleringer(annulleringer)
         val tidslinjeberegninger = Tidslinjeberegninger(generasjonIderAkkumulator.toList(), sykdomshistorikkAkkumulator)
         val tidslinjeperioder = Tidslinjeperioder(
-            fødselsnummer,
-            forkastetVedtaksperiodeAkkumulator.toList(),
-            vilkårsgrunnlagHistorikk,
-            vedtaksperiodeAkkumulator.toList(),
-            tidslinjeberegninger
+            fødselsnummer = fødselsnummer,
+            forkastetVedtaksperiodeIder = forkastetVedtaksperiodeAkkumulator.toList(),
+            vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk,
+            refusjoner = refusjonerAkkumulator.getRefusjoner(),
+            vedtaksperioder = vedtaksperiodeAkkumulator.toList(),
+            tidslinjeberegninger = tidslinjeberegninger
         )
         return Generasjoner(tidslinjeperioder).build()
     }
@@ -137,4 +140,11 @@ internal class GenerasjonerBuilder(
             sykdomshistorikkAkkumulator.leggTil(id, tidslinje)
         }
     }
+
+    override fun preVisitRefusjonshistorikk(refusjonshistorikk: Refusjonshistorikk) {
+        RefusjonerBuilder(refusjonshistorikk).build().also {
+            refusjonerAkkumulator.leggTil(it)
+        }
+    }
+
 }

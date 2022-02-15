@@ -1,10 +1,6 @@
 package no.nav.helse.serde.api.builders
 
-import no.nav.helse.Toggle
-import no.nav.helse.person.Arbeidsgiver
-import no.nav.helse.person.ForkastetVedtaksperiode
-import no.nav.helse.person.Vedtaksperiode
-import no.nav.helse.person.VilkårsgrunnlagHistorikk
+import no.nav.helse.person.*
 import no.nav.helse.serde.api.ArbeidsgiverDTO
 import no.nav.helse.serde.api.GhostPeriodeDTO
 import no.nav.helse.serde.api.v2.HendelseDTO
@@ -49,9 +45,10 @@ internal class ArbeidsgiverBuilder(
         return ArbeidsgiverDTO(
             organisasjonsnummer = organisasjonsnummer,
             id = id,
-            vedtaksperioder = perioderBuilder.build(hendelser, utbetalingshistorikk) + forkastetPerioderBuilder.build(hendelser, utbetalingshistorikk).filter { it.tilstand.visesNårForkastet() },
+            vedtaksperioder = perioderBuilder.build(hendelser, utbetalingshistorikk) + forkastetPerioderBuilder.build(hendelser, utbetalingshistorikk)
+                .filter { it.tilstand.visesNårForkastet() },
             utbetalingshistorikk = utbetalingshistorikk,
-            generasjoner = if (Toggle.SpeilApiV2.enabled) GenerasjonerBuilder(hendelser, fødselsnummer.somFødselsnummer(), vilkårsgrunnlagHistorikk, arbeidsgiver).build() else null,
+            generasjoner = GenerasjonerBuilder(hendelser, fødselsnummer.somFødselsnummer(), vilkårsgrunnlagHistorikk, arbeidsgiver).build(),
             ghostPerioder = arbeidsgiver.ghostPerioder().map {
                 GhostPeriodeDTO(
                     fom = it.fom.coerceAtLeast(it.skjæringstidspunkt),
