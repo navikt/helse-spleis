@@ -88,7 +88,9 @@ internal class MaksimumSykepengedagerfilter(
                 begrunnelser = listOf(begrunnelse)
             )
         }
-
+        if (begrunnelserForAvvisteDager[Begrunnelse.NyVilkårsprøvingNødvendig]?.any { it in periode } == true) {
+            aktivitetslogg.error("Bruker er fortsatt syk 26 uker etter maksdato")
+        }
         if (avvisteDager in periode)
             aktivitetslogg.warn("Maks antall sykepengedager er nådd i perioden. Vurder å sende vedtaksbrev fra Infotrygd")
         else

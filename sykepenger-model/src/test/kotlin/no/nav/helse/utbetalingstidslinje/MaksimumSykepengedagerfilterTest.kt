@@ -445,13 +445,39 @@ internal class MaksimumSykepengedagerfilterTest {
     }
 
     @Test
-    fun `ny begrunnelse etter 26 uker med sammenhengende sykdom etter maksdato`() {
+    fun `error dersom 26 uker med sammenhengende sykdom etter maksdato`() {
         val tidslinje = tidslinjeOf(248.NAVDAGER, 182.NAV, 1.NAVDAGER)
         tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018)
         tidslinje.inspektør.avvistedatoer.dropLast(1).forEach { dato ->
             assertEquals(listOf(Begrunnelse.SykepengedagerOppbrukt), tidslinje.inspektør.begrunnelse(dato))
         }
+        assertTrue(aktivitetslogg.hasErrorsOrWorse())
         assertEquals(listOf(Begrunnelse.NyVilkårsprøvingNødvendig), tidslinje.inspektør.begrunnelse(tidslinje.inspektør.avvistedatoer.last()))
+    }
+
+    @Test
+    fun `ikke error dersom 26 uker med sammenhengende sykdom etter maksdato og utenfor vedtaksperioden`() {
+        val tidslinje = tidslinjeOf(248.NAVDAGER, 182.NAV, 1.NAVDAGER)
+        tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018, tidslinje.periode().start til tidslinje.periode().endInclusive.minusDays(1))
+        assertFalse(aktivitetslogg.hasErrorsOrWorse())
+    }
+
+    @Test
+    fun `ikke error dersom 26 uker med sammenhengende sykdom etter maksdato og eldre enn vedtaksperioden`() {
+        val tidslinje = tidslinjeOf(248.NAVDAGER, 182.NAV, 1.NAVDAGER, 1.ARB, 31.NAV)
+        tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018, 14.juni(2019) til 15.juli(2019))
+        assertFalse(aktivitetslogg.hasErrorsOrWorse())
+    }
+
+    @Test
+    fun `ikke error dersom sykedager oppbrukt fram til 26 uker med sammenhengende sykdom etter maksdato`() {
+        val tidslinje = tidslinjeOf(248.NAVDAGER, 182.NAV)
+        tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018)
+        tidslinje.inspektør.avvistedatoer.forEach { dato ->
+            assertEquals(listOf(Begrunnelse.SykepengedagerOppbrukt), tidslinje.inspektør.begrunnelse(dato))
+        }
+        assertFalse(aktivitetslogg.hasErrorsOrWorse())
+        assertFalse(tidslinje.last().dato.erHelg())
     }
 
     // No 26 week gap with base of 246 NAV days
