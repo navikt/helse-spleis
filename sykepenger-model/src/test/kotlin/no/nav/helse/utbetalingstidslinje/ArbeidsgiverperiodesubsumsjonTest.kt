@@ -42,6 +42,38 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
     }
 
     @Test
+    fun spredt() {
+        undersøke(4.S + 1.A + 4.S + 1.A + 4.S + 10.A + 11.S)
+        assertEquals(35, observatør.dager)
+        assertEquals(16, observatør.arbeidsgiverperiodedager)
+        assertEquals(7, observatør.utbetalingsdager)
+        assertEquals(39, jurist.subsumsjoner)
+        assertEquals(0, jurist.`§ 8-17 ledd 2`)
+        assertEquals(16, jurist.`§ 8-17 første ledd bokstav a - ikke oppfylt`)
+        assertEquals(1, jurist.`§ 8-17 første ledd bokstav a - oppfylt`)
+        assertEquals(2, jurist.`§ 8-11 første ledd`)
+        assertEquals(16, jurist.`§ 8-19 andre ledd - beregning`)
+        assertEquals(1, jurist.`§ 8-19 første ledd - beregning`)
+        assertEquals(3, jurist.`§ 8-19 tredje ledd - beregning`)
+    }
+
+    @Test
+    fun `siste dag i arbeidsgiverperioden er også første dag etter opphold i arbeidsgiverperioden`() {
+        undersøke(15.S + 1.A + 2.S)
+        assertEquals(18, observatør.dager)
+        assertEquals(16, observatør.arbeidsgiverperiodedager)
+        assertEquals(1, observatør.utbetalingsdager)
+        assertEquals(35, jurist.subsumsjoner)
+        assertEquals(0, jurist.`§ 8-17 ledd 2`)
+        assertEquals(16, jurist.`§ 8-17 første ledd bokstav a - ikke oppfylt`)
+        assertEquals(1, jurist.`§ 8-17 første ledd bokstav a - oppfylt`)
+        assertEquals(0, jurist.`§ 8-11 første ledd`)
+        assertEquals(16, jurist.`§ 8-19 andre ledd - beregning`)
+        assertEquals(1, jurist.`§ 8-19 første ledd - beregning`)
+        assertEquals(1, jurist.`§ 8-19 tredje ledd - beregning`)
+    }
+
+    @Test
     fun `utbetaling kun i helg`() {
         undersøke(3.opphold + 18.S)
         assertEquals(18, observatør.dager)
@@ -113,8 +145,9 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
         var `§ 8-17 første ledd bokstav a - oppfylt` = 0
         var `§ 8-17 ledd 2` = 0
         var `§ 8-11 første ledd` = 0
-        var `§ 8-19 andre ledd - beregning` = 0
         var `§ 8-19 første ledd - beregning`= 0
+        var `§ 8-19 andre ledd - beregning` = 0
+        var `§ 8-19 tredje ledd - beregning` = 0
 
         override fun `§ 8-17 ledd 1 bokstav a`(oppfylt: Boolean, dagen: LocalDate) {
             subsumsjoner += 1
@@ -132,14 +165,19 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
             `§ 8-11 første ledd` += 1
         }
 
+        override fun `§ 8-19 første ledd`(dato: LocalDate, beregnetTidslinje: List<SubsumsjonObserver.Tidslinjedag>) {
+            subsumsjoner += 1
+            `§ 8-19 første ledd - beregning` += 1
+        }
+
         override fun `§ 8-19 andre ledd`(dato: LocalDate, beregnetTidslinje: List<SubsumsjonObserver.Tidslinjedag>) {
             subsumsjoner += 1
             `§ 8-19 andre ledd - beregning` += 1
         }
 
-        override fun `§ 8-19 første ledd`(dato: LocalDate, beregnetTidslinje: List<SubsumsjonObserver.Tidslinjedag>) {
+        override fun `§ 8-19 tredje ledd`(dato: LocalDate, beregnetTidslinje: List<SubsumsjonObserver.Tidslinjedag>) {
             subsumsjoner += 1
-            `§ 8-19 første ledd - beregning` += 1
+            `§ 8-19 tredje ledd - beregning` += 1
         }
     }
 

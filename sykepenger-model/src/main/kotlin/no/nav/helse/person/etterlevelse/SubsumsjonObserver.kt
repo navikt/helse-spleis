@@ -2,13 +2,8 @@ package no.nav.helse.person.etterlevelse
 
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.*
-import no.nav.helse.person.InntekthistorikkVisitor
 import no.nav.helse.person.Inntektshistorikk.Skatt
 import no.nav.helse.person.Inntektshistorikk.Skatt.Inntekttype.*
-import no.nav.helse.person.Sammenligningsgrunnlag
-import no.nav.helse.person.SykdomstidslinjeVisitor
-import no.nav.helse.person.UtbetalingsdagVisitor
-import no.nav.helse.person.VilkårsgrunnlagHistorikkVisitor
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Tidslinjedag.Tidslinjeperiode.Companion.dager
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -246,6 +241,17 @@ interface SubsumsjonObserver {
      * @param beregnetTidslinje tidslinje som ligger til grunn for beregning av agp
      */
     fun `§ 8-19 andre ledd`(dato: LocalDate, beregnetTidslinje: List<Tidslinjedag>) {}
+
+    /**
+     * Når det er gått mindre enn 16 kalenderdager siden forrige sykefravær,
+     * skal et nytt sykefravær regnes med i samme arbeidsgiverperiode.
+     *
+     * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-19)
+     *
+     * @param dato for en dag som anses som en agp-dag
+     * @param beregnetTidslinje tidslinje som ligger til grunn for beregning av agp
+     */
+    fun `§ 8-19 tredje ledd`(dato: LocalDate, beregnetTidslinje: List<Tidslinjedag>) {}
 
     /**
      * Inntekt som legges til grunn dersom sykdom ved en arbeidsgiver starter senere enn skjæringstidspunktet tilsvarer

@@ -13,4 +13,5 @@ internal interface ArbeidsgiverperiodeMediator {
     fun arbeidsgiverperiodeAvbrutt() {}
     fun arbeidsgiverperiodeFerdig() {}
     fun arbeidsgiverperiodeSistedag() {}
+    fun oppholdsdag() {}
 }

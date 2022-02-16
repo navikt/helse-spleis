@@ -52,6 +52,10 @@ internal class ArbeidsgiverperiodeBuilder(
         tilstand(Utbetaling)
     }
 
+    override fun oppholdsdag() {
+        mediator.oppholdsdag()
+    }
+
     override fun arbeidsgiverperiodeAvbrutt() {
         mediator.arbeidsgiverperiodeAvbrutt()
     }
