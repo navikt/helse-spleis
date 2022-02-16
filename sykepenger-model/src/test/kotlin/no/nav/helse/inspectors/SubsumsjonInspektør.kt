@@ -61,8 +61,10 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
         bokstav: Bokstav? = null,
         input: Map<String, Any>,
         output: Map<String, Any>,
+        vedtaksperiodeId: IdInnhenter? = null,
+        organisasjonsnummer: String = ORGNUMMER
     ) {
-        val resultat = finnSubsumsjoner(paragraf, versjon, ledd, punktum, bokstav, VILKAR_BEREGNET)
+        val resultat = finnSubsumsjoner(paragraf, versjon, ledd, punktum, bokstav, VILKAR_BEREGNET, vedtaksperiodeId?.id(organisasjonsnummer))
         assertEquals(1, resultat.size, "Forventer kun en subsumsjon. Subsumsjoner funnet: $resultat")
         val subsumsjon = resultat.first()
         assertEquals(VILKAR_BEREGNET, subsumsjon.utfall) { "Forventet oppfylt $paragraf $ledd $punktum" }
