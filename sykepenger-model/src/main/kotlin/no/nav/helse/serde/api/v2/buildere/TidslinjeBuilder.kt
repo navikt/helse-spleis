@@ -2,7 +2,6 @@ package no.nav.helse.serde.api.v2.buildere
 
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.*
-import no.nav.helse.serde.PersonData
 import no.nav.helse.serde.api.BegrunnelseDTO
 import no.nav.helse.serde.api.v2.*
 import no.nav.helse.sykdomstidslinje.*
@@ -259,7 +258,7 @@ internal class UtbetalingstidslinjeBuilder(utbetaling: Utbetaling): UtbetalingVi
                     type = UtbetalingstidslinjedagType.AvvistDag,
                     inntekt = 0, // Speil needs zero here
                     dato = dato,
-                    begrunnelser = dag.begrunnelser.map { BegrunnelseDTO.valueOf(PersonData.UtbetalingstidslinjeData.BegrunnelseData.fraBegrunnelse(it).name) },
+                    begrunnelser = dag.begrunnelser.map { BegrunnelseDTO.fraBegrunnelse(it) },
                     grad = 0.0,  // Speil wants zero here
                     totalGrad = totalGrad
                 )
