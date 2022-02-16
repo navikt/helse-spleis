@@ -225,12 +225,7 @@ internal class Inntektshistorikk {
         }
 
         override fun grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?) =
-            takeIf {
-                inntektsopplysninger.any {
-                    it.grunnlagForSykepengegrunnlag(skjæringstidspunkt, førsteFraværsdag) != null
-                        && it.erRelevant(Arbeidsforholdhistorikk.Arbeidsforhold.MAKS_INNTEKT_GAP)
-                }
-            }
+            takeIf { inntektsopplysninger.any { it.grunnlagForSykepengegrunnlag(skjæringstidspunkt, førsteFraværsdag) != null } }
 
         override fun grunnlagForSykepengegrunnlag(): Inntekt {
             return inntekterSisteTreMåneder
@@ -264,6 +259,8 @@ internal class Inntektshistorikk {
         override fun skalErstattesAv(other: Inntektsopplysning): Boolean =
             this.inntektsopplysninger.any { it.skalErstattesAv(other) }
                 || (other is SkattComposite && other.inntektsopplysninger.any { this.skalErstattesAv(it) })
+
+        internal fun harIngenInntektNyereEnn(antallMåneder: Long) = this.inntektsopplysninger.none { it.erRelevant(antallMåneder) }
     }
 
     internal class IkkeRapportert(
