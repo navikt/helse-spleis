@@ -1530,7 +1530,6 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, gjenopptaBehandling: IAktivitetslogg) {
-            if (vedtaksperiode.ingenUtbetaling()) return vedtaksperiode.tilstand(gjenopptaBehandling, AvsluttetUtenUtbetaling)
             vedtaksperiode.tilstand(gjenopptaBehandling, AvventerInntektsmeldingEllerHistorikkFerdigGap)
         }
 
@@ -1547,7 +1546,6 @@ internal class Vedtaksperiode private constructor(
         override val type = AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            vedtaksperiode.loggInnenforArbeidsgiverperiode()
             vedtaksperiode.person.inntektsmeldingReplay(vedtaksperiode.id)
         }
 
@@ -1563,11 +1561,6 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndterTidligereTilstøtendeUferdigPeriode(vedtaksperiode: Vedtaksperiode, tidligere: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.tilstand(hendelse, AvventerInntektsmeldingUferdigForlengelse)
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            if (vedtaksperiode.ingenUtbetaling()) return vedtaksperiode.tilstand(påminnelse, AvsluttetUtenUtbetaling)
-            super.håndter(vedtaksperiode, påminnelse)
         }
 
         // TODO: kan fjernes nå https://trello.com/c/Eoug7QnR er gjort
@@ -1599,7 +1592,6 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, gjenopptaBehandling: IAktivitetslogg) {
-            if (vedtaksperiode.ingenUtbetaling()) return vedtaksperiode.tilstand(gjenopptaBehandling, AvsluttetUtenUtbetaling)
             vedtaksperiode.håndterMuligForlengelse(
                 gjenopptaBehandling,
                 AvventerInntektsmeldingFerdigForlengelse,
@@ -1688,7 +1680,6 @@ internal class Vedtaksperiode private constructor(
         override val type = AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            vedtaksperiode.loggInnenforArbeidsgiverperiode()
             vedtaksperiode.person.inntektsmeldingReplay(vedtaksperiode.id)
             if (vedtaksperiode.arbeidsgiver.finnForkastetSykeperiodeRettFør(vedtaksperiode) == null) {
                 vedtaksperiode.trengerInntektsmelding(hendelse.hendelseskontekst())
@@ -1748,7 +1739,6 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            if (vedtaksperiode.ingenUtbetaling()) return vedtaksperiode.tilstand(påminnelse, AvsluttetUtenUtbetaling)
             vedtaksperiode.trengerHistorikkFraInfotrygd(påminnelse)
         }
 
@@ -1808,7 +1798,6 @@ internal class Vedtaksperiode private constructor(
         override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Sykmelding) {}
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            if (vedtaksperiode.ingenUtbetaling()) return vedtaksperiode.tilstand(påminnelse, AvsluttetUtenUtbetaling)
             super.håndter(vedtaksperiode, påminnelse)
         }
 
@@ -1821,7 +1810,6 @@ internal class Vedtaksperiode private constructor(
         }
 
         private fun fortsett(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            if (vedtaksperiode.ingenUtbetaling()) return vedtaksperiode.tilstand(hendelse, AvsluttetUtenUtbetaling)
             if (!vedtaksperiode.harInntekt()) return vedtaksperiode.tilstand(hendelse, AvventerInntektsmeldingEllerHistorikkFerdigGap)
             vedtaksperiode.tilstand(hendelse, AvventerHistorikk)
         }
@@ -2110,11 +2098,6 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            if (vedtaksperiode.ingenUtbetaling()) {
-                vedtaksperiode.utbetalinger.forkast(påminnelse)
-                vedtaksperiode.emitVedtaksperiodeReberegnet(påminnelse.hendelseskontekst())
-                return vedtaksperiode.tilstand(påminnelse, AvsluttetUtenUtbetaling)
-            }
             vedtaksperiode.trengerHistorikkFraInfotrygd(påminnelse)
         }
 
