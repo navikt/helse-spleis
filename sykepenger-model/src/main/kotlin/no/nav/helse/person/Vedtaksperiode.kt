@@ -1808,7 +1808,7 @@ internal class Vedtaksperiode private constructor(
         override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Sykmelding) {}
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            vedtaksperiode.loggInnenforArbeidsgiverperiode()
+            if (vedtaksperiode.ingenUtbetaling()) return vedtaksperiode.tilstand(påminnelse, AvsluttetUtenUtbetaling)
             super.håndter(vedtaksperiode, påminnelse)
         }
 
