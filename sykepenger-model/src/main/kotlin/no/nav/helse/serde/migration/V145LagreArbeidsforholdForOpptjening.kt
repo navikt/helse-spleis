@@ -28,7 +28,9 @@ internal class V145LagreArbeidsforholdForOpptjening : JsonMigration(version = 14
             .map { skjæringstidspunktFor(jsonNode, it["vedtaksperiodeId"].asText()) to hentArbeidsforhold(it) }
 
         val skjæringstidspunkter = vilkårsgrunnlagMeldinger.map { (skjæringstidspunkt, _) -> skjæringstidspunkt }
-        sikkerLogg.info("Fant skjæringstidspunkter $skjæringstidspunkter fnr=${jsonNode["fødselsnummer"]}")
+        if (skjæringstidspunkter.isNotEmpty()) {
+            sikkerLogg.info("Fant skjæringstidspunkter $skjæringstidspunkter fnr=${jsonNode["fødselsnummer"]}")
+        }
 
         jsonNode["vilkårsgrunnlagHistorikk"]
             .flatMap { it["vilkårsgrunnlag"] }
