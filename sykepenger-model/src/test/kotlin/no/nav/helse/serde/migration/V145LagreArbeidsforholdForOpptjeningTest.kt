@@ -50,7 +50,7 @@ internal class V145LagreArbeidsforholdForOpptjeningTest : MigrationTest(V145Lagr
         fun toJson() = serdeObjectMapper.writeValueAsString(mapOf(
             "orgnummer" to orgnummer,
             "ansattSiden" to ansattSiden,
-            "ansattTom" to ansattTom
+            "ansattTil" to ansattTom
         ))
     }
 
