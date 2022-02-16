@@ -30,7 +30,7 @@ class Fødselsnummer private constructor(private val value: String) {
 
     companion object {
         internal fun brukerutbetalingfilter(fødselsnummer: Fødselsnummer) =
-            fødselsnummer.fødselsdato.dayOfMonth == 31
+            fødselsnummer.fødselsdato.dayOfMonth == 31 || fødselsnummer.fødselsdato.dayOfMonth == 13
 
         fun tilFødselsnummer(fnr: String): Fødselsnummer {
             if (fnr.length == 11 && alleTegnErSiffer(fnr)) return Fødselsnummer(fnr)

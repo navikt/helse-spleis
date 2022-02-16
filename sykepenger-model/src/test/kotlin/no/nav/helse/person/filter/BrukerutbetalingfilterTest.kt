@@ -60,6 +60,11 @@ internal class BrukerutbetalingfilterTest {
     }
 
     @Test
+    fun `alternativ fødselsdato passer`() {
+        assertTrue(brukerutbetalingfilter(fnr = "13108512345", utbetaling = lagUtbetaling()))
+    }
+
+    @Test
     fun `delvis refusjon passer ikke`() {
         val delvisRefusjon = lagUtbetaling(tidslinjeOf(16.AP, 15.NAV.copyWith(arbeidsgiverbeløp = 600)))
         assertFalse(brukerutbetalingfilter(utbetaling = delvisRefusjon))
