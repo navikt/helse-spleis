@@ -15,7 +15,8 @@ import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -603,10 +604,7 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
 
         val personDto = serializePersonForSpeil(person)
         val vilkårsgrunnlag = personDto.vilkårsgrunnlagHistorikk[person.nyesteIdForVilkårsgrunnlagHistorikk()]?.get(1.januar)
-        assertForventetFeil("Skal ikke ta med sykepengegrunnlag fra A-ordningen dersom vi ikke har inntekt de 2 siste mnd",
-            nå = { assertNotNull(vilkårsgrunnlag?.inntekter?.firstOrNull { it.organisasjonsnummer == a2 }?.omregnetÅrsinntekt) },
-            ønsket = { assertNull(vilkårsgrunnlag?.inntekter?.firstOrNull { it.organisasjonsnummer == a2 }?.omregnetÅrsinntekt) }
-        )
+        assertNull(vilkårsgrunnlag?.inntekter?.firstOrNull { it.organisasjonsnummer == a2 }?.omregnetÅrsinntekt)
     }
 
     @Test

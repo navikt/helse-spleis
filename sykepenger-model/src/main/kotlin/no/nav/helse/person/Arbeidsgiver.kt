@@ -129,7 +129,6 @@ internal class Arbeidsgiver private constructor(
             inntektsopplysning?.subsumsjon(subsumsjonObserver, skjæringstidspunkt, arbeidsgiver.organisasjonsnummer)
             when {
                 arbeidsgiver.harInaktivtArbeidsforhold(skjæringstidspunkt) -> null
-                inntektsopplysning is Inntektshistorikk.SkattComposite && inntektsopplysning.harIngenInntektNyereEnn(MAKS_INNTEKT_GAP) -> null
                 inntektsopplysning == null && arbeidsgiver.arbeidsforholdhistorikk.harArbeidsforholdNyereEnn(skjæringstidspunkt, MAKS_INNTEKT_GAP) -> {
                     ArbeidsgiverInntektsopplysning(arbeidsgiver.organisasjonsnummer, IkkeRapportert(UUID.randomUUID(), skjæringstidspunkt))
                 }

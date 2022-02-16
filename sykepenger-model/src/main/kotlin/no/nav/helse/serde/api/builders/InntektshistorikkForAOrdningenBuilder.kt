@@ -66,6 +66,7 @@ internal class InntektshistorikkForAOrdningenBuilder(person: Person): PersonVisi
             beskrivelse: String,
             tidsstempel: LocalDateTime
         ) {
+            if (innslag.grunnlagForSykepengegrunnlag(dato, null) == null) return
             val inntekt = InntektBuilder(beløp).build()
             val inntekterFraAOrdningenForSkjæringstidspunkt = inntekterFraAOrdningen.getOrPut(dato, ::mutableMapOf)
             inntekterFraAOrdningenForSkjæringstidspunkt.merge(måned, inntekt.månedlig, Double::plus)
