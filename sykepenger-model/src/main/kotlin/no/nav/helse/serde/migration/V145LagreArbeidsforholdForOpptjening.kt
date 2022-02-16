@@ -12,8 +12,8 @@ internal class V145LagreArbeidsforholdForOpptjening : JsonMigration(version = 14
 
     override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         /*
-         hent vilkårsgrunnlag
-         finn tilhørende vedtaksperiode, hent skjæringstidspunkt
+         [v] hent vilkårsgrunnlag
+         [v] finn tilhørende vedtaksperiode, hent skjæringstidspunkt
          finn hvilke arbeidsforhold som ville bli brukt for opptjening for skjæringstidspunkt
          om vi ikke har noen relevante arbeidsforhold for et skjæringstidspunktet lag en insane default (opptjening fra 1970 eller noe)
          oppdater arbeidsforhold historikken
@@ -32,13 +32,22 @@ internal class V145LagreArbeidsforholdForOpptjening : JsonMigration(version = 14
             sikkerLogg.info("Fant skjæringstidspunkter $skjæringstidspunkter fnr=${jsonNode["fødselsnummer"]}")
         }
 
-        jsonNode["vilkårsgrunnlagHistorikk"]
+        val skjæringstidspunkterFraSpleis = jsonNode["vilkårsgrunnlagHistorikk"]
             .flatMap { it["vilkårsgrunnlag"] }
             .filter { it["type"].asText() == "Vilkårsprøving" }
-            .filter { !it.hasNonNull("meldingsreferanseId") }
-            .forEach {
-                sikkerLogg.info("Fant grunnlagsdata uten meldingsreferanseId fnr=${jsonNode["fødselsnummer"]} vilkårsgrunnlagId=${it["vilkårsgrunnlagId"]}")
-            }
+            .map { it["skjæringstidspunkt"].asText() }
+            .sorted()
+            .distinct()
+
+        val skjæringstidspunkterViIkkeFinnerMeldingFor = skjæringstidspunkterFraSpleis
+            .filter { it !in skjæringstidspunkter }
+
+        if (skjæringstidspunkterViIkkeFinnerMeldingFor.isNotEmpty()) {
+            sikkerLogg.info(
+                "Fant skjæringstidspunkt(er) i vilkårsgrunnlagshistorikken vi ikke finner melding for $skjæringstidspunkterViIkkeFinnerMeldingFor"
+                    + " fnr=${jsonNode["fødselsnummer"]}"
+            )
+        }
     }
 
     private fun hentArbeidsforhold(jsonNode: JsonNode) = jsonNode["@løsning"].arbeidsforholdNode().map {
