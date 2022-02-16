@@ -74,15 +74,19 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
     }
 
     @Test
-    @ForventetFeil("Nært forestående feature - https://trello.com/c/eG2Awz44")
     fun `inntektsmelding som overlapper med utbetalt periode skal til ny kø`() {
         // Utbetaling 17. mars til 31. mars (AGP 1-16. mars)
         nyttVedtak(1.mars, 31.mars)
-
         val imHendelseId = håndterInntektsmelding(listOf(20.februar til 1.mars))
-
-        // assertTrue(observatør.<nytt event her>.harRelatertUtbetaling)
-        assertNotNull(observatør.hendelseIkkeHåndtert(imHendelseId))
+        assertForventetFeil(
+            forklaring = "Nært forestående feature - https://trello.com/c/eG2Awz44",
+            nå = { assertTrue(observatør.hendelseIkkeHåndtertEventer.isEmpty()) },
+            ønsket = {
+                // assertTrue(observatør.<nytt event her>.harRelatertUtbetaling)
+                assertFalse(observatør.hendelseIkkeHåndtertEventer.isEmpty())
+                assertNotNull(observatør.hendelseIkkeHåndtert(imHendelseId))
+            }
+        )
     }
 
     @Test

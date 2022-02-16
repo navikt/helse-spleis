@@ -980,7 +980,6 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         assertSame(vilkårsgrunnlag, person.vilkårsgrunnlagFor(1.januar))
     }
 
-    @ForventetFeil("https://trello.com/c/MBCGez52")
     @Test
     fun `lagrer ikke inntekt fra infotrygd uten utbetaling som vilkårsgrunnlag i spleis`() {
         val inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true))
@@ -989,7 +988,10 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 31.januar))
         håndterYtelser(1.vedtaksperiode, inntektshistorikk = inntektshistorikk)
-
-        assertNull(person.vilkårsgrunnlagFor(1.januar))
+        assertForventetFeil(
+            forklaring = "https://trello.com/c/MBCGez52",
+            nå = { assertNotNull(person.vilkårsgrunnlagFor(1.januar)) },
+            ønsket = { assertNull(person.vilkårsgrunnlagFor(1.januar)) }
+        )
     }
 }

@@ -1,6 +1,6 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.ForventetFeil
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -77,7 +77,6 @@ internal class SamletSykdomsgradE2ETest: AbstractEndToEndTest() {
         )
     }
 
-    @ForventetFeil("når vi mottar korrigert søknad ligger det igjen warnings fra før som ikke lengre gjelder")
     @Test
     fun `opprinnelig søknad med 100 prosent arbeidshelse blir korrigert slik at sykdomsgraden blir 100 prosent `() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar, 100.prosent))
@@ -107,7 +106,12 @@ internal class SamletSykdomsgradE2ETest: AbstractEndToEndTest() {
             TIL_UTBETALING,
             AVSLUTTET
         )
-        assertNoWarnings()
+
+        assertForventetFeil(
+            forklaring = "når vi mottar korrigert søknad ligger det igjen warnings fra før som ikke lengre gjelder",
+            nå = { assertWarning("Minst én dag uten utbetaling på grunn av sykdomsgrad under 20 %. Vurder å sende vedtaksbrev fra Infotrygd") },
+            ønsket = { assertNoWarnings() }
+        )
     }
 
     @Test
