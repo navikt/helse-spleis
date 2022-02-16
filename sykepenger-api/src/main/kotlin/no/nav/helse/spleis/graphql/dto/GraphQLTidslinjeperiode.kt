@@ -190,6 +190,24 @@ data class GraphQLAktivitet(
     val tidsstempel: String
 )
 
+data class GraphQLRefusjon(
+    val arbeidsgiverperioder: List<GraphQLRefusjonsperiode>,
+    val endringer: List<GraphQLRefusjonsendring>,
+    val forsteFravaersdag: LocalDate?,
+    val sisteRefusjonsdag: LocalDate?,
+    val belop: Double?
+) {
+    data class GraphQLRefusjonsperiode(
+        val fom: LocalDate,
+        val tom: LocalDate
+    )
+
+    data class GraphQLRefusjonsendring(
+        val belop: Double,
+        val dato: LocalDate
+    )
+}
+
 data class GraphQLPeriodevilkar(
     val sykepengedager: Sykepengedager,
     val alder: Alder,
@@ -235,7 +253,8 @@ data class GraphQLBeregnetPeriode(
     val hendelser: List<GraphQLHendelse>,
     val vilkarsgrunnlaghistorikkId: UUID,
     val periodevilkar: GraphQLPeriodevilkar,
-    val aktivitetslogg: List<GraphQLAktivitet>
+    val aktivitetslogg: List<GraphQLAktivitet>,
+    val refusjon: GraphQLRefusjon?
 ) : GraphQLTidslinjeperiode {
     override val id: UUID = UUID.randomUUID()
 }

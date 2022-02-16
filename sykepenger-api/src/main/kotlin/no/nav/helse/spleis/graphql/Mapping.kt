@@ -190,6 +190,15 @@ internal fun mapTidslinjeperiode(periode: Tidslinjeperiode) =
                     melding = it.melding,
                     tidsstempel = it.tidsstempel
                 )
+            },
+            refusjon = periode.refusjon?.let { refusjon ->
+                GraphQLRefusjon(
+                    arbeidsgiverperioder = refusjon.arbeidsgiverperioder.map { GraphQLRefusjon.GraphQLRefusjonsperiode(it.fom, it.tom) },
+                    endringer = refusjon.endringer.map { GraphQLRefusjon.GraphQLRefusjonsendring(it.beløp, it.dato) },
+                    forsteFravaersdag = refusjon.førsteFraværsdag,
+                    sisteRefusjonsdag = refusjon.sisteRefusjonsdag,
+                    belop = refusjon.beløp
+                )
             }
         )
         else -> GraphQLUberegnetPeriode(
