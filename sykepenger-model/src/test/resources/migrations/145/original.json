@@ -1,0 +1,45 @@
+{
+    "arbeidsgivere": [
+        {
+            "organisasjonsnummer": "987654321",
+            "vedtaksperioder": [
+                {
+                    "id": "ed694052-1827-456a-9a58-4d3281eb8976",
+                    "skjæringstidspunkt": "2018-01-01"
+                }
+            ],
+            "forkastede": [
+                {
+                    "vedtaksperiode": {
+                        "id": "6a2bfcf2-50d4-4b13-8093-7697cd8ab1ff",
+                        "skjæringstidspunkt": "2018-01-01"
+                    }
+                }
+            ],
+            "arbeidsforholdhistorikk": [
+                {
+                    "id": "d3f715c6-ffbe-461f-aa41-8d898cec2b1c",
+                    "skjæringstidspunkt": "2018-01-01",
+                    "arbeidsforhold": [
+                        {
+                            "ansattFom": "2017-12-28",
+                            "ansattTom": null,
+                            "deaktivert": false
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "vilkårsgrunnlagHistorikk": [
+        {
+            "vilkårsgrunnlag": [
+                {
+                    "skjæringstidspunkt": "2018-01-01",
+                    "type": "Vilkårsprøving"
+                }
+            ]
+        }
+    ],
+    "skjemaVersjon": 144
+}
