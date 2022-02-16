@@ -1042,6 +1042,50 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `§ 8-19 tredje ledd - opphold i AGP`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 3.januar, 5.januar til 10.januar, 12.januar til 17.januar))
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode)
+
+        SubsumsjonInspektør(jurist).assertBeregnet(
+            paragraf = PARAGRAF_8_19,
+            ledd = 3.ledd,
+            versjon = 1.januar(2001),
+            input = mapOf(
+                "beregnetTidslinje" to listOf(
+                    mapOf(
+                        "fom" to 1.januar,
+                        "tom" to 3.januar,
+                        "dagtype" to "SYKEDAG",
+                        "grad" to 100
+                    ),
+                    mapOf(
+                        "fom" to 5.januar,
+                        "tom" to 10.januar,
+                        "dagtype" to "SYKEDAG",
+                        "grad" to 100
+                    ),
+                    mapOf(
+                        "fom" to 12.januar,
+                        "tom" to 31.januar,
+                        "dagtype" to "SYKEDAG",
+                        "grad" to 100
+                    ),
+                ),
+            ),
+            output = mapOf(
+                "perioder" to listOf(
+                    mapOf("fom" to 5.januar, "tom" to 5.januar),
+                    mapOf("fom" to 12.januar, "tom" to 12.januar)
+                )
+            )
+        )
+    }
+
+    @Test
     fun `§ 8-28 tredje ledd bokstav a - legger tre siste innraporterte inntekter til grunn for andre arbeidsgivere`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 15.mars, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 15.mars, 100.prosent), orgnummer = a1)
