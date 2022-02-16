@@ -120,8 +120,9 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         return using(sessionOf(dataSource)) { session ->
             session.run(
                 queryOf(
-                    "SELECT melding_id, melding_type, data FROM melding WHERE fnr = ? AND melding_type IN (?, ?, ?, ?, ?, ?)",
-                    fødselsnummer.toLong(), NY_SØKNAD.name, SENDT_SØKNAD_ARBEIDSGIVER.name, SENDT_SØKNAD_NAV.name, INNTEKTSMELDING.name, OVERSTYRTIDSLINJE.name, OVERSTYRINNTEKT.name
+                    "SELECT melding_id, melding_type, data FROM melding WHERE fnr = ? AND melding_type IN (?, ?, ?, ?, ?, ?, ?)",
+                    fødselsnummer.toLong(), NY_SØKNAD.name, SENDT_SØKNAD_ARBEIDSGIVER.name, SENDT_SØKNAD_NAV.name, INNTEKTSMELDING.name, OVERSTYRTIDSLINJE.name,
+                    OVERSTYRINNTEKT.name, VILKÅRSGRUNNLAG.name
                 ).map {
                     UUID.fromString(it.string("melding_id")) to Pair<Navn, Json>(
                         it.string("melding_type"),
