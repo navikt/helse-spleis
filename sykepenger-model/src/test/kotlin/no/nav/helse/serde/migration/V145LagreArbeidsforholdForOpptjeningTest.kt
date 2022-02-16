@@ -9,7 +9,10 @@ import java.util.*
 internal class V145LagreArbeidsforholdForOpptjeningTest : MigrationTest(V145LagreArbeidsforholdForOpptjening()) {
     val vilkårsgrunnlagId1 = UUID.randomUUID()
     override fun meldingerSupplier(): MeldingerSupplier = MeldingerSupplier {
-        mapOf(vilkårsgrunnlagId1 to ("VILKÅRSGRUNNLAG" to vilkårsgrunnlag()))
+        mapOf(
+            vilkårsgrunnlagId1 to ("VILKÅRSGRUNNLAG" to vilkårsgrunnlag()),
+            UUID.randomUUID() to ("VILKÅRSGRUNNLAG" to gammeltVilkårsgrunnlag(UUID.randomUUID().toString()))
+        )
     }
 
     @Test
@@ -34,6 +37,28 @@ internal class V145LagreArbeidsforholdForOpptjeningTest : MigrationTest(V145Lagr
     "vedtaksperiodeId": "$vedtaksperiodeId",
     "@løsning": {
         "ArbeidsforholdV2": [
+            ${arbeidsforhold.toJson()}
+        ]
+    },
+    "@final": true,
+    "@besvart": "2020-01-01T12:01:00.000000000"
+}
+    """
+
+    @Language("JSON")
+    private fun gammeltVilkårsgrunnlag(
+        vedtaksperiodeId: String = "ed694052-1827-456a-9a58-4d3281eb8976",
+        vararg arbeidsforhold: Arbeidsforhold = arrayOf(
+            Arbeidsforhold("987654321", LocalDate.EPOCH, null)
+        )
+    ) = """
+{
+    "@opprettet": "2020-01-01T12:00:00.000000000",
+    "@id": "51a874a5-8574-4a6a-a6b4-1d93ecbd7b85",
+    "organisasjonsnummer": "987654321",
+    "vedtaksperiodeId": "$vedtaksperiodeId",
+    "@løsning": {
+        "Opptjening": [
             ${arbeidsforhold.toJson()}
         ]
     },

@@ -41,9 +41,11 @@ internal class V145LagreArbeidsforholdForOpptjening : JsonMigration(version = 14
             }
     }
 
-    private fun hentArbeidsforhold(jsonNode: JsonNode) = jsonNode["@løsning"]["ArbeidsforholdV2"].map {
+    private fun hentArbeidsforhold(jsonNode: JsonNode) = jsonNode["@løsning"].arbeidsforholdNode().map {
         Arbeidsforhold(LocalDate.parse(it["ansattSiden"].asText()), it.optional("ansattTil")?.asText()?.let(LocalDate::parse), it["orgnummer"].asText())
     }
+
+    private fun JsonNode.arbeidsforholdNode() = optional("ArbeidsforholdV2") ?: get("Opptjening")
 
     private fun JsonNode.optional(field: String) = takeIf { it.hasNonNull(field) }?.get(field)
 
