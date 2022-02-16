@@ -243,24 +243,6 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `prod`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 1.januar, 100.prosent))
-        håndterSøknad(Sykdom(1.januar, 1.januar, 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(12.januar, 16.januar, 100.prosent))
-        håndterSøknad(Sykdom(12.januar, 16.januar, 100.prosent))
-        håndterInntektsmelding(listOf(
-            1.januar til 1.januar,
-            12.januar til 26.januar
-        ), førsteFraværsdag = 12.januar)
-
-        håndterSykmelding(Sykmeldingsperiode(17.januar, 19.januar, 100.prosent))
-        håndterSøknad(Sykdom(17.januar, 19.januar, 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(20.januar, 27.januar, 100.prosent))
-        håndterSøknad(Sykdom(20.januar, 27.januar, 100.prosent))
-
-    }
-
-    @Test
     fun `hensyntar historikk fra infotrygd - får vite om det etter IM - flere perioder`() {
         håndterSykmelding(Sykmeldingsperiode(2.februar, 2.februar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(6.februar, 6.februar, 100.prosent))
