@@ -72,8 +72,8 @@ internal class SubsumsjonMediator(
         KontekstType.Sykmelding -> "sykmelding"
         KontekstType.Søknad -> "soknad"
         KontekstType.Inntektsmelding -> "inntektsmelding"
-        KontekstType.OverstyrTidslinje -> "overstyrTidslinje"
-        KontekstType.OverstyrInntekt -> "overstyrInntekt"
-        KontekstType.OverstyrArbeidsforhold -> "overstyrArbeidsforhold"
+        KontekstType.OverstyrTidslinje -> "overstyrtidslinje"
+        KontekstType.OverstyrInntekt -> "overstyrinntekt"
+        KontekstType.OverstyrArbeidsforhold -> "overstyrarbeidsforhold"
     }
 }
