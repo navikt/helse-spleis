@@ -1,6 +1,5 @@
 package no.nav.helse.spleis
 
-import no.nav.helse.Toggle
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.etterlevelse.MaskinellJurist.KontekstType
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -24,7 +23,7 @@ internal class SubsumsjonMediator(
 
     fun finalize(rapidsConnection: RapidsConnection) {
         val events = jurist.events()
-        if (events.isEmpty() || Toggle.SubsumsjonHendelser.disabled) return
+        if (events.isEmpty()) return
         logg.info("som følge av hendelse id=${message.id} sendes ${events.size} subsumsjonsmeldinger på rapid")
         events
             .map { subsumsjonMelding(fødselsnummer = fødselsnummer, event = it) }

@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.networknt.schema.JsonSchemaFactory
 import com.networknt.schema.SpecVersion
 import com.networknt.schema.ValidationMessage
-import no.nav.helse.Toggle
 import no.nav.helse.januar
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Tidslinjedag
@@ -37,7 +36,7 @@ internal class SubsumsjonsmeldingTest {
     }
 
     @Test
-    fun `en melding på gyldig format`() = Toggle.SubsumsjonHendelser.enable {
+    fun `en melding på gyldig format`() {
         jurist.`§ 8-17 ledd 2`(1.januar(2018), MutableList(31) { Tidslinjedag((it + 1).januar, "NAVDAG", 100) })
         subsumsjonMediator.finalize(testRapid)
         assertSubsumsjonsmelding(testRapid.inspektør.message(0)["subsumsjon"])

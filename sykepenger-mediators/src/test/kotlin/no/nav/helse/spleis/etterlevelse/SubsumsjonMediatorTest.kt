@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.etterlevelse
 
-import no.nav.helse.Toggle
 import no.nav.helse.januar
 import no.nav.helse.spleis.e2e.AbstractEndToEndMediatorTest
 import no.nav.inntektsmeldingkontrakt.Periode
@@ -12,19 +11,7 @@ import org.junit.jupiter.api.Test
 internal class SubsumsjonMediatorTest : AbstractEndToEndMediatorTest() {
 
     @Test
-    fun `subsumsjon-hendelser`() {
-        sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
-        sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
-        sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
-        sendYtelser(0)
-        sendVilkårsgrunnlag(0)
-        sendYtelser(0)
-
-        assertTrue(testRapid.inspektør.meldinger("subsumsjon").isEmpty())
-    }
-
-    @Test
-    fun `subsumsjon-hendelser - med toggle`() = Toggle.SubsumsjonHendelser.enable {
+    fun `subsumsjon-hendelser - med toggle`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
         sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)

@@ -136,7 +136,6 @@ abstract class Toggle internal constructor(enabled: Boolean = false, private val
     object GraphQLPlayground : Toggle("GraphQLPlayground")
     object RevurdereInntektMedFlereArbeidsgivere : Toggle(false)
     object GjenopptaAvsluttetUtenUtbetaling : Toggle(false)
-    object SubsumsjonHendelser : Toggle("SUBSUMSJON_HENDELSER", false)
     object ForkastForlengelseAvForkastetPeriode : Toggle(false)
 
     object BrukerutbetalingFilter : Toggle("BRUKERUTBETALING_FILTER", false)
