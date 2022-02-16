@@ -1,18 +1,37 @@
 package no.nav.helse.utbetalingstidslinje
 
-import no.nav.helse.*
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.sykdomstidslinje.erHelg
-import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
-import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import no.nav.helse.april
+import no.nav.helse.desember
+import no.nav.helse.februar
+import no.nav.helse.hentErrors
+import no.nav.helse.januar
+import no.nav.helse.juli
+import no.nav.helse.juni
+import no.nav.helse.mars
+import no.nav.helse.oktober
+import no.nav.helse.somFødselsnummer
+import no.nav.helse.testhelpers.AP
+import no.nav.helse.testhelpers.ARB
+import no.nav.helse.testhelpers.FRI
+import no.nav.helse.testhelpers.HELG
+import no.nav.helse.testhelpers.NAV
+import no.nav.helse.testhelpers.NAVDAGER
+import no.nav.helse.testhelpers.UTELATE
+import no.nav.helse.testhelpers.Utbetalingsdager
+import no.nav.helse.testhelpers.tidslinjeOf
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 
 internal class MaksimumSykepengedagerfilterTest {
     private companion object {
@@ -451,7 +470,7 @@ internal class MaksimumSykepengedagerfilterTest {
         tidslinje.inspektør.avvistedatoer.dropLast(1).forEach { dato ->
             assertEquals(listOf(Begrunnelse.SykepengedagerOppbrukt), tidslinje.inspektør.begrunnelse(dato))
         }
-        assertTrue(aktivitetslogg.hasErrorsOrWorse())
+        assertTrue(aktivitetslogg.hentErrors().contains("Bruker er fortsatt syk 26 uker etter maksdato"))
         assertEquals(listOf(Begrunnelse.NyVilkårsprøvingNødvendig), tidslinje.inspektør.begrunnelse(tidslinje.inspektør.avvistedatoer.last()))
     }
 

@@ -21,9 +21,11 @@ internal class MaksdatoE2ETest : AbstractEndToEndTest() {
             forrigePeriode = nestePeriode(forrigePeriode)
             forlengVedtak(forrigePeriode.start, forrigePeriode.endInclusive)
         }
-        // oppretter forlengelse fom 182 dager etter maksdato
+        // oppretter forlengelse fom 182 dager etter maksdato: denne blir kastet til Infotrygd
         forrigePeriode = nyPeriodeMedYtelser(forrigePeriode)
-        person.søppelbøtte(hendelselogg, forrigePeriode) // simulerer at perioden forkastes; f.eks. fordi spesialtilfellet med fortsatt syk etter 182 dager må håndteres manuelt i IT
+        assertSisteTilstand(observatør.sisteVedtaksperiode(), TilstandType.TIL_INFOTRYGD) {
+            "Disse periodene skal kastes ut pr nå"
+        }
         forrigePeriode = nyPeriode(forrigePeriode)
         val siste = observatør.sisteVedtaksperiode()
         val inntektsmeldingId = inntektsmeldinger.keys.also { check(it.size == 1) { "forventer bare én inntektsmelding" } }.first()
@@ -31,6 +33,7 @@ internal class MaksdatoE2ETest : AbstractEndToEndTest() {
         assertSisteTilstand(siste, TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP) {
             "denne perioden skal under ingen omstendigheter utbetales fordi personen ikke har vært på arbeid etter maksdato"
         }
+
     }
 
     @Test
