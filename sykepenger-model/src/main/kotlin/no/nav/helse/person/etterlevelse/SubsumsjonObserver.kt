@@ -254,6 +254,18 @@ interface SubsumsjonObserver {
     fun `§ 8-19 tredje ledd`(dato: LocalDate, beregnetTidslinje: List<Tidslinjedag>) {}
 
     /**
+     * Når arbeidsgiveren har utbetalt sykepenger i en full arbeidsgiverperiode,
+     * skal det inntre ny arbeidsgiverperiode ved sykdom som inntreffer 16 dager
+     * etter at vedkommende arbeidstaker har gjenopptatt arbeidet.
+     *
+     * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-19)
+     *
+     * @param dato for den 16. oppholdsdag
+     * @param beregnetTidslinje tidslinje som ligger til grunn for beregning av agp
+     */
+    fun `§ 8-19 fjerde ledd`(dato: LocalDate, beregnetTidslinje: List<Tidslinjedag>) {}
+
+    /**
      * Inntekt som legges til grunn dersom sykdom ved en arbeidsgiver starter senere enn skjæringstidspunktet tilsvarer
      * innrapportert inntekt til a-ordningen for de tre siste månedene før skjæringstidspunktet
      *
