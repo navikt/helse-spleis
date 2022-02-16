@@ -1196,7 +1196,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertTrue(inspektør.sykdomstidslinje[27.oktober] is Dag.ArbeidsgiverHelgedag)
     }
 
-    @ForventetFeil("Vilkårsgrunnlag for arbeidsgiver 1 gjør at vedtaksperiode hos arbeidsgiver 2 ikke venter på inntektsmelding")
     @Test
     fun `vilkårsvurdering med flere arbeidsgivere skal ikke medføre at vi går til avventer historikk fra mottatt sykmelding ferdig forlengelse uten IM`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
@@ -1232,7 +1231,11 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, AVVENTER_HISTORIKK, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, orgnummer = a1)
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, orgnummer = a2)
-        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE, orgnummer = a2)
+        assertForventetFeil(
+            forklaring = "Vilkårsgrunnlag for arbeidsgiver 1 gjør at vedtaksperiode hos arbeidsgiver 2 ikke venter på inntektsmelding",
+            nå = { assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_HISTORIKK, orgnummer = a2) },
+            ønsket = { assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE, orgnummer = a2) }
+        )
     }
 
     @Test

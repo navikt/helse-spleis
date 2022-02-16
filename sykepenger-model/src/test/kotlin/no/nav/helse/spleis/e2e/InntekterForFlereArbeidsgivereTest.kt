@@ -241,7 +241,6 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
 
     }
 
-    @ForventetFeil("8-28 b")
     @Test
     fun `Skatteinntekter og inntektsmelding for en arbeidsgiver og kun skatt (i to måneder) for andre arbeidsgiver - gir korrekt sykepenge- og sammenligningsgrunnlag`() {
         val inntekterForSykepengegrunnlag = inntektperioderForSykepengegrunnlag {
@@ -271,8 +270,13 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
             arbeidsforhold = arbeidsforhold
         ).håndter(Person::håndter)
 
-        assertEquals(552000.årlig, person.vilkårsgrunnlagFor(1.januar)?.sykepengegrunnlag())
-        assertEquals(528000.årlig, person.beregnSammenligningsgrunnlag(1.januar, MaskinellJurist()))
+        assertEquals(528000.årlig, person.beregnSammenligningsgrunnlag(1.januar, MaskinellJurist()).sammenligningsgrunnlag)
+
+        assertForventetFeil(
+            forklaring = "8-28 b",
+            nå = { assertEquals(300000.årlig, person.vilkårsgrunnlagFor(1.januar)?.sykepengegrunnlag()?.sykepengegrunnlag) },
+            ønsket = { assertEquals(552000.årlig, person.vilkårsgrunnlagFor(1.januar)?.sykepengegrunnlag()?.sykepengegrunnlag) }
+        )
     }
 
     @Test

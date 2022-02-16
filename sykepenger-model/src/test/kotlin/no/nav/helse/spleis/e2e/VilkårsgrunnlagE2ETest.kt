@@ -1,6 +1,6 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.ForventetFeil
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -147,7 +147,6 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         assertError("Har mer enn 25 % avvik")
     }
 
-    @ForventetFeil("https://trello.com/c/edYRnoPm")
     @Test
     fun `skal ikke gjenbruke et vilkårsgrunnlag som feiler pga 25 prosent avvik`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
@@ -184,10 +183,13 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
-        assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD, orgnummer = a2)
+        assertForventetFeil(
+            forklaring = "https://trello.com/c/edYRnoPm",
+            nå = { assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a2) },
+            ønsket = { assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD, orgnummer = a2) }
+        )
     }
 
-    @ForventetFeil("https://trello.com/c/edYRnoPm")
     @Test
     fun `skal ikke gjenbruke et vilkårsgrunnlag som feiler pga frilanser arbeidsforhold`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
@@ -235,6 +237,11 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
-        assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD, orgnummer = a2)
+
+        assertForventetFeil(
+            forklaring = "https://trello.com/c/edYRnoPm",
+            nå = { assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a2) },
+            ønsket = { assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD, orgnummer = a2) }
+        )
     }
 }
