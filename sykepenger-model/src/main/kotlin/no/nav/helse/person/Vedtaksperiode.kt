@@ -1821,7 +1821,7 @@ internal class Vedtaksperiode private constructor(
             .plusDays(4)
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            if (vedtaksperiode.ingenUtbetaling()) {
+            if (vedtaksperiode.ingenUtbetaling() && !vedtaksperiode.utbetalinger.harUtbetaling()) {
                 sikkerlogg.info(
                     "Vedtaksperioden {} for {} er egentlig innenfor arbeidsgiverperioden ved {}",
                     keyValue("vedtaksperiodeId", vedtaksperiode.id), keyValue("fnr", vedtaksperiode.fødselsnummer), keyValue("tilstand", type)
