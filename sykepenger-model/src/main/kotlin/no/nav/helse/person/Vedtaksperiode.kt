@@ -1821,14 +1821,7 @@ internal class Vedtaksperiode private constructor(
             .plusDays(4)
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            if (vedtaksperiode.ingenUtbetaling()) {
-                sikkerlogg.info(
-                    "Vedtaksperioden {} for {} er egentlig innenfor arbeidsgiverperioden ved {}",
-                    keyValue("vedtaksperiodeId", vedtaksperiode.id), keyValue("fnr", vedtaksperiode.fødselsnummer), keyValue("tilstand", type)
-                )
-                hendelse.info("Avslutter periode fordi den er innenfor arbeidsgiverperioden, eller består utelukkende av ferie/permisjon/arbeidsdager")
-                return vedtaksperiode.tilstand(hendelse, AvsluttetUtenUtbetaling)
-            }
+            vedtaksperiode.loggInnenforArbeidsgiverperiode()
             if (vedtaksperiode.arbeidsgiver.harDagUtenSøknad(vedtaksperiode.periode)) {
                 hendelse.error("Tidslinjen inneholder minst én dag med kilde sykmelding")
                 return vedtaksperiode.tilstand(hendelse, TilInfotrygd)
