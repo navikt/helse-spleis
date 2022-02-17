@@ -2103,58 +2103,6 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `forlengelse av vedtaksperiode hvor utbetalinger tidligere har nådd makstid, men ikke har mottatt ytelser i 26 uker - skal få warning om at vilkårsgrunnlag må etterspørres`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
-        håndterYtelser(1.vedtaksperiode)
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
-
-        val months2018 = (2..12).map {
-            YearMonth.of(2018, it)
-        }
-        val months2019 = (1..6).map {
-            YearMonth.of(2019, it)
-        }
-
-        (months2018 + months2019).forEachIndexed { index, yearMonth ->
-            val vedtaksperiodeIndex = index + 2
-            håndterSykmelding(
-                Sykmeldingsperiode(
-                    LocalDate.of(yearMonth.year, yearMonth.month, 1),
-                    LocalDate.of(yearMonth.year, yearMonth.month, yearMonth.lengthOfMonth()),
-                    100.prosent
-                )
-            )
-            håndterSøknad(
-                Sykdom(
-                    LocalDate.of(yearMonth.year, yearMonth.month, 1),
-                    LocalDate.of(yearMonth.year, yearMonth.month, yearMonth.lengthOfMonth()),
-                    100.prosent
-                )
-            )
-            håndterYtelser(vedtaksperiodeIndex.vedtaksperiode)
-            if (person.personLogg.etterspurteBehov(vedtaksperiodeIndex.vedtaksperiode, Aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering)) {
-                håndterSimulering(vedtaksperiodeIndex.vedtaksperiode)
-            }
-            håndterUtbetalingsgodkjenning(vedtaksperiodeIndex.vedtaksperiode)
-            håndterUtbetalt(vedtaksperiodeIndex.vedtaksperiode)
-        }
-
-        håndterSykmelding(Sykmeldingsperiode(1.juli(2019), 31.juli(2019), 100.prosent))
-        håndterSøknad(Sykdom(1.juli(2019), 31.juli(2019), 100.prosent))
-        håndterYtelser(19.vedtaksperiode)
-        val utbetalingstidslinje = inspektør.utbetalingstidslinjer(19.vedtaksperiode)
-        val dager = utbetalingstidslinje.filter { it !is AvvistDag && it !is NavHelgDag }
-        assertTrue(dager.isEmpty()) { "Forventet at alle dager er avvist: ${dager.joinToString()}"}
-        assertWarnings()
-    }
-
-    @Test
     fun `Skal ikke få warning for opptjening av sykedager etter nådd maksdato for irrelevante perioder`() {
         // Gir det noe mening å sette refusjonsbeløp når det kun er infotrygd-utbetalinger?
         håndterSykmelding(Sykmeldingsperiode(1.januar(2020), 31.januar(2020), 100.prosent))

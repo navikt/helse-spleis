@@ -116,7 +116,7 @@ internal class ArbeidsgiverUtbetalingerTest {
         assertEquals(60 * 1200.0, inspektør.totalUtbetaling())
         assertEquals(30.mars, maksdato)
         assertEquals(0, gjenståendeSykedager)
-        assertTrue(aktivitetslogg.hasWarningsOrWorse())
+        assertTrue(aktivitetslogg.hentInfo().contains("Maks antall sykepengedager er nådd i perioden"))
         assertFalse(aktivitetslogg.hasErrorsOrWorse())
     }
 
@@ -131,7 +131,7 @@ internal class ArbeidsgiverUtbetalingerTest {
         assertEquals((60 * 1200.0), inspektør.totalUtbetaling())
         assertEquals(30.mars, maksdato)
         assertEquals(0, gjenståendeSykedager)
-        assertTrue(aktivitetslogg.hasWarningsOrWorse())
+        assertTrue(aktivitetslogg.hentInfo().contains("Maks antall sykepengedager er nådd i perioden"))
         assertFalse(aktivitetslogg.hasErrorsOrWorse())
     }
 
@@ -149,7 +149,7 @@ internal class ArbeidsgiverUtbetalingerTest {
         assertEquals(40 * 1200.0, inspektør.totalUtbetaling())
         assertEquals(30.mars, maksdato)
         assertEquals(0, gjenståendeSykedager)
-        assertTrue(aktivitetslogg.hasWarningsOrWorse())
+        assertTrue(aktivitetslogg.hentInfo().contains("Maks antall sykepengedager er nådd i perioden"))
         assertFalse(aktivitetslogg.hasErrorsOrWorse())
     }
 
@@ -218,8 +218,8 @@ internal class ArbeidsgiverUtbetalingerTest {
         assertEquals(28.desember, maksdato)
         assertEquals(0, gjenståendeSykedager)
         assertEquals(248, inspektør.navDagTeller)
-        assertTrue(aktivitetslogg.hasWarningsOrWorse()) { aktivitetslogg.toString() }
-        assertFalse(aktivitetslogg.hasErrorsOrWorse())
+        assertTrue(aktivitetslogg.hentInfo().contains("Maks antall sykepengedager er nådd i perioden"))
+        assertFalse(aktivitetslogg.hasWarningsOrWorse())
     }
 
     @Test
@@ -228,8 +228,8 @@ internal class ArbeidsgiverUtbetalingerTest {
         assertEquals(10.april, maksdato)
         assertEquals(0, gjenståendeSykedager)
         assertEquals(60, inspektør.navDagTeller)
-        assertTrue(aktivitetslogg.hasWarningsOrWorse())
-        assertFalse(aktivitetslogg.hasErrorsOrWorse())
+        assertTrue(aktivitetslogg.hentInfo().contains("Maks antall sykepengedager er nådd i perioden"))
+        assertFalse(aktivitetslogg.hasWarningsOrWorse())
     }
 
     @Test
@@ -237,8 +237,8 @@ internal class ArbeidsgiverUtbetalingerTest {
         undersøke(PERSON_68_ÅR_1_DESEMBER_2018, 16.AP, 366.NAV)
         assertEquals(28.desember, maksdato)
         assertEquals(0, gjenståendeSykedager)
-        assertTrue(aktivitetslogg.hasWarningsOrWorse())
-        assertFalse(aktivitetslogg.hasErrorsOrWorse())
+        assertTrue(aktivitetslogg.hentInfo().contains("Maks antall sykepengedager er nådd i perioden"))
+        assertFalse(aktivitetslogg.hasWarningsOrWorse())
     }
 
     @Test

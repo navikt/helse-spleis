@@ -92,7 +92,7 @@ internal class MaksimumSykepengedagerfilter(
             aktivitetslogg.error("Bruker er fortsatt syk 26 uker etter maksdato")
         }
         if (avvisteDager in periode)
-            aktivitetslogg.warn("Maks antall sykepengedager er nådd i perioden. Vurder å sende vedtaksbrev fra Infotrygd")
+            aktivitetslogg.info("Maks antall sykepengedager er nådd i perioden")
         else
             aktivitetslogg.info("Maksimalt antall sykedager overskrides ikke i perioden")
 
