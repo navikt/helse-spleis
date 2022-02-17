@@ -166,6 +166,14 @@ internal class VilkårsgrunnlagInntektBuilder(private val person: Person) {
             )
         }
 
+        override fun visitIkkeRapportert(id: UUID, dato: LocalDate, tidsstempel: LocalDateTime) {
+            omregnetÅrsinntektDTO = InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO(
+                kilde = InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO.IkkeRapportert,
+                beløp = 0.0,
+                månedsbeløp = 0.0
+            )
+        }
+
         override fun preVisitSkatt(skattComposite: Inntektshistorikk.SkattComposite, id: UUID, dato: LocalDate) {
             skattegreier.clear()
         }

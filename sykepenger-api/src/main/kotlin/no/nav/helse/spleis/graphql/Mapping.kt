@@ -302,6 +302,7 @@ internal fun mapInntektsgrunnlag(inntektsgrunnlag: InntektsgrunnlagDTO) = GraphQ
                         InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO.Inntektsmelding -> GraphQLInntektskilde.Inntektsmelding
                         InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO.Infotrygd -> GraphQLInntektskilde.Infotrygd
                         InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO.AOrdningen -> GraphQLInntektskilde.AOrdningen
+                        InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO.IkkeRapportert -> GraphQLInntektskilde.IkkeRapportert
                     },
                     belop = årsinntekt.beløp,
                     manedsbelop = årsinntekt.månedsbeløp,

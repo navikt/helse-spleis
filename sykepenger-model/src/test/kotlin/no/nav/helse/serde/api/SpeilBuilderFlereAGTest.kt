@@ -651,4 +651,50 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
             assertEquals(23.januar, it.endringer.last().dato)
         }
     }
+
+    @Test
+    fun `tar med vilkårsgrunnlag med ikke-rapportert inntekt`() {
+        // A2 må være først i listen for at buggen skal intreffe
+        nyttVedtak(1.januar(2017), 31.januar(2017), 100.prosent, orgnummer = a2)
+
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), orgnummer = a1)
+        håndterInntektsmelding(arbeidsgiverperioder = listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterVilkårsgrunnlag(
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
+                1.januar(2017) til 1.desember(2017) inntekter {
+                    a1 inntekt INNTEKT
+                }
+            }),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
+                inntektperioderForSykepengegrunnlag {
+                    1.oktober(2017) til 1.desember(2017) inntekter {
+                        a1 inntekt INNTEKT
+                    }
+                },
+                emptyList()
+            ),
+            arbeidsforhold = listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null),
+                Vilkårsgrunnlag.Arbeidsforhold(a2, 1.desember(2017), null)
+            )
+        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+
+        val personDto = speilApi()
+
+        val inntektsgrunnlag = personDto.inntektsgrunnlag.last().inntekter.firstOrNull { it.arbeidsgiver == a2 }
+        assertEquals(
+            InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO(
+                kilde = InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO.IkkeRapportert,
+                beløp = 0.0,
+                månedsbeløp = 0.0,
+                inntekterFraAOrdningen = null
+            ),
+            inntektsgrunnlag?.omregnetÅrsinntekt
+        )
+    }
 }
