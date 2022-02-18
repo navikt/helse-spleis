@@ -72,4 +72,15 @@ internal class OpptjeningTest {
         assertTrue(opptjening.erOppfylt())
     }
 
+    @Test
+    fun `Opptjening kobler sammen gap selvom rekkefølgen ikke er kronologisk`() {
+        val arbeidsforhold = listOf(
+            Arbeidsforholdhistorikk.Arbeidsforhold(ansattFom = 1.januar, ansattTom = 10.januar, deaktivert = false),
+            Arbeidsforholdhistorikk.Arbeidsforhold(ansattFom = 15.januar, ansattTom = null, deaktivert = false),
+            Arbeidsforholdhistorikk.Arbeidsforhold(ansattFom = 11.januar, ansattTom = 14.januar, deaktivert = false)
+        )
+        val opptjening = Opptjening(arbeidsforhold, 1.januar.plusDays(28))
+
+        assertTrue(opptjening.erOppfylt())
+    }
 }
