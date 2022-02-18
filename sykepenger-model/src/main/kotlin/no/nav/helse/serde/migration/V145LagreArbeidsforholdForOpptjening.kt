@@ -33,7 +33,7 @@ internal class V145LagreArbeidsforholdForOpptjening : JsonMigration(version = 14
         if (skjæringstidspunkter.isNotEmpty()) {
             sikkerLogg.info("Fant skjæringstidspunkter $skjæringstidspunkter fnr=$fødselsnummer")
         }
-        val fomDatoer = vilkårsgrunnlagMeldinger.map { (vedtaksperiodeId, _) -> fomFor(jsonNode, vedtaksperiodeId) }
+        val fomDatoer = skjæringstidspunkter.filterNotNull().flatMap { skjæringstidspunkt -> fomerFor(jsonNode, skjæringstidspunkt) }
 
         val skjæringstidspunkterFraSpleis = jsonNode["vilkårsgrunnlagHistorikk"]
             .flatMap { it["vilkårsgrunnlag"] }
@@ -68,17 +68,19 @@ internal class V145LagreArbeidsforholdForOpptjening : JsonMigration(version = 14
     private fun JsonNode.optional(field: String) = takeIf { it.hasNonNull(field) }?.get(field)
 
     fun skjæringstidspunktFor(jsonNode: ObjectNode, vedtaksperiodeId: String, fødselsnummer: String): String? =
-        jsonNode.vedtaksperiode(vedtaksperiodeId)
+        jsonNode.vedtaksperioder()
+            .firstOrNull { it["id"].asText() == vedtaksperiodeId }
             ?.get("skjæringstidspunkt")?.asText()
             .also { if (it == null) sikkerLogg.info("Fant ikke skjæringstidspunkt for $vedtaksperiodeId, fnr=$fødselsnummer") }
 
-    fun fomFor(jsonNode: ObjectNode, vedtaksperiodeId: String): String? =
-        jsonNode.vedtaksperiode(vedtaksperiodeId)?.get("fom")?.asText()
+    fun fomerFor(jsonNode: ObjectNode, skjæringstidspunkt: String): List<String> =
+        jsonNode.vedtaksperioder()
+            .filter { it["skjæringstidspunkt"].asText() == skjæringstidspunkt }
+            .map { it.get("fom").asText() }
 
 
-    fun JsonNode.vedtaksperiode(vedtaksperiodeId: String) = get("arbeidsgivere")
+    fun JsonNode.vedtaksperioder() = get("arbeidsgivere")
         .flatMap { it["vedtaksperioder"] + it["forkastede"].map { forkastet -> forkastet["vedtaksperiode"] } }
-        .firstOrNull { it["id"].asText() == vedtaksperiodeId }
 
     private data class Arbeidsforhold(val fom: LocalDate, val tom: LocalDate?, val orgnummer: String)
 }
