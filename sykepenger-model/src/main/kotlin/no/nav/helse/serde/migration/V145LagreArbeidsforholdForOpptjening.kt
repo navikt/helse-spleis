@@ -21,16 +21,19 @@ internal class V145LagreArbeidsforholdForOpptjening : JsonMigration(version = 14
           * om vi ikke har arbeidsgiveren fra før, opprett en ny arbeidsgiver og legg inn innslag
          legg inn alle relevante arbeidsforhold inn i vilkårsgrunnlag
          */
-        val vilkårsgrunnlagMeldinger = meldingerSupplier.hentMeldinger()
+        val fødselsnummer = jsonNode["fødselsnummer"].asText()
+        val meldinger = meldingerSupplier.hentMeldinger()
+        val vilkårsgrunnlagMeldinger = meldinger
             .values
             .filter { (navn, _) -> navn == "VILKÅRSGRUNNLAG" }
             .map { (_, json) -> serdeObjectMapper.readTree(json) }
-            .map { skjæringstidspunktFor(jsonNode, it["vedtaksperiodeId"].asText()) to hentArbeidsforhold(it) }
+            .map { it["vedtaksperiodeId"].asText() to hentArbeidsforhold(it) }
 
-        val skjæringstidspunkter = vilkårsgrunnlagMeldinger.map { (skjæringstidspunkt, _) -> skjæringstidspunkt }
+        val skjæringstidspunkter = vilkårsgrunnlagMeldinger.map { (vedtaksperiodeId, _) -> skjæringstidspunktFor(jsonNode, vedtaksperiodeId, fødselsnummer) }
         if (skjæringstidspunkter.isNotEmpty()) {
-            sikkerLogg.info("Fant skjæringstidspunkter $skjæringstidspunkter fnr=${jsonNode["fødselsnummer"]}")
+            sikkerLogg.info("Fant skjæringstidspunkter $skjæringstidspunkter fnr=$fødselsnummer")
         }
+        val fomDatoer = vilkårsgrunnlagMeldinger.map { (vedtaksperiodeId, _) -> fomFor(jsonNode, vedtaksperiodeId) }
 
         val skjæringstidspunkterFraSpleis = jsonNode["vilkårsgrunnlagHistorikk"]
             .flatMap { it["vilkårsgrunnlag"] }
@@ -39,14 +42,20 @@ internal class V145LagreArbeidsforholdForOpptjening : JsonMigration(version = 14
             .sorted()
             .distinct()
 
-        val skjæringstidspunkterViIkkeFinnerMeldingFor = skjæringstidspunkterFraSpleis
-            .filter { it !in skjæringstidspunkter }
+        val skjæringstidspunkterViIkkeFinnerMeldingFor = skjæringstidspunkterFraSpleis.filter { it !in skjæringstidspunkter }
 
         if (skjæringstidspunkterViIkkeFinnerMeldingFor.isNotEmpty()) {
             sikkerLogg.info(
-                "Fant skjæringstidspunkt(er) i vilkårsgrunnlagshistorikken vi ikke finner melding for $skjæringstidspunkterViIkkeFinnerMeldingFor"
-                    + " fnr=${jsonNode["fødselsnummer"]}"
+                "Fant skjæringstidspunkt(er) i vilkårsgrunnlagshistorikken vi ikke kan koble med skjæringstidspunkt $skjæringstidspunkterViIkkeFinnerMeldingFor"
+                    + " fnr=$fødselsnummer"
             )
+            val skjæringstidspunkterViIkkeFinnerMeldingerForMedFom = skjæringstidspunkterViIkkeFinnerMeldingFor.filter { it !in fomDatoer }
+            if (skjæringstidspunkterViIkkeFinnerMeldingerForMedFom.isNotEmpty()) {
+                sikkerLogg.info(
+                    "Fant skjæringstidspunkt(er) i vilkårsgrunnlagshistorikken vi ikke kan koble med fom $skjæringstidspunkterViIkkeFinnerMeldingerForMedFom"
+                        + " fnr=$fødselsnummer"
+                )
+            }
         }
     }
 
@@ -58,13 +67,18 @@ internal class V145LagreArbeidsforholdForOpptjening : JsonMigration(version = 14
 
     private fun JsonNode.optional(field: String) = takeIf { it.hasNonNull(field) }?.get(field)
 
-    fun skjæringstidspunktFor(jsonNode: ObjectNode, vedtaksperiodeId: String): String? =
-        jsonNode["arbeidsgivere"]
-            .flatMap { it["vedtaksperioder"] + it["forkastede"].map { forkastet -> forkastet["vedtaksperiode"] } }
-            .firstOrNull { it["id"].asText() == vedtaksperiodeId }
-            ?.get("skjæringstidspunkt")
-            ?.asText()
-            .also { if (it == null) sikkerLogg.info("Fant ikke skjæringstidspunkt for $vedtaksperiodeId") }
+    fun skjæringstidspunktFor(jsonNode: ObjectNode, vedtaksperiodeId: String, fødselsnummer: String): String? =
+        jsonNode.vedtaksperiode(vedtaksperiodeId)
+            ?.get("skjæringstidspunkt")?.asText()
+            .also { if (it == null) sikkerLogg.info("Fant ikke skjæringstidspunkt for $vedtaksperiodeId, fnr=$fødselsnummer") }
+
+    fun fomFor(jsonNode: ObjectNode, vedtaksperiodeId: String): String? =
+        jsonNode.vedtaksperiode(vedtaksperiodeId)?.get("fom")?.asText()
+
+
+    fun JsonNode.vedtaksperiode(vedtaksperiodeId: String) = get("arbeidsgivere")
+        .flatMap { it["vedtaksperioder"] + it["forkastede"].map { forkastet -> forkastet["vedtaksperiode"] } }
+        .firstOrNull { it["id"].asText() == vedtaksperiodeId }
 
     private data class Arbeidsforhold(val fom: LocalDate, val tom: LocalDate?, val orgnummer: String)
 }
