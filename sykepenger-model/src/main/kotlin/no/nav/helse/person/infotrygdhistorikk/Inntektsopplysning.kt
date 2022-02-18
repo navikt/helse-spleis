@@ -124,6 +124,6 @@ class Inntektsopplysning private constructor(
         internal fun List<Inntektsopplysning>.fjern(nødnummer: Nødnummer) = filterNot { it.orgnummer in nødnummer }
 
         internal fun sorter(inntekter: List<Inntektsopplysning>) =
-            inntekter.sortedBy { it.sykepengerFom }.sortedBy { it.hashCode() }
+            inntekter.sortedWith(compareBy({ it.sykepengerFom }, { it.hashCode() }))
     }
 }
