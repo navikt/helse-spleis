@@ -118,6 +118,14 @@ internal class Arbeidsforholdhistorikk private constructor(
 
             internal fun <T> List<Arbeidsforhold>.create(creator: (LocalDate, LocalDate?, Boolean) -> T) =
                 map { creator(it.ansattFom, it.ansattTom, it.deaktivert) }
+
+            internal fun Iterable<Arbeidsforhold>.toEtterlevelseMap(orgnummer: String) = map {
+                mapOf(
+                    "orgnummer" to orgnummer,
+                    "fom" to it.ansattFom,
+                    "tom" to it.ansattTom
+                )
+            }
         }
 
     }
