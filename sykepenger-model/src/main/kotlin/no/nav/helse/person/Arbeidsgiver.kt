@@ -123,19 +123,20 @@ internal class Arbeidsgiver private constructor(
                 else inntektsopplysninger + ArbeidsgiverInntektsopplysning(arbeidsgiver.organisasjonsnummer, inntektsopplysning)
             }
 
-        internal fun List<Arbeidsgiver>.beregnSykepengegrunnlag(skjæringstidspunkt: LocalDate, subsumsjonObserver: SubsumsjonObserver) = mapNotNull { arbeidsgiver ->
-            val førsteFraværsdag = arbeidsgiver.finnFørsteFraværsdag(skjæringstidspunkt)
-            val inntektsopplysning = arbeidsgiver.inntektshistorikk.grunnlagForSykepengegrunnlag(skjæringstidspunkt, førsteFraværsdag)
-            inntektsopplysning?.subsumsjon(subsumsjonObserver, skjæringstidspunkt, arbeidsgiver.organisasjonsnummer)
-            when {
-                arbeidsgiver.harInaktivtArbeidsforhold(skjæringstidspunkt) -> null
-                inntektsopplysning == null && arbeidsgiver.arbeidsforholdhistorikk.harArbeidsforholdNyereEnn(skjæringstidspunkt, MAKS_INNTEKT_GAP) -> {
-                    ArbeidsgiverInntektsopplysning(arbeidsgiver.organisasjonsnummer, IkkeRapportert(UUID.randomUUID(), skjæringstidspunkt))
+        internal fun List<Arbeidsgiver>.beregnSykepengegrunnlag(skjæringstidspunkt: LocalDate, subsumsjonObserver: SubsumsjonObserver) =
+            mapNotNull { arbeidsgiver ->
+                val førsteFraværsdag = arbeidsgiver.finnFørsteFraværsdag(skjæringstidspunkt)
+                val inntektsopplysning = arbeidsgiver.inntektshistorikk.grunnlagForSykepengegrunnlag(skjæringstidspunkt, førsteFraværsdag)
+                inntektsopplysning?.subsumsjon(subsumsjonObserver, skjæringstidspunkt, arbeidsgiver.organisasjonsnummer)
+                when {
+                    arbeidsgiver.harInaktivtArbeidsforhold(skjæringstidspunkt) -> null
+                    inntektsopplysning == null && arbeidsgiver.arbeidsforholdhistorikk.harArbeidsforholdNyereEnn(skjæringstidspunkt, MAKS_INNTEKT_GAP) -> {
+                        ArbeidsgiverInntektsopplysning(arbeidsgiver.organisasjonsnummer, IkkeRapportert(UUID.randomUUID(), skjæringstidspunkt))
+                    }
+                    inntektsopplysning != null -> ArbeidsgiverInntektsopplysning(arbeidsgiver.organisasjonsnummer, inntektsopplysning)
+                    else -> null
                 }
-                inntektsopplysning != null -> ArbeidsgiverInntektsopplysning(arbeidsgiver.organisasjonsnummer, inntektsopplysning)
-                else -> null
             }
-        }
 
         internal fun List<Arbeidsgiver>.grunnlagForSammenligningsgrunnlag(skjæringstidspunkt: LocalDate) =
             this.mapNotNull { arbeidsgiver ->
@@ -157,7 +158,8 @@ internal class Arbeidsgiver private constructor(
             .filter { it.organisasjonsnummer != orgnummer }
             .any { it.vedtaksperioder.harOverlappendeUtbetaltePerioder(periode) }
 
-        internal fun List<Arbeidsgiver>.deaktiverteArbeidsforhold(skjæringstidspunkt: LocalDate) = this.filter { it.arbeidsforholdhistorikk.harDeaktivertArbeidsforhold(skjæringstidspunkt) }
+        internal fun List<Arbeidsgiver>.deaktiverteArbeidsforhold(skjæringstidspunkt: LocalDate) =
+            this.filter { it.arbeidsforholdhistorikk.harDeaktivertArbeidsforhold(skjæringstidspunkt) }
 
         internal fun kunOvergangFraInfotrygd(
             arbeidsgivere: Iterable<Arbeidsgiver>,
@@ -186,7 +188,11 @@ internal class Arbeidsgiver private constructor(
         internal fun Iterable<Arbeidsgiver>.harUtbetaltPeriode(skjæringstidspunkt: LocalDate) =
             flatMap { it.vedtaksperioder }.medSkjæringstidspunkt(skjæringstidspunkt).harUtbetaling()
 
-        internal fun Iterable<Arbeidsgiver>.ghostPeriode(skjæringstidspunkt: LocalDate, vilkårsgrunnlagHistorikkInnslagId: UUID?, deaktivert: Boolean): GhostPeriode? {
+        internal fun Iterable<Arbeidsgiver>.ghostPeriode(
+            skjæringstidspunkt: LocalDate,
+            vilkårsgrunnlagHistorikkInnslagId: UUID?,
+            deaktivert: Boolean
+        ): GhostPeriode? {
             val relevanteVedtaksperioder = flatMap { it.vedtaksperioder.medSkjæringstidspunkt(skjæringstidspunkt) }
             if (relevanteVedtaksperioder.isEmpty()) return null
             return GhostPeriode(
@@ -409,8 +415,7 @@ internal class Arbeidsgiver private constructor(
                     )
                 )
                 inntektsmelding.info("Forkastet vedtaksperiode overlapper med uforventet inntektsmelding")
-            }
-            else
+            } else
                 inntektsmelding.info("Ingen forkastede vedtaksperioder overlapper med uforventet inntektsmelding")
         }
     }
@@ -754,7 +759,7 @@ internal class Arbeidsgiver private constructor(
         return inntektsopplysning is Inntektshistorikk.SkattComposite || harArbeidsforholdNyereEnnToMåneder
     }
 
-    internal fun infotrygdUtbetalingstidslinje() = person.infotrygdUtbetalingstidslinje(organisasjonsnummer)
+    internal fun utbetalingstidslinje(infotrygdhistorikk: Infotrygdhistorikk) = infotrygdhistorikk.utbetalingstidslinje(organisasjonsnummer)
 
     internal fun tidligsteDato(): LocalDate {
         return sykdomstidslinje().førsteDag()
@@ -770,7 +775,8 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate, periodeStart: LocalDate) =
-        inntektshistorikk.grunnlagForSykepengegrunnlag(skjæringstidspunkt, periodeStart, finnFørsteFraværsdag(skjæringstidspunkt))?.grunnlagForSykepengegrunnlag()
+        inntektshistorikk.grunnlagForSykepengegrunnlag(skjæringstidspunkt, periodeStart, finnFørsteFraværsdag(skjæringstidspunkt))
+            ?.grunnlagForSykepengegrunnlag()
 
     internal fun addInntekt(inntektsmelding: Inntektsmelding, skjæringstidspunkt: LocalDate, subsumsjonObserver: SubsumsjonObserver) {
         inntektsmelding.addInntekt(inntektshistorikk, skjæringstidspunkt, subsumsjonObserver)
@@ -778,7 +784,11 @@ internal class Arbeidsgiver private constructor(
 
     internal fun finnTidligereInntektsmeldinginfo(skjæringstidspunkt: LocalDate) = inntektsmeldingInfo.finn(skjæringstidspunkt)
 
-    internal fun addInntektsmelding(skjæringstidspunkt: LocalDate, inntektsmelding: Inntektsmelding, subsumsjonObserver: SubsumsjonObserver): InntektsmeldingInfo {
+    internal fun addInntektsmelding(
+        skjæringstidspunkt: LocalDate,
+        inntektsmelding: Inntektsmelding,
+        subsumsjonObserver: SubsumsjonObserver
+    ): InntektsmeldingInfo {
         val førsteFraværsdag = finnFørsteFraværsdag(skjæringstidspunkt)
         if (førsteFraværsdag != null) addInntekt(inntektsmelding, førsteFraværsdag, subsumsjonObserver)
         return inntektsmeldingInfo.opprett(skjæringstidspunkt, inntektsmelding)
@@ -994,7 +1004,12 @@ internal class Arbeidsgiver private constructor(
         )
     }
 
-    internal fun build(subsumsjonObserver: SubsumsjonObserver, infotrygdhistorikk: Infotrygdhistorikk, builder: IUtbetalingstidslinjeBuilder, periode: Periode): Utbetalingstidslinje {
+    internal fun build(
+        subsumsjonObserver: SubsumsjonObserver,
+        infotrygdhistorikk: Infotrygdhistorikk,
+        builder: IUtbetalingstidslinjeBuilder,
+        periode: Periode
+    ): Utbetalingstidslinje {
         val sykdomstidslinje = sykdomstidslinje().fremTilOgMed(periode.endInclusive).takeUnless { it.count() == 0 } ?: return Utbetalingstidslinje()
         return infotrygdhistorikk.build(organisasjonsnummer, sykdomstidslinje, builder, subsumsjonObserver)
     }
@@ -1076,7 +1091,10 @@ internal class Arbeidsgiver private constructor(
         tilstøtendeBak(vedtaksperiode)?.tidligerePeriodeRebehandles(hendelse)
     }
 
-    internal fun <T> arbeidsforhold(skjæringstidspunkt: LocalDate, creator: (orgnummer: String, ansattFom: LocalDate, ansattTom: LocalDate?, erAktiv: Boolean) -> T) =
+    internal fun <T> arbeidsforhold(
+        skjæringstidspunkt: LocalDate,
+        creator: (orgnummer: String, ansattFom: LocalDate, ansattTom: LocalDate?, erAktiv: Boolean) -> T
+    ) =
         arbeidsforholdhistorikk.sisteArbeidsforhold(skjæringstidspunkt) { ansattFom: LocalDate, ansattTom: LocalDate?, erAktiv: Boolean ->
             creator(organisasjonsnummer, ansattFom, ansattTom, erAktiv)
         }

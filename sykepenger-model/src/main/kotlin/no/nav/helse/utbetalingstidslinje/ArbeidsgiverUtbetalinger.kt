@@ -50,7 +50,7 @@ internal class ArbeidsgiverUtbetalinger(
         )
         arbeidsgivere.forEach { (arbeidsgiver, tidslinje) ->
             Refusjonsgjødsler(
-                tidslinje = tidslinje + arbeidsgiver.infotrygdUtbetalingstidslinje(),
+                tidslinje = tidslinje + arbeidsgiver.utbetalingstidslinje(infotrygdhistorikk),
                 refusjonshistorikk = arbeidsgiver.refusjonshistorikk,
                 infotrygdhistorikk = infotrygdhistorikk,
                 organisasjonsnummer = arbeidsgiver.organisasjonsnummer()
