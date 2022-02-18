@@ -1,5 +1,7 @@
 package no.nav.helse.person
 
+import no.nav.helse.hendelser.Periode.Companion.sammenhengende
+import no.nav.helse.hendelser.til
 import no.nav.helse.person.Arbeidsforholdhistorikk.Arbeidsforhold.Companion.create
 import no.nav.helse.person.Arbeidsforholdhistorikk.Arbeidsforhold.Companion.erDeaktivert
 import no.nav.helse.person.Arbeidsforholdhistorikk.Arbeidsforhold.Companion.harArbeidsforholdSomErNyereEnn
@@ -102,8 +104,6 @@ internal class Arbeidsforholdhistorikk private constructor(
 
         internal fun aktiver() = Arbeidsforhold(ansattFom = ansattFom, ansattTom = ansattTom, deaktivert = false)
 
-        private fun rettFør(dato: LocalDate) = ansattFom < dato && (ansattTom == null || ansattTom.plusDays(1) >= dato)
-
         companion object {
             const val MAKS_INNTEKT_GAP = 2L
 
@@ -111,12 +111,9 @@ internal class Arbeidsforholdhistorikk private constructor(
                 any { it.harArbeidetMindreEnn(skjæringstidspunkt, antallMåneder) && !it.deaktivert }
 
             internal fun Collection<Arbeidsforhold>.erDeaktivert() = any { it.deaktivert }
-            internal fun Collection<Arbeidsforhold>.førsteFom(skjæringstidspunkt: LocalDate) = filter { !it.deaktivert }
-                .sortedByDescending { it.ansattFom }
-                .fold(skjæringstidspunkt) { minsteFom, forhold ->
-                    if (forhold.rettFør(minsteFom)) forhold.ansattFom
-                    else minsteFom
-                }
+            internal fun Collection<Arbeidsforhold>.opptjeningsperiode(skjæringstidspunkt: LocalDate) = filter { !it.deaktivert }
+                .map { it.ansattFom til (it.ansattTom ?: skjæringstidspunkt) }
+                .sammenhengende(skjæringstidspunkt)
 
 
             internal fun <T> List<Arbeidsforhold>.create(creator: (LocalDate, LocalDate?, Boolean) -> T) =

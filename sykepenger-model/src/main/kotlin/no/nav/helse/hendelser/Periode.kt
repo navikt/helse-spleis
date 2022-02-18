@@ -3,6 +3,7 @@ package no.nav.helse.hendelser
 import no.nav.helse.sykdomstidslinje.erRettFør
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 
 // Understands beginning and end of a time interval
 open class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Iterable<LocalDate> {
@@ -38,6 +39,12 @@ open class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Ite
                 }
             }
 
+        internal fun Collection<Periode>.sammenhengende(skjæringstidspunkt: LocalDate) = sortedByDescending { it.start }
+            .fold(skjæringstidspunkt til skjæringstidspunkt) { acc, periode ->
+                if (periode.rettFørEllerOverlapper(acc.start)) periode.start til acc.endInclusive
+                else acc
+            }
+
         private fun List<Periode>.oppdaterSiste(periode: Periode) = this.dropLast(1).plusElement(periode)
     }
 
@@ -54,6 +61,9 @@ open class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Ite
 
     internal fun erRettFør(other: Periode) = erRettFør(other.start)
     internal fun erRettFør(other: LocalDate) = this.endInclusive.erRettFør(other)
+
+    private fun rettFørEllerOverlapper(dato: LocalDate) = start < dato && endInclusive.plusDays(1) >= dato
+    internal fun dagerMellom() = ChronoUnit.DAYS.between(start, endInclusive)
 
     internal fun periodeMellom(other: LocalDate): Periode? {
         val enDagFør = other.minusDays(1)
