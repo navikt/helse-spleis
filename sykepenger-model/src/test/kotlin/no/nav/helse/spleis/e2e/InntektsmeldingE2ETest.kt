@@ -30,6 +30,16 @@ import java.util.*
 
 internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
+    @Test
+    fun `strekker ikke periode tilbake før første fraværsdag`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 8.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 8.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 20.februar, 100.prosent))
+        håndterSøknad(Sykdom(1.februar, 20.februar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 8.januar, 10.januar til 17.januar), 1.februar)
+        assertEquals(1.februar til 20.februar, inspektør.periode(2.vedtaksperiode))
+    }
+
     @Disabled("WIP Test for inntektsmelding med refusjonsopphold")
     @Test
     fun `inntektsmelding med refusjonsopphold`() {

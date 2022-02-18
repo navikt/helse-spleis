@@ -79,7 +79,7 @@ abstract class SykdomstidslinjeHendelse(
 
     internal fun periode(): Periode {
         val periode = overlappsperiode() ?: aldri
-        val fom = nesteFom ?: return periode
+        val fom = nesteFom?.takeUnless { it < periode.start } ?: return periode
         if (fom > periode.endInclusive) return aldri
         return (sykdomstidslinje().førsteSykedagEtter(fom) ?: fom) til periode.endInclusive
     }
