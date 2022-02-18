@@ -31,12 +31,21 @@ internal fun SchemaBuilder.personSchema(personDao: PersonDao, hendelseDao: Hende
                             GraphQLArbeidsgiver(
                                 organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
                                 id = arbeidsgiver.id,
-                                generasjoner = arbeidsgiver.generasjoner?.map { generasjon ->
+                                generasjoner = arbeidsgiver.generasjoner.map { generasjon ->
                                     GraphQLGenerasjon(
                                         id = generasjon.id,
                                         perioder = generasjon.perioder.map { periode -> mapTidslinjeperiode(periode) }
                                     )
-                                } ?: emptyList()
+                                },
+                                ghostPerioder = arbeidsgiver.ghostPerioder.map { periode ->
+                                    GraphQLGhostPeriode(
+                                        fom = periode.fom,
+                                        tom = periode.tom,
+                                        skjaeringstidspunkt = periode.skjæringstidspunkt,
+                                        vilkarsgrunnlaghistorikkId = periode.vilkårsgrunnlagHistorikkInnslagId,
+                                        deaktivert = periode.deaktivert
+                                    )
+                                }
                             )
                         },
                         inntektsgrunnlag = person.inntektsgrunnlag.map { inntektsgrunnlag -> mapInntektsgrunnlag(inntektsgrunnlag) },

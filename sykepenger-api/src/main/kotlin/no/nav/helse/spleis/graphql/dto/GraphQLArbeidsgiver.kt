@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.graphql.dto
 
 import com.apurebase.kgraphql.schema.dsl.SchemaBuilder
+import java.time.LocalDate
 import java.util.*
 
 internal fun SchemaBuilder.arbeidsgiverTypes() {
@@ -46,10 +47,19 @@ data class GraphQLGenerasjon(
     val perioder: List<GraphQLTidslinjeperiode>
 )
 
+data class GraphQLGhostPeriode(
+    val fom: LocalDate,
+    val tom: LocalDate,
+    val skjaeringstidspunkt: LocalDate,
+    val vilkarsgrunnlaghistorikkId: UUID?,
+    val deaktivert: Boolean
+)
+
 data class GraphQLArbeidsgiver(
     val organisasjonsnummer: String,
     val id: UUID,
-    val generasjoner: List<GraphQLGenerasjon>
+    val generasjoner: List<GraphQLGenerasjon>,
+    val ghostPerioder: List<GraphQLGhostPeriode>
 )
 
 internal fun <T> List<T>.safeSlice(first: Int?, from: Int?): List<T> {
