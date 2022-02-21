@@ -52,8 +52,10 @@ internal class V145LagreArbeidsforholdForOpptjening : JsonMigration(version = 14
             val skjæringstidspunkterViIkkeFinnerMeldingerForMedFom = skjæringstidspunkterViIkkeFinnerMeldingFor.filter { it !in fomDatoer }
             if (skjæringstidspunkterViIkkeFinnerMeldingerForMedFom.isNotEmpty()) {
                 sikkerLogg.info(
-                    "Fant skjæringstidspunkt(er) i vilkårsgrunnlagshistorikken vi ikke kan koble med fom $skjæringstidspunkterViIkkeFinnerMeldingerForMedFom"
+                    "Fant skjæringstidspunkt(er) i vilkårsgrunnlagshistorikken vi ikke kan koble med fom "
+                        + " skjæringstidspunkter=$skjæringstidspunkter, "
                         + " fnr=$fødselsnummer,"
+                        + " finner ikke $skjæringstidspunkterViIkkeFinnerMeldingerForMedFom, \n"
                         + " vedtaksperioder=${jsonNode.vedtaksperioder().map { it["skjæringstidspunkt"].asText() + ":" + it["id"].asText() }}"
                 )
             }
