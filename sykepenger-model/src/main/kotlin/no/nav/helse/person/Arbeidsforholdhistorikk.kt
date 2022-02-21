@@ -2,9 +2,11 @@ package no.nav.helse.person
 
 import no.nav.helse.hendelser.Periode.Companion.sammenhengende
 import no.nav.helse.hendelser.til
+import no.nav.helse.person.Arbeidsforholdhistorikk.Arbeidsforhold.Companion.ansattVedSkjæringstidspunkt
 import no.nav.helse.person.Arbeidsforholdhistorikk.Arbeidsforhold.Companion.create
 import no.nav.helse.person.Arbeidsforholdhistorikk.Arbeidsforhold.Companion.erDeaktivert
 import no.nav.helse.person.Arbeidsforholdhistorikk.Arbeidsforhold.Companion.harArbeidsforholdSomErNyereEnn
+import no.nav.helse.person.Arbeidsforholdhistorikk.Arbeidsforhold.Companion.ikkeDeaktiverteArbeidsforhold
 import java.time.LocalDate
 import java.util.*
 
@@ -27,7 +29,10 @@ internal class Arbeidsforholdhistorikk private constructor(
         visitor.postVisitArbeidsforholdhistorikk(this)
     }
 
-    internal fun harRelevantArbeidsforhold(skjæringstidspunkt: LocalDate) = sisteInnslag(skjæringstidspunkt)?.erDeaktivert()?.not() ?: false
+    internal fun harRelevantArbeidsforhold(skjæringstidspunkt: LocalDate) = sisteInnslag(skjæringstidspunkt)?.arbeidsforhold
+        ?.ikkeDeaktiverteArbeidsforhold()
+        ?.ansattVedSkjæringstidspunkt(skjæringstidspunkt)
+        ?: false
 
     internal fun harArbeidsforholdNyereEnn(skjæringstidspunkt: LocalDate, antallMåneder: Long) =
         sisteInnslag(skjæringstidspunkt)?.harArbeidsforholdSomErNyereEnn(skjæringstidspunkt, antallMåneder) ?: false
@@ -118,6 +123,10 @@ internal class Arbeidsforholdhistorikk private constructor(
 
             internal fun <T> List<Arbeidsforhold>.create(creator: (LocalDate, LocalDate?, Boolean) -> T) =
                 map { creator(it.ansattFom, it.ansattTom, it.deaktivert) }
+
+            internal fun Collection<Arbeidsforhold>.ikkeDeaktiverteArbeidsforhold() = filter { !it.deaktivert }
+
+            internal fun Collection<Arbeidsforhold>.ansattVedSkjæringstidspunkt(skjæringstidspunkt: LocalDate) = any { it.gjelder(skjæringstidspunkt) }
 
             internal fun Iterable<Arbeidsforhold>.toEtterlevelseMap(orgnummer: String) = map {
                 mapOf(
