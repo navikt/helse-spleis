@@ -58,11 +58,7 @@ internal class OpptjeningE2ETest : AbstractEndToEndTest() {
             Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, 19.desember(2017))
         )
         assertHarArbeidsforhold(1.januar, a1)
-        assertForventetFeil(
-            nå = { assertHarIkkeArbeidsforhold(1.januar, a2) },
-            ønsket = { assertHarArbeidsforhold(1.januar, a2) }
-        )
-
+        assertHarArbeidsforhold(1.januar, a2)
     }
 
     @Test
@@ -72,10 +68,7 @@ internal class OpptjeningE2ETest : AbstractEndToEndTest() {
             Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, 24.desember(2017))
         )
         assertHarArbeidsforhold(1.januar, a1)
-        assertForventetFeil(
-            nå = { assertHarIkkeArbeidsforhold(1.januar, a2) },
-            ønsket = { assertHarArbeidsforhold(1.januar, a2) }
-        )
+        assertHarArbeidsforhold(1.januar, a2)
     }
 
     fun personMedArbeidsforhold(vararg arbeidsforhold: Vilkårsgrunnlag.Arbeidsforhold) {

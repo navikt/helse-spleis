@@ -1,7 +1,10 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.Fødselsnummer
+import no.nav.helse.Toggle
+import no.nav.helse.hendelser.Periode.Companion.sammenhengende
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Companion.grupperArbeidsforholdPerOrgnummer
+import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Companion.opptjeningsperiode
 import no.nav.helse.person.*
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.somFødselsnummer
@@ -91,8 +94,15 @@ class Vilkårsgrunnlag(
     }
 
     internal fun lagreArbeidsforhold(person: Person, skjæringstidspunkt: LocalDate) {
+        val opptjeningsperiode = arbeidsforhold.opptjeningsperiode(skjæringstidspunkt)
         arbeidsforhold
-            .filter { it.gjelder(skjæringstidspunkt) }
+            .filter {
+                if (Toggle.OpptjeningIModellen.enabled) {
+                    it.erDelAvOpptjeningsperiode(opptjeningsperiode)
+                } else {
+                    it.gjelder(skjæringstidspunkt)
+                }
+            }
             .grupperArbeidsforholdPerOrgnummer().forEach { (orgnummer, arbeidsforhold) ->
                 if (arbeidsforhold.any { it.erSøppel() }) {
                     warn("Vi fant ugyldige arbeidsforhold i Aareg, burde sjekkes opp nærmere") // TODO: må ses på av en voksen
@@ -114,6 +124,8 @@ class Vilkårsgrunnlag(
 
         fun erSøppel() =
             ansattTom != null && ansattTom < ansattFom
+
+        internal fun erDelAvOpptjeningsperiode(opptjeningsperiode: Periode) = ansattFom in opptjeningsperiode
 
         private fun erGyldig(skjæringstidspunkt: LocalDate) =
             ansattFom < skjæringstidspunkt && !erSøppel()
@@ -163,6 +175,9 @@ class Vilkårsgrunnlag(
             }
 
             internal fun List<Arbeidsforhold>.grupperArbeidsforholdPerOrgnummer() = groupBy { it.orgnummer }
+
+            internal fun Iterable<Arbeidsforhold>.opptjeningsperiode(skjæringstidspunkt: LocalDate) = mapNotNull { it.periode(skjæringstidspunkt) }
+                .sammenhengende(skjæringstidspunkt)
         }
     }
 }
