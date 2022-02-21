@@ -10,7 +10,7 @@ internal class Opptjening private constructor(
     private val arbeidsforhold: Map<String, List<Arbeidsforholdhistorikk.Arbeidsforhold>>,
     private val opptjeningsperiode: Periode
 ) {
-    internal fun opptjeningsdager() = opptjeningsperiode.dagerMellom()
+    internal fun opptjeningsdager() = opptjeningsperiode.dagerMellom().toInt()
     internal fun erOppfylt(): Boolean = opptjeningsperiode.dagerMellom() >= TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER
 
     internal fun valider(aktivitetslogg: IAktivitetslogg): Boolean {

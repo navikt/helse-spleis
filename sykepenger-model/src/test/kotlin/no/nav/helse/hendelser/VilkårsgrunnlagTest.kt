@@ -8,6 +8,7 @@ import no.nav.helse.person.*
 import no.nav.helse.person.Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
 import no.nav.helse.person.Vedtaksperiode.Vedtaksperiodetilstand
 import no.nav.helse.person.etterlevelse.MaskinellJurist
+import no.nav.helse.spleis.e2e.AbstractEndToEndTest.Companion.INNTEKT
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.assertWarning
 import no.nav.helse.testhelpers.fangeSkjæringstidspunkt
@@ -27,15 +28,12 @@ import java.util.*
 
 internal class VilkårsgrunnlagTest : AbstractPersonTest() {
     private companion object {
-        private const val aktørId = "123"
-        private val UNG_PERSON_FNR_2018 = "12029240045".somFødselsnummer()
-        private val orgnummer = "987654321"
         private val INNTEKT = 30000.0.månedlig
     }
 
     @BeforeEach
     fun setup() {
-        person = Person(aktørId, UNG_PERSON_FNR_2018, MaskinellJurist())
+        person = Person(AKTØRID, UNG_PERSON_FNR_2018, MaskinellJurist())
         person.addObserver(observatør)
         person.håndter(sykmelding())
         person.håndter(inntektsmelding())
@@ -55,7 +53,7 @@ internal class VilkårsgrunnlagTest : AbstractPersonTest() {
         val vilkårsgrunnlag = vilkårsgrunnlag(
                 inntektperioderForSammenligningsgrunnlag {
                     1.januar(2017) til 1.desember(2017) inntekter {
-                    orgnummer inntekt 37500.månedlig
+                    ORGNUMMER inntekt 37500.månedlig
                 }}
         )
         person.håndter(vilkårsgrunnlag)
@@ -65,7 +63,7 @@ internal class VilkårsgrunnlagTest : AbstractPersonTest() {
     @Test
     fun `27 dager opptjening fører til warning`() {
         val vilkårsgrunnlag = vilkårsgrunnlag(
-            arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(orgnummer, 5.desember(2017)))
+            arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNUMMER, 5.desember(2017)))
         )
         person.håndter(vilkårsgrunnlag)
         assertGrunnlagsdata(INNTEKT, Prosent.ratio(0.0), 27, false)
@@ -76,7 +74,7 @@ internal class VilkårsgrunnlagTest : AbstractPersonTest() {
     @Test
     fun `arbeidsforhold nyere enn første fraværsdag`() {
         val vilkårsgrunnlag = vilkårsgrunnlag(
-            arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(orgnummer, fangeSkjæringstidspunkt(person).plusDays(1)))
+            arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNUMMER, fangeSkjæringstidspunkt(person).plusDays(1)))
         )
         person.håndter(vilkårsgrunnlag)
         assertGrunnlagsdata(INNTEKT, Prosent.ratio(0.0), 0, false)
@@ -87,7 +85,7 @@ internal class VilkårsgrunnlagTest : AbstractPersonTest() {
     @Test
     fun `28 dager opptjening fører til OK opptjening`() {
         val vilkårsgrunnlag = vilkårsgrunnlag(
-            arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(orgnummer, 4.desember(2017)))
+            arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNUMMER, 4.desember(2017)))
         )
         person.håndter(vilkårsgrunnlag)
         assertGrunnlagsdata(INNTEKT, Prosent.ratio(0.0), 28, true)
@@ -128,7 +126,14 @@ internal class VilkårsgrunnlagTest : AbstractPersonTest() {
             sammenligningsgrunnlag = sammenligningsgrunnlag(skjæringstidspunkt = 31.januar),
             skjæringstidspunkt = 31.januar,
             antallArbeidsgivereFraAareg = 1,
-            opptjening = Opptjening.opptjening(emptyMap(), 1.januar, MaskinellJurist()),
+            opptjening = Opptjening.opptjening(
+                arbeidsforhold = mapOf(
+                    a1 to listOf(Arbeidsforholdhistorikk.Arbeidsforhold(1.januar, 14.januar, false)),
+                    a2 to listOf(Arbeidsforholdhistorikk.Arbeidsforhold(15.januar, null, false))
+                ),
+                skjæringstidspunkt = 31.januar,
+                subsumsjonObserver = MaskinellJurist()
+            ),
             periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
             subsumsjonObserver = MaskinellJurist()
         )
@@ -142,8 +147,8 @@ internal class VilkårsgrunnlagTest : AbstractPersonTest() {
         forventetAntallOpptjeningsdager: Int,
         forventetHarOpptjening: Boolean
     ) {
-        val idInnhenter = IdInnhenter { observatør.vedtaksperiode(orgnummer, 0) }
-        val grunnlagsdata = TestArbeidsgiverInspektør(person, orgnummer).vilkårsgrunnlag(idInnhenter) ?: fail("Forventet at vilkårsgrunnlag er satt")
+        val idInnhenter = IdInnhenter { observatør.vedtaksperiode(ORGNUMMER, 0) }
+        val grunnlagsdata = TestArbeidsgiverInspektør(person, ORGNUMMER).vilkårsgrunnlag(idInnhenter) ?: fail("Forventet at vilkårsgrunnlag er satt")
         val grunnlagsdataInspektør = GrunnlagsdataInspektør(grunnlagsdata)
         assertEquals(forventetSammenligningsgrunnlag, grunnlagsdataInspektør.sammenligningsgrunnlag)
         assertEquals(forventetAvviksprosent, grunnlagsdataInspektør.avviksprosent)
@@ -204,27 +209,27 @@ internal class VilkårsgrunnlagTest : AbstractPersonTest() {
     private fun vilkårsgrunnlag(
         inntektsmåneder: List<ArbeidsgiverInntekt> = inntektperioderForSammenligningsgrunnlag {
             1.januar(2017) til 1.desember(2017) inntekter {
-                orgnummer inntekt INNTEKT
+                ORGNUMMER inntekt INNTEKT
             }
         },
         skatteinntekter: List<ArbeidsgiverInntekt> = inntektperioderForSykepengegrunnlag {
             1.oktober(2017) til 1.desember(2017) inntekter {
-                orgnummer inntekt INNTEKT
+                ORGNUMMER inntekt INNTEKT
 
             }
         },
         arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold> = listOf(
             Vilkårsgrunnlag.Arbeidsforhold(
-                orgnummer,
+                ORGNUMMER,
                 4.desember(2017)
             )
         )
     ) = Vilkårsgrunnlag(
         meldingsreferanseId = UUID.randomUUID(),
         vedtaksperiodeId = vedtaksperiodeId(),
-        aktørId = aktørId,
+        aktørId = AKTØRID,
         fødselsnummer = UNG_PERSON_FNR_2018,
-        orgnummer = orgnummer,
+        orgnummer = ORGNUMMER,
         inntektsvurdering = Inntektsvurdering(inntektsmåneder),
         opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),
         medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
@@ -235,8 +240,8 @@ internal class VilkårsgrunnlagTest : AbstractPersonTest() {
     private fun sykmelding() = Sykmelding(
         meldingsreferanseId = UUID.randomUUID(),
         fnr = UNG_PERSON_FNR_2018.toString(),
-        aktørId = aktørId,
-        orgnummer = orgnummer,
+        aktørId = AKTØRID,
+        orgnummer = ORGNUMMER,
         sykeperioder = listOf(Sykmeldingsperiode(16.januar, 30.januar, 100.prosent)),
         sykmeldingSkrevet = 1.april.atStartOfDay(),
         mottatt = 1.april.atStartOfDay()
@@ -245,8 +250,8 @@ internal class VilkårsgrunnlagTest : AbstractPersonTest() {
     private fun søknad() = Søknad(
         meldingsreferanseId = UUID.randomUUID(),
         fnr = UNG_PERSON_FNR_2018.toString(),
-        aktørId = aktørId,
-        orgnummer = orgnummer,
+        aktørId = AKTØRID,
+        orgnummer = ORGNUMMER,
         perioder = listOf(Sykdom(16.januar, 30.januar, 100.prosent)),
         andreInntektskilder = emptyList(),
         sendtTilNAVEllerArbeidsgiver = 30.januar.atStartOfDay(),
@@ -259,9 +264,9 @@ internal class VilkårsgrunnlagTest : AbstractPersonTest() {
         Inntektsmelding(
             meldingsreferanseId = UUID.randomUUID(),
             refusjon = Inntektsmelding.Refusjon(INNTEKT, null, emptyList()),
-            orgnummer = orgnummer,
+            orgnummer = ORGNUMMER,
             fødselsnummer = UNG_PERSON_FNR_2018.toString(),
-            aktørId = aktørId,
+            aktørId = AKTØRID,
             førsteFraværsdag = 1.januar,
             beregnetInntekt = INNTEKT,
             arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
@@ -272,15 +277,15 @@ internal class VilkårsgrunnlagTest : AbstractPersonTest() {
 
     private fun ytelser() = Ytelser(
         meldingsreferanseId = UUID.randomUUID(),
-        aktørId = aktørId,
+        aktørId = AKTØRID,
         fødselsnummer = UNG_PERSON_FNR_2018.toString(),
-        organisasjonsnummer = orgnummer,
+        organisasjonsnummer = ORGNUMMER,
         vedtaksperiodeId = vedtaksperiodeId(),
         utbetalingshistorikk = Utbetalingshistorikk(
             meldingsreferanseId = UUID.randomUUID(),
-            aktørId = aktørId,
+            aktørId = AKTØRID,
             fødselsnummer = UNG_PERSON_FNR_2018.toString(),
-            organisasjonsnummer = orgnummer,
+            organisasjonsnummer = ORGNUMMER,
             vedtaksperiodeId = vedtaksperiodeId(),
             arbeidskategorikoder = emptyMap(),
             harStatslønn = false,
