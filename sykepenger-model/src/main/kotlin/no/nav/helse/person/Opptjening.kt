@@ -3,15 +3,21 @@ package no.nav.helse.person
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Arbeidsforholdhistorikk.Arbeidsforhold.Companion.opptjeningsperiode
 import no.nav.helse.person.Arbeidsforholdhistorikk.Arbeidsforhold.Companion.toEtterlevelseMap
-import no.nav.helse.person.etterlevelse.MaskinellJurist
+import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import java.time.LocalDate
 
 internal class Opptjening private constructor(
-    val arbeidsforhold: Map<String, List<Arbeidsforholdhistorikk.Arbeidsforhold>>,
-    val opptjeningsperiode: Periode
+    private val arbeidsforhold: Map<String, List<Arbeidsforholdhistorikk.Arbeidsforhold>>,
+    private val opptjeningsperiode: Periode
 ) {
+    internal fun opptjeningsdager() = opptjeningsperiode.dagerMellom()
+    internal fun erOppfylt(): Boolean = opptjeningsperiode.dagerMellom() >= TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER
 
-    fun erOppfylt(): Boolean = opptjeningsperiode.dagerMellom() >= TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER
+    internal fun valider(aktivitetslogg: IAktivitetslogg): Boolean {
+        val erOppfylt = erOppfylt()
+        if (!erOppfylt) aktivitetslogg.warn("Perioden er avslått på grunn av manglende opptjening")
+        return erOppfylt
+    }
 
     companion object {
         private const val TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER = 28
@@ -19,13 +25,13 @@ internal class Opptjening private constructor(
         fun opptjening(
             arbeidsforhold: Map<String, List<Arbeidsforholdhistorikk.Arbeidsforhold>>,
             skjæringstidspunkt: LocalDate,
-            jurist: MaskinellJurist
+            subsumsjonObserver: SubsumsjonObserver
         ): Opptjening {
             val opptjeningsperiode = arbeidsforhold.values.flatten().opptjeningsperiode(skjæringstidspunkt)
             val opptjening = Opptjening(arbeidsforhold, opptjeningsperiode)
             val arbeidsforholdForJurist = arbeidsforhold.flatMap { (orgnummer, arbeidsforhold) -> arbeidsforhold.toEtterlevelseMap(orgnummer) }
 
-            jurist.`§ 8-2 ledd 1`(
+            subsumsjonObserver.`§ 8-2 ledd 1`(
                 oppfylt = opptjening.erOppfylt(),
                 skjæringstidspunkt = skjæringstidspunkt,
                 tilstrekkeligAntallOpptjeningsdager = TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER,

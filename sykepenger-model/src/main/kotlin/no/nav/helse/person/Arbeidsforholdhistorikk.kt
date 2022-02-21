@@ -52,6 +52,8 @@ internal class Arbeidsforholdhistorikk private constructor(
         return innslag.erDeaktivert()
     }
 
+    internal fun arbeidsforhold(skjæringstidspunkt: LocalDate) = sisteInnslag(skjæringstidspunkt)?.arbeidsforhold ?: emptyList()
+
     private fun sisteInnslag(skjæringstidspunkt: LocalDate) = historikk.lastOrNull { it.gjelder(skjæringstidspunkt) }
     internal fun <T> sisteArbeidsforhold(skjæringstidspunkt: LocalDate, creator: (LocalDate, LocalDate?, Boolean) -> T) =
         sisteInnslag(skjæringstidspunkt)?.arbeidsforhold?.create(creator) ?: emptyList()

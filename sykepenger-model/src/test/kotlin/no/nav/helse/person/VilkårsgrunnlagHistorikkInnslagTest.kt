@@ -115,6 +115,7 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
             sykepengegrunnlag = Sykepengegrunnlag.opprett(emptyList(), skjæringstidspunkt, MaskinellJurist(), emptyList()),
             sammenligningsgrunnlag = Sammenligningsgrunnlag(emptyList()),
             avviksprosent = 0.0.prosent,
+            opptjening = Opptjening.opptjening(emptyMap(), 1.januar, MaskinellJurist()),
             antallOpptjeningsdagerErMinst = 28,
             harOpptjening = harOpptjening,
             medlemskapstatus = when (erMedlem) {

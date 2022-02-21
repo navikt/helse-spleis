@@ -196,6 +196,7 @@ internal class HistoriePeriodetypeTest {
             sykepengegrunnlag = sykepengegrunnlag(30000.månedlig),
             sammenligningsgrunnlag = sammenligningsgrunnlag(30000.månedlig),
             avviksprosent = Prosent.prosent(0.0),
+            opptjening = Opptjening.opptjening(emptyMap(), 1.januar, MaskinellJurist()),
             antallOpptjeningsdagerErMinst = 28,
             harOpptjening = true,
             medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,

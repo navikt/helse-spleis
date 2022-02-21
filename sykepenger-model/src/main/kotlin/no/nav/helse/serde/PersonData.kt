@@ -231,6 +231,7 @@ internal data class PersonData(
                 sykepengegrunnlag = sykepengegrunnlag.parseSykepengegrunnlag(),
                 sammenligningsgrunnlag = sammenligningsgrunnlag!!.parseSammenligningsgrunnlag(),
                 avviksprosent = avviksprosent?.ratio,
+                opptjening = null, // TODO
                 harOpptjening = harOpptjening!!,
                 antallOpptjeningsdagerErMinst = antallOpptjeningsdagerErMinst!!,
                 medlemskapstatus = when (medlemskapstatus!!) {

@@ -2,6 +2,7 @@ package no.nav.helse.person
 
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.januar
+import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosent
@@ -51,6 +52,7 @@ internal class VilkårsgrunnlagElementTest {
             sykepengegrunnlag = Sykepengegrunnlag(1000.daglig, emptyList(), 1000.daglig, Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET, emptyList()),
             sammenligningsgrunnlag = sammenligningsgrunnlag(1000.daglig),
             avviksprosent = avviksprosent,
+            opptjening = Opptjening.opptjening(emptyMap(), 1.januar, MaskinellJurist()),
             antallOpptjeningsdagerErMinst = 0,
             harOpptjening = true,
             medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,

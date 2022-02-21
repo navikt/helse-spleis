@@ -35,6 +35,7 @@ class Vilkårsgrunnlag(
         grunnlagForSykepengegrunnlag: Sykepengegrunnlag,
         sammenligningsgrunnlag: Sammenligningsgrunnlag,
         skjæringstidspunkt: LocalDate,
+        opptjening: Opptjening,
         antallArbeidsgivereFraAareg: Int,
         periodetype: Periodetype,
         subsumsjonObserver: SubsumsjonObserver
@@ -52,7 +53,11 @@ class Vilkårsgrunnlag(
             antallArbeidsgivereFraAareg,
             subsumsjonObserver
         )
-        val opptjeningvurderingOk = opptjeningvurdering.valider(this, skjæringstidspunkt, subsumsjonObserver)
+        val opptjeningvurderingOk = if (Toggle.OpptjeningIModellen.enabled) {
+            opptjening.valider(this)
+        } else {
+            opptjeningvurdering.valider(this, skjæringstidspunkt, subsumsjonObserver)
+        }
         val medlemskapsvurderingOk = medlemskapsvurdering.valider(this, periodetype)
         val minimumInntektvurderingOk = validerMinimumInntekt(this, fødselsnummer.somFødselsnummer(), skjæringstidspunkt, grunnlagForSykepengegrunnlag, subsumsjonObserver)
 
@@ -61,6 +66,7 @@ class Vilkårsgrunnlag(
             sykepengegrunnlag = grunnlagForSykepengegrunnlag,
             sammenligningsgrunnlag = sammenligningsgrunnlag,
             avviksprosent = inntektsvurdering.avviksprosent(),
+            opptjening = if (Toggle.OpptjeningIModellen.enabled) opptjening else null,
             antallOpptjeningsdagerErMinst = opptjeningvurdering.antallOpptjeningsdager,
             harOpptjening = opptjeningvurdering.harOpptjening(),
             medlemskapstatus = medlemskapsvurdering.medlemskapstatus,

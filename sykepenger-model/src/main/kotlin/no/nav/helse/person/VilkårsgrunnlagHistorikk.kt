@@ -126,6 +126,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         private val sykepengegrunnlag: Sykepengegrunnlag,
         private val sammenligningsgrunnlag: Sammenligningsgrunnlag,
         private val avviksprosent: Prosent?,
+        internal val opptjening: Opptjening?,
         private val antallOpptjeningsdagerErMinst: Int,
         private val harOpptjening: Boolean,
         private val medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
@@ -217,6 +218,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             sykepengegrunnlag = sykepengegrunnlag,
             sammenligningsgrunnlag = sammenligningsgrunnlag,
             avviksprosent = avviksprosent,
+            opptjening = opptjening, // TODO: Må sjekkes på nytt
             antallOpptjeningsdagerErMinst = antallOpptjeningsdagerErMinst,
             harOpptjening = harOpptjening,
             medlemskapstatus = medlemskapstatus,
@@ -240,6 +242,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             sykepengegrunnlag = sykepengegrunnlag,
             sammenligningsgrunnlag = sammenligningsgrunnlag,
             avviksprosent = avviksprosent,
+            opptjening = opptjening, // TODO: Må sjekkes på nytt
             antallOpptjeningsdagerErMinst = antallOpptjeningsdagerErMinst,
             harOpptjening = harOpptjening,
             medlemskapstatus = medlemskapstatus,

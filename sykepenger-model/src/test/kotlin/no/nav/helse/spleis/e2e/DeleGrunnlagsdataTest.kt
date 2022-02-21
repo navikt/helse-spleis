@@ -12,6 +12,7 @@ import no.nav.helse.person.ForlengelseFraInfotrygd.JA
 import no.nav.helse.person.ForlengelseFraInfotrygd.NEI
 import no.nav.helse.person.Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
 import no.nav.helse.person.TilstandType.*
+import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
@@ -335,6 +336,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
                 ),
             ),
             avviksprosent = Prosent.prosent(0.0),
+            opptjening = Opptjening.opptjening(emptyMap(), 1.januar, MaskinellJurist()),
             antallOpptjeningsdagerErMinst = 29,
             harOpptjening = true,
             medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,

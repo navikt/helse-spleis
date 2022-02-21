@@ -128,6 +128,7 @@ internal class VilkårsgrunnlagTest : AbstractPersonTest() {
             sammenligningsgrunnlag = sammenligningsgrunnlag(skjæringstidspunkt = 31.januar),
             skjæringstidspunkt = 31.januar,
             antallArbeidsgivereFraAareg = 1,
+            opptjening = Opptjening.opptjening(emptyMap(), 1.januar, MaskinellJurist()),
             periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
             subsumsjonObserver = MaskinellJurist()
         )

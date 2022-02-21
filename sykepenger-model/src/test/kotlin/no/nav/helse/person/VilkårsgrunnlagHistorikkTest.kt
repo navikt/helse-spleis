@@ -57,6 +57,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             sykepengegrunnlag(10000.månedlig),
             sammenligningsgrunnlag(10000.månedlig, 1.januar),
             1.januar,
+            Opptjening.opptjening(emptyMap(), 1.januar, MaskinellJurist()),
             1,
             Periodetype.FØRSTEGANGSBEHANDLING,
             MaskinellJurist()
@@ -88,6 +89,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             sykepengegrunnlag(10000.månedlig),
             sammenligningsgrunnlag(10000.månedlig, 1.januar),
             1.januar,
+            Opptjening.opptjening(emptyMap(), 1.januar, MaskinellJurist()),
             1,
             Periodetype.FØRSTEGANGSBEHANDLING,
             jurist
@@ -126,6 +128,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             sykepengegrunnlag(10000.månedlig),
             sammenligningsgrunnlag(10000.månedlig, 1.januar),
             1.januar,
+            Opptjening.opptjening(emptyMap(), 1.januar, MaskinellJurist()),
             1,
             Periodetype.FØRSTEGANGSBEHANDLING,
             MaskinellJurist()
@@ -134,6 +137,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             sykepengegrunnlag(10000.månedlig),
             sammenligningsgrunnlag(10000.månedlig, 1.januar),
             1.januar,
+            Opptjening.opptjening(emptyMap(), 1.januar, MaskinellJurist()),
             1,
             Periodetype.FØRSTEGANGSBEHANDLING,
             MaskinellJurist()
@@ -171,6 +175,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             sykepengegrunnlag(10000.månedlig),
             sammenligningsgrunnlag(10000.månedlig, 1.januar),
             1.januar,
+            Opptjening.opptjening(emptyMap(), 1.januar, MaskinellJurist()),
             1,
             Periodetype.FØRSTEGANGSBEHANDLING,
             MaskinellJurist()
@@ -214,6 +219,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             sykepengegrunnlag(10000.månedlig),
             sammenligningsgrunnlag(10000.månedlig, 1.januar),
             1.januar,
+            Opptjening.opptjening(emptyMap(), 1.januar, MaskinellJurist()),
             1,
             Periodetype.FØRSTEGANGSBEHANDLING,
             MaskinellJurist()
@@ -249,6 +255,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             sykepengegrunnlag(10000.månedlig),
             sammenligningsgrunnlag(10000.månedlig, 1.januar),
             1.januar,
+            Opptjening.opptjening(emptyMap(), 1.januar, MaskinellJurist()),
             1,
             Periodetype.FØRSTEGANGSBEHANDLING,
             MaskinellJurist()
@@ -278,6 +285,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             sykepengegrunnlag(10000.månedlig),
             sammenligningsgrunnlag(10000.månedlig, 1.januar),
             1.januar,
+            Opptjening.opptjening(emptyMap(), 1.januar, MaskinellJurist()),
             1,
             Periodetype.FØRSTEGANGSBEHANDLING,
             MaskinellJurist()
@@ -407,6 +415,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             sykepengegrunnlag(10000.månedlig),
             sammenligningsgrunnlag(10000.månedlig, 1.januar),
             1.januar,
+            Opptjening.opptjening(emptyMap(), 1.januar, MaskinellJurist()),
             1,
             Periodetype.FØRSTEGANGSBEHANDLING,
             MaskinellJurist()
@@ -427,6 +436,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             sykepengegrunnlag(10000.månedlig),
             sammenligningsgrunnlag(10000.månedlig, 1.januar),
             1.januar,
+            Opptjening.opptjening(emptyMap(), 1.januar, MaskinellJurist()),
             1,
             Periodetype.FØRSTEGANGSBEHANDLING,
             MaskinellJurist()
@@ -457,6 +467,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             sykepengegrunnlag(10000.månedlig),
             sammenligningsgrunnlag(10000.månedlig, 1.januar),
             1.januar,
+            Opptjening.opptjening(emptyMap(), 1.januar, MaskinellJurist()),
             1,
             Periodetype.FØRSTEGANGSBEHANDLING,
             MaskinellJurist()
@@ -477,6 +488,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             sykepengegrunnlag(10000.månedlig),
             sammenligningsgrunnlag(10000.månedlig, 1.januar),
             1.januar,
+            Opptjening.opptjening(emptyMap(), 1.januar, MaskinellJurist()),
             1,
             Periodetype.FØRSTEGANGSBEHANDLING,
             MaskinellJurist()
@@ -507,6 +519,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             sykepengegrunnlag(10.månedlig),
             sammenligningsgrunnlag(10.månedlig, 1.januar),
             1.januar,
+            Opptjening.opptjening(emptyMap(), 1.januar, MaskinellJurist()),
             1,
             Periodetype.FØRSTEGANGSBEHANDLING,
             MaskinellJurist()
@@ -546,6 +559,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             sykepengegrunnlag(10.månedlig),
             sammenligningsgrunnlag(10.månedlig, 1.januar),
             1.januar,
+            Opptjening.opptjening(emptyMap(), 1.januar, MaskinellJurist()),
             1,
             Periodetype.FØRSTEGANGSBEHANDLING,
             MaskinellJurist()
@@ -585,6 +599,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             sykepengegrunnlag(10000.månedlig),
             sammenligningsgrunnlag(10000.månedlig, 1.januar),
             1.januar,
+            Opptjening.opptjening(emptyMap(), 1.januar, MaskinellJurist()),
             1,
             Periodetype.FØRSTEGANGSBEHANDLING,
             MaskinellJurist()

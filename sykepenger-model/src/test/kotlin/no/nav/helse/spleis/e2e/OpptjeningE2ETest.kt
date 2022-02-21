@@ -3,10 +3,7 @@ package no.nav.helse.spleis.e2e
 import no.nav.helse.*
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.person.Arbeidsforholdhistorikk
-import no.nav.helse.person.Arbeidsgiver
-import no.nav.helse.person.Inntektskilde
-import no.nav.helse.person.PersonVisitor
+import no.nav.helse.person.*
 import no.nav.helse.spleis.e2e.OpptjeningE2ETest.ArbeidsforholdVisitor.Companion.assertHarArbeidsforhold
 import no.nav.helse.spleis.e2e.OpptjeningE2ETest.ArbeidsforholdVisitor.Companion.assertHarIkkeArbeidsforhold
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -63,6 +60,15 @@ internal class OpptjeningE2ETest : AbstractEndToEndTest() {
         )
         assertHarArbeidsforhold(1.januar, a1)
         assertHarArbeidsforhold(1.januar, a2)
+    }
+
+    @Test
+    fun `opptjening er ikke oppfylt siden det ikke er nok opptjeningsdager`() {
+        personMedArbeidsforhold(Vilkårsgrunnlag.Arbeidsforhold(a1, ansattFom = 31.desember(2017), ansattTom = null))
+        val grunnlagsdata = person.vilkårsgrunnlagFor(1.januar) as VilkårsgrunnlagHistorikk.Grunnlagsdata
+        assertEquals(1, grunnlagsdata.opptjening?.opptjeningsdager())
+        assertEquals(false, grunnlagsdata.opptjening?.erOppfylt())
+        assertWarning("Perioden er avslått på grunn av manglende opptjening", 1.vedtaksperiode.filter(orgnummer = a1))
     }
 
     @Test
