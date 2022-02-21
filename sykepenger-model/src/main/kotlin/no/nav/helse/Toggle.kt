@@ -149,4 +149,5 @@ abstract class Toggle internal constructor(enabled: Boolean = false, private val
             return aktivitetslogg.hasErrorsOrWorse()
         }
     }
+    object OpptjeningIModellen : Toggle(false)
 }
