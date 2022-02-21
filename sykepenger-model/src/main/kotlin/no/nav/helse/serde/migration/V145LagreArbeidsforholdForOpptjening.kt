@@ -14,6 +14,7 @@ internal class V145LagreArbeidsforholdForOpptjening : JsonMigration(version = 14
         /*
          [v] hent vilkårsgrunnlag
          [v] finn tilhørende vedtaksperiode, hent skjæringstidspunkt
+         [v] hvis vi ikke finner vedtaksperiode: prøv å matche på fom
          finn hvilke arbeidsforhold som ville bli brukt for opptjening for skjæringstidspunkt
          om vi ikke har noen relevante arbeidsforhold for et skjæringstidspunktet lag en insane default (opptjening fra 1970 eller noe)
          oppdater arbeidsforhold historikken
@@ -35,14 +36,27 @@ internal class V145LagreArbeidsforholdForOpptjening : JsonMigration(version = 14
         }
         val fomDatoer = skjæringstidspunkter.filterNotNull().flatMap { skjæringstidspunkt -> fomerFor(jsonNode, skjæringstidspunkt) }
 
-        val skjæringstidspunkterFraSpleis = jsonNode["vilkårsgrunnlagHistorikk"]
-            .flatMap { it["vilkårsgrunnlag"] }
-            .filter { it["type"].asText() == "Vilkårsprøving" }
+        val skjæringstidspunkterFraSpleis = alleVilkårsgrunnlag(jsonNode)
             .map { it["skjæringstidspunkt"].asText() }
             .sorted()
             .distinct()
 
-        val skjæringstidspunkterViIkkeFinnerMeldingFor = skjæringstidspunkterFraSpleis.filter { it !in skjæringstidspunkter }
+        val skjæringstidspunkterForVilkårsgrunnlagUtenMeldingsreferanseId = alleVilkårsgrunnlag(jsonNode)
+            .filter { !it.hasNonNull("meldingsreferanseId") }
+            .map { it["skjæringstidspunkt"].asText() }
+            .sorted()
+            .distinct()
+
+        if (skjæringstidspunkterForVilkårsgrunnlagUtenMeldingsreferanseId.isNotEmpty()) {
+            sikkerLogg.info(
+                "Fant skjæringstidspunkt for vilkårsgrunnlag vi har migrert inn uten "
+                    + "meldingsreferanseId: $skjæringstidspunkterForVilkårsgrunnlagUtenMeldingsreferanseId, fnr: $fødselsnummer"
+            )
+        }
+
+        val skjæringstidspunkterViIkkeFinnerMeldingFor = skjæringstidspunkterFraSpleis
+            .filter { it !in skjæringstidspunkter }
+            .filter { it !in skjæringstidspunkterForVilkårsgrunnlagUtenMeldingsreferanseId }
 
         if (skjæringstidspunkterViIkkeFinnerMeldingFor.isNotEmpty()) {
             sikkerLogg.info(
@@ -61,6 +75,10 @@ internal class V145LagreArbeidsforholdForOpptjening : JsonMigration(version = 14
             }
         }
     }
+
+    private fun alleVilkårsgrunnlag(jsonNode: ObjectNode) = jsonNode["vilkårsgrunnlagHistorikk"]
+        .flatMap { it["vilkårsgrunnlag"] }
+        .filter { it["type"].asText() == "Vilkårsprøving" }
 
     private fun hentArbeidsforhold(jsonNode: JsonNode) = jsonNode["@løsning"].arbeidsforholdNode().map {
         Arbeidsforhold(LocalDate.parse(it["ansattSiden"].asText()), it.optional("ansattTil")?.asText()?.let(LocalDate::parse), it["orgnummer"].asText())
