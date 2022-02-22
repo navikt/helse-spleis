@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.helse.serde.serdeObjectMapper
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
+import java.util.*
 
 internal class V145LagreArbeidsforholdForOpptjening : JsonMigration(version = 145) {
     override val description: String = "Lagrer arbeidsforhold relevant til opptjening i vilkårsgrunnlag og arbeidsforhold-historikken"
@@ -73,6 +74,41 @@ internal class V145LagreArbeidsforholdForOpptjening : JsonMigration(version = 14
                         + " vedtaksperioder=${jsonNode.vedtaksperioder().map { it["skjæringstidspunkt"].asText() + ":" + it["id"].asText() }}"
                 )
             }
+        }
+
+        loggVilkårsgrunnlagUtenMeldingsreferanseId(meldinger, jsonNode, fødselsnummer)
+    }
+
+    private fun loggVilkårsgrunnlagUtenMeldingsreferanseId(meldinger: Map<UUID, Pair<Navn, Json>>, jsonNode: ObjectNode, fødselsnummer: String) {
+        val vilkårsgrunnlagIder = meldinger
+            .filterValues { (navn, _) -> navn == "VILKÅRSGRUNNLAG" }
+            .keys
+            .map { it.toString() }
+
+        val vilkårsgrunnlag = alleVilkårsgrunnlag(jsonNode)
+
+        val (medMelding, utenMelding) = vilkårsgrunnlag.partition { it.optional("meldingsreferanseId")?.asText() in vilkårsgrunnlagIder }
+
+        val avsluttedeVedtaksperioder = jsonNode.vedtaksperioder()
+            .filter { it["tilstand"].asText() == "AVSLUTTET" }
+            .map { it["id"].asText() to it["skjæringstidspunkt"].asText() }
+
+        val vedtaksperioderUtenVilkårsgrunnlagMedKobling = avsluttedeVedtaksperioder
+            .filter { (_, skjæringstidspunkt) -> skjæringstidspunkt !in medMelding.map { it["skjæringstidspunkt"].asText() } }
+        if (vedtaksperioderUtenVilkårsgrunnlagMedKobling.isNotEmpty()) {
+            val vedtaksperioderUtenVilkårsgrunnlagUtenKobling = vedtaksperioderUtenVilkårsgrunnlagMedKobling
+                .filter { (_, skjæringstidspunkt) -> skjæringstidspunkt !in utenMelding.map { it["skjæringstidspunkt"].asText() } }
+            sikkerLogg.info(
+                "Fant vedtaksperioder uten vilkårsgrunnlag med kobling til melding for fnr=$fødselsnummer"
+                    + " skjæringstidspunkter vi ikke har kobling for: $vedtaksperioderUtenVilkårsgrunnlagMedKobling "
+                    + " skjæringstidspunkter vi ikke kjenner til: $vedtaksperioderUtenVilkårsgrunnlagUtenKobling"
+            )
+        }
+
+        val vilkårsgrunnlagMedIdUtenMelding = vilkårsgrunnlag.mapNotNull { it.optional("meldingsreferanseId")?.asText() }
+            .filter { it !in vilkårsgrunnlagIder }
+        if (vilkårsgrunnlagMedIdUtenMelding.isNotEmpty()) {
+            sikkerLogg.info("Fant vilkårsgrunnlag med meldingsreferanseId uten tilhørende melding fnr=$fødselsnummer, $vilkårsgrunnlagMedIdUtenMelding")
         }
     }
 
