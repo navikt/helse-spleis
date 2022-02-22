@@ -6,7 +6,7 @@ import no.nav.helse.person.Arbeidsforholdhistorikk.Arbeidsforhold.Companion.toEt
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import java.time.LocalDate
 
-internal class Opptjening private constructor(
+internal class Opptjening (
     private val arbeidsforhold: Map<String, List<Arbeidsforholdhistorikk.Arbeidsforhold>>,
     private val opptjeningsperiode: Periode
 ) {

@@ -72,6 +72,12 @@ class JsonBuilderTest {
     }
 
     @Test
+    fun `gjenoppbygd Person skal være lik opprinnelig Person -- også med OpptjeningIModell`() =
+        Toggle.OpptjeningIModellen.enable {
+            testSerialiseringAvPerson(person())
+        }
+
+    @Test
     fun `ingen betalingsperson`() {
         testSerialiseringAvPerson(ingenBetalingsperson())
     }
@@ -242,9 +248,14 @@ class JsonBuilderTest {
             fangeSykdomstidslinje()
             håndter(inntektsmelding(fom = fom))
             håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
-            håndter(vilkårsgrunnlag(
-                vedtaksperiodeId = vedtaksperiodeId,
-                arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(orgnummer, 1.januar(2017)), Vilkårsgrunnlag.Arbeidsforhold("987654326", 1.desember(2017))))
+            håndter(
+                vilkårsgrunnlag(
+                    vedtaksperiodeId = vedtaksperiodeId,
+                    arbeidsforhold = listOf(
+                        Vilkårsgrunnlag.Arbeidsforhold(orgnummer, 1.januar(2017)),
+                        Vilkårsgrunnlag.Arbeidsforhold("987654326", 1.desember(2017))
+                    )
+                )
             )
             håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
             håndter(simulering(vedtaksperiodeId = vedtaksperiodeId))

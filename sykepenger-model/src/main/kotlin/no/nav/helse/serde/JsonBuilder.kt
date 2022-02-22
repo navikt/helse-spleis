@@ -1,6 +1,7 @@
 package no.nav.helse.serde
 
 import no.nav.helse.Fødselsnummer
+import no.nav.helse.Toggle
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
@@ -806,6 +807,8 @@ internal class JsonBuilder : AbstractBuilder() {
     class GrunnlagsdataState(private val vilkårsgrunnlagElement: MutableList<Map<String, Any?>>) : BuilderState() {
         private val sykepengegrunnlagMap = mutableMapOf<String, Any>()
         private val sammenligningsgrunnlagMap = mutableMapOf<String, Any>()
+        private val opptjeningMap = mutableMapOf<String, Any>()
+
         override fun preVisitSykepengegrunnlag(
             sykepengegrunnlag1: Sykepengegrunnlag,
             sykepengegrunnlag: Inntekt,
@@ -818,6 +821,37 @@ internal class JsonBuilder : AbstractBuilder() {
 
         override fun preVisitSammenligningsgrunnlag(sammenligningsgrunnlag1: Sammenligningsgrunnlag, sammenligningsgrunnlag: Inntekt) {
             pushState(SammenlingningsgrunnlagState(sammenligningsgrunnlagMap))
+        }
+
+        private class ArbeidsforholdMapper: ArbeidsforholdhistorikkVisitor {
+            private val mappedArbeidsforhold: MutableList<Map<String, Any?>> = mutableListOf()
+            override fun visitArbeidsforhold(ansattFom: LocalDate, ansattTom: LocalDate?, deaktivert: Boolean) {
+                mappedArbeidsforhold.add(
+                    mapOf(
+                        "ansattFom" to ansattFom,
+                        "ansattTom" to ansattTom,
+                        "deaktivert" to deaktivert
+                    )
+                )
+            }
+            fun tilMap(arbeidsforholdListe: List<Arbeidsforholdhistorikk.Arbeidsforhold>): MutableList<Map<String, Any?>> {
+                arbeidsforholdListe.forEach {it.accept(this)}
+                return mappedArbeidsforhold
+            }
+        }
+
+        override fun visitOpptjening(
+            opptjening: Opptjening,
+            arbeidsforhold: Map<String, List<Arbeidsforholdhistorikk.Arbeidsforhold>>,
+            opptjeningsperiode: Periode
+        ) {
+            opptjeningMap.putAll(
+                arrayOf(
+                    "opptjeningFom" to opptjeningsperiode.start,
+                    "opptjeningTom" to opptjeningsperiode.endInclusive,
+                    "arbeidsforhold" to arbeidsforhold.mapValues { (_, arbeidsforholdListe) -> ArbeidsforholdMapper().tilMap(arbeidsforholdListe) }
+                )
+            )
         }
 
         override fun postVisitGrunnlagsdata(
@@ -842,6 +876,7 @@ internal class JsonBuilder : AbstractBuilder() {
                     "avviksprosent" to avviksprosent?.ratio(),
                     "sykepengegrunnlag" to sykepengegrunnlagMap,
                     "sammenligningsgrunnlag" to sammenligningsgrunnlagMap,
+                    "opptjening" to opptjeningMap.takeIf { Toggle.OpptjeningIModellen.enabled },
                     "harOpptjening" to harOpptjening,
                     "medlemskapstatus" to when (medlemskapstatus) {
                         Medlemskapsvurdering.Medlemskapstatus.Ja -> JsonMedlemskapstatus.JA

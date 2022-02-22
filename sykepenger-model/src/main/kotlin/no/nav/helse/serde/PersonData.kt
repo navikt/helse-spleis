@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonUnwrapped
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
+import no.nav.helse.hendelser.til
 import no.nav.helse.person.*
 import no.nav.helse.person.Dokumentsporing.Companion.tilSporing
 import no.nav.helse.person.etterlevelse.MaskinellJurist
@@ -217,6 +218,7 @@ internal data class PersonData(
         private val sykepengegrunnlag: SykepengegrunnlagData,
         private val sammenligningsgrunnlag: SammenligningsgrunnlagData?,
         private val avviksprosent: Double?,
+        private val opptjening: OpptjeningData?,
         private val harOpptjening: Boolean?,
         private val antallOpptjeningsdagerErMinst: Int?,
         private val medlemskapstatus: JsonMedlemskapstatus?,
@@ -231,7 +233,7 @@ internal data class PersonData(
                 sykepengegrunnlag = sykepengegrunnlag.parseSykepengegrunnlag(),
                 sammenligningsgrunnlag = sammenligningsgrunnlag!!.parseSammenligningsgrunnlag(),
                 avviksprosent = avviksprosent?.ratio,
-                opptjening = null, // TODO
+                opptjening = opptjening?.tilOpptjening(),
                 harOpptjening = harOpptjening!!,
                 antallOpptjeningsdagerErMinst = antallOpptjeningsdagerErMinst!!,
                 medlemskapstatus = when (medlemskapstatus!!) {
@@ -297,6 +299,17 @@ internal data class PersonData(
                         )
                     }
             }
+        }
+
+        data class OpptjeningData(
+            private val opptjeningFom: LocalDate,
+            private val opptjeningTom: LocalDate,
+            private val arbeidsforhold: Map<String, List<ArbeidsgiverData.ArbeidsforholdhistorikkInnslagData.ArbeidsforholdData>>
+        ) {
+            fun tilOpptjening() = Opptjening(
+                opptjeningsperiode = opptjeningFom til opptjeningTom,
+                arbeidsforhold = arbeidsforhold.mapValues { (_, forhold) -> forhold.map { it.tilArbeidsforhold() } }
+            )
         }
     }
 
