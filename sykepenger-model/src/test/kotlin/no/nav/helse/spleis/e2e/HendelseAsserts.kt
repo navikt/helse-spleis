@@ -196,13 +196,13 @@ internal fun AbstractEndToEndTest.assertError(error: String, vararg filtre: Akti
 
 internal fun AbstractPersonTest.assertErrors(vararg filtre: AktivitetsloggFilter) {
     val errors = collectErrors(*filtre)
-    assertTrue(errors.isNotEmpty(), "forventet ingen errors. Errors: \n${errors.joinToString("\n")}")
+    assertTrue(errors.isNotEmpty(), "forventet errors, fant ingen.")
 }
 
 
 internal fun AbstractPersonTest.assertNoErrors(vararg filtre: AktivitetsloggFilter) {
     val errors = collectErrors(*filtre)
-    assertTrue(errors.isEmpty(), "forventet errors, fant ingen.")
+    assertTrue(errors.isEmpty(), "forventet ingen errors. Errors: \n${errors.joinToString("\n")}")
 }
 
 internal fun AbstractEndToEndTest.assertSevere(severe: String, vararg filtre: AktivitetsloggFilter) {
