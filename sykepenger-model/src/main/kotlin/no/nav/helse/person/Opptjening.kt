@@ -19,6 +19,10 @@ internal class Opptjening private constructor(
         return erOppfylt
     }
 
+    internal fun accept(visitor: VilkårsgrunnlagHistorikkVisitor) {
+        visitor.visitOpptjening(this, arbeidsforhold, opptjeningsperiode)
+    }
+
     companion object {
         private const val TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER = 28
 

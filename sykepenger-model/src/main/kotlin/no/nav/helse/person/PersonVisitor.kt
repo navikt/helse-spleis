@@ -175,6 +175,7 @@ internal interface VilkårsgrunnlagHistorikkVisitor : InntekthistorikkVisitor {
     fun preVisitArbeidsgiverInntektsopplysning(arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning, orgnummer: String) {}
     fun postVisitArbeidsgiverInntektsopplysning(arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning, orgnummer: String) {}
     fun postVisitArbeidsgiverInntektsopplysninger() {}
+    fun visitOpptjening(opptjening: Opptjening, arbeidsforhold: Map<String, List<Arbeidsforholdhistorikk.Arbeidsforhold>>, opptjeningsperiode: Periode) {}
 }
 
 internal interface InntektsmeldingInfoVisitor {
