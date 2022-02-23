@@ -90,15 +90,16 @@ internal class InfotrygdhistorikkElement private constructor(
 
     internal fun build(organisasjonsnummer: String, sykdomstidslinje: Sykdomstidslinje, teller: Arbeidsgiverperiodeteller, builder: SykdomstidslinjeVisitor) {
         val dekoratør = Infotrygddekoratør(teller, builder, perioder.filterIsInstance<Utbetalingsperiode>().filter { it.gjelder(organisasjonsnummer) })
-        historikkFor(organisasjonsnummer, sykdomstidslinje).fremTilOgMed(sykdomstidslinje.sisteDag()).accept(dekoratør)
+        historikkFor(organisasjonsnummer, sykdomstidslinje).accept(dekoratør)
     }
 
     internal fun historikkFor(orgnummer: String, sykdomstidslinje: Sykdomstidslinje): Sykdomstidslinje {
+        if (sykdomstidslinje.periode() == null) return sykdomstidslinje
         return oppslag.computeIfAbsent(Oppslagsnøkkel(orgnummer, sykdomstidslinje)) {
             perioder.fold(sykdomstidslinje) { result, periode ->
                 periode.historikkFor(orgnummer, result, kilde)
             }
-        }
+        }.fremTilOgMed(sykdomstidslinje.sisteDag())
     }
 
     internal fun harBetalt(organisasjonsnummer: String, dato: LocalDate): Boolean {
@@ -188,11 +189,9 @@ internal class InfotrygdhistorikkElement private constructor(
                 .fold(Utbetalingstidslinje(), Utbetalingstidslinje::plus)
         }
 
-    internal fun fjernHistorikk(utbetalingstidlinje: Utbetalingstidslinje, organisasjonsnummer: String, tidligsteDato: LocalDate): Utbetalingstidslinje {
+    internal fun fjernHistorikk(utbetalingstidlinje: Utbetalingstidslinje, organisasjonsnummer: String): Utbetalingstidslinje {
         return utbetalingstidlinje.plus(utbetalingstidslinje(organisasjonsnummer).subset(utbetalingstidlinje.periode())) { spleisDag: Utbetalingstidslinje.Utbetalingsdag, infotrygdDag: Utbetalingstidslinje.Utbetalingsdag ->
             when {
-                // fjerner ledende dager
-                spleisDag.dato < tidligsteDato -> UkjentDag(spleisDag.dato, spleisDag.økonomi)
                 // fjerner utbetalinger i ukedager (bevarer fridager)
                 !infotrygdDag.dato.erHelg() && infotrygdDag is NavDag -> UkjentDag(spleisDag.dato, spleisDag.økonomi)
                 // fjerner utbetalinger i helger (bevarer fridager)

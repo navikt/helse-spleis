@@ -149,13 +149,13 @@ internal class Infotrygdhistorikk private constructor(
         builder: IUtbetalingstidslinjeBuilder,
         subsumsjonObserver: SubsumsjonObserver
     ): Utbetalingstidslinje {
-        build(organisasjonsnummer, sykdomstidslinje, builder as ArbeidsgiverperiodeMediator, subsumsjonObserver)
-        return fjernHistorikk(organisasjonsnummer, builder.result(), sykdomstidslinje.førsteDag())
+        build(organisasjonsnummer, sykdomstidslinje, InfotrygdUtbetalingstidslinjedekoratør(builder, sykdomstidslinje.førsteDag()), subsumsjonObserver)
+        return fjernHistorikk(organisasjonsnummer, builder.result())
     }
 
-    private fun fjernHistorikk(organisasjonsnummer: String, utbetalingstidslinje: Utbetalingstidslinje, førsteDag: LocalDate): Utbetalingstidslinje {
+    private fun fjernHistorikk(organisasjonsnummer: String, utbetalingstidslinje: Utbetalingstidslinje): Utbetalingstidslinje {
         if (!harHistorikk()) return utbetalingstidslinje
-        return siste.fjernHistorikk(utbetalingstidslinje, organisasjonsnummer, førsteDag)
+        return siste.fjernHistorikk(utbetalingstidslinje, organisasjonsnummer)
     }
 
     private fun oppfrisket(cutoff: LocalDateTime) =

@@ -1459,8 +1459,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             TIL_UTBETALING,
             AVSLUTTET,
             AVVENTER_HISTORIKK_REVURDERING,
-            REVURDERING_FEILET,
-            message = "Dette tåler vi når vi lagerer inntekten vi oppdager i infotrygd i revurderingen",
+            AVVENTER_SIMULERING_REVURDERING
         )
     }
 

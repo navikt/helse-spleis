@@ -151,16 +151,16 @@ internal class InfotrygdhistorikkElementTest {
                 ArbeidsgiverUtbetalingsperiode("ag1", 1.februar, 28.februar, 100.prosent, 25000.månedlig)
             )
         )
-        element.fjernHistorikk(tidslinjeOf(10.NAV), "ag1", 1.januar).also { utbetalingstidslinje ->
+        element.fjernHistorikk(tidslinjeOf(10.NAV), "ag1").also { utbetalingstidslinje ->
             assertTrue(utbetalingstidslinje.isEmpty())
         }
-        element.fjernHistorikk(tidslinjeOf(10.NAV, 10.FRI, 11.NAV, 28.NAV, 31.NAV), "ag1", 1.januar).also { utbetalingstidslinje ->
+        element.fjernHistorikk(tidslinjeOf(10.NAV, 10.FRI, 11.NAV, 28.NAV, 31.NAV), "ag1").also { utbetalingstidslinje ->
             assertEquals(11.januar til 31.mars, utbetalingstidslinje.periode())
             assertTrue(utbetalingstidslinje.subset(11.januar til 20.januar).all { it is Fridag })
             assertTrue(utbetalingstidslinje.subset(21.januar til 28.februar).all { it is UkjentDag })
             assertTrue(utbetalingstidslinje.subset(1.mars til 31.mars).all { it is NavDag || it is NavHelgDag })
         }
-        element.fjernHistorikk(tidslinjeOf(10.NAV, 10.FRI, 11.NAV, 28.NAV, 31.NAV), "ag1", 1.februar).also {
+        element.fjernHistorikk(tidslinjeOf(31.UTELATE, 28.NAV, 31.NAV), "ag1").also {
             assertEquals(1.mars til 31.mars, it.periode())
         }
     }
@@ -173,7 +173,7 @@ internal class InfotrygdhistorikkElementTest {
                 ArbeidsgiverUtbetalingsperiode("ag1", 21.januar, 31.januar, 100.prosent, 25000.månedlig),
             )
         )
-        element.fjernHistorikk(tidslinjeOf(10.NAV), "ag1", 1.januar).also { utbetalingstidslinje ->
+        element.fjernHistorikk(tidslinjeOf(10.NAV), "ag1").also { utbetalingstidslinje ->
             assertEquals(1.januar til 10.januar, utbetalingstidslinje.periode())
         }
     }
@@ -186,7 +186,7 @@ internal class InfotrygdhistorikkElementTest {
                 Friperiode(11.januar, 20.januar)
             )
         )
-        element.fjernHistorikk(tidslinjeOf(10.NAV, 10.FRI, 11.NAV), "ag1", 1.januar).also { utbetalingstidslinje ->
+        element.fjernHistorikk(tidslinjeOf(10.NAV, 10.FRI, 11.NAV), "ag1").also { utbetalingstidslinje ->
             assertEquals(1.januar til 31.januar, utbetalingstidslinje.periode())
             assertTrue(utbetalingstidslinje.subset(1.januar til 5.januar).all { it is NavDag })
             assertTrue(utbetalingstidslinje.subset(6.januar til 7.januar).all { it is NavHelgDag })
@@ -229,6 +229,19 @@ internal class InfotrygdhistorikkElementTest {
         assertEquals(5, inspektør.dager.filter { it.value is Dag.Feriedag }.size)
         assertEquals(12, inspektør.dager.filter { it.value is Dag.Sykedag }.size)
         assertEquals(3, inspektør.dager.filter { it.value is Dag.SykHelgedag }.size)
+    }
+
+    @Test
+    fun `historikk for utvider ikke`() {
+        val sykdomstidslinje = 10.S
+        val element = historikkelement(
+            listOf(
+                ArbeidsgiverUtbetalingsperiode("ag1", 1.januar, 31.januar, 100.prosent, 25000.månedlig),
+                Friperiode(1.februar, 28.februar)
+            )
+        )
+        val tidslinje = element.historikkFor("ag1", sykdomstidslinje)
+        assertEquals(sykdomstidslinje.periode(), tidslinje.periode())
     }
 
     @Test
