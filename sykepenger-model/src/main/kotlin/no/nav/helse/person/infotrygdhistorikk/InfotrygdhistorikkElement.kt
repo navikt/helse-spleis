@@ -189,7 +189,7 @@ internal class InfotrygdhistorikkElement private constructor(
         }
 
     internal fun fjernHistorikk(utbetalingstidlinje: Utbetalingstidslinje, organisasjonsnummer: String, tidligsteDato: LocalDate): Utbetalingstidslinje {
-        return utbetalingstidlinje.plus(utbetalingstidslinje(organisasjonsnummer)) { spleisDag: Utbetalingstidslinje.Utbetalingsdag, infotrygdDag: Utbetalingstidslinje.Utbetalingsdag ->
+        return utbetalingstidlinje.plus(utbetalingstidslinje(organisasjonsnummer).subset(utbetalingstidlinje.periode())) { spleisDag: Utbetalingstidslinje.Utbetalingsdag, infotrygdDag: Utbetalingstidslinje.Utbetalingsdag ->
             when {
                 // fjerner ledende dager
                 spleisDag.dato < tidligsteDato -> UkjentDag(spleisDag.dato, spleisDag.økonomi)

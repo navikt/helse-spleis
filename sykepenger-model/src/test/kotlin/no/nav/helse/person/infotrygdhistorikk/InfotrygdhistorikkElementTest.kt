@@ -151,6 +151,9 @@ internal class InfotrygdhistorikkElementTest {
                 ArbeidsgiverUtbetalingsperiode("ag1", 1.februar, 28.februar, 100.prosent, 25000.månedlig)
             )
         )
+        element.fjernHistorikk(tidslinjeOf(10.NAV), "ag1", 1.januar).also { utbetalingstidslinje ->
+            assertTrue(utbetalingstidslinje.isEmpty())
+        }
         element.fjernHistorikk(tidslinjeOf(10.NAV, 10.FRI, 11.NAV, 28.NAV, 31.NAV), "ag1", 1.januar).also { utbetalingstidslinje ->
             assertEquals(11.januar til 31.mars, utbetalingstidslinje.periode())
             assertTrue(utbetalingstidslinje.subset(11.januar til 20.januar).all { it is Fridag })
@@ -159,6 +162,19 @@ internal class InfotrygdhistorikkElementTest {
         }
         element.fjernHistorikk(tidslinjeOf(10.NAV, 10.FRI, 11.NAV, 28.NAV, 31.NAV), "ag1", 1.februar).also {
             assertEquals(1.mars til 31.mars, it.periode())
+        }
+    }
+
+    @Test
+    fun `tar ikke med historiske fridager`() {
+        val element = historikkelement(
+            listOf(
+                Friperiode(11.januar, 20.januar),
+                ArbeidsgiverUtbetalingsperiode("ag1", 21.januar, 31.januar, 100.prosent, 25000.månedlig),
+            )
+        )
+        element.fjernHistorikk(tidslinjeOf(10.NAV), "ag1", 1.januar).also { utbetalingstidslinje ->
+            assertEquals(1.januar til 10.januar, utbetalingstidslinje.periode())
         }
     }
 
