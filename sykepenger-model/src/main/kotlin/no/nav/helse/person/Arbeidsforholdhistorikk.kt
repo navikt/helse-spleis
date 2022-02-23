@@ -103,7 +103,7 @@ internal class Arbeidsforholdhistorikk private constructor(
             return result
         }
 
-        internal fun accept(visitor: ArbeidsforholdhistorikkVisitor) {
+        internal fun accept(visitor: ArbeidsforholdVisitor) {
             visitor.visitArbeidsforhold(ansattFom = ansattFom, ansattTom = ansattTom, deaktivert = deaktivert)
         }
 

@@ -102,7 +102,7 @@ internal interface FeriepengeutbetalingsperiodeVisitor {
     fun visitArbeidsgiverutbetalingsperiode(orgnr: String, periode: Periode, beløp: Int, utbetalt: LocalDate) {}
 }
 
-internal interface VilkårsgrunnlagHistorikkVisitor : InntekthistorikkVisitor {
+internal interface VilkårsgrunnlagHistorikkVisitor : InntekthistorikkVisitor, ArbeidsforholdVisitor {
     fun preVisitVilkårsgrunnlagHistorikk() {}
     fun preVisitInnslag(innslag: VilkårsgrunnlagHistorikk.Innslag, id: UUID, opprettet: LocalDateTime) {}
     fun postVisitInnslag(innslag: VilkårsgrunnlagHistorikk.Innslag, id: UUID, opprettet: LocalDateTime) {}
@@ -175,7 +175,10 @@ internal interface VilkårsgrunnlagHistorikkVisitor : InntekthistorikkVisitor {
     fun preVisitArbeidsgiverInntektsopplysning(arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning, orgnummer: String) {}
     fun postVisitArbeidsgiverInntektsopplysning(arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning, orgnummer: String) {}
     fun postVisitArbeidsgiverInntektsopplysninger() {}
-    fun visitOpptjening(opptjening: Opptjening, arbeidsforhold: Map<String, List<Arbeidsforholdhistorikk.Arbeidsforhold>>, opptjeningsperiode: Periode) {}
+    fun preVisitOpptjening(opptjening: Opptjening, arbeidsforhold: List<Opptjening.ArbeidsgiverOpptjeningsgrunnlag>, opptjeningsperiode: Periode) {}
+    fun postVisitOpptjening(opptjening: Opptjening, arbeidsforhold: List<Opptjening.ArbeidsgiverOpptjeningsgrunnlag>, opptjeningsperiode: Periode) {}
+    fun preVisitArbeidsgiverOpptjeningsgrunnlag(orgnummer: String, arbeidsforhold: List<Arbeidsforholdhistorikk.Arbeidsforhold>) {}
+    fun postVisitArbeidsgiverOpptjeningsgrunnlag(orgnummer: String, arbeidsforhold: List<Arbeidsforholdhistorikk.Arbeidsforhold>) {}
 }
 
 internal interface InntektsmeldingInfoVisitor {
@@ -513,11 +516,13 @@ internal interface RefusjonshistorikkVisitor {
     fun postVisitRefusjonshistorikk(refusjonshistorikk: Refusjonshistorikk) {}
 }
 
-internal interface ArbeidsforholdhistorikkVisitor {
+internal interface ArbeidsforholdVisitor {
+    fun visitArbeidsforhold(ansattFom: LocalDate, ansattTom: LocalDate?, deaktivert: Boolean) {}
+}
+
+internal interface ArbeidsforholdhistorikkVisitor: ArbeidsforholdVisitor {
     fun preVisitArbeidsforholdhistorikk(arbeidsforholdhistorikk: Arbeidsforholdhistorikk) {}
     fun postVisitArbeidsforholdhistorikk(arbeidsforholdhistorikk: Arbeidsforholdhistorikk) {}
-
-    fun visitArbeidsforhold(ansattFom: LocalDate, ansattTom: LocalDate?, deaktivert: Boolean) {}
 
     fun preVisitArbeidsforholdinnslag(arbeidsforholdinnslag: Arbeidsforholdhistorikk.Innslag, id: UUID, skjæringstidspunkt: LocalDate) {}
     fun postVisitArbeidsforholdinnslag(arbeidsforholdinnslag: Arbeidsforholdhistorikk.Innslag, id: UUID, skjæringstidspunkt: LocalDate) {}

@@ -13,7 +13,7 @@ internal class OpptjeningTest {
 
     @Test
     fun `Tom liste med arbeidsforhold betyr at du ikke oppfyller opptjeningskrav`() {
-        val arbeidsforhold = emptyMap<String, List<Arbeidsforholdhistorikk.Arbeidsforhold>>()
+        val arbeidsforhold = emptyList<Opptjening.ArbeidsgiverOpptjeningsgrunnlag>()
         val opptjening = Opptjening.opptjening(arbeidsforhold, 1.januar, MaskinellJurist())
 
         assertFalse(opptjening.erOppfylt())
@@ -21,7 +21,12 @@ internal class OpptjeningTest {
 
     @Test
     fun `Én dags opptjening oppfyller ikke krav til opptjening`() {
-        val arbeidsforhold = mapOf("orgnummer" to listOf(Arbeidsforholdhistorikk.Arbeidsforhold(ansattFom = 1.januar, ansattTom = null, deaktivert = false)))
+        val arbeidsforhold = listOf(
+            Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
+                "orgnummer",
+                listOf(Arbeidsforholdhistorikk.Arbeidsforhold(ansattFom = 1.januar, ansattTom = null, deaktivert = false))
+            )
+        )
         val opptjening = Opptjening.opptjening(arbeidsforhold, 2.januar, MaskinellJurist())
 
         assertFalse(opptjening.erOppfylt())
@@ -29,7 +34,12 @@ internal class OpptjeningTest {
 
     @Test
     fun `27 dager opptjening oppfyller ikke krav til opptjening`() {
-        val arbeidsforhold = mapOf("orgnummer" to listOf(Arbeidsforholdhistorikk.Arbeidsforhold(ansattFom = 1.januar, ansattTom = null, deaktivert = false)))
+        val arbeidsforhold = listOf(
+            Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
+                "orgnummer",
+                listOf(Arbeidsforholdhistorikk.Arbeidsforhold(ansattFom = 1.januar, ansattTom = null, deaktivert = false))
+            )
+        )
         val opptjening = Opptjening.opptjening(arbeidsforhold, 1.januar.plusDays(27), MaskinellJurist())
 
         assertFalse(opptjening.erOppfylt())
@@ -37,9 +47,10 @@ internal class OpptjeningTest {
 
     @Test
     fun `28 dager opptjening oppfyller krav til opptjening`() {
-        val arbeidsforhold = mapOf(
-            "orgnummer" to listOf(
-                Arbeidsforholdhistorikk.Arbeidsforhold(ansattFom = 1.januar, ansattTom = null, deaktivert = false)
+        val arbeidsforhold = listOf(
+            Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
+                "orgnummer",
+                listOf(Arbeidsforholdhistorikk.Arbeidsforhold(ansattFom = 1.januar, ansattTom = null, deaktivert = false))
             )
         )
         val opptjening = Opptjening.opptjening(arbeidsforhold, 1.januar.plusDays(28), MaskinellJurist())
@@ -49,7 +60,12 @@ internal class OpptjeningTest {
 
     @Test
     fun `Opptjening skal ikke bruke deaktiverte arbeidsforhold`() {
-        val arbeidsforhold = mapOf("orgnummer" to listOf(Arbeidsforholdhistorikk.Arbeidsforhold(ansattFom = 1.januar, ansattTom = null, deaktivert = true)))
+        val arbeidsforhold = listOf(
+            Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
+                "orgnummer",
+                listOf(Arbeidsforholdhistorikk.Arbeidsforhold(ansattFom = 1.januar, ansattTom = null, deaktivert = true))
+            )
+        )
         val opptjening = Opptjening.opptjening(arbeidsforhold, 1.januar.plusDays(28), MaskinellJurist())
 
         assertFalse(opptjening.erOppfylt())
@@ -57,13 +73,17 @@ internal class OpptjeningTest {
 
     @Test
     fun `Opptjening skal ikke koble sammen om deaktiverte arbeidsforhold fører til gap`() {
-        val arbeidsforhold = mapOf(
-            "orgnummer" to listOf(
-                Arbeidsforholdhistorikk.Arbeidsforhold(ansattFom = 1.januar, ansattTom = 10.januar, deaktivert = false),
-                Arbeidsforholdhistorikk.Arbeidsforhold(ansattFom = 11.januar, ansattTom = 14.januar, deaktivert = true),
-                Arbeidsforholdhistorikk.Arbeidsforhold(ansattFom = 15.januar, ansattTom = null, deaktivert = false)
+        val arbeidsforhold = listOf(
+            Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
+                "orgnummer",
+                listOf(
+                    Arbeidsforholdhistorikk.Arbeidsforhold(ansattFom = 1.januar, ansattTom = 10.januar, deaktivert = false),
+                    Arbeidsforholdhistorikk.Arbeidsforhold(ansattFom = 11.januar, ansattTom = 14.januar, deaktivert = true),
+                    Arbeidsforholdhistorikk.Arbeidsforhold(ansattFom = 15.januar, ansattTom = null, deaktivert = false)
+                )
             )
         )
+
         val opptjening = Opptjening.opptjening(arbeidsforhold, 1.januar.plusDays(28), MaskinellJurist())
 
         assertFalse(opptjening.erOppfylt())
@@ -71,12 +91,16 @@ internal class OpptjeningTest {
 
     @Test
     fun `to tilstøtende arbeidsforhold`() {
-        val arbeidsforhold = mapOf(
-            "orgnummer" to listOf(
-                Arbeidsforholdhistorikk.Arbeidsforhold(ansattFom = 1.januar, ansattTom = 10.januar, deaktivert = false),
-                Arbeidsforholdhistorikk.Arbeidsforhold(ansattFom = 11.januar, ansattTom = null, deaktivert = false)
+        val arbeidsforhold = listOf(
+            Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
+                "orgnummer",
+                listOf(
+                    Arbeidsforholdhistorikk.Arbeidsforhold(ansattFom = 1.januar, ansattTom = 10.januar, deaktivert = false),
+                    Arbeidsforholdhistorikk.Arbeidsforhold(ansattFom = 11.januar, ansattTom = null, deaktivert = false)
+                )
             )
         )
+
         val opptjening = Opptjening.opptjening(arbeidsforhold, 1.januar.plusDays(28), MaskinellJurist())
 
         assertTrue(opptjening.erOppfylt())
@@ -84,13 +108,17 @@ internal class OpptjeningTest {
 
     @Test
     fun `Opptjening kobler sammen gap selvom rekkefølgen ikke er kronologisk`() {
-        val arbeidsforhold = mapOf(
-            "orgnummer" to listOf(
-                Arbeidsforholdhistorikk.Arbeidsforhold(ansattFom = 1.januar, ansattTom = 10.januar, deaktivert = false),
-                Arbeidsforholdhistorikk.Arbeidsforhold(ansattFom = 15.januar, ansattTom = null, deaktivert = false),
-                Arbeidsforholdhistorikk.Arbeidsforhold(ansattFom = 11.januar, ansattTom = 14.januar, deaktivert = false)
+        val arbeidsforhold = listOf(
+            Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
+                "orgnummer",
+                listOf(
+                    Arbeidsforholdhistorikk.Arbeidsforhold(ansattFom = 1.januar, ansattTom = 10.januar, deaktivert = false),
+                    Arbeidsforholdhistorikk.Arbeidsforhold(ansattFom = 15.januar, ansattTom = null, deaktivert = false),
+                    Arbeidsforholdhistorikk.Arbeidsforhold(ansattFom = 11.januar, ansattTom = 14.januar, deaktivert = false)
+                )
             )
         )
+
         val opptjening = Opptjening.opptjening(arbeidsforhold, 1.januar.plusDays(28), MaskinellJurist())
 
         assertTrue(opptjening.erOppfylt())
@@ -99,9 +127,10 @@ internal class OpptjeningTest {
     @Test
     fun `§ 8-2 ledd 1 - opptjeningstid tilfredstilt`() {
         val jurist = MaskinellJurist()
-        val arbeidsforhold = mapOf(
-            AbstractPersonTest.ORGNUMMER to listOf(
-                Arbeidsforholdhistorikk.Arbeidsforhold(4.desember(2017), 31.januar, deaktivert = false)
+        val arbeidsforhold = listOf(
+            Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
+                AbstractPersonTest.ORGNUMMER,
+                listOf(Arbeidsforholdhistorikk.Arbeidsforhold(4.desember(2017), 31.januar, deaktivert = false))
             )
         )
         Opptjening.opptjening(arbeidsforhold, 1.januar, jurist)
@@ -128,9 +157,10 @@ internal class OpptjeningTest {
     @Test
     fun `§ 8-2 ledd 1 - opptjeningstid ikke tilfredstilt`() {
         val jurist = MaskinellJurist()
-        val arbeidsforhold = mapOf(
-            AbstractPersonTest.ORGNUMMER to listOf(
-                Arbeidsforholdhistorikk.Arbeidsforhold(5.desember(2017), 31.januar, deaktivert = false)
+        val arbeidsforhold = listOf(
+            Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
+                AbstractPersonTest.ORGNUMMER,
+                listOf(Arbeidsforholdhistorikk.Arbeidsforhold(5.desember(2017), 31.januar, deaktivert = false))
             )
         )
         Opptjening.opptjening(arbeidsforhold, 1.januar, jurist)

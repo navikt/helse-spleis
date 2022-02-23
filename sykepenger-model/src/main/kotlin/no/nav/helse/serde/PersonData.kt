@@ -16,6 +16,7 @@ import no.nav.helse.serde.PersonData.ArbeidsgiverData.RefusjonData.Companion.par
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.RefusjonData.EndringIRefusjonData.Companion.parseEndringerIRefusjon
 import no.nav.helse.serde.PersonData.InfotrygdhistorikkElementData.Companion.tilModellObjekt
 import no.nav.helse.serde.PersonData.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.Companion.parseArbeidsgiverInntektsopplysninger
+import no.nav.helse.serde.PersonData.VilkårsgrunnlagElementData.OpptjeningData.ArbeidsgiverOpptjeningsgrunnlagData.Companion.tilArbeidsgiverOpptjeningsgrunnlag
 import no.nav.helse.serde.PersonData.VilkårsgrunnlagInnslagData.Companion.tilModellObjekt
 import no.nav.helse.serde.mapping.JsonMedlemskapstatus
 import no.nav.helse.serde.reflection.Inntektsopplysningskilde
@@ -304,12 +305,26 @@ internal data class PersonData(
         data class OpptjeningData(
             private val opptjeningFom: LocalDate,
             private val opptjeningTom: LocalDate,
-            private val arbeidsforhold: Map<String, List<ArbeidsgiverData.ArbeidsforholdhistorikkInnslagData.ArbeidsforholdData>>
+            private val arbeidsforhold: List<ArbeidsgiverOpptjeningsgrunnlagData>
         ) {
             fun tilOpptjening() = Opptjening(
                 opptjeningsperiode = opptjeningFom til opptjeningTom,
-                arbeidsforhold = arbeidsforhold.mapValues { (_, forhold) -> forhold.map { it.tilArbeidsforhold() } }
+                arbeidsforhold = arbeidsforhold.tilArbeidsgiverOpptjeningsgrunnlag()
             )
+
+            data class ArbeidsgiverOpptjeningsgrunnlagData(
+                private val orgnummer: String,
+                private val arbeidsforhold: List<ArbeidsgiverData.ArbeidsforholdhistorikkInnslagData.ArbeidsforholdData>
+            ) {
+                companion object {
+                    fun List<ArbeidsgiverOpptjeningsgrunnlagData>.tilArbeidsgiverOpptjeningsgrunnlag() = map { arbeidsgiverOpptjeningsgrunnlag ->
+                        Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
+                            arbeidsgiverOpptjeningsgrunnlag.orgnummer,
+                            arbeidsgiverOpptjeningsgrunnlag.arbeidsforhold.map { it.tilArbeidsforhold() }
+                        )
+                    }
+                }
+            }
         }
     }
 

@@ -9,7 +9,7 @@ import no.nav.helse.januar
 import no.nav.helse.juni
 import no.nav.helse.person.Inntektshistorikk.Inntektsmelding
 import no.nav.helse.person.Ledd.Companion.ledd
-import no.nav.helse.person.Paragraf.*
+import no.nav.helse.person.Paragraf.PARAGRAF_8_2
 import no.nav.helse.person.Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
@@ -37,8 +37,8 @@ internal class VilkårsgrunnlagHistorikkTest {
 
     companion object {
         private val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold("123456789", 1.desember(2017)))
-        private val arbeidsforholdFraHistorikk = mapOf(
-            "123456789" to listOf(Arbeidsforholdhistorikk.Arbeidsforhold(1.desember(2017), null, false))
+        private val arbeidsforholdFraHistorikk = listOf(
+            Opptjening.ArbeidsgiverOpptjeningsgrunnlag("123456789", listOf(Arbeidsforholdhistorikk.Arbeidsforhold(1.desember(2017), null, false)))
         )
     }
 

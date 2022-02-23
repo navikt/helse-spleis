@@ -1,14 +1,16 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.*
+import no.nav.helse.april
+import no.nav.helse.desember
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.inspectors.GrunnlagsdataInspektør
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
+import no.nav.helse.januar
+import no.nav.helse.oktober
 import no.nav.helse.person.*
 import no.nav.helse.person.Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
 import no.nav.helse.person.Vedtaksperiode.Vedtaksperiodetilstand
 import no.nav.helse.person.etterlevelse.MaskinellJurist
-import no.nav.helse.spleis.e2e.AbstractEndToEndTest.Companion.INNTEKT
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.assertWarning
 import no.nav.helse.testhelpers.fangeSkjæringstidspunkt
@@ -127,9 +129,9 @@ internal class VilkårsgrunnlagTest : AbstractPersonTest() {
             skjæringstidspunkt = 31.januar,
             antallArbeidsgivereFraAareg = 1,
             opptjening = Opptjening.opptjening(
-                arbeidsforhold = mapOf(
-                    a1 to listOf(Arbeidsforholdhistorikk.Arbeidsforhold(1.januar, 14.januar, false)),
-                    a2 to listOf(Arbeidsforholdhistorikk.Arbeidsforhold(15.januar, null, false))
+                arbeidsforhold = listOf(
+                    Opptjening.ArbeidsgiverOpptjeningsgrunnlag(a1, listOf(Arbeidsforholdhistorikk.Arbeidsforhold(1.januar, 14.januar, false))),
+                    Opptjening.ArbeidsgiverOpptjeningsgrunnlag(a2, listOf(Arbeidsforholdhistorikk.Arbeidsforhold(15.januar, null, false)))
                 ),
                 skjæringstidspunkt = 31.januar,
                 subsumsjonObserver = MaskinellJurist()

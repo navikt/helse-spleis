@@ -141,7 +141,8 @@ internal class Arbeidsgiver private constructor(
         internal fun List<Arbeidsgiver>.beregnOpptjening(skjæringstidspunkt: LocalDate, subsumsjonObserver: SubsumsjonObserver): Opptjening {
             val arbeidsforhold = map { it.organisasjonsnummer to it.arbeidsforholdhistorikk.arbeidsforhold(skjæringstidspunkt) }
                 .filter { (_, arbeidsforhold) -> arbeidsforhold.isNotEmpty() }
-            return Opptjening.opptjening(arbeidsforhold.toMap(), skjæringstidspunkt, subsumsjonObserver)
+                .map { Opptjening.ArbeidsgiverOpptjeningsgrunnlag(it.first, it.second) }
+            return Opptjening.opptjening(arbeidsforhold, skjæringstidspunkt, subsumsjonObserver)
         }
 
         internal fun List<Arbeidsgiver>.grunnlagForSammenligningsgrunnlag(skjæringstidspunkt: LocalDate) =

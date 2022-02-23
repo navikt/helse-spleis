@@ -336,7 +336,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
                 ),
             ),
             avviksprosent = Prosent.prosent(0.0),
-            opptjening = Opptjening.opptjening(emptyMap(), 1.januar, MaskinellJurist()),
+            opptjening = Opptjening.opptjening(emptyList(), 1.januar, MaskinellJurist()),
             antallOpptjeningsdagerErMinst = 29,
             harOpptjening = true,
             medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,

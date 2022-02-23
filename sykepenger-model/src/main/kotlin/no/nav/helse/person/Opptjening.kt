@@ -3,11 +3,13 @@ package no.nav.helse.person
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Arbeidsforholdhistorikk.Arbeidsforhold.Companion.opptjeningsperiode
 import no.nav.helse.person.Arbeidsforholdhistorikk.Arbeidsforhold.Companion.toEtterlevelseMap
+import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Companion.arbeidsforholdForJurist
+import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Companion.opptjeningsperiode
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import java.time.LocalDate
 
 internal class Opptjening (
-    private val arbeidsforhold: Map<String, List<Arbeidsforholdhistorikk.Arbeidsforhold>>,
+    private val arbeidsforhold: List<ArbeidsgiverOpptjeningsgrunnlag>,
     private val opptjeningsperiode: Periode
 ) {
     internal fun opptjeningsdager() = opptjeningsperiode.dagerMellom().toInt()
@@ -20,20 +22,38 @@ internal class Opptjening (
     }
 
     internal fun accept(visitor: VilkårsgrunnlagHistorikkVisitor) {
-        visitor.visitOpptjening(this, arbeidsforhold, opptjeningsperiode)
+        visitor.preVisitOpptjening(this, arbeidsforhold, opptjeningsperiode)
+        arbeidsforhold.forEach { it.accept(visitor) }
+        visitor.postVisitOpptjening(this, arbeidsforhold, opptjeningsperiode)
+    }
+
+    internal class ArbeidsgiverOpptjeningsgrunnlag(private val orgnummer: String, private val arbeidsforhold: List<Arbeidsforholdhistorikk.Arbeidsforhold>) {
+        companion object {
+            internal fun List<ArbeidsgiverOpptjeningsgrunnlag>.opptjeningsperiode(skjæringstidspunkt: LocalDate) =
+                flatMap { it.arbeidsforhold }.opptjeningsperiode(skjæringstidspunkt)
+
+            internal fun List<ArbeidsgiverOpptjeningsgrunnlag>.arbeidsforholdForJurist() =
+                flatMap { it.arbeidsforhold.toEtterlevelseMap(it.orgnummer) }
+        }
+
+        internal fun accept(visitor: VilkårsgrunnlagHistorikkVisitor) {
+            visitor.preVisitArbeidsgiverOpptjeningsgrunnlag(orgnummer, arbeidsforhold)
+            arbeidsforhold.forEach { it.accept(visitor) }
+            visitor.postVisitArbeidsgiverOpptjeningsgrunnlag(orgnummer, arbeidsforhold)
+        }
     }
 
     companion object {
         private const val TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER = 28
 
         fun opptjening(
-            arbeidsforhold: Map<String, List<Arbeidsforholdhistorikk.Arbeidsforhold>>,
+            arbeidsforhold: List<ArbeidsgiverOpptjeningsgrunnlag>,
             skjæringstidspunkt: LocalDate,
             subsumsjonObserver: SubsumsjonObserver
         ): Opptjening {
-            val opptjeningsperiode = arbeidsforhold.values.flatten().opptjeningsperiode(skjæringstidspunkt)
+            val opptjeningsperiode = arbeidsforhold.opptjeningsperiode(skjæringstidspunkt)
             val opptjening = Opptjening(arbeidsforhold, opptjeningsperiode)
-            val arbeidsforholdForJurist = arbeidsforhold.flatMap { (orgnummer, arbeidsforhold) -> arbeidsforhold.toEtterlevelseMap(orgnummer) }
+            val arbeidsforholdForJurist = arbeidsforhold.arbeidsforholdForJurist()
 
             subsumsjonObserver.`§ 8-2 ledd 1`(
                 oppfylt = opptjening.erOppfylt(),

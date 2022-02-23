@@ -52,7 +52,7 @@ internal class VilkårsgrunnlagElementTest {
             sykepengegrunnlag = Sykepengegrunnlag(1000.daglig, emptyList(), 1000.daglig, Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET, emptyList()),
             sammenligningsgrunnlag = sammenligningsgrunnlag(1000.daglig),
             avviksprosent = avviksprosent,
-            opptjening = Opptjening.opptjening(emptyMap(), 1.januar, MaskinellJurist()),
+            opptjening = Opptjening.opptjening(emptyList(), 1.januar, MaskinellJurist()),
             antallOpptjeningsdagerErMinst = 0,
             harOpptjening = true,
             medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,

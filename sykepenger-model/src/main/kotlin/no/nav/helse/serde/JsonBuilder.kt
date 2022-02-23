@@ -804,6 +804,36 @@ internal class JsonBuilder : AbstractBuilder() {
         }
     }
 
+    internal class ArbeidsgiverOpptjeningsgrunnlagState(private val arbeidsforholdOpptjeningsgrunnlagMap: MutableList<Map<String, Any>>) : BuilderState() {
+        private var arbeidsforholdMap = mutableListOf<Map<String, Any?>>()
+
+        override fun visitArbeidsforhold(ansattFom: LocalDate, ansattTom: LocalDate?, deaktivert: Boolean) {
+            arbeidsforholdMap.add(mapOf("ansattFom" to ansattFom, "ansattTom" to ansattTom, "deaktivert" to deaktivert))
+        }
+
+        override fun postVisitArbeidsgiverOpptjeningsgrunnlag(orgnummer: String, arbeidsforhold: List<Arbeidsforholdhistorikk.Arbeidsforhold>) {
+            arbeidsforholdOpptjeningsgrunnlagMap.add(mapOf("orgnummer" to orgnummer, "arbeidsforhold" to arbeidsforholdMap))
+            popState()
+        }
+    }
+
+    class OpptjeningState(private val opptjeningsMap: MutableMap<String, Any>): BuilderState() {
+        private val arbeidsforholdOpptjeningsgrunnlagMap = mutableListOf<Map<String, Any>>()
+
+        override fun preVisitArbeidsgiverOpptjeningsgrunnlag(orgnummer: String, arbeidsforhold: List<Arbeidsforholdhistorikk.Arbeidsforhold>) {
+            pushState(ArbeidsgiverOpptjeningsgrunnlagState(arbeidsforholdOpptjeningsgrunnlagMap))
+        }
+
+        override fun postVisitOpptjening(opptjening: Opptjening, arbeidsforhold: List<Opptjening.ArbeidsgiverOpptjeningsgrunnlag>, opptjeningsperiode: Periode) {
+            opptjeningsMap.putAll(mapOf(
+                "arbeidsforhold" to arbeidsforholdOpptjeningsgrunnlagMap,
+                "opptjeningFom" to opptjeningsperiode.start,
+                "opptjeningTom" to opptjeningsperiode.endInclusive
+            ))
+            popState()
+        }
+    }
+
     class GrunnlagsdataState(private val vilkårsgrunnlagElement: MutableList<Map<String, Any?>>) : BuilderState() {
         private val sykepengegrunnlagMap = mutableMapOf<String, Any>()
         private val sammenligningsgrunnlagMap = mutableMapOf<String, Any>()
@@ -840,18 +870,8 @@ internal class JsonBuilder : AbstractBuilder() {
             }
         }
 
-        override fun visitOpptjening(
-            opptjening: Opptjening,
-            arbeidsforhold: Map<String, List<Arbeidsforholdhistorikk.Arbeidsforhold>>,
-            opptjeningsperiode: Periode
-        ) {
-            opptjeningMap.putAll(
-                arrayOf(
-                    "opptjeningFom" to opptjeningsperiode.start,
-                    "opptjeningTom" to opptjeningsperiode.endInclusive,
-                    "arbeidsforhold" to arbeidsforhold.mapValues { (_, arbeidsforholdListe) -> ArbeidsforholdMapper().tilMap(arbeidsforholdListe) }
-                )
-            )
+        override fun preVisitOpptjening(opptjening: Opptjening, arbeidsforhold: List<Opptjening.ArbeidsgiverOpptjeningsgrunnlag>, opptjeningsperiode: Periode) {
+            pushState(OpptjeningState(opptjeningMap))
         }
 
         override fun postVisitGrunnlagsdata(
