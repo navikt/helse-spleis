@@ -91,6 +91,7 @@ internal class V145LagreArbeidsforholdForOpptjening : JsonMigration(version = 14
 
         val avsluttedeVedtaksperioder = jsonNode.vedtaksperioder()
             .filter { it["tilstand"].asText() == "AVSLUTTET" }
+            .filter { it["periodetype"].asText() !in arrayOf("OVERGANG_FRA_IT", "INFOTRYGDFORLENGELSE")}
             .map { it["id"].asText() to it["skjæringstidspunkt"].asText() }
 
         val vedtaksperioderUtenVilkårsgrunnlagMedKobling = avsluttedeVedtaksperioder
@@ -107,6 +108,7 @@ internal class V145LagreArbeidsforholdForOpptjening : JsonMigration(version = 14
 
         val vilkårsgrunnlagMedIdUtenMelding = vilkårsgrunnlag.mapNotNull { it.optional("meldingsreferanseId")?.asText() }
             .filter { it !in vilkårsgrunnlagIder }
+
         if (vilkårsgrunnlagMedIdUtenMelding.isNotEmpty()) {
             sikkerLogg.info("Fant vilkårsgrunnlag med meldingsreferanseId uten tilhørende melding fnr=$fødselsnummer, $vilkårsgrunnlagMedIdUtenMelding")
         }
