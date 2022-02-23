@@ -13,6 +13,7 @@ import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Fagområde.Sykepenger
 import no.nav.helse.utbetalingslinjer.Fagområde.SykepengerRefusjon
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -96,7 +97,7 @@ internal class Utbetaling private constructor(
     )
 
     private val oppdragsperiode = Oppdrag.periode(arbeidsgiverOppdrag, personOppdrag)
-    internal val periode get() = oppdragsperiode.oppdaterTom(utbetalingstidslinje.periode()).takeUnless { it == Oppdrag.INGEN } ?: Oppdrag.INGEN // TOM forlenges eventuelt, fordi <fyll inn forklaring her>
+    private val periode get() = oppdragsperiode?.oppdaterTom(utbetalingstidslinje.periode()) ?: utbetalingstidslinje.periode().oppdaterFom(LocalDate.MIN)
     private val stønadsdager get() = Oppdrag.stønadsdager(arbeidsgiverOppdrag, personOppdrag)
     private val observers = mutableSetOf<UtbetalingObserver>()
     private var forrigeHendelse: ArbeidstakerHendelse? = null
@@ -123,6 +124,13 @@ internal class Utbetaling private constructor(
         check(kanIkkeForsøkesPåNy())
         if (type == Utbetalingtype.REVURDERING) return hvisRevurdering()
         return hvisUtbetaling()
+    }
+
+    internal fun harNærliggendeUtbetaling(arbeidsgiverperiode: Arbeidsgiverperiode?, other: Periode): Boolean {
+        if (arbeidsgiverOppdrag.isEmpty() && personOppdrag.isEmpty()) return false
+        if (arbeidsgiverperiode == null) return periode.overlapperMed(other)
+        arbeidsgiverperiode.kjentDag(other.endInclusive)
+        return periode in arbeidsgiverperiode
     }
 
     // this kan revurdere other gitt at fagsystemId == other.fagsystemId,
@@ -443,6 +451,9 @@ internal class Utbetaling private constructor(
         internal fun harBetalt(utbetalinger: List<Utbetaling>, dato: LocalDate): Boolean {
             return utbetalinger.utbetaltTidslinje().harBetalt(dato)
         }
+
+        internal fun List<Utbetaling>.harNærliggendeUtbetaling(arbeidsgiverperiode: Arbeidsgiverperiode?, periode: Periode) =
+            aktive().any { it.harNærliggendeUtbetaling(arbeidsgiverperiode, periode) }
 
         internal fun List<Utbetaling>.utbetaltTidslinje() =
             utbetalte()

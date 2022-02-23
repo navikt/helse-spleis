@@ -1533,7 +1533,11 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             "Opplysninger fra Infotrygd har endret seg etter at vedtaket ble fattet. Undersøk om det er overlapp med periode fra Infotrygd.",
             1.vedtaksperiode.filter()
         )
-        assertWarning("Validering av ytelser ved revurdering feilet. Utbetalingen må annulleres", 1.vedtaksperiode.filter())
+        assertWarning(
+            "Validering av ytelser ved revurdering feilet. Utbetalingen må annulleres",
+            1.vedtaksperiode.filter()
+        )
+        assertSisteTilstand(1.vedtaksperiode, REVURDERING_FEILET)
     }
 
     private fun assertEtterspurteYtelser(expected: Int, vedtaksperiodeIdInnhenter: IdInnhenter) {

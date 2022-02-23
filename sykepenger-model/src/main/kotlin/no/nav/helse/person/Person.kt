@@ -494,10 +494,8 @@ class Person private constructor(
             }
         }
 
-    internal fun harNærliggendeUtbetaling(periode: Periode): Boolean {
-        val arbeidsgiverperiode = 16L
-        val farligOmråde = periode.let { it.start.minusDays(arbeidsgiverperiode) til it.endInclusive.plusYears(3) }
-        return arbeidsgivere.any { it.harOverlappendeUtbetaling(farligOmråde) }
+    internal fun harNærliggendeUtbetaling(arbeidsgiverperiode: Arbeidsgiverperiode?, periode: Periode): Boolean {
+        return arbeidsgivere.any { it.harNærliggendeUtbetaling(arbeidsgiverperiode, periode.oppdaterTom(periode.endInclusive.plusYears(3))) }
     }
 
     internal fun lagreDødsdato(dødsdato: LocalDate) {

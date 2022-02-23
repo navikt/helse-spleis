@@ -48,7 +48,7 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `søknad som er lange nok etter utbetalingsperioden skal ikke til ny kø`() {
+    fun `søknad som har samme arbeidsgiverperiode som tidligere utbetaling`() {
         nyttVedtak(1.januar, 31.januar)
         håndterSykmelding(Sykmeldingsperiode(17.februar, 25.februar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(17.februar, 20.februar, 80.prosent))
@@ -57,6 +57,18 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
         ))
         val søknadHendelseId = håndterSøknad(Sykdom(17.februar, 20.februar, 80.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), 17.februar)
+
+        assertTrue(observatør.opprettOppgaveEvent().isEmpty())
+        assertTrue(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().any { søknadHendelseId in it.hendelser })
+    }
+
+    @Test
+    fun `søknad som er lange nok etter utbetalingsperioden skal ikke til ny kø`() {
+        nyttVedtak(1.januar, 31.januar)
+        håndterSykmelding(Sykmeldingsperiode(17.februar, 5.mars, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(17.februar, 4.mars, 80.prosent))
+        val søknadHendelseId = håndterSøknad(Sykdom(17.februar, 4.mars, 80.prosent))
+        person.søppelbøtte(hendelselogg, 17.februar til 5.mars)
 
         assertTrue(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().isEmpty())
         assertTrue(observatør.opprettOppgaveEvent().any { søknadHendelseId in it.hendelser })

@@ -787,9 +787,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun harNærliggendeUtbetaling(): Boolean {
-        val periode = arbeidsgiver.søknadsperioder(hendelseIder()).takeUnless { it.isEmpty() }
-            ?.let { perioder -> perioder.minOf { it.start } til perioder.maxOf { it.endInclusive } } ?: this.periode
-        return person.harNærliggendeUtbetaling(periode)
+        return person.harNærliggendeUtbetaling(finnArbeidsgiverperiode(), periode)
     }
 
     private fun mottaUtbetalingTilRevurdering(hendelse: ArbeidstakerHendelse, utbetaling: Utbetaling) {
@@ -2545,10 +2543,11 @@ internal class Vedtaksperiode private constructor(
                 hendelse,
                 vedtaksperiode.periode
             )
-            if (skalOppretteOppgave(vedtaksperiode)) sendOppgaveEvent(vedtaksperiode, hendelse)
+            sendOppgaveEvent(vedtaksperiode, hendelse)
         }
 
         private fun sendOppgaveEvent(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+            if (!skalOppretteOppgave(vedtaksperiode)) return
             val inntektsmeldingIds =
                 vedtaksperiode.arbeidsgiver.finnSammenhengendePeriode(vedtaksperiode.skjæringstidspunkt).mapNotNull { it.inntektsmeldingInfo }.ider()
             if (vedtaksperiode.harNærliggendeUtbetaling()) {
@@ -2571,7 +2570,7 @@ internal class Vedtaksperiode private constructor(
         private fun skalOppretteOppgave(vedtaksperiode: Vedtaksperiode) =
             vedtaksperiode.inntektsmeldingInfo != null ||
                 vedtaksperiode.arbeidsgiver.finnSammenhengendePeriode(vedtaksperiode.skjæringstidspunkt).any { it.inntektsmeldingInfo != null } ||
-                vedtaksperiode.arbeidsgiver.søknadsperioder(vedtaksperiode.hendelseIder()).isNotEmpty()
+                vedtaksperiode.sykdomstidslinje.any { it.kommerFra(Søknad::class) }
 
         override fun håndter(
             person: Person,
@@ -2692,10 +2691,6 @@ internal class Vedtaksperiode private constructor(
 
         internal fun List<Vedtaksperiode>.iderMedUtbetaling(utbetalingId: UUID) =
             filter { it.utbetalinger.harId(utbetalingId) }.map { it.id }
-
-        internal fun List<Vedtaksperiode>.harOverlappendeUtbetaling(periode: Periode) =
-            filter { it.tilstand !is AvsluttetUtenUtbetaling }
-                .any { it.utbetalinger.overlapperMed(periode) }
 
         internal fun List<Vedtaksperiode>.periode(): Periode {
             val fom = minOf { it.periode.start }

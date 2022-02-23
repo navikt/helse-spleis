@@ -11,6 +11,7 @@ import no.nav.helse.utbetalingslinjer.Oppdragstatus.AVVIST
 import no.nav.helse.utbetalingslinjer.Oppdragstatus.FEIL
 import no.nav.helse.utbetalingstidslinje.genererUtbetalingsreferanse
 import java.time.LocalDate
+import java.time.LocalDate.MIN
 import java.time.LocalDateTime
 import java.util.*
 
@@ -33,18 +34,11 @@ internal class Oppdrag private constructor(
     private var simuleringsResultat: Simulering.SimuleringResultat? = null
 ) : MutableList<Utbetalingslinje> by linjer, Aktivitetskontekst {
     internal companion object {
-
-        val INGEN = object : Periode(LocalDate.MIN, LocalDate.MAX) {
-            override fun overlapperMed(other: Periode) =
-                false
-        }
-
-        internal fun periode(vararg oppdrag: Oppdrag): Periode {
+        internal fun periode(vararg oppdrag: Oppdrag): Periode? {
             return oppdrag
                 .filter(Oppdrag::isNotEmpty)
                 .takeIf(List<*>::isNotEmpty)
                 ?.let { liste -> Periode(liste.minOf { it.førstedato }, liste.maxOf { it.sistedato }) }
-                ?: INGEN
         }
 
         internal fun stønadsdager(vararg oppdrag: Oppdrag): Int {
@@ -60,8 +54,8 @@ internal class Oppdrag private constructor(
         internal fun kanIkkeForsøkesPåNy(vararg oppdrag: Oppdrag) = oppdrag.any { it.status == AVVIST }
     }
 
-    internal val førstedato get() = linjer.firstOrNull()?.let { it.datoStatusFom() ?: it.fom } ?: LocalDate.MIN
-    internal val sistedato get() = linjer.lastOrNull()?.tom ?: LocalDate.MIN
+    internal val førstedato get() = linjer.firstOrNull()?.let { it.datoStatusFom() ?: it.fom } ?: MIN
+    internal val sistedato get() = linjer.lastOrNull()?.tom ?: MIN
 
     internal constructor(
         mottaker: String,

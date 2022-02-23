@@ -15,7 +15,6 @@ import no.nav.helse.person.Vedtaksperiode.Companion.IKKE_FERDIG_REVURDERT
 import no.nav.helse.person.Vedtaksperiode.Companion.KLAR_TIL_BEHANDLING
 import no.nav.helse.person.Vedtaksperiode.Companion.REVURDERING_IGANGSATT
 import no.nav.helse.person.Vedtaksperiode.Companion.harNødvendigInntekt
-import no.nav.helse.person.Vedtaksperiode.Companion.harOverlappendeUtbetaling
 import no.nav.helse.person.Vedtaksperiode.Companion.harOverlappendeUtbetaltePerioder
 import no.nav.helse.person.Vedtaksperiode.Companion.harUtbetaling
 import no.nav.helse.person.Vedtaksperiode.Companion.iderMedUtbetaling
@@ -36,6 +35,7 @@ import no.nav.helse.utbetalingslinjer.Feriepengeutbetaling
 import no.nav.helse.utbetalingslinjer.Feriepengeutbetaling.Companion.gjelderFeriepengeutbetaling
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling
+import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.harNærliggendeUtbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.utbetaltTidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
 import no.nav.helse.utbetalingslinjer.UtbetalingObserver
@@ -391,7 +391,8 @@ internal class Arbeidsgiver private constructor(
         }
         noenHarHåndtert(søknad, Vedtaksperiode::håndter, "Forventet ikke ${søknad.kilde}. Har nok ikke mottatt sykmelding")
         if (søknad.hasErrorsOrWorse()) {
-            val harNærliggendeUtbetaling = søknad.sykdomstidslinje().periode()?.let(person::harNærliggendeUtbetaling) ?: false
+            val søknadsperiode = søknad.sykdomstidslinje().periode()
+            val harNærliggendeUtbetaling = søknadsperiode?.let { person.harNærliggendeUtbetaling(arbeidsgiverperiode(it, MaskinellJurist()), it) } ?: false
             if (harNærliggendeUtbetaling) person.emitOpprettOppgaveForSpeilsaksbehandlereEvent(søknad) else person.emitOpprettOppgaveEvent(søknad)
             person.emitHendelseIkkeHåndtert(søknad)
         }
@@ -521,9 +522,9 @@ internal class Arbeidsgiver private constructor(
         val reberegnetTidslinje = reberegnUtbetalte(hendelse, arbeidsgivere, periode, vilkårsgrunnlagHistorikk)
 
         val etterutbetaling = sisteUtbetalte.etterutbetale(hendelse, reberegnetTidslinje)
-            ?: return hendelse.info("Utbetalingen for $organisasjonsnummer for perioden ${sisteUtbetalte.periode} er ikke blitt endret. Grunnbeløpsregulering gjennomføres ikke.")
+            ?: return hendelse.info("Utbetalingen for $organisasjonsnummer for perioden $sisteUtbetalte er ikke blitt endret. Grunnbeløpsregulering gjennomføres ikke.")
 
-        hendelse.info("Etterutbetaler for $organisasjonsnummer for perioden ${sisteUtbetalte.periode}")
+        hendelse.info("Etterutbetaler for $organisasjonsnummer for perioden $sisteUtbetalte")
         nyUtbetaling(etterutbetaling)
         etterutbetaling.håndter(hendelse)
     }
@@ -923,8 +924,8 @@ internal class Arbeidsgiver private constructor(
     internal fun tidligerePerioderFerdigBehandlet(vedtaksperiode: Vedtaksperiode) =
         Vedtaksperiode.tidligerePerioderFerdigBehandlet(vedtaksperioder, vedtaksperiode)
 
-    internal fun harOverlappendeUtbetaling(periode: Periode) =
-        vedtaksperioder.harOverlappendeUtbetaling(periode)
+    internal fun harNærliggendeUtbetaling(arbeidsgiverperiode: Arbeidsgiverperiode?, periode: Periode) =
+        utbetalinger.harNærliggendeUtbetaling(arbeidsgiverperiode, periode)
 
     internal fun alleAndrePerioderErKlare(vedtaksperiode: Vedtaksperiode) = vedtaksperioder.filterNot { it == vedtaksperiode }.none(IKKE_FERDIG_REVURDERT)
 
@@ -1078,9 +1079,6 @@ internal class Arbeidsgiver private constructor(
 
     internal fun erSykmeldingenDenSistSkrevne(sykmelding: Sykmelding, hendelseIder: Set<UUID>): Boolean =
         sykdomshistorikk.erSykmeldingenDenSistSkrevne(sykmelding, hendelseIder)
-
-    internal fun søknadsperioder(hendelseIder: Set<UUID>) = sykdomshistorikk.søknadsperioder(hendelseIder)
-
 
     internal fun loggførHendelsesreferanse(organisasjonsnummer: String, skjæringstidspunkt: LocalDate, overstyrInntekt: OverstyrInntekt) {
         if (this.organisasjonsnummer != organisasjonsnummer) return

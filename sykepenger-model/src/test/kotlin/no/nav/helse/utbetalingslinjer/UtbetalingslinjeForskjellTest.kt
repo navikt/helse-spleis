@@ -46,9 +46,9 @@ internal class UtbetalingslinjeForskjellTest {
 
     @Test
     fun `periode med bare tomme oppdrag`() {
-        assertEquals(LocalDate.MIN til LocalDate.MAX, Oppdrag.periode())
-        assertEquals(LocalDate.MIN til LocalDate.MAX, Oppdrag.periode(linjer()))
-        assertEquals(LocalDate.MIN til LocalDate.MAX, Oppdrag.periode(linjer(), linjer()))
+        assertNull(Oppdrag.periode())
+        assertNull(Oppdrag.periode(linjer()))
+        assertNull(Oppdrag.periode(linjer(), linjer()))
     }
 
     @Test

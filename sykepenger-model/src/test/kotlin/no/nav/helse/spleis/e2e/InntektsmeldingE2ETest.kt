@@ -1683,7 +1683,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertWarning("Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.", 3.vedtaksperiode.filter())
         assertWarning("Første fraværsdag i inntektsmeldingen er ulik skjæringstidspunktet. Kontrollér at inntektsmeldingen er knyttet til riktig periode.", 3.vedtaksperiode.filter())
         assertWarning("Inntektsmeldingen og vedtaksløsningen er uenige om beregningen av arbeidsgiverperioden. Undersøk hva som er riktig arbeidsgiverperiode.", 3.vedtaksperiode.filter())
-        assertEquals(17.januar til 31.mars, inspektør.utbetalinger.last().periode)
+        assertEquals(17.januar til 31.mars, inspektør.utbetalinger.last().inspektør.periode)
     }
 
     @Test

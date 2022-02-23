@@ -48,7 +48,7 @@ open class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Ite
         private fun List<Periode>.oppdaterSiste(periode: Periode) = this.dropLast(1).plusElement(periode)
     }
 
-    open fun overlapperMed(other: Periode) =
+    fun overlapperMed(other: Periode) =
         maxOf(this.start, other.start) <= minOf(this.endInclusive, other.endInclusive)
 
     internal fun slutterEtter(other: LocalDate) =
