@@ -13,8 +13,13 @@ import no.nav.helse.serde.PersonData.InfotrygdhistorikkElementData.Companion.til
 import no.nav.helse.somFødselsnummer
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.testhelpers.*
+import no.nav.helse.testhelpers.S
+import no.nav.helse.testhelpers.resetSeed
+import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.utbetalingslinjer.Utbetaling
+import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
+import no.nav.helse.utbetalingstidslinje.Inntekter
+import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilder
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
@@ -501,6 +506,25 @@ internal class InfotrygdhistorikkTest {
             UkjentInfotrygdperiode(16.januar, 18.januar)
         )))
         assertFalse(historikk.harBrukerutbetalingerFor("ag1", 10.januar til 18.januar))
+    }
+
+    @Test
+    fun `tar ikke med nyere historikk i beregning av utbetalingstidslinje`() {
+        historikk.oppdaterHistorikk(historikkelement(listOf(
+            ArbeidsgiverUtbetalingsperiode("ag1", 1.februar, 10.februar, 100.prosent, 25000.månedlig),
+            Friperiode(11.februar,  15.februar),
+        )))
+        val sykdomstidslinje = 31.S
+        val builder = UtbetalingstidslinjeBuilder(Inntekter(
+            skjæringstidspunkter = listOf(1.januar),
+            inntektPerSkjæringstidspunkt = mapOf(
+                1.januar to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 25000.månedlig)
+            ),
+            regler = ArbeidsgiverRegler.Companion.NormalArbeidstaker,
+            subsumsjonObserver = MaskinellJurist()
+        ))
+        val utbetalingstidslinje = historikk.build("ag1", sykdomstidslinje, builder, MaskinellJurist())
+        assertEquals(1.januar til 31.januar, utbetalingstidslinje.periode())
     }
 
     private fun utbetaling() = Utbetaling.lagUtbetaling(

@@ -269,13 +269,14 @@ internal class ArbeidsgiverUtbetalingerTest {
         val person = Person("aktørid", fnr, MaskinellJurist())
         // seed arbeidsgiver med sykdomshistorikk
         val førsteDag = arbeidsgiverTidslinje.periode().start
+        val sisteDag = arbeidsgiverTidslinje.periode().endInclusive
         person.håndter(
             Sykmelding(
                 meldingsreferanseId = UUID.randomUUID(),
                 fnr = UNG_PERSON_FNR_2018.toString(),
                 aktørId = "",
                 orgnummer = ORGNUMMER,
-                sykeperioder = listOf(Sykmeldingsperiode(førsteDag, førsteDag, 100.prosent)),
+                sykeperioder = listOf(Sykmeldingsperiode(førsteDag, sisteDag, 100.prosent)),
                 sykmeldingSkrevet = 1.januar.atStartOfDay(),
                 mottatt = 1.januar.atStartOfDay()
             )

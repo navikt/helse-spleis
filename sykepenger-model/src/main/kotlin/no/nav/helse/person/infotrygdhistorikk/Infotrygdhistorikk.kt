@@ -155,7 +155,7 @@ internal class Infotrygdhistorikk private constructor(
         subsumsjonObserver: SubsumsjonObserver
     ): Utbetalingstidslinje {
         build(organisasjonsnummer, sykdomstidslinje, builder as ArbeidsgiverperiodeMediator, subsumsjonObserver)
-        return fjernHistorikk(organisasjonsnummer, builder.result(), sykdomstidslinje.førsteDag())
+        return fjernHistorikk(organisasjonsnummer, builder.result(), sykdomstidslinje.førsteDag()).kutt(sykdomstidslinje.sisteDag())
     }
 
     private fun fjernHistorikk(organisasjonsnummer: String, utbetalingstidslinje: Utbetalingstidslinje, førsteDag: LocalDate): Utbetalingstidslinje {

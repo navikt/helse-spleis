@@ -90,7 +90,7 @@ internal class InfotrygdhistorikkElement private constructor(
 
     internal fun build(organisasjonsnummer: String, sykdomstidslinje: Sykdomstidslinje, teller: Arbeidsgiverperiodeteller, builder: SykdomstidslinjeVisitor) {
         val dekoratør = Infotrygddekoratør(teller, builder, perioder.filterIsInstance<Utbetalingsperiode>().filter { it.gjelder(organisasjonsnummer) })
-        historikkFor(organisasjonsnummer, sykdomstidslinje).accept(dekoratør)
+        historikkFor(organisasjonsnummer, sykdomstidslinje).fremTilOgMed(sykdomstidslinje.sisteDag()).accept(dekoratør)
     }
 
     internal fun historikkFor(orgnummer: String, sykdomstidslinje: Sykdomstidslinje): Sykdomstidslinje {

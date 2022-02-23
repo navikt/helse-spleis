@@ -1506,7 +1506,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Revurdering feiler når det kommer nyere IT historikk (frem i tid), men det ser OK ut i speil`() {
+    fun `Revurdering med nyere IT historikk (frem i tid)`() {
         /*
         Når periode ble revurdert dukker det opp en utbetaling etter vedtaksperioden vi ikke kjente til før. Siden vi har utbetalingsdager i infotrygd prøver
         vi å beregne utbetaling uten å ha lagret en inntekt. Det fører til en error i aktivitetsloggen som igjen gjør at perioden ender opp i RevurderingFeilet
@@ -1534,10 +1534,10 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             1.vedtaksperiode.filter()
         )
         assertWarning(
-            "Validering av ytelser ved revurdering feilet. Utbetalingen må annulleres",
+            "Det er utbetalt en periode i Infotrygd etter perioden du skal revurdere nå. Undersøk at antall forbrukte dager og grunnlag i Infotrygd er riktig",
             1.vedtaksperiode.filter()
         )
-        assertSisteTilstand(1.vedtaksperiode, REVURDERING_FEILET)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
     }
 
     private fun assertEtterspurteYtelser(expected: Int, vedtaksperiodeIdInnhenter: IdInnhenter) {
