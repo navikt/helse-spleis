@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
 
-internal class V145LagreArbeidsforholdForOpptjeningTest : MigrationTest(V145LagreArbeidsforholdForOpptjening()) {
+internal class V146LagreArbeidsforholdForOpptjeningTest : MigrationTest(V146LagreArbeidsforholdForOpptjening()) {
     val vilkårsgrunnlagId1 = UUID.randomUUID()
     override fun meldingerSupplier(): MeldingerSupplier = MeldingerSupplier {
         mapOf(
@@ -18,8 +18,8 @@ internal class V145LagreArbeidsforholdForOpptjeningTest : MigrationTest(V145Lagr
     @Test
     fun `kaster ikke exceptions`() {
         assertMigration(
-            "/migrations/145/expected.json",
-            "/migrations/145/original.json"
+            "/migrations/146/expected.json",
+            "/migrations/146/original.json"
         )
     }
 
