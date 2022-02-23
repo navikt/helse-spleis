@@ -102,7 +102,8 @@ internal class V146LagreArbeidsforholdForOpptjening : JsonMigration(version = 14
             sikkerLogg.info(
                 "Fant vedtaksperioder uten vilkårsgrunnlag med kobling til melding for fnr=$fødselsnummer"
                     + " skjæringstidspunkter vi ikke har kobling for: $vedtaksperioderUtenVilkårsgrunnlagMedKobling "
-                    + " skjæringstidspunkter vi ikke kjenner til: $vedtaksperioderUtenVilkårsgrunnlagUtenKobling"
+                    + " skjæringstidspunkter vi ikke kjenner til: $vedtaksperioderUtenVilkårsgrunnlagUtenKobling, "
+                    + "erTom=${vedtaksperioderUtenVilkårsgrunnlagUtenKobling.isEmpty()}"
             )
         }
 
