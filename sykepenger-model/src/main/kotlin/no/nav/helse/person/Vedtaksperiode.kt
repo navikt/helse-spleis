@@ -823,11 +823,6 @@ internal class Vedtaksperiode private constructor(
         tilstand(hendelse, avgjørTilstandForGap(tilstandHvisForlengelse, tilstandHvisGap))
     }
 
-    private fun validerSenerePerioderIInfotrygd(infotrygdhistorikk: Infotrygdhistorikk): Boolean {
-        val sisteYtelseFom = infotrygdhistorikk.førsteSykepengedagISenestePeriode(organisasjonsnummer) ?: return true
-        return sisteYtelseFom < periode.endInclusive
-    }
-
     private fun harArbeidsgivereMedOverlappendeUtbetaltePerioder(periode: Periode) =
         person.harArbeidsgivereMedOverlappendeUtbetaltePerioder(organisasjonsnummer, periode)
 
@@ -1423,11 +1418,6 @@ internal class Vedtaksperiode private constructor(
                 onValidationFailed {
                     ytelser.warn("Opplysninger fra Infotrygd har endret seg etter at vedtaket ble fattet. Undersøk om det er overlapp med periode fra Infotrygd.")
                 }
-                valider("Det er utbetalt en periode i Infotrygd etter perioden du skal revurdere nå. Undersøk at antall forbrukte dager og grunnlag i Infotrygd er riktig") {
-                    vedtaksperiode.validerSenerePerioderIInfotrygd(
-                        infotrygdhistorikk
-                    )
-                }
                 valider { infotrygdhistorikk.valider(this, arbeidsgiver, vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt) }
             }
             validation(ytelser) {
@@ -1863,7 +1853,6 @@ internal class Vedtaksperiode private constructor(
                     if (!ytelser.hasErrorsOrWorse()) error("Behandling av Ytelser feilet, årsak ukjent")
                     vedtaksperiode.tilstand(ytelser, TilInfotrygd)
                 }
-                valider("Det er utbetalt en senere periode i Infotrygd") { vedtaksperiode.validerSenerePerioderIInfotrygd(infotrygdhistorikk) }
                 onSuccess {
                     vedtaksperiode.skjæringstidspunktFraInfotrygd = person.skjæringstidspunkt(vedtaksperiode.periode)
                 }

@@ -1,16 +1,13 @@
 package no.nav.helse.person.infotrygdhistorikk
 
-import no.nav.helse.februar
+import no.nav.helse.*
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
-import no.nav.helse.januar
-import no.nav.helse.mars
 import no.nav.helse.person.*
 import no.nav.helse.person.Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.serde.PersonData
 import no.nav.helse.serde.PersonData.InfotrygdhistorikkElementData.Companion.tilModellObjekt
-import no.nav.helse.somFødselsnummer
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.S
@@ -285,7 +282,7 @@ internal class InfotrygdhistorikkTest {
 
     @Test
     fun `tom historikk validerer`() {
-        assertTrue(historikk.valider(aktivitetslogg, Periodetype.FØRSTEGANGSBEHANDLING, 1.januar til 31.januar, 1.januar))
+        assertTrue(historikk.valider(aktivitetslogg, Periodetype.FØRSTEGANGSBEHANDLING, 1.januar til 31.januar, 1.januar, "ag1"))
         assertFalse(aktivitetslogg.hasErrorsOrWorse())
     }
 
@@ -345,20 +342,40 @@ internal class InfotrygdhistorikkTest {
     fun `statslønn lager error ved Overgang fra IT`() {
         historikk.oppdaterHistorikk(historikkelement(harStatslønn = true))
         aktivitetslogg.barn().also {
-            assertTrue(historikk.valider(it, Periodetype.FØRSTEGANGSBEHANDLING, 1.januar til 31.januar, 1.januar))
+            assertTrue(historikk.valider(it, Periodetype.FØRSTEGANGSBEHANDLING, 1.januar til 31.januar, 1.januar, "ag1"))
             assertFalse(it.hasWarningsOrWorse())
         }
         aktivitetslogg.barn().also {
-            assertTrue(historikk.valider(it, Periodetype.FORLENGELSE, 1.januar til 31.januar, 1.januar))
+            assertTrue(historikk.valider(it, Periodetype.FORLENGELSE, 1.januar til 31.januar, 1.januar, "ag1"))
             assertFalse(it.hasWarningsOrWorse())
         }
         aktivitetslogg.barn().also {
-            assertTrue(historikk.valider(it, Periodetype.INFOTRYGDFORLENGELSE, 1.januar til 31.januar, 1.januar))
+            assertTrue(historikk.valider(it, Periodetype.INFOTRYGDFORLENGELSE, 1.januar til 31.januar, 1.januar, "ag1"))
             assertFalse(it.hasWarningsOrWorse())
         }
         aktivitetslogg.barn().also {
-            assertFalse(historikk.valider(it, Periodetype.OVERGANG_FRA_IT, 1.januar til 31.januar, 1.januar))
+            assertFalse(historikk.valider(it, Periodetype.OVERGANG_FRA_IT, 1.januar til 31.januar, 1.januar, "ag1"))
             assertTrue(it.hasErrorsOrWorse())
+        }
+    }
+
+    @Test
+    fun `nyere opplysninger i Infotrygd`() {
+        historikk.oppdaterHistorikk(historikkelement(listOf(
+            ArbeidsgiverUtbetalingsperiode("ag1", 1.februar,  15.februar, 100.prosent, 1500.daglig),
+            Friperiode(15.mars,  20.mars)
+        ), inntekter = listOf(Inntektsopplysning("ag1", 1.februar, 1000.daglig, true))))
+        aktivitetslogg.barn().also {
+            assertTrue(historikk.valider(it, Periodetype.FØRSTEGANGSBEHANDLING, 1.januar til 31.januar, 1.januar, "ag1"))
+            assertTrue(it.hasWarningsOrWorse())
+        }
+        aktivitetslogg.barn().also {
+            assertTrue(historikk.valider(it, Periodetype.FØRSTEGANGSBEHANDLING, 20.februar til 28.februar, 20.februar, "ag1"))
+            assertFalse(it.hasWarningsOrWorse())
+        }
+        aktivitetslogg.barn().also {
+            assertTrue(historikk.valider(it, Periodetype.FØRSTEGANGSBEHANDLING, 1.april til 5.april, 1.april, "ag1"))
+            assertFalse(it.hasWarningsOrWorse())
         }
     }
 

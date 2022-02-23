@@ -27,12 +27,12 @@ internal class Infotrygdhistorikk private constructor(
 
     internal fun valider(aktivitetslogg: IAktivitetslogg, arbeidsgiver: Arbeidsgiver, periode: Periode, skjæringstidspunkt: LocalDate): Boolean {
         val avgrensetPeriode = arbeidsgiver.avgrensetPeriode(periode)
-        return valider(aktivitetslogg, arbeidsgiver.periodetype(periode), avgrensetPeriode, skjæringstidspunkt)
+        return valider(aktivitetslogg, arbeidsgiver.periodetype(periode), avgrensetPeriode, skjæringstidspunkt, arbeidsgiver.organisasjonsnummer())
     }
 
-    internal fun valider(aktivitetslogg: IAktivitetslogg, periodetype: Periodetype, periode: Periode, skjæringstidspunkt: LocalDate): Boolean {
+    internal fun valider(aktivitetslogg: IAktivitetslogg, periodetype: Periodetype, periode: Periode, skjæringstidspunkt: LocalDate, orgnummer: String): Boolean {
         if (!harHistorikk()) return true
-        return siste.valider(aktivitetslogg, periodetype, periode, skjæringstidspunkt)
+        return siste.valider(aktivitetslogg, periodetype, periode, skjæringstidspunkt, orgnummer)
     }
 
     internal fun validerOverlappende(aktivitetslogg: IAktivitetslogg, periode: Periode, skjæringstidspunkt: LocalDate): Boolean {
@@ -96,11 +96,6 @@ internal class Infotrygdhistorikk private constructor(
     internal fun sisteSykepengedag(orgnummer: String): LocalDate? {
         if (!harHistorikk()) return null
         return siste.sisteSykepengedag(orgnummer)
-    }
-
-    internal fun førsteSykepengedagISenestePeriode(orgnummer: String): LocalDate? {
-        if (!harHistorikk()) return null
-        return siste.førsteSykepengedagISenestePeriode(orgnummer)
     }
 
     internal fun lagreVilkårsgrunnlag(

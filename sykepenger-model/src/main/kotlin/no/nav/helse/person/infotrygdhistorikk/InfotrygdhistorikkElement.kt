@@ -133,9 +133,11 @@ internal class InfotrygdhistorikkElement private constructor(
         inntekter.fjern(nødnummer).lagreVilkårsgrunnlag(vilkårsgrunnlagHistorikk, sykepengegrunnlagFor)
     }
 
-    internal fun valider(aktivitetslogg: IAktivitetslogg, periodetype: Periodetype, periode: Periode, skjæringstidspunkt: LocalDate): Boolean {
+    internal fun valider(aktivitetslogg: IAktivitetslogg, periodetype: Periodetype, periode: Periode, skjæringstidspunkt: LocalDate, organisasjonsnummer: String): Boolean {
         validerUgyldigePerioder(aktivitetslogg)
         validerStatslønn(aktivitetslogg, periodetype)
+        if (harNyereOpplysninger(organisasjonsnummer, periode))
+            aktivitetslogg.warn("Det er utbetalt en periode i Infotrygd etter perioden du skal behandle nå. Undersøk at antall forbrukte dager og grunnlag i Infotrygd er riktig")
         return valider(aktivitetslogg, perioder, periode, skjæringstidspunkt)
     }
 
@@ -206,10 +208,10 @@ internal class InfotrygdhistorikkElement private constructor(
             .maxOfOrNull { it.endInclusive }
     }
 
-    internal fun førsteSykepengedagISenestePeriode(orgnummer: String): LocalDate? {
+    private fun harNyereOpplysninger(orgnummer: String, periode: Periode): Boolean {
         return perioder.filterIsInstance<Utbetalingsperiode>()
             .filter { it.gjelder(orgnummer) }
-            .maxOfOrNull { it.start }
+            .any { it.slutterEtter(periode.endInclusive) }
     }
 
     internal fun oppfrisket(cutoff: LocalDateTime) =
