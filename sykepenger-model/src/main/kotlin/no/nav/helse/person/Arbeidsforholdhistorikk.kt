@@ -115,7 +115,7 @@ internal class Arbeidsforholdhistorikk private constructor(
             const val MAKS_INNTEKT_GAP = 2L
 
             internal fun List<Arbeidsforhold>.harArbeidsforholdSomErNyereEnn(skjæringstidspunkt: LocalDate, antallMåneder: Long) =
-                any { it.harArbeidetMindreEnn(skjæringstidspunkt, antallMåneder) && !it.deaktivert }
+                any { it.harArbeidetMindreEnn(skjæringstidspunkt, antallMåneder) && it.gjelder(skjæringstidspunkt) && !it.deaktivert }
 
             internal fun Collection<Arbeidsforhold>.erDeaktivert() = any { it.deaktivert }
             internal fun Collection<Arbeidsforhold>.opptjeningsperiode(skjæringstidspunkt: LocalDate) = filter { !it.deaktivert }

@@ -1,6 +1,7 @@
 package no.nav.helse.serde.api.v2.buildere
 
 import no.nav.helse.Grunnbeløp
+import no.nav.helse.Toggle
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.person.*
 import no.nav.helse.person.Inntektshistorikk.*
@@ -159,13 +160,14 @@ internal class VilkårsgrunnlagBuilder(
             sykepengegrunnlag: Sykepengegrunnlag,
             sammenligningsgrunnlag: Inntekt,
             avviksprosent: Prosent?,
-            antallOpptjeningsdagerErMinst: Int,
+            opptjening: Opptjening?,
             harOpptjening: Boolean,
-            medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
+            antallOpptjeningsdagerErMinst: Int,
             harMinimumInntekt: Boolean?,
             vurdertOk: Boolean,
             meldingsreferanseId: UUID?,
-            vilkårsgrunnlagId: UUID
+            vilkårsgrunnlagId: UUID,
+            medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus
         ) {
             val compositeSykepengegrunnlag = SykepengegrunnlagBuilder(sykepengegrunnlag, sammenligningsgrunnlagBuilder, skjæringstidspunkt, inntektshistorikkForAordningenBuilder).build()
             val minimumInntekt = InntektBuilder(person.minimumInntekt(skjæringstidspunkt)).build()
@@ -186,9 +188,9 @@ internal class VilkårsgrunnlagBuilder(
                     avviksprosent = avviksprosent?.prosent(),
                     grunnbeløp = grunnbeløp.årlig.toInt(),
                     meldingsreferanseId = meldingsreferanseId,
-                    antallOpptjeningsdagerErMinst = antallOpptjeningsdagerErMinst,
+                    antallOpptjeningsdagerErMinst = if (Toggle.OpptjeningIModellen.enabled) opptjening!!.opptjeningsdager() else antallOpptjeningsdagerErMinst,
                     oppfyllerKravOmMinstelønn = compositeSykepengegrunnlag.sykepengegrunnlag > minimumInntekt.årlig,
-                    oppfyllerKravOmOpptjening = harOpptjening,
+                    oppfyllerKravOmOpptjening = if (Toggle.OpptjeningIModellen.enabled) opptjening!!.erOppfylt() else harOpptjening,
                     oppfyllerKravOmMedlemskap = oppfyllerKravOmMedlemskap
                 )
             )

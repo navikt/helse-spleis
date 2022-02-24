@@ -1,5 +1,6 @@
 package no.nav.helse.person
 
+import no.nav.helse.Toggle
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Vilkårsgrunnlag
@@ -161,13 +162,14 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                 sykepengegrunnlag,
                 sammenligningsgrunnlag.sammenligningsgrunnlag,
                 avviksprosent,
-                antallOpptjeningsdagerErMinst,
+                opptjening,
                 harOpptjening,
-                medlemskapstatus,
+                antallOpptjeningsdagerErMinst,
                 harMinimumInntekt,
                 vurdertOk,
                 meldingsreferanseId,
-                vilkårsgrunnlagId
+                vilkårsgrunnlagId,
+                medlemskapstatus
             )
             sykepengegrunnlag.accept(vilkårsgrunnlagHistorikkVisitor)
             sammenligningsgrunnlag.accept(vilkårsgrunnlagHistorikkVisitor)
@@ -201,7 +203,8 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             val begrunnelser = mutableListOf<Begrunnelse>()
             if (medlemskapstatus == Medlemskapsvurdering.Medlemskapstatus.Nei) begrunnelser.add(Begrunnelse.ManglerMedlemskap)
             if (harMinimumInntekt == false) begrunnelser.add(alder.begrunnelseForMinimumInntekt(skjæringstidspunkt))
-            if (!harOpptjening) begrunnelser.add(Begrunnelse.ManglerOpptjening)
+            if (Toggle.OpptjeningIModellen.disabled && !harOpptjening) begrunnelser.add(Begrunnelse.ManglerOpptjening)
+            if (Toggle.OpptjeningIModellen.enabled && !opptjening!!.erOppfylt()) begrunnelser.add(Begrunnelse.ManglerOpptjening)
             Utbetalingstidslinje.avvis(tidslinjer, setOf(skjæringstidspunkt), begrunnelser)
         }
 

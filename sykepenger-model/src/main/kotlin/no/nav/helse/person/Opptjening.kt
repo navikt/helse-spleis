@@ -27,6 +27,8 @@ internal class Opptjening (
         visitor.postVisitOpptjening(this, arbeidsforhold, opptjeningsperiode)
     }
 
+    internal fun opptjeningFom() = opptjeningsperiode.start
+
     internal class ArbeidsgiverOpptjeningsgrunnlag(private val orgnummer: String, private val arbeidsforhold: List<Arbeidsforholdhistorikk.Arbeidsforhold>) {
         companion object {
             internal fun List<ArbeidsgiverOpptjeningsgrunnlag>.opptjeningsperiode(skjæringstidspunkt: LocalDate) =

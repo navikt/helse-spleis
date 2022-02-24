@@ -1,5 +1,6 @@
 package no.nav.helse.serde.api.builders
 
+import no.nav.helse.Toggle
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
@@ -327,13 +328,14 @@ private class GrunnlagsdataBuilder(skjæringstidspunkt: LocalDate, grunnlagsdata
         sykepengegrunnlag: Sykepengegrunnlag,
         sammenligningsgrunnlag: Inntekt,
         avviksprosent: Prosent?,
-        antallOpptjeningsdagerErMinst: Int,
+        opptjening: Opptjening?,
         harOpptjening: Boolean,
-        medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
+        antallOpptjeningsdagerErMinst: Int,
         harMinimumInntekt: Boolean?,
         vurdertOk: Boolean,
         meldingsreferanseId: UUID?,
-        vilkårsgrunnlagId: UUID
+        vilkårsgrunnlagId: UUID,
+        medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus
     ) {
         this.medlemskapstatus = when (medlemskapstatus) {
             Medlemskapsvurdering.Medlemskapstatus.Ja -> MedlemskapstatusDTO.JA
@@ -343,14 +345,14 @@ private class GrunnlagsdataBuilder(skjæringstidspunkt: LocalDate, grunnlagsdata
         this.grunnlagsdata = GrunnlagsdataDTO(
             beregnetÅrsinntektFraInntektskomponenten = sammenligningsgrunnlag.reflection { årlig, _, _, _ -> årlig },
             avviksprosent = avviksprosent?.ratio(),
-            antallOpptjeningsdagerErMinst = antallOpptjeningsdagerErMinst,
-            harOpptjening = harOpptjening,
+            antallOpptjeningsdagerErMinst = if (Toggle.OpptjeningIModellen.enabled) opptjening!!.opptjeningsdager() else antallOpptjeningsdagerErMinst,
+            harOpptjening = if (Toggle.OpptjeningIModellen.enabled) opptjening!!.erOppfylt() else harOpptjening,
             medlemskapstatus = this.medlemskapstatus
         )
         this.opptjening = OpptjeningDTO(
-            antallKjenteOpptjeningsdager = antallOpptjeningsdagerErMinst,
-            fom = skjæringstidspunkt.minusDays(antallOpptjeningsdagerErMinst.toLong()),
-            oppfylt = harOpptjening
+            antallKjenteOpptjeningsdager = if (Toggle.OpptjeningIModellen.enabled) opptjening!!.opptjeningsdager() else antallOpptjeningsdagerErMinst,
+            fom = if (Toggle.OpptjeningIModellen.enabled) opptjening!!.opptjeningFom() else skjæringstidspunkt.minusDays(antallOpptjeningsdagerErMinst.toLong()),
+            oppfylt = if (Toggle.OpptjeningIModellen.enabled) opptjening!!.erOppfylt() else harOpptjening,
         )
         this.avviksprosent = avviksprosent?.prosent()
         this.meldingsreferanseId = meldingsreferanseId

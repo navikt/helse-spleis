@@ -53,13 +53,14 @@ internal class PersonInspektør(person: Person): PersonVisitor {
         sykepengegrunnlag: Sykepengegrunnlag,
         sammenligningsgrunnlag: Inntekt,
         avviksprosent: Prosent?,
-        antallOpptjeningsdagerErMinst: Int,
+        opptjening: Opptjening?,
         harOpptjening: Boolean,
-        medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
+        antallOpptjeningsdagerErMinst: Int,
         harMinimumInntekt: Boolean?,
         vurdertOk: Boolean,
         meldingsreferanseId: UUID?,
-        vilkårsgrunnlagId: UUID
+        vilkårsgrunnlagId: UUID,
+        medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus
     ) {
         this.grunnlagsdata.add(skjæringstidspunkt to grunnlagsdata)
     }

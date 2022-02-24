@@ -239,13 +239,14 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         sykepengegrunnlag: Sykepengegrunnlag,
         sammenligningsgrunnlag: Inntekt,
         avviksprosent: Prosent?,
-        antallOpptjeningsdagerErMinst: Int,
+        opptjening: Opptjening?,
         harOpptjening: Boolean,
-        medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
+        antallOpptjeningsdagerErMinst: Int,
         harMinimumInntekt: Boolean?,
         vurdertOk: Boolean,
         meldingsreferanseId: UUID?,
-        vilkårsgrunnlagId: UUID
+        vilkårsgrunnlagId: UUID,
+        medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus
     ) {
         delegatee.preVisitGrunnlagsdata(
             skjæringstidspunkt,
@@ -253,13 +254,14 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
             sykepengegrunnlag,
             sammenligningsgrunnlag,
             avviksprosent,
-            antallOpptjeningsdagerErMinst,
+            opptjening,
             harOpptjening,
-            medlemskapstatus,
+            antallOpptjeningsdagerErMinst,
             harMinimumInntekt,
             vurdertOk,
             meldingsreferanseId,
-            vilkårsgrunnlagId
+            vilkårsgrunnlagId,
+            medlemskapstatus
         )
     }
 
