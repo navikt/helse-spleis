@@ -8,6 +8,7 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.inspectors.personLogg
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.ForlengelseFraInfotrygd
+import no.nav.helse.person.Periodetype
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
@@ -992,6 +993,36 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             forklaring = "https://trello.com/c/MBCGez52",
             nå = { assertNotNull(person.vilkårsgrunnlagFor(1.januar)) },
             ønsket = { assertNull(person.vilkårsgrunnlagFor(1.januar)) }
+        )
+    }
+
+    @Test
+    fun `forlengelse fra IT skal ikke kobles med periode i AvsluttetUtenUtbetaling`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
+
+        håndterSykmelding(Sykmeldingsperiode(17.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(17.januar, 31.januar, 100.prosent))
+        person.invaliderAllePerioder(Aktivitetslogg(), null)
+
+
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterUtbetalingshistorikk(1.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 31.januar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
+            Inntektsopplysning(ORGNUMMER, 17.januar, INNTEKT, true)
+        ))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+        håndterYtelser(3.vedtaksperiode)
+        håndterSimulering(3.vedtaksperiode)
+        assertForventetFeil(
+            "vet ikke om skjæringstidspunktet blir feil, men vedtaksperioden burde uansett ikke markeres som førstegangsbehandling når det ikke er gjort vilkårsprøving",
+            nå = {
+                assertEquals(1.januar, inspektør.skjæringstidspunkt(3.vedtaksperiode))
+                assertEquals(Periodetype.FØRSTEGANGSBEHANDLING, inspektør.periodetype(3.vedtaksperiode))
+            },
+            ønsket = {
+                assertEquals(17.januar, inspektør.skjæringstidspunkt(3.vedtaksperiode))
+                assertEquals(Periodetype.OVERGANG_FRA_IT, inspektør.periodetype(3.vedtaksperiode))
+            }
         )
     }
 }
