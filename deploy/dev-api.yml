@@ -65,7 +65,5 @@ spec:
     value: spleis
   - name: VAULT_MOUNTPATH
     value: postgresql/preprod-fss/
-  - name: SPEIL_API_V2
-    value: "true"
   - name: GraphQLPlayground
     value: "true"

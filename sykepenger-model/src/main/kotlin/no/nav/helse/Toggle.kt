@@ -1,9 +1,5 @@
 package no.nav.helse
 
-import no.nav.helse.person.IAktivitetslogg
-import no.nav.helse.person.filter.Featurefilter
-import no.nav.helse.utbetalingslinjer.Utbetaling
-
 /**
  * En toggle opprettes ved å angi initiell tilstand, og alternativt om tilstanden skal låses ved å angi [force]
  *
@@ -127,17 +123,12 @@ abstract class Toggle internal constructor(enabled: Boolean = false, private val
         }
     }
 
-    object OverlappendeSykmelding : Toggle(true)
-    object SendFeriepengeOppdrag : Toggle(true)
-    object DatoRangeJson : Toggle(true)
+    object GraphQLPlayground : Toggle("GraphQLPlayground", false)
+    object SendFeriepengeOppdrag : Toggle(false)
     object FlereArbeidsgivereFraInfotrygd : Toggle(false)
-    object Etterlevelse : Toggle()
-    object SpeilApiV2 : Toggle("SPEIL_API_V2")
-    object GraphQLPlayground : Toggle("GraphQLPlayground")
     object RevurdereInntektMedFlereArbeidsgivere : Toggle(false)
     object GjenopptaAvsluttetUtenUtbetaling : Toggle(false)
     object ForkastForlengelseAvForkastetPeriode : Toggle(false)
-
     object DelvisRefusjon : Toggle(false)
     object OpptjeningIModellen : Toggle(false)
 }

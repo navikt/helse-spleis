@@ -1,6 +1,5 @@
 package no.nav.helse.serde.api
 
-
 import no.nav.helse.*
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Dagtype.Feriedag
@@ -24,9 +23,7 @@ import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -34,16 +31,6 @@ import java.time.YearMonth
 import java.util.*
 
 internal class SpeilBuilderTest : AbstractEndToEndTest() {
-
-    @BeforeEach
-    fun beforeAllTests() {
-        Toggle.SpeilApiV2.enable()
-    }
-
-    @AfterEach
-    fun afterAllTests() {
-        Toggle.SpeilApiV2.pop()
-    }
 
     @Test
     fun `happy case`() {

@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.Toggle
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -9,22 +8,10 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.januar
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 internal class OverlappendeSykmeldingE2ETest : AbstractEndToEndTest() {
-
-    @BeforeEach
-    fun setup() {
-        Toggle.OverlappendeSykmelding.enable()
-    }
-
-    @AfterEach
-    fun teardown() {
-        Toggle.OverlappendeSykmelding.pop()
-    }
 
     @Test
     fun `sykmelding overlapper i starten av eksisterende periode (out of order)`() {

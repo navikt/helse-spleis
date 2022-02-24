@@ -48,7 +48,7 @@ class DateRanges {
     private val ranges = mutableListOf<DataHolder>()
     fun plus(date: LocalDate, data: Map<String, Any?>) = apply {
         val last = ranges.lastOrNull()
-        if (last != null && last.canBeJoinedBy(date, data) && Toggle.DatoRangeJson.enabled) {
+        if (last != null && last.canBeJoinedBy(date, data)) {
             last.range += date
         } else {
             ranges.add(DataHolder(DateRange.Single(date), data))

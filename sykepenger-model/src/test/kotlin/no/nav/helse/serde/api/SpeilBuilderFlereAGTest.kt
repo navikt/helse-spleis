@@ -24,15 +24,6 @@ import java.time.Month
 import java.time.YearMonth
 
 internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
-    @BeforeEach
-    fun beforeAllTests() {
-        Toggle.SpeilApiV2.enable()
-    }
-
-    @AfterEach
-    fun afterAllTests() {
-        Toggle.SpeilApiV2.pop()
-    }
 
     @Test
     fun `sender med ghost tidslinjer til speil`() {

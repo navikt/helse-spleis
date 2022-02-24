@@ -44,16 +44,6 @@ class JsonBuilderTest {
         private val orgnummer = "987654321"
     }
 
-    @BeforeEach
-    fun beforeEach() {
-        Toggle.Etterlevelse.enable()
-    }
-
-    @AfterEach
-    fun afterEach() {
-        Toggle.Etterlevelse.pop()
-    }
-
     @Test
     fun `gjenoppbygd Person skal være lik opprinnelig Person - The Jackson Way`() {
         val person = person()

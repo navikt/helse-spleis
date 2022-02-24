@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.graphql
 
-import no.nav.helse.Toggle
 import no.nav.helse.hendelser.utbetaling.UtbetalingOverført
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering
 import no.nav.helse.person.Person
@@ -23,7 +22,6 @@ internal class GraphQLApiTest : AbstractObservableTest() {
 
     @BeforeAll
     internal fun setupServer() {
-        Toggle.SpeilApiV2.enable()
         testServer = ApiTestServer()
         testServer.start()
     }
@@ -31,7 +29,6 @@ internal class GraphQLApiTest : AbstractObservableTest() {
     @AfterAll
     internal fun tearDownServer() {
         testServer.tearDown()
-        Toggle.SpeilApiV2.pop()
     }
 
     @BeforeEach

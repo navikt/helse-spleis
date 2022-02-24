@@ -10,7 +10,6 @@ import java.net.ServerSocket
 import java.net.URL
 
 fun main() = runBlocking {
-    Toggle.SpeilApiV2.enable()
     Toggle.GraphQLPlayground.enable()
     val server = ApiTestServer(4321)
     server.start()
