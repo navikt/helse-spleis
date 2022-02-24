@@ -7,8 +7,8 @@ import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.builders.UtbetaltEventBuilder
 import no.nav.helse.person.builders.VedtakFattetBuilder
-import no.nav.helse.person.filter.Brukerutbetalingfilter
 import no.nav.helse.person.filter.Featurefilter
+import no.nav.helse.person.filter.Utbetalingsfilter
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.harId
@@ -103,7 +103,7 @@ internal class VedtaksperiodeUtbetalinger(private val arbeidsgiver: Arbeidsgiver
         siste?.build(builder)
     }
 
-    internal fun build(builder: Brukerutbetalingfilter.Builder) {
+    internal fun build(builder: Utbetalingsfilter.Builder) {
         builder.utbetaling(siste!!)
     }
 

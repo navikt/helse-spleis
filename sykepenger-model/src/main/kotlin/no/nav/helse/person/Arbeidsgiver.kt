@@ -24,7 +24,7 @@ import no.nav.helse.person.Vedtaksperiode.Companion.periode
 import no.nav.helse.person.builders.UtbetalingsdagerBuilder
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
-import no.nav.helse.person.filter.Brukerutbetalingfilter
+import no.nav.helse.person.filter.Utbetalingsfilter
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.serde.reflection.Utbetalingstatus
@@ -1103,7 +1103,7 @@ internal class Arbeidsgiver private constructor(
             creator(organisasjonsnummer, ansattFom, ansattTom, erAktiv)
         }
 
-    internal fun build(filter: Brukerutbetalingfilter.Builder, inntektsmeldingId: UUID) {
+    internal fun build(filter: Utbetalingsfilter.Builder, inntektsmeldingId: UUID) {
         inntektshistorikk.build(filter, inntektsmeldingId)
     }
 

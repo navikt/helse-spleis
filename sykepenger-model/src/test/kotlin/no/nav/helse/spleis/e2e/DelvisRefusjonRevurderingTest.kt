@@ -57,7 +57,7 @@ internal class DelvisRefusjonRevurderingTest : AbstractEndToEndTest() {
             AVSLUTTET,
             AVVENTER_VILKÅRSPRØVING_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
-            REVURDERING_FEILET
+            AVVENTER_SIMULERING_REVURDERING
         )
 
     }
@@ -160,7 +160,7 @@ internal class DelvisRefusjonRevurderingTest : AbstractEndToEndTest() {
             orgnummer = a1
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        assertSisteTilstand(1.vedtaksperiode, orgnummer = a1, tilstand = REVURDERING_FEILET)
-        assertSisteTilstand(1.vedtaksperiode, orgnummer = a2, tilstand = REVURDERING_FEILET)
+        assertSisteTilstand(1.vedtaksperiode, orgnummer = a1, tilstand = AVVENTER_SIMULERING_REVURDERING)
+        assertSisteTilstand(1.vedtaksperiode, orgnummer = a2, tilstand = AVVENTER_ARBEIDSGIVERE_REVURDERING)
     }
 }

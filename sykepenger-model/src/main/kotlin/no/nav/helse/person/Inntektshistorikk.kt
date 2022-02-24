@@ -5,7 +5,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.subsumsjonsformat
-import no.nav.helse.person.filter.Brukerutbetalingfilter
+import no.nav.helse.person.filter.Utbetalingsfilter
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.summer
 import java.time.LocalDate
@@ -98,7 +98,7 @@ internal class Inntektshistorikk {
                 .mapNotNull { it.grunnlagForSykepengegrunnlag(periode) }
                 .firstOrNull()
 
-        internal fun build(filter: Brukerutbetalingfilter.Builder, inntektsmeldingId: UUID) {
+        internal fun build(filter: Utbetalingsfilter.Builder, inntektsmeldingId: UUID) {
             inntekter.forEach { it.build(filter, inntektsmeldingId) }
         }
 
@@ -122,7 +122,7 @@ internal class Inntektshistorikk {
 
         fun kanLagres(other: Inntektsopplysning) = true
         fun harInntektsmelding(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate) = false
-        fun build(filter: Brukerutbetalingfilter.Builder, inntektsmeldingId: UUID) {}
+        fun build(filter: Utbetalingsfilter.Builder, inntektsmeldingId: UUID) {}
     }
 
     internal class Saksbehandler(
@@ -182,7 +182,7 @@ internal class Inntektshistorikk {
     ) : Inntektsopplysning {
         override val prioritet = 60
 
-        override fun build(filter: Brukerutbetalingfilter.Builder, inntektsmeldingId: UUID) {
+        override fun build(filter: Utbetalingsfilter.Builder, inntektsmeldingId: UUID) {
             if (hendelseId != inntektsmeldingId) return
             filter.inntektsmeldingtidsstempel(tidsstempel)
         }
@@ -432,7 +432,7 @@ internal class Inntektshistorikk {
         RestoreJsonMode(this).apply(block)
     }
 
-    internal fun build(filter: Brukerutbetalingfilter.Builder, inntektsmeldingId: UUID) {
+    internal fun build(filter: Utbetalingsfilter.Builder, inntektsmeldingId: UUID) {
         nyesteInnslag()?.build(filter, inntektsmeldingId)
     }
 

@@ -24,7 +24,6 @@ import no.nav.helse.person.Vedtaksperiode.Companion.ALLE
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.subsumsjonsformat
-import no.nav.helse.person.filter.Brukerutbetalingfilter
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -428,8 +427,6 @@ class Person private constructor(
 
     internal fun harInfotrygdUtbetalt(orgnummer: String, skjæringstidspunkt: LocalDate) =
         infotrygdhistorikk.harBetalt(orgnummer, skjæringstidspunkt)
-
-    internal fun brukerutbetalingfilter() = Brukerutbetalingfilter.Builder(fødselsnummer)
 
     internal fun accept(visitor: PersonVisitor) {
         visitor.preVisitPerson(this, opprettet, aktørId, fødselsnummer, dødsdato, vilkårsgrunnlagHistorikk)

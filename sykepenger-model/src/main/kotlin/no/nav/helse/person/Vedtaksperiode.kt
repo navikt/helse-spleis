@@ -32,8 +32,7 @@ import no.nav.helse.person.builders.UtbetaltEventBuilder
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
-import no.nav.helse.person.filter.Brukerutbetalingfilter
-import no.nav.helse.person.filter.RevurderingBrukerutbetalingfilter
+import no.nav.helse.person.filter.Utbetalingsfilter
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
@@ -687,17 +686,15 @@ internal class Vedtaksperiode private constructor(
             hendelse.info("Behandlet en vedtaksperiode som tidligere ville blitt kastet ut på grunn av refusjon")
         }
 
-        val filter = person.brukerutbetalingfilter()
-            .periodetype(periodetype)
+        val utbetalingsfilter = Utbetalingsfilter.Builder()
+            .inntektkilde(inntektskilde())
             .also { utbetalinger.build(it) }
             .also { inntektsmeldingInfo?.build(it, arbeidsgiver) }
-            .inntektkilde(inntektskilde())
-            .vedtaksperiodeHarWarnings(vedtaksperiodeHarWarnings)
-            .harBrukerutbetaling(harBrukerutbetaling)
+            .utbetalingstidslinjerHarBrukerutbetaling(harBrukerutbetaling)
             .build()
 
         when {
-            utbetalinger.kanIkkeFortsette(hendelse, harBrukerutbetaling, filter) -> {
+            utbetalingsfilter.kanIkkeUtbetales(hendelse) -> {
                 person.invaliderAllePerioder(hendelse, "Kan ikke fortsette på grunn av manglende funksjonalitet for utbetaling til bruker")
             }
             ingenUtbetaling && kunArbeidsgiverdager && !vedtaksperiodeHarWarnings -> {
@@ -762,10 +759,6 @@ internal class Vedtaksperiode private constructor(
     private fun høstingsresultaterRevurdering(hendelse: ArbeidstakerHendelse, andreVedtaksperioder: List<Vedtaksperiode>) {
         hendelse.info("Videresender utbetaling til alle vedtaksperioder innenfor samme fagsystemid som er til revurdering")
         when {
-            utbetalinger.kanIkkeFortsette(hendelse, harBrukerutbetaling(andreVedtaksperioder), RevurderingBrukerutbetalingfilter) ->
-                tilstand(hendelse, RevurderingFeilet) {
-                    hendelse.error("""Saken inneholder brukerutbetalinger etter revurdering, settes til "Revurdering feilet"""")
-                }
             !utbetalinger.harUtbetalinger() && utbetalingstidslinje.kunArbeidsgiverdager() && !person.aktivitetslogg.logg(this).hasWarningsOrWorse() -> {
                 tilstand(hendelse, Avsluttet) {
                     hendelse.info("""Saken inneholder ingen utbetalingsdager for Nav og avsluttes""")
@@ -2754,7 +2747,7 @@ internal class InntektsmeldingInfo(
         return this.id == other.id && this.arbeidsforholdId == other.arbeidsforholdId
     }
 
-    internal fun build(filter: Brukerutbetalingfilter.Builder, arbeidsgiver: Arbeidsgiver) {
+    internal fun build(filter: Utbetalingsfilter.Builder, arbeidsgiver: Arbeidsgiver) {
         arbeidsgiver.build(filter, id)
     }
 

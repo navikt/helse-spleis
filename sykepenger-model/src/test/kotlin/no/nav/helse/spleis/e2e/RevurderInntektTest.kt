@@ -743,46 +743,21 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `revurdere inntekt slik at det blir brukerutbetaling uten å ha skrudd på brukerutbetaling `() =
-        Toggle.LageBrukerutbetaling.disable {
-            nyttVedtak(1.januar, 31.januar)
-            håndterOverstyrInntekt(inntekt = 35000.månedlig, skjæringstidspunkt = 1.januar)
-            håndterYtelser(1.vedtaksperiode)
-            assertSisteTilstand(1.vedtaksperiode, REVURDERING_FEILET)
-        }
+    fun `revurdere inntekt slik at det blir brukerutbetaling `() {
+        nyttVedtak(1.januar, 31.januar)
+        håndterOverstyrInntekt(inntekt = 35000.månedlig, skjæringstidspunkt = 1.januar)
+        håndterYtelser(1.vedtaksperiode)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
+    }
 
     @Test
-    fun `revurdere inntekt slik at det blir delvis refusjon`() = listOf(Toggle.LageBrukerutbetaling, Toggle.DelvisRefusjon).enable {
+    fun `revurdere inntekt slik at det blir delvis refusjon`() {
         nyttVedtak(1.januar, 31.januar)
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), refusjon = Refusjon(25000.månedlig, null, emptyList()))
         håndterOverstyrInntekt(inntekt = 35000.månedlig, skjæringstidspunkt = 1.januar)
         håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
     }
-
-    @Test
-    fun `revurdere inntekt slik at det blir delvis refusjon uten å skrudd på brukerutbetaling eller delvis refusjon`() =
-        listOf(Toggle.LageBrukerutbetaling, Toggle.DelvisRefusjon).disable {
-            nyttVedtak(1.januar, 31.januar)
-            håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), refusjon = Refusjon(25000.månedlig, null, emptyList()))
-            håndterOverstyrInntekt(inntekt = 35000.månedlig, skjæringstidspunkt = 1.januar)
-            håndterYtelser(1.vedtaksperiode)
-            assertSisteTilstand(1.vedtaksperiode, REVURDERING_FEILET)
-        }
-
-    @Test
-    fun `revurdere inntekt slik at det blir delvis refusjon uten å skrudd på delvis refusjon`() =
-        Toggle.LageBrukerutbetaling.enable {
-            Toggle.DelvisRefusjon.disable {
-                nyttVedtak(1.januar, 31.januar)
-                håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), refusjon = Refusjon(25000.månedlig, null, emptyList()))
-                håndterOverstyrInntekt(inntekt = 35000.månedlig, skjæringstidspunkt = 1.januar)
-                håndterYtelser(1.vedtaksperiode)
-                assertSisteTilstand(1.vedtaksperiode, REVURDERING_FEILET)
-            }
-        }
 
     @Test
     fun `revurdere mens en periode er til utbetaling`() {

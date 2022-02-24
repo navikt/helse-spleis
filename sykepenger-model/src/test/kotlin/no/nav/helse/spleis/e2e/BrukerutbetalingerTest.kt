@@ -124,24 +124,6 @@ internal class BrukerutbetalingerTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `utbetaling med 0 refusjon til arbeidsgiver toggle av`() {
-        Toggle.LageBrukerutbetaling.disable {
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-            håndterInntektsmelding(
-                refusjon = Inntektsmelding.Refusjon(0.månedlig, null),
-                førsteFraværsdag = 1.januar,
-                arbeidsgiverperioder = listOf(1.januar til 16.januar)
-            )
-            håndterYtelser()
-            håndterVilkårsgrunnlag(1.vedtaksperiode)
-            håndterYtelser()
-
-            assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD, orgnummer = ORGNUMMER)
-        }
-    }
-
-    @Test
     fun `utbetaling med delvis refusjon til arbeidsgiver toggle av`() {
         Toggle.LageBrukerutbetaling.disable {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
@@ -211,23 +193,6 @@ internal class BrukerutbetalingerTest : AbstractEndToEndTest() {
             håndterUtbetalingsgodkjenning(fnr = BRUKERUTBETALING_FNR)
             håndterUtbetalt(fnr = BRUKERUTBETALING_FNR)
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = ORGNUMMER)
-        }
-    }
-
-    @Test
-    fun `utbetaling med 0 refusjon, passerer ikke brukerutbetalingfilter`() {
-        Toggle.BrukerutbetalingFilter.enable {
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-            håndterInntektsmelding(
-                refusjon = Inntektsmelding.Refusjon(0.månedlig, null),
-                førsteFraværsdag = 1.januar,
-                arbeidsgiverperioder = listOf(1.januar til 16.januar)
-            )
-            håndterYtelser()
-            håndterVilkårsgrunnlag(1.vedtaksperiode)
-            håndterYtelser()
-            assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD, orgnummer = ORGNUMMER)
         }
     }
 

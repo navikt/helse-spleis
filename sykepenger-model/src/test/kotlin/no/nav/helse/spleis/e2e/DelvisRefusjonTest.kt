@@ -83,7 +83,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
-        assertForkastetPeriodeTilstander(
+        assertTilstander(
             1.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
@@ -91,7 +91,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
-            TIL_INFOTRYGD
+            AVVENTER_SIMULERING
         )
     }
 
