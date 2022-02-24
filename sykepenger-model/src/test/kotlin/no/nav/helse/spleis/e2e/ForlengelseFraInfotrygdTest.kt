@@ -1025,4 +1025,27 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             }
         )
     }
+
+    @Test
+    fun `førstegangsbehandling skal ikke hoppe videre dersom det kun er inntekt i Infotrygd`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterYtelser(1.vedtaksperiode, inntektshistorikk = listOf(
+            Inntektsopplysning(ORGNUMMER, 17.januar, INNTEKT, true)
+        ))
+        håndterSimulering(1.vedtaksperiode)
+
+        assertForventetFeil(
+            "vet ikke om skjæringstidspunktet blir feil, men vedtaksperioden burde uansett ikke markeres som førstegangsbehandling når det ikke er gjort vilkårsprøving",
+            nå = {
+                assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+                assertEquals(Periodetype.FØRSTEGANGSBEHANDLING, inspektør.periodetype(1.vedtaksperiode))
+            },
+            ønsket = {
+                assertEquals(17.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+                assertEquals(Periodetype.OVERGANG_FRA_IT, inspektør.periodetype(1.vedtaksperiode))
+            }
+        )
+    }
 }
