@@ -638,57 +638,55 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
 
     @Test
     fun `ta med personoppdrag`() {
-        Toggle.LageBrukerutbetaling.enable {
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-            håndterInntektsmelding(
-                refusjon = Inntektsmelding.Refusjon(0.månedlig, null),
-                førsteFraværsdag = 1.januar,
-                arbeidsgiverperioder = listOf(1.januar til 16.januar)
-            )
-            håndterYtelser()
-            håndterVilkårsgrunnlag(1.vedtaksperiode)
-            håndterYtelser()
-            håndterSimulering()
-            håndterUtbetalingsgodkjenning()
-            håndterUtbetalt()
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(
+            refusjon = Inntektsmelding.Refusjon(0.månedlig, null),
+            førsteFraværsdag = 1.januar,
+            arbeidsgiverperioder = listOf(1.januar til 16.januar)
+        )
+        håndterYtelser()
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser()
+        håndterSimulering()
+        håndterUtbetalingsgodkjenning()
+        håndterUtbetalt()
 
-            val personDTO = speilApi()
-            val utbetalingstidslinje = personDTO.arbeidsgivere[0].utbetalingshistorikk[0].utbetaling.utbetalingstidslinje
+        val personDTO = speilApi()
+        val utbetalingstidslinje = personDTO.arbeidsgivere[0].utbetalingshistorikk[0].utbetaling.utbetalingstidslinje
 
-            assertEquals(0, (personDTO.arbeidsgivere[0].vedtaksperioder[0] as VedtaksperiodeDTO).utbetalinger.arbeidsgiverUtbetaling?.linjer?.size)
-            assertEquals(1, (personDTO.arbeidsgivere[0].vedtaksperioder[0] as VedtaksperiodeDTO).utbetalinger.personUtbetaling?.linjer?.size)
+        assertEquals(0, (personDTO.arbeidsgivere[0].vedtaksperioder[0] as VedtaksperiodeDTO).utbetalinger.arbeidsgiverUtbetaling?.linjer?.size)
+        assertEquals(1, (personDTO.arbeidsgivere[0].vedtaksperioder[0] as VedtaksperiodeDTO).utbetalinger.personUtbetaling?.linjer?.size)
 
-            utbetalingstidslinje.filterIsInstance<IkkeUtbetaltDagDTO>().let {
-                it.forEach { arbeidsgiverperiodedag ->
-                    assertEquals(1431, arbeidsgiverperiodedag.inntekt)
-                    assertEquals(DagtypeDTO.ArbeidsgiverperiodeDag, arbeidsgiverperiodedag.type)
-                }
-                assertEquals(16, it.size)
+        utbetalingstidslinje.filterIsInstance<IkkeUtbetaltDagDTO>().let {
+            it.forEach { arbeidsgiverperiodedag ->
+                assertEquals(1431, arbeidsgiverperiodedag.inntekt)
+                assertEquals(DagtypeDTO.ArbeidsgiverperiodeDag, arbeidsgiverperiodedag.type)
             }
-
-            utbetalingstidslinje.filterIsInstance<NavDagDTO>().let {
-                it.forEach { navdag ->
-                    assertEquals(DagtypeDTO.NavDag, navdag.type)
-                    assertEquals(0, navdag.utbetaling)
-                    assertEquals(0, navdag.arbeidsgiverbeløp)
-                    assertEquals(1431, navdag.personbeløp)
-                    assertEquals(0, navdag.refusjonsbeløp)
-                }
-                assertEquals(11, it.size)
-            }
-
-            utbetalingstidslinje.filterIsInstance<NavHelgedagDTO>().let {
-                it.forEach { navhelgedag ->
-                    assertEquals(DagtypeDTO.NavHelgDag, navhelgedag.type)
-                    assertEquals(100.0, navhelgedag.grad)
-                }
-                assertEquals(4, it.size)
-            }
-
-            assertEquals(0, personDTO.arbeidsgivere[0].utbetalingshistorikk[0].utbetaling.arbeidsgiverNettoBeløp)
-            assertEquals(15741, personDTO.arbeidsgivere[0].utbetalingshistorikk[0].utbetaling.personNettoBeløp)
+            assertEquals(16, it.size)
         }
+
+        utbetalingstidslinje.filterIsInstance<NavDagDTO>().let {
+            it.forEach { navdag ->
+                assertEquals(DagtypeDTO.NavDag, navdag.type)
+                assertEquals(0, navdag.utbetaling)
+                assertEquals(0, navdag.arbeidsgiverbeløp)
+                assertEquals(1431, navdag.personbeløp)
+                assertEquals(0, navdag.refusjonsbeløp)
+            }
+            assertEquals(11, it.size)
+        }
+
+        utbetalingstidslinje.filterIsInstance<NavHelgedagDTO>().let {
+            it.forEach { navhelgedag ->
+                assertEquals(DagtypeDTO.NavHelgDag, navhelgedag.type)
+                assertEquals(100.0, navhelgedag.grad)
+            }
+            assertEquals(4, it.size)
+        }
+
+        assertEquals(0, personDTO.arbeidsgivere[0].utbetalingshistorikk[0].utbetaling.arbeidsgiverNettoBeløp)
+        assertEquals(15741, personDTO.arbeidsgivere[0].utbetalingshistorikk[0].utbetaling.personNettoBeløp)
     }
 
     @Test

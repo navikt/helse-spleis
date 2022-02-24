@@ -606,25 +606,23 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
 
     @Test
     fun `ta med personoppdrag`() {
-        Toggle.LageBrukerutbetaling.enable {
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-            håndterInntektsmelding(refusjon = Inntektsmelding.Refusjon(0.månedlig, null), førsteFraværsdag = 1.januar, arbeidsgiverperioder = listOf(1.januar til 16.januar))
-            håndterYtelser()
-            håndterVilkårsgrunnlag(1.vedtaksperiode)
-            håndterYtelser()
-            håndterSimulering()
-            håndterUtbetalingsgodkjenning()
-            håndterUtbetalt()
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(refusjon = Inntektsmelding.Refusjon(0.månedlig, null), førsteFraværsdag = 1.januar, arbeidsgiverperioder = listOf(1.januar til 16.januar))
+        håndterYtelser()
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser()
+        håndterSimulering()
+        håndterUtbetalingsgodkjenning()
+        håndterUtbetalt()
 
-            0.generasjon {
-                assertEquals(0, this.perioder.first().sammenslåttTidslinje[16].utbetalingsinfo!!.utbetaling)
-                assertEquals(0, this.perioder.first().sammenslåttTidslinje[16].utbetalingsinfo!!.arbeidsgiverbeløp)
-                assertEquals(0, this.perioder.first().sammenslåttTidslinje[16].utbetalingsinfo!!.refusjonsbeløp)
-                assertEquals(1431, this.perioder.first().sammenslåttTidslinje[16].utbetalingsinfo!!.personbeløp)
-                assertEquals(0, beregnetPeriode(0).utbetaling.arbeidsgiverNettoBeløp)
-                assertEquals(15741, beregnetPeriode(0).utbetaling.personNettoBeløp)
-            }
+        0.generasjon {
+            assertEquals(0, this.perioder.first().sammenslåttTidslinje[16].utbetalingsinfo!!.utbetaling)
+            assertEquals(0, this.perioder.first().sammenslåttTidslinje[16].utbetalingsinfo!!.arbeidsgiverbeløp)
+            assertEquals(0, this.perioder.first().sammenslåttTidslinje[16].utbetalingsinfo!!.refusjonsbeløp)
+            assertEquals(1431, this.perioder.first().sammenslåttTidslinje[16].utbetalingsinfo!!.personbeløp)
+            assertEquals(0, beregnetPeriode(0).utbetaling.arbeidsgiverNettoBeløp)
+            assertEquals(15741, beregnetPeriode(0).utbetaling.personNettoBeløp)
         }
     }
 

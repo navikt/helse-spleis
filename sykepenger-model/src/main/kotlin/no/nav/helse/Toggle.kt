@@ -138,16 +138,6 @@ abstract class Toggle internal constructor(enabled: Boolean = false, private val
     object GjenopptaAvsluttetUtenUtbetaling : Toggle(false)
     object ForkastForlengelseAvForkastetPeriode : Toggle(false)
 
-    object BrukerutbetalingFilter : Toggle("BRUKERUTBETALING_FILTER", false)
     object DelvisRefusjon : Toggle(false)
-    object LageBrukerutbetaling : Toggle(false) {
-        internal fun kanIkkeFortsette(aktivitetslogg: IAktivitetslogg, utbetaling: Utbetaling, harBrukerutbetaling: Boolean, brukerutbetalingfilter: Featurefilter): Boolean {
-            if (DelvisRefusjon.disabled && utbetaling.harDelvisRefusjon()) aktivitetslogg.error("Utbetalingen har endringer i både arbeidsgiver- og personoppdrag")
-            else if (brukerutbetalingfilter.filtrer(aktivitetslogg)) return false
-            else if (disabled && harBrukerutbetaling) aktivitetslogg.error("Utbetalingstidslinje inneholder brukerutbetaling")
-            else if (disabled && utbetaling.harBrukerutbetaling()) aktivitetslogg.error("Utbetaling inneholder brukerutbetaling (men ikke for den aktuelle vedtaksperioden)")
-            return aktivitetslogg.hasErrorsOrWorse()
-        }
-    }
     object OpptjeningIModellen : Toggle(false)
 }

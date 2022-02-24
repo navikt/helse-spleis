@@ -59,5 +59,3 @@ spec:
     value: "true"
   - name: SPEIL_API_V2
     value: "true"
-  - name: BRUKERUTBETALING_FILTER
-    value: "true"

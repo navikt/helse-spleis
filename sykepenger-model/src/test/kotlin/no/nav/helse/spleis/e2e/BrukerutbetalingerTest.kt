@@ -6,7 +6,6 @@ import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
-import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
@@ -86,153 +85,74 @@ internal class BrukerutbetalingerTest : AbstractEndToEndTest() {
 
     @Test
     fun `utbetaling med 0 refusjon til arbeidsgiver`() {
-        Toggle.LageBrukerutbetaling.enable {
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-            håndterInntektsmelding(
-                refusjon = Inntektsmelding.Refusjon(0.månedlig, null),
-                førsteFraværsdag = 1.januar,
-                arbeidsgiverperioder = listOf(1.januar til 16.januar)
-            )
-            håndterYtelser()
-            håndterVilkårsgrunnlag(1.vedtaksperiode)
-            håndterYtelser()
-            håndterSimulering()
-            håndterUtbetalingsgodkjenning()
-            håndterUtbetalt()
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(
+            refusjon = Inntektsmelding.Refusjon(0.månedlig, null),
+            førsteFraværsdag = 1.januar,
+            arbeidsgiverperioder = listOf(1.januar til 16.januar)
+        )
+        håndterYtelser()
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser()
+        håndterSimulering()
+        håndterUtbetalingsgodkjenning()
+        håndterUtbetalt()
 
-            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = ORGNUMMER)
-        }
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = ORGNUMMER)
     }
 
     @Test
     fun `utbetaling med delvis refusjon til arbeidsgiver`() {
-        Toggle.LageBrukerutbetaling.enable {
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-            håndterInntektsmelding(
-                refusjon = Inntektsmelding.Refusjon(20000.månedlig, null),
-                førsteFraværsdag = 1.januar,
-                arbeidsgiverperioder = listOf(1.januar til 16.januar)
-            )
-            håndterYtelser()
-            håndterVilkårsgrunnlag(1.vedtaksperiode)
-            håndterYtelser()
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(
+            refusjon = Inntektsmelding.Refusjon(20000.månedlig, null),
+            førsteFraværsdag = 1.januar,
+            arbeidsgiverperioder = listOf(1.januar til 16.januar)
+        )
+        håndterYtelser()
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser()
 
-            assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD, orgnummer = ORGNUMMER)
-        }
+        assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD, orgnummer = ORGNUMMER)
     }
 
     @Test
     fun `utbetaling med delvis refusjon til arbeidsgiver toggle av`() {
-        Toggle.LageBrukerutbetaling.disable {
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-            håndterInntektsmelding(
-                refusjon = Inntektsmelding.Refusjon(20000.månedlig, null),
-                førsteFraværsdag = 1.januar,
-                arbeidsgiverperioder = listOf(1.januar til 16.januar)
-            )
-            håndterYtelser()
-            håndterVilkårsgrunnlag(1.vedtaksperiode)
-            håndterYtelser()
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(
+            refusjon = Inntektsmelding.Refusjon(20000.månedlig, null),
+            førsteFraværsdag = 1.januar,
+            arbeidsgiverperioder = listOf(1.januar til 16.januar)
+        )
+        håndterYtelser()
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser()
 
-            assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD, orgnummer = ORGNUMMER)
-        }
+        assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD, orgnummer = ORGNUMMER)
     }
 
     @Test
-    fun `utbetaling med full refusjon til arbeidsgiver toggle på`() {
-        Toggle.LageBrukerutbetaling.enable {
-            nyttVedtak(1.januar, 31.januar)
-            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = ORGNUMMER)
-        }
+    fun `utbetaling med full refusjon til arbeidsgiver`() {
+        nyttVedtak(1.januar, 31.januar)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = ORGNUMMER)
     }
+
 
     @Test
-    fun `utbetaling med full refusjon til arbeidsgiver toggle av`() {
-        Toggle.LageBrukerutbetaling.disable {
-            nyttVedtak(1.januar, 31.januar)
-            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = ORGNUMMER)
-        }
-    }
-
-    @Test
-    fun `utbetaling med full refusjon, passerer brukerutbetalingfilter`() {
-        createTestPerson(BRUKERUTBETALING_FNR)
-        Toggle.BrukerutbetalingFilter.enable {
-            nyttVedtak(1.januar, 31.januar, fnr = BRUKERUTBETALING_FNR)
-            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = ORGNUMMER)
-        }
-    }
-
-    @Test
-    fun `utbetaling med full refusjon, passerer ikke brukerutbetalingfilter`() {
-        Toggle.BrukerutbetalingFilter.enable {
-            nyttVedtak(1.januar, 31.januar)
-            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = ORGNUMMER)
-        }
-    }
-
-    @Test
-    fun `utbetaling med 0 refusjon, passerer brukerutbetalingfilter`() {
-        createTestPerson(BRUKERUTBETALING_FNR)
-        Toggle.BrukerutbetalingFilter.enable {
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), fnr = BRUKERUTBETALING_FNR)
-            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), fnr = BRUKERUTBETALING_FNR)
-            håndterInntektsmelding(
-                fnr = BRUKERUTBETALING_FNR,
-                refusjon = Inntektsmelding.Refusjon(0.månedlig, null),
-                førsteFraværsdag = 1.januar,
-                arbeidsgiverperioder = listOf(1.januar til 16.januar)
-            )
-            håndterYtelser(fnr = BRUKERUTBETALING_FNR)
-            håndterVilkårsgrunnlag(1.vedtaksperiode, fnr = BRUKERUTBETALING_FNR)
-            håndterYtelser(fnr = BRUKERUTBETALING_FNR)
-            håndterSimulering(fnr = BRUKERUTBETALING_FNR)
-            håndterUtbetalingsgodkjenning(fnr = BRUKERUTBETALING_FNR)
-            håndterUtbetalt(fnr = BRUKERUTBETALING_FNR)
-            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = ORGNUMMER)
-        }
-    }
-
-    @Test
-    fun `utbetaling med delvis refusjon, passerer ikke brukerutbetalingfilter`() {
-        Toggle.BrukerutbetalingFilter.enable {
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-            håndterInntektsmelding(
-                refusjon = Inntektsmelding.Refusjon(INNTEKT/2, null),
-                førsteFraværsdag = 1.januar,
-                arbeidsgiverperioder = listOf(1.januar til 16.januar)
-            )
-            håndterYtelser()
-            håndterVilkårsgrunnlag(1.vedtaksperiode)
-            håndterYtelser()
-            assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD, orgnummer = ORGNUMMER)
-        }
-    }
-
-    @Test
-    fun `utbetaling med delvis refusjon, passerer brukerutbetalingfilter`() {
-        createTestPerson(BRUKERUTBETALING_FNR)
-        Toggle.BrukerutbetalingFilter.enable {
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), fnr = BRUKERUTBETALING_FNR)
-            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), fnr = BRUKERUTBETALING_FNR)
-            håndterInntektsmelding(
-                fnr = BRUKERUTBETALING_FNR,
-                refusjon = Inntektsmelding.Refusjon(INNTEKT/2, null),
-                førsteFraværsdag = 1.januar,
-                arbeidsgiverperioder = listOf(1.januar til 16.januar)
-            )
-            håndterYtelser(fnr = BRUKERUTBETALING_FNR)
-            håndterVilkårsgrunnlag(1.vedtaksperiode, fnr = BRUKERUTBETALING_FNR)
-            håndterYtelser(fnr = BRUKERUTBETALING_FNR)
-            assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD, orgnummer = ORGNUMMER)
-        }
-    }
-
-    private companion object {
-        private val BRUKERUTBETALING_FNR = Fødselsnummer.tilFødselsnummer("31019240045") // Fordi den er født 31.
+    fun `utbetaling med delvis refusjon`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(
+            refusjon = Inntektsmelding.Refusjon(INNTEKT/2, null),
+            førsteFraværsdag = 1.januar,
+            arbeidsgiverperioder = listOf(1.januar til 16.januar)
+        )
+        håndterYtelser()
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser()
+        assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD, orgnummer = ORGNUMMER)
     }
 }

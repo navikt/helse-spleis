@@ -148,7 +148,7 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
     }
 
     @Test
-    fun `annullering delvis refusjon`() = listOf(Toggle.LageBrukerutbetaling, Toggle.DelvisRefusjon).enable {
+    fun `annullering delvis refusjon`() = listOf(Toggle.DelvisRefusjon).enable {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
         sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar, opphørsdatoForRefusjon = 20.januar)
@@ -166,7 +166,7 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
 
     @Test
     @ForventetFeil("https://trello.com/c/2tTTa7k9")
-    fun `annullering ingen refusjon`() = Toggle.LageBrukerutbetaling.enable {
+    fun `annullering ingen refusjon`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
         sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar, opphørsdatoForRefusjon = 3.januar)

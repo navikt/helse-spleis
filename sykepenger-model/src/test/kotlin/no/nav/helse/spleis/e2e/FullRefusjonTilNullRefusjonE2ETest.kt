@@ -13,22 +13,10 @@ import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus.AKSEPTERT
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 internal class  FullRefusjonTilNullRefusjonE2ETest : AbstractEndToEndTest() {
-
-    @BeforeEach
-    fun setup() {
-        Toggle.LageBrukerutbetaling.enable()
-    }
-
-    @AfterEach
-    fun teardown() {
-        Toggle.LageBrukerutbetaling.pop()
-    }
 
     @Test
     fun `starter med ingen refusjon`() {
@@ -129,7 +117,7 @@ internal class  FullRefusjonTilNullRefusjonE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `starter med ingen refusjon, så korrigeres refusjonen til full`() = listOf(Toggle.LageBrukerutbetaling, Toggle.DelvisRefusjon).enable {
+    fun `starter med ingen refusjon, så korrigeres refusjonen til full`() = listOf(Toggle.DelvisRefusjon).enable {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, refusjon = Inntektsmelding.Refusjon(0.daglig, null))

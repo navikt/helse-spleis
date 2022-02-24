@@ -505,7 +505,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
 
     @Test
     fun `delvis refusjon`() {
-        listOf(Toggle.DelvisRefusjon, Toggle.LageBrukerutbetaling).enable {
+        listOf(Toggle.DelvisRefusjon).enable {
             sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
             sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
             sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar, opphørsdatoForRefusjon = 20.januar)
@@ -534,7 +534,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
 
     @Test
     fun `delvis refusjon og brukerutbetaling - ikke lov`() {
-        listOf(Toggle.DelvisRefusjon, Toggle.LageBrukerutbetaling).disable {
+        listOf(Toggle.DelvisRefusjon).disable {
             sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
             sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
             sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar, opphørsdatoForRefusjon = 20.januar)
@@ -557,24 +557,22 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
     @Test
     fun `delvis refusjon - ikke lov`() {
         Toggle.DelvisRefusjon.disable {
-            Toggle.LageBrukerutbetaling.enable {
-                sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
-                sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
-                sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar, opphørsdatoForRefusjon = 20.januar)
-                sendYtelser(0)
-                sendVilkårsgrunnlag(0)
-                sendYtelserUtenSykepengehistorikk(0)
-                assertUtbetalingTilstander(0, "IKKE_UTBETALT", "FORKASTET")
-                assertTilstander(
-                    0,
-                    "MOTTATT_SYKMELDING_FERDIG_GAP",
-                    "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
-                    "AVVENTER_HISTORIKK",
-                    "AVVENTER_VILKÅRSPRØVING",
-                    "AVVENTER_HISTORIKK",
-                    "TIL_INFOTRYGD"
-                )
-            }
+            sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+            sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
+            sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar, opphørsdatoForRefusjon = 20.januar)
+            sendYtelser(0)
+            sendVilkårsgrunnlag(0)
+            sendYtelserUtenSykepengehistorikk(0)
+            assertUtbetalingTilstander(0, "IKKE_UTBETALT", "FORKASTET")
+            assertTilstander(
+                0,
+                "MOTTATT_SYKMELDING_FERDIG_GAP",
+                "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
+                "AVVENTER_HISTORIKK",
+                "AVVENTER_VILKÅRSPRØVING",
+                "AVVENTER_HISTORIKK",
+                "TIL_INFOTRYGD"
+            )
         }
     }
 }

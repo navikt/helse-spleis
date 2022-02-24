@@ -51,7 +51,7 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
     }
 
     @Test
-    fun `simulering ved delvis refusjon`() = listOf(Toggle.LageBrukerutbetaling, Toggle.DelvisRefusjon).enable {
+    fun `simulering ved delvis refusjon`() = listOf(Toggle.DelvisRefusjon).enable {
         håndterYtelser(Inntektsmelding.Refusjon(31000.månedlig, sisteSykedag.minusDays(7), emptyList()))
         håndterSimuleringer(mapOf(
             Fagområde.SykepengerRefusjon to Pair(true, 1431),
@@ -62,7 +62,7 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
     }
 
     @Test
-    fun `simulering ved delvis refusjon hvor vi avventer en simulering`() = listOf(Toggle.LageBrukerutbetaling, Toggle.DelvisRefusjon).enable {
+    fun `simulering ved delvis refusjon hvor vi avventer en simulering`() = listOf(Toggle.DelvisRefusjon).enable {
         håndterYtelser(Inntektsmelding.Refusjon(31000.månedlig, sisteSykedag.minusDays(7), emptyList()))
         håndterSimuleringer(mapOf(
             Fagområde.SykepengerRefusjon to Pair(true, 1431)
@@ -72,7 +72,7 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
     }
 
     @Test
-    fun `simulering ved ingen refusjon`() = listOf(Toggle.LageBrukerutbetaling, Toggle.DelvisRefusjon).enable {
+    fun `simulering ved ingen refusjon`() = listOf(Toggle.DelvisRefusjon).enable {
         håndterYtelser(Inntektsmelding.Refusjon(INGEN, null, emptyList()))
         håndterSimuleringer(mapOf(
             Fagområde.Sykepenger to Pair(true, 1431)

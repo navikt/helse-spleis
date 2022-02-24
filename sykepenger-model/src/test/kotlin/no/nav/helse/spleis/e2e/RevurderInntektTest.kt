@@ -1,8 +1,6 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.*
-import no.nav.helse.Toggle.Companion.disable
-import no.nav.helse.Toggle.Companion.enable
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
@@ -733,7 +731,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `revurdere inntekt slik at det blir brukerutbetaling`() = Toggle.LageBrukerutbetaling.enable {
+    fun `revurdere inntekt slik at det blir brukerutbetaling`() {
         nyttVedtak(1.januar, 31.januar)
         håndterOverstyrInntekt(inntekt = 35000.månedlig, skjæringstidspunkt = 1.januar)
         håndterYtelser(1.vedtaksperiode)

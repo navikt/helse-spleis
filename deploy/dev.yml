@@ -58,8 +58,6 @@ spec:
     value: "true"
   - name: SPEIL_API_V2
     value: "true"
-  - name: BRUKERUTBETALING_FILTER
-    value: "true"
   - name: GraphQLPlayground
     value: "true"
   - name: SUBSUMSJON_HENDELSER

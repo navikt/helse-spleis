@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.Toggle
-import no.nav.helse.Toggle.Companion.enable
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.inspectors.inspektør
@@ -101,7 +100,7 @@ internal class UtbetalingFeiletE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `utbetaling feilet med ett oppdrag status avvist og ett som er ok`() = listOf(Toggle.DelvisRefusjon, Toggle.LageBrukerutbetaling).enable {
+    fun `utbetaling feilet med ett oppdrag status avvist og ett som er ok`() = Toggle.DelvisRefusjon.enable {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(1.januar til 16.januar), refusjon = Inntektsmelding.Refusjon(INNTEKT/2, null, emptyList()))
@@ -137,7 +136,7 @@ internal class UtbetalingFeiletE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `utbetaling feilet med ett oppdrag status ok og ett som er avvist`() = listOf(Toggle.DelvisRefusjon, Toggle.LageBrukerutbetaling).enable {
+    fun `utbetaling feilet med ett oppdrag status ok og ett som er avvist`() = Toggle.DelvisRefusjon.enable {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(1.januar til 16.januar), refusjon = Inntektsmelding.Refusjon(INNTEKT/2, null, emptyList()))

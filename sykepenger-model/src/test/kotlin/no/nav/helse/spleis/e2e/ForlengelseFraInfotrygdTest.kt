@@ -652,9 +652,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Person uten refusjon til arbeidsgiver blir ikke behandlet i Spleis`() {
-        assertFalse(Toggle.LageBrukerutbetaling.enabled) { "Denne testen gir ikke mening å kjøre når brukerutbetaling er live and direct!" }
-
+    fun `Person uten refusjon til arbeidsgiver blir ikke behandlet i Spleis`() { // TODO
         // seeder personen med historisk refusjonsopplysning
         håndterInntektsmelding(listOf(7.oktober(2019) til 23.oktober(2019)), refusjon = Inntektsmelding.Refusjon(null, null))
 
