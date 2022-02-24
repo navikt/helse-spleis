@@ -1027,6 +1027,48 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `forlengelse fra infotrygd hvor arbeidsgiverdager blir igjen fra IM etter tidligere forkastet periode`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 22.januar, 100.prosent))
+        håndterInntektsmelding(listOf(9.januar til 24.januar))
+
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+
+        /*
+        Dette vil kaste ut den første perioden, men siden vi har en periode etter tom-datoen til denne perioden vil beholde arbeidsgiverperiodedager fra IM
+        Perioden overlapper med en dag(22.januar), dagene 23. og 24. januar blir igjen fra IM i arbeidsgiverens sykdomstidslinje
+         */
+        håndterSykmelding(Sykmeldingsperiode(22.januar, 31.januar, 100.prosent))
+
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+        håndterInntektsmelding(listOf(1.februar til 16.februar))
+
+        // Perioden i infotrygd trenger ikke nødvendigvis å tilstøte, men det _må_ være arbeidsgiverperiodedager før første utbetalte dag i IT
+        håndterUtbetalingshistorikk(
+            2.vedtaksperiode,
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 25.januar, 31.januar, 100.prosent, INNTEKT),
+            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 25.januar, INNTEKT, true))
+        )
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+
+        /*
+        Siden infotrygd perioden tilstøter to arbeidsgiverdager fra IM vil vi beregne skjæringstidspunktet til å være 23.februar og markere det som en
+        førstegangsbehandling selv om det er en forlengelse fra IT
+         */
+        assertForventetFeil(
+            "vet ikke om skjæringstidspunktet blir feil, men vedtaksperioden burde uansett ikke markeres som førstegangsbehandling når det ikke er gjort vilkårsprøving",
+            nå = {
+                assertEquals(23.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
+                assertEquals(Periodetype.FØRSTEGANGSBEHANDLING, inspektør.periodetype(2.vedtaksperiode))
+            },
+            ønsket = {
+                assertEquals(25.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
+                assertEquals(Periodetype.OVERGANG_FRA_IT, inspektør.periodetype(2.vedtaksperiode))
+            }
+        )
+    }
+
+    @Test
     fun `førstegangsbehandling skal ikke hoppe videre dersom det kun er inntekt i Infotrygd`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
