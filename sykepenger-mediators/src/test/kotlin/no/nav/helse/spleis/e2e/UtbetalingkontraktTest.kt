@@ -13,7 +13,6 @@ import no.nav.syfo.kafka.felles.FravarDTO
 import no.nav.syfo.kafka.felles.FravarstypeDTO
 import no.nav.syfo.kafka.felles.SoknadsperiodeDTO
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -33,6 +32,8 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
         sendUtbetaling()
         val utbetalt = testRapid.inspektør.siste("utbetaling_utbetalt")
         assertUtbetalt(utbetalt)
+        val deprecatedUtbetalt = testRapid.inspektør.siste("utbetalt")
+        assertDeprecatedUtbetalt(deprecatedUtbetalt)
     }
 
     @Test
@@ -207,6 +208,17 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
         assertTrue(melding.path("automatiskBehandling").isBoolean)
         assertOppdragdetaljer(melding.path("arbeidsgiverOppdrag"), false)
         assertOppdragdetaljer(melding.path("personOppdrag"), false)
+    }
+
+    private fun assertDeprecatedUtbetalt(melding: JsonNode) {
+        assertTrue(melding.path("utbetalingId").asText().isNotEmpty())
+        assertDato(melding.path("fom").asText())
+        assertDato(melding.path("tom").asText())
+        assertDato(melding.path("utbetalingFom").asText())
+        assertDato(melding.path("utbetalingTom").asText())
+        assertDato(melding.path("maksdato").asText())
+        assertTrue(melding.path("forbrukteSykedager").isInt)
+        assertTrue(melding.path("gjenståendeSykedager").isInt)
     }
 
     private fun assertAnnullert(melding: JsonNode, arbeidsgiverAnnulering: Boolean, personAnnullering: Boolean) {

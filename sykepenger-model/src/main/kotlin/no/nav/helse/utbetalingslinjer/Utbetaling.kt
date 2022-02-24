@@ -226,6 +226,7 @@ internal class Utbetaling private constructor(
     internal fun build(builder: UtbetaltEventBuilder) {
         builder.utbetalingId(id)
             .oppdrag(arbeidsgiverOppdrag, personOppdrag)
+            .utbetalingsperiode(periode)
             .utbetalingOpprettet(tidsstempel)
             .utbetalingstidslinje(utbetalingstidslinje)
             .forbrukteSykedager(forbrukteSykedager!!)

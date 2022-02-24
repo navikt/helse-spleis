@@ -42,6 +42,8 @@ interface PersonObserver {
         val ikkeUtbetalteDager: List<IkkeUtbetaltDag>,
         val fom: LocalDate,
         val tom: LocalDate,
+        val utbetalingFom: LocalDate,
+        val utbetalingTom: LocalDate,
         val forbrukteSykedager: Int,
         val gjenståendeSykedager: Int,
         val godkjentAv: String,

@@ -32,6 +32,7 @@ internal class UtbetaltEventBuilder(
 
     private lateinit var maksdato: LocalDate
     private lateinit var utbetalingId: UUID
+    private lateinit var utbetalingperiode: Periode
 
     private lateinit var opprettet: LocalDateTime
     private val oppdragListe = mutableListOf<PersonObserver.UtbetaltEvent.Utbetalt>()
@@ -39,6 +40,7 @@ internal class UtbetaltEventBuilder(
 
     internal fun utbetalingId(id: UUID) = apply { this.utbetalingId = id }
     internal fun utbetalingOpprettet(tidspunkt: LocalDateTime) = apply { this.opprettet = tidspunkt }
+    internal fun utbetalingsperiode(periode: Periode) = apply { this.utbetalingperiode = periode }
     internal fun oppdrag(vararg oppdrag: Oppdrag) = apply {
         oppdrag.forEach { oppdragListe.add(OppdragUtbetaltBuilder(dagsats, it).result()) }
     }
@@ -63,6 +65,8 @@ internal class UtbetaltEventBuilder(
             ikkeUtbetalteDager = ikkeUtbetalteDager,
             fom = periode.start,
             tom = periode.endInclusive,
+            utbetalingFom = utbetalingperiode.start,
+            utbetalingTom = utbetalingperiode.endInclusive,
             forbrukteSykedager = forbrukteSykedager,
             gjenståendeSykedager = gjenståendeSykedager,
             godkjentAv = godkjentAv,

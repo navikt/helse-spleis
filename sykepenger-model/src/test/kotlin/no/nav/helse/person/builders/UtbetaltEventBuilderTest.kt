@@ -2,11 +2,11 @@ package no.nav.helse.person.builders
 
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.til
+import no.nav.helse.januar
 import no.nav.helse.person.*
+import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.testhelpers.AP
 import no.nav.helse.testhelpers.NAV
-import no.nav.helse.januar
-import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.utbetalingslinjer.Fagområde
 import no.nav.helse.utbetalingslinjer.Oppdrag
@@ -76,6 +76,7 @@ internal class UtbetaltEventBuilderTest {
             .utbetalingstidslinje(tidslinjeOf(16.AP, 2.NAV))
             .gjenståendeSykedager(gjenståendeSykedager)
             .forbrukteSykedager(forbrukteSykedager)
+            .utbetalingsperiode(16.januar til 31.januar)
             .maksdato(maksdato)
             .oppdrag(Oppdrag(mottaker1, Fagområde.SykepengerRefusjon), Oppdrag(mottaker2, Fagområde.Sykepenger))
             .result()
@@ -85,6 +86,8 @@ internal class UtbetaltEventBuilderTest {
         assertEquals(hendelser, result.hendelser)
         assertEquals(utbetalingId, result.utbetalingId)
         assertEquals(utbetalingOpprettet, result.opprettet)
+        assertEquals(16.januar, result.utbetalingFom)
+        assertEquals(31.januar, result.utbetalingTom)
         assertEquals(2, result.oppdrag.size)
         assertTrue(result.oppdrag.any { it.mottaker == mottaker1 })
         assertTrue(result.oppdrag.any { it.mottaker == mottaker2 })

@@ -337,6 +337,8 @@ internal class PersonMediator(
                     },
                     "fom" to event.fom,
                     "tom" to event.tom,
+                    "utbetalingFom" to event.utbetalingFom,
+                    "utbetalingTom" to event.utbetalingTom,
                     "forbrukteSykedager" to event.forbrukteSykedager,
                     "gjenståendeSykedager" to event.gjenståendeSykedager,
                     "godkjentAv" to event.godkjentAv,
