@@ -963,10 +963,10 @@ internal class JsonBuilder : AbstractBuilder() {
 
     class ArbeidsgiverInntektsopplysningerState(private val arbeidsgiverInntektsopplysninger: MutableList<Map<String, Any>>) : BuilderState() {
 
-        private val inntektsopplysninger = mutableMapOf<String, Any?>()
+        private var inntektsopplysninger: Map<String, Any?>? = null
 
         override fun preVisitArbeidsgiverInntektsopplysning(arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning, orgnummer: String) {
-            inntektsopplysninger.clear()
+            inntektsopplysninger = null
         }
 
         override fun visitSaksbehandler(
@@ -977,14 +977,14 @@ internal class JsonBuilder : AbstractBuilder() {
             beløp: Inntekt,
             tidsstempel: LocalDateTime
         ) {
-            inntektsopplysninger.putAll(mapOf(
+            inntektsopplysninger = mapOf(
                 "id" to id,
                 "dato" to dato,
                 "hendelseId" to hendelseId,
                 "beløp" to beløp.reflection { _, månedlig, _, _ -> månedlig },
                 "kilde" to Inntektsopplysningskilde.SAKSBEHANDLER,
                 "tidsstempel" to tidsstempel
-            ))
+            )
         }
 
         override fun visitInntektsmelding(
@@ -995,23 +995,23 @@ internal class JsonBuilder : AbstractBuilder() {
             beløp: Inntekt,
             tidsstempel: LocalDateTime
         ) {
-            inntektsopplysninger.putAll(mapOf(
+            inntektsopplysninger = mapOf(
                 "id" to id,
                 "dato" to dato,
                 "hendelseId" to hendelseId,
                 "beløp" to beløp.reflection { _, månedlig, _, _ -> månedlig },
                 "kilde" to Inntektsopplysningskilde.INNTEKTSMELDING,
                 "tidsstempel" to tidsstempel
-            ))
+            )
         }
 
         override fun visitIkkeRapportert(id: UUID, dato: LocalDate, tidsstempel: LocalDateTime) {
-            inntektsopplysninger.putAll(mapOf(
+            inntektsopplysninger = mapOf(
                 "id" to id,
                 "dato" to dato,
                 "kilde" to Inntektsopplysningskilde.IKKE_RAPPORTERT,
                 "tidsstempel" to tidsstempel
-            ))
+            )
         }
 
         override fun visitInfotrygd(
@@ -1022,7 +1022,7 @@ internal class JsonBuilder : AbstractBuilder() {
             beløp: Inntekt,
             tidsstempel: LocalDateTime
         ) {
-            inntektsopplysninger.putAll(mapOf(
+            inntektsopplysninger = mapOf(
                 "id" to id,
                 "dato" to dato,
                 "hendelseId" to hendelseId,
@@ -1030,16 +1030,13 @@ internal class JsonBuilder : AbstractBuilder() {
                 "kilde" to Inntektsopplysningskilde.INFOTRYGD,
                 "tidsstempel" to tidsstempel
             )
-            )
         }
 
         override fun preVisitSkatt(skattComposite: Inntektshistorikk.SkattComposite, id: UUID, dato: LocalDate) {
             val skatteopplysninger = mutableListOf<Map<String, Any?>>()
-            this.inntektsopplysninger.putAll(
-                mutableMapOf(
-                    "id" to id,
-                    "skatteopplysninger" to skatteopplysninger
-                )
+            this.inntektsopplysninger = mapOf(
+                "id" to id,
+                "skatteopplysninger" to skatteopplysninger
             )
             pushState(InntektsendringState(skatteopplysninger))
         }
@@ -1052,7 +1049,7 @@ internal class JsonBuilder : AbstractBuilder() {
             this.arbeidsgiverInntektsopplysninger.add(
                 mapOf(
                     "orgnummer" to orgnummer,
-                    "inntektsopplysning" to inntektsopplysninger.toMap()
+                    "inntektsopplysning" to inntektsopplysninger!!
                 )
             )
         }
