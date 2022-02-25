@@ -40,7 +40,7 @@ internal class FjerneBlokkerendePeriodeE2ETest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-        håndterUtbetalt(2.vedtaksperiode)
+        håndterUtbetalt()
 
         assertSisteForkastetPeriodeTilstand(ORGNUMMER, 1.vedtaksperiode, TilstandType.TIL_INFOTRYGD)
         assertSisteTilstand(2.vedtaksperiode, TilstandType.AVSLUTTET)
@@ -62,7 +62,7 @@ internal class FjerneBlokkerendePeriodeE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         val tom2 = tom.plusMonths(2)
         val fom2 = fom.plusMonths(2)
@@ -75,7 +75,7 @@ internal class FjerneBlokkerendePeriodeE2ETest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-        håndterUtbetalt(2.vedtaksperiode)
+        håndterUtbetalt()
 
         val utbetalingstidslinje = inspektør.utbetalingstidslinjer(1.vedtaksperiode)
         utbetalingstidslinje[tom].let {

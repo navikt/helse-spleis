@@ -70,13 +70,13 @@ internal class UtbetalingsfilterTest {
     }
 
     @Test
-    fun `delvis refusjon kan ikke utbetales`() {
+    fun `delvis refusjon kan utbetales`() {
         val filter = Utbetalingsfilter.Builder()
             .utbetalingstidslinjerHarBrukerutbetaling(false)
             .utbetaling(lagUtbetaling(tidslinjeOf(16.AP, 15.NAV.copyWith(arbeidsgiverbeløp = 600))))
             .inntektkilde(EN_ARBEIDSGIVER)
             .build()
-        filter.assertKanIkkeUtbetales("Utbetalingen har endringer i både arbeidsgiver- og personoppdrag")
+        filter.assertKanUtbetales()
     }
 
     @Test

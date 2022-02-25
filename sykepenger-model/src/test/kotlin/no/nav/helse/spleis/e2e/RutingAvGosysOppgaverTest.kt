@@ -263,7 +263,7 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         håndterSykmelding(Sykmeldingsperiode(18.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(18.januar, 20.januar, 100.prosent))

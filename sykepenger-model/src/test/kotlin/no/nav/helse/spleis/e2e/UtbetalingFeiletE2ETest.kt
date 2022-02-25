@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.Toggle
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.inspectors.inspektør
@@ -29,13 +28,13 @@ internal class UtbetalingFeiletE2ETest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-        håndterUtbetalt(2.vedtaksperiode, Oppdragstatus.AVVIST)
+        håndterUtbetalt(Oppdragstatus.AVVIST)
         håndterPåminnelse(2.vedtaksperiode, UTBETALING_FEILET)
         håndterYtelser(1.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-        håndterUtbetalt(2.vedtaksperiode)
+        håndterUtbetalt()
         val første = inspektør.utbetaling(0)
         assertEquals(Utbetaling.Forkastet, inspektør.utbetalingtilstand(2))
         inspektør.utbetaling(3).inspektør.also { utbetalingInspektør ->
@@ -60,7 +59,7 @@ internal class UtbetalingFeiletE2ETest : AbstractEndToEndTest() {
     @Test
     fun `utbetaling feilet med ett oppdrag status avvist`() {
         tilGodkjent(1.januar, 31.januar, 100.prosent, 1.januar)
-        håndterUtbetalt(1.vedtaksperiode, status = Oppdragstatus.AVVIST)
+        håndterUtbetalt(status = Oppdragstatus.AVVIST)
         håndterPåminnelse(1.vedtaksperiode, UTBETALING_FEILET)
         håndterYtelser(1.vedtaksperiode)
         assertEquals(Utbetaling.Forkastet, inspektør.utbetalingtilstand(0))
@@ -82,7 +81,7 @@ internal class UtbetalingFeiletE2ETest : AbstractEndToEndTest() {
     fun `utbetaling feilet med ett oppdrag status avvist som bygger på tidligere`() {
         nyttVedtak(1.januar, 31.januar)
         forlengTilGodkjentVedtak(1.februar, 28.februar)
-        håndterUtbetalt(2.vedtaksperiode, status = Oppdragstatus.AVVIST)
+        håndterUtbetalt(status = Oppdragstatus.AVVIST)
         håndterPåminnelse(2.vedtaksperiode, UTBETALING_FEILET)
         håndterYtelser(2.vedtaksperiode)
         val første = inspektør.utbetaling(0)
@@ -100,7 +99,7 @@ internal class UtbetalingFeiletE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `utbetaling feilet med ett oppdrag status avvist og ett som er ok`() = Toggle.DelvisRefusjon.enable {
+    fun `utbetaling feilet med ett oppdrag status avvist og ett som er ok`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(1.januar til 16.januar), refusjon = Inntektsmelding.Refusjon(INNTEKT/2, null, emptyList()))
@@ -109,8 +108,8 @@ internal class UtbetalingFeiletE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode, status = Oppdragstatus.AKSEPTERT, fagsystemId = inspektør.utbetaling(0).inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
-        håndterUtbetalt(1.vedtaksperiode, status = Oppdragstatus.AVVIST, fagsystemId = inspektør.utbetaling(0).inspektør.personOppdrag.inspektør.fagsystemId())
+        håndterUtbetalt(status = Oppdragstatus.AKSEPTERT, fagsystemId = inspektør.utbetaling(0).inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
+        håndterUtbetalt(status = Oppdragstatus.AVVIST, fagsystemId = inspektør.utbetaling(0).inspektør.personOppdrag.inspektør.fagsystemId())
         håndterPåminnelse(1.vedtaksperiode, UTBETALING_FEILET)
         håndterYtelser(1.vedtaksperiode)
         val første = inspektør.utbetaling(0)
@@ -136,7 +135,7 @@ internal class UtbetalingFeiletE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `utbetaling feilet med ett oppdrag status ok og ett som er avvist`() = Toggle.DelvisRefusjon.enable {
+    fun `utbetaling feilet med ett oppdrag status ok og ett som er avvist`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(1.januar til 16.januar), refusjon = Inntektsmelding.Refusjon(INNTEKT/2, null, emptyList()))
@@ -145,8 +144,8 @@ internal class UtbetalingFeiletE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode, status = Oppdragstatus.AVVIST, fagsystemId = inspektør.utbetaling(0).inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
-        håndterUtbetalt(1.vedtaksperiode, status = Oppdragstatus.AKSEPTERT, fagsystemId = inspektør.utbetaling(0).inspektør.personOppdrag.inspektør.fagsystemId())
+        håndterUtbetalt(status = Oppdragstatus.AVVIST, fagsystemId = inspektør.utbetaling(0).inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
+        håndterUtbetalt(status = Oppdragstatus.AKSEPTERT, fagsystemId = inspektør.utbetaling(0).inspektør.personOppdrag.inspektør.fagsystemId())
         håndterPåminnelse(1.vedtaksperiode, UTBETALING_FEILET)
         håndterYtelser(1.vedtaksperiode)
         val første = inspektør.utbetaling(0)
@@ -174,7 +173,7 @@ internal class UtbetalingFeiletE2ETest : AbstractEndToEndTest() {
     @Test
     fun `nyere perioder må vente til periode med feilet utbetaling er ok`() {
         tilGodkjent(1.januar, 31.januar, 100.prosent, 1.januar)
-        håndterUtbetalt(1.vedtaksperiode, status = Oppdragstatus.AVVIST)
+        håndterUtbetalt(status = Oppdragstatus.AVVIST)
 
         gapPeriode(1.mars til 31.mars, ORGNUMMER)
 

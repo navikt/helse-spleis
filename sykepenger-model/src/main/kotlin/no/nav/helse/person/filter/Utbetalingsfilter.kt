@@ -1,6 +1,5 @@
 package no.nav.helse.person.filter
 
-import no.nav.helse.Toggle
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.Inntektskilde.EN_ARBEIDSGIVER
@@ -22,14 +21,9 @@ internal class Utbetalingsfilter private constructor(
     internal fun kanIkkeUtbetales(aktivitetslogg: IAktivitetslogg) = !filtrer(aktivitetslogg)
 
     override fun filtrer(aktivitetslogg: IAktivitetslogg): Boolean {
-
-        if (Toggle.DelvisRefusjon.disabled && utbetaling.harDelvisRefusjon()) {
-            aktivitetslogg.error("Utbetalingen har endringer i både arbeidsgiver- og personoppdrag")
-        } else {
-            when (inntektskilde) {
-                EN_ARBEIDSGIVER -> enArbeidsgiver(aktivitetslogg)
-                FLERE_ARBEIDSGIVERE -> flereArbeidsgivere(aktivitetslogg)
-            }
+        when (inntektskilde) {
+            EN_ARBEIDSGIVER -> enArbeidsgiver(aktivitetslogg)
+            FLERE_ARBEIDSGIVERE -> flereArbeidsgivere(aktivitetslogg)
         }
         return !aktivitetslogg.hasErrorsOrWorse()
     }

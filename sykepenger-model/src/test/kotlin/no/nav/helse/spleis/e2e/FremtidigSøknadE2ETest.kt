@@ -39,7 +39,7 @@ internal class FremtidigSøknadE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
         assertTilstander(
             1.vedtaksperiode,
             START,

@@ -480,7 +480,7 @@ internal class OutOfOrderE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
 
@@ -515,7 +515,7 @@ internal class OutOfOrderE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(20.februar, 28.februar, 100.prosent))
@@ -544,7 +544,7 @@ internal class OutOfOrderE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
@@ -575,7 +575,7 @@ internal class OutOfOrderE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
@@ -604,7 +604,7 @@ internal class OutOfOrderE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         håndterSykmelding(Sykmeldingsperiode(7.mars, 31.mars, 100.prosent))
         håndterSøknad(Sykdom(7.mars, 31.mars, 100.prosent)) // ber om replay
@@ -645,7 +645,7 @@ internal class OutOfOrderE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         håndterSykmelding(Sykmeldingsperiode(1.april, 30.april, 100.prosent))
         håndterSøknad(Sykdom(1.april, 30.april, 100.prosent))

@@ -32,7 +32,7 @@ internal class RareFeilOgBugs : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         // skal ikke kunne skje i virkeligheten, brukes for å reprodusere bug der vi ikke lenger
         // greier å deserialisere eksisterende infotrygdhistorikk riktig

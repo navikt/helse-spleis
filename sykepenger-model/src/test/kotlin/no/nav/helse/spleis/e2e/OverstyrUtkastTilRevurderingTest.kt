@@ -123,7 +123,7 @@ internal class OverstyrUtkastTilRevurderingTest: AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-        håndterUtbetalt(2.vedtaksperiode)
+        håndterUtbetalt()
 
         val utbetalingstidslinje = inspektør.sisteUtbetalingUtbetalingstidslinje()
         assertTrue(utbetalingstidslinje[27.januar] is NavHelgDag)
@@ -194,7 +194,7 @@ internal class OverstyrUtkastTilRevurderingTest: AbstractEndToEndTest() {
         håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)
         håndterUtbetalingsgodkjenning(3.vedtaksperiode)
-        håndterUtbetalt(3.vedtaksperiode)
+        håndterUtbetalt()
 
         val utbetalingstidslinje = inspektør.sisteUtbetalingUtbetalingstidslinje()
         assertTrue(utbetalingstidslinje[27.januar] is NavHelgDag)
@@ -278,7 +278,7 @@ internal class OverstyrUtkastTilRevurderingTest: AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-        håndterUtbetalt(2.vedtaksperiode)
+        håndterUtbetalt()
 
         val utbetalingstidslinje = inspektør.sisteUtbetalingUtbetalingstidslinje()
         assertTrue(utbetalingstidslinje[28.januar] is NavHelgDag)

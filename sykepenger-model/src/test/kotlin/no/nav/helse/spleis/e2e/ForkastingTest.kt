@@ -140,7 +140,7 @@ internal class ForkastingTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
-        assertForkastetPeriodeTilstander(
+        assertTilstander(
             1.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
@@ -148,7 +148,7 @@ internal class ForkastingTest : AbstractEndToEndTest() {
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
-            TIL_INFOTRYGD
+            AVVENTER_SIMULERING
         )
     }
 
@@ -164,7 +164,7 @@ internal class ForkastingTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
-        assertForkastetPeriodeTilstander(
+        assertTilstander(
             1.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
@@ -172,7 +172,7 @@ internal class ForkastingTest : AbstractEndToEndTest() {
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
-            TIL_INFOTRYGD
+            AVVENTER_SIMULERING
         )
     }
 
@@ -196,7 +196,7 @@ internal class ForkastingTest : AbstractEndToEndTest() {
     fun `forkaster ikke påfølgende periode når tilstøtende forkastet periode ble avsluttet`() {
         nyttVedtak(29.august, 25.september)
         håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         håndterSykmelding(Sykmeldingsperiode(26.september, 23.oktober, 100.prosent))
 
@@ -237,7 +237,7 @@ internal class ForkastingTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
-        håndterUtbetalt(1.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
         assertEquals(Utbetaling.Utbetalt, inspektør.utbetalingtilstand(0))
         assertTilstander(

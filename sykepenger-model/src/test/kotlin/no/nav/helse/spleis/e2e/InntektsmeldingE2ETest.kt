@@ -50,7 +50,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         // -> TODO refusjon IM kommer her
 
@@ -104,7 +104,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Opphør i refusjon som overlapper med senere periode fører til at perioden forkastes`() {
+    fun `Opphør i refusjon som overlapper med senere periode`() {
         håndterSykmelding(Sykmeldingsperiode(1.november(2020), 20.november(2020), 100.prosent))
         håndterInntektsmelding(listOf(Periode(1.november(2020), 16.november(2020))), førsteFraværsdag = 1.november(2020))
         håndterSøknad(Sykdom(1.november(2020), 20.november(2020), 100.prosent))
@@ -119,7 +119,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -143,12 +143,12 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(21.november(2020), 10.desember(2020), 100.prosent))
 
         håndterYtelser(2.vedtaksperiode)
-        assertForkastetPeriodeTilstander(
+        assertTilstander(
             2.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
             AVVENTER_HISTORIKK,
-            TIL_INFOTRYGD
+            AVVENTER_SIMULERING
         )
     }
 
@@ -168,7 +168,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         håndterInntektsmelding(
             listOf(Periode(1.november(2020), 16.november(2020))),
@@ -215,7 +215,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -297,7 +297,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -347,7 +347,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -397,7 +397,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         håndterSykmelding(Sykmeldingsperiode(21.november(2020), 10.desember(2020), 100.prosent))
         håndterInntektsmelding(
@@ -595,7 +595,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         assertTilstander(
             1.vedtaksperiode,
@@ -713,7 +713,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         håndterSykmelding(Sykmeldingsperiode(22.januar, 31.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(22.januar, 1.februar, 100.prosent))
@@ -746,7 +746,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)
         håndterUtbetalingsgodkjenning(3.vedtaksperiode)
-        håndterUtbetalt(3.vedtaksperiode)
+        håndterUtbetalt()
 
         inspektør.also {
             assertEquals(3.februar, it.vedtaksperioder(3.vedtaksperiode).periode().start)
@@ -766,7 +766,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         inspektør.also {
             assertEquals(3.februar, it.vedtaksperioder(1.vedtaksperiode).periode().start)
@@ -786,7 +786,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         inspektør.also {
             assertEquals(3.februar, it.vedtaksperioder(1.vedtaksperiode).periode().start)
@@ -806,7 +806,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         inspektør.also {
             assertEquals(3.februar, it.vedtaksperioder(1.vedtaksperiode).periode().start)
@@ -826,7 +826,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         inspektør.also {
             assertEquals(3.februar, it.vedtaksperioder(1.vedtaksperiode).periode().start)
@@ -845,38 +845,11 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         inspektør.also {
             assertEquals(3.februar, it.vedtaksperioder(1.vedtaksperiode).periode().start)
         }
-    }
-
-    @Test
-    fun `trimmer inntektsmelding etter tom`() {
-        håndterSykmelding(Sykmeldingsperiode(6.januar, 14.januar, 100.prosent))
-        håndterSøknad(Sykdom(6.januar, 14.januar, 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(15.januar, 21.januar, 100.prosent))
-        håndterSøknad(Sykdom(15.januar, 21.januar, 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(22.januar, 7.februar, 100.prosent))
-        håndterSøknad(Sykdom(22.januar, 7.februar, 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(8.februar, 21.februar, 100.prosent))
-        håndterSøknad(Sykdom(8.februar, 21.februar, 100.prosent))
-        håndterInntektsmelding(
-            arbeidsgiverperioder = listOf(6.januar til 21.januar),
-            førsteFraværsdag = 22.januar,
-            beregnetInntekt = 30000.månedlig,
-            refusjon = Refusjon(25000.månedlig, null, emptyList())
-        )
-
-        håndterYtelser(3.vedtaksperiode)
-        håndterVilkårsgrunnlag(3.vedtaksperiode)
-        håndterYtelser(3.vedtaksperiode)
-
-        assertFalse(inspektør.periodeErForkastet(1.vedtaksperiode))
-        assertFalse(inspektør.periodeErForkastet(2.vedtaksperiode))
-        assertTrue(inspektør.periodeErForkastet(3.vedtaksperiode))
-        assertTrue(inspektør.periodeErForkastet(4.vedtaksperiode))
     }
 
     @Test
@@ -889,14 +862,14 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         håndterSykmelding(Sykmeldingsperiode(20.januar, 3.februar, 100.prosent))
         håndterSøknad(Sykdom(20.januar, 3.februar, 100.prosent, null))
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-        håndterUtbetalt(2.vedtaksperiode)
+        håndterUtbetalt()
 
         håndterSykmelding(Sykmeldingsperiode(7.februar, 7.februar, 100.prosent))
         håndterSøknad(Sykdom(7.februar, 7.februar, 100.prosent, null))
@@ -906,7 +879,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)
         håndterUtbetalingsgodkjenning(3.vedtaksperiode)
-        håndterUtbetalt(3.vedtaksperiode)
+        håndterUtbetalt()
 
         val inntektsmelding3 = håndterInntektsmelding(listOf(3.januar til 18.januar), 23.februar)
         håndterSykmelding(Sykmeldingsperiode(23.februar, 25.februar, 100.prosent))
@@ -1137,7 +1110,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         håndterSykmelding(Sykmeldingsperiode(29.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(29.januar, 31.januar, 100.prosent))
@@ -1156,7 +1129,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
@@ -1496,7 +1469,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
-        håndterUtbetalt(2.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
         assertNoErrors()
         assertActivities(person)
@@ -1559,7 +1532,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
         håndterSykmelding(Sykmeldingsperiode(29.januar, 23.februar, 100.prosent))
         håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(29.januar, 23.februar, 100.prosent))
@@ -1567,7 +1540,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
-        håndterUtbetalt(2.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
         assertNoErrors()
         assertActivities(person)
@@ -1611,7 +1584,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
         forventetEndringTeller++
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 23.februar, 100.prosent))
         håndterInntektsmeldingMedValidering(
@@ -1627,7 +1600,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
-        håndterUtbetalt(2.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
         assertNoErrors()
 
         assertNotNull(inspektør.sisteMaksdato(1.vedtaksperiode))

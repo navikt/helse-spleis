@@ -36,7 +36,7 @@ internal class FagsystemIDTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
         val historie2 = historie1 + listOf(
             ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 24.juni,  12.juli, 100.prosent, 1000.daglig),
@@ -51,7 +51,7 @@ internal class FagsystemIDTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
-        håndterUtbetalt(2.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
         assertEquals(2, inspektør.utbetalinger.size)
         val første = inspektør.utbetalinger.first().inspektør.arbeidsgiverOppdrag
@@ -89,7 +89,7 @@ internal class FagsystemIDTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
         val historie2 = historie1 + listOf(
             ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 24.juni,  12.juli, 100.prosent, 1000.daglig),
@@ -104,14 +104,14 @@ internal class FagsystemIDTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
-        håndterUtbetalt(2.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
         håndterSykmelding(Sykmeldingsperiode(1.august, 31.august, 100.prosent))
         håndterSøknad(Sykdom(1.august, 31.august, 100.prosent))
         håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)
         håndterUtbetalingsgodkjenning(3.vedtaksperiode, true)
-        håndterUtbetalt(3.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
         assertEquals(3, inspektør.utbetalinger.size)
         val første = inspektør.utbetalinger.first().inspektør.arbeidsgiverOppdrag
@@ -146,7 +146,7 @@ internal class FagsystemIDTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
         val historie2 = historie1 + listOf(
             // [ nok gap til ny arbeidsgiverperiode ]
             ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 5.april,  30.april, 100.prosent, 1000.daglig)
@@ -161,7 +161,7 @@ internal class FagsystemIDTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
-        håndterUtbetalt(2.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
         assertEquals(2, inspektør.utbetalinger.size)
         val første = inspektør.utbetalinger.first().inspektør.arbeidsgiverOppdrag
@@ -197,7 +197,7 @@ internal class FagsystemIDTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
         val historie2 = historie1 + listOf(
             // [ nok gap til ny arbeidsgiverperiode ]
             ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 5.april,  10.april, 100.prosent, 1000.daglig)
@@ -211,7 +211,7 @@ internal class FagsystemIDTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
-        håndterUtbetalt(2.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
         val siste = inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag
         siste.linjerUtenOpphør().also { linjer ->
@@ -242,7 +242,7 @@ internal class FagsystemIDTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
         val historie1 = listOf(
             ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.mai,  29.mai, 100.prosent, 1000.daglig)
@@ -258,7 +258,7 @@ internal class FagsystemIDTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
-        håndterUtbetalt(2.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
         assertEquals(2, inspektør.utbetalinger.size)
         val første = inspektør.utbetalinger.first().inspektør.arbeidsgiverOppdrag
@@ -297,7 +297,7 @@ internal class FagsystemIDTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
         val historie1 = listOf(
             ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.mai,  29.mai, 100.prosent, 1000.daglig)
@@ -312,14 +312,14 @@ internal class FagsystemIDTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
-        håndterUtbetalt(2.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
         håndterSykmelding(Sykmeldingsperiode(1.juli, 31.juli, 100.prosent))
         håndterSøknad(Sykdom(1.juli, 31.juli, 100.prosent))
         håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)
         håndterUtbetalingsgodkjenning(3.vedtaksperiode, true)
-        håndterUtbetalt(3.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
         assertEquals(3, inspektør.utbetalinger.size)
         val første = inspektør.utbetalinger.first().inspektør.arbeidsgiverOppdrag

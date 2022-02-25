@@ -75,7 +75,7 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, utbetalingGodkjent = true)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
         // ny periode
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent))

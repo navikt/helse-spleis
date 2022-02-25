@@ -46,15 +46,15 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-        håndterUtbetalt(2.vedtaksperiode)
+        håndterUtbetalt()
         håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)
         håndterUtbetalingsgodkjenning(3.vedtaksperiode)
-        håndterUtbetalt(3.vedtaksperiode)
+        håndterUtbetalt()
         håndterYtelser(4.vedtaksperiode)
         håndterVilkårsgrunnlag(4.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
@@ -66,7 +66,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         håndterYtelser(4.vedtaksperiode)
         håndterSimulering(4.vedtaksperiode)
         håndterUtbetalingsgodkjenning(4.vedtaksperiode)
-        håndterUtbetalt(4.vedtaksperiode)
+        håndterUtbetalt()
 
         assertNotNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
         assertEquals(inspektør.vilkårsgrunnlag(1.vedtaksperiode), inspektør.vilkårsgrunnlag(2.vedtaksperiode))
@@ -110,7 +110,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
         håndterYtelser(2.vedtaksperiode)
         assertTilstander(
             1.vedtaksperiode,
@@ -143,7 +143,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.mars)
         håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode)
@@ -189,7 +189,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
         håndterInntektsmeldingMedValidering(2.vedtaksperiode, listOf(Periode(18.januar, 1.februar)), førsteFraværsdag = 4.mars)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
         håndterYtelser(2.vedtaksperiode)
         assertTilstander(
             1.vedtaksperiode,
@@ -271,7 +271,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
         håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)

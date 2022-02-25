@@ -122,11 +122,11 @@ internal class FlereArbeidsgivereInfotrygdTest : AbstractEndToEndTest()  {
         håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true, orgnummer = a1)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
         håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true, orgnummer = a2)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(orgnummer = a2)
 
         //Forlengelsen starter her
         val forlengelseperiode = 1.februar(2021) til 28.februar(2021)
@@ -162,7 +162,7 @@ internal class FlereArbeidsgivereInfotrygdTest : AbstractEndToEndTest()  {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true, orgnummer = a1)
         assertSisteTilstand(2.vedtaksperiode, TIL_UTBETALING, orgnummer = a1)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
-        håndterUtbetalt(2.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
 
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET, orgnummer = a1)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
@@ -176,7 +176,7 @@ internal class FlereArbeidsgivereInfotrygdTest : AbstractEndToEndTest()  {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true, orgnummer = a2)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET, orgnummer = a1)
         assertSisteTilstand(2.vedtaksperiode, TIL_UTBETALING, orgnummer = a2)
-        håndterUtbetalt(2.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(orgnummer = a2)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET, orgnummer = a1)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET, orgnummer = a2)
     }
@@ -205,11 +205,11 @@ internal class FlereArbeidsgivereInfotrygdTest : AbstractEndToEndTest()  {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(orgnummer = a2)
 
         //Her starter forlengelsen
         val forlengelseperiode = 1.februar(2021) til 10.februar(2021)
@@ -222,7 +222,7 @@ internal class FlereArbeidsgivereInfotrygdTest : AbstractEndToEndTest()  {
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)
         håndterSimulering(2.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(2.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET, orgnummer = a1)
 
         håndterSykmelding(Sykmeldingsperiode(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a2)
@@ -236,7 +236,7 @@ internal class FlereArbeidsgivereInfotrygdTest : AbstractEndToEndTest()  {
         håndterYtelser(2.vedtaksperiode, orgnummer = a2)
         håndterSimulering(2.vedtaksperiode, orgnummer = a2)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a2)
-        håndterUtbetalt(2.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(orgnummer = a2)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET, orgnummer = a1)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET, orgnummer = a2)
     }
@@ -300,11 +300,11 @@ internal class FlereArbeidsgivereInfotrygdTest : AbstractEndToEndTest()  {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(orgnummer = a2)
 
         //Her starter forlengelsen
         val forlengelseperiode = 1.februar(2021) til 10.februar(2021)
@@ -317,11 +317,11 @@ internal class FlereArbeidsgivereInfotrygdTest : AbstractEndToEndTest()  {
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)
         håndterSimulering(2.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(2.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
         håndterYtelser(2.vedtaksperiode, orgnummer = a2)
         håndterSimulering(2.vedtaksperiode, orgnummer = a2)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a2)
-        håndterUtbetalt(2.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(orgnummer = a2)
 
         //Her starter forlengelsen av forlengelsen
         val forlengelsesforlengelseperiode = 11.februar(2021) til 20.februar(2021)
@@ -337,7 +337,7 @@ internal class FlereArbeidsgivereInfotrygdTest : AbstractEndToEndTest()  {
         håndterYtelser(3.vedtaksperiode, orgnummer = a1)
         håndterSimulering(3.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(3.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(3.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
         assertSisteTilstand(3.vedtaksperiode, AVSLUTTET, orgnummer = a1)
 
         håndterSykmelding(Sykmeldingsperiode(forlengelsesforlengelseperiode.start, forlengelsesforlengelseperiode.endInclusive, 100.prosent), orgnummer = a2)
@@ -381,11 +381,11 @@ internal class FlereArbeidsgivereInfotrygdTest : AbstractEndToEndTest()  {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(orgnummer = a2)
 
         //Her starter forlengelsen
         val forlengelseperiode = 1.februar(2021) til 28.februar(2021)
@@ -398,11 +398,11 @@ internal class FlereArbeidsgivereInfotrygdTest : AbstractEndToEndTest()  {
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)
         håndterSimulering(2.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(2.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
         håndterYtelser(2.vedtaksperiode, orgnummer = a2)
         håndterSimulering(2.vedtaksperiode, orgnummer = a2)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a2)
-        håndterUtbetalt(2.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(orgnummer = a2)
 
         håndterSykmelding(Sykmeldingsperiode(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a3)
         assertSisteTilstand(1.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_GAP, orgnummer = a3)
@@ -479,11 +479,11 @@ internal class FlereArbeidsgivereInfotrygdTest : AbstractEndToEndTest()  {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(orgnummer = a2)
 
         //Her starter forlengelsen
         val forlengelseperiode = 1.februar(2021) til 28.februar(2021)
@@ -522,11 +522,11 @@ internal class FlereArbeidsgivereInfotrygdTest : AbstractEndToEndTest()  {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(orgnummer = a2)
 
         //Her starter forlengelsen
         val forlengelseperiode = 1.februar(2021) til 28.februar(2021)
@@ -539,11 +539,11 @@ internal class FlereArbeidsgivereInfotrygdTest : AbstractEndToEndTest()  {
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)
         håndterSimulering(2.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(2.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
         håndterYtelser(2.vedtaksperiode, orgnummer = a2)
         håndterSimulering(2.vedtaksperiode, orgnummer = a2)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a2)
-        håndterUtbetalt(2.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(orgnummer = a2)
 
         //Her starter forlengelsen av forlengelsen
         val forlengelsesforlengelseperiode = 1.mars(2021) til 31.mars(2021)
@@ -593,15 +593,15 @@ internal class FlereArbeidsgivereInfotrygdTest : AbstractEndToEndTest()  {
         håndterYtelser(3.vedtaksperiode, orgnummer = a1)
         håndterSimulering(3.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(3.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(3.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
         håndterYtelser(3.vedtaksperiode, orgnummer = a2)
         håndterSimulering(3.vedtaksperiode, orgnummer = a2)
         håndterUtbetalingsgodkjenning(3.vedtaksperiode, orgnummer = a2)
-        håndterUtbetalt(3.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(orgnummer = a2)
         håndterYtelser(1.vedtaksperiode, orgnummer = a3)
         håndterSimulering(1.vedtaksperiode, orgnummer = a3)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a3)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a3)
+        håndterUtbetalt(orgnummer = a3)
 
         assertSisteTilstand(3.vedtaksperiode, AVSLUTTET, orgnummer = a1)
         assertSisteTilstand(3.vedtaksperiode, AVSLUTTET, orgnummer = a2)
@@ -637,11 +637,11 @@ internal class FlereArbeidsgivereInfotrygdTest : AbstractEndToEndTest()  {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(orgnummer = a2)
 
         //Her starter forlengelsen
         val forlengelseperiode = 1.februar(2021) til 10.februar(2021)
@@ -654,11 +654,11 @@ internal class FlereArbeidsgivereInfotrygdTest : AbstractEndToEndTest()  {
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)
         håndterSimulering(2.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(2.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
         håndterYtelser(2.vedtaksperiode, orgnummer = a2)
         håndterSimulering(2.vedtaksperiode, orgnummer = a2)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a2)
-        håndterUtbetalt(2.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(orgnummer = a2)
 
         håndterSykmelding(Sykmeldingsperiode(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a3)
         assertSisteTilstand(1.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_GAP, orgnummer = a3)
@@ -722,11 +722,11 @@ internal class FlereArbeidsgivereInfotrygdTest : AbstractEndToEndTest()  {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(orgnummer = a2)
 
         //Her starter forlengelsen
         val forlengelseperiode = 1.februar(2021) til 28.februar(2021)
@@ -739,11 +739,11 @@ internal class FlereArbeidsgivereInfotrygdTest : AbstractEndToEndTest()  {
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)
         håndterSimulering(2.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(2.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
         håndterYtelser(2.vedtaksperiode, orgnummer = a2)
         håndterSimulering(2.vedtaksperiode, orgnummer = a2)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a2)
-        håndterUtbetalt(2.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(orgnummer = a2)
 
         håndterSykmelding(Sykmeldingsperiode(forlengelseperiode.start, forlengelseperiode.endInclusive, 100.prosent), orgnummer = a3)
         assertSisteTilstand(1.vedtaksperiode, MOTTATT_SYKMELDING_FERDIG_GAP, orgnummer = a3)
@@ -758,7 +758,7 @@ internal class FlereArbeidsgivereInfotrygdTest : AbstractEndToEndTest()  {
         håndterYtelser(1.vedtaksperiode, orgnummer = a3)
         håndterSimulering(1.vedtaksperiode, orgnummer = a3)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a3)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a3)
+        håndterUtbetalt(orgnummer = a3)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a3)
 
         //Her starter forlengelsen av forlengelsen
@@ -806,15 +806,15 @@ internal class FlereArbeidsgivereInfotrygdTest : AbstractEndToEndTest()  {
         håndterYtelser(3.vedtaksperiode, orgnummer = a1)
         håndterSimulering(3.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(3.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(3.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
         håndterYtelser(3.vedtaksperiode, orgnummer = a2)
         håndterSimulering(3.vedtaksperiode, orgnummer = a2)
         håndterUtbetalingsgodkjenning(3.vedtaksperiode, orgnummer = a2)
-        håndterUtbetalt(3.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(orgnummer = a2)
         håndterYtelser(2.vedtaksperiode, orgnummer = a3)
         håndterSimulering(2.vedtaksperiode, orgnummer = a3)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a3)
-        håndterUtbetalt(2.vedtaksperiode, orgnummer = a3)
+        håndterUtbetalt(orgnummer = a3)
 
         assertSisteTilstand(3.vedtaksperiode, AVSLUTTET, orgnummer = a1)
         assertSisteTilstand(3.vedtaksperiode, AVSLUTTET, orgnummer = a2)
@@ -851,11 +851,11 @@ internal class FlereArbeidsgivereInfotrygdTest : AbstractEndToEndTest()  {
         håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true, orgnummer = a1)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
         håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true, orgnummer = a2)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(orgnummer = a2)
 
         //Forlengelsen starter her
         val forlengelseperiode = 1.februar(2021) til 28.februar(2021)
@@ -886,7 +886,7 @@ internal class FlereArbeidsgivereInfotrygdTest : AbstractEndToEndTest()  {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
         val periode2 = 1.mars(2021) til 31.mars(2021)
         håndterSykmelding(Sykmeldingsperiode(periode2.start, periode2.endInclusive, 100.prosent), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(1.april(2021), 30.april(2021), 100.prosent), orgnummer = a2)
@@ -901,7 +901,7 @@ internal class FlereArbeidsgivereInfotrygdTest : AbstractEndToEndTest()  {
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)
         håndterSimulering(2.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(2.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD, orgnummer = a2)
     }
@@ -959,7 +959,7 @@ internal class FlereArbeidsgivereInfotrygdTest : AbstractEndToEndTest()  {
         assertSisteTilstand(1.vedtaksperiode, TIL_UTBETALING, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
 
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
 
@@ -977,7 +977,7 @@ internal class FlereArbeidsgivereInfotrygdTest : AbstractEndToEndTest()  {
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, TIL_UTBETALING, orgnummer = a2)
 
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(orgnummer = a2)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
     }
@@ -1006,11 +1006,11 @@ internal class FlereArbeidsgivereInfotrygdTest : AbstractEndToEndTest()  {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(orgnummer = a2)
 
         //Her starter forlengelsen
         val forlengelseperiode = 1.februar(2021) til 10.februar(2021)
@@ -1051,7 +1051,7 @@ internal class FlereArbeidsgivereInfotrygdTest : AbstractEndToEndTest()  {
         assertSisteTilstand(2.vedtaksperiode, TIL_UTBETALING, orgnummer = a1)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
 
-        håndterUtbetalt(2.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET, orgnummer = a1)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
 
@@ -1069,7 +1069,7 @@ internal class FlereArbeidsgivereInfotrygdTest : AbstractEndToEndTest()  {
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET, orgnummer = a1)
         assertSisteTilstand(2.vedtaksperiode, TIL_UTBETALING, orgnummer = a2)
 
-        håndterUtbetalt(2.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(orgnummer = a2)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET, orgnummer = a1)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET, orgnummer = a2)
     }
@@ -1108,7 +1108,7 @@ internal class FlereArbeidsgivereInfotrygdTest : AbstractEndToEndTest()  {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
@@ -1123,7 +1123,7 @@ internal class FlereArbeidsgivereInfotrygdTest : AbstractEndToEndTest()  {
 
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(orgnummer = a2)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
 
@@ -1141,14 +1141,14 @@ internal class FlereArbeidsgivereInfotrygdTest : AbstractEndToEndTest()  {
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)
         håndterSimulering(2.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(2.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET, orgnummer = a1)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
 
         håndterYtelser(2.vedtaksperiode, orgnummer = a2)
         håndterSimulering(2.vedtaksperiode, orgnummer = a2)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a2)
-        håndterUtbetalt(2.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(orgnummer = a2)
 
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
@@ -1353,7 +1353,7 @@ internal class FlereArbeidsgivereInfotrygdTest : AbstractEndToEndTest()  {
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
 
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true, orgnummer = a1)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
@@ -1434,7 +1434,7 @@ internal class FlereArbeidsgivereInfotrygdTest : AbstractEndToEndTest()  {
         assertSisteTilstand(1.vedtaksperiode, TIL_UTBETALING, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
 
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
 
@@ -1454,7 +1454,7 @@ internal class FlereArbeidsgivereInfotrygdTest : AbstractEndToEndTest()  {
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, TIL_UTBETALING, orgnummer = a2)
 
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(orgnummer = a2)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
     }
@@ -1507,7 +1507,7 @@ internal class FlereArbeidsgivereInfotrygdTest : AbstractEndToEndTest()  {
         assertSisteTilstand(1.vedtaksperiode, TIL_UTBETALING, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
 
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
 
@@ -1525,7 +1525,7 @@ internal class FlereArbeidsgivereInfotrygdTest : AbstractEndToEndTest()  {
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, TIL_UTBETALING, orgnummer = a2)
 
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(orgnummer = a2)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
     }
@@ -1616,7 +1616,7 @@ internal class FlereArbeidsgivereInfotrygdTest : AbstractEndToEndTest()  {
         assertSisteTilstand(1.vedtaksperiode, TIL_UTBETALING, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
 
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
 
@@ -1635,7 +1635,7 @@ internal class FlereArbeidsgivereInfotrygdTest : AbstractEndToEndTest()  {
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, TIL_UTBETALING, orgnummer = a2)
 
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(orgnummer = a2)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
     }
@@ -1668,7 +1668,7 @@ internal class FlereArbeidsgivereInfotrygdTest : AbstractEndToEndTest()  {
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
 
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true, orgnummer = a1)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
 
         assertEquals(31000.00 * 12, observatør.vedtakFattetEvent[1.vedtaksperiode.id(a1)]?.grunnlagForSykepengegrunnlagPerArbeidsgiver?.get(a1))
         assertEquals(12000.00, observatør.vedtakFattetEvent[1.vedtaksperiode.id(a1)]?.grunnlagForSykepengegrunnlagPerArbeidsgiver?.get(a2))

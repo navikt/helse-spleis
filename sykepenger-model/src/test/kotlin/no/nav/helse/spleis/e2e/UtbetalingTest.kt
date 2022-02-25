@@ -49,7 +49,7 @@ internal class UtbetalingTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
         assertEquals(20, inspektør.utbetaling(0).inspektør.arbeidsgiverOppdrag[0].grad)
     }
 
@@ -65,7 +65,7 @@ internal class UtbetalingTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-        håndterUtbetalt(2.vedtaksperiode)
+        håndterUtbetalt()
         assertEquals(1, inspektør.utbetalinger.size)
         assertEquals(0, inspektør.utbetalinger(1.vedtaksperiode).size)
         assertEquals(1, inspektør.utbetalinger(2.vedtaksperiode).size)

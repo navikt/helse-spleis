@@ -153,7 +153,7 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
         )
 
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
         håndterSykmelding(Sykmeldingsperiode(26.februar, 15.april, 100.prosent))
         håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(26.februar, 15.april, 100.prosent))
@@ -221,7 +221,7 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-        håndterUtbetalt(2.vedtaksperiode)
+        håndterUtbetalt()
 
         assertEquals(Periodetype.FØRSTEGANGSBEHANDLING, inspektør.periodetype(1.vedtaksperiode))
         assertEquals(Periodetype.FORLENGELSE, inspektør.periodetype(2.vedtaksperiode))

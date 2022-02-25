@@ -49,7 +49,7 @@ internal class InntektshistorikkForAOrdningenBuilderTest : AbstractEndToEndTest(
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a1)

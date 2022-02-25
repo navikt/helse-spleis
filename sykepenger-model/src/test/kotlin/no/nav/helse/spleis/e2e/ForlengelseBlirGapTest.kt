@@ -70,7 +70,7 @@ internal class ForlengelseBlirGapTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
         assertTilstander(
             1.vedtaksperiode,
@@ -111,7 +111,7 @@ internal class ForlengelseBlirGapTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
         håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
@@ -154,7 +154,7 @@ internal class ForlengelseBlirGapTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
         håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)

@@ -380,7 +380,7 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         håndterOverstyrInntekt(48000.årlig, skjæringstidspunkt = 1.januar)
         håndterYtelser(1.vedtaksperiode)
@@ -390,7 +390,7 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         val utbetalinger = inspektør.utbetalinger
         assertTrue(utbetalinger[0].inspektør.erUtbetalt)

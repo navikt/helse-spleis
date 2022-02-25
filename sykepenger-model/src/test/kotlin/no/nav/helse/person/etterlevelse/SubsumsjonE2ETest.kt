@@ -543,7 +543,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
         håndterSykmelding(Sykmeldingsperiode(16.juni(2019), 31.juli(2019), 50.prosent))
         håndterSøknad(Sykdom(16.juni(2019), 31.juli(2019), 50.prosent, 50.prosent))
@@ -553,7 +553,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-        håndterUtbetalt(2.vedtaksperiode)
+        håndterUtbetalt()
 
         SubsumsjonInspektør(jurist).assertVurdert(
             paragraf = PARAGRAF_8_12,
@@ -574,7 +574,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         håndterSykmelding(Sykmeldingsperiode(17.juli, 31.august, 50.prosent))
         håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(17.juli, 31.august, 50.prosent, 50.prosent))
@@ -584,7 +584,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-        håndterUtbetalt(2.vedtaksperiode)
+        håndterUtbetalt()
 
 
         SubsumsjonInspektør(jurist).assertIkkeVurdert(
@@ -630,13 +630,13 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
         håndterSykmelding(Sykmeldingsperiode(1.januar(2019), 31.januar(2019), 100.prosent))
         håndterSøknad(Sykdom(1.januar(2019), 31.januar(2019), 100.prosent), sendtTilNAVEllerArbeidsgiver = 31.januar(2019))
         håndterYtelser(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
-        håndterUtbetalt(2.vedtaksperiode)
+        håndterUtbetalt()
 
         SubsumsjonInspektør(jurist).assertIkkeOppfylt(
             paragraf = PARAGRAF_8_12,
@@ -671,7 +671,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         SubsumsjonInspektør(jurist).assertOppfylt(
             paragraf = PARAGRAF_8_13,
@@ -740,7 +740,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         SubsumsjonInspektør(jurist).assertBeregnet(
             paragraf = PARAGRAF_8_13,
@@ -1326,7 +1326,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         SubsumsjonInspektør(jurist).assertBeregnet(
             paragraf = PARAGRAF_8_30,
@@ -1356,7 +1356,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         SubsumsjonInspektør(jurist).assertBeregnet(
             paragraf = PARAGRAF_8_30,
@@ -1413,7 +1413,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-        håndterUtbetalt(2.vedtaksperiode)
+        håndterUtbetalt()
 
         SubsumsjonInspektør(jurist).assertIkkeVurdert(PARAGRAF_8_30, LEDD_2, punktum = 1.punktum, vedtaksperiodeId = 1.vedtaksperiode)
         SubsumsjonInspektør(jurist).assertVurdert(PARAGRAF_8_30, LEDD_2, punktum = 1.punktum, vedtaksperiodeId = 2.vedtaksperiode)
@@ -1608,7 +1608,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, fnr = personOver67år)
         håndterSimulering(1.vedtaksperiode, fnr = personOver67år)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, fnr = personOver67år)
-        håndterUtbetalt(1.vedtaksperiode, fnr = personOver67år)
+        håndterUtbetalt(fnr = personOver67år)
 
         håndterSykmelding(Sykmeldingsperiode(2.februar, 28.februar, 100.prosent), fnr = personOver67år)
         håndterSøknad(Sykdom(2.februar, 28.februar, 100.prosent), fnr = personOver67år)
@@ -1618,7 +1618,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode, fnr = personOver67år)
         håndterSimulering(2.vedtaksperiode, fnr = personOver67år)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, fnr = personOver67år)
-        håndterUtbetalt(2.vedtaksperiode, fnr = personOver67år)
+        håndterUtbetalt(fnr = personOver67år)
 
         SubsumsjonInspektør(jurist).assertOppfylt(
             paragraf = PARAGRAF_8_51,
@@ -1692,7 +1692,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, fnr = personOver67år)
         håndterSimulering(1.vedtaksperiode, fnr = personOver67år)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, fnr = personOver67år)
-        håndterUtbetalt(1.vedtaksperiode, fnr = personOver67år)
+        håndterUtbetalt(fnr = personOver67år)
 
         håndterSykmelding(Sykmeldingsperiode(3.februar, 28.februar, 100.prosent), fnr = personOver67år)
         håndterSøknad(Sykdom(3.februar, 28.februar, 100.prosent), fnr = personOver67år)
@@ -1702,7 +1702,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode, fnr = personOver67år)
         håndterSimulering(2.vedtaksperiode, fnr = personOver67år)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, fnr = personOver67år)
-        håndterUtbetalt(2.vedtaksperiode, fnr = personOver67år)
+        håndterUtbetalt(fnr = personOver67år)
 
         SubsumsjonInspektør(jurist).assertOppfylt(
             paragraf = PARAGRAF_8_51,

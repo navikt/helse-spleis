@@ -47,7 +47,7 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
         )
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
         forlengVedtak(24.april(2021), 7.mai(2021))
 
         håndterOverstyrTidslinje((26.april(2021) til 27.april(2021)).map { manuellFeriedag(it) })
@@ -89,7 +89,7 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
         )
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
         forlengVedtak(24.april(2021), 7.mai(2021))
 
         håndterOverstyrTidslinje((26.april(2021) til 27.april(2021)).map { manuellFeriedag(it) })
@@ -129,14 +129,14 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
         )
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
         forlengVedtak(24.april(2021), 7.mai(2021))
 
         håndterOverstyrTidslinje((26.april(2021) til 27.april(2021)).map { manuellFeriedag(it) })
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
-        håndterUtbetalt(2.vedtaksperiode)
+        håndterUtbetalt()
 
         håndterAnnullerUtbetaling()
         val oppdrag = inspektør.arbeidsgiverOppdrag.last()
@@ -176,7 +176,7 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
         )
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         håndterOverstyrTidslinje((24.april(2021) til 30.april(2021)).map { manuellFeriedag(it) })
         håndterYtelser(1.vedtaksperiode)
@@ -217,7 +217,7 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
         )
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         håndterOverstyrTidslinje((17.april(2021) til 23.april(2021)).map { manuellFeriedag(it) })
         håndterYtelser(1.vedtaksperiode)
@@ -258,7 +258,7 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
         )
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         håndterOverstyrTidslinje((17.april(2021) til 23.april(2021)).map { manuellFeriedag(it) })
         håndterYtelser(1.vedtaksperiode)
@@ -300,7 +300,7 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
         )
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         håndterSykmelding(Sykmeldingsperiode(24.april(2021), 15.mai(2021), 100.prosent))
         håndterSøknadMedValidering(
@@ -317,7 +317,7 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
-        håndterUtbetalt(2.vedtaksperiode)
+        håndterUtbetalt()
 
         assertEquals(inspektør.arbeidsgiverOppdrag.first().fagsystemId(), inspektør.arbeidsgiverOppdrag.last().fagsystemId())
         assertEquals(15, inspektør.arbeidsgiverOppdrag.last().stønadsdager())
@@ -347,7 +347,7 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
         )
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         håndterSykmelding(Sykmeldingsperiode(24.april(2021), 15.mai(2021), 100.prosent))
         håndterSøknadMedValidering(
@@ -365,7 +365,7 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
-        håndterUtbetalt(2.vedtaksperiode)
+        håndterUtbetalt()
 
         assertEquals(inspektør.arbeidsgiverOppdrag.first().fagsystemId(), inspektør.arbeidsgiverOppdrag.last().fagsystemId())
         assertEquals(15, inspektør.arbeidsgiverOppdrag.last().stønadsdager())
@@ -395,7 +395,7 @@ internal class RevurderingFjernerUtbetalteDagerTest : AbstractEndToEndTest() {
         )
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         håndterOverstyrTidslinje((17.april(2021) til 20.april(2021)).map { manuellFeriedag(it) })
         håndterYtelser(1.vedtaksperiode)

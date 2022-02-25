@@ -26,7 +26,7 @@ internal class StatslønnWarningTest : AbstractEndToEndTest() {
         håndterYtelser(vedtaksperiodeIdInnhenter = 1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
         assertTrue(person.personLogg.warn().isEmpty())
     }

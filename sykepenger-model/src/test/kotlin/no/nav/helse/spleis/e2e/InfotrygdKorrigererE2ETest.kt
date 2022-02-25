@@ -25,7 +25,7 @@ internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent)) // korrigerer arbeidsdagene
         håndterSykmelding(Sykmeldingsperiode(1.februar, 16.februar, 100.prosent))
         håndterSøknad(Sykdom(1.februar, 16.februar, 100.prosent))

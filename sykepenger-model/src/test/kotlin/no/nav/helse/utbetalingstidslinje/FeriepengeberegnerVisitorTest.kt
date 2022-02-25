@@ -376,7 +376,7 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
         håndterYtelser(observatør.sisteVedtaksperiode(), orgnummer = orgnummer)
         håndterSimulering(observatør.sisteVedtaksperiode(), orgnummer = orgnummer)
         håndterUtbetalingsgodkjenning(observatør.sisteVedtaksperiode(), orgnummer = orgnummer)
-        håndterUtbetalt(observatør.sisteVedtaksperiode(), orgnummer = orgnummer)
+        håndterUtbetalt(orgnummer = orgnummer)
     }
 
     private fun byggPersonMedAnnullering(
@@ -403,7 +403,7 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
         håndterYtelser(observatør.sisteVedtaksperiode(), orgnummer = orgnummer)
         håndterSimulering(observatør.sisteVedtaksperiode(), orgnummer = orgnummer)
         håndterUtbetalingsgodkjenning(observatør.sisteVedtaksperiode(), orgnummer = orgnummer)
-        håndterUtbetalt(observatør.sisteVedtaksperiode(), orgnummer = orgnummer)
+        håndterUtbetalt(orgnummer = orgnummer)
         håndterAnnullerUtbetaling(orgnummer = orgnummer)
         håndterUtbetalt()
     }
@@ -432,12 +432,12 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(orgnummer = a2)
     }
 
     private fun byggPersonMedOpphør(
@@ -468,7 +468,7 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
 
         håndterSimulering(observatør.sisteVedtaksperiode(), orgnummer = orgnummer)
         håndterUtbetalingsgodkjenning(observatør.sisteVedtaksperiode(), orgnummer = orgnummer)
-        håndterUtbetalt(observatør.sisteVedtaksperiode(), orgnummer = orgnummer)
+        håndterUtbetalt(orgnummer = orgnummer)
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 60.prosent), orgnummer = orgnummer)
         håndterSøknadMedValidering(
@@ -485,6 +485,6 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
 
         håndterSimulering(observatør.sisteVedtaksperiode(), orgnummer = orgnummer)
         håndterUtbetalingsgodkjenning(observatør.sisteVedtaksperiode(), orgnummer = orgnummer)
-        håndterUtbetalt(observatør.sisteVedtaksperiode(), orgnummer = orgnummer)
+        håndterUtbetalt(orgnummer = orgnummer)
     }
 }

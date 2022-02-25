@@ -57,7 +57,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
 
         val a1Linje = inspektør(a1).utbetalinger.last().inspektør.arbeidsgiverOppdrag.single()
         assertEquals(17.januar, a1Linje.fom)
@@ -154,7 +154,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
 
         val a1Linje = inspektør(a1).utbetalinger.last().inspektør.arbeidsgiverOppdrag.single()
         assertEquals(17.januar, a1Linje.fom)
@@ -200,7 +200,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
 
         val a1Linje = inspektør(a1).utbetalinger.last().inspektør.arbeidsgiverOppdrag.single()
         assertEquals(17.januar, a1Linje.fom)
@@ -250,7 +250,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
 
         val a1Linje = inspektør(a1).utbetalinger.last().inspektør.arbeidsgiverOppdrag.last()
         assertEquals(17.mars, a1Linje.fom)
@@ -300,7 +300,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
 
         val a1Linje = inspektør(a1).utbetalinger.last().inspektør.arbeidsgiverOppdrag.last()
         assertEquals(17.mars, a1Linje.fom)
@@ -349,7 +349,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
 
         håndterSykmelding(Sykmeldingsperiode(1.april, 30.april, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(1.april, 30.april, 100.prosent), orgnummer = a1)
@@ -357,7 +357,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)
         håndterSimulering(2.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(2.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
 
         val a1Linje = inspektør(a1).utbetalinger.last().inspektør.arbeidsgiverOppdrag.single()
         assertEquals(17.mars, a1Linje.fom)
@@ -593,7 +593,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
 
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a1)
@@ -649,7 +649,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a1)
@@ -698,7 +698,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
 
         håndterSykmelding(Sykmeldingsperiode(1.april, 30.april, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(1.april, 30.april, 100.prosent), orgnummer = a1)
@@ -744,7 +744,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
 
         val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)!!
         assertTrue(vilkårsgrunnlag.gjelderFlereArbeidsgivere())

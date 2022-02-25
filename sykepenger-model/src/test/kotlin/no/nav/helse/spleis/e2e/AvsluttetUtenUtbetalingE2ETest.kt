@@ -1,12 +1,11 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.Toggle
+import no.nav.helse.*
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
-import no.nav.helse.januar
-import no.nav.helse.mars
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
@@ -39,7 +38,7 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
-        håndterUtbetalt(2.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
         assertTilstander(
             2.vedtaksperiode,
@@ -91,7 +90,7 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
         håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)
         håndterUtbetalingsgodkjenning(3.vedtaksperiode, true)
-        håndterUtbetalt(3.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
         assertTilstander(
             3.vedtaksperiode,
@@ -149,5 +148,46 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
         assertEquals(1.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
         val tidslinje = inspektør.sykdomstidslinje
         assertTrue((1.januar til 31.januar).all { tidslinje[it] is Dag.Sykedag || tidslinje[it] is Dag.SykHelgedag })
+    }
+
+    @Test
+    fun `arbeidsgiverperiode med brudd i helg`() {
+        håndterSykmelding(Sykmeldingsperiode(4.januar, 5.januar, 100.prosent))
+        håndterSøknad(Sykdom(4.januar, 5.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(8.januar, 12.januar, 100.prosent))
+        håndterSøknad(Sykdom(8.januar, 12.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(13.januar, 19.januar, 100.prosent))
+        håndterSøknad(Sykdom(13.januar, 19.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(20.januar, 1.februar, 100.prosent))
+        håndterSøknad(Sykdom(20.januar, 1.februar, 100.prosent))
+
+        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(4.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE)
+
+        // 6. og 7. januar blir FriskHelg og medfører brudd i arbeidsgiverperioden
+        // og dermed ble også skjæringstidspunktet forskjøvet til 8. januar
+        håndterInntektsmelding(
+            listOf(
+                1.januar til 3.januar, //3
+                4.januar til 5.januar, // 2
+                // 6. og 7. januar er helg
+                8.januar til 12.januar,// 5
+                13.januar til 18.januar // 6
+            ), 8.januar
+        )
+
+        assertForventetFeil(
+            forklaring = "Støtter ikke å reberegne ved inntektsmelding i AVSLUTTET_UTEN_UTBETALING",
+            nå = {
+                assertSisteTilstand(3.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+                assertSisteTilstand(4.vedtaksperiode, AVVENTER_HISTORIKK)
+            },
+            ønsket = {
+                assertSisteTilstand(3.vedtaksperiode, AVVENTER_HISTORIKK)
+                assertSisteTilstand(4.vedtaksperiode, AVVENTER_UFERDIG)
+            }
+        )
     }
 }

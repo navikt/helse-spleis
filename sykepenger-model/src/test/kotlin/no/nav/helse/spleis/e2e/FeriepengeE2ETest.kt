@@ -65,7 +65,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         håndterUtbetalingshistorikkForFeriepenger(
             opptjeningsår = Year.of(2020)
@@ -104,7 +104,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         håndterUtbetalingshistorikkForFeriepenger(
             opptjeningsår = Year.of(2020),
@@ -159,7 +159,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         håndterUtbetalingshistorikkForFeriepenger(
             opptjeningsår = Year.of(2020),
@@ -208,7 +208,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         håndterUtbetalingshistorikkForFeriepenger(
             opptjeningsår = Year.of(2020),
@@ -236,7 +236,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         håndterUtbetalingshistorikkForFeriepenger(
             opptjeningsår = Year.of(2020),
@@ -290,7 +290,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         håndterUtbetalingshistorikkForFeriepenger(
             opptjeningsår = Year.of(2020),
@@ -343,7 +343,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
 
         assertEquals(0, inspektør.feriepengeoppdrag.size)
@@ -368,7 +368,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         håndterUtbetalingshistorikkForFeriepenger(
             opptjeningsår = Year.of(2020),
@@ -408,7 +408,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         håndterUtbetalingshistorikkForFeriepenger(
             opptjeningsår = Year.of(2020),
@@ -448,7 +448,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         håndterUtbetalingshistorikkForFeriepenger(
             opptjeningsår = Year.of(2020),
@@ -478,7 +478,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         håndterUtbetalingshistorikkForFeriepenger(
             opptjeningsår = Year.of(2020)
@@ -510,7 +510,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         håndterUtbetalingshistorikkForFeriepenger(
             opptjeningsår = Year.of(2020)
@@ -550,7 +550,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         håndterUtbetalingshistorikkForFeriepenger(
             opptjeningsår = Year.of(2020)
@@ -564,7 +564,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-        håndterUtbetalt(2.vedtaksperiode)
+        håndterUtbetalt()
 
         håndterUtbetalingshistorikkForFeriepenger(
             opptjeningsår = Year.of(2020)
@@ -632,7 +632,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-            håndterUtbetalt(1.vedtaksperiode)
+            håndterUtbetalt()
 
             håndterUtbetalingshistorikkForFeriepenger(
                 opptjeningsår = Year.of(2020)
@@ -662,7 +662,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         håndterUtbetalingshistorikkForFeriepenger(
             opptjeningsår = Year.of(2020)
@@ -701,7 +701,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         håndterUtbetalingshistorikkForFeriepenger(
             opptjeningsår = Year.of(2020)
@@ -749,7 +749,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         håndterUtbetalingshistorikkForFeriepenger(
             utbetalinger = listOf(
@@ -802,7 +802,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         håndterUtbetalingshistorikkForFeriepenger(
             opptjeningsår = Year.of(2020)
@@ -858,7 +858,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-            håndterUtbetalt(1.vedtaksperiode)
+            håndterUtbetalt()
 
             håndterUtbetalingshistorikkForFeriepenger(
                 opptjeningsår = Year.of(2020)
@@ -904,7 +904,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         håndterUtbetalingshistorikkForFeriepenger(opptjeningsår = Year.of(2020))
 
@@ -942,7 +942,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         håndterUtbetalingshistorikkForFeriepenger(opptjeningsår = Year.of(2020))
 
@@ -988,7 +988,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         håndterUtbetalingshistorikkForFeriepenger(opptjeningsår = Year.of(2020))
 
@@ -1015,7 +1015,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-        håndterUtbetalt(2.vedtaksperiode)
+        håndterUtbetalt()
 
         håndterUtbetalingshistorikkForFeriepenger(opptjeningsår = Year.of(2020))
 

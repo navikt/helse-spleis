@@ -35,7 +35,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         assertTilstander(
             0,
@@ -83,14 +83,14 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 31000.månedlig, refusjon = Refusjon(31000.månedlig, null, emptyList()))
         håndterOverstyrInntekt(inntekt = 31000.månedlig, skjæringstidspunkt = 1.januar)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         assertEquals(15741, inspektør.utbetalinger[0].inspektør.arbeidsgiverOppdrag.nettoBeløp())
         assertEquals(506, inspektør.utbetalinger[1].inspektør.arbeidsgiverOppdrag.nettoBeløp())
@@ -174,7 +174,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-        håndterUtbetalt(2.vedtaksperiode)
+        håndterUtbetalt()
 
         håndterOverstyrInntekt(inntekt = 32000.månedlig, skjæringstidspunkt = 1.januar)
 
@@ -182,7 +182,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
-        håndterUtbetalt(2.vedtaksperiode)
+        håndterUtbetalt()
 
         assertTilstander(
             0,
@@ -238,7 +238,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-        håndterUtbetalt(2.vedtaksperiode)
+        håndterUtbetalt()
 
         håndterOverstyrInntekt(inntekt = 32000.månedlig, skjæringstidspunkt = 1.januar)
 
@@ -386,7 +386,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         forlengVedtak(1.juli(2020), 30.juli(2020))
         håndterOverstyrInntekt(inntekt = 35000.månedlig, skjæringstidspunkt = 18.mars(2020))
@@ -452,7 +452,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
-        håndterUtbetalt(2.vedtaksperiode)
+        håndterUtbetalt()
 
         val utbetalingsevent = observatør.utbetalingMedUtbetalingEventer.last()
 
@@ -465,7 +465,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
     fun `utbetaling_utbetalt tar med vedtaksperiode-ider for forkastede perioder`() {
         tilGodkjent(1.januar, 31.januar, 100.prosent, 1.januar)
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), andreInntektskilder = listOf(Søknad.Inntektskilde(true, "FRILANSER")))
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         val utbetalingEvent = observatør.utbetalingMedUtbetalingEventer.first()
 
@@ -520,7 +520,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
 
         håndterOverstyrInntekt(32000.månedlig, a1, 1.januar)
         assertEquals(1, observatør.avvisteRevurderinger.size)
@@ -545,7 +545,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         håndterOverstyrInntekt(46000.årlig, skjæringstidspunkt = 1.januar) // da havner vi under greia
         håndterYtelser(1.vedtaksperiode)
@@ -577,13 +577,13 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         håndterOverstyrInntekt(UnderMinstegrense, skjæringstidspunkt = 1.januar)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         håndterOverstyrInntekt(OverMinstegrense, skjæringstidspunkt = 1.januar)
         håndterYtelser(1.vedtaksperiode)
@@ -625,7 +625,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-        håndterUtbetalt(2.vedtaksperiode)
+        håndterUtbetalt()
 
         håndterOverstyrInntekt(skjæringstidspunkt = 1.januar)
         håndterYtelser(2.vedtaksperiode)
@@ -670,12 +670,12 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-        håndterUtbetalt(2.vedtaksperiode)
+        håndterUtbetalt()
 
         håndterOverstyrInntekt(skjæringstidspunkt = 1.januar)
         håndterYtelser(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-        håndterUtbetalt(2.vedtaksperiode)
+        håndterUtbetalt()
 
         assertEquals(2, inspektør.utbetalinger.size)
         assertEquals(0, inspektør.utbetalinger(1.vedtaksperiode).size)
@@ -737,7 +737,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
     }
 
     @Test
@@ -770,7 +770,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
     fun `revurdere mens en periode har feilet i utbetaling`() {
         nyttVedtak(1.januar, 31.januar)
         forlengTilGodkjentVedtak(1.februar, 28.februar)
-        håndterUtbetalt(2.vedtaksperiode, status = Oppdragstatus.FEIL)
+        håndterUtbetalt(status = Oppdragstatus.FEIL)
         håndterOverstyrInntekt(INNTEKT/2, skjæringstidspunkt = 1.januar)
         assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_SØKNAD_FERDIG_GAP, AVVENTER_HISTORIKK, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET)
         assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, UTBETALING_FEILET)

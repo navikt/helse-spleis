@@ -182,7 +182,7 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a3)
         håndterSimulering(1.vedtaksperiode, orgnummer = a3)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, utbetalingGodkjent = true, orgnummer = a3)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a3)
+        håndterUtbetalt(orgnummer = a3)
 
         håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), orgnummer = a1)

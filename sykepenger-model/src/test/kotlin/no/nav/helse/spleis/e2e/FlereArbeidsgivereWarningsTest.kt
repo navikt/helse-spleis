@@ -43,7 +43,7 @@ internal class FlereArbeidsgivereWarningsTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true, orgnummer = a1)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
 
         assertWarning("Bruker har flere inntektskilder de siste tre månedene enn arbeidsforhold som er oppdaget i Aa-registeret.", AktivitetsloggFilter.person())
         assertFalse(person.personLogg.toString().contains("Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold"))
@@ -79,7 +79,7 @@ internal class FlereArbeidsgivereWarningsTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true, orgnummer = a1)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
 
         assertWarning("Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold", AktivitetsloggFilter.person())
         håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
@@ -89,7 +89,7 @@ internal class FlereArbeidsgivereWarningsTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true, orgnummer = a2)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(orgnummer = a2)
 
         assertWarning(
             "Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold",

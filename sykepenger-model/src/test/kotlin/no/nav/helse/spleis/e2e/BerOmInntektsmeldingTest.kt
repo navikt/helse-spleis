@@ -118,7 +118,7 @@ internal class BerOmInntektsmeldingTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         håndterSykmelding(Sykmeldingsperiode(22.januar, 31.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(22.januar, 1.februar, 100.prosent))

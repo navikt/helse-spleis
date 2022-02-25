@@ -505,74 +505,28 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
 
     @Test
     fun `delvis refusjon`() {
-        listOf(Toggle.DelvisRefusjon).enable {
-            sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
-            sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
-            sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar, opphørsdatoForRefusjon = 20.januar)
-            sendYtelser(0)
-            sendVilkårsgrunnlag(0)
-            sendYtelserUtenSykepengehistorikk(0)
-            sendSimulering(0, SimuleringMessage.Simuleringstatus.OK, forventedeFagområder = setOf("SPREF", "SP"))
-            sendUtbetalingsgodkjenning(0)
-            sendUtbetaling()
-            assertUtbetalingTilstander(0, "IKKE_UTBETALT", "GODKJENT", "SENDT", "OVERFØRT", "UTBETALT")
-            assertEquals(2, testRapid.inspektør.alleEtterspurteBehov(Utbetaling).size)
-            assertTilstander(
-                0,
-                "MOTTATT_SYKMELDING_FERDIG_GAP",
-                "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
-                "AVVENTER_HISTORIKK",
-                "AVVENTER_VILKÅRSPRØVING",
-                "AVVENTER_HISTORIKK",
-                "AVVENTER_SIMULERING",
-                "AVVENTER_GODKJENNING",
-                "TIL_UTBETALING",
-                "AVSLUTTET"
-            )
-        }
-    }
-
-    @Test
-    fun `delvis refusjon og brukerutbetaling - ikke lov`() {
-        listOf(Toggle.DelvisRefusjon).disable {
-            sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
-            sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
-            sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar, opphørsdatoForRefusjon = 20.januar)
-            sendYtelser(0)
-            sendVilkårsgrunnlag(0)
-            sendYtelserUtenSykepengehistorikk(0)
-            assertUtbetalingTilstander(0, "IKKE_UTBETALT", "FORKASTET")
-            assertTilstander(
-                0,
-                "MOTTATT_SYKMELDING_FERDIG_GAP",
-                "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
-                "AVVENTER_HISTORIKK",
-                "AVVENTER_VILKÅRSPRØVING",
-                "AVVENTER_HISTORIKK",
-                "TIL_INFOTRYGD"
-            )
-        }
-    }
-
-    @Test
-    fun `delvis refusjon - ikke lov`() {
-        Toggle.DelvisRefusjon.disable {
-            sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
-            sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
-            sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar, opphørsdatoForRefusjon = 20.januar)
-            sendYtelser(0)
-            sendVilkårsgrunnlag(0)
-            sendYtelserUtenSykepengehistorikk(0)
-            assertUtbetalingTilstander(0, "IKKE_UTBETALT", "FORKASTET")
-            assertTilstander(
-                0,
-                "MOTTATT_SYKMELDING_FERDIG_GAP",
-                "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
-                "AVVENTER_HISTORIKK",
-                "AVVENTER_VILKÅRSPRØVING",
-                "AVVENTER_HISTORIKK",
-                "TIL_INFOTRYGD"
-            )
-        }
+        sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+        sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
+        sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar, opphørsdatoForRefusjon = 20.januar)
+        sendYtelser(0)
+        sendVilkårsgrunnlag(0)
+        sendYtelserUtenSykepengehistorikk(0)
+        sendSimulering(0, SimuleringMessage.Simuleringstatus.OK, forventedeFagområder = setOf("SPREF", "SP"))
+        sendUtbetalingsgodkjenning(0)
+        sendUtbetaling()
+        assertUtbetalingTilstander(0, "IKKE_UTBETALT", "GODKJENT", "SENDT", "OVERFØRT", "UTBETALT")
+        assertEquals(2, testRapid.inspektør.alleEtterspurteBehov(Utbetaling).size)
+        assertTilstander(
+            0,
+            "MOTTATT_SYKMELDING_FERDIG_GAP",
+            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
+            "AVVENTER_HISTORIKK",
+            "AVVENTER_VILKÅRSPRØVING",
+            "AVVENTER_HISTORIKK",
+            "AVVENTER_SIMULERING",
+            "AVVENTER_GODKJENNING",
+            "TIL_UTBETALING",
+            "AVSLUTTET"
+        )
     }
 }

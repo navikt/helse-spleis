@@ -105,7 +105,7 @@ internal class OpptjeningE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
 
         assertEquals(setOf(a1), person.vilkårsgrunnlagFor(1.januar)?.sykepengegrunnlag()?.inntektsopplysningPerArbeidsgiver()?.keys)
         assertEquals(Inntektskilde.EN_ARBEIDSGIVER, inspektør(a1).inntektskilde(1.vedtaksperiode))

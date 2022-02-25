@@ -72,7 +72,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         val personDTO = serializePersonForSpeil(person, hendelser)
 
@@ -269,7 +269,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
         //Spill igjennom andre
         håndterYtelser(2.vedtaksperiode)
@@ -402,7 +402,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         håndterSykmelding(Sykmeldingsperiode(sykmelding2.fom, sykmelding2.tom, 100.prosent), id = sykmelding2Id)
         håndterSøknad(Sykdom(søknad2.fom, søknad2.tom, 100.prosent), id = søknad2Id)
@@ -537,7 +537,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         håndterSykmelding(Sykmeldingsperiode(fom2Periode, tom2Periode, 100.prosent))
         håndterSøknad(Sykdom(fom2Periode, tom2Periode, 100.prosent))
@@ -566,7 +566,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-        håndterUtbetalt(2.vedtaksperiode)
+        håndterUtbetalt()
 
         val personDTO = speilApi()
 
@@ -591,7 +591,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-        håndterUtbetalt(2.vedtaksperiode)
+        håndterUtbetalt()
 
         val personDTO = speilApi()
         assertEquals(0, personDTO.arbeidsgivere.first().vedtaksperioder.first().utbetalingstidslinje.size)
@@ -616,7 +616,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar(2019), 31.januar(2019), 100.prosent))
         håndterYtelser(13.vedtaksperiode)
         håndterUtbetalingsgodkjenning(13.vedtaksperiode)
-        håndterUtbetalt(13.vedtaksperiode)
+        håndterUtbetalt()
 
         val personDTO = speilApi()
         val vedtaksperiode = personDTO.arbeidsgivere.first().vedtaksperioder.last() as VedtaksperiodeDTO
@@ -771,7 +771,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-        håndterUtbetalt(2.vedtaksperiode)
+        håndterUtbetalt()
 
         val personDTO = speilApi()
         val vedtaksperiode = personDTO.arbeidsgivere.first().vedtaksperioder.last() as VedtaksperiodeDTO
@@ -796,7 +796,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)
         håndterUtbetalingsgodkjenning(3.vedtaksperiode)
-        håndterUtbetalt(3.vedtaksperiode)
+        håndterUtbetalt()
 
         val personDTO = speilApi()
         val vedtaksperiode = personDTO.arbeidsgivere.first().vedtaksperioder.last() as VedtaksperiodeDTO
@@ -841,7 +841,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         håndterSykmelding(Sykmeldingsperiode(25.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(25.januar, 31.januar, 100.prosent), Ferie(25.januar, 31.januar))
@@ -863,7 +863,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         håndterSykmelding(Sykmeldingsperiode(25.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(25.januar, 31.januar, 100.prosent), Permisjon(25.januar, 31.januar))
@@ -897,7 +897,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         val personDTO = serializePersonForSpeil(person)
         assertEquals(1, personDTO.arbeidsgivere.size)
@@ -941,7 +941,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, automatiskBehandling = true)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         val personDTO = serializePersonForSpeil(person)
         val vedtaksperiode = personDTO.arbeidsgivere[0].vedtaksperioder[0] as VedtaksperiodeDTO
@@ -968,7 +968,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         val vedtaksperiodeDTO = serializePersonForSpeil(person)
             .arbeidsgivere.first()
@@ -1026,7 +1026,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         // forkast periode
         håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
@@ -1047,7 +1047,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         val serialisertPerson = serializePersonForSpeil(person)
         val vedtaksperiode = serialisertPerson.arbeidsgivere.first().vedtaksperioder.first()
@@ -1297,7 +1297,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         assertBeregningsider(person)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, automatiskBehandling = false, orgnummer = a1)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
@@ -1315,14 +1315,14 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-        håndterUtbetalt(2.vedtaksperiode)
+        håndterUtbetalt()
         håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(2.vedtaksperiode))
         val personDto = serializePersonForSpeil(person)
         val utbetalingshistorikk = personDto.arbeidsgivere.first().utbetalingshistorikk
@@ -1377,7 +1377,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         håndterYtelser(vedtaksperiodeIdInnhenter = 1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
 
         val personDto = serializePersonForSpeil(person)
         val inntekterFraAordningen = personDto.inntektsgrunnlag
@@ -1421,7 +1421,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         håndterYtelser(vedtaksperiodeIdInnhenter = 1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
 
         val personDto = serializePersonForSpeil(person)
 

@@ -59,7 +59,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
-        assertForkastetPeriodeTilstander(
+        assertTilstander(
             1.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
@@ -67,7 +67,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
-            TIL_INFOTRYGD
+            AVVENTER_SIMULERING
         )
     }
 
@@ -109,7 +109,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
         assertNoWarnings(1.vedtaksperiode.filter())
     }
 
@@ -127,7 +127,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
         assertWarning("Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler.", 1.vedtaksperiode.filter())
     }
 
@@ -148,12 +148,12 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
         assertNoWarnings(1.vedtaksperiode.filter())
     }
 
     @Test
-    fun `ikke kast ut vedtaksperiode når tidligere vedtaksperiode har opphør i refusjon`() {
+    fun `tidligere vedtaksperiode har opphør i refusjon`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(
@@ -163,7 +163,10 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
-        assertForkastetPeriodeTilstander(
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+        assertTilstander(
             1.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
@@ -171,7 +174,10 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
-            TIL_INFOTRYGD
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET
         )
 
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
@@ -202,7 +208,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `kast ut vedtaksperiode når refusjonopphører`() {
+    fun `kaster ikke ut vedtaksperiode når refusjonopphører`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(
@@ -212,7 +218,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
-        assertForkastetPeriodeTilstander(
+        assertTilstander(
             1.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
@@ -220,12 +226,12 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
-            TIL_INFOTRYGD
+            AVVENTER_SIMULERING
         )
     }
 
     @Test
-    fun `kast ut vedtaksperiode ved endring i refusjon`() {
+    fun `ikke kast ut vedtaksperiode ved endring i refusjon`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(
@@ -235,7 +241,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
-        assertForkastetPeriodeTilstander(
+        assertTilstander(
             1.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
@@ -243,7 +249,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
-            TIL_INFOTRYGD
+            AVVENTER_SIMULERING
         )
     }
 
@@ -339,14 +345,14 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
             håndterYtelser(1.vedtaksperiode, orgnummer = a1)
             håndterSimulering(1.vedtaksperiode, orgnummer = a1)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-            håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+            håndterUtbetalt(orgnummer = a1)
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
 
             håndterYtelser(1.vedtaksperiode, orgnummer = a2)
             håndterSimulering(1.vedtaksperiode, orgnummer = a2)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
-            håndterUtbetalt(1.vedtaksperiode, orgnummer = a2)
+            håndterUtbetalt(orgnummer = a2)
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
 
@@ -430,14 +436,14 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
             håndterYtelser(1.vedtaksperiode, orgnummer = a1)
             håndterSimulering(1.vedtaksperiode, orgnummer = a1)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-            håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+            håndterUtbetalt(orgnummer = a1)
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
 
             håndterYtelser(1.vedtaksperiode, orgnummer = a2)
             håndterSimulering(1.vedtaksperiode, orgnummer = a2)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
-            håndterUtbetalt(1.vedtaksperiode, orgnummer = a2)
+            håndterUtbetalt(orgnummer = a2)
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
 
@@ -514,14 +520,14 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
             håndterYtelser(1.vedtaksperiode, orgnummer = a1)
             håndterSimulering(1.vedtaksperiode, orgnummer = a1)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-            håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+            håndterUtbetalt(orgnummer = a1)
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
 
             håndterYtelser(1.vedtaksperiode, orgnummer = a2)
             håndterSimulering(1.vedtaksperiode, orgnummer = a2)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
-            håndterUtbetalt(1.vedtaksperiode, orgnummer = a2)
+            håndterUtbetalt(orgnummer = a2)
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
 
@@ -587,7 +593,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
-        assertForkastetPeriodeTilstander(
+        assertTilstander(
             1.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
@@ -595,7 +601,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
-            TIL_INFOTRYGD
+            AVVENTER_SIMULERING
         )
     }
 
@@ -614,7 +620,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
-        assertForkastetPeriodeTilstander(
+        assertTilstander(
             1.vedtaksperiode,
             START,
             MOTTATT_SYKMELDING_FERDIG_GAP,
@@ -622,7 +628,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
-            TIL_INFOTRYGD
+            AVVENTER_SIMULERING
         )
     }
 
@@ -754,7 +760,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         assertWarning("Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler.", 1.vedtaksperiode.filter())
     }
@@ -777,7 +783,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         forlengVedtak(11.februar, 28.februar)
 
@@ -803,7 +809,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         nyttVedtak(1.mars, 31.mars)
 
@@ -840,12 +846,12 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(orgnummer = a2)
 
         assertWarning("Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler.", 1.vedtaksperiode.filter(a1))
         assertWarning("Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler.", 1.vedtaksperiode.filter(a2))
@@ -868,7 +874,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         assertInfo("Refusjon gjelder ikke for hele utbetalingsperioden", 1.vedtaksperiode.filter())
     }
@@ -884,7 +890,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         assertInfo("Refusjon gjelder ikke for hele utbetalingsperioden", 1.vedtaksperiode.filter())
         assertWarning("Første fraværsdag i inntektsmeldingen er ulik skjæringstidspunktet. Kontrollér at inntektsmeldingen er knyttet til riktig periode.", 1.vedtaksperiode.filter())
@@ -902,7 +908,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         assertInfo("Refusjon gjelder ikke for hele utbetalingsperioden", 1.vedtaksperiode.filter())
         assertWarning("Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.", 1.vedtaksperiode.filter())
@@ -920,7 +926,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         håndterInntektsmelding(emptyList(), førsteFraværsdag = 1.februar)
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))

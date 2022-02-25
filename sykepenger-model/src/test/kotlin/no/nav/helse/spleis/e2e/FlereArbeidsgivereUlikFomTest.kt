@@ -47,7 +47,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
 
         håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a2)
 
@@ -102,7 +102,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
 
         håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a2)
 
@@ -149,7 +149,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
 
         håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a2)
 
@@ -205,7 +205,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
 
         val a1Linje = inspektør(a1).utbetalinger.last().inspektør.arbeidsgiverOppdrag.single()
         assertEquals(16.mars, a1Linje.fom)
@@ -216,7 +216,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
 
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(orgnummer = a2)
 
         val a2Linje = inspektør(a2).utbetalinger.last().inspektør.arbeidsgiverOppdrag.single()
         assertEquals(21.mars, a2Linje.fom)
@@ -265,7 +265,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
 
         val a1Linje = inspektør(a1).utbetalinger.last().inspektør.arbeidsgiverOppdrag.single()
         assertEquals(16.mars, a1Linje.fom)
@@ -276,7 +276,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
 
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(orgnummer = a2)
 
         val a2Linje = inspektør(a2).utbetalinger.last().inspektør.arbeidsgiverOppdrag.single()
         assertEquals(21.mars, a2Linje.fom)
@@ -324,13 +324,13 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
 
 
         håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(orgnummer = a2)
 
         val a1Linje = inspektør(a1).utbetalinger.last().inspektør.arbeidsgiverOppdrag.single()
         assertEquals(16.mars, a1Linje.fom)
@@ -383,13 +383,13 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
 
 
         håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(orgnummer = a2)
 
         val a1Linje = inspektør(a1).utbetalinger.last().inspektør.arbeidsgiverOppdrag.single()
         assertEquals(16.mars, a1Linje.fom)
@@ -466,22 +466,22 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a4)
         håndterSimulering(1.vedtaksperiode, orgnummer = a4)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a4)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a4)
+        håndterUtbetalt(orgnummer = a4)
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a3)
         håndterSimulering(1.vedtaksperiode, orgnummer = a3)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a3)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a3)
+        håndterUtbetalt(orgnummer = a3)
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(orgnummer = a2)
 
         val a1Linje = inspektør(a1).utbetalinger.last().inspektør.arbeidsgiverOppdrag.single()
         assertEquals(17.januar, a1Linje.fom)
@@ -567,22 +567,22 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(orgnummer = a2)
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a3)
         håndterSimulering(1.vedtaksperiode, orgnummer = a3)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a3)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a3)
+        håndterUtbetalt(orgnummer = a3)
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a4)
         håndterSimulering(1.vedtaksperiode, orgnummer = a4)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a4)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a4)
+        håndterUtbetalt(orgnummer = a4)
 
         val a1Linje = inspektør(a1).utbetalinger.last().inspektør.arbeidsgiverOppdrag.single()
         assertEquals(17.januar, a1Linje.fom)
@@ -667,22 +667,22 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(orgnummer = a2)
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a3)
         håndterSimulering(1.vedtaksperiode, orgnummer = a3)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a3)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a3)
+        håndterUtbetalt(orgnummer = a3)
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a4)
         håndterSimulering(1.vedtaksperiode, orgnummer = a4)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a4)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a4)
+        håndterUtbetalt(orgnummer = a4)
 
         val a1Linjer = inspektør(a1).utbetalinger.last().inspektør.arbeidsgiverOppdrag
         assertEquals(17.januar, a1Linjer[0].fom)
@@ -774,22 +774,22 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(orgnummer = a2)
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a3)
         håndterSimulering(1.vedtaksperiode, orgnummer = a3)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a3)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a3)
+        håndterUtbetalt(orgnummer = a3)
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a4)
         håndterSimulering(1.vedtaksperiode, orgnummer = a4)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a4)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a4)
+        håndterUtbetalt(orgnummer = a4)
 
         val a1Linje = inspektør(a1).utbetalinger.last().inspektør.arbeidsgiverOppdrag.single()
         assertEquals(18.januar, a1Linje.fom)
@@ -960,7 +960,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
 
         val a1Linje = inspektør(a1).utbetalinger.last().inspektør.arbeidsgiverOppdrag.last()
         assertEquals(16.mars, a1Linje.fom)
@@ -971,7 +971,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
 
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(orgnummer = a2)
 
         val a2Linje = inspektør(a2).utbetalinger.last().inspektør.arbeidsgiverOppdrag.last()
         assertEquals(5.april, a2Linje.fom)
@@ -1021,7 +1021,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
 
         val a1Linje = inspektør(a1).utbetalinger.last().inspektør.arbeidsgiverOppdrag.last()
         assertEquals(16.mars, a1Linje.fom)
@@ -1032,7 +1032,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
 
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(orgnummer = a2)
 
         val a2Linje = inspektør(a2).utbetalinger.last().inspektør.arbeidsgiverOppdrag.last()
         assertEquals(5.april, a2Linje.fom)
@@ -1149,12 +1149,12 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(orgnummer = a2)
 
         håndterSykmelding(Sykmeldingsperiode(21.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(22.januar, 31.januar, 100.prosent), orgnummer = a2)
@@ -1219,12 +1219,12 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(orgnummer = a2)
 
         håndterYtelser(2.vedtaksperiode, orgnummer = a2)
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)
@@ -1239,12 +1239,12 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)
         håndterSimulering(2.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(2.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
 
         håndterYtelser(2.vedtaksperiode, orgnummer = a2)
         håndterSimulering(2.vedtaksperiode, orgnummer = a2)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a2)
-        håndterUtbetalt(2.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(orgnummer = a2)
 
         assertEquals(
             32000.månedlig,
@@ -1318,22 +1318,22 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(orgnummer = a2)
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a3)
         håndterSimulering(1.vedtaksperiode, orgnummer = a3)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a3)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a3)
+        håndterUtbetalt(orgnummer = a3)
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a4)
         håndterSimulering(1.vedtaksperiode, orgnummer = a4)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a4)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a4)
+        håndterUtbetalt(orgnummer = a4)
 
         assertInstanceOf(
             Inntektshistorikk.Inntektsmelding::class.java,

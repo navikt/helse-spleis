@@ -32,7 +32,7 @@ internal class OmsorgspengerBehovTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, omsorgspenger = emptyList())
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
         assertTilstander(
             1.vedtaksperiode,
@@ -117,7 +117,7 @@ internal class OmsorgspengerBehovTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, omsorgspenger = omsorgspenger)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
         assertTilstander(
             1.vedtaksperiode,

@@ -18,8 +18,6 @@ import no.nav.helse.sykdomstidslinje.Dag.Sykedag
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Utbetaling
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.AvvistDag
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavHelgDag
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -27,9 +25,7 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.YearMonth
 import java.time.temporal.TemporalAdjusters.firstDayOfMonth
 import java.time.temporal.TemporalAdjusters.lastDayOfMonth
 import java.util.*
@@ -49,7 +45,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         inspektør.sykdomstidslinje.inspektør.låstePerioder.also {
             assertEquals(0, it.size)
         }
-        håndterUtbetalt(1.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
         assertNoErrors()
         assertActivities(person)
         inspektør.also {
@@ -94,7 +90,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1, inntektshistorikk = inntektshistorikk)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true, orgnummer = a1)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
         val periode2 = 1.mars(2021) til 31.mars(2021)
         val a2Periode = 2.april(2021) til 30.april(2021)
         håndterSykmelding(Sykmeldingsperiode(periode2.start, periode2.endInclusive, 100.prosent), orgnummer = a1)
@@ -106,7 +102,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode, orgnummer = a1, inntektshistorikk = inntektshistorikk)
         håndterSimulering(2.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true, orgnummer = a1)
-        håndterUtbetalt(2.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
 
         håndterSøknad(Sykdom(a2Periode.start, a2Periode.endInclusive, 100.prosent), orgnummer = a2)
         håndterInntektsmelding(
@@ -129,7 +125,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a2, inntektshistorikk = inntektshistorikk)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true, orgnummer = a2)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(orgnummer = a2)
     }
 
     @Test
@@ -283,7 +279,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
         assertNoErrors()
         assertActivities(person)
         inspektør.also {
@@ -363,7 +359,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
         assertNoErrors()
         assertActivities(person)
         inspektør.also {
@@ -500,7 +496,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         håndterSykmelding(Sykmeldingsperiode(24.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(24.januar, 31.januar, 100.prosent))
@@ -513,7 +509,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-        håndterUtbetalt(2.vedtaksperiode)
+        håndterUtbetalt()
 
         assertNoErrors()
         assertActivities(person)
@@ -555,7 +551,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
         assertActivities(person)
         håndterInntektsmeldingMedValidering(2.vedtaksperiode, listOf(Periode(1.februar, 16.februar)))
@@ -565,7 +561,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
-        håndterUtbetalt(2.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
         assertNoErrors()
         assertActivities(person)
@@ -612,7 +608,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
         assertActivities(person)
         håndterInntektsmeldingMedValidering(2.vedtaksperiode, listOf(Periode(1.februar, 16.februar)))
@@ -621,7 +617,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
-        håndterUtbetalt(2.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
         assertNoErrors()
         assertActivities(person)
@@ -669,7 +665,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
         assertActivities(person)
         håndterYtelser(2.vedtaksperiode)
@@ -677,7 +673,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
-        håndterUtbetalt(2.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
         assertNoErrors()
         assertActivities(person)
@@ -725,7 +721,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
         assertActivities(person)
         håndterYtelser(2.vedtaksperiode)
@@ -733,7 +729,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
-        håndterUtbetalt(2.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
         assertNoErrors()
         assertActivities(person)
@@ -780,7 +776,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
         assertActivities(person)
         håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(1.februar, 23.februar, 100.prosent))
@@ -789,7 +785,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
-        håndterUtbetalt(2.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
         assertNoErrors()
         assertActivities(person)
@@ -859,14 +855,14 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
         forventetEndringTeller++
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
         assertActivities(person)
         håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
-        håndterUtbetalt(2.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
         assertNoErrors()
         assertActivities(person)
         inspektør.also {
@@ -917,14 +913,14 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
         forventetEndringTeller++
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 23.februar, 100.prosent))
         håndterSøknad(Sykdom(1.februar, 23.februar, 100.prosent))
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
-        håndterUtbetalt(2.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
         assertEquals(inspektør.sisteMaksdato(1.vedtaksperiode), inspektør.sisteMaksdato(2.vedtaksperiode))
     }
@@ -956,11 +952,11 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
 
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
-        håndterUtbetalt(2.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
         assertNoErrors()
         assertActivities(person)
@@ -1006,7 +1002,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
-        håndterUtbetalt(2.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
         assertNoErrors()
         assertActivities(person)
@@ -1044,7 +1040,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
         assertNoErrors()
         assertActivities(person)
@@ -1074,7 +1070,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
         assertNoErrors()
         assertActivities(person)
@@ -1136,7 +1132,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
-        håndterUtbetalt(2.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
         assertNoErrors()
         assertActivities(person)
@@ -1173,13 +1169,13 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
         håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(29.januar, 23.februar, 100.prosent))
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
-        håndterUtbetalt(2.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
         assertNoErrors()
         assertActivities(person)
@@ -1212,14 +1208,14 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
         håndterSykmelding(Sykmeldingsperiode(29.januar, 23.februar, 100.prosent))
         håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(29.januar, 23.februar, 100.prosent))
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
-        håndterUtbetalt(2.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
         assertNotNull(inspektør.sisteMaksdato(1.vedtaksperiode))
         assertNotNull(inspektør.sisteMaksdato(2.vedtaksperiode))
@@ -1258,7 +1254,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode, Oppdragstatus.AVVIST)
+        håndterUtbetalt(Oppdragstatus.AVVIST)
 
         håndterSykmelding(Sykmeldingsperiode(29.januar, 23.februar, 100.prosent))
         håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(29.januar, 23.februar, 100.prosent))
@@ -1296,7 +1292,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
         assertNoErrors()
         assertActivities(person)
@@ -1508,13 +1504,13 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
         håndterSykmelding(Sykmeldingsperiode(5.februar, 10.februar, 100.prosent))
         håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(5.februar, 10.februar, 100.prosent))
         håndterAnnullerUtbetaling(fagsystemId = inspektør.utbetalinger[0].inspektør.arbeidsgiverOppdrag.fagsystemId())
         håndterAnnullerUtbetaling(fagsystemId = inspektør.utbetalinger[0].inspektør.arbeidsgiverOppdrag.fagsystemId())
-        håndterUtbetalt(1.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
         håndterAnnullerUtbetaling(fagsystemId = inspektør.utbetalinger[0].inspektør.arbeidsgiverOppdrag.fagsystemId())
 
         assertTrue(inspektør.utbetalinger[0].inspektør.erUtbetalt)
@@ -1533,7 +1529,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
         assertEquals(
             4, observatør.utbetaltEventer[0].ikkeUtbetalteDager
@@ -1619,7 +1615,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
         repeat(11) {
             val fom = 1.januar(2018).plusMonths(it + 1L).with(firstDayOfMonth())
@@ -1631,7 +1627,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
             håndterYtelser((it + 2).vedtaksperiode)
             håndterSimulering((it + 2).vedtaksperiode)
             håndterUtbetalingsgodkjenning((it + 2).vedtaksperiode, true)
-            håndterUtbetalt((it + 2).vedtaksperiode, Oppdragstatus.AKSEPTERT)
+            håndterUtbetalt(Oppdragstatus.AKSEPTERT)
         }
 
         håndterSykmelding(Sykmeldingsperiode(1.januar(2019), 31.januar(2019), 100.prosent))
@@ -1662,7 +1658,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
         håndterGrunnbeløpsregulering(gyldighetsdato = 20.juli(2020))
 
@@ -1750,14 +1746,14 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
         håndterSykmelding(Sykmeldingsperiode(15.oktober(2020), 30.oktober(2020), 30.prosent))
         håndterSøknad(Sykdom(15.oktober(2020), 30.oktober(2020), 30.prosent))
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
-        håndterUtbetalt(2.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
         håndterSykmelding(Sykmeldingsperiode(11.november(2020), 11.november(2020), 100.prosent))
         håndterSøknad(Sykdom(11.november(2020), 11.november(2020), 100.prosent))
@@ -1807,7 +1803,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
         val utbetaltEvent = observatør.utbetaltEventer.last()
 
@@ -1879,7 +1875,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         håndterSykmelding(Sykmeldingsperiode(20.januar(2021), 25.januar(2021), 100.prosent)) // Irrelevant, men tas med for completeness
         håndterSykmelding(Sykmeldingsperiode(1.januar(2021), 29.januar(2021), 20.prosent)) // Irrelevant, men tas med for completeness
@@ -2079,7 +2075,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
         håndterSimulering(1.vedtaksperiode, orgnummer = ORGNUMMER)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = ORGNUMMER)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = ORGNUMMER)
+        håndterUtbetalt(orgnummer = ORGNUMMER)
 
         person.invaliderAllePerioder(hendelselogg, feilmelding = "Feil med vilje")
 
@@ -2097,7 +2093,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
 
         håndterSimulering(2.vedtaksperiode, orgnummer = ORGNUMMER)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = ORGNUMMER)
-        håndterUtbetalt(2.vedtaksperiode, orgnummer = ORGNUMMER)
+        håndterUtbetalt(orgnummer = ORGNUMMER)
 
         assertEquals(88, inspektør(ORGNUMMER).forbrukteSykedager(1))
     }
@@ -2117,7 +2113,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         assertNoWarnings(1.vedtaksperiode.filter())
     }
@@ -2171,7 +2167,7 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-        håndterUtbetalt(2.vedtaksperiode)
+        håndterUtbetalt()
 
         assertTrue(inspektør.utbetalinger.last().inspektør.utbetalingstidslinje.inspektør.erNavdag(18.oktober(2021)))
     }

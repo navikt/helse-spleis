@@ -6,8 +6,7 @@ import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
-import no.nav.helse.person.TilstandType.AVSLUTTET
-import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.person.infotrygdhistorikk.PersonUtbetalingsperiode
@@ -46,7 +45,7 @@ internal class BrukerutbetalingerTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
         assertEquals(31.desember, inspektør.sisteMaksdato(1.vedtaksperiode))
     }
@@ -78,7 +77,7 @@ internal class BrukerutbetalingerTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, *historikk.toTypedArray(), inntektshistorikk = inntektsopplysning)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
         assertEquals(17.desember, inspektør.sisteMaksdato(1.vedtaksperiode))
     }
@@ -115,23 +114,7 @@ internal class BrukerutbetalingerTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser()
 
-        assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD, orgnummer = ORGNUMMER)
-    }
-
-    @Test
-    fun `utbetaling med delvis refusjon til arbeidsgiver toggle av`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(
-            refusjon = Inntektsmelding.Refusjon(20000.månedlig, null),
-            førsteFraværsdag = 1.januar,
-            arbeidsgiverperioder = listOf(1.januar til 16.januar)
-        )
-        håndterYtelser()
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser()
-
-        assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD, orgnummer = ORGNUMMER)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = ORGNUMMER)
     }
 
     @Test
@@ -153,6 +136,6 @@ internal class BrukerutbetalingerTest : AbstractEndToEndTest() {
         håndterYtelser()
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser()
-        assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD, orgnummer = ORGNUMMER)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = ORGNUMMER)
     }
 }

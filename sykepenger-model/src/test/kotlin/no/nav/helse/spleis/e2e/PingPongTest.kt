@@ -28,7 +28,7 @@ internal class PingPongTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
 
         håndterSykmelding(Sykmeldingsperiode(22.juni(2020), 9.juli(2020), 100.prosent))
@@ -50,7 +50,7 @@ internal class PingPongTest : AbstractEndToEndTest() {
         håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)
         håndterUtbetalingsgodkjenning(3.vedtaksperiode, true)
-        håndterUtbetalt(3.vedtaksperiode, Oppdragstatus.AKSEPTERT)
+        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
         assertFalse(inspektør.periodeErForkastet(1.vedtaksperiode))
         assertEquals(30.oktober(2020), inspektør.sisteMaksdato(3.vedtaksperiode))

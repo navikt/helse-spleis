@@ -149,7 +149,7 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
     }
 
     @Test
-    fun `annullering delvis refusjon`() = listOf(Toggle.DelvisRefusjon).enable {
+    fun `annullering delvis refusjon`()  {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
         sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar, opphørsdatoForRefusjon = 20.januar)

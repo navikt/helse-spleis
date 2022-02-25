@@ -89,7 +89,7 @@ internal class SamletSykdomsgradE2ETest: AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         assertTilstander(
             1.vedtaksperiode,

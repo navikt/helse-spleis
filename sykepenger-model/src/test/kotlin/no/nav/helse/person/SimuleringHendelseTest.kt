@@ -1,7 +1,6 @@
 package no.nav.helse.person
 
 import no.nav.helse.*
-import no.nav.helse.Toggle.Companion.enable
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.inspectors.personLogg
@@ -51,7 +50,7 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
     }
 
     @Test
-    fun `simulering ved delvis refusjon`() = listOf(Toggle.DelvisRefusjon).enable {
+    fun `simulering ved delvis refusjon`() {
         håndterYtelser(Inntektsmelding.Refusjon(31000.månedlig, sisteSykedag.minusDays(7), emptyList()))
         håndterSimuleringer(mapOf(
             Fagområde.SykepengerRefusjon to Pair(true, 1431),
@@ -62,7 +61,7 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
     }
 
     @Test
-    fun `simulering ved delvis refusjon hvor vi avventer en simulering`() = listOf(Toggle.DelvisRefusjon).enable {
+    fun `simulering ved delvis refusjon hvor vi avventer en simulering`() {
         håndterYtelser(Inntektsmelding.Refusjon(31000.månedlig, sisteSykedag.minusDays(7), emptyList()))
         håndterSimuleringer(mapOf(
             Fagområde.SykepengerRefusjon to Pair(true, 1431)
@@ -72,7 +71,7 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
     }
 
     @Test
-    fun `simulering ved ingen refusjon`() = listOf(Toggle.DelvisRefusjon).enable {
+    fun `simulering ved ingen refusjon`() {
         håndterYtelser(Inntektsmelding.Refusjon(INGEN, null, emptyList()))
         håndterSimuleringer(mapOf(
             Fagområde.Sykepenger to Pair(true, 1431)

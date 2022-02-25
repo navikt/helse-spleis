@@ -32,7 +32,7 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
         håndterYtelser(2.vedtaksperiode, orgnummer = AG1)
         håndterSimulering(2.vedtaksperiode, orgnummer = AG1)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = AG1)
-        håndterUtbetalt(2.vedtaksperiode, orgnummer = AG1)
+        håndterUtbetalt(orgnummer = AG1)
 
         håndterYtelser(2.vedtaksperiode, orgnummer = AG2)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = AG2)
@@ -297,7 +297,7 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
         håndterYtelser(2.vedtaksperiode, orgnummer = AG1)
         håndterSimulering(2.vedtaksperiode, orgnummer = AG1)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = AG1)
-        håndterUtbetalt(2.vedtaksperiode, orgnummer = AG1)
+        håndterUtbetalt(orgnummer = AG1)
 
         håndterOverstyrTidslinje((1.februar til 2.februar).map { manuellFeriedag(it) }, orgnummer = AG2)
         inspektør(AG1) {
@@ -348,7 +348,7 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
         håndterYtelser(2.vedtaksperiode, orgnummer = AG1)
         håndterSimulering(2.vedtaksperiode, orgnummer = AG1)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = AG1)
-        håndterUtbetalt(2.vedtaksperiode, orgnummer = AG1)
+        håndterUtbetalt(orgnummer = AG1)
 
         håndterOverstyrTidslinje((1.februar til 2.februar).map { manuellFeriedag(it) }, orgnummer = AG1)
         inspektør(AG1) {

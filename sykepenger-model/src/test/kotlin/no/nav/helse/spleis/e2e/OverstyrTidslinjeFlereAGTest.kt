@@ -15,7 +15,7 @@ internal class OverstyrTidslinjeFlereAGTest : AbstractEndToEndTest() {
     fun `kan ikke overstyre én AG hvis en annen AG har blitt godkjent`() {
         tilGodkjenning(1.januar, 31.januar, a1, a2)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
@@ -42,7 +42,7 @@ internal class OverstyrTidslinjeFlereAGTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, a1)
@@ -60,7 +60,7 @@ internal class OverstyrTidslinjeFlereAGTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
 
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, a1)
         assertTilstander(
@@ -88,7 +88,7 @@ internal class OverstyrTidslinjeFlereAGTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
 
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, a1)
         assertTilstander(
@@ -112,7 +112,7 @@ internal class OverstyrTidslinjeFlereAGTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
 
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, a1)
         assertTilstander(
@@ -138,7 +138,7 @@ internal class OverstyrTidslinjeFlereAGTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
 
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, a1)
         assertTilstander(
@@ -162,7 +162,7 @@ internal class OverstyrTidslinjeFlereAGTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, a1)
         assertTilstander(
             1.vedtaksperiode,
@@ -189,7 +189,7 @@ internal class OverstyrTidslinjeFlereAGTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
 
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, a1)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, a2)

@@ -54,75 +54,6 @@ internal class ManglendeVilkårsgrunnlagTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `arbeidsgiverperiode med brudd i helg`() {
-        håndterSykmelding(Sykmeldingsperiode(4.januar, 5.januar, 100.prosent))
-        håndterSøknad(Sykdom(4.januar, 5.januar, 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(8.januar, 12.januar, 100.prosent))
-        håndterSøknad(Sykdom(8.januar, 12.januar, 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(13.januar, 19.januar, 100.prosent))
-        håndterSøknad(Sykdom(13.januar, 19.januar, 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(20.januar, 1.februar, 100.prosent))
-        håndterSøknad(Sykdom(20.januar, 1.februar, 100.prosent))
-
-        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(4.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE)
-
-        // 6. og 7. januar blir FriskHelg og medfører brudd i arbeidsgiverperioden
-        // og dermed ble også skjæringstidspunktet forskjøvet til 8. januar
-        håndterInntektsmelding(
-            listOf(
-                1.januar til 3.januar, //3
-                4.januar til 5.januar, // 2
-                // 6. og 7. januar er helg
-                8.januar til 12.januar,// 5
-                13.januar til 18.januar // 6
-            ), 8.januar
-        )
-
-        if (Toggle.DelvisRefusjon.enabled) {
-            håndterYtelser(3.vedtaksperiode)
-        } else {
-            håndterYtelser(4.vedtaksperiode)
-        }
-
-        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
-
-        if (Toggle.DelvisRefusjon.enabled) {
-            assertTilstander(
-                3.vedtaksperiode,
-                START,
-                MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
-                AVSLUTTET_UTEN_UTBETALING,
-                AVVENTER_HISTORIKK,
-                AVVENTER_VILKÅRSPRØVING
-            )
-            assertTilstander(4.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE, AVVENTER_UFERDIG)
-            assertTrue(person.personLogg.etterspurteBehov(3.vedtaksperiode).map { it.type }
-                .containsAll(listOf(InntekterForSammenligningsgrunnlag, Medlemskap, InntekterForSykepengegrunnlag, ArbeidsforholdV2)))
-            assertTrue(person.personLogg.etterspurteBehov(4.vedtaksperiode).isEmpty())
-        } else {
-            assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
-            assertTilstander(
-                4.vedtaksperiode,
-                START,
-                MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
-                AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE,
-                AVVENTER_HISTORIKK,
-                AVVENTER_VILKÅRSPRØVING
-            )
-            assertTrue(person.personLogg.etterspurteBehov(3.vedtaksperiode).isEmpty())
-            assertTrue(person.personLogg.etterspurteBehov(4.vedtaksperiode).map { it.type }
-                .containsAll(listOf(InntekterForSammenligningsgrunnlag, Medlemskap, InntekterForSykepengegrunnlag, ArbeidsforholdV2)))
-        }
-
-        assertTrue(person.personLogg.etterspurteBehov(1.vedtaksperiode).isEmpty())
-        assertTrue(person.personLogg.etterspurteBehov(2.vedtaksperiode).isEmpty())
-    }
-
-    @Test
     fun `inntektsmelding drar periode tilbake og lager tilstøtende`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 5.januar, 100.prosent))
@@ -180,7 +111,7 @@ internal class ManglendeVilkårsgrunnlagTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Ferie(1.februar, 28.februar))
@@ -217,7 +148,7 @@ internal class ManglendeVilkårsgrunnlagTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Permisjon(1.februar, 28.februar))

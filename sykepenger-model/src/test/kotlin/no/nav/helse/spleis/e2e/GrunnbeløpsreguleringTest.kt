@@ -131,7 +131,7 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(1.vedtaksperiode)
+        håndterUtbetalt()
         håndterPåminnelse(2.vedtaksperiode, TilstandType.MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, LocalDateTime.now().minusMonths(3)) // forkast
 
         håndterGrunnbeløpsregulering(gyldighetsdato = GYLDIGHETSDATO_2020_GRUNNBELØP)
@@ -323,7 +323,7 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
         )
     ) {
         ubetaltVedtaksperiodeBegrensetAv6G(vedtaksperiodeIndeks, fom, tom, arbeidsgiverperiode, førsteFraværsdag, inntekter)
-        håndterUtbetalt(vedtaksperiodeIndeks.vedtaksperiode, AKSEPTERT)
+        håndterUtbetalt(AKSEPTERT)
     }
 
     private fun utbetaltForlengetVedtaksperiodeBegrensetAv6G(
@@ -336,6 +336,6 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
         håndterYtelser(vedtaksperiodeIndeks.vedtaksperiode)
         håndterSimulering(vedtaksperiodeIndeks.vedtaksperiode)
         håndterUtbetalingsgodkjenning(vedtaksperiodeIndeks.vedtaksperiode, true)
-        håndterUtbetalt(vedtaksperiodeIndeks.vedtaksperiode, AKSEPTERT)
+        håndterUtbetalt(AKSEPTERT)
     }
 }
