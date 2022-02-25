@@ -78,7 +78,7 @@ internal class ArbeidsforholdhistorikkTest {
     }
 
     @Test
-    fun `skal kunne markere et arbeidsforhold som inaktivt for et skjæringstidspunkt`() {
+    fun `skal kunne markere et arbeidsforhold som deaktivert for et skjæringstidspunkt`() {
         val arbeidsforhold = listOf(Arbeidsforhold(ansattFom = 31.januar(2010), ansattTom = null, deaktivert = false))
         val historikk = Arbeidsforholdhistorikk()
         historikk.lagre(arbeidsforhold, 1.januar)
@@ -101,7 +101,7 @@ internal class ArbeidsforholdhistorikkTest {
     }
 
     @Test
-    fun `duplikatsjekk skal fange opp forsøk på deaktivering av inaktivt arbeidsforhold`() {
+    fun `duplikatsjekk skal fange opp forsøk på deaktivering av deaktivert arbeidsforhold`() {
         val arbeidsforhold = listOf(Arbeidsforhold(ansattFom = 31.januar(2010), ansattTom = null, deaktivert = false))
         val historikk = Arbeidsforholdhistorikk()
         historikk.lagre(arbeidsforhold, 1.januar)
