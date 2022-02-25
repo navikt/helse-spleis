@@ -123,6 +123,9 @@ internal class JsonBuilder : AbstractBuilder() {
         private val beregningerList = mutableListOf<Map<String, Any?>>()
         private val refusjonOpphører = mutableListOf<LocalDate?>()
         private val feriepengeutbetalingListe = mutableListOf<Map<String, Any>>()
+        private val vedtaksperiodeListe = mutableListOf<MutableMap<String, Any?>>()
+        private val forkastedeVedtaksperiodeListe = mutableListOf<MutableMap<String, Any?>>()
+        private val utbetalingstidslinjer = mutableListOf<MutableMap<String, Any?>>()
 
         override fun preVisitInntekthistorikk(inntektshistorikk: Inntektshistorikk) {
             val inntektshistorikkListe = mutableListOf<Map<String, Any?>>()
@@ -135,8 +138,6 @@ internal class JsonBuilder : AbstractBuilder() {
             arbeidsgiverMap["sykdomshistorikk"] = sykdomshistorikkList
             pushState(SykdomshistorikkState(sykdomshistorikkList))
         }
-
-        private val utbetalingstidslinjer = mutableListOf<MutableMap<String, Any?>>()
 
         override fun preVisitTidslinjer(tidslinjer: MutableList<Utbetalingstidslinje>) {
             arbeidsgiverMap["utbetalingstidslinjer"] = utbetalingstidslinjer
@@ -153,23 +154,13 @@ internal class JsonBuilder : AbstractBuilder() {
             }
         }
 
-        private val vedtaksperiodeListe = mutableListOf<MutableMap<String, Any?>>()
-
-        override fun preVisitPerioder(vedtaksperioder: List<Vedtaksperiode>) {
-            vedtaksperiodeListe.clear()
-        }
-
         override fun postVisitPerioder(vedtaksperioder: List<Vedtaksperiode>) {
-            arbeidsgiverMap["vedtaksperioder"] = vedtaksperiodeListe.toList()
-        }
-
-        override fun preVisitForkastedePerioder(vedtaksperioder: List<ForkastetVedtaksperiode>) {
-            vedtaksperiodeListe.clear()
+            arbeidsgiverMap["vedtaksperioder"] = vedtaksperiodeListe
         }
 
         override fun preVisitForkastetPeriode(vedtaksperiode: Vedtaksperiode, forkastetÅrsak: ForkastetÅrsak) {
             val vedtaksperiodeMap = mutableMapOf<String, Any?>()
-            vedtaksperiodeListe.add(
+            forkastedeVedtaksperiodeListe.add(
                 mutableMapOf(
                     "vedtaksperiode" to vedtaksperiodeMap,
                     "årsak" to forkastetÅrsak
@@ -179,7 +170,7 @@ internal class JsonBuilder : AbstractBuilder() {
         }
 
         override fun postVisitForkastedePerioder(vedtaksperioder: List<ForkastetVedtaksperiode>) {
-            arbeidsgiverMap["forkastede"] = vedtaksperiodeListe.toList()
+            arbeidsgiverMap["forkastede"] = forkastedeVedtaksperiodeListe
         }
 
         override fun preVisitVedtaksperiode(
