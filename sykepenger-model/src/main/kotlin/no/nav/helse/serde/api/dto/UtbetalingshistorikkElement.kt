@@ -120,7 +120,6 @@ data class UtbetalingshistorikkElementDTO(
                     TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
                     TilstandType.AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE,
                     TilstandType.AVVENTER_INNTEKTSMELDING_UFERDIG_GAP,
-                    TilstandType.AVVENTER_UFERDIG,
                     TilstandType.AVVENTER_SØKNAD_UFERDIG_FORLENGELSE,
                     TilstandType.AVVENTER_SØKNAD_FERDIG_FORLENGELSE,
                     TilstandType.AVVENTER_SIMULERING,
@@ -130,8 +129,9 @@ data class UtbetalingshistorikkElementDTO(
                     TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING,
                     TilstandType.AVVENTER_HISTORIKK_REVURDERING,
                     TilstandType.AVVENTER_REVURDERING,
-                    TilstandType.AVVENTER_HISTORIKK -> TilstandstypeDTO.Venter
                     TilstandType.AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
+                    TilstandType.AVVENTER_HISTORIKK -> TilstandstypeDTO.Venter
+                    TilstandType.AVVENTER_UFERDIG,
                     TilstandType.AVVENTER_ARBEIDSGIVERE -> TilstandstypeDTO.VenterPåKiling
                     TilstandType.TIL_INFOTRYGD -> TilstandstypeDTO.TilInfotrygd
                     TilstandType.UTBETALING_FEILET -> TilstandstypeDTO.Feilet
