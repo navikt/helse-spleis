@@ -58,7 +58,6 @@ internal class ReberegningAvAvsluttetUtenUtbetalingE2ETest : AbstractEndToEndTes
         assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE)
     }
 
-    @ForventetFeil("Dette er ikke støttet enda")
     @Test
     fun `avsluttet periode trenger egen inntektsmelding etter at inntektsmelding treffer forrige`() {
         håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar, 100.prosent))
@@ -69,12 +68,21 @@ internal class ReberegningAvAvsluttetUtenUtbetalingE2ETest : AbstractEndToEndTes
         håndterSøknad(Sykdom(29.januar, 29.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(5.januar til 20.januar))
 
-        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
-        assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING_UFERDIG_GAP)
+        assertForventetFeil(
+            forklaring = "Dette er ikke støttet enda",
+            nå = {
+                assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+                assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
+                assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
+            },
+            ønsket = {
+                assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+                assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
+                assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING_UFERDIG_GAP)
+            }
+        )
     }
 
-    @ForventetFeil("Dette er ikke støttet enda")
     @Test
     fun `avsluttet periode trenger egen inntektsmelding etter at inntektsmelding treffer forrige 2`() {
         håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar, 100.prosent))
@@ -85,9 +93,19 @@ internal class ReberegningAvAvsluttetUtenUtbetalingE2ETest : AbstractEndToEndTes
         håndterSøknad(Sykdom(29.januar, 29.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(5.januar til 20.januar))
 
-        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVSLUTTET_UTEN_UTBETALING, AVVENTER_HISTORIKK)
-        assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING_UFERDIG_GAP)
+        assertForventetFeil(
+            forklaring = "Dette er ikke støttet enda",
+            nå = {
+                assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+                assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+                assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
+            },
+            ønsket = {
+                assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+                assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVSLUTTET_UTEN_UTBETALING, AVVENTER_HISTORIKK)
+                assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING_UFERDIG_GAP)
+            }
+        )
     }
 
     @Test
@@ -126,7 +144,6 @@ internal class ReberegningAvAvsluttetUtenUtbetalingE2ETest : AbstractEndToEndTes
         assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE, AVVENTER_UFERDIG)
     }
 
-    @ForventetFeil("Det sprenger")
     @Test
     fun `gjenopptar ikke behandling på neste gap periode etter at kort periode reberegnes`() {
         håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar, 100.prosent))
@@ -137,9 +154,20 @@ internal class ReberegningAvAvsluttetUtenUtbetalingE2ETest : AbstractEndToEndTes
         håndterSøknad(Sykdom(30.januar, 31.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(10.januar til 25.januar))
         håndterInntektsmeldingMedValidering(3.vedtaksperiode, listOf(10.januar til 25.januar), 30.januar)
-        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVSLUTTET_UTEN_UTBETALING, AVVENTER_HISTORIKK)
-        assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
+
+        assertForventetFeil(
+            forklaring = "Det sprenger",
+            nå = {
+                assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+                assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+                assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, AVVENTER_HISTORIKK)
+            },
+            ønsket = {
+                assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+                assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, AVSLUTTET_UTEN_UTBETALING, AVVENTER_HISTORIKK)
+                assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_UFERDIG_GAP, AVVENTER_UFERDIG)
+            }
+        )
     }
 
     @Test
