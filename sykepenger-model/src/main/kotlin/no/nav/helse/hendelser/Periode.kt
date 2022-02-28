@@ -21,23 +21,21 @@ open class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Ite
         fun List<Periode>.slutterEtter(grense: LocalDate) = any { it.slutterEtter(grense) }
 
         fun Iterable<LocalDate>.grupperSammenhengendePerioder() = this
-            .sorted()
-            .distinct()
-            .fold(listOf(), grupperSammenhengendePerioder { periode, dato -> periode.endInclusive.plusDays(1) != dato })
+            .grupperSammenhengendePerioder { periode, dato -> periode.endInclusive.plusDays(1) != dato }
 
         fun List<Periode>.grupperSammenhengendePerioderMedHensynTilHelg() = this
             .flatMap { periode -> periode.map { it } }
-            .sorted()
-            .distinct()
-            .fold(listOf(), grupperSammenhengendePerioder { periode, dato -> !periode.endInclusive.erRettFør(dato) })
+            .grupperSammenhengendePerioder { periode, dato -> !periode.endInclusive.erRettFør(dato) }
 
-        private fun grupperSammenhengendePerioder(erNyPeriode: (Periode, LocalDate) -> Boolean) =
-            { perioder: List<Periode>, dato: LocalDate ->
-                when {
-                    perioder.isEmpty() || erNyPeriode(perioder.last(), dato) -> perioder.plusElement(dato.somPeriode())
-                    else -> perioder.oppdaterSiste(perioder.last().oppdaterTom(dato))
+        private fun Iterable<LocalDate>.grupperSammenhengendePerioder(erNyPeriode: (Periode, LocalDate) -> Boolean) =
+            this.sorted()
+                .distinct()
+                .fold(listOf()) { perioder: List<Periode>, dato: LocalDate ->
+                    when {
+                        perioder.isEmpty() || erNyPeriode(perioder.last(), dato) -> perioder.plusElement(dato.somPeriode())
+                        else -> perioder.oppdaterSiste(perioder.last().oppdaterTom(dato))
+                    }
                 }
-            }
 
         internal fun Collection<Periode>.sammenhengende(skjæringstidspunkt: LocalDate) = sortedByDescending { it.start }
             .fold(skjæringstidspunkt til skjæringstidspunkt) { acc, periode ->
