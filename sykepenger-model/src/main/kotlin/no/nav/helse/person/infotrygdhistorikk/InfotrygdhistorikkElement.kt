@@ -102,8 +102,11 @@ internal class InfotrygdhistorikkElement private constructor(
         }.fremTilOgMed(sykdomstidslinje.sisteDag())
     }
 
-    internal fun harBetalt(organisasjonsnummer: String, dato: LocalDate): Boolean {
-        return utbetalingstidslinje(organisasjonsnummer).harBetalt(dato)
+    internal fun periodetype(organisasjonsnummer: String, other: Periode, dag: LocalDate): Periodetype? {
+        val utbetalinger = utbetalinger(organisasjonsnummer)
+        if (dag > other.start || utbetalinger.none { dag in it }) return null
+        if (dag in other || utbetalinger.any { dag in it && it.erRettFør(other) }) return Periodetype.OVERGANG_FRA_IT
+        return Periodetype.INFOTRYGDFORLENGELSE
     }
 
     internal fun ingenUkjenteArbeidsgivere(organisasjonsnumre: List<String>, dato: LocalDate): Boolean {
@@ -202,16 +205,15 @@ internal class InfotrygdhistorikkElement private constructor(
     }
 
     internal fun sisteSykepengedag(orgnummer: String): LocalDate? {
-        return perioder.filterIsInstance<Utbetalingsperiode>()
-            .filter { it.gjelder(orgnummer) }
-            .maxOfOrNull { it.endInclusive }
+        return utbetalinger(orgnummer).maxOfOrNull { it.endInclusive }
     }
 
     private fun harNyereOpplysninger(orgnummer: String, periode: Periode): Boolean {
-        return perioder.filterIsInstance<Utbetalingsperiode>()
-            .filter { it.gjelder(orgnummer) }
-            .any { it.slutterEtter(periode.endInclusive) }
+        return utbetalinger(orgnummer).any { it.slutterEtter(periode.endInclusive) }
     }
+
+    private fun utbetalinger(organisasjonsnummer: String) =
+        perioder.filterIsInstance<Utbetalingsperiode>().filter { it.gjelder(organisasjonsnummer) }
 
     internal fun oppfrisket(cutoff: LocalDateTime) =
         oppdatert > cutoff

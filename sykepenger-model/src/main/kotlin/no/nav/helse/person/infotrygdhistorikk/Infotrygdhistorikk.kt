@@ -66,9 +66,9 @@ internal class Infotrygdhistorikk private constructor(
         return siste.historikkFor(orgnummer, sykdomstidslinje)
     }
 
-    internal fun harBetalt(organisasjonsnummer: String, dato: LocalDate): Boolean {
-        if (!harHistorikk()) return false
-        return siste.harBetalt(organisasjonsnummer, dato)
+    internal fun periodetype(organisasjonsnummer: String, other: Periode, dag: LocalDate): Periodetype? {
+        if (!harHistorikk()) return null
+        return siste.periodetype(organisasjonsnummer, other, dag)
     }
 
     internal fun ingenUkjenteArbeidsgivere(organisasjonsnumre: List<String>, dato: LocalDate): Boolean {
