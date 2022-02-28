@@ -43,6 +43,10 @@ class BehovMediatorTest {
             messages.add(key to message)
         }
 
+        override fun rapidName(): String {
+            return "Testrapid"
+        }
+
         override fun start() {}
         override fun stop() {}
     }
