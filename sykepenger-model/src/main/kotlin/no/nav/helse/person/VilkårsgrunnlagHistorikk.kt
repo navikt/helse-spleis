@@ -239,6 +239,8 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             sammenligningsgrunnlag: Sammenligningsgrunnlag,
             sammenligningsgrunnlagVurdering: Boolean,
             avviksprosent: Prosent,
+            nyOpptjening: Opptjening?,
+            nyHarOpptjening: Boolean,
             minimumInntektVurdering: Boolean,
             meldingsreferanseId: UUID
         ) = Grunnlagsdata(
@@ -246,12 +248,12 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             sykepengegrunnlag = sykepengegrunnlag,
             sammenligningsgrunnlag = sammenligningsgrunnlag,
             avviksprosent = avviksprosent,
-            opptjening = opptjening, // TODO: Må sjekkes på nytt
+            opptjening = if (Toggle.OpptjeningIModellen.enabled) nyOpptjening!! else opptjening,
             antallOpptjeningsdagerErMinst = antallOpptjeningsdagerErMinst,
             harOpptjening = harOpptjening,
             medlemskapstatus = medlemskapstatus,
             harMinimumInntekt = minimumInntektVurdering,
-            vurdertOk = minimumInntektVurdering && sammenligningsgrunnlagVurdering,
+            vurdertOk = nyHarOpptjening && minimumInntektVurdering && sammenligningsgrunnlagVurdering,
             meldingsreferanseId = meldingsreferanseId,
             vilkårsgrunnlagId = UUID.randomUUID()
         )

@@ -738,7 +738,7 @@ class Person private constructor(
         return aktiveArbeidsforhold.size == 1 && aktiveArbeidsforhold.single().organisasjonsnummer() != orgnummer
     }
 
-    internal fun vilkårsprøvEtterNyInntekt(hendelse: PersonHendelse, skjæringstidspunkt: LocalDate, subsumsjonObserver: SubsumsjonObserver) {
+    internal fun vilkårsprøvEtterNyInformasjonFraSaksbehandler(hendelse: PersonHendelse, skjæringstidspunkt: LocalDate, subsumsjonObserver: SubsumsjonObserver) {
         val sykepengegrunnlag = beregnSykepengegrunnlag(skjæringstidspunkt, subsumsjonObserver)
         val sammenligningsgrunnlag = beregnSammenligningsgrunnlag(skjæringstidspunkt, subsumsjonObserver)
         val avviksprosent = sykepengegrunnlag.avviksprosent(sammenligningsgrunnlag.sammenligningsgrunnlag)
@@ -753,22 +753,30 @@ class Person private constructor(
             warn("Har mer enn %.0f %% avvik. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene.", maksimaltTillattAvvik)
         }
 
+        val opptjening = beregnOpptjening(skjæringstidspunkt, subsumsjonObserver)
+        if (Toggle.OpptjeningIModellen.enabled && !opptjening.erOppfylt()) {
+            hendelse.warn("Perioden er avslått på grunn av manglende opptjening")
+        }
+
         when (val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt)) {
             is VilkårsgrunnlagHistorikk.Grunnlagsdata -> {
                 val harMinimumInntekt = validerMinimumInntekt(hendelse, fødselsnummer, skjæringstidspunkt, sykepengegrunnlag, subsumsjonObserver)
+                val harOpptjening = if (Toggle.OpptjeningIModellen.enabled) opptjening.erOppfylt() else true // TODO: Bruk det nye opptjeningsobjektet for å sjekke opptjeningen når vi kan fjerne toggelen
                 val grunnlagselement = grunnlag.kopierGrunnlagsdataMed(
                     sykepengegrunnlag = sykepengegrunnlag,
                     sammenligningsgrunnlag = sammenligningsgrunnlag,
                     sammenligningsgrunnlagVurdering = harAkseptabeltAvvik,
                     avviksprosent = avviksprosent,
+                    nyOpptjening = if (Toggle.OpptjeningIModellen.enabled) opptjening else null,
+                    nyHarOpptjening = harOpptjening,
                     minimumInntektVurdering = harMinimumInntekt,
                     meldingsreferanseId = hendelse.meldingsreferanseId()
                 )
                 hendelse.kontekst(grunnlagselement)
                 vilkårsgrunnlagHistorikk.lagre(skjæringstidspunkt, grunnlagselement)
             }
-            is VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag -> hendelse.error("Vilkårsgrunnlaget ligger i infotrygd. Det er ikke støttet i revurdering.")
-            else -> hendelse.error("Fant ikke vilkårsgrunnlag. Kan ikke revurdere inntekt.")
+            is VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag -> hendelse.error("Vilkårsgrunnlaget ligger i infotrygd. Det er ikke støttet i revurdering eller overstyring.")
+            else -> hendelse.error("Fant ikke vilkårsgrunnlag. Kan ikke vilkårsprøve på nytt etter ny informasjon fra saksbehandler.")
         }
     }
 

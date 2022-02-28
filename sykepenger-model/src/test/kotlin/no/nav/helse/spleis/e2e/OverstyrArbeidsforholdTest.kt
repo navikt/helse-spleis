@@ -388,7 +388,7 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `vi vilkårsprøver krav om opptjening ved overstyring av arbeidsforhold`() {
+    fun `vi vilkårsprøver krav om opptjening ved overstyring av arbeidsforhold`() = Toggle.OpptjeningIModellen.enable {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1, beregnetInntekt = INNTEKT)
@@ -418,23 +418,10 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
         håndterOverstyrArbeidsforhold(1.januar, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, true)))
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
-        assertForventetFeil(
-            forklaring = "må implementeres",
-            nå = {
-                assertNoWarning(
-                    "Perioden er avslått på grunn av manglende opptjening. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene???",
-                    1.vedtaksperiode.filter(a1)
-                )
-                assertInstanceOf(Utbetalingstidslinje.Utbetalingsdag.NavDag::class.java, inspektør.sisteUtbetalingUtbetalingstidslinje()[31.januar])
-
-            },
-            ønsket = {
-                assertWarning(
-                    "Perioden er avslått på grunn av manglende opptjening. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene???",
-                    1.vedtaksperiode.filter(a1)
-                )
-                assertInstanceOf(Utbetalingstidslinje.Utbetalingsdag.AvvistDag::class.java, inspektør.sisteUtbetalingUtbetalingstidslinje()[31.januar])
-            }
+        assertWarning(
+            "Perioden er avslått på grunn av manglende opptjening",
+            1.vedtaksperiode.filter(a1)
         )
+        assertInstanceOf(Utbetalingstidslinje.Utbetalingsdag.AvvistDag::class.java, inspektør.sisteUtbetalingUtbetalingstidslinje()[31.januar])
     }
 }
