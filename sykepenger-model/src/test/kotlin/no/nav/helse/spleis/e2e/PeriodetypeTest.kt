@@ -1,21 +1,18 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.april
-import no.nav.helse.desember
-import no.nav.helse.februar
+import no.nav.helse.*
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
-import no.nav.helse.januar
-import no.nav.helse.person.Periodetype
-import no.nav.helse.person.TilstandType.*
+import no.nav.helse.person.Periodetype.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -23,147 +20,56 @@ import org.junit.jupiter.api.Test
 internal class PeriodetypeTest : AbstractEndToEndTest() {
 
     @Test
-    fun `periodetype settes til førstegangs hvis foregående ikke hadde utbetalingsdager`() {
-        håndterSykmelding(Sykmeldingsperiode(28.januar(2020), 10.februar(2020), 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(11.februar(2020), 21.februar(2020), 100.prosent))
-        håndterSøknad(Sykdom(28.januar(2020), 10.februar(2020), 100.prosent))
-        håndterSøknad(Sykdom(11.februar(2020), 21.februar(2020), 100.prosent))
-        håndterInntektsmelding(
-            arbeidsgiverperioder = listOf(Periode(28.januar(2020), 12.februar(2020))),
-            førsteFraværsdag = 28.januar(2020)
-        )
-
-        håndterYtelser(2.vedtaksperiode)
-        håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioderForSammenligningsgrunnlag {
-                1.januar(2019) til 1.desember(2019) inntekter {
-                    ORGNUMMER inntekt INNTEKT
-                }
-            }
-        ))
-        håndterYtelser(2.vedtaksperiode)
-
-        håndterSimulering(2.vedtaksperiode)
-
-        assertTilstander(
-            1.vedtaksperiode,
-            START,
-            MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVSLUTTET_UTEN_UTBETALING,
-            AVSLUTTET_UTEN_UTBETALING
-        )
-        assertTilstander(
-            2.vedtaksperiode,
-            START,
-            MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
-            MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
-            AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE,
-            AVVENTER_HISTORIKK,
-            AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING
-        )
-
-        assertEquals(
-            Periodetype.FØRSTEGANGSBEHANDLING.name,
-            hendelselogg.behov().first().detaljer()["periodetype"]
+    fun `førstegangsbehadling frem til og med første periode med betaling`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(6.januar, 13.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(14.januar, 20.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(21.januar, 25.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 5.januar, 100.prosent))
+        håndterSøknad(Sykdom(6.januar, 13.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        assertEquals(FØRSTEGANGSBEHANDLING, inspektør.periodetype(1.vedtaksperiode))
+        assertEquals(FØRSTEGANGSBEHANDLING, inspektør.periodetype(2.vedtaksperiode))
+        assertEquals(FØRSTEGANGSBEHANDLING, inspektør.periodetype(3.vedtaksperiode))
+        assertForventetFeil(
+            nå = { assertEquals(FØRSTEGANGSBEHANDLING, inspektør.periodetype(4.vedtaksperiode)) },
+            ønsket = { assertEquals(FORLENGELSE, inspektør.periodetype(4.vedtaksperiode)) }
         )
     }
 
     @Test
-    fun `periodetype settes til førstegangs hvis foregående ikke hadde utbetalingsdager - ikke arbeidsgiversøknad`() {
-        håndterSykmelding(Sykmeldingsperiode(28.januar(2020), 10.februar(2020), 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(11.februar(2020), 21.februar(2020), 100.prosent))
-        håndterSøknad(Sykdom(28.januar(2020), 10.februar(2020), 100.prosent))
-        håndterSøknad(Sykdom(11.februar(2020), 21.februar(2020), 100.prosent))
-        håndterInntektsmelding(
-            arbeidsgiverperioder = listOf(Periode(28.januar(2020), 12.februar(2020))),
-            førsteFraværsdag = 28.januar(2020)
-        )
-        håndterYtelser(2.vedtaksperiode)
-        håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioderForSammenligningsgrunnlag {
-                1.januar(2019) til 1.desember(2019) inntekter {
-                    ORGNUMMER inntekt INNTEKT
-                }
-            }
-        ))
-        håndterYtelser(2.vedtaksperiode)
-        håndterSimulering(2.vedtaksperiode)
-
-        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(
-            2.vedtaksperiode,
-            START,
-            MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
-            MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
-            AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE,
-            AVVENTER_HISTORIKK,
-            AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING
-        )
-
-        assertEquals(
-            Periodetype.FØRSTEGANGSBEHANDLING.name,
-            hendelselogg.behov().first().detaljer()["periodetype"]
-        )
+    fun `førstegangsbehadling etter gap`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(25.januar, 31.januar, 100.prosent))
+        assertEquals(FØRSTEGANGSBEHANDLING, inspektør.periodetype(1.vedtaksperiode))
+        assertEquals(FØRSTEGANGSBEHANDLING, inspektør.periodetype(2.vedtaksperiode))
     }
 
     @Test
     fun `periodetype er overgang fra Infotrygd hvis foregående ble behandlet i Infotrygd`() {
-        val historikk = ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 3.januar,  26.januar, 100.prosent, 1000.daglig)
+        val historikk = ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 3.januar, 26.januar, 100.prosent, 1000.daglig)
         val inntekter = listOf(Inntektsopplysning(ORGNUMMER, 3.januar(2018), 1000.daglig, true))
         håndterSykmelding(Sykmeldingsperiode(29.januar, 23.februar, 100.prosent))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(29.januar, 23.februar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode, historikk, inntektshistorikk = inntekter)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-
-        assertTilstander(
-            1.vedtaksperiode,
-            START,
-            MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING
-        )
-        assertEquals(
-            Periodetype.OVERGANG_FRA_IT.name,
-            hendelselogg.behov().first().detaljer()["periodetype"]
-        )
+        assertEquals(OVERGANG_FRA_IT, inspektør.periodetype(1.vedtaksperiode))
     }
 
     @Test
     fun `periodetype er forlengelse fra Infotrygd hvis førstegangsbehandlingen skjedde i Infotrygd`() {
-        val historikk = ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 3.januar,  26.januar, 100.prosent, 1000.daglig)
+        val historikk = ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 3.januar, 26.januar, 100.prosent, 1000.daglig)
         val inntekter = listOf(Inntektsopplysning(ORGNUMMER, 3.januar(2018), 1000.daglig, true))
         håndterSykmelding(Sykmeldingsperiode(29.januar, 23.februar, 100.prosent))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(29.januar, 23.februar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode, historikk, inntektshistorikk = inntekter)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-
-        assertEquals(
-            Periodetype.OVERGANG_FRA_IT.name,
-            hendelselogg.behov().first().detaljer()["periodetype"]
-        )
-
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(Oppdragstatus.AKSEPTERT)
-
         håndterSykmelding(Sykmeldingsperiode(26.februar, 15.april, 100.prosent))
         håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(26.februar, 15.april, 100.prosent))
-        håndterYtelser(2.vedtaksperiode)
-        håndterSimulering(2.vedtaksperiode)
-
-        assertEquals(
-            Periodetype.INFOTRYGDFORLENGELSE.name,
-            hendelselogg.behov().first().detaljer()["periodetype"]
-        )
+        assertEquals(OVERGANG_FRA_IT, inspektør.periodetype(1.vedtaksperiode))
+        assertEquals(INFOTRYGDFORLENGELSE, inspektør.periodetype(2.vedtaksperiode))
     }
 
     @Test
@@ -176,41 +82,23 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
             arbeidsgiverperioder = listOf(Periode(20.januar, 4.februar)),
             førsteFraværsdag = 20.januar
         )
-        håndterYtelser(1.vedtaksperiode)
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterYtelser(2.vedtaksperiode)
-        håndterSimulering(2.vedtaksperiode)
-
-        assertTilstander(
-            1.vedtaksperiode,
-            START,
-            MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            AVVENTER_HISTORIKK,
-            AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK,
-            AVVENTER_GODKJENNING,
-            AVSLUTTET
-        )
-        assertTilstander(
-            2.vedtaksperiode,
-            START,
-            MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
-            AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
-            AVVENTER_UFERDIG,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING
-        )
-
-        assertEquals(Periodetype.FØRSTEGANGSBEHANDLING, inspektør.periodetype(1.vedtaksperiode))
-        assertEquals(Periodetype.FØRSTEGANGSBEHANDLING, inspektør.periodetype(2.vedtaksperiode))
+        assertEquals(FØRSTEGANGSBEHANDLING, inspektør.periodetype(1.vedtaksperiode))
+        assertEquals(FØRSTEGANGSBEHANDLING, inspektør.periodetype(2.vedtaksperiode))
     }
 
     @Test
-    fun `første periode er kun arbeidsgiverperiode og helg`() {
+    fun `første periode er kun arbeidsgiverperiode og helg - før utbetaling`() {
+        håndterSykmelding(Sykmeldingsperiode(4.januar, 21.januar, 100.prosent))
+        håndterSøknad(Sykdom(4.januar, 21.januar, 100.prosent))
+        håndterInntektsmelding(listOf(4.januar til 19.januar))
+        håndterSykmelding(Sykmeldingsperiode(22.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(22.januar, 31.januar, 100.prosent))
+        assertEquals(FØRSTEGANGSBEHANDLING, inspektør.periodetype(1.vedtaksperiode))
+        assertEquals(FØRSTEGANGSBEHANDLING, inspektør.periodetype(2.vedtaksperiode))
+    }
+
+    @Test
+    fun `første periode er kun arbeidsgiverperiode og helg - etter utbetaling`() {
         håndterSykmelding(Sykmeldingsperiode(4.januar, 21.januar, 100.prosent))
         håndterSøknad(Sykdom(4.januar, 21.januar, 100.prosent))
         håndterInntektsmelding(listOf(4.januar til 19.januar))
@@ -222,9 +110,76 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
+        assertEquals(FØRSTEGANGSBEHANDLING, inspektør.periodetype(1.vedtaksperiode))
+        assertEquals(FORLENGELSE, inspektør.periodetype(2.vedtaksperiode))
+    }
 
-        assertEquals(Periodetype.FØRSTEGANGSBEHANDLING, inspektør.periodetype(1.vedtaksperiode))
-        assertEquals(Periodetype.FORLENGELSE, inspektør.periodetype(2.vedtaksperiode))
+    @Test
+    fun `periodetype for forlengelse dersom førstegangsbehandling består kun av avviste dager`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(
+            arbeidsgiverperioder = listOf(1.januar til 16.januar),
+            beregnetInntekt = 1000.månedlig
+        )
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
+                1.januar(2017) til 1.desember(2017) inntekter {
+                    ORGNUMMER inntekt 1000.månedlig
+                }
+            })
+        )
+        håndterYtelser(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+
+        assertForventetFeil(
+            nå = {
+                assertEquals(FØRSTEGANGSBEHANDLING, inspektør.periodetype(1.vedtaksperiode))
+                assertEquals(FØRSTEGANGSBEHANDLING, inspektør.periodetype(2.vedtaksperiode))
+            },
+            ønsket = {
+                assertEquals(FØRSTEGANGSBEHANDLING, inspektør.periodetype(1.vedtaksperiode))
+                assertEquals(FORLENGELSE, inspektør.periodetype(2.vedtaksperiode))
+            }
+        )
+    }
+
+    @Test
+    fun `periodetype for forlengelse dersom førstegangsbehandling er avvist`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(
+            arbeidsgiverperioder = listOf(1.januar til 16.januar),
+            beregnetInntekt = 1000.månedlig
+        )
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
+                1.januar(2017) til 1.desember(2017) inntekter {
+                    ORGNUMMER inntekt 1000.månedlig
+                }
+            })
+        )
+        håndterYtelser(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, utbetalingGodkjent = false)
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+
+        assertForventetFeil(
+            nå = {
+                assertEquals(FØRSTEGANGSBEHANDLING, inspektør.periodetype(1.vedtaksperiode))
+                assertEquals(FØRSTEGANGSBEHANDLING, inspektør.periodetype(2.vedtaksperiode))
+            },
+            ønsket = {
+                assertEquals(FØRSTEGANGSBEHANDLING, inspektør.periodetype(1.vedtaksperiode))
+                assertEquals(FORLENGELSE, inspektør.periodetype(2.vedtaksperiode))
+            }
+        )
     }
 
 }
