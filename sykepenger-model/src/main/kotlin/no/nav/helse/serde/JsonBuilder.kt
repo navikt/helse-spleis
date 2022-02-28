@@ -6,14 +6,41 @@ import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Simulering
-import no.nav.helse.person.*
+import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.Arbeidsforholdhistorikk
+import no.nav.helse.person.ArbeidsforholdhistorikkVisitor
+import no.nav.helse.person.Arbeidsgiver
+import no.nav.helse.person.ArbeidsgiverInntektsopplysning
+import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Dokumentsporing.Companion.toMap
+import no.nav.helse.person.ForkastetVedtaksperiode
+import no.nav.helse.person.ForkastetÅrsak
+import no.nav.helse.person.ForlengelseFraInfotrygd
+import no.nav.helse.person.Inntektshistorikk
+import no.nav.helse.person.Inntektskilde
+import no.nav.helse.person.InntektsmeldingInfo
+import no.nav.helse.person.InntektsmeldingInfoHistorikk
+import no.nav.helse.person.Opptjening
+import no.nav.helse.person.Periodetype
+import no.nav.helse.person.Person
+import no.nav.helse.person.Refusjonshistorikk
+import no.nav.helse.person.Sammenligningsgrunnlag
+import no.nav.helse.person.Sykepengegrunnlag
+import no.nav.helse.person.Vedtaksperiode
+import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.infotrygdhistorikk.Friperiode
 import no.nav.helse.person.infotrygdhistorikk.UgyldigPeriode
 import no.nav.helse.person.infotrygdhistorikk.UkjentInfotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType
-import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.*
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.ARBEIDSDAG
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.ARBEIDSGIVERDAG
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.FERIEDAG
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.FORELDET_SYKEDAG
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.FRISK_HELGEDAG
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.PERMISJONSDAG
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.PROBLEMDAG
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.SYKEDAG
 import no.nav.helse.serde.PersonData.UtbetalingstidslinjeData.TypeData
 import no.nav.helse.serde.api.builders.BuilderState
 import no.nav.helse.serde.mapping.JsonMedlemskapstatus
@@ -25,14 +52,33 @@ import no.nav.helse.sykdomstidslinje.Dag.Arbeidsgiverdag
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
-import no.nav.helse.utbetalingslinjer.*
+import no.nav.helse.utbetalingslinjer.Endringskode
+import no.nav.helse.utbetalingslinjer.Fagområde
+import no.nav.helse.utbetalingslinjer.Feriepengeutbetaling
+import no.nav.helse.utbetalingslinjer.Klassekode
+import no.nav.helse.utbetalingslinjer.Oppdrag
+import no.nav.helse.utbetalingslinjer.Oppdragstatus
+import no.nav.helse.utbetalingslinjer.Satstype
+import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
+import no.nav.helse.utbetalingslinjer.Utbetalingslinje
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.AvvistDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.ForeldetDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.Fridag
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavHelgDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.UkjentDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinjeberegning
-import no.nav.helse.økonomi.*
+import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Prosent
+import no.nav.helse.økonomi.Prosentdel
+import no.nav.helse.økonomi.Økonomi
+import no.nav.helse.økonomi.ØkonomiBuilder
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Year
@@ -803,8 +849,8 @@ internal class JsonBuilder : AbstractBuilder() {
             arbeidsforholdMap.add(mapOf("ansattFom" to ansattFom, "ansattTom" to ansattTom, "deaktivert" to deaktivert))
         }
 
-        override fun postVisitArbeidsgiverOpptjeningsgrunnlag(orgnummer: String, arbeidsforhold: List<Arbeidsforholdhistorikk.Arbeidsforhold>) {
-            arbeidsforholdOpptjeningsgrunnlagMap.add(mapOf("orgnummer" to orgnummer, "arbeidsforhold" to arbeidsforholdMap))
+        override fun postVisitArbeidsgiverOpptjeningsgrunnlag(orgnummer: String, ansattPerioder: List<Arbeidsforholdhistorikk.Arbeidsforhold>) {
+            arbeidsforholdOpptjeningsgrunnlagMap.add(mapOf("orgnummer" to orgnummer, "ansattPerioder" to arbeidsforholdMap))
             popState()
         }
     }
@@ -812,7 +858,7 @@ internal class JsonBuilder : AbstractBuilder() {
     class OpptjeningState(private val opptjeningsMap: MutableMap<String, Any>): BuilderState() {
         private val arbeidsforholdOpptjeningsgrunnlagMap = mutableListOf<Map<String, Any>>()
 
-        override fun preVisitArbeidsgiverOpptjeningsgrunnlag(orgnummer: String, arbeidsforhold: List<Arbeidsforholdhistorikk.Arbeidsforhold>) {
+        override fun preVisitArbeidsgiverOpptjeningsgrunnlag(orgnummer: String, ansattPerioder: List<Arbeidsforholdhistorikk.Arbeidsforhold>) {
             pushState(ArbeidsgiverOpptjeningsgrunnlagState(arbeidsforholdOpptjeningsgrunnlagMap))
         }
 

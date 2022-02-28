@@ -12,8 +12,16 @@ import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
-import no.nav.helse.utbetalingslinjer.*
+import no.nav.helse.utbetalingslinjer.Endringskode
+import no.nav.helse.utbetalingslinjer.Fagområde
+import no.nav.helse.utbetalingslinjer.Feriepengeutbetaling
+import no.nav.helse.utbetalingslinjer.Klassekode
+import no.nav.helse.utbetalingslinjer.Oppdrag
+import no.nav.helse.utbetalingslinjer.Oppdragstatus
+import no.nav.helse.utbetalingslinjer.Satstype
+import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
+import no.nav.helse.utbetalingslinjer.Utbetalingslinje
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinjeberegning
@@ -129,12 +137,12 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         delegatee.postVisitOpptjening(opptjening, arbeidsforhold, opptjeningsperiode)
     }
 
-    override fun preVisitArbeidsgiverOpptjeningsgrunnlag(orgnummer: String, arbeidsforhold: List<Arbeidsforholdhistorikk.Arbeidsforhold>) {
-        delegatee.preVisitArbeidsgiverOpptjeningsgrunnlag(orgnummer, arbeidsforhold)
+    override fun preVisitArbeidsgiverOpptjeningsgrunnlag(orgnummer: String, ansattPerioder: List<Arbeidsforholdhistorikk.Arbeidsforhold>) {
+        delegatee.preVisitArbeidsgiverOpptjeningsgrunnlag(orgnummer, ansattPerioder)
     }
 
-    override fun postVisitArbeidsgiverOpptjeningsgrunnlag(orgnummer: String, arbeidsforhold: List<Arbeidsforholdhistorikk.Arbeidsforhold>) {
-        delegatee.postVisitArbeidsgiverOpptjeningsgrunnlag(orgnummer, arbeidsforhold)
+    override fun postVisitArbeidsgiverOpptjeningsgrunnlag(orgnummer: String, ansattPerioder: List<Arbeidsforholdhistorikk.Arbeidsforhold>) {
+        delegatee.postVisitArbeidsgiverOpptjeningsgrunnlag(orgnummer, ansattPerioder)
     }
 
     override fun preVisitArbeidsgiverInntektsopplysninger() {

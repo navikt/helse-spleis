@@ -29,19 +29,19 @@ internal class Opptjening (
 
     internal fun opptjeningFom() = opptjeningsperiode.start
 
-    internal class ArbeidsgiverOpptjeningsgrunnlag(private val orgnummer: String, private val arbeidsforhold: List<Arbeidsforholdhistorikk.Arbeidsforhold>) {
+    internal class ArbeidsgiverOpptjeningsgrunnlag(private val orgnummer: String, private val ansattPerioder: List<Arbeidsforholdhistorikk.Arbeidsforhold>) {
         companion object {
             internal fun List<ArbeidsgiverOpptjeningsgrunnlag>.opptjeningsperiode(skjæringstidspunkt: LocalDate) =
-                flatMap { it.arbeidsforhold }.opptjeningsperiode(skjæringstidspunkt)
+                flatMap { it.ansattPerioder }.opptjeningsperiode(skjæringstidspunkt)
 
             internal fun List<ArbeidsgiverOpptjeningsgrunnlag>.arbeidsforholdForJurist() =
-                flatMap { it.arbeidsforhold.toEtterlevelseMap(it.orgnummer) }
+                flatMap { it.ansattPerioder.toEtterlevelseMap(it.orgnummer) }
         }
 
         internal fun accept(visitor: VilkårsgrunnlagHistorikkVisitor) {
-            visitor.preVisitArbeidsgiverOpptjeningsgrunnlag(orgnummer, arbeidsforhold)
-            arbeidsforhold.forEach { it.accept(visitor) }
-            visitor.postVisitArbeidsgiverOpptjeningsgrunnlag(orgnummer, arbeidsforhold)
+            visitor.preVisitArbeidsgiverOpptjeningsgrunnlag(orgnummer, ansattPerioder)
+            ansattPerioder.forEach { it.accept(visitor) }
+            visitor.postVisitArbeidsgiverOpptjeningsgrunnlag(orgnummer, ansattPerioder)
         }
     }
 

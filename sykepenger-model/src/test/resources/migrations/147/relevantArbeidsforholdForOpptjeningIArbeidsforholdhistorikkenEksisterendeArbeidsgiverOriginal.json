@@ -1,0 +1,72 @@
+{
+    "arbeidsgivere": [
+        {
+            "arbeidsforholdhistorikk": [
+                {
+                    "skjæringstidspunkt": "2018-01-01",
+                    "arbeidsforhold": [
+                        {
+                            "ansattFom": "2017-12-20",
+                            "ansattTom": null,
+                            "deaktivert": false
+                        }
+                    ]
+                },
+                {
+                    "skjæringstidspunkt": "2021-01-01",
+                    "arbeidsforhold": [
+                        {
+                            "ansattFom": "2020-12-20",
+                            "ansattTom": null,
+                            "deaktivert": false
+                        }
+                    ]
+                }
+            ],
+            "organisasjonsnummer": "987654321"
+        },
+        {
+            "arbeidsforholdhistorikk": [
+                {
+                    "skjæringstidspunkt": "2018-01-01",
+                    "arbeidsforhold": [
+                        {
+                            "ansattFom": "1970-01-01",
+                            "ansattTom": null,
+                            "deaktivert": false
+                        }
+                    ]
+                }
+            ],
+            "organisasjonsnummer": "654321987"
+        }
+    ],
+    "vilkårsgrunnlagHistorikk": [
+        {
+            "id": "0d969149-5d8d-42a0-92d6-fedfbef19790",
+            "vilkårsgrunnlag": [
+                {
+                    "skjæringstidspunkt": "2018-01-01",
+                    "type": "Vilkårsprøving",
+                    "meldingsreferanseId": "51a874a5-8574-4a6a-a6b4-1d93ecbd7b85"
+                },
+                {
+                    "skjæringstidspunkt": "2021-01-01",
+                    "type": "Vilkårsprøving",
+                    "meldingsreferanseId": "69010425-41d6-4f9c-8776-11269f0632ba"
+                }
+            ]
+        },
+        {
+            "id": "67b0c60a-8424-4c67-9504-29503771bbe8",
+            "vilkårsgrunnlag": [
+                {
+                    "skjæringstidspunkt": "2018-01-01",
+                    "type": "Vilkårsprøving",
+                    "meldingsreferanseId": "51a874a5-8574-4a6a-a6b4-1d93ecbd7b85"
+                }
+            ]
+        }
+    ],
+    "skjemaVersjon": 146
+}

@@ -1,7 +1,11 @@
 package no.nav.helse.person
 
-import no.nav.helse.*
+import no.nav.helse.april
+import no.nav.helse.februar
 import no.nav.helse.hendelser.til
+import no.nav.helse.januar
+import no.nav.helse.mai
+import no.nav.helse.mars
 import no.nav.helse.serde.AbstractBuilder
 import no.nav.helse.serde.JsonBuilder
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -14,7 +18,7 @@ internal class OpptjeningBuilderTest {
         val arbeidsgiverOpptjeningsgrunnlag = listOf(
             Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
                 orgnummer = "orgnummer",
-                arbeidsforhold = listOf(Arbeidsforholdhistorikk.Arbeidsforhold(ansattFom = 1.januar, ansattTom = null, deaktivert = false))
+                ansattPerioder = listOf(Arbeidsforholdhistorikk.Arbeidsforhold(ansattFom = 1.januar, ansattTom = null, deaktivert = false))
             )
         )
 
@@ -33,7 +37,7 @@ internal class OpptjeningBuilderTest {
                 "arbeidsforhold" to listOf(
                     mapOf(
                         "orgnummer" to "orgnummer",
-                        "arbeidsforhold" to listOf(
+                        "ansattPerioder" to listOf(
                             mapOf("ansattFom" to 1.januar, "ansattTom" to null, "deaktivert" to false)
                         )
                     )
@@ -50,13 +54,13 @@ internal class OpptjeningBuilderTest {
         val arbeidsgiverOpptjeningsgrunnlag = listOf(
             Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
                 orgnummer = "orgnummer",
-                arbeidsforhold = listOf(
+                ansattPerioder = listOf(
                     Arbeidsforholdhistorikk.Arbeidsforhold(ansattFom = 1.mars, ansattTom = 31.mars, deaktivert = false),
                     Arbeidsforholdhistorikk.Arbeidsforhold(ansattFom = 1.april, ansattTom = null, deaktivert = false)
                 )
             ), Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
                 orgnummer = "orgnummer2",
-                arbeidsforhold = listOf(
+                ansattPerioder = listOf(
                     Arbeidsforholdhistorikk.Arbeidsforhold(ansattFom = 1.januar, ansattTom = 31.januar, deaktivert = false),
                     Arbeidsforholdhistorikk.Arbeidsforhold(ansattFom = 1.februar, ansattTom = null, deaktivert = true)
                 )
@@ -78,14 +82,14 @@ internal class OpptjeningBuilderTest {
                 "arbeidsforhold" to listOf(
                     mapOf(
                         "orgnummer" to "orgnummer",
-                        "arbeidsforhold" to listOf(
+                        "ansattPerioder" to listOf(
                             mapOf("ansattFom" to 1.mars, "ansattTom" to 31.mars, "deaktivert" to false),
                             mapOf("ansattFom" to 1.april, "ansattTom" to null, "deaktivert" to false)
                         )
                     ),
                     mapOf(
                         "orgnummer" to "orgnummer2",
-                        "arbeidsforhold" to listOf(
+                        "ansattPerioder" to listOf(
                             mapOf("ansattFom" to 1.januar, "ansattTom" to 31.januar, "deaktivert" to false),
                             mapOf("ansattFom" to 1.februar, "ansattTom" to null, "deaktivert" to true)
                         )

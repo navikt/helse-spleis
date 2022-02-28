@@ -2,16 +2,27 @@ package no.nav.helse.spleis.e2e
 
 import no.nav.helse.Toggle
 import no.nav.helse.desember
-import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.InntektForSykepengegrunnlag
+import no.nav.helse.hendelser.Inntektsvurdering
+import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.Vilkårsgrunnlag
+import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
-import no.nav.helse.person.*
+import no.nav.helse.person.Arbeidsforholdhistorikk
+import no.nav.helse.person.Arbeidsgiver
+import no.nav.helse.person.IdInnhenter
+import no.nav.helse.person.Inntektskilde
+import no.nav.helse.person.PersonVisitor
+import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.spleis.e2e.OpptjeningE2ETest.ArbeidsforholdVisitor.Companion.assertHarArbeidsforhold
 import no.nav.helse.spleis.e2e.OpptjeningE2ETest.ArbeidsforholdVisitor.Companion.assertHarIkkeArbeidsforhold
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -51,6 +62,7 @@ internal class OpptjeningE2ETest : AbstractEndToEndTest() {
             Vilkårsgrunnlag.Arbeidsforhold(a1, 20.desember(2017), null),
             Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, 19.desember(2017))
         )
+
         assertHarArbeidsforhold(1.januar, a1)
         assertHarArbeidsforhold(1.januar, a2)
     }
@@ -111,12 +123,12 @@ internal class OpptjeningE2ETest : AbstractEndToEndTest() {
         assertEquals(Inntektskilde.EN_ARBEIDSGIVER, inspektør(a1).inntektskilde(1.vedtaksperiode))
     }
 
-    fun personMedArbeidsforhold(vararg arbeidsforhold: Vilkårsgrunnlag.Arbeidsforhold) {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        håndterVilkårsgrunnlag(1.vedtaksperiode, arbeidsforhold = arbeidsforhold.toList(), orgnummer = a1)
+    fun personMedArbeidsforhold(vararg arbeidsforhold: Vilkårsgrunnlag.Arbeidsforhold, fom: LocalDate = 1.januar, tom: LocalDate = 31.januar, vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode) {
+        håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(fom, tom, 100.prosent), orgnummer = a1)
+        håndterInntektsmelding(listOf(fom til fom.plusDays(15)), orgnummer = a1)
+        håndterYtelser(vedtaksperiodeIdInnhenter, orgnummer = a1)
+        håndterVilkårsgrunnlag(vedtaksperiodeIdInnhenter, arbeidsforhold = arbeidsforhold.toList(), orgnummer = a1)
     }
 
     internal class ArbeidsforholdVisitor(val forventetArbeidsforhold: String, val forventetSkjæringstidspunkt: LocalDate) : PersonVisitor {

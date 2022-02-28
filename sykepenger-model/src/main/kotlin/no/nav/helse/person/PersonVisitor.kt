@@ -9,12 +9,31 @@ import no.nav.helse.person.infotrygdhistorikk.Friperiode
 import no.nav.helse.person.infotrygdhistorikk.UgyldigPeriode
 import no.nav.helse.person.infotrygdhistorikk.UkjentInfotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
-import no.nav.helse.sykdomstidslinje.Dag.*
+import no.nav.helse.sykdomstidslinje.Dag.Arbeidsdag
+import no.nav.helse.sykdomstidslinje.Dag.ArbeidsgiverHelgedag
+import no.nav.helse.sykdomstidslinje.Dag.Arbeidsgiverdag
+import no.nav.helse.sykdomstidslinje.Dag.AvslåttDag
+import no.nav.helse.sykdomstidslinje.Dag.Feriedag
+import no.nav.helse.sykdomstidslinje.Dag.ForeldetSykedag
+import no.nav.helse.sykdomstidslinje.Dag.FriskHelgedag
+import no.nav.helse.sykdomstidslinje.Dag.Permisjonsdag
+import no.nav.helse.sykdomstidslinje.Dag.ProblemDag
+import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
+import no.nav.helse.sykdomstidslinje.Dag.Sykedag
+import no.nav.helse.sykdomstidslinje.Dag.UkjentDag
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
-import no.nav.helse.utbetalingslinjer.*
+import no.nav.helse.utbetalingslinjer.Endringskode
+import no.nav.helse.utbetalingslinjer.Fagområde
+import no.nav.helse.utbetalingslinjer.Feriepengeutbetaling
+import no.nav.helse.utbetalingslinjer.Klassekode
+import no.nav.helse.utbetalingslinjer.Oppdrag
+import no.nav.helse.utbetalingslinjer.Oppdragstatus
+import no.nav.helse.utbetalingslinjer.Satstype
+import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
+import no.nav.helse.utbetalingslinjer.Utbetalingslinje
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinjeberegning
@@ -178,8 +197,8 @@ internal interface VilkårsgrunnlagHistorikkVisitor : InntekthistorikkVisitor, A
     fun postVisitArbeidsgiverInntektsopplysninger() {}
     fun preVisitOpptjening(opptjening: Opptjening, arbeidsforhold: List<Opptjening.ArbeidsgiverOpptjeningsgrunnlag>, opptjeningsperiode: Periode) {}
     fun postVisitOpptjening(opptjening: Opptjening, arbeidsforhold: List<Opptjening.ArbeidsgiverOpptjeningsgrunnlag>, opptjeningsperiode: Periode) {}
-    fun preVisitArbeidsgiverOpptjeningsgrunnlag(orgnummer: String, arbeidsforhold: List<Arbeidsforholdhistorikk.Arbeidsforhold>) {}
-    fun postVisitArbeidsgiverOpptjeningsgrunnlag(orgnummer: String, arbeidsforhold: List<Arbeidsforholdhistorikk.Arbeidsforhold>) {}
+    fun preVisitArbeidsgiverOpptjeningsgrunnlag(orgnummer: String, ansattPerioder: List<Arbeidsforholdhistorikk.Arbeidsforhold>) {}
+    fun postVisitArbeidsgiverOpptjeningsgrunnlag(orgnummer: String, ansattPerioder: List<Arbeidsforholdhistorikk.Arbeidsforhold>) {}
 }
 
 internal interface InntektsmeldingInfoVisitor {
