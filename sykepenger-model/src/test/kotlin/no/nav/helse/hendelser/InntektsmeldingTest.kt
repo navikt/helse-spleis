@@ -8,7 +8,6 @@ import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.sykdomstidslinje.Dag.*
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.økonomi.Inntekt
-import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -555,31 +554,6 @@ internal class InntektsmeldingTest {
         inntektsmelding.addInntekt(inntektshistorikk, 1.februar, MaskinellJurist())
         assertEquals(2000.månedlig, inntektshistorikk.grunnlagForSykepengegrunnlag(1.februar, 1.februar)?.grunnlagForSykepengegrunnlag())
         assertNull(inntektshistorikk.grunnlagForSykepengegrunnlag(3.februar, 3.februar))
-    }
-
-    @Test
-    fun `logger info om at vi tidligere ville kastet ut inntektmeldinger på grunn av refusjon`() {
-        val arbeidsgiverperioder = listOf(1.januar til 16.januar)
-        inntektsmelding(arbeidsgiverperioder, refusjonBeløp = INGEN)
-        assertMelding("Arbeidsgiver forskutterer ikke (krever ikke refusjon)")
-        inntektsmelding(arbeidsgiverperioder, beregnetInntekt = 1000.månedlig, refusjonBeløp = 500.månedlig)
-        assertMelding("Inntektsmelding inneholder beregnet inntekt og refusjon som avviker med hverandre")
-        inntektsmelding(arbeidsgiverperioder, refusjonOpphørsdato = 20.januar)
-        assertMelding("Arbeidsgiver opphører refusjon i perioden")
-        inntektsmelding(arbeidsgiverperioder, refusjonOpphørsdato = 1.mars)
-        assertMelding("Arbeidsgiver opphører refusjon")
-        inntektsmelding(arbeidsgiverperioder, endringerIRefusjon = listOf(EndringIRefusjon(500.månedlig, 20.januar)))
-        assertMelding("Arbeidsgiver endrer refusjon i perioden")
-        inntektsmelding(arbeidsgiverperioder, endringerIRefusjon = listOf(EndringIRefusjon(500.månedlig, 1.mars)))
-        assertMelding("Arbeidsgiver har endringer i refusjon")
-    }
-
-    private fun assertMelding(melding: String, periode: Periode = 1.januar til 31.januar) {
-        assertTrue(inntektsmelding
-            .valider(periode, MaskinellJurist())
-            .hentInfo()
-            .contains("Ville tidligere blitt kastet ut på grunn av refusjon: $melding")
-        )
     }
 
     private fun inntektsmelding(

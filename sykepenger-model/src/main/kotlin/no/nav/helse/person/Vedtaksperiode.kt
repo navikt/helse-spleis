@@ -172,10 +172,6 @@ internal class Vedtaksperiode private constructor(
         val overlapper = overlapperMedSammenhengende(inntektsmelding, sammenhengendePerioder, other, vedtaksperioder)
         return overlapper.also {
             if (it) inntektsmelding.leggTil(hendelseIder)
-            if (arbeidsgiver.harRefusjonOpphørt(periode.endInclusive) && !erAvsluttet()) {
-                kontekst(inntektsmelding)
-                inntektsmelding.info("Ville tidligere blitt kastet ut på grunn av refusjon: Refusjon opphører i perioden")
-            }
             if (!it) return@also inntektsmelding.trimLeft(periode.endInclusive)
             kontekst(inntektsmelding)
             if (!inntektsmelding.erRelevant(periode, sammenhengendePerioder.map { it.periode })) return@also
@@ -678,10 +674,6 @@ internal class Vedtaksperiode private constructor(
         val vedtaksperiodeHarWarnings = person.aktivitetslogg.logg(this).hasWarningsOrWorse()
         val harBrukerutbetaling = harBrukerutbetaling(andreVedtaksperioder)
 
-        if (!harBrukerutbetaling && villeTidligereBlittKastetUtPåGrunnAvRefusjon()) {
-            hendelse.info("Behandlet en vedtaksperiode som tidligere ville blitt kastet ut på grunn av refusjon")
-        }
-
         val utbetalingsfilter = Utbetalingsfilter.Builder()
             .inntektkilde(inntektskilde())
             .also { utbetalinger.build(it) }
@@ -714,16 +706,6 @@ internal class Vedtaksperiode private constructor(
                 }
             }
         }
-    }
-
-    private fun villeTidligereBlittKastetUtPåGrunnAvRefusjon(): Boolean {
-        val meldinger = mutableListOf<String>()
-        person.aktivitetslogg.logg(this).accept(object : AktivitetsloggVisitor {
-            override fun visitInfo(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Info, melding: String, tidsstempel: String) {
-                meldinger.add(melding)
-            }
-        })
-        return meldinger.any { it.startsWith("Ville tidligere blitt kastet ut på grunn av refusjon:") }
     }
 
     private fun harBrukerutbetaling(andreVedtaksperioder: List<Vedtaksperiode>) =
@@ -1071,7 +1053,6 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.tilstand(
                 sykmelding, avgjørNesteTilstand(
                     vedtaksperiode = vedtaksperiode,
-                    hendelse = sykmelding,
                     ferdigForlengelse = MottattSykmeldingFerdigForlengelse,
                     uferdigForlengelse = MottattSykmeldingUferdigForlengelse,
                     ferdigGap = MottattSykmeldingFerdigGap,
@@ -1083,7 +1064,6 @@ internal class Vedtaksperiode private constructor(
 
         private fun avgjørNesteTilstand(
             vedtaksperiode: Vedtaksperiode,
-            hendelse: SykdomstidslinjeHendelse,
             ferdigForlengelse: Vedtaksperiodetilstand,
             uferdigForlengelse: Vedtaksperiodetilstand,
             ferdigGap: Vedtaksperiodetilstand,
@@ -1092,21 +1072,16 @@ internal class Vedtaksperiode private constructor(
             val periodeRettFør = vedtaksperiode.arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode)
             val forlengelse = periodeRettFør != null
             val ferdig = vedtaksperiode.arbeidsgiver.tidligerePerioderFerdigBehandlet(vedtaksperiode)
-            val refusjonOpphørt = vedtaksperiode.arbeidsgiver.harRefusjonOpphørt(vedtaksperiode.periode.endInclusive)
-
-            if (forlengelse && refusjonOpphørt) {
-                hendelse.info("Ville tidligere blitt kastet ut på grunn av refusjon: Refusjon er opphørt.")
-            }
 
             return when {
                 forlengelse && ferdig -> ferdigForlengelse
                 forlengelse && !ferdig -> uferdigForlengelse
                 !forlengelse && ferdig -> ferdigGap
-                !forlengelse && !ferdig -> uferdigGap
-                else -> hendelse.severe("Klarer ikke bestemme hvilken tilstand vi skal til")
+                else -> uferdigGap
             }
         }
     }
+
 
     private fun makstidForIkkeMottattSøknadTilstander(vedtaksperiode: Vedtaksperiode) =
         vedtaksperiode.periode.endInclusive
