@@ -342,12 +342,6 @@ class Person private constructor(
         }
     }
 
-    fun vedtaksperiodeReberegnet(hendelseskontekst: Hendelseskontekst) {
-        observers.forEach {
-            it.vedtaksperiodeReberegnet(hendelseskontekst)
-        }
-    }
-
     fun inntektsmeldingReplay(vedtaksperiodeId: UUID) {
         observers.forEach {
             it.inntektsmeldingReplay(fødselsnummer, vedtaksperiodeId)

@@ -11,7 +11,6 @@ import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 
@@ -25,7 +24,6 @@ internal class InfotrygdhistorikkEndretTest: AbstractEndToEndTest() {
         periodeTilGodkjenning()
         håndterUtbetalingshistorikk(1.vedtaksperiode, *utbetalinger.toTypedArray(), inntektshistorikk = inntektshistorikk)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
-        assertTrue(observatør.reberegnedeVedtaksperioder.contains(1.vedtaksperiode.id(ORGNUMMER)))
     }
 
     @Test
@@ -35,7 +33,6 @@ internal class InfotrygdhistorikkEndretTest: AbstractEndToEndTest() {
         håndterUtbetalingshistorikk(2.vedtaksperiode, *utbetalinger.toTypedArray(), inntektshistorikk = inntektshistorikk)
         håndterPåminnelse(1.vedtaksperiode, AVVENTER_GODKJENNING)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
-        assertTrue(observatør.reberegnedeVedtaksperioder.contains(1.vedtaksperiode.id(ORGNUMMER)))
     }
 
     @Test
@@ -43,7 +40,6 @@ internal class InfotrygdhistorikkEndretTest: AbstractEndToEndTest() {
         periodeTilGodkjenning(utbetalinger, inntektshistorikk)
         håndterUtbetalingshistorikk(1.vedtaksperiode)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
-        assertTrue(observatør.reberegnedeVedtaksperioder.contains(1.vedtaksperiode.id(ORGNUMMER)))
     }
 
     @Test

@@ -218,7 +218,6 @@ interface PersonObserver {
     fun vedtaksperiodePåminnet(hendelseskontekst: Hendelseskontekst, påminnelse: Påminnelse) {}
     fun vedtaksperiodeIkkePåminnet(hendelseskontekst: Hendelseskontekst, nåværendeTilstand: TilstandType) {}
     fun vedtaksperiodeEndret(hendelseskontekst: Hendelseskontekst, event: VedtaksperiodeEndretEvent) {}
-    fun vedtaksperiodeReberegnet(hendelseskontekst: Hendelseskontekst) {}
     fun vedtaksperiodeAvbrutt(hendelseskontekst: Hendelseskontekst, event: VedtaksperiodeAvbruttEvent) {}
     fun opprettOppgaveForSpeilsaksbehandlere(hendelseskontekst: Hendelseskontekst, event: OpprettOppgaveForSpeilsaksbehandlereEvent) {}
     fun opprettOppgave(hendelseskontekst: Hendelseskontekst, event: OpprettOppgaveEvent) {}

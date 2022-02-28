@@ -291,6 +291,5 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
             AVVENTER_HISTORIKK
         )
         assertNoWarnings(1.vedtaksperiode.filter())
-        assertTrue(observatør.reberegnedeVedtaksperioder.contains(1.vedtaksperiode.id(ORGNUMMER)))
     }
 }

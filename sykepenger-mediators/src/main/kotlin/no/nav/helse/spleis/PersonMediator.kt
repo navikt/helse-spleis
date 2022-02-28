@@ -215,13 +215,6 @@ internal class PersonMediator(
             )
         )
 
-    override fun vedtaksperiodeReberegnet(hendelseskontekst: Hendelseskontekst) {
-        queueMessage(
-            hendelseskontekst,
-            "vedtaksperiode_reberegnet", JsonMessage.newMessage()
-        )
-    }
-
     override fun vedtaksperiodeEndret(hendelseskontekst: Hendelseskontekst, event: PersonObserver.VedtaksperiodeEndretEvent) {
         queueMessage(
             hendelseskontekst,

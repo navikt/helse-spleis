@@ -574,10 +574,6 @@ internal class Vedtaksperiode private constructor(
         )
     }
 
-    private fun emitVedtaksperiodeReberegnet(hendelseskontekst: Hendelseskontekst) {
-        person.vedtaksperiodeReberegnet(hendelseskontekst)
-    }
-
     private fun emitVedtaksperiodeEndret(
         aktivitetslogg: IAktivitetslogg,
         previousState: Vedtaksperiodetilstand = tilstand
@@ -2044,7 +2040,6 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
             vedtaksperiode.håndterOverlappendeSøknad(søknad, AvventerHistorikk)
             if (søknad.hasErrorsOrWorse()) return
-            vedtaksperiode.emitVedtaksperiodeReberegnet(søknad.hendelseskontekst())
         }
 
         override fun håndter(
@@ -2088,7 +2083,6 @@ internal class Vedtaksperiode private constructor(
         ) {
             if (vedtaksperiode.utbetalinger.erHistorikkEndretSidenBeregning(infotrygdhistorikk)) return vedtaksperiode.tilstand(hendelse, AvventerHistorikk) {
                 hendelse.info("Infotrygdhistorikken har endret seg, reberegner periode")
-                vedtaksperiode.emitVedtaksperiodeReberegnet(hendelse.hendelseskontekst())
             }
 
             vedtaksperiode.trengerGodkjenning(hendelse)
