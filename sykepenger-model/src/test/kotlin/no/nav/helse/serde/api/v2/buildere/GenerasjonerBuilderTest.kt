@@ -1,12 +1,9 @@
 package no.nav.helse.serde.api.v2.buildere
 
 import no.nav.helse.*
-import no.nav.helse.hendelser.Inntektsmelding
-import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.til
 import no.nav.helse.person.arbeidsgiver
 import no.nav.helse.serde.api.builders.InntektshistorikkForAOrdningenBuilder
 import no.nav.helse.serde.api.v2.BeregnetPeriode
@@ -14,22 +11,23 @@ import no.nav.helse.serde.api.v2.Generasjon
 import no.nav.helse.serde.api.v2.Tidslinjeperiode
 import no.nav.helse.serde.api.v2.UberegnetPeriode
 import no.nav.helse.spleis.e2e.*
+import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
 
 internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
 
-    private val generasjoner get() = generasjoner()
+    private val generasjoner get() = generasjoner(ORGNUMMER)
 
-    private fun generasjoner(): List<Generasjon> {
+    private fun generasjoner(organisasjonsnummer: String): List<Generasjon> {
         val sammenligningsgrunnlagBuilder = OppsamletSammenligningsgrunnlagBuilder(person)
         val inntektshistorikkForAordningenBuilder = InntektshistorikkForAOrdningenBuilder(person)
         val vilkårsgrunnlagHistorikk = VilkårsgrunnlagBuilder(person, sammenligningsgrunnlagBuilder, inntektshistorikkForAordningenBuilder).build()
-        val generasjonerBuilder = GenerasjonerBuilder(søknadDTOer, UNG_PERSON_FNR_2018, vilkårsgrunnlagHistorikk, person.arbeidsgiver(ORGNUMMER))
+        val generasjonerBuilder = GenerasjonerBuilder(søknadDTOer, UNG_PERSON_FNR_2018, vilkårsgrunnlagHistorikk, person.arbeidsgiver(organisasjonsnummer))
         return generasjonerBuilder.build()
     }
 
@@ -626,6 +624,96 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         }
     }
 
+    @Test
+    fun `kun førstegangsbehandling har warnings fra vilkårsprøving`() {
+        val fom = 1.januar
+        val tom = 31.januar
+        val forlengelseFom = 1.februar
+        val forlengelseTom = 28.februar
+
+        håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent))
+        håndterSøknad(Sykdom(fom, tom, 100.prosent), sendtTilNAVEllerArbeidsgiver = fom.plusDays(1))
+        håndterInntektsmelding(
+            arbeidsgiverperioder = listOf(fom til fom.plusDays(15)),
+            refusjon = Inntektsmelding.Refusjon(beløp = 1000.månedlig, opphørsdato = null, endringerIRefusjon = emptyList()),
+            beregnetInntekt = 1000.månedlig
+        )
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
+                1.januar(2017) til 1.desember(2017) inntekter {
+                    ORGNUMMER inntekt 1000.månedlig
+                }
+            })
+        )
+        håndterYtelser(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, automatiskBehandling = false)
+
+        håndterSykmelding(Sykmeldingsperiode(forlengelseFom, forlengelseTom, 100.prosent))
+        håndterSøknad(Sykdom(forlengelseFom, forlengelseTom, 100.prosent), sendtTilNAVEllerArbeidsgiver = forlengelseTom)
+        håndterYtelser(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, automatiskBehandling = false)
+
+        assertEquals(1, generasjoner.size)
+
+        0.generasjon {
+            beregnetPeriode(0) er "GodkjentUtenUtbetaling" avType "UTBETALING" fra (1.februar til 28.februar) utenWarning "Perioden er avslått på grunn av at inntekt er under krav til minste sykepengegrunnlag"
+            beregnetPeriode(1) er "GodkjentUtenUtbetaling" avType "UTBETALING" fra (1.januar til 31.januar) medWarning "Perioden er avslått på grunn av at inntekt er under krav til minste sykepengegrunnlag"
+        }
+    }
+
+    @Test
+    fun `kun første arbeidsgiver har warnings fra vilkårsprøving`() {
+        val fom = 1.januar
+        val tom = 31.januar
+
+        håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(fom, tom, 100.prosent), sendtTilNAVEllerArbeidsgiver = fom.plusDays(1), orgnummer = a1)
+        håndterInntektsmelding(
+            arbeidsgiverperioder = listOf(fom til fom.plusDays(15)),
+            refusjon = Inntektsmelding.Refusjon(beløp = 1000.månedlig, opphørsdato = null, endringerIRefusjon = emptyList()),
+            beregnetInntekt = 1000.månedlig,
+            orgnummer = a1
+        )
+        håndterInntektsmelding(
+            arbeidsgiverperioder = listOf(fom til fom.plusDays(15)),
+            refusjon = Inntektsmelding.Refusjon(beløp = 1000.månedlig, opphørsdato = null, endringerIRefusjon = emptyList()),
+            beregnetInntekt = 1000.månedlig,
+            orgnummer = a2
+        )
+
+        håndterSøknad(Sykdom(fom, tom, 100.prosent), orgnummer = a2)
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode,
+            inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
+                1.januar(2017) til 1.desember(2017) inntekter {
+                    a1 inntekt 1000.månedlig
+                    a2 inntekt 1000.månedlig
+                }
+            }),
+            orgnummer = a1
+        )
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, automatiskBehandling = false, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, automatiskBehandling = false, orgnummer = a2)
+
+        assertEquals(1, generasjoner(a1).size)
+        assertEquals(1, generasjoner(a2).size)
+
+        0.generasjon(a1) {
+            beregnetPeriode(0) er "GodkjentUtenUtbetaling" avType "UTBETALING" fra (1.januar til 31.januar) medWarning "Perioden er avslått på grunn av at inntekt er under krav til minste sykepengegrunnlag"
+        }
+        0.generasjon(a2) {
+            beregnetPeriode(0) er "GodkjentUtenUtbetaling" avType "UTBETALING" fra (1.januar til 31.januar) utenWarning  "Perioden er avslått på grunn av at inntekt er under krav til minste sykepengegrunnlag"
+        }
+    }
+
     private fun BeregnetPeriode.assertAldersvilkår(expectedOppfylt: Boolean, expectedAlderSisteSykedag: Int) {
         assertEquals(expectedOppfylt, periodevilkår.alder.oppfylt)
         assertEquals(expectedAlderSisteSykedag, periodevilkår.alder.alderSisteSykedag)
@@ -657,9 +745,9 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         assertEquals(expectedOppfylt, periodevilkår.søknadsfrist?.oppfylt)
     }
 
-    private fun Int.generasjon(assertBlock: Generasjon.() -> Unit) {
+    private fun Int.generasjon(organisasjonsnummer: String = ORGNUMMER, assertBlock: Generasjon.() -> Unit) {
         require(this >= 0) { "Kan ikke være et negativt tall!" }
-        generasjoner[this].run(assertBlock)
+        generasjoner(organisasjonsnummer)[this].run(assertBlock)
     }
 
     private infix fun <T : Tidslinjeperiode> T.medAntallDager(antall: Int): T {
@@ -685,6 +773,16 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
     private infix fun <T : Tidslinjeperiode> T.fra(periode: Periode): T {
         assertEquals(periode.start, this.fom)
         assertEquals(periode.endInclusive, this.tom)
+        return this
+    }
+
+    private infix fun BeregnetPeriode.medWarning(warning: String): BeregnetPeriode {
+        assertTrue(this.aktivitetslogg.filter { it.alvorlighetsgrad == "W" }.any { it.melding == warning })
+        return this
+    }
+
+    private infix fun BeregnetPeriode.utenWarning(warning: String): BeregnetPeriode {
+        assertFalse(this.aktivitetslogg.filter { it.alvorlighetsgrad == "W" }.any { it.melding == warning })
         return this
     }
 

@@ -5,10 +5,8 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Utdanning
 import no.nav.helse.hendelser.til
-import no.nav.helse.inspectors.GrunnlagsdataInspektør
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.Vedtaksperiode
-import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.serde.api.AktivitetDTO
 import no.nav.helse.spleis.e2e.*
 import no.nav.helse.februar
@@ -16,8 +14,8 @@ import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import java.util.*
 
 internal class PeriodeVarslerBuilderTest: AbstractEndToEndTest() {
 
@@ -31,8 +29,8 @@ internal class PeriodeVarslerBuilderTest: AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
 
-        assertEquals(1, aktiviteter(1.vedtaksperiode).size)
-        assertEquals(1, aktiviteter(2.vedtaksperiode).size)
+        assertTrue(aktiviteter(1.vedtaksperiode).any { it.alvorlighetsgrad == "W" && it.melding == "Vurder lovvalg og medlemskap" })
+        assertEquals(0, aktiviteter(2.vedtaksperiode).size)
     }
 
     @Test
@@ -76,23 +74,14 @@ internal class PeriodeVarslerBuilderTest: AbstractEndToEndTest() {
 
         nyttVedtak(4.mars, 31.mars)
 
-        assertEquals(1, aktiviteter(1.vedtaksperiode).size)
-        assertEquals(1, aktiviteter(2.vedtaksperiode).size)
+        assertTrue(aktiviteter(1.vedtaksperiode).any { it.alvorlighetsgrad == "W" && it.melding == "Vurder lovvalg og medlemskap" })
+        assertEquals(0, aktiviteter(2.vedtaksperiode).size)
         assertEquals(0, aktiviteter(3.vedtaksperiode).size)
     }
 
     private fun aktiviteter(vedtaksperiodeId: IdInnhenter): List<AktivitetDTO> {
         val vedtaksperiode = inspektør.vedtaksperioder(vedtaksperiodeId)
-        val vilkårMeldingsreferanse = meldingsreferanseId(vedtaksperiodeId)
         val aktivitetsloggForegående = Vedtaksperiode.aktivitetsloggMedForegåendeUtenUtbetaling(vedtaksperiode)
-        val aktivitetsloggVilkårsgrunnlag = Vedtaksperiode.hentVilkårsgrunnlagAktiviteter(vedtaksperiode)
-        return VedtaksperiodeVarslerBuilder(vedtaksperiodeId.id(ORGNUMMER), aktivitetsloggForegående, aktivitetsloggVilkårsgrunnlag, vilkårMeldingsreferanse).build()
-    }
-
-    private fun meldingsreferanseId(vedtaksperiode: IdInnhenter): UUID? {
-        return inspektør.vilkårsgrunnlag(vedtaksperiode)
-            ?.let { it as? VilkårsgrunnlagHistorikk.Grunnlagsdata }
-            ?.let { GrunnlagsdataInspektør(it) }
-            ?.meldingsreferanseId
+        return PeriodeVarslerBuilder(aktivitetsloggForegående).build()
     }
 }

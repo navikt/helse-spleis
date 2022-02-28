@@ -17,7 +17,7 @@ import no.nav.helse.serde.api.v2.Tidslinjeberegninger.ITidslinjeberegning
 import no.nav.helse.serde.api.v2.buildere.BeregningId
 import no.nav.helse.serde.api.v2.buildere.IVilkårsgrunnlagHistorikk
 import no.nav.helse.serde.api.v2.buildere.InntektsmeldingId
-import no.nav.helse.serde.api.v2.buildere.VedtaksperiodeVarslerBuilder
+import no.nav.helse.serde.api.v2.buildere.PeriodeVarslerBuilder
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -154,13 +154,8 @@ internal class Tidslinjeperioder(
         refusjon: Refusjon?
     ): BeregnetPeriode {
         val sammenslåttTidslinje = tidslinjeberegning.sammenslåttTidslinje(utbetaling.utbetalingstidslinje, periode.fom, periode.tom)
-        val meldingsreferanseId =
-            vilkårsgrunnlagHistorikk.spleisgrunnlag(tidslinjeberegning.vilkårsgrunnlagshistorikkId, periode.skjæringstidspunkt)?.meldingsreferanseId
-        val varsler = VedtaksperiodeVarslerBuilder(
-            periode.vedtaksperiodeId,
-            periode.aktivitetsloggForPeriode,
-            periode.aktivitetsloggForVilkårsprøving,
-            meldingsreferanseId
+        val varsler = PeriodeVarslerBuilder(
+            periode.aktivitetsloggForPeriode
         ).build()
         return BeregnetPeriode(
             vedtaksperiodeId = periode.vedtaksperiodeId,
@@ -231,8 +226,7 @@ internal class IVedtaksperiode(
     val oppdatert: LocalDateTime,
     val tilstand: Vedtaksperiode.Vedtaksperiodetilstand,
     val skjæringstidspunkt: LocalDate,
-    val aktivitetsloggForPeriode: Aktivitetslogg,
-    val aktivitetsloggForVilkårsprøving: Aktivitetslogg
+    val aktivitetsloggForPeriode: Aktivitetslogg
 ) {
     val utbetalinger = utbetalinger.toMutableList()
 

@@ -1108,7 +1108,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Forlengelse får med warnings fra vilkårsprøving gjort i forrige periode`() {
+    fun `Forlengelse får ikke med warnings fra vilkårsprøving gjort i forrige periode`() {
         val fom = 1.januar
         val tom = 31.januar
         val forlengelseFom = 1.februar
@@ -1138,12 +1138,15 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, automatiskBehandling = false)
 
-        val serialisertVedtaksperiode = serializePersonForSpeil(person).arbeidsgivere.single().vedtaksperioder.last() as VedtaksperiodeDTO
-        assertTrue(serialisertVedtaksperiode.aktivitetslogg.any { it.melding == "Perioden er avslått på grunn av at inntekt er under krav til minste sykepengegrunnlag" })
+        val vedtaksperioder = serializePersonForSpeil(person)
+            .arbeidsgivere.flatMap { it.vedtaksperioder }
+        assertEquals(2, vedtaksperioder.size)
+        assertTrue((vedtaksperioder.first() as VedtaksperiodeDTO).aktivitetslogg.any { it.melding == "Perioden er avslått på grunn av at inntekt er under krav til minste sykepengegrunnlag" })
+        assertFalse((vedtaksperioder.last() as VedtaksperiodeDTO).aktivitetslogg.any { it.melding == "Perioden er avslått på grunn av at inntekt er under krav til minste sykepengegrunnlag" })
     }
 
     @Test
-    fun `Vedtaksperioder fra flere arbeidsgivere får samme vilkårsgrunnlag-warnings`() {
+    fun `Vedtaksperioder fra flere arbeidsgivere får ikke samme vilkårsgrunnlag-warnings`() {
         val fom = 1.januar
         val tom = 31.januar
 
@@ -1187,7 +1190,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
 
         assertEquals(2, vedtaksperioder.size)
         assertTrue((vedtaksperioder.first() as VedtaksperiodeDTO).aktivitetslogg.any { it.melding == "Perioden er avslått på grunn av at inntekt er under krav til minste sykepengegrunnlag" })
-        assertTrue((vedtaksperioder.last() as VedtaksperiodeDTO).aktivitetslogg.any { it.melding == "Perioden er avslått på grunn av at inntekt er under krav til minste sykepengegrunnlag" })
+        assertFalse((vedtaksperioder.last() as VedtaksperiodeDTO).aktivitetslogg.any { it.melding == "Perioden er avslått på grunn av at inntekt er under krav til minste sykepengegrunnlag" })
     }
 
     @Test

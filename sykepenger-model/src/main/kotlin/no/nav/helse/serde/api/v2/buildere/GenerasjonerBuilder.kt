@@ -79,7 +79,6 @@ internal class GenerasjonerBuilder(
         val sykdomstidslinje = VedtaksperiodeSykdomstidslinjeBuilder(vedtaksperiode).build()
         val utbetalinger = UtbetalingerBuilder(vedtaksperiode).build()
         val aktivetsloggForPeriode = Vedtaksperiode.aktivitetsloggMedForegåendeUtenUtbetaling(vedtaksperiode)
-        val aktivitetsloggForVilkårsprøving = Vedtaksperiode.hentVilkårsgrunnlagAktiviteter(vedtaksperiode)
         vedtaksperiodeAkkumulator.leggTil(
             IVedtaksperiode(
                 id,
@@ -94,8 +93,7 @@ internal class GenerasjonerBuilder(
                 tilstand = tilstand,
                 oppdatert = oppdatert,
                 skjæringstidspunkt = skjæringstidspunkt,
-                aktivitetsloggForPeriode = aktivetsloggForPeriode,
-                aktivitetsloggForVilkårsprøving = aktivitetsloggForVilkårsprøving
+                aktivitetsloggForPeriode = aktivetsloggForPeriode
             )
         )
     }

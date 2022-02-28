@@ -54,9 +54,7 @@ internal class VedtaksperiodeBuilder(
         ) || (tilstand.type == TilstandType.AVSLUTTET_UTEN_UTBETALING && beregningIder.isNotEmpty())
     private val grunnlagsdataBuilder = dataForVilkårsvurdering?.let { GrunnlagsdataBuilder(skjæringstidspunkt, it) }
 
-    private val warnings =
-        (hentWarnings(vedtaksperiode) + (grunnlagsdataBuilder?.meldingsreferanseId?.let { hentVilkårsgrunnlagWarnings(vedtaksperiode, id, it) }
-            ?: emptyList())).distinctBy { it.melding }
+    private val warnings = hentWarningsMedForegåendeUtenUtbetaling(vedtaksperiode)
 
     private var vedtaksperiodeUtbetalingstidslinjeperiode = LocalDate.MIN til LocalDate.MIN
     private var inUtbetaling = false
@@ -183,7 +181,7 @@ internal class VedtaksperiodeBuilder(
         return søknadSendtMåned < senesteMuligeSykedag.plusDays(1)
     }
 
-    private fun hentWarnings(vedtaksperiode: Vedtaksperiode): List<AktivitetDTO> {
+    private fun hentWarningsMedForegåendeUtenUtbetaling(vedtaksperiode: Vedtaksperiode): List<AktivitetDTO> {
         val aktiviteter = mutableListOf<AktivitetDTO>()
         Vedtaksperiode.aktivitetsloggMedForegåendeUtenUtbetaling(vedtaksperiode)
             .accept(object : AktivitetsloggVisitor {
@@ -201,26 +199,6 @@ internal class VedtaksperiodeBuilder(
                         }
                 }
             })
-        return aktiviteter.distinctBy { it.melding }
-    }
-
-    private fun hentVilkårsgrunnlagWarnings(vedtaksperiode: Vedtaksperiode, vedtaksperiodeId: UUID, vilkårsgrunnlagId: UUID): List<AktivitetDTO> {
-        val aktiviteter = mutableListOf<AktivitetDTO>()
-        Vedtaksperiode.hentVilkårsgrunnlagAktiviteter(vedtaksperiode).accept(object : AktivitetsloggVisitor {
-            override fun visitWarn(
-                kontekster: List<SpesifikkKontekst>,
-                aktivitet: Aktivitetslogg.Aktivitet.Warn,
-                melding: String,
-                tidsstempel: String
-            ) {
-                if (kontekster.filter { it.kontekstType == "Vilkårsgrunnlag" }
-                        .mapNotNull { it.kontekstMap["meldingsreferanseId"] }
-                        .map(UUID::fromString)
-                        .any { it == vilkårsgrunnlagId }) {
-                    aktiviteter.add(AktivitetDTO(vedtaksperiodeId, "W", melding, tidsstempel))
-                }
-            }
-        })
         return aktiviteter.distinctBy { it.melding }
     }
 
