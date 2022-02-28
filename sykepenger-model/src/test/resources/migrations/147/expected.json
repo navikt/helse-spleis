@@ -1,0 +1,25 @@
+{
+    "vilkårsgrunnlagHistorikk": [
+        {
+            "vilkårsgrunnlag": [
+                {
+                    "skjæringstidspunkt": "2018-01-01",
+                    "type": "Vilkårsprøving",
+                    "meldingsreferanseId": "69010425-41d6-4f9c-8776-11269f0632ba",
+                    "opptjening": {
+                        "arbeidsforhold": [
+                            {
+                                "orgnummer": "987654321",
+                                "ansattFom": "1970-01-01",
+                                "ansattTom": null
+                            }
+                        ],
+                        "opptjeningFom": "1970-01-01",
+                        "opptjeningTom": "2018-01-01"
+                    }
+                }
+            ]
+        }
+    ],
+    "skjemaVersjon": 147
+}
