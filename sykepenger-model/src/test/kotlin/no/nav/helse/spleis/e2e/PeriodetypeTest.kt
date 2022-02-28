@@ -1,11 +1,8 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.*
-import no.nav.helse.hendelser.Inntektsvurdering
-import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.til
 import no.nav.helse.person.Periodetype.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
@@ -112,6 +109,24 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
         håndterUtbetalt()
         assertEquals(FØRSTEGANGSBEHANDLING, inspektør.periodetype(1.vedtaksperiode))
         assertEquals(FORLENGELSE, inspektør.periodetype(2.vedtaksperiode))
+    }
+
+    @Test
+    fun `periodetype for forlengelse dersom førstegangsbehandling består kun av ferie`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 10.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(11.januar, 21.januar, 100.prosent))
+        håndterSøknad(Sykdom(11.januar, 21.januar, 100.prosent), Søknad.Søknadsperiode.Ferie(11.januar, 21.januar))
+        håndterSykmelding(Sykmeldingsperiode(22.januar, 31.januar, 100.prosent))
+        assertEquals(FØRSTEGANGSBEHANDLING, inspektør.periodetype(1.vedtaksperiode))
+        assertEquals(FØRSTEGANGSBEHANDLING, inspektør.periodetype(2.vedtaksperiode))
+        assertForventetFeil(
+            nå = {
+                assertEquals(FØRSTEGANGSBEHANDLING, inspektør.periodetype(3.vedtaksperiode))
+            },
+            ønsket = {
+                assertEquals(FORLENGELSE, inspektør.periodetype(3.vedtaksperiode))
+            }
+        )
     }
 
     @Test
