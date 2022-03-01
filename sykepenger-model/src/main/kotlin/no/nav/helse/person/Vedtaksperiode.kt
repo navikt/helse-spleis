@@ -1,14 +1,11 @@
 package no.nav.helse.person
 
 import net.logstash.logback.argument.StructuredArguments.keyValue
-import no.nav.helse.Grunnbeløp
-import no.nav.helse.Toggle
+import no.nav.helse.*
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Validation.Companion.validation
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
-import no.nav.helse.mai
-import no.nav.helse.memoized
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.arbeidsavklaringspenger
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.arbeidsforhold
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.dagpenger
@@ -1366,6 +1363,12 @@ internal class Vedtaksperiode private constructor(
             hendelse.info("Forespør sykdoms- og inntektshistorikk")
             vedtaksperiode.utbetalinger.forkast(hendelse)
             vedtaksperiode.trengerYtelser(hendelse)
+            vedtaksperiode.finnArbeidsgiverperiode()?.firstOrNull()?.also {
+                if (it < 1.oktober(2021)) {
+                    hendelse.info("Arbeidsgiverperioden er beregnet til å starte tidligere enn 1. oktober 2021." +
+                        "Denne perioden ville ikke kunne bli utbetalt dersom vi fjerner konverteringen av Utbetaling til Sykdomstidslinje")
+                }
+            }
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
