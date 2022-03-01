@@ -21,10 +21,10 @@ spec:
   preStopHookPath: /stop
   resources:
     limits:
-      cpu: 500m
+      cpu: 4000m
       memory: 5Gi
     requests:
-      cpu: 50m
+      cpu: 1000m
       memory: 1Gi
   replicas:
     min: 6
