@@ -24,7 +24,8 @@ import no.nav.helse.person.ForkastetÅrsak.IKKE_STØTTET
 import no.nav.helse.person.ForlengelseFraInfotrygd.JA
 import no.nav.helse.person.ForlengelseFraInfotrygd.NEI
 import no.nav.helse.person.InntektsmeldingInfo.Companion.ider
-import no.nav.helse.person.Periodetype.*
+import no.nav.helse.person.Periodetype.INFOTRYGDFORLENGELSE
+import no.nav.helse.person.Periodetype.OVERGANG_FRA_IT
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.builders.UtbetaltEventBuilder
 import no.nav.helse.person.builders.VedtakFattetBuilder
@@ -514,7 +515,6 @@ internal class Vedtaksperiode private constructor(
             skjæringstidspunkt,
             opptjening,
             person.antallArbeidsgivereMedRelevantArbeidsforhold(skjæringstidspunkt),
-            periodetype,
             jurist()
         )
         person.lagreVilkårsgrunnlag(skjæringstidspunkt, vilkårsgrunnlag)
@@ -691,7 +691,6 @@ internal class Vedtaksperiode private constructor(
                 }
             }
             ingenUtbetaling -> {
-                loggHvisForlengelse(hendelse)
                 tilstand(hendelse, AvventerGodkjenning) {
                     if (kunArbeidsgiverdager)
                         hendelse.info("""Saken inneholder ingen utbetalingsdager for Nav, men inneholder andre warnings""")
@@ -700,7 +699,6 @@ internal class Vedtaksperiode private constructor(
                 }
             }
             else -> {
-                loggHvisForlengelse(hendelse)
                 tilstand(hendelse, AvventerSimulering) {
                     hendelse.info("""Saken oppfyller krav for behandling, settes til "Avventer simulering"""")
                 }
@@ -743,13 +741,11 @@ internal class Vedtaksperiode private constructor(
                 }
             }
             !utbetalinger.harUtbetalinger() -> {
-                loggHvisForlengelse(hendelse)
                 tilstand(hendelse, AvventerGodkjenningRevurdering) {
                     hendelse.info("""Saken oppfyller krav for behandling, settes til "Avventer godkjenning" fordi ingenting skal utbetales""")
                 }
             }
             else -> {
-                loggHvisForlengelse(hendelse)
                 tilstand(hendelse, AvventerSimuleringRevurdering) {
                     hendelse.info("""Saken oppfyller krav for behandling, settes til "Avventer simulering"""")
                 }
@@ -768,14 +764,6 @@ internal class Vedtaksperiode private constructor(
     private fun List<Vedtaksperiode>.erKlareTilGodkjenning() = this
         .filter { this@Vedtaksperiode.periode.overlapperMed(it.periode) }
         .all { it.tilstand == AvventerArbeidsgivereRevurdering }
-
-    private fun loggHvisForlengelse(logg: IAktivitetslogg) {
-        periodetype.also { periodetype ->
-            if (periodetype != FØRSTEGANGSBEHANDLING) {
-                logg.info("Perioden er en forlengelse, av type $periodetype")
-            }
-        }
-    }
 
     private fun sendUtbetaltEvent(hendelse: IAktivitetslogg) {
         val vilkårsgrunnlag = requireNotNull(person.vilkårsgrunnlagFor(skjæringstidspunkt)) {
@@ -2077,11 +2065,10 @@ internal class Vedtaksperiode private constructor(
 
     private fun trengerGodkjenning(hendelse: IAktivitetslogg) {
         val aktiveVedtaksperioder = person.nåværendeVedtaksperioder(KLAR_TIL_BEHANDLING).map {
-            val periodetype = it.periodetype
             Aktivitetslogg.Aktivitet.AktivVedtaksperiode(
                 it.arbeidsgiver.organisasjonsnummer(),
                 it.id,
-                periodetype
+                it.periodetype
             )
         }
         utbetalinger.godkjenning(

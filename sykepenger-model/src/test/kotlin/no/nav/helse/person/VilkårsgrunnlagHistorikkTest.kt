@@ -62,7 +62,6 @@ internal class VilkårsgrunnlagHistorikkTest {
             1.januar,
             Opptjening.opptjening(arbeidsforholdFraHistorikk, 1.januar, MaskinellJurist()),
             1,
-            Periodetype.FØRSTEGANGSBEHANDLING,
             MaskinellJurist()
         )
         historikk.lagre(1.januar, vilkårsgrunnlag)
@@ -94,7 +93,6 @@ internal class VilkårsgrunnlagHistorikkTest {
             1.januar,
             Opptjening.opptjening(arbeidsforholdFraHistorikk, 1.januar, jurist),
             1,
-            Periodetype.FØRSTEGANGSBEHANDLING,
             jurist
         )
         SubsumsjonInspektør(jurist).assertVurdert(paragraf = PARAGRAF_8_2, ledd = 1.ledd, versjon = 12.juni(2020))
@@ -133,7 +131,6 @@ internal class VilkårsgrunnlagHistorikkTest {
             1.januar,
             Opptjening.opptjening(arbeidsforholdFraHistorikk, 1.januar, MaskinellJurist()),
             1,
-            Periodetype.FØRSTEGANGSBEHANDLING,
             MaskinellJurist()
         )
         vilkårsgrunnlag2.valider(
@@ -142,7 +139,6 @@ internal class VilkårsgrunnlagHistorikkTest {
             1.januar,
             Opptjening.opptjening(arbeidsforholdFraHistorikk, 1.januar, MaskinellJurist()),
             1,
-            Periodetype.FØRSTEGANGSBEHANDLING,
             MaskinellJurist()
         )
 
@@ -180,7 +176,6 @@ internal class VilkårsgrunnlagHistorikkTest {
             1.januar,
             Opptjening.opptjening(arbeidsforholdFraHistorikk, 1.januar, MaskinellJurist()),
             1,
-            Periodetype.FØRSTEGANGSBEHANDLING,
             MaskinellJurist()
         )
         historikk.lagre(1.januar, vilkårsgrunnlag)
@@ -224,7 +219,6 @@ internal class VilkårsgrunnlagHistorikkTest {
             1.januar,
             Opptjening.opptjening(arbeidsforholdFraHistorikk, 1.januar, MaskinellJurist()),
             1,
-            Periodetype.FØRSTEGANGSBEHANDLING,
             MaskinellJurist()
         )
 
@@ -260,7 +254,6 @@ internal class VilkårsgrunnlagHistorikkTest {
             1.januar,
             Opptjening.opptjening(arbeidsforholdFraHistorikk, 1.januar, MaskinellJurist()),
             1,
-            Periodetype.FØRSTEGANGSBEHANDLING,
             MaskinellJurist()
         )
         vilkårsgrunnlagHistorikk.lagre(1.januar, vilkårsgrunnlag)
@@ -290,7 +283,6 @@ internal class VilkårsgrunnlagHistorikkTest {
             1.januar,
             Opptjening.opptjening(arbeidsforholdFraHistorikk, 1.januar, MaskinellJurist()),
             1,
-            Periodetype.FØRSTEGANGSBEHANDLING,
             MaskinellJurist()
         )
         vilkårsgrunnlagHistorikk.lagre(1.januar, vilkårsgrunnlag)
@@ -420,7 +412,6 @@ internal class VilkårsgrunnlagHistorikkTest {
             1.januar,
             Opptjening.opptjening(arbeidsforholdFraHistorikk, 1.januar, MaskinellJurist()),
             1,
-            Periodetype.FØRSTEGANGSBEHANDLING,
             MaskinellJurist()
         )
         val vilkårsgrunnlag2 = Vilkårsgrunnlag(
@@ -441,7 +432,6 @@ internal class VilkårsgrunnlagHistorikkTest {
             1.januar,
             Opptjening.opptjening(arbeidsforholdFraHistorikk, 1.januar, MaskinellJurist()),
             1,
-            Periodetype.FØRSTEGANGSBEHANDLING,
             MaskinellJurist()
         )
         vilkårsgrunnlagHistorikk.lagre(10.januar, vilkårsgrunnlag1)
@@ -472,7 +462,6 @@ internal class VilkårsgrunnlagHistorikkTest {
             1.januar,
             Opptjening.opptjening(arbeidsforholdFraHistorikk, 1.januar, MaskinellJurist()),
             1,
-            Periodetype.FØRSTEGANGSBEHANDLING,
             MaskinellJurist()
         )
         val vilkårsgrunnlag2 = Vilkårsgrunnlag(
@@ -493,7 +482,6 @@ internal class VilkårsgrunnlagHistorikkTest {
             1.januar,
             Opptjening.opptjening(arbeidsforholdFraHistorikk, 1.januar, MaskinellJurist()),
             1,
-            Periodetype.FØRSTEGANGSBEHANDLING,
             MaskinellJurist()
         )
         vilkårsgrunnlagHistorikk.lagre(10.januar, vilkårsgrunnlag1)
@@ -524,7 +512,6 @@ internal class VilkårsgrunnlagHistorikkTest {
             1.januar,
             Opptjening.opptjening(arbeidsforholdFraHistorikk, 1.januar, MaskinellJurist()),
             1,
-            Periodetype.FØRSTEGANGSBEHANDLING,
             MaskinellJurist()
         )
         vilkårsgrunnlagHistorikk.lagre(1.januar, vilkårsgrunnlag)
@@ -564,7 +551,6 @@ internal class VilkårsgrunnlagHistorikkTest {
             1.januar,
             Opptjening.opptjening(arbeidsforholdFraHistorikk, 1.januar, MaskinellJurist()),
             1,
-            Periodetype.FØRSTEGANGSBEHANDLING,
             MaskinellJurist()
         )
         vilkårsgrunnlagHistorikk.lagre(1.januar, vilkårsgrunnlag)
@@ -604,7 +590,6 @@ internal class VilkårsgrunnlagHistorikkTest {
             1.januar,
             Opptjening.opptjening(arbeidsforholdFraHistorikk, 1.januar, MaskinellJurist()),
             1,
-            Periodetype.FØRSTEGANGSBEHANDLING,
             MaskinellJurist()
         )
         vilkårsgrunnlagHistorikk.lagre(1.januar, vilkårsgrunnlag)

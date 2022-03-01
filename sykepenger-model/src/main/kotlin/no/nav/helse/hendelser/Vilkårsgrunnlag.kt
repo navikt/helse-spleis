@@ -37,7 +37,6 @@ class Vilkårsgrunnlag(
         skjæringstidspunkt: LocalDate,
         opptjening: Opptjening,
         antallArbeidsgivereFraAareg: Int,
-        periodetype: Periodetype,
         subsumsjonObserver: SubsumsjonObserver
     ): IAktivitetslogg {
         if (grunnlagForSykepengegrunnlag.inntektsopplysningPerArbeidsgiver().values.all { it is Inntektshistorikk.SkattComposite }) {
@@ -58,7 +57,7 @@ class Vilkårsgrunnlag(
         } else {
             opptjeningvurdering.valider(this, skjæringstidspunkt, subsumsjonObserver)
         }
-        val medlemskapsvurderingOk = medlemskapsvurdering.valider(this, periodetype)
+        val medlemskapsvurderingOk = medlemskapsvurdering.valider(this)
         val minimumInntektvurderingOk = validerMinimumInntekt(this, fødselsnummer.somFødselsnummer(), skjæringstidspunkt, grunnlagForSykepengegrunnlag, subsumsjonObserver)
 
         grunnlagsdata = VilkårsgrunnlagHistorikk.Grunnlagsdata(

@@ -126,7 +126,6 @@ internal class VilkårsgrunnlagTest : AbstractPersonTest() {
             grunnlagForSykepengegrunnlag = sykepengegrunnlag(),
             sammenligningsgrunnlag = sammenligningsgrunnlag(skjæringstidspunkt = 31.januar),
             skjæringstidspunkt = 31.januar,
-            antallArbeidsgivereFraAareg = 1,
             opptjening = Opptjening.opptjening(
                 arbeidsforhold = listOf(
                     Opptjening.ArbeidsgiverOpptjeningsgrunnlag(a1, listOf(Arbeidsforholdhistorikk.Arbeidsforhold(1.januar, 14.januar, false))),
@@ -135,7 +134,7 @@ internal class VilkårsgrunnlagTest : AbstractPersonTest() {
                 skjæringstidspunkt = 31.januar,
                 subsumsjonObserver = MaskinellJurist()
             ),
-            periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
+            antallArbeidsgivereFraAareg = 1,
             subsumsjonObserver = MaskinellJurist()
         )
 
