@@ -8,11 +8,7 @@ import no.nav.helse.person.Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.serde.PersonData
 import no.nav.helse.serde.PersonData.InfotrygdhistorikkElementData.Companion.tilModellObjekt
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.testhelpers.S
-import no.nav.helse.testhelpers.opphold
-import no.nav.helse.testhelpers.resetSeed
-import no.nav.helse.testhelpers.tidslinjeOf
+import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.Inntekter
@@ -405,53 +401,6 @@ internal class InfotrygdhistorikkTest {
     }
 
     @Test
-    fun `historikk for - tom historikk`() {
-        assertEquals(0, historikk.historikkFor("ornr", Sykdomstidslinje()).count())
-        assertEquals(1, historikk.historikkFor("ornr", 1.S).count())
-    }
-
-    @Test
-    fun `historikk for - tom tidslinje`() {
-        historikk.oppdaterHistorikk(historikkelement(listOf(
-            ArbeidsgiverUtbetalingsperiode("ag1", 1.januar,  10.januar, 100.prosent, 1500.daglig),
-            ArbeidsgiverUtbetalingsperiode("ag2", 10.januar,  20.januar, 100.prosent, 1500.daglig),
-            Friperiode(20.januar,  31.januar)
-        )))
-        assertEquals(0, historikk.historikkFor("ag1", Sykdomstidslinje()).count())
-        assertEquals(0, historikk.historikkFor("ag3", Sykdomstidslinje()).count())
-    }
-
-    @Test
-    fun `historikk for`() {
-        historikk.oppdaterHistorikk(historikkelement(listOf(
-            ArbeidsgiverUtbetalingsperiode("ag1", 1.januar,  10.januar, 100.prosent, 1500.daglig),
-            ArbeidsgiverUtbetalingsperiode("ag2", 10.januar,  20.januar, 100.prosent, 1500.daglig),
-            Friperiode(20.januar,  31.januar)
-        )))
-        assertEquals(1.januar til 1.januar, historikk.historikkFor("ag1", resetSeed { 1.S }).periode())
-        assertEquals(1.januar til 31.januar, historikk.historikkFor("ag1", resetSeed { 20.opphold + 11.S }).periode())
-        assertEquals(20.januar til 31.januar, historikk.historikkFor("ag3", resetSeed { 20.opphold + 11.S }).periode())
-    }
-
-    @Test
-    fun `har betalt - tom historikk`() {
-        assertFalse(historikk.harBetalt("ag1", 1.januar))
-    }
-
-    @Test
-    fun `har betalt`() {
-        historikk.oppdaterHistorikk(historikkelement(listOf(
-            ArbeidsgiverUtbetalingsperiode("ag1", 1.januar,  10.januar, 100.prosent, 1500.daglig),
-            ArbeidsgiverUtbetalingsperiode("ag2", 10.januar,  20.januar, 100.prosent, 1500.daglig),
-            Friperiode(20.januar,  31.januar)
-        )))
-        assertTrue(historikk.harBetalt("ag1", 1.januar))
-        assertFalse(historikk.harBetalt("ag2", 1.januar))
-        assertTrue(historikk.harBetalt("ag2", 10.januar))
-        assertFalse(historikk.harBetalt("ag1", 20.januar))
-    }
-
-    @Test
     fun skjæringstidspunkt() {
         historikk.oppdaterHistorikk(historikkelement(listOf(
             ArbeidsgiverUtbetalingsperiode("ag1", 5.januar,  10.januar, 100.prosent, 25000.månedlig),
@@ -462,6 +411,36 @@ internal class InfotrygdhistorikkTest {
         )))
         assertEquals(5.januar, historikk.skjæringstidspunkt(5.januar til 31.januar, emptyList()))
         assertEquals(1.januar, historikk.skjæringstidspunkt(1.januar til 31.januar, listOf(2.S, 3.S)))
+    }
+
+    @Test
+    fun `skjæringstidspunkt med låst periode`() {
+        val sykdomstidslinje = 28.S + 3.A + 16.S
+        sykdomstidslinje.lås(1.januar til 31.januar)
+        historikk.oppdaterHistorikk(historikkelement(listOf(
+            ArbeidsgiverUtbetalingsperiode("ag1", 29.januar,  31.januar, 100.prosent, 25000.månedlig)
+        )))
+        assertEquals(1.januar, historikk.skjæringstidspunkt(1.februar til 16.februar, listOf(sykdomstidslinje)))
+    }
+
+    @Test
+    fun `skjæringstidspunkt for orgnr med låst periode`() {
+        val sykdomstidslinje = 28.S + 3.A + 16.S
+        sykdomstidslinje.lås(1.januar til 31.januar)
+        historikk.oppdaterHistorikk(historikkelement(listOf(
+            ArbeidsgiverUtbetalingsperiode("ag1", 29.januar,  31.januar, 100.prosent, 25000.månedlig)
+        )))
+        assertEquals(1.januar, historikk.skjæringstidspunkt("ag1", 1.februar til 16.februar, sykdomstidslinje))
+    }
+
+    @Test
+    fun `skjæringstidspunkter med låst periode`() {
+        val sykdomstidslinje = 28.S + 3.A + 16.S
+        sykdomstidslinje.lås(1.januar til 31.januar)
+        historikk.oppdaterHistorikk(historikkelement(listOf(
+            ArbeidsgiverUtbetalingsperiode("ag1", 29.januar,  31.januar, 100.prosent, 25000.månedlig)
+        )))
+        assertEquals(listOf(1.januar), historikk.skjæringstidspunkter(listOf(sykdomstidslinje)))
     }
 
     @Test

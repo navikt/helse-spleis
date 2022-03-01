@@ -342,7 +342,7 @@ internal class Vedtaksperiode private constructor(
     private fun skalHaWarningForFlereArbeidsforholdUtenSykdomEllerUlikStartdato(
         vilkårsgrunnlag: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement
     ) =
-        arbeidsgiver.erFørstegangsbehandling(periode, skjæringstidspunkt)
+        arbeidsgiver.erFørstegangsbehandling(periode)
             && (flereArbeidsforholdUtenSykdom(vilkårsgrunnlag) || flereArbeidsforholdUlikStartdato())
 
     private fun flereArbeidsforholdUtenSykdom(vilkårsgrunnlag: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement) =

@@ -61,14 +61,9 @@ internal class Infotrygdhistorikk private constructor(
         return siste.utbetalingstidslinje(organisasjonsnummer)
     }
 
-    internal fun historikkFor(orgnummer: String, sykdomstidslinje: Sykdomstidslinje): Sykdomstidslinje {
-        if (!harHistorikk()) return sykdomstidslinje
-        return siste.historikkFor(orgnummer, sykdomstidslinje)
-    }
-
-    internal fun harBetalt(organisasjonsnummer: String, dato: LocalDate): Boolean {
-        if (!harHistorikk()) return false
-        return siste.harBetalt(organisasjonsnummer, dato)
+    internal fun periodetype(organisasjonsnummer: String, other: Periode, dag: LocalDate): Periodetype? {
+        if (!harHistorikk()) return null
+        return siste.periodetype(organisasjonsnummer, other, dag)
     }
 
     internal fun ingenUkjenteArbeidsgivere(organisasjonsnumre: List<String>, dato: LocalDate): Boolean {
@@ -77,7 +72,7 @@ internal class Infotrygdhistorikk private constructor(
     }
 
     internal fun skjæringstidspunkt(organisasjonsnummer: String, periode: Periode, tidslinje: Sykdomstidslinje): LocalDate {
-        return Sykdomstidslinje.sisteRelevanteSkjæringstidspunktForPerioden(periode, listOf(historikkFor(organisasjonsnummer, tidslinje))) ?: periode.start
+        return Sykdomstidslinje.sisteRelevanteSkjæringstidspunktForPerioden(periode, listOf(tidslinje) + listOf(sykdomstidslinje(organisasjonsnummer))) ?: periode.start
     }
 
     internal fun skjæringstidspunkt(periode: Periode, tidslinjer: List<Sykdomstidslinje>): LocalDate {
@@ -86,6 +81,11 @@ internal class Infotrygdhistorikk private constructor(
 
     internal fun skjæringstidspunkter(tidslinjer: List<Sykdomstidslinje>): List<LocalDate> {
         return Sykdomstidslinje.skjæringstidspunkter(tidslinjer + listOf(sykdomstidslinje()))
+    }
+
+    private fun sykdomstidslinje(orgnummer: String): Sykdomstidslinje {
+        if (!harHistorikk()) return Sykdomstidslinje()
+        return siste.sykdomstidslinje(orgnummer)
     }
 
     private fun sykdomstidslinje(): Sykdomstidslinje {

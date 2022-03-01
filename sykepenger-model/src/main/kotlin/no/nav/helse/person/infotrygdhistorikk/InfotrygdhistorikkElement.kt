@@ -6,6 +6,7 @@ import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode.Companion.harBruk
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode.Companion.validerInntektForPerioder
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning.Companion.fjern
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning.Companion.lagreVilkårsgrunnlag
+import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Dag.Companion.sammenhengendeSykdom
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
@@ -95,19 +96,30 @@ internal class InfotrygdhistorikkElement private constructor(
 
     internal fun historikkFor(orgnummer: String, sykdomstidslinje: Sykdomstidslinje): Sykdomstidslinje {
         if (sykdomstidslinje.periode() == null) return sykdomstidslinje
-        return oppslag.computeIfAbsent(Oppslagsnøkkel(orgnummer, sykdomstidslinje)) {
-            perioder.fold(sykdomstidslinje) { result, periode ->
-                periode.historikkFor(orgnummer, result, kilde)
-            }
-        }.fremTilOgMed(sykdomstidslinje.sisteDag())
+        val ulåst = Sykdomstidslinje().merge(sykdomstidslinje, replace)
+        return cached(orgnummer, ulåst).fremTilOgMed(sykdomstidslinje.sisteDag())
     }
 
-    internal fun harBetalt(organisasjonsnummer: String, dato: LocalDate): Boolean {
-        return utbetalingstidslinje(organisasjonsnummer).harBetalt(dato)
+    private fun cached(orgnummer: String, sykdomstidslinje: Sykdomstidslinje) =
+        oppslag.computeIfAbsent(Oppslagsnøkkel(orgnummer, sykdomstidslinje)) {
+            sykdomstidslinje(orgnummer, sykdomstidslinje)
+        }
+
+    internal fun periodetype(organisasjonsnummer: String, other: Periode, dag: LocalDate): Periodetype? {
+        val utbetalinger = utbetalinger(organisasjonsnummer)
+        if (dag > other.start || utbetalinger.none { dag in it }) return null
+        if (dag in other || utbetalinger.any { dag in it && it.erRettFør(other) }) return Periodetype.OVERGANG_FRA_IT
+        return Periodetype.INFOTRYGDFORLENGELSE
     }
 
     internal fun ingenUkjenteArbeidsgivere(organisasjonsnumre: List<String>, dato: LocalDate): Boolean {
         return perioder.none { it.utbetalingEtter(organisasjonsnumre, dato) }
+    }
+
+    internal fun sykdomstidslinje(orgnummer: String, sykdomstidslinje: Sykdomstidslinje = Sykdomstidslinje()): Sykdomstidslinje {
+        return perioder.fold(sykdomstidslinje) { result, periode ->
+            periode.historikkFor(orgnummer, result, kilde)
+        }
     }
 
     internal fun sykdomstidslinje(): Sykdomstidslinje {
@@ -202,16 +214,15 @@ internal class InfotrygdhistorikkElement private constructor(
     }
 
     internal fun sisteSykepengedag(orgnummer: String): LocalDate? {
-        return perioder.filterIsInstance<Utbetalingsperiode>()
-            .filter { it.gjelder(orgnummer) }
-            .maxOfOrNull { it.endInclusive }
+        return utbetalinger(orgnummer).maxOfOrNull { it.endInclusive }
     }
 
     private fun harNyereOpplysninger(orgnummer: String, periode: Periode): Boolean {
-        return perioder.filterIsInstance<Utbetalingsperiode>()
-            .filter { it.gjelder(orgnummer) }
-            .any { it.slutterEtter(periode.endInclusive) }
+        return utbetalinger(orgnummer).any { it.slutterEtter(periode.endInclusive) }
     }
+
+    private fun utbetalinger(organisasjonsnummer: String) =
+        perioder.filterIsInstance<Utbetalingsperiode>().filter { it.gjelder(organisasjonsnummer) }
 
     internal fun oppfrisket(cutoff: LocalDateTime) =
         oppdatert > cutoff

@@ -952,7 +952,7 @@ internal class Arbeidsgiver private constructor(
 
     internal fun harSykdomFor(skjæringstidspunkt: LocalDate) = vedtaksperioder.any { it.gjelder(skjæringstidspunkt) }
 
-    fun finnFørsteFraværsdag(skjæringstidspunkt: LocalDate): LocalDate? {
+    internal fun finnFørsteFraværsdag(skjæringstidspunkt: LocalDate): LocalDate? {
         if (harSykdomFor(skjæringstidspunkt)) {
             return sykdomstidslinje().subset(finnSammenhengendePeriode(skjæringstidspunkt).periode()).sisteSkjæringstidspunkt()
         }
@@ -960,27 +960,11 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun periodetype(periode: Periode): Periodetype {
-        val skjæringstidspunkt = skjæringstidspunkt(periode)
-        return when {
-            erFørstegangsbehandling(periode, skjæringstidspunkt) -> Periodetype.FØRSTEGANGSBEHANDLING
-            forlengerInfotrygd(periode, skjæringstidspunkt) -> when {
-                Utbetaling.harBetalt(utbetalinger, Periode(skjæringstidspunkt, periode.start.minusDays(1))) -> Periodetype.INFOTRYGDFORLENGELSE
-                else -> Periodetype.OVERGANG_FRA_IT
-            }
-            !Utbetaling.harBetalt(utbetalinger, skjæringstidspunkt) -> Periodetype.FØRSTEGANGSBEHANDLING
-            else -> Periodetype.FORLENGELSE
-        }
+        return arbeidsgiverperiode(periode, MaskinellJurist())?.let { person.periodetype(organisasjonsnummer, it, periode, skjæringstidspunkt(periode)) } ?: Periodetype.FØRSTEGANGSBEHANDLING
     }
 
-    internal fun erFørstegangsbehandling(periode: Periode, skjæringstidspunkt: LocalDate) =
-        skjæringstidspunkt in periode
-
-    internal fun erForlengelse(periode: Periode, skjæringstidspunkt: LocalDate = skjæringstidspunkt(periode)) =
-        !erFørstegangsbehandling(periode, skjæringstidspunkt)
-
-    internal fun forlengerInfotrygd(periode: Periode, skjæringstidspunkt: LocalDate = skjæringstidspunkt(periode)) =
-        person.harInfotrygdUtbetalt(organisasjonsnummer, skjæringstidspunkt)
-
+    internal fun erFørstegangsbehandling(periode: Periode) = periodetype(periode) == Periodetype.FØRSTEGANGSBEHANDLING
+    internal fun erForlengelse(periode: Periode) = !erFørstegangsbehandling(periode)
     private fun skjæringstidspunkt(periode: Periode) = person.skjæringstidspunkt(organisasjonsnummer, sykdomstidslinje(), periode)
 
     internal fun avgrensetPeriode(periode: Periode) =

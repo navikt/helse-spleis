@@ -231,14 +231,16 @@ internal class Sykdomstidslinje private constructor(
 
     internal companion object {
 
-        internal fun sisteRelevanteSkjæringstidspunktForPerioden(periode: Periode, tidslinjer: List<Sykdomstidslinje>) = tidslinjer
-            .merge(sammenhengendeSykdom)
+        internal fun sisteRelevanteSkjæringstidspunktForPerioden(periode: Periode, tidslinjer: List<Sykdomstidslinje>) = samletTidslinje(tidslinjer)
             .fjernDagerFørSisteOppholdsdagFør(periode.start)
             .sisteSkjæringstidspunktTidligereEnn(periode.endInclusive)
 
-        internal fun skjæringstidspunkter(tidslinjer: List<Sykdomstidslinje>) = tidslinjer
-            .merge(sammenhengendeSykdom)
+        internal fun skjæringstidspunkter(tidslinjer: List<Sykdomstidslinje>) = samletTidslinje(tidslinjer)
             .skjæringstidspunkter()
+
+        private fun samletTidslinje(tidslinjer: List<Sykdomstidslinje>) = tidslinjer
+            .map { Sykdomstidslinje(it.dager, it.periode) } // fjerner evt. låser først
+            .merge(sammenhengendeSykdom)
 
         internal fun arbeidsdager(periode: Periode, kilde: Hendelseskilde) =
             Sykdomstidslinje(periode.associateWith { if (it.erHelg()) FriskHelgedag(it, kilde) else Arbeidsdag(it, kilde) })

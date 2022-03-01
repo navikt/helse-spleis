@@ -232,6 +232,23 @@ internal class InfotrygdhistorikkElementTest {
     }
 
     @Test
+    fun `historikk for overskriver selv om periode er låst`() {
+        val sykdomstidslinje = 28.S + 3.A + 16.S
+        sykdomstidslinje.lås(1.januar til 31.januar)
+        val element = historikkelement(
+            listOf(
+                ArbeidsgiverUtbetalingsperiode("ag1", 29.januar, 31.januar, 100.prosent, 25000.månedlig)
+            )
+        )
+        val inspektør = element.historikkFor("ag1", sykdomstidslinje).inspektør
+        assertEquals(0, inspektør.dager.filter { it.value is Dag.Arbeidsdag }.size)
+        assertEquals(0, inspektør.dager.filter { it.value is Dag.FriskHelgedag }.size)
+        assertEquals(0, inspektør.dager.filter { it.value is Dag.Feriedag }.size)
+        assertEquals(35, inspektør.dager.filter { it.value is Dag.Sykedag }.size)
+        assertEquals(12, inspektør.dager.filter { it.value is Dag.SykHelgedag }.size)
+    }
+
+    @Test
     fun `historikk for utvider ikke`() {
         val sykdomstidslinje = 10.S
         val element = historikkelement(
