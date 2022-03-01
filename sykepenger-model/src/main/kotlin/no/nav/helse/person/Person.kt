@@ -419,8 +419,8 @@ class Person private constructor(
         vedtaksperiode.håndterHistorikkFraInfotrygd(hendelse, infotrygdhistorikk)
     }
 
-    internal fun periodetype(orgnummer: String, arbeidsgiverperiode: Arbeidsgiverperiode, periode: Periode, skjæringstidspunkt: LocalDate) =
-        arbeidsgiverperiode.periodetype(orgnummer, periode, skjæringstidspunkt, infotrygdhistorikk)
+    internal fun harInfotrygdUtbetalt(orgnummer: String, skjæringstidspunkt: LocalDate) =
+        infotrygdhistorikk.harBetalt(orgnummer, skjæringstidspunkt)
 
     internal fun accept(visitor: PersonVisitor) {
         visitor.preVisitPerson(this, opprettet, aktørId, fødselsnummer, dødsdato, vilkårsgrunnlagHistorikk)

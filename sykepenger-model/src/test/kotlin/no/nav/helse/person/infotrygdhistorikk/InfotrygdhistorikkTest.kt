@@ -434,6 +434,24 @@ internal class InfotrygdhistorikkTest {
     }
 
     @Test
+    fun `har betalt - tom historikk`() {
+        assertFalse(historikk.harBetalt("ag1", 1.januar))
+    }
+
+    @Test
+    fun `har betalt`() {
+        historikk.oppdaterHistorikk(historikkelement(listOf(
+            ArbeidsgiverUtbetalingsperiode("ag1", 1.januar,  10.januar, 100.prosent, 1500.daglig),
+            ArbeidsgiverUtbetalingsperiode("ag2", 10.januar,  20.januar, 100.prosent, 1500.daglig),
+            Friperiode(20.januar,  31.januar)
+        )))
+        assertTrue(historikk.harBetalt("ag1", 1.januar))
+        assertFalse(historikk.harBetalt("ag2", 1.januar))
+        assertTrue(historikk.harBetalt("ag2", 10.januar))
+        assertFalse(historikk.harBetalt("ag1", 20.januar))
+    }
+
+    @Test
     fun skjæringstidspunkt() {
         historikk.oppdaterHistorikk(historikkelement(listOf(
             ArbeidsgiverUtbetalingsperiode("ag1", 5.januar,  10.januar, 100.prosent, 25000.månedlig),

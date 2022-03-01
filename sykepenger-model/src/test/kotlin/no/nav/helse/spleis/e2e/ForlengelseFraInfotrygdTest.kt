@@ -1011,8 +1011,17 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
         håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)
-        assertEquals(1.januar, inspektør.skjæringstidspunkt(3.vedtaksperiode))
-        assertEquals(Periodetype.OVERGANG_FRA_IT, inspektør.periodetype(3.vedtaksperiode))
+        assertForventetFeil(
+            "vet ikke om skjæringstidspunktet blir feil, men vedtaksperioden burde uansett ikke markeres som førstegangsbehandling når det ikke er gjort vilkårsprøving",
+            nå = {
+                assertEquals(1.januar, inspektør.skjæringstidspunkt(3.vedtaksperiode))
+                assertEquals(Periodetype.FØRSTEGANGSBEHANDLING, inspektør.periodetype(3.vedtaksperiode))
+            },
+            ønsket = {
+                assertEquals(17.januar, inspektør.skjæringstidspunkt(3.vedtaksperiode))
+                assertEquals(Periodetype.OVERGANG_FRA_IT, inspektør.periodetype(3.vedtaksperiode))
+            }
+        )
     }
 
     @Test
@@ -1041,10 +1050,20 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         håndterSimulering(2.vedtaksperiode)
 
         /*
-        Siden infotrygd perioden tilstøter to arbeidsgiverdager fra IM vil vi beregne skjæringstidspunktet til å være 23.februar
+        Siden infotrygd perioden tilstøter to arbeidsgiverdager fra IM vil vi beregne skjæringstidspunktet til å være 23.februar og markere det som en
+        førstegangsbehandling selv om det er en forlengelse fra IT
          */
-        assertEquals(23.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
-        assertEquals(Periodetype.OVERGANG_FRA_IT, inspektør.periodetype(2.vedtaksperiode))
+        assertForventetFeil(
+            "vet ikke om skjæringstidspunktet blir feil, men vedtaksperioden burde uansett ikke markeres som førstegangsbehandling når det ikke er gjort vilkårsprøving",
+            nå = {
+                assertEquals(23.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
+                assertEquals(Periodetype.FØRSTEGANGSBEHANDLING, inspektør.periodetype(2.vedtaksperiode))
+            },
+            ønsket = {
+                assertEquals(25.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
+                assertEquals(Periodetype.OVERGANG_FRA_IT, inspektør.periodetype(2.vedtaksperiode))
+            }
+        )
     }
 
     @Test

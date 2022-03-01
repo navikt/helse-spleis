@@ -28,7 +28,10 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
         assertEquals(FØRSTEGANGSBEHANDLING, inspektør.periodetype(1.vedtaksperiode))
         assertEquals(FØRSTEGANGSBEHANDLING, inspektør.periodetype(2.vedtaksperiode))
         assertEquals(FØRSTEGANGSBEHANDLING, inspektør.periodetype(3.vedtaksperiode))
-        assertEquals(FORLENGELSE, inspektør.periodetype(4.vedtaksperiode))
+        assertForventetFeil(
+            nå = { assertEquals(FØRSTEGANGSBEHANDLING, inspektør.periodetype(4.vedtaksperiode)) },
+            ønsket = { assertEquals(FORLENGELSE, inspektør.periodetype(4.vedtaksperiode)) }
+        )
     }
 
     @Test
@@ -76,11 +79,8 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
             arbeidsgiverperioder = listOf(Periode(20.januar, 4.februar)),
             førsteFraværsdag = 20.januar
         )
-        håndterYtelser(1.vedtaksperiode)
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
         assertEquals(FØRSTEGANGSBEHANDLING, inspektør.periodetype(1.vedtaksperiode))
-        assertEquals(FORLENGELSE, inspektør.periodetype(2.vedtaksperiode))
+        assertEquals(FØRSTEGANGSBEHANDLING, inspektør.periodetype(2.vedtaksperiode))
     }
 
     @Test
@@ -108,7 +108,7 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
         assertEquals(FØRSTEGANGSBEHANDLING, inspektør.periodetype(1.vedtaksperiode))
-        assertEquals(FØRSTEGANGSBEHANDLING, inspektør.periodetype(2.vedtaksperiode))
+        assertEquals(FORLENGELSE, inspektør.periodetype(2.vedtaksperiode))
     }
 
     @Test
@@ -151,8 +151,16 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
 
-        assertEquals(FØRSTEGANGSBEHANDLING, inspektør.periodetype(1.vedtaksperiode))
-        assertEquals(FORLENGELSE, inspektør.periodetype(2.vedtaksperiode))
+        assertForventetFeil(
+            nå = {
+                assertEquals(FØRSTEGANGSBEHANDLING, inspektør.periodetype(1.vedtaksperiode))
+                assertEquals(FØRSTEGANGSBEHANDLING, inspektør.periodetype(2.vedtaksperiode))
+            },
+            ønsket = {
+                assertEquals(FØRSTEGANGSBEHANDLING, inspektør.periodetype(1.vedtaksperiode))
+                assertEquals(FORLENGELSE, inspektør.periodetype(2.vedtaksperiode))
+            }
+        )
     }
 
     @Test
@@ -177,74 +185,16 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
 
-        assertEquals(FØRSTEGANGSBEHANDLING, inspektør.periodetype(1.vedtaksperiode))
-        assertEquals(FØRSTEGANGSBEHANDLING, inspektør.periodetype(2.vedtaksperiode))
-    }
-
-    @Test
-    fun `periodetype for forlengelse dersom førstegangsbehandling er avvist og utbetalt i Infotrygd`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(
-            arbeidsgiverperioder = listOf(1.januar til 16.januar),
-            beregnetInntekt = 1000.månedlig
+        assertForventetFeil(
+            nå = {
+                assertEquals(FØRSTEGANGSBEHANDLING, inspektør.periodetype(1.vedtaksperiode))
+                assertEquals(FØRSTEGANGSBEHANDLING, inspektør.periodetype(2.vedtaksperiode))
+            },
+            ønsket = {
+                assertEquals(FØRSTEGANGSBEHANDLING, inspektør.periodetype(1.vedtaksperiode))
+                assertEquals(FORLENGELSE, inspektør.periodetype(2.vedtaksperiode))
+            }
         )
-        håndterYtelser(1.vedtaksperiode)
-        håndterVilkårsgrunnlag(
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
-            inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
-                1.januar(2017) til 1.desember(2017) inntekter {
-                    ORGNUMMER inntekt 1000.månedlig
-                }
-            })
-        )
-        håndterYtelser(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, utbetalingGodkjent = false)
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
-        håndterUtbetalingshistorikk(2.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 31.januar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
-            Inntektsopplysning(ORGNUMMER, 17.januar, INNTEKT, true)
-        ))
-        assertEquals(FØRSTEGANGSBEHANDLING, inspektør.periodetype(1.vedtaksperiode))
-        assertEquals(OVERGANG_FRA_IT, inspektør.periodetype(2.vedtaksperiode))
     }
 
-    @Test
-    fun `spleis - gap - infotrygd - spleis`() {
-        nyttVedtak(1.januar, 25.januar)
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 28.mars, 100.prosent))
-        håndterUtbetalingshistorikk(2.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.februar, 28.februar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
-            Inntektsopplysning(ORGNUMMER, 1.februar, INNTEKT, true)
-        ))
-        håndterSøknad(Sykdom(1.mars, 28.mars, 100.prosent))
-        assertEquals(FØRSTEGANGSBEHANDLING, inspektør.periodetype(1.vedtaksperiode))
-        assertEquals(OVERGANG_FRA_IT, inspektør.periodetype(2.vedtaksperiode))
-    }
-
-    @Test
-    fun `infotrygd - gap - spleis`() {
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
-        håndterUtbetalingshistorikk(1.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.februar, 20.februar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
-            Inntektsopplysning(ORGNUMMER, 1.februar, INNTEKT, true)
-        ))
-        håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
-        assertEquals(FØRSTEGANGSBEHANDLING, inspektør.periodetype(1.vedtaksperiode))
-    }
-
-    @Test
-    fun `infotrygd - spleis - infotrygd - spleis`() {
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(1.april, 30.april, 100.prosent))
-        håndterUtbetalingshistorikk(1.vedtaksperiode,
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 31.januar, 100.prosent, INNTEKT),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.mars, 31.mars, 100.prosent, INNTEKT),
-            inntektshistorikk = listOf(
-                Inntektsopplysning(ORGNUMMER, 17.januar, INNTEKT, true),
-                Inntektsopplysning(ORGNUMMER, 1.mars, INNTEKT, true)
-            )
-        )
-
-        assertEquals(OVERGANG_FRA_IT, inspektør.periodetype(1.vedtaksperiode))
-        assertEquals(INFOTRYGDFORLENGELSE, inspektør.periodetype(2.vedtaksperiode))
-    }
 }
