@@ -10,7 +10,6 @@ import io.ktor.http.HttpHeaders.Authorization
 import io.ktor.server.engine.*
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import kotliquery.using
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmelding
@@ -165,7 +164,7 @@ internal class RestApiTest {
 
     private fun DataSource.lagrePerson(aktørId: String, fødselsnummer: String, person: Person) {
         val serialisertPerson = person.serialize()
-        using(sessionOf(this)) {
+        sessionOf(this).use {
             it.run(
                 queryOf(
                     "INSERT INTO person (aktor_id, fnr, skjema_versjon, data) VALUES (?, ?, ?, (to_json(?::json)))",
@@ -181,7 +180,7 @@ internal class RestApiTest {
         fødselsnummer: String = UNG_PERSON_FNR,
         data: String = "{}"
     ) {
-        using(sessionOf(this)) {
+        sessionOf(this).use {
             it.run(
                 queryOf(
                     "INSERT INTO melding (fnr, melding_id, melding_type, data) VALUES (?, ?, ?, (to_json(?::json)))",
@@ -200,7 +199,7 @@ internal class RestApiTest {
     }
 
     @Test
-    fun `sporingapi`() {
+    fun sporingapi() {
         "/api/vedtaksperioder".httpGet(HttpStatusCode.OK, mapOf("fnr" to UNG_PERSON_FNR))
     }
 

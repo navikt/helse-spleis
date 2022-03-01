@@ -2,7 +2,6 @@ package no.nav.helse.spleis.dao
 
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import kotliquery.using
 import no.nav.helse.serde.migration.Json
 import no.nav.helse.serde.migration.Navn
 import java.util.*
@@ -11,7 +10,7 @@ import javax.sql.DataSource
 internal class HendelseDao(private val dataSource: DataSource) {
 
     fun hentHendelse(meldingsReferanse: UUID): String? {
-        return using(sessionOf(dataSource)) { session ->
+        return sessionOf(dataSource).use { session ->
             session.run(
                 queryOf(
                     "SELECT data FROM melding WHERE melding_id = ?",
@@ -27,7 +26,7 @@ internal class HendelseDao(private val dataSource: DataSource) {
 
     fun hentHendelser(referanser: Set<UUID>): List<Pair<Meldingstype, String>> {
         if (referanser.isEmpty()) return emptyList()
-        return using(sessionOf(dataSource)) { session ->
+        return sessionOf(dataSource).use { session ->
             session.run(
                 queryOf(
                     "SELECT * FROM melding WHERE " +
@@ -45,7 +44,7 @@ internal class HendelseDao(private val dataSource: DataSource) {
     }
 
     fun hentAlleHendelser(fødselsnummer: Long): Map<UUID, Pair<Navn, Json>> {
-        return using(sessionOf(dataSource)) { session ->
+        return sessionOf(dataSource).use { session ->
             session.run(
                 queryOf(
                     "SELECT melding_id, melding_type, data FROM melding WHERE fnr = ? AND melding_type IN (${Meldingstype.values().joinToString { "?" }})",

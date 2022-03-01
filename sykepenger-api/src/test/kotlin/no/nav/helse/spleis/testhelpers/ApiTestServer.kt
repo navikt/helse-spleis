@@ -12,7 +12,6 @@ import io.mockk.every
 import io.mockk.mockkStatic
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import kotliquery.using
 import no.nav.helse.person.Person
 import no.nav.helse.serde.serialize
 import no.nav.helse.spleis.*
@@ -146,7 +145,7 @@ internal class ApiTestServer(private val port: Int = randomPort()) {
 
     internal fun lagrePerson(aktørId: String, fødselsnummer: String, person: Person) {
         val serialisertPerson = person.serialize()
-        using(sessionOf(dataSource)) {
+        sessionOf(dataSource).use {
             it.run(
                 queryOf(
                     "INSERT INTO person (aktor_id, fnr, skjema_versjon, data) VALUES (?, ?, ?, (to_json(?::json)))",
@@ -162,7 +161,7 @@ internal class ApiTestServer(private val port: Int = randomPort()) {
         meldingstype: HendelseDao.Meldingstype = HendelseDao.Meldingstype.INNTEKTSMELDING,
         data: String = "{}"
     ) {
-        using(sessionOf(dataSource)) {
+        sessionOf(dataSource).use {
             it.run(
                 queryOf(
                     "INSERT INTO melding (fnr, melding_id, melding_type, data) VALUES (?, ?, ?, (to_json(?::json)))",

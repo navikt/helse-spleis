@@ -4,11 +4,10 @@ import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import kotliquery.using
 import no.nav.helse.spleis.dao.HendelseDao
 import org.flywaydb.core.Flyway
 import org.junit.jupiter.api.*
-import org.junit.jupiter.api.TestInstance.*
+import org.junit.jupiter.api.TestInstance.Lifecycle
 import org.testcontainers.containers.PostgreSQLContainer
 import java.util.*
 import javax.sql.DataSource
@@ -63,7 +62,7 @@ class HendelseDaoTest {
         fødselsnummer: String = UNG_PERSON_FNR,
         data: String = "{}"
     ) {
-        using(sessionOf(this)) {
+        sessionOf(this).use {
             it.run(
                 queryOf(
                     "INSERT INTO melding (fnr, melding_id, melding_type, data) VALUES (?, ?, ?, (to_json(?::json)))",

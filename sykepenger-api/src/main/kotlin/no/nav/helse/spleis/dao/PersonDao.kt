@@ -3,7 +3,6 @@ package no.nav.helse.spleis.dao
 import kotliquery.Query
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import kotliquery.using
 import no.nav.helse.serde.SerialisertPerson
 import javax.sql.DataSource
 

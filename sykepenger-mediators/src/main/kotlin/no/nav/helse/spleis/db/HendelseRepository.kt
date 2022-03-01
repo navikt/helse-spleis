@@ -6,7 +6,6 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import kotliquery.using
 import no.nav.helse.Fødselsnummer
 import no.nav.helse.serde.migration.Json
 import no.nav.helse.serde.migration.Navn
@@ -33,7 +32,7 @@ internal class HendelseRepository(private val dataSource: DataSource) {
     }
 
     internal fun finnInntektsmeldinger(fnr: Fødselsnummer): List<JsonNode> =
-        using(sessionOf(dataSource)) { session ->
+        sessionOf(dataSource).use { session ->
             session.run(
                 queryOf(
                     "SELECT data FROM melding WHERE fnr = ? AND melding_type = 'INNTEKTSMELDING' ORDER BY lest_dato ASC",
@@ -45,7 +44,7 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         }
 
     internal fun finnSøknader(fnr: Fødselsnummer): List<JsonNode> =
-        using(sessionOf(dataSource)) { session ->
+        sessionOf(dataSource).use { session ->
             session.run(
                 queryOf(
                     "SELECT data FROM melding WHERE fnr = ? AND melding_type = 'SENDT_SØKNAD_NAV' ORDER BY lest_dato ASC",
@@ -58,7 +57,7 @@ internal class HendelseRepository(private val dataSource: DataSource) {
 
     internal fun lagreMelding(melding: HendelseMessage, fødselsnummer: Fødselsnummer, meldingId: UUID, json: String) {
         val meldingtype = meldingstype(melding) ?: return
-        using(sessionOf(dataSource)) { session ->
+        sessionOf(dataSource).use { session ->
             session.run(
                 queryOf(
                     "INSERT INTO melding (fnr, melding_id, melding_type, data) VALUES (?, ?, ?, (to_json(?::json))) ON CONFLICT(melding_id) DO NOTHING",
@@ -73,13 +72,13 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         }
     }
 
-    fun markerSomBehandlet(meldingId: UUID) = using(sessionOf(dataSource)) { session ->
+    fun markerSomBehandlet(meldingId: UUID) = sessionOf(dataSource).use { session ->
         session.run(queryOf("UPDATE melding SET behandlet_tidspunkt=now() WHERE melding_id = ? AND behandlet_tidspunkt IS NULL",
             meldingId.toString()
         ).asUpdate)
     }
 
-    fun erBehandlet(meldingId: UUID) = using(sessionOf(dataSource)) { session ->
+    fun erBehandlet(meldingId: UUID) = sessionOf(dataSource).use { session ->
         session.run(
             queryOf("SELECT behandlet_tidspunkt FROM melding WHERE melding_id = ?", meldingId.toString())
                 .map { it.localDateTimeOrNull("behandlet_tidspunkt") }.asSingle
@@ -117,7 +116,7 @@ internal class HendelseRepository(private val dataSource: DataSource) {
     }
 
     internal fun hentAlleHendelser(fødselsnummer: Fødselsnummer): Map<UUID, Pair<Navn, Json>> {
-        return using(sessionOf(dataSource)) { session ->
+        return sessionOf(dataSource).use { session ->
             session.run(
                 queryOf(
                     "SELECT melding_id, melding_type, data FROM melding WHERE fnr = ? AND melding_type IN (?, ?, ?, ?, ?, ?, ?)",

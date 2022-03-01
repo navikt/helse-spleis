@@ -27,7 +27,7 @@ internal class LagrePersonDao(private val dataSource: DataSource) {
     fun personAvstemt(hendelse: Avstemming) {
         @Language("PostreSQL")
         val statement = "UPDATE unike_person SET sist_avstemt = now() WHERE fnr = :fnr"
-        using(sessionOf(dataSource)) { session ->
+        sessionOf(dataSource).use { session ->
             session.run(queryOf(statement, mapOf(
                 "fnr" to hendelse.fødselsnummer().toLong()
             )).asExecute)
@@ -35,7 +35,7 @@ internal class LagrePersonDao(private val dataSource: DataSource) {
     }
 
     private fun lagrePerson(aktørId: String, fødselsnummer: Fødselsnummer, skjemaVersjon: Int, meldingId: UUID, personJson: String, vedtak: Boolean) {
-        using(sessionOf(dataSource)) { session ->
+        sessionOf(dataSource).use { session ->
             session.transaction {
                 opprettNyPerson(it, fødselsnummer, aktørId, skjemaVersjon, meldingId, personJson, vedtak)
             }
