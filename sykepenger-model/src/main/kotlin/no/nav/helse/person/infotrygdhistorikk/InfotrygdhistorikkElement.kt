@@ -12,6 +12,7 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.utbetalingslinjer.Utbetaling
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiodeteller
 import no.nav.helse.utbetalingstidslinje.Infotrygddekoratør
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -82,17 +83,27 @@ internal class InfotrygdhistorikkElement private constructor(
             )
     }
 
+    private val arbeidsgiverperiodecache = mutableMapOf<String, MutableMap<UUID, List<Arbeidsgiverperiode>>>()
+    internal fun arbeidsgiverperiodeFor(organisasjonsnummer: String, sykdomshistorikkId: UUID): List<Arbeidsgiverperiode>? {
+        val innslag = arbeidsgiverperiodecache[organisasjonsnummer] ?: return null
+        return innslag[sykdomshistorikkId]
+    }
+
+    internal fun lagreResultat(organisasjonsnummer: String, sykdomshistorikkId: UUID, resultat: List<Arbeidsgiverperiode>) {
+        arbeidsgiverperiodecache.getOrPut(organisasjonsnummer) { mutableMapOf() }[sykdomshistorikkId] = resultat
+    }
+
+    internal fun build(organisasjonsnummer: String, sykdomstidslinje: Sykdomstidslinje, teller: Arbeidsgiverperiodeteller, builder: SykdomstidslinjeVisitor) {
+        val dekoratør = Infotrygddekoratør(teller, builder, perioder.filterIsInstance<Utbetalingsperiode>().filter { it.gjelder(organisasjonsnummer) })
+        historikkFor(organisasjonsnummer, sykdomstidslinje).accept(dekoratør)
+    }
+
     private data class Oppslagsnøkkel(
         val orgnummer: String,
         val sykdomstidslinje: Sykdomstidslinje
     )
 
     private val oppslag = mutableMapOf<Oppslagsnøkkel, Sykdomstidslinje>()
-
-    internal fun build(organisasjonsnummer: String, sykdomstidslinje: Sykdomstidslinje, teller: Arbeidsgiverperiodeteller, builder: SykdomstidslinjeVisitor) {
-        val dekoratør = Infotrygddekoratør(teller, builder, perioder.filterIsInstance<Utbetalingsperiode>().filter { it.gjelder(organisasjonsnummer) })
-        historikkFor(organisasjonsnummer, sykdomstidslinje).accept(dekoratør)
-    }
 
     internal fun historikkFor(orgnummer: String, sykdomstidslinje: Sykdomstidslinje): Sykdomstidslinje {
         if (sykdomstidslinje.periode() == null) return sykdomstidslinje

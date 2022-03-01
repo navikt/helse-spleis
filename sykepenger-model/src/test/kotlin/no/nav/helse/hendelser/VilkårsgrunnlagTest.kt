@@ -13,7 +13,6 @@ import no.nav.helse.person.Vedtaksperiode.Vedtaksperiodetilstand
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.assertWarning
-import no.nav.helse.testhelpers.fangeSkjæringstidspunkt
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.økonomi.Inntekt
@@ -76,7 +75,7 @@ internal class VilkårsgrunnlagTest : AbstractPersonTest() {
     @Test
     fun `arbeidsforhold nyere enn første fraværsdag`() {
         val vilkårsgrunnlag = vilkårsgrunnlag(
-            arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNUMMER, fangeSkjæringstidspunkt(person).plusDays(1)))
+            arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNUMMER, 2.januar))
         )
         person.håndter(vilkårsgrunnlag)
         assertGrunnlagsdata(INNTEKT, Prosent.ratio(0.0), 0, false)
@@ -169,9 +168,9 @@ internal class VilkårsgrunnlagTest : AbstractPersonTest() {
                 oppdatert: LocalDateTime,
                 periode: Periode,
                 opprinneligPeriode: Periode,
-                skjæringstidspunkt: LocalDate,
+                periodetype: () -> Periodetype,
+                skjæringstidspunkt: () -> LocalDate,
                 skjæringstidspunktFraInfotrygd: LocalDate?,
-                periodetype: Periodetype,
                 forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
                 hendelseIder: Set<Dokumentsporing>,
                 inntektsmeldingInfo: InntektsmeldingInfo?,
@@ -194,9 +193,9 @@ internal class VilkårsgrunnlagTest : AbstractPersonTest() {
                 oppdatert: LocalDateTime,
                 periode: Periode,
                 opprinneligPeriode: Periode,
-                skjæringstidspunkt: LocalDate,
+                periodetype: () -> Periodetype,
+                skjæringstidspunkt: () -> LocalDate,
                 skjæringstidspunktFraInfotrygd: LocalDate?,
-                periodetype: Periodetype,
                 forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
                 hendelseIder: Set<Dokumentsporing>,
                 inntektsmeldingInfo: InntektsmeldingInfo?,

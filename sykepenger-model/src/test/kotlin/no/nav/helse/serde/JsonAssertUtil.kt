@@ -33,7 +33,7 @@ private class UtbetalingMixin
 @JsonIgnoreProperties("dagtyperSomAvvises")
 private class BegrunnelseMixin
 
-@JsonIgnoreProperties("oppslag", "utbetalingstidslinjeoppslag")
+@JsonIgnoreProperties("oppslag", "utbetalingstidslinjeoppslag", "arbeidsgiverperiodecache")
 private class InfotrygdhistorikkElementMixin
 
 private val objectMapper = jacksonObjectMapper()

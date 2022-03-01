@@ -26,7 +26,7 @@ internal class TestArbeidsgiverInspektør(
     private var vedtaksperiodeindeks = 0
     private val tilstander = mutableMapOf<Int, TilstandType>()
     private val perioder = mutableMapOf<Int, Periode>()
-    private val skjæringstidspunkter = mutableMapOf<Int, LocalDate>()
+    private val skjæringstidspunkter = mutableMapOf<Int, () -> LocalDate>()
     private val maksdatoer = mutableListOf<LocalDate>()
     private val forbrukteSykedagerer = mutableListOf<Int?>()
     private val gjenståendeSykedagerer = mutableListOf<Int?>()
@@ -61,7 +61,7 @@ internal class TestArbeidsgiverInspektør(
     private val forlengelserFraInfotrygd = mutableMapOf<Int, ForlengelseFraInfotrygd>()
     private val hendelseIder = mutableMapOf<Int, Set<Dokumentsporing>>()
     private val inntektskilder = mutableMapOf<Int, Inntektskilde>()
-    private val periodetyper = mutableMapOf<Int, Periodetype>()
+    private val periodetyper = mutableMapOf<Int, () -> Periodetype>()
 
     internal fun vilkårsgrunnlagHistorikkInnslag() = personInspektør.vilkårsgrunnlagHistorikkInnslag()
 
@@ -137,9 +137,9 @@ internal class TestArbeidsgiverInspektør(
         oppdatert: LocalDateTime,
         periode: Periode,
         opprinneligPeriode: Periode,
-        skjæringstidspunkt: LocalDate,
+        periodetype: () -> Periodetype,
+        skjæringstidspunkt: () -> LocalDate,
         skjæringstidspunktFraInfotrygd: LocalDate?,
-        periodetype: Periodetype,
         forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
         hendelseIder: Set<Dokumentsporing>,
         inntektsmeldingInfo: InntektsmeldingInfo?,
@@ -173,9 +173,9 @@ internal class TestArbeidsgiverInspektør(
         oppdatert: LocalDateTime,
         periode: Periode,
         opprinneligPeriode: Periode,
-        skjæringstidspunkt: LocalDate,
+        periodetype: () -> Periodetype,
+        skjæringstidspunkt: () -> LocalDate,
         skjæringstidspunktFraInfotrygd: LocalDate?,
-        periodetype: Periodetype,
         forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
         hendelseIder: Set<Dokumentsporing>,
         inntektsmeldingInfo: InntektsmeldingInfo?,
@@ -361,9 +361,9 @@ internal class TestArbeidsgiverInspektør(
             oppdatert: LocalDateTime,
             periode: Periode,
             opprinneligPeriode: Periode,
-            skjæringstidspunkt: LocalDate,
+            periodetype: () -> Periodetype,
+            skjæringstidspunkt: () -> LocalDate,
             skjæringstidspunktFraInfotrygd: LocalDate?,
-            periodetype: Periodetype,
             forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
             hendelseIder: Set<Dokumentsporing>,
             inntektsmeldingInfo: InntektsmeldingInfo?,
@@ -424,7 +424,7 @@ internal class TestArbeidsgiverInspektør(
 
     internal fun sisteTilstand(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperiodeIdInnhenter.finn(tilstander)
 
-    internal fun skjæringstidspunkt(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperiodeIdInnhenter.finn(skjæringstidspunkter)
+    internal fun skjæringstidspunkt(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperiodeIdInnhenter.finn(skjæringstidspunkter)()
 
     internal fun utbetalingstidslinjer(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperiodeIdInnhenter.finn(utbetalingstidslinjer)
 
@@ -436,7 +436,7 @@ internal class TestArbeidsgiverInspektør(
 
     internal fun inntektskilde(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperiodeIdInnhenter.finn(inntektskilder)
 
-    internal fun periodetype(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperiodeIdInnhenter.finn(periodetyper)
+    internal fun periodetype(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperiodeIdInnhenter.finn(periodetyper)()
 
     internal fun vedtaksperiodeId(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperiodeIdInnhenter.id(orgnummer)
 

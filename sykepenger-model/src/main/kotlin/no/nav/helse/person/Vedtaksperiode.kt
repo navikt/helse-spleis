@@ -8,6 +8,7 @@ import no.nav.helse.hendelser.Validation.Companion.validation
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.mai
+import no.nav.helse.memoized
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.arbeidsavklaringspenger
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.arbeidsforhold
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.dagpenger
@@ -107,6 +108,8 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun accept(visitor: VedtaksperiodeVisitor) {
+        val periodetypeMemoized = this::periodetype.memoized()
+        val skjæringstidspunktMemoized = this::skjæringstidspunkt.memoized()
         visitor.preVisitVedtaksperiode(
             this,
             id,
@@ -115,9 +118,9 @@ internal class Vedtaksperiode private constructor(
             oppdatert,
             periode,
             sykmeldingsperiode,
-            skjæringstidspunkt,
+            periodetypeMemoized,
+            skjæringstidspunktMemoized,
             skjæringstidspunktFraInfotrygd,
-            periodetype,
             forlengelseFraInfotrygd,
             hendelseIder,
             inntektsmeldingInfo,
@@ -135,9 +138,9 @@ internal class Vedtaksperiode private constructor(
             oppdatert,
             periode,
             sykmeldingsperiode,
-            skjæringstidspunkt,
+            periodetypeMemoized,
+            skjæringstidspunktMemoized,
             skjæringstidspunktFraInfotrygd,
-            periodetype,
             forlengelseFraInfotrygd,
             hendelseIder,
             inntektsmeldingInfo,
@@ -811,7 +814,7 @@ internal class Vedtaksperiode private constructor(
     override fun toString() = "${this.periode.start} - ${this.periode.endInclusive} (${this.tilstand::class.simpleName})"
 
     private fun finnArbeidsgiverperiode() =
-        arbeidsgiver.arbeidsgiverperiode(periode, MaskinellJurist()) // TODO: skal vi logge ved beregning av agp?
+        arbeidsgiver.arbeidsgiverperiode(periode, SubsumsjonObserver.NullObserver) // TODO: skal vi logge ved beregning av agp?
 
     private fun ingenUtbetaling() = Arbeidsgiverperiode.ingenUtbetaling(finnArbeidsgiverperiode(), periode, jurist())
 
@@ -2652,14 +2655,15 @@ internal class Vedtaksperiode private constructor(
 
         internal fun arbeidsgiverperiodeFor(
             person: Person,
+            sykdomshistorikkId: UUID,
             perioder: List<Vedtaksperiode>,
             organisasjonsnummer: String,
             sykdomstidslinje: Sykdomstidslinje,
             periode: Periode,
             subsumsjonObserver: SubsumsjonObserver
-        ): Arbeidsgiverperiode? {
+        ): List<Arbeidsgiverperiode> {
             val samletSykdomstidslinje = Sykdomstidslinje.gammelTidslinje(perioder.map { it.sykdomstidslinje }).merge(sykdomstidslinje, replace)
-            return person.arbeidsgiverperiodeFor(organisasjonsnummer, samletSykdomstidslinje, periode, subsumsjonObserver)
+            return person.arbeidsgiverperiodeFor(organisasjonsnummer, sykdomshistorikkId, samletSykdomstidslinje, periode, subsumsjonObserver)
         }
     }
 }

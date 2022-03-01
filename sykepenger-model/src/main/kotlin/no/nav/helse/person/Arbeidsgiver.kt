@@ -40,6 +40,7 @@ import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.utbetaltTidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
 import no.nav.helse.utbetalingslinjer.UtbetalingObserver
 import no.nav.helse.utbetalingstidslinje.*
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode.Companion.finn
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -393,7 +394,7 @@ internal class Arbeidsgiver private constructor(
         noenHarHåndtert(søknad, Vedtaksperiode::håndter, "Forventet ikke ${søknad.kilde}. Har nok ikke mottatt sykmelding")
         if (søknad.hasErrorsOrWorse()) {
             val søknadsperiode = søknad.sykdomstidslinje().periode()
-            val harNærliggendeUtbetaling = søknadsperiode?.let { person.harNærliggendeUtbetaling(arbeidsgiverperiode(it, MaskinellJurist()), it) } ?: false
+            val harNærliggendeUtbetaling = søknadsperiode?.let { person.harNærliggendeUtbetaling(arbeidsgiverperiode(it, SubsumsjonObserver.NullObserver), it) } ?: false
             if (harNærliggendeUtbetaling) person.emitOpprettOppgaveForSpeilsaksbehandlereEvent(søknad) else person.emitOpprettOppgaveEvent(søknad)
             person.emitHendelseIkkeHåndtert(søknad)
         }
@@ -751,8 +752,9 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun arbeidsgiverperiode(periode: Periode, subsumsjonObserver: SubsumsjonObserver): Arbeidsgiverperiode? {
-        val sykdomstidslinje = sykdomstidslinje()
-        return ForkastetVedtaksperiode.arbeidsgiverperiodeFor(person, forkastede, organisasjonsnummer, sykdomstidslinje, periode, subsumsjonObserver)
+        val arbeidsgiverperioder = person.arbeidsgiverperiodeFor(organisasjonsnummer, sykdomshistorikk.nyesteId()) ?:
+            ForkastetVedtaksperiode.arbeidsgiverperiodeFor(person, sykdomshistorikk.nyesteId(), forkastede, organisasjonsnummer, sykdomstidslinje(), periode, subsumsjonObserver)
+        return arbeidsgiverperioder.finn(periode)
     }
 
     internal fun ghostPerioder(): List<GhostPeriode> = person.skjæringstidspunkterFraSpleis()
@@ -960,7 +962,7 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun periodetype(periode: Periode): Periodetype {
-        return arbeidsgiverperiode(periode, MaskinellJurist())?.let { person.periodetype(organisasjonsnummer, it, periode, skjæringstidspunkt(periode)) } ?: Periodetype.FØRSTEGANGSBEHANDLING
+        return arbeidsgiverperiode(periode, SubsumsjonObserver.NullObserver)?.let { person.periodetype(organisasjonsnummer, it, periode, skjæringstidspunkt(periode)) } ?: Periodetype.FØRSTEGANGSBEHANDLING
     }
 
     internal fun erFørstegangsbehandling(periode: Periode) = periodetype(periode) == Periodetype.FØRSTEGANGSBEHANDLING

@@ -35,23 +35,23 @@ internal class VedtaksperioderBuilder(
         oppdatert: LocalDateTime,
         periode: Periode,
         opprinneligPeriode: Periode,
-        skjæringstidspunkt: LocalDate,
+        periodetype: () -> Periodetype,
+        skjæringstidspunkt: () -> LocalDate,
         skjæringstidspunktFraInfotrygd: LocalDate?,
-        periodetype: Periodetype,
         forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
         hendelseIder: Set<Dokumentsporing>,
         inntektsmeldingInfo: InntektsmeldingInfo?,
         inntektskilde: Inntektskilde
     ) {
-        val vilkårsgrunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) as? VilkårsgrunnlagHistorikk.Grunnlagsdata
+        val vilkårsgrunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt()) as? VilkårsgrunnlagHistorikk.Grunnlagsdata
         val sykepengegrunnlag = vilkårsgrunnlag?.sykepengegrunnlag()
 
         val vedtaksperiodeBuilder = VedtaksperiodeBuilder(
             vedtaksperiode = vedtaksperiode,
             id = id,
             periode = periode,
-            skjæringstidspunkt = skjæringstidspunkt,
-            periodetype = periodetype,
+            skjæringstidspunkt = skjæringstidspunkt(),
+            periodetype = periodetype(),
             forlengelseFraInfotrygd = forlengelseFraInfotrygd,
             tilstand = tilstand,
             inntektskilde = inntektskilde,

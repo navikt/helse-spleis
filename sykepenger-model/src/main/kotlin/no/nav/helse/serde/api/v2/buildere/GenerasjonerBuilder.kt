@@ -68,9 +68,9 @@ internal class GenerasjonerBuilder(
         oppdatert: LocalDateTime,
         periode: Periode,
         opprinneligPeriode: Periode,
-        skjæringstidspunkt: LocalDate,
+        periodetype: () -> Periodetype,
+        skjæringstidspunkt: () -> LocalDate,
         skjæringstidspunktFraInfotrygd: LocalDate?,
-        periodetype: Periodetype,
         forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
         hendelseIder: Set<Dokumentsporing>,
         inntektsmeldingInfo: InntektsmeldingInfo?,
@@ -88,11 +88,11 @@ internal class GenerasjonerBuilder(
                 inntektskilde = inntektskilde,
                 hendelser = hendelser.filter { it.id in hendelseIder.ider().map(UUID::toString) },
                 utbetalinger = utbetalinger,
-                periodetype = periodetype,
+                periodetype = periodetype(),
                 sykdomstidslinje = sykdomstidslinje,
                 tilstand = tilstand,
                 oppdatert = oppdatert,
-                skjæringstidspunkt = skjæringstidspunkt,
+                skjæringstidspunkt = skjæringstidspunkt(),
                 aktivitetsloggForPeriode = aktivetsloggForPeriode
             )
         )

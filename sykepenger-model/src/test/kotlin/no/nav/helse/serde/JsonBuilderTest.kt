@@ -27,9 +27,7 @@ import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -524,9 +522,9 @@ class JsonBuilderTest {
                 oppdatert: LocalDateTime,
                 periode: Periode,
                 opprinneligPeriode: Periode,
-                skjæringstidspunkt: LocalDate,
+                periodetype: () -> Periodetype,
+                skjæringstidspunkt: () -> LocalDate,
                 skjæringstidspunktFraInfotrygd: LocalDate?,
-                periodetype: Periodetype,
                 forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
                 hendelseIder: Set<Dokumentsporing>,
                 inntektsmeldingInfo: InntektsmeldingInfo?,

@@ -10,6 +10,7 @@ import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.*
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.util.*
 
 internal class Infotrygdhistorikk private constructor(
     private val elementer: MutableList<InfotrygdhistorikkElement>
@@ -129,6 +130,16 @@ internal class Infotrygdhistorikk private constructor(
         visitor.preVisitInfotrygdhistorikk()
         elementer.forEach { it.accept(visitor) }
         visitor.postVisitInfotrygdhistorikk()
+    }
+
+    internal fun arbeidsgiverperiodeFor(organisasjonsnummer: String, sykdomshistorikkId: UUID): List<Arbeidsgiverperiode>? {
+        if (!harHistorikk()) return null
+        return siste.arbeidsgiverperiodeFor(organisasjonsnummer, sykdomshistorikkId)
+    }
+
+    internal fun lagreResultat(organisasjonsnummer: String, sykdomshistorikkId: UUID, resultat: List<Arbeidsgiverperiode>) {
+        if (!harHistorikk()) return
+        return siste.lagreResultat(organisasjonsnummer, sykdomshistorikkId, resultat)
     }
 
     internal fun build(
