@@ -62,6 +62,11 @@ internal class Infotrygdhistorikk private constructor(
         return siste.utbetalingstidslinje(organisasjonsnummer)
     }
 
+    internal fun harBetaltRettFør(periode: Periode): Boolean {
+        if (!harHistorikk()) return false
+        return siste.harBetaltRettFør(periode)
+    }
+
     internal fun periodetype(organisasjonsnummer: String, other: Periode, dag: LocalDate): Periodetype? {
         if (!harHistorikk()) return null
         return siste.periodetype(organisasjonsnummer, other, dag)

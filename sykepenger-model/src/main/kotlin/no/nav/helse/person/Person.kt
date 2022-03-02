@@ -491,6 +491,7 @@ class Person private constructor(
         }
 
     internal fun harNærliggendeUtbetaling(arbeidsgiverperiode: Arbeidsgiverperiode?, periode: Periode): Boolean {
+        if (infotrygdhistorikk.harBetaltRettFør(periode)) return false
         return arbeidsgivere.any { it.harNærliggendeUtbetaling(arbeidsgiverperiode, periode.oppdaterTom(periode.endInclusive.plusYears(3))) }
     }
 

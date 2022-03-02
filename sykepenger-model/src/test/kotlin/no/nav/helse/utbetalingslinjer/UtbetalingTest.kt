@@ -16,7 +16,6 @@ import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.Oppdragstatus.*
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.aktive
-import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.MaksimumUtbetaling
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import org.junit.jupiter.api.Assertions.*
@@ -45,12 +44,11 @@ internal class UtbetalingTest {
         val tidslinje = tidslinjeOf(16.AP, 15.NAV)
         beregnUtbetalinger(tidslinje)
         val utbetaling = opprettUtbetaling(tidslinje)
-        val arbeidsgiverperiode = Arbeidsgiverperiode(listOf(1.januar til 16.januar))
-        assertTrue(utbetaling.harNærliggendeUtbetaling(arbeidsgiverperiode, 31.januar til 15.februar))
-        assertTrue(utbetaling.harNærliggendeUtbetaling(arbeidsgiverperiode, 1.desember(2017) til 20.januar))
-        assertTrue(utbetaling.harNærliggendeUtbetaling(arbeidsgiverperiode, 1.februar til 15.februar))
-        assertFalse(utbetaling.harNærliggendeUtbetaling(Arbeidsgiverperiode(listOf(15.februar til 2.mars)), 15.februar til 5.mars))
-        assertFalse(utbetaling.harNærliggendeUtbetaling(arbeidsgiverperiode, 1.januar til 15.januar))
+        assertTrue(utbetaling.harNærliggendeUtbetaling(31.januar til 15.februar))
+        assertTrue(utbetaling.harNærliggendeUtbetaling(1.desember(2017) til 20.januar))
+        assertTrue(utbetaling.harNærliggendeUtbetaling(1.februar til 15.februar))
+        assertTrue(utbetaling.harNærliggendeUtbetaling(15.februar til 5.mars))
+        assertFalse(utbetaling.harNærliggendeUtbetaling(1.januar til 15.januar))
     }
 
     @Test
@@ -58,8 +56,7 @@ internal class UtbetalingTest {
         val tidslinje = tidslinjeOf(16.AP, 17.NAV, 28.FRI)
         beregnUtbetalinger(tidslinje)
         val utbetaling = opprettUtbetaling(tidslinje)
-        val arbeidsgiverperiode = Arbeidsgiverperiode(listOf(1.januar til 16.januar))
-        assertTrue(utbetaling.harNærliggendeUtbetaling(arbeidsgiverperiode, 1.februar til 15.februar))
+        assertTrue(utbetaling.harNærliggendeUtbetaling(1.februar til 15.februar))
     }
 
     @Test
@@ -67,10 +64,10 @@ internal class UtbetalingTest {
         val tidslinje = tidslinjeOf(31.FRI)
         beregnUtbetalinger(tidslinje)
         val utbetaling = opprettUtbetaling(tidslinje)
-        assertFalse(utbetaling.harNærliggendeUtbetaling(null, 31.januar til 15.februar))
-        assertFalse(utbetaling.harNærliggendeUtbetaling(null, 1.desember(2017) til 20.januar))
-        assertFalse(utbetaling.harNærliggendeUtbetaling(null, 1.februar til 15.februar))
-        assertFalse(utbetaling.harNærliggendeUtbetaling(null, 1.januar til 15.januar))
+        assertFalse(utbetaling.harNærliggendeUtbetaling(31.januar til 15.februar))
+        assertFalse(utbetaling.harNærliggendeUtbetaling(1.desember(2017) til 20.januar))
+        assertFalse(utbetaling.harNærliggendeUtbetaling(1.februar til 15.februar))
+        assertFalse(utbetaling.harNærliggendeUtbetaling(1.januar til 15.januar))
     }
 
     @Test

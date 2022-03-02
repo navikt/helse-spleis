@@ -126,11 +126,9 @@ internal class Utbetaling private constructor(
         return hvisUtbetaling()
     }
 
-    internal fun harNærliggendeUtbetaling(arbeidsgiverperiode: Arbeidsgiverperiode?, other: Periode): Boolean {
+    internal fun harNærliggendeUtbetaling(other: Periode): Boolean {
         if (arbeidsgiverOppdrag.isEmpty() && personOppdrag.isEmpty()) return false
-        if (arbeidsgiverperiode == null) return periode.overlapperMed(other)
-        arbeidsgiverperiode.kjentDag(other.endInclusive)
-        return periode in arbeidsgiverperiode
+        return periode.overlapperMed(other.oppdaterFom(other.start.minusDays(16)))
     }
 
     // this kan revurdere other gitt at fagsystemId == other.fagsystemId,
@@ -446,7 +444,7 @@ internal class Utbetaling private constructor(
         }
 
         internal fun List<Utbetaling>.harNærliggendeUtbetaling(arbeidsgiverperiode: Arbeidsgiverperiode?, periode: Periode) =
-            aktive().any { it.harNærliggendeUtbetaling(arbeidsgiverperiode, periode) }
+            aktive().any { it.harNærliggendeUtbetaling(periode) }
 
         internal fun List<Utbetaling>.utbetaltTidslinje() =
             utbetalte()

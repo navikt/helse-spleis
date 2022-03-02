@@ -224,6 +224,12 @@ internal class InfotrygdhistorikkElement private constructor(
         }
     }
 
+    internal fun harBetaltRettFør(periode: Periode): Boolean {
+        return perioder.filterIsInstance<Utbetalingsperiode>().any {
+            it.erRettFør(periode)
+        }
+    }
+
     internal fun sisteSykepengedag(orgnummer: String): LocalDate? {
         return utbetalinger(orgnummer).maxOfOrNull { it.endInclusive }
     }

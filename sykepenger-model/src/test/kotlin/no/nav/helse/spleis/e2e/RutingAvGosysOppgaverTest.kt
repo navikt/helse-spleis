@@ -55,11 +55,11 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
         håndterUtbetalingshistorikk(2.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.februar, 3.februar, 100.prosent, 2000.daglig), inntektshistorikk = listOf(
             Inntektsopplysning(ORGNUMMER, 1.februar, 2000.daglig, true)
         ))
-        val søknadHendelseId = håndterSøknad(Sykdom(17.februar, 20.februar, 80.prosent))
+        val søknadId = håndterSøknad(Sykdom(17.februar, 20.februar, 80.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), 17.februar)
 
-        assertTrue(observatør.opprettOppgaveEvent().isEmpty())
-        assertTrue(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().any { søknadHendelseId in it.hendelser })
+        assertTrue(observatør.opprettOppgaveEvent().any { søknadId in it.hendelser })
+        assertFalse(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().any { søknadId in it.hendelser })
     }
 
     @Test
@@ -332,6 +332,89 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(22.januar, 24.januar, 100.prosent))
         val søknadId = håndterSøknad(Sykdom(22.januar, 22.januar, 100.prosent))
 
+        assertTrue(observatør.opprettOppgaveEvent().any { søknadId in it.hendelser })
+        assertFalse(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().any { søknadId in it.hendelser })
+    }
+
+    @Test
+    fun `forlengelse med infotrygd-utbetaling mellom`() {
+        nyttVedtak(1.januar, 31.januar)
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
+        håndterUtbetalingshistorikk(2.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.februar, 28.februar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
+            Inntektsopplysning(ORGNUMMER, 1.februar, INNTEKT, true)
+        ))
+        val søknadId = håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
+        person.søppelbøtte(hendelselogg, 1.mars til 31.mars)
+        assertTrue(observatør.opprettOppgaveEvent().any { søknadId in it.hendelser })
+        assertFalse(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().any { søknadId in it.hendelser })
+    }
+
+    @Test
+    fun `førstegangbehandling med infotrygd-utbetaling mellom`() {
+        nyttVedtak(1.januar, 31.januar)
+        håndterSykmelding(Sykmeldingsperiode(10.mars, 31.mars, 100.prosent))
+        håndterUtbetalingshistorikk(2.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.februar, 28.februar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
+            Inntektsopplysning(ORGNUMMER, 1.februar, INNTEKT, true)
+        ))
+        val søknadId = håndterSøknad(Sykdom(10.mars, 31.mars, 100.prosent))
+        person.søppelbøtte(hendelselogg, 10.mars til 31.mars)
+        assertTrue(observatør.opprettOppgaveEvent().any { søknadId in it.hendelser })
+        assertFalse(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().any { søknadId in it.hendelser })
+    }
+
+    @Test
+    fun `førstegangbehandling med kort infotrygd-utbetaling mellom`() {
+        nyttVedtak(1.januar, 31.januar)
+        håndterSykmelding(Sykmeldingsperiode(12.februar, 28.februar, 100.prosent))
+        håndterUtbetalingshistorikk(2.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.februar, 8.februar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
+            Inntektsopplysning(ORGNUMMER, 1.februar, INNTEKT, true)
+        ))
+        val søknadId = håndterSøknad(Sykdom(12.februar, 28.februar, 100.prosent))
+        person.søppelbøtte(hendelselogg, 12.februar til 28.februar)
+        assertFalse(observatør.opprettOppgaveEvent().any { søknadId in it.hendelser })
+        assertTrue(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().any { søknadId in it.hendelser }) {
+            "Selv om det er en Infotrygd-utbetaling mellom så er det ikke kritisk at vi likevel ruter oppgavene til Speil-benken," +
+                "mht. at vi også har en utbetaling innenfor 16 dager fra perioden som kastes ut. En fremtidig utvikler har " +
+                "likevel lov til å endre denne oppførselen :)"
+        }
+    }
+
+    @Test
+    fun `direkte overgang fra infotrygd`() {
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        val søknadId = håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+        håndterUtbetalingshistorikk(1.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 31.januar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
+            Inntektsopplysning(ORGNUMMER, 17.januar, INNTEKT, true)
+        ))
+        person.søppelbøtte(hendelselogg, 1.februar til 28.februar)
+        assertTrue(observatør.opprettOppgaveEvent().any { søknadId in it.hendelser })
+        assertFalse(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().any { søknadId in it.hendelser })
+    }
+
+    @Test
+    fun `infotrygdforlengelse med spleis-utbetaling mellom`() {
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+        håndterUtbetalingshistorikk(1.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 31.januar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
+            Inntektsopplysning(ORGNUMMER, 17.januar, INNTEKT, true)
+        ))
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+
+        håndterSykmelding(Sykmeldingsperiode(1.april, 30.april, 100.prosent))
+        val søknadId = håndterSøknad(Sykdom(1.april, 30.april, 100.prosent))
+        håndterUtbetalingshistorikk(2.vedtaksperiode,
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 31.januar, 100.prosent, INNTEKT),
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.mars, 31.mars, 100.prosent, INNTEKT),
+            inntektshistorikk = listOf(
+                Inntektsopplysning(ORGNUMMER, 17.januar, INNTEKT, true),
+                Inntektsopplysning(ORGNUMMER, 1.mars, INNTEKT, true)
+            )
+        )
+
+        person.søppelbøtte(hendelselogg, 1.april til 30.april)
         assertTrue(observatør.opprettOppgaveEvent().any { søknadId in it.hendelser })
         assertFalse(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().any { søknadId in it.hendelser })
     }
