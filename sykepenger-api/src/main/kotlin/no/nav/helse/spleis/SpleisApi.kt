@@ -9,9 +9,13 @@ import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
 import io.ktor.util.pipeline.*
+import io.prometheus.client.Histogram
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import no.nav.helse.person.Person
 import no.nav.helse.person.etterlevelse.MaskinellJurist
+import no.nav.helse.serde.SerialisertPerson
+import no.nav.helse.serde.api.PersonDTO
 import no.nav.helse.serde.api.serializePersonForSporing
 import no.nav.helse.serde.serialize
 import no.nav.helse.spleis.dao.HendelseDao
@@ -22,6 +26,19 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 import javax.sql.DataSource
+
+private object ApiMetrikker {
+    private val responstid = Histogram
+        .build("person_snapshot_api", "Metrikker for henting av speil-snapshot")
+        .labelNames("operasjon")
+        .register()
+
+    fun målDatabase(block: () -> SerialisertPerson?): SerialisertPerson? = responstid.labels("hent_person").time(block)
+
+    fun målDeserialisering(block: () -> Person): Person = responstid.labels("deserialiser_person").time(block)
+
+    fun målByggSnapshot(block: () -> PersonDTO): PersonDTO = responstid.labels("bygg_snapshot").time(block)
+}
 
 internal fun Application.spesialistApi(dataSource: DataSource, authProviderName: String) {
 
@@ -37,9 +54,9 @@ internal fun Application.spesialistApi(dataSource: DataSource, authProviderName:
                     val fnr = call.request.header("fnr")!!.toLong()
                     sikkerLogg.info("Serverer person-snapshot for fødselsnummer $fnr")
                     try {
-                        personDao.hentPersonFraFnr(fnr)
-                            ?.deserialize(MaskinellJurist()) { hendelseDao.hentAlleHendelser(fnr) }
-                            ?.let { håndterPerson(it, hendelseDao) }
+                        ApiMetrikker.målDatabase { personDao.hentPersonFraFnr(fnr) }
+                            ?.let { ApiMetrikker.målDeserialisering { it.deserialize(MaskinellJurist()) { hendelseDao.hentAlleHendelser(fnr) } } }
+                            ?.let { ApiMetrikker.målByggSnapshot { håndterPerson(it, hendelseDao) } }
                             ?.let { call.respond(it) }
                             ?: call.respond(HttpStatusCode.NotFound, "Resource not found")
                     } catch (e: RuntimeException) {
