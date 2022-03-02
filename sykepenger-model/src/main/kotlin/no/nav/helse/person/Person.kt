@@ -490,9 +490,9 @@ class Person private constructor(
             }
         }
 
-    internal fun harNærliggendeUtbetaling(arbeidsgiverperiode: Arbeidsgiverperiode?, periode: Periode): Boolean {
+    internal fun harNærliggendeUtbetaling(periode: Periode): Boolean {
         if (infotrygdhistorikk.harBetaltRettFør(periode)) return false
-        return arbeidsgivere.any { it.harNærliggendeUtbetaling(arbeidsgiverperiode, periode.oppdaterTom(periode.endInclusive.plusYears(3))) }
+        return arbeidsgivere.any { it.harNærliggendeUtbetaling(periode.oppdaterTom(periode.endInclusive.plusYears(3))) }
     }
 
     internal fun lagreDødsdato(dødsdato: LocalDate) {

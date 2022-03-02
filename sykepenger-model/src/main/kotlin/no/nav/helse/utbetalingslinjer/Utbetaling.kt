@@ -13,7 +13,6 @@ import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Fagområde.Sykepenger
 import no.nav.helse.utbetalingslinjer.Fagområde.SykepengerRefusjon
-import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -443,7 +442,7 @@ internal class Utbetaling private constructor(
             }
         }
 
-        internal fun List<Utbetaling>.harNærliggendeUtbetaling(arbeidsgiverperiode: Arbeidsgiverperiode?, periode: Periode) =
+        internal fun List<Utbetaling>.harNærliggendeUtbetaling(periode: Periode) =
             aktive().any { it.harNærliggendeUtbetaling(periode) }
 
         internal fun List<Utbetaling>.utbetaltTidslinje() =

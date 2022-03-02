@@ -754,7 +754,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun harNærliggendeUtbetaling(): Boolean {
-        return person.harNærliggendeUtbetaling(finnArbeidsgiverperiode(), periode)
+        return person.harNærliggendeUtbetaling(periode)
     }
 
     private fun mottaUtbetalingTilRevurdering(hendelse: ArbeidstakerHendelse, utbetaling: Utbetaling) {

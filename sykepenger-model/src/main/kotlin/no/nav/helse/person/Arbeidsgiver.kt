@@ -394,7 +394,7 @@ internal class Arbeidsgiver private constructor(
         noenHarHåndtert(søknad, Vedtaksperiode::håndter, "Forventet ikke ${søknad.kilde}. Har nok ikke mottatt sykmelding")
         if (søknad.hasErrorsOrWorse()) {
             val søknadsperiode = søknad.sykdomstidslinje().periode()
-            val harNærliggendeUtbetaling = søknadsperiode?.let { person.harNærliggendeUtbetaling(arbeidsgiverperiode(it, SubsumsjonObserver.NullObserver), it) } ?: false
+            val harNærliggendeUtbetaling = søknadsperiode?.let { person.harNærliggendeUtbetaling(it) } ?: false
             if (harNærliggendeUtbetaling) person.emitOpprettOppgaveForSpeilsaksbehandlereEvent(søknad) else person.emitOpprettOppgaveEvent(søknad)
             person.emitHendelseIkkeHåndtert(søknad)
         }
@@ -927,8 +927,8 @@ internal class Arbeidsgiver private constructor(
     internal fun tidligerePerioderFerdigBehandlet(vedtaksperiode: Vedtaksperiode) =
         Vedtaksperiode.tidligerePerioderFerdigBehandlet(vedtaksperioder, vedtaksperiode)
 
-    internal fun harNærliggendeUtbetaling(arbeidsgiverperiode: Arbeidsgiverperiode?, periode: Periode) =
-        utbetalinger.harNærliggendeUtbetaling(arbeidsgiverperiode, periode)
+    internal fun harNærliggendeUtbetaling(periode: Periode) =
+        utbetalinger.harNærliggendeUtbetaling(periode)
 
     internal fun alleAndrePerioderErKlare(vedtaksperiode: Vedtaksperiode) = vedtaksperioder.filterNot { it == vedtaksperiode }.none(IKKE_FERDIG_REVURDERT)
 
