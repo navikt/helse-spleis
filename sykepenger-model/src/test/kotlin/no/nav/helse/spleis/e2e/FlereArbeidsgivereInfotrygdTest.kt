@@ -906,7 +906,7 @@ internal class FlereArbeidsgivereInfotrygdTest : AbstractEndToEndTest()  {
         assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD, orgnummer = a2)
     }
 
-    @ForventetFeil("Det finnes ikke inntekt for skjæringstidspunktet (4. januar)")
+    @ForventetFeil("Det finnes ikke inntekt for skjæringstidspunktet (4. januar)") // kandidat for sletting?
     @Test
     fun `Tillater flere arbeidsgivere selv om ikke alle har samme periodetype`() {
         val periode = 27.januar(2021) til 31.januar(2021)

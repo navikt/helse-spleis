@@ -758,7 +758,6 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         assertWarning("Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold", 1.vedtaksperiode.filter(a1))
     }
 
-    @ForventetFeil("TODO")
     @Test
     fun `skal ikke gå til AvventerHistorikk uten IM fra alle arbeidsgivere om vi ikke overlapper med første vedtaksperiode`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 17.januar, 100.prosent), orgnummer = a1)
@@ -770,10 +769,13 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(18.januar, 10.februar, 100.prosent), orgnummer = a2)
         håndterInntektsmelding(listOf(18.januar til 2.februar), orgnummer = a2)
 
-        assertNotEquals(AVVENTER_HISTORIKK, observatør.tilstandsendringer[1.vedtaksperiode.id(a2)]?.last())
+        assertForventetFeil(
+            forklaring = "a2 burde vente på IM til a1 før den går videre til AvventerHistorikk",
+            ønsket = {assertNotEquals(AVVENTER_HISTORIKK, observatør.tilstandsendringer[1.vedtaksperiode.id(a2)]?.last())},
+            nå = {assertEquals(AVVENTER_HISTORIKK, observatør.tilstandsendringer[1.vedtaksperiode.id(a2)]?.last())}
+        )
     }
 
-    @ForventetFeil("TODO")
     @Test
     fun `forlengelse av ghost med IM som har første fraværsdag på annen måned enn skjæringstidspunkt skal ikke vente på IM`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
@@ -791,10 +793,15 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(13.februar, 28.februar, 100.prosent), orgnummer = a2)
 
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a2)
-        assertNotEquals(AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE, observatør.tilstandsendringer[2.vedtaksperiode.id(a2)]?.last())
+
+        assertForventetFeil(
+            forklaring = "Vi trenger ikke å vente på IM når en IM allerede har truffet første fraværsdag på ag2, " +
+                "selvom det er på en måned enn skjæringstidspunktet",
+            nå = {assertEquals(AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE, observatør.tilstandsendringer[2.vedtaksperiode.id(a2)]?.last())},
+            ønsket = {assertNotEquals(AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE, observatør.tilstandsendringer[2.vedtaksperiode.id(a2)]?.last())}
+        )
     }
 
-    @ForventetFeil("TODO")
     @Test
     fun `forlengelse av ghost med IM som har første fraværsdag på annen måned enn skjæringstidspunkt skal ikke vente på IM (uferdig)`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
@@ -811,9 +818,19 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(21.februar, 28.februar, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(21.februar, 28.februar, 100.prosent), orgnummer = a2)
 
-        // TODO: Denne asserten må fjernes når vi håndterer overlapp ved flere AG mer riktig
-        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a2)
-        assertNotEquals(AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, observatør.tilstandsendringer[2.vedtaksperiode.id(a2)]?.last())
+        assertForventetFeil(
+            forklaring = "Vi trenger ikke å vente på IM når en IM allerede har truffet første fraværsdag på ag2, " +
+                "selvom det er på en måned enn skjæringstidspunktet",
+            nå = {
+                assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
+                assertEquals(AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, observatør.tilstandsendringer[2.vedtaksperiode.id(a2)]?.last())
+            },
+            ønsket = {
+                // TODO: Denne asserten må fjernes når vi håndterer overlapp ved flere AG mer riktig
+                assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a2)
+                assertNotEquals(AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, observatør.tilstandsendringer[2.vedtaksperiode.id(a2)]?.last())
+            }
+        )
     }
 
     @Test
