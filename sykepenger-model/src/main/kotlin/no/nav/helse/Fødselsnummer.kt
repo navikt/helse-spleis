@@ -29,9 +29,6 @@ class Fødselsnummer private constructor(private val value: String) {
     }
 
     companion object {
-        internal fun brukerutbetalingfilter(fødselsnummer: Fødselsnummer) =
-            fødselsnummer.fødselsdato.dayOfMonth == 31
-
         fun tilFødselsnummer(fnr: String): Fødselsnummer {
             if (fnr.length == 11 && alleTegnErSiffer(fnr)) return Fødselsnummer(fnr)
             else throw RuntimeException("$fnr er ikke et gyldig fødselsnummer")
