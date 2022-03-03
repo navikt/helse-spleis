@@ -4,6 +4,8 @@ import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.januar
 import no.nav.helse.mars
+import no.nav.helse.november
+import no.nav.helse.person.AbstractPersonTest
 import no.nav.helse.serde.serdeObjectMapper
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
@@ -43,7 +45,7 @@ internal class V147LagreArbeidsforholdForOpptjeningTest : MigrationTest(V147Lagr
         )
 
         vilkårsgrunnlag = mapOf(
-            vilkårsgrunnlagId2 to ("VILKÅRSGRUNNLAG" to vilkårsgrunnlag(arbeidsforhold = arbeidsforhold2))
+            vilkårsgrunnlagId2 to ("VILKÅRSGRUNNLAG" to vilkårsgrunnlag(*arbeidsforhold2))
         )
 
         assertMigration(
@@ -69,14 +71,32 @@ internal class V147LagreArbeidsforholdForOpptjeningTest : MigrationTest(V147Lagr
         )
 
         vilkårsgrunnlag = mapOf(
-            vilkårsgrunnlagId1 to ("VILKÅRSGRUNNLAG" to vilkårsgrunnlag(arbeidsforhold = arbeidsforhold1)),
-            vilkårsgrunnlagId2 to ("VILKÅRSGRUNNLAG" to vilkårsgrunnlag(arbeidsforhold = arbeidsforhold2))
+            vilkårsgrunnlagId1 to ("VILKÅRSGRUNNLAG" to vilkårsgrunnlag(*arbeidsforhold1)),
+            vilkårsgrunnlagId2 to ("VILKÅRSGRUNNLAG" to vilkårsgrunnlag(*arbeidsforhold2))
         )
 
         assertMigration(
             "/migrations/147/relevantArbeidsforholdForOpptjeningIArbeidsforholdhistorikkenEksisterendeArbeidsgiverExpected.json",
             "/migrations/147/relevantArbeidsforholdForOpptjeningIArbeidsforholdhistorikkenEksisterendeArbeidsgiverOriginal.json",
             JSONCompareMode.LENIENT
+        )
+    }
+
+    @Test
+    fun `en arbeidsgiver med flere opptjeningsperioder for samme orgnummer`() {
+        val vilkårsgrunnlagId = UUID.fromString("ba640e1e-5fac-4e61-9b0f-52aa4f819702")
+        val arbeidsforhold = arrayOf(
+            Arbeidsforhold(AbstractPersonTest.a1, LocalDate.EPOCH, 1.desember(2017)),
+            Arbeidsforhold(AbstractPersonTest.a1, 1.november(2017), null)
+        )
+
+        vilkårsgrunnlag = mapOf(
+            vilkårsgrunnlagId to ("VILKÅRSGRUNNLAG" to vilkårsgrunnlag(*arbeidsforhold))
+        )
+
+        assertMigration(
+            "/migrations/147/enArbeidsgiverFlereOpptjeningsperioderExpected.json",
+            "/migrations/147/enArbeidsgiverFlereOpptjeningsperioderOriginal.json"
         )
     }
 

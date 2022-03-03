@@ -146,8 +146,7 @@ private fun Iterable<JsonNode>.toArbeidsforholdhistorikk() =
 private fun Opptjeningsgrunnlag.tilOpptjening(): ObjectNode {
     val arbeidsforholdNoder = serdeObjectMapper.createArrayNode()
     arbeidsforhold
-        //.groupBy { it.orgnummer } // TODO: Denne er skummel
-        .map { it.orgnummer to listOf(it) }
+        .groupBy { it.orgnummer }
         .forEach { (orgnummer, grupperteArbeidsforhold) ->
         arbeidsforholdNoder.addObject()
             .put("orgnummer", orgnummer)
