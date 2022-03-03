@@ -39,6 +39,11 @@ internal class ProbeApi {
             server.stop(5)
             logger.info("Stopper server på port $port")
         })
+        Thread.currentThread().setUncaughtExceptionHandler { _, e ->
+            logger.error("Uhåndtert feil", e)
+            server.stop(5)
+            logger.info("Stopper server på port $port")
+        }
     }
 
     private companion object {
