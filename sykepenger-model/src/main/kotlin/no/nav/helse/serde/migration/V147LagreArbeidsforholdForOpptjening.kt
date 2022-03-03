@@ -18,13 +18,11 @@ internal class V147LagreArbeidsforholdForOpptjening : JsonMigration(version = 14
     /* DETTE ER VÅR PLAN:
     * To trinns rakett:
     * 1. for hver vilkårsgrunnlagmelding med meldingsreferanse: migrer inn opptjening i vilkårsgrunnlag med samme meldingsreferanse
-    * 2. kobler sammen overstyr inntekt-hendelse
-    *       a) finn den originale vilkårsgrunnlaget som ble overstyrt
+    * 2. kobler sammen opptjening for vilkårsgrunnlag med overstyrt inntekt
+    *       a) finn den originale vilkårsgrunnlaget som ble overstyrt via antallOpptjeningsdagerErMinst
     *       b) kopier opptjening inn i revurderte vilkårsgrunnøag
     *
     * Om vi ikke finner via meldingsreferanse
-    *   - prøv fuzzy matching på alle andre felter
-    *   - fom/skjæringstidspunkt?
     *   - lag dummyopptjening
     * */
     override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
@@ -37,6 +35,7 @@ internal class V147LagreArbeidsforholdForOpptjening : JsonMigration(version = 14
             val vilkårsgrunnlagMedMeldingsreferanse = jsonNode.get("vilkårsgrunnlagHistorikk")
                 .flatMap { it.get("vilkårsgrunnlag") }
                 .filter { it.get("type").asText() == "Vilkårsprøving" }
+                .filter { it.hasNonNull("meldingsreferanseId") }
                 .filter { it.get("meldingsreferanseId").asText() == vilkårsgrunnlagMelding.key.toString() }
 
             if (vilkårsgrunnlagMedMeldingsreferanse.isEmpty()) {
@@ -57,6 +56,21 @@ internal class V147LagreArbeidsforholdForOpptjening : JsonMigration(version = 14
                 }
         }
 
+        val alleVilkårsgrunnlag = jsonNode.get("vilkårsgrunnlagHistorikk")
+            .flatMap { it.get("vilkårsgrunnlag") }
+
+        alleVilkårsgrunnlag
+            .filter { !it.hasNonNull("opptjening") }
+            .map { it as ObjectNode }
+            .forEach { vilkårsgrunnlagUtenOpptjening ->
+                val matchendeAntallOpptjeningsdager = alleVilkårsgrunnlag.firstOrNull { vilkårsgrunnlag ->
+                    vilkårsgrunnlagUtenOpptjening["antallOpptjeningsdagerErMinst"].asText() == vilkårsgrunnlag["antallOpptjeningsdagerErMinst"].asText()
+                        && vilkårsgrunnlag.hasNonNull("opptjening")
+                }
+                if (matchendeAntallOpptjeningsdager != null) {
+                    vilkårsgrunnlagUtenOpptjening.set<ObjectNode>("opptjening", matchendeAntallOpptjeningsdager["opptjening"].deepCopy())
+                }
+            }
     }
 
     private fun ObjectNode.emptyArray(name: String) = apply { withArray(name) }

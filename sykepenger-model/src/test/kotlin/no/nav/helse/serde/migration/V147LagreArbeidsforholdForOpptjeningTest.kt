@@ -5,7 +5,6 @@ import no.nav.helse.februar
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.november
-import no.nav.helse.person.AbstractPersonTest
 import no.nav.helse.serde.serdeObjectMapper
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
@@ -86,8 +85,8 @@ internal class V147LagreArbeidsforholdForOpptjeningTest : MigrationTest(V147Lagr
     fun `en arbeidsgiver med flere opptjeningsperioder for samme orgnummer`() {
         val vilkårsgrunnlagId = UUID.fromString("ba640e1e-5fac-4e61-9b0f-52aa4f819702")
         val arbeidsforhold = arrayOf(
-            Arbeidsforhold(AbstractPersonTest.a1, LocalDate.EPOCH, 1.desember(2017)),
-            Arbeidsforhold(AbstractPersonTest.a1, 1.november(2017), null)
+            Arbeidsforhold("987654321", LocalDate.EPOCH, 1.desember(2017)),
+            Arbeidsforhold("987654321", 1.november(2017), null)
         )
 
         vilkårsgrunnlag = mapOf(
@@ -97,6 +96,38 @@ internal class V147LagreArbeidsforholdForOpptjeningTest : MigrationTest(V147Lagr
         assertMigration(
             "/migrations/147/enArbeidsgiverFlereOpptjeningsperioderExpected.json",
             "/migrations/147/enArbeidsgiverFlereOpptjeningsperioderOriginal.json"
+        )
+    }
+
+    @Test
+    fun `kopierer opptjening for vilkårsgrunnlag med revurdert inntekt`() {
+        val vilkårsgrunnlagId = UUID.fromString("247d1c71-2254-4efc-8900-d7c76f77e027")
+        val arbeidsforhold = arrayOf(
+            Arbeidsforhold("987654321", LocalDate.EPOCH, null)
+        )
+
+        vilkårsgrunnlag = mapOf(
+            vilkårsgrunnlagId to ("VILKÅRSGRUNNLAG" to vilkårsgrunnlag(*arbeidsforhold))
+        )
+        assertMigration(
+            "/migrations/147/enkelPersonMedRevurdertInntektExpected.json",
+            "/migrations/147/enkelPersonMedRevurdertInntektOriginal.json"
+        )
+    }
+
+    @Test
+    fun `kopierer opptjening for vilkårsgrunnlag med lik opptjening og ulikt skjæringstidspunkt`() {
+        val vilkårsgrunnlagId = UUID.fromString("247d1c71-2254-4efc-8900-d7c76f77e027")
+        val arbeidsforhold = arrayOf(
+            Arbeidsforhold("987654321", LocalDate.EPOCH, null)
+        )
+
+        vilkårsgrunnlag = mapOf(
+            vilkårsgrunnlagId to ("VILKÅRSGRUNNLAG" to vilkårsgrunnlag(*arbeidsforhold))
+        )
+        assertMigration(
+            "/migrations/147/enkelPersonMedLignendeOpptjeningUliktSkjæringstidspunktExpected.json",
+            "/migrations/147/enkelPersonMedLignendeOpptjeningUliktSkjæringstidspunktOriginal.json"
         )
     }
 
