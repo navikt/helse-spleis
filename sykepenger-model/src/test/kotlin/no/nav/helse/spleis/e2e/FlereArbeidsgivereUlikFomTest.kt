@@ -1177,81 +1177,6 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         assertEquals(32000.månedlig, inntektsopplysning?.grunnlagForSykepengegrunnlag())
     }
 
-    @ForventetFeil("https://trello.com/c/k21yUamv kan ikke teste dette før denne lappen er fikset")
-    @Test
-    fun `To arbeidsgivere med ulik fom - med tidligere periode med gap i samme måned - velger riktig inntektsmelding for AG med senest fom`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 18.januar, 100.prosent), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 18.januar, 100.prosent), orgnummer = a2)
-        håndterSøknad(Sykdom(1.januar, 18.januar, 100.prosent), orgnummer = a1)
-        håndterSøknad(Sykdom(1.januar, 18.januar, 100.prosent), orgnummer = a2)
-
-        håndterSykmelding(Sykmeldingsperiode(20.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(22.januar, 31.januar, 100.prosent), orgnummer = a2)
-        håndterSøknad(Sykdom(20.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterSøknad(Sykdom(22.januar, 31.januar, 100.prosent), orgnummer = a2)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 20.januar, orgnummer = a1)
-        // Sender med en annen inntekt enn i forrige IM for å kunne asserte på at det er denne vi bruker
-        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 32000.månedlig, førsteFraværsdag = 22.januar, orgnummer = a2)
-
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 31000.månedlig, orgnummer = a2)
-
-        val sammenligningsgrunnlag = Inntektsvurdering(
-            listOf(
-                sammenligningsgrunnlag(a1, 20.januar, INNTEKT.repeat(12)),
-                sammenligningsgrunnlag(a2, 20.januar, 32000.månedlig.repeat(12))
-            )
-        )
-        val sykepengegrunnlag = InntektForSykepengegrunnlag(
-            inntekter = listOf(
-                grunnlag(a1, 20.januar, INNTEKT.repeat(12)),
-                grunnlag(a2, 20.januar, INNTEKT.repeat(12))
-            ), arbeidsforhold = emptyList()
-        )
-
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        håndterVilkårsgrunnlag(
-            1.vedtaksperiode,
-            inntektsvurdering = sammenligningsgrunnlag,
-            inntektsvurderingForSykepengegrunnlag = sykepengegrunnlag,
-            orgnummer = a1
-        )
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(orgnummer = a1)
-
-        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
-        håndterSimulering(1.vedtaksperiode, orgnummer = a2)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
-        håndterUtbetalt(orgnummer = a2)
-
-        håndterYtelser(2.vedtaksperiode, orgnummer = a2)
-        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
-
-        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
-        håndterVilkårsgrunnlag(
-            2.vedtaksperiode,
-            inntektsvurdering = sammenligningsgrunnlag,
-            inntektsvurderingForSykepengegrunnlag = sykepengegrunnlag,
-            orgnummer = a1
-        )
-        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
-        håndterSimulering(2.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(orgnummer = a1)
-
-        håndterYtelser(2.vedtaksperiode, orgnummer = a2)
-        håndterSimulering(2.vedtaksperiode, orgnummer = a2)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a2)
-        håndterUtbetalt(orgnummer = a2)
-
-        assertEquals(
-            32000.månedlig,
-            inspektør(a2).vilkårsgrunnlag(1.vedtaksperiode)?.sykepengegrunnlag()?.inntektsopplysningPerArbeidsgiver()?.get(a2)?.grunnlagForSykepengegrunnlag()
-        )
-    }
-
     @Disabled("TODO: Utbetalingstidslinjen gir ikke mening")
     @Test
     fun `Fire arbeidsgivere, to med fom i januar og to med fom i februar `() {
@@ -1382,7 +1307,6 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         assertEquals(569, a4Linje.beløp)
     }
 
-    @ForventetFeil("https://trello.com/c/vVcsM2tp")
     @Test
     fun `alle arbeidsgivere burde hoppe inn i AVVENTER_ARBEIDSGIVERE dersom de har samme skjæringstidspunkt men ikke overlapper`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
@@ -1391,6 +1315,20 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
 
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a3)
         håndterInntektsmelding(listOf(1.februar til 16.februar), orgnummer = a3)
-        assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_ARBEIDSGIVERE, orgnummer = a3)
+        assertForventetFeil(
+            forklaring = "Arbeidsgiver 3 har samme skjæringstidspunkt og burde vente på de andre arbeidsgiverne før den går videre",
+            nå = {
+                assertTilstander(
+                    1.vedtaksperiode,
+                    START,
+                    MOTTATT_SYKMELDING_FERDIG_GAP,
+                    AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+                    AVVENTER_HISTORIKK,
+                    orgnummer = a3
+                )
+            },
+            ønsket = {
+                assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_ARBEIDSGIVERE, orgnummer = a3)
+            })
     }
 }
