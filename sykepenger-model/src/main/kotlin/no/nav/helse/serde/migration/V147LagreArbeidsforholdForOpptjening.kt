@@ -8,12 +8,14 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.serde.migration.V147LagreArbeidsforholdForOpptjening.Arbeidsforhold
 import no.nav.helse.serde.migration.V147LagreArbeidsforholdForOpptjening.Opptjeningsgrunnlag
 import no.nav.helse.serde.serdeObjectMapper
+import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.util.*
 
 internal class V147LagreArbeidsforholdForOpptjening : JsonMigration(version = 147) {
     override val description: String =
         "Lagrer arbeidsforhold relevant til opptjening i vilkårsgrunnlag og arbeidsforhold-historikken"
+    private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
 
     /* DETTE ER VÅR PLAN:
     * To trinns rakett:
@@ -31,6 +33,8 @@ internal class V147LagreArbeidsforholdForOpptjening : JsonMigration(version = 14
             meldinger.filterValues { it.first == "VILKÅRSGRUNNLAG" }
                 .mapValues { (_, melding) -> serdeObjectMapper.readTree(melding.second) }
 
+        val fødselsnummer = jsonNode["fødselsnummer"].asText()
+
         vilkårsgrunnlagMeldinger.forEach { vilkårsgrunnlagMelding ->
             val vilkårsgrunnlagMedMeldingsreferanse = jsonNode.get("vilkårsgrunnlagHistorikk")
                 .flatMap { it.get("vilkårsgrunnlag") }
@@ -41,7 +45,7 @@ internal class V147LagreArbeidsforholdForOpptjening : JsonMigration(version = 14
             if (vilkårsgrunnlagMedMeldingsreferanse.isEmpty()) {
                 return@forEach
             }
-            val opptjeningFraMelding = vilkårsgrunnlagMelding.tilOpptjeningsgrunnlag(
+            val opptjeningFraMelding = vilkårsgrunnlagMelding.value.tilOpptjeningsgrunnlag(
                 LocalDate.parse(vilkårsgrunnlagMedMeldingsreferanse.first().get("skjæringstidspunkt").asText())
             )
             leggTilArbeidsforholdBruktTilOpptjeningIArbeidsforholdhistorikken(
@@ -64,14 +68,39 @@ internal class V147LagreArbeidsforholdForOpptjening : JsonMigration(version = 14
             .map { it as ObjectNode }
             .forEach { vilkårsgrunnlagUtenOpptjening ->
                 val matchendeAntallOpptjeningsdager = alleVilkårsgrunnlag.firstOrNull { vilkårsgrunnlag ->
-                    vilkårsgrunnlagUtenOpptjening["antallOpptjeningsdagerErMinst"].asText() == vilkårsgrunnlag["antallOpptjeningsdagerErMinst"].asText()
+                    vilkårsgrunnlagUtenOpptjening.antallOpptjeningsdager().asText() == vilkårsgrunnlag.antallOpptjeningsdager().asText()
                         && vilkårsgrunnlag.hasNonNull("opptjening")
                 }
                 if (matchendeAntallOpptjeningsdager != null) {
                     vilkårsgrunnlagUtenOpptjening.set<ObjectNode>("opptjening", matchendeAntallOpptjeningsdager["opptjening"].deepCopy())
                 }
             }
+
+        alleVilkårsgrunnlag
+            .filter { !it.hasNonNull("opptjening") }
+            .map { it as ObjectNode }
+            .forEach {
+                val skjæringstidspunkt = LocalDate.parse(it["skjæringstidspunkt"].asText())
+                val vilkårsgrunnlagId = it["vilkårsgrunnlagId"].asText()
+                val opptjeningFom = skjæringstidspunkt.minusDays(it.antallOpptjeningsdager().asLong())
+                sikkerLogg.info("Genererer dummy-arbeidsforhold for vilkårsgrunnlagId=$vilkårsgrunnlagId "
+                    + "og fødselsnummer=$fødselsnummer")
+                val generertArbeidsforhold = listOf(
+                    Opptjeningsgrunnlag.OpptjeningsgrunnlagArbeidsforhold(
+                        orgnummer = "MANGLET_ORGNUMMER_VED_MIGRERING",
+                        ansattFom = opptjeningFom.toString(),
+                        ansattTom = null
+                    )
+                )
+                it.set<ObjectNode>("opptjening", Opptjeningsgrunnlag(
+                    arbeidsforhold = generertArbeidsforhold,
+                    opptjeningsperiode = opptjeningFom til skjæringstidspunkt,
+                    skjæringstidspunkt = skjæringstidspunkt
+                ).tilOpptjening())
+            }
     }
+
+    private fun JsonNode.antallOpptjeningsdager() = get("antallOpptjeningsdagerErMinst")
 
     private fun ObjectNode.emptyArray(name: String) = apply { withArray(name) }
 
@@ -128,7 +157,6 @@ internal class V147LagreArbeidsforholdForOpptjening : JsonMigration(version = 14
 
 
     data class Opptjeningsgrunnlag(
-        val meldingsreferanse: String,
         val arbeidsforhold: List<OpptjeningsgrunnlagArbeidsforhold>,
         val opptjeningsperiode: Periode,
         val skjæringstidspunkt: LocalDate
@@ -189,10 +217,9 @@ internal fun Collection<Periode>.sammenhengende(skjæringstidspunkt: LocalDate) 
 
 private fun JsonNode.optional(field: String) = takeIf { it.hasNonNull(field) }?.get(field)
 
-private fun Map.Entry<UUID, JsonNode>.tilOpptjeningsgrunnlag(skjæringstidspunkt: LocalDate): Opptjeningsgrunnlag {
-    val (meldingsreferanse, json) = this
+private fun JsonNode.tilOpptjeningsgrunnlag(skjæringstidspunkt: LocalDate): Opptjeningsgrunnlag {
 
-    val løsning = json["@løsning"]
+    val løsning = get("@løsning")
     val opptjening = løsning.optional("Opptjening") ?: løsning.get("ArbeidsforholdV2")
 
     val arbeidsforhold = opptjening.map {
@@ -208,7 +235,6 @@ private fun Map.Entry<UUID, JsonNode>.tilOpptjeningsgrunnlag(skjæringstidspunkt
         .sammenhengende(skjæringstidspunkt)
 
     return Opptjeningsgrunnlag(
-        meldingsreferanse = meldingsreferanse.toString(),
         arbeidsforhold = arbeidsforhold.filter { LocalDate.parse(it.ansattFom) in opptjeningsperiode },
         opptjeningsperiode = opptjeningsperiode,
         skjæringstidspunkt = skjæringstidspunkt

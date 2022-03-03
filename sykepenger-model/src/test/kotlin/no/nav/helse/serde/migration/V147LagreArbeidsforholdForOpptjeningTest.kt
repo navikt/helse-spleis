@@ -131,6 +131,15 @@ internal class V147LagreArbeidsforholdForOpptjeningTest : MigrationTest(V147Lagr
         )
     }
 
+    @Test
+    fun `lager dummy-opptjening ved manglende kobling`() {
+        vilkårsgrunnlag = emptyMap()
+        assertMigration(
+            "/migrations/147/ingenKoblingTilVilkårsgrunnlagsmeldingExpected.json",
+            "/migrations/147/ingenKoblingTilVilkårsgrunnlagsmeldingOriginal.json"
+        )
+    }
+
     @Language("JSON")
     private fun vilkårsgrunnlag(
         vararg arbeidsforhold: Arbeidsforhold
