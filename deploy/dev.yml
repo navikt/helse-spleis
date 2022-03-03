@@ -33,8 +33,12 @@ spec:
   webproxy: true
   kafka:
     pool: nav-dev
-  vault:
-    enabled: true
+  gcp:
+    sqlInstances:
+      - type: POSTGRES_14
+        databases:
+          - name: spleis
+            envVarPrefix: DATABASE
   secureLogs:
     enabled: true
   env:
@@ -44,13 +48,5 @@ spec:
     value: tbd-spleis-v1
   - name: KAFKA_RESET_POLICY
     value: earliest
-  - name: DATABASE_HOST
-    value: b27dbvl008.preprod.local
-  - name: DATABASE_PORT
-    value: "5432"
-  - name: DATABASE_NAME
-    value: spleis
-  - name: VAULT_MOUNTPATH
-    value: postgresql/preprod-fss/
   - name: GraphQLPlayground
     value: "true"

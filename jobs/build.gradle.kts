@@ -1,4 +1,5 @@
 val mainClass = "no.nav.helse.spleis.jobs.AppKt"
+val vaultJdbcVersion = "1.3.9"
 
 tasks.withType<Test> {
     useJUnitPlatform()
@@ -9,6 +10,7 @@ tasks.withType<Test> {
 
 dependencies {
     implementation("com.github.navikt:rapids-and-rivers-cli:1.473885b")
+    implementation("no.nav:vault-jdbc:$vaultJdbcVersion")
 }
 
 tasks.named<Jar>("jar") {

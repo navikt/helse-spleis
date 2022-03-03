@@ -1,6 +1,7 @@
 val micrometerRegistryPrometheusVersion = "1.7.5"
 val ktorVersion = "1.5.0"
 val wireMockVersion = "2.31.0"
+val vaultJdbcVersion = "1.3.9"
 
 val mainClass = "no.nav.helse.spleis.AppKt"
 
@@ -11,7 +12,7 @@ dependencies {
 
     implementation("io.ktor:ktor-metrics-micrometer:$ktorVersion")
     implementation("io.micrometer:micrometer-registry-prometheus:$micrometerRegistryPrometheusVersion")
-
+    implementation("no.nav:vault-jdbc:$vaultJdbcVersion")
     implementation("io.ktor:ktor-jackson:$ktorVersion")
 
 

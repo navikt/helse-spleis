@@ -3,7 +3,7 @@ val mainClass = "no.nav.helse.AppKt"
 dependencies {
     implementation("com.github.navikt:rapids-and-rivers:2022.02.28-16.20.1a549dcffaae")
     implementation(project(":sykepenger-model"))
-
+    implementation("org.postgresql:postgresql:42.3.2")
     testImplementation("org.testcontainers:postgresql:1.16.2") {
         exclude("com.fasterxml.jackson.core")
     }

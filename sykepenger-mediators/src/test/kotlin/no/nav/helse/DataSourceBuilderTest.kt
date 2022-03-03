@@ -12,32 +12,9 @@ internal class DataSourceBuilderTest {
             DataSourceBuilder(mapOf(
                 "DATABASE_HOST" to "foobar",
                 "DATABASE_PORT" to "foobar",
-                "DATABASE_NAME" to "foobar",
+                "DATABASE_DATABASE" to "foobar",
                 "DATABASE_USERNAME" to "foobar",
                 "DATABASE_PASSWORD" to "foobar"
-            ))
-        }
-
-        assertDoesNotThrow {
-            DataSourceBuilder(mapOf(
-                "DATABASE_JDBC_URL" to "foobar"
-            ))
-        }
-
-        assertDoesNotThrow {
-            DataSourceBuilder(mapOf(
-                "DATABASE_HOST" to "foobar",
-                "DATABASE_PORT" to "foobar",
-                "DATABASE_NAME" to "foobar",
-                "VAULT_MOUNTPATH" to "foobar"
-            ))
-        }
-
-        assertDoesNotThrow {
-            DataSourceBuilder(mapOf(
-                "DATABASE_JDBC_URL" to "foobar",
-                "DATABASE_NAME" to "foobar",
-                "VAULT_MOUNTPATH" to "foobar"
             ))
         }
     }
@@ -59,60 +36,31 @@ internal class DataSourceBuilderTest {
         assertThrows<IllegalArgumentException> {
             DataSourceBuilder(
                 mapOf(
-                    "DATABASE_HOST" to "foobar"
-                )
-            )
-        }
-
-        assertThrows<IllegalArgumentException> {
-            DataSourceBuilder(
-                mapOf(
                     "DATABASE_HOST" to "foobar",
                     "DATABASE_PORT" to "foobar"
                 )
             )
         }
 
-        assertThrows<IllegalStateException> {
+        assertThrows<IllegalArgumentException> {
             DataSourceBuilder(
                 mapOf(
                     "DATABASE_HOST" to "foobar",
                     "DATABASE_PORT" to "foobar",
-                    "DATABASE_NAME" to "foobar"
+                    "DATABASE_DATABASE" to "foobar"
                 )
             )
         }
 
-        assertThrows<IllegalStateException> {
+        assertThrows<IllegalArgumentException> {
             DataSourceBuilder(
                 mapOf(
                     "DATABASE_HOST" to "foobar",
                     "DATABASE_PORT" to "foobar",
-                    "DATABASE_NAME" to "foobar",
+                    "DATABASE_DATABASE" to "foobar",
                     "DATABASE_USERNAME" to "foobar"
                 )
             )
-        }
-
-        assertThrows<IllegalStateException> {
-            DataSourceBuilder(mapOf(
-                "DATABASE_JDBC_URL" to "foobar",
-                "VAULT_MOUNTPATH" to "foobar"
-            ))
-        }
-
-        assertThrows<IllegalArgumentException> {
-            DataSourceBuilder(mapOf(
-                "VAULT_MOUNTPATH" to "foobar",
-                "DATABASE_USERNAME" to "foobar"
-            ))
-        }
-
-        assertThrows<IllegalArgumentException> {
-            DataSourceBuilder(mapOf(
-                "VAULT_MOUNTPATH" to "foobar",
-                "DATABASE_PASSWORD" to "foobar"
-            ))
         }
     }
 }
