@@ -25,8 +25,8 @@ internal class ApplicationConfiguration(env: Map<String, String> = System.getenv
         gcpProjectId = env["GCP_TEAM_PROJECT_ID"],
         databaseRegion = env["DATABASE_REGION"],
         databaseInstance = env["DATABASE_INSTANCE"],
-        databaseUsername = env["DATABASE_USERNAME"],
-        databasePassword = env["DATABASE_PASSWORD"],
+        databaseUsername = env["DATABASE_SPLEIS_API_USERNAME"],
+        databasePassword = env["DATABASE_SPLEIS_API_PASSWORD"],
         databaseName = env["DATABASE_DATABASE"]
     )
 }

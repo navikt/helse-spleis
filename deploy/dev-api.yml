@@ -60,13 +60,14 @@ spec:
           cluster: dev-gcp
   secureLogs:
     enabled: true
+  secrets:
+    envFrom:
+      - secret: google-sql-spleis-spleis-spleis-api-e80c8e59
   env:
   - name: GraphQLPlayground
     value: "true"
   - name: DATABASE_REGION
     value: "europe-north1"
-  - name: DATABASE_USERNAME
-    value: "spleis-api"
   - name: DATABASE_INSTANCE
     value: "spleis"
   - name: DATABASE_DATABASE
