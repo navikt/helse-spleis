@@ -16,7 +16,7 @@ import javax.sql.DataSource
 class HendelseDaoTest {
 
     private val UNG_PERSON_FNR = "12029240045"
-    private val postgres = PostgreSQLContainer<Nothing>("postgres:13")
+    private val postgres = PostgreSQLContainer<Nothing>("postgres:12")
     private lateinit var dataSource: DataSource
     private lateinit var flyway: Flyway
     private val meldingsReferanse = UUID.randomUUID()
