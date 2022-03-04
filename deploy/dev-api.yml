@@ -60,9 +60,8 @@ spec:
           cluster: dev-gcp
   secureLogs:
     enabled: true
-  secrets:
-    envFrom:
-      - secret: google-sql-spleis-spleis-spleis-api-e80c8e59
+  envFrom:
+    - secret: google-sql-spleis-spleis-spleis-api-e80c8e59
   env:
   - name: GraphQLPlayground
     value: "true"
