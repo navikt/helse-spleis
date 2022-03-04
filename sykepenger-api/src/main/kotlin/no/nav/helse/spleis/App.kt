@@ -61,7 +61,7 @@ internal fun createApp(ktorConfig: KtorConfig, azureConfig: AzureAdAppConfig, da
                 requestResponseTracing(httpTraceLog)
                 nais(teller)
                 azureAdAppAuthentication(azureConfig)
-                val dataSource = dataSourceConfiguration.getDataSource(DataSourceConfiguration.Role.ReadOnly)
+                val dataSource = dataSourceConfiguration.getDataSource()
                 spesialistApi(dataSource, API_SERVICE)
                 spannerApi(dataSource, API_SERVICE)
                 sporingApi(dataSource, API_SERVICE)

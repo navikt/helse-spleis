@@ -22,12 +22,12 @@ internal class ApplicationConfiguration(env: Map<String, String> = System.getenv
 
     internal val dataSourceConfiguration = DataSourceConfiguration(
         jdbcUrl = env["DATABASE_JDBC_URL"],
-        databaseHost = env["DATABASE_HOST"],
-        databasePort = env["DATABASE_PORT"],
+        gcpProjectId = env["GCP_TEAM_PROJECT_ID"],
+        databaseRegion = env["DATABASE_REGION"],
+        databaseInstance = env["DATABASE_INSTANCE"],
         databaseUsername = env["DATABASE_USERNAME"],
         databasePassword = env["DATABASE_PASSWORD"],
-        databaseName = env["DATABASE_NAME"],
-        vaultMountPath = env["VAULT_MOUNTPATH"]
+        databaseName = env["DATABASE_DATABASE"]
     )
 }
 

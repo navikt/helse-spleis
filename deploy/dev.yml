@@ -39,6 +39,8 @@ spec:
         databases:
           - name: spleis
             envVarPrefix: DATABASE
+            users:
+              - name: spleis-api
   secureLogs:
     enabled: true
   env:

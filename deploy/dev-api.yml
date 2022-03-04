@@ -9,7 +9,7 @@ spec:
   image: {{image}}
   port: 8080
   ingresses:
-   - https://spleis-api.dev-fss-pub.nais.io
+   - https://spleis-api.dev.intern.nav.no
   liveness:
     path: /isalive
     initialDelay: 5
@@ -28,6 +28,12 @@ spec:
     min: 1
     max: 2
     cpuThresholdPercentage: 75
+  gcp:
+    permissions:
+      - resource:
+          apiVersion: resourcemanager.cnrm.cloud.google.com/v1beta1
+          kind: Project
+        role: roles/cloudsql.client
   prometheus:
     enabled: true
     path: /metrics
@@ -52,18 +58,16 @@ spec:
         - application: sporing
           namespace: tbd
           cluster: dev-gcp
-  vault:
-    enabled: true
   secureLogs:
     enabled: true
   env:
-  - name: DATABASE_HOST
-    value: b27dbvl008.preprod.local
-  - name: DATABASE_PORT
-    value: "5432"
-  - name: DATABASE_NAME
-    value: spleis
-  - name: VAULT_MOUNTPATH
-    value: postgresql/preprod-fss/
   - name: GraphQLPlayground
     value: "true"
+  - name: DATABASE_REGION
+    value: "europe-north1"
+  - name: DATABASE_USERNAME
+    value: "spleis-api"
+  - name: DATABASE_INSTANCE
+    value: "spleis"
+  - name: DATABASE_DATABASE
+    value: "spleis"
