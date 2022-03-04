@@ -23,11 +23,10 @@ internal class DataSourceConfiguration(
             requireNotNull(databaseInstance) { "database instance must be set if jdbd url is not provided" }
             requireNotNull(databaseName) { "database name must be set if jdbc url is not provided" }
             String.format(
-                "jdbc:postgresql://%s/%s%s%s",
-                "$gcpProjectId:$databaseRegion:$databaseInstance",
+                "jdbc:postgresql:///%s?%s&%s",
                 databaseName,
-                "?cloudSqlInstance=$databaseInstance",
-                "&socketFactory=com.google.cloud.sql.postgres.SocketFactory"
+                "cloudSqlInstance=$gcpProjectId:$databaseRegion:$databaseInstance",
+                "socketFactory=com.google.cloud.sql.postgres.SocketFactory"
             )
         }
 
