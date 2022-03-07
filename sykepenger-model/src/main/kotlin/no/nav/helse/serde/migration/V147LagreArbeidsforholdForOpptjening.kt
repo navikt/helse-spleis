@@ -64,13 +64,14 @@ internal class V147LagreArbeidsforholdForOpptjening : JsonMigration(version = 14
             .flatMap { it.get("vilkårsgrunnlag") }
 
         alleVilkårsgrunnlag
+            .onEach { loggManglendeAntallOpptjeningsdager(it, fødselsnummer) }
             .filter { !it.hasNonNull("opptjening") }
             .map { it as ObjectNode }
             .forEach { vilkårsgrunnlagUtenOpptjening ->
                 val matchendeAntallOpptjeningsdager = alleVilkårsgrunnlag.firstOrNull { vilkårsgrunnlag ->
-                    vilkårsgrunnlagUtenOpptjening.antallOpptjeningsdager(fødselsnummer) == vilkårsgrunnlag.antallOpptjeningsdager(fødselsnummer)
+                    vilkårsgrunnlagUtenOpptjening.antallOpptjeningsdager() == vilkårsgrunnlag.antallOpptjeningsdager()
                         && vilkårsgrunnlagUtenOpptjening["sammenligningsgrunnlag"] == vilkårsgrunnlag["sammenligningsgrunnlag"]
-                        && vilkårsgrunnlag.antallOpptjeningsdager(fødselsnummer) != 0L
+                        && vilkårsgrunnlag.antallOpptjeningsdager() != 0L
                         && vilkårsgrunnlag.hasNonNull("opptjening")
                 }
                 if (matchendeAntallOpptjeningsdager != null) {
@@ -84,7 +85,7 @@ internal class V147LagreArbeidsforholdForOpptjening : JsonMigration(version = 14
             .forEach {
                 val skjæringstidspunkt = LocalDate.parse(it["skjæringstidspunkt"].asText())
                 val vilkårsgrunnlagId = it.vilkårsgrunnlagId()
-                val opptjeningFom = skjæringstidspunkt.minusDays(it.antallOpptjeningsdager(fødselsnummer))
+                val opptjeningFom = skjæringstidspunkt.minusDays(it.antallOpptjeningsdager())
                 sikkerLogg.info("Genererer dummy-arbeidsforhold for vilkårsgrunnlagId=$vilkårsgrunnlagId "
                     + "og fødselsnummer=$fødselsnummer")
                 val generertArbeidsforhold = listOf(
@@ -104,15 +105,12 @@ internal class V147LagreArbeidsforholdForOpptjening : JsonMigration(version = 14
 
     private fun JsonNode.vilkårsgrunnlagId() = get("vilkårsgrunnlagId").asText()
 
-    private fun JsonNode.antallOpptjeningsdager(fødselsnummer: String): Long {
-        return when (val antallDager = optional("antallOpptjeningsdagerErMinst")?.asLong()) {
-            null -> {
-                sikkerLogg.info("Fant ikke antallOpptjeningsdager for fnr=$fødselsnummer, vilkårsgrunnlagId=${vilkårsgrunnlagId()}")
-                0
-            }
-            else -> antallDager
-        }
+    private fun loggManglendeAntallOpptjeningsdager(jsonNode: JsonNode, fødselsnummer: String) {
+        if (!jsonNode.hasNonNull("antallOpptjeningsdagerErMinst"))
+            sikkerLogg.info("Fant ikke antallOpptjeningsdager for fnr=$fødselsnummer, vilkårsgrunnlagId=${jsonNode.vilkårsgrunnlagId()}")
     }
+
+    private fun JsonNode.antallOpptjeningsdager() = optional("antallOpptjeningsdagerErMinst")?.asLong() ?: 0
 
     private fun ObjectNode.emptyArray(name: String) = apply { withArray(name) }
 
