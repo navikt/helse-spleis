@@ -246,6 +246,7 @@ private fun JsonNode.tilOpptjeningsgrunnlag(skjæringstidspunkt: LocalDate): Opp
     }
 
     val opptjeningsperiode = arbeidsforhold
+        .filter { LocalDate.parse(it.ansattFom) < skjæringstidspunkt }
         .map { LocalDate.parse(it.ansattFom) til (it.ansattTom?.let(LocalDate::parse) ?: skjæringstidspunkt) }
         .sammenhengende(skjæringstidspunkt)
 
