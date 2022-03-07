@@ -68,7 +68,8 @@ internal class V147LagreArbeidsforholdForOpptjening : JsonMigration(version = 14
             .map { it as ObjectNode }
             .forEach { vilkårsgrunnlagUtenOpptjening ->
                 val matchendeAntallOpptjeningsdager = alleVilkårsgrunnlag.firstOrNull { vilkårsgrunnlag ->
-                    vilkårsgrunnlagUtenOpptjening.antallOpptjeningsdager().asText() == vilkårsgrunnlag.antallOpptjeningsdager().asText()
+                    vilkårsgrunnlagUtenOpptjening.antallOpptjeningsdager() == vilkårsgrunnlag.antallOpptjeningsdager()
+                        && vilkårsgrunnlagUtenOpptjening["sammenligningsgrunnlag"] == vilkårsgrunnlag["sammenligningsgrunnlag"]
                         && vilkårsgrunnlag.hasNonNull("opptjening")
                 }
                 if (matchendeAntallOpptjeningsdager != null) {

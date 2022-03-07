@@ -10,7 +10,7 @@ import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
 import org.skyscreamer.jsonassert.JSONCompareMode
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 
 internal class V147LagreArbeidsforholdForOpptjeningTest : MigrationTest(V147LagreArbeidsforholdForOpptjening()) {
     private lateinit var vilkårsgrunnlag: Map<UUID, Pair<Navn, Json>>
@@ -154,6 +154,23 @@ internal class V147LagreArbeidsforholdForOpptjeningTest : MigrationTest(V147Lagr
         assertMigration(
             "/migrations/147/ingenKoblingTilVilkårsgrunnlagsmeldingExpected.json",
             "/migrations/147/ingenKoblingTilVilkårsgrunnlagsmeldingOriginal.json"
+        )
+    }
+
+    @Test
+    fun `kopiere ikke opptjening ved ulik sammenligningsgrunnlag og skjæringstidspunkt`() {
+        val meldingsreferanseId = UUID.fromString("0e0dd2b2-9b4f-4d42-86d9-77668fe6f7c9")
+        val arbeidsforhold = arrayOf(
+            Arbeidsforhold("987654321", 1.desember(2018), null)
+        )
+
+        vilkårsgrunnlag = mapOf(
+            meldingsreferanseId to ("VILKÅRSGRUNNLAG" to vilkårsgrunnlag(*arbeidsforhold))
+        )
+
+        assertMigration(
+            "/migrations/147/vilkårsgrunnlagMedUliktSammelingsgrunnlagOgSkjæringstidspunktExpected.json",
+            "/migrations/147/vilkårsgrunnlagMedUliktSammelingsgrunnlagOgSkjæringstidspunktOriginal.json"
         )
     }
 
