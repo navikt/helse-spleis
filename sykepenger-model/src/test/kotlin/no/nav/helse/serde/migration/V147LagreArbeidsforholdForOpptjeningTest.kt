@@ -10,7 +10,7 @@ import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
 import org.skyscreamer.jsonassert.JSONCompareMode
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 
 internal class V147LagreArbeidsforholdForOpptjeningTest : MigrationTest(V147LagreArbeidsforholdForOpptjening()) {
     private lateinit var vilkårsgrunnlag: Map<UUID, Pair<Navn, Json>>
@@ -189,6 +189,16 @@ internal class V147LagreArbeidsforholdForOpptjeningTest : MigrationTest(V147Lagr
             "/migrations/147/personMedNullSomArbeidsForholdExpected.json",
             "/migrations/147/personMedNullSomArbeidsforholdOriginal.json",
             JSONCompareMode.LENIENT
+        )
+    }
+
+    @Test
+    fun `mangler antallOpptjeningsdagerErMinst`() {
+        vilkårsgrunnlag = emptyMap()
+
+        assertMigration(
+            "/migrations/147/manglendeAntallOpptjeningsdagerErMinstExpected.json",
+            "/migrations/147/manglendeAntallOpptjeningsdagerErMinstOriginal.json"
         )
     }
 

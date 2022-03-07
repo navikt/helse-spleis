@@ -6,22 +6,22 @@
                 {
                     "skjæringstidspunkt": "2018-01-01",
                     "type": "Vilkårsprøving",
-                    "meldingsreferanseId": "51a874a5-8574-4a6a-a6b4-1d93ecbd7b85",
-                    "vilkårsgrunnlagId": "8b089e91-de73-417d-9dbc-610075031c09",
+                    "meldingsreferanseId": null,
+                    "vilkårsgrunnlagId": "32d7745f-131d-4029-9683-d762d8179a61",
                     "opptjening": {
                         "arbeidsforhold": [
                             {
-                                "orgnummer": "987654321",
+                                "orgnummer": "MANGLET_ORGNUMMER_VED_MIGRERING",
                                 "ansattPerioder": [
                                     {
                                         "deaktivert": false,
-                                        "ansattFom": "1970-01-01",
+                                        "ansattFom": "2018-01-01",
                                         "ansattTom": null
                                     }
                                 ]
                             }
                         ],
-                        "opptjeningFom": "1970-01-01",
+                        "opptjeningFom": "2018-01-01",
                         "opptjeningTom": "2018-01-01"
                     }
                 }

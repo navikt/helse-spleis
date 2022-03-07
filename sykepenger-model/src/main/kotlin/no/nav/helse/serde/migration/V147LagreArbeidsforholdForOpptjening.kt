@@ -83,7 +83,7 @@ internal class V147LagreArbeidsforholdForOpptjening : JsonMigration(version = 14
             .map { it as ObjectNode }
             .forEach {
                 val skjæringstidspunkt = LocalDate.parse(it["skjæringstidspunkt"].asText())
-                val vilkårsgrunnlagId = it["vilkårsgrunnlagId"].asText()
+                val vilkårsgrunnlagId = it.vilkårsgrunnlagId()
                 val opptjeningFom = skjæringstidspunkt.minusDays(it.antallOpptjeningsdager(fødselsnummer))
                 sikkerLogg.info("Genererer dummy-arbeidsforhold for vilkårsgrunnlagId=$vilkårsgrunnlagId "
                     + "og fødselsnummer=$fødselsnummer")
@@ -102,11 +102,12 @@ internal class V147LagreArbeidsforholdForOpptjening : JsonMigration(version = 14
             }
     }
 
+    private fun JsonNode.vilkårsgrunnlagId() = get("vilkårsgrunnlagId").asText()
+
     private fun JsonNode.antallOpptjeningsdager(fødselsnummer: String): Long {
-        val antallDager = optional("antallOpptjeningsdagerErMinst")?.asLong()
-        return when (antallDager) {
+        return when (val antallDager = optional("antallOpptjeningsdagerErMinst")?.asLong()) {
             null -> {
-                sikkerLogg.info("Fant ikke antallOpptjeningsdager for fnr=$fødselsnummer")
+                sikkerLogg.info("Fant ikke antallOpptjeningsdager for fnr=$fødselsnummer, vilkårsgrunnlagId=${vilkårsgrunnlagId()}")
                 0
             }
             else -> antallDager

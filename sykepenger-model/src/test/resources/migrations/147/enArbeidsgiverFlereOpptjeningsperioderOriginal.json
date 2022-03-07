@@ -26,7 +26,8 @@
                 {
                     "skjæringstidspunkt": "2018-01-01",
                     "type": "Vilkårsprøving",
-                    "meldingsreferanseId": "ba640e1e-5fac-4e61-9b0f-52aa4f819702"
+                    "meldingsreferanseId": "ba640e1e-5fac-4e61-9b0f-52aa4f819702",
+                    "vilkårsgrunnlagId": "da124e26-18fe-42de-88c0-5b158494ca33"
                 }
             ]
         }
