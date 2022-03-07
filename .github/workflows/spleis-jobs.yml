@@ -56,7 +56,7 @@ jobs:
 
   deployProd:
       name: deploy to prod
-      needs: [set_version]
+      needs: [set_version, build, snyk]
       runs-on: ubuntu-latest
       steps:
           - uses: actions/checkout@v1
