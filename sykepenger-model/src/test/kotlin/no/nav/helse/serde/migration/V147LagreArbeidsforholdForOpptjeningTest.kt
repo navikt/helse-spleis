@@ -34,6 +34,23 @@ internal class V147LagreArbeidsforholdForOpptjeningTest : MigrationTest(V147Lagr
     }
 
     @Test
+    fun `migrerer opptjening fra vilkårsgrunnlagmelding med gammelt behovsnavn`() {
+        val arbeidsforhold = arrayOf(
+            Arbeidsforhold("987654321", LocalDate.EPOCH, null)
+        )
+
+        val vilkårsgrunnlagId = UUID.fromString("51a874a5-8574-4a6a-a6b4-1d93ecbd7b85")
+        vilkårsgrunnlag = mapOf(
+            vilkårsgrunnlagId to ("VILKÅRSGRUNNLAG" to vilkårsgrunnlagMedGammeltNavnPåLøsning(*arbeidsforhold))
+        )
+
+        assertMigration(
+            "/migrations/147/enkelExpected.json",
+            "/migrations/147/enkelOriginal.json"
+        )
+    }
+
+    @Test
     fun `Finner riktig opptjeningsperiode for flere arbeidsforhold med gap`() {
         val vilkårsgrunnlagId2 = UUID.fromString("69010425-41d6-4f9c-8776-11269f0632ba")
 
@@ -142,13 +159,30 @@ internal class V147LagreArbeidsforholdForOpptjeningTest : MigrationTest(V147Lagr
 
     @Language("JSON")
     private fun vilkårsgrunnlag(
-        vararg arbeidsforhold: Arbeidsforhold
+        vararg arbeidsforhold: Arbeidsforhold,
     ) = """
         {
             "@opprettet": "2020-01-01T12:00:00.000000000",
             "organisasjonsnummer": "987654321",
             "@løsning": {
                 "ArbeidsforholdV2": [
+                    ${arbeidsforhold.toJson()}
+                ]
+            },
+            "@final": true,
+            "@besvart": "2020-01-01T12:01:00.000000000"
+        }
+    """
+
+    @Language("JSON")
+    private fun vilkårsgrunnlagMedGammeltNavnPåLøsning(
+        vararg arbeidsforhold: Arbeidsforhold,
+    ) = """
+        {
+            "@opprettet": "2020-01-01T12:00:00.000000000",
+            "organisasjonsnummer": "987654321",
+            "@løsning": {
+                "Opptjening": [
                     ${arbeidsforhold.toJson()}
                 ]
             },
