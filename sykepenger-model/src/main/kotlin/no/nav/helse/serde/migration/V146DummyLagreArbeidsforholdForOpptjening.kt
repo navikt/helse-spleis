@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.util.*
 
-internal class V146LagreArbeidsforholdForOpptjening : JsonMigration(version = 146) {
+internal class V146DummyLagreArbeidsforholdForOpptjening : JsonMigration(version = 146) {
     override val description: String = "Lagrer arbeidsforhold relevant til opptjening i vilkårsgrunnlag og arbeidsforhold-historikken"
     private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
 

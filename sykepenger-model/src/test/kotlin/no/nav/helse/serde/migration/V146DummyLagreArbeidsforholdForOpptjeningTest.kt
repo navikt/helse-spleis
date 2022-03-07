@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
 
-internal class V146LagreArbeidsforholdForOpptjeningTest : MigrationTest(V146LagreArbeidsforholdForOpptjening()) {
+internal class V146DummyLagreArbeidsforholdForOpptjeningTest : MigrationTest(V146DummyLagreArbeidsforholdForOpptjening()) {
     val vilkårsgrunnlagId1 = UUID.randomUUID()
     override fun meldingerSupplier(): MeldingerSupplier = MeldingerSupplier {
         mapOf(
