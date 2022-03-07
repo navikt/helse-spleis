@@ -1,0 +1,57 @@
+{
+    "fødselsnummer": "FNR",
+    "vilkårsgrunnlagHistorikk": [
+        {
+            "vilkårsgrunnlag": [
+                {
+                    "skjæringstidspunkt": "2018-01-01",
+                    "type": "Vilkårsprøving",
+                    "meldingsreferanseId": "51a874a5-8574-4a6a-a6b4-1d93ecbd7b85",
+                    "opptjening": {
+                        "arbeidsforhold": [
+                            {
+                                "orgnummer": "987654321",
+                                "ansattPerioder": [
+                                    {
+                                        "deaktivert": false,
+                                        "ansattFom": "1970-01-01",
+                                        "ansattTom": null
+                                    }
+                                ]
+                            }
+                        ],
+                        "opptjeningFom": "1970-01-01",
+                        "opptjeningTom": "2018-01-01"
+                    }
+                }
+            ]
+        }
+    ],
+    "arbeidsgivere": [
+        {
+            "arbeidsforholdhistorikk": [
+                {
+                    "skjæringstidspunkt": "2018-01-01",
+                    "arbeidsforhold": [
+                        {
+                            "ansattFom": "1970-01-01",
+                            "ansattTom": null,
+                            "deaktivert": false
+                        }
+                    ]
+                }
+            ],
+            "vedtaksperioder": [
+                {
+                    "id": "f0195750-9895-11ec-a8fc-37e37a1ba01b",
+                    "skjæringstidspunkt": "2018-01-01"
+                }
+            ],
+            "forkastede": {
+                "vedtaksperioder": []
+            },
+            "organisasjonsnummer": "987654321"
+        }
+    ],
+    "skjemaVersjon": 147
+}

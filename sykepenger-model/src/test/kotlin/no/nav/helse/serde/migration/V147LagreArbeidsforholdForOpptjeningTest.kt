@@ -174,6 +174,25 @@ internal class V147LagreArbeidsforholdForOpptjeningTest : MigrationTest(V147Lagr
         )
     }
 
+    @Test
+    fun `kopiere opptjening ved minimalt med felter`() {
+        val arbeidsforhold = arrayOf(
+            Arbeidsforhold("987654321", LocalDate.EPOCH, null)
+        )
+
+        val vilkårsgrunnlagId = UUID.fromString("51a874a5-8574-4a6a-a6b4-1d93ecbd7b85")
+        vilkårsgrunnlag = mapOf(
+            vilkårsgrunnlagId to ("VILKÅRSGRUNNLAG" to vilkårsgrunnlagMedGammeltNavnPåLøsning(*arbeidsforhold))
+        )
+
+        assertMigration(
+            "/migrations/147/personMedNullSomArbeidsForholdExpected.json",
+            "/migrations/147/personMedNullSomArbeidsforholdOriginal.json",
+            JSONCompareMode.LENIENT
+        )
+    }
+
+
     @Language("JSON")
     private fun vilkårsgrunnlag(
         vararg arbeidsforhold: Arbeidsforhold,

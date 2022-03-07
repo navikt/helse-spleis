@@ -130,8 +130,11 @@ internal class V147LagreArbeidsforholdForOpptjening : JsonMigration(version = 14
 
         opptjening.arbeidsforhold
             .forEach { arbeidsforhold ->
-                val arbeidsforholdhistorikkJson = arbeidsgivere.finnEllerOpprettArbeidsgiver(arbeidsforhold.orgnummer)
-                    .get("arbeidsforholdhistorikk") as ArrayNode
+                val arbeidsgiver = arbeidsgivere.finnEllerOpprettArbeidsgiver(arbeidsforhold.orgnummer)
+
+                val arbeidsforholdhistorikkJson = arbeidsgiver
+                    .optional("arbeidsforholdhistorikk") as ArrayNode?
+                    ?: arbeidsgiver.putArray("arbeidsforholdhistorikk")
 
                 val arbeidsforholdhistorikkInnslagJson = arbeidsforholdhistorikkJson
                     .firstOrNull { LocalDate.parse(it.get("skjæringstidspunkt").asText()) == opptjening.skjæringstidspunkt }
