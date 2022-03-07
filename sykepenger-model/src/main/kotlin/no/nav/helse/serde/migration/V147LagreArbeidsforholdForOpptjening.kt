@@ -18,11 +18,11 @@ internal class V147LagreArbeidsforholdForOpptjening : JsonMigration(version = 14
     private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
 
     /* DETTE ER VÅR PLAN:
-    * To trinns rakett:
+    * To-trinns rakett:
     * 1. for hver vilkårsgrunnlagmelding med meldingsreferanse: migrer inn opptjening i vilkårsgrunnlag med samme meldingsreferanse
     * 2. kobler sammen opptjening for vilkårsgrunnlag med overstyrt inntekt
-    *       a) finn den originale vilkårsgrunnlaget som ble overstyrt via antallOpptjeningsdagerErMinst
-    *       b) kopier opptjening inn i revurderte vilkårsgrunnøag
+    *       a) finn den originale vilkårsgrunnlaget som ble overstyrt via antallOpptjeningsdagerErMinst og sammenligningsgrunnlag
+    *       b) kopier opptjening inn i revurderte vilkårsgrunnlag
     *
     * Om vi ikke finner via meldingsreferanse
     *   - lag dummyopptjening
