@@ -68,8 +68,9 @@ internal class V147LagreArbeidsforholdForOpptjening : JsonMigration(version = 14
             .map { it as ObjectNode }
             .forEach { vilkårsgrunnlagUtenOpptjening ->
                 val matchendeAntallOpptjeningsdager = alleVilkårsgrunnlag.firstOrNull { vilkårsgrunnlag ->
-                    vilkårsgrunnlagUtenOpptjening.antallOpptjeningsdager() == vilkårsgrunnlag.antallOpptjeningsdager()
+                    vilkårsgrunnlagUtenOpptjening.antallOpptjeningsdager(fødselsnummer) == vilkårsgrunnlag.antallOpptjeningsdager(fødselsnummer)
                         && vilkårsgrunnlagUtenOpptjening["sammenligningsgrunnlag"] == vilkårsgrunnlag["sammenligningsgrunnlag"]
+                        && vilkårsgrunnlag.antallOpptjeningsdager(fødselsnummer) != 0L
                         && vilkårsgrunnlag.hasNonNull("opptjening")
                 }
                 if (matchendeAntallOpptjeningsdager != null) {
@@ -83,7 +84,7 @@ internal class V147LagreArbeidsforholdForOpptjening : JsonMigration(version = 14
             .forEach {
                 val skjæringstidspunkt = LocalDate.parse(it["skjæringstidspunkt"].asText())
                 val vilkårsgrunnlagId = it["vilkårsgrunnlagId"].asText()
-                val opptjeningFom = skjæringstidspunkt.minusDays(it.antallOpptjeningsdager().asLong())
+                val opptjeningFom = skjæringstidspunkt.minusDays(it.antallOpptjeningsdager(fødselsnummer))
                 sikkerLogg.info("Genererer dummy-arbeidsforhold for vilkårsgrunnlagId=$vilkårsgrunnlagId "
                     + "og fødselsnummer=$fødselsnummer")
                 val generertArbeidsforhold = listOf(
@@ -101,7 +102,16 @@ internal class V147LagreArbeidsforholdForOpptjening : JsonMigration(version = 14
             }
     }
 
-    private fun JsonNode.antallOpptjeningsdager() = get("antallOpptjeningsdagerErMinst")
+    private fun JsonNode.antallOpptjeningsdager(fødselsnummer: String): Long {
+        val antallDager = optional("antallOpptjeningsdagerErMinst")?.asLong()
+        return when (antallDager) {
+            null -> {
+                sikkerLogg.info("Fant ikke antallOpptjeningsdager for fnr=$fødselsnummer")
+                0
+            }
+            else -> antallDager
+        }
+    }
 
     private fun ObjectNode.emptyArray(name: String) = apply { withArray(name) }
 
