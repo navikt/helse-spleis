@@ -202,6 +202,20 @@ internal class V147LagreArbeidsforholdForOpptjeningTest : MigrationTest(V147Lagr
         )
     }
 
+    @Test
+    fun `arbeidsforhold som startet etter skjæringstidspunkt`() {
+        vilkårsgrunnlag = mapOf(
+            UUID.fromString("51a874a5-8574-4a6a-a6b4-1d93ecbd7b85") to ("VILKÅRSGRUNNLAG" to vilkårsgrunnlag(
+                Arbeidsforhold("987654321", LocalDate.EPOCH, null),
+                Arbeidsforhold("654321987", 1.februar, null)
+            ))
+        )
+
+        assertMigration(
+            "/migrations/147/enkelExpected.json",
+            "/migrations/147/enkelOriginal.json"
+        )
+    }
 
     @Language("JSON")
     private fun vilkårsgrunnlag(
