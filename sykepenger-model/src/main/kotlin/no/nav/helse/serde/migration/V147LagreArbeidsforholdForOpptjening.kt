@@ -79,15 +79,19 @@ internal class V147LagreArbeidsforholdForOpptjening : JsonMigration(version = 14
                 }
             }
 
-        alleVilkårsgrunnlag
-            .filter { !it.hasNonNull("opptjening") }
+        val vilkårsgrunnlagSomTrengerDummyArbeidsforhold = alleVilkårsgrunnlag.filter { !it.hasNonNull("opptjening") }
             .map { it as ObjectNode }
+
+        if (vilkårsgrunnlagSomTrengerDummyArbeidsforhold.isNotEmpty()) {
+            sikkerLogg.info("Genererer dummy-arbeidsforhold for fødselsnummer=$fødselsnummer "
+                + "ider=${vilkårsgrunnlagSomTrengerDummyArbeidsforhold.map { it.vilkårsgrunnlagId() }}"
+            )
+        }
+
+        vilkårsgrunnlagSomTrengerDummyArbeidsforhold
             .forEach {
                 val skjæringstidspunkt = LocalDate.parse(it["skjæringstidspunkt"].asText())
-                val vilkårsgrunnlagId = it.vilkårsgrunnlagId()
                 val opptjeningFom = skjæringstidspunkt.minusDays(it.antallOpptjeningsdager())
-                sikkerLogg.info("Genererer dummy-arbeidsforhold for vilkårsgrunnlagId=$vilkårsgrunnlagId "
-                    + "og fødselsnummer=$fødselsnummer")
                 val generertArbeidsforhold = listOf(
                     Opptjeningsgrunnlag.OpptjeningsgrunnlagArbeidsforhold(
                         orgnummer = "MANGLET_ORGNUMMER_VED_MIGRERING",
@@ -95,11 +99,13 @@ internal class V147LagreArbeidsforholdForOpptjening : JsonMigration(version = 14
                         ansattTom = null
                     )
                 )
-                it.set<ObjectNode>("opptjening", Opptjeningsgrunnlag(
-                    arbeidsforhold = generertArbeidsforhold,
-                    opptjeningsperiode = opptjeningFom til skjæringstidspunkt,
-                    skjæringstidspunkt = skjæringstidspunkt
-                ).tilOpptjening())
+                it.set<ObjectNode>(
+                    "opptjening", Opptjeningsgrunnlag(
+                        arbeidsforhold = generertArbeidsforhold,
+                        opptjeningsperiode = opptjeningFom til skjæringstidspunkt,
+                        skjæringstidspunkt = skjæringstidspunkt
+                    ).tilOpptjening()
+                )
             }
     }
 
