@@ -198,24 +198,24 @@ internal class V147LagreArbeidsforholdForOpptjening : JsonMigration(version = 14
         val fødselsnummer = get("fødselsnummer").asText()
         val id = get("@id").asText()
 
-        val arbeidsforhold = opptjening.map {
-            Opptjeningsgrunnlag.OpptjeningsgrunnlagArbeidsforhold(
-                ansattFom = it.get("ansattSiden").asText(),
-                ansattTom = it.optional("ansattTil")?.asText(),
-                orgnummer = it.get("orgnummer").asText()
-            )
-        }
-
-        val opptjeningsperiode = arbeidsforhold
+        val arbeidsforhold = opptjening
+            .map {
+                Opptjeningsgrunnlag.OpptjeningsgrunnlagArbeidsforhold(
+                    ansattFom = it.get("ansattSiden").asText(),
+                    ansattTom = it.optional("ansattTil")?.asText(),
+                    orgnummer = it.get("orgnummer").asText()
+                )
+            }
             .filter { LocalDate.parse(it.ansattFom) < skjæringstidspunkt }
             .filter {
-                if (it.ansattTom == null || LocalDate.parse(it.ansattFom) <= LocalDate.parse(it.ansattTom)) {
-                    true
-                } else {
+                val erSøppel = it.ansattTom != null && LocalDate.parse(it.ansattFom) > LocalDate.parse(it.ansattTom)
+                if (erSøppel) {
                     sikkerLogg.info("Fant ugyldig periode i AA-reg for fødselsnummer=$fødselsnummer og id=$id")
-                    false
                 }
+                !erSøppel
             }
+
+        val opptjeningsperiode = arbeidsforhold
             .map { LocalDate.parse(it.ansattFom) til (it.ansattTom?.let(LocalDate::parse) ?: skjæringstidspunkt) }
             .sammenhengende(skjæringstidspunkt)
 
