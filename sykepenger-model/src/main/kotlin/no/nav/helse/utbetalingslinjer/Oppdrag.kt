@@ -187,7 +187,7 @@ internal class Oppdrag private constructor(
 
     internal fun erForskjelligFra(resultat: Simulering.SimuleringResultat): Boolean {
         return dagSatser().zip(dagSatser(resultat, førstedato, sistedato)).any { (oppdrag, simulering) ->
-            oppdrag.first != simulering.first || oppdrag.second != simulering.second
+            oppdrag.first != simulering.first || oppdrag.second?.toDouble() != simulering.second
         }
     }
 

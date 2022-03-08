@@ -233,7 +233,7 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
             hendelse = this
         }
 
-    private fun håndterSimuleringer(simuleringsdetaljer: Map<Fagområde, Pair<Boolean,Int>> = mapOf(Fagområde.SykepengerRefusjon to Pair(true, 1431))) {
+    private fun håndterSimuleringer(simuleringsdetaljer: Map<Fagområde, Pair<Boolean, Int>> = mapOf(Fagområde.SykepengerRefusjon to Pair(true, 1431))) {
         hendelse.behov().filter { it.type == Aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering }.forEach { simuleringsBehov ->
             val fagsystemId = simuleringsBehov.detaljer().getValue("fagsystemId") as String
             val fagområde = Fagområde.from(simuleringsBehov.detaljer().getValue("fagområde") as String)
@@ -283,7 +283,7 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
                                         uføregrad = 100,
                                         utbetalingstype = "YTELSE",
                                         tilbakeføring = false,
-                                        sats = Simulering.Sats(dagsats, 11, "DAGLIG"),
+                                        sats = Simulering.Sats(dagsats.toDouble(), 11, "DAGLIG"),
                                         refunderesOrgnummer = ORGNUMMER
                                     )
                                 )
@@ -309,7 +309,7 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
                                         uføregrad = 100,
                                         utbetalingstype = "YTELSE",
                                         tilbakeføring = false,
-                                        sats = Simulering.Sats(dagsats, 20, "DAGLIG"),
+                                        sats = Simulering.Sats(dagsats.toDouble(), 20, "DAGLIG"),
                                         refunderesOrgnummer = ORGNUMMER
                                     )
                                 )

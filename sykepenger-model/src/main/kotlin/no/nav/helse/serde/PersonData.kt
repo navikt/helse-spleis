@@ -1041,7 +1041,7 @@ internal data class PersonData(
                 }
 
                 data class Sats(
-                    val sats: Int,
+                    val sats: Double,
                     val antall: Int,
                     val type: String
                 )

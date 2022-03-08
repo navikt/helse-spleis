@@ -14,11 +14,17 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.person.Person
 import no.nav.helse.serde.serialize
-import no.nav.helse.spleis.*
+import no.nav.helse.spleis.JwtStub
 import no.nav.helse.spleis.config.AzureAdAppConfig
 import no.nav.helse.spleis.config.DataSourceConfiguration
 import no.nav.helse.spleis.config.KtorConfig
+import no.nav.helse.spleis.createApp
 import no.nav.helse.spleis.dao.HendelseDao
+import no.nav.helse.spleis.handleRequest
+import no.nav.helse.spleis.nais
+import no.nav.helse.spleis.randomPort
+import no.nav.helse.spleis.requestResponseTracing
+import no.nav.helse.spleis.responseBody
 import no.nav.helse.økonomi.Inntekt
 import org.awaitility.Awaitility
 import org.flywaydb.core.Flyway
@@ -86,6 +92,7 @@ internal class ApiTestServer(private val port: Int = randomPort()) {
             jdbcUrl = postgres.jdbcUrl
             username = postgres.username
             password = postgres.password
+            initializationFailTimeout = 5000
             maximumPoolSize = 3
             minimumIdle = 1
             idleTimeout = 10001

@@ -443,7 +443,7 @@ internal fun standardSimuleringsresultat(orgnummer: String) = Simulering.Simuler
                             utbetalingstype = "YTEL",
                             tilbakeføring = false,
                             sats = Simulering.Sats(
-                                sats = 1000,
+                                sats = 1000.toDouble(),
                                 antall = 2,
                                 type = "DAG"
                             ),

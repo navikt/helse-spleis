@@ -1,8 +1,28 @@
 package no.nav.helse.spleis
 
-import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.Arbeidsavklaringspenger
+import no.nav.helse.hendelser.Dagpenger
+import no.nav.helse.hendelser.Dødsinfo
+import no.nav.helse.hendelser.Foreldrepermisjon
+import no.nav.helse.hendelser.InntektForSykepengegrunnlag
+import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.Inntektsvurdering
+import no.nav.helse.hendelser.Institusjonsopphold
+import no.nav.helse.hendelser.Medlemskapsvurdering
+import no.nav.helse.hendelser.Omsorgspenger
+import no.nav.helse.hendelser.Opplæringspenger
+import no.nav.helse.hendelser.Opptjeningvurdering
+import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Pleiepenger
+import no.nav.helse.hendelser.Simulering
+import no.nav.helse.hendelser.Sykmelding
+import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.Utbetalingshistorikk
+import no.nav.helse.hendelser.Vilkårsgrunnlag
+import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.Aktivitetslogg
@@ -256,7 +276,7 @@ abstract class AbstractObservableTest {
                                         utbetalingstype = "YTEL",
                                         tilbakeføring = false,
                                         sats = Simulering.Sats(
-                                            sats = 1000,
+                                            sats = 1000.0,
                                             antall = 2,
                                             type = "DAG"
                                         ),

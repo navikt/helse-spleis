@@ -264,7 +264,7 @@ data class SimuleringsdataDTO(
         val konto: String,
         val beløp: Int,
         val tilbakeføring: Boolean,
-        val sats: Int,
+        val sats: Double,
         val typeSats: String,
         val antallSats: Int,
         val uføregrad: Int,

@@ -357,7 +357,7 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
                                         utbetalingstype = "YTELSE",
                                         tilbakeføring = false,
                                         sats = Simulering.Sats(
-                                            sats = 1000,
+                                            sats = 1000.0,
                                             antall = 2,
                                             type = "DAGLIG"
                                         ),

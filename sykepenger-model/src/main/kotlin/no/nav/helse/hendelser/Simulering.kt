@@ -120,7 +120,7 @@ class Simulering(
     )
 
     class Sats(
-        internal val sats: Int,
+        internal val sats: Double,
         internal val antall: Int,
         internal val type: String
     )

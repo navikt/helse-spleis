@@ -13,8 +13,22 @@ import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.spleis.TestMessageFactory.UtbetalingshistorikkTestdata.Companion.toJson
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
-import no.nav.inntektsmeldingkontrakt.*
-import no.nav.syfo.kafka.felles.*
+import no.nav.inntektsmeldingkontrakt.Arbeidsgivertype
+import no.nav.inntektsmeldingkontrakt.Inntektsmelding
+import no.nav.inntektsmeldingkontrakt.OpphoerAvNaturalytelse
+import no.nav.inntektsmeldingkontrakt.Periode
+import no.nav.inntektsmeldingkontrakt.Refusjon
+import no.nav.inntektsmeldingkontrakt.Status
+import no.nav.syfo.kafka.felles.ArbeidsgiverDTO
+import no.nav.syfo.kafka.felles.FravarDTO
+import no.nav.syfo.kafka.felles.InntektskildeDTO
+import no.nav.syfo.kafka.felles.MerknadDTO
+import no.nav.syfo.kafka.felles.PeriodeDTO
+import no.nav.syfo.kafka.felles.SkjultVerdi
+import no.nav.syfo.kafka.felles.SoknadsperiodeDTO
+import no.nav.syfo.kafka.felles.SoknadsstatusDTO
+import no.nav.syfo.kafka.felles.SoknadstypeDTO
+import no.nav.syfo.kafka.felles.SykepengesoknadDTO
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -609,7 +623,7 @@ internal class TestMessageFactory(
                                                 "konto" to "12345678910og1112",
                                                 "belop" to 9999,
                                                 "tilbakeforing" to false,
-                                                "sats" to 1111,
+                                                "sats" to 1000.5,
                                                 "typeSats" to "DAG",
                                                 "antallSats" to 9,
                                                 "uforegrad" to 100,

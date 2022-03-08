@@ -55,7 +55,7 @@ internal class SimuleringMessage(packet: JsonMessage) : BehovMessage(packet) {
                                             refunderesOrgnummer = detalj.path("refunderesOrgNr").asText(),
                                             tilbakeføring = detalj.path("tilbakeforing").asBoolean(),
                                             sats = Simulering.Sats(
-                                                sats = detalj.path("sats").asInt(),
+                                                sats = detalj.path("sats").asDouble(),
                                                 antall = detalj.path("antallSats").asInt(),
                                                 type = detalj.path("typeSats").asText()
                                             )
