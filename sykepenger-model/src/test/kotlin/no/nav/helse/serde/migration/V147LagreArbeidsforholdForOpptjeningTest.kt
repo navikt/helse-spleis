@@ -7,6 +7,8 @@ import no.nav.helse.mars
 import no.nav.helse.november
 import no.nav.helse.serde.serdeObjectMapper
 import org.intellij.lang.annotations.Language
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.skyscreamer.jsonassert.JSONCompareMode
 import java.time.LocalDate
@@ -231,6 +233,24 @@ internal class V147LagreArbeidsforholdForOpptjeningTest : MigrationTest(V147Lagr
             "/migrations/147/enkelOriginal.json"
         )
     }
+
+    @Test
+    fun erGyldig() {
+        assertTrue(arbeidsforholdForMigrering("2018-01-01", "2018-01-31").erGyldig("FNR", "ID"))
+        assertTrue(arbeidsforholdForMigrering("2018-01-01", "2018-01-01").erGyldig("FNR", "ID"))
+        assertFalse(arbeidsforholdForMigrering("2018-01-01", "2017-12-31").erGyldig("FNR", "ID"))
+        assertTrue(arbeidsforholdForMigrering("2018-01-01", null).erGyldig("FNR", "ID"))
+    }
+
+    @Test
+    fun erIkkeEtterSkjæringstidspunkt() {
+        assertTrue(arbeidsforholdForMigrering("2018-01-01", "2018-01-31").erIkkeEtterSkjæringstidspunkt(31.januar))
+        assertTrue(arbeidsforholdForMigrering("2018-01-01", "2018-01-31").erIkkeEtterSkjæringstidspunkt(1.januar))
+        assertFalse(arbeidsforholdForMigrering("2018-01-01", "2018-01-31").erIkkeEtterSkjæringstidspunkt(31.desember(2017)))
+    }
+
+    fun arbeidsforholdForMigrering(fom: String, tom: String?) =
+        V147LagreArbeidsforholdForOpptjening.Opptjeningsgrunnlag.OpptjeningsgrunnlagArbeidsforhold("ORGNUMMER", fom, tom)
 
     @Language("JSON")
     private fun vilkårsgrunnlag(

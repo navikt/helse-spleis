@@ -15,7 +15,6 @@ import java.util.*
 internal class V147LagreArbeidsforholdForOpptjening : JsonMigration(version = 147) {
     override val description: String =
         "Lagrer arbeidsforhold relevant til opptjening i vilkårsgrunnlag og arbeidsforhold-historikken"
-    private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
 
     /* DETTE ER VÅR PLAN:
     * To-trinns rakett:
@@ -184,7 +183,23 @@ internal class V147LagreArbeidsforholdForOpptjening : JsonMigration(version = 14
             val orgnummer: String,
             val ansattFom: String,
             val ansattTom: String? = null
-        )
+        ) {
+            internal fun erIkkeEtterSkjæringstidspunkt(
+                skjæringstidspunkt: LocalDate
+            ) = LocalDate.parse(ansattFom) <= skjæringstidspunkt
+
+            internal fun erGyldig(
+                fødselsnummer: String,
+                id: String
+            ): Boolean {
+                val erSøppel = ansattTom != null
+                    && LocalDate.parse(ansattFom) > LocalDate.parse(ansattTom)
+                if (erSøppel) {
+                    sikkerLogg.info("Fant ugyldig periode i AA-reg for fødselsnummer=$fødselsnummer og id=$id")
+                }
+                return !erSøppel
+            }
+        }
     }
 
     data class Arbeidsforhold(
@@ -206,14 +221,8 @@ internal class V147LagreArbeidsforholdForOpptjening : JsonMigration(version = 14
                     orgnummer = it.get("orgnummer").asText()
                 )
             }
-            .filter { LocalDate.parse(it.ansattFom) < skjæringstidspunkt }
-            .filter {
-                val erSøppel = it.ansattTom != null && LocalDate.parse(it.ansattFom) > LocalDate.parse(it.ansattTom)
-                if (erSøppel) {
-                    sikkerLogg.info("Fant ugyldig periode i AA-reg for fødselsnummer=$fødselsnummer og id=$id")
-                }
-                !erSøppel
-            }
+            .filter { it.erIkkeEtterSkjæringstidspunkt(skjæringstidspunkt) }
+            .filter { it.erGyldig(fødselsnummer, id) }
 
         val opptjeningsperiode = arbeidsforhold
             .map { LocalDate.parse(it.ansattFom) til (it.ansattTom?.let(LocalDate::parse) ?: skjæringstidspunkt) }
@@ -224,6 +233,10 @@ internal class V147LagreArbeidsforholdForOpptjening : JsonMigration(version = 14
             opptjeningsperiode = opptjeningsperiode,
             skjæringstidspunkt = skjæringstidspunkt
         )
+    }
+
+    companion object {
+        private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
     }
 }
 
