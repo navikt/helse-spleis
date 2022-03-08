@@ -223,6 +223,8 @@ internal class V147LagreArbeidsforholdForOpptjeningTest : MigrationTest(V147Lagr
     ) = """
         {
             "@opprettet": "2020-01-01T12:00:00.000000000",
+            "@id": "cdab7587-4be7-46a8-a39d-4445719e59b1",
+            "fødselsnummer": "FNR",
             "organisasjonsnummer": "987654321",
             "@løsning": {
                 "ArbeidsforholdV2": [
@@ -240,6 +242,8 @@ internal class V147LagreArbeidsforholdForOpptjeningTest : MigrationTest(V147Lagr
     ) = """
         {
             "@opprettet": "2020-01-01T12:00:00.000000000",
+            "@id": "cdab7587-4be7-46a8-a39d-4445719e59b1",
+            "fødselsnummer": "FNR",
             "organisasjonsnummer": "987654321",
             "@løsning": {
                 "Opptjening": [

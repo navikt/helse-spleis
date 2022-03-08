@@ -192,7 +192,39 @@ internal class V147LagreArbeidsforholdForOpptjening : JsonMigration(version = 14
         val ansattTom: String? = null
     )
 
+    private fun JsonNode.tilOpptjeningsgrunnlag(skjæringstidspunkt: LocalDate): Opptjeningsgrunnlag {
+        val løsning = get("@løsning")
+        val opptjening = løsning.optional("Opptjening") ?: løsning.get("ArbeidsforholdV2")
+        val fødselsnummer = get("fødselsnummer").asText()
+        val id = get("@id").asText()
 
+        val arbeidsforhold = opptjening.map {
+            Opptjeningsgrunnlag.OpptjeningsgrunnlagArbeidsforhold(
+                ansattFom = it.get("ansattSiden").asText(),
+                ansattTom = it.optional("ansattTil")?.asText(),
+                orgnummer = it.get("orgnummer").asText()
+            )
+        }
+
+        val opptjeningsperiode = arbeidsforhold
+            .filter { LocalDate.parse(it.ansattFom) < skjæringstidspunkt }
+            .filter {
+                if (it.ansattTom == null || LocalDate.parse(it.ansattFom) <= LocalDate.parse(it.ansattTom)) {
+                    true
+                } else {
+                    sikkerLogg.info("Fant ugyldig periode i AA-reg for fødselsnummer=$fødselsnummer og id=$id")
+                    false
+                }
+            }
+            .map { LocalDate.parse(it.ansattFom) til (it.ansattTom?.let(LocalDate::parse) ?: skjæringstidspunkt) }
+            .sammenhengende(skjæringstidspunkt)
+
+        return Opptjeningsgrunnlag(
+            arbeidsforhold = arbeidsforhold.filter { LocalDate.parse(it.ansattFom) in opptjeningsperiode },
+            opptjeningsperiode = opptjeningsperiode,
+            skjæringstidspunkt = skjæringstidspunkt
+        )
+    }
 }
 
 private fun Iterable<JsonNode>.toArbeidsforholdhistorikk() =
@@ -235,28 +267,3 @@ internal fun Collection<Periode>.sammenhengende(skjæringstidspunkt: LocalDate) 
     }
 
 private fun JsonNode.optional(field: String) = takeIf { it.hasNonNull(field) }?.get(field)
-
-private fun JsonNode.tilOpptjeningsgrunnlag(skjæringstidspunkt: LocalDate): Opptjeningsgrunnlag {
-
-    val løsning = get("@løsning")
-    val opptjening = løsning.optional("Opptjening") ?: løsning.get("ArbeidsforholdV2")
-
-    val arbeidsforhold = opptjening.map {
-        Opptjeningsgrunnlag.OpptjeningsgrunnlagArbeidsforhold(
-            ansattFom = it.get("ansattSiden").asText(),
-            ansattTom = it.optional("ansattTil")?.asText(),
-            orgnummer = it.get("orgnummer").asText()
-        )
-    }
-
-    val opptjeningsperiode = arbeidsforhold
-        .filter { LocalDate.parse(it.ansattFom) < skjæringstidspunkt }
-        .map { LocalDate.parse(it.ansattFom) til (it.ansattTom?.let(LocalDate::parse) ?: skjæringstidspunkt) }
-        .sammenhengende(skjæringstidspunkt)
-
-    return Opptjeningsgrunnlag(
-        arbeidsforhold = arbeidsforhold.filter { LocalDate.parse(it.ansattFom) in opptjeningsperiode },
-        opptjeningsperiode = opptjeningsperiode,
-        skjæringstidspunkt = skjæringstidspunkt
-    )
-}
