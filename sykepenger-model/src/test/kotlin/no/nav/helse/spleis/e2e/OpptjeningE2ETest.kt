@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.Toggle
 import no.nav.helse.desember
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsvurdering
@@ -19,26 +18,14 @@ import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.spleis.e2e.OpptjeningE2ETest.ArbeidsforholdVisitor.Companion.assertHarArbeidsforhold
 import no.nav.helse.spleis.e2e.OpptjeningE2ETest.ArbeidsforholdVisitor.Companion.assertHarIkkeArbeidsforhold
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
 
 internal class OpptjeningE2ETest : AbstractEndToEndTest() {
-    @BeforeEach
-    fun setup() {
-        Toggle.OpptjeningIModellen.enable()
-    }
-
-    @AfterEach
-    fun tearDown() {
-        Toggle.OpptjeningIModellen.disable()
-    }
-
     @Test
     fun `lagrer arbeidsforhold brukt til opptjening`() {
         personMedArbeidsforhold(Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null))
@@ -81,13 +68,13 @@ internal class OpptjeningE2ETest : AbstractEndToEndTest() {
     fun `opptjening er ikke oppfylt siden det ikke er nok opptjeningsdager`() {
         personMedArbeidsforhold(Vilkårsgrunnlag.Arbeidsforhold(a1, ansattFom = 31.desember(2017), ansattTom = null))
         val grunnlagsdata = person.vilkårsgrunnlagFor(1.januar) as VilkårsgrunnlagHistorikk.Grunnlagsdata
-        assertEquals(1, grunnlagsdata.opptjening?.opptjeningsdager())
-        assertEquals(false, grunnlagsdata.opptjening?.erOppfylt())
+        assertEquals(1, grunnlagsdata.opptjening.opptjeningsdager())
+        assertEquals(false, grunnlagsdata.opptjening.erOppfylt())
         assertWarning("Perioden er avslått på grunn av manglende opptjening", 1.vedtaksperiode.filter(orgnummer = a1))
     }
 
     @Test
-    fun `tar ikke med inntekter fra A-Ordningen dersom arbeidsforholdet kun er brukt til opptjening og ikke gjelder under skjæringstidspunktet`() = Toggle.OpptjeningIModellen.disable {
+    fun `tar ikke med inntekter fra A-Ordningen dersom arbeidsforholdet kun er brukt til opptjening og ikke gjelder under skjæringstidspunktet`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 15.mars, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 15.mars, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar)

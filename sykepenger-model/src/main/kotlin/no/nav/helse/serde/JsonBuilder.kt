@@ -805,7 +805,7 @@ internal class JsonBuilder : AbstractBuilder() {
             sykepengegrunnlag: Sykepengegrunnlag,
             sammenligningsgrunnlag: Inntekt,
             avviksprosent: Prosent?,
-            opptjening: Opptjening?,
+            opptjening: Opptjening,
             harOpptjening: Boolean,
             antallOpptjeningsdagerErMinst: Int,
             harMinimumInntekt: Boolean?,
@@ -934,7 +934,7 @@ internal class JsonBuilder : AbstractBuilder() {
                     "avviksprosent" to avviksprosent?.ratio(),
                     "sykepengegrunnlag" to sykepengegrunnlagMap,
                     "sammenligningsgrunnlag" to sammenligningsgrunnlagMap,
-                    "opptjening" to opptjeningMap.takeIf { Toggle.OpptjeningIModellen.enabled },
+                    "opptjening" to opptjeningMap,
                     "harOpptjening" to harOpptjening,
                     "medlemskapstatus" to when (medlemskapstatus) {
                         Medlemskapsvurdering.Medlemskapstatus.Ja -> JsonMedlemskapstatus.JA

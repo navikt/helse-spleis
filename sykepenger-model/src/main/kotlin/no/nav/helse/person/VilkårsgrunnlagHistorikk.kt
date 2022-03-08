@@ -127,7 +127,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         private val sykepengegrunnlag: Sykepengegrunnlag,
         private val sammenligningsgrunnlag: Sammenligningsgrunnlag,
         private val avviksprosent: Prosent?,
-        internal val opptjening: Opptjening?,
+        internal val opptjening: Opptjening,
         private val antallOpptjeningsdagerErMinst: Int,
         private val harOpptjening: Boolean,
         private val medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
@@ -173,7 +173,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             )
             sykepengegrunnlag.accept(vilkårsgrunnlagHistorikkVisitor)
             sammenligningsgrunnlag.accept(vilkårsgrunnlagHistorikkVisitor)
-            opptjening?.accept(vilkårsgrunnlagHistorikkVisitor)
+            opptjening.accept(vilkårsgrunnlagHistorikkVisitor)
             vilkårsgrunnlagHistorikkVisitor.postVisitGrunnlagsdata(
                 skjæringstidspunkt,
                 this,
@@ -203,8 +203,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             val begrunnelser = mutableListOf<Begrunnelse>()
             if (medlemskapstatus == Medlemskapsvurdering.Medlemskapstatus.Nei) begrunnelser.add(Begrunnelse.ManglerMedlemskap)
             if (harMinimumInntekt == false) begrunnelser.add(alder.begrunnelseForMinimumInntekt(skjæringstidspunkt))
-            if (Toggle.OpptjeningIModellen.disabled && !harOpptjening) begrunnelser.add(Begrunnelse.ManglerOpptjening)
-            if (Toggle.OpptjeningIModellen.enabled && !opptjening!!.erOppfylt()) begrunnelser.add(Begrunnelse.ManglerOpptjening)
+            if (!opptjening.erOppfylt()) begrunnelser.add(Begrunnelse.ManglerOpptjening)
             Utbetalingstidslinje.avvis(tidslinjer, setOf(skjæringstidspunkt), begrunnelser)
         }
 
@@ -239,7 +238,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             sammenligningsgrunnlag: Sammenligningsgrunnlag,
             sammenligningsgrunnlagVurdering: Boolean,
             avviksprosent: Prosent,
-            nyOpptjening: Opptjening?,
+            nyOpptjening: Opptjening,
             nyHarOpptjening: Boolean,
             minimumInntektVurdering: Boolean,
             meldingsreferanseId: UUID
@@ -248,7 +247,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             sykepengegrunnlag = sykepengegrunnlag,
             sammenligningsgrunnlag = sammenligningsgrunnlag,
             avviksprosent = avviksprosent,
-            opptjening = if (Toggle.OpptjeningIModellen.enabled) nyOpptjening!! else opptjening,
+            opptjening = nyOpptjening,
             antallOpptjeningsdagerErMinst = antallOpptjeningsdagerErMinst,
             harOpptjening = harOpptjening,
             medlemskapstatus = medlemskapstatus,

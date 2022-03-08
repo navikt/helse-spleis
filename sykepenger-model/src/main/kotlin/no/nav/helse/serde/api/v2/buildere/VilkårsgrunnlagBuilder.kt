@@ -160,7 +160,7 @@ internal class VilkårsgrunnlagBuilder(
             sykepengegrunnlag: Sykepengegrunnlag,
             sammenligningsgrunnlag: Inntekt,
             avviksprosent: Prosent?,
-            opptjening: Opptjening?,
+            opptjening: Opptjening,
             harOpptjening: Boolean,
             antallOpptjeningsdagerErMinst: Int,
             harMinimumInntekt: Boolean?,
@@ -188,9 +188,9 @@ internal class VilkårsgrunnlagBuilder(
                     avviksprosent = avviksprosent?.prosent(),
                     grunnbeløp = grunnbeløp.årlig.toInt(),
                     meldingsreferanseId = meldingsreferanseId,
-                    antallOpptjeningsdagerErMinst = if (Toggle.OpptjeningIModellen.enabled) opptjening!!.opptjeningsdager() else antallOpptjeningsdagerErMinst,
+                    antallOpptjeningsdagerErMinst = opptjening.opptjeningsdager(),
                     oppfyllerKravOmMinstelønn = compositeSykepengegrunnlag.sykepengegrunnlag > minimumInntekt.årlig,
-                    oppfyllerKravOmOpptjening = if (Toggle.OpptjeningIModellen.enabled) opptjening!!.erOppfylt() else harOpptjening,
+                    oppfyllerKravOmOpptjening = opptjening.erOppfylt(),
                     oppfyllerKravOmMedlemskap = oppfyllerKravOmMedlemskap
                 )
             )

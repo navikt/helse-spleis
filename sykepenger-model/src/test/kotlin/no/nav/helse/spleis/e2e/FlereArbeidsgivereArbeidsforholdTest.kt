@@ -378,11 +378,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter1, arbeidsforhold = emptyList()),
             arbeidsforhold = arbeidsforhold1
         )
-        if (Toggle.OpptjeningIModellen.enabled) {
-            assertEquals(5, tellArbeidsforholdINyesteHistorikkInnslag(a1))
-        } else {
-            assertEquals(3, tellArbeidsforholdINyesteHistorikkInnslag(a1))
-        }
+        assertEquals(5, tellArbeidsforholdINyesteHistorikkInnslag(a1))
     }
 
     @Test

@@ -53,7 +53,7 @@ internal class PersonInspektør(person: Person): PersonVisitor {
         sykepengegrunnlag: Sykepengegrunnlag,
         sammenligningsgrunnlag: Inntekt,
         avviksprosent: Prosent?,
-        opptjening: Opptjening?,
+        opptjening: Opptjening,
         harOpptjening: Boolean,
         antallOpptjeningsdagerErMinst: Int,
         harMinimumInntekt: Boolean?,

@@ -280,7 +280,7 @@ internal data class PersonData(
                 sykepengegrunnlag = sykepengegrunnlag.parseSykepengegrunnlag(),
                 sammenligningsgrunnlag = sammenligningsgrunnlag!!.parseSammenligningsgrunnlag(),
                 avviksprosent = avviksprosent?.ratio,
-                opptjening = opptjening?.tilOpptjening(),
+                opptjening = opptjening!!.tilOpptjening(),
                 harOpptjening = harOpptjening!!,
                 antallOpptjeningsdagerErMinst = antallOpptjeningsdagerErMinst!!,
                 medlemskapstatus = when (medlemskapstatus!!) {

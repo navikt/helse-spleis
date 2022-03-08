@@ -1,11 +1,19 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.Fødselsnummer
-import no.nav.helse.Toggle
 import no.nav.helse.hendelser.Periode.Companion.sammenhengende
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Companion.grupperArbeidsforholdPerOrgnummer
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Companion.opptjeningsperiode
-import no.nav.helse.person.*
+import no.nav.helse.person.Arbeidsforholdhistorikk
+import no.nav.helse.person.Arbeidsgiver
+import no.nav.helse.person.ArbeidstakerHendelse
+import no.nav.helse.person.IAktivitetslogg
+import no.nav.helse.person.Inntektshistorikk
+import no.nav.helse.person.Opptjening
+import no.nav.helse.person.Person
+import no.nav.helse.person.Sammenligningsgrunnlag
+import no.nav.helse.person.Sykepengegrunnlag
+import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.somFødselsnummer
 import org.slf4j.LoggerFactory
@@ -52,11 +60,7 @@ class Vilkårsgrunnlag(
             antallArbeidsgivereFraAareg,
             subsumsjonObserver
         )
-        val opptjeningvurderingOk = if (Toggle.OpptjeningIModellen.enabled) {
-            opptjening.valider(this)
-        } else {
-            opptjeningvurdering.valider(this, skjæringstidspunkt, subsumsjonObserver)
-        }
+        val opptjeningvurderingOk = opptjening.valider(this)
         val medlemskapsvurderingOk = medlemskapsvurdering.valider(this)
         val minimumInntektvurderingOk = validerMinimumInntekt(this, fødselsnummer.somFødselsnummer(), skjæringstidspunkt, grunnlagForSykepengegrunnlag, subsumsjonObserver)
 
@@ -65,7 +69,7 @@ class Vilkårsgrunnlag(
             sykepengegrunnlag = grunnlagForSykepengegrunnlag,
             sammenligningsgrunnlag = sammenligningsgrunnlag,
             avviksprosent = inntektsvurdering.avviksprosent(),
-            opptjening = if (Toggle.OpptjeningIModellen.enabled) opptjening else null,
+            opptjening = opptjening,
             antallOpptjeningsdagerErMinst = opptjeningvurdering.antallOpptjeningsdager,
             harOpptjening = opptjeningvurdering.harOpptjening(),
             medlemskapstatus = medlemskapsvurdering.medlemskapstatus,
@@ -101,13 +105,7 @@ class Vilkårsgrunnlag(
     internal fun lagreArbeidsforhold(person: Person, skjæringstidspunkt: LocalDate) {
         val opptjeningsperiode = arbeidsforhold.opptjeningsperiode(skjæringstidspunkt)
         arbeidsforhold
-            .filter {
-                if (Toggle.OpptjeningIModellen.enabled) {
-                    it.erDelAvOpptjeningsperiode(opptjeningsperiode)
-                } else {
-                    it.gjelder(skjæringstidspunkt)
-                }
-            }
+            .filter { it.erDelAvOpptjeningsperiode(opptjeningsperiode) }
             .grupperArbeidsforholdPerOrgnummer().forEach { (orgnummer, arbeidsforhold) ->
                 if (arbeidsforhold.any { it.erSøppel() }) {
                     warn("Vi fant ugyldige arbeidsforhold i Aareg, burde sjekkes opp nærmere") // TODO: må ses på av en voksen

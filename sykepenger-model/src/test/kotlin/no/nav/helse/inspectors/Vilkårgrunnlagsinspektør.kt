@@ -36,7 +36,7 @@ internal class Vilkårgrunnlagsinspektør(historikk: VilkårsgrunnlagHistorikk) 
         sykepengegrunnlag: Sykepengegrunnlag,
         sammenligningsgrunnlag: Inntekt,
         avviksprosent: Prosent?,
-        opptjening: Opptjening?,
+        opptjening: Opptjening,
         harOpptjening: Boolean,
         antallOpptjeningsdagerErMinst: Int,
         harMinimumInntekt: Boolean?,
@@ -89,7 +89,7 @@ internal class GrunnlagsdataInspektør(grunnlagsdata: VilkårsgrunnlagHistorikk.
         sykepengegrunnlag: Sykepengegrunnlag,
         sammenligningsgrunnlag: Inntekt,
         avviksprosent: Prosent?,
-        opptjening: Opptjening?,
+        opptjening: Opptjening,
         harOpptjening: Boolean,
         antallOpptjeningsdagerErMinst: Int,
         harMinimumInntekt: Boolean?,
@@ -101,19 +101,13 @@ internal class GrunnlagsdataInspektør(grunnlagsdata: VilkårsgrunnlagHistorikk.
         this.sykepengegrunnlag = sykepengegrunnlag
         this.sammenligningsgrunnlag = sammenligningsgrunnlag
         this.avviksprosent = avviksprosent
-        if (Toggle.OpptjeningIModellen.disabled) {
-            this.antallOpptjeningsdagerErMinst = antallOpptjeningsdagerErMinst
-            this.harOpptjening = harOpptjening
-        }
         this.meldingsreferanseId = meldingsreferanseId
         this.harMinimumInntekt = harMinimumInntekt
         this.vurdertOk = vurdertOk
     }
 
     override fun preVisitOpptjening(opptjening: Opptjening, arbeidsforhold: List<Opptjening.ArbeidsgiverOpptjeningsgrunnlag>, opptjeningsperiode: Periode) {
-        if (Toggle.OpptjeningIModellen.enabled) {
-            this.antallOpptjeningsdagerErMinst = opptjening.opptjeningsdager()
-            this.harOpptjening = opptjening.erOppfylt()
-        }
+        this.antallOpptjeningsdagerErMinst = opptjening.opptjeningsdager()
+        this.harOpptjening = opptjening.erOppfylt()
     }
 }

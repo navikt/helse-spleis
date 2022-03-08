@@ -388,7 +388,7 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `vi vilkårsprøver krav om opptjening ved overstyring av arbeidsforhold`() = Toggle.OpptjeningIModellen.enable {
+    fun `vi vilkårsprøver krav om opptjening ved overstyring av arbeidsforhold`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1, beregnetInntekt = INNTEKT)

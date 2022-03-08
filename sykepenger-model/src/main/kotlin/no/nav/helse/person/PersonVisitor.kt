@@ -132,7 +132,7 @@ internal interface VilkårsgrunnlagHistorikkVisitor : InntekthistorikkVisitor, A
         sykepengegrunnlag: Sykepengegrunnlag,
         sammenligningsgrunnlag: Inntekt,
         avviksprosent: Prosent?,
-        opptjening: Opptjening?,
+        opptjening: Opptjening,
         harOpptjening: Boolean,
         antallOpptjeningsdagerErMinst: Int,
         harMinimumInntekt: Boolean?,

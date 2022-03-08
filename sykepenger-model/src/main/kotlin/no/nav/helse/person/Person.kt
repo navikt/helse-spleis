@@ -754,20 +754,20 @@ class Person private constructor(
         }
 
         val opptjening = beregnOpptjening(skjæringstidspunkt, subsumsjonObserver)
-        if (Toggle.OpptjeningIModellen.enabled && !opptjening.erOppfylt()) {
+        if (!opptjening.erOppfylt()) {
             hendelse.warn("Perioden er avslått på grunn av manglende opptjening")
         }
 
         when (val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt)) {
             is VilkårsgrunnlagHistorikk.Grunnlagsdata -> {
                 val harMinimumInntekt = validerMinimumInntekt(hendelse, fødselsnummer, skjæringstidspunkt, sykepengegrunnlag, subsumsjonObserver)
-                val harOpptjening = if (Toggle.OpptjeningIModellen.enabled) opptjening.erOppfylt() else true // TODO: Bruk det nye opptjeningsobjektet for å sjekke opptjeningen når vi kan fjerne toggelen
+                val harOpptjening = opptjening.erOppfylt()
                 val grunnlagselement = grunnlag.kopierGrunnlagsdataMed(
                     sykepengegrunnlag = sykepengegrunnlag,
                     sammenligningsgrunnlag = sammenligningsgrunnlag,
                     sammenligningsgrunnlagVurdering = harAkseptabeltAvvik,
                     avviksprosent = avviksprosent,
-                    nyOpptjening = if (Toggle.OpptjeningIModellen.enabled) opptjening else null,
+                    nyOpptjening = opptjening,
                     nyHarOpptjening = harOpptjening,
                     minimumInntektVurdering = harMinimumInntekt,
                     meldingsreferanseId = hendelse.meldingsreferanseId()

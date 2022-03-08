@@ -60,12 +60,6 @@ class JsonBuilderTest {
     }
 
     @Test
-    fun `gjenoppbygd Person skal være lik opprinnelig Person -- også med OpptjeningIModell`() =
-        Toggle.OpptjeningIModellen.enable {
-            testSerialiseringAvPerson(person())
-        }
-
-    @Test
     fun `ingen betalingsperson`() {
         testSerialiseringAvPerson(ingenBetalingsperson())
     }

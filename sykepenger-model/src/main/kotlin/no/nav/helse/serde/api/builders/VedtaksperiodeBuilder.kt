@@ -306,7 +306,7 @@ private class GrunnlagsdataBuilder(skjæringstidspunkt: LocalDate, grunnlagsdata
         sykepengegrunnlag: Sykepengegrunnlag,
         sammenligningsgrunnlag: Inntekt,
         avviksprosent: Prosent?,
-        opptjening: Opptjening?,
+        opptjening: Opptjening,
         harOpptjening: Boolean,
         antallOpptjeningsdagerErMinst: Int,
         harMinimumInntekt: Boolean?,
@@ -323,14 +323,14 @@ private class GrunnlagsdataBuilder(skjæringstidspunkt: LocalDate, grunnlagsdata
         this.grunnlagsdata = GrunnlagsdataDTO(
             beregnetÅrsinntektFraInntektskomponenten = sammenligningsgrunnlag.reflection { årlig, _, _, _ -> årlig },
             avviksprosent = avviksprosent?.ratio(),
-            antallOpptjeningsdagerErMinst = if (Toggle.OpptjeningIModellen.enabled) opptjening!!.opptjeningsdager() else antallOpptjeningsdagerErMinst,
-            harOpptjening = if (Toggle.OpptjeningIModellen.enabled) opptjening!!.erOppfylt() else harOpptjening,
+            antallOpptjeningsdagerErMinst = opptjening.opptjeningsdager(),
+            harOpptjening = opptjening.erOppfylt(),
             medlemskapstatus = this.medlemskapstatus
         )
         this.opptjening = OpptjeningDTO(
-            antallKjenteOpptjeningsdager = if (Toggle.OpptjeningIModellen.enabled) opptjening!!.opptjeningsdager() else antallOpptjeningsdagerErMinst,
-            fom = if (Toggle.OpptjeningIModellen.enabled) opptjening!!.opptjeningFom() else skjæringstidspunkt.minusDays(antallOpptjeningsdagerErMinst.toLong()),
-            oppfylt = if (Toggle.OpptjeningIModellen.enabled) opptjening!!.erOppfylt() else harOpptjening,
+            antallKjenteOpptjeningsdager = opptjening.opptjeningsdager(),
+            fom = opptjening.opptjeningFom(),
+            oppfylt = opptjening.erOppfylt()
         )
         this.avviksprosent = avviksprosent?.prosent()
         this.meldingsreferanseId = meldingsreferanseId

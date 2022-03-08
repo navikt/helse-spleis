@@ -247,7 +247,7 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         sykepengegrunnlag: Sykepengegrunnlag,
         sammenligningsgrunnlag: Inntekt,
         avviksprosent: Prosent?,
-        opptjening: Opptjening?,
+        opptjening: Opptjening,
         harOpptjening: Boolean,
         antallOpptjeningsdagerErMinst: Int,
         harMinimumInntekt: Boolean?,

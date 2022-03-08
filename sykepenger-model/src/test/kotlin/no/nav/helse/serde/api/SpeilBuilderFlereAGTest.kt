@@ -388,7 +388,7 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `tar med arbeidsforhold som var med i beregning av opptjening, men ikke gjelder skjæringstidspunktet`() = Toggle.OpptjeningIModellen.enable {
+    fun `tar med arbeidsforhold som var med i beregning av opptjening, men ikke gjelder skjæringstidspunktet`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)

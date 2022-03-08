@@ -129,5 +129,4 @@ abstract class Toggle internal constructor(enabled: Boolean = false, private val
     object RevurdereInntektMedFlereArbeidsgivere : Toggle(false)
     object GjenopptaAvsluttetUtenUtbetaling : Toggle(false)
     object ForkastForlengelseAvForkastetPeriode : Toggle(false)
-    object OpptjeningIModellen : Toggle(true)
 }
