@@ -11,7 +11,16 @@ import no.nav.helse.spleis.db.PersonPostgresRepository
 // Understands how to build our application server
 class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.StatusListener {
 
-    private val dataSourceBuilder = DataSourceBuilder(env)
+    // Håndter on-prem og gcp database tilkobling forskjellig
+    private val dataSourceBuilder = when (env["NAIS_CLUSTER_NAME"]) {
+        "dev-gcp",
+        "prod-gcp" -> GcpDataSourceBuilder(env)
+        "dev-fss",
+        "prod-fss" -> OnPremDataSourceBuilder(env)
+        else -> throw IllegalArgumentException("env variable NAIS_CLUSTER_NAME has an unsupported value")
+    }
+
+
     private val dataSource = dataSourceBuilder.getDataSource()
 
     private val hendelseRepository = HendelseRepository(dataSource)

@@ -6,8 +6,14 @@ import org.flywaydb.core.Flyway
 import org.slf4j.LoggerFactory
 import java.time.Duration
 
+
+internal interface DataSourceBuilder {
+    fun getDataSource(): HikariDataSource
+    fun migrate()
+}
+
 // Understands how to create a data source from environment variables
-internal class DataSourceBuilder(env: Map<String, String>) {
+internal class GcpDataSourceBuilder(env: Map<String, String>): DataSourceBuilder{
 
     private val hikariConfig = HikariConfig().apply {
         jdbcUrl = env["DATABASE_JDBC_URL"] ?: String.format(
@@ -22,9 +28,9 @@ internal class DataSourceBuilder(env: Map<String, String>) {
         maxLifetime = Duration.ofMinutes(30).toMillis()
     }
 
-    internal fun getDataSource() = HikariDataSource(hikariConfig)
+    override fun getDataSource() = HikariDataSource(hikariConfig)
 
-    internal fun migrate() {
+    override fun migrate() {
         logger.info("Migrerer database")
         getDataSource().use { dataSource ->
             Flyway.configure()
@@ -36,6 +42,6 @@ internal class DataSourceBuilder(env: Map<String, String>) {
     }
 
     private companion object {
-        private val logger = LoggerFactory.getLogger(DataSourceBuilder::class.java)
+        private val logger = LoggerFactory.getLogger(OnPremDataSourceBuilder::class.java)
     }
 }
