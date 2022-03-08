@@ -6,10 +6,21 @@ import no.nav.helse.hendelser.contains
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.SykdomstidslinjeVisitor
-import no.nav.helse.sykdomstidslinje.Dag.*
+import no.nav.helse.sykdomstidslinje.Dag.Arbeidsdag
+import no.nav.helse.sykdomstidslinje.Dag.ArbeidsgiverHelgedag
+import no.nav.helse.sykdomstidslinje.Dag.Arbeidsgiverdag
+import no.nav.helse.sykdomstidslinje.Dag.AvslåttDag
 import no.nav.helse.sykdomstidslinje.Dag.Companion.default
 import no.nav.helse.sykdomstidslinje.Dag.Companion.sammenhengendeSykdom
 import no.nav.helse.sykdomstidslinje.Dag.Companion.sykmeldingSkrevet
+import no.nav.helse.sykdomstidslinje.Dag.Feriedag
+import no.nav.helse.sykdomstidslinje.Dag.ForeldetSykedag
+import no.nav.helse.sykdomstidslinje.Dag.FriskHelgedag
+import no.nav.helse.sykdomstidslinje.Dag.Permisjonsdag
+import no.nav.helse.sykdomstidslinje.Dag.ProblemDag
+import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
+import no.nav.helse.sykdomstidslinje.Dag.Sykedag
+import no.nav.helse.sykdomstidslinje.Dag.UkjentDag
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde.Companion.INGEN
 import no.nav.helse.økonomi.Prosentdel
@@ -102,8 +113,10 @@ internal class Sykdomstidslinje private constructor(
     private fun fraOgMed(dato: LocalDate) =
         Sykdomstidslinje(dager.tailMap(dato).toMap())
 
-    internal fun trim(periode: Periode) =
-        Sykdomstidslinje(dager.filterNot { it.key in periode })
+    internal fun trim(perioder: List<Periode>): Sykdomstidslinje {
+        val forkast = perioder.flatten()
+        return Sykdomstidslinje(dager.filterKeys { it !in forkast })
+    }
 
     internal fun forsøkUtvidelse(periode: Periode) =
         Sykdomstidslinje(dager.toSortedMap(), periode.merge(this.periode), låstePerioder.toMutableList()).takeIf { it.periode != this.periode }

@@ -39,14 +39,11 @@ internal class Sykdomshistorikk private constructor(
         elementer.add(0, Element.opprett(hendelse, arbeidsdager!!, utvidetTidslinje))
     }
 
-    internal fun tøm() {
-        if (!harSykdom()) return
-        elementer.add(0, Element.empty)
-    }
-
-    internal fun fjernDager(periode: Periode) {
-        if (sykdomstidslinje().periode()?.overlapperMed(periode) != true) return
-        elementer.add(0, Element.opprettReset(this, periode))
+    internal fun fjernDager(perioder: List<Periode>) {
+        if (perioder.isEmpty()) return
+        val periode = sykdomstidslinje().periode() ?: return
+        if (perioder.none { periode.overlapperMed(it) }) return
+        elementer.add(0, Element.opprettReset(this, perioder))
     }
 
     internal fun accept(visitor: SykdomshistorikkVisitor) {
@@ -128,9 +125,9 @@ internal class Sykdomshistorikk private constructor(
 
             internal fun opprettReset(
                 historikk: Sykdomshistorikk,
-                periode: Periode
+                perioder: List<Periode>
             ): Element {
-                return Element(beregnetSykdomstidslinje = historikk.sykdomstidslinje().trim(periode))
+                return Element(beregnetSykdomstidslinje = historikk.sykdomstidslinje().trim(perioder))
             }
 
             internal fun List<Element>.erSykmeldingenDenSistSkrevne(sykmelding: Sykmelding, hendelseIder: Set<UUID>): Boolean {

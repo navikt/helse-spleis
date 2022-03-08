@@ -1,13 +1,38 @@
 package no.nav.helse.person
 
 import no.nav.helse.Toggle
-import no.nav.helse.hendelser.*
-import no.nav.helse.hendelser.utbetaling.*
+import no.nav.helse.hendelser.ArbeidsgiverInntekt
+import no.nav.helse.hendelser.Hendelseskontekst
+import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.InntektsmeldingReplay
+import no.nav.helse.hendelser.OverstyrArbeidsforhold
+import no.nav.helse.hendelser.OverstyrInntekt
+import no.nav.helse.hendelser.OverstyrTidslinje
+import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Påminnelse
+import no.nav.helse.hendelser.Simulering
+import no.nav.helse.hendelser.Sykmelding
+import no.nav.helse.hendelser.Søknad
+import no.nav.helse.hendelser.Utbetalingsgrunnlag
+import no.nav.helse.hendelser.Utbetalingshistorikk
+import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
+import no.nav.helse.hendelser.Vilkårsgrunnlag
+import no.nav.helse.hendelser.Ytelser
+import no.nav.helse.hendelser.til
+import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
+import no.nav.helse.hendelser.utbetaling.Grunnbeløpsregulering
+import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
+import no.nav.helse.hendelser.utbetaling.UtbetalingOverført
+import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
+import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.Arbeidsforholdhistorikk.Arbeidsforhold.Companion.MAKS_INNTEKT_GAP
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.harAvsluttedePerioder
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.iderMedUtbetaling
 import no.nav.helse.person.Inntektshistorikk.IkkeRapportert
-import no.nav.helse.person.Vedtaksperiode.*
+import no.nav.helse.person.Vedtaksperiode.AvventerArbeidsgivere
+import no.nav.helse.person.Vedtaksperiode.AvventerArbeidsgivereRevurdering
+import no.nav.helse.person.Vedtaksperiode.AvventerHistorikk
+import no.nav.helse.person.Vedtaksperiode.AvventerHistorikkRevurdering
 import no.nav.helse.person.Vedtaksperiode.Companion.ALLE
 import no.nav.helse.person.Vedtaksperiode.Companion.AVVENTER_GODKJENT_REVURDERING
 import no.nav.helse.person.Vedtaksperiode.Companion.ER_ELLER_HAR_VÆRT_AVSLUTTET
@@ -39,8 +64,18 @@ import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.harNærliggendeUtbeta
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.utbetaltTidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
 import no.nav.helse.utbetalingslinjer.UtbetalingObserver
-import no.nav.helse.utbetalingstidslinje.*
+import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
+import no.nav.helse.utbetalingstidslinje.ArbeidsgiverUtbetalinger
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode.Companion.finn
+import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
+import no.nav.helse.utbetalingstidslinje.IUtbetalingstidslinjeBuilder
+import no.nav.helse.utbetalingstidslinje.Inntekter
+import no.nav.helse.utbetalingstidslinje.MaksimumUtbetaling
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilder
+import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilderException
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinjeberegning
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -221,22 +256,34 @@ internal class Arbeidsgiver private constructor(
         }
 
         internal fun Iterable<Arbeidsgiver>.gjenopptaBehandling(gjenopptaBehandling: IAktivitetslogg) = forEach { arbeidsgiver ->
-            gjenopptaBehandling.kontekst(arbeidsgiver)
-            arbeidsgiver.énHarHåndtert(gjenopptaBehandling, Vedtaksperiode::gjenopptaBehandling)
-            Vedtaksperiode.gjenopptaBehandling(
-                hendelse = gjenopptaBehandling,
-                person = arbeidsgiver.person,
-                nåværendeTilstand = AvventerArbeidsgivere,
-                nesteTilstand = AvventerHistorikk
-            )
-            Vedtaksperiode.gjenopptaBehandling(
-                hendelse = gjenopptaBehandling,
-                person = arbeidsgiver.person,
-                nåværendeTilstand = AvventerArbeidsgivereRevurdering,
-                nesteTilstand = AvventerHistorikkRevurdering,
-                filter = IKKE_FERDIG_REVURDERT
-            )
+            arbeidsgiver.gjenopptaBehandling(gjenopptaBehandling)
         }
+
+        internal fun søppelbøtte(
+            arbeidsgivere: List<Arbeidsgiver>,
+            hendelse: IAktivitetslogg,
+            filter: VedtaksperiodeFilter
+        ) {
+            arbeidsgivere.forEach { it.søppelbøtte(hendelse, filter, ForkastetÅrsak.IKKE_STØTTET) }
+        }
+    }
+
+    private fun gjenopptaBehandling(gjenopptaBehandling: IAktivitetslogg) {
+        gjenopptaBehandling.kontekst(this)
+        énHarHåndtert(gjenopptaBehandling, Vedtaksperiode::gjenopptaBehandling)
+        Vedtaksperiode.gjenopptaBehandling(
+            hendelse = gjenopptaBehandling,
+            person = person,
+            nåværendeTilstand = AvventerArbeidsgivere,
+            nesteTilstand = AvventerHistorikk
+        )
+        Vedtaksperiode.gjenopptaBehandling(
+            hendelse = gjenopptaBehandling,
+            person = person,
+            nåværendeTilstand = AvventerArbeidsgivereRevurdering,
+            nesteTilstand = AvventerHistorikkRevurdering,
+            filter = IKKE_FERDIG_REVURDERT
+        )
     }
 
     internal fun accept(visitor: ArbeidsgiverVisitor) {
@@ -508,6 +555,7 @@ internal class Arbeidsgiver private constructor(
         nyUtbetaling(annullering)
         annullering.håndter(hendelse)
         søppelbøtte(hendelse, ALLE, ForkastetÅrsak.ANNULLERING)
+        gjenopptaBehandling(hendelse)
     }
 
     internal fun håndter(arbeidsgivere: List<Arbeidsgiver>, hendelse: Grunnbeløpsregulering, vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk) {
@@ -777,8 +825,6 @@ internal class Arbeidsgiver private constructor(
 
     internal fun finnSammenhengendePeriode(skjæringstidspunkt: LocalDate) = vedtaksperioder.medSkjæringstidspunkt(skjæringstidspunkt)
 
-    private fun fjernDager(periode: Periode) = sykdomshistorikk.fjernDager(periode)
-
     internal fun harInntektsmelding(skjæringstidspunkt: LocalDate): Boolean {
         val førsteFraværsdag = finnFørsteFraværsdag(skjæringstidspunkt) ?: return false
         return inntektshistorikk.harInntektsmelding(skjæringstidspunkt, førsteFraværsdag)
@@ -826,44 +872,18 @@ internal class Arbeidsgiver private constructor(
         arbeidsgiverInntekt.lagreInntekter(inntektshistorikk, skjæringstidspunkt, hendelse.meldingsreferanseId())
     }
 
-    internal fun søppelbøtte(
+    private fun søppelbøtte(
         hendelse: IAktivitetslogg,
         filter: VedtaksperiodeFilter,
         årsak: ForkastetÅrsak
     ) {
-        forkast(filter, årsak)
-            .takeIf { it.isNotEmpty() }
-            ?.also { perioder ->
-                hendelse.kontekst(this)
-                perioder
-                    .forEach {
-                        it.forkast(hendelse, årsak)
-                        fjernDager(it.periode())
-                    }
-                if (vedtaksperioder.isEmpty()) sykdomshistorikk.tøm()
-                person.gjenopptaBehandling(hendelse)
-            }
-    }
-
-    private fun forkast(filter: VedtaksperiodeFilter, årsak: ForkastetÅrsak) = vedtaksperioder
-        .filter { periode -> periode.kanForkastes(utbetalinger) }
-        .filter(filter)
-        .also { perioder ->
-            vedtaksperioder.removeAll(perioder)
-            forkastede.addAll(perioder.map { ForkastetVedtaksperiode(it, årsak) })
-        }
-
-    // Fredet funksjonsnavn
-    private fun tidligereOgEttergølgende(vedtaksperiode: Vedtaksperiode): MutableList<Vedtaksperiode> {
-        var index = vedtaksperioder.indexOf(vedtaksperiode)
-        val results = vedtaksperioder.subList(0, index + 1).toMutableList()
-        if (results.isEmpty()) return mutableListOf()
-        while (vedtaksperioder.last() != results.last()) {
-            if (!vedtaksperioder[index].erSykeperiodeRettFør(vedtaksperioder[index + 1])) break
-            results.add(vedtaksperioder[index + 1])
-            index++
-        }
-        return results
+        hendelse.kontekst(this)
+        val perioder = vedtaksperioder
+            .filter(filter)
+            .filter { it.forkast(hendelse, utbetalinger) }
+        vedtaksperioder.removeAll(perioder)
+        forkastede.addAll(perioder.map { ForkastetVedtaksperiode(it, årsak) })
+        sykdomshistorikk.fjernDager(perioder.map { it.periode() })
     }
 
     internal fun startRevurderingForAlleBerørtePerioder(hendelse: ArbeidstakerHendelse, vedtaksperiode: Vedtaksperiode) {
@@ -879,12 +899,6 @@ internal class Arbeidsgiver private constructor(
 
     internal fun kanReberegnes(vedtaksperiode: Vedtaksperiode) = vedtaksperioder.all { it.kanReberegne(vedtaksperiode) }
 
-    // Fredet funksjonsnavn
-    internal fun tidligereOgEttergølgende(segSelv: Periode): VedtaksperiodeFilter {
-        val tidligereOgEttergølgende1 = vedtaksperioder.sorted().firstOrNull { it.periode().overlapperMed(segSelv) }?.let(::tidligereOgEttergølgende)
-        return fun(vedtaksperiode: Vedtaksperiode) = tidligereOgEttergølgende1 != null && vedtaksperiode in tidligereOgEttergølgende1
-    }
-
     internal fun overlappendePerioder(hendelse: SykdomstidslinjeHendelse) = vedtaksperioder.filter { hendelse.erRelevant(it.periode()) }
 
     private fun registrerNyVedtaksperiode(vedtaksperiode: Vedtaksperiode) {
@@ -894,7 +908,7 @@ internal class Arbeidsgiver private constructor(
 
     private fun registrerForkastetVedtaksperiode(vedtaksperiode: Vedtaksperiode, hendelse: Sykmelding) {
         hendelse.info("Oppretter forkastet vedtaksperiode ettersom Sykmelding inneholder errors")
-        vedtaksperiode.forkast(hendelse, ForkastetÅrsak.IKKE_STØTTET)
+        vedtaksperiode.forkast(hendelse, utbetalinger)
         forkastede.add(ForkastetVedtaksperiode(vedtaksperiode, ForkastetÅrsak.IKKE_STØTTET))
     }
 

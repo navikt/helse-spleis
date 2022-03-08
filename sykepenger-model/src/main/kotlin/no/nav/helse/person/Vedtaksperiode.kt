@@ -1,11 +1,30 @@
 package no.nav.helse.person
 
 import net.logstash.logback.argument.StructuredArguments.keyValue
-import no.nav.helse.*
-import no.nav.helse.hendelser.*
+import no.nav.helse.Grunnbeløp
+import no.nav.helse.Toggle
+import no.nav.helse.hendelser.Hendelseskontekst
+import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.OverstyrArbeidsforhold
+import no.nav.helse.hendelser.OverstyrInntekt
+import no.nav.helse.hendelser.OverstyrTidslinje
+import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Påminnelse
+import no.nav.helse.hendelser.Simulering
+import no.nav.helse.hendelser.Sykmelding
+import no.nav.helse.hendelser.Søknad
+import no.nav.helse.hendelser.Utbetalingsgrunnlag
+import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.hendelser.Validation.Companion.validation
+import no.nav.helse.hendelser.Vilkårsgrunnlag
+import no.nav.helse.hendelser.Ytelser
+import no.nav.helse.hendelser.harNødvendigInntekt
+import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
+import no.nav.helse.mai
+import no.nav.helse.memoized
+import no.nav.helse.oktober
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.arbeidsavklaringspenger
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.arbeidsforhold
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.dagpenger
@@ -19,14 +38,43 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.omsorgspenge
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.opplæringspenger
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.pleiepenger
 import no.nav.helse.person.Dokumentsporing.Companion.ider
-import no.nav.helse.person.ForkastetÅrsak.ERSTATTES
-import no.nav.helse.person.ForkastetÅrsak.IKKE_STØTTET
 import no.nav.helse.person.ForlengelseFraInfotrygd.JA
 import no.nav.helse.person.ForlengelseFraInfotrygd.NEI
 import no.nav.helse.person.InntektsmeldingInfo.Companion.ider
 import no.nav.helse.person.Periodetype.INFOTRYGDFORLENGELSE
 import no.nav.helse.person.Periodetype.OVERGANG_FRA_IT
-import no.nav.helse.person.TilstandType.*
+import no.nav.helse.person.TilstandType.AVSLUTTET
+import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
+import no.nav.helse.person.TilstandType.AVVENTER_ARBEIDSGIVERE
+import no.nav.helse.person.TilstandType.AVVENTER_ARBEIDSGIVERE_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
+import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
+import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP
+import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE
+import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE
+import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_UFERDIG_GAP
+import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
+import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_SØKNAD_FERDIG_FORLENGELSE
+import no.nav.helse.person.TilstandType.AVVENTER_SØKNAD_FERDIG_GAP
+import no.nav.helse.person.TilstandType.AVVENTER_SØKNAD_UFERDIG_FORLENGELSE
+import no.nav.helse.person.TilstandType.AVVENTER_SØKNAD_UFERDIG_GAP
+import no.nav.helse.person.TilstandType.AVVENTER_UFERDIG
+import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
+import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
+import no.nav.helse.person.TilstandType.MOTTATT_SYKMELDING_FERDIG_FORLENGELSE
+import no.nav.helse.person.TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP
+import no.nav.helse.person.TilstandType.MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE
+import no.nav.helse.person.TilstandType.MOTTATT_SYKMELDING_UFERDIG_GAP
+import no.nav.helse.person.TilstandType.REVURDERING_FEILET
+import no.nav.helse.person.TilstandType.START
+import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.person.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.TilstandType.UTBETALING_FEILET
 import no.nav.helse.person.builders.UtbetaltEventBuilder
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.etterlevelse.MaskinellJurist
@@ -351,26 +399,23 @@ internal class Vedtaksperiode private constructor(
 
     private fun flereArbeidsforholdUlikStartdato() = person.harFlereArbeidsforholdMedUlikStartdato(skjæringstidspunkt)
 
-    internal fun forkast(hendelse: IAktivitetslogg, årsak: ForkastetÅrsak) {
+    internal fun forkast(hendelse: IAktivitetslogg, utbetalinger: List<Utbetaling>): Boolean {
+        if (!this.utbetalinger.kanForkastes(utbetalinger) || this.tilstand == AvsluttetUtenUtbetaling) return false
         kontekst(hendelse)
         hendelse.info("Forkaster vedtaksperiode: %s", this.id.toString())
-        if (årsak !== ERSTATTES && !erAvsluttet() && this.tilstand !is RevurderingFeilet) tilstand(hendelse, TilInfotrygd)
-        kontekst(hendelse)
-        utbetalinger.forkast(hendelse)
+        this.utbetalinger.forkast(hendelse)
         person.vedtaksperiodeAvbrutt(
             hendelse,
             PersonObserver.VedtaksperiodeAvbruttEvent(
                 gjeldendeTilstand = tilstand.type,
             )
         )
+        if (this.tilstand !in setOf(Avsluttet, RevurderingFeilet)) tilstand(hendelse, TilInfotrygd)
+        return true
     }
 
-    private fun erAvsluttet() =
-        utbetalinger.erAvsluttet() || tilstand == AvsluttetUtenUtbetaling
-
-    internal fun kanForkastes(utbetalinger: List<Utbetaling>): Boolean {
-        if (!this.utbetalinger.harUtbetaling()) return tilstand != AvsluttetUtenUtbetaling
-        return this.utbetalinger.kanForkastes(utbetalinger)
+    private fun forkast(hendelse: IAktivitetslogg, filter: VedtaksperiodeFilter = TIDLIGERE_OG_ETTERGØLGENDE(periode)) {
+        person.søppelbøtte(hendelse, filter)
     }
 
     private fun erUtbetalt() = tilstand == Avsluttet && utbetalinger.erAvsluttet()
@@ -445,7 +490,7 @@ internal class Vedtaksperiode private constructor(
         hendelse.validerFørsteFraværsdag(skjæringstidspunkt)
         finnArbeidsgiverperiode()?.also { hendelse.validerArbeidsgiverperiode(it) }
         hendelse.valider(periode, jurist())
-        if (hendelse.hasErrorsOrWorse()) return arbeidsgiver.søppelbøtte(hendelse, SENERE_INCLUSIVE(this), IKKE_STØTTET)
+        if (hendelse.hasErrorsOrWorse()) return forkast(hendelse, SENERE_INCLUSIVE(this))
         hvisIngenErrors()
         hendelse.info("Fullført behandling av inntektsmelding")
         if (hendelse.hasErrorsOrWorse()) return
@@ -477,7 +522,7 @@ internal class Vedtaksperiode private constructor(
                 "Invaliderer alle perioder pga flere arbeidsgivere og feil i søknad"
             )
             hendelse.error("Invaliderer alle perioder for arbeidsgiver pga feil i søknad")
-            return tilstand(hendelse, TilInfotrygd)
+            return forkast(hendelse)
         }
         val tilstand = if (ingenUtbetaling()) AvsluttetUtenUtbetaling else nesteTilstand
         tilstand?.also { tilstand(hendelse, it) }
@@ -487,7 +532,7 @@ internal class Vedtaksperiode private constructor(
         søknad.trimLeft(periode.endInclusive)
         søknad.error(egendefinertFeiltekst ?: "Mottatt flere søknader for perioden - det støttes ikke før replay av hendelser er på plass")
         if (!tilstand.kanForkastes) return
-        tilstand(søknad, TilInfotrygd)
+        forkast(søknad)
     }
 
     private fun håndterOverlappendeSøknad(søknad: Søknad, nesteTilstand: Vedtaksperiodetilstand? = null) {
@@ -823,9 +868,8 @@ internal class Vedtaksperiode private constructor(
             .plusDays(110)
 
         fun håndterMakstid(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            vedtaksperiode.tilstand(påminnelse, TilInfotrygd) {
-                påminnelse.error("Gir opp fordi tilstanden er nådd makstid")
-            }
+            påminnelse.error("Gir opp fordi tilstanden er nådd makstid")
+            vedtaksperiode.forkast(påminnelse)
         }
 
         override fun toSpesifikkKontekst(): SpesifikkKontekst {
@@ -838,7 +882,7 @@ internal class Vedtaksperiode private constructor(
 
         fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Sykmelding) {
             hendelse.error("Mottatt sykmelding eller søknad out of order")
-            vedtaksperiode.arbeidsgiver.søppelbøtte(hendelse, SENERE_INCLUSIVE(ny), IKKE_STØTTET)
+            vedtaksperiode.forkast(hendelse)
         }
 
         fun reberegnetPeriodeFør(vedtaksperiode: Vedtaksperiode, reberegnet: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
@@ -909,7 +953,7 @@ internal class Vedtaksperiode private constructor(
         private fun overlappendeSykmeldingIkkeStøttet(vedtaksperiode: Vedtaksperiode, sykmelding: Sykmelding) {
             sykmelding.overlappIkkeStøttet(vedtaksperiode.periode)
             if (!kanForkastes) return
-            vedtaksperiode.tilstand(sykmelding, TilInfotrygd)
+            vedtaksperiode.forkast(sykmelding)
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
@@ -933,7 +977,7 @@ internal class Vedtaksperiode private constructor(
             infotrygdhistorikk: Infotrygdhistorikk
         ) {
             validation(hendelse) {
-                onValidationFailed { vedtaksperiode.tilstand(hendelse, TilInfotrygd) }
+                onValidationFailed { vedtaksperiode.forkast(hendelse) }
                 valider {
                     infotrygdhistorikk.validerOverlappende(
                         this,
@@ -1035,8 +1079,7 @@ internal class Vedtaksperiode private constructor(
                 sykmelding.warn("Denne personen har en utbetaling for samme periode for en annen arbeidsgiver. Kontroller at beregningene for begge arbeidsgiverne er korrekte.")
             }
 
-            if (sykmelding.valider(vedtaksperiode.periode, vedtaksperiode.jurist()).hasErrorsOrWorse())
-                return vedtaksperiode.tilstand(sykmelding, TilInfotrygd)
+            if (sykmelding.valider(vedtaksperiode.periode, vedtaksperiode.jurist()).hasErrorsOrWorse()) return vedtaksperiode.forkast(sykmelding)
 
             vedtaksperiode.tilstand(
                 sykmelding, avgjørNesteTilstand(
@@ -1665,7 +1708,7 @@ internal class Vedtaksperiode private constructor(
             infotrygdhistorikk: Infotrygdhistorikk
         ) {
             validation(hendelse) {
-                onValidationFailed { vedtaksperiode.tilstand(hendelse, TilInfotrygd) }
+                onValidationFailed { vedtaksperiode.forkast(hendelse) }
                 valider {
                     infotrygdhistorikk.validerOverlappende(
                         this,
@@ -1772,7 +1815,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.loggInnenforArbeidsgiverperiode()
             if (vedtaksperiode.arbeidsgiver.harDagUtenSøknad(vedtaksperiode.periode)) {
                 hendelse.error("Tidslinjen inneholder minst én dag med kilde sykmelding")
-                return vedtaksperiode.tilstand(hendelse, TilInfotrygd)
+                return vedtaksperiode.forkast(hendelse)
             }
             vedtaksperiode.trengerYtelser(hendelse)
             vedtaksperiode.utbetalinger.forkast(hendelse)
@@ -1809,7 +1852,7 @@ internal class Vedtaksperiode private constructor(
             validation(ytelser) {
                 onValidationFailed {
                     if (!ytelser.hasErrorsOrWorse()) error("Behandling av Ytelser feilet, årsak ukjent")
-                    vedtaksperiode.tilstand(ytelser, TilInfotrygd)
+                    vedtaksperiode.forkast(ytelser)
                 }
                 onSuccess {
                     vedtaksperiode.skjæringstidspunktFraInfotrygd = person.skjæringstidspunkt(vedtaksperiode.periode)
@@ -1936,7 +1979,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, simulering: Simulering) {
             if (vedtaksperiode.utbetalinger.valider(simulering).hasErrorsOrWorse())
-                return vedtaksperiode.tilstand(simulering, TilInfotrygd)
+                return vedtaksperiode.forkast(simulering)
 
             if (!vedtaksperiode.utbetalinger.erKlarForGodkjenning()) return
 
@@ -2017,10 +2060,10 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             utbetalingsgodkjenning: Utbetalingsgodkjenning
         ) {
+            if (vedtaksperiode.utbetalinger.erAvvist()) return vedtaksperiode.forkast(utbetalingsgodkjenning)
             vedtaksperiode.tilstand(
                 utbetalingsgodkjenning,
                 when {
-                    vedtaksperiode.utbetalinger.erAvvist() -> TilInfotrygd
                     vedtaksperiode.utbetalinger.harUtbetalinger() -> TilUtbetaling
                     else -> Avsluttet
                 }
@@ -2483,10 +2526,6 @@ internal class Vedtaksperiode private constructor(
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             hendelse.info("Sykdom for denne personen kan ikke behandles automatisk.")
-            vedtaksperiode.person.søppelbøtte(
-                hendelse,
-                vedtaksperiode.periode
-            )
             sendOppgaveEvent(vedtaksperiode, hendelse)
         }
 
@@ -2538,6 +2577,19 @@ internal class Vedtaksperiode private constructor(
 
         internal val SENERE_INCLUSIVE = fun(senereEnnDenne: Vedtaksperiode): VedtaksperiodeFilter {
             return fun(vedtaksperiode: Vedtaksperiode) = vedtaksperiode >= senereEnnDenne
+        }
+
+        internal val OVERLAPPENDE = fun(periode: Periode): VedtaksperiodeFilter {
+            return fun(other: Vedtaksperiode) = other.periode.overlapperMed(periode)
+        }
+
+        // Fredet funksjonsnavn
+        internal val TIDLIGERE_OG_ETTERGØLGENDE = fun(periode: Periode): VedtaksperiodeFilter {
+            // forkaster perioder som er før/overlapper med oppgitt periode, eller som er sammenhengende med
+            // perioden som overlapper (per arbeidsgiver!).
+            return fun (segSelv: Vedtaksperiode) = segSelv.person.nåværendeVedtaksperioder(OVERLAPPENDE(periode)).any { other ->
+                other.arbeidsgiver == segSelv.arbeidsgiver && (segSelv <= other || other.skjæringstidspunkt == segSelv.skjæringstidspunkt)
+            }
         }
 
         internal val IKKE_FERDIG_REVURDERT: VedtaksperiodeFilter = { it.ikkeFerdigRevurdert() }
