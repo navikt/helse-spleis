@@ -1,7 +1,6 @@
 package no.nav.helse.serde.api.v2.buildere
 
 import no.nav.helse.Grunnbeløp
-import no.nav.helse.Toggle
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.person.*
 import no.nav.helse.person.Inntektshistorikk.*
@@ -161,8 +160,6 @@ internal class VilkårsgrunnlagBuilder(
             sammenligningsgrunnlag: Inntekt,
             avviksprosent: Prosent?,
             opptjening: Opptjening,
-            harOpptjening: Boolean,
-            antallOpptjeningsdagerErMinst: Int,
             harMinimumInntekt: Boolean?,
             vurdertOk: Boolean,
             meldingsreferanseId: UUID?,

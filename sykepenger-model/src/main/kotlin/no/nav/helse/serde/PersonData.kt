@@ -266,8 +266,6 @@ internal data class PersonData(
         private val sammenligningsgrunnlag: SammenligningsgrunnlagData?,
         private val avviksprosent: Double?,
         private val opptjening: OpptjeningData?,
-        private val harOpptjening: Boolean?,
-        private val antallOpptjeningsdagerErMinst: Int?,
         private val medlemskapstatus: JsonMedlemskapstatus?,
         private val harMinimumInntekt: Boolean?,
         private val vurdertOk: Boolean?,
@@ -281,8 +279,6 @@ internal data class PersonData(
                 sammenligningsgrunnlag = sammenligningsgrunnlag!!.parseSammenligningsgrunnlag(),
                 avviksprosent = avviksprosent?.ratio,
                 opptjening = opptjening!!.tilOpptjening(),
-                harOpptjening = harOpptjening!!,
-                antallOpptjeningsdagerErMinst = antallOpptjeningsdagerErMinst!!,
                 medlemskapstatus = when (medlemskapstatus!!) {
                     JsonMedlemskapstatus.JA -> Medlemskapsvurdering.Medlemskapstatus.Ja
                     JsonMedlemskapstatus.NEI -> Medlemskapsvurdering.Medlemskapstatus.Nei

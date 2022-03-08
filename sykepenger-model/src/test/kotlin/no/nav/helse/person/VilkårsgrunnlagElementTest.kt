@@ -53,8 +53,6 @@ internal class VilkårsgrunnlagElementTest {
             sammenligningsgrunnlag = sammenligningsgrunnlag(1000.daglig),
             avviksprosent = avviksprosent,
             opptjening = Opptjening.opptjening(emptyList(), 1.januar, MaskinellJurist()),
-            antallOpptjeningsdagerErMinst = 0,
-            harOpptjening = true,
             medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
             harMinimumInntekt = true,
             vurdertOk = true,

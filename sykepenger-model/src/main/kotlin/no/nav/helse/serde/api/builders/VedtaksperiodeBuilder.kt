@@ -1,6 +1,5 @@
 package no.nav.helse.serde.api.builders
 
-import no.nav.helse.Toggle
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
@@ -307,8 +306,6 @@ private class GrunnlagsdataBuilder(skjæringstidspunkt: LocalDate, grunnlagsdata
         sammenligningsgrunnlag: Inntekt,
         avviksprosent: Prosent?,
         opptjening: Opptjening,
-        harOpptjening: Boolean,
-        antallOpptjeningsdagerErMinst: Int,
         harMinimumInntekt: Boolean?,
         vurdertOk: Boolean,
         meldingsreferanseId: UUID?,

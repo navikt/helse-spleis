@@ -54,8 +54,6 @@ internal class PersonInspektør(person: Person): PersonVisitor {
         sammenligningsgrunnlag: Inntekt,
         avviksprosent: Prosent?,
         opptjening: Opptjening,
-        harOpptjening: Boolean,
-        antallOpptjeningsdagerErMinst: Int,
         harMinimumInntekt: Boolean?,
         vurdertOk: Boolean,
         meldingsreferanseId: UUID?,

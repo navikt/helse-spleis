@@ -1,6 +1,5 @@
 package no.nav.helse.person
 
-import no.nav.helse.Toggle
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Vilkårsgrunnlag
@@ -128,8 +127,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         private val sammenligningsgrunnlag: Sammenligningsgrunnlag,
         private val avviksprosent: Prosent?,
         internal val opptjening: Opptjening,
-        private val antallOpptjeningsdagerErMinst: Int,
-        private val harOpptjening: Boolean,
         private val medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
         private val harMinimumInntekt: Boolean?,
         private val vurdertOk: Boolean,
@@ -163,8 +160,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                 sammenligningsgrunnlag.sammenligningsgrunnlag,
                 avviksprosent,
                 opptjening,
-                harOpptjening,
-                antallOpptjeningsdagerErMinst,
                 harMinimumInntekt,
                 vurdertOk,
                 meldingsreferanseId,
@@ -180,8 +175,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                 sykepengegrunnlag,
                 sammenligningsgrunnlag.sammenligningsgrunnlag,
                 avviksprosent,
-                antallOpptjeningsdagerErMinst,
-                harOpptjening,
                 medlemskapstatus,
                 harMinimumInntekt,
                 vurdertOk,
@@ -222,8 +215,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             sammenligningsgrunnlag = sammenligningsgrunnlag,
             avviksprosent = avviksprosent,
             opptjening = opptjening, // TODO: Må sjekkes på nytt
-            antallOpptjeningsdagerErMinst = antallOpptjeningsdagerErMinst,
-            harOpptjening = harOpptjening,
             medlemskapstatus = medlemskapstatus,
             harMinimumInntekt = minimumInntektVurdering,
             vurdertOk = vurdertOk && minimumInntektVurdering,
@@ -239,7 +230,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             sammenligningsgrunnlagVurdering: Boolean,
             avviksprosent: Prosent,
             nyOpptjening: Opptjening,
-            nyHarOpptjening: Boolean,
             minimumInntektVurdering: Boolean,
             meldingsreferanseId: UUID
         ) = Grunnlagsdata(
@@ -248,11 +238,9 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             sammenligningsgrunnlag = sammenligningsgrunnlag,
             avviksprosent = avviksprosent,
             opptjening = nyOpptjening,
-            antallOpptjeningsdagerErMinst = antallOpptjeningsdagerErMinst,
-            harOpptjening = harOpptjening,
             medlemskapstatus = medlemskapstatus,
             harMinimumInntekt = minimumInntektVurdering,
-            vurdertOk = nyHarOpptjening && minimumInntektVurdering && sammenligningsgrunnlagVurdering,
+            vurdertOk = nyOpptjening.erOppfylt() && minimumInntektVurdering && sammenligningsgrunnlagVurdering,
             meldingsreferanseId = meldingsreferanseId,
             vilkårsgrunnlagId = UUID.randomUUID()
         )

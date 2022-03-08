@@ -116,8 +116,6 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
             sammenligningsgrunnlag = Sammenligningsgrunnlag(emptyList()),
             avviksprosent = 0.0.prosent,
             opptjening = Opptjening.opptjening(emptyList(), 1.januar, MaskinellJurist()),
-            antallOpptjeningsdagerErMinst = 28,
-            harOpptjening = harOpptjening,
             medlemskapstatus = when (erMedlem) {
                 true -> Medlemskapsvurdering.Medlemskapstatus.Ja
                 false -> Medlemskapsvurdering.Medlemskapstatus.Nei

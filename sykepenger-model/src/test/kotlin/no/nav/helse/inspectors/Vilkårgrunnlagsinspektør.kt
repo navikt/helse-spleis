@@ -1,6 +1,5 @@
 package no.nav.helse.inspectors
 
-import no.nav.helse.Toggle
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Opptjening
@@ -37,8 +36,6 @@ internal class Vilkårgrunnlagsinspektør(historikk: VilkårsgrunnlagHistorikk) 
         sammenligningsgrunnlag: Inntekt,
         avviksprosent: Prosent?,
         opptjening: Opptjening,
-        harOpptjening: Boolean,
-        antallOpptjeningsdagerErMinst: Int,
         harMinimumInntekt: Boolean?,
         vurdertOk: Boolean,
         meldingsreferanseId: UUID?,
@@ -90,8 +87,6 @@ internal class GrunnlagsdataInspektør(grunnlagsdata: VilkårsgrunnlagHistorikk.
         sammenligningsgrunnlag: Inntekt,
         avviksprosent: Prosent?,
         opptjening: Opptjening,
-        harOpptjening: Boolean,
-        antallOpptjeningsdagerErMinst: Int,
         harMinimumInntekt: Boolean?,
         vurdertOk: Boolean,
         meldingsreferanseId: UUID?,

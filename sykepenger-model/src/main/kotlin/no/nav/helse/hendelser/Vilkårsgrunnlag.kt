@@ -70,8 +70,6 @@ class Vilkårsgrunnlag(
             sammenligningsgrunnlag = sammenligningsgrunnlag,
             avviksprosent = inntektsvurdering.avviksprosent(),
             opptjening = opptjening,
-            antallOpptjeningsdagerErMinst = opptjeningvurdering.antallOpptjeningsdager,
-            harOpptjening = opptjeningvurdering.harOpptjening(),
             medlemskapstatus = medlemskapsvurdering.medlemskapstatus,
             harMinimumInntekt = minimumInntektvurderingOk,
             vurdertOk = inntektsvurderingOk && opptjeningvurderingOk && medlemskapsvurderingOk && minimumInntektvurderingOk,

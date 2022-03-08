@@ -1,7 +1,6 @@
 package no.nav.helse.serde
 
 import no.nav.helse.Fødselsnummer
-import no.nav.helse.Toggle
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
@@ -806,8 +805,6 @@ internal class JsonBuilder : AbstractBuilder() {
             sammenligningsgrunnlag: Inntekt,
             avviksprosent: Prosent?,
             opptjening: Opptjening,
-            harOpptjening: Boolean,
-            antallOpptjeningsdagerErMinst: Int,
             harMinimumInntekt: Boolean?,
             vurdertOk: Boolean,
             meldingsreferanseId: UUID?,
@@ -918,8 +915,6 @@ internal class JsonBuilder : AbstractBuilder() {
             sykepengegrunnlag: Sykepengegrunnlag,
             sammenligningsgrunnlag: Inntekt,
             avviksprosent: Prosent?,
-            antallOpptjeningsdagerErMinst: Int,
-            harOpptjening: Boolean,
             medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
             harMinimumInntekt: Boolean?,
             vurdertOk: Boolean,
@@ -930,12 +925,10 @@ internal class JsonBuilder : AbstractBuilder() {
                 mapOf(
                     "skjæringstidspunkt" to skjæringstidspunkt,
                     "type" to "Vilkårsprøving",
-                    "antallOpptjeningsdagerErMinst" to antallOpptjeningsdagerErMinst,
                     "avviksprosent" to avviksprosent?.ratio(),
                     "sykepengegrunnlag" to sykepengegrunnlagMap,
                     "sammenligningsgrunnlag" to sammenligningsgrunnlagMap,
                     "opptjening" to opptjeningMap,
-                    "harOpptjening" to harOpptjening,
                     "medlemskapstatus" to when (medlemskapstatus) {
                         Medlemskapsvurdering.Medlemskapstatus.Ja -> JsonMedlemskapstatus.JA
                         Medlemskapsvurdering.Medlemskapstatus.Nei -> JsonMedlemskapstatus.NEI

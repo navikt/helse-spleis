@@ -761,14 +761,12 @@ class Person private constructor(
         when (val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt)) {
             is VilkårsgrunnlagHistorikk.Grunnlagsdata -> {
                 val harMinimumInntekt = validerMinimumInntekt(hendelse, fødselsnummer, skjæringstidspunkt, sykepengegrunnlag, subsumsjonObserver)
-                val harOpptjening = opptjening.erOppfylt()
                 val grunnlagselement = grunnlag.kopierGrunnlagsdataMed(
                     sykepengegrunnlag = sykepengegrunnlag,
                     sammenligningsgrunnlag = sammenligningsgrunnlag,
                     sammenligningsgrunnlagVurdering = harAkseptabeltAvvik,
                     avviksprosent = avviksprosent,
                     nyOpptjening = opptjening,
-                    nyHarOpptjening = harOpptjening,
                     minimumInntektVurdering = harMinimumInntekt,
                     meldingsreferanseId = hendelse.meldingsreferanseId()
                 )

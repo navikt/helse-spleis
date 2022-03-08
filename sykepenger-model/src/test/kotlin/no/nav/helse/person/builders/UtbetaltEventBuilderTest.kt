@@ -49,8 +49,6 @@ internal class UtbetaltEventBuilderTest {
             ),
             avviksprosent = null,
             opptjening = Opptjening.opptjening(emptyList(), 1.januar, MaskinellJurist()),
-            antallOpptjeningsdagerErMinst = 30,
-            harOpptjening = true,
             medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
             harMinimumInntekt = true,
             vurdertOk = true,
