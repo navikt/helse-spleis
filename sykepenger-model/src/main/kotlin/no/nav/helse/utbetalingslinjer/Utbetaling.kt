@@ -3,9 +3,21 @@ package no.nav.helse.utbetalingslinjer
 import no.nav.helse.hendelser.Hendelseskontekst
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
-import no.nav.helse.hendelser.utbetaling.*
-import no.nav.helse.person.*
+import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
+import no.nav.helse.hendelser.utbetaling.Grunnbeløpsregulering
+import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
+import no.nav.helse.hendelser.utbetaling.UtbetalingOverført
+import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
+import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
+import no.nav.helse.person.Aktivitetskontekst
+import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.godkjenning
+import no.nav.helse.person.ArbeidstakerHendelse
+import no.nav.helse.person.IAktivitetslogg
+import no.nav.helse.person.Periodetype
+import no.nav.helse.person.SpesifikkKontekst
+import no.nav.helse.person.UtbetalingVisitor
+import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.builders.UtbetaltEventBuilder
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.serde.reflection.Utbetalingstatus
@@ -209,8 +221,8 @@ internal class Utbetaling private constructor(
         hendelse.erRelevant(id)
 
     internal fun valider(simulering: Simulering): IAktivitetslogg {
-        arbeidsgiverOppdrag.sammenlignMed(simulering)
-        personOppdrag.sammenlignMed(simulering)
+        arbeidsgiverOppdrag.valider(simulering)
+        personOppdrag.valider(simulering)
         return simulering
     }
 

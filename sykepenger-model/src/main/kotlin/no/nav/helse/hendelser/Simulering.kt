@@ -28,25 +28,11 @@ class Simulering(
 
     internal fun valider(oppdrag: Oppdrag) = this.apply {
         if (!oppdrag.erRelevant(fagsystemId, fagområde)) return@apply
-
         if (!simuleringOK) {
             info("Feil under simulering: $melding")
             error("Feil under simulering")
         }
-        when {
-            simuleringResultat == null -> {
-                info("Ingenting ble simulert")
-            }
-            oppdrag.totalbeløp() != simuleringResultat.totalbeløp -> {
-                info("Simulering kom frem til et annet totalbeløp. Kontroller beløpet til utbetaling")
-            }
-            oppdrag.map { Periode(it.fom, it.tom) }.any { oppdrag -> simuleringResultat.perioder.none { oppdrag.overlapperMed(it.periode) } } -> {
-                warn("Simulering inneholder ikke alle periodene som skal betales")
-            }
-            oppdrag.erForskjelligFra(simuleringResultat) -> {
-                warn("Simulering har endret dagsats eller antall på én eller flere utbetalingslinjer")
-            }
-        }
+        if (simuleringResultat == null) info("Ingenting ble simulert")
     }
 
     class SimuleringResultat(

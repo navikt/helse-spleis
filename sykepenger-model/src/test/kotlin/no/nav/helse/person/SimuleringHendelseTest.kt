@@ -1,10 +1,37 @@
 package no.nav.helse.person
 
-import no.nav.helse.*
-import no.nav.helse.hendelser.*
+import no.nav.helse.desember
+import no.nav.helse.februar
+import no.nav.helse.hendelser.Arbeidsavklaringspenger
+import no.nav.helse.hendelser.Dagpenger
+import no.nav.helse.hendelser.Dødsinfo
+import no.nav.helse.hendelser.Foreldrepermisjon
+import no.nav.helse.hendelser.InntektForSykepengegrunnlag
+import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.Inntektsvurdering
+import no.nav.helse.hendelser.Institusjonsopphold
+import no.nav.helse.hendelser.Medlemskapsvurdering
+import no.nav.helse.hendelser.Omsorgspenger
+import no.nav.helse.hendelser.Opplæringspenger
+import no.nav.helse.hendelser.Opptjeningvurdering
+import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Pleiepenger
+import no.nav.helse.hendelser.Simulering
+import no.nav.helse.hendelser.Sykmelding
+import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.Utbetalingshistorikk
+import no.nav.helse.hendelser.Vilkårsgrunnlag
+import no.nav.helse.hendelser.Ytelser
+import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.personLogg
-import no.nav.helse.person.TilstandType.*
+import no.nav.helse.januar
+import no.nav.helse.mars
+import no.nav.helse.oktober
+import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
+import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
+import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
@@ -12,7 +39,9 @@ import no.nav.helse.utbetalingslinjer.Fagområde
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.util.*
@@ -31,14 +60,6 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
         håndterSimuleringer()
         assertEquals(AVVENTER_GODKJENNING, inspektør.sisteTilstand(1.vedtaksperiode))
         assertFalse(person.personLogg.hasWarningsOrWorse())
-    }
-
-    @Test
-    fun `simulering med endret dagsats`() {
-        håndterYtelser()
-        håndterSimuleringer(mapOf(Fagområde.SykepengerRefusjon to Pair(true, 500)))
-        assertEquals(AVVENTER_GODKJENNING, inspektør.sisteTilstand(1.vedtaksperiode))
-        assertTrue(person.personLogg.warn().toString().contains("Simulering"))
     }
 
     @Test

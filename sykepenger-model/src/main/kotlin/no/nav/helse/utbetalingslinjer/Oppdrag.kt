@@ -6,7 +6,6 @@ import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.UtbetalingOverført
 import no.nav.helse.person.*
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
-import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.utbetalingslinjer.Oppdragstatus.AVVIST
 import no.nav.helse.utbetalingslinjer.Oppdragstatus.FEIL
 import no.nav.helse.utbetalingstidslinje.genererUtbetalingsreferanse
@@ -176,35 +175,14 @@ internal class Oppdrag private constructor(
     internal fun erRelevant(fagsystemId: String, fagområde: Fagområde) =
         this.fagsystemId == fagsystemId && this.fagområde == fagområde
 
-    internal fun sammenlignMed(simulering: Simulering) =
-        simulering.valider(kopierKunLinjerMedEndring())
+    internal fun valider(simulering: Simulering) =
+        simulering.valider(this)
 
     private fun kopierKunLinjerMedEndring() = kopierMed(filter(Utbetalingslinje::erForskjell))
 
     private fun kopierUtenOpphørslinjer() = kopierMed(linjerUtenOpphør())
 
     internal fun linjerUtenOpphør() = filter { !it.erOpphør() }
-
-    internal fun erForskjelligFra(resultat: Simulering.SimuleringResultat): Boolean {
-        return dagSatser().zip(dagSatser(resultat, førstedato, sistedato)).any { (oppdrag, simulering) ->
-            oppdrag.first != simulering.first || oppdrag.second?.toDouble() != simulering.second
-        }
-    }
-
-    private fun dagSatser() = linjerUtenOpphør().flatMap { linje -> linje.dager().map { it to linje.beløp } }
-
-    private fun dagSatser(resultat: Simulering.SimuleringResultat, fom: LocalDate, tom: LocalDate) =
-        resultat.perioder.flatMap {
-            it.utbetalinger.flatMap {
-                it.detaljer.flatMap { detalj ->
-                    detalj.periode.start.datesUntil(detalj.periode.endInclusive.plusDays(1))
-                        .filter { it >= fom && it <= tom }
-                        .filter { !it.erHelg() }
-                        .map { it to detalj.sats.sats }
-                        .toList()
-                }
-            }
-        }
 
     internal fun annuller(aktivitetslogg: IAktivitetslogg): Oppdrag {
         return tomtOppdrag().minus(this, aktivitetslogg)
