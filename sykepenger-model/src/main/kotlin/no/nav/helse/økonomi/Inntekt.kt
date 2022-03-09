@@ -1,10 +1,10 @@
 package no.nav.helse.økonomi
 
+import no.nav.helse.memoize
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import java.time.LocalDate
 import kotlin.math.absoluteValue
-import kotlin.math.floor
 import kotlin.math.roundToInt
 
 class Inntekt private constructor(private val årlig: Double) : Comparable<Inntekt> {
@@ -40,6 +40,12 @@ class Inntekt private constructor(private val årlig: Double) : Comparable<Innte
         internal fun List<Inntekt>.summer() = this.fold(INGEN) { acc, inntekt -> acc + inntekt }
 
         internal val INGEN = 0.daglig
+
+        private val tilDagligDoubleMemoized = { tall: Double -> tall / ARBEIDSDAGER_PER_ÅR }.memoize()
+        private val tilMånedligDoubleMemoized = { tall: Double -> tall / 12 }.memoize()
+        private val tilDagligIntMemoized = { tall: Double -> tilDagligDoubleMemoized(tall).roundToInt() }
+        private val rundTilDagligMemoized = { tall: Double -> tilDagligIntMemoized(tall).daglig }.memoize()
+        private val rundNedTilDagligMemoized = { tall: Double -> tilDagligDoubleMemoized(tall).toInt().daglig }.memoize()
     }
 
     internal fun <R> reflection(block: (årlig: Double, månedlig: Double, daglig: Double, dagligInt: Int) -> R) = block(
@@ -49,15 +55,11 @@ class Inntekt private constructor(private val årlig: Double) : Comparable<Innte
         tilDagligInt()
     )
 
-    private fun tilDagligInt() = (rundTilDaglig().årlig / ARBEIDSDAGER_PER_ÅR).roundToInt()
-
-    private fun tilDagligDouble() = årlig / ARBEIDSDAGER_PER_ÅR
-
-    private fun tilMånedligDouble() = årlig / 12
-
-    internal fun rundTilDaglig() = Inntekt((årlig / ARBEIDSDAGER_PER_ÅR).roundToInt() * ARBEIDSDAGER_PER_ÅR.toDouble())
-
-    internal fun rundNedTilDaglig() = Inntekt(floor(tilDagligDouble()) * ARBEIDSDAGER_PER_ÅR)
+    private fun tilDagligInt() = tilDagligIntMemoized(årlig)
+    private fun tilDagligDouble() = tilDagligDoubleMemoized(årlig)
+    private fun tilMånedligDouble() = tilMånedligDoubleMemoized(årlig)
+    internal fun rundTilDaglig() = rundTilDagligMemoized(årlig)
+    internal fun rundNedTilDaglig() = rundNedTilDagligMemoized(årlig)
 
     internal fun dekningsgrunnlag(dagen: LocalDate, regler: ArbeidsgiverRegler, subsumsjonObserver: SubsumsjonObserver): Inntekt {
         val dekningsgrunnlag = Inntekt(this.årlig * regler.dekningsgrad())
