@@ -2,6 +2,7 @@ package no.nav.helse.inspectors
 
 import no.nav.helse.Fødselsnummer
 import no.nav.helse.hendelser.Medlemskapsvurdering
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.*
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosent
@@ -11,6 +12,9 @@ import java.util.*
 
 internal val Person.inspektør get() = PersonInspektør(this)
 internal val Person.personLogg get() = inspektør.aktivitetslogg
+
+internal fun Person.søppelbøtte(hendelse: IAktivitetslogg, periode: Periode) =
+    søppelbøtte(hendelse, Vedtaksperiode.TIDLIGERE_OG_ETTERGØLGENDE(periode))
 
 internal class PersonInspektør(person: Person): PersonVisitor {
     internal lateinit var vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk

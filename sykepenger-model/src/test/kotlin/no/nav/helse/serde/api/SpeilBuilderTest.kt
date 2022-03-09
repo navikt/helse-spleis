@@ -6,6 +6,7 @@ import no.nav.helse.hendelser.Dagtype.Feriedag
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.*
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.inspectors.inspektør
+import no.nav.helse.inspectors.søppelbøtte
 import no.nav.helse.person.ForlengelseFraInfotrygd
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.Periodetype

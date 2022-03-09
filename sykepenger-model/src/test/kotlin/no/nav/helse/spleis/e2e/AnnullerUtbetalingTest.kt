@@ -1,20 +1,17 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.februar
+import no.nav.helse.*
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.inspectors.personLogg
-import no.nav.helse.januar
-import no.nav.helse.mars
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.IdInnhenter
-import no.nav.helse.person.TilstandType
+import no.nav.helse.person.TilstandType.*
 import no.nav.helse.serde.api.TilstandstypeDTO
-import no.nav.helse.sisteBehov
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.*
@@ -34,8 +31,31 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         nyttVedtak(3.januar, 26.januar, 100.prosent, 3.januar)
         håndterAnnullerUtbetaling(fagsystemId = "unknown")
         inspektør.also {
-            assertEquals(TilstandType.AVSLUTTET, it.sisteTilstand(1.vedtaksperiode))
+            assertEquals(AVSLUTTET, it.sisteTilstand(1.vedtaksperiode))
         }
+    }
+
+    @Test
+    fun `forkaster ikke tidligere perioder ved annullering`() {
+        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(1.mai, 31.mai)
+        håndterAnnullerUtbetaling()
+        assertEquals(1, observatør.avbruttePerioder())
+        assertEquals(AVSLUTTET, observatør.avbrutt(2.vedtaksperiode.id(ORGNUMMER)).gjeldendeTilstand)
+    }
+
+    @Test
+    fun `forkaster senere perioder ved annullering`() {
+        nyttVedtak(1.januar, 31.januar)
+        forlengVedtak(1.februar, 28.februar) // forlengelse
+        nyttVedtak(10.mars, 31.mars) // førstegangsbehandling, men med samme agp
+        håndterSykmelding(Sykmeldingsperiode(1.mai, 20.mai, 100.prosent)) // førstegangsbehandling, ny agp
+        håndterAnnullerUtbetaling()
+        assertEquals(4, observatør.avbruttePerioder())
+        assertEquals(AVSLUTTET, observatør.avbrutt(1.vedtaksperiode.id(ORGNUMMER)).gjeldendeTilstand)
+        assertEquals(AVSLUTTET, observatør.avbrutt(2.vedtaksperiode.id(ORGNUMMER)).gjeldendeTilstand)
+        assertEquals(AVSLUTTET, observatør.avbrutt(3.vedtaksperiode.id(ORGNUMMER)).gjeldendeTilstand)
+        assertEquals(MOTTATT_SYKMELDING_FERDIG_GAP, observatør.avbrutt(4.vedtaksperiode.id(ORGNUMMER)).gjeldendeTilstand)
     }
 
     @Test
@@ -157,12 +177,12 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
     fun `En enkel periode som er avsluttet som blir annullert blir også satt i tilstand TilAnnullering`() {
         nyttVedtak(3.januar, 26.januar, 100.prosent, 3.januar)
         inspektør.also {
-            assertEquals(TilstandType.AVSLUTTET, inspektør.sisteTilstand(1.vedtaksperiode))
+            assertEquals(AVSLUTTET, inspektør.sisteTilstand(1.vedtaksperiode))
         }
         håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
         assertFalse(person.personLogg.hasErrorsOrWorse(), person.personLogg.toString())
         inspektør.also {
-            assertEquals(TilstandType.AVSLUTTET, inspektør.sisteTilstand(1.vedtaksperiode))
+            assertEquals(AVSLUTTET, inspektør.sisteTilstand(1.vedtaksperiode))
             assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
         }
     }
@@ -173,29 +193,29 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         forlengVedtak(27.januar, 31.januar, 100.prosent)
         forlengPeriode(1.februar, 20.februar, 100.prosent)
         inspektør.also {
-            assertEquals(TilstandType.AVSLUTTET, inspektør.sisteTilstand(1.vedtaksperiode))
-            assertEquals(TilstandType.AVSLUTTET, inspektør.sisteTilstand(2.vedtaksperiode))
-            assertEquals(TilstandType.AVVENTER_HISTORIKK, inspektør.sisteTilstand(3.vedtaksperiode))
+            assertEquals(AVSLUTTET, inspektør.sisteTilstand(1.vedtaksperiode))
+            assertEquals(AVSLUTTET, inspektør.sisteTilstand(2.vedtaksperiode))
+            assertEquals(AVVENTER_HISTORIKK, inspektør.sisteTilstand(3.vedtaksperiode))
         }
         håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
         assertFalse(person.personLogg.hasErrorsOrWorse(), person.personLogg.toString())
         inspektør.also {
-            assertEquals(TilstandType.AVSLUTTET, inspektør.sisteTilstand(1.vedtaksperiode))
+            assertEquals(AVSLUTTET, inspektør.sisteTilstand(1.vedtaksperiode))
             assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
-            assertEquals(TilstandType.AVSLUTTET, inspektør.sisteTilstand(2.vedtaksperiode))
+            assertEquals(AVSLUTTET, inspektør.sisteTilstand(2.vedtaksperiode))
             assertTrue(inspektør.periodeErForkastet(2.vedtaksperiode))
-            assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.sisteTilstand(3.vedtaksperiode))
+            assertEquals(TIL_INFOTRYGD, inspektør.sisteTilstand(3.vedtaksperiode))
             assertTrue(inspektør.periodeErForkastet(3.vedtaksperiode))
             assertTrue(it.utbetalinger.last().inspektør.erAnnullering)
             assertFalse(it.utbetalinger.last().inspektør.erUtbetalt)
         }
         håndterUtbetalt(status = Oppdragstatus.AKSEPTERT)
         inspektør.also {
-            assertEquals(TilstandType.AVSLUTTET, inspektør.sisteTilstand(1.vedtaksperiode))
+            assertEquals(AVSLUTTET, inspektør.sisteTilstand(1.vedtaksperiode))
             assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
-            assertEquals(TilstandType.AVSLUTTET, inspektør.sisteTilstand(2.vedtaksperiode))
+            assertEquals(AVSLUTTET, inspektør.sisteTilstand(2.vedtaksperiode))
             assertTrue(inspektør.periodeErForkastet(2.vedtaksperiode))
-            assertEquals(TilstandType.TIL_INFOTRYGD, inspektør.sisteTilstand(3.vedtaksperiode))
+            assertEquals(TIL_INFOTRYGD, inspektør.sisteTilstand(3.vedtaksperiode))
             assertTrue(inspektør.periodeErForkastet(3.vedtaksperiode))
             assertEquals(Behovtype.Utbetaling, person.personLogg.behov().last().type)
             assertTrue(it.utbetalinger.last().inspektør.erAnnullering)
@@ -208,13 +228,13 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         nyttVedtak(3.januar, 26.januar, 100.prosent, 3.januar)
         håndterAnnullerUtbetaling()
         inspektør.also {
-            assertEquals(TilstandType.AVSLUTTET, inspektør.sisteTilstand(1.vedtaksperiode))
+            assertEquals(AVSLUTTET, inspektør.sisteTilstand(1.vedtaksperiode))
             assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
         }
         håndterUtbetalt(status = Oppdragstatus.AKSEPTERT)
         assertFalse(person.personLogg.hasErrorsOrWorse(), person.personLogg.toString())
         inspektør.also {
-            assertEquals(TilstandType.AVSLUTTET, inspektør.sisteTilstand(1.vedtaksperiode))
+            assertEquals(AVSLUTTET, inspektør.sisteTilstand(1.vedtaksperiode))
             assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
         }
     }
@@ -224,13 +244,13 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         nyttVedtak(3.januar, 26.januar, 100.prosent, 3.januar)
         håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
         inspektør.also {
-            assertEquals(TilstandType.AVSLUTTET, inspektør.sisteTilstand(1.vedtaksperiode))
+            assertEquals(AVSLUTTET, inspektør.sisteTilstand(1.vedtaksperiode))
             assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
         }
         håndterUtbetalt(status = Oppdragstatus.AVVIST)
         assertTrue(person.personLogg.hasErrorsOrWorse())
         inspektør.also {
-            assertEquals(TilstandType.AVSLUTTET, inspektør.sisteTilstand(1.vedtaksperiode))
+            assertEquals(AVSLUTTET, inspektør.sisteTilstand(1.vedtaksperiode))
             assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
         }
     }
@@ -241,18 +261,18 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         forlengVedtak(27.januar, 30.januar, 100.prosent)
         nyttVedtak(1.mars, 20.mars, 100.prosent, 1.mars)
         inspektør.also {
-            assertEquals(TilstandType.AVSLUTTET, inspektør.sisteTilstand(1.vedtaksperiode))
-            assertEquals(TilstandType.AVSLUTTET, inspektør.sisteTilstand(2.vedtaksperiode))
-            assertEquals(TilstandType.AVSLUTTET, inspektør.sisteTilstand(3.vedtaksperiode))
+            assertEquals(AVSLUTTET, inspektør.sisteTilstand(1.vedtaksperiode))
+            assertEquals(AVSLUTTET, inspektør.sisteTilstand(2.vedtaksperiode))
+            assertEquals(AVSLUTTET, inspektør.sisteTilstand(3.vedtaksperiode))
         }
         val behovTeller = person.personLogg.behov().size
         håndterAnnullerUtbetaling(fagsystemId = inspektør.arbeidsgiverOppdrag.last().fagsystemId())
         assertFalse(person.personLogg.hasErrorsOrWorse(), person.personLogg.toString())
         assertEquals(1, person.personLogg.behov().size - behovTeller, person.personLogg.toString())
         inspektør.also {
-            assertEquals(TilstandType.AVSLUTTET, inspektør.sisteTilstand(1.vedtaksperiode))
-            assertEquals(TilstandType.AVSLUTTET, inspektør.sisteTilstand(2.vedtaksperiode))
-            assertEquals(TilstandType.AVSLUTTET, inspektør.sisteTilstand(3.vedtaksperiode))
+            assertEquals(AVSLUTTET, inspektør.sisteTilstand(1.vedtaksperiode))
+            assertEquals(AVSLUTTET, inspektør.sisteTilstand(2.vedtaksperiode))
+            assertEquals(AVSLUTTET, inspektør.sisteTilstand(3.vedtaksperiode))
             assertFalse(inspektør.periodeErForkastet(1.vedtaksperiode))
             assertFalse(inspektør.periodeErForkastet(2.vedtaksperiode))
             assertTrue(inspektør.periodeErForkastet(3.vedtaksperiode))
@@ -295,8 +315,8 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
             status = Oppdragstatus.AKSEPTERT
         )
 
-        assertEquals(TilstandType.AVSLUTTET, inspektør.sisteTilstand(1.vedtaksperiode))
-        assertEquals(TilstandType.AVSLUTTET, inspektør.sisteTilstand(2.vedtaksperiode))
+        assertEquals(AVSLUTTET, inspektør.sisteTilstand(1.vedtaksperiode))
+        assertEquals(AVSLUTTET, inspektør.sisteTilstand(2.vedtaksperiode))
 
         val annulleringer = observatør.annulleringer
         assertEquals(1, annulleringer.size)
@@ -396,7 +416,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(27.januar, 14.februar, 100.prosent))
         håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(27.januar, 14.februar, 100.prosent))
-        assertTilstander(2.vedtaksperiode, TilstandType.START, TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP, TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
+        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
     }
 
     @Test
