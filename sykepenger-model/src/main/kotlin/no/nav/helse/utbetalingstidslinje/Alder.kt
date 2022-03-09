@@ -109,10 +109,12 @@ internal class Alder(private val fødselsdato: LocalDate) {
         private val sisteDag: LocalDate,
         private val tilstand: Tilstand
     ) {
-        private val gjenståendeDager = if (sisteDag <= beregningFom) 0 else beregningFom.datesUntil(sisteDag)
-            .filter { it.dayOfWeek !in setOf(SATURDAY, SUNDAY) }
-            .count()
-            .toInt()
+        private val gjenståendeDager by lazy {
+            if (sisteDag <= beregningFom) 0 else beregningFom.datesUntil(sisteDag)
+                .filter { it.dayOfWeek !in setOf(SATURDAY, SUNDAY) }
+                .count()
+                .toInt()
+        }
 
         internal fun sisteDag(begrunnelse: Begrunnelse? = null): LocalDate {
             sporBegrunnelse(begrunnelse)
