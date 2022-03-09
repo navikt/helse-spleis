@@ -1,7 +1,12 @@
 package no.nav.helse
 
+import no.nav.helse.hendelser.til
+import no.nav.helse.sykdomstidslinje.ukedager
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
+import java.time.DayOfWeek.SATURDAY
+import java.time.DayOfWeek.SUNDAY
 import java.time.LocalDate
 
 internal class DatoerTest {
@@ -45,5 +50,66 @@ internal class DatoerTest {
         assertEquals(28.desember, 16.januar + 248.ukedager)
         assertEquals(19.januar, 1.januar + 14.ukedager)
         assertEquals(22.januar, 2.januar + 14.ukedager)
+    }
+
+    @Test
+    fun `ukedager mellom eldre dato`() {
+        assertEquals(0, (2.januar..1.januar).ukedager())
+    }
+
+    @Test
+    fun `ukedager mellom seg selv`() {
+        assertEquals(0, (1.januar..1.januar).ukedager())
+    }
+
+    @Test
+    fun `ukedager mellom - start på mandag`() {
+        assertEquals(1, (1.januar..2.januar).ukedager())
+        assertEquals(2, (1.januar..3.januar).ukedager())
+        assertEquals(3, (1.januar..4.januar).ukedager())
+        assertEquals(4, (1.januar..5.januar).ukedager())
+        assertEquals(5, (1.januar..6.januar).ukedager())
+        assertEquals(5, (1.januar..7.januar).ukedager())
+        assertEquals(5, (1.januar..8.januar).ukedager())
+    }
+
+    @Test
+    fun `ukedager mellom - starter på lørdag`() {
+        assertEquals(0, (6.januar..6.januar).ukedager())
+        assertEquals(0, (6.januar..7.januar).ukedager())
+        assertEquals(0, (6.januar..8.januar).ukedager())
+        assertEquals(5, (6.januar..13.januar).ukedager())
+        assertEquals(5, (6.januar..14.januar).ukedager())
+        assertEquals(5, (6.januar..15.januar).ukedager())
+    }
+
+    @Test
+    fun `ukedager mellom - starter på søndag`() {
+        assertEquals(0, (7.januar..7.januar).ukedager())
+        assertEquals(5, (7.januar..13.januar).ukedager())
+        assertEquals(5, (7.januar..14.januar).ukedager())
+        assertEquals(5, (7.januar..15.januar).ukedager())
+        assertEquals(10, (6.januar..22.januar).ukedager())
+        assertEquals(1326, (1.januar(2016)..31.januar(2021)).ukedager())
+    }
+
+    @Test
+    fun `ukedager mellom - hensyntar skuddår`() {
+        assertEquals(1, (28.februar(2016)..1.mars(2016)).ukedager())
+    }
+
+    @Disabled
+    @Test
+    fun `forskjell mellom ukedager-impl`() {
+        val periode = 1.februar(2016) til 31.desember(2020)
+        val times = 1000
+        val alternative1 = {
+            (1.februar(2016) til 31.desember(2020)).ukedager()
+        }
+        val alternative2 = {
+            periode.start.datesUntil(periode.endInclusive).filter { it.dayOfWeek !in setOf(SATURDAY, SUNDAY) }.count()
+        }
+
+        tournament(times, alternative1, alternative2)
     }
 }

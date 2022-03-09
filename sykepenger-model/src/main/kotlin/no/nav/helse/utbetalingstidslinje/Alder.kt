@@ -5,8 +5,10 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.plus
+import no.nav.helse.sykdomstidslinje.ukedager
 import no.nav.helse.ukedager
-import java.time.DayOfWeek.*
+import java.time.DayOfWeek.MONDAY
+import java.time.DayOfWeek.SUNDAY
 import java.time.LocalDate
 import java.time.Year
 import java.time.temporal.ChronoUnit.YEARS
@@ -109,12 +111,7 @@ internal class Alder(private val fødselsdato: LocalDate) {
         private val sisteDag: LocalDate,
         private val tilstand: Tilstand
     ) {
-        private val gjenståendeDager by lazy {
-            if (sisteDag <= beregningFom) 0 else beregningFom.datesUntil(sisteDag)
-                .filter { it.dayOfWeek !in setOf(SATURDAY, SUNDAY) }
-                .count()
-                .toInt()
-        }
+        private val gjenståendeDager = (beregningFom..sisteDag).ukedager()
 
         internal fun sisteDag(begrunnelse: Begrunnelse? = null): LocalDate {
             sporBegrunnelse(begrunnelse)

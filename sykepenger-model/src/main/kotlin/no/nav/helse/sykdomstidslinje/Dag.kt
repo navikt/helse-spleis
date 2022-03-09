@@ -209,6 +209,18 @@ internal sealed class Dag(
 private val helgedager = listOf(SATURDAY, SUNDAY)
 internal fun LocalDate.erHelg() = this.dayOfWeek in helgedager
 
+// antall ukedager mellom start og endInclusive, ikke medregnet endInclusive i seg selv
+internal fun ClosedRange<LocalDate>.ukedager(): Int {
+    val epochStart = start.toEpochDay()
+    val epochEnd = endInclusive.toEpochDay()
+    if (epochStart >= epochEnd) return 0
+    val dagerMellom = (epochEnd - epochStart).toInt()
+    val heleHelger = (dagerMellom + start.dayOfWeek.value - 1) / 7 * 2
+    val justerFørsteHelg = if (start.dayOfWeek == SUNDAY) 1 else 0
+    val justerSisteHelg = if (endInclusive.dayOfWeek == SUNDAY) 1 else 0
+    return dagerMellom - heleHelger + justerFørsteHelg - justerSisteHelg
+}
+
 internal fun LocalDate.erRettFør(other: LocalDate): Boolean =
     this < other && when (this.dayOfWeek) {
         MONDAY, TUESDAY, WEDNESDAY, THURSDAY, SUNDAY -> this.plusDays(1) == other

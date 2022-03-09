@@ -5,38 +5,10 @@ import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.til
-import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.Arbeidsforholdhistorikk
-import no.nav.helse.person.Arbeidsgiver
-import no.nav.helse.person.ArbeidsgiverInntektsopplysning
-import no.nav.helse.person.Dokumentsporing
+import no.nav.helse.person.*
 import no.nav.helse.person.Dokumentsporing.Companion.tilSporing
-import no.nav.helse.person.ForkastetVedtaksperiode
-import no.nav.helse.person.ForkastetÅrsak
-import no.nav.helse.person.ForlengelseFraInfotrygd
-import no.nav.helse.person.Inntektshistorikk
-import no.nav.helse.person.Inntektskilde
-import no.nav.helse.person.InntektsmeldingInfo
-import no.nav.helse.person.InntektsmeldingInfoHistorikk
-import no.nav.helse.person.Opptjening
-import no.nav.helse.person.Person
-import no.nav.helse.person.Refusjonshistorikk
-import no.nav.helse.person.Sammenligningsgrunnlag
-import no.nav.helse.person.SpesifikkKontekst
-import no.nav.helse.person.Sykepengegrunnlag
-import no.nav.helse.person.TilstandType
-import no.nav.helse.person.Vedtaksperiode
-import no.nav.helse.person.VedtaksperiodeUtbetalinger
-import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.etterlevelse.MaskinellJurist
-import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
-import no.nav.helse.person.infotrygdhistorikk.Friperiode
-import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
-import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
-import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
-import no.nav.helse.person.infotrygdhistorikk.PersonUtbetalingsperiode
-import no.nav.helse.person.infotrygdhistorikk.UgyldigPeriode
-import no.nav.helse.person.infotrygdhistorikk.UkjentInfotrygdperiode
+import no.nav.helse.person.infotrygdhistorikk.*
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.ArbeidsforholdhistorikkInnslagData.Companion.tilArbeidsforholdhistorikk
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.InntektsmeldingInfoHistorikkElementData.Companion.finn
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.InntektsmeldingInfoHistorikkElementData.Companion.tilInntektsmeldingInfoHistorikk
@@ -54,30 +26,16 @@ import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
-import no.nav.helse.utbetalingslinjer.Endringskode
-import no.nav.helse.utbetalingslinjer.Fagområde
-import no.nav.helse.utbetalingslinjer.Feriepengeutbetaling
-import no.nav.helse.utbetalingslinjer.Klassekode
-import no.nav.helse.utbetalingslinjer.Oppdrag
-import no.nav.helse.utbetalingslinjer.Oppdragstatus
-import no.nav.helse.utbetalingslinjer.Satstype
-import no.nav.helse.utbetalingslinjer.Utbetaling
+import no.nav.helse.sykdomstidslinje.erHelg
+import no.nav.helse.utbetalingslinjer.*
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
-import no.nav.helse.utbetalingslinjer.Utbetalingslinje
-import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
-import no.nav.helse.utbetalingstidslinje.Begrunnelse
-import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
-import no.nav.helse.utbetalingstidslinje.Feriepengeberegner.UtbetaltDag.InfotrygdArbeidsgiver
-import no.nav.helse.utbetalingstidslinje.Feriepengeberegner.UtbetaltDag.InfotrygdPerson
-import no.nav.helse.utbetalingstidslinje.Feriepengeberegner.UtbetaltDag.SpleisArbeidsgiver
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinjeberegning
+import no.nav.helse.utbetalingstidslinje.*
+import no.nav.helse.utbetalingstidslinje.Feriepengeberegner.UtbetaltDag.*
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosent.Companion.ratio
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.Økonomi
-import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Year
@@ -733,8 +691,6 @@ internal data class PersonData(
                 private val økonomi get() = Økonomi.sykdomsgrad(grad.prosent)
 
                 private val hendelseskilde get() = kilde.parseKilde()
-
-                private fun LocalDate.erHelg() = dayOfWeek in arrayOf(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY)
 
                 internal fun parseDag(dato: LocalDate): Dag = when (type) {
                     JsonDagType.ARBEIDSDAG -> Dag.Arbeidsdag(
