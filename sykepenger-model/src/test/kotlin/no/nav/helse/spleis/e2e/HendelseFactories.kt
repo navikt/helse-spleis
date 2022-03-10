@@ -168,7 +168,6 @@ internal fun AbstractEndToEndTest.vilkårsgrunnlag(
     medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
     orgnummer: String = AbstractPersonTest.ORGNUMMER,
     arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold> = listOf(Vilkårsgrunnlag.Arbeidsforhold(orgnummer, 1.januar(2017))),
-    opptjening: Opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),
     inntektsvurdering: Inntektsvurdering,
     inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag,
     fnr: Fødselsnummer = AbstractPersonTest.UNG_PERSON_FNR_2018
@@ -180,9 +179,8 @@ internal fun AbstractEndToEndTest.vilkårsgrunnlag(
         fødselsnummer = fnr,
         orgnummer = orgnummer,
         inntektsvurdering = inntektsvurdering,
-        inntektsvurderingForSykepengegrunnlag = inntektsvurderingForSykepengegrunnlag,
         medlemskapsvurdering = Medlemskapsvurdering(medlemskapstatus),
-        opptjeningvurdering = opptjening,
+        inntektsvurderingForSykepengegrunnlag = inntektsvurderingForSykepengegrunnlag,
         arbeidsforhold = arbeidsforhold
     ).apply {
         hendelselogg = this

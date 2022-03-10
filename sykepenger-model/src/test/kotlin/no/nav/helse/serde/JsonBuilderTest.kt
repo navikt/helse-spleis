@@ -624,10 +624,9 @@ class JsonBuilderTest {
         fødselsnummer = fnr,
         orgnummer = orgnummer,
         inntektsvurdering = Inntektsvurdering(inntektsvurdering),
+        medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
         inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntektsvurderingForSykepengegrunnlag, arbeidsforhold = emptyList()),
-        opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),
-        arbeidsforhold = arbeidsforhold,
-        medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja)
+        arbeidsforhold = arbeidsforhold
     )
 
     private fun utbetalingshistorikk(

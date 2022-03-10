@@ -11,7 +11,6 @@ import no.nav.helse.hendelser.Institusjonsopphold
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Omsorgspenger
 import no.nav.helse.hendelser.Opplæringspenger
-import no.nav.helse.hendelser.Opptjeningvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Pleiepenger
 import no.nav.helse.hendelser.Simulering
@@ -125,37 +124,34 @@ abstract class AbstractObservableTest {
     )
 
     protected fun vilkårsgrunnlag(
-        vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode,
-        medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
-        orgnummer: String = ORGNUMMER,
-        arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold> = listOf(Vilkårsgrunnlag.Arbeidsforhold(orgnummer.toString(), FOM.minusYears(1))),
-        opptjening: Opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),
-        inntektsvurdering: Inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioderForSammenligningsgrunnlag {
-                Periode(FOM.minusYears(1), FOM.minusDays(1)) inntekter {
-                    ORGNUMMER inntekt INNTEKT
-                }
-            }
-        ),
-        inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag = InntektForSykepengegrunnlag(
-            inntekter = inntektperioderForSykepengegrunnlag {
-                Periode(FOM.minusMonths(3), FOM.minusDays(1)) inntekter {
-                    ORGNUMMER inntekt INNTEKT
-                }
-            }
-        , arbeidsforhold = emptyList()),
-        fnr: String = UNG_PERSON_FNR
+            vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode,
+            medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
+            orgnummer: String = ORGNUMMER,
+            arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold> = listOf(Vilkårsgrunnlag.Arbeidsforhold(orgnummer.toString(), FOM.minusYears(1))),
+            inntektsvurdering: Inntektsvurdering = Inntektsvurdering(
+                    inntekter = inntektperioderForSammenligningsgrunnlag {
+                        Periode(FOM.minusYears(1), FOM.minusDays(1)) inntekter {
+                            ORGNUMMER inntekt INNTEKT
+                        }
+                    }
+            ),
+            inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag = InntektForSykepengegrunnlag(
+                    inntekter = inntektperioderForSykepengegrunnlag {
+                        Periode(FOM.minusMonths(3), FOM.minusDays(1)) inntekter {
+                            ORGNUMMER inntekt INNTEKT
+                        }
+                    }, arbeidsforhold = emptyList()),
+            fnr: String = UNG_PERSON_FNR
     ): Vilkårsgrunnlag = Vilkårsgrunnlag(
-        meldingsreferanseId = UUID.randomUUID(),
-        vedtaksperiodeId = vedtaksperiodeIdInnhenter(orgnummer).toString(),
-        aktørId = AKTØRID,
-        fødselsnummer = fnr.somFødselsnummer(),
-        orgnummer = orgnummer,
-        inntektsvurdering = inntektsvurdering,
-        inntektsvurderingForSykepengegrunnlag = inntektsvurderingForSykepengegrunnlag,
-        medlemskapsvurdering = Medlemskapsvurdering(medlemskapstatus),
-        opptjeningvurdering = opptjening,
-        arbeidsforhold = arbeidsforhold
+            meldingsreferanseId = UUID.randomUUID(),
+            vedtaksperiodeId = vedtaksperiodeIdInnhenter(orgnummer).toString(),
+            aktørId = AKTØRID,
+            fødselsnummer = fnr.somFødselsnummer(),
+            orgnummer = orgnummer,
+            inntektsvurdering = inntektsvurdering,
+            medlemskapsvurdering = Medlemskapsvurdering(medlemskapstatus),
+            inntektsvurderingForSykepengegrunnlag = inntektsvurderingForSykepengegrunnlag,
+            arbeidsforhold = arbeidsforhold
     )
 
     protected fun ytelser(

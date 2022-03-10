@@ -27,7 +27,6 @@ class Vilkårsgrunnlag(
     fødselsnummer: Fødselsnummer,
     orgnummer: String,
     private val inntektsvurdering: Inntektsvurdering,
-    private val opptjeningvurdering: Opptjeningvurdering,
     private val medlemskapsvurdering: Medlemskapsvurdering,
     private val inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag,
     arbeidsforhold: List<Arbeidsforhold>

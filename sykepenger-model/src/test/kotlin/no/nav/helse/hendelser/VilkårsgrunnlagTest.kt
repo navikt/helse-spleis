@@ -231,7 +231,6 @@ internal class VilkårsgrunnlagTest : AbstractPersonTest() {
         fødselsnummer = UNG_PERSON_FNR_2018,
         orgnummer = ORGNUMMER,
         inntektsvurdering = Inntektsvurdering(inntektsmåneder),
-        opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),
         medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
         inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = skatteinntekter, arbeidsforhold = emptyList()),
         arbeidsforhold = arbeidsforhold

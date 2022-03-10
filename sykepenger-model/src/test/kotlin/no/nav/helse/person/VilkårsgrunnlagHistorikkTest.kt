@@ -51,7 +51,6 @@ internal class VilkårsgrunnlagHistorikkTest {
             fødselsnummer = "20043769969".somFødselsnummer(),
             orgnummer = "ORGNUMMER",
             inntektsvurdering = Inntektsvurdering(emptyList()),
-            opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
             arbeidsforhold = arbeidsforhold
@@ -74,16 +73,15 @@ internal class VilkårsgrunnlagHistorikkTest {
     @Test
     fun `Registrerer subsumsjoner ved validering av vilkårsgrunnlag`() {
         val vilkårsgrunnlag = Vilkårsgrunnlag(
-            meldingsreferanseId = UUID.randomUUID(),
-            vedtaksperiodeId = UUID.randomUUID().toString(),
-            aktørId = "AKTØR_ID",
-            fødselsnummer = "20043769969".somFødselsnummer(),
-            orgnummer = "ORGNUMMER",
-            inntektsvurdering = Inntektsvurdering(emptyList()),
-            opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),
-            medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
-            arbeidsforhold = arbeidsforhold
+                meldingsreferanseId = UUID.randomUUID(),
+                vedtaksperiodeId = UUID.randomUUID().toString(),
+                aktørId = "AKTØR_ID",
+                fødselsnummer = "20043769969".somFødselsnummer(),
+                orgnummer = "ORGNUMMER",
+                inntektsvurdering = Inntektsvurdering(emptyList()),
+                medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
+                inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
+                arbeidsforhold = arbeidsforhold
         )
 
         val jurist = MaskinellJurist()
@@ -102,28 +100,26 @@ internal class VilkårsgrunnlagHistorikkTest {
     fun `ny vilkårsprøving på samme skjæringstidspunkt overskriver gammel vilkårsprøving - medfører nytt innslag`() {
         val arbeidsforhold = arbeidsforhold
         val vilkårsgrunnlag1 = Vilkårsgrunnlag(
-            meldingsreferanseId = UUID.randomUUID(),
-            vedtaksperiodeId = UUID.randomUUID().toString(),
-            aktørId = "AKTØR_ID",
-            fødselsnummer = "20043769969".somFødselsnummer(),
-            orgnummer = "ORGNUMMER",
-            inntektsvurdering = Inntektsvurdering(emptyList()),
-            opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),
-            medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
-            arbeidsforhold = arbeidsforhold
+                meldingsreferanseId = UUID.randomUUID(),
+                vedtaksperiodeId = UUID.randomUUID().toString(),
+                aktørId = "AKTØR_ID",
+                fødselsnummer = "20043769969".somFødselsnummer(),
+                orgnummer = "ORGNUMMER",
+                inntektsvurdering = Inntektsvurdering(emptyList()),
+                medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
+                inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
+                arbeidsforhold = arbeidsforhold
         )
         val vilkårsgrunnlag2 = Vilkårsgrunnlag(
-            meldingsreferanseId = UUID.randomUUID(),
-            vedtaksperiodeId = UUID.randomUUID().toString(),
-            aktørId = "AKTØR_ID",
-            fødselsnummer = "20043769969".somFødselsnummer(),
-            orgnummer = "ORGNUMMER",
-            inntektsvurdering = Inntektsvurdering(emptyList()),
-            opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),
-            medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Nei),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
-            arbeidsforhold = arbeidsforhold
+                meldingsreferanseId = UUID.randomUUID(),
+                vedtaksperiodeId = UUID.randomUUID().toString(),
+                aktørId = "AKTØR_ID",
+                fødselsnummer = "20043769969".somFødselsnummer(),
+                orgnummer = "ORGNUMMER",
+                inntektsvurdering = Inntektsvurdering(emptyList()),
+                medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Nei),
+                inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
+                arbeidsforhold = arbeidsforhold
         )
         vilkårsgrunnlag1.valider(
             sykepengegrunnlag(10000.månedlig),
@@ -159,16 +155,15 @@ internal class VilkårsgrunnlagHistorikkTest {
     @Test
     fun `vilkårsprøving på to ulike skjæringstidspunkt medfører to innslag der siste innslag har vilkårsprøving for begge skjæringstidspunktene`() {
         val vilkårsgrunnlag = Vilkårsgrunnlag(
-            meldingsreferanseId = UUID.randomUUID(),
-            vedtaksperiodeId = UUID.randomUUID().toString(),
-            aktørId = "AKTØR_ID",
-            fødselsnummer = "20043769969".somFødselsnummer(),
-            orgnummer = "ORGNUMMER",
-            inntektsvurdering = Inntektsvurdering(emptyList()),
-            opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),
-            medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
-            arbeidsforhold = arbeidsforhold
+                meldingsreferanseId = UUID.randomUUID(),
+                vedtaksperiodeId = UUID.randomUUID().toString(),
+                aktørId = "AKTØR_ID",
+                fødselsnummer = "20043769969".somFødselsnummer(),
+                orgnummer = "ORGNUMMER",
+                inntektsvurdering = Inntektsvurdering(emptyList()),
+                medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
+                inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
+                arbeidsforhold = arbeidsforhold
         )
         vilkårsgrunnlag.valider(
             sykepengegrunnlag(10000.månedlig),
@@ -187,16 +182,15 @@ internal class VilkårsgrunnlagHistorikkTest {
     @Test
     fun `to ulike skjæringstidspunker, der det ene er i infotrygd, medfører to innslag der siste innslag har vilkårsprøving for begge skjæringstidspunktene`() {
         val vilkårsgrunnlag = Vilkårsgrunnlag(
-            meldingsreferanseId = UUID.randomUUID(),
-            vedtaksperiodeId = UUID.randomUUID().toString(),
-            aktørId = "AKTØR_ID",
-            fødselsnummer = "20043769969".somFødselsnummer(),
-            orgnummer = "ORGNUMMER",
-            inntektsvurdering = Inntektsvurdering(emptyList()),
-            opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),
-            medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
-            arbeidsforhold = arbeidsforhold
+                meldingsreferanseId = UUID.randomUUID(),
+                vedtaksperiodeId = UUID.randomUUID().toString(),
+                aktørId = "AKTØR_ID",
+                fødselsnummer = "20043769969".somFødselsnummer(),
+                orgnummer = "ORGNUMMER",
+                inntektsvurdering = Inntektsvurdering(emptyList()),
+                medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
+                inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
+                arbeidsforhold = arbeidsforhold
         )
         val infotrygdhistorikk = Infotrygdhistorikk().apply {
             oppdaterHistorikk(
@@ -237,16 +231,15 @@ internal class VilkårsgrunnlagHistorikkTest {
     fun `Finner vilkårsgrunnlag for skjæringstidspunkt - ok`() {
         val vilkårsgrunnlagHistorikk = VilkårsgrunnlagHistorikk()
         val vilkårsgrunnlag = Vilkårsgrunnlag(
-            meldingsreferanseId = UUID.randomUUID(),
-            vedtaksperiodeId = UUID.randomUUID().toString(),
-            aktørId = "AKTØR_ID",
-            fødselsnummer = "20043769969".somFødselsnummer(),
-            orgnummer = "ORGNUMMER",
-            inntektsvurdering = Inntektsvurdering(emptyList()),
-            opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),
-            medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
-            arbeidsforhold = arbeidsforhold
+                meldingsreferanseId = UUID.randomUUID(),
+                vedtaksperiodeId = UUID.randomUUID().toString(),
+                aktørId = "AKTØR_ID",
+                fødselsnummer = "20043769969".somFødselsnummer(),
+                orgnummer = "ORGNUMMER",
+                inntektsvurdering = Inntektsvurdering(emptyList()),
+                medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
+                inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
+                arbeidsforhold = arbeidsforhold
         )
         vilkårsgrunnlag.valider(
             sykepengegrunnlag(10000.månedlig),
@@ -266,16 +259,15 @@ internal class VilkårsgrunnlagHistorikkTest {
     fun `Finner vilkårsgrunnlag for skjæringstidspunkt - ikke ok`() {
         val vilkårsgrunnlagHistorikk = VilkårsgrunnlagHistorikk()
         val vilkårsgrunnlag = Vilkårsgrunnlag(
-            meldingsreferanseId = UUID.randomUUID(),
-            vedtaksperiodeId = UUID.randomUUID().toString(),
-            aktørId = "AKTØR_ID",
-            fødselsnummer = "20043769969".somFødselsnummer(),
-            orgnummer = "ORGNUMMER",
-            inntektsvurdering = Inntektsvurdering(emptyList()),
-            opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),
-            medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Nei),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
-            arbeidsforhold = arbeidsforhold
+                meldingsreferanseId = UUID.randomUUID(),
+                vedtaksperiodeId = UUID.randomUUID().toString(),
+                aktørId = "AKTØR_ID",
+                fødselsnummer = "20043769969".somFødselsnummer(),
+                orgnummer = "ORGNUMMER",
+                inntektsvurdering = Inntektsvurdering(emptyList()),
+                medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Nei),
+                inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
+                arbeidsforhold = arbeidsforhold
         )
         vilkårsgrunnlag.valider(
             sykepengegrunnlag(10000.månedlig),
@@ -395,16 +387,15 @@ internal class VilkårsgrunnlagHistorikkTest {
     fun `Avviser kun utbetalingsdager som har likt skjæringstidspunkt som et vilkårsgrunnlag som ikke er ok`() {
         val vilkårsgrunnlagHistorikk = VilkårsgrunnlagHistorikk()
         val vilkårsgrunnlag1 = Vilkårsgrunnlag(
-            meldingsreferanseId = UUID.randomUUID(),
-            vedtaksperiodeId = UUID.randomUUID().toString(),
-            aktørId = "AKTØR_ID",
-            fødselsnummer = "20043769969".somFødselsnummer(),
-            orgnummer = "ORGNUMMER",
-            inntektsvurdering = Inntektsvurdering(emptyList()),
-            opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),
-            medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Nei),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
-            arbeidsforhold = arbeidsforhold
+                meldingsreferanseId = UUID.randomUUID(),
+                vedtaksperiodeId = UUID.randomUUID().toString(),
+                aktørId = "AKTØR_ID",
+                fødselsnummer = "20043769969".somFødselsnummer(),
+                orgnummer = "ORGNUMMER",
+                inntektsvurdering = Inntektsvurdering(emptyList()),
+                medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Nei),
+                inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
+                arbeidsforhold = arbeidsforhold
         )
         vilkårsgrunnlag1.valider(
             sykepengegrunnlag(10000.månedlig),
@@ -415,16 +406,15 @@ internal class VilkårsgrunnlagHistorikkTest {
             MaskinellJurist()
         )
         val vilkårsgrunnlag2 = Vilkårsgrunnlag(
-            meldingsreferanseId = UUID.randomUUID(),
-            vedtaksperiodeId = UUID.randomUUID().toString(),
-            aktørId = "AKTØR_ID",
-            fødselsnummer = "20043769969".somFødselsnummer(),
-            orgnummer = "ORGNUMMER",
-            inntektsvurdering = Inntektsvurdering(emptyList()),
-            opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),
-            medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
-            arbeidsforhold = arbeidsforhold
+                meldingsreferanseId = UUID.randomUUID(),
+                vedtaksperiodeId = UUID.randomUUID().toString(),
+                aktørId = "AKTØR_ID",
+                fødselsnummer = "20043769969".somFødselsnummer(),
+                orgnummer = "ORGNUMMER",
+                inntektsvurdering = Inntektsvurdering(emptyList()),
+                medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
+                inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
+                arbeidsforhold = arbeidsforhold
         )
         vilkårsgrunnlag2.valider(
             sykepengegrunnlag(10000.månedlig),
@@ -445,16 +435,15 @@ internal class VilkårsgrunnlagHistorikkTest {
     fun `Avviser kun utbetalingsdager som har likt skjæringstidspunkt som et vilkårsgrunnlag som ikke er ok - vilkårsgrunnlag fra IT`() {
         val vilkårsgrunnlagHistorikk = VilkårsgrunnlagHistorikk()
         val vilkårsgrunnlag1 = Vilkårsgrunnlag(
-            meldingsreferanseId = UUID.randomUUID(),
-            vedtaksperiodeId = UUID.randomUUID().toString(),
-            aktørId = "AKTØR_ID",
-            fødselsnummer = "20043769969".somFødselsnummer(),
-            orgnummer = "ORGNUMMER",
-            inntektsvurdering = Inntektsvurdering(emptyList()),
-            opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),
-            medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Nei),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
-            arbeidsforhold = arbeidsforhold
+                meldingsreferanseId = UUID.randomUUID(),
+                vedtaksperiodeId = UUID.randomUUID().toString(),
+                aktørId = "AKTØR_ID",
+                fødselsnummer = "20043769969".somFødselsnummer(),
+                orgnummer = "ORGNUMMER",
+                inntektsvurdering = Inntektsvurdering(emptyList()),
+                medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Nei),
+                inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
+                arbeidsforhold = arbeidsforhold
         )
         vilkårsgrunnlag1.valider(
             sykepengegrunnlag(10000.månedlig),
@@ -465,16 +454,15 @@ internal class VilkårsgrunnlagHistorikkTest {
             MaskinellJurist()
         )
         val vilkårsgrunnlag2 = Vilkårsgrunnlag(
-            meldingsreferanseId = UUID.randomUUID(),
-            vedtaksperiodeId = UUID.randomUUID().toString(),
-            aktørId = "AKTØR_ID",
-            fødselsnummer = "20043769969".somFødselsnummer(),
-            orgnummer = "ORGNUMMER",
-            inntektsvurdering = Inntektsvurdering(emptyList()),
-            opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),
-            medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
-            arbeidsforhold = arbeidsforhold
+                meldingsreferanseId = UUID.randomUUID(),
+                vedtaksperiodeId = UUID.randomUUID().toString(),
+                aktørId = "AKTØR_ID",
+                fødselsnummer = "20043769969".somFødselsnummer(),
+                orgnummer = "ORGNUMMER",
+                inntektsvurdering = Inntektsvurdering(emptyList()),
+                medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
+                inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
+                arbeidsforhold = arbeidsforhold
         )
         vilkårsgrunnlag2.valider(
             sykepengegrunnlag(10000.månedlig),
@@ -495,16 +483,15 @@ internal class VilkårsgrunnlagHistorikkTest {
     fun `Avslår vilkår for minimum inntekt med riktig begrunnelse for personer under 67 år`() {
         val vilkårsgrunnlagHistorikk = VilkårsgrunnlagHistorikk()
         val vilkårsgrunnlag = Vilkårsgrunnlag(
-            meldingsreferanseId = UUID.randomUUID(),
-            vedtaksperiodeId = UUID.randomUUID().toString(),
-            aktørId = "AKTØR_ID",
-            fødselsnummer = "20043769969".somFødselsnummer(),
-            orgnummer = "ORGNUMMER",
-            inntektsvurdering = Inntektsvurdering(emptyList()),
-            opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),
-            medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
-            arbeidsforhold = arbeidsforhold
+                meldingsreferanseId = UUID.randomUUID(),
+                vedtaksperiodeId = UUID.randomUUID().toString(),
+                aktørId = "AKTØR_ID",
+                fødselsnummer = "20043769969".somFødselsnummer(),
+                orgnummer = "ORGNUMMER",
+                inntektsvurdering = Inntektsvurdering(emptyList()),
+                medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
+                inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
+                arbeidsforhold = arbeidsforhold
         )
         vilkårsgrunnlag.valider(
             sykepengegrunnlag(10.månedlig),
@@ -534,16 +521,15 @@ internal class VilkårsgrunnlagHistorikkTest {
         val vilkårsgrunnlagHistorikk = VilkårsgrunnlagHistorikk()
         val fødselsnummer = "01015036963".somFødselsnummer()
         val vilkårsgrunnlag = Vilkårsgrunnlag(
-            meldingsreferanseId = UUID.randomUUID(),
-            vedtaksperiodeId = UUID.randomUUID().toString(),
-            aktørId = "AKTØR_ID",
-            fødselsnummer = fødselsnummer,
-            orgnummer = "ORGNUMMER",
-            inntektsvurdering = Inntektsvurdering(emptyList()),
-            opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),
-            medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
-            arbeidsforhold = arbeidsforhold
+                meldingsreferanseId = UUID.randomUUID(),
+                vedtaksperiodeId = UUID.randomUUID().toString(),
+                aktørId = "AKTØR_ID",
+                fødselsnummer = fødselsnummer,
+                orgnummer = "ORGNUMMER",
+                inntektsvurdering = Inntektsvurdering(emptyList()),
+                medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
+                inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
+                arbeidsforhold = arbeidsforhold
         )
         vilkårsgrunnlag.valider(
             sykepengegrunnlag(10.månedlig),
@@ -573,16 +559,15 @@ internal class VilkårsgrunnlagHistorikkTest {
     fun `kan overskrive vilkårsgrunnlag`() {
         val vilkårsgrunnlagHistorikk = VilkårsgrunnlagHistorikk()
         val vilkårsgrunnlag = Vilkårsgrunnlag(
-            meldingsreferanseId = UUID.randomUUID(),
-            vedtaksperiodeId = UUID.randomUUID().toString(),
-            aktørId = "AKTØR_ID",
-            fødselsnummer = "20043769969".somFødselsnummer(),
-            orgnummer = "ORGNUMMER",
-            inntektsvurdering = Inntektsvurdering(emptyList()),
-            opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),
-            medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
-            arbeidsforhold = arbeidsforhold
+                meldingsreferanseId = UUID.randomUUID(),
+                vedtaksperiodeId = UUID.randomUUID().toString(),
+                aktørId = "AKTØR_ID",
+                fødselsnummer = "20043769969".somFødselsnummer(),
+                orgnummer = "ORGNUMMER",
+                inntektsvurdering = Inntektsvurdering(emptyList()),
+                medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
+                inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
+                arbeidsforhold = arbeidsforhold
         )
         vilkårsgrunnlag.valider(
             sykepengegrunnlag(10000.månedlig),

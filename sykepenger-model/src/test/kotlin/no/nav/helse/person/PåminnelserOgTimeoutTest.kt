@@ -294,14 +294,6 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
                 }
             }),
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
-            opptjeningvurdering = Opptjeningvurdering(
-                listOf(
-                    Vilkårsgrunnlag.Arbeidsforhold(
-                        ORGNUMMER,
-                        1.januar(2017)
-                    )
-                )
-            ),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
                 inntekter = inntektperioderForSykepengegrunnlag {
                     1.oktober(2017) til 1.desember(2017) inntekter {

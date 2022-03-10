@@ -224,21 +224,13 @@ internal class GodkjenningHendelseTest : AbstractPersonTest() {
                         ORGNUMMER inntekt 31000.månedlig
                     }
                 }),
+            medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
                 inntekter = inntektperioderForSykepengegrunnlag {
                     1.oktober(2017) til 1.desember(2017) inntekter {
                         ORGNUMMER inntekt 31000.månedlig
                     }
                 }, arbeidsforhold = emptyList()
-            ),
-            medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
-            opptjeningvurdering = Opptjeningvurdering(
-                listOf(
-                    Vilkårsgrunnlag.Arbeidsforhold(
-                        ORGNUMMER,
-                        1.januar(2017)
-                    )
-                )
             ),
             arbeidsforhold = listOf(
                 Vilkårsgrunnlag.Arbeidsforhold(

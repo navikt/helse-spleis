@@ -642,8 +642,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
             orgnummer = a1,
             inntektsvurdering = inntektsvurdering,
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = sykepengegrunnlag, arbeidsforhold = emptyList()),
-            arbeidsforhold = arbeidsforhold,
-            opptjening = Opptjeningvurdering(arbeidsforhold)
+            arbeidsforhold = arbeidsforhold
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)

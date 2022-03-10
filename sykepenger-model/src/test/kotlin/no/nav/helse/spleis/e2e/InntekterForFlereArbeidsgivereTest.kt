@@ -431,14 +431,9 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
             inntektsvurdering = Inntektsvurdering(
                 inntekter = inntekter
             ),
+            medlemskapsvurdering = Medlemskapsvurdering(medlemskapstatus),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
                 inntekter = inntekterForSykepengegrunnlag, arbeidsforhold = emptyList()
-            ),
-            medlemskapsvurdering = Medlemskapsvurdering(medlemskapstatus),
-            opptjeningvurdering = Opptjeningvurdering(
-                arbeidsforhold ?: listOf(
-                    Vilkårsgrunnlag.Arbeidsforhold(orgnummer, 1.januar(2017))
-                )
             ),
             arbeidsforhold = arbeidsforhold ?: listOf(
                 Vilkårsgrunnlag.Arbeidsforhold(orgnummer, 1.januar(2017))

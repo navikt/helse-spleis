@@ -13,7 +13,6 @@ import no.nav.helse.hendelser.Institusjonsopphold
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Omsorgspenger
 import no.nav.helse.hendelser.Opplæringspenger
-import no.nav.helse.hendelser.Opptjeningvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Pleiepenger
 import no.nav.helse.hendelser.Simulering
@@ -229,14 +228,6 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
                 }
             }),
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
-            opptjeningvurdering = Opptjeningvurdering(
-                listOf(
-                    Vilkårsgrunnlag.Arbeidsforhold(
-                        ORGNUMMER,
-                        1.januar(2017)
-                    )
-                )
-            ),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
                 inntekter = inntektperioderForSykepengegrunnlag {
                     1.oktober(2017) til 1.desember(2017) inntekter {

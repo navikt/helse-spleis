@@ -95,15 +95,12 @@ internal class VilkårsgrunnlagMessage(packet: JsonMessage) : BehovMessage(packe
             inntektsvurdering = Inntektsvurdering(
                 inntekter = inntekterForSammenligningsgrunnlag
             ),
+            medlemskapsvurdering = Medlemskapsvurdering(
+                medlemskapstatus = medlemskapstatus
+            ),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
                 inntekter = inntekterForSykepengegrunnlag,
                 arbeidsforhold = arbeidsforholdForSykepengegrunnlag
-            ),
-            opptjeningvurdering = Opptjeningvurdering(
-                arbeidsforhold = arbeidsforhold
-            ),
-            medlemskapsvurdering = Medlemskapsvurdering(
-                medlemskapstatus = medlemskapstatus
             ),
             arbeidsforhold = arbeidsforhold
         )

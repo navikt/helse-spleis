@@ -323,38 +323,30 @@ internal class TilUtbetalingHendelseTest : AbstractPersonTest() {
 
     private fun vilkårsgrunnlag(vedtaksperiodeIdInnhenter: IdInnhenter) =
         Vilkårsgrunnlag(
-            meldingsreferanseId = UUID.randomUUID(),
-            vedtaksperiodeId = "${vedtaksperiodeIdInnhenter.id(ORGNUMMER)}",
-            aktørId = AKTØRID,
-            fødselsnummer = UNG_PERSON_FNR_2018,
-            orgnummer = ORGNUMMER,
-            inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
-                1.januar(2017) til 1.desember(2017) inntekter {
-                    ORGNUMMER inntekt INNTEKT
-                }
-            }),
-            medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
-            opptjeningvurdering = Opptjeningvurdering(
-                listOf(
+                meldingsreferanseId = UUID.randomUUID(),
+                vedtaksperiodeId = "${vedtaksperiodeIdInnhenter.id(ORGNUMMER)}",
+                aktørId = AKTØRID,
+                fødselsnummer = UNG_PERSON_FNR_2018,
+                orgnummer = ORGNUMMER,
+                inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
+                    1.januar(2017) til 1.desember(2017) inntekter {
+                        ORGNUMMER inntekt INNTEKT
+                    }
+                }),
+                medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
+                inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
+                    inntekter = inntektperioderForSykepengegrunnlag {
+                        1.oktober(2017) til 1.desember(2017) inntekter {
+                            ORGNUMMER inntekt 31000.månedlig
+                        }
+                    }, arbeidsforhold = emptyList()
+                ),
+                arbeidsforhold = listOf(
                     Vilkårsgrunnlag.Arbeidsforhold(
                         ORGNUMMER,
                         1.januar(2017)
                     )
                 )
-            ),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = inntektperioderForSykepengegrunnlag {
-                    1.oktober(2017) til 1.desember(2017) inntekter {
-                        ORGNUMMER inntekt 31000.månedlig
-                    }
-                }, arbeidsforhold = emptyList()
-            ),
-            arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(
-                    ORGNUMMER,
-                    1.januar(2017)
-                )
-            )
         ).apply {
             hendelse = this
         }

@@ -44,7 +44,7 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
     fun `finner kun begrunnelser fra vilkårsgrunnlag som er Grunnlagsdata`() {
         val tidslinjer = listOf(tidslinjeOf(1.NAV))
         innslag.add(1.januar, testgrunnlag)
-        innslag.add(1.januar, grunnlagsdata(1.januar, vurdertOk = false, harOpptjening = false))
+        innslag.add(1.januar, grunnlagsdata(1.januar, vurdertOk = false))
         innslag.avvis(tidslinjer, ALDER)
         val avvisteDager = avvisteDager(tidslinjer)
         assertEquals(1, avvisteDager.size)
@@ -54,7 +54,7 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
     @Test
     fun `avviser dager uten opptjening`() {
         val tidslinjer = listOf(tidslinjeOf(1.NAV))
-        innslag.add(1.januar, grunnlagsdata(1.januar, vurdertOk = false, harOpptjening = false))
+        innslag.add(1.januar, grunnlagsdata(1.januar, vurdertOk = false))
         innslag.avvis(tidslinjer, ALDER)
         val avvisteDager = avvisteDager(tidslinjer)
         assertEquals(1, avvisteDager.size)
@@ -72,7 +72,7 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
     @Test
     fun `avviser med flere begrunnelser`() {
         val tidslinjer = listOf(tidslinjeOf(1.NAV))
-        innslag.add(1.januar, grunnlagsdata(1.januar, vurdertOk = false, harMinimumInntekt = false, harOpptjening = false))
+        innslag.add(1.januar, grunnlagsdata(1.januar, vurdertOk = false, harMinimumInntekt = false))
         innslag.avvis(tidslinjer, ALDER)
         val avvisteDager = avvisteDager(tidslinjer)
         assertEquals(1, avvisteDager.size)
@@ -85,7 +85,7 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
     @Test
     fun `avviser på tvers av vilkårsgrunnlagelementer`() {
         val tidslinjer = listOf(tidslinjeOf(2.NAV, skjæringstidspunkter = listOf(1.januar, 2.januar)))
-        innslag.add(1.januar, grunnlagsdata(1.januar, vurdertOk = false, harOpptjening = false))
+        innslag.add(1.januar, grunnlagsdata(1.januar, vurdertOk = false))
         innslag.add(2.januar, grunnlagsdata(2.januar, vurdertOk = false, harMinimumInntekt = false))
         innslag.avvis(tidslinjer, ALDER)
         val avvisteDager = avvisteDager(tidslinjer)
@@ -98,7 +98,7 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
     fun `oppfyller ingen inngangsvilkår deler av perioden`() {
         val tidslinjer = listOf(tidslinjeOf(2.NAV, skjæringstidspunkter = listOf(1.januar, 2.januar)))
         innslag.add(1.januar, grunnlagsdata(1.januar, vurdertOk = true))
-        innslag.add(2.januar, grunnlagsdata(2.januar, vurdertOk = false, harOpptjening = false, harMinimumInntekt = false, erMedlem = false))
+        innslag.add(2.januar, grunnlagsdata(2.januar, vurdertOk = false, harMinimumInntekt = false, erMedlem = false))
         innslag.avvis(tidslinjer, ALDER)
         val avvisteDager = avvisteDager(tidslinjer)
         assertEquals(1, avvisteDager.size)
@@ -109,7 +109,7 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
         }
     }
 
-    private fun grunnlagsdata(skjæringstidspunkt: LocalDate, vurdertOk: Boolean = true, harOpptjening: Boolean = true, harMinimumInntekt: Boolean = true, erMedlem: Boolean = true) =
+    private fun grunnlagsdata(skjæringstidspunkt: LocalDate, vurdertOk: Boolean = true, harMinimumInntekt: Boolean = true, erMedlem: Boolean = true) =
         VilkårsgrunnlagHistorikk.Grunnlagsdata(
             skjæringstidspunkt = skjæringstidspunkt,
             sykepengegrunnlag = Sykepengegrunnlag.opprett(emptyList(), skjæringstidspunkt, MaskinellJurist(), emptyList()),

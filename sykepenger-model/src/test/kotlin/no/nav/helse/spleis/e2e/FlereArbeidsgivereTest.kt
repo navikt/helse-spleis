@@ -34,21 +34,21 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         )
         person.håndter(ytelser(1.vedtaksperiode, orgnummer = a1, inntektshistorikk = emptyList()))
         person.håndter(vilkårsgrunnlag(
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
-            orgnummer = a1,
-            inntektsvurdering = Inntektsvurdering(
-                inntekter = inntektperioderForSammenligningsgrunnlag {
-                    1.januar(2017) til 1.juni(2017) inntekter {
-                        a1 inntekt INNTEKT
-                        a2 inntekt 5000.månedlig
-                    }
-                    1.august(2017) til 1.desember(2017) inntekter {
-                        a1 inntekt 17000.månedlig
-                        a2 inntekt 3500.månedlig
-                    }
-                }
-            ),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList())
+                vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+                orgnummer = a1,
+                inntektsvurdering = Inntektsvurdering(
+                        inntekter = inntektperioderForSammenligningsgrunnlag {
+                            1.januar(2017) til 1.juni(2017) inntekter {
+                                a1 inntekt INNTEKT
+                                a2 inntekt 5000.månedlig
+                            }
+                            1.august(2017) til 1.desember(2017) inntekter {
+                                a1 inntekt 17000.månedlig
+                                a2 inntekt 3500.månedlig
+                            }
+                        }
+                ),
+                inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList())
         )
         )
 
@@ -430,20 +430,20 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         historikk(a1)
         person.håndter(
             vilkårsgrunnlag(
-                vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
-                orgnummer = a1,
-                inntektsvurdering = Inntektsvurdering(
-                    inntekter = inntektperioderForSammenligningsgrunnlag {
-                        1.januar(2017) til 1.desember(2017) inntekter {
-                            a1 inntekt INNTEKT
-                        }
-                        1.januar(2017) til 1.desember(2017) inntekter {
-                            a2 inntekt INNTEKT
-                        }
-                    },
-                ),
-                inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
-                medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Nei
+                    vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+                    medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Nei,
+                    orgnummer = a1,
+                    inntektsvurdering = Inntektsvurdering(
+                        inntekter = inntektperioderForSammenligningsgrunnlag {
+                            1.januar(2017) til 1.desember(2017) inntekter {
+                                a1 inntekt INNTEKT
+                            }
+                            1.januar(2017) til 1.desember(2017) inntekter {
+                                a2 inntekt INNTEKT
+                            }
+                        },
+                    ),
+                    inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList())
             )
         )
         historikk(a1)

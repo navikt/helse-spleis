@@ -396,7 +396,6 @@ internal fun AbstractEndToEndTest.håndterVilkårsgrunnlag(
         ), arbeidsforhold = emptyList()
     ),
     arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold> = finnArbeidsgivere().map { Vilkårsgrunnlag.Arbeidsforhold(it, LocalDate.EPOCH, null) },
-    opptjening: Opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),
     fnr: Fødselsnummer = AbstractPersonTest.UNG_PERSON_FNR_2018
 ) {
     fun assertEtterspurt(behovtype: Behovtype) =
@@ -411,7 +410,6 @@ internal fun AbstractEndToEndTest.håndterVilkårsgrunnlag(
         medlemskapstatus = medlemskapstatus,
         orgnummer = orgnummer,
         arbeidsforhold = arbeidsforhold,
-        opptjening = opptjening,
         inntektsvurdering = inntektsvurdering,
         inntektsvurderingForSykepengegrunnlag = inntektsvurderingForSykepengegrunnlag,
         fnr = fnr
@@ -814,22 +812,22 @@ internal fun AbstractEndToEndTest.gapPeriode(periode: Periode, orgnummer: String
     )
     historikk(orgnummer, sykedagstelling)
     person.håndter(vilkårsgrunnlag(
-        vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
-        orgnummer = orgnummer,
-        inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioderForSammenligningsgrunnlag {
-                1.januar(2017) til 1.desember(2017) inntekter {
-                    orgnummer inntekt AbstractEndToEndTest.INNTEKT
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            orgnummer = orgnummer,
+            inntektsvurdering = Inntektsvurdering(
+                inntekter = inntektperioderForSammenligningsgrunnlag {
+                    1.januar(2017) til 1.desember(2017) inntekter {
+                        orgnummer inntekt AbstractEndToEndTest.INNTEKT
+                    }
                 }
-            }
-        ),
-        inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-            inntekter = inntektperioderForSykepengegrunnlag {
-                1.oktober(2017) til 1.desember(2017) inntekter {
-                    orgnummer inntekt AbstractEndToEndTest.INNTEKT
-                }
-            }, arbeidsforhold = emptyList()
-        )
+            ),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
+                inntekter = inntektperioderForSykepengegrunnlag {
+                    1.oktober(2017) til 1.desember(2017) inntekter {
+                        orgnummer inntekt AbstractEndToEndTest.INNTEKT
+                    }
+                }, arbeidsforhold = emptyList()
+            )
     )
     )
 }

@@ -236,9 +236,8 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
             orgnummer = ORGNUMMER,
             inntektsvurdering = Inntektsvurdering(inntekter),
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
-            opptjeningvurdering = Opptjeningvurdering(arbeidsforhold),
-            arbeidsforhold = arbeidsforhold,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekterForSykepengegrunnlag, arbeidsforhold = emptyList())
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekterForSykepengegrunnlag, arbeidsforhold = emptyList()),
+            arbeidsforhold = arbeidsforhold
         ).apply {
             hendelse = this
         }
