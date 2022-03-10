@@ -4,6 +4,7 @@ import no.nav.helse.*
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
@@ -17,6 +18,36 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 
 internal class PingPongTest : AbstractEndToEndTest() {
+
+    @Test
+    fun `Infotrygd betaler gap etter vi har betalt perioden etterpå`() {
+        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(10.februar, 28.februar)
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
+        håndterUtbetalingshistorikk(3.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 5.februar, 9.februar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
+            Inntektsopplysning(ORGNUMMER, 5.februar, INNTEKT, true)
+        ))
+        håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
+        håndterYtelser(3.vedtaksperiode)
+
+        assertForventetFeil(
+            forklaring = "Fordi OppdragBuilder stopper ved første ukjente dag (les Infotrygd-dag), vil vi for perioden 1.mars - 31.mars lage et oppdrag som starter 10. februar." +
+                "Dette oppdraget matches så mot det forrige vi har utbetalt og vi kommer frem til at vi skal opphøre perioden 1.januar - 31.januar først.",
+            nå = {
+                assertWarning("Utbetaling opphører tidligere utbetaling. Kontroller simuleringen", 3.vedtaksperiode.filter(ORGNUMMER))
+                val første = inspektør.utbetaling(0)
+                val utbetaling = inspektør.utbetaling(2)
+                val utbetalingInspektør = utbetaling.inspektør
+                assertEquals(første.inspektør.korrelasjonsId, utbetalingInspektør.korrelasjonsId)
+                assertEquals(17.januar, utbetalingInspektør.arbeidsgiverOppdrag[0].datoStatusFom())
+                assertEquals(10.februar til 30.mars, utbetalingInspektør.arbeidsgiverOppdrag[1].let { it.fom til it.tom })
+            },
+            ønsket = {
+                /* vet ikke helt hva som er best her, men vi burde nok la saksbehandlere likevel få se perioden slik at de kan annullere personen */
+                assertFalse(true)
+            }
+        )
+    }
 
     @Test
     fun `Forlengelser av infotrygd overgang har samme maksdato som forrige`() {
