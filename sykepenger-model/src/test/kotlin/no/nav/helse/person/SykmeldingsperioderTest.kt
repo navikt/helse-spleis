@@ -58,7 +58,7 @@ internal class SykmeldingsperioderTest() {
         sykmeldingsperioder.lagre(5.januar til 10.januar)
         assertEquals(listOf(5.januar til 10.januar, 15.januar til 25.januar), sykmeldingsperioder.perioder())
     }
-    class Inspektør() : Sykmeldingsperioder.Visitor {
+    class Inspektør() : SykmeldingsperioderVisitor {
 
         val perioder = mutableListOf<Periode>()
 

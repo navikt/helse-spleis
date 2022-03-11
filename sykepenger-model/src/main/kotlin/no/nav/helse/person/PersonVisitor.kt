@@ -208,8 +208,9 @@ internal interface InntektsmeldingInfoHistorikkVisitor : InntektsmeldingInfoVisi
     fun postVisitInntektsmeldinginfoHistorikk(inntektsmeldingInfoHistorikk: InntektsmeldingInfoHistorikk) {}
 }
 
-internal interface ArbeidsgiverVisitor : InntekthistorikkVisitor, SykdomshistorikkVisitor, VedtaksperiodeVisitor, UtbetalingVisitor,
-    UtbetalingstidslinjeberegningVisitor, FeriepengeutbetalingVisitor, RefusjonshistorikkVisitor, ArbeidsforholdhistorikkVisitor, InntektsmeldingInfoHistorikkVisitor {
+internal interface ArbeidsgiverVisitor : InntekthistorikkVisitor, SykdomshistorikkVisitor, VedtaksperiodeVisitor,
+    UtbetalingVisitor, UtbetalingstidslinjeberegningVisitor, FeriepengeutbetalingVisitor, RefusjonshistorikkVisitor,
+    ArbeidsforholdhistorikkVisitor, InntektsmeldingInfoHistorikkVisitor, SykmeldingsperioderVisitor {
     fun preVisitArbeidsgiver(
         arbeidsgiver: Arbeidsgiver,
         id: UUID,

@@ -1,5 +1,10 @@
 package no.nav.helse.serde
 
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.Year
+import java.time.YearMonth
+import java.util.UUID
 import no.nav.helse.Fødselsnummer
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
@@ -78,11 +83,6 @@ import no.nav.helse.økonomi.Prosent
 import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Økonomi
 import no.nav.helse.økonomi.ØkonomiBuilder
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.Year
-import java.time.YearMonth
-import java.util.*
 import kotlin.collections.set
 
 fun Person.serialize(): SerialisertPerson {
@@ -1111,6 +1111,12 @@ internal class JsonBuilder : AbstractBuilder() {
 
         override fun postVisitForkastetPeriode(vedtaksperiode: Vedtaksperiode, forkastetÅrsak: ForkastetÅrsak) {
             popState()
+        }
+    }
+
+    internal class SykmeldingsperioderState(private val sykmeldingsperioder: MutableList<Map<String, Any>>) : BuilderState () {
+        override fun visitSykmeldingsperiode(periode: Periode) {
+            sykmeldingsperioder.add(mapOf("fom" to periode.start, "tom" to periode.endInclusive))
         }
     }
 
