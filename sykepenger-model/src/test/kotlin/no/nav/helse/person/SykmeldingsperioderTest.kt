@@ -5,7 +5,6 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class SykmeldingsperioderTest() {
@@ -17,7 +16,6 @@ internal class SykmeldingsperioderTest() {
         assertEquals(listOf(1.januar til 31.januar), sykmeldingsperioder.perioder())
     }
 
-    @Disabled
     @Test
     fun `utvider ikke perioder ved duplikate sykmeldingsperioder`() {
         val sykmeldingsperioder = Sykmeldingsperioder()
@@ -26,7 +24,6 @@ internal class SykmeldingsperioderTest() {
         assertEquals(listOf(1.januar til 31.januar), sykmeldingsperioder.perioder())
     }
 
-    @Disabled
     @Test
     fun `utvider periode ved overlappende sykmeldingsperioder, lager ikke ny periode`() {
         val sykmeldingsperioder = Sykmeldingsperioder()
@@ -41,6 +38,18 @@ internal class SykmeldingsperioderTest() {
         sykmeldingsperioder.lagre(1.januar til 31.januar)
         sykmeldingsperioder.lagre(20.februar til 28.februar)
         assertEquals(listOf(1.januar til 31.januar, 20.februar til 28.februar), sykmeldingsperioder.perioder())
+    }
+
+    @Test
+    fun `to perioder med gap, kommer en periode i mellom som overlapper med begge`() {
+        val sykmeldingsperioder = Sykmeldingsperioder()
+        sykmeldingsperioder.lagre(1.januar til 10.januar)
+        sykmeldingsperioder.lagre(15.januar til 25.januar)
+        assertEquals(listOf(1.januar til 10.januar, 15.januar til 25.januar), sykmeldingsperioder.perioder())
+
+        sykmeldingsperioder.lagre(9.januar til 15.januar)
+        assertEquals(listOf(1.januar til 25.januar), sykmeldingsperioder.perioder())
+
     }
 
     class Inspektør() : Sykmeldingsperioder.Visitor {

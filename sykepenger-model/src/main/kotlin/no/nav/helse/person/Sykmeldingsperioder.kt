@@ -1,9 +1,10 @@
 package no.nav.helse.person
 
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.til
 
 internal class Sykmeldingsperioder(
-    private val perioder: MutableList<Periode> = mutableListOf()
+    private var perioder: List<Periode> = listOf()
 ) {
 
     internal fun accept(visitor: Visitor) {
@@ -13,7 +14,9 @@ internal class Sykmeldingsperioder(
     }
 
     internal fun lagre(periode: Periode) {
-        perioder.add(periode)
+        val (overlappendePerioder, gapPerioder)  = perioder.partition { it.overlapperMed(periode) }
+        val sammenhengendePerioder = overlappendePerioder + listOf(periode)
+        perioder = gapPerioder + listOf(sammenhengendePerioder.minOf { it.start } til sammenhengendePerioder.maxOf { it.endInclusive })
     }
 
     interface Visitor {
