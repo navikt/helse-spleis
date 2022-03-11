@@ -656,6 +656,18 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         delegatee.preVisitSykdomshistorikk(sykdomshistorikk)
     }
 
+    override fun preVisitSykmeldingsperioder(sykmeldingsperioder: Sykmeldingsperioder) {
+        delegatee.preVisitSykmeldingsperioder(sykmeldingsperioder)
+    }
+
+    override fun visitSykmeldingsperiode(periode: Periode) {
+        delegatee.visitSykmeldingsperiode(periode)
+    }
+
+    override fun postVisitSykmeldingsperioder(sykmeldingsperioder: Sykmeldingsperioder) {
+        delegatee.postVisitSykmeldingsperioder(sykmeldingsperioder)
+    }
+
     override fun preVisitSykdomshistorikkElement(element: Sykdomshistorikk.Element, id: UUID, hendelseId: UUID?, tidsstempel: LocalDateTime) {
         delegatee.preVisitSykdomshistorikkElement(element, id, hendelseId, tidsstempel)
     }

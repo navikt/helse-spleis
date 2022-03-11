@@ -50,6 +50,7 @@ internal class Arbeidsgiver private constructor(
     private val id: UUID,
     private val inntektshistorikk: Inntektshistorikk,
     private val sykdomshistorikk: Sykdomshistorikk,
+    private val sykmeldingsperioder: Sykmeldingsperioder,
     private val vedtaksperioder: MutableList<Vedtaksperiode>,
     private val forkastede: MutableList<ForkastetVedtaksperiode>,
     private val utbetalinger: MutableList<Utbetaling>,
@@ -67,6 +68,7 @@ internal class Arbeidsgiver private constructor(
         id = UUID.randomUUID(),
         inntektshistorikk = Inntektshistorikk(),
         sykdomshistorikk = Sykdomshistorikk(),
+        sykmeldingsperioder = Sykmeldingsperioder(),
         vedtaksperioder = mutableListOf(),
         forkastede = mutableListOf(),
         utbetalinger = mutableListOf(),
@@ -254,6 +256,7 @@ internal class Arbeidsgiver private constructor(
         visitor.preVisitArbeidsgiver(this, id, organisasjonsnummer)
         inntektshistorikk.accept(visitor)
         sykdomshistorikk.accept(visitor)
+        sykmeldingsperioder.accept(visitor)
         visitor.preVisitUtbetalinger(utbetalinger)
         utbetalinger.forEach { it.accept(visitor) }
         visitor.postVisitUtbetalinger(utbetalinger)
@@ -377,6 +380,7 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun håndter(sykmelding: Sykmelding) {
+        sykmeldingsperioder.lagre(sykmelding.sykdomstidslinje().periode()!!)
         val vedtaksperiode = Vedtaksperiode(
             person = person,
             arbeidsgiver = this,
@@ -1079,6 +1083,7 @@ internal class Arbeidsgiver private constructor(
                 id: UUID,
                 inntektshistorikk: Inntektshistorikk,
                 sykdomshistorikk: Sykdomshistorikk,
+                sykmeldingsperioder: Sykmeldingsperioder,
                 vedtaksperioder: MutableList<Vedtaksperiode>,
                 forkastede: MutableList<ForkastetVedtaksperiode>,
                 utbetalinger: List<Utbetaling>,
@@ -1095,6 +1100,7 @@ internal class Arbeidsgiver private constructor(
                 id,
                 inntektshistorikk,
                 sykdomshistorikk,
+                sykmeldingsperioder,
                 vedtaksperioder,
                 forkastede,
                 utbetalinger.toMutableList(),

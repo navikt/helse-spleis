@@ -410,6 +410,7 @@ internal data class PersonData(
         private val id: UUID,
         private val inntektshistorikk: List<InntektshistorikkInnslagData> = listOf(),
         private val sykdomshistorikk: List<SykdomshistorikkData>,
+        private val sykmeldingsperioder: List<SykmeldingsperiodeData> = listOf(),
         private val vedtaksperioder: List<VedtaksperiodeData>,
         private val forkastede: List<ForkastetVedtaksperiodeData>,
         private val utbetalinger: List<UtbetalingData>,
@@ -442,6 +443,7 @@ internal data class PersonData(
                 id,
                 modelInntekthistorikk,
                 modelSykdomshistorikk,
+                Sykmeldingsperioder(sykmeldingsperioder.map { it.tilPeriode() }),
                 vedtaksperiodeliste,
                 forkastedeliste,
                 modelUtbetalinger,
@@ -822,6 +824,13 @@ internal data class PersonData(
                     }
 
             }
+        }
+
+        data class SykmeldingsperiodeData(
+            private val fom: LocalDate,
+            private val tom: LocalDate
+        ) {
+            internal fun tilPeriode() = fom til tom
         }
 
         data class VedtaksperiodeData(

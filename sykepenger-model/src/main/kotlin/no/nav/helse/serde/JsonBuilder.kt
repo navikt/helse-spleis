@@ -30,6 +30,7 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.Refusjonshistorikk
 import no.nav.helse.person.Sammenligningsgrunnlag
 import no.nav.helse.person.Sykepengegrunnlag
+import no.nav.helse.person.Sykmeldingsperioder
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.infotrygdhistorikk.Friperiode
@@ -186,6 +187,12 @@ internal class JsonBuilder : AbstractBuilder() {
 
         override fun preVisitTidslinjer(tidslinjer: MutableList<Utbetalingstidslinje>) {
             arbeidsgiverMap["utbetalingstidslinjer"] = utbetalingstidslinjer
+        }
+
+        override fun preVisitSykmeldingsperioder(sykmeldingsperioder: Sykmeldingsperioder) {
+            val sykmeldingsperioderListe = mutableListOf<Map<String, Any>>()
+            arbeidsgiverMap["sykmeldingsperioder"] = sykmeldingsperioderListe
+            pushState(SykmeldingsperioderState(sykmeldingsperioderListe))
         }
 
         override fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {
@@ -1117,6 +1124,10 @@ internal class JsonBuilder : AbstractBuilder() {
     internal class SykmeldingsperioderState(private val sykmeldingsperioder: MutableList<Map<String, Any>>) : BuilderState () {
         override fun visitSykmeldingsperiode(periode: Periode) {
             sykmeldingsperioder.add(mapOf("fom" to periode.start, "tom" to periode.endInclusive))
+        }
+
+        override fun postVisitSykmeldingsperioder(sykmeldingsperioder: Sykmeldingsperioder) {
+            popState()
         }
     }
 
