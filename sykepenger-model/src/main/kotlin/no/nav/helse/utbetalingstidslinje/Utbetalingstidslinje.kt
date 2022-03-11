@@ -1,5 +1,7 @@
 package no.nav.helse.utbetalingstidslinje
 
+import java.time.DayOfWeek
+import java.time.LocalDate
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.contains
@@ -16,8 +18,6 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.Økonomi
 import no.nav.helse.økonomi.Økonomi.Companion.avgrensTilArbeidsgiverperiode
-import java.time.DayOfWeek
-import java.time.LocalDate
 
 /**
  * Forstår utbetalingsforpliktelser for en bestemt arbeidsgiver
@@ -25,7 +25,7 @@ import java.time.LocalDate
 
 internal class Utbetalingstidslinje private constructor(
     private val utbetalingsdager: MutableList<Utbetalingsdag>
-) : MutableList<Utbetalingsdag> by utbetalingsdager {
+) : List<Utbetalingsdag> by utbetalingsdager {
 
     private val førsteDato get() = utbetalingsdager.first().dato
     private val sisteDato get() = utbetalingsdager.last().dato
@@ -113,23 +113,23 @@ internal class Utbetalingstidslinje private constructor(
     }
 
     internal fun addArbeidsgiverperiodedag(dato: LocalDate, økonomi: Økonomi) {
-        utbetalingsdager.add(ArbeidsgiverperiodeDag(dato, økonomi))
+        add(ArbeidsgiverperiodeDag(dato, økonomi))
     }
 
     internal fun addNAVdag(dato: LocalDate, økonomi: Økonomi) {
-        utbetalingsdager.add(NavDag(dato, økonomi))
+        add(NavDag(dato, økonomi))
     }
 
     internal fun addArbeidsdag(dato: LocalDate, økonomi: Økonomi) {
-        utbetalingsdager.add(Arbeidsdag(dato, økonomi))
+        add(Arbeidsdag(dato, økonomi))
     }
 
     internal fun addFridag(dato: LocalDate, økonomi: Økonomi) {
-        utbetalingsdager.add(Fridag(dato, økonomi))
+        add(Fridag(dato, økonomi))
     }
 
     internal fun addHelg(dato: LocalDate, økonomi: Økonomi) {
-        utbetalingsdager.add(NavHelgDag(dato, økonomi))
+        add(NavHelgDag(dato, økonomi))
     }
 
     private fun addUkjentDag(dato: LocalDate) =
@@ -138,15 +138,19 @@ internal class Utbetalingstidslinje private constructor(
         }
 
     private fun addUkjentDag(dato: LocalDate, økonomi: Økonomi) {
-        utbetalingsdager.add(UkjentDag(dato, økonomi))
+        add(UkjentDag(dato, økonomi))
     }
 
     internal fun addAvvistDag(dato: LocalDate, økonomi: Økonomi, begrunnelser: List<Begrunnelse>) {
-        utbetalingsdager.add(AvvistDag(dato, økonomi, begrunnelser))
+        add(AvvistDag(dato, økonomi, begrunnelser))
     }
 
     internal fun addForeldetDag(dato: LocalDate, økonomi: Økonomi) {
-        utbetalingsdager.add(ForeldetDag(dato, økonomi))
+        add(ForeldetDag(dato, økonomi))
+    }
+
+    private fun add(dag: Utbetalingsdag) {
+        utbetalingsdager.add(dag)
     }
 
     internal operator fun plus(other: Utbetalingstidslinje): Utbetalingstidslinje {
