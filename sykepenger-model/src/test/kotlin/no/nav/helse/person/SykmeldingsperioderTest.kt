@@ -4,12 +4,10 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class SykmeldingsperioderTest() {
 
-    @Disabled
     @Test
     fun `Kan lagre Sykmeldingsperioder`() {
         val sykmeldingsperioder = Sykmeldingsperioder()
