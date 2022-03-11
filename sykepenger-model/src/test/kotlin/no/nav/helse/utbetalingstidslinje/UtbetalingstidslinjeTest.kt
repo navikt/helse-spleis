@@ -1,5 +1,7 @@
 package no.nav.helse.utbetalingstidslinje
 
+import java.time.LocalDate
+import java.util.TreeMap
 import no.nav.helse.desember
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
@@ -8,11 +10,14 @@ import no.nav.helse.testhelpers.ARB
 import no.nav.helse.testhelpers.FOR
 import no.nav.helse.testhelpers.FRI
 import no.nav.helse.testhelpers.NAV
+import no.nav.helse.testhelpers.UTELATE
 import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.AvvistDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.Fridag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavHelgDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.UkjentDag
+import no.nav.helse.økonomi.Økonomi
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -59,6 +64,59 @@ internal class UtbetalingstidslinjeTest {
         assertEquals(2, result.size)
         assertEquals(1.januar til 5.januar, result.first().periode())
         assertEquals(7.januar til 11.januar, result.last().periode())
+    }
+
+    @Test
+    fun `plusser sammen 1`() {
+        val tidslinje1 = tidslinjeOf(3.NAV, 3.UTELATE, 3.NAV)
+        val tidslinje2 = tidslinjeOf(3.UTELATE, 3.NAV, 3.UTELATE)
+        val result = tidslinje1 + tidslinje2
+        result.zipWithNext { a, b ->
+            assertTrue(a.dato < b.dato)
+        }
+    }
+
+    @Test
+    fun `plusser sammen 2`() {
+        val tidslinje1 = tidslinjeOf(3.UTELATE, 3.NAV, 3.UTELATE)
+        val tidslinje2 = tidslinjeOf(3.NAV, 3.UTELATE, 3.NAV)
+        val result = tidslinje1 + tidslinje2
+        result.zipWithNext { a, b ->
+            assertTrue(a.dato < b.dato)
+        }
+    }
+
+    @Test
+    fun `iterator`() {
+        val tidslinje = tidslinjeOf(3.NAV, 3.UTELATE, 3.NAV)
+        val result = mutableListOf<LocalDate>()
+        tidslinje.iterator().forEach { result.add(it.dato) }
+        assertEquals(9, result.size)
+        assertEquals(1.januar, result.first())
+        assertEquals(9.januar, result.last())
+    }
+
+    @Test
+    fun `reversed iterator`() {
+        val tidslinje = tidslinjeOf(3.NAV, 3.UTELATE, 3.NAV)
+        val result = mutableListOf<LocalDate>()
+        tidslinje.reverse().iterator().forEach { result.add(it.dato) }
+        assertEquals(9, result.size)
+        assertEquals(9.januar, result.first())
+        assertEquals(1.januar, result.last())
+    }
+
+    @Test
+    fun sorted() {
+        val comparator = Comparator(LocalDate::compareTo).reversed().reversed()
+        val map = TreeMap<LocalDate, Utbetalingstidslinje.Utbetalingsdag>(comparator)
+
+        map[2.januar] = NavDag(2.januar, Økonomi.ikkeBetalt())
+        map[1.januar] = Fridag(1.januar, Økonomi.ikkeBetalt())
+
+        map.forEach { (dato, dag) ->
+            println("$dato")
+        }
     }
 
     @Test

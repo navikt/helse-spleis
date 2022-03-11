@@ -34,7 +34,7 @@ internal class Utbetalingstidslinje(utbetalingsdager: List<Utbetalingsdag>) : Co
 
     internal companion object {
         internal fun periode(tidslinjer: List<Utbetalingstidslinje>) = tidslinjer
-            .filter { it.utbetalingsdager.isNotEmpty() }
+            .filter { it.isNotEmpty() }
             .map { it.periode() }
             .reduce(Periode::merge)
 
@@ -54,14 +54,12 @@ internal class Utbetalingstidslinje(utbetalingsdager: List<Utbetalingsdag>) : Co
     }
 
     internal fun er6GBegrenset(): Boolean {
-        return utbetalingsdager.any {
-            it.økonomi.er6GBegrenset()
-        }
+        return any { it.økonomi.er6GBegrenset() }
     }
 
     internal fun accept(visitor: UtbetalingsdagVisitor) {
         visitor.preVisitUtbetalingstidslinje(this)
-        utbetalingsdager.forEach { it.accept(visitor) }
+        forEach { it.accept(visitor) }
         visitor.postVisitUtbetalingstidslinje(this)
     }
 
@@ -74,6 +72,38 @@ internal class Utbetalingstidslinje(utbetalingsdager: List<Utbetalingsdag>) : Co
         }
     }
 
+    internal fun addArbeidsgiverperiodedag(dato: LocalDate, økonomi: Økonomi) {
+        add(ArbeidsgiverperiodeDag(dato, økonomi))
+    }
+
+    internal fun addNAVdag(dato: LocalDate, økonomi: Økonomi) {
+        add(NavDag(dato, økonomi))
+    }
+
+    internal fun addArbeidsdag(dato: LocalDate, økonomi: Økonomi) {
+        add(Arbeidsdag(dato, økonomi))
+    }
+
+    internal fun addFridag(dato: LocalDate, økonomi: Økonomi) {
+        add(Fridag(dato, økonomi))
+    }
+
+    internal fun addHelg(dato: LocalDate, økonomi: Økonomi) {
+        add(NavHelgDag(dato, økonomi))
+    }
+
+    internal fun addAvvistDag(dato: LocalDate, økonomi: Økonomi, begrunnelser: List<Begrunnelse>) {
+        add(AvvistDag(dato, økonomi, begrunnelser))
+    }
+
+    internal fun addForeldetDag(dato: LocalDate, økonomi: Økonomi) {
+        add(ForeldetDag(dato, økonomi))
+    }
+
+    private fun add(dag: Utbetalingsdag) {
+        utbetalingsdager.add(dag)
+    }
+
     internal operator fun plus(other: Utbetalingstidslinje): Utbetalingstidslinje {
         return this.plus(other) { venstre, høyre -> maxOf(venstre, høyre) }
     }
@@ -84,50 +114,40 @@ internal class Utbetalingstidslinje(utbetalingsdager: List<Utbetalingsdag>) : Co
 
     internal fun harUtbetalinger() = sykepengeperiode() != null
 
-    override fun iterator() = this.utbetalingsdager.iterator()
-
     internal fun plus(
         other: Utbetalingstidslinje,
         plusstrategy: (Utbetalingsdag, Utbetalingsdag) -> Utbetalingsdag
     ): Utbetalingstidslinje {
         if (other.isEmpty()) return this
         if (this.isEmpty()) return other
-        val tidligsteDato = this.tidligsteDato(other)
-        val sisteDato = this.sisteDato(other)
-        return this.utvide(tidligsteDato, sisteDato).binde(other.utvide(tidligsteDato, sisteDato), plusstrategy)
+        return this.binde(other, plusstrategy)
+    }
+
+    override fun iterator(): Iterator<Utbetalingsdag> {
+        if (utbetalingsdager.isEmpty()) return emptyList<Utbetalingsdag>().iterator()
+        val periode = if (førsteDato > sisteDato) (sisteDato til førsteDato).reversed() else førsteDato til sisteDato
+        val periodeIterator = periode.iterator()
+        return object : Iterator<Utbetalingsdag> {
+            override fun hasNext(): Boolean {
+                return periodeIterator.hasNext()
+            }
+
+            override fun next(): Utbetalingsdag {
+                return get(periodeIterator.next())
+            }
+        }
     }
 
     private fun binde(
         other: Utbetalingstidslinje,
         strategy: (Utbetalingsdag, Utbetalingsdag) -> Utbetalingsdag
     ) = Utbetalingstidslinje(
-        this.utbetalingsdager.zip(other.utbetalingsdager, strategy).toMutableList()
-    ).trim()
-
-    private fun trim(): Utbetalingstidslinje {
-        val første = firstOrNull { it !is UkjentDag }?.dato ?: return Utbetalingstidslinje()
-        return subset(første til last { it !is UkjentDag }.dato)
-    }
+        Companion.periode(listOf(this, other)).mapNotNull {
+            strategy(this[it], other[it]).takeUnless { it is UkjentDag }
+        }.toMutableList()
+    )
 
     private fun trimLedendeFridager() = Utbetalingstidslinje(dropWhile { it is Fridag }.toMutableList())
-
-    private fun utvide(tidligsteDato: LocalDate, sisteDato: LocalDate): Utbetalingstidslinje {
-        val original = this
-        return Builder().apply {
-            tidligsteDato.datesUntil(original.førsteDato)
-                .forEach { addUkjentDag(it) }
-            original.utbetalingsdager.forEach { add(it) }
-            original.sisteDato.plusDays(1)
-                .datesUntil(sisteDato.plusDays(1))
-                .forEach { addUkjentDag(it) }
-        }.build()
-    }
-
-    private fun tidligsteDato(other: Utbetalingstidslinje) =
-        minOf(this.førsteDato, other.førsteDato)
-
-    private fun sisteDato(other: Utbetalingstidslinje) =
-        maxOf(this.sisteDato, other.sisteDato)
 
     internal fun periode() = Periode(førsteDato, sisteDato)
 
@@ -163,16 +183,15 @@ internal class Utbetalingstidslinje(utbetalingsdager: List<Utbetalingsdag>) : Co
     }
 
     private fun harUtbetalinger(periode: Periode) =
-        subset(periode).any { it is UkjentDag || it is NavDag || it is NavHelgDag || it is ForeldetDag }
+        periode.asSequence().map(::get).any { it is UkjentDag || it is NavDag || it is NavHelgDag || it is ForeldetDag }
 
     internal fun kutt(sisteDato: LocalDate) = subset(LocalDate.MIN til sisteDato)
 
     internal operator fun get(dato: LocalDate) =
-        if (isEmpty() || dato !in periode()) UkjentDag(dato, Økonomi.ikkeBetalt())
-        else utbetalingsdager.first { it.dato == dato }
+        utbetalingsdager.firstOrNull { it.dato == dato } ?: UkjentDag(dato, Økonomi.ikkeBetalt())
 
     override fun toString(): String {
-        return utbetalingsdager.joinToString(separator = "") {
+        return joinToString(separator = "") {
             (if (it.dato.dayOfWeek == DayOfWeek.MONDAY) " " else "") +
                 when (it::class) {
                     NavDag::class -> "N"

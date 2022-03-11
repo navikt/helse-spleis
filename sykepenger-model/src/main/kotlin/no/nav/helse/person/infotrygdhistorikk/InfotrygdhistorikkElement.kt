@@ -23,6 +23,7 @@ import no.nav.helse.utbetalingstidslinje.Infotrygddekoratør
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.Fridag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavHelgDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.UkjentDag
 
 class InfotrygdhistorikkElement private constructor(
@@ -205,7 +206,7 @@ class InfotrygdhistorikkElement private constructor(
                 // fjerner utbetalinger i ukedager (bevarer fridager)
                 !infotrygdDag.dato.erHelg() && infotrygdDag is NavDag -> UkjentDag(spleisDag.dato, spleisDag.økonomi)
                 // fjerner utbetalinger i helger (bevarer fridager)
-                infotrygdDag.dato.erHelg() && infotrygdDag !is Fridag -> UkjentDag(spleisDag.dato, spleisDag.økonomi)
+                infotrygdDag.dato.erHelg() && infotrygdDag is NavHelgDag -> UkjentDag(spleisDag.dato, spleisDag.økonomi)
                 else -> spleisDag
             }
         }

@@ -1,7 +1,16 @@
 package no.nav.helse.utbetalingstidslinje
 
+import no.nav.helse.februar
+import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
-import no.nav.helse.testhelpers.*
+import no.nav.helse.januar
+import no.nav.helse.testhelpers.AP
+import no.nav.helse.testhelpers.ARB
+import no.nav.helse.testhelpers.FRI
+import no.nav.helse.testhelpers.HELG
+import no.nav.helse.testhelpers.NAV
+import no.nav.helse.testhelpers.UTELATE
+import no.nav.helse.testhelpers.tidslinjeOf
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -26,25 +35,45 @@ internal class TidslinjefusjonTest {
 
     @Test
     fun `slå sammen ikke-tilstøtende betalingstider med helger`() {
-        val inspektør = (tidslinjeOf(15.NAV) + tidslinjeOf(15.UTELATE, 7.UTELATE, 15.NAV)).inspektør
+        val tidslinjer = listOf(
+            tidslinjeOf(15.NAV),
+            tidslinjeOf(15.UTELATE, 7.UTELATE, 15.NAV)
+        )
+        val result = tidslinjer.reduce(Utbetalingstidslinje::plus)
+        val inspektør = result.inspektør
+        val periode = Utbetalingstidslinje.periode(tidslinjer)
+        val antallDager = periode.dagerMellom().toInt() + 1
+        assertEquals(1.januar til 6.februar, periode)
+        assertEquals(30, result.size)
         assertEquals(37, inspektør.size)
+        assertEquals(antallDager, inspektør.size)
         assertEquals(22, inspektør.navDagTeller)
         assertEquals(8, inspektør.navHelgDagTeller)
-        assertEquals(5, inspektør.ukjentDagTeller)
-        assertEquals(2, inspektør.fridagTeller)
+        assertEquals(7, inspektør.ukjentDagTeller)
+        assertEquals(antallDager - result.size, inspektør.ukjentDagTeller)
+        assertEquals(0, inspektør.fridagTeller)
     }
 
     @Test
     fun `bli med i flere utbetalingstidslinjer`() {
-        val inspektør = (tidslinjeOf(15.NAV) +
-            tidslinjeOf(15.UTELATE, 7.UTELATE, 15.NAV) +
+        val tidslinjer = listOf(
+            tidslinjeOf(15.NAV),
+            tidslinjeOf(15.UTELATE, 7.UTELATE, 15.NAV),
             tidslinjeOf(15.UTELATE, 22.UTELATE, 7.UTELATE, 15.NAV)
-            ).inspektør
+        )
+        val result = tidslinjer.reduce(Utbetalingstidslinje::plus)
+        val inspektør = result.inspektør
+        val periode = Utbetalingstidslinje.periode(tidslinjer)
+        val antallDager = periode.dagerMellom().toInt() + 1
+        assertEquals(1.januar til 28.februar, periode)
+        assertEquals(45, result.size)
         assertEquals(59, inspektør.size)
+        assertEquals(antallDager, inspektør.size)
         assertEquals(33, inspektør.navDagTeller)
         assertEquals(12, inspektør.navHelgDagTeller)
-        assertEquals(10, inspektør.ukjentDagTeller)
-        assertEquals(4, inspektør.fridagTeller)
+        assertEquals(14, inspektør.ukjentDagTeller)
+        assertEquals(antallDager - result.size, inspektør.ukjentDagTeller)
+        assertEquals(0, inspektør.fridagTeller)
     }
 
     // The following tests handle overlapping Utbetalingstidslinjer. This should only be for multiple arbeitsgivere
