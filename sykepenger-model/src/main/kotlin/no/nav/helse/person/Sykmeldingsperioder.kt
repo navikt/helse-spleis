@@ -14,9 +14,10 @@ internal class Sykmeldingsperioder(
     }
 
     internal fun lagre(periode: Periode) {
-        val (overlappendePerioder, gapPerioder)  = perioder.partition { it.overlapperMed(periode) }
+        val (overlappendePerioder, gapPerioder) = perioder.partition { it.overlapperMed(periode) }
         val sammenhengendePerioder = overlappendePerioder + listOf(periode)
-        perioder = gapPerioder + listOf(sammenhengendePerioder.minOf { it.start } til sammenhengendePerioder.maxOf { it.endInclusive })
+        val nyPeriode = sammenhengendePerioder.minOf { it.start } til sammenhengendePerioder.maxOf { it.endInclusive }
+        perioder = (gapPerioder + listOf(nyPeriode)).sortedBy { it.start }
     }
 
     interface Visitor {

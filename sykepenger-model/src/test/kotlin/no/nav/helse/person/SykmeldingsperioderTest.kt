@@ -49,9 +49,15 @@ internal class SykmeldingsperioderTest() {
 
         sykmeldingsperioder.lagre(9.januar til 15.januar)
         assertEquals(listOf(1.januar til 25.januar), sykmeldingsperioder.perioder())
-
     }
 
+    @Test
+    fun `sykmeldingsperioder lagres i riktig rekkefølge`() {
+        val sykmeldingsperioder = Sykmeldingsperioder()
+        sykmeldingsperioder.lagre(15.januar til 25.januar)
+        sykmeldingsperioder.lagre(5.januar til 10.januar)
+        assertEquals(listOf(5.januar til 10.januar, 15.januar til 25.januar), sykmeldingsperioder.perioder())
+    }
     class Inspektør() : Sykmeldingsperioder.Visitor {
 
         val perioder = mutableListOf<Periode>()
