@@ -20,15 +20,30 @@ internal class ApplicationConfiguration(env: Map<String, String> = System.getenv
         configurationUrl = env.getValue("AZURE_APP_WELL_KNOWN_URL")
     )
 
-    internal val dataSourceConfiguration = DataSourceConfiguration(
-        jdbcUrl = env["DATABASE_JDBC_URL"],
-        gcpProjectId = env["GCP_TEAM_PROJECT_ID"],
-        databaseRegion = env["DATABASE_REGION"],
-        databaseInstance = env["DATABASE_INSTANCE"],
-        databaseUsername = env["DATABASE_SPLEIS_API_USERNAME"],
-        databasePassword = env["DATABASE_SPLEIS_API_PASSWORD"],
-        databaseName = env["DATABASE_DATABASE"]
-    )
+    // Håndter on-prem og gcp database tilkobling forskjellig
+    internal val dataSourceConfiguration = when (env["NAIS_CLUSTER_NAME"]) {
+        "dev-gcp",
+        "prod-gcp" -> GcpDataSourceConfiguration(
+            jdbcUrl = env["DATABASE_JDBC_URL"],
+            gcpProjectId = env["GCP_TEAM_PROJECT_ID"],
+            databaseRegion = env["DATABASE_REGION"],
+            databaseInstance = env["DATABASE_INSTANCE"],
+            databaseUsername = env["DATABASE_SPLEIS_API_USERNAME"],
+            databasePassword = env["DATABASE_SPLEIS_API_PASSWORD"],
+            databaseName = env["DATABASE_DATABASE"]
+        )
+        "dev-fss",
+        "prod-fss" -> OnPremDataSourceConfiguration(
+            jdbcUrl = env["DATABASE_JDBC_URL"],
+            databaseHost = env["DATABASE_HOST"],
+            databasePort = env["DATABASE_PORT"],
+            databaseUsername = env["DATABASE_USERNAME"],
+            databasePassword = env["DATABASE_PASSWORD"],
+            databaseName = env["DATABASE_NAME"],
+            vaultMountPath = env["VAULT_MOUNTPATH"]
+        )
+        else -> throw IllegalArgumentException("env variable NAIS_CLUSTER_NAME has an unsupported value")
+    }
 }
 
 internal class KtorConfig(private val httpPort: Int = 8080) {

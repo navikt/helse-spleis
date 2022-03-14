@@ -16,7 +16,7 @@ import no.nav.helse.person.Person
 import no.nav.helse.serde.serialize
 import no.nav.helse.spleis.JwtStub
 import no.nav.helse.spleis.config.AzureAdAppConfig
-import no.nav.helse.spleis.config.DataSourceConfiguration
+import no.nav.helse.spleis.config.GcpDataSourceConfiguration
 import no.nav.helse.spleis.config.KtorConfig
 import no.nav.helse.spleis.createApp
 import no.nav.helse.spleis.dao.HendelseDao
@@ -110,7 +110,7 @@ internal class ApiTestServer(private val port: Int = randomPort()) {
                 clientId = "spleis_azure_ad_app_id",
                 configurationUrl = "${wireMockServer.baseUrl()}/config"
             ),
-            DataSourceConfiguration(
+            GcpDataSourceConfiguration(
                 jdbcUrl = postgres.jdbcUrl,
                 databaseUsername = postgres.username,
                 databasePassword = postgres.password

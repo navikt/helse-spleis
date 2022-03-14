@@ -5,13 +5,19 @@ import com.fasterxml.jackson.core.util.DefaultPrettyPrinter
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import io.ktor.application.*
-import io.ktor.features.*
-import io.ktor.http.*
-import io.ktor.jackson.*
-import io.ktor.request.*
-import io.ktor.server.engine.*
-import io.ktor.server.netty.*
+import io.ktor.application.install
+import io.ktor.features.CallId
+import io.ktor.features.CallLogging
+import io.ktor.features.ContentNegotiation
+import io.ktor.features.callIdMdc
+import io.ktor.http.ContentType
+import io.ktor.jackson.JacksonConverter
+import io.ktor.request.path
+import io.ktor.server.engine.applicationEngineEnvironment
+import io.ktor.server.engine.embeddedServer
+import io.ktor.server.netty.Netty
+import java.util.UUID
+import java.util.concurrent.atomic.AtomicInteger
 import no.nav.helse.spleis.config.ApplicationConfiguration
 import no.nav.helse.spleis.config.AzureAdAppConfig
 import no.nav.helse.spleis.config.DataSourceConfiguration
@@ -19,8 +25,6 @@ import no.nav.helse.spleis.config.KtorConfig
 import no.nav.helse.spleis.graphql.installGraphQLApi
 import org.slf4j.LoggerFactory
 import org.slf4j.event.Level
-import java.util.*
-import java.util.concurrent.atomic.AtomicInteger
 
 internal val objectMapper = jacksonObjectMapper()
     .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)

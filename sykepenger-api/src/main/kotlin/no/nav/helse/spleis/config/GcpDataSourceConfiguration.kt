@@ -3,9 +3,15 @@ package no.nav.helse.spleis.config
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import java.time.Duration
+import javax.sql.DataSource
+
+
+interface DataSourceConfiguration {
+    fun getDataSource(): DataSource
+}
 
 // Understands how to create a data source from environment variables
-internal class DataSourceConfiguration(
+internal class GcpDataSourceConfiguration(
     private val jdbcUrl: String? = null,
     private val gcpProjectId: String? = null,
     private val databaseRegion: String? = null,
@@ -13,11 +19,11 @@ internal class DataSourceConfiguration(
     private val databaseUsername: String? = null,
     private val databasePassword: String? = null,
     private val databaseName: String? = null
-) {
+): DataSourceConfiguration {
     // username and password is only needed when vault is not enabled,
     // since we rotate credentials automatically when vault is enabled
     private val hikariConfig = HikariConfig().apply {
-        jdbcUrl = this@DataSourceConfiguration.jdbcUrl ?: kotlin.run {
+        jdbcUrl = this@GcpDataSourceConfiguration.jdbcUrl ?: kotlin.run {
             requireNotNull(gcpProjectId) { "gcp project id must be set if jdbd url is not provided" }
             requireNotNull(databaseRegion) { "database region must be set if jdbd url is not provided" }
             requireNotNull(databaseInstance) { "database instance must be set if jdbd url is not provided" }
@@ -40,5 +46,5 @@ internal class DataSourceConfiguration(
         idleTimeout = Duration.ofMinutes(10).toMillis()
     }
 
-    fun getDataSource() = HikariDataSource(hikariConfig)
+    override fun getDataSource() = HikariDataSource(hikariConfig)
 }
