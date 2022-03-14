@@ -52,6 +52,8 @@ spec:
     inbound:
       rules:
         - application: spesialist
+          namespace: tbd
+          cluster: dev-fss
         - application: spanner
           namespace: tbd
           cluster: dev-gcp
