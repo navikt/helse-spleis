@@ -2,6 +2,14 @@ name: Alt utenom API
 
 on:
   push:
+    paths-ignore:
+      - 'sykepenger-api/**'
+      - 'jobs/**'
+      - 'doc/**'
+      - '.idea/**'
+      - 'README.md'
+      - 'LICENSE'
+      - 'CODEOWNERS'
     branches:
       - master
 
