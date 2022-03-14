@@ -113,7 +113,7 @@ spec:
           application: spoler
           access: readwrite
         - team: tbd
-          application: spleis
+          application: helse-spleis
           access: readwrite
         - team: tbd
           application: spleis-api

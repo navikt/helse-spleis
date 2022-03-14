@@ -61,13 +61,13 @@ spec:
   secureLogs:
     enabled: true
   envFrom:
-    - secret: google-sql-spleis-spleis-spleis-api-e80c8e59
+    - secret: google-sql-helse-spleis-spleis-spleis-api-cf4f5c2c
   env:
   - name: GraphQLPlayground
     value: "true"
   - name: DATABASE_REGION
     value: "europe-north1"
   - name: DATABASE_INSTANCE
-    value: "spleis"
+    value: "helse-spleis"
   - name: DATABASE_DATABASE
     value: "spleis"

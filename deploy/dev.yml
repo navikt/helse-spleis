@@ -1,7 +1,7 @@
 apiVersion: nais.io/v1alpha1
 kind: Application
 metadata:
-  name: spleis
+  name: helse-spleis
   namespace: tbd
   labels:
     team: tbd
@@ -36,6 +36,7 @@ spec:
   gcp:
     sqlInstances:
       - type: POSTGRES_14
+        diskAutoresize: true
         databases:
           - name: spleis
             envVarPrefix: DATABASE
