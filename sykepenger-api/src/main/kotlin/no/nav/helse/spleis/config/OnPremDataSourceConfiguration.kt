@@ -51,7 +51,7 @@ internal class OnPremDataSourceConfiguration(
         }
     }
 
-    fun getDataSource(role: Role = Role.User): DataSource {
+    private fun getDataSource(role: Role): DataSource {
         if (!shouldGetCredentialsFromVault) return HikariDataSource(hikariConfig)
         return HikariCPVaultUtil.createHikariDataSourceWithVaultIntegration(hikariConfig, vaultMountPath, "$databaseName-$role")
     }
@@ -61,5 +61,5 @@ internal class OnPremDataSourceConfiguration(
         override fun toString() = name.lowercase()
     }
 
-    override fun getDataSource(): DataSource = getDataSource(Role.User)
+    override fun getDataSource(): DataSource = getDataSource(Role.ReadOnly)
 }
