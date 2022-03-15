@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.meldinger.model
 
 import com.fasterxml.jackson.databind.JsonNode
+import java.util.UUID
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDate
@@ -9,7 +10,6 @@ import no.nav.helse.somFødselsnummer
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.db.HendelseRepository
 import org.slf4j.Logger
-import java.util.*
 
 internal abstract class HendelseMessage(private val packet: JsonMessage) {
     internal val id: UUID = UUID.fromString(packet["@id"].asText())
@@ -33,8 +33,9 @@ internal abstract class HendelseMessage(private val packet: JsonMessage) {
         logger.info("som følge av $navn id=$id sendes $size meldinger på rapid for fnr=$fødselsnummer")
     }
 
-    internal fun logRecognized(logger: Logger) {
-        logger.info("gjenkjente {} med id={} for fnr={}:\n{}", this::class.simpleName, id, fødselsnummer, toJson())
+    internal fun logRecognized(insecureLog: Logger, safeLog: Logger) {
+        insecureLog.info("gjenkjente {} med id={}", this::class.simpleName, id)
+        safeLog.info("gjenkjente {} med id={} for fnr={}:\n{}", this::class.simpleName, id, fødselsnummer, toJson())
     }
 
     internal fun logDuplikat(logger: Logger) {

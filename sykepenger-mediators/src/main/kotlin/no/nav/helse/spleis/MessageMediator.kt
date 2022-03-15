@@ -1,15 +1,38 @@
 package no.nav.helse.spleis
 
+import java.sql.SQLException
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.serde.DeserializationException
 import no.nav.helse.serde.migration.JsonMigrationException
 import no.nav.helse.spleis.db.HendelseRepository
-import no.nav.helse.spleis.meldinger.*
+import no.nav.helse.spleis.meldinger.AnnullerUtbetalingerRiver
+import no.nav.helse.spleis.meldinger.EtterbetalingerRiver
+import no.nav.helse.spleis.meldinger.EtterbetalingerRiverMedHistorikk
+import no.nav.helse.spleis.meldinger.InntektsmeldingerReplayRiver
+import no.nav.helse.spleis.meldinger.InntektsmeldingerRiver
+import no.nav.helse.spleis.meldinger.NyeSøknaderRiver
+import no.nav.helse.spleis.meldinger.OverstyrArbeidsforholdRiver
+import no.nav.helse.spleis.meldinger.OverstyrInntektRiver
+import no.nav.helse.spleis.meldinger.OverstyrTidlinjeRiver
+import no.nav.helse.spleis.meldinger.PersonAvstemmingRiver
+import no.nav.helse.spleis.meldinger.PersonPåminnelserRiver
+import no.nav.helse.spleis.meldinger.PåminnelserRiver
+import no.nav.helse.spleis.meldinger.SendtArbeidsgiverSøknaderRiver
+import no.nav.helse.spleis.meldinger.SendtNavSøknaderRiver
+import no.nav.helse.spleis.meldinger.SimuleringerRiver
+import no.nav.helse.spleis.meldinger.UtbetalingerOverførtRiver
+import no.nav.helse.spleis.meldinger.UtbetalingerRiver
+import no.nav.helse.spleis.meldinger.UtbetalingpåminnelserRiver
+import no.nav.helse.spleis.meldinger.UtbetalingsgodkjenningerRiver
+import no.nav.helse.spleis.meldinger.UtbetalingsgrunnlagRiver
+import no.nav.helse.spleis.meldinger.UtbetalingshistorikkForFeriepengerRiver
+import no.nav.helse.spleis.meldinger.UtbetalingshistorikkRiver
+import no.nav.helse.spleis.meldinger.VilkårsgrunnlagRiver
+import no.nav.helse.spleis.meldinger.YtelserRiver
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import org.slf4j.LoggerFactory
-import java.sql.SQLException
 
 internal class MessageMediator(
     rapidsConnection: RapidsConnection,
@@ -61,7 +84,7 @@ internal class MessageMediator(
     override fun onRecognizedMessage(message: HendelseMessage, context: MessageContext) {
         try {
             messageRecognized = true
-            message.logRecognized(sikkerLogg)
+            message.logRecognized(log, sikkerLogg)
             hendelseRepository.lagreMelding(message)
 
             if (message.skalDuplikatsjekkes && hendelseRepository.erBehandlet(message.id)) {
