@@ -30,6 +30,12 @@ spec:
     min: 6
     max: 6
     cpuThresholdPercentage: 75
+  gcp:
+    permissions:
+      - resource:
+          apiVersion: resourcemanager.cnrm.cloud.google.com/v1beta1
+          kind: Project
+        role: roles/cloudsql.client
   prometheus:
     enabled: true
     path: /metrics
@@ -57,6 +63,8 @@ spec:
           cluster: prod-gcp
   secureLogs:
     enabled: true
+  envFrom:
+    - secret: google-sql-spleis-spleis-spleis-api-e80c8e59
   env:
   - name: DATABASE_REGION
     value: "europe-north1"
@@ -64,3 +72,4 @@ spec:
     value: "helse-spleis"
   - name: DATABASE_DATABASE
     value: "spleis"
+
