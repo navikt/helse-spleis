@@ -1,12 +1,14 @@
 package no.nav.helse.serde.api.v2.buildere
 
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Simulering
 import no.nav.helse.person.UtbetalingVisitor
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.VedtaksperiodeVisitor
 import no.nav.helse.serde.api.v2.IUtbetaling
+import no.nav.helse.serde.api.v2.SpeilOppdrag
 import no.nav.helse.serde.api.v2.Utbetaling
-import no.nav.helse.utbetalingslinjer.Oppdrag
+import no.nav.helse.utbetalingslinjer.*
 import no.nav.helse.utbetalingslinjer.Utbetaling.Forkastet
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
 import java.time.LocalDate
@@ -15,7 +17,7 @@ import java.util.*
 import no.nav.helse.utbetalingslinjer.Utbetaling as InternUtbetaling
 
 // Besøker hele vedtaksperiode-treet
-internal class UtbetalingerBuilder(vedtaksperiode: Vedtaksperiode): VedtaksperiodeVisitor {
+internal class UtbetalingerBuilder(vedtaksperiode: Vedtaksperiode) : VedtaksperiodeVisitor {
     val utbetalinger = mutableMapOf<UUID, IUtbetaling>()
 
     init {
@@ -49,7 +51,7 @@ internal class UtbetalingerBuilder(vedtaksperiode: Vedtaksperiode): Vedtaksperio
     }
 }
 
-internal class UtbetalingBuilder(utbetaling: InternUtbetaling): UtbetalingVisitor {
+internal class UtbetalingBuilder(utbetaling: InternUtbetaling) : UtbetalingVisitor {
     private lateinit var utbetaling: IUtbetaling
 
     init {
@@ -95,13 +97,14 @@ internal class UtbetalingBuilder(utbetaling: InternUtbetaling): UtbetalingVisito
             personNettoBeløp = personNettoBeløp,
             arbeidsgiverFagsystemId = oppdragBuilder.arbeidsgiverFagsystemId(),
             personFagsystemId = oppdragBuilder.personFagsystemId(),
-            vurdering = vurdering
+            vurdering = vurdering,
+            oppdrag = oppdragBuilder.oppdrag()
         )
     }
 }
 
 // Besøker hele utbetaling-treet
-internal class VurderingBuilder(utbetaling: InternUtbetaling): UtbetalingVisitor {
+internal class VurderingBuilder(utbetaling: InternUtbetaling) : UtbetalingVisitor {
     init {
         utbetaling.accept(this)
     }
@@ -128,16 +131,24 @@ internal class VurderingBuilder(utbetaling: InternUtbetaling): UtbetalingVisitor
 
 // Besøker hele utbetaling-treet
 internal class OppdragBuilder(utbetaling: InternUtbetaling) : UtbetalingVisitor {
+    private val speilOppdrag: MutableMap<String, SpeilOppdrag>
+
     init {
+        speilOppdrag = mutableMapOf()
         utbetaling.accept(this)
     }
 
     private lateinit var arbeidsgiverFagsystemId: String
     private lateinit var personFagsystemId: String
 
+
+    private var linjer = mutableListOf<SpeilOppdrag.Utbetalingslinje>()
+
     internal fun arbeidsgiverFagsystemId() = arbeidsgiverFagsystemId
 
     internal fun personFagsystemId() = personFagsystemId
+
+    internal fun oppdrag() = speilOppdrag
 
     override fun preVisitArbeidsgiverOppdrag(oppdrag: Oppdrag) {
         arbeidsgiverFagsystemId = oppdrag.fagsystemId()
@@ -145,5 +156,121 @@ internal class OppdragBuilder(utbetaling: InternUtbetaling) : UtbetalingVisitor 
 
     override fun preVisitPersonOppdrag(oppdrag: Oppdrag) {
         personFagsystemId = oppdrag.fagsystemId()
+    }
+
+    override fun visitUtbetalingslinje(
+        linje: Utbetalingslinje,
+        fom: LocalDate,
+        tom: LocalDate,
+        stønadsdager: Int,
+        totalbeløp: Int,
+        satstype: Satstype,
+        beløp: Int?,
+        aktuellDagsinntekt: Int?,
+        grad: Int?,
+        delytelseId: Int,
+        refDelytelseId: Int?,
+        refFagsystemId: String?,
+        endringskode: Endringskode,
+        datoStatusFom: LocalDate?,
+        statuskode: String?,
+        klassekode: Klassekode
+    ) {
+        if (beløp == null || grad == null) return
+        linjer.add(
+            SpeilOppdrag.Utbetalingslinje(
+                fom = fom,
+                tom = tom,
+                dagsats = beløp,
+                grad = grad
+            )
+        )
+    }
+
+    override fun preVisitOppdrag(
+        oppdrag: Oppdrag,
+        fagområde: Fagområde,
+        fagsystemId: String,
+        mottaker: String,
+        førstedato: LocalDate,
+        sistedato: LocalDate,
+        sisteArbeidsgiverdag: LocalDate?,
+        stønadsdager: Int,
+        totalBeløp: Int,
+        nettoBeløp: Int,
+        tidsstempel: LocalDateTime,
+        endringskode: Endringskode,
+        avstemmingsnøkkel: Long?,
+        status: Oppdragstatus?,
+        overføringstidspunkt: LocalDateTime?,
+        erSimulert: Boolean,
+        simuleringsResultat: Simulering.SimuleringResultat?
+    ) {
+        linjer = mutableListOf()
+    }
+
+    override fun postVisitOppdrag(
+        oppdrag: Oppdrag,
+        fagområde: Fagområde,
+        fagsystemId: String,
+        mottaker: String,
+        førstedato: LocalDate,
+        sistedato: LocalDate,
+        sisteArbeidsgiverdag: LocalDate?,
+        stønadsdager: Int,
+        totalBeløp: Int,
+        nettoBeløp: Int,
+        tidsstempel: LocalDateTime,
+        endringskode: Endringskode,
+        avstemmingsnøkkel: Long?,
+        status: Oppdragstatus?,
+        overføringstidspunkt: LocalDateTime?,
+        erSimulert: Boolean,
+        simuleringsResultat: Simulering.SimuleringResultat?
+    ) {
+        speilOppdrag.putIfAbsent(
+            fagsystemId,
+            SpeilOppdrag(
+                fagsystemId = fagsystemId,
+                tidsstempel = tidsstempel,
+                simulering = simuleringsResultat?.let { simulering ->
+                    SpeilOppdrag.Simulering(
+                        totalbeløp = simulering.totalbeløp,
+                        perioder = simulering.perioder.map { periode ->
+                            SpeilOppdrag.Simuleringsperiode(
+                                fom = periode.periode.start,
+                                tom = periode.periode.endInclusive,
+                                utbetalinger = periode.utbetalinger.map { utbetaling ->
+                                    SpeilOppdrag.Simuleringsutbetaling(
+                                        mottakerId = utbetaling.utbetalesTil.id,
+                                        mottakerNavn = utbetaling.utbetalesTil.navn,
+                                        forfall = utbetaling.forfallsdato,
+                                        feilkonto = utbetaling.feilkonto,
+                                        detaljer = utbetaling.detaljer.map {
+                                            SpeilOppdrag.Simuleringsdetaljer(
+                                                faktiskFom = it.periode.start,
+                                                faktiskTom = it.periode.endInclusive,
+                                                konto = it.konto,
+                                                beløp = it.beløp,
+                                                tilbakeføring = it.tilbakeføring,
+                                                sats = it.sats.sats,
+                                                typeSats = it.sats.type,
+                                                antallSats = it.sats.antall,
+                                                uføregrad = it.uføregrad,
+                                                klassekode = it.klassekode.kode,
+                                                klassekodeBeskrivelse = it.klassekode.beskrivelse,
+                                                utbetalingstype = it.utbetalingstype,
+                                                refunderesOrgNr = it.refunderesOrgnummer
+                                            )
+                                        }
+                                    )
+                                }
+                            )
+                        }
+                    )
+                },
+                utbetalingslinjer = linjer
+            )
+        )
     }
 }

@@ -70,6 +70,49 @@ private fun mapDag(dag: SammenslåttDag) = GraphQLDag(
     }
 )
 
+private fun mapOppdrag(oppdrag: SpeilOppdrag): GraphQLOppdrag =
+    GraphQLOppdrag(
+        fagsystemId = oppdrag.fagsystemId,
+        tidsstempel = oppdrag.tidsstempel,
+        simulering = oppdrag.simulering?.let { simulering ->
+            GraphQLSimulering(
+                totalbelop = simulering.totalbeløp,
+                perioder = simulering.perioder.map { periode ->
+                    GraphQLSimuleringsperiode(
+                        fom = periode.fom,
+                        tom = periode.tom,
+                        utbetalinger = periode.utbetalinger.map { utbetaling ->
+                            GraphQLSimuleringsutbetaling(
+                                utbetalesTilId = utbetaling.mottakerId,
+                                utbetalesTilNavn = utbetaling.mottakerNavn,
+                                forfall = utbetaling.forfall,
+                                feilkonto = utbetaling.feilkonto,
+                                detaljer = utbetaling.detaljer.map {
+                                    GraphQLSimuleringsdetaljer(
+                                        faktiskFom = it.faktiskFom,
+                                        faktiskTom = it.faktiskTom,
+                                        konto = it.konto,
+                                        belop = it.beløp,
+                                        tilbakeforing = it.tilbakeføring,
+                                        sats = it.sats,
+                                        typeSats = it.typeSats,
+                                        antallSats = it.antallSats,
+                                        uforegrad = it.uføregrad,
+                                        klassekode = it.klassekode,
+                                        klassekodeBeskrivelse = it.klassekodeBeskrivelse,
+                                        utbetalingstype = it.utbetalingstype,
+                                        refunderesOrgNr = it.refunderesOrgNr
+                                    )
+                                }
+                            )
+                        }
+                    )
+                }
+            )
+        },
+        utbetalingslinjer = emptyList()
+    )
+
 private fun mapUtbetaling(utbetaling: Utbetaling) = GraphQLUtbetaling(
     id = utbetaling.id,
     type = utbetaling.type,
@@ -85,6 +128,12 @@ private fun mapUtbetaling(utbetaling: Utbetaling) = GraphQLUtbetaling(
             automatisk = it.automatisk,
             ident = it.ident
         )
+    },
+    arbeidsgiveroppdrag = utbetaling.oppdrag[utbetaling.arbeidsgiverFagsystemId]?.let {
+        mapOppdrag(it)
+    },
+    personoppdrag = utbetaling.oppdrag[utbetaling.personFagsystemId]?.let {
+        mapOppdrag(it)
     }
 )
 

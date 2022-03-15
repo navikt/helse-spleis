@@ -43,7 +43,8 @@ internal fun SchemaBuilder.personSchema(personDao: PersonDao, hendelseDao: Hende
                                         tom = periode.tom,
                                         skjaeringstidspunkt = periode.skjæringstidspunkt,
                                         vilkarsgrunnlaghistorikkId = periode.vilkårsgrunnlagHistorikkInnslagId,
-                                        deaktivert = periode.deaktivert
+                                        deaktivert = periode.deaktivert,
+                                        organisasjonsnummer = arbeidsgiver.organisasjonsnummer
                                     )
                                 }
                             )

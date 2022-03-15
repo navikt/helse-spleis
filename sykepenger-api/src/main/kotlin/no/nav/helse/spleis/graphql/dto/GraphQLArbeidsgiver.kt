@@ -52,7 +52,8 @@ data class GraphQLGhostPeriode(
     val tom: LocalDate,
     val skjaeringstidspunkt: LocalDate,
     val vilkarsgrunnlaghistorikkId: UUID?,
-    val deaktivert: Boolean
+    val deaktivert: Boolean,
+    val organisasjonsnummer: String
 )
 
 data class GraphQLArbeidsgiver(

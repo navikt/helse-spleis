@@ -123,6 +123,55 @@ data class BeregnetPeriode(
     )
 }
 
+data class SpeilOppdrag(
+    val fagsystemId: String,
+    val tidsstempel: LocalDateTime,
+    val simulering: Simulering?,
+    val utbetalingslinjer: List<Utbetalingslinje>
+) {
+    data class Simulering(
+        val totalbeløp: Int,
+        val perioder: List<Simuleringsperiode>
+    )
+
+    data class Simuleringsperiode(
+        val fom: LocalDate,
+        val tom: LocalDate,
+        val utbetalinger: List<Simuleringsutbetaling>
+    )
+
+    data class Simuleringsutbetaling(
+        val mottakerId: String,
+        val mottakerNavn: String,
+        val forfall: LocalDate,
+        val feilkonto: Boolean,
+        val detaljer: List<Simuleringsdetaljer>
+    )
+
+    data class Simuleringsdetaljer(
+        val faktiskFom: LocalDate,
+        val faktiskTom: LocalDate,
+        val konto: String,
+        val beløp: Int,
+        val tilbakeføring: Boolean,
+        val sats: Double,
+        val typeSats: String,
+        val antallSats: Int,
+        val uføregrad: Int,
+        val klassekode: String,
+        val klassekodeBeskrivelse: String,
+        val utbetalingstype: String,
+        val refunderesOrgNr: String
+    )
+
+    data class Utbetalingslinje(
+        val fom: LocalDate,
+        val tom: LocalDate,
+        val dagsats: Int,
+        val grad: Int
+    )
+}
+
 data class Utbetaling(
     val type: String,
     val status: String,
@@ -130,6 +179,7 @@ data class Utbetaling(
     val personNettoBeløp: Int,
     val arbeidsgiverFagsystemId: String,
     val personFagsystemId: String,
+    val oppdrag: Map<String, SpeilOppdrag>,
     val vurdering: Vurdering?,
     val id: UUID
 ) {

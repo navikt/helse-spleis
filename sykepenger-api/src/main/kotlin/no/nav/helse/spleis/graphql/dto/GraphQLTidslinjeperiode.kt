@@ -135,6 +135,20 @@ data class GraphQLVurdering(
     val ident: String
 )
 
+data class GraphQLUtbetalingslinje(
+    val fom: LocalDate,
+    val tom: LocalDate,
+    val dagsats: Int,
+    val grad: Int
+)
+
+data class GraphQLOppdrag(
+    val fagsystemId: String,
+    val tidsstempel: LocalDateTime,
+    val simulering: GraphQLSimulering?,
+    val utbetalingslinjer: List<GraphQLUtbetalingslinje>
+)
+
 data class GraphQLUtbetaling(
     val id: UUID,
     val type: String,
@@ -143,6 +157,8 @@ data class GraphQLUtbetaling(
     val personNettoBelop: Int,
     val arbeidsgiverFagsystemId: String,
     val personFagsystemId: String,
+    val arbeidsgiveroppdrag: GraphQLOppdrag?,
+    val personoppdrag: GraphQLOppdrag?,
     val vurdering: GraphQLVurdering?
 )
 

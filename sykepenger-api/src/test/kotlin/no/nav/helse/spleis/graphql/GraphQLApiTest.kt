@@ -325,7 +325,83 @@ internal class GraphQLApiTest : AbstractObservableTest() {
                                         arbeidsgiverNettoBelop,
                                         personNettoBelop,
                                         arbeidsgiverFagsystemId,
-                                        personFagsystemId
+                                        personFagsystemId,
+                                        personoppdrag {
+                                            fagsystemId,
+                                            tidsstempel,
+                                            simulering {
+                                                totalbelop,
+                                                perioder {
+                                                    fom,
+                                                    tom,
+                                                    utbetalinger {
+                                                        utbetalesTilId,
+                                                        utbetalesTilNavn,
+                                                        forfall,
+                                                        feilkonto,
+                                                        detaljer {
+                                                            faktiskFom,
+                                                            faktiskTom,
+                                                            konto,
+                                                            belop,
+                                                            tilbakeforing,
+                                                            sats,
+                                                            typeSats,
+                                                            antallSats,
+                                                            uforegrad,
+                                                            klassekode,
+                                                            klassekodeBeskrivelse,
+                                                            utbetalingstype,
+                                                            refunderesOrgNr
+                                                        }
+                                                    }
+                                                }
+                                            },
+                                            utbetalingslinjer {
+                                                fom,
+                                                tom,
+                                                dagsats,
+                                                grad
+                                            }
+                                        },
+                                        arbeidsgiveroppdrag {
+                                            fagsystemId,
+                                            tidsstempel,
+                                            simulering {
+                                                totalbelop,
+                                                perioder {
+                                                    fom,
+                                                    tom,
+                                                    utbetalinger {
+                                                        utbetalesTilId,
+                                                        utbetalesTilNavn,
+                                                        forfall,
+                                                        feilkonto,
+                                                        detaljer {
+                                                            faktiskFom,
+                                                            faktiskTom,
+                                                            konto,
+                                                            belop,
+                                                            tilbakeforing,
+                                                            sats,
+                                                            typeSats,
+                                                            antallSats,
+                                                            uforegrad,
+                                                            klassekode,
+                                                            klassekodeBeskrivelse,
+                                                            utbetalingstype,
+                                                            refunderesOrgNr
+                                                        }
+                                                    }
+                                                }
+                                            },
+                                            utbetalingslinjer {
+                                                fom,
+                                                tom,
+                                                dagsats,
+                                                grad
+                                            }
+                                        }
                                     },
                                     hendelser {
                                         id,

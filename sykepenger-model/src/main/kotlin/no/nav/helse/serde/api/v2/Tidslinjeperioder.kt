@@ -258,19 +258,21 @@ internal class IUtbetaling(
     private val personNettoBeløp: Int,
     private val arbeidsgiverFagsystemId: String,
     private val personFagsystemId: String,
-    private val vurdering: Utbetaling.Vurdering?
+    private val vurdering: Utbetaling.Vurdering?,
+    private val oppdrag: Map<String, SpeilOppdrag>
 ) {
     fun fagsystemId() = arbeidsgiverFagsystemId
     fun toDTO(): Utbetaling {
         return Utbetaling(
-            type,
-            tilstand,
-            arbeidsgiverNettoBeløp,
-            personNettoBeløp,
-            arbeidsgiverFagsystemId,
-            personFagsystemId,
-            vurdering,
-            id
+            type = type,
+            status = tilstand,
+            arbeidsgiverNettoBeløp = arbeidsgiverNettoBeløp,
+            personNettoBeløp = personNettoBeløp,
+            arbeidsgiverFagsystemId = arbeidsgiverFagsystemId,
+            personFagsystemId = personFagsystemId,
+            vurdering = vurdering,
+            id = id,
+            oppdrag = oppdrag
         )
     }
 }
