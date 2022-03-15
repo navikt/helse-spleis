@@ -53,6 +53,19 @@ internal class AppTest {
         assertEquals(0, finnUnikePerson("123"))
     }
 
+    @Test
+    fun `sletter kun aktuelt fnr`() {
+        opprettPerson("123")
+        opprettPerson("1234")
+        testRapid.sendTestMessage(slettemelding("123"))
+        assertEquals(0, finnPerson("123"))
+        assertEquals(1, finnPerson("1234"))
+        assertEquals(0, finnMelding("123"))
+        assertEquals(1, finnMelding("1234"))
+        assertEquals(0, finnUnikePerson("123"))
+        assertEquals(1, finnUnikePerson("1234"))
+    }
+
     @Language("JSON")
     private fun slettemelding(fødselsnummer: String) = """
         {
@@ -89,23 +102,25 @@ internal class AppTest {
     }
 
     private fun opprettDummyPerson(fødselsnummer: String) {
-        sessionOf(dataSource).transaction {
-            val opprettMelding =
-                "INSERT INTO melding(fnr, melding_id, melding_type, data, behandlet_tidspunkt) VALUES(?, ?, ?, ?::json, ?)"
-            it.run(
-                queryOf(opprettMelding, fødselsnummer.toLong(), UUID.randomUUID(), "melding", "{}", LocalDateTime.now()).asExecute
-            )
+        sessionOf(dataSource).use { session ->
+            session.transaction {
+                val opprettMelding =
+                    "INSERT INTO melding(fnr, melding_id, melding_type, data, behandlet_tidspunkt) VALUES(?, ?, ?, ?::json, ?)"
+                it.run(
+                    queryOf(opprettMelding, fødselsnummer.toLong(), UUID.randomUUID(), "melding", "{}", LocalDateTime.now()).asUpdate
+                )
 
-            val opprettUnikePerson = "INSERT INTO unike_person(fnr, aktor_id, sist_avstemt) VALUES(?, ?, ?)"
-            it.run(
-                queryOf(opprettUnikePerson, fødselsnummer.toLong(), fødselsnummer.reversed().toLong(), LocalDateTime.now()).asExecute
-            )
+                val opprettUnikePerson = "INSERT INTO unike_person(fnr, aktor_id, sist_avstemt) VALUES(?, ?, ?)"
+                it.run(
+                    queryOf(opprettUnikePerson, fødselsnummer.toLong(), fødselsnummer.reversed().toLong(), LocalDateTime.now()).asUpdate
+                )
 
-            val opprettPerson =
-                "INSERT INTO person(skjema_versjon, fnr, aktor_id, data, melding_id, rullet_tilbake) VALUES(?, ?, ?, ?::json, ?, ?)"
-            it.run(
-                queryOf(opprettPerson, 0, fødselsnummer.toLong(), fødselsnummer.reversed().toLong(), "{}", UUID.randomUUID(), LocalDateTime.now()).asExecute
-            )
+                val opprettPerson =
+                    "INSERT INTO person(skjema_versjon, fnr, aktor_id, data, melding_id, rullet_tilbake) VALUES(?, ?, ?, ?::json, ?, ?)"
+                it.run(
+                    queryOf(opprettPerson, 0, fødselsnummer.toLong(), fødselsnummer.reversed().toLong(), "{}", UUID.randomUUID(), LocalDateTime.now()).asUpdate
+                )
+            }
         }
     }
 

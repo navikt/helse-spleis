@@ -7,10 +7,12 @@ import kotliquery.sessionOf
 
 internal class PersonRepository(private val dataSource: DataSource) {
     internal fun slett(fødselsnummer: String) {
-        sessionOf(dataSource).transaction {
-            it.slettPerson(fødselsnummer)
-            it.slettMeldinger(fødselsnummer)
-            it.slettUnikePerson(fødselsnummer)
+        sessionOf(dataSource).use { session ->
+            session.transaction {
+                it.slettPerson(fødselsnummer)
+                it.slettMeldinger(fødselsnummer)
+                it.slettUnikePerson(fødselsnummer)
+            }
         }
     }
 
