@@ -4,14 +4,19 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
+import org.slf4j.LoggerFactory
 
 internal class SlettPersonRiver(
     rapidsConnection: RapidsConnection,
     private val personRepository: PersonRepository
 ): River.PacketListener {
+
+    private companion object {
+        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
+    }
+
     init {
         River(rapidsConnection).apply {
-            rapidsConnection.register(this)
             validate {
                 it.demandValue("@event_name", "slett_person")
                 it.requireKey("@id", "fødselsnummer")
@@ -20,6 +25,8 @@ internal class SlettPersonRiver(
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
-        TODO("Not yet implemented")
+        val fødselsnummer = packet["fødselsnummer"].asText()
+        sikkerlogg.info("Sletter person med fødselsnummer: $fødselsnummer")
+        personRepository.slett(fødselsnummer)
     }
 }
