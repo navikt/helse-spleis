@@ -33,11 +33,21 @@ spec:
   webproxy: true
   kafka:
     pool: nav-prod
-  vault:
-    enabled: true
-    paths:
-      - mountPath: /var/run/secrets/nais.io/service_user
-        kvPath: /serviceuser/data/prod/srvspleis
+  gcp:
+    sqlInstances:
+      - type: POSTGRES_14
+        diskAutoresize: true
+        pointInTimeRecovery: true
+        diskSize: 2048
+        diskType: SSD
+        name: helse-spleis
+        tier: db-custom-16-106496
+        retainedBackups: 14
+        databases:
+          - name: spleis
+            envVarPrefix: DATABASE
+            users:
+              - name: spleis-api
   secureLogs:
     enabled: true
   env:
@@ -47,11 +57,3 @@ spec:
     value: tbd-spleis-v1
   - name: KAFKA_RESET_POLICY
     value: none
-  - name: DATABASE_HOST
-    value: a01dbfl039.adeo.no
-  - name: DATABASE_PORT
-    value: "5432"
-  - name: DATABASE_NAME
-    value: spleis2
-  - name: VAULT_MOUNTPATH
-    value: postgresql/prod-fss/
