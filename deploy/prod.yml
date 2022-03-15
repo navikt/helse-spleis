@@ -30,7 +30,6 @@ spec:
   prometheus:
     enabled: true
     path: /metrics
-  webproxy: true
   kafka:
     pool: nav-prod
   gcp:
