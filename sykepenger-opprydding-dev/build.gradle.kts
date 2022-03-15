@@ -9,9 +9,6 @@ repositories {
 
 dependencies {
     implementation(kotlin("stdlib"))
-    implementation("io.ktor:ktor-auth-jwt:$ktorVersion") {
-        exclude(group = "junit")
-    }
     implementation("com.github.navikt:rapids-and-rivers:2022.02.28-16.20.1a549dcffaae")
     implementation("org.postgresql:postgresql:42.3.3")
 
