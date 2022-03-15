@@ -20,7 +20,6 @@ class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.StatusList
         else -> throw IllegalArgumentException("env variable NAIS_CLUSTER_NAME has an unsupported value")
     }
 
-
     private val dataSource = dataSourceBuilder.getDataSource()
 
     private val hendelseRepository = HendelseRepository(dataSource)
@@ -52,8 +51,7 @@ class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.StatusList
         dataSourceBuilder.migrate()
     }
 
-    fun versjonAvKode(env: Map<String, String>): String {
-        return env.get("NAIS_APP_IMAGE") ?: throw IllegalArgumentException("NAIS_APP_IMAGE env variable is missing")
+    private fun versjonAvKode(env: Map<String, String>): String {
+        return env["NAIS_APP_IMAGE"] ?: throw IllegalArgumentException("NAIS_APP_IMAGE env variable is missing")
     }
-
 }
