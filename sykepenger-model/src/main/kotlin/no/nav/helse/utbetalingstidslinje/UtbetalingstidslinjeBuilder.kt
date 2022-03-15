@@ -1,11 +1,11 @@
 package no.nav.helse.utbetalingstidslinje
 
+import java.time.LocalDate
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Økonomi
-import java.time.LocalDate
 
 internal sealed class UtbetalingstidslinjeBuilderException(private val kort: String, message: String) : RuntimeException(message) {
     internal fun logg(aktivitetslogg: IAktivitetslogg) {
@@ -34,39 +34,40 @@ internal interface IUtbetalingstidslinjeBuilder : ArbeidsgiverperiodeMediator {
 }
 
 internal class UtbetalingstidslinjeBuilder(private val inntekter: Inntekter) : IUtbetalingstidslinjeBuilder {
-    private val tidslinje = Utbetalingstidslinje()
     private val periodebuilder = ArbeidsgiverperiodeBuilderBuilder()
     private var sisteArbeidsgiverperiode: Arbeidsgiverperiode? = null
     private val nåværendeArbeidsgiverperiode: Arbeidsgiverperiode? get() = sisteArbeidsgiverperiode ?: periodebuilder.build()
 
+    private val builder = Utbetalingstidslinje.Builder()
+
     override fun result(): Utbetalingstidslinje {
-        return tidslinje
+        return builder.build()
     }
 
     override fun fridag(dato: LocalDate) {
-        tidslinje.addFridag(dato, inntekter.medFrivilligInntekt(dato, Økonomi.ikkeBetalt(nåværendeArbeidsgiverperiode)))
+        builder.addFridag(dato, inntekter.medFrivilligInntekt(dato, Økonomi.ikkeBetalt(nåværendeArbeidsgiverperiode)))
     }
 
     override fun arbeidsdag(dato: LocalDate) {
-        tidslinje.addArbeidsdag(dato, inntekter.medFrivilligInntekt(dato, Økonomi.ikkeBetalt(nåværendeArbeidsgiverperiode)))
+        builder.addArbeidsdag(dato, inntekter.medFrivilligInntekt(dato, Økonomi.ikkeBetalt(nåværendeArbeidsgiverperiode)))
     }
 
     override fun arbeidsgiverperiodedag(dato: LocalDate, økonomi: Økonomi) {
         periodebuilder.arbeidsgiverperiodedag(dato, økonomi)
-        tidslinje.addArbeidsgiverperiodedag(dato, inntekter.medFrivilligInntekt(dato, Økonomi.ikkeBetalt(nåværendeArbeidsgiverperiode)))
+        builder.addArbeidsgiverperiodedag(dato, inntekter.medFrivilligInntekt(dato, Økonomi.ikkeBetalt(nåværendeArbeidsgiverperiode)))
     }
 
     override fun utbetalingsdag(dato: LocalDate, økonomi: Økonomi) {
-        if (dato.erHelg()) return tidslinje.addHelg(dato, inntekter.medSkjæringstidspunkt(dato, økonomi, nåværendeArbeidsgiverperiode))
-        tidslinje.addNAVdag(dato, inntekter.medInntekt(dato, økonomi, nåværendeArbeidsgiverperiode))
+        if (dato.erHelg()) return builder.addHelg(dato, inntekter.medSkjæringstidspunkt(dato, økonomi, nåværendeArbeidsgiverperiode))
+        builder.addNAVdag(dato, inntekter.medInntekt(dato, økonomi, nåværendeArbeidsgiverperiode))
     }
 
     override fun foreldetDag(dato: LocalDate, økonomi: Økonomi) {
-        tidslinje.addForeldetDag(dato, inntekter.medInntekt(dato, økonomi, nåværendeArbeidsgiverperiode))
+        builder.addForeldetDag(dato, inntekter.medInntekt(dato, økonomi, nåværendeArbeidsgiverperiode))
     }
 
     override fun avvistDag(dato: LocalDate, begrunnelse: Begrunnelse) {
-        tidslinje.addAvvistDag(dato, inntekter.medFrivilligInntekt(dato, Økonomi.ikkeBetalt(nåværendeArbeidsgiverperiode)), listOf(begrunnelse))
+        builder.addAvvistDag(dato, inntekter.medFrivilligInntekt(dato, Økonomi.ikkeBetalt(nåværendeArbeidsgiverperiode)), listOf(begrunnelse))
     }
 
     override fun arbeidsgiverperiodeAvbrutt() {

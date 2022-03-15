@@ -1,5 +1,7 @@
 package no.nav.helse.person.infotrygdhistorikk
 
+import java.time.LocalDate
+import java.util.Objects
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.InfotrygdhistorikkVisitor
@@ -10,8 +12,6 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Økonomi
-import java.time.LocalDate
-import java.util.*
 
 abstract class Utbetalingsperiode(
     protected val orgnr: String,
@@ -25,15 +25,15 @@ abstract class Utbetalingsperiode(
     }
 
     override fun utbetalingstidslinje() =
-        Utbetalingstidslinje().also { utbetalingstidslinje ->
-            this.forEach { dag -> nyDag(utbetalingstidslinje, dag) }
-        }
+        Utbetalingstidslinje.Builder().apply {
+            this@Utbetalingsperiode.forEach { dag -> nyDag(this, dag) }
+        }.build()
 
-    private fun nyDag(utbetalingstidslinje: Utbetalingstidslinje, dato: LocalDate) {
+    private fun nyDag(builder: Utbetalingstidslinje.Builder, dato: LocalDate) {
         val økonomi = Økonomi.sykdomsgrad(grad)
-        if (dato.erHelg()) return utbetalingstidslinje.addHelg(dato, økonomi.inntekt(Inntekt.INGEN, skjæringstidspunkt = dato))
+        if (dato.erHelg()) return builder.addHelg(dato, økonomi.inntekt(Inntekt.INGEN, skjæringstidspunkt = dato))
         val refusjon = if (!harBrukerutbetaling()) inntekt else Inntekt.INGEN
-        utbetalingstidslinje.addNAVdag(dato, økonomi.inntekt(inntekt, skjæringstidspunkt = dato).arbeidsgiverRefusjon(refusjon))
+        builder.addNAVdag(dato, økonomi.inntekt(inntekt, skjæringstidspunkt = dato).arbeidsgiverRefusjon(refusjon))
     }
 
     override fun valider(aktivitetslogg: IAktivitetslogg, periode: Periode, skjæringstidspunkt: LocalDate, nødnummer: Nødnummer) {
