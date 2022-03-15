@@ -23,19 +23,4 @@ internal class DataSourceBuilder(env: Map<String, String>) {
     }
 
     internal fun getDataSource() = HikariDataSource(hikariConfig)
-
-    internal fun migrate() {
-        logger.info("Migrerer database")
-        getDataSource().use { dataSource ->
-            Flyway.configure()
-                .dataSource(dataSource)
-                .load()
-                .migrate()
-        }
-        logger.info("Migrering ferdig!")
-    }
-
-    private companion object {
-        private val logger = LoggerFactory.getLogger(DataSourceBuilder::class.java)
-    }
 }

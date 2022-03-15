@@ -1,9 +1,8 @@
 package no.nav.helse
 
 import no.nav.helse.rapids_rivers.RapidApplication
-import no.nav.helse.rapids_rivers.RapidsConnection
 
-internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.StatusListener {
+internal class ApplicationBuilder(env: Map<String, String>) {
     // Sikrer at man ikke får tilgang til db andre steder enn i dev-gcp
     private val dataSourceBuilder = when (env["NAIS_CLUSTER_NAME"]) {
         "dev-gcp" -> DataSourceBuilder(env)
@@ -12,13 +11,8 @@ internal class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.S
     private val rapidsConnection = RapidApplication.create(env)
 
     init {
-        rapidsConnection.register(this)
         SlettPersonRiver(rapidsConnection, PersonRepository(dataSourceBuilder.getDataSource()))
     }
 
     internal fun start() = rapidsConnection.start()
-
-    override fun onStartup(rapidsConnection: RapidsConnection) {
-        dataSourceBuilder.migrate()
-    }
 }

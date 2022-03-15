@@ -93,38 +93,18 @@ internal class AppTest {
             val opprettMelding =
                 "INSERT INTO melding(fnr, melding_id, melding_type, data, behandlet_tidspunkt) VALUES(?, ?, ?, ?::json, ?)"
             it.run(
-                queryOf(
-                    opprettMelding,
-                    fødselsnummer.toLong(),
-                    UUID.randomUUID(),
-                    "melding",
-                    "{}",
-                    LocalDateTime.now()
-                ).asExecute
+                queryOf(opprettMelding, fødselsnummer.toLong(), UUID.randomUUID(), "melding", "{}", LocalDateTime.now()).asExecute
             )
 
             val opprettUnikePerson = "INSERT INTO unike_person(fnr, aktor_id, sist_avstemt) VALUES(?, ?, ?)"
             it.run(
-                queryOf(
-                    opprettUnikePerson,
-                    fødselsnummer.toLong(),
-                    fødselsnummer.reversed().toLong(),
-                    LocalDateTime.now(),
-                ).asExecute
+                queryOf(opprettUnikePerson, fødselsnummer.toLong(), fødselsnummer.reversed().toLong(), LocalDateTime.now()).asExecute
             )
 
             val opprettPerson =
                 "INSERT INTO person(skjema_versjon, fnr, aktor_id, data, melding_id, rullet_tilbake) VALUES(?, ?, ?, ?::json, ?, ?)"
             it.run(
-                queryOf(
-                    opprettPerson,
-                    0,
-                    fødselsnummer.toLong(),
-                    fødselsnummer.reversed().toLong(),
-                    "{}",
-                    UUID.randomUUID(),
-                    LocalDateTime.now()
-                ).asExecute
+                queryOf(opprettPerson, 0, fødselsnummer.toLong(), fødselsnummer.reversed().toLong(), "{}", UUID.randomUUID(), LocalDateTime.now()).asExecute
             )
         }
     }
