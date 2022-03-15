@@ -1,6 +1,11 @@
 package no.nav.helse.spleis.db
 
-import kotliquery.*
+import java.util.UUID
+import javax.sql.DataSource
+import kotliquery.Session
+import kotliquery.TransactionalSession
+import kotliquery.queryOf
+import kotliquery.sessionOf
 import no.nav.helse.Fødselsnummer
 import no.nav.helse.hendelser.Avstemming
 import no.nav.helse.person.PersonHendelse
@@ -9,8 +14,6 @@ import no.nav.helse.somFødselsnummer
 import no.nav.helse.spleis.PostgresProbe
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import org.intellij.lang.annotations.Language
-import java.util.*
-import javax.sql.DataSource
 
 internal class LagrePersonDao(private val dataSource: DataSource) {
     fun lagrePerson(message: HendelseMessage, person: SerialisertPerson, hendelse: PersonHendelse, vedtak: Boolean) {
@@ -25,7 +28,7 @@ internal class LagrePersonDao(private val dataSource: DataSource) {
     }
 
     fun personAvstemt(hendelse: Avstemming) {
-        @Language("PostreSQL")
+        @Language("PostgreSQL")
         val statement = "UPDATE unike_person SET sist_avstemt = now() WHERE fnr = :fnr"
         sessionOf(dataSource).use { session ->
             session.run(queryOf(statement, mapOf(
@@ -45,7 +48,7 @@ internal class LagrePersonDao(private val dataSource: DataSource) {
     }
 
     private fun opprettNyPerson(session: TransactionalSession, fødselsnummer: Fødselsnummer, aktørId: String, skjemaVersjon: Int, meldingId: UUID, personJson: String, vedtak: Boolean) {
-        @Language("PostreSQL")
+        @Language("PostgreSQL")
         val statement = "INSERT INTO unike_person (fnr, aktor_id) VALUES (:fnr, :aktor) ON CONFLICT DO NOTHING"
         session.run(queryOf(statement, mapOf(
             "fnr" to fødselsnummer.toLong(),
@@ -56,16 +59,16 @@ internal class LagrePersonDao(private val dataSource: DataSource) {
     }
 
     private fun opprettNyPersonversjon(session: Session, fødselsnummer: Fødselsnummer, aktørId: String, skjemaVersjon: Int, meldingId: UUID, personJson: String, vedtak: Boolean) {
-        @Language("PostreSQL")
+        @Language("PostgreSQL")
         val statement = """
             INSERT INTO person (aktor_id, fnr, skjema_versjon, melding_id, data, vedtak)
-            VALUES (?, ?, ?, ?, (to_json(?::json)), ?)
+            VALUES (?, ?, ?, ?, CAST(? AS json), ?)
         """
         session.run(queryOf(statement, aktørId.toLong(), fødselsnummer.toLong(), skjemaVersjon, meldingId, personJson, vedtak).asExecute)
     }
 
     private fun slettEldrePersonversjon(session: Session, fødselsnummer: Fødselsnummer) {
-        @Language("PostreSQL")
+        @Language("PostgreSQL")
         val statement = """
             DELETE FROM person
             WHERE vedtak = false AND fnr = ?
