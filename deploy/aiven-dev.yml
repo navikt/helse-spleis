@@ -172,6 +172,9 @@ spec:
         - team: tbd
           application: spleis-testdata
           access: readwrite
+        - team: tbd
+          application: spleis-opprydding-dev
+          access: read
         - team: teamsykmelding
           application: sparenaproxy
           access: read
