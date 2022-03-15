@@ -40,7 +40,7 @@ spec:
         diskSize: 2048
         diskType: SSD
         name: helse-spleis
-        tier: db-custom-16-106496
+        tier: db-custom-32-212992
         retainedBackups: 14
         databases:
           - name: spleis
