@@ -2,9 +2,9 @@ package no.nav.helse
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
+import java.time.Duration
 import org.flywaydb.core.Flyway
 import org.slf4j.LoggerFactory
-import java.time.Duration
 
 
 internal interface DataSourceBuilder {
@@ -26,6 +26,7 @@ internal class GcpDataSourceBuilder(env: Map<String, String>): DataSourceBuilder
         maximumPoolSize = 1
         connectionTimeout = Duration.ofSeconds(5).toMillis()
         maxLifetime = Duration.ofMinutes(30).toMillis()
+        initializationFailTimeout = Duration.ofMinutes(1).toMillis()
     }
 
     override fun getDataSource() = HikariDataSource(hikariConfig)

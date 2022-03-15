@@ -44,6 +44,7 @@ internal class GcpDataSourceConfiguration(
         connectionTimeout = Duration.ofSeconds(5).toMillis()
         maxLifetime = Duration.ofMinutes(30).toMillis()
         idleTimeout = Duration.ofMinutes(10).toMillis()
+        initializationFailTimeout = Duration.ofMinutes(1).toMillis()
     }
 
     override fun getDataSource() = HikariDataSource(hikariConfig)
