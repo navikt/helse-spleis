@@ -1,4 +1,3 @@
-val ktorVersion = "1.6.7"
 val testcontainersVersion = "1.16.3"
 
 val mainClass = "no.nav.helse.spleis.AppKt"
