@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.meldinger
 
 import com.fasterxml.jackson.databind.JsonNode
+import java.time.LocalDateTime
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -8,7 +9,6 @@ import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkMessage
-import java.time.LocalDateTime
 
 internal class UtbetalingshistorikkRiver(
     rapidsConnection: RapidsConnection,
@@ -19,8 +19,8 @@ internal class UtbetalingshistorikkRiver(
 
     override fun validate(message: JsonMessage) {
         message.demand("@behov") { require(it.size() == behov.size) }
+        message.demand("@besvart") { require(it.asLocalDateTime() > LocalDateTime.now().minusHours(1)) }
         message.requireKey("vedtaksperiodeId", "tilstand")
-        message.require("@besvart") { require(it.asLocalDateTime() > LocalDateTime.now().minusHours(1)) }
         message.rejectKey("fagsystemId")
         validerSykepengehistorikk(message)
     }

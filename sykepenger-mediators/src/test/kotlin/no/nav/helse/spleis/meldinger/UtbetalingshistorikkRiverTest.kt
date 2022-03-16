@@ -1,11 +1,11 @@
 package no.nav.helse.spleis.meldinger
 
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spleis.IMessageMediator
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
-import java.time.LocalDateTime
-import java.util.*
 
 internal class UtbetalingshistorikkRiverTest : RiverTest() {
     override fun river(rapidsConnection: RapidsConnection, mediator: IMessageMediator) {
@@ -29,7 +29,7 @@ internal class UtbetalingshistorikkRiverTest : RiverTest() {
 
     @Test
     fun `ignorerer gammel historikk`() {
-        assertErrors(gammelHistorikk)
+        assertIgnored(gammelHistorikk)
     }
 
     @Test
