@@ -3,9 +3,10 @@ package no.nav.helse.spleis.e2e
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.Toggle
-import no.nav.helse.Toggle.Companion.disable
-import no.nav.helse.Toggle.Companion.enable
+import java.math.BigDecimal
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.januar
@@ -21,12 +22,8 @@ import no.nav.inntektsmeldingkontrakt.Periode
 import no.nav.syfo.kafka.felles.FravarDTO
 import no.nav.syfo.kafka.felles.FravarstypeDTO
 import no.nav.syfo.kafka.felles.SoknadsperiodeDTO
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import java.math.BigDecimal
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
 
 internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
 
@@ -125,7 +122,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
         sendUtbetalingsgodkjenning(0)
         sendUtbetaling()
-        val fagsystemId = testRapid.inspektør.let { it.siste("utbetalt")["utbetalt"][0]["fagsystemId"] }.asText()
+        val fagsystemId = testRapid.inspektør.alleEtterspurteBehov(Utbetaling).last { it.path(Utbetaling.name).path("fagområde").asText() == "SPREF"}.path(Utbetaling.name).path("fagsystemId").asText()
         sendAnnullering(fagsystemId)
         sendUtbetaling()
         assertUtbetalingTilstander(0, "IKKE_UTBETALT", "GODKJENT", "SENDT", "OVERFØRT", "UTBETALT")
@@ -237,82 +234,6 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
             "AVVENTER_GODKJENNING",
             "TIL_UTBETALING"
         )
-    }
-
-    @Test
-    fun `Send annulleringsevent`() {
-        sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
-        sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
-        sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
-        sendYtelser(0)
-        sendVilkårsgrunnlag(0)
-        sendYtelser(0)
-        sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
-        sendUtbetalingsgodkjenning(0, true)
-        sendUtbetaling(utbetalingOK = true)
-
-        val fagsystemId = testRapid.inspektør.let { it.siste("utbetalt")["utbetalt"][0]["fagsystemId"] }.asText()
-        sendAnnullering(fagsystemId)
-        sendUtbetaling(
-            utbetalingOK = true
-        )
-
-        val utbetalingAnnullert = testRapid.inspektør.siste("utbetaling_annullert")
-
-        assertEquals(fagsystemId, utbetalingAnnullert["fagsystemId"].asText())
-        assertEquals("siri.saksbehandler@nav.no", utbetalingAnnullert["saksbehandlerEpost"].asText())
-        assertNotNull(utbetalingAnnullert["annullertAvSaksbehandler"].asText())
-
-        assertEquals(19.januar.toString(), utbetalingAnnullert["fom"].asText())
-        assertEquals(26.januar.toString(), utbetalingAnnullert["tom"].asText())
-        assertEquals(19.januar.toString(), utbetalingAnnullert["utbetalingslinjer"][0]["fom"].asText())
-        assertEquals(26.januar.toString(), utbetalingAnnullert["utbetalingslinjer"][0]["tom"].asText())
-        assertEquals(0, utbetalingAnnullert["utbetalingslinjer"][0]["beløp"].asInt())
-        assertEquals(0, utbetalingAnnullert["utbetalingslinjer"][0]["grad"].asInt())
-    }
-
-    @Test
-    fun `Utbetalingsevent har automatiskBehandling = true for automatiske behandlinger`() {
-        sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
-        sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
-        sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
-        sendYtelser(0)
-        sendVilkårsgrunnlag(0)
-        sendYtelser(0)
-        sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
-        sendUtbetalingsgodkjenning(
-            vedtaksperiodeIndeks = 0,
-            godkjent = true,
-            saksbehandlerIdent = "SYSTEM",
-            automatiskBehandling = true
-        )
-        sendUtbetaling(utbetalingOK = true)
-
-        val utbetaltEvent = testRapid.inspektør.siste("utbetalt")
-        assertTrue(utbetaltEvent["automatiskBehandling"].booleanValue())
-        assertEquals("SYSTEM", utbetaltEvent["godkjentAv"].textValue())
-    }
-
-    @Test
-    fun `Utbetalingsevent har automatiskBehandling = false for manuelle behandlinger`() {
-        sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
-        sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
-        sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
-        sendYtelser(0)
-        sendVilkårsgrunnlag(0)
-        sendYtelser(0)
-        sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
-        sendUtbetalingsgodkjenning(
-            vedtaksperiodeIndeks = 0,
-            godkjent = true,
-            saksbehandlerIdent = "O123456",
-            automatiskBehandling = false
-        )
-        sendUtbetaling(utbetalingOK = true)
-
-        val utbetaltEvent = testRapid.inspektør.siste("utbetalt")
-        assertFalse(utbetaltEvent["automatiskBehandling"].booleanValue())
-        assertEquals("O123456", utbetaltEvent["godkjentAv"].textValue())
     }
 
     @Test
@@ -481,26 +402,6 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
             meldingId = meldingId.toString()
         )
         verify(exactly = 2) { hendelseRepository.markerSomBehandlet(meldingId) }
-    }
-
-    @Test
-    fun `spleis sender korrekt grad (avrundet) ut`() {
-        sendNySøknad(
-            SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 30)
-        )
-        sendSøknad(
-            0, listOf(
-                SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 30, faktiskGrad = 80)
-            )
-        )
-        sendInntektsmelding(0, listOf(Periode(fom = 1.januar, tom = 16.januar)), førsteFraværsdag = 1.januar)
-        sendYtelserUtenSykepengehistorikk(0)
-        sendVilkårsgrunnlag(0)
-        sendYtelserUtenSykepengehistorikk(0)
-        sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
-        sendUtbetalingsgodkjenning(0, true)
-        sendUtbetaling()
-        assertEquals(20.0, testRapid.inspektør.siste("utbetalt").path("utbetalt").first().path("utbetalingslinjer").first().path("grad").asDouble())
     }
 
     @Test

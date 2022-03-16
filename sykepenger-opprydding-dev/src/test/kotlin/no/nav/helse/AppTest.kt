@@ -11,7 +11,7 @@ import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.flywaydb.core.Flyway
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -144,6 +144,7 @@ internal class AppTest {
             minimumIdle = 1
             idleTimeout = 10001
             connectionTimeout = 1000
+            initializationFailTimeout = 5000
             maxLifetime = 30001
         }
 

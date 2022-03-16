@@ -1,14 +1,13 @@
 package no.nav.helse.spleis.e2e
 
+import java.util.UUID
 import no.nav.helse.Fødselsnummer
-
 import no.nav.helse.hendelser.Hendelseskontekst
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonObserver.VedtaksperiodeEndretEvent
 import no.nav.helse.person.TilstandType
 import org.junit.jupiter.api.fail
-import java.util.*
 
 internal class TestObservatør : PersonObserver {
     internal val tilstandsendringer = mutableMapOf<UUID, MutableList<TilstandType>>()
@@ -28,7 +27,6 @@ internal class TestObservatør : PersonObserver {
     private val vedtaksperioder = mutableMapOf<String, MutableSet<UUID>>()
     private val vedtaksperiodeendringer = mutableMapOf<UUID, MutableList<VedtaksperiodeEndretEvent>>()
 
-    val utbetaltEventer = mutableListOf<PersonObserver.UtbetaltEvent>()
     private val avbruttEventer = mutableMapOf<UUID, PersonObserver.VedtaksperiodeAvbruttEvent>()
     val annulleringer = mutableListOf<PersonObserver.UtbetalingAnnullertEvent>()
     lateinit var avstemming: Map<String, Any>
@@ -92,10 +90,6 @@ internal class TestObservatør : PersonObserver {
 
     override fun inntektsmeldingReplay(fødselsnummer: Fødselsnummer, vedtaksperiodeId: UUID) {
         inntektsmeldingReplayEventer.add(vedtaksperiodeId)
-    }
-
-    override fun vedtaksperiodeUtbetalt(hendelseskontekst: Hendelseskontekst, event: PersonObserver.UtbetaltEvent) {
-        utbetaltEventer.add(event)
     }
 
     override fun annullering(hendelseskontekst: Hendelseskontekst, event: PersonObserver.UtbetalingAnnullertEvent) {

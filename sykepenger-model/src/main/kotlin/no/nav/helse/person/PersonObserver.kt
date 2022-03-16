@@ -1,13 +1,13 @@
 package no.nav.helse.person
 
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.Fødselsnummer
 import no.nav.helse.hendelser.Hendelseskontekst
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.serde.api.BegrunnelseDTO
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
 
 interface PersonObserver {
     data class VedtaksperiodeIkkeFunnetEvent(
@@ -34,68 +34,6 @@ interface PersonObserver {
     data class OpprettOppgaveEvent(
         val hendelser: Set<UUID>,
     )
-
-    data class UtbetaltEvent(
-        val hendelser: Set<UUID>,
-        val utbetalingId: UUID,
-        val oppdrag: List<Utbetalt>,
-        val ikkeUtbetalteDager: List<IkkeUtbetaltDag>,
-        val fom: LocalDate,
-        val tom: LocalDate,
-        val utbetalingFom: LocalDate,
-        val utbetalingTom: LocalDate,
-        val forbrukteSykedager: Int,
-        val gjenståendeSykedager: Int,
-        val godkjentAv: String,
-        val automatiskBehandling: Boolean,
-        val opprettet: LocalDateTime,
-        val sykepengegrunnlag: Double,
-        val månedsinntekt: Double,
-        val maksdato: LocalDate
-    ) {
-        data class Utbetalt(
-            val mottaker: String,
-            val fagområde: String,
-            val fagsystemId: String,
-            val totalbeløp: Int,
-            val utbetalingslinjer: List<Utbetalingslinje>
-        ) {
-            data class Utbetalingslinje(
-                val fom: LocalDate,
-                val tom: LocalDate,
-                val sats: Int,
-                val beløp: Int,
-                val grad: Int,
-                val sykedager: Int
-            )
-        }
-
-        data class IkkeUtbetaltDag(
-            val dato: LocalDate,
-            val type: Type,
-            val begrunnelser: List<Begrunnelse>? = null
-        ) {
-            enum class Type {
-                Annullering,
-                Fridag,
-                Arbeidsdag,
-                AvvistDag
-            }
-            enum class Begrunnelse {
-                SykepengedagerOppbrukt,
-                SykepengedagerOppbruktOver67,
-                MinimumInntekt,
-                MinimumInntektOver67,
-                EgenmeldingUtenforArbeidsgiverperiode,
-                MinimumSykdomsgrad,
-                EtterDødsdato,
-                ManglerMedlemskap,
-                ManglerOpptjening,
-                Over70,
-                // TODO: Legge til NyVilkårsprøvingNødvendig
-            }
-        }
-    }
 
     data class RevurderingAvvistEvent(
         val fødselsnummer: String,
@@ -221,8 +159,6 @@ interface PersonObserver {
     fun vedtaksperiodeAvbrutt(hendelseskontekst: Hendelseskontekst, event: VedtaksperiodeAvbruttEvent) {}
     fun opprettOppgaveForSpeilsaksbehandlere(hendelseskontekst: Hendelseskontekst, event: OpprettOppgaveForSpeilsaksbehandlereEvent) {}
     fun opprettOppgave(hendelseskontekst: Hendelseskontekst, event: OpprettOppgaveEvent) {}
-    @Deprecated("Fjernes til fordel for utbetaling_utbetalt")
-    fun vedtaksperiodeUtbetalt(hendelseskontekst: Hendelseskontekst, event: UtbetaltEvent) {}
     fun personEndret(hendelseskontekst: Hendelseskontekst) {}
     fun vedtaksperiodeIkkeFunnet(hendelseskontekst: Hendelseskontekst, vedtaksperiodeEvent: VedtaksperiodeIkkeFunnetEvent) {}
     fun manglerInntektsmelding(hendelseskontekst: Hendelseskontekst, orgnr: String, event: ManglendeInntektsmeldingEvent) {}

@@ -7,6 +7,9 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.prometheus.client.Summary
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.Fødselsnummer
 import no.nav.helse.hendelser.Hendelseskontekst
 import no.nav.helse.hendelser.Periode
@@ -25,9 +28,6 @@ import no.nav.helse.spleis.db.HendelseRepository
 import no.nav.helse.spleis.db.LagrePersonDao
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
 
 internal class PersonMediator(
     private val person: Person,
@@ -293,55 +293,6 @@ internal class PersonMediator(
         queueMessage(hendelseskontekst,
            "revurdering_avvist",
             JsonMessage.newMessage(event.toJsonMap())
-        )
-    }
-
-    override fun vedtaksperiodeUtbetalt(hendelseskontekst: Hendelseskontekst, event: PersonObserver.UtbetaltEvent) {
-        queueMessage(
-            hendelseskontekst,
-            "utbetalt", JsonMessage.newMessage(
-                mapOf(
-                    "utbetalingId" to event.utbetalingId,
-                    "hendelser" to event.hendelser,
-                    "utbetalt" to event.oppdrag.map { utbetalt ->
-                        mapOf(
-                            "mottaker" to utbetalt.mottaker,
-                            "fagområde" to utbetalt.fagområde,
-                            "fagsystemId" to utbetalt.fagsystemId,
-                            "totalbeløp" to utbetalt.totalbeløp,
-                            "utbetalingslinjer" to utbetalt.utbetalingslinjer.map { linje ->
-                                mapOf(
-                                    "fom" to linje.fom,
-                                    "tom" to linje.tom,
-                                    "sats" to linje.sats,
-                                    "dagsats" to linje.sats,
-                                    "beløp" to linje.beløp,
-                                    "grad" to linje.grad,
-                                    "sykedager" to linje.sykedager
-                                )
-                            }
-                        )
-                    },
-                    "ikkeUtbetalteDager" to event.ikkeUtbetalteDager.map {
-                        mapOf(
-                            "dato" to it.dato,
-                            "type" to it.type.name
-                        )
-                    },
-                    "fom" to event.fom,
-                    "tom" to event.tom,
-                    "utbetalingFom" to event.utbetalingFom,
-                    "utbetalingTom" to event.utbetalingTom,
-                    "forbrukteSykedager" to event.forbrukteSykedager,
-                    "gjenståendeSykedager" to event.gjenståendeSykedager,
-                    "godkjentAv" to event.godkjentAv,
-                    "automatiskBehandling" to event.automatiskBehandling,
-                    "opprettet" to event.opprettet,
-                    "sykepengegrunnlag" to event.sykepengegrunnlag,
-                    "månedsinntekt" to event.månedsinntekt,
-                    "maksdato" to event.maksdato
-                )
-            )
         )
     }
 

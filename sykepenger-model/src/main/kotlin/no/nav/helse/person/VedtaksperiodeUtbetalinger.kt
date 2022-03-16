@@ -1,10 +1,11 @@
 package no.nav.helse.person
 
+import java.time.LocalDate
+import java.util.UUID
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
-import no.nav.helse.person.builders.UtbetaltEventBuilder
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.filter.Utbetalingsfilter
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
@@ -12,8 +13,6 @@ import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.harId
 import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import java.time.LocalDate
-import java.util.*
 
 internal class VedtaksperiodeUtbetalinger(private val arbeidsgiver: Arbeidsgiver, utbetalinger: List<Utbetaling>) {
     internal constructor(arbeidsgiver: Arbeidsgiver) : this(arbeidsgiver, mutableListOf())
@@ -95,9 +94,6 @@ internal class VedtaksperiodeUtbetalinger(private val arbeidsgiver: Arbeidsgiver
     }
 
     internal fun build(builder: VedtakFattetBuilder) {
-        siste?.build(builder)
-    }
-    internal fun build(builder: UtbetaltEventBuilder) {
         siste?.build(builder)
     }
 

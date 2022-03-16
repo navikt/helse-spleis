@@ -73,6 +73,7 @@ internal class PersonRepositoryTest {
             minimumIdle = 1
             idleTimeout = 10001
             connectionTimeout = 1000
+            initializationFailTimeout = 5000
             maxLifetime = 30001
         }
 

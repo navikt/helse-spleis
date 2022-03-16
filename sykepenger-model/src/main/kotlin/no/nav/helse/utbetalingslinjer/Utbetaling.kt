@@ -1,5 +1,9 @@
 package no.nav.helse.utbetalingslinjer
 
+import java.time.Duration
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.hendelser.Hendelseskontekst
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
@@ -18,7 +22,6 @@ import no.nav.helse.person.Periodetype
 import no.nav.helse.person.SpesifikkKontekst
 import no.nav.helse.person.UtbetalingVisitor
 import no.nav.helse.person.Vedtaksperiode
-import no.nav.helse.person.builders.UtbetaltEventBuilder
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
@@ -28,10 +31,6 @@ import no.nav.helse.utbetalingslinjer.Fagområde.SykepengerRefusjon
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.time.Duration
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
 
 // Understands related payment activities for an Arbeidsgiver
 internal class Utbetaling private constructor(
@@ -229,19 +228,6 @@ internal class Utbetaling private constructor(
     internal fun build(builder: VedtakFattetBuilder) {
         builder.utbetalingId(id)
         vurdering?.build(builder)
-    }
-
-    // TODO: fjerne når gamle "utbetalt"-event er borte
-    internal fun build(builder: UtbetaltEventBuilder) {
-        builder.utbetalingId(id)
-            .oppdrag(arbeidsgiverOppdrag, personOppdrag)
-            .utbetalingsperiode(periode)
-            .utbetalingOpprettet(tidsstempel)
-            .utbetalingstidslinje(utbetalingstidslinje)
-            .forbrukteSykedager(forbrukteSykedager!!)
-            .gjenståendeSykedager(gjenståendeSykedager!!)
-            .maksdato(maksdato)
-        vurdering!!.build(builder)
     }
 
     internal fun vedtakFattet(hendelse: IAktivitetslogg) {
@@ -920,11 +906,6 @@ internal class Utbetaling private constructor(
 
         internal fun build(builder: VedtakFattetBuilder) {
             builder.utbetalingVurdert(tidspunkt)
-        }
-
-        internal fun build(builder: UtbetaltEventBuilder) {
-            builder.godkjentAv(ident)
-                .automatiskBehandling(automatiskBehandling)
         }
     }
 

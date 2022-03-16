@@ -82,7 +82,6 @@ import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.TilstandType.UTBETALING_FEILET
-import no.nav.helse.person.builders.UtbetaltEventBuilder
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
@@ -818,15 +817,6 @@ internal class Vedtaksperiode private constructor(
     private fun List<Vedtaksperiode>.erKlareTilGodkjenning() = this
         .filter { this@Vedtaksperiode.periode.overlapperMed(it.periode) }
         .all { it.tilstand == AvventerArbeidsgivereRevurdering }
-
-    private fun sendUtbetaltEvent(hendelse: IAktivitetslogg) {
-        val vilkårsgrunnlag = requireNotNull(person.vilkårsgrunnlagFor(skjæringstidspunkt)) {
-            "Forventet vilkårsgrunnlag ved opprettelse av utbetalt-event"
-        }
-        val builder = UtbetaltEventBuilder(hendelseIder(), periode, vilkårsgrunnlag)
-        utbetalinger.build(builder)
-        person.vedtaksperiodeUtbetalt(hendelse.hendelseskontekst(), builder.result())
-    }
 
     private fun håndterMuligForlengelse(
         hendelse: IAktivitetslogg,
@@ -2466,7 +2456,6 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.utbetalinger.vedtakFattet(hendelse)
             check(vedtaksperiode.utbetalinger.erAvsluttet()) { "forventer at utbetaling skal være avsluttet" }
             vedtaksperiode.sendVedtakFattet(hendelse)
-            vedtaksperiode.sendUtbetaltEvent(hendelse) // TODO: Fjerne når konsumentene lytter på vedtak fattet
             vedtaksperiode.person.gjenopptaBehandling(hendelse)
         }
 

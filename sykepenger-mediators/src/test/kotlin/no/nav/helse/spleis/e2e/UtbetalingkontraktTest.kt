@@ -1,9 +1,9 @@
 package no.nav.helse.spleis.e2e
 
 import com.fasterxml.jackson.databind.JsonNode
+import java.time.LocalDate
+import java.time.LocalDateTime
 import no.nav.helse.ForventetFeil
-import no.nav.helse.Toggle
-import no.nav.helse.Toggle.Companion.enable
 import no.nav.helse.januar
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling
 import no.nav.helse.rapids_rivers.isMissingOrNull
@@ -12,10 +12,11 @@ import no.nav.inntektsmeldingkontrakt.Periode
 import no.nav.syfo.kafka.felles.FravarDTO
 import no.nav.syfo.kafka.felles.FravarstypeDTO
 import no.nav.syfo.kafka.felles.SoknadsperiodeDTO
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertDoesNotThrow
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
-import java.time.LocalDateTime
 
 internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
 
@@ -32,8 +33,57 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
         sendUtbetaling()
         val utbetalt = testRapid.inspektør.siste("utbetaling_utbetalt")
         assertUtbetalt(utbetalt)
-        val deprecatedUtbetalt = testRapid.inspektør.siste("utbetalt")
-        assertDeprecatedUtbetalt(deprecatedUtbetalt)
+    }
+
+    @Test
+    fun `manuell behandling`() {
+        sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+        sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
+        sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
+        sendYtelser(0)
+        sendVilkårsgrunnlag(0)
+        sendYtelser(0)
+        sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
+        sendUtbetalingsgodkjenning(
+            vedtaksperiodeIndeks = 0,
+            automatiskBehandling = false
+        )
+        sendUtbetaling()
+        val utbetaltEvent = testRapid.inspektør.siste("utbetaling_utbetalt")
+        assertFalse(utbetaltEvent["automatiskBehandling"].booleanValue())
+    }
+
+    @Test
+    fun `automatisk behandling`() {
+        sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+        sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
+        sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
+        sendYtelser(0)
+        sendVilkårsgrunnlag(0)
+        sendYtelser(0)
+        sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
+        sendUtbetalingsgodkjenning(
+            vedtaksperiodeIndeks = 0,
+            automatiskBehandling = true
+        )
+        sendUtbetaling()
+        val utbetaltEvent = testRapid.inspektør.siste("utbetaling_utbetalt")
+        assertTrue(utbetaltEvent["automatiskBehandling"].booleanValue())
+    }
+
+    @Test
+    fun `spleis sender korrekt grad (avrundet) ut`() {
+        sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 30))
+        sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 30, faktiskGrad = 80)))
+        sendInntektsmelding(0, listOf(Periode(fom = 1.januar, tom = 16.januar)), førsteFraværsdag = 1.januar)
+        sendYtelserUtenSykepengehistorikk(0)
+        sendVilkårsgrunnlag(0)
+        sendYtelserUtenSykepengehistorikk(0)
+        sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
+        sendUtbetalingsgodkjenning(0, true)
+        sendUtbetaling()
+        val utbetaling = testRapid.inspektør.siste("utbetaling_utbetalt")
+        assertEquals(20.0, utbetaling.path("arbeidsgiverOppdrag").path("linjer").first().path("grad").asDouble())
     }
 
     @Test
@@ -208,17 +258,6 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
         assertTrue(melding.path("automatiskBehandling").isBoolean)
         assertOppdragdetaljer(melding.path("arbeidsgiverOppdrag"), false)
         assertOppdragdetaljer(melding.path("personOppdrag"), false)
-    }
-
-    private fun assertDeprecatedUtbetalt(melding: JsonNode) {
-        assertTrue(melding.path("utbetalingId").asText().isNotEmpty())
-        assertDato(melding.path("fom").asText())
-        assertDato(melding.path("tom").asText())
-        assertDato(melding.path("utbetalingFom").asText())
-        assertDato(melding.path("utbetalingTom").asText())
-        assertDato(melding.path("maksdato").asText())
-        assertTrue(melding.path("forbrukteSykedager").isInt)
-        assertTrue(melding.path("gjenståendeSykedager").isInt)
     }
 
     private fun assertAnnullert(melding: JsonNode, arbeidsgiverAnnulering: Boolean, personAnnullering: Boolean) {
