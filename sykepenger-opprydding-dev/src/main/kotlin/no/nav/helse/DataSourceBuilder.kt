@@ -7,19 +7,12 @@ import java.time.Duration
 // Understands how to create a data source from environment variables
 internal class DataSourceBuilder(env: Map<String, String>) {
 
-    private val gcpProjectId: String? = env["GCP_TEAM_PROJECT_ID"]
-    private val databaseRegion: String? = env["DATABASE_REGION"]
-    private val databaseInstance: String? = env["DATABASE_INSTANCE"]
-    private val databaseUsername: String? = env["DATABASE_SPLEIS_API_USERNAME"]
-    private val databasePassword: String? = env["DATABASE_SPLEIS_API_PASSWORD"]
-    private val databaseName: String? = env["DATABASE_DATABASE"]
-
-    init {
-        requireNotNull(gcpProjectId) { "gcp project id must be set if jdbd url is not provided" }
-        requireNotNull(databaseRegion) { "database region must be set if jdbd url is not provided" }
-        requireNotNull(databaseInstance) { "database instance must be set if jdbd url is not provided" }
-        requireNotNull(databaseName) { "database name must be set if jdbc url is not provided" }
-    }
+    private val gcpProjectId: String = requireNotNull(env["GCP_TEAM_PROJECT_ID"]) { "GCP_TEAM_PROJECT_ID must be set" }
+    private val databaseRegion: String = requireNotNull(env["DATABASE_REGION"]) { "DATABASE_REGION must be set" }
+    private val databaseInstance: String = requireNotNull(env["DATABASE_INSTANCE"]) { "DATABASE_INSTANCE must be set" }
+    private val databaseUsername: String = requireNotNull(env["DATABASE_SPLEIS_OPPRYDDING_USERNAME"]) { "DATABASE_SPLEIS_OPPRYDDING_USERNAME must be set" }
+    private val databasePassword: String = requireNotNull(env["DATABASE_SPLEIS_OPPRYDDING_PASSWORD"]) { "DATABASE_SPLEIS_OPPRYDDING_PASSWORD must be set" }
+    private val databaseName: String = requireNotNull(env["DATABASE_DATABASE"]) { "DATABASE_DATABASE must be set" }
 
     private val hikariConfig = HikariConfig().apply {
         jdbcUrl = String.format(
@@ -29,8 +22,8 @@ internal class DataSourceBuilder(env: Map<String, String>) {
             "socketFactory=com.google.cloud.sql.postgres.SocketFactory"
         )
 
-        databaseUsername?.let { this.username = it }
-        databasePassword?.let { this.password = it }
+        username = databaseUsername
+        password = databasePassword
 
         maximumPoolSize = 3
         minimumIdle = 1

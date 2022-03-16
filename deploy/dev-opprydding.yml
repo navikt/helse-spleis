@@ -42,3 +42,9 @@ spec:
       value: tbd-spleis-opprydding-dev-v1
     - name: KAFKA_RESET_POLICY
       value: latest
+    - name: DATABASE_REGION
+      value: "europe-north1"
+    - name: DATABASE_INSTANCE
+      value: "helse-spleis"
+    - name: DATABASE_DATABASE
+      value: "spleis"
