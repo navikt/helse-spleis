@@ -1,9 +1,10 @@
-name: Alt utenom API
+name: Alt utenom API og opprydding-dev
 
 on:
   push:
     paths-ignore:
       - 'sykepenger-api/**'
+      - 'sykepenger-opprydding-dev/**'
       - 'jobs/**'
       - 'doc/**'
       - '.idea/**'
