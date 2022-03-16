@@ -174,11 +174,11 @@ spec:
           access: readwrite
         - team: tbd
           application: spleis-opprydding-dev
-          access: read
+          access: readwrite
         - team: teamsykmelding
           application: sparenaproxy
           access: read
         - team: default
           application: sparenaproxy
-          access: read   
-          
+          access: read
+
