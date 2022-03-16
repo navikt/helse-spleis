@@ -5,6 +5,7 @@ on:
     branches:
       - master
     paths:
+      - 'Dockerfile-opprydding-dev'
       - 'sykepenger-opprydding-dev/**'
       - 'build.gradle.kts'
       - '.github/workflows/spleis-opprydding-dev.yml'
