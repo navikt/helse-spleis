@@ -27,6 +27,7 @@ internal class DataSourceBuilder(env: Map<String, String>) {
 
         maximumPoolSize = 3
         minimumIdle = 1
+        initializationFailTimeout = Duration.ofMinutes(1).toMillis()
         connectionTimeout = Duration.ofSeconds(5).toMillis()
         maxLifetime = Duration.ofMinutes(30).toMillis()
         idleTimeout = Duration.ofMinutes(10).toMillis()
