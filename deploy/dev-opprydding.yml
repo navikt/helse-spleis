@@ -35,6 +35,8 @@ spec:
     pool: nav-dev
   secureLogs:
     enabled: true
+  envFrom:
+    - secret: google-sql-helse-spleis-spleis-spleis-opprydding-dev-fe3a79a6
   env:
     - name: KAFKA_RAPID_TOPIC
       value: tbd.rapid.v1
@@ -46,5 +48,3 @@ spec:
       value: "europe-north1"
     - name: DATABASE_INSTANCE
       value: "helse-spleis"
-    - name: DATABASE_DATABASE
-      value: "spleis"

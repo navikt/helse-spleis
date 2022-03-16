@@ -10,9 +10,9 @@ internal class DataSourceBuilder(env: Map<String, String>) {
     private val gcpProjectId: String = requireNotNull(env["GCP_TEAM_PROJECT_ID"]) { "GCP_TEAM_PROJECT_ID must be set" }
     private val databaseRegion: String = requireNotNull(env["DATABASE_REGION"]) { "DATABASE_REGION must be set" }
     private val databaseInstance: String = requireNotNull(env["DATABASE_INSTANCE"]) { "DATABASE_INSTANCE must be set" }
-    private val databaseUsername: String = requireNotNull(env["DATABASE_SPLEIS_OPPRYDDING_USERNAME"]) { "DATABASE_SPLEIS_OPPRYDDING_USERNAME must be set" }
-    private val databasePassword: String = requireNotNull(env["DATABASE_SPLEIS_OPPRYDDING_PASSWORD"]) { "DATABASE_SPLEIS_OPPRYDDING_PASSWORD must be set" }
-    private val databaseName: String = requireNotNull(env["DATABASE_DATABASE"]) { "DATABASE_DATABASE must be set" }
+    private val databaseUsername: String = requireNotNull(env["DATABASE_SPLEIS_OPPRYDDING_DEV_USERNAME"]) { "DATABASE_SPLEIS_OPPRYDDING_USERNAME must be set" }
+    private val databasePassword: String = requireNotNull(env["DATABASE_SPLEIS_OPPRYDDING_DEV_PASSWORD"]) { "DATABASE_SPLEIS_OPPRYDDING_PASSWORD must be set" }
+    private val databaseName: String = requireNotNull(env["DATABASE_SPLEIS_OPPRYDDING_DEV_DATABASE"]) { "DATABASE_DATABASE must be set" }
 
     private val hikariConfig = HikariConfig().apply {
         jdbcUrl = String.format(

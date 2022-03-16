@@ -1,6 +1,6 @@
 val testcontainersVersion = "1.16.3"
 
-val mainClass = "no.nav.helse.spleis.AppKt"
+val mainClass = "no.nav.helse.AppKt"
 
 repositories {
     mavenCentral()
