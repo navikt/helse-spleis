@@ -36,6 +36,7 @@ internal class GcpDataSourceBuilder(env: Map<String, String>): DataSourceBuilder
         getDataSource().use { dataSource ->
             Flyway.configure()
                 .dataSource(dataSource)
+                .lockRetryCount(-1)
                 .load()
                 .migrate()
         }
