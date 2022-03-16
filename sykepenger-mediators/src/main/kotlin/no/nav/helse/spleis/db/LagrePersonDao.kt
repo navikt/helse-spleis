@@ -62,7 +62,7 @@ internal class LagrePersonDao(private val dataSource: DataSource) {
         @Language("PostgreSQL")
         val statement = """
             INSERT INTO person (aktor_id, fnr, skjema_versjon, melding_id, data, vedtak)
-            VALUES (?, ?, ?, ?, CAST(? AS json), ?)
+            VALUES (?, ?, ?, ?, ?, ?)
         """
         session.run(queryOf(statement, aktørId.toLong(), fødselsnummer.toLong(), skjemaVersjon, meldingId, personJson, vedtak).asExecute)
     }
