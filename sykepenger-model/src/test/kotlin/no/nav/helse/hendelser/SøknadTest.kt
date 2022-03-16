@@ -1,21 +1,39 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.*
-import no.nav.helse.hendelser.Søknad.*
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.*
+import java.time.LocalDateTime
+import java.util.UUID
+import no.nav.helse.desember
+import no.nav.helse.februar
+import no.nav.helse.hendelser.Søknad.Inntektskilde
+import no.nav.helse.hendelser.Søknad.Merknad
+import no.nav.helse.hendelser.Søknad.Søknadsperiode
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Egenmelding
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Papirsykmelding
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Permisjon
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Utdanning
 import no.nav.helse.hentErrors
 import no.nav.helse.hentWarnings
+import no.nav.helse.januar
+import no.nav.helse.mai
+import no.nav.helse.november
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.etterlevelse.MaskinellJurist
-import no.nav.helse.sykdomstidslinje.Dag.*
+import no.nav.helse.sykdomstidslinje.Dag.Arbeidsdag
+import no.nav.helse.sykdomstidslinje.Dag.FriskHelgedag
+import no.nav.helse.sykdomstidslinje.Dag.ProblemDag
+import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
+import no.nav.helse.sykdomstidslinje.Dag.Sykedag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import java.time.LocalDateTime
-import java.util.*
 
 internal class SøknadTest {
 
@@ -68,6 +86,14 @@ internal class SøknadTest {
     }
 
     @Test
+    fun `søknad med utdanning før perioden`() {
+        søknad(Sykdom(5.januar, 10.januar, 100.prosent), Utdanning(1.januar, 10.januar))
+        assertTrue(søknad.valider(EN_PERIODE, MaskinellJurist()).hasWarningsOrWorse())
+        assertEquals(5.januar til 10.januar, søknad.periode())
+        assertEquals(6, søknad.sykdomstidslinje().count())
+    }
+
+    @Test
     fun `søknad med permisjon`() {
         søknad(Sykdom(1.januar, 10.januar, 100.prosent), Permisjon(5.januar, 10.januar))
         assertTrue(søknad.valider(EN_PERIODE, MaskinellJurist()).hasWarningsOrWorse())
@@ -75,11 +101,28 @@ internal class SøknadTest {
     }
 
     @Test
-    fun `søknad med papirsykmelding`() {
+    fun `søknad med permisjon før perioden`() {
+        søknad(Sykdom(5.januar, 10.januar, 100.prosent), Permisjon(1.januar, 10.januar))
+        assertTrue(søknad.valider(EN_PERIODE, MaskinellJurist()).hasWarningsOrWorse())
+        assertEquals(5.januar til 10.januar, søknad.periode())
+        assertEquals(6, søknad.sykdomstidslinje().count())
+    }
+
+    @Test
+    fun `søknad med papirsykmelding utenfor søknadsperioden`() {
         søknad(Sykdom(1.januar, 10.januar, 100.prosent), Papirsykmelding(11.januar, 16.januar))
         assertTrue(søknad.valider(EN_PERIODE, MaskinellJurist()).hasErrorsOrWorse())
-        assertEquals(16, søknad.sykdomstidslinje().count())
-        assertEquals(6, søknad.sykdomstidslinje().filterIsInstance<ProblemDag>().size)
+        assertEquals(10, søknad.sykdomstidslinje().count())
+        assertEquals(1.januar til 10.januar, søknad.periode())
+        assertEquals(0, søknad.sykdomstidslinje().filterIsInstance<ProblemDag>().size)
+    }
+
+    @Test
+    fun `søknad med papirsykmelding`() {
+        søknad(Sykdom(1.januar, 10.januar, 100.prosent), Papirsykmelding(1.januar, 10.januar))
+        assertTrue(søknad.valider(EN_PERIODE, MaskinellJurist()).hasErrorsOrWorse())
+        assertEquals(10, søknad.sykdomstidslinje().count())
+        assertEquals(10, søknad.sykdomstidslinje().filterIsInstance<ProblemDag>().size)
     }
 
     @Test
@@ -114,7 +157,7 @@ internal class SøknadTest {
     fun `ferie etter sykdomsvindu - ikke et realistisk scenario`() {
         søknad(Sykdom(1.januar, 10.januar, 100.prosent), Ferie(2.januar, 16.januar))
         assertFalse(søknad.valider(EN_PERIODE, MaskinellJurist()).hasWarningsOrWorse())
-        assertEquals(1.januar til 16.januar, søknad.sykdomstidslinje().periode())
+        assertEquals(1.januar til 10.januar, søknad.sykdomstidslinje().periode())
     }
 
     @Test

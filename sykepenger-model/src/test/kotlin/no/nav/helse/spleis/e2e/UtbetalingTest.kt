@@ -56,7 +56,7 @@ internal class UtbetalingTest : AbstractEndToEndTest() {
     @Test
     fun `første periode er kun arbeidsgiverperiode og ferie`() {
         håndterSykmelding(Sykmeldingsperiode(4.januar, 22.januar, 100.prosent))
-        håndterSøknad(Sykdom(4.januar, 21.januar, 100.prosent), Søknad.Søknadsperiode.Ferie(20.januar, 22.januar))
+        håndterSøknad(Sykdom(4.januar, 22.januar, 100.prosent), Søknad.Søknadsperiode.Ferie(20.januar, 22.januar))
         håndterInntektsmelding(listOf(4.januar til 19.januar))
         håndterSykmelding(Sykmeldingsperiode(23.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(23.januar, 31.januar, 100.prosent))

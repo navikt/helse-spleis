@@ -1,8 +1,11 @@
 package no.nav.helse.hendelser
 
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.*
 import no.nav.helse.person.Arbeidsgiver
-import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.Dokumentsporing
+import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.somFødselsnummer
 import no.nav.helse.sykdomstidslinje.Dag
@@ -12,9 +15,6 @@ import no.nav.helse.sykdomstidslinje.merge
 import no.nav.helse.tournament.Dagturnering
 import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.økonomi.Prosentdel
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
 
 class Søknad(
     meldingsreferanseId: UUID,
@@ -44,6 +44,7 @@ class Søknad(
             .map { it.sykdomstidslinje(sykdomsperiode, avskjæringsdato(), kilde) }
             .filter { it.periode()?.start?.isAfter(sykdomsperiode.start.minusDays(tidslinjegrense)) ?: false }
             .merge(Dagturnering.SØKNAD::beste)
+            .subset(sykdomsperiode)
     }
 
     override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) {
