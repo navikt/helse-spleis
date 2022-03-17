@@ -1,9 +1,13 @@
 package no.nav.helse.serde.api.v2
 
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.Fødselsnummer
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.Periodetype
+import no.nav.helse.person.TilstandType
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.Vedtaksperiode.AvsluttetUtenUtbetaling
 import no.nav.helse.serde.api.v2.Behandlingstype.UBEREGNET
@@ -18,9 +22,6 @@ import no.nav.helse.serde.api.v2.buildere.BeregningId
 import no.nav.helse.serde.api.v2.buildere.IVilkårsgrunnlagHistorikk
 import no.nav.helse.serde.api.v2.buildere.InntektsmeldingId
 import no.nav.helse.serde.api.v2.buildere.PeriodeVarslerBuilder
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
 
 internal class Generasjoner(perioder: Tidslinjeperioder) {
     private val generasjoner: List<Generasjon> = perioder.toGenerasjoner()
@@ -42,7 +43,9 @@ internal class Generasjoner(perioder: Tidslinjeperioder) {
 
         private fun finnPeriode(periode: Tidslinjeperiode) = perioder.find { it.erSammeVedtaksperiode(periode) }
         private fun inneholderPeriode(periode: Tidslinjeperiode) = finnPeriode(periode) != null
-        private fun erFagsystemIdAnnullert(periode: BeregnetPeriode): Boolean = tidslinjeperioder.any { it.harSammeFagsystemId(periode) && it.erAnnullering() }
+        private fun erFagsystemIdAnnullert(periode: BeregnetPeriode): Boolean =
+            tidslinjeperioder.any { it.harSammeFagsystemId(periode) && it.erAnnullering() }
+
         private fun harMinstÉnRevurdertPeriodeTidligereEnn(tidslinjeperiode: Tidslinjeperiode): Boolean =
             tidslinjeperioder.any { it.erRevurdering() && it.fom < tidslinjeperiode.fom }
 
@@ -76,7 +79,9 @@ internal class Generasjoner(perioder: Tidslinjeperioder) {
                 forEachIndexed { index, generasjon ->
                     if (index == size - 1) return@forEachIndexed // siste generasjon skal ikke gjøres noe med
                     val nesteGenerasjon = this[index + 1]
-                    val (perioderSomSkalSammenstilles, ikkeSammenstiltePerioder) = generasjon.finnKandidaterForSammenstilling(nesteGenerasjon)
+                    val (perioderSomSkalSammenstilles, ikkeSammenstiltePerioder) = generasjon.finnKandidaterForSammenstilling(
+                        nesteGenerasjon
+                    )
                     nesteGenerasjon.utvidMed(perioderSomSkalSammenstilles)
                     generasjon.fjernPerioderSomVenter(perioderSomSkalSammenstilles)
                     generasjon.erstattet = ikkeSammenstiltePerioder.isEmpty()
@@ -112,7 +117,12 @@ internal class Tidslinjeperioder(
     init {
         perioder = vedtaksperioder.toMutableList().flatMap { periode ->
             when {
-                periode.utbetalinger.isEmpty() -> listOf(uberegnetPeriode(periode, erForkastet(periode.vedtaksperiodeId)))
+                periode.utbetalinger.isEmpty() -> listOf(
+                    uberegnetPeriode(
+                        periode,
+                        erForkastet(periode.vedtaksperiodeId)
+                    )
+                )
                 else -> periode.utbetalinger.map { utbetaling ->
                     val tidslinjeberegning = tidslinjeberegninger.finn(utbetaling.beregningId)
                     val refusjon = refusjoner[periode.inntektsmeldingId()]
@@ -153,10 +163,12 @@ internal class Tidslinjeperioder(
         erForkastet: Boolean,
         refusjon: Refusjon?
     ): BeregnetPeriode {
-        val sammenslåttTidslinje = tidslinjeberegning.sammenslåttTidslinje(utbetaling.utbetalingstidslinje, periode.fom, periode.tom)
+        val sammenslåttTidslinje =
+            tidslinjeberegning.sammenslåttTidslinje(utbetaling.utbetalingstidslinje, periode.fom, periode.tom)
         val varsler = PeriodeVarslerBuilder(
             periode.aktivitetsloggForPeriode
         ).build()
+        val utbetalingDTO = utbetaling.toDTO()
         return BeregnetPeriode(
             vedtaksperiodeId = periode.vedtaksperiodeId,
             beregningId = utbetaling.beregningId,
@@ -174,14 +186,16 @@ internal class Tidslinjeperioder(
             sammenslåttTidslinje = sammenslåttTidslinje,
             gjenståendeSykedager = utbetaling.gjenståendeSykedager,
             forbrukteSykedager = utbetaling.forbrukteSykedager,
-            utbetaling = utbetaling.toDTO(),
+            utbetaling = utbetalingDTO,
             vilkårsgrunnlagshistorikkId = tidslinjeberegning.vilkårsgrunnlagshistorikkId,
             aktivitetslogg = varsler,
-            refusjon = refusjon
+            refusjon = refusjon,
+            tilstand = periode.tilstand.type.tilPeriodetilstand(utbetalingDTO, sammenslåttTidslinje)
         )
     }
 
-    private fun List<SammenslåttDag>.sisteNavDag() = lastOrNull { it.utbetalingstidslinjedagtype == UtbetalingstidslinjedagType.NavDag }
+    private fun List<SammenslåttDag>.sisteNavDag() =
+        lastOrNull { it.utbetalingstidslinjedagtype == UtbetalingstidslinjedagType.NavDag }
 
     private fun periodevilkår(
         periode: IVedtaksperiode,
@@ -276,3 +290,70 @@ internal class IUtbetaling(
         )
     }
 }
+
+private fun TilstandType.tilPeriodetilstand(utbetaling: Utbetaling, tidslinje: List<SammenslåttDag>): Periodetilstand =
+    when (this) {
+        TilstandType.START,
+        TilstandType.MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
+        TilstandType.MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
+        TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
+        TilstandType.MOTTATT_SYKMELDING_UFERDIG_GAP,
+        TilstandType.AVVENTER_SØKNAD_FERDIG_GAP,
+        TilstandType.AVVENTER_SØKNAD_UFERDIG_GAP,
+        TilstandType.AVVENTER_VILKÅRSPRØVING,
+        TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+        TilstandType.AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE,
+        TilstandType.AVVENTER_INNTEKTSMELDING_UFERDIG_GAP,
+        TilstandType.AVVENTER_SØKNAD_UFERDIG_FORLENGELSE,
+        TilstandType.AVVENTER_SØKNAD_FERDIG_FORLENGELSE,
+        TilstandType.AVVENTER_SIMULERING,
+        TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING,
+        TilstandType.AVVENTER_SIMULERING_REVURDERING,
+        TilstandType.AVVENTER_ARBEIDSGIVERE_REVURDERING,
+        TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING,
+        TilstandType.AVVENTER_HISTORIKK_REVURDERING,
+        TilstandType.AVVENTER_REVURDERING,
+        TilstandType.AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
+        TilstandType.AVVENTER_HISTORIKK -> Periodetilstand.Venter
+        TilstandType.AVVENTER_UFERDIG,
+        TilstandType.AVVENTER_ARBEIDSGIVERE -> Periodetilstand.VenterPåKiling
+        TilstandType.TIL_INFOTRYGD -> Periodetilstand.TilInfotrygd
+        TilstandType.UTBETALING_FEILET -> Periodetilstand.Feilet
+        TilstandType.REVURDERING_FEILET -> Periodetilstand.RevurderingFeilet
+        TilstandType.TIL_UTBETALING -> Periodetilstand.TilUtbetaling
+        TilstandType.AVVENTER_GODKJENNING_REVURDERING,
+        TilstandType.AVVENTER_GODKJENNING -> Periodetilstand.Oppgaver
+        TilstandType.AVSLUTTET,
+        TilstandType.AVSLUTTET_UTEN_UTBETALING -> when (utbetaling.type) {
+            "ANNULLERING" -> when (utbetaling.status) {
+                "Annullert" -> Periodetilstand.Annullert
+                "UtbetalingFeilet" -> Periodetilstand.AnnulleringFeilet
+                else -> Periodetilstand.TilAnnullering
+            }
+            "REVURDERING" -> Periodetilstand.Utbetalt
+            else -> when (utbetaling.status) {
+                "Utbetalt",
+                "GodkjentUtenUtbetaling" -> {
+                    when {
+                        tidslinje.inneholderKunFeriedager() -> Periodetilstand.KunFerie
+                        tidslinje.inneholderSykepengedager() -> Periodetilstand.Utbetalt
+                        else -> Periodetilstand.IngenUtbetaling
+                    }
+                }
+                "UtbetalingFeilet" -> Periodetilstand.Feilet
+                else -> Periodetilstand.TilUtbetaling
+            }
+        }
+    }
+
+private fun List<SammenslåttDag>.inneholderKunFeriedager(): Boolean =
+    all {
+        it.utbetalingstidslinjedagtype in setOf(
+            UtbetalingstidslinjedagType.NavHelgDag,
+            UtbetalingstidslinjedagType.Helgedag,
+            UtbetalingstidslinjedagType.Feriedag
+        )
+    }
+
+private fun List<SammenslåttDag>.inneholderSykepengedager(): Boolean =
+    any { it.utbetalingstidslinjedagtype == UtbetalingstidslinjedagType.NavDag }

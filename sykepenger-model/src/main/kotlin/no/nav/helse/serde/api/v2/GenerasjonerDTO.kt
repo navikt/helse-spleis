@@ -1,13 +1,13 @@
 package no.nav.helse.serde.api.v2
 
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.Periodetype
 import no.nav.helse.serde.api.AktivitetDTO
 import no.nav.helse.serde.api.v2.Behandlingstype.VENTER
 import no.nav.helse.serde.api.v2.buildere.BeregningId
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
 
 data class Generasjon(
     val id: UUID, // Runtime
@@ -23,6 +23,22 @@ enum class Behandlingstype {
 
     // Perioder som venter på beregning
     VENTER
+}
+
+enum class Periodetilstand {
+    TilUtbetaling,
+    TilAnnullering,
+    Utbetalt,
+    Annullert,
+    AnnulleringFeilet,
+    Oppgaver,
+    Venter,
+    VenterPåKiling,
+    IngenUtbetaling,
+    KunFerie,
+    Feilet,
+    RevurderingFeilet,
+    TilInfotrygd;
 }
 
 interface Tidslinjeperiode {
@@ -86,7 +102,8 @@ data class BeregnetPeriode(
     val vilkårsgrunnlagshistorikkId: UUID,
     val periodevilkår: Vilkår,
     val aktivitetslogg: List<AktivitetDTO>,
-    val refusjon: Refusjon?
+    val refusjon: Refusjon?,
+    val tilstand: Periodetilstand
 ) : Tidslinjeperiode {
     override val tidslinjeperiodeId: UUID = UUID.randomUUID()
 
