@@ -39,7 +39,7 @@ import java.util.concurrent.atomic.AtomicInteger
 import javax.sql.DataSource
 
 internal class ApiTestServer(private val port: Int = randomPort()) {
-    private val postgres = PostgreSQLContainer<Nothing>("postgres:12")
+    private val postgres = PostgreSQLContainer<Nothing>("postgres:14")
     private lateinit var dataSource: DataSource
     private lateinit var flyway: Flyway
 

@@ -27,7 +27,7 @@ internal class AppTest {
 
     @BeforeAll
     fun beforeAll() {
-        psqlContainer = PostgreSQLContainer<Nothing>("postgres:12")
+        psqlContainer = PostgreSQLContainer<Nothing>("postgres:14")
         psqlContainer.start()
     }
 

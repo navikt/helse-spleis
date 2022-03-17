@@ -9,7 +9,7 @@ import org.testcontainers.containers.PostgreSQLContainer
 
 object PostgresContainer {
     val instance by lazy {
-        PostgreSQLContainer<Nothing>("postgres:12.1").apply {
+        PostgreSQLContainer<Nothing>("postgres:14").apply {
             start()
         }
     }
