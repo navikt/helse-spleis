@@ -13,6 +13,7 @@ internal fun SchemaBuilder.tidslinjeperiodeTypes() {
     enum<GraphQLUtbetalingsdagType>()
     enum<GraphQLSykdomsdagkildetype>()
     enum<GraphQLBegrunnelse>()
+    enum<GraphQLPeriodetilstand>()
 
     type<GraphQLSykdomsdagkilde>()
     type<GraphQLUtbetalingsinfo>()
@@ -112,6 +113,22 @@ enum class GraphQLBegrunnelse {
     ManglerMedlemskap,
     ManglerOpptjening,
     Over70
+}
+
+enum class GraphQLPeriodetilstand {
+    TilUtbetaling,
+    TilAnnullering,
+    Utbetalt,
+    Annullert,
+    AnnulleringFeilet,
+    Oppgaver,
+    Venter,
+    VenterPaKiling,
+    IngenUtbetaling,
+    KunFerie,
+    Feilet,
+    RevurderingFeilet,
+    TilInfotrygd;
 }
 
 data class GraphQLSykdomsdagkilde(
@@ -270,7 +287,8 @@ data class GraphQLBeregnetPeriode(
     val vilkarsgrunnlaghistorikkId: UUID,
     val periodevilkar: GraphQLPeriodevilkar,
     val aktivitetslogg: List<GraphQLAktivitet>,
-    val refusjon: GraphQLRefusjon?
+    val refusjon: GraphQLRefusjon?,
+    val tilstand: GraphQLPeriodetilstand
 ) : GraphQLTidslinjeperiode {
     override val id: UUID = UUID.randomUUID()
 }

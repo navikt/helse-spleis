@@ -248,6 +248,21 @@ internal fun mapTidslinjeperiode(periode: Tidslinjeperiode) =
                     sisteRefusjonsdag = refusjon.sisteRefusjonsdag,
                     belop = refusjon.beløp
                 )
+            },
+            tilstand = when (periode.tilstand) {
+                Periodetilstand.TilUtbetaling -> GraphQLPeriodetilstand.TilUtbetaling
+                Periodetilstand.TilAnnullering -> GraphQLPeriodetilstand.TilAnnullering
+                Periodetilstand.Utbetalt -> GraphQLPeriodetilstand.Utbetalt
+                Periodetilstand.Annullert -> GraphQLPeriodetilstand.Annullert
+                Periodetilstand.AnnulleringFeilet -> GraphQLPeriodetilstand.AnnulleringFeilet
+                Periodetilstand.Oppgaver -> GraphQLPeriodetilstand.Oppgaver
+                Periodetilstand.Venter -> GraphQLPeriodetilstand.Venter
+                Periodetilstand.VenterPåKiling -> GraphQLPeriodetilstand.VenterPaKiling
+                Periodetilstand.IngenUtbetaling -> GraphQLPeriodetilstand.IngenUtbetaling
+                Periodetilstand.KunFerie -> GraphQLPeriodetilstand.KunFerie
+                Periodetilstand.Feilet -> GraphQLPeriodetilstand.Feilet
+                Periodetilstand.RevurderingFeilet -> GraphQLPeriodetilstand.RevurderingFeilet
+                Periodetilstand.TilInfotrygd -> GraphQLPeriodetilstand.TilInfotrygd
             }
         )
         else -> GraphQLUberegnetPeriode(
