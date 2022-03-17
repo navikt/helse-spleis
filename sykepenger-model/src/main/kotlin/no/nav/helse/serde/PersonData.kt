@@ -410,7 +410,7 @@ internal data class PersonData(
         private val id: UUID,
         private val inntektshistorikk: List<InntektshistorikkInnslagData> = listOf(),
         private val sykdomshistorikk: List<SykdomshistorikkData>,
-        private val sykmeldingsperioder: List<SykmeldingsperiodeData> = listOf(),
+        private val sykmeldingsperioder: List<SykmeldingsperiodeData>,
         private val vedtaksperioder: List<VedtaksperiodeData>,
         private val forkastede: List<ForkastetVedtaksperiodeData>,
         private val utbetalinger: List<UtbetalingData>,
