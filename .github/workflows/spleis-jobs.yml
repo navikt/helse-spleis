@@ -65,7 +65,7 @@ jobs:
                 APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
                 CLUSTER: dev-gcp
 #                RESOURCE: deploy/dev-gc-job.yml,deploy/dev-avstemming-aiven.yml,deploy/dev-avstemming-job.yml
-                RESOURCE: deploy/dev-avstemming-job.yml
+                RESOURCE: deploy/dev-gc-job.yml,deploy/dev-avstemming-job.yml
                 IMAGE: ${{ needs.set_version.outputs.image }}
 
   deployProd:
