@@ -1,5 +1,4 @@
 val mainClass = "no.nav.helse.spleis.jobs.AppKt"
-val vaultJdbcVersion = "1.3.9"
 val cloudSqlVersion = "1.4.4"
 
 tasks.withType<Test> {
@@ -11,9 +10,7 @@ tasks.withType<Test> {
 
 dependencies {
     implementation("com.github.navikt:rapids-and-rivers-cli:1.473885b")
-    implementation("org.postgresql:postgresql:42.3.2")
     implementation("com.google.cloud.sql:postgres-socket-factory:$cloudSqlVersion")
-    implementation("no.nav:vault-jdbc:$vaultJdbcVersion")
 }
 
 tasks.named<Jar>("jar") {

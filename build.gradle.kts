@@ -7,7 +7,6 @@ val hikariVersion = "5.0.0"
 val jacksonVersion = "2.13.0"
 val junitJupiterVersion = "5.8.1"
 val kotliqueryVersion = "1.6.0"
-val vaultJdbcVersion = "1.3.9"
 val kGraphQLVersion = "0.17.14"
 
 allprojects {
@@ -22,6 +21,7 @@ allprojects {
     }
 
     dependencies {
+        implementation("org.postgresql:postgresql:42.3.3")
         implementation("org.jetbrains.kotlin:kotlin-reflect:1.5.31")
         implementation("ch.qos.logback:logback-classic:1.2.6")
         implementation("net.logstash.logback:logstash-logback-encoder:6.6") {
@@ -34,7 +34,6 @@ allprojects {
         implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
 
         implementation("com.zaxxer:HikariCP:$hikariVersion")
-        implementation("no.nav:vault-jdbc:$vaultJdbcVersion")
         implementation("com.github.seratch:kotliquery:$kotliqueryVersion")
         implementation("org.flywaydb:flyway-core:$flywayVersion")
 

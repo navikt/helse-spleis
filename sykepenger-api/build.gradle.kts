@@ -10,7 +10,6 @@ dependencies {
 
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
 
-    implementation("org.postgresql:postgresql:42.3.2")
     implementation("com.google.cloud.sql:postgres-socket-factory:$cloudSqlVersion")
     implementation("io.ktor:ktor-metrics-micrometer:$ktorVersion")
     implementation("io.micrometer:micrometer-registry-prometheus:$micrometerRegistryPrometheusVersion")
