@@ -41,9 +41,22 @@ jobs:
           docker login --username "$GITHUB_REPOSITORY" -p ${{ secrets.GITHUB_TOKEN }} https://docker.pkg.github.com
           docker push ${{ needs.set_version.outputs.image }}
 
+  snyk:
+    name: check vulnerabilities
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Gradle vulnerability check
+        uses: snyk/actions/gradle@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --project-name=spleis-jobs --org=tbd-ty7 --fail-on=all --configuration-matching='^runtimeClasspath'
+          command: monitor
+
   deployDev:
       name: deploy to dev
-      needs: [set_version, build]
+      needs: [set_version, build, snyk]
       runs-on: ubuntu-latest
       steps:
           - uses: actions/checkout@v1
@@ -57,7 +70,7 @@ jobs:
 
   deployProd:
       name: deploy to prod
-      needs: [set_version, build, snyk]
+      needs: [set_version, build, deployDev, snyk]
       runs-on: ubuntu-latest
       steps:
           - uses: actions/checkout@v1
