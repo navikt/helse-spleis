@@ -9,7 +9,7 @@ internal class DataSourceBuilderTest {
     @Test
     fun `kaster ikke exception når tilkobling konfigureres riktig`() {
         assertDoesNotThrow {
-            GcpDataSourceBuilder(mapOf(
+            DataSourceBuilder(mapOf(
                 "DATABASE_HOST" to "foobar",
                 "DATABASE_PORT" to "foobar",
                 "DATABASE_DATABASE" to "foobar",
@@ -22,11 +22,11 @@ internal class DataSourceBuilderTest {
     @Test
     fun `kaster exception ved mangende konfig`() {
         assertThrows<IllegalArgumentException> {
-            GcpDataSourceBuilder(emptyMap())
+            DataSourceBuilder(emptyMap())
         }
 
         assertThrows<IllegalArgumentException> {
-            GcpDataSourceBuilder(
+            DataSourceBuilder(
                 mapOf(
                     "DATABASE_HOST" to "foobar"
                 )
@@ -34,7 +34,7 @@ internal class DataSourceBuilderTest {
         }
 
         assertThrows<IllegalArgumentException> {
-            GcpDataSourceBuilder(
+            DataSourceBuilder(
                 mapOf(
                     "DATABASE_HOST" to "foobar",
                     "DATABASE_PORT" to "foobar"
@@ -43,7 +43,7 @@ internal class DataSourceBuilderTest {
         }
 
         assertThrows<IllegalArgumentException> {
-            GcpDataSourceBuilder(
+            DataSourceBuilder(
                 mapOf(
                     "DATABASE_HOST" to "foobar",
                     "DATABASE_PORT" to "foobar",
@@ -53,7 +53,7 @@ internal class DataSourceBuilderTest {
         }
 
         assertThrows<IllegalArgumentException> {
-            GcpDataSourceBuilder(
+            DataSourceBuilder(
                 mapOf(
                     "DATABASE_HOST" to "foobar",
                     "DATABASE_PORT" to "foobar",
