@@ -19,7 +19,7 @@ spec:
       - resource:
           apiVersion: resourcemanager.cnrm.cloud.google.com/v1beta1
           kind: Project
-          name: tbd-dev-7ff9
+          name: tbd-prod-eacd
         role: roles/cloudsql.client
   env:
     - name: DATABASE_REGION
