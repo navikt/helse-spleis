@@ -8,6 +8,7 @@ import no.nav.helse.person.Periodetype
 import no.nav.helse.serde.api.AktivitetDTO
 import no.nav.helse.serde.api.v2.Behandlingstype.VENTER
 import no.nav.helse.serde.api.v2.buildere.BeregningId
+import no.nav.helse.serde.api.dto.EndringskodeDTO
 
 data class Generasjon(
     val id: UUID, // Runtime
@@ -185,7 +186,8 @@ data class SpeilOppdrag(
         val fom: LocalDate,
         val tom: LocalDate,
         val dagsats: Int,
-        val grad: Int
+        val grad: Int,
+        val endringskode: EndringskodeDTO
     )
 }
 

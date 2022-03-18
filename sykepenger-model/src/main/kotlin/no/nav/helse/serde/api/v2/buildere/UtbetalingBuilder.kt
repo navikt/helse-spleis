@@ -14,6 +14,7 @@ import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
+import no.nav.helse.serde.api.dto.EndringskodeDTO.Companion.dto
 import no.nav.helse.utbetalingslinjer.Utbetaling as InternUtbetaling
 
 // Besøker hele vedtaksperiode-treet
@@ -182,7 +183,8 @@ internal class OppdragBuilder(utbetaling: InternUtbetaling) : UtbetalingVisitor 
                 fom = fom,
                 tom = tom,
                 dagsats = beløp,
-                grad = grad
+                grad = grad,
+                endringskode = endringskode.dto()
             )
         )
     }

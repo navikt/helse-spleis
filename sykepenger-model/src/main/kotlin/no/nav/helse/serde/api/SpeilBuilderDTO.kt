@@ -14,6 +14,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
+import no.nav.helse.serde.api.dto.EndringskodeDTO
 
 data class PersonDTO(
     val aktørId: String,
@@ -129,7 +130,8 @@ data class UtbetalingerDTO(
         val fom: LocalDate,
         val tom: LocalDate,
         val dagsats: Int,
-        val grad: Int
+        val grad: Int,
+        val endringskode: EndringskodeDTO
     )
 }
 

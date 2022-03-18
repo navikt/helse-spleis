@@ -30,6 +30,8 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
+import no.nav.helse.serde.api.dto.EndringskodeDTO
+import no.nav.helse.utbetalingslinjer.Endringskode
 
 internal class SpeilBuilderTest : AbstractEndToEndTest() {
 
@@ -1471,6 +1473,28 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         assertEquals(19.januar, refusjon.endringer.first().dato)
         assertEquals(33000.0, refusjon.endringer.last().beløp)
         assertEquals(23.januar, refusjon.endringer.last().dato)
+    }
+
+    @Test
+    fun `endringskode på oppdragslinjer`() {
+        nyttVedtak(1.januar, 31.januar, 100.prosent, refusjon = Inntektsmelding.Refusjon(INNTEKT, 23.januar))
+        assertEndringskoder(arbeidsgiverEndringskode = EndringskodeDTO.NY, personEndringskode = EndringskodeDTO.NY)
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(26.januar, Feriedag)))
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+        assertEndringskoder(arbeidsgiverEndringskode = EndringskodeDTO.UEND, personEndringskode = EndringskodeDTO.ENDR)
+    }
+
+    private fun assertEndringskoder(arbeidsgiverEndringskode: EndringskodeDTO, personEndringskode: EndringskodeDTO) {
+        val personDto = serializePersonForSpeil(person)
+        val vedtaksperiode = personDto.arbeidsgivere.first().vedtaksperioder.first() as VedtaksperiodeDTO
+        val beregnetPeriodetype = personDto.arbeidsgivere.first().generasjoner.first().perioder.first() as BeregnetPeriode
+        assertEquals(arbeidsgiverEndringskode, vedtaksperiode.sisteUtbetaling!!.arbeidsgiverOppdrag.utbetalingslinjer.first().endringskode)
+        assertEquals(arbeidsgiverEndringskode, beregnetPeriodetype.utbetaling.oppdrag.getValue(beregnetPeriodetype.utbetaling.arbeidsgiverFagsystemId).utbetalingslinjer.first().endringskode)
+        assertEquals(personEndringskode, vedtaksperiode.sisteUtbetaling!!.personOppdrag.utbetalingslinjer.first().endringskode)
+        assertEquals(personEndringskode, beregnetPeriodetype.utbetaling.oppdrag.getValue(beregnetPeriodetype.utbetaling.personFagsystemId).utbetalingslinjer.first().endringskode)
     }
 
     private fun <T> Collection<T>.assertOnNonEmptyCollection(func: (T) -> Unit) {

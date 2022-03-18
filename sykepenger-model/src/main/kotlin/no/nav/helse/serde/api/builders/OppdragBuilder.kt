@@ -6,6 +6,7 @@ import no.nav.helse.serde.api.UtbetalingerDTO
 import no.nav.helse.utbetalingslinjer.*
 import java.time.LocalDate
 import java.time.LocalDateTime
+import no.nav.helse.serde.api.dto.EndringskodeDTO.Companion.dto
 
 internal class OppdragBuilder : BuilderState() {
     private lateinit var fagsystemId: String
@@ -102,7 +103,8 @@ internal class OppdragBuilder : BuilderState() {
             fom = fom,
             tom = tom,
             dagsats = beløp!!,
-            grad = grad!!
+            grad = grad!!,
+            endringskode = endringskode.dto()
         ))
     }
 
