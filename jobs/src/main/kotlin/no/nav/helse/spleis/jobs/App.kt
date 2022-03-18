@@ -143,21 +143,14 @@ private interface DataSourceConfiguration {
 private class GCP : DataSourceConfiguration {
     private val env = System.getenv()
 
-    private val gcpProjectId = env["GCP_TEAM_PROJECT_ID"]
-    private val databaseRegion = env["DATABASE_REGION"]
-    private val databaseInstance = env["DATABASE_INSTANCE"]
-    private val databaseUsername = env["DATABASE_SPLEIS_API_USERNAME"]?.toString()
-    private val databasePassword = env["DATABASE_SPLEIS_API_PASSWORD"]?.toString()
-    private val databaseName = env["DATABASE_DATABASE"]
+    private val gcpProjectId = requireNotNull(env["GCP_TEAM_PROJECT_ID"]) { "gcp project id must be set" }
+    private val databaseRegion = requireNotNull(env["DATABASE_REGION"]) { "database region must be set" }
+    private val databaseInstance = requireNotNull(env["DATABASE_INSTANCE"]) { "database instance must be set" }
+    private val databaseUsername = requireNotNull(env["DATABASE_SPLEIS_AVSTEMMING_USERNAME"]) { "database name must be set" }
+    private val databasePassword = requireNotNull(env["DATABASE_SPLEIS_AVSTEMMING_PASSWORD"]) { "database username must be set"}
+    private val databaseName = requireNotNull(env["DATABASE_SPLEIS_AVSTEMMING_DATABASE"]) { "database password must be set"}
 
     private val hikariConfig = HikariConfig().apply {
-        requireNotNull(gcpProjectId) { "gcp project id must be set" }
-        requireNotNull(databaseRegion) { "database region must be set" }
-        requireNotNull(databaseInstance) { "database instance must be set" }
-        requireNotNull(databaseName) { "database name must be set" }
-        requireNotNull(databaseUsername) { "database username must be set"}
-        requireNotNull(databasePassword) { "database password must be set"}
-
         jdbcUrl = String.format(
             "jdbc:postgresql:///%s?%s&%s",
             databaseName,
@@ -170,6 +163,7 @@ private class GCP : DataSourceConfiguration {
 
         maximumPoolSize = 3
         minimumIdle = 1
+        initializationFailTimeout = Duration.ofMinutes(1).toMillis()
         connectionTimeout = Duration.ofSeconds(5).toMillis()
         maxLifetime = Duration.ofMinutes(30).toMillis()
         idleTimeout = Duration.ofMinutes(10).toMillis()
