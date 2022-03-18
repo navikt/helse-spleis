@@ -16,7 +16,6 @@ import no.nav.helse.person.Person
 import no.nav.helse.serde.serialize
 import no.nav.helse.spleis.JwtStub
 import no.nav.helse.spleis.config.AzureAdAppConfig
-import no.nav.helse.spleis.config.GcpDataSourceConfiguration
 import no.nav.helse.spleis.config.KtorConfig
 import no.nav.helse.spleis.createApp
 import no.nav.helse.spleis.dao.HendelseDao
@@ -37,6 +36,7 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 import javax.sql.DataSource
+import no.nav.helse.spleis.config.DataSourceConfiguration
 
 internal class ApiTestServer(private val port: Int = randomPort()) {
     private val postgres = PostgreSQLContainer<Nothing>("postgres:14")
@@ -110,7 +110,7 @@ internal class ApiTestServer(private val port: Int = randomPort()) {
                 clientId = "spleis_azure_ad_app_id",
                 configurationUrl = "${wireMockServer.baseUrl()}/config"
             ),
-            GcpDataSourceConfiguration(
+            DataSourceConfiguration(
                 jdbcUrl = postgres.jdbcUrl,
                 databaseUsername = postgres.username,
                 databasePassword = postgres.password

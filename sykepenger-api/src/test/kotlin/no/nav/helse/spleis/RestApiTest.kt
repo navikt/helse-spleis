@@ -19,7 +19,6 @@ import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.serde.serialize
 import no.nav.helse.somFødselsnummer
 import no.nav.helse.spleis.config.AzureAdAppConfig
-import no.nav.helse.spleis.config.GcpDataSourceConfiguration
 import no.nav.helse.spleis.config.KtorConfig
 import no.nav.helse.spleis.dao.HendelseDao
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -37,6 +36,7 @@ import java.util.*
 import java.util.concurrent.TimeUnit.SECONDS
 import java.util.concurrent.atomic.AtomicInteger
 import javax.sql.DataSource
+import no.nav.helse.spleis.config.DataSourceConfiguration
 
 @TestInstance(Lifecycle.PER_CLASS)
 internal class RestApiTest {
@@ -102,7 +102,7 @@ internal class RestApiTest {
                 clientId = "spleis_azure_ad_app_id",
                 configurationUrl = "${wireMockServer.baseUrl()}/config"
             ),
-            GcpDataSourceConfiguration(
+            DataSourceConfiguration(
                 jdbcUrl = postgres.jdbcUrl,
                 databaseUsername = postgres.username,
                 databasePassword = postgres.password
