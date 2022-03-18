@@ -9,7 +9,6 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.rapids_and_rivers.cli.AivenConfig
 import no.nav.rapids_and_rivers.cli.ConsumerProducerFactory
-import no.nav.vault.jdbc.hikaricp.HikariCPVaultUtil
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -45,13 +44,7 @@ fun main(args: Array<String>) {
 
 @ExperimentalTime
 private fun vacuumTask() {
-    val ds = when (System.getenv("NAIS_CLUSTER_NAME")) {
-        "dev-gcp",
-        "prod-gcp" -> GCP().dataSource()
-        "dev-fss",
-        "prod-fss" -> OnPrem("admin").dataSource()
-        else -> throw IllegalArgumentException("env variable NAIS_CLUSTER_NAME has an unsupported value")
-    }
+    val ds = DataSourceConfiguration().dataSource()
     log.info("Commencing VACUUM FULL")
     val duration = measureTime {
         sessionOf(ds).use { session -> session.run(queryOf(("VACUUM FULL person")).asExecute) }
@@ -67,13 +60,7 @@ private fun vacuumTask() {
 @ExperimentalTime
 private fun avstemmingTask(factory: ConsumerProducerFactory, customDayOfMonth: Int? = null) {
     // Håndter on-prem og gcp database tilkobling forskjellig
-    val ds = when (System.getenv("NAIS_CLUSTER_NAME")) {
-        "dev-gcp",
-        "prod-gcp" -> GCP().dataSource()
-        "dev-fss",
-        "prod-fss" -> OnPrem().dataSource()
-        else -> throw IllegalArgumentException("env variable NAIS_CLUSTER_NAME has an unsupported value")
-    }
+    val ds = DataSourceConfiguration().dataSource()
     val dayOfMonth = customDayOfMonth ?: LocalDate.now().dayOfMonth
     log.info("Commencing avstemming for dayOfMonth=$dayOfMonth")
     val producer = factory.createProducer()
@@ -136,11 +123,7 @@ private class PaginatedQuery(private val select: String, private val table: Stri
     }
 }
 
-private interface DataSourceConfiguration {
-    fun dataSource(): DataSource
-}
-
-private class GCP : DataSourceConfiguration {
+private class DataSourceConfiguration {
     private val env = System.getenv()
 
     private val gcpProjectId = requireNotNull(env["GCP_TEAM_PROJECT_ID"]) { "gcp project id must be set" }
@@ -169,32 +152,6 @@ private class GCP : DataSourceConfiguration {
         idleTimeout = Duration.ofMinutes(10).toMillis()
     }
 
-    override fun dataSource() = HikariDataSource(hikariConfig)
+    internal fun dataSource() = HikariDataSource(hikariConfig)
 }
 
-// Understands how to create a data source from environment variables
-private class OnPrem(private val role: String = "readonly"): DataSourceConfiguration {
-    private val env = System.getenv()
-    private val url = env["JDBC_URL"]
-    private val dbName = env["DB_NAME"]
-
-    // username and password is only needed when vault is not enabled,
-    // since we rotate credentials automatically when vault is enabled
-    private val hikariConfig = HikariConfig().apply {
-        requireNotNull(url) { "postgres url must be set" }
-        requireNotNull(dbName) { "db name must be set" }
-        jdbcUrl = url.removeSuffix("/") + "/" + dbName
-
-        maximumPoolSize = 3
-        minimumIdle = 1
-        connectionTimeout = Duration.ofSeconds(5).toMillis()
-        maxLifetime = Duration.ofMinutes(30).toMillis()
-        idleTimeout = Duration.ofMinutes(10).toMillis()
-    }
-
-    override fun dataSource(): DataSource = HikariCPVaultUtil.createHikariDataSourceWithVaultIntegration(
-        hikariConfig,
-        System.getenv("VAULT_MOUNTPATH"),
-        System.getenv("DB_NAME") + "-$role"
-    )
-}
