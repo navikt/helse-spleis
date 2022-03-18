@@ -47,6 +47,7 @@ spec:
             envVarPrefix: DATABASE
             users:
               - name: spleis-api
+              - name: spleis-avstemming
   secureLogs:
     enabled: true
   env:
