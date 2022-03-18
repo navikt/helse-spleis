@@ -1559,6 +1559,34 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.tilstand(gjenopptaBehandling, AvventerHistorikk)
         }
 
+        override fun håndter(
+            person: Person,
+            arbeidsgiver: Arbeidsgiver,
+            vedtaksperiode: Vedtaksperiode,
+            hendelse: IAktivitetslogg,
+            infotrygdhistorikk: Infotrygdhistorikk
+        ) {
+            validation(hendelse) {
+                onValidationFailed { vedtaksperiode.forkast(hendelse) }
+                valider {
+                    infotrygdhistorikk.validerOverlappende(
+                        this,
+                        arbeidsgiver.avgrensetPeriode(vedtaksperiode.periode),
+                        vedtaksperiode.skjæringstidspunkt
+                    )
+                }
+                onSuccess {
+                    if (arbeidsgiver.erForlengelse(vedtaksperiode.periode)) {
+                        info("Oppdaget at perioden er en forlengelse")
+                        return@onSuccess vedtaksperiode.tilstand(hendelse, AvventerHistorikk).also {
+                            arbeidsgiver.finnSykeperiodeRettEtter(vedtaksperiode)?.forlengerInfotrygd(hendelse)
+                            vedtaksperiode.kontekst(hendelse)
+                        }
+                    }
+                }
+            }
+        }
+
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
             vedtaksperiode.håndterOverlappendeSøknad(søknad)
         }
