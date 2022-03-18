@@ -55,15 +55,16 @@ jobs:
                 RESOURCE: deploy/dev-avstemming-job.yml
                 IMAGE: ${{ needs.set_version.outputs.image }}
 
-#  deployProd:
-#      name: deploy to prod
-#      needs: [set_version, build, snyk]
-#      runs-on: ubuntu-latest
-#      steps:
-#          - uses: actions/checkout@v1
-#          - uses: nais/deploy/actions/deploy@v1
-#            env:
-#                APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
-#                CLUSTER: prod-fss
+  deployProd:
+      name: deploy to prod
+      needs: [set_version, build, snyk]
+      runs-on: ubuntu-latest
+      steps:
+          - uses: actions/checkout@v1
+          - uses: nais/deploy/actions/deploy@v1
+            env:
+                APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+                CLUSTER: prod-fss
 #                RESOURCE: deploy/prod-gc-job.yml,deploy/prod-avstemming-aiven.yml,deploy/prod-avstemming-job.yml
-#                IMAGE: ${{ needs.set_version.outputs.image }}
+                RESOURCE: deploy/prod-avstemming-job.yml
+                IMAGE: ${{ needs.set_version.outputs.image }}
