@@ -42,6 +42,7 @@ spec:
             users:
               - name: spleis-api
               - name: spleis-opprydding-dev
+              - name: spleis-avstemming
   secureLogs:
     enabled: true
   env:
