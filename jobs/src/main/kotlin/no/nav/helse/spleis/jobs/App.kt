@@ -60,7 +60,7 @@ private fun vacuumTask() {
 @ExperimentalTime
 private fun avstemmingTask(factory: ConsumerProducerFactory, customDayOfMonth: Int? = null) {
     // Håndter on-prem og gcp database tilkobling forskjellig
-    val ds = DataSourceConfiguration(DbUser.SPLEIS_AVSTEMMING).dataSource()
+    val ds = DataSourceConfiguration(DbUser.AVSTEMMING).dataSource()
     val dayOfMonth = customDayOfMonth ?: LocalDate.now().dayOfMonth
     log.info("Commencing avstemming for dayOfMonth=$dayOfMonth")
     val producer = factory.createProducer()
@@ -129,9 +129,9 @@ private class DataSourceConfiguration(dbUsername: DbUser) {
     private val gcpProjectId = requireNotNull(env["GCP_TEAM_PROJECT_ID"]) { "gcp project id must be set" }
     private val databaseRegion = requireNotNull(env["DATABASE_REGION"]) { "database region must be set" }
     private val databaseInstance = requireNotNull(env["DATABASE_INSTANCE"]) { "database instance must be set" }
-    private val databaseUsername = requireNotNull(env["DATABASE_${dbUsername}_USERNAME"]) { "database username must be set" }
-    private val databasePassword = requireNotNull(env["DATABASE_${dbUsername}_PASSWORD"]) { "database password must be set"}
-    private val databaseName = requireNotNull(env["DATABASE_${dbUsername}_DATABASE"]) { "database name must be set"}
+    private val databaseUsername = requireNotNull(env["${dbUsername}_USERNAME"]) { "database username must be set" }
+    private val databasePassword = requireNotNull(env["${dbUsername}_PASSWORD"]) { "database password must be set"}
+    private val databaseName = requireNotNull(env["${dbUsername}_DATABASE"]) { "database name must be set"}
 
     private val hikariConfig = HikariConfig().apply {
         jdbcUrl = String.format(
@@ -155,6 +155,8 @@ private class DataSourceConfiguration(dbUsername: DbUser) {
     internal fun dataSource() = HikariDataSource(hikariConfig)
 }
 
-private enum class DbUser {
-    SPLEIS, SPLEIS_AVSTEMMING
+private enum class DbUser(private val dbUserPrefix: String) {
+    SPLEIS("DATABASE"), AVSTEMMING("DATABASE_SPLEIS_AVSTEMMING");
+
+    override fun toString() = dbUserPrefix
 }
