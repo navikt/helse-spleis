@@ -26,5 +26,5 @@ spec:
       value: "europe-north1"
     - name: DATABASE_INSTANCE
       value: "helse-spleis"
-    - name: RUNTIME_OPS
+    - name: RUNTIME_OPTS
       value: "avstemming"
