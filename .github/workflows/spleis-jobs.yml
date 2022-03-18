@@ -1,4 +1,4 @@
-name: Bygg og deploy jobs
+name: Spleis-jobs
 
 on:
   push:

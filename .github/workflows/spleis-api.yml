@@ -1,4 +1,4 @@
-name: API
+name: Spleis-api
 
 on:
   push:
