@@ -44,7 +44,7 @@ fun main(args: Array<String>) {
 
 @ExperimentalTime
 private fun vacuumTask() {
-    val ds = DataSourceConfiguration().dataSource()
+    val ds = DataSourceConfiguration(DbUser.SPLEIS).dataSource()
     log.info("Commencing VACUUM FULL")
     val duration = measureTime {
         sessionOf(ds).use { session -> session.run(queryOf(("VACUUM FULL person")).asExecute) }
@@ -60,7 +60,7 @@ private fun vacuumTask() {
 @ExperimentalTime
 private fun avstemmingTask(factory: ConsumerProducerFactory, customDayOfMonth: Int? = null) {
     // Håndter on-prem og gcp database tilkobling forskjellig
-    val ds = DataSourceConfiguration().dataSource()
+    val ds = DataSourceConfiguration(DbUser.SPLEIS_AVSTEMMING).dataSource()
     val dayOfMonth = customDayOfMonth ?: LocalDate.now().dayOfMonth
     log.info("Commencing avstemming for dayOfMonth=$dayOfMonth")
     val producer = factory.createProducer()
@@ -123,15 +123,15 @@ private class PaginatedQuery(private val select: String, private val table: Stri
     }
 }
 
-private class DataSourceConfiguration {
+private class DataSourceConfiguration(dbUsername: DbUser) {
     private val env = System.getenv()
 
     private val gcpProjectId = requireNotNull(env["GCP_TEAM_PROJECT_ID"]) { "gcp project id must be set" }
     private val databaseRegion = requireNotNull(env["DATABASE_REGION"]) { "database region must be set" }
     private val databaseInstance = requireNotNull(env["DATABASE_INSTANCE"]) { "database instance must be set" }
-    private val databaseUsername = requireNotNull(env["DATABASE_SPLEIS_AVSTEMMING_USERNAME"]) { "database name must be set" }
-    private val databasePassword = requireNotNull(env["DATABASE_SPLEIS_AVSTEMMING_PASSWORD"]) { "database username must be set"}
-    private val databaseName = requireNotNull(env["DATABASE_SPLEIS_AVSTEMMING_DATABASE"]) { "database password must be set"}
+    private val databaseUsername = requireNotNull(env["DATABASE_${dbUsername}_USERNAME"]) { "database username must be set" }
+    private val databasePassword = requireNotNull(env["DATABASE_${dbUsername}_PASSWORD"]) { "database password must be set"}
+    private val databaseName = requireNotNull(env["DATABASE_${dbUsername}_DATABASE"]) { "database name must be set"}
 
     private val hikariConfig = HikariConfig().apply {
         jdbcUrl = String.format(
@@ -155,3 +155,6 @@ private class DataSourceConfiguration {
     internal fun dataSource() = HikariDataSource(hikariConfig)
 }
 
+private enum class DbUser {
+    SPLEIS, SPLEIS_AVSTEMMING
+}
