@@ -53,7 +53,7 @@ spec:
       rules:
         - application: spesialist
           namespace: tbd
-          cluster: dev-fss
+          cluster: dev-gcp
         - application: spanner
           namespace: tbd
           cluster: dev-gcp
