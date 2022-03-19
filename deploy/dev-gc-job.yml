@@ -7,7 +7,7 @@ metadata:
   namespace: tbd
 spec:
   image: {{image}}
-  schedule: "0 1 * * SAT"
+  schedule: "0 2 * * SAT"
   kafka:
     pool: nav-dev
   secureLogs:
