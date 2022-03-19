@@ -13,7 +13,7 @@ spec:
   secureLogs:
     enabled: true
   envFrom:
-    - secret: google-sql-helse-spleis
+    - secret: google-sql-spleis
   gcp:
     permissions:
       - resource:
