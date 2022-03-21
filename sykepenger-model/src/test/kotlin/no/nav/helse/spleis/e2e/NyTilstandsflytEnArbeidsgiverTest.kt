@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e
 
 import no.nav.helse.Toggle
 import no.nav.helse.assertForventetFeil
+import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
@@ -57,5 +58,19 @@ internal class NyTilstandsflytEnArbeidsgiverTest : AbstractEndToEndTest() {
             TIL_UTBETALING,
             AVSLUTTET
         )
+    }
+
+    @Disabled
+    @Test
+    fun `Én arbeidsgiver - forlengelse av en periode i avventer tidligere eller overlappende perioder`() {
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+
+        assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
+        assertTilstand(2.vedtaksperiode, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER)
     }
 }
