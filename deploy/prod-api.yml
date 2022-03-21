@@ -54,7 +54,7 @@ spec:
       rules:
         - application: spesialist
           namespace: tbd
-          cluster: prod-fss
+          cluster: prod-gcp
         - application: spanner
           namespace: tbd
           cluster: prod-gcp
