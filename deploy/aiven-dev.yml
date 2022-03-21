@@ -175,6 +175,9 @@ spec:
         - team: tbd
           application: spleis-opprydding-dev
           access: readwrite
+        - team: tbd
+          application: spesialist-opprydding-dev
+          access: readwrite
         - team: teamsykmelding
           application: sparenaproxy
           access: read
