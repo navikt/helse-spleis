@@ -1103,7 +1103,9 @@ internal class Vedtaksperiode private constructor(
             if (søknad.valider(vedtaksperiode.periode, vedtaksperiode.jurist()).hasErrorsOrWorse())
                 return vedtaksperiode.forkast(søknad)
 
-            vedtaksperiode.tilstand(søknad, AvventerInntektsmeldingEllerHistorikk)
+            val nyTilstand = if (vedtaksperiode.harInntekt()) AvventerTidligereEllerOverlappendePerioder else AvventerInntektsmeldingEllerHistorikk
+            vedtaksperiode.tilstand(søknad, nyTilstand)
+
             søknad.info("Fullført behandling av søknad")
         }
 
