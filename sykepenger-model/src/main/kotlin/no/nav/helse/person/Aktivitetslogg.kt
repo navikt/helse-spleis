@@ -369,7 +369,6 @@ class Aktivitetslogg(
 
                             }.toMap(),
                             "aktiveVedtaksperioder" to aktiveVedtaksperioder.map(AktivVedtaksperiode::toMap),
-                            "orgnummereMedAktiveArbeidsforhold" to orgnummereMedRelevanteArbeidsforhold,
                             "orgnummereMedRelevanteArbeidsforhold" to orgnummereMedRelevanteArbeidsforhold,
                             "arbeidsforholdId" to arbeidsforholdId
                         )
