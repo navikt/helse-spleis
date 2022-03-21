@@ -1,5 +1,8 @@
 package no.nav.helse.serde.api.dto
 
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.TilstandType
 import no.nav.helse.serde.api.DagtypeDTO
@@ -8,13 +11,14 @@ import no.nav.helse.serde.api.TilstandstypeDTO
 import no.nav.helse.serde.api.UtbetalingstidslinjedagDTO
 import no.nav.helse.serde.api.builders.OppdragDTO
 import no.nav.helse.serde.reflection.Utbetalingstatus
-import no.nav.helse.serde.reflection.Utbetalingstatus.*
+import no.nav.helse.serde.reflection.Utbetalingstatus.ANNULLERT
+import no.nav.helse.serde.reflection.Utbetalingstatus.FORKASTET
+import no.nav.helse.serde.reflection.Utbetalingstatus.GODKJENT_UTEN_UTBETALING
+import no.nav.helse.serde.reflection.Utbetalingstatus.UTBETALING_FEILET
+import no.nav.helse.serde.reflection.Utbetalingstatus.UTBETALT
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype.ANNULLERING
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype.REVURDERING
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
 
 data class UtbetalingshistorikkElementDTO(
     val hendelsetidslinje: List<SykdomstidslinjedagDTO>,
@@ -117,6 +121,7 @@ data class UtbetalingshistorikkElementDTO(
                     TilstandType.AVVENTER_SØKNAD_FERDIG_GAP,
                     TilstandType.AVVENTER_SØKNAD_UFERDIG_GAP,
                     TilstandType.AVVENTER_VILKÅRSPRØVING,
+                    TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
                     TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
                     TilstandType.AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE,
                     TilstandType.AVVENTER_INNTEKTSMELDING_UFERDIG_GAP,
@@ -132,6 +137,7 @@ data class UtbetalingshistorikkElementDTO(
                     TilstandType.AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
                     TilstandType.AVVENTER_HISTORIKK -> TilstandstypeDTO.Venter
                     TilstandType.AVVENTER_UFERDIG,
+                    TilstandType.AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
                     TilstandType.AVVENTER_ARBEIDSGIVERE -> TilstandstypeDTO.VenterPåKiling
                     TilstandType.TIL_INFOTRYGD -> TilstandstypeDTO.TilInfotrygd
                     TilstandType.UTBETALING_FEILET -> TilstandstypeDTO.Feilet

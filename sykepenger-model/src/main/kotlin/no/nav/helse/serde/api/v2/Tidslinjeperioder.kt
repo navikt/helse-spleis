@@ -314,8 +314,10 @@ private fun TilstandType.tilPeriodetilstand(utbetaling: Utbetaling, tidslinje: L
         TilstandType.AVVENTER_HISTORIKK_REVURDERING,
         TilstandType.AVVENTER_REVURDERING,
         TilstandType.AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
+        TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
         TilstandType.AVVENTER_HISTORIKK -> Periodetilstand.Venter
         TilstandType.AVVENTER_UFERDIG,
+        TilstandType.AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
         TilstandType.AVVENTER_ARBEIDSGIVERE -> Periodetilstand.VenterPåKiling
         TilstandType.TIL_INFOTRYGD -> Periodetilstand.TilInfotrygd
         TilstandType.UTBETALING_FEILET -> Periodetilstand.Feilet
