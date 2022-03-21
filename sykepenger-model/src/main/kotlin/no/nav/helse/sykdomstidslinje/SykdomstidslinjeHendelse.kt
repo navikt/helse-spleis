@@ -10,6 +10,7 @@ import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
+import no.nav.helse.person.Dokumentsporing
 import kotlin.reflect.KClass
 
 internal typealias Melding = KClass<out SykdomstidslinjeHendelse>
@@ -94,6 +95,8 @@ abstract class SykdomstidslinjeHendelse(
 
     override fun equals(other: Any?): Boolean = other is SykdomstidslinjeHendelse
         && this.meldingsreferanseId() == other.meldingsreferanseId()
+
+    internal abstract fun leggTil(hendelseIder: MutableSet<Dokumentsporing>)
 
     override fun hashCode(): Int {
         return meldingsreferanseId().hashCode()

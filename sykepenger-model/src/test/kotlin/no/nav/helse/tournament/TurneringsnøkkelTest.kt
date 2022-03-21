@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
+import no.nav.helse.person.Dokumentsporing
 
 internal class TurneringsnøkkelTest {
     private val enDag = LocalDate.now()
@@ -66,5 +67,6 @@ internal class TurneringsnøkkelTest {
         override fun sykdomstidslinje(): Sykdomstidslinje = throw RuntimeException("Brukes ikke i testene")
         override fun valider(periode: Periode, subsumsjonObserver: SubsumsjonObserver): Aktivitetslogg = throw RuntimeException("Brukes ikke i testene")
         override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) = throw RuntimeException("Brukes ikke i testene")
+        override fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) {}
     }
 }

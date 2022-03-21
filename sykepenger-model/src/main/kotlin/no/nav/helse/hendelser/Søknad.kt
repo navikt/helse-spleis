@@ -81,7 +81,7 @@ class Søknad(
     }
     private fun avskjæringsdato(): LocalDate = sendtTilNAVEllerArbeidsgiver.toLocalDate().minusMonths(3).withDayOfMonth(1)
 
-    internal fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) {
+    override fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) {
         hendelseIder.add(Dokumentsporing.søknad(meldingsreferanseId()))
     }
 

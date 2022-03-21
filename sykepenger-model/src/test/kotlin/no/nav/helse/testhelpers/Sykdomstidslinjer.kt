@@ -15,6 +15,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 import java.util.stream.Collectors
+import no.nav.helse.person.Dokumentsporing
 
 private var threadLocalDagensDato = ThreadLocal.withInitial { 1.januar }
 private var dagensDato: LocalDate
@@ -117,4 +118,5 @@ internal class TestHendelse(private val tidslinje: Sykdomstidslinje = Sykdomstid
     override fun sykdomstidslinje() = tidslinje
     override fun valider(periode: Periode, subsumsjonObserver: SubsumsjonObserver) = Aktivitetslogg()
     override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) = Unit
+    override fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) {}
 }

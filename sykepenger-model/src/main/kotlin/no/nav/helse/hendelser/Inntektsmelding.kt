@@ -190,7 +190,7 @@ class Inntektsmelding(
 
     internal fun inntektsmeldingsinfo() = InntektsmeldingInfo(id = meldingsreferanseId(), arbeidsforholdId = arbeidsforholdId)
 
-    internal fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) {
+    override fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) {
         hendelseIder.add(Dokumentsporing.inntektsmelding(meldingsreferanseId()))
     }
 

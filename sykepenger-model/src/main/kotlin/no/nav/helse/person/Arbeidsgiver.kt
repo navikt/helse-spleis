@@ -381,6 +381,7 @@ internal class Arbeidsgiver private constructor(
 
     internal fun håndter(sykmelding: Sykmelding) {
         sykmeldingsperioder.lagre(sykmelding.sykdomstidslinje().periode()!!)
+        if (Toggle.NyTilstandsflyt.enabled) return
         val vedtaksperiode = Vedtaksperiode(
             person = person,
             arbeidsgiver = this,
@@ -402,6 +403,27 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun håndter(søknad: Søknad) {
+        if (Toggle.NyTilstandsflyt.enabled) {
+            opprettVedtaksperiodeOgHåndter(søknad)
+        } else {
+            finnVedtaksperiodeOgHåndter(søknad)
+        }
+    }
+
+    fun opprettVedtaksperiodeOgHåndter(søknad: Søknad) {
+        søknad.kontekst(this)
+        val vedtaksperiode = Vedtaksperiode(
+            person = person,
+            arbeidsgiver = this,
+            hendelse = søknad,
+            jurist = jurist
+        )
+        if (noenHarHåndtert(søknad, Vedtaksperiode::håndter)) return
+        registrerNyVedtaksperiode(vedtaksperiode)
+        vedtaksperiode.håndter(søknad)
+    }
+
+    fun finnVedtaksperiodeOgHåndter(søknad: Søknad) {
         søknad.kontekst(this)
         if (vedtaksperioder.any { it.overlapperMenUlikFerieinformasjon(søknad) }) {
             søknad.warn("Det er oppgitt ny informasjon om ferie i søknaden som det ikke har blitt opplyst om tidligere. Tidligere periode må revurderes.")

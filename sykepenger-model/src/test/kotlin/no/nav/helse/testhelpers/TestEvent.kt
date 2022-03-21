@@ -8,6 +8,7 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import java.time.LocalDateTime
 import java.util.*
+import no.nav.helse.person.Dokumentsporing
 
 private const val UNG_PERSON_FNR_2018 = "12029240045"
 private const val AKTØRID = "42"
@@ -31,4 +32,5 @@ internal sealed class TestEvent(opprettet: LocalDateTime) : SykdomstidslinjeHend
     override fun sykdomstidslinje() = Sykdomstidslinje()
     override fun valider(periode: Periode, subsumsjonObserver: SubsumsjonObserver) = Aktivitetslogg()
     override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) = Unit
+    override fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) {}
 }

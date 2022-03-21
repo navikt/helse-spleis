@@ -82,7 +82,7 @@ class Sykmelding(
         error("Mottatt overlappende sykmeldinger - $hvorfor")
     }
 
-    internal fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) {
+    override fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) {
         hendelseIder.add(Dokumentsporing.sykmelding(meldingsreferanseId()))
     }
 }

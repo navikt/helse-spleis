@@ -89,7 +89,7 @@ class OverstyrTidslinje(
             errors = this.errorsAndWorse()
         )
 
-    internal fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) {
+    override fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) {
         hendelseIder.add(Dokumentsporing.overstyrTidslinje(meldingsreferanseId()))
     }
 }

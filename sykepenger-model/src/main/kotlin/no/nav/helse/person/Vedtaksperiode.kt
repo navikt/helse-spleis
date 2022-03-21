@@ -59,6 +59,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE
@@ -70,6 +71,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_SØKNAD_FERDIG_FORLENGELSE
 import no.nav.helse.person.TilstandType.AVVENTER_SØKNAD_FERDIG_GAP
 import no.nav.helse.person.TilstandType.AVVENTER_SØKNAD_UFERDIG_FORLENGELSE
 import no.nav.helse.person.TilstandType.AVVENTER_SØKNAD_UFERDIG_GAP
+import no.nav.helse.person.TilstandType.AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER
 import no.nav.helse.person.TilstandType.AVVENTER_UFERDIG
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
@@ -128,7 +130,7 @@ internal class Vedtaksperiode private constructor(
     internal constructor(
         person: Person,
         arbeidsgiver: Arbeidsgiver,
-        hendelse: Sykmelding,
+        hendelse: SykdomstidslinjeHendelse,
         jurist: MaskinellJurist,
         id: UUID = UUID.randomUUID()
     ) : this(
@@ -1092,6 +1094,19 @@ internal class Vedtaksperiode private constructor(
             sykmelding.info("Fullført behandling av sykmelding")
         }
 
+        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
+            vedtaksperiode.oppdaterHistorikk(søknad)
+            if (vedtaksperiode.harArbeidsgivereMedOverlappendeUtbetaltePerioder(vedtaksperiode.periode)) {
+                søknad.warn("Denne personen har en utbetaling for samme periode for en annen arbeidsgiver. Kontroller at beregningene for begge arbeidsgiverne er korrekte.")
+            }
+
+            if (søknad.valider(vedtaksperiode.periode, vedtaksperiode.jurist()).hasErrorsOrWorse())
+                return vedtaksperiode.forkast(søknad)
+
+            vedtaksperiode.tilstand(søknad, AvventerInntektsmeldingEllerHistorikk)
+            søknad.info("Fullført behandling av søknad")
+        }
+
         private fun avgjørNesteTilstand(
             vedtaksperiode: Vedtaksperiode,
             ferdigForlengelse: Vedtaksperiodetilstand,
@@ -1764,6 +1779,22 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.trengerIkkeInntektsmelding(aktivitetslogg.hendelseskontekst())
         }
 
+    }
+
+    internal object AvventerInntektsmeldingEllerHistorikk : Vedtaksperiodetilstand {
+        override val type: TilstandType = AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
+            vedtaksperiode.håndterInntektsmelding(inntektsmelding, AvventerTidligereEllerOverlappendePerioder)
+        }
+    }
+
+    internal object AvventerTidligereEllerOverlappendePerioder : Vedtaksperiodetilstand {
+        override val type: TilstandType = AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER
+
+        override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+            vedtaksperiode.tilstand(hendelse, AvventerHistorikk)
+        }
     }
 
     private fun forlengerInfotrygd(hendelse: IAktivitetslogg) {
