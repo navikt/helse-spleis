@@ -60,8 +60,8 @@ internal class NyTilstandsflytEnArbeidsgiverTest : AbstractEndToEndTest() {
 
     @Test
     fun `Forlengelse av en avsluttet periode går til AvventerHistorikk`() {
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -70,10 +70,15 @@ internal class NyTilstandsflytEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
 
         assertTilstand(1.vedtaksperiode, AVSLUTTET)
         assertTilstander(2.vedtaksperiode, START, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, AVVENTER_HISTORIKK)
+    }
+
+    @Test
+    fun `Førstegangsbehandling går ikke videre dersom vi har en tidligere uferdig periode`() {
+
     }
 }
