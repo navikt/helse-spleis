@@ -103,6 +103,7 @@ class Inntektsopplysning private constructor(
             aktivitetslogg: IAktivitetslogg
         ) {
             val harFlereInntekterPåSammeAGogDato = filter { it.erRelevant(skjæringstidspunkt) }
+                .toSet()
                 .groupBy { it.orgnummer to it.sykepengerFom }
                 .any { (_, inntekter) -> inntekter.size > 1 }
             if (harFlereInntekterPåSammeAGogDato)

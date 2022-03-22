@@ -649,7 +649,7 @@ internal class InfotrygdhistorikkElementTest {
     }
 
     @Test
-    fun `validering gir warning hvis vi har to inntekter for samme arbeidsgiver på samme dato`() {
+    fun `validering gir melding hvis vi har to inntekter for samme arbeidsgiver på samme dato`() {
         val element = historikkelement(
             inntekter = listOf(
                 Inntektsopplysning(ORGNUMMER, 1.januar, 1234.månedlig, true),
@@ -658,9 +658,45 @@ internal class InfotrygdhistorikkElementTest {
         )
 
         assertTrue(element.valider(aktivitetslogg, Periodetype.FØRSTEGANGSBEHANDLING, Periode(1.januar, 31.januar), 1.januar, "ag1"))
-        assertTrue(aktivitetslogg.hasWarningsOrWorse())
+        assertFlereInntekterInfotrygd()
+    }
+
+    @Test
+    fun `validering gir ikke melding ved duplikate inntekter for samme arbeidsgiver på samme dato`() {
+        val element = historikkelement(
+            inntekter = listOf(
+                Inntektsopplysning(ORGNUMMER, 1.januar, 1234.månedlig, true),
+                Inntektsopplysning(ORGNUMMER, 1.januar, 1234.månedlig, true),
+            )
+        )
         assertTrue(element.valider(aktivitetslogg, Periodetype.FØRSTEGANGSBEHANDLING, Periode(1.januar, 31.januar), 1.januar, "ag1"))
-        assertFalse(aktivitetslogg.hasErrorsOrWorse())
+        assertEnInntektInfotrygd()
+    }
+
+    @Test
+    fun `validering gir melding hvis vi har duplikate inntekter for samme arbeidsgiver på samme dato, men forskjellig refusjonsinformasjon`() {
+        val element = historikkelement(
+            inntekter = listOf(
+                Inntektsopplysning(ORGNUMMER, 1.januar, 1234.månedlig, true),
+                Inntektsopplysning(ORGNUMMER, 1.januar, 1234.månedlig, false),
+            )
+        )
+
+        assertTrue(element.valider(aktivitetslogg, Periodetype.FØRSTEGANGSBEHANDLING, Periode(1.januar, 31.januar), 1.januar, "ag1"))
+        assertFlereInntekterInfotrygd()
+    }
+
+    @Test
+    fun `validering gir melding hvis vi har duplikate inntekter for samme arbeidsgiver på samme dato, men forskjellig opphør i refusjon`() {
+        val element = historikkelement(
+            inntekter = listOf(
+                Inntektsopplysning(ORGNUMMER, 1.januar, 1234.månedlig, true),
+                Inntektsopplysning(ORGNUMMER, 1.januar, 1234.månedlig, true, 15.januar),
+            )
+        )
+
+        assertTrue(element.valider(aktivitetslogg, Periodetype.FØRSTEGANGSBEHANDLING, Periode(1.januar, 31.januar), 1.januar, "ag1"))
+        assertFlereInntekterInfotrygd()
     }
 
     @Test
@@ -740,6 +776,16 @@ internal class InfotrygdhistorikkElementTest {
             ), inntektshistorikk, UUID.randomUUID()
         )
         assertEquals(1234.månedlig, inntektshistorikk.grunnlagForSykepengegrunnlag(1.januar, 1.januar)?.grunnlagForSykepengegrunnlag())
+    }
+
+    private fun assertFlereInntekterInfotrygd() {
+        assertTrue(aktivitetslogg.hentWarnings().contains("Det er lagt inn flere inntekter i Infotrygd med samme fom-dato. Kontroller sykepengegrunnlaget."))
+        assertFalse(aktivitetslogg.hasErrorsOrWorse())
+    }
+
+    private fun assertEnInntektInfotrygd() {
+        assertFalse(aktivitetslogg.hentWarnings().contains("Det er lagt inn flere inntekter i Infotrygd med samme fom-dato. Kontroller sykepengegrunnlaget."))
+        assertFalse(aktivitetslogg.hasErrorsOrWorse())
     }
 
     private fun historikkelement(
