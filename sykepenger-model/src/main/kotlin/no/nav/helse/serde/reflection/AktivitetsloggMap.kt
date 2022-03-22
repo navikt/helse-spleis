@@ -17,7 +17,8 @@ import no.nav.helse.serde.PersonData.AktivitetsloggData.Alvorlighetsgrad.WARN
 
 internal class AktivitetsloggMap(aktivitetslogg: Aktivitetslogg) : AktivitetsloggVisitor {
     private val aktiviteter = mutableListOf<Map<String, Any>>()
-    private val alleKontekster = mutableMapOf<Map<String, Any>, Int>()
+    // ønsker *Linked*HashMap for å sikre insertion order (med hensikt gjort eksplsitt fremfor bruk av mutableMapOf())
+    private val alleKontekster = LinkedHashMap<Map<String, Any>, Int>()
 
     init {
         aktivitetslogg.accept(this)
