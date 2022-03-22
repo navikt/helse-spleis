@@ -290,7 +290,20 @@ internal class InntektsmeldingTest {
     fun `inntektsmelding uten arbeidsgiverperiode med førsteFraværsdag satt`() {
         inntektsmelding(emptyList(), førsteFraværsdag = 1.januar)
         val nyTidslinje = inntektsmelding.sykdomstidslinje()
-        assertTrue(inntektsmelding.valider(Periode(1.januar, 31.januar), MaskinellJurist()).hasWarningsOrWorse())
+        val aktivitetslogg = inntektsmelding.valider(Periode(1.januar, 31.januar), MaskinellJurist())
+        assertTrue(aktivitetslogg.hentWarnings().contains("Inntektsmeldingen mangler arbeidsgiverperiode. Vurder om vilkårene for sykepenger er oppfylt, og om det skal være arbeidsgiverperiode"))
+        assertFalse(aktivitetslogg.hasErrorsOrWorse())
+        assertEquals(1.januar, nyTidslinje.periode()?.start)
+        assertEquals(1.januar, nyTidslinje.periode()?.endInclusive)
+    }
+
+    @Test
+    fun `inntektsmelding uten arbeidsgiverperiode med førsteFraværsdag & begrunnelseForReduksjonEllerIkkeUtbetalt satt`() {
+        inntektsmelding(emptyList(), førsteFraværsdag = 1.januar, begrunnelseForReduksjonEllerIkkeUtbetalt = "begrunnelse")
+        val nyTidslinje = inntektsmelding.sykdomstidslinje()
+        val aktivitetslogg = inntektsmelding.valider(Periode(1.januar, 31.januar), MaskinellJurist())
+        assertTrue(aktivitetslogg.hentWarnings().contains("Inntektsmeldingen mangler arbeidsgiverperiode. Vurder om vilkårene for sykepenger er oppfylt, og om det skal være arbeidsgiverperiode"))
+        assertTrue(aktivitetslogg.hentErrors().contains("Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden på grunn av: begrunnelse"))
         assertEquals(1.januar, nyTidslinje.periode()?.start)
         assertEquals(1.januar, nyTidslinje.periode()?.endInclusive)
     }
