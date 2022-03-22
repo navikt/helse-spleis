@@ -111,4 +111,19 @@ internal class NyTilstandsflytEnArbeidsgiverTest : AbstractEndToEndTest() {
         assertTilstand(1.vedtaksperiode, AVSLUTTET)
         assertTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK)
     }
+
+    @Test
+    fun `Inntektsmelding kommer før søknad - vi kommer oss videre til AvventerHistorikk pga replay`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmeldingReplay(inntektsmeldingId, 1.vedtaksperiode.id(ORGNUMMER))
+        assertTilstander(
+            1.vedtaksperiode,
+            START,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_HISTORIKK
+        )
+    }
 }

@@ -1788,6 +1788,10 @@ internal class Vedtaksperiode private constructor(
     internal object AvventerInntektsmeldingEllerHistorikk : Vedtaksperiodetilstand {
         override val type: TilstandType = AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 
+        override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+            vedtaksperiode.person.inntektsmeldingReplay(vedtaksperiode.id)
+        }
+
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
             vedtaksperiode.håndterInntektsmelding(inntektsmelding, AvventerTidligereEllerOverlappendePerioder)
         }
