@@ -25,6 +25,6 @@ internal class InfotrygdInntektE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, inntektshistorikk = inntektshistorikk)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING)
         assertInntektForDato(23000.månedlig, 1.januar, inspektør = inspektør)
-        assertWarning("Det er lagt inn flere inntekter i Infotrygd med samme fom-dato. Kontroller sykepengegrunnlaget.")
+        assertInfo("Det er lagt inn flere inntekter i Infotrygd med samme fom-dato.")
     }
 }

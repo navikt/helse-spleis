@@ -779,13 +779,13 @@ internal class InfotrygdhistorikkElementTest {
     }
 
     private fun assertFlereInntekterInfotrygd() {
-        assertTrue(aktivitetslogg.hentWarnings().contains("Det er lagt inn flere inntekter i Infotrygd med samme fom-dato. Kontroller sykepengegrunnlaget."))
-        assertFalse(aktivitetslogg.hasErrorsOrWorse())
+        assertTrue(aktivitetslogg.hentInfo().contains("Det er lagt inn flere inntekter i Infotrygd med samme fom-dato."))
+        assertFalse(aktivitetslogg.hasWarningsOrWorse())
     }
 
     private fun assertEnInntektInfotrygd() {
-        assertFalse(aktivitetslogg.hentWarnings().contains("Det er lagt inn flere inntekter i Infotrygd med samme fom-dato. Kontroller sykepengegrunnlaget."))
-        assertFalse(aktivitetslogg.hasErrorsOrWorse())
+        assertFalse(aktivitetslogg.hentInfo().contains("Det er lagt inn flere inntekter i Infotrygd med samme fom-dato."))
+        assertFalse(aktivitetslogg.hasWarningsOrWorse())
     }
 
     private fun historikkelement(

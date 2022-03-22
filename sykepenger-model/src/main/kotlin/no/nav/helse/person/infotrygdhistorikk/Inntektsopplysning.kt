@@ -107,7 +107,7 @@ class Inntektsopplysning private constructor(
                 .groupBy { it.orgnummer to it.sykepengerFom }
                 .any { (_, inntekter) -> inntekter.size > 1 }
             if (harFlereInntekterPåSammeAGogDato)
-                aktivitetslogg.warn("Det er lagt inn flere inntekter i Infotrygd med samme fom-dato. Kontroller sykepengegrunnlaget.")
+                aktivitetslogg.info("Det er lagt inn flere inntekter i Infotrygd med samme fom-dato.")
         }
 
         internal fun List<Inntektsopplysning>.lagreVilkårsgrunnlag(
