@@ -1801,8 +1801,8 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun gjenopptaBehandlingNy(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg): Boolean {
-            val alleTidligerePerioderErFerdigBehandlet = vedtaksperiode.arbeidsgiver.tidligerePerioderFerdigBehandlet(vedtaksperiode)
-            if(alleTidligerePerioderErFerdigBehandlet) {
+            val alleTidligerePerioderErFerdigBehandlet = vedtaksperiode.person.tidligerePerioderFerdigBehandlet(vedtaksperiode)
+            if (alleTidligerePerioderErFerdigBehandlet) {
                 vedtaksperiode.tilstand(hendelse, AvventerHistorikk)
                 return true
             }

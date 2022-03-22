@@ -498,6 +498,9 @@ class Person private constructor(
             newValue
         }
 
+    internal fun tidligerePerioderFerdigBehandlet(vedtaksperiode: Vedtaksperiode) =
+        arbeidsgivere.all { it.tidligerePerioderFerdigBehandlet(vedtaksperiode) }
+
     internal fun nåværendeVedtaksperioder(filter: VedtaksperiodeFilter) = arbeidsgivere.nåværendeVedtaksperioder(filter).sorted()
 
     internal fun ghostPeriode(skjæringstidspunkt: LocalDate, deaktivert: Boolean) =
@@ -808,6 +811,9 @@ class Person private constructor(
         arbeidsgivere.forEach { it.loggførHendelsesreferanse(orgnummer, skjæringstidspunkt, hendelse) }
 
     internal fun gjenopptaBehandlingNy(hendelse: IAktivitetslogg) {
-        arbeidsgivere.forEach { it.gjenopptaBehandlingNy(hendelse) }
+        arbeidsgivere.forEach {
+            val gjenopptatt = it.gjenopptaBehandlingNy(hendelse)
+            if (gjenopptatt) return
+        }
     }
 }

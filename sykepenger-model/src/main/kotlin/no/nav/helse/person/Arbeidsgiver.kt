@@ -1132,11 +1132,12 @@ internal class Arbeidsgiver private constructor(
         inntektshistorikk.build(filter, inntektsmeldingId)
     }
 
-    internal fun gjenopptaBehandlingNy(hendelse: IAktivitetslogg) {
+    internal fun gjenopptaBehandlingNy(hendelse: IAktivitetslogg): Boolean {
         vedtaksperioder.sorted().forEach {
             val gjenopptatt = it.gjenopptaBehandlingNy(hendelse)
-            if(gjenopptatt) return
+            if (gjenopptatt) return true
         }
+        return false
     }
 
     internal class JsonRestorer private constructor() {
