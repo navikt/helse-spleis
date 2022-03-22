@@ -4,7 +4,7 @@ plugins {
 
 val flywayVersion = "8.5.4"
 val hikariVersion = "5.0.0"
-val jacksonVersion = "2.13.0"
+val jacksonVersion = "2.13.2"
 val junitJupiterVersion = "5.8.1"
 val kotliqueryVersion = "1.6.0"
 val kGraphQLVersion = "0.17.14"
