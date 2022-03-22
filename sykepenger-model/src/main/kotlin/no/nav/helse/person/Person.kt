@@ -806,4 +806,8 @@ class Person private constructor(
 
     internal fun loggførHendelsesreferanse(orgnummer: String, skjæringstidspunkt: LocalDate, hendelse: OverstyrInntekt) =
         arbeidsgivere.forEach { it.loggførHendelsesreferanse(orgnummer, skjæringstidspunkt, hendelse) }
+
+    internal fun gjenopptaBehandlingNy(hendelse: IAktivitetslogg) {
+        arbeidsgivere.forEach { it.gjenopptaBehandlingNy(hendelse) }
+    }
 }

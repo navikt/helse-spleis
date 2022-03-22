@@ -19,7 +19,6 @@ import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class NyTilstandsflytEnArbeidsgiverTest : AbstractEndToEndTest() {
@@ -79,7 +78,6 @@ internal class NyTilstandsflytEnArbeidsgiverTest : AbstractEndToEndTest() {
         assertTilstander(2.vedtaksperiode, START, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, AVVENTER_HISTORIKK)
     }
 
-    @Disabled
     @Test
     fun `Førstegangsbehandling går ikke videre dersom vi har en tidligere uferdig periode`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
@@ -93,7 +91,6 @@ internal class NyTilstandsflytEnArbeidsgiverTest : AbstractEndToEndTest() {
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER)
     }
 
-    @Disabled
     @Test
     fun `Førstegangsbehandling går videre etter at en tidligere uferdig periode er ferdig`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))

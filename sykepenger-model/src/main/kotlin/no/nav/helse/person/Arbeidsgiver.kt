@@ -1,13 +1,41 @@
 package no.nav.helse.person
 
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.Toggle
-import no.nav.helse.hendelser.*
-import no.nav.helse.hendelser.utbetaling.*
+import no.nav.helse.hendelser.ArbeidsgiverInntekt
+import no.nav.helse.hendelser.Hendelseskontekst
+import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.InntektsmeldingReplay
+import no.nav.helse.hendelser.OverstyrArbeidsforhold
+import no.nav.helse.hendelser.OverstyrInntekt
+import no.nav.helse.hendelser.OverstyrTidslinje
+import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Påminnelse
+import no.nav.helse.hendelser.Simulering
+import no.nav.helse.hendelser.Sykmelding
+import no.nav.helse.hendelser.Søknad
+import no.nav.helse.hendelser.Utbetalingsgrunnlag
+import no.nav.helse.hendelser.Utbetalingshistorikk
+import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
+import no.nav.helse.hendelser.Vilkårsgrunnlag
+import no.nav.helse.hendelser.Ytelser
+import no.nav.helse.hendelser.til
+import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
+import no.nav.helse.hendelser.utbetaling.Grunnbeløpsregulering
+import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
+import no.nav.helse.hendelser.utbetaling.UtbetalingOverført
+import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
+import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.Arbeidsforholdhistorikk.Arbeidsforhold.Companion.MAKS_INNTEKT_GAP
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.harAvsluttedePerioder
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.iderMedUtbetaling
 import no.nav.helse.person.Inntektshistorikk.IkkeRapportert
-import no.nav.helse.person.Vedtaksperiode.*
+import no.nav.helse.person.Vedtaksperiode.AvventerArbeidsgivere
+import no.nav.helse.person.Vedtaksperiode.AvventerArbeidsgivereRevurdering
+import no.nav.helse.person.Vedtaksperiode.AvventerHistorikk
+import no.nav.helse.person.Vedtaksperiode.AvventerHistorikkRevurdering
 import no.nav.helse.person.Vedtaksperiode.Companion.AVVENTER_GODKJENT_REVURDERING
 import no.nav.helse.person.Vedtaksperiode.Companion.ER_ELLER_HAR_VÆRT_AVSLUTTET
 import no.nav.helse.person.Vedtaksperiode.Companion.IKKE_FERDIG_REVURDERT
@@ -38,11 +66,18 @@ import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.harNærliggendeUtbeta
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.utbetaltTidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
 import no.nav.helse.utbetalingslinjer.UtbetalingObserver
-import no.nav.helse.utbetalingstidslinje.*
+import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
+import no.nav.helse.utbetalingstidslinje.ArbeidsgiverUtbetalinger
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode.Companion.finn
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
+import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
+import no.nav.helse.utbetalingstidslinje.IUtbetalingstidslinjeBuilder
+import no.nav.helse.utbetalingstidslinje.Inntekter
+import no.nav.helse.utbetalingstidslinje.MaksimumUtbetaling
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilder
+import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilderException
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinjeberegning
 
 internal class Arbeidsgiver private constructor(
     private val person: Person,
@@ -1095,6 +1130,13 @@ internal class Arbeidsgiver private constructor(
 
     internal fun build(filter: Utbetalingsfilter.Builder, inntektsmeldingId: UUID) {
         inntektshistorikk.build(filter, inntektsmeldingId)
+    }
+
+    internal fun gjenopptaBehandlingNy(hendelse: IAktivitetslogg) {
+        vedtaksperioder.sorted().forEach {
+            val gjenopptatt = it.gjenopptaBehandlingNy(hendelse)
+            if(gjenopptatt) return
+        }
     }
 
     internal class JsonRestorer private constructor() {
