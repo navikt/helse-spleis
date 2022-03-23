@@ -1099,16 +1099,11 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
-            vedtaksperiode.oppdaterHistorikk(søknad)
+            val nyTilstand = if (vedtaksperiode.harInntekt()) AvventerTidligereEllerOverlappendePerioder else AvventerInntektsmeldingEllerHistorikk
             if (vedtaksperiode.harArbeidsgivereMedOverlappendeUtbetaltePerioder(vedtaksperiode.periode)) {
                 søknad.warn("Denne personen har en utbetaling for samme periode for en annen arbeidsgiver. Kontroller at beregningene for begge arbeidsgiverne er korrekte.")
             }
-
-            if (søknad.valider(vedtaksperiode.periode, vedtaksperiode.jurist()).hasErrorsOrWorse())
-                return vedtaksperiode.forkast(søknad)
-
-            val nyTilstand = if (vedtaksperiode.harInntekt()) AvventerTidligereEllerOverlappendePerioder else AvventerInntektsmeldingEllerHistorikk
-            vedtaksperiode.tilstand(søknad, nyTilstand)
+            vedtaksperiode.håndterSøknad(søknad, nyTilstand)
 
             søknad.info("Fullført behandling av søknad")
         }
