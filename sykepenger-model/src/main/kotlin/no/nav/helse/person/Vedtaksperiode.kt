@@ -2217,9 +2217,11 @@ internal class Vedtaksperiode private constructor(
         tilstand.tidligerePeriodeRebehandles(this, hendelse)
     }
 
-    internal fun gjenopptaBehandlingNy(hendelse: IAktivitetslogg) = tilstand.gjenopptaBehandlingNy(this, hendelse)
-
-
+    internal fun gjenopptaBehandlingNy(hendelse: IAktivitetslogg) {
+        hendelse.kontekst(arbeidsgiver)
+        kontekst(hendelse)
+        tilstand.gjenopptaBehandlingNy(this, hendelse)
+    }
 
     internal object AvventerGodkjenningRevurdering : Vedtaksperiodetilstand {
         override val type = AVVENTER_GODKJENNING_REVURDERING
