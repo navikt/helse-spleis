@@ -209,6 +209,16 @@ internal class PeriodeTest {
         assertThrows<IllegalArgumentException> { (1.januar til 2.januar).subset(11.januar til 12.januar) }
     }
 
+    @Test
+    fun beholdDagerEtter() {
+        val periode = 1.februar til 28.februar
+        assertEquals(null, periode.beholdDagerEtter(28.februar))
+        assertEquals(2.februar til 28.februar, periode.beholdDagerEtter(1.februar))
+        assertEquals(28.februar til 28.februar, periode.beholdDagerEtter(27.februar))
+        assertEquals(16.februar til 28.februar, periode.beholdDagerEtter(15.februar))
+        assertEquals(periode, periode.beholdDagerEtter(31.januar))
+    }
+
     private fun assertSize(expected: Int, periode: Periode) {
         var count = 0
         periode.forEach { _ -> count++ }

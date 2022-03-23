@@ -83,6 +83,12 @@ open class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Ite
     internal fun oppdaterTom(other: LocalDate) = Periode(this.start, maxOf(other, this.endInclusive))
     internal fun oppdaterTom(other: Periode) = oppdaterTom(other.endInclusive)
 
+    internal fun beholdDagerEtter(cutoff: LocalDate): Periode? = when {
+        endInclusive <= cutoff -> null
+        start > cutoff -> this
+        else -> cutoff.plusDays(1) til endInclusive
+    }
+
     override fun equals(other: Any?) =
         other is Periode && this.equals(other)
 

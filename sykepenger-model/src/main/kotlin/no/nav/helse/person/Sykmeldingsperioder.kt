@@ -24,6 +24,10 @@ internal class Sykmeldingsperioder(
         val lavesteDato = perioder.minOfOrNull { it.start } ?: return true
         return lavesteDato > vedtaksperiode.endInclusive
     }
+
+    internal fun fjern(søknadsperiode: Periode) {
+        perioder = perioder.mapNotNull { it.beholdDagerEtter(søknadsperiode.endInclusive) }
+    }
 }
 internal interface SykmeldingsperioderVisitor {
     fun preVisitSykmeldingsperioder(sykmeldingsperioder: Sykmeldingsperioder) {}
