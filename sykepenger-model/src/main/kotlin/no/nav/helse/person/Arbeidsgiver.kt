@@ -38,6 +38,7 @@ import no.nav.helse.person.Vedtaksperiode.AvventerHistorikk
 import no.nav.helse.person.Vedtaksperiode.AvventerHistorikkRevurdering
 import no.nav.helse.person.Vedtaksperiode.Companion.AVVENTER_GODKJENT_REVURDERING
 import no.nav.helse.person.Vedtaksperiode.Companion.ER_ELLER_HAR_VÆRT_AVSLUTTET
+import no.nav.helse.person.Vedtaksperiode.Companion.IKKE_FERDIG_BEHANDLET
 import no.nav.helse.person.Vedtaksperiode.Companion.IKKE_FERDIG_REVURDERT
 import no.nav.helse.person.Vedtaksperiode.Companion.KLAR_TIL_BEHANDLING
 import no.nav.helse.person.Vedtaksperiode.Companion.REVURDERING_IGANGSATT
@@ -260,6 +261,16 @@ internal class Arbeidsgiver private constructor(
             arbeidsgiver.gjenopptaBehandling(gjenopptaBehandling)
         }
 
+        internal fun Iterable<Arbeidsgiver>.gjenopptaBehandlingNy(aktivitetslogg: IAktivitetslogg) {
+            val førstePeriode = nåværendeVedtaksperioder(IKKE_FERDIG_BEHANDLET)
+                .sortedBy { it.periode().endInclusive }
+                .firstOrNull() ?: return
+
+            if (all { it.sykmeldingsperioder.kanFortsetteBehandling(førstePeriode.periode()) }) {
+                førstePeriode.gjenopptaBehandlingNy(aktivitetslogg)
+            }
+        }
+
         internal fun søppelbøtte(
             arbeidsgivere: List<Arbeidsgiver>,
             hendelse: IAktivitetslogg,
@@ -438,6 +449,8 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun håndter(søknad: Søknad) {
+        søknad.kontekst(this)
+        sykmeldingsperioder.fjern(søknad.periode())
         if (Toggle.NyTilstandsflyt.enabled) {
             opprettVedtaksperiodeOgHåndter(søknad)
         } else {
@@ -446,7 +459,6 @@ internal class Arbeidsgiver private constructor(
     }
 
     fun opprettVedtaksperiodeOgHåndter(søknad: Søknad) {
-        søknad.kontekst(this)
         val vedtaksperiode = Vedtaksperiode(
             person = person,
             arbeidsgiver = this,
@@ -459,7 +471,6 @@ internal class Arbeidsgiver private constructor(
     }
 
     fun finnVedtaksperiodeOgHåndter(søknad: Søknad) {
-        søknad.kontekst(this)
         if (vedtaksperioder.any { it.overlapperMenUlikFerieinformasjon(søknad) }) {
             søknad.warn("Det er oppgitt ny informasjon om ferie i søknaden som det ikke har blitt opplyst om tidligere. Tidligere periode må revurderes.")
         }
@@ -1130,14 +1141,6 @@ internal class Arbeidsgiver private constructor(
 
     internal fun build(filter: Utbetalingsfilter.Builder, inntektsmeldingId: UUID) {
         inntektshistorikk.build(filter, inntektsmeldingId)
-    }
-
-    internal fun gjenopptaBehandlingNy(hendelse: IAktivitetslogg): Boolean {
-        vedtaksperioder.sorted().forEach {
-            val gjenopptatt = it.gjenopptaBehandlingNy(hendelse)
-            if (gjenopptatt) return true
-        }
-        return false
     }
 
     internal class JsonRestorer private constructor() {

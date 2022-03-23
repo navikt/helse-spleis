@@ -1070,7 +1070,9 @@ internal class Vedtaksperiode private constructor(
             hendelse.info("Tidligere periode oppdaget forlengelse fra Infotrygd")
         }
 
-        fun gjenopptaBehandlingNy(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) = false
+        fun gjenopptaBehandlingNy(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+            sikkerlogg.warn("Mottok en gjenopptaBehandling for en periode som ikke forventet det")
+        }
     }
 
     internal object Start : Vedtaksperiodetilstand {
@@ -1804,13 +1806,8 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.person.gjenopptaBehandlingNy(hendelse)
         }
 
-        override fun gjenopptaBehandlingNy(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg): Boolean {
-            val alleTidligerePerioderErFerdigBehandlet = vedtaksperiode.person.tidligerePerioderFerdigBehandlet(vedtaksperiode)
-            if (alleTidligerePerioderErFerdigBehandlet) {
-                vedtaksperiode.tilstand(hendelse, AvventerHistorikk)
-                return true
-            }
-            return false
+        override fun gjenopptaBehandlingNy(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+            vedtaksperiode.tilstand(hendelse, AvventerHistorikk)
         }
     }
 
@@ -2225,7 +2222,7 @@ internal class Vedtaksperiode private constructor(
         tilstand.tidligerePeriodeRebehandles(this, hendelse)
     }
 
-    internal fun gjenopptaBehandlingNy(hendelse: IAktivitetslogg): Boolean = tilstand.gjenopptaBehandlingNy(this, hendelse)
+    internal fun gjenopptaBehandlingNy(hendelse: IAktivitetslogg) = tilstand.gjenopptaBehandlingNy(this, hendelse)
 
 
 
@@ -2537,7 +2534,8 @@ internal class Vedtaksperiode private constructor(
             check(vedtaksperiode.utbetalinger.erAvsluttet()) { "forventer at utbetaling skal være avsluttet" }
             vedtaksperiode.sendVedtakFattet(hendelse)
             vedtaksperiode.person.gjenopptaBehandling(hendelse)
-            vedtaksperiode.person.gjenopptaBehandlingNy(hendelse)
+            if (Toggle.NyTilstandsflyt.enabled)
+                vedtaksperiode.person.gjenopptaBehandlingNy(hendelse)
         }
 
         override fun håndter(

@@ -40,6 +40,7 @@ import no.nav.helse.person.Arbeidsgiver.Companion.deaktiverteArbeidsforhold
 import no.nav.helse.person.Arbeidsgiver.Companion.finn
 import no.nav.helse.person.Arbeidsgiver.Companion.ghostPeriode
 import no.nav.helse.person.Arbeidsgiver.Companion.gjenopptaBehandling
+import no.nav.helse.person.Arbeidsgiver.Companion.gjenopptaBehandlingNy
 import no.nav.helse.person.Arbeidsgiver.Companion.grunnlagForSammenligningsgrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.harArbeidsgivereMedOverlappendeUtbetaltePerioder
 import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigInntekt
@@ -811,9 +812,6 @@ class Person private constructor(
         arbeidsgivere.forEach { it.loggførHendelsesreferanse(orgnummer, skjæringstidspunkt, hendelse) }
 
     internal fun gjenopptaBehandlingNy(hendelse: IAktivitetslogg) {
-        arbeidsgivere.forEach {
-            val gjenopptatt = it.gjenopptaBehandlingNy(hendelse)
-            if (gjenopptatt) return
-        }
+        arbeidsgivere.gjenopptaBehandlingNy(hendelse)
     }
 }
