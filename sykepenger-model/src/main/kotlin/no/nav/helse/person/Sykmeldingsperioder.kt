@@ -19,6 +19,11 @@ internal class Sykmeldingsperioder(
         val nyPeriode = sammenhengendePerioder.minOf { it.start } til sammenhengendePerioder.maxOf { it.endInclusive }
         perioder = (gapPerioder + listOf(nyPeriode)).sortedBy { it.start }
     }
+
+    internal fun kanFortsetteBehandling(vedtaksperiode: Periode): Boolean {
+        val lavesteDato = perioder.minOfOrNull { it.start } ?: return true
+        return lavesteDato > vedtaksperiode.endInclusive
+    }
 }
 internal interface SykmeldingsperioderVisitor {
     fun preVisitSykmeldingsperioder(sykmeldingsperioder: Sykmeldingsperioder) {}
