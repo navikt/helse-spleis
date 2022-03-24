@@ -111,6 +111,12 @@ internal class NyTilstandsflytFlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a2)
         håndterInntektsmelding(listOf(1.mars til 16.mars), orgnummer = a1)
         assertTilstand(1.vedtaksperiode, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, a1)
+
+        håndterInntektsmelding(listOf(1.mars til 16.mars), orgnummer = a2)
+        utbetalPeriode(1.vedtaksperiode, a1, 1.mars)
+        utbetalPeriodeEtterVilkårsprøving(1.vedtaksperiode, a2)
+        assertTilstand(1.vedtaksperiode, AVSLUTTET, a1)
+        assertTilstand(1.vedtaksperiode, AVSLUTTET, a2)
     }
 
     @Test
