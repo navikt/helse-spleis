@@ -100,6 +100,20 @@ internal class NyTilstandsflytFlereArbeidsgivereTest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `drawio -- MANGLER SØKNAD`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent), orgnummer = a2)
+
+        håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a1)
+        assertEquals(emptyList<Periode>(), inspektør(a1).sykmeldingsperioder())
+
+        håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a2)
+        håndterInntektsmelding(listOf(1.mars til 16.mars), orgnummer = a1)
+        assertTilstand(1.vedtaksperiode, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, a1)
+    }
+
+    @Test
     fun `drawio -- ULIK LENGDE PÅ SYKEFRAVÆR`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(5.januar, 5.februar, 100.prosent), orgnummer = a2)

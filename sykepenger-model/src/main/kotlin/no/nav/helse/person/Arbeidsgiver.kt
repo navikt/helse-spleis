@@ -261,10 +261,18 @@ internal class Arbeidsgiver private constructor(
             arbeidsgiver.gjenopptaBehandling(gjenopptaBehandling)
         }
 
+        /*
+            sjekker at vi har inntekt for første fraværsdag for alle arbeidsgivere med sykdom for skjæringstidspunkt
+         */
+        internal fun Iterable<Arbeidsgiver>.harNødvendigInntekt(skjæringstidspunkt: LocalDate) =
+            filter { it.harSykdomFor(skjæringstidspunkt) }.all { it.harInntektsmelding(skjæringstidspunkt) }
+
         internal fun Iterable<Arbeidsgiver>.gjenopptaBehandlingNy(aktivitetslogg: IAktivitetslogg) {
             val førstePeriode = nåværendeVedtaksperioder(IKKE_FERDIG_BEHANDLET)
                 .sortedBy { it.periode().endInclusive }
                 .firstOrNull() ?: return
+
+            if (!førstePeriode.harNødvendigInntekt(this)) return
 
             if (all { it.sykmeldingsperioder.kanFortsetteBehandling(førstePeriode.periode()) }) {
                 førstePeriode.gjenopptaBehandlingNy(aktivitetslogg)

@@ -44,6 +44,7 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.medlemskap
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.omsorgspenger
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.opplæringspenger
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.pleiepenger
+import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigInntekt
 import no.nav.helse.person.Dokumentsporing.Companion.ider
 import no.nav.helse.person.ForlengelseFraInfotrygd.JA
 import no.nav.helse.person.ForlengelseFraInfotrygd.NEI
@@ -389,6 +390,9 @@ internal class Vedtaksperiode private constructor(
     internal fun inntektskilde() = inntektskilde
     private fun harInntekt() = harInntektsmelding() || arbeidsgiver.grunnlagForSykepengegrunnlag(skjæringstidspunkt, periode.start) != null
     private fun harInntektsmelding() = arbeidsgiver.harInntektsmelding(skjæringstidspunkt)
+    internal fun harNødvendigInntekt(arbeidsgivere: Iterable<Arbeidsgiver>) =
+        arbeidsgivere.harNødvendigInntekt(skjæringstidspunkt)
+
     private fun avgjørTilstandForInntekt(): Vedtaksperiodetilstand {
         val rettFør = arbeidsgiver.finnSykeperiodeRettFør(this)
         if (harInntekt() || rettFør?.harInntekt() == true) return AvventerHistorikk
