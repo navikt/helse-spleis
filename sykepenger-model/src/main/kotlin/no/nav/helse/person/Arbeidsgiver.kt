@@ -866,6 +866,25 @@ internal class Arbeidsgiver private constructor(
         return sykdomstidslinje().førsteDag()
     }
 
+    /**
+     * Finner alle vedtaksperioder som tilstøter vedtaksperioden
+     * @param vedtaksperiode Perioden vi skal finne alle sammenhengende perioder for. Vi henter alle perioder som
+     * tilstøter både foran og bak.
+     */
+    internal fun finnSammehengendeVedtaksperioder(vedtaksperiode: Vedtaksperiode): List<Vedtaksperiode> {
+        val (perioderFør, perioderEtter) = vedtaksperioder.sorted().partition { it < vedtaksperiode }
+        val sammenhengendePerioder = mutableListOf(vedtaksperiode)
+        perioderFør.reversed().forEach {
+            if (it.erSykeperiodeRettFør(sammenhengendePerioder.first()))
+                sammenhengendePerioder.add(0, it)
+        }
+        perioderEtter.forEach {
+            if (sammenhengendePerioder.last().erSykeperiodeRettFør(it))
+                sammenhengendePerioder.add(it)
+        }
+        return sammenhengendePerioder
+    }
+
     internal fun finnSammenhengendePeriode(skjæringstidspunkt: LocalDate) = vedtaksperioder.medSkjæringstidspunkt(skjæringstidspunkt)
 
     internal fun harInntektsmelding(skjæringstidspunkt: LocalDate): Boolean {

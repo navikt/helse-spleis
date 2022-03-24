@@ -221,7 +221,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun håndter(inntektsmelding: Inntektsmelding, other: UUID?, vedtaksperioder: List<Vedtaksperiode>): Boolean {
-        val sammenhengendePerioder = arbeidsgiver.finnSammenhengendePeriode(skjæringstidspunkt)
+        val sammenhengendePerioder = arbeidsgiver.finnSammehengendeVedtaksperioder(this)
         val overlapper = overlapperMedSammenhengende(inntektsmelding, sammenhengendePerioder, other, vedtaksperioder)
         return overlapper.also {
             if (it) inntektsmelding.leggTil(hendelseIder)

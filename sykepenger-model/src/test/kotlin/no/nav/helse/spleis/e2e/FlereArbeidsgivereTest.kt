@@ -965,4 +965,22 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
     }
+
+    @Test
+    fun `inntektsmelding skal kun treffe sammenhengende vedtaksperioder, ikke alle med samme skjæringstidspunkt`() {
+        // Vedtaksperiode for AG 1 skal bare koble sammen to vedtaksperioder for AG 2 så de får samme skjæringstidspunkt
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar, 100.prosent), orgnummer = a2)
+        håndterSykmelding(Sykmeldingsperiode(25.januar, 31.januar, 100.prosent), orgnummer = a2)
+
+        håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(25.januar, 31.januar, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
+        assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, orgnummer = a1)
+        assertTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
+        assertTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_UFERDIG_GAP, orgnummer = a2)
+    }
 }
