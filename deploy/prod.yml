@@ -48,6 +48,9 @@ spec:
             users:
               - name: spleis-api
               - name: spleis-avstemming
+        flags:
+          - name: maintenance_work_mem
+            value: "10240MB"
   secureLogs:
     enabled: true
   env:
