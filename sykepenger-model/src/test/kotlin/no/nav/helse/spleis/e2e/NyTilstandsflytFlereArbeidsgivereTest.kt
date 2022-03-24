@@ -162,6 +162,29 @@ internal class NyTilstandsflytFlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertTilstand(2.vedtaksperiode, AVSLUTTET, orgnummer = a1)
     }
 
+    @Test
+    fun `drawio -- BURDE BLOKKERE PGA MANGLENDE IM`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a2)
+
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a2)
+
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        assertTilstand(1.vedtaksperiode, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, orgnummer = a1)
+        assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, orgnummer = a2)
+
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
+        assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
+        assertTilstand(1.vedtaksperiode, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, orgnummer = a2)
+
+        utbetalPeriode(1.vedtaksperiode, a1, 1.januar)
+        utbetalPeriodeEtterVilkårsprøving(1.vedtaksperiode, a2)
+
+        assertTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
+    }
+
     private fun utbetalPeriodeEtterVilkårsprøving(vedtaksperiode: IdInnhenter, orgnummer: String) {
         håndterYtelser(vedtaksperiode, orgnummer = orgnummer)
         håndterSimulering(vedtaksperiode, orgnummer = orgnummer)
