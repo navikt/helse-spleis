@@ -166,9 +166,3 @@ spec:
         - team: risk
           application: helserisk-treskeverk
           access: readwrite
-        - team: teamsykmelding
-          application: sparenaproxy
-          access: read
-        - team: default
-          application: sparenaproxy
-          access: read
