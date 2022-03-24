@@ -500,10 +500,7 @@ internal class Vedtaksperiode private constructor(
         periode = hendelse.oppdaterFom(periode)
         oppdaterHistorikk(hendelse)
         inntektsmeldingInfo = arbeidsgiver.addInntektsmelding(skjæringstidspunkt, hendelse, jurist())
-
-        hendelse.validerFørsteFraværsdag(skjæringstidspunkt)
-        finnArbeidsgiverperiode()?.also { hendelse.validerArbeidsgiverperiode(it) }
-        hendelse.valider(periode, jurist())
+        hendelse.valider(periode, skjæringstidspunkt, finnArbeidsgiverperiode(), jurist())
         if (hendelse.hasErrorsOrWorse()) return forkast(hendelse, SENERE_INCLUSIVE(this))
         hvisIngenErrors()
         hendelse.info("Fullført behandling av inntektsmelding")

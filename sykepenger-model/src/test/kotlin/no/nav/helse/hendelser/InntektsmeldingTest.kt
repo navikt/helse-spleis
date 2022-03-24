@@ -1,20 +1,36 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.*
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
+import no.nav.helse.desember
+import no.nav.helse.februar
+import no.nav.helse.hendelser.Inntektsmelding.Companion.WARN_UENIGHET_ARBEIDSGIVERPERIODE
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon
+import no.nav.helse.hentErrors
+import no.nav.helse.hentInfo
+import no.nav.helse.hentWarnings
+import no.nav.helse.januar
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.etterlevelse.MaskinellJurist
-import no.nav.helse.sykdomstidslinje.Dag.*
+import no.nav.helse.person.etterlevelse.SubsumsjonObserver
+import no.nav.helse.sykdomstidslinje.Dag.Arbeidsdag
+import no.nav.helse.sykdomstidslinje.Dag.ArbeidsgiverHelgedag
+import no.nav.helse.sykdomstidslinje.Dag.Arbeidsgiverdag
+import no.nav.helse.sykdomstidslinje.Dag.FriskHelgedag
+import no.nav.helse.sykdomstidslinje.Dag.UkjentDag
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertDoesNotThrow
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
 
 internal class InntektsmeldingTest {
 
@@ -216,24 +232,24 @@ internal class InntektsmeldingTest {
     @Test
     fun `uenighet om arbeidsgiverperiode`() {
         inntektsmelding(listOf(1.januar til 10.januar, 11.januar til 16.januar))
-        inntektsmelding.validerArbeidsgiverperiode(Arbeidsgiverperiode(listOf(1.januar til 16.januar)))
-        assertFalse(inntektsmelding.hasWarningsOrWorse())
+        inntektsmelding.valider(1.februar til 28.februar, 1.januar, Arbeidsgiverperiode(listOf(1.januar til 16.januar)), SubsumsjonObserver.NullObserver)
+        assertFalse(WARN_UENIGHET_ARBEIDSGIVERPERIODE in inntektsmelding.hentWarnings())
 
         inntektsmelding(listOf(1.januar til 10.januar, 12.januar til 17.januar))
-        inntektsmelding.validerArbeidsgiverperiode(Arbeidsgiverperiode(listOf(1.januar til 16.januar)))
-        assertTrue(inntektsmelding.hasWarningsOrWorse())
+        inntektsmelding.valider(1.februar til 28.februar, 1.januar, Arbeidsgiverperiode(listOf(1.januar til 16.januar)), SubsumsjonObserver.NullObserver)
+        assertTrue(WARN_UENIGHET_ARBEIDSGIVERPERIODE in inntektsmelding.hentWarnings())
 
         inntektsmelding(listOf(12.januar til 27.januar))
-        inntektsmelding.validerArbeidsgiverperiode(Arbeidsgiverperiode(listOf(11.januar til 27.januar)))
-        assertFalse(inntektsmelding.hasWarningsOrWorse())
+        inntektsmelding.valider(1.februar til 28.februar, 11.januar, Arbeidsgiverperiode(listOf(11.januar til 27.januar)), SubsumsjonObserver.NullObserver)
+        assertFalse(WARN_UENIGHET_ARBEIDSGIVERPERIODE in inntektsmelding.hentWarnings())
 
         inntektsmelding(listOf(12.januar til 27.januar))
-        inntektsmelding.validerArbeidsgiverperiode(Arbeidsgiverperiode(listOf(13.januar til 28.januar)))
-        assertFalse(inntektsmelding.hasWarningsOrWorse())
+        inntektsmelding.valider(1.februar til 28.februar, 13.januar, Arbeidsgiverperiode(listOf(13.januar til 28.januar)), SubsumsjonObserver.NullObserver)
+        assertFalse(WARN_UENIGHET_ARBEIDSGIVERPERIODE in inntektsmelding.hentWarnings())
 
         inntektsmelding(emptyList())
-        inntektsmelding.validerArbeidsgiverperiode(Arbeidsgiverperiode(listOf(1.januar til 16.januar)))
-        assertFalse(inntektsmelding.hasWarningsOrWorse())
+        inntektsmelding.valider(1.februar til 28.februar, 1.januar, Arbeidsgiverperiode(listOf(1.januar til 16.januar)), SubsumsjonObserver.NullObserver)
+        assertFalse(WARN_UENIGHET_ARBEIDSGIVERPERIODE in inntektsmelding.hentWarnings())
     }
 
     @Test

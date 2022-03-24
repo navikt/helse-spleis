@@ -1,22 +1,33 @@
 package no.nav.helse.hendelser
 
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon.Companion.cacheRefusjon
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon.Companion.endrerRefusjon
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon.Companion.minOf
-import no.nav.helse.person.*
+import no.nav.helse.person.Arbeidsgiver
+import no.nav.helse.person.Dokumentsporing
+import no.nav.helse.person.IAktivitetslogg
+import no.nav.helse.person.Inntektshistorikk
+import no.nav.helse.person.InntektsmeldingInfo
+import no.nav.helse.person.Refusjonshistorikk
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.sykdomstidslinje.Dag
-import no.nav.helse.sykdomstidslinje.Dag.*
+import no.nav.helse.sykdomstidslinje.Dag.Arbeidsdag
+import no.nav.helse.sykdomstidslinje.Dag.ArbeidsgiverHelgedag
+import no.nav.helse.sykdomstidslinje.Dag.Arbeidsgiverdag
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
+import no.nav.helse.sykdomstidslinje.Dag.Feriedag
+import no.nav.helse.sykdomstidslinje.Dag.FriskHelgedag
+import no.nav.helse.sykdomstidslinje.Dag.Sykedag
+import no.nav.helse.sykdomstidslinje.Dag.UkjentDag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.merge
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
 
 class Inntektsmelding(
     meldingsreferanseId: UUID,
@@ -35,6 +46,7 @@ class Inntektsmelding(
 
     internal companion object {
         internal const val WARN_UENIGHET_ARBEIDSGIVERPERIODE = "Inntektsmeldingen og vedtaksløsningen er uenige om beregningen av arbeidsgiverperioden. Undersøk hva som er riktig arbeidsgiverperiode."
+        internal const val WARN_ULIKHET_FØRSTE_FRAVÆRSDAG_OG_SKJÆRINGSTIDSPUNKT = "Første fraværsdag i inntektsmeldingen er ulik skjæringstidspunktet. Kontrollér at inntektsmeldingen er knyttet til riktig periode."
     }
 
     private val beste = { venstre: Dag, høyre: Dag ->
@@ -129,6 +141,12 @@ class Inntektsmelding(
         return arbeidsgiverperiode?.slutterEtter(førsteFraværsdag) != true
     }
 
+    internal fun valider(periode: Periode, skjæringstidspunkt: LocalDate, arbeidsgiverperiode: Arbeidsgiverperiode?, subsumsjonObserver: SubsumsjonObserver): IAktivitetslogg {
+        validerFørsteFraværsdag(skjæringstidspunkt)
+        if (arbeidsgiverperiode != null) validerArbeidsgiverperiode(arbeidsgiverperiode)
+        return valider(periode, subsumsjonObserver)
+    }
+
     override fun valider(periode: Periode, subsumsjonObserver: SubsumsjonObserver): IAktivitetslogg {
         refusjon.valider(this, periode, beregnetInntekt)
         if (arbeidsgiverperioder.isEmpty()) info("Inntektsmeldingen mangler arbeidsgiverperiode. Vurder om vilkårene for sykepenger er oppfylt, og om det skal være arbeidsgiverperiode")
@@ -142,12 +160,12 @@ class Inntektsmelding(
         return this
     }
 
-    internal fun validerFørsteFraværsdag(skjæringstidspunkt: LocalDate) {
+    private fun validerFørsteFraværsdag(skjæringstidspunkt: LocalDate) {
         if (førsteFraværsdag == null || førsteFraværsdag == skjæringstidspunkt) return
-        warn("Første fraværsdag i inntektsmeldingen er ulik skjæringstidspunktet. Kontrollér at inntektsmeldingen er knyttet til riktig periode.")
+        warn(WARN_ULIKHET_FØRSTE_FRAVÆRSDAG_OG_SKJÆRINGSTIDSPUNKT)
     }
 
-    internal fun validerArbeidsgiverperiode(arbeidsgiverperiode: Arbeidsgiverperiode) {
+    private fun validerArbeidsgiverperiode(arbeidsgiverperiode: Arbeidsgiverperiode) {
         if (førsteFraværsdagErEtterArbeidsgiverperioden() || arbeidsgiverperiode.sammenlign(arbeidsgiverperioder)) return
         warn(WARN_UENIGHET_ARBEIDSGIVERPERIODE)
     }
@@ -163,7 +181,7 @@ class Inntektsmelding(
         } ?: skjæringstidspunktVedtaksperiode
 
         if (skjæringstidspunkt != førsteFraværsdag) {
-            warn("Første fraværsdag i inntektsmeldingen er ulik skjæringstidspunktet. Kontrollér at inntektsmeldingen er knyttet til riktig periode.")
+            warn(WARN_ULIKHET_FØRSTE_FRAVÆRSDAG_OG_SKJÆRINGSTIDSPUNKT)
         }
 
         val (årligInntekt, dagligInntekt) = beregnetInntekt.reflection { årlig, _, daglig, _ -> årlig to daglig }
