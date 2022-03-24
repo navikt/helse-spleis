@@ -157,9 +157,6 @@ spec:
         - team: tbd
           application: vedtaksfeed
           access: readwrite
-        - team: tbd
-          application: spangre-utsettelser
-          access: readwrite
         - team: risk
           application: sigmund
           access: readwrite
