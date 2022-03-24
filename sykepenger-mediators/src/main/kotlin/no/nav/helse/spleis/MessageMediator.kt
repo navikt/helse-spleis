@@ -150,9 +150,7 @@ internal class MessageMediator(
             rapidsConnection.publish(key, message)
         }
 
-        override fun rapidName(): String {
-            return "Spleis"
-        }
+        override fun rapidName() = rapidsConnection.rapidName()
 
         override fun start() = throw IllegalStateException()
         override fun stop() = throw IllegalStateException()
