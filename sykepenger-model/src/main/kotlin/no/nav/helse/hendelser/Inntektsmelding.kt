@@ -154,7 +154,10 @@ class Inntektsmelding(
 
     override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) = arbeidsgiver.håndter(this)
 
+    private var inntektLagret = false
     internal fun addInntekt(inntektshistorikk: Inntektshistorikk, skjæringstidspunktVedtaksperiode: LocalDate, subsumsjonObserver: SubsumsjonObserver) {
+        if (inntektLagret) return
+        inntektLagret = true
         val skjæringstidspunkt = (sykdomstidslinje.sisteSkjæringstidspunkt() ?: return).takeUnless {
             førsteFraværsdagErEtterArbeidsgiverperioden() && it > skjæringstidspunktVedtaksperiode
         } ?: skjæringstidspunktVedtaksperiode

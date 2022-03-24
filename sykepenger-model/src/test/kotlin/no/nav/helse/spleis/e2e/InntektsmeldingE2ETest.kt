@@ -41,6 +41,16 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertEquals(1.februar til 20.februar, inspektør.periode(2.vedtaksperiode))
     }
 
+    @Test
+    fun `lagrer inntekt én gang`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 8.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 8.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(9.januar, 20.januar, 100.prosent))
+        håndterSøknad(Sykdom(9.januar, 20.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        assertEquals(1, inspektør.inntektInspektør.antallInnslag)
+    }
+
     @Disabled("WIP Test for inntektsmelding med refusjonsopphold")
     @Test
     fun `inntektsmelding med refusjonsopphold`() {
