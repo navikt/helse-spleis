@@ -185,6 +185,48 @@ internal class NyTilstandsflytFlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
     }
 
+    @Test
+    fun `drawio -- PERIODE HOS AG1 STREKKER SEG OVER TO PERIODER HOS AG2 - Må vente på alle IM`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+
+        håndterSykmelding(Sykmeldingsperiode(2.januar, 18.januar, 100.prosent), orgnummer = a2)
+        håndterSykmelding(Sykmeldingsperiode(20.januar, 30.januar, 100.prosent), orgnummer = a2)
+
+        håndterSøknad(Sykdom(2.januar, 18.januar, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(20.januar, 30.januar, 100.prosent), orgnummer = a2)
+
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, orgnummer = a1)
+        håndterInntektsmelding(listOf(2.januar til 17.januar), førsteFraværsdag = 2.januar, orgnummer = a2)
+
+        assertTilstand(1.vedtaksperiode, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, orgnummer = a1)
+        assertTilstand(1.vedtaksperiode, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, orgnummer = a2)
+        assertTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, orgnummer = a2)
+
+        håndterInntektsmelding(listOf(2.januar til 17.januar), førsteFraværsdag = 20.januar, orgnummer = a2)
+
+        assertTilstand(1.vedtaksperiode, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, orgnummer = a1)
+        assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
+        assertTilstand(2.vedtaksperiode, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, orgnummer = a2)
+
+        utbetalPeriode(1.vedtaksperiode, orgnummer = a2, 1.januar)
+        assertTilstand(1.vedtaksperiode, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, orgnummer = a1)
+        assertTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
+        assertTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
+
+
+        utbetalPeriodeEtterVilkårsprøving(2.vedtaksperiode, orgnummer = a2)
+        assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
+        assertTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
+        assertTilstand(2.vedtaksperiode, AVSLUTTET, orgnummer = a2)
+
+        utbetalPeriodeEtterVilkårsprøving(1.vedtaksperiode, orgnummer = a1)
+        assertTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
+        assertTilstand(2.vedtaksperiode, AVSLUTTET, orgnummer = a2)
+    }
+
     private fun utbetalPeriodeEtterVilkårsprøving(vedtaksperiode: IdInnhenter, orgnummer: String) {
         håndterYtelser(vedtaksperiode, orgnummer = orgnummer)
         håndterSimulering(vedtaksperiode, orgnummer = orgnummer)
