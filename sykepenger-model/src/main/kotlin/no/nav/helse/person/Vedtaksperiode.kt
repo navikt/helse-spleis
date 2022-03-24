@@ -663,8 +663,12 @@ internal class Vedtaksperiode private constructor(
     private fun alleAndreAvventerArbeidsgivere() = overlappendeVedtaksperioder().all { it == this || it.tilstand == AvventerArbeidsgivere }
 
     private fun forberedMuligUtbetaling(vilkårsgrunnlag: Vilkårsgrunnlag) {
-        håndter(vilkårsgrunnlag, nesteTilstand())
-        Companion.gjenopptaBehandling(vilkårsgrunnlag, person, AvventerArbeidsgivere, AvventerHistorikk)
+        if (Toggle.NyTilstandsflyt.enabled) {
+            håndter(vilkårsgrunnlag, AvventerHistorikk)
+        } else {
+            håndter(vilkårsgrunnlag, nesteTilstand())
+            Companion.gjenopptaBehandling(vilkårsgrunnlag, person, AvventerArbeidsgivere, AvventerHistorikk)
+        }
     }
 
     private fun forberedMuligUtbetaling(inntektsmelding: Inntektsmelding) {
@@ -694,33 +698,47 @@ internal class Vedtaksperiode private constructor(
         hendelse: ArbeidstakerHendelse
     ) {
         val vedtaksperioder = person.nåværendeVedtaksperioder(IKKE_FERDIG_BEHANDLET)
+        if (Toggle.NyTilstandsflyt.enabled) {
+            forsøkUtbetalingNyFlyt(maksimumSykepenger, hendelse, vedtaksperioder)
+        } else {
+            forsøkUtbetalingGammelFlyt(maksimumSykepenger, hendelse, vedtaksperioder)
+        }
+    }
+
+    fun forsøkUtbetalingNyFlyt(
+        maksimumSykepenger: Alder.MaksimumSykepenger,
+        hendelse: ArbeidstakerHendelse,
+        vedtaksperioder: List<Vedtaksperiode>
+    ) {
+        vedtaksperioder
+            .filter { this.periode.overlapperMed(it.periode) }
+            .forEach { it.lagUtbetaling(maksimumSykepenger, hendelse) }
+        høstingsresultater(hendelse, vedtaksperioder.drop(1))
+    }
+
+    fun forsøkUtbetalingGammelFlyt(maksimumSykepenger: Alder.MaksimumSykepenger, hendelse: ArbeidstakerHendelse, vedtaksperioder: List<Vedtaksperiode>) {
         val første = vedtaksperioder.first()
         if (første == this) {
-            return første.forsøkUtbetalingSteg2(vedtaksperioder.drop(1), maksimumSykepenger, hendelse)
+            val andreVedtaksperioder = vedtaksperioder.drop(1)
+            if (andreVedtaksperioder
+                    .filter { første.periode.overlapperMed(it.periode) }
+                    .all { it.tilstand == AvventerArbeidsgivere }
+            ) {
+                vedtaksperioder
+                    .filter { første.periode.overlapperMed(it.periode) }
+                    .forEach { it.lagUtbetaling(maksimumSykepenger, hendelse) }
+                første.høstingsresultater(hendelse, andreVedtaksperioder)
+            } else {
+                første.tilstand(hendelse, AvventerArbeidsgivere)
+            }
+        } else {
+            this.tilstand(hendelse, AvventerArbeidsgivere)
+            Companion.gjenopptaBehandling(hendelse, person, AvventerArbeidsgivere, AvventerHistorikk)
         }
-
-        this.tilstand(hendelse, AvventerArbeidsgivere)
-        Companion.gjenopptaBehandling(hendelse, person, AvventerArbeidsgivere, AvventerHistorikk)
     }
 
     private fun lagUtbetaling(maksimumSykepenger: Alder.MaksimumSykepenger, hendelse: ArbeidstakerHendelse) {
         utbetalingstidslinje = utbetalinger.lagUtbetaling(fødselsnummer, periode, maksimumSykepenger, hendelse)
-    }
-
-    private fun forsøkUtbetalingSteg2(
-        andreVedtaksperioder: List<Vedtaksperiode>,
-        maksimumSykepenger: Alder.MaksimumSykepenger,
-        hendelse: ArbeidstakerHendelse
-    ) {
-        if (andreVedtaksperioder
-                .filter { this.periode.overlapperMed(it.periode) }
-                .all { it.tilstand == AvventerArbeidsgivere }
-        ) {
-            (andreVedtaksperioder + this)
-                .filter { this.periode.overlapperMed(it.periode) }
-                .forEach { it.lagUtbetaling(maksimumSykepenger, hendelse) }
-            høstingsresultater(hendelse, andreVedtaksperioder)
-        } else tilstand(hendelse, AvventerArbeidsgivere)
     }
 
     private fun høstingsresultater(hendelse: ArbeidstakerHendelse, andreVedtaksperioder: List<Vedtaksperiode>) {
