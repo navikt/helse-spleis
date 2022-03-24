@@ -62,6 +62,7 @@ internal class TestArbeidsgiverInspektør(
     private val hendelseIder = mutableMapOf<Int, Set<Dokumentsporing>>()
     private val inntektskilder = mutableMapOf<Int, Inntektskilde>()
     private val periodetyper = mutableMapOf<Int, () -> Periodetype>()
+    private val sykmeldingsperioder = mutableListOf<Periode>()
 
     internal fun vilkårsgrunnlagHistorikkInnslag() = personInspektør.vilkårsgrunnlagHistorikkInnslag()
 
@@ -351,6 +352,10 @@ internal class TestArbeidsgiverInspektør(
         }
     }
 
+    override fun visitSykmeldingsperiode(periode: Periode) {
+        this.sykmeldingsperioder.add(periode)
+    }
+
     private inner class VedtaksperiodeSykdomstidslinjeinnhenter: VedtaksperiodeVisitor {
         private lateinit var vedtaksperiodeId: UUID
         override fun preVisitVedtaksperiode(
@@ -439,6 +444,8 @@ internal class TestArbeidsgiverInspektør(
     internal fun periodetype(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperiodeIdInnhenter.finn(periodetyper)()
 
     internal fun vedtaksperiodeId(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperiodeIdInnhenter.id(orgnummer)
+
+    internal fun sykmeldingsperioder() = sykmeldingsperioder.toList()
 
     internal data class UtbetalingstidslinjeberegningData(
         val id: UUID,
