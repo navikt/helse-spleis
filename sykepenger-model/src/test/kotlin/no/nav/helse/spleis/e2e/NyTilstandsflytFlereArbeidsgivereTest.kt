@@ -21,7 +21,6 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class NyTilstandsflytFlereArbeidsgivereTest : AbstractEndToEndTest() {
@@ -121,21 +120,42 @@ internal class NyTilstandsflytFlereArbeidsgivereTest : AbstractEndToEndTest() {
 
         håndterInntektsmelding(listOf(5.januar til 20.januar), orgnummer = a2)
 
-        utbetalFerdigPeriode(1.vedtaksperiode, a1, 1.januar)
+        utbetalPeriode(1.vedtaksperiode, a1, 1.januar)
 
         assertTilstand(1.vedtaksperiode, AVSLUTTET, a1)
+
+        håndterSykmelding(Sykmeldingsperiode(6.februar, 26.februar, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a1)
+
+        utbetalPeriodeEtterVilkårsprøving(1.vedtaksperiode, a2)
+        assertTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
+
+        håndterSøknad(Sykdom(6.februar, 26.februar, 100.prosent), orgnummer = a2)
+        assertTilstand(2.vedtaksperiode, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, orgnummer = a1)
+        assertTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
+
+        utbetalPeriodeEtterVilkårsprøving(2.vedtaksperiode, orgnummer = a2)
+        assertTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
+        assertTilstand(2.vedtaksperiode, AVSLUTTET, orgnummer = a2)
+
+        utbetalPeriodeEtterVilkårsprøving(2.vedtaksperiode, orgnummer = a1)
+        assertTilstand(2.vedtaksperiode, AVSLUTTET, orgnummer = a1)
     }
 
-    private fun utbetalFerdigPeriode(vedtaksperiode: IdInnhenter, orgnummer: String, skjæringstidspunkt: LocalDate) {
+    private fun utbetalPeriodeEtterVilkårsprøving(vedtaksperiode: IdInnhenter, orgnummer: String) {
+        håndterYtelser(vedtaksperiode, orgnummer = orgnummer)
+        håndterSimulering(vedtaksperiode, orgnummer = orgnummer)
+        håndterUtbetalingsgodkjenning(vedtaksperiode, orgnummer = orgnummer)
+        håndterUtbetalt(orgnummer = orgnummer)
+    }
+
+    private fun utbetalPeriode(vedtaksperiode: IdInnhenter, orgnummer: String, skjæringstidspunkt: LocalDate) {
         håndterYtelser(vedtaksperiode, orgnummer = orgnummer)
         håndterVilkårsgrunnlag(vedtaksperiode, orgnummer = orgnummer, inntektsvurdering = Inntektsvurdering(listOf(
             sammenligningsgrunnlag(a1, skjæringstidspunkt, 31000.månedlig.repeat(12)),
             sammenligningsgrunnlag(a2, skjæringstidspunkt, 31000.månedlig.repeat(12)),
         )))
-        håndterYtelser(vedtaksperiode, orgnummer = orgnummer)
-        håndterSimulering(vedtaksperiode, orgnummer = orgnummer)
-        håndterUtbetalingsgodkjenning(vedtaksperiode, orgnummer = orgnummer)
-        håndterUtbetalt(orgnummer = orgnummer)
+        utbetalPeriodeEtterVilkårsprøving(vedtaksperiode, orgnummer)
     }
 
 }
