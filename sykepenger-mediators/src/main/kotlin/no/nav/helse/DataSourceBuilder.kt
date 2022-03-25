@@ -18,7 +18,7 @@ internal class DataSourceBuilder(env: Map<String, String>) {
         username = requireNotNull(env["DATABASE_USERNAME"]) { "databasebrukernavn må settes" }
         password = requireNotNull(env["DATABASE_PASSWORD"]) { "databasepassord må settes" }
         maximumPoolSize = 1
-        connectionTimeout = Duration.ofSeconds(5).toMillis()
+        connectionTimeout = Duration.ofSeconds(30).toMillis()
         maxLifetime = Duration.ofMinutes(30).toMillis()
         initializationFailTimeout = Duration.ofMinutes(1).toMillis()
     }
