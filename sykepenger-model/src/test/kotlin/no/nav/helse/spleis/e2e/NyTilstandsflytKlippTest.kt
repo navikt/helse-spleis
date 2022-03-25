@@ -115,6 +115,41 @@ internal class NyTilstandsflytKlippTest : AbstractEndToEndTest() {
         )
     }
 
+    @Test
+    fun `drawio -- starter før slutter inni`() {
+        håndterSykmelding(Sykmeldingsperiode(20.januar, 15.februar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.februar, 15.februar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        utbetalPeriode(1.vedtaksperiode)
+        utbetalPeriodeEtterVilkårsprøving(2.vedtaksperiode)
+        assertTilstander(
+            1.vedtaksperiode,
+            START,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET
+        )
+        assertTilstander(
+            2.vedtaksperiode,
+            START,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET
+        )
+    }
+
     private fun utbetalPeriodeEtterVilkårsprøving(vedtaksperiode: IdInnhenter) {
         håndterYtelser(vedtaksperiode)
         håndterSimulering(vedtaksperiode)
