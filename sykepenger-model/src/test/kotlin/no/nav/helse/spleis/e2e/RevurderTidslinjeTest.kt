@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
 
 internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
 
@@ -1497,6 +1498,25 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             AVSLUTTET,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING,
+        )
+    }
+
+    @Test
+    fun `Forlengelse med kun helg og arbeid hvor en arbeidsdag blir overstyrt til ferie`() {
+        nyttVedtak(1.januar, 19.januar)
+        håndterSykmelding(Sykmeldingsperiode(20.januar, 31.januar, 100.prosent))
+        håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(20.januar, 31.januar, 100.prosent), Arbeid(22.januar, 31.januar))
+        håndterYtelser(2.vedtaksperiode)
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(24.januar, Dagtype.Feriedag)))
+        håndterYtelser(2.vedtaksperiode)
+        assertTilstander(
+            2.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
+            AVVENTER_HISTORIKK,
+            AVSLUTTET,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVSLUTTET
         )
     }
 
