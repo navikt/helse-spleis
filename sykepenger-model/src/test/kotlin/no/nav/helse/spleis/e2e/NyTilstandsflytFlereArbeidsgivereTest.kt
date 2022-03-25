@@ -281,6 +281,45 @@ internal class NyTilstandsflytFlereArbeidsgivereTest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `drawio -- Må vente på alle IM (gap)`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 22.januar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(25.januar, 17.februar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(25.januar, 17.februar, 100.prosent), orgnummer = a2)
+
+        håndterSøknad(Sykdom(1.januar, 22.januar, 100.prosent), orgnummer = a1)
+
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        assertForventetFeil(
+            forklaring = "Vedtaksperioden kan gå videre til AvventerHistorikk siden vi har gap til neste periode",
+            nå = { assertTilstand(1.vedtaksperiode, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, orgnummer = a1) },
+            ønsket = { assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1) }
+        )
+
+        håndterSøknad(Sykdom(25.januar, 17.februar, 100.prosent), orgnummer = a1)
+        assertTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, orgnummer = a1)
+
+        håndterSøknad(Sykdom(25.januar, 17.februar, 100.prosent), orgnummer = a2)
+        assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, orgnummer = a2)
+
+        håndterInntektsmelding(listOf(25.januar til 9.februar), orgnummer = a1)
+        håndterInntektsmelding(listOf(25.januar til 9.februar), orgnummer = a2)
+        assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
+        assertTilstand(2.vedtaksperiode, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, orgnummer = a1)
+        assertTilstand(1.vedtaksperiode, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, orgnummer = a2)
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
+        utbetalPeriodeEtterVilkårsprøving(1.vedtaksperiode, orgnummer = a1)
+        assertTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+
+        utbetalPeriode(2.vedtaksperiode, orgnummer = a1, 25.januar)
+        assertTilstand(2.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+
+        utbetalPeriodeEtterVilkårsprøving(1.vedtaksperiode, orgnummer = a2)
+        assertTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
+    }
+
+    @Test
     fun `Kort periode skal ikke blokkeres av mangelende søknad`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar, 100.prosent), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar, 100.prosent), orgnummer = a2)
