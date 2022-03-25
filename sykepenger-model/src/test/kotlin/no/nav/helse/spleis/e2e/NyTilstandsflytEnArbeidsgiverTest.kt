@@ -14,7 +14,6 @@ import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER
-import no.nav.helse.person.TilstandType.AVVENTER_UFERDIG
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
@@ -150,5 +149,18 @@ internal class NyTilstandsflytEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.januar til 16.januar))
 
         assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
+    }
+
+    @Test
+    fun `Går til AvventerInntektsmelding ved gap`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 22.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(25.januar, 17.februar, 100.prosent))
+
+        håndterSøknad(Sykdom(1.januar, 22.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+
+        håndterSøknad(Sykdom(25.januar, 17.februar, 100.prosent))
+
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
     }
 }
