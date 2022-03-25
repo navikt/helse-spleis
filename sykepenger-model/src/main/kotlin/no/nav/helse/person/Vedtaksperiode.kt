@@ -763,12 +763,7 @@ internal class Vedtaksperiode private constructor(
             utbetalingsfilter.kanIkkeUtbetales(hendelse) -> {
                 person.invaliderAllePerioder(hendelse, "Kan ikke fortsette på grunn av manglende funksjonalitet for utbetaling til bruker")
             }
-            ingenUtbetaling && Toggle.IngenUtbetalingTilGodkjenning.enabled -> {
-                tilstand(hendelse, AvventerGodkjenning) {
-                    hendelse.info("""Saken oppfyller krav for behandling, settes til "Avventer godkjenning" fordi ingenting skal utbetales""")
-                }
-            }
-            ingenUtbetaling && kunArbeidsgiverdager && !vedtaksperiodeHarWarnings -> {
+            ingenUtbetaling && kunArbeidsgiverdager && !vedtaksperiodeHarWarnings && Toggle.AvsluttIngenUtbetaling.enabled -> {
                 tilstand(hendelse, Avsluttet) {
                     hendelse.info("""Saken inneholder ingen utbetalingsdager for Nav og avsluttes""")
                 }
@@ -818,12 +813,7 @@ internal class Vedtaksperiode private constructor(
     private fun høstingsresultaterRevurdering(hendelse: ArbeidstakerHendelse) {
         hendelse.info("Videresender utbetaling til alle vedtaksperioder innenfor samme fagsystemid som er til revurdering")
         when {
-            !utbetalinger.harUtbetalinger() && Toggle.IngenUtbetalingTilGodkjenning.enabled -> {
-                tilstand(hendelse, AvventerGodkjenningRevurdering) {
-                    hendelse.info("""Saken oppfyller krav for behandling, settes til "Avventer godkjenning" fordi ingenting skal utbetales""")
-                }
-            }
-            !utbetalinger.harUtbetalinger() && utbetalingstidslinje.kunArbeidsgiverdager() && !person.aktivitetslogg.logg(this).hasWarningsOrWorse() -> {
+            !utbetalinger.harUtbetalinger() && utbetalingstidslinje.kunArbeidsgiverdager() && !person.aktivitetslogg.logg(this).hasWarningsOrWorse() && Toggle.AvsluttIngenUtbetaling.enabled -> {
                 tilstand(hendelse, Avsluttet) {
                     hendelse.info("""Saken inneholder ingen utbetalingsdager for Nav og avsluttes""")
                 }

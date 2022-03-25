@@ -137,7 +137,7 @@ internal class ManglendeVilkårsgrunnlagTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `periode etter en periode med ferie - opphav i Infotrygd - Avsluttes via godkjenningsbehov`() = Toggle.IngenUtbetalingTilGodkjenning.enable {
+    fun `periode etter en periode med ferie - opphav i Infotrygd - Avsluttes via godkjenningsbehov`() = Toggle.AvsluttIngenUtbetaling.disable {
         håndterInntektsmelding(listOf(15.november(2017) til 30.november(2017)))
         val historikk = ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.desember(2017), 31.desember(2017), 100.prosent, INNTEKT)
         val inntektshistorikk = listOf(

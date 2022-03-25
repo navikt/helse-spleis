@@ -322,7 +322,7 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Ferie teller likt som utbetaling når vi skal sjekke om vi har nærliggende utbetaling - Avsluttes via godkjenningsbehov`() = Toggle.IngenUtbetalingTilGodkjenning.enable {
+    fun `Ferie teller likt som utbetaling når vi skal sjekke om vi har nærliggende utbetaling - Avsluttes via godkjenningsbehov`() = Toggle.AvsluttIngenUtbetaling.disable {
         nyttVedtak(1.mars, 31.mars)
 
         håndterSykmelding(Sykmeldingsperiode(1.april, 30.april, 100.prosent))

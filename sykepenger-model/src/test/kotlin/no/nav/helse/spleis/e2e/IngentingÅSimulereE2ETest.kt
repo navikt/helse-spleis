@@ -33,7 +33,7 @@ internal class IngentingÅSimulereE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `forlenger et vedtak med bare helg - Avsluttes via godkjenningsbehov`() = Toggle.IngenUtbetalingTilGodkjenning.enable {
+    fun `forlenger et vedtak med bare helg - Avsluttes via godkjenningsbehov`() = Toggle.AvsluttIngenUtbetaling.disable {
         nyttVedtak(1.januar, 19.januar)
         håndterSykmelding(Sykmeldingsperiode(20.januar, 21.januar, 100.prosent))
         håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(20.januar, 21.januar, 100.prosent))
@@ -58,7 +58,7 @@ internal class IngentingÅSimulereE2ETest : AbstractEndToEndTest() {
 
 
     @Test
-    fun `førstegangsbehandling på eksisterende utbetaling med bare helg - Avsluttes via godkjenningsbehov`() = Toggle.IngenUtbetalingTilGodkjenning.enable {
+    fun `førstegangsbehandling på eksisterende utbetaling med bare helg - Avsluttes via godkjenningsbehov`() = Toggle.AvsluttIngenUtbetaling.disable {
         nyttVedtak(1.januar, 18.januar)
         håndterSykmelding(Sykmeldingsperiode(20.januar, 21.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(2.vedtaksperiode, listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 20.januar)
@@ -83,7 +83,7 @@ internal class IngentingÅSimulereE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `forlenger et vedtak med bare helg og litt ferie - Avsluttes via godkjenningsbehov`() = Toggle.IngenUtbetalingTilGodkjenning.enable {
+    fun `forlenger et vedtak med bare helg og litt ferie - Avsluttes via godkjenningsbehov`() = Toggle.AvsluttIngenUtbetaling.disable {
         nyttVedtak(1.januar, 19.januar)
         håndterSykmelding(Sykmeldingsperiode(20.januar, 23.januar, 100.prosent))
         håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(20.januar, 23.januar, 100.prosent), Ferie(22.januar, 23.januar))

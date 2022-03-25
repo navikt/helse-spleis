@@ -1521,7 +1521,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Forlengelse med kun helg og arbeid hvor en arbeidsdag blir overstyrt til ferie - Avsluttes via godkjenningsbehov`() = Toggle.IngenUtbetalingTilGodkjenning.enable {
+    fun `Forlengelse med kun helg og arbeid hvor en arbeidsdag blir overstyrt til ferie - Avsluttes via godkjenningsbehov`() = Toggle.AvsluttIngenUtbetaling.disable {
         nyttVedtak(1.januar, 19.januar)
         håndterSykmelding(Sykmeldingsperiode(20.januar, 31.januar, 100.prosent))
         håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(20.januar, 31.januar, 100.prosent), Arbeid(22.januar, 31.januar))

@@ -75,7 +75,7 @@ internal class VedtakFattetE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `sender vedtak fattet for forlengelseperioder utenfor arbeidsgiverperioden med bare ferie - Avsluttes via godkjenningsbehov`() = Toggle.IngenUtbetalingTilGodkjenning.enable {
+    fun `sender vedtak fattet for forlengelseperioder utenfor arbeidsgiverperioden med bare ferie - Avsluttes via godkjenningsbehov`() = Toggle.AvsluttIngenUtbetaling.disable {
         nyttVedtak(1.januar, 20.januar, 100.prosent)
         håndterSykmelding(Sykmeldingsperiode(21.januar, 31.januar, 100.prosent))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(21.januar, 31.januar, 100.prosent), Ferie(21.januar, 31.januar))
