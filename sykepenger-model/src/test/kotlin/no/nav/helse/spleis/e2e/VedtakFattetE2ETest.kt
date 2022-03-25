@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.Toggle
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -63,6 +64,23 @@ internal class VedtakFattetE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(21.januar, 31.januar, 100.prosent))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(21.januar, 31.januar, 100.prosent), Ferie(21.januar, 31.januar))
         håndterYtelser(2.vedtaksperiode)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
+        assertEquals(2, inspektør.utbetalinger.size)
+        assertEquals(1, observatør.utbetalingUtenUtbetalingEventer.size)
+        assertEquals(1, observatør.utbetalingMedUtbetalingEventer.size)
+        assertEquals(2, observatør.vedtakFattetEvent.size)
+        val event = observatør.vedtakFattetEvent.getValue(2.vedtaksperiode.id(ORGNUMMER))
+        assertEquals(inspektør.utbetaling(1).inspektør.utbetalingId, event.utbetalingId)
+        assertEquals(Utbetaling.GodkjentUtenUtbetaling, inspektør.utbetaling(1).inspektør.tilstand)
+    }
+
+    @Test
+    fun `sender vedtak fattet for forlengelseperioder utenfor arbeidsgiverperioden med bare ferie - Avsluttes via godkjenningsbehov`() = Toggle.IngenUtbetalingTilGodkjenning.enable {
+        nyttVedtak(1.januar, 20.januar, 100.prosent)
+        håndterSykmelding(Sykmeldingsperiode(21.januar, 31.januar, 100.prosent))
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(21.januar, 31.januar, 100.prosent), Ferie(21.januar, 31.januar))
+        håndterYtelser(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
         assertEquals(2, inspektør.utbetalinger.size)
         assertEquals(1, observatør.utbetalingUtenUtbetalingEventer.size)

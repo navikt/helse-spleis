@@ -763,6 +763,11 @@ internal class Vedtaksperiode private constructor(
             utbetalingsfilter.kanIkkeUtbetales(hendelse) -> {
                 person.invaliderAllePerioder(hendelse, "Kan ikke fortsette på grunn av manglende funksjonalitet for utbetaling til bruker")
             }
+            ingenUtbetaling && Toggle.IngenUtbetalingTilGodkjenning.enabled -> {
+                tilstand(hendelse, AvventerGodkjenning) {
+                    hendelse.info("""Saken oppfyller krav for behandling, settes til "Avventer godkjenning" fordi ingenting skal utbetales""")
+                }
+            }
             ingenUtbetaling && kunArbeidsgiverdager && !vedtaksperiodeHarWarnings -> {
                 tilstand(hendelse, Avsluttet) {
                     hendelse.info("""Saken inneholder ingen utbetalingsdager for Nav og avsluttes""")
@@ -806,13 +811,18 @@ internal class Vedtaksperiode private constructor(
         when {
             !andreVedtaksperioder.erKlareTilGodkjenning() -> tilstand(hendelse, AvventerArbeidsgivereRevurdering)
             !arbeidsgiver.alleAndrePerioderErKlare(this) -> tilstand(hendelse, AvventerGjennomførtRevurdering)
-            else -> høstingsresultaterRevurdering(hendelse, andreVedtaksperioder)
+            else -> høstingsresultaterRevurdering(hendelse)
         }
     }
 
-    private fun høstingsresultaterRevurdering(hendelse: ArbeidstakerHendelse, andreVedtaksperioder: List<Vedtaksperiode>) {
+    private fun høstingsresultaterRevurdering(hendelse: ArbeidstakerHendelse) {
         hendelse.info("Videresender utbetaling til alle vedtaksperioder innenfor samme fagsystemid som er til revurdering")
         when {
+            !utbetalinger.harUtbetalinger() && Toggle.IngenUtbetalingTilGodkjenning.enabled -> {
+                tilstand(hendelse, AvventerGodkjenningRevurdering) {
+                    hendelse.info("""Saken oppfyller krav for behandling, settes til "Avventer godkjenning" fordi ingenting skal utbetales""")
+                }
+            }
             !utbetalinger.harUtbetalinger() && utbetalingstidslinje.kunArbeidsgiverdager() && !person.aktivitetslogg.logg(this).hasWarningsOrWorse() -> {
                 tilstand(hendelse, Avsluttet) {
                     hendelse.info("""Saken inneholder ingen utbetalingsdager for Nav og avsluttes""")

@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
+import no.nav.helse.Toggle
 
 internal class VedtakkontraktTest : AbstractEndToEndMediatorTest() {
 
@@ -60,6 +61,29 @@ internal class VedtakkontraktTest : AbstractEndToEndMediatorTest() {
             fravær = listOf(FravarDTO(fom = 27.januar, tom = 31.januar, FravarstypeDTO.FERIE))
         )
         sendYtelserUtenSykepengehistorikk(1)
+        assertVedtakMedUtbetalingUtenUtbetaling()
+    }
+
+    @Test
+    fun `vedtak med utbetaling uten utbetaling - Avsluttes via godkjenningsbehov`() = Toggle.IngenUtbetalingTilGodkjenning.enable {
+        sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+        sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
+        sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
+        sendYtelser(0)
+        sendVilkårsgrunnlag(0)
+        sendYtelser(0)
+        sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
+        sendUtbetalingsgodkjenning(0)
+        sendUtbetaling()
+
+        sendNySøknad(SoknadsperiodeDTO(fom = 27.januar, tom = 31.januar, sykmeldingsgrad = 100))
+        sendSøknad(
+            1,
+            listOf(SoknadsperiodeDTO(fom = 27.januar, tom = 31.januar, sykmeldingsgrad = 100)),
+            fravær = listOf(FravarDTO(fom = 27.januar, tom = 31.januar, FravarstypeDTO.FERIE))
+        )
+        sendYtelserUtenSykepengehistorikk(1)
+        sendUtbetalingsgodkjenning(1)
         assertVedtakMedUtbetalingUtenUtbetaling()
     }
 
