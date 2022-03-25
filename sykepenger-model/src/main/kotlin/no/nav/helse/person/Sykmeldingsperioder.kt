@@ -1,5 +1,6 @@
 package no.nav.helse.person
 
+import java.time.YearMonth
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 
@@ -19,6 +20,9 @@ internal class Sykmeldingsperioder(
         val nyPeriode = sammenhengendePerioder.minOf { it.start } til sammenhengendePerioder.maxOf { it.endInclusive }
         perioder = (gapPerioder + listOf(nyPeriode)).sortedBy { it.start }
     }
+
+    internal fun harSykmeldingsperiodeI(måned: YearMonth): Boolean =
+        perioder.flatten().any { YearMonth.from(it) == måned }
 
     internal fun kanFortsetteBehandling(vedtaksperiode: Periode): Boolean {
         val lavesteDato = perioder.minOfOrNull { it.start } ?: return true

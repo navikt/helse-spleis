@@ -257,6 +257,47 @@ internal class NyTilstandsflytFlereArbeidsgivereTest : AbstractEndToEndTest() {
         )
     }
 
+    @Test
+    fun `drawio -- Må vente på alle IM (forlengelse)`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 17.januar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(18.januar, 17.februar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(18.januar, 17.februar, 100.prosent), orgnummer = a2)
+
+        håndterSøknad(Sykdom(1.januar, 17.januar, 100.prosent), orgnummer = a1)
+
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        assertTilstand(1.vedtaksperiode, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, orgnummer = a1)
+
+        håndterSøknad(Sykdom(18.januar, 17.februar, 100.prosent), orgnummer = a1)
+        assertTilstand(2.vedtaksperiode, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, orgnummer = a1)
+
+        håndterSøknad(Sykdom(18.januar, 17.februar, 100.prosent), orgnummer = a2)
+        assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, orgnummer = a2)
+
+        håndterInntektsmelding(listOf(18.januar til 2.februar), orgnummer = a2)
+        assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
+        assertTilstand(2.vedtaksperiode, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, orgnummer = a1)
+        assertTilstand(1.vedtaksperiode, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, orgnummer = a2)
+    }
+
+    @Test
+    fun `Kort periode skal ikke blokkeres av mangelende søknad`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar, 100.prosent), orgnummer = a2)
+
+        håndterSykmelding(Sykmeldingsperiode(21.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(21.januar, 31.januar, 100.prosent), orgnummer = a2)
+
+        håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), orgnummer = a2)
+
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
+
+        assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
+        assertTilstand(1.vedtaksperiode, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, orgnummer = a2)
+    }
+
     private fun utbetalPeriodeEtterVilkårsprøving(vedtaksperiode: IdInnhenter, orgnummer: String) {
         håndterYtelser(vedtaksperiode, orgnummer = orgnummer)
         håndterSimulering(vedtaksperiode, orgnummer = orgnummer)

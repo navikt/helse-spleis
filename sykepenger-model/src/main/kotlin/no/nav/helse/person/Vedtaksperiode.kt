@@ -44,6 +44,7 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.medlemskap
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.omsorgspenger
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.opplæringspenger
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.pleiepenger
+import no.nav.helse.person.Arbeidsgiver.Companion.trengerSøknadISammeMåned
 import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigInntekt
 import no.nav.helse.person.Dokumentsporing.Companion.ider
 import no.nav.helse.person.ForlengelseFraInfotrygd.JA
@@ -392,6 +393,9 @@ internal class Vedtaksperiode private constructor(
     private fun harInntektsmelding() = arbeidsgiver.harInntektsmelding(skjæringstidspunkt)
     internal fun harNødvendigInntekt(arbeidsgivere: Iterable<Arbeidsgiver>) =
         arbeidsgivere.harNødvendigInntekt(skjæringstidspunkt)
+
+    internal fun trengerSøknadISammeMåned(arbeidsgivere: Iterable<Arbeidsgiver>) =
+        arbeidsgivere.trengerSøknadISammeMåned(skjæringstidspunkt)
 
     private fun avgjørTilstandForInntekt(): Vedtaksperiodetilstand {
         val rettFør = arbeidsgiver.finnSykeperiodeRettFør(this)

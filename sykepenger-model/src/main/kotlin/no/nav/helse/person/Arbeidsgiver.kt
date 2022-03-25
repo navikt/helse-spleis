@@ -2,6 +2,7 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.Toggle
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
@@ -267,11 +268,16 @@ internal class Arbeidsgiver private constructor(
         internal fun Iterable<Arbeidsgiver>.harNødvendigInntekt(skjæringstidspunkt: LocalDate) =
             filter { it.harSykdomFor(skjæringstidspunkt) }.all { it.harInntektsmelding(skjæringstidspunkt) }
 
+        internal fun Iterable<Arbeidsgiver>.trengerSøknadISammeMåned(skjæringstidspunkt: LocalDate) = this
+            .filter { !it.harSykdomFor(skjæringstidspunkt) }
+            .any { it.sykmeldingsperioder.harSykmeldingsperiodeI(YearMonth.from(skjæringstidspunkt)) }
+
         internal fun Iterable<Arbeidsgiver>.gjenopptaBehandlingNy(aktivitetslogg: IAktivitetslogg) {
             val førstePeriode = nåværendeVedtaksperioder(IKKE_FERDIG_BEHANDLET)
                 .sortedBy { it.periode().endInclusive }
                 .firstOrNull() ?: return
 
+            if (førstePeriode.trengerSøknadISammeMåned(this)) return
             if (!førstePeriode.harNødvendigInntekt(this)) return
 
             if (all { it.sykmeldingsperioder.kanFortsetteBehandling(førstePeriode.periode()) }) {

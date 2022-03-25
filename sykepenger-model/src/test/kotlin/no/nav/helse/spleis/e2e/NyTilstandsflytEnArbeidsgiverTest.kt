@@ -141,4 +141,14 @@ internal class NyTilstandsflytEnArbeidsgiverTest : AbstractEndToEndTest() {
             AVVENTER_HISTORIKK
         )
     }
+
+    @Test
+    fun `Kort periode skal ikke blokkeres av mangelende søknad`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(21.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+
+        assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
+    }
 }
