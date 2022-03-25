@@ -162,7 +162,6 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
     }
 
     @Test
-    @ForventetFeil("Denne er skrudd av i påvente av at vi skal støtte revurdering over skjæringstidspunkt")
     fun `overstyr inntekt to vedtak med kort opphold`() {
         nyttVedtak(1.januar, 26.januar, 100.prosent)
 
@@ -178,52 +177,86 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
 
         håndterOverstyrInntekt(inntekt = 32000.månedlig, skjæringstidspunkt = 1.januar)
 
-        håndterYtelser(1.vedtaksperiode)
-        håndterYtelser(2.vedtaksperiode)
-        håndterSimulering(2.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
-        håndterUtbetalt()
+        assertForventetFeil(
+            forklaring = "Denne er skrudd av i påvente av at vi skal støtte revurdering over skjæringstidspunkt",
+            nå = {
+                assertTilstander(
+                    1.vedtaksperiode,
+                    START,
+                    MOTTATT_SYKMELDING_FERDIG_GAP,
+                    AVVENTER_SØKNAD_FERDIG_GAP,
+                    AVVENTER_HISTORIKK,
+                    AVVENTER_VILKÅRSPRØVING,
+                    AVVENTER_HISTORIKK,
+                    AVVENTER_SIMULERING,
+                    AVVENTER_GODKJENNING,
+                    TIL_UTBETALING,
+                    AVSLUTTET
+                )
 
-        assertTilstander(
-            0,
-            START,
-            MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_SØKNAD_FERDIG_GAP,
-            AVVENTER_HISTORIKK,
-            AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING,
-            TIL_UTBETALING,
-            AVSLUTTET,
-            AVVENTER_VILKÅRSPRØVING_REVURDERING,
-            AVVENTER_HISTORIKK_REVURDERING,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
-            AVSLUTTET,
+                assertTilstander(
+                    2.vedtaksperiode,
+                    START,
+                    MOTTATT_SYKMELDING_FERDIG_GAP,
+                    AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+                    AVVENTER_HISTORIKK,
+                    AVVENTER_VILKÅRSPRØVING,
+                    AVVENTER_HISTORIKK,
+                    AVVENTER_SIMULERING,
+                    AVVENTER_GODKJENNING,
+                    TIL_UTBETALING,
+                    AVSLUTTET
+                )
 
-            )
+                assertEquals(2, inspektør.utbetalinger.filter { it.inspektør.erUtbetalt }.size)
+            },
+            ønsket = {
+                håndterYtelser(1.vedtaksperiode)
+                håndterYtelser(2.vedtaksperiode)
+                håndterSimulering(2.vedtaksperiode)
+                håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
+                håndterUtbetalt()
+                assertTilstander(
+                    1.vedtaksperiode,
+                    START,
+                    MOTTATT_SYKMELDING_FERDIG_GAP,
+                    AVVENTER_SØKNAD_FERDIG_GAP,
+                    AVVENTER_HISTORIKK,
+                    AVVENTER_VILKÅRSPRØVING,
+                    AVVENTER_HISTORIKK,
+                    AVVENTER_SIMULERING,
+                    AVVENTER_GODKJENNING,
+                    TIL_UTBETALING,
+                    AVSLUTTET,
+                    AVVENTER_VILKÅRSPRØVING_REVURDERING,
+                    AVVENTER_HISTORIKK_REVURDERING,
+                    AVVENTER_GJENNOMFØRT_REVURDERING,
+                    AVSLUTTET
+                )
 
-        assertTilstander(
-            1,
-            START,
-            MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            AVVENTER_HISTORIKK,
-            AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING,
-            TIL_UTBETALING,
-            AVSLUTTET,
-            AVVENTER_ARBEIDSGIVERE_REVURDERING,
-            AVVENTER_HISTORIKK_REVURDERING,
-            AVVENTER_SIMULERING_REVURDERING,
-            AVVENTER_GODKJENNING_REVURDERING,
-            TIL_UTBETALING,
-            AVSLUTTET,
+                assertTilstander(
+                    2.vedtaksperiode,
+                    START,
+                    MOTTATT_SYKMELDING_FERDIG_GAP,
+                    AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+                    AVVENTER_HISTORIKK,
+                    AVVENTER_VILKÅRSPRØVING,
+                    AVVENTER_HISTORIKK,
+                    AVVENTER_SIMULERING,
+                    AVVENTER_GODKJENNING,
+                    TIL_UTBETALING,
+                    AVSLUTTET,
+                    AVVENTER_ARBEIDSGIVERE_REVURDERING,
+                    AVVENTER_HISTORIKK_REVURDERING,
+                    AVVENTER_SIMULERING_REVURDERING,
+                    AVVENTER_GODKJENNING_REVURDERING,
+                    TIL_UTBETALING,
+                    AVSLUTTET
+                )
+
+                assertEquals(3, inspektør.utbetalinger.filter { it.inspektør.erUtbetalt }.size)
+            }
         )
-
-        assertEquals(3, inspektør.utbetalinger.filter { it.inspektør.erUtbetalt }.size)
     }
 
     @Test
