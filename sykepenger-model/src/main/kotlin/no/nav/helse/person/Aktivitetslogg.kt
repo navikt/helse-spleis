@@ -1,15 +1,15 @@
 package no.nav.helse.person
 
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.YearMonth
+import java.time.format.DateTimeFormatter
+import java.util.UUID
 import no.nav.helse.hendelser.Hendelseskontekst
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov
 import no.nav.helse.serde.reflection.AktivitetsloggMap
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.YearMonth
-import java.time.format.DateTimeFormatter
-import java.util.*
 
 // Understands issues that arose when analyzing a JSON message
 // Implements Collecting Parameter in Refactoring by Martin Fowler
@@ -533,7 +533,14 @@ class SpesifikkKontekst(internal val kontekstType: String, internal val kontekst
     internal fun sammeType(other: Aktivitetskontekst) = this.kontekstType == other.toSpesifikkKontekst().kontekstType
 
     override fun equals(other: Any?) =
-        this === other || other is SpesifikkKontekst && this.kontekstMap == other.kontekstMap
+        this === other ||
+                (other is SpesifikkKontekst
+                        && this.kontekstMap == other.kontekstMap
+                        && this.kontekstType == other.kontekstType)
 
-    override fun hashCode() = kontekstMap.hashCode()
+    override fun hashCode(): Int {
+        var result = kontekstType.hashCode()
+        result = 31 * result + kontekstMap.hashCode()
+        return result
+    }
 }
