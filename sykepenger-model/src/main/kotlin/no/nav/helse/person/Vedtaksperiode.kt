@@ -1854,8 +1854,8 @@ internal class Vedtaksperiode private constructor(
                     )
                 }
                 onSuccess {
-                    if (arbeidsgiver.erForlengelse(vedtaksperiode.periode)) {
-                        info("Oppdaget at perioden er en forlengelse")
+                    if (arbeidsgiver.erInfotrygdOvergang(vedtaksperiode.periode)) {
+                        info("Oppdaget at perioden er en overgang fra infotrygd")
                         return@onSuccess vedtaksperiode.tilstand(hendelse, AvventerHistorikk).also {
                             arbeidsgiver.finnSykeperiodeRettEtter(vedtaksperiode)?.forlengerInfotrygd(hendelse)
                             vedtaksperiode.kontekst(hendelse)

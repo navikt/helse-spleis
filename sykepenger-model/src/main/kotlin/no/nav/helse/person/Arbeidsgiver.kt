@@ -1049,6 +1049,7 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun erFørstegangsbehandling(periode: Periode) = periodetype(periode) == Periodetype.FØRSTEGANGSBEHANDLING
+    internal fun erInfotrygdOvergang(periode: Periode) = periodetype(periode) == Periodetype.OVERGANG_FRA_IT
     internal fun erForlengelse(periode: Periode) = !erFørstegangsbehandling(periode)
     private fun skjæringstidspunkt(periode: Periode) = person.skjæringstidspunkt(organisasjonsnummer, sykdomstidslinje(), periode)
 
