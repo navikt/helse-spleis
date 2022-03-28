@@ -392,11 +392,14 @@ internal class Vedtaksperiode private constructor(
 
     internal fun gjelder(skjæringstidspunkt: LocalDate) = this.skjæringstidspunkt == skjæringstidspunkt
 
+    internal fun stammerFraInfotrygd() = arbeidsgiver.erInfotrygdOvergangEllerForlengelse(periode)
+
     internal fun inntektskilde() = inntektskilde
     private fun harInntekt() = harInntektsmelding() || arbeidsgiver.grunnlagForSykepengegrunnlag(skjæringstidspunkt, periode.start) != null
     private fun harInntektsmelding() = arbeidsgiver.harInntektsmelding(skjæringstidspunkt)
-    internal fun harNødvendigInntekt(arbeidsgivere: Iterable<Arbeidsgiver>) =
-        arbeidsgivere.harNødvendigInntekt(skjæringstidspunkt)
+
+    internal fun kanGjennoptaBehandling(arbeidsgivere: Iterable<Arbeidsgiver>) =
+        arbeidsgivere.harNødvendigInntekt(skjæringstidspunkt) || stammerFraInfotrygd()
 
     internal fun trengerSøknadISammeMåned(arbeidsgivere: Iterable<Arbeidsgiver>) =
         arbeidsgivere.trengerSøknadISammeMåned(skjæringstidspunkt)
@@ -1854,9 +1857,9 @@ internal class Vedtaksperiode private constructor(
                     )
                 }
                 onSuccess {
-                    if (arbeidsgiver.erInfotrygdOvergang(vedtaksperiode.periode)) {
-                        info("Oppdaget at perioden er en overgang fra infotrygd")
-                        return@onSuccess vedtaksperiode.tilstand(hendelse, AvventerHistorikk).also {
+                    if (vedtaksperiode.stammerFraInfotrygd()) {
+                        info("Oppdaget at perioden startet i infotrygd")
+                        return@onSuccess vedtaksperiode.tilstand(hendelse, AvventerTidligereEllerOverlappendePerioder).also {
                             arbeidsgiver.finnSykeperiodeRettEtter(vedtaksperiode)?.forlengerInfotrygd(hendelse)
                             vedtaksperiode.kontekst(hendelse)
                         }

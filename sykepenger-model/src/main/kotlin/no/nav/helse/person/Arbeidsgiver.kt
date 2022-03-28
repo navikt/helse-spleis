@@ -278,7 +278,7 @@ internal class Arbeidsgiver private constructor(
                 .firstOrNull() ?: return
 
             if (førstePeriode.trengerSøknadISammeMåned(this)) return
-            if (!førstePeriode.harNødvendigInntekt(this)) return
+            if (!førstePeriode.kanGjennoptaBehandling(this)) return
 
             if (all { it.sykmeldingsperioder.kanFortsetteBehandling(førstePeriode.periode()) }) {
                 førstePeriode.gjenopptaBehandlingNy(aktivitetslogg)
@@ -1049,7 +1049,8 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun erFørstegangsbehandling(periode: Periode) = periodetype(periode) == Periodetype.FØRSTEGANGSBEHANDLING
-    internal fun erInfotrygdOvergang(periode: Periode) = periodetype(periode) == Periodetype.OVERGANG_FRA_IT
+    internal fun erInfotrygdOvergangEllerForlengelse(periode: Periode) =
+        periodetype(periode) in arrayOf(Periodetype.OVERGANG_FRA_IT, Periodetype.INFOTRYGDFORLENGELSE)
     internal fun erForlengelse(periode: Periode) = !erFørstegangsbehandling(periode)
     private fun skjæringstidspunkt(periode: Periode) = person.skjæringstidspunkt(organisasjonsnummer, sykdomstidslinje(), periode)
 
