@@ -206,6 +206,28 @@ internal class NyTilstandsflytEnArbeidsgiverTest : AbstractEndToEndTest() {
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
     }
 
+    @Test
+    fun `drawio -- Out of order`() {
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar))
+
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+        håndterInntektsmeldingReplay(inntektsmeldingId, 1.vedtaksperiode.id(ORGNUMMER))
+        assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
+
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmeldingReplay(inntektsmeldingId, 2.vedtaksperiode.id(ORGNUMMER))
+        assertTilstand(1.vedtaksperiode, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER)
+        assertTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK)
+
+        utbetalPeriode(2.vedtaksperiode)
+        assertTilstand(2.vedtaksperiode, AVSLUTTET)
+
+        utbetalPeriodeEtterVilkårsprøving(1.vedtaksperiode)
+        assertTilstand(1.vedtaksperiode, AVSLUTTET)
+    }
+
     private fun utbetalPeriodeEtterVilkårsprøving(vedtaksperiode: IdInnhenter) {
         håndterYtelser(vedtaksperiode)
         håndterSimulering(vedtaksperiode)
