@@ -4,19 +4,19 @@ import no.nav.helse.Toggle
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.januar
 import no.nav.helse.mars
+import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
-import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class NyTilstandsflytInfotrygdTest : AbstractEndToEndTest() {
@@ -141,6 +141,19 @@ internal class NyTilstandsflytInfotrygdTest : AbstractEndToEndTest() {
         )
         assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
         assertTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
+    }
+
+    @Test
+    fun `spør etter infotrygdhistorikk`() {
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+
+        assertEtterspurt(
+            løsning = Utbetalingshistorikk::class,
+            type = Aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            orgnummer = ORGNUMMER
+        )
     }
 
     private fun utbetalPeriode(vedtaksperiode: IdInnhenter) {
