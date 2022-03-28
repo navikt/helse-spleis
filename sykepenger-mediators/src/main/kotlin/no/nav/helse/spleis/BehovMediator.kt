@@ -1,13 +1,13 @@
 package no.nav.helse.spleis
 
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.PersonHendelse
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import org.slf4j.Logger
-import java.time.LocalDateTime
-import java.util.*
 
 internal class BehovMediator(
     private val rapidsConnection: RapidsConnection,
@@ -35,6 +35,7 @@ internal class BehovMediator(
                     "@event_name" to "behov",
                     "@opprettet" to LocalDateTime.now(),
                     "@id" to id,
+                    "@behovId" to UUID.randomUUID(),
                     "@behov" to behovMap.keys,
                     "@forårsaket_av" to message.tracinginfo()
                 )

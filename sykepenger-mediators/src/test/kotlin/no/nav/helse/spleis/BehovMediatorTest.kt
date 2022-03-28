@@ -5,18 +5,26 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.mockk.mockk
-import no.nav.helse.person.*
-import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.*
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
+import no.nav.helse.person.Aktivitetskontekst
+import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Foreldrepenger
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling
+import no.nav.helse.person.ArbeidstakerHendelse
+import no.nav.helse.person.Person
+import no.nav.helse.person.SpesifikkKontekst
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.somFødselsnummer
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertDoesNotThrow
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
 
 class BehovMediatorTest {
 
@@ -94,6 +102,8 @@ class BehovMediatorTest {
             assertEquals("behov", it["@event_name"].asText())
             assertTrue(it.hasNonNull("@id"))
             assertDoesNotThrow { UUID.fromString(it["@id"].asText()) }
+            assertTrue(it.hasNonNull("@behovId"))
+            assertDoesNotThrow { UUID.fromString(it["@behovId"].asText()) }
             assertTrue(it.hasNonNull("@opprettet"))
             assertDoesNotThrow { LocalDateTime.parse(it["@opprettet"].asText()) }
             assertEquals(listOf("Sykepengehistorikk", "Foreldrepenger"), it["@behov"].map(JsonNode::asText))
@@ -109,6 +119,8 @@ class BehovMediatorTest {
             assertTrue(it.hasNonNull("@id"))
             assertDoesNotThrow { UUID.fromString(it["@id"].asText()) }
             assertTrue(it.hasNonNull("@opprettet"))
+            assertTrue(it.hasNonNull("@behovId"))
+            assertDoesNotThrow { UUID.fromString(it["@behovId"].asText()) }
             assertDoesNotThrow { LocalDateTime.parse(it["@opprettet"].asText()) }
             assertEquals(listOf("Utbetaling"), it["@behov"].map(JsonNode::asText))
             assertEquals("behov", it["@event_name"].asText())
