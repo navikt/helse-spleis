@@ -7,6 +7,7 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
+import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
@@ -31,6 +32,47 @@ internal class NyTilstandsflytEnArbeidsgiverTest : AbstractEndToEndTest() {
     @AfterEach
     fun tearDown() {
         Toggle.NyTilstandsflyt.disable()
+    }
+
+    @Test
+    fun `drawio -- misc -- oppvarming`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+
+        utbetalPeriode(1.vedtaksperiode)
+
+        assertTilstander(
+            1.vedtaksperiode,
+            START,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET
+        )
+
+        utbetalPeriodeEtterVilkårsprøving(2.vedtaksperiode)
+
+        assertTilstander(
+            2.vedtaksperiode,
+            START,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET
+        )
     }
 
     @Test
@@ -162,5 +204,18 @@ internal class NyTilstandsflytEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(25.januar, 17.februar, 100.prosent))
 
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
+    }
+
+    private fun utbetalPeriodeEtterVilkårsprøving(vedtaksperiode: IdInnhenter) {
+        håndterYtelser(vedtaksperiode)
+        håndterSimulering(vedtaksperiode)
+        håndterUtbetalingsgodkjenning(vedtaksperiode)
+        håndterUtbetalt()
+    }
+
+    private fun utbetalPeriode(vedtaksperiode: IdInnhenter) {
+        håndterYtelser(vedtaksperiode)
+        håndterVilkårsgrunnlag(vedtaksperiode)
+        utbetalPeriodeEtterVilkårsprøving(vedtaksperiode)
     }
 }
