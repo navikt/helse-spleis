@@ -1832,6 +1832,10 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.trengerHistorikkFraInfotrygd(hendelse)
         }
 
+        override fun leaving(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
+            vedtaksperiode.trengerIkkeInntektsmelding(aktivitetslogg.hendelseskontekst())
+        }
+
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
             vedtaksperiode.håndterInntektsmelding(inntektsmelding, AvventerTidligereEllerOverlappendePerioder)
         }

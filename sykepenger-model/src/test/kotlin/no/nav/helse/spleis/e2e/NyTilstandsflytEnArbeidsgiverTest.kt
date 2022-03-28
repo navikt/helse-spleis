@@ -22,6 +22,8 @@ import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -384,6 +386,16 @@ internal class NyTilstandsflytEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.mars til 16.mars))
         assertTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
         assertTilstand(1.vedtaksperiode, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER)
+    }
+
+    @Test
+    fun `Ber om inntektsmelding i AvventerInntektsmeldingEllerHistorikk og sier ifra at vi ikke trenger når vi forlater tilstanden`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        assertEquals(1, observatør.manglendeInntektsmeldingVedtaksperioder.size)
+        assertEquals(0, observatør.trengerIkkeInntektsmeldingVedtaksperioder.size)
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        assertEquals(1, observatør.trengerIkkeInntektsmeldingVedtaksperioder.size)
     }
 
     private fun utbetalPeriodeEtterVilkårsprøving(vedtaksperiode: IdInnhenter) {
