@@ -1,6 +1,8 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.ForventetFeil
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.januar
 import no.nav.helse.person.TilstandType
 import no.nav.helse.spleis.TestMessageFactory
@@ -11,16 +13,19 @@ import no.nav.syfo.kafka.felles.InntektskildetypeDTO
 import no.nav.syfo.kafka.felles.SoknadsperiodeDTO
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
 
 internal class FlereArbeidsgivereMediatorTest : AbstractEndToEndMediatorTest() {
 
     @Test
     fun `tillater søknader med flere arbeidsforhold`() {
-        sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100), orgnummer = "orgnummer1")
-        sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100), orgnummer = "orgnummer2")
+        sendNySøknad(
+            SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100),
+            orgnummer = "orgnummer1"
+        )
+        sendNySøknad(
+            SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100),
+            orgnummer = "orgnummer2"
+        )
         sendSøknad(
             vedtaksperiodeIndeks = 0,
             perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
@@ -50,8 +55,14 @@ internal class FlereArbeidsgivereMediatorTest : AbstractEndToEndMediatorTest() {
 
     @Test
     fun `tillater ikke søknader med !ANDRE_ARBEIDSFORHOLD`() {
-        sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100), orgnummer = "orgnummer1")
-        sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100), orgnummer = "orgnummer2")
+        sendNySøknad(
+            SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100),
+            orgnummer = "orgnummer1"
+        )
+        sendNySøknad(
+            SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100),
+            orgnummer = "orgnummer2"
+        )
         sendSøknad(
             vedtaksperiodeIndeks = 0,
             perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
@@ -81,8 +92,14 @@ internal class FlereArbeidsgivereMediatorTest : AbstractEndToEndMediatorTest() {
 
     @Test
     fun `tillater søknader med ANDRE_ARBEIDSFORHOLD med og uten sykmelding - når det finnes flere arbeidsgivere med sykdom `() {
-        sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100), orgnummer = "orgnummer1")
-        sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100), orgnummer = "orgnummer2")
+        sendNySøknad(
+            SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100),
+            orgnummer = "orgnummer1"
+        )
+        sendNySøknad(
+            SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100),
+            orgnummer = "orgnummer2"
+        )
         sendSøknad(
             vedtaksperiodeIndeks = 0,
             perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
@@ -176,7 +193,11 @@ internal class FlereArbeidsgivereMediatorTest : AbstractEndToEndMediatorTest() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 14.januar, sykmeldingsgrad = 100))
         sendNySøknad(SoknadsperiodeDTO(fom = 16.januar, tom = 20.januar, sykmeldingsgrad = 100))
 
-        sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 14.januar), Periode(16.januar, 19.januar)), førsteFraværsdag = 16.januar)
+        sendInntektsmelding(
+            0,
+            listOf(Periode(fom = 3.januar, tom = 14.januar), Periode(16.januar, 19.januar)),
+            førsteFraværsdag = 16.januar
+        )
 
         sendSøknad(
             vedtaksperiodeIndeks = 1,

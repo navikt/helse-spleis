@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.meldinger.model
 
+import java.util.UUID
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Utbetalingsgrunnlag
@@ -7,6 +8,7 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.ArbeidsforholdV2
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.InntekterForSykepengegrunnlag
 import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asOptionalLocalDate
 import no.nav.helse.rapids_rivers.asYearMonth
@@ -14,7 +16,6 @@ import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.meldinger.model.VilkårsgrunnlagMessage.Companion.arbeidsgiver
 import no.nav.helse.spleis.meldinger.model.VilkårsgrunnlagMessage.Companion.asInntekttype
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
-import java.util.*
 
 internal class UtbetalingsgrunnlagMessage(packet: JsonMessage) : BehovMessage(packet) {
     private val aktørId = packet["aktørId"].asText()
@@ -48,8 +49,8 @@ internal class UtbetalingsgrunnlagMessage(packet: JsonMessage) : BehovMessage(pa
             )
          }
 
-    override fun behandle(mediator: IHendelseMediator) {
-        mediator.behandle(this, utbetalingsgrunnlag)
+    override fun behandle(mediator: IHendelseMediator, context: MessageContext) {
+        mediator.behandle(this, utbetalingsgrunnlag, context)
     }
 
     private val utbetalingsgrunnlag

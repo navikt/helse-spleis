@@ -4,6 +4,7 @@ import no.nav.helse.hendelser.utbetaling.Grunnbeløpsregulering
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk
 import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.spleis.IHendelseMediator
 
@@ -18,7 +19,7 @@ internal class EtterbetalingMessage(val packet: JsonMessage) : HendelseMessage(p
         UtbetalingshistorikkMessage(packet)
     }
 
-    override fun behandle(mediator: IHendelseMediator) {
+    override fun behandle(mediator: IHendelseMediator, context: MessageContext) {
         val aktivitetslogg = Aktivitetslogg()
         mediator.behandle(
             this,
@@ -30,7 +31,8 @@ internal class EtterbetalingMessage(val packet: JsonMessage) : HendelseMessage(p
                 gyldighetsdato,
                 fagsystemId,
                 aktivitetslogg
-            )
+            ),
+            context
         )
     }
 }

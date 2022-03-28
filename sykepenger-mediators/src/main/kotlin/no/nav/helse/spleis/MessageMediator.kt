@@ -92,7 +92,7 @@ internal class MessageMediator(
                 return
             }
 
-            hendelseMediator.behandle(message)
+            hendelseMediator.behandle(message, context)
             hendelseRepository.markerSomBehandlet(message.id)
         } catch (err: JsonMigrationException) {
             severeErrorHandler(err, message)

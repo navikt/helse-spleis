@@ -1,11 +1,18 @@
 package no.nav.helse.spleis.meldinger.model
 
 import com.fasterxml.jackson.databind.JsonNode
+import java.time.LocalDate
 import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk
-import no.nav.helse.person.infotrygdhistorikk.*
+import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
+import no.nav.helse.person.infotrygdhistorikk.Friperiode
+import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
+import no.nav.helse.person.infotrygdhistorikk.PersonUtbetalingsperiode
+import no.nav.helse.person.infotrygdhistorikk.UgyldigPeriode
+import no.nav.helse.person.infotrygdhistorikk.UkjentInfotrygdperiode
 import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.asOptionalLocalDate
@@ -13,7 +20,6 @@ import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import java.time.LocalDate
 
 // Understands a JSON message representing an Ytelserbehov
 internal class UtbetalingshistorikkMessage(packet: JsonMessage) : BehovMessage(packet) {
@@ -118,7 +124,7 @@ internal class UtbetalingshistorikkMessage(packet: JsonMessage) : BehovMessage(p
             besvart = besvart
         )
 
-    override fun behandle(mediator: IHendelseMediator) {
-        mediator.behandle(this, utbetalingshistorikk())
+    override fun behandle(mediator: IHendelseMediator, context: MessageContext) {
+        mediator.behandle(this, utbetalingshistorikk(), context)
     }
 }

@@ -3,6 +3,7 @@ package no.nav.helse.spleis.meldinger.model
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.spleis.IHendelseMediator
 
 internal class AnnulleringMessage(packet: JsonMessage) : HendelseMessage(packet) {
@@ -24,8 +25,8 @@ internal class AnnulleringMessage(packet: JsonMessage) : HendelseMessage(packet)
             opprettet
         )
 
-    override fun behandle(mediator: IHendelseMediator) {
-        mediator.behandle(this, annullerUtbetaling)
+    override fun behandle(mediator: IHendelseMediator, context: MessageContext) {
+        mediator.behandle(this, annullerUtbetaling, context)
     }
 
     private class Saksbehandler(

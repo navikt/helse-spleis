@@ -3,6 +3,7 @@ package no.nav.helse.spleis.meldinger.model
 import no.nav.helse.hendelser.utbetaling.UtbetalingOverført
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling
 import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.spleis.IHendelseMediator
 
@@ -27,7 +28,7 @@ internal class UtbetalingOverførtMessage(packet: JsonMessage) : BehovMessage(pa
             overføringstidspunkt = overføringstidspunkt
         )
 
-    override fun behandle(mediator: IHendelseMediator) {
-        mediator.behandle(this, utbetaling)
+    override fun behandle(mediator: IHendelseMediator, context: MessageContext) {
+        mediator.behandle(this, utbetaling, context)
     }
 }

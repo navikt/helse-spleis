@@ -1,15 +1,19 @@
 package no.nav.helse.spleis.meldinger.model
 
 import com.fasterxml.jackson.databind.JsonNode
+import java.util.UUID
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.isMissingOrNull
 import no.nav.helse.spleis.IHendelseMediator
-import no.nav.helse.spleis.meldinger.model.SimuleringMessage.Simuleringstatus.*
-import java.util.*
+import no.nav.helse.spleis.meldinger.model.SimuleringMessage.Simuleringstatus.OK
+import no.nav.helse.spleis.meldinger.model.SimuleringMessage.Simuleringstatus.OPPDRAG_UR_ER_STENGT
+import no.nav.helse.spleis.meldinger.model.SimuleringMessage.Simuleringstatus.TEKNISK_FEIL
+import no.nav.helse.spleis.meldinger.model.SimuleringMessage.Simuleringstatus.valueOf
 
 internal class SimuleringMessage(packet: JsonMessage) : BehovMessage(packet) {
     private val vedtaksperiodeId = packet["vedtaksperiodeId"].asText()
@@ -83,10 +87,10 @@ internal class SimuleringMessage(packet: JsonMessage) : BehovMessage(packet) {
             utbetalingId = utbetalingId
         )
 
-    override fun behandle(mediator: IHendelseMediator) {
+    override fun behandle(mediator: IHendelseMediator, context: MessageContext) {
         // dont send message into the model if Oppdrag/UR is closed for biz.
         if (status in listOf(TEKNISK_FEIL, OPPDRAG_UR_ER_STENGT)) return
-        mediator.behandle(this, simulering)
+        mediator.behandle(this, simulering, context)
     }
 
     internal enum class Simuleringstatus {

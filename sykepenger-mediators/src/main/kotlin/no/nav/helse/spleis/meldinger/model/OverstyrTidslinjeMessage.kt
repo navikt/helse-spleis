@@ -4,6 +4,7 @@ import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.spleis.IHendelseMediator
 
@@ -21,7 +22,7 @@ internal class OverstyrTidslinjeMessage(val packet: JsonMessage) : HendelseMessa
             )
         }
 
-    override fun behandle(mediator: IHendelseMediator) =
+    override fun behandle(mediator: IHendelseMediator, context: MessageContext) =
         mediator.behandle(
             this, OverstyrTidslinje(
                 meldingsreferanseId = id,
@@ -30,6 +31,6 @@ internal class OverstyrTidslinjeMessage(val packet: JsonMessage) : HendelseMessa
                 organisasjonsnummer = organisasjonsnummer,
                 dager = dager,
                 opprettet = opprettet
-            )
+            ), context
         )
 }

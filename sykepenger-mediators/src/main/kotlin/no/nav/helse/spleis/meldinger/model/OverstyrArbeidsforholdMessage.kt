@@ -2,9 +2,9 @@ package no.nav.helse.spleis.meldinger.model
 
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.spleis.IHendelseMediator
-import java.time.LocalDate
 
 internal class OverstyrArbeidsforholdMessage(val packet: JsonMessage): HendelseMessage(packet) {
 
@@ -19,16 +19,17 @@ internal class OverstyrArbeidsforholdMessage(val packet: JsonMessage): HendelseM
             )
         }
 
-    override fun behandle(mediator: IHendelseMediator) {
+    override fun behandle(mediator: IHendelseMediator, context: MessageContext) {
         mediator.behandle(
             this,
-            overstyrArbeidsforhold = OverstyrArbeidsforhold(
+            OverstyrArbeidsforhold(
                 meldingsreferanseId = id,
                 fødselsnummer = fødselsnummer,
                 aktørId = aktørId,
                 skjæringstidspunkt = skjæringstidspunkt,
                 overstyrteArbeidsforhold = overstyrteArbeidsforhold
-            )
+            ),
+            context
         )
     }
 

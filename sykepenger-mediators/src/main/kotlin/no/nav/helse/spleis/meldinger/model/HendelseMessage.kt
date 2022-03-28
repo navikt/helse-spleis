@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import java.util.UUID
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.somFødselsnummer
@@ -19,7 +20,7 @@ internal abstract class HendelseMessage(private val packet: JsonMessage) {
 
     protected abstract val fødselsnummer: String
 
-    internal abstract fun behandle(mediator: IHendelseMediator)
+    internal abstract fun behandle(mediator: IHendelseMediator, context: MessageContext)
 
     internal fun lagreMelding(repository: HendelseRepository) {
         repository.lagreMelding(this, fødselsnummer.somFødselsnummer(), id, toJson())

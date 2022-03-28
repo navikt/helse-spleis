@@ -7,6 +7,7 @@ import java.util.UUID
 import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.flywaydb.core.Flyway
 import org.intellij.lang.annotations.Language
@@ -66,15 +67,7 @@ internal class AppTest {
         assertEquals(1, finnUnikePerson("1234"))
     }
 
-    @Language("JSON")
-    private fun slettemelding(fødselsnummer: String) = """
-        {
-          "@event_name": "slett_person",
-          "@id": "${UUID.randomUUID()}",
-          "opprettet": "${LocalDateTime.now()}",
-          "fødselsnummer": "$fødselsnummer"
-        }
-    """.trimIndent()
+    private fun slettemelding(fødselsnummer: String) = JsonMessage.newMessage("slett_person", mapOf("fødselsnummer" to fødselsnummer)).toJson()
 
     private fun opprettPerson(fødselsnummer: String) {
         opprettDummyPerson(fødselsnummer)

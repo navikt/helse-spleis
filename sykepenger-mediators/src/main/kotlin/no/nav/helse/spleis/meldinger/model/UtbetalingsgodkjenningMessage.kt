@@ -1,11 +1,12 @@
 package no.nav.helse.spleis.meldinger.model
 
+import java.util.UUID
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning
 import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.spleis.IHendelseMediator
-import java.util.*
 
 // Understands a JSON message representing a Godkjenning-behov
 internal class UtbetalingsgodkjenningMessage(packet: JsonMessage) : BehovMessage(packet) {
@@ -34,7 +35,7 @@ internal class UtbetalingsgodkjenningMessage(packet: JsonMessage) : BehovMessage
             automatiskBehandling = automatiskBehandling
         )
 
-    override fun behandle(mediator: IHendelseMediator) {
-        mediator.behandle(this, utbetalingsgodkjenning)
+    override fun behandle(mediator: IHendelseMediator, context: MessageContext) {
+        mediator.behandle(this, utbetalingsgodkjenning, context)
     }
 }

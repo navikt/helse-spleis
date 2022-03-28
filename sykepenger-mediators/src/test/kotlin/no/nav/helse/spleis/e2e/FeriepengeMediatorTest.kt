@@ -1,12 +1,21 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.*
+import no.nav.helse.Toggle
+import no.nav.helse.april
+import no.nav.helse.desember
+import no.nav.helse.januar
+import no.nav.helse.juni
+import no.nav.helse.mai
+import no.nav.helse.mars
 import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.september
 import no.nav.helse.spleis.TestMessageFactory
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.inntektsmeldingkontrakt.Periode
 import no.nav.syfo.kafka.felles.SoknadsperiodeDTO
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class FeriepengeMediatorTest : AbstractEndToEndMediatorTest() {
@@ -15,7 +24,11 @@ internal class FeriepengeMediatorTest : AbstractEndToEndMediatorTest() {
     fun `Beregner feriepenger korrekt for enkel spleisperiode med en utbetaling i infotrygd`() = Toggle.SendFeriepengeOppdrag.enable {
         sendNySøknad(SoknadsperiodeDTO(fom = 1.juni(2020), tom = 30.juni(2020), sykmeldingsgrad = 100))
         sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 1.juni(2020), tom = 30.juni(2020), sykmeldingsgrad = 100)))
-        sendInntektsmelding(0, listOf(Periode(fom = 1.juni(2020), tom = 16.juni(2020))), førsteFraværsdag = 1.juni(2020))
+        sendInntektsmelding(
+            0,
+            listOf(Periode(fom = 1.juni(2020), tom = 16.juni(2020))),
+            førsteFraværsdag = 1.juni(2020)
+        )
         sendYtelser(0)
         sendVilkårsgrunnlag(0, skjæringstidspunkt = 1.juni(2020))
         sendYtelserUtenSykepengehistorikk(0)
@@ -74,7 +87,11 @@ internal class FeriepengeMediatorTest : AbstractEndToEndMediatorTest() {
     fun `Ser bort fra perioder med arbeidskategori som ikke gir rett til feriepenger`() = Toggle.SendFeriepengeOppdrag.enable {
         sendNySøknad(SoknadsperiodeDTO(fom = 1.juni(2020), tom = 30.juni(2020), sykmeldingsgrad = 100))
         sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 1.juni(2020), tom = 30.juni(2020), sykmeldingsgrad = 100)))
-        sendInntektsmelding(0, listOf(Periode(fom = 1.juni(2020), tom = 16.juni(2020))), førsteFraværsdag = 1.juni(2020))
+        sendInntektsmelding(
+            0,
+            listOf(Periode(fom = 1.juni(2020), tom = 16.juni(2020))),
+            førsteFraværsdag = 1.juni(2020)
+        )
         sendYtelser(0)
         sendVilkårsgrunnlag(0, skjæringstidspunkt = 1.juni(2020))
         sendYtelserUtenSykepengehistorikk(0)
@@ -147,7 +164,11 @@ internal class FeriepengeMediatorTest : AbstractEndToEndMediatorTest() {
     fun `Ukjent arbeidskategorikode tolkes som tom`() = Toggle.SendFeriepengeOppdrag.enable {
         sendNySøknad(SoknadsperiodeDTO(fom = 1.juni(2020), tom = 30.juni(2020), sykmeldingsgrad = 100))
         sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 1.juni(2020), tom = 30.juni(2020), sykmeldingsgrad = 100)))
-        sendInntektsmelding(0, listOf(Periode(fom = 1.juni(2020), tom = 16.juni(2020))), førsteFraværsdag = 1.juni(2020))
+        sendInntektsmelding(
+            0,
+            listOf(Periode(fom = 1.juni(2020), tom = 16.juni(2020))),
+            førsteFraværsdag = 1.juni(2020)
+        )
         sendYtelser(0)
         sendVilkårsgrunnlag(0, skjæringstidspunkt = 1.juni(2020))
         sendYtelserUtenSykepengehistorikk(0)
@@ -220,7 +241,11 @@ internal class FeriepengeMediatorTest : AbstractEndToEndMediatorTest() {
     fun `Sjekker at orgnummer på utbetalingsbehov blir riktig med flere arbeidsgivere`() = Toggle.SendFeriepengeOppdrag.enable {
         sendNySøknad(SoknadsperiodeDTO(fom = 1.juni(2020), tom = 30.juni(2020), sykmeldingsgrad = 100))
         sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 1.juni(2020), tom = 30.juni(2020), sykmeldingsgrad = 100)))
-        sendInntektsmelding(0, listOf(Periode(fom = 1.juni(2020), tom = 16.juni(2020))), førsteFraværsdag = 1.juni(2020))
+        sendInntektsmelding(
+            0,
+            listOf(Periode(fom = 1.juni(2020), tom = 16.juni(2020))),
+            førsteFraværsdag = 1.juni(2020)
+        )
         sendYtelser(0)
         sendVilkårsgrunnlag(0, skjæringstidspunkt = 1.juni(2020))
         sendYtelserUtenSykepengehistorikk(0)

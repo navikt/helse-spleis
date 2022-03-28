@@ -1,9 +1,9 @@
 package no.nav.helse.spleis
 
-import com.fasterxml.jackson.databind.node.ObjectNode
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.mockk.mockk
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.januar
 import no.nav.helse.person.TilstandType
@@ -16,9 +16,6 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
 
 internal class MessageMediatorTest {
 
@@ -87,12 +84,7 @@ internal class MessageMediatorTest {
 
     @Test
     fun `ignorerer gammel utbetalingshistorikk`() {
-        val message = meldingsfabrikk.lagUtbetalingshistorikk(UUID.randomUUID(), TilstandType.START).let {
-            jacksonObjectMapper()
-                .readValue<ObjectNode>(it)
-                .put("@besvart", "${LocalDateTime.now().minusHours(2)}")
-                .toString()
-        }
+        val message = meldingsfabrikk.lagUtbetalingshistorikk(UUID.randomUUID(), TilstandType.START, besvart = LocalDateTime.now().minusHours(2))
         testRapid.sendTestMessage(message)
         assertFalse(hendelseMediator.lestUtbetalingshistorikk)
     }

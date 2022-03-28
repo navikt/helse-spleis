@@ -1,52 +1,37 @@
 package no.nav.helse.spleis
 
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.PersonHendelse
 import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.spleis.meldinger.model.HendelseMessage
+import no.nav.helse.rapids_rivers.MessageContext
 import org.slf4j.Logger
 
-internal class BehovMediator(
-    private val rapidsConnection: RapidsConnection,
-    private val sikkerLogg: Logger
-) {
-    internal fun håndter(message: HendelseMessage, hendelse: PersonHendelse) {
+internal class BehovMediator(private val sikkerLogg: Logger) {
+    internal fun håndter(context: MessageContext, hendelse: PersonHendelse) {
         hendelse.kontekster().forEach {
             if (!it.hasErrorsOrWorse()) {
-                håndter(message, hendelse, it.behov())
+                håndter(context, hendelse, it.behov())
             }
         }
     }
 
-    private fun håndter(message: HendelseMessage, hendelse: PersonHendelse, behov: List<Aktivitetslogg.Aktivitet.Behov>) {
+    private fun håndter(context: MessageContext, hendelse: PersonHendelse, behov: List<Aktivitetslogg.Aktivitet.Behov>) {
         behov
             .groupBy { it.kontekst() }
             .onEach { (_, behovMap) ->
                 require(behovMap.size == behovMap.map { it.type.name }.toSet().size) { "Kan ikke produsere samme behov på samme kontekst" }
             }
             .forEach { (kontekst, liste) ->
-                val id = UUID.randomUUID()
                 val behovMap = liste.associate { behov -> behov.type.name to behov.detaljer() }
-
-                mutableMapOf(
-                    "@event_name" to "behov",
-                    "@opprettet" to LocalDateTime.now(),
-                    "@id" to id,
-                    "@behovId" to UUID.randomUUID(),
-                    "@behov" to behovMap.keys,
-                    "@forårsaket_av" to message.tracinginfo()
-                )
+                mutableMapOf<String, Any>()
                     .apply {
                         putAll(kontekst)
                         putAll(behovMap)
                     }
-                    .let { JsonMessage.newMessage(it) }
+                    .let { JsonMessage.newNeed(behovMap.keys, it) }
                     .also {
                         sikkerLogg.info("sender behov for {}:\n{}", behovMap.keys, it.toJson())
-                        rapidsConnection.publish(hendelse.fødselsnummer(), it.toJson())
+                        context.publish(hendelse.fødselsnummer(), it.toJson())
                     }
             }
     }

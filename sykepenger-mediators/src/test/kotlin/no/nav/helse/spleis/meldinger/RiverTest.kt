@@ -21,16 +21,20 @@ internal abstract class RiverTest {
 
     protected abstract fun river(rapidsConnection: RapidsConnection, mediator: IMessageMediator)
 
+    protected fun assertNoErrors(message: Pair<*, String>) = assertNoErrors(message.second)
+
     protected fun assertNoErrors(message: String) {
         rapid.sendTestMessage(message)
         assertTrue(messageMediator.recognizedMessage)
     }
 
+    protected fun assertErrors(message: Pair<*, String>) = assertErrors(message.second)
     protected fun assertErrors(message: String) {
         rapid.sendTestMessage(message)
         assertTrue(messageMediator.riverError)
     }
 
+    protected fun assertIgnored(message: Pair<*, String>) = assertIgnored(message.second)
     protected fun assertIgnored(message: String) {
         rapid.sendTestMessage(message)
         assertFalse(messageMediator.recognizedMessage)

@@ -8,7 +8,6 @@ import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.prometheus.client.Summary
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.Fødselsnummer
 import no.nav.helse.hendelser.Hendelseskontekst
@@ -20,6 +19,7 @@ import no.nav.helse.person.PersonHendelse
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.TilstandType
 import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asOptionalLocalDate
@@ -61,7 +61,7 @@ internal class PersonMediator(
         person.addObserver(this)
     }
 
-    fun finalize(rapidsConnection: RapidsConnection, lagrePersonDao: LagrePersonDao) {
+    fun finalize(rapidsConnection: RapidsConnection, context: MessageContext, lagrePersonDao: LagrePersonDao) {
         val serialisertPerson = person.serialize()
         try {
             jsonSizeSummary.observe(serialisertPerson.json.length.toDouble())
@@ -72,14 +72,14 @@ internal class PersonMediator(
             sikkerLogg.error("Kunne ikke lage metrikker for person ${hendelse.fødselsnummer()}", e)
         }
         lagrePersonDao.lagrePerson(message, serialisertPerson, hendelse, vedtak)
-        sendUtgåendeMeldinger(rapidsConnection)
+        sendUtgåendeMeldinger(context)
         sendReplays(rapidsConnection)
     }
 
-    private fun sendUtgåendeMeldinger(rapidsConnection: RapidsConnection) {
+    private fun sendUtgåendeMeldinger(context: MessageContext) {
         if (meldinger.isEmpty()) return
         message.logOutgoingMessages(sikkerLogg, meldinger.size)
-        meldinger.forEach { pakke -> pakke.publish(rapidsConnection) }
+        meldinger.forEach { pakke -> pakke.publish(context) }
     }
 
     private fun sendReplays(rapidsConnection: RapidsConnection) {
@@ -111,80 +111,65 @@ internal class PersonMediator(
     }
 
     override fun vedtaksperiodePåminnet(hendelseskontekst: Hendelseskontekst, påminnelse: Påminnelse) {
-        queueMessage(hendelseskontekst, "vedtaksperiode_påminnet", JsonMessage.newMessage(påminnelse.toOutgoingMessage()))
+        queueMessage(hendelseskontekst, JsonMessage.newMessage("vedtaksperiode_påminnet", påminnelse.toOutgoingMessage()))
     }
 
     override fun vedtaksperiodeIkkePåminnet(hendelseskontekst: Hendelseskontekst, nåværendeTilstand: TilstandType) {
-        queueMessage(
-            hendelseskontekst,
-            "vedtaksperiode_ikke_påminnet", JsonMessage.newMessage(
-                mapOf(
-                    "tilstand" to nåværendeTilstand
-                )
-            )
-        )
+        queueMessage(hendelseskontekst, JsonMessage.newMessage("vedtaksperiode_ikke_påminnet", mapOf(
+            "tilstand" to nåværendeTilstand
+        )))
     }
 
     override fun annullering(hendelseskontekst: Hendelseskontekst, event: PersonObserver.UtbetalingAnnullertEvent) {
-        queueMessage(
-            hendelseskontekst,
-            "utbetaling_annullert", JsonMessage.newMessage(
-                mutableMapOf(
-                    "utbetalingId" to event.utbetalingId,
-                    "korrelasjonsId" to event.korrelasjonsId,
-                    "fom" to event.fom,
-                    "tom" to event.tom,
-                    "annullertAvSaksbehandler" to event.annullertAvSaksbehandler,
-                    "tidspunkt" to event.annullertAvSaksbehandler,
-                    "saksbehandlerEpost" to event.saksbehandlerEpost,
-                    "epost" to event.saksbehandlerEpost,
-                    "saksbehandlerIdent" to event.saksbehandlerIdent,
-                    "ident" to event.saksbehandlerIdent,
-                    "utbetalingslinjer" to event.utbetalingslinjer.map { mapOf(
-                        "fom" to it.fom,
-                        "tom" to it.tom,
-                        "grad" to it.grad,
-                        "beløp" to it.beløp
-                    )}
-                ).apply {
-                    event.arbeidsgiverFagsystemId?.also {
-                        this["fagsystemId"] = it
-                        this["arbeidsgiverFagsystemId"] = it
-                    }
-                    event.personFagsystemId?.also {
-                        this["personFagsystemId"] = it
-                    }
-                }
-            )
-        )
+        queueMessage(hendelseskontekst, JsonMessage.newMessage("utbetaling_annullert", mutableMapOf(
+            "utbetalingId" to event.utbetalingId,
+            "korrelasjonsId" to event.korrelasjonsId,
+            "fom" to event.fom,
+            "tom" to event.tom,
+            "annullertAvSaksbehandler" to event.annullertAvSaksbehandler,
+            "tidspunkt" to event.annullertAvSaksbehandler,
+            "saksbehandlerEpost" to event.saksbehandlerEpost,
+            "epost" to event.saksbehandlerEpost,
+            "saksbehandlerIdent" to event.saksbehandlerIdent,
+            "ident" to event.saksbehandlerIdent,
+            "utbetalingslinjer" to event.utbetalingslinjer.map { mapOf(
+                "fom" to it.fom,
+                "tom" to it.tom,
+                "grad" to it.grad,
+                "beløp" to it.beløp
+            )}
+        ).apply {
+            event.arbeidsgiverFagsystemId?.also {
+                this["fagsystemId"] = it
+                this["arbeidsgiverFagsystemId"] = it
+            }
+            event.personFagsystemId?.also {
+                this["personFagsystemId"] = it
+            }
+        }))
     }
 
     override fun utbetalingEndret(hendelseskontekst: Hendelseskontekst, event: PersonObserver.UtbetalingEndretEvent) {
-        queueMessage(
-            hendelseskontekst,
-            "utbetaling_endret", JsonMessage.newMessage(
-                mapOf(
-                    "utbetalingId" to event.utbetalingId,
-                    "type" to event.type,
-                    "forrigeStatus" to event.forrigeStatus,
-                    "gjeldendeStatus" to event.gjeldendeStatus,
-                    "arbeidsgiverOppdrag" to event.arbeidsgiverOppdrag,
-                    "personOppdrag" to event.personOppdrag
-                )
-            )
-        )
+        queueMessage(hendelseskontekst , JsonMessage.newMessage("utbetaling_endret", mapOf(
+            "utbetalingId" to event.utbetalingId,
+            "type" to event.type,
+            "forrigeStatus" to event.forrigeStatus,
+            "gjeldendeStatus" to event.gjeldendeStatus,
+            "arbeidsgiverOppdrag" to event.arbeidsgiverOppdrag,
+            "personOppdrag" to event.personOppdrag
+        )))
     }
 
     override fun utbetalingUtbetalt(hendelseskontekst: Hendelseskontekst, event: PersonObserver.UtbetalingUtbetaltEvent) {
-        queueMessage(hendelseskontekst, "utbetaling_utbetalt", utbetalingAvsluttet(event))
+        queueMessage(hendelseskontekst, utbetalingAvsluttet("utbetaling_utbetalt", event))
     }
 
     override fun utbetalingUtenUtbetaling(hendelseskontekst: Hendelseskontekst, event: PersonObserver.UtbetalingUtbetaltEvent) {
-        queueMessage(hendelseskontekst, "utbetaling_uten_utbetaling", utbetalingAvsluttet(event))
+        queueMessage(hendelseskontekst, utbetalingAvsluttet("utbetaling_uten_utbetaling", event))
     }
 
-    private fun utbetalingAvsluttet(event: PersonObserver.UtbetalingUtbetaltEvent) =
-        JsonMessage.newMessage(mapOf(
+    private fun utbetalingAvsluttet(eventName: String, event: PersonObserver.UtbetalingUtbetaltEvent) =
+        JsonMessage.newMessage(eventName, mapOf(
             "utbetalingId" to event.utbetalingId,
             "korrelasjonsId" to event.korrelasjonsId,
             "type" to event.type,
@@ -205,63 +190,38 @@ internal class PersonMediator(
         ))
 
     override fun feriepengerUtbetalt(hendelseskontekst: Hendelseskontekst, event: PersonObserver.FeriepengerUtbetaltEvent) =
-        queueMessage(
-            hendelseskontekst,
-            "feriepenger_utbetalt", JsonMessage.newMessage(
-                mapOf(
-                    "arbeidsgiverOppdrag" to event.arbeidsgiverOppdrag,
-                    "personOppdrag" to event.personOppdrag,
-                )
-            )
-        )
+        queueMessage(hendelseskontekst, JsonMessage.newMessage("feriepenger_utbetalt", mapOf(
+            "arbeidsgiverOppdrag" to event.arbeidsgiverOppdrag,
+            "personOppdrag" to event.personOppdrag,
+        )))
 
     override fun vedtaksperiodeEndret(hendelseskontekst: Hendelseskontekst, event: PersonObserver.VedtaksperiodeEndretEvent) {
-        queueMessage(
-            hendelseskontekst,
-            "vedtaksperiode_endret", JsonMessage.newMessage(
-                mapOf(
-                    "gjeldendeTilstand" to event.gjeldendeTilstand,
-                    "forrigeTilstand" to event.forrigeTilstand,
-                    "aktivitetslogg" to event.aktivitetslogg.toMap(),
-                    "harVedtaksperiodeWarnings" to event.harVedtaksperiodeWarnings,
-                    "hendelser" to event.hendelser,
-                    "makstid" to event.makstid
-                )
-            )
-        )
+        queueMessage(hendelseskontekst, JsonMessage.newMessage("vedtaksperiode_endret", mapOf(
+            "gjeldendeTilstand" to event.gjeldendeTilstand,
+            "forrigeTilstand" to event.forrigeTilstand,
+            "aktivitetslogg" to event.aktivitetslogg.toMap(),
+            "harVedtaksperiodeWarnings" to event.harVedtaksperiodeWarnings,
+            "hendelser" to event.hendelser,
+            "makstid" to event.makstid
+        )))
     }
 
     override fun opprettOppgaveForSpeilsaksbehandlere(hendelseskontekst: Hendelseskontekst, event: PersonObserver.OpprettOppgaveForSpeilsaksbehandlereEvent) {
-        queueMessage(
-            hendelseskontekst,
-            "opprett_oppgave_for_speilsaksbehandlere", JsonMessage.newMessage(
-                mapOf(
-                    "hendelser" to event.hendelser,
-                )
-            )
-        )
+        queueMessage(hendelseskontekst, JsonMessage.newMessage("opprett_oppgave_for_speilsaksbehandlere", mapOf(
+            "hendelser" to event.hendelser,
+        )))
     }
 
     override fun opprettOppgave(hendelseskontekst: Hendelseskontekst, event: PersonObserver.OpprettOppgaveEvent) {
-        queueMessage(
-            hendelseskontekst,
-            "opprett_oppgave", JsonMessage.newMessage(
-                mapOf(
-                    "hendelser" to event.hendelser,
-                )
-            )
-        )
+        queueMessage(hendelseskontekst, JsonMessage.newMessage("opprett_oppgave", mapOf(
+            "hendelser" to event.hendelser,
+        )))
     }
 
     override fun vedtaksperiodeAvbrutt(hendelseskontekst: Hendelseskontekst, event: PersonObserver.VedtaksperiodeAvbruttEvent) {
-        queueMessage(
-            hendelseskontekst,
-            "vedtaksperiode_forkastet", JsonMessage.newMessage(
-                mapOf(
-                    "tilstand" to event.gjeldendeTilstand,
-                )
-            )
-        )
+        queueMessage(hendelseskontekst, JsonMessage.newMessage("vedtaksperiode_forkastet", mapOf(
+            "tilstand" to event.gjeldendeTilstand,
+        )))
     }
 
     override fun vedtakFattet(
@@ -269,46 +229,34 @@ internal class PersonMediator(
         event: PersonObserver.VedtakFattetEvent
     ) {
         vedtak = true
-        queueMessage(
-            hendelseskontekst,
-            "vedtak_fattet", JsonMessage.newMessage(
-            mutableMapOf(
-                "fom" to event.periode.start,
-                "tom" to event.periode.endInclusive,
-                "hendelser" to event.hendelseIder,
-                "skjæringstidspunkt" to event.skjæringstidspunkt,
-                "sykepengegrunnlag" to event.sykepengegrunnlag,
-                "grunnlagForSykepengegrunnlag" to event.grunnlagForSykepengegrunnlag,
-                "grunnlagForSykepengegrunnlagPerArbeidsgiver" to event.grunnlagForSykepengegrunnlagPerArbeidsgiver,
-                "begrensning" to event.sykepengegrunnlagsbegrensning,
-                "inntekt" to event.inntekt,
-                "vedtakFattetTidspunkt" to event.vedtakFattetTidspunkt
-            ).apply {
-                event.utbetalingId?.let { this["utbetalingId"] = it }
-            }
-        ))
+        queueMessage(hendelseskontekst, JsonMessage.newMessage("vedtak_fattet", mutableMapOf(
+            "fom" to event.periode.start,
+            "tom" to event.periode.endInclusive,
+            "hendelser" to event.hendelseIder,
+            "skjæringstidspunkt" to event.skjæringstidspunkt,
+            "sykepengegrunnlag" to event.sykepengegrunnlag,
+            "grunnlagForSykepengegrunnlag" to event.grunnlagForSykepengegrunnlag,
+            "grunnlagForSykepengegrunnlagPerArbeidsgiver" to event.grunnlagForSykepengegrunnlagPerArbeidsgiver,
+            "begrensning" to event.sykepengegrunnlagsbegrensning,
+            "inntekt" to event.inntekt,
+            "vedtakFattetTidspunkt" to event.vedtakFattetTidspunkt
+        ).apply {
+            event.utbetalingId?.let { this["utbetalingId"] = it }
+        }))
     }
 
     override fun revurderingAvvist(hendelseskontekst: Hendelseskontekst, event: PersonObserver.RevurderingAvvistEvent) {
-        queueMessage(hendelseskontekst,
-           "revurdering_avvist",
-            JsonMessage.newMessage(event.toJsonMap())
-        )
+        queueMessage(hendelseskontekst, JsonMessage.newMessage("revurdering_avvist", event.toJsonMap()))
     }
 
     override fun avstemt(hendelseskontekst: Hendelseskontekst, result: Map<String, Any>) {
-        queueMessage(hendelseskontekst, "person_avstemt", JsonMessage.newMessage(result))
+        queueMessage(hendelseskontekst, JsonMessage.newMessage("person_avstemt", result))
     }
 
     override fun vedtaksperiodeIkkeFunnet(hendelseskontekst: Hendelseskontekst, vedtaksperiodeEvent: PersonObserver.VedtaksperiodeIkkeFunnetEvent) {
-        queueMessage(
-            hendelseskontekst,
-            "vedtaksperiode_ikke_funnet", JsonMessage.newMessage(
-                mapOf(
-                    "vedtaksperiodeId" to vedtaksperiodeEvent.vedtaksperiodeId
-                )
-            )
-        )
+        queueMessage(hendelseskontekst, JsonMessage.newMessage("vedtaksperiode_ikke_funnet", mapOf(
+            "vedtaksperiodeId" to vedtaksperiodeEvent.vedtaksperiodeId
+        )))
     }
 
     override fun manglerInntektsmelding(hendelseskontekst: Hendelseskontekst, orgnr: String, event: PersonObserver.ManglendeInntektsmeldingEvent) {
@@ -316,49 +264,33 @@ internal class PersonMediator(
             hendelse.info("Hindrer publisering av trenger_inntektsmelding - har allerede fått inntektsmelding, men perioden er mistolket som gap")
             return
         }
-        queueMessage(
-            hendelseskontekst,
-            "trenger_inntektsmelding", JsonMessage.newMessage(
-                mapOf(
-                    "fom" to event.fom,
-                    "tom" to event.tom
-                )
-            )
-        )
+        queueMessage(hendelseskontekst , JsonMessage.newMessage("trenger_inntektsmelding", mapOf(
+            "fom" to event.fom,
+            "tom" to event.tom
+        )))
     }
 
     override fun trengerIkkeInntektsmelding(hendelseskontekst: Hendelseskontekst, event: PersonObserver.TrengerIkkeInntektsmeldingEvent) {
-        queueMessage(
-            hendelseskontekst,
-            "trenger_ikke_inntektsmelding", JsonMessage.newMessage(
-                mapOf(
-                    "fom" to event.fom,
-                    "tom" to event.tom
-                )
-            )
-        )
+        queueMessage(hendelseskontekst, JsonMessage.newMessage("trenger_ikke_inntektsmelding", mapOf(
+            "fom" to event.fom,
+            "tom" to event.tom
+        )))
     }
 
     override fun hendelseIkkeHåndtert(hendelseskontekst: Hendelseskontekst, event: PersonObserver.HendelseIkkeHåndtertEvent) {
-        queueMessage(hendelseskontekst, "hendelse_ikke_håndtert", JsonMessage.newMessage(
-            mapOf(
-                "hendelseId" to event.hendelseId,
-                "årsaker" to event.årsaker
-            )
-        ))
+        queueMessage(hendelseskontekst, JsonMessage.newMessage("hendelse_ikke_håndtert", mapOf(
+            "hendelseId" to event.hendelseId,
+            "årsaker" to event.årsaker
+        )))
     }
 
-    private fun leggPåStandardfelter(hendelseskontekst: Hendelseskontekst, eventName: String, outgoingMessage: JsonMessage) = outgoingMessage.apply {
-        this["@event_name"] = eventName
-        this["@id"] = UUID.randomUUID()
-        this["@opprettet"] = LocalDateTime.now()
-        this["@forårsaket_av"] = message.tracinginfo()
+    private fun leggPåStandardfelter(hendelseskontekst: Hendelseskontekst, outgoingMessage: JsonMessage) = outgoingMessage.apply {
         hendelseskontekst.appendTo(this::set)
     }
 
-    private fun queueMessage(hendelseskontekst: Hendelseskontekst, eventName: String, outgoingMessage: JsonMessage) {
+    private fun queueMessage(hendelseskontekst: Hendelseskontekst, outgoingMessage: JsonMessage) {
         loggHvisTomHendelseliste(outgoingMessage)
-        queueMessage(hendelse.fødselsnummer(), eventName, leggPåStandardfelter(hendelseskontekst, eventName, outgoingMessage).toJson())
+        queueMessage(hendelse.fødselsnummer(), outgoingMessage.also { it.interestedIn("@event_name") }["@event_name"].asText(), leggPåStandardfelter(hendelseskontekst, outgoingMessage).toJson())
     }
 
     private fun loggHvisTomHendelseliste(outgoingMessage: JsonMessage) {
@@ -402,8 +334,8 @@ internal class PersonMediator(
         private val eventName: String,
         private val blob: String,
     ) {
-        fun publish(rapidsConnection: RapidsConnection) {
-            rapidsConnection.publish(fødselsnummer, blob.also { sikkerLogg.info("sender $eventName: $it") })
+        fun publish(context: MessageContext) {
+            context.publish(fødselsnummer, blob.also { sikkerLogg.info("sender $eventName: $it") })
         }
     }
 

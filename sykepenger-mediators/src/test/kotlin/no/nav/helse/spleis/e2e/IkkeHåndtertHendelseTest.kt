@@ -35,7 +35,10 @@ internal class IkkeHåndtertHendelseTest: AbstractEndToEndMediatorTest() {
 
     @Test
     fun `oppretter forkastet periode dersom sykmelding er for gammel`() {
-        sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100), meldingOpprettet = 5.desember.atStartOfDay())
+        sendNySøknad(
+            SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100),
+            meldingOpprettet = 5.desember.atStartOfDay()
+        )
         assertEquals(0, testRapid.inspektør.meldinger("hendelse_ikke_håndtert").size)
         assertTilstander(0, "TIL_INFOTRYGD")
     }

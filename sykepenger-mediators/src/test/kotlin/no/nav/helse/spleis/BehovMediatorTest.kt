@@ -66,7 +66,7 @@ class BehovMediatorTest {
     fun setup() {
         person = Person(aktørId, fødselsnummer.somFødselsnummer(), MaskinellJurist())
         aktivitetslogg = Aktivitetslogg()
-        behovMediator = BehovMediator(testRapid, mockk(relaxed = true))
+        behovMediator = BehovMediator(mockk(relaxed = true))
         messages.clear()
     }
 
@@ -92,7 +92,7 @@ class BehovMediatorTest {
         hendelse.kontekst(TestKontekst("Tilstand", "Tilstand 2"))
         hendelse.behov(Utbetaling, "Skal utbetale")
 
-        behovMediator.håndter(message, hendelse)
+        behovMediator.håndter(testRapid, hendelse)
 
         assertEquals(2, messages.size)
         assertEquals(fødselsnummer, messages[0].first)
@@ -150,7 +150,7 @@ class BehovMediatorTest {
             )
         )
 
-        assertDoesNotThrow { behovMediator.håndter(message, hendelse) }
+        assertDoesNotThrow { behovMediator.håndter(testRapid, hendelse) }
     }
 
     @Test
@@ -172,7 +172,7 @@ class BehovMediatorTest {
             )
         )
 
-        assertThrows<IllegalArgumentException> { behovMediator.håndter(message, hendelse) }
+        assertThrows<IllegalArgumentException> { behovMediator.håndter(testRapid, hendelse) }
     }
 
     @Test
@@ -186,7 +186,7 @@ class BehovMediatorTest {
         hendelse.behov(Sykepengehistorikk, "Trenger sykepengehistorikk")
         hendelse.behov(Sykepengehistorikk, "Trenger sykepengehistorikk")
 
-        assertThrows<IllegalArgumentException> { behovMediator.håndter(message, hendelse) }
+        assertThrows<IllegalArgumentException> { behovMediator.håndter(testRapid, hendelse) }
     }
 
     private class TestKontekst(

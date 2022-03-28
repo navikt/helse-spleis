@@ -2,6 +2,7 @@ package no.nav.helse.spleis.meldinger.model
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.spleis.IHendelseMediator
@@ -13,17 +14,17 @@ internal abstract class SøknadMessage(private val packet: JsonMessage, private 
     protected val sykmeldingSkrevet = packet["sykmeldingSkrevet"].asLocalDateTime()
     final override val fødselsnummer = packet["fnr"].asText()
 
-    final override fun behandle(mediator: IHendelseMediator) {
+    final override fun behandle(mediator: IHendelseMediator, context: MessageContext) {
         bygg()
-        _behandle(mediator, packet)
+        _behandle(mediator, packet, context)
     }
 
-    protected abstract fun _behandle(mediator: IHendelseMediator, packet: JsonMessage)
+    protected abstract fun _behandle(mediator: IHendelseMediator, packet: JsonMessage, context: MessageContext)
 
     private fun bygg() {
         builder.meldingsreferanseId(this.id)
             .fnr(fødselsnummer)
-            .opprettet(opprettet)
+            .opprettet(packet["opprettet"].asLocalDateTime())
             .aktørId(packet["aktorId"].asText())
             .sykmeldingSkrevet(sykmeldingSkrevet)
             .organisasjonsnummer(packet["arbeidsgiver.orgnummer"].asText())

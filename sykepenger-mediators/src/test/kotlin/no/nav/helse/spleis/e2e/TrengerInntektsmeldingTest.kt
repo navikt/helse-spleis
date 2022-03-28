@@ -1,7 +1,12 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.*
+import no.nav.helse.august
+import no.nav.helse.februar
+import no.nav.helse.januar
+import no.nav.helse.juli
+import no.nav.helse.mars
 import no.nav.helse.rapids_rivers.asLocalDate
+import no.nav.helse.september
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.inntektsmeldingkontrakt.Periode
 import no.nav.syfo.kafka.felles.SoknadsperiodeDTO
@@ -14,7 +19,11 @@ internal class TrengerInntektsmeldingTest : AbstractEndToEndMediatorTest() {
     fun `sender ikke trenger_inntektsmelding i tilfeller hvor vi egentlig har fått inntektsmelding, men har kastet søkander som følge av overlapp og fått kunstig gap`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 21.juli(2021), tom = 4.august(2021), sykmeldingsgrad = 100))
         sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 21.juli(2021), tom = 4.august(2021), sykmeldingsgrad = 100)))
-        sendInntektsmelding(0, listOf(Periode(fom = 21.juli(2021), tom =  5.august(2021))), førsteFraværsdag = 21.juli(2021))
+        sendInntektsmelding(
+            0,
+            listOf(Periode(fom = 21.juli(2021), tom =  5.august(2021))),
+            førsteFraværsdag = 21.juli(2021)
+        )
         assertTilstander(
             0,
             "MOTTATT_SYKMELDING_FERDIG_GAP",
@@ -125,7 +134,10 @@ internal class TrengerInntektsmeldingTest : AbstractEndToEndMediatorTest() {
         sendInntektsmelding(0, listOf(Periode(fom = 1.januar, tom = 16.januar)), førsteFraværsdag = 1.januar)
 
         val annenArbeidsgiver = "999999999"
-        sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 20.januar, sykmeldingsgrad = 100), orgnummer = annenArbeidsgiver)
+        sendNySøknad(
+            SoknadsperiodeDTO(fom = 1.januar, tom = 20.januar, sykmeldingsgrad = 100),
+            orgnummer = annenArbeidsgiver
+        )
         sendSøknad(1, listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 20.januar, sykmeldingsgrad = 100)), orgnummer = annenArbeidsgiver)
 
         assertEquals(1, testRapid

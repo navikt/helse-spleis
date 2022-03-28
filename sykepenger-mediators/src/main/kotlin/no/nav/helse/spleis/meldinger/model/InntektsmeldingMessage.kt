@@ -2,7 +2,12 @@ package no.nav.helse.spleis.meldinger.model
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.hendelser.Inntektsmelding
-import no.nav.helse.rapids_rivers.*
+import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.helse.rapids_rivers.MessageContext
+import no.nav.helse.rapids_rivers.asLocalDate
+import no.nav.helse.rapids_rivers.asLocalDateTime
+import no.nav.helse.rapids_rivers.asOptionalLocalDate
+import no.nav.helse.rapids_rivers.isMissingOrNull
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 
@@ -46,8 +51,8 @@ internal open class InntektsmeldingMessage(packet: JsonMessage) : HendelseMessag
             mottatt = mottatt
         )
 
-    override fun behandle(mediator: IHendelseMediator) {
-        mediator.behandle(this, inntektsmelding)
+    override fun behandle(mediator: IHendelseMediator, context: MessageContext) {
+        mediator.behandle(this, inntektsmelding, context)
     }
 }
 

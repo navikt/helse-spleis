@@ -1,9 +1,14 @@
 package no.nav.helse.spleis
 
 import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.YearMonth
+import java.util.UUID
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.*
@@ -29,10 +34,6 @@ import no.nav.syfo.kafka.felles.SoknadsperiodeDTO
 import no.nav.syfo.kafka.felles.SoknadsstatusDTO
 import no.nav.syfo.kafka.felles.SoknadstypeDTO
 import no.nav.syfo.kafka.felles.SykepengesoknadDTO
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.YearMonth
-import java.util.*
 
 internal class TestMessageFactory(
     private val fødselsnummer: String,
@@ -53,13 +54,12 @@ internal class TestMessageFactory(
     fun lagNySøknad(
         vararg perioder: SoknadsperiodeDTO,
         opprettet: LocalDateTime = perioder.minOfOrNull { it.fom!! }!!.atStartOfDay(),
-        meldingId: String = UUID.randomUUID().toString(),
         orgnummer: String = organisasjonsnummer
-    ): String {
+    ): Pair<UUID, String> {
         val fom = perioder.minOfOrNull { it.fom!! }!!
         val nySøknad = SykepengesoknadDTO(
             status = SoknadsstatusDTO.NY,
-            id = meldingId,
+            id = UUID.randomUUID().toString(),
             sykmeldingId = UUID.randomUUID().toString(),
             aktorId = aktørId,
             fodselsnummer = SkjultVerdi(fødselsnummer),
@@ -72,16 +72,16 @@ internal class TestMessageFactory(
             egenmeldinger = emptyList(),
             fravar = emptyList(),
             soknadsperioder = perioder.toList(),
-            opprettet = fom.plusMonths(3)?.atStartOfDay(),
+            opprettet = opprettet,
             sykmeldingSkrevet = fom.atStartOfDay()
         )
-        return nyHendelse("ny_søknad", mapOf("@opprettet" to opprettet, "@id" to meldingId) + nySøknad.toMap())
+        return nyHendelse("ny_søknad", nySøknad.toMap())
     }
 
     fun lagSøknadArbeidsgiver(
         perioder: List<SoknadsperiodeDTO>,
         egenmeldinger: List<PeriodeDTO> = emptyList()
-    ): String {
+    ): Pair<UUID, String> {
         val fom = perioder.minOfOrNull { it.fom!! }!!
         val sendtSøknad = SykepengesoknadDTO(
             status = SoknadsstatusDTO.SENDT,
@@ -111,7 +111,7 @@ internal class TestMessageFactory(
         andreInntektskilder: List<InntektskildeDTO>? = null,
         sendtNav: LocalDateTime? = perioder.maxOfOrNull { it.tom!! }?.atStartOfDay(),
         orgnummer: String = organisasjonsnummer
-    ): String {
+    ): Pair<UUID, String> {
         val fom = perioder.minOfOrNull { it.fom!! }
         val sendtSøknad = SykepengesoknadDTO(
             status = SoknadsstatusDTO.SENDT,
@@ -173,39 +173,32 @@ internal class TestMessageFactory(
         opphørsdatoForRefusjon: LocalDate? = null,
         meldingId: String = UUID.randomUUID().toString(),
         orgnummer: String = organisasjonsnummer
-    ) = nyHendelse(
-        "inntektsmelding",
-        mapOf("@id" to meldingId) + lagInntektsmelding(
+    ) = nyHendelse("inntektsmelding", lagInntektsmelding(
             arbeidsgiverperiode,
             førsteFraværsdag,
             opphørAvNaturalytelser,
             beregnetInntekt,
             orgnummer,
             opphørsdatoForRefusjon
-        ).toMap()
-    )
+        ).toMap())
 
     fun lagInnteksmeldingReplay(
         vedtaksperiodeId: UUID,
-        arbeidsgiverperiode: List<Periode>,
-        førsteFraværsdag: LocalDate,
-        orgnummer: String = organisasjonsnummer,
-        meldingId: String = UUID.randomUUID().toString()
-    ) = nyHendelse(
-        "inntektsmelding_replay",
-        mapOf("@id" to meldingId, "vedtaksperiodeId" to vedtaksperiodeId) + lagInntektsmelding(
-            arbeidsgiverperiode = arbeidsgiverperiode,
-            førsteFraværsdag = førsteFraværsdag,
-            orgnummer = orgnummer
-        ).toMap()
-    )
+        inntektsmelding: String
+    ) = objectMapper.readTree(inntektsmelding).also {
+        (it as ObjectNode).put("@event_name", "inntektsmelding_replay")
+        (it as ObjectNode).put("vedtaksperiodeId", "$vedtaksperiodeId")
+    }.let { node ->
+        UUID.fromString(node.path("@id").asText()) to node.toString()
+    }
 
-    fun lagUtbetalingshistorikk(vedtaksperiodeId: UUID, tilstand: TilstandType, sykepengehistorikk: List<UtbetalingshistorikkTestdata> = emptyList()): String {
+    fun lagUtbetalingshistorikk(vedtaksperiodeId: UUID, tilstand: TilstandType, sykepengehistorikk: List<UtbetalingshistorikkTestdata> = emptyList(), besvart: LocalDateTime = LocalDateTime.now()): Pair<UUID, String> {
         return lagBehovMedLøsning(
             vedtaksperiodeId = vedtaksperiodeId,
             tilstand = tilstand,
             behov = listOf("Sykepengehistorikk"),
-            løsninger = sykepengehistorikk.toJson()
+            løsninger = sykepengehistorikk.toJson(),
+            besvart = besvart
         )
     }
 
@@ -427,7 +420,7 @@ internal class TestMessageFactory(
         dagpenger: List<DagpengerTestdata> = emptyList(),
         sykepengehistorikk: List<UtbetalingshistorikkTestdata>? = emptyList(),
         orgnummer: String = organisasjonsnummer
-    ): String {
+    ): Pair<UUID, String> {
         val behovliste = mutableListOf(
             "Foreldrepenger",
             "Pleiepenger",
@@ -511,7 +504,7 @@ internal class TestMessageFactory(
         arbeidsforhold: List<Arbeidsforhold>,
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
         orgnummer: String = organisasjonsnummer
-    ): String {
+    ): Pair<UUID, String> {
         return lagBehovMedLøsning(
             behov = listOf(
                 InntekterForSammenligningsgrunnlag.name,
@@ -588,7 +581,7 @@ internal class TestMessageFactory(
         fagsystemId: String = "fagsystemid",
         fagområde: String = "SPREF",
         orgnummer: String = organisasjonsnummer
-    ): String {
+    ): Pair<UUID, String> {
         return lagBehovMedLøsning(
             behov = listOf("Simulering"),
             vedtaksperiodeId = vedtaksperiodeId,
@@ -653,7 +646,7 @@ internal class TestMessageFactory(
     fun lagEtterbetaling(
         fagsystemId: String,
         gyldighetsdato: LocalDate
-    ): String {
+    ): Pair<UUID, String> {
         return nyHendelse(
             navn = "Etterbetalingskandidat_v1",
             hendelse = mapOf(
@@ -669,7 +662,7 @@ internal class TestMessageFactory(
     fun lagEtterbetalingMedHistorikk(
         fagsystemId: String,
         gyldighetsdato: LocalDate
-    ): String {
+    ): Pair<UUID, String> {
         return lagBehovMedLøsning(
             behov = listOf("Sykepengehistorikk"),
             løsninger = mapOf(
@@ -695,7 +688,7 @@ internal class TestMessageFactory(
         makstidOppnådd: Boolean,
         godkjenttidspunkt: LocalDateTime,
         orgnummer: String = organisasjonsnummer
-    ): String {
+    ): Pair<UUID, String> {
         return lagBehovMedLøsning(
             behov = listOf("Godkjenning"),
             orgnummer = orgnummer,
@@ -717,7 +710,7 @@ internal class TestMessageFactory(
         )
     }
 
-    fun lagUtbetalingpåminnelse(utbetalingId: UUID, status: Utbetalingstatus): String {
+    fun lagUtbetalingpåminnelse(utbetalingId: UUID, status: Utbetalingstatus): Pair<UUID, String> {
         return nyHendelse(
             "utbetalingpåminnelse", mapOf(
                 "aktørId" to aktørId,
@@ -737,7 +730,7 @@ internal class TestMessageFactory(
         tilstand: TilstandType,
         orgnummer: String = organisasjonsnummer,
         tilstandsendringstidspunkt: LocalDateTime = LocalDateTime.now()
-    ): String {
+    ): Pair<UUID, String> {
         return nyHendelse(
             "påminnelse", mapOf(
                 "aktørId" to aktørId,
@@ -753,7 +746,7 @@ internal class TestMessageFactory(
         )
     }
 
-    fun lagPersonPåminnelse(): String {
+    fun lagPersonPåminnelse(): Pair<UUID, String> {
         return nyHendelse(
             "person_påminnelse", mapOf(
                 "aktørId" to aktørId,
@@ -768,7 +761,7 @@ internal class TestMessageFactory(
         utbetalingOK: Boolean = true,
         avstemmingsnøkkel: Long = 123456L,
         overføringstidspunkt: LocalDateTime = LocalDateTime.now()
-    ): String {
+    ): Pair<UUID, String> {
         return lagBehovMedLøsning(
             behov = listOf("Utbetaling"),
             tilstand = null,
@@ -793,7 +786,7 @@ internal class TestMessageFactory(
         utbetalingId: String,
         avstemmingsnøkkel: Long,
         overføringstidspunkt: LocalDateTime = LocalDateTime.now()
-    ): String {
+    ): Pair<UUID, String> {
         return lagBehovMedLøsning(
             behov = listOf("Utbetaling"),
             tilstand = null,
@@ -813,7 +806,7 @@ internal class TestMessageFactory(
         )
     }
 
-    fun lagAnnullering(fagsystemId: String): String {
+    fun lagAnnullering(fagsystemId: String): Pair<UUID, String> {
         return nyHendelse(
             "annullering", mapOf(
                 "aktørId" to aktørId,
@@ -837,7 +830,7 @@ internal class TestMessageFactory(
         )
     )
 
-    fun lagOverstyringTidslinje(dager: List<ManuellOverskrivingDag>): String {
+    fun lagOverstyringTidslinje(dager: List<ManuellOverskrivingDag>): Pair<UUID, String> {
         return nyHendelse(
             "overstyr_tidslinje", mutableMapOf(
                 "aktørId" to aktørId,
@@ -853,7 +846,7 @@ internal class TestMessageFactory(
             ))
     }
 
-    fun lagOverstyringInntekt(inntekt: Double, skjæringstidspunkt: LocalDate): String {
+    fun lagOverstyringInntekt(inntekt: Double, skjæringstidspunkt: LocalDate): Pair<UUID, String> {
         return nyHendelse(
             "overstyr_inntekt", mutableMapOf(
                 "aktørId" to aktørId,
@@ -869,7 +862,7 @@ internal class TestMessageFactory(
         skjæringstidspunkt: LocalDate,
         overstyrteArbeidsforhold: List<ArbeidsforholdOverstyrt>,
         orgnummer: String = organisasjonsnummer
-    ): String {
+    ): Pair<UUID, String> {
         return nyHendelse(
             "overstyr_arbeidsforhold", mutableMapOf(
                 "aktørId" to aktørId,
@@ -886,13 +879,7 @@ internal class TestMessageFactory(
     }
 
     private fun nyHendelse(navn: String, hendelse: Map<String, Any>) =
-        JsonMessage.newMessage(nyHendelse(navn) + hendelse).toJson()
-
-    private fun nyHendelse(navn: String) = mutableMapOf<String, Any>(
-        "@id" to UUID.randomUUID(),
-        "@event_name" to navn,
-        "@opprettet" to LocalDateTime.now()
-    )
+        JsonMessage.newMessage(navn, hendelse).let { it.id to it.toJson() }
 
     private fun lagBehovMedLøsning(
         behov: List<String> = listOf(),
@@ -900,7 +887,8 @@ internal class TestMessageFactory(
         orgnummer: String = organisasjonsnummer,
         tilstand: TilstandType?,
         løsninger: Map<String, Any> = emptyMap(),
-        ekstraFelter: Map<String, Any> = emptyMap()
+        ekstraFelter: Map<String, Any> = emptyMap(),
+        besvart: LocalDateTime = LocalDateTime.now()
     ) = nyHendelse(
         "behov", ekstraFelter + mutableMapOf(
             "@behov" to behov,
@@ -909,7 +897,7 @@ internal class TestMessageFactory(
             "organisasjonsnummer" to orgnummer,
             "@løsning" to løsninger,
             "@final" to true,
-            "@besvart" to LocalDateTime.now()
+            "@besvart" to besvart
         ).apply {
             tilstand?.let { this["tilstand"] = it.name }
             vedtaksperiodeId?.let { this["vedtaksperiodeId"] = vedtaksperiodeId.toString() }

@@ -3,7 +3,11 @@ package no.nav.helse.spleis.e2e
 import no.nav.helse.desember
 import no.nav.helse.januar
 import no.nav.helse.november
-import no.nav.helse.spleis.TestMessageFactory.*
+import no.nav.helse.spleis.TestMessageFactory.InstitusjonsoppholdTestdata
+import no.nav.helse.spleis.TestMessageFactory.OmsorgspengerTestdata
+import no.nav.helse.spleis.TestMessageFactory.OpplæringspengerTestdata
+import no.nav.helse.spleis.TestMessageFactory.PleiepengerTestdata
+import no.nav.helse.spleis.TestMessageFactory.UtbetalingshistorikkTestdata
 import no.nav.inntektsmeldingkontrakt.Periode
 import no.nav.syfo.kafka.felles.SoknadsperiodeDTO
 import org.junit.jupiter.api.Test
@@ -133,7 +137,12 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
     fun `Arbeidskategorikode lik 01 passerer validering`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
-        sendInntektsmelding(0, listOf(Periode(fom = 17.desember(2017), tom = 31.desember(2017))), førsteFraværsdag = 17.desember(2017), beregnetInntekt = 36000.0)
+        sendInntektsmelding(
+            0,
+            listOf(Periode(fom = 17.desember(2017), tom = 31.desember(2017))),
+            førsteFraværsdag = 17.desember(2017),
+            beregnetInntekt = 36000.0
+        )
         val historikk = listOf(UtbetalingshistorikkTestdata(
             fom = 1.januar,
             tom = 26.januar,

@@ -1,15 +1,16 @@
 package no.nav.helse.spleis.meldinger.model
 
 import com.fasterxml.jackson.databind.JsonNode
+import java.time.Year
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.SykepengehistorikkForFeriepenger
 import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asOptionalLocalDate
 import no.nav.helse.spleis.IHendelseMediator
-import java.time.Year
 
 // Understands a JSON message representing an Ytelserbehov
 internal class UtbetalingshistorikkForFeriepengerMessage(packet: JsonMessage) : BehovMessage(packet) {
@@ -83,7 +84,7 @@ internal class UtbetalingshistorikkForFeriepengerMessage(packet: JsonMessage) : 
             aktivitetslogg = aktivitetslogg
         )
 
-    override fun behandle(mediator: IHendelseMediator) {
-        mediator.behandle(this, utbetalingshistorikkForFeriepenger())
+    override fun behandle(mediator: IHendelseMediator, context: MessageContext) {
+        mediator.behandle(this, utbetalingshistorikkForFeriepenger(), context)
     }
 }

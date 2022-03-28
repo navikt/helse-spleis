@@ -4,12 +4,12 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import java.util.UUID
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.TilstandType
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.junit.jupiter.api.fail
 import org.slf4j.LoggerFactory
-import java.util.*
 
 internal class TestRapid : RapidsConnection() {
     private companion object {
@@ -26,6 +26,8 @@ internal class TestRapid : RapidsConnection() {
     internal fun reset() {
         messages.clear()
     }
+
+    fun sendTestMessage(message: Pair<UUID, String>) = sendTestMessage(message.second)
 
     fun sendTestMessage(message: String) {
         log.info("sending message:\n\t$message")

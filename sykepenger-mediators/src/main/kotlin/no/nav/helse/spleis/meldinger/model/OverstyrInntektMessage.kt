@@ -2,6 +2,7 @@ package no.nav.helse.spleis.meldinger.model
 
 import no.nav.helse.hendelser.OverstyrInntekt
 import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -14,7 +15,7 @@ internal class OverstyrInntektMessage(val packet: JsonMessage) : HendelseMessage
     private val månedligInntekt = packet["månedligInntekt"].asDouble()
     private val skjæringstidspunkt = packet["skjæringstidspunkt"].asLocalDate()
 
-    override fun behandle(mediator: IHendelseMediator) =
+    override fun behandle(mediator: IHendelseMediator, context: MessageContext) =
         mediator.behandle(
             this, OverstyrInntekt(
                 meldingsreferanseId = id,
@@ -23,7 +24,7 @@ internal class OverstyrInntektMessage(val packet: JsonMessage) : HendelseMessage
                 organisasjonsnummer = organisasjonsnummer,
                 inntekt = månedligInntekt.månedlig,
                 skjæringstidspunkt = skjæringstidspunkt
-            )
-
+            ),
+            context
         )
 }

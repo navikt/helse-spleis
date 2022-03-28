@@ -1,12 +1,13 @@
 package no.nav.helse.spleis.e2e
 
+import com.fasterxml.jackson.databind.node.ObjectNode
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.januar
@@ -349,11 +350,10 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
             hendelseMediator = TestHendelseMediator()
         )
 
-        val meldingId = UUID.randomUUID()
-        sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 25.januar, sykmeldingsgrad = 100), meldingId = meldingId.toString())
-        verify(exactly = 1) { hendelseRepository.markerSomBehandlet(meldingId) }
-        sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 26.januar, sykmeldingsgrad = 100), meldingId = meldingId.toString())
-        verify(exactly = 1) { hendelseRepository.markerSomBehandlet(meldingId) }
+        val (meldingId, message) = meldingsfabrikk.lagNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 25.januar, sykmeldingsgrad = 100))
+        testRapid.sendTestMessage(message)
+        testRapid.sendTestMessage(message)
+        verify(exactly = 1) { hendelseRepository.markerSomBehandlet(eq(meldingId)) }
         verify(exactly = 2) { hendelseRepository.erBehandlet(any()) }
     }
 
@@ -368,20 +368,21 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
             hendelseMediator = TestHendelseMediator()
         )
 
-        val meldingId = UUID.randomUUID()
-        sendNySøknad(SoknadsperiodeDTO(fom = 25.januar, tom = 1.januar, sykmeldingsgrad = 100), meldingId = meldingId.toString())
+        val meldingId = sendNySøknad(SoknadsperiodeDTO(fom = 25.januar, tom = 1.januar, sykmeldingsgrad = 100))
         verify(exactly = 0) { hendelseRepository.markerSomBehandlet(meldingId) }
-        sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 25.januar, sykmeldingsgrad = 100), meldingId = meldingId.toString())
+        val (_, message) = meldingsfabrikk.lagNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 25.januar, sykmeldingsgrad = 100))
+        val medSammeId = (jacksonObjectMapper().readTree(message) as ObjectNode).also {
+            it.put("@id", meldingId.toString())
+        }.toString()
+        testRapid.sendTestMessage(medSammeId)
+        testRapid.sendTestMessage(medSammeId)
         verify(exactly = 1) { hendelseRepository.markerSomBehandlet(meldingId) }
-        sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 25.januar, sykmeldingsgrad = 100), meldingId = meldingId.toString())
         verify(exactly = 1) { hendelseRepository.markerSomBehandlet(meldingId) }
         verify(exactly = 3) { hendelseRepository.erBehandlet(any()) }
     }
 
     @Test
     fun `InntektsmeldingReplay blir ikke stoppet av duplikatsjekk`() {
-        val meldingId = UUID.randomUUID()
-
         val hendelseRepository: HendelseRepository = mockk(relaxed = true)
         MessageMediator(
             rapidsConnection = testRapid,
@@ -392,14 +393,15 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 26.januar, sykmeldingsgrad = 100)))
 
-        verify(exactly = 0) { hendelseRepository.markerSomBehandlet(meldingId) }
-        sendInntektsmelding(0, listOf(Periode(fom = 1.januar, tom = 16.januar)), førsteFraværsdag = 1.januar, meldingId = meldingId.toString())
+        val (meldingId, inntektsmelding) = sendInntektsmelding(
+            0,
+            listOf(Periode(fom = 1.januar, tom = 16.januar)),
+            førsteFraværsdag = 1.januar
+        )
         verify(exactly = 1) { hendelseRepository.markerSomBehandlet(meldingId) }
         sendInntektsmeldingReplay(
             vedtaksperiodeIndeks = 0,
-            arbeidsgiverperiode = listOf(Periode(fom = 1.januar, tom = 16.januar)),
-            førsteFraværsdag = 1.januar,
-            meldingId = meldingId.toString()
+            inntektsmelding = inntektsmelding
         )
         verify(exactly = 2) { hendelseRepository.markerSomBehandlet(meldingId) }
     }
@@ -408,7 +410,12 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
     fun `delvis refusjon`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
-        sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar, opphørsdatoForRefusjon = 20.januar)
+        sendInntektsmelding(
+            0,
+            listOf(Periode(fom = 3.januar, tom = 18.januar)),
+            førsteFraværsdag = 3.januar,
+            opphørsdatoForRefusjon = 20.januar
+        )
         sendYtelser(0)
         sendVilkårsgrunnlag(0)
         sendYtelserUtenSykepengehistorikk(0)

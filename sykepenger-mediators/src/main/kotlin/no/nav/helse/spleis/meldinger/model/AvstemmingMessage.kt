@@ -2,6 +2,7 @@ package no.nav.helse.spleis.meldinger.model
 
 import no.nav.helse.hendelser.Avstemming
 import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.spleis.IHendelseMediator
 
 internal class AvstemmingMessage(packet: JsonMessage) : HendelseMessage(packet) {
@@ -16,7 +17,7 @@ internal class AvstemmingMessage(packet: JsonMessage) : HendelseMessage(packet) 
             fødselsnummer = fødselsnummer
         )
 
-    override fun behandle(mediator: IHendelseMediator) {
-        mediator.behandle(this, avstemming)
+    override fun behandle(mediator: IHendelseMediator, context: MessageContext) {
+        mediator.behandle(this, avstemming, context)
     }
 }

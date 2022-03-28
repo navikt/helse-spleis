@@ -3,6 +3,7 @@ package no.nav.helse.spleis.meldinger.model
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.person.TilstandType
 import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.spleis.IHendelseMediator
 
@@ -33,7 +34,7 @@ internal class PåminnelseMessage(packet: JsonMessage) : HendelseMessage(packet)
             nestePåminnelsestidspunkt = nestePåminnelsestidspunkt
         )
 
-    override fun behandle(mediator: IHendelseMediator) {
-        mediator.behandle(this, påminnelse)
+    override fun behandle(mediator: IHendelseMediator, context: MessageContext) {
+        mediator.behandle(this, påminnelse, context)
     }
 }
