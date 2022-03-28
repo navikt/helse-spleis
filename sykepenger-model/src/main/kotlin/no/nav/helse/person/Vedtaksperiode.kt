@@ -1823,6 +1823,10 @@ internal class Vedtaksperiode private constructor(
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.person.inntektsmeldingReplay(vedtaksperiode.id)
+            if (vedtaksperiode.arbeidsgiver.finnForkastetSykeperiodeRettFør(vedtaksperiode) == null) {
+                vedtaksperiode.trengerInntektsmelding(hendelse.hendelseskontekst())
+            }
+            vedtaksperiode.trengerHistorikkFraInfotrygd(hendelse)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
@@ -1832,6 +1836,38 @@ internal class Vedtaksperiode private constructor(
         override fun nyPeriodeFørMedNyFlyt(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Søknad) {}
 
         override fun tidligerePeriodeRebehandles(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {}
+
+        override fun håndter(
+            person: Person,
+            arbeidsgiver: Arbeidsgiver,
+            vedtaksperiode: Vedtaksperiode,
+            hendelse: IAktivitetslogg,
+            infotrygdhistorikk: Infotrygdhistorikk
+        ) {
+            validation(hendelse) {
+                onValidationFailed { person.invaliderAllePerioder(hendelse, null) }
+                valider {
+                    infotrygdhistorikk.validerOverlappende(
+                        this,
+                        arbeidsgiver.avgrensetPeriode(vedtaksperiode.periode),
+                        vedtaksperiode.skjæringstidspunkt
+                    )
+                }
+                onSuccess {
+                    if (arbeidsgiver.erForlengelse(vedtaksperiode.periode)) {
+                        info("Oppdaget at perioden er en forlengelse")
+                        return@onSuccess vedtaksperiode.tilstand(hendelse, AvventerHistorikk).also {
+                            arbeidsgiver.finnSykeperiodeRettEtter(vedtaksperiode)?.forlengerInfotrygd(hendelse)
+                            vedtaksperiode.kontekst(hendelse)
+                        }
+                    }
+                }
+            }
+        }
+
+        override fun forlengerInfotrygd(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+            vedtaksperiode.tilstand(hendelse, AvventerTidligereEllerOverlappendePerioder)
+        }
     }
 
     internal object AvventerTidligereEllerOverlappendePerioder : Vedtaksperiodetilstand {

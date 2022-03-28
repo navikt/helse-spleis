@@ -5,8 +5,11 @@ import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.januar
+import no.nav.helse.mars
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
+import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
+import no.nav.helse.person.TilstandType.AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -26,7 +29,6 @@ internal class NyTilstandsflytInfotrygdTest : AbstractEndToEndTest() {
         Toggle.NyTilstandsflyt.disable()
     }
 
-    @Disabled
     @Test
     fun `enkel infotrygdforlengelse`() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
@@ -39,6 +41,51 @@ internal class NyTilstandsflytInfotrygdTest : AbstractEndToEndTest() {
         )
         assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
         utbetalPeriode(1.vedtaksperiode)
+    }
+
+    @Test
+    fun `Infotrygdhistorikk som ikke medfører forlengelse`() {
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+        håndterUtbetalingshistorikk(
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 30.januar, 100.prosent, INNTEKT)),
+            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true))
+        )
+        assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
+    }
+
+    @Test
+    fun `Forlengelse av en infotrygdforlengelse trenger ikke vente på inntekt`() {
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
+        håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
+        håndterUtbetalingshistorikk(
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 31.januar, 100.prosent, INNTEKT)),
+            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true))
+        )
+        assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
+        assertTilstand(2.vedtaksperiode, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER)
+    }
+
+    @Test
+    fun `GAP til infotrygdforlengelse skal vente på inntekt`() {
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+
+        håndterSykmelding(Sykmeldingsperiode(10.mars, 31.mars, 100.prosent))
+        håndterSøknad(Sykdom(10.mars, 31.mars, 100.prosent))
+        håndterUtbetalingshistorikk(
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 31.januar, 100.prosent, INNTEKT)),
+            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true))
+        )
+        assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
+        assertTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
     }
 
     private fun utbetalPeriode(vedtaksperiode: IdInnhenter) {
