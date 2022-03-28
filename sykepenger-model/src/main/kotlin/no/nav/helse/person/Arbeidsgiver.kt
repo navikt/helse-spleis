@@ -482,6 +482,7 @@ internal class Arbeidsgiver private constructor(
         if (noenHarHåndtert(søknad, Vedtaksperiode::håndter)) return
         registrerNyVedtaksperiode(vedtaksperiode)
         vedtaksperiode.håndter(søknad)
+        håndter(søknad) { nyPeriodeMedNyFlyt(vedtaksperiode, søknad) }
     }
 
     fun finnVedtaksperiodeOgHåndter(søknad: Søknad) {
