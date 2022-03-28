@@ -44,8 +44,8 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.medlemskap
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.omsorgspenger
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.opplæringspenger
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.pleiepenger
-import no.nav.helse.person.Arbeidsgiver.Companion.trengerSøknadISammeMåned
 import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigInntekt
+import no.nav.helse.person.Arbeidsgiver.Companion.trengerSøknadISammeMåned
 import no.nav.helse.person.Dokumentsporing.Companion.ider
 import no.nav.helse.person.ForlengelseFraInfotrygd.JA
 import no.nav.helse.person.ForlengelseFraInfotrygd.NEI
@@ -1819,6 +1819,8 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
             vedtaksperiode.håndterInntektsmelding(inntektsmelding, AvventerTidligereEllerOverlappendePerioder)
         }
+
+        override fun tidligerePeriodeRebehandles(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {}
     }
 
     internal object AvventerTidligereEllerOverlappendePerioder : Vedtaksperiodetilstand {
@@ -2511,7 +2513,7 @@ internal class Vedtaksperiode private constructor(
                     if (Toggle.GjenopptaAvsluttetUtenUtbetaling.disabled) return@håndterInntektsmelding AvsluttetUtenUtbetaling
                     vedtaksperiode.arbeidsgiver.tidligerePeriodeRebehandles(vedtaksperiode, inntektsmelding)
                     vedtaksperiode.kontekst(inntektsmelding)
-                    AvventerHistorikk
+                    AvventerTidligereEllerOverlappendePerioder
                 }
             }
         }
