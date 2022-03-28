@@ -914,7 +914,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         fun nyPeriodeFørMedNyFlyt(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Søknad) {
-            hendelse.error("Mottatt sykmelding eller søknad out of order")
+            hendelse.error("Mottatt søknad out of order")
             vedtaksperiode.forkast(hendelse)
         }
 
@@ -1840,6 +1840,8 @@ internal class Vedtaksperiode private constructor(
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.person.gjenopptaBehandlingNy(hendelse)
         }
+
+        override fun nyPeriodeFørMedNyFlyt(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Søknad) {}
 
         override fun gjenopptaBehandlingNy(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.tilstand(hendelse, AvventerHistorikk)
