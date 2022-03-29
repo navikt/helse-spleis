@@ -308,7 +308,8 @@ private fun mapInntekt(inntekt: Arbeidsgiverinntekt) = GraphQLArbeidsgiverinntek
             belop = it,
             inntekterFraAOrdningen = emptyList()
         )
-    }
+    },
+    deaktivert = inntekt.deaktivert
 )
 
 internal fun mapVilkårsgrunnlag(id: UUID, vilkårsgrunnlag: List<Vilkårsgrunnlag>) =

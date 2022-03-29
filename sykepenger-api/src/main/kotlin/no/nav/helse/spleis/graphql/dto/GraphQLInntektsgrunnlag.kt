@@ -42,7 +42,8 @@ data class GraphQLSammenligningsgrunnlag(
 data class GraphQLArbeidsgiverinntekt(
     val arbeidsgiver: String,
     val omregnetArsinntekt: GraphQLOmregnetArsinntekt?,
-    val sammenligningsgrunnlag: GraphQLSammenligningsgrunnlag?
+    val sammenligningsgrunnlag: GraphQLSammenligningsgrunnlag?,
+    val deaktivert: Boolean? = null,
 )
 
 data class GraphQLInntektsgrunnlag(
