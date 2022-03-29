@@ -7,6 +7,7 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
+import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.november
 import no.nav.helse.person.IdInnhenter
@@ -19,10 +20,10 @@ import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
+import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -396,6 +397,21 @@ internal class NyTilstandsflytEnArbeidsgiverTest : AbstractEndToEndTest() {
         assertEquals(0, observatør.trengerIkkeInntektsmeldingVedtaksperioder.size)
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         assertEquals(1, observatør.trengerIkkeInntektsmeldingVedtaksperioder.size)
+    }
+
+    @Test
+    fun `To perioder med gap, den siste venter på at den første skal bli ferdig - dersom den første blir forkastet skal den siste perioden gå videre`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.mai, 31.mai, 100.prosent))
+
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.mai, 31.mai, 100.prosent))
+
+        håndterInntektsmelding(listOf(1.mai til 16.mai))
+        håndterPåminnelse(1.vedtaksperiode, påminnetTilstand = AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, tilstandsendringstidspunkt = 5.februar.atStartOfDay())
+
+        assertTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
+        assertTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK)
     }
 
     private fun utbetalPeriodeEtterVilkårsprøving(vedtaksperiode: IdInnhenter) {
