@@ -896,7 +896,7 @@ internal class Arbeidsgiver private constructor(
 
     internal fun harInntektsmelding(skjæringstidspunkt: LocalDate): Boolean {
         val førsteFraværsdag = finnFørsteFraværsdag(skjæringstidspunkt) ?: return false
-        return inntektshistorikk.harInntektsmelding(skjæringstidspunkt, førsteFraværsdag)
+        return inntektshistorikk.harInntektsmelding(førsteFraværsdag)
     }
 
     internal fun grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate, periodeStart: LocalDate) =

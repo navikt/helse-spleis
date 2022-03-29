@@ -39,10 +39,8 @@ internal class InntektshistorikkTest {
         inntektsmelding().addInntekt(historikk, 1.januar, MaskinellJurist())
         assertEquals(1, inspektør.inntektTeller.size)
         assertEquals(1, inspektør.inntektTeller.first())
-        assertTrue(historikk.harInntektsmelding(1.januar, 1.januar))
-        assertFalse(historikk.harInntektsmelding(1.januar, 2.januar))
-        assertTrue(historikk.harInntektsmelding(31.januar, 1.januar))
-        assertFalse(historikk.harInntektsmelding(1.februar, 1.januar))
+        assertTrue(historikk.harInntektsmelding(1.januar))
+        assertFalse(historikk.harInntektsmelding(2.januar))
     }
 
     @Test

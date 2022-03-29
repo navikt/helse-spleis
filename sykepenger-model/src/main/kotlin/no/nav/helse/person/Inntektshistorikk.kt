@@ -37,8 +37,8 @@ internal class Inntektshistorikk {
 
     internal fun isNotEmpty() = historikk.isNotEmpty()
 
-    internal fun harInntektsmelding(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate) = historikk.any {
-        it.harInntektsmelding(skjæringstidspunkt, førsteFraværsdag)
+    internal fun harInntektsmelding(førsteFraværsdag: LocalDate) = historikk.any {
+        it.harInntektsmelding(førsteFraværsdag)
     }
 
     internal fun grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate, dato: LocalDate, førsteFraværsdag: LocalDate?): Inntektsopplysning? =
@@ -75,9 +75,9 @@ internal class Inntektshistorikk {
             }
         }
 
-        internal fun harInntektsmelding(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate) = inntekter
+        internal fun harInntektsmelding(førsteFraværsdag: LocalDate) = inntekter
             .sorted()
-            .any { it.harInntektsmelding(skjæringstidspunkt, førsteFraværsdag) }
+            .any { it.harInntektsmelding(førsteFraværsdag) }
 
         internal fun grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?) =
             inntekter
@@ -121,7 +121,7 @@ internal class Inntektshistorikk {
             (-this.dato.compareTo(other.dato)).takeUnless { it == 0 } ?: -this.prioritet.compareTo(other.prioritet)
 
         fun kanLagres(other: Inntektsopplysning) = true
-        fun harInntektsmelding(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate) = false
+        fun harInntektsmelding(førsteFraværsdag: LocalDate) = false
         fun build(filter: Utbetalingsfilter.Builder, inntektsmeldingId: UUID) {}
     }
 
@@ -191,8 +191,8 @@ internal class Inntektshistorikk {
             visitor.visitInntektsmelding(this, id, dato, hendelseId, beløp, tidsstempel)
         }
 
-        override fun harInntektsmelding(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate) =
-            grunnlagForSykepengegrunnlag(skjæringstidspunkt, førsteFraværsdag) != null
+        override fun harInntektsmelding(førsteFraværsdag: LocalDate) =
+            førsteFraværsdag == dato
 
         override fun grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?) =
             takeIf { førsteFraværsdag != null && YearMonth.from(skjæringstidspunkt) == YearMonth.from(førsteFraværsdag) && it.dato == førsteFraværsdag }

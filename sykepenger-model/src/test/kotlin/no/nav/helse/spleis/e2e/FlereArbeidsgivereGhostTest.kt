@@ -795,10 +795,9 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a2)
 
         assertForventetFeil(
-            forklaring = "Vi trenger ikke å vente på IM når en IM allerede har truffet første fraværsdag på ag2, " +
-                "selvom det er på en måned enn skjæringstidspunktet",
-            nå = {assertEquals(AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE, observatør.tilstandsendringer[2.vedtaksperiode.id(a2)]?.last())},
-            ønsket = {assertNotEquals(AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE, observatør.tilstandsendringer[2.vedtaksperiode.id(a2)]?.last())}
+            forklaring = "",
+            nå = { assertTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2) },
+            ønsket = { assertTilstand(2.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a2) }
         )
     }
 
@@ -819,16 +818,14 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(21.februar, 28.februar, 100.prosent), orgnummer = a2)
 
         assertForventetFeil(
-            forklaring = "Vi trenger ikke å vente på IM når en IM allerede har truffet første fraværsdag på ag2, " +
-                "selvom det er på en måned enn skjæringstidspunktet",
+            forklaring = "",
             nå = {
-                assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
-                assertEquals(AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, observatør.tilstandsendringer[2.vedtaksperiode.id(a2)]?.last())
+                assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
+                assertTilstand(2.vedtaksperiode, AVVENTER_UFERDIG, orgnummer = a2)
             },
             ønsket = {
-                // TODO: Denne asserten må fjernes når vi håndterer overlapp ved flere AG mer riktig
-                assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a2)
-                assertNotEquals(AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, observatør.tilstandsendringer[2.vedtaksperiode.id(a2)]?.last())
+                assertTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
+                assertTilstand(2.vedtaksperiode, AVVENTER_UFERDIG, orgnummer = a2)
             }
         )
     }
