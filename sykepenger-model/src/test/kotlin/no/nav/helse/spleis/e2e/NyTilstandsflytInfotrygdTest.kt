@@ -2,6 +2,8 @@ package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate
 import no.nav.helse.Toggle
+import no.nav.helse.assertForventetFeil
+import no.nav.helse.august
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -10,11 +12,14 @@ import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.IdInnhenter
+import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
+import no.nav.helse.september
+import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -180,6 +185,31 @@ internal class NyTilstandsflytInfotrygdTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
         assertTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK)
+    }
+
+    @Test
+    fun `Kort periode som forlenger infotrygd`() {
+        val historikk = listOf(
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.august, 17.august, 100.prosent, 1000.daglig)
+        )
+        val inntektsopplysning = listOf(
+            Inntektsopplysning(ORGNUMMER, 1.august, INNTEKT, true)
+        )
+
+        håndterSykmelding(Sykmeldingsperiode(18.august, 2.september, 100.prosent))
+        håndterSøknad(Sykdom(18.august, 2.september, 100.prosent))
+        håndterUtbetalingshistorikk(
+            1.vedtaksperiode,
+            *historikk.toTypedArray(),
+            inntektshistorikk = inntektsopplysning
+        )
+
+        assertForventetFeil(
+            forklaring = "Infotrygdovergang går feilaktig til AvsluttetUtenUtbetaling," +
+                    " fordi vi ikke har historikk og går til AvsluttetUtenUtbetaling på direkten",
+            nå = { assertTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING) },
+            ønsket = { assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK) }
+        )
     }
 
     private fun utbetalPeriode(vedtaksperiode: IdInnhenter) {
