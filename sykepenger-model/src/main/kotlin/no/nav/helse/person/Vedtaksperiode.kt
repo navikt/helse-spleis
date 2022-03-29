@@ -1138,7 +1138,8 @@ internal class Vedtaksperiode private constructor(
                 søknad.warn("Denne personen har en utbetaling for samme periode for en annen arbeidsgiver. Kontroller at beregningene for begge arbeidsgiverne er korrekte.")
             }
             vedtaksperiode.håndterSøknad(søknad) {
-                if (vedtaksperiode.harInntekt()) AvventerTidligereEllerOverlappendePerioder
+                if (vedtaksperiode.harInntektsmelding() || vedtaksperiode.stammerFraInfotrygd())
+                    AvventerTidligereEllerOverlappendePerioder
                 else AvventerInntektsmeldingEllerHistorikk
             }
 

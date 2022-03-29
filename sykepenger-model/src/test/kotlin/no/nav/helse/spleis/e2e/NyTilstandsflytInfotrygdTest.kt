@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import java.time.LocalDate
 import no.nav.helse.Toggle
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -154,6 +155,31 @@ internal class NyTilstandsflytInfotrygdTest : AbstractEndToEndTest() {
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
             orgnummer = ORGNUMMER
         )
+    }
+
+    @Test
+    fun `Forlengelse av en infotrygdforlengelse - skal ikke vente på inntektsmelding`() {
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+        håndterUtbetalingshistorikk(
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 31.januar, 100.prosent, INNTEKT)),
+            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true)),
+            besvart = LocalDate.EPOCH.atStartOfDay()
+        )
+        håndterYtelser(
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 31.januar, 100.prosent, INNTEKT)),
+            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true)),
+            besvart = LocalDate.EPOCH.atStartOfDay()
+        )
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
+        håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
+        assertTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK)
     }
 
     private fun utbetalPeriode(vedtaksperiode: IdInnhenter) {

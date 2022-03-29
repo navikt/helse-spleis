@@ -3,11 +3,14 @@ package no.nav.helse.spleis.e2e
 import java.time.LocalDate
 import no.nav.helse.Toggle
 import no.nav.helse.assertForventetFeil
+import no.nav.helse.desember
 import no.nav.helse.februar
+import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
@@ -17,6 +20,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER
 import no.nav.helse.person.TilstandType.START
+import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.AfterEach
@@ -334,6 +338,50 @@ internal class NyTilstandsflytFlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
 
         assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
+        assertTilstand(1.vedtaksperiode, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, orgnummer = a2)
+    }
+
+    @Test
+    fun `En arbeidsgiver uten sykdom, blir syk i forlengelsen - skal vente på inntektsmelding før den går til AvventerTidligereEllerOverlappendePerioder`() {
+        val periode1 = 1.januar(2021) til 31.januar(2021)
+        val periode2 = 1.februar(2021) til 28.februar(2021)
+        håndterSykmelding(Sykmeldingsperiode(periode1.start, periode1.endInclusive, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(periode1.start, periode1.endInclusive, 100.prosent), orgnummer = a1)
+        håndterUtbetalingshistorikk(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar(2021) til 16.januar(2021)), førsteFraværsdag = 1.januar(2021), orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a1)
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode,
+            orgnummer = a1,
+            inntektsvurdering = Inntektsvurdering(
+                inntekter = inntektperioderForSammenligningsgrunnlag {
+                    1.januar(2020) til 1.desember(2020) inntekter {
+                        a1 inntekt INNTEKT
+                        a2 inntekt 1000.månedlig
+                    }
+                }
+            ),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
+                listOf(
+                    grunnlag(a1, 1.januar(2021), INNTEKT.repeat(3)),
+                    grunnlag(a2, 1.januar(2021), 1000.månedlig.repeat(3))
+                )
+                , arbeidsforhold = emptyList()),
+            arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null), Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null))
+        )
+        håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
+
+
+        håndterSykmelding(Sykmeldingsperiode(periode2.start, periode2.endInclusive, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(periode2.start, periode2.endInclusive, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(periode2.start, periode2.endInclusive, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(periode2.start, periode2.endInclusive, 100.prosent), orgnummer = a2)
+
+        assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, orgnummer = a2)
+        håndterInntektsmelding(listOf(1.februar(2021) til 16.februar(2021)), førsteFraværsdag = 1.februar(2021), orgnummer = a2)
         assertTilstand(1.vedtaksperiode, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, orgnummer = a2)
     }
 
