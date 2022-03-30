@@ -50,7 +50,7 @@ spec:
               - name: spleis-avstemming
         flags:
           - name: maintenance_work_mem
-            value: "10240MB"
+            value: "1048576"
   secureLogs:
     enabled: true
   env:
