@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate
 import no.nav.helse.Toggle
+import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
@@ -408,6 +409,44 @@ internal class NyTilstandsflytFlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertTilstand(2.vedtaksperiode, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, orgnummer = a2)
     }
 
+    @Test
+    fun `kort periode hos annen arbeidsgiver skal ikke blokkere videre behandling pga manglende IM`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a2)
+
+        håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent), orgnummer = a1)
+        håndterUtbetalingshistorikk(1.vedtaksperiode, orgnummer = a1)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a2)
+        håndterUtbetalingshistorikk(1.vedtaksperiode, orgnummer = a2)
+
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
+        assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
+    }
+
+    @Test
+    fun `kort periode hos annen arbeidsgiver vi tidligere har utbetalt til skal ikke blokkere videre behandling pga manglende IM`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a2)
+
+        håndterUtbetalingshistorikk(1.vedtaksperiode, orgnummer = a2)
+
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
+
+        utbetalPeriode(1.vedtaksperiode, a2, 1.januar)
+
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 16.mars, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.april, 30.april, 100.prosent), orgnummer = a2)
+
+        håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a1)
+        håndterUtbetalingshistorikk(1.vedtaksperiode, orgnummer = a1)
+
+        håndterSøknad(Sykdom(1.mars, 16.mars, 100.prosent), orgnummer = a2)
+        håndterUtbetalingshistorikk(2.vedtaksperiode, orgnummer = a2)
+
+        håndterInntektsmelding(listOf(1.mars til 16.mars), orgnummer = a1)
+        assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
+    }
+
     private fun utbetalPeriodeEtterVilkårsprøving(vedtaksperiode: IdInnhenter, orgnummer: String) {
         håndterYtelser(vedtaksperiode, orgnummer = orgnummer)
         håndterSimulering(vedtaksperiode, orgnummer = orgnummer)
@@ -417,10 +456,25 @@ internal class NyTilstandsflytFlereArbeidsgivereTest : AbstractEndToEndTest() {
 
     private fun utbetalPeriode(vedtaksperiode: IdInnhenter, orgnummer: String, skjæringstidspunkt: LocalDate) {
         håndterYtelser(vedtaksperiode, orgnummer = orgnummer)
-        håndterVilkårsgrunnlag(vedtaksperiode, orgnummer = orgnummer, inntektsvurdering = Inntektsvurdering(listOf(
-            sammenligningsgrunnlag(a1, skjæringstidspunkt, 31000.månedlig.repeat(12)),
-            sammenligningsgrunnlag(a2, skjæringstidspunkt, 31000.månedlig.repeat(12)),
-        )))
+        håndterVilkårsgrunnlag(
+            vedtaksperiode, orgnummer = orgnummer,
+            inntektsvurdering = Inntektsvurdering(
+                listOf(
+                    sammenligningsgrunnlag(a1, skjæringstidspunkt, 31000.månedlig.repeat(12)),
+                    sammenligningsgrunnlag(a2, skjæringstidspunkt, 31000.månedlig.repeat(12)),
+                )
+            ),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
+                listOf(
+                    grunnlag(a1, skjæringstidspunkt, 31000.månedlig.repeat(3)),
+                    grunnlag(a2, skjæringstidspunkt, 31000.månedlig.repeat(3)),
+                ), arbeidsforhold = emptyList()
+            ),
+            arbeidsforhold = listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH),
+                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH)
+            )
+        )
         utbetalPeriodeEtterVilkårsprøving(vedtaksperiode, orgnummer)
     }
 

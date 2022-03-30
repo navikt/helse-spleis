@@ -398,7 +398,7 @@ internal class Vedtaksperiode private constructor(
 
     internal fun forlengelseFraInfotrygd() = arbeidsgiver.erForlengelse(periode) && !harVedtaksperiodeRettFør()
 
-    internal fun kanGjennoptaBehandling(arbeidsgivere: Iterable<Arbeidsgiver>) =
+    internal fun kanGjenopptaBehandling(arbeidsgivere: Iterable<Arbeidsgiver>) =
         arbeidsgivere.harNødvendigInntekt(skjæringstidspunkt) || this.forlengelseFraInfotrygd == JA
 
     internal fun trengerSøknadISammeMåned(arbeidsgivere: Iterable<Arbeidsgiver>) =
@@ -2806,6 +2806,8 @@ internal class Vedtaksperiode private constructor(
                 .all { it.tilstand.erFerdigBehandlet }
 
         internal fun Iterable<Vedtaksperiode>.nåværendeVedtaksperiode(filter: VedtaksperiodeFilter) = firstOrNull(filter)
+
+        internal fun Iterable<Vedtaksperiode>.harPerioderMedPotensiellUtbetaling() = any { it.tilstand != AvsluttetUtenUtbetaling }
 
         internal fun List<Vedtaksperiode>.medSkjæringstidspunkt(skjæringstidspunkt: LocalDate) =
             this.filter { it.skjæringstidspunkt == skjæringstidspunkt }

@@ -45,6 +45,7 @@ import no.nav.helse.person.Vedtaksperiode.Companion.KLAR_TIL_BEHANDLING
 import no.nav.helse.person.Vedtaksperiode.Companion.REVURDERING_IGANGSATT
 import no.nav.helse.person.Vedtaksperiode.Companion.harNødvendigInntekt
 import no.nav.helse.person.Vedtaksperiode.Companion.harOverlappendeUtbetaltePerioder
+import no.nav.helse.person.Vedtaksperiode.Companion.harPerioderMedPotensiellUtbetaling
 import no.nav.helse.person.Vedtaksperiode.Companion.harUtbetaling
 import no.nav.helse.person.Vedtaksperiode.Companion.iderMedUtbetaling
 import no.nav.helse.person.Vedtaksperiode.Companion.medSkjæringstidspunkt
@@ -266,7 +267,13 @@ internal class Arbeidsgiver private constructor(
             sjekker at vi har inntekt for første fraværsdag for alle arbeidsgivere med sykdom for skjæringstidspunkt
          */
         internal fun Iterable<Arbeidsgiver>.harNødvendigInntekt(skjæringstidspunkt: LocalDate) =
-            filter { it.harSykdomFor(skjæringstidspunkt) }.all { it.harInntektsmelding(skjæringstidspunkt) }
+            filter { it.harSykdomFor(skjæringstidspunkt) }
+                .filter {
+                    it.vedtaksperioder
+                        .medSkjæringstidspunkt(skjæringstidspunkt)
+                        .harPerioderMedPotensiellUtbetaling()
+                }
+                .all { it.harInntektsmelding(skjæringstidspunkt) }
 
         internal fun Iterable<Arbeidsgiver>.trengerSøknadISammeMåned(skjæringstidspunkt: LocalDate) = this
             .filter { !it.harSykdomFor(skjæringstidspunkt) }
@@ -278,7 +285,7 @@ internal class Arbeidsgiver private constructor(
                 .firstOrNull() ?: return
 
             if (førstePeriode.trengerSøknadISammeMåned(this)) return
-            if (!førstePeriode.kanGjennoptaBehandling(this)) return
+            if (!førstePeriode.kanGjenopptaBehandling(this)) return
 
             if (all { it.sykmeldingsperioder.kanFortsetteBehandling(førstePeriode.periode()) }) {
                 førstePeriode.gjenopptaBehandlingNy(aktivitetslogg)
