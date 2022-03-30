@@ -1,12 +1,17 @@
 package no.nav.helse.spleis.meldinger
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.helse.rapids_rivers.*
+import java.util.UUID
+import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.helse.rapids_rivers.MessageContext
+import no.nav.helse.rapids_rivers.MessageProblems
+import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.rapids_rivers.River
+import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import no.nav.helse.spleis.withMDC
 import org.slf4j.LoggerFactory
-import java.util.*
 
 internal abstract class HendelseRiver(rapidsConnection: RapidsConnection, private val messageMediator: IMessageMediator) : River.PacketValidation {
     protected val river = River(rapidsConnection)
@@ -31,6 +36,8 @@ internal abstract class HendelseRiver(rapidsConnection: RapidsConnection, privat
             river.validate(this@HendelseRiver)
             river.register(this)
         }
+
+        override fun name() = this@HendelseRiver::class.simpleName ?: "ukjent"
 
         override fun onPacket(packet: JsonMessage, context: MessageContext) {
             withMDC(mapOf(
