@@ -1,24 +1,73 @@
 package no.nav.helse.serde
 
-import no.nav.helse.*
-import no.nav.helse.hendelser.*
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.Year
+import java.util.UUID
+import no.nav.helse.Toggle
+import no.nav.helse.april
+import no.nav.helse.desember
+import no.nav.helse.februar
+import no.nav.helse.hendelser.Arbeidsavklaringspenger
+import no.nav.helse.hendelser.ArbeidsgiverInntekt
+import no.nav.helse.hendelser.Dagpenger
+import no.nav.helse.hendelser.Dødsinfo
+import no.nav.helse.hendelser.Foreldrepermisjon
+import no.nav.helse.hendelser.InntektForSykepengegrunnlag
+import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.Inntektsvurdering
+import no.nav.helse.hendelser.Institusjonsopphold
+import no.nav.helse.hendelser.Medlemskapsvurdering
+import no.nav.helse.hendelser.Omsorgspenger
+import no.nav.helse.hendelser.Opplæringspenger
+import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Pleiepenger
+import no.nav.helse.hendelser.Simulering
+import no.nav.helse.hendelser.Sykmelding
+import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger.*
+import no.nav.helse.hendelser.Utbetalingshistorikk
+import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
+import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder.Arbeidskategorikode
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder.KodePeriode
+import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger.Feriepenger
+import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger.Utbetalingsperiode
+import no.nav.helse.hendelser.Vilkårsgrunnlag
+import no.nav.helse.hendelser.Ytelser
+import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.UtbetalingOverført
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.inspectors.personLogg
-import no.nav.helse.person.*
+import no.nav.helse.januar
+import no.nav.helse.juli
+import no.nav.helse.mai
+import no.nav.helse.mars
+import no.nav.helse.oktober
+import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
+import no.nav.helse.person.Arbeidsgiver
+import no.nav.helse.person.Dokumentsporing
+import no.nav.helse.person.ForlengelseFraInfotrygd
+import no.nav.helse.person.Inntektskilde
+import no.nav.helse.person.InntektsmeldingInfo
+import no.nav.helse.person.Periodetype
+import no.nav.helse.person.Person
+import no.nav.helse.person.PersonVisitor
+import no.nav.helse.person.TilstandType
+import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.person.infotrygdhistorikk.UgyldigPeriode
+import no.nav.helse.sisteBehov
+import no.nav.helse.somFødselsnummer
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
@@ -27,13 +76,10 @@ import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.LocalTime
-import java.time.Year
-import java.util.*
 
 class JsonBuilderTest {
     companion object {
@@ -173,6 +219,49 @@ class JsonBuilderTest {
         }
         assertEquals(json, json2)
         assertJsonEquals(person, result)
+    }
+
+    @Test
+    fun `En forlengelse med ny tilstandsflyt`() = Toggle.NyTilstandsflyt.enable {
+        val person = Person(aktørId, fnr, MaskinellJurist()).apply {
+            håndter(sykmelding(fom = 1.januar, tom = 31.januar))
+            håndter(
+                søknad(
+                    hendelseId = UUID.randomUUID(),
+                    fom = 1.januar,
+                    tom = 31.januar,
+                    sendtSøknad = 1.februar.atStartOfDay()
+                )
+            )
+        }
+        testSerialiseringAvPerson(person)
+    }
+
+    @Test
+    fun `Person med ny tilstandsflyt som venter på inntektsmelding`() = Toggle.NyTilstandsflyt.enable {
+        val person = Person(aktørId, fnr, MaskinellJurist()).apply {
+            håndter(sykmelding(fom = 1.januar, tom = 31.januar))
+            håndter(
+                søknad(
+                    hendelseId = UUID.randomUUID(),
+                    fom = 1.januar,
+                    tom = 31.januar,
+                    sendtSøknad = 1.februar.atStartOfDay()
+                )
+            )
+
+            håndter(sykmelding(fom = 1.februar, tom = 28.februar))
+            håndter(
+                søknad(
+                    hendelseId = UUID.randomUUID(),
+                    fom = 1.februar,
+                    tom = 28.februar,
+                    sendtSøknad = 1.mars.atStartOfDay()
+                )
+            )
+            håndter(inntektsmelding(fom = 1.januar))
+        }
+        testSerialiseringAvPerson(person)
     }
 
     private lateinit var vedtaksperiodeId: String
