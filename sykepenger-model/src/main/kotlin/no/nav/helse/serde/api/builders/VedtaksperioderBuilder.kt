@@ -1,12 +1,20 @@
 package no.nav.helse.serde.api.builders
 
-import no.nav.helse.hendelser.Periode
-import no.nav.helse.person.*
-import no.nav.helse.serde.api.dto.UtbetalingshistorikkElementDTO
-import no.nav.helse.serde.api.v2.HendelseDTO
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
+import no.nav.helse.hendelser.Periode
+import no.nav.helse.person.Arbeidsgiver
+import no.nav.helse.person.Dokumentsporing
+import no.nav.helse.person.ForkastetVedtaksperiode
+import no.nav.helse.person.ForlengelseFraInfotrygd
+import no.nav.helse.person.Inntektskilde
+import no.nav.helse.person.InntektsmeldingInfo
+import no.nav.helse.person.Periodetype
+import no.nav.helse.person.Vedtaksperiode
+import no.nav.helse.person.VilkårsgrunnlagHistorikk
+import no.nav.helse.serde.api.dto.UtbetalingshistorikkElementDTO
+import no.nav.helse.serde.api.v2.HendelseDTO
 
 internal class VedtaksperioderBuilder(
     private val arbeidsgiver: Arbeidsgiver,
@@ -22,7 +30,7 @@ internal class VedtaksperioderBuilder(
         perioder.map { it.build(hendelser, utbetalinger) }
 
     private fun gruppeId(vedtaksperiode: Vedtaksperiode): UUID {
-        val gruppeId = arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode)?.let(gruppeIder::getValue) ?: UUID.randomUUID()
+        val gruppeId = arbeidsgiver.finnVedtaksperiodeRettFør(vedtaksperiode)?.let(gruppeIder::getValue) ?: UUID.randomUUID()
         gruppeIder[vedtaksperiode] = gruppeId
         return gruppeId
     }

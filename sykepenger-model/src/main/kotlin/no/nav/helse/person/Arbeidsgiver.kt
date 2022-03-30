@@ -882,11 +882,11 @@ internal class Arbeidsgiver private constructor(
         val (perioderFør, perioderEtter) = vedtaksperioder.sorted().partition { it < vedtaksperiode }
         val sammenhengendePerioder = mutableListOf(vedtaksperiode)
         perioderFør.reversed().forEach {
-            if (it.erSykeperiodeRettFør(sammenhengendePerioder.first()))
+            if (it.erVedtaksperiodeRettFør(sammenhengendePerioder.first()))
                 sammenhengendePerioder.add(0, it)
         }
         perioderEtter.forEach {
-            if (sammenhengendePerioder.last().erSykeperiodeRettFør(it))
+            if (sammenhengendePerioder.last().erVedtaksperiodeRettFør(it))
                 sammenhengendePerioder.add(it)
         }
         return sammenhengendePerioder
@@ -981,14 +981,14 @@ internal class Arbeidsgiver private constructor(
         forkastede.add(ForkastetVedtaksperiode(vedtaksperiode, ForkastetÅrsak.IKKE_STØTTET))
     }
 
-    internal fun finnSykeperiodeRettFør(vedtaksperiode: Vedtaksperiode) =
+    internal fun finnVedtaksperiodeRettFør(vedtaksperiode: Vedtaksperiode) =
         vedtaksperioder.firstOrNull { other ->
-            other.erSykeperiodeRettFør(vedtaksperiode)
+            other.erVedtaksperiodeRettFør(vedtaksperiode)
         }
 
-    internal fun finnSykeperiodeRettEtter(vedtaksperiode: Vedtaksperiode) =
+    internal fun finnVedtaksperiodeRettEtter(vedtaksperiode: Vedtaksperiode) =
         vedtaksperioder.firstOrNull { other ->
-            vedtaksperiode.erSykeperiodeRettFør(other)
+            vedtaksperiode.erVedtaksperiodeRettFør(other)
         }
 
     internal fun finnSykeperioderAvsluttetUtenUtbetalingRettFør(vedtaksperiode: Vedtaksperiode) =
@@ -1158,7 +1158,7 @@ internal class Arbeidsgiver private constructor(
     internal fun harFerdigstiltPeriode() = vedtaksperioder.any(ER_ELLER_HAR_VÆRT_AVSLUTTET) || forkastede.harAvsluttedePerioder()
 
     private fun tilstøtendeBak(vedtaksperiode: Vedtaksperiode): Vedtaksperiode? {
-        return vedtaksperioder.firstOrNull { it > vedtaksperiode }?.takeIf { vedtaksperiode.erSykeperiodeRettFør(it) }
+        return vedtaksperioder.firstOrNull { it > vedtaksperiode }?.takeIf { vedtaksperiode.erVedtaksperiodeRettFør(it) }
     }
 
     internal fun tidligerePeriodeRebehandles(vedtaksperiode: Vedtaksperiode, hendelse: PersonHendelse) {

@@ -1,5 +1,6 @@
 package no.nav.helse.person
 
+import java.util.UUID
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmelding
@@ -8,7 +9,6 @@ import no.nav.helse.person.Vedtaksperiode.Companion.iderMedUtbetaling
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
-import java.util.*
 
 internal class ForkastetVedtaksperiode(
     private val vedtaksperiode: Vedtaksperiode,
@@ -46,7 +46,7 @@ internal class ForkastetVedtaksperiode(
             Vedtaksperiode.sjekkOmOverlapperMedForkastet(forkastede.perioder(), inntektsmelding)
 
         internal fun finnForkastetSykeperiodeRettFør(forkastede: Iterable<ForkastetVedtaksperiode>, other: Vedtaksperiode) =
-            forkastede.perioder().firstOrNull { vedtaksperiode -> vedtaksperiode.erSykeperiodeRettFør(other) }
+            forkastede.perioder().firstOrNull { vedtaksperiode -> vedtaksperiode.erVedtaksperiodeRettFør(other) }
 
         internal fun List<ForkastetVedtaksperiode>.iderMedUtbetaling(utbetalingId: UUID) =
             map { it.vedtaksperiode }.iderMedUtbetaling(utbetalingId)
