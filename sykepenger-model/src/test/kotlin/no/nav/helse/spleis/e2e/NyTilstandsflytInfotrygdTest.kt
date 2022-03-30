@@ -251,12 +251,7 @@ internal class NyTilstandsflytInfotrygdTest : AbstractEndToEndTest() {
             inntektshistorikk = inntektsopplysning
         )
 
-        assertForventetFeil(
-            forklaring = "Infotrygdovergang går feilaktig til AvsluttetUtenUtbetaling," +
-                    " fordi vi ikke har historikk og går til AvsluttetUtenUtbetaling på direkten",
-            nå = { assertTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING) },
-            ønsket = { assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK) }
-        )
+        assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
     }
 
     private fun utbetalPeriode(vedtaksperiode: IdInnhenter) {

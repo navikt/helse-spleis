@@ -31,8 +31,17 @@ internal class ReberegningAvAvsluttetUtenUtbetalingE2ETest : AbstractEndToEndTes
     fun `reberegner avsluttet periode dersom inntektsmelding kommer inn`() = (Toggle.GjenopptaAvsluttetUtenUtbetaling + Toggle.NyTilstandsflyt).enable {
         håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(1.januar til 16.januar))
-        assertTilstander(1.vedtaksperiode, START, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, AVVENTER_HISTORIKK)
+        assertTilstander(
+            1.vedtaksperiode,
+            START,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVSLUTTET_UTEN_UTBETALING,
+            AVSLUTTET_UTEN_UTBETALING,
+            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_HISTORIKK
+        )
     }
 
     @Test
@@ -140,24 +149,43 @@ internal class ReberegningAvAvsluttetUtenUtbetalingE2ETest : AbstractEndToEndTes
     fun `gjenopptar behandling på neste periode avsluttet periode etter IM`() = (Toggle.GjenopptaAvsluttetUtenUtbetaling + Toggle.NyTilstandsflyt).enable {
         håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
         håndterSykmelding(Sykmeldingsperiode(21.januar, 26.januar, 100.prosent))
         håndterSøknad(Sykdom(21.januar, 26.januar, 100.prosent))
+        håndterUtbetalingshistorikk(2.vedtaksperiode)
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(10.januar til 25.januar))
-        assertTilstander(1.vedtaksperiode, START, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(2.vedtaksperiode, START, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, AVVENTER_HISTORIKK)
+        assertTilstander(
+            1.vedtaksperiode,
+            START,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVSLUTTET_UTEN_UTBETALING,
+            AVSLUTTET_UTEN_UTBETALING
+        )
+        assertTilstander(
+            2.vedtaksperiode,
+            START,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVSLUTTET_UTEN_UTBETALING,
+            AVSLUTTET_UTEN_UTBETALING,
+            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_HISTORIKK
+        )
     }
 
     @Test
     fun `gjenopptar ikke behandling på neste periode etter at kort periode reberegnes`() = (Toggle.GjenopptaAvsluttetUtenUtbetaling + Toggle.NyTilstandsflyt).enable {
         håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
         håndterSykmelding(Sykmeldingsperiode(21.januar, 26.januar, 100.prosent))
         håndterSøknad(Sykdom(21.januar, 26.januar, 100.prosent))
+        håndterUtbetalingshistorikk(2.vedtaksperiode)
         håndterSykmelding(Sykmeldingsperiode(27.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(27.januar, 31.januar, 100.prosent))
+        håndterUtbetalingshistorikk(3.vedtaksperiode)
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(10.januar til 25.januar))
-        assertTilstander(1.vedtaksperiode, START, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(2.vedtaksperiode, START, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, AVVENTER_HISTORIKK)
+        assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, AVVENTER_HISTORIKK)
         assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER)
     }
 
@@ -216,14 +244,16 @@ internal class ReberegningAvAvsluttetUtenUtbetalingE2ETest : AbstractEndToEndTes
         (Toggle.GjenopptaAvsluttetUtenUtbetaling + Toggle.NyTilstandsflyt).enable {
             håndterSykmelding(Sykmeldingsperiode(3.januar, 18.januar, 100.prosent))
             håndterSøknad(Sykdom(3.januar, 18.januar, 100.prosent))
+            håndterUtbetalingshistorikk(1.vedtaksperiode)
 
 
             håndterSykmelding(Sykmeldingsperiode(19.januar, 31.januar, 100.prosent))
             håndterSøknad(Sykdom(19.januar, 31.januar, 100.prosent))
+            håndterUtbetalingshistorikk(2.vedtaksperiode)
 
             håndterInntektsmelding(listOf(1.januar til 16.januar))
 
-            assertTilstander(1.vedtaksperiode, START, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, AVVENTER_HISTORIKK)
+            assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, AVVENTER_HISTORIKK)
             assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER)
         }
     }

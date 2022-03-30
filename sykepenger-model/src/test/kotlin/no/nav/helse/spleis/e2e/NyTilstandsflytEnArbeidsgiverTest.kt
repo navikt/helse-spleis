@@ -165,11 +165,18 @@ internal class NyTilstandsflytEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(17.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
 
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterSøknad(Sykdom(17.januar, 31.januar, 100.prosent))
 
-        assertTilstander(1.vedtaksperiode, START, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(
+            1.vedtaksperiode,
+            START,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVSLUTTET_UTEN_UTBETALING,
+            AVSLUTTET_UTEN_UTBETALING
+        )
         assertTilstander(2.vedtaksperiode, START, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, AVVENTER_HISTORIKK)
     }
 
@@ -237,6 +244,7 @@ internal class NyTilstandsflytEnArbeidsgiverTest : AbstractEndToEndTest() {
     fun `drawio -- Avsluttet uten utbetaling`() = Toggle.GjenopptaAvsluttetUtenUtbetaling.enable {
         håndterSykmelding(Sykmeldingsperiode(5.januar, 19.januar, 100.prosent))
         håndterSøknad(Sykdom(5.januar, 19.januar, 100.prosent))
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
         assertTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
 
         håndterInntektsmelding(listOf(1.januar til 16.januar))
@@ -251,13 +259,23 @@ internal class NyTilstandsflytEnArbeidsgiverTest : AbstractEndToEndTest() {
         Toggle.GjenopptaAvsluttetUtenUtbetaling.enable {
             håndterSykmelding(Sykmeldingsperiode(1.november, 30.november, 100.prosent))
             håndterSøknad(Sykdom(1.november, 30.november, 100.prosent))
+            håndterUtbetalingshistorikk(1.vedtaksperiode)
 
             håndterSykmelding(Sykmeldingsperiode(5.januar, 19.januar, 100.prosent))
             håndterSøknad(Sykdom(5.januar, 19.januar, 100.prosent))
+            håndterUtbetalingshistorikk(2.vedtaksperiode)
             assertTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
 
             håndterInntektsmelding(listOf(1.januar til 16.januar))
-            assertTilstander(2.vedtaksperiode, START, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, AVVENTER_HISTORIKK)
+            assertTilstander(
+                2.vedtaksperiode,
+                START,
+                AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+                AVSLUTTET_UTEN_UTBETALING,
+                AVSLUTTET_UTEN_UTBETALING,
+                AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+                AVVENTER_HISTORIKK
+            )
         }
     }
 
@@ -265,10 +283,12 @@ internal class NyTilstandsflytEnArbeidsgiverTest : AbstractEndToEndTest() {
     fun `Periode i AvsluttetUtenUtbetaling blir truffet av en IM slik at den får en utbetaling - senere perioder må trekkes tilbake til ventetilstand`() = Toggle.GjenopptaAvsluttetUtenUtbetaling.enable {
         håndterSykmelding(Sykmeldingsperiode(5.januar, 19.januar, 100.prosent))
         håndterSøknad(Sykdom(5.januar, 19.januar, 100.prosent))
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
         assertTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
 
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
+        håndterUtbetalingshistorikk(2.vedtaksperiode)
         håndterInntektsmelding(listOf(1.mars til 16.mars))
 
         håndterInntektsmelding(listOf(1.januar til 16.januar))
@@ -412,6 +432,16 @@ internal class NyTilstandsflytEnArbeidsgiverTest : AbstractEndToEndTest() {
 
         assertTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
         assertTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK)
+    }
+
+    @Test
+    fun `Periode skal ha utbetaling grunnet inntektsmelding vi mottok før søknad`() {
+        håndterSykmelding(Sykmeldingsperiode(11.januar, 26.januar, 100.prosent))
+        val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterSøknad(Sykdom(11.januar, 26.januar, 100.prosent))
+        håndterInntektsmeldingReplay(inntektsmeldingId, 1.vedtaksperiode.id(ORGNUMMER))
+
+        assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
     }
 
     private fun utbetalPeriodeEtterVilkårsprøving(vedtaksperiode: IdInnhenter) {

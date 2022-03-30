@@ -546,7 +546,7 @@ internal class Vedtaksperiode private constructor(
             hendelse.error("Invaliderer alle perioder for arbeidsgiver pga feil i søknad")
             return forkast(hendelse)
         }
-        val tilstand = if (ingenUtbetaling()) AvsluttetUtenUtbetaling else nesteTilstand()
+        val tilstand = if (ingenUtbetaling() && Toggle.NyTilstandsflyt.disabled) AvsluttetUtenUtbetaling else nesteTilstand()
         tilstand?.also { tilstand(hendelse, it) }
     }
 
@@ -1871,6 +1871,8 @@ internal class Vedtaksperiode private constructor(
                             arbeidsgiver.finnVedtaksperiodeRettEtter(vedtaksperiode)?.håndterInfotrygdforlengelse(hendelse)
                             vedtaksperiode.kontekst(hendelse)
                         }
+                    } else if (vedtaksperiode.ingenUtbetaling()) {
+                        vedtaksperiode.tilstand(hendelse, AvsluttetUtenUtbetaling)
                     }
                 }
             }
