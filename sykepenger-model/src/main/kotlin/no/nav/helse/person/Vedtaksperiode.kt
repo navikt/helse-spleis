@@ -392,14 +392,14 @@ internal class Vedtaksperiode private constructor(
 
     internal fun gjelder(skjæringstidspunkt: LocalDate) = this.skjæringstidspunkt == skjæringstidspunkt
 
-    internal fun stammerFraInfotrygd() = arbeidsgiver.erInfotrygdOvergangEllerForlengelse(periode)
-
     internal fun inntektskilde() = inntektskilde
     private fun harInntekt() = harInntektsmelding() || arbeidsgiver.grunnlagForSykepengegrunnlag(skjæringstidspunkt, periode.start) != null
     private fun harInntektsmelding() = arbeidsgiver.harInntektsmelding(skjæringstidspunkt)
 
+    internal fun forlengelseFraInfotrygd() = arbeidsgiver.erForlengelse(periode) && !harSykeperiodeRettFør()
+
     internal fun kanGjennoptaBehandling(arbeidsgivere: Iterable<Arbeidsgiver>) =
-        arbeidsgivere.harNødvendigInntekt(skjæringstidspunkt) || stammerFraInfotrygd()
+        arbeidsgivere.harNødvendigInntekt(skjæringstidspunkt) || this.forlengelseFraInfotrygd == JA
 
     internal fun trengerSøknadISammeMåned(arbeidsgivere: Iterable<Arbeidsgiver>) =
         arbeidsgivere.trengerSøknadISammeMåned(skjæringstidspunkt)
@@ -1101,7 +1101,7 @@ internal class Vedtaksperiode private constructor(
             hendelse.error("Forventet ikke at tidligere periode kan rebehandles")
         }
 
-        fun forlengerInfotrygd(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+        fun håndterInfotrygdforlengelse(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             hendelse.info("Tidligere periode oppdaget forlengelse fra Infotrygd")
         }
 
@@ -1137,8 +1137,10 @@ internal class Vedtaksperiode private constructor(
             if (vedtaksperiode.harArbeidsgivereMedOverlappendeUtbetaltePerioder(vedtaksperiode.periode)) {
                 søknad.warn("Denne personen har en utbetaling for samme periode for en annen arbeidsgiver. Kontroller at beregningene for begge arbeidsgiverne er korrekte.")
             }
+            val forlengerInfotrygd = vedtaksperiode.arbeidsgiver.finnSykeperiodeRettFør(vedtaksperiode)?.forlengelseFraInfotrygd == JA
+            if (forlengerInfotrygd) vedtaksperiode.forlengelseFraInfotrygd = JA
             vedtaksperiode.håndterSøknad(søknad) {
-                if (vedtaksperiode.harInntektsmelding() || vedtaksperiode.stammerFraInfotrygd())
+                if (vedtaksperiode.harInntektsmelding() || forlengerInfotrygd)
                     AvventerTidligereEllerOverlappendePerioder
                 else AvventerInntektsmeldingEllerHistorikk
             }
@@ -1226,7 +1228,7 @@ internal class Vedtaksperiode private constructor(
             håndterOverlappendeSykmelding(vedtaksperiode, sykmelding)
         }
 
-        override fun forlengerInfotrygd(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+        override fun håndterInfotrygdforlengelse(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.tilstand(hendelse, AvventerSøknadUferdigForlengelse)
         }
 
@@ -1635,7 +1637,7 @@ internal class Vedtaksperiode private constructor(
                     if (arbeidsgiver.erForlengelse(vedtaksperiode.periode)) {
                         info("Oppdaget at perioden er en forlengelse")
                         return@onSuccess vedtaksperiode.tilstand(hendelse, AvventerHistorikk).also {
-                            arbeidsgiver.finnSykeperiodeRettEtter(vedtaksperiode)?.forlengerInfotrygd(hendelse)
+                            arbeidsgiver.finnSykeperiodeRettEtter(vedtaksperiode)?.håndterInfotrygdforlengelse(hendelse)
                             vedtaksperiode.kontekst(hendelse)
                         }
                     }
@@ -1661,7 +1663,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.håndterOverlappendeSøknad(søknad)
         }
 
-        override fun forlengerInfotrygd(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+        override fun håndterInfotrygdforlengelse(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.tilstand(hendelse, AvventerUferdig)
         }
 
@@ -1804,7 +1806,7 @@ internal class Vedtaksperiode private constructor(
                     if (arbeidsgiver.erForlengelse(vedtaksperiode.periode)) {
                         info("Oppdaget at perioden er en forlengelse")
                         return@onSuccess vedtaksperiode.tilstand(hendelse, AvventerHistorikk).also {
-                            arbeidsgiver.finnSykeperiodeRettEtter(vedtaksperiode)?.forlengerInfotrygd(hendelse)
+                            arbeidsgiver.finnSykeperiodeRettEtter(vedtaksperiode)?.håndterInfotrygdforlengelse(hendelse)
                             vedtaksperiode.kontekst(hendelse)
                         }
                     }
@@ -1862,10 +1864,11 @@ internal class Vedtaksperiode private constructor(
                     )
                 }
                 onSuccess {
-                    if (vedtaksperiode.stammerFraInfotrygd()) {
+                    if (vedtaksperiode.forlengelseFraInfotrygd()) {
                         info("Oppdaget at perioden startet i infotrygd")
+                        vedtaksperiode.forlengelseFraInfotrygd = JA
                         return@onSuccess vedtaksperiode.tilstand(hendelse, AvventerTidligereEllerOverlappendePerioder).also {
-                            arbeidsgiver.finnSykeperiodeRettEtter(vedtaksperiode)?.forlengerInfotrygd(hendelse)
+                            arbeidsgiver.finnSykeperiodeRettEtter(vedtaksperiode)?.håndterInfotrygdforlengelse(hendelse)
                             vedtaksperiode.kontekst(hendelse)
                         }
                     }
@@ -1873,8 +1876,10 @@ internal class Vedtaksperiode private constructor(
             }
         }
 
-        override fun forlengerInfotrygd(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+        override fun håndterInfotrygdforlengelse(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.tilstand(hendelse, AvventerTidligereEllerOverlappendePerioder)
+            vedtaksperiode.forlengelseFraInfotrygd = JA
+            vedtaksperiode.arbeidsgiver.finnSykeperiodeRettEtter(vedtaksperiode)?.håndterInfotrygdforlengelse(hendelse)
         }
     }
 
@@ -1892,10 +1897,10 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
-    private fun forlengerInfotrygd(hendelse: IAktivitetslogg) {
+    private fun håndterInfotrygdforlengelse(hendelse: IAktivitetslogg) {
         kontekst(hendelse)
-        tilstand.forlengerInfotrygd(this, hendelse)
-        arbeidsgiver.finnSykeperiodeRettEtter(this)?.forlengerInfotrygd(hendelse)
+        tilstand.håndterInfotrygdforlengelse(this, hendelse)
+        arbeidsgiver.finnSykeperiodeRettEtter(this)?.håndterInfotrygdforlengelse(hendelse)
     }
 
     internal object AvventerVilkårsprøving : Vedtaksperiodetilstand {
