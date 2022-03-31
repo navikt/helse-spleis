@@ -672,7 +672,11 @@ internal class Vedtaksperiode private constructor(
     private fun Iterable<Vedtaksperiode>.kanGåTilNesteTilstand() =
         first() == this@Vedtaksperiode && drop(1).all { it.tilstand == AvventerArbeidsgivere }
 
-    private fun alleAndreAvventerArbeidsgivere() = overlappendeVedtaksperioder().all { it == this || it.tilstand == AvventerArbeidsgivere }
+    private fun alleAndreAvventerArbeidsgivere() = overlappendeVedtaksperioder().all {
+        it == this
+                || it.tilstand == AvventerArbeidsgivere
+                || it.tilstand == AvventerTidligereEllerOverlappendePerioder
+    }
 
     private fun forberedMuligUtbetaling(vilkårsgrunnlag: Vilkårsgrunnlag) {
         if (Toggle.NyTilstandsflyt.enabled) {
