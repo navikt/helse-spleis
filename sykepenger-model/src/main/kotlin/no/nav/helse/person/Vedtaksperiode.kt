@@ -1140,9 +1140,12 @@ internal class Vedtaksperiode private constructor(
             val forlengerInfotrygd = vedtaksperiode.arbeidsgiver.finnVedtaksperiodeRettFør(vedtaksperiode)?.forlengelseFraInfotrygd == JA
             if (forlengerInfotrygd) vedtaksperiode.forlengelseFraInfotrygd = JA
             vedtaksperiode.håndterSøknad(søknad) {
-                if (vedtaksperiode.harInntektsmelding() || forlengerInfotrygd)
-                    AvventerTidligereEllerOverlappendePerioder
-                else AvventerInntektsmeldingEllerHistorikk
+                when {
+                    forlengerInfotrygd -> AvventerTidligereEllerOverlappendePerioder
+                    vedtaksperiode.harInntektsmelding() && vedtaksperiode.ingenUtbetaling() -> AvsluttetUtenUtbetaling
+                    vedtaksperiode.harInntektsmelding() -> AvventerTidligereEllerOverlappendePerioder
+                    else -> AvventerInntektsmeldingEllerHistorikk
+                }
             }
 
             søknad.info("Fullført behandling av søknad")

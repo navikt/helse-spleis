@@ -435,6 +435,19 @@ internal class NyTilstandsflytEnArbeidsgiverTest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `Kort periode med en tidligere kort periode som har lagret inntekt for første fraværsdag`() {
+        /* skal ikke gå videre til AVVENTER_HISTORIKK siden perioden ikke går forbi AGP */
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 2.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(10.januar, 11.januar, 100.prosent))
+
+        håndterSøknad(Sykdom(1.januar, 2.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 2.januar, 10.januar til 23.januar), førsteFraværsdag = 10.januar)
+        håndterSøknad(Sykdom(10.januar, 11.januar, 100.prosent))
+
+        assertTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+    }
+
+    @Test
     fun `Periode skal ha utbetaling grunnet inntektsmelding vi mottok før søknad`() {
         håndterSykmelding(Sykmeldingsperiode(11.januar, 26.januar, 100.prosent))
         val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar))
