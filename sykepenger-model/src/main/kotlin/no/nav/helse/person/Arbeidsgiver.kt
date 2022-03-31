@@ -463,10 +463,10 @@ internal class Arbeidsgiver private constructor(
         håndter(sykmelding) { nyPeriode(vedtaksperiode, sykmelding) }
     }
 
-    private fun kanIkkeBehandle(sykmelding: Sykmelding): Boolean {
-        ForkastetVedtaksperiode.overlapperMedForkastet(forkastede, sykmelding)
-        ForkastetVedtaksperiode.forlengerForkastet(forkastede, sykmelding)
-        return sykmelding.hasErrorsOrWorse()
+    private fun kanIkkeBehandle(hendelse: SykdomstidslinjeHendelse): Boolean {
+        ForkastetVedtaksperiode.overlapperMedForkastet(forkastede, hendelse)
+        ForkastetVedtaksperiode.forlengerForkastet(forkastede, hendelse)
+        return hendelse.hasErrorsOrWorse()
     }
 
     internal fun håndter(søknad: Søknad) {
@@ -486,6 +486,7 @@ internal class Arbeidsgiver private constructor(
             hendelse = søknad,
             jurist = jurist
         )
+        if (kanIkkeBehandle(søknad)) return registrerForkastetVedtaksperiode(vedtaksperiode, søknad)
         if (noenHarHåndtert(søknad, Vedtaksperiode::håndter)) return
         registrerNyVedtaksperiode(vedtaksperiode)
         vedtaksperiode.håndter(søknad)
@@ -982,7 +983,7 @@ internal class Arbeidsgiver private constructor(
         vedtaksperioder.sort()
     }
 
-    private fun registrerForkastetVedtaksperiode(vedtaksperiode: Vedtaksperiode, hendelse: Sykmelding) {
+    private fun registrerForkastetVedtaksperiode(vedtaksperiode: Vedtaksperiode, hendelse: SykdomstidslinjeHendelse) {
         hendelse.info("Oppretter forkastet vedtaksperiode ettersom Sykmelding inneholder errors")
         vedtaksperiode.forkast(hendelse, utbetalinger)
         forkastede.add(ForkastetVedtaksperiode(vedtaksperiode, ForkastetÅrsak.IKKE_STØTTET))

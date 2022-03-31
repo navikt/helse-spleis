@@ -2839,24 +2839,24 @@ internal class Vedtaksperiode private constructor(
 
         internal fun List<Vedtaksperiode>.harInntekt() = any { it.harInntekt() }
 
-        internal fun overlapperMedForkastet(forkastede: Iterable<Vedtaksperiode>, sykmelding: Sykmelding) {
+        internal fun overlapperMedForkastet(forkastede: Iterable<Vedtaksperiode>, hendelse: SykdomstidslinjeHendelse) {
             forkastede
-                .filter { it.periode.overlapperMed(sykmelding.periode()) }
+                .filter { it.periode.overlapperMed(hendelse.periode()) }
                 .forEach {
-                    sykmelding.error("Sykmelding overlapper med forkastet vedtaksperiode")
-                    sykmelding.info("Sykmelding overlapper med forkastet vedtaksperiode ${it.id}, hendelse sykmeldingsperiode: ${sykmelding.periode()}, vedtaksperiode sykmeldingsperiode: ${it.periode}")
+                    hendelse.error("Sykmelding overlapper med forkastet vedtaksperiode")
+                    hendelse.info("Sykmelding overlapper med forkastet vedtaksperiode ${it.id}, hendelse sykmeldingsperiode: ${hendelse.periode()}, vedtaksperiode sykmeldingsperiode: ${it.periode}")
                 }
         }
 
-        internal fun forlengerForkastet(forkastede: Iterable<Vedtaksperiode>, sykmelding: Sykmelding) {
+        internal fun forlengerForkastet(forkastede: Iterable<Vedtaksperiode>, hendelse: SykdomstidslinjeHendelse) {
             forkastede
-                .filter { it.sykdomstidslinje.erRettFør(sykmelding.sykdomstidslinje()) }
+                .filter { it.sykdomstidslinje.erRettFør(hendelse.sykdomstidslinje()) }
                 .forEach {
                     if (Toggle.ForkastForlengelseAvForkastetPeriode.enabled) {
-                        sykmelding.error("Sykmelding forlenger en forkastet periode")
-                        sykmelding.info("Sykmelding forlenger forkastet vedtaksperiode ${it.id}, hendelse sykmeldingsperiode: ${sykmelding.periode()}, vedtaksperiode sykmeldingsperiode: ${it.periode}")
+                        hendelse.error("Sykmelding forlenger en forkastet periode")
+                        hendelse.info("Sykmelding forlenger forkastet vedtaksperiode ${it.id}, hendelse sykmeldingsperiode: ${hendelse.periode()}, vedtaksperiode sykmeldingsperiode: ${it.periode}")
                     } else {
-                        sykmelding.info("Sykmelding forlenger forkastet vedtaksperiode")
+                        hendelse.info("Sykmelding forlenger forkastet vedtaksperiode")
                     }
                 }
         }

@@ -3,11 +3,11 @@ package no.nav.helse.person
 import java.util.UUID
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.person.Vedtaksperiode.Companion.ER_ELLER_HAR_VÆRT_AVSLUTTET
 import no.nav.helse.person.Vedtaksperiode.Companion.iderMedUtbetaling
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
+import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 
 internal class ForkastetVedtaksperiode(
@@ -25,11 +25,11 @@ internal class ForkastetVedtaksperiode(
 
         internal fun Iterable<ForkastetVedtaksperiode>.harAvsluttedePerioder() = this.perioder().any(ER_ELLER_HAR_VÆRT_AVSLUTTET)
 
-        internal fun overlapperMedForkastet(forkastede: Iterable<ForkastetVedtaksperiode>, sykmelding: Sykmelding) {
-            Vedtaksperiode.overlapperMedForkastet(forkastede.perioder(), sykmelding)
+        internal fun overlapperMedForkastet(forkastede: Iterable<ForkastetVedtaksperiode>, hendelse: SykdomstidslinjeHendelse) {
+            Vedtaksperiode.overlapperMedForkastet(forkastede.perioder(), hendelse)
         }
-        internal fun forlengerForkastet(forkastede: Iterable<ForkastetVedtaksperiode>, sykmelding: Sykmelding) {
-            Vedtaksperiode.forlengerForkastet(forkastede.perioder(), sykmelding)
+        internal fun forlengerForkastet(forkastede: Iterable<ForkastetVedtaksperiode>, hendelse: SykdomstidslinjeHendelse) {
+            Vedtaksperiode.forlengerForkastet(forkastede.perioder(), hendelse)
         }
 
         internal fun arbeidsgiverperiodeFor(
