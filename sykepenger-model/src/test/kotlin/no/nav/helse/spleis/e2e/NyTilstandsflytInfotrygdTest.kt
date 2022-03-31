@@ -25,6 +25,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -252,6 +253,21 @@ internal class NyTilstandsflytInfotrygdTest : AbstractEndToEndTest() {
         )
 
         assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
+    }
+
+    @Test
+    fun `spør om utbetalingshistorikk i AvventerInntektsmeldingEllerHistorikk ved påminnelse`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterUtbetalingshistorikk(1.vedtaksperiode, besvart = LocalDate.EPOCH.atStartOfDay())
+        håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
+
+        assertEtterspurt(
+            løsning = Utbetalingshistorikk::class,
+            type = Aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk,
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            orgnummer = ORGNUMMER
+        )
     }
 
     private fun utbetalPeriode(vedtaksperiode: IdInnhenter) {

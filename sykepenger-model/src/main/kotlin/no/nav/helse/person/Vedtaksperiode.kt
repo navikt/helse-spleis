@@ -1889,6 +1889,10 @@ internal class Vedtaksperiode private constructor(
             }
         }
 
+        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
+            vedtaksperiode.trengerHistorikkFraInfotrygd(påminnelse)
+        }
+
         override fun håndterInfotrygdforlengelse(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.tilstand(hendelse, AvventerTidligereEllerOverlappendePerioder)
             vedtaksperiode.forlengelseFraInfotrygd = JA
