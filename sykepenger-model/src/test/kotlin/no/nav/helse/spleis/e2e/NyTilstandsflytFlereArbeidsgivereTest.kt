@@ -434,8 +434,8 @@ internal class NyTilstandsflytFlereArbeidsgivereTest : AbstractEndToEndTest() {
 
         utbetalPeriode(1.vedtaksperiode, a2, 1.januar)
 
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 16.mars, 100.prosent), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(1.april, 30.april, 100.prosent), orgnummer = a2)
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 16.mars, 100.prosent), orgnummer = a2)
 
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a1)
         håndterUtbetalingshistorikk(1.vedtaksperiode, orgnummer = a1)
