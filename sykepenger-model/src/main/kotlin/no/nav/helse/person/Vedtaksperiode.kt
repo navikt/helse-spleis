@@ -1846,6 +1846,10 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.håndterInntektsmelding(inntektsmelding, AvventerTidligereEllerOverlappendePerioder)
         }
 
+        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
+            vedtaksperiode.håndterOverlappendeSøknad(søknad)
+        }
+
         override fun nyPeriodeFørMedNyFlyt(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Søknad) {}
 
         override fun tidligerePeriodeRebehandles(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {}
@@ -1893,6 +1897,10 @@ internal class Vedtaksperiode private constructor(
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.person.gjenopptaBehandlingNy(hendelse)
+        }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
+            vedtaksperiode.håndterOverlappendeSøknad(søknad)
         }
 
         override fun nyPeriodeFørMedNyFlyt(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Søknad) {}
