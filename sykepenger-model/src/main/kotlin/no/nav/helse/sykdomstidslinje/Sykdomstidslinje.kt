@@ -1,5 +1,11 @@
 package no.nav.helse.sykdomstidslinje
 
+import java.time.DayOfWeek
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.Objects
+import java.util.SortedMap
+import java.util.stream.Collectors.toMap
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.contains
@@ -25,11 +31,6 @@ import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde.Companion.INGEN
 import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Økonomi
-import java.time.DayOfWeek
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
-import java.util.stream.Collectors.toMap
 
 internal class Sykdomstidslinje private constructor(
     private val dager: SortedMap<LocalDate, Dag>,
@@ -388,7 +389,9 @@ internal class Sykdomstidslinje private constructor(
         )
 
         internal fun ulikFerieinformasjon(sykdomstidslinje: Sykdomstidslinje, ferieperiode: Periode) =
-            ferieperiode.any { sykdomstidslinje[it] !is Feriedag }
+            ferieperiode
+                .filter { sykdomstidslinje.periode()?.contains(it) ?: false }
+                .any { sykdomstidslinje[it] !is Feriedag }
 
         internal fun gammelTidslinje(tidslinjer: List<Sykdomstidslinje>) =
             tidslinjer.map { Sykdomstidslinje(it.dager.filter { (_, dag ) -> dag !is ProblemDag }.toSortedMap(), it.periode) }.merge(sammenhengendeSykdom)

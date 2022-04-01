@@ -148,8 +148,8 @@ internal class SøknadTest {
     fun `ulik ferieinformasjon`() {
         søknad(Sykdom(1.februar, 10.februar, 100.prosent), Ferie(20.januar, 31.januar))
         assertFalse(søknad.harUlikFerieinformasjon(Sykdomstidslinje.Companion.feriedager(20.januar, 31.januar, SykdomstidslinjeHendelse.Hendelseskilde.INGEN)))
-        assertTrue(søknad.harUlikFerieinformasjon(Sykdomstidslinje.Companion.feriedager(21.januar, 31.januar, SykdomstidslinjeHendelse.Hendelseskilde.INGEN)))
-        assertTrue(søknad.harUlikFerieinformasjon(Sykdomstidslinje.Companion.feriedager(20.januar, 30.januar, SykdomstidslinjeHendelse.Hendelseskilde.INGEN)))
+        assertFalse(søknad.harUlikFerieinformasjon(Sykdomstidslinje.Companion.feriedager(21.januar, 31.januar, SykdomstidslinjeHendelse.Hendelseskilde.INGEN)))
+        assertFalse(søknad.harUlikFerieinformasjon(Sykdomstidslinje.Companion.feriedager(20.januar, 30.januar, SykdomstidslinjeHendelse.Hendelseskilde.INGEN)))
         assertTrue(søknad.harUlikFerieinformasjon(Sykdomstidslinje.Companion.sykedager(20.januar, 10.februar, 100.prosent, SykdomstidslinjeHendelse.Hendelseskilde.INGEN)))
     }
 
