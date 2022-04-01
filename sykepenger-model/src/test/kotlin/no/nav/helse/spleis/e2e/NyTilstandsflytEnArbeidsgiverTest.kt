@@ -5,6 +5,7 @@ import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
@@ -25,7 +26,6 @@ import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -515,6 +515,18 @@ internal class NyTilstandsflytEnArbeidsgiverTest : AbstractEndToEndTest() {
         assertTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
         assertTilstand(2.vedtaksperiode, TIL_INFOTRYGD)
         assertTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
+    }
+
+    @Test
+    fun `ferie strekker seg ut over tidligere vedtaksperiode`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        utbetalPeriode(1.vedtaksperiode)
+
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Ferie(20.januar, 31.januar))
+        assertWarning("Det er oppgitt ny informasjon om ferie i søknaden som det ikke har blitt opplyst om tidligere. Tidligere periode må revurderes.", 2.vedtaksperiode.filter())
     }
 
     @Test

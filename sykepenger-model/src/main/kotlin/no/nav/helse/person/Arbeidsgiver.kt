@@ -486,6 +486,9 @@ internal class Arbeidsgiver private constructor(
             hendelse = søknad,
             jurist = jurist
         )
+        if (vedtaksperioder.any { it.overlapperMenUlikFerieinformasjon(søknad) }) {
+            søknad.warn("Det er oppgitt ny informasjon om ferie i søknaden som det ikke har blitt opplyst om tidligere. Tidligere periode må revurderes.")
+        }
         if (kanIkkeBehandle(søknad)) return registrerForkastetVedtaksperiode(vedtaksperiode, søknad)
         if (noenHarHåndtert(søknad, Vedtaksperiode::håndter)) return
         registrerNyVedtaksperiode(vedtaksperiode)
