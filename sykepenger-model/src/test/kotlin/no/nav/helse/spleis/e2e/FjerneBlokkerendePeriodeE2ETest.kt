@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import no.nav.helse.nesteArbeidsdag
 
 /*
  * Disse testene er klokkesensitive fordi makstidsjekken i håndter påminnelse bruker LocalDateTime.now()
@@ -48,8 +49,8 @@ internal class FjerneBlokkerendePeriodeE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `perioder venter på søknad ut måneden og tre måneder frem i tid - perioden fordelt over to måneder`() {
-        val tom = TIDLIGST_MULIGE_UTBETALINGSDAG
-        val fom = tom.minusDays(20)
+        val tom = TIDLIGST_MULIGE_UTBETALINGSDAG.nesteArbeidsdag()
+        val fom = tom.minusDays(20).nesteArbeidsdag()
         håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent))
         håndterPåminnelse(
             1.vedtaksperiode,

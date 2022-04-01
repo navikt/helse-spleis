@@ -13,13 +13,14 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.YearMonth
+import no.nav.helse.nesteArbeidsdag
 
 internal class FremtidigSøknadE2ETest : AbstractEndToEndTest() {
     private companion object {
         private val inneværendeMåned = YearMonth.now()
         private val nesteMåned = inneværendeMåned.plusMonths(1)
         private val fom = inneværendeMåned.atDay(14)
-        private val tom = nesteMåned.atDay(14)
+        private val tom = nesteMåned.atDay(14).nesteArbeidsdag()
         private val sisteArbeidsgiverdag = fom.plusDays(15)
     }
 

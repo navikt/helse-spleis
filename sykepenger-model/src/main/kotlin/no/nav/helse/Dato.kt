@@ -32,3 +32,5 @@ internal class Ukedager(private val antallUkedager: Int) {
         antallUkedager / 5 * 7 + table.tilleggsdager(dato.dayOfWeek, antallUkedager)
     operator fun plus(other: LocalDate): LocalDate = other.plusDays(dager(other).toLong())
 }
+
+fun LocalDate.nesteArbeidsdag(): LocalDate = this + 0.ukedager
