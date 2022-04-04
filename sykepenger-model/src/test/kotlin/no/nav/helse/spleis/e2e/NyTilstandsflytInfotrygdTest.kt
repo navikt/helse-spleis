@@ -270,6 +270,35 @@ internal class NyTilstandsflytInfotrygdTest : AbstractEndToEndTest() {
         )
     }
 
+    @Test
+    fun `oppdager at vi er en infotrygdforlengelse når infotrygdhistorikken tilstøter en periode i AvsluttetUtenUtbetaling`() {
+        håndterSykmelding(Sykmeldingsperiode(10.januar, 19.januar, 100.prosent))
+        håndterSøknad(Sykdom(10.januar, 19.januar, 100.prosent))
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+        håndterSykmelding(Sykmeldingsperiode(20.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(20.januar, 31.januar, 100.prosent))
+        håndterUtbetalingshistorikk(2.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 9.januar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
+            Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true)
+        ))
+        assertTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK)
+    }
+
+    @Test
+    fun `oppdager at vi er en infotrygdforlengelse når vi tilstøter en periode i AvsluttetUtenUtbetaling`() {
+        håndterSykmelding(Sykmeldingsperiode(10.januar, 19.januar, 100.prosent))
+        håndterSøknad(Sykdom(10.januar, 19.januar, 100.prosent))
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+        håndterSykmelding(Sykmeldingsperiode(20.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(20.januar, 31.januar, 100.prosent))
+        håndterUtbetalingshistorikk(2.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 19.januar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
+            Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true)
+        ))
+        assertTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK)
+    }
+
+
     private fun utbetalPeriode(vedtaksperiode: IdInnhenter) {
         håndterYtelser(vedtaksperiode)
         håndterSimulering(vedtaksperiode)

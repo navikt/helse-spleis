@@ -50,6 +50,8 @@ import no.nav.helse.person.Dokumentsporing.Companion.ider
 import no.nav.helse.person.ForlengelseFraInfotrygd.JA
 import no.nav.helse.person.ForlengelseFraInfotrygd.NEI
 import no.nav.helse.person.InntektsmeldingInfo.Companion.ider
+import no.nav.helse.person.Periodetype.FORLENGELSE
+import no.nav.helse.person.Periodetype.FØRSTEGANGSBEHANDLING
 import no.nav.helse.person.Periodetype.INFOTRYGDFORLENGELSE
 import no.nav.helse.person.Periodetype.OVERGANG_FRA_IT
 import no.nav.helse.person.TilstandType.AVSLUTTET
@@ -396,7 +398,17 @@ internal class Vedtaksperiode private constructor(
     private fun harInntekt() = harInntektsmelding() || arbeidsgiver.grunnlagForSykepengegrunnlag(skjæringstidspunkt, periode.start) != null
     private fun harInntektsmelding() = arbeidsgiver.harInntektsmelding(skjæringstidspunkt)
 
-    internal fun forlengelseFraInfotrygd() = arbeidsgiver.erForlengelse(periode) && !harVedtaksperiodeRettFør()
+    internal fun forlengelseFraInfotrygd() = when (arbeidsgiver.periodetype(periode)) {
+        OVERGANG_FRA_IT -> true
+        INFOTRYGDFORLENGELSE -> true
+        /* For forlengelse trenger vi kompenserende kode ved ping-pong fordi ved ping-pong vil periodetype() returnere
+        FORLENGELSE siden første utbetalingsdag er i spleis.
+        Ved å sjekke om vi ikke har en vedtaksperiode foran oss kan vi finne ut om infotrygdhistorikken fyller inn et
+        gap mellom denne og en tidligere vedtaksperiode
+         */
+        FORLENGELSE -> !harVedtaksperiodeRettFør()
+        FØRSTEGANGSBEHANDLING -> false
+    }
 
     internal fun kanGjenopptaBehandling(arbeidsgivere: Iterable<Arbeidsgiver>) =
         arbeidsgivere.harNødvendigInntekt(skjæringstidspunkt) || this.forlengelseFraInfotrygd == JA
