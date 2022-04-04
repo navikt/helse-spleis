@@ -25,6 +25,7 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling
 import no.nav.helse.person.TilstandType
+import no.nav.helse.rapids_rivers.toUUID
 import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.spleis.HendelseMediator
 import no.nav.helse.spleis.MessageMediator
@@ -107,7 +108,7 @@ internal abstract class AbstractEndToEndMediatorTest {
     ): UUID {
         val (id, message) = meldingsfabrikk.lagNySøknad(*perioder, opprettet = meldingOpprettet, orgnummer = orgnummer)
         testRapid.sendTestMessage(message)
-        return id
+        return id.toUUID()
     }
 
     protected fun sendSøknad(
@@ -195,8 +196,9 @@ internal abstract class AbstractEndToEndMediatorTest {
             opphørsdatoForRefusjon,
             meldingId,
             orgnummer
-        ).also { (_, message) ->
+        ).let { (id, message) ->
             testRapid.sendTestMessage(message)
+            id.toUUID() to message
         }
     }
 

@@ -27,7 +27,7 @@ internal class TestRapid : RapidsConnection() {
         messages.clear()
     }
 
-    fun sendTestMessage(message: Pair<UUID, String>) = sendTestMessage(message.second)
+    fun sendTestMessage(message: Pair<*, String>) = sendTestMessage(message.second)
 
     fun sendTestMessage(message: String) {
         log.info("sending message:\n\t$message")

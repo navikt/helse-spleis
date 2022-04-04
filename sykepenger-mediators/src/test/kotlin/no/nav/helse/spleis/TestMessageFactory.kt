@@ -55,7 +55,7 @@ internal class TestMessageFactory(
         vararg perioder: SoknadsperiodeDTO,
         opprettet: LocalDateTime = perioder.minOfOrNull { it.fom!! }!!.atStartOfDay(),
         orgnummer: String = organisasjonsnummer
-    ): Pair<UUID, String> {
+    ): Pair<String, String> {
         val fom = perioder.minOfOrNull { it.fom!! }!!
         val nySøknad = SykepengesoknadDTO(
             status = SoknadsstatusDTO.NY,
@@ -81,7 +81,7 @@ internal class TestMessageFactory(
     fun lagSøknadArbeidsgiver(
         perioder: List<SoknadsperiodeDTO>,
         egenmeldinger: List<PeriodeDTO> = emptyList()
-    ): Pair<UUID, String> {
+    ): Pair<String, String> {
         val fom = perioder.minOfOrNull { it.fom!! }!!
         val sendtSøknad = SykepengesoknadDTO(
             status = SoknadsstatusDTO.SENDT,
@@ -111,7 +111,7 @@ internal class TestMessageFactory(
         andreInntektskilder: List<InntektskildeDTO>? = null,
         sendtNav: LocalDateTime? = perioder.maxOfOrNull { it.tom!! }?.atStartOfDay(),
         orgnummer: String = organisasjonsnummer
-    ): Pair<UUID, String> {
+    ): Pair<String, String> {
         val fom = perioder.minOfOrNull { it.fom!! }
         val sendtSøknad = SykepengesoknadDTO(
             status = SoknadsstatusDTO.SENDT,
@@ -192,7 +192,7 @@ internal class TestMessageFactory(
         UUID.fromString(node.path("@id").asText()) to node.toString()
     }
 
-    fun lagUtbetalingshistorikk(vedtaksperiodeId: UUID, tilstand: TilstandType, sykepengehistorikk: List<UtbetalingshistorikkTestdata> = emptyList(), besvart: LocalDateTime = LocalDateTime.now()): Pair<UUID, String> {
+    fun lagUtbetalingshistorikk(vedtaksperiodeId: UUID, tilstand: TilstandType, sykepengehistorikk: List<UtbetalingshistorikkTestdata> = emptyList(), besvart: LocalDateTime = LocalDateTime.now()): Pair<String, String> {
         return lagBehovMedLøsning(
             vedtaksperiodeId = vedtaksperiodeId,
             tilstand = tilstand,
@@ -420,7 +420,7 @@ internal class TestMessageFactory(
         dagpenger: List<DagpengerTestdata> = emptyList(),
         sykepengehistorikk: List<UtbetalingshistorikkTestdata>? = emptyList(),
         orgnummer: String = organisasjonsnummer
-    ): Pair<UUID, String> {
+    ): Pair<String, String> {
         val behovliste = mutableListOf(
             "Foreldrepenger",
             "Pleiepenger",
@@ -504,7 +504,7 @@ internal class TestMessageFactory(
         arbeidsforhold: List<Arbeidsforhold>,
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
         orgnummer: String = organisasjonsnummer
-    ): Pair<UUID, String> {
+    ): Pair<String, String> {
         return lagBehovMedLøsning(
             behov = listOf(
                 InntekterForSammenligningsgrunnlag.name,
@@ -581,7 +581,7 @@ internal class TestMessageFactory(
         fagsystemId: String = "fagsystemid",
         fagområde: String = "SPREF",
         orgnummer: String = organisasjonsnummer
-    ): Pair<UUID, String> {
+    ): Pair<String, String> {
         return lagBehovMedLøsning(
             behov = listOf("Simulering"),
             vedtaksperiodeId = vedtaksperiodeId,
@@ -646,7 +646,7 @@ internal class TestMessageFactory(
     fun lagEtterbetaling(
         fagsystemId: String,
         gyldighetsdato: LocalDate
-    ): Pair<UUID, String> {
+    ): Pair<String, String> {
         return nyHendelse(
             navn = "Etterbetalingskandidat_v1",
             hendelse = mapOf(
@@ -662,7 +662,7 @@ internal class TestMessageFactory(
     fun lagEtterbetalingMedHistorikk(
         fagsystemId: String,
         gyldighetsdato: LocalDate
-    ): Pair<UUID, String> {
+    ): Pair<String, String> {
         return lagBehovMedLøsning(
             behov = listOf("Sykepengehistorikk"),
             løsninger = mapOf(
@@ -688,7 +688,7 @@ internal class TestMessageFactory(
         makstidOppnådd: Boolean,
         godkjenttidspunkt: LocalDateTime,
         orgnummer: String = organisasjonsnummer
-    ): Pair<UUID, String> {
+    ): Pair<String, String> {
         return lagBehovMedLøsning(
             behov = listOf("Godkjenning"),
             orgnummer = orgnummer,
@@ -710,7 +710,7 @@ internal class TestMessageFactory(
         )
     }
 
-    fun lagUtbetalingpåminnelse(utbetalingId: UUID, status: Utbetalingstatus): Pair<UUID, String> {
+    fun lagUtbetalingpåminnelse(utbetalingId: UUID, status: Utbetalingstatus): Pair<String, String> {
         return nyHendelse(
             "utbetalingpåminnelse", mapOf(
                 "aktørId" to aktørId,
@@ -730,7 +730,7 @@ internal class TestMessageFactory(
         tilstand: TilstandType,
         orgnummer: String = organisasjonsnummer,
         tilstandsendringstidspunkt: LocalDateTime = LocalDateTime.now()
-    ): Pair<UUID, String> {
+    ): Pair<String, String> {
         return nyHendelse(
             "påminnelse", mapOf(
                 "aktørId" to aktørId,
@@ -746,7 +746,7 @@ internal class TestMessageFactory(
         )
     }
 
-    fun lagPersonPåminnelse(): Pair<UUID, String> {
+    fun lagPersonPåminnelse(): Pair<String, String> {
         return nyHendelse(
             "person_påminnelse", mapOf(
                 "aktørId" to aktørId,
@@ -761,7 +761,7 @@ internal class TestMessageFactory(
         utbetalingOK: Boolean = true,
         avstemmingsnøkkel: Long = 123456L,
         overføringstidspunkt: LocalDateTime = LocalDateTime.now()
-    ): Pair<UUID, String> {
+    ): Pair<String, String> {
         return lagBehovMedLøsning(
             behov = listOf("Utbetaling"),
             tilstand = null,
@@ -786,7 +786,7 @@ internal class TestMessageFactory(
         utbetalingId: String,
         avstemmingsnøkkel: Long,
         overføringstidspunkt: LocalDateTime = LocalDateTime.now()
-    ): Pair<UUID, String> {
+    ): Pair<String, String> {
         return lagBehovMedLøsning(
             behov = listOf("Utbetaling"),
             tilstand = null,
@@ -806,7 +806,7 @@ internal class TestMessageFactory(
         )
     }
 
-    fun lagAnnullering(fagsystemId: String): Pair<UUID, String> {
+    fun lagAnnullering(fagsystemId: String): Pair<String, String> {
         return nyHendelse(
             "annullering", mapOf(
                 "aktørId" to aktørId,
@@ -830,7 +830,7 @@ internal class TestMessageFactory(
         )
     )
 
-    fun lagOverstyringTidslinje(dager: List<ManuellOverskrivingDag>): Pair<UUID, String> {
+    fun lagOverstyringTidslinje(dager: List<ManuellOverskrivingDag>): Pair<String, String> {
         return nyHendelse(
             "overstyr_tidslinje", mutableMapOf(
                 "aktørId" to aktørId,
@@ -846,7 +846,7 @@ internal class TestMessageFactory(
             ))
     }
 
-    fun lagOverstyringInntekt(inntekt: Double, skjæringstidspunkt: LocalDate): Pair<UUID, String> {
+    fun lagOverstyringInntekt(inntekt: Double, skjæringstidspunkt: LocalDate): Pair<String, String> {
         return nyHendelse(
             "overstyr_inntekt", mutableMapOf(
                 "aktørId" to aktørId,
@@ -862,7 +862,7 @@ internal class TestMessageFactory(
         skjæringstidspunkt: LocalDate,
         overstyrteArbeidsforhold: List<ArbeidsforholdOverstyrt>,
         orgnummer: String = organisasjonsnummer
-    ): Pair<UUID, String> {
+    ): Pair<String, String> {
         return nyHendelse(
             "overstyr_arbeidsforhold", mutableMapOf(
                 "aktørId" to aktørId,

@@ -13,6 +13,7 @@ import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.januar
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling
 import no.nav.helse.rapids_rivers.asLocalDateTime
+import no.nav.helse.rapids_rivers.toUUID
 import no.nav.helse.spleis.MessageMediator
 import no.nav.helse.spleis.TestHendelseMediator
 import no.nav.helse.spleis.db.HendelseRepository
@@ -353,7 +354,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         val (meldingId, message) = meldingsfabrikk.lagNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 25.januar, sykmeldingsgrad = 100))
         testRapid.sendTestMessage(message)
         testRapid.sendTestMessage(message)
-        verify(exactly = 1) { hendelseRepository.markerSomBehandlet(eq(meldingId)) }
+        verify(exactly = 1) { hendelseRepository.markerSomBehandlet(eq(meldingId.toUUID())) }
         verify(exactly = 2) { hendelseRepository.erBehandlet(any()) }
     }
 
