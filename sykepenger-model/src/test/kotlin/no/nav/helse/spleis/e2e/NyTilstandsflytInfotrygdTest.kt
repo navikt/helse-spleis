@@ -3,7 +3,6 @@ package no.nav.helse.spleis.e2e
 import java.time.LocalDate
 import no.nav.helse.Toggle
 import no.nav.helse.april
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -25,7 +24,6 @@ import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -212,7 +210,7 @@ internal class NyTilstandsflytInfotrygdTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Forlengelse av ping pong - skal ikke vente - skal ikke vente på IM`() {
+    fun `Forlengelse av ping pong - skal ikke vente på IM`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar),)
@@ -298,6 +296,29 @@ internal class NyTilstandsflytInfotrygdTest : AbstractEndToEndTest() {
         assertTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK)
     }
 
+    @Test
+    fun `forlengelse av ping-pong, ny periode som forlenger ping-pong-perioden går til AvventerHistorikk`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        utbetalPeriode(1.vedtaksperiode)
+
+
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
+        håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
+        håndterUtbetalingshistorikk(2.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.februar, 28.februar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
+            Inntektsopplysning(ORGNUMMER, 1.februar, INNTEKT, true)
+        ))
+        utbetalPeriode(2.vedtaksperiode)
+
+        håndterSykmelding(Sykmeldingsperiode(1.april, 30.april, 100.prosent))
+        håndterSøknad(Sykdom(1.april, 30.april, 100.prosent))
+        assertSisteTilstand(3.vedtaksperiode, AVVENTER_HISTORIKK)
+    }
 
     private fun utbetalPeriode(vedtaksperiode: IdInnhenter) {
         håndterYtelser(vedtaksperiode)

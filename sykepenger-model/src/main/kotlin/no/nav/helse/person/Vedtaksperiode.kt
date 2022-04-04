@@ -1153,11 +1153,12 @@ internal class Vedtaksperiode private constructor(
             if (vedtaksperiode.harArbeidsgivereMedOverlappendeUtbetaltePerioder(vedtaksperiode.periode)) {
                 søknad.warn("Denne personen har en utbetaling for samme periode for en annen arbeidsgiver. Kontroller at beregningene for begge arbeidsgiverne er korrekte.")
             }
-            val forlengerInfotrygd = vedtaksperiode.arbeidsgiver.finnVedtaksperiodeRettFør(vedtaksperiode)?.forlengelseFraInfotrygd == JA
-            if (forlengerInfotrygd) vedtaksperiode.forlengelseFraInfotrygd = JA
+            val forlengelseFraInfotrygd = vedtaksperiode.arbeidsgiver.finnVedtaksperiodeRettFør(vedtaksperiode)?.forlengelseFraInfotrygd
+            if (forlengelseFraInfotrygd != null) vedtaksperiode.forlengelseFraInfotrygd = forlengelseFraInfotrygd
+
             vedtaksperiode.håndterSøknad(søknad) {
                 when {
-                    forlengerInfotrygd -> AvventerTidligereEllerOverlappendePerioder
+                    forlengelseFraInfotrygd == JA -> AvventerTidligereEllerOverlappendePerioder
                     vedtaksperiode.harInntektsmelding() && vedtaksperiode.ingenUtbetaling() -> AvsluttetUtenUtbetaling
                     vedtaksperiode.harInntektsmelding() -> AvventerTidligereEllerOverlappendePerioder
                     else -> AvventerInntektsmeldingEllerHistorikk
@@ -1859,6 +1860,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
+            vedtaksperiode.forlengelseFraInfotrygd = NEI
             vedtaksperiode.håndterInntektsmelding(inntektsmelding, AvventerTidligereEllerOverlappendePerioder)
         }
 
@@ -2093,7 +2095,7 @@ internal class Vedtaksperiode private constructor(
                 onSuccess {
                     when (periodetype) {
                         in listOf(OVERGANG_FRA_IT, INFOTRYGDFORLENGELSE) -> {
-                            vedtaksperiode.forlengelseFraInfotrygd = JA
+                            if (Toggle.NyTilstandsflyt.disabled) vedtaksperiode.forlengelseFraInfotrygd = JA
                             if (vedtaksperiode.skjæringstidspunktFraInfotrygd in 1.mai(2021) til 16.mai(2021)) {
                                 val gammeltGrunnbeløp = Grunnbeløp.`6G`.beløp(LocalDate.of(2021, 4, 30))
                                 val sykepengegrunnlag = vilkårsgrunnlag.sykepengegrunnlag()
@@ -2101,7 +2103,7 @@ internal class Vedtaksperiode private constructor(
                             }
                         }
                         else -> {
-                            vedtaksperiode.forlengelseFraInfotrygd = NEI
+                            if (Toggle.NyTilstandsflyt.disabled) vedtaksperiode.forlengelseFraInfotrygd = NEI
                             if (vedtaksperiode.inntektsmeldingInfo == null) arbeidsgiver.finnTidligereInntektsmeldinginfo(vedtaksperiode.skjæringstidspunkt)
                                 ?.also { vedtaksperiode.kopierManglende(it) }
                         }
