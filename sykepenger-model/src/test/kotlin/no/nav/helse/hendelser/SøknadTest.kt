@@ -96,7 +96,7 @@ internal class SøknadTest {
     @Test
     fun `søknad med permisjon`() {
         søknad(Sykdom(1.januar, 10.januar, 100.prosent), Permisjon(5.januar, 10.januar))
-        assertTrue(søknad.valider(EN_PERIODE, MaskinellJurist()).hasWarningsOrWorse())
+        assertFalse(søknad.valider(EN_PERIODE, MaskinellJurist()).hasErrorsOrWorse())
         assertEquals(10, søknad.sykdomstidslinje().count())
     }
 

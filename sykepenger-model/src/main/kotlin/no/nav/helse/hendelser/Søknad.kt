@@ -86,7 +86,6 @@ class Søknad(
     }
 
     class Merknad(private val type: String, beskrivelse: String?) {
-        private val beskrivelse = beskrivelse.takeUnless { it.isNullOrBlank() }
         internal fun valider(aktivitetslogg: IAktivitetslogg) {
             if (type == "UGYLDIG_TILBAKEDATERING" || type == "TILBAKEDATERING_KREVER_FLERE_OPPLYSNINGER") {
                 aktivitetslogg.warn("Sykmeldingen er tilbakedatert, vurder fra og med dato for utbetaling.")
@@ -176,7 +175,6 @@ class Søknad(
 
             override fun valider(søknad: Søknad) {
                 valider(søknad, "Søknaden inneholder Permisjonsdager utenfor sykdomsvindu")
-                søknad.warn("Permisjon oppgitt i perioden i søknaden.")
             }
         }
 
