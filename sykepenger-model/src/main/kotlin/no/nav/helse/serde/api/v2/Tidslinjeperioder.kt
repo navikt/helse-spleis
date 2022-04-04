@@ -278,8 +278,8 @@ internal class IUtbetaling(
     fun fagsystemId() = arbeidsgiverFagsystemId
     fun toDTO(): Utbetaling {
         return Utbetaling(
-            type = type,
-            status = tilstand,
+            type = Utbetalingtype.valueOf(type),
+            status = Utbetalingstatus.valueOf(tilstand),
             arbeidsgiverNettoBeløp = arbeidsgiverNettoBeløp,
             personNettoBeløp = personNettoBeløp,
             arbeidsgiverFagsystemId = arbeidsgiverFagsystemId,
@@ -327,22 +327,22 @@ private fun TilstandType.tilPeriodetilstand(utbetaling: Utbetaling, tidslinje: L
         TilstandType.AVVENTER_GODKJENNING -> Periodetilstand.Oppgaver
         TilstandType.AVSLUTTET,
         TilstandType.AVSLUTTET_UTEN_UTBETALING -> when (utbetaling.type) {
-            "ANNULLERING" -> when (utbetaling.status) {
-                "Annullert" -> Periodetilstand.Annullert
-                "UtbetalingFeilet" -> Periodetilstand.AnnulleringFeilet
+            Utbetalingtype.ANNULLERING -> when (utbetaling.status) {
+                Utbetalingstatus.Annullert -> Periodetilstand.Annullert
+                Utbetalingstatus.UtbetalingFeilet -> Periodetilstand.AnnulleringFeilet
                 else -> Periodetilstand.TilAnnullering
             }
-            "REVURDERING" -> Periodetilstand.Utbetalt
+            Utbetalingtype.REVURDERING -> Periodetilstand.Utbetalt
             else -> when (utbetaling.status) {
-                "Utbetalt",
-                "GodkjentUtenUtbetaling" -> {
+                Utbetalingstatus.Utbetalt,
+                Utbetalingstatus.GodkjentUtenUtbetaling -> {
                     when {
                         tidslinje.inneholderKunFeriedager() -> Periodetilstand.KunFerie
                         tidslinje.inneholderSykepengedager() -> Periodetilstand.Utbetalt
                         else -> Periodetilstand.IngenUtbetaling
                     }
                 }
-                "UtbetalingFeilet" -> Periodetilstand.Feilet
+                Utbetalingstatus.UtbetalingFeilet -> Periodetilstand.Feilet
                 else -> Periodetilstand.TilUtbetaling
             }
         }

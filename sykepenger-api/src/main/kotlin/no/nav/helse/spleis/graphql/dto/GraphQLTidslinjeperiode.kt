@@ -4,6 +4,7 @@ import com.apurebase.kgraphql.schema.dsl.SchemaBuilder
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
+import no.nav.helse.serde.api.v2.Utbetalingtype
 
 internal fun SchemaBuilder.tidslinjeperiodeTypes() {
     enum<GraphQLInntektstype>()
@@ -14,11 +15,20 @@ internal fun SchemaBuilder.tidslinjeperiodeTypes() {
     enum<GraphQLSykdomsdagkildetype>()
     enum<GraphQLBegrunnelse>()
     enum<GraphQLPeriodetilstand>()
+    enum<Utbetalingtype>()
+    enum<GraphQLUtbetalingstatus>()
 
     type<GraphQLSykdomsdagkilde>()
     type<GraphQLUtbetalingsinfo>()
     type<GraphQLVurdering>()
-    type<GraphQLUtbetaling>()
+    type<GraphQLUtbetaling>() {
+        property(GraphQLUtbetaling::type) {
+            deprecate("Burde bruke enum \"typeEnum\"")
+        }
+        property(GraphQLUtbetaling::status) {
+            deprecate("Burde bruke enum \"statusEnum\"")
+        }
+    }
     type<GraphQLDag>()
     type<GraphQLTidslinjeperiode>()
     type<GraphQLUberegnetPeriode>()
@@ -131,6 +141,19 @@ enum class GraphQLPeriodetilstand {
     TilInfotrygd;
 }
 
+enum class GraphQLUtbetalingstatus {
+    Annullert,
+    Forkastet,
+    Godkjent,
+    GodkjentUtenUtbetaling,
+    IkkeGodkjent,
+    Overfort,
+    Sendt,
+    Ubetalt,
+    UtbetalingFeilet,
+    Utbetalt
+}
+
 data class GraphQLSykdomsdagkilde(
     val id: UUID,
     val type: GraphQLSykdomsdagkildetype
@@ -169,7 +192,9 @@ data class GraphQLOppdrag(
 data class GraphQLUtbetaling(
     val id: UUID,
     val type: String,
+    val typeEnum: Utbetalingtype,
     val status: String,
+    val statusEnum: GraphQLUtbetalingstatus,
     val arbeidsgiverNettoBelop: Int,
     val personNettoBelop: Int,
     val arbeidsgiverFagsystemId: String,

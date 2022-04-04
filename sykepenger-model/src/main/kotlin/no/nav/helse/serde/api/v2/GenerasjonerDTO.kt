@@ -6,9 +6,9 @@ import java.util.UUID
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.Periodetype
 import no.nav.helse.serde.api.AktivitetDTO
+import no.nav.helse.serde.api.dto.EndringskodeDTO
 import no.nav.helse.serde.api.v2.Behandlingstype.VENTER
 import no.nav.helse.serde.api.v2.buildere.BeregningId
-import no.nav.helse.serde.api.dto.EndringskodeDTO
 
 data class Generasjon(
     val id: UUID, // Runtime
@@ -108,8 +108,8 @@ data class BeregnetPeriode(
 ) : Tidslinjeperiode {
     override val tidslinjeperiodeId: UUID = UUID.randomUUID()
 
-    internal fun erAnnullering() = utbetaling.type == "ANNULLERING"
-    internal fun erRevurdering() = utbetaling.type == "REVURDERING"
+    internal fun erAnnullering() = utbetaling.type == Utbetalingtype.ANNULLERING
+    internal fun erRevurdering() = utbetaling.type == Utbetalingtype.REVURDERING
     internal fun harSammeFagsystemId(other: BeregnetPeriode) = fagsystemId() == other.fagsystemId()
 
     private fun fagsystemId() = utbetaling.arbeidsgiverFagsystemId
@@ -191,9 +191,30 @@ data class SpeilOppdrag(
     )
 }
 
+enum class Utbetalingstatus {
+    Annullert,
+    Forkastet,
+    Godkjent,
+    GodkjentUtenUtbetaling,
+    IkkeGodkjent,
+    Overført,
+    Sendt,
+    Ubetalt,
+    UtbetalingFeilet,
+    Utbetalt
+}
+
+enum class Utbetalingtype {
+    UTBETALING,
+    ETTERUTBETALING,
+    ANNULLERING,
+    REVURDERING,
+    FERIEPENGER
+}
+
 data class Utbetaling(
-    val type: String,
-    val status: String,
+    val type: Utbetalingtype,
+    val status: Utbetalingstatus,
     val arbeidsgiverNettoBeløp: Int,
     val personNettoBeløp: Int,
     val arbeidsgiverFagsystemId: String,
@@ -202,7 +223,8 @@ data class Utbetaling(
     val vurdering: Vurdering?,
     val id: UUID
 ) {
-    fun erAnnullering() = type == "ANNULLERING"
+    fun erAnnullering() = type == Utbetalingtype.ANNULLERING
+
     data class Vurdering(
         val godkjent: Boolean,
         val tidsstempel: LocalDateTime,

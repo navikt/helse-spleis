@@ -1,12 +1,73 @@
 package no.nav.helse.spleis.graphql
 
+import java.util.UUID
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.Periodetype
 import no.nav.helse.serde.api.BegrunnelseDTO
 import no.nav.helse.serde.api.InntektsgrunnlagDTO
-import no.nav.helse.serde.api.v2.*
-import no.nav.helse.spleis.graphql.dto.*
-import java.util.*
+import no.nav.helse.serde.api.v2.Arbeidsgiverinntekt
+import no.nav.helse.serde.api.v2.Behandlingstype
+import no.nav.helse.serde.api.v2.BeregnetPeriode
+import no.nav.helse.serde.api.v2.HendelseDTO
+import no.nav.helse.serde.api.v2.InfotrygdVilkårsgrunnlag
+import no.nav.helse.serde.api.v2.Inntektkilde
+import no.nav.helse.serde.api.v2.InntektsmeldingDTO
+import no.nav.helse.serde.api.v2.Periodetilstand
+import no.nav.helse.serde.api.v2.SammenslåttDag
+import no.nav.helse.serde.api.v2.SpeilOppdrag
+import no.nav.helse.serde.api.v2.SpleisVilkårsgrunnlag
+import no.nav.helse.serde.api.v2.SykdomstidslinjedagKildetype
+import no.nav.helse.serde.api.v2.SykdomstidslinjedagType
+import no.nav.helse.serde.api.v2.SykmeldingDTO
+import no.nav.helse.serde.api.v2.SøknadArbeidsgiverDTO
+import no.nav.helse.serde.api.v2.SøknadNavDTO
+import no.nav.helse.serde.api.v2.Tidslinjeperiode
+import no.nav.helse.serde.api.v2.Utbetaling
+import no.nav.helse.serde.api.v2.Utbetalingstatus
+import no.nav.helse.serde.api.v2.UtbetalingstidslinjedagType
+import no.nav.helse.serde.api.v2.Utbetalingtype
+import no.nav.helse.serde.api.v2.Vilkårsgrunnlag
+import no.nav.helse.spleis.graphql.dto.GraphQLAktivitet
+import no.nav.helse.spleis.graphql.dto.GraphQLArbeidsgiverinntekt
+import no.nav.helse.spleis.graphql.dto.GraphQLBegrunnelse
+import no.nav.helse.spleis.graphql.dto.GraphQLBehandlingstype
+import no.nav.helse.spleis.graphql.dto.GraphQLBeregnetPeriode
+import no.nav.helse.spleis.graphql.dto.GraphQLDag
+import no.nav.helse.spleis.graphql.dto.GraphQLHendelse
+import no.nav.helse.spleis.graphql.dto.GraphQLHendelsetype
+import no.nav.helse.spleis.graphql.dto.GraphQLInfotrygdVilkarsgrunnlag
+import no.nav.helse.spleis.graphql.dto.GraphQLInntekterFraAOrdningen
+import no.nav.helse.spleis.graphql.dto.GraphQLInntektsgrunnlag
+import no.nav.helse.spleis.graphql.dto.GraphQLInntektskilde
+import no.nav.helse.spleis.graphql.dto.GraphQLInntektsmelding
+import no.nav.helse.spleis.graphql.dto.GraphQLInntektstype
+import no.nav.helse.spleis.graphql.dto.GraphQLOmregnetArsinntekt
+import no.nav.helse.spleis.graphql.dto.GraphQLOppdrag
+import no.nav.helse.spleis.graphql.dto.GraphQLPeriodetilstand
+import no.nav.helse.spleis.graphql.dto.GraphQLPeriodetype
+import no.nav.helse.spleis.graphql.dto.GraphQLPeriodevilkar
+import no.nav.helse.spleis.graphql.dto.GraphQLRefusjon
+import no.nav.helse.spleis.graphql.dto.GraphQLSammenligningsgrunnlag
+import no.nav.helse.spleis.graphql.dto.GraphQLSimulering
+import no.nav.helse.spleis.graphql.dto.GraphQLSimuleringsdetaljer
+import no.nav.helse.spleis.graphql.dto.GraphQLSimuleringsperiode
+import no.nav.helse.spleis.graphql.dto.GraphQLSimuleringsutbetaling
+import no.nav.helse.spleis.graphql.dto.GraphQLSoknadArbeidsgiver
+import no.nav.helse.spleis.graphql.dto.GraphQLSoknadNav
+import no.nav.helse.spleis.graphql.dto.GraphQLSpleisVilkarsgrunnlag
+import no.nav.helse.spleis.graphql.dto.GraphQLSykdomsdagkilde
+import no.nav.helse.spleis.graphql.dto.GraphQLSykdomsdagkildetype
+import no.nav.helse.spleis.graphql.dto.GraphQLSykdomsdagtype
+import no.nav.helse.spleis.graphql.dto.GraphQLSykmelding
+import no.nav.helse.spleis.graphql.dto.GraphQLUberegnetPeriode
+import no.nav.helse.spleis.graphql.dto.GraphQLUtbetaling
+import no.nav.helse.spleis.graphql.dto.GraphQLUtbetalingsdagType
+import no.nav.helse.spleis.graphql.dto.GraphQLUtbetalingsinfo
+import no.nav.helse.spleis.graphql.dto.GraphQLUtbetalingstatus
+import no.nav.helse.spleis.graphql.dto.GraphQLVilkarsgrunnlag
+import no.nav.helse.spleis.graphql.dto.GraphQLVilkarsgrunnlaghistorikk
+import no.nav.helse.spleis.graphql.dto.GraphQLVilkarsgrunnlagtype
+import no.nav.helse.spleis.graphql.dto.GraphQLVurdering
 
 private fun mapDag(dag: SammenslåttDag) = GraphQLDag(
     dato = dag.dagen,
@@ -115,8 +176,21 @@ private fun mapOppdrag(oppdrag: SpeilOppdrag): GraphQLOppdrag =
 
 private fun mapUtbetaling(utbetaling: Utbetaling) = GraphQLUtbetaling(
     id = utbetaling.id,
-    type = utbetaling.type,
-    status = utbetaling.status,
+    type = utbetaling.type.toString(),
+    typeEnum = utbetaling.type,
+    status = utbetaling.status.toString(),
+    statusEnum = when (utbetaling.status) {
+        Utbetalingstatus.Annullert -> GraphQLUtbetalingstatus.Annullert
+        Utbetalingstatus.Forkastet -> GraphQLUtbetalingstatus.Forkastet
+        Utbetalingstatus.Godkjent -> GraphQLUtbetalingstatus.Godkjent
+        Utbetalingstatus.GodkjentUtenUtbetaling -> GraphQLUtbetalingstatus.GodkjentUtenUtbetaling
+        Utbetalingstatus.IkkeGodkjent -> GraphQLUtbetalingstatus.IkkeGodkjent
+        Utbetalingstatus.Overført -> GraphQLUtbetalingstatus.Overfort
+        Utbetalingstatus.Sendt -> GraphQLUtbetalingstatus.Sendt
+        Utbetalingstatus.Ubetalt -> GraphQLUtbetalingstatus.Ubetalt
+        Utbetalingstatus.UtbetalingFeilet -> GraphQLUtbetalingstatus.UtbetalingFeilet
+        Utbetalingstatus.Utbetalt -> GraphQLUtbetalingstatus.Utbetalt
+    },
     arbeidsgiverNettoBelop = utbetaling.arbeidsgiverNettoBeløp,
     personNettoBelop = utbetaling.personNettoBeløp,
     arbeidsgiverFagsystemId = utbetaling.arbeidsgiverFagsystemId,
@@ -242,7 +316,12 @@ internal fun mapTidslinjeperiode(periode: Tidslinjeperiode) =
             },
             refusjon = periode.refusjon?.let { refusjon ->
                 GraphQLRefusjon(
-                    arbeidsgiverperioder = refusjon.arbeidsgiverperioder.map { GraphQLRefusjon.GraphQLRefusjonsperiode(it.fom, it.tom) },
+                    arbeidsgiverperioder = refusjon.arbeidsgiverperioder.map {
+                        GraphQLRefusjon.GraphQLRefusjonsperiode(
+                            it.fom,
+                            it.tom
+                        )
+                    },
                     endringer = refusjon.endringer.map { GraphQLRefusjon.GraphQLRefusjonsendring(it.beløp, it.dato) },
                     forsteFravaersdag = refusjon.førsteFraværsdag,
                     sisteRefusjonsdag = refusjon.sisteRefusjonsdag,
