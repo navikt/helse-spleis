@@ -39,6 +39,23 @@ internal class ForkastingTest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `forlengelse av infotrygd uten inntektsopplysninger -- alternativ syntax`() {
+        hendelsene {
+            håndterSykmelding(Sykmeldingsperiode(1.februar, 23.februar, 100.prosent))
+            håndterSøknad(Sykdom(1.februar, 23.februar, 100.prosent))
+        } førerTil AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP somEtterfulgtAv {
+            håndterUtbetalingshistorikk(
+                1.vedtaksperiode,
+                ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 31.januar, 100.prosent, INNTEKT),
+                inntektshistorikk = emptyList()
+            )
+        } førerTil TIL_INFOTRYGD
+
+        assertTrue(inspektør.utbetalinger.isEmpty())
+    }
+
+
+    @Test
     fun `når utbetaling er ikke godkjent skal påfølgende perioder også kastes ut`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 26.januar, 100.prosent))
@@ -70,6 +87,30 @@ internal class ForkastingTest : AbstractEndToEndTest() {
             AVVENTER_UFERDIG,
             TIL_INFOTRYGD
         )
+    }
+
+    @Test
+    fun `når utbetaling er ikke godkjent skal påfølgende perioder også kastes ut -- alternativ syntax`() {
+        hendelsene {
+            håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
+            håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(3.januar, 26.januar, 100.prosent))
+        } førerTil AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP somEtterfulgtAv {
+            håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)))
+        } førerTil AVVENTER_HISTORIKK somEtterfulgtAv {
+            håndterYtelser(1.vedtaksperiode)
+        } førerTil AVVENTER_VILKÅRSPRØVING somEtterfulgtAv {
+            håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        } førerTil AVVENTER_HISTORIKK somEtterfulgtAv {
+            håndterYtelser(1.vedtaksperiode)
+        } førerTil AVVENTER_SIMULERING somEtterfulgtAv {
+            håndterSimulering(1.vedtaksperiode)
+        } førerTil AVVENTER_GODKJENNING somEtterfulgtAv {
+            håndterSykmelding(Sykmeldingsperiode(29.januar, 23.februar, 100.prosent))
+            håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(29.januar, 23.februar, 100.prosent))
+        } førerTil listOf(AVVENTER_GODKJENNING, AVVENTER_UFERDIG) somEtterfulgtAv {
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode, false)
+        } førerTil listOf(TIL_INFOTRYGD, TIL_INFOTRYGD)
+        assertEquals(Utbetaling.IkkeGodkjent, inspektør.utbetalingtilstand(0))
     }
 
     @Test
