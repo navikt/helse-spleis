@@ -230,11 +230,6 @@ internal class Utbetaling private constructor(
         vurdering?.build(builder)
     }
 
-    internal fun vedtakFattet(hendelse: IAktivitetslogg) {
-        hendelse.kontekst(this)
-        tilstand.vedtakFattet(this, hendelse)
-    }
-
     internal fun håndter(hendelse: AnnullerUtbetaling) {
         godkjenn(hendelse, hendelse.vurdering())
     }
@@ -599,13 +594,6 @@ internal class Utbetaling private constructor(
             hendelse.error("Forventet ikke å lage godkjenning på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
         }
 
-        fun vedtakFattet(
-            utbetaling: Utbetaling,
-            hendelse: IAktivitetslogg
-        ) {
-            hendelse.error("Forventet ikke å fatte vedtak på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
-        }
-
         fun entering(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {}
     }
 
@@ -613,14 +601,6 @@ internal class Utbetaling private constructor(
         override fun forkast(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {
             hendelse.info("Forkaster utbetaling")
             utbetaling.tilstand(Forkastet, hendelse)
-        }
-
-        override fun vedtakFattet(
-            utbetaling: Utbetaling,
-            hendelse: IAktivitetslogg
-        ) {
-            check(!utbetaling.harUtbetalinger()) { "Kan ikke lukkes når utbetaling har utbetalinger" }
-            godkjenn(utbetaling, hendelse, Vurdering.automatiskGodkjent)
         }
 
         override fun godkjenn(utbetaling: Utbetaling, hendelse: IAktivitetslogg, vurdering: Vurdering) {
@@ -666,12 +646,6 @@ internal class Utbetaling private constructor(
             check(!utbetaling.harUtbetalinger())
             utbetaling.vurdering?.avsluttetUtenUtbetaling(hendelse.hendelseskontekst(), utbetaling)
             utbetaling.avsluttet = LocalDateTime.now()
-        }
-
-        override fun vedtakFattet(
-            utbetaling: Utbetaling,
-            hendelse: IAktivitetslogg
-        ) {
         }
     }
 
@@ -777,12 +751,6 @@ internal class Utbetaling private constructor(
                     if (it.arbeidsgiverOppdrag.sistedato != utbetaling.arbeidsgiverOppdrag.sistedato)
                         hendelse.severe("Etterutbetaling har utvidet eller kortet ned oppdraget")
                 }
-
-        override fun vedtakFattet(
-            utbetaling: Utbetaling,
-            hendelse: IAktivitetslogg
-        ) {
-        }
     }
 
     internal object UtbetalingFeilet : Tilstand {
@@ -808,13 +776,7 @@ internal class Utbetaling private constructor(
     }
 
     internal object IkkeGodkjent : Tilstand
-    internal object Forkastet : Tilstand {
-        override fun vedtakFattet(
-            utbetaling: Utbetaling,
-            hendelse: IAktivitetslogg
-        ) {
-        }
-    }
+    internal object Forkastet : Tilstand
 
     internal class Vurdering(
         private val godkjent: Boolean,

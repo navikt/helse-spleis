@@ -885,29 +885,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `egen tilstandstype for perioder med kun fravær - feriedager`()  {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 24.januar, 100.prosent))
-        håndterSøknad(Sykdom(1.januar, 24.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
-        håndterYtelser(1.vedtaksperiode)
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt()
-
-        håndterSykmelding(Sykmeldingsperiode(25.januar, 31.januar, 100.prosent))
-        håndterSøknad(Sykdom(25.januar, 31.januar, 100.prosent), Ferie(25.januar, 31.januar))
-        håndterYtelser(2.vedtaksperiode)
-
-        val personDTO = serializePersonForSpeil(person)
-        val vedtaksperiode = personDTO.arbeidsgivere[0].vedtaksperioder[1] as VedtaksperiodeDTO
-        assertTrue(vedtaksperiode.fullstendig)
-        assertEquals(TilstandstypeDTO.KunFerie, vedtaksperiode.tilstand)
-    }
-
-    @Test
-    fun `egen tilstandstype for perioder med kun fravær - feriedager - Avsluttes via godkjenningsbehov`() = Toggle.AvsluttIngenUtbetaling.disable {
+    fun `egen tilstandstype for perioder med kun fravær - feriedager`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 24.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 24.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
@@ -929,7 +907,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `egen tilstandstype for perioder med kun fravær - permisjonsdager (gir warning)`() = Toggle.AvsluttIngenUtbetaling.disable {
+    fun `egen tilstandstype for perioder med kun fravær - permisjonsdager (gir warning)`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 24.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 24.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))

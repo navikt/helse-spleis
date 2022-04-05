@@ -772,7 +772,6 @@ internal class Vedtaksperiode private constructor(
     private fun høstingsresultater(hendelse: ArbeidstakerHendelse, andreVedtaksperioder: List<Vedtaksperiode>) {
         val ingenUtbetaling = !utbetalinger.harUtbetalinger()
         val kunArbeidsgiverdager = utbetalingstidslinje.kunArbeidsgiverdager()
-        val vedtaksperiodeHarWarnings = person.aktivitetslogg.logg(this).hasWarningsOrWorse()
         val harBrukerutbetaling = harBrukerutbetaling(andreVedtaksperioder)
 
         val utbetalingsfilter = Utbetalingsfilter.Builder()
@@ -785,11 +784,6 @@ internal class Vedtaksperiode private constructor(
         when {
             utbetalingsfilter.kanIkkeUtbetales(hendelse) -> {
                 person.invaliderAllePerioder(hendelse, "Kan ikke fortsette på grunn av manglende funksjonalitet for utbetaling til bruker")
-            }
-            ingenUtbetaling && kunArbeidsgiverdager && !vedtaksperiodeHarWarnings && Toggle.AvsluttIngenUtbetaling.enabled -> {
-                tilstand(hendelse, Avsluttet) {
-                    hendelse.info("""Saken inneholder ingen utbetalingsdager for Nav og avsluttes""")
-                }
             }
             ingenUtbetaling -> {
                 tilstand(hendelse, AvventerGodkjenning) {
@@ -836,11 +830,6 @@ internal class Vedtaksperiode private constructor(
     private fun høstingsresultaterRevurdering(hendelse: ArbeidstakerHendelse) {
         hendelse.info("Videresender utbetaling til alle vedtaksperioder innenfor samme fagsystemid som er til revurdering")
         when {
-            !utbetalinger.harUtbetalinger() && utbetalingstidslinje.kunArbeidsgiverdager() && !person.aktivitetslogg.logg(this).hasWarningsOrWorse() && Toggle.AvsluttIngenUtbetaling.enabled -> {
-                tilstand(hendelse, Avsluttet) {
-                    hendelse.info("""Saken inneholder ingen utbetalingsdager for Nav og avsluttes""")
-                }
-            }
             !utbetalinger.harUtbetalinger() -> {
                 tilstand(hendelse, AvventerGodkjenningRevurdering) {
                     hendelse.info("""Saken oppfyller krav for behandling, settes til "Avventer godkjenning" fordi ingenting skal utbetales""")
@@ -2669,7 +2658,6 @@ internal class Vedtaksperiode private constructor(
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.arbeidsgiver.lås(vedtaksperiode.periode)
-            vedtaksperiode.utbetalinger.vedtakFattet(hendelse)
             check(vedtaksperiode.utbetalinger.erAvsluttet()) { "forventer at utbetaling skal være avsluttet" }
             vedtaksperiode.sendVedtakFattet(hendelse)
             vedtaksperiode.person.gjenopptaBehandling(hendelse)

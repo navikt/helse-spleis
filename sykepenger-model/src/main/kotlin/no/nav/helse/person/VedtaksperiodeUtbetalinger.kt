@@ -50,8 +50,6 @@ internal class VedtaksperiodeUtbetalinger(private val arbeidsgiver: Arbeidsgiver
 
     internal fun reberegnUtbetaling(hvisRevurdering: () -> Unit, hvisUtbetaling: () -> Unit) = siste!!.reberegnUtbetaling(hvisRevurdering, hvisUtbetaling)
 
-    internal fun vedtakFattet(hendelse: IAktivitetslogg) = siste!!.vedtakFattet(hendelse)
-
     internal fun forkast(hendelse: IAktivitetslogg) {
         siste?.forkast(hendelse)
     }

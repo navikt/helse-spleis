@@ -1445,38 +1445,6 @@ internal class KunEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterUtbetalingshistorikk(1.vedtaksperiode, historikk, inntektshistorikk = inntektshistorikk)
         håndterSøknad(Sykdom(1.juni, 30.juni, 100.prosent), Arbeid(1.juni, 30.juni))
         håndterYtelser(1.vedtaksperiode)
-
-        håndterSykmelding(Sykmeldingsperiode(1.juli, 31.juli, 100.prosent))
-
-        assertNoWarnings(1.vedtaksperiode.filter())
-        assertNoErrors(1.vedtaksperiode.filter())
-        assertEquals(Utbetaling.GodkjentUtenUtbetaling, inspektør.utbetalingtilstand(0))
-        assertTilstander(
-            0,
-            START,
-            MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-            AVVENTER_HISTORIKK,
-            AVSLUTTET
-        )
-
-        assertTilstander(
-            1,
-            START,
-            MOTTATT_SYKMELDING_FERDIG_GAP
-        )
-    }
-
-    @Test
-    fun `Perioder hvor søknaden til vedtaksperiode 1 har dannet gap (friskmeldt) for hele perioden skal regnes som gap til påfølgende vedtaksperiode - Avsluttes via godkjenningsbehov`() = Toggle.AvsluttIngenUtbetaling.disable {
-        håndterInntektsmelding(listOf(16.april til 30.april))
-        val historikk = ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.mai, 31.mai, 100.prosent, 1000.daglig)
-        val inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.mai, INNTEKT, true))
-
-        håndterSykmelding(Sykmeldingsperiode(1.juni, 30.juni, 100.prosent))
-        håndterUtbetalingshistorikk(1.vedtaksperiode, historikk, inntektshistorikk = inntektshistorikk)
-        håndterSøknad(Sykdom(1.juni, 30.juni, 100.prosent), Arbeid(1.juni, 30.juni))
-        håndterYtelser(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
 
         håndterSykmelding(Sykmeldingsperiode(1.juli, 31.juli, 100.prosent))
