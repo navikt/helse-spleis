@@ -178,4 +178,8 @@ spec:
         - team: tbd
           application: spesialist-opprydding-dev
           access: readwrite
+        - team: tbd
+          application: sparkel-medlemskap-mock
+          access: readwrite
+
 
