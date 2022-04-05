@@ -2743,8 +2743,6 @@ internal class Vedtaksperiode private constructor(
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             hendelse.info("Sykdom for denne personen kan ikke behandles automatisk.")
             sendOppgaveEvent(vedtaksperiode, hendelse)
-            if (Toggle.NyTilstandsflyt.enabled)
-                vedtaksperiode.person.gjenopptaBehandlingNy(hendelse)
         }
 
         private fun sendOppgaveEvent(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {

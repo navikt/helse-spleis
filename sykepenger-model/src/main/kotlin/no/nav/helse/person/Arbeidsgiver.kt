@@ -964,6 +964,7 @@ internal class Arbeidsgiver private constructor(
         vedtaksperioder.removeAll(perioder)
         forkastede.addAll(perioder.map { ForkastetVedtaksperiode(it, årsak) })
         sykdomshistorikk.fjernDager(perioder.map { it.periode() })
+        if (Toggle.NyTilstandsflyt.enabled) person.gjenopptaBehandlingNy(hendelse)
     }
 
     internal fun startRevurderingForAlleBerørtePerioder(hendelse: ArbeidstakerHendelse, vedtaksperiode: Vedtaksperiode) {
