@@ -3,12 +3,12 @@ val mainClass = "no.nav.helse.AppKt"
 dependencies {
     implementation("com.github.navikt:rapids-and-rivers:2022.04.05-09.40.11a466d7ac70")
     implementation(project(":sykepenger-model"))
-    testImplementation("org.testcontainers:postgresql:1.16.2") {
+    testImplementation("org.testcontainers:postgresql:1.16.3") {
         exclude("com.fasterxml.jackson.core")
     }
     testImplementation("com.github.navikt:inntektsmelding-kontrakt:2020.04.06-ab8f786")
     testImplementation("com.github.navikt:syfokafka:2021.02.15-14.09-103a1544")
-    testImplementation("io.mockk:mockk:1.12.0")
+    testImplementation("io.mockk:mockk:1.12.3")
 }
 
 tasks {
