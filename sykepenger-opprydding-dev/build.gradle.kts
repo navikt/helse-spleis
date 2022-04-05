@@ -9,7 +9,7 @@ repositories {
 
 dependencies {
     implementation(kotlin("stdlib"))
-    implementation("com.github.navikt:rapids-and-rivers:2022.03.28-20.54.89f957fff8f2")
+    implementation("com.github.navikt:rapids-and-rivers:2022.04.05-09.40.11a466d7ac70")
     implementation("com.google.cloud.sql:postgres-socket-factory:$cloudSqlVersion")
     implementation("org.postgresql:postgresql:42.3.3")
 
