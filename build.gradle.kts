@@ -1,13 +1,19 @@
 plugins {
-    kotlin("jvm") version "1.6.10"
+    kotlin("jvm") version "1.6.20"
 }
 
 val flywayVersion = "8.5.4"
 val hikariVersion = "5.0.0"
 val jacksonVersion = "2.13.2"
-val junitJupiterVersion = "5.8.1"
+val junitJupiterVersion = "5.8.2"
 val kotliqueryVersion = "1.6.0"
 val kGraphQLVersion = "0.17.14"
+val postgresqlVersion = "42.3.3"
+val kotlinReflectVersion = "1.5.31"
+val logbackClassicVersion = "1.2.6"
+val logstashVersion = "6.6"
+val jsonSchemaValidatorVersion = "1.0.65"
+val jvmTargetVersion = "17"
 
 allprojects {
     group = "no.nav.helse"
@@ -21,10 +27,10 @@ allprojects {
     }
 
     dependencies {
-        implementation("org.postgresql:postgresql:42.3.3")
-        implementation("org.jetbrains.kotlin:kotlin-reflect:1.5.31")
-        implementation("ch.qos.logback:logback-classic:1.2.6")
-        implementation("net.logstash.logback:logstash-logback-encoder:6.6") {
+        implementation("org.postgresql:postgresql:$postgresqlVersion")
+        implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinReflectVersion")
+        implementation("ch.qos.logback:logback-classic:$logbackClassicVersion")
+        implementation("net.logstash.logback:logstash-logback-encoder:$logstashVersion") {
             exclude("com.fasterxml.jackson.core")
             exclude("com.fasterxml.jackson.dataformat")
         }
@@ -43,21 +49,18 @@ allprojects {
         testImplementation("org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion")
         testImplementation("org.junit.jupiter:junit-jupiter-params:$junitJupiterVersion")
         testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitJupiterVersion")
-        testImplementation("com.networknt:json-schema-validator:1.0.65")
+        testImplementation("com.networknt:json-schema-validator:$jsonSchemaValidatorVersion")
     }
 
     tasks {
         compileKotlin {
-            kotlinOptions.jvmTarget = "17"
+            kotlinOptions.jvmTarget = jvmTargetVersion
         }
 
         compileTestKotlin {
-            kotlinOptions.jvmTarget = "17"
+            kotlinOptions.jvmTarget = jvmTargetVersion
         }
 
-        withType<Wrapper> {
-            gradleVersion = "7.3.1"
-        }
     }
 }
 
