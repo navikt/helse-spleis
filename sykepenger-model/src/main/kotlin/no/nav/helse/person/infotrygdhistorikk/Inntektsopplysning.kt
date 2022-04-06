@@ -1,11 +1,16 @@
 package no.nav.helse.person.infotrygdhistorikk
 
-import no.nav.helse.Toggle
-import no.nav.helse.person.*
-import no.nav.helse.økonomi.Inntekt
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
+import java.util.Objects
+import java.util.UUID
+import no.nav.helse.person.IAktivitetslogg
+import no.nav.helse.person.InfotrygdhistorikkVisitor
+import no.nav.helse.person.Inntektshistorikk
+import no.nav.helse.person.Person
+import no.nav.helse.person.Sykepengegrunnlag
+import no.nav.helse.person.VilkårsgrunnlagHistorikk
+import no.nav.helse.økonomi.Inntekt
 
 class Inntektsopplysning private constructor(
     private val orgnummer: String,
@@ -89,13 +94,9 @@ class Inntektsopplysning private constructor(
             aktivitetslogg: IAktivitetslogg
         ) {
             val relevanteInntektsopplysninger = filter { it.erRelevant(skjæringstidspunkt) }
-            val harFlereArbeidsgivere = relevanteInntektsopplysninger.distinctBy { it.orgnummer }.size > 1
-            if (Toggle.FlereArbeidsgivereFraInfotrygd.disabled && harFlereArbeidsgivere) {
+            if (relevanteInntektsopplysninger.distinctBy { it.orgnummer }.size > 1) {
                 return aktivitetslogg.error("Støtter ikke overgang fra infotrygd for flere arbeidsgivere")
             }
-            val harFlereSkjæringstidspunkt = relevanteInntektsopplysninger.distinctBy { it.sykepengerFom }.size > 1
-            if (harFlereArbeidsgivere && harFlereSkjæringstidspunkt) aktivitetslogg.error("Har inntekt på flere arbeidsgivere med forskjellig fom dato")
-
         }
 
         private fun List<Inntektsopplysning>.validerAntallInntekterPerArbeidsgiverPerDato(

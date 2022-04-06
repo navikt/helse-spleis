@@ -4,7 +4,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
-import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.august
 import no.nav.helse.desember
@@ -34,7 +33,6 @@ import no.nav.helse.mars
 import no.nav.helse.november
 import no.nav.helse.oktober
 import no.nav.helse.person.ForlengelseFraInfotrygd
-import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.Periodetype
 import no.nav.helse.person.Person
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
@@ -1031,44 +1029,6 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Total sykdomsgrad ved flere arbeidsgivere`() = Toggle.FlereArbeidsgivereFraInfotrygd.enable {
-        val periode = 27.januar(2021) til 31.januar(2021)
-        val inntekt = 30000.månedlig
-
-        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 50.prosent), orgnummer = a1)
-        val inntektshistorikk = listOf(
-            Inntektsopplysning(a1, 20.januar(2021), inntekt, true),
-            Inntektsopplysning(a2, 20.januar(2021), inntekt, true)
-        )
-
-        val utbetalinger = arrayOf(
-            ArbeidsgiverUtbetalingsperiode(a1, 20.januar(2021), 26.januar(2021), 100.prosent, inntekt),
-            ArbeidsgiverUtbetalingsperiode(a2, 20.januar(2021), 26.januar(2021), 100.prosent, inntekt)
-        )
-
-        håndterUtbetalingshistorikk(1.vedtaksperiode, utbetalinger = utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
-
-        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
-        håndterUtbetalingshistorikk(1.vedtaksperiode, utbetalinger = utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a2)
-        håndterSøknad(Sykdom(periode.start, periode.endInclusive, 50.prosent), orgnummer = a1)
-
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-
-        håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
-
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-
-        val navdagDTO = serializePersonForSpeil(person)
-            .arbeidsgivere.first()
-            .vedtaksperioder.last()
-            .utbetalingstidslinje.filterIsInstance<NavDagDTO>().last()
-
-        assertEquals(75.0, navdagDTO.totalGrad)
-    }
-
-    @Test
     fun `markerer forkastede vedtaksperioder som forkastet`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
@@ -1105,40 +1065,6 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         val serialisertPerson = serializePersonForSpeil(person)
         val vedtaksperiode = serialisertPerson.arbeidsgivere.first().vedtaksperioder.first()
         assertFalse(vedtaksperiode.erForkastet)
-    }
-
-    @Test
-    fun `Inntektskilde ved flere arbeidsgivere`() = Toggle.FlereArbeidsgivereFraInfotrygd.enable {
-        val periode = 27.januar(2021) til 31.januar(2021)
-        val inntekt = 30000.månedlig
-        val inntektshistorikk = listOf(
-            Inntektsopplysning(a1, 20.januar(2021), inntekt, true),
-            Inntektsopplysning(a2, 20.januar(2021), inntekt, true)
-        )
-
-        val utbetalinger = arrayOf(
-            ArbeidsgiverUtbetalingsperiode(a1, 20.januar(2021), 26.januar(2021), 100.prosent, inntekt),
-            ArbeidsgiverUtbetalingsperiode(a2, 20.januar(2021), 26.januar(2021), 100.prosent, inntekt)
-        )
-
-        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 50.prosent), orgnummer = a1)
-        håndterUtbetalingshistorikk(1.vedtaksperiode, utbetalinger = utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
-        håndterUtbetalingshistorikk(1.vedtaksperiode, utbetalinger = utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a2)
-        håndterSøknad(Sykdom(periode.start, periode.endInclusive, 50.prosent), orgnummer = a1)
-
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-
-        håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-
-        val vedtaksperiode = serializePersonForSpeil(person)
-            .arbeidsgivere.first()
-            .vedtaksperioder.single()
-
-        assertEquals(Inntektskilde.FLERE_ARBEIDSGIVERE, vedtaksperiode.inntektskilde)
     }
 
     @Test
