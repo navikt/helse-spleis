@@ -819,6 +819,10 @@ internal class Arbeidsgiver private constructor(
         håndter(hendelse, Vedtaksperiode::håndter)
     }
 
+    internal fun iverksettRevurdering(hendelse: OverstyrTidslinje) {
+        håndter(hendelse) { this.iverksettRevurdering(hendelse) }
+    }
+
     internal fun håndter(hendelse: OverstyrInntekt) {
         hendelse.kontekst(this)
         vedtaksperioder

@@ -1,16 +1,17 @@
 package no.nav.helse.hendelser
 
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
-import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.Dokumentsporing
+import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
 
 data class ManuellOverskrivingDag(
     val dato: LocalDate,
@@ -66,6 +67,22 @@ class OverstyrTidslinje(
                 )
             }
         }.reduce { acc, manuellOverskrivingDag -> acc + manuellOverskrivingDag }
+    }
+
+    private val revurderinger = mutableListOf<Vedtaksperiode>()
+    internal fun begynnRevurdering(vedtaksperiode: Vedtaksperiode) {
+        revurderinger.add(vedtaksperiode)
+    }
+
+    internal fun iverksettRevurdering(vedtaksperiode: Vedtaksperiode) {
+        if (revurderinger.isEmpty()) return
+        vedtaksperiode.iverksettRevurdering(this, revurderinger.first(), revurderinger.toList())
+    }
+
+    internal fun iverksettRevurdering() {
+        if (revurderinger.isEmpty()) return
+        val første = revurderinger.first()
+        Vedtaksperiode.iverksettRevurdering(this, revurderinger, første)
     }
 
     internal fun alleredeHåndtert() = håndtert

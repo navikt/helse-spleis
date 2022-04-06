@@ -275,6 +275,7 @@ class Person private constructor(
     }
 
     fun håndter(hendelse: OverstyrTidslinje) {
+        if (Toggle.NyRevurdering.enabled) return håndterNy(hendelse)
         hendelse.kontekst(this)
         if (arbeidsgivere.kanOverstyreTidslinje(hendelse)) {
             finnArbeidsgiver(hendelse).håndter(hendelse)
@@ -284,6 +285,14 @@ class Person private constructor(
         if (hendelse.hasErrorsOrWorse()) {
             observers.forEach { it.revurderingAvvist(hendelse.hendelseskontekst(), hendelse.tilRevurderingAvvistEvent()) }
         }
+    }
+
+    fun håndterNy(hendelse: OverstyrTidslinje) {
+        check(Toggle.NyRevurdering.enabled)
+        hendelse.kontekst(this)
+        finnArbeidsgiver(hendelse).håndter(hendelse)
+        arbeidsgivere.forEach { it.iverksettRevurdering(hendelse) }
+        hendelse.iverksettRevurdering()
     }
 
     fun håndter(hendelse: OverstyrInntekt) {

@@ -1113,6 +1113,11 @@ internal class Vedtaksperiode private constructor(
         fun gjenopptaBehandlingNy(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             sikkerlogg.warn("Mottok en gjenopptaBehandling for en periode som ikke forventet det")
         }
+
+        fun iverksettRevurdering(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje, første: Vedtaksperiode) {
+            if (vedtaksperiode.arbeidsgiver.finnVedtaksperiodeRettFør(vedtaksperiode) != null) return håndterTidligereTilstøtendeUferdigPeriode(vedtaksperiode, første, hendelse)
+            return håndterTidligereUferdigPeriode(vedtaksperiode, første, hendelse)
+        }
     }
 
     internal object Start : Vedtaksperiodetilstand {
@@ -2354,6 +2359,21 @@ internal class Vedtaksperiode private constructor(
         tilstand.gjenopptaBehandlingNy(this, hendelse)
     }
 
+    internal fun iverksettRevurdering(hendelse: OverstyrTidslinje) {
+        hendelse.iverksettRevurdering(this)
+    }
+
+    // 1. alle vedtaksperioder for samme AG, som tilhører samme utbetaling som $første, skal i AvventerGjennomførtRevurdering
+    // 2. alle vedtaksperioder for annen AG, som overlapper med utbetalingen til $første, skal i AvventerGjennomførtRevurdering
+    // 3. alle vedtaksperioder for samme AG, som er aktive, må inn i tilhørende uferdig-tilstand (f.eks. skal AVVENTER_GODKJENNING inn i AVVENTER_UFERDIG)
+    // 4. alle vedtaksperioder for annen AG, som er aktive, må inn i tilhørende uferdig-tilstand (f.eks. skal AVVENTER_GODKJENNING inn i AVVENTER_UFERDIG)
+    internal fun iverksettRevurdering(hendelse: OverstyrTidslinje, første: Vedtaksperiode, perioder: List<Vedtaksperiode>) {
+        if (this == første || perioder.none { other -> this.periode.start >= første.periode.start && this.utbetalinger.overlapperMed(other.utbetalinger) }) return
+        hendelse.kontekst(this)
+        kontekst(hendelse)
+        tilstand.iverksettRevurdering(this, hendelse, første)
+    }
+
     internal object AvventerGodkjenningRevurdering : Vedtaksperiodetilstand {
         override val type = AVVENTER_GODKJENNING_REVURDERING
         override val kanReberegnes = false
@@ -2674,8 +2694,20 @@ internal class Vedtaksperiode private constructor(
         ) {
         }
 
+        override fun iverksettRevurdering(
+            vedtaksperiode: Vedtaksperiode,
+            hendelse: OverstyrTidslinje,
+            første: Vedtaksperiode
+        ) {
+            vedtaksperiode.tilstand(hendelse, AvventerGjennomførtRevurdering)
+            hendelse.begynnRevurdering(vedtaksperiode)
+        }
+
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
-            vedtaksperiode.person.igangsettRevurdering(hendelse, vedtaksperiode)
+            if (Toggle.NyRevurdering.disabled) return vedtaksperiode.person.igangsettRevurdering(hendelse, vedtaksperiode)
+            vedtaksperiode.oppdaterHistorikk(hendelse) // TODO: vente med å gjøre dette til signalet `iverksettRevuedering()` går ut??
+            vedtaksperiode.tilstand(hendelse, AvventerGjennomførtRevurdering)
+            hendelse.begynnRevurdering(vedtaksperiode)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {
@@ -2910,6 +2942,15 @@ internal class Vedtaksperiode private constructor(
         ): List<Arbeidsgiverperiode> {
             val samletSykdomstidslinje = Sykdomstidslinje.gammelTidslinje(perioder.map { it.sykdomstidslinje }).merge(sykdomstidslinje, replace)
             return person.arbeidsgiverperiodeFor(organisasjonsnummer, sykdomshistorikkId, samletSykdomstidslinje, periode, subsumsjonObserver)
+        }
+
+        internal fun iverksettRevurdering(hendelse: IAktivitetslogg, revurderinger: List<Vedtaksperiode>, første: Vedtaksperiode) {
+            // poker videre siste utbetalte vedtaksperiode (som hører til samme utbetaling som $første)
+            // dvs. den skal gå til Avventer historikk revurdering
+            revurderinger.sorted().last { første.arbeidsgiver == it.arbeidsgiver }.also { siste ->
+                siste.kontekst(hendelse)
+                siste.tilstand(hendelse, AvventerHistorikkRevurdering)
+            }
         }
     }
 }

@@ -527,6 +527,10 @@ internal class Utbetaling private constructor(
         tilstand(nesteTilstand, hendelse)
     }
 
+    internal fun overlapperMed(other: Utbetaling): Boolean {
+        return this.periode.overlapperMed(other.periode)
+    }
+
     internal fun erEldreEnn(other: LocalDateTime): Boolean {
         return other > tidsstempel
     }
@@ -538,7 +542,6 @@ internal class Utbetaling private constructor(
         if (this.overføringstidspunkt == null) this.overføringstidspunkt = tidspunkt
         if (this.avstemmingsnøkkel == null) this.avstemmingsnøkkel = avstemmingsnøkkel
     }
-
     override fun toString() = "$type(${Utbetalingstatus.fraTilstand(tilstand)}) - $periode"
 
     internal interface Tilstand {

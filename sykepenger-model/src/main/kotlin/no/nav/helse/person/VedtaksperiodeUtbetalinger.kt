@@ -99,8 +99,13 @@ internal class VedtaksperiodeUtbetalinger(private val arbeidsgiver: Arbeidsgiver
         builder.utbetaling(siste!!)
     }
 
+    internal fun overlapperMed(other: VedtaksperiodeUtbetalinger): Boolean {
+        if (!this.harUtbetalinger() || !other.harUtbetalinger()) return false
+        return this.siste!!.overlapperMed(other.siste!!)
+    }
     internal fun valider(simulering: Simulering) = siste!!.valider(simulering)
     internal fun erKlarForGodkjenning() = siste!!.erKlarForGodkjenning()
+
     internal fun simuler(hendelse: IAktivitetslogg) = siste!!.simuler(hendelse)
 
     internal fun godkjenning(
