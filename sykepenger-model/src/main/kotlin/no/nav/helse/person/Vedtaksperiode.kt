@@ -2826,8 +2826,6 @@ internal class Vedtaksperiode private constructor(
 
         internal fun Iterable<Vedtaksperiode>.nåværendeVedtaksperiode(filter: VedtaksperiodeFilter) = firstOrNull(filter)
 
-        internal fun Iterable<Vedtaksperiode>.harPerioderMedPotensiellUtbetaling() = any { it.tilstand != AvsluttetUtenUtbetaling }
-
         internal fun List<Vedtaksperiode>.medSkjæringstidspunkt(skjæringstidspunkt: LocalDate) =
             this.filter { it.skjæringstidspunkt == skjæringstidspunkt }
 

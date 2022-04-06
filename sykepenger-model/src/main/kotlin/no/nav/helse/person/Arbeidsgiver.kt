@@ -45,7 +45,6 @@ import no.nav.helse.person.Vedtaksperiode.Companion.KLAR_TIL_BEHANDLING
 import no.nav.helse.person.Vedtaksperiode.Companion.REVURDERING_IGANGSATT
 import no.nav.helse.person.Vedtaksperiode.Companion.harNødvendigInntekt
 import no.nav.helse.person.Vedtaksperiode.Companion.harOverlappendeUtbetaltePerioder
-import no.nav.helse.person.Vedtaksperiode.Companion.harPerioderMedPotensiellUtbetaling
 import no.nav.helse.person.Vedtaksperiode.Companion.harUtbetaling
 import no.nav.helse.person.Vedtaksperiode.Companion.iderMedUtbetaling
 import no.nav.helse.person.Vedtaksperiode.Companion.medSkjæringstidspunkt
@@ -271,7 +270,7 @@ internal class Arbeidsgiver private constructor(
                 .filter {
                     it.vedtaksperioder
                         .medSkjæringstidspunkt(skjæringstidspunkt)
-                        .harPerioderMedPotensiellUtbetaling()
+                        .any(IKKE_FERDIG_BEHANDLET)
                 }
                 .all { it.harInntektsmelding(skjæringstidspunkt) }
 

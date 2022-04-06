@@ -13,6 +13,7 @@ import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.IdInnhenter
+import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
@@ -334,6 +335,35 @@ internal class NyTilstandsflytInfotrygdTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.april, 30.april, 100.prosent))
         håndterSøknad(Sykdom(1.april, 30.april, 100.prosent))
         assertSisteTilstand(4.vedtaksperiode, AVVENTER_HISTORIKK)
+    }
+
+    @Test
+    fun `annen arbeidsgiver forlenger infotrygdforlengelse`() {
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a1)
+        håndterUtbetalingshistorikk(
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 31.januar, 100.prosent, INNTEKT)),
+            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true)),
+            besvart = LocalDate.EPOCH.atStartOfDay(),
+            orgnummer = a1
+        )
+        håndterYtelser(
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 31.januar, 100.prosent, INNTEKT)),
+            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true)),
+            besvart = LocalDate.EPOCH.atStartOfDay(),
+            orgnummer = a1
+        )
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
+
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a2)
+        håndterInntektsmelding(listOf(1.mars til 16.mars), orgnummer = a2)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        assertTilstand(1.vedtaksperiode, TilstandType.TIL_INFOTRYGD, orgnummer = a2)
     }
 
     private fun utbetalPeriode(vedtaksperiode: IdInnhenter) {
