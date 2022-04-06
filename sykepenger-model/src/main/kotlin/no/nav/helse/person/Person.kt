@@ -647,6 +647,7 @@ class Person private constructor(
         infotrygdhistorikk.tøm()
         Arbeidsgiver.søppelbøtte(arbeidsgivere, hendelse, filter)
         gjenopptaBehandling(hendelse)
+        if (Toggle.NyTilstandsflyt.enabled) gjenopptaBehandlingNy(hendelse)
     }
 
     internal fun oppdaterHarMinimumInntekt(
