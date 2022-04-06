@@ -17,6 +17,7 @@ import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER
+import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.september
@@ -198,15 +199,18 @@ internal class NyTilstandsflytInfotrygdTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         utbetalPeriode(1.vedtaksperiode)
 
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+        person.invaliderAllePerioder(hendelselogg, null)
+
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
 
         val utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.februar, 28.februar, 100.prosent, 30000.månedlig))
         val inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.februar, 30000.månedlig, true))
 
-        håndterUtbetalingshistorikk(2.vedtaksperiode, utbetalinger = utbetalinger, inntektshistorikk = inntektshistorikk)
-        assertTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK)
-
+        håndterUtbetalingshistorikk(3.vedtaksperiode, utbetalinger = utbetalinger, inntektshistorikk = inntektshistorikk)
+        assertTilstand(3.vedtaksperiode, AVVENTER_HISTORIKK)
     }
 
     @Test
@@ -218,6 +222,10 @@ internal class NyTilstandsflytInfotrygdTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         utbetalPeriode(1.vedtaksperiode)
 
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+        person.invaliderAllePerioder(hendelselogg, null)
+
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
 
@@ -227,10 +235,10 @@ internal class NyTilstandsflytInfotrygdTest : AbstractEndToEndTest() {
         val utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.februar, 28.februar, 100.prosent, 30000.månedlig))
         val inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.februar, 30000.månedlig, true))
 
-        håndterUtbetalingshistorikk(2.vedtaksperiode, utbetalinger = utbetalinger, inntektshistorikk = inntektshistorikk)
+        håndterUtbetalingshistorikk(3.vedtaksperiode, utbetalinger = utbetalinger, inntektshistorikk = inntektshistorikk)
 
-        assertTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK)
-        assertTilstand(3.vedtaksperiode, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER)
+        assertTilstand(3.vedtaksperiode, AVVENTER_HISTORIKK)
+        assertTilstand(4.vedtaksperiode, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER)
     }
 
     @Test
@@ -270,16 +278,22 @@ internal class NyTilstandsflytInfotrygdTest : AbstractEndToEndTest() {
 
     @Test
     fun `oppdager at vi er en infotrygdforlengelse når infotrygdhistorikken tilstøter en periode i AvsluttetUtenUtbetaling`() {
-        håndterSykmelding(Sykmeldingsperiode(10.januar, 19.januar, 100.prosent))
-        håndterSøknad(Sykdom(10.januar, 19.januar, 100.prosent))
-        håndterUtbetalingshistorikk(1.vedtaksperiode)
-        håndterSykmelding(Sykmeldingsperiode(20.januar, 31.januar, 100.prosent))
-        håndterSøknad(Sykdom(20.januar, 31.januar, 100.prosent))
-        håndterUtbetalingshistorikk(2.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 9.januar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
-            Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true)
-        ))
-        assertTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 9.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 9.januar, 100.prosent))
+        person.invaliderAllePerioder(hendelselogg, null)
+
+        håndterSykmelding(Sykmeldingsperiode(10.januar, 16.januar, 100.prosent))
+        håndterSøknad(Sykdom(10.januar, 16.januar, 100.prosent))
+        håndterUtbetalingshistorikk(2.vedtaksperiode)
+        håndterSykmelding(Sykmeldingsperiode(17.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(17.januar, 31.januar, 100.prosent))
+        håndterUtbetalingshistorikk(
+            3.vedtaksperiode,
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 9.januar, 100.prosent, INNTEKT),
+            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true))
+        )
+        assertTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstand(3.vedtaksperiode, AVVENTER_HISTORIKK)
     }
 
     @Test
@@ -291,7 +305,7 @@ internal class NyTilstandsflytInfotrygdTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(20.januar, 31.januar, 100.prosent))
         håndterUtbetalingshistorikk(2.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 19.januar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
             Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true)
-        ))
+        )) // antar at noe har skjedd med en periode som vi har i AvsluttetUtenUtbetaling som har ført til utbetaling i infotrygd
         assertTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK)
     }
@@ -302,22 +316,24 @@ internal class NyTilstandsflytInfotrygdTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
         håndterInntektsmelding(listOf(1.januar til 16.januar))
-
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         utbetalPeriode(1.vedtaksperiode)
 
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+        person.invaliderAllePerioder(hendelselogg, null)
 
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
-        håndterUtbetalingshistorikk(2.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.februar, 28.februar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
+        håndterUtbetalingshistorikk(3.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.februar, 28.februar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
             Inntektsopplysning(ORGNUMMER, 1.februar, INNTEKT, true)
         ))
-        utbetalPeriode(2.vedtaksperiode)
+        utbetalPeriode(3.vedtaksperiode)
 
         håndterSykmelding(Sykmeldingsperiode(1.april, 30.april, 100.prosent))
         håndterSøknad(Sykdom(1.april, 30.april, 100.prosent))
-        assertSisteTilstand(3.vedtaksperiode, AVVENTER_HISTORIKK)
+        assertSisteTilstand(4.vedtaksperiode, AVVENTER_HISTORIKK)
     }
 
     private fun utbetalPeriode(vedtaksperiode: IdInnhenter) {
