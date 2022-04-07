@@ -243,12 +243,22 @@ internal fun AbstractEndToEndTest.forlengTilGodkjentVedtak(
     fnr: Fødselsnummer = AbstractPersonTest.UNG_PERSON_FNR_2018,
     orgnummer: String = AbstractPersonTest.ORGNUMMER
 ) {
+    forlengTilGodkjenning(fom, tom, grad, fnr, orgnummer)
+    håndterUtbetalingsgodkjenning(observatør.sisteVedtaksperiode(), true, fnr = fnr, orgnummer = orgnummer)
+}
+
+internal fun AbstractEndToEndTest.forlengTilGodkjenning(
+    fom: LocalDate,
+    tom: LocalDate,
+    grad: Prosentdel = 100.prosent,
+    fnr: Fødselsnummer = AbstractPersonTest.UNG_PERSON_FNR_2018,
+    orgnummer: String = AbstractPersonTest.ORGNUMMER
+) {
     håndterSykmelding(Sykmeldingsperiode(fom, tom, grad), fnr = fnr, orgnummer = orgnummer)
     val id: IdInnhenter = observatør.sisteVedtaksperiode()
     håndterSøknadMedValidering(id, Søknadsperiode.Sykdom(fom, tom, grad), fnr = fnr, orgnummer = orgnummer)
     håndterYtelser(id, fnr = fnr, orgnummer = orgnummer)
     if (person.personLogg.etterspurteBehov(id, Behovtype.Simulering)) håndterSimulering(id, fnr = fnr, orgnummer = orgnummer)
-    håndterUtbetalingsgodkjenning(id, true, fnr = fnr, orgnummer = orgnummer)
 }
 
 internal fun AbstractEndToEndTest.forlengVedtak(
@@ -259,7 +269,6 @@ internal fun AbstractEndToEndTest.forlengVedtak(
     orgnummer: String = AbstractPersonTest.ORGNUMMER
 ) {
     forlengTilGodkjentVedtak(fom, tom, grad, fnr, orgnummer)
-    val id: IdInnhenter = observatør.sisteVedtaksperiode()
     håndterUtbetalt(status = Oppdragstatus.AKSEPTERT, fnr = fnr, orgnummer = orgnummer)
 }
 
