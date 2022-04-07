@@ -47,6 +47,8 @@ internal abstract class AbstractPersonTest {
     fun inspektør(orgnummer: String, block: TestArbeidsgiverInspektør.() -> Unit) = inspektør(orgnummer).run(block)
 }
 
+internal fun AbstractPersonTest.nullstillTilstandsendringer() = observatør.nullstillTilstandsendringer()
+
 internal fun interface IdInnhenter {
     fun id(orgnummer: String): UUID
 }

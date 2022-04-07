@@ -80,6 +80,10 @@ internal class TestObservatør : PersonObserver {
         if (event.gjeldendeTilstand == TilstandType.AVSLUTTET) utbetalteVedtaksperioder.add(hendelseskontekst.vedtaksperiodeId())
     }
 
+    internal fun nullstillTilstandsendringer() {
+        tilstandsendringer.replaceAll { _, value -> mutableListOf(value.last()) }
+    }
+
     override fun manglerInntektsmelding(hendelseskontekst: Hendelseskontekst, orgnr: String, event: PersonObserver.ManglendeInntektsmeldingEvent) {
         manglendeInntektsmeldingVedtaksperioder.add(hendelseskontekst.vedtaksperiodeId())
     }
