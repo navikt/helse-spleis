@@ -44,6 +44,7 @@ import no.nav.helse.person.Arbeidsgiver.Companion.gjenopptaBehandlingNy
 import no.nav.helse.person.Arbeidsgiver.Companion.grunnlagForSammenligningsgrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.harArbeidsgivereMedOverlappendeUtbetaltePerioder
 import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigInntekt
+import no.nav.helse.person.Arbeidsgiver.Companion.harOverlappendeVedtaksperiode
 import no.nav.helse.person.Arbeidsgiver.Companion.harUtbetaltPeriode
 import no.nav.helse.person.Arbeidsgiver.Companion.harVedtaksperiodeFor
 import no.nav.helse.person.Arbeidsgiver.Companion.håndter
@@ -518,6 +519,9 @@ class Person private constructor(
         if (infotrygdhistorikk.harBetaltRettFør(periode)) return false
         return arbeidsgivere.any { it.harNærliggendeUtbetaling(periode.oppdaterTom(periode.endInclusive.plusYears(3))) }
     }
+
+    internal fun harOverlappendeVedtaksperiode(hendelse: SykdomstidslinjeHendelse) =
+        arbeidsgivere.harOverlappendeVedtaksperiode(hendelse)
 
     internal fun lagreDødsdato(dødsdato: LocalDate) {
         this.dødsdato = dødsdato

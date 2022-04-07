@@ -150,6 +150,9 @@ internal class Arbeidsgiver private constructor(
         internal fun Iterable<Arbeidsgiver>.nåværendeVedtaksperioder(filter: VedtaksperiodeFilter) =
             mapNotNull { it.vedtaksperioder.nåværendeVedtaksperiode(filter) }
 
+        internal fun Iterable<Arbeidsgiver>.harOverlappendeVedtaksperiode(hendelse: SykdomstidslinjeHendelse) =
+            any { it.harOverlappendeVedtaksperiode(hendelse) }
+
         internal fun List<Arbeidsgiver>.beregnSykepengegrunnlag(skjæringstidspunkt: LocalDate, periodeStart: LocalDate) =
             fold(emptyList<ArbeidsgiverInntektsopplysning>()) { inntektsopplysninger, arbeidsgiver ->
                 val inntektsopplysning = arbeidsgiver.inntektshistorikk.grunnlagForSykepengegrunnlag(
@@ -454,7 +457,7 @@ internal class Arbeidsgiver private constructor(
             hendelse = sykmelding,
             jurist = jurist
         )
-        if (kanIkkeBehandle(sykmelding)) return registrerForkastetVedtaksperiode(vedtaksperiode, sykmelding)
+        if (harOverlappendeVedtaksperiode(sykmelding)) return registrerForkastetVedtaksperiode(vedtaksperiode, sykmelding)
         if (noenHarHåndtert(sykmelding, Vedtaksperiode::håndter)) return
         registrerNyVedtaksperiode(vedtaksperiode)
         sykmelding.nyVedtaksperiode()
@@ -462,7 +465,7 @@ internal class Arbeidsgiver private constructor(
         håndter(sykmelding) { nyPeriode(vedtaksperiode, sykmelding) }
     }
 
-    private fun kanIkkeBehandle(hendelse: SykdomstidslinjeHendelse): Boolean {
+    private fun harOverlappendeVedtaksperiode(hendelse: SykdomstidslinjeHendelse): Boolean {
         ForkastetVedtaksperiode.overlapperMedForkastet(forkastede, hendelse)
         ForkastetVedtaksperiode.forlengerForkastet(forkastede, hendelse)
         return hendelse.hasErrorsOrWorse()
@@ -488,7 +491,7 @@ internal class Arbeidsgiver private constructor(
         if (vedtaksperioder.any { it.overlapperMenUlikFerieinformasjon(søknad) }) {
             søknad.warn("Det er oppgitt ny informasjon om ferie i søknaden som det ikke har blitt opplyst om tidligere. Tidligere periode må revurderes.")
         }
-        if (kanIkkeBehandle(søknad)) return registrerForkastetVedtaksperiode(vedtaksperiode, søknad)
+        if (person.harOverlappendeVedtaksperiode(søknad)) return registrerForkastetVedtaksperiode(vedtaksperiode, søknad)
         if (noenHarHåndtert(søknad, Vedtaksperiode::håndter)) return
         registrerNyVedtaksperiode(vedtaksperiode)
         vedtaksperiode.håndter(søknad)
