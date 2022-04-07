@@ -2368,7 +2368,7 @@ internal class Vedtaksperiode private constructor(
     // 3. alle vedtaksperioder for samme AG, som er aktive, må inn i tilhørende uferdig-tilstand (f.eks. skal AVVENTER_GODKJENNING inn i AVVENTER_UFERDIG)
     // 4. alle vedtaksperioder for annen AG, som er aktive, må inn i tilhørende uferdig-tilstand (f.eks. skal AVVENTER_GODKJENNING inn i AVVENTER_UFERDIG)
     internal fun iverksettRevurdering(hendelse: OverstyrTidslinje, første: Vedtaksperiode, perioder: List<Vedtaksperiode>) {
-        if (this == første || perioder.none { other -> this.periode.start >= første.periode.start && this.utbetalinger.overlapperMed(other.utbetalinger) }) return
+        if (this == første || perioder.none { other -> this >= første && this.utbetalinger.overlapperMed(other.utbetalinger) }) return
         hendelse.kontekst(this)
         kontekst(hendelse)
         tilstand.iverksettRevurdering(this, hendelse, første)
