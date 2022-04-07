@@ -17,12 +17,16 @@ import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
+import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_UFERDIG
 import no.nav.helse.person.nullstillTilstandsendringer
+import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype.REVURDERING
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -97,6 +101,44 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, orgnummer = a2)
         assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, orgnummer = a2)
         assertTilstander(3.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, orgnummer = a2)
+    }
+
+    @Test
+    fun `revurdere første periode - flere ag - ag 1 - har generert utbetaling`() {
+        setupToArbeidsgivereFørstegangsbehandling(1.januar til 31.januar)
+        setupToArbeidsgivereForlengelse(1.februar til 28.februar)
+        setupToArbeidsgivereForlengelse(1.mars til 31.mars)
+        nullstillTilstandsendringer()
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(5.januar, Feriedag)), orgnummer = a1)
+        håndterYtelser(3.vedtaksperiode, orgnummer = a1)
+
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, orgnummer = a1)
+        assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, orgnummer = a1)
+        assertTilstander(3.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, orgnummer = a1)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, orgnummer = a2)
+        assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, orgnummer = a2)
+        assertTilstander(3.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, orgnummer = a2)
+
+        inspektør(a1) {
+            assertEquals(REVURDERING, utbetalingstype(3.vedtaksperiode, 1))
+            assertEquals(4, utbetalinger.size)
+        }
+
+        assertForventetFeil(
+            forklaring = "Utbetalinger må være genreret før noe går til godkjenning fordi er avhengig av utbetalinger for å lage generasjoner",
+            nå = {
+                inspektør(a2) {
+                    assertNull(utbetalingstype(3.vedtaksperiode, 2))
+                    assertEquals(6, utbetalinger.size)
+                }
+            },
+            ønsket = {
+                inspektør(a2) {
+                    assertEquals(REVURDERING, utbetalingstype(3.vedtaksperiode, 2))
+                    assertEquals(4, utbetalinger.size)
+                }
+            }
+        )
     }
 
     @Test

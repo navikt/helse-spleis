@@ -45,6 +45,7 @@ internal class TestArbeidsgiverInspektør(
     internal val infotrygdFeriepengebeløpArbeidsgiver = mutableListOf<Double>()
     internal val spleisFeriepengebeløpArbeidsgiver = mutableListOf<Double>()
     private val vedtaksperiodeutbetalinger = mutableMapOf<Int, MutableList<Int>>()
+    private val vedtaksperiodeutbetalingstyper = mutableMapOf<Int, MutableList<Utbetalingtype>>()
     private val utbetalingstilstander = mutableListOf<Utbetaling.Tilstand>()
     private val utbetalingIder = mutableListOf<UUID>()
     private val utbetalingutbetalingstidslinjer = mutableListOf<Utbetalingstidslinje>()
@@ -291,6 +292,7 @@ internal class TestArbeidsgiverInspektør(
             gjenståendeSykedagerer.add(gjenståendeSykedager)
         } else {
             vedtaksperiodeutbetalinger.getOrPut(vedtaksperiodeindeks) { mutableListOf() }.add(utbetalinger.indexOf(utbetaling))
+            vedtaksperiodeutbetalingstyper.getOrPut(vedtaksperiodeindeks) { mutableListOf() }.add(type)
         }
     }
 
@@ -398,6 +400,7 @@ internal class TestArbeidsgiverInspektør(
     internal fun utbetalinger(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperiodeIdInnhenter.id(orgnummer).utbetalingsindeksOrNull?.let { indekser ->
         utbetalinger.filterIndexed { index, _ -> index in indekser }
     } ?: emptyList()
+    internal fun utbetalingstype(vedtaksperiodeIdInnhenter: IdInnhenter, utbetalingIndex: Int) = vedtaksperiodeutbetalingstyper[vedtaksperiodeIdInnhenter.id(orgnummer).indeks]!!.getOrNull(utbetalingIndex)
     internal fun utbetalingtilstand(indeks: Int) = utbetalingstilstander[indeks]
     internal fun utbetaling(indeks: Int) = utbetalinger[indeks]
     internal fun utbetalingId(indeks: Int) = utbetalingIder[indeks]
