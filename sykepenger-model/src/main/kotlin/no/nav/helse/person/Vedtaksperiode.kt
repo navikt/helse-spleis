@@ -519,6 +519,11 @@ internal class Vedtaksperiode private constructor(
         tilstand.entering(this, event)
     }
 
+    private fun begynnRevurdering(hendelse: OverstyrTidslinje) {
+        tilstand(hendelse, AvventerGjennomførtRevurdering)
+        hendelse.begynnRevurdering(this)
+    }
+
     private fun håndterInntektsmelding(hendelse: Inntektsmelding, hvisIngenErrors: () -> Unit = {}, nesteTilstand: () -> Vedtaksperiodetilstand) {
         periode = hendelse.oppdaterFom(periode)
         oppdaterHistorikk(hendelse)
@@ -1519,6 +1524,14 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndterTidligereUferdigPeriode(vedtaksperiode: Vedtaksperiode, tidligere: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.tilstand(hendelse, AvventerArbeidsgivereRevurdering)
+        }
+
+        override fun iverksettRevurdering(
+            vedtaksperiode: Vedtaksperiode,
+            hendelse: OverstyrTidslinje,
+            første: Vedtaksperiode
+        ) {
+            vedtaksperiode.begynnRevurdering(hendelse)
         }
 
         /*
@@ -2699,8 +2712,7 @@ internal class Vedtaksperiode private constructor(
             hendelse: OverstyrTidslinje,
             første: Vedtaksperiode
         ) {
-            vedtaksperiode.tilstand(hendelse, AvventerGjennomførtRevurdering)
-            hendelse.begynnRevurdering(vedtaksperiode)
+            vedtaksperiode.begynnRevurdering(hendelse)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
@@ -2947,6 +2959,7 @@ internal class Vedtaksperiode private constructor(
         internal fun iverksettRevurdering(hendelse: IAktivitetslogg, revurderinger: List<Vedtaksperiode>, første: Vedtaksperiode) {
             // poker videre siste utbetalte vedtaksperiode (som hører til samme utbetaling som $første)
             // dvs. den skal gå til Avventer historikk revurdering
+            // Siste på første skjæringstidspunkt istedenfor for samme arbeidsgiver?
             revurderinger.sorted().last { første.arbeidsgiver == it.arbeidsgiver }.also { siste ->
                 siste.kontekst(hendelse)
                 siste.tilstand(hendelse, AvventerHistorikkRevurdering)
