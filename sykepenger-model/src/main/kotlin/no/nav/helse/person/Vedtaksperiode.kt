@@ -1459,6 +1459,14 @@ internal class Vedtaksperiode private constructor(
         override fun håndterRevurderingFeilet(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.tilstand(hendelse, RevurderingFeilet)
         }
+
+        override fun iverksettRevurdering(
+            vedtaksperiode: Vedtaksperiode,
+            hendelse: OverstyrTidslinje,
+            første: Vedtaksperiode
+        ) {
+            vedtaksperiode.begynnRevurdering(hendelse)
+        }
     }
 
     internal object AvventerHistorikkRevurdering : Vedtaksperiodetilstand {
@@ -2712,6 +2720,7 @@ internal class Vedtaksperiode private constructor(
             hendelse: OverstyrTidslinje,
             første: Vedtaksperiode
         ) {
+            if (vedtaksperiode.skjæringstidspunkt != første.skjæringstidspunkt) return
             vedtaksperiode.begynnRevurdering(hendelse)
         }
 
@@ -2749,6 +2758,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
+
     }
 
     internal object RevurderingFeilet : Vedtaksperiodetilstand {
@@ -2959,8 +2969,7 @@ internal class Vedtaksperiode private constructor(
         internal fun iverksettRevurdering(hendelse: IAktivitetslogg, revurderinger: List<Vedtaksperiode>, første: Vedtaksperiode) {
             // poker videre siste utbetalte vedtaksperiode (som hører til samme utbetaling som $første)
             // dvs. den skal gå til Avventer historikk revurdering
-            // Siste på første skjæringstidspunkt istedenfor for samme arbeidsgiver?
-            revurderinger.sorted().last { første.arbeidsgiver == it.arbeidsgiver }.also { siste ->
+            revurderinger.sorted().last { første.arbeidsgiver == it.arbeidsgiver && første.skjæringstidspunkt == it.skjæringstidspunkt }.also { siste ->
                 siste.kontekst(hendelse)
                 siste.tilstand(hendelse, AvventerHistorikkRevurdering)
             }
