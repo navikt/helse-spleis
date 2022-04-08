@@ -1,16 +1,35 @@
 package no.nav.helse.spleis.e2e
 
+import java.time.LocalDate
+import java.time.YearMonth
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
-import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.InntektForSykepengegrunnlag
+import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.Inntektsvurdering
+import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.Vilkårsgrunnlag
+import no.nav.helse.hendelser.til
 import no.nav.helse.januar
-import no.nav.helse.person.TilstandType.*
+import no.nav.helse.mars
+import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
+import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP
+import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
+import no.nav.helse.person.TilstandType.AVVENTER_SØKNAD_UFERDIG_FORLENGELSE
+import no.nav.helse.person.TilstandType.AVVENTER_UFERDIG
+import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
+import no.nav.helse.person.TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP
+import no.nav.helse.person.TilstandType.MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE
+import no.nav.helse.person.TilstandType.START
+import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
+import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
-import java.time.YearMonth
 
 internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
     @Test
@@ -242,6 +261,59 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
             forklaring = "https://trello.com/c/edYRnoPm",
             nå = { assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a2) },
             ønsket = { assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD, orgnummer = a2) }
+        )
+    }
+
+    @Test
+    fun `flere kall til håndterYtelser burde ikke duplisere vilkårsgrunnlag fra infotrygd`() {
+        val gammelSykdom = arrayOf(
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar(2016), 31.januar(2016), 100.prosent, INNTEKT),
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.mars(2016), 31.mars(2016), 100.prosent, INNTEKT)
+        )
+        val gammelInntekt = listOf(
+            Inntektsopplysning(ORGNUMMER, 1.januar(2016), INNTEKT, false),
+            Inntektsopplysning(ORGNUMMER, 1.mars(2016), INNTEKT, false)
+        )
+        /*
+        Vi må ha gap for å lagre nye vilkårsgrunnlag. håndterYtelser kun lagrer vilkårsgrunnlag fra IT dersom
+         vi ikke har en utbetalt periode som gjelder skjæringstidspunktet
+         */
+        repeat(3) {
+            val fom = LocalDate.of(2018, it + 1, 1)
+            val tom = fom.plusDays(17)
+            håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent))
+            håndterSøknad(Sykdom(fom, tom, 100.prosent))
+            håndterUtbetalingshistorikk(
+                (it+1).vedtaksperiode,
+                utbetalinger = gammelSykdom,
+                inntektshistorikk = gammelInntekt,
+                besvart = LocalDate.EPOCH.atStartOfDay()
+            )
+            håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = fom)
+
+            håndterYtelser(
+                (it+1).vedtaksperiode,
+                utbetalinger = gammelSykdom,
+                inntektshistorikk = gammelInntekt,
+                besvart = LocalDate.EPOCH.atStartOfDay()
+            )
+            håndterVilkårsgrunnlag((it+1).vedtaksperiode)
+            håndterYtelser(
+                (it+1).vedtaksperiode,
+                utbetalinger = gammelSykdom,
+                inntektshistorikk = gammelInntekt,
+                besvart = LocalDate.EPOCH.atStartOfDay()
+            )
+            håndterSimulering((it+1).vedtaksperiode)
+            håndterUtbetalingsgodkjenning((it+1).vedtaksperiode)
+            håndterUtbetalt()
+        }
+
+        assertForventetFeil(
+            forklaring = "Siden det ikke er duplikatsjekk vil vi lage nytt innslag per inntekt per håndterYtelser",
+            // 3 vedtaksperioder x inntekter fra IT 2 x 2 håndterYtelser + 3 spleis vilkårsgrunnlag = 15
+            nå = { Assertions.assertEquals(15, inspektør.vilkårsgrunnlagHistorikkInnslag().size) },
+            ønsket = { Assertions.assertEquals(5, inspektør.vilkårsgrunnlagHistorikkInnslag().size) }
         )
     }
 }
