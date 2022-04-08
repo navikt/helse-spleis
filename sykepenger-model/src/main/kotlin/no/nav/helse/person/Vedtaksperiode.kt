@@ -1417,9 +1417,13 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, gjenopptaBehandling: IAktivitetslogg) {
-            if (!vedtaksperiode.utbetalinger.erAvsluttet()) return
-            gjenopptaBehandling.info("Går til avsluttet fordi revurdering er fullført via en annen vedtaksperiode")
-            vedtaksperiode.tilstand(gjenopptaBehandling, Avsluttet)
+            if (Toggle.NyRevurdering.disabled) {
+                if (!vedtaksperiode.utbetalinger.erAvsluttet()) return
+                gjenopptaBehandling.info("Går til avsluttet fordi revurdering er fullført via en annen vedtaksperiode")
+                vedtaksperiode.tilstand(gjenopptaBehandling, Avsluttet)
+            } else {
+                vedtaksperiode.arbeidsgiver.gjenopptaRevurdering(vedtaksperiode, gjenopptaBehandling)
+            }
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: UtbetalingHendelse) {
@@ -2966,10 +2970,10 @@ internal class Vedtaksperiode private constructor(
             return person.arbeidsgiverperiodeFor(organisasjonsnummer, sykdomshistorikkId, samletSykdomstidslinje, periode, subsumsjonObserver)
         }
 
-        internal fun iverksettRevurdering(hendelse: IAktivitetslogg, revurderinger: List<Vedtaksperiode>, første: Vedtaksperiode) {
+        internal fun iverksettRevurdering(hendelse: IAktivitetslogg, perioder: List<Vedtaksperiode>, første: Vedtaksperiode) {
             // poker videre siste utbetalte vedtaksperiode (som hører til samme utbetaling som $første)
             // dvs. den skal gå til Avventer historikk revurdering
-            revurderinger.sorted().last { første.arbeidsgiver == it.arbeidsgiver && første.skjæringstidspunkt == it.skjæringstidspunkt }.also { siste ->
+            perioder.sorted().last { første.arbeidsgiver == it.arbeidsgiver && første.skjæringstidspunkt == it.skjæringstidspunkt }.also { siste ->
                 siste.kontekst(hendelse)
                 siste.tilstand(hendelse, AvventerHistorikkRevurdering)
             }

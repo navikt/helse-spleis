@@ -321,6 +321,10 @@ internal class Arbeidsgiver private constructor(
         )
     }
 
+    internal fun gjenopptaRevurdering(første: Vedtaksperiode, hendelse: IAktivitetslogg) {
+        Vedtaksperiode.iverksettRevurdering(hendelse, vedtaksperioder, første)
+    }
+
     internal fun accept(visitor: ArbeidsgiverVisitor) {
         visitor.preVisitArbeidsgiver(this, id, organisasjonsnummer)
         inntektshistorikk.accept(visitor)
