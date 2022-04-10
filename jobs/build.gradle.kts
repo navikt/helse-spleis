@@ -9,7 +9,7 @@ tasks.withType<Test> {
 }
 
 dependencies {
-    implementation("com.github.navikt:rapids-and-rivers-cli:1.473885b")
+    implementation("com.github.navikt:rapids-and-rivers-cli:1.7927bf9")
     implementation("com.google.cloud.sql:postgres-socket-factory:$cloudSqlVersion")
 }
 

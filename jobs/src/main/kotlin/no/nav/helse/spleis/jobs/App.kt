@@ -3,6 +3,10 @@ package no.nav.helse.spleis.jobs
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import java.time.Duration
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
+import javax.sql.DataSource
 import kotliquery.Row
 import kotliquery.Session
 import kotliquery.queryOf
@@ -11,10 +15,6 @@ import no.nav.rapids_and_rivers.cli.AivenConfig
 import no.nav.rapids_and_rivers.cli.ConsumerProducerFactory
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
-import javax.sql.DataSource
 import kotlin.math.ceil
 import kotlin.properties.Delegates
 import kotlin.time.DurationUnit
@@ -64,6 +64,11 @@ private fun avstemmingTask(factory: ConsumerProducerFactory, customDayOfMonth: I
     val dayOfMonth = customDayOfMonth ?: LocalDate.now().dayOfMonth
     log.info("Commencing avstemming for dayOfMonth=$dayOfMonth")
     val producer = factory.createProducer()
+    // spørringen funker slik at den putter alle personer opp i 27 (*) ulike "bøtter" (fnr % 27 gir tall mellom 0 og 26, også plusser vi på én slik at vi starter fom. 1)
+    // hvor én bøtte tilsvarer én dag i måneden. Tallet 27 (for februar) ble valgt slik at vi sikrer oss at vi avstemmer
+    // alle personer hver måned. Dag 28, 29, 30, 31 avstemmes 0 personer siden det er umulig å ha disse rest-verdiene
+    //
+    // * det skulle nok vært 28
     val paginated = PaginatedQuery(
         "fnr,aktor_id",
         "unike_person",
