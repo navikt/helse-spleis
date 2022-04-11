@@ -62,6 +62,9 @@ class Inntektsopplysning private constructor(
         return this.refusjonTilArbeidsgiver == other.refusjonTilArbeidsgiver
     }
 
+    internal fun erDuplikat(dato: LocalDate, beløp: Inntekt) =
+        this.inntekt == beløp && this.sykepengerFom == dato
+
     internal companion object {
         internal fun addInntekter(liste: List<Inntektsopplysning>, person: Person, aktivitetslogg: IAktivitetslogg, hendelseId: UUID, nødnummer: Nødnummer) =
             liste
@@ -70,9 +73,11 @@ class Inntektsopplysning private constructor(
                 .onEach { (orgnummer, opplysninger) -> person.lagreSykepengegrunnlagFraInfotrygd(orgnummer, opplysninger, aktivitetslogg, hendelseId) }
                 .isNotEmpty()
 
-        internal fun lagreInntekter(list: List<Inntektsopplysning>, inntektshistorikk: Inntektshistorikk, hendelseId: UUID) {
+        internal fun lagreInntekter(inntektsopplysninger: List<Inntektsopplysning>, inntektshistorikk: Inntektshistorikk, hendelseId: UUID) {
+            val nyeInntekter = inntektshistorikk.filtrerBortKjenteInntekter(inntektsopplysninger)
+            if (nyeInntekter.isEmpty()) return
             inntektshistorikk.append {
-                list.reversed().forEach { it.addInntekt(this, hendelseId) }
+                nyeInntekter.reversed().forEach { it.addInntekt(this, hendelseId) }
             }
         }
 

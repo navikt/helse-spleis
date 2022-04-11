@@ -116,6 +116,33 @@ internal class InfotrygdInntektsopplysningTest {
     }
 
     @Test
+    fun `Duplikate opplysninger`() {
+        repeat(2) {
+            Inntektsopplysning.lagreInntekter(
+                listOf(
+                    Inntektsopplysning(ORGNR, 1.januar, 25000.månedlig, true),
+                    Inntektsopplysning(ORGNR, 1.mars, 25000.månedlig, true)
+                ),
+                historikk,
+                UUID.randomUUID()
+            )
+        }
+
+        Inntektsopplysning.lagreInntekter(
+            listOf(
+                Inntektsopplysning(ORGNR, 1.januar, 26900.månedlig, true),
+                Inntektsopplysning(ORGNR, 1.mars, 25000.månedlig, true)
+            ),
+            historikk,
+            UUID.randomUUID()
+        )
+
+        assertEquals(2, inspektør.inntektTeller.size)
+        assertEquals(2, inspektør.inntektTeller[0])
+        assertEquals(2, inspektør.inntektTeller[1])
+    }
+
+    @Test
     fun `Bruker inntekt fra infotrygd fremfor inntekt fra skatt for å beregne sykepengegrunnlaget - skatt kommer sist`() {
         Inntektsopplysning.lagreInntekter(
             listOf(Inntektsopplysning(ORGNR, 1.januar, 25000.månedlig, true)),

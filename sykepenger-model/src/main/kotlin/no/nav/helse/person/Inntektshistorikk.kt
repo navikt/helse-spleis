@@ -1,6 +1,10 @@
 package no.nav.helse.person
 
 
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.YearMonth
+import java.util.*
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
@@ -8,18 +12,11 @@ import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.subsumsjons
 import no.nav.helse.person.filter.Utbetalingsfilter
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.summer
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.YearMonth
-import java.util.*
+import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning as InfotrygdhistorikkInntektsopplysning
 
 internal class Inntektshistorikk {
 
     private val historikk = mutableListOf<Innslag>()
-
-    private val innslag
-        get() = (nyesteInnslag()?.clone() ?: Innslag(UUID.randomUUID()))
-            .also { historikk.add(0, it) }
 
     internal companion object {
         internal val NULLUUID: UUID = UUID.fromString("00000000-0000-0000-0000-000000000000")
@@ -29,6 +26,12 @@ internal class Inntektshistorikk {
         visitor.preVisitInntekthistorikk(this)
         historikk.forEach { it.accept(visitor) }
         visitor.postVisitInntekthistorikk(this)
+    }
+
+    internal fun nyttInnslag(): Innslag {
+        val innslag = nyesteInnslag()?.clone() ?: Innslag(UUID.randomUUID())
+        historikk.add(0, innslag)
+        return innslag
     }
 
     internal fun nyesteInnslag() = historikk.firstOrNull()
@@ -102,6 +105,9 @@ internal class Inntektshistorikk {
             inntekter.forEach { it.build(filter, inntektsmeldingId) }
         }
 
+        internal fun erDuplikat(inntektsopplysning: InfotrygdhistorikkInntektsopplysning) =
+            inntekter.filterIsInstance<Infotrygd>().any { it.erDuplikat(inntektsopplysning) }
+
         internal companion object {
             internal fun nyesteId(inntektshistorikk: Inntektshistorikk) = inntektshistorikk.nyesteInnslag()!!.id
         }
@@ -171,6 +177,8 @@ internal class Inntektshistorikk {
 
         override fun skalErstattesAv(other: Inntektsopplysning) =
             other is Infotrygd && this.dato == other.dato
+
+        internal fun erDuplikat(other: InfotrygdhistorikkInntektsopplysning) = other.erDuplikat(dato, beløp)
     }
 
     internal class Inntektsmelding(
@@ -380,7 +388,7 @@ internal class Inntektshistorikk {
     }
 
     internal fun append(block: AppendMode.() -> Unit) {
-        AppendMode(innslag).append(block)
+        AppendMode(nyttInnslag()).append(block)
     }
 
     internal class AppendMode(private val innslag: Innslag) {
@@ -434,6 +442,11 @@ internal class Inntektshistorikk {
 
     internal fun build(filter: Utbetalingsfilter.Builder, inntektsmeldingId: UUID) {
         nyesteInnslag()?.build(filter, inntektsmeldingId)
+    }
+
+    internal fun filtrerBortKjenteInntekter(inntektsopplysninger: List<InfotrygdhistorikkInntektsopplysning>): List<InfotrygdhistorikkInntektsopplysning> {
+        val nyesteInnslag = nyesteInnslag() ?: return inntektsopplysninger
+        return inntektsopplysninger.filter { !nyesteInnslag.erDuplikat(it) }
     }
 
     internal class RestoreJsonMode(private val inntektshistorikk: Inntektshistorikk) {
