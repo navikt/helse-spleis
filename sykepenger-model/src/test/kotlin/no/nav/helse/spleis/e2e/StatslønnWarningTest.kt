@@ -1,6 +1,6 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.assertForventetFeil
+import java.time.LocalDate
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
@@ -8,7 +8,11 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
-import no.nav.helse.person.TilstandType.*
+import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
+import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP
+import no.nav.helse.person.TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP
+import no.nav.helse.person.TilstandType.START
+import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
@@ -16,7 +20,6 @@ import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
 
 internal class StatslønnWarningTest : AbstractEndToEndTest() {
 
@@ -97,30 +100,17 @@ internal class StatslønnWarningTest : AbstractEndToEndTest() {
         )
         assertError("Det er lagt inn statslønn i Infotrygd, undersøk at utbetalingen blir riktig.", 1.vedtaksperiode.filter())
 
-        assertForventetFeil(
-            forklaring = "Spleis sjekker ikke statslønn-feltet ved forlengelse fra Infotrygd",
-            nå = {
-                assertTilstander(
-                    2.vedtaksperiode,
-                    START,
-                    MOTTATT_SYKMELDING_FERDIG_GAP,
-                    AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-                    AVVENTER_HISTORIKK,
-                    AVVENTER_SIMULERING
-                )
-                assertNoErrors(2.vedtaksperiode.filter())
-            },
-            ønsket = {
-                assertForkastetPeriodeTilstander(
-                    2.vedtaksperiode,
-                    START,
-                    MOTTATT_SYKMELDING_FERDIG_GAP,
-                    AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-                    AVVENTER_HISTORIKK,
-                    TIL_INFOTRYGD
-                )
-                assertError("Det er lagt inn statslønn i Infotrygd, undersøk at utbetalingen blir riktig.", 2.vedtaksperiode.filter())
-            }
+        assertForkastetPeriodeTilstander(
+            2.vedtaksperiode,
+            START,
+            MOTTATT_SYKMELDING_FERDIG_GAP,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_HISTORIKK,
+            TIL_INFOTRYGD
+        )
+        assertError(
+            "Det er lagt inn statslønn i Infotrygd, undersøk at utbetalingen blir riktig.",
+            2.vedtaksperiode.filter()
         )
     }
 }

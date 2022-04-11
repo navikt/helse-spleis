@@ -1,7 +1,17 @@
 package no.nav.helse.person.infotrygdhistorikk
 
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.Objects
+import java.util.UUID
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.person.*
+import no.nav.helse.person.IAktivitetslogg
+import no.nav.helse.person.InfotrygdhistorikkVisitor
+import no.nav.helse.person.Periodetype
+import no.nav.helse.person.Person
+import no.nav.helse.person.SykdomstidslinjeVisitor
+import no.nav.helse.person.Sykepengegrunnlag
+import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode.Companion.harBrukerutbetalingFor
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode.Companion.validerInntektForPerioder
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning.Companion.fjern
@@ -16,10 +26,9 @@ import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiodeteller
 import no.nav.helse.utbetalingstidslinje.Infotrygddekoratør
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.Fridag
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.UkjentDag
 
 internal class InfotrygdhistorikkElement private constructor(
     private val id: UUID,
@@ -159,6 +168,9 @@ internal class InfotrygdhistorikkElement private constructor(
 
     internal fun valider(aktivitetslogg: IAktivitetslogg, periodetype: Periodetype, periode: Periode, skjæringstidspunkt: LocalDate, organisasjonsnummer: String): Boolean {
         validerUgyldigePerioder(aktivitetslogg)
+        if (periodetype == Periodetype.OVERGANG_FRA_IT) {
+            aktivitetslogg.info("Perioden er en direkte overgang fra periode med opphav i Infotrygd")
+        }
         validerStatslønn(aktivitetslogg, periodetype)
         if (harNyereOpplysninger(organisasjonsnummer, periode))
             aktivitetslogg.warn("Det er utbetalt en periode i Infotrygd etter perioden du skal behandle nå. Undersøk at antall forbrukte dager og grunnlag i Infotrygd er riktig")
@@ -175,10 +187,9 @@ internal class InfotrygdhistorikkElement private constructor(
     }
 
     private fun validerStatslønn(aktivitetslogg: IAktivitetslogg, periodetype: Periodetype) {
-        if (periodetype != Periodetype.OVERGANG_FRA_IT) return
-        aktivitetslogg.info("Perioden er en direkte overgang fra periode med opphav i Infotrygd")
-        if (!harStatslønn) return
-        aktivitetslogg.error("Det er lagt inn statslønn i Infotrygd, undersøk at utbetalingen blir riktig.")
+        if (harStatslønn && periodetype in arrayOf(Periodetype.OVERGANG_FRA_IT, Periodetype.INFOTRYGDFORLENGELSE)) {
+            aktivitetslogg.error("Det er lagt inn statslønn i Infotrygd, undersøk at utbetalingen blir riktig.")
+        }
     }
 
     private fun valider(aktivitetslogg: IAktivitetslogg, perioder: List<Infotrygdperiode>, periode: Periode, skjæringstidspunkt: LocalDate): Boolean {
