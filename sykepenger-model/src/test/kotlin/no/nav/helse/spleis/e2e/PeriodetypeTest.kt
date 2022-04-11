@@ -1,9 +1,21 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.*
-import no.nav.helse.hendelser.*
+import no.nav.helse.april
+import no.nav.helse.assertForventetFeil
+import no.nav.helse.desember
+import no.nav.helse.februar
+import no.nav.helse.hendelser.Inntektsvurdering
+import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.person.Periodetype.*
+import no.nav.helse.hendelser.til
+import no.nav.helse.januar
+import no.nav.helse.mars
+import no.nav.helse.person.Periodetype.FORLENGELSE
+import no.nav.helse.person.Periodetype.FØRSTEGANGSBEHANDLING
+import no.nav.helse.person.Periodetype.INFOTRYGDFORLENGELSE
+import no.nav.helse.person.Periodetype.OVERGANG_FRA_IT
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
@@ -246,5 +258,56 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
 
         assertEquals(OVERGANG_FRA_IT, inspektør.periodetype(1.vedtaksperiode))
         assertEquals(INFOTRYGDFORLENGELSE, inspektør.periodetype(2.vedtaksperiode))
+    }
+
+    @Test
+    fun `overgang fra infotrygd hvor januar-periode er splittet inn i to utbetalingsperioder i IT - skal markeres som overgang`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+
+        person.invaliderAllePerioder(hendelselogg, null)
+
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+
+        håndterUtbetalingshistorikk(
+            2.vedtaksperiode,
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 16.januar, 100.prosent, INNTEKT),
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 31.januar, 50.prosent, INNTEKT),
+            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true))
+        )
+
+        assertForventetFeil(
+            forklaring = "Periodetype blir satt feil",
+            nå = { assertEquals(INFOTRYGDFORLENGELSE, inspektør.periodetype(2.vedtaksperiode)) },
+            ønsket = { assertEquals(OVERGANG_FRA_IT, inspektør.periodetype(2.vedtaksperiode)) }
+        )
+    }
+
+    @Test
+    fun `overgang fra infotrygd hvor det er to forkastede vedtaksperioder som fører til to utbetalinger i IT - skal markeres som overgang`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+
+        person.invaliderAllePerioder(hendelselogg, null)
+
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 50.prosent))
+        håndterSøknad(Sykdom(1.mars, 31.mars, 50.prosent))
+
+        håndterUtbetalingshistorikk(
+            3.vedtaksperiode,
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 31.januar, 100.prosent, INNTEKT),
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.februar, 28.februar, 50.prosent, INNTEKT),
+            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true))
+        )
+
+        assertForventetFeil(
+            forklaring = "Periodetype blir satt feil",
+            nå = { assertEquals(INFOTRYGDFORLENGELSE, inspektør.periodetype(3.vedtaksperiode)) },
+            ønsket = { assertEquals(OVERGANG_FRA_IT, inspektør.periodetype(3.vedtaksperiode)) }
+        )
     }
 }
