@@ -398,6 +398,9 @@ internal class Vedtaksperiode private constructor(
     private fun harInntekt() = harInntektsmelding() || arbeidsgiver.grunnlagForSykepengegrunnlag(skjæringstidspunkt, periode.start) != null
     private fun harInntektsmelding() = arbeidsgiver.harInntektsmelding(skjæringstidspunkt)
 
+    private fun låsOpp() = arbeidsgiver.låsOpp(periode)
+    private fun lås() = arbeidsgiver.lås(periode)
+
     internal fun forlengelseFraInfotrygd() = when (arbeidsgiver.periodetype(periode)) {
         OVERGANG_FRA_IT -> true
         INFOTRYGDFORLENGELSE -> true
@@ -929,11 +932,6 @@ internal class Vedtaksperiode private constructor(
         fun nyPeriodeFørMedNyFlyt(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Søknad) {
             hendelse.error("Mottatt søknad out of order")
             vedtaksperiode.forkast(hendelse)
-        }
-
-        fun reberegnetPeriodeFør(vedtaksperiode: Vedtaksperiode, reberegnet: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
-            if (this !in setOf(Avsluttet, TilUtbetaling, UtbetalingFeilet)) return
-            hendelse.error("Blokkerer reberegning av tidligere periode fordi jeg er i tilstand $type")
         }
 
         fun nyRevurderingFør(vedtaksperiode: Vedtaksperiode, revurdert: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {
@@ -2702,7 +2700,7 @@ internal class Vedtaksperiode private constructor(
             LocalDateTime.MAX
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            vedtaksperiode.arbeidsgiver.lås(vedtaksperiode.periode)
+            vedtaksperiode.lås()
             check(vedtaksperiode.utbetalinger.erAvsluttet()) { "forventer at utbetaling skal være avsluttet" }
             vedtaksperiode.sendVedtakFattet(hendelse)
             vedtaksperiode.person.gjenopptaBehandling(hendelse)
@@ -2730,7 +2728,8 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
             if (Toggle.NyRevurdering.disabled) return vedtaksperiode.person.igangsettRevurdering(hendelse, vedtaksperiode)
-            vedtaksperiode.oppdaterHistorikk(hendelse) // TODO: vente med å gjøre dette til signalet `iverksettRevuedering()` går ut??
+            vedtaksperiode.låsOpp()
+            vedtaksperiode.oppdaterHistorikk(hendelse)
             vedtaksperiode.tilstand(hendelse, AvventerGjennomførtRevurdering)
             hendelse.begynnRevurdering(vedtaksperiode)
         }

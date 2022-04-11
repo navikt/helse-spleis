@@ -515,10 +515,6 @@ internal class Arbeidsgiver private constructor(
         }
     }
 
-    internal fun harRefusjonOpphørt(periodeTom: LocalDate): Boolean {
-        return refusjonOpphører.firstOrNull()?.let { it <= periodeTom } ?: false
-    }
-
     internal fun cacheRefusjon(opphørsdato: LocalDate?) {
         if (refusjonOpphører.firstOrNull() != opphørsdato) refusjonOpphører.add(0, opphørsdato)
     }
@@ -1048,7 +1044,7 @@ internal class Arbeidsgiver private constructor(
         sykdomshistorikk.sykdomstidslinje().lås(periode)
     }
 
-    private fun låsOpp(periode: Periode) {
+    internal fun låsOpp(periode: Periode) {
         sykdomshistorikk.sykdomstidslinje().låsOpp(periode)
     }
 
