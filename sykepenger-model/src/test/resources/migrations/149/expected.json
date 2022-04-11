@@ -1,0 +1,75 @@
+{
+  "arbeidsgivere": [
+    {
+      "sykdomshistorikk": [],
+      "vedtaksperioder": []
+    },
+    {
+      "sykdomshistorikk": [
+        {
+          "beregnetSykdomstidslinje": {
+            "låstePerioder": [
+              {
+                "fom": "2018-01-01",
+                "tom": "2018-01-31"
+              }
+            ],
+            "periode": {
+              "fom": "2018-01-01",
+              "tom": "2018-01-31"
+            },
+            "dager": []
+          }
+        }
+      ],
+      "vedtaksperioder": [
+        {
+          "fom": "2018-01-01",
+          "tom": "2018-01-31",
+          "tilstand": "AVSLUTTET"
+        }
+      ]
+    },
+    {
+      "sykdomshistorikk": [
+        {
+          "beregnetSykdomstidslinje": {
+            "låstePerioder": [
+              {
+                "fom": "2018-01-01",
+                "tom": "2018-01-31"
+              },
+              {
+                "fom": "2018-02-01",
+                "tom": "2018-02-28"
+              }
+            ],
+            "periode": {
+              "fom": "2018-01-01",
+              "tom": "2018-01-31"
+            },
+            "dager": []
+          }
+        }
+      ],
+      "vedtaksperioder": [
+        {
+          "fom": "2018-01-01",
+          "tom": "2018-01-31",
+          "tilstand": "AVSLUTTET"
+        },
+        {
+          "fom": "2018-02-01",
+          "tom": "2018-02-28",
+          "tilstand": "AVSLUTTET"
+        },
+        {
+          "fom": "2018-03-01",
+          "tom": "2018-03-31",
+          "tilstand": "MOTTATT_SYKMELDING_FERDIG_GAP"
+        }
+      ]
+    }
+  ],
+  "skjemaVersjon": 149
+}
