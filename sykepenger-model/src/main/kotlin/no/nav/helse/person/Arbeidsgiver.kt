@@ -1032,8 +1032,8 @@ internal class Arbeidsgiver private constructor(
 
     internal fun alleAndrePerioderErKlare(vedtaksperiode: Vedtaksperiode) = vedtaksperioder.filterNot { it == vedtaksperiode }.none(IKKE_FERDIG_REVURDERT)
 
-    internal fun fordelRevurdertUtbetaling(hendelse: ArbeidstakerHendelse, utbetaling: Utbetaling) {
-        håndter(hendelse) { håndterRevurdertUtbetaling(utbetaling, hendelse) }
+    internal fun fordelRevurdertUtbetaling(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse, utbetaling: Utbetaling) {
+        håndter(hendelse) { håndterRevurdertUtbetaling(vedtaksperiode, utbetaling, hendelse) }
     }
 
     override fun toSpesifikkKontekst(): SpesifikkKontekst {

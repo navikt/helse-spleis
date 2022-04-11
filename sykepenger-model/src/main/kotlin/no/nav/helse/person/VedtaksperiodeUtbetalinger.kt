@@ -40,25 +40,37 @@ internal class VedtaksperiodeUtbetalinger(private val arbeidsgiver: Arbeidsgiver
     internal fun kanIkkeForsøkesPåNy() = siste?.kanIkkeForsøkesPåNy() == true
     internal fun kanForkastes(other: List<Utbetaling>) =
         utbetalinger.isEmpty() || siste!!.kanForkastes(other)
+
     internal fun harAvsluttede() = utbetalinger.any { it.erAvsluttet() }
     internal fun harId(utbetalingId: UUID) = utbetalinger.harId(utbetalingId)
     internal fun hørerIkkeSammenMed(other: Utbetaling) = siste?.hørerSammen(other) == false
     internal fun hørerIkkeSammenMed(other: VedtaksperiodeUtbetalinger) = hørerIkkeSammenMed(other.siste!!)
     internal fun gjelderIkkeFor(hendelse: UtbetalingHendelse) = siste?.gjelderFor(hendelse) != true
     internal fun gjelderIkkeFor(hendelse: Utbetalingsgodkjenning) = siste?.gjelderFor(hendelse) != true
-    internal fun erHistorikkEndretSidenBeregning(infotrygdhistorikk: Infotrygdhistorikk) = infotrygdhistorikk.harEndretHistorikk(siste!!)
+    internal fun erHistorikkEndretSidenBeregning(infotrygdhistorikk: Infotrygdhistorikk) =
+        infotrygdhistorikk.harEndretHistorikk(siste!!)
 
-    internal fun reberegnUtbetaling(hvisRevurdering: () -> Unit, hvisUtbetaling: () -> Unit) = siste!!.reberegnUtbetaling(hvisRevurdering, hvisUtbetaling)
+    internal fun reberegnUtbetaling(hvisRevurdering: () -> Unit, hvisUtbetaling: () -> Unit) =
+        siste!!.reberegnUtbetaling(hvisRevurdering, hvisUtbetaling)
 
     internal fun forkast(hendelse: IAktivitetslogg) {
         siste?.forkast(hendelse)
     }
 
-    internal fun mottaRevurdering(hendelse: ArbeidstakerHendelse, utbetaling: Utbetaling, periode: Periode): Utbetalingstidslinje {
+    internal fun mottaRevurdering(
+        hendelse: ArbeidstakerHendelse,
+        utbetaling: Utbetaling,
+        periode: Periode
+    ): Utbetalingstidslinje {
         return nyUtbetaling(hendelse, periode) { utbetaling }
     }
 
-    internal fun lagUtbetaling(fødselsnummer: String, periode: Periode, maksimumSykepenger: Alder.MaksimumSykepenger, hendelse: ArbeidstakerHendelse): Utbetalingstidslinje {
+    internal fun lagUtbetaling(
+        fødselsnummer: String,
+        periode: Periode,
+        maksimumSykepenger: Alder.MaksimumSykepenger,
+        hendelse: ArbeidstakerHendelse
+    ): Utbetalingstidslinje {
         return nyUtbetaling(hendelse, periode) {
             arbeidsgiver.lagUtbetaling(
                 aktivitetslogg = hendelse,
@@ -72,7 +84,13 @@ internal class VedtaksperiodeUtbetalinger(private val arbeidsgiver: Arbeidsgiver
         }
     }
 
-    internal fun lagRevurdering(fødselsnummer: String, periode: Periode, maksimumSykepenger: Alder.MaksimumSykepenger, hendelse: ArbeidstakerHendelse): Utbetalingstidslinje {
+    internal fun lagRevurdering(
+        fødselsnummer: String,
+        vedtaksperiode: Vedtaksperiode,
+        periode: Periode,
+        maksimumSykepenger: Alder.MaksimumSykepenger,
+        hendelse: ArbeidstakerHendelse
+    ): Utbetalingstidslinje {
         return nyUtbetaling(hendelse, periode) {
             arbeidsgiver.lagRevurdering(
                 aktivitetslogg = hendelse,
@@ -82,11 +100,15 @@ internal class VedtaksperiodeUtbetalinger(private val arbeidsgiver: Arbeidsgiver
                 gjenståendeSykedager = maksimumSykepenger.gjenståendeDager(),
                 periode = periode,
                 forrige = utbetalinger
-            ).also { arbeidsgiver.fordelRevurdertUtbetaling(hendelse, it) }
+            ).also { arbeidsgiver.fordelRevurdertUtbetaling(vedtaksperiode, hendelse, it) }
         }
     }
 
-    private fun nyUtbetaling(hendelse: IAktivitetslogg, periode: Periode, generator: () -> Utbetaling): Utbetalingstidslinje {
+    private fun nyUtbetaling(
+        hendelse: IAktivitetslogg,
+        periode: Periode,
+        generator: () -> Utbetaling
+    ): Utbetalingstidslinje {
         siste?.forkast(hendelse)
         return generator().also { utbetalinger.add(it) }.utbetalingstidslinje(periode)
     }
@@ -103,6 +125,7 @@ internal class VedtaksperiodeUtbetalinger(private val arbeidsgiver: Arbeidsgiver
         if (!this.harUtbetalinger() || !other.harUtbetalinger()) return false
         return this.siste!!.overlapperMed(other.siste!!)
     }
+
     internal fun valider(simulering: Simulering) = siste!!.valider(simulering)
     internal fun erKlarForGodkjenning() = siste!!.erKlarForGodkjenning()
 
