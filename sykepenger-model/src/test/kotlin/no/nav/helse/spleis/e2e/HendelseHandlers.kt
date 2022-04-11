@@ -1,17 +1,67 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.*
-import no.nav.helse.hendelser.*
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.Year
+import java.time.YearMonth
+import java.util.UUID
+import no.nav.helse.Fødselsnummer
+import no.nav.helse.desember
+import no.nav.helse.etterspurteBehov
+import no.nav.helse.hendelser.ArbeidsgiverInntekt
+import no.nav.helse.hendelser.Dagtype
+import no.nav.helse.hendelser.Infotrygdendring
+import no.nav.helse.hendelser.InntektForSykepengegrunnlag
+import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.Inntektsvurdering
+import no.nav.helse.hendelser.Institusjonsopphold
+import no.nav.helse.hendelser.ManuellOverskrivingDag
+import no.nav.helse.hendelser.Medlemskapsvurdering
+import no.nav.helse.hendelser.OverstyrArbeidsforhold
+import no.nav.helse.hendelser.OverstyrInntekt
+import no.nav.helse.hendelser.OverstyrTidslinje
+import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Simulering
+import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode
-import no.nav.helse.hendelser.utbetaling.*
+import no.nav.helse.hendelser.Utbetalingshistorikk
+import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
+import no.nav.helse.hendelser.Vilkårsgrunnlag
+import no.nav.helse.hendelser.Ytelser
+import no.nav.helse.hendelser.til
+import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
+import no.nav.helse.hendelser.utbetaling.Grunnbeløpsregulering
+import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
+import no.nav.helse.hendelser.utbetaling.UtbetalingOverført
+import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.inspectors.personLogg
-import no.nav.helse.person.*
+import no.nav.helse.januar
+import no.nav.helse.oktober
+import no.nav.helse.person.AbstractPersonTest
+import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
-import no.nav.helse.person.TilstandType.*
+import no.nav.helse.person.Arbeidsgiver
+import no.nav.helse.person.IdInnhenter
+import no.nav.helse.person.Person
+import no.nav.helse.person.PersonVisitor
+import no.nav.helse.person.TilstandType
+import no.nav.helse.person.TilstandType.AVSLUTTET
+import no.nav.helse.person.TilstandType.AVVENTER_ARBEIDSGIVERE
+import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
+import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
+import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP
+import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
+import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
+import no.nav.helse.person.TilstandType.MOTTATT_SYKMELDING_FERDIG_FORLENGELSE
+import no.nav.helse.person.TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP
+import no.nav.helse.person.TilstandType.START
+import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.serde.reflection.Utbetalingstatus
+import no.nav.helse.sisteBehov
 import no.nav.helse.testhelpers.Inntektperioder
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
@@ -23,11 +73,6 @@ import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.fail
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.Year
-import java.time.YearMonth
-import java.util.*
 
 
 internal fun AbstractEndToEndTest.håndterSykmelding(
@@ -478,6 +523,7 @@ internal fun AbstractEndToEndTest.håndterUtbetalingshistorikk(
     vararg utbetalinger: Infotrygdperiode,
     inntektshistorikk: List<Inntektsopplysning> = emptyList(),
     orgnummer: String = AbstractPersonTest.ORGNUMMER,
+    statslønn: Boolean = false,
     besvart: LocalDateTime = LocalDateTime.now()
 ) {
     val bedtOmSykepengehistorikk = person.personLogg.etterspurteBehov(vedtaksperiodeIdInnhenter, Behovtype.Sykepengehistorikk, orgnummer)
@@ -487,6 +533,7 @@ internal fun AbstractEndToEndTest.håndterUtbetalingshistorikk(
         utbetalinger = utbetalinger.toList(),
         inntektshistorikk = inntektshistorikk,
         orgnummer = orgnummer,
+        harStatslønn = statslønn,
         besvart = besvart
     ).håndter(Person::håndter)
 }
