@@ -202,6 +202,20 @@ internal class SykdomstidslinjeTest {
         assertFalse(tidslinje.erLåst(periode))
     }
 
+    @Test
+    fun `Tar med låser som ikke er forkastet`() {
+        val tidslinje = 31.S
+        tidslinje.lås(1.januar til 9.januar)
+        tidslinje.lås(10.januar til 31.januar)
+        val nyTidslinje = tidslinje.trim(listOf(10.januar til 31.januar))
+        assertEquals(1.januar, nyTidslinje.førsteDag())
+        assertEquals(9.januar, nyTidslinje.sisteDag())
+        val forsøktOverskrevetTidslinje = resetSeed {
+            nyTidslinje.merge(9.F)
+        }
+        assertEquals(nyTidslinje, forsøktOverskrevetTidslinje)
+    }
+
     private val konfliktsky = { venstre: Dag, høyre: Dag ->
         when {
             venstre is Dag.UkjentDag -> høyre

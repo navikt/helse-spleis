@@ -288,7 +288,8 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             andreInntektskilder = listOf(Søknad.Inntektskilde(true, "ANDRE_ARBEIDSFORHOLD")) // <-- for å sende til Infotrygd
         )
         inspektør.sykdomstidslinje.inspektør.låstePerioder.also {
-            assertEquals(0, it.size)
+            assertEquals(1, it.size)
+            assertEquals(Periode(1.januar, 31.januar), it.first())
         }
 
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
@@ -303,8 +304,9 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(3.vedtaksperiode, true)
         håndterUtbetalt(Oppdragstatus.AKSEPTERT)
         inspektør.sykdomstidslinje.inspektør.låstePerioder.also {
-            assertEquals(1, it.size)
-            assertEquals(Periode(1.mars, 31.mars), it.first())
+            assertEquals(2, it.size)
+            assertEquals(Periode(1.januar, 31.januar), it[0])
+            assertEquals(Periode(1.mars, 31.mars), it[1])
         }
 
         assertTilstander(

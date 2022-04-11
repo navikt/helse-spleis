@@ -116,7 +116,8 @@ internal class Sykdomstidslinje private constructor(
 
     internal fun trim(perioder: List<Periode>): Sykdomstidslinje {
         val forkast = perioder.flatten()
-        return Sykdomstidslinje(dager.filterKeys { it !in forkast })
+        val låstePerioder = låstePerioder.filterNot { it in perioder }
+        return Sykdomstidslinje(dager.filterKeys { it !in forkast }.toSortedMap(), null, låstePerioder.toMutableList())
     }
 
     internal fun forsøkUtvidelse(periode: Periode) =

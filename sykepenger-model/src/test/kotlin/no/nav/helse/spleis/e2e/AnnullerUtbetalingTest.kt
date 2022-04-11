@@ -456,4 +456,13 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
         assertFalse(inspektør.periodeErForkastet(2.vedtaksperiode))
     }
+
+    @Test
+    fun `annullering av periode medfører at låser på sykdomstidslinje blir forkastet`() {
+        nyttVedtak(1.januar, 31.januar)
+        håndterAnnullerUtbetaling()
+        inspektør.sykdomstidslinje.inspektør.låstePerioder.also {
+            assertEquals(0, it.size)
+        }
+    }
 }
