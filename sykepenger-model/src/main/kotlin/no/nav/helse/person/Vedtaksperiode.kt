@@ -1536,6 +1536,10 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.arbeidsgiver.gjenopptaRevurdering(vedtaksperiode, gjenopptaBehandling)
         }
 
+        override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
+            vedtaksperiode.oppdaterHistorikk(hendelse)
+        }
+
         override fun håndterRevurderingFeilet(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.tilstand(hendelse, RevurderingFeilet)
         }
@@ -3083,6 +3087,10 @@ internal class Vedtaksperiode private constructor(
                 vedtaksperiode.person.gjenopptaBehandlingNy(hendelse)
         }
 
+        override fun leaving(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
+            vedtaksperiode.låsOpp()
+        }
+
         override fun håndter(
             person: Person,
             arbeidsgiver: Arbeidsgiver,
@@ -3113,6 +3121,7 @@ internal class Vedtaksperiode private constructor(
             )
             vedtaksperiode.låsOpp()
             vedtaksperiode.oppdaterHistorikk(hendelse)
+            vedtaksperiode.lås()
             vedtaksperiode.person.startRevurdering(vedtaksperiode, hendelse)
         }
 
@@ -3384,9 +3393,7 @@ internal class Vedtaksperiode private constructor(
             overstyrt: Vedtaksperiode,
             hendelse: IAktivitetslogg
         ) {
-
             val vedtaksperioder = this.values.flatten()
-            // TODO: bedre navn for pågående
             val pågående = vedtaksperioder.firstOrNull {
                 it.tilstand in setOf(
                     AvventerGjennomførtRevurdering,
