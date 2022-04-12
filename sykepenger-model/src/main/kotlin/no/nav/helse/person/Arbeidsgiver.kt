@@ -896,7 +896,7 @@ internal class Arbeidsgiver private constructor(
      * tilstøter både foran og bak.
      */
     internal fun finnSammehengendeVedtaksperioder(vedtaksperiode: Vedtaksperiode): List<Vedtaksperiode> {
-        val (perioderFør, perioderEtter) = vedtaksperioder.sorted().partition { it < vedtaksperiode }
+        val (perioderFør, perioderEtter) = vedtaksperioder.sorted().partition { it før vedtaksperiode }
         val sammenhengendePerioder = mutableListOf(vedtaksperiode)
         perioderFør.reversed().forEach {
             if (it.erVedtaksperiodeRettFør(sammenhengendePerioder.first()))
@@ -1175,7 +1175,7 @@ internal class Arbeidsgiver private constructor(
     internal fun harFerdigstiltPeriode() = vedtaksperioder.any(ER_ELLER_HAR_VÆRT_AVSLUTTET) || forkastede.harAvsluttedePerioder()
 
     private fun tilstøtendeBak(vedtaksperiode: Vedtaksperiode): Vedtaksperiode? {
-        return vedtaksperioder.firstOrNull { it > vedtaksperiode }?.takeIf { vedtaksperiode.erVedtaksperiodeRettFør(it) }
+        return vedtaksperioder.firstOrNull { it etter vedtaksperiode }?.takeIf { vedtaksperiode.erVedtaksperiodeRettFør(it) }
     }
 
     internal fun tidligerePeriodeRebehandles(vedtaksperiode: Vedtaksperiode, hendelse: PersonHendelse) {

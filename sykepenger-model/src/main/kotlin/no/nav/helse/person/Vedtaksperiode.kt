@@ -353,7 +353,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun kanReberegne(other: Vedtaksperiode): Boolean {
-        if (other > this || other == this) return true
+        if (other etter this || other == this) return true
         return tilstand.kanReberegnes
     }
 
@@ -368,7 +368,7 @@ internal class Vedtaksperiode private constructor(
         håndterer: (Vedtaksperiodetilstand, Vedtaksperiode, Vedtaksperiode, Hendelse) -> Unit,
         hendelse: Hendelse
     ) {
-        if (ny > this || ny == this) return
+        if (ny etter this || ny == this) return
         kontekst(hendelse)
         håndterer(tilstand, this, ny, hendelse)
         if (hendelse.hasErrorsOrWorse()) return
@@ -398,6 +398,8 @@ internal class Vedtaksperiode private constructor(
     }
 
     override fun compareTo(other: Vedtaksperiode) = this.periode.endInclusive.compareTo(other.periode.endInclusive)
+    internal infix fun før(other: Vedtaksperiode) = this < other
+    internal infix fun etter(other: Vedtaksperiode) = this > other
 
     internal fun erVedtaksperiodeRettFør(other: Vedtaksperiode) =
         this.sykdomstidslinje.erRettFør(other.sykdomstidslinje)
@@ -525,7 +527,7 @@ internal class Vedtaksperiode private constructor(
         if (other == null) return true // ingen replay
         if (vedtaksperioder.none { it.id == other }) return false // perioden som ba om replay ikke finnes mer
         if (sammenhengendePerioder.any { it.id == other }) return true // perioden som ba om replay er en del av de sammenhengende periodene som overlapper med IM (som vedtaksperioden er en del av)
-        return this > vedtaksperioder.first { it.id == other } // vedtaksperioden er _etter_ den perioden som ba om replay
+        return this etter vedtaksperioder.first { it.id == other } // vedtaksperioden er _etter_ den perioden som ba om replay
     }
 
     private fun tilstand(
@@ -3265,7 +3267,7 @@ internal class Vedtaksperiode private constructor(
 
         internal fun tidligerePerioderFerdigBehandlet(perioder: List<Vedtaksperiode>, vedtaksperiode: Vedtaksperiode) =
             perioder
-                .filter { it < vedtaksperiode }
+                .filter { it før vedtaksperiode }
                 .all { it.tilstand.erFerdigBehandlet }
 
         internal fun Iterable<Vedtaksperiode>.nåværendeVedtaksperiode(filter: VedtaksperiodeFilter) =
