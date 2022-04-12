@@ -3,16 +3,16 @@ plugins {
 }
 
 val flywayVersion = "8.5.4"
-val hikariVersion = "5.0.0"
+val hikariVersion = "5.0.1"
 val jacksonVersion = "2.13.2"
 val junitJupiterVersion = "5.8.2"
-val kotliqueryVersion = "1.6.0"
+val kotliqueryVersion = "1.7.0"
 val kGraphQLVersion = "0.17.14"
 val postgresqlVersion = "42.3.3"
 val kotlinReflectVersion = "1.5.31"
-val logbackClassicVersion = "1.2.6"
-val logstashVersion = "6.6"
-val jsonSchemaValidatorVersion = "1.0.65"
+val logbackClassicVersion = "1.2.11"
+val logstashVersion = "7.0.1"
+val jsonSchemaValidatorVersion = "1.0.68"
 val jvmTargetVersion = "17"
 
 allprojects {
