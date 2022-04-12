@@ -2719,11 +2719,10 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun nesteRevurderingstilstand(hendelse: IAktivitetslogg, overstyrt: Vedtaksperiode, pågående: Vedtaksperiode?) {
-        if (skjæringstidspunkt == overstyrt.skjæringstidspunkt) return tilstand(
-            hendelse,
-            AvventerGjennomførtRevurdering
-        )
-        tilstand(hendelse, AvventerRevurdering)
+        if (utbetalinger.utbetales()) return
+        if (pågående?.utbetalinger?.utbetales() == true) return tilstand(hendelse, AvventerRevurdering)
+        if (skjæringstidspunkt != overstyrt.skjæringstidspunkt) return tilstand(hendelse, AvventerRevurdering)
+        tilstand(hendelse, AvventerGjennomførtRevurdering)
     }
 
     // ny revurderingsflyt
