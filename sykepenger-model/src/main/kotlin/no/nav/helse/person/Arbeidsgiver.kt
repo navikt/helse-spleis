@@ -50,6 +50,7 @@ import no.nav.helse.person.Vedtaksperiode.Companion.iderMedUtbetaling
 import no.nav.helse.person.Vedtaksperiode.Companion.medSkjæringstidspunkt
 import no.nav.helse.person.Vedtaksperiode.Companion.nåværendeVedtaksperiode
 import no.nav.helse.person.Vedtaksperiode.Companion.periode
+import no.nav.helse.person.Vedtaksperiode.Companion.startRevurdering
 import no.nav.helse.person.builders.UtbetalingsdagerBuilder
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
@@ -132,6 +133,10 @@ internal class Arbeidsgiver private constructor(
                 overlappendePerioder.any(REVURDERING_IGANGSATT) -> overlappendePerioder.all(REVURDERING_IGANGSATT)
                 else -> true
             }
+        }
+
+        internal fun List<Arbeidsgiver>.startRevurdering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+            associateWith { it.vedtaksperioder.toList() }.startRevurdering(vedtaksperiode, hendelse)
         }
 
         internal fun List<Arbeidsgiver>.harPeriodeSomBlokkererOverstyrArbeidsforhold(skjæringstidspunkt: LocalDate) = any { arbeidsgiver ->
@@ -322,7 +327,7 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun gjenopptaRevurdering(første: Vedtaksperiode, hendelse: IAktivitetslogg) {
-        Vedtaksperiode.iverksettRevurdering(hendelse, vedtaksperioder, første)
+        Vedtaksperiode.gjenopptaRevurdering(hendelse, vedtaksperioder, første, this)
     }
 
     internal fun accept(visitor: ArbeidsgiverVisitor) {
@@ -817,10 +822,6 @@ internal class Arbeidsgiver private constructor(
     internal fun håndter(hendelse: OverstyrTidslinje) {
         hendelse.kontekst(this)
         håndter(hendelse, Vedtaksperiode::håndter)
-    }
-
-    internal fun iverksettRevurdering(hendelse: OverstyrTidslinje) {
-        håndter(hendelse) { this.iverksettRevurdering(hendelse) }
     }
 
     internal fun håndter(hendelse: OverstyrInntekt) {

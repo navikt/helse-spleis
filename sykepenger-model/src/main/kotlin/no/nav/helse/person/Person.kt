@@ -51,6 +51,7 @@ import no.nav.helse.person.Arbeidsgiver.Companion.håndter
 import no.nav.helse.person.Arbeidsgiver.Companion.kanOverstyreTidslinje
 import no.nav.helse.person.Arbeidsgiver.Companion.minstEttSykepengegrunnlagSomIkkeKommerFraSkatt
 import no.nav.helse.person.Arbeidsgiver.Companion.nåværendeVedtaksperioder
+import no.nav.helse.person.Arbeidsgiver.Companion.startRevurdering
 import no.nav.helse.person.Vedtaksperiode.Companion.ALLE
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
@@ -291,8 +292,6 @@ class Person private constructor(
         check(Toggle.NyRevurdering.enabled)
         hendelse.kontekst(this)
         finnArbeidsgiver(hendelse).håndter(hendelse)
-        arbeidsgivere.forEach { it.iverksettRevurdering(hendelse) }
-        hendelse.iverksettRevurdering()
     }
 
     fun håndter(hendelse: OverstyrInntekt) {
@@ -827,5 +826,9 @@ class Person private constructor(
 
     internal fun gjenopptaBehandlingNy(hendelse: IAktivitetslogg) {
         arbeidsgivere.gjenopptaBehandlingNy(hendelse)
+    }
+
+    internal fun startRevurdering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+        arbeidsgivere.startRevurdering(vedtaksperiode, hendelse)
     }
 }

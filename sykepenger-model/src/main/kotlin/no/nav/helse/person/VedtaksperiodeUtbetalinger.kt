@@ -31,6 +31,7 @@ internal class VedtaksperiodeUtbetalinger(private val arbeidsgiver: Arbeidsgiver
     private fun erSiste(other: Utbetaling) = siste == other
     internal fun erSiste(other: VedtaksperiodeUtbetalinger) = erSiste(other.siste!!)
 
+    internal fun utbetales() = siste?.erInFlight() == true
     internal fun erAvsluttet() = siste?.erAvsluttet() == true
     internal fun erAvvist() = siste?.erAvvist() == true
     internal fun harUtbetalinger() = siste?.harUtbetalinger() == true
@@ -38,15 +39,16 @@ internal class VedtaksperiodeUtbetalinger(private val arbeidsgiver: Arbeidsgiver
     internal fun erUtbetalt() = siste?.erUtbetalt() == true
     internal fun erUbetalt() = siste?.erUbetalt() == true
     internal fun kanIkkeForsøkesPåNy() = siste?.kanIkkeForsøkesPåNy() == true
+
     internal fun kanForkastes(other: List<Utbetaling>) =
         utbetalinger.isEmpty() || siste!!.kanForkastes(other)
-
     internal fun harAvsluttede() = utbetalinger.any { it.erAvsluttet() }
     internal fun harId(utbetalingId: UUID) = utbetalinger.harId(utbetalingId)
     internal fun hørerIkkeSammenMed(other: Utbetaling) = siste?.hørerSammen(other) == false
     internal fun hørerIkkeSammenMed(other: VedtaksperiodeUtbetalinger) = hørerIkkeSammenMed(other.siste!!)
     internal fun gjelderIkkeFor(hendelse: UtbetalingHendelse) = siste?.gjelderFor(hendelse) != true
     internal fun gjelderIkkeFor(hendelse: Utbetalingsgodkjenning) = siste?.gjelderFor(hendelse) != true
+
     internal fun erHistorikkEndretSidenBeregning(infotrygdhistorikk: Infotrygdhistorikk) =
         infotrygdhistorikk.harEndretHistorikk(siste!!)
 
@@ -125,12 +127,11 @@ internal class VedtaksperiodeUtbetalinger(private val arbeidsgiver: Arbeidsgiver
         if (!this.harUtbetalinger() || !other.harUtbetalinger()) return false
         return this.siste!!.overlapperMed(other.siste!!)
     }
-
     internal fun valider(simulering: Simulering) = siste!!.valider(simulering)
+
     internal fun erKlarForGodkjenning() = siste!!.erKlarForGodkjenning()
 
     internal fun simuler(hendelse: IAktivitetslogg) = siste!!.simuler(hendelse)
-
     internal fun godkjenning(
         hendelse: IAktivitetslogg,
         vedtaksperiode: Vedtaksperiode,
@@ -152,4 +153,5 @@ internal class VedtaksperiodeUtbetalinger(private val arbeidsgiver: Arbeidsgiver
             aktivitetslogg = aktivitetslogg
         )
     }
+
 }

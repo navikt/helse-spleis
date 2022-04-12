@@ -123,7 +123,7 @@ internal class Utbetaling private constructor(
     internal fun erUbetalt() = tilstand == Ubetalt
     internal fun erUtbetalt() = tilstand == Utbetalt || tilstand == Annullert
     private fun erAktiv() = erAvsluttet() || erInFlight()
-    private fun erInFlight() = tilstand in listOf(Godkjent, Sendt, Overført, UtbetalingFeilet)
+    internal fun erInFlight() = tilstand in listOf(Godkjent, Sendt, Overført, UtbetalingFeilet)
     internal fun erAvsluttet() = erUtbetalt() || tilstand == GodkjentUtenUtbetaling
     internal fun erAvvist() = tilstand == IkkeGodkjent
     internal fun harFeilet() = tilstand == UtbetalingFeilet
@@ -141,13 +141,14 @@ internal class Utbetaling private constructor(
         return periode.overlapperMed(other.oppdaterFom(other.start.minusDays(16)))
     }
 
+
     // this kan revurdere other gitt at fagsystemId == other.fagsystemId,
     // og at this er lik den siste aktive utbetalingen for fagsystemIden
     internal fun hørerSammen(other: Utbetaling) =
         this.korrelasjonsId == other.korrelasjonsId
-
     internal fun harUtbetalinger() =
         arbeidsgiverOppdrag.harUtbetalinger() || personOppdrag.harUtbetalinger()
+
     internal fun harDelvisRefusjon() = arbeidsgiverOppdrag.harUtbetalinger () && personOppdrag.harUtbetalinger()
 
     internal fun harBrukerutbetaling() = personOppdrag.harUtbetalinger()
@@ -273,6 +274,7 @@ internal class Utbetaling private constructor(
         }
         tilstand.entering(this, hendelse)
     }
+
 
     internal companion object {
 
@@ -419,9 +421,9 @@ internal class Utbetaling private constructor(
         ): Oppdrag {
             return byggOppdrag(sisteAktive, fødselsnummer, tidslinje, sisteDato, aktivitetslogg, forrige, Sykepenger)
         }
-
         internal fun List<Utbetaling>.aktive() = grupperUtbetalinger(Utbetaling::erAktiv)
         private fun List<Utbetaling>.utbetalte() = grupperUtbetalinger { it.erUtbetalt() || it.erInFlight() }
+
         private fun List<Utbetaling>.grupperUtbetalinger(filter: (Utbetaling) -> Boolean) =
             this.groupBy { it.arbeidsgiverOppdrag.fagsystemId() }
                 .map { (_, utbetalinger) -> utbetalinger.sortedBy { it.tidsstempel } }
@@ -442,7 +444,6 @@ internal class Utbetaling private constructor(
             utbetalte()
                 .map { it.utbetalingstidslinje }
                 .fold(Utbetalingstidslinje(), Utbetalingstidslinje::plus)
-
         internal fun List<Utbetaling>.harId(id: UUID) = any { it.id == id }
     }
 
@@ -534,7 +535,6 @@ internal class Utbetaling private constructor(
     internal fun erEldreEnn(other: LocalDateTime): Boolean {
         return other > tidsstempel
     }
-
     private fun lagreOverføringsinformasjon(hendelse: ArbeidstakerHendelse, avstemmingsnøkkel: Long, tidspunkt: LocalDateTime) {
         hendelse.info("Utbetalingen ble overført til Oppdrag/UR $tidspunkt, og har fått avstemmingsnøkkel $avstemmingsnøkkel.\n")
         if (this.avstemmingsnøkkel != null && this.avstemmingsnøkkel != avstemmingsnøkkel)
