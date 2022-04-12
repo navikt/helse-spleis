@@ -10,6 +10,7 @@ import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.til
@@ -239,7 +240,7 @@ internal class NyTilstandsflytFlereArbeidsgivereTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Burde slippe å vente på inntektsmelding fra forlengelsen for å gå videre med førstegangsbehandling`(){
+    fun `Burde slippe å vente på inntektsmelding fra forlengelsen for å gå videre med førstegangsbehandling`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(1.januar, 18.januar, 100.prosent), orgnummer = a2)
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent), orgnummer = a2)
@@ -354,7 +355,11 @@ internal class NyTilstandsflytFlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(periode1.start, periode1.endInclusive, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(periode1.start, periode1.endInclusive, 100.prosent), orgnummer = a1)
         håndterUtbetalingshistorikk(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar(2021) til 16.januar(2021)), førsteFraværsdag = 1.januar(2021), orgnummer = a1)
+        håndterInntektsmelding(
+            listOf(1.januar(2021) til 16.januar(2021)),
+            førsteFraværsdag = 1.januar(2021),
+            orgnummer = a1
+        )
         håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a1)
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
@@ -371,9 +376,12 @@ internal class NyTilstandsflytFlereArbeidsgivereTest : AbstractEndToEndTest() {
                 listOf(
                     grunnlag(a1, 1.januar(2021), INNTEKT.repeat(3)),
                     grunnlag(a2, 1.januar(2021), 1000.månedlig.repeat(3))
-                )
-                , arbeidsforhold = emptyList()),
-            arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null), Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null))
+                ), arbeidsforhold = emptyList()
+            ),
+            arbeidsforhold = listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null),
+                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null)
+            )
         )
         håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
@@ -387,7 +395,11 @@ internal class NyTilstandsflytFlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(periode2.start, periode2.endInclusive, 100.prosent), orgnummer = a2)
 
         assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, orgnummer = a2)
-        håndterInntektsmelding(listOf(1.februar(2021) til 16.februar(2021)), førsteFraværsdag = 1.februar(2021), orgnummer = a2)
+        håndterInntektsmelding(
+            listOf(1.februar(2021) til 16.februar(2021)),
+            førsteFraværsdag = 1.februar(2021),
+            orgnummer = a2
+        )
         assertTilstand(1.vedtaksperiode, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, orgnummer = a2)
     }
 
@@ -459,8 +471,18 @@ internal class NyTilstandsflytFlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a2)
 
-        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT, refusjon = Inntektsmelding.Refusjon(INNTEKT, null), orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT, refusjon = Inntektsmelding.Refusjon(INGEN, null), orgnummer = a2)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            beregnetInntekt = INNTEKT,
+            refusjon = Inntektsmelding.Refusjon(INNTEKT, null),
+            orgnummer = a1
+        )
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            beregnetInntekt = INNTEKT,
+            refusjon = Inntektsmelding.Refusjon(INGEN, null),
+            orgnummer = a2
+        )
 
         assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
     }
@@ -473,8 +495,18 @@ internal class NyTilstandsflytFlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a2)
 
-        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT, refusjon = Inntektsmelding.Refusjon(INNTEKT, null), orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT, refusjon = Inntektsmelding.Refusjon(INNTEKT, null), orgnummer = a2)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            beregnetInntekt = INNTEKT,
+            refusjon = Inntektsmelding.Refusjon(INNTEKT, null),
+            orgnummer = a1
+        )
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            beregnetInntekt = INNTEKT,
+            refusjon = Inntektsmelding.Refusjon(INNTEKT, null),
+            orgnummer = a2
+        )
 
         vilkårsprøv(1.vedtaksperiode, a1, 1.januar)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
@@ -514,6 +546,58 @@ internal class NyTilstandsflytFlereArbeidsgivereTest : AbstractEndToEndTest() {
             AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
             TIL_INFOTRYGD,
             orgnummer = a2
+        )
+    }
+
+    @Test
+    fun `bruker har satt inntektskilde til ANDRE_ARBEIDSFORHOLD hvor vi har sykmeldingsperioder for begge arbeidsgivere`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a2)
+        håndterSøknad(
+            Sykdom(1.januar, 31.januar, 100.prosent),
+            andreInntektskilder = listOf(Søknad.Inntektskilde(true, "ANDRE_ARBEIDSFORHOLD")),
+            orgnummer = a1
+        )
+        håndterSøknad(
+            Sykdom(1.januar, 31.januar, 100.prosent),
+            andreInntektskilder = listOf(Søknad.Inntektskilde(true, "ANDRE_ARBEIDSFORHOLD")),
+            orgnummer = a2
+        )
+
+        assertForventetFeil(
+            forklaring = "Vi må sjekke mot sykmeldingsperioder om vi forventer en søknad før vi kaster ut",
+            nå = {
+                assertTilstand(1.vedtaksperiode, TIL_INFOTRYGD, orgnummer = a1)
+                assertTilstand(1.vedtaksperiode, TIL_INFOTRYGD, orgnummer = a2)
+                assertError("Søknaden inneholder ANDRE_ARBEIDSFORHOLD med sykdom, men vi kjenner kun til sykdom ved ett arbeidsforhold")
+            },
+            ønsket = {
+                assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, orgnummer = a1)
+                assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, orgnummer = a2)
+                assertNoWarning("Søknaden inneholder ANDRE_ARBEIDSFORHOLD med sykdom, men vi kjenner kun til sykdom ved ett arbeidsforhold")
+            }
+        )
+    }
+
+    @Test
+    fun `bruker har satt inntektskilde til ANDRE_ARBEIDSFORHOLD men vi kjenner ikke til sykdom for mer enn en arbeidsgiver`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(
+            Sykdom(1.januar, 31.januar, 100.prosent),
+            andreInntektskilder = listOf(Søknad.Inntektskilde(true, "ANDRE_ARBEIDSFORHOLD")),
+            orgnummer = a1
+        )
+
+        assertForventetFeil(
+            forklaring = "Vi må sjekke mot sykmeldingsperioder om vi forventer en søknad før vi kaster ut",
+            nå = {
+                assertTilstand(1.vedtaksperiode, TIL_INFOTRYGD, orgnummer = a1)
+                assertError("Søknaden inneholder ANDRE_ARBEIDSFORHOLD med sykdom, men vi kjenner kun til sykdom ved ett arbeidsforhold")
+            },
+            ønsket = {
+                assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, orgnummer = a1)
+                assertWarning("Søknaden inneholder ANDRE_ARBEIDSFORHOLD med sykdom, men vi kjenner kun til sykdom ved ett arbeidsforhold")
+            }
         )
     }
 
