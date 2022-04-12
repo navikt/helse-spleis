@@ -2552,6 +2552,15 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.tilstand(simulering, AvventerGodkjenningRevurdering)
         }
 
+        override fun startRevurdering(
+            vedtaksperiode: Vedtaksperiode,
+            hendelse: IAktivitetslogg,
+            overstyrt: Vedtaksperiode,
+            pågående: Vedtaksperiode?
+        ) {
+            vedtaksperiode.nesteRevurderingstilstand(hendelse, overstyrt, pågående)
+        }
+
         override fun håndterTidligereTilstøtendeUferdigPeriode(
             vedtaksperiode: Vedtaksperiode,
             tidligere: Vedtaksperiode,
@@ -2801,6 +2810,15 @@ internal class Vedtaksperiode private constructor(
                     else -> Avsluttet
                 }
             )
+        }
+
+        override fun startRevurdering(
+            vedtaksperiode: Vedtaksperiode,
+            hendelse: IAktivitetslogg,
+            overstyrt: Vedtaksperiode,
+            pågående: Vedtaksperiode?
+        ) {
+            vedtaksperiode.nesteRevurderingstilstand(hendelse, overstyrt, pågående)
         }
 
         override fun håndterRevurderingFeilet(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
