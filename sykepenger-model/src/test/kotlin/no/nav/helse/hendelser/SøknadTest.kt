@@ -53,10 +53,10 @@ internal class SøknadTest {
     }
 
     @Test
-    fun `tillater ikke andre inntektskilder dersom én arbeidsgiver`() {
+    fun `warning ved ANDRE_ARBEIDSFORHOLD hvor bruker er sykmeldt, men vi kun kjenner til sykmelding for en arbeidsgiver`() {
         søknad(Sykdom(1.januar, 10.januar, 100.prosent), andreInntektskilder = listOf(Inntektskilde(true, "ANDRE_ARBEIDSFORHOLD")))
         assertFalse(søknad.valider(EN_PERIODE, MaskinellJurist()).hasErrorsOrWorse())
-        assertTrue(søknad.validerIkkeOppgittFlereArbeidsforholdMedSykmelding().hasErrorsOrWorse())
+        assertTrue(søknad.validerIkkeOppgittFlereArbeidsforholdMedSykmelding().hasWarningsOrWorse())
     }
 
     @Test

@@ -227,7 +227,8 @@ class Søknad(
         }
 
         fun validerIkkeSykmeldt(aktivitetslogg: IAktivitetslogg) {
-            if (sykmeldt) aktivitetslogg.error("Søknaden inneholder ANDRE_ARBEIDSFORHOLD med sykdom, men vi kjenner kun til sykdom ved ett arbeidsforhold")
+            if (!sykmeldt) return
+            aktivitetslogg.warn("Den sykmeldte har oppgitt å ha andre arbeidsforhold med sykmelding i søknaden.")
         }
     }
 }

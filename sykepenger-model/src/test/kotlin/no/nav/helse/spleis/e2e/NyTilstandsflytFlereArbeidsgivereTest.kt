@@ -564,17 +564,15 @@ internal class NyTilstandsflytFlereArbeidsgivereTest : AbstractEndToEndTest() {
             orgnummer = a2
         )
 
+        assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, orgnummer = a1)
+        assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, orgnummer = a2)
         assertForventetFeil(
             forklaring = "Vi må sjekke mot sykmeldingsperioder om vi forventer en søknad før vi kaster ut",
             nå = {
-                assertTilstand(1.vedtaksperiode, TIL_INFOTRYGD, orgnummer = a1)
-                assertTilstand(1.vedtaksperiode, TIL_INFOTRYGD, orgnummer = a2)
-                assertError("Søknaden inneholder ANDRE_ARBEIDSFORHOLD med sykdom, men vi kjenner kun til sykdom ved ett arbeidsforhold")
+                assertWarning("Den sykmeldte har oppgitt å ha andre arbeidsforhold med sykmelding i søknaden.")
             },
             ønsket = {
-                assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, orgnummer = a1)
-                assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, orgnummer = a2)
-                assertNoWarning("Søknaden inneholder ANDRE_ARBEIDSFORHOLD med sykdom, men vi kjenner kun til sykdom ved ett arbeidsforhold")
+                assertNoWarning("Den sykmeldte har oppgitt å ha andre arbeidsforhold med sykmelding i søknaden.")
             }
         )
     }
@@ -588,17 +586,8 @@ internal class NyTilstandsflytFlereArbeidsgivereTest : AbstractEndToEndTest() {
             orgnummer = a1
         )
 
-        assertForventetFeil(
-            forklaring = "Vi må sjekke mot sykmeldingsperioder om vi forventer en søknad før vi kaster ut",
-            nå = {
-                assertTilstand(1.vedtaksperiode, TIL_INFOTRYGD, orgnummer = a1)
-                assertError("Søknaden inneholder ANDRE_ARBEIDSFORHOLD med sykdom, men vi kjenner kun til sykdom ved ett arbeidsforhold")
-            },
-            ønsket = {
-                assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, orgnummer = a1)
-                assertWarning("Søknaden inneholder ANDRE_ARBEIDSFORHOLD med sykdom, men vi kjenner kun til sykdom ved ett arbeidsforhold")
-            }
-        )
+        assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, orgnummer = a1)
+        assertWarning("Den sykmeldte har oppgitt å ha andre arbeidsforhold med sykmelding i søknaden.")
     }
 
     private fun utbetalPeriodeEtterVilkårsprøving(vedtaksperiode: IdInnhenter, orgnummer: String) {

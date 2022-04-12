@@ -11,7 +11,6 @@ import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
@@ -283,10 +282,8 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         }
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
-        håndterSøknad(
-            Sykdom(1.februar, 28.februar, 100.prosent),
-            andreInntektskilder = listOf(Søknad.Inntektskilde(true, "ANDRE_ARBEIDSFORHOLD")) // <-- for å sende til Infotrygd
-        )
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+        person.invaliderAllePerioder(hendelselogg, null)
         inspektør.sykdomstidslinje.inspektør.låstePerioder.also {
             assertEquals(1, it.size)
             assertEquals(Periode(1.januar, 31.januar), it.first())
@@ -322,7 +319,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             TIL_UTBETALING,
             AVSLUTTET
         )
-        assertForkastetPeriodeTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_FORLENGELSE, TIL_INFOTRYGD)
+        assertTilstand(2.vedtaksperiode, TIL_INFOTRYGD)
         assertTilstander(
             3.vedtaksperiode,
             START,

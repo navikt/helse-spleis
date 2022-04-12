@@ -1,22 +1,39 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.*
-import no.nav.helse.hendelser.*
+import java.time.LocalDate
+import java.time.YearMonth
+import java.util.UUID
+import no.nav.helse.april
+import no.nav.helse.assertForventetFeil
+import no.nav.helse.desember
+import no.nav.helse.februar
+import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
+import no.nav.helse.hendelser.Inntektsvurdering
+import no.nav.helse.hendelser.OverstyrArbeidsforhold
+import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.Vilkårsgrunnlag
+import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
+import no.nav.helse.januar
+import no.nav.helse.mars
+import no.nav.helse.november
 import no.nav.helse.person.Inntektshistorikk.Skatt.Inntekttype.LØNNSINNTEKT
 import no.nav.helse.person.Inntektskilde
-import no.nav.helse.person.TilstandType.*
+import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
+import no.nav.helse.person.TilstandType.AVVENTER_ARBEIDSGIVERE
+import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
+import no.nav.helse.person.TilstandType.AVVENTER_UFERDIG
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
-import java.time.YearMonth
-import java.util.*
 
 internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
 
@@ -491,7 +508,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             orgnummer = a1
         )
 
-        assertErrors()
+        assertWarning("Den sykmeldte har oppgitt å ha andre arbeidsforhold med sykmelding i søknaden.")
     }
 
     @Test
