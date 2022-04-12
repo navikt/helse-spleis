@@ -191,6 +191,80 @@ internal class InfotrygdInntektsopplysningTest {
         assertNull(historikk.grunnlagForSykepengegrunnlag(1.januar, 4.januar, 1.januar))
     }
 
+    @Test
+    fun equals() {
+        val inntektID = UUID.randomUUID()
+        val hendelseId = UUID.randomUUID()
+        val tidsstempel = LocalDateTime.now()
+        val inntektsopplysning1 = Inntektshistorikk.Infotrygd(
+            id = inntektID,
+            dato = 1.januar,
+            hendelseId = hendelseId,
+            beløp = 25000.månedlig,
+            tidsstempel = tidsstempel
+        )
+        assertEquals(
+            inntektsopplysning1,
+            Inntektshistorikk.Infotrygd(
+                id = inntektID,
+                dato = 1.januar,
+                hendelseId = hendelseId,
+                beløp = 25000.månedlig,
+                tidsstempel = tidsstempel
+            )
+        )
+        assertNotEquals(
+            inntektsopplysning1,
+            Inntektshistorikk.Infotrygd(
+                id = inntektID,
+                dato = 5.januar,
+                hendelseId = hendelseId,
+                beløp = 25000.månedlig,
+                tidsstempel = tidsstempel
+            )
+        )
+        assertNotEquals(
+            inntektsopplysning1,
+            Inntektshistorikk.Infotrygd(
+                id = inntektID,
+                dato = 1.januar,
+                hendelseId = hendelseId,
+                beløp = 32000.månedlig,
+                tidsstempel = tidsstempel
+            )
+        )
+        assertNotEquals(
+            inntektsopplysning1,
+            Inntektshistorikk.Infotrygd(
+                id = UUID.randomUUID(),
+                dato = 1.januar,
+                hendelseId = hendelseId,
+                beløp = 25000.månedlig,
+                tidsstempel = tidsstempel
+            )
+        )
+        assertNotEquals(
+            inntektsopplysning1,
+            Inntektshistorikk.Infotrygd(
+                id = inntektID,
+                dato = 1.januar,
+                hendelseId = UUID.randomUUID(),
+                beløp = 25000.månedlig,
+                tidsstempel = tidsstempel
+            )
+        )
+        assertEquals(
+            inntektsopplysning1,
+            Inntektshistorikk.Infotrygd(
+                id = inntektID,
+                dato = 1.januar,
+                hendelseId = hendelseId,
+                beløp = 25000.månedlig,
+                tidsstempel = LocalDate.EPOCH.atStartOfDay()
+            )
+        )
+    }
+
     private fun inntektsopplysning(refusjonTom: LocalDate? = null) =
         Inntektsopplysning(ORGNR, DATO, 1000.månedlig, true, refusjonTom)
 

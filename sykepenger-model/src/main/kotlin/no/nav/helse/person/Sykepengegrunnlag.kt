@@ -78,6 +78,24 @@ internal class Sykepengegrunnlag(
     }
     internal fun oppfyllerKravTilMinimumInntekt(minimumInntekt: Inntekt) = grunnlagForSykepengegrunnlag >= minimumInntekt
 
+    override fun equals(other: Any?): Boolean {
+        if (other !is Sykepengegrunnlag) return false
+        return sykepengegrunnlag == other.sykepengegrunnlag
+                 && arbeidsgiverInntektsopplysninger == other.arbeidsgiverInntektsopplysninger
+                 && grunnlagForSykepengegrunnlag == other.grunnlagForSykepengegrunnlag
+                 && begrensning == other.begrensning
+                 && deaktiverteArbeidsforhold == other.deaktiverteArbeidsforhold
+    }
+
+    override fun hashCode(): Int {
+        var result = sykepengegrunnlag.hashCode()
+        result = 31 * result + arbeidsgiverInntektsopplysninger.hashCode()
+        result = 31 * result + grunnlagForSykepengegrunnlag.hashCode()
+        result = 31 * result + begrensning.hashCode()
+        result = 31 * result + deaktiverteArbeidsforhold.hashCode()
+        return result
+    }
+
     enum class Begrensning {
         ER_6G_BEGRENSET, ER_IKKE_6G_BEGRENSET, VURDERT_I_INFOTRYGD
     }

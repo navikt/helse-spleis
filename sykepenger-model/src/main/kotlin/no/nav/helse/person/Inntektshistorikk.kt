@@ -179,6 +179,25 @@ internal class Inntektshistorikk {
             other is Infotrygd && this.dato == other.dato
 
         internal fun erDuplikat(other: InfotrygdhistorikkInntektsopplysning) = other.erDuplikat(dato, beløp)
+
+        // Vi overrider equals for å kunne sjekke om et vilkårsgrunnlag for infotrygd er et duplikat
+        override fun equals(other: Any?): Boolean {
+            if (other !is Infotrygd) return false
+            return id == other.id
+                    && dato == other.dato
+                    && hendelseId == other.hendelseId
+                    && beløp == other.beløp
+                    && prioritet == other.prioritet
+        }
+
+        override fun hashCode(): Int {
+            var result = id.hashCode()
+            result = 31 * result + dato.hashCode()
+            result = 31 * result + hendelseId.hashCode()
+            result = 31 * result + beløp.hashCode()
+            result = 31 * result + prioritet
+            return result
+        }
     }
 
     internal class Inntektsmelding(

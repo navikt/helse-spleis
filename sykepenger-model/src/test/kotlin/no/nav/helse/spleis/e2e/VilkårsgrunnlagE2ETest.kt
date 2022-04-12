@@ -28,7 +28,7 @@ import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
@@ -275,8 +275,8 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
             Inntektsopplysning(ORGNUMMER, 1.mars(2016), INNTEKT, false)
         )
         /*
-        Vi må ha gap for å lagre nye vilkårsgrunnlag. håndterYtelser kun lagrer vilkårsgrunnlag fra IT dersom
-         vi ikke har en utbetalt periode som gjelder skjæringstidspunktet
+            Vi må ha gap for å lagre nye vilkårsgrunnlag. håndterYtelser lagrer kun vilkårsgrunnlag fra IT dersom
+            vi ikke har en utbetalt periode som gjelder skjæringstidspunktet
          */
         repeat(3) {
             val fom = LocalDate.of(2018, it + 1, 1)
@@ -309,11 +309,6 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
             håndterUtbetalt()
         }
 
-        assertForventetFeil(
-            forklaring = "Siden det ikke er duplikatsjekk vil vi lage nytt innslag per inntekt per håndterYtelser",
-            // 3 vedtaksperioder x inntekter fra IT 2 x 2 håndterYtelser + 3 spleis vilkårsgrunnlag = 15
-            nå = { Assertions.assertEquals(15, inspektør.vilkårsgrunnlagHistorikkInnslag().size) },
-            ønsket = { Assertions.assertEquals(5, inspektør.vilkårsgrunnlagHistorikkInnslag().size) }
-        )
+        assertEquals(4, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
     }
 }

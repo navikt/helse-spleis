@@ -30,6 +30,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
+import no.nav.helse.februar
 
 internal class VilkårsgrunnlagHistorikkTest {
     private val historikk = VilkårsgrunnlagHistorikk()
@@ -553,6 +554,56 @@ internal class VilkårsgrunnlagHistorikkTest {
                 assertEquals(Begrunnelse.MinimumInntektOver67, it.begrunnelser.first())
             }
         }
+    }
+
+    @Test
+    fun `equals av InfotrygdVilkårsgrunnlag`() {
+        val element1 = VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag(
+            skjæringstidspunkt = 1.januar,
+            sykepengegrunnlag = Sykepengegrunnlag(
+                arbeidsgiverInntektsopplysninger = emptyList(),
+                sykepengegrunnlag = 25000.månedlig,
+                grunnlagForSykepengegrunnlag = 25000.månedlig,
+                begrensning = ER_IKKE_6G_BEGRENSET,
+                deaktiverteArbeidsforhold = emptyList()
+            )
+        )
+        assertEquals(
+            element1, VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag(
+                skjæringstidspunkt = 1.januar,
+                sykepengegrunnlag = Sykepengegrunnlag(
+                    arbeidsgiverInntektsopplysninger = emptyList(),
+                    sykepengegrunnlag = 25000.månedlig,
+                    grunnlagForSykepengegrunnlag = 25000.månedlig,
+                    begrensning = ER_IKKE_6G_BEGRENSET,
+                    deaktiverteArbeidsforhold = emptyList()
+                )
+            )
+        )
+        assertNotEquals(
+            element1, VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag(
+                skjæringstidspunkt = 5.februar,
+                sykepengegrunnlag = Sykepengegrunnlag(
+                    arbeidsgiverInntektsopplysninger = emptyList(),
+                    sykepengegrunnlag = 25000.månedlig,
+                    grunnlagForSykepengegrunnlag = 25000.månedlig,
+                    begrensning = ER_IKKE_6G_BEGRENSET,
+                    deaktiverteArbeidsforhold = emptyList()
+                )
+            )
+        )
+        assertNotEquals(
+            element1, VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag(
+                skjæringstidspunkt = 1.januar,
+                sykepengegrunnlag = Sykepengegrunnlag(
+                    arbeidsgiverInntektsopplysninger = emptyList(),
+                    sykepengegrunnlag = 30900.månedlig,
+                    grunnlagForSykepengegrunnlag = 25000.månedlig,
+                    begrensning = ER_IKKE_6G_BEGRENSET,
+                    deaktiverteArbeidsforhold = emptyList()
+                )
+            )
+        )
     }
 
     @Test

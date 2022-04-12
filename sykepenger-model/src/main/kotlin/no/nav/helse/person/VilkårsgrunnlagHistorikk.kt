@@ -1,25 +1,26 @@
 package no.nav.helse.person
 
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Vilkårsgrunnlag
-import no.nav.helse.person.VilkårsgrunnlagHistorikk.Innslag.Companion.sisteId
 import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosent
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
 
 internal class VilkårsgrunnlagHistorikk private constructor(private val historikk: MutableList<Innslag>) {
 
     internal constructor() : this(mutableListOf())
 
-    private fun nyttInnslag() = (historikk.firstOrNull()?.clone() ?: Innslag(UUID.randomUUID(), LocalDateTime.now()))
+    private fun nyttInnslag() = (sisteInnlag()?.clone() ?: Innslag(UUID.randomUUID(), LocalDateTime.now()))
             .also { historikk.add(0, it) }
+
+    private fun sisteInnlag() = historikk.firstOrNull()
 
     internal fun accept(visitor: VilkårsgrunnlagHistorikkVisitor) {
         visitor.preVisitVilkårsgrunnlagHistorikk()
@@ -33,25 +34,32 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         nyttInnslag().add(skjæringstidspunkt, grunnlagselement)
     }
 
+    internal fun lagre(grunnlagselementer: List<VilkårsgrunnlagElement>) {
+        val nyeElementer = sisteInnlag()?.filtrerUtKjenteVilkårsgrunnlag(grunnlagselementer) ?: grunnlagselementer
+        if (nyeElementer.isEmpty()) return
+        val nyttInnslag = nyttInnslag()
+        nyeElementer.forEach { nyttInnslag.add(it.skjæringstidspunkt(), it) }
+    }
+
     internal fun oppdaterMinimumInntektsvurdering(skjæringstidspunkt: LocalDate, grunnlagsdata: Grunnlagsdata, oppfyllerKravTilMinimumInntekt: Boolean) {
         nyttInnslag().add(skjæringstidspunkt, grunnlagsdata.kopierMedMinimumInntektsvurdering(oppfyllerKravTilMinimumInntekt))
     }
 
-    internal fun sisteId() = historikk.sisteId()
+    internal fun sisteId() = sisteInnlag()!!.id
 
-    internal fun vilkårsgrunnlagFor(skjæringstidspunkt: LocalDate) = historikk.firstOrNull()?.vilkårsgrunnlagFor(skjæringstidspunkt)
+    internal fun vilkårsgrunnlagFor(skjæringstidspunkt: LocalDate) = sisteInnlag()?.vilkårsgrunnlagFor(skjæringstidspunkt)
 
     internal fun avvisInngangsvilkår(tidslinjer: List<Utbetalingstidslinje>, alder: Alder) {
-        historikk.firstOrNull()?.avvis(tidslinjer, alder)
+        sisteInnlag()?.avvis(tidslinjer, alder)
     }
 
-    internal fun inntektsopplysningPerSkjæringstidspunktPerArbeidsgiver() = historikk.firstOrNull()?.inntektsopplysningPerSkjæringstidspunktPerArbeidsgiver()
+    internal fun inntektsopplysningPerSkjæringstidspunktPerArbeidsgiver() = sisteInnlag()?.inntektsopplysningPerSkjæringstidspunktPerArbeidsgiver()
 
-    internal fun skjæringstidspunkterFraSpleis() = historikk.firstOrNull()?.skjæringstidspunkterFraSpleis() ?: emptySet()
+    internal fun skjæringstidspunkterFraSpleis() = sisteInnlag()?.skjæringstidspunkterFraSpleis() ?: emptySet()
 
-    internal fun erRelevant(organisasjonsnummer: String, skjæringstidspunkter: List<LocalDate>) = historikk.firstOrNull()?.erRelevant(organisasjonsnummer, skjæringstidspunkter) ?: false
+    internal fun erRelevant(organisasjonsnummer: String, skjæringstidspunkter: List<LocalDate>) = sisteInnlag()?.erRelevant(organisasjonsnummer, skjæringstidspunkter) ?: false
 
-    internal class Innslag(private val id: UUID, private val opprettet: LocalDateTime) {
+    internal class Innslag(internal val id: UUID, private val opprettet: LocalDateTime) {
         private val vilkårsgrunnlag = mutableMapOf<LocalDate, VilkårsgrunnlagElement>()
 
         internal fun accept(visitor: VilkårsgrunnlagHistorikkVisitor) {
@@ -101,9 +109,11 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             }
         }
 
-        internal companion object {
-            internal fun List<Innslag>.sisteId() = this.first().id
-        }
+        internal fun filtrerUtKjenteVilkårsgrunnlag(grunnlagselementer: List<VilkårsgrunnlagElement>) =
+            grunnlagselementer.filter { nyttElement ->
+                val originaltElementForSkjæringstidspunkt = vilkårsgrunnlag[nyttElement.skjæringstidspunkt()]
+                originaltElementForSkjæringstidspunkt != nyttElement
+            }
     }
 
     internal interface VilkårsgrunnlagElement: Aktivitetskontekst {
@@ -282,5 +292,16 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                 "vilkårsgrunnlagtype" to "Infotrygd"
             )
         )
+
+        override fun equals(other: Any?): Boolean {
+            if (other !is InfotrygdVilkårsgrunnlag) return false
+            return skjæringstidspunkt == other.skjæringstidspunkt && sykepengegrunnlag == other.sykepengegrunnlag
+        }
+
+        override fun hashCode(): Int {
+            var result = skjæringstidspunkt.hashCode()
+            result = 31 * result + sykepengegrunnlag.hashCode()
+            return result
+        }
     }
 }
