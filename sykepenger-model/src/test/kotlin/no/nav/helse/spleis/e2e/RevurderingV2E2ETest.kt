@@ -464,7 +464,13 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
 
             },
             ønsket = {
-                assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING)
+                assertTilstander(
+                    2.vedtaksperiode,
+                    AVSLUTTET,
+                    AVVENTER_GJENNOMFØRT_REVURDERING,
+                    AVVENTER_REVURDERING,
+                    AVVENTER_GJENNOMFØRT_REVURDERING
+                )
                 assertTilstander(
                     3.vedtaksperiode,
                     AVSLUTTET,
@@ -475,6 +481,88 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
                     AVVENTER_HISTORIKK_REVURDERING
                 )
 
+            }
+        )
+    }
+
+    @Test
+    fun `revurdere eldre skjæringstidspunkt menst nyere utbetales`() {
+        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(10.februar, 28.februar, arbeidsgiverperiode = listOf(1.januar til 16.januar))
+        forlengVedtak(1.mars, 31.mars)
+        nullstillTilstandsendringer()
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(15.februar, Feriedag)))
+
+        håndterYtelser(3.vedtaksperiode)
+        håndterSimulering(3.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(3.vedtaksperiode)
+
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(19.januar, Feriedag)))
+        håndterUtbetalt()
+
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+
+        assertForventetFeil(
+            forklaring = "",
+            nå = {
+                assertTilstander(
+                    1.vedtaksperiode,
+                    AVSLUTTET,
+                    AVVENTER_GJENNOMFØRT_REVURDERING,
+                    AVVENTER_HISTORIKK_REVURDERING,
+                    AVVENTER_SIMULERING_REVURDERING,
+                    AVVENTER_GODKJENNING_REVURDERING,
+                    TIL_UTBETALING,
+                    AVSLUTTET
+                )
+                assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, AVSLUTTET)
+                assertTilstander(
+                    3.vedtaksperiode,
+                    AVSLUTTET,
+                    AVVENTER_GJENNOMFØRT_REVURDERING,
+                    AVVENTER_HISTORIKK_REVURDERING,
+                    AVVENTER_SIMULERING_REVURDERING,
+                    AVVENTER_GODKJENNING_REVURDERING,
+                    TIL_UTBETALING,
+                    AVSLUTTET
+                )
+
+            },
+            ønsket = {
+                assertTilstander(
+                    1.vedtaksperiode,
+                    AVSLUTTET,
+                    AVVENTER_REVURDERING,
+                    AVVENTER_GJENNOMFØRT_REVURDERING,
+                    AVVENTER_HISTORIKK_REVURDERING,
+                    AVVENTER_SIMULERING_REVURDERING,
+                    AVVENTER_GODKJENNING_REVURDERING,
+                    TIL_UTBETALING,
+                    AVSLUTTET
+                )
+                assertTilstander(
+                    2.vedtaksperiode,
+                    AVSLUTTET,
+                    AVVENTER_GJENNOMFØRT_REVURDERING,
+                    AVVENTER_REVURDERING,
+                    AVVENTER_GJENNOMFØRT_REVURDERING
+                )
+                assertTilstander(
+                    3.vedtaksperiode,
+                    AVSLUTTET,
+                    AVVENTER_GJENNOMFØRT_REVURDERING,
+                    AVVENTER_HISTORIKK_REVURDERING,
+                    AVVENTER_SIMULERING_REVURDERING,
+                    AVVENTER_GODKJENNING_REVURDERING,
+                    TIL_UTBETALING,
+                    AVSLUTTET,
+                    AVVENTER_REVURDERING,
+                    AVVENTER_GJENNOMFØRT_REVURDERING,
+                    AVVENTER_HISTORIKK_REVURDERING
+                )
             }
         )
     }
