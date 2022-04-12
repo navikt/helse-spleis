@@ -638,7 +638,7 @@ class Person private constructor(
     internal fun minstEttSykepengegrunnlagSomIkkeKommerFraSkatt(skjæringstidspunkt: LocalDate) =
         arbeidsgivere.minstEttSykepengegrunnlagSomIkkeKommerFraSkatt(skjæringstidspunkt)
 
-    internal fun harFlereArbeidsgivereMedSykdom() = arbeidsgivereMedSykdom().count() > 1
+    internal fun harFlereArbeidsgivereMedSykdom() = arbeidsgivere.count(Arbeidsgiver::harSykdomEllerForventerSøknad) > 1
 
     private fun arbeidsgivereMedSykdom() = arbeidsgivere.filter(Arbeidsgiver::harSykdom)
 

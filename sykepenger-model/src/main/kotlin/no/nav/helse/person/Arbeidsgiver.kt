@@ -1051,6 +1051,10 @@ internal class Arbeidsgiver private constructor(
 
     internal fun harSykdom() = sykdomshistorikk.harSykdom() || sykdomstidslinje().harSykedager()
 
+    internal fun harSykdomEllerForventerSøknad() = sykdomshistorikk.harSykdom()
+            || sykdomstidslinje().harSykedager()
+            || (sykmeldingsperioder.harSykmeldingsperiode() && Toggle.NyTilstandsflyt.enabled)
+
     internal fun harSpleisSykdom() = sykdomshistorikk.harSykdom()
 
     internal fun harSykdomFor(skjæringstidspunkt: LocalDate) = vedtaksperioder.any { it.gjelder(skjæringstidspunkt) }

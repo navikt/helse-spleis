@@ -566,15 +566,7 @@ internal class NyTilstandsflytFlereArbeidsgivereTest : AbstractEndToEndTest() {
 
         assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, orgnummer = a1)
         assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, orgnummer = a2)
-        assertForventetFeil(
-            forklaring = "Vi må sjekke mot sykmeldingsperioder om vi forventer en søknad før vi kaster ut",
-            nå = {
-                assertWarning("Den sykmeldte har oppgitt å ha andre arbeidsforhold med sykmelding i søknaden.")
-            },
-            ønsket = {
-                assertNoWarning("Den sykmeldte har oppgitt å ha andre arbeidsforhold med sykmelding i søknaden.")
-            }
-        )
+        assertNoWarning("Den sykmeldte har oppgitt å ha andre arbeidsforhold med sykmelding i søknaden.")
     }
 
     @Test

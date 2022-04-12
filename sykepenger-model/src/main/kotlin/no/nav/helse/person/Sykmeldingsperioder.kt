@@ -24,6 +24,8 @@ internal class Sykmeldingsperioder(
     internal fun harSykmeldingsperiodeI(måned: YearMonth): Boolean =
         perioder.flatten().any { YearMonth.from(it) == måned }
 
+    internal fun harSykmeldingsperiode() = perioder.isNotEmpty()
+
     internal fun kanFortsetteBehandling(vedtaksperiode: Periode): Boolean {
         val lavesteDato = perioder.minOfOrNull { it.start } ?: return true
         return lavesteDato > vedtaksperiode.endInclusive
