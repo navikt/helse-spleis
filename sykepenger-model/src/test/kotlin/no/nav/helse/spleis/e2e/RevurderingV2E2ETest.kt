@@ -14,8 +14,6 @@ import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
-import no.nav.helse.person.IdInnhenter
-import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
@@ -33,12 +31,9 @@ import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.sykdomstidslinje.Dag
-import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype.REVURDERING
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -154,235 +149,6 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
             AVVENTER_GODKJENNING_REVURDERING,
             TIL_UTBETALING,
             AVSLUTTET
-        )
-    }
-
-    @Test
-    fun `revurdere første periode - flere ag - ag 1`() {
-        setupToArbeidsgivereFørstegangsbehandling(1.januar til 31.januar)
-        setupToArbeidsgivereForlengelse(1.februar til 28.februar)
-        setupToArbeidsgivereForlengelse(1.mars til 31.mars)
-        nullstillTilstandsendringer()
-        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)), orgnummer = a1)
-        håndterYtelser(3.vedtaksperiode, orgnummer = a1)
-        håndterSimulering(3.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalingsgodkjenning(3.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(orgnummer = a1)
-
-        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, AVSLUTTET, orgnummer = a1)
-        assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, AVSLUTTET, orgnummer = a1)
-        assertTilstander(
-            3.vedtaksperiode,
-            AVSLUTTET,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
-            AVVENTER_HISTORIKK_REVURDERING,
-            AVVENTER_SIMULERING_REVURDERING,
-            AVVENTER_GODKJENNING_REVURDERING,
-            TIL_UTBETALING,
-            AVSLUTTET,
-            orgnummer = a1
-        )
-        assertForventetFeil(
-            forklaring = "Venter på implementering av ny revurderingsflyt for flere arbeidsgivere",
-            nå = {
-                assertTilstander(
-                    1.vedtaksperiode,
-                    AVSLUTTET,
-                    AVVENTER_GJENNOMFØRT_REVURDERING,
-                    AVSLUTTET,
-                    orgnummer = a2
-                )
-                assertTilstander(
-                    2.vedtaksperiode,
-                    AVSLUTTET,
-                    AVVENTER_GJENNOMFØRT_REVURDERING,
-                    AVSLUTTET,
-                    orgnummer = a2
-                )
-                assertTilstander(
-                    3.vedtaksperiode,
-                    AVSLUTTET,
-                    AVVENTER_GJENNOMFØRT_REVURDERING,
-                    AVSLUTTET,
-                    orgnummer = a2
-                )
-
-            },
-            ønsket = {
-                assertTilstander(
-                    1.vedtaksperiode,
-                    AVSLUTTET,
-                    AVVENTER_REVURDERING,
-                    AVVENTER_GJENNOMFØRT_REVURDERING,
-                    orgnummer = a2
-                )
-                assertTilstander(
-                    2.vedtaksperiode,
-                    AVSLUTTET,
-                    AVVENTER_REVURDERING,
-                    AVVENTER_GJENNOMFØRT_REVURDERING,
-                    orgnummer = a2
-                )
-                assertTilstander(
-                    3.vedtaksperiode,
-                    AVSLUTTET,
-                    AVVENTER_REVURDERING,
-                    AVVENTER_GJENNOMFØRT_REVURDERING,
-                    AVVENTER_HISTORIKK_REVURDERING,
-                    orgnummer = a2
-                )
-            })
-    }
-
-    @Test
-    fun `revurdere første periode - flere ag - ag 1 - har generert utbetaling`() {
-        setupToArbeidsgivereFørstegangsbehandling(1.januar til 31.januar)
-        setupToArbeidsgivereForlengelse(1.februar til 28.februar)
-        setupToArbeidsgivereForlengelse(1.mars til 31.mars)
-        nullstillTilstandsendringer()
-        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)), orgnummer = a1)
-        håndterYtelser(3.vedtaksperiode, orgnummer = a1)
-        håndterSimulering(3.vedtaksperiode)
-
-        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, orgnummer = a1)
-        assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, orgnummer = a1)
-        assertTilstander(
-            3.vedtaksperiode,
-            AVSLUTTET,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
-            AVVENTER_HISTORIKK_REVURDERING,
-            AVVENTER_SIMULERING_REVURDERING,
-            AVVENTER_GODKJENNING_REVURDERING,
-            orgnummer = a1
-        )
-        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, orgnummer = a2)
-        assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, orgnummer = a2)
-        assertTilstander(3.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, orgnummer = a2)
-
-        inspektør(a1) {
-            assertEquals(REVURDERING, utbetalingstype(3.vedtaksperiode, 1))
-            assertEquals(4, utbetalinger.size)
-        }
-
-        assertForventetFeil(
-            forklaring = "Utbetalinger må være genreret før noe går til godkjenning fordi er avhengig av utbetalinger for å lage generasjoner",
-            nå = {
-                inspektør(a2) {
-                    assertNull(utbetalingstype(3.vedtaksperiode, 2))
-                    assertEquals(6, utbetalinger.size)
-                }
-            },
-            ønsket = {
-                inspektør(a2) {
-                    assertEquals(REVURDERING, utbetalingstype(3.vedtaksperiode, 2))
-                    assertEquals(4, utbetalinger.size)
-                }
-            }
-        )
-    }
-
-    @Test
-    fun `revurdere andre periode - flere ag - ag 1`() {
-        setupToArbeidsgivereFørstegangsbehandling(1.januar til 31.januar)
-        setupToArbeidsgivereForlengelse(1.februar til 28.februar)
-        setupToArbeidsgivereForlengelse(1.mars til 31.mars)
-        nullstillTilstandsendringer()
-        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(5.februar, Feriedag)), orgnummer = a1)
-        assertTilstander(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
-        assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, orgnummer = a1)
-        assertTilstander(
-            3.vedtaksperiode,
-            AVSLUTTET,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
-            AVVENTER_HISTORIKK_REVURDERING,
-            orgnummer = a1
-        )
-        assertTilstander(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
-        assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, orgnummer = a2)
-        assertTilstander(3.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, orgnummer = a2)
-    }
-
-    @Test
-    fun `revurdere tredje periode - flere ag - ag1`() {
-        setupToArbeidsgivereFørstegangsbehandling(1.januar til 31.januar)
-        setupToArbeidsgivereForlengelse(1.februar til 28.februar)
-        setupToArbeidsgivereForlengelse(1.mars til 31.mars)
-        nullstillTilstandsendringer()
-        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(5.mars, Feriedag)), orgnummer = a1)
-        assertTilstander(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
-        assertTilstander(2.vedtaksperiode, AVSLUTTET, orgnummer = a1)
-        assertTilstander(
-            3.vedtaksperiode,
-            AVSLUTTET,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
-            AVVENTER_HISTORIKK_REVURDERING,
-            orgnummer = a1
-        )
-        assertTilstander(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
-        assertTilstander(2.vedtaksperiode, AVSLUTTET, orgnummer = a2)
-        assertTilstander(3.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, orgnummer = a2)
-    }
-
-    @Test
-    fun `revurdere første periode - flere ag - ag 2`() {
-        setupToArbeidsgivereFørstegangsbehandling(1.januar til 31.januar)
-        setupToArbeidsgivereForlengelse(1.februar til 28.februar)
-        setupToArbeidsgivereForlengelse(1.mars til 31.mars)
-        nullstillTilstandsendringer()
-        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(5.januar, Feriedag)), orgnummer = a2)
-        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, orgnummer = a1)
-        assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, orgnummer = a1)
-        assertTilstander(3.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, orgnummer = a1)
-        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, orgnummer = a2)
-        assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, orgnummer = a2)
-        assertTilstander(
-            3.vedtaksperiode,
-            AVSLUTTET,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
-            AVVENTER_HISTORIKK_REVURDERING,
-            orgnummer = a2
-        )
-    }
-
-    @Test
-    fun `revurdere andre periode - flere ag - ag 2`() {
-        setupToArbeidsgivereFørstegangsbehandling(1.januar til 31.januar)
-        setupToArbeidsgivereForlengelse(1.februar til 28.februar)
-        setupToArbeidsgivereForlengelse(1.mars til 31.mars)
-        nullstillTilstandsendringer()
-        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(5.februar, Feriedag)), orgnummer = a2)
-        assertTilstander(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
-        assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, orgnummer = a1)
-        assertTilstander(3.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, orgnummer = a1)
-        assertTilstander(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
-        assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, orgnummer = a2)
-        assertTilstander(
-            3.vedtaksperiode,
-            AVSLUTTET,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
-            AVVENTER_HISTORIKK_REVURDERING,
-            orgnummer = a2
-        )
-    }
-
-    @Test
-    fun `revurdere tredje periode - flere ag - ag2`() {
-        setupToArbeidsgivereFørstegangsbehandling(1.januar til 31.januar)
-        setupToArbeidsgivereForlengelse(1.februar til 28.februar)
-        setupToArbeidsgivereForlengelse(1.mars til 31.mars)
-        nullstillTilstandsendringer()
-        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(5.mars, Feriedag)), orgnummer = a2)
-        assertTilstander(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
-        assertTilstander(2.vedtaksperiode, AVSLUTTET, orgnummer = a1)
-        assertTilstander(3.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, orgnummer = a1)
-        assertTilstander(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
-        assertTilstander(2.vedtaksperiode, AVSLUTTET, orgnummer = a2)
-        assertTilstander(
-            3.vedtaksperiode,
-            AVSLUTTET,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
-            AVVENTER_HISTORIKK_REVURDERING,
-            orgnummer = a2
         )
     }
 
@@ -748,28 +514,5 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(5.januar, Feriedag)))
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING)
         assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
-    }
-
-
-    private fun setupToArbeidsgivereForlengelse(periode: Periode) {
-        val id: IdInnhenter = observatør.sisteVedtaksperiode()
-        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
-        håndterYtelser(id, orgnummer = a1)
-        håndterYtelser(id, orgnummer = a2)
-        håndterYtelser(id, orgnummer = a1)
-        håndterSimulering(id, orgnummer = a1)
-        håndterUtbetalingsgodkjenning(id, orgnummer = a1)
-        håndterUtbetalt(orgnummer = a1)
-
-        håndterYtelser(id, orgnummer = a2)
-        håndterSimulering(id, orgnummer = a2)
-        håndterUtbetalingsgodkjenning(id, orgnummer = a2)
-        håndterUtbetalt(orgnummer = a2)
-
-        assertSisteTilstand(id, AVSLUTTET, orgnummer = a1)
-        assertSisteTilstand(id, AVSLUTTET, orgnummer = a2)
     }
 }
