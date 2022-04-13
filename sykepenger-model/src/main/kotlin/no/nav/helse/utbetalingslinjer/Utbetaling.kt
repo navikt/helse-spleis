@@ -125,6 +125,7 @@ internal class Utbetaling private constructor(
     private fun erAktiv() = erAvsluttet() || erInFlight()
     internal fun erInFlight() = tilstand in listOf(Godkjent, Sendt, Overført, UtbetalingFeilet)
     internal fun erAvsluttet() = erUtbetalt() || tilstand == GodkjentUtenUtbetaling
+    private fun erAvsluttetRevurdering() = erAvsluttet() && type == Utbetalingtype.REVURDERING
     internal fun erAvvist() = tilstand == IkkeGodkjent
     internal fun harFeilet() = tilstand == UtbetalingFeilet
     internal fun kanIkkeForsøkesPåNy() = Oppdrag.kanIkkeForsøkesPåNy(arbeidsgiverOppdrag, personOppdrag)
@@ -445,6 +446,9 @@ internal class Utbetaling private constructor(
                 .map { it.utbetalingstidslinje }
                 .fold(Utbetalingstidslinje(), Utbetalingstidslinje::plus)
         internal fun List<Utbetaling>.harId(id: UUID) = any { it.id == id }
+
+        internal fun List<Utbetaling>.erSisteUtbetaling(utbetaling: Utbetaling) =
+            maxByOrNull { it.tidsstempel }!! == utbetaling && utbetaling.erAvsluttetRevurdering()
     }
 
     internal fun accept(visitor: UtbetalingVisitor) {

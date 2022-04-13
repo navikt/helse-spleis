@@ -37,6 +37,7 @@ import no.nav.helse.person.Arbeidsgiver.Companion.beregnFeriepengerForAlleArbeid
 import no.nav.helse.person.Arbeidsgiver.Companion.beregnOpptjening
 import no.nav.helse.person.Arbeidsgiver.Companion.beregnSykepengegrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.deaktiverteArbeidsforhold
+import no.nav.helse.person.Arbeidsgiver.Companion.erSisteUtbetaling
 import no.nav.helse.person.Arbeidsgiver.Companion.finn
 import no.nav.helse.person.Arbeidsgiver.Companion.ghostPeriode
 import no.nav.helse.person.Arbeidsgiver.Companion.gjenopptaBehandling
@@ -50,6 +51,7 @@ import no.nav.helse.person.Arbeidsgiver.Companion.harVedtaksperiodeFor
 import no.nav.helse.person.Arbeidsgiver.Companion.håndter
 import no.nav.helse.person.Arbeidsgiver.Companion.kanOverstyreTidslinje
 import no.nav.helse.person.Arbeidsgiver.Companion.minstEttSykepengegrunnlagSomIkkeKommerFraSkatt
+import no.nav.helse.person.Arbeidsgiver.Companion.nesteRevurderingsperiode
 import no.nav.helse.person.Arbeidsgiver.Companion.nåværendeVedtaksperioder
 import no.nav.helse.person.Arbeidsgiver.Companion.startRevurdering
 import no.nav.helse.person.Vedtaksperiode.Companion.ALLE
@@ -60,6 +62,7 @@ import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
+import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverUtbetalinger
@@ -831,4 +834,10 @@ class Person private constructor(
     internal fun startRevurdering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
         arbeidsgivere.startRevurdering(vedtaksperiode, hendelse)
     }
+
+    internal fun nesteRevurderingsperiode() =
+        arbeidsgivere.nesteRevurderingsperiode()
+
+    internal fun erSisteUtbetaling(utbetaling: Utbetaling) =
+        arbeidsgivere.erSisteUtbetaling(utbetaling)
 }

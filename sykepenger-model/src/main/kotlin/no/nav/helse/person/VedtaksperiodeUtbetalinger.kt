@@ -33,6 +33,7 @@ internal class VedtaksperiodeUtbetalinger(private val arbeidsgiver: Arbeidsgiver
 
     internal fun utbetales() = siste?.erInFlight() == true
     internal fun erAvsluttet() = siste?.erAvsluttet() == true
+    internal fun erAvsluttetRevurdering() = siste?.let { arbeidsgiver.erSisteUtbetaling(it) } ?: false
     internal fun erAvvist() = siste?.erAvvist() == true
     internal fun harUtbetalinger() = siste?.harUtbetalinger() == true
     internal fun harFeilet() = siste?.harFeilet() == true
@@ -153,5 +154,4 @@ internal class VedtaksperiodeUtbetalinger(private val arbeidsgiver: Arbeidsgiver
             aktivitetslogg = aktivitetslogg
         )
     }
-
 }
