@@ -190,37 +190,6 @@ class Person private constructor(
         }
     }
 
-    internal fun arbeidsgiverperiodeFor(organisasjonsnummer: String, sykdomshistorikkId: UUID): List<Arbeidsgiverperiode>? {
-        return infotrygdhistorikk.arbeidsgiverperiodeFor(organisasjonsnummer, sykdomshistorikkId)
-    }
-
-    internal fun arbeidsgiverperiodeFor(orgnummer: String, sykdomshistorikkId: UUID, sykdomstidslinje: Sykdomstidslinje, periode: Periode, subsumsjonObserver: SubsumsjonObserver): List<Arbeidsgiverperiode> {
-        val periodebuilder = ArbeidsgiverperiodeBuilderBuilder()
-        infotrygdhistorikk.build(orgnummer, sykdomstidslinje, periodebuilder, subsumsjonObserver)
-        return periodebuilder.result().also {
-            infotrygdhistorikk.lagreResultat(orgnummer, sykdomshistorikkId, it)
-        }
-    }
-
-    private fun arbeidsgiverUtbetalinger(
-        regler: ArbeidsgiverRegler = NormalArbeidstaker,
-        subsumsjonObserver: SubsumsjonObserver
-    ): ArbeidsgiverUtbetalinger {
-        val skjæringstidspunkter = skjæringstidspunkter()
-        return ArbeidsgiverUtbetalinger(
-            regler = regler,
-            arbeidsgivere = arbeidsgivereMedSykdom().associateWith {
-                    it.builder(regler, skjæringstidspunkter, vilkårsgrunnlagHistorikk.inntektsopplysningPerSkjæringstidspunktPerArbeidsgiver(), subsumsjonObserver)
-            },
-            infotrygdhistorikk = infotrygdhistorikk,
-            alder = fødselsnummer.alder(),
-            dødsdato = dødsdato,
-            vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk,
-            subsumsjonObserver = subsumsjonObserver
-        )
-    }
-
-
     fun håndter(utbetalingsgodkjenning: Utbetalingsgodkjenning) {
         registrer(utbetalingsgodkjenning, "Behandler utbetalingsgodkjenning")
         finnArbeidsgiver(utbetalingsgodkjenning).håndter(utbetalingsgodkjenning)
@@ -313,6 +282,52 @@ class Person private constructor(
         if (!arbeidsgivere.håndter(overstyrArbeidsforhold)) {
             overstyrArbeidsforhold.severe("Kan ikke overstyre arbeidsforhold fordi ingen vedtaksperioder håndterte hendelsen")
         }
+    }
+
+    fun håndter(hendelse: AnnullerUtbetaling) {
+        hendelse.kontekst(this)
+        arbeidsgivere.finn(hendelse.organisasjonsnummer())?.håndter(hendelse)
+            ?: hendelse.error("Finner ikke arbeidsgiver")
+    }
+
+    fun håndter(hendelse: Grunnbeløpsregulering) {
+        hendelse.kontekst(this)
+        arbeidsgivere.finn(hendelse.organisasjonsnummer())?.håndter(arbeidsgivere, hendelse, vilkårsgrunnlagHistorikk)
+            ?: hendelse.error("Finner ikke arbeidsgiver")
+    }
+
+    fun addObserver(observer: PersonObserver) {
+        observers.add(observer)
+    }
+
+    internal fun arbeidsgiverperiodeFor(organisasjonsnummer: String, sykdomshistorikkId: UUID): List<Arbeidsgiverperiode>? {
+        return infotrygdhistorikk.arbeidsgiverperiodeFor(organisasjonsnummer, sykdomshistorikkId)
+    }
+
+    internal fun arbeidsgiverperiodeFor(orgnummer: String, sykdomshistorikkId: UUID, sykdomstidslinje: Sykdomstidslinje, periode: Periode, subsumsjonObserver: SubsumsjonObserver): List<Arbeidsgiverperiode> {
+        val periodebuilder = ArbeidsgiverperiodeBuilderBuilder()
+        infotrygdhistorikk.build(orgnummer, sykdomstidslinje, periodebuilder, subsumsjonObserver)
+        return periodebuilder.result().also {
+            infotrygdhistorikk.lagreResultat(orgnummer, sykdomshistorikkId, it)
+        }
+    }
+
+    private fun arbeidsgiverUtbetalinger(
+        regler: ArbeidsgiverRegler = NormalArbeidstaker,
+        subsumsjonObserver: SubsumsjonObserver
+    ): ArbeidsgiverUtbetalinger {
+        val skjæringstidspunkter = skjæringstidspunkter()
+        return ArbeidsgiverUtbetalinger(
+            regler = regler,
+            arbeidsgivere = arbeidsgivereMedSykdom().associateWith {
+                it.builder(regler, skjæringstidspunkter, vilkårsgrunnlagHistorikk.inntektsopplysningPerSkjæringstidspunktPerArbeidsgiver(), subsumsjonObserver)
+            },
+            infotrygdhistorikk = infotrygdhistorikk,
+            alder = fødselsnummer.alder(),
+            dødsdato = dødsdato,
+            vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk,
+            subsumsjonObserver = subsumsjonObserver
+        )
     }
 
     internal fun gjenopptaBehandling(hendelse: IAktivitetslogg) {
@@ -417,22 +432,6 @@ class Person private constructor(
 
     internal fun feriepengerUtbetalt(hendelseskontekst: Hendelseskontekst, feriepengerUtbetaltEvent: PersonObserver.FeriepengerUtbetaltEvent) {
         observers.forEach { it.feriepengerUtbetalt(hendelseskontekst, feriepengerUtbetaltEvent) }
-    }
-
-    fun håndter(hendelse: AnnullerUtbetaling) {
-        hendelse.kontekst(this)
-        arbeidsgivere.finn(hendelse.organisasjonsnummer())?.håndter(hendelse)
-            ?: hendelse.error("Finner ikke arbeidsgiver")
-    }
-
-    fun håndter(hendelse: Grunnbeløpsregulering) {
-        hendelse.kontekst(this)
-        arbeidsgivere.finn(hendelse.organisasjonsnummer())?.håndter(arbeidsgivere, hendelse, vilkårsgrunnlagHistorikk)
-            ?: hendelse.error("Finner ikke arbeidsgiver")
-    }
-
-    fun addObserver(observer: PersonObserver) {
-        observers.add(observer)
     }
 
     internal fun nyesteIdForVilkårsgrunnlagHistorikk() =
