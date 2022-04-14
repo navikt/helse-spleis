@@ -43,6 +43,7 @@ import no.nav.helse.person.Vedtaksperiode.Companion.IKKE_FERDIG_BEHANDLET
 import no.nav.helse.person.Vedtaksperiode.Companion.IKKE_FERDIG_REVURDERT
 import no.nav.helse.person.Vedtaksperiode.Companion.KLAR_TIL_BEHANDLING
 import no.nav.helse.person.Vedtaksperiode.Companion.REVURDERING_IGANGSATT
+import no.nav.helse.person.Vedtaksperiode.Companion.avventerRevurdering
 import no.nav.helse.person.Vedtaksperiode.Companion.harNødvendigInntekt
 import no.nav.helse.person.Vedtaksperiode.Companion.harOverlappendeUtbetaltePerioder
 import no.nav.helse.person.Vedtaksperiode.Companion.harUtbetaling
@@ -66,7 +67,6 @@ import no.nav.helse.utbetalingslinjer.Feriepengeutbetaling
 import no.nav.helse.utbetalingslinjer.Feriepengeutbetaling.Companion.gjelderFeriepengeutbetaling
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling
-import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.erSisteUtbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.harNærliggendeUtbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.utbetaltTidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
@@ -143,9 +143,6 @@ internal class Arbeidsgiver private constructor(
 
         internal fun List<Arbeidsgiver>.nesteRevurderingsperiode() =
             flatMap { it.vedtaksperioder }.nesteRevurderingsperiode(this)
-
-        internal fun List<Arbeidsgiver>.erSisteUtbetaling(utbetaling: Utbetaling) =
-            flatMap { it.utbetalinger }.erSisteUtbetaling(utbetaling)
 
         internal fun List<Arbeidsgiver>.harPeriodeSomBlokkererOverstyrArbeidsforhold(skjæringstidspunkt: LocalDate) = any { arbeidsgiver ->
             arbeidsgiver.vedtaksperioder
@@ -333,6 +330,8 @@ internal class Arbeidsgiver private constructor(
             filter = IKKE_FERDIG_REVURDERT
         )
     }
+
+    internal fun avventerRevurdering() = vedtaksperioder.avventerRevurdering()
 
     internal fun gjenopptaRevurdering(første: Vedtaksperiode, hendelse: IAktivitetslogg) {
         Vedtaksperiode.gjenopptaRevurdering(hendelse, vedtaksperioder, første, this)
@@ -1206,8 +1205,6 @@ internal class Arbeidsgiver private constructor(
     internal fun build(filter: Utbetalingsfilter.Builder, inntektsmeldingId: UUID) {
         inntektshistorikk.build(filter, inntektsmeldingId)
     }
-
-    internal fun erSisteUtbetaling(utbetaling: Utbetaling) = person.erSisteUtbetaling(utbetaling)
 
     internal class JsonRestorer private constructor() {
         internal companion object {
