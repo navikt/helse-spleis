@@ -11,6 +11,7 @@ import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.juni
+import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
@@ -371,6 +372,25 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
                 assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING)
                 assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
                 assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_GAP, AVVENTER_UFERDIG)
+            }
+        )
+    }
+
+    @Test
+    fun `out of order periode trigger revurdering`() {
+        nyttVedtak(1.mai, 31.mai)
+        forlengVedtak(1.juni, 30.juni)
+        nullstillTilstandsendringer()
+        try { nyttVedtak(1.januar, 31.januar) }
+        catch (_: AssertionError) {} /* svelger exception siden perioden trigger pt. forkasting siden det er utbetalt senere perioder */
+        assertForventetFeil(
+            nå = {
+                assertTilstander(1.vedtaksperiode, AVSLUTTET)
+                assertTilstander(2.vedtaksperiode, AVSLUTTET)
+            },
+            ønsket = {
+                assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING)
+                assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
             }
         )
     }
