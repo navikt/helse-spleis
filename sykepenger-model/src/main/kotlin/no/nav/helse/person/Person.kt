@@ -319,7 +319,7 @@ class Person private constructor(
         arbeidsgivere.gjenopptaBehandling(hendelse)
     }
 
-    fun annullert(hendelseskontekst: Hendelseskontekst, event: PersonObserver.UtbetalingAnnullertEvent) {
+    internal fun annullert(hendelseskontekst: Hendelseskontekst, event: PersonObserver.UtbetalingAnnullertEvent) {
         observers.forEach { it.annullering(hendelseskontekst, event) }
     }
 
@@ -358,44 +358,44 @@ class Person private constructor(
         vedtaksperiode.revurder(hendelse)
     }
 
-    fun vedtaksperiodePåminnet(påminnelse: Påminnelse) {
+    internal fun vedtaksperiodePåminnet(påminnelse: Påminnelse) {
         observers.forEach { it.vedtaksperiodePåminnet(påminnelse.hendelseskontekst(), påminnelse) }
     }
 
-    fun vedtaksperiodeIkkePåminnet(påminnelse: Påminnelse, tilstandType: TilstandType) {
+    internal fun vedtaksperiodeIkkePåminnet(påminnelse: Påminnelse, tilstandType: TilstandType) {
         observers.forEach { it.vedtaksperiodeIkkePåminnet(påminnelse.hendelseskontekst(), tilstandType) }
     }
 
-    fun opprettOppgaveForSpeilsaksbehandlere(aktivitetslogg: IAktivitetslogg, event: PersonObserver.OpprettOppgaveForSpeilsaksbehandlereEvent) {
+    internal fun opprettOppgaveForSpeilsaksbehandlere(aktivitetslogg: IAktivitetslogg, event: PersonObserver.OpprettOppgaveForSpeilsaksbehandlereEvent) {
         observers.forEach { it.opprettOppgaveForSpeilsaksbehandlere(aktivitetslogg.hendelseskontekst(), event) }
     }
 
-    fun opprettOppgave(aktivitetslogg: IAktivitetslogg, event: PersonObserver.OpprettOppgaveEvent) {
+    internal fun opprettOppgave(aktivitetslogg: IAktivitetslogg, event: PersonObserver.OpprettOppgaveEvent) {
         observers.forEach { it.opprettOppgave(aktivitetslogg.hendelseskontekst(), event) }
     }
 
-    fun vedtaksperiodeAvbrutt(aktivitetslogg: IAktivitetslogg, event: PersonObserver.VedtaksperiodeAvbruttEvent) {
+    internal fun vedtaksperiodeAvbrutt(aktivitetslogg: IAktivitetslogg, event: PersonObserver.VedtaksperiodeAvbruttEvent) {
         observers.forEach { it.vedtaksperiodeAvbrutt(aktivitetslogg.hendelseskontekst(), event) }
     }
 
-    fun vedtaksperiodeEndret(aktivitetslogg: IAktivitetslogg, event: PersonObserver.VedtaksperiodeEndretEvent) {
+    internal fun vedtaksperiodeEndret(aktivitetslogg: IAktivitetslogg, event: PersonObserver.VedtaksperiodeEndretEvent) {
         observers.forEach {
             it.vedtaksperiodeEndret(aktivitetslogg.hendelseskontekst(), event)
             it.personEndret(aktivitetslogg.hendelseskontekst())
         }
     }
 
-    fun inntektsmeldingReplay(vedtaksperiodeId: UUID) {
+    internal fun inntektsmeldingReplay(vedtaksperiodeId: UUID) {
         observers.forEach {
             it.inntektsmeldingReplay(fødselsnummer, vedtaksperiodeId)
         }
     }
 
-    fun trengerInntektsmelding(hendelseskontekst: Hendelseskontekst, orgnr: String, event: PersonObserver.ManglendeInntektsmeldingEvent) {
+    internal fun trengerInntektsmelding(hendelseskontekst: Hendelseskontekst, orgnr: String, event: PersonObserver.ManglendeInntektsmeldingEvent) {
         observers.forEach { it.manglerInntektsmelding(hendelseskontekst, orgnr, event) }
     }
 
-    fun trengerIkkeInntektsmelding(hendelseskontekst: Hendelseskontekst, event: PersonObserver.TrengerIkkeInntektsmeldingEvent) {
+    internal fun trengerIkkeInntektsmelding(hendelseskontekst: Hendelseskontekst, event: PersonObserver.TrengerIkkeInntektsmeldingEvent) {
         observers.forEach { it.trengerIkkeInntektsmelding(hendelseskontekst, event) }
     }
 
