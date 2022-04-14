@@ -2736,7 +2736,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun nesteRevurderingstilstand(hendelse: IAktivitetslogg, overstyrt: Vedtaksperiode, pågående: Vedtaksperiode?) {
         if (utbetalinger.utbetales()) return
-        if (pågående?.utbetalinger?.utbetales() == true) return tilstand(hendelse, AvventerRevurdering)
+        if (pågående?.utbetalinger?.utbetales() == true || overstyrt.arbeidsgiver != this.arbeidsgiver) return tilstand(hendelse, AvventerRevurdering)
         if (skjæringstidspunkt != overstyrt.skjæringstidspunkt) return tilstand(hendelse, AvventerRevurdering)
         tilstand(hendelse, AvventerGjennomførtRevurdering)
     }
