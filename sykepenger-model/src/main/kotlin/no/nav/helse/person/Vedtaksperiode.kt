@@ -3414,7 +3414,7 @@ internal class Vedtaksperiode private constructor(
         // Ny revurderingsflyt
         // Finner eldste vedtaksperiode, foretrekker eldste arbeidsgiver ved likhet (ag1 før ag2)
         internal fun List<Vedtaksperiode>.nesteRevurderingsperiode(arbeidsgivere: List<Arbeidsgiver>) =
-            sortedWith(compareBy({ it }, { arbeidsgivere.indexOf(it.arbeidsgiver) })).first { it.tilstand == AvventerRevurdering }
+            pågående() ?: sortedWith(compareBy({ it }, { arbeidsgivere.indexOf(it.arbeidsgiver) })).first { it.tilstand == AvventerRevurdering }
 
         internal fun Map<Arbeidsgiver, List<Vedtaksperiode>>.startRevurdering(
             overstyrt: Vedtaksperiode,
