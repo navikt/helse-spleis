@@ -48,8 +48,8 @@ import no.nav.helse.person.Vedtaksperiode.Companion.harNødvendigInntekt
 import no.nav.helse.person.Vedtaksperiode.Companion.harOverlappendeUtbetaltePerioder
 import no.nav.helse.person.Vedtaksperiode.Companion.harUtbetaling
 import no.nav.helse.person.Vedtaksperiode.Companion.iderMedUtbetaling
+import no.nav.helse.person.Vedtaksperiode.Companion.kanStarteRevurdering
 import no.nav.helse.person.Vedtaksperiode.Companion.medSkjæringstidspunkt
-import no.nav.helse.person.Vedtaksperiode.Companion.nesteRevurderingsperiode
 import no.nav.helse.person.Vedtaksperiode.Companion.nåværendeVedtaksperiode
 import no.nav.helse.person.Vedtaksperiode.Companion.periode
 import no.nav.helse.person.Vedtaksperiode.Companion.startRevurdering
@@ -141,8 +141,8 @@ internal class Arbeidsgiver private constructor(
             associateWith { it.vedtaksperioder.toList() }.startRevurdering(vedtaksperiode, hendelse)
         }
 
-        internal fun List<Arbeidsgiver>.nesteRevurderingsperiode() =
-            flatMap { it.vedtaksperioder }.nesteRevurderingsperiode(this)
+        internal fun List<Arbeidsgiver>.kanStarteRevurdering(vedtaksperiode: Vedtaksperiode) =
+            flatMap { it.vedtaksperioder }.kanStarteRevurdering(this, vedtaksperiode)
 
         internal fun List<Arbeidsgiver>.harPeriodeSomBlokkererOverstyrArbeidsforhold(skjæringstidspunkt: LocalDate) = any { arbeidsgiver ->
             arbeidsgiver.vedtaksperioder

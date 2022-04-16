@@ -1532,7 +1532,7 @@ internal class Vedtaksperiode private constructor(
             LocalDateTime.MAX
 
         override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, gjenopptaBehandling: IAktivitetslogg) {
-            if (vedtaksperiode != vedtaksperiode.person.nesteRevurderingsperiode()) return
+            if (!vedtaksperiode.person.kanStarteRevurdering(vedtaksperiode)) return
             //if (!vedtaksperiode.utbetalinger.erAvsluttet() || !vedtaksperiode.person.bar(vedtaksperiode.arbeidsgiver)) return
             vedtaksperiode.tilstand(gjenopptaBehandling, AvventerGjennomførtRevurdering)
             vedtaksperiode.arbeidsgiver.gjenopptaRevurdering(vedtaksperiode, gjenopptaBehandling)
@@ -3413,8 +3413,13 @@ internal class Vedtaksperiode private constructor(
 
         // Ny revurderingsflyt
         // Finner eldste vedtaksperiode, foretrekker eldste arbeidsgiver ved likhet (ag1 før ag2)
-        internal fun List<Vedtaksperiode>.nesteRevurderingsperiode(arbeidsgivere: List<Arbeidsgiver>) =
-            pågående() ?: sortedWith(compareBy({ it }, { arbeidsgivere.indexOf(it.arbeidsgiver) })).first { it.tilstand == AvventerRevurdering }
+        internal fun List<Vedtaksperiode>.kanStarteRevurdering(arbeidsgivere: List<Arbeidsgiver>, vedtaksperiode: Vedtaksperiode): Boolean {
+            val pågående = pågående() ?: nesteRevurderingsperiode(arbeidsgivere, vedtaksperiode)
+            return vedtaksperiode == pågående
+        }
+
+        private fun List<Vedtaksperiode>.nesteRevurderingsperiode(arbeidsgivere: List<Arbeidsgiver>, other: Vedtaksperiode) =
+            filter(IKKE_FERDIG_BEHANDLET).firstOrNull { it før other } ?: sortedWith(compareBy({ it }, { arbeidsgivere.indexOf(it.arbeidsgiver) })).first { it.tilstand == AvventerRevurdering }
 
         internal fun Map<Arbeidsgiver, List<Vedtaksperiode>>.startRevurdering(
             overstyrt: Vedtaksperiode,
