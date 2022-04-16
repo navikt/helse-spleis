@@ -13,6 +13,7 @@ import no.nav.helse.juni
 import no.nav.helse.mars
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
+import no.nav.helse.person.TilstandType.AVVENTER_ARBEIDSGIVERE
 import no.nav.helse.person.TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
@@ -202,9 +203,9 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
         nyeVedtak(1.januar, 31.januar, a1, a2)
         forlengVedtak(1.februar, 28.februar, a1, a2)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)), a1)
-        håndterYtelser(2.vedtaksperiode)
-        håndterSimulering(2.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(2.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
         nullstillTilstandsendringer()
         håndterSykmelding(Sykmeldingsperiode(1.juni, 10.juni, 100.prosent), orgnummer = a2)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.juni, 10.juni, 100.prosent), orgnummer = a2)
@@ -221,6 +222,26 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
                 assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_GAP, AVVENTER_UFERDIG, orgnummer = a2)
             }
         )
+    }
+
+    @Test
+    fun `revurdering av ag 2 mens ag 1 er til utbetaling`() {
+        nyeVedtak(1.januar, 31.januar, a1, a2)
+        forlengelseTilGodkjenning(1.februar, 28.februar, a1, a2)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
+        nullstillTilstandsendringer()
+
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)), a2)
+
+        inspektør(a1) {
+            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
+            assertTilstander(2.vedtaksperiode, TIL_UTBETALING)
+        }
+
+        inspektør(a2) {
+            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
+            assertTilstander(2.vedtaksperiode, AVVENTER_ARBEIDSGIVERE)
+        }
     }
 
     @Test

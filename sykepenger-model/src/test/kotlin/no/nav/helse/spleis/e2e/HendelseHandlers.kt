@@ -194,6 +194,15 @@ internal fun AbstractEndToEndTest.forlengVedtak(fom: LocalDate, tom: LocalDate, 
     }
 }
 
+internal fun AbstractEndToEndTest.forlengelseTilGodkjenning(fom: LocalDate, tom: LocalDate, vararg organisasjonsnumre: String) {
+    require(organisasjonsnumre.isNotEmpty()) { "Må inneholde minst ett organisasjonsnummer" }
+    organisasjonsnumre.forEach { håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent), orgnummer = it) }
+    organisasjonsnumre.forEach { håndterSøknad(Søknadsperiode.Sykdom(fom, tom, 100.prosent), orgnummer = it) }
+    organisasjonsnumre.forEach { håndterYtelser(vedtaksperiodeIdInnhenter = observatør.sisteVedtaksperiode(), orgnummer = it) }
+    håndterYtelser(observatør.sisteVedtaksperiode(), orgnummer = organisasjonsnumre.first())
+    håndterSimulering(observatør.sisteVedtaksperiode(), orgnummer = organisasjonsnumre.first())
+}
+
 internal fun AbstractEndToEndTest.nyttVedtak(
     fom: LocalDate,
     tom: LocalDate,
