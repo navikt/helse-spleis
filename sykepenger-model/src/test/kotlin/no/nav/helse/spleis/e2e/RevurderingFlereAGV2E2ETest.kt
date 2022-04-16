@@ -10,6 +10,7 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.januar
 import no.nav.helse.juni
+import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
@@ -277,6 +278,49 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
         inspektør(a2) {
             assertTilstander(1.vedtaksperiode, AVSLUTTET)
             assertTilstander(2.vedtaksperiode, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
+        }
+    }
+
+    @Test
+    fun `revurdering av tidligere frittstående periode hos ag3 mens overlappende hos ag1 og ag2 utbetales`() {
+        nyttVedtak(1.januar, 31.januar, orgnummer = a3)
+
+        nyeVedtak(1.mai, 31.mai, a1, a2)
+        forlengelseTilGodkjenning(1.juni, 30.juni, a1, a2)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
+        nullstillTilstandsendringer()
+
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)), a3)
+        håndterUtbetalt(orgnummer = a1)
+
+        inspektør(a1) {
+            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
+            assertTilstander(2.vedtaksperiode, TIL_UTBETALING, AVSLUTTET)
+        }
+        inspektør(a2) {
+            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
+            assertTilstander(2.vedtaksperiode, AVVENTER_ARBEIDSGIVERE)
+        }
+        inspektør(a3) {
+            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+        }
+
+        nullstillTilstandsendringer()
+        håndterYtelser(1.vedtaksperiode, orgnummer = a3)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a3)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a3)
+        håndterUtbetalt(orgnummer = a3)
+
+        inspektør(a1) {
+            assertTilstander(1.vedtaksperiode, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING)
+            assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+        }
+        inspektør(a2) {
+            assertTilstander(1.vedtaksperiode, AVVENTER_REVURDERING)
+            assertTilstander(2.vedtaksperiode, AVVENTER_ARBEIDSGIVERE)
+        }
+        inspektør(a3) {
+            assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVSLUTTET)
         }
     }
 
