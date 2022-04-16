@@ -16,8 +16,10 @@ import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_ARBEIDSGIVERE
 import no.nav.helse.person.TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_UFERDIG
 import no.nav.helse.person.TilstandType.MOTTATT_SYKMELDING_UFERDIG_GAP
@@ -232,15 +234,49 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
         nullstillTilstandsendringer()
 
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)), a2)
+        håndterUtbetalt()
 
         inspektør(a1) {
-            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
-            assertTilstander(2.vedtaksperiode, TIL_UTBETALING)
+            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING)
+            assertTilstander(2.vedtaksperiode, TIL_UTBETALING, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
         }
 
         inspektør(a2) {
             assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
             assertTilstander(2.vedtaksperiode, AVVENTER_ARBEIDSGIVERE)
+        }
+
+        nullstillTilstandsendringer()
+        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
+
+        inspektør(a1) {
+            assertTilstander(1.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING, AVSLUTTET)
+            assertTilstander(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, AVSLUTTET)
+        }
+
+        inspektør(a2) {
+            assertTilstander(1.vedtaksperiode, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+            assertTilstander(2.vedtaksperiode, AVVENTER_ARBEIDSGIVERE)
+        }
+
+        nullstillTilstandsendringer()
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(orgnummer = a2)
+
+        inspektør(a2) {
+            assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVSLUTTET)
+            assertTilstander(2.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, AVVENTER_HISTORIKK)
+        }
+
+        nullstillTilstandsendringer()
+        håndterYtelser(2.vedtaksperiode, orgnummer = a2)
+
+        inspektør(a2) {
+            assertTilstander(1.vedtaksperiode, AVSLUTTET)
+            assertTilstander(2.vedtaksperiode, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
         }
     }
 
