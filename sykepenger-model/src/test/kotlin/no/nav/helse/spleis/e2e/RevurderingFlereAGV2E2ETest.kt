@@ -325,6 +325,49 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
     }
 
     @Test
+    fun `revurdering av senere frittstående periode hos ag3 mens overlappende out of order hos ag1 og ag2 utbetales`() {
+        nyttVedtak(1.april, 30.april, orgnummer = a3)
+
+        nyeVedtak(1.februar, 28.februar, a1, a2)
+        forlengelseTilGodkjenning(1.mars, 15.mars, a1, a2)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
+        nullstillTilstandsendringer()
+
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.april, Feriedag)), a3)
+        håndterUtbetalt(orgnummer = a1)
+
+        assertForventetFeil(
+            forklaring = "april-periode hos ag3 bør avvente?",
+            nå = {
+                inspektør(a1) {
+                    assertTilstander(1.vedtaksperiode, AVSLUTTET)
+                    assertTilstander(2.vedtaksperiode, TIL_UTBETALING, AVSLUTTET)
+                }
+                inspektør(a2) {
+                    assertTilstander(1.vedtaksperiode, AVSLUTTET)
+                    assertTilstander(2.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, AVVENTER_HISTORIKK)
+                }
+                inspektør(a3) {
+                    assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+                }
+            },
+            ønsket = {
+                inspektør(a1) {
+                    assertTilstander(1.vedtaksperiode, AVSLUTTET)
+                    assertTilstander(2.vedtaksperiode, TIL_UTBETALING, AVSLUTTET)
+                }
+                inspektør(a2) {
+                    assertTilstander(1.vedtaksperiode, AVSLUTTET)
+                    assertTilstander(2.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, AVVENTER_HISTORIKK)
+                }
+                inspektør(a3) {
+                    assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
+                }
+            }
+        )
+    }
+
+    @Test
     fun `revurdering av ag 1 kicker i gang revurdering av ag 2 - holder igjen senere perioder hos ag1`() {
         nyeVedtak(1.januar, 31.januar, a1, a2)
         forlengVedtak(1.februar, 28.februar, a1, a2)
