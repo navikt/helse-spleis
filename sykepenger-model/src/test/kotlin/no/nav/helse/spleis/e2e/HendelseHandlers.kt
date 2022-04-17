@@ -95,7 +95,13 @@ internal fun AbstractEndToEndTest.håndterSykmelding(
     return id
 }
 
-internal fun AbstractEndToEndTest.tilGodkjenning(fom: LocalDate, tom: LocalDate, vararg organisasjonsnummere: String) {
+internal fun AbstractEndToEndTest.tilGodkjenning(fom: LocalDate, tom: LocalDate, vararg organisasjonsnummere: String, inntekterBlock: Inntektperioder.() -> Unit = {
+    fom.minusYears(1) til fom.minusMonths(1) inntekter {
+        organisasjonsnummere.forEach {
+            it inntekt 20000.månedlig
+        }
+    }
+}) {
     require(organisasjonsnummere.isNotEmpty()) { "Må inneholde minst ett organisasjonsnummer" }
     organisasjonsnummere.forEach {
         håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent), orgnummer = it)
@@ -111,19 +117,14 @@ internal fun AbstractEndToEndTest.tilGodkjenning(fom: LocalDate, tom: LocalDate,
             orgnummer = it
         )
     }
-    val (første, _) = organisasjonsnummere.first() to organisasjonsnummere.drop(1)
 
-    første.let { organisasjonsnummer ->
+    organisasjonsnummere.first().let { organisasjonsnummer ->
         håndterYtelser(vedtaksperiodeIdInnhenter = 1.vedtaksperiode, orgnummer = organisasjonsnummer)
         håndterVilkårsgrunnlag(
             vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
             orgnummer = organisasjonsnummer,
             inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
-                fom.minusYears(1) til fom.minusMonths(1) inntekter {
-                    organisasjonsnummere.forEach {
-                        it inntekt 20000.månedlig
-                    }
-                }
+                inntekterBlock()
             })
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = organisasjonsnummer)
@@ -142,33 +143,10 @@ internal fun AbstractEndToEndTest.nyeVedtak(
     }
 ) {
     require(organisasjonsnummere.isNotEmpty()) { "Må inneholde minst ett organisasjonsnummer" }
-    organisasjonsnummere.forEach {
-        håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent), orgnummer = it)
-    }
-    organisasjonsnummere.forEach {
-        håndterSøknad(Søknadsperiode.Sykdom(fom, tom, 100.prosent), orgnummer = it)
-
-    }
-    organisasjonsnummere.forEach {
-        håndterInntektsmelding(
-            arbeidsgiverperioder = listOf(Periode(fom, fom.plusDays(15))),
-            beregnetInntekt = 20000.månedlig,
-            orgnummer = it
-        )
-    }
+    tilGodkjenning(fom, tom, *organisasjonsnummere, inntekterBlock = inntekterBlock)
     val (første, resten) = organisasjonsnummere.first() to organisasjonsnummere.drop(1)
 
     første.let { organisasjonsnummer ->
-        håndterYtelser(vedtaksperiodeIdInnhenter = 1.vedtaksperiode, orgnummer = organisasjonsnummer)
-        håndterVilkårsgrunnlag(
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
-            orgnummer = organisasjonsnummer,
-            inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
-                inntekterBlock()
-            })
-        )
-        håndterYtelser(1.vedtaksperiode, orgnummer = organisasjonsnummer)
-        håndterSimulering(1.vedtaksperiode, orgnummer = organisasjonsnummer)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = organisasjonsnummer)
         håndterUtbetalt(orgnummer = organisasjonsnummer)
     }
@@ -181,19 +159,6 @@ internal fun AbstractEndToEndTest.nyeVedtak(
     }
 }
 
-internal fun AbstractEndToEndTest.forlengVedtak(fom: LocalDate, tom: LocalDate, vararg organisasjonsnumre: String) {
-    require(organisasjonsnumre.isNotEmpty()) { "Må inneholde minst ett organisasjonsnummer" }
-    organisasjonsnumre.forEach { håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent), orgnummer = it) }
-    organisasjonsnumre.forEach { håndterSøknad(Søknadsperiode.Sykdom(fom, tom, 100.prosent), orgnummer = it) }
-    organisasjonsnumre.forEach { håndterYtelser(vedtaksperiodeIdInnhenter = observatør.sisteVedtaksperiode(), orgnummer = it) }
-    organisasjonsnumre.forEach { organisasjonsnummer ->
-        håndterYtelser(observatør.sisteVedtaksperiode(), orgnummer = organisasjonsnummer)
-        håndterSimulering(observatør.sisteVedtaksperiode(), orgnummer = organisasjonsnummer)
-        håndterUtbetalingsgodkjenning(observatør.sisteVedtaksperiode(), orgnummer = organisasjonsnummer)
-        håndterUtbetalt(orgnummer = organisasjonsnummer)
-    }
-}
-
 internal fun AbstractEndToEndTest.forlengelseTilGodkjenning(fom: LocalDate, tom: LocalDate, vararg organisasjonsnumre: String) {
     require(organisasjonsnumre.isNotEmpty()) { "Må inneholde minst ett organisasjonsnummer" }
     organisasjonsnumre.forEach { håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent), orgnummer = it) }
@@ -201,6 +166,21 @@ internal fun AbstractEndToEndTest.forlengelseTilGodkjenning(fom: LocalDate, tom:
     organisasjonsnumre.forEach { håndterYtelser(vedtaksperiodeIdInnhenter = observatør.sisteVedtaksperiode(), orgnummer = it) }
     håndterYtelser(observatør.sisteVedtaksperiode(), orgnummer = organisasjonsnumre.first())
     håndterSimulering(observatør.sisteVedtaksperiode(), orgnummer = organisasjonsnumre.first())
+}
+
+internal fun AbstractEndToEndTest.forlengVedtak(fom: LocalDate, tom: LocalDate, vararg organisasjonsnumre: String) {
+    forlengelseTilGodkjenning(fom, tom, *organisasjonsnumre)
+    val (første, resten) = organisasjonsnumre.first() to organisasjonsnumre.drop(1)
+    første.let { organisasjonsnummer ->
+        håndterUtbetalingsgodkjenning(observatør.sisteVedtaksperiode(), orgnummer = organisasjonsnummer)
+        håndterUtbetalt(orgnummer = organisasjonsnummer)
+    }
+    resten.forEach { organisasjonsnummer ->
+        håndterYtelser(observatør.sisteVedtaksperiode(), orgnummer = organisasjonsnummer)
+        håndterSimulering(observatør.sisteVedtaksperiode(), orgnummer = organisasjonsnummer)
+        håndterUtbetalingsgodkjenning(observatør.sisteVedtaksperiode(), orgnummer = organisasjonsnummer)
+        håndterUtbetalt(orgnummer = organisasjonsnummer)
+    }
 }
 
 internal fun AbstractEndToEndTest.nyttVedtak(
