@@ -16,6 +16,7 @@ import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_ARBEIDSGIVERE
 import no.nav.helse.person.TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
@@ -371,6 +372,44 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
         inspektør(a3) {
             assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
         }
+    }
+
+    @Test
+    fun `revurdering av senere frittstående periode hos ag3 mens overlappende forlengelse out of order hos ag1 og ag2 utbetales`() {
+        nyttVedtak(1.april, 30.april, orgnummer = a3)
+        tilGodkjenning(1.februar, 28.februar, a1, a2)
+        nullstillTilstandsendringer()
+        inspektør(a1) {
+            assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING)
+        }
+        inspektør(a2) {
+            assertTilstander(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE)
+        }
+        inspektør(a3) {
+            assertTilstander(1.vedtaksperiode, AVSLUTTET)
+        }
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
+
+        inspektør(a1) {
+            assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET)
+        }
+        inspektør(a2) {
+            assertTilstander(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, AVVENTER_HISTORIKK)
+        }
+        assertForventetFeil(
+            forklaring = "Når en periode avsluttes bør det trigge revurdering av alle senere avsluttede perioder",
+            nå = {
+                inspektør(a3) {
+                    assertTilstander(1.vedtaksperiode, AVSLUTTET)
+                }
+            },
+            ønsket = {
+                inspektør(a3) {
+                    assertTilstander(1.vedtaksperiode, AVVENTER_REVURDERING)
+                }
+            }
+        )
     }
 
     @Test
