@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate
+import no.nav.helse.EnableToggle
 import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.august
@@ -24,20 +25,10 @@ import no.nav.helse.september
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
+@EnableToggle(Toggle.NyTilstandsflyt::class)
 internal class NyTilstandsflytInfotrygdTest : AbstractEndToEndTest() {
-    @BeforeEach
-    fun setup() {
-        Toggle.NyTilstandsflyt.enable()
-    }
-
-    @AfterEach
-    fun tearDown() {
-        Toggle.NyTilstandsflyt.pop()
-    }
 
     @Test
     fun `enkel infotrygdforlengelse`() {

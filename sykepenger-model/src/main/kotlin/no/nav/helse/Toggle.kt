@@ -40,12 +40,11 @@ abstract class Toggle internal constructor(enabled: Boolean = false, private val
     val disabled get() = !enabled
 
     /**
-     * Brukes sammen med [pop] {@link Toggles#pop() pop()}
-     * statically bound {@link ILoggerFactory} instance
-     * @link Toggles
+     * Brukes sammen med [pop] {@link Toggle#pop() pop()}
+     * @link Toggle
      * @return Unit
      */
-    fun enable() {
+    private fun enable() {
         if (force) return
         states.get().add(true)
     }

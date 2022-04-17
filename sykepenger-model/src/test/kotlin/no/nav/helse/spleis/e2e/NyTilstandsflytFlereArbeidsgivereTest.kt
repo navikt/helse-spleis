@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate
+import no.nav.helse.EnableToggle
 import no.nav.helse.Toggle
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
@@ -28,23 +29,13 @@ import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
+@EnableToggle(Toggle.NyTilstandsflyt::class)
 internal class NyTilstandsflytFlereArbeidsgivereTest : AbstractEndToEndTest() {
-    @BeforeEach
-    fun setup() {
-        Toggle.NyTilstandsflyt.enable()
-    }
-
-    @AfterEach
-    fun tearDown() {
-        Toggle.NyTilstandsflyt.pop()
-    }
 
     @Test
     fun `En periode i AvventerTidligerEllerOverlappendePerioder for hver arbeidsgiver - kun en periode skal gå videre`() {

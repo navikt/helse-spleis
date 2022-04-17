@@ -1,36 +1,37 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.*
+import no.nav.helse.EnableToggle
+import no.nav.helse.Toggle
+import no.nav.helse.desember
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
+import no.nav.helse.januar
+import no.nav.helse.juli
+import no.nav.helse.mars
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
-import no.nav.helse.person.TilstandType.*
+import no.nav.helse.person.TilstandType.AVSLUTTET
+import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
+import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
+import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP
+import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
+import no.nav.helse.person.TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP
+import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.serde.api.BegrunnelseDTO
+import no.nav.helse.somFødselsnummer
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
+@EnableToggle(Toggle.SendFeriepengeOppdrag::class)
 internal class AvvisningEtterFylte70ÅrTest : AbstractEndToEndTest() {
     companion object {
         private val FYLLER_70_TIENDE_JANUAR = "10014812345".somFødselsnummer()
         private val FYLLER_70_FJORTENDE_JANUAR = "14014812345".somFødselsnummer()
         private val FYLLER_70_TOOGTYVENDE_JANUAR = "22014812345".somFødselsnummer()
-    }
-
-    @BeforeEach
-    fun setUp() {
-        Toggle.SendFeriepengeOppdrag.enable()
-    }
-
-    @AfterEach
-    fun tearDown() {
-        Toggle.SendFeriepengeOppdrag.pop()
     }
 
     @Test

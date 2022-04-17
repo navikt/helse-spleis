@@ -1,7 +1,11 @@
 package no.nav.helse.spleis.e2e
 
 import ch.qos.logback.classic.Logger
-import no.nav.helse.*
+import java.time.Year
+import no.nav.helse.EnableToggle
+import no.nav.helse.Toggle
+import no.nav.helse.august
+import no.nav.helse.desember
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -10,10 +14,19 @@ import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger.Utbetalingsperi
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.inspectors.personLogg
+import no.nav.helse.januar
+import no.nav.helse.juli
+import no.nav.helse.juni
+import no.nav.helse.mai
+import no.nav.helse.mars
+import no.nav.helse.november
+import no.nav.helse.oktober
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
+import no.nav.helse.september
 import no.nav.helse.serde.reflection.castAsList
+import no.nav.helse.sisteBehov
 import no.nav.helse.testhelpers.LogCollector
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.utbetalingslinjer.Endringskode
@@ -21,31 +34,22 @@ import no.nav.helse.utbetalingslinjer.Klassekode
 import no.nav.helse.utbetalingslinjer.Satstype
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.slf4j.LoggerFactory
-import java.time.Year
 import kotlin.math.roundToInt
 
+@EnableToggle(Toggle.SendFeriepengeOppdrag::class)
 internal class FeriepengeE2ETest : AbstractEndToEndTest() {
     private val logCollector = LogCollector()
 
     init {
         (LoggerFactory.getLogger("tjenestekall") as Logger).addAppender(logCollector)
         logCollector.start()
-    }
-
-    @BeforeEach
-    fun setUp() {
-        logCollector.clear()
-        Toggle.SendFeriepengeOppdrag.enable()
-    }
-
-    @AfterEach
-    fun tearDown() {
-        Toggle.SendFeriepengeOppdrag.pop()
     }
 
     @Test

@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.EnableToggle
 import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
@@ -30,23 +31,12 @@ import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype.REVURDERING
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
+@EnableToggle(Toggle.NyRevurdering::class)
 internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
-
-    @BeforeEach
-    fun setup() {
-        Toggle.NyRevurdering.enable()
-    }
-
-    @AfterEach
-    fun tearDown() {
-        Toggle.NyRevurdering.pop()
-    }
 
     @Test
     fun `revurdere første periode - flere ag - ag 1`() {

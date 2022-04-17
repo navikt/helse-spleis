@@ -66,10 +66,20 @@ internal class ToggleTest {
     fun `Enable until previous state requested`() {
         prepareToggle(enabled = false, force = false)
         assertFalse(toggle.enabled)
-        toggle.enable()
-        assertTrue(toggle.enabled)
-        toggle.pop()
+        toggle.enable {
+            assertTrue(toggle.enabled)
+        }
         assertFalse(toggle.enabled)
+    }
+
+    @Test
+    fun `keep enabled`() {
+        prepareToggle(enabled = true, force = false)
+        assertTrue(toggle.enabled)
+        toggle.enable {
+            assertTrue(toggle.enabled)
+        }
+        assertTrue(toggle.enabled)
     }
 
     @Test
@@ -86,9 +96,9 @@ internal class ToggleTest {
     fun `Keep disabled if forced state`() {
         prepareToggle(enabled = false, force = true)
         assertFalse(toggle.enabled)
-        toggle.enable()
-        assertFalse(toggle.enabled)
-        toggle.pop()
+        toggle.enable {
+            assertFalse(toggle.enabled)
+        }
         assertFalse(toggle.enabled)
     }
 
@@ -106,17 +116,17 @@ internal class ToggleTest {
     fun `Pop to previous state in multiple blocks`() {
         prepareToggle(enabled = false, force = false)
         assertFalse(toggle.enabled)
-        toggle.enable()
-        assertTrue(toggle.enabled)
-        toggle.disable {
-            assertFalse(toggle.enabled)
-            toggle.enable {
-                assertTrue(toggle.enabled)
+        toggle.enable {
+            assertTrue(toggle.enabled)
+            toggle.disable {
+                assertFalse(toggle.enabled)
+                toggle.enable {
+                    assertTrue(toggle.enabled)
+                }
+                assertFalse(toggle.enabled)
             }
-            assertFalse(toggle.enabled)
+            assertTrue(toggle.enabled)
         }
-        assertTrue(toggle.enabled)
-        toggle.pop()
         assertFalse(toggle.enabled)
     }
 
