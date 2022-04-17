@@ -871,7 +871,7 @@ internal fun AbstractEndToEndTest.gapPeriode(periode: Periode, orgnummer: String
     )
 }
 
-internal fun AbstractEndToEndTest.nyPeriode(periode: Periode, vararg orgnummer: String, grad: Prosentdel = 100.prosent, fnr: Fødselsnummer = AbstractPersonTest.UNG_PERSON_FNR_2018) {
+internal fun AbstractEndToEndTest.nyPeriode(periode: Periode, vararg orgnummer: String = arrayOf(AbstractPersonTest.ORGNUMMER), grad: Prosentdel = 100.prosent, fnr: Fødselsnummer = AbstractPersonTest.UNG_PERSON_FNR_2018) {
     orgnummer.forEach { håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, grad), fnr = fnr, orgnummer = it) }
     orgnummer.forEach {
         val id: IdInnhenter = observatør.sisteVedtaksperiode()

@@ -130,4 +130,5 @@ abstract class Toggle internal constructor(enabled: Boolean = false, private val
     object ForkastForlengelseAvForkastetPeriode : Toggle(false)
     object NyTilstandsflyt : Toggle(false)
     object NyRevurdering : Toggle(false)
+    object RevurdereOutOfOrder : Toggle(false)
 }

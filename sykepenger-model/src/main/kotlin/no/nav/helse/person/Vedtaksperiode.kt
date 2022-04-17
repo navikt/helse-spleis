@@ -983,11 +983,13 @@ internal class Vedtaksperiode private constructor(
         }
 
         fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Sykmelding) {
+            if (Toggle.RevurdereOutOfOrder.enabled) return
             hendelse.error("Mottatt sykmelding eller søknad out of order")
             vedtaksperiode.forkast(hendelse)
         }
 
         fun nyPeriodeFørMedNyFlyt(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Søknad) {
+            if (Toggle.RevurdereOutOfOrder.enabled) return
             hendelse.error("Mottatt søknad out of order")
             vedtaksperiode.forkast(hendelse)
         }
@@ -1533,7 +1535,6 @@ internal class Vedtaksperiode private constructor(
 
         override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, gjenopptaBehandling: IAktivitetslogg) {
             if (!vedtaksperiode.person.kanStarteRevurdering(vedtaksperiode)) return
-            //if (!vedtaksperiode.utbetalinger.erAvsluttet() || !vedtaksperiode.person.bar(vedtaksperiode.arbeidsgiver)) return
             vedtaksperiode.tilstand(gjenopptaBehandling, AvventerGjennomførtRevurdering)
             vedtaksperiode.arbeidsgiver.gjenopptaRevurdering(vedtaksperiode, gjenopptaBehandling)
         }
@@ -3169,7 +3170,8 @@ internal class Vedtaksperiode private constructor(
             tidligere: Vedtaksperiode,
             hendelse: IAktivitetslogg
         ) {
-            vedtaksperiode.tilstand(hendelse, AvventerArbeidsgivereRevurdering)
+            if (Toggle.RevurdereOutOfOrder.disabled) return vedtaksperiode.tilstand(hendelse, AvventerArbeidsgivereRevurdering)
+            vedtaksperiode.tilstand(hendelse, AvventerRevurdering)
         }
 
         override fun håndterTidligereTilstøtendeUferdigPeriode(
@@ -3177,7 +3179,8 @@ internal class Vedtaksperiode private constructor(
             tidligere: Vedtaksperiode,
             hendelse: IAktivitetslogg
         ) {
-            vedtaksperiode.tilstand(hendelse, AvventerArbeidsgivereRevurdering)
+            if (Toggle.RevurdereOutOfOrder.disabled) return vedtaksperiode.tilstand(hendelse, AvventerArbeidsgivereRevurdering)
+            vedtaksperiode.tilstand(hendelse, AvventerRevurdering)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}

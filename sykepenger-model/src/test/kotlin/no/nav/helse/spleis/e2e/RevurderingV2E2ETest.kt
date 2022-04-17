@@ -25,6 +25,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER
 import no.nav.helse.person.TilstandType.AVVENTER_UFERDIG
+import no.nav.helse.person.TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP
 import no.nav.helse.person.TilstandType.MOTTATT_SYKMELDING_UFERDIG_GAP
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
@@ -383,20 +384,27 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `out of order periode trigger revurdering`() {
-        nyttVedtak(1.mai, 31.mai)
-        forlengVedtak(1.juni, 30.juni)
-        nullstillTilstandsendringer()
-        try { nyttVedtak(1.januar, 31.januar) }
-        catch (_: AssertionError) {} /* svelger exception siden perioden trigger pt. forkasting siden det er utbetalt senere perioder */
-        assertForventetFeil(
-            nå = {
-                assertTilstander(1.vedtaksperiode, AVSLUTTET)
-                assertTilstander(2.vedtaksperiode, AVSLUTTET)
-            },
-            ønsket = {
-                assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING)
-                assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
-            }
-        )
+        Toggle.RevurdereOutOfOrder.enable {
+            nyttVedtak(1.mai, 31.mai)
+            forlengVedtak(1.juni, 30.juni)
+            nullstillTilstandsendringer()
+            nyttVedtak(1.januar, 31.januar)
+            assertSisteTilstand(3.vedtaksperiode, AVSLUTTET)
+            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING)
+            assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+        }
+    }
+
+    @Test
+    fun `out of order periode uten utbetaling trigger revurdering`() {
+        Toggle.RevurdereOutOfOrder.enable {
+            nyttVedtak(1.mai, 31.mai)
+            forlengVedtak(1.juni, 30.juni)
+            nullstillTilstandsendringer()
+            nyPeriode(1.januar til 15.januar)
+            assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
+            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING)
+            assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+        }
     }
 }
