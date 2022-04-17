@@ -61,7 +61,7 @@ abstract class Toggle internal constructor(enabled: Boolean = false, private val
     /**
      *
      */
-    fun disable() {
+    private fun disable() {
         if (force) return
         states.get().add(false)
     }

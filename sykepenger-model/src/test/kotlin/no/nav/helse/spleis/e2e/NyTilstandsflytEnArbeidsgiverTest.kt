@@ -41,7 +41,7 @@ internal class NyTilstandsflytEnArbeidsgiverTest : AbstractEndToEndTest() {
 
     @AfterEach
     fun tearDown() {
-        Toggle.NyTilstandsflyt.disable()
+        Toggle.NyTilstandsflyt.pop()
     }
 
     @Test

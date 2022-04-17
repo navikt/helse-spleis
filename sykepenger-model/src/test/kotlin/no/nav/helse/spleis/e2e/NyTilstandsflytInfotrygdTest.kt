@@ -18,7 +18,6 @@ import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER
-import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.september
@@ -37,7 +36,7 @@ internal class NyTilstandsflytInfotrygdTest : AbstractEndToEndTest() {
 
     @AfterEach
     fun tearDown() {
-        Toggle.NyTilstandsflyt.disable()
+        Toggle.NyTilstandsflyt.pop()
     }
 
     @Test

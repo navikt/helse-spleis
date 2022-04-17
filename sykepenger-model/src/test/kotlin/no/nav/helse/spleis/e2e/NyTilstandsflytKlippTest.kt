@@ -29,7 +29,7 @@ internal class NyTilstandsflytKlippTest : AbstractEndToEndTest() {
 
     @AfterEach
     fun tearDown() {
-        Toggle.NyTilstandsflyt.disable()
+        Toggle.NyTilstandsflyt.pop()
     }
 
     @Test
