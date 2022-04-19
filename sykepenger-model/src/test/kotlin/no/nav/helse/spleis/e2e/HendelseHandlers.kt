@@ -153,6 +153,48 @@ internal fun AbstractEndToEndTest.nyeVedtak(
     }
 }
 
+internal fun AbstractEndToEndTest.førstegangTilGodkjenning(
+    fom: LocalDate,
+    tom: LocalDate,
+    vararg organisasjonsnummere: String,
+    inntekterBlock: Inntektperioder.() -> Unit = {
+        organisasjonsnummere.forEach {
+            lagInntektperioder(it, fom, 20000.månedlig)
+        }
+    }
+) {
+    require(organisasjonsnummere.isNotEmpty()) { "Må inneholde minst ett organisasjonsnummer" }
+    organisasjonsnummere.forEach {
+        håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent), orgnummer = it)
+    }
+    organisasjonsnummere.forEach {
+        håndterSøknad(Søknadsperiode.Sykdom(fom, tom, 100.prosent), orgnummer = it)
+
+    }
+    organisasjonsnummere.forEach {
+        håndterInntektsmelding(
+            arbeidsgiverperioder = listOf(Periode(fom, fom.plusDays(15))),
+            beregnetInntekt = 20000.månedlig,
+            orgnummer = it
+        )
+    }
+
+    val vedtaksperiode = observatør.sisteVedtaksperiode()
+
+    organisasjonsnummere.first().let { organisasjonsnummer ->
+        håndterYtelser(vedtaksperiodeIdInnhenter = vedtaksperiode, orgnummer = organisasjonsnummer)
+        håndterVilkårsgrunnlag(
+            vedtaksperiodeIdInnhenter = vedtaksperiode,
+            orgnummer = organisasjonsnummer,
+            inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
+                inntekterBlock()
+            })
+        )
+        håndterYtelser(vedtaksperiode, orgnummer = organisasjonsnummer)
+        håndterSimulering(vedtaksperiode, orgnummer = organisasjonsnummer)
+    }
+}
+
 internal fun AbstractEndToEndTest.forlengelseTilGodkjenning(fom: LocalDate, tom: LocalDate, vararg organisasjonsnumre: String) {
     require(organisasjonsnumre.isNotEmpty()) { "Må inneholde minst ett organisasjonsnummer" }
     nyPeriode(fom til tom, *organisasjonsnumre)

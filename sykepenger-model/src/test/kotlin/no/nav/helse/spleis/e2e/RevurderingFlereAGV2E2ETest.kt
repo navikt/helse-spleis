@@ -427,4 +427,40 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
             assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
         }
     }
+
+    @Test
+    fun `revurdering på tidligere skjæringstidspunkt for ag 1 mens senere periode for ag 1 er til utbetaling`() {
+        /* Rekkefølge ting burde skje i:
+        * 1. a1 v2 utbetales, a1 v1 avventer revurdering, a2 v1 avventer andre arbeidsgivere
+        * 2. a1 v2 utbetalt, a1 v1 revurderes, a2 v1 avventer andre arbeidsgivere
+        * 3. a1 v1 revurdert, a1 v2 revurderes, a2 v1 avventer andre arbeidsgivere
+        * */
+        nyttVedtak(1.januar, 31.januar, orgnummer = a1)
+        førstegangTilGodkjenning(1.mars, 31.mars, a1, a2)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
+
+        nullstillTilstandsendringer()
+
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)), a1)
+
+        inspektør(a1) {
+            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
+            assertTilstander(2.vedtaksperiode, TIL_UTBETALING)
+        }
+
+        inspektør(a2) {
+            assertTilstander(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE)
+        }
+
+        håndterUtbetalt(orgnummer = a1)
+
+        inspektør(a1) {
+            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+            assertTilstander(2.vedtaksperiode, TIL_UTBETALING, AVSLUTTET, AVVENTER_REVURDERING)
+        }
+
+        inspektør(a2) {
+            assertTilstander(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE)
+        }
+    }
 }
