@@ -463,4 +463,45 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
             assertTilstander(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE)
         }
     }
+
+    @Test
+    fun `tre ag der a1 og a3 har to førstegangsbehandlinger - første førstegang på a1 blir revurdert mens andre førstegang på a1 er til utbetaling`() {
+        nyeVedtak(1.januar, 31.januar, a1, a3)
+        førstegangTilGodkjenning(1.mars, 31.mars, a1, a2, a3)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
+
+        nullstillTilstandsendringer()
+
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)), a1)
+
+        inspektør(a1) {
+            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
+            assertTilstander(2.vedtaksperiode, TIL_UTBETALING)
+        }
+
+        inspektør(a2) {
+            assertTilstander(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE)
+        }
+
+        inspektør(a3) {
+            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
+            assertTilstander(2.vedtaksperiode, AVVENTER_ARBEIDSGIVERE)
+        }
+
+        håndterUtbetalt(orgnummer = a1)
+
+        inspektør(a1) {
+            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+            assertTilstander(2.vedtaksperiode, TIL_UTBETALING, AVSLUTTET, AVVENTER_REVURDERING)
+        }
+
+        inspektør(a2) {
+            assertTilstander(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE)
+        }
+
+        inspektør(a3) {
+            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
+            assertTilstander(2.vedtaksperiode, AVVENTER_ARBEIDSGIVERE)
+        }
+    }
 }
