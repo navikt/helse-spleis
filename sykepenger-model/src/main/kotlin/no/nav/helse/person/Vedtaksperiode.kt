@@ -3422,7 +3422,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         private fun List<Vedtaksperiode>.nesteRevurderingsperiode(arbeidsgivere: List<Arbeidsgiver>, other: Vedtaksperiode) =
-            sortedWith(compareBy({ it }, { arbeidsgivere.indexOf(it.arbeidsgiver) })).first(IKKE_FERDIG_BEHANDLET)
+            sortedWith(compareBy({ it }, { arbeidsgivere.indexOf(it.arbeidsgiver) })).firstOrNull(IKKE_FERDIG_BEHANDLET) ?: other
 
         internal fun Map<Arbeidsgiver, List<Vedtaksperiode>>.startRevurdering(
             overstyrt: Vedtaksperiode,
