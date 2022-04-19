@@ -163,7 +163,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `revurdere eldre skjæringstidspunkt menst nyere utbetales`() {
+    fun `revurdere eldre skjæringstidspunkt mens nyere revurdert skjæringstidspunkt utbetales`() {
         nyttVedtak(1.januar, 20.januar)
         forlengVedtak(21.januar, 31.januar)
         nyttVedtak(10.februar, 28.februar, arbeidsgiverperiode = listOf(1.januar til 16.januar))
@@ -200,6 +200,21 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         assertTilstander(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVSLUTTET)
         assertTilstander(3.vedtaksperiode, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING)
         assertTilstander(4.vedtaksperiode, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+    }
+
+    @Test
+    fun `revurdering av eldre skjæringstidspunkt mens nyere skjæringstidspunkt utbetales`() {
+        nyttVedtak(1.januar, 31.januar)
+        tilGodkjent(1.mars, 31.mars, 100.prosent, førsteFraværsdag = 1.mars)
+        nullstillTilstandsendringer()
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)))
+
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
+        assertTilstander(2.vedtaksperiode, TIL_UTBETALING)
+
+        håndterUtbetalt()
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+        assertTilstander(2.vedtaksperiode, TIL_UTBETALING, AVSLUTTET, AVVENTER_REVURDERING)
     }
 
     @Test
@@ -397,4 +412,5 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
             assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
         }
     }
+
 }
