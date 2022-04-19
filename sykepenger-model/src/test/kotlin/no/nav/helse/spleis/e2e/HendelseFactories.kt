@@ -32,7 +32,8 @@ internal fun AbstractEndToEndTest.utbetaling(
     status: Oppdragstatus,
     fnr: Fødselsnummer = AbstractPersonTest.UNG_PERSON_FNR_2018,
     orgnummer: String = AbstractPersonTest.ORGNUMMER,
-    meldingsreferanseId: UUID = UUID.randomUUID()
+    meldingsreferanseId: UUID = UUID.randomUUID(),
+    utbetalingId: UUID? = null
 ) =
     UtbetalingHendelse(
         meldingsreferanseId = meldingsreferanseId,
@@ -40,7 +41,7 @@ internal fun AbstractEndToEndTest.utbetaling(
         fødselsnummer = fnr.toString(),
         orgnummer = orgnummer,
         fagsystemId = fagsystemId,
-        utbetalingId = person.personLogg.sisteBehov(Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling).kontekst().getValue("utbetalingId"),
+        utbetalingId = utbetalingId?.toString() ?: person.personLogg.sisteBehov(Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling).kontekst().getValue("utbetalingId"),
         status = status,
         melding = "hei",
         avstemmingsnøkkel = 123456L,

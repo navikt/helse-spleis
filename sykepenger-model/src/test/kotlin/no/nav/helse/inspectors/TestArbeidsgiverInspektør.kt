@@ -45,6 +45,7 @@ internal class TestArbeidsgiverInspektør(
     internal val infotrygdFeriepengebeløpArbeidsgiver = mutableListOf<Double>()
     internal val spleisFeriepengebeløpArbeidsgiver = mutableListOf<Double>()
     private val vedtaksperiodeutbetalinger = mutableMapOf<Int, MutableList<Int>>()
+    private val vedtaksperiodeutbetalingider = mutableMapOf<Int, MutableList<UUID>>()
     private val vedtaksperiodeutbetalingstyper = mutableMapOf<Int, MutableList<Utbetalingtype>>()
     private val utbetalingstilstander = mutableListOf<Utbetaling.Tilstand>()
     private val utbetalingIder = mutableListOf<UUID>()
@@ -292,6 +293,7 @@ internal class TestArbeidsgiverInspektør(
             gjenståendeSykedagerer.add(gjenståendeSykedager)
         } else {
             vedtaksperiodeutbetalinger.getOrPut(vedtaksperiodeindeks) { mutableListOf() }.add(utbetalinger.indexOf(utbetaling))
+            vedtaksperiodeutbetalingider.getOrPut(vedtaksperiodeindeks) { mutableListOf() }.add(id)
             vedtaksperiodeutbetalingstyper.getOrPut(vedtaksperiodeindeks) { mutableListOf() }.add(type)
         }
     }
@@ -422,6 +424,10 @@ internal class TestArbeidsgiverInspektør(
 
     internal fun gjenståendeSykedager(vedtaksperiodeIdInnhenter: IdInnhenter) = gjenståendeSykedagerer.filterIndexed { index, _ -> index in vedtaksperiodeIdInnhenter.id(orgnummer).utbetalingsindeks }.last() ?: fail {
         "Vedtaksperiode ${vedtaksperiodeIdInnhenter.id(orgnummer)} har ikke oppgitt gjenstående sykedager"
+    }
+
+    internal fun utbetalingId(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperiodeutbetalingider[vedtaksperiodeIdInnhenter.id(orgnummer).indeks]?.last() ?: fail {
+        "Vedtaksperiode ${vedtaksperiodeIdInnhenter.id(orgnummer)} har ingen utbetalinger"
     }
 
     internal fun forlengelseFraInfotrygd(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperiodeIdInnhenter.finn(forlengelserFraInfotrygd)

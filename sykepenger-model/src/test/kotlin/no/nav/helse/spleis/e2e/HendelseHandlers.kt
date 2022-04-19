@@ -665,9 +665,10 @@ internal fun AbstractEndToEndTest.håndterUtbetalt(
     fnr: Fødselsnummer = AbstractPersonTest.UNG_PERSON_FNR_2018,
     orgnummer: String = AbstractPersonTest.ORGNUMMER,
     fagsystemId: String,
+    utbetalingId: UUID? = null,
     meldingsreferanseId: UUID = UUID.randomUUID()
 ) {
-    val utbetalingId = person.personLogg.sisteBehov(Behovtype.Utbetaling).kontekst().getValue("utbetalingId")
+    val utbetalingId = utbetalingId?.toString() ?: person.personLogg.sisteBehov(Behovtype.Utbetaling).kontekst().getValue("utbetalingId")
     if (sendOverførtKvittering) {
         UtbetalingOverført(
             meldingsreferanseId = UUID.randomUUID(),
@@ -685,7 +686,8 @@ internal fun AbstractEndToEndTest.håndterUtbetalt(
         status = status,
         fnr = fnr,
         orgnummer = orgnummer,
-        meldingsreferanseId = meldingsreferanseId
+        meldingsreferanseId = meldingsreferanseId,
+        utbetalingId = UUID.fromString(utbetalingId)
     ).håndter(Person::håndter)
 }
 
@@ -694,9 +696,11 @@ internal fun AbstractEndToEndTest.håndterUtbetalt(
     sendOverførtKvittering: Boolean = true,
     fnr: Fødselsnummer = AbstractPersonTest.UNG_PERSON_FNR_2018,
     orgnummer: String = AbstractPersonTest.ORGNUMMER,
+    vedtaksperiodeIdInnhenter: IdInnhenter? = null,
     meldingsreferanseId: UUID = UUID.randomUUID()
 ) {
-    val utbetalingId = person.personLogg.sisteBehov(Behovtype.Utbetaling).kontekst().getValue("utbetalingId")
+    val utbetalingId = if (vedtaksperiodeIdInnhenter != null) inspektør(orgnummer).utbetalingId(vedtaksperiodeIdInnhenter).toString() else
+            person.personLogg.sisteBehov(Behovtype.Utbetaling).kontekst().getValue("utbetalingId")
     val utbetaling = inspektør(orgnummer).utbetalinger.first { it.inspektør.utbetalingId.toString() == utbetalingId }.inspektør
     utbetaling.let { listOf(
         it.arbeidsgiverOppdrag.inspektør.fagsystemId(),
@@ -704,7 +708,7 @@ internal fun AbstractEndToEndTest.håndterUtbetalt(
     )}.filter { utbetaling.arbeidsgiverOppdrag.inspektør.fagsystemId() == it && utbetaling.arbeidsgiverOppdrag.harUtbetalinger()
         || utbetaling.personOppdrag.inspektør.fagsystemId() == it && utbetaling.personOppdrag.harUtbetalinger() }
     .forEach { fagsystemId ->
-        håndterUtbetalt(status, sendOverførtKvittering, fnr, orgnummer, fagsystemId, meldingsreferanseId)
+        håndterUtbetalt(status, sendOverførtKvittering, fnr, orgnummer, fagsystemId, UUID.fromString(utbetalingId), meldingsreferanseId)
     }
 }
 

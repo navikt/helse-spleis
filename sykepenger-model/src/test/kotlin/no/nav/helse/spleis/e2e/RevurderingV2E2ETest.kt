@@ -413,4 +413,47 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         }
     }
 
+    @Test
+    fun `out of order periode mens senere periode revurderes til utbetaling`() {
+        Toggle.RevurdereOutOfOrder.enable {
+            nyttVedtak(1.mai, 31.mai)
+            forlengTilGodkjenning(1.juni, 30.juni)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+
+            nyttVedtak(1.januar, 31.januar)
+            nullstillTilstandsendringer()
+
+            assertForventetFeil(
+                forklaring = """Out of order-periode bør vente med å utbetales til revurdering er utbetalt, 
+                    deretter utbetale og sette i gang revurdering for senere perioder""",
+                nå = {
+                    assertTilstander(1.vedtaksperiode, AVVENTER_REVURDERING)
+                    assertTilstander(2.vedtaksperiode, TIL_UTBETALING)
+                    assertSisteTilstand(3.vedtaksperiode, AVSLUTTET)
+                },
+                ønsket = {
+                    assertTilstander(1.vedtaksperiode, AVVENTER_REVURDERING)
+                    assertTilstander(2.vedtaksperiode, TIL_UTBETALING)
+                    assertSisteTilstand(3.vedtaksperiode, AVVENTER_UFERDIG)
+                }
+            )
+
+            håndterUtbetalt(vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+
+            assertForventetFeil(
+                forklaring = """Out of order-periode bør vente med å utbetales til revurdering er utbetalt, 
+                    deretter utbetale og sette i gang revurdering for senere perioder""",
+                nå = {
+                    assertTilstander(1.vedtaksperiode, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING)
+                    assertTilstander(2.vedtaksperiode, TIL_UTBETALING, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+                    assertSisteTilstand(3.vedtaksperiode, AVSLUTTET)
+                },
+                ønsket = {
+                    assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
+                    assertTilstander(2.vedtaksperiode, TIL_UTBETALING, AVSLUTTET, AVVENTER_REVURDERING)
+                    assertTilstander(3.vedtaksperiode, AVVENTER_UFERDIG, AVVENTER_HISTORIKK)
+                }
+            )
+        }
+    }
 }
