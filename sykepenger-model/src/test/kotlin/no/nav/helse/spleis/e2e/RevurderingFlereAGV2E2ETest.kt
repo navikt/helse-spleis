@@ -330,38 +330,51 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
     fun `revurdering av senere frittstående periode hos ag3 mens overlappende out of order hos ag1 og ag2 utbetales`() {
         nyttVedtak(1.april, 30.april, orgnummer = a3)
 
-        // XXX: disse nye periodene burde kanskje sørge for å shuffle april-perioden (a3) til AVVENTER_REVURDERING?
         nyeVedtak(1.februar, 28.februar, a1, a2)
         forlengelseTilGodkjenning(1.mars, 15.mars, a1, a2)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
         nullstillTilstandsendringer()
 
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertTilstander(2.vedtaksperiode, TIL_UTBETALING, orgnummer = a1)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
+        assertTilstander(2.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
+
+        assertForventetFeil(
+            nå = {
+                assertTilstander(1.vedtaksperiode, AVSLUTTET, orgnummer = a3)
+            },
+            ønsket = {
+                assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, orgnummer = a3)
+            }
+        )
+
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.april, Feriedag)), a3)
-        inspektør(a1) {
-            assertTilstander(1.vedtaksperiode, AVSLUTTET)
-            assertTilstander(2.vedtaksperiode, TIL_UTBETALING)
-        }
-        inspektør(a2) {
-            assertTilstander(1.vedtaksperiode, AVSLUTTET)
-            assertTilstander(2.vedtaksperiode, AVVENTER_ARBEIDSGIVERE)
-        }
-        inspektør(a3) {
-            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
-        }
+
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertTilstander(2.vedtaksperiode, TIL_UTBETALING, orgnummer = a1)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
+        assertTilstander(2.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, orgnummer = a3)
 
         håndterUtbetalt(orgnummer = a1)
 
-        inspektør(a1) {
-            assertTilstander(1.vedtaksperiode, AVSLUTTET)
-            assertTilstander(2.vedtaksperiode, TIL_UTBETALING, AVSLUTTET)
-        }
-        inspektør(a2) {
-            assertTilstander(1.vedtaksperiode, AVSLUTTET)
-            assertTilstander(2.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, AVVENTER_HISTORIKK)
-        }
-        inspektør(a3) {
-            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
-        }
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertTilstander(2.vedtaksperiode, TIL_UTBETALING, AVSLUTTET, orgnummer = a1)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
+        assertTilstander(2.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, AVVENTER_HISTORIKK, orgnummer = a2)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, orgnummer = a3)
+
+        håndterYtelser(2.vedtaksperiode, orgnummer = a2)
+        håndterSimulering(2.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(orgnummer = a2)
+
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertTilstander(2.vedtaksperiode, TIL_UTBETALING, AVSLUTTET, orgnummer = a1)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
+        assertTilstander(2.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET, orgnummer = a2)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a3)
     }
 
     @Test
