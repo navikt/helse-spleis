@@ -582,6 +582,15 @@ internal class NyTilstandsflytEnArbeidsgiverTest : AbstractEndToEndTest() {
         )
     }
 
+    @Test
+    fun `sender trenger_ikke_inntektsmelding ved forkastelse av vedtaksperiode`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+
+        person.invaliderAllePerioder(hendelselogg, null)
+        assertEquals(listOf(1.vedtaksperiode.id(ORGNUMMER)), observatør.trengerIkkeInntektsmeldingVedtaksperioder)
+    }
+
     private fun utbetalPeriodeEtterVilkårsprøving(vedtaksperiode: IdInnhenter) {
         håndterYtelser(vedtaksperiode)
         håndterSimulering(vedtaksperiode)
