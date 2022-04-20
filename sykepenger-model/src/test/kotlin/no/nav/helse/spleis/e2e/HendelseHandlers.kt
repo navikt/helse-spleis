@@ -703,7 +703,7 @@ private fun AbstractEndToEndTest.førsteUhåndterteUtbetalingsbehov(orgnummer: S
 
     return inspektør(orgnummer).utbetalinger
         .filter { it.inspektør.tilstand in setOf(Utbetaling.Sendt, Utbetaling.Overført) }
-        .also { require(it.size < 2) { "Du har for mange utbetalinger i spill! Utbetalinger: ${it.map { utbetaling -> utbetaling.inspektør.utbetalingId }}" } }
+        .also { require(it.size < 2) { "For mange utbetalinger i spill! Er sendt ut godkjenningsbehov for periodene ${it.map { utbetaling -> utbetaling.inspektør.periode }}" } }
         .firstOrNull { it.inspektør.utbetalingId in utbetalingsbehovUtbetalingIder }
         ?.let {
             it.inspektør.utbetalingId to listOfNotNull(
