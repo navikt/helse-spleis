@@ -1,8 +1,11 @@
 package no.nav.helse.hendelser
 
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.person.Arbeidsgiver
-import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.Dokumentsporing
+import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.Companion.noOverlap
@@ -10,9 +13,6 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.merge
 import no.nav.helse.økonomi.Prosentdel
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
 
 class Sykmelding(
     meldingsreferanseId: UUID,
@@ -39,12 +39,12 @@ class Sykmelding(
     }
 
     override fun valider(periode: Periode, subsumsjonObserver: SubsumsjonObserver): IAktivitetslogg {
-        forGammel()
+        validerAtSykmeldingIkkeErForGammel()
         return this
     }
 
-    private fun forGammel() = (periode.endInclusive < mottatt.toLocalDate().minusMonths(6)).also {
-        if (it) error(ERRORTEKST_FOR_GAMMEL)
+    internal fun validerAtSykmeldingIkkeErForGammel() {
+        if (periode.endInclusive < mottatt.toLocalDate().minusMonths(6)) error(ERRORTEKST_FOR_GAMMEL)
     }
 
     internal fun nyVedtaksperiode() {

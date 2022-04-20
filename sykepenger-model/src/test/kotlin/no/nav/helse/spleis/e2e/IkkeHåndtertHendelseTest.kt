@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e
 
 import no.nav.helse.EnableToggle
 import no.nav.helse.Toggle
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -42,11 +41,8 @@ internal class IkkeHåndtertHendelseTest : AbstractEndToEndTest() {
     fun `oppretter ikke sykmeldingsperiode dersom sykmelding er for gammel`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent), mottatt = 5.desember.atStartOfDay())
         assertEquals(0, observatør.hendelseIkkeHåndtertEventer.size)
-        assertForventetFeil(
-            forklaring = "Burde ikke opprette sykmeldingsperioder om validering feiler",
-            nå = { assertEquals(listOf(3.januar til 26.januar), inspektør.sykmeldingsperioder()) },
-            ønsket = { assertEquals(emptyList<Periode>(), inspektør.sykmeldingsperioder()) }
-        )
+        assertEquals(emptyList<Periode>(), inspektør.sykmeldingsperioder())
+        assertError("Søknadsperioden kan ikke være eldre enn 6 måneder fra mottattidspunkt")
     }
 
     @Test

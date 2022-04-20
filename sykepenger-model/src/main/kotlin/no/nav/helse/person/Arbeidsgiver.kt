@@ -467,6 +467,10 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun håndter(sykmelding: Sykmelding) {
+        if (Toggle.NyTilstandsflyt.enabled) {
+            sykmelding.validerAtSykmeldingIkkeErForGammel()
+            if (sykmelding.hasErrorsOrWorse()) return
+        }
         sykmeldingsperioder.lagre(sykmelding.sykdomstidslinje().periode()!!)
         if (Toggle.NyTilstandsflyt.enabled) return
         val vedtaksperiode = Vedtaksperiode(
