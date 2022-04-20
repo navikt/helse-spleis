@@ -508,9 +508,6 @@ class Person private constructor(
             newValue
         }
 
-    internal fun tidligerePerioderFerdigBehandlet(vedtaksperiode: Vedtaksperiode) =
-        arbeidsgivere.all { it.tidligerePerioderFerdigBehandlet(vedtaksperiode) }
-
     internal fun nåværendeVedtaksperioder(filter: VedtaksperiodeFilter) = arbeidsgivere.nåværendeVedtaksperioder(filter).sorted()
 
     internal fun ghostPeriode(skjæringstidspunkt: LocalDate, deaktivert: Boolean) =

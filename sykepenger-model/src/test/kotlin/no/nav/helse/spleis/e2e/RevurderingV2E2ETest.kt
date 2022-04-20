@@ -23,9 +23,11 @@ import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER
 import no.nav.helse.person.TilstandType.AVVENTER_UFERDIG
+import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP
 import no.nav.helse.person.TilstandType.MOTTATT_SYKMELDING_UFERDIG_GAP
 import no.nav.helse.person.TilstandType.START
@@ -420,38 +422,69 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
             forlengTilGodkjenning(1.juni, 30.juni)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
 
-            tilGodkjenning(1.januar, 31.januar, ORGNUMMER)
+            nyPeriode(1.januar til 31.januar)
+            håndterInntektsmelding(listOf(1.januar til 16.januar))
             nullstillTilstandsendringer()
 
             assertTilstander(1.vedtaksperiode, AVVENTER_REVURDERING)
             assertTilstander(2.vedtaksperiode, TIL_UTBETALING)
-            assertForventetFeil(
-                forklaring = """Out of order-periode bør vente med å utbetales til revurdering er utbetalt, 
-                    deretter utbetale og sette i gang revurdering for senere perioder""",
-                nå = {
-                    assertSisteTilstand(3.vedtaksperiode, AVVENTER_GODKJENNING)
-                },
-                ønsket = {
-                    assertSisteTilstand(3.vedtaksperiode, AVVENTER_UFERDIG)
-                }
-            )
+            assertSisteTilstand(3.vedtaksperiode, AVVENTER_UFERDIG)
 
             håndterUtbetalt()
 
+            assertTilstander(1.vedtaksperiode, AVVENTER_REVURDERING)
+            assertTilstander(3.vedtaksperiode, AVVENTER_UFERDIG, AVVENTER_HISTORIKK)
+
             assertForventetFeil(
-                forklaring = """Out of order-periode bør vente med å utbetales til revurdering er utbetalt, 
-                    deretter utbetale og sette i gang revurdering for senere perioder""",
+                forklaring = """Forventer at periode som går fra til utbetaling til avsluttet blir sendt videre til 
+                    avventer revurdering dersom tidligere periode gjenopptar behandling""",
                 nå = {
-                    assertTilstander(1.vedtaksperiode, AVVENTER_REVURDERING)
                     assertTilstander(2.vedtaksperiode, TIL_UTBETALING, AVSLUTTET)
-                    assertSisteTilstand(3.vedtaksperiode, AVVENTER_GODKJENNING)
                 },
                 ønsket = {
-                    assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
                     assertTilstander(2.vedtaksperiode, TIL_UTBETALING, AVSLUTTET, AVVENTER_REVURDERING)
-                    assertTilstander(3.vedtaksperiode, AVVENTER_UFERDIG, AVVENTER_HISTORIKK)
                 }
             )
         }
+    }
+
+    @Test
+    fun `første periode i til utbetaling når det dukker opp en out of order-periode`() = Toggle.RevurdereOutOfOrder.enable {
+        tilGodkjent(1.mars, 31.mars, 100.prosent, 1.mars)
+        nyPeriode(1.januar til 31.januar)
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        nullstillTilstandsendringer()
+
+        assertTilstander(1.vedtaksperiode, TIL_UTBETALING)
+        assertTilstander(2.vedtaksperiode, AVVENTER_UFERDIG)
+
+        håndterUtbetalt()
+        assertTilstander(2.vedtaksperiode, AVVENTER_UFERDIG, AVVENTER_HISTORIKK)
+        assertForventetFeil(
+            forklaring = """Forventer at periode som går fra til utbetaling til avsluttet blir sendt videre til 
+                    avventer revurdering dersom tidligere periode gjenopptar behandling""",
+            nå = {
+                assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVSLUTTET)
+            },
+            ønsket = {
+                assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVSLUTTET, AVVENTER_REVURDERING)
+            }
+        )
+        håndterYtelser(2.vedtaksperiode)
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt()
+
+        assertTilstander(2.vedtaksperiode, AVVENTER_UFERDIG, AVVENTER_HISTORIKK, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET)
+        assertForventetFeil(
+            nå = {
+                assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVSLUTTET)
+            },
+            ønsket = {
+                assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+            }
+        )
     }
 }

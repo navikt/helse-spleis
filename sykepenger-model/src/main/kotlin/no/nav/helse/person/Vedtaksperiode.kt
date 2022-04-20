@@ -1277,7 +1277,10 @@ internal class Vedtaksperiode private constructor(
         ): Vedtaksperiodetilstand {
             val periodeRettFør = vedtaksperiode.arbeidsgiver.finnVedtaksperiodeRettFør(vedtaksperiode)
             val forlengelse = periodeRettFør != null
-            val ferdig = vedtaksperiode.arbeidsgiver.tidligerePerioderFerdigBehandlet(vedtaksperiode)
+            val ferdig = when (Toggle.RevurdereOutOfOrder.enabled) {
+                true -> vedtaksperiode.arbeidsgiver.tidligerePerioderFerdigBehandlet(vedtaksperiode) && !vedtaksperiode.arbeidsgiver.senerePerioderPågående(vedtaksperiode)
+                false -> vedtaksperiode.arbeidsgiver.tidligerePerioderFerdigBehandlet(vedtaksperiode)
+            }
 
             return when {
                 forlengelse && ferdig -> ferdigForlengelse
@@ -3305,10 +3308,11 @@ internal class Vedtaksperiode private constructor(
             return vedtaksperiode.person.aktivitetslogg.logg(*aktivitetskontekster.toTypedArray())
         }
 
-        internal fun tidligerePerioderFerdigBehandlet(perioder: List<Vedtaksperiode>, vedtaksperiode: Vedtaksperiode) =
-            perioder
-                .filter { it før vedtaksperiode }
-                .all { it.tilstand.erFerdigBehandlet }
+        internal fun List<Vedtaksperiode>.tidligerePerioderFerdigBehandlet(vedtaksperiode: Vedtaksperiode) =
+            filter { it før vedtaksperiode }.all { it.tilstand.erFerdigBehandlet }
+
+        internal fun List<Vedtaksperiode>.senerePerioderPågående(vedtaksperiode: Vedtaksperiode) =
+            this.pågående()?.let { it etter vedtaksperiode } ?: false
 
         internal fun Iterable<Vedtaksperiode>.nåværendeVedtaksperiode(filter: VedtaksperiodeFilter) =
             firstOrNull(filter)
