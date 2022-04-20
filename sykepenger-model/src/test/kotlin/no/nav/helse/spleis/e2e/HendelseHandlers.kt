@@ -115,16 +115,17 @@ internal fun AbstractEndToEndTest.tilGodkjenning(fom: LocalDate, tom: LocalDate,
     }
 
     organisasjonsnummere.first().let { organisasjonsnummer ->
-        håndterYtelser(vedtaksperiodeIdInnhenter = 1.vedtaksperiode, orgnummer = organisasjonsnummer)
+        val vedtaksperiode = observatør.sisteVedtaksperiode()
+        håndterYtelser(vedtaksperiodeIdInnhenter = vedtaksperiode, orgnummer = organisasjonsnummer)
         håndterVilkårsgrunnlag(
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            vedtaksperiodeIdInnhenter = vedtaksperiode,
             orgnummer = organisasjonsnummer,
             inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
                 inntekterBlock()
             })
         )
-        håndterYtelser(1.vedtaksperiode, orgnummer = organisasjonsnummer)
-        håndterSimulering(1.vedtaksperiode, orgnummer = organisasjonsnummer)
+        håndterYtelser(vedtaksperiode, orgnummer = organisasjonsnummer)
+        håndterSimulering(vedtaksperiode, orgnummer = organisasjonsnummer)
     }
 }
 
@@ -232,7 +233,7 @@ internal fun AbstractEndToEndTest.nyttVedtak(
     inntekterBlock: Inntektperioder.() -> Unit = { lagInntektperioder(orgnummer, fom) }
 ) {
     tilGodkjent(fom, tom, grad, førsteFraværsdag, fnr = fnr, orgnummer = orgnummer, refusjon = refusjon, inntekterBlock = inntekterBlock, arbeidsgiverperiode = arbeidsgiverperiode)
-    håndterUtbetalt(status = Oppdragstatus.AKSEPTERT, fnr = fnr, orgnummer = orgnummer, periode = fom til tom)
+    håndterUtbetalt(status = Oppdragstatus.AKSEPTERT, fnr = fnr, orgnummer = orgnummer)
 }
 
 internal fun AbstractEndToEndTest.tilGodkjent(
@@ -695,18 +696,20 @@ internal fun AbstractEndToEndTest.håndterUtbetalt(
 
 private fun Oppdrag.fagsytemIdOrNull() = if (harUtbetalinger()) inspektør.fagsystemId() else null
 
-private fun AbstractEndToEndTest.uhåndterteUtbetalingsbehov(orgnummer: String, periode: Periode?): Map<UUID, List<String>> {
+private fun AbstractEndToEndTest.førsteUhåndterteUtbetalingsbehov(orgnummer: String): Pair<UUID, List<String>>? {
     val utbetalingsbehovUtbetalingIder = person.personLogg.behov()
         .filter { it.type == Behovtype.Utbetaling }
         .map { UUID.fromString(it.kontekst().getValue("utbetalingId")) }
 
     return inspektør(orgnummer).utbetalinger
         .filter { it.inspektør.tilstand in setOf(Utbetaling.Sendt, Utbetaling.Overført) }
-        .filter { it.inspektør.utbetalingId in utbetalingsbehovUtbetalingIder }
-        .filter { periode == null || periode.overlapperMed(it.inspektør.periode) }
-        .associate { it.inspektør.utbetalingId to listOfNotNull(
-            it.inspektør.arbeidsgiverOppdrag.fagsytemIdOrNull(),
-            it.inspektør.personOppdrag.fagsytemIdOrNull())
+        .also { require(it.size < 2) { "Du har for mange utbetalinger i spill! Utbetalinger: ${it.map { utbetaling -> utbetaling.inspektør.utbetalingId }}" } }
+        .firstOrNull { it.inspektør.utbetalingId in utbetalingsbehovUtbetalingIder }
+        ?.let {
+            it.inspektør.utbetalingId to listOfNotNull(
+                it.inspektør.arbeidsgiverOppdrag.fagsytemIdOrNull(),
+                it.inspektør.personOppdrag.fagsytemIdOrNull()
+            )
         }
 }
 
@@ -715,10 +718,9 @@ internal fun AbstractEndToEndTest.håndterUtbetalt(
     sendOverførtKvittering: Boolean = true,
     fnr: Fødselsnummer = AbstractPersonTest.UNG_PERSON_FNR_2018,
     orgnummer: String = AbstractPersonTest.ORGNUMMER,
-    meldingsreferanseId: UUID = UUID.randomUUID(),
-    periode: Periode? = null
+    meldingsreferanseId: UUID = UUID.randomUUID()
 ) {
-    uhåndterteUtbetalingsbehov(orgnummer, periode).forEach { (utbetalingId, fagsystemIder) ->
+    førsteUhåndterteUtbetalingsbehov(orgnummer)?.also { (utbetalingId, fagsystemIder) ->
         fagsystemIder.forEach { fagsystemId ->
             håndterUtbetalt(status, sendOverførtKvittering, fnr, orgnummer, fagsystemId, utbetalingId, meldingsreferanseId)
         }

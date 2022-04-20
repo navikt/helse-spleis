@@ -182,6 +182,7 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
             gyldighetsdato = GYLDIGHETSDATO_2020_GRUNNBELØP,
             fagsystemId = inspektør.utbetalinger.first().inspektør.arbeidsgiverOppdrag.fagsystemId()
         )
+        håndterUtbetalt()
         utbetaltForlengetVedtaksperiodeBegrensetAv6G(3, 1.august(2020), 31.august(2020))
         inspektør.utbetalinger.also { utbetalinger ->
             assertEquals(4, utbetalinger.size)

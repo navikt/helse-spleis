@@ -420,20 +420,18 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
             forlengTilGodkjenning(1.juni, 30.juni)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
 
-            nyttVedtak(1.januar, 31.januar)
+            tilGodkjenning(1.januar, 31.januar, ORGNUMMER)
             nullstillTilstandsendringer()
 
+            assertTilstander(1.vedtaksperiode, AVVENTER_REVURDERING)
+            assertTilstander(2.vedtaksperiode, TIL_UTBETALING)
             assertForventetFeil(
                 forklaring = """Out of order-periode bør vente med å utbetales til revurdering er utbetalt, 
                     deretter utbetale og sette i gang revurdering for senere perioder""",
                 nå = {
-                    assertTilstander(1.vedtaksperiode, AVVENTER_REVURDERING)
-                    assertTilstander(2.vedtaksperiode, TIL_UTBETALING)
-                    assertSisteTilstand(3.vedtaksperiode, AVSLUTTET)
+                    assertSisteTilstand(3.vedtaksperiode, AVVENTER_GODKJENNING)
                 },
                 ønsket = {
-                    assertTilstander(1.vedtaksperiode, AVVENTER_REVURDERING)
-                    assertTilstander(2.vedtaksperiode, TIL_UTBETALING)
                     assertSisteTilstand(3.vedtaksperiode, AVVENTER_UFERDIG)
                 }
             )
@@ -444,9 +442,9 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
                 forklaring = """Out of order-periode bør vente med å utbetales til revurdering er utbetalt, 
                     deretter utbetale og sette i gang revurdering for senere perioder""",
                 nå = {
-                    assertTilstander(1.vedtaksperiode, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING)
-                    assertTilstander(2.vedtaksperiode, TIL_UTBETALING, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
-                    assertSisteTilstand(3.vedtaksperiode, AVSLUTTET)
+                    assertTilstander(1.vedtaksperiode, AVVENTER_REVURDERING)
+                    assertTilstander(2.vedtaksperiode, TIL_UTBETALING, AVSLUTTET)
+                    assertSisteTilstand(3.vedtaksperiode, AVVENTER_GODKJENNING)
                 },
                 ønsket = {
                     assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
