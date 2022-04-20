@@ -487,4 +487,43 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
             }
         )
     }
+
+    @Test
+    fun `periode til utbetaling blir overstyrt`() {
+        tilGodkjent(1.januar, 31.januar, 100.prosent, 1.januar)
+        nullstillTilstandsendringer()
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)))
+        assertTilstander(1.vedtaksperiode, TIL_UTBETALING)
+        håndterUtbetalt()
+        assertForventetFeil(
+            nå = {
+                assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVSLUTTET)
+            },
+            ønsket = {
+                assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+            }
+        )
+    }
+
+    @Test
+    fun `revurdert periode til utbetaling blir revurdert`() {
+        nyttVedtak(1.januar, 31.januar)
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)))
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        nullstillTilstandsendringer()
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)))
+
+        assertTilstander(1.vedtaksperiode, TIL_UTBETALING)
+        håndterUtbetalt()
+        assertForventetFeil(
+            nå = {
+                assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVSLUTTET)
+            },
+            ønsket = {
+                assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+            }
+        )
+    }
 }
