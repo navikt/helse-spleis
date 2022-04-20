@@ -66,7 +66,9 @@ import no.nav.helse.testhelpers.Inntektperioder
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.utbetalingslinjer.Fagområde
+import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
+import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel
@@ -230,7 +232,7 @@ internal fun AbstractEndToEndTest.nyttVedtak(
     inntekterBlock: Inntektperioder.() -> Unit = { lagInntektperioder(orgnummer, fom) }
 ) {
     tilGodkjent(fom, tom, grad, førsteFraværsdag, fnr = fnr, orgnummer = orgnummer, refusjon = refusjon, inntekterBlock = inntekterBlock, arbeidsgiverperiode = arbeidsgiverperiode)
-    håndterUtbetalt(status = Oppdragstatus.AKSEPTERT, fnr = fnr, orgnummer = orgnummer)
+    håndterUtbetalt(status = Oppdragstatus.AKSEPTERT, fnr = fnr, orgnummer = orgnummer, periode = fom til tom)
 }
 
 internal fun AbstractEndToEndTest.tilGodkjent(
@@ -691,24 +693,35 @@ internal fun AbstractEndToEndTest.håndterUtbetalt(
     ).håndter(Person::håndter)
 }
 
+private fun Oppdrag.fagsytemIdOrNull() = if (harUtbetalinger()) inspektør.fagsystemId() else null
+
+private fun AbstractEndToEndTest.uhåndterteUtbetalingsbehov(orgnummer: String, periode: Periode?): Map<UUID, List<String>> {
+    val utbetalingsbehovUtbetalingIder = person.personLogg.behov()
+        .filter { it.type == Behovtype.Utbetaling }
+        .map { UUID.fromString(it.kontekst().getValue("utbetalingId")) }
+
+    return inspektør(orgnummer).utbetalinger
+        .filter { it.inspektør.tilstand in setOf(Utbetaling.Sendt, Utbetaling.Overført) }
+        .filter { it.inspektør.utbetalingId in utbetalingsbehovUtbetalingIder }
+        .filter { periode == null || periode.overlapperMed(it.inspektør.periode) }
+        .associate { it.inspektør.utbetalingId to listOfNotNull(
+            it.inspektør.arbeidsgiverOppdrag.fagsytemIdOrNull(),
+            it.inspektør.personOppdrag.fagsytemIdOrNull())
+        }
+}
+
 internal fun AbstractEndToEndTest.håndterUtbetalt(
     status: Oppdragstatus = Oppdragstatus.AKSEPTERT,
     sendOverførtKvittering: Boolean = true,
     fnr: Fødselsnummer = AbstractPersonTest.UNG_PERSON_FNR_2018,
     orgnummer: String = AbstractPersonTest.ORGNUMMER,
-    vedtaksperiodeIdInnhenter: IdInnhenter? = null,
-    meldingsreferanseId: UUID = UUID.randomUUID()
+    meldingsreferanseId: UUID = UUID.randomUUID(),
+    periode: Periode? = null
 ) {
-    val utbetalingId = if (vedtaksperiodeIdInnhenter != null) inspektør(orgnummer).utbetalingId(vedtaksperiodeIdInnhenter).toString() else
-            person.personLogg.sisteBehov(Behovtype.Utbetaling).kontekst().getValue("utbetalingId")
-    val utbetaling = inspektør(orgnummer).utbetalinger.first { it.inspektør.utbetalingId.toString() == utbetalingId }.inspektør
-    utbetaling.let { listOf(
-        it.arbeidsgiverOppdrag.inspektør.fagsystemId(),
-        it.personOppdrag.inspektør.fagsystemId()
-    )}.filter { utbetaling.arbeidsgiverOppdrag.inspektør.fagsystemId() == it && utbetaling.arbeidsgiverOppdrag.harUtbetalinger()
-        || utbetaling.personOppdrag.inspektør.fagsystemId() == it && utbetaling.personOppdrag.harUtbetalinger() }
-    .forEach { fagsystemId ->
-        håndterUtbetalt(status, sendOverførtKvittering, fnr, orgnummer, fagsystemId, UUID.fromString(utbetalingId), meldingsreferanseId)
+    uhåndterteUtbetalingsbehov(orgnummer, periode).forEach { (utbetalingId, fagsystemIder) ->
+        fagsystemIder.forEach { fagsystemId ->
+            håndterUtbetalt(status, sendOverførtKvittering, fnr, orgnummer, fagsystemId, utbetalingId, meldingsreferanseId)
+        }
     }
 }
 

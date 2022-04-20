@@ -438,7 +438,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
                 }
             )
 
-            håndterUtbetalt(vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+            håndterUtbetalt()
 
             assertForventetFeil(
                 forklaring = """Out of order-periode bør vente med å utbetales til revurdering er utbetalt, 
