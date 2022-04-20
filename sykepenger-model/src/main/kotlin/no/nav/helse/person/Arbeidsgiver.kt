@@ -508,7 +508,12 @@ internal class Arbeidsgiver private constructor(
             søknad.warn("Det er oppgitt ny informasjon om ferie i søknaden som det ikke har blitt opplyst om tidligere. Tidligere periode må revurderes.")
         }
         if (person.harOverlappendeVedtaksperiode(søknad)) return registrerForkastetVedtaksperiode(vedtaksperiode, søknad)
-        if (noenHarHåndtert(søknad, Vedtaksperiode::håndter)) return
+        if (noenHarHåndtert(søknad, Vedtaksperiode::håndter)) {
+            if (søknad.hasErrorsOrWorse()) {
+                person.emitHendelseIkkeHåndtert(søknad)
+            }
+            return
+        }
         registrerNyVedtaksperiode(vedtaksperiode)
         vedtaksperiode.håndter(søknad)
         håndter(søknad) { nyPeriodeMedNyFlyt(vedtaksperiode, søknad) }

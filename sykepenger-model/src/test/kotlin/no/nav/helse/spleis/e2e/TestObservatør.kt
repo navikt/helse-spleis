@@ -46,7 +46,7 @@ internal class TestObservatør : PersonObserver {
     fun avbrutt(vedtaksperiodeId: UUID) = avbruttEventer.getValue(vedtaksperiodeId)
     fun opprettOppgaveForSpeilsaksbehandlereEvent() = opprettOppgaverTilSpeilsaksbehandlerEventer
     fun opprettOppgaveEvent() = opprettOppgaverEventer
-    fun hendelseIkkeHåndtert(hendelseId: UUID) = hendelseIkkeHåndtertEventer.getValue(hendelseId)
+    fun hendelseIkkeHåndtert(hendelseId: UUID) = hendelseIkkeHåndtertEventer.get(hendelseId)
 
     override fun avstemt(hendelseskontekst: Hendelseskontekst, result: Map<String, Any>) {
         avstemming = result

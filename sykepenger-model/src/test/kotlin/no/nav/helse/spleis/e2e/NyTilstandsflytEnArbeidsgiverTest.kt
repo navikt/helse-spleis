@@ -29,6 +29,7 @@ import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -589,6 +590,17 @@ internal class NyTilstandsflytEnArbeidsgiverTest : AbstractEndToEndTest() {
 
         person.invaliderAllePerioder(hendelselogg, null)
         assertEquals(listOf(1.vedtaksperiode.id(ORGNUMMER)), observatør.trengerIkkeInntektsmeldingVedtaksperioder)
+    }
+
+    @Test
+    fun `sender hendelse_ikke_håndtert ved søknad som treffer utbetalt periode`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        utbetalPeriode(1.vedtaksperiode)
+
+        val søknadId = håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        assertNotNull(observatør.hendelseIkkeHåndtert(søknadId))
     }
 
     private fun utbetalPeriodeEtterVilkårsprøving(vedtaksperiode: IdInnhenter) {
