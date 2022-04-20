@@ -225,7 +225,6 @@ internal class InntektshistorikkTest {
                 ORGNUMMER inntekt INNTEKT
             }
         }.forEach { it.lagreInntekter(historikk, 1.januar, UUID.randomUUID()) }
-        Thread.sleep(10) // Nødvendig for konsistent resultat på windows
         inntektperioderForSykepengegrunnlag {
             1.desember(2016) til 1.august(2017) inntekter {
                 ORGNUMMER inntekt INNTEKT
@@ -249,7 +248,6 @@ internal class InntektshistorikkTest {
                     ORGNUMMER inntekt INNTEKT
                 }
             }.forEach { it.lagreInntekter(historikk, 1.januar, meldingsreferanseId) }
-            Thread.sleep(10) // Nødvendig for konsistent resultat på windows
         }
 
         assertEquals(3, inspektør.inntektTeller.size)
