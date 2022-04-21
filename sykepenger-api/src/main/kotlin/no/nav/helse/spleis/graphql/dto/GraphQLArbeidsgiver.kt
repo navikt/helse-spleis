@@ -48,6 +48,7 @@ data class GraphQLGenerasjon(
 )
 
 data class GraphQLGhostPeriode(
+    val id: UUID,
     val fom: LocalDate,
     val tom: LocalDate,
     val skjaeringstidspunkt: LocalDate,

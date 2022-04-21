@@ -51,6 +51,7 @@ internal class ArbeidsgiverBuilder(
             generasjoner = GenerasjonerBuilder(hendelser, fødselsnummer.somFødselsnummer(), vilkårsgrunnlagHistorikk, arbeidsgiver).build(),
             ghostPerioder = arbeidsgiver.ghostPerioder().map {
                 GhostPeriodeDTO(
+                    id = UUID.randomUUID(),
                     fom = it.fom.coerceAtLeast(it.skjæringstidspunkt),
                     tom = it.tom,
                     skjæringstidspunkt = it.skjæringstidspunkt,

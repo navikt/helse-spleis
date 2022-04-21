@@ -1,8 +1,13 @@
 package no.nav.helse.serde.api
 
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.YearMonth
+import java.util.UUID
 import no.nav.helse.person.ForlengelseFraInfotrygd
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.Periodetype
+import no.nav.helse.serde.api.dto.EndringskodeDTO
 import no.nav.helse.serde.api.dto.UtbetalingshistorikkElementDTO
 import no.nav.helse.serde.api.v2.Generasjon
 import no.nav.helse.serde.api.v2.HendelseDTO
@@ -10,11 +15,6 @@ import no.nav.helse.serde.api.v2.Vilkårsgrunnlag
 import no.nav.helse.serde.mapping.SpeilDagtype
 import no.nav.helse.serde.mapping.SpeilKildetype
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.YearMonth
-import java.util.*
-import no.nav.helse.serde.api.dto.EndringskodeDTO
 
 data class PersonDTO(
     val aktørId: String,
@@ -110,6 +110,7 @@ data class VedtaksperiodeDTO(
 }
 
 data class GhostPeriodeDTO(
+    val id: UUID,
     val fom: LocalDate,
     val tom: LocalDate,
     val skjæringstidspunkt: LocalDate,

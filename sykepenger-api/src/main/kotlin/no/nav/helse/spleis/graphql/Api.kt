@@ -39,6 +39,7 @@ internal fun SchemaBuilder.personSchema(personDao: PersonDao, hendelseDao: Hende
                                 },
                                 ghostPerioder = arbeidsgiver.ghostPerioder.map { periode ->
                                     GraphQLGhostPeriode(
+                                        id = periode.id,
                                         fom = periode.fom,
                                         tom = periode.tom,
                                         skjaeringstidspunkt = periode.skjæringstidspunkt,
