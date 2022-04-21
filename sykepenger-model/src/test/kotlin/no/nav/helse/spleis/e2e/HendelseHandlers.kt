@@ -6,6 +6,7 @@ import java.time.Year
 import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.Fødselsnummer
+import no.nav.helse.Toggle
 import no.nav.helse.desember
 import no.nav.helse.etterspurteBehov
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
@@ -287,16 +288,30 @@ internal fun AbstractEndToEndTest.tilYtelser(
     arbeidsgiverperiode: List<Periode>? = null
 ): IdInnhenter {
     håndterSykmelding(Sykmeldingsperiode(fom, tom, grad), fnr = fnr, orgnummer = orgnummer)
-    val id = observatør.sisteVedtaksperiode()
-    håndterInntektsmeldingMedValidering(
-        id,
-        arbeidsgiverperiode ?: listOf(Periode(fom, fom.plusDays(15))),
-        førsteFraværsdag = førsteFraværsdag,
-        fnr = fnr,
-        orgnummer = orgnummer,
-        refusjon = refusjon
-    )
-    håndterSøknadMedValidering(id, Søknadsperiode.Sykdom(fom, tom, grad), fnr = fnr, orgnummer = orgnummer)
+    val id = if (Toggle.NyTilstandsflyt.enabled) {
+        håndterSøknad(Søknadsperiode.Sykdom(fom, tom, grad), fnr = fnr, orgnummer = orgnummer)
+        håndterInntektsmelding(
+            arbeidsgiverperiode ?: listOf(Periode(fom, fom.plusDays(15))),
+            førsteFraværsdag = førsteFraværsdag,
+            fnr = fnr,
+            orgnummer = orgnummer,
+            refusjon = refusjon
+        )
+        observatør.sisteVedtaksperiode()
+    } else {
+        val id = observatør.sisteVedtaksperiode()
+        håndterInntektsmeldingMedValidering(
+            id,
+            arbeidsgiverperiode ?: listOf(Periode(fom, fom.plusDays(15))),
+            førsteFraværsdag = førsteFraværsdag,
+            fnr = fnr,
+            orgnummer = orgnummer,
+            refusjon = refusjon
+        )
+        håndterSøknadMedValidering(id, Søknadsperiode.Sykdom(fom, tom, grad), fnr = fnr, orgnummer = orgnummer)
+        id
+    }
+
     håndterYtelser(id, fnr = fnr, orgnummer = orgnummer, besvart = LocalDate.EPOCH.atStartOfDay())
     håndterVilkårsgrunnlag(
         id,

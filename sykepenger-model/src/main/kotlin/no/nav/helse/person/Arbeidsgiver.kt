@@ -139,6 +139,9 @@ internal class Arbeidsgiver private constructor(
             }
         }
 
+        private fun Iterable<Arbeidsgiver>.senerePerioderPågående(vedtaksperiode: Vedtaksperiode) =
+            any { it.senerePerioderPågående(vedtaksperiode) }
+
         internal fun List<Arbeidsgiver>.startRevurdering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             associateWith { it.vedtaksperioder.toList() }.startRevurdering(vedtaksperiode, hendelse)
         }
@@ -300,6 +303,7 @@ internal class Arbeidsgiver private constructor(
 
             if (førstePeriode.trengerSøknadISammeMåned(this)) return
             if (!førstePeriode.kanGjenopptaBehandling(this)) return
+            if (senerePerioderPågående(førstePeriode)) return
 
             if (all { it.sykmeldingsperioder.kanFortsetteBehandling(førstePeriode.periode()) }) {
                 førstePeriode.gjenopptaBehandlingNy(aktivitetslogg)
@@ -521,8 +525,8 @@ internal class Arbeidsgiver private constructor(
             return
         }
         registrerNyVedtaksperiode(vedtaksperiode)
-        vedtaksperiode.håndter(søknad)
         håndter(søknad) { nyPeriodeMedNyFlyt(vedtaksperiode, søknad) }
+        vedtaksperiode.håndter(søknad)
     }
 
     fun finnVedtaksperiodeOgHåndter(søknad: Søknad) {

@@ -28,8 +28,6 @@ import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER
 import no.nav.helse.person.TilstandType.AVVENTER_UFERDIG
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
-import no.nav.helse.person.TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP
-import no.nav.helse.person.TilstandType.MOTTATT_SYKMELDING_UFERDIG_GAP
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.nullstillTilstandsendringer
@@ -38,7 +36,7 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-@EnableToggle(Toggle.NyRevurdering::class)
+@EnableToggle(Toggle.NyRevurdering::class, Toggle.NyTilstandsflyt::class)
 internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
 
     @Test
@@ -70,7 +68,15 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         håndterUtbetalt()
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVSLUTTET)
-        assertTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_UFERDIG, AVVENTER_HISTORIKK)
+        assertForventetFeil(
+            forklaring = "avventer uferdig støtter ikke gjenopptaBehandlingNy og ny tilstandsflyt forventer å bruke avventer tidligere eller overlappende perioder istedenfor avventer uferdig",
+            nå = {
+                assertTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_UFERDIG)
+            },
+            ønsket = {
+                assertTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, AVVENTER_HISTORIKK)
+            }
+        )
     }
 
     @Test
@@ -244,30 +250,6 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `periode med forlengelse etterfulgt av kort periode - kort periode avsluttes ikke før revurdering er ferdig`() {
-        nyttVedtak(1.januar, 31.januar)
-        forlengVedtak(1.februar, 28.februar)
-
-        nullstillTilstandsendringer()
-        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)))
-
-        håndterSykmelding(Sykmeldingsperiode(1.april, 16.april, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.april, 16.april, 100.prosent))
-
-        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING)
-        assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
-        assertForventetFeil(
-            forklaring = "Vi vet ikke hva ønsket oppførsel egentlig bør være",
-            nå = {
-                assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
-            },
-            ønsket = {
-                assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_GAP, AVVENTER_UFERDIG)
-            }
-        )
-    }
-
-    @Test
     fun `periode med forlengelse etterfulgt av kort periode - kort periode avsluttes ikke før revurdering er ferdig - ny flyt`() {
         Toggle.NyTilstandsflyt.enable {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
@@ -363,6 +345,30 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `periode med forlengelse etterfulgt av kort periode - kort periode avsluttes ikke før revurdering er ferdig`() {
+        nyttVedtak(1.januar, 31.januar)
+        forlengVedtak(1.februar, 28.februar)
+
+        nullstillTilstandsendringer()
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)))
+
+        håndterSykmelding(Sykmeldingsperiode(1.april, 16.april, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.april, 16.april, 100.prosent))
+
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING)
+        assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+        assertForventetFeil(
+            forklaring = "Vi vet ikke hva ønsket oppførsel egentlig bør være",
+            nå = {
+                assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING)
+            },
+            ønsket = {
+                assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER)
+            }
+        )
+    }
+
+    @Test
     fun `revudering påvirkes ikke av gjenoppta behandling ved avsluttet uten utbetaling`() {
         nyttVedtak(1.januar, 31.januar)
         forlengVedtak(1.februar, 28.februar)
@@ -381,10 +387,10 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
         assertForventetFeil(
             nå = {
-                assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
+                assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING)
             },
             ønsket = {
-                assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_UFERDIG_GAP, AVVENTER_UFERDIG)
+                assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER)
             }
         )
     }
@@ -409,7 +415,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
             forlengVedtak(1.juni, 30.juni)
             nullstillTilstandsendringer()
             nyPeriode(1.januar til 15.januar)
-            assertTilstander(3.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVSLUTTET_UTEN_UTBETALING)
+            assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING)
             assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING)
             assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
         }
@@ -428,12 +434,12 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
 
             assertTilstander(1.vedtaksperiode, AVVENTER_REVURDERING)
             assertTilstander(2.vedtaksperiode, TIL_UTBETALING)
-            assertSisteTilstand(3.vedtaksperiode, AVVENTER_UFERDIG)
+            assertSisteTilstand(3.vedtaksperiode, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER)
 
             håndterUtbetalt()
 
             assertTilstander(1.vedtaksperiode, AVVENTER_REVURDERING)
-            assertTilstander(3.vedtaksperiode, AVVENTER_UFERDIG, AVVENTER_HISTORIKK)
+            assertTilstander(3.vedtaksperiode, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, AVVENTER_HISTORIKK)
 
             assertForventetFeil(
                 forklaring = """Forventer at periode som går fra til utbetaling til avsluttet blir sendt videre til 
@@ -456,10 +462,10 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
 
         assertTilstander(1.vedtaksperiode, TIL_UTBETALING)
-        assertTilstander(2.vedtaksperiode, AVVENTER_UFERDIG)
+        assertTilstander(2.vedtaksperiode, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER)
 
         håndterUtbetalt()
-        assertTilstander(2.vedtaksperiode, AVVENTER_UFERDIG, AVVENTER_HISTORIKK)
+        assertTilstander(2.vedtaksperiode, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, AVVENTER_HISTORIKK)
         assertForventetFeil(
             forklaring = """Forventer at periode som går fra til utbetaling til avsluttet blir sendt videre til 
                     avventer revurdering dersom tidligere periode gjenopptar behandling""",
@@ -477,7 +483,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
 
-        assertTilstander(2.vedtaksperiode, AVVENTER_UFERDIG, AVVENTER_HISTORIKK, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET)
+        assertTilstander(2.vedtaksperiode, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, AVVENTER_HISTORIKK, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET)
         assertForventetFeil(
             nå = {
                 assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVSLUTTET)
