@@ -1,6 +1,7 @@
 package no.nav.helse
 
 import java.lang.reflect.Method
+import no.nav.helse.Toggle.Companion.enable
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.api.extension.ExtensionContext
 import org.junit.jupiter.api.extension.InvocationInterceptor
@@ -11,7 +12,7 @@ import kotlin.reflect.KClass
 @Target(AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.RUNTIME)
 @ExtendWith(ToggleInterceptor::class)
-internal annotation class EnableToggle(val toggle: KClass<out Toggle>)
+internal annotation class EnableToggle(vararg val toggle: KClass<out Toggle>)
 
 private class ToggleInterceptor: InvocationInterceptor {
     override fun interceptTestMethod(
@@ -20,7 +21,7 @@ private class ToggleInterceptor: InvocationInterceptor {
         extensionContext: ExtensionContext
     ) {
         AnnotationSupport.findAnnotation(extensionContext.testClass, EnableToggle::class.java).ifPresentOrElse({ annotation ->
-            annotation.toggle.objectInstance?.enable { invocation.proceed() }
+            annotation.toggle.mapNotNull { it.objectInstance }.enable { invocation.proceed() }
         }) {
             invocation.proceed()
         }
