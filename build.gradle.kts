@@ -1,8 +1,8 @@
 plugins {
-    kotlin("jvm") version "1.6.20"
+    kotlin("jvm") version "1.6.21"
 }
 
-val flywayVersion = "8.5.4"
+val flywayVersion = "8.5.7"
 val hikariVersion = "5.0.1"
 val jacksonVersion = "2.13.2"
 val junitJupiterVersion = "5.8.2"
