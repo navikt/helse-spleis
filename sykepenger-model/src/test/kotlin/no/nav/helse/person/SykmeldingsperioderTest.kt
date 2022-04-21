@@ -1,12 +1,16 @@
 package no.nav.helse.person
 
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.desember
 import no.nav.helse.februar
+import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
+import no.nav.helse.økonomi.Inntekt
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -159,6 +163,37 @@ internal class SykmeldingsperioderTest() {
         sykmeldingsperioder.fjern(1.januar til 31.januar)
         assertEquals(listOf(1.februar til 28.februar), sykmeldingsperioder.perioder())
     }
+
+    @Test
+    fun `sykmeldingsperioder blir truffet eller ikke truffet riktig av inntektsmelding`() {
+        val sykmeldingsperioder = Sykmeldingsperioder()
+        sykmeldingsperioder.lagre(1.januar til 15.januar)
+        sykmeldingsperioder.lagre(1.mars til 28.mars)
+
+        assertTrue(sykmeldingsperioder.blirTruffetAv(inntektsmelding(listOf(1.januar til 16.januar), 1.januar)))
+        assertFalse(sykmeldingsperioder.blirTruffetAv(inntektsmelding(listOf(1.februar til 16.februar), 1.februar)))
+        assertTrue(sykmeldingsperioder.blirTruffetAv(inntektsmelding(listOf(1.mars til 16.mars), 1.mars)))
+    }
+
+    private fun inntektsmelding(
+        arbeidsgiverperioder: List<Periode>,
+        førsteFraværsdag: LocalDate
+    ): Inntektsmelding =
+        Inntektsmelding(
+            meldingsreferanseId = UUID.randomUUID(),
+            refusjon = Inntektsmelding.Refusjon(null, null),
+            orgnummer = "ORGNUMMER",
+            fødselsnummer = "FNR",
+            aktørId = "AKTØRID",
+            førsteFraværsdag = førsteFraværsdag,
+            beregnetInntekt = Inntekt.INGEN,
+            arbeidsgiverperioder = arbeidsgiverperioder,
+            arbeidsforholdId = null,
+            begrunnelseForReduksjonEllerIkkeUtbetalt = null,
+            harOpphørAvNaturalytelser = false,
+            mottatt = LocalDateTime.now()
+        )
+
 
     class Inspektør() : SykmeldingsperioderVisitor {
 

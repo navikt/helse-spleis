@@ -3,6 +3,7 @@ package no.nav.helse.person
 import java.time.YearMonth
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
+import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 
 internal class Sykmeldingsperioder(
     private var perioder: List<Periode> = listOf()
@@ -34,6 +35,8 @@ internal class Sykmeldingsperioder(
     internal fun fjern(søknadsperiode: Periode) {
         perioder = perioder.mapNotNull { it.beholdDagerEtter(søknadsperiode.endInclusive) }
     }
+
+    fun blirTruffetAv(inntektsmelding: SykdomstidslinjeHendelse) = perioder.any(inntektsmelding::erRelevant)
 }
 internal interface SykmeldingsperioderVisitor {
     fun preVisitSykmeldingsperioder(sykmeldingsperioder: Sykmeldingsperioder) {}

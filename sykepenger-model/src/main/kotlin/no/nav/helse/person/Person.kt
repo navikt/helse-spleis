@@ -387,6 +387,10 @@ class Person private constructor(
         observers.forEach { it.opprettOppgave(aktivitetslogg.hendelseskontekst(), event) }
     }
 
+    internal fun utsettOppgave(aktivitetslogg: IAktivitetslogg, event: PersonObserver.UtsettOppgaveEvent) {
+        observers.forEach { it.utsettOppgave(aktivitetslogg.hendelseskontekst(), event)}
+    }
+
     internal fun vedtaksperiodeAvbrutt(aktivitetslogg: IAktivitetslogg, event: PersonObserver.VedtaksperiodeAvbruttEvent) {
         observers.forEach { it.vedtaksperiodeAvbrutt(aktivitetslogg.hendelseskontekst(), event) }
     }
@@ -684,6 +688,17 @@ class Person private constructor(
                 hendelse.hendelseskontekst(),
                 PersonObserver.OpprettOppgaveEvent(
                     setOf(hendelse.meldingsreferanseId())
+                )
+            )
+        }
+    }
+
+    internal fun emitUtsettOppgaveEvent(hendelse: SykdomstidslinjeHendelse) {
+        observers.forEach {
+            it.utsettOppgave(
+                hendelse.hendelseskontekst(),
+                PersonObserver.UtsettOppgaveEvent(
+                    hendelse.meldingsreferanseId()
                 )
             )
         }

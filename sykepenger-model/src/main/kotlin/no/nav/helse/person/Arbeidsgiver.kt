@@ -553,6 +553,9 @@ internal class Arbeidsgiver private constructor(
         if (vedtaksperiodeId != null) inntektsmelding.info("Replayer inntektsmelding til påfølgende perioder som overlapper.")
         if (!noenHarHåndtert(inntektsmelding) { håndter(inntektsmelding, vedtaksperiodeId, vedtaksperioder.toList()) }) {
             if (vedtaksperiodeId != null) return inntektsmelding.info("Vedtaksperiode overlapper ikke med replayet Inntektsmelding")
+            if (Toggle.NyTilstandsflyt.enabled && sykmeldingsperioder.blirTruffetAv(inntektsmelding)) {
+                person.emitUtsettOppgaveEvent(inntektsmelding)
+            }
             inntektsmelding.error("Forventet ikke inntektsmelding. Har nok ikke mottatt sykmelding")
             if (ForkastetVedtaksperiode.sjekkOmOverlapperMedForkastet(forkastede, inntektsmelding)) {
                 person.opprettOppgave(

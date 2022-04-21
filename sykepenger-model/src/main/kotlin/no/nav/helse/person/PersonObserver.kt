@@ -35,6 +35,10 @@ interface PersonObserver {
         val hendelser: Set<UUID>,
     )
 
+    data class UtsettOppgaveEvent(
+        val hendelse: UUID
+    )
+
     data class RevurderingAvvistEvent(
         val fødselsnummer: String,
         val errors: List<String>
@@ -159,6 +163,7 @@ interface PersonObserver {
     fun vedtaksperiodeAvbrutt(hendelseskontekst: Hendelseskontekst, event: VedtaksperiodeAvbruttEvent) {}
     fun opprettOppgaveForSpeilsaksbehandlere(hendelseskontekst: Hendelseskontekst, event: OpprettOppgaveForSpeilsaksbehandlereEvent) {}
     fun opprettOppgave(hendelseskontekst: Hendelseskontekst, event: OpprettOppgaveEvent) {}
+    fun utsettOppgave(hendelseskontekst: Hendelseskontekst, event: UtsettOppgaveEvent) {}
     fun personEndret(hendelseskontekst: Hendelseskontekst) {}
     fun vedtaksperiodeIkkeFunnet(hendelseskontekst: Hendelseskontekst, vedtaksperiodeEvent: VedtaksperiodeIkkeFunnetEvent) {}
     fun manglerInntektsmelding(hendelseskontekst: Hendelseskontekst, orgnr: String, event: ManglendeInntektsmeldingEvent) {}

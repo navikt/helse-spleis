@@ -22,6 +22,7 @@ internal class TestObservatør : PersonObserver {
     val hendelseIkkeHåndtertEventer =  mutableMapOf<UUID, PersonObserver.HendelseIkkeHåndtertEvent>()
     val opprettOppgaverTilSpeilsaksbehandlerEventer = mutableListOf<PersonObserver.OpprettOppgaveForSpeilsaksbehandlereEvent>()
     val opprettOppgaverEventer = mutableListOf<PersonObserver.OpprettOppgaveEvent>()
+    private val utsettOppgaveEventer = mutableListOf<PersonObserver.UtsettOppgaveEvent>()
 
     private lateinit var sisteVedtaksperiode: UUID
     private val vedtaksperioder = mutableMapOf<String, MutableSet<UUID>>()
@@ -44,8 +45,9 @@ internal class TestObservatør : PersonObserver {
 
     fun avbruttePerioder() = avbruttEventer.size
     fun avbrutt(vedtaksperiodeId: UUID) = avbruttEventer.getValue(vedtaksperiodeId)
-    fun opprettOppgaveForSpeilsaksbehandlereEvent() = opprettOppgaverTilSpeilsaksbehandlerEventer
-    fun opprettOppgaveEvent() = opprettOppgaverEventer
+    fun opprettOppgaveForSpeilsaksbehandlereEvent() = opprettOppgaverTilSpeilsaksbehandlerEventer.toList()
+    fun opprettOppgaveEvent() = opprettOppgaverEventer.toList()
+    fun utsettOppgaveEventer() = utsettOppgaveEventer.toList()
     fun hendelseIkkeHåndtert(hendelseId: UUID) = hendelseIkkeHåndtertEventer.get(hendelseId)
 
     override fun avstemt(hendelseskontekst: Hendelseskontekst, result: Map<String, Any>) {
@@ -114,6 +116,10 @@ internal class TestObservatør : PersonObserver {
 
     override fun opprettOppgave(hendelseskontekst: Hendelseskontekst, event: PersonObserver.OpprettOppgaveEvent) {
         opprettOppgaverEventer.add(event)
+    }
+
+    override fun utsettOppgave(hendelseskontekst: Hendelseskontekst, event: PersonObserver.UtsettOppgaveEvent) {
+        utsettOppgaveEventer.add(event)
     }
 
     override fun revurderingAvvist(hendelseskontekst: Hendelseskontekst, event: PersonObserver.RevurderingAvvistEvent) {
