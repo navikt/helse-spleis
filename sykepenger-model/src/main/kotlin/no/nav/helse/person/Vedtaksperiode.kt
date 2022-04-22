@@ -2999,8 +2999,8 @@ internal class Vedtaksperiode private constructor(
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             check(!vedtaksperiode.utbetalinger.harUtbetaling()) { "Forventet ikke at perioden har fått utbetaling: kun perioder innenfor arbeidsgiverperioden skal sendes hit. " }
             vedtaksperiode.sendVedtakFattet(hendelse)
-            if (Toggle.NyTilstandsflyt.disabled) return vedtaksperiode.person.gjenopptaBehandling(hendelse)
-            vedtaksperiode.person.gjenopptaBehandlingNy(hendelse)
+            vedtaksperiode.person.gjenopptaBehandling(hendelse)
+            if (Toggle.NyTilstandsflyt.enabled) return vedtaksperiode.person.gjenopptaBehandlingNy(hendelse)
         }
 
         override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Sykmelding) {}
@@ -3114,8 +3114,8 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.lås()
             check(vedtaksperiode.utbetalinger.erAvsluttet()) { "forventer at utbetaling skal være avsluttet" }
             vedtaksperiode.sendVedtakFattet(hendelse)
-            if (Toggle.NyTilstandsflyt.disabled) return vedtaksperiode.person.gjenopptaBehandling(hendelse)
-            vedtaksperiode.person.gjenopptaBehandlingNy(hendelse)
+            vedtaksperiode.person.gjenopptaBehandling(hendelse)
+            if (Toggle.NyTilstandsflyt.enabled) return vedtaksperiode.person.gjenopptaBehandlingNy(hendelse)
         }
 
         override fun leaving(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {

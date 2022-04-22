@@ -71,7 +71,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         assertForventetFeil(
             forklaring = "avventer uferdig støtter ikke gjenopptaBehandlingNy og ny tilstandsflyt forventer å bruke avventer tidligere eller overlappende perioder istedenfor avventer uferdig",
             nå = {
-                assertTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_UFERDIG)
+                assertTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_UFERDIG, AVVENTER_HISTORIKK)
             },
             ønsket = {
                 assertTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, AVVENTER_HISTORIKK)
