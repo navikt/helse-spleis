@@ -207,6 +207,8 @@ internal class Vedtaksperiode private constructor(
 
     internal fun jurist() = jurist.medVedtaksperiode(id, hendelseIder.toSet(), sykmeldingsperiode)
 
+    internal fun harId(vedtaksperiodeId: UUID) = id == vedtaksperiodeId
+
     internal fun hendelseIder() = hendelseIder.ider()
 
     internal fun håndter(sykmelding: Sykmelding) = overlapperMed(sykmelding).also {
@@ -688,6 +690,10 @@ internal class Vedtaksperiode private constructor(
                 tom = this.periode.endInclusive
             )
         )
+    }
+
+    internal fun trengerInntektsmeldingReplay() {
+        person.inntektsmeldingReplay(id)
     }
 
     private fun emitVedtaksperiodeEndret(
@@ -1855,7 +1861,7 @@ internal class Vedtaksperiode private constructor(
         override val type = AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            vedtaksperiode.person.inntektsmeldingReplay(vedtaksperiode.id)
+            vedtaksperiode.trengerInntektsmeldingReplay()
         }
 
         override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Sykmelding) {}
@@ -2047,7 +2053,7 @@ internal class Vedtaksperiode private constructor(
         override val type = AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            vedtaksperiode.person.inntektsmeldingReplay(vedtaksperiode.id)
+            vedtaksperiode.trengerInntektsmeldingReplay()
             if (vedtaksperiode.arbeidsgiver.finnForkastetSykeperiodeRettFør(vedtaksperiode) == null) {
                 vedtaksperiode.trengerInntektsmelding(hendelse.hendelseskontekst())
             }
@@ -2128,7 +2134,7 @@ internal class Vedtaksperiode private constructor(
         override val type: TilstandType = AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            vedtaksperiode.person.inntektsmeldingReplay(vedtaksperiode.id)
+            vedtaksperiode.trengerInntektsmeldingReplay()
             if (vedtaksperiode.arbeidsgiver.finnForkastetSykeperiodeRettFør(vedtaksperiode) == null) {
                 vedtaksperiode.trengerInntektsmelding(hendelse.hendelseskontekst())
             }

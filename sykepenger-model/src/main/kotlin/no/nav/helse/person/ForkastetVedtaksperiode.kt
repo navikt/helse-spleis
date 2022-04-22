@@ -20,10 +20,34 @@ internal class ForkastetVedtaksperiode(
         visitor.postVisitForkastetPeriode(vedtaksperiode, forkastetÅrsak)
     }
 
+    private fun håndterInnteksmeldingReplay(
+        person: Person,
+        inntektsmelding: Inntektsmelding,
+    ): Boolean {
+        if (inntektsmelding.erRelevant(vedtaksperiode.periode())) {
+            if(person.harNærliggendeUtbetaling(vedtaksperiode.periode())) {
+                person.emitOpprettOppgaveForSpeilsaksbehandlereEvent(inntektsmelding)
+            } else {
+                person.emitOpprettOppgaveEvent(inntektsmelding)
+            }
+            return true
+        }
+        return false
+    }
+
     internal companion object {
         private fun Iterable<ForkastetVedtaksperiode>.perioder() = map { it.vedtaksperiode }
 
         internal fun Iterable<ForkastetVedtaksperiode>.harAvsluttedePerioder() = this.perioder().any(ER_ELLER_HAR_VÆRT_AVSLUTTET)
+
+        internal fun Iterable<ForkastetVedtaksperiode>.håndterInntektsmeldingReplay(
+            person: Person,
+            inntektsmelding: Inntektsmelding,
+            vedtaksperiodeId: UUID
+        ) = finnForkastetVedtaksperiode(vedtaksperiodeId)?.håndterInnteksmeldingReplay(person, inntektsmelding) ?: false
+
+        private fun Iterable<ForkastetVedtaksperiode>.finnForkastetVedtaksperiode(vedtaksperiodeId: UUID): ForkastetVedtaksperiode? =
+            firstOrNull { it.vedtaksperiode.harId(vedtaksperiodeId) }
 
         internal fun overlapperMedForkastet(forkastede: Iterable<ForkastetVedtaksperiode>, hendelse: SykdomstidslinjeHendelse) {
             Vedtaksperiode.overlapperMedForkastet(forkastede.perioder(), hendelse)
