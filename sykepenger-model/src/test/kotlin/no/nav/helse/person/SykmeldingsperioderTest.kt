@@ -175,6 +175,23 @@ internal class SykmeldingsperioderTest() {
         assertTrue(sykmeldingsperioder.blirTruffetAv(inntektsmelding(listOf(1.mars til 16.mars), 1.mars)))
     }
 
+    @Test
+    fun `AGP treffer sykmeldingsperiode, men første fraværsdag er senere`() {
+        val sykmeldingsperioder = Sykmeldingsperioder()
+        sykmeldingsperioder.lagre(1.januar til 31.januar)
+
+        assertFalse(sykmeldingsperioder.blirTruffetAv(inntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 2.februar)))
+    }
+
+    @Test
+    fun `AGP treffer ikke sykmeldingsperiode, men første fraværsdag treffer`() {
+        val sykmeldingsperioder = Sykmeldingsperioder()
+        sykmeldingsperioder.lagre(1.januar til 31.januar)
+        sykmeldingsperioder.lagre(10.februar til 28.februar)
+
+        assertTrue(sykmeldingsperioder.blirTruffetAv(inntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 10.februar)))
+    }
+
     private fun inntektsmelding(
         arbeidsgiverperioder: List<Periode>,
         førsteFraværsdag: LocalDate
