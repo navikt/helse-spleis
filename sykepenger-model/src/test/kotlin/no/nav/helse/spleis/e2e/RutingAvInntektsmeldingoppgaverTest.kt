@@ -69,4 +69,25 @@ internal class RutingAvInntektsmeldingoppgaverTest : AbstractEndToEndTest() {
         assertEquals(listOf(søknadId1, inntektsmeldingId1, søknadId2, inntektsmeldingId2), observatør.opprettOppgaveEvent().flatMap { it.hendelser })
         assertEquals(listOf(1.vedtaksperiode.id(ORGNUMMER), 2.vedtaksperiode.id(ORGNUMMER)), observatør.inntektsmeldingReplayEventer)
     }
+
+    @Test
+    fun `dersom vi har en nærliggende utbetaling og vi mottar inntektsmelding før søknad og søknaden feiler - skal det opprettes oppgave i speilkøen i gosys`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+
+        håndterSykmelding(Sykmeldingsperiode(7.februar, 28.februar, 100.prosent))
+        val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 7.februar)
+        val søknadId = håndterSøknad(Sykdom(7.februar, 28.februar, 100.prosent), andreInntektskilder = listOf(Søknad.Inntektskilde(true, "FRILANSER")))
+        håndterInntektsmeldingReplay(inntektsmeldingId, 2.vedtaksperiode.id(ORGNUMMER))
+
+        assertEquals(listOf(søknadId, inntektsmeldingId), observatør.opprettOppgaveForSpeilsaksbehandlereEvent().flatMap { it.hendelser })
+
+    }
 }
