@@ -958,7 +958,7 @@ internal data class PersonData(
                 TilstandType.AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE -> Vedtaksperiode.AvventerInntektsmeldingUferdigForlengelse
                 TilstandType.AVVENTER_SØKNAD_UFERDIG_FORLENGELSE -> Vedtaksperiode.AvventerSøknadUferdigForlengelse
                 TilstandType.AVVENTER_SØKNAD_FERDIG_FORLENGELSE -> Vedtaksperiode.AvventerSøknadFerdigForlengelse
-                TilstandType.AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER -> Vedtaksperiode.AvventerTidligereEllerOverlappendePerioder
+                TilstandType.AVVENTER_BLOKKERENDE_PERIODE -> Vedtaksperiode.AvventerBlokkerendePeriode
                 TilstandType.AVVENTER_UFERDIG -> Vedtaksperiode.AvventerUferdig
                 TilstandType.AVVENTER_ARBEIDSGIVERE -> Vedtaksperiode.AvventerArbeidsgivere
                 TilstandType.AVVENTER_REVURDERING -> Vedtaksperiode.AvventerRevurdering

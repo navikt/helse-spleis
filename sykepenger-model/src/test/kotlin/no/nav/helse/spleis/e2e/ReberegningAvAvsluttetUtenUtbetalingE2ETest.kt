@@ -16,7 +16,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_UFERDIG_GAP
-import no.nav.helse.person.TilstandType.AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER
+import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_UFERDIG
 import no.nav.helse.person.TilstandType.MOTTATT_SYKMELDING_FERDIG_FORLENGELSE
 import no.nav.helse.person.TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP
@@ -39,7 +39,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingE2ETest : AbstractEndToEndTes
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVSLUTTET_UTEN_UTBETALING,
             AVSLUTTET_UTEN_UTBETALING,
-            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK
         )
     }
@@ -167,7 +167,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingE2ETest : AbstractEndToEndTes
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVSLUTTET_UTEN_UTBETALING,
             AVSLUTTET_UTEN_UTBETALING,
-            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK
         )
     }
@@ -185,8 +185,8 @@ internal class ReberegningAvAvsluttetUtenUtbetalingE2ETest : AbstractEndToEndTes
         håndterUtbetalingshistorikk(3.vedtaksperiode)
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(10.januar til 25.januar))
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, AVVENTER_HISTORIKK)
-        assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER)
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
+        assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE)
     }
 
     @Test
@@ -253,8 +253,8 @@ internal class ReberegningAvAvsluttetUtenUtbetalingE2ETest : AbstractEndToEndTes
 
             håndterInntektsmelding(listOf(1.januar til 16.januar))
 
-            assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, AVVENTER_HISTORIKK)
-            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER)
+            assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
+            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE)
         }
     }
 

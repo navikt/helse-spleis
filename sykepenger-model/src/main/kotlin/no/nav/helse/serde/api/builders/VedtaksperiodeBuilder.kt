@@ -47,7 +47,7 @@ internal class VedtaksperiodeBuilder(
             TilstandType.UTBETALING_FEILET,
             TilstandType.REVURDERING_FEILET,
             TilstandType.TIL_UTBETALING,
-            TilstandType.AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            TilstandType.AVVENTER_BLOKKERENDE_PERIODE,
             TilstandType.AVVENTER_ARBEIDSGIVERE,
             TilstandType.AVVENTER_ARBEIDSGIVERE_REVURDERING,
             TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING

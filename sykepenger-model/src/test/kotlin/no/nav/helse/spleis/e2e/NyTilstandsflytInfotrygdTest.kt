@@ -18,7 +18,7 @@ import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
-import no.nav.helse.person.TilstandType.AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER
+import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.september
@@ -70,7 +70,7 @@ internal class NyTilstandsflytInfotrygdTest : AbstractEndToEndTest() {
             inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true))
         )
         assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
-        assertTilstand(2.vedtaksperiode, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER)
+        assertTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
     }
 
     @Test
@@ -95,7 +95,7 @@ internal class NyTilstandsflytInfotrygdTest : AbstractEndToEndTest() {
         )
 
         assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
-        assertTilstand(2.vedtaksperiode, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER)
+        assertTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
     }
 
     @Test
@@ -111,7 +111,7 @@ internal class NyTilstandsflytInfotrygdTest : AbstractEndToEndTest() {
             inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 15.februar, INNTEKT, true))
         )
         assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
-        assertTilstand(2.vedtaksperiode, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER)
+        assertTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
     }
 
     @Test
@@ -229,7 +229,7 @@ internal class NyTilstandsflytInfotrygdTest : AbstractEndToEndTest() {
         håndterUtbetalingshistorikk(3.vedtaksperiode, utbetalinger = utbetalinger, inntektshistorikk = inntektshistorikk)
 
         assertTilstand(3.vedtaksperiode, AVVENTER_HISTORIKK)
-        assertTilstand(4.vedtaksperiode, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER)
+        assertTilstand(4.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
     }
 
     @Test

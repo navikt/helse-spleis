@@ -137,7 +137,7 @@ data class UtbetalingshistorikkElementDTO(
                     TilstandType.AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
                     TilstandType.AVVENTER_HISTORIKK -> TilstandstypeDTO.Venter
                     TilstandType.AVVENTER_UFERDIG,
-                    TilstandType.AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+                    TilstandType.AVVENTER_BLOKKERENDE_PERIODE,
                     TilstandType.AVVENTER_ARBEIDSGIVERE -> TilstandstypeDTO.VenterPåKiling
                     TilstandType.TIL_INFOTRYGD -> TilstandstypeDTO.TilInfotrygd
                     TilstandType.UTBETALING_FEILET -> TilstandstypeDTO.Feilet

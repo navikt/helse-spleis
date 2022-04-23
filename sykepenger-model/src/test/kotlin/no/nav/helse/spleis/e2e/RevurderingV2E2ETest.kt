@@ -25,7 +25,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
-import no.nav.helse.person.TilstandType.AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER
+import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_UFERDIG
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
@@ -74,7 +74,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
                 assertTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_UFERDIG, AVVENTER_HISTORIKK)
             },
             ønsket = {
-                assertTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, AVVENTER_HISTORIKK)
+                assertTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
             }
         )
     }
@@ -283,7 +283,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
                     assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING)
                 },
                 ønsket = {
-                    assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER)
+                    assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE)
                 }
             )
         }
@@ -363,7 +363,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
                 assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING)
             },
             ønsket = {
-                assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER)
+                assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE)
             }
         )
     }
@@ -390,7 +390,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
                 assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING)
             },
             ønsket = {
-                assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER)
+                assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE)
             }
         )
     }
@@ -434,12 +434,12 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
 
             assertTilstander(1.vedtaksperiode, AVVENTER_REVURDERING)
             assertTilstander(2.vedtaksperiode, TIL_UTBETALING)
-            assertSisteTilstand(3.vedtaksperiode, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER)
+            assertSisteTilstand(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
 
             håndterUtbetalt()
 
             assertTilstander(1.vedtaksperiode, AVVENTER_REVURDERING)
-            assertTilstander(3.vedtaksperiode, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, AVVENTER_HISTORIKK)
+            assertTilstander(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
 
             assertForventetFeil(
                 forklaring = """Forventer at periode som går fra til utbetaling til avsluttet blir sendt videre til 
@@ -462,10 +462,10 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
 
         assertTilstander(1.vedtaksperiode, TIL_UTBETALING)
-        assertTilstander(2.vedtaksperiode, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER)
+        assertTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
 
         håndterUtbetalt()
-        assertTilstander(2.vedtaksperiode, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, AVVENTER_HISTORIKK)
+        assertTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
         assertForventetFeil(
             forklaring = """Forventer at periode som går fra til utbetaling til avsluttet blir sendt videre til 
                     avventer revurdering dersom tidligere periode gjenopptar behandling""",
@@ -483,7 +483,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
 
-        assertTilstander(2.vedtaksperiode, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, AVVENTER_HISTORIKK, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET)
+        assertTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET)
         assertForventetFeil(
             nå = {
                 assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVSLUTTET)

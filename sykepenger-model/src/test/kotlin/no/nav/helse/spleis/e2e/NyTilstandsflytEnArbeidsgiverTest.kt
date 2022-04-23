@@ -20,7 +20,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
-import no.nav.helse.person.TilstandType.AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER
+import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
@@ -52,7 +52,7 @@ internal class NyTilstandsflytEnArbeidsgiverTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -68,7 +68,7 @@ internal class NyTilstandsflytEnArbeidsgiverTest : AbstractEndToEndTest() {
             2.vedtaksperiode,
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
@@ -93,7 +93,7 @@ internal class NyTilstandsflytEnArbeidsgiverTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -120,7 +120,7 @@ internal class NyTilstandsflytEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
 
         assertTilstand(1.vedtaksperiode, AVSLUTTET)
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, AVVENTER_HISTORIKK)
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
     }
 
     @Test
@@ -133,7 +133,7 @@ internal class NyTilstandsflytEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.mars til 16.mars))
 
         assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER)
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE)
     }
 
     @Test
@@ -174,7 +174,7 @@ internal class NyTilstandsflytEnArbeidsgiverTest : AbstractEndToEndTest() {
             AVSLUTTET_UTEN_UTBETALING,
             AVSLUTTET_UTEN_UTBETALING
         )
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, AVVENTER_HISTORIKK)
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
     }
 
     @Test
@@ -187,7 +187,7 @@ internal class NyTilstandsflytEnArbeidsgiverTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+            AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK
         )
     }
@@ -227,7 +227,7 @@ internal class NyTilstandsflytEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmeldingReplay(inntektsmeldingId, 2.vedtaksperiode.id(ORGNUMMER))
-        assertTilstand(1.vedtaksperiode, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER)
+        assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
         assertTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK)
 
         utbetalPeriode(2.vedtaksperiode)
@@ -270,7 +270,7 @@ internal class NyTilstandsflytEnArbeidsgiverTest : AbstractEndToEndTest() {
                 AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
                 AVSLUTTET_UTEN_UTBETALING,
                 AVSLUTTET_UTEN_UTBETALING,
-                AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER,
+                AVVENTER_BLOKKERENDE_PERIODE,
                 AVVENTER_HISTORIKK
             )
         }
@@ -298,7 +298,7 @@ internal class NyTilstandsflytEnArbeidsgiverTest : AbstractEndToEndTest() {
             },
             ønsket = {
                 assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
-                assertTilstand(2.vedtaksperiode, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER)
+                assertTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
 
                 utbetalPeriode(1.vedtaksperiode)
                 assertTilstand(1.vedtaksperiode, AVSLUTTET)
@@ -322,7 +322,7 @@ internal class NyTilstandsflytEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
 
-        assertTilstand(1.vedtaksperiode, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER)
+        assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
         assertTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
     }
 
@@ -335,7 +335,7 @@ internal class NyTilstandsflytEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
 
-        assertTilstand(1.vedtaksperiode, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER)
+        assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
         assertTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
     }
 
@@ -349,7 +349,7 @@ internal class NyTilstandsflytEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
 
-        assertTilstand(1.vedtaksperiode, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER)
+        assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
         assertTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
     }
 
@@ -365,7 +365,7 @@ internal class NyTilstandsflytEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
 
-        assertTilstand(1.vedtaksperiode, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER)
+        assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
         assertTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
     }
 
@@ -389,7 +389,7 @@ internal class NyTilstandsflytEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.mars til 16.mars))
 
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        assertTilstand(1.vedtaksperiode, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER)
+        assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
         assertTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
     }
 
@@ -403,7 +403,7 @@ internal class NyTilstandsflytEnArbeidsgiverTest : AbstractEndToEndTest() {
 
         håndterInntektsmelding(listOf(1.mars til 16.mars))
         assertTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
-        assertTilstand(1.vedtaksperiode, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER)
+        assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
     }
 
     @Test
@@ -481,7 +481,7 @@ internal class NyTilstandsflytEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
 
         assertTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
-        assertTilstand(2.vedtaksperiode, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER)
+        assertTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
     }
 
     @Test
@@ -551,7 +551,7 @@ internal class NyTilstandsflytEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
         person.invaliderAllePerioder(hendelselogg, null)
 
-        assertForkastetPeriodeTilstander(2.vedtaksperiode, START, AVVENTER_TIDLIGERE_ELLER_OVERLAPPENDE_PERIODER, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(2.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE, TIL_INFOTRYGD)
     }
 
     @Test
