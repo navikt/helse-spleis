@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 @EnableToggle(Toggle.NyTilstandsflyt::class)
-internal class RutingAvInntektsmeldingoppgaverTest : AbstractEndToEndTest() {
+internal class RutingAvInntektsmeldingOppgaverTest : AbstractEndToEndTest() {
 
     @Test
     fun `dersom vi mottar inntektsmelding før søknad skal det sendes et utsett_oppgave-event`() {
@@ -87,8 +87,6 @@ internal class RutingAvInntektsmeldingoppgaverTest : AbstractEndToEndTest() {
         val søknadId = håndterSøknad(Sykdom(7.februar, 28.februar, 100.prosent), andreInntektskilder = listOf(Søknad.Inntektskilde(true, "FRILANSER")))
         håndterInntektsmeldingReplay(inntektsmeldingId, 2.vedtaksperiode.id(ORGNUMMER))
 
-
         assertEquals(listOf(søknadId, inntektsmeldingId), observatør.opprettOppgaveForSpeilsaksbehandlereEvent().flatMap { it.hendelser })
-
     }
 }

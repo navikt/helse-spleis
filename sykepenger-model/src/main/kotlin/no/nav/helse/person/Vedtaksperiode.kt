@@ -911,10 +911,6 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
-    private fun harNærliggendeUtbetaling(): Boolean {
-        return person.harNærliggendeUtbetaling(periode)
-    }
-
     private fun mottaUtbetalingTilRevurdering(hendelse: ArbeidstakerHendelse, utbetaling: Utbetaling) {
         utbetalingstidslinje = utbetalinger.mottaRevurdering(hendelse, utbetaling, periode)
     }
@@ -3234,21 +3230,11 @@ internal class Vedtaksperiode private constructor(
             val inntektsmeldingIds =
                 vedtaksperiode.arbeidsgiver.finnSammenhengendePeriode(vedtaksperiode.skjæringstidspunkt)
                     .mapNotNull { it.inntektsmeldingInfo }.ider()
-            if (vedtaksperiode.harNærliggendeUtbetaling()) {
-                vedtaksperiode.person.opprettOppgaveForSpeilsaksbehandlere(
-                    hendelse,
-                    PersonObserver.OpprettOppgaveForSpeilsaksbehandlereEvent(
-                        hendelser = vedtaksperiode.hendelseIder() + inntektsmeldingIds,
-                    )
-                )
-            } else {
-                vedtaksperiode.person.opprettOppgave(
-                    hendelse,
-                    PersonObserver.OpprettOppgaveEvent(
-                        hendelser = vedtaksperiode.hendelseIder() + inntektsmeldingIds,
-                    )
-                )
-            }
+            vedtaksperiode.person.sendOppgaveEvent(
+                hendelse = hendelse,
+                periode = vedtaksperiode.periode(),
+                hendelseIder = vedtaksperiode.hendelseIder() + inntektsmeldingIds
+            )
         }
 
         private fun skalOppretteOppgave(vedtaksperiode: Vedtaksperiode) =

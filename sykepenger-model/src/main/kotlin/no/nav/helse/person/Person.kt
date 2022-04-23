@@ -524,9 +524,22 @@ class Person private constructor(
             }
         }
 
-    internal fun harNærliggendeUtbetaling(periode: Periode): Boolean {
+    private fun harNærliggendeUtbetaling(periode: Periode): Boolean {
         if (infotrygdhistorikk.harBetaltRettFør(periode)) return false
         return arbeidsgivere.any { it.harNærliggendeUtbetaling(periode.oppdaterTom(periode.endInclusive.plusYears(3))) }
+    }
+
+    internal fun sendOppgaveEvent(hendelse: SykdomstidslinjeHendelse) {
+        sendOppgaveEvent(hendelse, hendelse.sykdomstidslinje().periode(), setOf(hendelse.meldingsreferanseId()))
+    }
+
+    internal fun sendOppgaveEvent(hendelse: IAktivitetslogg, periode: Periode?, hendelseIder: Set<UUID>) {
+        val harNærliggendeUtbetaling = periode?.let { harNærliggendeUtbetaling(it) } ?: false
+        if (harNærliggendeUtbetaling) {
+            emitOpprettOppgaveForSpeilsaksbehandlereEvent(hendelse, hendelseIder)
+        } else {
+            emitOpprettOppgaveEvent(hendelse, hendelseIder)
+        }
     }
 
     internal fun harOverlappendeVedtaksperiode(hendelse: SykdomstidslinjeHendelse) =
@@ -671,23 +684,23 @@ class Person private constructor(
         vilkårsgrunnlagHistorikk.oppdaterMinimumInntektsvurdering(skjæringstidspunkt, grunnlagsdata, oppfyltKravTilMinimumInntekt)
     }
 
-    internal fun emitOpprettOppgaveForSpeilsaksbehandlereEvent(hendelse: SykdomstidslinjeHendelse) {
+    private fun emitOpprettOppgaveForSpeilsaksbehandlereEvent(hendelse: IAktivitetslogg, hendelseIder: Set<UUID>) {
         observers.forEach {
             it.opprettOppgaveForSpeilsaksbehandlere(
                 hendelse.hendelseskontekst(),
                 PersonObserver.OpprettOppgaveForSpeilsaksbehandlereEvent(
-                    setOf(hendelse.meldingsreferanseId())
+                    hendelseIder
                 )
             )
         }
     }
 
-    internal fun emitOpprettOppgaveEvent(hendelse: SykdomstidslinjeHendelse) {
+    private fun emitOpprettOppgaveEvent(hendelse: IAktivitetslogg, hendelseIder: Set<UUID>) {
         observers.forEach {
             it.opprettOppgave(
                 hendelse.hendelseskontekst(),
                 PersonObserver.OpprettOppgaveEvent(
-                    setOf(hendelse.meldingsreferanseId())
+                    hendelseIder
                 )
             )
         }

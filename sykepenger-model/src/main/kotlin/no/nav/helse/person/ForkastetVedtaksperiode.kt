@@ -25,11 +25,7 @@ internal class ForkastetVedtaksperiode(
         inntektsmelding: Inntektsmelding,
     ): Boolean {
         if (inntektsmelding.erRelevant(vedtaksperiode.periode())) {
-            if(person.harNærliggendeUtbetaling(vedtaksperiode.periode())) {
-                person.emitOpprettOppgaveForSpeilsaksbehandlereEvent(inntektsmelding)
-            } else {
-                person.emitOpprettOppgaveEvent(inntektsmelding)
-            }
+            person.sendOppgaveEvent(inntektsmelding)
             return true
         }
         return false

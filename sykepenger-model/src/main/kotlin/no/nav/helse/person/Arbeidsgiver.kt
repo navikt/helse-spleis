@@ -521,6 +521,7 @@ internal class Arbeidsgiver private constructor(
         if (person.harOverlappendeVedtaksperiode(søknad)) return registrerForkastetVedtaksperiode(vedtaksperiode, søknad)
         if (noenHarHåndtert(søknad, Vedtaksperiode::håndter)) {
             if (søknad.hasErrorsOrWorse()) {
+                person.sendOppgaveEvent(søknad)
                 person.emitHendelseIkkeHåndtert(søknad)
             }
             return
@@ -539,9 +540,7 @@ internal class Arbeidsgiver private constructor(
         }
         noenHarHåndtert(søknad, Vedtaksperiode::håndter, "Forventet ikke ${søknad.kilde}. Har nok ikke mottatt sykmelding")
         if (søknad.hasErrorsOrWorse()) {
-            val søknadsperiode = søknad.sykdomstidslinje().periode()
-            val harNærliggendeUtbetaling = søknadsperiode?.let { person.harNærliggendeUtbetaling(it) } ?: false
-            if (harNærliggendeUtbetaling) person.emitOpprettOppgaveForSpeilsaksbehandlereEvent(søknad) else person.emitOpprettOppgaveEvent(søknad)
+            person.sendOppgaveEvent(søknad)
             person.emitHendelseIkkeHåndtert(søknad)
         }
     }
