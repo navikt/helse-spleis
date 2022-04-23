@@ -11,6 +11,7 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.serde.migration.JsonMigration
 import no.nav.helse.serde.migration.JsonMigrationException
+import no.nav.helse.serde.migration.JsonMigrationObserver
 import no.nav.helse.serde.migration.MeldingerSupplier
 import no.nav.helse.serde.migration.V100SlettEnkeltFeriepengeutbetaling
 import no.nav.helse.serde.migration.V101SlettEnkeltFeriepengeutbetaling
@@ -341,18 +342,22 @@ class SerialisertPerson(val json: String) {
 
     val skjemaVersjon = gjeldendeVersjon()
 
-    private fun migrate(jsonNode: JsonNode, meldingerSupplier: MeldingerSupplier) {
+    private fun migrate(jsonNode: JsonNode, meldingerSupplier: MeldingerSupplier, observer: JsonMigrationObserver) {
         try {
-            migrations.migrate(jsonNode, meldingerSupplier)
+            migrations.migrate(jsonNode, meldingerSupplier, observer)
         } catch (err: Exception) {
             throw JsonMigrationException("Feil under migrering: ${err.message}", err)
         }
     }
 
-    fun deserialize(jurist: MaskinellJurist, meldingerSupplier: MeldingerSupplier = MeldingerSupplier.empty): Person {
+    fun deserialize(
+        jurist: MaskinellJurist,
+        meldingerSupplier: MeldingerSupplier = MeldingerSupplier.empty,
+        observer: JsonMigrationObserver = JsonMigrationObserver.Void
+    ): Person {
         val jsonNode = serdeObjectMapper.readTree(json)
 
-        migrate(jsonNode, meldingerSupplier)
+        migrate(jsonNode, meldingerSupplier, observer)
 
         try {
             val personData: PersonData = requireNotNull(serdeObjectMapper.treeToValue(jsonNode))

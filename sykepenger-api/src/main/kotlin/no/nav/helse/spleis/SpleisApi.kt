@@ -1,15 +1,25 @@
 package no.nav.helse.spleis
 
 import com.fasterxml.jackson.databind.JsonNode
-import io.ktor.application.*
-import io.ktor.auth.*
-import io.ktor.features.*
-import io.ktor.http.*
-import io.ktor.request.*
-import io.ktor.response.*
-import io.ktor.routing.*
-import io.ktor.util.pipeline.*
+import io.ktor.application.Application
+import io.ktor.application.ApplicationCall
+import io.ktor.application.call
+import io.ktor.auth.authenticate
+import io.ktor.features.BadRequestException
+import io.ktor.features.NotFoundException
+import io.ktor.http.ContentType
+import io.ktor.http.HttpStatusCode
+import io.ktor.request.header
+import io.ktor.response.respond
+import io.ktor.response.respondText
+import io.ktor.routing.get
+import io.ktor.routing.routing
+import io.ktor.util.pipeline.PipelineContext
 import io.prometheus.client.Histogram
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
+import javax.sql.DataSource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import no.nav.helse.person.Person
@@ -22,10 +32,6 @@ import no.nav.helse.spleis.dao.HendelseDao
 import no.nav.helse.spleis.dao.PersonDao
 import no.nav.helse.spleis.dto.håndterPerson
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
-import javax.sql.DataSource
 
 private object ApiMetrikker {
     private val responstid = Histogram
@@ -55,7 +61,13 @@ internal fun Application.spesialistApi(dataSource: DataSource, authProviderName:
                     sikkerLogg.info("Serverer person-snapshot for fødselsnummer $fnr")
                     try {
                         ApiMetrikker.målDatabase { personDao.hentPersonFraFnr(fnr) }
-                            ?.let { ApiMetrikker.målDeserialisering { it.deserialize(MaskinellJurist()) { hendelseDao.hentAlleHendelser(fnr) } } }
+                            ?.let {
+                                ApiMetrikker.målDeserialisering {
+                                    it.deserialize(
+                                        jurist = MaskinellJurist(),
+                                        meldingerSupplier = { hendelseDao.hentAlleHendelser(fnr) })
+                                }
+                            }
                             ?.let { ApiMetrikker.målByggSnapshot { håndterPerson(it, hendelseDao) } }
                             ?.let { call.respond(it) }
                             ?: call.respond(HttpStatusCode.NotFound, "Resource not found")
@@ -80,7 +92,12 @@ internal fun Application.spannerApi(dataSource: DataSource, authProviderName: St
                 withContext(Dispatchers.IO) {
                     val fnr = fnr(personDao)
                     val person = personDao.hentPersonFraFnr(fnr) ?: throw NotFoundException("Kunne ikke finne person for fødselsnummer")
-                    call.respond(person.deserialize(MaskinellJurist()) { hendelseDao.hentAlleHendelser(fnr) }.serialize().json)
+                    call.respond(
+                        person.deserialize(
+                            jurist = MaskinellJurist(),
+                            meldingerSupplier = { hendelseDao.hentAlleHendelser(fnr) }
+                        ).serialize().json
+                    )
                 }
             }
 
@@ -115,7 +132,13 @@ internal fun Application.sporingApi(dataSource: DataSource, authProviderName: St
                 withContext(Dispatchers.IO) {
                     val fnr = fnr(personDao)
                     val person = personDao.hentPersonFraFnr(fnr) ?: throw NotFoundException("Kunne ikke finne person for fødselsnummer")
-                    call.respond(serializePersonForSporing(person.deserialize(MaskinellJurist()) { hendelseDao.hentAlleHendelser(fnr) }))
+                    call.respond(
+                        serializePersonForSporing(
+                            person.deserialize(
+                                jurist = MaskinellJurist(),
+                                meldingerSupplier = { hendelseDao.hentAlleHendelser(fnr) })
+                        )
+                    )
                 }
             }
         }

@@ -2,26 +2,40 @@ package no.nav.helse.spleis.graphql
 
 import com.apurebase.kgraphql.GraphQL
 import com.apurebase.kgraphql.schema.dsl.SchemaBuilder
-import io.ktor.application.*
-import io.ktor.auth.*
+import io.ktor.application.Application
+import io.ktor.application.install
+import io.ktor.auth.authenticate
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.YearMonth
+import java.time.format.DateTimeFormatter
+import java.util.UUID
+import javax.sql.DataSource
 import no.nav.helse.Toggle
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.spleis.dao.HendelseDao
 import no.nav.helse.spleis.dao.PersonDao
 import no.nav.helse.spleis.dto.håndterPerson
-import no.nav.helse.spleis.graphql.dto.*
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.YearMonth
-import java.time.format.DateTimeFormatter
-import java.util.*
-import javax.sql.DataSource
+import no.nav.helse.spleis.graphql.dto.GraphQLArbeidsgiver
+import no.nav.helse.spleis.graphql.dto.GraphQLGenerasjon
+import no.nav.helse.spleis.graphql.dto.GraphQLGhostPeriode
+import no.nav.helse.spleis.graphql.dto.GraphQLPerson
+import no.nav.helse.spleis.graphql.dto.arbeidsgiverTypes
+import no.nav.helse.spleis.graphql.dto.hendelseTypes
+import no.nav.helse.spleis.graphql.dto.inntektsgrunnlagTypes
+import no.nav.helse.spleis.graphql.dto.personTypes
+import no.nav.helse.spleis.graphql.dto.simuleringTypes
+import no.nav.helse.spleis.graphql.dto.tidslinjeperiodeTypes
+import no.nav.helse.spleis.graphql.dto.vilkarsgrunnlagTypes
 
 internal fun SchemaBuilder.personSchema(personDao: PersonDao, hendelseDao: HendelseDao) {
     query("person") {
         resolver { fnr: String ->
             personDao.hentPersonFraFnr(fnr.toLong())
-                ?.deserialize(MaskinellJurist()) { hendelseDao.hentAlleHendelser(fnr.toLong()) }
+                ?.deserialize(
+                    jurist = MaskinellJurist(),
+                    meldingerSupplier = { hendelseDao.hentAlleHendelser(fnr.toLong()) }
+                )
                 ?.let { håndterPerson(it, hendelseDao) }
                 ?.let { person ->
                     GraphQLPerson(
