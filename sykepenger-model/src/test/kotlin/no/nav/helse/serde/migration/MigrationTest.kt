@@ -6,11 +6,14 @@ import no.nav.helse.serde.serdeObjectMapper
 import org.skyscreamer.jsonassert.JSONAssert
 import org.skyscreamer.jsonassert.JSONCompareMode
 
-internal abstract class MigrationTest(private val migration: JsonMigration) {
+internal abstract class MigrationTest(private val migration: () -> JsonMigration) {
+
+    internal constructor(migration: JsonMigration) : this({ migration })
+
     open fun meldingerSupplier() = MeldingerSupplier.empty
 
     protected fun toNode(json: String): JsonNode = serdeObjectMapper.readTree(json)
-    protected fun migrer(json: String) = listOf(migration).migrate(toNode(json), meldingerSupplier())
+    protected fun migrer(json: String) = listOf(migration()).migrate(toNode(json), meldingerSupplier())
 
     protected fun assertMigration(
         expectedJson: String,

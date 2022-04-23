@@ -1,0 +1,135 @@
+{
+  "arbeidsgivere": [
+    {
+      "vedtaksperioder": [],
+      "forkastede": [
+        {
+          "vedtaksperiode": {
+            "tilstand": "AVSLUTTET"
+          }
+        },
+        {
+          "vedtaksperiode": {
+            "tilstand": "AVVENTER_ARBEIDSGIVERE"
+          }
+        },
+        {
+          "vedtaksperiode": {
+            "tilstand": "AVVENTER_UFERDIG"
+          }
+        },
+        {
+          "vedtaksperiode": {
+            "tilstand": "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP"
+          }
+        },
+        {
+          "vedtaksperiode": {
+            "tilstand": "AVVENTER_INNTEKTSMELDING_UFERDIG_GAP"
+          }
+        },
+        {
+          "vedtaksperiode": {
+            "tilstand": "AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE"
+          }
+        },
+        {
+          "vedtaksperiode": {
+            "tilstand": "AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE"
+          }
+        },
+        {
+          "vedtaksperiode": {
+            "tilstand": "AVVENTER_SØKNAD_UFERDIG_FORLENGELSE"
+          }
+        },
+        {
+          "vedtaksperiode": {
+            "tilstand": "AVVENTER_SØKNAD_FERDIG_FORLENGELSE"
+          }
+        },
+        {
+          "vedtaksperiode": {
+            "tilstand": "AVVENTER_SØKNAD_FERDIG_GAP"
+          }
+        },
+        {
+          "vedtaksperiode": {
+            "tilstand": "AVVENTER_SØKNAD_UFERDIG_GAP"
+          }
+        },
+        {
+          "vedtaksperiode": {
+            "tilstand": "MOTTATT_SYKMELDING_FERDIG_FORLENGELSE"
+          }
+        },
+        {
+          "vedtaksperiode": {
+            "tilstand": "MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE"
+          }
+        },
+        {
+          "vedtaksperiode": {
+            "tilstand": "MOTTATT_SYKMELDING_FERDIG_GAP"
+          }
+        },
+        {
+          "vedtaksperiode": {
+            "tilstand": "MOTTATT_SYKMELDING_UFERDIG_GAP"
+          }
+        }
+      ]
+    },
+    {
+      "vedtaksperioder": [
+        {
+          "tilstand": "AVSLUTTET"
+        },
+        {
+          "tilstand": "AVVENTER_ARBEIDSGIVERE"
+        },
+        {
+          "tilstand": "AVVENTER_UFERDIG"
+        },
+        {
+          "tilstand": "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP"
+        },
+        {
+          "tilstand": "AVVENTER_INNTEKTSMELDING_UFERDIG_GAP"
+        },
+        {
+          "tilstand": "AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE"
+        },
+        {
+          "tilstand": "AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE"
+        },
+        {
+          "tilstand": "AVVENTER_SØKNAD_UFERDIG_FORLENGELSE"
+        },
+        {
+          "tilstand": "AVVENTER_SØKNAD_FERDIG_FORLENGELSE"
+        },
+        {
+          "tilstand": "AVVENTER_SØKNAD_FERDIG_GAP"
+        },
+        {
+          "tilstand": "AVVENTER_SØKNAD_UFERDIG_GAP"
+        },
+        {
+          "tilstand": "MOTTATT_SYKMELDING_FERDIG_FORLENGELSE"
+        },
+        {
+          "tilstand": "MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE"
+        },
+        {
+          "tilstand": "MOTTATT_SYKMELDING_FERDIG_GAP"
+        },
+        {
+          "tilstand": "MOTTATT_SYKMELDING_UFERDIG_GAP"
+        }
+      ],
+      "forkastede": []
+    }
+  ],
+  "skjemaVersjon": 149
+}

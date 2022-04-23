@@ -1,0 +1,111 @@
+{
+  "arbeidsgivere": [
+    {
+      "vedtaksperioder": [],
+      "forkastede": [
+        {
+          "vedtaksperiode": {
+            "tilstand": "AVSLUTTET"
+          }
+        },
+        {
+          "vedtaksperiode": {
+            "tilstand": "AVVENTER_BLOKKERENDE_PERIODE"
+          }
+        },
+        {
+          "vedtaksperiode": {
+            "tilstand": "AVVENTER_BLOKKERENDE_PERIODE"
+          }
+        },
+        {
+          "vedtaksperiode": {
+            "tilstand": "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK"
+          }
+        },
+        {
+          "vedtaksperiode": {
+            "tilstand": "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK"
+          }
+        },
+        {
+          "vedtaksperiode": {
+            "tilstand": "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK"
+          }
+        },
+        {
+          "vedtaksperiode": {
+            "tilstand": "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK"
+          }
+        },
+        {
+          "vedtaksperiode": {
+            "tilstand": "TIL_INFOTRYGD"
+          }
+        },
+        {
+          "vedtaksperiode": {
+            "tilstand": "TIL_INFOTRYGD"
+          }
+        },
+        {
+          "vedtaksperiode": {
+            "tilstand": "TIL_INFOTRYGD"
+          }
+        },
+        {
+          "vedtaksperiode": {
+            "tilstand": "TIL_INFOTRYGD"
+          }
+        },
+        {
+          "vedtaksperiode": {
+            "tilstand": "TIL_INFOTRYGD"
+          }
+        },
+        {
+          "vedtaksperiode": {
+            "tilstand": "TIL_INFOTRYGD"
+          }
+        },
+        {
+          "vedtaksperiode": {
+            "tilstand": "TIL_INFOTRYGD"
+          }
+        },
+        {
+          "vedtaksperiode": {
+            "tilstand": "TIL_INFOTRYGD"
+          }
+        }
+      ]
+    },
+    {
+      "vedtaksperioder": [
+        {
+          "tilstand": "AVSLUTTET"
+        },
+        {
+          "tilstand": "AVVENTER_BLOKKERENDE_PERIODE"
+        },
+        {
+          "tilstand": "AVVENTER_BLOKKERENDE_PERIODE"
+        },
+        {
+          "tilstand": "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK"
+        },
+        {
+          "tilstand": "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK"
+        },
+        {
+          "tilstand": "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK"
+        },
+        {
+          "tilstand": "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK"
+        }
+      ],
+      "forkastede": []
+    }
+  ],
+  "skjemaVersjon": 150
+}
