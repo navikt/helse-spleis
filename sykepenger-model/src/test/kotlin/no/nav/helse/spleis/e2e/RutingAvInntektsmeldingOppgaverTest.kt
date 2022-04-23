@@ -52,6 +52,7 @@ internal class RutingAvInntektsmeldingOppgaverTest : AbstractEndToEndTest() {
         val søknadId = håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), andreInntektskilder = listOf(Søknad.Inntektskilde(true, "FRILANSER")))
         håndterInntektsmeldingReplay(inntektsmeldingId, 1.vedtaksperiode.id(ORGNUMMER))
         assertEquals(listOf(søknadId, inntektsmeldingId), observatør.opprettOppgaveEvent().flatMap { it.hendelser })
+        assertEquals(listOf(1.vedtaksperiode.id(ORGNUMMER)), observatør.inntektsmeldingReplayEventer)
     }
 
     @Test

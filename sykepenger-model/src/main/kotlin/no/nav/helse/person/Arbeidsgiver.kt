@@ -530,6 +530,8 @@ internal class Arbeidsgiver private constructor(
         håndter(søknad) { nyPeriodeMedNyFlyt(vedtaksperiode, søknad) }
         vedtaksperiode.håndter(søknad)
         if (søknad.hasErrorsOrWorse()) {
+            søknad.info("Forsøkte å opprette en ny vedtaksperiode, men den ble forkastet før den rakk å spørre om inntektsmeldingReplay. " +
+                    "Ber om inntektsmeldingReplay så vi kan opprette gosys-oppgaver for inntektsmeldinger som ville ha truffet denne vedtaksperioden")
             vedtaksperiode.trengerInntektsmeldingReplay()
         }
     }
