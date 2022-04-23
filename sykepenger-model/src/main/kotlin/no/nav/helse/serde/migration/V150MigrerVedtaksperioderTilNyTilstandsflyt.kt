@@ -3,10 +3,11 @@ package no.nav.helse.serde.migration
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
+import java.util.UUID
 import no.nav.helse.Toggle
 
 internal class V150MigrerVedtaksperioderTilNyTilstandsflyt : JsonMigration(version = 150) {
-    override val description: String = ""
+    override val description: String = "Migrerer vedtaksperiodetilstander til ny flyt"
 
     init {
         require(Toggle.NyTilstandsflyt.enabled) {
@@ -37,11 +38,17 @@ internal class V150MigrerVedtaksperioderTilNyTilstandsflyt : JsonMigration(versi
         "MOTTATT_SYKMELDING_UFERDIG_GAP"
     )
 
-    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {}
+
+    override fun doMigration(
+        jsonNode: ObjectNode,
+        meldingerSupplier: MeldingerSupplier,
+        observer: JsonMigrationObserver
+    ) {
         jsonNode["arbeidsgivere"]
             .forEach { arbeidsgiverNode ->
                 val vedtaksperioder = arbeidsgiverNode["vedtaksperioder"] as ArrayNode
-                vedtaksperioder.slettIkkeMottattSøknadTilstander()
+                vedtaksperioder.slettIkkeMottattSøknadTilstander(observer)
                 vedtaksperioder.oppdaterTilstander()
 
                 val forkastedeVedtaksperioder = arbeidsgiverNode["forkastede"]
@@ -51,8 +58,15 @@ internal class V150MigrerVedtaksperioderTilNyTilstandsflyt : JsonMigration(versi
             }
     }
 
-    private fun ArrayNode.slettIkkeMottattSøknadTilstander() = removeAll { vedtaksperiodeNode ->
-        vedtaksperiodeNode["tilstand"].asText() in tilstanderUtenMottatSøknad
+    private fun ArrayNode.slettIkkeMottattSøknadTilstander(observer: JsonMigrationObserver) {
+        val iterator = iterator()
+        while (iterator.hasNext()) {
+            val vedtaksperiodeNode = iterator.next()
+            if (vedtaksperiodeNode["tilstand"].asText() in tilstanderUtenMottatSøknad) {
+                iterator.remove()
+                observer.vedtaksperiodeSlettet(UUID.fromString(vedtaksperiodeNode["id"].asText()), vedtaksperiodeNode)
+            }
+        }
     }
 
     private fun Iterable<JsonNode>.oppdaterTilstander() = forEach { vedtaksperiodeNode ->

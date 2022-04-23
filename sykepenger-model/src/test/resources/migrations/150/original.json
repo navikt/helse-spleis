@@ -5,76 +5,91 @@
       "forkastede": [
         {
           "vedtaksperiode": {
+            "id": "e03dbd13-0bd8-4c70-ad00-477f4d9d2b73",
             "tilstand": "AVSLUTTET"
           }
         },
         {
           "vedtaksperiode": {
+            "id": "e800dba2-87f1-4dcd-bb6d-c931a6288ab9",
             "tilstand": "AVVENTER_ARBEIDSGIVERE"
           }
         },
         {
           "vedtaksperiode": {
+            "id": "9f7e0e74-2f74-41b4-bd48-23bbaa01c372",
             "tilstand": "AVVENTER_UFERDIG"
           }
         },
         {
           "vedtaksperiode": {
+            "id": "d3e48dd6-928a-479e-bc3b-5b5918c27c12",
             "tilstand": "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP"
           }
         },
         {
           "vedtaksperiode": {
+            "id": "1d89e87d-b003-4747-8ac6-cc0bf8b40b30",
             "tilstand": "AVVENTER_INNTEKTSMELDING_UFERDIG_GAP"
           }
         },
         {
           "vedtaksperiode": {
+            "id": "c81e7c82-be40-41f8-8135-939554100471",
             "tilstand": "AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE"
           }
         },
         {
           "vedtaksperiode": {
+            "id": "10260823-df41-4257-8b26-4256d60e9311",
             "tilstand": "AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE"
           }
         },
         {
           "vedtaksperiode": {
+            "id": "4b2e466b-b461-440c-bac6-3d5588d75732",
             "tilstand": "AVVENTER_SØKNAD_UFERDIG_FORLENGELSE"
           }
         },
         {
           "vedtaksperiode": {
+            "id": "89f77c72-5c66-4fdf-b6be-08c9f4733395",
             "tilstand": "AVVENTER_SØKNAD_FERDIG_FORLENGELSE"
           }
         },
         {
           "vedtaksperiode": {
+            "id": "4ae46eb2-323a-4d1d-bbe0-a47db9af6d3a",
             "tilstand": "AVVENTER_SØKNAD_FERDIG_GAP"
           }
         },
         {
           "vedtaksperiode": {
+            "id": "1c0c62b0-99c2-41b7-a83a-a7a8459221cc",
             "tilstand": "AVVENTER_SØKNAD_UFERDIG_GAP"
           }
         },
         {
           "vedtaksperiode": {
+            "id": "db4ba93e-b2ae-46ba-b40f-9eebd56b4a73",
             "tilstand": "MOTTATT_SYKMELDING_FERDIG_FORLENGELSE"
           }
         },
         {
           "vedtaksperiode": {
+            "id": "da985ecc-2760-4b2b-985c-0cf2b5da8acc",
             "tilstand": "MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE"
           }
         },
         {
           "vedtaksperiode": {
+            "id": "2c6d830d-5df5-40df-9ae3-2f8433f9160f",
             "tilstand": "MOTTATT_SYKMELDING_FERDIG_GAP"
           }
         },
         {
           "vedtaksperiode": {
+            "id": "09f5b521-6a9a-4764-96fd-2cad923e848b",
             "tilstand": "MOTTATT_SYKMELDING_UFERDIG_GAP"
           }
         }
@@ -83,48 +98,63 @@
     {
       "vedtaksperioder": [
         {
+          "id": "c589526f-cc0f-4a8b-93db-cc0d13216af3",
           "tilstand": "AVSLUTTET"
         },
         {
+          "id": "326323d4-572a-402c-baf4-5ddf04d24a43",
           "tilstand": "AVVENTER_ARBEIDSGIVERE"
         },
         {
+          "id": "5615ca7f-2519-4bae-8b70-57b475f958fb",
           "tilstand": "AVVENTER_UFERDIG"
         },
         {
+          "id": "559cfe35-153a-4297-94cc-e303374c1665",
           "tilstand": "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP"
         },
         {
+          "id": "d69bdf89-9fca-46c5-b80a-b66951bb69e3",
           "tilstand": "AVVENTER_INNTEKTSMELDING_UFERDIG_GAP"
         },
         {
+          "id": "61983033-3acc-47b2-b1ad-ed63cf5136e1",
           "tilstand": "AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE"
         },
         {
+          "id": "e32738c2-22fe-439b-8b55-1d6eb0b4eb3d",
           "tilstand": "AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE"
         },
         {
+          "id": "241f0cdc-95c0-409d-876d-2d3ac6a31a9c",
           "tilstand": "AVVENTER_SØKNAD_UFERDIG_FORLENGELSE"
         },
         {
+          "id": "bfb92723-04ae-46bd-9425-2fed2df6cc3c",
           "tilstand": "AVVENTER_SØKNAD_FERDIG_FORLENGELSE"
         },
         {
+          "id": "a206320d-69f3-4a5b-90d3-d16b36a5af23",
           "tilstand": "AVVENTER_SØKNAD_FERDIG_GAP"
         },
         {
+          "id": "569d96a6-c7ad-4fe1-920c-ca815b27ff35",
           "tilstand": "AVVENTER_SØKNAD_UFERDIG_GAP"
         },
         {
+          "id": "730efe78-4020-407c-ba80-a044b05f53ac",
           "tilstand": "MOTTATT_SYKMELDING_FERDIG_FORLENGELSE"
         },
         {
+          "id": "693f09a3-19e2-4693-9d90-a921f0d77ec3",
           "tilstand": "MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE"
         },
         {
+          "id": "b48f5fb6-ba22-43cb-b0d9-59a95e52e9b3",
           "tilstand": "MOTTATT_SYKMELDING_FERDIG_GAP"
         },
         {
+          "id": "0c91a3c8-0abb-42cb-80b1-2c552a63eec6",
           "tilstand": "MOTTATT_SYKMELDING_UFERDIG_GAP"
         }
       ],

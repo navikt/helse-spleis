@@ -5,76 +5,91 @@
       "forkastede": [
         {
           "vedtaksperiode": {
+            "id": "e03dbd13-0bd8-4c70-ad00-477f4d9d2b73",
             "tilstand": "AVSLUTTET"
           }
         },
         {
           "vedtaksperiode": {
+            "id": "e800dba2-87f1-4dcd-bb6d-c931a6288ab9",
             "tilstand": "AVVENTER_BLOKKERENDE_PERIODE"
           }
         },
         {
           "vedtaksperiode": {
+            "id": "9f7e0e74-2f74-41b4-bd48-23bbaa01c372",
             "tilstand": "AVVENTER_BLOKKERENDE_PERIODE"
           }
         },
         {
           "vedtaksperiode": {
+            "id": "d3e48dd6-928a-479e-bc3b-5b5918c27c12",
             "tilstand": "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK"
           }
         },
         {
           "vedtaksperiode": {
+            "id": "1d89e87d-b003-4747-8ac6-cc0bf8b40b30",
             "tilstand": "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK"
           }
         },
         {
           "vedtaksperiode": {
+            "id": "c81e7c82-be40-41f8-8135-939554100471",
             "tilstand": "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK"
           }
         },
         {
           "vedtaksperiode": {
+            "id": "10260823-df41-4257-8b26-4256d60e9311",
             "tilstand": "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK"
           }
         },
         {
           "vedtaksperiode": {
+            "id": "4b2e466b-b461-440c-bac6-3d5588d75732",
             "tilstand": "TIL_INFOTRYGD"
           }
         },
         {
           "vedtaksperiode": {
+            "id": "89f77c72-5c66-4fdf-b6be-08c9f4733395",
             "tilstand": "TIL_INFOTRYGD"
           }
         },
         {
           "vedtaksperiode": {
+            "id": "4ae46eb2-323a-4d1d-bbe0-a47db9af6d3a",
             "tilstand": "TIL_INFOTRYGD"
           }
         },
         {
           "vedtaksperiode": {
+            "id": "1c0c62b0-99c2-41b7-a83a-a7a8459221cc",
             "tilstand": "TIL_INFOTRYGD"
           }
         },
         {
           "vedtaksperiode": {
+            "id": "db4ba93e-b2ae-46ba-b40f-9eebd56b4a73",
             "tilstand": "TIL_INFOTRYGD"
           }
         },
         {
           "vedtaksperiode": {
+            "id": "da985ecc-2760-4b2b-985c-0cf2b5da8acc",
             "tilstand": "TIL_INFOTRYGD"
           }
         },
         {
           "vedtaksperiode": {
+            "id": "2c6d830d-5df5-40df-9ae3-2f8433f9160f",
             "tilstand": "TIL_INFOTRYGD"
           }
         },
         {
           "vedtaksperiode": {
+            "id": "09f5b521-6a9a-4764-96fd-2cad923e848b",
             "tilstand": "TIL_INFOTRYGD"
           }
         }
@@ -83,24 +98,31 @@
     {
       "vedtaksperioder": [
         {
+          "id": "c589526f-cc0f-4a8b-93db-cc0d13216af3",
           "tilstand": "AVSLUTTET"
         },
         {
+          "id": "326323d4-572a-402c-baf4-5ddf04d24a43",
           "tilstand": "AVVENTER_BLOKKERENDE_PERIODE"
         },
         {
+          "id": "5615ca7f-2519-4bae-8b70-57b475f958fb",
           "tilstand": "AVVENTER_BLOKKERENDE_PERIODE"
         },
         {
+          "id": "559cfe35-153a-4297-94cc-e303374c1665",
           "tilstand": "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK"
         },
         {
+          "id": "d69bdf89-9fca-46c5-b80a-b66951bb69e3",
           "tilstand": "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK"
         },
         {
+          "id": "61983033-3acc-47b2-b1ad-ed63cf5136e1",
           "tilstand": "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK"
         },
         {
+          "id": "e32738c2-22fe-439b-8b55-1d6eb0b4eb3d",
           "tilstand": "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK"
         }
       ],
