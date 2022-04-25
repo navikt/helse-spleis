@@ -16,16 +16,20 @@ internal class GenerellMeldingskontraktTest : AbstractEndToEndMediatorTest() {
 
     @Test
     fun `vedtaksperiode endret`() {
-        val meldingId = sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+        sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+        val søknadId = sendSøknad(listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
         val vedtaksperiodeEndret = testRapid.inspektør.siste("vedtaksperiode_endret")
-        assertVedtaksperiodeEndret(vedtaksperiodeEndret, meldingId, "ny_søknad")
+        assertVedtaksperiodeEndret(vedtaksperiodeEndret, søknadId, "sendt_søknad_nav")
     }
 
     @Test
     fun `behov`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
-        sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
-        val (meldingId, _) = sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
+        sendSøknad(listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
+        val (meldingId, _) = sendInntektsmelding(
+            listOf(Periode(fom = 3.januar, tom = 18.januar)),
+            førsteFraværsdag = 3.januar
+        )
         val behov = testRapid.inspektør.siste("behov")
         assertBehov(behov, meldingId, "inntektsmelding")
     }
@@ -34,7 +38,7 @@ internal class GenerellMeldingskontraktTest : AbstractEndToEndMediatorTest() {
     fun `replay inntektsmelding`() {
         val (meldingId, _) = sendInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
-        sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
+        sendSøknad(listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
         val behov = testRapid.inspektør.siste("behov")
         assertBehov(behov, meldingId, "inntektsmelding_replay")
     }

@@ -13,14 +13,11 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
+import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP
+import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
-import no.nav.helse.person.TilstandType.AVVENTER_SØKNAD_UFERDIG_FORLENGELSE
-import no.nav.helse.person.TilstandType.AVVENTER_UFERDIG
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
-import no.nav.helse.person.TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP
-import no.nav.helse.person.TilstandType.MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
@@ -67,6 +64,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 17.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 17.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(18.januar, 20.januar, 100.prosent))
+        håndterSøknad(Sykdom(18.januar, 20.januar, 100.prosent))
 
         val arbeidsgiverperioder = listOf(
             1.januar til 16.januar
@@ -84,8 +82,8 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         assertForkastetPeriodeTilstander(
             1.vedtaksperiode,
             START,
-            MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             TIL_INFOTRYGD
@@ -94,8 +92,8 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         assertForkastetPeriodeTilstander(
             2.vedtaksperiode,
             START,
-            MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
-            AVVENTER_SØKNAD_UFERDIG_FORLENGELSE,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVVENTER_BLOKKERENDE_PERIODE,
             TIL_INFOTRYGD
         )
     }
@@ -132,8 +130,8 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         assertTilstander(
             1.vedtaksperiode,
             START,
-            MOTTATT_SYKMELDING_FERDIG_GAP,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
@@ -142,8 +140,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         assertTilstander(
             2.vedtaksperiode,
             START,
-            MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
-            AVVENTER_UFERDIG
+            AVVENTER_BLOKKERENDE_PERIODE
         )
     }
 
@@ -168,73 +165,60 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `skal ikke gjenbruke et vilkårsgrunnlag som feiler pga 25 prosent avvik`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 17.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 17.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
 
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode)
 
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             INNTEKT,
             inntektsvurdering = Inntektsvurdering(
-                inntekter = listOf(
-                    sammenligningsgrunnlag(a1, 1.januar, (INNTEKT / 2).repeat(12)),
-                    sammenligningsgrunnlag(a2, 1.januar, (INNTEKT / 2).repeat(12))
-                ),
+                inntekter = listOf(sammenligningsgrunnlag(a1, 1.januar, (INNTEKT / 2).repeat(12))),
             ),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = listOf(
-                    grunnlag(a1, 1.januar, INNTEKT.repeat(3)),
-                    grunnlag(a2, 1.januar, INNTEKT.repeat(3))
-                ),
+                inntekter = listOf(grunnlag(a1, 1.januar, INNTEKT.repeat(3))),
                 arbeidsforhold = emptyList()
             ),
-            arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, 1.desember(2017)),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, 1.desember(2017))
-            ),
-            orgnummer = a1
+            arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(a1, 1.desember(2017)))
         )
+        assertError("Har mer enn 25 % avvik", 1.vedtaksperiode.filter())
 
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a2)
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a2)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
+        håndterSykmelding(Sykmeldingsperiode(18.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(18.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 18.januar))
 
-        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        håndterYtelser(2.vedtaksperiode)
         assertForventetFeil(
             forklaring = "https://trello.com/c/edYRnoPm",
-            nå = { assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a2) },
-            ønsket = { assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD, orgnummer = a2) }
+            nå = { assertSisteTilstand(2.vedtaksperiode, AVVENTER_SIMULERING) },
+            ønsket = { assertSisteTilstand(2.vedtaksperiode, TIL_INFOTRYGD) }
         )
     }
 
     @Test
     fun `skal ikke gjenbruke et vilkårsgrunnlag som feiler pga frilanser arbeidsforhold`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 17.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 17.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
 
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode)
 
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,
             INNTEKT,
             inntektsvurdering = Inntektsvurdering(
-                inntekter = listOf(
-                    sammenligningsgrunnlag(a1, 1.januar, INNTEKT.repeat(12)),
-                    sammenligningsgrunnlag(a2, 1.januar, INNTEKT.repeat(12))
-                ),
+                inntekter = listOf(sammenligningsgrunnlag(a1, 1.januar, INNTEKT.repeat(12))),
             ),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
                 inntekter = listOf(
                     grunnlag(a1, 1.januar, INNTEKT.repeat(3)),
-                    grunnlag(a2, 1.januar, INNTEKT.repeat(3)),
-                    grunnlag(a3, 1.januar, INNTEKT.repeat(1))
+                    grunnlag(a2, 1.januar, INNTEKT.repeat(1))
                 ),
                 arbeidsforhold = listOf(
                     InntektForSykepengegrunnlag.Arbeidsforhold(
-                        orgnummer = a3,
+                        orgnummer = a2,
                         månedligeArbeidsforhold = listOf(
                             InntektForSykepengegrunnlag.MånedligArbeidsforhold(
                                 yearMonth = YearMonth.of(2017, 12),
@@ -247,20 +231,20 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
             arbeidsforhold = listOf(
                 Vilkårsgrunnlag.Arbeidsforhold(a1, 1.desember(2017)),
                 Vilkårsgrunnlag.Arbeidsforhold(a2, 1.desember(2017))
-            ),
-            orgnummer = a1,
+            )
         )
+        assertError("Fant frilanserinntekt på en arbeidsgiver de siste 3 månedene", 1.vedtaksperiode.filter())
 
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a2)
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a2)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
+        håndterSykmelding(Sykmeldingsperiode(18.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(18.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 18.januar))
 
-        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        håndterYtelser(2.vedtaksperiode)
 
         assertForventetFeil(
             forklaring = "https://trello.com/c/edYRnoPm",
-            nå = { assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a2) },
-            ønsket = { assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD, orgnummer = a2) }
+            nå = { assertSisteTilstand(2.vedtaksperiode, AVVENTER_SIMULERING) },
+            ønsket = { assertSisteTilstand(2.vedtaksperiode, TIL_INFOTRYGD) }
         )
     }
 

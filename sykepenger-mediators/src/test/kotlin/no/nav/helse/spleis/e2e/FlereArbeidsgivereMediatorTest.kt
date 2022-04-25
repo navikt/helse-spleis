@@ -27,7 +27,6 @@ internal class FlereArbeidsgivereMediatorTest : AbstractEndToEndMediatorTest() {
             orgnummer = "orgnummer2"
         )
         sendSøknad(
-            vedtaksperiodeIndeks = 0,
             perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
             andreInntektskilder = listOf(InntektskildeDTO(InntektskildetypeDTO.ANDRE_ARBEIDSFORHOLD, true)),
             orgnummer = "orgnummer1"
@@ -35,12 +34,10 @@ internal class FlereArbeidsgivereMediatorTest : AbstractEndToEndMediatorTest() {
 
         assertTilstander(
             0,
-            "MOTTATT_SYKMELDING_FERDIG_GAP",
-            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP"
+            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK"
         )
 
         sendSøknad(
-            vedtaksperiodeIndeks = 1,
             perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
             andreInntektskilder = listOf(InntektskildeDTO(InntektskildetypeDTO.ANDRE_ARBEIDSFORHOLD, true)),
             orgnummer = "orgnummer2"
@@ -48,8 +45,7 @@ internal class FlereArbeidsgivereMediatorTest : AbstractEndToEndMediatorTest() {
 
         assertTilstander(
             1,
-            "MOTTATT_SYKMELDING_FERDIG_GAP",
-            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP"
+            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK"
         )
     }
 
@@ -64,14 +60,12 @@ internal class FlereArbeidsgivereMediatorTest : AbstractEndToEndMediatorTest() {
             orgnummer = "orgnummer2"
         )
         sendSøknad(
-            vedtaksperiodeIndeks = 0,
             perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
             andreInntektskilder = listOf(InntektskildeDTO(InntektskildetypeDTO.ANDRE_ARBEIDSFORHOLD, true)),
             orgnummer = "orgnummer1"
         )
 
         sendSøknad(
-            vedtaksperiodeIndeks = 1,
             perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
             andreInntektskilder = listOf(InntektskildeDTO(InntektskildetypeDTO.JORDBRUKER_FISKER_REINDRIFTSUTOVER, true)),
             orgnummer = "orgnummer2"
@@ -79,13 +73,11 @@ internal class FlereArbeidsgivereMediatorTest : AbstractEndToEndMediatorTest() {
 
         assertTilstander(
             0,
-            "MOTTATT_SYKMELDING_FERDIG_GAP",
-            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
+            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
             "TIL_INFOTRYGD"
         )
         assertTilstander(
             1,
-            "MOTTATT_SYKMELDING_FERDIG_GAP",
             "TIL_INFOTRYGD"
         )
     }
@@ -101,14 +93,12 @@ internal class FlereArbeidsgivereMediatorTest : AbstractEndToEndMediatorTest() {
             orgnummer = "orgnummer2"
         )
         sendSøknad(
-            vedtaksperiodeIndeks = 0,
             perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
             andreInntektskilder = listOf(InntektskildeDTO(InntektskildetypeDTO.ANDRE_ARBEIDSFORHOLD, true)),
             orgnummer = "orgnummer1"
         )
 
         sendSøknad(
-            vedtaksperiodeIndeks = 1,
             perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
             andreInntektskilder = listOf(InntektskildeDTO(InntektskildetypeDTO.ANDRE_ARBEIDSFORHOLD, false)),
             orgnummer = "orgnummer2"
@@ -116,13 +106,11 @@ internal class FlereArbeidsgivereMediatorTest : AbstractEndToEndMediatorTest() {
 
         assertTilstander(
             0,
-            "MOTTATT_SYKMELDING_FERDIG_GAP",
-            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
+            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
         )
         assertTilstander(
             1,
-            "MOTTATT_SYKMELDING_FERDIG_GAP",
-            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
+            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
         )
     }
 
@@ -131,10 +119,9 @@ internal class FlereArbeidsgivereMediatorTest : AbstractEndToEndMediatorTest() {
         val a1 = "arbeidsgiver 1"
         val a2 = "arbeidsgiver 2"
         sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100), orgnummer = a1)
-        sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)), orgnummer = a1)
+        sendSøknad(listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)), orgnummer = a1)
         sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100), orgnummer = a2)
         sendSøknad(
-            1,
             listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)),
             andreInntektskilder = listOf(InntektskildeDTO(InntektskildetypeDTO.FOSTERHJEMGODTGJORELSE, true)),
             sendtNav = LocalDateTime.MAX,
@@ -154,14 +141,14 @@ internal class FlereArbeidsgivereMediatorTest : AbstractEndToEndMediatorTest() {
         val a1 = "arbeidsgiver 1"
         val a2 = "arbeidsgiver 2"
         sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100), orgnummer = a1)
-        sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)), orgnummer = a1)
+        sendSøknad(listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)), orgnummer = a1)
         sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100), orgnummer = a2)
-        sendSøknad(1, listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)), orgnummer = a2)
+        sendSøknad(listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)), orgnummer = a2)
         sendNyPåminnelse(
             vedtaksperiodeIndeks = 0,
             orgnummer = a1,
             tilstandsendringstidspunkt = LocalDateTime.MIN,
-            tilstandType = TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP
+            tilstandType = TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
         )
 
         val melding = testRapid.inspektør.meldinger("trenger_ikke_inntektsmelding")
@@ -177,7 +164,7 @@ internal class FlereArbeidsgivereMediatorTest : AbstractEndToEndMediatorTest() {
         val a1 = "ag1"
         val a2 = "ag2"
         sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100), orgnummer = a1)
-        sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)), orgnummer = a1)
+        sendSøknad(listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)), orgnummer = a1)
         sendInntektsmelding(listOf(Periode(1.januar, 16.januar)), 1.januar, orgnummer = a1)
         sendYtelser(0, orgnummer = a1)
         sendVilkårsgrunnlag(
@@ -208,8 +195,8 @@ internal class FlereArbeidsgivereMediatorTest : AbstractEndToEndMediatorTest() {
         sendSimulering(0, orgnummer = a1, status = SimuleringMessage.Simuleringstatus.OK)
         assertTilstander(
             0,
-            "MOTTATT_SYKMELDING_FERDIG_GAP",
-            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
+            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
+            "AVVENTER_BLOKKERENDE_PERIODE",
             "AVVENTER_HISTORIKK",
             "AVVENTER_VILKÅRSPRØVING",
             "AVVENTER_HISTORIKK",

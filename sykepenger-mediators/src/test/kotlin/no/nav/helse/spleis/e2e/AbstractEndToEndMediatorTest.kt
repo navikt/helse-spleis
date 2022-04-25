@@ -116,17 +116,14 @@ internal abstract class AbstractEndToEndMediatorTest {
     }
 
     protected fun sendSøknad(
-        vedtaksperiodeIndeks: Int,
         perioder: List<SoknadsperiodeDTO>,
         fravær: List<FravarDTO> = emptyList(),
         egenmeldinger: List<PeriodeDTO> = emptyList(),
         andreInntektskilder: List<InntektskildeDTO>? = null,
         sendtNav: LocalDateTime? = perioder.maxOfOrNull { it.tom!! }?.atStartOfDay(),
         orgnummer: String = ORGNUMMER
-    ) {
-        assertFalse(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Foreldrepenger))
-
-        val (_, message) = meldingsfabrikk.lagSøknadNav(
+    ): UUID {
+        val (id, message) = meldingsfabrikk.lagSøknadNav(
                 perioder = perioder,
                 fravær = fravær,
                 egenmeldinger = egenmeldinger,
@@ -136,6 +133,7 @@ internal abstract class AbstractEndToEndMediatorTest {
             )
 
         testRapid.sendTestMessage(message)
+        return id.toUUID()
     }
 
     protected fun sendSøknadUtenVedtaksperiode(perioder: List<SoknadsperiodeDTO>) {
@@ -168,19 +166,6 @@ internal abstract class AbstractEndToEndMediatorTest {
         assertFalse(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Foreldrepenger))
         val (_, message) = meldingsfabrikk.lagSøknadArbeidsgiver(perioder, egenmeldinger)
         testRapid.sendTestMessage(message)
-    }
-
-    protected fun sendInntektsmelding(
-        vedtaksperiodeIndeks: Int,
-        arbeidsgiverperiode: List<Periode>,
-        førsteFraværsdag: LocalDate,
-        opphørAvNaturalytelser: List<OpphoerAvNaturalytelse> = emptyList(),
-        beregnetInntekt: Double = INNTEKT,
-        orgnummer: String = ORGNUMMER,
-        opphørsdatoForRefusjon: LocalDate? = null
-    ): Pair<UUID, String> {
-        assertFalse(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Foreldrepenger))
-        return sendInntektsmelding(arbeidsgiverperiode, førsteFraværsdag, opphørAvNaturalytelser, beregnetInntekt, opphørsdatoForRefusjon, orgnummer)
     }
 
     protected fun sendInntektsmelding(
@@ -332,7 +317,7 @@ internal abstract class AbstractEndToEndMediatorTest {
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Sykepengehistorikk))
         val (_, message) = meldingsfabrikk.lagUtbetalingshistorikk(
             testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks),
-            TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             sykepengehistorikk
         )
         testRapid.sendTestMessage(message)

@@ -8,7 +8,19 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
-import no.nav.helse.person.TilstandType.*
+import no.nav.helse.person.TilstandType.AVSLUTTET
+import no.nav.helse.person.TilstandType.AVVENTER_ARBEIDSGIVERE_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
+import no.nav.helse.person.TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
+import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
+import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
+import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
+import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
+import no.nav.helse.person.TilstandType.START
+import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -75,7 +87,6 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = aadvokatene)
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = haandtverkerne)
 
-        håndterYtelser(2.vedtaksperiode, orgnummer = haandtverkerne)
         håndterYtelser(2.vedtaksperiode, orgnummer = aadvokatene)
 
         håndterSimulering(2.vedtaksperiode, orgnummer = aadvokatene)
@@ -92,7 +103,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
             assertTilstander(
                 2.vedtaksperiode,
                 START,
-                MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
+                AVVENTER_BLOKKERENDE_PERIODE,
                 AVVENTER_HISTORIKK,
                 AVVENTER_SIMULERING,
                 AVVENTER_GODKJENNING,
@@ -107,9 +118,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
             assertTilstander(
                 2.vedtaksperiode,
                 START,
-                MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
-                AVVENTER_HISTORIKK,
-                AVVENTER_ARBEIDSGIVERE,
+                AVVENTER_BLOKKERENDE_PERIODE,
                 AVVENTER_HISTORIKK,
                 AVVENTER_SIMULERING,
                 AVVENTER_GODKJENNING,
@@ -234,7 +243,8 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = aadvokatene)
         håndterUtbetalt(orgnummer = aadvokatene)
 
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent), orgnummer = haandtverkerne)
+        håndterSykmelding(Sykmeldingsperiode(10.februar, 28.februar, 100.prosent), orgnummer = haandtverkerne)
+        håndterSøknad(Sykdom(10.februar, 28.februar, 100.prosent), orgnummer = haandtverkerne)
 
         håndterOverstyrTidslinje((20.januar til 22.januar).map { manuellFeriedag(it) }, orgnummer = haandtverkerne)
         håndterYtelser(1.vedtaksperiode, orgnummer = haandtverkerne)
@@ -258,9 +268,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
             assertTilstander(
                 2.vedtaksperiode,
                 START,
-                MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
-                MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
-                MOTTATT_SYKMELDING_FERDIG_FORLENGELSE
+                AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
             )
             assertNoErrors()
             assertEquals(2, utbetalinger.filter { it.erAvsluttet() }.size)
@@ -324,8 +332,6 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = aadvokatene)
 
         håndterYtelser(vedtaksperiodeIdInnhenter = 2.vedtaksperiode, orgnummer = haandtverkerne)
-        håndterYtelser(vedtaksperiodeIdInnhenter = 2.vedtaksperiode, orgnummer = aadvokatene)
-        håndterYtelser(vedtaksperiodeIdInnhenter = 2.vedtaksperiode, orgnummer = haandtverkerne)
 
         håndterSimulering(2.vedtaksperiode, orgnummer = haandtverkerne)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = haandtverkerne)
@@ -383,7 +389,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
             )
             assertTilstander(
                 2.vedtaksperiode,
-                *TIL_AVSLUTTET_FORLENGELSE(false),
+                *TIL_AVSLUTTET_FORLENGELSE(),
                 AVVENTER_ARBEIDSGIVERE_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING,
@@ -451,8 +457,6 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = haandtverkerne)
 
         håndterYtelser(vedtaksperiodeIdInnhenter = 2.vedtaksperiode, orgnummer = aadvokatene)
-        håndterYtelser(vedtaksperiodeIdInnhenter = 2.vedtaksperiode, orgnummer = haandtverkerne)
-        håndterYtelser(vedtaksperiodeIdInnhenter = 2.vedtaksperiode, orgnummer = aadvokatene)
 
         håndterSimulering(2.vedtaksperiode, orgnummer = aadvokatene)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = aadvokatene)
@@ -503,7 +507,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
             )
             assertTilstander(
                 2.vedtaksperiode,
-                *TIL_AVSLUTTET_FORLENGELSE(false),
+                *TIL_AVSLUTTET_FORLENGELSE(),
                 AVVENTER_ARBEIDSGIVERE_REVURDERING
             )
             assertNoErrors()

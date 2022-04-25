@@ -1,6 +1,8 @@
 package no.nav.helse.spleis.e2e
 
 import com.fasterxml.jackson.databind.JsonNode
+import java.time.LocalDate
+import java.time.LocalDateTime
 import no.nav.helse.januar
 import no.nav.helse.rapids_rivers.isMissingOrNull
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
@@ -8,18 +10,19 @@ import no.nav.inntektsmeldingkontrakt.Periode
 import no.nav.syfo.kafka.felles.FravarDTO
 import no.nav.syfo.kafka.felles.FravarstypeDTO
 import no.nav.syfo.kafka.felles.SoknadsperiodeDTO
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertDoesNotThrow
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
-import java.time.LocalDateTime
 
 internal class VedtakkontraktTest : AbstractEndToEndMediatorTest() {
 
     @Test
     fun `vedtak med utbetaling`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
-        sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
-        sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
+        sendSøknad(listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
+        sendInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
         sendYtelser(0)
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
@@ -33,19 +36,18 @@ internal class VedtakkontraktTest : AbstractEndToEndMediatorTest() {
     fun `vedtak uten utbetaling`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(
-            0,
             listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
             fravær = listOf(FravarDTO(19.januar, 26.januar, FravarstypeDTO.FERIE))
         )
-        sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
+        sendInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
         assertVedtakUtenUtbetaling()
     }
 
     @Test
     fun `vedtak med utbetaling uten utbetaling`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
-        sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
-        sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
+        sendSøknad(listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
+        sendInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
         sendYtelser(0)
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
@@ -55,7 +57,6 @@ internal class VedtakkontraktTest : AbstractEndToEndMediatorTest() {
 
         sendNySøknad(SoknadsperiodeDTO(fom = 27.januar, tom = 31.januar, sykmeldingsgrad = 100))
         sendSøknad(
-            1,
             listOf(SoknadsperiodeDTO(fom = 27.januar, tom = 31.januar, sykmeldingsgrad = 100)),
             fravær = listOf(FravarDTO(fom = 27.januar, tom = 31.januar, FravarstypeDTO.FERIE))
         )

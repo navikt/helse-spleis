@@ -1,29 +1,53 @@
 package no.nav.helse.serde.api.v2.buildere
 
+import java.math.BigDecimal
+import java.math.RoundingMode
+import java.time.LocalDate
+import java.time.YearMonth
+import java.util.UUID
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
-import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
+import no.nav.helse.hendelser.Inntektsvurdering
+import no.nav.helse.hendelser.Medlemskapsvurdering
+import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold
+import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.serde.api.builders.InntektshistorikkForAOrdningenBuilder
-import no.nav.helse.serde.api.v2.*
+import no.nav.helse.serde.api.v2.Arbeidsgiverinntekt
+import no.nav.helse.serde.api.v2.InfotrygdVilkårsgrunnlag
+import no.nav.helse.serde.api.v2.InntekterFraAOrdningen
+import no.nav.helse.serde.api.v2.Inntektkilde
+import no.nav.helse.serde.api.v2.SpleisVilkårsgrunnlag
 import no.nav.helse.serde.api.v2.Vilkårsgrunnlag
-import no.nav.helse.spleis.e2e.*
+import no.nav.helse.serde.api.v2.Vilkårsgrunnlagtype
+import no.nav.helse.spleis.e2e.AbstractEndToEndTest
+import no.nav.helse.spleis.e2e.finnSkjæringstidspunkt
+import no.nav.helse.spleis.e2e.grunnlag
+import no.nav.helse.spleis.e2e.håndterInntektsmelding
+import no.nav.helse.spleis.e2e.håndterOverstyrInntekt
+import no.nav.helse.spleis.e2e.håndterSimulering
+import no.nav.helse.spleis.e2e.håndterSykmelding
+import no.nav.helse.spleis.e2e.håndterSøknad
+import no.nav.helse.spleis.e2e.håndterUtbetalingshistorikk
+import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
+import no.nav.helse.spleis.e2e.håndterYtelser
+import no.nav.helse.spleis.e2e.lagInntektperioder
+import no.nav.helse.spleis.e2e.nyeVedtak
+import no.nav.helse.spleis.e2e.nyttVedtak
+import no.nav.helse.spleis.e2e.repeat
+import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
-import java.math.BigDecimal
-import java.math.RoundingMode
-import java.time.LocalDate
-import java.time.YearMonth
-import java.util.*
 
 internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
 
@@ -41,8 +65,8 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
     @Test
     fun `har en generasjon med vilkårsgrunnlag for periode til godkjenning`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = inntekt)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = inntekt)
         håndterYtelser()
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntekt = inntekt)
 
@@ -52,13 +76,10 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
         assertSpleisVilkårsprøving(
             vilkårsgrunnlag = spleisgrunnlag,
             sammenligningsgrunnlag = 480000.0,
-            grunnbeløp = 93634,
             avviksprosent = 0.0,
             omregnetÅrsinntekt = 480000.0,
             skjæringstidspunkt = 1.januar,
             sykepengegrunnlag = 480000.0,
-            oppfyllerKravOmMinstelønn = true,
-            oppfyllerKravOmOpptjening = true,
             oppfyllerKravOmMedlemskap = true
         )
 
@@ -84,21 +105,18 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
         assertSpleisVilkårsprøving(
             vilkårsgrunnlag = vilkårsgrunnlag,
             sammenligningsgrunnlag = 480000.0,
-            grunnbeløp = 93634,
             avviksprosent = 0.0,
             omregnetÅrsinntekt = 480000.0,
             skjæringstidspunkt = 1.januar,
             sykepengegrunnlag = 480000.0,
-            oppfyllerKravOmMinstelønn = true,
-            oppfyllerKravOmOpptjening = true,
             oppfyllerKravOmMedlemskap = true
         )
 
         assertEquals(2, vilkårsgrunnlag.inntekter.size)
-        val inntektAg1 = vilkårsgrunnlag.inntekter.first { it.organisasjonsnummer == AG1.toString() }
+        val inntektAg1 = vilkårsgrunnlag.inntekter.first { it.organisasjonsnummer == AG1 }
         assertEquals(228000.0, inntektAg1.sammenligningsgrunnlag)
 
-        val inntektAg2 = vilkårsgrunnlag.inntekter.first { it.organisasjonsnummer == AG2.toString() }
+        val inntektAg2 = vilkårsgrunnlag.inntekter.first { it.organisasjonsnummer == AG2 }
         assertEquals(252000.0, inntektAg2.sammenligningsgrunnlag)
     }
 
@@ -120,13 +138,10 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
         assertSpleisVilkårsprøving(
             vilkårsgrunnlag = førsteGenerasjon,
             sammenligningsgrunnlag = 372000.0,
-            grunnbeløp = 93634,
             avviksprosent = 0.0,
             omregnetÅrsinntekt = 372000.0,
             skjæringstidspunkt = 1.januar,
             sykepengegrunnlag = 372000.0,
-            oppfyllerKravOmMinstelønn = true,
-            oppfyllerKravOmOpptjening = true,
             oppfyllerKravOmMedlemskap = true
         )
         assertEquals(1, førsteGenerasjon.inntekter.size)
@@ -138,13 +153,10 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
         assertSpleisVilkårsprøving(
             vilkårsgrunnlag = andreGenerasjon,
             sammenligningsgrunnlag = 372000.0,
-            grunnbeløp = 93634,
             avviksprosent = 12.9,
             omregnetÅrsinntekt = 420000.0,
             skjæringstidspunkt = 1.januar,
             sykepengegrunnlag = 420000.0,
-            oppfyllerKravOmMinstelønn = true,
-            oppfyllerKravOmOpptjening = true,
             oppfyllerKravOmMedlemskap = true
         )
         assertEquals(1, andreGenerasjon.inntekter.size)
@@ -169,18 +181,15 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
         assertSpleisVilkårsprøving(
             vilkårsgrunnlag = førsteGenerasjon,
             sammenligningsgrunnlag = 480000.0,
-            grunnbeløp = 93634,
             avviksprosent = 0.0,
             omregnetÅrsinntekt = 480000.0,
             skjæringstidspunkt = 1.januar,
             sykepengegrunnlag = 480000.0,
-            oppfyllerKravOmMinstelønn = true,
-            oppfyllerKravOmOpptjening = true,
             oppfyllerKravOmMedlemskap = true
         )
 
         assertEquals(2, førsteGenerasjon.inntekter.size)
-        val inntektAg1 = førsteGenerasjon.inntekter.first { it.organisasjonsnummer == AG1.toString() }
+        val inntektAg1 = førsteGenerasjon.inntekter.first { it.organisasjonsnummer == AG1 }
         assertInntekt(
             inntektAg1,
             sammenligningsgrunnlag = 228000.0,
@@ -190,7 +199,7 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
             omregnetÅrsinntektMånedsbeløp = 20000.0
         )
 
-        val inntektAg2 = førsteGenerasjon.inntekter.first { it.organisasjonsnummer == AG2.toString() }
+        val inntektAg2 = førsteGenerasjon.inntekter.first { it.organisasjonsnummer == AG2 }
         assertInntekt(
             inntektAg2,
             sammenligningsgrunnlag = 252000.0,
@@ -214,13 +223,10 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
                 assertSpleisVilkårsprøving(
                     vilkårsgrunnlag = andreGenerasjon,
                     sammenligningsgrunnlag = 480000.0,
-                    grunnbeløp = 93634,
                     avviksprosent = 0.0,
                     omregnetÅrsinntekt = 480000.0,
                     skjæringstidspunkt = 1.januar,
                     sykepengegrunnlag = 480000.0,
-                    oppfyllerKravOmMinstelønn = true,
-                    oppfyllerKravOmOpptjening = true,
                     oppfyllerKravOmMedlemskap = true
                 )
                 assertInntekt(
@@ -237,13 +243,10 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
                 assertSpleisVilkårsprøving(
                     vilkårsgrunnlag = andreGenerasjon,
                     sammenligningsgrunnlag = 480000.0,
-                    grunnbeløp = 93634,
                     avviksprosent = 5.3,
                     omregnetÅrsinntekt = 456000.0,
                     skjæringstidspunkt = 1.januar,
                     sykepengegrunnlag = 456000.0,
-                    oppfyllerKravOmMinstelønn = true,
-                    oppfyllerKravOmOpptjening = true,
                     oppfyllerKravOmMedlemskap = true
                 )
                 assertInntekt(
@@ -263,8 +266,8 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
         nyttVedtak(1.januar, 31.januar)
 
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
-        håndterInntektsmelding(listOf(1.mars til 16.mars))
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
+        håndterInntektsmelding(listOf(1.mars til 16.mars))
         håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode, medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.VetIkke)
 
@@ -274,13 +277,10 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
         assertSpleisVilkårsprøving(
             vilkårsgrunnlag = førsteGenerasjon,
             sammenligningsgrunnlag = 372000.0,
-            grunnbeløp = 93634,
             avviksprosent = 0.0,
             omregnetÅrsinntekt = 372000.0,
             skjæringstidspunkt = 1.januar,
             sykepengegrunnlag = 372000.0,
-            oppfyllerKravOmMinstelønn = true,
-            oppfyllerKravOmOpptjening = true,
             oppfyllerKravOmMedlemskap = true
         )
         assertEquals(1, førsteGenerasjon.inntekter.size)
@@ -291,13 +291,10 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
         assertSpleisVilkårsprøving(
             vilkårsgrunnlag = andreGenerasjon,
             sammenligningsgrunnlag = 372000.0,
-            grunnbeløp = 93634,
             avviksprosent = 0.0,
             omregnetÅrsinntekt = 372000.0,
             skjæringstidspunkt = 1.mars,
             sykepengegrunnlag = 372000.0,
-            oppfyllerKravOmMinstelønn = true,
-            oppfyllerKravOmOpptjening = true,
             oppfyllerKravOmMedlemskap = null
         )
         assertEquals(1, førsteGenerasjon.inntekter.size)
@@ -320,7 +317,7 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
         val generasjoner = vilkårsgrunnlag.build().toDTO()
 
         val førsteGenerasjon = generasjoner.første().vilkårsgrunnlagInfotrygd(skjæringstidspunkt)
-        assertInfotrygdVilkårsprøving(førsteGenerasjon, skjæringstidspunkt, 480000.0)
+        assertInfotrygdVilkårsprøving(førsteGenerasjon, skjæringstidspunkt)
         assertEquals(1, førsteGenerasjon.inntekter.size)
         val inntekt = førsteGenerasjon.inntekter.first()
         assertInntekt(inntekt, ORGNUMMER, null, 480000.0, Inntektkilde.Infotrygd, primitivInntekt)
@@ -343,8 +340,8 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
         )
 
         val arbeidsforhold = listOf(
-            Arbeidsforhold(AG1.toString(), LocalDate.EPOCH, null),
-            Arbeidsforhold(AG2.toString(), LocalDate.EPOCH, null)
+            Arbeidsforhold(AG1, LocalDate.EPOCH, null),
+            Arbeidsforhold(AG2, LocalDate.EPOCH, null)
         )
 
         håndterYtelser(1.vedtaksperiode, orgnummer = AG1)
@@ -367,17 +364,14 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
         assertSpleisVilkårsprøving(
             vilkårsgrunnlag = generasjon,
             sammenligningsgrunnlag = 756000.0,
-            grunnbeløp = 93634,
             avviksprosent = 0.0,
             omregnetÅrsinntekt = 756000.0,
             skjæringstidspunkt = 1.januar,
             sykepengegrunnlag = 561804.0,
-            oppfyllerKravOmMinstelønn = true,
-            oppfyllerKravOmOpptjening = true,
             oppfyllerKravOmMedlemskap = true
         )
         assertEquals(2, generasjon.inntekter.size)
-        val inntektAg1 = generasjon.inntekter.first { it.organisasjonsnummer == AG1.toString() }
+        val inntektAg1 = generasjon.inntekter.first { it.organisasjonsnummer == AG1 }
         assertInntekt(
             inntektAg1,
             sammenligningsgrunnlag = 372000.0,
@@ -386,7 +380,7 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
             inntektskilde = Inntektkilde.Inntektsmelding,
             omregnetÅrsinntektMånedsbeløp = 31000.0
         )
-        val inntektGhost = generasjon.inntekter.first { it.organisasjonsnummer == AG2.toString() }
+        val inntektGhost = generasjon.inntekter.first { it.organisasjonsnummer == AG2 }
         assertInntekt(
             inntektGhost,
             AG2, 384000.0, omregnetÅrsinntekt = 384000.0, Inntektkilde.AOrdningen, 32000.0, inntekterFraAOrdningen(1.januar, 32000.0)
@@ -396,35 +390,31 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
     private fun assertInfotrygdVilkårsprøving(
         vilkårsgrunnlag: InfotrygdVilkårsgrunnlag,
         skjæringstidspunkt: LocalDate,
-        omregnetÅrsinntekt: Double,
     ) {
         assertEquals(Vilkårsgrunnlagtype.INFOTRYGD, vilkårsgrunnlag.vilkårsgrunnlagtype)
         assertEquals(skjæringstidspunkt, vilkårsgrunnlag.skjæringstidspunkt)
         assertNull(vilkårsgrunnlag.sammenligningsgrunnlag)
-        assertEquals(omregnetÅrsinntekt, vilkårsgrunnlag.omregnetÅrsinntekt)
+        assertEquals(480000.0, vilkårsgrunnlag.omregnetÅrsinntekt)
     }
 
     private fun assertSpleisVilkårsprøving(
         vilkårsgrunnlag: SpleisVilkårsgrunnlag,
         sammenligningsgrunnlag: Double,
-        grunnbeløp: Int,
         avviksprosent: Double,
         omregnetÅrsinntekt: Double,
         skjæringstidspunkt: LocalDate,
         sykepengegrunnlag: Double,
-        oppfyllerKravOmMinstelønn: Boolean,
-        oppfyllerKravOmOpptjening: Boolean,
         oppfyllerKravOmMedlemskap: Boolean?,
     ) {
         assertEquals(Vilkårsgrunnlagtype.SPLEIS, vilkårsgrunnlag.vilkårsgrunnlagtype)
         assertEquals(sammenligningsgrunnlag, vilkårsgrunnlag.sammenligningsgrunnlag)
-        assertEquals(grunnbeløp, vilkårsgrunnlag.grunnbeløp)
-        assertEquals(oppfyllerKravOmMinstelønn, vilkårsgrunnlag.oppfyllerKravOmMinstelønn)
+        assertEquals(93634, vilkårsgrunnlag.grunnbeløp)
+        assertEquals(true, vilkårsgrunnlag.oppfyllerKravOmMinstelønn)
         assertEquals(avviksprosent, BigDecimal(vilkårsgrunnlag.avviksprosent!!).setScale(2, RoundingMode.HALF_DOWN).toDouble())
         assertEquals(omregnetÅrsinntekt, vilkårsgrunnlag.omregnetÅrsinntekt)
         assertEquals(skjæringstidspunkt, vilkårsgrunnlag.skjæringstidspunkt)
         assertEquals(sykepengegrunnlag, vilkårsgrunnlag.sykepengegrunnlag)
-        assertEquals(oppfyllerKravOmOpptjening, vilkårsgrunnlag.oppfyllerKravOmOpptjening)
+        assertEquals(true, vilkårsgrunnlag.oppfyllerKravOmOpptjening)
         assertEquals(oppfyllerKravOmMedlemskap, vilkårsgrunnlag.oppfyllerKravOmMedlemskap)
     }
 

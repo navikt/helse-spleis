@@ -1,9 +1,14 @@
 package no.nav.helse.spleis.e2e
 
+import java.time.LocalDate
 import no.nav.helse.februar
-import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
+import no.nav.helse.hendelser.Inntektsvurdering
+import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.Vilkårsgrunnlag
+import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.person.TilstandType
@@ -13,7 +18,6 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
 
 internal class OverstyrInntektTest : AbstractEndToEndTest() {
 
@@ -31,8 +35,8 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
 
         assertTilstander(1.vedtaksperiode,
             TilstandType.START,
-            TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
-            TilstandType.AVVENTER_SØKNAD_FERDIG_GAP,
+            TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            TilstandType.AVVENTER_BLOKKERENDE_PERIODE,
             TilstandType.AVVENTER_HISTORIKK,
             TilstandType.AVVENTER_VILKÅRSPRØVING,
             TilstandType.AVVENTER_HISTORIKK,
@@ -48,8 +52,8 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
         // assert at vi går gjennom restene av tilstandene som vanlig
         assertTilstander(1.vedtaksperiode,
             TilstandType.START,
-            TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
-            TilstandType.AVVENTER_SØKNAD_FERDIG_GAP,
+            TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            TilstandType.AVVENTER_BLOKKERENDE_PERIODE,
             TilstandType.AVVENTER_HISTORIKK,
             TilstandType.AVVENTER_VILKÅRSPRØVING,
             TilstandType.AVVENTER_HISTORIKK,
@@ -76,8 +80,8 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
 
         assertForkastetPeriodeTilstander(1.vedtaksperiode,
             TilstandType.START,
-            TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
-            TilstandType.AVVENTER_SØKNAD_FERDIG_GAP,
+            TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            TilstandType.AVVENTER_BLOKKERENDE_PERIODE,
             TilstandType.AVVENTER_HISTORIKK,
             TilstandType.AVVENTER_VILKÅRSPRØVING,
             TilstandType.AVVENTER_HISTORIKK,
@@ -185,8 +189,8 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
 
         assertTilstander(1.vedtaksperiode,
             TilstandType.START,
-            TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
-            TilstandType.AVVENTER_SØKNAD_FERDIG_GAP,
+            TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            TilstandType.AVVENTER_BLOKKERENDE_PERIODE,
             TilstandType.AVVENTER_HISTORIKK,
             TilstandType.AVVENTER_VILKÅRSPRØVING,
             TilstandType.AVVENTER_HISTORIKK,
@@ -228,8 +232,8 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
 
         assertTilstander(1.vedtaksperiode,
             TilstandType.START,
-            TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
-            TilstandType.AVVENTER_SØKNAD_FERDIG_GAP,
+            TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            TilstandType.AVVENTER_BLOKKERENDE_PERIODE,
             TilstandType.AVVENTER_HISTORIKK,
             TilstandType.AVVENTER_VILKÅRSPRØVING,
             TilstandType.AVVENTER_HISTORIKK,
@@ -247,7 +251,7 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
 
         assertTilstander(2.vedtaksperiode,
             TilstandType.START,
-            TilstandType.MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
+            TilstandType.AVVENTER_BLOKKERENDE_PERIODE,
             TilstandType.AVVENTER_HISTORIKK,
             TilstandType.AVVENTER_SIMULERING,
             TilstandType.AVVENTER_GODKJENNING,
@@ -286,8 +290,8 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
 
         assertTilstander(1.vedtaksperiode,
             TilstandType.START,
-            TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
-            TilstandType.AVVENTER_SØKNAD_FERDIG_GAP,
+            TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            TilstandType.AVVENTER_BLOKKERENDE_PERIODE,
             TilstandType.AVVENTER_HISTORIKK,
             TilstandType.AVVENTER_VILKÅRSPRØVING,
             TilstandType.AVVENTER_HISTORIKK,
@@ -304,7 +308,7 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
 
         assertTilstander(2.vedtaksperiode,
             TilstandType.START,
-            TilstandType.MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
+            TilstandType.AVVENTER_BLOKKERENDE_PERIODE,
             TilstandType.AVVENTER_HISTORIKK,
             TilstandType.AVVENTER_SIMULERING,
             TilstandType.AVVENTER_GODKJENNING,

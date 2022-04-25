@@ -15,6 +15,6 @@ internal class UgyldigDataTest : AbstractEndToEndMediatorTest() {
     @Test
     fun `sendt søknad - tom er før fom`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 2.januar, sykmeldingsgrad = 100))
-        assertDoesNotThrow { sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 2.januar, tom = 1.januar, sykmeldingsgrad = 100))) }
+        assertDoesNotThrow { sendSøknad(listOf(SoknadsperiodeDTO(fom = 2.januar, tom = 1.januar, sykmeldingsgrad = 100))) }
     }
 }

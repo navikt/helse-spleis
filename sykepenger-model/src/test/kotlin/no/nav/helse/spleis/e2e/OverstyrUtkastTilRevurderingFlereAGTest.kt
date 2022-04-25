@@ -3,7 +3,13 @@ package no.nav.helse.spleis.e2e
 import no.nav.helse.februar
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
-import no.nav.helse.person.TilstandType.*
+import no.nav.helse.person.TilstandType.AVSLUTTET
+import no.nav.helse.person.TilstandType.AVVENTER_ARBEIDSGIVERE_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
+import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.Fridag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
 import org.junit.jupiter.api.Test
@@ -88,7 +94,7 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
             )
             assertTilstander(
                 2.vedtaksperiode,
-                *TIL_AVSLUTTET_FORLENGELSE(false),
+                *TIL_AVSLUTTET_FORLENGELSE(),
                 AVVENTER_ARBEIDSGIVERE_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING,
@@ -142,7 +148,7 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
             )
             assertTilstander(
                 2.vedtaksperiode,
-                *TIL_AVSLUTTET_FORLENGELSE(false),
+                *TIL_AVSLUTTET_FORLENGELSE(),
                 AVVENTER_ARBEIDSGIVERE_REVURDERING
             )
         }
@@ -204,7 +210,7 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
             )
             assertTilstander(
                 2.vedtaksperiode,
-                *TIL_AVSLUTTET_FORLENGELSE(false),
+                *TIL_AVSLUTTET_FORLENGELSE(),
                 AVVENTER_ARBEIDSGIVERE_REVURDERING
             )
         }
@@ -280,7 +286,7 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
             )
             assertTilstander(
                 2.vedtaksperiode,
-                *TIL_AVSLUTTET_FORLENGELSE(false),
+                *TIL_AVSLUTTET_FORLENGELSE(),
                 AVVENTER_ARBEIDSGIVERE_REVURDERING
             )
         }
@@ -330,7 +336,7 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
             )
             assertTilstander(
                 2.vedtaksperiode,
-                *TIL_AVSLUTTET_FORLENGELSE(false),
+                *TIL_AVSLUTTET_FORLENGELSE(),
                 AVVENTER_ARBEIDSGIVERE_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING
             )
@@ -381,7 +387,7 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
             )
             assertTilstander(
                 2.vedtaksperiode,
-                *TIL_AVSLUTTET_FORLENGELSE(false),
+                *TIL_AVSLUTTET_FORLENGELSE(),
                 AVVENTER_ARBEIDSGIVERE_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING
             )

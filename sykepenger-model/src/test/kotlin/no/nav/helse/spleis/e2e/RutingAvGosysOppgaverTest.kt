@@ -1,19 +1,31 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.*
+import no.nav.helse.Toggle
+import no.nav.helse.april
+import no.nav.helse.assertForventetFeil
+import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.*
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Papirsykmelding
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.søppelbøtte
-import no.nav.helse.person.TilstandType.*
+import no.nav.helse.januar
+import no.nav.helse.mai
+import no.nav.helse.mars
+import no.nav.helse.person.TilstandType.AVSLUTTET
+import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
+import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
@@ -23,11 +35,9 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
         nyttVedtak(1.januar, 31.januar)
 
         håndterSykmelding(Sykmeldingsperiode(16.februar, 25.februar, 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(16.februar, 20.februar, 80.prosent))
-        // Søknad som ikke støttes pga dekker ikke 21- 25.februar
         val søknadHendelseId = håndterSøknad(Sykdom(16.februar, 20.februar, 80.prosent))
-        // Inntektsmelding trigger sjekken av om søknad dekker hele perioden
         håndterInntektsmelding(listOf(1.januar til 16.januar), 16.februar)
+        person.invaliderAllePerioder(hendelselogg, null)
 
         assertTrue(observatør.opprettOppgaveEvent().isEmpty())
         assertTrue(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().any { søknadHendelseId in it.hendelser })
@@ -40,9 +50,9 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.februar til 15.februar), førsteFraværsdag = 1.februar)
 
         håndterSykmelding(Sykmeldingsperiode(16.februar, 25.februar, 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(16.februar, 20.februar, 80.prosent))
-        // Søknad som ikke støttes pga dekker ikke 21- 25.februar
+
         val søknadHendelseId = håndterSøknad(Sykdom(16.februar, 20.februar, 80.prosent))
+        person.invaliderAllePerioder(hendelselogg, null)
 
         assertTrue(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().isEmpty())
         assertTrue(observatør.opprettOppgaveEvent().any { søknadHendelseId in it.hendelser })
@@ -51,12 +61,17 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
     @Test
     fun `søknad som har samme arbeidsgiverperiode som tidligere utbetaling`() {
         nyttVedtak(1.januar, 31.januar)
-        håndterSykmelding(Sykmeldingsperiode(17.februar, 25.februar, 100.prosent))
+
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 3.februar, 100.prosent))
+        håndterSøknad(Sykdom(1.februar, 3.februar, 100.prosent))
+        person.invaliderAllePerioder(hendelselogg, null)
+
         håndterSykmelding(Sykmeldingsperiode(17.februar, 20.februar, 80.prosent))
+        val søknadId = håndterSøknad(Sykdom(17.februar, 20.februar, 80.prosent))
+        person.invaliderAllePerioder(hendelselogg, null)
         håndterUtbetalingshistorikk(2.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.februar, 3.februar, 100.prosent, 2000.daglig), inntektshistorikk = listOf(
             Inntektsopplysning(ORGNUMMER, 1.februar, 2000.daglig, true)
         ))
-        val søknadId = håndterSøknad(Sykdom(17.februar, 20.februar, 80.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), 17.februar)
 
         assertTrue(observatør.opprettOppgaveEvent().any { søknadId in it.hendelser })
@@ -66,24 +81,12 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
     @Test
     fun `søknad som er lange nok etter utbetalingsperioden skal ikke til ny kø`() {
         nyttVedtak(1.januar, 31.januar)
-        håndterSykmelding(Sykmeldingsperiode(17.februar, 5.mars, 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(17.februar, 4.mars, 80.prosent))
-        val søknadHendelseId = håndterSøknad(Sykdom(17.februar, 4.mars, 80.prosent))
-        person.søppelbøtte(hendelselogg, 17.februar til 5.mars)
+        håndterSykmelding(Sykmeldingsperiode(17.februar, 5.mars, 80.prosent))
+        val søknadHendelseId = håndterSøknad(Sykdom(17.februar, 5.mars, 80.prosent))
+        person.invaliderAllePerioder(hendelselogg, null)
 
         assertTrue(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().isEmpty())
         assertTrue(observatør.opprettOppgaveEvent().any { søknadHendelseId in it.hendelser })
-    }
-
-    @Test
-    fun `ikke-håndtert søknad som ligger nær utbetalingsperioden skal til ny kø`() {
-        // Utbetaling 17. mars til 31. mars (AGP 1-16. mars)
-        nyttVedtak(1.mars, 31.mars)
-
-        val søknadHendelseId = håndterSøknad(Sykdom(20.februar, 1.mars, 80.prosent))
-
-        assertTrue(observatør.opprettOppgaveEvent().isEmpty())
-        assertTrue(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().any { søknadHendelseId in it.hendelser })
     }
 
     @Test
@@ -106,20 +109,20 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
     fun `søknad 2 år før utbetalingsperioden - ny kø`() {
         nyttVedtak(1.mars, 31.mars)
 
-        håndterSykmelding(Sykmeldingsperiode(20.februar(2016), 28.februar(2016), 80.prosent))
-        val søknadHendelseId = håndterSøknad(Sykdom(20.februar(2016), 28.februar(2016), 80.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.februar(2016), 28.februar(2016), 80.prosent))
+        val søknadHendelseId = håndterSøknad(Sykdom(1.februar(2016), 28.februar(2016), 80.prosent))
 
         assertTrue(observatør.opprettOppgaveEvent().isEmpty())
         assertTrue(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().any { søknadHendelseId in it.hendelser })
     }
 
     @Test
-    fun `søknad 4 år før utbetalingsperioden - vanlig kø`() {
+    fun `søknad 4 år før utbetalingsperioden - vanlig kø`() = Toggle.NyTilstandsflyt.disable {
         // Utbetaling 17. mars til 31. mars (AGP 1-16. mars)
         nyttVedtak(1.mars, 31.mars)
 
-        håndterSykmelding(Sykmeldingsperiode(20.februar(2014), 28.februar(2014), 80.prosent))
-        val søknadHendelseId = håndterSøknad(Sykdom(20.februar(2014), 28.februar(2014), 80.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.februar(2014), 28.februar(2014), 80.prosent))
+        val søknadHendelseId = håndterSøknad(Sykdom(1.februar(2014), 28.februar(2014), 80.prosent))
 
         assertTrue(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().isEmpty())
         assertTrue(observatør.opprettOppgaveEvent().any { søknadHendelseId in it.hendelser })
@@ -130,12 +133,11 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
         // Utbetaling 17. mars til 31. mars (AGP 1-16. mars)
         nyttVedtak(1.mars, 31.mars, orgnummer = "999999999")
 
-        håndterSykmelding(Sykmeldingsperiode(20.februar, 12.mars, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(20.februar, 11.mars, 80.prosent))
         val søknadHendelseId = håndterSøknad(Sykdom(20.februar, 11.mars, 80.prosent))
 
-        // kastes ut pga at søknaden ikke dekker hele vedtaksperioden
         håndterInntektsmelding(listOf(5.februar til 20.februar))
+        person.invaliderAllePerioder(hendelselogg, null)
 
         assertTrue(observatør.opprettOppgaveEvent().isEmpty())
         assertTrue(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().any { søknadHendelseId in it.hendelser })
@@ -185,19 +187,21 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
 
     @Test
     fun `overlappende sykmelding kaster ut perioden`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 10.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar))
-        håndterSykmelding(Sykmeldingsperiode(2.januar, 11.januar, 100.prosent))
+        person.invaliderAllePerioder(hendelselogg, null)
 
         assertTrue(observatør.opprettOppgaveEvent().any { inntektsmeldingId in it.hendelser })
     }
 
     @Test
     fun `inntektsmelding som treffer forkastet periode`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 10.januar, 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 11.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
 
         val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar))
+        person.invaliderAllePerioder(hendelselogg, null )
 
         assertTrue(observatør.opprettOppgaveEvent().any { inntektsmeldingId in it.hendelser })
     }
@@ -276,18 +280,6 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Ny inntektsmelding med samme AGP og forkasting uten søknad skal til egen kø`() {
-        nyttVedtak(1.mars, 31.mars)
-
-        håndterSykmelding(Sykmeldingsperiode(5.april, 25.mai, 100.prosent))
-        val inntektsmeldingId = håndterInntektsmelding(listOf(1.mars til 16.mars), førsteFraværsdag = 5.april)
-        håndterSykmelding(Sykmeldingsperiode(5.april, 26.mai, 100.prosent))
-
-        assertTrue(observatør.opprettOppgaveEvent().isEmpty())
-        assertTrue(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().any { inntektsmeldingId in it.hendelser })
-    }
-
-    @Test
     fun `Ingen eksplisitt oppgave for korrigert inntektsmelding, håndteres vha timeout`() {
         nyttVedtak(1.mars, 31.mars)
 
@@ -309,8 +301,9 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
 
         håndterSykmelding(Sykmeldingsperiode(1.mai, 26.mai, 100.prosent))
+        håndterSøknad(Sykdom(1.mai, 26.mai, 100.prosent))
         val inntektsmeldingId = håndterInntektsmelding(listOf(1.mars til 16.mars), førsteFraværsdag = 1.mai) // NB - det er kanskje ikke realistisk at AG setter førsteFraværsdag etter ferie?
-        håndterSykmelding(Sykmeldingsperiode(1.mai, 27.mai, 100.prosent))
+        person.invaliderAllePerioder(hendelselogg, null)
 
         assertNoWarning("Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.", 1.vedtaksperiode.filter())
         assertNoWarning("Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.", 2.vedtaksperiode.filter())
@@ -330,8 +323,11 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.januar til 16.januar), refusjon = delvisRefusjon)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
 
-        håndterSykmelding(Sykmeldingsperiode(22.januar, 22.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(22.januar, 24.januar, 100.prosent))
+        håndterSøknad(Sykdom(22.januar, 24.januar, 100.prosent))
+        person.invaliderAllePerioder(hendelselogg, null)
+
+        håndterSykmelding(Sykmeldingsperiode(22.januar, 22.januar, 100.prosent))
         val søknadId = håndterSøknad(Sykdom(22.januar, 22.januar, 100.prosent))
 
         assertTrue(observatør.opprettOppgaveEvent().any { søknadId in it.hendelser })
@@ -342,6 +338,7 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
     fun `forlengelse med infotrygd-utbetaling mellom`() {
         nyttVedtak(1.januar, 31.januar)
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
+        håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
         håndterUtbetalingshistorikk(2.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.februar, 28.februar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
             Inntektsopplysning(ORGNUMMER, 1.februar, INNTEKT, true)
         ))
@@ -355,6 +352,7 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
     fun `førstegangbehandling med infotrygd-utbetaling mellom`() {
         nyttVedtak(1.januar, 31.januar)
         håndterSykmelding(Sykmeldingsperiode(10.mars, 31.mars, 100.prosent))
+        håndterSøknad(Sykdom(10.mars, 31.mars, 100.prosent))
         håndterUtbetalingshistorikk(2.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.februar, 28.februar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
             Inntektsopplysning(ORGNUMMER, 1.februar, INNTEKT, true)
         ))
@@ -368,6 +366,7 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
     fun `førstegangbehandling med kort infotrygd-utbetaling mellom`() {
         nyttVedtak(1.januar, 31.januar)
         håndterSykmelding(Sykmeldingsperiode(12.februar, 28.februar, 100.prosent))
+        håndterSøknad(Sykdom(12.februar, 28.februar, 100.prosent))
         håndterUtbetalingshistorikk(2.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.februar, 8.februar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
             Inntektsopplysning(ORGNUMMER, 1.februar, INNTEKT, true)
         ))

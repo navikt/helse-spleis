@@ -30,7 +30,7 @@ internal class MaksdatoE2ETest : AbstractEndToEndTest() {
         val siste = observatør.sisteVedtaksperiode()
         val inntektsmeldingId = inntektsmeldinger.keys.also { check(it.size == 1) { "forventer bare én inntektsmelding" } }.first()
         håndterInntektsmeldingReplay(inntektsmeldingId, siste.id(ORGNUMMER))
-        assertSisteTilstand(siste, TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP) {
+        assertSisteTilstand(siste, TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK) {
             "denne perioden skal under ingen omstendigheter utbetales fordi personen ikke har vært på arbeid etter maksdato"
         }
 

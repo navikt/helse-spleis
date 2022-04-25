@@ -1,5 +1,7 @@
 package no.nav.helse.spleis.e2e
 
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.april
 import no.nav.helse.februar
 import no.nav.helse.januar
@@ -9,16 +11,14 @@ import no.nav.syfo.kafka.felles.SoknadsperiodeDTO
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
-import java.time.LocalDateTime
-import java.util.*
 
 internal class AvstemmingMediatorTest : AbstractEndToEndMediatorTest() {
 
     @Test
     fun avstemming() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
-        sendSøknad(0, listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
-        sendInntektsmelding(0, listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
+        sendSøknad(listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
+        sendInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
         sendYtelser(0)
         sendVilkårsgrunnlag(0)
         sendYtelserUtenSykepengehistorikk(0)
@@ -28,8 +28,10 @@ internal class AvstemmingMediatorTest : AbstractEndToEndMediatorTest() {
         sendNySøknad(SoknadsperiodeDTO(fom = 1.februar, tom = 27.februar, sykmeldingsgrad = 100))
         sendNySøknad(SoknadsperiodeDTO(fom = 1.februar, tom = 28.februar, sykmeldingsgrad = 100))
         sendNySøknad(SoknadsperiodeDTO(fom = 1.april, tom = 30.april, sykmeldingsgrad = 100))
-        sendSøknad(2, listOf(SoknadsperiodeDTO(fom = 1.april, tom = 30.april, sykmeldingsgrad = 100)))
-        sendInntektsmelding(2, listOf(Periode(fom = 1.april, tom = 16.april)), førsteFraværsdag = 1.april)
+        sendSøknad(listOf(SoknadsperiodeDTO(fom = 1.februar, tom = 27.februar, sykmeldingsgrad = 100)))
+        sendSøknad(listOf(SoknadsperiodeDTO(fom = 1.februar, tom = 28.februar, sykmeldingsgrad = 100)))
+        sendSøknad(listOf(SoknadsperiodeDTO(fom = 1.april, tom = 30.april, sykmeldingsgrad = 100)))
+        sendInntektsmelding(listOf(Periode(fom = 1.april, tom = 16.april)), førsteFraværsdag = 1.april)
         sendYtelserUtenSykepengehistorikk(2)
         sendVilkårsgrunnlag(2, skjæringstidspunkt = 1.april)
         sendYtelserUtenSykepengehistorikk(2)

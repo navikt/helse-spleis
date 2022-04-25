@@ -139,7 +139,6 @@ class JsonBuilderTest {
         val tom = 31.januar
         val dødPerson = Person(aktørId, fnr, MaskinellJurist()).apply {
             håndter(sykmelding(fom = fom, tom = tom))
-            fangeVedtaksperiode()
             håndter(
                 søknad(
                     hendelseId = UUID.randomUUID(),
@@ -149,6 +148,7 @@ class JsonBuilderTest {
                 )
             )
             fangeSykdomstidslinje()
+            fangeVedtaksperiode()
             håndter(inntektsmelding(fom = fom))
             håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId, dødsdato = 1.januar))
             håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
@@ -277,7 +277,6 @@ class JsonBuilderTest {
     ): Person =
         Person(aktørId, fnr, MaskinellJurist()).apply {
             håndter(sykmelding(fom = fom, tom = tom))
-            fangeVedtaksperiode()
             håndter(
                 søknad(
                     hendelseId = søknadhendelseId,
@@ -287,6 +286,7 @@ class JsonBuilderTest {
                 )
             )
             fangeSykdomstidslinje()
+            fangeVedtaksperiode()
             håndter(inntektsmelding(fom = fom))
             håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
             håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
@@ -307,7 +307,6 @@ class JsonBuilderTest {
     ): Person =
         Person(aktørId, fnr, MaskinellJurist()).apply {
             håndter(sykmelding(fom = fom, tom = tom))
-            fangeVedtaksperiode()
             håndter(
                 søknad(
                     hendelseId = søknadhendelseId,
@@ -316,6 +315,7 @@ class JsonBuilderTest {
                     sendtSøknad = sendtSøknad.atStartOfDay()
                 )
             )
+            fangeVedtaksperiode()
             fangeSykdomstidslinje()
             håndter(inntektsmelding(fom = fom))
             håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
@@ -343,7 +343,6 @@ class JsonBuilderTest {
     ): Person =
         Person(aktørId, fnr, MaskinellJurist()).apply {
             håndter(sykmelding(fom = 1.januar, tom = 9.januar))
-            fangeVedtaksperiode()
             håndter(
                 søknad(
                     fom = 1.januar,
@@ -352,6 +351,7 @@ class JsonBuilderTest {
                     hendelseId = søknadhendelseId
                 )
             )
+            fangeVedtaksperiode()
             håndter(inntektsmelding(fom = 1.januar))
             håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
             håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
@@ -386,7 +386,6 @@ class JsonBuilderTest {
     ): Person =
         Person(aktørId, fnr, MaskinellJurist()).apply {
             håndter(sykmelding(fom = fom, tom = tom))
-            fangeVedtaksperiode()
             håndter(
                 søknad(
                     hendelseId = søknadhendelseId,
@@ -395,6 +394,7 @@ class JsonBuilderTest {
                     sendtSøknad = sendtSøknad.atStartOfDay()
                 )
             )
+            fangeVedtaksperiode()
             håndter(
                 inntektsmelding(
                     fom = fom,
@@ -416,7 +416,6 @@ class JsonBuilderTest {
     ): Person =
         Person(aktørId, fnr, MaskinellJurist()).apply {
             håndter(sykmelding(fom = 1.januar, tom = 9.januar))
-            fangeVedtaksperiode()
             håndter(
                 søknad(
                     fom = 1.januar,
@@ -424,6 +423,7 @@ class JsonBuilderTest {
                     hendelseId = søknadhendelseId
                 )
             )
+            fangeVedtaksperiode()
             håndter(inntektsmelding(fom = 1.januar, refusjon = Inntektsmelding.Refusjon(31000.månedlig, 4.januar, emptyList())))
         }
 
@@ -432,8 +432,8 @@ class JsonBuilderTest {
         val inntektshistorikk = listOf(Inntektsopplysning(orgnummer, 1.desember(2017), 31000.månedlig, true))
         return Person(aktørId, fnr, MaskinellJurist()).apply {
             håndter(sykmelding(fom = 1.januar, tom = 31.januar))
-            fangeVedtaksperiode()
             håndter(søknad(fom = 1.januar, tom = 31.januar, hendelseId = søknadhendelseId))
+            fangeVedtaksperiode()
             håndter(utbetalingshistorikk(refusjoner, inntektshistorikk))
             håndter(
                 ytelser(
@@ -457,8 +457,8 @@ class JsonBuilderTest {
         val ugyldigePerioder = listOf(UgyldigPeriode(1.mai(2017), 20.mai(2017), 0), UgyldigPeriode(1.februar(2017), 31.januar(2017), 100))
         return Person(aktørId, fnr, MaskinellJurist()).apply {
             håndter(sykmelding(fom = 1.januar, tom = 31.januar))
-            fangeVedtaksperiode()
             håndter(søknad(fom = 1.januar, tom = 31.januar, hendelseId = søknadhendelseId))
+            fangeVedtaksperiode()
             håndter(utbetalingshistorikk(refusjoner, inntektshistorikk, ugyldigePerioder))
         }
     }
@@ -471,7 +471,6 @@ class JsonBuilderTest {
     ): Person =
         Person(aktørId, fnr, MaskinellJurist()).apply {
             håndter(sykmelding(fom = fom, tom = tom))
-            fangeVedtaksperiode()
             håndter(
                 søknad(
                     hendelseId = søknadhendelseId,
@@ -481,6 +480,7 @@ class JsonBuilderTest {
                 )
             )
             fangeSykdomstidslinje()
+            fangeVedtaksperiode()
             håndter(inntektsmelding(fom = fom))
             håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
             håndter(vilkårsgrunnlag(vedtaksperiodeId = vedtaksperiodeId))
@@ -538,7 +538,6 @@ class JsonBuilderTest {
     ): Person =
         Person(aktørId, fnr, MaskinellJurist()).apply {
             håndter(sykmelding(fom = fom, tom = tom))
-            fangeVedtaksperiode()
             håndter(
                 søknad(
                     hendelseId = søknadhendelseId,
@@ -548,6 +547,7 @@ class JsonBuilderTest {
                 )
             )
             fangeSykdomstidslinje()
+            fangeVedtaksperiode()
             håndter(inntektsmelding(fom = fom))
             håndter(ytelser(vedtaksperiodeId = vedtaksperiodeId))
             håndter(

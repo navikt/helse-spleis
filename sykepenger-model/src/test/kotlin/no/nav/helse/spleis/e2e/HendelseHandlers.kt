@@ -49,14 +49,12 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.PersonVisitor
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET
-import no.nav.helse.person.TilstandType.AVVENTER_ARBEIDSGIVERE
+import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP
+import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
-import no.nav.helse.person.TilstandType.MOTTATT_SYKMELDING_FERDIG_FORLENGELSE
-import no.nav.helse.person.TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
@@ -209,13 +207,10 @@ internal fun AbstractEndToEndTest.forlengelseTilGodkjenning(fom: LocalDate, tom:
 }
 
 internal fun AbstractEndToEndTest.forlengVedtak(fom: LocalDate, tom: LocalDate, vararg organisasjonsnumre: String) {
-    forlengelseTilGodkjenning(fom, tom, *organisasjonsnumre)
-    val (første, resten) = organisasjonsnumre.first() to organisasjonsnumre.drop(1)
-    første.let { organisasjonsnummer ->
-        håndterUtbetalingsgodkjenning(observatør.sisteVedtaksperiode(), orgnummer = organisasjonsnummer)
-        håndterUtbetalt(orgnummer = organisasjonsnummer)
-    }
-    resten.forEach { organisasjonsnummer ->
+    require(organisasjonsnumre.isNotEmpty()) { "Må inneholde minst ett organisasjonsnummer" }
+    organisasjonsnumre.forEach { håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent), orgnummer = it) }
+    organisasjonsnumre.forEach { håndterSøknad(Søknadsperiode.Sykdom(fom, tom, 100.prosent), orgnummer = it) }
+    organisasjonsnumre.forEach { organisasjonsnummer ->
         håndterYtelser(observatør.sisteVedtaksperiode(), orgnummer = organisasjonsnummer)
         håndterSimulering(observatør.sisteVedtaksperiode(), orgnummer = organisasjonsnummer)
         håndterUtbetalingsgodkjenning(observatør.sisteVedtaksperiode(), orgnummer = organisasjonsnummer)
@@ -893,9 +888,8 @@ internal fun AbstractEndToEndTest.håndterFeriepengerUtbetalt(
 internal fun TIL_AVSLUTTET_FØRSTEGANGSBEHANDLING(førsteAG: Boolean = true): Array<out TilstandType> =
     if (førsteAG) arrayOf(
         START,
-        MOTTATT_SYKMELDING_FERDIG_GAP,
-        AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-        AVVENTER_ARBEIDSGIVERE,
+        AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+        AVVENTER_BLOKKERENDE_PERIODE,
         AVVENTER_HISTORIKK,
         AVVENTER_VILKÅRSPRØVING,
         AVVENTER_HISTORIKK,
@@ -905,9 +899,8 @@ internal fun TIL_AVSLUTTET_FØRSTEGANGSBEHANDLING(førsteAG: Boolean = true): Ar
         AVSLUTTET
     ) else arrayOf(
         START,
-        MOTTATT_SYKMELDING_FERDIG_GAP,
-        AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-        AVVENTER_ARBEIDSGIVERE,
+        AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+        AVVENTER_BLOKKERENDE_PERIODE,
         AVVENTER_HISTORIKK,
         AVVENTER_SIMULERING,
         AVVENTER_GODKJENNING,
@@ -918,9 +911,7 @@ internal fun TIL_AVSLUTTET_FØRSTEGANGSBEHANDLING(førsteAG: Boolean = true): Ar
 internal fun TIL_AVSLUTTET_FORLENGELSE(førsteAG: Boolean = true) =
     if (førsteAG) arrayOf(
         START,
-        MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
-        AVVENTER_HISTORIKK,
-        AVVENTER_ARBEIDSGIVERE,
+        AVVENTER_BLOKKERENDE_PERIODE,
         AVVENTER_HISTORIKK,
         AVVENTER_SIMULERING,
         AVVENTER_GODKJENNING,
@@ -928,9 +919,7 @@ internal fun TIL_AVSLUTTET_FORLENGELSE(førsteAG: Boolean = true) =
         AVSLUTTET,
     ) else arrayOf(
         START,
-        MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
-        AVVENTER_HISTORIKK,
-        AVVENTER_ARBEIDSGIVERE,
+        AVVENTER_BLOKKERENDE_PERIODE,
         AVVENTER_HISTORIKK,
         AVVENTER_SIMULERING,
         AVVENTER_GODKJENNING,
@@ -978,8 +967,7 @@ internal fun AbstractEndToEndTest.gapPeriode(periode: Periode, orgnummer: String
 internal fun AbstractEndToEndTest.nyPeriode(periode: Periode, vararg orgnummer: String = arrayOf(AbstractPersonTest.ORGNUMMER), grad: Prosentdel = 100.prosent, fnr: Fødselsnummer = AbstractPersonTest.UNG_PERSON_FNR_2018) {
     orgnummer.forEach { håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, grad), fnr = fnr, orgnummer = it) }
     orgnummer.forEach {
-        val id: IdInnhenter = observatør.sisteVedtaksperiode()
-        håndterSøknadMedValidering(id, Søknadsperiode.Sykdom(periode.start, periode.endInclusive, grad), fnr = fnr, orgnummer = it)
+        håndterSøknad(Søknadsperiode.Sykdom(periode.start, periode.endInclusive, grad), fnr = fnr, orgnummer = it)
     }
 }
 

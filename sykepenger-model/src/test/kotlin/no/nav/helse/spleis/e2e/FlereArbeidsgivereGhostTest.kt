@@ -4,7 +4,6 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.april
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
@@ -23,15 +22,13 @@ import no.nav.helse.november
 import no.nav.helse.person.Inntektshistorikk.Skatt.Inntekttype.LØNNSINNTEKT
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.TilstandType.AVVENTER_ARBEIDSGIVERE
+import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.TilstandType.AVVENTER_UFERDIG
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -619,11 +616,11 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         val inntektshistorikk = listOf(Inntektsopplysning(a1, 1.februar, 30000.månedlig, true))
 
         håndterUtbetalingshistorikk(2.vedtaksperiode, orgnummer = a1, utbetalinger = utbetalinger, inntektshistorikk = inntektshistorikk)
+
+        assertTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)
 
-        assertWarning(
-            "Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold", 1.vedtaksperiode.filter(a1)
-        )
+        assertWarning("Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold", 1.vedtaksperiode.filter(a1))
         assertNoWarnings(2.vedtaksperiode.filter(orgnummer = a1))
     }
 
@@ -786,11 +783,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(18.januar, 10.februar, 100.prosent), orgnummer = a2)
         håndterInntektsmelding(listOf(18.januar til 2.februar), orgnummer = a2)
 
-        assertForventetFeil(
-            forklaring = "a2 burde vente på IM til a1 før den går videre til AvventerHistorikk",
-            ønsket = {assertNotEquals(AVVENTER_HISTORIKK, observatør.tilstandsendringer[1.vedtaksperiode.id(a2)]?.last())},
-            nå = {assertEquals(AVVENTER_HISTORIKK, observatør.tilstandsendringer[1.vedtaksperiode.id(a2)]?.last())}
-        )
+        assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
     }
 
     @Test
@@ -810,12 +803,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(13.februar, 28.februar, 100.prosent), orgnummer = a2)
 
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a2)
-
-        assertForventetFeil(
-            forklaring = "",
-            nå = { assertTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2) },
-            ønsket = { assertTilstand(2.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a2) }
-        )
+        assertTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
     }
 
     @Test
@@ -834,17 +822,9 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(21.februar, 28.februar, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(21.februar, 28.februar, 100.prosent), orgnummer = a2)
 
-        assertForventetFeil(
-            forklaring = "",
-            nå = {
-                assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
-                assertTilstand(2.vedtaksperiode, AVVENTER_UFERDIG, orgnummer = a2)
-            },
-            ønsket = {
-                assertTilstand(1.vedtaksperiode, AVVENTER_ARBEIDSGIVERE, orgnummer = a2)
-                assertTilstand(2.vedtaksperiode, AVVENTER_UFERDIG, orgnummer = a2)
-            }
-        )
+
+        assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
+        assertTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
     }
 
     @Test

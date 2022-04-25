@@ -205,7 +205,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         assertEquals(MedlemskapstatusDTO.JA, medlemskapstatus)
 
         assertEquals(31000.0, vedtaksperiode.inntektFraInntektsmelding)
-        assertEquals(3, vedtaksperiode.hendelser.size)
+        assertEquals(2, vedtaksperiode.hendelser.size)
 
         assertEquals(372000.0, vedtaksperiode.dataForVilkårsvurdering?.beregnetÅrsinntektFraInntektskomponenten)
         assertEquals(0.0, vedtaksperiode.dataForVilkårsvurdering?.avviksprosent)
@@ -284,7 +284,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
 
         assertEquals(1, personDTO.arbeidsgivere.single().utbetalingshistorikk.size)
         assertEquals(31, tidslinje.beregnettidslinje.size)
-        assertEquals(31, tidslinje.hendelsetidslinje.size)
+        assertEquals(16, tidslinje.hendelsetidslinje.size)
         assertEquals(31, tidslinje.utbetaling.utbetalingstidslinje.size)
 
         assertEquals(vilkårsgrunnlagIder[0].id, personDTO.arbeidsgivere.first().utbetalingshistorikk[0].vilkårsgrunnlagHistorikkId)
@@ -370,9 +370,9 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         assertEquals(14.februar, nyesteHistorikkElement.beregnettidslinje.last().dagen)
 
         assertEquals(1.januar, eldsteHistorikkElement.hendelsetidslinje.first().dagen)
-        assertEquals(31.januar, eldsteHistorikkElement.hendelsetidslinje.last().dagen)
-        assertEquals(1.januar, eldsteHistorikkElement.hendelsetidslinje.first().dagen)
-        assertEquals(31.januar, eldsteHistorikkElement.hendelsetidslinje.last().dagen)
+        assertEquals(16.januar, eldsteHistorikkElement.hendelsetidslinje.last().dagen)
+        assertEquals(1.januar, eldsteHistorikkElement.beregnettidslinje.first().dagen)
+        assertEquals(31.januar, eldsteHistorikkElement.beregnettidslinje.last().dagen)
 
         assertNotNull(eldsteHistorikkElement.utbetaling.vurdering)
         assertNull(nyesteHistorikkElement.utbetaling.vurdering)
@@ -419,6 +419,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
     @Test
     fun `ufullstendig vedtaksperiode når tilstand er Venter`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         val personDTO = speilApi()
 
         val arbeidsgiver = personDTO.arbeidsgivere[0]
@@ -465,12 +466,12 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         val vedtaksperioder = personDTO.arbeidsgivere.first().vedtaksperioder.filterIsInstance<VedtaksperiodeDTO>()
 
         assertEquals(2, vedtaksperioder.size)
-        assertEquals(3, vedtaksperioder.first().hendelser.size)
-        assertEquals(3, vedtaksperioder.last().hendelser.size)
+        assertEquals(2, vedtaksperioder.first().hendelser.size)
+        assertEquals(2, vedtaksperioder.last().hendelser.size)
         assertEquals(inntektsmeldingId, vedtaksperioder.first().inntektsmeldingId)
         assertEquals(inntektsmeldingId, vedtaksperioder.last().inntektsmeldingId)
-        assertTrue(vedtaksperioder.first().hendelser.map { UUID.fromString(it.id) }.containsAll(listOf(sykmelding1Id, søknad1Id, inntektsmeldingId)))
-        assertTrue(vedtaksperioder.last().hendelser.map { UUID.fromString(it.id) }.containsAll(listOf(sykmelding2Id, søknad2Id, inntektsmeldingId)))
+        assertTrue(vedtaksperioder.first().hendelser.map { UUID.fromString(it.id) }.containsAll(listOf(søknad1Id, inntektsmeldingId)))
+        assertTrue(vedtaksperioder.last().hendelser.map { UUID.fromString(it.id) }.containsAll(listOf(søknad2Id, inntektsmeldingId)))
     }
 
     @Test
@@ -536,6 +537,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         val inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, skjæringstidspunktFraInfotrygd, INNTEKT, true))
 
         håndterSykmelding(Sykmeldingsperiode(fom1Periode, tom1Periode, 100.prosent))
+        håndterSøknad(Sykdom(fom1Periode, tom1Periode, 100.prosent))
         // Til infotrygd pga overlapp
         håndterUtbetalingshistorikk(
             1.vedtaksperiode,
@@ -543,15 +545,14 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
             inntektshistorikk = inntektshistorikk,
             besvart = 16.februar.atStartOfDay()
         )
-        håndterSøknad(Sykdom(fom1Periode, tom1Periode, 100.prosent))
 
         håndterSykmelding(Sykmeldingsperiode(fom2Periode, tom2Periode, 100.prosent))
+        håndterSøknad(Sykdom(fom2Periode, tom2Periode, 100.prosent))
         håndterUtbetalingshistorikk(
             2.vedtaksperiode,
             ArbeidsgiverUtbetalingsperiode(ORGNUMMER, skjæringstidspunktFraInfotrygd, tom1Periode, 100.prosent, INNTEKT),
             inntektshistorikk = inntektshistorikk
         )
-        håndterSøknad(Sykdom(fom2Periode, tom2Periode, 100.prosent))
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
@@ -882,7 +883,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `egen tilstandstype for perioder med kun fravær - feriedager`() {
+    fun `egen tilstandstype for perioder med kun fravær - feriedager`()  {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 24.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 24.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
@@ -930,6 +931,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
     fun `perioder med søknad arbeidsgiver blir ufullstendig`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
 
         val personDTO = serializePersonForSpeil(person)
         val vedtaksperiode = personDTO.arbeidsgivere[0].vedtaksperioder[0] as UfullstendigVedtaksperiodeDTO
@@ -1132,6 +1134,8 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent), orgnummer = a2)
         håndterSøknad(Sykdom(fom, tom, 100.prosent), sendtTilNAVEllerArbeidsgiver = fom.plusDays(1), orgnummer = a1)
+        håndterSøknad(Sykdom(fom, tom, 100.prosent), orgnummer = a2)
+
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(fom til fom.plusDays(15)),
             refusjon = Inntektsmelding.Refusjon(beløp = 1000.månedlig, opphørsdato = null, endringerIRefusjon = emptyList()),
@@ -1144,8 +1148,6 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
             beregnetInntekt = 1000.månedlig,
             orgnummer = a2
         )
-
-        håndterSøknad(Sykdom(fom, tom, 100.prosent), orgnummer = a2)
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(
@@ -1236,13 +1238,14 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Begge arbeidsgivere har     beregningsId og tilsvarende utbetalingshistorikkelement når første sendes til godkjenning`() {
+    fun `Begge arbeidsgivere har beregningsId og tilsvarende utbetalingshistorikkelement når første sendes til godkjenning`() {
         val fom = 1.januar
         val tom = 31.januar
 
         håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent), orgnummer = a2)
         håndterSøknad(Sykdom(fom, tom, 100.prosent), sendtTilNAVEllerArbeidsgiver = fom.plusDays(1), orgnummer = a1)
+        håndterSøknad(Sykdom(fom, tom, 100.prosent), sendtTilNAVEllerArbeidsgiver = fom.plusDays(1), orgnummer = a2)
 
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(fom til fom.plusDays(15)),
@@ -1256,8 +1259,6 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
             beregnetInntekt = 31000.månedlig,
             orgnummer = a2
         )
-
-        håndterSøknad(Sykdom(fom, tom, 100.prosent), sendtTilNAVEllerArbeidsgiver = fom.plusDays(1), orgnummer = a2)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(
             1.vedtaksperiode,

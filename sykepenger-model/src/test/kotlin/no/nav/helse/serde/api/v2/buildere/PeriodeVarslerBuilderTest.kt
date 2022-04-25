@@ -1,17 +1,27 @@
 package no.nav.helse.serde.api.v2.buildere
 
+import no.nav.helse.februar
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Utdanning
 import no.nav.helse.hendelser.til
+import no.nav.helse.januar
+import no.nav.helse.mars
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.serde.api.AktivitetDTO
-import no.nav.helse.spleis.e2e.*
-import no.nav.helse.februar
-import no.nav.helse.januar
-import no.nav.helse.mars
+import no.nav.helse.spleis.e2e.AbstractEndToEndTest
+import no.nav.helse.spleis.e2e.forlengVedtak
+import no.nav.helse.spleis.e2e.håndterInntektsmelding
+import no.nav.helse.spleis.e2e.håndterSimulering
+import no.nav.helse.spleis.e2e.håndterSykmelding
+import no.nav.helse.spleis.e2e.håndterSøknad
+import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
+import no.nav.helse.spleis.e2e.håndterUtbetalt
+import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
+import no.nav.helse.spleis.e2e.håndterYtelser
+import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -22,12 +32,13 @@ internal class PeriodeVarslerBuilderTest: AbstractEndToEndTest() {
     @Test
     fun `varsel på samme skjæringstidspunkt kopieres`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar)) // Warning
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar)) // Warning
         håndterYtelser()
         håndterVilkårsgrunnlag(1.vedtaksperiode, medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.VetIkke)
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
 
         assertTrue(aktiviteter(1.vedtaksperiode).any { it.alvorlighetsgrad == "W" && it.melding == "Vurder lovvalg og medlemskap" })
         assertEquals(0, aktiviteter(2.vedtaksperiode).size)
@@ -36,8 +47,8 @@ internal class PeriodeVarslerBuilderTest: AbstractEndToEndTest() {
     @Test
     fun `periode med varsel`(){
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 2.januar) // Warning
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 2.januar) // Warning
         håndterYtelser()
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser()
@@ -62,8 +73,8 @@ internal class PeriodeVarslerBuilderTest: AbstractEndToEndTest() {
     @Test
     fun `plukker riktig vilkårsgrunnlag`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterYtelser()
         håndterVilkårsgrunnlag(1.vedtaksperiode, medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.VetIkke) // Warning på vilkårsgrunnlag
         håndterYtelser()

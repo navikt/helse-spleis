@@ -1,19 +1,74 @@
 package no.nav.helse.person.etterlevelse
 
-import no.nav.helse.*
-import no.nav.helse.hendelser.*
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.*
+import java.time.LocalDate
+import java.time.YearMonth
+import no.nav.helse.april
+import no.nav.helse.assertForventetFeil
+import no.nav.helse.august
+import no.nav.helse.desember
+import no.nav.helse.februar
+import no.nav.helse.hendelser.InntektForSykepengegrunnlag
+import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.Inntektsvurdering
+import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Utlandsopphold
+import no.nav.helse.hendelser.Vilkårsgrunnlag
+import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.SubsumsjonInspektør
+import no.nav.helse.januar
+import no.nav.helse.juli
+import no.nav.helse.juni
+import no.nav.helse.mai
+import no.nav.helse.mars
+import no.nav.helse.oktober
 import no.nav.helse.person.Bokstav.BOKSTAV_A
 import no.nav.helse.person.FOLKETRYGDLOVENS_OPPRINNELSESDATO
-import no.nav.helse.person.Ledd.*
 import no.nav.helse.person.Ledd.Companion.ledd
-import no.nav.helse.person.Paragraf.*
+import no.nav.helse.person.Ledd.LEDD_1
+import no.nav.helse.person.Ledd.LEDD_2
+import no.nav.helse.person.Ledd.LEDD_3
+import no.nav.helse.person.Paragraf.PARAGRAF_8_10
+import no.nav.helse.person.Paragraf.PARAGRAF_8_11
+import no.nav.helse.person.Paragraf.PARAGRAF_8_12
+import no.nav.helse.person.Paragraf.PARAGRAF_8_13
+import no.nav.helse.person.Paragraf.PARAGRAF_8_16
+import no.nav.helse.person.Paragraf.PARAGRAF_8_17
+import no.nav.helse.person.Paragraf.PARAGRAF_8_19
+import no.nav.helse.person.Paragraf.PARAGRAF_8_2
+import no.nav.helse.person.Paragraf.PARAGRAF_8_28
+import no.nav.helse.person.Paragraf.PARAGRAF_8_29
+import no.nav.helse.person.Paragraf.PARAGRAF_8_3
+import no.nav.helse.person.Paragraf.PARAGRAF_8_30
+import no.nav.helse.person.Paragraf.PARAGRAF_8_51
+import no.nav.helse.person.Paragraf.PARAGRAF_8_9
 import no.nav.helse.person.Punktum.Companion.punktum
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
-import no.nav.helse.spleis.e2e.*
+import no.nav.helse.somFødselsnummer
+import no.nav.helse.spleis.e2e.AbstractEndToEndTest
+import no.nav.helse.spleis.e2e.assertSisteTilstand
+import no.nav.helse.spleis.e2e.finnSkjæringstidspunkt
+import no.nav.helse.spleis.e2e.forlengVedtak
+import no.nav.helse.spleis.e2e.grunnlag
+import no.nav.helse.spleis.e2e.håndterInntektsmelding
+import no.nav.helse.spleis.e2e.håndterInntektsmeldingMedValidering
+import no.nav.helse.spleis.e2e.håndterInntektsmeldingReplay
+import no.nav.helse.spleis.e2e.håndterSimulering
+import no.nav.helse.spleis.e2e.håndterSykmelding
+import no.nav.helse.spleis.e2e.håndterSøknad
+import no.nav.helse.spleis.e2e.håndterSøknadMedValidering
+import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
+import no.nav.helse.spleis.e2e.håndterUtbetalingshistorikk
+import no.nav.helse.spleis.e2e.håndterUtbetalt
+import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
+import no.nav.helse.spleis.e2e.håndterYtelser
+import no.nav.helse.spleis.e2e.nyttVedtak
+import no.nav.helse.spleis.e2e.repeat
+import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
@@ -21,8 +76,6 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
-import java.time.YearMonth
 
 internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
 
@@ -536,8 +589,9 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
     @Test
     fun `§8-12 ledd 1 punktum 1 - Blir kun vurdert en gang etter ny periode med ny rett til sykepenger`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar(2019), 100.prosent))
-        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)))
+        val inntektsmeldingId = håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)))
         håndterSøknad(Sykdom(1.januar, 31.januar(2019), 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.januar(2018))
+        håndterInntektsmeldingReplay(inntektsmeldingId, 1.vedtaksperiode.id(ORGNUMMER))
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
@@ -623,8 +677,9 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
     @Test
     fun `§8-12 ledd 2 - Bruker har ikke vært arbeidsfør i 26 uker`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar(2018), 31.desember(2018), 100.prosent))
-        håndterInntektsmelding(listOf(Periode(1.januar(2018), 16.januar(2018))))
+        val inntektsmeldingId = håndterInntektsmelding(listOf(Periode(1.januar(2018), 16.januar(2018))))
         håndterSøknad(Sykdom(1.januar(2018), 31.desember(2018), 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.januar(2018))
+        håndterInntektsmeldingReplay(inntektsmeldingId, 1.vedtaksperiode.id(ORGNUMMER))
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)

@@ -1,15 +1,15 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.desember
+import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
-import no.nav.helse.person.TilstandType
-import no.nav.helse.desember
-import no.nav.helse.februar
-import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.januar
+import no.nav.helse.person.TilstandType
+import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Test
@@ -37,8 +37,8 @@ internal class OpplæringspengerBehovTest : AbstractEndToEndTest() {
         assertTilstander(
             1.vedtaksperiode,
             TilstandType.START,
-            TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
-            TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            TilstandType.AVVENTER_BLOKKERENDE_PERIODE,
             TilstandType.AVVENTER_HISTORIKK,
             TilstandType.AVVENTER_VILKÅRSPRØVING,
             TilstandType.AVVENTER_HISTORIKK,
@@ -59,8 +59,8 @@ internal class OpplæringspengerBehovTest : AbstractEndToEndTest() {
         assertForkastetPeriodeTilstander(
             1.vedtaksperiode,
             TilstandType.START,
-            TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
-            TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            TilstandType.AVVENTER_BLOKKERENDE_PERIODE,
             TilstandType.AVVENTER_HISTORIKK,
             TilstandType.TIL_INFOTRYGD
         )
@@ -76,8 +76,8 @@ internal class OpplæringspengerBehovTest : AbstractEndToEndTest() {
         assertForkastetPeriodeTilstander(
             1.vedtaksperiode,
             TilstandType.START,
-            TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
-            TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            TilstandType.AVVENTER_BLOKKERENDE_PERIODE,
             TilstandType.AVVENTER_HISTORIKK,
             TilstandType.TIL_INFOTRYGD
         )
@@ -93,8 +93,8 @@ internal class OpplæringspengerBehovTest : AbstractEndToEndTest() {
         assertForkastetPeriodeTilstander(
             1.vedtaksperiode,
             TilstandType.START,
-            TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
-            TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            TilstandType.AVVENTER_BLOKKERENDE_PERIODE,
             TilstandType.AVVENTER_HISTORIKK,
             TilstandType.TIL_INFOTRYGD
         )
@@ -128,8 +128,8 @@ internal class OpplæringspengerBehovTest : AbstractEndToEndTest() {
         assertTilstander(
             1.vedtaksperiode,
             TilstandType.START,
-            TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
-            TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
+            TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            TilstandType.AVVENTER_BLOKKERENDE_PERIODE,
             TilstandType.AVVENTER_HISTORIKK,
             TilstandType.AVVENTER_VILKÅRSPRØVING,
             TilstandType.AVVENTER_HISTORIKK,

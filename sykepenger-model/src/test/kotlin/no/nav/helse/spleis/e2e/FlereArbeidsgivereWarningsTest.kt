@@ -1,9 +1,13 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.assertForventetFeil
+import java.time.LocalDate
 import no.nav.helse.desember
-import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.InntektForSykepengegrunnlag
+import no.nav.helse.hendelser.Inntektsvurdering
+import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.Vilkårsgrunnlag
+import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
@@ -11,7 +15,6 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
 
 internal class FlereArbeidsgivereWarningsTest : AbstractEndToEndTest() {
 
@@ -20,18 +23,7 @@ internal class FlereArbeidsgivereWarningsTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent), orgnummer = a2)
-        assertForventetFeil(
-            forklaring = "Periode nr. 1 hos AG2 får warning fordi den overlapper med kort arbeidsgiverperiodesøknad. Falsk positiv",
-            nå = {
-                assertWarning(
-                    "Denne personen har en utbetaling for samme periode for en annen arbeidsgiver. Kontroller at beregningene for begge arbeidsgiverne er korrekte.",
-                    1.vedtaksperiode.filter(orgnummer = a2)
-                )
-            },
-            ønsket = {
-                assertNoWarnings(1.vedtaksperiode.filter(orgnummer = a2))
-            }
-        )
+        assertNoWarnings(1.vedtaksperiode.filter(orgnummer = a2))
     }
 
     @Test

@@ -1,5 +1,9 @@
 package no.nav.helse.hendelser
 
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.YearMonth
+import java.util.UUID
 import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -7,8 +11,25 @@ import no.nav.helse.inspectors.GrunnlagsdataInspektør
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.januar
 import no.nav.helse.oktober
-import no.nav.helse.person.*
+import no.nav.helse.person.AbstractPersonTest
+import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.Arbeidsforholdhistorikk
+import no.nav.helse.person.ArbeidsgiverInntektsopplysning
+import no.nav.helse.person.Dokumentsporing
+import no.nav.helse.person.ForlengelseFraInfotrygd
+import no.nav.helse.person.IdInnhenter
+import no.nav.helse.person.Inntektshistorikk
+import no.nav.helse.person.Inntektskilde
+import no.nav.helse.person.InntektsmeldingInfo
+import no.nav.helse.person.Opptjening
+import no.nav.helse.person.Periodetype
+import no.nav.helse.person.Person
+import no.nav.helse.person.PersonVisitor
+import no.nav.helse.person.Sammenligningsgrunnlag
+import no.nav.helse.person.Sykepengegrunnlag
 import no.nav.helse.person.Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
+import no.nav.helse.person.TilstandType
+import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.Vedtaksperiode.Vedtaksperiodetilstand
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
@@ -19,13 +40,12 @@ import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosent
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.YearMonth
-import java.util.*
 
 internal class VilkårsgrunnlagTest : AbstractPersonTest() {
     private companion object {
@@ -37,8 +57,8 @@ internal class VilkårsgrunnlagTest : AbstractPersonTest() {
         person = Person(AKTØRID, UNG_PERSON_FNR_2018, MaskinellJurist())
         person.addObserver(observatør)
         person.håndter(sykmelding())
-        person.håndter(inntektsmelding())
         person.håndter(søknad())
+        person.håndter(inntektsmelding())
         person.håndter(ytelser())
     }
 

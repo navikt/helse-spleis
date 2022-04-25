@@ -1,18 +1,19 @@
 package no.nav.helse.spleis.e2e
 
+import java.time.LocalDateTime
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.mars
-import no.nav.helse.person.TilstandType.*
+import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
+import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Test
-import java.time.LocalDateTime
 
 internal class InfotrygdhistorikkEndretTest: AbstractEndToEndTest() {
     private val gammelHistorikk = LocalDateTime.now().minusHours(24)
@@ -30,6 +31,7 @@ internal class InfotrygdhistorikkEndretTest: AbstractEndToEndTest() {
     fun `cachet infotrygdhistorikk på periode grunnet påminnelse på annen vedtaksperiode, skal fortsatt reberegne`() {
         periodeTilGodkjenning()
         håndterSykmelding(Sykmeldingsperiode(1.mai, 31.mai, 100.prosent))
+        håndterSøknad(Sykdom(fom = 1.mai, tom = 31.mai, 100.prosent))
         håndterUtbetalingshistorikk(2.vedtaksperiode, *utbetalinger.toTypedArray(), inntektshistorikk = inntektshistorikk)
         håndterPåminnelse(1.vedtaksperiode, AVVENTER_GODKJENNING)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)

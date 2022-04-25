@@ -1,19 +1,42 @@
 package no.nav.helse.inspectors
 
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
-import no.nav.helse.person.*
+import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.Arbeidsgiver
+import no.nav.helse.person.ArbeidsgiverVisitor
+import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Dokumentsporing.Companion.ider
+import no.nav.helse.person.ForkastetVedtaksperiode
+import no.nav.helse.person.ForlengelseFraInfotrygd
+import no.nav.helse.person.IdInnhenter
+import no.nav.helse.person.Inntektskilde
+import no.nav.helse.person.InntektsmeldingInfo
+import no.nav.helse.person.Periodetype
+import no.nav.helse.person.Person
+import no.nav.helse.person.PersonVisitor
+import no.nav.helse.person.TilstandType
+import no.nav.helse.person.Vedtaksperiode
+import no.nav.helse.person.VedtaksperiodeVisitor
+import no.nav.helse.person.VilkårsgrunnlagHistorikkVisitor
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.utbetalingslinjer.*
+import no.nav.helse.utbetalingslinjer.Endringskode
+import no.nav.helse.utbetalingslinjer.Fagområde
+import no.nav.helse.utbetalingslinjer.Feriepengeutbetaling
+import no.nav.helse.utbetalingslinjer.Klassekode
+import no.nav.helse.utbetalingslinjer.Oppdrag
+import no.nav.helse.utbetalingslinjer.Oppdragstatus
+import no.nav.helse.utbetalingslinjer.Satstype
+import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
+import no.nav.helse.utbetalingslinjer.Utbetalingslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinjeberegning
 import org.junit.jupiter.api.fail
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
 
 internal class TestArbeidsgiverInspektør(
     private val person: Person,

@@ -1,5 +1,7 @@
 package no.nav.helse.serde.api
 
+import java.time.LocalDate
+import java.util.UUID
 import no.nav.helse.desember
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Periode
@@ -15,14 +17,22 @@ import no.nav.helse.person.PersonVisitor
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.serde.api.builders.VilkårsgrunnlagInntektBuilder
-import no.nav.helse.spleis.e2e.*
+import no.nav.helse.spleis.e2e.AbstractEndToEndTest
+import no.nav.helse.spleis.e2e.håndterInntektsmelding
+import no.nav.helse.spleis.e2e.håndterInntektsmeldingMedValidering
+import no.nav.helse.spleis.e2e.håndterSykmelding
+import no.nav.helse.spleis.e2e.håndterSøknad
+import no.nav.helse.spleis.e2e.håndterSøknadMedValidering
+import no.nav.helse.spleis.e2e.håndterUtbetalingshistorikk
+import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
+import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
-import java.util.*
 
 internal class VilkårsgrunnlagInntektBuilderTest : AbstractEndToEndTest() {
 
@@ -176,10 +186,11 @@ internal class VilkårsgrunnlagInntektBuilderTest : AbstractEndToEndTest() {
     fun `Finner inntektsgrunnlag for en arbeidsgiver med inntekt fra Infotrygd på senere dato enn skjærinstidspunkt`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
+        håndterUtbetalingshistorikk(1.vedtaksperiode, besvart = LocalDate.EPOCH.atStartOfDay())
 
         håndterSykmelding(Sykmeldingsperiode(25.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 25.januar)
         håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(25.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 25.januar)
         håndterYtelser(
             2.vedtaksperiode,
             ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar,  24.januar, 100.prosent, 1000.daglig),

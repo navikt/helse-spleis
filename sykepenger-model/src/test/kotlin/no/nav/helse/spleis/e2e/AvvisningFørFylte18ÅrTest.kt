@@ -4,7 +4,9 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.november
 import no.nav.helse.oktober
-import no.nav.helse.person.TilstandType.*
+import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
+import no.nav.helse.person.TilstandType.START
+import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.somFødselsnummer
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -27,7 +29,7 @@ internal class AvvisningFørFylte18ÅrTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.oktober, 31.oktober, 100.prosent), mottatt = 1.november.atStartOfDay(), fnr = FYLLER_18_ÅR_2_NOVEMBER)
         håndterSøknad(Sykdom(1.oktober, 31.oktober, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.november, fnr = FYLLER_18_ÅR_2_NOVEMBER)
         assertTrue(hendelselogg.hasErrorsOrWorse())
-        assertForkastetPeriodeTilstander(1, START, MOTTATT_SYKMELDING_FERDIG_GAP, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(1, START, TIL_INFOTRYGD)
     }
 
     @Test
@@ -35,6 +37,6 @@ internal class AvvisningFørFylte18ÅrTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.oktober, 31.oktober, 100.prosent), mottatt = 2.november.atStartOfDay(), fnr = FYLLER_18_ÅR_2_NOVEMBER)
         håndterSøknad(Sykdom(1.oktober, 31.oktober, 100.prosent), sendtTilNAVEllerArbeidsgiver = 2.november, fnr = FYLLER_18_ÅR_2_NOVEMBER)
         assertFalse(hendelselogg.hasErrorsOrWorse())
-        assertTilstander(0, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
+        assertTilstander(0, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
     }
 }

@@ -1,20 +1,31 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.*
+import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.inspectors.personLogg
+import no.nav.helse.januar
+import no.nav.helse.mai
+import no.nav.helse.mars
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.IdInnhenter
-import no.nav.helse.person.TilstandType.*
+import no.nav.helse.person.TilstandType.AVSLUTTET
+import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
+import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
+import no.nav.helse.person.TilstandType.START
+import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.serde.api.TilstandstypeDTO
+import no.nav.helse.sisteBehov
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
@@ -50,12 +61,13 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         forlengVedtak(1.februar, 28.februar) // forlengelse
         nyttVedtak(10.mars, 31.mars) // førstegangsbehandling, men med samme agp
         håndterSykmelding(Sykmeldingsperiode(1.mai, 20.mai, 100.prosent)) // førstegangsbehandling, ny agp
+        håndterSøknad(Sykdom(1.mai, 20.mai, 100.prosent))
         håndterAnnullerUtbetaling()
         assertEquals(4, observatør.avbruttePerioder())
         assertEquals(AVSLUTTET, observatør.avbrutt(1.vedtaksperiode.id(ORGNUMMER)).gjeldendeTilstand)
         assertEquals(AVSLUTTET, observatør.avbrutt(2.vedtaksperiode.id(ORGNUMMER)).gjeldendeTilstand)
         assertEquals(AVSLUTTET, observatør.avbrutt(3.vedtaksperiode.id(ORGNUMMER)).gjeldendeTilstand)
-        assertEquals(MOTTATT_SYKMELDING_FERDIG_GAP, observatør.avbrutt(4.vedtaksperiode.id(ORGNUMMER)).gjeldendeTilstand)
+        assertEquals(AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, observatør.avbrutt(4.vedtaksperiode.id(ORGNUMMER)).gjeldendeTilstand)
     }
 
     @Test
@@ -416,7 +428,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(27.januar, 14.februar, 100.prosent))
         håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(27.januar, 14.februar, 100.prosent))
-        assertTilstander(2.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP)
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
     }
 
     @Test
@@ -435,6 +447,9 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         // prøv å forkast, ikke klar det
         håndterSykmelding(Sykmeldingsperiode(1.februar, 19.februar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(1.februar, 20.februar, 100.prosent))
+        håndterSøknad(Sykdom(1.februar, 19.februar, 100.prosent))
+        håndterSøknad(Sykdom(1.februar, 20.februar, 100.prosent))
+
         assertTrue(inspektør.periodeErIkkeForkastet(1.vedtaksperiode))
         assertTrue(inspektør.periodeErForkastet(2.vedtaksperiode))
         // annullér

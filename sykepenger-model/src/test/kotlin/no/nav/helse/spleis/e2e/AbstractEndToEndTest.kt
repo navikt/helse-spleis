@@ -1,16 +1,20 @@
 package no.nav.helse.spleis.e2e
 
+import java.time.LocalDate
+import java.util.UUID
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
-import no.nav.helse.person.*
+import no.nav.helse.person.AbstractPersonTest
+import no.nav.helse.person.IdInnhenter
+import no.nav.helse.person.Person
+import no.nav.helse.person.PersonHendelse
+import no.nav.helse.person.TilstandType
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.BeforeEach
-import java.time.LocalDate
-import java.util.*
 
 internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
 
@@ -22,7 +26,6 @@ internal abstract class AbstractEndToEndTest : AbstractPersonTest() {
     }
 
     internal lateinit var hendelselogg: PersonHendelse
-    internal var forventetEndringTeller = 0
     internal val sykmeldinger = mutableMapOf<UUID, Array<out Sykmeldingsperiode>>()
     internal val søknader = mutableMapOf<UUID, Triple<LocalDate, List<Søknad.Inntektskilde>, Array<out Søknadsperiode>>>()
     internal val inntektsmeldinger = mutableMapOf<UUID, () -> Inntektsmelding>()

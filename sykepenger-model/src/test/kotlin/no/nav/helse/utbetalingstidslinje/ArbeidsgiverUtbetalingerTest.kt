@@ -1,28 +1,59 @@
 package no.nav.helse.utbetalingstidslinje
 
-import no.nav.helse.*
-import no.nav.helse.hendelser.*
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.YearMonth
+import java.util.UUID
+import no.nav.helse.Fødselsnummer
+import no.nav.helse.april
+import no.nav.helse.desember
+import no.nav.helse.februar
+import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.Medlemskapsvurdering
+import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Sykmelding
+import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.Søknad
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hentInfo
 import no.nav.helse.inspectors.UtbetalingstidslinjeInspektør
 import no.nav.helse.inspectors.inspektør
-import no.nav.helse.person.*
+import no.nav.helse.januar
+import no.nav.helse.mars
+import no.nav.helse.person.AbstractPersonTest
+import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.ArbeidsgiverInntektsopplysning
+import no.nav.helse.person.InfotrygdhistorikkVisitor
+import no.nav.helse.person.Inntektshistorikk
+import no.nav.helse.person.Opptjening
+import no.nav.helse.person.Person
+import no.nav.helse.person.Sammenligningsgrunnlag
+import no.nav.helse.person.Sykepengegrunnlag
 import no.nav.helse.person.Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
+import no.nav.helse.person.VilkårsgrunnlagHistorikk
+import no.nav.helse.person.arbeidsgiver
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
-import no.nav.helse.testhelpers.*
+import no.nav.helse.somFødselsnummer
+import no.nav.helse.testhelpers.AP
+import no.nav.helse.testhelpers.ARB
+import no.nav.helse.testhelpers.FRI
+import no.nav.helse.testhelpers.NAV
+import no.nav.helse.testhelpers.UTELATE
+import no.nav.helse.testhelpers.Utbetalingsdager
+import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosent
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.Økonomi
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.YearMonth
-import java.util.*
 
 internal class ArbeidsgiverUtbetalingerTest {
 
@@ -277,6 +308,20 @@ internal class ArbeidsgiverUtbetalingerTest {
                 sykeperioder = listOf(Sykmeldingsperiode(førsteDag, sisteDag, 100.prosent)),
                 sykmeldingSkrevet = 1.januar.atStartOfDay(),
                 mottatt = 1.januar.atStartOfDay()
+            )
+        )
+        person.håndter(
+            Søknad(
+                meldingsreferanseId = UUID.randomUUID(),
+                fnr = UNG_PERSON_FNR_2018.toString(),
+                aktørId = "",
+                orgnummer = ORGNUMMER,
+                perioder = listOf(Sykdom(førsteDag, sisteDag, 100.prosent)),
+                sykmeldingSkrevet = 1.januar.atStartOfDay(),
+                andreInntektskilder = emptyList(),
+                sendtTilNAVEllerArbeidsgiver = 1.januar.atStartOfDay(),
+                permittert = false,
+                merknaderFraSykmelding = emptyList()
             )
         )
 

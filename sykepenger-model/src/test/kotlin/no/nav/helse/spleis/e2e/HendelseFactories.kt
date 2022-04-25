@@ -1,9 +1,41 @@
 package no.nav.helse.spleis.e2e
 
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.Year
+import java.time.YearMonth
+import java.util.UUID
 import no.nav.helse.Fødselsnummer
 import no.nav.helse.etterspurteBehov
-import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.Arbeidsavklaringspenger
+import no.nav.helse.hendelser.ArbeidsgiverInntekt
+import no.nav.helse.hendelser.Dagpenger
+import no.nav.helse.hendelser.Dagtype
+import no.nav.helse.hendelser.Dødsinfo
+import no.nav.helse.hendelser.Foreldrepermisjon
+import no.nav.helse.hendelser.InntektCreator
+import no.nav.helse.hendelser.InntektForSykepengegrunnlag
+import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.InntektsmeldingReplay
+import no.nav.helse.hendelser.Inntektsvurdering
+import no.nav.helse.hendelser.Institusjonsopphold
+import no.nav.helse.hendelser.ManuellOverskrivingDag
+import no.nav.helse.hendelser.Medlemskapsvurdering
+import no.nav.helse.hendelser.Omsorgspenger
+import no.nav.helse.hendelser.Opplæringspenger
+import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Pleiepenger
+import no.nav.helse.hendelser.Påminnelse
+import no.nav.helse.hendelser.Simulering
+import no.nav.helse.hendelser.Sykmelding
+import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode
+import no.nav.helse.hendelser.Utbetalingshistorikk
+import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
+import no.nav.helse.hendelser.Vilkårsgrunnlag
+import no.nav.helse.hendelser.Ytelser
+import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
@@ -21,11 +53,6 @@ import no.nav.helse.testhelpers.Inntektperioder
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Inntekt
 import org.junit.jupiter.api.fail
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.Year
-import java.time.YearMonth
-import java.util.*
 
 internal fun AbstractEndToEndTest.utbetaling(
     fagsystemId: String,

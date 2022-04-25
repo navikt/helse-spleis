@@ -1,21 +1,30 @@
 package no.nav.helse.person
 
-import no.nav.helse.*
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
+import no.nav.helse.august
+import no.nav.helse.desember
+import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.Inntektsinspektør
+import no.nav.helse.januar
+import no.nav.helse.november
+import no.nav.helse.oktober
 import no.nav.helse.person.etterlevelse.MaskinellJurist
-import no.nav.helse.testhelpers.*
+import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
+import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
 
 internal class InntektshistorikkTest {
 

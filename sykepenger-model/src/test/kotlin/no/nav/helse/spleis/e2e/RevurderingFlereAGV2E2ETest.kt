@@ -192,7 +192,7 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
     }
 
     @Test
-    fun `revudering påvirkes ikke av gjenoppta behandling ved avsluttet uten utbetaling`() {
+    fun `revurdering påvirkes ikke av gjenoppta behandling ved avsluttet uten utbetaling`() {
         nyeVedtak(1.januar, 31.januar, a1, a2)
         forlengVedtak(1.februar, 28.februar, a1, a2)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)), a1)

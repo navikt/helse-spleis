@@ -355,6 +355,7 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
         val utbetalinger = arrayOf(
             ArbeidsgiverUtbetalingsperiode(a2, 1.januar(2017), 31.januar(2017), 100.prosent, 1000.daglig)
         )
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         val inntektshistorikk = listOf(
             Inntektsopplysning(a2, 1.januar(2017), INNTEKT, true)
         )
@@ -363,7 +364,6 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
             utbetalinger = utbetalinger,
             inntektshistorikk = inntektshistorikk
         )
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(

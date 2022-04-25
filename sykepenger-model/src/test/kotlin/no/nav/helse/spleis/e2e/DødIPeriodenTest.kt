@@ -16,8 +16,8 @@ internal class DødIPeriodenTest : AbstractEndToEndTest() {
     @Test
     fun `Dager etter dødsdato avvises`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)))
         håndterYtelser(1.vedtaksperiode, dødsdato = 18.januar)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, dødsdato = 18.januar)
@@ -27,8 +27,8 @@ internal class DødIPeriodenTest : AbstractEndToEndTest() {
     @Test
     fun `Ingen dager avvises når dødsdato er etter perioden`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)))
         håndterYtelser(1.vedtaksperiode, dødsdato = 1.februar)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, dødsdato = 1.februar)
@@ -38,8 +38,8 @@ internal class DødIPeriodenTest : AbstractEndToEndTest() {
     @Test
     fun `Alle dager avvises når dødsdato er før perioden`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)))
         håndterYtelser(1.vedtaksperiode, dødsdato = 31.desember(2017))
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode, dødsdato = 31.desember(2017))

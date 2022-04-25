@@ -1,7 +1,10 @@
 package no.nav.helse.spleis.e2e
 
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.hendelser.Avstemming
 import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.mars
@@ -12,8 +15,6 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import java.time.LocalDateTime
-import java.util.*
 
 internal class AvstemmingTest : AbstractEndToEndTest() {
 
@@ -21,6 +22,8 @@ internal class AvstemmingTest : AbstractEndToEndTest() {
     fun `avstemmer`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 2.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(1.januar, 3.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 2.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 3.januar, 100.prosent))
         nyttVedtak(4.januar, 26.januar, 100.prosent)
         nyttVedtak(1.mars, 31.mars, 100.prosent)
         tilYtelser(1.mai, 30.mai, 100.prosent, 1.mai)

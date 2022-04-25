@@ -503,6 +503,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
     fun `ventende periode`() {
         nyttVedtak(1.januar, 31.januar)
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
 
         assertEquals(1, generasjoner.size)
         assertEquals(2, generasjoner[0].perioder.size)
@@ -518,6 +519,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         nyttVedtak(1.januar, 31.januar)
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
 
         håndterOverstyrTidslinje((29.januar til 31.januar).map { manuellFeriedag(it) })
         håndterYtelser(1.vedtaksperiode)
@@ -715,6 +717,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent), orgnummer = a2)
         håndterSøknad(Sykdom(fom, tom, 100.prosent), sendtTilNAVEllerArbeidsgiver = fom.plusDays(1), orgnummer = a1)
+        håndterSøknad(Sykdom(fom, tom, 100.prosent), orgnummer = a2)
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(fom til fom.plusDays(15)),
             refusjon = Inntektsmelding.Refusjon(
@@ -736,7 +739,6 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
             orgnummer = a2
         )
 
-        håndterSøknad(Sykdom(fom, tom, 100.prosent), orgnummer = a2)
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(

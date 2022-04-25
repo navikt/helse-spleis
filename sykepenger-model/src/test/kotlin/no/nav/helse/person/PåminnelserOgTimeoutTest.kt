@@ -1,77 +1,61 @@
 package no.nav.helse.person
 
-import no.nav.helse.*
-import no.nav.helse.hendelser.*
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
+import no.nav.helse.desember
+import no.nav.helse.etterspurteBehov
+import no.nav.helse.hendelser.Arbeidsavklaringspenger
+import no.nav.helse.hendelser.Dagpenger
+import no.nav.helse.hendelser.Dødsinfo
+import no.nav.helse.hendelser.Foreldrepermisjon
+import no.nav.helse.hendelser.InntektForSykepengegrunnlag
+import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.Inntektsvurdering
+import no.nav.helse.hendelser.Institusjonsopphold
+import no.nav.helse.hendelser.Medlemskapsvurdering
+import no.nav.helse.hendelser.Omsorgspenger
+import no.nav.helse.hendelser.Opplæringspenger
+import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Pleiepenger
+import no.nav.helse.hendelser.Påminnelse
+import no.nav.helse.hendelser.Simulering
+import no.nav.helse.hendelser.Sykmelding
+import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.Utbetalingshistorikk
+import no.nav.helse.hendelser.Vilkårsgrunnlag
+import no.nav.helse.hendelser.Ytelser
+import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.inspectors.personLogg
+import no.nav.helse.januar
+import no.nav.helse.oktober
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
-import no.nav.helse.person.TilstandType.*
+import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
+import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
+import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
+import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
+import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.serde.reflection.Utbetalingstatus
+import no.nav.helse.sisteBehov
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
 
 internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
-
-    private companion object {
-        private val nå = LocalDate.now()
-    }
-
     private lateinit var hendelse: ArbeidstakerHendelse
-
-    @Test
-    fun `påminnelse i mottatt sykmelding innenfor makstid`() {
-        person.håndter(sykmelding(Sykmeldingsperiode(nå.minusDays(30), nå, 100.prosent)))
-        person.håndter(påminnelse(MOTTATT_SYKMELDING_FERDIG_GAP, 1.vedtaksperiode))
-        assertEquals(MOTTATT_SYKMELDING_FERDIG_GAP, inspektør.sisteTilstand(1.vedtaksperiode))
-        assertEquals(1, hendelse.behov().size)
-        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.Sykepengehistorikk))
-    }
-
-    @Test
-    fun `påminnelse i mottatt søknad`() {
-        person.håndter(sykmelding())
-        person.håndter(søknad())
-        assertEquals(AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, inspektør.sisteTilstand(1.vedtaksperiode))
-        assertEquals(1, hendelse.behov().size)
-        person.håndter(påminnelse(AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, 1.vedtaksperiode))
-        assertEquals(AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, inspektør.sisteTilstand(1.vedtaksperiode))
-        assertEquals(1, hendelse.behov().size)
-        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.Sykepengehistorikk))
-    }
-
-    @Test
-    fun `påminnelse i mottatt søknad innenfor makstid`() {
-        person.håndter(sykmelding(Sykmeldingsperiode(nå.minusDays(60), nå.minusDays(31), 100.prosent)))
-        person.håndter(sykmelding(Sykmeldingsperiode(nå.minusDays(30), nå, 100.prosent)))
-        person.håndter(søknad(Sykdom(nå.minusDays(30), nå, 100.prosent)))
-        assertEquals(AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, inspektør.sisteTilstand(2.vedtaksperiode))
-        person.håndter(påminnelse(AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, 2.vedtaksperiode))
-        assertEquals(AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE, inspektør.sisteTilstand(2.vedtaksperiode))
-        assertEquals(1, hendelse.behov().size)
-        assertTrue(hendelse.etterspurteBehov(2.vedtaksperiode.id(ORGNUMMER), Behovtype.Sykepengehistorikk))
-    }
-
-    @Test
-    fun `påminnelse i mottatt inntektsmelding`() {
-        person.håndter(sykmelding(Sykmeldingsperiode(nå.minusDays(30), nå, 100.prosent)))
-        person.håndter(inntektsmelding(Periode(nå.minusDays(30), nå.minusDays(14))))
-        person.håndter(påminnelse(AVVENTER_SØKNAD_FERDIG_GAP, 1.vedtaksperiode))
-        assertEquals(1, hendelse.behov().size)
-        assertEquals(AVVENTER_SØKNAD_FERDIG_GAP, inspektør.sisteTilstand(1.vedtaksperiode))
-    }
 
     @Test
     fun `påminnelse i vilkårsprøving`() {
@@ -184,36 +168,13 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
     @Test
     fun `ignorerer påminnelser på tidligere tilstander`() {
         person.håndter(sykmelding())
-        person.håndter(påminnelse(TIL_INFOTRYGD, 1.vedtaksperiode))
-        assertEquals(MOTTATT_SYKMELDING_FERDIG_GAP, inspektør.sisteTilstand(1.vedtaksperiode))
-
         person.håndter(søknad())
-        person.håndter(påminnelse(MOTTATT_SYKMELDING_FERDIG_GAP, 1.vedtaksperiode))
-        assertEquals(AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, inspektør.sisteTilstand(1.vedtaksperiode))
-
         person.håndter(inntektsmelding())
-        person.håndter(påminnelse(AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, 1.vedtaksperiode))
-        assertEquals(AVVENTER_HISTORIKK, inspektør.sisteTilstand(1.vedtaksperiode))
 
         person.håndter(ytelser())
         person.håndter(vilkårsgrunnlag())
         person.håndter(påminnelse(AVVENTER_VILKÅRSPRØVING, 1.vedtaksperiode))
         assertEquals(AVVENTER_HISTORIKK, inspektør.sisteTilstand(1.vedtaksperiode))
-
-        person.håndter(ytelser())
-        person.håndter(påminnelse(AVVENTER_HISTORIKK, 1.vedtaksperiode))
-        assertEquals(AVVENTER_SIMULERING, inspektør.sisteTilstand(1.vedtaksperiode))
-
-        person.håndter(simulering())
-        person.håndter(påminnelse(AVVENTER_SIMULERING, 1.vedtaksperiode))
-        assertEquals(AVVENTER_GODKJENNING, inspektør.sisteTilstand(1.vedtaksperiode))
-
-        person.håndter(utbetalingsgodkjenning())
-        person.håndter(påminnelse(AVVENTER_GODKJENNING, 1.vedtaksperiode))
-        assertEquals(TIL_UTBETALING, inspektør.sisteTilstand(1.vedtaksperiode))
-
-        person.håndter(påminnelse(TIL_UTBETALING, 1.vedtaksperiode))
-        assertEquals(TIL_UTBETALING, inspektør.sisteTilstand(1.vedtaksperiode))
     }
 
     private fun søknad(

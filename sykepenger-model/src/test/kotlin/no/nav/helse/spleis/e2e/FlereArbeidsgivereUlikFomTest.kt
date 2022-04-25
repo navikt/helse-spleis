@@ -1,18 +1,27 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.*
-import no.nav.helse.hendelser.*
+import java.time.LocalDate
+import no.nav.helse.april
+import no.nav.helse.februar
+import no.nav.helse.hendelser.InntektForSykepengegrunnlag
+import no.nav.helse.hendelser.Inntektsvurdering
+import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.Vilkårsgrunnlag
+import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
+import no.nav.helse.januar
+import no.nav.helse.mars
 import no.nav.helse.person.Inntektshistorikk
-import no.nav.helse.person.TilstandType.*
+import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
+import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
+import no.nav.helse.person.TilstandType.START
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertInstanceOf
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
 
 internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
 
@@ -1308,27 +1317,16 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `alle arbeidsgivere burde hoppe inn i AVVENTER_ARBEIDSGIVERE dersom de har samme skjæringstidspunkt men ikke overlapper`() {
+    fun `alle arbeidsgivere burde hoppe inn i AVVENTER_BLOKKERENDE_PERIODE dersom de har samme skjæringstidspunkt men ikke overlapper`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a2)
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent), orgnummer = a3)
 
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a2)
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a3)
         håndterInntektsmelding(listOf(1.februar til 16.februar), orgnummer = a3)
-        assertForventetFeil(
-            forklaring = "Arbeidsgiver 3 har samme skjæringstidspunkt og burde vente på de andre arbeidsgiverne før den går videre",
-            nå = {
-                assertTilstander(
-                    1.vedtaksperiode,
-                    START,
-                    MOTTATT_SYKMELDING_FERDIG_GAP,
-                    AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-                    AVVENTER_HISTORIKK,
-                    orgnummer = a3
-                )
-            },
-            ønsket = {
-                assertTilstander(1.vedtaksperiode, START, MOTTATT_SYKMELDING_FERDIG_GAP, AVVENTER_ARBEIDSGIVERE, orgnummer = a3)
-            })
+
+        assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a3)
     }
 }

@@ -1,14 +1,35 @@
 package no.nav.helse.person
 
-import no.nav.helse.hendelser.*
+import java.time.LocalDateTime
+import java.util.UUID
+import no.nav.helse.hendelser.Arbeidsavklaringspenger
+import no.nav.helse.hendelser.Dagpenger
+import no.nav.helse.hendelser.Dødsinfo
+import no.nav.helse.hendelser.Foreldrepermisjon
+import no.nav.helse.hendelser.Institusjonsopphold
+import no.nav.helse.hendelser.Omsorgspenger
+import no.nav.helse.hendelser.Opplæringspenger
+import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Pleiepenger
+import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.Utbetalingshistorikk
+import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.januar
-import no.nav.helse.person.TilstandType.*
+import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
+import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
+import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
+import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.person.infotrygdhistorikk.UgyldigPeriode
-import no.nav.helse.spleis.e2e.*
+import no.nav.helse.spleis.e2e.AbstractEndToEndTest
+import no.nav.helse.spleis.e2e.håndterInntektsmelding
+import no.nav.helse.spleis.e2e.håndterSimulering
+import no.nav.helse.spleis.e2e.håndterSykmelding
+import no.nav.helse.spleis.e2e.håndterSøknad
+import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -16,8 +37,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import java.time.LocalDateTime
-import java.util.*
 
 internal class YtelserHendelseTest : AbstractEndToEndTest() {
     private companion object {
@@ -32,14 +51,11 @@ internal class YtelserHendelseTest : AbstractEndToEndTest() {
         }
 
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        person.håndter(ytelser(1.vedtaksperiode))
-        assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(MOTTATT_SYKMELDING_FERDIG_GAP, inspektør.sisteTilstand(1.vedtaksperiode))
 
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         person.håndter(ytelser(1.vedtaksperiode))
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP, inspektør.sisteTilstand(1.vedtaksperiode))
+        assertEquals(AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, inspektør.sisteTilstand(1.vedtaksperiode))
 
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)))
         person.håndter(ytelser(1.vedtaksperiode))
