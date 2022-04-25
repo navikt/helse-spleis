@@ -163,3 +163,6 @@ spec:
         - team: risk
           application: helserisk-treskeverk
           access: readwrite
+        - team: tbd
+          application: sparkel-oppgave-endret
+          access: readwrite
