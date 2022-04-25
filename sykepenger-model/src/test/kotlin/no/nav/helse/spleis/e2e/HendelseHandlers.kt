@@ -202,7 +202,8 @@ internal fun AbstractEndToEndTest.førstegangTilGodkjenning(
 internal fun AbstractEndToEndTest.forlengelseTilGodkjenning(fom: LocalDate, tom: LocalDate, vararg organisasjonsnumre: String) {
     require(organisasjonsnumre.isNotEmpty()) { "Må inneholde minst ett organisasjonsnummer" }
     nyPeriode(fom til tom, *organisasjonsnumre)
-    organisasjonsnumre.forEach { håndterYtelser(vedtaksperiodeIdInnhenter = observatør.sisteVedtaksperiode(), orgnummer = it) }
+    if (Toggle.NyTilstandsflyt.disabled)
+        organisasjonsnumre.forEach { håndterYtelser(vedtaksperiodeIdInnhenter = observatør.sisteVedtaksperiode(), orgnummer = it) }
     håndterYtelser(observatør.sisteVedtaksperiode(), orgnummer = organisasjonsnumre.first())
     håndterSimulering(observatør.sisteVedtaksperiode(), orgnummer = organisasjonsnumre.first())
 }
@@ -686,7 +687,7 @@ internal fun AbstractEndToEndTest.håndterUtbetalt(
     utbetalingId: UUID? = null,
     meldingsreferanseId: UUID = UUID.randomUUID()
 ) {
-    val utbetalingId = utbetalingId?.toString() ?: person.personLogg.sisteBehov(Behovtype.Utbetaling).kontekst().getValue("utbetalingId")
+    val faktiskUtbetalingId = utbetalingId?.toString() ?: person.personLogg.sisteBehov(Behovtype.Utbetaling).kontekst().getValue("utbetalingId")
     if (sendOverførtKvittering) {
         UtbetalingOverført(
             meldingsreferanseId = UUID.randomUUID(),
@@ -694,7 +695,7 @@ internal fun AbstractEndToEndTest.håndterUtbetalt(
             fødselsnummer = fnr.toString(),
             orgnummer = orgnummer,
             fagsystemId = fagsystemId,
-            utbetalingId = utbetalingId,
+            utbetalingId = faktiskUtbetalingId,
             avstemmingsnøkkel = 123456L,
             overføringstidspunkt = LocalDateTime.now()
         ).håndter(Person::håndter)
@@ -705,7 +706,7 @@ internal fun AbstractEndToEndTest.håndterUtbetalt(
         fnr = fnr,
         orgnummer = orgnummer,
         meldingsreferanseId = meldingsreferanseId,
-        utbetalingId = UUID.fromString(utbetalingId)
+        utbetalingId = UUID.fromString(faktiskUtbetalingId)
     ).håndter(Person::håndter)
 }
 
