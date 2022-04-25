@@ -532,4 +532,44 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
             }
         )
     }
+
+    @Test
+    fun `revurdering på tidligere skjæringstidspunkt mens nyere førstegangsbehandling står i avventer simulering`() {
+        nyttVedtak(1.januar, 31.januar)
+        tilSimulering(1.mars, 31.mars, 100.prosent, 1.mars)
+
+        nullstillTilstandsendringer()
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)))
+
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+        assertForventetFeil(
+            forklaring = "Skal bli grønn når gjenopptaBehandlingEtter-branchen er rebaset inn",
+            ønsket = {
+                assertTilstander(2.vedtaksperiode, AVVENTER_SIMULERING, AVVENTER_BLOKKERENDE_PERIODE)
+            },
+            nå = {
+                assertTilstander(2.vedtaksperiode, AVVENTER_SIMULERING, AVVENTER_UFERDIG)
+            }
+        )
+    }
+
+    @Test
+    fun `revurdering på tidligere skjæringstidspunkt mens nyere førstegangsbehandling står i avventer godkjenning`() {
+        nyttVedtak(1.januar, 31.januar)
+        tilGodkjenning(1.mars, 31.mars, 100.prosent, 1.mars)
+
+        nullstillTilstandsendringer()
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)))
+
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+        assertForventetFeil(
+            forklaring = "Skal bli grønn når gjenopptaBehandlingEtter-branchen er rebaset inn",
+            ønsket = {
+                assertTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE)
+            },
+            nå = {
+                assertTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_UFERDIG)
+            }
+        )
+    }
 }

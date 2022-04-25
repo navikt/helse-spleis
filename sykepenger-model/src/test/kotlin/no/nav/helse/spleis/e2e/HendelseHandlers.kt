@@ -265,9 +265,23 @@ internal fun AbstractEndToEndTest.tilGodkjenning(
     inntekterBlock: Inntektperioder.() -> Unit = { lagInntektperioder(orgnummer, fom) },
     arbeidsgiverperiode: List<Periode>? = null
 ): IdInnhenter {
-    val id = tilYtelser(fom, tom, grad, førsteFraværsdag, fnr = fnr, orgnummer = orgnummer, refusjon = refusjon, inntekterBlock = inntekterBlock, arbeidsgiverperiode = arbeidsgiverperiode)
+    val id = tilSimulering(fom, tom, grad, førsteFraværsdag, fnr = fnr, orgnummer = orgnummer, refusjon = refusjon, inntekterBlock = inntekterBlock, arbeidsgiverperiode = arbeidsgiverperiode)
     håndterSimulering(id, fnr = fnr, orgnummer = orgnummer)
     return id
+}
+
+internal fun AbstractEndToEndTest.tilSimulering(
+    fom: LocalDate,
+    tom: LocalDate,
+    grad: Prosentdel,
+    førsteFraværsdag: LocalDate,
+    fnr: Fødselsnummer = AbstractPersonTest.UNG_PERSON_FNR_2018,
+    orgnummer: String = AbstractPersonTest.ORGNUMMER,
+    refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(AbstractEndToEndTest.INNTEKT, null, emptyList()),
+    inntekterBlock: Inntektperioder.() -> Unit = { lagInntektperioder(orgnummer, fom) },
+    arbeidsgiverperiode: List<Periode>? = null
+): IdInnhenter {
+    return tilYtelser(fom, tom, grad, førsteFraværsdag, fnr = fnr, orgnummer = orgnummer, refusjon = refusjon, inntekterBlock = inntekterBlock, arbeidsgiverperiode = arbeidsgiverperiode)
 }
 
 internal fun AbstractEndToEndTest.tilYtelser(
