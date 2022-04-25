@@ -5,8 +5,8 @@ import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
-import io.ktor.application.*
 import io.ktor.http.*
+import io.ktor.server.application.Application
 import io.ktor.server.engine.*
 import io.mockk.every
 import io.mockk.mockkStatic
