@@ -1,13 +1,13 @@
 package no.nav.helse.serde.api
 
+import java.time.LocalDate
+import java.time.LocalDateTime
 import no.nav.helse.Fødselsnummer
 import no.nav.helse.person.Person
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.serde.AbstractBuilder
 import no.nav.helse.serde.api.builders.PersonBuilder
 import no.nav.helse.serde.api.v2.HendelseDTO
-import java.time.LocalDate
-import java.time.LocalDateTime
 
 fun serializePersonForSpeil(person: Person, hendelser: List<HendelseDTO> = emptyList()): PersonDTO {
     val jsonBuilder = SpeilBuilder(hendelser)
@@ -21,7 +21,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : Abstract
         /* Økes for å signalisere til spesialist at strukturen i snapshot'et
          * på et eller annet vis har endret seg, og at spesialist derfor må oppdatere cachede snapshots løpende
          */
-        const val SNAPSHOT_VERSJON = 24
+        const val SNAPSHOT_VERSJON = 25
     }
 
     private lateinit var personBuilder: PersonBuilder
