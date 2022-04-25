@@ -4,7 +4,8 @@ import com.auth0.jwk.JwkProvider
 import com.auth0.jwk.JwkProviderBuilder
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import io.ktor.auth.jwt.*
+import io.ktor.server.auth.jwt.JWTAuthenticationProvider
+import io.ktor.server.auth.jwt.JWTPrincipal
 import io.ktor.server.engine.*
 import java.io.InputStream
 import java.net.HttpURLConnection
@@ -54,7 +55,7 @@ internal class AzureAdAppConfig(private val clientId: String, configurationUrl: 
         jwkProvider = JwkProviderBuilder(URL(this.jwksUri)).build()
     }
 
-    fun configureVerification(configuration: JWTAuthenticationProvider.Configuration) {
+    fun configureVerification(configuration: JWTAuthenticationProvider.Config) {
         configuration.verifier(jwkProvider, issuer) {
             withAudience(clientId)
         }

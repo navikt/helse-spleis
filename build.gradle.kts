@@ -9,7 +9,7 @@ val junitJupiterVersion = "5.8.2"
 val kotliqueryVersion = "1.7.0"
 val kGraphQLVersion = "0.17.14"
 val postgresqlVersion = "42.3.3"
-val kotlinReflectVersion = "1.5.31"
+val kotlinReflectVersion = "1.6.21"
 val logbackClassicVersion = "1.2.11"
 val logstashVersion = "7.0.1"
 val jsonSchemaValidatorVersion = "1.0.68"
@@ -43,8 +43,12 @@ allprojects {
         implementation("com.github.seratch:kotliquery:$kotliqueryVersion")
         implementation("org.flywaydb:flyway-core:$flywayVersion")
 
-        implementation("com.apurebase:kgraphql:$kGraphQLVersion")
-        implementation("com.apurebase:kgraphql-ktor:$kGraphQLVersion")
+        // Midledertidig løsnings, pga problemer med KGraphQL og ktor 2.0 se: https://github.com/aPureBase/KGraphQL/issues/185
+        // Etter evt fix fra apurebase Legg tilbake importerne:
+        // implementation("com.apurebase:kgraphql:$kGraphQLVersion")
+        // implementation("com.apurebase:kgraphql-ktor:$kGraphQLVersion")
+        implementation("com.github.untoldwind.KGraphQL:kgraphql:0.17.14-fork-5")
+        implementation("com.github.untoldwind.KGraphQL:kgraphql-ktor:0.17.14-fork-5")
 
         testImplementation("org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion")
         testImplementation("org.junit.jupiter:junit-jupiter-params:$junitJupiterVersion")

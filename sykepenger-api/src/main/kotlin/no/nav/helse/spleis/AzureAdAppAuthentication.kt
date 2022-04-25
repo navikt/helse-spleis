@@ -1,8 +1,9 @@
 package no.nav.helse.spleis
 
-import io.ktor.application.*
-import io.ktor.auth.*
-import io.ktor.auth.jwt.*
+import io.ktor.server.application.Application
+import io.ktor.server.application.install
+import io.ktor.server.auth.Authentication
+import io.ktor.server.auth.jwt.jwt
 import no.nav.helse.spleis.config.AzureAdAppConfig
 
 internal const val API_BRUKER = "api_bruker"

@@ -1,11 +1,14 @@
 package no.nav.helse.spleis
 
-import io.ktor.application.*
-import io.ktor.features.*
 import io.ktor.http.*
 import io.ktor.http.content.*
-import io.ktor.request.*
-import io.ktor.response.*
+import io.ktor.server.application.Application
+import io.ktor.server.application.ApplicationCallPipeline
+import io.ktor.server.application.call
+import io.ktor.server.plugins.callid.callId
+import io.ktor.server.request.httpMethod
+import io.ktor.server.request.uri
+import io.ktor.server.response.ApplicationSendPipeline
 import io.ktor.util.*
 import io.prometheus.client.Counter
 import io.prometheus.client.Histogram
