@@ -1,6 +1,13 @@
 package no.nav.helse.person
 
-import no.nav.helse.hendelser.*
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
+import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Sykmelding
+import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode
 import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
@@ -8,11 +15,10 @@ import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
 
 internal class InntektsmeldingHendelseTest : AbstractPersonTest() {
 
@@ -53,13 +59,6 @@ internal class InntektsmeldingHendelseTest : AbstractPersonTest() {
         assertFalse(person.personLogg.hasErrorsOrWorse(), person.personLogg.toString())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.AVVENTER_HISTORIKK, inspektør.sisteTilstand(1.vedtaksperiode))
-    }
-
-    @Test
-    fun `mangler sykmelding`() {
-        person.håndter(inntektsmelding())
-        assertTrue(person.personLogg.hasWarningsOrWorse())
-        assertEquals(0, inspektør.vedtaksperiodeTeller)
     }
 
     @Test

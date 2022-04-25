@@ -571,7 +571,6 @@ internal class Arbeidsgiver private constructor(
             if (Toggle.NyTilstandsflyt.enabled && sykmeldingsperioder.blirTruffetAv(inntektsmelding)) {
                 person.emitUtsettOppgaveEvent(inntektsmelding)
             }
-            inntektsmelding.error("Forventet ikke inntektsmelding. Har nok ikke mottatt sykmelding")
             if (ForkastetVedtaksperiode.sjekkOmOverlapperMedForkastet(forkastede, inntektsmelding)) {
                 person.opprettOppgave(
                     inntektsmelding,
