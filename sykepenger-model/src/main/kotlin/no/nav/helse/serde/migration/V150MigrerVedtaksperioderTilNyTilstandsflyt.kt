@@ -53,11 +53,19 @@ internal class V150MigrerVedtaksperioderTilNyTilstandsflyt : JsonMigration(versi
             .forEach { arbeidsgiverNode ->
                 val vedtaksperioder = arbeidsgiverNode["vedtaksperioder"] as ArrayNode
                 vedtaksperioder.slettIkkeMottattSøknadTilstander(observer, fødselsnummer)
-                vedtaksperioder.oppdaterTilstander(fødselsnummer = fødselsnummer, forkastet = false)
+                vedtaksperioder.oppdaterTilstander(
+                    fødselsnummer = fødselsnummer,
+                    forkastet = false,
+                    observer = observer
+                )
 
                 val forkastedeVedtaksperioder = arbeidsgiverNode["forkastede"]
                     .map { forkastetVedtaksperiodeNode -> forkastetVedtaksperiodeNode["vedtaksperiode"] }
-                forkastedeVedtaksperioder.oppdaterTilstander(fødselsnummer = fødselsnummer, forkastet = true)
+                forkastedeVedtaksperioder.oppdaterTilstander(
+                    fødselsnummer = fødselsnummer,
+                    forkastet = true,
+                    observer = observer
+                )
                 forkastedeVedtaksperioder.oppdaterForkastedeIkkeMottattSøknadTilstander(fødselsnummer)
             }
     }
@@ -83,7 +91,8 @@ internal class V150MigrerVedtaksperioderTilNyTilstandsflyt : JsonMigration(versi
 
     private fun Iterable<JsonNode>.oppdaterTilstander(
         fødselsnummer: String,
-        forkastet: Boolean
+        forkastet: Boolean,
+        observer: JsonMigrationObserver
     ) = forEach { vedtaksperiodeNode ->
         val vedtaksperiode = vedtaksperiodeNode as ObjectNode
         val gammelTilstand = vedtaksperiodeNode.tilstand()
@@ -103,6 +112,9 @@ internal class V150MigrerVedtaksperioderTilNyTilstandsflyt : JsonMigration(versi
             StructuredArguments.keyValue("forkastet", forkastet)
         )
         vedtaksperiode.put("tilstand", nyTilstand)
+        if (!forkastet) {
+            observer.vedtaksperiodeEndret(UUID.fromString(vedtaksperiodeId), gammelTilstand, nyTilstand)
+        }
     }
 
     private fun Iterable<JsonNode>.oppdaterForkastedeIkkeMottattSøknadTilstander(fødselsnummer: String) =

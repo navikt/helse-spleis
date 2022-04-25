@@ -67,5 +67,40 @@ internal class V150MigrerVedtaksperioderTilNyTilstandsflytTest :
             )
         )
         assertEquals(forventetSlettedeVedtaksperioder, observatør.slettedeVedtaksperioder)
+
+        val tilstandsendinger = listOf(
+            mapOf(
+                "id" to "326323d4-572a-402c-baf4-5ddf04d24a43",
+                "gammelTilstand" to "AVVENTER_ARBEIDSGIVERE",
+                "nyTilstand" to "AVVENTER_BLOKKERENDE_PERIODE"
+            ),
+            mapOf(
+                "id" to "5615ca7f-2519-4bae-8b70-57b475f958fb",
+                "gammelTilstand" to "AVVENTER_UFERDIG",
+                "nyTilstand" to "AVVENTER_BLOKKERENDE_PERIODE"
+            ),
+            mapOf(
+                "id" to "559cfe35-153a-4297-94cc-e303374c1665",
+                "gammelTilstand" to "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
+                "nyTilstand" to "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK"
+            ),
+            mapOf(
+                "id" to "d69bdf89-9fca-46c5-b80a-b66951bb69e3",
+                "gammelTilstand" to "AVVENTER_INNTEKTSMELDING_UFERDIG_GAP",
+                "nyTilstand" to "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK"
+            ),
+            mapOf(
+                "id" to "61983033-3acc-47b2-b1ad-ed63cf5136e1",
+                "gammelTilstand" to "AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE",
+                "nyTilstand" to "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK"
+            ),
+            mapOf(
+                "id" to "e32738c2-22fe-439b-8b55-1d6eb0b4eb3d",
+                "gammelTilstand" to "AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE",
+                "nyTilstand" to "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK"
+            )
+        )
+        assertEquals(tilstandsendinger, observatør.endredeVedtaksperioder)
+
     }
 }

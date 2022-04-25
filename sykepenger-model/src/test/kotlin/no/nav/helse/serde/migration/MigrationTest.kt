@@ -42,8 +42,17 @@ internal abstract class MigrationTest(private val migration: () -> JsonMigration
 
     internal class TestJsonMigrationObserver: JsonMigrationObserver {
         val slettedeVedtaksperioder = mutableListOf<Pair<UUID, JsonNode>>()
+        val endredeVedtaksperioder = mutableListOf<Map<String, String>>()
         override fun vedtaksperiodeSlettet(vedtaksperiodeId: UUID, vedtaksperiodeNode: JsonNode) {
             slettedeVedtaksperioder.add(vedtaksperiodeId to vedtaksperiodeNode)
+        }
+
+        override fun vedtaksperiodeEndret(vedtaksperiodeId: UUID, gammelTilstand: String, nyTilstand: String) {
+            endredeVedtaksperioder.add(mapOf(
+                "id" to vedtaksperiodeId.toString(),
+                "gammelTilstand" to gammelTilstand,
+                "nyTilstand" to nyTilstand
+            ))
         }
     }
 }

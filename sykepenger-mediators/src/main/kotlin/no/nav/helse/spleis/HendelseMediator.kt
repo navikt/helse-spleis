@@ -30,6 +30,7 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.serde.migration.JsonMigrationObserver
 import no.nav.helse.somFødselsnummer
+import no.nav.helse.spleis.db.EndretVedtaksperiodeDao
 import no.nav.helse.spleis.db.HendelseRepository
 import no.nav.helse.spleis.db.LagrePersonDao
 import no.nav.helse.spleis.db.PersonRepository
@@ -69,6 +70,7 @@ internal class HendelseMediator(
     private val hendelseRepository: HendelseRepository,
     private val lagrePersonDao: LagrePersonDao,
     private val slettetVedtaksperiodeDao: SlettetVedtaksperiodeDao,
+    private val endretVedtaksperiodeDao: EndretVedtaksperiodeDao,
     private val versjonAvKode: String
 ) : IHendelseMediator {
     private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
@@ -248,7 +250,7 @@ internal class HendelseMediator(
         handler: (Person) -> Unit
     ) {
         val jurist = MaskinellJurist()
-        val observer = MigrationObserver(slettetVedtaksperiodeDao, hendelse)
+        val observer = MigrationObserver(slettetVedtaksperiodeDao, endretVedtaksperiodeDao, hendelse)
         val person = person(hendelse, jurist, observer)
         val personMediator = PersonMediator(person, message, hendelse, hendelseRepository)
         val subsumsjonMediator = SubsumsjonMediator(jurist, hendelse.fødselsnummer(), message, versjonAvKode)

@@ -4,6 +4,7 @@ import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spleis.HendelseMediator
 import no.nav.helse.spleis.MessageMediator
+import no.nav.helse.spleis.db.EndretVedtaksperiodeDao
 import no.nav.helse.spleis.db.HendelseRepository
 import no.nav.helse.spleis.db.LagrePersonDao
 import no.nav.helse.spleis.db.PersonPostgresRepository
@@ -21,6 +22,7 @@ class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.StatusList
     private val personRepository = PersonPostgresRepository(dataSource)
     private val lagrePersonDao = LagrePersonDao(dataSource)
     private val slettetVedtaksperiodeDao = SlettetVedtaksperiodeDao(dataSource)
+    private val endretVedtaksperiodeDao = EndretVedtaksperiodeDao(dataSource)
     private val rapidsConnection = RapidApplication.create(env)
 
     private val hendelseMediator = HendelseMediator(
@@ -29,6 +31,7 @@ class ApplicationBuilder(env: Map<String, String>) : RapidsConnection.StatusList
         hendelseRepository = hendelseRepository,
         lagrePersonDao = lagrePersonDao,
         slettetVedtaksperiodeDao = slettetVedtaksperiodeDao,
+        endretVedtaksperiodeDao = endretVedtaksperiodeDao,
         versjonAvKode = versjonAvKode(env)
     )
 

@@ -42,6 +42,7 @@ import no.nav.helse.spleis.TestMessageFactory.OpplæringspengerTestdata
 import no.nav.helse.spleis.TestMessageFactory.PleiepengerTestdata
 import no.nav.helse.spleis.TestMessageFactory.UtbetalingshistorikkForFeriepengerTestdata
 import no.nav.helse.spleis.TestMessageFactory.UtbetalingshistorikkTestdata
+import no.nav.helse.spleis.db.EndretVedtaksperiodeDao
 import no.nav.helse.spleis.db.HendelseRepository
 import no.nav.helse.spleis.db.LagrePersonDao
 import no.nav.helse.spleis.db.PersonPostgresRepository
@@ -87,6 +88,7 @@ internal abstract class AbstractEndToEndMediatorTest {
             hendelseRepository = HendelseRepository(dataSource),
             lagrePersonDao = LagrePersonDao(dataSource),
             slettetVedtaksperiodeDao = SlettetVedtaksperiodeDao(dataSource),
+            endretVedtaksperiodeDao = EndretVedtaksperiodeDao(dataSource),
             versjonAvKode = "test-versjon"
         )
 

@@ -2,8 +2,8 @@ package no.nav.helse.serde.migration
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
+import java.util.UUID
 import org.slf4j.LoggerFactory
-import java.util.*
 
 fun interface MeldingerSupplier {
     companion object {
@@ -31,8 +31,11 @@ private class MemoizedMeldingerSupplier(private val supplier: MeldingerSupplier)
 interface JsonMigrationObserver {
     object Void : JsonMigrationObserver {
         override fun vedtaksperiodeSlettet(vedtaksperiodeId: UUID, vedtaksperiodeNode: JsonNode) {}
+        override fun vedtaksperiodeEndret(vedtaksperiodeId: UUID,  gammelTilstand: String, nyTilstand: String) {}
+
     }
     fun vedtaksperiodeSlettet(vedtaksperiodeId: UUID, vedtaksperiodeNode: JsonNode)
+    fun vedtaksperiodeEndret(vedtaksperiodeId: UUID,  gammelTilstand: String, nyTilstand: String)
 }
 
 // Implements GoF Command Pattern to perform migration
