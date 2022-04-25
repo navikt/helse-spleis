@@ -56,3 +56,5 @@ spec:
     value: "true"
   - name: AVSLUTT_INGEN_UTBETALING
     value: "false"
+  - name: NY_TILSTANDSFLYT
+    value: "true"
