@@ -1,5 +1,6 @@
 package no.nav.helse.person
 
+import java.time.LocalDate
 import java.time.YearMonth
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
@@ -32,8 +33,8 @@ internal class Sykmeldingsperioder(
         return lavesteDato > vedtaksperiode.endInclusive
     }
 
-    internal fun fjern(søknadsperiode: Periode) {
-        perioder = perioder.mapNotNull { it.beholdDagerEtter(søknadsperiode.endInclusive) }
+    internal fun fjern(tom: LocalDate) {
+        perioder = perioder.mapNotNull { it.beholdDagerEtter(tom) }
     }
 
     fun blirTruffetAv(inntektsmelding: SykdomstidslinjeHendelse) = perioder.any(inntektsmelding::erRelevant)

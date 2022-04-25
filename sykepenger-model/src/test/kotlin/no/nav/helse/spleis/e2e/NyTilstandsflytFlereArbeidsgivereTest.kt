@@ -19,9 +19,9 @@ import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.TilstandType.AVSLUTTET
+import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
-import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.serde.api.serializePersonForSpeil
@@ -148,12 +148,12 @@ internal class NyTilstandsflytFlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertTilstand(1.vedtaksperiode, AVSLUTTET, a1)
 
         håndterSykmelding(Sykmeldingsperiode(6.februar, 26.februar, 100.prosent), orgnummer = a2)
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(6.februar, 26.februar, 100.prosent), orgnummer = a2)
 
         utbetalPeriodeEtterVilkårsprøving(1.vedtaksperiode, a2)
         assertTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
 
-        håndterSøknad(Sykdom(6.februar, 26.februar, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a1)
         assertTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
         assertTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
 
@@ -571,6 +571,17 @@ internal class NyTilstandsflytFlereArbeidsgivereTest : AbstractEndToEndTest() {
 
         assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, orgnummer = a1)
         assertWarning("Den sykmeldte har oppgitt å ha andre arbeidsforhold med sykmelding i søknaden.")
+    }
+
+    @Test
+    fun `Gammel sykemeldingsperiode skal ikke blokkere videre behandling av en senere søknad`(){
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+
+        håndterSykmelding(Sykmeldingsperiode(5.februar, 28.februar, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(5.februar, 28.februar, 100.prosent), orgnummer = a2)
+        håndterInntektsmelding(listOf(5.februar til 20.februar), orgnummer = a2)
+
+        assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer=a2)
     }
 
     private fun utbetalPeriodeEtterVilkårsprøving(vedtaksperiode: IdInnhenter, orgnummer: String) {

@@ -96,7 +96,7 @@ internal class SykmeldingsperioderTest() {
         val sykmeldingsperioder = Sykmeldingsperioder()
         sykmeldingsperioder.lagre(1.januar til 31.januar)
         sykmeldingsperioder.lagre(1.januar til 28.februar)
-        sykmeldingsperioder.fjern(1.februar til 28.februar)
+        sykmeldingsperioder.fjern(28.februar)
         assertEquals(emptyList<Periode>(), sykmeldingsperioder.perioder())
     }
 
@@ -105,7 +105,7 @@ internal class SykmeldingsperioderTest() {
         val sykmeldingsperioder = Sykmeldingsperioder()
         sykmeldingsperioder.lagre(1.januar til 31.januar)
         sykmeldingsperioder.lagre(1.februar til 28.februar)
-        sykmeldingsperioder.fjern(1.januar til 31.januar)
+        sykmeldingsperioder.fjern(31.januar)
         assertEquals(listOf(1.februar til 28.februar), sykmeldingsperioder.perioder())
     }
 
@@ -114,7 +114,7 @@ internal class SykmeldingsperioderTest() {
         val sykmeldingsperioder = Sykmeldingsperioder()
         sykmeldingsperioder.lagre(1.januar til 31.januar)
         sykmeldingsperioder.lagre(30.januar til 28.februar)
-        sykmeldingsperioder.fjern(1.januar til 31.januar)
+        sykmeldingsperioder.fjern(31.januar)
         assertEquals(listOf(1.februar til 28.februar), sykmeldingsperioder.perioder())
     }
 
@@ -124,7 +124,7 @@ internal class SykmeldingsperioderTest() {
         sykmeldingsperioder.lagre(1.januar til 31.januar)
         sykmeldingsperioder.lagre(1.februar til 28.februar)
         sykmeldingsperioder.lagre(1.mars til 31.mars)
-        sykmeldingsperioder.fjern(1.februar til 28.februar)
+        sykmeldingsperioder.fjern(28.februar)
         assertEquals(listOf(1.mars til 31.mars), sykmeldingsperioder.perioder())
     }
 
@@ -134,7 +134,7 @@ internal class SykmeldingsperioderTest() {
         sykmeldingsperioder.lagre(1.januar til 25.januar)
         sykmeldingsperioder.lagre(1.februar til 25.februar)
         sykmeldingsperioder.lagre(1.mars til 25.mars)
-        sykmeldingsperioder.fjern(1.februar til 25.februar)
+        sykmeldingsperioder.fjern(25.februar)
         assertEquals(listOf(1.mars til 25.mars), sykmeldingsperioder.perioder())
     }
 
@@ -144,7 +144,7 @@ internal class SykmeldingsperioderTest() {
         sykmeldingsperioder.lagre(1.januar til 25.januar)
         sykmeldingsperioder.lagre(1.februar til 25.februar)
         sykmeldingsperioder.lagre(1.mars til 25.mars)
-        sykmeldingsperioder.fjern(1.februar til 24.februar)
+        sykmeldingsperioder.fjern(24.februar)
         assertEquals(listOf(25.februar til 25.februar, 1.mars til 25.mars), sykmeldingsperioder.perioder())
     }
 
@@ -152,7 +152,7 @@ internal class SykmeldingsperioderTest() {
     fun `etterfølgende søknad som tilstøter sykmeldingsperiode, fjerner alt`() {
         val sykmeldingsperioder = Sykmeldingsperioder()
         sykmeldingsperioder.lagre(1.januar til 31.januar)
-        sykmeldingsperioder.fjern(1.februar til 28.februar)
+        sykmeldingsperioder.fjern(28.februar)
         assertEquals(emptyList<Periode>(), sykmeldingsperioder.perioder())
     }
 
@@ -160,7 +160,7 @@ internal class SykmeldingsperioderTest() {
     fun `søknad forran som tilstøter sykmeldingsperioden, fjerner ingenting`() {
         val sykmeldingsperioder = Sykmeldingsperioder()
         sykmeldingsperioder.lagre(1.februar til 28.februar)
-        sykmeldingsperioder.fjern(1.januar til 31.januar)
+        sykmeldingsperioder.fjern(31.januar)
         assertEquals(listOf(1.februar til 28.februar), sykmeldingsperioder.perioder())
     }
 
