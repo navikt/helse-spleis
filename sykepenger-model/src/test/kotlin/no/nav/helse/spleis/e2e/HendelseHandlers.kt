@@ -74,7 +74,7 @@ import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.fail
 
 
@@ -353,6 +353,19 @@ internal fun AbstractEndToEndTest.forlengTilGodkjentVedtak(
     håndterUtbetalingsgodkjenning(observatør.sisteVedtaksperiode(), true, fnr = fnr, orgnummer = orgnummer)
 }
 
+internal fun AbstractEndToEndTest.forlengTilSimulering(
+    fom: LocalDate,
+    tom: LocalDate,
+    grad: Prosentdel = 100.prosent,
+    fnr: Fødselsnummer = AbstractPersonTest.UNG_PERSON_FNR_2018,
+    orgnummer: String = AbstractPersonTest.ORGNUMMER
+) {
+    nyPeriode(fom til tom, orgnummer, grad = grad, fnr = fnr)
+    val id: IdInnhenter = observatør.sisteVedtaksperiode()
+    håndterYtelser(id, fnr = fnr, orgnummer = orgnummer)
+    assertTrue(person.personLogg.etterspurteBehov(id, Behovtype.Simulering)) { "Forventet at simulering er etterspurt" }
+}
+
 internal fun AbstractEndToEndTest.forlengTilGodkjenning(
     fom: LocalDate,
     tom: LocalDate,
@@ -475,7 +488,7 @@ internal fun AbstractEndToEndTest.håndterInntektsmeldingReplay(
     vedtaksperiodeId: UUID
 ) {
     val inntektsmeldinggenerator = inntektsmeldinger[inntektsmeldingId] ?: fail { "Fant ikke inntektsmelding med id $inntektsmeldingId" }
-    Assertions.assertTrue(observatør.bedtOmInntektsmeldingReplay(vedtaksperiodeId)) { "Vedtaksperioden har ikke bedt om replay av inntektsmelding" }
+    assertTrue(observatør.bedtOmInntektsmeldingReplay(vedtaksperiodeId)) { "Vedtaksperioden har ikke bedt om replay av inntektsmelding" }
     inntektsmeldingReplay(inntektsmeldinggenerator(), vedtaksperiodeId)
         .håndter(Person::håndter)
 }
