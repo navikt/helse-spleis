@@ -3144,6 +3144,8 @@ internal class Vedtaksperiode private constructor(
                 return vedtaksperiode.tilstand(hendelse, AvventerRevurdering)
             if (overstyrt.skjæringstidspunkt != vedtaksperiode.skjæringstidspunkt && overstyrt før vedtaksperiode)
                 return vedtaksperiode.tilstand(hendelse, AvventerRevurdering)
+            if (vedtaksperiode.utbetalinger.hørerIkkeSammenMed(overstyrt.utbetalinger))
+                return vedtaksperiode.tilstand(hendelse, AvventerRevurdering)
             vedtaksperiode.tilstand(hendelse, AvventerGjennomførtRevurdering)
         }
 
