@@ -58,6 +58,7 @@ import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_ARBEIDSGIVERE
 import no.nav.helse.person.TilstandType.AVVENTER_ARBEIDSGIVERE_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
@@ -75,7 +76,6 @@ import no.nav.helse.person.TilstandType.AVVENTER_SØKNAD_FERDIG_FORLENGELSE
 import no.nav.helse.person.TilstandType.AVVENTER_SØKNAD_FERDIG_GAP
 import no.nav.helse.person.TilstandType.AVVENTER_SØKNAD_UFERDIG_FORLENGELSE
 import no.nav.helse.person.TilstandType.AVVENTER_SØKNAD_UFERDIG_GAP
-import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_UFERDIG
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
@@ -3142,13 +3142,7 @@ internal class Vedtaksperiode private constructor(
             overstyrt: Vedtaksperiode,
             pågående: Vedtaksperiode?
         ) {
-            if (pågående?.utbetalinger?.utbetales() == true || overstyrt.arbeidsgiver != vedtaksperiode.arbeidsgiver)
-                return vedtaksperiode.tilstand(hendelse, AvventerRevurdering)
-            if (overstyrt.skjæringstidspunkt != vedtaksperiode.skjæringstidspunkt && overstyrt før vedtaksperiode)
-                return vedtaksperiode.tilstand(hendelse, AvventerRevurdering)
-            if (vedtaksperiode.utbetalinger.hørerIkkeSammenMed(overstyrt.utbetalinger))
-                return vedtaksperiode.tilstand(hendelse, AvventerRevurdering)
-            vedtaksperiode.tilstand(hendelse, AvventerGjennomførtRevurdering)
+            vedtaksperiode.nesteRevurderingstilstand(hendelse, overstyrt, pågående)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
