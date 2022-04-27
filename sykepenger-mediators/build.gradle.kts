@@ -1,14 +1,20 @@
 val mainClass = "no.nav.helse.AppKt"
 
+val rapidsAndRiversVersion = "2022.04.21-09.34.08966130226f"
+val testcontainersPostgresqlVersion = "1.17.1"
+val innteksmeldingKontraktVersion = "2020.04.06-ab8f786"
+val syfokafkaVersion = "2021.02.15-14.09-103a1544"
+val mockkVersion = "1.12.3"
+
 dependencies {
-    implementation("com.github.navikt:rapids-and-rivers:2022.04.05-09.40.11a466d7ac70")
+    implementation("com.github.navikt:rapids-and-rivers:$rapidsAndRiversVersion")
     implementation(project(":sykepenger-model"))
-    testImplementation("org.testcontainers:postgresql:1.16.3") {
+    testImplementation("org.testcontainers:postgresql:$testcontainersPostgresqlVersion") {
         exclude("com.fasterxml.jackson.core")
     }
-    testImplementation("com.github.navikt:inntektsmelding-kontrakt:2020.04.06-ab8f786")
-    testImplementation("com.github.navikt:syfokafka:2021.02.15-14.09-103a1544")
-    testImplementation("io.mockk:mockk:1.12.3")
+    testImplementation("com.github.navikt:inntektsmelding-kontrakt:$innteksmeldingKontraktVersion")
+    testImplementation("com.github.navikt:syfokafka:$syfokafkaVersion")
+    testImplementation("io.mockk:mockk:$mockkVersion")
 }
 
 tasks {
