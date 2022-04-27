@@ -1,19 +1,20 @@
 package no.nav.helse.spleis
 
 import com.fasterxml.jackson.databind.JsonNode
-import io.ktor.application.Application
-import io.ktor.application.ApplicationCall
-import io.ktor.application.call
-import io.ktor.auth.authenticate
-import io.ktor.features.BadRequestException
-import io.ktor.features.NotFoundException
+
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
-import io.ktor.request.header
-import io.ktor.response.respond
-import io.ktor.response.respondText
-import io.ktor.routing.get
-import io.ktor.routing.routing
+import io.ktor.server.application.Application
+import io.ktor.server.application.ApplicationCall
+import io.ktor.server.application.call
+import io.ktor.server.auth.authenticate
+import io.ktor.server.plugins.BadRequestException
+import io.ktor.server.plugins.NotFoundException
+import io.ktor.server.request.header
+import io.ktor.server.response.respond
+import io.ktor.server.response.respondText
+import io.ktor.server.routing.get
+import io.ktor.server.routing.routing
 import io.ktor.util.pipeline.PipelineContext
 import io.prometheus.client.Histogram
 import java.time.LocalDate

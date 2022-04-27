@@ -2,9 +2,9 @@ package no.nav.helse.spleis.graphql
 
 import com.apurebase.kgraphql.GraphQL
 import com.apurebase.kgraphql.schema.dsl.SchemaBuilder
-import io.ktor.application.Application
-import io.ktor.application.install
-import io.ktor.auth.authenticate
+import io.ktor.server.application.Application
+import io.ktor.server.application.install
+import io.ktor.server.auth.authenticate
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth

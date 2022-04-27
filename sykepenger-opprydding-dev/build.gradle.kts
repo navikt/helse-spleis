@@ -1,5 +1,7 @@
-val testcontainersVersion = "1.16.3"
+val testcontainersVersion = "1.17.1"
 val cloudSqlVersion = "1.4.4"
+val rapidsAndRiversVersion = "2022.04.21-09.34.08966130226f"
+val postgresqlVersion = "42.3.3"
 
 val mainClass = "no.nav.helse.AppKt"
 
@@ -9,9 +11,9 @@ repositories {
 
 dependencies {
     implementation(kotlin("stdlib"))
-    implementation("com.github.navikt:rapids-and-rivers:2022.04.05-09.40.11a466d7ac70")
+    implementation("com.github.navikt:rapids-and-rivers:$rapidsAndRiversVersion")
     implementation("com.google.cloud.sql:postgres-socket-factory:$cloudSqlVersion")
-    implementation("org.postgresql:postgresql:42.3.3")
+    implementation("org.postgresql:postgresql:$postgresqlVersion")
 
     testImplementation(project(":sykepenger-mediators"))
     testImplementation("org.testcontainers:postgresql:$testcontainersVersion") {
