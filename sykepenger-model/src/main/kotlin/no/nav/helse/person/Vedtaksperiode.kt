@@ -2750,6 +2750,8 @@ internal class Vedtaksperiode private constructor(
         if (utbetalinger.utbetales()) return
         if (pågående?.utbetalinger?.utbetales() == true || overstyrt.arbeidsgiver != this.arbeidsgiver) return tilstand(hendelse, AvventerRevurdering)
         if (skjæringstidspunkt != overstyrt.skjæringstidspunkt) return tilstand(hendelse, AvventerRevurdering)
+        if (utbetalinger.hørerIkkeSammenMed(overstyrt.utbetalinger))
+            return tilstand(hendelse, AvventerRevurdering)
         tilstand(hendelse, AvventerGjennomførtRevurdering)
     }
 
