@@ -16,7 +16,7 @@ internal class V149ResetLåstePerioder : JsonMigration(version = 149) {
                         it.put("tom", vedtaksperiodeNode["tom"].asText())
                     }
                 }
-                val sisteSykdomshistorikkinnslag = arbeidsgiverNode["sykdomshistorikk"].lastOrNull() ?: return@forEach
+                val sisteSykdomshistorikkinnslag = arbeidsgiverNode["sykdomshistorikk"].firstOrNull() ?: return@forEach
                 (sisteSykdomshistorikkinnslag["beregnetSykdomstidslinje"] as ObjectNode).also {
                     it.putArray("låstePerioder").addAll(periodenoder)
                 }
