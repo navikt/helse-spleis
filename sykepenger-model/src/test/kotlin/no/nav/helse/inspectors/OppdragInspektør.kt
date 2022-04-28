@@ -1,10 +1,17 @@
 package no.nav.helse.inspectors
 
-import no.nav.helse.hendelser.Simulering
-import no.nav.helse.person.UtbetalingVisitor
-import no.nav.helse.utbetalingslinjer.*
 import java.time.LocalDate
 import java.time.LocalDateTime
+import no.nav.helse.hendelser.Simulering
+import no.nav.helse.person.UtbetalingVisitor
+import no.nav.helse.utbetalingslinjer.Endringskode
+import no.nav.helse.utbetalingslinjer.Fagområde
+import no.nav.helse.utbetalingslinjer.Klassekode
+import no.nav.helse.utbetalingslinjer.Oppdrag
+import no.nav.helse.utbetalingslinjer.Oppdragstatus
+import no.nav.helse.utbetalingslinjer.Satstype
+import no.nav.helse.utbetalingslinjer.Utbetalingslinje
+import kotlin.properties.Delegates
 
 internal val Oppdrag.inspektør get() = OppdragInspektør(this)
 
@@ -18,7 +25,8 @@ internal class OppdragInspektør(oppdrag: Oppdrag) : UtbetalingVisitor {
     internal lateinit var mottaker: String
         private set
     private val totalBeløp = mutableListOf<Int>()
-    private val nettoBeløp = mutableListOf<Int>()
+    internal var nettoBeløp by Delegates.notNull<Int>()
+        private set
     private val fom = mutableListOf<LocalDate>()
     private val tom = mutableListOf<LocalDate>()
     private val datoStatusFom = mutableListOf<LocalDate?>()
@@ -58,7 +66,7 @@ internal class OppdragInspektør(oppdrag: Oppdrag) : UtbetalingVisitor {
         this.fagområde = fagområde
         this.endringskode = endringskode
         this.mottaker = mottaker
-        this.nettoBeløp.add(nettoBeløp)
+        this.nettoBeløp = nettoBeløp
         this.status = status
         this.simuleringsResultat = simuleringsResultat
         this.sisteArbeidsgiverdag = sisteArbeidsgiverdag
@@ -102,7 +110,6 @@ internal class OppdragInspektør(oppdrag: Oppdrag) : UtbetalingVisitor {
     fun tom(indeks: Int) = tom.elementAt(indeks)
     fun datoStatusFom(indeks: Int) = datoStatusFom.elementAt(indeks)
     fun totalBeløp(indeks: Int) = totalBeløp.elementAt(indeks)
-    fun nettoBeløp(indeks: Int) = nettoBeløp.elementAt(indeks)
     fun status() = status
     fun simuleringsResultat() = simuleringsResultat
 }

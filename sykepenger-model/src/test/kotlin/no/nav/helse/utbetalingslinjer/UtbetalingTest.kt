@@ -197,8 +197,8 @@ internal class UtbetalingTest {
         val første = opprettUtbetaling(tidslinje, sisteDato = 7.januar)
         val andre = opprettUtbetaling(tidslinje, første)
 
-        assertEquals(6000, første.inspektør.arbeidsgiverOppdrag.inspektør.nettoBeløp(0))
-        assertEquals(4800, andre.inspektør.arbeidsgiverOppdrag.inspektør.nettoBeløp(0))
+        assertEquals(6000, første.inspektør.arbeidsgiverOppdrag.inspektør.nettoBeløp)
+        assertEquals(4800, andre.inspektør.arbeidsgiverOppdrag.inspektør.nettoBeløp)
     }
 
     @Test
