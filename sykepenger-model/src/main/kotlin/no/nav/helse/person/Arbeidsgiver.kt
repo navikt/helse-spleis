@@ -476,24 +476,9 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun håndter(sykmelding: Sykmelding) {
-        if (Toggle.NyTilstandsflyt.enabled) {
-            sykmelding.validerAtSykmeldingIkkeErForGammel()
-            if (sykmelding.hasErrorsOrWorse()) return
-        }
+        sykmelding.validerAtSykmeldingIkkeErForGammel()
+        if (sykmelding.hasErrorsOrWorse()) return
         sykmeldingsperioder.lagre(sykmelding.sykdomstidslinje().periode()!!)
-        if (Toggle.NyTilstandsflyt.enabled) return
-        val vedtaksperiode = Vedtaksperiode(
-            person = person,
-            arbeidsgiver = this,
-            hendelse = sykmelding,
-            jurist = jurist
-        )
-        if (harOverlappendeVedtaksperiode(sykmelding)) return registrerForkastetVedtaksperiode(vedtaksperiode, sykmelding)
-        if (noenHarHåndtert(sykmelding, Vedtaksperiode::håndter)) return
-        registrerNyVedtaksperiode(vedtaksperiode)
-        sykmelding.nyVedtaksperiode()
-        vedtaksperiode.håndter(sykmelding)
-        håndter(sykmelding) { nyPeriode(vedtaksperiode, sykmelding) }
     }
 
     private fun harOverlappendeVedtaksperiode(hendelse: SykdomstidslinjeHendelse): Boolean {
@@ -506,11 +491,7 @@ internal class Arbeidsgiver private constructor(
         søknad.kontekst(this)
         sykmeldingsperioder.fjern(søknad.periode().endInclusive)
         person.slettUtgåtteSykmeldingsperioder(søknad.periode().endInclusive)
-        if (Toggle.NyTilstandsflyt.enabled) {
-            opprettVedtaksperiodeOgHåndter(søknad)
-        } else {
-            finnVedtaksperiodeOgHåndter(søknad)
-        }
+        opprettVedtaksperiodeOgHåndter(søknad)
     }
 
     fun opprettVedtaksperiodeOgHåndter(søknad: Søknad) {
@@ -568,7 +549,7 @@ internal class Arbeidsgiver private constructor(
                 }
                 return
             }
-            if (Toggle.NyTilstandsflyt.enabled && sykmeldingsperioder.blirTruffetAv(inntektsmelding)) {
+            if (sykmeldingsperioder.blirTruffetAv(inntektsmelding)) {
                 person.emitUtsettOppgaveEvent(inntektsmelding)
             }
             if (ForkastetVedtaksperiode.sjekkOmOverlapperMedForkastet(forkastede, inntektsmelding)) {
@@ -1095,7 +1076,7 @@ internal class Arbeidsgiver private constructor(
 
     internal fun harSykdomEllerForventerSøknad() = sykdomshistorikk.harSykdom()
             || sykdomstidslinje().harSykedager()
-            || (sykmeldingsperioder.harSykmeldingsperiode() && Toggle.NyTilstandsflyt.enabled)
+            || (sykmeldingsperioder.harSykmeldingsperiode())
 
     internal fun harSpleisSykdom() = sykdomshistorikk.harSykdom()
 

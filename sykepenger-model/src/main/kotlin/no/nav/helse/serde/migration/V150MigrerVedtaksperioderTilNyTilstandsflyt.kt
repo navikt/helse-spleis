@@ -12,12 +12,6 @@ internal class V150MigrerVedtaksperioderTilNyTilstandsflyt : JsonMigration(versi
     override val description: String = "Migrerer vedtaksperiodetilstander til ny flyt"
     private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
 
-    init {
-        require(Toggle.NyTilstandsflyt.enabled) {
-            "Er du helt sikker på at du vil slette og endre alle vedtaksperiodetilstander? ;)"
-        }
-    }
-
     private val inntektsmeldingTilstander = arrayOf(
         "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP",
         "AVVENTER_INNTEKTSMELDING_UFERDIG_GAP",

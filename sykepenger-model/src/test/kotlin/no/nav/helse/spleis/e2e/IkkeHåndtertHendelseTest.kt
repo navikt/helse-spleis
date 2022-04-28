@@ -1,7 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.EnableToggle
-import no.nav.helse.Toggle
 import no.nav.helse.desember
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -13,7 +11,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 
-@EnableToggle(Toggle.NyTilstandsflyt::class)
 internal class IkkeHåndtertHendelseTest : AbstractEndToEndTest() {
     @Test
     fun `håndterer hendelse_ikke_håndtert ved korrigerende søknad av utbetalt periode`() {

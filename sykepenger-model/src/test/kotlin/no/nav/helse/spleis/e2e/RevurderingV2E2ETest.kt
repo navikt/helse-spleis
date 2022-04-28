@@ -39,7 +39,7 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-@EnableToggle(Toggle.NyRevurdering::class, Toggle.NyTilstandsflyt::class)
+@EnableToggle(Toggle.NyRevurdering::class)
 internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
 
     @Test
@@ -254,42 +254,50 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `periode med forlengelse etterfulgt av kort periode - kort periode avsluttes ikke før revurdering er ferdig - ny flyt`() {
-        Toggle.NyTilstandsflyt.enable {
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-            håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
-            håndterYtelser(1.vedtaksperiode)
-            håndterVilkårsgrunnlag(1.vedtaksperiode)
-            håndterYtelser(1.vedtaksperiode)
-            håndterSimulering(1.vedtaksperiode)
-            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-            håndterUtbetalt()
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
 
-            håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
-            håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent))
-            håndterYtelser(2.vedtaksperiode)
-            håndterSimulering(2.vedtaksperiode)
-            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-            håndterUtbetalt()
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent))
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt()
 
-            nullstillTilstandsendringer()
-            håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)))
+        nullstillTilstandsendringer()
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)))
 
-            håndterSykmelding(Sykmeldingsperiode(1.april, 16.april, 100.prosent))
-            håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.april, 16.april, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.april, 16.april, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.april, 16.april, 100.prosent))
 
-            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING)
-            assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
-            assertForventetFeil(
-                forklaring = "Vi vet ikke hva ønsket oppførsel egentlig bør være",
-                nå = {
-                    assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING)
-                },
-                ønsket = {
-                    assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE)
-                }
-            )
-        }
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING)
+        assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+        assertForventetFeil(
+            forklaring = "Vi vet ikke hva ønsket oppførsel egentlig bør være",
+            nå = {
+                assertTilstander(
+                    3.vedtaksperiode,
+                    START,
+                    AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+                    AVSLUTTET_UTEN_UTBETALING
+                )
+            },
+            ønsket = {
+                assertTilstander(
+                    3.vedtaksperiode,
+                    START,
+                    AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+                    AVVENTER_BLOKKERENDE_PERIODE
+                )
+            }
+        )
     }
 
     @Test

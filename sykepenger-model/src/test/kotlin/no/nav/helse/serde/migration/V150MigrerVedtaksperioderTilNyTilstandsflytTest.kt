@@ -6,7 +6,6 @@ import no.nav.helse.Toggle
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-@EnableToggle(Toggle.NyTilstandsflyt::class)
 internal class V150MigrerVedtaksperioderTilNyTilstandsflytTest :
     MigrationTest({ V150MigrerVedtaksperioderTilNyTilstandsflyt() }) {
 

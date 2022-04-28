@@ -20,7 +20,7 @@ import org.junit.jupiter.api.Test
 internal class ReberegningAvAvsluttetUtenUtbetalingE2ETest : AbstractEndToEndTest() {
 
     @Test
-    fun `reberegner avsluttet periode dersom inntektsmelding kommer inn`() = (Toggle.GjenopptaAvsluttetUtenUtbetaling + Toggle.NyTilstandsflyt).enable {
+    fun `reberegner avsluttet periode dersom inntektsmelding kommer inn`() = Toggle.GjenopptaAvsluttetUtenUtbetaling.enable {
         håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
@@ -144,7 +144,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingE2ETest : AbstractEndToEndTes
     }
 
     @Test
-    fun `skal ikke gjenoppta behandling på neste periode avsluttet periode etter IM`() = (Toggle.GjenopptaAvsluttetUtenUtbetaling + Toggle.NyTilstandsflyt).enable {
+    fun `skal ikke gjenoppta behandling på neste periode avsluttet periode etter IM`() = Toggle.GjenopptaAvsluttetUtenUtbetaling.enable {
         håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
@@ -171,7 +171,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingE2ETest : AbstractEndToEndTes
     }
 
     @Test
-    fun `skal ikke gjenoppta behandling på neste periode etter at kort periode reberegnes`() = (Toggle.GjenopptaAvsluttetUtenUtbetaling + Toggle.NyTilstandsflyt).enable {
+    fun `skal ikke gjenoppta behandling på neste periode etter at kort periode reberegnes`() = Toggle.GjenopptaAvsluttetUtenUtbetaling.enable {
         håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
@@ -246,7 +246,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingE2ETest : AbstractEndToEndTes
 
     @Test
     fun `Perioder etter AvsluttetUtenUtbetaling blir satt til AvventerUferdig ved gjennopptagelse av tidligere periode`() {
-        (Toggle.GjenopptaAvsluttetUtenUtbetaling + Toggle.NyTilstandsflyt).enable {
+        Toggle.GjenopptaAvsluttetUtenUtbetaling.enable {
             håndterSykmelding(Sykmeldingsperiode(3.januar, 18.januar, 100.prosent))
             håndterSøknad(Sykdom(3.januar, 18.januar, 100.prosent))
             håndterUtbetalingshistorikk(1.vedtaksperiode)

@@ -117,12 +117,13 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `søknad 4 år før utbetalingsperioden - vanlig kø`() = Toggle.NyTilstandsflyt.disable {
+    fun `søknad 4 år før utbetalingsperioden - vanlig kø`() {
         // Utbetaling 17. mars til 31. mars (AGP 1-16. mars)
         nyttVedtak(1.mars, 31.mars)
 
         håndterSykmelding(Sykmeldingsperiode(1.februar(2014), 28.februar(2014), 80.prosent))
         val søknadHendelseId = håndterSøknad(Sykdom(1.februar(2014), 28.februar(2014), 80.prosent))
+        person.invaliderAllePerioder(hendelselogg, null)
 
         assertTrue(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().isEmpty())
         assertTrue(observatør.opprettOppgaveEvent().any { søknadHendelseId in it.hendelser })

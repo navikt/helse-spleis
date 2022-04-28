@@ -200,8 +200,6 @@ internal fun AbstractEndToEndTest.førstegangTilGodkjenning(
 internal fun AbstractEndToEndTest.forlengelseTilGodkjenning(fom: LocalDate, tom: LocalDate, vararg organisasjonsnumre: String) {
     require(organisasjonsnumre.isNotEmpty()) { "Må inneholde minst ett organisasjonsnummer" }
     nyPeriode(fom til tom, *organisasjonsnumre)
-    if (Toggle.NyTilstandsflyt.disabled)
-        organisasjonsnumre.forEach { håndterYtelser(vedtaksperiodeIdInnhenter = observatør.sisteVedtaksperiode(), orgnummer = it) }
     håndterYtelser(observatør.sisteVedtaksperiode(), orgnummer = organisasjonsnumre.first())
     håndterSimulering(observatør.sisteVedtaksperiode(), orgnummer = organisasjonsnumre.first())
 }
@@ -298,29 +296,15 @@ internal fun AbstractEndToEndTest.tilYtelser(
     arbeidsgiverperiode: List<Periode>? = null
 ): IdInnhenter {
     håndterSykmelding(Sykmeldingsperiode(fom, tom, grad), fnr = fnr, orgnummer = orgnummer)
-    val id = if (Toggle.NyTilstandsflyt.enabled) {
-        håndterSøknad(Søknadsperiode.Sykdom(fom, tom, grad), fnr = fnr, orgnummer = orgnummer)
-        håndterInntektsmelding(
-            arbeidsgiverperiode ?: listOf(Periode(fom, fom.plusDays(15))),
-            førsteFraværsdag = førsteFraværsdag,
-            fnr = fnr,
-            orgnummer = orgnummer,
-            refusjon = refusjon
-        )
-        observatør.sisteVedtaksperiode()
-    } else {
-        val id = observatør.sisteVedtaksperiode()
-        håndterInntektsmeldingMedValidering(
-            id,
-            arbeidsgiverperiode ?: listOf(Periode(fom, fom.plusDays(15))),
-            førsteFraværsdag = førsteFraværsdag,
-            fnr = fnr,
-            orgnummer = orgnummer,
-            refusjon = refusjon
-        )
-        håndterSøknadMedValidering(id, Søknadsperiode.Sykdom(fom, tom, grad), fnr = fnr, orgnummer = orgnummer)
-        id
-    }
+    håndterSøknad(Søknadsperiode.Sykdom(fom, tom, grad), fnr = fnr, orgnummer = orgnummer)
+    håndterInntektsmelding(
+        arbeidsgiverperiode ?: listOf(Periode(fom, fom.plusDays(15))),
+        førsteFraværsdag = førsteFraværsdag,
+        fnr = fnr,
+        orgnummer = orgnummer,
+        refusjon = refusjon
+    )
+    val id = observatør.sisteVedtaksperiode()
 
     håndterYtelser(id, fnr = fnr, orgnummer = orgnummer, besvart = LocalDate.EPOCH.atStartOfDay())
     håndterVilkårsgrunnlag(

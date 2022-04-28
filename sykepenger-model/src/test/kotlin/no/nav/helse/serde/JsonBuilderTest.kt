@@ -222,7 +222,7 @@ class JsonBuilderTest {
     }
 
     @Test
-    fun `En forlengelse med ny tilstandsflyt`() = Toggle.NyTilstandsflyt.enable {
+    fun `En forlengelse med ny tilstandsflyt`() {
         val person = Person(aktørId, fnr, MaskinellJurist()).apply {
             håndter(sykmelding(fom = 1.januar, tom = 31.januar))
             håndter(
@@ -238,7 +238,7 @@ class JsonBuilderTest {
     }
 
     @Test
-    fun `Person med ny tilstandsflyt som venter på inntektsmelding`() = Toggle.NyTilstandsflyt.enable {
+    fun `Person med ny tilstandsflyt som venter på inntektsmelding`() {
         val person = Person(aktørId, fnr, MaskinellJurist()).apply {
             håndter(sykmelding(fom = 1.januar, tom = 31.januar))
             håndter(

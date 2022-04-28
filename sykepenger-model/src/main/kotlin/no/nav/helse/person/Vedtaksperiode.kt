@@ -122,7 +122,7 @@ internal class Vedtaksperiode private constructor(
     private val sykmeldingsperiode: Periode,
     private val utbetalinger: VedtaksperiodeUtbetalinger,
     private var utbetalingstidslinje: Utbetalingstidslinje = Utbetalingstidslinje(),
-    private var forlengelseFraInfotrygd: ForlengelseFraInfotrygd = ForlengelseFraInfotrygd.IKKE_ETTERSPURT,
+    private var forlengelseFraInfotrygd: ForlengelseFraInfotrygd = IKKE_ETTERSPURT,
     private var inntektskilde: Inntektskilde,
     private val opprettet: LocalDateTime,
     private var oppdatert: LocalDateTime = opprettet,
@@ -598,9 +598,7 @@ internal class Vedtaksperiode private constructor(
             hendelse.error("Invaliderer alle perioder for arbeidsgiver pga feil i søknad")
             return forkast(hendelse)
         }
-        val tilstand =
-            if (ingenUtbetaling() && Toggle.NyTilstandsflyt.disabled) AvsluttetUtenUtbetaling else nesteTilstand()
-        tilstand?.also { tilstand(hendelse, it) }
+        nesteTilstand()?.also { tilstand(hendelse, it) }
     }
 
     private fun overlappendeSøknadIkkeStøttet(søknad: Søknad, egendefinertFeiltekst: String? = null) {
@@ -747,12 +745,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun forberedMuligUtbetaling(vilkårsgrunnlag: Vilkårsgrunnlag) {
-        if (Toggle.NyTilstandsflyt.enabled) {
-            håndter(vilkårsgrunnlag, AvventerHistorikk)
-        } else {
-            håndter(vilkårsgrunnlag, nesteTilstand())
-            Companion.gjenopptaBehandling(vilkårsgrunnlag, person, AvventerArbeidsgivere, AvventerHistorikk)
-        }
+        håndter(vilkårsgrunnlag, AvventerHistorikk)
     }
 
     private fun forberedMuligUtbetaling(inntektsmelding: Inntektsmelding) {
@@ -782,47 +775,10 @@ internal class Vedtaksperiode private constructor(
         hendelse: ArbeidstakerHendelse
     ) {
         val vedtaksperioder = person.nåværendeVedtaksperioder(IKKE_FERDIG_BEHANDLET)
-        if (Toggle.NyTilstandsflyt.enabled) {
-            forsøkUtbetalingNyFlyt(maksimumSykepenger, hendelse, vedtaksperioder)
-        } else {
-            forsøkUtbetalingGammelFlyt(maksimumSykepenger, hendelse, vedtaksperioder)
-        }
-    }
-
-    fun forsøkUtbetalingNyFlyt(
-        maksimumSykepenger: Alder.MaksimumSykepenger,
-        hendelse: ArbeidstakerHendelse,
-        vedtaksperioder: List<Vedtaksperiode>
-    ) {
         vedtaksperioder
             .filter { this.periode.overlapperMed(it.periode) }
             .forEach { it.lagUtbetaling(maksimumSykepenger, hendelse) }
         høstingsresultater(hendelse, vedtaksperioder.drop(1))
-    }
-
-    fun forsøkUtbetalingGammelFlyt(
-        maksimumSykepenger: Alder.MaksimumSykepenger,
-        hendelse: ArbeidstakerHendelse,
-        vedtaksperioder: List<Vedtaksperiode>
-    ) {
-        val første = vedtaksperioder.first()
-        if (første == this) {
-            val andreVedtaksperioder = vedtaksperioder.drop(1)
-            if (andreVedtaksperioder
-                    .filter { første.periode.overlapperMed(it.periode) }
-                    .all { it.tilstand == AvventerArbeidsgivere }
-            ) {
-                vedtaksperioder
-                    .filter { første.periode.overlapperMed(it.periode) }
-                    .forEach { it.lagUtbetaling(maksimumSykepenger, hendelse) }
-                første.høstingsresultater(hendelse, andreVedtaksperioder)
-            } else {
-                første.tilstand(hendelse, AvventerArbeidsgivere)
-            }
-        } else {
-            this.tilstand(hendelse, AvventerArbeidsgivere)
-            Companion.gjenopptaBehandling(hendelse, person, AvventerArbeidsgivere, AvventerHistorikk)
-        }
     }
 
     private fun lagUtbetaling(maksimumSykepenger: Alder.MaksimumSykepenger, hendelse: ArbeidstakerHendelse) {
@@ -2430,7 +2386,6 @@ internal class Vedtaksperiode private constructor(
                 onSuccess {
                     when (periodetype) {
                         in listOf(OVERGANG_FRA_IT, INFOTRYGDFORLENGELSE) -> {
-                            if (Toggle.NyTilstandsflyt.disabled) vedtaksperiode.forlengelseFraInfotrygd = JA
                             if (vedtaksperiode.skjæringstidspunktFraInfotrygd in 1.mai(2021) til 16.mai(2021)) {
                                 val gammeltGrunnbeløp = Grunnbeløp.`6G`.beløp(LocalDate.of(2021, 4, 30))
                                 val sykepengegrunnlag = vilkårsgrunnlag.sykepengegrunnlag()
@@ -2438,7 +2393,6 @@ internal class Vedtaksperiode private constructor(
                             }
                         }
                         else -> {
-                            if (Toggle.NyTilstandsflyt.disabled) vedtaksperiode.forlengelseFraInfotrygd = NEI
                             if (vedtaksperiode.inntektsmeldingInfo == null) arbeidsgiver.finnTidligereInntektsmeldinginfo(
                                 vedtaksperiode.skjæringstidspunkt
                             )
@@ -3019,7 +2973,7 @@ internal class Vedtaksperiode private constructor(
             check(!vedtaksperiode.utbetalinger.harUtbetaling()) { "Forventet ikke at perioden har fått utbetaling: kun perioder innenfor arbeidsgiverperioden skal sendes hit. " }
             vedtaksperiode.sendVedtakFattet(hendelse)
             vedtaksperiode.person.gjenopptaBehandling(hendelse)
-            if (Toggle.NyTilstandsflyt.enabled) return vedtaksperiode.person.gjenopptaBehandlingNy(hendelse)
+            return vedtaksperiode.person.gjenopptaBehandlingNy(hendelse)
         }
 
         override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Sykmelding) {}
@@ -3134,7 +3088,7 @@ internal class Vedtaksperiode private constructor(
             check(vedtaksperiode.utbetalinger.erAvsluttet()) { "forventer at utbetaling skal være avsluttet" }
             vedtaksperiode.sendVedtakFattet(hendelse)
             vedtaksperiode.person.gjenopptaBehandling(hendelse)
-            if (Toggle.NyTilstandsflyt.enabled) return vedtaksperiode.person.gjenopptaBehandlingNy(hendelse)
+            return vedtaksperiode.person.gjenopptaBehandlingNy(hendelse)
         }
 
         override fun leaving(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {

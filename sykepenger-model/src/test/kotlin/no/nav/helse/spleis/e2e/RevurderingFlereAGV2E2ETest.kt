@@ -34,7 +34,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 
-@EnableToggle(Toggle.NyRevurdering::class, Toggle.NyTilstandsflyt::class)
+@EnableToggle(Toggle.NyRevurdering::class)
 internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
 
     @Test

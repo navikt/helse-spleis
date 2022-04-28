@@ -13,7 +13,6 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-@EnableToggle(Toggle.NyTilstandsflyt::class)
 internal class RutingAvInntektsmeldingOppgaverTest : AbstractEndToEndTest() {
 
     @Test
