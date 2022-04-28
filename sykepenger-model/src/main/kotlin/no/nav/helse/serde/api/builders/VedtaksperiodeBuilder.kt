@@ -1,11 +1,51 @@
 package no.nav.helse.serde.api.builders
 
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
-import no.nav.helse.person.*
+import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.AktivitetsloggVisitor
+import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Dokumentsporing.Companion.ider
-import no.nav.helse.serde.api.*
+import no.nav.helse.person.ForlengelseFraInfotrygd
+import no.nav.helse.person.Inntektskilde
+import no.nav.helse.person.InntektsmeldingInfo
+import no.nav.helse.person.Opptjening
+import no.nav.helse.person.Periodetype
+import no.nav.helse.person.SpesifikkKontekst
+import no.nav.helse.person.Sykepengegrunnlag
+import no.nav.helse.person.TilstandType.AVSLUTTET
+import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
+import no.nav.helse.person.TilstandType.AVVENTER_ARBEIDSGIVERE
+import no.nav.helse.person.TilstandType.AVVENTER_ARBEIDSGIVERE_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
+import no.nav.helse.person.TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
+import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
+import no.nav.helse.person.TilstandType.REVURDERING_FEILET
+import no.nav.helse.person.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.TilstandType.UTBETALING_FEILET
+import no.nav.helse.person.Vedtaksperiode
+import no.nav.helse.person.VilkårsgrunnlagHistorikk
+import no.nav.helse.person.VilkårsgrunnlagHistorikkVisitor
+import no.nav.helse.serde.api.AktivitetDTO
+import no.nav.helse.serde.api.AlderDTO
+import no.nav.helse.serde.api.DagtypeDTO
+import no.nav.helse.serde.api.GrunnlagsdataDTO
+import no.nav.helse.serde.api.MedlemskapstatusDTO
+import no.nav.helse.serde.api.OpptjeningDTO
+import no.nav.helse.serde.api.SykdomstidslinjedagDTO
+import no.nav.helse.serde.api.SykepengedagerDTO
+import no.nav.helse.serde.api.SøknadsfristDTO
+import no.nav.helse.serde.api.TilstandstypeDTO
+import no.nav.helse.serde.api.UfullstendigVedtaksperiodeDTO
+import no.nav.helse.serde.api.UfullstendigVedtaksperiodedagDTO
+import no.nav.helse.serde.api.VedtaksperiodeDTO
+import no.nav.helse.serde.api.VedtaksperiodeDTOBase
+import no.nav.helse.serde.api.VilkårDTO
 import no.nav.helse.serde.api.dto.UtbetalingshistorikkElementDTO
 import no.nav.helse.serde.api.v2.HendelseDTO
 import no.nav.helse.serde.api.v2.SøknadNavDTO
@@ -16,9 +56,6 @@ import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosent
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
 
 internal class VedtaksperiodeBuilder(
     vedtaksperiode: Vedtaksperiode,
@@ -41,17 +78,19 @@ internal class VedtaksperiodeBuilder(
     private val beregningIder = mutableListOf<UUID>()
     private val fullstendig
         get() = tilstand.type in listOf(
-            TilstandType.AVSLUTTET,
-            TilstandType.AVVENTER_GODKJENNING,
-            TilstandType.AVVENTER_GODKJENNING_REVURDERING,
-            TilstandType.UTBETALING_FEILET,
-            TilstandType.REVURDERING_FEILET,
-            TilstandType.TIL_UTBETALING,
-            TilstandType.AVVENTER_BLOKKERENDE_PERIODE,
-            TilstandType.AVVENTER_ARBEIDSGIVERE,
-            TilstandType.AVVENTER_ARBEIDSGIVERE_REVURDERING,
-            TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
-        ) || (tilstand.type == TilstandType.AVSLUTTET_UTEN_UTBETALING && beregningIder.isNotEmpty())
+            AVSLUTTET,
+            AVVENTER_GODKJENNING,
+            AVVENTER_GODKJENNING_REVURDERING,
+            UTBETALING_FEILET,
+            REVURDERING_FEILET,
+            TIL_UTBETALING,
+            AVVENTER_ARBEIDSGIVERE,
+            AVVENTER_ARBEIDSGIVERE_REVURDERING,
+            AVVENTER_GJENNOMFØRT_REVURDERING
+        ) || (tilstand.type in listOf(
+            AVSLUTTET_UTEN_UTBETALING,
+            AVVENTER_BLOKKERENDE_PERIODE
+        ) && beregningIder.isNotEmpty())
     private val grunnlagsdataBuilder = dataForVilkårsvurdering?.let { GrunnlagsdataBuilder(skjæringstidspunkt, it) }
 
     private val warnings = hentWarningsMedForegåendeUtenUtbetaling(vedtaksperiode)
