@@ -47,6 +47,7 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.pleiepenger
 import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigInntekt
 import no.nav.helse.person.Arbeidsgiver.Companion.trengerSøknadISammeMåned
 import no.nav.helse.person.Dokumentsporing.Companion.ider
+import no.nav.helse.person.ForlengelseFraInfotrygd.IKKE_ETTERSPURT
 import no.nav.helse.person.ForlengelseFraInfotrygd.JA
 import no.nav.helse.person.ForlengelseFraInfotrygd.NEI
 import no.nav.helse.person.InntektsmeldingInfo.Companion.ider
@@ -2214,6 +2215,20 @@ internal class Vedtaksperiode private constructor(
 
         override fun gjenopptaBehandlingNy(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.tilstand(hendelse, AvventerHistorikk)
+        }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
+            if (vedtaksperiode.forlengelseFraInfotrygd == IKKE_ETTERSPURT) {
+                vedtaksperiode.forlengelseFraInfotrygd = when {
+                    vedtaksperiode.forlengelseFraInfotrygd() -> JA
+                    else -> NEI
+                }
+                sikkerlogg.info(
+                    "Setter forlengelseFraInfotrygd til ${vedtaksperiode.forlengelseFraInfotrygd} " +
+                            "for ${vedtaksperiode.fødselsnummer} med vedtaksperiodeId ${vedtaksperiode.id} ved påminnelse for periode hvor det tidligere ikke var satt"
+                )
+            }
+            vedtaksperiode.person.gjenopptaBehandlingNy(påminnelse)
         }
     }
 

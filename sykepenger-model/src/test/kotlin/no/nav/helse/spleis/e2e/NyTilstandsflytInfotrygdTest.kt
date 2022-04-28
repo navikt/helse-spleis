@@ -13,19 +13,26 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.ForlengelseFraInfotrygd
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
+import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.september
+import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import kotlin.reflect.KMutableProperty
+import kotlin.reflect.full.memberProperties
+import kotlin.reflect.jvm.isAccessible
 
 @EnableToggle(Toggle.NyTilstandsflyt::class)
 internal class NyTilstandsflytInfotrygdTest : AbstractEndToEndTest() {
@@ -354,6 +361,45 @@ internal class NyTilstandsflytInfotrygdTest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.mars til 16.mars), orgnummer = a2)
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         assertTilstand(1.vedtaksperiode, TilstandType.TIL_INFOTRYGD, orgnummer = a2)
+    }
+
+    @Test
+    fun `vedtaksperiode som sitter fast i AvventerBlokkerendePeriode fordi forlengelseFraInfotrygd ikke er satt`() {
+        /*
+            Etter migrering V150 migrerte vi AvventerUferdig -> AvventerBlokkerendePeriode. Nye vedtaksperioder går
+            innom AvventerInntektsmeldingEllerHistorikk som setter et forlengseFraInfotrygd-flagg.
+            gjenopptaBehandlingNy vil ikke sende periode i AvventerBlokkerendePeriode videre til AvventerHistorikk dersom
+            forlengeseFraInfotrygd-flagget ikke er satt. Før ny tilstandsflyt ble flagget satt i AvventerHistorikk.
+         */
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a1)
+        håndterUtbetalingshistorikk(
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            utbetalinger = arrayOf(
+                ArbeidsgiverUtbetalingsperiode(
+                    ORGNUMMER,
+                    1.januar,
+                    31.januar,
+                    100.prosent,
+                    INNTEKT
+                )
+            ),
+            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true)),
+            besvart = LocalDate.EPOCH.atStartOfDay(),
+            orgnummer = a1
+        )
+        val vedtaksperiode = inspektør.vedtaksperioder(1.vedtaksperiode)
+        val tilstand = Vedtaksperiode::class.memberProperties.first { it.name == "tilstand" } as KMutableProperty<*>
+        val forlengelseFraInfotrygd =
+            Vedtaksperiode::class.memberProperties.first { it.name == "forlengelseFraInfotrygd" } as KMutableProperty<*>
+        tilstand.isAccessible = true
+        forlengelseFraInfotrygd.isAccessible = true
+        tilstand.setter.call(vedtaksperiode, Vedtaksperiode.AvventerBlokkerendePeriode)
+        forlengelseFraInfotrygd.setter.call(vedtaksperiode, ForlengelseFraInfotrygd.IKKE_ETTERSPURT)
+
+        håndterPåminnelse(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+        assertEquals(ForlengelseFraInfotrygd.JA, forlengelseFraInfotrygd.getter.call(vedtaksperiode))
+        assertEquals(Vedtaksperiode.AvventerHistorikk, tilstand.getter.call(vedtaksperiode))
     }
 
     private fun utbetalPeriode(vedtaksperiode: IdInnhenter) {
