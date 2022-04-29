@@ -89,11 +89,11 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
         )
 
 
-        val perioder = speilJson.arbeidsgivere.single { it.organisasjonsnummer == a2 }?.ghostPerioder
+        val perioder = speilJson.arbeidsgivere.single { it.organisasjonsnummer == a2 }.ghostPerioder
 
-        assertEquals(1, perioder?.size)
+        assertEquals(1, perioder.size)
 
-        val actual = perioder!!.first()
+        val actual = perioder.first()
         val expected =
             GhostPeriodeDTO(
                 id = UUID.randomUUID(),

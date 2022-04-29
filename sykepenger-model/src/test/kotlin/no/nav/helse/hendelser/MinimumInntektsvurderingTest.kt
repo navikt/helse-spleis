@@ -118,7 +118,7 @@ internal class MinimumInntektsvurderingTest {
                 aktivitetslogg = aktivitetslogg,
                 fødselsnummer = fødselsnummer,
                 skjæringstidspunkt = skjæringstidspunkt,
-                grunnlagForSykepengegrunnlag = sykepengegrunnlag(skjæringstidspunkt, this.aktivitetslogg, beløp),
+                grunnlagForSykepengegrunnlag = sykepengegrunnlag(skjæringstidspunkt, beløp),
                 MaskinellJurist()
             )
         )
@@ -136,7 +136,7 @@ internal class MinimumInntektsvurderingTest {
                 aktivitetslogg = aktivitetslogg,
                 fødselsnummer = fødselsnummer,
                 skjæringstidspunkt = skjæringstidspunkt,
-                grunnlagForSykepengegrunnlag = sykepengegrunnlag(skjæringstidspunkt, this.aktivitetslogg, beløp),
+                grunnlagForSykepengegrunnlag = sykepengegrunnlag(skjæringstidspunkt, beløp),
                 MaskinellJurist()
             )
         )
@@ -145,7 +145,6 @@ internal class MinimumInntektsvurderingTest {
 
     private fun sykepengegrunnlag(
         skjæringstidspunkt: LocalDate,
-        aktivitetslogg: Aktivitetslogg,
         beløp: Inntekt
     ) = Sykepengegrunnlag.opprett(
         arbeidsgiverInntektsopplysninger = listOf(

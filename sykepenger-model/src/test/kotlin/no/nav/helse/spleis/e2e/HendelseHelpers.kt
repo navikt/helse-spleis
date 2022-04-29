@@ -154,7 +154,6 @@ private val AbstractEndToEndTest.sykmeldingDTOer get() = sykmeldinger.map { (id,
 }
 
 private val AbstractEndToEndTest.inntektsmeldingDTOer get() = inntektsmeldinger.map { (id, inntektsmeldingGetter) ->
-    val im = inntektsmeldingGetter()
     InntektsmeldingDTO(
         id = id.toString(),
         mottattDato = LocalDateTime.now(),
