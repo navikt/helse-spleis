@@ -114,19 +114,8 @@ data class UtbetalingshistorikkElementDTO(
 
                 return when (tilstandstype) {
                     TilstandType.START,
-                    TilstandType.MOTTATT_SYKMELDING_FERDIG_FORLENGELSE,
-                    TilstandType.MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE,
-                    TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP,
-                    TilstandType.MOTTATT_SYKMELDING_UFERDIG_GAP,
-                    TilstandType.AVVENTER_SØKNAD_FERDIG_GAP,
-                    TilstandType.AVVENTER_SØKNAD_UFERDIG_GAP,
                     TilstandType.AVVENTER_VILKÅRSPRØVING,
                     TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-                    TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP,
-                    TilstandType.AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE,
-                    TilstandType.AVVENTER_INNTEKTSMELDING_UFERDIG_GAP,
-                    TilstandType.AVVENTER_SØKNAD_UFERDIG_FORLENGELSE,
-                    TilstandType.AVVENTER_SØKNAD_FERDIG_FORLENGELSE,
                     TilstandType.AVVENTER_SIMULERING,
                     TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING,
                     TilstandType.AVVENTER_SIMULERING_REVURDERING,
@@ -134,11 +123,9 @@ data class UtbetalingshistorikkElementDTO(
                     TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING,
                     TilstandType.AVVENTER_HISTORIKK_REVURDERING,
                     TilstandType.AVVENTER_REVURDERING,
-                    TilstandType.AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE,
                     TilstandType.AVVENTER_HISTORIKK -> TilstandstypeDTO.Venter
                     TilstandType.AVVENTER_UFERDIG,
-                    TilstandType.AVVENTER_BLOKKERENDE_PERIODE,
-                    TilstandType.AVVENTER_ARBEIDSGIVERE -> TilstandstypeDTO.VenterPåKiling
+                    TilstandType.AVVENTER_BLOKKERENDE_PERIODE -> TilstandstypeDTO.VenterPåKiling
                     TilstandType.TIL_INFOTRYGD -> TilstandstypeDTO.TilInfotrygd
                     TilstandType.UTBETALING_FEILET -> TilstandstypeDTO.Feilet
                     TilstandType.REVURDERING_FEILET -> TilstandstypeDTO.RevurderingFeilet

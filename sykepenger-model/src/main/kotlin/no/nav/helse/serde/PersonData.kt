@@ -944,23 +944,10 @@ internal data class PersonData(
                 TilstandType.REVURDERING_FEILET -> Vedtaksperiode.RevurderingFeilet
                 TilstandType.TIL_INFOTRYGD -> Vedtaksperiode.TilInfotrygd
                 TilstandType.START -> Vedtaksperiode.Start
-                TilstandType.MOTTATT_SYKMELDING_FERDIG_FORLENGELSE -> Vedtaksperiode.MottattSykmeldingFerdigForlengelse
-                TilstandType.MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE -> Vedtaksperiode.MottattSykmeldingUferdigForlengelse
-                TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP -> Vedtaksperiode.MottattSykmeldingFerdigGap
-                TilstandType.MOTTATT_SYKMELDING_UFERDIG_GAP -> Vedtaksperiode.MottattSykmeldingUferdigGap
-                TilstandType.AVVENTER_SØKNAD_FERDIG_GAP -> Vedtaksperiode.AvventerSøknadFerdigGap
                 TilstandType.AVVENTER_VILKÅRSPRØVING -> Vedtaksperiode.AvventerVilkårsprøving
-                TilstandType.AVVENTER_SØKNAD_UFERDIG_GAP -> Vedtaksperiode.AvventerSøknadUferdigGap
                 TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK -> Vedtaksperiode.AvventerInntektsmeldingEllerHistorikk
-                TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP -> Vedtaksperiode.AvventerInntektsmeldingEllerHistorikkFerdigGap
-                TilstandType.AVVENTER_INNTEKTSMELDING_UFERDIG_GAP -> Vedtaksperiode.AvventerInntektsmeldingUferdigGap
-                TilstandType.AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE -> Vedtaksperiode.AvventerInntektsmeldingFerdigForlengelse
-                TilstandType.AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE -> Vedtaksperiode.AvventerInntektsmeldingUferdigForlengelse
-                TilstandType.AVVENTER_SØKNAD_UFERDIG_FORLENGELSE -> Vedtaksperiode.AvventerSøknadUferdigForlengelse
-                TilstandType.AVVENTER_SØKNAD_FERDIG_FORLENGELSE -> Vedtaksperiode.AvventerSøknadFerdigForlengelse
                 TilstandType.AVVENTER_BLOKKERENDE_PERIODE -> Vedtaksperiode.AvventerBlokkerendePeriode
                 TilstandType.AVVENTER_UFERDIG -> Vedtaksperiode.AvventerUferdig
-                TilstandType.AVVENTER_ARBEIDSGIVERE -> Vedtaksperiode.AvventerArbeidsgivere
                 TilstandType.AVVENTER_REVURDERING -> Vedtaksperiode.AvventerRevurdering
                 TilstandType.AVVENTER_HISTORIKK_REVURDERING -> Vedtaksperiode.AvventerHistorikkRevurdering
                 TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING -> Vedtaksperiode.AvventerVilkårsprøvingRevurdering

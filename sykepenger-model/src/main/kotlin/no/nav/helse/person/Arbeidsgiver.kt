@@ -34,7 +34,6 @@ import no.nav.helse.person.ForkastetVedtaksperiode.Companion.harAvsluttedePeriod
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.håndterInntektsmeldingReplay
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.iderMedUtbetaling
 import no.nav.helse.person.Inntektshistorikk.IkkeRapportert
-import no.nav.helse.person.Vedtaksperiode.AvventerArbeidsgivere
 import no.nav.helse.person.Vedtaksperiode.AvventerArbeidsgivereRevurdering
 import no.nav.helse.person.Vedtaksperiode.AvventerHistorikk
 import no.nav.helse.person.Vedtaksperiode.AvventerHistorikkRevurdering
@@ -330,12 +329,6 @@ internal class Arbeidsgiver private constructor(
         Vedtaksperiode.gjenopptaBehandling(
             hendelse = gjenopptaBehandling,
             person = person,
-            nåværendeTilstand = AvventerArbeidsgivere,
-            nesteTilstand = AvventerHistorikk
-        )
-        Vedtaksperiode.gjenopptaBehandling(
-            hendelse = gjenopptaBehandling,
-            person = person,
             nåværendeTilstand = AvventerArbeidsgivereRevurdering,
             nesteTilstand = AvventerHistorikkRevurdering,
             filter = IKKE_FERDIG_REVURDERT
@@ -494,7 +487,7 @@ internal class Arbeidsgiver private constructor(
         opprettVedtaksperiodeOgHåndter(søknad)
     }
 
-    fun opprettVedtaksperiodeOgHåndter(søknad: Søknad) {
+    private fun opprettVedtaksperiodeOgHåndter(søknad: Søknad) {
         val vedtaksperiode = Vedtaksperiode(
             person = person,
             arbeidsgiver = this,
@@ -519,17 +512,6 @@ internal class Arbeidsgiver private constructor(
             søknad.info("Forsøkte å opprette en ny vedtaksperiode, men den ble forkastet før den rakk å spørre om inntektsmeldingReplay. " +
                     "Ber om inntektsmeldingReplay så vi kan opprette gosys-oppgaver for inntektsmeldinger som ville ha truffet denne vedtaksperioden")
             vedtaksperiode.trengerInntektsmeldingReplay()
-        }
-    }
-
-    fun finnVedtaksperiodeOgHåndter(søknad: Søknad) {
-        if (vedtaksperioder.any { it.overlapperMenUlikFerieinformasjon(søknad) }) {
-            søknad.warn("Det er oppgitt ny informasjon om ferie i søknaden som det ikke har blitt opplyst om tidligere. Tidligere periode må revurderes.")
-        }
-        noenHarHåndtert(søknad, Vedtaksperiode::håndter, "Forventet ikke ${søknad.kilde}. Har nok ikke mottatt sykmelding")
-        if (søknad.hasErrorsOrWorse()) {
-            person.sendOppgaveEvent(søknad)
-            person.emitHendelseIkkeHåndtert(søknad)
         }
     }
 

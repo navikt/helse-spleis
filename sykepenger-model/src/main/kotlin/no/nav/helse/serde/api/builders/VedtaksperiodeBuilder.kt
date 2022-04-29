@@ -19,7 +19,6 @@ import no.nav.helse.person.SpesifikkKontekst
 import no.nav.helse.person.Sykepengegrunnlag
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.TilstandType.AVVENTER_ARBEIDSGIVERE
 import no.nav.helse.person.TilstandType.AVVENTER_ARBEIDSGIVERE_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
@@ -84,7 +83,6 @@ internal class VedtaksperiodeBuilder(
             UTBETALING_FEILET,
             REVURDERING_FEILET,
             TIL_UTBETALING,
-            AVVENTER_ARBEIDSGIVERE,
             AVVENTER_ARBEIDSGIVERE_REVURDERING,
             AVVENTER_GJENNOMFØRT_REVURDERING
         ) || (tilstand.type in listOf(

@@ -57,7 +57,6 @@ import no.nav.helse.person.Periodetype.INFOTRYGDFORLENGELSE
 import no.nav.helse.person.Periodetype.OVERGANG_FRA_IT
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.TilstandType.AVVENTER_ARBEIDSGIVERE
 import no.nav.helse.person.TilstandType.AVVENTER_ARBEIDSGIVERE_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
@@ -66,24 +65,12 @@ import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
-import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP
-import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE
-import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE
-import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_UFERDIG_GAP
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
-import no.nav.helse.person.TilstandType.AVVENTER_SØKNAD_FERDIG_FORLENGELSE
-import no.nav.helse.person.TilstandType.AVVENTER_SØKNAD_FERDIG_GAP
-import no.nav.helse.person.TilstandType.AVVENTER_SØKNAD_UFERDIG_FORLENGELSE
-import no.nav.helse.person.TilstandType.AVVENTER_SØKNAD_UFERDIG_GAP
 import no.nav.helse.person.TilstandType.AVVENTER_UFERDIG
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
-import no.nav.helse.person.TilstandType.MOTTATT_SYKMELDING_FERDIG_FORLENGELSE
-import no.nav.helse.person.TilstandType.MOTTATT_SYKMELDING_FERDIG_GAP
-import no.nav.helse.person.TilstandType.MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE
-import no.nav.helse.person.TilstandType.MOTTATT_SYKMELDING_UFERDIG_GAP
 import no.nav.helse.person.TilstandType.REVURDERING_FEILET
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
@@ -445,12 +432,6 @@ internal class Vedtaksperiode private constructor(
     internal fun trengerSøknadISammeMåned(arbeidsgivere: Iterable<Arbeidsgiver>) =
         arbeidsgivere.trengerSøknadISammeMåned(skjæringstidspunkt)
 
-    private fun avgjørTilstandForInntekt(): Vedtaksperiodetilstand {
-        val rettFør = arbeidsgiver.finnVedtaksperiodeRettFør(this)
-        if (harInntekt() || rettFør?.harInntekt() == true) return AvventerHistorikk
-        return AvventerInntektsmeldingFerdigForlengelse
-    }
-
     private fun avgjørTilstandForGap(hvisForlengelse: Vedtaksperiodetilstand, hvisGap: Vedtaksperiodetilstand) =
         if (harVedtaksperiodeRettFør()) hvisForlengelse else hvisGap
 
@@ -724,7 +705,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun tickleForArbeidsgiveravhengighet(påminnelse: Påminnelse) {
-        Companion.gjenopptaBehandling(påminnelse, person, AvventerArbeidsgivere, AvventerHistorikk)
+        Companion.gjenopptaBehandling(påminnelse, person, AvventerBlokkerendePeriode, AvventerHistorikk)
     }
 
     private fun gjenopptaBehandling(hendelse: IAktivitetslogg, nesteTilstand: Vedtaksperiodetilstand) {
@@ -735,36 +716,12 @@ internal class Vedtaksperiode private constructor(
     private fun overlappendeVedtaksperioder() =
         person.nåværendeVedtaksperioder(IKKE_FERDIG_BEHANDLET).filter { periode.overlapperMed(it.periode) }
 
-    private fun Iterable<Vedtaksperiode>.kanGåTilNesteTilstand() =
-        first() == this@Vedtaksperiode && drop(1).all { it.tilstand == AvventerArbeidsgivere }
-
     private fun alleAndreAvventerArbeidsgivere() = overlappendeVedtaksperioder().all {
-        it == this
-                || it.tilstand == AvventerArbeidsgivere
-                || it.tilstand == AvventerBlokkerendePeriode
+        it == this || it.tilstand == AvventerBlokkerendePeriode
     }
 
     private fun forberedMuligUtbetaling(vilkårsgrunnlag: Vilkårsgrunnlag) {
         håndter(vilkårsgrunnlag, AvventerHistorikk)
-    }
-
-    private fun forberedMuligUtbetaling(inntektsmelding: Inntektsmelding) {
-        håndterInntektsmelding(inntektsmelding, nesteTilstand())
-        Companion.gjenopptaBehandling(inntektsmelding, person, AvventerArbeidsgivere, AvventerHistorikk)
-    }
-
-    private fun forberedMuligUtbetaling(søknad: Søknad) {
-        håndterSøknad(søknad, ::nesteTilstand)
-        Companion.gjenopptaBehandling(søknad, person, AvventerArbeidsgivere, AvventerHistorikk)
-    }
-
-    private fun nesteTilstand(): Vedtaksperiodetilstand {
-        val overlappendeVedtaksperioder = overlappendeVedtaksperioder()
-        val nesteTilstand = when {
-            overlappendeVedtaksperioder.kanGåTilNesteTilstand() -> AvventerHistorikk
-            else -> AvventerArbeidsgivere
-        }
-        return nesteTilstand
     }
 
     /**
@@ -989,32 +946,6 @@ internal class Vedtaksperiode private constructor(
             overlappendeSykmeldingIkkeStøttet(vedtaksperiode, sykmelding)
         }
 
-        fun håndterOverlappendeSykmelding(vedtaksperiode: Vedtaksperiode, sykmelding: Sykmelding) {
-            check(
-                vedtaksperiode.tilstand in setOf(
-                    MottattSykmeldingFerdigGap,
-                    MottattSykmeldingUferdigGap,
-                    MottattSykmeldingFerdigForlengelse,
-                    MottattSykmeldingUferdigForlengelse
-                )
-            )
-            if (!vedtaksperiode.sykmeldingsperiode.inneholder(sykmelding.periode())) return overlappendeSykmeldingIkkeStøttet(
-                vedtaksperiode,
-                sykmelding
-            )
-
-            if (!vedtaksperiode.arbeidsgiver.erSykmeldingenDenSistSkrevne(sykmelding, vedtaksperiode.hendelseIder())) {
-                sykmelding.warn("Mottatt en sykmelding som er skrevet tidligere enn den som er lagt til grunn, vurder sykmeldingene og gjør eventuelle justeringer")
-            } else {
-                if (inneholderForskjelligeGraderinger(vedtaksperiode, sykmelding)) {
-                    sykmelding.warn("Korrigert sykmelding er lagt til grunn - kontroller dagene i sykmeldingsperioden")
-                } else {
-                    sykmelding.info("Ny sykmelding med like graderinger er lagt til grunn")
-                }
-                vedtaksperiode.oppdaterHistorikk(sykmelding)
-            }
-        }
-
         private fun graderFraSykomstidslinje(sykdomstidslinje: Sykdomstidslinje): List<Double> {
             val grader = mutableListOf<Double>()
             sykdomstidslinje.forEach { dag ->
@@ -1185,28 +1116,6 @@ internal class Vedtaksperiode private constructor(
     internal object Start : Vedtaksperiodetilstand {
         override val type = START
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, sykmelding: Sykmelding) {
-            vedtaksperiode.oppdaterHistorikk(sykmelding)
-            if (vedtaksperiode.harArbeidsgivereMedOverlappendeUtbetaltePerioder(vedtaksperiode.periode)) {
-                sykmelding.warn("Denne personen har en utbetaling for samme periode for en annen arbeidsgiver. Kontroller at beregningene for begge arbeidsgiverne er korrekte.")
-            }
-
-            if (sykmelding.valider(vedtaksperiode.periode, vedtaksperiode.jurist())
-                    .hasErrorsOrWorse()
-            ) return vedtaksperiode.forkast(sykmelding)
-
-            vedtaksperiode.tilstand(
-                sykmelding, avgjørNesteTilstand(
-                    vedtaksperiode = vedtaksperiode,
-                    ferdigForlengelse = MottattSykmeldingFerdigForlengelse,
-                    uferdigForlengelse = MottattSykmeldingUferdigForlengelse,
-                    ferdigGap = MottattSykmeldingFerdigGap,
-                    uferdigGap = MottattSykmeldingUferdigGap
-                )
-            )
-            sykmelding.info("Fullført behandling av sykmelding")
-        }
-
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
             if (vedtaksperiode.harArbeidsgivereMedOverlappendeUtbetaltePerioder(vedtaksperiode.periode)) {
                 søknad.warn("Denne personen har en utbetaling for samme periode for en annen arbeidsgiver. Kontroller at beregningene for begge arbeidsgiverne er korrekte.")
@@ -1258,236 +1167,6 @@ internal class Vedtaksperiode private constructor(
             .withDayOfMonth(1)
             .atStartOfDay()
             .minus(1, ChronoUnit.NANOS)
-
-    internal object MottattSykmeldingFerdigForlengelse : Vedtaksperiodetilstand {
-        override val type = MOTTATT_SYKMELDING_FERDIG_FORLENGELSE
-        override fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime) =
-            vedtaksperiode.makstidForIkkeMottattSøknadTilstander(vedtaksperiode)
-
-        override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Sykmelding) {}
-
-        override fun tidligerePeriodeRebehandles(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            vedtaksperiode.tilstand(hendelse, MottattSykmeldingUferdigForlengelse)
-        }
-
-        override fun håndterTidligereUferdigPeriode(
-            vedtaksperiode: Vedtaksperiode,
-            tidligere: Vedtaksperiode,
-            hendelse: IAktivitetslogg
-        ) {
-            vedtaksperiode.tilstand(hendelse, MottattSykmeldingUferdigForlengelse)
-        }
-
-        override fun håndterTidligereTilstøtendeUferdigPeriode(
-            vedtaksperiode: Vedtaksperiode,
-            tidligere: Vedtaksperiode,
-            hendelse: IAktivitetslogg
-        ) {
-            vedtaksperiode.tilstand(hendelse, MottattSykmeldingUferdigForlengelse)
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, sykmelding: Sykmelding) {
-            håndterOverlappendeSykmelding(vedtaksperiode, sykmelding)
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
-            vedtaksperiode.håndterSøknad(søknad, vedtaksperiode::avgjørTilstandForInntekt)
-            søknad.info("Fullført behandling av søknad")
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
-            vedtaksperiode.arbeidsgiver.finnVedtaksperiodeRettFør(vedtaksperiode)?.also { forrige ->
-                forrige.inntektsmeldingInfo?.also { it.erSamme(inntektsmelding) } ?: run {
-                    if (forrige.utbetalinger.erAvsluttet()) inntektsmelding.warn("Vi har mottatt en inntektsmelding i en løpende sykmeldingsperiode med oppgitt første/bestemmende fraværsdag som er ulik tidligere fastsatt skjæringstidspunkt.")
-                }
-            }
-            vedtaksperiode.håndterInntektsmelding(inntektsmelding) { AvventerSøknadFerdigForlengelse }
-        }
-    }
-
-    internal object MottattSykmeldingUferdigForlengelse : Vedtaksperiodetilstand {
-        override val type = MOTTATT_SYKMELDING_UFERDIG_FORLENGELSE
-        override fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime) =
-            vedtaksperiode.makstidForIkkeMottattSøknadTilstander(vedtaksperiode)
-
-        override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Sykmelding) {}
-        override fun håndterTidligereUferdigPeriode(
-            vedtaksperiode: Vedtaksperiode,
-            tidligere: Vedtaksperiode,
-            hendelse: IAktivitetslogg
-        ) {
-        }
-
-        override fun håndterTidligereTilstøtendeUferdigPeriode(
-            vedtaksperiode: Vedtaksperiode,
-            tidligere: Vedtaksperiode,
-            hendelse: IAktivitetslogg
-        ) {
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, sykmelding: Sykmelding) {
-            håndterOverlappendeSykmelding(vedtaksperiode, sykmelding)
-        }
-
-        override fun håndterInfotrygdforlengelse(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            vedtaksperiode.tilstand(hendelse, AvventerSøknadUferdigForlengelse)
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
-            val nesteForlengelsetilstand = when {
-                vedtaksperiode.harInntekt() -> AvventerUferdig
-                else -> AvventerInntektsmeldingUferdigForlengelse
-            }
-            vedtaksperiode.håndterSøknad(søknad) {
-                vedtaksperiode.avgjørTilstandForGap(nesteForlengelsetilstand, AvventerInntektsmeldingUferdigGap)
-            }
-            søknad.info("Fullført behandling av søknad")
-        }
-
-        override fun håndter(
-            vedtaksperiode: Vedtaksperiode,
-            inntektsmelding: Inntektsmelding
-        ) {
-            vedtaksperiode.håndterInntektsmelding(inntektsmelding) {
-                vedtaksperiode.avgjørTilstandForGap(
-                    AvventerSøknadUferdigForlengelse,
-                    AvventerSøknadUferdigGap
-                )
-            }
-        }
-
-        override fun gjenopptaBehandling(
-            vedtaksperiode: Vedtaksperiode,
-            gjenopptaBehandling: IAktivitetslogg
-        ) {
-            vedtaksperiode.håndterMuligForlengelse(
-                gjenopptaBehandling,
-                MottattSykmeldingFerdigForlengelse,
-                MottattSykmeldingFerdigGap
-            )
-        }
-    }
-
-    internal object MottattSykmeldingFerdigGap : Vedtaksperiodetilstand {
-        override val type = MOTTATT_SYKMELDING_FERDIG_GAP
-        override fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime): LocalDateTime =
-            vedtaksperiode.makstidForIkkeMottattSøknadTilstander(vedtaksperiode)
-
-        override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Sykmelding) {}
-
-        override fun håndterTidligereUferdigPeriode(
-            vedtaksperiode: Vedtaksperiode,
-            tidligere: Vedtaksperiode,
-            hendelse: IAktivitetslogg
-        ) {
-            vedtaksperiode.tilstand(hendelse, MottattSykmeldingUferdigGap)
-        }
-
-        override fun håndterTidligereTilstøtendeUferdigPeriode(
-            vedtaksperiode: Vedtaksperiode,
-            tidligere: Vedtaksperiode,
-            hendelse: IAktivitetslogg
-        ) {
-            vedtaksperiode.tilstand(hendelse, MottattSykmeldingUferdigForlengelse)
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, sykmelding: Sykmelding) {
-            håndterOverlappendeSykmelding(vedtaksperiode, sykmelding)
-        }
-
-        override fun håndter(
-            vedtaksperiode: Vedtaksperiode,
-            inntektsmelding: Inntektsmelding
-        ) {
-            vedtaksperiode.håndterInntektsmelding(inntektsmelding) {
-                vedtaksperiode.avgjørTilstandForGap(
-                    AvventerSøknadFerdigForlengelse,
-                    AvventerSøknadFerdigGap
-                )
-            }
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
-            vedtaksperiode.håndterSøknad(søknad) { AvventerInntektsmeldingEllerHistorikkFerdigGap }
-            søknad.info("Fullført behandling av søknad")
-        }
-
-    }
-
-    internal object MottattSykmeldingUferdigGap : Vedtaksperiodetilstand {
-        override val type = MOTTATT_SYKMELDING_UFERDIG_GAP
-        override fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime) =
-            vedtaksperiode.makstidForIkkeMottattSøknadTilstander(vedtaksperiode)
-
-        override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Sykmelding) {}
-
-        override fun håndterTidligereTilstøtendeUferdigPeriode(
-            vedtaksperiode: Vedtaksperiode,
-            tidligere: Vedtaksperiode,
-            hendelse: IAktivitetslogg
-        ) {
-            vedtaksperiode.tilstand(hendelse, MottattSykmeldingUferdigForlengelse)
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, sykmelding: Sykmelding) {
-            håndterOverlappendeSykmelding(vedtaksperiode, sykmelding)
-        }
-
-        override fun gjenopptaBehandling(
-            vedtaksperiode: Vedtaksperiode,
-            gjenopptaBehandling: IAktivitetslogg
-        ) {
-            vedtaksperiode.tilstand(gjenopptaBehandling, MottattSykmeldingFerdigGap)
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
-            vedtaksperiode.håndterSøknad(søknad) { AvventerInntektsmeldingUferdigGap }
-            søknad.info("Fullført behandling av søknad")
-        }
-
-        override fun håndter(
-            vedtaksperiode: Vedtaksperiode,
-            inntektsmelding: Inntektsmelding
-        ) {
-            vedtaksperiode.håndterInntektsmelding(inntektsmelding) {
-                vedtaksperiode.avgjørTilstandForGap(
-                    AvventerSøknadUferdigForlengelse,
-                    AvventerSøknadUferdigGap
-                )
-            }
-        }
-    }
-
-    internal object AvventerSøknadFerdigGap : Vedtaksperiodetilstand {
-        override val type = AVVENTER_SØKNAD_FERDIG_GAP
-
-        override fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime) =
-            vedtaksperiode.makstidForIkkeMottattSøknadTilstander(vedtaksperiode)
-
-        override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Sykmelding) {}
-
-        override fun håndterTidligereUferdigPeriode(
-            vedtaksperiode: Vedtaksperiode,
-            tidligere: Vedtaksperiode,
-            hendelse: IAktivitetslogg
-        ) {
-            vedtaksperiode.tilstand(hendelse, AvventerSøknadUferdigGap)
-        }
-
-        override fun håndterTidligereTilstøtendeUferdigPeriode(
-            vedtaksperiode: Vedtaksperiode,
-            tidligere: Vedtaksperiode,
-            hendelse: IAktivitetslogg
-        ) {
-            vedtaksperiode.tilstand(hendelse, AvventerSøknadUferdigForlengelse)
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
-            vedtaksperiode.forberedMuligUtbetaling(søknad)
-            søknad.info("Fullført behandling av søknad")
-        }
-
-    }
 
     internal object AvventerRevurdering : Vedtaksperiodetilstand {
         override val type = AVVENTER_REVURDERING
@@ -1764,325 +1443,6 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
-    internal object AvventerArbeidsgivere : Vedtaksperiodetilstand {
-        override val type = AVVENTER_ARBEIDSGIVERE
-
-        override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            vedtaksperiode.utbetalinger.forkast(hendelse)
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            vedtaksperiode.tickleForArbeidsgiveravhengighet(påminnelse)
-        }
-    }
-
-    internal object AvventerInntektsmeldingUferdigGap : Vedtaksperiodetilstand {
-        override val type = AVVENTER_INNTEKTSMELDING_UFERDIG_GAP
-
-        override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Sykmelding) {}
-
-        override fun håndterTidligereTilstøtendeUferdigPeriode(
-            vedtaksperiode: Vedtaksperiode,
-            tidligere: Vedtaksperiode,
-            hendelse: IAktivitetslogg
-        ) {
-            vedtaksperiode.tilstand(hendelse, AvventerInntektsmeldingUferdigForlengelse)
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
-            vedtaksperiode.håndterInntektsmelding(inntektsmelding, AvventerUferdig)
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
-            vedtaksperiode.håndterOverlappendeSøknad(søknad)
-        }
-
-        override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, gjenopptaBehandling: IAktivitetslogg) {
-            vedtaksperiode.tilstand(gjenopptaBehandling, AvventerInntektsmeldingEllerHistorikkFerdigGap)
-        }
-
-        override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            vedtaksperiode.trengerInntektsmelding(hendelse.hendelseskontekst())
-        }
-
-        override fun leaving(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
-            vedtaksperiode.trengerIkkeInntektsmelding(aktivitetslogg.hendelseskontekst())
-        }
-    }
-
-    internal object AvventerInntektsmeldingFerdigForlengelse : Vedtaksperiodetilstand {
-        override val type = AVVENTER_INNTEKTSMELDING_FERDIG_FORLENGELSE
-
-        override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            vedtaksperiode.trengerInntektsmeldingReplay()
-        }
-
-        override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Sykmelding) {}
-
-        override fun tidligerePeriodeRebehandles(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            vedtaksperiode.tilstand(hendelse, AvventerUferdig)
-        }
-
-        override fun håndterTidligereUferdigPeriode(
-            vedtaksperiode: Vedtaksperiode,
-            tidligere: Vedtaksperiode,
-            hendelse: IAktivitetslogg
-        ) {
-            vedtaksperiode.tilstand(hendelse, AvventerInntektsmeldingUferdigForlengelse)
-        }
-
-        override fun håndterTidligereTilstøtendeUferdigPeriode(
-            vedtaksperiode: Vedtaksperiode,
-            tidligere: Vedtaksperiode,
-            hendelse: IAktivitetslogg
-        ) {
-            vedtaksperiode.tilstand(hendelse, AvventerInntektsmeldingUferdigForlengelse)
-        }
-
-        // TODO: kan fjernes nå https://trello.com/c/Eoug7QnR er gjort
-        override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, gjenopptaBehandling: IAktivitetslogg) {
-            if (!vedtaksperiode.harInntektsmelding()) return
-            vedtaksperiode.tilstand(gjenopptaBehandling, AvventerHistorikk)
-        }
-
-        override fun håndter(
-            person: Person,
-            arbeidsgiver: Arbeidsgiver,
-            vedtaksperiode: Vedtaksperiode,
-            hendelse: IAktivitetslogg,
-            infotrygdhistorikk: Infotrygdhistorikk
-        ) {
-            validation(hendelse) {
-                onValidationFailed { vedtaksperiode.forkast(hendelse) }
-                valider {
-                    infotrygdhistorikk.validerOverlappende(
-                        this,
-                        arbeidsgiver.avgrensetPeriode(vedtaksperiode.periode),
-                        vedtaksperiode.skjæringstidspunkt
-                    )
-                }
-                onSuccess {
-                    if (arbeidsgiver.erForlengelse(vedtaksperiode.periode)) {
-                        info("Oppdaget at perioden er en forlengelse")
-                        return@onSuccess vedtaksperiode.tilstand(hendelse, AvventerHistorikk).also {
-                            arbeidsgiver.finnVedtaksperiodeRettEtter(vedtaksperiode)
-                                ?.håndterInfotrygdforlengelse(hendelse)
-                            vedtaksperiode.kontekst(hendelse)
-                        }
-                    }
-                }
-            }
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
-            vedtaksperiode.håndterOverlappendeSøknad(søknad)
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
-            vedtaksperiode.forberedMuligUtbetaling(inntektsmelding)
-        }
-    }
-
-    internal object AvventerInntektsmeldingUferdigForlengelse : Vedtaksperiodetilstand {
-        override val type = AVVENTER_INNTEKTSMELDING_UFERDIG_FORLENGELSE
-
-        override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Sykmelding) {}
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
-            vedtaksperiode.håndterOverlappendeSøknad(søknad)
-        }
-
-        override fun håndterInfotrygdforlengelse(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            vedtaksperiode.tilstand(hendelse, AvventerUferdig)
-        }
-
-        override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, gjenopptaBehandling: IAktivitetslogg) {
-            vedtaksperiode.håndterMuligForlengelse(
-                gjenopptaBehandling,
-                AvventerInntektsmeldingFerdigForlengelse,
-                AvventerInntektsmeldingEllerHistorikkFerdigGap
-            )
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
-            vedtaksperiode.håndterInntektsmelding(inntektsmelding, AvventerUferdig)
-        }
-    }
-
-    internal object AvventerSøknadUferdigForlengelse : Vedtaksperiodetilstand {
-        override val type = AVVENTER_SØKNAD_UFERDIG_FORLENGELSE
-
-        override fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime) =
-            vedtaksperiode.makstidForIkkeMottattSøknadTilstander(vedtaksperiode)
-
-        override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Sykmelding) {}
-
-        override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, gjenopptaBehandling: IAktivitetslogg) {
-            vedtaksperiode.håndterMuligForlengelse(
-                gjenopptaBehandling,
-                AvventerSøknadFerdigForlengelse,
-                AvventerSøknadFerdigGap
-            )
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
-            vedtaksperiode.håndterInntektsmelding(inntektsmelding) {
-                vedtaksperiode.avgjørTilstandForGap(
-                    this,
-                    AvventerSøknadUferdigGap
-                )
-            }
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
-            val nesteTilstand = when {
-                vedtaksperiode.harInntekt() -> AvventerUferdig
-                vedtaksperiode.arbeidsgiver.finnVedtaksperiodeRettFør(vedtaksperiode) != null -> AvventerInntektsmeldingUferdigForlengelse
-                else -> AvventerInntektsmeldingUferdigGap
-            }
-            vedtaksperiode.håndterSøknad(søknad) { nesteTilstand }
-            søknad.info("Fullført behandling av søknad")
-        }
-    }
-
-    internal object AvventerSøknadFerdigForlengelse : Vedtaksperiodetilstand {
-        override val type = AVVENTER_SØKNAD_FERDIG_FORLENGELSE
-
-        override fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime) =
-            vedtaksperiode.makstidForIkkeMottattSøknadTilstander(vedtaksperiode)
-
-        override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Sykmelding) {}
-
-        override fun håndterTidligereUferdigPeriode(
-            vedtaksperiode: Vedtaksperiode,
-            tidligere: Vedtaksperiode,
-            hendelse: IAktivitetslogg
-        ) {
-            vedtaksperiode.tilstand(hendelse, AvventerSøknadUferdigForlengelse)
-        }
-
-        override fun håndterTidligereTilstøtendeUferdigPeriode(
-            vedtaksperiode: Vedtaksperiode,
-            tidligere: Vedtaksperiode,
-            hendelse: IAktivitetslogg
-        ) {
-            vedtaksperiode.tilstand(hendelse, AvventerSøknadUferdigForlengelse)
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
-            vedtaksperiode.forberedMuligUtbetaling(søknad)
-            søknad.info("Fullført behandling av søknad")
-        }
-
-    }
-
-    internal object AvventerSøknadUferdigGap : Vedtaksperiodetilstand {
-        override val type = AVVENTER_SØKNAD_UFERDIG_GAP
-
-        override fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime) =
-            vedtaksperiode.makstidForIkkeMottattSøknadTilstander(vedtaksperiode)
-
-        override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Sykmelding) {}
-
-        override fun håndterTidligereTilstøtendeUferdigPeriode(
-            vedtaksperiode: Vedtaksperiode,
-            tidligere: Vedtaksperiode,
-            hendelse: IAktivitetslogg
-        ) {
-            vedtaksperiode.tilstand(hendelse, AvventerSøknadUferdigForlengelse)
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
-            vedtaksperiode.håndterSøknad(søknad) { AvventerUferdig }
-            søknad.info("Fullført behandling av søknad")
-        }
-
-        override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, gjenopptaBehandling: IAktivitetslogg) {
-            vedtaksperiode.tilstand(gjenopptaBehandling, AvventerSøknadFerdigGap)
-        }
-    }
-
-    internal object AvventerInntektsmeldingEllerHistorikkFerdigGap : Vedtaksperiodetilstand {
-        override val type = AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK_FERDIG_GAP
-
-        override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            vedtaksperiode.trengerInntektsmeldingReplay()
-            if (vedtaksperiode.arbeidsgiver.finnForkastetSykeperiodeRettFør(vedtaksperiode) == null) {
-                vedtaksperiode.trengerInntektsmelding(hendelse.hendelseskontekst())
-            }
-            vedtaksperiode.trengerHistorikkFraInfotrygd(hendelse)
-        }
-
-        override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Sykmelding) {}
-
-        override fun håndterTidligereUferdigPeriode(
-            vedtaksperiode: Vedtaksperiode,
-            tidligere: Vedtaksperiode,
-            hendelse: IAktivitetslogg
-        ) {
-            ventPåTidligere(vedtaksperiode, hendelse)
-        }
-
-        override fun håndterTidligereTilstøtendeUferdigPeriode(
-            vedtaksperiode: Vedtaksperiode,
-            tidligere: Vedtaksperiode,
-            hendelse: IAktivitetslogg
-        ) {
-            vedtaksperiode.tilstand(hendelse, AvventerInntektsmeldingUferdigForlengelse)
-        }
-
-        private fun ventPåTidligere(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            vedtaksperiode.tilstand(hendelse, AvventerInntektsmeldingUferdigGap)
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
-            vedtaksperiode.håndterOverlappendeSøknad(søknad)
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
-            vedtaksperiode.forberedMuligUtbetaling(inntektsmelding)
-        }
-
-        override fun håndter(
-            person: Person,
-            arbeidsgiver: Arbeidsgiver,
-            vedtaksperiode: Vedtaksperiode,
-            hendelse: IAktivitetslogg,
-            infotrygdhistorikk: Infotrygdhistorikk
-        ) {
-            validation(hendelse) {
-                onValidationFailed { vedtaksperiode.forkast(hendelse) }
-                valider {
-                    infotrygdhistorikk.validerOverlappende(
-                        this,
-                        arbeidsgiver.avgrensetPeriode(vedtaksperiode.periode),
-                        vedtaksperiode.skjæringstidspunkt
-                    )
-                }
-                onValidationFailed { person.invaliderAllePerioder(hendelse, null) }
-                onSuccess {
-                    if (arbeidsgiver.erForlengelse(vedtaksperiode.periode)) {
-                        info("Oppdaget at perioden er en forlengelse")
-                        return@onSuccess vedtaksperiode.tilstand(hendelse, AvventerHistorikk).also {
-                            arbeidsgiver.finnVedtaksperiodeRettEtter(vedtaksperiode)
-                                ?.håndterInfotrygdforlengelse(hendelse)
-                            vedtaksperiode.kontekst(hendelse)
-                        }
-                    }
-                }
-            }
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            vedtaksperiode.trengerHistorikkFraInfotrygd(påminnelse)
-        }
-
-        override fun leaving(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
-            vedtaksperiode.trengerIkkeInntektsmelding(aktivitetslogg.hendelseskontekst())
-        }
-
-    }
-
     internal object AvventerInntektsmeldingEllerHistorikk : Vedtaksperiodetilstand {
         override val type: TilstandType = AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 
@@ -2261,7 +1621,7 @@ internal class Vedtaksperiode private constructor(
         private fun fortsett(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             if (!vedtaksperiode.harInntekt()) return vedtaksperiode.tilstand(
                 hendelse,
-                AvventerInntektsmeldingEllerHistorikkFerdigGap
+                AvventerInntektsmeldingEllerHistorikk
             )
             vedtaksperiode.tilstand(hendelse, AvventerHistorikk)
         }
@@ -2984,7 +2344,7 @@ internal class Vedtaksperiode private constructor(
             hendelse: IAktivitetslogg
         ) {
             if (vedtaksperiode.ingenUtbetaling()) return
-            vedtaksperiode.tilstand(hendelse, AvventerInntektsmeldingUferdigGap)
+            vedtaksperiode.tilstand(hendelse, AvventerInntektsmeldingEllerHistorikk)
         }
 
         override fun håndterTidligereTilstøtendeUferdigPeriode(
@@ -2993,7 +2353,7 @@ internal class Vedtaksperiode private constructor(
             hendelse: IAktivitetslogg
         ) {
             if (vedtaksperiode.ingenUtbetaling()) return
-            vedtaksperiode.tilstand(hendelse, AvventerInntektsmeldingUferdigForlengelse)
+            vedtaksperiode.tilstand(hendelse, AvventerInntektsmeldingEllerHistorikk)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
@@ -3255,7 +2615,7 @@ internal class Vedtaksperiode private constructor(
         internal val REVURDERING_IGANGSATT: VedtaksperiodeFilter = { it.erITilstandForRevurdering() }
 
         internal val KLAR_TIL_BEHANDLING: VedtaksperiodeFilter = {
-            it.tilstand == AvventerArbeidsgivere || it.tilstand == AvventerGodkjenning
+            it.tilstand == AvventerBlokkerendePeriode || it.tilstand == AvventerGodkjenning
         }
 
         internal val IKKE_FERDIG_BEHANDLET: VedtaksperiodeFilter = { !it.tilstand.erFerdigBehandlet }

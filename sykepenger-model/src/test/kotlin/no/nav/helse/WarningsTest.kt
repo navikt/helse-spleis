@@ -56,9 +56,7 @@ internal class WarningsTest {
             "Utbetalingen ble gjennomført, men med advarsel: \$melding",
             "Utbetalingen forlenger et tidligere oppdrag som opphørte alle utbetalte dager. Sjekk simuleringen.",
             "Utbetaling fra og med dato er endret. Kontroller simuleringen",
-            "Søknaden inneholder Permisjonsdager utenfor sykdomsvindu",
-            "Mottatt en sykmelding som er skrevet tidligere enn den som er lagt til grunn, vurder sykmeldingene og gjør eventuelle justeringer",
-            "Korrigert sykmelding er lagt til grunn - kontroller dagene i sykmeldingsperioden"
+            "Søknaden inneholder Permisjonsdager utenfor sykdomsvindu"
         )
 
         val nyeWarningerSomManglerEksplisittTest = ikkeTestedeWarnings.minus(warningerSomManglerEksplisittTest)
