@@ -35,7 +35,6 @@ import no.nav.helse.person.ForkastetVedtaksperiode.Companion.håndterInntektsmel
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.iderMedUtbetaling
 import no.nav.helse.person.Inntektshistorikk.IkkeRapportert
 import no.nav.helse.person.Vedtaksperiode.AvventerArbeidsgivereRevurdering
-import no.nav.helse.person.Vedtaksperiode.AvventerHistorikk
 import no.nav.helse.person.Vedtaksperiode.AvventerHistorikkRevurdering
 import no.nav.helse.person.Vedtaksperiode.Companion.AVVENTER_GODKJENT_REVURDERING
 import no.nav.helse.person.Vedtaksperiode.Companion.ER_ELLER_HAR_VÆRT_AVSLUTTET
@@ -54,7 +53,6 @@ import no.nav.helse.person.Vedtaksperiode.Companion.nåværendeVedtaksperiode
 import no.nav.helse.person.Vedtaksperiode.Companion.periode
 import no.nav.helse.person.Vedtaksperiode.Companion.senerePerioderPågående
 import no.nav.helse.person.Vedtaksperiode.Companion.startRevurdering
-import no.nav.helse.person.Vedtaksperiode.Companion.tidligerePerioderFerdigBehandlet
 import no.nav.helse.person.builders.UtbetalingsdagerBuilder
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
@@ -1027,9 +1025,6 @@ internal class Arbeidsgiver private constructor(
     internal fun finnForkastetSykeperiodeRettFør(vedtaksperiode: Vedtaksperiode) =
         ForkastetVedtaksperiode.finnForkastetSykeperiodeRettFør(forkastede, vedtaksperiode)
 
-    internal fun tidligerePerioderFerdigBehandlet(vedtaksperiode: Vedtaksperiode) =
-        vedtaksperioder.tidligerePerioderFerdigBehandlet(vedtaksperiode)
-
     internal fun senerePerioderPågående(vedtaksperiode: Vedtaksperiode) =
         vedtaksperioder.senerePerioderPågående(vedtaksperiode)
 
@@ -1076,7 +1071,6 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun erFørstegangsbehandling(periode: Periode) = periodetype(periode) == Periodetype.FØRSTEGANGSBEHANDLING
-    internal fun erForlengelse(periode: Periode) = !erFørstegangsbehandling(periode)
     private fun skjæringstidspunkt(periode: Periode) = person.skjæringstidspunkt(organisasjonsnummer, sykdomstidslinje(), periode)
 
     internal fun avgrensetPeriode(periode: Periode) =
@@ -1130,11 +1124,6 @@ internal class Arbeidsgiver private constructor(
     internal fun harDagUtenSøknad(periode: Periode) =
         sykdomstidslinje().harDagUtenSøknad(periode)
 
-    private fun <Hendelse : IAktivitetslogg> noenHarHåndtert(hendelse: Hendelse, håndterer: Vedtaksperiode.(Hendelse) -> Boolean, errortekst: String) {
-        if (noenHarHåndtert(hendelse, håndterer)) return
-        hendelse.error(errortekst)
-    }
-
     private fun <Hendelse : IAktivitetslogg> håndter(hendelse: Hendelse, håndterer: Vedtaksperiode.(Hendelse) -> Unit) {
         looper { håndterer(it, hendelse) }
     }
@@ -1173,9 +1162,6 @@ internal class Arbeidsgiver private constructor(
 
     internal fun harVedtaksperiodeMedUkjentArbeidsforhold(skjæringstidspunkt: LocalDate) =
         !harRelevantArbeidsforhold(skjæringstidspunkt) && vedtaksperioder.any { it.gjelder(skjæringstidspunkt) }
-
-    internal fun erSykmeldingenDenSistSkrevne(sykmelding: Sykmelding, hendelseIder: Set<UUID>): Boolean =
-        sykdomshistorikk.erSykmeldingenDenSistSkrevne(sykmelding, hendelseIder)
 
     internal fun loggførHendelsesreferanse(organisasjonsnummer: String, skjæringstidspunkt: LocalDate, overstyrInntekt: OverstyrInntekt) {
         if (this.organisasjonsnummer != organisasjonsnummer) return

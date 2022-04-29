@@ -1,10 +1,8 @@
 package no.nav.helse.sykdomstidslinje
 
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.person.PersonHendelse
 import no.nav.helse.person.SykdomshistorikkVisitor
-import no.nav.helse.sykdomstidslinje.Sykdomshistorikk.Element.Companion.erSykmeldingenDenSistSkrevne
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk.Element.Companion.nyesteId
 import no.nav.helse.tournament.Dagturnering
 import java.time.LocalDateTime
@@ -62,9 +60,6 @@ internal class Sykdomshistorikk private constructor(
             sykdomstidslinje().merge(hendelseSykdomstidslinje, Dagturnering.TURNERING::beste)
         return tidslinje.also { it.valider(hendelse) }
     }
-
-    internal fun erSykmeldingenDenSistSkrevne(sykmelding: Sykmelding, hendelseIder: Set<UUID>): Boolean =
-        elementer.erSykmeldingenDenSistSkrevne(sykmelding, hendelseIder)
 
     internal class Element private constructor(
         private val id: UUID = UUID.randomUUID(),
@@ -130,11 +125,6 @@ internal class Sykdomshistorikk private constructor(
                 return Element(beregnetSykdomstidslinje = historikk.sykdomstidslinje().trim(perioder))
             }
 
-            internal fun List<Element>.erSykmeldingenDenSistSkrevne(sykmelding: Sykmelding, hendelseIder: Set<UUID>): Boolean {
-                return filter { it.hendelseId in hendelseIder }.none {
-                    it.hendelseSykdomstidslinje.sykmeldingSkrevet() > sykmelding.sykdomstidslinje().sykmeldingSkrevet()
-                }
-            }
         }
     }
 }

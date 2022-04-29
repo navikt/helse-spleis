@@ -2,7 +2,6 @@ package no.nav.helse.sykdomstidslinje
 
 import java.time.DayOfWeek
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.Objects
 import java.util.SortedMap
 import java.util.stream.Collectors.toMap
@@ -18,7 +17,6 @@ import no.nav.helse.sykdomstidslinje.Dag.Arbeidsgiverdag
 import no.nav.helse.sykdomstidslinje.Dag.AvslåttDag
 import no.nav.helse.sykdomstidslinje.Dag.Companion.default
 import no.nav.helse.sykdomstidslinje.Dag.Companion.sammenhengendeSykdom
-import no.nav.helse.sykdomstidslinje.Dag.Companion.sykmeldingSkrevet
 import no.nav.helse.sykdomstidslinje.Dag.Feriedag
 import no.nav.helse.sykdomstidslinje.Dag.ForeldetSykedag
 import no.nav.helse.sykdomstidslinje.Dag.FriskHelgedag
@@ -241,8 +239,6 @@ internal class Sykdomstidslinje private constructor(
                 }
         }?.trim() ?: "Tom tidslinje"
     }
-
-    internal fun sykmeldingSkrevet(): LocalDateTime = dager.sykmeldingSkrevet()
 
     internal companion object {
 

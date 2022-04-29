@@ -3,7 +3,6 @@ package no.nav.helse.person
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.time.temporal.ChronoUnit
 import java.util.Objects
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
@@ -81,7 +80,6 @@ import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.filter.Utbetalingsfilter
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
-import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
@@ -90,7 +88,6 @@ import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverUtbetalinger
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import no.nav.helse.økonomi.Økonomi
 import org.slf4j.LoggerFactory
 
 internal class Vedtaksperiode private constructor(
@@ -334,10 +331,6 @@ internal class Vedtaksperiode private constructor(
         tilstand.håndter(this, hendelse)
     }
 
-    internal fun nyPeriode(ny: Vedtaksperiode, hendelse: Sykmelding) {
-        håndterEndringIEldrePeriode(ny, Vedtaksperiodetilstand::nyPeriodeFør, hendelse)
-    }
-
     internal fun nyPeriodeMedNyFlyt(ny: Vedtaksperiode, hendelse: Søknad) {
         håndterEndringIEldrePeriode(ny, Vedtaksperiodetilstand::nyPeriodeFørMedNyFlyt, hendelse)
     }
@@ -431,9 +424,6 @@ internal class Vedtaksperiode private constructor(
 
     internal fun trengerSøknadISammeMåned(arbeidsgivere: Iterable<Arbeidsgiver>) =
         arbeidsgivere.trengerSøknadISammeMåned(skjæringstidspunkt)
-
-    private fun avgjørTilstandForGap(hvisForlengelse: Vedtaksperiodetilstand, hvisGap: Vedtaksperiodetilstand) =
-        if (harVedtaksperiodeRettFør()) hvisForlengelse else hvisGap
 
     private fun skalHaWarningForFlereArbeidsforholdUtenSykdomEllerUlikStartdato(
         vilkårsgrunnlag: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement
@@ -833,14 +823,6 @@ internal class Vedtaksperiode private constructor(
         .filter { this@Vedtaksperiode.periode.overlapperMed(it.periode) }
         .all { it.tilstand == AvventerArbeidsgivereRevurdering }
 
-    private fun håndterMuligForlengelse(
-        hendelse: IAktivitetslogg,
-        tilstandHvisForlengelse: Vedtaksperiodetilstand,
-        tilstandHvisGap: Vedtaksperiodetilstand
-    ) {
-        tilstand(hendelse, avgjørTilstandForGap(tilstandHvisForlengelse, tilstandHvisGap))
-    }
-
     private fun harArbeidsgivereMedOverlappendeUtbetaltePerioder(periode: Periode) =
         person.harArbeidsgivereMedOverlappendeUtbetaltePerioder(organisasjonsnummer, periode)
 
@@ -944,29 +926,6 @@ internal class Vedtaksperiode private constructor(
 
         fun håndter(vedtaksperiode: Vedtaksperiode, sykmelding: Sykmelding) {
             overlappendeSykmeldingIkkeStøttet(vedtaksperiode, sykmelding)
-        }
-
-        private fun graderFraSykomstidslinje(sykdomstidslinje: Sykdomstidslinje): List<Double> {
-            val grader = mutableListOf<Double>()
-            sykdomstidslinje.forEach { dag ->
-                dag.accept(object : SykdomstidslinjeVisitor {
-                    override fun visitDag(
-                        dag: Dag.Sykedag,
-                        dato: LocalDate,
-                        økonomi: Økonomi,
-                        kilde: SykdomstidslinjeHendelse.Hendelseskilde
-                    ) {
-                        økonomi.medData { grad, _, _ -> grader.add(grad) }
-                    }
-                })
-            }
-            return grader
-        }
-
-        private fun inneholderForskjelligeGraderinger(vedtaksperiode: Vedtaksperiode, sykmelding: Sykmelding): Boolean {
-            val graderEksisterendeSykmelding = graderFraSykomstidslinje(vedtaksperiode.sykdomstidslinje)
-            val graderNySykmelding = graderFraSykomstidslinje(sykmelding.sykdomstidslinje())
-            return graderEksisterendeSykmelding != graderNySykmelding
         }
 
         private fun overlappendeSykmeldingIkkeStøttet(vedtaksperiode: Vedtaksperiode, sykmelding: Sykmelding) {
@@ -1135,38 +1094,7 @@ internal class Vedtaksperiode private constructor(
 
             søknad.info("Fullført behandling av søknad")
         }
-
-        private fun avgjørNesteTilstand(
-            vedtaksperiode: Vedtaksperiode,
-            ferdigForlengelse: Vedtaksperiodetilstand,
-            uferdigForlengelse: Vedtaksperiodetilstand,
-            ferdigGap: Vedtaksperiodetilstand,
-            uferdigGap: Vedtaksperiodetilstand,
-        ): Vedtaksperiodetilstand {
-            val periodeRettFør = vedtaksperiode.arbeidsgiver.finnVedtaksperiodeRettFør(vedtaksperiode)
-            val forlengelse = periodeRettFør != null
-            val ferdig = when (Toggle.RevurdereOutOfOrder.enabled) {
-                true -> vedtaksperiode.arbeidsgiver.tidligerePerioderFerdigBehandlet(vedtaksperiode) && !vedtaksperiode.arbeidsgiver.senerePerioderPågående(vedtaksperiode)
-                false -> vedtaksperiode.arbeidsgiver.tidligerePerioderFerdigBehandlet(vedtaksperiode)
-            }
-
-            return when {
-                forlengelse && ferdig -> ferdigForlengelse
-                forlengelse && !ferdig -> uferdigForlengelse
-                !forlengelse && ferdig -> ferdigGap
-                else -> uferdigGap
-            }
-        }
     }
-
-
-    private fun makstidForIkkeMottattSøknadTilstander(vedtaksperiode: Vedtaksperiode) =
-        vedtaksperiode.periode.endInclusive
-            .plusMonths(3)
-            .plusMonths(1)
-            .withDayOfMonth(1)
-            .atStartOfDay()
-            .minus(1, ChronoUnit.NANOS)
 
     internal object AvventerRevurdering : Vedtaksperiodetilstand {
         override val type = AVVENTER_REVURDERING
@@ -2632,9 +2560,6 @@ internal class Vedtaksperiode private constructor(
             val aktivitetskontekster = listOf(vedtaksperiode) + tidligereUbetalt
             return vedtaksperiode.person.aktivitetslogg.logg(*aktivitetskontekster.toTypedArray())
         }
-
-        internal fun List<Vedtaksperiode>.tidligerePerioderFerdigBehandlet(vedtaksperiode: Vedtaksperiode) =
-            filter { it før vedtaksperiode }.all { it.tilstand.erFerdigBehandlet }
 
         internal fun Iterable<Vedtaksperiode>.nåværendeVedtaksperiode(filter: VedtaksperiodeFilter) =
             firstOrNull(filter)
