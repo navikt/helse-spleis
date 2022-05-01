@@ -7,7 +7,7 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
-import no.nav.helse.nesteArbeidsdag
+import no.nav.helse.førsteArbeidsdag
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
@@ -28,7 +28,7 @@ internal class FremtidigSøknadE2ETest : AbstractEndToEndTest() {
         private val inneværendeMåned = YearMonth.now()
         private val nesteMåned = inneværendeMåned.plusMonths(1)
         private val fom = inneværendeMåned.atDay(14)
-        private val tom = nesteMåned.atDay(14).nesteArbeidsdag()
+        private val tom = nesteMåned.atDay(14).førsteArbeidsdag()
         private val sisteArbeidsgiverdag = fom.plusDays(15)
     }
 

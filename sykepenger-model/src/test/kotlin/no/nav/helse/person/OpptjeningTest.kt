@@ -2,9 +2,13 @@ package no.nav.helse.person
 
 import no.nav.helse.desember
 import no.nav.helse.inspectors.SubsumsjonInspektør
+import no.nav.helse.april
 import no.nav.helse.januar
 import no.nav.helse.juni
+import no.nav.helse.mai
+import no.nav.helse.oktober
 import no.nav.helse.person.etterlevelse.MaskinellJurist
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -122,6 +126,102 @@ internal class OpptjeningTest {
         val opptjening = Opptjening.opptjening(arbeidsforhold, 1.januar.plusDays(28), MaskinellJurist())
 
         assertTrue(opptjening.erOppfylt())
+    }
+
+    @Test
+    fun `slutter på lørdag, starter på mandag`() {
+        val arbeidsforhold = listOf(
+            Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
+                "a1",
+                listOf(
+                    Arbeidsforholdhistorikk.Arbeidsforhold(
+                        ansattFom = 1.oktober(2017),
+                        ansattTom = 30.april(2022),
+                        deaktivert = false
+                    )
+                )
+            ),
+
+            Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
+                "a2",
+                listOf(
+                    Arbeidsforholdhistorikk.Arbeidsforhold(
+                        ansattFom = 2.mai(2022),
+                        ansattTom = null,
+                        deaktivert = false
+                    )
+                )
+            )
+        )
+
+        val opptjening = Opptjening.opptjening(arbeidsforhold, 2.mai(2022), MaskinellJurist())
+
+        assertTrue(opptjening.erOppfylt())
+        assertEquals(1.oktober(2017), opptjening.opptjeningFom())
+    }
+
+    @Test
+    fun `slutter på fredag, starter på mandag`() {
+        val arbeidsforhold = listOf(
+            Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
+                "a1",
+                listOf(
+                    Arbeidsforholdhistorikk.Arbeidsforhold(
+                        ansattFom = 1.oktober(2017),
+                        ansattTom = 29.april(2022),
+                        deaktivert = false
+                    )
+                )
+            ),
+
+            Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
+                "a2",
+                listOf(
+                    Arbeidsforholdhistorikk.Arbeidsforhold(
+                        ansattFom = 2.mai(2022),
+                        ansattTom = null,
+                        deaktivert = false
+                    )
+                )
+            )
+        )
+
+        val opptjening = Opptjening.opptjening(arbeidsforhold, 2.mai(2022), MaskinellJurist())
+
+        assertTrue(opptjening.erOppfylt())
+        assertEquals(1.oktober(2017), opptjening.opptjeningFom())
+    }
+
+    @Test
+    fun `slutter på torsdag, starter på mandag`() {
+        val arbeidsforhold = listOf(
+            Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
+                "a1",
+                listOf(
+                    Arbeidsforholdhistorikk.Arbeidsforhold(
+                        ansattFom = 1.oktober(2017),
+                        ansattTom = 28.april(2022),
+                        deaktivert = false
+                    )
+                )
+            ),
+
+            Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
+                "a2",
+                listOf(
+                    Arbeidsforholdhistorikk.Arbeidsforhold(
+                        ansattFom = 2.mai(2022),
+                        ansattTom = null,
+                        deaktivert = false
+                    )
+                )
+            )
+        )
+
+        val opptjening = Opptjening.opptjening(arbeidsforhold, 2.mai(2022), MaskinellJurist())
+
+        assertFalse(opptjening.erOppfylt())
+        assertEquals(2.mai(2022), opptjening.opptjeningFom())
     }
 
     @Test
