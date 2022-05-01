@@ -33,4 +33,5 @@ internal class Ukedager(private val antallUkedager: Int) {
     operator fun plus(other: LocalDate): LocalDate = other.plusDays(dager(other).toLong())
 }
 
-fun LocalDate.nesteArbeidsdag(): LocalDate = this + 0.ukedager
+fun LocalDate.førsteArbeidsdag(): LocalDate = this + 0.ukedager
+fun LocalDate.nesteArbeidsdag(): LocalDate = this + 1.ukedager

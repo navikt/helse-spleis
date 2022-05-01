@@ -4,6 +4,8 @@ import no.nav.helse.sykdomstidslinje.erRettFør
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
+import no.nav.helse.førsteArbeidsdag
+import no.nav.helse.nesteArbeidsdag
 
 // Understands beginning and end of a time interval
 open class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Iterable<LocalDate> {
@@ -60,7 +62,7 @@ open class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Ite
     internal fun erRettFør(other: Periode) = erRettFør(other.start)
     internal fun erRettFør(other: LocalDate) = this.endInclusive.erRettFør(other)
 
-    private fun rettFørEllerOverlapper(dato: LocalDate) = start < dato && endInclusive.plusDays(1) >= dato
+    private fun rettFørEllerOverlapper(dato: LocalDate) = start < dato && endInclusive.nesteArbeidsdag() >= dato
     internal fun dagerMellom() = ChronoUnit.DAYS.between(start, endInclusive)
 
     internal fun periodeMellom(other: LocalDate): Periode? {
