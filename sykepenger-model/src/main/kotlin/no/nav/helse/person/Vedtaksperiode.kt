@@ -2579,8 +2579,8 @@ internal class Vedtaksperiode private constructor(
             forkastede
                 .filter { it.periode.overlapperMed(hendelse.periode()) }
                 .forEach {
-                    hendelse.error("Sykmelding overlapper med forkastet vedtaksperiode")
-                    hendelse.info("Sykmelding overlapper med forkastet vedtaksperiode ${it.id}, hendelse sykmeldingsperiode: ${hendelse.periode()}, vedtaksperiode sykmeldingsperiode: ${it.periode}")
+                    hendelse.error("Søknad overlapper med forkastet vedtaksperiode")
+                    hendelse.info("Søknad overlapper med forkastet vedtaksperiode ${it.id}, hendelse periode: ${hendelse.periode()}, vedtaksperiode periode: ${it.periode}")
                 }
         }
 
@@ -2589,10 +2589,10 @@ internal class Vedtaksperiode private constructor(
                 .filter { it.sykdomstidslinje.erRettFør(hendelse.sykdomstidslinje()) }
                 .forEach {
                     if (Toggle.ForkastForlengelseAvForkastetPeriode.enabled) {
-                        hendelse.error("Sykmelding forlenger en forkastet periode")
-                        hendelse.info("Sykmelding forlenger forkastet vedtaksperiode ${it.id}, hendelse sykmeldingsperiode: ${hendelse.periode()}, vedtaksperiode sykmeldingsperiode: ${it.periode}")
+                        hendelse.error("Søknad forlenger en forkastet periode")
+                        hendelse.info("Søknad forlenger forkastet vedtaksperiode ${it.id}, hendelse periode: ${hendelse.periode()}, vedtaksperiode periode: ${it.periode}")
                     } else {
-                        hendelse.info("Sykmelding forlenger forkastet vedtaksperiode")
+                        hendelse.info("Søknad forlenger forkastet vedtaksperiode")
                     }
                 }
         }

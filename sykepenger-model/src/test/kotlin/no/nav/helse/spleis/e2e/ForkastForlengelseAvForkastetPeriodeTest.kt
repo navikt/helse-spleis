@@ -99,7 +99,7 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
         håndterSykmelding(Sykmeldingsperiode(16.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(16.januar, 31.januar, 100.prosent))
         assertSisteForkastetPeriodeTilstand(ORGNUMMER, 2.vedtaksperiode, TIL_INFOTRYGD)
-        assertError("Sykmelding forlenger en forkastet periode", 2.vedtaksperiode.filter())
+        assertError("Søknad forlenger en forkastet periode", 2.vedtaksperiode.filter())
     }
 
     @Test
@@ -109,7 +109,7 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
         håndterSykmelding(Sykmeldingsperiode(16.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(16.januar, 31.januar, 100.prosent))
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
-        assertInfo("Sykmelding forlenger forkastet vedtaksperiode", 2.vedtaksperiode.filter())
+        assertInfo("Søknad forlenger forkastet vedtaksperiode", 2.vedtaksperiode.filter())
     }
 
     @Test
@@ -119,7 +119,7 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
         håndterSykmelding(Sykmeldingsperiode(22.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(22.januar, 31.januar, 100.prosent))
         assertSisteForkastetPeriodeTilstand(ORGNUMMER, 2.vedtaksperiode, TIL_INFOTRYGD)
-        assertError("Sykmelding forlenger en forkastet periode", 2.vedtaksperiode.filter())
+        assertError("Søknad forlenger en forkastet periode", 2.vedtaksperiode.filter())
     }
 
     @Test
@@ -129,7 +129,7 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
         håndterSykmelding(Sykmeldingsperiode(22.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(22.januar, 31.januar, 100.prosent))
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
-        assertInfo("Sykmelding forlenger forkastet vedtaksperiode", 2.vedtaksperiode.filter())
+        assertInfo("Søknad forlenger forkastet vedtaksperiode", 2.vedtaksperiode.filter())
     }
 
     @Test
@@ -149,7 +149,7 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
         håndterSykmelding(Sykmeldingsperiode(23.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(23.januar, 31.januar, 100.prosent))
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
-        assertNoInfo("Sykmelding forlenger en forkastet periode", 2.vedtaksperiode.filter())
+        assertNoInfo("Søknad forlenger en forkastet periode", 2.vedtaksperiode.filter())
     }
 
     @Test
@@ -159,11 +159,11 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
         håndterSykmelding(Sykmeldingsperiode(16.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(16.januar, 31.januar, 100.prosent))
         assertSisteForkastetPeriodeTilstand(ORGNUMMER, 2.vedtaksperiode, TIL_INFOTRYGD)
-        assertError("Sykmelding forlenger en forkastet periode", 2.vedtaksperiode.filter())
+        assertError("Søknad forlenger en forkastet periode", 2.vedtaksperiode.filter())
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
         assertSisteForkastetPeriodeTilstand(ORGNUMMER, 3.vedtaksperiode, TIL_INFOTRYGD)
-        assertError("Sykmelding forlenger en forkastet periode", 3.vedtaksperiode.filter())
+        assertError("Søknad forlenger en forkastet periode", 3.vedtaksperiode.filter())
         håndterSykmelding(Sykmeldingsperiode(2.mars, 31.mars, 100.prosent))
         håndterSøknad(Sykdom(2.mars, 31.mars, 100.prosent))
         assertSisteTilstand(4.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
