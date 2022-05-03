@@ -1988,8 +1988,6 @@ internal class Vedtaksperiode private constructor(
     internal fun erITilstandForRevurdering() =
         tilstand == AvventerSimuleringRevurdering || ikkeFerdigRevurdert() || avventerRevurdering()
 
-    internal fun overlapperMenUlikFerieinformasjon(søknad: Søknad) = søknad.harUlikFerieinformasjon(sykdomstidslinje)
-
     internal fun loggførHendelsesreferanse(hendelse: OverstyrInntekt) = hendelse.leggTil(hendelseIder)
 
     internal fun tidligerePeriodeRebehandles(hendelse: IAktivitetslogg) {

@@ -12,7 +12,6 @@ import no.nav.helse.januar
 import no.nav.helse.juli
 import no.nav.helse.mars
 import no.nav.helse.person.TilstandType.AVSLUTTET
-import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
@@ -112,63 +111,6 @@ internal class SøknadMedDagerUtenforPeriodeE2ETest: AbstractEndToEndTest() {
     }
 
     @Test
-    fun `feriedager som vi ikke vet om fra forrige periode, trimme bort ferie, warning`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterUtbetalingshistorikk(1.vedtaksperiode)
-
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Ferie(25.januar, 31.januar))
-        håndterUtbetalingshistorikk(2.vedtaksperiode)
-
-        assertEquals(1.januar til 31.januar, inspektør.periode(1.vedtaksperiode) )
-        assertEquals(1.februar til 28.februar, inspektør.periode(2.vedtaksperiode) )
-        assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
-        assertEquals(null, inspektør.vedtaksperiodeSykdomstidslinje(1.vedtaksperiode).inspektør.dagteller[Feriedag::class])
-        assertEquals(null, inspektør.vedtaksperiodeSykdomstidslinje(2.vedtaksperiode).inspektør.dagteller[Feriedag::class])
-        assertWarnings()
-    }
-
-    @Test
-    fun `feriedager som vi ikke vet om midt i forrige periode, trimme bort ferie, warning`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterUtbetalingshistorikk(1.vedtaksperiode)
-
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Ferie(25.januar, 30.januar))
-        håndterUtbetalingshistorikk(2.vedtaksperiode)
-
-        assertEquals(1.januar til 31.januar, inspektør.periode(1.vedtaksperiode) )
-        assertEquals(1.februar til 28.februar, inspektør.periode(2.vedtaksperiode) )
-        assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
-        assertEquals(null, inspektør.vedtaksperiodeSykdomstidslinje(1.vedtaksperiode).inspektør.dagteller[Feriedag::class])
-        assertEquals(null, inspektør.vedtaksperiodeSykdomstidslinje(2.vedtaksperiode).inspektør.dagteller[Feriedag::class])
-        assertWarning("Det er oppgitt ny informasjon om ferie i søknaden som det ikke har blitt opplyst om tidligere. Tidligere periode må revurderes.", AktivitetsloggFilter.person())
-    }
-
-    @Test
-    fun `feriedager fra søknad arbeidsgiver som vi ikke vet om midt i forrige periode, trimme bort ferie, warning`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterUtbetalingshistorikk(1.vedtaksperiode)
-
-        håndterSykmelding(Sykmeldingsperiode(20.februar, 28.februar, 100.prosent))
-        håndterSøknad(Sykdom(20.februar, 28.februar, 100.prosent), Ferie(25.januar, 30.januar))
-        håndterUtbetalingshistorikk(2.vedtaksperiode)
-
-        assertEquals(1.januar til 31.januar, inspektør.periode(1.vedtaksperiode) )
-        assertEquals(20.februar til 28.februar, inspektør.periode(2.vedtaksperiode) )
-        assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING)
-        assertEquals(null, inspektør.vedtaksperiodeSykdomstidslinje(1.vedtaksperiode).inspektør.dagteller[Feriedag::class])
-        assertEquals(null, inspektør.vedtaksperiodeSykdomstidslinje(2.vedtaksperiode).inspektør.dagteller[Feriedag::class])
-        assertWarning("Det er oppgitt ny informasjon om ferie i søknaden som det ikke har blitt opplyst om tidligere. Tidligere periode må revurderes.", AktivitetsloggFilter.person())
-    }
-
-    @Test
     fun `feriedager som vi ikke vet om og ikke treffer forrige periode, trimme bort ferie, ingen warning`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 22.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 22.januar, 100.prosent))
@@ -203,25 +145,6 @@ internal class SøknadMedDagerUtenforPeriodeE2ETest: AbstractEndToEndTest() {
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
         assertEquals(null, inspektør.vedtaksperiodeSykdomstidslinje(1.vedtaksperiode).inspektør.dagteller[Feriedag::class])
         assertEquals(null, inspektør.vedtaksperiodeSykdomstidslinje(2.vedtaksperiode).inspektør.dagteller[Feriedag::class])
-    }
-
-    @Test
-    fun `feriedager som vi ikke vet om og treffer forrige periode, trimme bort ferie, warning`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 22.januar, 100.prosent))
-        håndterSøknad(Sykdom(1.januar, 22.januar, 100.prosent))
-        håndterUtbetalingshistorikk(1.vedtaksperiode)
-
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Ferie(18.januar, 31.januar))
-        håndterUtbetalingshistorikk(2.vedtaksperiode)
-
-        assertEquals(1.januar til 22.januar, inspektør.periode(1.vedtaksperiode) )
-        assertEquals(1.februar til 28.februar, inspektør.periode(2.vedtaksperiode) )
-        assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
-        assertEquals(null, inspektør.vedtaksperiodeSykdomstidslinje(1.vedtaksperiode).inspektør.dagteller[Feriedag::class])
-        assertEquals(null, inspektør.vedtaksperiodeSykdomstidslinje(2.vedtaksperiode).inspektør.dagteller[Feriedag::class])
-        assertWarnings()
     }
 
     @Test

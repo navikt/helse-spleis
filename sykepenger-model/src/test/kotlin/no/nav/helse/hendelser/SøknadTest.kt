@@ -26,8 +26,6 @@ import no.nav.helse.sykdomstidslinje.Dag.FriskHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.ProblemDag
 import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.Sykedag
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -142,15 +140,6 @@ internal class SøknadTest {
         søknad(Sykdom(1.februar, 10.februar, 100.prosent), Ferie(20.januar, 31.januar))
         assertFalse(søknad.valider(EN_PERIODE, MaskinellJurist()).hasWarningsOrWorse())
         assertEquals(1.februar, søknad.sykdomstidslinje().førsteDag())
-    }
-
-    @Test
-    fun `ulik ferieinformasjon`() {
-        søknad(Sykdom(1.februar, 10.februar, 100.prosent), Ferie(20.januar, 31.januar))
-        assertFalse(søknad.harUlikFerieinformasjon(Sykdomstidslinje.Companion.feriedager(20.januar, 31.januar, SykdomstidslinjeHendelse.Hendelseskilde.INGEN)))
-        assertFalse(søknad.harUlikFerieinformasjon(Sykdomstidslinje.Companion.feriedager(21.januar, 31.januar, SykdomstidslinjeHendelse.Hendelseskilde.INGEN)))
-        assertFalse(søknad.harUlikFerieinformasjon(Sykdomstidslinje.Companion.feriedager(20.januar, 30.januar, SykdomstidslinjeHendelse.Hendelseskilde.INGEN)))
-        assertTrue(søknad.harUlikFerieinformasjon(Sykdomstidslinje.Companion.sykedager(20.januar, 10.februar, 100.prosent, SykdomstidslinjeHendelse.Hendelseskilde.INGEN)))
     }
 
     @Test

@@ -58,11 +58,6 @@ class Søknad(
         return this
     }
 
-    // registrerer feriedager i forkant av sykmeldingsperioden i søknaden som vi ikke ønsker å beholde
-    // kan fjernes når søkere ikke lenger har anledning til å oppgi slik informasjon
-    internal fun harUlikFerieinformasjon(other: Sykdomstidslinje) =
-        Søknadsperiode.Ferie.harUlikFerieinformasjon(sykdomsperiode, perioder, other)
-
     internal fun harArbeidsdager() = perioder.filterIsInstance<Søknadsperiode.Arbeid>().isNotEmpty()
 
     override fun valider(periode: Periode, subsumsjonObserver: SubsumsjonObserver): IAktivitetslogg {
@@ -143,12 +138,6 @@ class Søknad(
         }
 
         class Ferie(fom: LocalDate, tom: LocalDate) : Søknadsperiode(fom, tom) {
-            internal companion object {
-                internal fun harUlikFerieinformasjon(sykdomsperiode: Periode, perioder: List<Søknadsperiode>, other: Sykdomstidslinje) =
-                    perioder.filterIsInstance<Ferie>()
-                        .filter { it.periode.start < sykdomsperiode.start }
-                        .any { Sykdomstidslinje.ulikFerieinformasjon(other, it.periode.start til minOf(sykdomsperiode.start, it.periode.endInclusive)) }
-            }
             override fun sykdomstidslinje(sykdomsperiode: Periode, avskjæringsdato: LocalDate, kilde: Hendelseskilde) =
                 Sykdomstidslinje.feriedager(periode.start, periode.endInclusive, kilde).subset(sykdomsperiode.oppdaterTom(periode))
         }
