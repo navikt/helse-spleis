@@ -1054,7 +1054,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         fun gjenopptaBehandlingNy(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            sikkerlogg.warn("Mottok en gjenopptaBehandling for en periode som ikke forventet det")
+            hendelse.info("Mottok en gjenopptaBehandling")
         }
 
         fun startRevurdering(
