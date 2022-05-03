@@ -15,6 +15,7 @@ import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.arbeidsgiver
 import no.nav.helse.serde.api.builders.InntektshistorikkForAOrdningenBuilder
+import no.nav.helse.serde.api.v2.Behandlingstype
 import no.nav.helse.serde.api.v2.BeregnetPeriode
 import no.nav.helse.serde.api.v2.Generasjon
 import no.nav.helse.serde.api.v2.Tidslinjeperiode
@@ -500,6 +501,18 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `to perioder etter hverandre, nyeste er i venter-tilstand`() {
+        tilGodkjenning(1.januar, 31.januar, ORGNUMMER)
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 21.februar, 100.prosent))
+        håndterSøknad(Sykdom(1.februar, 21.februar, 100.prosent))
+
+        0.generasjon {
+            uberegnetPeriode(0) harBehandlingstype Behandlingstype.VENTER
+            beregnetPeriode(1) er Utbetalingstatus.Ubetalt avType Utbetalingtype.UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false
+        }
+    }
+
+    @Test
     fun `ventende periode`() {
         nyttVedtak(1.januar, 31.januar)
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
@@ -816,6 +829,11 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
 
     private infix fun BeregnetPeriode.er(utbetalingstilstand: Utbetalingstatus): BeregnetPeriode {
         assertEquals(utbetalingstilstand, this.utbetaling.status)
+        return this
+    }
+
+    private infix fun <T : Tidslinjeperiode> T.harBehandlingstype(type: Behandlingstype): T {
+        assertEquals(type, this.behandlingstype)
         return this
     }
 
