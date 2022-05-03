@@ -497,6 +497,9 @@ internal class Arbeidsgiver private constructor(
             if (søknad.hasErrorsOrWorse()) {
                 person.sendOppgaveEvent(søknad)
                 person.emitHendelseIkkeHåndtert(søknad)
+            } else {
+                person.emitUtsettOppgaveEvent(søknad)
+                // TODO: person.emitHendelseHåndtert(søknad, liste av vedtaksperioder som har håndtert)
             }
             return
         }
