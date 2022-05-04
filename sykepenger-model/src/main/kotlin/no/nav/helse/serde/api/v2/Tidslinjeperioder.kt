@@ -8,10 +8,13 @@ import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.Periodetype
 import no.nav.helse.person.TilstandType
-import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.Vedtaksperiode.AvsluttetUtenUtbetaling
+import no.nav.helse.person.Vedtaksperiode.AvventerBlokkerendePeriode
+import no.nav.helse.person.Vedtaksperiode.AvventerUferdig
+import no.nav.helse.person.Vedtaksperiode.Vedtaksperiodetilstand
 import no.nav.helse.serde.api.v2.Behandlingstype.UBEREGNET
 import no.nav.helse.serde.api.v2.Behandlingstype.VENTER
+import no.nav.helse.serde.api.v2.Behandlingstype.VENTER_PÅ_INFORMASJON
 import no.nav.helse.serde.api.v2.Generasjoner.Generasjon.Companion.fjernErstattede
 import no.nav.helse.serde.api.v2.Generasjoner.Generasjon.Companion.sammenstillMedNeste
 import no.nav.helse.serde.api.v2.Generasjoner.Generasjon.Companion.sorterGenerasjoner
@@ -143,12 +146,19 @@ internal class Tidslinjeperioder(
     }
 
     private fun uberegnetPeriode(periode: IVedtaksperiode, erForkastet: Boolean): UberegnetPeriode {
+        fun behandlingstype(vedtaksperiodetilstand: Vedtaksperiodetilstand) = when (vedtaksperiodetilstand) {
+            AvventerBlokkerendePeriode,
+            AvventerUferdig -> VENTER
+            AvsluttetUtenUtbetaling -> UBEREGNET
+            else -> VENTER_PÅ_INFORMASJON
+        }
+
         return UberegnetPeriode(
             vedtaksperiodeId = periode.vedtaksperiodeId,
             fom = periode.fom,
             tom = periode.tom,
             sammenslåttTidslinje = periode.sykdomstidslinje.merge(emptyList()),
-            behandlingstype = if (periode.tilstand == AvsluttetUtenUtbetaling) UBEREGNET else VENTER,
+            behandlingstype = behandlingstype(periode.tilstand),
             periodetype = periode.periodetype,
             inntektskilde = periode.inntektskilde,
             erForkastet = erForkastet,
@@ -238,7 +248,7 @@ internal class IVedtaksperiode(
     val periodetype: Periodetype,
     val sykdomstidslinje: List<Sykdomstidslinjedag>,
     val oppdatert: LocalDateTime,
-    val tilstand: Vedtaksperiode.Vedtaksperiodetilstand,
+    val tilstand: Vedtaksperiodetilstand,
     val skjæringstidspunkt: LocalDate,
     val aktivitetsloggForPeriode: Aktivitetslogg
 ) {

@@ -13,6 +13,7 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
+import no.nav.helse.person.TilstandType
 import no.nav.helse.person.arbeidsgiver
 import no.nav.helse.serde.api.builders.InntektshistorikkForAOrdningenBuilder
 import no.nav.helse.serde.api.v2.Behandlingstype
@@ -23,6 +24,7 @@ import no.nav.helse.serde.api.v2.UberegnetPeriode
 import no.nav.helse.serde.api.v2.Utbetalingstatus
 import no.nav.helse.serde.api.v2.Utbetalingtype
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
+import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.håndterAnnullerUtbetaling
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
@@ -506,8 +508,22 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 21.februar, 100.prosent))
         håndterSøknad(Sykdom(1.februar, 21.februar, 100.prosent))
 
+        assertTilstand(2.vedtaksperiode, TilstandType.AVVENTER_BLOKKERENDE_PERIODE)
         0.generasjon {
             uberegnetPeriode(0) harBehandlingstype Behandlingstype.VENTER
+            beregnetPeriode(1) er Utbetalingstatus.Ubetalt avType Utbetalingtype.UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false
+        }
+    }
+
+    @Test
+    fun `to førstegangsbehandlinger, nyeste er i venter-tilstand`() {
+        tilGodkjenning(1.januar, 31.januar, ORGNUMMER)
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
+        håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
+
+        assertTilstand(2.vedtaksperiode, TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
+        0.generasjon {
+            uberegnetPeriode(0) harBehandlingstype Behandlingstype.VENTER_PÅ_INFORMASJON
             beregnetPeriode(1) er Utbetalingstatus.Ubetalt avType Utbetalingtype.UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false
         }
     }
