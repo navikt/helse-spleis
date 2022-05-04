@@ -69,7 +69,8 @@ enum class GraphQLInntektstype {
 enum class GraphQLBehandlingstype {
     Uberegnet,
     Behandlet,
-    Venter
+    Venter,
+    VenterPaInformasjon
 }
 
 enum class GraphQLPeriodetype {

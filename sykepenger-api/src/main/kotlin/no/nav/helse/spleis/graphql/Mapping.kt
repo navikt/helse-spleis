@@ -25,7 +25,6 @@ import no.nav.helse.serde.api.v2.Tidslinjeperiode
 import no.nav.helse.serde.api.v2.Utbetaling
 import no.nav.helse.serde.api.v2.Utbetalingstatus
 import no.nav.helse.serde.api.v2.UtbetalingstidslinjedagType
-import no.nav.helse.serde.api.v2.Utbetalingtype
 import no.nav.helse.serde.api.v2.Vilkårsgrunnlag
 import no.nav.helse.spleis.graphql.dto.GraphQLAktivitet
 import no.nav.helse.spleis.graphql.dto.GraphQLArbeidsgiverinntekt
@@ -291,6 +290,7 @@ internal fun mapTidslinjeperiode(periode: Tidslinjeperiode) =
                 Behandlingstype.UBEREGNET -> GraphQLBehandlingstype.Uberegnet
                 Behandlingstype.BEHANDLET -> GraphQLBehandlingstype.Behandlet
                 Behandlingstype.VENTER -> GraphQLBehandlingstype.Venter
+                Behandlingstype.VENTER_PÅ_INFORMASJON -> GraphQLBehandlingstype.VenterPaInformasjon
             },
             periodetype = mapPeriodetype(periode.periodetype),
             inntektstype = mapInntektstype(periode.inntektskilde),
@@ -352,6 +352,7 @@ internal fun mapTidslinjeperiode(periode: Tidslinjeperiode) =
                 Behandlingstype.UBEREGNET -> GraphQLBehandlingstype.Uberegnet
                 Behandlingstype.BEHANDLET -> GraphQLBehandlingstype.Behandlet
                 Behandlingstype.VENTER -> GraphQLBehandlingstype.Venter
+                Behandlingstype.VENTER_PÅ_INFORMASJON -> GraphQLBehandlingstype.VenterPaInformasjon
             },
             periodetype = mapPeriodetype(periode.periodetype),
             inntektstype = mapInntektstype(periode.inntektskilde),

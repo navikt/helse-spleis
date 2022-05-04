@@ -23,7 +23,10 @@ enum class Behandlingstype {
     BEHANDLET,
 
     // Perioder som venter på beregning
-    VENTER
+    VENTER,
+
+    // Perioder som venter på dokumenter eller annen informasjon og dermed ikke er klare for beregning
+    VENTER_PÅ_INFORMASJON
 }
 
 enum class Periodetilstand {
