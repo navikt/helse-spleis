@@ -8,6 +8,7 @@ import no.nav.helse.person.Periodetype
 import no.nav.helse.serde.api.AktivitetDTO
 import no.nav.helse.serde.api.dto.EndringskodeDTO
 import no.nav.helse.serde.api.v2.Behandlingstype.VENTER
+import no.nav.helse.serde.api.v2.Behandlingstype.VENTER_PÅ_INFORMASJON
 import no.nav.helse.serde.api.v2.buildere.BeregningId
 
 data class Generasjon(
@@ -59,7 +60,7 @@ interface Tidslinjeperiode {
     val opprettet: LocalDateTime
 
     fun erSammeVedtaksperiode(other: Tidslinjeperiode) = vedtaksperiodeId == other.vedtaksperiodeId
-    fun venter() = behandlingstype == VENTER
+    fun venter() = behandlingstype in setOf(VENTER, VENTER_PÅ_INFORMASJON)
 }
 
 data class Utbetalingsinfo(

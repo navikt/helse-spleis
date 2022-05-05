@@ -4,8 +4,10 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import no.nav.helse.desember
 import no.nav.helse.februar
+import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Inntektsvurdering
+import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
@@ -525,6 +527,31 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         0.generasjon {
             uberegnetPeriode(0) harBehandlingstype Behandlingstype.VENTER_PÅ_INFORMASJON
             beregnetPeriode(1) er Utbetalingstatus.Ubetalt avType Utbetalingtype.UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false
+        }
+    }
+
+    @Test
+    fun `tidligere generasjoner skal ikke inneholde perioder som venter eller venter på informasjon`() {
+        nyttVedtak(1.januar, 31.januar)
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
+        håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
+
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Dagtype.Feriedag)))
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+
+        assertTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET)
+        assertTilstand(2.vedtaksperiode, TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
+        0.generasjon {
+            assertEquals(2, this.perioder.size)
+            uberegnetPeriode(0) harBehandlingstype Behandlingstype.VENTER_PÅ_INFORMASJON
+            beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType Utbetalingtype.REVURDERING fra (1.januar til 31.januar) medAntallDager 31 forkastet false
+        }
+        1.generasjon {
+            assertEquals(1, this.perioder.size)
+            beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType Utbetalingtype.UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false
         }
     }
 
