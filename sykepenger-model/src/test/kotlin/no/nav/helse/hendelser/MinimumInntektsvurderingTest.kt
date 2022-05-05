@@ -45,9 +45,18 @@ internal class MinimumInntektsvurderingTest {
     }
 
     @Test
-    fun `Validering feiler hvis inntekt er lavere enn en halv G for ung person`() {
+    fun `Valider inntekt høyere enn en halv G for ung person etter nytt grunnbeløp men før virkningstidspunkt for minimuminntekt`() {
+        assertHarMinimumInntekt(
+            skjæringstidspunkt = 23.mai(2021),
+            beløp = 53199.4.årlig,
+            fødselsnummer = UNG
+        )
+    }
+
+    @Test
+    fun `Validering feiler hvis inntekt er lavere enn en halv G for ung person etter virkningstidspunkt for minimuminntekt`() {
         assertHarIkkeMinimumInntekt(
-            skjæringstidspunkt = 1.mai(2021),
+            skjæringstidspunkt = 24.mai(2021),
             beløp = 53199.4.årlig,
             fødselsnummer = UNG
         )
@@ -99,9 +108,18 @@ internal class MinimumInntektsvurderingTest {
     }
 
     @Test
-    fun `Validering feiler hvis inntekt er lavere enn to G for gammel person`() {
+    fun `Validerin inntekt over to G for gammel person etter nytt grunnbeløp men før virkningstidspunkt for minimuminntekt`() {
+        assertHarMinimumInntekt(
+            skjæringstidspunkt = 23.mai(2021),
+            beløp = 212797.9.årlig,
+            fødselsnummer = GAMMEL
+        )
+    }
+
+    @Test
+    fun `Validering feiler hvis inntekt er lavere enn to G for gammel person etter virkningstidspunkt for minimuminntekt`() {
         assertHarIkkeMinimumInntekt(
-            skjæringstidspunkt = 1.mai(2021),
+            skjæringstidspunkt = 24.mai(2021),
             beløp = 212797.9.årlig,
             fødselsnummer = GAMMEL
         )

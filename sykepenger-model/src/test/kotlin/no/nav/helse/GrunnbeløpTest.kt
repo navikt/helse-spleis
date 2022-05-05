@@ -1,8 +1,14 @@
 package no.nav.helse
 
+import java.time.LocalDate
+import no.nav.helse.person.etterlevelse.MaskinellJurist
+import no.nav.helse.utbetalingstidslinje.Alder
+import no.nav.helse.utbetalingstidslinje.Begrunnelse
+import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 
 internal class GrunnbeløpTest {
@@ -37,4 +43,111 @@ internal class GrunnbeløpTest {
     fun `skjæringstidspunkt brukes når virkningsdato er eldre`() {
         assertEquals(101351.årlig, Grunnbeløp.`1G`.beløp(10.oktober(2020), 21.september(2020)))
     }
+
+
+    @Test
+    fun `virkningstidspunktet for regulering av kravet til minsteinntekt`() {
+        val halvG2018 = Grunnbeløp.halvG.beløp(30.april(2019))
+        val halvG2019 = Grunnbeløp.halvG.beløp(1.mai(2019))
+        val `2G2018` = Grunnbeløp.`2G`.beløp(30.april(2019))
+        val `2G2019` = Grunnbeløp.`2G`.beløp(1.mai(2019))
+
+        // person er under 67 ved skjæringstidspunkt
+        assertMinsteinntektOk(
+            skjæringstidspunkt = 26.mai(2019),
+            inntekt = halvG2018,
+            alder = under67(),
+        )
+        assertMinimumInntektAvslag(
+            skjæringstidspunkt = 27.mai(2019),
+            inntekt = halvG2018,
+            alder = under67(),
+        )
+        assertMinsteinntektOk(
+            skjæringstidspunkt = 27.mai(2019),
+            inntekt = halvG2019,
+            alder = under67(),
+        )
+
+        // 67-åring blir behandlet som under 67 år
+        assertMinsteinntektOk(
+            skjæringstidspunkt = 26.mai(2019),
+            inntekt =  halvG2018,
+            alder = akkurat67(26.mai(2019)),
+        )
+        assertMinimumInntektAvslag(
+            skjæringstidspunkt = 27.mai(2019),
+            inntekt =  halvG2018,
+            alder = akkurat67(27.mai(2019)),
+        )
+        assertMinsteinntektOk(
+            skjæringstidspunkt = 27.mai(2019),
+            inntekt = halvG2019,
+            alder = akkurat67(27.mai(2019)),
+        )
+
+
+        // person er over 67 ved skjæringstidspunkt
+        assertMinsteinntektOk(
+            skjæringstidspunkt = 26.mai(2019),
+            inntekt = `2G2018`,
+            alder = over67(30.april(2019)),
+        )
+        assertMinimumInntektOver67Avslag(
+            skjæringstidspunkt = 27.mai(2019),
+            inntekt = `2G2018`,
+            alder = over67(27.mai(2019)),
+        )
+        assertMinsteinntektOk(
+            skjæringstidspunkt = 27.mai(2019),
+            inntekt = `2G2019`,
+            alder = over67(30.april(2019)),
+        )
+    }
+
+    private fun assertMinsteinntektOk(
+        skjæringstidspunkt: LocalDate,
+        inntekt: Inntekt,
+        alder: Alder
+    ) = assertNull(
+        Grunnbeløp.validerMinsteInntekt(
+            skjæringstidspunkt = skjæringstidspunkt,
+            inntekt = inntekt,
+            alder = alder,
+            subsumsjonObserver = MaskinellJurist()
+        )
+    )
+
+    private fun assertMinimumInntektOver67Avslag(
+        skjæringstidspunkt: LocalDate,
+        inntekt: Inntekt,
+        alder: Alder
+    ) = assertEquals(
+        Begrunnelse.MinimumInntektOver67,
+        Grunnbeløp.validerMinsteInntekt(
+            skjæringstidspunkt = skjæringstidspunkt,
+            inntekt = inntekt,
+            alder = alder,
+            subsumsjonObserver = MaskinellJurist()
+        )
+    )
+
+    private fun assertMinimumInntektAvslag(
+        skjæringstidspunkt: LocalDate,
+        inntekt: Inntekt,
+        alder: Alder
+    ) = assertEquals(
+        Begrunnelse.MinimumInntekt, Grunnbeløp.validerMinsteInntekt(
+            skjæringstidspunkt = skjæringstidspunkt,
+            inntekt = inntekt,
+            alder = alder,
+            subsumsjonObserver = MaskinellJurist()
+        )
+    )
+
+    private fun under67() = Alder(LocalDate.now().minusYears(66))
+    private fun over67(skjæringstidspunkt: LocalDate) =
+        Alder(skjæringstidspunkt.minusYears(67).minusDays(1))
+    private fun akkurat67(skjæringstidspunkt: LocalDate) =
+        Alder(skjæringstidspunkt.minusYears(67))
 }
