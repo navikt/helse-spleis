@@ -76,6 +76,7 @@ internal class GenerasjonerBuilder(
         inntektsmeldingInfo: InntektsmeldingInfo?,
         inntektskilde: Inntektskilde
     ) {
+        if (tilstand == Vedtaksperiode.TilInfotrygd) return
         val sykdomstidslinje = VedtaksperiodeSykdomstidslinjeBuilder(vedtaksperiode).build()
         val utbetalinger = UtbetalingerBuilder(vedtaksperiode).build()
         val aktivetsloggForPeriode = Vedtaksperiode.aktivitetsloggMedForegåendeUtenUtbetaling(vedtaksperiode)

@@ -25,6 +25,7 @@ import no.nav.helse.serde.api.v2.Tidslinjeperiode
 import no.nav.helse.serde.api.v2.UberegnetPeriode
 import no.nav.helse.serde.api.v2.Utbetalingstatus
 import no.nav.helse.serde.api.v2.Utbetalingtype
+import no.nav.helse.somFødselsnummer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.forlengVedtak
@@ -553,6 +554,16 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
             assertEquals(1, this.perioder.size)
             beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType Utbetalingtype.UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false
         }
+    }
+
+    @Test
+    fun `periode som har tilstand TIL_INFOTRYGD sendes ikke med til Speil`() {
+        val fyller18November2018 = "02110075045".somFødselsnummer()
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent), fnr = fyller18November2018)
+        håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), fnr = fyller18November2018)
+
+        assertTilstand(1.vedtaksperiode, TilstandType.TIL_INFOTRYGD)
+        assertEquals(emptyList<Generasjon>(), generasjoner)
     }
 
     @Test
