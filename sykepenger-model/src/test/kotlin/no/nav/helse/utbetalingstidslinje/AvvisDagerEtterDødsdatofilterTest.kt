@@ -88,7 +88,7 @@ internal class AvvisDagerEtterDødsdatofilterTest {
 
     private fun undersøke(tidslinjer: List<Utbetalingstidslinje>, dødsdato: LocalDate?, periode: Periode) {
         aktivitetslogg = Aktivitetslogg()
-        AvvisDagerEtterDødsdatofilter(tidslinjer, periode, dødsdato, aktivitetslogg).filter()
+        AvvisDagerEtterDødsdatofilter(dødsdato).filter(tidslinjer, periode, aktivitetslogg)
         inspektør = tidslinjer.first().inspektør
     }
 }
