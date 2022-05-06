@@ -1,0 +1,23 @@
+{
+  "fødselsnummer": "12029240045",
+  "arbeidsgivere": [
+    {
+      "organisasjonsnummer": "987654321",
+      "sykmeldingsperioder": [
+        {
+          "fom": "2022-03-17",
+          "tom": "2022-03-20"
+        }
+      ],
+      "vedtaksperioder": [
+        {
+          "fom": "2022-03-17",
+          "tom": "2022-03-20",
+          "sykmeldingFom": "2022-03-17",
+          "sykmeldingTom": "2022-03-20"
+        }
+      ]
+    }
+  ],
+  "skjemaVersjon": 151
+}
