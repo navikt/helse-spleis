@@ -41,7 +41,7 @@ internal class ArbeidsgiverUtbetalinger(
         virkningsdato: LocalDate,
     ) {
         val tidslinjer = arbeidsgivere.values.toList()
-        Sykdomsgradfilter(tidslinjer, periode, aktivitetslogg, subsumsjonObserver).filter()
+        Sykdomsgradfilter.filter(tidslinjer, periode, aktivitetslogg, subsumsjonObserver)
         AvvisDagerEtterDødsdatofilter(tidslinjer, periode, dødsdato, aktivitetslogg).filter()
         vilkårsgrunnlagHistorikk.avvisInngangsvilkår(tidslinjer, alder)
         maksimumSykepenger = MaksimumSykepengedagerfilter(alder, regler, periode, aktivitetslogg, subsumsjonObserver).filter(

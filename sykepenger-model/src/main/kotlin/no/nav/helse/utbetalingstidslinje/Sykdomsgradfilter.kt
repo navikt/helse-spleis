@@ -11,14 +11,14 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Companion.periode
 import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Økonomi.Companion.totalSykdomsgrad
 
-internal class Sykdomsgradfilter(
-    private val tidslinjer: List<Utbetalingstidslinje>,
-    private val periode: Periode,
-    private val aktivitetslogg: IAktivitetslogg,
-    private val subsumsjonObserver: SubsumsjonObserver
-) {
+internal object Sykdomsgradfilter {
 
-    internal fun filter() {
+    internal fun filter(
+        tidslinjer: List<Utbetalingstidslinje>,
+        periode: Periode,
+        aktivitetslogg: IAktivitetslogg,
+        subsumsjonObserver: SubsumsjonObserver
+    ) {
         val tidslinjerForSubsumsjon = tidslinjer.subsumsjonsformat()
         val dagerUnderGrensen = periode(tidslinjer).filter { dato -> totalSykdomsgrad(tidslinjer.map { it[dato].økonomi }).erUnderGrensen() }
         Prosentdel.subsumsjon(subsumsjonObserver) { grense ->

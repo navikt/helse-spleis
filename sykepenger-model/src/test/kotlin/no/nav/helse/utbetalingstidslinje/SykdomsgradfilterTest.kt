@@ -112,7 +112,7 @@ internal class SykdomsgradfilterTest {
 
     private fun undersøke(tidslinjer: List<Utbetalingstidslinje>, periode: Periode) {
         aktivitetslogg = Aktivitetslogg()
-        Sykdomsgradfilter(tidslinjer, periode, aktivitetslogg, MaskinellJurist()).filter()
+        Sykdomsgradfilter.filter(tidslinjer, periode, aktivitetslogg, MaskinellJurist())
         inspektør = tidslinjer.inspektør(0)
     }
 
