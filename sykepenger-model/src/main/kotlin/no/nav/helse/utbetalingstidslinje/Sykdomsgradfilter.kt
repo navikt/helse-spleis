@@ -11,14 +11,14 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Companion.periode
 import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Økonomi.Companion.totalSykdomsgrad
 
-internal object Sykdomsgradfilter {
+internal object Sykdomsgradfilter: UtbetalingstidslinjerFilter {
 
-    internal fun filter(
+    override fun filter(
         tidslinjer: List<Utbetalingstidslinje>,
         periode: Periode,
         aktivitetslogg: IAktivitetslogg,
         subsumsjonObserver: SubsumsjonObserver
-    ) {
+    ): List<Utbetalingstidslinje> {
         val tidslinjerForSubsumsjon = tidslinjer.subsumsjonsformat()
         val dagerUnderGrensen = periode(tidslinjer).filter { dato -> totalSykdomsgrad(tidslinjer.map { it[dato].økonomi }).erUnderGrensen() }
         Prosentdel.subsumsjon(subsumsjonObserver) { grense ->
@@ -28,8 +28,8 @@ internal object Sykdomsgradfilter {
         val avvisteDager = avvisteDager(tidslinjer, periode, Begrunnelse.MinimumSykdomsgrad)
         val harAvvisteDager = avvisteDager.isNotEmpty()
         subsumsjonObserver.`§ 8-13 ledd 1`(periode, avvisteDager.map { it.dato }, tidslinjerForSubsumsjon)
-        if (harAvvisteDager)
-            return aktivitetslogg.warn("Minst én dag uten utbetaling på grunn av sykdomsgrad under 20 %%. Vurder å sende vedtaksbrev fra Infotrygd")
-        aktivitetslogg.info("Ingen avviste dager på grunn av 20 %% samlet sykdomsgrad-regel for denne perioden")
+        if (harAvvisteDager) aktivitetslogg.warn("Minst én dag uten utbetaling på grunn av sykdomsgrad under 20 %%. Vurder å sende vedtaksbrev fra Infotrygd")
+        else aktivitetslogg.info("Ingen avviste dager på grunn av 20 %% samlet sykdomsgrad-regel for denne perioden")
+        return tidslinjer
     }
 }
