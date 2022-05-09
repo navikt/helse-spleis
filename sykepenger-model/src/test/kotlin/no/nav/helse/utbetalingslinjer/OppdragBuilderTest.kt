@@ -19,6 +19,7 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import no.nav.helse.person.etterlevelse.MaskinellJurist
 
 internal class OppdragBuilderTest {
 
@@ -482,11 +483,12 @@ internal class OppdragBuilderTest {
                 else -> spleisdag
             }
         }
-        MaksimumUtbetaling(
+        MaksimumUtbetaling { startdato }.betal(
             listOf(tidslinje),
+            tidslinje.periode(),
             Aktivitetslogg(),
-            startdato
-        ).betal()
+            MaskinellJurist()
+        )
         return OppdragBuilder(
             tidslinje,
             ORGNUMMER,

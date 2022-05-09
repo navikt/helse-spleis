@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.person.etterlevelse.MaskinellJurist
 
 internal class UtbetalingsfilterTest {
 
@@ -110,11 +111,12 @@ internal class UtbetalingsfilterTest {
     }
 
     private fun lagUtbetaling(tidslinje: Utbetalingstidslinje = tidslinjeOf(16.AP, 15.NAV), forrige: Utbetaling? = null): Utbetaling {
-        MaksimumUtbetaling(
+        MaksimumUtbetaling { tidslinje.first().dato }.betal(
             listOf(tidslinje),
+            tidslinje.periode(),
             aktivitetslogg,
-            tidslinje.first().dato
-        ).betal()
+            MaskinellJurist()
+        )
 
         return Utbetaling.lagUtbetaling(
             forrige?.let { listOf(forrige) } ?: emptyList(),

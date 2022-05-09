@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
+import no.nav.helse.person.etterlevelse.MaskinellJurist
 
 internal class UtbetalingTest {
 
@@ -780,7 +781,7 @@ internal class UtbetalingTest {
                 else -> spleisdag
             }
         }
-    }.also { MaksimumUtbetaling(listOf(tidslinje), aktivitetslogg, 1.januar).betal() }
+    }.also { MaksimumUtbetaling { 1.januar }.betal(listOf(tidslinje), tidslinje.periode(), aktivitetslogg, MaskinellJurist()) }
 
     private fun opprettGodkjentUtbetaling(
         tidslinje: Utbetalingstidslinje = tidslinjeOf(16.AP, 5.NAV(3000)),
