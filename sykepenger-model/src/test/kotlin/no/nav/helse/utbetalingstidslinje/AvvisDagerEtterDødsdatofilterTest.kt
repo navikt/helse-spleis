@@ -11,6 +11,7 @@ import no.nav.helse.testhelpers.tidslinjeOf
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import no.nav.helse.person.etterlevelse.MaskinellJurist
 
 internal class AvvisDagerEtterDødsdatofilterTest {
     private lateinit var inspektør: UtbetalingstidslinjeInspektør
@@ -88,7 +89,7 @@ internal class AvvisDagerEtterDødsdatofilterTest {
 
     private fun undersøke(tidslinjer: List<Utbetalingstidslinje>, dødsdato: LocalDate?, periode: Periode) {
         aktivitetslogg = Aktivitetslogg()
-        AvvisDagerEtterDødsdatofilter(dødsdato).filter(tidslinjer, periode, aktivitetslogg)
+        AvvisDagerEtterDødsdatofilter(dødsdato).filter(tidslinjer, periode, aktivitetslogg, MaskinellJurist())
         inspektør = tidslinjer.first().inspektør
     }
 }

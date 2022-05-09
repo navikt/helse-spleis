@@ -42,8 +42,8 @@ internal class ArbeidsgiverUtbetalinger(
     ) {
         val tidslinjer = arbeidsgivere.values.toList()
         Sykdomsgradfilter.filter(tidslinjer, periode, aktivitetslogg, subsumsjonObserver)
-        AvvisDagerEtterDødsdatofilter(dødsdato).filter(tidslinjer, periode, aktivitetslogg)
-        AvvisInngangsvilkårfilter(vilkårsgrunnlagHistorikk, alder).filter(tidslinjer)
+        AvvisDagerEtterDødsdatofilter(dødsdato).filter(tidslinjer, periode, aktivitetslogg, subsumsjonObserver)
+        AvvisInngangsvilkårfilter(vilkårsgrunnlagHistorikk, alder).filter(tidslinjer, periode, aktivitetslogg, subsumsjonObserver)
         maksimumSykepenger = MaksimumSykepengedagerfilter(alder, regler, periode, aktivitetslogg, subsumsjonObserver).filter(
             tidslinjer,
             infotrygdhistorikk.utbetalingstidslinje().kutt(periode.endInclusive)
