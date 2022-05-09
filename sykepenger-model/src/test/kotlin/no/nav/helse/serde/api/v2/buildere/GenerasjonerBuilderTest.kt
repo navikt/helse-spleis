@@ -835,6 +835,87 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         }
     }
 
+    @Test
+    fun `ag2 venter på ag1 mens ag1 er til godkjenning`() {
+        tilGodkjenning(1.januar, 31.januar, a1, a2)
+
+        0.generasjon(a1) {
+            beregnetPeriode(0) harBehandlingstype Behandlingstype.BEHANDLET
+        }
+        0.generasjon(a2) {
+            beregnetPeriode(0) harBehandlingstype Behandlingstype.VENTER
+        }
+    }
+
+    @Test
+    fun `periode med bare ferie`() {
+        nyttVedtak(1.januar, 31.januar)
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 20.februar, 100.prosent))
+        håndterSøknad(Sykdom(1.februar, 20.februar, 100.prosent), Ferie(1.februar, 20.februar))
+        håndterYtelser(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+
+        0.generasjon {
+            beregnetPeriode(0) harBehandlingstype Behandlingstype.BEHANDLET er Utbetalingstatus.GodkjentUtenUtbetaling
+            beregnetPeriode(1) harBehandlingstype Behandlingstype.BEHANDLET er Utbetalingstatus.Utbetalt
+        }
+    }
+
+    @Test
+    fun `behandlingstyper i normal forlengelsesflyt`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+
+        0.generasjon {
+            uberegnetPeriode(0) harBehandlingstype Behandlingstype.VENTER_PÅ_INFORMASJON
+            uberegnetPeriode(1) harBehandlingstype Behandlingstype.VENTER_PÅ_INFORMASJON
+        }
+
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        0.generasjon {
+            uberegnetPeriode(0) harBehandlingstype Behandlingstype.VENTER
+            uberegnetPeriode(1) harBehandlingstype Behandlingstype.VENTER_PÅ_INFORMASJON
+        }
+
+        håndterYtelser(1.vedtaksperiode)
+        0.generasjon {
+            uberegnetPeriode(0) harBehandlingstype Behandlingstype.VENTER
+            uberegnetPeriode(1) harBehandlingstype Behandlingstype.VENTER_PÅ_INFORMASJON
+        }
+
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        0.generasjon {
+            uberegnetPeriode(0) harBehandlingstype Behandlingstype.VENTER
+            uberegnetPeriode(1) harBehandlingstype Behandlingstype.VENTER_PÅ_INFORMASJON
+        }
+
+        håndterYtelser(1.vedtaksperiode)
+        0.generasjon {
+            uberegnetPeriode(0) harBehandlingstype Behandlingstype.VENTER
+            beregnetPeriode(1) harBehandlingstype Behandlingstype.BEHANDLET
+        }
+
+        håndterSimulering(1.vedtaksperiode)
+        0.generasjon {
+            uberegnetPeriode(0) harBehandlingstype Behandlingstype.VENTER
+            beregnetPeriode(1) harBehandlingstype Behandlingstype.BEHANDLET
+        }
+
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        0.generasjon {
+            uberegnetPeriode(0) harBehandlingstype Behandlingstype.VENTER
+            beregnetPeriode(1) harBehandlingstype Behandlingstype.BEHANDLET
+        }
+
+        håndterUtbetalt()
+        0.generasjon {
+            uberegnetPeriode(0) harBehandlingstype Behandlingstype.VENTER_PÅ_INFORMASJON
+            beregnetPeriode(1) harBehandlingstype Behandlingstype.BEHANDLET
+        }
+    }
+
     private fun BeregnetPeriode.assertAldersvilkår(expectedOppfylt: Boolean, expectedAlderSisteSykedag: Int) {
         assertEquals(expectedOppfylt, periodevilkår.alder.oppfylt)
         assertEquals(expectedAlderSisteSykedag, periodevilkår.alder.alderSisteSykedag)

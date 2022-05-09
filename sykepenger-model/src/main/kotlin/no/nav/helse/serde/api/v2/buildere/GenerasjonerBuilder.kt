@@ -85,14 +85,13 @@ internal class GenerasjonerBuilder(
                 id,
                 periode.start,
                 periode.endInclusive,
-                behandlingstype = Behandlingstype.BEHANDLET,
                 inntektskilde = inntektskilde,
                 hendelser = hendelser.filter { it.id in hendelseIder.ider().map(UUID::toString) },
                 utbetalinger = utbetalinger,
                 periodetype = periodetype(),
                 sykdomstidslinje = sykdomstidslinje,
-                tilstand = tilstand,
                 oppdatert = oppdatert,
+                tilstand = tilstand,
                 skjæringstidspunkt = skjæringstidspunkt(),
                 aktivitetsloggForPeriode = aktivetsloggForPeriode
             )

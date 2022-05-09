@@ -849,7 +849,7 @@ internal class Vedtaksperiode private constructor(
     private fun ingenUtbetaling() = Arbeidsgiverperiode.ingenUtbetaling(finnArbeidsgiverperiode(), periode, jurist())
 
     // Gang of four State pattern
-    internal interface Vedtaksperiodetilstand : Aktivitetskontekst {
+    internal sealed interface Vedtaksperiodetilstand : Aktivitetskontekst {
         val type: TilstandType
         val erFerdigBehandlet: Boolean get() = false
         val kanForkastes: Boolean get() = true
