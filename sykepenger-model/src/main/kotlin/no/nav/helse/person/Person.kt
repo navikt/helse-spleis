@@ -36,6 +36,7 @@ import no.nav.helse.hendelser.validerMinimumInntekt
 import no.nav.helse.person.Arbeidsgiver.Companion.beregnFeriepengerForAlleArbeidsgivere
 import no.nav.helse.person.Arbeidsgiver.Companion.beregnOpptjening
 import no.nav.helse.person.Arbeidsgiver.Companion.beregnSykepengegrunnlag
+import no.nav.helse.person.Arbeidsgiver.Companion.build
 import no.nav.helse.person.Arbeidsgiver.Companion.deaktiverteArbeidsforhold
 import no.nav.helse.person.Arbeidsgiver.Companion.finn
 import no.nav.helse.person.Arbeidsgiver.Companion.ghostPeriode
@@ -61,11 +62,14 @@ import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
+import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverUtbetalinger
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverperiodeBuilderBuilder
+import no.nav.helse.utbetalingstidslinje.AvvisDagerEtterDødsdatofilter
+import no.nav.helse.utbetalingstidslinje.AvvisInngangsvilkårfilter
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
 import no.nav.helse.økonomi.Inntekt
 import org.slf4j.LoggerFactory
@@ -881,5 +885,20 @@ class Person private constructor(
 
     internal fun slettUtgåtteSykmeldingsperioder(tom: LocalDate) {
         arbeidsgivere.slettUtgåtteSykmeldingsperioder(tom)
+    }
+
+    internal fun build(builder: Utbetaling.Builder) = builder.apply {
+        fødselsnummer(fødselsnummer)
+        subsumsjonsObserver(jurist)
+        infotrygdhistorikk(infotrygdhistorikk)
+        avvisInngangsvilkårfilter(AvvisInngangsvilkårfilter(vilkårsgrunnlagHistorikk, fødselsnummer.alder()))
+        avvisDagerEtterDødsdatofilter(AvvisDagerEtterDødsdatofilter(dødsdato))
+        arbeidsgivereMedSykdom().build(
+            builder = this,
+            skjæringstidspunkter = skjæringstidspunkter(),
+            inntektsopplysningPerSkjæringstidspunktPerArbeidsgiver = vilkårsgrunnlagHistorikk.inntektsopplysningPerSkjæringstidspunktPerArbeidsgiver(),
+            subsumsjonObserver = jurist,
+            regler = NormalArbeidstaker
+        )
     }
 }

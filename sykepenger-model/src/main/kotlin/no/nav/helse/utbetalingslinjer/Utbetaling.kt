@@ -4,6 +4,7 @@ import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.Fødselsnummer
 import no.nav.helse.hendelser.Hendelseskontekst
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
@@ -16,6 +17,7 @@ import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.Aktivitetskontekst
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.godkjenning
+import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.Inntektskilde
@@ -23,12 +25,21 @@ import no.nav.helse.person.Periodetype
 import no.nav.helse.person.SpesifikkKontekst
 import no.nav.helse.person.UtbetalingVisitor
 import no.nav.helse.person.builders.VedtakFattetBuilder
+import no.nav.helse.person.etterlevelse.SubsumsjonObserver
+import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Fagområde.Sykepenger
 import no.nav.helse.utbetalingslinjer.Fagområde.SykepengerRefusjon
+import no.nav.helse.utbetalingstidslinje.Alder.MaksimumSykepenger
+import no.nav.helse.utbetalingstidslinje.Inntekter
+import no.nav.helse.utbetalingstidslinje.MaksimumUtbetaling
+import no.nav.helse.utbetalingstidslinje.Refusjonsgjødsler
+import no.nav.helse.utbetalingstidslinje.Sykdomsgradfilter
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilder
+import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjerFilter
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -933,4 +944,124 @@ internal class Utbetaling private constructor(
     }
 
     enum class Utbetalingtype { UTBETALING, ETTERUTBETALING, ANNULLERING, REVURDERING, FERIEPENGER }
+
+    internal class Builder(
+        private val aktivitetslogg: IAktivitetslogg,
+        private val periode: Periode
+    ) {
+        private lateinit var fødselsnummer: Fødselsnummer
+        internal fun fødselsnummer(fødselsnummer: Fødselsnummer) =
+            apply { this.fødselsnummer = fødselsnummer }
+
+        private lateinit var infotrygdhistorikk: Infotrygdhistorikk
+        internal fun infotrygdhistorikk(infotrygdhistorikk: Infotrygdhistorikk) =
+            apply { this.infotrygdhistorikk = infotrygdhistorikk }
+
+        private lateinit var subsumsjonObserver: SubsumsjonObserver
+        internal fun subsumsjonsObserver(subsumsjonObserver: SubsumsjonObserver) =
+            apply { this.subsumsjonObserver = subsumsjonObserver }
+
+        private lateinit var avvisInngangsvilkårfilter: UtbetalingstidslinjerFilter
+        internal fun avvisInngangsvilkårfilter(avvisInngangsvilkårfilter: UtbetalingstidslinjerFilter) =
+            apply { this.avvisInngangsvilkårfilter = avvisInngangsvilkårfilter }
+
+        private lateinit var avvisDagerEtterDødsdatofilter: UtbetalingstidslinjerFilter
+        internal fun avvisDagerEtterDødsdatofilter(avvisDagerEtterDødsdatofilter: UtbetalingstidslinjerFilter) =
+            apply { this.avvisDagerEtterDødsdatofilter = avvisDagerEtterDødsdatofilter }
+
+        private lateinit var maksimumSykepenger: MaksimumSykepenger
+
+        private class Arbeidsgivergrunnlag(
+            val sykdomstidslinje: Sykdomstidslinje,
+            val inntekter: Inntekter,
+            val utbetalinger: List<Utbetaling>
+        )
+        private val arbeidsgivere = mutableMapOf<Arbeidsgiver, Arbeidsgivergrunnlag>()
+        private fun arbeidsgivergrunnlag(organisasjonsnummer: String) =
+            arbeidsgivere.filterKeys { it.organisasjonsnummer() == organisasjonsnummer }.values.single()
+        internal fun arbeidsgiver(
+            arbeidsgiver: Arbeidsgiver,
+            sykdomstidslinje: Sykdomstidslinje,
+            inntekter: Inntekter,
+            utbetalinger: List<Utbetaling>
+        ) = apply {
+            require(!arbeidsgivere.contains(arbeidsgiver)) { "Arbeidsgiver ${arbeidsgiver.organisasjonsnummer()} er allerede lagt til." }
+            arbeidsgivere[arbeidsgiver] = Arbeidsgivergrunnlag(
+                sykdomstidslinje = sykdomstidslinje,
+                inntekter = inntekter,
+                utbetalinger = utbetalinger
+            )
+        }
+
+        private class Vedtaksperiodegrunnlag(
+            val organisasjonsnummer: String,
+            val sisteUtbetaling: Utbetaling?
+        )
+        private val vedtaksperioder = mutableMapOf<Vedtaksperiode, Vedtaksperiodegrunnlag>()
+        internal fun vedtaksperiode(
+            vedtaksperiode: Vedtaksperiode,
+            sisteUtbetaling: Utbetaling?,
+            arbeidsgiver: Arbeidsgiver
+        ) = apply {
+            require(!vedtaksperioder.contains(vedtaksperiode)) { "Vedtaksperiode $vedtaksperiode er allerede lagt til." }
+            vedtaksperioder[vedtaksperiode] = Vedtaksperiodegrunnlag(
+                organisasjonsnummer = arbeidsgiver.organisasjonsnummer(),
+                sisteUtbetaling = sisteUtbetaling
+            )
+        }
+
+        private fun erRevurdering() = vedtaksperioder.values.mapNotNull { it.sisteUtbetaling }.any { it.tilstand == Utbetalt }
+
+        private fun filtrer(tidslinjer: List<Utbetalingstidslinje>) {
+            Sykdomsgradfilter.filter(tidslinjer, periode, aktivitetslogg, subsumsjonObserver)
+            avvisDagerEtterDødsdatofilter.filter(tidslinjer, periode, aktivitetslogg, subsumsjonObserver)
+            avvisInngangsvilkårfilter.filter(tidslinjer, periode, aktivitetslogg, subsumsjonObserver)
+            // TODO: MaksimumSykepengedagerfilter
+            MaksimumUtbetaling().filter(tidslinjer, periode, aktivitetslogg, subsumsjonObserver)
+        }
+
+        internal fun build() = when (erRevurdering()) {
+            true -> revurderinger()
+            false -> utbetalinger()
+        }
+
+        private fun utbetalinger(): List<Utbetaling> {
+            val utbetalingstidslinjer = arbeidsgivere.mapValues { (arbeidsgiver, arbeidsgivergrunnlag) ->
+                val sykdomstidslinje = arbeidsgivergrunnlag.sykdomstidslinje.fremTilOgMed(periode.endInclusive)
+                val utbetalingstidslinjeBuilder = UtbetalingstidslinjeBuilder(arbeidsgivergrunnlag.inntekter)
+                val utbetalingstidslinje = infotrygdhistorikk
+                    .build(arbeidsgiver.organisasjonsnummer(), sykdomstidslinje, utbetalingstidslinjeBuilder, subsumsjonObserver)
+                Refusjonsgjødsler(utbetalingstidslinje, arbeidsgiver.refusjonshistorikk, infotrygdhistorikk, arbeidsgiver.organisasjonsnummer())
+                    .gjødsle(aktivitetslogg, periode)
+                //arbeidsgiver.lagreUtbetalingstidslinjeberegning()
+                UUID.randomUUID() to utbetalingstidslinje
+            }.mapKeys { it.key.organisasjonsnummer() }
+
+            filtrer(utbetalingstidslinjer.values.map { it.second })
+
+            return vedtaksperioder.mapValues { (vedtaksperiode, vedtaksperiodegrunnlag) ->
+                val arbeidsgivergrunnlag = arbeidsgivergrunnlag(vedtaksperiodegrunnlag.organisasjonsnummer)
+                val (beregningId, utbetalingstidslinje) = utbetalingstidslinjer.getValue(vedtaksperiodegrunnlag.organisasjonsnummer)
+                val utbetaling = lagUtbetaling(
+                    utbetalinger = arbeidsgivergrunnlag.utbetalinger,
+                    fødselsnummer = fødselsnummer.toString(),
+                    beregningId = beregningId,
+                    organisasjonsnummer = vedtaksperiodegrunnlag.organisasjonsnummer,
+                    utbetalingstidslinje = utbetalingstidslinje,
+                    sisteDato = periode.endInclusive,
+                    aktivitetslogg = aktivitetslogg,
+                    maksdato = maksimumSykepenger.sisteDag(),
+                    forbrukteSykedager = maksimumSykepenger.forbrukteDager(),
+                    gjenståendeSykedager = maksimumSykepenger.gjenståendeDager(),
+                    forrige = vedtaksperiodegrunnlag.sisteUtbetaling
+                )
+                //vedtaksperiode.lagreUtbetaling()
+                utbetaling
+            }.values.toList()
+        }
+
+        private fun revurderinger(): List<Utbetaling> {
+            return emptyList()
+        }
+    }
 }

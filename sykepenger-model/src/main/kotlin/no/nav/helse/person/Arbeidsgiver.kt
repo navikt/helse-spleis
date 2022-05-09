@@ -314,6 +314,27 @@ internal class Arbeidsgiver private constructor(
             it.sykmeldingsperioder.fjern(tom.minusDays(1))
         }
 
+        internal fun Iterable<Arbeidsgiver>.build(
+            builder: Utbetaling.Builder,
+            regler: ArbeidsgiverRegler,
+            skjæringstidspunkter: List<LocalDate>,
+            inntektsopplysningPerSkjæringstidspunktPerArbeidsgiver: Map<LocalDate, Map<String, Inntektshistorikk.Inntektsopplysning>>?,
+            subsumsjonObserver: SubsumsjonObserver) = builder.also {
+            forEach { arbeidsgiver -> it.arbeidsgiver(
+                arbeidsgiver = arbeidsgiver,
+                sykdomstidslinje = arbeidsgiver.sykdomstidslinje(),
+                utbetalinger = arbeidsgiver.utbetalinger,
+                inntekter = Inntekter(
+                    skjæringstidspunkter = skjæringstidspunkter,
+                    inntektPerSkjæringstidspunkt = inntektsopplysningPerSkjæringstidspunktPerArbeidsgiver?.mapValues { (_, inntektsopplysningPerArbeidsgiver) ->
+                        inntektsopplysningPerArbeidsgiver[arbeidsgiver.organisasjonsnummer]
+                    },
+                    regler = regler,
+                    subsumsjonObserver = subsumsjonObserver
+                )
+            )}
+        }
+
         internal fun søppelbøtte(
             arbeidsgivere: List<Arbeidsgiver>,
             hendelse: IAktivitetslogg,
