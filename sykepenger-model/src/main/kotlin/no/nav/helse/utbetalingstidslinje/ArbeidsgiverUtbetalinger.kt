@@ -56,6 +56,6 @@ internal class ArbeidsgiverUtbetalinger(
                 organisasjonsnummer = arbeidsgiver.organisasjonsnummer()
             ).gjødsle(aktivitetslogg, periode)
         }
-        MaksimumUtbetaling(tidslinjer, aktivitetslogg, virkningsdato).betal()
+        MaksimumUtbetaling { virkningsdato }.betal(tidslinjer, periode, aktivitetslogg, subsumsjonObserver)
     }
 }

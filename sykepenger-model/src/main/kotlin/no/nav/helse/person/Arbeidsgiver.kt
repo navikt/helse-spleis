@@ -664,7 +664,7 @@ internal class Arbeidsgiver private constructor(
             .filter { it.second.isNotEmpty() }
             .toMap()
 
-        MaksimumUtbetaling(arbeidsgivertidslinjer.values.toList(), aktivitetslogg, periode.endInclusive).betal()
+        MaksimumUtbetaling().betal(arbeidsgivertidslinjer.values.toList(), periode, aktivitetslogg, jurist)
 
         arbeidsgivertidslinjer.forEach { (arbeidsgiver, reberegnetUtbetalingstidslinje) ->
             arbeidsgiver.lagreUtbetalingstidslinjeberegning(organisasjonsnummer, reberegnetUtbetalingstidslinje, vilkårsgrunnlagHistorikk)
