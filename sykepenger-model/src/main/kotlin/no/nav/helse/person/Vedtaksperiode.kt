@@ -826,6 +826,23 @@ internal class Vedtaksperiode private constructor(
     private fun harArbeidsgivereMedOverlappendeUtbetaltePerioder(periode: Periode) =
         person.harArbeidsgivereMedOverlappendeUtbetaltePerioder(organisasjonsnummer, periode)
 
+    private fun oppdaterForlengelseFraInfotrygdFlagg(vedtaksperiode: Vedtaksperiode) {
+        if (vedtaksperiode.forlengelseFraInfotrygd == NEI) {
+            val vedtaksperioder =
+                vedtaksperiode.arbeidsgiver.finnSammenhengendePeriode(vedtaksperiode.skjæringstidspunkt)
+            val førsteInfotrygdForlengelse = vedtaksperioder.sorted().firstOrNull { it.forlengelseFraInfotrygd() }
+            if (førsteInfotrygdForlengelse != null) {
+                vedtaksperioder.filter { it etter førsteInfotrygdForlengelse }.forEach { periode ->
+                    periode.forlengelseFraInfotrygd = JA
+                    sikkerlogg.info(
+                        "Setter forlengelseFraInfotrygd til ${periode.forlengelseFraInfotrygd} " +
+                                "for ${periode.fødselsnummer} med vedtaksperiodeId ${periode.id} ved påminnelse for periode hvor det tidligere var satt til NEI"
+                    )
+                }
+            }
+        }
+    }
+
     private fun Vedtaksperiodetilstand.påminnelse(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
         if (!påminnelse.gjelderTilstand(type)) return vedtaksperiode.person.vedtaksperiodeIkkePåminnet(påminnelse, type)
         vedtaksperiode.person.vedtaksperiodePåminnet(påminnelse)
@@ -1416,7 +1433,7 @@ internal class Vedtaksperiode private constructor(
                     )
                 }
                 onSuccess {
-                    if (vedtaksperiode.forlengelseFraInfotrygd()) {
+                    if (vedtaksperiode.forlengelseFraInfotrygd() || vedtaksperiode.forlengelseFraInfotrygd == JA) {
                         info("Oppdaget at perioden startet i infotrygd")
                         vedtaksperiode.forlengelseFraInfotrygd = JA
                         return@onSuccess vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode)
@@ -1433,6 +1450,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
+            vedtaksperiode.oppdaterForlengelseFraInfotrygdFlagg(vedtaksperiode)
             vedtaksperiode.trengerHistorikkFraInfotrygd(påminnelse)
         }
 
@@ -1472,6 +1490,7 @@ internal class Vedtaksperiode private constructor(
                             "for ${vedtaksperiode.fødselsnummer} med vedtaksperiodeId ${vedtaksperiode.id} ved påminnelse for periode hvor det tidligere ikke var satt"
                 )
             }
+            vedtaksperiode.oppdaterForlengelseFraInfotrygdFlagg(vedtaksperiode)
             vedtaksperiode.person.gjenopptaBehandlingNy(påminnelse)
         }
     }
