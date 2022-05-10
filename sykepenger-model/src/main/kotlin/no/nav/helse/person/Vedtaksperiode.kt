@@ -315,20 +315,22 @@ internal class Vedtaksperiode private constructor(
         return tilstand.håndter(this, overstyrArbeidsforhold)
     }
 
-    internal fun håndter(hendelse: OverstyrInntekt) {
+    internal fun håndter(hendelse: OverstyrInntekt): Boolean {
+        if (!kanHåndtereOverstyring(hendelse)) return false
         kontekst(hendelse)
-        if (forlengelseFraInfotrygd == JA) {
+        if (Toggle.NyRevurdering.disabled && forlengelseFraInfotrygd == JA) {
             hendelse.error("Forespurt overstyring av inntekt hvor skjæringstidspunktet ligger i infotrygd")
-            return
+            return true
         }
 
         if (Toggle.RevurdereInntektMedFlereArbeidsgivere.disabled && inntektskilde == Inntektskilde.FLERE_ARBEIDSGIVERE) {
             hendelse.error("Forespurt overstyring av inntekt hvor personen har flere arbeidsgivere (inkl. ghosts)")
-            return
+            return true
         }
 
         hendelse.loggførHendelsesreferanse(person)
         tilstand.håndter(this, hendelse)
+        return true
     }
 
     internal fun nyPeriodeMedNyFlyt(ny: Vedtaksperiode, hendelse: Søknad) {
@@ -392,7 +394,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun harVedtaksperiodeRettFør() = arbeidsgiver.finnVedtaksperiodeRettFør(this) != null
 
-    internal fun kanHåndtereOverstyring(hendelse: OverstyrInntekt): Boolean {
+    private fun kanHåndtereOverstyring(hendelse: OverstyrInntekt): Boolean {
         return utbetalingstidslinje.isNotEmpty() && gjelder(hendelse.skjæringstidspunkt)
     }
 
@@ -2431,10 +2433,20 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {
-            if (vedtaksperiode.person.kanRevurdereInntekt(hendelse.skjæringstidspunkt)) {
-                vedtaksperiode.person.igangsettRevurdering(hendelse, vedtaksperiode)
+            if (Toggle.NyRevurdering.disabled) {
+                if (vedtaksperiode.person.kanRevurdereInntekt(hendelse.skjæringstidspunkt)) {
+                    vedtaksperiode.person.igangsettRevurdering(hendelse, vedtaksperiode)
+                } else {
+                    hendelse.error("Kan ikke revurdere inntekt, da vi mangler datagrunnlag på skjæringstidspunktet")
+                }
             } else {
-                hendelse.error("Kan ikke revurdere inntekt, da vi mangler datagrunnlag på skjæringstidspunktet")
+                vedtaksperiode.person.nyInntekt(hendelse)
+                vedtaksperiode.person.vilkårsprøvEtterNyInformasjonFraSaksbehandler(
+                    hendelse,
+                    vedtaksperiode.skjæringstidspunkt,
+                    vedtaksperiode.jurist()
+                )
+                vedtaksperiode.person.startRevurdering(vedtaksperiode, hendelse)
             }
         }
 

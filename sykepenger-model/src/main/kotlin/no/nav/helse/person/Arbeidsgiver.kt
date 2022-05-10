@@ -826,9 +826,7 @@ internal class Arbeidsgiver private constructor(
 
     internal fun håndter(hendelse: OverstyrInntekt) {
         hendelse.kontekst(this)
-        vedtaksperioder
-            .firstOrNull { it.kanHåndtereOverstyring(hendelse) }
-            ?.håndter(hendelse)
+        énHarHåndtert(hendelse, Vedtaksperiode::håndter)
     }
 
     internal fun håndter(overstyrArbeidsforhold: OverstyrArbeidsforhold): Boolean {

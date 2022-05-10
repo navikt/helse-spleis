@@ -1,5 +1,8 @@
 package no.nav.helse.inspectors
 
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.UtbetalingVisitor
 import no.nav.helse.utbetalingslinjer.Oppdrag
@@ -7,9 +10,7 @@ import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalt
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
+import kotlin.properties.Delegates
 
 internal val Utbetaling.inspektør get() = UtbetalingInspektør(this)
 
@@ -27,6 +28,8 @@ internal class UtbetalingInspektør(utbetaling: Utbetaling) : UtbetalingVisitor 
     lateinit var personOppdrag: Oppdrag
         private set
     lateinit var utbetalingstidslinje: Utbetalingstidslinje
+        private set
+    var nettobeløp by Delegates.notNull<Int>()
         private set
     private lateinit var status: Utbetaling.Tilstand
     private lateinit var type: Utbetalingtype
@@ -68,6 +71,7 @@ internal class UtbetalingInspektør(utbetaling: Utbetaling) : UtbetalingVisitor 
         this.type = type
         this.status = tilstand
         this.avstemmingsnøkkel = avstemmingsnøkkel
+        this.nettobeløp = arbeidsgiverNettoBeløp + personNettoBeløp
     }
 
     override fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {

@@ -44,6 +44,8 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavHelgDag
+import no.nav.helse.økonomi.Inntekt.Companion.INGEN
+import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -868,11 +870,12 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         }
         inspektør.sisteUtbetalingUtbetalingstidslinje()[dato].let {
             assertTrue(it is UD) { "Forventet ${UD::class.simpleName} men var ${it::class.simpleName}"}
-            assertEquals(beløp, it.økonomi.inspektør.arbeidsgiverbeløp)
+            assertEquals(beløp.daglig, it.økonomi.inspektør.arbeidsgiverbeløp)
+            assertEquals(INGEN, it.økonomi.inspektør.personbeløp)
         }
     }
 
     private fun assertDiff(diff: Int) {
-        assertEquals(diff, inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.inspektør.nettoBeløp)
+        assertEquals(diff, inspektør.utbetalinger.last().inspektør.nettobeløp)
     }
 }
