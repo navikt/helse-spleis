@@ -1,10 +1,15 @@
 package no.nav.helse.økonomi
 
 import java.time.LocalDate
-import no.nav.helse.*
+import no.nav.helse.Grunnbeløp
+import no.nav.helse.april
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.hendelser.til
+import no.nav.helse.januar
+import no.nav.helse.mai
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.etterlevelse.MaskinellJurist
+import no.nav.helse.september
 import no.nav.helse.testhelpers.ARB
 import no.nav.helse.testhelpers.AVV
 import no.nav.helse.testhelpers.NAV
@@ -13,6 +18,7 @@ import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.MaksimumUtbetaling
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.AvvistDag
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -41,6 +47,28 @@ internal class ØkonomiDagTest {
         val a = tidslinjeOf(2.NAV(1201, 50.0))
         listOf(a).betal()
         assertØkonomi(a, 601.0)
+    }
+
+    @Test
+    fun `liten inntekt`() {
+        val inntekt = 5000.månedlig
+        val a = tidslinjeOf(1.NAV(inntekt))
+        listOf(a).betal()
+        assertØkonomi(a, 231.0, 0.0)
+        val b = tidslinjeOf(1.NAV(inntekt, 50))
+        listOf(b).betal()
+        assertForventetFeil(
+            forklaring = "Differanse mellom utbetaling til arbeidsgiver og sykepengegrunnlag utgjør 260 kr som skal tilfalle bruker",
+            nå = {
+                assertØkonomi(b, 115.0, 0.0)
+            },
+            ønsket = {
+                assertØkonomi(b, 115.0, 1.0)
+            }
+        )
+        val c = tidslinjeOf(1.NAV(inntekt, refusjonsbeløp = inntekt/2))
+        listOf(c).betal()
+        assertØkonomi(c, 115.0, 116.0) // 231
     }
 
     @Test
