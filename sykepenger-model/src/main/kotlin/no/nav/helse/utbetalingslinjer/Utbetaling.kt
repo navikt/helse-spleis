@@ -17,7 +17,6 @@ import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.Aktivitetskontekst
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.godkjenning
-import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.Inntektskilde
@@ -1006,13 +1005,13 @@ internal class Utbetaling private constructor(
         private val vedtaksperioder = mutableMapOf<UUID, Vedtaksperiodegrunnlag>()
         internal fun vedtaksperiode(
             vedtaksperiodeId: UUID,
+            organisasjonsnummer: String,
             sisteUtbetaling: Utbetaling?,
-            arbeidsgiver: Arbeidsgiver,
             lagre: (utbetaling: Utbetaling) -> Unit
         ) = apply {
             require(!vedtaksperioder.contains(vedtaksperiodeId)) { "Vedtaksperiode $vedtaksperiodeId er allerede lagt til." }
             vedtaksperioder[vedtaksperiodeId] = Vedtaksperiodegrunnlag(
-                organisasjonsnummer = arbeidsgiver.organisasjonsnummer(),
+                organisasjonsnummer = organisasjonsnummer,
                 sisteUtbetaling = sisteUtbetaling,
                 lagre = lagre
             )
@@ -1024,7 +1023,7 @@ internal class Utbetaling private constructor(
             Sykdomsgradfilter.filter(tidslinjer, periode, aktivitetslogg, subsumsjonObserver)
             avvisDagerEtterDødsdatofilter.filter(tidslinjer, periode, aktivitetslogg, subsumsjonObserver)
             avvisInngangsvilkårfilter.filter(tidslinjer, periode, aktivitetslogg, subsumsjonObserver)
-            // TODO: MaksimumSykepengedagerfilter
+            // TODO: MaksimumSykepengedagerfilter, maksimumSykepenger =
             MaksimumUtbetaling().filter(tidslinjer, periode, aktivitetslogg, subsumsjonObserver)
         }
 
@@ -1058,9 +1057,13 @@ internal class Utbetaling private constructor(
                     utbetalingstidslinje = utbetalingstidslinje,
                     sisteDato = periode.endInclusive,
                     aktivitetslogg = aktivitetslogg,
-                    maksdato = maksimumSykepenger.sisteDag(),
-                    forbrukteSykedager = maksimumSykepenger.forbrukteDager(),
-                    gjenståendeSykedager = maksimumSykepenger.gjenståendeDager(),
+                    maksdato = periode.endInclusive.plusDays(100),
+                    forbrukteSykedager = 100,
+                    gjenståendeSykedager = 100,
+                    // TODO: Bruke disse når den er satt
+                    //maksdato = maksimumSykepenger.sisteDag(),
+                    //forbrukteSykedager = maksimumSykepenger.forbrukteDager(),
+                    //gjenståendeSykedager = maksimumSykepenger.gjenståendeDager(),
                     forrige = vedtaksperiodegrunnlag.sisteUtbetaling
                 )
                 vedtaksperiodegrunnlag.lagre(utbetaling)
