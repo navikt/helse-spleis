@@ -14,6 +14,7 @@ import no.nav.helse.mars
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.ForlengelseFraInfotrygd
 import no.nav.helse.person.ForlengelseFraInfotrygd.IKKE_ETTERSPURT
+import no.nav.helse.person.ForlengelseFraInfotrygd.JA
 import no.nav.helse.person.ForlengelseFraInfotrygd.NEI
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.TilstandType
@@ -503,13 +504,15 @@ internal class NyTilstandsflytInfotrygdTest : AbstractEndToEndTest() {
             Inntektsopplysning(ORGNUMMER, 1.februar, INNTEKT, true)
         ))
         utbetalPeriode(3.vedtaksperiode)
+        tvingForlengelseFraInfotrygd(3.vedtaksperiode, NEI)
 
         håndterSykmelding(Sykmeldingsperiode(1.april, 30.april, 100.prosent))
         håndterSøknad(Sykdom(1.april, 30.april, 100.prosent))
-        tvingForlengelseFraInfotrygd(4.vedtaksperiode, NEI)
+        assertTilstand(4.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
         håndterUtbetalingshistorikk(4.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.februar, 28.februar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
             Inntektsopplysning(ORGNUMMER, 1.februar, INNTEKT, true)
         ))
+        håndterPåminnelse(4.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
         utbetalPeriode(4.vedtaksperiode)
 
         håndterSykmelding(Sykmeldingsperiode(1.mai, 30.mai, 100.prosent))
@@ -519,6 +522,10 @@ internal class NyTilstandsflytInfotrygdTest : AbstractEndToEndTest() {
         ))
         håndterPåminnelse(5.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
         assertTilstand(5.vedtaksperiode, AVVENTER_HISTORIKK)
+
+        assertEquals(JA, inspektør.forlengelseFraInfotrygd(3.vedtaksperiode))
+        assertEquals(JA, inspektør.forlengelseFraInfotrygd(4.vedtaksperiode))
+        assertEquals(JA, inspektør.forlengelseFraInfotrygd(5.vedtaksperiode))
     }
 
     /*

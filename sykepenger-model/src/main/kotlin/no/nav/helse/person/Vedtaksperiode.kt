@@ -832,7 +832,7 @@ internal class Vedtaksperiode private constructor(
                 vedtaksperiode.arbeidsgiver.finnSammenhengendePeriode(vedtaksperiode.skjæringstidspunkt)
             val førsteInfotrygdForlengelse = vedtaksperioder.sorted().firstOrNull { it.forlengelseFraInfotrygd() }
             if (førsteInfotrygdForlengelse != null) {
-                vedtaksperioder.filter { it etter førsteInfotrygdForlengelse }.forEach { periode ->
+                vedtaksperioder.filter { it >= førsteInfotrygdForlengelse }.forEach { periode ->
                     periode.forlengelseFraInfotrygd = JA
                     sikkerlogg.info(
                         "Setter forlengelseFraInfotrygd til ${periode.forlengelseFraInfotrygd} " +
