@@ -98,6 +98,9 @@ spec:
           application: spenn-avstemming
           access: readwrite
         - team: tbd
+          application: spenn-opprydding-dev
+          access: readwrite
+        - team: tbd
           application: spesialist
           access: readwrite
         - team: tbd
