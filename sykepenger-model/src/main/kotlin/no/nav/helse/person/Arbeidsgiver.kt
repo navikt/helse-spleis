@@ -314,35 +314,6 @@ internal class Arbeidsgiver private constructor(
             it.sykmeldingsperioder.fjern(tom.minusDays(1))
         }
 
-        internal fun Iterable<Arbeidsgiver>.build(
-            builder: Utbetaling.Builder,
-            regler: ArbeidsgiverRegler,
-            skjæringstidspunkter: List<LocalDate>,
-            vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk,
-            inntektsopplysningPerSkjæringstidspunktPerArbeidsgiver: Map<LocalDate, Map<String, Inntektshistorikk.Inntektsopplysning>>?,
-            subsumsjonObserver: SubsumsjonObserver) = builder.also {
-            forEach { arbeidsgiver -> it.arbeidsgiver(
-                organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
-                sykdomstidslinje = arbeidsgiver.sykdomstidslinje(),
-                utbetalinger = arbeidsgiver.utbetalinger,
-                refusjonshistorikk = arbeidsgiver.refusjonshistorikk,
-                lagre = { utbetalingstidlinje ->
-                    // TODO: Trenger å få tilbake beregningId her
-                    // TODO: Der lagreUtbetalingstidslinjeberegning kalles i dag brukes ikke arbeidsgiver.organisasjonsnummer..
-                    arbeidsgiver.lagreUtbetalingstidslinjeberegning(arbeidsgiver.organisasjonsnummer, utbetalingstidlinje, vilkårsgrunnlagHistorikk)
-                    UUID.randomUUID()
-                },
-                inntekter = Inntekter(
-                    skjæringstidspunkter = skjæringstidspunkter,
-                    inntektPerSkjæringstidspunkt = inntektsopplysningPerSkjæringstidspunktPerArbeidsgiver?.mapValues { (_, inntektsopplysningPerArbeidsgiver) ->
-                        inntektsopplysningPerArbeidsgiver[arbeidsgiver.organisasjonsnummer]
-                    },
-                    regler = regler,
-                    subsumsjonObserver = subsumsjonObserver
-                )
-            )}
-        }
-
         internal fun søppelbøtte(
             arbeidsgivere: List<Arbeidsgiver>,
             hendelse: IAktivitetslogg,
@@ -362,6 +333,14 @@ internal class Arbeidsgiver private constructor(
             nesteTilstand = AvventerHistorikkRevurdering,
             filter = IKKE_FERDIG_REVURDERT
         )
+    }
+
+    internal fun lagUtbetaling(
+        builder: Utbetaling.Builder,
+        skjæringstidspunkter: List<LocalDate>,
+        inntektsopplysninger: Map<LocalDate, Inntektshistorikk.Inntektsopplysning?>?
+    ) {
+        builder.arbeidsgiver(organisasjonsnummer, sykdomstidslinje(), skjæringstidspunkter, inntektsopplysninger, utbetalinger, refusjonshistorikk)
     }
 
     internal fun avventerRevurdering() = vedtaksperioder.avventerRevurdering()

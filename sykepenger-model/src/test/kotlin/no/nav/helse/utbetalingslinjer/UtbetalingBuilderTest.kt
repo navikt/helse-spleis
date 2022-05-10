@@ -11,86 +11,114 @@ import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.Inntektshistorikk.Inntektsopplysning
 import no.nav.helse.person.Refusjonshistorikk
-import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
+import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.NullObserver
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.S
 import no.nav.helse.testhelpers.assertNotNull
+import no.nav.helse.testhelpers.resetSeed
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
-import no.nav.helse.utbetalingstidslinje.Inntekter
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjerFilter
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
+import org.junit.jupiter.api.assertThrows
 
 internal class UtbetalingBuilderTest {
 
     private lateinit var aktivitetslogg: Aktivitetslogg
-    private val utbetalingstidslinjer = mutableMapOf<String, Utbetalingstidslinje>()
-    private val utbetalinger = mutableMapOf<UUID, Utbetaling>()
 
     @BeforeEach
     internal fun clear() {
         aktivitetslogg = Aktivitetslogg()
-        utbetalingstidslinjer.clear()
-        utbetalinger.clear()
+        resetSeed()
     }
 
     @Test
     fun `utbetalinger for en arbeidsgiver`() {
-        nyBuilder(1.januar til 31.januar)
-            .arbeidsgiver(
-                organisasjonsnummer = arbeidsgiver1,
-                sykdomstidslinje = 31.S,
-                inntekter = inntekter(
-                    inntektsmelding(1.januar, 1200.daglig)
-                )
-            )
-            .vedtaksperiode(
-                vedtaksperiodeId = vedtaksperiode1,
-                organisasjonsnummer = arbeidsgiver1
-            )
-            .build()
+        val utbetalinger = nyBuilder(1.januar til 31.januar)
+            .avvisInngangsvilkårfilter(dummyUtbetalingstidslinjerFilter)
+            .arbeidsgiver(arbeidsgiver1, 31.S, inntektsmelding(1.januar, 1200.daglig))
+            .vedtaksperiode(vedtaksperiode1, arbeidsgiver1, null)
+            .utbetalinger()
 
         assertNotNull(utbetalinger.getValue(vedtaksperiode1))
-        assertNotNull(utbetalingstidslinjer.getValue(arbeidsgiver1))
+        assertEquals(1, utbetalinger.size)
     }
 
+    @Test
+    fun `utbetalinger for flere arbeidsgivere`() {
+        val v1 = UUID.randomUUID()
+        val v2 = UUID.randomUUID()
+        val a1 = "123456789"
+        val a2 = "987654321"
+        val utbetalinger = nyBuilder(1.januar til 31.januar)
+            .avvisInngangsvilkårfilter(dummyUtbetalingstidslinjerFilter)
+            .arbeidsgiver(a1, 31.S, inntektsmelding(1.januar, 1200.daglig))
+            .arbeidsgiver(a2, 28.S, inntektsmelding(1.januar, 1200.daglig))
+            .vedtaksperiode(v1, a1, null)
+            .vedtaksperiode(v2, a2, null)
+            .utbetalinger()
+
+        assertNotNull(utbetalinger.getValue(v1))
+        assertNotNull(utbetalinger.getValue(v2))
+        assertEquals(2, utbetalinger.size)
+    }
+
+    @Test
+    fun `arbeidsgiver uten vedtaksperiode`() {
+        val a1 = "123456789"
+        val builder = nyBuilder(1.januar til 31.januar)
+            .avvisInngangsvilkårfilter(dummyUtbetalingstidslinjerFilter)
+            .arbeidsgiver(a1, 28.S, inntektsmelding(1.januar, 1200.daglig))
+
+        assertThrows<UninitializedPropertyAccessException>("kan ikke ha satt arbeidsgiver uten å sette vedtaksperiode") {
+            builder.utbetalinger()
+        }
+    }
+
+    @Test
+    fun `arbeidsgiver må være satt før vedtaksperiode settes`() {
+        assertThrows<IllegalStateException> {
+            nyBuilder(1.januar til 31.januar)
+                .avvisInngangsvilkårfilter(dummyUtbetalingstidslinjerFilter)
+                .vedtaksperiode(UUID.randomUUID(), "123456789", null)
+        }
+
+        assertDoesNotThrow {
+            nyBuilder(1.januar til 31.januar)
+                .avvisInngangsvilkårfilter(dummyUtbetalingstidslinjerFilter)
+                .arbeidsgiver("123456789", 31.S, inntektsmelding(1.januar, 1200.daglig))
+                .vedtaksperiode(UUID.randomUUID(), "123456789", null)
+        }
+    }
+
+    @Test
+    fun `avvisInngangsvilkårfilter må settes`() {
+        assertThrows<UninitializedPropertyAccessException> {
+            nyBuilder(1.januar til 31.januar)
+                .arbeidsgiver("123456789", 31.S, inntektsmelding(1.januar, 1200.daglig))
+                .vedtaksperiode(UUID.randomUUID(), "123456789", null)
+                .utbetalinger()
+        }
+        resetSeed()
+        assertDoesNotThrow {
+            nyBuilder(1.januar til 31.januar)
+                .avvisInngangsvilkårfilter(dummyUtbetalingstidslinjerFilter)
+                .arbeidsgiver("123456789", 31.S, inntektsmelding(1.januar, 1200.daglig))
+                .vedtaksperiode(UUID.randomUUID(), "123456789", null)
+                .utbetalinger()
+        }
+    }
     private fun nyBuilder(
         periode: Periode, infotrygdHistorikk:
         Infotrygdhistorikk = Infotrygdhistorikk()
-    ) = Utbetaling.Builder(aktivitetslogg, periode)
-        .fødselsnummer(fødselsnummer)
-        .subsumsjonsObserver(subsumsjonObserver)
-        .avvisDagerEtterDødsdatofilter(dummyUtbetalingstidslinjerFilter)
-        .avvisInngangsvilkårfilter(dummyUtbetalingstidslinjerFilter)
-        .infotrygdhistorikk(infotrygdHistorikk)
-
-    private fun Utbetaling.Builder.arbeidsgiver(
-        organisasjonsnummer: String,
-        sykdomstidslinje: Sykdomstidslinje,
-        inntekter: Inntekter,
-        utbetalinger: List<Utbetaling> = emptyList(),
-        refusjonshistorikk: Refusjonshistorikk = Refusjonshistorikk()
-    ) = apply {
-        arbeidsgiver(organisasjonsnummer, sykdomstidslinje, inntekter, utbetalinger, refusjonshistorikk) { utbetalingstidslinje ->
-            utbetalingstidslinjer[organisasjonsnummer] = utbetalingstidslinje
-            UUID.randomUUID()
-        }
-    }
-
-    private fun Utbetaling.Builder.vedtaksperiode(
-        vedtaksperiodeId: UUID,
-        organisasjonsnummer: String,
-        sisteUtbetaling: Utbetaling? = null,
-    ) = apply {
-        vedtaksperiode(vedtaksperiodeId, organisasjonsnummer, sisteUtbetaling) { utbetaling ->
-            utbetalinger[vedtaksperiodeId] = utbetaling
-        }
-    }
+    ) = Utbetaling.Builder(fødselsnummer, aktivitetslogg, periode, NullObserver, null, infotrygdHistorikk, NormalArbeidstaker)
 
     private companion object {
         private val dummyUtbetalingstidslinjerFilter = object : UtbetalingstidslinjerFilter {
@@ -101,22 +129,22 @@ internal class UtbetalingBuilderTest {
                 subsumsjonObserver: SubsumsjonObserver
             ) = tidslinjer
         }
-        private val subsumsjonObserver = MaskinellJurist()
 
         private val fødselsnummer = Fødselsnummer.tilFødselsnummer("12029240045")
-        private val arbeidsgiver1 = "987654321"
+        private const val arbeidsgiver1 = "987654321"
         private val vedtaksperiode1 = UUID.fromString("a0ec1467-4ac1-46a9-b131-436c6befc9a5")
 
         private fun inntektsmelding(skjæringstidspunkt: LocalDate, inntekt: Inntekt) =
             skjæringstidspunkt to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), skjæringstidspunkt, UUID.randomUUID(), inntekt)
 
-        private fun inntekter(
-            vararg inntektsopplysninger: Pair<LocalDate, Inntektsopplysning>
-        ) = Inntekter(
-            skjæringstidspunkter = inntektsopplysninger.map { it.first },
-            inntektPerSkjæringstidspunkt = inntektsopplysninger.toMap(),
-            regler = NormalArbeidstaker,
-            subsumsjonObserver = subsumsjonObserver
-        )
+        private fun Utbetaling.Builder.arbeidsgiver(
+            organisasjonsnummer: String,
+            sykdomstidslinje: Sykdomstidslinje,
+            vararg inntekter: Pair<LocalDate, Inntektsopplysning>,
+            skjæringstidspunkter: List<LocalDate> = inntekter.toMap().keys.toList()
+        ): Utbetaling.Builder {
+            resetSeed()
+            return arbeidsgiver(organisasjonsnummer, sykdomstidslinje, skjæringstidspunkter, inntekter.toMap(), emptyList(), Refusjonshistorikk())
+        }
     }
 }

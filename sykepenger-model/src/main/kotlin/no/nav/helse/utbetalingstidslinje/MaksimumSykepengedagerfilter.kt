@@ -10,6 +10,7 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.Nav
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.UkjentDag
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
+import no.nav.helse.utbetalingslinjer.Utbetaling
 
 internal class MaksimumSykepengedagerfilter(
     private val alder: Alder,
@@ -34,6 +35,14 @@ internal class MaksimumSykepengedagerfilter(
     private lateinit var tidslinjegrunnlag: List<Utbetalingstidslinje>
 
     internal fun maksimumSykepenger() = maksimumSykepenger
+
+    internal fun maksimumSykepenger(builder: Utbetaling.Builder) {
+        builder.maksimumSykepenger(
+            sisteDag = maksimumSykepenger.sisteDag(),
+            gjenståendeSykedager = maksimumSykepenger.gjenståendeDager(),
+            forbrukteSykedager = maksimumSykepenger.forbrukteDager()
+        )
+    }
 
     private fun avvisDag(dag: LocalDate, begrunnelse: Begrunnelse) {
         begrunnelserForAvvisteDager.getOrPut(begrunnelse) {

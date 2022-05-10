@@ -68,6 +68,14 @@ internal class VedtaksperiodeUtbetalinger(private val arbeidsgiver: Arbeidsgiver
     }
 
     internal fun lagUtbetaling(
+        builder: Utbetaling.Builder,
+        vedtaksperiodeId: UUID,
+        organisasjonsnummer: String
+    ) {
+        builder.vedtaksperiode(vedtaksperiodeId, organisasjonsnummer, siste)
+    }
+
+    internal fun lagUtbetaling(
         fødselsnummer: String,
         periode: Periode,
         maksimumSykepenger: Alder.MaksimumSykepenger,

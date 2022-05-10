@@ -2521,6 +2521,18 @@ internal class Vedtaksperiode private constructor(
 
         internal val ALLE: VedtaksperiodeFilter = { true }
 
+        internal fun List<Vedtaksperiode>.lagUtbetalinger(
+            builder: Utbetaling.Builder,
+            skjæringstidspunkter: List<LocalDate>,
+            inntektsopplysninger: Map<LocalDate, Map<String, Inntektshistorikk.Inntektsopplysning>>?
+        ) {
+            forEach { periode ->
+                val inntektsopplysningerForArbeidsgiver = inntektsopplysninger?.mapValues { (_, value) -> value[periode.organisasjonsnummer] }
+                periode.arbeidsgiver.lagUtbetaling(builder, skjæringstidspunkter, inntektsopplysningerForArbeidsgiver)
+                periode.utbetalinger.lagUtbetaling(builder, periode.id, periode.organisasjonsnummer)
+            }
+        }
+
         internal fun aktivitetsloggMedForegåendeUtenUtbetaling(vedtaksperiode: Vedtaksperiode): Aktivitetslogg {
             val tidligereUbetalt =
                 vedtaksperiode.arbeidsgiver.finnSykeperioderAvsluttetUtenUtbetalingRettFør(vedtaksperiode)

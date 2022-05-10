@@ -36,7 +36,6 @@ import no.nav.helse.hendelser.validerMinimumInntekt
 import no.nav.helse.person.Arbeidsgiver.Companion.beregnFeriepengerForAlleArbeidsgivere
 import no.nav.helse.person.Arbeidsgiver.Companion.beregnOpptjening
 import no.nav.helse.person.Arbeidsgiver.Companion.beregnSykepengegrunnlag
-import no.nav.helse.person.Arbeidsgiver.Companion.build
 import no.nav.helse.person.Arbeidsgiver.Companion.deaktiverteArbeidsforhold
 import no.nav.helse.person.Arbeidsgiver.Companion.finn
 import no.nav.helse.person.Arbeidsgiver.Companion.ghostPeriode
@@ -55,6 +54,7 @@ import no.nav.helse.person.Arbeidsgiver.Companion.nåværendeVedtaksperioder
 import no.nav.helse.person.Arbeidsgiver.Companion.slettUtgåtteSykmeldingsperioder
 import no.nav.helse.person.Arbeidsgiver.Companion.startRevurdering
 import no.nav.helse.person.Vedtaksperiode.Companion.ALLE
+import no.nav.helse.person.Vedtaksperiode.Companion.lagUtbetalinger
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.subsumsjonsformat
@@ -68,7 +68,6 @@ import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbe
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverUtbetalinger
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverperiodeBuilderBuilder
-import no.nav.helse.utbetalingstidslinje.AvvisDagerEtterDødsdatofilter
 import no.nav.helse.utbetalingstidslinje.AvvisInngangsvilkårfilter
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
 import no.nav.helse.økonomi.Inntekt
@@ -887,19 +886,21 @@ class Person private constructor(
         arbeidsgivere.slettUtgåtteSykmeldingsperioder(tom)
     }
 
-    internal fun build(builder: Utbetaling.Builder) = builder.apply {
-        fødselsnummer(fødselsnummer)
-        subsumsjonsObserver(jurist)
-        infotrygdhistorikk(infotrygdhistorikk)
-        avvisInngangsvilkårfilter(AvvisInngangsvilkårfilter(vilkårsgrunnlagHistorikk, fødselsnummer.alder()))
-        avvisDagerEtterDødsdatofilter(AvvisDagerEtterDødsdatofilter(dødsdato))
-        arbeidsgivereMedSykdom().build(
-            builder = this,
-            skjæringstidspunkter = skjæringstidspunkter(),
-            inntektsopplysningPerSkjæringstidspunktPerArbeidsgiver = vilkårsgrunnlagHistorikk.inntektsopplysningPerSkjæringstidspunktPerArbeidsgiver(),
-            subsumsjonObserver = jurist,
-            vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk,
+    internal fun lagUtbetalinger(aktivitetslogg: IAktivitetslogg, periode: Periode, subsumsjonObserver: SubsumsjonObserver, vedtaksperioder: List<Vedtaksperiode>) =
+        Utbetaling.Builder(
+            fødselsnummer = fødselsnummer,
+            aktivitetslogg = aktivitetslogg,
+            periode = periode,
+            subsumsjonObserver = subsumsjonObserver,
+            dødsdato = dødsdato,
+            infotrygdhistorikk = infotrygdhistorikk,
             regler = NormalArbeidstaker
-        )
-    }
+        ).apply {
+            avvisInngangsvilkårfilter(AvvisInngangsvilkårfilter(vilkårsgrunnlagHistorikk, fødselsnummer.alder()))
+            vedtaksperioder.lagUtbetalinger(
+                this,
+                skjæringstidspunkter(),
+                vilkårsgrunnlagHistorikk.inntektsopplysningPerSkjæringstidspunktPerArbeidsgiver()
+            )
+        }
 }
