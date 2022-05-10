@@ -1,5 +1,6 @@
 package no.nav.helse.økonomi
 
+import java.time.LocalDate
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.SykdomstidslinjeVisitor
@@ -7,13 +8,17 @@ import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.AvvistDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavHelgDag
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.summer
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
+import no.nav.helse.økonomi.Prosentdel.Companion.fraRatio
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import java.time.LocalDate
 import kotlin.math.roundToInt
 import kotlin.properties.Delegates
 
@@ -33,8 +38,8 @@ internal class Økonomi private constructor(
 ) {
 
     companion object {
-        internal val arbeidsgiverBeløp = { økonomi: Økonomi -> økonomi.arbeidsgiverbeløp!! }
-        internal val personBeløp = { økonomi: Økonomi -> økonomi.personbeløp!! }
+        private val arbeidsgiverBeløp = { økonomi: Økonomi -> økonomi.arbeidsgiverbeløp!! }
+        private val personBeløp = { økonomi: Økonomi -> økonomi.personbeløp!! }
 
         internal fun sykdomsgrad(grad: Prosentdel) =
             Økonomi(grad)
@@ -78,88 +83,55 @@ internal class Økonomi private constructor(
             økonomiList.forEach { it.grunnbeløpgrense = Grunnbeløp.`6G`.beløp(skjæringstidspunkt, virkningsdato) }
 
             val grense = maksbeløp(økonomiList.first())
-            fordelArbeidsgiverbeløp(økonomiList, totalArbeidsgiver, grense)
-            fordelPersonbeløp(økonomiList, totalPerson + totalArbeidsgiver - totalArbeidsgiver(økonomiList), grense - totalArbeidsgiver(økonomiList))
+            val sykepengegrunnlag = minOf(total, grense) // TODO: få sykepengegrunnlaget (før 6g) fra Vilkårsgrunnlag
+            fordel(økonomiList, totalArbeidsgiver, sykepengegrunnlag, { økonomi, inntekt -> økonomi.arbeidsgiverbeløp = inntekt }, arbeidsgiverBeløp)
+            val totalArbeidsgiverrefusjon = totalArbeidsgiver(økonomiList)
+            fordel(økonomiList, total - totalArbeidsgiverrefusjon, sykepengegrunnlag - totalArbeidsgiverrefusjon, { økonomi, inntekt -> økonomi.personbeløp = inntekt }, personBeløp)
             økonomiList.forEach { økonomi -> økonomi.er6GBegrenset = total > grense }
         }
 
-        private fun fordelPersonbeløp(økonomiList: List<Økonomi>, total: Inntekt, budsjett: Inntekt) {
-            val beregningsresultat = beregnUtbetalingFørAvrunding(
-                økonomiList,
-                total,
-                budsjett,
-            ) { it.personbeløp!! }
+        private fun fordel(økonomiList: List<Økonomi>, total: Inntekt, grense: Inntekt, setter: (Økonomi, Inntekt?) -> Unit, getter: (Økonomi) -> Inntekt?) {
+            val ratio = reduksjon(grense, total)
+            val beregningsresultat = økonomiList.map { Beregningsresultat(it, getter(it)?.times(ratio)) }
 
-            beregningsresultat.forEach { it.økonomi.personbeløp = it.utbetalingEtterAvrunding() }
+            beregningsresultat.forEach { it.oppdater(setter) }
 
-            val totaltRestbeløp =
-                (total.coerceAtMost(budsjett) - totalPerson(økonomiList))
-                    .reflection { _, _, _, dagligInt -> dagligInt }
+            val totaltRestbeløp = (total.coerceAtMost(grense) - total(økonomiList, getter))
+                .reflection { _, _, _, dagligInt -> dagligInt }
 
-            beregningsresultat
-                .sortedByDescending { it.differanse() }
-                .take(totaltRestbeløp)
-                .forEach { it.økonomi.personbeløp = it.økonomi.personbeløp!! + 1.daglig }
+            Beregningsresultat.fordel(beregningsresultat, totaltRestbeløp, setter, getter)
         }
 
-        private fun fordelArbeidsgiverbeløp(økonomiList: List<Økonomi>, total: Inntekt, grense: Inntekt) {
-            val beregningsresultat = beregnUtbetalingFørAvrunding(
-                økonomiList,
-                total,
-                grense
-            ) { it.arbeidsgiverbeløp!! }
-
-            beregningsresultat.forEach { it.økonomi.arbeidsgiverbeløp = it.utbetalingEtterAvrunding() }
-
-            val totaltRestbeløp =
-                (total.coerceAtMost(grense) - totalArbeidsgiver(økonomiList))
-                    .reflection { _, _, _, dagligInt -> dagligInt }
-
-            beregningsresultat
-                .sortedByDescending { it.differanse() }
-                .take(totaltRestbeløp)
-                .forEach { it.økonomi.arbeidsgiverbeløp = it.økonomi.arbeidsgiverbeløp!! + 1.daglig }
+        private fun reduksjon(grense: Inntekt, total: Inntekt): Prosentdel {
+            if (total == INGEN) return 0.prosent
+            return fraRatio((grense ratio total).coerceAtMost(1.0))
         }
 
-        private fun beregnUtbetalingFørAvrunding(
-            økonomiList: List<Økonomi>,
-            total: Inntekt,
-            grense: Inntekt,
-            get: (Økonomi) -> Inntekt,
-        ): List<Beregningsresultat> {
-            if (total <= 0.daglig) {
-                return økonomiList.map { Beregningsresultat(økonomi = it, utbetalingFørAvrunding = 0.daglig) }
+        private class Beregningsresultat(private val økonomi: Økonomi, beløp: Inntekt?) {
+            private val utbetalingFørAvrunding = beløp ?: INGEN
+            private val utbetalingEtterAvrunding = utbetalingFørAvrunding.rundNedTilDaglig()
+            private val differanse = (utbetalingFørAvrunding - utbetalingEtterAvrunding).reflection { _, _, daglig, _ -> daglig }
+
+            fun oppdater(setter: (Økonomi, Inntekt?) -> Unit) {
+                setter(this.økonomi, this.utbetalingEtterAvrunding)
             }
 
-            val ratio = grense ratio total
-
-            return økonomiList
-                .map {
-                    val utbetalingFørAvrunding = get(it) * ratio.coerceAtMost(1.0)
-                    Beregningsresultat(
-                        økonomi = it,
-                        utbetalingFørAvrunding = utbetalingFørAvrunding
-                    )
+            companion object {
+                fun fordel(liste: List<Beregningsresultat>, rest: Int, setter: (Økonomi, Inntekt?) -> Unit, getter: (Økonomi) -> Inntekt?) {
+                    liste
+                        .sortedByDescending { it.differanse }
+                        .take(rest)
+                        .forEach { setter(it.økonomi, getter(it.økonomi)?.plus(1.daglig)) }
                 }
+            }
         }
 
-        data class Beregningsresultat(
-            internal val økonomi: Økonomi,
-            internal val utbetalingFørAvrunding: Inntekt,
-        ) {
-            internal fun differanse() = (utbetalingFørAvrunding - utbetalingEtterAvrunding()).reflection { _, _, daglig, _ -> daglig }
-            internal fun utbetalingEtterAvrunding() = utbetalingFørAvrunding.rundNedTilDaglig()
-        }
+        private fun total(økonomiList: List<Økonomi>, strategi: (Økonomi) -> Inntekt?): Inntekt =
+            økonomiList.mapNotNull { strategi(it) }.summer()
 
-        private fun totalArbeidsgiver(økonomiList: List<Økonomi>): Inntekt =
-            økonomiList
-                .map { it.arbeidsgiverbeløp ?: throw IllegalStateException("utbetalinger ennå ikke beregnet") }
-                .summer()
+        private fun totalArbeidsgiver(økonomiList: List<Økonomi>) = total(økonomiList, arbeidsgiverBeløp)
 
-        private fun totalPerson(økonomiList: List<Økonomi>): Inntekt =
-            økonomiList
-                .map { it.personbeløp ?: throw IllegalStateException("utbetalinger ennå ikke beregnet") }
-                .summer()
+        private fun totalPerson(økonomiList: List<Økonomi>) = total(økonomiList, personBeløp)
 
         internal fun er6GBegrenset(økonomiList: List<Økonomi>) =
             økonomiList.any { it.er6GBegrenset() }
