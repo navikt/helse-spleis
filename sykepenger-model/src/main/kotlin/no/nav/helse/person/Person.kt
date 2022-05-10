@@ -898,6 +898,7 @@ class Person private constructor(
             skjæringstidspunkter = skjæringstidspunkter(),
             inntektsopplysningPerSkjæringstidspunktPerArbeidsgiver = vilkårsgrunnlagHistorikk.inntektsopplysningPerSkjæringstidspunktPerArbeidsgiver(),
             subsumsjonObserver = jurist,
+            vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk,
             regler = NormalArbeidstaker
         )
     }

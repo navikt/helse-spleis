@@ -974,7 +974,8 @@ internal class Utbetaling private constructor(
         private class Arbeidsgivergrunnlag(
             val sykdomstidslinje: Sykdomstidslinje,
             val inntekter: Inntekter,
-            val utbetalinger: List<Utbetaling>
+            val utbetalinger: List<Utbetaling>,
+            val lagre: (utbetalingstidslinje: Utbetalingstidslinje) -> UUID
         )
         private val arbeidsgivere = mutableMapOf<Arbeidsgiver, Arbeidsgivergrunnlag>()
         private fun arbeidsgivergrunnlag(organisasjonsnummer: String) =
@@ -983,30 +984,35 @@ internal class Utbetaling private constructor(
             arbeidsgiver: Arbeidsgiver,
             sykdomstidslinje: Sykdomstidslinje,
             inntekter: Inntekter,
-            utbetalinger: List<Utbetaling>
+            utbetalinger: List<Utbetaling>,
+            lagre: (utbetalingstidslinje: Utbetalingstidslinje) -> UUID
         ) = apply {
             require(!arbeidsgivere.contains(arbeidsgiver)) { "Arbeidsgiver ${arbeidsgiver.organisasjonsnummer()} er allerede lagt til." }
             arbeidsgivere[arbeidsgiver] = Arbeidsgivergrunnlag(
                 sykdomstidslinje = sykdomstidslinje,
                 inntekter = inntekter,
-                utbetalinger = utbetalinger
+                utbetalinger = utbetalinger,
+                lagre = lagre
             )
         }
 
         private class Vedtaksperiodegrunnlag(
             val organisasjonsnummer: String,
-            val sisteUtbetaling: Utbetaling?
+            val sisteUtbetaling: Utbetaling?,
+            val lagre: (utbetaling: Utbetaling) -> Unit
         )
         private val vedtaksperioder = mutableMapOf<Vedtaksperiode, Vedtaksperiodegrunnlag>()
         internal fun vedtaksperiode(
             vedtaksperiode: Vedtaksperiode,
             sisteUtbetaling: Utbetaling?,
-            arbeidsgiver: Arbeidsgiver
+            arbeidsgiver: Arbeidsgiver,
+            lagre: (utbetaling: Utbetaling) -> Unit
         ) = apply {
             require(!vedtaksperioder.contains(vedtaksperiode)) { "Vedtaksperiode $vedtaksperiode er allerede lagt til." }
             vedtaksperioder[vedtaksperiode] = Vedtaksperiodegrunnlag(
                 organisasjonsnummer = arbeidsgiver.organisasjonsnummer(),
-                sisteUtbetaling = sisteUtbetaling
+                sisteUtbetaling = sisteUtbetaling,
+                lagre = lagre
             )
         }
 
@@ -1025,7 +1031,7 @@ internal class Utbetaling private constructor(
             false -> utbetalinger()
         }
 
-        private fun utbetalinger(): List<Utbetaling> {
+        private fun utbetalinger() {
             val utbetalingstidslinjer = arbeidsgivere.mapValues { (arbeidsgiver, arbeidsgivergrunnlag) ->
                 val sykdomstidslinje = arbeidsgivergrunnlag.sykdomstidslinje.fremTilOgMed(periode.endInclusive)
                 val utbetalingstidslinjeBuilder = UtbetalingstidslinjeBuilder(arbeidsgivergrunnlag.inntekter)
@@ -1033,13 +1039,13 @@ internal class Utbetaling private constructor(
                     .build(arbeidsgiver.organisasjonsnummer(), sykdomstidslinje, utbetalingstidslinjeBuilder, subsumsjonObserver)
                 Refusjonsgjødsler(utbetalingstidslinje, arbeidsgiver.refusjonshistorikk, infotrygdhistorikk, arbeidsgiver.organisasjonsnummer())
                     .gjødsle(aktivitetslogg, periode)
-                //arbeidsgiver.lagreUtbetalingstidslinjeberegning()
-                UUID.randomUUID() to utbetalingstidslinje
+                val beregningId = arbeidsgivergrunnlag.lagre(utbetalingstidslinje)
+                beregningId to utbetalingstidslinje
             }.mapKeys { it.key.organisasjonsnummer() }
 
             filtrer(utbetalingstidslinjer.values.map { it.second })
 
-            return vedtaksperioder.mapValues { (vedtaksperiode, vedtaksperiodegrunnlag) ->
+            vedtaksperioder.forEach { (_, vedtaksperiodegrunnlag) ->
                 val arbeidsgivergrunnlag = arbeidsgivergrunnlag(vedtaksperiodegrunnlag.organisasjonsnummer)
                 val (beregningId, utbetalingstidslinje) = utbetalingstidslinjer.getValue(vedtaksperiodegrunnlag.organisasjonsnummer)
                 val utbetaling = lagUtbetaling(
@@ -1055,13 +1061,12 @@ internal class Utbetaling private constructor(
                     gjenståendeSykedager = maksimumSykepenger.gjenståendeDager(),
                     forrige = vedtaksperiodegrunnlag.sisteUtbetaling
                 )
-                //vedtaksperiode.lagreUtbetaling()
-                utbetaling
-            }.values.toList()
+                vedtaksperiodegrunnlag.lagre(utbetaling)
+            }
         }
 
-        private fun revurderinger(): List<Utbetaling> {
-            return emptyList()
+        private fun revurderinger() {
+            // TODO
         }
     }
 }

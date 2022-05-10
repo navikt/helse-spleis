@@ -318,12 +318,19 @@ internal class Arbeidsgiver private constructor(
             builder: Utbetaling.Builder,
             regler: ArbeidsgiverRegler,
             skjæringstidspunkter: List<LocalDate>,
+            vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk,
             inntektsopplysningPerSkjæringstidspunktPerArbeidsgiver: Map<LocalDate, Map<String, Inntektshistorikk.Inntektsopplysning>>?,
             subsumsjonObserver: SubsumsjonObserver) = builder.also {
             forEach { arbeidsgiver -> it.arbeidsgiver(
                 arbeidsgiver = arbeidsgiver,
                 sykdomstidslinje = arbeidsgiver.sykdomstidslinje(),
                 utbetalinger = arbeidsgiver.utbetalinger,
+                lagre = { utbetalingstidlinje ->
+                    // TODO: Trenger å få tilbake beregningId her
+                    // TODO: Der lagreUtbetalingstidslinjeberegning kalles i dag brukes ikke arbeidsgiver.organisasjonsnummer..
+                    arbeidsgiver.lagreUtbetalingstidslinjeberegning(arbeidsgiver.organisasjonsnummer, utbetalingstidlinje, vilkårsgrunnlagHistorikk)
+                    UUID.randomUUID()
+                },
                 inntekter = Inntekter(
                     skjæringstidspunkter = skjæringstidspunkter,
                     inntektPerSkjæringstidspunkt = inntektsopplysningPerSkjæringstidspunktPerArbeidsgiver?.mapValues { (_, inntektsopplysningPerArbeidsgiver) ->
