@@ -125,6 +125,25 @@ internal class Sykdomshistorikk private constructor(
                 return Element(beregnetSykdomstidslinje = historikk.sykdomstidslinje().trim(perioder))
             }
 
+            internal fun ferdigSykdomshistorikkElement(
+                id: UUID,
+                hendelseId: UUID?,
+                tidsstempel: LocalDateTime,
+                hendelseSykdomstidslinje: Sykdomstidslinje,
+                beregnetSykdomstidslinje: Sykdomstidslinje
+            ): Element = Element(
+                id = id,
+                hendelseId = hendelseId,
+                tidsstempel = tidsstempel,
+                hendelseSykdomstidslinje = hendelseSykdomstidslinje,
+                beregnetSykdomstidslinje = beregnetSykdomstidslinje
+            )
+
         }
+    }
+
+    internal companion object {
+        internal fun ferdigSykdomshistorikk(historikk: List<Element>): Sykdomshistorikk =
+            Sykdomshistorikk(historikk.toMutableList())
     }
 }

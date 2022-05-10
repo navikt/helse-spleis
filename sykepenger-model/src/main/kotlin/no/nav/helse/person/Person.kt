@@ -83,8 +83,29 @@ class Person private constructor(
     private var dødsdato: LocalDate?,
     private val jurist: MaskinellJurist
 ) : Aktivitetskontekst {
-    private companion object {
+    internal companion object {
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
+        internal fun ferdigPerson(
+            aktørId: String,
+            fødselsnummer: Fødselsnummer,
+            arbeidsgivere: MutableList<Arbeidsgiver>,
+            aktivitetslogg: Aktivitetslogg,
+            opprettet: LocalDateTime,
+            infotrygdhistorikk: Infotrygdhistorikk,
+            vilkårsgrunnlaghistorikk: VilkårsgrunnlagHistorikk,
+            dødsdato: LocalDate?,
+            jurist: MaskinellJurist
+        ): Person = Person(
+            aktørId = aktørId,
+            fødselsnummer = fødselsnummer,
+            arbeidsgivere = arbeidsgivere,
+            aktivitetslogg = aktivitetslogg,
+            opprettet = opprettet,
+            infotrygdhistorikk = infotrygdhistorikk,
+            vilkårsgrunnlagHistorikk = vilkårsgrunnlaghistorikk,
+            dødsdato = dødsdato,
+            jurist = jurist
+        )
     }
 
     constructor(

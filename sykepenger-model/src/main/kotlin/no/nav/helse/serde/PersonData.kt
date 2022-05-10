@@ -69,7 +69,6 @@ import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Satstype
 import no.nav.helse.utbetalingslinjer.Utbetaling
-import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
@@ -84,8 +83,6 @@ import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosent.Companion.ratio
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.Økonomi
-import kotlin.reflect.full.primaryConstructor
-import kotlin.reflect.jvm.isAccessible
 
 internal data class PersonData(
     private val aktørId: String,
@@ -100,20 +97,17 @@ internal data class PersonData(
     private val arbeidsgivereliste = mutableListOf<Arbeidsgiver>()
     private val modelAktivitetslogg get() = aktivitetslogg?.konverterTilAktivitetslogg() ?: Aktivitetslogg()
 
-    //FIXME: Å bruke reflection for å finne konstruktør ødelegger hele greia med privat konstruktør.
-    private fun person(jurist: MaskinellJurist) = Person::class.primaryConstructor!!
-        .apply { isAccessible = true }
-        .call(
-            aktørId,
-            fødselsnummer.somFødselsnummer(),
-            arbeidsgivereliste,
-            modelAktivitetslogg,
-            opprettet,
-            infotrygdhistorikk.tilModellObjekt(),
-            vilkårsgrunnlagHistorikk.tilModellObjekt(),
-            dødsdato,
-            jurist
-        )
+    private fun person(jurist: MaskinellJurist) = Person.ferdigPerson(
+        aktørId = aktørId,
+        fødselsnummer = fødselsnummer.somFødselsnummer(),
+        arbeidsgivere = arbeidsgivereliste,
+        aktivitetslogg = modelAktivitetslogg,
+        opprettet = opprettet,
+        infotrygdhistorikk = infotrygdhistorikk.tilModellObjekt(),
+        vilkårsgrunnlaghistorikk = vilkårsgrunnlagHistorikk.tilModellObjekt(),
+        dødsdato = dødsdato,
+        jurist = jurist
+    )
 
     internal fun createPerson(jurist: MaskinellJurist): Person {
         val personJurist = jurist.medFødselsnummer(fødselsnummer.somFødselsnummer())
@@ -147,29 +141,25 @@ internal data class PersonData(
     ) {
         internal companion object {
             fun List<InfotrygdhistorikkElementData>.tilModellObjekt() =
-                Infotrygdhistorikk::class.primaryConstructor!!
-                    .apply { isAccessible = true }
-                    .call(map { it.parseInfotrygdhistorikkElement() })
+                Infotrygdhistorikk.ferdigInfotrygdhistorikk(map { it.parseInfotrygdhistorikkElement() })
         }
 
-        internal fun parseInfotrygdhistorikkElement() = InfotrygdhistorikkElement::class.primaryConstructor!!
-            .apply { isAccessible = true }
-            .call(
-                id,
-                tidsstempel,
-                hendelseId,
-                arbeidsgiverutbetalingsperioder.map { it.parsePeriode() }
-                        + personutbetalingsperioder.map { it.parsePeriode() }
-                        + ferieperioder.map { it.parsePeriode() }
-                        + ukjenteperioder.map { it.parsePeriode() },
-                inntekter.map { it.parseInntektsopplysning() },
-                arbeidskategorikoder,
-                ugyldigePerioder,
-                harStatslønn,
-                oppdatert,
-                lagretInntekter,
-                lagretVilkårsgrunnlag
-            )
+        internal fun parseInfotrygdhistorikkElement() = InfotrygdhistorikkElement.ferdigElement(
+            id = id,
+            tidsstempel = tidsstempel,
+            hendelseId = hendelseId,
+            infotrygdperioder = arbeidsgiverutbetalingsperioder.map { it.parsePeriode() }
+                    + personutbetalingsperioder.map { it.parsePeriode() }
+                    + ferieperioder.map { it.parsePeriode() }
+                    + ukjenteperioder.map { it.parsePeriode() },
+            inntekter = inntekter.map { it.parseInntektsopplysning() },
+            arbeidskategorikoder = arbeidskategorikoder,
+            ugyldigePerioder = ugyldigePerioder,
+            harStatslønn = harStatslønn,
+            oppdatert = oppdatert,
+            lagretInntekter = lagretInntekter,
+            lagretVilkårsgrunnlag = lagretVilkårsgrunnlag
+        )
 
         data class FerieperiodeData(
             private val fom: LocalDate,
@@ -225,16 +215,14 @@ internal data class PersonData(
             private val refusjonTom: LocalDate?,
             private val lagret: LocalDateTime?
         ) {
-            internal fun parseInntektsopplysning() = Inntektsopplysning::class.primaryConstructor!!
-                .apply { isAccessible = true }
-                .call(
-                    orgnr,
-                    sykepengerFom,
-                    inntekt.månedlig,
-                    refusjonTilArbeidsgiver,
-                    refusjonTom,
-                    lagret
-                )
+            internal fun parseInntektsopplysning() = Inntektsopplysning.ferdigInntektsopplysning(
+                orgnummer = orgnr,
+                sykepengerFom = sykepengerFom,
+                inntekt = inntekt.månedlig,
+                refusjonTilArbeidsgiver = refusjonTilArbeidsgiver,
+                refusjonTom = refusjonTom,
+                lagret = lagret
+            )
         }
     }
 
@@ -254,9 +242,7 @@ internal data class PersonData(
                     innslag
                 }
 
-            internal fun List<VilkårsgrunnlagInnslagData>.tilModellObjekt() = VilkårsgrunnlagHistorikk::class.primaryConstructor!!
-                .apply { isAccessible = true }
-                .call(parseVilkårsgrunnlag())
+            internal fun List<VilkårsgrunnlagInnslagData>.tilModellObjekt() = VilkårsgrunnlagHistorikk.ferdigVilkårsgrunnlagHistorikk(parseVilkårsgrunnlag())
         }
     }
 
@@ -707,13 +693,11 @@ internal data class PersonData(
             private val dagerMap: Map<LocalDate, Dag> = DagData.parseDager(dager)
 
             internal fun createSykdomstidslinje(): Sykdomstidslinje =
-                Sykdomstidslinje::class.primaryConstructor!!
-                    .apply { isAccessible = true }
-                    .call(
-                        dagerMap,
-                        periode,
-                        låstePerioder ?: mutableListOf<Periode>()
-                    )
+                Sykdomstidslinje.ferdigSykdomstidslinje(
+                    dager = dagerMap,
+                    periode = periode,
+                    perioder = låstePerioder ?: mutableListOf()
+                )
 
             data class DagData(
                 private val type: JsonDagType,
@@ -828,28 +812,24 @@ internal data class PersonData(
         ) {
             internal fun createFeriepengeutbetaling(fødselsnummer: String): Feriepengeutbetaling {
                 val feriepengeberegner = createFeriepengeberegner(fødselsnummer)
-                return Feriepengeutbetaling::class.primaryConstructor!!
-                    .apply { isAccessible = true }
-                    .call(
-                        feriepengeberegner,
-                        infotrygdFeriepengebeløpPerson,
-                        infotrygdFeriepengebeløpArbeidsgiver,
-                        spleisFeriepengebeløpArbeidsgiver,
-                        oppdrag.konverterTilOppdrag(),
-                        utbetalingId,
-                        sendTilOppdrag
-                    )
+                return Feriepengeutbetaling.ferdigFeriepengeutbetaling(
+                    feriepengeberegner = feriepengeberegner,
+                    infotrygdFeriepengebeløpPerson = infotrygdFeriepengebeløpPerson,
+                    infotrygdFeriepengebeløpArbeidsgiver = infotrygdFeriepengebeløpArbeidsgiver,
+                    spleisFeriepengebeløpArbeidsgiver = spleisFeriepengebeløpArbeidsgiver,
+                    oppdrag = oppdrag.konverterTilOppdrag(),
+                    utbetalingId = utbetalingId,
+                    sendTilOppdrag = sendTilOppdrag
+                )
             }
 
             private fun createFeriepengeberegner(fødselsnummer: String): Feriepengeberegner {
                 val alder = fødselsnummer.somFødselsnummer().alder()
-                return Feriepengeberegner::class.primaryConstructor!!
-                    .apply { isAccessible = true }
-                    .call(
-                        alder,
-                        opptjeningsår,
-                        utbetalteDager.sortedBy { it.type }.map { it.createUtbetaltDag() }
-                    )
+                return Feriepengeberegner.ferdigFeriepengeberegner(
+                    alder = alder,
+                    opptjeningsår = opptjeningsår,
+                    utbetalteDager = utbetalteDager.sortedBy { it.type }.map { it.createUtbetaltDag() }
+                )
             }
 
             data class UtbetaltDagData(
@@ -907,30 +887,35 @@ internal data class PersonData(
             ): Vedtaksperiode {
                 val sporingIder = hendelseIder.tilSporing()
                 val sykmeldingsperiode = Periode(sykmeldingFom, sykmeldingTom)
-                return Vedtaksperiode::class.primaryConstructor!!
-                    .apply { isAccessible = true }
-                    .call(
-                        person,
+                return Vedtaksperiode.ferdigVedtaksperiode(
+                    person = person,
+                    arbeidsgiver = arbeidsgiver,
+                    id = id,
+                    aktørId = aktørId,
+                    fødselsnummer = fødselsnummer,
+                    organisasjonsnummer = organisasjonsnummer,
+                    tilstand = parseTilstand(this.tilstand),
+                    skjæringstidspunktFraInfotrygd = skjæringstidspunktFraInfotrygd,
+                    sykdomstidslinje = sykdomstidslinje.createSykdomstidslinje(),
+                    dokumentsporing = sporingIder.toMutableSet(),
+                    inntektsmeldingInfo = inntektsmeldingInfo?.let {
+                        inntektsmeldingInfoHistorikk.finn(
+                            skjæringstidspunktFraInfotrygd ?: skjæringstidspunkt,
+                            it
+                        )
+                    },
+                    periode = Periode(fom, tom),
+                    sykmeldingsperiode = sykmeldingsperiode,
+                    utbetalinger = VedtaksperiodeUtbetalinger(
                         arbeidsgiver,
-                        id,
-                        aktørId,
-                        fødselsnummer,
-                        organisasjonsnummer,
-                        parseTilstand(this.tilstand),
-                        skjæringstidspunktFraInfotrygd,
-                        sykdomstidslinje.createSykdomstidslinje(),
-                        sporingIder.toMutableSet(),
-                        inntektsmeldingInfo?.let { inntektsmeldingInfoHistorikk.finn(skjæringstidspunktFraInfotrygd ?: skjæringstidspunkt, it) },
-                        Periode(fom, tom),
-                        sykmeldingsperiode,
-                        VedtaksperiodeUtbetalinger(arbeidsgiver, this.utbetalinger.map { utbetalinger.getValue(it) }),
-                        this.utbetalingstidslinje.konverterTilUtbetalingstidslinje(),
-                        forlengelseFraInfotrygd,
-                        inntektskilde,
-                        opprettet,
-                        oppdatert,
-                        jurist.medVedtaksperiode(id, sporingIder, sykmeldingsperiode)
-                    )
+                        this.utbetalinger.map { utbetalinger.getValue(it) }),
+                    utbetalingstidslinje = this.utbetalingstidslinje.konverterTilUtbetalingstidslinje(),
+                    forlengelseFraInfotrygd = forlengelseFraInfotrygd,
+                    inntektskilde = inntektskilde,
+                    opprettet = opprettet,
+                    oppdatert = oppdatert,
+                    medVedtaksperiode = jurist.medVedtaksperiode(id, sporingIder, sykmeldingsperiode)
+                )
             }
 
             private fun parseTilstand(tilstand: TilstandType) = when (tilstand) {
@@ -1101,9 +1086,7 @@ internal data class PersonData(
 
             internal companion object {
                 internal fun List<ArbeidsforholdhistorikkInnslagData>.tilArbeidsforholdhistorikk() =
-                    Arbeidsforholdhistorikk::class.primaryConstructor!!
-                        .apply { isAccessible = true }
-                        .call(map { it.tilInnslag() })
+                    Arbeidsforholdhistorikk.ferdigArbeidsforholdhistorikk(map { it.tilInnslag() })
             }
 
             internal fun tilInnslag() = Arbeidsforholdhistorikk.Innslag(id, arbeidsforhold.map { it.tilArbeidsforhold() }, skjæringstidspunkt)
@@ -1128,21 +1111,17 @@ internal data class PersonData(
 
         internal companion object {
             internal fun parseSykdomshistorikk(data: List<SykdomshistorikkData>) =
-                Sykdomshistorikk::class.primaryConstructor!!
-                    .apply { isAccessible = true }
-                    .call(data.map { it.parseSykdomshistorikk() }.toMutableList())
+                Sykdomshistorikk.ferdigSykdomshistorikk(data.map { it.parseSykdomshistorikk() })
         }
 
         internal fun parseSykdomshistorikk(): Sykdomshistorikk.Element {
-            return Sykdomshistorikk.Element::class.primaryConstructor!!
-                .apply { isAccessible = true }
-                .call(
-                    id,
-                    hendelseId,
-                    tidsstempel,
-                    hendelseSykdomstidslinje.createSykdomstidslinje(),
-                    beregnetSykdomstidslinje.createSykdomstidslinje()
-                )
+            return Sykdomshistorikk.Element.ferdigSykdomshistorikkElement(
+                id = id,
+                hendelseId = hendelseId,
+                tidsstempel = tidsstempel,
+                hendelseSykdomstidslinje = hendelseSykdomstidslinje.createSykdomstidslinje(),
+                beregnetSykdomstidslinje = beregnetSykdomstidslinje.createSykdomstidslinje()
+            )
         }
     }
 
@@ -1163,30 +1142,28 @@ internal data class PersonData(
         private val overføringstidspunkt: LocalDateTime?,
         private val avstemmingsnøkkel: Long?,
         private val avsluttet: LocalDateTime?,
-        private val oppdatert: LocalDateTime?
+        private val oppdatert: LocalDateTime
     ) {
 
-        internal fun konverterTilUtbetaling() = Utbetaling::class.primaryConstructor!!
-            .apply { isAccessible = true }
-            .call(
-                id,
-                korrelasjonsId,
-                beregningId,
-                utbetalingstidslinje.konverterTilUtbetalingstidslinje(),
-                arbeidsgiverOppdrag.konverterTilOppdrag(),
-                personOppdrag.konverterTilOppdrag(),
-                tidsstempel,
-                enumValueOf<Utbetalingstatus>(status).tilTilstand(),
-                enumValueOf<Utbetalingtype>(type),
-                maksdato,
-                forbrukteSykedager,
-                gjenståendeSykedager,
-                vurdering?.konverterTilVurdering(),
-                overføringstidspunkt,
-                avstemmingsnøkkel,
-                avsluttet,
-                oppdatert
-            )
+        internal fun konverterTilUtbetaling() = Utbetaling.ferdigUtbetaling(
+            id = id,
+            korrelasjonsId = korrelasjonsId,
+            beregningId = beregningId,
+            utbetalingstidslinje = utbetalingstidslinje.konverterTilUtbetalingstidslinje(),
+            arbeidsgiverOppdrag = arbeidsgiverOppdrag.konverterTilOppdrag(),
+            personOppdrag = personOppdrag.konverterTilOppdrag(),
+            tidsstempel = tidsstempel,
+            tilstand = enumValueOf<Utbetalingstatus>(status).tilTilstand(),
+            utbetalingtype = enumValueOf(type),
+            maksdato = maksdato,
+            forbrukteSykedager = forbrukteSykedager,
+            gjenståendeSykedager = gjenståendeSykedager,
+            vurdering = vurdering?.konverterTilVurdering(),
+            overføringstidspunkt = overføringstidspunkt,
+            avstemmingsnøkkel = avstemmingsnøkkel,
+            avsluttet = avsluttet,
+            oppdatert = oppdatert
+        )
 
         data class VurderingData(
             private val godkjent: Boolean,
@@ -1195,15 +1172,13 @@ internal data class PersonData(
             private val tidspunkt: LocalDateTime,
             private val automatiskBehandling: Boolean
         ) {
-            internal fun konverterTilVurdering() = Utbetaling.Vurdering::class.primaryConstructor!!
-                .apply { isAccessible = true }
-                .call(
-                    godkjent,
-                    ident,
-                    epost,
-                    tidspunkt,
-                    automatiskBehandling
-                )
+            internal fun konverterTilVurdering() = Utbetaling.ferdigVurdering(
+                godkjent = godkjent,
+                ident = ident,
+                epost = epost,
+                tidspunkt = tidspunkt,
+                automatiskBehandling = automatiskBehandling
+            )
         }
     }
 
@@ -1222,25 +1197,21 @@ internal data class PersonData(
         private val erSimulert: Boolean,
         private val simuleringsResultat: ArbeidsgiverData.VedtaksperiodeData.DataForSimuleringData?
     ) {
-        internal fun konverterTilOppdrag(): Oppdrag {
-            return Oppdrag::class.primaryConstructor!!
-                .apply { isAccessible = true }
-                .call(
-                    mottaker,
-                    Fagområde.from(fagområde),
-                    linjer.map { it.konverterTilUtbetalingslinje() },
-                    fagsystemId,
-                    Endringskode.valueOf(endringskode),
-                    sisteArbeidsgiverdag,
-                    nettoBeløp,
-                    overføringstidspunkt,
-                    avstemmingsnøkkel,
-                    status,
-                    tidsstempel,
-                    erSimulert,
-                    simuleringsResultat?.parseDataForSimulering()
-                )
-        }
+        internal fun konverterTilOppdrag(): Oppdrag = Oppdrag.ferdigOppdrag(
+            mottaker = mottaker,
+            from = Fagområde.from(fagområde),
+            utbetalingslinjer = linjer.map { it.konverterTilUtbetalingslinje() },
+            fagsystemId = fagsystemId,
+            endringskode = Endringskode.valueOf(endringskode),
+            sisteArbeidsgiverdag = sisteArbeidsgiverdag,
+            nettoBeløp = nettoBeløp,
+            overføringstidspunkt = overføringstidspunkt,
+            avstemmingsnøkkel = avstemmingsnøkkel,
+            status = status,
+            tidsstempel = tidsstempel,
+            erSimulert = erSimulert,
+            simuleringResultat = simuleringsResultat?.parseDataForSimulering()
+        )
     }
 
     data class UtbetalingslinjeData(
@@ -1258,32 +1229,27 @@ internal data class PersonData(
         private val datoStatusFom: LocalDate?
     ) {
 
-        internal fun konverterTilUtbetalingslinje(): Utbetalingslinje = Utbetalingslinje::class.primaryConstructor!!
-            .apply { isAccessible = true }
-            .call(
-                fom,
-                tom,
-                Satstype.fromString(satstype),
-                sats,
-                lønn,
-                grad,
-                refFagsystemId,
-                delytelseId,
-                refDelytelseId,
-                Endringskode.valueOf(endringskode),
-                Klassekode.from(klassekode),
-                datoStatusFom
-            )
+        internal fun konverterTilUtbetalingslinje(): Utbetalingslinje = Utbetalingslinje.ferdigUtbetalingslinje(
+            fom = fom,
+            tom = tom,
+            satstype = Satstype.fromString(satstype),
+            sats = sats,
+            lønn = lønn,
+            grad = grad,
+            refFagsystemId = refFagsystemId,
+            delytelseId = delytelseId,
+            refDelytelseId = refDelytelseId,
+            endringskode = Endringskode.valueOf(endringskode),
+            klassekode = Klassekode.from(klassekode),
+            datoStatusFom = datoStatusFom
+        )
     }
 
     data class UtbetalingstidslinjeData(
         val dager: List<UtbetalingsdagData>
     ) {
-        internal fun konverterTilUtbetalingstidslinje(): Utbetalingstidslinje {
-            return Utbetalingstidslinje::class.primaryConstructor!!
-                .apply { isAccessible = true }
-                .call(dager.flatMap { it.parseDager() }.toMutableList())
-        }
+        internal fun konverterTilUtbetalingstidslinje(): Utbetalingstidslinje =
+            Utbetalingstidslinje.ferdigUtbetalingstidslinje(dager.flatMap { it.parseDager() })
 
         enum class BegrunnelseData {
             SykepengedagerOppbrukt,

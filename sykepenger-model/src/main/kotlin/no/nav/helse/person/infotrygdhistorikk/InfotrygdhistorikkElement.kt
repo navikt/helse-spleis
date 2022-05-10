@@ -90,6 +90,32 @@ internal class InfotrygdhistorikkElement private constructor(
                 lagretInntekter = false,
                 lagretVilkårsgrunnlag = false
             )
+
+        internal fun ferdigElement(
+            id: UUID,
+            tidsstempel: LocalDateTime,
+            hendelseId: UUID?,
+            infotrygdperioder: List<Infotrygdperiode>,
+            inntekter: List<Inntektsopplysning>,
+            arbeidskategorikoder: Map<String, LocalDate>,
+            ugyldigePerioder: List<UgyldigPeriode>,
+            harStatslønn: Boolean,
+            oppdatert: LocalDateTime,
+            lagretInntekter: Boolean,
+            lagretVilkårsgrunnlag: Boolean
+        ): InfotrygdhistorikkElement = InfotrygdhistorikkElement(
+            id = id,
+            tidsstempel = tidsstempel,
+            hendelseId = hendelseId,
+            perioder = infotrygdperioder,
+            inntekter = inntekter,
+            arbeidskategorikoder = arbeidskategorikoder,
+            ugyldigePerioder = ugyldigePerioder,
+            harStatslønn = harStatslønn,
+            oppdatert = oppdatert,
+            lagretInntekter = lagretInntekter,
+            lagretVilkårsgrunnlag = lagretVilkårsgrunnlag
+        )
     }
 
     private val arbeidsgiverperiodecache = mutableMapOf<String, MutableMap<UUID, List<Arbeidsgiverperiode>>>()
@@ -183,7 +209,7 @@ internal class InfotrygdhistorikkElement private constructor(
     }
 
     private fun validerUgyldigePerioder(aktivitetslogg: IAktivitetslogg) {
-        ugyldigePerioder.forEach { ugyldigPeriode -> ugyldigPeriode.valider(aktivitetslogg)}
+        ugyldigePerioder.forEach { ugyldigPeriode -> ugyldigPeriode.valider(aktivitetslogg) }
     }
 
     private fun validerStatslønn(aktivitetslogg: IAktivitetslogg, periodetype: Periodetype) {
@@ -194,7 +220,8 @@ internal class InfotrygdhistorikkElement private constructor(
 
     private fun valider(aktivitetslogg: IAktivitetslogg, perioder: List<Infotrygdperiode>, periode: Periode, skjæringstidspunkt: LocalDate): Boolean {
         aktivitetslogg.info("Sjekker utbetalte perioder")
-        perioder.filterIsInstance<Utbetalingsperiode>().forEach { it.valider(aktivitetslogg, periode, skjæringstidspunkt, nødnummer) }
+        perioder.filterIsInstance<Utbetalingsperiode>()
+            .forEach { it.valider(aktivitetslogg, periode, skjæringstidspunkt, nødnummer) }
 
         aktivitetslogg.info("Sjekker inntektsopplysninger")
         Inntektsopplysning.valider(inntekter, aktivitetslogg, skjæringstidspunkt, nødnummer)

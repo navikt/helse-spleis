@@ -2731,6 +2731,50 @@ internal class Vedtaksperiode private constructor(
         ) {
             mapOf(arbeidsgiver to perioder).startRevurdering(første, hendelse)
         }
+
+        fun ferdigVedtaksperiode(
+            person: Person,
+            arbeidsgiver: Arbeidsgiver,
+            id: UUID,
+            aktørId: String,
+            fødselsnummer: String,
+            organisasjonsnummer: String,
+            tilstand: Vedtaksperiodetilstand,
+            skjæringstidspunktFraInfotrygd: LocalDate?,
+            sykdomstidslinje: Sykdomstidslinje,
+            dokumentsporing: Set<Dokumentsporing>,
+            inntektsmeldingInfo: InntektsmeldingInfo?,
+            periode: Periode,
+            sykmeldingsperiode: Periode,
+            utbetalinger: VedtaksperiodeUtbetalinger,
+            utbetalingstidslinje: Utbetalingstidslinje,
+            forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
+            inntektskilde: Inntektskilde,
+            opprettet: LocalDateTime,
+            oppdatert: LocalDateTime,
+            medVedtaksperiode: MaskinellJurist
+        ): Vedtaksperiode = Vedtaksperiode(
+            person = person,
+            arbeidsgiver = arbeidsgiver,
+            id = id,
+            aktørId = aktørId,
+            fødselsnummer = fødselsnummer,
+            organisasjonsnummer = organisasjonsnummer,
+            tilstand = tilstand,
+            skjæringstidspunktFraInfotrygd = skjæringstidspunktFraInfotrygd,
+            sykdomstidslinje = sykdomstidslinje,
+            hendelseIder = dokumentsporing.map { it }.toMutableSet(),
+            inntektsmeldingInfo = inntektsmeldingInfo,
+            periode = periode,
+            sykmeldingsperiode = sykmeldingsperiode,
+            utbetalinger = utbetalinger,
+            utbetalingstidslinje = utbetalingstidslinje,
+            forlengelseFraInfotrygd = forlengelseFraInfotrygd,
+            inntektskilde = inntektskilde,
+            opprettet = opprettet,
+            oppdatert = oppdatert,
+            jurist = medVedtaksperiode
+        )
     }
 
 }

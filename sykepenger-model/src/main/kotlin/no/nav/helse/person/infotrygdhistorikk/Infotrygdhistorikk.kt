@@ -19,11 +19,13 @@ internal class Infotrygdhistorikk private constructor(
 
     constructor() : this(mutableListOf())
 
-    private companion object {
+    internal companion object {
         private val gammel: LocalDateTime get() = LocalDateTime.now().minusHours(2)
 
         private fun oppfriskningsperiode(tidligsteDato: LocalDate) =
             tidligsteDato.minusYears(4) til LocalDate.now()
+
+        internal fun ferdigInfotrygdhistorikk(elementer: List<InfotrygdhistorikkElement>) = Infotrygdhistorikk(elementer.map { it }.toMutableList())
     }
 
     internal fun valider(aktivitetslogg: IAktivitetslogg, arbeidsgiver: Arbeidsgiver, periode: Periode, skjæringstidspunkt: LocalDate): Boolean {

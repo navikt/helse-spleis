@@ -140,4 +140,9 @@ internal class Arbeidsforholdhistorikk private constructor(
         }
 
     }
+
+    internal companion object {
+        internal fun ferdigArbeidsforholdhistorikk(historikk: List<Innslag>): Arbeidsforholdhistorikk =
+            Arbeidsforholdhistorikk(historikk.map{it}.toMutableList())
+    }
 }

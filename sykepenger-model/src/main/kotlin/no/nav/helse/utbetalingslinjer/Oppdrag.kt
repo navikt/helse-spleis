@@ -51,6 +51,35 @@ internal class Oppdrag private constructor(
 
         internal fun ingenFeil(vararg oppdrag: Oppdrag) = oppdrag.none { it.status in listOf(AVVIST, FEIL) }
         internal fun kanIkkeForsøkesPåNy(vararg oppdrag: Oppdrag) = oppdrag.any { it.status == AVVIST }
+        internal fun ferdigOppdrag(
+            mottaker: String,
+            from: Fagområde,
+            utbetalingslinjer: List<Utbetalingslinje>,
+            fagsystemId: String,
+            endringskode: Endringskode,
+            sisteArbeidsgiverdag: LocalDate?,
+            nettoBeløp: Int,
+            overføringstidspunkt: LocalDateTime?,
+            avstemmingsnøkkel: Long?,
+            status: Oppdragstatus?,
+            tidsstempel: LocalDateTime,
+            erSimulert: Boolean,
+            simuleringResultat: Simulering.SimuleringResultat?
+        ): Oppdrag = Oppdrag(
+            mottaker = mottaker,
+            fagområde = from,
+            linjer = utbetalingslinjer.toMutableList(),
+            fagsystemId = fagsystemId,
+            endringskode = endringskode,
+            sisteArbeidsgiverdag = sisteArbeidsgiverdag,
+            nettoBeløp = nettoBeløp,
+            overføringstidspunkt = overføringstidspunkt,
+            avstemmingsnøkkel = avstemmingsnøkkel,
+            status = status,
+            tidsstempel = tidsstempel,
+            erSimulert = erSimulert,
+            simuleringsResultat = simuleringResultat
+        )
     }
 
     internal val førstedato get() = linjer.firstOrNull()?.let { it.datoStatusFom() ?: it.fom } ?: MIN

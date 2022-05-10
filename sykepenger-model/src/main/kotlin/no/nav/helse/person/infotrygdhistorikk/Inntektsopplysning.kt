@@ -132,5 +132,22 @@ class Inntektsopplysning private constructor(
 
         internal fun sorter(inntekter: List<Inntektsopplysning>) =
             inntekter.sortedWith(compareBy({ it.sykepengerFom }, { it.hashCode() }))
+
+        internal fun ferdigInntektsopplysning(
+            orgnummer: String,
+            sykepengerFom: LocalDate,
+            inntekt: Inntekt,
+            refusjonTilArbeidsgiver: Boolean,
+            refusjonTom: LocalDate?,
+            lagret: LocalDateTime?
+        ): Inntektsopplysning =
+            Inntektsopplysning(
+                orgnummer = orgnummer,
+                sykepengerFom = sykepengerFom,
+                inntekt = inntekt,
+                refusjonTilArbeidsgiver = refusjonTilArbeidsgiver,
+                refusjonTom = refusjonTom,
+                lagret = lagret
+            )
     }
 }

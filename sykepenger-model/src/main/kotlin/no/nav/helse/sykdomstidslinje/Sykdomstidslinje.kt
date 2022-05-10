@@ -392,6 +392,12 @@ internal class Sykdomstidslinje private constructor(
 
         internal fun gammelTidslinje(tidslinjer: List<Sykdomstidslinje>) =
             tidslinjer.map { Sykdomstidslinje(it.dager.filter { (_, dag ) -> dag !is ProblemDag }.toSortedMap(), it.periode) }.merge(sammenhengendeSykdom)
+
+        internal fun ferdigSykdomstidslinje(
+            dager: Map<LocalDate, Dag>,
+            periode: Periode?,
+            perioder: List<Periode>
+        ): Sykdomstidslinje = Sykdomstidslinje(dager.toSortedMap(), periode, perioder.map{it}.toMutableList())
     }
 }
 

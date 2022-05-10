@@ -304,4 +304,9 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             return result
         }
     }
+
+    companion object {
+        fun ferdigVilkårsgrunnlagHistorikk(parseVilkårsgrunnlag: List<Innslag>) =
+            VilkårsgrunnlagHistorikk(parseVilkårsgrunnlag.map { it }.toMutableList())
+    }
 }

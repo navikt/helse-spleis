@@ -31,7 +31,10 @@ internal class Feriepengeberegner(
     private val opptjeningsår: Year,
     private val utbetalteDager: List<UtbetaltDag>
 ) {
-    private companion object {
+    internal companion object {
+        internal fun ferdigFeriepengeberegner(alder: Alder, opptjeningsår: Year, utbetalteDager: List<UtbetaltDag>): Feriepengeberegner =
+            Feriepengeberegner(alder, opptjeningsår, utbetalteDager)
+
         private const val ANTALL_FERIEPENGEDAGER_I_OPPTJENINGSÅRET = 48
     }
 

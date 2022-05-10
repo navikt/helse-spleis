@@ -445,6 +445,51 @@ internal class Utbetaling private constructor(
                 .map { it.utbetalingstidslinje }
                 .fold(Utbetalingstidslinje(), Utbetalingstidslinje::plus)
         internal fun List<Utbetaling>.harId(id: UUID) = any { it.id == id }
+        internal fun ferdigUtbetaling(
+            id: UUID,
+            korrelasjonsId: UUID,
+            beregningId: UUID,
+            utbetalingstidslinje: Utbetalingstidslinje,
+            arbeidsgiverOppdrag: Oppdrag,
+            personOppdrag: Oppdrag,
+            tidsstempel: LocalDateTime,
+            tilstand: Tilstand,
+            utbetalingtype: Utbetalingtype,
+            maksdato: LocalDate,
+            forbrukteSykedager: Int?,
+            gjenståendeSykedager: Int?,
+            vurdering: Vurdering?,
+            overføringstidspunkt: LocalDateTime?,
+            avstemmingsnøkkel: Long?,
+            avsluttet: LocalDateTime?,
+            oppdatert: LocalDateTime
+        ): Utbetaling = Utbetaling(
+            id = id,
+            korrelasjonsId = korrelasjonsId,
+            beregningId = beregningId,
+            utbetalingstidslinje = utbetalingstidslinje,
+            arbeidsgiverOppdrag = arbeidsgiverOppdrag,
+            personOppdrag = personOppdrag,
+            tidsstempel = tidsstempel,
+            tilstand = tilstand,
+            type = utbetalingtype,
+            maksdato = maksdato,
+            forbrukteSykedager = forbrukteSykedager,
+            gjenståendeSykedager = gjenståendeSykedager,
+            vurdering = vurdering,
+            overføringstidspunkt = overføringstidspunkt,
+            avstemmingsnøkkel = avstemmingsnøkkel,
+            avsluttet = avsluttet,
+            oppdatert = oppdatert
+        )
+
+        internal fun ferdigVurdering(
+            godkjent: Boolean,
+            ident: String,
+            epost: String,
+            tidspunkt: LocalDateTime,
+            automatiskBehandling: Boolean
+        ): Vurdering = Vurdering(godkjent, ident, epost, tidspunkt, automatiskBehandling)
     }
 
     internal fun accept(visitor: UtbetalingVisitor) {

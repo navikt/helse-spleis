@@ -31,6 +31,34 @@ internal class Utbetalingslinje internal constructor(
                 .filterNot { it.erHelg() }
                 .size
         }
+
+        internal fun ferdigUtbetalingslinje(
+            fom: LocalDate,
+            tom: LocalDate,
+            satstype: Satstype,
+            sats: Int,
+            lønn: Int?,
+            grad: Int?,
+            refFagsystemId: String?,
+            delytelseId: Int,
+            refDelytelseId: Int?,
+            endringskode: Endringskode,
+            klassekode: Klassekode,
+            datoStatusFom: LocalDate?
+        ): Utbetalingslinje = Utbetalingslinje(
+            fom = fom,
+            tom = tom,
+            satstype = satstype,
+            beløp = sats,
+            aktuellDagsinntekt = lønn,
+            grad = grad,
+            refFagsystemId = refFagsystemId,
+            delytelseId = delytelseId,
+            refDelytelseId = refDelytelseId,
+            endringskode = endringskode,
+            klassekode = klassekode,
+            datoStatusFom = datoStatusFom
+        )
     }
 
     private val statuskode get() = datoStatusFom?.let { "OPPH" }

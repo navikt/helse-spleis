@@ -29,6 +29,24 @@ internal class Feriepengeutbetaling private constructor(
     companion object {
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
         fun List<Feriepengeutbetaling>.gjelderFeriepengeutbetaling(hendelse: UtbetalingHendelse) = any { hendelse.erRelevant(it.oppdrag.fagsystemId()) }
+        internal fun ferdigFeriepengeutbetaling(
+            feriepengeberegner: Feriepengeberegner,
+            infotrygdFeriepengebeløpPerson: Double,
+            infotrygdFeriepengebeløpArbeidsgiver: Double,
+            spleisFeriepengebeløpArbeidsgiver: Double,
+            oppdrag: Oppdrag,
+            utbetalingId: UUID,
+            sendTilOppdrag: Boolean
+        ): Feriepengeutbetaling =
+            Feriepengeutbetaling(
+                feriepengeberegner = feriepengeberegner,
+                infotrygdFeriepengebeløpPerson = infotrygdFeriepengebeløpPerson,
+                infotrygdFeriepengebeløpArbeidsgiver = infotrygdFeriepengebeløpArbeidsgiver,
+                spleisFeriepengebeløpArbeidsgiver = spleisFeriepengebeløpArbeidsgiver,
+                oppdrag = oppdrag,
+                utbetalingId = utbetalingId,
+                sendTilOppdrag = sendTilOppdrag
+            )
     }
 
     internal fun accept(visitor: FeriepengeutbetalingVisitor) {
