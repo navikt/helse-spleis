@@ -22,6 +22,7 @@ import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.Periodetype
+import no.nav.helse.person.Refusjonshistorikk
 import no.nav.helse.person.SpesifikkKontekst
 import no.nav.helse.person.UtbetalingVisitor
 import no.nav.helse.person.builders.VedtakFattetBuilder
@@ -975,23 +976,24 @@ internal class Utbetaling private constructor(
             val sykdomstidslinje: Sykdomstidslinje,
             val inntekter: Inntekter,
             val utbetalinger: List<Utbetaling>,
+            val refusjonshistorikk: Refusjonshistorikk,
             val lagre: (utbetalingstidslinje: Utbetalingstidslinje) -> UUID
         )
-        private val arbeidsgivere = mutableMapOf<Arbeidsgiver, Arbeidsgivergrunnlag>()
-        private fun arbeidsgivergrunnlag(organisasjonsnummer: String) =
-            arbeidsgivere.filterKeys { it.organisasjonsnummer() == organisasjonsnummer }.values.single()
+        private val arbeidsgivere = mutableMapOf<String, Arbeidsgivergrunnlag>()
         internal fun arbeidsgiver(
-            arbeidsgiver: Arbeidsgiver,
+            organisasjonsnummer: String,
             sykdomstidslinje: Sykdomstidslinje,
             inntekter: Inntekter,
             utbetalinger: List<Utbetaling>,
+            refusjonshistorikk: Refusjonshistorikk,
             lagre: (utbetalingstidslinje: Utbetalingstidslinje) -> UUID
         ) = apply {
-            require(!arbeidsgivere.contains(arbeidsgiver)) { "Arbeidsgiver ${arbeidsgiver.organisasjonsnummer()} er allerede lagt til." }
-            arbeidsgivere[arbeidsgiver] = Arbeidsgivergrunnlag(
+            require(!arbeidsgivere.contains(organisasjonsnummer)) { "Arbeidsgiver $organisasjonsnummer er allerede lagt til." }
+            arbeidsgivere[organisasjonsnummer] = Arbeidsgivergrunnlag(
                 sykdomstidslinje = sykdomstidslinje,
                 inntekter = inntekter,
                 utbetalinger = utbetalinger,
+                refusjonshistorikk = refusjonshistorikk,
                 lagre = lagre
             )
         }
@@ -1001,15 +1003,15 @@ internal class Utbetaling private constructor(
             val sisteUtbetaling: Utbetaling?,
             val lagre: (utbetaling: Utbetaling) -> Unit
         )
-        private val vedtaksperioder = mutableMapOf<Vedtaksperiode, Vedtaksperiodegrunnlag>()
+        private val vedtaksperioder = mutableMapOf<UUID, Vedtaksperiodegrunnlag>()
         internal fun vedtaksperiode(
-            vedtaksperiode: Vedtaksperiode,
+            vedtaksperiodeId: UUID,
             sisteUtbetaling: Utbetaling?,
             arbeidsgiver: Arbeidsgiver,
             lagre: (utbetaling: Utbetaling) -> Unit
         ) = apply {
-            require(!vedtaksperioder.contains(vedtaksperiode)) { "Vedtaksperiode $vedtaksperiode er allerede lagt til." }
-            vedtaksperioder[vedtaksperiode] = Vedtaksperiodegrunnlag(
+            require(!vedtaksperioder.contains(vedtaksperiodeId)) { "Vedtaksperiode $vedtaksperiodeId er allerede lagt til." }
+            vedtaksperioder[vedtaksperiodeId] = Vedtaksperiodegrunnlag(
                 organisasjonsnummer = arbeidsgiver.organisasjonsnummer(),
                 sisteUtbetaling = sisteUtbetaling,
                 lagre = lagre
@@ -1032,21 +1034,21 @@ internal class Utbetaling private constructor(
         }
 
         private fun utbetalinger() {
-            val utbetalingstidslinjer = arbeidsgivere.mapValues { (arbeidsgiver, arbeidsgivergrunnlag) ->
+            val utbetalingstidslinjer = arbeidsgivere.mapValues { (organisasjonsnummer, arbeidsgivergrunnlag) ->
                 val sykdomstidslinje = arbeidsgivergrunnlag.sykdomstidslinje.fremTilOgMed(periode.endInclusive)
                 val utbetalingstidslinjeBuilder = UtbetalingstidslinjeBuilder(arbeidsgivergrunnlag.inntekter)
                 val utbetalingstidslinje = infotrygdhistorikk
-                    .build(arbeidsgiver.organisasjonsnummer(), sykdomstidslinje, utbetalingstidslinjeBuilder, subsumsjonObserver)
-                Refusjonsgjødsler(utbetalingstidslinje, arbeidsgiver.refusjonshistorikk, infotrygdhistorikk, arbeidsgiver.organisasjonsnummer())
+                    .build(organisasjonsnummer, sykdomstidslinje, utbetalingstidslinjeBuilder, subsumsjonObserver)
+                Refusjonsgjødsler(utbetalingstidslinje, arbeidsgivergrunnlag.refusjonshistorikk, infotrygdhistorikk, organisasjonsnummer)
                     .gjødsle(aktivitetslogg, periode)
                 val beregningId = arbeidsgivergrunnlag.lagre(utbetalingstidslinje)
                 beregningId to utbetalingstidslinje
-            }.mapKeys { it.key.organisasjonsnummer() }
+            }
 
             filtrer(utbetalingstidslinjer.values.map { it.second })
 
             vedtaksperioder.forEach { (_, vedtaksperiodegrunnlag) ->
-                val arbeidsgivergrunnlag = arbeidsgivergrunnlag(vedtaksperiodegrunnlag.organisasjonsnummer)
+                val arbeidsgivergrunnlag = arbeidsgivere.getValue(vedtaksperiodegrunnlag.organisasjonsnummer)
                 val (beregningId, utbetalingstidslinje) = utbetalingstidslinjer.getValue(vedtaksperiodegrunnlag.organisasjonsnummer)
                 val utbetaling = lagUtbetaling(
                     utbetalinger = arbeidsgivergrunnlag.utbetalinger,

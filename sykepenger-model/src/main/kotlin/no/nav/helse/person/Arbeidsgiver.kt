@@ -322,9 +322,10 @@ internal class Arbeidsgiver private constructor(
             inntektsopplysningPerSkjæringstidspunktPerArbeidsgiver: Map<LocalDate, Map<String, Inntektshistorikk.Inntektsopplysning>>?,
             subsumsjonObserver: SubsumsjonObserver) = builder.also {
             forEach { arbeidsgiver -> it.arbeidsgiver(
-                arbeidsgiver = arbeidsgiver,
+                organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
                 sykdomstidslinje = arbeidsgiver.sykdomstidslinje(),
                 utbetalinger = arbeidsgiver.utbetalinger,
+                refusjonshistorikk = arbeidsgiver.refusjonshistorikk,
                 lagre = { utbetalingstidlinje ->
                     // TODO: Trenger å få tilbake beregningId her
                     // TODO: Der lagreUtbetalingstidslinjeberegning kalles i dag brukes ikke arbeidsgiver.organisasjonsnummer..
