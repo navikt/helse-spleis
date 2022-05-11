@@ -129,6 +129,7 @@ internal class Inntektshistorikk {
         fun kanLagres(other: Inntektsopplysning) = true
         fun harInntektsmelding(førsteFraværsdag: LocalDate) = false
         fun build(filter: Utbetalingsfilter.Builder, inntektsmeldingId: UUID) {}
+        fun erNødvendigInntektForVilkårsprøving(harSykdom: Boolean) = false
     }
 
     internal class Saksbehandler(
@@ -152,6 +153,7 @@ internal class Inntektshistorikk {
         override fun skalErstattesAv(other: Inntektsopplysning) =
             other is Saksbehandler && this.dato == other.dato
 
+        override fun erNødvendigInntektForVilkårsprøving(harSykdom: Boolean) = true
     }
 
     internal class Infotrygd(
@@ -174,6 +176,8 @@ internal class Inntektshistorikk {
         internal fun grunnlagForSykepengegrunnlag(periode: Periode) = takeIf { it.dato in periode }
 
         override fun grunnlagForSammenligningsgrunnlag(): Inntekt = error("Infotrygd har ikke grunnlag for sammenligningsgrunnlag")
+
+        override fun erNødvendigInntektForVilkårsprøving(harSykdom: Boolean) = harSykdom
 
         override fun skalErstattesAv(other: Inntektsopplysning) =
             other is Infotrygd && this.dato == other.dato
@@ -218,11 +222,13 @@ internal class Inntektshistorikk {
             visitor.visitInntektsmelding(this, id, dato, hendelseId, beløp, tidsstempel)
         }
 
+        override fun erNødvendigInntektForVilkårsprøving(harSykdom: Boolean) = harSykdom
+
         override fun harInntektsmelding(førsteFraværsdag: LocalDate) =
             førsteFraværsdag == dato
 
         override fun grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?) =
-            takeIf { førsteFraværsdag != null && YearMonth.from(skjæringstidspunkt) == YearMonth.from(førsteFraværsdag) && it.dato == førsteFraværsdag }
+            takeIf { (førsteFraværsdag != null && YearMonth.from(skjæringstidspunkt) == YearMonth.from(førsteFraværsdag) && it.dato == førsteFraværsdag) || it.dato == skjæringstidspunkt }
 
         override fun grunnlagForSykepengegrunnlag(): Inntekt = beløp
 
@@ -244,6 +250,8 @@ internal class Inntektshistorikk {
         override val prioritet = inntektsopplysninger.first().prioritet
 
         private val inntekterSisteTreMåneder = inntektsopplysninger.filter { it.erRelevant(3) }
+
+        override fun erNødvendigInntektForVilkårsprøving(harSykdom: Boolean) = !harSykdom
 
         override fun accept(visitor: InntekthistorikkVisitor) {
             visitor.preVisitSkatt(this, id, dato)

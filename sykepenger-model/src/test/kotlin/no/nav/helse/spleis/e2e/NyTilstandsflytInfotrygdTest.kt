@@ -32,6 +32,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import kotlin.reflect.KMutableProperty
 import kotlin.reflect.full.memberProperties
@@ -194,7 +195,7 @@ internal class NyTilstandsflytInfotrygdTest : AbstractEndToEndTest() {
     fun `Ping pong - venter ikke på inntektsmelding`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar),)
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         utbetalPeriode(1.vedtaksperiode)
@@ -478,6 +479,7 @@ internal class NyTilstandsflytInfotrygdTest : AbstractEndToEndTest() {
         assertTilstand(4.vedtaksperiode, AVVENTER_HISTORIKK)
     }
 
+    @Disabled("Gir ikke mening dersom vi skriver oss bort fra at forlengelseFraInfotrygd-flagget brukes til noe funksjonelt")
     @Test
     fun `Sørger for at en periode kommer seg videre dersom det er en tidligere periode enn den tilstøtende som er overgang fra IT` () {
         /*

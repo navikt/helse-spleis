@@ -404,6 +404,9 @@ internal class Vedtaksperiode private constructor(
     private fun harInntekt() =
         harInntektsmelding() || arbeidsgiver.grunnlagForSykepengegrunnlag(skjæringstidspunkt, periode.start) != null
 
+    private fun harNødvendigInntektForVilkårsprøving() =
+        arbeidsgiver.harNødvendigInntektForVilkårsprøving(skjæringstidspunkt, periode.start)
+
     private fun harInntektsmelding() = arbeidsgiver.harInntektsmelding(skjæringstidspunkt)
 
     private fun låsOpp() = arbeidsgiver.låsOpp(periode)
@@ -1435,7 +1438,8 @@ internal class Vedtaksperiode private constructor(
                     )
                 }
                 onSuccess {
-                    if (vedtaksperiode.forlengelseFraInfotrygd() || vedtaksperiode.forlengelseFraInfotrygd == JA) {
+                    infotrygdhistorikk.addInntekter(person, this)
+                    if (vedtaksperiode.harNødvendigInntektForVilkårsprøving()) {
                         info("Oppdaget at perioden startet i infotrygd")
                         vedtaksperiode.forlengelseFraInfotrygd = JA
                         return@onSuccess vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode)
@@ -2602,7 +2606,7 @@ internal class Vedtaksperiode private constructor(
             this.takeIf { it.isNotEmpty() }
                 ?.harInntekt() ?: true
 
-        internal fun List<Vedtaksperiode>.harInntekt() = any { it.harInntekt() }
+        private fun List<Vedtaksperiode>.harInntekt() = any { it.harInntekt() }
 
         internal fun overlapperMedForkastet(forkastede: Iterable<Vedtaksperiode>, hendelse: SykdomstidslinjeHendelse) {
             forkastede
