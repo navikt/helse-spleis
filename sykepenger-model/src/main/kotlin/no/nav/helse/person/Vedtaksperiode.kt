@@ -1459,7 +1459,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            vedtaksperiode.person.gjenopptaBehandlingNy(påminnelse)
+            vedtaksperiode.tilstand(påminnelse, AvventerInntektsmeldingEllerHistorikk)
         }
     }
 
@@ -1501,7 +1501,8 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            vedtaksperiode.trengerVilkårsgrunnlag(påminnelse)
+            vedtaksperiode.tilstand(påminnelse, AvventerInntektsmeldingEllerHistorikk)
+            //vedtaksperiode.trengerVilkårsgrunnlag(påminnelse)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
@@ -1589,7 +1590,8 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            vedtaksperiode.trengerYtelser(påminnelse)
+            vedtaksperiode.tilstand(påminnelse, AvventerInntektsmeldingEllerHistorikk)
+            //vedtaksperiode.trengerYtelser(påminnelse)
         }
 
         override fun håndter(
@@ -1766,7 +1768,8 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            trengerSimulering(vedtaksperiode, påminnelse)
+            vedtaksperiode.tilstand(påminnelse, AvventerInntektsmeldingEllerHistorikk)
+            //trengerSimulering(vedtaksperiode, påminnelse)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, simulering: Simulering) {
@@ -1909,7 +1912,8 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            vedtaksperiode.trengerHistorikkFraInfotrygd(påminnelse)
+            vedtaksperiode.tilstand(påminnelse, AvventerInntektsmeldingEllerHistorikk)
+            // vedtaksperiode.trengerHistorikkFraInfotrygd(påminnelse)
         }
 
         override fun håndter(

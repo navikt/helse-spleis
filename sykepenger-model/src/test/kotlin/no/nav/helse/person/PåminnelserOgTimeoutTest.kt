@@ -3,6 +3,7 @@ package no.nav.helse.person
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.etterspurteBehov
 import no.nav.helse.hendelser.Arbeidsavklaringspenger
@@ -65,11 +66,20 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
         person.håndter(ytelser())
         val antallBehovFør = hendelse.behov().size
         person.håndter(påminnelse(AVVENTER_VILKÅRSPRØVING, 1.vedtaksperiode))
-        assertEquals(AVVENTER_VILKÅRSPRØVING, inspektør.sisteTilstand(1.vedtaksperiode))
-        assertEquals(antallBehovFør, hendelse.behov().size)
-        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.InntekterForSammenligningsgrunnlag))
-        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.InntekterForSykepengegrunnlag))
-        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.ArbeidsforholdV2))
+
+        assertForventetFeil(
+            forklaring = "Denne testen skal funke når vi har vanlig påminnelseslogikk igjen",
+            nå = {
+                assertEquals(AVVENTER_HISTORIKK, inspektør.sisteTilstand(1.vedtaksperiode))
+            },
+            ønsket = {
+                assertEquals(AVVENTER_VILKÅRSPRØVING, inspektør.sisteTilstand(1.vedtaksperiode))
+                assertEquals(antallBehovFør, hendelse.behov().size)
+                assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.InntekterForSammenligningsgrunnlag))
+                assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.InntekterForSykepengegrunnlag))
+                assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.ArbeidsforholdV2))
+            }
+        )
     }
 
     @Test
@@ -103,17 +113,26 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
         person.håndter(vilkårsgrunnlag())
         assertEquals(9, hendelse.behov().size)
         person.håndter(påminnelse(AVVENTER_HISTORIKK, 1.vedtaksperiode))
-        assertEquals(AVVENTER_HISTORIKK, inspektør.sisteTilstand(1.vedtaksperiode))
-        assertEquals(9, hendelse.behov().size)
-        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.Foreldrepenger))
-        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.Pleiepenger))
-        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.Omsorgspenger))
-        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.Opplæringspenger))
-        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.Arbeidsavklaringspenger))
-        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.Dagpenger))
-        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.Institusjonsopphold))
-        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.Sykepengehistorikk))
-        assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.Dødsinfo))
+        assertForventetFeil(
+            forklaring = "Denne testen skal funke når vi har vanlig påminnelseslogikk igjen",
+            nå = {
+                assertEquals(TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, inspektør.sisteTilstand(1.vedtaksperiode))
+            },
+            ønsket = {
+                assertEquals(AVVENTER_HISTORIKK, inspektør.sisteTilstand(1.vedtaksperiode))
+                assertEquals(9, hendelse.behov().size)
+                assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.Foreldrepenger))
+                assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.Pleiepenger))
+                assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.Omsorgspenger))
+                assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.Opplæringspenger))
+                assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.Arbeidsavklaringspenger))
+                assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.Dagpenger))
+                assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.Institusjonsopphold))
+                assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.Sykepengehistorikk))
+                assertTrue(hendelse.etterspurteBehov(1.vedtaksperiode.id(ORGNUMMER), Behovtype.Dødsinfo))
+            }
+        )
+
     }
 
     @Test
@@ -128,8 +147,16 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
         assertEquals(1, hendelse.behov().size)
         assertTrue(hendelse.behov().any { it.type == Behovtype.Simulering })
         person.håndter(påminnelse(AVVENTER_SIMULERING, 1.vedtaksperiode))
-        assertEquals(AVVENTER_SIMULERING, inspektør.sisteTilstand(1.vedtaksperiode))
-        assertEquals(1, hendelse.behov().size)
+        assertForventetFeil(
+            forklaring = "Denne testen skal funke når vi har vanlig påminnelseslogikk igjen",
+            nå = {
+                assertEquals(AVVENTER_HISTORIKK, inspektør.sisteTilstand(1.vedtaksperiode))
+            },
+            ønsket = {
+                assertEquals(AVVENTER_SIMULERING, inspektør.sisteTilstand(1.vedtaksperiode))
+                assertEquals(1, hendelse.behov().size)
+            }
+        )
     }
 
     @Test
@@ -145,8 +172,19 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
         assertEquals(1, hendelse.behov().size)
         assertTrue(hendelse.behov().any { it.type == Behovtype.Godkjenning })
         person.håndter(påminnelse(AVVENTER_GODKJENNING, 1.vedtaksperiode))
-        assertEquals(AVVENTER_GODKJENNING, inspektør.sisteTilstand(1.vedtaksperiode))
-        assertEquals(1, hendelse.behov().size)
+
+        assertForventetFeil(
+            forklaring = "Denne testen skal funke når vi har vanlig påminnelseslogikk igjen",
+            nå = {
+                assertEquals(AVVENTER_HISTORIKK, inspektør.sisteTilstand(1.vedtaksperiode))
+            },
+            ønsket = {
+
+                assertEquals(AVVENTER_GODKJENNING, inspektør.sisteTilstand(1.vedtaksperiode))
+                assertEquals(1, hendelse.behov().size)
+            }
+        )
+
     }
 
     @Test
