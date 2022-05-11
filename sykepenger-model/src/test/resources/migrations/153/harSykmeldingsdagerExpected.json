@@ -1,0 +1,133 @@
+{
+  "fødselsnummer": "12029240045",
+  "arbeidsgivere": [
+    {
+      "sykdomshistorikk": [
+        {
+          "hendelseId": null,
+          "hendelseSykdomstidslinje": {
+            "låstePerioder": [],
+            "periode": null,
+            "dager": []
+          },
+          "beregnetSykdomstidslinje": {
+            "låstePerioder": [
+              {
+                "fom": "2018-01-01",
+                "tom": "2018-01-31"
+              },
+              {
+                "fom": "2018-03-01",
+                "tom": "2018-03-31"
+              }
+            ],
+            "periode": null,
+            "dager": [
+              {
+                "fom": "2018-03-01",
+                "tom": "2018-03-31",
+                "type": "SYKEDAG",
+                "kilde": {
+                  "type": "Søknad",
+                  "id": "1533cd21-3636-4816-b07b-f9c6f22353f8",
+                  "tidsstempel": "2018-03-01T00:00:00"
+                },
+                "grad": 100.0
+              }
+            ]
+          }
+        },
+        {
+          "id": "f11ebd3b-4891-4532-b21a-67593f0aa18c",
+          "hendelseId": "b022f0d6-4ca3-49e9-b4b5-8e403b420654",
+          "tidsstempel": "2022-05-11T12:50:47.003192",
+          "hendelseSykdomstidslinje": {
+            "låstePerioder": [],
+            "periode": {
+              "fom": "2018-03-01",
+              "tom": "2018-03-16"
+            },
+            "dager": [
+              {
+                "fom": "2018-03-01",
+                "tom": "2018-03-16",
+                "type": "ARBEIDSGIVERDAG",
+                "kilde": {
+                  "type": "Inntektsmelding",
+                  "id": "b022f0d6-4ca3-49e9-b4b5-8e403b420654",
+                  "tidsstempel": "2022-05-11T12:50:47.001621"
+                },
+                "grad": 100.0
+              }
+            ]
+          },
+          "beregnetSykdomstidslinje": {
+            "låstePerioder": [
+              {
+                "fom": "2018-01-01",
+                "tom": "2018-01-31"
+              },
+              {
+                "fom": "2018-03-01",
+                "tom": "2018-03-31"
+              }
+            ],
+            "periode": {
+              "fom": "2018-01-01",
+              "tom": "2018-03-31"
+            },
+            "dager": [
+              {
+                "fom": "2018-01-01",
+                "tom": "2018-01-30",
+                "type": "SYKEDAG",
+                "kilde": {
+                  "type": "Sykmelding",
+                  "id": "a886ac31-264b-4bb7-9701-fa01bb88a3bf",
+                  "tidsstempel": "2018-01-01T00:00:00"
+                },
+                "grad": 100.0
+              },
+              {
+                "dato": "2018-01-31",
+                "type": "SYKEDAG",
+                "kilde": {
+                  "type": "Sykmelding",
+                  "id": "18c1c054-9fac-4e11-b331-2b5268de1625",
+                  "tidsstempel": "2018-01-01T00:00:00"
+                },
+                "grad": 50.0
+              },
+              {
+                "fom": "2018-03-01",
+                "tom": "2018-03-31",
+                "type": "SYKEDAG",
+                "kilde": {
+                  "type": "Søknad",
+                  "id": "1533cd21-3636-4816-b07b-f9c6f22353f8",
+                  "tidsstempel": "2018-03-01T00:00:00"
+                },
+                "grad": 100.0
+              }
+            ]
+          }
+        }
+      ],
+      "vedtaksperioder": [
+        {
+          "id": "280a5301-032b-4628-bec1-c2389b569904",
+          "fom": "2018-01-01",
+          "tom": "2018-01-31",
+          "tilstand": "AVSLUTTET"
+        },
+        {
+          "id": "a4b9c2a1-2296-4a87-a01c-5a0a153e1787",
+          "fom": "2018-03-01",
+          "tom": "2018-03-31",
+          "tilstand": "AVSLUTTET"
+        }
+      ]
+    }
+  ],
+  "skjemaVersjon": 153
+}
