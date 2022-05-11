@@ -19,10 +19,9 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning
-import no.nav.helse.person.ForlengelseFraInfotrygd.JA
-import no.nav.helse.person.ForlengelseFraInfotrygd.NEI
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.Opptjening
+import no.nav.helse.person.Periodetype
 import no.nav.helse.person.Sammenligningsgrunnlag
 import no.nav.helse.person.Sykepengegrunnlag
 import no.nav.helse.person.Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
@@ -155,8 +154,9 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         val vilkårsgrunnlagPeriode2 = inspektør.vilkårsgrunnlag(2.vedtaksperiode)
         assertTrue(vilkårsgrunnlagPeriode1 is VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag)
         assertSame(vilkårsgrunnlagPeriode1, vilkårsgrunnlagPeriode2)
-        assertEquals(JA, inspektør.forlengelseFraInfotrygd(1.vedtaksperiode))
-        assertEquals(JA, inspektør.forlengelseFraInfotrygd(2.vedtaksperiode))
+
+        assertEquals(Periodetype.OVERGANG_FRA_IT, inspektør.periodetype(1.vedtaksperiode))
+        assertEquals(Periodetype.INFOTRYGDFORLENGELSE, inspektør.periodetype(2.vedtaksperiode))
     }
 
     @Test
@@ -199,8 +199,8 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         )
         assertTrue(inspektør.vilkårsgrunnlag(1.vedtaksperiode) is VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag)
         assertTrue(inspektør.vilkårsgrunnlag(2.vedtaksperiode) is VilkårsgrunnlagHistorikk.Grunnlagsdata)
-        assertEquals(JA, inspektør.forlengelseFraInfotrygd(1.vedtaksperiode))
-        assertEquals(NEI, inspektør.forlengelseFraInfotrygd(2.vedtaksperiode))
+        assertEquals(Periodetype.OVERGANG_FRA_IT, inspektør.periodetype(1.vedtaksperiode))
+        assertEquals(Periodetype.FØRSTEGANGSBEHANDLING, inspektør.periodetype(2.vedtaksperiode))
     }
 
     @Test
@@ -241,8 +241,6 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         assertNoWarning("Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.", 1.vedtaksperiode.filter())
         assertWarning("Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.", 2.vedtaksperiode.filter())
         assertEquals(inspektør.vilkårsgrunnlag(1.vedtaksperiode), inspektør.vilkårsgrunnlag(2.vedtaksperiode))
-        assertEquals(NEI, inspektør.forlengelseFraInfotrygd(1.vedtaksperiode))
-        assertEquals(NEI, inspektør.forlengelseFraInfotrygd(2.vedtaksperiode))
         assertEquals(18.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
         assertEquals(18.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
     }
@@ -327,8 +325,9 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         assertNotNull(inspektør.vilkårsgrunnlag(1.vedtaksperiode))
         assertNotNull(inspektør.vilkårsgrunnlag(2.vedtaksperiode))
         assertNotEquals(inspektør.vilkårsgrunnlag(1.vedtaksperiode), inspektør.vilkårsgrunnlag(2.vedtaksperiode))
-        assertEquals(NEI, inspektør.forlengelseFraInfotrygd(1.vedtaksperiode))
-        assertEquals(NEI, inspektør.forlengelseFraInfotrygd(2.vedtaksperiode))
+
+        assertEquals(Periodetype.FØRSTEGANGSBEHANDLING, inspektør.periodetype(1.vedtaksperiode))
+        assertEquals(Periodetype.FØRSTEGANGSBEHANDLING, inspektør.periodetype(2.vedtaksperiode))
     }
 
     @Test

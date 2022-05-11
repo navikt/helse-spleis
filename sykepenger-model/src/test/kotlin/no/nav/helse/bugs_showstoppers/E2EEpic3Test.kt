@@ -27,7 +27,7 @@ import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.november
 import no.nav.helse.oktober
-import no.nav.helse.person.ForlengelseFraInfotrygd
+import no.nav.helse.person.Periodetype
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -1299,7 +1299,8 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             }
         ))
         håndterYtelser(1.vedtaksperiode)
-        assertEquals(ForlengelseFraInfotrygd.NEI, inspektør.forlengelseFraInfotrygd(1.vedtaksperiode))
+        assertEquals(Periodetype.FØRSTEGANGSBEHANDLING, inspektør.periodetype(1.vedtaksperiode))
+
         assertFalse(person.personLogg.hasWarningsOrWorse())
         assertTilstander(
             1.vedtaksperiode,

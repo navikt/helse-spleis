@@ -31,7 +31,6 @@ import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.november
 import no.nav.helse.oktober
-import no.nav.helse.person.ForlengelseFraInfotrygd
 import no.nav.helse.person.Periodetype
 import no.nav.helse.person.Person
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
@@ -565,7 +564,6 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
             }
 
         // Denne periode er forlengelse av Infotrygd-periode.
-        assertEquals(ForlengelseFraInfotrygd.JA, vedtaksperioder.first().forlengelseFraInfotrygd)
         assertEquals(Periodetype.OVERGANG_FRA_IT, vedtaksperioder.first().periodetype)
     }
 
@@ -601,7 +599,6 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
                 assertEquals(1, it.size)
             }
 
-        assertEquals(ForlengelseFraInfotrygd.JA, vedtaksperioder.first().forlengelseFraInfotrygd)
         assertEquals(Periodetype.OVERGANG_FRA_IT, vedtaksperioder.first().periodetype)
     }
 

@@ -281,14 +281,13 @@ internal class Arbeidsgiver private constructor(
         /*
             sjekker at vi har inntekt for første fraværsdag for alle arbeidsgivere med sykdom for skjæringstidspunkt
          */
-        internal fun Iterable<Arbeidsgiver>.harNødvendigInntekt(skjæringstidspunkt: LocalDate) =
-            filter { it.harSykdomFor(skjæringstidspunkt) }
-                .filter {
+        internal fun Iterable<Arbeidsgiver>.harNødvendigInntekt(skjæringstidspunkt: LocalDate, start: LocalDate) =
+                filter {
                     it.vedtaksperioder
                         .medSkjæringstidspunkt(skjæringstidspunkt)
                         .any(IKKE_FERDIG_BEHANDLET)
                 }
-                .all { it.harInntektsmelding(skjæringstidspunkt) }
+                .all { it.harNødvendigInntektForVilkårsprøving(skjæringstidspunkt, start) }
 
         internal fun Iterable<Arbeidsgiver>.trengerSøknadISammeMåned(skjæringstidspunkt: LocalDate) = this
             .filter { !it.harSykdomFor(skjæringstidspunkt) }
