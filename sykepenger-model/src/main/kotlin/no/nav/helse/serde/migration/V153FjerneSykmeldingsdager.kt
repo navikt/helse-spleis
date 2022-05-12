@@ -68,7 +68,7 @@ internal class V153FjerneSykmeldingsdager : JsonMigration(version = 153) {
 
             arbeidsgiver.path("vedtaksperioder").filter { vedtaksperiode ->
                 val vedtaksperiodeFom = LocalDate.parse(vedtaksperiode.path("fom").asText())
-                sykmeldingsdager.any { it.dagFom() < vedtaksperiodeFom }
+                sykmeldingsdager.any { it.dagFom() <= vedtaksperiodeFom }
             }.forEach { vedtaksperiode ->
                 val opprettet = LocalDateTime.parse(vedtaksperiode.path("opprettet").asText())
                 val oppdatert = LocalDateTime.parse(vedtaksperiode.path("oppdatert").asText())
