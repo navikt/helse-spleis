@@ -48,6 +48,8 @@ internal class V153FjerneSykmeldingsdager : JsonMigration(version = 153) {
 
     override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         val fødselsnummer = jsonNode.path("fødselsnummer").asText()
+        val aktørId = jsonNode.path("aktørId").asText()
+        val lanseringsdato = LocalDateTime.of(2022, 4, 25, 20, 0, 0)
 
         jsonNode["arbeidsgivere"].forEach { arbeidsgiver ->
             val organisasjonsnummer = arbeidsgiver.path("organisasjonsnummer").asText()
@@ -68,11 +70,16 @@ internal class V153FjerneSykmeldingsdager : JsonMigration(version = 153) {
                 val vedtaksperiodeFom = LocalDate.parse(vedtaksperiode.path("fom").asText())
                 sykmeldingsdager.any { it.dagFom() < vedtaksperiodeFom }
             }.forEach { vedtaksperiode ->
-                sikkerlogg.info("Vedtaksperiode opprettet etter sykmeldingsdager på sykdomstidslinjen for {}, {}, {}, {}",
+                val opprettet = LocalDateTime.parse(vedtaksperiode.path("opprettet").asText())
+                val oppdatert = LocalDateTime.parse(vedtaksperiode.path("oppdatert").asText())
+                sikkerlogg.info("Vedtaksperiode opprettet etter sykmeldingsdager på sykdomstidslinjen for {}, {}, {}, {}, {}, {}, {}",
                     keyValue("fødselsnummer", fødselsnummer),
+                    keyValue("aktørId", aktørId),
                     keyValue("organisasjonsnummer", organisasjonsnummer),
                     keyValue("vedtaksperiodeId", vedtaksperiode.path("id").asText()),
-                    keyValue("tilstand", vedtaksperiode.path("tilstand").asText())
+                    keyValue("tilstand", vedtaksperiode.path("tilstand").asText()),
+                    keyValue("opprettetEtterNyFlyt", opprettet >= lanseringsdato),
+                    keyValue("oppdatertEtterNyFlyt", oppdatert >= lanseringsdato)
                 )
             }
 

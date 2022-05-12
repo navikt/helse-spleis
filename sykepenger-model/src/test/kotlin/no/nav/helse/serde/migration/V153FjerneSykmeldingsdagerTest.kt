@@ -20,8 +20,8 @@ internal class V153FjerneSykmeldingsdagerTest: MigrationTest(V153FjerneSykmeldin
         )
 
         val migrert = migrer("/migrations/153/harSykmeldingsdagerOriginal.json".readResource())
-        assertDoesNotThrow { UUID.fromString(migrert.path("arbeidsgivere").first()["sykdomshistorikk"].first()["id"].asText()) }
-        assertDoesNotThrow { LocalDateTime.parse(migrert.path("arbeidsgivere").first()["sykdomshistorikk"].first()["tidsstempel"].asText()) }
+        assertDoesNotThrow { UUID.fromString(migrert.path("arbeidsgivere")[1]["sykdomshistorikk"].first()["id"].asText()) }
+        assertDoesNotThrow { LocalDateTime.parse(migrert.path("arbeidsgivere")[1]["sykdomshistorikk"].first()["tidsstempel"].asText()) }
     }
 
     @Test
