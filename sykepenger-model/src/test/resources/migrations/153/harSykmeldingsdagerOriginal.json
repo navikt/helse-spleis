@@ -2,6 +2,7 @@
   "fødselsnummer": "12029240045",
   "arbeidsgivere": [
     {
+      "organisasjonsnummer": "a1",
       "sykdomshistorikk": [
         {
           "id": "f11ebd3b-4891-4532-b21a-67593f0aa18c",

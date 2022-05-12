@@ -50,6 +50,7 @@ internal class V153FjerneSykmeldingsdager : JsonMigration(version = 153) {
         val fødselsnummer = jsonNode.path("fødselsnummer").asText()
 
         jsonNode["arbeidsgivere"].forEach { arbeidsgiver ->
+            val organisasjonsnummer = arbeidsgiver.path("organisasjonsnummer").asText()
             val sykdomshistorikk = arbeidsgiver["sykdomshistorikk"] as ArrayNode
             val sisteSykdomshistorikkElement = sykdomshistorikk.firstOrNull() ?: return@forEach
             val endretSykdomstidslinje = (sisteSykdomshistorikkElement["beregnetSykdomstidslinje"].deepCopy<ObjectNode>())
@@ -58,16 +59,18 @@ internal class V153FjerneSykmeldingsdager : JsonMigration(version = 153) {
                 .partition { it.path("kilde").path("type").asText() != "Sykmelding" }
             if (sykmeldingsdager.isEmpty()) return@forEach
 
-            sikkerlogg.info("Fjerner sykmeldingsdager ${sykmeldingsdager.map { it.dagPeriode() }} fra sykdomstidslinjen for {}",
-                keyValue("fødselsnummer", fødselsnummer)
+            sikkerlogg.info("Fjerner sykmeldingsdager ${sykmeldingsdager.map { it.dagPeriode() }} fra sykdomstidslinjen for {}, {}",
+                keyValue("fødselsnummer", fødselsnummer),
+                keyValue("organisasjonsnummer", organisasjonsnummer)
             )
 
             arbeidsgiver.path("vedtaksperioder").filter { vedtaksperiode ->
                 val vedtaksperiodeFom = LocalDate.parse(vedtaksperiode.path("fom").asText())
                 sykmeldingsdager.any { it.dagFom() < vedtaksperiodeFom }
             }.forEach { vedtaksperiode ->
-                sikkerlogg.info("Vedtaksperiode opprettet etter sykmeldingsdager på sykdomstidslinjen for {}, {}, {}",
+                sikkerlogg.info("Vedtaksperiode opprettet etter sykmeldingsdager på sykdomstidslinjen for {}, {}, {}, {}",
                     keyValue("fødselsnummer", fødselsnummer),
+                    keyValue("organisasjonsnummer", organisasjonsnummer),
                     keyValue("vedtaksperiodeId", vedtaksperiode.path("id").asText()),
                     keyValue("tilstand", vedtaksperiode.path("tilstand").asText())
                 )
