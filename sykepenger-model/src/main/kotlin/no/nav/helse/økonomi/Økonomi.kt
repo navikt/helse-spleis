@@ -36,7 +36,6 @@ internal class Økonomi private constructor(
     private var er6GBegrenset: Boolean? = null,
     private var tilstand: Tilstand = Tilstand.KunGrad,
 ) {
-
     companion object {
         private val arbeidsgiverBeløp = { økonomi: Økonomi -> økonomi.arbeidsgiverbeløp!! }
         private val personBeløp = { økonomi: Økonomi -> økonomi.personbeløp!! }
@@ -61,7 +60,9 @@ internal class Økonomi private constructor(
 
         internal fun betal(økonomiList: List<Økonomi>, virkningsdato: LocalDate): List<Økonomi> = økonomiList.also {
             delteUtbetalinger(it)
-            økonomiList.forEach { it.totalGrad = totalSykdomsgrad(økonomiList) }
+            totalSykdomsgrad(økonomiList).also { totalSykdomsgrad ->
+                økonomiList.forEach { økonomi -> økonomi.totalGrad = totalSykdomsgrad }
+            }
             fordelBeløp(it, virkningsdato)
         }
 
