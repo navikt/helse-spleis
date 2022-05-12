@@ -240,7 +240,8 @@ internal fun påminnelse(
     påminnetTilstand: TilstandType,
     tilstandsendringstidspunkt: LocalDateTime,
     fnr: Fødselsnummer = AbstractPersonTest.UNG_PERSON_FNR_2018,
-    orgnummer: String = AbstractPersonTest.ORGNUMMER
+    orgnummer: String = AbstractPersonTest.ORGNUMMER,
+    antallGangerPåminnet: Int = 1
 ): Påminnelse {
     return Påminnelse(
         meldingsreferanseId = UUID.randomUUID(),
@@ -248,7 +249,7 @@ internal fun påminnelse(
         fødselsnummer = fnr.toString(),
         organisasjonsnummer = orgnummer,
         vedtaksperiodeId = vedtaksperiodeId.toString(),
-        antallGangerPåminnet = 0,
+        antallGangerPåminnet = antallGangerPåminnet,
         tilstand = påminnetTilstand,
         tilstandsendringstidspunkt = tilstandsendringstidspunkt,
         påminnelsestidspunkt = LocalDateTime.now(),

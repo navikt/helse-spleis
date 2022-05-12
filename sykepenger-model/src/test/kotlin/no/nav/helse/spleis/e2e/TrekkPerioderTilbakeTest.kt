@@ -33,7 +33,7 @@ internal class TrekkPerioderTilbakeTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
-        håndterPåminnelse(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+        håndterPåminnelse(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, antallGangerPåminnet = 9000)
 
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
@@ -65,7 +65,7 @@ internal class TrekkPerioderTilbakeTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
-        håndterPåminnelse(1.vedtaksperiode, AVVENTER_HISTORIKK)
+        håndterPåminnelse(1.vedtaksperiode, AVVENTER_HISTORIKK, antallGangerPåminnet = 9000)
 
         håndterUtbetalingshistorikk(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
@@ -101,7 +101,7 @@ internal class TrekkPerioderTilbakeTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterYtelser(1.vedtaksperiode)
-        håndterPåminnelse(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
+        håndterPåminnelse(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING, antallGangerPåminnet = 9000)
 
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -134,7 +134,7 @@ internal class TrekkPerioderTilbakeTest : AbstractEndToEndTest() {
     @Test
     fun `Trekker en periode tilbake fra AvventerSimulering til AvventerInntektsmeldingEllerHistorikk`() {
         tilYtelser(1.januar, 31.januar, 100.prosent, 1.januar)
-        håndterPåminnelse(1.vedtaksperiode, AVVENTER_SIMULERING)
+        håndterPåminnelse(1.vedtaksperiode, AVVENTER_SIMULERING, antallGangerPåminnet = 9000)
 
         håndterUtbetalingshistorikk(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
@@ -166,7 +166,7 @@ internal class TrekkPerioderTilbakeTest : AbstractEndToEndTest() {
     @Test
     fun `Trekker en periode tilbake fra AvventerGodkjenning til AvventerInntektsmeldingEllerHistorikk`() {
         tilGodkjenning(1.januar, 31.januar, 100.prosent, 1.januar)
-        håndterPåminnelse(1.vedtaksperiode, AVVENTER_GODKJENNING)
+        håndterPåminnelse(1.vedtaksperiode, AVVENTER_GODKJENNING, antallGangerPåminnet = 9000)
 
         håndterUtbetalingshistorikk(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
@@ -230,7 +230,7 @@ internal class TrekkPerioderTilbakeTest : AbstractEndToEndTest() {
         assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a3)
 
         nullstillTilstandsendringer()
-        håndterPåminnelse(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a3)
+        håndterPåminnelse(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a3, antallGangerPåminnet = 9000)
         assertTilstander(
             1.vedtaksperiode,
             AVVENTER_BLOKKERENDE_PERIODE,
@@ -249,7 +249,7 @@ internal class TrekkPerioderTilbakeTest : AbstractEndToEndTest() {
             orgnummer = a2
         )
 
-        håndterPåminnelse(1.vedtaksperiode, AVVENTER_GODKJENNING, orgnummer = a1)
+        håndterPåminnelse(1.vedtaksperiode, AVVENTER_GODKJENNING, orgnummer = a1, antallGangerPåminnet = 9000)
         assertTilstander(
             1.vedtaksperiode,
             AVVENTER_GODKJENNING,
@@ -258,7 +258,7 @@ internal class TrekkPerioderTilbakeTest : AbstractEndToEndTest() {
             AVVENTER_HISTORIKK,
             orgnummer = a1
         )
-        håndterPåminnelse(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
+        håndterPåminnelse(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2, antallGangerPåminnet = 9000)
         assertTilstander(
             1.vedtaksperiode,
             AVVENTER_BLOKKERENDE_PERIODE,
@@ -284,7 +284,7 @@ internal class TrekkPerioderTilbakeTest : AbstractEndToEndTest() {
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Dagtype.Feriedag)))
         assertTilstand(2.vedtaksperiode, AVVENTER_UFERDIG)
 
-        håndterPåminnelse(2.vedtaksperiode, påminnetTilstand = AVVENTER_UFERDIG)
+        håndterPåminnelse(2.vedtaksperiode, påminnetTilstand = AVVENTER_UFERDIG, antallGangerPåminnet = 9000)
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_HISTORIKK_REVURDERING)
         assertTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_UFERDIG, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE)
     }

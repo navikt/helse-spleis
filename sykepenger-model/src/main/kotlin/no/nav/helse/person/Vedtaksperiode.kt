@@ -1470,7 +1470,11 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            vedtaksperiode.tilstand(påminnelse, AvventerInntektsmeldingEllerHistorikk)
+            if (påminnelse.maigate()) {
+                vedtaksperiode.tilstand(påminnelse, AvventerInntektsmeldingEllerHistorikk)
+            } else {
+                vedtaksperiode.person.gjenopptaBehandlingNy(påminnelse)
+            }
         }
     }
 
@@ -1514,8 +1518,11 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            vedtaksperiode.tilstand(påminnelse, AvventerInntektsmeldingEllerHistorikk)
-            //vedtaksperiode.trengerVilkårsgrunnlag(påminnelse)
+            if (påminnelse.maigate()) {
+                vedtaksperiode.tilstand(påminnelse, AvventerInntektsmeldingEllerHistorikk)
+            } else {
+                vedtaksperiode.trengerVilkårsgrunnlag(påminnelse)
+            }
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
@@ -1552,7 +1559,9 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            vedtaksperiode.tilstand(påminnelse, AvventerInntektsmeldingEllerHistorikk)
+            if (påminnelse.maigate()) {
+                vedtaksperiode.tilstand(påminnelse, AvventerInntektsmeldingEllerHistorikk)
+            }
         }
 
         private fun fortsett(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
@@ -1613,8 +1622,11 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            vedtaksperiode.tilstand(påminnelse, AvventerInntektsmeldingEllerHistorikk)
-            //vedtaksperiode.trengerYtelser(påminnelse)
+            if (påminnelse.maigate()) {
+                vedtaksperiode.tilstand(påminnelse, AvventerInntektsmeldingEllerHistorikk)
+            } else {
+                vedtaksperiode.trengerYtelser(påminnelse)
+            }
         }
 
         override fun håndter(
@@ -1793,9 +1805,12 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            vedtaksperiode.utbetalinger.forkast(påminnelse)
-            vedtaksperiode.tilstand(påminnelse, AvventerInntektsmeldingEllerHistorikk)
-            //trengerSimulering(vedtaksperiode, påminnelse)
+            if (påminnelse.maigate()) {
+                vedtaksperiode.utbetalinger.forkast(påminnelse)
+                vedtaksperiode.tilstand(påminnelse, AvventerInntektsmeldingEllerHistorikk)
+            } else {
+                trengerSimulering(vedtaksperiode, påminnelse)
+            }
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, simulering: Simulering) {
@@ -1942,9 +1957,12 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            vedtaksperiode.utbetalinger.forkast(påminnelse)
-            vedtaksperiode.tilstand(påminnelse, AvventerInntektsmeldingEllerHistorikk)
-            // vedtaksperiode.trengerHistorikkFraInfotrygd(påminnelse)
+            if (påminnelse.maigate()) {
+                vedtaksperiode.utbetalinger.forkast(påminnelse)
+                vedtaksperiode.tilstand(påminnelse, AvventerInntektsmeldingEllerHistorikk)
+            } else {
+                vedtaksperiode.trengerHistorikkFraInfotrygd(påminnelse)
+            }
         }
 
         override fun håndter(

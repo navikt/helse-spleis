@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e
 
 import java.time.LocalDateTime
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
@@ -10,7 +9,6 @@ import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
@@ -36,16 +34,7 @@ internal class InfotrygdhistorikkEndretTest: AbstractEndToEndTest() {
         håndterSøknad(Sykdom(fom = 1.mai, tom = 31.mai, 100.prosent))
         håndterUtbetalingshistorikk(2.vedtaksperiode, *utbetalinger.toTypedArray(), inntektshistorikk = inntektshistorikk)
         håndterPåminnelse(1.vedtaksperiode, AVVENTER_GODKJENNING)
-        assertForventetFeil(
-            forklaring = "Denne testen skal funke når vi har vanlig påminnelseslogikk igjen",
-            nå = {
-                assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
-            },
-            ønsket = {
-                assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
-            }
-        )
-
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
     }
 
     @Test
@@ -59,15 +48,7 @@ internal class InfotrygdhistorikkEndretTest: AbstractEndToEndTest() {
     fun `infotrygdhistorikken er uendret`() {
         periodeTilGodkjenning(utbetalinger, inntektshistorikk)
         håndterUtbetalingshistorikk(1.vedtaksperiode, *utbetalinger.toTypedArray(), inntektshistorikk = inntektshistorikk)
-        assertForventetFeil(
-            forklaring = "Denne testen skal funke når vi har vanlig påminnelseslogikk igjen",
-            nå = {
-                assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
-            },
-            ønsket = {
-                assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
-            }
-        )
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
     }
 
     private fun periodeTilGodkjenning(perioder: List<Infotrygdperiode> = emptyList(), inntektsopplysning: List<Inntektsopplysning> = emptyList()) {

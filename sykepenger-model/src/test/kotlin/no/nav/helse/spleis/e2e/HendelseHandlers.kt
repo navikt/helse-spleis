@@ -6,7 +6,6 @@ import java.time.Year
 import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.Fødselsnummer
-import no.nav.helse.Toggle
 import no.nav.helse.desember
 import no.nav.helse.etterspurteBehov
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
@@ -659,13 +658,15 @@ internal fun AbstractEndToEndTest.håndterPåminnelse(
     vedtaksperiodeIdInnhenter: IdInnhenter,
     påminnetTilstand: TilstandType,
     tilstandsendringstidspunkt: LocalDateTime = LocalDateTime.now(),
-    orgnummer: String = AbstractPersonTest.ORGNUMMER
+    orgnummer: String = AbstractPersonTest.ORGNUMMER,
+    antallGangerPåminnet: Int = 1
 ) {
     påminnelse(
         vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer),
         påminnetTilstand = påminnetTilstand,
         tilstandsendringstidspunkt = tilstandsendringstidspunkt,
-        orgnummer = orgnummer
+        orgnummer = orgnummer,
+        antallGangerPåminnet = antallGangerPåminnet
     ).håndter(Person::håndter)
 }
 
