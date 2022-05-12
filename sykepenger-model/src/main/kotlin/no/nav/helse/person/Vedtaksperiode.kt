@@ -1370,6 +1370,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun leaving(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
+            vedtaksperiode.utbetalinger.forkast(aktivitetslogg)
             vedtaksperiode.trengerIkkeInntektsmelding(aktivitetslogg.hendelseskontekst())
         }
 
@@ -1792,6 +1793,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
+            vedtaksperiode.utbetalinger.forkast(påminnelse)
             vedtaksperiode.tilstand(påminnelse, AvventerInntektsmeldingEllerHistorikk)
             //trengerSimulering(vedtaksperiode, påminnelse)
         }
@@ -1873,8 +1875,10 @@ internal class Vedtaksperiode private constructor(
         override val kanReberegnes = false
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            if (Toggle.Bugfix.enabled && !vedtaksperiode.harNødvendigInntektForVilkårsprøving())
+            if (Toggle.Bugfix.enabled && !vedtaksperiode.harNødvendigInntektForVilkårsprøving()) {
+                vedtaksperiode.utbetalinger.forkast(hendelse)
                 return vedtaksperiode.tilstand(hendelse, AvventerInntektsmeldingEllerHistorikk)
+            }
             vedtaksperiode.trengerGodkjenning(hendelse)
         }
 
@@ -1938,6 +1942,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
+            vedtaksperiode.utbetalinger.forkast(påminnelse)
             vedtaksperiode.tilstand(påminnelse, AvventerInntektsmeldingEllerHistorikk)
             // vedtaksperiode.trengerHistorikkFraInfotrygd(påminnelse)
         }
