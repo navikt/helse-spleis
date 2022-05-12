@@ -1445,6 +1445,8 @@ internal class Vedtaksperiode private constructor(
         override val type: TilstandType = AVVENTER_BLOKKERENDE_PERIODE
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+            if (Toggle.Bugfix.enabled && !vedtaksperiode.harNødvendigInntektForVilkårsprøving())
+                return vedtaksperiode.tilstand(hendelse, AvventerInntektsmeldingEllerHistorikk)
             vedtaksperiode.person.gjenopptaBehandlingNy(hendelse)
         }
 
@@ -1475,6 +1477,8 @@ internal class Vedtaksperiode private constructor(
             tilstandsendringstidspunkt.plusDays(5)
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+            if (Toggle.Bugfix.enabled && !vedtaksperiode.harNødvendigInntektForVilkårsprøving())
+                return vedtaksperiode.tilstand(hendelse, AvventerInntektsmeldingEllerHistorikk)
             vedtaksperiode.trengerVilkårsgrunnlag(hendelse)
         }
 
@@ -1523,6 +1527,10 @@ internal class Vedtaksperiode private constructor(
 
     internal object AvventerUferdig : Vedtaksperiodetilstand {
         override val type = AVVENTER_UFERDIG
+        override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+            if (Toggle.Bugfix.enabled && !vedtaksperiode.harNødvendigInntektForVilkårsprøving())
+                return vedtaksperiode.tilstand(hendelse, AvventerInntektsmeldingEllerHistorikk)
+        }
 
         override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Sykmelding) {}
 
@@ -1532,6 +1540,10 @@ internal class Vedtaksperiode private constructor(
 
         override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, gjenopptaBehandling: IAktivitetslogg) {
             fortsett(vedtaksperiode, gjenopptaBehandling)
+        }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
+            vedtaksperiode.tilstand(påminnelse, AvventerInntektsmeldingEllerHistorikk)
         }
 
         private fun fortsett(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
@@ -1553,6 +1565,8 @@ internal class Vedtaksperiode private constructor(
             .plusDays(4)
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+            if (Toggle.Bugfix.enabled && !vedtaksperiode.harNødvendigInntektForVilkårsprøving())
+                return vedtaksperiode.tilstand(hendelse, AvventerInntektsmeldingEllerHistorikk)
             vedtaksperiode.loggInnenforArbeidsgiverperiode()
             if (vedtaksperiode.arbeidsgiver.harDagUtenSøknad(vedtaksperiode.periode)) {
                 hendelse.error("Tidslinjen inneholder minst én dag med kilde sykmelding")
@@ -1738,6 +1752,8 @@ internal class Vedtaksperiode private constructor(
         ): LocalDateTime = tilstandsendringstidspunkt.plusDays(7)
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+            if (Toggle.Bugfix.enabled && !vedtaksperiode.harNødvendigInntektForVilkårsprøving())
+                return vedtaksperiode.tilstand(hendelse, AvventerInntektsmeldingEllerHistorikk)
             trengerSimulering(vedtaksperiode, hendelse)
         }
 
@@ -1849,6 +1865,8 @@ internal class Vedtaksperiode private constructor(
         override val kanReberegnes = false
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+            if (Toggle.Bugfix.enabled && !vedtaksperiode.harNødvendigInntektForVilkårsprøving())
+                return vedtaksperiode.tilstand(hendelse, AvventerInntektsmeldingEllerHistorikk)
             vedtaksperiode.trengerGodkjenning(hendelse)
         }
 

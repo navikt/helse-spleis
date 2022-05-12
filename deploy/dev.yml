@@ -54,7 +54,5 @@ spec:
     value: earliest
   - name: GraphQLPlayground
     value: "true"
-  - name: AVSLUTT_INGEN_UTBETALING
-    value: "false"
-  - name: NY_TILSTANDSFLYT
+  - name: Bugfix
     value: "true"
