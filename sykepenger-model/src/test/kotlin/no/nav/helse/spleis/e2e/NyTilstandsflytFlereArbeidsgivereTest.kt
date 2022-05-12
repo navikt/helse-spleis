@@ -201,30 +201,57 @@ internal class NyTilstandsflytFlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(2.januar til 17.januar), førsteFraværsdag = 2.januar, orgnummer = a2)
 
         assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
-        assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
+        assertForventetFeil(
+            forklaring = """Det finnes en feil i måten vi finner førsteFraværsdag på, der vi finner en førsteFraværsdag 
+                for perioder som ligger *etter* den aktuelle perioden. Denne bør feile når buggen er fikset""",
+            nå = {
+                assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, orgnummer = a2)
+            },
+            ønsket = {
+                assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
+            }
+        )
         assertTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, orgnummer = a2)
 
         håndterInntektsmelding(listOf(2.januar til 17.januar), førsteFraværsdag = 20.januar, orgnummer = a2)
 
         assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
-        assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
+        assertForventetFeil(
+            forklaring = """Det finnes en feil i måten vi finner førsteFraværsdag på, der vi finner en førsteFraværsdag 
+                for perioder som ligger *etter* den aktuelle perioden. Denne bør feile når buggen er fikset""",
+            nå = {
+                assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, orgnummer = a2)
+            },
+            ønsket = {
+                assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
+            }
+        )
+
         assertTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
 
-        utbetalPeriode(1.vedtaksperiode, orgnummer = a2, 1.januar)
-        assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
-        assertTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
-        assertTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
+        assertForventetFeil(
+            forklaring = """Det finnes en feil i måten vi finner førsteFraværsdag på, der vi finner en førsteFraværsdag 
+                for perioder som ligger *etter* den aktuelle perioden. Denne bør feile når buggen er fikset""",
+            nå = {},
+            ønsket = {
+                utbetalPeriode(1.vedtaksperiode, orgnummer = a2, 1.januar)
+
+                assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
+                assertTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
+                assertTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
 
 
-        utbetalPeriodeEtterVilkårsprøving(2.vedtaksperiode, orgnummer = a2)
-        assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
-        assertTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
-        assertTilstand(2.vedtaksperiode, AVSLUTTET, orgnummer = a2)
+                utbetalPeriodeEtterVilkårsprøving(2.vedtaksperiode, orgnummer = a2)
+                assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
+                assertTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
+                assertTilstand(2.vedtaksperiode, AVSLUTTET, orgnummer = a2)
 
-        utbetalPeriodeEtterVilkårsprøving(1.vedtaksperiode, orgnummer = a1)
-        assertTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
-        assertTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
-        assertTilstand(2.vedtaksperiode, AVSLUTTET, orgnummer = a2)
+                utbetalPeriodeEtterVilkårsprøving(1.vedtaksperiode, orgnummer = a1)
+                assertTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+                assertTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
+                assertTilstand(2.vedtaksperiode, AVSLUTTET, orgnummer = a2)
+            }
+        )
     }
 
     @Test

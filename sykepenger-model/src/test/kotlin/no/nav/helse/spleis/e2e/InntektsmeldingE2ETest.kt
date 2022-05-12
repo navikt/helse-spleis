@@ -3,7 +3,9 @@ package no.nav.helse.spleis.e2e
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
+import no.nav.helse.Toggle
 import no.nav.helse.april
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
@@ -54,10 +56,62 @@ import org.junit.jupiter.api.Assertions.assertInstanceOf
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
+
+    @Test
+    fun `Periode uten inntekt går ikke i loop ved replay av inntektsmelding`() = Toggle.Bugfix.enable {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 6.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 6.januar, 100.prosent))
+
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+
+        håndterSykmelding(Sykmeldingsperiode(9.januar, 19.januar, 100.prosent))
+        val id = håndterInntektsmelding(listOf(9.januar til 19.januar, 23.januar til 27.januar))
+        håndterSøknad(Sykdom(9.januar, 19.januar, 100.prosent))
+        håndterInntektsmeldingReplay(id, 2.vedtaksperiode.id(ORGNUMMER))
+
+        assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
+    }
+
+    @Test
+    fun `Periode uten inntekt går ikke i loop ved mottatt inntektsmelding`() = Toggle.Bugfix.enable {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 6.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 6.januar, 100.prosent))
+
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+
+        håndterSykmelding(Sykmeldingsperiode(9.januar, 19.januar, 100.prosent))
+        håndterSøknad(Sykdom(9.januar, 19.januar, 100.prosent))
+        håndterInntektsmelding(listOf(9.januar til 19.januar, 23.januar til 27.januar))
+
+        assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
+    }
+
+    @Test
+    fun `Feilutbetaling på grunn av feilberegnet arbeidsgiverperiode`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 6.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 6.januar, 100.prosent))
+
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+
+        håndterSykmelding(Sykmeldingsperiode(9.januar, 19.januar, 100.prosent))
+        håndterSøknad(Sykdom(9.januar, 19.januar, 100.prosent))
+        håndterInntektsmelding(listOf(9.januar til 24.januar))
+
+        assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING)
+        assertForventetFeil(
+            nå ={
+                assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
+            },
+            ønsket = { """¯\_(ツ)_/¯"""; fail() }
+        )
+    }
 
     @Test
     fun `strekker ikke periode tilbake før første fraværsdag`() {

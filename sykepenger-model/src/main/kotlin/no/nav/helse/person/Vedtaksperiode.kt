@@ -542,18 +542,6 @@ internal class Vedtaksperiode private constructor(
         tilstand(hendelse, nesteTilstand())
     }
 
-    private fun håndterInntektsmelding(
-        hendelse: Inntektsmelding,
-        hvisUtenforArbeidsgiverperioden: Vedtaksperiodetilstand
-    ) {
-        håndterInntektsmelding(hendelse, hvisIngenErrors = {
-            if (!alleAndreAvventerArbeidsgivere()) hendelse.validerMuligBrukerutbetaling()
-            if (hendelse.hasErrorsOrWorse()) person.invaliderAllePerioder(hendelse, null)
-        }) {
-            if (ingenUtbetaling()) AvsluttetUtenUtbetaling else hvisUtenforArbeidsgiverperioden
-        }
-    }
-
     private fun oppdaterHistorikk(hendelse: SykdomstidslinjeHendelse) {
         hendelse.trimLeft(periode.endInclusive)
         sykdomstidslinje = arbeidsgiver.oppdaterSykdom(hendelse).subset(periode)
@@ -1386,7 +1374,27 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
-            vedtaksperiode.håndterInntektsmelding(inntektsmelding, AvventerBlokkerendePeriode)
+            vedtaksperiode.håndterInntektsmelding(inntektsmelding, hvisIngenErrors = {
+                if (!vedtaksperiode.alleAndreAvventerArbeidsgivere())
+                    inntektsmelding.validerMuligBrukerutbetaling()
+                if (inntektsmelding.hasErrorsOrWorse())
+                    vedtaksperiode.person.invaliderAllePerioder(inntektsmelding, null)
+            }) {
+                when {
+                    vedtaksperiode.ingenUtbetaling() -> AvsluttetUtenUtbetaling
+                    !vedtaksperiode.harNødvendigInntektForVilkårsprøving() -> {
+                        sikkerlogg.info(
+                            "Vedtaksperiode {}, {}, {}, {} har håndtert en IM men mangler fortsatt nødvendig inntekt",
+                            keyValue("fødselsnummer", vedtaksperiode.fødselsnummer),
+                            keyValue("aktørId", vedtaksperiode.aktørId),
+                            keyValue("organisasjonsnummer", vedtaksperiode.organisasjonsnummer),
+                            keyValue("vedtaksperiodeId", vedtaksperiode.id)
+                        )
+                        AvventerInntektsmeldingEllerHistorikk
+                    }
+                    else -> AvventerBlokkerendePeriode
+                }
+            }
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
