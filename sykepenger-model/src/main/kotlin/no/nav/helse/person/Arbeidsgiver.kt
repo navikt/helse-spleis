@@ -919,10 +919,12 @@ internal class Arbeidsgiver private constructor(
             ?.grunnlagForSykepengegrunnlag()
 
     internal fun harNødvendigInntektForVilkårsprøving(skjæringstidspunkt: LocalDate, periodeStart: LocalDate): Boolean {
-        if (harInntektsmelding(skjæringstidspunkt)) return true
-        val inntektsopplysning = inntektshistorikk.grunnlagForSykepengegrunnlag(skjæringstidspunkt, periodeStart, finnFørsteFraværsdag(skjæringstidspunkt))
-        if (inntektsopplysning == null) return false
-        return inntektsopplysning.erNødvendigInntektForVilkårsprøving(harSykdomFor(skjæringstidspunkt))
+        return inntektshistorikk.harNødvendigInntektForVilkårsprøving(
+            skjæringstidspunkt,
+            periodeStart,
+            finnFørsteFraværsdag(skjæringstidspunkt),
+            harSykdomFor(skjæringstidspunkt)
+        )
     }
 
     internal fun addInntekt(inntektsmelding: Inntektsmelding, skjæringstidspunkt: LocalDate, subsumsjonObserver: SubsumsjonObserver) {

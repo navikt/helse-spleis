@@ -2787,10 +2787,6 @@ internal class InntektsmeldingInfo(
     private val id: UUID,
     internal val arbeidsforholdId: String?
 ) {
-    internal fun erSamme(inntektsmelding: Inntektsmelding) {
-        if (id == inntektsmelding.meldingsreferanseId()) return
-        inntektsmelding.warn("Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.")
-    }
 
     internal fun leggTil(hendelser: MutableSet<Dokumentsporing>) {
         hendelser.add(Dokumentsporing.inntektsmelding(id))
