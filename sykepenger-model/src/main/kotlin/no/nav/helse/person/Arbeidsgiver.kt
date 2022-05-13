@@ -1127,9 +1127,6 @@ internal class Arbeidsgiver private constructor(
         return !aktivitetslogg.hasErrorsOrWorse()
     }
 
-    internal fun harDagUtenSøknad(periode: Periode) =
-        sykdomstidslinje().harDagUtenSøknad(periode)
-
     private fun <Hendelse : IAktivitetslogg> håndter(hendelse: Hendelse, håndterer: Vedtaksperiode.(Hendelse) -> Unit) {
         looper { håndterer(it, hendelse) }
     }

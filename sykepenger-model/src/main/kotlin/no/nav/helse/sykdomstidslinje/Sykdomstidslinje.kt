@@ -6,7 +6,6 @@ import java.util.Objects
 import java.util.SortedMap
 import java.util.stream.Collectors.toMap
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.contains
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.IAktivitetslogg
@@ -169,8 +168,6 @@ internal class Sykdomstidslinje private constructor(
 
     internal fun førsteSykedagEtter(dato: LocalDate) =
         periode?.firstOrNull { it >= dato && erEnSykedag(this[it]) }
-
-    internal fun harDagUtenSøknad(periode: Periode) = subset(periode).any { it.kommerFra(Sykmelding::class) }
 
     internal fun erRettFør(other: Sykdomstidslinje): Boolean {
         return this.sisteDag().erRettFør(other.førsteDag()) && !this.erSisteDagArbeidsdag() && !other.erFørsteDagArbeidsdag()
