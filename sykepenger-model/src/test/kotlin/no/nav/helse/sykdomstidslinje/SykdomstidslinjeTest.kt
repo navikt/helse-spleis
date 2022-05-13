@@ -1,30 +1,12 @@
 package no.nav.helse.sykdomstidslinje
 
-import no.nav.helse.april
-import no.nav.helse.desember
-import no.nav.helse.februar
-import no.nav.helse.fredag
+import no.nav.helse.*
 import no.nav.helse.hendelser.til
-import no.nav.helse.januar
-import no.nav.helse.mandag
-import no.nav.helse.mars
-import no.nav.helse.onsdag
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.sykdomstidslinje.Dag.Companion.default
-import no.nav.helse.testhelpers.A
-import no.nav.helse.testhelpers.F
-import no.nav.helse.testhelpers.S
-import no.nav.helse.testhelpers.TestEvent
-import no.nav.helse.testhelpers.UK
-import no.nav.helse.testhelpers.opphold
-import no.nav.helse.testhelpers.resetSeed
-import no.nav.helse.tirsdag
-import no.nav.helse.torsdag
+import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -145,6 +127,13 @@ internal class SykdomstidslinjeTest {
 
         val merged = tidslinje1.merge(tidslinje2, Dag.replace)
         assertEquals("AAASS", merged.toShortString())
+    }
+
+    @Test
+    fun `dager som har sykmelding som kilde`(){
+        val tidslinje = Sykdomstidslinje.sykedager(1.mandag, 1.onsdag, 100.prosent, TestEvent.sykmelding) + Sykdomstidslinje.sykedager(1.torsdag, 1.fredag, 100.prosent, TestEvent.søknad)
+        assertTrue(tidslinje.harDagUtenSøknad(1.januar til 5.januar))
+        assertFalse(tidslinje.harDagUtenSøknad(4.januar til 5.januar))
     }
 
     @Test

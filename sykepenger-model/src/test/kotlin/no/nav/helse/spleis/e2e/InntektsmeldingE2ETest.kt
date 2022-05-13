@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
+import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
@@ -62,46 +63,7 @@ import org.junit.jupiter.api.Test
 internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
     @Test
-    fun `mange korte perioder som ikke er sykdom`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 1.januar, 100.prosent))
-        håndterSøknad(Sykdom(1.januar, 1.januar, 100.prosent))
-        håndterUtbetalingshistorikk(1.vedtaksperiode)
-        håndterSykmelding(Sykmeldingsperiode(10.januar, 10.januar, 100.prosent))
-        håndterSøknad(Sykdom(10.januar, 10.januar, 100.prosent))
-        håndterUtbetalingshistorikk(2.vedtaksperiode)
-        håndterSykmelding(Sykmeldingsperiode(20.januar, 20.januar, 100.prosent))
-        håndterSøknad(Sykdom(20.januar, 20.januar, 100.prosent))
-        håndterUtbetalingshistorikk(3.vedtaksperiode)
-        håndterSykmelding(Sykmeldingsperiode(30.januar, 30.januar, 100.prosent))
-        håndterSøknad(Sykdom(30.januar, 30.januar, 100.prosent))
-        håndterUtbetalingshistorikk(4.vedtaksperiode)
-
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 19.februar, 100.prosent))
-        håndterSøknad(Sykdom(1.februar, 19.februar, 100.prosent))
-        håndterInntektsmelding(listOf(1.februar til 16.februar))
-        håndterYtelser(5.vedtaksperiode)
-        håndterVilkårsgrunnlag(5.vedtaksperiode)
-        håndterYtelser(5.vedtaksperiode)
-
-        assertForventetFeil(
-            forklaring = "Inntektsmelding forteller _implisitt_ at 1.jan-30.jan er arbeidsdager. Dagene henger igjen som sykedager i modellen." +
-                    "De spredte sykedagene er innenfor 16 dager fra hverandre, slik at de teller med i samme arbeidsgiverperiodetelling." +
-                    "Dette medfører at vi starter utbetaling tidligere enn det arbeidsgiver har ment å fortelle oss er riktig.",
-            nå = {
-                assertEquals(Dag.Sykedag::class, inspektør.sykdomstidslinje[1.januar]::class)
-                assertEquals(Dag.Sykedag::class, inspektør.sykdomstidslinje[10.januar]::class)
-                assertEquals(Dag.SykHelgedag::class, inspektør.sykdomstidslinje[20.januar]::class)
-                assertEquals(Dag.Sykedag::class, inspektør.sykdomstidslinje[30.januar]::class)
-                assertEquals(13.februar, inspektør.utbetaling(0).inspektør.arbeidsgiverOppdrag.førstedato)
-            },
-            ønsket = {
-                assertEquals(1.februar, inspektør.utbetaling(0).inspektør.arbeidsgiverOppdrag.førstedato)
-                fail("""\_(ツ)_/¯""")
-            }
-        )
-    }
-    @Test
-    fun `Periode uten inntekt går ikke videre ved replay av inntektsmelding`() {
+    fun `Periode uten inntekt går ikke i loop ved replay av inntektsmelding`() = Toggle.Bugfix.enable {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 6.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 6.januar, 100.prosent))
 
@@ -114,22 +76,10 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
-        assertForventetFeil(
-            forklaring = "Inntektsmelding forteller _implisitt_ at 1.jan-6.jan er arbeidsdager. Dagene henger igjen som sykedager i modellen." +
-                    "Egentlig skal 2.vedtaksperiode ikke bli stående i AvventerInntektsmeldingEllerHistorikk, men samtidig er det kanskje også feil" +
-                    "å anta at den skal i AUU siden vi baserer svaret vårt på et feilaktig grunnlag uansett...",
-            nå = {
-                assertEquals(Dag.Sykedag::class, inspektør.sykdomstidslinje[1.januar]::class)
-                assertEquals(Dag.SykHelgedag::class, inspektør.sykdomstidslinje[6.januar]::class)
-            },
-            ønsket = {
-                fail("""\_(ツ)_/¯""")
-            }
-        )
     }
 
     @Test
-    fun `Periode uten inntekt går ikke videre ved mottatt inntektsmelding`() {
+    fun `Periode uten inntekt går ikke i loop ved mottatt inntektsmelding`() = Toggle.Bugfix.enable {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 6.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 6.januar, 100.prosent))
 
@@ -141,18 +91,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
-        assertForventetFeil(
-            forklaring = "Inntektsmelding forteller _implisitt_ at 1.jan-6.jan er arbeidsdager. Dagene henger igjen som sykedager i modellen." +
-                    "Egentlig skal 2.vedtaksperiode ikke bli stående i AvventerInntektsmeldingEllerHistorikk, men samtidig er det kanskje også feil" +
-                    "å anta at den skal i AUU siden vi baserer svaret vårt på et feilaktig grunnlag uansett...",
-            nå = {
-                assertEquals(Dag.Sykedag::class, inspektør.sykdomstidslinje[1.januar]::class)
-                assertEquals(Dag.SykHelgedag::class, inspektør.sykdomstidslinje[6.januar]::class)
-            },
-            ønsket = {
-                fail("""\_(ツ)_/¯""")
-            }
-        )
     }
 
     @Test
@@ -165,23 +103,13 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(9.januar, 19.januar, 100.prosent))
         håndterSøknad(Sykdom(9.januar, 19.januar, 100.prosent))
         håndterInntektsmelding(listOf(9.januar til 24.januar))
-        håndterYtelser(2.vedtaksperiode)
-        håndterVilkårsgrunnlag(2.vedtaksperiode)
-        håndterYtelser(2.vedtaksperiode)
 
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING)
         assertForventetFeil(
-            forklaring = "Inntektsmelding forteller _implisitt_ at 1.jan-6.jan er arbeidsdager. Dagene henger igjen som sykedager i modellen." +
-                    "De spredte sykedagene er innenfor 16 dager fra hverandre, slik at de teller med i samme arbeidsgiverperiodetelling." +
-                    "Dette medfører at vi starter utbetaling tidligere enn det arbeidsgiver har ment å fortelle oss er riktig.",
-            nå = {
-                assertEquals(19.januar, inspektør.utbetaling(0).inspektør.arbeidsgiverOppdrag.førstedato)
-                assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
+            nå ={
+                assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
             },
-            ønsket = {
-                assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-                fail("""¯\_(ツ)_/¯""")
-            }
+            ønsket = { """¯\_(ツ)_/¯"""; fail() }
         )
     }
 
