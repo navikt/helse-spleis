@@ -1358,7 +1358,8 @@ internal class Vedtaksperiode private constructor(
         override val type: TilstandType = AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            vedtaksperiode.trengerInntektsmeldingReplay()
+            if (!vedtaksperiode.harNødvendigInntektForVilkårsprøving())
+                vedtaksperiode.trengerInntektsmeldingReplay()
             if (vedtaksperiode.arbeidsgiver.finnForkastetSykeperiodeRettFør(vedtaksperiode) == null) {
                 vedtaksperiode.trengerInntektsmelding(hendelse.hendelseskontekst())
             }
