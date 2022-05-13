@@ -1456,7 +1456,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            if (påminnelse.maigate()) {
+            if (påminnelse.maigate(vedtaksperiode.oppdatert)) {
                 vedtaksperiode.tilstand(påminnelse, AvventerInntektsmeldingEllerHistorikk)
             } else {
                 vedtaksperiode.person.gjenopptaBehandlingNy(påminnelse)
@@ -1498,7 +1498,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            if (påminnelse.maigate()) {
+            if (påminnelse.maigate(vedtaksperiode.oppdatert)) {
                 vedtaksperiode.tilstand(påminnelse, AvventerInntektsmeldingEllerHistorikk)
             } else {
                 vedtaksperiode.trengerVilkårsgrunnlag(påminnelse)
@@ -1539,7 +1539,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            if (påminnelse.maigate()) {
+            if (påminnelse.maigate(vedtaksperiode.oppdatert)) {
                 vedtaksperiode.tilstand(påminnelse, AvventerInntektsmeldingEllerHistorikk)
             }
         }
@@ -1602,7 +1602,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            if (påminnelse.maigate()) {
+            if (påminnelse.maigate(vedtaksperiode.oppdatert)) {
                 vedtaksperiode.tilstand(påminnelse, AvventerInntektsmeldingEllerHistorikk)
             } else {
                 vedtaksperiode.trengerYtelser(påminnelse)
@@ -1785,7 +1785,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            if (påminnelse.maigate()) {
+            if (påminnelse.maigate(vedtaksperiode.oppdatert)) {
                 vedtaksperiode.utbetalinger.forkast(påminnelse)
                 vedtaksperiode.tilstand(påminnelse, AvventerInntektsmeldingEllerHistorikk)
             } else {
@@ -1937,7 +1937,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            if (påminnelse.maigate()) {
+            if (påminnelse.maigate(vedtaksperiode.oppdatert)) {
                 vedtaksperiode.utbetalinger.forkast(påminnelse)
                 vedtaksperiode.tilstand(påminnelse, AvventerInntektsmeldingEllerHistorikk)
             } else {

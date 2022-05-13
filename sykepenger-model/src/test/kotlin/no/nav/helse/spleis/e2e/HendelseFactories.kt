@@ -253,7 +253,8 @@ internal fun påminnelse(
         tilstand = påminnetTilstand,
         tilstandsendringstidspunkt = tilstandsendringstidspunkt,
         påminnelsestidspunkt = LocalDateTime.now(),
-        nestePåminnelsestidspunkt = LocalDateTime.now()
+        nestePåminnelsestidspunkt = LocalDateTime.now(),
+        MAIGATE_MAX = LocalDateTime.now().plusDays(1)
     )
 }
 

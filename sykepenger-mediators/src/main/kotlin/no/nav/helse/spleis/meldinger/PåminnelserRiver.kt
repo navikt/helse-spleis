@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.meldinger
 
 import com.fasterxml.jackson.databind.JsonNode
-import java.time.LocalDateTime
 import no.nav.helse.person.TilstandType
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -17,7 +16,6 @@ internal class PåminnelserRiver(
     override val riverName = "Påminnelse"
 
     override fun validate(message: JsonMessage) {
-        message.demand("påminnelsestidspunkt") { require(it.asLocalDateTime() > LocalDateTime.now().minusHours(3)) }
         message.requireKey("antallGangerPåminnet", "vedtaksperiodeId",
             "organisasjonsnummer", "fødselsnummer", "aktørId")
         message.require("tilstandsendringstidspunkt", JsonNode::asLocalDateTime)
