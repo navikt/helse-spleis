@@ -55,7 +55,7 @@ internal class NyTilstandsflytInfotrygdTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Forlengelse av en infotrygdforlengelse trenger ikke vente på inntekt`() {
+    fun `Forlengelse av en infotrygdforlengelse venter på inntekt`() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
 
@@ -67,7 +67,7 @@ internal class NyTilstandsflytInfotrygdTest : AbstractEndToEndTest() {
             inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true))
         )
         assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
-        assertTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+        assertTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
     }
 
     @Test
@@ -202,7 +202,7 @@ internal class NyTilstandsflytInfotrygdTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Forlengelse av ping pong - skal ikke vente på IM`() {
+    fun `Forlengelse av ping pong - periode 2 venter på IM`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar),)
@@ -226,7 +226,7 @@ internal class NyTilstandsflytInfotrygdTest : AbstractEndToEndTest() {
         håndterUtbetalingshistorikk(3.vedtaksperiode, utbetalinger = utbetalinger, inntektshistorikk = inntektshistorikk)
 
         assertTilstand(3.vedtaksperiode, AVVENTER_HISTORIKK)
-        assertTilstand(4.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+        assertTilstand(4.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
     }
 
     @Test

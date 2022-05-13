@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.april
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsvurdering
@@ -40,6 +41,7 @@ import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
+import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
@@ -137,26 +139,27 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        nullstillTilstandsendringer()
         håndterUtbetalt()
-        håndterYtelser(2.vedtaksperiode)
-        assertTilstander(
-            1.vedtaksperiode,
-            START,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING,
-            TIL_UTBETALING,
-            AVSLUTTET
-        )
-        val vilkårsgrunnlagPeriode1 = inspektør.vilkårsgrunnlag(1.vedtaksperiode)
-        val vilkårsgrunnlagPeriode2 = inspektør.vilkårsgrunnlag(2.vedtaksperiode)
-        assertTrue(vilkårsgrunnlagPeriode1 is VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag)
-        assertSame(vilkårsgrunnlagPeriode1, vilkårsgrunnlagPeriode2)
+        assertForventetFeil(
+            forklaring = "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK burde kanskje håndtere gjenopptaBehandling?",
+            nå = {
+                assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVSLUTTET)
+                assertTilstander(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
+            },
+            ønsket = {
+                håndterYtelser(2.vedtaksperiode)
+                assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVSLUTTET)
+                assertTilstander(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
+                val vilkårsgrunnlagPeriode1 = inspektør.vilkårsgrunnlag(1.vedtaksperiode)
+                val vilkårsgrunnlagPeriode2 = inspektør.vilkårsgrunnlag(2.vedtaksperiode)
+                assertTrue(vilkårsgrunnlagPeriode1 is VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag)
+                assertSame(vilkårsgrunnlagPeriode1, vilkårsgrunnlagPeriode2)
 
-        assertEquals(Periodetype.OVERGANG_FRA_IT, inspektør.periodetype(1.vedtaksperiode))
-        assertEquals(Periodetype.INFOTRYGDFORLENGELSE, inspektør.periodetype(2.vedtaksperiode))
+                assertEquals(Periodetype.OVERGANG_FRA_IT, inspektør.periodetype(1.vedtaksperiode))
+                assertEquals(Periodetype.INFOTRYGDFORLENGELSE, inspektør.periodetype(2.vedtaksperiode))
+            }
+        )
     }
 
     @Test
