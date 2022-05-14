@@ -1,23 +1,48 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.Toggle
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.inspectors.søppelbøtte
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.serde.serialize
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
+import org.junit.jupiter.api.assertThrows
 
 internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest() {
+
+    @Test
+    fun `overlapper med forkastet hos annen arbeidsgiver`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent), orgnummer = a1)
+        person.søppelbøtte(hendelselogg, 1.januar til 16.januar)
+        håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent), orgnummer = a2)
+        assertForventetFeil(
+            forklaring = "Arbeidsgiverperiode-beregning forutsetter at det finnes sykdomshistorikk",
+            nå = {
+                assertThrows<RuntimeException> { inspektør(a2).vedtaksperioder(1.vedtaksperiode).inspektør.periodetype }
+                assertThrows<RuntimeException> { person.serialize() }
+            },
+            ønsket = {
+                assertDoesNotThrow { inspektør(a2).vedtaksperioder(1.vedtaksperiode).inspektør.periodetype }
+                assertDoesNotThrow { person.serialize() }
+            }
+        )
+    }
 
     @Test
     fun `forlenger tidligere overlappende sykmelding`() = Toggle.ForkastForlengelseAvForkastetPeriode.enable {
