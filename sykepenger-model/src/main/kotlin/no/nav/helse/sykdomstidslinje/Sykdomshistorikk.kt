@@ -1,12 +1,12 @@
 package no.nav.helse.sykdomstidslinje
 
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.PersonHendelse
 import no.nav.helse.person.SykdomshistorikkVisitor
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk.Element.Companion.nyesteId
 import no.nav.helse.tournament.Dagturnering
-import java.time.LocalDateTime
-import java.util.*
 
 internal class Sykdomshistorikk private constructor(
     private val elementer: MutableList<Element>
@@ -21,7 +21,7 @@ internal class Sykdomshistorikk private constructor(
 
     internal fun sykdomstidslinje() = Element.sykdomstidslinje(elementer)
 
-    internal fun nyesteId(): UUID = elementer.nyesteId()
+    internal fun nyesteId()= elementer.nyesteId()
 
     internal fun håndter(hendelse: SykdomstidslinjeHendelse): Sykdomstidslinje {
         if (isEmpty() || !elementer.first().harHåndtert(hendelse)) {
@@ -91,9 +91,9 @@ internal class Sykdomshistorikk private constructor(
 
         companion object {
 
-            internal val empty get() = Element()
+            private val empty get() = Element()
 
-            internal fun List<Element>.nyesteId() = this.first().id
+            internal fun List<Element>.nyesteId(): UUID = (this.firstOrNull() ?: empty).id
 
             internal fun sykdomstidslinje(elementer: List<Element>) = elementer.first().beregnetSykdomstidslinje
 

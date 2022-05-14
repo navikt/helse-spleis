@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.Toggle
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -20,7 +19,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
-import org.junit.jupiter.api.assertThrows
 
 internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest() {
 
@@ -31,17 +29,8 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
         håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent), orgnummer = a1)
         person.søppelbøtte(hendelselogg, 1.januar til 16.januar)
         håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent), orgnummer = a2)
-        assertForventetFeil(
-            forklaring = "Arbeidsgiverperiode-beregning forutsetter at det finnes sykdomshistorikk",
-            nå = {
-                assertThrows<RuntimeException> { inspektør(a2).vedtaksperioder(1.vedtaksperiode).inspektør.periodetype }
-                assertThrows<RuntimeException> { person.serialize() }
-            },
-            ønsket = {
-                assertDoesNotThrow { inspektør(a2).vedtaksperioder(1.vedtaksperiode).inspektør.periodetype }
-                assertDoesNotThrow { person.serialize() }
-            }
-        )
+        assertDoesNotThrow { inspektør(a2).vedtaksperioder(1.vedtaksperiode).inspektør.periodetype }
+        assertDoesNotThrow { person.serialize() }
     }
 
     @Test
