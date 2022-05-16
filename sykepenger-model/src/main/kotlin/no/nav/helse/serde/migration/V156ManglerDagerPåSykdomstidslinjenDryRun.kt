@@ -31,7 +31,7 @@ internal class V156ManglerDagerPåSykdomstidslinjenDryRun: JsonMigration(version
 
                 arbeidsgiver["vedtaksperioder"].forEach vedtaksperiodeLoop@ { vedtaksperiode ->
                     val periode = vedtaksperiode.periode()
-                    val datoerIVedtaksperiode = periode.datoer()
+                    val datoerIVedtaksperiode = periode.datoer().toList()
                     val sykdomstidslinjeForPeriode = datoerPåSykdomstidslinjen.subset(periode).toSet()
 
                     val manglerPåSykdomstidslinjen = datoerIVedtaksperiode.minus(sykdomstidslinjeForPeriode).sorted()
