@@ -1,5 +1,6 @@
 package no.nav.helse.økonomi
 
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
@@ -8,11 +9,37 @@ import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.Økonomi.Companion.avgrensTilArbeidsgiverperiode
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertDoesNotThrow
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNotSame
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 internal class ØkonomiTest {
+
+    @Test
+    fun `akkurat under 20-prosent-grensen`() {
+        val økonomi = listOf(
+            9.prosent.sykdomsgrad.inntekt(30000.månedlig, skjæringstidspunkt = 1.januar),
+            52.prosent.sykdomsgrad.inntekt(10312.40.månedlig, skjæringstidspunkt = 1.januar)
+        )
+        val totalSykdomsgrad = Økonomi.totalSykdomsgrad(økonomi)
+        assertForventetFeil(
+            forklaring = "utregnet sykdomsgrad er 0,1999992062… IKKE 0,2",
+            nå = {
+                assertEquals(20.prosent, totalSykdomsgrad)
+                assertFalse(totalSykdomsgrad.erUnderGrensen())
+            },
+            ønsket = {
+                assertNotEquals(20.prosent, totalSykdomsgrad)
+                assertTrue(totalSykdomsgrad.erUnderGrensen())
+            })
+    }
 
     @Test
     fun `overskriver ikke arbeidsgiverperiode`() {
