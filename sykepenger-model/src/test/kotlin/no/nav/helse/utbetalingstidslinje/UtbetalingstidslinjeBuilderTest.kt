@@ -1,6 +1,9 @@
 package no.nav.helse.utbetalingstidslinje
 
+import java.time.LocalDate
+import java.util.UUID
 import no.nav.helse.februar
+import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.UtbetalingstidslinjeInspektør
 import no.nav.helse.inspectors.inspektør
@@ -11,16 +14,27 @@ import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.testhelpers.*
+import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
+import no.nav.helse.testhelpers.A
+import no.nav.helse.testhelpers.AV
+import no.nav.helse.testhelpers.F
+import no.nav.helse.testhelpers.K
+import no.nav.helse.testhelpers.P
+import no.nav.helse.testhelpers.PROBLEM
+import no.nav.helse.testhelpers.R
+import no.nav.helse.testhelpers.S
+import no.nav.helse.testhelpers.U
+import no.nav.helse.testhelpers.opphold
+import no.nav.helse.testhelpers.resetSeed
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilderException.UforventetDagException
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Økonomi
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import java.time.LocalDate
-import java.util.*
 
 internal class UtbetalingstidslinjeBuilderTest {
     @Test
@@ -514,6 +528,16 @@ internal class UtbetalingstidslinjeBuilderTest {
         }
     }
 
+    @Test
+    fun `utbetalingsdager med kilde Sykmelding etter arbeidsgiverperioden`() {
+        assertThrows<IllegalStateException> { undersøke(16.S + 1.S(Sykmelding::class)) }
+    }
+
+    @Test
+    fun `utbetalingsdager med kilde Sykmelding i arbeidsgiverperioden`() {
+        assertThrows<IllegalStateException> { undersøke(1.S(Sykmelding::class)) }
+    }
+
     private val Økonomi.arbeidsgiverperiode get() = this.get<Arbeidsgiverperiode?>("arbeidsgiverperiode")
     private lateinit var teller: Arbeidsgiverperiodeteller
 
@@ -575,12 +599,16 @@ internal class UtbetalingstidslinjeBuilderTest {
             mediators.forEach { it.arbeidsdag(dato) }
         }
 
-        override fun arbeidsgiverperiodedag(dato: LocalDate, økonomi: Økonomi) {
-            mediators.forEach { it.arbeidsgiverperiodedag(dato, økonomi) }
+        override fun arbeidsgiverperiodedag(
+            dato: LocalDate,
+            økonomi: Økonomi,
+            kilde: SykdomstidslinjeHendelse.Hendelseskilde
+        ) {
+            mediators.forEach { it.arbeidsgiverperiodedag(dato, økonomi, kilde) }
         }
 
-        override fun utbetalingsdag(dato: LocalDate, økonomi: Økonomi) {
-            mediators.forEach { it.utbetalingsdag(dato, økonomi) }
+        override fun utbetalingsdag(dato: LocalDate, økonomi: Økonomi, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
+            mediators.forEach { it.utbetalingsdag(dato, økonomi, kilde) }
         }
 
         override fun arbeidsgiverperiodeAvbrutt() {

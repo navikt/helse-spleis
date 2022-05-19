@@ -37,6 +37,7 @@ import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.somFødselsnummer
+import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.testhelpers.AP
 import no.nav.helse.testhelpers.ARB
 import no.nav.helse.testhelpers.FRI
@@ -380,8 +381,16 @@ internal class ArbeidsgiverUtbetalingerTest {
                 override fun result() = arbeidsgiverTidslinje
                 override fun fridag(dato: LocalDate) {}
                 override fun arbeidsdag(dato: LocalDate) {}
-                override fun arbeidsgiverperiodedag(dato: LocalDate, økonomi: Økonomi) {}
-                override fun utbetalingsdag(dato: LocalDate, økonomi: Økonomi) {}
+                override fun arbeidsgiverperiodedag(
+                    dato: LocalDate,
+                    økonomi: Økonomi,
+                    kilde: SykdomstidslinjeHendelse.Hendelseskilde
+                ) {}
+                override fun utbetalingsdag(
+                    dato: LocalDate,
+                    økonomi: Økonomi,
+                    kilde: SykdomstidslinjeHendelse.Hendelseskilde
+                ) {}
                 override fun foreldetDag(dato: LocalDate, økonomi: Økonomi) {}
                 override fun avvistDag(dato: LocalDate, begrunnelse: Begrunnelse) {}
             }),

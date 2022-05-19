@@ -16,6 +16,7 @@ import java.time.LocalDateTime
 import java.util.*
 import java.util.stream.Collectors
 import no.nav.helse.person.Dokumentsporing
+import no.nav.helse.sykdomstidslinje.Melding
 
 private var threadLocalDagensDato = ThreadLocal.withInitial { 1.januar }
 private var dagensDato: LocalDate
@@ -38,6 +39,13 @@ internal val Int.S
         100.prosent,
         SykdomstidslinjeHendelse.Hendelseskilde.INGEN
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
+
+internal fun Int.S(melding: Melding) = Sykdomstidslinje.sykedager(
+    dagensDato,
+    dagensDato.plusDays(this.toLong() - 1),
+    100.prosent,
+    SykdomstidslinjeHendelse.Hendelseskilde(melding, UUID.randomUUID(), LocalDateTime.now())
+).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
 internal val Int.U
     get() = Sykdomstidslinje.arbeidsgiverdager(

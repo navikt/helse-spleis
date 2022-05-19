@@ -1,8 +1,10 @@
 package no.nav.helse.utbetalingstidslinje
 
 import java.time.LocalDate
+import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.sykdomstidslinje.Dag
+import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Økonomi
@@ -52,12 +54,18 @@ internal class UtbetalingstidslinjeBuilder(private val inntekter: Inntekter) : I
         builder.addArbeidsdag(dato, inntekter.medFrivilligInntekt(dato, Økonomi.ikkeBetalt(nåværendeArbeidsgiverperiode)))
     }
 
-    override fun arbeidsgiverperiodedag(dato: LocalDate, økonomi: Økonomi) {
-        periodebuilder.arbeidsgiverperiodedag(dato, økonomi)
+    override fun arbeidsgiverperiodedag(
+        dato: LocalDate,
+        økonomi: Økonomi,
+        kilde: SykdomstidslinjeHendelse.Hendelseskilde
+    ) {
+        check(!kilde.erAvType(Sykmelding::class)) { "Kan ikke opprette arbeidsgiverperiodedag for $dato med kilde Sykmelding" }
+        periodebuilder.arbeidsgiverperiodedag(dato, økonomi, kilde)
         builder.addArbeidsgiverperiodedag(dato, inntekter.medFrivilligInntekt(dato, Økonomi.ikkeBetalt(nåværendeArbeidsgiverperiode)))
     }
 
-    override fun utbetalingsdag(dato: LocalDate, økonomi: Økonomi) {
+    override fun utbetalingsdag(dato: LocalDate, økonomi: Økonomi, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
+        check(!kilde.erAvType(Sykmelding::class)) { "Kan ikke opprette utbetalingsdag for $dato med kilde Sykmelding" }
         if (dato.erHelg()) return builder.addHelg(dato, inntekter.medSkjæringstidspunkt(dato, økonomi, nåværendeArbeidsgiverperiode))
         builder.addNAVdag(dato, inntekter.medInntekt(dato, økonomi, nåværendeArbeidsgiverperiode))
     }
