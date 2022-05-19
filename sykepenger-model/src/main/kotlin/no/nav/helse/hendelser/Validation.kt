@@ -1,8 +1,6 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.person.IAktivitetslogg
-import no.nav.helse.person.Person
-import java.time.LocalDate
 
 internal class Validation private constructor(private val hendelse: IAktivitetslogg) : IAktivitetslogg by(hendelse) {
     private var hasErrors = false
@@ -44,11 +42,4 @@ internal class Validation private constructor(private val hendelse: IAktivitetsl
         feilmelding?.also { error(it) }
         errorBlock(this)
     }
-}
-
-internal fun Validation.harNødvendigInntekt(
-    person: Person,
-    skjæringstidspunkt: LocalDate
-) = valider("Vi har ikke inntektshistorikken vi trenger for skjæringstidspunktet") {
-    person.harNødvendigInntekt(skjæringstidspunkt)
 }

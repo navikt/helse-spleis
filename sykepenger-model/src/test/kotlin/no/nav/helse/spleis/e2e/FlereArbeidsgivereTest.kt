@@ -50,6 +50,39 @@ import org.junit.jupiter.api.Test
 internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
 
     @Test
+    fun `kort sykdom hos ag2 med eksisterende vedtak`() {
+        nyttVedtak(1.januar, 31.januar, 100.prosent, orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 14.februar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 14.februar, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(1.februar, 14.februar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(1.februar, 14.februar, 100.prosent), orgnummer = a2)
+        håndterUtbetalingshistorikk(1.vedtaksperiode, orgnummer = a2)
+        assertEquals(1.januar, inspektør(a1).vedtaksperioder(2.vedtaksperiode).inspektør.skjæringstidspunkt)
+        assertEquals(1.januar, inspektør(a2).vedtaksperioder(1.vedtaksperiode).inspektør.skjæringstidspunkt)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a2)
+        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a1)
+    }
+
+    @Test
+    fun `kort sykdom hos ag2`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 14.januar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 14.januar, 100.prosent), orgnummer = a2)
+        håndterSykmelding(Sykmeldingsperiode(15.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(1.januar, 14.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(1.januar, 14.januar, 100.prosent), orgnummer = a2)
+        håndterUtbetalingshistorikk(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingshistorikk(1.vedtaksperiode, orgnummer = a2)
+        håndterSøknad(Sykdom(15.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
+        håndterVilkårsgrunnlag(2.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a1)
+    }
+
+    @Test
     fun `Sammenligningsgrunnlag for flere arbeidsgivere`() {
         val periodeA1 = 1.januar til 31.januar
         nyPeriode(1.januar til 31.januar, a1)

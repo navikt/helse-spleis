@@ -23,7 +23,6 @@ import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.hendelser.Validation.Companion.validation
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
-import no.nav.helse.hendelser.harNødvendigInntekt
 import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
@@ -1658,9 +1657,6 @@ internal class Vedtaksperiode private constructor(
                         }
                     }
                 }
-                // TODO: forventer at denne ikke trengs lenger, sjekk om dette stemmer når lagring av sykepengegrunnlaget er stabilt. Kan hvertfall ikke fjernes før https://trello.com/c/pY0WYUC0
-                // TODO: https://trello.com/c/pY0WYUC0 er løst - kan denne fjernes nå?
-                harNødvendigInntekt(person, vedtaksperiode.skjæringstidspunkt)
                 lateinit var arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger
                 valider("Feil ved kalkulering av utbetalingstidslinjer") {
                     person.fyllUtPeriodeMedForventedeDager(
@@ -2544,12 +2540,6 @@ internal class Vedtaksperiode private constructor(
             this.filter { it.skjæringstidspunkt == skjæringstidspunkt }
 
         internal fun List<Vedtaksperiode>.harUtbetaling() = any { it.erUtbetalt() }
-
-        internal fun List<Vedtaksperiode>.harNødvendigInntekt() =
-            this.takeIf { it.isNotEmpty() }
-                ?.harInntekt() ?: true
-
-        private fun List<Vedtaksperiode>.harInntekt() = any { it.harInntekt() }
 
         internal fun overlapperMedForkastet(forkastede: Iterable<Vedtaksperiode>, hendelse: SykdomstidslinjeHendelse) {
             forkastede

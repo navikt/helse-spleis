@@ -22,6 +22,7 @@ internal class VedtaksperiodeInspektør(vedtaksperiode: Vedtaksperiode) : Vedtak
 
     private lateinit var periodetypeGetter: () -> Periodetype
     internal val periodetype get() = periodetypeGetter()
+    internal lateinit var skjæringstidspunkt: LocalDate
 
     override fun preVisitVedtaksperiode(
         vedtaksperiode: Vedtaksperiode,
@@ -39,6 +40,7 @@ internal class VedtaksperiodeInspektør(vedtaksperiode: Vedtaksperiode) : Vedtak
         inntektsmeldingInfo: InntektsmeldingInfo?,
         inntektskilde: Inntektskilde
     ) {
+        this.skjæringstidspunkt = skjæringstidspunkt()
         this.periodetypeGetter = periodetype
     }
 }
