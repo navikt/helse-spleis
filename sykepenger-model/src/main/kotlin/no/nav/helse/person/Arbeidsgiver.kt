@@ -269,7 +269,7 @@ internal class Arbeidsgiver private constructor(
             feriepengeberegner: Feriepengeberegner,
             utbetalingshistorikkForFeriepenger: UtbetalingshistorikkForFeriepenger
         ) {
-            filter { it.organisasjonsnummer != "0" }.forEach { it.utbetalFeriepenger(
+            forEach { it.utbetalFeriepenger(
                 aktørId,
                 fødselsnummer,
                 feriepengeberegner,

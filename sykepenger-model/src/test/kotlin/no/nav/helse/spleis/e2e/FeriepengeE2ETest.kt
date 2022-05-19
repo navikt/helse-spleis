@@ -1112,6 +1112,78 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         assertEquals(0, engangsutbetalinger().size)
     }
 
+    @Test
+    fun `Feriepengeutbetaling til orgnummer 0`() {
+        håndterSykmelding(Sykmeldingsperiode(1.juni(2020), 14.august(2020), 100.prosent))
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.juni(2020), 14.august(2020), 100.prosent)) // 43 dager
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+        håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioderForSammenligningsgrunnlag {
+                1.juni(2019) til 1.mai(2020) inntekter {
+                    ORGNUMMER inntekt INNTEKT
+                }
+            }
+        ))
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+
+        håndterUtbetalingshistorikkForFeriepenger(
+            opptjeningsår = Year.of(2020),
+            utbetalinger = listOf(
+                Personutbetalingsperiode("0", 1.september(2020), 15.september(2020), 1172, 20.september(2020)),
+            ),
+            feriepengehistorikk = listOf(UtbetalingshistorikkForFeriepenger.Feriepenger("0", 3211, 1.mai(2021), 31.mai(2021)))
+        )
+
+        assertTrue(logCollector.any { it.message.startsWith("Differanse mellom det IT har utbetalt og det spleis har beregnet at IT skulle betale") })
+        assertEquals(2, engangsutbetalinger().size)
+        val utbetaling = engangsutbetalinger().last()
+        assertEquals(0 - (6 * 1172 * 0.102).roundToInt(), utbetaling.linje()["sats"])
+        assertNull(utbetaling.linje()["datoStatusFom"])
+        assertEquals("SP", utbetaling.detaljer()["fagområde"])
+        assertEquals("SPATFER", utbetaling.linje()["klassekode"])
+    }
+
+    @Test
+    fun `Test av sanity-logging`() {
+        håndterSykmelding(Sykmeldingsperiode(1.juni(2020), 14.august(2020), 100.prosent))
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.juni(2020), 14.august(2020), 100.prosent)) // 43 dager
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+        håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioderForSammenligningsgrunnlag {
+                1.juni(2019) til 1.mai(2020) inntekter {
+                    ORGNUMMER inntekt INNTEKT
+                }
+            }
+        ))
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+
+        håndterUtbetalingshistorikkForFeriepenger(
+            opptjeningsår = Year.of(2020),
+            utbetalinger = listOf(
+                // Ikke funksjonelt gyldig med refusjon til orgnr 0
+                Arbeidsgiverutbetalingsperiode("0", 1.september(2020), 15.september(2020), 1172, 20.september(2020)),
+            ),
+            feriepengehistorikk = listOf(UtbetalingshistorikkForFeriepenger.Feriepenger("0", 3211, 1.mai(2021), 31.mai(2021)))
+        )
+
+        assertTrue(logCollector.any { it.message.startsWith("Forventer ikke arbeidsgiveroppdrag til orgnummer \"0\"") })
+        assertEquals(2, engangsutbetalinger().size)
+        val ugyldigOppdrag = engangsutbetalinger().last()
+        assertEquals(0 - (6 * 1172 * 0.102).roundToInt(), ugyldigOppdrag.linje()["sats"])
+        assertNull(ugyldigOppdrag.linje()["datoStatusFom"])
+        assertEquals("SPREF", ugyldigOppdrag.detaljer()["fagområde"])
+    }
+
     private fun engangsutbetalinger() = person.personLogg.behov()
         .filter { it.type == Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling }
         .filter { utbetaling -> utbetaling.detaljer()["linjer"].castAsList<Map<String, Any>>().any { linje -> linje["satstype"] == "ENG" } }

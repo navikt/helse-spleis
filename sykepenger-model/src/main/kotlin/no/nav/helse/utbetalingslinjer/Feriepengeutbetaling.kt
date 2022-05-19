@@ -206,6 +206,8 @@ internal class Feriepengeutbetaling private constructor(
                 sisteArbeidsgiverdag = null
             )
 
+            if (beløp != 0 && orgnummer == "0") sikkerLogg.warn("Forventer ikke arbeidsgiveroppdrag til orgnummer \"0\", aktørId=$aktørId.")
+
             val sendTilOppdrag = if (forrigeSendteOppdrag == null) { beløp != 0 } else { beløp != forrigeSendteOppdrag.totalbeløp() || beløp == 0 }
 
             if (forrigeSendteOppdrag != null) {
@@ -283,8 +285,10 @@ internal class Feriepengeutbetaling private constructor(
                 Totalt feriepengebeløp: $totaltFeriepengebeløpArbeidsgiver
                 Differanse: $differanseMellomTotalOgAlleredeUtbetaltAvInfotrygd
                 Oppdrag: ${oppdrag.toHendelseMap()}
+                Personoppdrag: ${personoppdrag.toHendelseMap()}
                 Datoer: ${feriepengeberegner.feriepengedatoer()}
                 Differanse fra forrige sendte oppdrag: ${forrigeSendteOppdrag?.totalbeløp()?.minus(oppdrag.totalbeløp())}
+                Differanse fra forrige sendte personoppdrag: ${forrigeSendteOppdragForPerson?.totalbeløp()?.minus(personoppdrag.totalbeløp())}
                 Skal sendes til oppdrag: $sendTilOppdrag
                 Skal personoppdrag sendes: $sendPersonoppdragTilOS
                 """.trimIndent()
