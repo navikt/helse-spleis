@@ -22,6 +22,7 @@ internal class V158SletterDuplikaterFraInntektshistorikken : JsonMigration(versi
 
     private fun ObjectNode.finnOrgnummer(vedtaksperiodeId: String) = this["arbeidsgivere"].firstOrNull { arbeidsgiver ->
         arbeidsgiver["vedtaksperioder"].any { it["id"].asText() == vedtaksperiodeId }
+            || arbeidsgiver["forkastede"].map { it["vedtaksperiode"] }.any { it["id"].asText() in vedtaksperiodeId }
     }?.get("organisasjonsnummer")
 
     private fun ObjectNode.finnArbeidsgiver(orgnummer: String) = this["arbeidsgivere"]
