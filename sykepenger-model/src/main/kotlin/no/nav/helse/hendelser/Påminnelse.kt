@@ -17,8 +17,7 @@ class Påminnelse(
     private val tilstand: TilstandType,
     private val tilstandsendringstidspunkt: LocalDateTime,
     private val påminnelsestidspunkt: LocalDateTime,
-    private val nestePåminnelsestidspunkt: LocalDateTime,
-    private val MAIGATE_MAX: LocalDateTime = LocalDateTime.of(2022, 5, 12, 12, 0, 0)
+    private val nestePåminnelsestidspunkt: LocalDateTime
 ) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer, aktørId, organisasjonsnummer, Aktivitetslogg()) {
     private companion object {
         private const val MAGISK_VERDI_FOR_MAIGATE = 9000
@@ -30,8 +29,8 @@ class Påminnelse(
     fun påminnelsestidspunkt() = påminnelsestidspunkt
     fun nestePåminnelsestidspunkt() = nestePåminnelsestidspunkt
 
-    internal fun maigate(oppdatert: LocalDateTime): Boolean {
-        return oppdatert < MAIGATE_MAX && antallGangerPåminnet == MAGISK_VERDI_FOR_MAIGATE
+    internal fun maigate(): Boolean {
+        return antallGangerPåminnet == MAGISK_VERDI_FOR_MAIGATE
     }
 
     internal fun erRelevant(vedtaksperiodeId: UUID) = vedtaksperiodeId.toString() == this.vedtaksperiodeId
