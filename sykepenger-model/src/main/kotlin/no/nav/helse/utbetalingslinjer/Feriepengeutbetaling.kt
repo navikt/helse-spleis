@@ -1,17 +1,22 @@
 package no.nav.helse.utbetalingslinjer
 
+import java.time.LocalDateTime
+import java.time.Month
+import java.time.Year
+import java.util.UUID
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
-import no.nav.helse.person.*
+import no.nav.helse.person.Aktivitetskontekst
+import no.nav.helse.person.FeriepengeutbetalingVisitor
+import no.nav.helse.person.Person
+import no.nav.helse.person.PersonHendelse
+import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.SpesifikkKontekst
 import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
 import no.nav.helse.utbetalingstidslinje.genererUtbetalingsreferanse
 import org.slf4j.LoggerFactory
-import java.time.LocalDateTime
-import java.time.Month
-import java.time.Year
-import java.util.*
 import kotlin.math.roundToInt
 
 internal class Feriepengeutbetaling private constructor(
@@ -131,6 +136,7 @@ internal class Feriepengeutbetaling private constructor(
         internal fun build(): Feriepengeutbetaling {
             val infotrygdHarUtbetaltTilArbeidsgiver = utbetalingshistorikkForFeriepenger.utbetalteFeriepengerTilArbeidsgiver(orgnummer)
             val hvaViHarBeregnetAtInfotrygdHarUtbetaltTilArbeidsgiver = feriepengeberegner.beregnUtbetalteFeriepengerForInfotrygdArbeidsgiver(orgnummer)
+            val hvaViHarBeregnetAtInfotrygdHarUtbetaltTilPersonForDenneAktuelleArbeidsgiver = feriepengeberegner.beregnUtbetalteFeriepengerForInfotrygdPersonForEnArbeidsgiver(orgnummer)
 
             if (hvaViHarBeregnetAtInfotrygdHarUtbetaltTilArbeidsgiver.roundToInt() != 0 &&
                 hvaViHarBeregnetAtInfotrygdHarUtbetaltTilArbeidsgiver.roundToInt() !in infotrygdHarUtbetaltTilArbeidsgiver
@@ -193,6 +199,17 @@ internal class Feriepengeutbetaling private constructor(
                 }
             }
 
+            val diff = hvaViHarBeregnetAtInfotrygdHarUtbetaltTilPersonForDenneAktuelleArbeidsgiver - infotrygdFeriepengebeløpPerson
+            if (diff > 499 || diff < -100) sikkerLogg.info(
+                """
+                ${if (diff > 0) "Differanse mellom det IT har utbetalt og det spleis har beregnet at IT skulle betale" else "Utbetalt for lite i Infotrygd"} for person & orgnr-kombo:
+                AktørId: $aktørId
+                Arbeidsgiver: $orgnummer
+                Diff: $diff
+                Hva vi har beregnet at IT har utbetalt til person for denne AG: $hvaViHarBeregnetAtInfotrygdHarUtbetaltTilPersonForDenneAktuelleArbeidsgiver
+                IT sin personandel: $infotrygdFeriepengebeløpPerson
+                """.trimIndent()
+            )
             sikkerLogg.info(
                 """
                 Nøkkelverdier om feriepengeberegning
@@ -200,6 +217,8 @@ internal class Feriepengeutbetaling private constructor(
                 Arbeidsgiver: $orgnummer
                 IT har utbetalt til arbeidsgiver: $infotrygdHarUtbetaltTilArbeidsgiver
                 Hva vi har beregnet at IT har utbetalt til arbeidsgiver: $hvaViHarBeregnetAtInfotrygdHarUtbetaltTilArbeidsgiver
+                Hva vi har beregnet at IT har utbetalt til person for denne AG: $hvaViHarBeregnetAtInfotrygdHarUtbetaltTilPersonForDenneAktuelleArbeidsgiver
+                Diff mellom hva vi har beregnet at IT har utbetalt til person for denne AG og hva vi syns de burde ha betalt: $diff
                 IT sin personandel: $infotrygdFeriepengebeløpPerson
                 IT sin arbeidsgiverandel: $infotrygdFeriepengebeløpArbeidsgiver
                 Spleis sin arbeidsgiverandel: $spleisFeriepengebeløpArbeidsgiver

@@ -11,6 +11,7 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode
+import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Personutbetalingsperiode
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.inspectors.personLogg
@@ -1042,6 +1043,44 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         assertNull(utbetaling.linje()["datoStatusFom"])
         assertEquals(fagsystemId3, utbetaling.detaljer()["fagsystemId"])
         assertEquals(førsteUtbetaling.linje()["klassekode"], utbetaling.linje()["klassekode"])
+    }
+
+    @Test
+    fun `Feriepengeutbetaling til person`() {
+        håndterSykmelding(Sykmeldingsperiode(1.juni(2020), 14.august(2020), 100.prosent))
+        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.juni(2020), 14.august(2020), 100.prosent)) // 43 dager
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+        håndterInntektsmelding(listOf(1.juni(2020) til 16.juni(2020)))
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioderForSammenligningsgrunnlag {
+                1.juni(2019) til 1.mai(2020) inntekter {
+                    ORGNUMMER inntekt INNTEKT
+                }
+            }
+        ))
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+
+        håndterUtbetalingshistorikkForFeriepenger(opptjeningsår = Year.of(2020), utbetalinger = listOf(
+            Personutbetalingsperiode(ORGNUMMER, 1.september(2020), 15.september(2020), 1172, 20.september(2020))
+        ))
+        håndterUtbetalingshistorikkForFeriepenger(
+            opptjeningsår = Year.of(2020),
+            utbetalinger = listOf(
+                Arbeidsgiverutbetalingsperiode(
+                    ORGNUMMER,
+                    1.mars(2020),
+                    31.mars(2020),
+                    1431,
+                    31.mars(2020)
+                )
+            ),
+            feriepengehistorikk = listOf(UtbetalingshistorikkForFeriepenger.Feriepenger(ORGNUMMER, 3211, 1.mai(2021), 31.mai(2021)))
+        )
+        assertTrue(logCollector.any { it.message.startsWith("Differanse mellom det IT har utbetalt og det spleis har beregnet at IT skulle betale") })
     }
 
     private fun engangsutbetalinger() = person.personLogg.behov()

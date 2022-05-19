@@ -1,13 +1,28 @@
 package no.nav.helse.utbetalingstidslinje
 
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.Year
+import java.util.UUID
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.hendelser.til
-import no.nav.helse.person.*
+import no.nav.helse.person.Arbeidsgiver
+import no.nav.helse.person.FeriepengeutbetalingVisitor
+import no.nav.helse.person.FeriepengeutbetalingsperiodeVisitor
+import no.nav.helse.person.Person
+import no.nav.helse.person.PersonVisitor
 import no.nav.helse.sykdomstidslinje.erHelg
-import no.nav.helse.utbetalingslinjer.*
+import no.nav.helse.utbetalingslinjer.Endringskode
+import no.nav.helse.utbetalingslinjer.Fagområde
+import no.nav.helse.utbetalingslinjer.Klassekode
+import no.nav.helse.utbetalingslinjer.Oppdrag
+import no.nav.helse.utbetalingslinjer.Oppdragstatus
+import no.nav.helse.utbetalingslinjer.Satstype
+import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
+import no.nav.helse.utbetalingslinjer.Utbetalingslinje
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner.UtbetaltDag.Companion.ARBEIDSGIVER
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner.UtbetaltDag.Companion.INFOTRYGD
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner.UtbetaltDag.Companion.INFOTRYGD_ARBEIDSGIVER
@@ -19,10 +34,6 @@ import no.nav.helse.utbetalingstidslinje.Feriepengeberegner.UtbetaltDag.Companio
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner.UtbetaltDag.Companion.orgnummerFilter
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner.UtbetaltDag.Companion.summer
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner.UtbetaltDag.Companion.tilDato
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.Year
-import java.util.*
 
 private typealias UtbetaltDagSelector = (Feriepengeberegner.UtbetaltDag) -> Boolean
 
@@ -72,6 +83,11 @@ internal class Feriepengeberegner(
         return alder.beregnFeriepenger(opptjeningsår, grunnlag)
     }
 
+    internal fun beregnUtbetalteFeriepengerForInfotrygdPersonForEnArbeidsgiver(orgnummer: String): Double {
+        val grunnlag = grunnlagForFeriepengerUtbetaltAvInfotrygdTilPersonForArbeidsgiver(orgnummer)
+        return alder.beregnFeriepenger(opptjeningsår, grunnlag)
+    }
+
     internal fun beregnFeriepengedifferansenForArbeidsgiver(orgnummer: String): Double {
         val grunnlag = feriepengedager().filter(ARBEIDSGIVER and orgnummerFilter(orgnummer)).summer()
         val grunnlagUtbetaltAvInfotrygd = grunnlagForFeriepengerUtbetaltAvInfotrygd(orgnummer)
@@ -81,6 +97,11 @@ internal class Feriepengeberegner(
     private fun grunnlagForFeriepengerUtbetaltAvInfotrygd(orgnummer: String): Int {
         val itFeriepengedager = utbetalteDager.filter(INFOTRYGD).feriepengedager().flatMap { (_, dagListe) -> dagListe }
         return itFeriepengedager.filter(INFOTRYGD_ARBEIDSGIVER and orgnummerFilter(orgnummer)).summer()
+    }
+
+    private fun grunnlagForFeriepengerUtbetaltAvInfotrygdTilPersonForArbeidsgiver(orgnummer: String): Int {
+        val itFeriepengedager = utbetalteDager.filter(INFOTRYGD).feriepengedager().flatMap { (_, dagListe) -> dagListe }
+        return itFeriepengedager.filter(INFOTRYGD_PERSON and orgnummerFilter(orgnummer)).summer()
     }
 
     private fun beregnForFilter(filter: UtbetaltDagSelector): Double {
