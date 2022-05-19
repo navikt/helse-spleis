@@ -1,0 +1,46 @@
+{
+  "arbeidsgivere": [
+    {
+      "organisasjonsnummer": "987654321",
+      "vedtaksperioder": [
+        {
+          "id": "9354c0c8-ac43-4c34-b094-aa64fd94be5e"
+        }
+      ],
+      "inntektshistorikk": [
+        {
+          "id": "a9f09978-cb29-48d4-929f-0e8b6e81de1a",
+          "inntektsopplysninger":[
+            {
+              "id": "e09a9f74-e97c-4de0-9a77-470bc5eb3459",
+              "dato": "2022-05-09",
+              "hendelseId": "13fe11c4-0aa5-4a8f-ba7a-dfb5a40f4623",
+              "beløp":26572.430000000004,
+              "kilde": "INNTEKTSMELDING",
+              "tidsstempel": "2022-05-12T12:22:07.73510307"
+            }
+          ]
+        },
+        {
+          "id": "0e14e1a5-ae00-4521-afcf-1b9e41c9bd7e",
+          "inntektsopplysninger": [
+            {
+              "id": "52a70d7b-ec27-40ec-aadb-4f5469e5d79c",
+              "dato": "2022-04-09",
+              "hendelseId": "b03b5266-a3f9-447c-9e3d-45dc117d818b",
+              "beløp": 26572.430000000004,
+              "kilde": "INNTEKTSMELDING",
+              "tidsstempel": "2022-04-12T12:22:07.73510307"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "organisasjonsnummer": "56789123",
+      "vedtaksperioder": [],
+      "inntektshistorikk": []
+    }
+  ],
+  "skjemaVersjon": 158
+}
