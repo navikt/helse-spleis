@@ -352,6 +352,8 @@ internal class TestArbeidsgiverInspektør(
         overføringstidspunkt: LocalDateTime?,
         avstemmingsnøkkel: Long?,
         utbetalingId: UUID,
+        sendTilOppdrag: Boolean,
+        sendPersonoppdragTilOS: Boolean,
     ) {
         inFeriepengeutbetaling = true
         this.infotrygdFeriepengebeløpArbeidsgiver.add(infotrygdFeriepengebeløpArbeidsgiver)
@@ -367,6 +369,8 @@ internal class TestArbeidsgiverInspektør(
         overføringstidspunkt: LocalDateTime?,
         avstemmingsnøkkel: Long?,
         utbetalingId: UUID,
+        sendTilOppdrag: Boolean,
+        sendPersonoppdragTilOS: Boolean,
     ) {
         inFeriepengeutbetaling = false
     }

@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
+import no.nav.helse.Fødselsnummer
 import no.nav.helse.Toggle
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.Hendelseskontekst
@@ -264,10 +265,16 @@ internal class Arbeidsgiver private constructor(
 
         internal fun Iterable<Arbeidsgiver>.beregnFeriepengerForAlleArbeidsgivere(
             aktørId: String,
+            fødselsnummer: Fødselsnummer,
             feriepengeberegner: Feriepengeberegner,
             utbetalingshistorikkForFeriepenger: UtbetalingshistorikkForFeriepenger
         ) {
-            filter { it.organisasjonsnummer != "0" }.forEach { it.utbetalFeriepenger(aktørId, feriepengeberegner, utbetalingshistorikkForFeriepenger) }
+            filter { it.organisasjonsnummer != "0" }.forEach { it.utbetalFeriepenger(
+                aktørId,
+                fødselsnummer,
+                feriepengeberegner,
+                utbetalingshistorikkForFeriepenger
+            ) }
         }
 
         internal fun Iterable<Arbeidsgiver>.gjenopptaBehandling(gjenopptaBehandling: IAktivitetslogg) = forEach { arbeidsgiver ->
@@ -418,6 +425,7 @@ internal class Arbeidsgiver private constructor(
 
     internal fun utbetalFeriepenger(
         aktørId: String,
+        fødselsnummer: Fødselsnummer,
         feriepengeberegner: Feriepengeberegner,
         utbetalingshistorikkForFeriepenger: UtbetalingshistorikkForFeriepenger
     ) {
@@ -425,6 +433,7 @@ internal class Arbeidsgiver private constructor(
 
         val feriepengeutbetaling = Feriepengeutbetaling.Builder(
             aktørId,
+            fødselsnummer,
             organisasjonsnummer,
             feriepengeberegner,
             utbetalingshistorikkForFeriepenger,
@@ -433,10 +442,7 @@ internal class Arbeidsgiver private constructor(
 
         if (Toggle.SendFeriepengeOppdrag.enabled) {
             feriepengeutbetalinger.add(feriepengeutbetaling)
-
-            if (feriepengeutbetaling.sendTilOppdrag) {
-                feriepengeutbetaling.overfør(utbetalingshistorikkForFeriepenger)
-            }
+            feriepengeutbetaling.overfør(utbetalingshistorikkForFeriepenger)
         }
     }
 

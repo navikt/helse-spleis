@@ -3,7 +3,8 @@ package no.nav.helse.utbetalingslinjer
 internal enum class Klassekode(internal val verdi: String) {
     RefusjonIkkeOpplysningspliktig(verdi = "SPREFAG-IOP"),
     RefusjonFeriepengerIkkeOpplysningspliktig(verdi = "SPREFAGFER-IOP"),
-    SykepengerArbeidstakerOrdinær(verdi = "SPATORD");
+    SykepengerArbeidstakerOrdinær(verdi = "SPATORD"),
+    SykepengerArbeidstakerFeriepenger(verdi = "SPATFER");
 
     internal companion object {
         private val map = values().associateBy(Klassekode::verdi)

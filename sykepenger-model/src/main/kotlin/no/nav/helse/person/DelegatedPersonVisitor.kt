@@ -1,5 +1,10 @@
 package no.nav.helse.person
 
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.Year
+import java.time.YearMonth
+import java.util.UUID
 import no.nav.helse.Fødselsnummer
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
@@ -29,11 +34,6 @@ import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosent
 import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Økonomi
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.Year
-import java.time.YearMonth
-import java.util.*
 
 internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisitor) : PersonVisitor {
     private val delegatee get() = delegateeFun()
@@ -489,7 +489,9 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         spleisFeriepengebeløpArbeidsgiver: Double,
         overføringstidspunkt: LocalDateTime?,
         avstemmingsnøkkel: Long?,
-        utbetalingId: UUID
+        utbetalingId: UUID,
+        sendTilOppdrag: Boolean,
+        sendPersonoppdragTilOS: Boolean
     ) {
         delegatee.preVisitFeriepengeutbetaling(
             feriepengeutbetaling,
@@ -498,8 +500,18 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
             spleisFeriepengebeløpArbeidsgiver,
             overføringstidspunkt,
             avstemmingsnøkkel,
-            utbetalingId
+            utbetalingId,
+            sendTilOppdrag,
+            sendPersonoppdragTilOS
         )
+    }
+
+    override fun preVisitFeriepengerArbeidsgiveroppdrag() {
+        delegatee.preVisitFeriepengerArbeidsgiveroppdrag()
+    }
+
+    override fun preVisitFeriepengerPersonoppdrag() {
+        delegatee.preVisitFeriepengerPersonoppdrag()
     }
 
     override fun postVisitFeriepengeutbetaling(
@@ -509,7 +521,9 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         spleisFeriepengebeløpArbeidsgiver: Double,
         overføringstidspunkt: LocalDateTime?,
         avstemmingsnøkkel: Long?,
-        utbetalingId: UUID
+        utbetalingId: UUID,
+        sendTilOppdrag: Boolean,
+        sendPersonoppdragTilOS: Boolean
     ) {
         delegatee.postVisitFeriepengeutbetaling(
             feriepengeutbetaling,
@@ -518,7 +532,9 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
             spleisFeriepengebeløpArbeidsgiver,
             overføringstidspunkt,
             avstemmingsnøkkel,
-            utbetalingId
+            utbetalingId,
+            sendTilOppdrag,
+            sendPersonoppdragTilOS
         )
     }
 

@@ -332,7 +332,9 @@ internal class JsonBuilder : AbstractBuilder() {
             spleisFeriepengebeløpArbeidsgiver: Double,
             overføringstidspunkt: LocalDateTime?,
             avstemmingsnøkkel: Long?,
-            utbetalingId: UUID
+            utbetalingId: UUID,
+            sendTilOppdrag: Boolean,
+            sendPersonoppdragTilOS: Boolean
         ) {
             val feriepengeutbetalingMap = mutableMapOf<String, Any>()
             feriepengeutbetalinger.add(feriepengeutbetalingMap)
@@ -345,7 +347,8 @@ internal class JsonBuilder : AbstractBuilder() {
     }
 
     private class FeriepengeutbetalingState(private val feriepengeutbetalingMap: MutableMap<String, Any>) : BuilderState() {
-        private val oppdragMap = mutableMapOf<String, Any?>()
+        private val arbeidsgiveroppdragMap = mutableMapOf<String, Any?>()
+        private val personoppdragMap = mutableMapOf<String, Any?>()
 
         override fun preVisitFeriepengeberegner(
             feriepengeberegner: Feriepengeberegner,
@@ -356,26 +359,12 @@ internal class JsonBuilder : AbstractBuilder() {
             pushState(FeriepengeberegnerState(feriepengeutbetalingMap))
         }
 
-        override fun preVisitOppdrag(
-            oppdrag: Oppdrag,
-            fagområde: Fagområde,
-            fagsystemId: String,
-            mottaker: String,
-            førstedato: LocalDate,
-            sistedato: LocalDate,
-            sisteArbeidsgiverdag: LocalDate?,
-            stønadsdager: Int,
-            totalBeløp: Int,
-            nettoBeløp: Int,
-            tidsstempel: LocalDateTime,
-            endringskode: Endringskode,
-            avstemmingsnøkkel: Long?,
-            status: Oppdragstatus?,
-            overføringstidspunkt: LocalDateTime?,
-            erSimulert: Boolean,
-            simuleringsResultat: Simulering.SimuleringResultat?
-        ) {
-            pushState(OppdragState(oppdragMap))
+        override fun preVisitFeriepengerArbeidsgiveroppdrag() {
+            pushState(OppdragState(arbeidsgiveroppdragMap))
+        }
+
+        override fun preVisitFeriepengerPersonoppdrag() {
+            pushState(OppdragState(personoppdragMap))
         }
 
         override fun postVisitFeriepengeutbetaling(
@@ -385,14 +374,18 @@ internal class JsonBuilder : AbstractBuilder() {
             spleisFeriepengebeløpArbeidsgiver: Double,
             overføringstidspunkt: LocalDateTime?,
             avstemmingsnøkkel: Long?,
-            utbetalingId: UUID
+            utbetalingId: UUID,
+            sendTilOppdrag: Boolean,
+            sendPersonoppdragTilOS: Boolean
         ) {
             feriepengeutbetalingMap["infotrygdFeriepengebeløpPerson"] = infotrygdFeriepengebeløpPerson
             feriepengeutbetalingMap["infotrygdFeriepengebeløpArbeidsgiver"] = infotrygdFeriepengebeløpArbeidsgiver
             feriepengeutbetalingMap["spleisFeriepengebeløpArbeidsgiver"] = spleisFeriepengebeløpArbeidsgiver
             feriepengeutbetalingMap["utbetalingId"] = utbetalingId
-            feriepengeutbetalingMap["sendTilOppdrag"] = feriepengeutbetaling.sendTilOppdrag
-            feriepengeutbetalingMap["oppdrag"] = oppdragMap
+            feriepengeutbetalingMap["sendTilOppdrag"] = sendTilOppdrag
+            feriepengeutbetalingMap["sendPersonoppdragTilOS"] = sendPersonoppdragTilOS
+            feriepengeutbetalingMap["oppdrag"] = arbeidsgiveroppdragMap
+            feriepengeutbetalingMap["personoppdrag"] = personoppdragMap
             popState()
         }
     }

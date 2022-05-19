@@ -804,11 +804,13 @@ internal data class PersonData(
             private val infotrygdFeriepengebeløpArbeidsgiver: Double,
             private val spleisFeriepengebeløpArbeidsgiver: Double,
             private val oppdrag: OppdragData,
+            private val personoppdrag: OppdragData,
             private val opptjeningsår: Year,
             private val utbetalteDager: List<UtbetaltDagData>,
             private val feriepengedager: List<UtbetaltDagData>,
             private val utbetalingId: UUID,
-            private val sendTilOppdrag: Boolean
+            private val sendTilOppdrag: Boolean,
+            private val sendPersonoppdragTilOS: Boolean,
         ) {
             internal fun createFeriepengeutbetaling(fødselsnummer: String): Feriepengeutbetaling {
                 val feriepengeberegner = createFeriepengeberegner(fødselsnummer)
@@ -818,8 +820,10 @@ internal data class PersonData(
                     infotrygdFeriepengebeløpArbeidsgiver = infotrygdFeriepengebeløpArbeidsgiver,
                     spleisFeriepengebeløpArbeidsgiver = spleisFeriepengebeløpArbeidsgiver,
                     oppdrag = oppdrag.konverterTilOppdrag(),
+                    personoppdrag = personoppdrag.konverterTilOppdrag(),
                     utbetalingId = utbetalingId,
-                    sendTilOppdrag = sendTilOppdrag
+                    sendTilOppdrag = sendTilOppdrag,
+                    sendPersonoppdragTilOS = sendPersonoppdragTilOS,
                 )
             }
 

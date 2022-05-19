@@ -192,7 +192,7 @@ class Person private constructor(
                 Arbeidsgiver(this, it, jurist)
             }
         }
-        arbeidsgivere.beregnFeriepengerForAlleArbeidsgivere(aktørId, feriepengeberegner, utbetalingshistorikk)
+        arbeidsgivere.beregnFeriepengerForAlleArbeidsgivere(aktørId, fødselsnummer, feriepengeberegner, utbetalingshistorikk)
 
         if (Toggle.SendFeriepengeOppdrag.enabled) {
             aktivitetslogg.info("Feriepenger er utbetalt")

@@ -501,7 +501,14 @@ class JsonBuilderTest {
                             31.mars,
                             1431,
                             31.mars
-                        )
+                        ),
+                        Utbetalingsperiode.Personutbetalingsperiode(
+                            orgnummer,
+                            1.april,
+                            25.april,
+                            1800,
+                            30.april
+                        ),
                     ),
                     feriepengehistorikk = listOf(Feriepenger(orgnummer, 3211, 1.mai(2019), 31.mai(2019)))
                 )

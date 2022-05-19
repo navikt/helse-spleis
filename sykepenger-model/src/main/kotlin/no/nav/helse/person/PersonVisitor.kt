@@ -1,5 +1,10 @@
 package no.nav.helse.person
 
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.Year
+import java.time.YearMonth
+import java.util.UUID
 import no.nav.helse.Fødselsnummer
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
@@ -41,11 +46,6 @@ import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosent
 import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Økonomi
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.Year
-import java.time.YearMonth
-import java.util.*
 
 internal interface PersonVisitor : ArbeidsgiverVisitor, AktivitetsloggVisitor, VilkårsgrunnlagHistorikkVisitor, InfotrygdhistorikkVisitor {
     fun preVisitPerson(
@@ -246,9 +246,14 @@ internal interface FeriepengeutbetalingVisitor : OppdragVisitor {
         spleisFeriepengebeløpArbeidsgiver: Double,
         overføringstidspunkt: LocalDateTime?,
         avstemmingsnøkkel: Long?,
-        utbetalingId: UUID
+        utbetalingId: UUID,
+        sendTilOppdrag: Boolean,
+        sendPersonoppdragTilOS: Boolean,
     ) {
     }
+
+    fun preVisitFeriepengerArbeidsgiveroppdrag() {}
+    fun preVisitFeriepengerPersonoppdrag() {}
 
     fun preVisitFeriepengeberegner(
         feriepengeberegner: Feriepengeberegner,
@@ -286,7 +291,9 @@ internal interface FeriepengeutbetalingVisitor : OppdragVisitor {
         spleisFeriepengebeløpArbeidsgiver: Double,
         overføringstidspunkt: LocalDateTime?,
         avstemmingsnøkkel: Long?,
-        utbetalingId: UUID
+        utbetalingId: UUID,
+        sendTilOppdrag: Boolean,
+        sendPersonoppdragTilOS: Boolean,
     ) {
     }
 

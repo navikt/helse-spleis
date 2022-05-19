@@ -135,7 +135,7 @@ interface PersonObserver {
 
     data class FeriepengerUtbetaltEvent(
         val arbeidsgiverOppdrag: Map<String, Any?>,
-        val personOppdrag: Map<String, Any> = mapOf("linjer" to emptyList<String>())
+        val personOppdrag: Map<String, Any?> = mapOf("linjer" to emptyList<String>())
     )
 
     data class HendelseIkkeHåndtertEvent(
