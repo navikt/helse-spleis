@@ -42,6 +42,16 @@ internal class ØkonomiTest {
     }
 
     @Test
+    fun `total sykdomsgrad regnes ut fra aktuell dagsinntekt`() {
+        val inntekt = 10000.månedlig
+        val økonomi = listOf(
+            100.prosent.sykdomsgrad.inntekt(inntekt, dekningsgrunnlag = inntekt, skjæringstidspunkt = 1.januar),
+            50.prosent.sykdomsgrad.inntekt(inntekt, dekningsgrunnlag = INGEN, skjæringstidspunkt = 1.januar)
+        )
+        assertEquals(75.prosent, Økonomi.totalSykdomsgrad(økonomi))
+    }
+
+    @Test
     fun `overskriver ikke arbeidsgiverperiode`() {
         val arbeidsgiverperiode = Arbeidsgiverperiode(listOf(1.januar til 16.januar))
         val økonomi = Økonomi.ikkeBetalt(arbeidsgiverperiode)

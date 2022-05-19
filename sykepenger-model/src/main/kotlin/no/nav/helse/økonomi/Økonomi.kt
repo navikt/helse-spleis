@@ -50,7 +50,7 @@ internal class Økonomi private constructor(
         }
 
         internal fun totalSykdomsgrad(økonomiList: List<Økonomi>) =
-            Inntekt.vektlagtGjennomsnitt(økonomiList.map { it.grad() to it.dekningsgrunnlag })
+            Inntekt.vektlagtGjennomsnitt(økonomiList.map { it.grad() to it.aktuellDagsinntekt })
 
         internal fun List<Økonomi>.avgrensTilArbeidsgiverperiode(periode: Periode): Periode? {
             return map { it.arbeidsgiverperiode }.firstOrNull()?.firstOrNull()?.let { førsteArbeidsgiverperiodedag ->
