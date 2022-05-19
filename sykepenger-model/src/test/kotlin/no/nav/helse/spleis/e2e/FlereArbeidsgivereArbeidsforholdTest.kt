@@ -1,24 +1,39 @@
 package no.nav.helse.spleis.e2e
 
 
-import no.nav.helse.*
-import no.nav.helse.hendelser.*
+import java.time.LocalDate
+import java.util.UUID
+import no.nav.helse.april
+import no.nav.helse.desember
+import no.nav.helse.februar
+import no.nav.helse.hendelser.InntektForSykepengegrunnlag
+import no.nav.helse.hendelser.Inntektsvurdering
+import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.Vilkårsgrunnlag
+import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.inspectors.personLogg
-import no.nav.helse.person.*
+import no.nav.helse.januar
+import no.nav.helse.juli
+import no.nav.helse.mai
+import no.nav.helse.mars
+import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.Arbeidsgiver
+import no.nav.helse.person.Inntektskilde
+import no.nav.helse.person.PersonVisitor
+import no.nav.helse.person.TilstandType
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.serde.reflection.castAsList
 import no.nav.helse.serde.reflection.castAsMap
+import no.nav.helse.sisteBehov
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
-import java.util.*
 
 internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
 
@@ -344,10 +359,11 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalt(orgnummer = a2)
 
+        assertEquals(693.0, inspektør(a2).utbetalinger.last().inspektør.utbetalingstidslinje[19.mars].økonomi.inspektør.arbeidsgiverbeløp?.reflection { _, _, daglig, _ -> daglig })
         val a2Linje = inspektør(a2).utbetalinger.last().inspektør.arbeidsgiverOppdrag.last()
         assertEquals(17.mars, a2Linje.fom)
         assertEquals(30.mars, a2Linje.tom)
-        assertEquals(692, a2Linje.beløp)
+        assertEquals(693, a2Linje.beløp)
 
         assertNoWarnings()
     }

@@ -276,10 +276,16 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
 
-        val a1Linje = inspektør(a1).utbetalinger.last().inspektør.arbeidsgiverOppdrag.single()
-        assertEquals(16.mars, a1Linje.fom)
-        assertEquals(30.mars, a1Linje.tom)
-        assertEquals(997, a1Linje.beløp)
+        val arbeidsgiverOppdrag = inspektør(a1).utbetalinger.last().inspektør.arbeidsgiverOppdrag
+        assertEquals(2, arbeidsgiverOppdrag.size)
+        val a1Linje1 = arbeidsgiverOppdrag[0]
+        assertEquals(16.mars, a1Linje1.fom)
+        assertEquals(20.mars, a1Linje1.tom)
+        assertEquals(997, a1Linje1.beløp)
+        val a1Linje2 = arbeidsgiverOppdrag[1]
+        assertEquals(21.mars, a1Linje2.fom)
+        assertEquals(30.mars, a1Linje2.tom)
+        assertEquals(998, a1Linje2.beløp)
 
         håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a2)
 
@@ -290,7 +296,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         val a2Linje = inspektør(a2).utbetalinger.last().inspektør.arbeidsgiverOppdrag.single()
         assertEquals(21.mars, a2Linje.fom)
         assertEquals(30.mars, a2Linje.tom)
-        assertEquals(1164, a2Linje.beløp)
+        assertEquals(1163, a2Linje.beløp)
 
     }
 
@@ -694,25 +700,22 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterUtbetalt(orgnummer = a4)
 
         val a1Linjer = inspektør(a1).utbetalinger.last().inspektør.arbeidsgiverOppdrag
+        assertEquals(1, a1Linjer.size)
         assertEquals(17.januar, a1Linjer[0].fom)
-        assertEquals(18.januar, a1Linjer[0].tom)
+        assertEquals(15.mars, a1Linjer[0].tom)
         assertEquals(515, a1Linjer[0].beløp)
-
-        // Siden maksbeløpet blir større når vi får inn flere arbeidsgivere vil vi få en ekstra krone som blir med i kronerulleringen(avrunning), det fører
-        // til at vi fordeler den til den arbeidsgiveren som tapte mest på avrunningen
-        assertEquals(19.januar, a1Linjer[1].fom)
-        assertEquals(15.mars, a1Linjer[1].tom)
-        assertEquals(516, a1Linjer[1].beløp)
 
         val a2Linje = inspektør(a2).utbetalinger.last().inspektør.arbeidsgiverOppdrag.single()
         assertEquals(18.januar, a2Linje.fom)
         assertEquals(15.mars, a2Linje.tom)
         assertEquals(532, a2Linje.beløp)
 
+        // Siden maksbeløpet blir større når vi får inn flere arbeidsgivere vil vi få en ekstra krone som blir med i kronerulleringen(avrunning), det fører
+        // til at vi fordeler den til den arbeidsgiveren som tapte mest på avrunningen
         val a3Linje = inspektør(a3).utbetalinger.last().inspektør.arbeidsgiverOppdrag.single()
         assertEquals(19.januar, a3Linje.fom)
         assertEquals(15.mars, a3Linje.tom)
-        assertEquals(274, a3Linje.beløp)
+        assertEquals(275, a3Linje.beløp)
 
         val a4Linje = inspektør(a4).utbetalinger.last().inspektør.arbeidsgiverOppdrag.single()
         assertEquals(20.januar, a4Linje.fom)

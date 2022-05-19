@@ -410,8 +410,8 @@ internal class ØkonomiTest {
             assertTrue(it.er6GBegrenset())
         }
         assertUtbetaling(a, 470.0, 0.0)
-        assertUtbetaling(b, 322.0, 0.0)
-        assertUtbetaling(c, 69.0, 0.0)
+        assertUtbetaling(b, 321.0, 0.0)
+        assertUtbetaling(c, 70.0, 0.0)
     }
 
     @Test

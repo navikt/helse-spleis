@@ -3,7 +3,6 @@ package no.nav.helse.økonomi
 import java.time.LocalDate
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.april
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mai
@@ -36,8 +35,15 @@ internal class ØkonomiDagTest {
     }
 
     @Test
-    fun `Dekningsgrunnlag med desimaler`() {
+    fun `dekningsgrunnlag rundes opp`() {
         val a = tidslinjeOf(2.NAV(1200.75, 50.0))
+        listOf(a).betal()
+        assertØkonomi(a, 601.0)
+    }
+
+    @Test
+    fun `dekningsgrunnlag rundes ned`() {
+        val a = tidslinjeOf(2.NAV(1200.49, 50.0))
         listOf(a).betal()
         assertØkonomi(a, 600.0)
     }
@@ -57,18 +63,10 @@ internal class ØkonomiDagTest {
         assertØkonomi(a, 231.0, 0.0)
         val b = tidslinjeOf(1.NAV(inntekt, 50))
         listOf(b).betal()
-        assertForventetFeil(
-            forklaring = "Differanse mellom utbetaling til arbeidsgiver og sykepengegrunnlag utgjør 260 kr som skal tilfalle bruker",
-            nå = {
-                assertØkonomi(b, 115.0, 0.0)
-            },
-            ønsket = {
-                assertØkonomi(b, 115.0, 1.0)
-            }
-        )
+        assertØkonomi(b, 116.0, 0.0)
         val c = tidslinjeOf(1.NAV(inntekt, refusjonsbeløp = inntekt/2))
         listOf(c).betal()
-        assertØkonomi(c, 115.0, 116.0) // 231
+        assertØkonomi(c, 115.0, 116.0)
     }
 
     @Test

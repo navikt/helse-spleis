@@ -273,8 +273,8 @@ internal class Økonomi private constructor(
     internal fun harPersonbeløp() = personbeløp!! > INGEN
 
     private fun _betal() {
-        val total = dekningsgrunnlag * grad().ratio()
-        val gradertArbeidsgiverRefusjonsbeløp = arbeidsgiverRefusjonsbeløp * grad().ratio()
+        val total = (dekningsgrunnlag.rundTilDaglig() * grad().ratio()).rundTilDaglig()
+        val gradertArbeidsgiverRefusjonsbeløp = (arbeidsgiverRefusjonsbeløp.rundTilDaglig() * grad().ratio()).rundTilDaglig()
         arbeidsgiverbeløp = gradertArbeidsgiverRefusjonsbeløp.coerceAtMost(total)
         personbeløp = (total - arbeidsgiverbeløp!!).coerceAtLeast(INGEN)
     }
