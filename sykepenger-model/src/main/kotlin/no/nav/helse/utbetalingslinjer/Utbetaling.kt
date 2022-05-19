@@ -18,10 +18,10 @@ import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.godkjenning
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.IAktivitetslogg
+import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.Periodetype
 import no.nav.helse.person.SpesifikkKontekst
 import no.nav.helse.person.UtbetalingVisitor
-import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
@@ -195,16 +195,28 @@ internal class Utbetaling private constructor(
 
     internal fun godkjenning(
         hendelse: IAktivitetslogg,
-        vedtaksperiode: Vedtaksperiode,
+        periode: Periode,
         skjæringstidspunkt: LocalDate,
         periodetype: Periodetype,
+        inntektskilde: Inntektskilde,
         aktiveVedtaksperioder: List<Aktivitetslogg.Aktivitet.AktivVedtaksperiode>,
         orgnummereMedRelevanteArbeidsforhold: List<String>,
         arbeidsforholdId: String?,
         aktivitetslogg: Aktivitetslogg
     ) {
         hendelse.kontekst(this)
-        tilstand.godkjenning(this, vedtaksperiode, skjæringstidspunkt, periodetype, aktiveVedtaksperioder, orgnummereMedRelevanteArbeidsforhold, arbeidsforholdId, aktivitetslogg, hendelse)
+        tilstand.godkjenning(
+            this,
+            periode,
+            skjæringstidspunkt,
+            periodetype,
+            inntektskilde,
+            aktiveVedtaksperioder,
+            orgnummereMedRelevanteArbeidsforhold,
+            arbeidsforholdId,
+            aktivitetslogg,
+            hendelse
+        )
     }
 
     internal fun håndter(påminnelse: Utbetalingpåminnelse) {
@@ -630,9 +642,10 @@ internal class Utbetaling private constructor(
 
         fun godkjenning(
             utbetaling: Utbetaling,
-            vedtaksperiode: Vedtaksperiode,
+            periode: Periode,
             skjæringstidspunkt: LocalDate,
             periodetype: Periodetype,
+            inntektskilde: Inntektskilde,
             aktiveVedtaksperioder: List<Aktivitetslogg.Aktivitet.AktivVedtaksperiode>,
             orgnummereMedRelevanteArbeidsforhold: List<String>,
             arbeidsforholdId: String?,
@@ -663,9 +676,10 @@ internal class Utbetaling private constructor(
 
         override fun godkjenning(
             utbetaling: Utbetaling,
-            vedtaksperiode: Vedtaksperiode,
+            periode: Periode,
             skjæringstidspunkt: LocalDate,
             periodetype: Periodetype,
+            inntektskilde: Inntektskilde,
             aktiveVedtaksperioder: List<Aktivitetslogg.Aktivitet.AktivVedtaksperiode>,
             orgnummereMedRelevanteArbeidsforhold: List<String>,
             arbeidsforholdId: String?,
@@ -674,14 +688,14 @@ internal class Utbetaling private constructor(
         ) {
             godkjenning(
                 aktivitetslogg = hendelse,
-                periodeFom = vedtaksperiode.periode().start,
-                periodeTom = vedtaksperiode.periode().endInclusive,
+                periodeFom = periode.start,
+                periodeTom = periode.endInclusive,
                 skjæringstidspunkt = skjæringstidspunkt,
-                vedtaksperiodeaktivitetslogg = aktivitetslogg.logg(vedtaksperiode),
+                vedtaksperiodeaktivitetslogg = aktivitetslogg,
                 periodetype = periodetype,
                 utbetalingtype = utbetaling.type,
-                inntektskilde = vedtaksperiode.inntektskilde(),
-                aktiveVedtaksperioder =  aktiveVedtaksperioder,
+                inntektskilde = inntektskilde,
+                aktiveVedtaksperioder = aktiveVedtaksperioder,
                 orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold,
                 arbeidsforholdId = arbeidsforholdId
             )

@@ -134,9 +134,10 @@ internal class VedtaksperiodeUtbetalinger(private val arbeidsgiver: Arbeidsgiver
     internal fun simuler(hendelse: IAktivitetslogg) = siste!!.simuler(hendelse)
     internal fun godkjenning(
         hendelse: IAktivitetslogg,
-        vedtaksperiode: Vedtaksperiode,
+        periode: Periode,
         skjæringstidspunkt: LocalDate,
         periodetype: Periodetype,
+        inntektskilde: Inntektskilde,
         aktiveVedtaksperioder: List<Aktivitetslogg.Aktivitet.AktivVedtaksperiode>,
         arbeidsforholdId: String?,
         orgnummereMedRelevanteArbeidsforhold: List<String>,
@@ -144,9 +145,10 @@ internal class VedtaksperiodeUtbetalinger(private val arbeidsgiver: Arbeidsgiver
     ) {
         siste!!.godkjenning(
             hendelse = hendelse,
-            vedtaksperiode = vedtaksperiode,
+            periode = periode,
             skjæringstidspunkt = skjæringstidspunkt,
             periodetype = periodetype,
+            inntektskilde = inntektskilde,
             aktiveVedtaksperioder = aktiveVedtaksperioder,
             arbeidsforholdId = arbeidsforholdId,
             orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold,

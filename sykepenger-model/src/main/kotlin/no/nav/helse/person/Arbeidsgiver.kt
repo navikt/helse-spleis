@@ -905,15 +905,6 @@ internal class Arbeidsgiver private constructor(
 
     internal fun finnSammenhengendePeriode(skjæringstidspunkt: LocalDate) = vedtaksperioder.medSkjæringstidspunkt(skjæringstidspunkt)
 
-    internal fun harInntektsmelding(skjæringstidspunkt: LocalDate): Boolean {
-        val førsteFraværsdag = finnFørsteFraværsdag(skjæringstidspunkt) ?: return false
-        return inntektshistorikk.harInntektsmelding(førsteFraværsdag)
-    }
-
-    internal fun grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate, periodeStart: LocalDate) =
-        inntektshistorikk.grunnlagForSykepengegrunnlag(skjæringstidspunkt, periodeStart, finnFørsteFraværsdag(skjæringstidspunkt))
-            ?.grunnlagForSykepengegrunnlag()
-
     internal fun harNødvendigInntektForVilkårsprøving(skjæringstidspunkt: LocalDate, periodeStart: LocalDate): Boolean {
         return inntektshistorikk.harNødvendigInntektForVilkårsprøving(
             skjæringstidspunkt,

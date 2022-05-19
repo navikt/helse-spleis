@@ -397,14 +397,8 @@ internal class Vedtaksperiode private constructor(
 
     internal fun gjelder(skjæringstidspunkt: LocalDate) = this.skjæringstidspunkt == skjæringstidspunkt
 
-    internal fun inntektskilde() = inntektskilde
-    private fun harInntekt() =
-        harInntektsmelding() || arbeidsgiver.grunnlagForSykepengegrunnlag(skjæringstidspunkt, periode.start) != null
-
     private fun harNødvendigInntektForVilkårsprøving() =
         arbeidsgiver.harNødvendigInntektForVilkårsprøving(skjæringstidspunkt, periode.start)
-
-    private fun harInntektsmelding() = arbeidsgiver.harInntektsmelding(skjæringstidspunkt)
 
     private fun låsOpp() = arbeidsgiver.låsOpp(periode)
     private fun lås() = arbeidsgiver.lås(periode)
@@ -728,7 +722,7 @@ internal class Vedtaksperiode private constructor(
         val harBrukerutbetaling = harBrukerutbetaling(andreVedtaksperioder)
 
         val utbetalingsfilter = Utbetalingsfilter.Builder()
-            .inntektkilde(inntektskilde())
+            .inntektkilde(inntektskilde)
             .also { utbetalinger.build(it) }
             .also { inntektsmeldingInfo?.build(it, arbeidsgiver) }
             .utbetalingstidslinjerHarBrukerutbetaling(harBrukerutbetaling)
@@ -1516,15 +1510,9 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, gjenopptaBehandling: IAktivitetslogg) {
-            fortsett(vedtaksperiode, gjenopptaBehandling)
-        }
-
-        private fun fortsett(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            if (!vedtaksperiode.harInntekt()) return vedtaksperiode.tilstand(
-                hendelse,
-                AvventerInntektsmeldingEllerHistorikk
-            )
-            vedtaksperiode.tilstand(hendelse, AvventerHistorikk)
+            if (!vedtaksperiode.harNødvendigInntektForVilkårsprøving())
+                return vedtaksperiode.tilstand(gjenopptaBehandling, AvventerInntektsmeldingEllerHistorikk)
+            vedtaksperiode.tilstand(gjenopptaBehandling, AvventerHistorikk)
         }
     }
 
@@ -1924,13 +1912,14 @@ internal class Vedtaksperiode private constructor(
         }
         utbetalinger.godkjenning(
             hendelse = hendelse,
-            vedtaksperiode = this,
+            periode = periode,
             skjæringstidspunkt = skjæringstidspunkt,
             periodetype = periodetype,
+            inntektskilde = inntektskilde,
             aktiveVedtaksperioder = aktiveVedtaksperioder,
             arbeidsforholdId = inntektsmeldingInfo?.arbeidsforholdId,
             orgnummereMedRelevanteArbeidsforhold = person.orgnummereMedRelevanteArbeidsforhold(skjæringstidspunkt),
-            aktivitetslogg = person.aktivitetslogg
+            aktivitetslogg = person.aktivitetslogg.logg(this)
         )
     }
 
