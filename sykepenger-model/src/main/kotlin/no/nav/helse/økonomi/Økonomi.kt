@@ -66,9 +66,6 @@ internal class Økonomi private constructor(
             fordelBeløp(it, virkningsdato)
         }
 
-        private fun maksbeløp(økonomi: Økonomi) =
-            (økonomi.grunnbeløpgrense?.rundTilDaglig()!! * økonomi.totalGrad).rundTilDaglig()
-
         private fun delteUtbetalinger(økonomiList: List<Økonomi>) = økonomiList.forEach { it.betal() }
 
         private fun fordelBeløp(økonomiList: List<Økonomi>, virkningsdato: LocalDate) {
@@ -81,14 +78,17 @@ internal class Økonomi private constructor(
             check(økonomiList.filter { it.skjæringstidspunkt != null }.distinctBy { it.skjæringstidspunkt }.count() == 1) { "det finnes flere unike skjæringstidspunkt for økonomiobjekt på samme dag" }
 
             val skjæringstidspunkt = økonomiList.firstNotNullOf { it.skjæringstidspunkt }
-            økonomiList.forEach { it.grunnbeløpgrense = Grunnbeløp.`6G`.beløp(skjæringstidspunkt, virkningsdato) }
+            val grunnbeløp = Grunnbeløp.`6G`.beløp(skjæringstidspunkt, virkningsdato)
+            økonomiList.forEach { it.grunnbeløpgrense = grunnbeløp }
 
-            val grense = maksbeløp(økonomiList.first())
-            val sykepengegrunnlag = minOf(total, grense) // TODO: få sykepengegrunnlaget (før 6g) fra Vilkårsgrunnlag
+            val grunnlagForSykepengegrunnlag = økonomiList.map { it.aktuellDagsinntekt }.summer()
+            val sykepengegrunnlagBegrenset6G = minOf(grunnlagForSykepengegrunnlag, grunnbeløp).rundTilDaglig() // TODO: få sykepengegrunnlaget (etter 6g) fra Vilkårsgrunnlag
+            val er6GBegrenset = grunnlagForSykepengegrunnlag > grunnbeløp
+            val sykepengegrunnlag = (sykepengegrunnlagBegrenset6G * økonomiList.first().totalGrad).rundTilDaglig()
             fordel(økonomiList, totalArbeidsgiver, sykepengegrunnlag, { økonomi, inntekt -> økonomi.arbeidsgiverbeløp = inntekt }, arbeidsgiverBeløp)
             val totalArbeidsgiverrefusjon = totalArbeidsgiver(økonomiList)
             fordel(økonomiList, total - totalArbeidsgiverrefusjon, sykepengegrunnlag - totalArbeidsgiverrefusjon, { økonomi, inntekt -> økonomi.personbeløp = inntekt }, personBeløp)
-            økonomiList.forEach { økonomi -> økonomi.er6GBegrenset = total > grense }
+            økonomiList.forEach { økonomi -> økonomi.er6GBegrenset = er6GBegrenset }
         }
 
         private fun fordel(økonomiList: List<Økonomi>, total: Inntekt, grense: Inntekt, setter: (Økonomi, Inntekt?) -> Unit, getter: (Økonomi) -> Inntekt?) {

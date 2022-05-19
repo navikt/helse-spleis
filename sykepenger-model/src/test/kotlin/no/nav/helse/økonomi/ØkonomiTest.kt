@@ -1,5 +1,6 @@
 package no.nav.helse.økonomi
 
+import no.nav.helse.Grunnbeløp
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
@@ -21,6 +22,15 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 internal class ØkonomiTest {
+
+    @Test
+    fun `er 6g-begrensning selv om dekningsgrunnlaget er lavere`() {
+        val `6g` = Grunnbeløp.`6G`.beløp(1.januar)
+        val `over6g` = `6g` + 260.daglig
+        val økonomi = listOf(100.prosent.sykdomsgrad.inntekt(over6g, dekningsgrunnlag = `6g`, skjæringstidspunkt = 1.januar))
+        Økonomi.betal(økonomi, 1.januar)
+        assertTrue(økonomi.er6GBegrenset()) { "sykepengegrunnlaget regnes ut fra innrapportert inntekt (§ 8-28) og ikke dekningsgrunnlaget" }
+    }
 
     @Test
     fun `akkurat under 20-prosent-grensen`() {
