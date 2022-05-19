@@ -1358,8 +1358,7 @@ internal class Vedtaksperiode private constructor(
         override val type: TilstandType = AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            if (!vedtaksperiode.harNødvendigInntektForVilkårsprøving())
-                vedtaksperiode.trengerInntektsmeldingReplay()
+            vedtaksperiode.trengerInntektsmeldingReplay()
             if (vedtaksperiode.arbeidsgiver.finnForkastetSykeperiodeRettFør(vedtaksperiode) == null) {
                 vedtaksperiode.trengerInntektsmelding(hendelse.hendelseskontekst())
             }
@@ -1367,7 +1366,6 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun leaving(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
-            vedtaksperiode.utbetalinger.forkast(aktivitetslogg)
             vedtaksperiode.trengerIkkeInntektsmelding(aktivitetslogg.hendelseskontekst())
         }
 
@@ -1440,8 +1438,6 @@ internal class Vedtaksperiode private constructor(
         override val type: TilstandType = AVVENTER_BLOKKERENDE_PERIODE
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            if (Toggle.Bugfix.enabled && !vedtaksperiode.harNødvendigInntektForVilkårsprøving())
-                return vedtaksperiode.tilstand(hendelse, AvventerInntektsmeldingEllerHistorikk)
             vedtaksperiode.person.gjenopptaBehandlingNy(hendelse)
         }
 
@@ -1456,11 +1452,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            if (påminnelse.maigate()) {
-                vedtaksperiode.tilstand(påminnelse, AvventerInntektsmeldingEllerHistorikk)
-            } else {
-                vedtaksperiode.person.gjenopptaBehandlingNy(påminnelse)
-            }
+            vedtaksperiode.person.gjenopptaBehandlingNy(påminnelse)
         }
     }
 
@@ -1470,8 +1462,6 @@ internal class Vedtaksperiode private constructor(
             tilstandsendringstidspunkt.plusDays(5)
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            if (Toggle.Bugfix.enabled && !vedtaksperiode.harNødvendigInntektForVilkårsprøving())
-                return vedtaksperiode.tilstand(hendelse, AvventerInntektsmeldingEllerHistorikk)
             vedtaksperiode.trengerVilkårsgrunnlag(hendelse)
         }
 
@@ -1498,11 +1488,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            if (påminnelse.maigate()) {
-                vedtaksperiode.tilstand(påminnelse, AvventerInntektsmeldingEllerHistorikk)
-            } else {
-                vedtaksperiode.trengerVilkårsgrunnlag(påminnelse)
-            }
+            vedtaksperiode.trengerVilkårsgrunnlag(påminnelse)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
@@ -1523,10 +1509,6 @@ internal class Vedtaksperiode private constructor(
 
     internal object AvventerUferdig : Vedtaksperiodetilstand {
         override val type = AVVENTER_UFERDIG
-        override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            if (Toggle.Bugfix.enabled && !vedtaksperiode.harNødvendigInntektForVilkårsprøving())
-                return vedtaksperiode.tilstand(hendelse, AvventerInntektsmeldingEllerHistorikk)
-        }
 
         override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Sykmelding) {}
 
@@ -1536,12 +1518,6 @@ internal class Vedtaksperiode private constructor(
 
         override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, gjenopptaBehandling: IAktivitetslogg) {
             fortsett(vedtaksperiode, gjenopptaBehandling)
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            if (påminnelse.maigate()) {
-                vedtaksperiode.tilstand(påminnelse, AvventerInntektsmeldingEllerHistorikk)
-            }
         }
 
         private fun fortsett(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
@@ -1563,13 +1539,7 @@ internal class Vedtaksperiode private constructor(
             .plusDays(4)
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            if (Toggle.Bugfix.enabled && !vedtaksperiode.harNødvendigInntektForVilkårsprøving())
-                return vedtaksperiode.tilstand(hendelse, AvventerInntektsmeldingEllerHistorikk)
             vedtaksperiode.loggInnenforArbeidsgiverperiode()
-            if (vedtaksperiode.arbeidsgiver.harDagUtenSøknad(vedtaksperiode.periode)) {
-                hendelse.error("Tidslinjen inneholder minst én dag med kilde sykmelding")
-                return vedtaksperiode.forkast(hendelse)
-            }
             vedtaksperiode.trengerYtelser(hendelse)
             vedtaksperiode.utbetalinger.forkast(hendelse)
             hendelse.info("Forespør sykdoms- og inntektshistorikk")
@@ -1602,11 +1572,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            if (påminnelse.maigate()) {
-                vedtaksperiode.tilstand(påminnelse, AvventerInntektsmeldingEllerHistorikk)
-            } else {
-                vedtaksperiode.trengerYtelser(påminnelse)
-            }
+            vedtaksperiode.trengerYtelser(påminnelse)
         }
 
         override fun håndter(
@@ -1753,8 +1719,6 @@ internal class Vedtaksperiode private constructor(
         ): LocalDateTime = tilstandsendringstidspunkt.plusDays(7)
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            if (Toggle.Bugfix.enabled && !vedtaksperiode.harNødvendigInntektForVilkårsprøving())
-                return vedtaksperiode.tilstand(hendelse, AvventerInntektsmeldingEllerHistorikk)
             trengerSimulering(vedtaksperiode, hendelse)
         }
 
@@ -1785,12 +1749,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            if (påminnelse.maigate()) {
-                vedtaksperiode.utbetalinger.forkast(påminnelse)
-                vedtaksperiode.tilstand(påminnelse, AvventerInntektsmeldingEllerHistorikk)
-            } else {
-                trengerSimulering(vedtaksperiode, påminnelse)
-            }
+            trengerSimulering(vedtaksperiode, påminnelse)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, simulering: Simulering) {
@@ -1870,10 +1829,6 @@ internal class Vedtaksperiode private constructor(
         override val kanReberegnes = false
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            if (Toggle.Bugfix.enabled && !vedtaksperiode.harNødvendigInntektForVilkårsprøving()) {
-                vedtaksperiode.utbetalinger.forkast(hendelse)
-                return vedtaksperiode.tilstand(hendelse, AvventerInntektsmeldingEllerHistorikk)
-            }
             vedtaksperiode.trengerGodkjenning(hendelse)
         }
 
@@ -1937,12 +1892,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            if (påminnelse.maigate()) {
-                vedtaksperiode.utbetalinger.forkast(påminnelse)
-                vedtaksperiode.tilstand(påminnelse, AvventerInntektsmeldingEllerHistorikk)
-            } else {
-                vedtaksperiode.trengerHistorikkFraInfotrygd(påminnelse)
-            }
+            vedtaksperiode.trengerHistorikkFraInfotrygd(påminnelse)
         }
 
         override fun håndter(
@@ -2575,8 +2525,6 @@ internal class Vedtaksperiode private constructor(
         }
 
         internal val IKKE_FERDIG_BEHANDLET: VedtaksperiodeFilter = { !it.tilstand.erFerdigBehandlet }
-        internal val FERDIG_BEHANDLET: VedtaksperiodeFilter = { it.tilstand.erFerdigBehandlet }
-        internal val UTEN_UTBETALING: VedtaksperiodeFilter = { it.tilstand == AvsluttetUtenUtbetaling }
         internal val ER_ELLER_HAR_VÆRT_AVSLUTTET: VedtaksperiodeFilter =
             { it.tilstand is AvsluttetUtenUtbetaling || it.utbetalinger.harAvsluttede() }
 
