@@ -6,7 +6,7 @@ import net.logstash.logback.argument.StructuredArguments.keyValue
 import org.slf4j.LoggerFactory
 import kotlin.math.roundToInt
 
-internal class V159FikserDoubleGrad : JsonMigration(version = 159) {
+internal class V160FikserDoubleGrad : JsonMigration(version = 160) {
     override val description = "Spisset migrering for å runde av alle grader med desimal. Grad oppgis bare som heltall i søknad, sykmelding og overstyringer." +
             "Desimalet skyldes unøyaktigheter med doubles."
 
@@ -16,20 +16,21 @@ internal class V159FikserDoubleGrad : JsonMigration(version = 159) {
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
             val orgnr = arbeidsgiver.path("organisasjonsnummer").asText()
             arbeidsgiver.path("sykdomshistorikk").forEach { element ->
-                migrerTidslinje(aktørId, orgnr, element.path("hendelseSykdomstidslinje"))
-                migrerTidslinje(aktørId, orgnr, element.path("beregnetSykdomstidslinje"))
+                migrerSykdomstidslinje(aktørId, orgnr, element.path("hendelseSykdomstidslinje"))
+                migrerSykdomstidslinje(aktørId, orgnr, element.path("beregnetSykdomstidslinje"))
             }
         }
     }
 
-    private fun migrerTidslinje(aktørId: String, orgnr: String, tidslinje: JsonNode) {
+    private fun migrerSykdomstidslinje(aktørId: String, orgnr: String, tidslinje: JsonNode) {
         tidslinje.path("dager")
             .forEach { dag ->
                 val gradFør = dag.path("grad").asDouble()
                 val gradEtter = gradFør.roundToInt().toDouble()
                 val kilde = dag.path("kilde").path("type").asText()
                 if (gradFør != gradEtter) {
-                    log.info("{} {} ville rundet av $gradFør til $gradEtter med {}", keyValue("aktørId", aktørId), keyValue("organisasjonsnummer", orgnr), keyValue("kilde", kilde))
+                    (dag as ObjectNode).put("grad", gradEtter)
+                    log.info("{} {} runder av $gradFør til $gradEtter med {}", keyValue("aktørId", aktørId), keyValue("organisasjonsnummer", orgnr), keyValue("kilde", kilde))
                 }
             }
     }
