@@ -1,7 +1,8 @@
 package no.nav.helse.økonomi
 
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
+import no.nav.helse.økonomi.Inntekt.Companion.daglig
+import no.nav.helse.økonomi.Prosentdel.Companion.fraRatio
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -13,41 +14,50 @@ import org.junit.jupiter.api.assertThrows
 internal class ProsentdelTest {
 
     @Test fun equality() {
-        assertEquals(Prosentdel.fraRatio(0.25), 25.0.prosent )
-        assertNotEquals(Prosentdel.fraRatio(0.25), 75.0.prosent )
-        assertNotEquals(Prosentdel.fraRatio(0.25), Any() )
-        assertNotEquals(Prosentdel.fraRatio(0.25), null )
+        assertEquals(fraRatio(0.25), 25.0.prosent )
+        assertNotEquals(fraRatio(0.25), 75.0.prosent )
+        assertNotEquals(fraRatio(0.25), Any() )
+        assertNotEquals(fraRatio(0.25), null )
+    }
+
+    @Test
+    fun reciprok() {
+        val gradertVerdi = 5.daglig
+        val grad = 50.prosent
+        assertEquals(10.daglig, grad.reciproc(gradertVerdi))
+        val inntekt = 100.daglig
+        val enTredjedel = fraRatio(1/3.0)
+        val gradertInntekt = inntekt.times(enTredjedel)
+        assertEquals(inntekt, enTredjedel.reciproc(gradertInntekt))
     }
 
     @Test
     fun `opprette med Int`() {
-        assertEquals(20.prosent, 20.0.prosent)
+        1.rangeTo(99).forEach { n ->
+            assertEquals(n, n.prosent)
+            assertEquals(100 - n, n.prosent.not())
+        }
+        assertEquals(fraRatio("0"), 0.prosent)
+        assertEquals(fraRatio("1.0"), 0.prosent.not())
+        assertEquals(fraRatio("1"), 100.prosent)
+        assertEquals(fraRatio("0.0"), 100.prosent.not())
+    }
+
+    private fun assertEquals(n: Int, prosentdel: Prosentdel) {
+        val forventet = fraRatio("0.${n.toString().padStart(2, '0').removeSuffix("0")}")
+        assertEquals(forventet, prosentdel)
+        assertEquals(n, prosentdel.toDouble().toInt())
     }
 
     @Test
     fun avrundingsfeil() {
         // Fredet variabelnavn
         val karakterMedAvrunding = (1 / 7.0).prosent
-        assertEquals(karakterMedAvrunding, !!karakterMedAvrunding)
-        assertNotEquals(
-            karakterMedAvrunding.get<Double>("brøkdel"),
-            (!!karakterMedAvrunding).get<Double>("brøkdel")
-        )
-        assertEquals(karakterMedAvrunding.hashCode(), (!!karakterMedAvrunding).hashCode())
-    }
-
-    @Test
-    fun `20 prosent blir ikke 19,9999`() {
-        val prosent = 80.prosent.not()
-        assertEquals(20.prosent, prosent)
-        assertForventetFeil(
-            forklaring = "motsatt 80 % er 20 %; men for en datamaskin er det veldig vanskelig å få <1 - 0.8> til å bli det",
-            nå = {
-                assertNotEquals(20.0, prosent.toDouble())
-            },
-            ønsket = {
-                assertEquals(20.0, prosent.toDouble())
-            })
+        val dobbelomvendt = !!karakterMedAvrunding
+        assertEquals(karakterMedAvrunding, dobbelomvendt)
+        assertEquals(karakterMedAvrunding, karakterMedAvrunding)
+        assertEquals(karakterMedAvrunding.get<Double>("brøkdel"), (dobbelomvendt).get<Double>("brøkdel"))
+        assertEquals(karakterMedAvrunding.hashCode(), (dobbelomvendt).hashCode())
     }
 
     @Test

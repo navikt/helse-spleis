@@ -1,54 +1,64 @@
 package no.nav.helse.økonomi
 
+import java.math.BigDecimal
+import java.math.BigDecimal.ONE
+import java.math.BigDecimal.ZERO
+import java.math.MathContext
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
-import kotlin.math.absoluteValue
 import kotlin.math.roundToInt
-import kotlin.math.roundToLong
 
-class Prosentdel private constructor(private val brøkdel: Double): Comparable<Prosentdel> {
-
+class Prosentdel private constructor(private val brøkdel: BigDecimal): Comparable<Prosentdel> {
     init {
         require(brøkdel.toDouble() in 0.0..1.0) { "Må være prosent mellom 0 og 100" }
     }
 
     companion object {
-        private const val EPSILON = 0.000001
-        private const val SIKKER_BRØK = 1.0
+        private val mc = MathContext.DECIMAL128
+        private val SIKKER_BRØK = 1.0.toBigDecimal(mc)
+        private val HUNDRE_PROSENT = 100.0.toBigDecimal(mc)
         private val GRENSE = 20.prosent
 
-        internal fun fraRatio(ratio: Double) = Prosentdel(ratio)
+        internal fun fraRatio(ratio: Double) = Prosentdel(ratio.toBigDecimal(mc))
+        internal fun fraRatio(ratio: String) = Prosentdel(ratio.toBigDecimal(mc))
 
         internal fun subsumsjon(subsumsjonObserver: SubsumsjonObserver, block: SubsumsjonObserver.(Double) -> Unit) {
             subsumsjonObserver.block(GRENSE.toDouble())
         }
 
-        val Number.prosent get() = fraRatio(this.toDouble() / 100.0)
+        internal fun Collection<Pair<Prosentdel, BigDecimal>>.average(): Prosentdel {
+            val total = this.sumOf { it.second }
+            if (total <= ZERO) return map { it.first to ONE }.average()
+            return Prosentdel(this.sumOf { it.first.brøkdel.multiply(it.second, mc) }.divide(total, mc))
+        }
+
+        val Number.prosent get() = Prosentdel(this.toDouble().toBigDecimal(mc).divide(HUNDRE_PROSENT, mc))
     }
 
     override fun equals(other: Any?) = other is Prosentdel && this.equals(other)
 
-    private fun equals(other: Prosentdel) =
-        (this.brøkdel - other.brøkdel).absoluteValue < EPSILON
+    private fun equals(other: Prosentdel) = this.brøkdel == other.brøkdel
 
-    override fun hashCode() = (brøkdel / EPSILON).roundToLong().hashCode()
+    override fun hashCode() = brøkdel.hashCode()
 
-    internal operator fun not() = Prosentdel(SIKKER_BRØK - brøkdel)
+    internal operator fun not() = Prosentdel(SIKKER_BRØK - this.brøkdel)
 
-    override fun compareTo(other: Prosentdel) =
-        if (this.equals(other)) 0
-        else this.brøkdel.compareTo(other.brøkdel)
+    internal operator fun div(other: Prosentdel) = Prosentdel(this.brøkdel.divide(other.brøkdel, mc))
+
+    override fun compareTo(other: Prosentdel) = this.brøkdel.compareTo(other.brøkdel)
 
     override fun toString(): String {
-        return "${(brøkdel * 100)} %"
+        return "${(toDouble())} %"
     }
 
-    internal fun ratio() = brøkdel
+    internal fun reciproc(other: Inntekt) = other.times(inverse())
 
-    internal fun toDouble() = brøkdel * 100.0
+    private fun inverse(): BigDecimal = SIKKER_BRØK.divide(this.brøkdel, mc)
+
+    internal fun times(other: Inntekt) = other.times(brøkdel)
+
+    internal fun toDouble() = brøkdel.multiply(HUNDRE_PROSENT, mc).toDouble()
 
     internal fun roundToInt() = toDouble().roundToInt()
-
-    internal fun roundToTwoDecimalPlaces() = roundToInt() / 100.0
 
     internal fun erUnderGrensen() = this < GRENSE
 }

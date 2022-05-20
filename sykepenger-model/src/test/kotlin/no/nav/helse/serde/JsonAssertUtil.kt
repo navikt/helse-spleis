@@ -3,9 +3,15 @@ package no.nav.helse.serde
 import com.fasterxml.jackson.annotation.JsonAutoDetect
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.PropertyAccessor
+import com.fasterxml.jackson.core.JsonGenerator
+import com.fasterxml.jackson.databind.JsonSerializer
 import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.databind.SerializerProvider
+import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import java.math.BigDecimal
+import java.math.RoundingMode
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Person
 import no.nav.helse.person.Vedtaksperiode
@@ -13,6 +19,7 @@ import no.nav.helse.person.VedtaksperiodeUtbetalinger
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
+import no.nav.helse.økonomi.Prosentdel
 import org.junit.jupiter.api.Assertions
 
 @JsonIgnoreProperties("jurist")
@@ -36,6 +43,20 @@ private class BegrunnelseMixin
 @JsonIgnoreProperties("oppslag", "utbetalingstidslinjeoppslag", "arbeidsgiverperiodecache")
 private class InfotrygdhistorikkElementMixin
 
+internal class BigDecimalSerializer : JsonSerializer<BigDecimal>() {
+    private companion object {
+        private const val PRECISION = 15
+    }
+    override fun serialize(value: BigDecimal?, gen: JsonGenerator, serializers: SerializerProvider?) {
+        gen.writeString(value?.setScale(PRECISION, RoundingMode.HALF_EVEN).toString());
+    }
+}
+
+private class ProsentdelMixin {
+    @JsonSerialize(using = BigDecimalSerializer::class)
+    private lateinit var brøkdel: BigDecimal
+}
+
 private val objectMapper = jacksonObjectMapper()
     .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
     .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
@@ -47,7 +68,8 @@ private val objectMapper = jacksonObjectMapper()
             VedtaksperiodeUtbetalinger::class.java to VedtaksperiodeUtbetalingerMixin::class.java,
             Utbetaling::class.java to UtbetalingMixin::class.java,
             Begrunnelse::class.java to BegrunnelseMixin::class.java,
-            InfotrygdhistorikkElement::class.java to InfotrygdhistorikkElementMixin::class.java
+            InfotrygdhistorikkElement::class.java to InfotrygdhistorikkElementMixin::class.java,
+            Prosentdel::class.java to ProsentdelMixin::class.java
         )
     )
     .setVisibility(PropertyAccessor.GETTER, JsonAutoDetect.Visibility.NONE)

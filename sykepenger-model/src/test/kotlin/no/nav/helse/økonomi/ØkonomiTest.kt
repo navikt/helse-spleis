@@ -1,13 +1,14 @@
 package no.nav.helse.økonomi
 
+import java.math.MathContext
 import no.nav.helse.Grunnbeløp
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import no.nav.helse.økonomi.Prosentdel.Companion.fraRatio
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.Økonomi.Companion.avgrensTilArbeidsgiverperiode
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
@@ -39,16 +40,8 @@ internal class ØkonomiTest {
             52.prosent.sykdomsgrad.inntekt(10312.40.månedlig, skjæringstidspunkt = 1.januar)
         )
         val totalSykdomsgrad = Økonomi.totalSykdomsgrad(økonomi)
-        assertForventetFeil(
-            forklaring = "utregnet sykdomsgrad er 0,1999992062… IKKE 0,2",
-            nå = {
-                assertEquals(20.prosent, totalSykdomsgrad)
-                assertFalse(totalSykdomsgrad.erUnderGrensen())
-            },
-            ønsket = {
-                assertNotEquals(20.prosent, totalSykdomsgrad)
-                assertTrue(totalSykdomsgrad.erUnderGrensen())
-            })
+        assertNotEquals(20.prosent, totalSykdomsgrad)
+        assertTrue(totalSykdomsgrad.erUnderGrensen())
     }
 
     @Test
@@ -423,7 +416,7 @@ internal class ØkonomiTest {
         val b = 80.prosent.sykdomsgrad.inntekt(10000.månedlig, skjæringstidspunkt = 1.januar).arbeidsgiverRefusjon(10000.månedlig * 90.prosent)
         val c = 20.prosent.sykdomsgrad.inntekt(31000.månedlig, skjæringstidspunkt = 1.januar).arbeidsgiverRefusjon(31000.månedlig * 25.prosent)
         listOf(a, b, c).betal(1.januar).also {
-            assertEquals(39.838709677419345.prosent, it.totalSykdomsgrad())
+            assertEquals(fraRatio(247.0.toBigDecimal().divide(620.0.toBigDecimal(), MathContext.DECIMAL128).toString()), it.totalSykdomsgrad())
             // grense = 864
         }
         listOf(a, b, c).forEach {
@@ -440,7 +433,7 @@ internal class ØkonomiTest {
         val b = 20.prosent.sykdomsgrad.inntekt(10000.månedlig, skjæringstidspunkt = 1.januar).arbeidsgiverRefusjon(10000.månedlig * 20.prosent)
         val c = 20.prosent.sykdomsgrad.inntekt(31000.månedlig, skjæringstidspunkt = 1.januar).arbeidsgiverRefusjon(31000.månedlig * 25.prosent)
         listOf(a, b, c).betal(1.januar).also {
-            assertEquals(30.16129032258064.prosent, it.totalSykdomsgrad())
+            assertEquals(fraRatio(187.0.toBigDecimal().divide(620.0.toBigDecimal(), MathContext.DECIMAL128).toString()), it.totalSykdomsgrad())
             // grense = 864
         }
         listOf(a, b, c).forEach {

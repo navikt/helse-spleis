@@ -1,9 +1,12 @@
 package no.nav.helse.økonomi
 
+import java.math.BigDecimal
+import java.math.MathContext
+import java.time.LocalDate
 import no.nav.helse.memoize
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
-import java.time.LocalDate
+import no.nav.helse.økonomi.Prosentdel.Companion.average
 import kotlin.math.absoluteValue
 import kotlin.math.roundToInt
 
@@ -20,13 +23,12 @@ class Inntekt private constructor(private val årlig: Double) : Comparable<Innte
     }
 
     companion object {
+        private val mc = MathContext.DECIMAL128
         //8-10 ledd 3
         private const val ARBEIDSDAGER_PER_ÅR = 260
 
         internal fun vektlagtGjennomsnitt(parene: List<Pair<Prosentdel, Inntekt>>): Prosentdel {
-            val total = parene.sumOf { it.second.årlig }
-            if (total <= 0.0) return Prosentdel.fraRatio(parene.map { it.first.ratio() }.average())
-            return Prosentdel.fraRatio(parene.sumOf { (it.first.ratio() * it.second.årlig) } / total)
+            return parene.map { it.first to it.second.årlig.toBigDecimal(mc) }.average()
         }
 
         val Number.månedlig get() = Inntekt(this.toDouble() * 12)
@@ -68,12 +70,12 @@ class Inntekt private constructor(private val årlig: Double) : Comparable<Innte
     }
 
     internal operator fun times(scalar: Number) = Inntekt(this.årlig * scalar.toDouble())
+    internal operator fun times(scalar: BigDecimal) = Inntekt(scalar.multiply(this.årlig.toBigDecimal(mc), mc).toDouble())
 
-    internal operator fun times(prosentdel: Prosentdel) = times(prosentdel.ratio())
+    internal operator fun times(prosentdel: Prosentdel) = prosentdel.times(this)
 
     internal operator fun div(scalar: Number) = Inntekt(this.årlig / scalar.toDouble())
-
-    internal operator fun div(prosentdel: Prosentdel) = this / prosentdel.ratio()
+    internal operator fun div(other: Prosentdel) = other.reciproc(this)
 
     internal infix fun ratio(other: Inntekt) = this.årlig / other.årlig
 
