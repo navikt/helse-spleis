@@ -9,14 +9,14 @@ internal class VCrazyLoopSletterDuplikaterFraInntektshistorikken : JsonMigration
 
     private val tilfeller: Map<VedtaksperiodeID, InntektsoppsysningsID> = mapOf(
         "9354c0c8-ac43-4c34-b094-aa64fd94be5e" to "a9f09978-cb29-48d4-929f-0e8b6e81de1a",
-        "d57b382a-7721-4b01-866d-b8b8a102a727" to "fc1823d4-0764-4900-a728-aee6da161e33"
+        "dd4e8eec-7b6e-4f01-9d49-73310b4916ce" to "fc1823d4-0764-4900-a728-aee6da161e33"
     )
 
     override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
-        tilfeller.forEach { (vedtaksperiodeID, inntektsopplysningID) -> migrerEttTilfelle(vedtaksperiodeID, inntektsopplysningID, jsonNode, meldingerSupplier) }
+        tilfeller.forEach { (vedtaksperiodeID, inntektsopplysningID) -> migrerEttTilfelle(vedtaksperiodeID, inntektsopplysningID, jsonNode) }
     }
 
-    private fun migrerEttTilfelle(vedtaksperiodeID: VedtaksperiodeID, inntektsoppsysningsID: InntektsoppsysningsID, jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
+    private fun migrerEttTilfelle(vedtaksperiodeID: VedtaksperiodeID, inntektsoppsysningsID: InntektsoppsysningsID, jsonNode: ObjectNode) {
         val relevantOrgummer = jsonNode.finnOrgnummer(vedtaksperiodeID)?.asText() ?: return
         val arbeidsgiver = jsonNode.finnArbeidsgiver(relevantOrgummer) ?: return
         val inntektsopplysning = arbeidsgiver.finnInntektsopplysning(inntektsoppsysningsID) ?: return
