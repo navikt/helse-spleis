@@ -3,7 +3,7 @@ package no.nav.helse.serde.migration
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 
-internal class V159SletterDuplikaterFraInntektshistorikken : JsonMigration(version = 159) {
+internal class VCrazyLoopSletterDuplikaterFraInntektshistorikken : JsonMigration(version = 160) {
     override val description = "Spisset migrering for person som gikk i loop og dupliserte innteksthistorikken sin"
 
 
