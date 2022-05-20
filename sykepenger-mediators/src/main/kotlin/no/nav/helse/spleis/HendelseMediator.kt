@@ -3,6 +3,7 @@ package no.nav.helse.spleis
 import no.nav.helse.hendelser.Avstemming
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingReplay
+import no.nav.helse.hendelser.Migrate
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrInntekt
 import no.nav.helse.hendelser.OverstyrTidslinje
@@ -38,6 +39,7 @@ import no.nav.helse.spleis.meldinger.model.EtterbetalingMessage
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingReplayMessage
+import no.nav.helse.spleis.meldinger.model.MigrateMessage
 import no.nav.helse.spleis.meldinger.model.NySøknadMessage
 import no.nav.helse.spleis.meldinger.model.OverstyrArbeidsforholdMessage
 import no.nav.helse.spleis.meldinger.model.OverstyrInntektMessage
@@ -211,6 +213,10 @@ internal class HendelseMediator(
         }
     }
 
+    override fun behandle(message: MigrateMessage, migrate: Migrate, context: MessageContext) {
+        håndter(message, migrate, context) { /* intentionally left blank */ }
+    }
+
     override fun behandle(message: OverstyrTidslinjeMessage, overstyrTidslinje: OverstyrTidslinje, context: MessageContext) {
         håndter(message, overstyrTidslinje, context) { person ->
             HendelseProbe.onOverstyrTidslinje()
@@ -297,6 +303,7 @@ internal interface IHendelseMediator {
     fun behandle(message: SimuleringMessage, simulering: Simulering, context: MessageContext)
     fun behandle(message: AnnulleringMessage, annullerUtbetaling: AnnullerUtbetaling, context: MessageContext)
     fun behandle(message: AvstemmingMessage, avstemming: Avstemming, context: MessageContext)
+    fun behandle(message: MigrateMessage, migrate: Migrate, context: MessageContext)
     fun behandle(message: OverstyrTidslinjeMessage, overstyrTidslinje: OverstyrTidslinje, context: MessageContext)
     fun behandle(message: OverstyrInntektMessage, overstyrInntekt: OverstyrInntekt, context: MessageContext)
     fun behandle(message: OverstyrArbeidsforholdMessage, overstyrArbeidsforhold: OverstyrArbeidsforhold, context: MessageContext)

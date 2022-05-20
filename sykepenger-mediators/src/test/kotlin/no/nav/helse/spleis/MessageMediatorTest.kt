@@ -141,6 +141,12 @@ internal class MessageMediatorTest {
     }
 
     @Test
+    fun migrate() {
+        testRapid.sendTestMessage(meldingsfabrikk.lagMigrate())
+        assertTrue(hendelseMediator.lestMigrate)
+    }
+
+    @Test
     fun `Håndterer overstyr_inntekt`() {
         testRapid.sendTestMessage(meldingsfabrikk.lagOverstyringInntekt(30000.0, 1.januar))
         assertTrue(hendelseMediator.lestOverstyrInntekt)

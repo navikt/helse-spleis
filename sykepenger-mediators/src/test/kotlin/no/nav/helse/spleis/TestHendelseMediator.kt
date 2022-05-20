@@ -3,6 +3,7 @@ package no.nav.helse.spleis
 import no.nav.helse.hendelser.Avstemming
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingReplay
+import no.nav.helse.hendelser.Migrate
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrInntekt
 import no.nav.helse.hendelser.OverstyrTidslinje
@@ -29,6 +30,7 @@ import no.nav.helse.spleis.meldinger.model.EtterbetalingMessage
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingMessage
 import no.nav.helse.spleis.meldinger.model.InntektsmeldingReplayMessage
+import no.nav.helse.spleis.meldinger.model.MigrateMessage
 import no.nav.helse.spleis.meldinger.model.NySøknadMessage
 import no.nav.helse.spleis.meldinger.model.OverstyrArbeidsforholdMessage
 import no.nav.helse.spleis.meldinger.model.OverstyrInntektMessage
@@ -87,6 +89,8 @@ internal class TestHendelseMediator : IHendelseMediator {
     internal var lestAnnullerUtbetaling = false
         private set
     internal var lestAvstemming = false
+        private set
+    internal var lestMigrate = false
         private set
     internal var lestOverstyrTidslinje = false
         private set
@@ -199,6 +203,10 @@ internal class TestHendelseMediator : IHendelseMediator {
 
     override fun behandle(message: AvstemmingMessage, avstemming: Avstemming, context: MessageContext) {
         lestAvstemming = true
+    }
+
+    override fun behandle(message: MigrateMessage, migrate: Migrate, context: MessageContext) {
+        lestMigrate = true
     }
 
     override fun behandle(message: OverstyrTidslinjeMessage, overstyrTidslinje: OverstyrTidslinje, context: MessageContext) {

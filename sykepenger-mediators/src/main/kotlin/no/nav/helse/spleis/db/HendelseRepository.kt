@@ -4,17 +4,56 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import java.util.UUID
+import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.Fødselsnummer
 import no.nav.helse.serde.migration.Json
 import no.nav.helse.serde.migration.Navn
 import no.nav.helse.spleis.PostgresProbe
-import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.*
-import no.nav.helse.spleis.meldinger.model.*
+import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.GRUNNBELØPSREGULERING
+import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.INNTEKTSMELDING
+import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.KANSELLER_UTBETALING
+import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.NY_SØKNAD
+import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.OVERSTYRARBEIDSFORHOLD
+import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.OVERSTYRINNTEKT
+import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.OVERSTYRTIDSLINJE
+import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.SENDT_SØKNAD_ARBEIDSGIVER
+import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.SENDT_SØKNAD_NAV
+import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.SIMULERING
+import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.UTBETALING
+import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.UTBETALINGPÅMINNELSE
+import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.UTBETALINGSGODKJENNING
+import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.UTBETALINGSGRUNNLAG
+import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.UTBETALING_OVERFØRT
+import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.VILKÅRSGRUNNLAG
+import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.YTELSER
+import no.nav.helse.spleis.meldinger.model.AnnulleringMessage
+import no.nav.helse.spleis.meldinger.model.AvstemmingMessage
+import no.nav.helse.spleis.meldinger.model.EtterbetalingMessage
+import no.nav.helse.spleis.meldinger.model.HendelseMessage
+import no.nav.helse.spleis.meldinger.model.InntektsmeldingMessage
+import no.nav.helse.spleis.meldinger.model.MigrateMessage
+import no.nav.helse.spleis.meldinger.model.NySøknadMessage
+import no.nav.helse.spleis.meldinger.model.OverstyrArbeidsforholdMessage
+import no.nav.helse.spleis.meldinger.model.OverstyrInntektMessage
+import no.nav.helse.spleis.meldinger.model.OverstyrTidslinjeMessage
+import no.nav.helse.spleis.meldinger.model.PersonPåminnelseMessage
+import no.nav.helse.spleis.meldinger.model.PåminnelseMessage
+import no.nav.helse.spleis.meldinger.model.SendtSøknadArbeidsgiverMessage
+import no.nav.helse.spleis.meldinger.model.SendtSøknadNavMessage
+import no.nav.helse.spleis.meldinger.model.SimuleringMessage
+import no.nav.helse.spleis.meldinger.model.UtbetalingMessage
+import no.nav.helse.spleis.meldinger.model.UtbetalingOverførtMessage
+import no.nav.helse.spleis.meldinger.model.UtbetalingpåminnelseMessage
+import no.nav.helse.spleis.meldinger.model.UtbetalingsgodkjenningMessage
+import no.nav.helse.spleis.meldinger.model.UtbetalingsgrunnlagMessage
+import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkForFeriepengerMessage
+import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkMessage
+import no.nav.helse.spleis.meldinger.model.VilkårsgrunnlagMessage
+import no.nav.helse.spleis.meldinger.model.YtelserMessage
 import org.slf4j.LoggerFactory
-import java.util.*
-import javax.sql.DataSource
 
 internal class HendelseRepository(private val dataSource: DataSource) {
 
@@ -108,6 +147,7 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         is OverstyrArbeidsforholdMessage -> OVERSTYRARBEIDSFORHOLD
         is UtbetalingsgrunnlagMessage -> UTBETALINGSGRUNNLAG
         is UtbetalingshistorikkForFeriepengerMessage -> null //TODO: Skal lagres som UTBETALINGSHISTORIKK_FOR_FERIEPENGER
+        is MigrateMessage,
         is AvstemmingMessage,
         is PersonPåminnelseMessage,
         is PåminnelseMessage,

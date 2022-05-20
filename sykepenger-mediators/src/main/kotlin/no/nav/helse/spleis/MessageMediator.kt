@@ -12,6 +12,7 @@ import no.nav.helse.spleis.meldinger.EtterbetalingerRiver
 import no.nav.helse.spleis.meldinger.EtterbetalingerRiverMedHistorikk
 import no.nav.helse.spleis.meldinger.InntektsmeldingerReplayRiver
 import no.nav.helse.spleis.meldinger.InntektsmeldingerRiver
+import no.nav.helse.spleis.meldinger.MigrateRiver
 import no.nav.helse.spleis.meldinger.NyeSøknaderRiver
 import no.nav.helse.spleis.meldinger.OverstyrArbeidsforholdRiver
 import no.nav.helse.spleis.meldinger.OverstyrInntektRiver
@@ -65,6 +66,7 @@ internal class MessageMediator(
             SimuleringerRiver(it, this)
             AnnullerUtbetalingerRiver(it, this)
             PersonAvstemmingRiver(it, this)
+            MigrateRiver(it, this)
             OverstyrTidlinjeRiver(it, this)
             EtterbetalingerRiver(it, this)
             EtterbetalingerRiverMedHistorikk(it, this)

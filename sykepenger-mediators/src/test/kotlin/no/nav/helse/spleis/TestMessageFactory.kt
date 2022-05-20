@@ -830,6 +830,13 @@ internal class TestMessageFactory(
         )
     )
 
+    fun lagMigrate() = nyHendelse(
+        "json_migrate", mapOf(
+            "fødselsnummer" to fødselsnummer,
+            "aktørId" to aktørId
+        )
+    )
+
     fun lagOverstyringTidslinje(dager: List<ManuellOverskrivingDag>): Pair<String, String> {
         return nyHendelse(
             "overstyr_tidslinje", mutableMapOf(
