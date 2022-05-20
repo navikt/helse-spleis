@@ -1,11 +1,5 @@
 package no.nav.helse.økonomi
 
-import java.time.LocalDateTime
-import java.util.UUID
-import no.nav.helse.hendelser.Dagtype
-import no.nav.helse.hendelser.ManuellOverskrivingDag
-import no.nav.helse.hendelser.OverstyrTidslinje
-import no.nav.helse.januar
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.fraRatio
@@ -47,12 +41,6 @@ internal class ProsentdelTest {
         assertEquals(fraRatio("1.0"), 0.prosent.not())
         assertEquals(fraRatio("1"), 100.prosent)
         assertEquals(fraRatio("0.0"), 100.prosent.not())
-
-
-        val a = OverstyrTidslinje(UUID.randomUUID(), "fnr", "katør", "Oegnr", listOf(
-            ManuellOverskrivingDag(1.januar, Dagtype.Sykedag, 55)
-        ), LocalDateTime.now()).sykdomstidslinje()
-        val b = a
     }
 
     private fun assertEquals(n: Int, prosentdel: Prosentdel) {
