@@ -28,13 +28,10 @@ import no.nav.helse.person.PersonHendelse
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.serde.migration.JsonMigrationObserver
 import no.nav.helse.somFødselsnummer
-import no.nav.helse.spleis.db.EndretVedtaksperiodeDao
 import no.nav.helse.spleis.db.HendelseRepository
 import no.nav.helse.spleis.db.LagrePersonDao
 import no.nav.helse.spleis.db.PersonRepository
-import no.nav.helse.spleis.db.SlettetVedtaksperiodeDao
 import no.nav.helse.spleis.meldinger.model.AnnulleringMessage
 import no.nav.helse.spleis.meldinger.model.AvstemmingMessage
 import no.nav.helse.spleis.meldinger.model.EtterbetalingMessage
@@ -69,8 +66,6 @@ internal class HendelseMediator(
     private val personRepository: PersonRepository,
     private val hendelseRepository: HendelseRepository,
     private val lagrePersonDao: LagrePersonDao,
-    private val slettetVedtaksperiodeDao: SlettetVedtaksperiodeDao,
-    private val endretVedtaksperiodeDao: EndretVedtaksperiodeDao,
     private val versjonAvKode: String
 ) : IHendelseMediator {
     private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
@@ -250,8 +245,7 @@ internal class HendelseMediator(
         handler: (Person) -> Unit
     ) {
         val jurist = MaskinellJurist()
-        val observer = MigrationObserver(slettetVedtaksperiodeDao, endretVedtaksperiodeDao, hendelse)
-        val person = person(hendelse, jurist, observer)
+        val person = person(hendelse, jurist)
         val personMediator = PersonMediator(person, message, hendelse, hendelseRepository)
         val subsumsjonMediator = SubsumsjonMediator(jurist, hendelse.fødselsnummer(), message, versjonAvKode)
         person.addObserver(VedtaksperiodeProbe)
@@ -259,13 +253,11 @@ internal class HendelseMediator(
         finalize(context, personMediator, subsumsjonMediator, hendelse)
     }
 
-    private fun person(hendelse: PersonHendelse, jurist: MaskinellJurist, observer: JsonMigrationObserver): Person {
+    private fun person(hendelse: PersonHendelse, jurist: MaskinellJurist): Person {
         return personRepository.hentPerson(hendelse.fødselsnummer().somFødselsnummer())
             ?.deserialize(
-                jurist = jurist,
-                meldingerSupplier = { hendelseRepository.hentAlleHendelser(hendelse.fødselsnummer().somFødselsnummer()) },
-                observer = observer
-            )
+                jurist = jurist
+            ) { hendelseRepository.hentAlleHendelser(hendelse.fødselsnummer().somFødselsnummer()) }
             ?: Person(aktørId = hendelse.aktørId(), fødselsnummer = hendelse.fødselsnummer().somFødselsnummer(), jurist = jurist)
     }
 

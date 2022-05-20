@@ -33,9 +33,8 @@ internal fun SchemaBuilder.personSchema(personDao: PersonDao, hendelseDao: Hende
         resolver { fnr: String ->
             personDao.hentPersonFraFnr(fnr.toLong())
                 ?.deserialize(
-                    jurist = MaskinellJurist(),
-                    meldingerSupplier = { hendelseDao.hentAlleHendelser(fnr.toLong()) }
-                )
+                    jurist = MaskinellJurist()
+                ) { hendelseDao.hentAlleHendelser(fnr.toLong()) }
                 ?.let { håndterPerson(it, hendelseDao) }
                 ?.let { person ->
                     GraphQLPerson(

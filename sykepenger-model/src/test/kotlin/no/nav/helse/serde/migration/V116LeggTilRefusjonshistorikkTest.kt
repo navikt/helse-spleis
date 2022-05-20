@@ -125,7 +125,10 @@ internal class V116LeggTilRefusjonshistorikkTest {
 
     private fun toNode(json: String) = serdeObjectMapper.readTree(json)
 
-    private fun migrer(json: String, meldingSupplier: MeldingerSupplier) = listOf(V116LeggTilRefusjonshistorikk()).migrate(toNode(json), meldingSupplier)
+    private fun migrer(json: String, meldingSupplier: MeldingerSupplier) = listOf(V116LeggTilRefusjonshistorikk()).migrate(
+        toNode(json),
+        meldingSupplier
+    )
 
 
     private fun inntektsmelding(

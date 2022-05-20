@@ -13,7 +13,9 @@ internal class V5BegrensGradTilMellom0Og100Test {
     @Test
     fun `endre grad -400 til 0`() {
         val json = objectMapper.readTree(personJson)
-        listOf(V1EndreKunArbeidsgiverSykedagEnum(), V4LeggTilNySykdomstidslinje(), V5BegrensGradTilMellom0Og100()).migrate(json)
+        listOf(V1EndreKunArbeidsgiverSykedagEnum(), V4LeggTilNySykdomstidslinje(), V5BegrensGradTilMellom0Og100()).migrate(
+            json
+        )
         val migratedJson = objectMapper.readTree(json.toString())
 
         migratedJson.path("arbeidsgivere")
@@ -31,7 +33,9 @@ internal class V5BegrensGradTilMellom0Og100Test {
     @Test
     fun `endre grad 300 til 100`() {
         val json = objectMapper.readTree(personJson)
-        listOf(V1EndreKunArbeidsgiverSykedagEnum(), V4LeggTilNySykdomstidslinje(), V5BegrensGradTilMellom0Og100()).migrate(json)
+        listOf(V1EndreKunArbeidsgiverSykedagEnum(), V4LeggTilNySykdomstidslinje(), V5BegrensGradTilMellom0Og100()).migrate(
+            json
+        )
         val migratedJson = objectMapper.readTree(json.toString())
 
         migratedJson.path("arbeidsgivere")
@@ -48,7 +52,9 @@ internal class V5BegrensGradTilMellom0Og100Test {
     @Test
     fun `grad mellom 0 og 100 endres ikke`() {
         val json = objectMapper.readTree(personJson)
-        listOf(V1EndreKunArbeidsgiverSykedagEnum(), V4LeggTilNySykdomstidslinje(), V5BegrensGradTilMellom0Og100()).migrate(json)
+        listOf(V1EndreKunArbeidsgiverSykedagEnum(), V4LeggTilNySykdomstidslinje(), V5BegrensGradTilMellom0Og100()).migrate(
+            json
+        )
         val migratedJson = objectMapper.readTree(json.toString())
 
         migratedJson.path("arbeidsgivere")

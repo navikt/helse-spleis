@@ -3,9 +3,7 @@ package no.nav.helse.serde.migration
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
-import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments
-import no.nav.helse.Toggle
 import org.slf4j.LoggerFactory
 
 internal class V150MigrerVedtaksperioderTilNyTilstandsflyt : JsonMigration(version = 150) {
@@ -35,36 +33,31 @@ internal class V150MigrerVedtaksperioderTilNyTilstandsflyt : JsonMigration(versi
         "MOTTATT_SYKMELDING_UFERDIG_GAP"
     )
 
-    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {}
-
     override fun doMigration(
         jsonNode: ObjectNode,
-        meldingerSupplier: MeldingerSupplier,
-        observer: JsonMigrationObserver
+        meldingerSupplier: MeldingerSupplier
     ) {
         val fødselsnummer = jsonNode["fødselsnummer"].asText()
         jsonNode["arbeidsgivere"]
             .forEach { arbeidsgiverNode ->
                 val vedtaksperioder = arbeidsgiverNode["vedtaksperioder"] as ArrayNode
-                vedtaksperioder.slettIkkeMottattSøknadTilstander(observer, fødselsnummer)
+                vedtaksperioder.slettIkkeMottattSøknadTilstander(fødselsnummer)
                 vedtaksperioder.oppdaterTilstander(
                     fødselsnummer = fødselsnummer,
-                    forkastet = false,
-                    observer = observer
+                    forkastet = false
                 )
 
                 val forkastedeVedtaksperioder = arbeidsgiverNode["forkastede"]
                     .map { forkastetVedtaksperiodeNode -> forkastetVedtaksperiodeNode["vedtaksperiode"] }
                 forkastedeVedtaksperioder.oppdaterTilstander(
                     fødselsnummer = fødselsnummer,
-                    forkastet = true,
-                    observer = observer
+                    forkastet = true
                 )
                 forkastedeVedtaksperioder.oppdaterForkastedeIkkeMottattSøknadTilstander(fødselsnummer)
             }
     }
 
-    private fun ArrayNode.slettIkkeMottattSøknadTilstander(observer: JsonMigrationObserver, fødselsnummer: String) {
+    private fun ArrayNode.slettIkkeMottattSøknadTilstander(fødselsnummer: String) {
         val iterator = iterator()
         while (iterator.hasNext()) {
             val vedtaksperiodeNode = iterator.next()
@@ -78,15 +71,13 @@ internal class V150MigrerVedtaksperioderTilNyTilstandsflyt : JsonMigration(versi
                     StructuredArguments.keyValue("vedtaksperiodeId", vedtaksperiodeId),
                     StructuredArguments.keyValue("gammelTilstand", gammelTilstand)
                 )
-                observer.vedtaksperiodeSlettet(UUID.fromString(vedtaksperiodeId), vedtaksperiodeNode)
             }
         }
     }
 
     private fun Iterable<JsonNode>.oppdaterTilstander(
         fødselsnummer: String,
-        forkastet: Boolean,
-        observer: JsonMigrationObserver
+        forkastet: Boolean
     ) = forEach { vedtaksperiodeNode ->
         val vedtaksperiode = vedtaksperiodeNode as ObjectNode
         val gammelTilstand = vedtaksperiodeNode.tilstand()
@@ -106,9 +97,6 @@ internal class V150MigrerVedtaksperioderTilNyTilstandsflyt : JsonMigration(versi
             StructuredArguments.keyValue("forkastet", forkastet)
         )
         vedtaksperiode.put("tilstand", nyTilstand)
-        if (!forkastet) {
-            observer.vedtaksperiodeEndret(UUID.fromString(vedtaksperiodeId), gammelTilstand, nyTilstand)
-        }
     }
 
     private fun Iterable<JsonNode>.oppdaterForkastedeIkkeMottattSøknadTilstander(fødselsnummer: String) =

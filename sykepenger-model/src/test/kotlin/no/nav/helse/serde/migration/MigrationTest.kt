@@ -1,7 +1,6 @@
 package no.nav.helse.serde.migration
 
 import com.fasterxml.jackson.databind.JsonNode
-import java.util.UUID
 import no.nav.helse.readResource
 import no.nav.helse.serde.serdeObjectMapper
 import org.skyscreamer.jsonassert.JSONAssert
@@ -11,13 +10,12 @@ internal abstract class MigrationTest(private val migration: () -> JsonMigration
 
     internal constructor(migration: JsonMigration) : this({ migration })
 
-    internal val observatør = TestJsonMigrationObserver()
     open fun meldingerSupplier() = MeldingerSupplier.empty
 
     protected fun toNode(json: String): JsonNode = serdeObjectMapper.readTree(json)
     protected fun migrer(json: String): JsonNode {
         val migers = migration()
-        return listOf(migers).migrate(toNode(json), meldingerSupplier(), observatør)
+        return listOf(migers).migrate(toNode(json), meldingerSupplier())
     }
 
     protected fun assertMigration(
@@ -41,21 +39,5 @@ internal abstract class MigrationTest(private val migration: () -> JsonMigration
             migrert.toString(),
             jsonCompareMode
         )
-    }
-
-    internal class TestJsonMigrationObserver: JsonMigrationObserver {
-        val slettedeVedtaksperioder = mutableListOf<Pair<UUID, JsonNode>>()
-        val endredeVedtaksperioder = mutableListOf<Map<String, String>>()
-        override fun vedtaksperiodeSlettet(vedtaksperiodeId: UUID, vedtaksperiodeNode: JsonNode) {
-            slettedeVedtaksperioder.add(vedtaksperiodeId to vedtaksperiodeNode)
-        }
-
-        override fun vedtaksperiodeEndret(vedtaksperiodeId: UUID, gammelTilstand: String, nyTilstand: String) {
-            endredeVedtaksperioder.add(mapOf(
-                "id" to vedtaksperiodeId.toString(),
-                "gammelTilstand" to gammelTilstand,
-                "nyTilstand" to nyTilstand
-            ))
-        }
     }
 }

@@ -17,25 +17,14 @@ typealias Json = String
 
 internal fun List<JsonMigration>.migrate(
     jsonNode: JsonNode,
-    meldingerSupplier: MeldingerSupplier = MeldingerSupplier.empty,
-    observer: JsonMigrationObserver = JsonMigrationObserver.Void
+    meldingerSupplier: MeldingerSupplier = MeldingerSupplier.empty
 ) =
-    JsonMigration.migrate(this, jsonNode, MemoizedMeldingerSupplier(meldingerSupplier), observer)
+    JsonMigration.migrate(this, jsonNode, MemoizedMeldingerSupplier(meldingerSupplier))
 
 private class MemoizedMeldingerSupplier(private val supplier: MeldingerSupplier): MeldingerSupplier {
     private val meldinger: Map<UUID, Pair<Navn, Json>> by lazy { supplier.hentMeldinger() }
 
     override fun hentMeldinger(): Map<UUID, Pair<Navn, Json>> = meldinger
-}
-
-interface JsonMigrationObserver {
-    object Void : JsonMigrationObserver {
-        override fun vedtaksperiodeSlettet(vedtaksperiodeId: UUID, vedtaksperiodeNode: JsonNode) {}
-        override fun vedtaksperiodeEndret(vedtaksperiodeId: UUID,  gammelTilstand: String, nyTilstand: String) {}
-
-    }
-    fun vedtaksperiodeSlettet(vedtaksperiodeId: UUID, vedtaksperiodeNode: JsonNode)
-    fun vedtaksperiodeEndret(vedtaksperiodeId: UUID,  gammelTilstand: String, nyTilstand: String)
 }
 
 // Implements GoF Command Pattern to perform migration
@@ -48,13 +37,12 @@ internal abstract class JsonMigration(private val version: Int) {
         internal fun migrate(
             migrations: List<JsonMigration>,
             jsonNode: JsonNode,
-            supplier: MeldingerSupplier,
-            observer: JsonMigrationObserver
+            supplier: MeldingerSupplier
         ) = jsonNode.apply {
             require(this is ObjectNode) { "Kan kun migrere ObjectNodes" }
             val sortedMigrations = migrations.sortedBy { it.version }
             require(sortedMigrations.windowed(2).none { (a, b) -> a.version == b.version }) { "Versjoner må være unike" }
-            sortedMigrations.forEach { it.migrate(this, supplier, observer) }
+            sortedMigrations.forEach { it.migrate(this, supplier) }
         }
 
         internal fun medSkjemaversjon(migrations: List<JsonMigration>, jsonNode: JsonNode): ObjectNode =
@@ -73,20 +61,13 @@ internal abstract class JsonMigration(private val version: Int) {
 
     protected abstract val description: String
 
-    private fun migrate(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier, observer: JsonMigrationObserver) {
+    private fun migrate(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         if (!shouldMigrate(jsonNode)) return
-        doMigration(jsonNode, meldingerSupplier, observer)
+        doMigration(jsonNode, meldingerSupplier)
         after(jsonNode)
     }
 
     protected abstract fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier)
-    protected open fun doMigration(
-        jsonNode: ObjectNode,
-        meldingerSupplier: MeldingerSupplier,
-        observer: JsonMigrationObserver
-    ) {
-        doMigration(jsonNode, meldingerSupplier)
-    }
 
     protected open fun shouldMigrate(jsonNode: JsonNode) =
         skjemaVersjon(jsonNode) < version

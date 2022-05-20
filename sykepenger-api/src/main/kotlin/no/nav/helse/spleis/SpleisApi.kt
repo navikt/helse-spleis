@@ -65,8 +65,8 @@ internal fun Application.spesialistApi(dataSource: DataSource, authProviderName:
                             ?.let {
                                 ApiMetrikker.målDeserialisering {
                                     it.deserialize(
-                                        jurist = MaskinellJurist(),
-                                        meldingerSupplier = { hendelseDao.hentAlleHendelser(fnr) })
+                                        jurist = MaskinellJurist()
+                                    ) { hendelseDao.hentAlleHendelser(fnr) }
                                 }
                             }
                             ?.let { ApiMetrikker.målByggSnapshot { håndterPerson(it, hendelseDao) } }
@@ -95,9 +95,8 @@ internal fun Application.spannerApi(dataSource: DataSource, authProviderName: St
                     val person = personDao.hentPersonFraFnr(fnr) ?: throw NotFoundException("Kunne ikke finne person for fødselsnummer")
                     call.respond(
                         person.deserialize(
-                            jurist = MaskinellJurist(),
-                            meldingerSupplier = { hendelseDao.hentAlleHendelser(fnr) }
-                        ).serialize().json
+                            jurist = MaskinellJurist()
+                        ) { hendelseDao.hentAlleHendelser(fnr) }.serialize().json
                     )
                 }
             }
@@ -136,8 +135,8 @@ internal fun Application.sporingApi(dataSource: DataSource, authProviderName: St
                     call.respond(
                         serializePersonForSporing(
                             person.deserialize(
-                                jurist = MaskinellJurist(),
-                                meldingerSupplier = { hendelseDao.hentAlleHendelser(fnr) })
+                                jurist = MaskinellJurist()
+                            ) { hendelseDao.hentAlleHendelser(fnr) }
                         )
                     )
                 }
