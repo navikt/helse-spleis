@@ -1,0 +1,149 @@
+{
+  "arbeidsgivere": [
+    {
+      "sykdomshistorikk": [
+        {
+          "hendelseSykdomstidslinje": {
+            "dager": [
+              {
+                "grad": 20.0
+              },
+              {
+                "grad": 56.0
+              },
+              {
+                "grad": 55.0
+              },
+              {
+                "grad": 55.0
+              }
+            ]
+          },
+          "beregnetSykdomstidslinje": {
+            "dager": [
+              {
+                "grad": 100.0
+              },
+              {
+                "grad": 100.0
+              },
+              {
+                "grad": 20.0
+              },
+              {
+                "grad": 20.0
+              }
+            ]
+          }
+        },
+        {
+          "hendelseSykdomstidslinje": {
+            "dager": [
+              {
+                "grad": 20.0
+              },
+              {
+                "grad": 55.0
+              },
+              {
+                "grad": 55.0
+              },
+              {
+                "grad": 55.0
+              }
+            ]
+          },
+          "beregnetSykdomstidslinje": {
+            "dager": [
+              {
+                "grad": 100.0
+              },
+              {
+                "grad": 100.0
+              },
+              {
+                "grad": 20.0
+              },
+              {
+                "grad": 20.0
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "sykdomshistorikk": [
+        {
+          "hendelseSykdomstidslinje": {
+            "dager": [
+              {
+                "grad": 20.0
+              },
+              {
+                "grad": 55.0
+              },
+              {
+                "grad": 55.0
+              },
+              {
+                "grad": 55.0
+              }
+            ]
+          },
+          "beregnetSykdomstidslinje": {
+            "dager": [
+              {
+                "grad": 100.0
+              },
+              {
+                "grad": 100.0
+              },
+              {
+                "grad": 20.0
+              },
+              {
+                "grad": 20.0
+              }
+            ]
+          }
+        },
+        {
+          "hendelseSykdomstidslinje": {
+            "dager": [
+              {
+                "grad": 20.0
+              },
+              {
+                "grad": 55.0
+              },
+              {
+                "grad": 55.0
+              },
+              {
+                "grad": 55.0
+              }
+            ]
+          },
+          "beregnetSykdomstidslinje": {
+            "dager": [
+              {
+                "grad": 100.0
+              },
+              {
+                "grad": 100.0
+              },
+              {
+                "grad": 20.0
+              },
+              {
+                "grad": 20.0
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "skjemaVersjon": 159
+}
