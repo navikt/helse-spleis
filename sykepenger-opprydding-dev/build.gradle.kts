@@ -1,6 +1,6 @@
 val testcontainersVersion = "1.17.1"
 val cloudSqlVersion = "1.4.4"
-val rapidsAndRiversVersion = "2022.04.21-09.34.08966130226f"
+val rapidsAndRiversVersion = "2022.05.19-14.18.e3dc97b518d8"
 val postgresqlVersion = "42.3.3"
 
 val mainClass = "no.nav.helse.AppKt"

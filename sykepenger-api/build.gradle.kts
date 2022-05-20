@@ -1,5 +1,5 @@
 val micrometerRegistryPrometheusVersion = "1.7.5"
-val ktorVersion = "2.0.0"
+val ktorVersion = "2.0.1"
 val wireMockVersion = "2.31.0"
 val cloudSqlVersion = "1.4.4"
 val awaitilityVersion = "4.1.1"
