@@ -131,10 +131,21 @@
           "sykdomstidslinje": {
             "låstePerioder": [],
             "periode": {
-              "fom": "2018-02-01",
+              "fom": "2018-01-27",
               "tom": "2018-02-14"
             },
             "dager": [
+              {
+                "fom": "2018-01-27",
+                "tom": "2018-01-31",
+                "type": "SYKEDAG",
+                "kilde": {
+                  "type": "Sykmelding",
+                  "id": "96ef5317-6299-429b-affd-29372618d175",
+                  "tidsstempel": "2018-01-03T00:00:00"
+                },
+                "grad": 100.0
+              },
               {
                 "fom": "2018-02-01",
                 "tom": "2018-02-14",

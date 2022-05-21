@@ -45,17 +45,27 @@ internal class V162ManglerDagerPåSykdomstidslinjen: JsonMigration(version = 162
 
     private fun trimVedtaksperiodeor(fødselsnummer: String, aktørId: String, organisasjonsnummer: String, arbeidsgiver: ObjectNode) {
         arbeidsgiver["vedtaksperioder"].forEach { vedtaksperiode ->
+            (vedtaksperiode as ObjectNode)
             val periode = vedtaksperiode.periode()
-            val vedtaksperiodetidslinje = vedtaksperiode["sykdomstidslinje"]
+            val sykdomstidslinje = vedtaksperiode["sykdomstidslinje"]
                 .path("dager")
                 .filterNot { it["kilde"]["type"].asText() == "Sykmelding" }
-                .flatMap { it.dagPeriode() }
 
+            (vedtaksperiode.path("sykdomstidslinje") as ObjectNode)
+                .replace("dager", serdeObjectMapper.createArrayNode().addAll(sykdomstidslinje))
+
+            val vedtaksperiodetidslinje = sykdomstidslinje.flatMap { it.dagPeriode() }
             val sykdomstidslinjeperiode = vedtaksperiodetidslinje.first() til vedtaksperiodetidslinje.last()
+
             if (sykdomstidslinjeperiode != periode) {
                 vedtaksperiode as ObjectNode
                 vedtaksperiode.put("fom", sykdomstidslinjeperiode.start.toString())
                 vedtaksperiode.put("tom", sykdomstidslinjeperiode.endInclusive.toString())
+
+                (vedtaksperiode.path("sykdomstidslinje").path("periode") as ObjectNode).also {
+                    it.put("fom", sykdomstidslinjeperiode.start.toString())
+                    it.put("tom", sykdomstidslinjeperiode.endInclusive.toString())
+                }
 
                 sikkerlogg.info(
                     "Trimmet perioden for {}, {}, {}, {}, {}",
