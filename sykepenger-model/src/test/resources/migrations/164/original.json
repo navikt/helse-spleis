@@ -165,38 +165,8 @@
           "tilstand": "AVSLUTTET"
         }
       ],
-      "forkastede": [
-        {
-          "årsak": "IKKE_STØTTET",
-          "vedtaksperiode": {
-            "sykdomstidslinje": {
-              "låstePerioder": [],
-              "periode": {
-                "fom": "2018-01-03",
-                "tom": "2018-01-26"
-              },
-              "dager": [
-                {
-                  "fom": "2018-01-03",
-                  "tom": "2018-01-26",
-                  "type": "SYKEDAG",
-                  "kilde": {
-                    "type": "Sykmelding",
-                    "id": "96ef5317-6299-429b-affd-29372618d175",
-                    "tidsstempel": "2018-01-03T00:00:00"
-                  },
-                  "grad": 100.0
-                }
-              ]
-            },
-            "id": "321c2677-8d31-4799-8627-1d38eb48387f",
-            "fom": "2018-01-03",
-            "tom": "2018-01-26",
-            "tilstand": "AVSLUTTET"
-          }
-        }
-      ]
+      "forkastede": []
     }
   ],
-  "skjemaVersjon": 162
+  "skjemaVersjon": 163
 }
