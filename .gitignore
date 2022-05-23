@@ -9,3 +9,4 @@ gradle.properties
 ~$Utbetaling.xlsx
 testressurser/
 *.dtmp
+**/*noCommit*
