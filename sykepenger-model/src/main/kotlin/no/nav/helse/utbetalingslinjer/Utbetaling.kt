@@ -28,6 +28,7 @@ import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Fagområde.Sykepenger
 import no.nav.helse.utbetalingslinjer.Fagområde.SykepengerRefusjon
+import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -141,6 +142,10 @@ internal class Utbetaling private constructor(
         return periode.overlapperMed(other.oppdaterFom(other.start.minusDays(16)))
     }
 
+    internal fun måReberegnes(): Boolean {
+        return tidsstempel in LocalDateTime.of(2022, 5, 20, 8, 0, 0)..LocalDateTime.of(2022, 5, 23, 9, 0, 0)
+                && utbetalingstidslinje.subset(periode).any { it.erAvvistMed(Begrunnelse.MinimumSykdomsgrad) != null }
+    }
 
     // this kan revurdere other gitt at fagsystemId == other.fagsystemId,
     // og at this er lik den siste aktive utbetalingen for fagsystemIden
