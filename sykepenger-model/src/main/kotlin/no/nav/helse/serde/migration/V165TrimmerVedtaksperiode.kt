@@ -1,7 +1,6 @@
 package no.nav.helse.serde.migration
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import java.time.LocalDate
 import net.logstash.logback.argument.StructuredArguments.keyValue
@@ -10,7 +9,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.serde.serdeObjectMapper
 import org.slf4j.LoggerFactory
 
-internal class V164ManglerDagerPåSykdomstidslinjen: JsonMigration(version = 164) {
+internal class V165TrimmerVedtaksperiode: JsonMigration(version = 165) {
     override val description = "Rydder opp i vedtaksperioder som inneholder dager som ikke er på sykdomstidslinjen"
 
     override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
@@ -21,19 +20,11 @@ internal class V164ManglerDagerPåSykdomstidslinjen: JsonMigration(version = 164
             .forEach { arbeidsgiver ->
                 arbeidsgiver as ObjectNode
                 val organisasjonsnummer = arbeidsgiver.path("organisasjonsnummer").asText()
-                val forkastede = mutableListOf<JsonNode>()
-                trimVedtaksperiodeor(fødselsnummer, aktørId, organisasjonsnummer, arbeidsgiver)
-                (arbeidsgiver.path("forkastede") as ArrayNode)
-                    .addAll(forkastede.map { vedtaksperiode ->
-                        serdeObjectMapper.createObjectNode()
-                            .put("årsak", "IKKE_STØTTET")
-                            .set("vedtaksperiode", vedtaksperiode)
-                    })
-
+                trimVedtaksperioder(fødselsnummer, aktørId, organisasjonsnummer, arbeidsgiver)
             }
     }
 
-    private fun trimVedtaksperiodeor(fødselsnummer: String, aktørId: String, organisasjonsnummer: String, arbeidsgiver: ObjectNode) {
+    private fun trimVedtaksperioder(fødselsnummer: String, aktørId: String, organisasjonsnummer: String, arbeidsgiver: ObjectNode) {
         arbeidsgiver["vedtaksperioder"].forEach { vedtaksperiode ->
             (vedtaksperiode as ObjectNode)
             val periode = vedtaksperiode.periode()
@@ -47,15 +38,15 @@ internal class V164ManglerDagerPåSykdomstidslinjen: JsonMigration(version = 164
             val vedtaksperiodetidslinje = sykdomstidslinje.flatMap { it.dagPeriode() }
             val sykdomstidslinjeperiode = vedtaksperiodetidslinje.first() til vedtaksperiodetidslinje.last()
 
+            (vedtaksperiode.path("sykdomstidslinje").path("periode") as ObjectNode).also {
+                it.put("fom", sykdomstidslinjeperiode.start.toString())
+                it.put("tom", sykdomstidslinjeperiode.endInclusive.toString())
+            }
+
             if (sykdomstidslinjeperiode != periode) {
                 vedtaksperiode as ObjectNode
                 vedtaksperiode.put("fom", sykdomstidslinjeperiode.start.toString())
                 vedtaksperiode.put("tom", sykdomstidslinjeperiode.endInclusive.toString())
-
-                (vedtaksperiode.path("sykdomstidslinje").path("periode") as ObjectNode).also {
-                    it.put("fom", sykdomstidslinjeperiode.start.toString())
-                    it.put("tom", sykdomstidslinjeperiode.endInclusive.toString())
-                }
 
                 sikkerlogg.info(
                     "Trimmet perioden for {}, {}, {}, {}, {}",

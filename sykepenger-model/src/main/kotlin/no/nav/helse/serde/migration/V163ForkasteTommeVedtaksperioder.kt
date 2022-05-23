@@ -9,8 +9,8 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.serde.serdeObjectMapper
 import org.slf4j.LoggerFactory
 
-internal class V163ForkasteForkastedeVedtaksperioder: JsonMigration(version = 163) {
-    override val description = "Rydder opp i vedtaksperioder som har blitt forkastet tidligere"
+internal class V163ForkasteTommeVedtaksperioder: JsonMigration(version = 163) {
+    override val description = "Rydder opp i vedtaksperioder som har tom sykdomstidslinje"
 
     override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         val fødselsnummer = jsonNode.path("fødselsnummer").asText()
@@ -20,15 +20,8 @@ internal class V163ForkasteForkastedeVedtaksperioder: JsonMigration(version = 16
             .forEach { arbeidsgiver ->
                 arbeidsgiver as ObjectNode
                 val organisasjonsnummer = arbeidsgiver.path("organisasjonsnummer").asText()
-
-                val datoerPåArbeidsgivertidslinjen = arbeidsgiver["sykdomshistorikk"]
-                    .path(0)
-                    .path("beregnetSykdomstidslinje")
-                    .path("dager")
-                    .map { it.dagPeriode() }
-
                 val forkastede = mutableListOf<JsonNode>()
-                sletteForkastedeVedtaksperioder(fødselsnummer, aktørId, organisasjonsnummer, arbeidsgiver, datoerPåArbeidsgivertidslinjen, forkastede)
+                sletteTommeVedtaksperioder(fødselsnummer, aktørId, organisasjonsnummer, arbeidsgiver, forkastede)
                 (arbeidsgiver.path("forkastede") as ArrayNode)
                     .addAll(forkastede.map { vedtaksperiode ->
                         serdeObjectMapper.createObjectNode()
@@ -39,31 +32,27 @@ internal class V163ForkasteForkastedeVedtaksperioder: JsonMigration(version = 16
             }
     }
 
-    private fun sletteForkastedeVedtaksperioder(
+    private fun sletteTommeVedtaksperioder(
         fødselsnummer: String,
         aktørId: String,
         organisasjonsnummer: String,
         arbeidsgiver: ObjectNode,
-        datoerPåArbeidsgivertidslinjen: List<Periode>,
         forkastede: MutableList<JsonNode>
     ) {
         val før = arbeidsgiver["vedtaksperioder"].size()
-        val (perioder, forkastedePerioder) = arbeidsgiver["vedtaksperioder"].partition { vedtaksperiode ->
-            val vedtaksperiodetidslinje = vedtaksperiode["sykdomstidslinje"]
+        val (perioder, tommePerioder) = arbeidsgiver["vedtaksperioder"].partition { vedtaksperiode ->
+            vedtaksperiode["sykdomstidslinje"]
                 .path("dager")
                 .filterNot { it["kilde"]["type"].asText() == "Sykmelding" }
-                .flatMap { it.dagPeriode() }
-
-            val dagerSomManglerPåArbeidsgivertidslinjen = vedtaksperiodetidslinje.filter { dag -> datoerPåArbeidsgivertidslinjen.none { periode -> dag in periode } }
-            vedtaksperiodetidslinje.isNotEmpty() && dagerSomManglerPåArbeidsgivertidslinjen.isEmpty()
+                .isNotEmpty()
         }
         val etter = perioder.size
         if (før == etter) return
 
         arbeidsgiver.replace("vedtaksperioder", serdeObjectMapper.createArrayNode().addAll(perioder))
-        forkastede.addAll(forkastedePerioder)
+        forkastede.addAll(tommePerioder)
 
-        sikkerlogg.info("Forkaster ${før - etter} vedtaksperioder som ikke finnes på arbeidsgivers sykdomstidslinje. {}, {}, {}",
+        sikkerlogg.info("Forkaster ${før - etter} tomme vedtaksperioder. {}, {}, {}",
             keyValue("fødselsnummer", fødselsnummer), keyValue("aktørId", aktørId), keyValue("organisasjonsnummer", organisasjonsnummer))
     }
 
