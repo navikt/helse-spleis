@@ -918,7 +918,7 @@ internal data class PersonData(
                     inntektskilde = inntektskilde,
                     opprettet = opprettet,
                     oppdatert = oppdatert,
-                    medVedtaksperiode = jurist.medVedtaksperiode(id, sporingIder, sykmeldingsperiode)
+                    medVedtaksperiode = jurist
                 )
             }
 

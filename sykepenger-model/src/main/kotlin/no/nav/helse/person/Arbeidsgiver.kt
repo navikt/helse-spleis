@@ -487,12 +487,7 @@ internal class Arbeidsgiver private constructor(
     }
 
     private fun opprettVedtaksperiodeOgHåndter(søknad: Søknad) {
-        val vedtaksperiode = Vedtaksperiode(
-            person = person,
-            arbeidsgiver = this,
-            hendelse = søknad,
-            jurist = jurist
-        )
+        val vedtaksperiode = søknad.lagVedtaksperiode(person, this, jurist)
         if (person.harOverlappendeVedtaksperiode(søknad)) return registrerForkastetVedtaksperiode(vedtaksperiode, søknad)
         if (noenHarHåndtert(søknad, Vedtaksperiode::håndter)) {
             if (søknad.hasErrorsOrWorse()) {

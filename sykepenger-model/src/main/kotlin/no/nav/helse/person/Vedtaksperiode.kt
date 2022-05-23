@@ -107,39 +107,45 @@ internal class Vedtaksperiode private constructor(
     private var inntektskilde: Inntektskilde,
     private val opprettet: LocalDateTime,
     private var oppdatert: LocalDateTime = opprettet,
-    private val jurist: MaskinellJurist
+    jurist: MaskinellJurist
 ) : Aktivitetskontekst, Comparable<Vedtaksperiode> {
 
+    private val jurist = jurist.medVedtaksperiode(id, hendelseIder, sykmeldingsperiode)
     private val skjæringstidspunkt get() = skjæringstidspunktFraInfotrygd ?: person.skjæringstidspunkt(periode)
     private val periodetype get() = arbeidsgiver.periodetype(periode)
 
     internal constructor(
+        søknad: Søknad,
         person: Person,
         arbeidsgiver: Arbeidsgiver,
-        hendelse: SykdomstidslinjeHendelse,
-        jurist: MaskinellJurist,
-        id: UUID = UUID.randomUUID()
+        aktørId: String,
+        fødselsnummer: String,
+        organisasjonsnummer: String,
+        sykdomstidslinje: Sykdomstidslinje,
+        dokumentsporing: Dokumentsporing,
+        periode: Periode,
+        jurist: MaskinellJurist
     ) : this(
         person = person,
         arbeidsgiver = arbeidsgiver,
-        id = id,
-        aktørId = hendelse.aktørId(),
-        fødselsnummer = hendelse.fødselsnummer(),
-        organisasjonsnummer = hendelse.organisasjonsnummer(),
+        id = UUID.randomUUID(),
+        aktørId = aktørId,
+        fødselsnummer = fødselsnummer,
+        organisasjonsnummer = organisasjonsnummer,
         tilstand = Start,
         skjæringstidspunktFraInfotrygd = null,
-        sykdomstidslinje = hendelse.sykdomstidslinje(),
-        hendelseIder = mutableSetOf<Dokumentsporing>().also { hendelse.leggTil(it) },
+        sykdomstidslinje = sykdomstidslinje,
+        hendelseIder = mutableSetOf(dokumentsporing),
         inntektsmeldingInfo = null,
-        periode = hendelse.periode(),
-        sykmeldingsperiode = hendelse.periode(),
+        periode = periode,
+        sykmeldingsperiode = periode,
         utbetalinger = VedtaksperiodeUtbetalinger(arbeidsgiver),
         utbetalingstidslinje = Utbetalingstidslinje(),
         inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
         opprettet = LocalDateTime.now(),
-        jurist = jurist.medVedtaksperiode(id, mutableSetOf(), hendelse.periode())
+        jurist = jurist
     ) {
-        kontekst(hendelse)
+        kontekst(søknad)
     }
 
     internal fun accept(visitor: VedtaksperiodeVisitor) {
@@ -2667,7 +2673,7 @@ internal class Vedtaksperiode private constructor(
             mapOf(arbeidsgiver to perioder).startRevurdering(første, hendelse)
         }
 
-        fun ferdigVedtaksperiode(
+        internal fun ferdigVedtaksperiode(
             person: Person,
             arbeidsgiver: Arbeidsgiver,
             id: UUID,

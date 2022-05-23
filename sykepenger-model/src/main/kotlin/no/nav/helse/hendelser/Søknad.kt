@@ -6,6 +6,10 @@ import java.util.*
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.IAktivitetslogg
+import no.nav.helse.person.Inntektskilde
+import no.nav.helse.person.Person
+import no.nav.helse.person.Vedtaksperiode
+import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.somFødselsnummer
 import no.nav.helse.sykdomstidslinje.Dag
@@ -78,6 +82,22 @@ class Søknad(
 
     override fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) {
         hendelseIder.add(Dokumentsporing.søknad(meldingsreferanseId()))
+    }
+
+    internal fun lagVedtaksperiode(person: Person, arbeidsgiver: Arbeidsgiver, jurist: MaskinellJurist): Vedtaksperiode {
+        val periode = requireNotNull(sykdomstidslinje.periode()) { "ugyldig søknad: tidslinjen er tom" }
+        return Vedtaksperiode(
+            søknad = this,
+            person = person,
+            arbeidsgiver = arbeidsgiver,
+            aktørId = aktørId,
+            fødselsnummer = fødselsnummer,
+            organisasjonsnummer = organisasjonsnummer,
+            sykdomstidslinje = sykdomstidslinje,
+            dokumentsporing = Dokumentsporing.søknad(meldingsreferanseId()),
+            periode = periode,
+            jurist = jurist
+        )
     }
 
     class Merknad(private val type: String, beskrivelse: String?) {
