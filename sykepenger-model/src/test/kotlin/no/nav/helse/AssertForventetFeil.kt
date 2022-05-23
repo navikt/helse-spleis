@@ -2,7 +2,7 @@ package no.nav.helse
 
 import org.junit.jupiter.api.assertThrows
 
-private const val ØnsketOppførsel = "✅ Testen oppfører seg nå som ønsket! Fjern bruken av 'assertForventetFeil', og behold kun assertions for ønsket oppførsel ✅"
+private const val ØnsketOppførsel = "✅ Koden oppfører seg nå som ønsket! Fjern bruken av 'assertForventetFeil', og behold kun assertions for ønsket oppførsel ✅"
 private const val FeilITestkode = "☠️️ Feil i testkoden, feiler ikke på assertions ☠️️"
 
 private fun Throwable.håndterNåOppførselFeil(harØnsketOppførsel: Boolean) {
