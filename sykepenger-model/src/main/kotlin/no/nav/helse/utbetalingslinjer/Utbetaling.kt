@@ -28,7 +28,6 @@ import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Fagområde.Sykepenger
 import no.nav.helse.utbetalingslinjer.Fagområde.SykepengerRefusjon
-import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -140,11 +139,6 @@ internal class Utbetaling private constructor(
     internal fun harNærliggendeUtbetaling(other: Periode): Boolean {
         if (arbeidsgiverOppdrag.isEmpty() && personOppdrag.isEmpty()) return false
         return periode.overlapperMed(other.oppdaterFom(other.start.minusDays(16)))
-    }
-
-    internal fun måReberegnes(): Boolean {
-        return tidsstempel in LocalDateTime.of(2022, 5, 20, 8, 0, 0)..LocalDateTime.of(2022, 5, 20, 15, 0, 0)
-                && utbetalingstidslinje.subset(periode).any { it.erAvvistMed(Begrunnelse.MinimumSykdomsgrad) != null }
     }
 
     // this kan revurdere other gitt at fagsystemId == other.fagsystemId,
@@ -783,11 +777,6 @@ internal class Utbetaling private constructor(
         override fun entering(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {
             utbetaling.vurdering?.utbetalt(hendelse.hendelseskontekst(), utbetaling)
             utbetaling.avsluttet = LocalDateTime.now()
-        }
-
-        override fun håndter(utbetaling: Utbetaling, påminnelse: Utbetalingpåminnelse) {
-            if (!utbetaling.måReberegnes()) return
-            påminnelse.info("Utbetaling må trolig revurderes pga. potensielle avviste dager")
         }
 
         override fun annuller(utbetaling: Utbetaling, hendelse: AnnullerUtbetaling) =

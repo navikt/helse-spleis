@@ -50,7 +50,7 @@ internal class VedtaksperiodeUtbetalinger(private val arbeidsgiver: Arbeidsgiver
     internal fun gjelderIkkeFor(hendelse: Utbetalingsgodkjenning) = siste?.gjelderFor(hendelse) != true
 
     internal fun erHistorikkEndretSidenBeregning(infotrygdhistorikk: Infotrygdhistorikk) =
-        siste?.måReberegnes() == true || infotrygdhistorikk.harEndretHistorikk(siste!!)
+        infotrygdhistorikk.harEndretHistorikk(siste!!)
 
     internal fun reberegnUtbetaling(hvisRevurdering: () -> Unit, hvisUtbetaling: () -> Unit) =
         siste!!.reberegnUtbetaling(hvisRevurdering, hvisUtbetaling)
