@@ -143,7 +143,7 @@ internal class Utbetaling private constructor(
     }
 
     internal fun måReberegnes(): Boolean {
-        return tidsstempel in LocalDateTime.of(2022, 5, 20, 8, 0, 0)..LocalDateTime.of(2022, 5, 23, 9, 0, 0)
+        return tidsstempel in LocalDateTime.of(2022, 5, 20, 8, 0, 0)..LocalDateTime.of(2022, 5, 20, 15, 0, 0)
                 && utbetalingstidslinje.subset(periode).any { it.erAvvistMed(Begrunnelse.MinimumSykdomsgrad) != null }
     }
 
