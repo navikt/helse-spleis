@@ -25,6 +25,19 @@
           ]
         },
         {
+          "id": "476aeeaa-ed61-45d8-aea8-1c280f7afdd7",
+          "inntektsopplysninger":[
+            {
+              "id": "e09a9f74-e97c-4de0-9a77-470bc5eb3459",
+              "dato": "2022-05-09",
+              "hendelseId": "13fe11c4-0aa5-4a8f-ba7a-dfb5a40f4623",
+              "beløp":26572.430000000004,
+              "kilde": "INNTEKTSMELDING",
+              "tidsstempel": "2022-05-12T12:22:07.73510307"
+            }
+          ]
+        },
+        {
           "id": "0e14e1a5-ae00-4521-afcf-1b9e41c9bd7e",
           "inntektsopplysninger": [
             {
@@ -45,5 +58,5 @@
       "inntektshistorikk": []
     }
   ],
-  "skjemaVersjon": 165
+  "skjemaVersjon": 161
 }

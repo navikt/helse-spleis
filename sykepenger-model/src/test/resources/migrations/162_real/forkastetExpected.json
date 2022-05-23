@@ -2,27 +2,17 @@
   "arbeidsgivere": [
     {
       "organisasjonsnummer": "987654321",
-      "vedtaksperioder": [
+      "vedtaksperioder": [],
+      "forkastede": [
         {
-          "id": "9354c0c8-ac43-4c34-b094-aa64fd94be5e"
+          "vedtaksperiode": {
+            "id": "9354c0c8-ac43-4c34-b094-aa64fd94be5e"
+          }
         }
       ],
       "inntektshistorikk": [
         {
           "id": "a9f09978-cb29-48d4-929f-0e8b6e81de1a",
-          "inntektsopplysninger":[
-            {
-              "id": "e09a9f74-e97c-4de0-9a77-470bc5eb3459",
-              "dato": "2022-05-09",
-              "hendelseId": "13fe11c4-0aa5-4a8f-ba7a-dfb5a40f4623",
-              "beløp":26572.430000000004,
-              "kilde": "INNTEKTSMELDING",
-              "tidsstempel": "2022-05-12T12:22:07.73510307"
-            }
-          ]
-        },
-        {
-          "id": "476aeeaa-ed61-45d8-aea8-1c280f7afdd7",
           "inntektsopplysninger":[
             {
               "id": "e09a9f74-e97c-4de0-9a77-470bc5eb3459",
@@ -55,5 +45,5 @@
       "inntektshistorikk": []
     }
   ],
-  "skjemaVersjon": 164
+  "skjemaVersjon": 162
 }

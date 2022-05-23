@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 private typealias VedtaksperiodeID = String
 private typealias InntektsoppsysningsID = String
-internal class V165SletterDuplikaterFraInntektshistorikken : JsonMigration(version = 165) {
-    override val description = "Spisset migrering for person som gikk i loop og dupliserte innteksthistorikken sin"
+internal class V162SletterDuplikaterFraInntektshistorikken : JsonMigration(version = 162) {
+    override val description = "Spisset migrering for to personer som gikk i loop og dupliserte innteksthistorikken sin"
 
     private val tilfeller: Map<VedtaksperiodeID, InntektsoppsysningsID> = mapOf(
         "9354c0c8-ac43-4c34-b094-aa64fd94be5e" to "a9f09978-cb29-48d4-929f-0e8b6e81de1a",

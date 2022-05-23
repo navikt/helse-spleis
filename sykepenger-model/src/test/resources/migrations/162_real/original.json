@@ -2,12 +2,9 @@
   "arbeidsgivere": [
     {
       "organisasjonsnummer": "987654321",
-      "vedtaksperioder": [],
-      "forkastede": [
+      "vedtaksperioder": [
         {
-          "vedtaksperiode": {
-            "id": "9354c0c8-ac43-4c34-b094-aa64fd94be5e"
-          }
+          "id": "9354c0c8-ac43-4c34-b094-aa64fd94be5e"
         }
       ],
       "inntektshistorikk": [
@@ -58,5 +55,5 @@
       "inntektshistorikk": []
     }
   ],
-  "skjemaVersjon": 164
+  "skjemaVersjon": 161
 }
