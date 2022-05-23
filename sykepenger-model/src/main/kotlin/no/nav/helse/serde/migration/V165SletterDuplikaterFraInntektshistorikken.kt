@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 private typealias VedtaksperiodeID = String
 private typealias InntektsoppsysningsID = String
-internal class VCrazyLoopSletterDuplikaterFraInntektshistorikken : JsonMigration(version = 160) {
+internal class V165SletterDuplikaterFraInntektshistorikken : JsonMigration(version = 165) {
     override val description = "Spisset migrering for person som gikk i loop og dupliserte innteksthistorikken sin"
 
     private val tilfeller: Map<VedtaksperiodeID, InntektsoppsysningsID> = mapOf(
@@ -26,13 +26,14 @@ internal class VCrazyLoopSletterDuplikaterFraInntektshistorikken : JsonMigration
         }
     }
 
-    private fun ObjectNode.finnOrgnummer(vedtaksperiodeId: VedtaksperiodeID) = this["arbeidsgivere"].firstOrNull { arbeidsgiver ->
-        arbeidsgiver["vedtaksperioder"].any { it["id"].asText() == vedtaksperiodeId }
-            || arbeidsgiver["forkastede"]?.map { it["vedtaksperiode"] }?.any { it["id"].asText() in vedtaksperiodeId }?:false
+    private fun ObjectNode.finnOrgnummer(vedtaksperiodeId: VedtaksperiodeID) = this["arbeidsgivere"].firstOrNull { arbeidsgiver: JsonNode ->
+        arbeidsgiver.harVedtaksperiode(vedtaksperiodeId) || arbeidsgiver.harForkastetVedtaksperiode(vedtaksperiodeId)?:false
     }?.get("organisasjonsnummer")
 
     private fun ObjectNode.finnArbeidsgiver(orgnummer: String) = this["arbeidsgivere"]
         .firstOrNull { arbeidsgiver -> arbeidsgiver["organisasjonsnummer"].asText() == orgnummer }
 
     private fun JsonNode.finnInntektsopplysning(inntektsopplysningId: String) = this["inntektshistorikk"].firstOrNull { it["id"].asText() == inntektsopplysningId }
+    private fun JsonNode.harVedtaksperiode(vedtaksperiodeId: VedtaksperiodeID) = this["vedtaksperioder"].any { it["id"].asText() == vedtaksperiodeId }
+    private fun JsonNode.harForkastetVedtaksperiode(vedtaksperiodeId: VedtaksperiodeID) = this["forkastede"]?.map { it["vedtaksperiode"] }?.any { it["id"].asText() in vedtaksperiodeId }
 }

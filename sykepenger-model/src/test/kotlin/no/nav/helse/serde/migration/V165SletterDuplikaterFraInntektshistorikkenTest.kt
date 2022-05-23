@@ -3,7 +3,7 @@ package no.nav.helse.serde.migration
 import org.junit.jupiter.api.Test
 
 
-internal class VCrazyLoopSletterDuplikaterFraInntektshistorikkenTest : MigrationTest(VCrazyLoopSletterDuplikaterFraInntektshistorikken()) {
+internal class V165SletterDuplikaterFraInntektshistorikkenTest : MigrationTest(V165SletterDuplikaterFraInntektshistorikken()) {
     @Test
     fun `sletter duplikate innslag i inntektshistorikken`() {
         assertMigration("/migrations/crazyloop/expected.json", "/migrations/crazyloop/original.json")
