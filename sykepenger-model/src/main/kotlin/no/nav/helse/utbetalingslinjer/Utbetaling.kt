@@ -785,6 +785,11 @@ internal class Utbetaling private constructor(
             utbetaling.avsluttet = LocalDateTime.now()
         }
 
+        override fun håndter(utbetaling: Utbetaling, påminnelse: Utbetalingpåminnelse) {
+            if (!utbetaling.måReberegnes()) return
+            påminnelse.info("Utbetaling må trolig revurderes pga. potensielle avviste dager")
+        }
+
         override fun annuller(utbetaling: Utbetaling, hendelse: AnnullerUtbetaling) =
             Utbetaling(
                 utbetaling.beregningId,
