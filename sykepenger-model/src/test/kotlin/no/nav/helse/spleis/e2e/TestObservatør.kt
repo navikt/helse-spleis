@@ -12,8 +12,8 @@ import org.junit.jupiter.api.fail
 internal class TestObservatør : PersonObserver {
     internal val tilstandsendringer = mutableMapOf<UUID, MutableList<TilstandType>>()
     val utbetalteVedtaksperioder = mutableListOf<UUID>()
-    val manglendeInntektsmeldingVedtaksperioder = mutableListOf<UUID>()
-    val trengerIkkeInntektsmeldingVedtaksperioder = mutableListOf<UUID>()
+    val manglendeInntektsmeldingVedtaksperioder = mutableListOf<PersonObserver.ManglendeInntektsmeldingEvent>()
+    val trengerIkkeInntektsmeldingVedtaksperioder = mutableListOf<PersonObserver.TrengerIkkeInntektsmeldingEvent>()
     val utbetalingUtenUtbetalingEventer = mutableListOf<PersonObserver.UtbetalingUtbetaltEvent>()
     val utbetalingMedUtbetalingEventer = mutableListOf<PersonObserver.UtbetalingUtbetaltEvent>()
     val feriepengerUtbetaltEventer = mutableListOf<PersonObserver.FeriepengerUtbetaltEvent>()
@@ -87,11 +87,11 @@ internal class TestObservatør : PersonObserver {
     }
 
     override fun manglerInntektsmelding(hendelseskontekst: Hendelseskontekst, orgnr: String, event: PersonObserver.ManglendeInntektsmeldingEvent) {
-        manglendeInntektsmeldingVedtaksperioder.add(hendelseskontekst.vedtaksperiodeId())
+        manglendeInntektsmeldingVedtaksperioder.add(event)
     }
 
     override fun trengerIkkeInntektsmelding(hendelseskontekst: Hendelseskontekst, event: PersonObserver.TrengerIkkeInntektsmeldingEvent) {
-        trengerIkkeInntektsmeldingVedtaksperioder.add(hendelseskontekst.vedtaksperiodeId())
+        trengerIkkeInntektsmeldingVedtaksperioder.add(event)
     }
 
     override fun inntektsmeldingReplay(fødselsnummer: Fødselsnummer, vedtaksperiodeId: UUID) {

@@ -128,7 +128,12 @@ internal class NyTilstandsflytEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.mars til 16.mars))
 
         assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE)
+        assertTilstander(
+            2.vedtaksperiode,
+            START,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVVENTER_BLOKKERENDE_PERIODE
+        )
     }
 
     @Test
@@ -348,7 +353,11 @@ internal class NyTilstandsflytEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.mai, 31.mai, 100.prosent))
 
         håndterInntektsmelding(listOf(1.mai til 16.mai))
-        håndterPåminnelse(1.vedtaksperiode, påminnetTilstand = AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, tilstandsendringstidspunkt = 5.februar.atStartOfDay())
+        håndterPåminnelse(
+            1.vedtaksperiode,
+            påminnetTilstand = AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            tilstandsendringstidspunkt = 5.februar.atStartOfDay()
+        )
 
         assertTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
         assertTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK)
@@ -427,7 +436,10 @@ internal class NyTilstandsflytEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Arbeid(20.februar, 28.februar))
 
-        assertError("Mottatt flere søknader for perioden - siste søknad inneholder arbeidsdag", 2.vedtaksperiode.filter())
+        assertError(
+            "Mottatt flere søknader for perioden - siste søknad inneholder arbeidsdag",
+            2.vedtaksperiode.filter()
+        )
 
         assertTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
         assertTilstand(2.vedtaksperiode, TIL_INFOTRYGD)
@@ -479,7 +491,15 @@ internal class NyTilstandsflytEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterInntektsmeldingReplay(inntektsmeldingId, 2.vedtaksperiode.id(ORGNUMMER))
         håndterUtbetalingshistorikk(
             2.vedtaksperiode,
-            utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.februar, 10.februar, 100.prosent, INNTEKT)),
+            utbetalinger = arrayOf(
+                ArbeidsgiverUtbetalingsperiode(
+                    ORGNUMMER,
+                    1.februar,
+                    10.februar,
+                    100.prosent,
+                    INNTEKT
+                )
+            ),
             inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.februar, INNTEKT, true))
         )
 
@@ -500,7 +520,9 @@ internal class NyTilstandsflytEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
 
         person.invaliderAllePerioder(hendelselogg, null)
-        assertEquals(listOf(1.vedtaksperiode.id(ORGNUMMER)), observatør.trengerIkkeInntektsmeldingVedtaksperioder)
+        assertEquals(
+            1.januar til 31.januar,
+            observatør.trengerIkkeInntektsmeldingVedtaksperioder.map { it.fom til it.tom }.single())
     }
 
     @Test

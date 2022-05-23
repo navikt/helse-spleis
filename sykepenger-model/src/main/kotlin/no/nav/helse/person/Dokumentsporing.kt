@@ -14,6 +14,7 @@ internal data class Dokumentsporing private constructor(private val id: UUID, pr
 
         internal fun Iterable<Dokumentsporing>.toMap() = associate { it.id to it.type }
         internal fun Iterable<Dokumentsporing>.ider() = map { it.id }.toSet()
+        internal fun Iterable<Dokumentsporing>.søknadIder() = filter { it.type == Type.Søknad }.map { it.id }.toSet()
         internal fun Map<UUID, Type>.tilSporing() = map { Dokumentsporing(it.key, it.value) }.toSet()
     }
 

@@ -45,6 +45,7 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.pleiepenger
 import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigInntekt
 import no.nav.helse.person.Arbeidsgiver.Companion.trengerSøknadISammeMåned
 import no.nav.helse.person.Dokumentsporing.Companion.ider
+import no.nav.helse.person.Dokumentsporing.Companion.søknadIder
 import no.nav.helse.person.ForlengelseFraInfotrygd.IKKE_ETTERSPURT
 import no.nav.helse.person.InntektsmeldingInfo.Companion.ider
 import no.nav.helse.person.Periodetype.FORLENGELSE
@@ -637,7 +638,8 @@ internal class Vedtaksperiode private constructor(
             this.organisasjonsnummer,
             PersonObserver.ManglendeInntektsmeldingEvent(
                 fom = this.periode.start,
-                tom = this.periode.endInclusive
+                tom = this.periode.endInclusive,
+                søknadIder = hendelseIder.søknadIder()
             )
         )
     }
@@ -647,7 +649,8 @@ internal class Vedtaksperiode private constructor(
             hendelseskontekst,
             PersonObserver.TrengerIkkeInntektsmeldingEvent(
                 fom = this.periode.start,
-                tom = this.periode.endInclusive
+                tom = this.periode.endInclusive,
+                søknadIder = hendelseIder.søknadIder()
             )
         )
     }

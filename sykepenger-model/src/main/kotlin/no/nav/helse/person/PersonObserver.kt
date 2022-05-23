@@ -52,12 +52,14 @@ interface PersonObserver {
 
     data class ManglendeInntektsmeldingEvent(
         val fom: LocalDate,
-        val tom: LocalDate
+        val tom: LocalDate,
+        val søknadIder: Set<UUID>
     )
 
     data class TrengerIkkeInntektsmeldingEvent(
         val fom: LocalDate,
-        val tom: LocalDate
+        val tom: LocalDate,
+        val søknadIder: Set<UUID>
     )
 
     data class UtbetalingAnnullertEvent(
