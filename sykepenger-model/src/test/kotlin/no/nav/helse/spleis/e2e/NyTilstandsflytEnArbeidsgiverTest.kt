@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.Toggle
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -10,7 +9,6 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.mars
-import no.nav.helse.november
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
@@ -232,78 +230,6 @@ internal class NyTilstandsflytEnArbeidsgiverTest : AbstractEndToEndTest() {
 
         utbetalPeriodeEtterVilkårsprøving(1.vedtaksperiode)
         assertTilstand(1.vedtaksperiode, AVSLUTTET)
-    }
-
-    @Test
-    fun `drawio -- Avsluttet uten utbetaling`() = Toggle.GjenopptaAvsluttetUtenUtbetaling.enable {
-        håndterSykmelding(Sykmeldingsperiode(5.januar, 19.januar, 100.prosent))
-        håndterSøknad(Sykdom(5.januar, 19.januar, 100.prosent))
-        håndterUtbetalingshistorikk(1.vedtaksperiode)
-        assertTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
-        assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
-
-        utbetalPeriode(1.vedtaksperiode)
-        assertTilstand(1.vedtaksperiode, AVSLUTTET)
-    }
-
-    @Test
-    fun `Periode i AvsluttetUtenUtbetaling blir truffet av en IM slik at den får en utbetaling - går ikke videre siden tidligere periode må behandles først`() {
-        Toggle.GjenopptaAvsluttetUtenUtbetaling.enable {
-            håndterSykmelding(Sykmeldingsperiode(1.november, 30.november, 100.prosent))
-            håndterSøknad(Sykdom(1.november, 30.november, 100.prosent))
-            håndterUtbetalingshistorikk(1.vedtaksperiode)
-
-            håndterSykmelding(Sykmeldingsperiode(5.januar, 19.januar, 100.prosent))
-            håndterSøknad(Sykdom(5.januar, 19.januar, 100.prosent))
-            håndterUtbetalingshistorikk(2.vedtaksperiode)
-            assertTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
-            assertTilstander(
-                2.vedtaksperiode,
-                START,
-                AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-                AVSLUTTET_UTEN_UTBETALING,
-                AVSLUTTET_UTEN_UTBETALING,
-                AVVENTER_BLOKKERENDE_PERIODE,
-                AVVENTER_HISTORIKK
-            )
-        }
-    }
-
-    @Test
-    fun `Periode i AvsluttetUtenUtbetaling blir truffet av en IM slik at den får en utbetaling - senere perioder må trekkes tilbake til ventetilstand`() = Toggle.GjenopptaAvsluttetUtenUtbetaling.enable {
-        håndterSykmelding(Sykmeldingsperiode(5.januar, 19.januar, 100.prosent))
-        håndterSøknad(Sykdom(5.januar, 19.januar, 100.prosent))
-        håndterUtbetalingshistorikk(1.vedtaksperiode)
-        assertTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
-        håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
-        håndterUtbetalingshistorikk(2.vedtaksperiode)
-        håndterInntektsmelding(listOf(1.mars til 16.mars))
-
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
-
-        assertForventetFeil(
-            forklaring = "Skal trekke tilbake tidligere periode til en ventetilstand",
-            nå = {
-                assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
-                assertTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK)
-            },
-            ønsket = {
-                assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
-                assertTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
-
-                utbetalPeriode(1.vedtaksperiode)
-                assertTilstand(1.vedtaksperiode, AVSLUTTET)
-
-                utbetalPeriode(2.vedtaksperiode)
-                assertTilstand(2.vedtaksperiode, AVSLUTTET)
-            }
-        )
     }
 
     @Test

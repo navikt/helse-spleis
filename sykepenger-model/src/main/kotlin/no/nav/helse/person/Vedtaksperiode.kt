@@ -2280,10 +2280,7 @@ internal class Vedtaksperiode private constructor(
                     )
                     AvsluttetUtenUtbetaling
                 } else {
-                    if (Toggle.GjenopptaAvsluttetUtenUtbetaling.disabled) return@håndterInntektsmelding AvsluttetUtenUtbetaling
-                    vedtaksperiode.arbeidsgiver.tidligerePeriodeRebehandles(vedtaksperiode, inntektsmelding)
-                    vedtaksperiode.kontekst(inntektsmelding)
-                    AvventerBlokkerendePeriode
+                    return@håndterInntektsmelding AvsluttetUtenUtbetaling
                 }
             }
         }

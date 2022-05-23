@@ -1,7 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.Toggle
-import no.nav.helse.Toggle.Companion.enable
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -18,23 +16,6 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Test
 
 internal class ReberegningAvAvsluttetUtenUtbetalingE2ETest : AbstractEndToEndTest() {
-
-    @Test
-    fun `reberegner avsluttet periode dersom inntektsmelding kommer inn`() = Toggle.GjenopptaAvsluttetUtenUtbetaling.enable {
-        håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar, 100.prosent))
-        håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
-        håndterUtbetalingshistorikk(1.vedtaksperiode)
-        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(1.januar til 16.januar))
-        assertTilstander(
-            1.vedtaksperiode,
-            START,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVSLUTTET_UTEN_UTBETALING,
-            AVSLUTTET_UTEN_UTBETALING,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK
-        )
-    }
 
     @Test
     fun `reberegner ikke avsluttet periode dersom inntektsmelding kommer inn og det er utbetalt nyere periode`() {
@@ -144,50 +125,6 @@ internal class ReberegningAvAvsluttetUtenUtbetalingE2ETest : AbstractEndToEndTes
     }
 
     @Test
-    fun `skal ikke gjenoppta behandling på neste periode avsluttet periode etter IM`() = Toggle.GjenopptaAvsluttetUtenUtbetaling.enable {
-        håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar, 100.prosent))
-        håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
-        håndterUtbetalingshistorikk(1.vedtaksperiode)
-        håndterSykmelding(Sykmeldingsperiode(21.januar, 26.januar, 100.prosent))
-        håndterSøknad(Sykdom(21.januar, 26.januar, 100.prosent))
-        håndterUtbetalingshistorikk(2.vedtaksperiode)
-        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(10.januar til 25.januar))
-        assertTilstander(
-            1.vedtaksperiode,
-            START,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVSLUTTET_UTEN_UTBETALING,
-            AVSLUTTET_UTEN_UTBETALING
-        )
-        assertTilstander(
-            2.vedtaksperiode,
-            START,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVSLUTTET_UTEN_UTBETALING,
-            AVSLUTTET_UTEN_UTBETALING,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK
-        )
-    }
-
-    @Test
-    fun `skal ikke gjenoppta behandling på neste periode etter at kort periode reberegnes`() = Toggle.GjenopptaAvsluttetUtenUtbetaling.enable {
-        håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar, 100.prosent))
-        håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
-        håndterUtbetalingshistorikk(1.vedtaksperiode)
-        håndterSykmelding(Sykmeldingsperiode(21.januar, 26.januar, 100.prosent))
-        håndterSøknad(Sykdom(21.januar, 26.januar, 100.prosent))
-        håndterUtbetalingshistorikk(2.vedtaksperiode)
-        håndterSykmelding(Sykmeldingsperiode(27.januar, 31.januar, 100.prosent))
-        håndterSøknad(Sykdom(27.januar, 31.januar, 100.prosent))
-        håndterUtbetalingshistorikk(3.vedtaksperiode)
-        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(10.januar til 25.januar))
-        assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
-        assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE)
-    }
-
-    @Test
     fun `skal ikke gjenoppta behandling på neste gap periode etter at kort periode reberegnes`() {
         håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
@@ -241,26 +178,6 @@ internal class ReberegningAvAvsluttetUtenUtbetalingE2ETest : AbstractEndToEndTes
         håndterInntektsmelding(listOf(10.januar til 25.januar))
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
-    }
-
-
-    @Test
-    fun `Perioder etter AvsluttetUtenUtbetaling blir satt til AvventerUferdig ved gjennopptagelse av tidligere periode`() {
-        Toggle.GjenopptaAvsluttetUtenUtbetaling.enable {
-            håndterSykmelding(Sykmeldingsperiode(3.januar, 18.januar, 100.prosent))
-            håndterSøknad(Sykdom(3.januar, 18.januar, 100.prosent))
-            håndterUtbetalingshistorikk(1.vedtaksperiode)
-
-
-            håndterSykmelding(Sykmeldingsperiode(19.januar, 31.januar, 100.prosent))
-            håndterSøknad(Sykdom(19.januar, 31.januar, 100.prosent))
-            håndterUtbetalingshistorikk(2.vedtaksperiode)
-
-            håndterInntektsmelding(listOf(1.januar til 16.januar))
-
-            assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
-            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE)
-        }
     }
 
     @Test

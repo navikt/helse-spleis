@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.Toggle
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
@@ -136,17 +135,6 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
         assertTrue(hendelseId in observatør.hendelseider(1.vedtaksperiode.id(ORGNUMMER)))
 
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
-    }
-
-    @Test
-    fun `Vedtaksperioder i AVSLUTTET_UTEN_UTBETALING som treffes av en inntektsmelding slik at den får utebetaling - skal gå videre til AVVENTER_HISTORIKK`() = Toggle.GjenopptaAvsluttetUtenUtbetaling.enable {
-        håndterSykmelding(Sykmeldingsperiode(9.januar, 20.januar, 100.prosent))
-        håndterSøknad(Sykdom(9.januar, 20.januar, 100.prosent))
-        håndterUtbetalingshistorikk(1.vedtaksperiode)
-        assertTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
-        assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
     }
 
     @Test
