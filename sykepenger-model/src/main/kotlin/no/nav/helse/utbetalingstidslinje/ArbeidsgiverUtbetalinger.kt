@@ -41,13 +41,14 @@ internal class ArbeidsgiverUtbetalinger(
         virkningsdato: LocalDate,
     ) {
         val tidslinjer = arbeidsgivere.values.toList()
+        val infotrygdtidslinje = infotrygdhistorikk.utbetalingstidslinje().kutt(periode.endInclusive)
         Sykdomsgradfilter.filter(tidslinjer, periode, aktivitetslogg, subsumsjonObserver)
         AvvisDagerEtterDødsdatofilter(dødsdato).filter(tidslinjer, periode, aktivitetslogg, subsumsjonObserver)
         AvvisInngangsvilkårfilter(vilkårsgrunnlagHistorikk, alder).filter(tidslinjer, periode, aktivitetslogg, subsumsjonObserver)
-        maksimumSykepenger = MaksimumSykepengedagerfilter(alder, regler, periode, aktivitetslogg, subsumsjonObserver).filter(
-            tidslinjer,
-            infotrygdhistorikk.utbetalingstidslinje().kutt(periode.endInclusive)
-        )
+        maksimumSykepenger = MaksimumSykepengedagerfilter(alder, regler, infotrygdtidslinje).let {
+            it.filter(tidslinjer, periode, aktivitetslogg, subsumsjonObserver)
+            it.maksimumSykepenger()
+        }
         arbeidsgivere.forEach { (arbeidsgiver, tidslinje) ->
             Refusjonsgjødsler(
                 tidslinje = tidslinje + arbeidsgiver.utbetalingstidslinje(infotrygdhistorikk),

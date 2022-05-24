@@ -5,7 +5,6 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.hentErrors
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import org.junit.jupiter.api.BeforeEach
@@ -20,6 +19,8 @@ import no.nav.helse.juli
 import no.nav.helse.juni
 import no.nav.helse.mars
 import no.nav.helse.oktober
+import no.nav.helse.person.etterlevelse.SubsumsjonObserver
+import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.NullObserver
 import no.nav.helse.somFødselsnummer
 import no.nav.helse.testhelpers.AP
 import no.nav.helse.testhelpers.ARB
@@ -548,10 +549,11 @@ internal class MaksimumSykepengedagerfilterTest {
         maksimumSykepenger = MaksimumSykepengedagerfilter(
             fnr.somFødselsnummer().alder(),
             NormalArbeidstaker,
-            periode ?: (this + personTidslinje).periode(),
-            aktivitetslogg,
-            subsumsjonObserver = MaskinellJurist()
-        ).filter(listOf(this), personTidslinje)
+            personTidslinje
+        ).let {
+            it.filter(listOf(this), periode ?: (this + personTidslinje).periode(), aktivitetslogg, NullObserver)
+            it.maksimumSykepenger()
+        }
         return inspektør.avvistedatoer
     }
 }
