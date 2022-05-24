@@ -7,7 +7,7 @@ private const val FeilITestkode = "☠️️ Feil i testkoden, feiler ikke på a
 
 private fun Throwable.håndterNåOppførselFeil(harØnsketOppførsel: Boolean) {
     if (harØnsketOppførsel) throw AssertionError(ØnsketOppførsel)
-    if (this is AssertionError) throw AssertionError("⚠️ Testen har endret nå-oppførsel, men ikke til ønsket oppførsel ⚠️️️", this)
+    if (this is AssertionError) throw AssertionError("⚠️ Koden har endret nå-oppførsel, men ikke til ønsket oppførsel ⚠️️️", this)
     throw AssertionError(FeilITestkode, this)
 }
 

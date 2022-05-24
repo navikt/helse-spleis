@@ -16,7 +16,7 @@ internal class AssertForventetFeilTest {
                 ønsket = { assertTrue(true) }
             )
         }
-        assertEquals("✅ Testen oppfører seg nå som ønsket! Fjern bruken av 'assertForventetFeil', og behold kun assertions for ønsket oppførsel ✅", assertionError.message)
+        assertEquals("✅ Koden oppfører seg nå som ønsket! Fjern bruken av 'assertForventetFeil', og behold kun assertions for ønsket oppførsel ✅", assertionError.message)
     }
 
     @Test
@@ -27,7 +27,7 @@ internal class AssertForventetFeilTest {
                 ønsket = { assertTrue(false) }
             )
         }
-        assertEquals("⚠️ Testen har endret nå-oppførsel, men ikke til ønsket oppførsel ⚠️️️", assertionError.message)
+        assertEquals("⚠️ Koden har endret nå-oppførsel, men ikke til ønsket oppførsel ⚠️️️", assertionError.message)
     }
 
     @Test
@@ -49,7 +49,7 @@ internal class AssertForventetFeilTest {
                 ønsket = { assertTrue(true) }
             )
         }
-        assertEquals("✅ Testen oppfører seg nå som ønsket! Fjern bruken av 'assertForventetFeil', og behold kun assertions for ønsket oppførsel ✅ ==> Expected java.lang.Throwable to be thrown, but nothing was thrown.", assertionError.message)
+        assertEquals("✅ Koden oppfører seg nå som ønsket! Fjern bruken av 'assertForventetFeil', og behold kun assertions for ønsket oppførsel ✅ ==> Expected java.lang.Throwable to be thrown, but nothing was thrown.", assertionError.message)
     }
 
     @Test
