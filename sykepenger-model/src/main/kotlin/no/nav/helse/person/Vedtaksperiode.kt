@@ -2529,7 +2529,7 @@ internal class Vedtaksperiode private constructor(
             forEach { periode ->
                 val inntektsopplysningerForArbeidsgiver = inntektsopplysninger?.mapValues { (_, value) -> value[periode.organisasjonsnummer] }
                 periode.arbeidsgiver.lagUtbetaling(builder, skjæringstidspunkter, inntektsopplysningerForArbeidsgiver)
-                periode.utbetalinger.lagUtbetaling(builder, periode.id, periode.organisasjonsnummer)
+                periode.utbetalinger.lagUtbetaling(builder, periode, periode.organisasjonsnummer)
             }
         }
 

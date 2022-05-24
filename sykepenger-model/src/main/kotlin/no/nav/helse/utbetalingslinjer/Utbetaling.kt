@@ -25,6 +25,7 @@ import no.nav.helse.person.Periodetype
 import no.nav.helse.person.Refusjonshistorikk
 import no.nav.helse.person.SpesifikkKontekst
 import no.nav.helse.person.UtbetalingVisitor
+import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
@@ -1002,16 +1003,16 @@ internal class Utbetaling private constructor(
                 )
         }
         internal fun vedtaksperiode(
-            vedtaksperiodeId: UUID,
+            vedtaksperiode: Vedtaksperiode,
             organisasjonsnummer: String,
             sisteUtbetaling: Utbetaling?
         ) = apply {
             val tidslinjeBuilder = utbetalingstidslinjeBuildere[organisasjonsnummer]
                 ?: throw IllegalStateException("Arbeidsgiveren til vedtaksperioden finnes ikke som utbetalingstidslinjebuilder")
-            tidslinjeBuilder.vedtaksperiode(vedtaksperiodeId, sisteUtbetaling)
+            tidslinjeBuilder.vedtaksperiode(vedtaksperiode, sisteUtbetaling)
         }
 
-        internal fun utbetalinger(): Map<UUID, Utbetaling> {
+        internal fun utbetalinger(): Map<Vedtaksperiode, Utbetaling> {
             utbetalingstidslinjeBuildere
                 .values
                 .toList()
@@ -1044,19 +1045,19 @@ internal class Utbetaling private constructor(
                 return utbetalingstidslinje
             }
 
-            fun vedtaksperiode(vedtaksperiodeId: UUID, sisteUtbetaling: Utbetaling?) {
-                utbetalingBuilder = UtbetalingBuilder(vedtaksperiodeId, organisasjonsnummer, sisteUtbetaling)
+            fun vedtaksperiode(vedtaksperiode: Vedtaksperiode, sisteUtbetaling: Utbetaling?) {
+                utbetalingBuilder = UtbetalingBuilder(vedtaksperiode, organisasjonsnummer, sisteUtbetaling)
             }
 
             fun utbetaling() = utbetalingBuilder.build(utbetalingstidslinje)
 
             private inner class UtbetalingBuilder(
-                private val vedtaksperiodeId: UUID,
+                private val vedtaksperiode: Vedtaksperiode,
                 private val organisasjonsnummer: String,
                 private val sisteUtbetaling: Utbetaling?
             ) {
-                fun build(utbetalingstidslinje: Utbetalingstidslinje): Pair<UUID, Utbetaling> {
-                    return vedtaksperiodeId to lagUtbetaling(
+                fun build(utbetalingstidslinje: Utbetalingstidslinje): Pair<Vedtaksperiode, Utbetaling> {
+                    return vedtaksperiode to lagUtbetaling(
                         utbetalinger = utbetalinger,
                         fødselsnummer = fødselsnummer.toString(),
                         beregningId = beregningId,

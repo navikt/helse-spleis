@@ -69,10 +69,10 @@ internal class VedtaksperiodeUtbetalinger(private val arbeidsgiver: Arbeidsgiver
 
     internal fun lagUtbetaling(
         builder: Utbetaling.Builder,
-        vedtaksperiodeId: UUID,
+        vedtaksperiode: Vedtaksperiode,
         organisasjonsnummer: String
     ) {
-        builder.vedtaksperiode(vedtaksperiodeId, organisasjonsnummer, siste)
+        builder.vedtaksperiode(vedtaksperiode, organisasjonsnummer, siste)
     }
 
     internal fun lagUtbetaling(
