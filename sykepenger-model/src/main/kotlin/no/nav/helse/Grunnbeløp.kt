@@ -123,6 +123,10 @@ internal class Grunnbeløp private constructor(private val multiplier: Double) {
             if (oppfylt) return null
             return Begrunnelse.MinimumInntekt
         }
+
+        fun virkningstidspunktFor(beløp: Inntekt): LocalDate {
+            return `1G`.grunnbeløp.find { it.beløp(1.0) == beløp }?.virkningstidspunkt() ?: throw IllegalArgumentException("$beløp er ikke et Grunnbeløp")
+        }
     }
 
     private class HistoriskGrunnbeløp(private val beløp: Inntekt, private val gyldigFra: LocalDate, private val virkningsdato: LocalDate = gyldigFra, private val gyldigMinsteinntektKrav: LocalDate) {
@@ -150,5 +154,7 @@ internal class Grunnbeløp private constructor(private val multiplier: Double) {
         }
 
         fun beløp(multiplier: Double) = beløp * multiplier
+
+        fun virkningstidspunkt() = virkningsdato
     }
 }

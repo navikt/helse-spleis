@@ -10,6 +10,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 internal class GrunnbeløpTest {
 
@@ -103,6 +104,34 @@ internal class GrunnbeløpTest {
             inntekt = `2G2019`,
             alder = over67(30.april(2019)),
         )
+    }
+
+    @Test
+    fun `virkningstidspunkt for Grunnbeløp`() {
+        val beløp = Grunnbeløp.`1G`.beløp(1.mai(2019))
+        val virkningstidspunkt = Grunnbeløp.virkningstidspunktFor(beløp)
+        assertEquals(1.mai(2019), virkningstidspunkt)
+    }
+
+    @Test
+    fun `virkningstidspunkt før ny G sitt virkningstidspunkt`() {
+        val beløp = Grunnbeløp.`1G`.beløp(30.april(2020))
+        val virkningstidspunkt = Grunnbeløp.virkningstidspunktFor(beløp)
+        assertEquals(1.mai(2019), virkningstidspunkt)
+    }
+
+
+    @Test
+    fun `virkningstidspunkt etter ny G sitt virkningstidspunkt`() {
+        val beløp = Grunnbeløp.`1G`.beløp(2.mai(2021))
+        val virkningstidspunkt = Grunnbeløp.virkningstidspunktFor(beløp)
+        assertEquals(1.mai(2021), virkningstidspunkt)
+    }
+
+    @Test
+    fun `kaster exception for beløp som ikke er gyldig Grunnbeløp`() {
+        val ikkeGyldigGrunnbeløp = 123123.årlig
+        assertThrows<IllegalArgumentException> { Grunnbeløp.virkningstidspunktFor(ikkeGyldigGrunnbeløp)}
     }
 
     private fun assertMinsteinntektOk(
