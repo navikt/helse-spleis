@@ -28,7 +28,7 @@ internal class SykepengegrunnlagTest {
 
     @Test
     fun `justerer grunnbeløpet`() {
-        val sykepengegrunnlag = 60000.månedlig.sykepengegrunnlag(1.mai(2020))
+        val sykepengegrunnlag = 60000.månedlig.sykepengegrunnlag("orgnr", 1.mai(2020), 1.mai(2020))
         val justert = sykepengegrunnlag.justerGrunnbeløp()
         assertNotEquals(sykepengegrunnlag, justert)
         assertNotEquals(sykepengegrunnlag.inspektør.sykepengegrunnlag, justert.inspektør.sykepengegrunnlag)

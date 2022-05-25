@@ -135,7 +135,6 @@ internal interface SykepengegrunnlagVisitor : ArbeidsgiverInntektsopplysningVisi
         `6G`: Inntekt,
         begrensning: Sykepengegrunnlag.Begrensning,
         deaktiverteArbeidsforhold: List<String>,
-        greguleringstidspunkt: LocalDateTime?,
         vurdertInfotrygd: Boolean
     ) {}
     fun preVisitArbeidsgiverInntektsopplysninger() {}
@@ -151,7 +150,6 @@ internal interface SykepengegrunnlagVisitor : ArbeidsgiverInntektsopplysningVisi
         `6G`: Inntekt,
         begrensning: Sykepengegrunnlag.Begrensning,
         deaktiverteArbeidsforhold: List<String>,
-        greguleringstidspunkt: LocalDateTime?,
         vurdertInfotrygd: Boolean
     ) {}
 }

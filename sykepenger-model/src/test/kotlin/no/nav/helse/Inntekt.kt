@@ -27,3 +27,16 @@ internal fun Inntekt.sykepengegrunnlag(orgnr: String, skjæringstidspunkt: Local
         skjæringstidspunkt = skjæringstidspunkt,
         subsumsjonObserver = SubsumsjonObserver.NullObserver
     )
+internal fun Inntekt.sykepengegrunnlag(orgnr: String, skjæringstidspunkt: LocalDate, virkningstidspunkt: LocalDate) =
+    Sykepengegrunnlag(
+        skjæringstidspunkt = skjæringstidspunkt,
+        arbeidsgiverInntektsopplysninger = listOf(
+            ArbeidsgiverInntektsopplysning(
+                orgnr,
+                Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), skjæringstidspunkt, UUID.randomUUID(), this)
+            )
+        ),
+        deaktiverteArbeidsforhold = emptyList(),
+        vurdertInfotrygd = false,
+        `6G` = Grunnbeløp.`6G`.beløp(skjæringstidspunkt, virkningstidspunkt)
+    )

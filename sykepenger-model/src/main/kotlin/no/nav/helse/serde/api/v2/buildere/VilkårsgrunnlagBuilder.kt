@@ -266,7 +266,6 @@ internal class VilkårsgrunnlagBuilder(
                 `6G`: Inntekt,
                 begrensning: Sykepengegrunnlag.Begrensning,
                 deaktiverteArbeidsforhold: List<String>,
-                greguleringstidspunkt: LocalDateTime?,
                 vurdertInfotrygd: Boolean
             ) {
                 this.sykepengegrunnlag = InntektBuilder(sykepengegrunnlag).build()

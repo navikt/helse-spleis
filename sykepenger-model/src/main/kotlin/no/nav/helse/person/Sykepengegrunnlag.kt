@@ -1,7 +1,6 @@
 package no.nav.helse.person
 
 import java.time.LocalDate
-import java.time.LocalDateTime
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.inntektsopplysningPerArbeidsgiver
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.sykepengegrunnlag
@@ -20,13 +19,13 @@ internal class Sykepengegrunnlag(
     internal val deaktiverteArbeidsforhold: List<String>,
     private val vurdertInfotrygd: Boolean,
     private val overstyrtGrunnlagForSykepengegrunnlag: Inntekt? = null,
-    private val greguleringstidspunkt: LocalDateTime? = null
+    `6G`: Inntekt? = null
 ) {
-    private val `6G`: Inntekt = Grunnbeløp.`6G`.beløp(skjæringstidspunkt, greguleringstidspunkt?.toLocalDate())
+    private val `6G`: Inntekt = `6G` ?: Grunnbeløp.`6G`.beløp(skjæringstidspunkt, LocalDate.now())
     private val grunnlag = arbeidsgiverInntektsopplysninger.sykepengegrunnlag()
     internal val grunnlagForSykepengegrunnlag: Inntekt = overstyrtGrunnlagForSykepengegrunnlag ?: grunnlag.values.summer() // TODO: gjøre private
-    internal val sykepengegrunnlag = grunnlagForSykepengegrunnlag.coerceAtMost(`6G`)
-    internal val begrensning = if (vurdertInfotrygd) VURDERT_I_INFOTRYGD else if (grunnlagForSykepengegrunnlag > `6G`) ER_6G_BEGRENSET else ER_IKKE_6G_BEGRENSET
+    internal val sykepengegrunnlag = grunnlagForSykepengegrunnlag.coerceAtMost(this.`6G`)
+    internal val begrensning = if (vurdertInfotrygd) VURDERT_I_INFOTRYGD else if (grunnlagForSykepengegrunnlag > this.`6G`) ER_6G_BEGRENSET else ER_IKKE_6G_BEGRENSET
 
     internal constructor(
         arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
@@ -71,8 +70,7 @@ internal class Sykepengegrunnlag(
             arbeidsgiverInntektsopplysninger = arbeidsgiverInntektsopplysninger,
             deaktiverteArbeidsforhold = deaktiverteArbeidsforhold,
             vurdertInfotrygd = vurdertInfotrygd,
-            overstyrtGrunnlagForSykepengegrunnlag = grunnlagForSykepengegrunnlag,
-            greguleringstidspunkt = LocalDateTime.now()
+            overstyrtGrunnlagForSykepengegrunnlag = grunnlagForSykepengegrunnlag
         )
 
     internal fun accept(visitor: SykepengegrunnlagVisitor) {
@@ -85,7 +83,6 @@ internal class Sykepengegrunnlag(
             `6G`,
             begrensning,
             deaktiverteArbeidsforhold,
-            greguleringstidspunkt,
             vurdertInfotrygd
         )
         visitor.preVisitArbeidsgiverInntektsopplysninger()
@@ -100,7 +97,6 @@ internal class Sykepengegrunnlag(
             `6G`,
             begrensning,
             deaktiverteArbeidsforhold,
-            greguleringstidspunkt,
             vurdertInfotrygd
         )
     }
