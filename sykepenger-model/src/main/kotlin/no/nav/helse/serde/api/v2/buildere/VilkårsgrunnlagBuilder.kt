@@ -1,20 +1,31 @@
 package no.nav.helse.serde.api.v2.buildere
 
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.YearMonth
+import java.util.UUID
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.hendelser.Medlemskapsvurdering
-import no.nav.helse.person.*
-import no.nav.helse.person.Inntektshistorikk.*
+import no.nav.helse.person.ArbeidsgiverInntektsopplysning
+import no.nav.helse.person.InntekthistorikkVisitor
+import no.nav.helse.person.Inntektshistorikk.Infotrygd
+import no.nav.helse.person.Inntektshistorikk.Inntektsmelding
+import no.nav.helse.person.Inntektshistorikk.Saksbehandler
+import no.nav.helse.person.Inntektshistorikk.Skatt
+import no.nav.helse.person.Inntektshistorikk.SkattComposite
+import no.nav.helse.person.Opptjening
+import no.nav.helse.person.Person
+import no.nav.helse.person.PersonVisitor
+import no.nav.helse.person.Sykepengegrunnlag
+import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.Grunnlagsdata
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag
+import no.nav.helse.person.VilkårsgrunnlagHistorikkVisitor
 import no.nav.helse.serde.api.builders.InntektshistorikkForAOrdningenBuilder
 import no.nav.helse.serde.api.v2.SpleisVilkårsgrunnlag
 import no.nav.helse.serde.api.v2.Vilkårsgrunnlag
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosent
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.YearMonth
-import java.util.*
 import kotlin.properties.Delegates
 
 private typealias VilkårsgrunnlagHistorikkId = UUID
@@ -248,10 +259,15 @@ internal class VilkårsgrunnlagBuilder(
 
             override fun preVisitSykepengegrunnlag(
                 sykepengegrunnlag1: Sykepengegrunnlag,
+                skjæringstidspunkt: LocalDate,
                 sykepengegrunnlag: Inntekt,
+                overstyrtGrunnlagForSykepengegrunnlag: Inntekt?,
                 grunnlagForSykepengegrunnlag: Inntekt,
+                `6G`: Inntekt,
                 begrensning: Sykepengegrunnlag.Begrensning,
-                deaktiverteArbeidsforhold: List<String>
+                deaktiverteArbeidsforhold: List<String>,
+                greguleringstidspunkt: LocalDateTime?,
+                vurdertInfotrygd: Boolean
             ) {
                 this.sykepengegrunnlag = InntektBuilder(sykepengegrunnlag).build()
                 this.omregnetÅrsinntekt = InntektBuilder(grunnlagForSykepengegrunnlag).build().årlig

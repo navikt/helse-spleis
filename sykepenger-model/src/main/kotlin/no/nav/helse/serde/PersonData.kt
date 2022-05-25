@@ -289,20 +289,22 @@ internal data class PersonData(
         }
 
         data class SykepengegrunnlagData(
+            private val skjæringstidspunkt: LocalDate?, // TODO: migrere denne i json
             private val sykepengegrunnlag: Double,
             private val arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysningData>,
-            private val grunnlagForSykepengegrunnlag: Double,
+            private val overstyrtGrunnlagForSykepengegrunnlag: Double?,
             private val begrensning: Sykepengegrunnlag.Begrensning,
             private val deaktiverteArbeidsforhold: List<String>,
+            private val vurdertInfotrygd: Boolean?, // TODO: migrere denne i json
             private val greguleringstidspunkt: LocalDateTime?
         ) {
 
             internal fun parseSykepengegrunnlag(skjæringstidspunkt: LocalDate): Sykepengegrunnlag = Sykepengegrunnlag(
-                skjæringstidspunkt = skjæringstidspunkt,
+                skjæringstidspunkt = this.skjæringstidspunkt ?: skjæringstidspunkt,
                 arbeidsgiverInntektsopplysninger = arbeidsgiverInntektsopplysninger.parseArbeidsgiverInntektsopplysninger(),
                 deaktiverteArbeidsforhold = deaktiverteArbeidsforhold,
-                vurdertInfotrygd = begrensning == Sykepengegrunnlag.Begrensning.VURDERT_I_INFOTRYGD, // TODO: migrere denne til boolean i json
-                cachedGrunnlagForSykepengegrunnlag = grunnlagForSykepengegrunnlag.årlig,
+                vurdertInfotrygd = this.vurdertInfotrygd ?: (begrensning == Sykepengegrunnlag.Begrensning.VURDERT_I_INFOTRYGD), // TODO: migrere denne til boolean i json
+                overstyrtGrunnlagForSykepengegrunnlag = overstyrtGrunnlagForSykepengegrunnlag?.årlig,
                 greguleringstidspunkt = greguleringstidspunkt
             )
         }

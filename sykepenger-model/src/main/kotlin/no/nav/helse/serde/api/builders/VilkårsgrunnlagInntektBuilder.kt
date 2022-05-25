@@ -1,13 +1,19 @@
 package no.nav.helse.serde.api.builders
 
-import no.nav.helse.Grunnbeløp
-import no.nav.helse.person.*
-import no.nav.helse.serde.api.InntektsgrunnlagDTO
-import no.nav.helse.økonomi.Inntekt
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
+import no.nav.helse.Grunnbeløp
+import no.nav.helse.person.ArbeidsgiverInntektsopplysning
+import no.nav.helse.person.Inntektshistorikk
+import no.nav.helse.person.Person
+import no.nav.helse.person.Sammenligningsgrunnlag
+import no.nav.helse.person.Sykepengegrunnlag
+import no.nav.helse.person.VilkårsgrunnlagHistorikk
+import no.nav.helse.person.VilkårsgrunnlagHistorikkVisitor
+import no.nav.helse.serde.api.InntektsgrunnlagDTO
+import no.nav.helse.økonomi.Inntekt
 
 internal class VilkårsgrunnlagInntektBuilder(private val person: Person) {
     private val nøkkeldataOmInntekter = mutableListOf<NøkkeldataOmInntekt>()
@@ -75,10 +81,15 @@ internal class VilkårsgrunnlagInntektBuilder(private val person: Person) {
 
         override fun preVisitSykepengegrunnlag(
             sykepengegrunnlag1: Sykepengegrunnlag,
+            skjæringstidspunkt: LocalDate,
             sykepengegrunnlag: Inntekt,
+            overstyrtGrunnlagForSykepengegrunnlag: Inntekt?,
             grunnlagForSykepengegrunnlag: Inntekt,
+            `6G`: Inntekt,
             begrensning: Sykepengegrunnlag.Begrensning,
-            deaktiverteArbeidsforhold: List<String>
+            deaktiverteArbeidsforhold: List<String>,
+            greguleringstidspunkt: LocalDateTime?,
+            vurdertInfotrygd: Boolean
         ) {
             this.sykepengegrunnlag = sykepengegrunnlag1
         }

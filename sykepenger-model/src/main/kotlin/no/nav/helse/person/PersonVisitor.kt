@@ -121,7 +121,42 @@ internal interface FeriepengeutbetalingsperiodeVisitor {
     fun visitArbeidsgiverutbetalingsperiode(orgnr: String, periode: Periode, beløp: Int, utbetalt: LocalDate) {}
 }
 
-internal interface VilkårsgrunnlagHistorikkVisitor : InntekthistorikkVisitor, ArbeidsforholdVisitor {
+internal interface ArbeidsgiverInntektsopplysningVisitor : InntekthistorikkVisitor {
+    fun preVisitArbeidsgiverInntektsopplysning(arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning, orgnummer: String) {}
+    fun postVisitArbeidsgiverInntektsopplysning(arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning, orgnummer: String) {}
+}
+internal interface SykepengegrunnlagVisitor : ArbeidsgiverInntektsopplysningVisitor {
+    fun preVisitSykepengegrunnlag(
+        sykepengegrunnlag1: Sykepengegrunnlag,
+        skjæringstidspunkt: LocalDate,
+        sykepengegrunnlag: Inntekt,
+        overstyrtGrunnlagForSykepengegrunnlag: Inntekt?,
+        grunnlagForSykepengegrunnlag: Inntekt,
+        `6G`: Inntekt,
+        begrensning: Sykepengegrunnlag.Begrensning,
+        deaktiverteArbeidsforhold: List<String>,
+        greguleringstidspunkt: LocalDateTime?,
+        vurdertInfotrygd: Boolean
+    ) {}
+    fun preVisitArbeidsgiverInntektsopplysninger() {}
+
+    fun postVisitArbeidsgiverInntektsopplysninger() {}
+
+    fun postVisitSykepengegrunnlag(
+        sykepengegrunnlag1: Sykepengegrunnlag,
+        skjæringstidspunkt: LocalDate,
+        sykepengegrunnlag: Inntekt,
+        overstyrtGrunnlagForSykepengegrunnlag: Inntekt?,
+        grunnlagForSykepengegrunnlag: Inntekt,
+        `6G`: Inntekt,
+        begrensning: Sykepengegrunnlag.Begrensning,
+        deaktiverteArbeidsforhold: List<String>,
+        greguleringstidspunkt: LocalDateTime?,
+        vurdertInfotrygd: Boolean
+    ) {}
+}
+
+internal interface VilkårsgrunnlagHistorikkVisitor : SykepengegrunnlagVisitor, ArbeidsforholdVisitor {
     fun preVisitVilkårsgrunnlagHistorikk() {}
     fun preVisitInnslag(innslag: VilkårsgrunnlagHistorikk.Innslag, id: UUID, opprettet: LocalDateTime) {}
     fun postVisitInnslag(innslag: VilkårsgrunnlagHistorikk.Innslag, id: UUID, opprettet: LocalDateTime) {}
@@ -165,20 +200,6 @@ internal interface VilkårsgrunnlagHistorikkVisitor : InntekthistorikkVisitor, A
         sykepengegrunnlag: Sykepengegrunnlag,
         vilkårsgrunnlagId: UUID
     ) {}
-    fun preVisitSykepengegrunnlag(
-        sykepengegrunnlag1: Sykepengegrunnlag,
-        sykepengegrunnlag: Inntekt,
-        grunnlagForSykepengegrunnlag: Inntekt,
-        begrensning: Sykepengegrunnlag.Begrensning,
-        deaktiverteArbeidsforhold: List<String>
-    ) {}
-    fun postVisitSykepengegrunnlag(
-        sykepengegrunnlag1: Sykepengegrunnlag,
-        sykepengegrunnlag: Inntekt,
-        grunnlagForSykepengegrunnlag: Inntekt,
-        begrensning: Sykepengegrunnlag.Begrensning,
-        deaktiverteArbeidsforhold: List<String>
-    ) {}
     fun preVisitSammenligningsgrunnlag(
         sammenligningsgrunnlag1: Sammenligningsgrunnlag,
         sammenligningsgrunnlag: Inntekt
@@ -187,10 +208,6 @@ internal interface VilkårsgrunnlagHistorikkVisitor : InntekthistorikkVisitor, A
         sammenligningsgrunnlag1: Sammenligningsgrunnlag,
         sammenligningsgrunnlag: Inntekt
     ) {}
-    fun preVisitArbeidsgiverInntektsopplysninger() {}
-    fun preVisitArbeidsgiverInntektsopplysning(arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning, orgnummer: String) {}
-    fun postVisitArbeidsgiverInntektsopplysning(arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning, orgnummer: String) {}
-    fun postVisitArbeidsgiverInntektsopplysninger() {}
     fun preVisitOpptjening(opptjening: Opptjening, arbeidsforhold: List<Opptjening.ArbeidsgiverOpptjeningsgrunnlag>, opptjeningsperiode: Periode) {}
     fun postVisitOpptjening(opptjening: Opptjening, arbeidsforhold: List<Opptjening.ArbeidsgiverOpptjeningsgrunnlag>, opptjeningsperiode: Periode) {}
     fun preVisitArbeidsgiverOpptjeningsgrunnlag(orgnummer: String, ansattPerioder: List<Arbeidsforholdhistorikk.Arbeidsforhold>) {}

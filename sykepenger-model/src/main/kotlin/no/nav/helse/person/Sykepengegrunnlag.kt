@@ -19,12 +19,12 @@ internal class Sykepengegrunnlag(
     private val arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
     internal val deaktiverteArbeidsforhold: List<String>,
     private val vurdertInfotrygd: Boolean,
-    cachedGrunnlagForSykepengegrunnlag: Inntekt? = null,
+    private val overstyrtGrunnlagForSykepengegrunnlag: Inntekt? = null,
     private val greguleringstidspunkt: LocalDateTime? = null
 ) {
     private val `6G`: Inntekt = Grunnbeløp.`6G`.beløp(skjæringstidspunkt, greguleringstidspunkt?.toLocalDate())
     private val grunnlag = arbeidsgiverInntektsopplysninger.sykepengegrunnlag()
-    internal val grunnlagForSykepengegrunnlag: Inntekt = cachedGrunnlagForSykepengegrunnlag ?: grunnlag.values.summer() // TODO: gjøre private
+    internal val grunnlagForSykepengegrunnlag: Inntekt = overstyrtGrunnlagForSykepengegrunnlag ?: grunnlag.values.summer() // TODO: gjøre private
     internal val sykepengegrunnlag = grunnlagForSykepengegrunnlag.coerceAtMost(`6G`)
     internal val begrensning = if (vurdertInfotrygd) VURDERT_I_INFOTRYGD else if (grunnlagForSykepengegrunnlag > `6G`) ER_6G_BEGRENSET else ER_IKKE_6G_BEGRENSET
 
@@ -71,16 +71,38 @@ internal class Sykepengegrunnlag(
             arbeidsgiverInntektsopplysninger = arbeidsgiverInntektsopplysninger,
             deaktiverteArbeidsforhold = deaktiverteArbeidsforhold,
             vurdertInfotrygd = vurdertInfotrygd,
-            cachedGrunnlagForSykepengegrunnlag = grunnlagForSykepengegrunnlag,
+            overstyrtGrunnlagForSykepengegrunnlag = grunnlagForSykepengegrunnlag,
             greguleringstidspunkt = LocalDateTime.now()
         )
 
-    internal fun accept(vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor) {
-        vilkårsgrunnlagHistorikkVisitor.preVisitSykepengegrunnlag(this, sykepengegrunnlag, grunnlagForSykepengegrunnlag, begrensning, deaktiverteArbeidsforhold)
-        vilkårsgrunnlagHistorikkVisitor.preVisitArbeidsgiverInntektsopplysninger()
-        arbeidsgiverInntektsopplysninger.forEach { it.accept(vilkårsgrunnlagHistorikkVisitor) }
-        vilkårsgrunnlagHistorikkVisitor.postVisitArbeidsgiverInntektsopplysninger()
-        vilkårsgrunnlagHistorikkVisitor.postVisitSykepengegrunnlag(this, sykepengegrunnlag, grunnlagForSykepengegrunnlag, begrensning, deaktiverteArbeidsforhold)
+    internal fun accept(visitor: SykepengegrunnlagVisitor) {
+        visitor.preVisitSykepengegrunnlag(
+            this,
+            skjæringstidspunkt,
+            sykepengegrunnlag,
+            overstyrtGrunnlagForSykepengegrunnlag,
+            grunnlagForSykepengegrunnlag,
+            `6G`,
+            begrensning,
+            deaktiverteArbeidsforhold,
+            greguleringstidspunkt,
+            vurdertInfotrygd
+        )
+        visitor.preVisitArbeidsgiverInntektsopplysninger()
+        arbeidsgiverInntektsopplysninger.forEach { it.accept(visitor) }
+        visitor.postVisitArbeidsgiverInntektsopplysninger()
+        visitor.postVisitSykepengegrunnlag(
+            this,
+            skjæringstidspunkt,
+            sykepengegrunnlag,
+            overstyrtGrunnlagForSykepengegrunnlag,
+            grunnlagForSykepengegrunnlag,
+            `6G`,
+            begrensning,
+            deaktiverteArbeidsforhold,
+            greguleringstidspunkt,
+            vurdertInfotrygd
+        )
     }
 
     internal fun avviksprosent(sammenligningsgrunnlag: Inntekt, subsumsjonObserver: SubsumsjonObserver) = grunnlagForSykepengegrunnlag.avviksprosent(sammenligningsgrunnlag).also { avvik ->
