@@ -680,6 +680,10 @@ class Person private constructor(
 
     internal fun minimumInntekt(skjæringstidspunkt: LocalDate): Inntekt = fødselsnummer.alder().minimumInntekt(skjæringstidspunkt)
 
+    internal fun oppdaterManglendeMinimumInntekt(vilkårsgrunnlag: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement, skjæringstidspunkt: LocalDate, subsumsjonObserver: SubsumsjonObserver) {
+        vilkårsgrunnlag.oppdaterManglendeMinimumInntekt(vilkårsgrunnlagHistorikk, fødselsnummer.alder(), skjæringstidspunkt, subsumsjonObserver)
+    }
+
     internal fun kunOvergangFraInfotrygd(vedtaksperiode: Vedtaksperiode) =
         Arbeidsgiver.kunOvergangFraInfotrygd(arbeidsgivere, vedtaksperiode)
 
@@ -703,7 +707,7 @@ class Person private constructor(
         grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata,
         oppfyltKravTilMinimumInntekt: Boolean
     ) {
-        vilkårsgrunnlagHistorikk.oppdaterMinimumInntektsvurdering(skjæringstidspunkt, grunnlagsdata, oppfyltKravTilMinimumInntekt)
+
     }
 
     private fun emitOpprettOppgaveForSpeilsaksbehandlereEvent(hendelse: IAktivitetslogg, hendelseIder: Set<UUID>) {
@@ -831,15 +835,9 @@ class Person private constructor(
     internal fun vilkårsprøvEtterNyInformasjonFraSaksbehandler(hendelse: PersonHendelse, skjæringstidspunkt: LocalDate, subsumsjonObserver: SubsumsjonObserver) {
         val sykepengegrunnlag = beregnSykepengegrunnlag(skjæringstidspunkt, subsumsjonObserver)
         val sammenligningsgrunnlag = beregnSammenligningsgrunnlag(skjæringstidspunkt, subsumsjonObserver)
-        val avviksprosent = sykepengegrunnlag.avviksprosent(sammenligningsgrunnlag.sammenligningsgrunnlag)
+        val avviksprosent = sammenligningsgrunnlag.avviksprosent(sykepengegrunnlag, subsumsjonObserver)
 
-        val harAkseptabeltAvvik = Inntektsvurdering.validerAvvik(
-            hendelse,
-            avviksprosent,
-            sykepengegrunnlag.grunnlagForSykepengegrunnlag,
-            sammenligningsgrunnlag.sammenligningsgrunnlag,
-            subsumsjonObserver
-        ) { _, maksimaltTillattAvvik ->
+        val harAkseptabeltAvvik = Inntektsvurdering.validerAvvik(hendelse, avviksprosent) { _, maksimaltTillattAvvik ->
             warn("Har mer enn %.0f %% avvik. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene.", maksimaltTillattAvvik)
         }
 

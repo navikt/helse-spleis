@@ -39,7 +39,7 @@ class Inntekt private constructor(private val årlig: Double) : Comparable<Innte
 
         fun Number.daglig(grad: Prosentdel) = this.daglig / grad
 
-        internal fun List<Inntekt>.summer() = this.fold(INGEN) { acc, inntekt -> acc + inntekt }
+        internal fun Collection<Inntekt>.summer() = this.fold(INGEN) { acc, inntekt -> acc + inntekt }
 
         internal val INGEN = 0.daglig
 

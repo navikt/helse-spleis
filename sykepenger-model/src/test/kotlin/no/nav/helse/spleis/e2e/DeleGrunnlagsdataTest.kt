@@ -24,8 +24,6 @@ import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Periodetype
 import no.nav.helse.person.Sammenligningsgrunnlag
-import no.nav.helse.person.Sykepengegrunnlag
-import no.nav.helse.person.Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -42,8 +40,8 @@ import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.person.nullstillTilstandsendringer
+import no.nav.helse.sykepengegrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
-import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosent
@@ -346,12 +344,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
 
         val vilkårsgrunnlagElement = VilkårsgrunnlagHistorikk.Grunnlagsdata(
             skjæringstidspunkt = 1.januar,
-            sykepengegrunnlag = sykepengegrunnlag(inntekt, listOf(
-                ArbeidsgiverInntektsopplysning(
-                    ORGNUMMER,
-                    Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), inntekt)
-                )
-            )),
+            sykepengegrunnlag = inntekt.sykepengegrunnlag(ORGNUMMER),
             sammenligningsgrunnlag = Sammenligningsgrunnlag(
                 arbeidsgiverInntektsopplysninger = listOf(
                     ArbeidsgiverInntektsopplysning("orgnummer",
@@ -443,13 +436,5 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
             assertEquals(0, it.avvistDagTeller)
         }
     }
-
-    private fun sykepengegrunnlag(inntekt: Inntekt, arbeidsgiverInntektsopplysning: List<ArbeidsgiverInntektsopplysning> = listOf()) = Sykepengegrunnlag(
-        arbeidsgiverInntektsopplysninger = arbeidsgiverInntektsopplysning,
-        sykepengegrunnlag = inntekt,
-        grunnlagForSykepengegrunnlag = inntekt,
-        begrensning = ER_IKKE_6G_BEGRENSET,
-        deaktiverteArbeidsforhold = emptyList()
-    )
 
 }

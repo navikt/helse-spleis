@@ -6,6 +6,7 @@ import java.util.UUID
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Vilkårsgrunnlag
+import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -41,7 +42,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         nyeElementer.forEach { nyttInnslag.add(it.skjæringstidspunkt(), it) }
     }
 
-    internal fun oppdaterMinimumInntektsvurdering(skjæringstidspunkt: LocalDate, grunnlagsdata: Grunnlagsdata, oppfyllerKravTilMinimumInntekt: Boolean) {
+    private fun oppdaterMinimumInntektsvurdering(skjæringstidspunkt: LocalDate, grunnlagsdata: Grunnlagsdata, oppfyllerKravTilMinimumInntekt: Boolean) {
         nyttInnslag().add(skjæringstidspunkt, grunnlagsdata.kopierMedMinimumInntektsvurdering(oppfyllerKravTilMinimumInntekt))
     }
 
@@ -124,9 +125,9 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         fun sammenligningsgrunnlag(): Inntekt?
         fun sammenligningsgrunnlagPerArbeidsgiver(): Map<String, Inntektshistorikk.Inntektsopplysning>
         fun grunnlagsBegrensning(): Sykepengegrunnlag.Begrensning
-        fun grunnlagForSykepengegrunnlag(): Inntekt
+        fun grunnlagForSykepengegrunnlag(): Inntekt // TODO: fjerne denne
         fun gjelderFlereArbeidsgivere(): Boolean
-        fun oppdaterManglendeMinimumInntekt(person: Person, skjæringstidspunkt: LocalDate) {}
+        fun oppdaterManglendeMinimumInntekt(vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk, alder: Alder, skjæringstidspunkt: LocalDate, subsumsjonObserver: SubsumsjonObserver) {}
         fun sjekkAvviksprosent(aktivitetslogg: IAktivitetslogg): Boolean = true
         fun avvis(tidslinjer: List<Utbetalingstidslinje>, skjæringstidspunkt: LocalDate, alder: Alder) {}
     }
@@ -156,10 +157,11 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             return Inntektsvurdering.sjekkAvvik(avviksprosent, aktivitetslogg, IAktivitetslogg::error)
         }
 
-        override fun oppdaterManglendeMinimumInntekt(person: Person, skjæringstidspunkt: LocalDate) {
+        override fun oppdaterManglendeMinimumInntekt(vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk, alder: Alder, skjæringstidspunkt: LocalDate, subsumsjonObserver: SubsumsjonObserver) {
             if (harMinimumInntekt != null) return
-            sykepengegrunnlag.oppdaterHarMinimumInntekt(skjæringstidspunkt, person, this)
             sikkerLogg.info("Vi antar at det ikke finnes forlengelser til perioder som har harMinimumInntekt = null lenger")
+            val oppfyltKravTilMinimumInntekt = sykepengegrunnlag.oppfyllerKravTilMinimumInntekt(alder, skjæringstidspunkt, subsumsjonObserver)
+            vilkårsgrunnlagHistorikk.oppdaterMinimumInntektsvurdering(skjæringstidspunkt, this, oppfyltKravTilMinimumInntekt)
         }
 
         override fun accept(skjæringstidspunkt: LocalDate, vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor) {

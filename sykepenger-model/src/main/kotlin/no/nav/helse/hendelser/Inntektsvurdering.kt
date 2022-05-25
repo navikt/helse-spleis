@@ -1,5 +1,6 @@
 package no.nav.helse.hendelser
 
+import java.time.LocalDate
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.Companion.antallMåneder
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.Companion.kilder
 import no.nav.helse.person.IAktivitetslogg
@@ -10,7 +11,6 @@ import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosent
 import no.nav.helse.økonomi.Prosent.Companion.MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT
-import java.time.LocalDate
 
 class Inntektsvurdering(private val inntekter: List<ArbeidsgiverInntekt>) {
     private lateinit var avviksprosent: Prosent
@@ -28,10 +28,8 @@ class Inntektsvurdering(private val inntekter: List<ArbeidsgiverInntekt>) {
         if (inntekter.kilder(3) > antallArbeidsgivereFraAareg) {
             aktivitetslogg.warn("Bruker har flere inntektskilder de siste tre månedene enn arbeidsforhold som er oppdaget i Aa-registeret.")
         }
-        avviksprosent = grunnlagForSykepengegrunnlag.avviksprosent(sammenligningsgrunnlag)
-        return validerAvvik(
-            aktivitetslogg, avviksprosent, grunnlagForSykepengegrunnlag.grunnlagForSykepengegrunnlag, sammenligningsgrunnlag, subsumsjonObserver
-        ) { melding, tillattAvvik ->
+        avviksprosent = grunnlagForSykepengegrunnlag.avviksprosent(sammenligningsgrunnlag, subsumsjonObserver)
+        return validerAvvik(aktivitetslogg, avviksprosent) { melding, tillattAvvik ->
             error(melding, tillattAvvik)
         }
     }
@@ -43,14 +41,9 @@ class Inntektsvurdering(private val inntekter: List<ArbeidsgiverInntekt>) {
         internal fun validerAvvik(
             aktivitetslogg: IAktivitetslogg,
             avvik: Prosent,
-            grunnlagForSykepengegrunnlag: Inntekt,
-            sammenligningsgrunnlag: Inntekt,
-            subsumsjonObserver: SubsumsjonObserver,
             onFailure: IAktivitetslogg.(melding: String, tillattAvvik: Double) -> Unit
         ): Boolean {
-            val harAkseptabeltAvvik = sjekkAvvik(avvik, aktivitetslogg, onFailure)
-            subsumsjonObserver.`§ 8-30 ledd 2 punktum 1`(MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT, grunnlagForSykepengegrunnlag, sammenligningsgrunnlag, avvik)
-            return harAkseptabeltAvvik
+            return sjekkAvvik(avvik, aktivitetslogg, onFailure)
         }
 
         internal fun sjekkAvvik(avvik: Prosent, aktivitetslogg: IAktivitetslogg, onFailure: IAktivitetslogg.(melding: String, tillattAvvik: Double) -> Unit): Boolean {
