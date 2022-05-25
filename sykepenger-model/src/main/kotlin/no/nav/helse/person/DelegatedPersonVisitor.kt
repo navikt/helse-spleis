@@ -102,7 +102,6 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         `6G`: Inntekt,
         begrensning: Sykepengegrunnlag.Begrensning,
         deaktiverteArbeidsforhold: List<String>,
-        greguleringstidspunkt: LocalDateTime?,
         vurdertInfotrygd: Boolean
     ) {
         delegatee.preVisitSykepengegrunnlag(
@@ -114,7 +113,6 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
             `6G`,
             begrensning,
             deaktiverteArbeidsforhold,
-            greguleringstidspunkt,
             vurdertInfotrygd
         )
     }
@@ -128,7 +126,6 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         `6G`: Inntekt,
         begrensning: Sykepengegrunnlag.Begrensning,
         deaktiverteArbeidsforhold: List<String>,
-        greguleringstidspunkt: LocalDateTime?,
         vurdertInfotrygd: Boolean
     ) {
         delegatee.postVisitSykepengegrunnlag(
@@ -140,7 +137,6 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
             `6G`,
             begrensning,
             deaktiverteArbeidsforhold,
-            greguleringstidspunkt,
             vurdertInfotrygd
         )
     }

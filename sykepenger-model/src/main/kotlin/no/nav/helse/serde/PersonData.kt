@@ -6,6 +6,7 @@ import java.time.LocalDateTime
 import java.time.Year
 import java.time.YearMonth
 import java.util.UUID
+import no.nav.helse.Grunnbeløp
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
@@ -291,12 +292,12 @@ internal data class PersonData(
         data class SykepengegrunnlagData(
             private val skjæringstidspunkt: LocalDate?, // TODO: migrere denne i json
             private val sykepengegrunnlag: Double,
+            private val grunnbeløp: Double?, // TODO: migrere denne i json
             private val arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysningData>,
             private val overstyrtGrunnlagForSykepengegrunnlag: Double?,
             private val begrensning: Sykepengegrunnlag.Begrensning,
             private val deaktiverteArbeidsforhold: List<String>,
             private val vurdertInfotrygd: Boolean?, // TODO: migrere denne i json
-            private val greguleringstidspunkt: LocalDateTime?
         ) {
 
             internal fun parseSykepengegrunnlag(skjæringstidspunkt: LocalDate): Sykepengegrunnlag = Sykepengegrunnlag(
@@ -305,7 +306,7 @@ internal data class PersonData(
                 deaktiverteArbeidsforhold = deaktiverteArbeidsforhold,
                 vurdertInfotrygd = this.vurdertInfotrygd ?: (begrensning == Sykepengegrunnlag.Begrensning.VURDERT_I_INFOTRYGD), // TODO: migrere denne til boolean i json
                 overstyrtGrunnlagForSykepengegrunnlag = overstyrtGrunnlagForSykepengegrunnlag?.årlig,
-                greguleringstidspunkt = greguleringstidspunkt
+                `6G` = grunnbeløp?.årlig ?: Grunnbeløp.`6G`.beløp(skjæringstidspunkt, LocalDate.now()) // TODO: jsonmigrering
             )
         }
 

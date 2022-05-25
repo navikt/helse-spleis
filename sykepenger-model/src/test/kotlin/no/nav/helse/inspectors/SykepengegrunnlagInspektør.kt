@@ -1,7 +1,6 @@
 package no.nav.helse.inspectors
 
 import java.time.LocalDate
-import java.time.LocalDateTime
 import no.nav.helse.person.Sykepengegrunnlag
 import no.nav.helse.person.VilkårsgrunnlagHistorikkVisitor
 import no.nav.helse.økonomi.Inntekt
@@ -25,7 +24,6 @@ internal class SykepengegrunnlagInspektør(sykepengegrunnlag: Sykepengegrunnlag)
         `6G`: Inntekt,
         begrensning: Sykepengegrunnlag.Begrensning,
         deaktiverteArbeidsforhold: List<String>,
-        greguleringstidspunkt: LocalDateTime?,
         vurdertInfotrygd: Boolean
     ) {
         this.`6G` = `6G`

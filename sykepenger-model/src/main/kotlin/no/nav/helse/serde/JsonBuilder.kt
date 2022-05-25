@@ -883,7 +883,6 @@ internal class JsonBuilder : AbstractBuilder() {
             `6G`: Inntekt,
             begrensning: Sykepengegrunnlag.Begrensning,
             deaktiverteArbeidsforhold: List<String>,
-            greguleringstidspunkt: LocalDateTime?,
             vurdertInfotrygd: Boolean
         ) {
             pushState(SykepengegrunnlagState(sykepengegrunnlagMap))
@@ -962,7 +961,6 @@ internal class JsonBuilder : AbstractBuilder() {
             `6G`: Inntekt,
             begrensning: Sykepengegrunnlag.Begrensning,
             deaktiverteArbeidsforhold: List<String>,
-            greguleringstidspunkt: LocalDateTime?,
             vurdertInfotrygd: Boolean
         ) {
 
@@ -978,7 +976,6 @@ internal class JsonBuilder : AbstractBuilder() {
                     "vurdertInfotrygd" to vurdertInfotrygd
                 ).apply {
                     compute("overstyrtGrunnlagForSykepengegrunnlag") { _, _ -> overstyrtGrunnlagForSykepengegrunnlag?.reflection { årlig, _, _, _ -> årlig } }
-                    compute("greguleringstidspunkt") { _, _ -> greguleringstidspunkt }
                 }
             )
             popState()
