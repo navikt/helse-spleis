@@ -5,6 +5,7 @@ import no.nav.helse.Grunnbeløp
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.arbeidsgivergrunnlag
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.inntektsopplysningPerArbeidsgiver
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.sykepengegrunnlag
+import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.valider
 import no.nav.helse.person.Sykepengegrunnlag.Begrensning.ER_6G_BEGRENSET
 import no.nav.helse.person.Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
 import no.nav.helse.person.Sykepengegrunnlag.Begrensning.VURDERT_I_INFOTRYGD
@@ -63,6 +64,11 @@ internal class Sykepengegrunnlag(
         }
     }
 
+    internal fun valider(aktivitetslogg: IAktivitetslogg): Boolean {
+        arbeidsgiverInntektsopplysninger.valider(aktivitetslogg)
+        return !aktivitetslogg.hasErrorsOrWorse()
+    }
+
     internal fun justerGrunnbeløp() =
         Sykepengegrunnlag(
             skjæringstidspunkt = skjæringstidspunkt,
@@ -99,10 +105,10 @@ internal class Sykepengegrunnlag(
             vurdertInfotrygd
         )
     }
-
     internal fun avviksprosent(sammenligningsgrunnlag: Inntekt, subsumsjonObserver: SubsumsjonObserver) = grunnlagForSykepengegrunnlag.avviksprosent(sammenligningsgrunnlag).also { avvik ->
         subsumsjonObserver.`§ 8-30 ledd 2 punktum 1`(Prosent.MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT, grunnlagForSykepengegrunnlag, sammenligningsgrunnlag, avvik)
     }
+
     internal fun inntektsopplysningPerArbeidsgiver(): Map<String, Inntektshistorikk.Inntektsopplysning> =
         arbeidsgiverInntektsopplysninger.inntektsopplysningPerArbeidsgiver()
 

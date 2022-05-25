@@ -10,7 +10,6 @@ import no.nav.helse.person.Arbeidsforholdhistorikk
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.IAktivitetslogg
-import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Person
 import no.nav.helse.person.Sammenligningsgrunnlag
@@ -46,9 +45,7 @@ class Vilkårsgrunnlag(
         antallArbeidsgivereFraAareg: Int,
         subsumsjonObserver: SubsumsjonObserver
     ): IAktivitetslogg {
-        if (grunnlagForSykepengegrunnlag.inntektsopplysningPerArbeidsgiver().values.all { it is Inntektshistorikk.SkattComposite }) {
-            error("Bruker mangler nødvendig inntekt ved validering av Vilkårsgrunnlag")
-        }
+        val sykepengegrunnlagOk = grunnlagForSykepengegrunnlag.valider(this)
         inntektsvurderingForSykepengegrunnlag.valider(this)
         inntektsvurderingForSykepengegrunnlag.loggInteressantFrilanserInformasjon(skjæringstidspunkt)
 
@@ -76,7 +73,7 @@ class Vilkårsgrunnlag(
             opptjening = opptjening,
             medlemskapstatus = medlemskapsvurdering.medlemskapstatus,
             harMinimumInntekt = minimumInntektvurderingOk,
-            vurdertOk = inntektsvurderingOk && opptjeningvurderingOk && medlemskapsvurderingOk && minimumInntektvurderingOk,
+            vurdertOk = sykepengegrunnlagOk && inntektsvurderingOk && opptjeningvurderingOk && medlemskapsvurderingOk && minimumInntektvurderingOk,
             meldingsreferanseId = meldingsreferanseId(),
             vilkårsgrunnlagId = UUID.randomUUID()
         )
