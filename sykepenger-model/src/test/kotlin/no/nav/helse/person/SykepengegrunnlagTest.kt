@@ -30,6 +30,7 @@ internal class SykepengegrunnlagTest {
         val hendelseId = UUID.randomUUID()
         val tidsstempel = LocalDateTime.now()
         val sykepengegrunnlag1 = Sykepengegrunnlag(
+            skjæringstidspunkt = 1.januar,
             arbeidsgiverInntektsopplysninger = listOf(
                 ArbeidsgiverInntektsopplysning(
                     orgnummer = "orgnummer",
@@ -43,13 +44,14 @@ internal class SykepengegrunnlagTest {
                 )
             ),
             deaktiverteArbeidsforhold = emptyList(),
-            `6G` = Grunnbeløp.`6G`.beløp(1.januar),
-            vurdertInfotrygd = false
+            vurdertInfotrygd = false,
+            `6G` = Grunnbeløp.`6G`.beløp(1.januar)
         )
 
         assertEquals(
             sykepengegrunnlag1,
             Sykepengegrunnlag(
+                skjæringstidspunkt = 1.januar,
                 arbeidsgiverInntektsopplysninger = listOf(
                     ArbeidsgiverInntektsopplysning(
                         orgnummer = "orgnummer",
@@ -71,6 +73,7 @@ internal class SykepengegrunnlagTest {
         assertNotEquals(
             sykepengegrunnlag1,
             Sykepengegrunnlag(
+                skjæringstidspunkt = 1.januar,
                 arbeidsgiverInntektsopplysninger = emptyList(),
                 deaktiverteArbeidsforhold = emptyList(),
                 `6G` = Grunnbeløp.`6G`.beløp(1.januar),
@@ -81,6 +84,7 @@ internal class SykepengegrunnlagTest {
         assertNotEquals(
             sykepengegrunnlag1,
             Sykepengegrunnlag(
+                skjæringstidspunkt = 1.januar,
                 arbeidsgiverInntektsopplysninger = listOf(
                     ArbeidsgiverInntektsopplysning(
                         orgnummer = "orgnummer",
@@ -102,6 +106,7 @@ internal class SykepengegrunnlagTest {
         assertNotEquals(
             sykepengegrunnlag1,
             Sykepengegrunnlag(
+                skjæringstidspunkt = 1.januar,
                 arbeidsgiverInntektsopplysninger = listOf(
                     ArbeidsgiverInntektsopplysning(
                         orgnummer = "orgnummer",
@@ -123,6 +128,7 @@ internal class SykepengegrunnlagTest {
         assertNotEquals(
             sykepengegrunnlag1,
             Sykepengegrunnlag(
+                skjæringstidspunkt = 1.januar,
                 arbeidsgiverInntektsopplysninger = listOf(
                     ArbeidsgiverInntektsopplysning(
                         orgnummer = "orgnummer",
@@ -143,6 +149,7 @@ internal class SykepengegrunnlagTest {
         assertNotEquals(
             sykepengegrunnlag1,
             Sykepengegrunnlag(
+                skjæringstidspunkt = 1.januar,
                 arbeidsgiverInntektsopplysninger = listOf(
                     ArbeidsgiverInntektsopplysning(
                         orgnummer = "orgnummer",

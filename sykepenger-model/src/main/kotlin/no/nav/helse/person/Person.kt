@@ -680,8 +680,8 @@ class Person private constructor(
 
     internal fun minimumInntekt(skjæringstidspunkt: LocalDate): Inntekt = fødselsnummer.alder().minimumInntekt(skjæringstidspunkt)
 
-    internal fun oppdaterManglendeMinimumInntekt(vilkårsgrunnlag: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement, skjæringstidspunkt: LocalDate, subsumsjonObserver: SubsumsjonObserver) {
-        vilkårsgrunnlag.oppdaterManglendeMinimumInntekt(vilkårsgrunnlagHistorikk, fødselsnummer.alder(), skjæringstidspunkt, subsumsjonObserver)
+    internal fun oppdaterManglendeMinimumInntekt(vilkårsgrunnlag: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement, subsumsjonObserver: SubsumsjonObserver) {
+        vilkårsgrunnlag.oppdaterManglendeMinimumInntekt(vilkårsgrunnlagHistorikk, fødselsnummer.alder(), subsumsjonObserver)
     }
 
     internal fun kunOvergangFraInfotrygd(vedtaksperiode: Vedtaksperiode) =
@@ -848,7 +848,12 @@ class Person private constructor(
 
         when (val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt)) {
             is VilkårsgrunnlagHistorikk.Grunnlagsdata -> {
-                val harMinimumInntekt = validerMinimumInntekt(hendelse, fødselsnummer, skjæringstidspunkt, sykepengegrunnlag, subsumsjonObserver)
+                val harMinimumInntekt = validerMinimumInntekt(
+                    hendelse,
+                    fødselsnummer,
+                    sykepengegrunnlag,
+                    subsumsjonObserver
+                )
                 val grunnlagselement = grunnlag.kopierGrunnlagsdataMed(
                     sykepengegrunnlag = sykepengegrunnlag,
                     sammenligningsgrunnlag = sammenligningsgrunnlag,
