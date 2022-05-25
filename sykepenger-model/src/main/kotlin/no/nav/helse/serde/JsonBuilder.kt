@@ -966,7 +966,6 @@ internal class JsonBuilder : AbstractBuilder() {
 
             this.sykepengegrunnlag.putAll(
                 mutableMapOf(
-                    "skjæringstidspunkt" to skjæringstidspunkt,
                     "sykepengegrunnlag" to sykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
                     "grunnlagForSykepengegrunnlag" to grunnlagForSykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
                     "grunnbeløp" to `6G`.reflection { årlig, _, _, _ -> årlig },
