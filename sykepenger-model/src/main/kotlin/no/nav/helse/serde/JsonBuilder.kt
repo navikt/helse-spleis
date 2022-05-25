@@ -876,10 +876,15 @@ internal class JsonBuilder : AbstractBuilder() {
 
         override fun preVisitSykepengegrunnlag(
             sykepengegrunnlag1: Sykepengegrunnlag,
+            skjæringstidspunkt: LocalDate,
             sykepengegrunnlag: Inntekt,
+            overstyrtGrunnlagForSykepengegrunnlag: Inntekt?,
             grunnlagForSykepengegrunnlag: Inntekt,
+            `6G`: Inntekt,
             begrensning: Sykepengegrunnlag.Begrensning,
-            deaktiverteArbeidsforhold: List<String>
+            deaktiverteArbeidsforhold: List<String>,
+            greguleringstidspunkt: LocalDateTime?,
+            vurdertInfotrygd: Boolean
         ) {
             pushState(SykepengegrunnlagState(sykepengegrunnlagMap))
         }
@@ -950,20 +955,31 @@ internal class JsonBuilder : AbstractBuilder() {
 
         override fun postVisitSykepengegrunnlag(
             sykepengegrunnlag1: Sykepengegrunnlag,
+            skjæringstidspunkt: LocalDate,
             sykepengegrunnlag: Inntekt,
+            overstyrtGrunnlagForSykepengegrunnlag: Inntekt?,
             grunnlagForSykepengegrunnlag: Inntekt,
+            `6G`: Inntekt,
             begrensning: Sykepengegrunnlag.Begrensning,
-            deaktiverteArbeidsforhold: List<String>
+            deaktiverteArbeidsforhold: List<String>,
+            greguleringstidspunkt: LocalDateTime?,
+            vurdertInfotrygd: Boolean
         ) {
 
             this.sykepengegrunnlag.putAll(
-                mapOf(
+                mutableMapOf(
+                    "skjæringstidspunkt" to skjæringstidspunkt,
                     "sykepengegrunnlag" to sykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
                     "grunnlagForSykepengegrunnlag" to grunnlagForSykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
+                    "grunnbeløp" to `6G`.reflection { årlig, _, _, _ -> årlig },
                     "arbeidsgiverInntektsopplysninger" to arbeidsgiverInntektsopplysninger,
                     "begrensning" to begrensning,
-                    "deaktiverteArbeidsforhold" to deaktiverteArbeidsforhold
-                )
+                    "deaktiverteArbeidsforhold" to deaktiverteArbeidsforhold,
+                    "vurdertInfotrygd" to vurdertInfotrygd
+                ).apply {
+                    compute("overstyrtGrunnlagForSykepengegrunnlag") { _, _ -> overstyrtGrunnlagForSykepengegrunnlag?.reflection { årlig, _, _, _ -> årlig } }
+                    compute("greguleringstidspunkt") { _, _ -> greguleringstidspunkt }
+                }
             )
             popState()
         }

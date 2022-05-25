@@ -32,7 +32,25 @@ internal class SykepengegrunnlagTest {
         val justert = sykepengegrunnlag.justerGrunnbeløp()
         assertNotEquals(sykepengegrunnlag, justert)
         assertNotEquals(sykepengegrunnlag.inspektør.sykepengegrunnlag, justert.inspektør.sykepengegrunnlag)
+        assertNotEquals(sykepengegrunnlag.inspektør.`6G`, justert.inspektør.`6G`)
+        assertTrue(sykepengegrunnlag.inspektør.`6G` < justert.inspektør.`6G`)
         assertTrue(sykepengegrunnlag.inspektør.sykepengegrunnlag < justert.inspektør.sykepengegrunnlag)
+    }
+
+    @Test
+    fun `overstyrt sykepengegrunnlag`() {
+        val inntekt = 10000.månedlig
+        val overstyrt = 15000.månedlig
+        val sykepengegrunnlag = Sykepengegrunnlag(
+            skjæringstidspunkt = 1.januar,
+            arbeidsgiverInntektsopplysninger = listOf(
+                ArbeidsgiverInntektsopplysning("orgnr", Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), inntekt))
+            ),
+            deaktiverteArbeidsforhold = emptyList(),
+            vurdertInfotrygd = false,
+            overstyrtGrunnlagForSykepengegrunnlag = overstyrt
+        )
+        assertEquals(overstyrt, sykepengegrunnlag.sykepengegrunnlag)
     }
 
     @Test
@@ -76,7 +94,7 @@ internal class SykepengegrunnlagTest {
                 ),
                 deaktiverteArbeidsforhold = emptyList(),
                 vurdertInfotrygd = false,
-                cachedGrunnlagForSykepengegrunnlag = 25000.månedlig
+                overstyrtGrunnlagForSykepengegrunnlag = 25000.månedlig
             )
         )
         assertEquals(sykepengegrunnlag1, sykepengegrunnlag1.justerGrunnbeløp()) { "grunnbeløpet trenger ikke justering" }
@@ -87,7 +105,7 @@ internal class SykepengegrunnlagTest {
                 arbeidsgiverInntektsopplysninger = emptyList(),
                 deaktiverteArbeidsforhold = emptyList(),
                 vurdertInfotrygd = false,
-                cachedGrunnlagForSykepengegrunnlag = 25000.månedlig
+                overstyrtGrunnlagForSykepengegrunnlag = 25000.månedlig
             )
         )
         assertNotEquals(
@@ -108,7 +126,7 @@ internal class SykepengegrunnlagTest {
                 ),
                 deaktiverteArbeidsforhold = emptyList(),
                 vurdertInfotrygd = false,
-                cachedGrunnlagForSykepengegrunnlag = 20000.månedlig
+                overstyrtGrunnlagForSykepengegrunnlag = 20000.månedlig
             )
         )
         assertNotEquals(
@@ -129,7 +147,7 @@ internal class SykepengegrunnlagTest {
                 ),
                 deaktiverteArbeidsforhold = emptyList(),
                 vurdertInfotrygd = true,
-                cachedGrunnlagForSykepengegrunnlag = 25000.månedlig
+                overstyrtGrunnlagForSykepengegrunnlag = 25000.månedlig
             )
         )
         assertNotEquals(

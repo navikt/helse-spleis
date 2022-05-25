@@ -8,10 +8,10 @@ internal class ArbeidsgiverInntektsopplysning(
     private val inntektsopplysning: Inntektshistorikk.Inntektsopplysning
 ) {
 
-    internal fun accept(vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor) {
-        vilkårsgrunnlagHistorikkVisitor.preVisitArbeidsgiverInntektsopplysning(this, orgnummer)
-        inntektsopplysning.accept(vilkårsgrunnlagHistorikkVisitor)
-        vilkårsgrunnlagHistorikkVisitor.postVisitArbeidsgiverInntektsopplysning(this, orgnummer)
+    internal fun accept(visitor: ArbeidsgiverInntektsopplysningVisitor) {
+        visitor.preVisitArbeidsgiverInntektsopplysning(this, orgnummer)
+        inntektsopplysning.accept(visitor)
+        visitor.postVisitArbeidsgiverInntektsopplysning(this, orgnummer)
     }
 
     override fun equals(other: Any?): Boolean {

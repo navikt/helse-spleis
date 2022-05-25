@@ -95,22 +95,54 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
 
     override fun preVisitSykepengegrunnlag(
         sykepengegrunnlag1: Sykepengegrunnlag,
+        skjæringstidspunkt: LocalDate,
         sykepengegrunnlag: Inntekt,
+        overstyrtGrunnlagForSykepengegrunnlag: Inntekt?,
         grunnlagForSykepengegrunnlag: Inntekt,
+        `6G`: Inntekt,
         begrensning: Sykepengegrunnlag.Begrensning,
-        deaktiverteArbeidsforhold: List<String>
+        deaktiverteArbeidsforhold: List<String>,
+        greguleringstidspunkt: LocalDateTime?,
+        vurdertInfotrygd: Boolean
     ) {
-        delegatee.preVisitSykepengegrunnlag(sykepengegrunnlag1, sykepengegrunnlag, grunnlagForSykepengegrunnlag, begrensning, deaktiverteArbeidsforhold)
+        delegatee.preVisitSykepengegrunnlag(
+            sykepengegrunnlag1,
+            skjæringstidspunkt,
+            sykepengegrunnlag,
+            overstyrtGrunnlagForSykepengegrunnlag,
+            grunnlagForSykepengegrunnlag,
+            `6G`,
+            begrensning,
+            deaktiverteArbeidsforhold,
+            greguleringstidspunkt,
+            vurdertInfotrygd
+        )
     }
 
     override fun postVisitSykepengegrunnlag(
         sykepengegrunnlag1: Sykepengegrunnlag,
+        skjæringstidspunkt: LocalDate,
         sykepengegrunnlag: Inntekt,
+        overstyrtGrunnlagForSykepengegrunnlag: Inntekt?,
         grunnlagForSykepengegrunnlag: Inntekt,
+        `6G`: Inntekt,
         begrensning: Sykepengegrunnlag.Begrensning,
-        deaktiverteArbeidsforhold: List<String>
+        deaktiverteArbeidsforhold: List<String>,
+        greguleringstidspunkt: LocalDateTime?,
+        vurdertInfotrygd: Boolean
     ) {
-        delegatee.postVisitSykepengegrunnlag(sykepengegrunnlag1, sykepengegrunnlag, grunnlagForSykepengegrunnlag, begrensning, deaktiverteArbeidsforhold)
+        delegatee.postVisitSykepengegrunnlag(
+            sykepengegrunnlag1,
+            skjæringstidspunkt,
+            sykepengegrunnlag,
+            overstyrtGrunnlagForSykepengegrunnlag,
+            grunnlagForSykepengegrunnlag,
+            `6G`,
+            begrensning,
+            deaktiverteArbeidsforhold,
+            greguleringstidspunkt,
+            vurdertInfotrygd
+        )
     }
 
     override fun preVisitSammenligningsgrunnlag(sammenligningsgrunnlag1: Sammenligningsgrunnlag, sammenligningsgrunnlag: Inntekt) {
