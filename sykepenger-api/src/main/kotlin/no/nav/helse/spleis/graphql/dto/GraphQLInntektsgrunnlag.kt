@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.graphql.dto
 
 import com.apurebase.kgraphql.schema.dsl.SchemaBuilder
-import java.time.LocalDate
 import java.time.YearMonth
 
 internal fun SchemaBuilder.inntektsgrunnlagTypes() {
@@ -11,7 +10,6 @@ internal fun SchemaBuilder.inntektsgrunnlagTypes() {
     type<GraphQLOmregnetArsinntekt>()
     type<GraphQLSammenligningsgrunnlag>()
     type<GraphQLArbeidsgiverinntekt>()
-    type<GraphQLInntektsgrunnlag>()
 }
 
 enum class GraphQLInntektskilde {
@@ -45,16 +43,3 @@ data class GraphQLArbeidsgiverinntekt(
     val sammenligningsgrunnlag: GraphQLSammenligningsgrunnlag?,
     val deaktivert: Boolean? = null,
 )
-
-data class GraphQLInntektsgrunnlag(
-    val skjaeringstidspunkt: LocalDate,
-    val sykepengegrunnlag: Double?,
-    val omregnetArsinntekt: Double?,
-    val sammenligningsgrunnlag: Double?,
-    val avviksprosent: Double?,
-    val maksUtbetalingPerDag: Double?,
-    val inntekter: List<GraphQLArbeidsgiverinntekt>,
-    val oppfyllerKravOmMinstelonn: Boolean?,
-    val grunnbelop: Int
-) {
-}

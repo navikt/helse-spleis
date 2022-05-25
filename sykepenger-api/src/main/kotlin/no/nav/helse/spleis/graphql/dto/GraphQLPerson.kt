@@ -23,7 +23,6 @@ data class GraphQLPerson(
     val aktorId: String,
     val fodselsnummer: String,
     val arbeidsgivere: List<GraphQLArbeidsgiver>,
-    val inntektsgrunnlag: List<GraphQLInntektsgrunnlag>,
     val vilkarsgrunnlaghistorikk: List<GraphQLVilkarsgrunnlaghistorikk>,
     val dodsdato: LocalDate?,
     val versjon: Int

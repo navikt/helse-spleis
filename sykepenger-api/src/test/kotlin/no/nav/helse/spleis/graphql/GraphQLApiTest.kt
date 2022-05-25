@@ -1,5 +1,7 @@
 package no.nav.helse.spleis.graphql
 
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.hendelser.utbetaling.UtbetalingOverført
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering
 import no.nav.helse.person.Person
@@ -9,11 +11,13 @@ import no.nav.helse.spleis.AbstractObservableTest
 import no.nav.helse.spleis.objectMapper
 import no.nav.helse.spleis.testhelpers.ApiTestServer
 import no.nav.helse.spleis.testhelpers.TestObservatør
-import org.junit.jupiter.api.*
+import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.TestInstance.Lifecycle
-import java.time.LocalDateTime
-import java.util.*
 
 @TestInstance(Lifecycle.PER_CLASS)
 internal class GraphQLApiTest : AbstractObservableTest() {
@@ -185,9 +189,6 @@ internal class GraphQLApiTest : AbstractObservableTest() {
                             }
                         }
                     },
-                    inntektsgrunnlag {
-                        sykepengegrunnlag
-                    },
                     dodsdato,
                     versjon
                 }
@@ -199,7 +200,7 @@ internal class GraphQLApiTest : AbstractObservableTest() {
             body = """{"query": "$query"}"""
         ) {
             objectMapper.readTree(this).get("data").get("person").let { person ->
-                assertEquals(6, person.size())
+                assertEquals(5, person.size())
             }
         }
     }
@@ -227,55 +228,6 @@ internal class GraphQLApiTest : AbstractObservableTest() {
             objectMapper.readTree(this).get("data").get("person").get("arbeidsgivere").let { arbeidsgivere ->
                 assertEquals(1, arbeidsgivere.size())
                 assertEquals(3, arbeidsgivere.get(0).size())
-            }
-        }
-    }
-
-    @Test
-    fun `inntektsgrunnlag med person-resolver`() {
-        val query = """
-            {
-                person(fnr: \"$UNG_PERSON_FNR\") {
-                    inntektsgrunnlag {
-                        skjaeringstidspunkt,
-                        sykepengegrunnlag,
-                        omregnetArsinntekt,
-                        sammenligningsgrunnlag,
-                        avviksprosent,
-                        maksUtbetalingPerDag,
-                        inntekter {
-                            arbeidsgiver,
-                            omregnetArsinntekt {
-                                kilde,
-                                belop,
-                                manedsbelop,
-                                inntekterFraAOrdningen {
-                                    maned,
-                                    sum
-                                }
-                            },
-                            sammenligningsgrunnlag {
-                                belop,
-                                inntekterFraAOrdningen {
-                                    maned,
-                                    sum
-                                }
-                            }
-                        },
-                        oppfyllerKravOmMinstelonn,
-                        grunnbelop
-                    }
-                }
-            }
-        """.trimIndent()
-
-        testServer.httpPost(
-            path = "/graphql",
-            body = """{"query": "$query"}"""
-        ) {
-            objectMapper.readTree(this).get("data").get("person").get("inntektsgrunnlag").let { inntektsgrunnlag ->
-                assertEquals(1, inntektsgrunnlag.size())
-                assertEquals(9, inntektsgrunnlag.get(0).size())
             }
         }
     }

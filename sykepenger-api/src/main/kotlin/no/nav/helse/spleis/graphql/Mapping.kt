@@ -4,7 +4,6 @@ import java.util.UUID
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.Periodetype
 import no.nav.helse.serde.api.BegrunnelseDTO
-import no.nav.helse.serde.api.InntektsgrunnlagDTO
 import no.nav.helse.serde.api.v2.Arbeidsgiverinntekt
 import no.nav.helse.serde.api.v2.Behandlingstype
 import no.nav.helse.serde.api.v2.BeregnetPeriode
@@ -36,7 +35,6 @@ import no.nav.helse.spleis.graphql.dto.GraphQLHendelse
 import no.nav.helse.spleis.graphql.dto.GraphQLHendelsetype
 import no.nav.helse.spleis.graphql.dto.GraphQLInfotrygdVilkarsgrunnlag
 import no.nav.helse.spleis.graphql.dto.GraphQLInntekterFraAOrdningen
-import no.nav.helse.spleis.graphql.dto.GraphQLInntektsgrunnlag
 import no.nav.helse.spleis.graphql.dto.GraphQLInntektskilde
 import no.nav.helse.spleis.graphql.dto.GraphQLInntektsmelding
 import no.nav.helse.spleis.graphql.dto.GraphQLInntektstype
@@ -429,49 +427,3 @@ internal fun mapVilkårsgrunnlag(id: UUID, vilkårsgrunnlag: List<Vilkårsgrunnl
             }
         }
     )
-
-internal fun mapInntektsgrunnlag(inntektsgrunnlag: InntektsgrunnlagDTO) = GraphQLInntektsgrunnlag(
-    skjaeringstidspunkt = inntektsgrunnlag.skjæringstidspunkt,
-    sykepengegrunnlag = inntektsgrunnlag.sykepengegrunnlag,
-    omregnetArsinntekt = inntektsgrunnlag.omregnetÅrsinntekt,
-    sammenligningsgrunnlag = inntektsgrunnlag.sammenligningsgrunnlag,
-    avviksprosent = inntektsgrunnlag.avviksprosent,
-    maksUtbetalingPerDag = inntektsgrunnlag.maksUtbetalingPerDag,
-    inntekter = inntektsgrunnlag.inntekter.map { inntekt ->
-        GraphQLArbeidsgiverinntekt(
-            arbeidsgiver = inntekt.arbeidsgiver,
-            omregnetArsinntekt = inntekt.omregnetÅrsinntekt?.let { årsinntekt ->
-                GraphQLOmregnetArsinntekt(
-                    kilde = when (årsinntekt.kilde) {
-                        InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO.Saksbehandler -> GraphQLInntektskilde.Saksbehandler
-                        InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO.Inntektsmelding -> GraphQLInntektskilde.Inntektsmelding
-                        InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO.Infotrygd -> GraphQLInntektskilde.Infotrygd
-                        InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO.AOrdningen -> GraphQLInntektskilde.AOrdningen
-                        InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO.IkkeRapportert -> GraphQLInntektskilde.IkkeRapportert
-                    },
-                    belop = årsinntekt.beløp,
-                    manedsbelop = årsinntekt.månedsbeløp,
-                    inntekterFraAOrdningen = årsinntekt.inntekterFraAOrdningen?.map {
-                        GraphQLInntekterFraAOrdningen(
-                            maned = it.måned,
-                            sum = it.sum
-                        )
-                    }
-                )
-            },
-            sammenligningsgrunnlag = inntekt.sammenligningsgrunnlag?.let { sammenligningsgrunnlag ->
-                GraphQLSammenligningsgrunnlag(
-                    belop = sammenligningsgrunnlag.beløp,
-                    inntekterFraAOrdningen = sammenligningsgrunnlag.inntekterFraAOrdningen.map {
-                        GraphQLInntekterFraAOrdningen(
-                            maned = it.måned,
-                            sum = it.sum
-                        )
-                    }
-                )
-            }
-        )
-    },
-    oppfyllerKravOmMinstelonn = inntektsgrunnlag.oppfyllerKravOmMinstelønn,
-    grunnbelop = inntektsgrunnlag.grunnbeløp
-)

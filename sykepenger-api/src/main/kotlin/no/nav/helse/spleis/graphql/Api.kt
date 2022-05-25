@@ -63,7 +63,6 @@ internal fun SchemaBuilder.personSchema(personDao: PersonDao, hendelseDao: Hende
                                 }
                             )
                         },
-                        inntektsgrunnlag = person.inntektsgrunnlag.map { inntektsgrunnlag -> mapInntektsgrunnlag(inntektsgrunnlag) },
                         vilkarsgrunnlaghistorikk = person.vilkårsgrunnlagHistorikk.entries.map { (id, dateMap) ->
                             mapVilkårsgrunnlag(id, dateMap.values.toList())
                         },
