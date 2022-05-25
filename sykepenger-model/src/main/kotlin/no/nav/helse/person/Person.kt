@@ -702,14 +702,6 @@ class Person private constructor(
         gjenopptaBehandlingNy(hendelse)
     }
 
-    internal fun oppdaterHarMinimumInntekt(
-        skjæringstidspunkt: LocalDate,
-        grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata,
-        oppfyltKravTilMinimumInntekt: Boolean
-    ) {
-
-    }
-
     private fun emitOpprettOppgaveForSpeilsaksbehandlereEvent(hendelse: IAktivitetslogg, hendelseIder: Set<UUID>) {
         observers.forEach {
             it.opprettOppgaveForSpeilsaksbehandlere(
