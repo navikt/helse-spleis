@@ -18,12 +18,11 @@ import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.Periodetype
 import no.nav.helse.person.Person
-import no.nav.helse.person.Sykepengegrunnlag
-import no.nav.helse.person.Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.somFødselsnummer
 import no.nav.helse.sykdomstidslinje.Dag
+import no.nav.helse.sykepengegrunnlag
 import no.nav.helse.testhelpers.A
 import no.nav.helse.testhelpers.FRI
 import no.nav.helse.testhelpers.NAV
@@ -37,7 +36,6 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.Fri
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavHelgDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.UkjentDag
-import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -770,7 +768,7 @@ internal class InfotrygdhistorikkElementTest {
     @Test
     fun `lagring av vilkårsgrunnlag låser elementet`() {
         val element = historikkelement()
-        element.lagreVilkårsgrunnlag(VilkårsgrunnlagHistorikk(), sykepengegrunnlagFor(INGEN))
+        element.lagreVilkårsgrunnlag(VilkårsgrunnlagHistorikk(), INGEN::sykepengegrunnlag)
         assertFalse(element.kanSlettes())
     }
 
@@ -832,14 +830,4 @@ internal class InfotrygdhistorikkElementTest {
             ugyldigePerioder = ugyldigePerioder,
             harStatslønn = harStatslønn
         )
-
-    private fun sykepengegrunnlagFor(inntekt: Inntekt): (LocalDate) -> Sykepengegrunnlag = {
-        Sykepengegrunnlag(
-            arbeidsgiverInntektsopplysninger = listOf(),
-            sykepengegrunnlag = inntekt,
-            grunnlagForSykepengegrunnlag = inntekt,
-            begrensning = ER_IKKE_6G_BEGRENSET,
-            deaktiverteArbeidsforhold = emptyList()
-        )
-    }
 }

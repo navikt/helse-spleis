@@ -1,21 +1,28 @@
 package no.nav.helse.person
 
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.YearMonth
+import java.util.UUID
 import no.nav.helse.desember
-import no.nav.helse.hendelser.*
+import no.nav.helse.februar
+import no.nav.helse.hendelser.InntektForSykepengegrunnlag
+import no.nav.helse.hendelser.Inntektsvurdering
+import no.nav.helse.hendelser.Medlemskapsvurdering
+import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.inspectors.GrunnlagsdataInspektør
 import no.nav.helse.inspectors.SubsumsjonInspektør
 import no.nav.helse.inspectors.Vilkårgrunnlagsinspektør
 import no.nav.helse.januar
 import no.nav.helse.juni
-import no.nav.helse.person.Inntektshistorikk.Inntektsmelding
 import no.nav.helse.person.Ledd.Companion.ledd
 import no.nav.helse.person.Paragraf.PARAGRAF_8_2
-import no.nav.helse.person.Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.somFødselsnummer
+import no.nav.helse.sykepengegrunnlag
 import no.nav.helse.testhelpers.AP
 import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.tidslinjeOf
@@ -24,13 +31,14 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertInstanceOf
+import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.YearMonth
-import java.util.*
-import no.nav.helse.februar
 
 internal class VilkårsgrunnlagHistorikkTest {
     private val historikk = VilkårsgrunnlagHistorikk()
@@ -57,7 +65,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             arbeidsforhold = arbeidsforhold
         )
         vilkårsgrunnlag.valider(
-            sykepengegrunnlag(10000.månedlig),
+            10000.månedlig.sykepengegrunnlag,
             sammenligningsgrunnlag(10000.månedlig, 1.januar),
             1.januar,
             Opptjening.opptjening(arbeidsforholdFraHistorikk, 1.januar, MaskinellJurist()),
@@ -87,7 +95,7 @@ internal class VilkårsgrunnlagHistorikkTest {
 
         val jurist = MaskinellJurist()
         vilkårsgrunnlag.valider(
-            sykepengegrunnlag(10000.månedlig),
+            10000.månedlig.sykepengegrunnlag,
             sammenligningsgrunnlag(10000.månedlig, 1.januar),
             1.januar,
             Opptjening.opptjening(arbeidsforholdFraHistorikk, 1.januar, jurist),
@@ -123,7 +131,7 @@ internal class VilkårsgrunnlagHistorikkTest {
                 arbeidsforhold = arbeidsforhold
         )
         vilkårsgrunnlag1.valider(
-            sykepengegrunnlag(10000.månedlig),
+            10000.månedlig.sykepengegrunnlag,
             sammenligningsgrunnlag(10000.månedlig, 1.januar),
             1.januar,
             Opptjening.opptjening(arbeidsforholdFraHistorikk, 1.januar, MaskinellJurist()),
@@ -131,7 +139,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             MaskinellJurist()
         )
         vilkårsgrunnlag2.valider(
-            sykepengegrunnlag(10000.månedlig),
+            10000.månedlig.sykepengegrunnlag,
             sammenligningsgrunnlag(10000.månedlig, 1.januar),
             1.januar,
             Opptjening.opptjening(arbeidsforholdFraHistorikk, 1.januar, MaskinellJurist()),
@@ -167,7 +175,7 @@ internal class VilkårsgrunnlagHistorikkTest {
                 arbeidsforhold = arbeidsforhold
         )
         vilkårsgrunnlag.valider(
-            sykepengegrunnlag(10000.månedlig),
+            10000.månedlig.sykepengegrunnlag,
             sammenligningsgrunnlag(10000.månedlig, 1.januar),
             1.januar,
             Opptjening.opptjening(arbeidsforholdFraHistorikk, 1.januar, MaskinellJurist()),
@@ -209,7 +217,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             )
         }
         vilkårsgrunnlag.valider(
-            sykepengegrunnlag(10000.månedlig),
+            10000.månedlig.sykepengegrunnlag,
             sammenligningsgrunnlag(10000.månedlig, 1.januar),
             1.januar,
             Opptjening.opptjening(arbeidsforholdFraHistorikk, 1.januar, MaskinellJurist()),
@@ -222,7 +230,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             skjæringstidspunkt = 4.januar,
             vilkårsgrunnlagHistorikk = historikk,
             kanOverskriveVilkårsgrunnlag = { false },
-            sykepengegrunnlagFor = sykepengegrunnlagFor(INGEN)
+            sykepengegrunnlagFor = INGEN::sykepengegrunnlag
         )
         assertEquals(1, inspektør.vilkårsgrunnlagTeller[1])
         assertEquals(2, inspektør.vilkårsgrunnlagTeller[0])
@@ -243,7 +251,7 @@ internal class VilkårsgrunnlagHistorikkTest {
                 arbeidsforhold = arbeidsforhold
         )
         vilkårsgrunnlag.valider(
-            sykepengegrunnlag(10000.månedlig),
+            10000.månedlig.sykepengegrunnlag,
             sammenligningsgrunnlag(10000.månedlig, 1.januar),
             1.januar,
             Opptjening.opptjening(arbeidsforholdFraHistorikk, 1.januar, MaskinellJurist()),
@@ -271,7 +279,7 @@ internal class VilkårsgrunnlagHistorikkTest {
                 arbeidsforhold = arbeidsforhold
         )
         vilkårsgrunnlag.valider(
-            sykepengegrunnlag(10000.månedlig),
+            10000.månedlig.sykepengegrunnlag,
             sammenligningsgrunnlag(10000.månedlig, 1.januar),
             1.januar,
             Opptjening.opptjening(arbeidsforholdFraHistorikk, 1.januar, MaskinellJurist()),
@@ -304,7 +312,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             skjæringstidspunkt = 1.januar,
             vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk,
             kanOverskriveVilkårsgrunnlag = { false },
-            sykepengegrunnlagFor = sykepengegrunnlagFor(31000.månedlig)
+            sykepengegrunnlagFor = 31000.månedlig::sykepengegrunnlag
         )
         assertNotNull(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar))
     }
@@ -329,7 +337,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             skjæringstidspunkt = 1.januar,
             vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk,
             kanOverskriveVilkårsgrunnlag = { false },
-            sykepengegrunnlagFor = sykepengegrunnlagFor(31000.månedlig)
+            sykepengegrunnlagFor = 31000.månedlig::sykepengegrunnlag
         )
         assertNotNull(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar))
     }
@@ -354,7 +362,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             skjæringstidspunkt = 1.januar,
             vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk,
             kanOverskriveVilkårsgrunnlag = { false },
-            sykepengegrunnlagFor = sykepengegrunnlagFor(INGEN)
+            sykepengegrunnlagFor = INGEN::sykepengegrunnlag
         )
         assertNull(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar))
     }
@@ -379,7 +387,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             skjæringstidspunkt = 1.januar,
             vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk,
             kanOverskriveVilkårsgrunnlag = { false },
-            sykepengegrunnlagFor = sykepengegrunnlagFor(INGEN)
+            sykepengegrunnlagFor = INGEN::sykepengegrunnlag
         )
         assertNull(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar))
     }
@@ -399,7 +407,7 @@ internal class VilkårsgrunnlagHistorikkTest {
                 arbeidsforhold = arbeidsforhold
         )
         vilkårsgrunnlag1.valider(
-            sykepengegrunnlag(10000.månedlig),
+            10000.månedlig.sykepengegrunnlag,
             sammenligningsgrunnlag(10000.månedlig, 1.januar),
             1.januar,
             Opptjening.opptjening(arbeidsforholdFraHistorikk, 1.januar, MaskinellJurist()),
@@ -418,7 +426,7 @@ internal class VilkårsgrunnlagHistorikkTest {
                 arbeidsforhold = arbeidsforhold
         )
         vilkårsgrunnlag2.valider(
-            sykepengegrunnlag(10000.månedlig),
+            10000.månedlig.sykepengegrunnlag,
             sammenligningsgrunnlag(10000.månedlig, 1.januar),
             1.januar,
             Opptjening.opptjening(arbeidsforholdFraHistorikk, 1.januar, MaskinellJurist()),
@@ -447,7 +455,7 @@ internal class VilkårsgrunnlagHistorikkTest {
                 arbeidsforhold = arbeidsforhold
         )
         vilkårsgrunnlag1.valider(
-            sykepengegrunnlag(10000.månedlig),
+            10000.månedlig.sykepengegrunnlag,
             sammenligningsgrunnlag(10000.månedlig, 1.januar),
             1.januar,
             Opptjening.opptjening(arbeidsforholdFraHistorikk, 1.januar, MaskinellJurist()),
@@ -466,7 +474,7 @@ internal class VilkårsgrunnlagHistorikkTest {
                 arbeidsforhold = arbeidsforhold
         )
         vilkårsgrunnlag2.valider(
-            sykepengegrunnlag(10000.månedlig),
+            10000.månedlig.sykepengegrunnlag,
             sammenligningsgrunnlag(10000.månedlig, 1.januar),
             1.januar,
             Opptjening.opptjening(arbeidsforholdFraHistorikk, 1.januar, MaskinellJurist()),
@@ -474,7 +482,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             MaskinellJurist()
         )
         vilkårsgrunnlagHistorikk.lagre(10.januar, vilkårsgrunnlag1)
-        vilkårsgrunnlagHistorikk.lagre(1.januar, VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag(1.januar, sykepengegrunnlag(10000.månedlig)))
+        vilkårsgrunnlagHistorikk.lagre(1.januar, VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag(1.januar, 10000.månedlig.sykepengegrunnlag))
         val utbetalingstidslinjeMedNavDager = tidslinjeOf(16.AP, 10.NAV)
         vilkårsgrunnlagHistorikk.avvisInngangsvilkår(listOf(utbetalingstidslinjeMedNavDager), "20043769969".somFødselsnummer().alder())
         assertEquals(8, utbetalingstidslinjeMedNavDager.filterIsInstance<Utbetalingstidslinje.Utbetalingsdag.NavDag>().size)
@@ -495,7 +503,7 @@ internal class VilkårsgrunnlagHistorikkTest {
                 arbeidsforhold = arbeidsforhold
         )
         vilkårsgrunnlag.valider(
-            sykepengegrunnlag(10.månedlig),
+            10.månedlig.sykepengegrunnlag,
             sammenligningsgrunnlag(10.månedlig, 1.januar),
             1.januar,
             Opptjening.opptjening(arbeidsforholdFraHistorikk, 1.januar, MaskinellJurist()),
@@ -533,7 +541,7 @@ internal class VilkårsgrunnlagHistorikkTest {
                 arbeidsforhold = arbeidsforhold
         )
         vilkårsgrunnlag.valider(
-            sykepengegrunnlag(10.månedlig),
+            10.månedlig.sykepengegrunnlag,
             sammenligningsgrunnlag(10.månedlig, 1.januar),
             1.januar,
             Opptjening.opptjening(arbeidsforholdFraHistorikk, 1.januar, MaskinellJurist()),
@@ -558,50 +566,34 @@ internal class VilkårsgrunnlagHistorikkTest {
 
     @Test
     fun `equals av InfotrygdVilkårsgrunnlag`() {
+        val sykepengegrunnlag = 25000.månedlig.sykepengegrunnlag
         val element1 = VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag(
             skjæringstidspunkt = 1.januar,
-            sykepengegrunnlag = Sykepengegrunnlag(
-                arbeidsgiverInntektsopplysninger = emptyList(),
-                sykepengegrunnlag = 25000.månedlig,
-                grunnlagForSykepengegrunnlag = 25000.månedlig,
-                begrensning = ER_IKKE_6G_BEGRENSET,
-                deaktiverteArbeidsforhold = emptyList()
-            )
+            sykepengegrunnlag = sykepengegrunnlag
         )
+        assertEquals(element1, element1)
         assertEquals(
             element1, VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag(
                 skjæringstidspunkt = 1.januar,
-                sykepengegrunnlag = Sykepengegrunnlag(
-                    arbeidsgiverInntektsopplysninger = emptyList(),
-                    sykepengegrunnlag = 25000.månedlig,
-                    grunnlagForSykepengegrunnlag = 25000.månedlig,
-                    begrensning = ER_IKKE_6G_BEGRENSET,
-                    deaktiverteArbeidsforhold = emptyList()
-                )
+                sykepengegrunnlag = sykepengegrunnlag
+            )
+        )
+        assertNotEquals(
+            element1, VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag(
+                skjæringstidspunkt = 2.januar,
+                sykepengegrunnlag = sykepengegrunnlag
             )
         )
         assertNotEquals(
             element1, VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag(
                 skjæringstidspunkt = 5.februar,
-                sykepengegrunnlag = Sykepengegrunnlag(
-                    arbeidsgiverInntektsopplysninger = emptyList(),
-                    sykepengegrunnlag = 25000.månedlig,
-                    grunnlagForSykepengegrunnlag = 25000.månedlig,
-                    begrensning = ER_IKKE_6G_BEGRENSET,
-                    deaktiverteArbeidsforhold = emptyList()
-                )
+                sykepengegrunnlag = 25000.månedlig.sykepengegrunnlag
             )
         )
         assertNotEquals(
             element1, VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag(
                 skjæringstidspunkt = 1.januar,
-                sykepengegrunnlag = Sykepengegrunnlag(
-                    arbeidsgiverInntektsopplysninger = emptyList(),
-                    sykepengegrunnlag = 30900.månedlig,
-                    grunnlagForSykepengegrunnlag = 25000.månedlig,
-                    begrensning = ER_IKKE_6G_BEGRENSET,
-                    deaktiverteArbeidsforhold = emptyList()
-                )
+                sykepengegrunnlag = 30900.månedlig.sykepengegrunnlag
             )
         )
     }
@@ -621,7 +613,7 @@ internal class VilkårsgrunnlagHistorikkTest {
                 arbeidsforhold = arbeidsforhold
         )
         vilkårsgrunnlag.valider(
-            sykepengegrunnlag(10000.månedlig),
+            10000.månedlig.sykepengegrunnlag,
             sammenligningsgrunnlag(10000.månedlig, 1.januar),
             1.januar,
             Opptjening.opptjening(arbeidsforholdFraHistorikk, 1.januar, MaskinellJurist()),
@@ -647,21 +639,10 @@ internal class VilkårsgrunnlagHistorikkTest {
             skjæringstidspunkt = 1.januar,
             vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk,
             kanOverskriveVilkårsgrunnlag = { true },
-            sykepengegrunnlagFor = sykepengegrunnlagFor(31000.månedlig)
+            sykepengegrunnlagFor = 31000.månedlig::sykepengegrunnlag
         )
         assertInstanceOf(VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag::class.java, vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar))
     }
-
-    private fun sykepengegrunnlag(inntekt: Inntekt) =
-        Sykepengegrunnlag(
-            arbeidsgiverInntektsopplysninger = listOf(
-                ArbeidsgiverInntektsopplysning("orgnummer", Inntektsmelding(UUID.randomUUID(), LocalDate.now(), UUID.randomUUID(), inntekt))
-            ),
-            sykepengegrunnlag = inntekt,
-            grunnlagForSykepengegrunnlag = inntekt,
-            begrensning = ER_IKKE_6G_BEGRENSET,
-            deaktiverteArbeidsforhold = emptyList()
-        )
 
     private fun sammenligningsgrunnlag(inntekt: Inntekt, skjæringstidspunkt: LocalDate) = Sammenligningsgrunnlag(
         arbeidsgiverInntektsopplysninger = listOf(
@@ -681,16 +662,4 @@ internal class VilkårsgrunnlagHistorikkTest {
             )
         ),
     )
-
-    private fun sykepengegrunnlagFor(inntekt: Inntekt): (LocalDate) -> Sykepengegrunnlag = {
-        Sykepengegrunnlag(
-            arbeidsgiverInntektsopplysninger = listOf(
-                ArbeidsgiverInntektsopplysning("orgnummer", Inntektsmelding(UUID.randomUUID(), LocalDate.now(), UUID.randomUUID(), inntekt))
-            ),
-            sykepengegrunnlag = inntekt,
-            grunnlagForSykepengegrunnlag = inntekt,
-            begrensning = ER_IKKE_6G_BEGRENSET,
-            deaktiverteArbeidsforhold = emptyList()
-        )
-    }
 }

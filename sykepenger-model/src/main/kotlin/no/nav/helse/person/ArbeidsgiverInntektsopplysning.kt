@@ -1,6 +1,5 @@
 package no.nav.helse.person
 
-import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.summer
 
@@ -26,20 +25,9 @@ internal class ArbeidsgiverInntektsopplysning(
         return result
     }
 
-    companion object {
-        internal fun List<ArbeidsgiverInntektsopplysning>.sykepengegrunnlag(
-            subsumsjonObserver: SubsumsjonObserver
-        ): Inntekt {
-            val grunnlagForSykepengegrunnlag = map { it.inntektsopplysning.grunnlagForSykepengegrunnlag() }.summer()
-            val grunnlagForSykepengegrunnlagPerArbeidsgiver = this
-                .associateBy { it.orgnummer }
-                .mapValues { it.value.inntektsopplysning.grunnlagForSykepengegrunnlag() }
-            subsumsjonObserver.`§ 8-30 ledd 1`(
-                grunnlagForSykepengegrunnlagPerArbeidsgiver,
-                grunnlagForSykepengegrunnlag
-            )
-            return grunnlagForSykepengegrunnlag
-        }
+    internal companion object {
+        internal fun List<ArbeidsgiverInntektsopplysning>.sykepengegrunnlag() =
+            associateBy { it.orgnummer }.mapValues { it.value.inntektsopplysning.grunnlagForSykepengegrunnlag() }
 
         internal fun List<ArbeidsgiverInntektsopplysning>.sammenligningsgrunnlag(): Inntekt {
             return map { it.inntektsopplysning.grunnlagForSammenligningsgrunnlag() }.summer()

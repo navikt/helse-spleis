@@ -26,14 +26,13 @@ import no.nav.helse.person.Periodetype
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonVisitor
 import no.nav.helse.person.Sammenligningsgrunnlag
-import no.nav.helse.person.Sykepengegrunnlag
-import no.nav.helse.person.Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.Vedtaksperiode.Vedtaksperiodetilstand
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.assertWarning
+import no.nav.helse.sykepengegrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.økonomi.Inntekt
@@ -143,7 +142,7 @@ internal class VilkårsgrunnlagTest : AbstractPersonTest() {
             Vilkårsgrunnlag.Arbeidsforhold("ORGNR2", 15.januar, null)
         ))
         vilkårsgrunnlag.valider(
-            grunnlagForSykepengegrunnlag = sykepengegrunnlag(),
+            grunnlagForSykepengegrunnlag = INNTEKT.sykepengegrunnlag,
             sammenligningsgrunnlag = sammenligningsgrunnlag(skjæringstidspunkt = 31.januar),
             skjæringstidspunkt = 31.januar,
             opptjening = Opptjening.opptjening(
@@ -322,16 +321,6 @@ internal class VilkårsgrunnlagTest : AbstractPersonTest() {
         arbeidsavklaringspenger = Arbeidsavklaringspenger(emptyList()),
         dagpenger = Dagpenger(emptyList()),
         aktivitetslogg = Aktivitetslogg()
-    )
-
-    private fun sykepengegrunnlag(inntekt: Inntekt = INNTEKT) = Sykepengegrunnlag(
-        arbeidsgiverInntektsopplysninger = listOf(
-            ArbeidsgiverInntektsopplysning("orgnummer", Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), LocalDate.now(), UUID.randomUUID(), inntekt)
-        )),
-        sykepengegrunnlag = inntekt,
-        grunnlagForSykepengegrunnlag = inntekt,
-        begrensning = ER_IKKE_6G_BEGRENSET,
-        deaktiverteArbeidsforhold = emptyList()
     )
 
     private fun sammenligningsgrunnlag(inntekt: Inntekt = INNTEKT, skjæringstidspunkt: LocalDate) = Sammenligningsgrunnlag(

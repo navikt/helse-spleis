@@ -13,13 +13,12 @@ import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.Periodetype
 import no.nav.helse.person.Person
-import no.nav.helse.person.Sykepengegrunnlag
-import no.nav.helse.person.Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.serde.PersonData
 import no.nav.helse.serde.PersonData.InfotrygdhistorikkElementData.Companion.tilModellObjekt
 import no.nav.helse.somFødselsnummer
+import no.nav.helse.sykepengegrunnlag
 import no.nav.helse.testhelpers.A
 import no.nav.helse.testhelpers.S
 import no.nav.helse.testhelpers.opphold
@@ -29,7 +28,6 @@ import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.Inntekter
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilder
-import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -167,7 +165,7 @@ internal class InfotrygdhistorikkTest {
             skjæringstidspunkt = 1.januar,
             vilkårsgrunnlagHistorikk = VilkårsgrunnlagHistorikk(),
             kanOverskriveVilkårsgrunnlag = { false },
-            sykepengegrunnlagFor = sykepengegrunnlagFor(INGEN)
+            sykepengegrunnlagFor = INGEN::sykepengegrunnlag
         )
         historikk.tøm()
         assertFalse(historikk.oppfriskNødvendig(aktivitetslogg, tidligsteDato))
@@ -189,7 +187,7 @@ internal class InfotrygdhistorikkTest {
             skjæringstidspunkt = 1.januar,
             vilkårsgrunnlagHistorikk = VilkårsgrunnlagHistorikk(),
             kanOverskriveVilkårsgrunnlag = { false },
-            sykepengegrunnlagFor = sykepengegrunnlagFor(INGEN)
+            sykepengegrunnlagFor = INGEN::sykepengegrunnlag
         )
         historikk.oppdaterHistorikk(historikkelement(
             oppdatert = tidsstempel2,
@@ -602,14 +600,4 @@ internal class InfotrygdhistorikkTest {
             ugyldigePerioder = ugyldigePerioder,
             harStatslønn = harStatslønn
         )
-
-    private fun sykepengegrunnlagFor(inntekt: Inntekt): (LocalDate) -> Sykepengegrunnlag = {
-        Sykepengegrunnlag(
-            arbeidsgiverInntektsopplysninger = listOf(),
-            sykepengegrunnlag = inntekt,
-            grunnlagForSykepengegrunnlag = inntekt,
-            begrensning = ER_IKKE_6G_BEGRENSET,
-            deaktiverteArbeidsforhold = emptyList()
-        )
-    }
 }

@@ -434,7 +434,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                 "grunnlagForSykepengegrunnlag" to 561805.0
             ),
             output = mapOf(
-                "erBegrenset" to true
+                "erBegrenset" to false // Infotrygd-inntekter er allerede begrenset til 6G
             )
         )
     }

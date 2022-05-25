@@ -6,6 +6,7 @@ import java.time.LocalDateTime
 import java.time.Year
 import java.time.YearMonth
 import java.util.UUID
+import no.nav.helse.Grunnbeløp
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
@@ -262,7 +263,7 @@ internal data class PersonData(
         internal fun parseDataForVilkårsvurdering(): Pair<LocalDate, VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement> = skjæringstidspunkt to when (type) {
             GrunnlagsdataType.Vilkårsprøving -> VilkårsgrunnlagHistorikk.Grunnlagsdata(
                 skjæringstidspunkt = skjæringstidspunkt,
-                sykepengegrunnlag = sykepengegrunnlag.parseSykepengegrunnlag(),
+                sykepengegrunnlag = sykepengegrunnlag.parseSykepengegrunnlag(skjæringstidspunkt),
                 sammenligningsgrunnlag = sammenligningsgrunnlag!!.parseSammenligningsgrunnlag(),
                 avviksprosent = avviksprosent?.ratio,
                 opptjening = opptjening!!.tilOpptjening(),
@@ -278,7 +279,7 @@ internal data class PersonData(
             )
             GrunnlagsdataType.Infotrygd -> VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag(
                 skjæringstidspunkt = skjæringstidspunkt,
-                sykepengegrunnlag = sykepengegrunnlag.parseSykepengegrunnlag(),
+                sykepengegrunnlag = sykepengegrunnlag.parseSykepengegrunnlag(skjæringstidspunkt),
                 vilkårsgrunnlagId = vilkårsgrunnlagId
             )
         }
@@ -296,12 +297,12 @@ internal data class PersonData(
             private val deaktiverteArbeidsforhold: List<String>
         ) {
 
-            internal fun parseSykepengegrunnlag(): Sykepengegrunnlag = Sykepengegrunnlag(
-                sykepengegrunnlag.årlig,
+            internal fun parseSykepengegrunnlag(skjæringstidspunkt: LocalDate): Sykepengegrunnlag = Sykepengegrunnlag(
                 arbeidsgiverInntektsopplysninger.parseArbeidsgiverInntektsopplysninger(),
-                grunnlagForSykepengegrunnlag.årlig,
-                begrensning,
-                deaktiverteArbeidsforhold
+                deaktiverteArbeidsforhold,
+                Grunnbeløp.`6G`.beløp(skjæringstidspunkt), // TODO: migrere denne i json
+                begrensning == Sykepengegrunnlag.Begrensning.VURDERT_I_INFOTRYGD, // TODO: migrere denne til boolean i json
+                grunnlagForSykepengegrunnlag.årlig
             )
         }
 

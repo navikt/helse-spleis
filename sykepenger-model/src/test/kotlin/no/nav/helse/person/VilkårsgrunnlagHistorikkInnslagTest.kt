@@ -1,10 +1,14 @@
 package no.nav.helse.person
 
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.Fødselsnummer
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.person.etterlevelse.MaskinellJurist
+import no.nav.helse.sykepengegrunnlag
 import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.testhelpers.tidslinjeOf
@@ -15,9 +19,6 @@ import no.nav.helse.økonomi.Prosent.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
 
 internal class VilkårsgrunnlagHistorikkInnslagTest {
     private lateinit var innslag: VilkårsgrunnlagHistorikk.Innslag
@@ -134,7 +135,7 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
         get() = object : VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement {
             override fun accept(skjæringstidspunkt: LocalDate, vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor) {}
 
-            override fun sykepengegrunnlag() = Sykepengegrunnlag(Inntekt.INGEN, emptyList(), Inntekt.INGEN, Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET, emptyList())
+            override fun sykepengegrunnlag() = Inntekt.INGEN.sykepengegrunnlag
 
             override fun grunnlagsBegrensning() = Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
 

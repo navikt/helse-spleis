@@ -28,8 +28,6 @@ import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Person
 import no.nav.helse.person.Sammenligningsgrunnlag
-import no.nav.helse.person.Sykepengegrunnlag
-import no.nav.helse.person.Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.arbeidsgiver
 import no.nav.helse.person.etterlevelse.MaskinellJurist
@@ -38,6 +36,7 @@ import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.somFødselsnummer
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
+import no.nav.helse.sykepengegrunnlag
 import no.nav.helse.testhelpers.AP
 import no.nav.helse.testhelpers.ARB
 import no.nav.helse.testhelpers.FRI
@@ -89,7 +88,7 @@ internal class ArbeidsgiverUtbetalingerTest {
     fun `avgrenset betaling pga minimum inntekt`() {
         val vilkårsgrunnlagElement = VilkårsgrunnlagHistorikk.Grunnlagsdata(
             skjæringstidspunkt = 1.januar,
-            sykepengegrunnlag = sykepengegrunnlag(1000.månedlig),
+            sykepengegrunnlag = 1000.månedlig.sykepengegrunnlag,
             sammenligningsgrunnlag = sammenligningsgrunnlag(1000.månedlig),
             avviksprosent = Prosent.prosent(0.0),
             opptjening = Opptjening.opptjening(emptyList(), 1.januar, MaskinellJurist()),
@@ -331,7 +330,7 @@ internal class ArbeidsgiverUtbetalingerTest {
         vilkårsgrunnlagHistorikk.lagre(
             1.januar, vilkårsgrunnlagElement ?: VilkårsgrunnlagHistorikk.Grunnlagsdata(
                 skjæringstidspunkt = 1.januar,
-                sykepengegrunnlag = sykepengegrunnlag(30000.månedlig),
+                sykepengegrunnlag = 30000.månedlig.sykepengegrunnlag,
                 sammenligningsgrunnlag = sammenligningsgrunnlag(30000.månedlig),
                 avviksprosent = Prosent.prosent(0.0),
                 opptjening = Opptjening.opptjening(emptyList(), 1.januar, MaskinellJurist()),
@@ -413,14 +412,6 @@ internal class ArbeidsgiverUtbetalingerTest {
             override fun accept(visitor: InfotrygdhistorikkVisitor) {}
             override fun utbetalingstidslinje() = historiskTidslinje
         }
-
-    private fun sykepengegrunnlag(inntekt: Inntekt) = Sykepengegrunnlag(
-        arbeidsgiverInntektsopplysninger = listOf(),
-        sykepengegrunnlag = inntekt,
-        grunnlagForSykepengegrunnlag = inntekt,
-        begrensning = ER_IKKE_6G_BEGRENSET,
-        deaktiverteArbeidsforhold = emptyList()
-    )
 
     private fun sammenligningsgrunnlag(inntekt: Inntekt) = Sammenligningsgrunnlag(
         arbeidsgiverInntektsopplysninger = listOf(

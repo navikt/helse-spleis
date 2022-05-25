@@ -1,20 +1,20 @@
 package no.nav.helse.hendelser
 
+import java.time.LocalDate
+import no.nav.helse.desember
+import no.nav.helse.januar
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Sykepengegrunnlag
-import no.nav.helse.person.Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
-import no.nav.helse.desember
+import no.nav.helse.person.etterlevelse.MaskinellJurist
+import no.nav.helse.sykepengegrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
-import no.nav.helse.januar
-import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
 
 internal class InntektsvurderingTest {
     private companion object {
@@ -26,7 +26,7 @@ internal class InntektsvurderingTest {
 
     @Test
     fun `ugyldige verdier`() {
-        assertFalse(validererOk(inntektsvurdering(emptyList()), sykepengegrunnlag(INGEN), INGEN, 1))
+        assertFalse(validererOk(inntektsvurdering(emptyList()), INGEN.sykepengegrunnlag, INGEN, 1))
         assertFalse(
             validererOk(
                 inntektsvurdering(
@@ -35,7 +35,7 @@ internal class InntektsvurderingTest {
                             ORGNR inntekt INGEN
                         }
                     }
-                ), sykepengegrunnlag(INGEN), INGEN, 1
+                ), INGEN.sykepengegrunnlag, INGEN, 1
             )
         )
     }
@@ -43,11 +43,11 @@ internal class InntektsvurderingTest {
     @Test
     fun `skal kunne beregne avvik mellom innmeldt lønn fra inntektsmelding og lønn fra inntektskomponenten`() {
         val inntektsvurdering = inntektsvurdering()
-        assertFalse(validererOk(inntektsvurdering, sykepengegrunnlag(1250.01.månedlig), INNTEKT, 1))
-        assertFalse(validererOk(inntektsvurdering, sykepengegrunnlag(749.99.månedlig), INNTEKT, 1))
-        assertTrue(validererOk(inntektsvurdering, sykepengegrunnlag(1000.00.månedlig), INNTEKT, 1))
-        assertTrue(validererOk(inntektsvurdering, sykepengegrunnlag(1250.00.månedlig), INNTEKT, 1))
-        assertTrue(validererOk(inntektsvurdering, sykepengegrunnlag(750.00.månedlig), INNTEKT, 1))
+        assertFalse(validererOk(inntektsvurdering, 1250.01.månedlig.sykepengegrunnlag, INNTEKT, 1))
+        assertFalse(validererOk(inntektsvurdering, 749.99.månedlig.sykepengegrunnlag, INNTEKT, 1))
+        assertTrue(validererOk(inntektsvurdering, 1000.00.månedlig.sykepengegrunnlag, INNTEKT, 1))
+        assertTrue(validererOk(inntektsvurdering, 1250.00.månedlig.sykepengegrunnlag, INNTEKT, 1))
+        assertTrue(validererOk(inntektsvurdering, 750.00.månedlig.sykepengegrunnlag, INNTEKT, 1))
     }
 
     private fun validererOk(
@@ -65,14 +65,6 @@ internal class InntektsvurderingTest {
             MaskinellJurist()
         )
     }
-
-    private fun sykepengegrunnlag(inntekt: Inntekt = INNTEKT) = Sykepengegrunnlag(
-        arbeidsgiverInntektsopplysninger = listOf(),
-        sykepengegrunnlag = inntekt,
-        grunnlagForSykepengegrunnlag = inntekt,
-        begrensning = ER_IKKE_6G_BEGRENSET,
-        deaktiverteArbeidsforhold = emptyList()
-    )
 
     private fun inntektsvurdering(
         inntektsmåneder: List<ArbeidsgiverInntekt> = inntektperioderForSykepengegrunnlag {
