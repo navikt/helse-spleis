@@ -38,7 +38,7 @@ import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.AvvisDagerEtterDødsdatofilter
 import no.nav.helse.utbetalingstidslinje.Inntekter
 import no.nav.helse.utbetalingstidslinje.MaksimumSykepengedagerfilter
-import no.nav.helse.utbetalingstidslinje.MaksimumUtbetaling
+import no.nav.helse.utbetalingstidslinje.MaksimumUtbetalingFilter
 import no.nav.helse.utbetalingstidslinje.Refusjonsgjødsler
 import no.nav.helse.utbetalingstidslinje.Sykdomsgradfilter
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -1021,7 +1021,7 @@ internal class Utbetaling private constructor(
                     AvvisDagerEtterDødsdatofilter(dødsdato),
                     avvisInngangsvilkårfilter,
                     maksimumSykepengedagerfilter,
-                    MaksimumUtbetaling(),
+                    MaksimumUtbetalingFilter(),
                 )
             return utbetalingstidslinjeBuildere.map { (_, builder) -> builder.utbetaling() }.toMap()
         }

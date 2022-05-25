@@ -53,7 +53,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         sisteInnlag()?.avvis(tidslinjer, alder)
     }
 
-    internal fun inntektsopplysningPerSkjæringstidspunktPerArbeidsgiver() = sisteInnlag()?.inntektsopplysningPerSkjæringstidspunktPerArbeidsgiver()
+    internal fun inntektsopplysninger() = sisteInnlag()?.inntektsopplysningPerSkjæringstidspunktPerArbeidsgiver()
 
     internal fun skjæringstidspunkterFraSpleis() = sisteInnlag()?.skjæringstidspunkterFraSpleis() ?: emptySet()
 

@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-internal class MaksimumUtbetalingHendelseTest {
+internal class MaksimumUtbetalingFilterHendelseTest {
     private lateinit var aktivitetslogg: Aktivitetslogg
 
     @BeforeEach
@@ -58,6 +58,6 @@ internal class MaksimumUtbetalingHendelseTest {
     }
 
     private fun Utbetalingstidslinje.betal() {
-        MaksimumUtbetaling { 1.januar }.betal(listOf(this), this.periode(), aktivitetslogg, MaskinellJurist())
+        MaksimumUtbetalingFilter { 1.januar }.betal(listOf(this), this.periode(), aktivitetslogg, MaskinellJurist())
     }
 }

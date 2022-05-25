@@ -16,7 +16,7 @@ import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.Oppdragstatus.*
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.aktive
-import no.nav.helse.utbetalingstidslinje.MaksimumUtbetaling
+import no.nav.helse.utbetalingstidslinje.MaksimumUtbetalingFilter
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
@@ -781,7 +781,7 @@ internal class UtbetalingTest {
                 else -> spleisdag
             }
         }
-    }.also { MaksimumUtbetaling { 1.januar }.betal(listOf(tidslinje), tidslinje.periode(), aktivitetslogg, MaskinellJurist()) }
+    }.also { MaksimumUtbetalingFilter { 1.januar }.betal(listOf(tidslinje), tidslinje.periode(), aktivitetslogg, MaskinellJurist()) }
 
     private fun opprettGodkjentUtbetaling(
         tidslinje: Utbetalingstidslinje = tidslinjeOf(16.AP, 5.NAV(3000)),

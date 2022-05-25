@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-internal class MaksimumUtbetalingFlereArbeidsgivereTest {
+internal class MaksimumUtbetalingFilterFlereArbeidsgivereTest {
     private lateinit var aktivitetslogg: Aktivitetslogg
 
     @BeforeEach
@@ -34,7 +34,7 @@ internal class MaksimumUtbetalingFlereArbeidsgivereTest {
         val periode = Utbetalingstidslinje.periode(listOf(ag1.first, ag2.first))
         val dato = periode.start
         val maksDagsats = Grunnbeløp.`6G`.dagsats(dato)
-        MaksimumUtbetaling { dato }.betal(listOf(ag2.first, ag1.first), periode, aktivitetslogg, MaskinellJurist())
+        MaksimumUtbetalingFilter { dato }.betal(listOf(ag2.first, ag1.first), periode, aktivitetslogg, MaskinellJurist())
         assertTrue(ag1.first.inspektør.økonomi(reflectedArbeidsgiverBeløp).all { it.daglig == maksDagsats }) {
             "noen dager har fått nytt grunnbeløp"
         }

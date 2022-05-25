@@ -8,7 +8,7 @@ import no.nav.helse.testhelpers.AP
 import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.utbetalingslinjer.Utbetaling
-import no.nav.helse.utbetalingstidslinje.MaksimumUtbetaling
+import no.nav.helse.utbetalingstidslinje.MaksimumUtbetalingFilter
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
@@ -111,7 +111,7 @@ internal class UtbetalingsfilterTest {
     }
 
     private fun lagUtbetaling(tidslinje: Utbetalingstidslinje = tidslinjeOf(16.AP, 15.NAV), forrige: Utbetaling? = null): Utbetaling {
-        MaksimumUtbetaling { tidslinje.first().dato }.betal(
+        MaksimumUtbetalingFilter { tidslinje.first().dato }.betal(
             listOf(tidslinje),
             tidslinje.periode(),
             aktivitetslogg,

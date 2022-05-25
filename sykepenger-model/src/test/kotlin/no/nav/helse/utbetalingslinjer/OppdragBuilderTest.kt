@@ -13,7 +13,7 @@ import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingslinjer.Endringskode.*
 import no.nav.helse.utbetalingslinjer.Fagområde.SykepengerRefusjon
 import no.nav.helse.utbetalingslinjer.OppdragBuilderTest.Dagtype
-import no.nav.helse.utbetalingstidslinje.MaksimumUtbetaling
+import no.nav.helse.utbetalingstidslinje.MaksimumUtbetalingFilter
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -483,7 +483,7 @@ internal class OppdragBuilderTest {
                 else -> spleisdag
             }
         }
-        MaksimumUtbetaling { startdato }.betal(
+        MaksimumUtbetalingFilter { startdato }.betal(
             listOf(tidslinje),
             tidslinje.periode(),
             Aktivitetslogg(),

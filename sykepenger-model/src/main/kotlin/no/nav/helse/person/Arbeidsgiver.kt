@@ -78,7 +78,7 @@ import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode.Companion.finn
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
 import no.nav.helse.utbetalingstidslinje.IUtbetalingstidslinjeBuilder
 import no.nav.helse.utbetalingstidslinje.Inntekter
-import no.nav.helse.utbetalingstidslinje.MaksimumUtbetaling
+import no.nav.helse.utbetalingstidslinje.MaksimumUtbetalingFilter
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilder
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilderException
@@ -668,7 +668,7 @@ internal class Arbeidsgiver private constructor(
             .filter { it.second.isNotEmpty() }
             .toMap()
 
-        MaksimumUtbetaling().betal(arbeidsgivertidslinjer.values.toList(), periode, aktivitetslogg, jurist)
+        MaksimumUtbetalingFilter().betal(arbeidsgivertidslinjer.values.toList(), periode, aktivitetslogg, jurist)
 
         arbeidsgivertidslinjer.forEach { (arbeidsgiver, reberegnetUtbetalingstidslinje) ->
             arbeidsgiver.lagreUtbetalingstidslinjeberegning(organisasjonsnummer, reberegnetUtbetalingstidslinje, vilkårsgrunnlagHistorikk)

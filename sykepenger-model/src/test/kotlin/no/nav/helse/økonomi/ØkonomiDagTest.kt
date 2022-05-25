@@ -14,7 +14,7 @@ import no.nav.helse.testhelpers.AVV
 import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
-import no.nav.helse.utbetalingstidslinje.MaksimumUtbetaling
+import no.nav.helse.utbetalingstidslinje.MaksimumUtbetalingFilter
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.AvvistDag
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -172,6 +172,6 @@ internal class ØkonomiDagTest {
 
     private fun List<Utbetalingstidslinje>.betal(virkningsdato: LocalDate = 1.januar) {
         val periode = virkningsdato til virkningsdato // Brukes ikke når vi eksplisitt setter virkningsdato
-        MaksimumUtbetaling { virkningsdato }.betal(this, periode, Aktivitetslogg(), MaskinellJurist())
+        MaksimumUtbetalingFilter { virkningsdato }.betal(this, periode, Aktivitetslogg(), MaskinellJurist())
     }
 }

@@ -342,7 +342,7 @@ class Person private constructor(
         return ArbeidsgiverUtbetalinger(
             regler = regler,
             arbeidsgivere = arbeidsgivereMedSykdom().associateWith {
-                it.builder(regler, skjæringstidspunkter, vilkårsgrunnlagHistorikk.inntektsopplysningPerSkjæringstidspunktPerArbeidsgiver(), subsumsjonObserver)
+                it.builder(regler, skjæringstidspunkter, vilkårsgrunnlagHistorikk.inntektsopplysninger(), subsumsjonObserver)
             },
             infotrygdhistorikk = infotrygdhistorikk,
             alder = fødselsnummer.alder(),
@@ -897,10 +897,6 @@ class Person private constructor(
             regler = NormalArbeidstaker
         ).apply {
             avvisInngangsvilkårfilter(AvvisInngangsvilkårfilter(vilkårsgrunnlagHistorikk, fødselsnummer.alder()))
-            vedtaksperioder.lagUtbetalinger(
-                this,
-                skjæringstidspunkter(),
-                vilkårsgrunnlagHistorikk.inntektsopplysningPerSkjæringstidspunktPerArbeidsgiver()
-            )
+            vedtaksperioder.lagUtbetalinger(this, skjæringstidspunkter(), vilkårsgrunnlagHistorikk.inntektsopplysninger())
         }
 }
