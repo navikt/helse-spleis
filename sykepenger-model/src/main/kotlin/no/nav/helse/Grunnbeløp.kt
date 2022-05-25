@@ -1,11 +1,11 @@
 package no.nav.helse
 
-import no.nav.helse.økonomi.Inntekt
-import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import java.time.LocalDate
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
+import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Inntekt.Companion.årlig
 
 internal class Grunnbeløp private constructor(private val multiplier: Double) {
     private val grunnbeløp = listOf(
@@ -83,7 +83,7 @@ internal class Grunnbeløp private constructor(private val multiplier: Double) {
     internal fun beløp(dato: LocalDate) =
         gjeldende(dato).beløp(multiplier)
 
-    internal fun beløp(dato: LocalDate, virkningFra: LocalDate) =
+    internal fun beløp(dato: LocalDate, virkningFra: LocalDate?) =
         gjeldende(dato, virkningFra).beløp(multiplier)
 
     internal fun dagsats(dato: LocalDate) = beløp(dato).rundTilDaglig()
