@@ -22,6 +22,7 @@ import no.nav.helse.juni
 import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.oktober
+import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -915,37 +916,26 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
 
     @Test
     fun `kastes ikke ut pga manglende inntekt etter inntektsmelding`() {
-        håndterSykmelding(Sykmeldingsperiode(3.januar, 8.januar, 100.prosent), orgnummer = a2)
-        håndterSykmelding(Sykmeldingsperiode(4.januar, 8.januar, 100.prosent), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(9.januar, 18.januar, 100.prosent), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(9.januar, 18.januar, 100.prosent), orgnummer = a2)
-        håndterSøknad(Sykdom(3.januar, 8.januar, 100.prosent), orgnummer = a2)
+        håndterSykmelding(Sykmeldingsperiode(3.januar, 18.januar, 100.prosent), orgnummer = a2)
+        håndterSykmelding(Sykmeldingsperiode(4.januar, 18.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(3.januar, 18.januar, 100.prosent), orgnummer = a2)
         håndterUtbetalingshistorikk(1.vedtaksperiode, orgnummer = a2)
-        håndterSøknad(Sykdom(4.januar, 8.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(4.januar, 18.januar, 100.prosent), orgnummer = a1)
         håndterUtbetalingshistorikk(1.vedtaksperiode, orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(19.januar, 22.januar, 100.prosent), orgnummer = a1)
-        håndterSøknad(Sykdom(9.januar, 18.januar, 100.prosent), orgnummer = a1)
-        håndterUtbetalingshistorikk(2.vedtaksperiode, orgnummer = a1)
 
-        håndterSøknad(Sykdom(9.januar, 18.januar, 100.prosent), orgnummer = a2)
-        håndterUtbetalingshistorikk(2.vedtaksperiode, orgnummer = a2)
+        håndterSykmelding(Sykmeldingsperiode(19.januar, 22.januar, 100.prosent), orgnummer = a1)
 
         håndterSøknad(Sykdom(19.januar, 22.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(4.januar til 19.januar), orgnummer = a1)
-        håndterYtelser(3.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
+        håndterVilkårsgrunnlag(2.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
 
-        assertForventetFeil(
-            forklaring = "https://trello.com/c/OFgymppw Sjekker sykepengegrunnlag opp mot skjæringstidspunkt, mens inntekt lagres på 'første fraværsdag'",
-            nå = { assertError("Forventer minst ett sykepengegrunnlag som er fra inntektsmelding eller Infotrygd", 3.vedtaksperiode.filter(a1)) },
-            ønsket = {
-                assertNoErrors(3.vedtaksperiode.filter(a1))
-                assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a1)
-                assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a2)
-                assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a1)
-                assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a2)
-                assertSisteTilstand(3.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a1)
-            }
-        )
+        assertNoErrors(2.vedtaksperiode.filter(a1))
+        assertEquals(Inntektskilde.EN_ARBEIDSGIVER, inspektør(a1).inntektskilde(2.vedtaksperiode))
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a2)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a1)
     }
 
     @Test

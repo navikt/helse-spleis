@@ -2,6 +2,7 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import no.nav.helse.Grunnbeløp
+import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.arbeidsgivergrunnlag
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.inntektsopplysningPerArbeidsgiver
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.sykepengegrunnlag
 import no.nav.helse.person.Sykepengegrunnlag.Begrensning.ER_6G_BEGRENSET
@@ -10,7 +11,6 @@ import no.nav.helse.person.Sykepengegrunnlag.Begrensning.VURDERT_I_INFOTRYGD
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.økonomi.Inntekt
-import no.nav.helse.økonomi.Inntekt.Companion.summer
 import no.nav.helse.økonomi.Prosent
 
 internal class Sykepengegrunnlag(
@@ -22,8 +22,7 @@ internal class Sykepengegrunnlag(
     `6G`: Inntekt? = null
 ) {
     private val `6G`: Inntekt = `6G` ?: Grunnbeløp.`6G`.beløp(skjæringstidspunkt, LocalDate.now())
-    private val grunnlag = arbeidsgiverInntektsopplysninger.sykepengegrunnlag()
-    internal val grunnlagForSykepengegrunnlag: Inntekt = overstyrtGrunnlagForSykepengegrunnlag ?: grunnlag.values.summer() // TODO: gjøre private
+    internal val grunnlagForSykepengegrunnlag: Inntekt = overstyrtGrunnlagForSykepengegrunnlag ?: arbeidsgiverInntektsopplysninger.sykepengegrunnlag() // TODO: gjøre private
     internal val sykepengegrunnlag = grunnlagForSykepengegrunnlag.coerceAtMost(this.`6G`)
     internal val begrensning = if (vurdertInfotrygd) VURDERT_I_INFOTRYGD else if (grunnlagForSykepengegrunnlag > this.`6G`) ER_6G_BEGRENSET else ER_IKKE_6G_BEGRENSET
 
@@ -35,7 +34,7 @@ internal class Sykepengegrunnlag(
         vurdertInfotrygd: Boolean = false
     ) : this(skjæringstidspunkt, arbeidsgiverInntektsopplysninger, deaktiverteArbeidsforhold, vurdertInfotrygd) {
         subsumsjonObserver.apply {
-            `§ 8-30 ledd 1`(grunnlag, grunnlagForSykepengegrunnlag)
+            `§ 8-30 ledd 1`(arbeidsgiverInntektsopplysninger.arbeidsgivergrunnlag(), grunnlagForSykepengegrunnlag)
             `§ 8-10 ledd 2 punktum 1`(
                 erBegrenset = begrensning == ER_6G_BEGRENSET,
                 maksimaltSykepengegrunnlag = `6G`,

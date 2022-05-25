@@ -4,7 +4,7 @@ package no.nav.helse.person
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
@@ -60,9 +60,6 @@ internal class Inntektshistorikk {
 
     internal fun grunnlagForSammenligningsgrunnlag(dato: LocalDate): Inntektsopplysning? =
         nyesteInnslag()?.grunnlagForSammenligningsgrunnlag(dato)
-
-    internal fun sykepengegrunnlagKommerFraSkatt(skjæringstidspunkt: LocalDate) =
-        grunnlagForSykepengegrunnlag(skjæringstidspunkt, skjæringstidspunkt).let { it == null || it is SkattComposite }
 
     internal class Innslag(private val id: UUID) {
         private val inntekter = mutableListOf<Inntektsopplysning>()
@@ -136,6 +133,14 @@ internal class Inntektshistorikk {
         fun harInntektsmelding(førsteFraværsdag: LocalDate) = false
         fun build(filter: Utbetalingsfilter.Builder, inntektsmeldingId: UUID) {}
         fun erNødvendigInntektForVilkårsprøving(harSykdom: Boolean) = false
+
+        companion object {
+            internal fun List<Inntektsopplysning>.valider(aktivitetslogg: IAktivitetslogg) {
+                if (all { it is SkattComposite }) {
+                    aktivitetslogg.error("Bruker mangler nødvendig inntekt ved validering av Vilkårsgrunnlag")
+                }
+            }
+        }
     }
 
     internal class Saksbehandler(

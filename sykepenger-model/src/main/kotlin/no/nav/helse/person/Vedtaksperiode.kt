@@ -1615,12 +1615,6 @@ internal class Vedtaksperiode private constructor(
                         vedtaksperiode.jurist()
                     )
                 }
-                validerHvis(
-                    "Forventer minst ett sykepengegrunnlag som er fra inntektsmelding eller Infotrygd",
-                    person.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt) == null
-                ) {
-                    person.minstEttSykepengegrunnlagSomIkkeKommerFraSkatt(vedtaksperiode.skjæringstidspunkt)
-                }
                 onSuccess {
                     person.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt)?.also {
                         // Må gjøres frem til 1.oktober 2021. Etter denne datoen kan denne koden slettes,
