@@ -1,6 +1,7 @@
 package no.nav.helse.person
 
 import java.time.LocalDate
+import java.time.LocalDateTime
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.inntektsopplysningPerArbeidsgiver
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.sykepengegrunnlag
@@ -19,8 +20,9 @@ internal class Sykepengegrunnlag(
     internal val deaktiverteArbeidsforhold: List<String>,
     private val vurdertInfotrygd: Boolean,
     cachedGrunnlagForSykepengegrunnlag: Inntekt? = null,
-    private val `6G`: Inntekt = Grunnbeløp.`6G`.beløp(skjæringstidspunkt)
+    private val greguleringstidspunkt: LocalDateTime? = null
 ) {
+    private val `6G`: Inntekt = Grunnbeløp.`6G`.beløp(skjæringstidspunkt, greguleringstidspunkt?.toLocalDate())
     private val grunnlag = arbeidsgiverInntektsopplysninger.sykepengegrunnlag()
     internal val grunnlagForSykepengegrunnlag: Inntekt = cachedGrunnlagForSykepengegrunnlag ?: grunnlag.values.summer() // TODO: gjøre private
     internal val sykepengegrunnlag = grunnlagForSykepengegrunnlag.coerceAtMost(`6G`)
@@ -62,6 +64,16 @@ internal class Sykepengegrunnlag(
             return Sykepengegrunnlag(arbeidsgiverInntektsopplysninger, emptyList(), skjæringstidspunkt, subsumsjonObserver, true)
         }
     }
+
+    internal fun justerGrunnbeløp() =
+        Sykepengegrunnlag(
+            skjæringstidspunkt = skjæringstidspunkt,
+            arbeidsgiverInntektsopplysninger = arbeidsgiverInntektsopplysninger,
+            deaktiverteArbeidsforhold = deaktiverteArbeidsforhold,
+            vurdertInfotrygd = vurdertInfotrygd,
+            cachedGrunnlagForSykepengegrunnlag = grunnlagForSykepengegrunnlag,
+            greguleringstidspunkt = LocalDateTime.now()
+        )
 
     internal fun accept(vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor) {
         vilkårsgrunnlagHistorikkVisitor.preVisitSykepengegrunnlag(this, sykepengegrunnlag, grunnlagForSykepengegrunnlag, begrensning, deaktiverteArbeidsforhold)
