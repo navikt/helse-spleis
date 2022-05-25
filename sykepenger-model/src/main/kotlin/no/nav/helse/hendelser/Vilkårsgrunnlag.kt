@@ -1,5 +1,7 @@
 package no.nav.helse.hendelser
 
+import java.time.LocalDate
+import java.util.UUID
 import no.nav.helse.Fødselsnummer
 import no.nav.helse.hendelser.Periode.Companion.sammenhengende
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Companion.grupperArbeidsforholdPerOrgnummer
@@ -17,8 +19,6 @@ import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.somFødselsnummer
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
-import java.util.*
 
 class Vilkårsgrunnlag(
     meldingsreferanseId: UUID,
@@ -61,7 +61,12 @@ class Vilkårsgrunnlag(
         )
         val opptjeningvurderingOk = opptjening.valider(this)
         val medlemskapsvurderingOk = medlemskapsvurdering.valider(this)
-        val minimumInntektvurderingOk = validerMinimumInntekt(this, fødselsnummer.somFødselsnummer(), skjæringstidspunkt, grunnlagForSykepengegrunnlag, subsumsjonObserver)
+        val minimumInntektvurderingOk = validerMinimumInntekt(
+            this,
+            fødselsnummer.somFødselsnummer(),
+            grunnlagForSykepengegrunnlag,
+            subsumsjonObserver
+        )
 
         grunnlagsdata = VilkårsgrunnlagHistorikk.Grunnlagsdata(
             skjæringstidspunkt = skjæringstidspunkt,

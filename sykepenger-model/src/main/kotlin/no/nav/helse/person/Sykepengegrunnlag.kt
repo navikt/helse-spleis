@@ -14,11 +14,12 @@ import no.nav.helse.økonomi.Inntekt.Companion.summer
 import no.nav.helse.økonomi.Prosent
 
 internal class Sykepengegrunnlag(
+    private val skjæringstidspunkt: LocalDate,
     private val arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
     internal val deaktiverteArbeidsforhold: List<String>,
-    private val `6G`: Inntekt,
     private val vurdertInfotrygd: Boolean,
-    cachedGrunnlagForSykepengegrunnlag: Inntekt? = null
+    cachedGrunnlagForSykepengegrunnlag: Inntekt? = null,
+    private val `6G`: Inntekt = Grunnbeløp.`6G`.beløp(skjæringstidspunkt)
 ) {
     private val grunnlag = arbeidsgiverInntektsopplysninger.sykepengegrunnlag()
     internal val grunnlagForSykepengegrunnlag: Inntekt = cachedGrunnlagForSykepengegrunnlag ?: grunnlag.values.summer() // TODO: gjøre private
@@ -31,7 +32,7 @@ internal class Sykepengegrunnlag(
         skjæringstidspunkt: LocalDate,
         subsumsjonObserver: SubsumsjonObserver,
         vurdertInfotrygd: Boolean = false
-    ) : this(arbeidsgiverInntektsopplysninger, deaktiverteArbeidsforhold, Grunnbeløp.`6G`.beløp(skjæringstidspunkt), vurdertInfotrygd) {
+    ) : this(skjæringstidspunkt, arbeidsgiverInntektsopplysninger, deaktiverteArbeidsforhold, vurdertInfotrygd) {
         subsumsjonObserver.apply {
             `§ 8-30 ledd 1`(grunnlag, grunnlagForSykepengegrunnlag)
             `§ 8-10 ledd 2 punktum 1`(
@@ -76,7 +77,7 @@ internal class Sykepengegrunnlag(
     internal fun inntektsopplysningPerArbeidsgiver(): Map<String, Inntektshistorikk.Inntektsopplysning> =
         arbeidsgiverInntektsopplysninger.inntektsopplysningPerArbeidsgiver()
 
-    internal fun oppfyllerKravTilMinimumInntekt(alder: Alder, skjæringstidspunkt: LocalDate, subsumsjonObserver: SubsumsjonObserver): Boolean {
+    internal fun oppfyllerKravTilMinimumInntekt(alder: Alder, subsumsjonObserver: SubsumsjonObserver): Boolean {
         val minimumInntekt = alder.minimumInntekt(skjæringstidspunkt)
         val oppfyllerKrav = grunnlagForSykepengegrunnlag >= minimumInntekt
         val alderPåSkjæringstidspunkt = alder.alderPåDato(skjæringstidspunkt)

@@ -298,11 +298,12 @@ internal data class PersonData(
         ) {
 
             internal fun parseSykepengegrunnlag(skjæringstidspunkt: LocalDate): Sykepengegrunnlag = Sykepengegrunnlag(
-                arbeidsgiverInntektsopplysninger.parseArbeidsgiverInntektsopplysninger(),
-                deaktiverteArbeidsforhold,
-                Grunnbeløp.`6G`.beløp(skjæringstidspunkt), // TODO: migrere denne i json
-                begrensning == Sykepengegrunnlag.Begrensning.VURDERT_I_INFOTRYGD, // TODO: migrere denne til boolean i json
-                grunnlagForSykepengegrunnlag.årlig
+                skjæringstidspunkt = skjæringstidspunkt,
+                arbeidsgiverInntektsopplysninger = arbeidsgiverInntektsopplysninger.parseArbeidsgiverInntektsopplysninger(),
+                deaktiverteArbeidsforhold = deaktiverteArbeidsforhold,
+                vurdertInfotrygd = begrensning == Sykepengegrunnlag.Begrensning.VURDERT_I_INFOTRYGD, // TODO: migrere denne til boolean i json
+                cachedGrunnlagForSykepengegrunnlag = grunnlagForSykepengegrunnlag.årlig,
+                `6G` = Grunnbeløp.`6G`.beløp(skjæringstidspunkt) // TODO: migrere denne i json
             )
         }
 

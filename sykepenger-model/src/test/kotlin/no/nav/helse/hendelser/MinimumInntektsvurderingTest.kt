@@ -1,21 +1,21 @@
 package no.nav.helse.hendelser
 
+import java.time.LocalDate
+import java.util.UUID
 import no.nav.helse.Fødselsnummer
+import no.nav.helse.april
+import no.nav.helse.mai
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.Sykepengegrunnlag
-import no.nav.helse.somFødselsnummer
-import no.nav.helse.april
-import no.nav.helse.mai
 import no.nav.helse.person.etterlevelse.MaskinellJurist
+import no.nav.helse.somFødselsnummer
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
-import java.util.*
 
 internal class MinimumInntektsvurderingTest {
 
@@ -135,7 +135,6 @@ internal class MinimumInntektsvurderingTest {
             validerMinimumInntekt(
                 aktivitetslogg = aktivitetslogg,
                 fødselsnummer = fødselsnummer,
-                skjæringstidspunkt = skjæringstidspunkt,
                 grunnlagForSykepengegrunnlag = sykepengegrunnlag(skjæringstidspunkt, beløp),
                 MaskinellJurist()
             )
@@ -153,7 +152,6 @@ internal class MinimumInntektsvurderingTest {
             validerMinimumInntekt(
                 aktivitetslogg = aktivitetslogg,
                 fødselsnummer = fødselsnummer,
-                skjæringstidspunkt = skjæringstidspunkt,
                 grunnlagForSykepengegrunnlag = sykepengegrunnlag(skjæringstidspunkt, beløp),
                 MaskinellJurist()
             )
