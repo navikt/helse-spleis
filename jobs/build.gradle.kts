@@ -1,5 +1,6 @@
 val mainClass = "no.nav.helse.spleis.jobs.AppKt"
 val cloudSqlVersion = "1.4.4"
+val rapidsAndRiversCliVersion = "1.7927bf9"
 
 tasks.withType<Test> {
     useJUnitPlatform()
@@ -9,7 +10,7 @@ tasks.withType<Test> {
 }
 
 dependencies {
-    implementation("com.github.navikt:rapids-and-rivers-cli:1.7927bf9")
+    implementation("com.github.navikt:rapids-and-rivers-cli:$rapidsAndRiversCliVersion")
     implementation("com.google.cloud.sql:postgres-socket-factory:$cloudSqlVersion")
 }
 

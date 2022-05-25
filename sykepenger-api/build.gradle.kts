@@ -1,10 +1,10 @@
-val micrometerRegistryPrometheusVersion = "1.7.5"
+val micrometerRegistryPrometheusVersion = "1.9.0"
 val ktorVersion = "2.0.1"
 val wireMockVersion = "2.31.0"
-val cloudSqlVersion = "1.4.4"
+val cloudSqlVersion = "1.6.0"
 val awaitilityVersion = "4.1.1"
-val testcontainersPostgresqlVersion = "1.16.2"
-val mockVersion = "1.12.0"
+val testcontainersPostgresqlVersion = "1.17.1"
+val mockVersion = "1.12.4"
 
 val mainClass = "no.nav.helse.spleis.AppKt"
 

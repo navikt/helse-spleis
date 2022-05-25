@@ -4,7 +4,7 @@ val rapidsAndRiversVersion = "2022.05.19-14.18.e3dc97b518d8"
 val testcontainersPostgresqlVersion = "1.17.1"
 val innteksmeldingKontraktVersion = "2020.04.06-ab8f786"
 val syfokafkaVersion = "2021.02.15-14.09-103a1544"
-val mockkVersion = "1.12.3"
+val mockkVersion = "1.12.4"
 
 dependencies {
     implementation("com.github.navikt:rapids-and-rivers:$rapidsAndRiversVersion")

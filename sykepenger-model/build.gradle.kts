@@ -1,6 +1,9 @@
+val commonsCodecVersion = "1.15"
+val jsonassertVersion = "1.5.0"
+
 dependencies {
-    implementation("commons-codec:commons-codec:1.13")
-    testImplementation("org.skyscreamer:jsonassert:1.5.0")
+    implementation("commons-codec:commons-codec:$commonsCodecVersion")
+    testImplementation("org.skyscreamer:jsonassert:$jsonassertVersion")
 }
 
 tasks {
