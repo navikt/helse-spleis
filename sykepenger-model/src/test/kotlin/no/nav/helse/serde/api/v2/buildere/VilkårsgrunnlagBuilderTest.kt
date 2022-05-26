@@ -44,6 +44,7 @@ import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.spleis.e2e.repeat
 import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
@@ -79,7 +80,7 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
             avviksprosent = 0.0,
             omregnetÅrsinntekt = 480000.0,
             skjæringstidspunkt = 1.januar,
-            sykepengegrunnlag = 480000.0,
+            sykepengegrunnlag = 480000.0.årlig.rundTilDaglig().reflection { årlig, _, _, _ -> årlig },
             oppfyllerKravOmMedlemskap = true
         )
 
@@ -108,7 +109,7 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
             avviksprosent = 0.0,
             omregnetÅrsinntekt = 480000.0,
             skjæringstidspunkt = 1.januar,
-            sykepengegrunnlag = 480000.0,
+            sykepengegrunnlag = 480000.0.årlig.rundTilDaglig().reflection { årlig, _, _, _ -> årlig },
             oppfyllerKravOmMedlemskap = true
         )
 
@@ -141,7 +142,7 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
             avviksprosent = 0.0,
             omregnetÅrsinntekt = 372000.0,
             skjæringstidspunkt = 1.januar,
-            sykepengegrunnlag = 372000.0,
+            sykepengegrunnlag = 372000.0.årlig.rundTilDaglig().reflection { årlig, _, _, _ -> årlig },
             oppfyllerKravOmMedlemskap = true
         )
         assertEquals(1, førsteGenerasjon.inntekter.size)
@@ -156,7 +157,7 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
             avviksprosent = 12.9,
             omregnetÅrsinntekt = 420000.0,
             skjæringstidspunkt = 1.januar,
-            sykepengegrunnlag = 420000.0,
+            sykepengegrunnlag = 420000.0.årlig.rundTilDaglig().reflection { årlig, _, _, _ -> årlig },
             oppfyllerKravOmMedlemskap = true
         )
         assertEquals(1, andreGenerasjon.inntekter.size)
@@ -184,7 +185,7 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
             avviksprosent = 0.0,
             omregnetÅrsinntekt = 480000.0,
             skjæringstidspunkt = 1.januar,
-            sykepengegrunnlag = 480000.0,
+            sykepengegrunnlag = 480000.0.årlig.rundTilDaglig().reflection { årlig, _, _, _ -> årlig },
             oppfyllerKravOmMedlemskap = true
         )
 
@@ -226,7 +227,7 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
                     avviksprosent = 0.0,
                     omregnetÅrsinntekt = 480000.0,
                     skjæringstidspunkt = 1.januar,
-                    sykepengegrunnlag = 480000.0,
+                    sykepengegrunnlag = 480000.0.årlig.rundTilDaglig().reflection { årlig, _, _, _ -> årlig },
                     oppfyllerKravOmMedlemskap = true
                 )
                 assertInntekt(
@@ -246,7 +247,7 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
                     avviksprosent = 5.3,
                     omregnetÅrsinntekt = 456000.0,
                     skjæringstidspunkt = 1.januar,
-                    sykepengegrunnlag = 456000.0,
+                    sykepengegrunnlag = 456000.0.årlig.rundTilDaglig().reflection { årlig, _, _, _ -> årlig },
                     oppfyllerKravOmMedlemskap = true
                 )
                 assertInntekt(
@@ -280,7 +281,7 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
             avviksprosent = 0.0,
             omregnetÅrsinntekt = 372000.0,
             skjæringstidspunkt = 1.januar,
-            sykepengegrunnlag = 372000.0,
+            sykepengegrunnlag = 372000.0.årlig.rundTilDaglig().reflection { årlig, _, _, _ -> årlig },
             oppfyllerKravOmMedlemskap = true
         )
         assertEquals(1, førsteGenerasjon.inntekter.size)
@@ -294,7 +295,7 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
             avviksprosent = 0.0,
             omregnetÅrsinntekt = 372000.0,
             skjæringstidspunkt = 1.mars,
-            sykepengegrunnlag = 372000.0,
+            sykepengegrunnlag = 372000.0.årlig.rundTilDaglig().reflection { årlig, _, _, _ -> årlig },
             oppfyllerKravOmMedlemskap = null
         )
         assertEquals(1, førsteGenerasjon.inntekter.size)
@@ -367,7 +368,7 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
             avviksprosent = 0.0,
             omregnetÅrsinntekt = 756000.0,
             skjæringstidspunkt = 1.januar,
-            sykepengegrunnlag = 561804.0,
+            sykepengegrunnlag = 561804.0.årlig.rundTilDaglig().reflection { årlig, _, _, _ -> årlig },
             oppfyllerKravOmMedlemskap = true
         )
         assertEquals(2, generasjon.inntekter.size)

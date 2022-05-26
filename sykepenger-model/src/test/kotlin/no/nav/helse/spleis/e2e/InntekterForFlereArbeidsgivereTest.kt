@@ -1,11 +1,28 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.*
-import no.nav.helse.hendelser.*
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
+import no.nav.helse.assertForventetFeil
+import no.nav.helse.desember
+import no.nav.helse.februar
+import no.nav.helse.hendelser.ArbeidsgiverInntekt
+import no.nav.helse.hendelser.InntektForSykepengegrunnlag
+import no.nav.helse.hendelser.Inntektsvurdering
+import no.nav.helse.hendelser.Medlemskapsvurdering
+import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.Vilkårsgrunnlag
+import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.GrunnlagsdataInspektør
 import no.nav.helse.inspectors.Kilde
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
+import no.nav.helse.januar
+import no.nav.helse.juli
+import no.nav.helse.juni
+import no.nav.helse.november
+import no.nav.helse.oktober
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.Person
 import no.nav.helse.person.TilstandType.AVSLUTTET
@@ -20,9 +37,6 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
 
 // TODO: tester for at sykepengegrunnlaget er riktig
 internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
@@ -236,7 +250,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
             arbeidsforhold = arbeidsforhold
         ).håndter(Person::håndter)
 
-        assertEquals(552000.årlig, person.vilkårsgrunnlagFor(1.januar)?.sykepengegrunnlag()?.sykepengegrunnlag)
+        assertEquals(552000.årlig.rundTilDaglig(), person.vilkårsgrunnlagFor(1.januar)?.sykepengegrunnlag()?.sykepengegrunnlag)
         assertEquals(528000.årlig, person.beregnSammenligningsgrunnlag(1.januar, MaskinellJurist()).sammenligningsgrunnlag)
 
     }
@@ -274,8 +288,8 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
 
         assertForventetFeil(
             forklaring = "8-28 b",
-            nå = { assertEquals(300000.årlig, person.vilkårsgrunnlagFor(1.januar)?.sykepengegrunnlag()?.sykepengegrunnlag) },
-            ønsket = { assertEquals(552000.årlig, person.vilkårsgrunnlagFor(1.januar)?.sykepengegrunnlag()?.sykepengegrunnlag) }
+            nå = { assertEquals(300000.årlig.rundTilDaglig(), person.vilkårsgrunnlagFor(1.januar)?.sykepengegrunnlag()?.sykepengegrunnlag) },
+            ønsket = { assertEquals(552000.årlig.rundTilDaglig(), person.vilkårsgrunnlagFor(1.januar)?.sykepengegrunnlag()?.sykepengegrunnlag) }
         )
     }
 

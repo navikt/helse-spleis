@@ -70,6 +70,7 @@ import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -203,7 +204,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         val medlemskapstatus = vilkår.medlemskapstatus
         assertEquals(MedlemskapstatusDTO.JA, medlemskapstatus)
 
-        assertEquals(31000.0, vedtaksperiode.inntektFraInntektsmelding)
+        assertEquals(31000.0.månedlig.rundTilDaglig().reflection { _, månedlig, _, _ -> månedlig }, vedtaksperiode.inntektFraInntektsmelding)
         assertEquals(2, vedtaksperiode.hendelser.size)
 
         assertEquals(372000.0, vedtaksperiode.dataForVilkårsvurdering?.beregnetÅrsinntektFraInntektskomponenten)
@@ -952,11 +953,11 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         assertEquals(1, personDTO.arbeidsgivere.size)
         assertEquals(1, personDTO.arbeidsgivere[0].vedtaksperioder.size)
         val inntektsgrunnlag = personDTO.inntektsgrunnlag.find { it.skjæringstidspunkt == 1.januar }
-        assertEquals(31000.0 * 12, inntektsgrunnlag?.sykepengegrunnlag)
-        assertEquals(31000.0 * 12, inntektsgrunnlag?.omregnetÅrsinntekt)
+        assertEquals((31000.0 * 12).årlig.rundTilDaglig().reflection { årlig, _, _, _ -> årlig }, inntektsgrunnlag?.sykepengegrunnlag)
+        assertEquals((31000.0 * 12), inntektsgrunnlag?.omregnetÅrsinntekt)
         assertEquals(31000.0 * 12, inntektsgrunnlag?.sammenligningsgrunnlag)
         assertEquals(0.0, inntektsgrunnlag?.avviksprosent)
-        assertEquals(31000.0 * 12 / 260, inntektsgrunnlag?.maksUtbetalingPerDag)
+        assertEquals((31000.0 * 12).årlig.rundTilDaglig().reflection { _, _, daglig, _ -> daglig }, inntektsgrunnlag?.maksUtbetalingPerDag)
         assertEquals(1, inntektsgrunnlag?.inntekter?.size)
         inntektsgrunnlag?.inntekter?.forEach { arbeidsgiverinntekt ->
             assertEquals(ORGNUMMER, arbeidsgiverinntekt.arbeidsgiver)

@@ -2,12 +2,14 @@ package no.nav.helse.person
 
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.Grunnbeløp
 import no.nav.helse.desember
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest.Companion.INNTEKT
 import no.nav.helse.sykepengegrunnlag
+import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
@@ -38,6 +40,21 @@ internal class SykepengegrunnlagTest {
     }
 
     @Test
+    fun `sykepengegrunnlaget skal rundes av - 6g-begrenset`() {
+        val `6G` = Grunnbeløp.`6G`.beløp(1.januar)
+        val sykepengegrunnlag = `6G`.sykepengegrunnlag
+        assertNotEquals(`6G`, sykepengegrunnlag.inspektør.sykepengegrunnlag)
+        assertEquals(`6G`.rundTilDaglig(), sykepengegrunnlag.inspektør.sykepengegrunnlag)
+    }
+    @Test
+    fun `sykepengegrunnlaget skal rundes av - under 6`() {
+        val daglig = 255.5.daglig
+        val sykepengegrunnlag = daglig.sykepengegrunnlag
+        assertNotEquals(daglig, sykepengegrunnlag.inspektør.sykepengegrunnlag)
+        assertEquals(daglig.rundTilDaglig(), sykepengegrunnlag.inspektør.sykepengegrunnlag)
+    }
+
+    @Test
     fun `overstyrt sykepengegrunnlag`() {
         val inntekt = 10000.månedlig
         val overstyrt = 15000.månedlig
@@ -50,7 +67,8 @@ internal class SykepengegrunnlagTest {
             vurdertInfotrygd = false,
             overstyrtGrunnlagForSykepengegrunnlag = overstyrt
         )
-        assertEquals(overstyrt, sykepengegrunnlag.sykepengegrunnlag)
+        assertNotEquals(inntekt.rundTilDaglig(), sykepengegrunnlag.sykepengegrunnlag)
+        assertEquals(overstyrt.rundTilDaglig(), sykepengegrunnlag.sykepengegrunnlag)
     }
 
     @Test

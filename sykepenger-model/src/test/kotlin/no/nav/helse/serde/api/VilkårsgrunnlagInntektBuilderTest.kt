@@ -86,11 +86,11 @@ internal class VilkårsgrunnlagInntektBuilderTest : AbstractEndToEndTest() {
 
         assertTrue(inntektsgrunnlag.isNotEmpty())
         inntektsgrunnlag.single { it.skjæringstidspunkt == 1.januar }.also { inntektsgrunnlaget ->
-            assertEquals(INNTEKT.reflection { årlig, _, _, _ -> årlig }, inntektsgrunnlaget.sykepengegrunnlag)
+            assertEquals(INNTEKT.rundTilDaglig().reflection { årlig, _, _, _ -> årlig }, inntektsgrunnlaget.sykepengegrunnlag)
             assertEquals(INNTEKT.reflection { årlig, _, _, _ -> årlig }, inntektsgrunnlaget.omregnetÅrsinntekt)
             assertEquals(INNTEKT.reflection { årlig, _, _, _ -> årlig }, inntektsgrunnlaget.sammenligningsgrunnlag)
             assertEquals(0.0, inntektsgrunnlaget.avviksprosent)
-            assertEquals(1430.7692307692307, inntektsgrunnlaget.maksUtbetalingPerDag)
+            assertEquals(1431.0, inntektsgrunnlaget.maksUtbetalingPerDag)
             requireNotNull(inntektsgrunnlaget.inntekter.single { it.arbeidsgiver == ORGNUMMER }.omregnetÅrsinntekt).also { omregnetÅrsinntekt ->
                 assertEquals(InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO.Saksbehandler, omregnetÅrsinntekt.kilde)
                 assertEquals(INNTEKT.reflection { årlig, _, _, _ -> årlig }, omregnetÅrsinntekt.beløp)
@@ -128,11 +128,11 @@ internal class VilkårsgrunnlagInntektBuilderTest : AbstractEndToEndTest() {
 
         assertTrue(inntektsgrunnlag.isNotEmpty())
         inntektsgrunnlag.single { it.skjæringstidspunkt == 1.januar }.also { inntektsgrunnlaget ->
-            assertEquals(INNTEKT.reflection { årlig, _, _, _ -> årlig }, inntektsgrunnlaget.sykepengegrunnlag)
+            assertEquals(INNTEKT.rundTilDaglig().reflection { årlig, _, _, _ -> årlig }, inntektsgrunnlaget.sykepengegrunnlag)
             assertEquals(INNTEKT.reflection { årlig, _, _, _ -> årlig }, inntektsgrunnlaget.omregnetÅrsinntekt)
             assertEquals(INNTEKT.reflection { _, mnd, _, _ -> mnd } * 13, inntektsgrunnlaget.sammenligningsgrunnlag)
             assertEquals(7.7, inntektsgrunnlaget.avviksprosent)
-            assertEquals(1430.7692307692307, inntektsgrunnlaget.maksUtbetalingPerDag)
+            assertEquals(1431.0, inntektsgrunnlaget.maksUtbetalingPerDag)
             requireNotNull(inntektsgrunnlaget.inntekter.single { it.arbeidsgiver == ORGNUMMER }.omregnetÅrsinntekt).also { omregnetÅrsinntekt ->
                 assertEquals(InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO.Inntektsmelding, omregnetÅrsinntekt.kilde)
                 assertEquals(INNTEKT.reflection { årlig, _, _, _ -> årlig }, omregnetÅrsinntekt.beløp)
@@ -168,11 +168,11 @@ internal class VilkårsgrunnlagInntektBuilderTest : AbstractEndToEndTest() {
 
         assertTrue(inntektsgrunnlag.isNotEmpty())
         inntektsgrunnlag.single { it.skjæringstidspunkt == 1.oktober(2017) }.also { inntektsgrunnlaget ->
-            assertEquals(INNTEKT.reflection { årlig, _, _, _ -> årlig }, inntektsgrunnlaget.sykepengegrunnlag)
+            assertEquals(INNTEKT.rundTilDaglig().reflection { årlig, _, _, _ -> årlig }, inntektsgrunnlaget.sykepengegrunnlag)
             assertEquals(INNTEKT.reflection { årlig, _, _, _ -> årlig }, inntektsgrunnlaget.omregnetÅrsinntekt)
             assertNull(inntektsgrunnlaget.sammenligningsgrunnlag)
             assertNull(inntektsgrunnlaget.avviksprosent)
-            assertEquals(1430.7692307692307, inntektsgrunnlaget.maksUtbetalingPerDag)
+            assertEquals(1431.0, inntektsgrunnlaget.maksUtbetalingPerDag)
             requireNotNull(inntektsgrunnlaget.inntekter.single { it.arbeidsgiver == ORGNUMMER }.omregnetÅrsinntekt).also { omregnetÅrsinntekt ->
                 assertEquals(InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO.Infotrygd, omregnetÅrsinntekt.kilde)
                 assertEquals(INNTEKT.reflection { årlig, _, _, _ -> årlig }, omregnetÅrsinntekt.beløp)
@@ -205,11 +205,11 @@ internal class VilkårsgrunnlagInntektBuilderTest : AbstractEndToEndTest() {
 
         assertTrue(inntektsgrunnlag.isNotEmpty())
         inntektsgrunnlag.single { it.skjæringstidspunkt == 1.januar }.also { inntektsgrunnlaget ->
-            assertEquals(INNTEKT.reflection { årlig, _, _, _ -> årlig }, inntektsgrunnlaget.sykepengegrunnlag)
+            assertEquals(INNTEKT.rundTilDaglig().reflection { årlig, _, _, _ -> årlig }, inntektsgrunnlaget.sykepengegrunnlag)
             assertEquals(INNTEKT.reflection { årlig, _, _, _ -> årlig }, inntektsgrunnlaget.omregnetÅrsinntekt)
             assertNull(inntektsgrunnlaget.sammenligningsgrunnlag)
             assertNull(inntektsgrunnlaget.avviksprosent)
-            assertEquals(1430.7692307692307, inntektsgrunnlaget.maksUtbetalingPerDag)
+            assertEquals(1431.0, inntektsgrunnlaget.maksUtbetalingPerDag)
             requireNotNull(inntektsgrunnlaget.inntekter.single { it.arbeidsgiver == ORGNUMMER }.omregnetÅrsinntekt).also { omregnetÅrsinntekt ->
                 assertEquals(InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO.Infotrygd, omregnetÅrsinntekt.kilde)
                 assertEquals(INNTEKT.reflection { årlig, _, _, _ -> årlig }, omregnetÅrsinntekt.beløp)
