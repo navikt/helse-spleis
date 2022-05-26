@@ -1,5 +1,5 @@
 val mainClass = "no.nav.helse.spleis.jobs.AppKt"
-val cloudSqlVersion = "1.4.4"
+val cloudSqlVersion = "1.6.0"
 val rapidsAndRiversCliVersion = "1.7927bf9"
 
 tasks.withType<Test> {
