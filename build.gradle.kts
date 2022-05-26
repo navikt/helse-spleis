@@ -48,7 +48,7 @@ allprojects {
         // implementation("com.apurebase:kgraphql:$kGraphQLVersion")
         // implementation("com.apurebase:kgraphql-ktor:$kGraphQLVersion")
         implementation("com.github.untoldwind.KGraphQL:kgraphql:0.17.14-fork-5")
-        implementation("com.github.untoldwind.KGraphQL:kgraphql-ktor:0.17.14-fork-5")
+        implementation("com.github.untoldwind.KGraphQL:kgraphql-ktor:0.17.14-fork-6")
 
         testImplementation("org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion")
         testImplementation("org.junit.jupiter:junit-jupiter-params:$junitJupiterVersion")
