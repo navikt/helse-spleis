@@ -33,8 +33,8 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         historikk.add(0, nytt)
     }
 
-    private fun oppdaterMinimumInntektsvurdering(grunnlagsdata: Grunnlagsdata, oppfyllerKravTilMinimumInntekt: Boolean) {
-        lagre(grunnlagsdata.kopierMedMinimumInntektsvurdering(oppfyllerKravTilMinimumInntekt))
+    private fun oppdaterMinimumInntektsvurdering(grunnlagsdata: Grunnlagsdata) {
+        lagre(grunnlagsdata.kopierMedMinimumInntektsvurdering())
     }
 
     internal fun sisteId() = sisteInnlag()!!.id
@@ -129,7 +129,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         fun grunnlagsBegrensning(): Sykepengegrunnlag.Begrensning
         fun grunnlagForSykepengegrunnlag(): Inntekt // TODO: fjerne denne
         fun gjelderFlereArbeidsgivere(): Boolean
-        fun oppdaterManglendeMinimumInntekt(vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk, alder: Alder, subsumsjonObserver: SubsumsjonObserver) {}
+        fun oppdaterManglendeMinimumInntekt(vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk) {}
         fun sjekkAvviksprosent(aktivitetslogg: IAktivitetslogg): Boolean = true
         fun avvis(tidslinjer: List<Utbetalingstidslinje>, skjæringstidspunkt: LocalDate) {}
     }
@@ -161,11 +161,10 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             return Inntektsvurdering.sjekkAvvik(avviksprosent, aktivitetslogg, IAktivitetslogg::error)
         }
 
-        override fun oppdaterManglendeMinimumInntekt(vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk, alder: Alder, subsumsjonObserver: SubsumsjonObserver) {
+        override fun oppdaterManglendeMinimumInntekt(vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk) {
             if (harMinimumInntekt != null) return
             sikkerLogg.info("Vi antar at det ikke finnes forlengelser til perioder som har harMinimumInntekt = null lenger")
-            val oppfyltKravTilMinimumInntekt = sykepengegrunnlag.oppfyllerKravTilMinimumInntekt(alder, subsumsjonObserver)
-            vilkårsgrunnlagHistorikk.oppdaterMinimumInntektsvurdering(this, oppfyltKravTilMinimumInntekt)
+            vilkårsgrunnlagHistorikk.oppdaterMinimumInntektsvurdering(this)
         }
 
         override fun accept(vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor) {
@@ -225,41 +224,47 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             )
         )
 
-        internal fun kopierMedMinimumInntektsvurdering(minimumInntektVurdering: Boolean) = Grunnlagsdata(
-            skjæringstidspunkt = skjæringstidspunkt,
-            sykepengegrunnlag = sykepengegrunnlag,
-            sammenligningsgrunnlag = sammenligningsgrunnlag,
-            avviksprosent = avviksprosent,
-            opptjening = opptjening, // TODO: Må sjekkes på nytt
-            medlemskapstatus = medlemskapstatus,
-            harMinimumInntekt = minimumInntektVurdering,
-            vurdertOk = vurdertOk && minimumInntektVurdering,
-            meldingsreferanseId = meldingsreferanseId,
-            vilkårsgrunnlagId = UUID.randomUUID()
-        ).also {
-            sikkerLogg.info("Oppretter nytt Grunnlagsdata med harMinimumInntekt=$minimumInntektVurdering")
+        internal fun kopierMedMinimumInntektsvurdering(): Grunnlagsdata {
+            val minimumInntektVurdering = sykepengegrunnlag.harMinimuminntekt()
+            return Grunnlagsdata(
+                skjæringstidspunkt = skjæringstidspunkt,
+                sykepengegrunnlag = sykepengegrunnlag,
+                sammenligningsgrunnlag = sammenligningsgrunnlag,
+                avviksprosent = avviksprosent,
+                opptjening = opptjening, // TODO: Må sjekkes på nytt
+                medlemskapstatus = medlemskapstatus,
+                harMinimumInntekt = minimumInntektVurdering,
+                vurdertOk = vurdertOk && minimumInntektVurdering,
+                meldingsreferanseId = meldingsreferanseId,
+                vilkårsgrunnlagId = UUID.randomUUID()
+            ).also {
+                sikkerLogg.info("Oppretter nytt Grunnlagsdata med harMinimumInntekt=$minimumInntektVurdering")
+            }
         }
 
         internal fun kopierGrunnlagsdataMed(
+            hendelse: PersonHendelse,
             sykepengegrunnlag: Sykepengegrunnlag,
             sammenligningsgrunnlag: Sammenligningsgrunnlag,
             sammenligningsgrunnlagVurdering: Boolean,
             avviksprosent: Prosent,
             nyOpptjening: Opptjening,
-            minimumInntektVurdering: Boolean,
             meldingsreferanseId: UUID
-        ) = Grunnlagsdata(
-            skjæringstidspunkt = skjæringstidspunkt,
-            sykepengegrunnlag = sykepengegrunnlag,
-            sammenligningsgrunnlag = sammenligningsgrunnlag,
-            avviksprosent = avviksprosent,
-            opptjening = nyOpptjening,
-            medlemskapstatus = medlemskapstatus,
-            harMinimumInntekt = minimumInntektVurdering,
-            vurdertOk = nyOpptjening.erOppfylt() && minimumInntektVurdering && sammenligningsgrunnlagVurdering,
-            meldingsreferanseId = meldingsreferanseId,
-            vilkårsgrunnlagId = UUID.randomUUID()
-        )
+        ): Grunnlagsdata {
+            val sykepengegrunnlagOk = sykepengegrunnlag.valider(hendelse)
+            return Grunnlagsdata(
+                skjæringstidspunkt = skjæringstidspunkt,
+                sykepengegrunnlag = sykepengegrunnlag,
+                sammenligningsgrunnlag = sammenligningsgrunnlag,
+                avviksprosent = avviksprosent,
+                opptjening = nyOpptjening,
+                medlemskapstatus = medlemskapstatus,
+                harMinimumInntekt = sykepengegrunnlag.harMinimuminntekt(),
+                vurdertOk = nyOpptjening.erOppfylt() && sykepengegrunnlagOk && sammenligningsgrunnlagVurdering,
+                meldingsreferanseId = meldingsreferanseId,
+                vilkårsgrunnlagId = UUID.randomUUID()
+            )
+        }
 
         fun harInntektFraAOrdningen(): Boolean = sykepengegrunnlag.inntektsopplysningPerArbeidsgiver().values
             .any { it is Inntektshistorikk.SkattComposite || it is Inntektshistorikk.IkkeRapportert }

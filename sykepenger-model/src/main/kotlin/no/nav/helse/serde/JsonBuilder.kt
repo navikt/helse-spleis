@@ -967,7 +967,6 @@ internal class JsonBuilder : AbstractBuilder() {
             minsteinntekt: Inntekt,
             oppfyllerMinsteinntektskrav: Boolean
         ) {
-
             this.sykepengegrunnlag.putAll(
                 mutableMapOf(
                     "sykepengegrunnlag" to sykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },

@@ -5,7 +5,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.april
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.inspectors.inspektør
@@ -24,8 +23,6 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertDoesNotThrow
-import org.junit.jupiter.api.assertThrows
 import kotlin.properties.Delegates
 
 internal class SykepengegrunnlagTest {
@@ -57,16 +54,7 @@ internal class SykepengegrunnlagTest {
         assertFalse(aktivitetslogg.hasWarningsOrWorse())
         assertTrue(sykepengegrunnlag.inspektør.oppfyllerMinsteinntektskrav)
         assertEquals(halvG, sykepengegrunnlag.inspektør.minsteinntekt)
-        assertForventetFeil(
-            forklaring = "må lage subsumsjon når Sykepengegrunnlag overtar validering av minsteinntekt",
-            nå = {
-                assertThrows<IllegalStateException> { observer.`§ 8-3 ledd 2 punktum 1` }
-            },
-            ønsket = {
-                assertDoesNotThrow { observer.`§ 8-3 ledd 2 punktum 1` }
-                assertTrue(observer.`§ 8-3 ledd 2 punktum 1`)
-            }
-        )
+        assertTrue(observer.`§ 8-3 ledd 2 punktum 1`)
 
         observer = MinsteinntektSubsumsjonObservatør()
         aktivitetslogg = Aktivitetslogg()
@@ -74,20 +62,9 @@ internal class SykepengegrunnlagTest {
         validert = forLiteSykepengegrunnlag.valider(aktivitetslogg)
         assertFalse(forLiteSykepengegrunnlag.inspektør.oppfyllerMinsteinntektskrav)
         assertEquals(halvG, forLiteSykepengegrunnlag.inspektør.minsteinntekt)
-        assertForventetFeil(
-            forklaring = "må lage subsumsjon når Sykepengegrunnlag overtar validering av minsteinntekt",
-            nå = {
-                assertTrue(validert)
-                assertFalse(aktivitetslogg.hasWarningsOrWorse())
-                assertThrows<IllegalStateException> { observer.`§ 8-3 ledd 2 punktum 1` }
-            },
-            ønsket = {
-                assertFalse(validert)
-                assertTrue(aktivitetslogg.hasWarningsOrWorse())
-                assertDoesNotThrow { observer.`§ 8-3 ledd 2 punktum 1` }
-                assertFalse(observer.`§ 8-3 ledd 2 punktum 1`)
-            }
-        )
+        assertFalse(validert)
+        assertTrue(aktivitetslogg.hasWarningsOrWorse())
+        assertFalse(observer.`§ 8-3 ledd 2 punktum 1`)
     }
 
     @Test
@@ -104,16 +81,7 @@ internal class SykepengegrunnlagTest {
         assertEquals(`2G`, sykepengegrunnlag.inspektør.minsteinntekt)
         assertTrue(validert)
         assertFalse(aktivitetslogg.hasWarningsOrWorse())
-        assertForventetFeil(
-            forklaring = "må lage subsumsjon når Sykepengegrunnlag overtar validering av minsteinntekt",
-            nå = {
-                assertThrows<IllegalStateException> { observer.`§ 8-51 ledd 2` }
-            },
-            ønsket = {
-                assertDoesNotThrow { observer.`§ 8-51 ledd 2` }
-                assertTrue(observer.`§ 8-51 ledd 2`)
-            }
-        )
+        assertTrue(observer.`§ 8-51 ledd 2`)
 
         observer = MinsteinntektSubsumsjonObservatør()
         aktivitetslogg = Aktivitetslogg()
@@ -121,20 +89,9 @@ internal class SykepengegrunnlagTest {
         validert = forLiteSykepengegrunnlag.valider(aktivitetslogg)
         assertFalse(forLiteSykepengegrunnlag.inspektør.oppfyllerMinsteinntektskrav)
         assertEquals(`2G`, forLiteSykepengegrunnlag.inspektør.minsteinntekt)
-        assertForventetFeil(
-            forklaring = "må lage subsumsjon når Sykepengegrunnlag overtar validering av minsteinntekt",
-            nå = {
-                assertTrue(validert)
-                assertFalse(aktivitetslogg.hasWarningsOrWorse())
-                assertThrows<IllegalStateException> { observer.`§ 8-51 ledd 2` }
-            },
-            ønsket = {
-                assertFalse(validert)
-                assertTrue(aktivitetslogg.hasWarningsOrWorse())
-                assertDoesNotThrow { observer.`§ 8-51 ledd 2` }
-                assertFalse(observer.`§ 8-51 ledd 2`)
-            }
-        )
+        assertFalse(validert)
+        assertTrue(aktivitetslogg.hasWarningsOrWorse())
+        assertFalse(observer.`§ 8-51 ledd 2`)
     }
 
     @Test
@@ -153,36 +110,16 @@ internal class SykepengegrunnlagTest {
         assertEquals(`2G_2020`, sykepengegrunnlag.inspektør.minsteinntekt)
         assertTrue(validert)
         assertFalse(aktivitetslogg.hasWarningsOrWorse())
-        assertForventetFeil(
-            forklaring = "må lage subsumsjon når Sykepengegrunnlag overtar validering av minsteinntekt",
-            nå = {
-                assertThrows<IllegalStateException> { observer.`§ 8-51 ledd 2` }
-            },
-            ønsket = {
-                assertDoesNotThrow { observer.`§ 8-51 ledd 2` }
-                assertTrue(observer.`§ 8-51 ledd 2`)
-            }
-        )
+        assertTrue(observer.`§ 8-51 ledd 2`)
 
         aktivitetslogg = Aktivitetslogg()
         val forLiteSykepengegrunnlag = (`2G_2021` - 1.daglig).sykepengegrunnlag(alder, "orgnr", skjæringstidspunkt, observer)
         validert = forLiteSykepengegrunnlag.valider(aktivitetslogg)
         assertTrue(forLiteSykepengegrunnlag.inspektør.oppfyllerMinsteinntektskrav)
         assertEquals(`2G_2020`, forLiteSykepengegrunnlag.inspektør.minsteinntekt)
-        assertForventetFeil(
-            forklaring = "må lage subsumsjon når Sykepengegrunnlag overtar validering av minsteinntekt",
-            nå = {
-                assertTrue(validert)
-                assertFalse(aktivitetslogg.hasWarningsOrWorse())
-                assertThrows<IllegalStateException> { observer.`§ 8-51 ledd 2` }
-            },
-            ønsket = {
-                assertFalse(validert)
-                assertTrue(aktivitetslogg.hasWarningsOrWorse())
-                assertDoesNotThrow { observer.`§ 8-51 ledd 2` }
-                assertTrue(observer.`§ 8-51 ledd 2`)
-            }
-        )
+        assertTrue(validert)
+        assertFalse(aktivitetslogg.hasWarningsOrWorse())
+        assertTrue(observer.`§ 8-51 ledd 2`)
     }
     @Test
     fun `mindre enn 2G, og skjæringstidspunkt er etter virkningen av minsteinntekt`() {
@@ -203,17 +140,8 @@ internal class SykepengegrunnlagTest {
         validert = forLiteSykepengegrunnlag.valider(aktivitetslogg)
         assertFalse(forLiteSykepengegrunnlag.inspektør.oppfyllerMinsteinntektskrav)
         assertEquals(`2G_2021`, forLiteSykepengegrunnlag.inspektør.minsteinntekt)
-        assertForventetFeil(
-            forklaring = "må lage subsumsjon når Sykepengegrunnlag overtar validering av minsteinntekt",
-            nå = {
-                assertTrue(validert)
-                assertFalse(aktivitetslogg.hasWarningsOrWorse())
-            },
-            ønsket = {
-                assertFalse(validert)
-                assertTrue(aktivitetslogg.hasWarningsOrWorse())
-            }
-        )
+        assertFalse(validert)
+        assertTrue(aktivitetslogg.hasWarningsOrWorse())
     }
 
     @Test
