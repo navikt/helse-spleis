@@ -41,6 +41,7 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
             TilstandType.AVVENTER_VILKÅRSPRØVING,
             TilstandType.AVVENTER_HISTORIKK,
             TilstandType.AVVENTER_SIMULERING,
+            TilstandType.AVVENTER_GODKJENNING,
             TilstandType.AVVENTER_GODKJENNING, // <-- Her står vi når vi overstyrer inntekt.
             TilstandType.AVVENTER_VILKÅRSPRØVING)
 
@@ -58,6 +59,7 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
             TilstandType.AVVENTER_VILKÅRSPRØVING,
             TilstandType.AVVENTER_HISTORIKK,
             TilstandType.AVVENTER_SIMULERING,
+            TilstandType.AVVENTER_GODKJENNING,
             TilstandType.AVVENTER_GODKJENNING, // <-- Her sto vi da vi overstyrte inntekt.
             TilstandType.AVVENTER_VILKÅRSPRØVING,
             TilstandType.AVVENTER_HISTORIKK,

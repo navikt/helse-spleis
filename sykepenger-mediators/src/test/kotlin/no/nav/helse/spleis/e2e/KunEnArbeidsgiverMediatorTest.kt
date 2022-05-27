@@ -226,6 +226,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
             "AVVENTER_HISTORIKK",
             "AVVENTER_SIMULERING",
             "AVVENTER_GODKJENNING",
+            "AVVENTER_GODKJENNING",
             "AVVENTER_VILKÅRSPRØVING",
             "AVVENTER_HISTORIKK",
             "AVVENTER_SIMULERING",
