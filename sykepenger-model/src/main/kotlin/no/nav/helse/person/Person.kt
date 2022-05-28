@@ -627,6 +627,7 @@ class Person private constructor(
         subsumsjonObserver: SubsumsjonObserver
     ): Sykepengegrunnlag {
         return Sykepengegrunnlag.opprett(
+            fødselsnummer.alder(),
             arbeidsgivere.beregnSykepengegrunnlag(skjæringstidspunkt, subsumsjonObserver),
             skjæringstidspunkt,
             subsumsjonObserver,
@@ -640,6 +641,7 @@ class Person private constructor(
         subsumsjonObserver: SubsumsjonObserver
     ) =
         Sykepengegrunnlag.opprettForInfotrygd(
+            fødselsnummer.alder(),
             arbeidsgivere.beregnSykepengegrunnlag(
                 skjæringstidspunkt,
                 personensSisteKjenteSykedagIDenSammenhengdendeSykeperioden

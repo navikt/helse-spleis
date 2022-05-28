@@ -113,7 +113,7 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
     private fun grunnlagsdata(skjæringstidspunkt: LocalDate, vurdertOk: Boolean = true, harMinimumInntekt: Boolean = true, erMedlem: Boolean = true) =
         VilkårsgrunnlagHistorikk.Grunnlagsdata(
             skjæringstidspunkt = skjæringstidspunkt,
-            sykepengegrunnlag = Sykepengegrunnlag.opprett(emptyList(), skjæringstidspunkt, MaskinellJurist(), emptyList()),
+            sykepengegrunnlag = Sykepengegrunnlag.opprett(ALDER, emptyList(), skjæringstidspunkt, MaskinellJurist(), emptyList()),
             sammenligningsgrunnlag = Sammenligningsgrunnlag(emptyList()),
             avviksprosent = 0.0.prosent,
             opptjening = Opptjening.opptjening(emptyList(), 1.januar, MaskinellJurist()),

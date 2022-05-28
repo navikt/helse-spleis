@@ -71,6 +71,7 @@ import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Satstype
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje
+import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
@@ -97,15 +98,16 @@ internal data class PersonData(
 ) {
     private val arbeidsgivereliste = mutableListOf<Arbeidsgiver>()
     private val modelAktivitetslogg get() = aktivitetslogg?.konverterTilAktivitetslogg() ?: Aktivitetslogg()
+    private val fnr by lazy { fødselsnummer.somFødselsnummer() }
 
     private fun person(jurist: MaskinellJurist) = Person.ferdigPerson(
         aktørId = aktørId,
-        fødselsnummer = fødselsnummer.somFødselsnummer(),
+        fødselsnummer = fnr,
         arbeidsgivere = arbeidsgivereliste,
         aktivitetslogg = modelAktivitetslogg,
         opprettet = opprettet,
         infotrygdhistorikk = infotrygdhistorikk.tilModellObjekt(),
-        vilkårsgrunnlaghistorikk = vilkårsgrunnlagHistorikk.tilModellObjekt(),
+        vilkårsgrunnlaghistorikk = vilkårsgrunnlagHistorikk.tilModellObjekt(fnr.alder()),
         dødsdato = dødsdato,
         jurist = jurist
     )
@@ -233,17 +235,17 @@ internal data class PersonData(
         val vilkårsgrunnlag: List<VilkårsgrunnlagElementData>
     ) {
         internal companion object {
-            private fun List<VilkårsgrunnlagInnslagData>.parseVilkårsgrunnlag() =
+            private fun List<VilkårsgrunnlagInnslagData>.parseVilkårsgrunnlag(alder: Alder) =
                 this.map { innslagData ->
                     val innslag = VilkårsgrunnlagHistorikk.Innslag(innslagData.id, innslagData.opprettet)
                     innslagData.vilkårsgrunnlag.forEach {
-                        val (skjæringstidspunkt, vilkårsgrunnlagElement) = it.parseDataForVilkårsvurdering()
+                        val (skjæringstidspunkt, vilkårsgrunnlagElement) = it.parseDataForVilkårsvurdering(alder)
                         innslag.add(skjæringstidspunkt, vilkårsgrunnlagElement)
                     }
                     innslag
                 }
 
-            internal fun List<VilkårsgrunnlagInnslagData>.tilModellObjekt() = VilkårsgrunnlagHistorikk.ferdigVilkårsgrunnlagHistorikk(parseVilkårsgrunnlag())
+            internal fun List<VilkårsgrunnlagInnslagData>.tilModellObjekt(alder: Alder) = VilkårsgrunnlagHistorikk.ferdigVilkårsgrunnlagHistorikk(parseVilkårsgrunnlag(alder))
         }
     }
 
@@ -260,10 +262,10 @@ internal data class PersonData(
         private val meldingsreferanseId: UUID?,
         private val vilkårsgrunnlagId: UUID
     ) {
-        internal fun parseDataForVilkårsvurdering(): Pair<LocalDate, VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement> = skjæringstidspunkt to when (type) {
+        internal fun parseDataForVilkårsvurdering(alder: Alder): Pair<LocalDate, VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement> = skjæringstidspunkt to when (type) {
             GrunnlagsdataType.Vilkårsprøving -> VilkårsgrunnlagHistorikk.Grunnlagsdata(
                 skjæringstidspunkt = skjæringstidspunkt,
-                sykepengegrunnlag = sykepengegrunnlag.parseSykepengegrunnlag(skjæringstidspunkt),
+                sykepengegrunnlag = sykepengegrunnlag.parseSykepengegrunnlag(alder, skjæringstidspunkt),
                 sammenligningsgrunnlag = sammenligningsgrunnlag!!.parseSammenligningsgrunnlag(),
                 avviksprosent = avviksprosent?.ratio,
                 opptjening = opptjening!!.tilOpptjening(),
@@ -279,7 +281,7 @@ internal data class PersonData(
             )
             GrunnlagsdataType.Infotrygd -> VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag(
                 skjæringstidspunkt = skjæringstidspunkt,
-                sykepengegrunnlag = sykepengegrunnlag.parseSykepengegrunnlag(skjæringstidspunkt),
+                sykepengegrunnlag = sykepengegrunnlag.parseSykepengegrunnlag(alder, skjæringstidspunkt),
                 vilkårsgrunnlagId = vilkårsgrunnlagId
             )
         }
@@ -299,7 +301,8 @@ internal data class PersonData(
             private val vurdertInfotrygd: Boolean?, // TODO: migrere denne i json
         ) {
 
-            internal fun parseSykepengegrunnlag(skjæringstidspunkt: LocalDate): Sykepengegrunnlag = Sykepengegrunnlag(
+            internal fun parseSykepengegrunnlag(alder: Alder, skjæringstidspunkt: LocalDate): Sykepengegrunnlag = Sykepengegrunnlag(
+                alder = alder,
                 skjæringstidspunkt = skjæringstidspunkt,
                 arbeidsgiverInntektsopplysninger = arbeidsgiverInntektsopplysninger.parseArbeidsgiverInntektsopplysninger(),
                 deaktiverteArbeidsforhold = deaktiverteArbeidsforhold,

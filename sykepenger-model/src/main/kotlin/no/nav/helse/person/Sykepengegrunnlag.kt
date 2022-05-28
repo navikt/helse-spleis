@@ -2,6 +2,7 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import no.nav.helse.Grunnbeløp
+import no.nav.helse.Grunnbeløp.Companion.halvG
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.arbeidsgivergrunnlag
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.inntektsopplysningPerArbeidsgiver
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.sykepengegrunnlag
@@ -15,6 +16,7 @@ import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosent
 
 internal class Sykepengegrunnlag(
+    private val alder: Alder,
     private val skjæringstidspunkt: LocalDate,
     private val arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
     internal val deaktiverteArbeidsforhold: List<String>,
@@ -27,13 +29,17 @@ internal class Sykepengegrunnlag(
     internal val sykepengegrunnlag = grunnlagForSykepengegrunnlag.coerceAtMost(this.`6G`).rundTilDaglig()
     internal val begrensning = if (vurdertInfotrygd) VURDERT_I_INFOTRYGD else if (grunnlagForSykepengegrunnlag > this.`6G`) ER_6G_BEGRENSET else ER_IKKE_6G_BEGRENSET
 
+    private val minsteinntekt = (if (alder.forhøyetInntektskrav(skjæringstidspunkt)) Grunnbeløp.`2G` else halvG).minsteinntekt(skjæringstidspunkt)
+    private val oppfyllerMinsteinntektskrav = grunnlagForSykepengegrunnlag >= minsteinntekt
+
     internal constructor(
+        alder: Alder,
         arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
         deaktiverteArbeidsforhold: List<String>,
         skjæringstidspunkt: LocalDate,
         subsumsjonObserver: SubsumsjonObserver,
         vurdertInfotrygd: Boolean = false
-    ) : this(skjæringstidspunkt, arbeidsgiverInntektsopplysninger, deaktiverteArbeidsforhold, vurdertInfotrygd) {
+    ) : this(alder, skjæringstidspunkt, arbeidsgiverInntektsopplysninger, deaktiverteArbeidsforhold, vurdertInfotrygd) {
         subsumsjonObserver.apply {
             `§ 8-30 ledd 1`(arbeidsgiverInntektsopplysninger.arbeidsgivergrunnlag(), grunnlagForSykepengegrunnlag)
             `§ 8-10 ledd 2 punktum 1`(
@@ -47,20 +53,22 @@ internal class Sykepengegrunnlag(
 
     internal companion object {
         fun opprett(
+            alder: Alder,
             arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
             skjæringstidspunkt: LocalDate,
             subsumsjonObserver: SubsumsjonObserver,
             deaktiverteArbeidsforhold: List<String>
         ): Sykepengegrunnlag {
-            return Sykepengegrunnlag(arbeidsgiverInntektsopplysninger, deaktiverteArbeidsforhold, skjæringstidspunkt, subsumsjonObserver)
+            return Sykepengegrunnlag(alder, arbeidsgiverInntektsopplysninger, deaktiverteArbeidsforhold, skjæringstidspunkt, subsumsjonObserver)
         }
 
         fun opprettForInfotrygd(
+            alder: Alder,
             arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
             skjæringstidspunkt: LocalDate,
             subsumsjonObserver: SubsumsjonObserver
         ): Sykepengegrunnlag {
-            return Sykepengegrunnlag(arbeidsgiverInntektsopplysninger, emptyList(), skjæringstidspunkt, subsumsjonObserver, true)
+            return Sykepengegrunnlag(alder, arbeidsgiverInntektsopplysninger, emptyList(), skjæringstidspunkt, subsumsjonObserver, true)
         }
     }
 
@@ -71,6 +79,7 @@ internal class Sykepengegrunnlag(
 
     internal fun justerGrunnbeløp() =
         Sykepengegrunnlag(
+            alder = alder,
             skjæringstidspunkt = skjæringstidspunkt,
             arbeidsgiverInntektsopplysninger = arbeidsgiverInntektsopplysninger,
             deaktiverteArbeidsforhold = deaktiverteArbeidsforhold,
@@ -88,7 +97,9 @@ internal class Sykepengegrunnlag(
             `6G`,
             begrensning,
             deaktiverteArbeidsforhold,
-            vurdertInfotrygd
+            vurdertInfotrygd,
+            minsteinntekt,
+            oppfyllerMinsteinntektskrav
         )
         visitor.preVisitArbeidsgiverInntektsopplysninger()
         arbeidsgiverInntektsopplysninger.forEach { it.accept(visitor) }
@@ -102,7 +113,9 @@ internal class Sykepengegrunnlag(
             `6G`,
             begrensning,
             deaktiverteArbeidsforhold,
-            vurdertInfotrygd
+            vurdertInfotrygd,
+            minsteinntekt,
+            oppfyllerMinsteinntektskrav
         )
     }
     internal fun avviksprosent(sammenligningsgrunnlag: Inntekt, subsumsjonObserver: SubsumsjonObserver) = grunnlagForSykepengegrunnlag.avviksprosent(sammenligningsgrunnlag).also { avvik ->

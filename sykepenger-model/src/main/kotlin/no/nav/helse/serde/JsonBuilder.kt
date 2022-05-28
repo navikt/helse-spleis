@@ -883,7 +883,9 @@ internal class JsonBuilder : AbstractBuilder() {
             `6G`: Inntekt,
             begrensning: Sykepengegrunnlag.Begrensning,
             deaktiverteArbeidsforhold: List<String>,
-            vurdertInfotrygd: Boolean
+            vurdertInfotrygd: Boolean,
+            minsteinntekt: Inntekt,
+            oppfyllerMinsteinntektskrav: Boolean
         ) {
             pushState(SykepengegrunnlagState(sykepengegrunnlagMap))
         }
@@ -961,7 +963,9 @@ internal class JsonBuilder : AbstractBuilder() {
             `6G`: Inntekt,
             begrensning: Sykepengegrunnlag.Begrensning,
             deaktiverteArbeidsforhold: List<String>,
-            vurdertInfotrygd: Boolean
+            vurdertInfotrygd: Boolean,
+            minsteinntekt: Inntekt,
+            oppfyllerMinsteinntektskrav: Boolean
         ) {
 
             this.sykepengegrunnlag.putAll(
@@ -972,7 +976,9 @@ internal class JsonBuilder : AbstractBuilder() {
                     "arbeidsgiverInntektsopplysninger" to arbeidsgiverInntektsopplysninger,
                     "begrensning" to begrensning,
                     "deaktiverteArbeidsforhold" to deaktiverteArbeidsforhold,
-                    "vurdertInfotrygd" to vurdertInfotrygd
+                    "vurdertInfotrygd" to vurdertInfotrygd,
+                    "minsteinntekt" to minsteinntekt.reflection { årlig, _, _, _ -> årlig },
+                    "oppfyllerMinsteinntektskrav" to oppfyllerMinsteinntektskrav
                 ).apply {
                     compute("overstyrtGrunnlagForSykepengegrunnlag") { _, _ -> overstyrtGrunnlagForSykepengegrunnlag?.reflection { årlig, _, _, _ -> årlig } }
                 }

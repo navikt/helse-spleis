@@ -7,16 +7,19 @@ import no.nav.helse.person.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.Sykepengegrunnlag
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
+import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.økonomi.Inntekt
 
 internal val Inntekt.sykepengegrunnlag get() = sykepengegrunnlag(AbstractPersonTest.ORGNUMMER)
 
-internal fun Inntekt.sykepengegrunnlag(orgnr: String) = sykepengegrunnlag(orgnr, 1.januar)
+internal fun Inntekt.sykepengegrunnlag(orgnr: String) = sykepengegrunnlag(AbstractPersonTest.UNG_PERSON_FNR_2018.alder(), orgnr, 1.januar)
+internal fun Inntekt.sykepengegrunnlag(alder: Alder) = sykepengegrunnlag(alder, AbstractPersonTest.ORGNUMMER, 1.januar)
 internal fun Inntekt.sykepengegrunnlag(skjæringstidspunkt: LocalDate) =
-    sykepengegrunnlag(AbstractPersonTest.ORGNUMMER, skjæringstidspunkt)
+    sykepengegrunnlag(AbstractPersonTest.UNG_PERSON_FNR_2018.alder(), AbstractPersonTest.ORGNUMMER, skjæringstidspunkt)
 
-internal fun Inntekt.sykepengegrunnlag(orgnr: String, skjæringstidspunkt: LocalDate) =
+internal fun Inntekt.sykepengegrunnlag(alder: Alder, orgnr: String, skjæringstidspunkt: LocalDate, subsumsjonObserver: SubsumsjonObserver = SubsumsjonObserver.NullObserver) =
     Sykepengegrunnlag(
+        alder = alder,
         arbeidsgiverInntektsopplysninger = listOf(
             ArbeidsgiverInntektsopplysning(
                 orgnr,
@@ -25,10 +28,11 @@ internal fun Inntekt.sykepengegrunnlag(orgnr: String, skjæringstidspunkt: Local
         ),
         deaktiverteArbeidsforhold = emptyList(),
         skjæringstidspunkt = skjæringstidspunkt,
-        subsumsjonObserver = SubsumsjonObserver.NullObserver
+        subsumsjonObserver = subsumsjonObserver
     )
 internal fun Inntekt.sykepengegrunnlag(orgnr: String, skjæringstidspunkt: LocalDate, virkningstidspunkt: LocalDate) =
     Sykepengegrunnlag(
+        alder = AbstractPersonTest.UNG_PERSON_FNR_2018.alder(),
         skjæringstidspunkt = skjæringstidspunkt,
         arbeidsgiverInntektsopplysninger = listOf(
             ArbeidsgiverInntektsopplysning(
