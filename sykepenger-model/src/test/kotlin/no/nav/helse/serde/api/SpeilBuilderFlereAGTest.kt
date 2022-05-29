@@ -392,41 +392,6 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
         assertEquals(0, ghostpølser.size)
     }
 
-
-    @Test
-    fun `tar med flere arbeidsforhold som gjelder skjæringstidspunktet`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        håndterVilkårsgrunnlag(
-            1.vedtaksperiode,
-            inntektsvurdering = Inntektsvurdering(
-                listOf(
-                    sammenligningsgrunnlag(a1, 1.januar, INNTEKT.repeat(12)),
-                    sammenligningsgrunnlag(a2, 1.januar, 1000.månedlig.repeat(12))
-                )
-            ),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                listOf(
-                    grunnlag(a1, 1.januar, INNTEKT.repeat(3)),
-                    grunnlag(a2, 1.januar, 1000.månedlig.repeat(3))
-                ),
-                arbeidsforhold = emptyList()
-            ),
-            arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null)
-            ),
-            orgnummer = a1
-        )
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-
-        val personDto = serializePersonForSpeil(person)
-        assertEquals(listOf(a1, a2), personDto.arbeidsforholdPerSkjæringstidspunkt[1.januar]?.map { it.orgnummer })
-    }
-
     @Test
     fun `tar med deaktiverte arbeidsforhold som gjelder skjæringstidspunktet`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
@@ -459,15 +424,6 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
         håndterOverstyrArbeidsforhold(1.januar, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, true)))
 
         val personDto = serializePersonForSpeil(person)
-        assertEquals(
-            mapOf(
-                1.januar to listOf(
-                    ArbeidsforholdDTO(a1, LocalDate.EPOCH, null, false),
-                    ArbeidsforholdDTO(a2, LocalDate.EPOCH, null, true)
-                )
-            ),
-            personDto.arbeidsforholdPerSkjæringstidspunkt
-        )
 
         val perioder = personDto.arbeidsgivere.find { it.organisasjonsnummer == a2 }?.ghostPerioder
 
@@ -485,39 +441,6 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
             )
 
         assertTrue(areEquals(expected, actual))
-    }
-
-    @Test
-    fun `tar med arbeidsforhold som var med i beregning av opptjening, men ikke gjelder skjæringstidspunktet`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        håndterVilkårsgrunnlag(
-            1.vedtaksperiode,
-            inntektsvurdering = Inntektsvurdering(
-                listOf(
-                    sammenligningsgrunnlag(a2, 19.desember(2017), INNTEKT.repeat(11))
-                )
-            ),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                listOf(
-                    grunnlag(a2, 19.desember(2017), INNTEKT.repeat(2))
-                ),
-                arbeidsforhold = emptyList()
-            ),
-            arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, 20.desember(2017), null),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, 19.desember(2017))
-            ),
-            orgnummer = a1
-        )
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-
-        val personDto = serializePersonForSpeil(person)
-
-        assertEquals(listOf(a1, a2), personDto.arbeidsforholdPerSkjæringstidspunkt[1.januar]?.map { it.orgnummer })
     }
 
     @Test
@@ -740,52 +663,6 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
                 assertEquals(33000.0, it.endringer.last().beløp)
                 assertEquals(23.januar, it.endringer.last().dato)
             }
-    }
-
-    @Test
-    fun `tar med vilkårsgrunnlag med ikke-rapportert inntekt`() {
-        // A2 må være først i listen for at buggen skal intreffe
-        nyttVedtak(1.januar(2017), 31.januar(2017), 100.prosent, orgnummer = a2)
-
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar, 100.prosent), orgnummer = a1)
-        håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(arbeidsgiverperioder = listOf(1.januar til 16.januar), orgnummer = a1)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        håndterVilkårsgrunnlag(
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
-            inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
-                1.januar(2017) til 1.desember(2017) inntekter {
-                    a1 inntekt INNTEKT
-                }
-            }),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntektperioderForSykepengegrunnlag {
-                    1.oktober(2017) til 1.desember(2017) inntekter {
-                        a1 inntekt INNTEKT
-                    }
-                },
-                emptyList()
-            ),
-            arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, 1.desember(2017), null)
-            )
-        )
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-
-        val personDto = speilApi()
-
-        val inntektsgrunnlag = personDto.inntektsgrunnlag.last().inntekter.firstOrNull { it.arbeidsgiver == a2 }
-        assertEquals(
-            InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO(
-                kilde = InntektsgrunnlagDTO.ArbeidsgiverinntektDTO.OmregnetÅrsinntektDTO.InntektkildeDTO.IkkeRapportert,
-                beløp = 0.0,
-                månedsbeløp = 0.0,
-                inntekterFraAOrdningen = null
-            ),
-            inntektsgrunnlag?.omregnetÅrsinntekt
-        )
     }
 
     private fun areEquals(a: GhostPeriodeDTO, b: GhostPeriodeDTO): Boolean =

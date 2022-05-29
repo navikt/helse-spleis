@@ -22,13 +22,11 @@ import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
-import no.nav.helse.serde.api.serializePersonForSpeil
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
@@ -492,36 +490,6 @@ internal class NyTilstandsflytFlereArbeidsgivereTest : AbstractEndToEndTest() {
         )
 
         assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
-    }
-
-    @Test
-    fun `en periode er fullstending om den venter på andre arbeidsgivere(speilbuilder)`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a2)
-
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a2)
-
-        håndterInntektsmelding(
-            listOf(1.januar til 16.januar),
-            beregnetInntekt = INNTEKT,
-            refusjon = Inntektsmelding.Refusjon(INNTEKT, null),
-            orgnummer = a1
-        )
-        håndterInntektsmelding(
-            listOf(1.januar til 16.januar),
-            beregnetInntekt = INNTEKT,
-            refusjon = Inntektsmelding.Refusjon(INNTEKT, null),
-            orgnummer = a2
-        )
-
-        vilkårsprøv(1.vedtaksperiode, a1, 1.januar)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-
-        val speilSnapshot = serializePersonForSpeil(person)
-        assertTrue(speilSnapshot.arbeidsgivere[0].vedtaksperioder.single().fullstendig)
-        assertTrue(speilSnapshot.arbeidsgivere[1].vedtaksperioder.single().fullstendig)
     }
 
     @Test

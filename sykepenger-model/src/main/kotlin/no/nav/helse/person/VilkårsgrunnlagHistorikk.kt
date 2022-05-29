@@ -124,7 +124,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         fun valider(aktivitetslogg: Aktivitetslogg)
         fun accept(vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor)
         fun sykepengegrunnlag(): Sykepengegrunnlag
-        fun sammenligningsgrunnlag(): Inntekt?
         fun sammenligningsgrunnlagPerArbeidsgiver(): Map<String, Inntektshistorikk.Inntektsopplysning>
         fun grunnlagsBegrensning(): Sykepengegrunnlag.Begrensning
         fun grunnlagForSykepengegrunnlag(): Inntekt // TODO: fjerne denne
@@ -202,7 +201,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         override fun sykepengegrunnlag() = sykepengegrunnlag
         override fun grunnlagsBegrensning() = sykepengegrunnlag.begrensning
         override fun grunnlagForSykepengegrunnlag() = sykepengegrunnlag.grunnlagForSykepengegrunnlag
-        override fun sammenligningsgrunnlag() = sammenligningsgrunnlag.sammenligningsgrunnlag
         override fun sammenligningsgrunnlagPerArbeidsgiver() = sammenligningsgrunnlag.inntektsopplysningPerArbeidsgiver()
 
         override fun gjelderFlereArbeidsgivere() = sykepengegrunnlag.inntektsopplysningPerArbeidsgiver().size > 1
@@ -285,7 +283,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
         override fun sykepengegrunnlag() = sykepengegrunnlag
         override fun grunnlagsBegrensning() = sykepengegrunnlag.begrensning
-        override fun sammenligningsgrunnlag() = null
         override fun sammenligningsgrunnlagPerArbeidsgiver() = emptyMap<String, Inntektshistorikk.Inntektsopplysning>()
 
         override fun grunnlagForSykepengegrunnlag() = sykepengegrunnlag.grunnlagForSykepengegrunnlag

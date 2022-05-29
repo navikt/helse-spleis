@@ -5,9 +5,17 @@ import com.github.tomakehurst.wiremock.client.WireMock.stubFor
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
-import io.ktor.http.*
 import io.ktor.http.HttpHeaders.Authorization
-import io.ktor.server.engine.*
+import io.ktor.http.HttpMethod
+import io.ktor.http.HttpStatusCode
+import io.ktor.server.engine.ApplicationEngine
+import java.net.Socket
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
+import java.util.concurrent.TimeUnit.SECONDS
+import java.util.concurrent.atomic.AtomicInteger
+import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.hendelser.Inntektsmelding
@@ -19,24 +27,21 @@ import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.serde.serialize
 import no.nav.helse.somFødselsnummer
 import no.nav.helse.spleis.config.AzureAdAppConfig
+import no.nav.helse.spleis.config.DataSourceConfiguration
 import no.nav.helse.spleis.config.KtorConfig
 import no.nav.helse.spleis.dao.HendelseDao
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.awaitility.Awaitility.await
 import org.flywaydb.core.Flyway
-import org.junit.jupiter.api.*
+import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.TestInstance.Lifecycle
 import org.testcontainers.containers.PostgreSQLContainer
-import java.net.Socket
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
-import java.util.concurrent.TimeUnit.SECONDS
-import java.util.concurrent.atomic.AtomicInteger
-import javax.sql.DataSource
-import no.nav.helse.spleis.config.DataSourceConfiguration
 
 @TestInstance(Lifecycle.PER_CLASS)
 internal class RestApiTest {
@@ -191,11 +196,6 @@ internal class RestApiTest {
                 ).asExecute
             )
         }
-    }
-
-    @Test
-    fun `hent person`() {
-        "/api/person-snapshot".httpGet(HttpStatusCode.OK, mapOf("fnr" to UNG_PERSON_FNR))
     }
 
     @Test
