@@ -101,7 +101,6 @@ internal class Sykepengegrunnlag(
             vurdertInfotrygd = vurdertInfotrygd,
             overstyrtGrunnlagForSykepengegrunnlag = grunnlagForSykepengegrunnlag
         )
-
     internal fun accept(visitor: SykepengegrunnlagVisitor) {
         visitor.preVisitSykepengegrunnlag(
             this,
@@ -133,6 +132,7 @@ internal class Sykepengegrunnlag(
             oppfyllerMinsteinntektskrav
         )
     }
+
     internal fun avviksprosent(sammenligningsgrunnlag: Inntekt, subsumsjonObserver: SubsumsjonObserver) = grunnlagForSykepengegrunnlag.avviksprosent(sammenligningsgrunnlag).also { avvik ->
         subsumsjonObserver.`§ 8-30 ledd 2 punktum 1`(Prosent.MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT, grunnlagForSykepengegrunnlag, sammenligningsgrunnlag, avvik)
     }

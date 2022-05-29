@@ -64,7 +64,6 @@ class Vilkårsgrunnlag(
             avviksprosent = inntektsvurdering.avviksprosent(),
             opptjening = opptjening,
             medlemskapstatus = medlemskapsvurdering.medlemskapstatus,
-            harMinimumInntekt = grunnlagForSykepengegrunnlag.harMinimuminntekt(),
             vurdertOk = sykepengegrunnlagOk && inntektsvurderingOk && opptjeningvurderingOk && medlemskapsvurderingOk,
             meldingsreferanseId = meldingsreferanseId(),
             vilkårsgrunnlagId = UUID.randomUUID()

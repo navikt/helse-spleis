@@ -677,10 +677,6 @@ class Person private constructor(
 
     internal fun minimumInntekt(skjæringstidspunkt: LocalDate): Inntekt = fødselsnummer.alder().minimumInntekt(skjæringstidspunkt)
 
-    internal fun oppdaterManglendeMinimumInntekt(vilkårsgrunnlag: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement) {
-        vilkårsgrunnlag.oppdaterManglendeMinimumInntekt(vilkårsgrunnlagHistorikk)
-    }
-
     internal fun kunOvergangFraInfotrygd(vedtaksperiode: Vedtaksperiode) =
         Arbeidsgiver.kunOvergangFraInfotrygd(arbeidsgivere, vedtaksperiode)
 

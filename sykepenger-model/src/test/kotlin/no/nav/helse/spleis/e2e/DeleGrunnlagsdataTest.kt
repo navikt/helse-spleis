@@ -1,8 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import java.time.LocalDate
-import java.time.YearMonth
-import java.util.UUID
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
@@ -14,16 +11,10 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
-import no.nav.helse.inspectors.GrunnlagsdataInspektør
-import no.nav.helse.inspectors.PersonInspektør
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
-import no.nav.helse.person.ArbeidsgiverInntektsopplysning
-import no.nav.helse.person.Inntektshistorikk
-import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Periodetype
-import no.nav.helse.person.Sammenligningsgrunnlag
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -36,15 +27,11 @@ import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
-import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.person.nullstillTilstandsendringer
-import no.nav.helse.sykepengegrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
-import no.nav.helse.økonomi.Inntekt.Companion.årlig
-import no.nav.helse.økonomi.Prosent
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
@@ -329,73 +316,6 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
 
         assertEquals(Periodetype.FØRSTEGANGSBEHANDLING, inspektør.periodetype(1.vedtaksperiode))
         assertEquals(Periodetype.FØRSTEGANGSBEHANDLING, inspektør.periodetype(2.vedtaksperiode))
-    }
-
-    @Test
-    fun `når vilkårsgrunnlag mangler sjekk på minimum inntekt gjøres denne sjekken - søknad arbeidsgiver`() {
-        val inntekt = 93634.årlig / 2 - 1.årlig
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent))
-        håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
-        håndterInntektsmeldingMedValidering(
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
-            arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
-            beregnetInntekt = inntekt
-        )
-
-        val vilkårsgrunnlagElement = VilkårsgrunnlagHistorikk.Grunnlagsdata(
-            skjæringstidspunkt = 1.januar,
-            sykepengegrunnlag = inntekt.sykepengegrunnlag(ORGNUMMER),
-            sammenligningsgrunnlag = Sammenligningsgrunnlag(
-                arbeidsgiverInntektsopplysninger = listOf(
-                    ArbeidsgiverInntektsopplysning("orgnummer",
-                        Inntektshistorikk.SkattComposite(UUID.randomUUID(), (0 until 12).map {
-                            Inntektshistorikk.Skatt.Sammenligningsgrunnlag(
-                                dato = LocalDate.now(),
-                                hendelseId = UUID.randomUUID(),
-                                beløp = inntekt,
-                                måned = YearMonth.of(2017, it + 1),
-                                type = Inntektshistorikk.Skatt.Inntekttype.LØNNSINNTEKT,
-                                fordel = "fordel",
-                                beskrivelse = "beskrivelse"
-                            )
-                        })
-                    )
-                ),
-            ),
-            avviksprosent = Prosent.prosent(0.0),
-            opptjening = Opptjening.opptjening(emptyList(), 1.januar, MaskinellJurist()),
-            medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
-            harMinimumInntekt = null,
-            vurdertOk = true,
-            meldingsreferanseId = UUID.randomUUID(),
-            vilkårsgrunnlagId = UUID.randomUUID()
-        )
-
-        // Gjøres utelukkende for å teste oppførsel som ikke skal kunne skje lenger
-        // (minimumInntekt kan være null i db, men ikke i modellen, mangler en migrering)
-        val vilkårsgrunnlagHistorikk = PersonInspektør(person).vilkårsgrunnlagHistorikk
-        vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlagElement)
-
-        håndterSykmelding(Sykmeldingsperiode(17.januar, 17.februar, 100.prosent))
-        håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(17.januar, 17.februar, 100.prosent))
-        håndterYtelser(2.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-
-        val grunnlagsdataInspektør = GrunnlagsdataInspektør(inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!)
-        assertEquals(false, grunnlagsdataInspektør.harMinimumInntekt)
-        inspektør.utbetalingUtbetalingstidslinje(0).inspektør.also {
-            assertEquals(0, it.navDagTeller)
-            assertEquals(16, it.arbeidsgiverperiodeDagTeller)
-            assertEquals(23, it.avvistDagTeller)
-        }
-        assertTilstander(
-            2.vedtaksperiode,
-            START,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK,
-            AVVENTER_GODKJENNING,
-            AVSLUTTET
-        )
     }
 
     @Test

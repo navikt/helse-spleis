@@ -65,7 +65,7 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
     @Test
     fun `avviser ikke dager dersom vurdert ok`() {
         val tidslinjer = listOf(tidslinjeOf(1.NAV))
-        innslag.add(1.januar, grunnlagsdata(1.januar))
+        innslag.add(1.januar, grunnlagsdata(1.januar, harOpptjening = true, harMinimumInntekt = true, erMedlem = true))
         innslag.avvis(tidslinjer)
         assertEquals(0, avvisteDager(tidslinjer).size)
     }
@@ -129,7 +129,6 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
                 true -> Medlemskapsvurdering.Medlemskapstatus.Ja
                 false -> Medlemskapsvurdering.Medlemskapstatus.Nei
             },
-            harMinimumInntekt = harMinimumInntekt,
             vurdertOk = harOpptjening && harMinimumInntekt && erMedlem,
             meldingsreferanseId = UUID.randomUUID(),
             vilkårsgrunnlagId = UUID.randomUUID()

@@ -344,7 +344,6 @@ private class GrunnlagsdataBuilder(skjæringstidspunkt: LocalDate, grunnlagsdata
         sammenligningsgrunnlag: Inntekt,
         avviksprosent: Prosent?,
         opptjening: Opptjening,
-        harMinimumInntekt: Boolean?,
         vurdertOk: Boolean,
         meldingsreferanseId: UUID?,
         vilkårsgrunnlagId: UUID,
