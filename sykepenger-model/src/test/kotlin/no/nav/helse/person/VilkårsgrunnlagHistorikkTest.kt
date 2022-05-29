@@ -436,7 +436,7 @@ internal class VilkårsgrunnlagHistorikkTest {
         vilkårsgrunnlagHistorikk.lagre(10.januar, vilkårsgrunnlag1)
         vilkårsgrunnlagHistorikk.lagre(1.januar, vilkårsgrunnlag2)
         val utbetalingstidslinjeMedNavDager = tidslinjeOf(16.AP, 10.NAV)
-        vilkårsgrunnlagHistorikk.avvisInngangsvilkår(listOf(utbetalingstidslinjeMedNavDager), "20043769969".somFødselsnummer().alder())
+        vilkårsgrunnlagHistorikk.avvisInngangsvilkår(listOf(utbetalingstidslinjeMedNavDager))
         assertEquals(8, utbetalingstidslinjeMedNavDager.filterIsInstance<Utbetalingstidslinje.Utbetalingsdag.NavDag>().size)
     }
 
@@ -484,7 +484,7 @@ internal class VilkårsgrunnlagHistorikkTest {
         vilkårsgrunnlagHistorikk.lagre(10.januar, vilkårsgrunnlag1)
         vilkårsgrunnlagHistorikk.lagre(1.januar, VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag(1.januar, 10000.månedlig.sykepengegrunnlag))
         val utbetalingstidslinjeMedNavDager = tidslinjeOf(16.AP, 10.NAV)
-        vilkårsgrunnlagHistorikk.avvisInngangsvilkår(listOf(utbetalingstidslinjeMedNavDager), "20043769969".somFødselsnummer().alder())
+        vilkårsgrunnlagHistorikk.avvisInngangsvilkår(listOf(utbetalingstidslinjeMedNavDager))
         assertEquals(8, utbetalingstidslinjeMedNavDager.filterIsInstance<Utbetalingstidslinje.Utbetalingsdag.NavDag>().size)
     }
 
@@ -515,7 +515,7 @@ internal class VilkårsgrunnlagHistorikkTest {
         val grunnlagsdataInspektør = GrunnlagsdataInspektør(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar)!!)
         assertFalse(grunnlagsdataInspektør.vurdertOk)
         val utbetalingstidslinjeMedNavDager = tidslinjeOf(16.AP, 10.NAV)
-        vilkårsgrunnlagHistorikk.avvisInngangsvilkår(listOf(utbetalingstidslinjeMedNavDager), "20043769969".somFødselsnummer().alder())
+        vilkårsgrunnlagHistorikk.avvisInngangsvilkår(listOf(utbetalingstidslinjeMedNavDager))
         utbetalingstidslinjeMedNavDager.filterIsInstance<Utbetalingstidslinje.Utbetalingsdag.AvvistDag>().let { avvisteDager ->
             assertEquals(8, avvisteDager.size)
             avvisteDager.forEach {
@@ -541,7 +541,7 @@ internal class VilkårsgrunnlagHistorikkTest {
                 arbeidsforhold = arbeidsforhold
         )
         vilkårsgrunnlag.valider(
-            10.månedlig.sykepengegrunnlag,
+            10.månedlig.sykepengegrunnlag(fødselsnummer.alder()),
             sammenligningsgrunnlag(10.månedlig, 1.januar),
             1.januar,
             Opptjening.opptjening(arbeidsforholdFraHistorikk, 1.januar, MaskinellJurist()),
@@ -553,7 +553,7 @@ internal class VilkårsgrunnlagHistorikkTest {
         val grunnlagsdataInspektør = GrunnlagsdataInspektør(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar)!!)
         assertFalse(grunnlagsdataInspektør.vurdertOk)
         val utbetalingstidslinjeMedNavDager = tidslinjeOf(16.AP, 10.NAV)
-        vilkårsgrunnlagHistorikk.avvisInngangsvilkår(listOf(utbetalingstidslinjeMedNavDager), fødselsnummer.alder())
+        vilkårsgrunnlagHistorikk.avvisInngangsvilkår(listOf(utbetalingstidslinjeMedNavDager))
 
         utbetalingstidslinjeMedNavDager.filterIsInstance<Utbetalingstidslinje.Utbetalingsdag.AvvistDag>().let { avvisteDager ->
             assertEquals(8, avvisteDager.size)

@@ -1,12 +1,12 @@
 package no.nav.helse.utbetalingstidslinje
 
+import java.time.LocalDate
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
-import java.time.LocalDate
 
 internal class ArbeidsgiverUtbetalinger(
     private val regler: ArbeidsgiverRegler,
@@ -44,7 +44,7 @@ internal class ArbeidsgiverUtbetalinger(
         val infotrygdtidslinje = infotrygdhistorikk.utbetalingstidslinje().kutt(periode.endInclusive)
         Sykdomsgradfilter.filter(tidslinjer, periode, aktivitetslogg, subsumsjonObserver)
         AvvisDagerEtterDødsdatofilter(dødsdato).filter(tidslinjer, periode, aktivitetslogg, subsumsjonObserver)
-        AvvisInngangsvilkårfilter(vilkårsgrunnlagHistorikk, alder).filter(tidslinjer, periode, aktivitetslogg, subsumsjonObserver)
+        AvvisInngangsvilkårfilter(vilkårsgrunnlagHistorikk).filter(tidslinjer, periode, aktivitetslogg, subsumsjonObserver)
         maksimumSykepenger = MaksimumSykepengedagerfilter(alder, regler, infotrygdtidslinje).let {
             it.filter(tidslinjer, periode, aktivitetslogg, subsumsjonObserver)
             it.maksimumSykepenger()

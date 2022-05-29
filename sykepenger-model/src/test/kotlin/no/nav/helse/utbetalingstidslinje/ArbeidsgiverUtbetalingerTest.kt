@@ -22,6 +22,7 @@ import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.AbstractPersonTest
 import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.Arbeidsforholdhistorikk
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.InfotrygdhistorikkVisitor
 import no.nav.helse.person.Inntektshistorikk
@@ -330,10 +331,14 @@ internal class ArbeidsgiverUtbetalingerTest {
         vilkårsgrunnlagHistorikk.lagre(
             1.januar, vilkårsgrunnlagElement ?: VilkårsgrunnlagHistorikk.Grunnlagsdata(
                 skjæringstidspunkt = 1.januar,
-                sykepengegrunnlag = 30000.månedlig.sykepengegrunnlag,
+                sykepengegrunnlag = 30000.månedlig.sykepengegrunnlag(fnr.alder()),
                 sammenligningsgrunnlag = sammenligningsgrunnlag(30000.månedlig),
                 avviksprosent = Prosent.prosent(0.0),
-                opptjening = Opptjening.opptjening(emptyList(), 1.januar, MaskinellJurist()),
+                opptjening = Opptjening.opptjening(listOf(
+                    Opptjening.ArbeidsgiverOpptjeningsgrunnlag(ORGNUMMER, listOf(
+                        Arbeidsforholdhistorikk.Arbeidsforhold(1.januar.minusYears(1), null, false)
+                    ))
+                ), 1.januar, MaskinellJurist()),
                 medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
                 harMinimumInntekt = true,
                 vurdertOk = true,

@@ -50,8 +50,8 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
     internal fun vilkårsgrunnlagFor(skjæringstidspunkt: LocalDate) = sisteInnlag()?.vilkårsgrunnlagFor(skjæringstidspunkt)
 
-    internal fun avvisInngangsvilkår(tidslinjer: List<Utbetalingstidslinje>, alder: Alder) {
-        sisteInnlag()?.avvis(tidslinjer, alder)
+    internal fun avvisInngangsvilkår(tidslinjer: List<Utbetalingstidslinje>) {
+        sisteInnlag()?.avvis(tidslinjer)
     }
 
     internal fun inntektsopplysninger() = sisteInnlag()?.inntektsopplysningPerSkjæringstidspunktPerArbeidsgiver()
@@ -101,12 +101,9 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                         || it.sammenligningsgrunnlagPerArbeidsgiver().containsKey(organisasjonsnummer)
                 }
 
-        internal fun harSykepengegrunnlag(organisasjonsnummer: String, skjæringstidspunkt: LocalDate) =
-            vilkårsgrunnlag[skjæringstidspunkt]?.sykepengegrunnlag()?.inntektsopplysningPerArbeidsgiver()?.containsKey(organisasjonsnummer) ?: false
-
-        internal fun avvis(tidslinjer: List<Utbetalingstidslinje>, alder: Alder) {
+        internal fun avvis(tidslinjer: List<Utbetalingstidslinje>) {
             vilkårsgrunnlag.forEach { (skjæringstidspunkt, element) ->
-                element.avvis(tidslinjer, skjæringstidspunkt, alder)
+                element.avvis(tidslinjer, skjæringstidspunkt)
             }
         }
 
@@ -129,7 +126,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         fun gjelderFlereArbeidsgivere(): Boolean
         fun oppdaterManglendeMinimumInntekt(vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk, alder: Alder, subsumsjonObserver: SubsumsjonObserver) {}
         fun sjekkAvviksprosent(aktivitetslogg: IAktivitetslogg): Boolean = true
-        fun avvis(tidslinjer: List<Utbetalingstidslinje>, skjæringstidspunkt: LocalDate, alder: Alder) {}
+        fun avvis(tidslinjer: List<Utbetalingstidslinje>, skjæringstidspunkt: LocalDate) {}
     }
 
     internal class Grunnlagsdata(
@@ -203,12 +200,12 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
         override fun gjelderFlereArbeidsgivere() = sykepengegrunnlag.inntektsopplysningPerArbeidsgiver().size > 1
 
-        override fun avvis(tidslinjer: List<Utbetalingstidslinje>, skjæringstidspunkt: LocalDate, alder: Alder) {
-            if (vurdertOk) return
+        override fun avvis(tidslinjer: List<Utbetalingstidslinje>, skjæringstidspunkt: LocalDate) {
             val begrunnelser = mutableListOf<Begrunnelse>()
             if (medlemskapstatus == Medlemskapsvurdering.Medlemskapstatus.Nei) begrunnelser.add(Begrunnelse.ManglerMedlemskap)
-            if (harMinimumInntekt == false) begrunnelser.add(alder.begrunnelseForMinimumInntekt(skjæringstidspunkt))
+            sykepengegrunnlag.begrunnelse(begrunnelser)
             if (!opptjening.erOppfylt()) begrunnelser.add(Begrunnelse.ManglerOpptjening)
+            if (begrunnelser.isEmpty()) return
             Utbetalingstidslinje.avvis(tidslinjer, setOf(skjæringstidspunkt), begrunnelser)
         }
 

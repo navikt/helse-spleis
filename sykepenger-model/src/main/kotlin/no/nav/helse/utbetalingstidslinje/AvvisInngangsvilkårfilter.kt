@@ -6,8 +6,7 @@ import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 
 internal class AvvisInngangsvilkårfilter(
-    private val vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk,
-    private val alder: Alder
+    private val vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk
 ): UtbetalingstidslinjerFilter {
 
     override fun filter(
@@ -16,7 +15,7 @@ internal class AvvisInngangsvilkårfilter(
         aktivitetslogg: IAktivitetslogg,
         subsumsjonObserver: SubsumsjonObserver
     ): List<Utbetalingstidslinje> {
-        vilkårsgrunnlagHistorikk.avvisInngangsvilkår(tidslinjer, alder)
+        vilkårsgrunnlagHistorikk.avvisInngangsvilkår(tidslinjer)
         return tidslinjer
     }
 }

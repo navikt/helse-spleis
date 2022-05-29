@@ -12,6 +12,7 @@ import no.nav.helse.person.Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
 import no.nav.helse.person.Sykepengegrunnlag.Begrensning.VURDERT_I_INFOTRYGD
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.utbetalingstidslinje.Alder
+import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosent
 
@@ -29,7 +30,8 @@ internal class Sykepengegrunnlag(
     internal val sykepengegrunnlag = grunnlagForSykepengegrunnlag.coerceAtMost(this.`6G`).rundTilDaglig()
     internal val begrensning = if (vurdertInfotrygd) VURDERT_I_INFOTRYGD else if (grunnlagForSykepengegrunnlag > this.`6G`) ER_6G_BEGRENSET else ER_IKKE_6G_BEGRENSET
 
-    private val minsteinntekt = (if (alder.forhøyetInntektskrav(skjæringstidspunkt)) Grunnbeløp.`2G` else halvG).minsteinntekt(skjæringstidspunkt)
+    private val forhøyetInntektskrav = alder.forhøyetInntektskrav(skjæringstidspunkt)
+    private val minsteinntekt = (if (forhøyetInntektskrav) Grunnbeløp.`2G` else halvG).minsteinntekt(skjæringstidspunkt)
     private val oppfyllerMinsteinntektskrav = grunnlagForSykepengegrunnlag >= minsteinntekt
 
     internal constructor(
@@ -70,6 +72,13 @@ internal class Sykepengegrunnlag(
         ): Sykepengegrunnlag {
             return Sykepengegrunnlag(alder, arbeidsgiverInntektsopplysninger, emptyList(), skjæringstidspunkt, subsumsjonObserver, true)
         }
+    }
+
+    // TODO: la Sykepengegrunnlag _avvise_ dager selv, ikke returnere begrunnelse
+    // TODO: Sykepengegrunnlag må avvise dager under 2G etter at bruker har fylt 67 år, selv om skjæringstidspunktet er satt før 67 års-dagen: https://trello.com/c/0ld9Q4qD
+    internal fun begrunnelse(begrunnelser: MutableList<Begrunnelse>) {
+        if (oppfyllerMinsteinntektskrav) return
+        begrunnelser.add(if (forhøyetInntektskrav) Begrunnelse.MinimumInntektOver67 else Begrunnelse.MinimumInntekt)
     }
 
     internal fun valider(aktivitetslogg: IAktivitetslogg): Boolean {

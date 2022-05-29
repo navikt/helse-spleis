@@ -15,6 +15,7 @@ import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.somFødselsnummer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest.Companion.INNTEKT
 import no.nav.helse.sykepengegrunnlag
+import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -213,6 +214,41 @@ internal class SykepengegrunnlagTest {
                 assertTrue(aktivitetslogg.hasWarningsOrWorse())
             }
         )
+    }
+
+    @Test
+    fun `begrunnelse tom 67 år - minsteinntekt oppfylt`() {
+        val alder = FNR_67_ÅR_FEBRUAR_2021.alder()
+        val skjæringstidspunkt = 1.februar(2021)
+        val halvG = Grunnbeløp.halvG.beløp(skjæringstidspunkt)
+
+        val sykepengegrunnlag = (halvG).sykepengegrunnlag(alder, "orgnr", skjæringstidspunkt)
+        val begrunnelser = mutableListOf<Begrunnelse>()
+        sykepengegrunnlag.begrunnelse(begrunnelser)
+        assertTrue(begrunnelser.isEmpty())
+    }
+
+    @Test
+    fun `begrunnelse tom 67 år`() {
+        val alder = FNR_67_ÅR_FEBRUAR_2021.alder()
+        val skjæringstidspunkt = 1.februar(2021)
+        val halvG = Grunnbeløp.halvG.beløp(skjæringstidspunkt)
+
+        val sykepengegrunnlag = (halvG - 1.daglig).sykepengegrunnlag(alder, "orgnr", skjæringstidspunkt)
+        val begrunnelser = mutableListOf<Begrunnelse>()
+        sykepengegrunnlag.begrunnelse(begrunnelser)
+        assertEquals(Begrunnelse.MinimumInntekt, begrunnelser.single())
+    }
+    @Test
+    fun `begrunnelse etter 67 år`() {
+        val alder = FNR_67_ÅR_FEBRUAR_2021.alder()
+        val skjæringstidspunkt = 2.februar(2021)
+        val `2G` = Grunnbeløp.`2G`.beløp(skjæringstidspunkt)
+
+        val sykepengegrunnlag = (`2G` - 1.daglig).sykepengegrunnlag(alder, "orgnr", skjæringstidspunkt)
+        val begrunnelser = mutableListOf<Begrunnelse>()
+        sykepengegrunnlag.begrunnelse(begrunnelser)
+        assertEquals(Begrunnelse.MinimumInntektOver67, begrunnelser.single())
     }
 
     @Test

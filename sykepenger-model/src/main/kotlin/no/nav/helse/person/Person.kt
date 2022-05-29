@@ -889,7 +889,7 @@ class Person private constructor(
             infotrygdhistorikk = infotrygdhistorikk,
             regler = NormalArbeidstaker
         ).apply {
-            avvisInngangsvilkårfilter(AvvisInngangsvilkårfilter(vilkårsgrunnlagHistorikk, fødselsnummer.alder()))
+            avvisInngangsvilkårfilter(AvvisInngangsvilkårfilter(vilkårsgrunnlagHistorikk))
             vedtaksperioder.lagUtbetalinger(this, skjæringstidspunkter(), vilkårsgrunnlagHistorikk.inntektsopplysninger())
         }
 }
