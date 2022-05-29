@@ -76,7 +76,7 @@ internal class VilkårsgrunnlagInntektBuilder(private val person: Person) {
         var sammenligningsgrunnlag: Sammenligningsgrunnlag? = null
 
         init {
-            vilkårsgrunnlag.accept(skjæringstidspunkt, this)
+            vilkårsgrunnlag.accept(this)
         }
 
         override fun preVisitSykepengegrunnlag(

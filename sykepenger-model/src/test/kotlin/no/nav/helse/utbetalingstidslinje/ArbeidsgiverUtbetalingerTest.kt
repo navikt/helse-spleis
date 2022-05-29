@@ -329,7 +329,7 @@ internal class ArbeidsgiverUtbetalingerTest {
         val vilkårsgrunnlagHistorikk = VilkårsgrunnlagHistorikk()
 
         vilkårsgrunnlagHistorikk.lagre(
-            1.januar, vilkårsgrunnlagElement ?: VilkårsgrunnlagHistorikk.Grunnlagsdata(
+            vilkårsgrunnlagElement ?: VilkårsgrunnlagHistorikk.Grunnlagsdata(
                 skjæringstidspunkt = 1.januar,
                 sykepengegrunnlag = 30000.månedlig.sykepengegrunnlag(fnr.alder()),
                 sammenligningsgrunnlag = sammenligningsgrunnlag(30000.månedlig),

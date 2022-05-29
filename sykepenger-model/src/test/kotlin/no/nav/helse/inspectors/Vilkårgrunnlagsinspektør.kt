@@ -1,5 +1,8 @@
 package no.nav.helse.inspectors
 
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Opptjening
@@ -8,10 +11,9 @@ import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.VilkårsgrunnlagHistorikkVisitor
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosent
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
 import kotlin.properties.Delegates
+
+internal val VilkårsgrunnlagHistorikk.inspektør get() = Vilkårgrunnlagsinspektør(this)
 
 internal class Vilkårgrunnlagsinspektør(historikk: VilkårsgrunnlagHistorikk) : VilkårsgrunnlagHistorikkVisitor {
     val vilkårsgrunnlagTeller = mutableMapOf<Int, Int>()
@@ -77,7 +79,7 @@ internal class GrunnlagsdataInspektør(grunnlagsdata: VilkårsgrunnlagHistorikk.
     internal var vurdertOk by Delegates.notNull<Boolean>()
         private set
     init {
-        grunnlagsdata.accept(LocalDate.now(), this)
+        grunnlagsdata.accept(this)
     }
 
     override fun preVisitGrunnlagsdata(

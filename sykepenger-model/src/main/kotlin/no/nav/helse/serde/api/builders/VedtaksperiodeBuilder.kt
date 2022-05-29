@@ -323,7 +323,7 @@ internal class VedtaksperiodeBuilder(
 
 private class GrunnlagsdataBuilder(skjæringstidspunkt: LocalDate, grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata) : VilkårsgrunnlagHistorikkVisitor {
     init {
-        grunnlagsdata.accept(skjæringstidspunkt, this)
+        grunnlagsdata.accept(this)
     }
 
     lateinit var medlemskapstatus: MedlemskapstatusDTO

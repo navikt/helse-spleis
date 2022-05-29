@@ -574,8 +574,8 @@ class Person private constructor(
 
     internal fun vilkårsgrunnlagFor(skjæringstidspunkt: LocalDate) = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt)
 
-    internal fun lagreVilkårsgrunnlag(skjæringstidspunkt: LocalDate, vilkårsgrunnlag: Vilkårsgrunnlag) {
-        vilkårsgrunnlagHistorikk.lagre(skjæringstidspunkt, vilkårsgrunnlag)
+    internal fun lagreVilkårsgrunnlag(skjæringstidspunkt: LocalDate, vilkårsgrunnlag: VilkårsgrunnlagHistorikk.Grunnlagsdata) {
+        vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag)
     }
 
     internal fun lagreVilkårsgrunnlagFraInfotrygd(
@@ -854,7 +854,7 @@ class Person private constructor(
                     meldingsreferanseId = hendelse.meldingsreferanseId()
                 )
                 hendelse.kontekst(grunnlagselement)
-                vilkårsgrunnlagHistorikk.lagre(skjæringstidspunkt, grunnlagselement)
+                vilkårsgrunnlagHistorikk.lagre(grunnlagselement)
             }
             is VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag -> hendelse.error("Vilkårsgrunnlaget ligger i infotrygd. Det er ikke støttet i revurdering eller overstyring.")
             else -> hendelse.error("Fant ikke vilkårsgrunnlag. Kan ikke vilkårsprøve på nytt etter ny informasjon fra saksbehandler.")

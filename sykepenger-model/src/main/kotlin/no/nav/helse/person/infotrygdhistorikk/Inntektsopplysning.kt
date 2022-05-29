@@ -120,12 +120,14 @@ class Inntektsopplysning private constructor(
             vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk,
             sykepengegrunnlagFor: (skjæringstidspunkt: LocalDate) -> Sykepengegrunnlag
         ) {
-            vilkårsgrunnlagHistorikk.lagre(this.map {
-                VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag(
-                    skjæringstidspunkt = it.sykepengerFom,
-                    sykepengegrunnlag = sykepengegrunnlagFor(it.sykepengerFom)
-                )
-            })
+            vilkårsgrunnlagHistorikk.lagre(
+                *map {
+                    VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag(
+                        skjæringstidspunkt = it.sykepengerFom,
+                        sykepengegrunnlag = sykepengegrunnlagFor(it.sykepengerFom)
+                    )
+                }.toTypedArray()
+            )
         }
 
         internal fun List<Inntektsopplysning>.fjern(nødnummer: Nødnummer) = filterNot { it.orgnummer in nødnummer }

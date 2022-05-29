@@ -1,7 +1,6 @@
 package no.nav.helse.person
 
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.Fødselsnummer
 import no.nav.helse.hendelser.Medlemskapsvurdering
@@ -31,7 +30,7 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
 
     @BeforeEach
     fun beforeEach() {
-        innslag = VilkårsgrunnlagHistorikk.Innslag(UUID.randomUUID(), LocalDateTime.now())
+        innslag = VilkårsgrunnlagHistorikk.Innslag(null, emptyList())
     }
 
     @Test
@@ -143,7 +142,11 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
 
     private val testgrunnlag
         get() = object : VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement {
-            override fun accept(skjæringstidspunkt: LocalDate, vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor) {}
+            override fun add(innslag: VilkårsgrunnlagHistorikk.Innslag) {
+                innslag.add(1.januar, this)
+            }
+
+            override fun accept(vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor) {}
 
             override fun sykepengegrunnlag() = Inntekt.INGEN.sykepengegrunnlag
 
@@ -156,8 +159,6 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
             override fun sammenligningsgrunnlagPerArbeidsgiver(): Map<String, Inntektshistorikk.Inntektsopplysning> = emptyMap()
 
             override fun gjelderFlereArbeidsgivere() = false
-
-            override fun skjæringstidspunkt() = 1.januar
 
             override fun valider(aktivitetslogg: Aktivitetslogg) {}
 

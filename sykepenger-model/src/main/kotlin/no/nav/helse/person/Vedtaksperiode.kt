@@ -600,7 +600,7 @@ internal class Vedtaksperiode private constructor(
             person.antallArbeidsgivereMedRelevantArbeidsforhold(skjæringstidspunkt),
             jurist()
         )
-        person.lagreVilkårsgrunnlag(skjæringstidspunkt, vilkårsgrunnlag)
+        person.lagreVilkårsgrunnlag(skjæringstidspunkt, vilkårsgrunnlag.grunnlagsdata())
         if (vilkårsgrunnlag.hasErrorsOrWorse()) {
             return person.invaliderAllePerioder(vilkårsgrunnlag, null)
         }

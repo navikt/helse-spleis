@@ -237,12 +237,9 @@ internal data class PersonData(
         internal companion object {
             private fun List<VilkårsgrunnlagInnslagData>.parseVilkårsgrunnlag(alder: Alder) =
                 this.map { innslagData ->
-                    val innslag = VilkårsgrunnlagHistorikk.Innslag(innslagData.id, innslagData.opprettet)
-                    innslagData.vilkårsgrunnlag.forEach {
-                        val (skjæringstidspunkt, vilkårsgrunnlagElement) = it.parseDataForVilkårsvurdering(alder)
-                        innslag.add(skjæringstidspunkt, vilkårsgrunnlagElement)
-                    }
-                    innslag
+                    VilkårsgrunnlagHistorikk.Innslag.gjenopprett(innslagData.id, innslagData.opprettet, innslagData.vilkårsgrunnlag.map {
+                        it.parseDataForVilkårsvurdering(alder)
+                    }.toMap())
                 }
 
             internal fun List<VilkårsgrunnlagInnslagData>.tilModellObjekt(alder: Alder) = VilkårsgrunnlagHistorikk.ferdigVilkårsgrunnlagHistorikk(parseVilkårsgrunnlag(alder))

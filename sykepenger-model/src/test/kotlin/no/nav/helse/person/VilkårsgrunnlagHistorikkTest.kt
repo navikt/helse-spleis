@@ -13,6 +13,7 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.inspectors.GrunnlagsdataInspektør
 import no.nav.helse.inspectors.SubsumsjonInspektør
 import no.nav.helse.inspectors.Vilkårgrunnlagsinspektør
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.juni
 import no.nav.helse.person.Ledd.Companion.ledd
@@ -38,10 +39,11 @@ import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 internal class VilkårsgrunnlagHistorikkTest {
-    private val historikk = VilkårsgrunnlagHistorikk()
+    private lateinit var historikk: VilkårsgrunnlagHistorikk
     private val inspektør get() = Vilkårgrunnlagsinspektør(historikk)
 
     companion object {
@@ -49,6 +51,11 @@ internal class VilkårsgrunnlagHistorikkTest {
         private val arbeidsforholdFraHistorikk = listOf(
             Opptjening.ArbeidsgiverOpptjeningsgrunnlag("123456789", listOf(Arbeidsforholdhistorikk.Arbeidsforhold(1.desember(2017), null, false)))
         )
+    }
+
+    @BeforeEach
+    fun setup() {
+        historikk = VilkårsgrunnlagHistorikk()
     }
 
     @Test
@@ -72,7 +79,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             1,
             MaskinellJurist()
         )
-        historikk.lagre(1.januar, vilkårsgrunnlag)
+        historikk.lagre(vilkårsgrunnlag.grunnlagsdata())
         assertNotNull(historikk.vilkårsgrunnlagFor(1.januar))
         val grunnlagsdataInspektør = GrunnlagsdataInspektør(historikk.vilkårsgrunnlagFor(1.januar)!!)
         assertTrue(grunnlagsdataInspektør.vurdertOk)
@@ -147,12 +154,12 @@ internal class VilkårsgrunnlagHistorikkTest {
             MaskinellJurist()
         )
 
-        historikk.lagre(1.januar, vilkårsgrunnlag1)
+        historikk.lagre(vilkårsgrunnlag1.grunnlagsdata())
         assertNotNull(historikk.vilkårsgrunnlagFor(1.januar))
         val grunnlagsdataInspektør1 = GrunnlagsdataInspektør(historikk.vilkårsgrunnlagFor(1.januar)!!)
         assertTrue(grunnlagsdataInspektør1.vurdertOk)
 
-        historikk.lagre(1.januar, vilkårsgrunnlag2)
+        historikk.lagre(vilkårsgrunnlag2.grunnlagsdata())
         assertNotNull(historikk.vilkårsgrunnlagFor(1.januar))
         val grunnlagsdataInspektør2 = GrunnlagsdataInspektør(historikk.vilkårsgrunnlagFor(1.januar)!!)
         assertFalse(grunnlagsdataInspektør2.vurdertOk)
@@ -182,8 +189,16 @@ internal class VilkårsgrunnlagHistorikkTest {
             1,
             MaskinellJurist()
         )
-        historikk.lagre(1.januar, vilkårsgrunnlag)
-        historikk.lagre(4.januar, vilkårsgrunnlag)
+        historikk.lagre(vilkårsgrunnlag.grunnlagsdata())
+        vilkårsgrunnlag.valider(
+            10000.månedlig.sykepengegrunnlag,
+            sammenligningsgrunnlag(10000.månedlig, 1.januar),
+            4.januar,
+            Opptjening.opptjening(arbeidsforholdFraHistorikk, 1.januar, MaskinellJurist()),
+            1,
+            MaskinellJurist()
+        )
+        historikk.lagre(vilkårsgrunnlag.grunnlagsdata())
         assertEquals(1, inspektør.vilkårsgrunnlagTeller[1])
         assertEquals(2, inspektør.vilkårsgrunnlagTeller[0])
     }
@@ -225,7 +240,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             MaskinellJurist()
         )
 
-        historikk.lagre(1.januar, vilkårsgrunnlag)
+        historikk.lagre(vilkårsgrunnlag.grunnlagsdata())
         infotrygdhistorikk.lagreVilkårsgrunnlag(
             skjæringstidspunkt = 4.januar,
             vilkårsgrunnlagHistorikk = historikk,
@@ -258,7 +273,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             1,
             MaskinellJurist()
         )
-        vilkårsgrunnlagHistorikk.lagre(1.januar, vilkårsgrunnlag)
+        vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag.grunnlagsdata())
         assertNotNull(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar))
         val grunnlagsdataInspektør = GrunnlagsdataInspektør(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar)!!)
         assertTrue(grunnlagsdataInspektør.vurdertOk)
@@ -286,7 +301,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             1,
             MaskinellJurist()
         )
-        vilkårsgrunnlagHistorikk.lagre(1.januar, vilkårsgrunnlag)
+        vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag.grunnlagsdata())
         assertNotNull(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar))
         val grunnlagsdataInspektør = GrunnlagsdataInspektør(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar)!!)
         assertFalse(grunnlagsdataInspektør.vurdertOk)
@@ -433,8 +448,8 @@ internal class VilkårsgrunnlagHistorikkTest {
             1,
             MaskinellJurist()
         )
-        vilkårsgrunnlagHistorikk.lagre(10.januar, vilkårsgrunnlag1)
-        vilkårsgrunnlagHistorikk.lagre(1.januar, vilkårsgrunnlag2)
+        vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag1.grunnlagsdata())
+        vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag2.grunnlagsdata())
         val utbetalingstidslinjeMedNavDager = tidslinjeOf(16.AP, 10.NAV)
         vilkårsgrunnlagHistorikk.avvisInngangsvilkår(listOf(utbetalingstidslinjeMedNavDager))
         assertEquals(8, utbetalingstidslinjeMedNavDager.filterIsInstance<Utbetalingstidslinje.Utbetalingsdag.NavDag>().size)
@@ -481,8 +496,8 @@ internal class VilkårsgrunnlagHistorikkTest {
             1,
             MaskinellJurist()
         )
-        vilkårsgrunnlagHistorikk.lagre(10.januar, vilkårsgrunnlag1)
-        vilkårsgrunnlagHistorikk.lagre(1.januar, VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag(1.januar, 10000.månedlig.sykepengegrunnlag))
+        vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag1.grunnlagsdata())
+        vilkårsgrunnlagHistorikk.lagre(VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag(1.januar, 10000.månedlig.sykepengegrunnlag))
         val utbetalingstidslinjeMedNavDager = tidslinjeOf(16.AP, 10.NAV)
         vilkårsgrunnlagHistorikk.avvisInngangsvilkår(listOf(utbetalingstidslinjeMedNavDager))
         assertEquals(8, utbetalingstidslinjeMedNavDager.filterIsInstance<Utbetalingstidslinje.Utbetalingsdag.NavDag>().size)
@@ -510,7 +525,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             1,
             MaskinellJurist()
         )
-        vilkårsgrunnlagHistorikk.lagre(1.januar, vilkårsgrunnlag)
+        vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag.grunnlagsdata())
         assertNotNull(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar))
         val grunnlagsdataInspektør = GrunnlagsdataInspektør(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar)!!)
         assertFalse(grunnlagsdataInspektør.vurdertOk)
@@ -548,7 +563,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             1,
             MaskinellJurist()
         )
-        vilkårsgrunnlagHistorikk.lagre(1.januar, vilkårsgrunnlag)
+        vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag.grunnlagsdata())
         assertNotNull(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar))
         val grunnlagsdataInspektør = GrunnlagsdataInspektør(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar)!!)
         assertFalse(grunnlagsdataInspektør.vurdertOk)
@@ -620,7 +635,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             1,
             MaskinellJurist()
         )
-        vilkårsgrunnlagHistorikk.lagre(1.januar, vilkårsgrunnlag)
+        vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag.grunnlagsdata())
 
         val historikk = Infotrygdhistorikk().apply {
             oppdaterHistorikk(
@@ -662,4 +677,18 @@ internal class VilkårsgrunnlagHistorikkTest {
             )
         ),
     )
+
+    @Test
+    fun `lagrer ikke duplikater`() {
+        val skjæringstidspunkt = 1.januar
+        val sykepengegrunnlag = 1000.månedlig.sykepengegrunnlag(skjæringstidspunkt)
+        val grunnlag1 = VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag(skjæringstidspunkt, sykepengegrunnlag)
+        val grunnlag2 = VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag(skjæringstidspunkt, sykepengegrunnlag)
+        historikk.lagre(grunnlag1)
+        val før = historikk.inspektør.innslag
+        historikk.lagre(grunnlag2)
+        val etter = historikk.inspektør.innslag
+        assertEquals(grunnlag1, grunnlag2)
+        assertEquals(0, etter - før)
+    }
 }

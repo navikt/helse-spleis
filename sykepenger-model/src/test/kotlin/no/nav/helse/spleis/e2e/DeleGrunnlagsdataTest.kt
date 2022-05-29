@@ -374,7 +374,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         // Gjøres utelukkende for å teste oppførsel som ikke skal kunne skje lenger
         // (minimumInntekt kan være null i db, men ikke i modellen, mangler en migrering)
         val vilkårsgrunnlagHistorikk = PersonInspektør(person).vilkårsgrunnlagHistorikk
-        vilkårsgrunnlagHistorikk.lagre(1.januar, vilkårsgrunnlagElement)
+        vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlagElement)
 
         håndterSykmelding(Sykmeldingsperiode(17.januar, 17.februar, 100.prosent))
         håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(17.januar, 17.februar, 100.prosent))
