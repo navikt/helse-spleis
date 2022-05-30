@@ -1,9 +1,7 @@
 package no.nav.helse.spleis
 
 import com.fasterxml.jackson.databind.JsonNode
-
 import io.ktor.http.ContentType
-import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
@@ -16,72 +14,17 @@ import io.ktor.server.response.respondText
 import io.ktor.server.routing.get
 import io.ktor.server.routing.routing
 import io.ktor.util.pipeline.PipelineContext
-import io.prometheus.client.Histogram
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import no.nav.helse.person.Person
 import no.nav.helse.person.etterlevelse.MaskinellJurist
-import no.nav.helse.serde.SerialisertPerson
-import no.nav.helse.serde.api.dto.PersonDTO
 import no.nav.helse.serde.api.serializePersonForSporing
 import no.nav.helse.serde.serialize
 import no.nav.helse.spleis.dao.HendelseDao
 import no.nav.helse.spleis.dao.PersonDao
-import no.nav.helse.spleis.dto.håndterPerson
-import org.slf4j.LoggerFactory
-
-private object ApiMetrikker {
-    private val responstid = Histogram
-        .build("person_snapshot_api", "Metrikker for henting av speil-snapshot")
-        .labelNames("operasjon")
-        .register()
-
-    fun målDatabase(block: () -> SerialisertPerson?): SerialisertPerson? = responstid.labels("hent_person").time(block)
-
-    fun målDeserialisering(block: () -> Person): Person = responstid.labels("deserialiser_person").time(block)
-
-    fun målByggSnapshot(block: () -> PersonDTO): PersonDTO = responstid.labels("bygg_snapshot").time(block)
-}
-
-internal fun Application.spesialistApi(dataSource: DataSource, authProviderName: String) {
-
-    val hendelseDao = HendelseDao(dataSource)
-    val personDao = PersonDao(dataSource)
-
-    val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
-
-    routing {
-        authenticate(authProviderName) {
-            get("/api/person-snapshot") {
-                withContext(Dispatchers.IO) {
-                    val fnr = call.request.header("fnr")!!.toLong()
-                    sikkerLogg.info("Serverer person-snapshot for fødselsnummer $fnr")
-                    try {
-                        ApiMetrikker.målDatabase { personDao.hentPersonFraFnr(fnr) }
-                            ?.let {
-                                ApiMetrikker.målDeserialisering {
-                                    it.deserialize(
-                                        jurist = MaskinellJurist()
-                                    ) { hendelseDao.hentAlleHendelser(fnr) }
-                                }
-                            }
-                            ?.let { ApiMetrikker.målByggSnapshot { håndterPerson(it, hendelseDao) } }
-                            ?.let { call.respond(it) }
-                            ?: call.respond(HttpStatusCode.NotFound, "Resource not found")
-                    } catch (e: RuntimeException) {
-                        sikkerLogg.error("Feil ved servering av person-json for person: $fnr", e)
-                        call.respond(HttpStatusCode.InternalServerError, "Feil ved servering av person-json. Sjekk sikkerlogg i spleis-api")
-                        throw e
-                    }
-                }
-            }
-        }
-    }
-}
 
 internal fun Application.spannerApi(dataSource: DataSource, authProviderName: String) {
     val hendelseDao = HendelseDao(dataSource)

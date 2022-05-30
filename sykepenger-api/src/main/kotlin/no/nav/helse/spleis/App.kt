@@ -66,7 +66,6 @@ internal fun createApp(ktorConfig: KtorConfig, azureConfig: AzureAdAppConfig, da
                 nais(teller)
                 azureAdAppAuthentication(azureConfig)
                 val dataSource = dataSourceConfiguration.getDataSource()
-                spesialistApi(dataSource, API_SERVICE)
                 spannerApi(dataSource, API_SERVICE)
                 sporingApi(dataSource, API_SERVICE)
                 installGraphQLApi(dataSource, API_SERVICE)
