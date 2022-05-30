@@ -18,7 +18,6 @@ import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
-import no.nav.helse.serde.api.TilstandstypeDTO
 import no.nav.helse.sisteBehov
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -80,7 +79,6 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         @Suppress("UNCHECKED_CAST")
         val statusForUtbetaling = (behov.detaljer()["linjer"] as List<Map<String, Any>>)[0]["statuskode"]
         assertEquals("OPPH", statusForUtbetaling)
-        assertEquals(TilstandstypeDTO.TilAnnullering, speilApi().arbeidsgivere[0].vedtaksperioder[0].tilstand)
         håndterUtbetalt(status = Oppdragstatus.AKSEPTERT)
         assertFalse(person.personLogg.hasErrorsOrWorse())
         assertEquals(2, inspektør.arbeidsgiverOppdrag.size)
@@ -95,7 +93,6 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
             assertNull(it.detaljer()["maksdato"])
             assertEquals("SPREF", it.detaljer()["fagområde"])
         }
-        assertEquals(TilstandstypeDTO.Annullert, speilApi().arbeidsgivere[0].vedtaksperioder[0].tilstand)
     }
 
     @Test
@@ -104,17 +101,9 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         nyttVedtak(1.mars, 31.mars, 100.prosent, 1.mars)
         håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(2.vedtaksperiode))
         håndterUtbetalt(status = Oppdragstatus.AKSEPTERT)
-        speilApi().arbeidsgivere[0].also {
-            assertEquals(TilstandstypeDTO.Utbetalt, it.vedtaksperioder[0].tilstand)
-            assertEquals(TilstandstypeDTO.Annullert, it.vedtaksperioder[1].tilstand)
-        }
         sisteBehovErAnnullering(2.vedtaksperiode)
         håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
         håndterUtbetalt(status = Oppdragstatus.AKSEPTERT)
-        speilApi().arbeidsgivere[0].also {
-            assertEquals(TilstandstypeDTO.Annullert, it.vedtaksperioder[0].tilstand)
-            assertEquals(TilstandstypeDTO.Annullert, it.vedtaksperioder[1].tilstand)
-        }
         sisteBehovErAnnullering(1.vedtaksperiode)
     }
 
@@ -143,7 +132,6 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         tilGodkjent(3.januar, 26.januar, 100.prosent, 3.januar)
         håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
         assertTrue(hendelselogg.hasErrorsOrWorse())
-        assertEquals(TilstandstypeDTO.TilUtbetaling, speilApi().arbeidsgivere[0].vedtaksperioder[0].tilstand)
         assertIngenAnnulleringsbehov()
     }
 
@@ -153,7 +141,6 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         håndterUtbetalt(status = Oppdragstatus.FEIL)
         håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
         assertTrue(hendelselogg.hasErrorsOrWorse())
-        assertEquals(TilstandstypeDTO.Feilet, speilApi().arbeidsgivere[0].vedtaksperioder[0].tilstand)
         assertIngenAnnulleringsbehov()
     }
 
@@ -163,10 +150,6 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         tilGodkjent(1.mars, 31.mars, 100.prosent, 1.mars)
         håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
         assertTrue(hendelselogg.hasErrorsOrWorse())
-        speilApi().arbeidsgivere[0].also {
-            assertEquals(TilstandstypeDTO.Utbetalt, it.vedtaksperioder[0].tilstand)
-            assertEquals(TilstandstypeDTO.TilUtbetaling, it.vedtaksperioder[1].tilstand)
-        }
         assertIngenAnnulleringsbehov()
     }
 
@@ -182,7 +165,6 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         håndterUtbetalt(status = Oppdragstatus.FEIL)
         assertTrue(hendelselogg.hasErrorsOrWorse())
         assertEquals(2, inspektør.arbeidsgiverOppdrag.size)
-        assertEquals(TilstandstypeDTO.AnnulleringFeilet, speilApi().arbeidsgivere[0].vedtaksperioder[0].tilstand)
     }
 
     @Test

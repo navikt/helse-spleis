@@ -2,9 +2,13 @@ package no.nav.helse.serde.api.v2.buildere
 
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.util.UUID
+import no.nav.helse.april
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
+import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.ManuellOverskrivingDag
@@ -12,19 +16,28 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Utdanning
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Utlandsopphold
+import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
+import no.nav.helse.juni
 import no.nav.helse.mars
+import no.nav.helse.oktober
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.arbeidsgiver
 import no.nav.helse.serde.api.builders.InntektshistorikkForAOrdningenBuilder
 import no.nav.helse.serde.api.v2.Behandlingstype
 import no.nav.helse.serde.api.v2.BeregnetPeriode
 import no.nav.helse.serde.api.v2.Generasjon
+import no.nav.helse.serde.api.v2.Inntektkilde
+import no.nav.helse.serde.api.v2.OmregnetÅrsinntekt
+import no.nav.helse.serde.api.v2.SykdomstidslinjedagType
 import no.nav.helse.serde.api.v2.Tidslinjeperiode
 import no.nav.helse.serde.api.v2.UberegnetPeriode
 import no.nav.helse.serde.api.v2.Utbetalingstatus
 import no.nav.helse.serde.api.v2.Utbetalingtype
+import no.nav.helse.serde.api.v2.Vilkårsgrunnlag
 import no.nav.helse.somFødselsnummer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertTilstand
@@ -44,31 +57,18 @@ import no.nav.helse.spleis.e2e.manuellSykedag
 import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.spleis.e2e.søknadDTOer
 import no.nav.helse.spleis.e2e.tilGodkjenning
+import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
+import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
-
-    private val generasjoner get() = generasjoner(ORGNUMMER)
-
-    private fun generasjoner(organisasjonsnummer: String): List<Generasjon> {
-        val sammenligningsgrunnlagBuilder = OppsamletSammenligningsgrunnlagBuilder(person)
-        val inntektshistorikkForAordningenBuilder = InntektshistorikkForAOrdningenBuilder(person)
-        val vilkårsgrunnlagHistorikk =
-            VilkårsgrunnlagBuilder(person, sammenligningsgrunnlagBuilder, inntektshistorikkForAordningenBuilder).build()
-        val generasjonerBuilder = GenerasjonerBuilder(
-            søknadDTOer,
-            UNG_PERSON_FNR_2018,
-            vilkårsgrunnlagHistorikk,
-            person.arbeidsgiver(organisasjonsnummer)
-        )
-        return generasjonerBuilder.build()
-    }
 
     @Test
     fun `happy case`() {
@@ -80,6 +80,267 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
             beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType Utbetalingtype.UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false
         }
     }
+
+    @Test
+    fun `person med foreldet dager`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.juni)
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+
+        0.generasjon {
+            uberegnetPeriode(0) harTidslinje (1.januar til 31.januar to SykdomstidslinjedagType.FORELDET_SYKEDAG)
+        }
+    }
+
+    @Test
+    fun `Sender unike advarsler per periode`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.april)
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+
+        håndterYtelser(1.vedtaksperiode, arbeidsavklaringspenger = listOf(1.januar.minusDays(60) til 31.januar.minusDays(60)))
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode, arbeidsavklaringspenger = listOf(1.januar.minusDays(60) til 31.januar.minusDays(60)))
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+
+        0.generasjon {
+            val dedupedAktivitetslogg = beregnetPeriode(0).aktivitetslogg.distinctBy { it.melding }
+            assertEquals(dedupedAktivitetslogg, beregnetPeriode(0).aktivitetslogg)
+        }
+    }
+
+    @Test
+    fun `annullerer feilet revurdering`() {
+        nyttVedtak(1.januar, 31.januar)
+
+        håndterOverstyrTidslinje()
+        håndterYtelser()
+        håndterSimulering(simuleringOK = false)
+        håndterAnnullerUtbetaling()
+
+        0.generasjon {
+            beregnetPeriode(0) er Utbetalingstatus.Sendt avType Utbetalingtype.ANNULLERING
+        }
+
+        assertForventetFeil(
+            forklaring = "periode som er revurdert men endt opp i feilet skal kunne vises",
+            nå = {
+                1.generasjon { beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType Utbetalingtype.UTBETALING }
+            },
+            ønsket = {
+                1.generasjon { beregnetPeriode(0) er Utbetalingstatus.UtbetalingFeilet avType Utbetalingtype.REVURDERING }
+                2.generasjon { beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType Utbetalingtype.UTBETALING }
+            }
+        )
+    }
+
+    @Test
+    fun `Sender med varsler for tidligere periode som er avsluttet uten utbetaling`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 9.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 9.januar, 100.prosent), Utdanning(3.januar, 4.januar))
+
+        håndterSykmelding(Sykmeldingsperiode(10.januar, 25.januar, 100.prosent))
+        håndterSøknad(Sykdom(10.januar, 25.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+
+        håndterYtelser(2.vedtaksperiode)
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt()
+
+        0.generasjon {
+            val periode = beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType Utbetalingtype.UTBETALING
+            assertNotEquals(periode.vedtaksperiodeId, periode.aktivitetslogg[0].vedtaksperiodeId)
+        }
+    }
+
+    @Test
+    fun `Sender med varsler for alle tidligere tilstøtende perioder som er avsluttet uten utbetaling`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 9.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 9.januar, 100.prosent), Utdanning(3.januar, 4.januar)) // Warning
+
+        håndterSykmelding(Sykmeldingsperiode(10.januar, 14.januar, 100.prosent))
+        håndterSøknad(Sykdom(10.januar, 14.januar, 100.prosent), Utlandsopphold(11.januar, 12.januar)) // Warning
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+
+        håndterSykmelding(Sykmeldingsperiode(15.januar, 25.januar, 100.prosent))
+        håndterSøknad(Sykdom(15.januar, 25.januar, 100.prosent))
+
+        håndterYtelser(3.vedtaksperiode)
+        håndterVilkårsgrunnlag(3.vedtaksperiode)
+        håndterYtelser(3.vedtaksperiode)
+        håndterSimulering(3.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(3.vedtaksperiode)
+        håndterUtbetalt()
+
+        0.generasjon {
+            val periode = beregnetPeriode(0) avType Utbetalingtype.UTBETALING er Utbetalingstatus.Utbetalt
+            assertNotEquals(periode.vedtaksperiodeId, periode.aktivitetslogg[0].vedtaksperiodeId)
+            assertNotEquals(periode.vedtaksperiodeId, periode.aktivitetslogg[1].vedtaksperiodeId)
+        }
+    }
+
+    @Test
+    fun `arbeidsgivere uten vedtaksperioder som skal vises i speil, filtreres bort`() {
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+        person.invaliderAllePerioder(hendelselogg, null)
+        assertEquals(0, generasjoner.size)
+    }
+
+    @Test
+    fun `Vedtaksperioder fra flere arbeidsgivere får ikke samme vilkårsgrunnlag-warnings`() {
+        val fom = 1.januar
+        val tom = 31.januar
+
+        håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(fom, tom, 100.prosent), sendtTilNAVEllerArbeidsgiver = fom.plusDays(1), orgnummer = a1)
+        håndterSøknad(Sykdom(fom, tom, 100.prosent), orgnummer = a2)
+
+        håndterInntektsmelding(
+            arbeidsgiverperioder = listOf(fom til fom.plusDays(15)),
+            refusjon = Inntektsmelding.Refusjon(beløp = 1000.månedlig, opphørsdato = null, endringerIRefusjon = emptyList()),
+            beregnetInntekt = 1000.månedlig,
+            orgnummer = a1
+        )
+        håndterInntektsmelding(
+            arbeidsgiverperioder = listOf(fom til fom.plusDays(15)),
+            refusjon = Inntektsmelding.Refusjon(beløp = 1000.månedlig, opphørsdato = null, endringerIRefusjon = emptyList()),
+            beregnetInntekt = 1000.månedlig,
+            orgnummer = a2
+        )
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode,
+            inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
+                1.januar(2017) til 1.desember(2017) inntekter {
+                    a1 inntekt 1000.månedlig
+                    a2 inntekt 1000.månedlig
+                }
+            }),
+            orgnummer = a1
+        )
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, automatiskBehandling = false, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, automatiskBehandling = false, orgnummer = a2)
+
+        0.generasjon(a1) {
+            assertTrue(beregnetPeriode(0).aktivitetslogg.any { it.melding == "Perioden er avslått på grunn av at inntekt er under krav til minste sykepengegrunnlag" })
+        }
+
+        0.generasjon(a2) {
+            assertFalse(beregnetPeriode(0).aktivitetslogg.any { it.melding == "Perioden er avslått på grunn av at inntekt er under krav til minste sykepengegrunnlag" })
+        }
+    }
+
+    @Test
+    fun `Akkumulerer inntekter fra a-orningen pr måned`() {
+        val fom = 1.januar
+        val tom = 31.januar
+
+        håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(fom, tom, 100.prosent), sendtTilNAVEllerArbeidsgiver = fom.plusDays(1), orgnummer = a1)
+        håndterInntektsmelding(
+            arbeidsgiverperioder = listOf(fom til fom.plusDays(15)),
+            refusjon = Inntektsmelding.Refusjon(
+                beløp = 1000.månedlig,
+                opphørsdato = null,
+                endringerIRefusjon = emptyList()
+            ),
+            beregnetInntekt = 1000.månedlig,
+            orgnummer = a1
+        )
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode,
+            inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
+                1.januar(2017) til 1.desember(2017) inntekter {
+                    a1 inntekt 1000.månedlig
+                    a2 inntekt 600.månedlig
+                    a2 inntekt 400.månedlig
+                }
+            }),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntektperioderForSykepengegrunnlag {
+                1.oktober(2017) til 1.desember(2017) inntekter {
+                    a1 inntekt 1000.månedlig
+                    a2 inntekt 600.månedlig
+                    a2 inntekt 400.månedlig
+                }
+            }, arbeidsforhold = emptyList()),
+            arbeidsforhold = listOf(
+                Arbeidsforhold(a1, LocalDate.EPOCH),
+                Arbeidsforhold(a2, LocalDate.EPOCH)
+            ),
+            orgnummer = a1
+        )
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, automatiskBehandling = false)
+
+        0.generasjon(a1) {
+            val periode = beregnetPeriode(0)
+            val vilkårsgrunnlag = periode.vilkårsgrunnlag()
+            val omregnetÅrsinntekt = vilkårsgrunnlag.inntekter.first { it.organisasjonsnummer == a2 }.omregnetÅrsinntekt
+            assertEquals(3, omregnetÅrsinntekt?.inntekterFraAOrdningen?.size)
+            assertTrue(omregnetÅrsinntekt?.inntekterFraAOrdningen?.all { it.sum == 1000.0 } ?: false)
+        }
+    }
+
+    @Test
+    fun `tar med vilkårsgrunnlag med ikke-rapportert inntekt`() {
+        // A2 må være først i listen for at buggen skal intreffe
+        nyttVedtak(1.januar(2017), 31.januar(2017), 100.prosent, orgnummer = a2)
+
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), orgnummer = a1)
+        håndterInntektsmelding(arbeidsgiverperioder = listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterVilkårsgrunnlag(
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
+                1.januar(2017) til 1.desember(2017) inntekter {
+                    a1 inntekt INNTEKT
+                }
+            }),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
+                inntektperioderForSykepengegrunnlag {
+                    1.oktober(2017) til 1.desember(2017) inntekter {
+                        a1 inntekt INNTEKT
+                    }
+                },
+                emptyList()
+            ),
+            arbeidsforhold = listOf(
+                Arbeidsforhold(a1, LocalDate.EPOCH, null),
+                Arbeidsforhold(a2, 1.desember(2017), null)
+            )
+        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+
+        0.generasjon(a1) {
+            val vilkårsgrunnlag = beregnetPeriode(0).vilkårsgrunnlag()
+            val inntektsgrunnlag = vilkårsgrunnlag.inntekter.firstOrNull { it.organisasjonsnummer == a2 }
+            assertEquals(
+                OmregnetÅrsinntekt(
+                    Inntektkilde.IkkeRapportert,
+                    0.0,
+                    0.0,
+                    null
+                ),
+                inntektsgrunnlag?.omregnetÅrsinntekt
+            )
+        }
+    }
+
 
     @Test
     fun `happy case med periode til godkjenning`() {
@@ -947,6 +1208,25 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         assertEquals(expectedOppfylt, periodevilkår.søknadsfrist?.oppfylt)
     }
 
+    private val generasjoner get() = generasjoner(ORGNUMMER)
+    private lateinit var vilkårsgrunnlag: Map<UUID, Map<LocalDate, Vilkårsgrunnlag>>
+
+    private fun generasjoner(organisasjonsnummer: String): List<Generasjon> {
+        val sammenligningsgrunnlagBuilder = OppsamletSammenligningsgrunnlagBuilder(person)
+        val inntektshistorikkForAordningenBuilder = InntektshistorikkForAOrdningenBuilder(person)
+        val vilkårsgrunnlagHistorikk =
+            VilkårsgrunnlagBuilder(person, sammenligningsgrunnlagBuilder, inntektshistorikkForAordningenBuilder).build()
+        vilkårsgrunnlag = vilkårsgrunnlagHistorikk.toDTO()
+
+        val generasjonerBuilder = GenerasjonerBuilder(
+            søknadDTOer,
+            UNG_PERSON_FNR_2018,
+            vilkårsgrunnlagHistorikk,
+            person.arbeidsgiver(organisasjonsnummer)
+        )
+        return generasjonerBuilder.build()
+    }
+
     private fun Int.generasjon(organisasjonsnummer: String = ORGNUMMER, assertBlock: Generasjon.() -> Unit) {
         require(this >= 0) { "Kan ikke være et negativt tall!" }
         generasjoner(organisasjonsnummer)[this].run(assertBlock)
@@ -955,6 +1235,18 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
     private infix fun <T : Tidslinjeperiode> T.medAntallDager(antall: Int): T {
         assertEquals(antall, sammenslåttTidslinje.size)
         return this
+    }
+    private infix fun <T : Tidslinjeperiode> T.harTidslinje(dager: Pair<Periode, SykdomstidslinjedagType>): T {
+        val (periode, dagtype) = dager
+        val periodeUtenHelg = periode.filterNot { it.erHelg() }
+        val tidslinjedager = this.sammenslåttTidslinje.filter { it.dagen in periodeUtenHelg }
+        assertEquals(periodeUtenHelg.toList().size, tidslinjedager.size)
+        assertTrue(tidslinjedager.all { it.sykdomstidslinjedagtype == dagtype })
+        return this
+    }
+
+    private fun BeregnetPeriode.vilkårsgrunnlag(): Vilkårsgrunnlag {
+        return requireNotNull(vilkårsgrunnlag[this.vilkårsgrunnlagshistorikkId]?.get(this.skjæringstidspunkt)) { "Forventet å finne vilkårsgrunnlag for periode" }
     }
 
     private infix fun <T : Tidslinjeperiode> T.forkastet(forkastet: Boolean): T {

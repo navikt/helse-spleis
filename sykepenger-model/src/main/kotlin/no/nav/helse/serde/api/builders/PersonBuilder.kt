@@ -5,7 +5,6 @@ import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Person
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.serde.AbstractBuilder
-import no.nav.helse.serde.api.ArbeidsforholdDTO
 import no.nav.helse.serde.api.PersonDTO
 import no.nav.helse.serde.api.v2.HendelseDTO
 import no.nav.helse.serde.api.v2.buildere.OppsamletSammenligningsgrunnlagBuilder
@@ -24,7 +23,6 @@ internal class PersonBuilder(
     private val versjon: Int
 ) : BuilderState(builder) {
     private val arbeidsgivere = mutableListOf<ArbeidsgiverBuilder>()
-    private val vilkårsgrunnlagInntektBuilder = VilkårsgrunnlagInntektBuilder(person)
     private val inntektshistorikkForAordningenBuilder = InntektshistorikkForAOrdningenBuilder(person)
 
     internal fun build(hendelser: List<HendelseDTO>): PersonDTO {
@@ -37,10 +35,8 @@ internal class PersonBuilder(
             aktørId = aktørId,
             arbeidsgivere = arbeidsgivere.map { it.build(hendelser, fødselsnummer.toString(), vilkårsgrunnlagHistorikk) },
             vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk.toDTO(),
-            inntektsgrunnlag = vilkårsgrunnlagInntektBuilder.build(),
             dødsdato = dødsdato,
-            versjon = versjon,
-            arbeidsforholdPerSkjæringstidspunkt = person.hentArbeidsforhold(::ArbeidsforholdDTO)
+            versjon = versjon
         )
     }
 
@@ -49,8 +45,7 @@ internal class PersonBuilder(
         id: UUID,
         organisasjonsnummer: String
     ) {
-        val arbeidsgiverBuilder =
-            ArbeidsgiverBuilder(arbeidsgiver, vilkårsgrunnlagHistorikk, id, organisasjonsnummer, fødselsnummer.toString(), vilkårsgrunnlagInntektBuilder)
+        val arbeidsgiverBuilder = ArbeidsgiverBuilder(arbeidsgiver, id, organisasjonsnummer)
         if (vilkårsgrunnlagHistorikk.erRelevant(organisasjonsnummer, person.skjæringstidspunkter()) || arbeidsgiver.harFerdigstiltPeriode() || arbeidsgiver.harSpleisSykdom()) {
             arbeidsgivere.add(arbeidsgiverBuilder)
         }
