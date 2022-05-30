@@ -1845,8 +1845,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
             super.håndter(vedtaksperiode, inntektsmelding)
-            // Hack for å trigge spesialist til å hente nytt snapshot
-            vedtaksperiode.emitVedtaksperiodeEndret(inntektsmelding)
+            vedtaksperiode.tilstand(inntektsmelding, AvventerHistorikk)
         }
 
         override fun håndter(

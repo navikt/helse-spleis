@@ -210,13 +210,16 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         sendYtelser(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
         sendInntektsmelding(listOf(Periode(fom = 1.januar, tom = 16.januar)), førsteFraværsdag = 1.januar, beregnetInntekt = 33000.0)
+        sendYtelser(0)
+        sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
         sendOverstyringInntekt(33000.0, 1.januar)
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
         sendUtbetalingsgodkjenning(0, true)
         assertUtbetalingTilstander(0, "IKKE_UTBETALT", "FORKASTET")
-        assertUtbetalingTilstander(1, "IKKE_UTBETALT", "GODKJENT", "SENDT")
+        assertUtbetalingTilstander(1, "IKKE_UTBETALT", "FORKASTET")
+        assertUtbetalingTilstander(2, "IKKE_UTBETALT", "GODKJENT", "SENDT")
         assertTilstander(
             0,
             "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
@@ -226,6 +229,8 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
             "AVVENTER_HISTORIKK",
             "AVVENTER_SIMULERING",
             "AVVENTER_GODKJENNING",
+            "AVVENTER_HISTORIKK",
+            "AVVENTER_SIMULERING",
             "AVVENTER_GODKJENNING",
             "AVVENTER_VILKÅRSPRØVING",
             "AVVENTER_HISTORIKK",

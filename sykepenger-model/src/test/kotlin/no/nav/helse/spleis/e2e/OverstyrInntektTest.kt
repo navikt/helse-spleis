@@ -31,6 +31,8 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
         assertInntektForDato(INNTEKT, fom, inspektør = inspektør)
 
         håndterInntektsmelding(listOf(fom til fom.plusDays(15)), beregnetInntekt = overstyrtInntekt, refusjon = Refusjon(overstyrtInntekt, null, emptyList()))
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
         håndterOverstyrInntekt(inntekt = overstyrtInntekt, orgnummer = ORGNUMMER, skjæringstidspunkt = fom)
 
         assertTilstander(1.vedtaksperiode,
@@ -42,6 +44,8 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
             TilstandType.AVVENTER_HISTORIKK,
             TilstandType.AVVENTER_SIMULERING,
             TilstandType.AVVENTER_GODKJENNING,
+            TilstandType.AVVENTER_HISTORIKK,
+            TilstandType.AVVENTER_SIMULERING,
             TilstandType.AVVENTER_GODKJENNING, // <-- Her står vi når vi overstyrer inntekt.
             TilstandType.AVVENTER_VILKÅRSPRØVING)
 
@@ -60,6 +64,8 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
             TilstandType.AVVENTER_HISTORIKK,
             TilstandType.AVVENTER_SIMULERING,
             TilstandType.AVVENTER_GODKJENNING,
+            TilstandType.AVVENTER_HISTORIKK,
+            TilstandType.AVVENTER_SIMULERING,
             TilstandType.AVVENTER_GODKJENNING, // <-- Her sto vi da vi overstyrte inntekt.
             TilstandType.AVVENTER_VILKÅRSPRØVING,
             TilstandType.AVVENTER_HISTORIKK,

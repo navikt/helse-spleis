@@ -43,6 +43,7 @@ import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.sisteBehov
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
+import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
@@ -1343,15 +1344,21 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Ny inntektsmelding som treffer AvventerGodkjenning - emitter vedtaksperiodeEndret for spesialist sin del`() {
+    fun `Ny inntektsmelding som treffer AvventerGodkjenning - hensyntar nye refusjonsopplysninger`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)))
+        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), refusjon = Refusjon(INNTEKT, null, emptyList()))
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
-        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)))
+
+        assertFalse(inspektør.utbetaling(0).inspektør.personOppdrag.harUtbetalinger())
+        assertEquals(17.januar til 31.januar, Oppdrag.periode(inspektør.utbetaling(0).inspektør.arbeidsgiverOppdrag))
+
+        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), refusjon = Refusjon(INGEN, null, emptyList()))
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
 
         assertTilstander(
             1.vedtaksperiode,
@@ -1363,8 +1370,59 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
-            AVVENTER_GODKJENNING
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
         )
+        assertWarning(
+            "Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.",
+            AktivitetsloggFilter.person()
+        )
+        assertTrue(inspektør.utbetaling(1).inspektør.personOppdrag.harUtbetalinger())
+        assertEquals(17.januar til 31.januar, Oppdrag.periode(inspektør.utbetaling(1).inspektør.personOppdrag))
+    }
+
+    @Test
+    fun `Ny inntektsmelding som treffer AvventerGodkjenning - hensyntar ikke ny inntekt`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), beregnetInntekt = INNTEKT)
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), beregnetInntekt = INNTEKT * 2)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+
+        assertTilstander(
+            1.vedtaksperiode,
+            START,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+        )
+        assertWarning(
+            "Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.",
+            AktivitetsloggFilter.person()
+        )
+        assertForventetFeil(
+            forklaring = "Benytter ikke inntekten i den nye inntektsmeldingen",
+            nå = {
+                assertInntektForDato(INNTEKT, 1.januar, inspektør = inspektør)
+            },
+            ønsket = {
+                assertInntektForDato(INNTEKT * 2, 1.januar, inspektør = inspektør)
+            }
+        )
+
     }
 
     @Test
