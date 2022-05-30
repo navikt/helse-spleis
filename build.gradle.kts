@@ -12,7 +12,7 @@ val postgresqlVersion = "42.3.3"
 val kotlinReflectVersion = "1.6.21"
 val logbackClassicVersion = "1.2.11"
 val logstashVersion = "7.1.1"
-val jsonSchemaValidatorVersion = "1.0.69"
+val jsonSchemaValidatorVersion = "1.0.70"
 val jvmTargetVersion = "17"
 
 allprojects {
