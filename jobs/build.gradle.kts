@@ -1,6 +1,6 @@
 val mainClass = "no.nav.helse.spleis.jobs.AppKt"
 val cloudSqlVersion = "1.4.4"
-val rapidsAndRiversCliVersion = "1.7927bf9"
+val rapidsAndRiversCliVersion = "1.5142592"
 
 tasks.withType<Test> {
     useJUnitPlatform()
