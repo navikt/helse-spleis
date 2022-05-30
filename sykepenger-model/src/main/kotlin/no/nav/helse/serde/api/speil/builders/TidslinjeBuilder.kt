@@ -1,15 +1,23 @@
-package no.nav.helse.serde.api.v2.buildere
+package no.nav.helse.serde.api.speil.builders
 
 import no.nav.helse.hendelser.*
 import no.nav.helse.person.*
-import no.nav.helse.serde.api.BegrunnelseDTO
-import no.nav.helse.serde.api.v2.*
+import no.nav.helse.serde.api.dto.BegrunnelseDTO
 import no.nav.helse.sykdomstidslinje.*
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
 import java.util.*
+import no.nav.helse.serde.api.dto.AvvistDag
+import no.nav.helse.serde.api.dto.NavDag
+import no.nav.helse.serde.api.dto.Sykdomstidslinjedag
+import no.nav.helse.serde.api.dto.SykdomstidslinjedagKildetype
+import no.nav.helse.serde.api.dto.SykdomstidslinjedagType
+import no.nav.helse.serde.api.dto.Utbetalingstidslinjedag
+import no.nav.helse.serde.api.dto.UtbetalingstidslinjedagMedGrad
+import no.nav.helse.serde.api.dto.UtbetalingstidslinjedagType
+import no.nav.helse.serde.api.dto.UtbetalingstidslinjedagUtenGrad
 
 // Besøker hele sykdomshistorikk-treet
 internal class VedtaksperiodeSykdomstidslinjeBuilder(vedtaksperiode: Vedtaksperiode): VedtaksperiodeVisitor {

@@ -2,7 +2,7 @@ package no.nav.helse.serde.api.sporing
 
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.*
-import no.nav.helse.serde.api.builders.BuilderState
+import no.nav.helse.serde.api.BuilderState
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*

@@ -1,6 +1,6 @@
 package no.nav.helse.person
 
-import no.nav.helse.serde.api.BegrunnelseDTO
+import no.nav.helse.serde.api.dto.BegrunnelseDTO
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 

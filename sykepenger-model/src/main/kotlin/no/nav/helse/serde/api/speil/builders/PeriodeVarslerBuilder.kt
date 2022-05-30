@@ -1,9 +1,9 @@
-package no.nav.helse.serde.api.v2.buildere
+package no.nav.helse.serde.api.speil.builders
 
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.AktivitetsloggVisitor
 import no.nav.helse.person.SpesifikkKontekst
-import no.nav.helse.serde.api.AktivitetDTO
+import no.nav.helse.serde.api.dto.AktivitetDTO
 import java.util.*
 
 internal class PeriodeVarslerBuilder(

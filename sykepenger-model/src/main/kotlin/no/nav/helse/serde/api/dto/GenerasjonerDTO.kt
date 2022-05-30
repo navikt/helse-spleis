@@ -1,15 +1,13 @@
-package no.nav.helse.serde.api.v2
+package no.nav.helse.serde.api.dto
 
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.Periodetype
-import no.nav.helse.serde.api.AktivitetDTO
-import no.nav.helse.serde.api.dto.EndringskodeDTO
-import no.nav.helse.serde.api.v2.Behandlingstype.VENTER
-import no.nav.helse.serde.api.v2.Behandlingstype.VENTER_PÅ_INFORMASJON
-import no.nav.helse.serde.api.v2.buildere.BeregningId
+import no.nav.helse.serde.api.dto.Behandlingstype.VENTER
+import no.nav.helse.serde.api.dto.Behandlingstype.VENTER_PÅ_INFORMASJON
+import no.nav.helse.serde.api.speil.builders.BeregningId
 
 data class Generasjon(
     val id: UUID, // Runtime

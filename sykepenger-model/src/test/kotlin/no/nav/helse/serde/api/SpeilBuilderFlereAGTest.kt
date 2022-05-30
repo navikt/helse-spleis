@@ -20,11 +20,12 @@ import no.nav.helse.oktober
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.september
-import no.nav.helse.serde.api.v2.Arbeidsgiverinntekt
-import no.nav.helse.serde.api.v2.BeregnetPeriode
-import no.nav.helse.serde.api.v2.InntekterFraAOrdningen
-import no.nav.helse.serde.api.v2.Inntektkilde
-import no.nav.helse.serde.api.v2.OmregnetÅrsinntekt
+import no.nav.helse.serde.api.dto.Arbeidsgiverinntekt
+import no.nav.helse.serde.api.dto.BeregnetPeriode
+import no.nav.helse.serde.api.dto.GhostPeriodeDTO
+import no.nav.helse.serde.api.dto.InntekterFraAOrdningen
+import no.nav.helse.serde.api.dto.Inntektkilde
+import no.nav.helse.serde.api.dto.OmregnetÅrsinntekt
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.grunnlag
 import no.nav.helse.spleis.e2e.håndterInntektsmelding

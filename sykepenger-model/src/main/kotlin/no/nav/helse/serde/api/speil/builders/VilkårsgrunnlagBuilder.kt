@@ -1,4 +1,4 @@
-package no.nav.helse.serde.api.v2.buildere
+package no.nav.helse.serde.api.speil.builders
 
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -21,9 +21,8 @@ import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.Grunnlagsdata
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag
 import no.nav.helse.person.VilkårsgrunnlagHistorikkVisitor
-import no.nav.helse.serde.api.builders.InntektshistorikkForAOrdningenBuilder
-import no.nav.helse.serde.api.v2.SpleisVilkårsgrunnlag
-import no.nav.helse.serde.api.v2.Vilkårsgrunnlag
+import no.nav.helse.serde.api.dto.SpleisVilkårsgrunnlag
+import no.nav.helse.serde.api.dto.Vilkårsgrunnlag
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosent
 import kotlin.properties.Delegates
@@ -102,7 +101,7 @@ internal class IInfotrygdGrunnlag(
     override val sykepengegrunnlag: Double
 ) : IVilkårsgrunnlag {
     override fun toDTO(): Vilkårsgrunnlag {
-        return no.nav.helse.serde.api.v2.InfotrygdVilkårsgrunnlag(
+        return no.nav.helse.serde.api.dto.InfotrygdVilkårsgrunnlag(
             skjæringstidspunkt = skjæringstidspunkt,
             omregnetÅrsinntekt = omregnetÅrsinntekt,
             sammenligningsgrunnlag = sammenligningsgrunnlag,
@@ -345,7 +344,7 @@ internal class VilkårsgrunnlagBuilder(
                 this.inntekt = nyArbeidsgiverInntekt(IInntektkilde.AOrdningen, inntekt, dato, inntekterFraAOrdningen)
             }
 
-            internal class SkattBuilder(skattComposite: SkattComposite) : InntekthistorikkVisitor {
+            class SkattBuilder(skattComposite: SkattComposite) : InntekthistorikkVisitor {
                 private val inntekt = InntektBuilder(skattComposite.grunnlagForSykepengegrunnlag()).build()
                 private val inntekterFraAOrdningen = mutableMapOf<YearMonth, Double>()
 

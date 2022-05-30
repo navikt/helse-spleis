@@ -3,7 +3,7 @@ package no.nav.helse.serde.api.sporing
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.ForkastetVedtaksperiode
 import no.nav.helse.person.Vedtaksperiode
-import no.nav.helse.serde.api.builders.BuilderState
+import no.nav.helse.serde.api.BuilderState
 import no.nav.helse.sykdomstidslinje.erRettFør
 import java.util.*
 

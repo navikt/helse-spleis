@@ -4,7 +4,7 @@ import com.apurebase.kgraphql.schema.dsl.SchemaBuilder
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
-import no.nav.helse.serde.api.v2.Utbetalingtype
+import no.nav.helse.serde.api.dto.Utbetalingtype
 
 internal fun SchemaBuilder.tidslinjeperiodeTypes() {
     enum<GraphQLInntektstype>()

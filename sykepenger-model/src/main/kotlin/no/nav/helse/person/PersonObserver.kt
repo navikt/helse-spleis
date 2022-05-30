@@ -7,7 +7,7 @@ import no.nav.helse.Fødselsnummer
 import no.nav.helse.hendelser.Hendelseskontekst
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Påminnelse
-import no.nav.helse.serde.api.BegrunnelseDTO
+import no.nav.helse.serde.api.dto.BegrunnelseDTO
 
 interface PersonObserver {
     data class VedtaksperiodeIkkeFunnetEvent(

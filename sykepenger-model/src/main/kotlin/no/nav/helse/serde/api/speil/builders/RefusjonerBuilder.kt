@@ -1,9 +1,9 @@
-package no.nav.helse.serde.api.v2.buildere
+package no.nav.helse.serde.api.speil.builders
 
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Refusjonshistorikk
 import no.nav.helse.person.RefusjonshistorikkVisitor
-import no.nav.helse.serde.api.v2.Refusjon
+import no.nav.helse.serde.api.dto.Refusjon
 import no.nav.helse.økonomi.Inntekt
 import java.time.LocalDate
 import java.time.LocalDateTime

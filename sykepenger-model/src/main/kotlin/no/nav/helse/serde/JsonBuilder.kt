@@ -12,7 +12,6 @@ import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsforholdhistorikk
-import no.nav.helse.person.ArbeidsforholdhistorikkVisitor
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.Dokumentsporing
@@ -47,7 +46,7 @@ import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonD
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.PROBLEMDAG
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.SYKEDAG
 import no.nav.helse.serde.PersonData.UtbetalingstidslinjeData.TypeData
-import no.nav.helse.serde.api.builders.BuilderState
+import no.nav.helse.serde.api.BuilderState
 import no.nav.helse.serde.mapping.JsonMedlemskapstatus
 import no.nav.helse.serde.reflection.AktivitetsloggMap
 import no.nav.helse.serde.reflection.Inntektsopplysningskilde
@@ -894,23 +893,6 @@ internal class JsonBuilder : AbstractBuilder() {
             pushState(SammenlingningsgrunnlagState(sammenligningsgrunnlagMap))
         }
 
-        private class ArbeidsforholdMapper: ArbeidsforholdhistorikkVisitor {
-            private val mappedArbeidsforhold: MutableList<Map<String, Any?>> = mutableListOf()
-            override fun visitArbeidsforhold(ansattFom: LocalDate, ansattTom: LocalDate?, deaktivert: Boolean) {
-                mappedArbeidsforhold.add(
-                    mapOf(
-                        "ansattFom" to ansattFom,
-                        "ansattTom" to ansattTom,
-                        "deaktivert" to deaktivert
-                    )
-                )
-            }
-            fun tilMap(arbeidsforholdListe: List<Arbeidsforholdhistorikk.Arbeidsforhold>): MutableList<Map<String, Any?>> {
-                arbeidsforholdListe.forEach {it.accept(this)}
-                return mappedArbeidsforhold
-            }
-        }
-
         override fun preVisitOpptjening(opptjening: Opptjening, arbeidsforhold: List<Opptjening.ArbeidsgiverOpptjeningsgrunnlag>, opptjeningsperiode: Periode) {
             pushState(OpptjeningState(opptjeningMap))
         }
@@ -1132,7 +1114,7 @@ internal class JsonBuilder : AbstractBuilder() {
         }
     }
 
-    internal class SykmeldingsperioderState(private val sykmeldingsperioder: MutableList<Map<String, Any>>) : BuilderState () {
+    internal class SykmeldingsperioderState(private val sykmeldingsperioder: MutableList<Map<String, Any>>) : BuilderState() {
         override fun visitSykmeldingsperiode(periode: Periode) {
             sykmeldingsperioder.add(mapOf("fom" to periode.start, "tom" to periode.endInclusive))
         }

@@ -1,4 +1,4 @@
-package no.nav.helse.serde.api.builders
+package no.nav.helse.serde.api
 
 import no.nav.helse.person.PersonVisitor
 import no.nav.helse.serde.AbstractBuilder

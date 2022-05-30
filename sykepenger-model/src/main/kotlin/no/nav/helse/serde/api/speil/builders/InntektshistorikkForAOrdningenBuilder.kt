@@ -1,7 +1,6 @@
-package no.nav.helse.serde.api.builders
+package no.nav.helse.serde.api.speil.builders
 
 import no.nav.helse.person.*
-import no.nav.helse.serde.api.v2.buildere.*
 import no.nav.helse.økonomi.Inntekt
 import java.time.LocalDate
 import java.time.LocalDateTime

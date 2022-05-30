@@ -19,7 +19,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.etterlevelse.MaskinellJurist
-import no.nav.helse.serde.api.BegrunnelseDTO
+import no.nav.helse.serde.api.dto.BegrunnelseDTO
 import no.nav.helse.somFødselsnummer
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals

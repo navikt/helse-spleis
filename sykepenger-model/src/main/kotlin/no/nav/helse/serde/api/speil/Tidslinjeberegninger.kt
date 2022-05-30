@@ -1,9 +1,14 @@
-package no.nav.helse.serde.api.v2
+package no.nav.helse.serde.api.speil
 
-import no.nav.helse.serde.api.v2.buildere.BeregningId
-import no.nav.helse.serde.api.v2.buildere.GenerasjonIder
-import no.nav.helse.serde.api.v2.buildere.VilkårsgrunnlagshistorikkId
+import no.nav.helse.serde.api.speil.builders.BeregningId
+import no.nav.helse.serde.api.speil.builders.GenerasjonIder
+import no.nav.helse.serde.api.speil.builders.VilkårsgrunnlagshistorikkId
 import java.time.LocalDate
+import no.nav.helse.serde.api.dto.AvvistDag
+import no.nav.helse.serde.api.dto.SammenslåttDag
+import no.nav.helse.serde.api.dto.Sykdomstidslinjedag
+import no.nav.helse.serde.api.dto.Utbetalingstidslinjedag
+import no.nav.helse.serde.api.dto.UtbetalingstidslinjedagType
 
 internal class Tidslinjeberegninger(generasjonIder: List<GenerasjonIder>, sykdomshistorikkAkkumulator: SykdomshistorikkAkkumulator) {
     private val beregninger: List<ITidslinjeberegning> = lagTidslinjeberegninger(generasjonIder, sykdomshistorikkAkkumulator)

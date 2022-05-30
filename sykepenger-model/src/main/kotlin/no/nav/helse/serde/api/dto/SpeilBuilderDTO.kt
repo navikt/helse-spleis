@@ -1,9 +1,7 @@
-package no.nav.helse.serde.api
+package no.nav.helse.serde.api.dto
 
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.helse.serde.api.v2.Generasjon
-import no.nav.helse.serde.api.v2.Vilkårsgrunnlag
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 
 data class PersonDTO(

@@ -1,17 +1,16 @@
-package no.nav.helse.serde.api.builders
+package no.nav.helse.serde.api.speil.builders
 
 import no.nav.helse.Fødselsnummer
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Person
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.serde.AbstractBuilder
-import no.nav.helse.serde.api.PersonDTO
-import no.nav.helse.serde.api.v2.HendelseDTO
-import no.nav.helse.serde.api.v2.buildere.OppsamletSammenligningsgrunnlagBuilder
-import no.nav.helse.serde.api.v2.buildere.VilkårsgrunnlagBuilder
+import no.nav.helse.serde.api.dto.PersonDTO
+import no.nav.helse.serde.api.dto.HendelseDTO
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
+import no.nav.helse.serde.api.BuilderState
 
 internal class PersonBuilder(
     builder: AbstractBuilder,

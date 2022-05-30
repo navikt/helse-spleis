@@ -1,4 +1,4 @@
-package no.nav.helse.serde.api.v2
+package no.nav.helse.serde.api.dto
 
 import java.time.LocalDate
 import java.time.LocalDateTime

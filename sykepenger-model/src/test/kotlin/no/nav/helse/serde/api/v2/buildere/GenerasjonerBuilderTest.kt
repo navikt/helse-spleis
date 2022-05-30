@@ -26,18 +26,21 @@ import no.nav.helse.mars
 import no.nav.helse.oktober
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.arbeidsgiver
-import no.nav.helse.serde.api.builders.InntektshistorikkForAOrdningenBuilder
-import no.nav.helse.serde.api.v2.Behandlingstype
-import no.nav.helse.serde.api.v2.BeregnetPeriode
-import no.nav.helse.serde.api.v2.Generasjon
-import no.nav.helse.serde.api.v2.Inntektkilde
-import no.nav.helse.serde.api.v2.OmregnetÅrsinntekt
-import no.nav.helse.serde.api.v2.SykdomstidslinjedagType
-import no.nav.helse.serde.api.v2.Tidslinjeperiode
-import no.nav.helse.serde.api.v2.UberegnetPeriode
-import no.nav.helse.serde.api.v2.Utbetalingstatus
-import no.nav.helse.serde.api.v2.Utbetalingtype
-import no.nav.helse.serde.api.v2.Vilkårsgrunnlag
+import no.nav.helse.serde.api.speil.builders.GenerasjonerBuilder
+import no.nav.helse.serde.api.speil.builders.InntektshistorikkForAOrdningenBuilder
+import no.nav.helse.serde.api.speil.builders.OppsamletSammenligningsgrunnlagBuilder
+import no.nav.helse.serde.api.speil.builders.VilkårsgrunnlagBuilder
+import no.nav.helse.serde.api.dto.Behandlingstype
+import no.nav.helse.serde.api.dto.BeregnetPeriode
+import no.nav.helse.serde.api.dto.Generasjon
+import no.nav.helse.serde.api.dto.Inntektkilde
+import no.nav.helse.serde.api.dto.OmregnetÅrsinntekt
+import no.nav.helse.serde.api.dto.SykdomstidslinjedagType
+import no.nav.helse.serde.api.dto.Tidslinjeperiode
+import no.nav.helse.serde.api.dto.UberegnetPeriode
+import no.nav.helse.serde.api.dto.Utbetalingstatus
+import no.nav.helse.serde.api.dto.Utbetalingtype
+import no.nav.helse.serde.api.dto.Vilkårsgrunnlag
 import no.nav.helse.somFødselsnummer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertTilstand
@@ -1221,7 +1224,6 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         val generasjonerBuilder = GenerasjonerBuilder(
             søknadDTOer,
             UNG_PERSON_FNR_2018,
-            vilkårsgrunnlagHistorikk,
             person.arbeidsgiver(organisasjonsnummer)
         )
         return generasjonerBuilder.build()

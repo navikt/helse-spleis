@@ -1,6 +1,5 @@
-package no.nav.helse.serde.api.v2
+package no.nav.helse.serde.api.dto
 
-import no.nav.helse.serde.api.BegrunnelseDTO
 import java.time.LocalDate
 import java.util.*
 

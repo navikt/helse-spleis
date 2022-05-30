@@ -7,10 +7,10 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode
 import no.nav.helse.person.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.serde.api.serializePersonForSpeil
-import no.nav.helse.serde.api.v2.HendelseDTO
-import no.nav.helse.serde.api.v2.InntektsmeldingDTO
-import no.nav.helse.serde.api.v2.SykmeldingDTO
-import no.nav.helse.serde.api.v2.SøknadNavDTO
+import no.nav.helse.serde.api.dto.HendelseDTO
+import no.nav.helse.serde.api.dto.InntektsmeldingDTO
+import no.nav.helse.serde.api.dto.SykmeldingDTO
+import no.nav.helse.serde.api.dto.SøknadNavDTO
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import java.time.LocalDate
@@ -153,7 +153,7 @@ private val AbstractEndToEndTest.sykmeldingDTOer get() = sykmeldinger.map { (id,
     )
 }
 
-private val AbstractEndToEndTest.inntektsmeldingDTOer get() = inntektsmeldinger.map { (id, inntektsmeldingGetter) ->
+private val AbstractEndToEndTest.inntektsmeldingDTOer get() = inntektsmeldinger.map { (id, _) ->
     InntektsmeldingDTO(
         id = id.toString(),
         mottattDato = LocalDateTime.now(),

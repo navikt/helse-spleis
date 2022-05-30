@@ -4,10 +4,10 @@ import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.januar
 import no.nav.helse.mars
-import no.nav.helse.serde.api.builders.InntektshistorikkForAOrdningenBuilder
-import no.nav.helse.serde.api.v2.buildere.IInntekterFraAOrdningen
-import no.nav.helse.serde.api.v2.buildere.IInntektkilde
-import no.nav.helse.serde.api.v2.buildere.IOmregnetÅrsinntekt
+import no.nav.helse.serde.api.speil.builders.InntektshistorikkForAOrdningenBuilder
+import no.nav.helse.serde.api.speil.builders.IInntekterFraAOrdningen
+import no.nav.helse.serde.api.speil.builders.IInntektkilde
+import no.nav.helse.serde.api.speil.builders.IOmregnetÅrsinntekt
 import no.nav.helse.spleis.e2e.*
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent

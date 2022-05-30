@@ -1,12 +1,11 @@
-package no.nav.helse.serde.api.builders
+package no.nav.helse.serde.api.speil.builders
 
 import java.util.UUID
 import no.nav.helse.person.Arbeidsgiver
-import no.nav.helse.serde.api.ArbeidsgiverDTO
-import no.nav.helse.serde.api.GhostPeriodeDTO
-import no.nav.helse.serde.api.v2.HendelseDTO
-import no.nav.helse.serde.api.v2.buildere.GenerasjonerBuilder
-import no.nav.helse.serde.api.v2.buildere.IVilkårsgrunnlagHistorikk
+import no.nav.helse.serde.api.BuilderState
+import no.nav.helse.serde.api.dto.ArbeidsgiverDTO
+import no.nav.helse.serde.api.dto.GhostPeriodeDTO
+import no.nav.helse.serde.api.dto.HendelseDTO
 import no.nav.helse.somFødselsnummer
 
 internal class ArbeidsgiverBuilder(
@@ -29,7 +28,7 @@ internal class ArbeidsgiverBuilder(
                     deaktivert = it.deaktivert
                 )
             },
-            generasjoner = GenerasjonerBuilder(hendelser, fødselsnummer.somFødselsnummer(), vilkårsgrunnlagHistorikk, arbeidsgiver).build()
+            generasjoner = GenerasjonerBuilder(hendelser, fødselsnummer.somFødselsnummer(), arbeidsgiver).build()
         )
     }
 

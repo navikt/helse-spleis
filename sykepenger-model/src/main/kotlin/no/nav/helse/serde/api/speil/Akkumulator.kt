@@ -1,11 +1,17 @@
-package no.nav.helse.serde.api.v2
+package no.nav.helse.serde.api.speil
 
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.*
-import no.nav.helse.serde.api.v2.buildere.*
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
+import no.nav.helse.serde.api.speil.builders.BeregningId
+import no.nav.helse.serde.api.speil.builders.FagsystemId
+import no.nav.helse.serde.api.speil.builders.GenerasjonIder
+import no.nav.helse.serde.api.speil.builders.InntektsmeldingId
+import no.nav.helse.serde.api.speil.builders.SykdomshistorikkId
+import no.nav.helse.serde.api.dto.Refusjon
+import no.nav.helse.serde.api.dto.Sykdomstidslinjedag
 
 internal class ForkastetVedtaksperiodeAkkumulator : VedtaksperiodeVisitor {
     private val forkastedeVedtaksperioderIder = mutableListOf<UUID>()

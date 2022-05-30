@@ -2,7 +2,7 @@ package no.nav.helse.serde
 
 import no.nav.helse.person.DelegatedPersonVisitor
 import no.nav.helse.person.PersonVisitor
-import no.nav.helse.serde.api.builders.BuilderState
+import no.nav.helse.serde.api.BuilderState
 
 internal abstract class AbstractBuilder private constructor(
     private val stack: MutableList<PersonVisitor>

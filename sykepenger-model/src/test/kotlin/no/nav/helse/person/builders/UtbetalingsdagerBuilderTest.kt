@@ -3,7 +3,7 @@ package no.nav.helse.person.builders
 import no.nav.helse.januar
 import no.nav.helse.person.PersonObserver.Utbetalingsdag
 import no.nav.helse.person.PersonObserver.Utbetalingsdag.Dagtype.*
-import no.nav.helse.serde.api.BegrunnelseDTO
+import no.nav.helse.serde.api.dto.BegrunnelseDTO
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.*
 import no.nav.helse.testhelpers.NAV

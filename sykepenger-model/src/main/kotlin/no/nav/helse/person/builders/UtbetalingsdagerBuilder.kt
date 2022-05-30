@@ -2,7 +2,7 @@ package no.nav.helse.person.builders
 
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.UtbetalingsdagVisitor
-import no.nav.helse.serde.api.BegrunnelseDTO
+import no.nav.helse.serde.api.dto.BegrunnelseDTO
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje

@@ -1,13 +1,13 @@
-package no.nav.helse.serde.api.v2.buildere
+package no.nav.helse.serde.api.speil.builders
 
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.person.UtbetalingVisitor
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.VedtaksperiodeVisitor
-import no.nav.helse.serde.api.v2.IUtbetaling
-import no.nav.helse.serde.api.v2.SpeilOppdrag
-import no.nav.helse.serde.api.v2.Utbetaling
+import no.nav.helse.serde.api.speil.IUtbetaling
+import no.nav.helse.serde.api.dto.SpeilOppdrag
+import no.nav.helse.serde.api.dto.Utbetaling
 import no.nav.helse.utbetalingslinjer.*
 import no.nav.helse.utbetalingslinjer.Utbetaling.Forkastet
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype

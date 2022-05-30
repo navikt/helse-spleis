@@ -1,16 +1,36 @@
-package no.nav.helse.serde.api.v2.buildere
+package no.nav.helse.serde.api.speil.builders
 
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.Fødselsnummer
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.person.*
+import no.nav.helse.person.Arbeidsgiver
+import no.nav.helse.person.ArbeidsgiverVisitor
+import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Dokumentsporing.Companion.ider
-import no.nav.helse.serde.api.v2.*
+import no.nav.helse.person.ForkastetÅrsak
+import no.nav.helse.person.ForlengelseFraInfotrygd
+import no.nav.helse.person.Inntektskilde
+import no.nav.helse.person.InntektsmeldingInfo
+import no.nav.helse.person.Periodetype
+import no.nav.helse.person.Refusjonshistorikk
+import no.nav.helse.person.Vedtaksperiode
+import no.nav.helse.serde.api.dto.Generasjon
+import no.nav.helse.serde.api.dto.HendelseDTO
+import no.nav.helse.serde.api.speil.AnnulleringerAkkumulator
+import no.nav.helse.serde.api.speil.ForkastetVedtaksperiodeAkkumulator
+import no.nav.helse.serde.api.speil.GenerasjonIderAkkumulator
+import no.nav.helse.serde.api.speil.Generasjoner
+import no.nav.helse.serde.api.speil.IVedtaksperiode
+import no.nav.helse.serde.api.speil.RefusjonerAkkumulator
+import no.nav.helse.serde.api.speil.SykdomshistorikkAkkumulator
+import no.nav.helse.serde.api.speil.Tidslinjeberegninger
+import no.nav.helse.serde.api.speil.Tidslinjeperioder
+import no.nav.helse.serde.api.speil.VedtaksperiodeAkkumulator
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
 
 internal data class GenerasjonIder(
     val beregningId: BeregningId,
@@ -28,7 +48,6 @@ internal typealias InntektsmeldingId = UUID
 internal class GenerasjonerBuilder(
     private val hendelser: List<HendelseDTO>,
     private val fødselsnummer: Fødselsnummer,
-    private val vilkårsgrunnlagHistorikk: IVilkårsgrunnlagHistorikk,
     arbeidsgiver: Arbeidsgiver
 ) : ArbeidsgiverVisitor {
     private val vedtaksperiodeAkkumulator = VedtaksperiodeAkkumulator()
@@ -48,7 +67,6 @@ internal class GenerasjonerBuilder(
         val tidslinjeperioder = Tidslinjeperioder(
             fødselsnummer = fødselsnummer,
             forkastetVedtaksperiodeIder = forkastetVedtaksperiodeAkkumulator.toList(),
-            vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk,
             refusjoner = refusjonerAkkumulator.getRefusjoner(),
             vedtaksperioder = vedtaksperiodeAkkumulator.toList(),
             tidslinjeberegninger = tidslinjeberegninger

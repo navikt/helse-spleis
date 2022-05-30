@@ -1,4 +1,4 @@
-package no.nav.helse.serde.api.v2
+package no.nav.helse.serde.api.dto
 
 import java.time.LocalDate
 import java.time.YearMonth
@@ -30,7 +30,7 @@ data class SpleisVilkårsgrunnlag(
     val oppfyllerKravOmMinstelønn: Boolean,
     val oppfyllerKravOmOpptjening: Boolean,
     val oppfyllerKravOmMedlemskap: Boolean?
-) : Vilkårsgrunnlag  {
+) : Vilkårsgrunnlag {
     override val vilkårsgrunnlagtype = Vilkårsgrunnlagtype.SPLEIS
 }
 

@@ -10,7 +10,8 @@ import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.Vedtaksperiode
-import no.nav.helse.serde.api.AktivitetDTO
+import no.nav.helse.serde.api.dto.AktivitetDTO
+import no.nav.helse.serde.api.speil.builders.PeriodeVarslerBuilder
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.håndterInntektsmelding

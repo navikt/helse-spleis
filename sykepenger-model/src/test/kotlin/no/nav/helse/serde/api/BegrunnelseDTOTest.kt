@@ -1,5 +1,6 @@
 package no.nav.helse.serde.api
 
+import no.nav.helse.serde.api.dto.BegrunnelseDTO
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test

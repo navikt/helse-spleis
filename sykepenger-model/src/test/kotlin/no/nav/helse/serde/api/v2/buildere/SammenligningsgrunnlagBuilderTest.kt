@@ -6,6 +6,7 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.januar
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
+import no.nav.helse.serde.api.speil.builders.OppsamletSammenligningsgrunnlagBuilder
 import no.nav.helse.spleis.e2e.*
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -54,7 +55,7 @@ internal class SammenligningsgrunnlagBuilderTest : AbstractEndToEndTest() {
             lagInntektperioder(fom = 1.januar, inntekt = 20000.månedlig, orgnummer = AG2)
         }
 
-        assertEquals(240000.0, grunnlag.sammenligningsgrunnlag(AG1.toString(), 1.januar))
-        assertEquals(240000.0, grunnlag.sammenligningsgrunnlag(AG2.toString(), 1.januar))
+        assertEquals(240000.0, grunnlag.sammenligningsgrunnlag(AG1, 1.januar))
+        assertEquals(240000.0, grunnlag.sammenligningsgrunnlag(AG2, 1.januar))
     }
 }

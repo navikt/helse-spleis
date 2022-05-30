@@ -1,4 +1,4 @@
-package no.nav.helse.serde.api.v2
+package no.nav.helse.serde.api.speil
 
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -30,25 +30,40 @@ import no.nav.helse.person.Vedtaksperiode.TilInfotrygd
 import no.nav.helse.person.Vedtaksperiode.TilUtbetaling
 import no.nav.helse.person.Vedtaksperiode.UtbetalingFeilet
 import no.nav.helse.person.Vedtaksperiode.Vedtaksperiodetilstand
-import no.nav.helse.serde.api.v2.Behandlingstype.BEHANDLET
-import no.nav.helse.serde.api.v2.Behandlingstype.UBEREGNET
-import no.nav.helse.serde.api.v2.Behandlingstype.VENTER
-import no.nav.helse.serde.api.v2.Behandlingstype.VENTER_PÅ_INFORMASJON
-import no.nav.helse.serde.api.v2.Generasjoner.Generasjon.Companion.fjernErstattede
-import no.nav.helse.serde.api.v2.Generasjoner.Generasjon.Companion.sammenstillMedNeste
-import no.nav.helse.serde.api.v2.Generasjoner.Generasjon.Companion.sorterGenerasjoner
-import no.nav.helse.serde.api.v2.Generasjoner.Generasjon.Companion.toDTO
-import no.nav.helse.serde.api.v2.HendelseDTO.Companion.finn
-import no.nav.helse.serde.api.v2.Tidslinjeberegninger.ITidslinjeberegning
-import no.nav.helse.serde.api.v2.buildere.BeregningId
-import no.nav.helse.serde.api.v2.buildere.IVilkårsgrunnlagHistorikk
-import no.nav.helse.serde.api.v2.buildere.InntektsmeldingId
-import no.nav.helse.serde.api.v2.buildere.PeriodeVarslerBuilder
+import no.nav.helse.serde.api.dto.Behandlingstype.BEHANDLET
+import no.nav.helse.serde.api.dto.Behandlingstype.UBEREGNET
+import no.nav.helse.serde.api.dto.Behandlingstype.VENTER
+import no.nav.helse.serde.api.dto.Behandlingstype.VENTER_PÅ_INFORMASJON
+import no.nav.helse.serde.api.speil.Generasjoner.Generasjon.Companion.fjernErstattede
+import no.nav.helse.serde.api.speil.Generasjoner.Generasjon.Companion.sammenstillMedNeste
+import no.nav.helse.serde.api.speil.Generasjoner.Generasjon.Companion.sorterGenerasjoner
+import no.nav.helse.serde.api.speil.Generasjoner.Generasjon.Companion.toDTO
+import no.nav.helse.serde.api.dto.HendelseDTO.Companion.finn
+import no.nav.helse.serde.api.speil.Tidslinjeberegninger.ITidslinjeberegning
+import no.nav.helse.serde.api.speil.builders.BeregningId
+import no.nav.helse.serde.api.speil.builders.InntektsmeldingId
+import no.nav.helse.serde.api.speil.builders.PeriodeVarslerBuilder
+import no.nav.helse.serde.api.dto.BeregnetPeriode
+import no.nav.helse.serde.api.dto.Generasjon
+import no.nav.helse.serde.api.dto.HendelseDTO
+import no.nav.helse.serde.api.dto.Periodetilstand
+import no.nav.helse.serde.api.dto.Refusjon
+import no.nav.helse.serde.api.dto.SammenslåttDag
+import no.nav.helse.serde.api.dto.SpeilOppdrag
+import no.nav.helse.serde.api.dto.Sykdomstidslinjedag
+import no.nav.helse.serde.api.dto.SøknadNavDTO
+import no.nav.helse.serde.api.dto.Tidslinjeperiode
+import no.nav.helse.serde.api.dto.UberegnetPeriode
+import no.nav.helse.serde.api.dto.Utbetaling
+import no.nav.helse.serde.api.dto.Utbetalingstatus
+import no.nav.helse.serde.api.dto.Utbetalingstidslinjedag
+import no.nav.helse.serde.api.dto.UtbetalingstidslinjedagType
+import no.nav.helse.serde.api.dto.Utbetalingtype
 
 internal class Generasjoner(perioder: Tidslinjeperioder) {
     private val generasjoner: List<Generasjon> = perioder.toGenerasjoner()
 
-    internal fun build(): List<no.nav.helse.serde.api.v2.Generasjon> {
+    internal fun build(): List<no.nav.helse.serde.api.dto.Generasjon> {
         return generasjoner
             .sammenstillMedNeste()
             .fjernErstattede()
@@ -115,7 +130,7 @@ internal class Generasjoner(perioder: Tidslinjeperioder) {
 
             internal fun List<Generasjon>.sorterGenerasjoner() = map { it.sorterFallende() }
 
-            internal fun List<Generasjon>.toDTO(): List<no.nav.helse.serde.api.v2.Generasjon> {
+            internal fun List<Generasjon>.toDTO(): List<no.nav.helse.serde.api.dto.Generasjon> {
                 return map {
                     Generasjon(UUID.randomUUID(), it.perioder)
                 }
@@ -127,7 +142,6 @@ internal class Generasjoner(perioder: Tidslinjeperioder) {
 internal class Tidslinjeperioder(
     private val fødselsnummer: Fødselsnummer,
     private val forkastetVedtaksperiodeIder: List<UUID>,
-    private val vilkårsgrunnlagHistorikk: IVilkårsgrunnlagHistorikk,
     private val refusjoner: Map<InntektsmeldingId, Refusjon>,
     vedtaksperioder: List<IVedtaksperiode>,
     tidslinjeberegninger: Tidslinjeberegninger

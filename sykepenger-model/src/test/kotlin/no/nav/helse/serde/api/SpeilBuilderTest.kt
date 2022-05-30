@@ -11,8 +11,8 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.november
-import no.nav.helse.serde.api.v2.BeregnetPeriode
-import no.nav.helse.serde.api.v2.Inntektkilde
+import no.nav.helse.serde.api.dto.BeregnetPeriode
+import no.nav.helse.serde.api.dto.Inntektkilde
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.finnSkjæringstidspunkt
 import no.nav.helse.spleis.e2e.grunnlag

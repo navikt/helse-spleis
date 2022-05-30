@@ -1,10 +1,10 @@
-package no.nav.helse.serde.api.v2.buildere
+package no.nav.helse.serde.api.speil.builders
 
 import no.nav.helse.person.*
-import no.nav.helse.serde.api.v2.Arbeidsgiverinntekt
-import no.nav.helse.serde.api.v2.InntekterFraAOrdningen
-import no.nav.helse.serde.api.v2.Inntektkilde
-import no.nav.helse.serde.api.v2.OmregnetÅrsinntekt
+import no.nav.helse.serde.api.dto.Arbeidsgiverinntekt
+import no.nav.helse.serde.api.dto.InntekterFraAOrdningen
+import no.nav.helse.serde.api.dto.Inntektkilde
+import no.nav.helse.serde.api.dto.OmregnetÅrsinntekt
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.*
