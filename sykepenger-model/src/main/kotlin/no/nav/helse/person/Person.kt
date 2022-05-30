@@ -289,7 +289,7 @@ class Person private constructor(
         hendelse.kontekst(this)
         finnArbeidsgiver(hendelse).håndter(hendelse)
 
-        if (Toggle.NyRevurdering.disabled && hendelse.hasErrorsOrWorse()) {
+        if (hendelse.hasErrorsOrWorse()) {
             observers.forEach { it.revurderingAvvist(hendelse.hendelseskontekst(), hendelse.tilRevurderingAvvistEvent()) }
         }
     }

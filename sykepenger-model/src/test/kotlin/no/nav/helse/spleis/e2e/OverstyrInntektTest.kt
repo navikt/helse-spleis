@@ -100,7 +100,7 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `avviser revurdering av inntekt for saker med flere arbeidsgivere`() {
+    fun `avviser overstyring av inntekt for saker med flere arbeidsgivere`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a2)
 
@@ -136,7 +136,7 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `avviser revurdering av inntekt for saker med 1 arbeidsgiver og ghost`() {
+    fun `avviser overstyring av inntekt for saker med 1 arbeidsgiver og ghost`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(

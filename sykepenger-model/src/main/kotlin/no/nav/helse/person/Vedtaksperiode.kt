@@ -1161,7 +1161,14 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {
-            vedtaksperiode.person.overstyrUtkastRevurdering(hendelse)
+            if (Toggle.NyRevurdering.disabled) return vedtaksperiode.person.overstyrUtkastRevurdering(hendelse)
+            vedtaksperiode.person.nyInntekt(hendelse)
+            vedtaksperiode.person.vilkårsprøvEtterNyInformasjonFraSaksbehandler(
+                hendelse,
+                vedtaksperiode.skjæringstidspunkt,
+                vedtaksperiode.jurist()
+            )
+            vedtaksperiode.person.startRevurdering(vedtaksperiode, hendelse)
         }
 
         override fun revurder(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {
