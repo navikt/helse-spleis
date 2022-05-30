@@ -16,7 +16,6 @@ import no.nav.helse.person.Sammenligningsgrunnlag
 import no.nav.helse.person.Sykepengegrunnlag
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
-import no.nav.helse.somFødselsnummer
 import org.slf4j.LoggerFactory
 
 class Vilkårsgrunnlag(
@@ -58,13 +57,6 @@ class Vilkårsgrunnlag(
         )
         val opptjeningvurderingOk = opptjening.valider(this)
         val medlemskapsvurderingOk = medlemskapsvurdering.valider(this)
-        val minimumInntektvurderingOk = validerMinimumInntekt(
-            this,
-            fødselsnummer.somFødselsnummer(),
-            grunnlagForSykepengegrunnlag,
-            subsumsjonObserver
-        )
-
         grunnlagsdata = VilkårsgrunnlagHistorikk.Grunnlagsdata(
             skjæringstidspunkt = skjæringstidspunkt,
             sykepengegrunnlag = grunnlagForSykepengegrunnlag,
@@ -72,8 +64,7 @@ class Vilkårsgrunnlag(
             avviksprosent = inntektsvurdering.avviksprosent(),
             opptjening = opptjening,
             medlemskapstatus = medlemskapsvurdering.medlemskapstatus,
-            harMinimumInntekt = minimumInntektvurderingOk,
-            vurdertOk = sykepengegrunnlagOk && inntektsvurderingOk && opptjeningvurderingOk && medlemskapsvurderingOk && minimumInntektvurderingOk,
+            vurdertOk = sykepengegrunnlagOk && inntektsvurderingOk && opptjeningvurderingOk && medlemskapsvurderingOk,
             meldingsreferanseId = meldingsreferanseId(),
             vilkårsgrunnlagId = UUID.randomUUID()
         )

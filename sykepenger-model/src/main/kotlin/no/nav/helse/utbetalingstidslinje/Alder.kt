@@ -5,7 +5,6 @@ import java.time.DayOfWeek.SUNDAY
 import java.time.LocalDate
 import java.time.Year
 import java.time.temporal.ChronoUnit.YEARS
-import no.nav.helse.Grunnbeløp
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
@@ -40,8 +39,6 @@ internal class Alder(private val fødselsdato: LocalDate) {
     internal fun alderPåDato(dato: LocalDate) = YEARS.between(fødselsdato, dato).toInt()
 
     private fun alderVedSluttenAvÅret(year: Year) = YEARS.between(Year.from(fødselsdato), year).toInt()
-
-    internal fun minimumInntekt(dato: LocalDate) = (if (forhøyetInntektskrav(dato)) Grunnbeløp.`2G` else Grunnbeløp.halvG).minsteinntekt(dato)
 
     // Forhøyet inntektskrav gjelder fra dagen _etter_ 67-årsdagen - se § 8-51 andre ledd der det spesifiseres _mellom_.
     internal fun forhøyetInntektskrav(dato: LocalDate) = dato > forhøyetInntektskravAlder

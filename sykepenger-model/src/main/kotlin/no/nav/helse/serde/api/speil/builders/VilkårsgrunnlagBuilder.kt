@@ -41,6 +41,7 @@ internal class IInnslag(
 internal class ISykepengegrunnlag(
     val inntekterPerArbeidsgiver: List<IArbeidsgiverinntekt>,
     val sykepengegrunnlag: Double,
+    val oppfyllerMinsteinntektskrav: Boolean,
     val maksUtbetalingPerDag: Double,
     val omregnetÅrsinntekt: Double
 )
@@ -170,14 +171,12 @@ internal class VilkårsgrunnlagBuilder(
             sammenligningsgrunnlag: Inntekt,
             avviksprosent: Prosent?,
             opptjening: Opptjening,
-            harMinimumInntekt: Boolean?,
             vurdertOk: Boolean,
             meldingsreferanseId: UUID?,
             vilkårsgrunnlagId: UUID,
             medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus
         ) {
             val compositeSykepengegrunnlag = SykepengegrunnlagBuilder(sykepengegrunnlag, sammenligningsgrunnlagBuilder, skjæringstidspunkt, inntektshistorikkForAordningenBuilder).build()
-            val minimumInntekt = InntektBuilder(person.minimumInntekt(skjæringstidspunkt)).build()
             val grunnbeløp = InntektBuilder(Grunnbeløp.`1G`.beløp(skjæringstidspunkt)).build()
             val oppfyllerKravOmMedlemskap = when (medlemskapstatus) {
                 Medlemskapsvurdering.Medlemskapstatus.Ja -> true
@@ -196,7 +195,7 @@ internal class VilkårsgrunnlagBuilder(
                     grunnbeløp = grunnbeløp.årlig.toInt(),
                     meldingsreferanseId = meldingsreferanseId,
                     antallOpptjeningsdagerErMinst = opptjening.opptjeningsdager(),
-                    oppfyllerKravOmMinstelønn = compositeSykepengegrunnlag.sykepengegrunnlag > minimumInntekt.årlig,
+                    oppfyllerKravOmMinstelønn = compositeSykepengegrunnlag.oppfyllerMinsteinntektskrav,
                     oppfyllerKravOmOpptjening = opptjening.erOppfylt(),
                     oppfyllerKravOmMedlemskap = oppfyllerKravOmMedlemskap
                 )
@@ -232,6 +231,7 @@ internal class VilkårsgrunnlagBuilder(
             private lateinit var sykepengegrunnlag: IInntekt
             private var omregnetÅrsinntekt by Delegates.notNull<Double>()
             private lateinit var deaktiverteArbeidsforhold: List<String>
+            private var oppfyllerMinsteinntektskrav by Delegates.notNull<Boolean>()
 
             init {
                 sykepengegrunnlag.accept(this)
@@ -240,6 +240,7 @@ internal class VilkårsgrunnlagBuilder(
             fun build() = ISykepengegrunnlag(
                 inntekterPerArbeidsgiver = inntekterPerArbeidsgiver.toList() + sammenligningsgrunnlagForArbeidsgivereUtenSykepengegrunnlag(),
                 sykepengegrunnlag = sykepengegrunnlag.årlig,
+                oppfyllerMinsteinntektskrav = oppfyllerMinsteinntektskrav,
                 maksUtbetalingPerDag = sykepengegrunnlag.daglig,
                 omregnetÅrsinntekt = omregnetÅrsinntekt
             )
@@ -270,6 +271,7 @@ internal class VilkårsgrunnlagBuilder(
                 oppfyllerMinsteinntektskrav: Boolean
             ) {
                 this.sykepengegrunnlag = InntektBuilder(sykepengegrunnlag).build()
+                this.oppfyllerMinsteinntektskrav = oppfyllerMinsteinntektskrav
                 this.omregnetÅrsinntekt = InntektBuilder(grunnlagForSykepengegrunnlag).build().årlig
                 this.deaktiverteArbeidsforhold = deaktiverteArbeidsforhold
             }

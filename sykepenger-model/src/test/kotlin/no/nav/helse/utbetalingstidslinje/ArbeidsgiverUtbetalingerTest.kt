@@ -94,7 +94,6 @@ internal class ArbeidsgiverUtbetalingerTest {
             avviksprosent = Prosent.prosent(0.0),
             opptjening = Opptjening.opptjening(emptyList(), 1.januar, MaskinellJurist()),
             medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
-            harMinimumInntekt = false,
             vurdertOk = false,
             meldingsreferanseId = UUID.randomUUID(),
             vilkårsgrunnlagId = UUID.randomUUID()
@@ -340,7 +339,6 @@ internal class ArbeidsgiverUtbetalingerTest {
                     ))
                 ), 1.januar, MaskinellJurist()),
                 medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
-                harMinimumInntekt = true,
                 vurdertOk = true,
                 meldingsreferanseId = UUID.randomUUID(),
                 vilkårsgrunnlagId = UUID.randomUUID()

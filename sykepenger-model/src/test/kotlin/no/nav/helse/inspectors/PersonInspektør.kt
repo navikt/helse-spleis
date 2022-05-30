@@ -1,14 +1,22 @@
 package no.nav.helse.inspectors
 
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.Fødselsnummer
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.person.*
+import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.Arbeidsgiver
+import no.nav.helse.person.IAktivitetslogg
+import no.nav.helse.person.Opptjening
+import no.nav.helse.person.Person
+import no.nav.helse.person.PersonVisitor
+import no.nav.helse.person.Sykepengegrunnlag
+import no.nav.helse.person.Vedtaksperiode
+import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosent
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
 
 internal val Person.inspektør get() = PersonInspektør(this)
 internal val Person.personLogg get() = inspektør.aktivitetslogg
@@ -58,7 +66,6 @@ internal class PersonInspektør(person: Person): PersonVisitor {
         sammenligningsgrunnlag: Inntekt,
         avviksprosent: Prosent?,
         opptjening: Opptjening,
-        harMinimumInntekt: Boolean?,
         vurdertOk: Boolean,
         meldingsreferanseId: UUID?,
         vilkårsgrunnlagId: UUID,

@@ -55,7 +55,6 @@ internal class VilkårsgrunnlagElementTest {
             avviksprosent = avviksprosent,
             opptjening = Opptjening.opptjening(emptyList(), 1.januar, MaskinellJurist()),
             medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
-            harMinimumInntekt = true,
             vurdertOk = true,
             meldingsreferanseId = UUID.randomUUID(),
             vilkårsgrunnlagId = UUID.randomUUID()

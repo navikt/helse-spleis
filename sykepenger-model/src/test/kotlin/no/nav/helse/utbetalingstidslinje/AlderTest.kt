@@ -1,17 +1,26 @@
 package no.nav.helse.utbetalingstidslinje
 
-import no.nav.helse.*
+import java.time.LocalDate
+import no.nav.helse.desember
+import no.nav.helse.februar
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.SubsumsjonInspektør
+import no.nav.helse.januar
+import no.nav.helse.mai
+import no.nav.helse.mars
+import no.nav.helse.november
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Ledd.LEDD_1
 import no.nav.helse.person.Paragraf.PARAGRAF_8_3
 import no.nav.helse.person.Punktum.Companion.punktum
 import no.nav.helse.person.etterlevelse.MaskinellJurist
-import no.nav.helse.økonomi.Inntekt.Companion.årlig
-import org.junit.jupiter.api.Assertions.*
+import no.nav.helse.plus
+import no.nav.helse.somFødselsnummer
+import no.nav.helse.ukedager
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
 
 internal class AlderTest {
 
@@ -89,27 +98,6 @@ internal class AlderTest {
     @Test
     fun `får lov å søke dersom personen er minst 18 år`() {
         assertFalse(FYLLER_18_ÅR_2_NOVEMBER_2018.forUngForÅSøke(2.november))
-    }
-    @Test
-    fun `Minimum inntekt er en halv g hvis du akkurat har fylt 67`() {
-        assertEquals(67, FYLLER_67_ÅR_1_JANUAR_2018.alderPåDato(1.januar))
-        assertEquals(Grunnbeløp.halvG.beløp(1.januar), FYLLER_67_ÅR_1_JANUAR_2018.minimumInntekt(1.januar))
-        assertEquals((93634 / 2).årlig, FYLLER_67_ÅR_1_JANUAR_2018.minimumInntekt(1.januar))
-    }
-
-    @Test
-    fun `Minimum inntekt er 2g hvis du er en dag over 67`() {
-        assertEquals(67, FYLLER_67_ÅR_1_JANUAR_2018.alderPåDato(2.januar))
-        assertEquals(Grunnbeløp.`2G`.beløp(2.januar), FYLLER_67_ÅR_1_JANUAR_2018.minimumInntekt(2.januar))
-        assertEquals((93634 * 2).årlig, FYLLER_67_ÅR_1_JANUAR_2018.minimumInntekt(2.januar))
-    }
-
-    @Test
-    fun `Minimum inntekt er 2g hvis du er 69`() {
-        val FYLLER_69_1_JANUAR_2018 = "01014949945".somFødselsnummer().alder()
-        assertEquals(69, FYLLER_69_1_JANUAR_2018.alderPåDato(1.januar))
-        assertEquals(Grunnbeløp.`2G`.beløp(1.januar), FYLLER_69_1_JANUAR_2018.minimumInntekt(1.januar))
-        assertEquals((93634 * 2).årlig, FYLLER_69_1_JANUAR_2018.minimumInntekt(1.januar))
     }
 
     @Test

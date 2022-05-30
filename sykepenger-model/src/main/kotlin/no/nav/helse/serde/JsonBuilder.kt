@@ -804,7 +804,6 @@ internal class JsonBuilder : AbstractBuilder() {
             sammenligningsgrunnlag: Inntekt,
             avviksprosent: Prosent?,
             opptjening: Opptjening,
-            harMinimumInntekt: Boolean?,
             vurdertOk: Boolean,
             meldingsreferanseId: UUID?,
             vilkårsgrunnlagId: UUID,
@@ -904,7 +903,6 @@ internal class JsonBuilder : AbstractBuilder() {
             sammenligningsgrunnlag: Inntekt,
             avviksprosent: Prosent?,
             medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
-            harMinimumInntekt: Boolean?,
             vurdertOk: Boolean,
             meldingsreferanseId: UUID?,
             vilkårsgrunnlagId: UUID
@@ -922,7 +920,6 @@ internal class JsonBuilder : AbstractBuilder() {
                         Medlemskapsvurdering.Medlemskapstatus.Nei -> JsonMedlemskapstatus.NEI
                         Medlemskapsvurdering.Medlemskapstatus.VetIkke -> JsonMedlemskapstatus.VET_IKKE
                     },
-                    "harMinimumInntekt" to harMinimumInntekt,
                     "vurdertOk" to vurdertOk,
                     "meldingsreferanseId" to meldingsreferanseId,
                     "vilkårsgrunnlagId" to vilkårsgrunnlagId
@@ -949,7 +946,6 @@ internal class JsonBuilder : AbstractBuilder() {
             minsteinntekt: Inntekt,
             oppfyllerMinsteinntektskrav: Boolean
         ) {
-
             this.sykepengegrunnlag.putAll(
                 mutableMapOf(
                     "sykepengegrunnlag" to sykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },

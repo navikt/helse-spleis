@@ -254,7 +254,6 @@ internal data class PersonData(
         private val avviksprosent: Double?,
         private val opptjening: OpptjeningData?,
         private val medlemskapstatus: JsonMedlemskapstatus?,
-        private val harMinimumInntekt: Boolean?,
         private val vurdertOk: Boolean?,
         private val meldingsreferanseId: UUID?,
         private val vilkårsgrunnlagId: UUID
@@ -271,7 +270,6 @@ internal data class PersonData(
                     JsonMedlemskapstatus.NEI -> Medlemskapsvurdering.Medlemskapstatus.Nei
                     JsonMedlemskapstatus.VET_IKKE -> Medlemskapsvurdering.Medlemskapstatus.VetIkke
                 },
-                harMinimumInntekt = harMinimumInntekt,
                 vurdertOk = vurdertOk!!,
                 meldingsreferanseId = meldingsreferanseId,
                 vilkårsgrunnlagId = vilkårsgrunnlagId

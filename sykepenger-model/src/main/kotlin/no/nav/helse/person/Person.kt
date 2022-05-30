@@ -32,7 +32,6 @@ import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.UtbetalingOverført
 import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
-import no.nav.helse.hendelser.validerMinimumInntekt
 import no.nav.helse.person.Arbeidsgiver.Companion.beregnFeriepengerForAlleArbeidsgivere
 import no.nav.helse.person.Arbeidsgiver.Companion.beregnOpptjening
 import no.nav.helse.person.Arbeidsgiver.Companion.beregnSykepengegrunnlag
@@ -69,7 +68,6 @@ import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverperiodeBuilderBuilder
 import no.nav.helse.utbetalingstidslinje.AvvisInngangsvilkårfilter
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
-import no.nav.helse.økonomi.Inntekt
 import org.slf4j.LoggerFactory
 import kotlin.math.roundToInt
 
@@ -676,12 +674,6 @@ class Person private constructor(
 
     private fun arbeidsgivereMedSykdom() = arbeidsgivere.filter(Arbeidsgiver::harSykdom)
 
-    internal fun minimumInntekt(skjæringstidspunkt: LocalDate): Inntekt = fødselsnummer.alder().minimumInntekt(skjæringstidspunkt)
-
-    internal fun oppdaterManglendeMinimumInntekt(vilkårsgrunnlag: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement, subsumsjonObserver: SubsumsjonObserver) {
-        vilkårsgrunnlag.oppdaterManglendeMinimumInntekt(vilkårsgrunnlagHistorikk, fødselsnummer.alder(), subsumsjonObserver)
-    }
-
     internal fun kunOvergangFraInfotrygd(vedtaksperiode: Vedtaksperiode) =
         Arbeidsgiver.kunOvergangFraInfotrygd(arbeidsgivere, vedtaksperiode)
 
@@ -838,19 +830,13 @@ class Person private constructor(
 
         when (val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt)) {
             is VilkårsgrunnlagHistorikk.Grunnlagsdata -> {
-                val harMinimumInntekt = validerMinimumInntekt(
-                    hendelse,
-                    fødselsnummer,
-                    sykepengegrunnlag,
-                    subsumsjonObserver
-                )
                 val grunnlagselement = grunnlag.kopierGrunnlagsdataMed(
+                    hendelse = hendelse,
                     sykepengegrunnlag = sykepengegrunnlag,
                     sammenligningsgrunnlag = sammenligningsgrunnlag,
                     sammenligningsgrunnlagVurdering = harAkseptabeltAvvik,
                     avviksprosent = avviksprosent,
                     nyOpptjening = opptjening,
-                    minimumInntektVurdering = harMinimumInntekt,
                     meldingsreferanseId = hendelse.meldingsreferanseId()
                 )
                 hendelse.kontekst(grunnlagselement)

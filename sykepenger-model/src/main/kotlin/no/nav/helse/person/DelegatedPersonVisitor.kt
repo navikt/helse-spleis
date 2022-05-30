@@ -65,7 +65,6 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         sammenligningsgrunnlag: Inntekt,
         avviksprosent: Prosent?,
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
-        harMinimumInntekt: Boolean?,
         vurdertOk: Boolean,
         meldingsreferanseId: UUID?,
         vilkårsgrunnlagId: UUID
@@ -77,7 +76,6 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
             sammenligningsgrunnlag,
             avviksprosent,
             medlemskapstatus,
-            harMinimumInntekt,
             vurdertOk,
             meldingsreferanseId,
             vilkårsgrunnlagId
@@ -280,7 +278,6 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         sammenligningsgrunnlag: Inntekt,
         avviksprosent: Prosent?,
         opptjening: Opptjening,
-        harMinimumInntekt: Boolean?,
         vurdertOk: Boolean,
         meldingsreferanseId: UUID?,
         vilkårsgrunnlagId: UUID,
@@ -293,7 +290,6 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
             sammenligningsgrunnlag,
             avviksprosent,
             opptjening,
-            harMinimumInntekt,
             vurdertOk,
             meldingsreferanseId,
             vilkårsgrunnlagId,

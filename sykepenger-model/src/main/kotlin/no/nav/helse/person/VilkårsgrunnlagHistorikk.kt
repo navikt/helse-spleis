@@ -5,13 +5,10 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Medlemskapsvurdering
-import no.nav.helse.person.etterlevelse.SubsumsjonObserver
-import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosent
-import org.slf4j.LoggerFactory
 
 internal class VilkårsgrunnlagHistorikk private constructor(private val historikk: MutableList<Innslag>) {
 
@@ -31,10 +28,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         val nytt = Innslag(siste, grunnlagselement.toList())
         if (nytt == siste) return
         historikk.add(0, nytt)
-    }
-
-    private fun oppdaterMinimumInntektsvurdering(grunnlagsdata: Grunnlagsdata, oppfyllerKravTilMinimumInntekt: Boolean) {
-        lagre(grunnlagsdata.kopierMedMinimumInntektsvurdering(oppfyllerKravTilMinimumInntekt))
     }
 
     internal fun sisteId() = sisteInnlag()!!.id
@@ -128,7 +121,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         fun grunnlagsBegrensning(): Sykepengegrunnlag.Begrensning
         fun grunnlagForSykepengegrunnlag(): Inntekt // TODO: fjerne denne
         fun gjelderFlereArbeidsgivere(): Boolean
-        fun oppdaterManglendeMinimumInntekt(vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk, alder: Alder, subsumsjonObserver: SubsumsjonObserver) {}
         fun sjekkAvviksprosent(aktivitetslogg: IAktivitetslogg): Boolean = true
         fun avvis(tidslinjer: List<Utbetalingstidslinje>, skjæringstidspunkt: LocalDate) {}
     }
@@ -140,15 +132,10 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         private val avviksprosent: Prosent?,
         internal val opptjening: Opptjening,
         private val medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
-        private val harMinimumInntekt: Boolean?,
         private val vurdertOk: Boolean,
         private val meldingsreferanseId: UUID?,
         private val vilkårsgrunnlagId: UUID
     ) : VilkårsgrunnlagElement {
-        private companion object {
-            private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
-        }
-
         override fun add(innslag: Innslag) {
             innslag.add(skjæringstidspunkt, this)
         }
@@ -160,13 +147,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             return Inntektsvurdering.sjekkAvvik(avviksprosent, aktivitetslogg, IAktivitetslogg::error)
         }
 
-        override fun oppdaterManglendeMinimumInntekt(vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk, alder: Alder, subsumsjonObserver: SubsumsjonObserver) {
-            if (harMinimumInntekt != null) return
-            sikkerLogg.info("Vi antar at det ikke finnes forlengelser til perioder som har harMinimumInntekt = null lenger")
-            val oppfyltKravTilMinimumInntekt = sykepengegrunnlag.oppfyllerKravTilMinimumInntekt(alder, subsumsjonObserver)
-            vilkårsgrunnlagHistorikk.oppdaterMinimumInntektsvurdering(this, oppfyltKravTilMinimumInntekt)
-        }
-
         override fun accept(vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor) {
             vilkårsgrunnlagHistorikkVisitor.preVisitGrunnlagsdata(
                 skjæringstidspunkt,
@@ -175,7 +155,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                 sammenligningsgrunnlag.sammenligningsgrunnlag,
                 avviksprosent,
                 opptjening,
-                harMinimumInntekt,
                 vurdertOk,
                 meldingsreferanseId,
                 vilkårsgrunnlagId,
@@ -191,7 +170,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                 sammenligningsgrunnlag.sammenligningsgrunnlag,
                 avviksprosent,
                 medlemskapstatus,
-                harMinimumInntekt,
                 vurdertOk,
                 meldingsreferanseId,
                 vilkårsgrunnlagId
@@ -222,41 +200,28 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             )
         )
 
-        internal fun kopierMedMinimumInntektsvurdering(minimumInntektVurdering: Boolean) = Grunnlagsdata(
-            skjæringstidspunkt = skjæringstidspunkt,
-            sykepengegrunnlag = sykepengegrunnlag,
-            sammenligningsgrunnlag = sammenligningsgrunnlag,
-            avviksprosent = avviksprosent,
-            opptjening = opptjening, // TODO: Må sjekkes på nytt
-            medlemskapstatus = medlemskapstatus,
-            harMinimumInntekt = minimumInntektVurdering,
-            vurdertOk = vurdertOk && minimumInntektVurdering,
-            meldingsreferanseId = meldingsreferanseId,
-            vilkårsgrunnlagId = UUID.randomUUID()
-        ).also {
-            sikkerLogg.info("Oppretter nytt Grunnlagsdata med harMinimumInntekt=$minimumInntektVurdering")
-        }
-
         internal fun kopierGrunnlagsdataMed(
+            hendelse: PersonHendelse,
             sykepengegrunnlag: Sykepengegrunnlag,
             sammenligningsgrunnlag: Sammenligningsgrunnlag,
             sammenligningsgrunnlagVurdering: Boolean,
             avviksprosent: Prosent,
             nyOpptjening: Opptjening,
-            minimumInntektVurdering: Boolean,
             meldingsreferanseId: UUID
-        ) = Grunnlagsdata(
-            skjæringstidspunkt = skjæringstidspunkt,
-            sykepengegrunnlag = sykepengegrunnlag,
-            sammenligningsgrunnlag = sammenligningsgrunnlag,
-            avviksprosent = avviksprosent,
-            opptjening = nyOpptjening,
-            medlemskapstatus = medlemskapstatus,
-            harMinimumInntekt = minimumInntektVurdering,
-            vurdertOk = nyOpptjening.erOppfylt() && minimumInntektVurdering && sammenligningsgrunnlagVurdering,
-            meldingsreferanseId = meldingsreferanseId,
-            vilkårsgrunnlagId = UUID.randomUUID()
-        )
+        ): Grunnlagsdata {
+            val sykepengegrunnlagOk = sykepengegrunnlag.valider(hendelse)
+            return Grunnlagsdata(
+                skjæringstidspunkt = skjæringstidspunkt,
+                sykepengegrunnlag = sykepengegrunnlag,
+                sammenligningsgrunnlag = sammenligningsgrunnlag,
+                avviksprosent = avviksprosent,
+                opptjening = nyOpptjening,
+                medlemskapstatus = medlemskapstatus,
+                vurdertOk = nyOpptjening.erOppfylt() && sykepengegrunnlagOk && sammenligningsgrunnlagVurdering,
+                meldingsreferanseId = meldingsreferanseId,
+                vilkårsgrunnlagId = UUID.randomUUID()
+            )
+        }
 
         fun harInntektFraAOrdningen(): Boolean = sykepengegrunnlag.inntektsopplysningPerArbeidsgiver().values
             .any { it is Inntektshistorikk.SkattComposite || it is Inntektshistorikk.IkkeRapportert }

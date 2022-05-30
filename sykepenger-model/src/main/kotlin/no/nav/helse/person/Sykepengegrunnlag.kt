@@ -50,6 +50,10 @@ internal class Sykepengegrunnlag(
                 skjæringstidspunkt = skjæringstidspunkt,
                 grunnlagForSykepengegrunnlag = grunnlagForSykepengegrunnlag
             )
+            if (alder.forhøyetInntektskrav(skjæringstidspunkt))
+                `§ 8-51 ledd 2`(oppfyllerMinsteinntektskrav, skjæringstidspunkt, alder.alderPåDato(skjæringstidspunkt), grunnlagForSykepengegrunnlag, minsteinntekt)
+            else
+                `§ 8-3 ledd 2 punktum 1`(oppfyllerMinsteinntektskrav, skjæringstidspunkt, grunnlagForSykepengegrunnlag, minsteinntekt)
         }
     }
 
@@ -83,7 +87,9 @@ internal class Sykepengegrunnlag(
 
     internal fun valider(aktivitetslogg: IAktivitetslogg): Boolean {
         arbeidsgiverInntektsopplysninger.valider(aktivitetslogg)
-        return !aktivitetslogg.hasErrorsOrWorse()
+        if (oppfyllerMinsteinntektskrav) aktivitetslogg.info("Krav til minste sykepengegrunnlag er oppfylt")
+        else aktivitetslogg.warn("Perioden er avslått på grunn av at inntekt er under krav til minste sykepengegrunnlag")
+        return oppfyllerMinsteinntektskrav && !aktivitetslogg.hasErrorsOrWorse()
     }
 
     internal fun justerGrunnbeløp() =
@@ -95,7 +101,6 @@ internal class Sykepengegrunnlag(
             vurdertInfotrygd = vurdertInfotrygd,
             overstyrtGrunnlagForSykepengegrunnlag = grunnlagForSykepengegrunnlag
         )
-
     internal fun accept(visitor: SykepengegrunnlagVisitor) {
         visitor.preVisitSykepengegrunnlag(
             this,
@@ -127,23 +132,13 @@ internal class Sykepengegrunnlag(
             oppfyllerMinsteinntektskrav
         )
     }
+
     internal fun avviksprosent(sammenligningsgrunnlag: Inntekt, subsumsjonObserver: SubsumsjonObserver) = grunnlagForSykepengegrunnlag.avviksprosent(sammenligningsgrunnlag).also { avvik ->
         subsumsjonObserver.`§ 8-30 ledd 2 punktum 1`(Prosent.MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT, grunnlagForSykepengegrunnlag, sammenligningsgrunnlag, avvik)
     }
 
     internal fun inntektsopplysningPerArbeidsgiver(): Map<String, Inntektshistorikk.Inntektsopplysning> =
         arbeidsgiverInntektsopplysninger.inntektsopplysningPerArbeidsgiver()
-
-    internal fun oppfyllerKravTilMinimumInntekt(alder: Alder, subsumsjonObserver: SubsumsjonObserver): Boolean {
-        val minimumInntekt = alder.minimumInntekt(skjæringstidspunkt)
-        val oppfyllerKrav = grunnlagForSykepengegrunnlag >= minimumInntekt
-        val alderPåSkjæringstidspunkt = alder.alderPåDato(skjæringstidspunkt)
-        if (alder.forhøyetInntektskrav(skjæringstidspunkt))
-            subsumsjonObserver.`§ 8-51 ledd 2`(oppfyllerKrav, skjæringstidspunkt, alderPåSkjæringstidspunkt, grunnlagForSykepengegrunnlag, minimumInntekt)
-        else
-            subsumsjonObserver.`§ 8-3 ledd 2 punktum 1`(oppfyllerKrav, skjæringstidspunkt, grunnlagForSykepengegrunnlag, minimumInntekt)
-        return oppfyllerKrav
-    }
 
     override fun equals(other: Any?): Boolean {
         if (other !is Sykepengegrunnlag) return false
