@@ -1969,14 +1969,13 @@ internal class Vedtaksperiode private constructor(
         if (utbetalinger.utbetales()) return
         if (pågående?.utbetalinger?.utbetales() == true || overstyrt.arbeidsgiver != this.arbeidsgiver) return tilstand(hendelse, AvventerRevurdering)
         if (skjæringstidspunkt != overstyrt.skjæringstidspunkt) return tilstand(hendelse, AvventerRevurdering)
-        if (utbetalinger.hørerIkkeSammenMed(overstyrt.utbetalinger))
-            return tilstand(hendelse, AvventerRevurdering)
+        if (utbetalinger.hørerIkkeSammenMed(overstyrt.utbetalinger)) return tilstand(hendelse, AvventerRevurdering)
         tilstand(hendelse, AvventerGjennomførtRevurdering)
     }
 
     // ny revurderingsflyt
     private fun startRevurdering(hendelse: IAktivitetslogg, overstyrt: Vedtaksperiode, pågående: Vedtaksperiode?) {
-        if (overstyrt > this) return
+        if (overstyrt etter this) return
         kontekst(hendelse)
         tilstand.startRevurdering(this, hendelse, overstyrt, pågående)
     }
@@ -2661,8 +2660,8 @@ internal class Vedtaksperiode private constructor(
 
             val skjæringstidspunkt = overstyrt.skjæringstidspunkt
             val siste = this.getValue(overstyrt.arbeidsgiver).lastOrNull {
-                    it.tilstand == AvventerGjennomførtRevurdering && skjæringstidspunkt == it.skjæringstidspunkt
-                } ?: return
+                it.tilstand == AvventerGjennomførtRevurdering && skjæringstidspunkt == it.skjæringstidspunkt
+            } ?: return
 
             siste.kontekst(hendelse)
             siste.tilstand(hendelse, AvventerHistorikkRevurdering)
