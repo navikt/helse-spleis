@@ -475,6 +475,12 @@ internal class Vedtaksperiode private constructor(
         tilstand.revurder(this, hendelse)
     }
 
+    private fun revurderInntekt(hendelse: OverstyrInntekt) {
+        person.nyInntekt(hendelse)
+        person.vilkårsprøvEtterNyInformasjonFraSaksbehandler(hendelse, skjæringstidspunkt, jurist())
+        person.startRevurdering(this, hendelse)
+    }
+
     internal fun periode() = periode
 
     private fun kontekst(hendelse: IAktivitetslogg) {
@@ -1162,13 +1168,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {
             if (Toggle.NyRevurdering.disabled) return vedtaksperiode.person.overstyrUtkastRevurdering(hendelse)
-            vedtaksperiode.person.nyInntekt(hendelse)
-            vedtaksperiode.person.vilkårsprøvEtterNyInformasjonFraSaksbehandler(
-                hendelse,
-                vedtaksperiode.skjæringstidspunkt,
-                vedtaksperiode.jurist()
-            )
-            vedtaksperiode.person.startRevurdering(vedtaksperiode, hendelse)
+            vedtaksperiode.revurderInntekt(hendelse)
         }
 
         override fun revurder(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {
@@ -1228,6 +1228,11 @@ internal class Vedtaksperiode private constructor(
                     )
                 }
             }
+        }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {
+            if (Toggle.NyRevurdering.disabled) return super.håndter(vedtaksperiode, hendelse)
+            vedtaksperiode.revurderInntekt(hendelse)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
@@ -2009,13 +2014,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {
             if (Toggle.NyRevurdering.disabled) return vedtaksperiode.person.overstyrUtkastRevurdering(hendelse)
-            vedtaksperiode.person.nyInntekt(hendelse)
-            vedtaksperiode.person.vilkårsprøvEtterNyInformasjonFraSaksbehandler(
-                hendelse,
-                vedtaksperiode.skjæringstidspunkt,
-                vedtaksperiode.jurist()
-            )
-            vedtaksperiode.person.startRevurdering(vedtaksperiode, hendelse)
+            vedtaksperiode.revurderInntekt(hendelse)
         }
 
         override fun revurder(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {
