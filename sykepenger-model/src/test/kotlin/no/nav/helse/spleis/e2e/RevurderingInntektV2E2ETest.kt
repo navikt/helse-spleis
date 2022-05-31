@@ -1,33 +1,34 @@
 package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate
+import java.util.UUID
 import no.nav.helse.EnableToggle
 import no.nav.helse.Toggle
+import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Inntektsvurdering
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
-import no.nav.helse.person.TilstandType.AVSLUTTET
-import no.nav.helse.person.TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
-import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
-import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
-import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
-import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
-import no.nav.helse.person.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.Sykedag
 import no.nav.helse.utbetalingslinjer.Endringskode
+import no.nav.helse.utbetalingslinjer.Oppdrag
+import no.nav.helse.utbetalingslinjer.Oppdragstatus
+import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.WARN_FORLENGER_OPPHØRT_OPPDRAG
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
@@ -603,6 +604,179 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         håndterOverstyrInntekt(32000.månedlig, a1, 1.januar)
         assertEquals(1, observatør.avvisteRevurderinger.size)
         assertError("Forespurt overstyring av inntekt hvor personen har flere arbeidsgivere (inkl. ghosts)")
+    }
+
+    @Test
+    fun `revurdering av inntekt delegeres til den første perioden som har en utbetalingstidslinje - arbeidsgiversøknad først`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 15.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 15.januar, 100.prosent))
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+        håndterSykmelding(Sykmeldingsperiode(16.januar, 15.februar, 100.prosent))
+        håndterSøknad(Sykdom(16.januar, 15.februar, 100.prosent))
+        håndterInntektsmelding(
+            listOf(Periode(1.januar, 16.januar))
+        )
+        håndterYtelser(2.vedtaksperiode)
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt()
+
+        nullstillTilstandsendringer()
+        håndterOverstyrInntekt(skjæringstidspunkt = 1.januar, inntekt = 30000.månedlig)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt()
+
+        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(
+            2.vedtaksperiode,
+            AVSLUTTET,
+            AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_SIMULERING_REVURDERING,
+            AVVENTER_GODKJENNING_REVURDERING,
+            TIL_UTBETALING,
+            AVSLUTTET
+        )
+        assertDiff(-1012)
+    }
+
+    @Test
+    fun `revurdering av inntekt delegeres til den første perioden som har en utbetalingstidslinje - periode uten utbetaling først`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Søknad.Søknadsperiode.Ferie(1.januar, 31.januar))
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)))
+
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+        håndterYtelser(2.vedtaksperiode)
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt()
+
+        nullstillTilstandsendringer()
+
+        håndterOverstyrInntekt(skjæringstidspunkt = 1.januar, inntekt = 30000.månedlig)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt()
+
+        assertEquals(2, inspektør.utbetalinger.size)
+        assertEquals(0, inspektør.utbetalinger(1.vedtaksperiode).size)
+        assertEquals(2, inspektør.utbetalinger(2.vedtaksperiode).size)
+        assertEquals(Utbetaling.Utbetalt, inspektør.utbetalingtilstand(0))
+        assertEquals(Utbetaling.Utbetalt, inspektør.utbetalingtilstand(1))
+        assertTilstander(
+            1.vedtaksperiode,
+            AVSLUTTET_UTEN_UTBETALING
+        )
+        assertTilstander(
+            2.vedtaksperiode,
+            AVSLUTTET,
+            AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_SIMULERING_REVURDERING,
+            AVVENTER_GODKJENNING_REVURDERING,
+            TIL_UTBETALING,
+            AVSLUTTET
+        )
+        assertDiff(-920)
+    }
+
+    @Test
+    fun `Perioder med aktuelt skjæringstidspunkt skal være stemplet med hendelseId`() {
+        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(1.mars, 31.mars)
+        forlengVedtak(1.april, 30.april)
+        val overstyrInntektHendelseId = UUID.randomUUID()
+        håndterOverstyrInntekt(skjæringstidspunkt = 1.mars, meldingsreferanseId = overstyrInntektHendelseId)
+
+        assertHarIkkeHendelseIder(1.vedtaksperiode, overstyrInntektHendelseId)
+        assertHarHendelseIder(2.vedtaksperiode, overstyrInntektHendelseId)
+        assertHarHendelseIder(3.vedtaksperiode, overstyrInntektHendelseId)
+    }
+
+    @Test
+    fun `revurdere inntekt slik at det blir brukerutbetaling`() {
+        nyttVedtak(1.januar, 31.januar)
+        håndterInntektsmelding(
+            listOf(Periode(1.januar, 16.januar)), refusjon = Inntektsmelding.Refusjon(
+                INGEN,
+                null,
+                emptyList()
+            )
+        )
+        håndterOverstyrInntekt(inntekt = INNTEKT, skjæringstidspunkt = 1.januar)
+        håndterYtelser(1.vedtaksperiode)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
+        assertDiff(0)
+        assertTrue(inspektør.utbetaling(1).inspektør.personOppdrag.harUtbetalinger())
+        assertTrue(inspektør.utbetaling(1).inspektør.arbeidsgiverOppdrag.harUtbetalinger()) // opphører arbeidsgiveroppdraget
+        assertEquals(17.januar til 31.januar, Oppdrag.periode(inspektør.utbetaling(1).inspektør.personOppdrag))
+        assertEquals(17.januar, inspektør.utbetaling(1).arbeidsgiverOppdrag().first().inspektør.datoStatusFom)
+
+        assertEquals(15741, inspektør.utbetaling(1).personOppdrag().nettoBeløp())
+        assertEquals(-15741, inspektør.utbetaling(1).arbeidsgiverOppdrag().nettoBeløp())
+    }
+
+    @Test
+    fun `revurdere inntekt slik at det blir delvis refusjon`() {
+        nyttVedtak(1.januar, 31.januar)
+        håndterInntektsmelding(
+            listOf(Periode(1.januar, 16.januar)), refusjon = Inntektsmelding.Refusjon(
+                25000.månedlig,
+                null,
+                emptyList()
+            )
+        )
+        håndterOverstyrInntekt(inntekt = INNTEKT, skjæringstidspunkt = 1.januar)
+        håndterYtelser(1.vedtaksperiode)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
+        assertDiff(0)
+        assertTrue(inspektør.utbetaling(1).inspektør.personOppdrag.harUtbetalinger())
+        assertTrue(inspektør.utbetaling(1).inspektør.arbeidsgiverOppdrag.harUtbetalinger()) // opphører arbeidsgiveroppdraget
+        assertEquals(17.januar til 31.januar, Oppdrag.periode(inspektør.utbetaling(1).inspektør.personOppdrag))
+        assertEquals(17.januar til 31.januar, Oppdrag.periode(inspektør.utbetaling(1).inspektør.arbeidsgiverOppdrag))
+
+        assertEquals(3047, inspektør.utbetaling(1).personOppdrag().nettoBeløp())
+        assertEquals(-3047, inspektør.utbetaling(1).arbeidsgiverOppdrag().nettoBeløp())
+    }
+
+    @Test
+    fun `revurdere mens en periode er til utbetaling`() {
+        nyttVedtak(1.januar, 31.januar)
+        forlengTilGodkjentVedtak(1.februar, 28.februar)
+        nullstillTilstandsendringer()
+        håndterOverstyrInntekt(30000.månedlig, skjæringstidspunkt = 1.januar)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
+        assertTilstander(2.vedtaksperiode, TIL_UTBETALING)
+        håndterUtbetalt()
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING)
+        assertTilstander(
+            2.vedtaksperiode,
+            TIL_UTBETALING,
+            AVSLUTTET,
+            AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING
+        )
+    }
+
+    @Test
+    fun `revurdere mens en periode har feilet i utbetaling`() {
+        nyttVedtak(1.januar, 31.januar)
+        forlengTilGodkjentVedtak(1.februar, 28.februar)
+        nullstillTilstandsendringer()
+        håndterUtbetalt(status = Oppdragstatus.FEIL)
+        håndterOverstyrInntekt(30000.månedlig, skjæringstidspunkt = 1.januar)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
+        assertTilstander(2.vedtaksperiode, TIL_UTBETALING, UTBETALING_FEILET)
     }
 
 

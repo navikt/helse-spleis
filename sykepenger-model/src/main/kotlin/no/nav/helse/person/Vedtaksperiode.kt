@@ -2174,7 +2174,7 @@ internal class Vedtaksperiode private constructor(
             tidligere: Vedtaksperiode,
             hendelse: IAktivitetslogg
         ) {
-            vedtaksperiode.tilstand(hendelse, AvventerArbeidsgivereRevurdering)
+            if (Toggle.NyRevurdering.disabled) return vedtaksperiode.tilstand(hendelse, AvventerArbeidsgivereRevurdering)
         }
 
         override fun håndterTidligereTilstøtendeUferdigPeriode(
@@ -2182,7 +2182,7 @@ internal class Vedtaksperiode private constructor(
             tidligere: Vedtaksperiode,
             hendelse: IAktivitetslogg
         ) {
-            vedtaksperiode.tilstand(hendelse, AvventerArbeidsgivereRevurdering)
+            if (Toggle.NyRevurdering.disabled) return vedtaksperiode.tilstand(hendelse, AvventerArbeidsgivereRevurdering)
         }
 
         override fun håndter(
