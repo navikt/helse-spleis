@@ -150,6 +150,33 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `skal kunne overstyre inntekt i AvventerSimuleringRevurdering`() {
+        nyttVedtak(1.januar, 31.januar)
+        nullstillTilstandsendringer()
+
+        håndterOverstyrInntekt(inntekt = 20000.månedlig, skjæringstidspunkt = 1.januar)
+        håndterYtelser(1.vedtaksperiode)
+        håndterOverstyrInntekt(inntekt = 25000.månedlig, skjæringstidspunkt = 1.januar)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+
+        assertTilstander(1.vedtaksperiode,
+            AVSLUTTET,
+            AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_SIMULERING_REVURDERING,
+            AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_SIMULERING_REVURDERING,
+            AVVENTER_GODKJENNING_REVURDERING
+        )
+        assertDiff(-3047)
+
+        assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString().trim())
+        assertEquals("PPPPPPP PPPPPPP PPNNNHH NNNNNHH NNN", inspektør.sisteUtbetalingUtbetalingstidslinje().toString().trim())
+    }
+
+    @Test
     fun `skal kunne overstyre inntekt i utkast til revurdering ved revurdering av tidslinje`() {
         nyttVedtak(1.januar, 31.januar)
         forlengVedtak(1.februar, 28.februar)

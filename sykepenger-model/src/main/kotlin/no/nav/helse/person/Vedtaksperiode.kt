@@ -1790,6 +1790,11 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.tilstand(simulering, AvventerGodkjenningRevurdering)
         }
 
+        override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {
+            if (Toggle.NyRevurdering.disabled) return super.håndter(vedtaksperiode, hendelse)
+            vedtaksperiode.revurderInntekt(hendelse)
+        }
+
         override fun startRevurdering(
             vedtaksperiode: Vedtaksperiode,
             hendelse: IAktivitetslogg,
