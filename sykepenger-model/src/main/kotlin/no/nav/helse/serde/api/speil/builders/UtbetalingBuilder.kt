@@ -132,10 +132,9 @@ internal class VurderingBuilder(utbetaling: InternUtbetaling) : UtbetalingVisito
 
 // Besøker hele utbetaling-treet
 internal class OppdragBuilder(utbetaling: InternUtbetaling) : UtbetalingVisitor {
-    private val speilOppdrag: MutableMap<String, SpeilOppdrag>
+    private val speilOppdrag: MutableMap<String, SpeilOppdrag> = mutableMapOf()
 
     init {
-        speilOppdrag = mutableMapOf()
         utbetaling.accept(this)
     }
 

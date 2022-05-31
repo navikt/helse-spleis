@@ -14,7 +14,7 @@ internal class ArbeidsgiverBuilder(
     private val organisasjonsnummer: String
 ) : BuilderState() {
 
-    internal fun build(hendelser: List<HendelseDTO>, fødselsnummer: String, vilkårsgrunnlagHistorikk: IVilkårsgrunnlagHistorikk): ArbeidsgiverDTO {
+    internal fun build(hendelser: List<HendelseDTO>, fødselsnummer: String): ArbeidsgiverDTO {
         return ArbeidsgiverDTO(
             organisasjonsnummer = organisasjonsnummer,
             id = id,

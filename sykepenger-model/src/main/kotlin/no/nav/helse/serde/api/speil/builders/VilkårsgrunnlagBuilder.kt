@@ -49,8 +49,7 @@ internal class ISykepengegrunnlag(
 internal class IInntekt(
     val årlig: Double,
     val månedlig: Double,
-    val daglig: Double,
-    val dagligAvrundet: Int
+    val daglig: Double
 )
 
 internal interface IVilkårsgrunnlag {
@@ -114,8 +113,8 @@ internal class IInfotrygdGrunnlag(
 
 internal class InntektBuilder(private val inntekt: Inntekt) {
     internal fun build(): IInntekt {
-        return inntekt.reflection { årlig, månedlig, daglig, dagligInt ->
-            IInntekt(årlig, månedlig, daglig, dagligInt)
+        return inntekt.reflection { årlig, månedlig, daglig, _ ->
+            IInntekt(årlig, månedlig, daglig)
         }
     }
 }
@@ -127,14 +126,11 @@ internal class IVilkårsgrunnlagHistorikk {
         historikk.putIfAbsent(vilkårsgrunnlagHistorikkId, innslag)
     }
 
-    internal fun spleisgrunnlag(vilkårsgrunnlagHistorikkId: UUID, skjæringstidspunkt: LocalDate) =
-        historikk[vilkårsgrunnlagHistorikkId]?.vilkårsgrunnlag(skjæringstidspunkt) as? ISpleisGrunnlag
-
     internal fun toDTO() = historikk.mapValues { (_, innslag) -> innslag.toDTO() }.toMap()
 }
 
 internal class VilkårsgrunnlagBuilder(
-    private val person: Person,
+    person: Person,
     private val sammenligningsgrunnlagBuilder: OppsamletSammenligningsgrunnlagBuilder,
     private val inntektshistorikkForAordningenBuilder: InntektshistorikkForAOrdningenBuilder
 ) : PersonVisitor {
@@ -147,12 +143,11 @@ internal class VilkårsgrunnlagBuilder(
     internal fun build() = historikk
 
     override fun preVisitInnslag(innslag: VilkårsgrunnlagHistorikk.Innslag, id: UUID, opprettet: LocalDateTime) {
-        historikk.leggTil(id, InnslagBuilder(innslag, person, sammenligningsgrunnlagBuilder, inntektshistorikkForAordningenBuilder).build())
+        historikk.leggTil(id, InnslagBuilder(innslag, sammenligningsgrunnlagBuilder, inntektshistorikkForAordningenBuilder).build())
     }
 
     internal class InnslagBuilder(
         innslag: VilkårsgrunnlagHistorikk.Innslag,
-        private val person: Person,
         private val sammenligningsgrunnlagBuilder: OppsamletSammenligningsgrunnlagBuilder,
         private val inntektshistorikkForAordningenBuilder: InntektshistorikkForAOrdningenBuilder
     ) : VilkårsgrunnlagHistorikkVisitor {
@@ -337,7 +332,7 @@ internal class VilkårsgrunnlagBuilder(
             }
 
             override fun visitIkkeRapportert(id: UUID, dato: LocalDate, tidsstempel: LocalDateTime) {
-                val inntekt = IInntekt(0.0, 0.0, 0.0, 0)
+                val inntekt = IInntekt(0.0, 0.0, 0.0)
                 this.inntekt = nyArbeidsgiverInntekt(IInntektkilde.IkkeRapportert, inntekt, dato)
             }
 
