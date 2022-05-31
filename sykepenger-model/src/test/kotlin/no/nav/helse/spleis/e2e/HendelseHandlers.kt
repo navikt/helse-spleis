@@ -834,21 +834,6 @@ internal fun AbstractEndToEndTest.håndterOverstyrArbeidsforhold(
     ).håndter(Person::håndter)
 }
 
-internal fun AbstractEndToEndTest.håndterUtbetalingshistorikkUtenValidering(
-    vararg utbetalinger: Infotrygdperiode,
-    inntektshistorikk: List<Inntektsopplysning> = emptyList(),
-    orgnummer: String = AbstractPersonTest.ORGNUMMER,
-    besvart: LocalDateTime = LocalDateTime.now()
-) {
-    utbetalingshistorikk(
-        vedtaksperiodeIdInnhenter = { UUID.randomUUID() },
-        utbetalinger = utbetalinger.toList(),
-        inntektshistorikk = inntektshistorikk,
-        orgnummer = orgnummer,
-        besvart = besvart
-    ).håndter(Person::håndter)
-}
-
 internal fun AbstractEndToEndTest.håndterUtbetalingshistorikkForFeriepenger(
     opptjeningsår: Year,
     utbetalinger: List<UtbetalingshistorikkForFeriepenger.Utbetalingsperiode> = listOf(),
