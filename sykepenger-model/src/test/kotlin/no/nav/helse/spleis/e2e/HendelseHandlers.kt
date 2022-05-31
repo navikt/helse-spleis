@@ -60,6 +60,7 @@ import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.sisteBehov
+import no.nav.helse.spleis.e2e.AbstractEndToEndTest.Companion.INNTEKT
 import no.nav.helse.testhelpers.Inntektperioder
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
@@ -222,11 +223,12 @@ internal fun AbstractEndToEndTest.nyttVedtak(
     førsteFraværsdag: LocalDate = fom,
     fnr: Fødselsnummer = AbstractPersonTest.UNG_PERSON_FNR_2018,
     orgnummer: String = AbstractPersonTest.ORGNUMMER,
-    refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(AbstractEndToEndTest.INNTEKT, null, emptyList()),
+    beregnetInntekt: Inntekt = INNTEKT,
+    refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
     arbeidsgiverperiode: List<Periode>? = null,
-    inntekterBlock: Inntektperioder.() -> Unit = { lagInntektperioder(orgnummer, fom) }
+    inntekterBlock: Inntektperioder.() -> Unit = { lagInntektperioder(orgnummer, fom, beregnetInntekt) }
 ) {
-    tilGodkjent(fom, tom, grad, førsteFraværsdag, fnr = fnr, orgnummer = orgnummer, refusjon = refusjon, inntekterBlock = inntekterBlock, arbeidsgiverperiode = arbeidsgiverperiode)
+    tilGodkjent(fom, tom, grad, førsteFraværsdag, fnr = fnr, orgnummer = orgnummer, refusjon = refusjon, inntekterBlock = inntekterBlock, arbeidsgiverperiode = arbeidsgiverperiode, beregnetInntekt = beregnetInntekt)
     håndterUtbetalt(status = Oppdragstatus.AKSEPTERT, fnr = fnr, orgnummer = orgnummer)
 }
 
@@ -237,11 +239,12 @@ internal fun AbstractEndToEndTest.tilGodkjent(
     førsteFraværsdag: LocalDate,
     fnr: Fødselsnummer = AbstractPersonTest.UNG_PERSON_FNR_2018,
     orgnummer: String = AbstractPersonTest.ORGNUMMER,
-    refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(AbstractEndToEndTest.INNTEKT, null, emptyList()),
-    inntekterBlock: Inntektperioder.() -> Unit = { lagInntektperioder(orgnummer, fom) },
+    beregnetInntekt: Inntekt = INNTEKT,
+    refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
+    inntekterBlock: Inntektperioder.() -> Unit = { lagInntektperioder(orgnummer, fom, beregnetInntekt) },
     arbeidsgiverperiode: List<Periode>? = null
 ): IdInnhenter {
-    val id = tilGodkjenning(fom, tom, grad, førsteFraværsdag, fnr = fnr, orgnummer = orgnummer, refusjon = refusjon, inntekterBlock = inntekterBlock, arbeidsgiverperiode = arbeidsgiverperiode)
+    val id = tilGodkjenning(fom, tom, grad, førsteFraværsdag, fnr = fnr, orgnummer = orgnummer, refusjon = refusjon, inntekterBlock = inntekterBlock, arbeidsgiverperiode = arbeidsgiverperiode, beregnetInntekt = beregnetInntekt)
     håndterUtbetalingsgodkjenning(id, true, fnr = fnr, orgnummer = orgnummer)
     return id
 }
@@ -253,11 +256,12 @@ internal fun AbstractEndToEndTest.tilGodkjenning(
     førsteFraværsdag: LocalDate,
     fnr: Fødselsnummer = AbstractPersonTest.UNG_PERSON_FNR_2018,
     orgnummer: String = AbstractPersonTest.ORGNUMMER,
-    refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(AbstractEndToEndTest.INNTEKT, null, emptyList()),
-    inntekterBlock: Inntektperioder.() -> Unit = { lagInntektperioder(orgnummer, fom) },
-    arbeidsgiverperiode: List<Periode>? = null
+    beregnetInntekt: Inntekt = INNTEKT,
+    refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
+    inntekterBlock: Inntektperioder.() -> Unit = { lagInntektperioder(orgnummer, fom, beregnetInntekt) },
+    arbeidsgiverperiode: List<Periode>? = null,
 ): IdInnhenter {
-    val id = tilSimulering(fom, tom, grad, førsteFraværsdag, fnr = fnr, orgnummer = orgnummer, refusjon = refusjon, inntekterBlock = inntekterBlock, arbeidsgiverperiode = arbeidsgiverperiode)
+    val id = tilSimulering(fom, tom, grad, førsteFraværsdag, fnr = fnr, orgnummer = orgnummer, refusjon = refusjon, inntekterBlock = inntekterBlock, arbeidsgiverperiode = arbeidsgiverperiode, beregnetInntekt = beregnetInntekt)
     håndterSimulering(id, fnr = fnr, orgnummer = orgnummer)
     return id
 }
@@ -269,11 +273,12 @@ internal fun AbstractEndToEndTest.tilSimulering(
     førsteFraværsdag: LocalDate,
     fnr: Fødselsnummer = AbstractPersonTest.UNG_PERSON_FNR_2018,
     orgnummer: String = AbstractPersonTest.ORGNUMMER,
-    refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(AbstractEndToEndTest.INNTEKT, null, emptyList()),
-    inntekterBlock: Inntektperioder.() -> Unit = { lagInntektperioder(orgnummer, fom) },
+    beregnetInntekt: Inntekt = INNTEKT,
+    refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
+    inntekterBlock: Inntektperioder.() -> Unit = { lagInntektperioder(orgnummer, fom, beregnetInntekt) },
     arbeidsgiverperiode: List<Periode>? = null
 ): IdInnhenter {
-    return tilYtelser(fom, tom, grad, førsteFraværsdag, fnr = fnr, orgnummer = orgnummer, refusjon = refusjon, inntekterBlock = inntekterBlock, arbeidsgiverperiode = arbeidsgiverperiode)
+    return tilYtelser(fom, tom, grad, førsteFraværsdag, fnr = fnr, orgnummer = orgnummer, refusjon = refusjon, inntekterBlock = inntekterBlock, arbeidsgiverperiode = arbeidsgiverperiode, beregnetInntekt = beregnetInntekt)
 }
 
 internal fun AbstractEndToEndTest.tilYtelser(
@@ -283,12 +288,13 @@ internal fun AbstractEndToEndTest.tilYtelser(
     førsteFraværsdag: LocalDate,
     fnr: Fødselsnummer = AbstractPersonTest.UNG_PERSON_FNR_2018,
     orgnummer: String = AbstractPersonTest.ORGNUMMER,
-    refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(AbstractEndToEndTest.INNTEKT, null, emptyList()),
-    inntekterBlock: Inntektperioder.() -> Unit = { lagInntektperioder(orgnummer, fom) },
+    beregnetInntekt: Inntekt = INNTEKT,
+    refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
+    inntekterBlock: Inntektperioder.() -> Unit = { lagInntektperioder(orgnummer, fom, beregnetInntekt) },
     inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag = InntektForSykepengegrunnlag(
         inntekter = inntektperioderForSykepengegrunnlag {
             fom.minusMonths(3) til fom.minusMonths(1) inntekter {
-                orgnummer inntekt AbstractEndToEndTest.INNTEKT
+                orgnummer inntekt beregnetInntekt
             }
         }, arbeidsforhold = emptyList()
     ),
@@ -301,14 +307,15 @@ internal fun AbstractEndToEndTest.tilYtelser(
         førsteFraværsdag = førsteFraværsdag,
         fnr = fnr,
         orgnummer = orgnummer,
-        refusjon = refusjon
+        refusjon = refusjon,
+        beregnetInntekt = beregnetInntekt
     )
     val id = observatør.sisteVedtaksperiode()
 
     håndterYtelser(id, fnr = fnr, orgnummer = orgnummer, besvart = LocalDate.EPOCH.atStartOfDay())
     håndterVilkårsgrunnlag(
-        id,
-        AbstractEndToEndTest.INNTEKT,
+        vedtaksperiodeIdInnhenter = id,
+        inntekt = beregnetInntekt,
         fnr = fnr,
         orgnummer = orgnummer,
         inntektsvurdering = Inntektsvurdering(
@@ -425,7 +432,7 @@ internal fun AbstractEndToEndTest.håndterInntektsmeldingMedValidering(
     vedtaksperiodeIdInnhenter: IdInnhenter,
     arbeidsgiverperioder: List<Periode>,
     førsteFraværsdag: LocalDate = arbeidsgiverperioder.maxOfOrNull { it.start } ?: 1.januar,
-    beregnetInntekt: Inntekt = AbstractEndToEndTest.INNTEKT,
+    beregnetInntekt: Inntekt = INNTEKT,
     refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
     orgnummer: String = AbstractPersonTest.ORGNUMMER,
     fnr: Fødselsnummer = AbstractPersonTest.UNG_PERSON_FNR_2018,
@@ -437,7 +444,7 @@ internal fun AbstractEndToEndTest.håndterInntektsmeldingMedValidering(
 internal fun AbstractEndToEndTest.håndterInntektsmelding(
     arbeidsgiverperioder: List<Periode>,
     førsteFraværsdag: LocalDate = arbeidsgiverperioder.maxOfOrNull { it.start } ?: 1.januar,
-    beregnetInntekt: Inntekt = AbstractEndToEndTest.INNTEKT,
+    beregnetInntekt: Inntekt = INNTEKT,
     refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
     orgnummer: String = AbstractPersonTest.ORGNUMMER,
     id: UUID = UUID.randomUUID(),
@@ -473,7 +480,7 @@ internal fun AbstractEndToEndTest.håndterInntektsmeldingReplay(
 
 internal fun AbstractEndToEndTest.håndterVilkårsgrunnlag(
     vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode,
-    inntekt: Inntekt = AbstractEndToEndTest.INNTEKT,
+    inntekt: Inntekt = INNTEKT,
     medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
     orgnummer: String = AbstractPersonTest.ORGNUMMER,
     inntektsvurdering: Inntektsvurdering = Inntektsvurdering(
@@ -491,7 +498,7 @@ internal fun AbstractEndToEndTest.håndterVilkårsgrunnlag(
                 ArbeidsgiverInntekt.MånedligInntekt.Sykepengegrunnlag(
                     yearMonth = yearMonth,
                     type = ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT,
-                    inntekt = AbstractEndToEndTest.INNTEKT,
+                    inntekt = inntekt,
                     fordel = "fordel",
                     beskrivelse = "beskrivelse"
                 )
@@ -934,14 +941,14 @@ internal fun AbstractEndToEndTest.gapPeriode(periode: Periode, orgnummer: String
             inntektsvurdering = Inntektsvurdering(
                 inntekter = inntektperioderForSammenligningsgrunnlag {
                     1.januar(2017) til 1.desember(2017) inntekter {
-                        orgnummer inntekt AbstractEndToEndTest.INNTEKT
+                        orgnummer inntekt INNTEKT
                     }
                 }
             ),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
                 inntekter = inntektperioderForSykepengegrunnlag {
                     1.oktober(2017) til 1.desember(2017) inntekter {
-                        orgnummer inntekt AbstractEndToEndTest.INNTEKT
+                        orgnummer inntekt INNTEKT
                     }
                 }, arbeidsforhold = emptyList()
             )

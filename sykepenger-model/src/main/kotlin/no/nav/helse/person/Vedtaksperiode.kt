@@ -322,7 +322,7 @@ internal class Vedtaksperiode private constructor(
     internal fun håndter(hendelse: OverstyrInntekt): Boolean {
         if (!kanHåndtereOverstyring(hendelse)) return false
         kontekst(hendelse)
-        if (Toggle.NyRevurdering.disabled && periodetype in listOf(OVERGANG_FRA_IT, INFOTRYGDFORLENGELSE)) {
+        if (periodetype in listOf(OVERGANG_FRA_IT, INFOTRYGDFORLENGELSE)) {
             hendelse.error("Forespurt overstyring av inntekt hvor skjæringstidspunktet ligger i infotrygd")
             return true
         }

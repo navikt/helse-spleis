@@ -6,9 +6,11 @@ import no.nav.helse.Toggle
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
+import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.Søknad
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -20,9 +22,13 @@ import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
+import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.Sykedag
+import no.nav.helse.utbetalingslinjer.Endringskode
+import no.nav.helse.utbetalingslinjer.WARN_FORLENGER_OPPHØRT_OPPDRAG
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
 import no.nav.helse.økonomi.Inntekt
@@ -32,6 +38,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -246,7 +253,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
     @Test
     fun `Ved overstyring av revurdering av inntekt til under krav til minste sykepengegrunnlag skal vi opphøre den opprinnelige utbetalingen`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, beregnetInntekt = 50000.årlig)
         håndterYtelser(1.vedtaksperiode)
         val inntekter = listOf(grunnlag(ORGNUMMER, 1.januar, 50000.årlig.repeat(3)))
@@ -383,7 +390,220 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         )
     }
 
+    @Test
+    fun `revurder inntekt avvik over 25 prosent reduksjon`() {
+        nyttVedtak(1.januar, 31.januar, 100.prosent)
+        nullstillTilstandsendringer()
+        håndterOverstyrInntekt(inntekt = 7000.månedlig, skjæringstidspunkt = 1.januar)
 
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+
+        assertWarning("Har mer enn 25 % avvik. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene.", AktivitetsloggFilter.person())
+        assertEquals(1, inspektør.utbetalinger.size)
+    }
+
+    @Test
+    fun `revurder inntekt avvik over 25 prosent økning`() {
+        nyttVedtak(1.januar, 31.januar, 100.prosent)
+        nullstillTilstandsendringer()
+
+        håndterOverstyrInntekt(inntekt = 70000.månedlig, skjæringstidspunkt = 1.januar)
+
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+
+        assertWarning("Har mer enn 25 % avvik. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene.", AktivitetsloggFilter.person())
+        assertEquals(1, inspektør.utbetalinger.size)
+    }
+
+    @Test
+    fun `revurder inntekt til under krav til minste sykepengegrunnlag`() {
+        nyttVedtak(1.januar, 31.januar, 100.prosent)
+        nullstillTilstandsendringer()
+        håndterOverstyrInntekt(inntekt = 3000.månedlig, skjæringstidspunkt = 1.januar)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+
+        assertTilstander(
+            1.vedtaksperiode,
+            AVSLUTTET,
+            AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_SIMULERING_REVURDERING,
+            AVVENTER_GODKJENNING_REVURDERING
+        )
+
+        val utbetalingTilRevurdering = inspektør.utbetalinger.last()
+        assertEquals(2, inspektør.utbetalinger.size)
+        assertDiff(-15741)
+
+        assertWarning(
+            "Har mer enn 25 % avvik. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene.",
+            AktivitetsloggFilter.person()
+        )
+        assertWarning(
+            "Perioden er avslått på grunn av at inntekt er under krav til minste sykepengegrunnlag",
+            AktivitetsloggFilter.person()
+        )
+        assertFalse(utbetalingTilRevurdering.utbetalingstidslinje().harUtbetalinger())
+    }
+
+    @Test
+    fun `revurder inntekt til under krav til minste sykepengegrunnlag slik at utbetaling opphører, og så revurder igjen til over krav til minste sykepengegrunnlag`() {
+        nyttVedtak(1.januar, 31.januar, 100.prosent, beregnetInntekt = 5000.månedlig)
+        nullstillTilstandsendringer()
+        håndterOverstyrInntekt(inntekt = 3000.månedlig, skjæringstidspunkt = 1.januar)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+
+        assertTilstander(
+            1.vedtaksperiode,
+            AVSLUTTET,
+            AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_SIMULERING_REVURDERING,
+            AVVENTER_GODKJENNING_REVURDERING
+        )
+
+        val utbetalingTilRevurdering = inspektør.utbetalinger.last()
+        assertEquals(2, inspektør.utbetalinger.size)
+        assertDiff(-2541)
+
+        assertWarning(
+            "Har mer enn 25 % avvik. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene.",
+            AktivitetsloggFilter.person()
+        )
+        assertWarning(
+            "Perioden er avslått på grunn av at inntekt er under krav til minste sykepengegrunnlag",
+            AktivitetsloggFilter.person()
+        )
+        assertFalse(utbetalingTilRevurdering.utbetalingstidslinje().harUtbetalinger())
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+
+        håndterOverstyrInntekt(5000.månedlig, skjæringstidspunkt = 1.januar)
+        håndterYtelser(1.vedtaksperiode)
+
+        val utbetalinger = inspektør.utbetalinger
+        var opprinneligFagsystemId: String?
+        utbetalinger[0].inspektør.arbeidsgiverOppdrag.apply {
+            assertEquals(Endringskode.NY, inspektør.endringskode)
+            opprinneligFagsystemId = fagsystemId()
+            assertEquals(1, size)
+            first().inspektør.apply {
+                assertEquals(Endringskode.NY, endringskode)
+                assertEquals(1, delytelseId)
+                assertEquals(null, refDelytelseId)
+                assertEquals(null, refFagsystemId)
+            }
+        }
+        utbetalinger[1].inspektør.arbeidsgiverOppdrag.apply {
+            assertEquals(Endringskode.ENDR, inspektør.endringskode)
+            assertEquals(opprinneligFagsystemId, fagsystemId())
+            assertEquals(1, size)
+            first().inspektør.apply {
+                assertEquals(Endringskode.ENDR, endringskode)
+                assertEquals(1, delytelseId)
+                assertEquals(null, refDelytelseId)
+                assertEquals(null, refFagsystemId)
+                assertEquals(17.januar, datoStatusFom)
+            }
+        }
+        utbetalinger[2].inspektør.arbeidsgiverOppdrag.apply {
+            assertEquals(Endringskode.ENDR, inspektør.endringskode)
+            assertEquals(opprinneligFagsystemId, fagsystemId())
+            assertEquals(1, size)
+            first().inspektør.apply {
+                assertEquals(Endringskode.NY, endringskode)
+                assertEquals(2, delytelseId)
+                assertEquals(1, refDelytelseId)
+                assertEquals(fagsystemId(), refFagsystemId)
+            }
+        }
+        assertDiff(2541)
+        assertWarning(WARN_FORLENGER_OPPHØRT_OPPDRAG, AktivitetsloggFilter.person())
+    }
+
+
+    @Test
+    fun `revurdering ved skjæringstidspunkt hos infotrygd`() {
+        val historikk = listOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 31.januar, 100.prosent, 1000.daglig))
+        val inntektsopplysning = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true))
+
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+        håndterUtbetalingshistorikk(1.vedtaksperiode, *historikk.toTypedArray(), inntektshistorikk = inntektsopplysning)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+
+        forlengVedtak(1.mars, 31.mars)
+        nullstillTilstandsendringer()
+        håndterOverstyrInntekt(inntekt = 35000.månedlig, skjæringstidspunkt = 1.januar)
+
+        assertTilstander(
+            1.vedtaksperiode,
+            AVSLUTTET
+        )
+        assertTilstander(
+            2.vedtaksperiode,
+            AVSLUTTET
+        )
+        assertErrors()
+    }
+
+    @Test
+    fun `avviser revurdering av inntekt for saker med flere arbeidsgivere`() {
+        nyeVedtak(1.januar, 31.januar, a1, a2)
+        håndterOverstyrInntekt(inntekt = 32000.månedlig, a1, 1.januar)
+
+        assertEquals(1, observatør.avvisteRevurderinger.size)
+        assertError("Forespurt overstyring av inntekt hvor personen har flere arbeidsgivere (inkl. ghosts)")
+    }
+
+    @Test
+    fun `avviser revurdering av inntekt for saker med 1 arbeidsgiver og ghost`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            førsteFraværsdag = 1.januar,
+            refusjon = Inntektsmelding.Refusjon(31000.månedlig, null, emptyList()),
+            orgnummer = a1
+        )
+
+        val inntekter = listOf(
+            grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 31000.månedlig.repeat(3)),
+            grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 32000.månedlig.repeat(3))
+        )
+
+        val arbeidsforhold = listOf(
+            Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null),
+            Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null)
+        )
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterVilkårsgrunnlag(
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            inntektsvurdering = Inntektsvurdering(
+                listOf(
+                    sammenligningsgrunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 31000.månedlig.repeat(12)),
+                    sammenligningsgrunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 32000.månedlig.repeat(12))
+                )
+            ),
+            orgnummer = a1,
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter, arbeidsforhold = emptyList()),
+            arbeidsforhold = arbeidsforhold
+        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
+
+        håndterOverstyrInntekt(32000.månedlig, a1, 1.januar)
+        assertEquals(1, observatør.avvisteRevurderinger.size)
+        assertError("Forespurt overstyring av inntekt hvor personen har flere arbeidsgivere (inkl. ghosts)")
+    }
 
 
     private inline fun <reified D: Dag, reified UD: Utbetalingsdag>assertDag(dato: LocalDate, arbeidsgiverbeløp: Inntekt, personbeløp: Inntekt = INGEN, aktuellDagsinntekt: Inntekt = INGEN) {
