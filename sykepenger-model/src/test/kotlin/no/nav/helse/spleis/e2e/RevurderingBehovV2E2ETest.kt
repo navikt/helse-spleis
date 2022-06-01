@@ -56,6 +56,32 @@ internal class RevurderingBehovV2E2ETest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `Sjekker overlapp mot overtrygd`() {
+        nyttVedtak(1.januar, 31.januar)
+        forlengVedtak(1.februar, 28.februar, besvart = LocalDate.EPOCH.atStartOfDay())
+        forlengVedtak(1.mars, 31.mars, besvart = LocalDate.EPOCH.atStartOfDay())
+        håndterOverstyrInntekt(30000.månedlig, skjæringstidspunkt = 1.januar)
+        val utbetalinger = listOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar,  31.januar, 100.prosent, INNTEKT))
+        val inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true))
+        assertNoWarnings()
+        håndterYtelser(3.vedtaksperiode, utbetalinger = utbetalinger.toTypedArray(), inntektshistorikk = inntektshistorikk)
+        assertYtelser(1.januar til 31.mars)
+        assertWarnings()
+    }
+
+    @Test
+    fun `Sjekker overlapp mot pleiepenger`() {
+        nyttVedtak(1.januar, 31.januar)
+        forlengVedtak(1.februar, 28.februar)
+        forlengVedtak(1.mars, 31.mars)
+        håndterOverstyrInntekt(30000.månedlig, skjæringstidspunkt = 1.januar)
+        assertNoWarnings()
+        håndterYtelser(3.vedtaksperiode, pleiepenger = listOf(1.januar til 31.januar))
+        assertYtelser(1.januar til 31.mars)
+        assertWarnings()
+    }
+
+    @Test
     fun `Ping Pong - henter ytelser for første periode isolert, deretter for andre periode isolert`() {
         nyttVedtak(1.januar, 31.januar)
 
