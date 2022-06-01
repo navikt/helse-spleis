@@ -48,8 +48,6 @@ import no.nav.helse.person.Dokumentsporing.Companion.ider
 import no.nav.helse.person.Dokumentsporing.Companion.søknadIder
 import no.nav.helse.person.ForlengelseFraInfotrygd.IKKE_ETTERSPURT
 import no.nav.helse.person.InntektsmeldingInfo.Companion.ider
-import no.nav.helse.person.Periodetype.FORLENGELSE
-import no.nav.helse.person.Periodetype.FØRSTEGANGSBEHANDLING
 import no.nav.helse.person.Periodetype.INFOTRYGDFORLENGELSE
 import no.nav.helse.person.Periodetype.OVERGANG_FRA_IT
 import no.nav.helse.person.TilstandType.AVSLUTTET
@@ -396,8 +394,6 @@ internal class Vedtaksperiode private constructor(
     internal fun erSykeperiodeAvsluttetUtenUtbetalingRettFør(other: Vedtaksperiode) =
         this.sykdomstidslinje.erRettFør(other.sykdomstidslinje) && this.tilstand == AvsluttetUtenUtbetaling
 
-    private fun harVedtaksperiodeRettFør() = arbeidsgiver.finnVedtaksperiodeRettFør(this) != null
-
     private fun kanHåndtereOverstyring(hendelse: OverstyrInntekt): Boolean {
         return utbetalingstidslinje.isNotEmpty() && gjelder(hendelse.skjæringstidspunkt)
     }
@@ -409,18 +405,6 @@ internal class Vedtaksperiode private constructor(
 
     private fun låsOpp() = arbeidsgiver.låsOpp(periode)
     private fun lås() = arbeidsgiver.lås(periode)
-
-    internal fun forlengelseFraInfotrygd() = when (arbeidsgiver.periodetype(periode)) {
-        OVERGANG_FRA_IT -> true
-        INFOTRYGDFORLENGELSE -> true
-        /* For forlengelse trenger vi kompenserende kode ved ping-pong fordi ved ping-pong vil periodetype() returnere
-        FORLENGELSE siden første utbetalingsdag er i spleis.
-        Ved å sjekke om vi ikke har en vedtaksperiode foran oss kan vi finne ut om infotrygdhistorikken fyller inn et
-        gap mellom denne og en tidligere vedtaksperiode
-         */
-        FORLENGELSE -> !harVedtaksperiodeRettFør()
-        FØRSTEGANGSBEHANDLING -> false
-    }
 
     internal fun kanGjenopptaBehandling(arbeidsgivere: Iterable<Arbeidsgiver>) =
         arbeidsgivere.harNødvendigInntekt(skjæringstidspunkt, periode.start)
@@ -1966,11 +1950,6 @@ internal class Vedtaksperiode private constructor(
         tilstand == AvventerSimuleringRevurdering || ikkeFerdigRevurdert() || avventerRevurdering()
 
     internal fun loggførHendelsesreferanse(hendelse: OverstyrInntekt) = hendelse.leggTil(hendelseIder)
-
-    internal fun tidligerePeriodeRebehandles(hendelse: IAktivitetslogg) {
-        kontekst(hendelse)
-        tilstand.tidligerePeriodeRebehandles(this, hendelse)
-    }
 
     internal fun gjenopptaBehandlingNy(hendelse: IAktivitetslogg) {
         hendelse.kontekst(arbeidsgiver)

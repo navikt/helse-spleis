@@ -1003,11 +1003,6 @@ internal class Arbeidsgiver private constructor(
             other.erVedtaksperiodeRettFør(vedtaksperiode)
         }
 
-    internal fun finnVedtaksperiodeRettEtter(vedtaksperiode: Vedtaksperiode) =
-        vedtaksperioder.firstOrNull { other ->
-            vedtaksperiode.erVedtaksperiodeRettFør(other)
-        }
-
     internal fun finnSykeperioderAvsluttetUtenUtbetalingRettFør(vedtaksperiode: Vedtaksperiode) =
         finnSykeperioderAvsluttetUtenUtbetalingRettFør(vedtaksperiode, emptyList())
 
@@ -1162,14 +1157,6 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun harFerdigstiltPeriode() = vedtaksperioder.any(ER_ELLER_HAR_VÆRT_AVSLUTTET) || forkastede.harAvsluttedePerioder()
-
-    private fun tilstøtendeBak(vedtaksperiode: Vedtaksperiode): Vedtaksperiode? {
-        return vedtaksperioder.firstOrNull { it etter vedtaksperiode }?.takeIf { vedtaksperiode.erVedtaksperiodeRettFør(it) }
-    }
-
-    internal fun tidligerePeriodeRebehandles(vedtaksperiode: Vedtaksperiode, hendelse: PersonHendelse) {
-        tilstøtendeBak(vedtaksperiode)?.tidligerePeriodeRebehandles(hendelse)
-    }
 
     internal fun <T> arbeidsforhold(
         skjæringstidspunkt: LocalDate,
