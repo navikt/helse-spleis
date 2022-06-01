@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.time.YearMonth
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
+import no.nav.helse.februar
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Inntektsvurdering
@@ -11,6 +12,7 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.til
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -26,9 +28,49 @@ import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
 
 internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
+    @Test
+    fun `lagrer ikke feil i vilkårsprøving`() {
+        val inntektFraIT = INNTEKT/2
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(17.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(17.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterYtelser(2.vedtaksperiode)
+        håndterVilkårsgrunnlag(2.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioderForSammenligningsgrunnlag {
+                1.januar(2017) til 1.desember(2017) inntekter {
+                    ORGNUMMER inntekt INNTEKT/2
+                }
+            }
+        ))
+        assertTrue(inspektør.periodeErForkastet(2.vedtaksperiode))
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+        håndterUtbetalingshistorikk(3.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 31.januar, 100.prosent, inntektFraIT), inntektshistorikk = listOf(
+            Inntektsopplysning(ORGNUMMER, 17.januar, inntektFraIT, true)
+        ))
+        assertEquals(1.januar, inspektør.vedtaksperioder(3.vedtaksperiode).inspektør.skjæringstidspunkt)
+        val grunnlagsdataInspektør = inspektør.vilkårsgrunnlag(3.vedtaksperiode)?.inspektør
+        assertForventetFeil(
+            forklaring = "vi plukker opp vilkårsgrunnlaget som ble lagret ved vurdering av 2.vedtaksperiode",
+            nå = {
+                assertEquals(INNTEKT.rundTilDaglig(), grunnlagsdataInspektør?.sykepengegrunnlag?.inspektør?.sykepengegrunnlag)
+                assertFalse(grunnlagsdataInspektør?.vurdertOk ?: fail { "mangler vilkårsgrunnlag" })
+            },
+            ønsket = {
+                assertEquals(inntektFraIT, grunnlagsdataInspektør?.sykepengegrunnlag?.inspektør?.sykepengegrunnlag)
+                assertTrue(grunnlagsdataInspektør?.vurdertOk ?: fail { "mangler vilkårsgrunnlag" })
+            }
+        )
+    }
+
     @Test
     fun `mer enn 25% avvik lager kun én errormelding i aktivitetsloggen`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
