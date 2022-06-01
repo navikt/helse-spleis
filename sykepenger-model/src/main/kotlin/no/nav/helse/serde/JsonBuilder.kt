@@ -878,6 +878,7 @@ internal class JsonBuilder : AbstractBuilder() {
             sykepengegrunnlag: Inntekt,
             overstyrtGrunnlagForSykepengegrunnlag: Inntekt?,
             grunnlagForSykepengegrunnlag: Inntekt,
+            maksimalDagsats: Inntekt,
             `6G`: Inntekt,
             begrensning: Sykepengegrunnlag.Begrensning,
             deaktiverteArbeidsforhold: List<String>,
@@ -939,6 +940,7 @@ internal class JsonBuilder : AbstractBuilder() {
             sykepengegrunnlag: Inntekt,
             overstyrtGrunnlagForSykepengegrunnlag: Inntekt?,
             grunnlagForSykepengegrunnlag: Inntekt,
+            maksimalDagsats: Inntekt,
             `6G`: Inntekt,
             begrensning: Sykepengegrunnlag.Begrensning,
             deaktiverteArbeidsforhold: List<String>,
@@ -950,6 +952,7 @@ internal class JsonBuilder : AbstractBuilder() {
                 mutableMapOf(
                     "sykepengegrunnlag" to sykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
                     "grunnlagForSykepengegrunnlag" to grunnlagForSykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
+                    "maksimalDagsats" to maksimalDagsats.reflection { årlig, _, _, _ -> årlig },
                     "grunnbeløp" to `6G`.reflection { årlig, _, _, _ -> årlig },
                     "arbeidsgiverInntektsopplysninger" to arbeidsgiverInntektsopplysninger,
                     "begrensning" to begrensning,

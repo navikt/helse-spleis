@@ -278,6 +278,7 @@ internal class VilkårsgrunnlagBuilder(
                 sykepengegrunnlag: Inntekt,
                 overstyrtGrunnlagForSykepengegrunnlag: Inntekt?,
                 grunnlagForSykepengegrunnlag: Inntekt,
+                maksimalDagsats: Inntekt,
                 `6G`: Inntekt,
                 begrensning: Sykepengegrunnlag.Begrensning,
                 deaktiverteArbeidsforhold: List<String>,

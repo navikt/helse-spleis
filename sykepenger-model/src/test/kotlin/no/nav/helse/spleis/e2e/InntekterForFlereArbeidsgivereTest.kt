@@ -18,6 +18,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.GrunnlagsdataInspektør
 import no.nav.helse.inspectors.Kilde
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.juli
 import no.nav.helse.juni
@@ -250,7 +251,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
             arbeidsforhold = arbeidsforhold
         ).håndter(Person::håndter)
 
-        assertEquals(552000.årlig.rundTilDaglig(), person.vilkårsgrunnlagFor(1.januar)?.sykepengegrunnlag()?.sykepengegrunnlag)
+        assertEquals(552000.årlig, person.vilkårsgrunnlagFor(1.januar)?.inspektør?.sykepengegrunnlag?.inspektør?.sykepengegrunnlag)
         assertEquals(528000.årlig, person.beregnSammenligningsgrunnlag(1.januar, MaskinellJurist()).sammenligningsgrunnlag)
 
     }
@@ -288,8 +289,8 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
 
         assertForventetFeil(
             forklaring = "8-28 b",
-            nå = { assertEquals(300000.årlig.rundTilDaglig(), person.vilkårsgrunnlagFor(1.januar)?.sykepengegrunnlag()?.sykepengegrunnlag) },
-            ønsket = { assertEquals(552000.årlig.rundTilDaglig(), person.vilkårsgrunnlagFor(1.januar)?.sykepengegrunnlag()?.sykepengegrunnlag) }
+            nå = { assertEquals(300000.årlig, person.vilkårsgrunnlagFor(1.januar)?.inspektør?.sykepengegrunnlag?.inspektør?.sykepengegrunnlag) },
+            ønsket = { assertEquals(552000.årlig, person.vilkårsgrunnlagFor(1.januar)?.inspektør?.sykepengegrunnlag?.inspektør?.sykepengegrunnlag) }
         )
     }
 

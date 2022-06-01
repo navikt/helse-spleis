@@ -61,7 +61,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         assertForventetFeil(
             forklaring = "vi plukker opp vilkårsgrunnlaget som ble lagret ved vurdering av 2.vedtaksperiode",
             nå = {
-                assertEquals(INNTEKT.rundTilDaglig(), grunnlagsdataInspektør?.sykepengegrunnlag?.inspektør?.sykepengegrunnlag)
+                assertEquals(INNTEKT, grunnlagsdataInspektør?.sykepengegrunnlag?.inspektør?.sykepengegrunnlag)
                 assertFalse(grunnlagsdataInspektør?.vurdertOk ?: fail { "mangler vilkårsgrunnlag" })
             },
             ønsket = {
