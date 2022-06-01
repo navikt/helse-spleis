@@ -872,6 +872,9 @@ internal class Arbeidsgiver private constructor(
         return arbeidsgiverperioder.finn(periode)
     }
 
+    internal fun revurderingsperiode(vedtaksperiode: Vedtaksperiode) =
+        vedtaksperioder.filter { it.avventerRevurdering() || it === vedtaksperiode }.periode()
+
     internal fun ghostPerioder(): List<GhostPeriode> = person.skjæringstidspunkterFraSpleis()
         .filter { skjæringstidspunkt -> vedtaksperioder.none { it.gjelder(skjæringstidspunkt) } }
         .filter(::erGhost)
