@@ -126,6 +126,6 @@ abstract class Toggle internal constructor(enabled: Boolean = false, private val
     object SendFeriepengeOppdrag : Toggle(true)
     object RevurdereInntektMedFlereArbeidsgivere : Toggle(false)
     object ForkastForlengelseAvForkastetPeriode : Toggle(false)
-    object NyRevurdering : Toggle(false)
+    object NyRevurdering : Toggle("NyRevurdering", false)
     object RevurdereOutOfOrder : Toggle(false)
 }
