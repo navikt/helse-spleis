@@ -69,6 +69,7 @@ internal class ISpleisGrunnlag(
     override val sykepengegrunnlag: Double,
     val avviksprosent: Double?,
     val grunnbeløp: Int,
+    val sykepengegrunnlagsgrense: SykepengegrunnlagsgrenseDTO,
     val meldingsreferanseId: UUID?,
     val antallOpptjeningsdagerErMinst: Int,
     val oppfyllerKravOmMinstelønn: Boolean,
@@ -84,12 +85,30 @@ internal class ISpleisGrunnlag(
             inntekter = inntekter.map { it.toDTO() },
             avviksprosent = avviksprosent,
             grunnbeløp = grunnbeløp,
+            sykepengegrunnlagsgrense = sykepengegrunnlagsgrense,
             antallOpptjeningsdagerErMinst = antallOpptjeningsdagerErMinst,
             opptjeningFra = skjæringstidspunkt.minusDays(antallOpptjeningsdagerErMinst.toLong()),
             oppfyllerKravOmMinstelønn = oppfyllerKravOmMinstelønn,
             oppfyllerKravOmOpptjening = oppfyllerKravOmOpptjening,
             oppfyllerKravOmMedlemskap = oppfyllerKravOmMedlemskap
         )
+    }
+}
+
+class SykepengegrunnlagsgrenseDTO(
+    val grunnbeløp: Int,
+    val grense: Int,
+    val virkningstidspunkt: LocalDate,
+) {
+    companion object {
+        fun fra6GBegrensning(grunnbeløpgrense: Inntekt): SykepengegrunnlagsgrenseDTO {
+            val virkningstidspunkt = Grunnbeløp.virkningstidspunktFor(grunnbeløpgrense / 6)
+            return SykepengegrunnlagsgrenseDTO(
+                Grunnbeløp.`1G`.beløp(virkningstidspunkt).reflection { årlig, _, _, _ -> årlig.toInt() },
+                grunnbeløpgrense.reflection { årlig, _, _, _ -> årlig }.toInt(),
+                virkningstidspunkt
+            )
+        }
     }
 }
 
@@ -188,6 +207,7 @@ internal class VilkårsgrunnlagBuilder(
                     sykepengegrunnlag = compositeSykepengegrunnlag.sykepengegrunnlag,
                     avviksprosent = avviksprosent?.prosent(),
                     grunnbeløp = grunnbeløp.årlig.toInt(),
+                    sykepengegrunnlagsgrense = SykepengegrunnlagsgrenseDTO.fra6GBegrensning(Grunnbeløp.`6G`.beløp(skjæringstidspunkt)),
                     meldingsreferanseId = meldingsreferanseId,
                     antallOpptjeningsdagerErMinst = opptjening.opptjeningsdager(),
                     oppfyllerKravOmMinstelønn = compositeSykepengegrunnlag.oppfyllerMinsteinntektskrav,
@@ -265,6 +285,7 @@ internal class VilkårsgrunnlagBuilder(
                 minsteinntekt: Inntekt,
                 oppfyllerMinsteinntektskrav: Boolean
             ) {
+
                 this.sykepengegrunnlag = InntektBuilder(sykepengegrunnlag).build()
                 this.oppfyllerMinsteinntektskrav = oppfyllerMinsteinntektskrav
                 this.omregnetÅrsinntekt = InntektBuilder(grunnlagForSykepengegrunnlag).build().årlig

@@ -36,6 +36,7 @@ data class GraphQLSpleisVilkarsgrunnlag(
     override val inntekter: List<GraphQLArbeidsgiverinntekt>,
     val avviksprosent: Double?,
     val grunnbelop: Int,
+    val sykepengegrunnlagsgrense: GraphQLSykepengegrunnlagsgrense,
     val antallOpptjeningsdagerErMinst: Int,
     val opptjeningFra: LocalDate,
     val oppfyllerKravOmMinstelonn: Boolean,
@@ -58,4 +59,10 @@ data class GraphQLInfotrygdVilkarsgrunnlag(
 data class GraphQLVilkarsgrunnlaghistorikk(
     val id: UUID,
     val grunnlag: List<GraphQLVilkarsgrunnlag>
+)
+
+data class GraphQLSykepengegrunnlagsgrense(
+    val grunnbelop: Int,
+    val grense: Int,
+    val virkningstidspunkt: LocalDate,
 )

@@ -2,6 +2,7 @@ package no.nav.helse.serde.api.dto
 
 import java.time.LocalDate
 import java.time.YearMonth
+import no.nav.helse.serde.api.speil.builders.SykepengegrunnlagsgrenseDTO
 
 interface Vilkårsgrunnlag {
     val skjæringstidspunkt: LocalDate
@@ -25,6 +26,7 @@ data class SpleisVilkårsgrunnlag(
     override val inntekter: List<Arbeidsgiverinntekt>,
     val avviksprosent: Double?,
     val grunnbeløp: Int,
+    val sykepengegrunnlagsgrense: SykepengegrunnlagsgrenseDTO,
     val antallOpptjeningsdagerErMinst: Int,
     val opptjeningFra: LocalDate,
     val oppfyllerKravOmMinstelønn: Boolean,

@@ -25,6 +25,7 @@ import no.nav.helse.serde.api.dto.Utbetaling
 import no.nav.helse.serde.api.dto.Utbetalingstatus
 import no.nav.helse.serde.api.dto.UtbetalingstidslinjedagType
 import no.nav.helse.serde.api.dto.Vilkårsgrunnlag
+import no.nav.helse.serde.api.speil.builders.SykepengegrunnlagsgrenseDTO
 import no.nav.helse.spleis.graphql.dto.GraphQLAktivitet
 import no.nav.helse.spleis.graphql.dto.GraphQLArbeidsgiverinntekt
 import no.nav.helse.spleis.graphql.dto.GraphQLBegrunnelse
@@ -55,6 +56,7 @@ import no.nav.helse.spleis.graphql.dto.GraphQLSpleisVilkarsgrunnlag
 import no.nav.helse.spleis.graphql.dto.GraphQLSykdomsdagkilde
 import no.nav.helse.spleis.graphql.dto.GraphQLSykdomsdagkildetype
 import no.nav.helse.spleis.graphql.dto.GraphQLSykdomsdagtype
+import no.nav.helse.spleis.graphql.dto.GraphQLSykepengegrunnlagsgrense
 import no.nav.helse.spleis.graphql.dto.GraphQLSykmelding
 import no.nav.helse.spleis.graphql.dto.GraphQLUberegnetPeriode
 import no.nav.helse.spleis.graphql.dto.GraphQLUtbetaling
@@ -403,6 +405,7 @@ internal fun mapVilkårsgrunnlag(id: UUID, vilkårsgrunnlag: List<Vilkårsgrunnl
                     inntekter = grunnlag.inntekter.map { inntekt -> mapInntekt(inntekt) },
                     avviksprosent = grunnlag.avviksprosent,
                     grunnbelop = grunnlag.grunnbeløp,
+                    sykepengegrunnlagsgrense = mapSykepengergrunnlagsgrense(grunnlag.sykepengegrunnlagsgrense),
                     antallOpptjeningsdagerErMinst = grunnlag.antallOpptjeningsdagerErMinst,
                     opptjeningFra = grunnlag.opptjeningFra,
                     oppfyllerKravOmMinstelonn = grunnlag.oppfyllerKravOmMinstelønn,
@@ -427,3 +430,6 @@ internal fun mapVilkårsgrunnlag(id: UUID, vilkårsgrunnlag: List<Vilkårsgrunnl
             }
         }
     )
+
+private fun mapSykepengergrunnlagsgrense(sykepengegrunnlagsgrenseDTO: SykepengegrunnlagsgrenseDTO) =
+    GraphQLSykepengegrunnlagsgrense(sykepengegrunnlagsgrenseDTO.grunnbeløp, sykepengegrunnlagsgrenseDTO.grense, sykepengegrunnlagsgrenseDTO.virkningstidspunkt)

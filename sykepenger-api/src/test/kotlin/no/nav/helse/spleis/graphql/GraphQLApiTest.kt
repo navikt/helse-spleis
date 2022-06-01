@@ -543,4 +543,54 @@ internal class GraphQLApiTest : AbstractObservableTest() {
             assertEquals(ORGNUMMER, organisasjonsnummer)
         }
     }
+
+    @Test
+    fun `vilkårsgrunnlag med grunnbeløpgrense`() {
+        val query = """
+            {
+                person(fnr: \"$UNG_PERSON_FNR\") {
+                    arbeidsgivere {
+                        generasjoner {
+                            perioder {
+                                ... on GraphQLBeregnetPeriode {
+                                    vilkarsgrunnlaghistorikkId
+                                }
+                            }
+                        }
+                    },
+                    vilkarsgrunnlaghistorikk {
+                        id,
+                        grunnlag {
+                            
+                            ... on GraphQLSpleisVilkarsgrunnlag {
+                                sykepengegrunnlagsgrense {
+                                    grunnbelop,
+                                    grense,
+                                    virkningstidspunkt
+                                }                            
+                            }
+                        }
+                    }
+                }
+            }
+        """.trimIndent()
+
+        testServer.httpPost(
+            path = "/graphql",
+            body = """{"query": "$query"}"""
+        ) {
+            objectMapper.readTree(this).get("data").get("person").let { person ->
+                val vilkårsId: String =
+                    person.get("arbeidsgivere").get(0).get("generasjoner").get(0).get("perioder").get(0).get("vilkarsgrunnlaghistorikkId").asText()
+                val vilkårsgrunnlaghistorikk = person.get("vilkarsgrunnlaghistorikk")
+                assertEquals(1, vilkårsgrunnlaghistorikk.size())
+                assertEquals(vilkårsId, vilkårsgrunnlaghistorikk.get(0).get("id").asText())
+                assertEquals(1, vilkårsgrunnlaghistorikk.get(0).get("grunnlag").get(0).size())
+                assertEquals(93634, vilkårsgrunnlaghistorikk.get(0).get("grunnlag").get(0).get("sykepengegrunnlagsgrense").get("grunnbelop").asInt())
+                assertEquals( 561804, vilkårsgrunnlaghistorikk.get(0).get("grunnlag").get(0).get("sykepengegrunnlagsgrense").get("grense").asInt())
+                assertEquals("2017-05-01", vilkårsgrunnlaghistorikk.get(0).get("grunnlag").get(0).get("sykepengegrunnlagsgrense").get("virkningstidspunkt").asText())
+            }
+        }
+    }
+
 }
