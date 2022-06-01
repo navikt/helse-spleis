@@ -1,5 +1,9 @@
 package no.nav.helse.hendelser
 
+import java.time.LocalDate
+import java.time.YearMonth
+import java.time.temporal.ChronoUnit
+import java.util.UUID
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.MånedligInntekt.Companion.harInntektFor
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.MånedligInntekt.Companion.nylig
 import no.nav.helse.person.Inntektshistorikk
@@ -7,10 +11,6 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.PersonHendelse
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.summer
-import java.time.LocalDate
-import java.time.YearMonth
-import java.time.temporal.ChronoUnit
-import java.util.*
 
 typealias InntektCreator = (
     yearMonth: YearMonth,
@@ -32,7 +32,7 @@ class ArbeidsgiverInntekt(
 
     companion object {
         fun lagreSykepengegrunnlag(inntekter: List<ArbeidsgiverInntekt>, person: Person, skjæringstidspunkt: LocalDate, hendelse: PersonHendelse) {
-            inntekter.forEach { person.lagreGrunnlagForSykepengegrunnlag(it.arbeidsgiver, it, skjæringstidspunkt, hendelse) }
+            inntekter.forEach { person.lagreOmregnetÅrsinntekt(it.arbeidsgiver, it, skjæringstidspunkt, hendelse) }
         }
 
         fun lagreSammenligningsgrunnlag(inntekter: List<ArbeidsgiverInntekt>, person: Person, skjæringstidspunkt: LocalDate, hendelse: PersonHendelse) {

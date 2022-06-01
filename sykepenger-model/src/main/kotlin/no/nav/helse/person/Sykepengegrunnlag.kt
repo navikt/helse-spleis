@@ -3,9 +3,9 @@ package no.nav.helse.person
 import java.time.LocalDate
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.Grunnbeløp.Companion.halvG
-import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.arbeidsgivergrunnlag
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.inntektsopplysningPerArbeidsgiver
-import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.sykepengegrunnlag
+import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.omregnetÅrsinntekt
+import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.omregnetÅrsinntektPerArbeidsgiver
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.valider
 import no.nav.helse.person.Sykepengegrunnlag.Begrensning.ER_6G_BEGRENSET
 import no.nav.helse.person.Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
@@ -22,18 +22,18 @@ internal class Sykepengegrunnlag(
     private val arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
     internal val deaktiverteArbeidsforhold: List<String>,
     private val vurdertInfotrygd: Boolean,
-    private val overstyrtGrunnlagForSykepengegrunnlag: Inntekt? = null,
+    private val skjønnsmessigFastsattÅrsinntekt: Inntekt? = null,
     `6G`: Inntekt? = null
 ) {
     private val `6G`: Inntekt = `6G` ?: Grunnbeløp.`6G`.beløp(skjæringstidspunkt, LocalDate.now())
-    internal val grunnlagForSykepengegrunnlag: Inntekt = overstyrtGrunnlagForSykepengegrunnlag ?: arbeidsgiverInntektsopplysninger.sykepengegrunnlag() // TODO: gjøre private
-    internal val sykepengegrunnlag = grunnlagForSykepengegrunnlag.coerceAtMost(this.`6G`)
+    internal val inntektsgrunnlag: Inntekt = skjønnsmessigFastsattÅrsinntekt ?: arbeidsgiverInntektsopplysninger.omregnetÅrsinntekt() // TODO: gjøre private
+    internal val sykepengegrunnlag = inntektsgrunnlag.coerceAtMost(this.`6G`)
     private val maksimalDagsats = sykepengegrunnlag.rundTilDaglig()
-    internal val begrensning = if (vurdertInfotrygd) VURDERT_I_INFOTRYGD else if (grunnlagForSykepengegrunnlag > this.`6G`) ER_6G_BEGRENSET else ER_IKKE_6G_BEGRENSET
+    internal val begrensning = if (vurdertInfotrygd) VURDERT_I_INFOTRYGD else if (inntektsgrunnlag > this.`6G`) ER_6G_BEGRENSET else ER_IKKE_6G_BEGRENSET
 
     private val forhøyetInntektskrav = alder.forhøyetInntektskrav(skjæringstidspunkt)
     private val minsteinntekt = (if (forhøyetInntektskrav) Grunnbeløp.`2G` else halvG).minsteinntekt(skjæringstidspunkt)
-    private val oppfyllerMinsteinntektskrav = grunnlagForSykepengegrunnlag >= minsteinntekt
+    private val oppfyllerMinsteinntektskrav = inntektsgrunnlag >= minsteinntekt
 
     internal constructor(
         alder: Alder,
@@ -44,17 +44,17 @@ internal class Sykepengegrunnlag(
         vurdertInfotrygd: Boolean = false
     ) : this(alder, skjæringstidspunkt, arbeidsgiverInntektsopplysninger, deaktiverteArbeidsforhold, vurdertInfotrygd) {
         subsumsjonObserver.apply {
-            `§ 8-30 ledd 1`(arbeidsgiverInntektsopplysninger.arbeidsgivergrunnlag(), grunnlagForSykepengegrunnlag)
+            `§ 8-30 ledd 1`(arbeidsgiverInntektsopplysninger.omregnetÅrsinntektPerArbeidsgiver(), inntektsgrunnlag)
             `§ 8-10 ledd 2 punktum 1`(
                 erBegrenset = begrensning == ER_6G_BEGRENSET,
                 maksimaltSykepengegrunnlag = `6G`,
                 skjæringstidspunkt = skjæringstidspunkt,
-                grunnlagForSykepengegrunnlag = grunnlagForSykepengegrunnlag
+                inntektsgrunnlag = inntektsgrunnlag
             )
             if (alder.forhøyetInntektskrav(skjæringstidspunkt))
-                `§ 8-51 ledd 2`(oppfyllerMinsteinntektskrav, skjæringstidspunkt, alder.alderPåDato(skjæringstidspunkt), grunnlagForSykepengegrunnlag, minsteinntekt)
+                `§ 8-51 ledd 2`(oppfyllerMinsteinntektskrav, skjæringstidspunkt, alder.alderPåDato(skjæringstidspunkt), inntektsgrunnlag, minsteinntekt)
             else
-                `§ 8-3 ledd 2 punktum 1`(oppfyllerMinsteinntektskrav, skjæringstidspunkt, grunnlagForSykepengegrunnlag, minsteinntekt)
+                `§ 8-3 ledd 2 punktum 1`(oppfyllerMinsteinntektskrav, skjæringstidspunkt, inntektsgrunnlag, minsteinntekt)
         }
     }
 
@@ -100,15 +100,15 @@ internal class Sykepengegrunnlag(
             arbeidsgiverInntektsopplysninger = arbeidsgiverInntektsopplysninger,
             deaktiverteArbeidsforhold = deaktiverteArbeidsforhold,
             vurdertInfotrygd = vurdertInfotrygd,
-            overstyrtGrunnlagForSykepengegrunnlag = grunnlagForSykepengegrunnlag
+            skjønnsmessigFastsattÅrsinntekt = skjønnsmessigFastsattÅrsinntekt
         )
     internal fun accept(visitor: SykepengegrunnlagVisitor) {
         visitor.preVisitSykepengegrunnlag(
             this,
             skjæringstidspunkt,
             sykepengegrunnlag,
-            overstyrtGrunnlagForSykepengegrunnlag,
-            grunnlagForSykepengegrunnlag,
+            skjønnsmessigFastsattÅrsinntekt,
+            inntektsgrunnlag,
             maksimalDagsats,
             `6G`,
             begrensning,
@@ -124,8 +124,8 @@ internal class Sykepengegrunnlag(
             this,
             skjæringstidspunkt,
             sykepengegrunnlag,
-            overstyrtGrunnlagForSykepengegrunnlag,
-            grunnlagForSykepengegrunnlag,
+            skjønnsmessigFastsattÅrsinntekt,
+            inntektsgrunnlag,
             maksimalDagsats,
             `6G`,
             begrensning,
@@ -136,8 +136,8 @@ internal class Sykepengegrunnlag(
         )
     }
 
-    internal fun avviksprosent(sammenligningsgrunnlag: Inntekt, subsumsjonObserver: SubsumsjonObserver) = grunnlagForSykepengegrunnlag.avviksprosent(sammenligningsgrunnlag).also { avvik ->
-        subsumsjonObserver.`§ 8-30 ledd 2 punktum 1`(Prosent.MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT, grunnlagForSykepengegrunnlag, sammenligningsgrunnlag, avvik)
+    internal fun avviksprosent(sammenligningsgrunnlag: Inntekt, subsumsjonObserver: SubsumsjonObserver) = inntektsgrunnlag.avviksprosent(sammenligningsgrunnlag).also { avvik ->
+        subsumsjonObserver.`§ 8-30 ledd 2 punktum 1`(Prosent.MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT, inntektsgrunnlag, sammenligningsgrunnlag, avvik)
     }
 
     internal fun inntektsopplysningPerArbeidsgiver(): Map<String, Inntektshistorikk.Inntektsopplysning> =
@@ -147,7 +147,7 @@ internal class Sykepengegrunnlag(
         if (other !is Sykepengegrunnlag) return false
         return sykepengegrunnlag == other.sykepengegrunnlag
                  && arbeidsgiverInntektsopplysninger == other.arbeidsgiverInntektsopplysninger
-                 && grunnlagForSykepengegrunnlag == other.grunnlagForSykepengegrunnlag
+                 && inntektsgrunnlag == other.inntektsgrunnlag
                  && begrensning == other.begrensning
                  && deaktiverteArbeidsforhold == other.deaktiverteArbeidsforhold
     }
@@ -155,7 +155,7 @@ internal class Sykepengegrunnlag(
     override fun hashCode(): Int {
         var result = sykepengegrunnlag.hashCode()
         result = 31 * result + arbeidsgiverInntektsopplysninger.hashCode()
-        result = 31 * result + grunnlagForSykepengegrunnlag.hashCode()
+        result = 31 * result + inntektsgrunnlag.hashCode()
         result = 31 * result + begrensning.hashCode()
         result = 31 * result + deaktiverteArbeidsforhold.hashCode()
         return result

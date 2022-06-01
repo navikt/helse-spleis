@@ -1,22 +1,29 @@
 package no.nav.helse.person.infotrygdhistorikk
 
-import no.nav.helse.*
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
+import no.nav.helse.desember
+import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.Inntektsinspektør
+import no.nav.helse.januar
+import no.nav.helse.mars
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.etterlevelse.MaskinellJurist
+import no.nav.helse.september
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
 
 internal class InfotrygdInntektsopplysningTest {
 
@@ -77,7 +84,7 @@ internal class InfotrygdInntektsopplysningTest {
         )
         assertEquals(1, inspektør.inntektTeller.size)
         assertEquals(1, inspektør.inntektTeller.first())
-        assertEquals(INNTEKT, historikk.grunnlagForSykepengegrunnlag(1.januar, 1.januar)?.grunnlagForSykepengegrunnlag())
+        assertEquals(INNTEKT, historikk.omregnetÅrsinntekt(1.januar, 1.januar)?.omregnetÅrsinntekt())
     }
 
     @Test
@@ -91,7 +98,7 @@ internal class InfotrygdInntektsopplysningTest {
         assertEquals(2, inspektør.inntektTeller.size)
         assertEquals(2, inspektør.inntektTeller.first())
         assertEquals(1, inspektør.inntektTeller.last())
-        assertEquals(25000.månedlig, historikk.grunnlagForSykepengegrunnlag(1.januar, 1.januar)?.grunnlagForSykepengegrunnlag())
+        assertEquals(25000.månedlig, historikk.omregnetÅrsinntekt(1.januar, 1.januar)?.omregnetÅrsinntekt())
     }
 
     @Test
@@ -112,7 +119,7 @@ internal class InfotrygdInntektsopplysningTest {
         assertEquals(2, inspektør.inntektTeller.size)
         assertEquals(24, inspektør.inntektTeller.first())
         assertEquals(23, inspektør.inntektTeller.last())
-        assertEquals(25000.månedlig, historikk.grunnlagForSykepengegrunnlag(1.januar, 1.januar)?.grunnlagForSykepengegrunnlag())
+        assertEquals(25000.månedlig, historikk.omregnetÅrsinntekt(1.januar, 1.januar)?.omregnetÅrsinntekt())
     }
 
     @Test
@@ -160,7 +167,7 @@ internal class InfotrygdInntektsopplysningTest {
         assertEquals(2, inspektør.inntektTeller.size)
         assertEquals(24, inspektør.inntektTeller.first())
         assertEquals(1, inspektør.inntektTeller.last())
-        assertEquals(25000.månedlig, historikk.grunnlagForSykepengegrunnlag(1.januar, 1.januar)?.grunnlagForSykepengegrunnlag())
+        assertEquals(25000.månedlig, historikk.omregnetÅrsinntekt(1.januar, 1.januar)?.omregnetÅrsinntekt())
     }
 
     @Test
@@ -186,9 +193,9 @@ internal class InfotrygdInntektsopplysningTest {
             historikk,
             UUID.randomUUID()
         )
-        assertEquals(30000.månedlig, historikk.grunnlagForSykepengegrunnlag(1.januar, 11.januar, 1.januar)?.grunnlagForSykepengegrunnlag())
-        assertEquals(25000.månedlig, historikk.grunnlagForSykepengegrunnlag(1.januar, 9.januar, 1.januar)?.grunnlagForSykepengegrunnlag())
-        assertNull(historikk.grunnlagForSykepengegrunnlag(1.januar, 4.januar, 1.januar))
+        assertEquals(30000.månedlig, historikk.omregnetÅrsinntekt(1.januar, 11.januar, 1.januar)?.omregnetÅrsinntekt())
+        assertEquals(25000.månedlig, historikk.omregnetÅrsinntekt(1.januar, 9.januar, 1.januar)?.omregnetÅrsinntekt())
+        assertNull(historikk.omregnetÅrsinntekt(1.januar, 4.januar, 1.januar))
     }
 
     @Test

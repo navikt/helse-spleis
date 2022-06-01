@@ -276,8 +276,8 @@ internal class VilkårsgrunnlagBuilder(
                 sykepengegrunnlag1: Sykepengegrunnlag,
                 skjæringstidspunkt: LocalDate,
                 sykepengegrunnlag: Inntekt,
-                overstyrtGrunnlagForSykepengegrunnlag: Inntekt?,
-                grunnlagForSykepengegrunnlag: Inntekt,
+                skjønnsmessigFastsattÅrsinntekt: Inntekt?,
+                inntektsgrunnlag: Inntekt,
                 maksimalDagsats: Inntekt,
                 `6G`: Inntekt,
                 begrensning: Sykepengegrunnlag.Begrensning,
@@ -289,7 +289,7 @@ internal class VilkårsgrunnlagBuilder(
 
                 this.sykepengegrunnlag = InntektBuilder(sykepengegrunnlag).build()
                 this.oppfyllerMinsteinntektskrav = oppfyllerMinsteinntektskrav
-                this.omregnetÅrsinntekt = InntektBuilder(grunnlagForSykepengegrunnlag).build().årlig
+                this.omregnetÅrsinntekt = InntektBuilder(inntektsgrunnlag).build().årlig
                 this.deaktiverteArbeidsforhold = deaktiverteArbeidsforhold
             }
 
@@ -364,7 +364,7 @@ internal class VilkårsgrunnlagBuilder(
             }
 
             class SkattBuilder(skattComposite: SkattComposite) : InntekthistorikkVisitor {
-                private val inntekt = InntektBuilder(skattComposite.grunnlagForSykepengegrunnlag()).build()
+                private val inntekt = InntektBuilder(skattComposite.omregnetÅrsinntekt()).build()
                 private val inntekterFraAOrdningen = mutableMapOf<YearMonth, Double>()
 
                 init {

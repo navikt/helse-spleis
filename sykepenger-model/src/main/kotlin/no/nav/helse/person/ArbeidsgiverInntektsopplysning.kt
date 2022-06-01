@@ -9,8 +9,8 @@ internal class ArbeidsgiverInntektsopplysning(
     private val orgnummer: String,
     private val inntektsopplysning: Inntektshistorikk.Inntektsopplysning
 ) {
-    private fun sykepengegrunnlag(acc: Inntekt): Inntekt {
-        return acc + inntektsopplysning.grunnlagForSykepengegrunnlag()
+    private fun omregnetÅrsinntekt(acc: Inntekt): Inntekt {
+        return acc + inntektsopplysning.omregnetÅrsinntekt()
     }
 
     internal fun accept(visitor: ArbeidsgiverInntektsopplysningVisitor) {
@@ -34,11 +34,11 @@ internal class ArbeidsgiverInntektsopplysning(
         internal fun List<ArbeidsgiverInntektsopplysning>.valider(aktivitetslogg: IAktivitetslogg) {
             map { it.inntektsopplysning }.valider(aktivitetslogg)
         }
-        internal fun List<ArbeidsgiverInntektsopplysning>.sykepengegrunnlag() =
-            fold(INGEN) { acc, item -> item.sykepengegrunnlag(acc)}
+        internal fun List<ArbeidsgiverInntektsopplysning>.omregnetÅrsinntekt() =
+            fold(INGEN) { acc, item -> item.omregnetÅrsinntekt(acc)}
 
-        internal fun List<ArbeidsgiverInntektsopplysning>.arbeidsgivergrunnlag() =
-            associate { it.orgnummer to it.inntektsopplysning.grunnlagForSykepengegrunnlag() }
+        internal fun List<ArbeidsgiverInntektsopplysning>.omregnetÅrsinntektPerArbeidsgiver() =
+            associate { it.orgnummer to it.inntektsopplysning.omregnetÅrsinntekt() }
 
         internal fun List<ArbeidsgiverInntektsopplysning>.sammenligningsgrunnlag(): Inntekt {
             return map { it.inntektsopplysning.grunnlagForSammenligningsgrunnlag() }.summer()

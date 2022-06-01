@@ -32,7 +32,7 @@ internal class InntektsmeldingHendelseTest : AbstractPersonTest() {
         val inntekthistorikk = Inntektshistorikk()
         inntektsmelding(beregnetInntekt = INNTEKT_PR_MÅNED, førsteFraværsdag = 1.januar)
             .addInntekt(inntekthistorikk, 1.januar, MaskinellJurist())
-        assertEquals(INNTEKT_PR_MÅNED, inntekthistorikk.grunnlagForSykepengegrunnlag(1.januar, 1.januar)?.grunnlagForSykepengegrunnlag())
+        assertEquals(INNTEKT_PR_MÅNED, inntekthistorikk.omregnetÅrsinntekt(1.januar, 1.januar)?.omregnetÅrsinntekt())
     }
 
     @Test

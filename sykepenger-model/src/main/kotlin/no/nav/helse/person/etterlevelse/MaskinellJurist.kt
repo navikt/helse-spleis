@@ -1,26 +1,48 @@
 package no.nav.helse.person.etterlevelse
 
+import java.time.LocalDate
+import java.time.Year
+import java.time.format.DateTimeFormatter
+import java.util.UUID
 import no.nav.helse.Fødselsnummer
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.januar
 import no.nav.helse.juni
-import no.nav.helse.person.*
+import no.nav.helse.person.Bokstav
 import no.nav.helse.person.Bokstav.BOKSTAV_A
+import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Dokumentsporing.Companion.toMap
-import no.nav.helse.person.Ledd.*
+import no.nav.helse.person.FOLKETRYGDLOVENS_OPPRINNELSESDATO
+import no.nav.helse.person.Ledd
 import no.nav.helse.person.Ledd.Companion.ledd
-import no.nav.helse.person.Paragraf.*
+import no.nav.helse.person.Ledd.LEDD_1
+import no.nav.helse.person.Ledd.LEDD_2
+import no.nav.helse.person.Ledd.LEDD_3
+import no.nav.helse.person.Paragraf
+import no.nav.helse.person.Paragraf.PARAGRAF_8_10
+import no.nav.helse.person.Paragraf.PARAGRAF_8_11
+import no.nav.helse.person.Paragraf.PARAGRAF_8_12
+import no.nav.helse.person.Paragraf.PARAGRAF_8_13
+import no.nav.helse.person.Paragraf.PARAGRAF_8_16
+import no.nav.helse.person.Paragraf.PARAGRAF_8_17
+import no.nav.helse.person.Paragraf.PARAGRAF_8_19
+import no.nav.helse.person.Paragraf.PARAGRAF_8_2
+import no.nav.helse.person.Paragraf.PARAGRAF_8_28
+import no.nav.helse.person.Paragraf.PARAGRAF_8_29
+import no.nav.helse.person.Paragraf.PARAGRAF_8_3
+import no.nav.helse.person.Paragraf.PARAGRAF_8_30
+import no.nav.helse.person.Paragraf.PARAGRAF_8_51
+import no.nav.helse.person.Paragraf.PARAGRAF_8_9
+import no.nav.helse.person.Punktum
 import no.nav.helse.person.Punktum.Companion.punktum
 import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall
-import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall.*
+import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall.VILKAR_BEREGNET
+import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall.VILKAR_IKKE_OPPFYLT
+import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall.VILKAR_OPPFYLT
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Tidslinjedag.Companion.dager
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosent
-import java.time.LocalDate
-import java.time.Year
-import java.time.format.DateTimeFormatter
-import java.util.*
 
 class MaskinellJurist private constructor(
     private val parent: MaskinellJurist?,
@@ -107,7 +129,7 @@ class MaskinellJurist private constructor(
         )
     }
 
-    override fun `§ 8-3 ledd 2 punktum 1`(oppfylt: Boolean, skjæringstidspunkt: LocalDate, grunnlagForSykepengegrunnlag: Inntekt, minimumInntekt: Inntekt) {
+    override fun `§ 8-3 ledd 2 punktum 1`(oppfylt: Boolean, skjæringstidspunkt: LocalDate, inntektsgrunnlag: Inntekt, minimumInntekt: Inntekt) {
         leggTil(
             EnkelSubsumsjon(
                 utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
@@ -117,7 +139,7 @@ class MaskinellJurist private constructor(
                 punktum = 1.punktum,
                 input = mapOf(
                     "skjæringstidspunkt" to skjæringstidspunkt,
-                    "grunnlagForSykepengegrunnlag" to grunnlagForSykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
+                    "grunnlagForSykepengegrunnlag" to inntektsgrunnlag.reflection { årlig, _, _, _ -> årlig },
                     "minimumInntekt" to minimumInntekt.reflection { årlig, _, _, _ -> årlig }
                 ),
                 output = emptyMap(),
@@ -147,7 +169,7 @@ class MaskinellJurist private constructor(
         erBegrenset: Boolean,
         maksimaltSykepengegrunnlag: Inntekt,
         skjæringstidspunkt: LocalDate,
-        grunnlagForSykepengegrunnlag: Inntekt
+        inntektsgrunnlag: Inntekt
     ) {
         leggTil(
             EnkelSubsumsjon(
@@ -159,7 +181,7 @@ class MaskinellJurist private constructor(
                 input = mapOf(
                     "maksimaltSykepengegrunnlag" to maksimaltSykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
                     "skjæringstidspunkt" to skjæringstidspunkt,
-                    "grunnlagForSykepengegrunnlag" to grunnlagForSykepengegrunnlag.reflection { årlig, _, _, _ -> årlig }
+                    "grunnlagForSykepengegrunnlag" to inntektsgrunnlag.reflection { årlig, _, _, _ -> årlig }
                 ),
                 output = mapOf(
                     "erBegrenset" to erBegrenset
@@ -586,7 +608,7 @@ class MaskinellJurist private constructor(
         oppfylt: Boolean,
         skjæringstidspunkt: LocalDate,
         alderPåSkjæringstidspunkt: Int,
-        grunnlagForSykepengegrunnlag: Inntekt,
+        inntektsgrunnlag: Inntekt,
         minimumInntekt: Inntekt
     ) {
         leggTil(
@@ -598,7 +620,7 @@ class MaskinellJurist private constructor(
                 input = mapOf(
                     "skjæringstidspunkt" to skjæringstidspunkt,
                     "alderPåSkjæringstidspunkt" to alderPåSkjæringstidspunkt,
-                    "grunnlagForSykepengegrunnlag" to grunnlagForSykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
+                    "grunnlagForSykepengegrunnlag" to inntektsgrunnlag.reflection { årlig, _, _, _ -> årlig },
                     "minimumInntekt" to minimumInntekt.reflection { årlig, _, _, _ -> årlig }
                 ),
                 output = emptyMap(),

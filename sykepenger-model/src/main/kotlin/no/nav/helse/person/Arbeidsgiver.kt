@@ -168,7 +168,7 @@ internal class Arbeidsgiver private constructor(
 
         internal fun List<Arbeidsgiver>.beregnSykepengegrunnlag(skjæringstidspunkt: LocalDate, periodeStart: LocalDate) =
             fold(emptyList<ArbeidsgiverInntektsopplysning>()) { inntektsopplysninger, arbeidsgiver ->
-                val inntektsopplysning = arbeidsgiver.inntektshistorikk.grunnlagForSykepengegrunnlag(
+                val inntektsopplysning = arbeidsgiver.inntektshistorikk.omregnetÅrsinntekt(
                     skjæringstidspunkt,
                     maxOf(skjæringstidspunkt, periodeStart),
                     arbeidsgiver.finnFørsteFraværsdag(skjæringstidspunkt)
@@ -181,7 +181,7 @@ internal class Arbeidsgiver private constructor(
         internal fun List<Arbeidsgiver>.beregnSykepengegrunnlag(skjæringstidspunkt: LocalDate, subsumsjonObserver: SubsumsjonObserver) =
             mapNotNull { arbeidsgiver ->
                 val førsteFraværsdag = arbeidsgiver.finnFørsteFraværsdag(skjæringstidspunkt)
-                val inntektsopplysning = arbeidsgiver.inntektshistorikk.grunnlagForSykepengegrunnlag(skjæringstidspunkt, førsteFraværsdag)
+                val inntektsopplysning = arbeidsgiver.inntektshistorikk.omregnetÅrsinntekt(skjæringstidspunkt, førsteFraværsdag)
                 inntektsopplysning?.subsumsjon(subsumsjonObserver, skjæringstidspunkt, arbeidsgiver.organisasjonsnummer)
                 when {
                     arbeidsgiver.harDeaktivertArbeidsforhold(skjæringstidspunkt) -> null
@@ -882,7 +882,7 @@ internal class Arbeidsgiver private constructor(
 
     private fun erGhost(skjæringstidspunkt: LocalDate): Boolean {
         val førsteFraværsdag = finnFørsteFraværsdag(skjæringstidspunkt)
-        val inntektsopplysning = inntektshistorikk.grunnlagForSykepengegrunnlag(skjæringstidspunkt, førsteFraværsdag)
+        val inntektsopplysning = inntektshistorikk.omregnetÅrsinntekt(skjæringstidspunkt, førsteFraværsdag)
         val harArbeidsforholdNyereEnnToMåneder = arbeidsforholdhistorikk.harArbeidsforholdNyereEnn(skjæringstidspunkt, MAKS_INNTEKT_GAP)
         return inntektsopplysning is Inntektshistorikk.SkattComposite || harArbeidsforholdNyereEnnToMåneder
     }
@@ -951,7 +951,7 @@ internal class Arbeidsgiver private constructor(
         Inntektsopplysning.lagreInntekter(inntektsopplysninger, inntektshistorikk, hendelseId)
     }
 
-    internal fun lagreSykepengegrunnlag(arbeidsgiverInntekt: ArbeidsgiverInntekt, skjæringstidspunkt: LocalDate, hendelse: PersonHendelse) {
+    internal fun lagreOmregnetÅrsinntekt(arbeidsgiverInntekt: ArbeidsgiverInntekt, skjæringstidspunkt: LocalDate, hendelse: PersonHendelse) {
         if (harRelevantArbeidsforhold(skjæringstidspunkt)) {
             arbeidsgiverInntekt.lagreInntekter(inntektshistorikk, skjæringstidspunkt, hendelse.meldingsreferanseId())
         }

@@ -593,13 +593,13 @@ class Person private constructor(
         }
     }
 
-    internal fun lagreGrunnlagForSykepengegrunnlag(
+    internal fun lagreOmregnetÅrsinntekt(
         orgnummer: String,
         arbeidsgiverInntekt: ArbeidsgiverInntekt,
         skjæringstidspunkt: LocalDate,
         hendelse: PersonHendelse
     ) {
-        finnArbeidsgiverForInntekter(orgnummer, hendelse).lagreSykepengegrunnlag(arbeidsgiverInntekt, skjæringstidspunkt, hendelse)
+        finnArbeidsgiverForInntekter(orgnummer, hendelse).lagreOmregnetÅrsinntekt(arbeidsgiverInntekt, skjæringstidspunkt, hendelse)
     }
 
     internal fun lagreGrunnlagForSammenligningsgrunnlag(

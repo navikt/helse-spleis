@@ -1094,7 +1094,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         val inntektsopplysning =
             inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.sykepengegrunnlag()?.inntektsopplysningPerArbeidsgiver()
                 ?.get(ORGNUMMER)
-        assertEquals(INNTEKT, inntektsopplysning?.grunnlagForSykepengegrunnlag())
+        assertEquals(INNTEKT, inntektsopplysning?.omregnetÅrsinntekt())
         assertInstanceOf(Inntektshistorikk.Inntektsmelding::class.java, inntektsopplysning)
     }
 

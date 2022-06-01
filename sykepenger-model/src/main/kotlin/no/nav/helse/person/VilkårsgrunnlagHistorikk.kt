@@ -119,7 +119,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         fun sykepengegrunnlag(): Sykepengegrunnlag
         fun sammenligningsgrunnlagPerArbeidsgiver(): Map<String, Inntektshistorikk.Inntektsopplysning>
         fun grunnlagsBegrensning(): Sykepengegrunnlag.Begrensning
-        fun grunnlagForSykepengegrunnlag(): Inntekt // TODO: fjerne denne
+        fun inntektsgrunnlag(): Inntekt // TODO: fjerne denne
         fun gjelderFlereArbeidsgivere(): Boolean
         fun sjekkAvviksprosent(aktivitetslogg: IAktivitetslogg): Boolean = true
         fun avvis(tidslinjer: List<Utbetalingstidslinje>, skjæringstidspunkt: LocalDate) {}
@@ -178,7 +178,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
         override fun sykepengegrunnlag() = sykepengegrunnlag
         override fun grunnlagsBegrensning() = sykepengegrunnlag.begrensning
-        override fun grunnlagForSykepengegrunnlag() = sykepengegrunnlag.grunnlagForSykepengegrunnlag
+        override fun inntektsgrunnlag() = sykepengegrunnlag.inntektsgrunnlag
         override fun sammenligningsgrunnlagPerArbeidsgiver() = sammenligningsgrunnlag.inntektsopplysningPerArbeidsgiver()
         override fun gjelderFlereArbeidsgivere() = sykepengegrunnlag.inntektsopplysningPerArbeidsgiver().size > 1
 
@@ -248,7 +248,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         override fun sykepengegrunnlag() = sykepengegrunnlag
         override fun grunnlagsBegrensning() = sykepengegrunnlag.begrensning
         override fun sammenligningsgrunnlagPerArbeidsgiver() = emptyMap<String, Inntektshistorikk.Inntektsopplysning>()
-        override fun grunnlagForSykepengegrunnlag() = sykepengegrunnlag.grunnlagForSykepengegrunnlag
+        override fun inntektsgrunnlag() = sykepengegrunnlag.inntektsgrunnlag
         override fun gjelderFlereArbeidsgivere() = sykepengegrunnlag.inntektsopplysningPerArbeidsgiver().size > 1
 
         override fun toSpesifikkKontekst() = SpesifikkKontekst(

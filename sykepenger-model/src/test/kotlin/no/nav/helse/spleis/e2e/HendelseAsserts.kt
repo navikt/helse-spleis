@@ -1,21 +1,31 @@
 package no.nav.helse.spleis.e2e
 
+import java.time.LocalDate
+import java.util.UUID
 import no.nav.helse.Fødselsnummer
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.inspectors.personLogg
-import no.nav.helse.person.*
+import no.nav.helse.person.AbstractPersonTest
+import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.AktivitetsloggVisitor
+import no.nav.helse.person.ArbeidstakerHendelse
+import no.nav.helse.person.IdInnhenter
+import no.nav.helse.person.Inntektskilde
+import no.nav.helse.person.Person
+import no.nav.helse.person.SpesifikkKontekst
+import no.nav.helse.person.TilstandType
 import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
-import org.junit.jupiter.api.Assertions.*
-import java.time.LocalDate
-import java.util.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import kotlin.reflect.KClass
 
 
 internal fun assertInntektForDato(forventetInntekt: Inntekt?, dato: LocalDate, førsteFraværsdag: LocalDate = dato, inspektør: TestArbeidsgiverInspektør) {
-    assertEquals(forventetInntekt, inspektør.inntektInspektør.grunnlagForSykepengegrunnlag(dato, førsteFraværsdag)?.grunnlagForSykepengegrunnlag())
+    assertEquals(forventetInntekt, inspektør.inntektInspektør.omregnetÅrsinntekt(dato, førsteFraværsdag)?.omregnetÅrsinntekt())
 }
 
 internal fun AbstractEndToEndTest.erEtterspurt(type: Aktivitetslogg.Aktivitet.Behov.Behovtype, vedtaksperiodeIdInnhenter: IdInnhenter, orgnummer: String, tilstand: TilstandType): Boolean {

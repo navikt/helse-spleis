@@ -46,17 +46,17 @@ internal class Inntektshistorikk {
 
     internal fun harNødvendigInntektForVilkårsprøving(skjæringstidspunkt: LocalDate, periodeStart: LocalDate, førsteFraværsdag: LocalDate?, harSykdomForSkjæringstidspunkt: Boolean): Boolean {
         if (førsteFraværsdag != null && harInntektsmelding(førsteFraværsdag)) return true
-        val inntektsopplysning = grunnlagForSykepengegrunnlag(skjæringstidspunkt, periodeStart, førsteFraværsdag) ?: return false
+        val inntektsopplysning = omregnetÅrsinntekt(skjæringstidspunkt, periodeStart, førsteFraværsdag) ?: return false
         return inntektsopplysning.erNødvendigInntektForVilkårsprøving(harSykdomForSkjæringstidspunkt)
     }
 
-    internal fun grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate, dato: LocalDate, førsteFraværsdag: LocalDate?): Inntektsopplysning? =
-        grunnlagForSykepengegrunnlag(skjæringstidspunkt, førsteFraværsdag) ?: skjæringstidspunkt
+    internal fun omregnetÅrsinntekt(skjæringstidspunkt: LocalDate, dato: LocalDate, førsteFraværsdag: LocalDate?): Inntektsopplysning? =
+        omregnetÅrsinntekt(skjæringstidspunkt, førsteFraværsdag) ?: skjæringstidspunkt
             .takeIf { it <= dato }
-            ?.let { nyesteInnslag()?.grunnlagForSykepengegrunnlagFraInfotrygd(it til dato) }
+            ?.let { nyesteInnslag()?.omregnetÅrsinntektInfotrygd(it til dato) }
 
-    internal fun grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?): Inntektsopplysning? =
-        nyesteInnslag()?.grunnlagForSykepengegrunnlag(skjæringstidspunkt, førsteFraværsdag)
+    internal fun omregnetÅrsinntekt(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?): Inntektsopplysning? =
+        nyesteInnslag()?.omregnetÅrsinntekt(skjæringstidspunkt, førsteFraværsdag)
 
     internal fun grunnlagForSammenligningsgrunnlag(dato: LocalDate): Inntektsopplysning? =
         nyesteInnslag()?.grunnlagForSammenligningsgrunnlag(dato)
@@ -85,10 +85,10 @@ internal class Inntektshistorikk {
             .sorted()
             .any { it.harInntektsmelding(førsteFraværsdag) }
 
-        internal fun grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?) =
+        internal fun omregnetÅrsinntekt(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?) =
             inntekter
                 .sorted()
-                .mapNotNull { it.grunnlagForSykepengegrunnlag(skjæringstidspunkt, førsteFraværsdag) }
+                .mapNotNull { it.omregnetÅrsinntekt(skjæringstidspunkt, førsteFraværsdag) }
                 .firstOrNull()
 
         internal fun grunnlagForSammenligningsgrunnlag(dato: LocalDate) =
@@ -97,11 +97,11 @@ internal class Inntektshistorikk {
                 .mapNotNull { it.grunnlagForSammenligningsgrunnlag(dato) }
                 .firstOrNull()
 
-        internal fun grunnlagForSykepengegrunnlagFraInfotrygd(periode: Periode) =
+        internal fun omregnetÅrsinntektInfotrygd(periode: Periode) =
             inntekter
                 .filterIsInstance<Infotrygd>()
                 .sorted()
-                .mapNotNull { it.grunnlagForSykepengegrunnlag(periode) }
+                .mapNotNull { it.omregnetÅrsinntekt(periode) }
                 .firstOrNull()
 
         internal fun build(filter: Utbetalingsfilter.Builder, inntektsmeldingId: UUID) {
@@ -120,8 +120,8 @@ internal class Inntektshistorikk {
         val dato: LocalDate
         val prioritet: Int
         fun accept(visitor: InntekthistorikkVisitor)
-        fun grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?): Inntektsopplysning? = null
-        fun grunnlagForSykepengegrunnlag(): Inntekt
+        fun omregnetÅrsinntekt(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?): Inntektsopplysning? = null
+        fun omregnetÅrsinntekt(): Inntekt
         fun grunnlagForSammenligningsgrunnlag(dato: LocalDate): Inntektsopplysning? = null
         fun grunnlagForSammenligningsgrunnlag(): Inntekt
         fun skalErstattesAv(other: Inntektsopplysning): Boolean
@@ -156,8 +156,8 @@ internal class Inntektshistorikk {
             visitor.visitSaksbehandler(this, id, dato, hendelseId, beløp, tidsstempel)
         }
 
-        override fun grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?) = takeIf { it.dato == skjæringstidspunkt }
-        override fun grunnlagForSykepengegrunnlag(): Inntekt = beløp
+        override fun omregnetÅrsinntekt(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?) = takeIf { it.dato == skjæringstidspunkt }
+        override fun omregnetÅrsinntekt(): Inntekt = beløp
 
         override fun grunnlagForSammenligningsgrunnlag(): Inntekt = error("Saksbehandler har ikke grunnlag for sammenligningsgrunnlag")
 
@@ -181,10 +181,10 @@ internal class Inntektshistorikk {
         }
 
         // TODO: egen test for å bruke førstefraværsdag her: https://trello.com/c/QFYSoFOs
-        override fun grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?) = takeIf { it.dato == skjæringstidspunkt }
-        override fun grunnlagForSykepengegrunnlag(): Inntekt = beløp
+        override fun omregnetÅrsinntekt(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?) = takeIf { it.dato == skjæringstidspunkt }
+        override fun omregnetÅrsinntekt(): Inntekt = beløp
 
-        internal fun grunnlagForSykepengegrunnlag(periode: Periode) = takeIf { it.dato in periode }
+        internal fun omregnetÅrsinntekt(periode: Periode) = takeIf { it.dato in periode }
 
         override fun grunnlagForSammenligningsgrunnlag(): Inntekt = error("Infotrygd har ikke grunnlag for sammenligningsgrunnlag")
 
@@ -238,10 +238,10 @@ internal class Inntektshistorikk {
         override fun harInntektsmelding(førsteFraværsdag: LocalDate) =
             førsteFraværsdag == dato
 
-        override fun grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?) =
+        override fun omregnetÅrsinntekt(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?) =
             takeIf { (førsteFraværsdag != null && YearMonth.from(skjæringstidspunkt) == YearMonth.from(førsteFraværsdag) && it.dato == førsteFraværsdag) || it.dato == skjæringstidspunkt }
 
-        override fun grunnlagForSykepengegrunnlag(): Inntekt = beløp
+        override fun omregnetÅrsinntekt(): Inntekt = beløp
 
         override fun grunnlagForSammenligningsgrunnlag(): Inntekt = error("Inntektsmelding har ikke grunnlag for sammenligningsgrunnlag")
 
@@ -270,17 +270,17 @@ internal class Inntektshistorikk {
             visitor.postVisitSkatt(this, id, dato)
         }
 
-        override fun grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?) =
+        override fun omregnetÅrsinntekt(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?) =
             takeIf {
                 inntektsopplysninger.any {
-                    it.grunnlagForSykepengegrunnlag(skjæringstidspunkt, førsteFraværsdag) != null
+                    it.omregnetÅrsinntekt(skjæringstidspunkt, førsteFraværsdag) != null
                         && it.erRelevant(Arbeidsforholdhistorikk.Arbeidsforhold.MAKS_INNTEKT_GAP)
                 }
             }
 
-        override fun grunnlagForSykepengegrunnlag(): Inntekt {
+        override fun omregnetÅrsinntekt(): Inntekt {
             return inntekterSisteTreMåneder
-                .map(Skatt::grunnlagForSykepengegrunnlag)
+                .map(Skatt::omregnetÅrsinntekt)
                 .summer()
                 .div(3)
         }
@@ -302,9 +302,9 @@ internal class Inntektshistorikk {
                 organisasjonsnummer = organisasjonsnummer,
                 skjæringstidspunkt = skjæringstidspunkt,
                 inntekterSisteTreMåneder = inntekterSisteTreMåneder.subsumsjonsformat(),
-                grunnlagForSykepengegrunnlag = grunnlagForSykepengegrunnlag()
+                grunnlagForSykepengegrunnlag = omregnetÅrsinntekt()
             )
-            subsumsjonObserver.`§ 8-29`(skjæringstidspunkt, grunnlagForSykepengegrunnlag(), inntektsopplysninger.subsumsjonsformat(), organisasjonsnummer)
+            subsumsjonObserver.`§ 8-29`(skjæringstidspunkt, omregnetÅrsinntekt(), inntektsopplysninger.subsumsjonsformat(), organisasjonsnummer)
         }
 
         override fun skalErstattesAv(other: Inntektsopplysning): Boolean =
@@ -324,7 +324,7 @@ internal class Inntektshistorikk {
             visitor.visitIkkeRapportert(id, dato, tidsstempel)
         }
 
-        override fun grunnlagForSykepengegrunnlag() = Inntekt.INGEN
+        override fun omregnetÅrsinntekt() = Inntekt.INGEN
 
         override fun grunnlagForSammenligningsgrunnlag() = Inntekt.INGEN
 
@@ -375,10 +375,10 @@ internal class Inntektshistorikk {
                 visitor.visitSkattSykepengegrunnlag(this, dato, hendelseId, beløp, måned, type, fordel, beskrivelse, tidsstempel)
             }
 
-            override fun grunnlagForSykepengegrunnlag(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?) =
+            override fun omregnetÅrsinntekt(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?) =
                 takeIf { this.dato == skjæringstidspunkt && måned.isWithinRangeOf(skjæringstidspunkt, 3) }
 
-            override fun grunnlagForSykepengegrunnlag(): Inntekt = beløp
+            override fun omregnetÅrsinntekt(): Inntekt = beløp
 
             override fun grunnlagForSammenligningsgrunnlag(): Inntekt = error("Sykepengegrunnlag har ikke grunnlag for sammenligningsgrunnlag")
 
@@ -418,7 +418,7 @@ internal class Inntektshistorikk {
 
             override fun grunnlagForSammenligningsgrunnlag(): Inntekt = beløp
 
-            override fun grunnlagForSykepengegrunnlag(): Inntekt = error("Sammenligningsgrunnlag har ikke grunnlag for sykepengegrunnlag")
+            override fun omregnetÅrsinntekt(): Inntekt = error("Sammenligningsgrunnlag har ikke grunnlag for sykepengegrunnlag")
 
             override fun skalErstattesAv(other: Inntektsopplysning) =
                 other is Sammenligningsgrunnlag && this.dato == other.dato

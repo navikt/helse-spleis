@@ -1,11 +1,16 @@
 package no.nav.helse.serde.api.speil.builders
 
-import no.nav.helse.person.*
-import no.nav.helse.økonomi.Inntekt
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
+import no.nav.helse.person.Arbeidsgiver
+import no.nav.helse.person.ArbeidsgiverVisitor
+import no.nav.helse.person.InntekthistorikkVisitor
+import no.nav.helse.person.Inntektshistorikk
+import no.nav.helse.person.Person
+import no.nav.helse.person.PersonVisitor
+import no.nav.helse.økonomi.Inntekt
 
 internal class InntektshistorikkForAOrdningenBuilder(person: Person): PersonVisitor {
     private val arbeidsgivere = mutableMapOf<String, ArbeidsgiverInntektBuilder>()
@@ -48,7 +53,7 @@ internal class InntektshistorikkForAOrdningenBuilder(person: Person): PersonVisi
 
         fun build() = inntekterFraAOrdningen
             .mapValues { (skjæringstidspunnkt, inntekterFraAOrdningen) ->
-                InntektBuilder(innslag.grunnlagForSykepengegrunnlag(skjæringstidspunnkt, null)!!.grunnlagForSykepengegrunnlag()).build() to inntekterFraAOrdningen
+                InntektBuilder(innslag.omregnetÅrsinntekt(skjæringstidspunnkt, null)!!.omregnetÅrsinntekt()).build() to inntekterFraAOrdningen
                     .map { (måned, sum) -> IInntekterFraAOrdningen(måned, sum) }
             }
             .toMap()
@@ -65,7 +70,7 @@ internal class InntektshistorikkForAOrdningenBuilder(person: Person): PersonVisi
             beskrivelse: String,
             tidsstempel: LocalDateTime
         ) {
-            if (innslag.grunnlagForSykepengegrunnlag(dato, null) == null) return
+            if (innslag.omregnetÅrsinntekt(dato, null) == null) return
             val inntekt = InntektBuilder(beløp).build()
             val inntekterFraAOrdningenForSkjæringstidspunkt = inntekterFraAOrdningen.getOrPut(dato, ::mutableMapOf)
             inntekterFraAOrdningenForSkjæringstidspunkt.merge(måned, inntekt.månedlig, Double::plus)

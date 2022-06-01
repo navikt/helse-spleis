@@ -1,13 +1,13 @@
 package no.nav.helse.inspectors
 
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.YearMonth
+import java.util.UUID
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.ArbeidsgiverVisitor
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.økonomi.Inntekt
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.YearMonth
-import java.util.*
 
 internal enum class Kilde {
     SKATT, INFOTRYGD, INNTEKTSMELDING, SAKSBEHANDLER
@@ -42,7 +42,7 @@ internal class InntektshistorikkInspektør(arbeidsgiver: Arbeidsgiver) : Arbeids
     ) = element(innslag.reversed()).opplysninger.filter { it.kilde in kilder }.size
     internal val sisteInnslag get() = innslag.firstOrNull()
 
-    internal fun grunnlagForSykepengegrunnlag(dato: LocalDate, førsteFraværsdag: LocalDate) = inntektshistorikk.grunnlagForSykepengegrunnlag(dato, førsteFraværsdag)
+    internal fun omregnetÅrsinntekt(dato: LocalDate, førsteFraværsdag: LocalDate) = inntektshistorikk.omregnetÅrsinntekt(dato, førsteFraværsdag)
 
     override fun preVisitInntekthistorikk(inntektshistorikk: Inntektshistorikk) {
         this.inntektshistorikk = inntektshistorikk
@@ -67,7 +67,7 @@ internal class InntektshistorikkInspektør(arbeidsgiver: Arbeidsgiver) : Arbeids
         inntektsopplysninger.add(
             Opplysning(
                 dato,
-                inntektsmelding.grunnlagForSykepengegrunnlag(dato, dato)?.grunnlagForSykepengegrunnlag(),
+                inntektsmelding.omregnetÅrsinntekt(dato, dato)?.omregnetÅrsinntekt(),
                 inntektsmelding.grunnlagForSammenligningsgrunnlag(dato)?.grunnlagForSammenligningsgrunnlag(),
                 Kilde.INNTEKTSMELDING
             )
@@ -85,7 +85,7 @@ internal class InntektshistorikkInspektør(arbeidsgiver: Arbeidsgiver) : Arbeids
         inntektsopplysninger.add(
             Opplysning(
                 dato,
-                infotrygd.grunnlagForSykepengegrunnlag(dato, dato)?.grunnlagForSykepengegrunnlag(),
+                infotrygd.omregnetÅrsinntekt(dato, dato)?.omregnetÅrsinntekt(),
                 infotrygd.grunnlagForSammenligningsgrunnlag(dato)?.grunnlagForSammenligningsgrunnlag(),
                 Kilde.INFOTRYGD
             )
@@ -126,7 +126,7 @@ internal class InntektshistorikkInspektør(arbeidsgiver: Arbeidsgiver) : Arbeids
         inntektsopplysninger.add(
             Opplysning(
                 skattedato,
-                skattComposite.grunnlagForSykepengegrunnlag(skattedato, skattedato)?.grunnlagForSykepengegrunnlag(),
+                skattComposite.omregnetÅrsinntekt(skattedato, skattedato)?.omregnetÅrsinntekt(),
                 skattComposite.grunnlagForSammenligningsgrunnlag(skattedato)?.grunnlagForSammenligningsgrunnlag(),
                 Kilde.SKATT
             )
@@ -144,7 +144,7 @@ internal class InntektshistorikkInspektør(arbeidsgiver: Arbeidsgiver) : Arbeids
         inntektsopplysninger.add(
             Opplysning(
                 dato,
-                saksbehandler.grunnlagForSykepengegrunnlag(dato, dato)?.grunnlagForSykepengegrunnlag(),
+                saksbehandler.omregnetÅrsinntekt(dato, dato)?.omregnetÅrsinntekt(),
                 saksbehandler.grunnlagForSammenligningsgrunnlag(dato)?.grunnlagForSammenligningsgrunnlag(),
                 Kilde.SAKSBEHANDLER
             )

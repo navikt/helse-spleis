@@ -136,7 +136,7 @@ internal class PingPongTest : AbstractEndToEndTest() {
         håndterUtbetalingshistorikk(3.vedtaksperiode, historie, inntektshistorikk = inntekt)
         håndterYtelser(3.vedtaksperiode)
         assertEquals(1.januar, inspektør.skjæringstidspunkt(3.vedtaksperiode))
-        assertEquals(INNTEKT - 100.månedlig, inspektør.vilkårsgrunnlag(2.vedtaksperiode)?.grunnlagForSykepengegrunnlag())
+        assertEquals(INNTEKT - 100.månedlig, inspektør.vilkårsgrunnlag(2.vedtaksperiode)?.inntektsgrunnlag())
     }
 
     @Test
@@ -158,7 +158,7 @@ internal class PingPongTest : AbstractEndToEndTest() {
         håndterUtbetalingshistorikk(3.vedtaksperiode, historie, inntektshistorikk = inntekt)
         håndterYtelser(3.vedtaksperiode)
         assertEquals(20.desember(2017), inspektør.skjæringstidspunkt(3.vedtaksperiode))
-        assertEquals(INNTEKT, inspektør.vilkårsgrunnlag(3.vedtaksperiode)?.grunnlagForSykepengegrunnlag())
+        assertEquals(INNTEKT, inspektør.vilkårsgrunnlag(3.vedtaksperiode)?.inntektsgrunnlag())
     }
 
     @Test

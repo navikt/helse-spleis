@@ -876,8 +876,8 @@ internal class JsonBuilder : AbstractBuilder() {
             sykepengegrunnlag1: Sykepengegrunnlag,
             skjæringstidspunkt: LocalDate,
             sykepengegrunnlag: Inntekt,
-            overstyrtGrunnlagForSykepengegrunnlag: Inntekt?,
-            grunnlagForSykepengegrunnlag: Inntekt,
+            skjønnsmessigFastsattÅrsinntekt: Inntekt?,
+            inntektsgrunnlag: Inntekt,
             maksimalDagsats: Inntekt,
             `6G`: Inntekt,
             begrensning: Sykepengegrunnlag.Begrensning,
@@ -938,8 +938,8 @@ internal class JsonBuilder : AbstractBuilder() {
             sykepengegrunnlag1: Sykepengegrunnlag,
             skjæringstidspunkt: LocalDate,
             sykepengegrunnlag: Inntekt,
-            overstyrtGrunnlagForSykepengegrunnlag: Inntekt?,
-            grunnlagForSykepengegrunnlag: Inntekt,
+            skjønnsmessigFastsattÅrsinntekt: Inntekt?,
+            inntektsgrunnlag: Inntekt,
             maksimalDagsats: Inntekt,
             `6G`: Inntekt,
             begrensning: Sykepengegrunnlag.Begrensning,
@@ -951,7 +951,7 @@ internal class JsonBuilder : AbstractBuilder() {
             this.sykepengegrunnlag.putAll(
                 mutableMapOf(
                     "sykepengegrunnlag" to sykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
-                    "grunnlagForSykepengegrunnlag" to grunnlagForSykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
+                    "inntektsgrunnlag" to inntektsgrunnlag.reflection { årlig, _, _, _ -> årlig },
                     "maksimalDagsats" to maksimalDagsats.reflection { årlig, _, _, _ -> årlig },
                     "grunnbeløp" to `6G`.reflection { årlig, _, _, _ -> årlig },
                     "arbeidsgiverInntektsopplysninger" to arbeidsgiverInntektsopplysninger,
@@ -961,7 +961,7 @@ internal class JsonBuilder : AbstractBuilder() {
                     "minsteinntekt" to minsteinntekt.reflection { årlig, _, _, _ -> årlig },
                     "oppfyllerMinsteinntektskrav" to oppfyllerMinsteinntektskrav
                 ).apply {
-                    compute("overstyrtGrunnlagForSykepengegrunnlag") { _, _ -> overstyrtGrunnlagForSykepengegrunnlag?.reflection { årlig, _, _, _ -> årlig } }
+                    compute("skjønnsmessigFastsattÅrsinntekt") { _, _ -> skjønnsmessigFastsattÅrsinntekt?.reflection { årlig, _, _, _ -> årlig } }
                 }
             )
             popState()

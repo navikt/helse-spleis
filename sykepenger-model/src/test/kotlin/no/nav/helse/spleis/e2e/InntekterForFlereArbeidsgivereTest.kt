@@ -289,8 +289,14 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
 
         assertForventetFeil(
             forklaring = "8-28 b",
-            nå = { assertEquals(300000.årlig, person.vilkårsgrunnlagFor(1.januar)?.inspektør?.sykepengegrunnlag?.inspektør?.sykepengegrunnlag) },
-            ønsket = { assertEquals(552000.årlig, person.vilkårsgrunnlagFor(1.januar)?.inspektør?.sykepengegrunnlag?.inspektør?.sykepengegrunnlag) }
+            nå = {
+                assertEquals(300000.årlig, person.vilkårsgrunnlagFor(1.januar)?.inspektør?.sykepengegrunnlag?.inspektør?.sykepengegrunnlag)
+                assertEquals(300000.årlig.rundTilDaglig(), person.vilkårsgrunnlagFor(1.januar)?.inspektør?.sykepengegrunnlag?.inspektør?.maksimalDagsats)
+             },
+            ønsket = {
+                assertEquals(552000.årlig, person.vilkårsgrunnlagFor(1.januar)?.inspektør?.sykepengegrunnlag?.inspektør?.sykepengegrunnlag)
+                assertEquals(552000.årlig.rundTilDaglig(), person.vilkårsgrunnlagFor(1.januar)?.inspektør?.sykepengegrunnlag?.inspektør?.maksimalDagsats)
+            }
         )
     }
 

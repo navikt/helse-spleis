@@ -1,5 +1,6 @@
 package no.nav.helse.utbetalingstidslinje
 
+import java.time.LocalDate
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilderException.ManglerInntektException
@@ -7,7 +8,6 @@ import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilderException.Ne
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Økonomi
-import java.time.LocalDate
 
 internal class Inntekter(
     private val skjæringstidspunkter: List<LocalDate>,
@@ -51,7 +51,7 @@ internal class Inntekter(
             .lastOrNull { it <= dato }
             ?.let { skjæringstidspunkt ->
                 finnInntekt(skjæringstidspunkt, dato)?.let { inntektsopplysning ->
-                    skjæringstidspunkt to inntektsopplysning.grunnlagForSykepengegrunnlag()
+                    skjæringstidspunkt to inntektsopplysning.omregnetÅrsinntekt()
                 }
             }
 

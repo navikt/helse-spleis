@@ -1,13 +1,13 @@
 package no.nav.helse.person.builders
 
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.Sykepengegrunnlag
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.økonomi.Inntekt
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
 
 internal class VedtakFattetBuilder(
     private val periode: Periode,
@@ -16,11 +16,11 @@ internal class VedtakFattetBuilder(
     vilkårsgrunnlag: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?
 ) {
     private val sykepengegrunnlag = vilkårsgrunnlag?.sykepengegrunnlag()?.sykepengegrunnlag ?: Inntekt.INGEN
-    private val grunnlagForSykepengegrunnlag = vilkårsgrunnlag?.grunnlagForSykepengegrunnlag() ?: Inntekt.INGEN
+    private val inntektsgrunnlag = vilkårsgrunnlag?.inntektsgrunnlag() ?: Inntekt.INGEN
     private val begrensning = vilkårsgrunnlag?.grunnlagsBegrensning()
 
-    private val grunnlagForSykepengegrunnlagPerArbeidsgiver =  vilkårsgrunnlag?.sykepengegrunnlag()?.inntektsopplysningPerArbeidsgiver()?.mapValues { (_, inntektsopplysning) ->
-        inntektsopplysning.grunnlagForSykepengegrunnlag()
+    private val omregnetÅrsinntektPerArbeidsgiver =  vilkårsgrunnlag?.sykepengegrunnlag()?.inntektsopplysningPerArbeidsgiver()?.mapValues { (_, inntektsopplysning) ->
+        inntektsopplysning.omregnetÅrsinntekt()
     } ?: emptyMap()
 
     private var vedtakFattetTidspunkt = LocalDateTime.now()
@@ -35,9 +35,9 @@ internal class VedtakFattetBuilder(
             hendelseIder = hendelseIder,
             skjæringstidspunkt = skjæringstidspunkt,
             sykepengegrunnlag = sykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
-            grunnlagForSykepengegrunnlag = grunnlagForSykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
-            grunnlagForSykepengegrunnlagPerArbeidsgiver = grunnlagForSykepengegrunnlagPerArbeidsgiver.mapValues { (_, inntekt) -> inntekt.reflection { årlig, _, _, _ -> årlig} },
-            inntekt = grunnlagForSykepengegrunnlag.reflection { _, månedlig, _, _ -> månedlig },
+            inntektsgrunnlag = inntektsgrunnlag.reflection { årlig, _, _, _ -> årlig },
+            omregnetÅrsinntektPerArbeidsgiver = omregnetÅrsinntektPerArbeidsgiver.mapValues { (_, inntekt) -> inntekt.reflection { årlig, _, _, _ -> årlig} },
+            inntekt = inntektsgrunnlag.reflection { _, månedlig, _, _ -> månedlig },
             utbetalingId = utbetalingId,
             sykepengegrunnlagsbegrensning = when (begrensning) {
                 Sykepengegrunnlag.Begrensning.ER_6G_BEGRENSET -> "ER_6G_BEGRENSET"
