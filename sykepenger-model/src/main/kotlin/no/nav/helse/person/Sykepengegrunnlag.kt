@@ -10,6 +10,7 @@ import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.valider
 import no.nav.helse.person.Sykepengegrunnlag.Begrensning.ER_6G_BEGRENSET
 import no.nav.helse.person.Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
 import no.nav.helse.person.Sykepengegrunnlag.Begrensning.VURDERT_I_INFOTRYGD
+import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
@@ -29,7 +30,7 @@ internal class Sykepengegrunnlag(
     internal val inntektsgrunnlag: Inntekt = skjønnsmessigFastsattÅrsinntekt ?: arbeidsgiverInntektsopplysninger.omregnetÅrsinntekt() // TODO: gjøre private
     internal val sykepengegrunnlag = inntektsgrunnlag.coerceAtMost(this.`6G`)
     private val maksimalDagsats = sykepengegrunnlag.rundTilDaglig()
-    internal val begrensning = if (vurdertInfotrygd) VURDERT_I_INFOTRYGD else if (inntektsgrunnlag > this.`6G`) ER_6G_BEGRENSET else ER_IKKE_6G_BEGRENSET
+    private val begrensning = if (vurdertInfotrygd) VURDERT_I_INFOTRYGD else if (inntektsgrunnlag > this.`6G`) ER_6G_BEGRENSET else ER_IKKE_6G_BEGRENSET
 
     private val forhøyetInntektskrav = alder.forhøyetInntektskrav(skjæringstidspunkt)
     private val minsteinntekt = (if (forhøyetInntektskrav) Grunnbeløp.`2G` else halvG).minsteinntekt(skjæringstidspunkt)
@@ -142,6 +143,14 @@ internal class Sykepengegrunnlag(
 
     internal fun inntektsopplysningPerArbeidsgiver(): Map<String, Inntektshistorikk.Inntektsopplysning> =
         arbeidsgiverInntektsopplysninger.inntektsopplysningPerArbeidsgiver()
+
+    internal fun build(builder: VedtakFattetBuilder) {
+        builder
+            .sykepengegrunnlag(this.sykepengegrunnlag)
+            .inntektsgrunnlag(this.inntektsgrunnlag)
+            .begrensning(this.begrensning)
+            .omregnetÅrsinntektPerArbeidsgiver(arbeidsgiverInntektsopplysninger.omregnetÅrsinntektPerArbeidsgiver())
+    }
 
     override fun equals(other: Any?): Boolean {
         if (other !is Sykepengegrunnlag) return false

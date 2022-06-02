@@ -53,6 +53,7 @@ import no.nav.helse.person.Arbeidsgiver.Companion.slettUtgåtteSykmeldingsperiod
 import no.nav.helse.person.Arbeidsgiver.Companion.startRevurdering
 import no.nav.helse.person.Vedtaksperiode.Companion.ALLE
 import no.nav.helse.person.Vedtaksperiode.Companion.lagUtbetalinger
+import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.subsumsjonsformat
@@ -568,6 +569,11 @@ class Person private constructor(
 
     internal fun lagreDødsdato(dødsdato: LocalDate) {
         this.dødsdato = dødsdato
+    }
+
+
+    internal fun build(skjæringstidspunkt: LocalDate, builder: VedtakFattetBuilder) {
+        vilkårsgrunnlagHistorikk.build(skjæringstidspunkt, builder)
     }
 
     internal fun vilkårsgrunnlagFor(skjæringstidspunkt: LocalDate) = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt)

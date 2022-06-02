@@ -672,10 +672,10 @@ internal class Vedtaksperiode private constructor(
         val builder = VedtakFattetBuilder(
             periode,
             hendelseIder(),
-            skjæringstidspunkt,
-            person.vilkårsgrunnlagFor(skjæringstidspunkt)
+            skjæringstidspunkt
         )
         utbetalinger.build(builder)
+        person.build(skjæringstidspunkt, builder)
         person.vedtakFattet(hendelse.hendelseskontekst(), builder.result())
     }
 

@@ -6,6 +6,7 @@ import no.nav.helse.Fødselsnummer
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
+import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.sykepengegrunnlag
 import no.nav.helse.testhelpers.NAV
@@ -144,6 +145,8 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
             override fun add(innslag: VilkårsgrunnlagHistorikk.Innslag) {
                 innslag.add(1.januar, this)
             }
+
+            override fun build(builder: VedtakFattetBuilder) {}
 
             override fun accept(vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor) {}
 

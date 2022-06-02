@@ -5,9 +5,9 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Medlemskapsvurdering
+import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosent
 
 internal class VilkårsgrunnlagHistorikk private constructor(private val historikk: MutableList<Innslag>) {
@@ -31,6 +31,11 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
     }
 
     internal fun sisteId() = sisteInnlag()!!.id
+
+
+    internal fun build(skjæringstidspunkt: LocalDate, builder: VedtakFattetBuilder) {
+        vilkårsgrunnlagFor(skjæringstidspunkt)?.build(builder)
+    }
 
     internal fun vilkårsgrunnlagFor(skjæringstidspunkt: LocalDate) = sisteInnlag()?.vilkårsgrunnlagFor(skjæringstidspunkt)
 
@@ -118,8 +123,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         fun accept(vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor)
         fun sykepengegrunnlag(): Sykepengegrunnlag
         fun sammenligningsgrunnlagPerArbeidsgiver(): Map<String, Inntektshistorikk.Inntektsopplysning>
-        fun grunnlagsBegrensning(): Sykepengegrunnlag.Begrensning
-        fun inntektsgrunnlag(): Inntekt // TODO: fjerne denne
+        fun build(builder: VedtakFattetBuilder)
         fun gjelderFlereArbeidsgivere(): Boolean
         fun sjekkAvviksprosent(aktivitetslogg: IAktivitetslogg): Boolean = true
         fun avvis(tidslinjer: List<Utbetalingstidslinje>, skjæringstidspunkt: LocalDate) {}
@@ -145,6 +149,10 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         override fun sjekkAvviksprosent(aktivitetslogg: IAktivitetslogg): Boolean {
             if (avviksprosent == null) return true
             return Inntektsvurdering.sjekkAvvik(avviksprosent, aktivitetslogg, IAktivitetslogg::error)
+        }
+
+        override fun build(builder: VedtakFattetBuilder) {
+            sykepengegrunnlag.build(builder)
         }
 
         override fun accept(vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor) {
@@ -177,8 +185,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         }
 
         override fun sykepengegrunnlag() = sykepengegrunnlag
-        override fun grunnlagsBegrensning() = sykepengegrunnlag.begrensning
-        override fun inntektsgrunnlag() = sykepengegrunnlag.inntektsgrunnlag
         override fun sammenligningsgrunnlagPerArbeidsgiver() = sammenligningsgrunnlag.inntektsopplysningPerArbeidsgiver()
         override fun gjelderFlereArbeidsgivere() = sykepengegrunnlag.inntektsopplysningPerArbeidsgiver().size > 1
 
@@ -236,6 +242,10 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             innslag.add(skjæringstidspunkt, this)
         }
 
+        override fun build(builder: VedtakFattetBuilder) {
+            sykepengegrunnlag.build(builder)
+        }
+
         override fun valider(aktivitetslogg: Aktivitetslogg) {
         }
 
@@ -246,9 +256,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         }
 
         override fun sykepengegrunnlag() = sykepengegrunnlag
-        override fun grunnlagsBegrensning() = sykepengegrunnlag.begrensning
         override fun sammenligningsgrunnlagPerArbeidsgiver() = emptyMap<String, Inntektshistorikk.Inntektsopplysning>()
-        override fun inntektsgrunnlag() = sykepengegrunnlag.inntektsgrunnlag
         override fun gjelderFlereArbeidsgivere() = sykepengegrunnlag.inntektsopplysningPerArbeidsgiver().size > 1
 
         override fun toSpesifikkKontekst() = SpesifikkKontekst(

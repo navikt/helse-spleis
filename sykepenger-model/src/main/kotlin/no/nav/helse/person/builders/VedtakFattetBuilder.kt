@@ -6,28 +6,26 @@ import java.util.UUID
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.Sykepengegrunnlag
-import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.økonomi.Inntekt
 
 internal class VedtakFattetBuilder(
     private val periode: Periode,
     private val hendelseIder: Set<UUID>,
-    private val skjæringstidspunkt: LocalDate,
-    vilkårsgrunnlag: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?
+    private val skjæringstidspunkt: LocalDate
 ) {
-    private val sykepengegrunnlag = vilkårsgrunnlag?.sykepengegrunnlag()?.sykepengegrunnlag ?: Inntekt.INGEN
-    private val inntektsgrunnlag = vilkårsgrunnlag?.inntektsgrunnlag() ?: Inntekt.INGEN
-    private val begrensning = vilkårsgrunnlag?.grunnlagsBegrensning()
-
-    private val omregnetÅrsinntektPerArbeidsgiver =  vilkårsgrunnlag?.sykepengegrunnlag()?.inntektsopplysningPerArbeidsgiver()?.mapValues { (_, inntektsopplysning) ->
-        inntektsopplysning.omregnetÅrsinntekt()
-    } ?: emptyMap()
-
+    private var sykepengegrunnlag =  Inntekt.INGEN
+    private var inntektsgrunnlag = Inntekt.INGEN
+    private var begrensning: Sykepengegrunnlag.Begrensning? = null
+    private var omregnetÅrsinntektPerArbeidsgiver = emptyMap<String, Inntekt>()
     private var vedtakFattetTidspunkt = LocalDateTime.now()
     private var utbetalingId: UUID? = null
 
     internal fun utbetalingId(id: UUID) = apply { this.utbetalingId = id }
     internal fun utbetalingVurdert(tidspunkt: LocalDateTime) = apply { this.vedtakFattetTidspunkt = tidspunkt }
+    internal fun sykepengegrunnlag(sykepengegrunnlag: Inntekt) = apply { this.sykepengegrunnlag = sykepengegrunnlag }
+    internal fun inntektsgrunnlag(inntektsgrunnlag: Inntekt) = apply { this.inntektsgrunnlag = inntektsgrunnlag }
+    internal fun begrensning(begrensning: Sykepengegrunnlag.Begrensning) = apply { this.begrensning = begrensning }
+    internal fun omregnetÅrsinntektPerArbeidsgiver(omregnetÅrsinntektPerArbeidsgiver: Map<String, Inntekt>) = apply { this.omregnetÅrsinntektPerArbeidsgiver = omregnetÅrsinntektPerArbeidsgiver }
 
     internal fun result(): PersonObserver.VedtakFattetEvent {
         return PersonObserver.VedtakFattetEvent(
