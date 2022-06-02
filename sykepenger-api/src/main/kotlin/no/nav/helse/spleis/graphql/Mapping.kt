@@ -328,26 +328,8 @@ internal fun mapTidslinjeperiode(periode: Tidslinjeperiode) =
                     belop = refusjon.beløp
                 )
             },
-            tilstand = when (periode.periodetilstand) {
-                Periodetilstand.TilUtbetaling -> GraphQLPeriodetilstand.TilUtbetaling
-                Periodetilstand.TilAnnullering -> GraphQLPeriodetilstand.TilAnnullering
-                Periodetilstand.Utbetalt -> GraphQLPeriodetilstand.Utbetalt
-                Periodetilstand.Annullert -> GraphQLPeriodetilstand.Annullert
-                Periodetilstand.AnnulleringFeilet -> GraphQLPeriodetilstand.AnnulleringFeilet
-                Periodetilstand.Oppgaver -> GraphQLPeriodetilstand.Oppgaver
-                Periodetilstand.Venter -> GraphQLPeriodetilstand.Venter
-                Periodetilstand.VenterPåKiling -> GraphQLPeriodetilstand.VenterPaKiling
-                Periodetilstand.IngenUtbetaling -> GraphQLPeriodetilstand.IngenUtbetaling
-                Periodetilstand.KunFerie -> GraphQLPeriodetilstand.KunFerie
-                Periodetilstand.Feilet -> GraphQLPeriodetilstand.Feilet
-                Periodetilstand.RevurderingFeilet -> GraphQLPeriodetilstand.RevurderingFeilet
-                Periodetilstand.TilInfotrygd -> GraphQLPeriodetilstand.TilInfotrygd
-                Periodetilstand.UtbetalingFeilet -> GraphQLPeriodetilstand.UtbetalingFeilet
-                Periodetilstand.ForberederGodkjenning -> GraphQLPeriodetilstand.ForberederGodkjenning
-                Periodetilstand.ManglerInformasjon -> GraphQLPeriodetilstand.ManglerInformasjon
-                Periodetilstand.VenterPåAnnenPeriode -> GraphQLPeriodetilstand.VenterPaAnnenPeriode
-                Periodetilstand.TilGodkjenning -> GraphQLPeriodetilstand.TilGodkjenning
-            }
+            tilstand = mapTilstand(periode.tilstand),
+            periodetilstand = mapTilstand(periode.periodetilstand),
         )
         else -> GraphQLUberegnetPeriode(
             fom = periode.fom,
@@ -364,8 +346,30 @@ internal fun mapTidslinjeperiode(periode: Tidslinjeperiode) =
             erForkastet = periode.erForkastet,
             opprettet = periode.opprettet,
             vedtaksperiodeId = periode.vedtaksperiodeId,
+            periodetilstand = mapTilstand(periode.periodetilstand),
         )
     }
+
+private fun mapTilstand(tilstand: Periodetilstand) = when (tilstand) {
+    Periodetilstand.TilUtbetaling -> GraphQLPeriodetilstand.TilUtbetaling
+    Periodetilstand.TilAnnullering -> GraphQLPeriodetilstand.TilAnnullering
+    Periodetilstand.Utbetalt -> GraphQLPeriodetilstand.Utbetalt
+    Periodetilstand.Annullert -> GraphQLPeriodetilstand.Annullert
+    Periodetilstand.AnnulleringFeilet -> GraphQLPeriodetilstand.AnnulleringFeilet
+    Periodetilstand.Oppgaver -> GraphQLPeriodetilstand.Oppgaver
+    Periodetilstand.Venter -> GraphQLPeriodetilstand.Venter
+    Periodetilstand.VenterPåKiling -> GraphQLPeriodetilstand.VenterPaKiling
+    Periodetilstand.IngenUtbetaling -> GraphQLPeriodetilstand.IngenUtbetaling
+    Periodetilstand.KunFerie -> GraphQLPeriodetilstand.KunFerie
+    Periodetilstand.Feilet -> GraphQLPeriodetilstand.Feilet
+    Periodetilstand.RevurderingFeilet -> GraphQLPeriodetilstand.RevurderingFeilet
+    Periodetilstand.TilInfotrygd -> GraphQLPeriodetilstand.TilInfotrygd
+    Periodetilstand.UtbetalingFeilet -> GraphQLPeriodetilstand.UtbetalingFeilet
+    Periodetilstand.ForberederGodkjenning -> GraphQLPeriodetilstand.ForberederGodkjenning
+    Periodetilstand.ManglerInformasjon -> GraphQLPeriodetilstand.ManglerInformasjon
+    Periodetilstand.VenterPåAnnenPeriode -> GraphQLPeriodetilstand.VenterPaAnnenPeriode
+    Periodetilstand.TilGodkjenning -> GraphQLPeriodetilstand.TilGodkjenning
+}
 
 private fun mapInntekt(inntekt: Arbeidsgiverinntekt) = GraphQLArbeidsgiverinntekt(
     arbeidsgiver = inntekt.organisasjonsnummer,
