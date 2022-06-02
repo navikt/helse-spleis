@@ -9,11 +9,13 @@ import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
+import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Inntektsmelding.Companion.WARN_UENIGHET_ARBEIDSGIVERPERIODE
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
@@ -1940,5 +1942,52 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             "Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden på grunn av: begrunnelse",
             1.vedtaksperiode.filter()
         )
+    }
+
+    @Test
+    fun `padding med arbeidsdager før arbeidsgiverperioden`() {
+        håndterSykmelding(Sykmeldingsperiode(28.januar(2022), 16.februar(2022), 100.prosent))
+        håndterSøknad(Sykdom(28.januar(2022), 16.februar(2022), 100.prosent))
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
+
+        håndterSykmelding(Sykmeldingsperiode(17.februar(2022), 8.mars(2022), 100.prosent))
+        håndterSøknad(Sykdom(17.februar(2022), 8.mars(2022), 100.prosent))
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
+
+        håndterSykmelding(Sykmeldingsperiode(9.mars(2022), 31.mars(2022), 100.prosent))
+        håndterSøknad(Sykdom(9.mars(2022), 31.mars(2022), 100.prosent))
+        assertSisteTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
+
+        val førsteDagIArbeidsgiverperioden = 28.februar(2022)
+        håndterInntektsmelding(arbeidsgiverperioder = listOf(førsteDagIArbeidsgiverperioden til 15.mars(2022)), førsteFraværsdag = 28.februar(2022))
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertSisteTilstand(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+
+        håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertSisteTilstand(3.vedtaksperiode, AVVENTER_HISTORIKK)
+
+        håndterYtelser(3.vedtaksperiode)
+        håndterVilkårsgrunnlag(3.vedtaksperiode)
+        håndterYtelser(3.vedtaksperiode)
+        håndterSimulering(3.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(3.vedtaksperiode)
+        håndterUtbetalt()
+        assertSisteTilstand(3.vedtaksperiode, AVSLUTTET)
+
+        assertEquals(28.januar(2022), inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.skjæringstidspunkt)
+        assertEquals(28.februar(2022), inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.skjæringstidspunkt)
+        assertEquals(28.februar(2022), inspektør.vedtaksperioder(3.vedtaksperiode).inspektør.skjæringstidspunkt)
+
+        val beregnetSykdomstidslinje = inspektør.sykdomshistorikk.sykdomstidslinje()
+        val beregnetSykdomstidslinjeDager = beregnetSykdomstidslinje.inspektør.dager
+        assertTrue(beregnetSykdomstidslinjeDager.filterKeys { it in 28.januar(2022) til førsteDagIArbeidsgiverperioden.minusDays(1) }.values.all {
+            (it is Dag.Arbeidsdag || it is Dag.FriskHelgedag) && it.kommerFra(Inntektsmelding::class)
+        }) { beregnetSykdomstidslinje.toShortString() }
+        assertTrue(beregnetSykdomstidslinjeDager.filterKeys { it in førsteDagIArbeidsgiverperioden til 31.mars(2022) }.values.all {
+            (it is Dag.Sykedag || it is Dag.SykHelgedag) && it.kommerFra(Søknad::class)
+        }) { beregnetSykdomstidslinje.toShortString() }
     }
 }
