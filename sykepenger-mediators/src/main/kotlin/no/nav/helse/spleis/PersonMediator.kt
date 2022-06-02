@@ -272,14 +272,16 @@ internal class PersonMediator(
         }
         queueMessage(hendelseskontekst , JsonMessage.newMessage("trenger_inntektsmelding", mapOf(
             "fom" to event.fom,
-            "tom" to event.tom
+            "tom" to event.tom,
+            "søknadIder" to event.søknadIder
         )))
     }
 
     override fun trengerIkkeInntektsmelding(hendelseskontekst: Hendelseskontekst, event: PersonObserver.TrengerIkkeInntektsmeldingEvent) {
         queueMessage(hendelseskontekst, JsonMessage.newMessage("trenger_ikke_inntektsmelding", mapOf(
             "fom" to event.fom,
-            "tom" to event.tom
+            "tom" to event.tom,
+            "søknadIder" to event.søknadIder
         )))
     }
 

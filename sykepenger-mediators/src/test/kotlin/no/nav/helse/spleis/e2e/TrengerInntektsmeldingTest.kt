@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import java.util.UUID
 import no.nav.helse.august
 import no.nav.helse.februar
 import no.nav.helse.januar
@@ -14,6 +15,16 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class TrengerInntektsmeldingTest : AbstractEndToEndMediatorTest() {
+
+    @Test
+    fun `trenger_inntektsmelding`() {
+        sendNySøknad(SoknadsperiodeDTO(fom = 21.juli(2021), tom = 4.august(2021), sykmeldingsgrad = 100))
+        val søknadId = sendSøknad(listOf(SoknadsperiodeDTO(fom = 21.juli(2021), tom = 4.august(2021), sykmeldingsgrad = 100)))
+        sendUtbetalingshistorikk(0)
+        val melding = testRapid.inspektør.siste("trenger_inntektsmelding")
+        assertEquals(søknadId, UUID.fromString(melding["søknadIder"].toList().single().asText()))
+    }
+
 
     @Test
     fun `sender ikke trenger_inntektsmelding i tilfeller hvor vi egentlig har fått inntektsmelding, men har kastet søkander som følge av overlapp og fått kunstig gap`() {
