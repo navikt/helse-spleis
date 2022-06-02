@@ -328,7 +328,7 @@ internal fun mapTidslinjeperiode(periode: Tidslinjeperiode) =
                     belop = refusjon.beløp
                 )
             },
-            tilstand = when (periode.tilstand) {
+            tilstand = when (periode.periodetilstand) {
                 Periodetilstand.TilUtbetaling -> GraphQLPeriodetilstand.TilUtbetaling
                 Periodetilstand.TilAnnullering -> GraphQLPeriodetilstand.TilAnnullering
                 Periodetilstand.Utbetalt -> GraphQLPeriodetilstand.Utbetalt
@@ -342,6 +342,11 @@ internal fun mapTidslinjeperiode(periode: Tidslinjeperiode) =
                 Periodetilstand.Feilet -> GraphQLPeriodetilstand.Feilet
                 Periodetilstand.RevurderingFeilet -> GraphQLPeriodetilstand.RevurderingFeilet
                 Periodetilstand.TilInfotrygd -> GraphQLPeriodetilstand.TilInfotrygd
+                Periodetilstand.UtbetalingFeilet -> GraphQLPeriodetilstand.UtbetalingFeilet
+                Periodetilstand.ForberederGodkjenning -> GraphQLPeriodetilstand.ForberederGodkjenning
+                Periodetilstand.ManglerInformasjon -> GraphQLPeriodetilstand.ManglerInformasjon
+                Periodetilstand.VenterPåAnnenPeriode -> GraphQLPeriodetilstand.VenterPaAnnenPeriode
+                Periodetilstand.TilGodkjenning -> GraphQLPeriodetilstand.TilGodkjenning
             }
         )
         else -> GraphQLUberegnetPeriode(

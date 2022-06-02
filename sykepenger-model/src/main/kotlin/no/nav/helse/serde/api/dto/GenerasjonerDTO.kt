@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.Periodetype
+import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.serde.api.dto.Behandlingstype.VENTER
 import no.nav.helse.serde.api.dto.Behandlingstype.VENTER_PÅ_INFORMASJON
 import no.nav.helse.serde.api.speil.builders.BeregningId
@@ -34,15 +35,30 @@ enum class Periodetilstand {
     Utbetalt,
     Annullert,
     AnnulleringFeilet,
+    UtbetalingFeilet,
+    RevurderingFeilet,
+    ForberederGodkjenning,
+    ManglerInformasjon,
+    VenterPåAnnenPeriode,
+    TilGodkjenning,
+    IngenUtbetaling,
+    //Gamle tilstander under
+    Feilet,
     Oppgaver,
     Venter,
     VenterPåKiling,
-    IngenUtbetaling,
     KunFerie,
-    Feilet,
-    RevurderingFeilet,
     TilInfotrygd;
 }
+
+data class Utbetalingsinfo(
+    val inntekt: Int? = null,
+    val utbetaling: Int? = null,
+    val personbeløp: Int? = null,
+    val arbeidsgiverbeløp: Int? = null,
+    val refusjonsbeløp: Int? = null,
+    val totalGrad: Double? = null
+)
 
 interface Tidslinjeperiode {
     // Brukes i Speil for å kunne korrelere tidslinje-komponenten og saksbildet. Trenger ikke være persistent på tvers av snapshots.
@@ -56,19 +72,11 @@ interface Tidslinjeperiode {
     val inntektskilde: Inntektskilde
     val erForkastet: Boolean
     val opprettet: LocalDateTime
+    val periodetilstand: Periodetilstand
 
     fun erSammeVedtaksperiode(other: Tidslinjeperiode) = vedtaksperiodeId == other.vedtaksperiodeId
     fun venter() = behandlingstype in setOf(VENTER, VENTER_PÅ_INFORMASJON)
 }
-
-data class Utbetalingsinfo(
-    val inntekt: Int? = null,
-    val utbetaling: Int? = null,
-    val personbeløp: Int? = null,
-    val arbeidsgiverbeløp: Int? = null,
-    val refusjonsbeløp: Int? = null,
-    val totalGrad: Double? = null
-)
 
 data class UberegnetPeriode(
     override val vedtaksperiodeId: UUID,
@@ -79,7 +87,8 @@ data class UberegnetPeriode(
     override val periodetype: Periodetype,
     override val inntektskilde: Inntektskilde,
     override val erForkastet: Boolean,
-    override val opprettet: LocalDateTime
+    override val opprettet: LocalDateTime,
+    override val periodetilstand: Periodetilstand
 ) : Tidslinjeperiode {
     override val tidslinjeperiodeId: UUID = UUID.randomUUID()
 }
@@ -95,6 +104,7 @@ data class BeregnetPeriode(
     override val periodetype: Periodetype,
     override val inntektskilde: Inntektskilde,
     override val opprettet: LocalDateTime,
+    override val periodetilstand: Periodetilstand,
     val beregningId: BeregningId,
     val gjenståendeSykedager: Int?,
     val forbrukteSykedager: Int?,
@@ -223,9 +233,19 @@ data class Utbetaling(
     val personFagsystemId: String,
     val oppdrag: Map<String, SpeilOppdrag>,
     val vurdering: Vurdering?,
-    val id: UUID
+    val id: UUID,
+    val tilGodkjenning: Boolean
 ) {
     fun erAnnullering() = type == Utbetalingtype.ANNULLERING
+    private fun erForkastetRevurdering() = status == Utbetalingstatus.Forkastet && type == Utbetalingtype.REVURDERING
+    private fun erUtbetalingFeilet() = status == Utbetalingstatus.UtbetalingFeilet && type == Utbetalingtype.UTBETALING
+    fun utbetales() = status in listOf(Utbetalingstatus.Godkjent, Utbetalingstatus.Sendt, Utbetalingstatus.Overført)
+    fun utbetalt() = status in listOf(Utbetalingstatus.Utbetalt, Utbetalingstatus.GodkjentUtenUtbetaling)
+    fun kanUtbetales() = !erUtbetalingFeilet() && !erForkastetRevurdering()
+    fun tilGodkjenning() = tilGodkjenning
+
+    internal fun revurderingFeilet(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) = (erForkastetRevurdering() || status == Utbetalingstatus.Ubetalt) && tilstand == Vedtaksperiode.RevurderingFeilet
+    internal fun utbetalingFeilet(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) = erUtbetalingFeilet() && tilstand == Vedtaksperiode.UtbetalingFeilet
 
     data class Vurdering(
         val godkjent: Boolean,

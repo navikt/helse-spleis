@@ -18,7 +18,10 @@ import no.nav.helse.serde.api.dto.EndringskodeDTO.Companion.dto
 import no.nav.helse.utbetalingslinjer.Utbetaling as InternUtbetaling
 
 // Besøker hele vedtaksperiode-treet
-internal class UtbetalingerBuilder(vedtaksperiode: Vedtaksperiode) : VedtaksperiodeVisitor {
+internal class UtbetalingerBuilder(
+    vedtaksperiode: Vedtaksperiode,
+    private val vedtaksperiodetilstand: Vedtaksperiode.Vedtaksperiodetilstand
+) : VedtaksperiodeVisitor {
     val utbetalinger = mutableMapOf<UUID, IUtbetaling>()
 
     init {
@@ -47,7 +50,8 @@ internal class UtbetalingerBuilder(vedtaksperiode: Vedtaksperiode) : Vedtaksperi
         avsluttet: LocalDateTime?,
         avstemmingsnøkkel: Long?
     ) {
-        if (tilstand == Forkastet) return
+        if (tilstand == Forkastet && vedtaksperiodetilstand != Vedtaksperiode.RevurderingFeilet) return
+        utbetalinger.entries.find { it.value.forkastet() }?.let { utbetalinger.remove(it.key) }
         utbetalinger.putIfAbsent(beregningId, UtbetalingBuilder(utbetaling).build())
     }
 }

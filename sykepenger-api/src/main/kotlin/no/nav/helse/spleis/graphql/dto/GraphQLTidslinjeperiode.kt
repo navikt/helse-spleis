@@ -139,7 +139,12 @@ enum class GraphQLPeriodetilstand {
     KunFerie,
     Feilet,
     RevurderingFeilet,
-    TilInfotrygd;
+    TilInfotrygd,
+    UtbetalingFeilet,
+    ForberederGodkjenning,
+    ManglerInformasjon,
+    VenterPaAnnenPeriode,
+    TilGodkjenning;
 }
 
 enum class GraphQLUtbetalingstatus {
