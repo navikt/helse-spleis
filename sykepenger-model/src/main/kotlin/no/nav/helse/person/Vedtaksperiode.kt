@@ -6,7 +6,6 @@ import java.time.YearMonth
 import java.util.Objects
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
-import no.nav.helse.Grunnbeløp
 import no.nav.helse.Toggle
 import no.nav.helse.hendelser.Hendelseskontekst
 import no.nav.helse.hendelser.Inntektsmelding
@@ -23,11 +22,9 @@ import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.hendelser.Validation.Companion.validation
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
-import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
-import no.nav.helse.mai
 import no.nav.helse.memoized
 import no.nav.helse.oktober
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.arbeidsavklaringspenger
@@ -1631,11 +1628,7 @@ internal class Vedtaksperiode private constructor(
                 onSuccess {
                     when (periodetype) {
                         in listOf(OVERGANG_FRA_IT, INFOTRYGDFORLENGELSE) -> {
-                            if (vedtaksperiode.skjæringstidspunktFraInfotrygd in 1.mai(2021) til 16.mai(2021)) {
-                                val gammeltGrunnbeløp = Grunnbeløp.`6G`.beløp(LocalDate.of(2021, 4, 30))
-                                val sykepengegrunnlag = vilkårsgrunnlag.sykepengegrunnlag()
-                                if (sykepengegrunnlag.sykepengegrunnlag >= gammeltGrunnbeløp) ytelser.warn("Første utbetalingsdag er i Infotrygd og mellom 1. og 16. mai. Kontroller at riktig grunnbeløp er brukt.")
-                            }
+                            vilkårsgrunnlag.sjekkGammeltSkjæringstidspunkt(ytelser)
                         }
                         else -> {
                             if (vedtaksperiode.inntektsmeldingInfo == null) arbeidsgiver.finnTidligereInntektsmeldinginfo(

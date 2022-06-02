@@ -152,10 +152,6 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
 
             override fun sykepengegrunnlag() = Inntekt.INGEN.sykepengegrunnlag
 
-            override fun grunnlagsBegrensning() = Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
-
-            override fun inntektsgrunnlag() = Inntekt.INGEN
-
             override fun sammenligningsgrunnlagPerArbeidsgiver(): Map<String, Inntektshistorikk.Inntektsopplysning> = emptyMap()
 
             override fun gjelderFlereArbeidsgivere() = false

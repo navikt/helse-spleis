@@ -16,7 +16,7 @@ internal class SykepengegrunnlagInspektør(sykepengegrunnlag: Sykepengegrunnlag)
     lateinit var inntektsgrunnlag: Inntekt
     var skjønnsmessigFastsattÅrsinntekt: Inntekt? = null
     lateinit var `6G`: Inntekt
-
+    lateinit var deaktiverteArbeidsforhold: List<String>
     init {
         sykepengegrunnlag.accept(this)
     }
@@ -42,5 +42,6 @@ internal class SykepengegrunnlagInspektør(sykepengegrunnlag: Sykepengegrunnlag)
         this.maksimalDagsats = maksimalDagsats
         this.skjønnsmessigFastsattÅrsinntekt = skjønnsmessigFastsattÅrsinntekt
         this.inntektsgrunnlag = inntektsgrunnlag
+        this.deaktiverteArbeidsforhold = deaktiverteArbeidsforhold
     }
 }

@@ -21,14 +21,14 @@ internal class Sykepengegrunnlag(
     private val alder: Alder,
     private val skjæringstidspunkt: LocalDate,
     private val arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
-    internal val deaktiverteArbeidsforhold: List<String>,
+    private val deaktiverteArbeidsforhold: List<String>,
     private val vurdertInfotrygd: Boolean,
     private val skjønnsmessigFastsattÅrsinntekt: Inntekt? = null,
     `6G`: Inntekt? = null
-) {
+) : Comparable<Inntekt> {
     private val `6G`: Inntekt = `6G` ?: Grunnbeløp.`6G`.beløp(skjæringstidspunkt, LocalDate.now())
-    internal val inntektsgrunnlag: Inntekt = skjønnsmessigFastsattÅrsinntekt ?: arbeidsgiverInntektsopplysninger.omregnetÅrsinntekt() // TODO: gjøre private
-    internal val sykepengegrunnlag = inntektsgrunnlag.coerceAtMost(this.`6G`)
+    private val inntektsgrunnlag: Inntekt = skjønnsmessigFastsattÅrsinntekt ?: arbeidsgiverInntektsopplysninger.omregnetÅrsinntekt()
+    private val sykepengegrunnlag = inntektsgrunnlag.coerceAtMost(this.`6G`)
     private val maksimalDagsats = sykepengegrunnlag.rundTilDaglig()
     private val begrensning = if (vurdertInfotrygd) VURDERT_I_INFOTRYGD else if (inntektsgrunnlag > this.`6G`) ER_6G_BEGRENSET else ER_IKKE_6G_BEGRENSET
 
@@ -169,6 +169,8 @@ internal class Sykepengegrunnlag(
         result = 31 * result + deaktiverteArbeidsforhold.hashCode()
         return result
     }
+
+    override fun compareTo(other: Inntekt) = this.sykepengegrunnlag.compareTo(other)
 
     enum class Begrensning {
         ER_6G_BEGRENSET, ER_IKKE_6G_BEGRENSET, VURDERT_I_INFOTRYGD

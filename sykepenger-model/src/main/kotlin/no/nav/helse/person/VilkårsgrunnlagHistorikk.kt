@@ -3,8 +3,11 @@ package no.nav.helse.person
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.Grunnbeløp
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Medlemskapsvurdering
+import no.nav.helse.hendelser.til
+import no.nav.helse.mai
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -127,6 +130,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         fun gjelderFlereArbeidsgivere(): Boolean
         fun sjekkAvviksprosent(aktivitetslogg: IAktivitetslogg): Boolean = true
         fun avvis(tidslinjer: List<Utbetalingstidslinje>, skjæringstidspunkt: LocalDate) {}
+        fun sjekkGammeltSkjæringstidspunkt(aktivitetslogg: IAktivitetslogg) {}
     }
 
     internal class Grunnlagsdata(
@@ -244,6 +248,13 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
         override fun build(builder: VedtakFattetBuilder) {
             sykepengegrunnlag.build(builder)
+        }
+
+        override fun sjekkGammeltSkjæringstidspunkt(aktivitetslogg: IAktivitetslogg) {
+            if (skjæringstidspunkt !in 1.mai(2021) til 16.mai(2021)) return
+            val gammeltGrunnbeløp = Grunnbeløp.`6G`.beløp(LocalDate.of(2021, 4, 30))
+            if (sykepengegrunnlag < gammeltGrunnbeløp) return
+            aktivitetslogg.warn("Første utbetalingsdag er i Infotrygd og mellom 1. og 16. mai. Kontroller at riktig grunnbeløp er brukt.")
         }
 
         override fun valider(aktivitetslogg: Aktivitetslogg) {

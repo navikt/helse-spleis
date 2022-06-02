@@ -101,6 +101,15 @@ internal class GrunnlagsdataInspektør(grunnlagsdata: VilkårsgrunnlagHistorikk.
         this.vurdertOk = vurdertOk
     }
 
+    override fun postVisitInfotrygdVilkårsgrunnlag(
+        infotrygdVilkårsgrunnlag: VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag,
+        skjæringstidspunkt: LocalDate,
+        sykepengegrunnlag: Sykepengegrunnlag,
+        vilkårsgrunnlagId: UUID
+    ) {
+        this.sykepengegrunnlag = sykepengegrunnlag
+    }
+
     override fun preVisitOpptjening(opptjening: Opptjening, arbeidsforhold: List<Opptjening.ArbeidsgiverOpptjeningsgrunnlag>, opptjeningsperiode: Periode) {
         this.antallOpptjeningsdagerErMinst = opptjening.opptjeningsdager()
         this.harOpptjening = opptjening.erOppfylt()

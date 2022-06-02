@@ -845,6 +845,6 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         assertEquals(listOf(a1, a2).toList(), person.orgnummereMedRelevanteArbeidsforhold(skjæringstidspunkt).toList())
         håndterOverstyrArbeidsforhold(skjæringstidspunkt, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, true)))
         assertEquals(listOf(a1), person.orgnummereMedRelevanteArbeidsforhold(skjæringstidspunkt))
-        assertEquals(listOf(a2), person.vilkårsgrunnlagFor(1.januar)?.sykepengegrunnlag()?.deaktiverteArbeidsforhold)
+        assertEquals(listOf(a2), person.vilkårsgrunnlagFor(1.januar)?.inspektør?.sykepengegrunnlag?.inspektør?.deaktiverteArbeidsforhold)
     }
 }
