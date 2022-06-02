@@ -21,6 +21,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import kotlin.properties.Delegates
@@ -188,6 +189,7 @@ internal class SykepengegrunnlagTest {
         assertNotEquals(sykepengegrunnlag.inspektør.`6G`, justert.inspektør.`6G`)
         assertTrue(sykepengegrunnlag.inspektør.`6G` < justert.inspektør.`6G`)
         assertTrue(sykepengegrunnlag.inspektør.sykepengegrunnlag < justert.inspektør.sykepengegrunnlag)
+        assertNull(sykepengegrunnlag.inspektør.skjønnsmessigFastsattÅrsinntekt)
     }
 
     @Test
@@ -222,6 +224,7 @@ internal class SykepengegrunnlagTest {
         assertNotEquals(inntekt, sykepengegrunnlag.inspektør.sykepengegrunnlag)
         assertEquals(overstyrt, sykepengegrunnlag.inspektør.sykepengegrunnlag)
         assertEquals(overstyrt.rundTilDaglig(), sykepengegrunnlag.inspektør.maksimalDagsats)
+        assertEquals(overstyrt, sykepengegrunnlag.inspektør.skjønnsmessigFastsattÅrsinntekt)
     }
 
     @Test
