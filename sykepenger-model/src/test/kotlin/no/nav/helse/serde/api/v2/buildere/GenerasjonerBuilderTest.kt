@@ -1371,6 +1371,25 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         assertEquals(2, generasjoner.size)
     }
 
+    @Test
+    fun `revurdering til kun ferie`() {
+        nyttVedtak(1.januar, 31.januar)
+        håndterOverstyrTidslinje(List(16) { ManuellOverskrivingDag(16.januar.plusDays(it.toLong()), Dagtype.Feriedag) })
+        håndterYtelser()
+        håndterSimulering()
+        håndterUtbetalingsgodkjenning()
+        håndterUtbetalt()
+
+        assertEquals(2, generasjoner.size)
+        0.generasjon {
+            beregnetPeriode(0) medTilstand IngenUtbetaling
+        }
+
+        1.generasjon {
+            beregnetPeriode(0) medTilstand Utbetalt
+        }
+    }
+
     private fun BeregnetPeriode.assertAldersvilkår(expectedOppfylt: Boolean, expectedAlderSisteSykedag: Int) {
         assertEquals(expectedOppfylt, periodevilkår.alder.oppfylt)
         assertEquals(expectedAlderSisteSykedag, periodevilkår.alder.alderSisteSykedag)
