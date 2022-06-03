@@ -41,7 +41,7 @@ internal data class GenerasjonIder(
 internal typealias BeregningId = UUID
 internal typealias SykdomshistorikkId = UUID
 internal typealias VilkårsgrunnlagshistorikkId = UUID
-internal typealias FagsystemId = String
+internal typealias KorrelasjonsId = UUID
 internal typealias InntektsmeldingId = UUID
 
 // Besøker hele arbeidsgiver-treet

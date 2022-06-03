@@ -90,6 +90,7 @@ internal class UtbetalingBuilder(utbetaling: InternUtbetaling) : UtbetalingVisit
         val oppdragBuilder = OppdragBuilder(utbetaling)
         this.utbetaling = IUtbetaling(
             id = id,
+            korrelasjonsId = korrelasjonsId,
             beregningId = beregningId,
             opprettet = tidsstempel,
             utbetalingstidslinje = tidslinje,

@@ -346,7 +346,7 @@ internal class IVedtaksperiode(
     val utbetalinger = utbetalinger.toMutableList()
 
     fun håndterAnnullering(annulleringer: AnnulleringerAkkumulator) {
-        fagsystemId()?.let {
+        utbetalinger.firstOrNull()?.also {
             annulleringer.finnAnnullering(it)?.let { annullering ->
                 utbetalinger.add(annullering)
             }
@@ -358,8 +358,6 @@ internal class IVedtaksperiode(
     fun inntektsmeldingId(): InntektsmeldingId? =
         hendelser.find { it.type == "INNTEKTSMELDING" }?.let { UUID.fromString(it.id) }
 
-    private fun fagsystemId() = utbetalinger.firstOrNull()?.fagsystemId()
-
     internal companion object {
         fun List<IVedtaksperiode>.tilGodkjenning(utbetaling: IUtbetaling) =
             any { periode -> periode.utbetalinger.any { it.erSammeSom(utbetaling) } && periode.tilGodkjenning() }
@@ -368,6 +366,7 @@ internal class IVedtaksperiode(
 
 internal class IUtbetaling(
     val id: UUID,
+    private val korrelasjonsId: UUID,
     val beregningId: BeregningId,
     val opprettet: LocalDateTime,
     val utbetalingstidslinje: List<Utbetalingstidslinjedag>,
@@ -386,11 +385,13 @@ internal class IUtbetaling(
     private var erTilGodkjenning by Delegates.notNull<Boolean>()
     fun erSammeSom(other: IUtbetaling) = id == other.id
     fun fagsystemId() = arbeidsgiverFagsystemId
+    fun hørerSammen(other: IUtbetaling) = korrelasjonsId == other.korrelasjonsId
     fun forkastet() = tilstand == "Forkastet"
 
     fun settTilGodkjenning(vedtaksperioder: List<IVedtaksperiode>) {
         erTilGodkjenning = vedtaksperioder.tilGodkjenning(this)
     }
+
     fun toDTO(): Utbetaling {
         return Utbetaling(
             type = Utbetalingtype.valueOf(type),
@@ -404,6 +405,14 @@ internal class IUtbetaling(
             oppdrag = oppdrag,
             tilGodkjenning = erTilGodkjenning
         )
+    }
+
+    internal companion object {
+        internal fun Map<UUID, IUtbetaling>.leggTil(utbetaling: IUtbetaling): Map<UUID, IUtbetaling> {
+            return this.toMutableMap().also {
+                it.putIfAbsent(utbetaling.korrelasjonsId, utbetaling)
+            }
+        }
     }
 }
 

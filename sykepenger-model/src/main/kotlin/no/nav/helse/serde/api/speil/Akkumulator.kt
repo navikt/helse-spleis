@@ -6,12 +6,13 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 import no.nav.helse.serde.api.speil.builders.BeregningId
-import no.nav.helse.serde.api.speil.builders.FagsystemId
+import no.nav.helse.serde.api.speil.builders.KorrelasjonsId
 import no.nav.helse.serde.api.speil.builders.GenerasjonIder
 import no.nav.helse.serde.api.speil.builders.InntektsmeldingId
 import no.nav.helse.serde.api.speil.builders.SykdomshistorikkId
 import no.nav.helse.serde.api.dto.Refusjon
 import no.nav.helse.serde.api.dto.Sykdomstidslinjedag
+import no.nav.helse.serde.api.speil.IUtbetaling.Companion.leggTil
 
 internal class ForkastetVedtaksperiodeAkkumulator : VedtaksperiodeVisitor {
     private val forkastedeVedtaksperioderIder = mutableListOf<UUID>()
@@ -69,13 +70,12 @@ internal class GenerasjonIderAkkumulator {
 }
 
 internal class AnnulleringerAkkumulator {
-    private val annulleringer = mutableMapOf<FagsystemId, IUtbetaling>()
+    private var annulleringer = mapOf<KorrelasjonsId, IUtbetaling>()
 
     internal fun leggTil(utbetaling: IUtbetaling) {
-        annulleringer.putIfAbsent(utbetaling.fagsystemId(), utbetaling)
+        annulleringer = annulleringer.leggTil(utbetaling)
     }
-
-    internal fun finnAnnullering(fagsystemId: String) = annulleringer[fagsystemId]
+    internal fun finnAnnullering(utbetaling: IUtbetaling) = annulleringer.values.firstOrNull { it.hørerSammen(utbetaling) }
 }
 
 internal class SykdomshistorikkAkkumulator {
