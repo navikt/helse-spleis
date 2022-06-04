@@ -2,6 +2,7 @@ package no.nav.helse.serde.api.dto
 
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.UUID
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.Periodetype
@@ -9,6 +10,7 @@ import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.serde.api.dto.Behandlingstype.VENTER
 import no.nav.helse.serde.api.dto.Behandlingstype.VENTER_PÅ_INFORMASJON
 import no.nav.helse.serde.api.speil.builders.BeregningId
+import no.nav.helse.serde.api.speil.builders.KorrelasjonsId
 
 data class Generasjon(
     val id: UUID, // Runtime
@@ -91,6 +93,10 @@ data class UberegnetPeriode(
     override val periodetilstand: Periodetilstand
 ) : Tidslinjeperiode {
     override val tidslinjeperiodeId: UUID = UUID.randomUUID()
+    override fun toString(): String {
+        return "${fom.format()}-${tom.format()} - $periodetilstand"
+    }
+    private fun LocalDate.format() = format(DateTimeFormatter.ofPattern("dd.MM.yyyy"))
 }
 
 // Dekker datagrunnlaget vi trenger for å populere både pølsen og _hele_ saksbildet
@@ -117,14 +123,18 @@ data class BeregnetPeriode(
     val aktivitetslogg: List<AktivitetDTO>,
     val refusjon: Refusjon?,
     val tilstand: Periodetilstand
-) : Tidslinjeperiode {
+) : Tidslinjeperiode, Comparable<BeregnetPeriode> {
     override val tidslinjeperiodeId: UUID = UUID.randomUUID()
 
     internal fun erAnnullering() = utbetaling.type == Utbetalingtype.ANNULLERING
     internal fun erRevurdering() = utbetaling.type == Utbetalingtype.REVURDERING
-    internal fun harSammeFagsystemId(other: BeregnetPeriode) = fagsystemId() == other.fagsystemId()
+    internal fun hørerSammen(other: BeregnetPeriode) = utbetaling.hørerSammen(other.utbetaling)
 
-    private fun fagsystemId() = utbetaling.arbeidsgiverFagsystemId
+    override fun compareTo(other: BeregnetPeriode) = tom.compareTo(other.tom)
+    override fun toString(): String {
+        return "${fom.format()}-${tom.format()} - $periodetilstand - ${utbetaling.type}"
+    }
+    private fun LocalDate.format() = format(DateTimeFormatter.ofPattern("dd.MM.yyyy"))
 
     data class Vilkår(
         val sykepengedager: Sykepengedager,
@@ -224,7 +234,7 @@ enum class Utbetalingtype {
     FERIEPENGER
 }
 
-data class Utbetaling(
+class Utbetaling(
     val type: Utbetalingtype,
     val status: Utbetalingstatus,
     val arbeidsgiverNettoBeløp: Int,
@@ -234,7 +244,8 @@ data class Utbetaling(
     val oppdrag: Map<String, SpeilOppdrag>,
     val vurdering: Vurdering?,
     val id: UUID,
-    val tilGodkjenning: Boolean
+    val tilGodkjenning: Boolean,
+    private val korrelasjonsId: KorrelasjonsId
 ) {
     fun erAnnullering() = type == Utbetalingtype.ANNULLERING
     private fun erForkastetRevurdering() = status == Utbetalingstatus.Forkastet && type == Utbetalingtype.REVURDERING
@@ -243,6 +254,8 @@ data class Utbetaling(
     fun utbetalt() = status in listOf(Utbetalingstatus.Utbetalt, Utbetalingstatus.GodkjentUtenUtbetaling)
     fun kanUtbetales() = !erUtbetalingFeilet() && !erForkastetRevurdering()
     fun tilGodkjenning() = tilGodkjenning
+
+    fun hørerSammen(other: Utbetaling) = korrelasjonsId == other.korrelasjonsId
 
     internal fun revurderingFeilet(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) = (erForkastetRevurdering() || status == Utbetalingstatus.Ubetalt) && tilstand == Vedtaksperiode.RevurderingFeilet
     internal fun utbetalingFeilet(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) = erUtbetalingFeilet() && tilstand == Vedtaksperiode.UtbetalingFeilet

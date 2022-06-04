@@ -431,7 +431,7 @@ internal class Vedtaksperiode private constructor(
                 gjeldendeTilstand = tilstand.type,
             )
         )
-        if (this.tilstand !in setOf(Avsluttet, RevurderingFeilet)) tilstand(hendelse, TilInfotrygd)
+        if (this.tilstand !in AVSLUTTET_OG_SENERE) tilstand(hendelse, TilInfotrygd)
         return true
     }
 
@@ -2475,6 +2475,18 @@ internal class Vedtaksperiode private constructor(
     internal companion object {
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
         private const val IKKE_HÅNDTERT: Boolean = false
+
+        private val AVSLUTTET_OG_SENERE = listOf(
+            Avsluttet,
+            AvventerRevurdering,
+            AvventerGjennomførtRevurdering,
+            AvventerArbeidsgivereRevurdering,
+            AvventerHistorikkRevurdering,
+            AvventerVilkårsprøvingRevurdering,
+            AvventerSimuleringRevurdering,
+            AvventerGodkjenningRevurdering,
+            RevurderingFeilet
+        )
 
         internal val SENERE_INCLUSIVE = fun(senereEnnDenne: Vedtaksperiode): VedtaksperiodeFilter {
             return fun(vedtaksperiode: Vedtaksperiode) = vedtaksperiode >= senereEnnDenne

@@ -66,7 +66,7 @@ import no.nav.helse.serde.api.dto.Utbetalingstidslinjedag
 import no.nav.helse.serde.api.dto.UtbetalingstidslinjedagType
 import no.nav.helse.serde.api.dto.Utbetalingtype
 import no.nav.helse.serde.api.speil.Generasjoner.Generasjon.Companion.fjernErstattede
-import no.nav.helse.serde.api.speil.Generasjoner.Generasjon.Companion.sammenstillMedNeste
+import no.nav.helse.serde.api.speil.Generasjoner.Generasjon.Companion.flyttPerioder
 import no.nav.helse.serde.api.speil.Generasjoner.Generasjon.Companion.sorterGenerasjoner
 import no.nav.helse.serde.api.speil.Generasjoner.Generasjon.Companion.toDTO
 import no.nav.helse.serde.api.speil.IVedtaksperiode.Companion.tilGodkjenning
@@ -81,7 +81,7 @@ internal class Generasjoner(perioder: Tidslinjeperioder) {
 
     internal fun build(): List<no.nav.helse.serde.api.dto.Generasjon> {
         return generasjoner
-            .sammenstillMedNeste()
+            .flyttPerioder()
             .fjernErstattede()
             .sorterGenerasjoner()
             .toDTO()
@@ -96,18 +96,30 @@ internal class Generasjoner(perioder: Tidslinjeperioder) {
 
         private fun finnPeriode(periode: Tidslinjeperiode) = perioder.find { it.erSammeVedtaksperiode(periode) }
         private fun inneholderPeriode(periode: Tidslinjeperiode) = finnPeriode(periode) != null
-        private fun erFagsystemIdAnnullert(periode: BeregnetPeriode): Boolean =
-            tidslinjeperioder.any { it.harSammeFagsystemId(periode) && it.erAnnullering() }
+        private fun harAnnullert(periode: BeregnetPeriode): Boolean =
+            tidslinjeperioder.any { it.hørerSammen(periode) && it.erAnnullering() }
+
+        private fun senereUtbetalingAnnullert(periode: BeregnetPeriode): Boolean {
+            return perioder.any { it is BeregnetPeriode && it > periode && it.erAnnullering() && !it.hørerSammen(periode) }
+        }
 
         private fun harMinstÉnRevurdertPeriodeTidligereEnn(tidslinjeperiode: Tidslinjeperiode): Boolean =
             tidslinjeperioder.any { it.erRevurdering() && it.fom < tidslinjeperiode.fom }
 
-        private fun finnKandidaterForSammenstilling(nesteGenerasjon: Generasjon): Pair<List<Tidslinjeperiode>, List<Tidslinjeperiode>> {
-            return perioder.partition {
-                if (it is UberegnetPeriode) return@partition SKAL_SAMMENSTILLES
-                if (it is BeregnetPeriode && !it.erAnnullering() && nesteGenerasjon.erFagsystemIdAnnullert(it)) return@partition SKAL_IKKE_SAMMENSTILLES
-                if (nesteGenerasjon.harMinstÉnRevurdertPeriodeTidligereEnn(it)) return@partition SKAL_IKKE_SAMMENSTILLES
-                !nesteGenerasjon.inneholderPeriode(it)
+        private fun kandidaterSomSkalFlyttesTilNesteGenerasjon(nesteGenerasjon: Generasjon, alle: List<Generasjon>): Pair<List<Tidslinjeperiode>, List<Tidslinjeperiode>> {
+            return perioder.partition { periode ->
+                if (periode !is BeregnetPeriode) return@partition FLYTTES
+                if (!periode.erAnnullering()) {
+                    if (nesteGenerasjon.harAnnullert(periode)) return@partition FLYTTES_IKKE
+
+                    // Dersom det har forekommet to annulleringer på rad der perioden inngår, ønsker vi ikke å flytte
+                    // denne versjonen av perioden til neste generasjon, fordi vi ønsker å sammenstille de to annulleringene
+                    val nesteEtterNeste = alle.getOrNull(alle.indexOf(nesteGenerasjon) + 1)
+                    if (nesteGenerasjon.senereUtbetalingAnnullert(periode) && nesteEtterNeste?.harAnnullert(periode) == true) return@partition FLYTTES_IKKE
+                    if (nesteGenerasjon.harMinstÉnRevurdertPeriodeTidligereEnn(periode)) return@partition FLYTTES_IKKE
+                }
+                if (nesteGenerasjon.harMinstÉnRevurdertPeriodeTidligereEnn(periode)) return@partition FLYTTES
+                !nesteGenerasjon.inneholderPeriode(periode)
             }
         }
 
@@ -125,19 +137,18 @@ internal class Generasjoner(perioder: Tidslinjeperioder) {
         }
 
         internal companion object {
-            private const val SKAL_IKKE_SAMMENSTILLES: Boolean = false
-            private const val SKAL_SAMMENSTILLES: Boolean = true
+            private const val FLYTTES_IKKE: Boolean = false
+            private const val FLYTTES: Boolean = true
 
-            internal fun List<Generasjon>.sammenstillMedNeste(): List<Generasjon> {
+            internal fun List<Generasjon>.flyttPerioder(): List<Generasjon> {
                 forEachIndexed { index, generasjon ->
                     if (index == size - 1) return@forEachIndexed // siste generasjon skal ikke gjøres noe med
                     val nesteGenerasjon = this[index + 1]
-                    val (perioderSomSkalSammenstilles, ikkeSammenstiltePerioder) = generasjon.finnKandidaterForSammenstilling(
-                        nesteGenerasjon
-                    )
-                    nesteGenerasjon.utvidMed(perioderSomSkalSammenstilles)
-                    generasjon.fjernPerioderSomVenter(perioderSomSkalSammenstilles)
-                    generasjon.erstattet = ikkeSammenstiltePerioder.isEmpty()
+                    val (skalFlyttes, skalIkkeFlyttes) =
+                        generasjon.kandidaterSomSkalFlyttesTilNesteGenerasjon(nesteGenerasjon, this)
+                    nesteGenerasjon.utvidMed(skalFlyttes)
+                    generasjon.fjernPerioderSomVenter(skalFlyttes)
+                    generasjon.erstattet = skalIkkeFlyttes.isEmpty()
                 }
                 return this
             }
@@ -403,7 +414,8 @@ internal class IUtbetaling(
             vurdering = vurdering,
             id = id,
             oppdrag = oppdrag,
-            tilGodkjenning = erTilGodkjenning
+            tilGodkjenning = erTilGodkjenning,
+            korrelasjonsId = korrelasjonsId
         )
     }
 
