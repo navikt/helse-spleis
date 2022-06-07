@@ -104,7 +104,7 @@ internal class Generasjoner(perioder: Tidslinjeperioder) {
         }
 
         private fun harMinstÉnRevurdertPeriodeTidligereEnn(tidslinjeperiode: Tidslinjeperiode): Boolean =
-            tidslinjeperioder.any { it.erRevurdering() && it.fom < tidslinjeperiode.fom }
+            tidslinjeperioder.any { it.erRevurdering() && it.fom < tidslinjeperiode.fom && it.hørerSammen(tidslinjeperiode) }
 
         private fun kandidaterSomSkalFlyttesTilNesteGenerasjon(nesteGenerasjon: Generasjon, alle: List<Generasjon>): Pair<List<Tidslinjeperiode>, List<Tidslinjeperiode>> {
             return perioder.partition { periode ->
@@ -112,8 +112,9 @@ internal class Generasjoner(perioder: Tidslinjeperioder) {
                 if (!periode.erAnnullering()) {
                     if (nesteGenerasjon.harAnnullert(periode)) return@partition FLYTTES_IKKE
 
-                    // Dersom det har forekommet to annulleringer på rad der perioden inngår, ønsker vi ikke å flytte
-                    // denne versjonen av perioden til neste generasjon, fordi vi ønsker å sammenstille de to annulleringene
+                    // Dersom det har forekommet to annulleringer på rad rett etter denne versjonen av perioden,
+                    // der perioden inngår, ønsker vi ikke å flytte denne versjonen til neste generasjon fordi vi ønsker
+                    // å sammenstille de to annulleringene
                     val nesteEtterNeste = alle.getOrNull(alle.indexOf(nesteGenerasjon) + 1)
                     if (nesteGenerasjon.senereUtbetalingAnnullert(periode) && nesteEtterNeste?.harAnnullert(periode) == true) return@partition FLYTTES_IKKE
                     if (nesteGenerasjon.harMinstÉnRevurdertPeriodeTidligereEnn(periode)) return@partition FLYTTES_IKKE

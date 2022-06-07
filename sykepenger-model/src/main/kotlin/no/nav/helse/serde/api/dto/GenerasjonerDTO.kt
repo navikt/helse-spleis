@@ -126,9 +126,11 @@ data class BeregnetPeriode(
 ) : Tidslinjeperiode, Comparable<BeregnetPeriode> {
     override val tidslinjeperiodeId: UUID = UUID.randomUUID()
 
+    override fun venter(): Boolean = super.venter() && periodetilstand != Periodetilstand.Utbetalt
+
     internal fun erAnnullering() = utbetaling.type == Utbetalingtype.ANNULLERING
     internal fun erRevurdering() = utbetaling.type == Utbetalingtype.REVURDERING
-    internal fun hørerSammen(other: BeregnetPeriode) = utbetaling.hørerSammen(other.utbetaling)
+    internal fun hørerSammen(other: Tidslinjeperiode) = other is BeregnetPeriode && utbetaling.hørerSammen(other.utbetaling)
 
     override fun compareTo(other: BeregnetPeriode) = tom.compareTo(other.tom)
     override fun toString(): String {

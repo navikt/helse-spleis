@@ -3,6 +3,7 @@ package no.nav.helse.serde.api.v2.buildere
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.februar
@@ -1676,6 +1677,35 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
             beregnetPeriode(2) medTilstand Utbetalt avType UTBETALING
         }
         4.generasjon {
+            assertEquals(2, perioder.size)
+            beregnetPeriode(0) medTilstand Utbetalt
+            beregnetPeriode(1) medTilstand Utbetalt
+        }
+    }
+
+    @Test
+    fun `revurdering av tidligere skjæringstidspunkt`() = Toggle.NyRevurdering.enable {
+        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(1.mars, 31.mars)
+
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Dagtype.Feriedag)))
+
+        assertEquals(1, generasjoner.size)
+        0.generasjon {
+            assertEquals(2, perioder.size)
+            beregnetPeriode(0) medTilstand Utbetalt
+            beregnetPeriode(1) medTilstand Utbetalt
+        }
+
+        håndterYtelser(1.vedtaksperiode)
+
+        assertEquals(2, generasjoner.size)
+        0.generasjon {
+            assertEquals(2, perioder.size)
+            beregnetPeriode(0) medTilstand Utbetalt
+            beregnetPeriode(1) medTilstand ForberederGodkjenning
+        }
+        1.generasjon {
             assertEquals(2, perioder.size)
             beregnetPeriode(0) medTilstand Utbetalt
             beregnetPeriode(1) medTilstand Utbetalt
