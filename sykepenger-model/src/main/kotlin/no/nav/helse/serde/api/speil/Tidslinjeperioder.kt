@@ -7,7 +7,6 @@ import no.nav.helse.Fødselsnummer
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.Periodetype
-import no.nav.helse.person.TilstandType
 import no.nav.helse.person.Vedtaksperiode.Avsluttet
 import no.nav.helse.person.Vedtaksperiode.AvsluttetUtenUtbetaling
 import no.nav.helse.person.Vedtaksperiode.AvventerArbeidsgivereRevurdering
@@ -39,20 +38,14 @@ import no.nav.helse.serde.api.dto.Generasjon
 import no.nav.helse.serde.api.dto.HendelseDTO
 import no.nav.helse.serde.api.dto.HendelseDTO.Companion.finn
 import no.nav.helse.serde.api.dto.Periodetilstand
-import no.nav.helse.serde.api.dto.Periodetilstand.AnnulleringFeilet
 import no.nav.helse.serde.api.dto.Periodetilstand.Annullert
-import no.nav.helse.serde.api.dto.Periodetilstand.Feilet
 import no.nav.helse.serde.api.dto.Periodetilstand.ForberederGodkjenning
 import no.nav.helse.serde.api.dto.Periodetilstand.IngenUtbetaling
-import no.nav.helse.serde.api.dto.Periodetilstand.KunFerie
 import no.nav.helse.serde.api.dto.Periodetilstand.ManglerInformasjon
-import no.nav.helse.serde.api.dto.Periodetilstand.Oppgaver
 import no.nav.helse.serde.api.dto.Periodetilstand.TilAnnullering
 import no.nav.helse.serde.api.dto.Periodetilstand.TilGodkjenning
 import no.nav.helse.serde.api.dto.Periodetilstand.Utbetalt
-import no.nav.helse.serde.api.dto.Periodetilstand.Venter
 import no.nav.helse.serde.api.dto.Periodetilstand.VenterPåAnnenPeriode
-import no.nav.helse.serde.api.dto.Periodetilstand.VenterPåKiling
 import no.nav.helse.serde.api.dto.Refusjon
 import no.nav.helse.serde.api.dto.SammenslåttDag
 import no.nav.helse.serde.api.dto.SpeilOppdrag
@@ -290,7 +283,6 @@ internal class Tidslinjeperioder(
             vilkårsgrunnlagshistorikkId = tidslinjeberegning.vilkårsgrunnlagshistorikkId,
             aktivitetslogg = varsler,
             refusjon = refusjon,
-            tilstand = periode.tilstand.type.tilPeriodetilstand(utbetalingDTO, sammenslåttTidslinje),
             periodetilstand = when {
                 utbetalingDTO.erAnnullering() -> if (utbetalingDTO.status != Utbetalingstatus.Annullert) TilAnnullering else Annullert
                 utbetalingDTO.revurderingFeilet(periode.tilstand) -> Periodetilstand.RevurderingFeilet
@@ -429,59 +421,6 @@ internal class IUtbetaling(
         }
     }
 }
-
-private fun TilstandType.tilPeriodetilstand(utbetaling: Utbetaling, tidslinje: List<SammenslåttDag>): Periodetilstand =
-    when (this) {
-        TilstandType.START,
-        TilstandType.AVVENTER_VILKÅRSPRØVING,
-        TilstandType.AVVENTER_SIMULERING,
-        TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING,
-        TilstandType.AVVENTER_SIMULERING_REVURDERING,
-        TilstandType.AVVENTER_ARBEIDSGIVERE_REVURDERING,
-        TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING,
-        TilstandType.AVVENTER_HISTORIKK_REVURDERING,
-        TilstandType.AVVENTER_REVURDERING,
-        TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-        TilstandType.AVVENTER_HISTORIKK -> Venter
-        TilstandType.AVVENTER_UFERDIG,
-        TilstandType.AVVENTER_BLOKKERENDE_PERIODE -> VenterPåKiling
-        TilstandType.TIL_INFOTRYGD -> Periodetilstand.TilInfotrygd
-        TilstandType.UTBETALING_FEILET -> Feilet
-        TilstandType.REVURDERING_FEILET -> Periodetilstand.RevurderingFeilet
-        TilstandType.TIL_UTBETALING -> Periodetilstand.TilUtbetaling
-        TilstandType.AVVENTER_GODKJENNING_REVURDERING,
-        TilstandType.AVVENTER_GODKJENNING -> Oppgaver
-        TilstandType.AVSLUTTET,
-        TilstandType.AVSLUTTET_UTEN_UTBETALING -> when (utbetaling.type) {
-            Utbetalingtype.ANNULLERING -> when (utbetaling.status) {
-                Utbetalingstatus.Annullert -> Annullert
-                Utbetalingstatus.UtbetalingFeilet -> AnnulleringFeilet
-                else -> TilAnnullering
-            }
-            Utbetalingtype.REVURDERING -> Utbetalt
-            else -> when (utbetaling.status) {
-                Utbetalingstatus.Utbetalt,
-                Utbetalingstatus.GodkjentUtenUtbetaling -> {
-                    when {
-                        tidslinje.inneholderKunFeriedager() -> KunFerie
-                        tidslinje.inneholderSykepengedager() -> Utbetalt
-                        else -> IngenUtbetaling
-                    }
-                }
-                Utbetalingstatus.UtbetalingFeilet -> Feilet
-                else -> Periodetilstand.TilUtbetaling
-            }
-        }
-    }
-
-private fun List<SammenslåttDag>.inneholderKunFeriedager(): Boolean =
-    all {
-        it.utbetalingstidslinjedagtype in setOf(
-            UtbetalingstidslinjedagType.NavHelgDag,
-            UtbetalingstidslinjedagType.Helgedag,
-            UtbetalingstidslinjedagType.Feriedag
-        )
-    }
 
 private fun List<SammenslåttDag>.inneholderSykepengedager(): Boolean =
     any { it.utbetalingstidslinjedagtype == UtbetalingstidslinjedagType.NavDag }

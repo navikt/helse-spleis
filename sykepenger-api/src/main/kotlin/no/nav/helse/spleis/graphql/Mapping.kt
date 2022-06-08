@@ -328,7 +328,6 @@ internal fun mapTidslinjeperiode(periode: Tidslinjeperiode) =
                     belop = refusjon.beløp
                 )
             },
-            tilstand = mapTilstand(periode.tilstand),
             periodetilstand = mapTilstand(periode.periodetilstand),
         )
         else -> GraphQLUberegnetPeriode(

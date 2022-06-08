@@ -321,8 +321,7 @@ data class GraphQLBeregnetPeriode(
     val vilkarsgrunnlaghistorikkId: UUID,
     val periodevilkar: GraphQLPeriodevilkar,
     val aktivitetslogg: List<GraphQLAktivitet>,
-    val refusjon: GraphQLRefusjon?,
-    val tilstand: GraphQLPeriodetilstand
+    val refusjon: GraphQLRefusjon?
 ) : GraphQLTidslinjeperiode {
     override val id: UUID = UUID.randomUUID()
 }
