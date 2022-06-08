@@ -8,7 +8,6 @@ import no.nav.helse.serde.api.dto.Utbetalingtype
 
 internal fun SchemaBuilder.tidslinjeperiodeTypes() {
     enum<GraphQLInntektstype>()
-    enum<GraphQLBehandlingstype>()
     enum<GraphQLPeriodetype>()
     enum<GraphQLSykdomsdagtype>()
     enum<GraphQLUtbetalingsdagType>()
@@ -64,13 +63,6 @@ internal fun SchemaBuilder.tidslinjeperiodeTypes() {
 enum class GraphQLInntektstype {
     EnArbeidsgiver,
     FlereArbeidsgivere
-}
-
-enum class GraphQLBehandlingstype {
-    Uberegnet,
-    Behandlet,
-    Venter,
-    VenterPaInformasjon
 }
 
 enum class GraphQLPeriodetype {
@@ -220,7 +212,6 @@ interface GraphQLTidslinjeperiode {
     val fom: LocalDate
     val tom: LocalDate
     val tidslinje: List<GraphQLDag>
-    val behandlingstype: GraphQLBehandlingstype
     val periodetype: GraphQLPeriodetype
     val inntektstype: GraphQLInntektstype
     val erForkastet: Boolean
@@ -233,7 +224,6 @@ data class GraphQLUberegnetPeriode(
     override val fom: LocalDate,
     override val tom: LocalDate,
     override val tidslinje: List<GraphQLDag>,
-    override val behandlingstype: GraphQLBehandlingstype,
     override val periodetype: GraphQLPeriodetype,
     override val inntektstype: GraphQLInntektstype,
     override val erForkastet: Boolean,
@@ -299,7 +289,6 @@ data class GraphQLBeregnetPeriode(
     override val fom: LocalDate,
     override val tom: LocalDate,
     override val tidslinje: List<GraphQLDag>,
-    override val behandlingstype: GraphQLBehandlingstype,
     override val periodetype: GraphQLPeriodetype,
     override val inntektstype: GraphQLInntektstype,
     override val erForkastet: Boolean,

@@ -7,7 +7,6 @@ import no.nav.helse.Fødselsnummer
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.Periodetype
-import no.nav.helse.person.Vedtaksperiode.Avsluttet
 import no.nav.helse.person.Vedtaksperiode.AvsluttetUtenUtbetaling
 import no.nav.helse.person.Vedtaksperiode.AvventerArbeidsgivereRevurdering
 import no.nav.helse.person.Vedtaksperiode.AvventerBlokkerendePeriode
@@ -15,24 +14,9 @@ import no.nav.helse.person.Vedtaksperiode.AvventerGjennomførtRevurdering
 import no.nav.helse.person.Vedtaksperiode.AvventerGodkjenning
 import no.nav.helse.person.Vedtaksperiode.AvventerGodkjenningRevurdering
 import no.nav.helse.person.Vedtaksperiode.AvventerHistorikk
-import no.nav.helse.person.Vedtaksperiode.AvventerHistorikkRevurdering
-import no.nav.helse.person.Vedtaksperiode.AvventerInntektsmeldingEllerHistorikk
-import no.nav.helse.person.Vedtaksperiode.AvventerRevurdering
-import no.nav.helse.person.Vedtaksperiode.AvventerSimulering
-import no.nav.helse.person.Vedtaksperiode.AvventerSimuleringRevurdering
 import no.nav.helse.person.Vedtaksperiode.AvventerUferdig
 import no.nav.helse.person.Vedtaksperiode.AvventerVilkårsprøving
-import no.nav.helse.person.Vedtaksperiode.AvventerVilkårsprøvingRevurdering
-import no.nav.helse.person.Vedtaksperiode.RevurderingFeilet
-import no.nav.helse.person.Vedtaksperiode.Start
-import no.nav.helse.person.Vedtaksperiode.TilInfotrygd
-import no.nav.helse.person.Vedtaksperiode.TilUtbetaling
-import no.nav.helse.person.Vedtaksperiode.UtbetalingFeilet
 import no.nav.helse.person.Vedtaksperiode.Vedtaksperiodetilstand
-import no.nav.helse.serde.api.dto.Behandlingstype.BEHANDLET
-import no.nav.helse.serde.api.dto.Behandlingstype.UBEREGNET
-import no.nav.helse.serde.api.dto.Behandlingstype.VENTER
-import no.nav.helse.serde.api.dto.Behandlingstype.VENTER_PÅ_INFORMASJON
 import no.nav.helse.serde.api.dto.BeregnetPeriode
 import no.nav.helse.serde.api.dto.Generasjon
 import no.nav.helse.serde.api.dto.HendelseDTO
@@ -200,30 +184,6 @@ internal class Tidslinjeperioder(
         Generasjoner.Generasjon(listOf(it))
     }
 
-    private fun behandlingstype(vedtaksperiodetilstand: Vedtaksperiodetilstand, erBeregnet: Boolean) = when (vedtaksperiodetilstand) {
-        TilInfotrygd -> UBEREGNET
-        AvsluttetUtenUtbetaling -> if (erBeregnet) BEHANDLET else UBEREGNET
-        AvventerGjennomførtRevurdering -> if (erBeregnet) BEHANDLET else VENTER_PÅ_INFORMASJON
-        AvventerUferdig,
-        AvventerRevurdering,
-        AvventerBlokkerendePeriode -> VENTER
-        Start,
-        AvventerHistorikk,
-        AvventerVilkårsprøving,
-        AvventerHistorikkRevurdering,
-        AvventerArbeidsgivereRevurdering,
-        AvventerVilkårsprøvingRevurdering,
-        AvventerInntektsmeldingEllerHistorikk -> VENTER_PÅ_INFORMASJON
-        Avsluttet,
-        TilUtbetaling,
-        UtbetalingFeilet,
-        RevurderingFeilet,
-        AvventerSimulering,
-        AvventerGodkjenning,
-        AvventerSimuleringRevurdering,
-        AvventerGodkjenningRevurdering -> BEHANDLET
-    }
-
     private fun uberegnetPeriode(periode: IVedtaksperiode, erForkastet: Boolean): UberegnetPeriode {
 
         val tidslinje = periode.sykdomstidslinje.merge(emptyList())
@@ -232,7 +192,6 @@ internal class Tidslinjeperioder(
             fom = periode.fom,
             tom = periode.tom,
             sammenslåttTidslinje = tidslinje,
-            behandlingstype = behandlingstype(periode.tilstand, false),
             periodetype = periode.periodetype,
             inntektskilde = periode.inntektskilde,
             erForkastet = erForkastet,
@@ -268,7 +227,6 @@ internal class Tidslinjeperioder(
             fom = periode.fom,
             tom = periode.tom,
             erForkastet = erForkastet,
-            behandlingstype = behandlingstype(periode.tilstand, true),
             periodetype = periode.periodetype,
             inntektskilde = periode.inntektskilde,
             skjæringstidspunkt = periode.skjæringstidspunkt,

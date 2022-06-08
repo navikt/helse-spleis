@@ -5,7 +5,6 @@ import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.Periodetype
 import no.nav.helse.serde.api.dto.BegrunnelseDTO
 import no.nav.helse.serde.api.dto.Arbeidsgiverinntekt
-import no.nav.helse.serde.api.dto.Behandlingstype
 import no.nav.helse.serde.api.dto.BeregnetPeriode
 import no.nav.helse.serde.api.dto.HendelseDTO
 import no.nav.helse.serde.api.dto.InfotrygdVilkårsgrunnlag
@@ -29,7 +28,6 @@ import no.nav.helse.serde.api.speil.builders.SykepengegrunnlagsgrenseDTO
 import no.nav.helse.spleis.graphql.dto.GraphQLAktivitet
 import no.nav.helse.spleis.graphql.dto.GraphQLArbeidsgiverinntekt
 import no.nav.helse.spleis.graphql.dto.GraphQLBegrunnelse
-import no.nav.helse.spleis.graphql.dto.GraphQLBehandlingstype
 import no.nav.helse.spleis.graphql.dto.GraphQLBeregnetPeriode
 import no.nav.helse.spleis.graphql.dto.GraphQLDag
 import no.nav.helse.spleis.graphql.dto.GraphQLHendelse
@@ -286,12 +284,6 @@ internal fun mapTidslinjeperiode(periode: Tidslinjeperiode) =
             fom = periode.fom,
             tom = periode.tom,
             tidslinje = periode.sammenslåttTidslinje.map { mapDag(it) },
-            behandlingstype = when (periode.behandlingstype) {
-                Behandlingstype.UBEREGNET -> GraphQLBehandlingstype.Uberegnet
-                Behandlingstype.BEHANDLET -> GraphQLBehandlingstype.Behandlet
-                Behandlingstype.VENTER -> GraphQLBehandlingstype.Venter
-                Behandlingstype.VENTER_PÅ_INFORMASJON -> GraphQLBehandlingstype.VenterPaInformasjon
-            },
             periodetype = mapPeriodetype(periode.periodetype),
             inntektstype = mapInntektstype(periode.inntektskilde),
             erForkastet = periode.erForkastet,
@@ -334,12 +326,6 @@ internal fun mapTidslinjeperiode(periode: Tidslinjeperiode) =
             fom = periode.fom,
             tom = periode.tom,
             tidslinje = periode.sammenslåttTidslinje.map { mapDag(it) },
-            behandlingstype = when (periode.behandlingstype) {
-                Behandlingstype.UBEREGNET -> GraphQLBehandlingstype.Uberegnet
-                Behandlingstype.BEHANDLET -> GraphQLBehandlingstype.Behandlet
-                Behandlingstype.VENTER -> GraphQLBehandlingstype.Venter
-                Behandlingstype.VENTER_PÅ_INFORMASJON -> GraphQLBehandlingstype.VenterPaInformasjon
-            },
             periodetype = mapPeriodetype(periode.periodetype),
             inntektstype = mapInntektstype(periode.inntektskilde),
             erForkastet = periode.erForkastet,

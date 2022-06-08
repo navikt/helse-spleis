@@ -32,10 +32,6 @@ import no.nav.helse.person.TilstandType.REVURDERING_FEILET
 import no.nav.helse.person.TilstandType.UTBETALING_FEILET
 import no.nav.helse.person.arbeidsgiver
 import no.nav.helse.person.nullstillTilstandsendringer
-import no.nav.helse.serde.api.dto.Behandlingstype
-import no.nav.helse.serde.api.dto.Behandlingstype.BEHANDLET
-import no.nav.helse.serde.api.dto.Behandlingstype.VENTER
-import no.nav.helse.serde.api.dto.Behandlingstype.VENTER_PÅ_INFORMASJON
 import no.nav.helse.serde.api.dto.BeregnetPeriode
 import no.nav.helse.serde.api.dto.Generasjon
 import no.nav.helse.serde.api.dto.Inntektkilde
@@ -859,7 +855,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         assertTilstand(2.vedtaksperiode, TilstandType.AVVENTER_BLOKKERENDE_PERIODE)
         0.generasjon {
             assertEquals(2, perioder.size)
-            uberegnetPeriode(0) harBehandlingstype VENTER medTilstand VenterPåAnnenPeriode
+            uberegnetPeriode(0) medTilstand VenterPåAnnenPeriode
             beregnetPeriode(1) er Utbetalingstatus.Ubetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand TilGodkjenning
         }
     }
@@ -873,7 +869,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         assertTilstand(2.vedtaksperiode, TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
         0.generasjon {
             assertEquals(2, perioder.size)
-            uberegnetPeriode(0) harBehandlingstype VENTER_PÅ_INFORMASJON medTilstand ManglerInformasjon
+            uberegnetPeriode(0) medTilstand ManglerInformasjon
             beregnetPeriode(1) er Utbetalingstatus.Ubetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand TilGodkjenning
         }
     }
@@ -894,7 +890,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         assertTilstand(2.vedtaksperiode, TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
         0.generasjon {
             assertEquals(2, this.perioder.size)
-            uberegnetPeriode(0) harBehandlingstype VENTER_PÅ_INFORMASJON medTilstand ManglerInformasjon
+            uberegnetPeriode(0) medTilstand ManglerInformasjon
             beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType REVURDERING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
         }
         1.generasjon {
@@ -1194,11 +1190,11 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
 
         0.generasjon(a1) {
             assertEquals(1, perioder.size)
-            beregnetPeriode(0) harBehandlingstype BEHANDLET medTilstand TilGodkjenning
+            beregnetPeriode(0) medTilstand TilGodkjenning
         }
         0.generasjon(a2) {
             assertEquals(1, perioder.size)
-            beregnetPeriode(0) harBehandlingstype VENTER medTilstand VenterPåAnnenPeriode
+            beregnetPeriode(0) medTilstand VenterPåAnnenPeriode
         }
     }
 
@@ -1212,8 +1208,8 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
 
         0.generasjon {
             assertEquals(2, perioder.size)
-            beregnetPeriode(0) harBehandlingstype BEHANDLET er Utbetalingstatus.GodkjentUtenUtbetaling medTilstand IngenUtbetaling
-            beregnetPeriode(1) harBehandlingstype BEHANDLET er Utbetalingstatus.Utbetalt medTilstand Utbetalt
+            beregnetPeriode(0) er Utbetalingstatus.GodkjentUtenUtbetaling medTilstand IngenUtbetaling
+            beregnetPeriode(1) er Utbetalingstatus.Utbetalt medTilstand Utbetalt
         }
     }
 
@@ -1226,57 +1222,57 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
 
         0.generasjon {
             assertEquals(2, perioder.size)
-            uberegnetPeriode(0) harBehandlingstype VENTER_PÅ_INFORMASJON medTilstand ManglerInformasjon
-            uberegnetPeriode(1) harBehandlingstype VENTER_PÅ_INFORMASJON medTilstand ManglerInformasjon
+            uberegnetPeriode(0) medTilstand ManglerInformasjon
+            uberegnetPeriode(1) medTilstand ManglerInformasjon
         }
 
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         0.generasjon {
             assertEquals(2, perioder.size)
-            uberegnetPeriode(0) harBehandlingstype VENTER medTilstand VenterPåAnnenPeriode
-            uberegnetPeriode(1) harBehandlingstype VENTER_PÅ_INFORMASJON medTilstand ForberederGodkjenning
+            uberegnetPeriode(0) medTilstand VenterPåAnnenPeriode
+            uberegnetPeriode(1) medTilstand ForberederGodkjenning
         }
 
         håndterYtelser(1.vedtaksperiode)
         0.generasjon {
             assertEquals(2, perioder.size)
-            uberegnetPeriode(0) harBehandlingstype VENTER medTilstand VenterPåAnnenPeriode
-            uberegnetPeriode(1) harBehandlingstype VENTER_PÅ_INFORMASJON medTilstand ForberederGodkjenning
+            uberegnetPeriode(0) medTilstand VenterPåAnnenPeriode
+            uberegnetPeriode(1) medTilstand ForberederGodkjenning
         }
 
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         0.generasjon {
             assertEquals(2, perioder.size)
-            uberegnetPeriode(0) harBehandlingstype VENTER medTilstand VenterPåAnnenPeriode
-            uberegnetPeriode(1) harBehandlingstype VENTER_PÅ_INFORMASJON medTilstand ForberederGodkjenning
+            uberegnetPeriode(0) medTilstand VenterPåAnnenPeriode
+            uberegnetPeriode(1) medTilstand ForberederGodkjenning
         }
 
         håndterYtelser(1.vedtaksperiode)
         0.generasjon {
             assertEquals(2, perioder.size)
-            uberegnetPeriode(0) harBehandlingstype VENTER medTilstand VenterPåAnnenPeriode
-            beregnetPeriode(1) harBehandlingstype BEHANDLET medTilstand ForberederGodkjenning
+            uberegnetPeriode(0) medTilstand VenterPåAnnenPeriode
+            beregnetPeriode(1) medTilstand ForberederGodkjenning
         }
 
         håndterSimulering(1.vedtaksperiode)
         0.generasjon {
             assertEquals(2, perioder.size)
-            uberegnetPeriode(0) harBehandlingstype VENTER medTilstand VenterPåAnnenPeriode
-            beregnetPeriode(1) harBehandlingstype BEHANDLET medTilstand TilGodkjenning
+            uberegnetPeriode(0) medTilstand VenterPåAnnenPeriode
+            beregnetPeriode(1) medTilstand TilGodkjenning
         }
 
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         0.generasjon {
             assertEquals(2, perioder.size)
-            uberegnetPeriode(0) harBehandlingstype VENTER medTilstand VenterPåAnnenPeriode
-            beregnetPeriode(1) harBehandlingstype BEHANDLET medTilstand TilUtbetaling
+            uberegnetPeriode(0) medTilstand VenterPåAnnenPeriode
+            beregnetPeriode(1) medTilstand TilUtbetaling
         }
 
         håndterUtbetalt()
         0.generasjon {
             assertEquals(2, perioder.size)
-            uberegnetPeriode(0) harBehandlingstype VENTER_PÅ_INFORMASJON medTilstand ForberederGodkjenning
-            beregnetPeriode(1) harBehandlingstype BEHANDLET medTilstand Utbetalt
+            uberegnetPeriode(0) medTilstand ForberederGodkjenning
+            beregnetPeriode(1) medTilstand Utbetalt
         }
     }
 
@@ -1790,11 +1786,6 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
 
     private infix fun BeregnetPeriode.er(utbetalingstilstand: Utbetalingstatus): BeregnetPeriode {
         assertEquals(utbetalingstilstand, this.utbetaling.status)
-        return this
-    }
-
-    private infix fun <T : Tidslinjeperiode> T.harBehandlingstype(type: Behandlingstype): T {
-        assertEquals(type, this.behandlingstype)
         return this
     }
 

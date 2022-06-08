@@ -121,7 +121,6 @@ internal class GraphQLApiTest : AbstractObservableTest() {
                                     },
                                     begrunnelser
                                 }
-                                behandlingstype,
                                 periodetype,
                                 inntektstype,
                                 erForkastet,
@@ -260,7 +259,6 @@ internal class GraphQLApiTest : AbstractObservableTest() {
                                     },
                                     begrunnelser
                                 }
-                                behandlingstype,
                                 periodetype,
                                 inntektstype,
                                 erForkastet,
