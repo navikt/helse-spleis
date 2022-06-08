@@ -22,7 +22,7 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : Abstract
         /* Økes for å signalisere til spesialist at strukturen i snapshot'et
          * på et eller annet vis har endret seg, og at spesialist derfor må oppdatere cachede snapshots løpende
          */
-        const val SNAPSHOT_VERSJON = 35
+        const val SNAPSHOT_VERSJON = 37
     }
 
     private lateinit var personBuilder: PersonBuilder

@@ -244,6 +244,7 @@ internal class Tidslinjeperioder(
             inntektskilde = periode.inntektskilde,
             erForkastet = erForkastet,
             opprettet = periode.oppdatert,
+            skjæringstidspunkt = periode.skjæringstidspunkt,
             periodetilstand = when (periode.tilstand) {
                 is AvsluttetUtenUtbetaling -> IngenUtbetaling
                 is AvventerUferdig,
@@ -301,7 +302,7 @@ internal class Tidslinjeperioder(
                     !iVentetilstand(periode.tilstand) -> ForberederGodkjenning
                     else -> VenterPåAnnenPeriode
                 }
-                else -> Venter
+                else -> ManglerInformasjon
             },
         )
     }

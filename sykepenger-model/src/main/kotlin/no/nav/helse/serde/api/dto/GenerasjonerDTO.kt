@@ -75,6 +75,7 @@ interface Tidslinjeperiode {
     val erForkastet: Boolean
     val opprettet: LocalDateTime
     val periodetilstand: Periodetilstand
+    val skjæringstidspunkt: LocalDate
 
     fun erSammeVedtaksperiode(other: Tidslinjeperiode) = vedtaksperiodeId == other.vedtaksperiodeId
     fun venter() = behandlingstype in setOf(VENTER, VENTER_PÅ_INFORMASJON)
@@ -90,7 +91,8 @@ data class UberegnetPeriode(
     override val inntektskilde: Inntektskilde,
     override val erForkastet: Boolean,
     override val opprettet: LocalDateTime,
-    override val periodetilstand: Periodetilstand
+    override val periodetilstand: Periodetilstand,
+    override val skjæringstidspunkt: LocalDate
 ) : Tidslinjeperiode {
     override val tidslinjeperiodeId: UUID = UUID.randomUUID()
     override fun toString(): String {
@@ -111,10 +113,10 @@ data class BeregnetPeriode(
     override val inntektskilde: Inntektskilde,
     override val opprettet: LocalDateTime,
     override val periodetilstand: Periodetilstand,
+    override val skjæringstidspunkt: LocalDate,
     val beregningId: BeregningId,
     val gjenståendeSykedager: Int?,
     val forbrukteSykedager: Int?,
-    val skjæringstidspunkt: LocalDate,
     val maksdato: LocalDate,
     val utbetaling: Utbetaling,
     val hendelser: List<HendelseDTO>,
