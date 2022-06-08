@@ -44,12 +44,6 @@ enum class Periodetilstand {
     VenterPåAnnenPeriode,
     TilGodkjenning,
     IngenUtbetaling,
-    //Gamle tilstander under
-    Feilet,
-    Oppgaver,
-    Venter,
-    VenterPåKiling,
-    KunFerie,
     TilInfotrygd;
 }
 
