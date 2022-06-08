@@ -218,6 +218,7 @@ interface GraphQLTidslinjeperiode {
     val opprettet: LocalDateTime
     val vedtaksperiodeId: UUID
     val periodetilstand: GraphQLPeriodetilstand
+    val skjaeringstidspunkt: LocalDate
 }
 
 data class GraphQLUberegnetPeriode(
@@ -229,7 +230,8 @@ data class GraphQLUberegnetPeriode(
     override val erForkastet: Boolean,
     override val opprettet: LocalDateTime,
     override val vedtaksperiodeId: UUID,
-    override val periodetilstand: GraphQLPeriodetilstand
+    override val periodetilstand: GraphQLPeriodetilstand,
+    override val skjaeringstidspunkt: LocalDate
 ) : GraphQLTidslinjeperiode {
     override val id: UUID = UUID.randomUUID()
 }
@@ -295,10 +297,10 @@ data class GraphQLBeregnetPeriode(
     override val opprettet: LocalDateTime,
     override val vedtaksperiodeId: UUID,
     override val periodetilstand: GraphQLPeriodetilstand,
+    override val skjaeringstidspunkt: LocalDate,
     val beregningId: UUID,
     val gjenstaendeSykedager: Int?,
     val forbrukteSykedager: Int?,
-    val skjaeringstidspunkt: LocalDate,
     val maksdato: LocalDate,
     val utbetaling: GraphQLUtbetaling,
     val hendelser: List<GraphQLHendelse>,
