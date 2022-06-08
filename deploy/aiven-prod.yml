@@ -166,3 +166,6 @@ spec:
         - team: tbd
           application: sparkel-oppgave-endret
           access: readwrite
+        - team: tbd
+          application: sparkel-identer
+          access: readwrite
