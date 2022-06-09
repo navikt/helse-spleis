@@ -1141,6 +1141,7 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
             if (Toggle.NyRevurdering.disabled) return vedtaksperiode.person.overstyrUtkastRevurdering(hendelse)
             vedtaksperiode.oppdaterHistorikk(hendelse)
+            vedtaksperiode.emitVedtaksperiodeEndret(hendelse)
             vedtaksperiode.person.startRevurdering(vedtaksperiode, hendelse)
         }
 
@@ -1151,6 +1152,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {
             if (Toggle.NyRevurdering.disabled) return vedtaksperiode.person.overstyrUtkastRevurdering(hendelse)
+            vedtaksperiode.emitVedtaksperiodeEndret(hendelse)
             vedtaksperiode.revurderInntekt(hendelse)
         }
 

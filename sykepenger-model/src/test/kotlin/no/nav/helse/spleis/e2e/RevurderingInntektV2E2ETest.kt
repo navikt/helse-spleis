@@ -19,7 +19,15 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
-import no.nav.helse.person.TilstandType.*
+import no.nav.helse.person.TilstandType.AVSLUTTET
+import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
+import no.nav.helse.person.TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
+import no.nav.helse.person.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.TilstandType.UTBETALING_FEILET
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.person.nullstillTilstandsendringer
@@ -123,6 +131,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
 
         assertTilstander(1.vedtaksperiode,
             AVSLUTTET,
+            AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_GJENNOMFØRT_REVURDERING,
         )
 
@@ -235,6 +244,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
 
         assertTilstander(1.vedtaksperiode,
             AVSLUTTET,
+            AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_GJENNOMFØRT_REVURDERING
         )
 
