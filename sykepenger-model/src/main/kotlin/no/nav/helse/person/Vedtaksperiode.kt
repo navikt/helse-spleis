@@ -425,10 +425,13 @@ internal class Vedtaksperiode private constructor(
         kontekst(hendelse)
         hendelse.info("Forkaster vedtaksperiode: %s", this.id.toString())
         this.utbetalinger.forkast(hendelse)
-        person.vedtaksperiodeAvbrutt(
+        person.vedtaksperiodeForkastet(
             hendelse,
-            PersonObserver.VedtaksperiodeAvbruttEvent(
+            PersonObserver.VedtaksperiodeForkastetEvent(
                 gjeldendeTilstand = tilstand.type,
+                hendelser = hendelseIder(),
+                fom = periode.start,
+                tom = periode.endInclusive
             )
         )
         if (this.tilstand !in AVSLUTTET_OG_SENERE) tilstand(hendelse, TilInfotrygd)

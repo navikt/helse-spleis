@@ -50,8 +50,8 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         nyttVedtak(1.januar, 31.januar)
         nyttVedtak(1.mai, 31.mai)
         håndterAnnullerUtbetaling()
-        assertEquals(1, observatør.avbruttePerioder())
-        assertEquals(AVSLUTTET, observatør.avbrutt(2.vedtaksperiode.id(ORGNUMMER)).gjeldendeTilstand)
+        assertEquals(1, observatør.forkastedePerioder())
+        assertEquals(AVSLUTTET, observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)).gjeldendeTilstand)
     }
 
     @Test
@@ -62,11 +62,11 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.mai, 20.mai, 100.prosent)) // førstegangsbehandling, ny agp
         håndterSøknad(Sykdom(1.mai, 20.mai, 100.prosent))
         håndterAnnullerUtbetaling()
-        assertEquals(4, observatør.avbruttePerioder())
-        assertEquals(AVSLUTTET, observatør.avbrutt(1.vedtaksperiode.id(ORGNUMMER)).gjeldendeTilstand)
-        assertEquals(AVSLUTTET, observatør.avbrutt(2.vedtaksperiode.id(ORGNUMMER)).gjeldendeTilstand)
-        assertEquals(AVSLUTTET, observatør.avbrutt(3.vedtaksperiode.id(ORGNUMMER)).gjeldendeTilstand)
-        assertEquals(AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, observatør.avbrutt(4.vedtaksperiode.id(ORGNUMMER)).gjeldendeTilstand)
+        assertEquals(4, observatør.forkastedePerioder())
+        assertEquals(AVSLUTTET, observatør.forkastet(1.vedtaksperiode.id(ORGNUMMER)).gjeldendeTilstand)
+        assertEquals(AVSLUTTET, observatør.forkastet(2.vedtaksperiode.id(ORGNUMMER)).gjeldendeTilstand)
+        assertEquals(AVSLUTTET, observatør.forkastet(3.vedtaksperiode.id(ORGNUMMER)).gjeldendeTilstand)
+        assertEquals(AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, observatør.forkastet(4.vedtaksperiode.id(ORGNUMMER)).gjeldendeTilstand)
     }
 
     @Test

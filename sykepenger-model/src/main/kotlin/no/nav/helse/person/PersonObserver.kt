@@ -23,8 +23,11 @@ interface PersonObserver {
         val makstid: LocalDateTime
     )
 
-    data class VedtaksperiodeAvbruttEvent(
+    data class VedtaksperiodeForkastetEvent(
         val gjeldendeTilstand: TilstandType,
+        val hendelser: Set<UUID>,
+        val fom: LocalDate,
+        val tom: LocalDate
     )
 
     data class OpprettOppgaveForSpeilsaksbehandlereEvent(
@@ -162,7 +165,7 @@ interface PersonObserver {
     fun vedtaksperiodePåminnet(hendelseskontekst: Hendelseskontekst, påminnelse: Påminnelse) {}
     fun vedtaksperiodeIkkePåminnet(hendelseskontekst: Hendelseskontekst, nåværendeTilstand: TilstandType) {}
     fun vedtaksperiodeEndret(hendelseskontekst: Hendelseskontekst, event: VedtaksperiodeEndretEvent) {}
-    fun vedtaksperiodeAvbrutt(hendelseskontekst: Hendelseskontekst, event: VedtaksperiodeAvbruttEvent) {}
+    fun vedtaksperiodeForkastet(hendelseskontekst: Hendelseskontekst, event: VedtaksperiodeForkastetEvent) {}
     fun opprettOppgaveForSpeilsaksbehandlere(hendelseskontekst: Hendelseskontekst, event: OpprettOppgaveForSpeilsaksbehandlereEvent) {}
     fun opprettOppgave(hendelseskontekst: Hendelseskontekst, event: OpprettOppgaveEvent) {}
     fun utsettOppgave(hendelseskontekst: Hendelseskontekst, event: UtsettOppgaveEvent) {}

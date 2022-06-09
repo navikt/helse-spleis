@@ -413,8 +413,8 @@ class Person private constructor(
         observers.forEach { it.utsettOppgave(aktivitetslogg.hendelseskontekst(), event)}
     }
 
-    internal fun vedtaksperiodeAvbrutt(aktivitetslogg: IAktivitetslogg, event: PersonObserver.VedtaksperiodeAvbruttEvent) {
-        observers.forEach { it.vedtaksperiodeAvbrutt(aktivitetslogg.hendelseskontekst(), event) }
+    internal fun vedtaksperiodeForkastet(aktivitetslogg: IAktivitetslogg, event: PersonObserver.VedtaksperiodeForkastetEvent) {
+        observers.forEach { it.vedtaksperiodeForkastet(aktivitetslogg.hendelseskontekst(), event) }
     }
 
     internal fun vedtaksperiodeEndret(aktivitetslogg: IAktivitetslogg, event: PersonObserver.VedtaksperiodeEndretEvent) {

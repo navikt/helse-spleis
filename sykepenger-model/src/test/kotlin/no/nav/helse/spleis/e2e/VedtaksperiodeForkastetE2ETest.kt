@@ -15,10 +15,10 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-internal class VedtaksperiodeAvbruttE2ETest : AbstractEndToEndTest() {
+internal class VedtaksperiodeForkastetE2ETest : AbstractEndToEndTest() {
 
     @Test
-    fun `vedtaksperioder avbrytes`() {
+    fun `vedtaksperioder forkastes`() {
         nyttVedtak(1.januar, 31.januar)
         forlengVedtak(1.februar, 28.februar)
         forlengVedtak(1.mars, 31.mars)
@@ -26,8 +26,8 @@ internal class VedtaksperiodeAvbruttE2ETest : AbstractEndToEndTest() {
         håndterYtelser(4.vedtaksperiode)
         håndterSimulering(4.vedtaksperiode)
         håndterUtbetalingsgodkjenning(4.vedtaksperiode, false) // <- TIL_INFOTRYGD
-        assertEquals(1, observatør.avbruttePerioder())
-        assertEquals(AVVENTER_GODKJENNING, observatør.avbrutt(4.vedtaksperiode.id(ORGNUMMER)).gjeldendeTilstand)
+        assertEquals(1, observatør.forkastedePerioder())
+        assertEquals(AVVENTER_GODKJENNING, observatør.forkastet(4.vedtaksperiode.id(ORGNUMMER)).gjeldendeTilstand)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
         assertSisteTilstand(3.vedtaksperiode, AVSLUTTET)
@@ -35,7 +35,7 @@ internal class VedtaksperiodeAvbruttE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `avbryter ikke kort periode`() {
+    fun `forkaster ikke kort periode`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 5.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(6.januar, 15.januar, 100.prosent))
@@ -50,8 +50,8 @@ internal class VedtaksperiodeAvbruttE2ETest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(3.vedtaksperiode)
         håndterUtbetalt()
         håndterAnnullerUtbetaling(ORGNUMMER)
-        assertEquals(1, observatør.avbruttePerioder())
-        assertEquals(AVSLUTTET, observatør.avbrutt(3.vedtaksperiode.id(ORGNUMMER)).gjeldendeTilstand)
+        assertEquals(1, observatør.forkastedePerioder())
+        assertEquals(AVSLUTTET, observatør.forkastet(3.vedtaksperiode.id(ORGNUMMER)).gjeldendeTilstand)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertSisteTilstand(3.vedtaksperiode, AVSLUTTET)

@@ -28,7 +28,7 @@ internal class TestObservatør : PersonObserver {
     private val vedtaksperioder = mutableMapOf<String, MutableSet<UUID>>()
     private val vedtaksperiodeendringer = mutableMapOf<UUID, MutableList<VedtaksperiodeEndretEvent>>()
 
-    private val avbruttEventer = mutableMapOf<UUID, PersonObserver.VedtaksperiodeAvbruttEvent>()
+    private val forkastedeEventer = mutableMapOf<UUID, PersonObserver.VedtaksperiodeForkastetEvent>()
     val annulleringer = mutableListOf<PersonObserver.UtbetalingAnnullertEvent>()
     lateinit var avstemming: Map<String, Any>
     val inntektsmeldingReplayEventer = mutableListOf<UUID>()
@@ -43,8 +43,8 @@ internal class TestObservatør : PersonObserver {
     fun vedtaksperiodeIndeks(orgnummer: String, id: UUID) = vedtaksperioder.getValue(orgnummer).indexOf(id)
     fun bedtOmInntektsmeldingReplay(vedtaksperiodeId: UUID) = vedtaksperiodeId in inntektsmeldingReplayEventer
 
-    fun avbruttePerioder() = avbruttEventer.size
-    fun avbrutt(vedtaksperiodeId: UUID) = avbruttEventer.getValue(vedtaksperiodeId)
+    fun forkastedePerioder() = forkastedeEventer.size
+    fun forkastet(vedtaksperiodeId: UUID) = forkastedeEventer.getValue(vedtaksperiodeId)
     fun opprettOppgaveForSpeilsaksbehandlereEvent() = opprettOppgaverTilSpeilsaksbehandlerEventer.toList()
     fun opprettOppgaveEvent() = opprettOppgaverEventer.toList()
     fun utsettOppgaveEventer() = utsettOppgaveEventer.toList()
@@ -102,8 +102,8 @@ internal class TestObservatør : PersonObserver {
         annulleringer.add(event)
     }
 
-    override fun vedtaksperiodeAvbrutt(hendelseskontekst: Hendelseskontekst, event: PersonObserver.VedtaksperiodeAvbruttEvent) {
-        avbruttEventer[hendelseskontekst.vedtaksperiodeId()] = event
+    override fun vedtaksperiodeForkastet(hendelseskontekst: Hendelseskontekst, event: PersonObserver.VedtaksperiodeForkastetEvent) {
+        forkastedeEventer[hendelseskontekst.vedtaksperiodeId()] = event
     }
 
     override fun hendelseIkkeHåndtert(hendelseskontekst: Hendelseskontekst, event: PersonObserver.HendelseIkkeHåndtertEvent) {
