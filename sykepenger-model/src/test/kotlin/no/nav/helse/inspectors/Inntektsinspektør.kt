@@ -1,12 +1,12 @@
 package no.nav.helse.inspectors
 
-import no.nav.helse.person.InntekthistorikkVisitor
-import no.nav.helse.person.Inntektshistorikk
-import no.nav.helse.økonomi.Inntekt
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
+import no.nav.helse.person.InntekthistorikkVisitor
+import no.nav.helse.person.Inntektshistorikk
+import no.nav.helse.økonomi.Inntekt
 
 internal class Inntektsinspektør(historikk: Inntektshistorikk) : InntekthistorikkVisitor {
     var inntektTeller = mutableListOf<Int>()
@@ -96,8 +96,8 @@ internal class Inntektsinspektør(historikk: Inntektshistorikk) : Inntekthistori
         inntektTeller.add(inntektTeller.removeLast() + 1)
     }
 
-    override fun visitSkattSammenligningsgrunnlag(
-        sammenligningsgrunnlag: Inntektshistorikk.Skatt.Sammenligningsgrunnlag,
+    override fun visitSkattRapportertInntekt(
+        rapportertInntekt: Inntektshistorikk.Skatt.RapportertInntekt,
         dato: LocalDate,
         hendelseId: UUID,
         beløp: Inntekt,

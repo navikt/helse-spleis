@@ -72,14 +72,14 @@ class Vilkårsgrunnlag(
     }
 
 
-    internal fun lagreInntekter(person: Person, skjæringstidspunkt: LocalDate) {
-        inntektsvurdering.lagreInntekter(person, skjæringstidspunkt, this)
+    internal fun lagreRapporterteInntekter(person: Person, skjæringstidspunkt: LocalDate) {
+        inntektsvurdering.lagreRapporterteInntekter(person, skjæringstidspunkt, this)
     }
 
     internal fun grunnlagsdata() = requireNotNull(grunnlagsdata) { "Må kalle valider() først" }
 
     internal fun lagreSkatteinntekter(person: Person, skjæringstidspunkt: LocalDate) {
-        inntektsvurderingForSykepengegrunnlag.lagreInntekter(person, skjæringstidspunkt, this)
+        inntektsvurderingForSykepengegrunnlag.lagreOmregnetÅrsinntekter(person, skjæringstidspunkt, this)
     }
 
     internal fun loggUkjenteArbeidsforhold(person: Person, skjæringstidspunkt: LocalDate) {

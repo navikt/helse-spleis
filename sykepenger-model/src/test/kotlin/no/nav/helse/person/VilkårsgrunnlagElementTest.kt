@@ -68,7 +68,7 @@ internal class VilkårsgrunnlagElementTest {
         arbeidsgiverInntektsopplysninger = listOf(
             ArbeidsgiverInntektsopplysning("orgnummer",
                 Inntektshistorikk.SkattComposite(UUID.randomUUID(), (0 until 12).map {
-                    Inntektshistorikk.Skatt.Sammenligningsgrunnlag(
+                    Inntektshistorikk.Skatt.RapportertInntekt(
                         dato = LocalDate.now(),
                         hendelseId = UUID.randomUUID(),
                         beløp = inntekt,

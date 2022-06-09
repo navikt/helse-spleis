@@ -664,7 +664,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             ArbeidsgiverInntektsopplysning(
                 "ORGNR1",
                 Inntektshistorikk.SkattComposite(UUID.randomUUID(), (0 until 12).map {
-                    Inntektshistorikk.Skatt.Sammenligningsgrunnlag(
+                    Inntektshistorikk.Skatt.RapportertInntekt(
                         dato = skjæringstidspunkt,
                         hendelseId = UUID.randomUUID(),
                         beløp = inntekt,

@@ -656,7 +656,7 @@ internal data class PersonData(
                             inntektsopplysninger = requireNotNull(inntektData.skatteopplysninger).map { skatteData ->
                                 when (skatteData.kilde?.let(Inntektsopplysningskilde::valueOf)) {
                                     Inntektsopplysningskilde.SKATT_SAMMENLIGNINGSGRUNNLAG ->
-                                        Inntektshistorikk.Skatt.Sammenligningsgrunnlag(
+                                        Inntektshistorikk.Skatt.RapportertInntekt(
                                             dato = requireNotNull(skatteData.dato),
                                             hendelseId = requireNotNull(skatteData.hendelseId),
                                             beløp = requireNotNull(skatteData.beløp).månedlig,

@@ -644,8 +644,8 @@ internal interface InntekthistorikkVisitor {
     ) {
     }
 
-    fun visitSkattSammenligningsgrunnlag(
-        sammenligningsgrunnlag: Inntektshistorikk.Skatt.Sammenligningsgrunnlag,
+    fun visitSkattRapportertInntekt(
+        rapportertInntekt: Inntektshistorikk.Skatt.RapportertInntekt,
         dato: LocalDate,
         hendelseId: UUID,
         beløp: Inntekt,

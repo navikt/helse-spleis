@@ -4,11 +4,19 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Year
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.person.*
+import no.nav.helse.person.ArbeidsgiverInntektsopplysning
+import no.nav.helse.person.InntekthistorikkVisitor
 import no.nav.helse.person.Inntektshistorikk.Skatt
-import no.nav.helse.person.Inntektshistorikk.Skatt.Inntekttype.*
+import no.nav.helse.person.Inntektshistorikk.Skatt.Inntekttype.LØNNSINNTEKT
+import no.nav.helse.person.Inntektshistorikk.Skatt.Inntekttype.NÆRINGSINNTEKT
+import no.nav.helse.person.Inntektshistorikk.Skatt.Inntekttype.PENSJON_ELLER_TRYGD
+import no.nav.helse.person.Inntektshistorikk.Skatt.Inntekttype.YTELSE_FRA_OFFENTLIGE
+import no.nav.helse.person.Sammenligningsgrunnlag
+import no.nav.helse.person.SykdomstidslinjeVisitor
+import no.nav.helse.person.UtbetalingsdagVisitor
+import no.nav.helse.person.VilkårsgrunnlagHistorikkVisitor
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Tidslinjedag.Tidslinjeperiode.Companion.dager
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -563,8 +571,8 @@ interface SubsumsjonObserver {
             inntekter[orgnummer] = inntektliste
         }
 
-        override fun visitSkattSammenligningsgrunnlag(
-            sammenligningsgrunnlag: Skatt.Sammenligningsgrunnlag,
+        override fun visitSkattRapportertInntekt(
+            rapportertInntekt: Skatt.RapportertInntekt,
             dato: LocalDate,
             hendelseId: UUID,
             beløp: Inntekt,

@@ -1,13 +1,18 @@
 package no.nav.helse.serde.api.speil.builders
 
-import no.nav.helse.person.*
+import java.time.LocalDate
+import java.time.YearMonth
+import java.util.UUID
+import no.nav.helse.person.Arbeidsgiver
+import no.nav.helse.person.ArbeidsgiverVisitor
+import no.nav.helse.person.InntekthistorikkVisitor
+import no.nav.helse.person.Inntektshistorikk
+import no.nav.helse.person.Person
+import no.nav.helse.person.PersonVisitor
 import no.nav.helse.serde.api.dto.Arbeidsgiverinntekt
 import no.nav.helse.serde.api.dto.InntekterFraAOrdningen
 import no.nav.helse.serde.api.dto.Inntektkilde
 import no.nav.helse.serde.api.dto.OmregnetÅrsinntekt
-import java.time.LocalDate
-import java.time.YearMonth
-import java.util.*
 
 // Samler opp hver arbeidsgivers siste generasjon av sammenligningsgrunnlag per skjæringstidspunkt
 internal class OppsamletSammenligningsgrunnlagBuilder(person: Person) : PersonVisitor {
@@ -59,7 +64,7 @@ internal class OppsamletSammenligningsgrunnlagBuilder(person: Person) : PersonVi
         fun build() = akkumulator.toMap()
 
         override fun preVisitSkatt(skattComposite: Inntektshistorikk.SkattComposite, id: UUID, dato: LocalDate) {
-            skattComposite.sammenligningsgrunnlag()?.let {
+            skattComposite.rapportertInntekt(dato)?.rapportertInntekt()?.let {
                 akkumulator.put(dato, InntektBuilder(it).build().årlig)
             }
         }

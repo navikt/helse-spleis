@@ -1,11 +1,11 @@
 package no.nav.helse.hendelser
 
+import java.time.LocalDate
+import java.util.UUID
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Companion.grupperArbeidsforholdPerOrgnummer
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.Person
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
-import java.util.*
 
 class Utbetalingsgrunnlag(
     meldingsreferanseId: UUID,
@@ -20,7 +20,7 @@ class Utbetalingsgrunnlag(
     private val arbeidsforhold = arbeidsforhold.filter { it.orgnummer.isNotBlank() }
 
     internal fun lagreInntekter(person: Person, skjæringstidspunkt: LocalDate) {
-        inntektsvurderingForSykepengegrunnlag.lagreInntekter(person, skjæringstidspunkt, this)
+        inntektsvurderingForSykepengegrunnlag.lagreOmregnetÅrsinntekter(person, skjæringstidspunkt, this)
     }
 
     internal fun loggUkjenteArbeidsforhold(person: Person, skjæringstidspunkt: LocalDate) {

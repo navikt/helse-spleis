@@ -1347,8 +1347,8 @@ internal class JsonBuilder : AbstractBuilder() {
             ))
         }
 
-        override fun visitSkattSammenligningsgrunnlag(
-            sammenligningsgrunnlag: Inntektshistorikk.Skatt.Sammenligningsgrunnlag,
+        override fun visitSkattRapportertInntekt(
+            rapportertInntekt: Inntektshistorikk.Skatt.RapportertInntekt,
             dato: LocalDate,
             hendelseId: UUID,
             beløp: Inntekt,

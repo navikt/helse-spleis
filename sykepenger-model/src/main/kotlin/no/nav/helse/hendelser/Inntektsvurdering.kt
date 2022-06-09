@@ -34,8 +34,8 @@ class Inntektsvurdering(private val inntekter: List<ArbeidsgiverInntekt>) {
         }
     }
 
-    internal fun lagreInntekter(person: Person, skjæringstidspunkt: LocalDate, hendelse: PersonHendelse) =
-        ArbeidsgiverInntekt.lagreSammenligningsgrunnlag(inntekter, person, skjæringstidspunkt, hendelse)
+    internal fun lagreRapporterteInntekter(person: Person, skjæringstidspunkt: LocalDate, hendelse: PersonHendelse) =
+        ArbeidsgiverInntekt.lagreRapporterteInntekter(inntekter, person, skjæringstidspunkt, hendelse)
 
     internal companion object {
         internal fun validerAvvik(

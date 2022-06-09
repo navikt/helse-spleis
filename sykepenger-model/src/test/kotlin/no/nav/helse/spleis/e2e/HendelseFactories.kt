@@ -523,7 +523,7 @@ internal fun sammenligningsgrunnlag(
     orgnummer: String,
     skjæringstidspunkt: LocalDate,
     inntekter: List<Inntekt>
-) = lagMånedsinntekter(orgnummer, skjæringstidspunkt, inntekter, creator = ArbeidsgiverInntekt.MånedligInntekt::Sammenligningsgrunnlag)
+) = lagMånedsinntekter(orgnummer, skjæringstidspunkt, inntekter, creator = ArbeidsgiverInntekt.MånedligInntekt::RapportertInntekt)
 
 private fun lagMånedsinntekter(
     orgnummer: String,

@@ -1,5 +1,7 @@
 package no.nav.helse.person.etterlevelse
 
+import java.time.YearMonth
+import java.util.UUID
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.januar
@@ -10,13 +12,17 @@ import no.nav.helse.person.Sammenligningsgrunnlag
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.subsumsjonsformat
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Tidslinjedag
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Tidslinjedag.Companion.dager
-import no.nav.helse.testhelpers.*
+import no.nav.helse.testhelpers.AP
+import no.nav.helse.testhelpers.ARB
+import no.nav.helse.testhelpers.FRI
+import no.nav.helse.testhelpers.NAV
+import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import java.time.YearMonth
-import java.util.*
 
 internal class SubsumsjonObserverTest {
 
@@ -121,7 +127,7 @@ internal class SubsumsjonObserverTest {
                     SkattComposite(
                         UUID.randomUUID(),
                         listOf(
-                            Skatt.Sammenligningsgrunnlag(
+                            Skatt.RapportertInntekt(
                                 dato = 1.januar,
                                 hendelseId = UUID.randomUUID(),
                                 beløp = 20000.månedlig,
@@ -130,7 +136,7 @@ internal class SubsumsjonObserverTest {
                                 fordel = "fordel",
                                 beskrivelse = "beskrivelse"
                             ),
-                            Skatt.Sammenligningsgrunnlag(
+                            Skatt.RapportertInntekt(
                                 dato = 1.januar,
                                 hendelseId = UUID.randomUUID(),
                                 beløp = 20000.månedlig,
@@ -147,7 +153,7 @@ internal class SubsumsjonObserverTest {
                     SkattComposite(
                         UUID.randomUUID(),
                         listOf(
-                            Skatt.Sammenligningsgrunnlag(
+                            Skatt.RapportertInntekt(
                                 dato = 1.januar,
                                 hendelseId = UUID.randomUUID(),
                                 beløp = 15000.månedlig,
@@ -156,7 +162,7 @@ internal class SubsumsjonObserverTest {
                                 fordel = "fordel",
                                 beskrivelse = "beskrivelse"
                             ),
-                            Skatt.Sammenligningsgrunnlag(
+                            Skatt.RapportertInntekt(
                                 dato = 1.januar,
                                 hendelseId = UUID.randomUUID(),
                                 beløp = 15000.månedlig,

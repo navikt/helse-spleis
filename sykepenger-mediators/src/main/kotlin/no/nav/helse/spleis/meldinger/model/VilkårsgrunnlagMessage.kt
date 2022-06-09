@@ -31,7 +31,7 @@ internal class VilkårsgrunnlagMessage(packet: JsonMessage) : BehovMessage(packe
         .flatMap { måned ->
             måned["inntektsliste"]
                 .groupBy({ inntekt -> inntekt.arbeidsgiver() }) { inntekt ->
-                    ArbeidsgiverInntekt.MånedligInntekt.Sammenligningsgrunnlag(
+                    ArbeidsgiverInntekt.MånedligInntekt.RapportertInntekt(
                         yearMonth = måned["årMåned"].asYearMonth(),
                         inntekt = inntekt["beløp"].asDouble().månedlig,
                         type = inntekt["inntektstype"].asInntekttype(),

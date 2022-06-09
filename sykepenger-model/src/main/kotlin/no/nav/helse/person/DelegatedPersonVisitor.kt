@@ -880,8 +880,8 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         delegatee.visitSkattSykepengegrunnlag(sykepengegrunnlag, dato, hendelseId, beløp, måned, type, fordel, beskrivelse, tidsstempel)
     }
 
-    override fun visitSkattSammenligningsgrunnlag(
-        sammenligningsgrunnlag: Inntektshistorikk.Skatt.Sammenligningsgrunnlag,
+    override fun visitSkattRapportertInntekt(
+        rapportertInntekt: Inntektshistorikk.Skatt.RapportertInntekt,
         dato: LocalDate,
         hendelseId: UUID,
         beløp: Inntekt,
@@ -891,7 +891,7 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         beskrivelse: String,
         tidsstempel: LocalDateTime
     ) {
-        delegatee.visitSkattSammenligningsgrunnlag(sammenligningsgrunnlag, dato, hendelseId, beløp, måned, type, fordel, beskrivelse, tidsstempel)
+        delegatee.visitSkattRapportertInntekt(rapportertInntekt, dato, hendelseId, beløp, måned, type, fordel, beskrivelse, tidsstempel)
     }
 
     override fun postVisitSkatt(skattComposite: Inntektshistorikk.SkattComposite, id: UUID, dato: LocalDate) {

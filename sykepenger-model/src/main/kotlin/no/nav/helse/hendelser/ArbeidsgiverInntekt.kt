@@ -31,12 +31,12 @@ class ArbeidsgiverInntekt(
     private fun harInntekter() = inntekter.isNotEmpty()
 
     companion object {
-        fun lagreSykepengegrunnlag(inntekter: List<ArbeidsgiverInntekt>, person: Person, skjæringstidspunkt: LocalDate, hendelse: PersonHendelse) {
+        fun lagreOmregnetÅrsinntekter(inntekter: List<ArbeidsgiverInntekt>, person: Person, skjæringstidspunkt: LocalDate, hendelse: PersonHendelse) {
             inntekter.forEach { person.lagreOmregnetÅrsinntekt(it.arbeidsgiver, it, skjæringstidspunkt, hendelse) }
         }
 
-        fun lagreSammenligningsgrunnlag(inntekter: List<ArbeidsgiverInntekt>, person: Person, skjæringstidspunkt: LocalDate, hendelse: PersonHendelse) {
-            inntekter.forEach { person.lagreGrunnlagForSammenligningsgrunnlag(it.arbeidsgiver, it, skjæringstidspunkt, hendelse) }
+        internal fun lagreRapporterteInntekter(inntekter: List<ArbeidsgiverInntekt>, person: Person, skjæringstidspunkt: LocalDate, hendelse: PersonHendelse) {
+            inntekter.forEach { person.lagreRapporterteInntekter(it.arbeidsgiver, it, skjæringstidspunkt, hendelse) }
         }
 
         internal fun List<ArbeidsgiverInntekt>.kilder(antallMåneder: Int) = this
@@ -69,7 +69,7 @@ class ArbeidsgiverInntekt(
             meldingsreferanseId: UUID
         )
 
-        class Sammenligningsgrunnlag(
+        class RapportertInntekt(
             yearMonth: YearMonth,
             inntekt: Inntekt,
             type: Inntekttype,
@@ -82,7 +82,7 @@ class ArbeidsgiverInntekt(
                 skjæringstidspunkt: LocalDate,
                 meldingsreferanseId: UUID,
             ) {
-                inntektshistorikk.addSkattSammenligningsgrunnlag(
+                inntektshistorikk.addRapportertInntekt(
                     dato = skjæringstidspunkt,
                     hendelseId = meldingsreferanseId,
                     beløp = inntekt,

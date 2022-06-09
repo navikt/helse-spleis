@@ -58,8 +58,8 @@ internal class Inntektshistorikk {
     internal fun omregnetÅrsinntekt(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?): Inntektsopplysning? =
         nyesteInnslag()?.omregnetÅrsinntekt(skjæringstidspunkt, førsteFraværsdag)
 
-    internal fun grunnlagForSammenligningsgrunnlag(dato: LocalDate): Inntektsopplysning? =
-        nyesteInnslag()?.grunnlagForSammenligningsgrunnlag(dato)
+    internal fun rapportertInntekt(dato: LocalDate): Inntektsopplysning? =
+        nyesteInnslag()?.rapportertInntekt(dato)
 
     internal class Innslag(private val id: UUID) {
         private val inntekter = mutableListOf<Inntektsopplysning>()
@@ -91,10 +91,10 @@ internal class Inntektshistorikk {
                 .mapNotNull { it.omregnetÅrsinntekt(skjæringstidspunkt, førsteFraværsdag) }
                 .firstOrNull()
 
-        internal fun grunnlagForSammenligningsgrunnlag(dato: LocalDate) =
+        internal fun rapportertInntekt(dato: LocalDate) =
             inntekter
                 .sorted()
-                .mapNotNull { it.grunnlagForSammenligningsgrunnlag(dato) }
+                .mapNotNull { it.rapportertInntekt(dato) }
                 .firstOrNull()
 
         internal fun omregnetÅrsinntektInfotrygd(periode: Periode) =
@@ -122,8 +122,8 @@ internal class Inntektshistorikk {
         fun accept(visitor: InntekthistorikkVisitor)
         fun omregnetÅrsinntekt(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?): Inntektsopplysning? = null
         fun omregnetÅrsinntekt(): Inntekt
-        fun grunnlagForSammenligningsgrunnlag(dato: LocalDate): Inntektsopplysning? = null
-        fun grunnlagForSammenligningsgrunnlag(): Inntekt
+        fun rapportertInntekt(dato: LocalDate): Inntektsopplysning? = null
+        fun rapportertInntekt(): Inntekt
         fun skalErstattesAv(other: Inntektsopplysning): Boolean
         fun subsumsjon(subsumsjonObserver: SubsumsjonObserver, skjæringstidspunkt: LocalDate, organisasjonsnummer: String) = run {}
         override fun compareTo(other: Inntektsopplysning) =
@@ -159,7 +159,7 @@ internal class Inntektshistorikk {
         override fun omregnetÅrsinntekt(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?) = takeIf { it.dato == skjæringstidspunkt }
         override fun omregnetÅrsinntekt(): Inntekt = beløp
 
-        override fun grunnlagForSammenligningsgrunnlag(): Inntekt = error("Saksbehandler har ikke grunnlag for sammenligningsgrunnlag")
+        override fun rapportertInntekt(): Inntekt = error("Saksbehandler har ikke grunnlag for sammenligningsgrunnlag")
 
         override fun skalErstattesAv(other: Inntektsopplysning) =
             other is Saksbehandler && this.dato == other.dato
@@ -186,7 +186,7 @@ internal class Inntektshistorikk {
 
         internal fun omregnetÅrsinntekt(periode: Periode) = takeIf { it.dato in periode }
 
-        override fun grunnlagForSammenligningsgrunnlag(): Inntekt = error("Infotrygd har ikke grunnlag for sammenligningsgrunnlag")
+        override fun rapportertInntekt(): Inntekt = error("Infotrygd har ikke grunnlag for sammenligningsgrunnlag")
 
         override fun erNødvendigInntektForVilkårsprøving(harSykdom: Boolean) = harSykdom
 
@@ -243,7 +243,7 @@ internal class Inntektshistorikk {
 
         override fun omregnetÅrsinntekt(): Inntekt = beløp
 
-        override fun grunnlagForSammenligningsgrunnlag(): Inntekt = error("Inntektsmelding har ikke grunnlag for sammenligningsgrunnlag")
+        override fun rapportertInntekt(): Inntekt = error("Inntektsmelding har ikke grunnlag for sammenligningsgrunnlag")
 
         override fun skalErstattesAv(other: Inntektsopplysning) =
             other is Inntektsmelding && this.dato == other.dato
@@ -285,17 +285,15 @@ internal class Inntektshistorikk {
                 .div(3)
         }
 
-        override fun grunnlagForSammenligningsgrunnlag(dato: LocalDate) =
-            takeIf { inntektsopplysninger.any { it.grunnlagForSammenligningsgrunnlag(dato) != null } }
+        override fun rapportertInntekt(dato: LocalDate) =
+            takeIf { inntektsopplysninger.any { it.rapportertInntekt(dato) != null } }
 
-        override fun grunnlagForSammenligningsgrunnlag(): Inntekt =
+        override fun rapportertInntekt(): Inntekt =
             inntektsopplysninger
                 .filter { it.erRelevant(12) }
-                .map(Skatt::grunnlagForSammenligningsgrunnlag)
+                .map(Skatt::rapportertInntekt)
                 .summer()
                 .div(12)
-
-        internal fun sammenligningsgrunnlag() = grunnlagForSammenligningsgrunnlag(dato)?.grunnlagForSammenligningsgrunnlag()
 
         override fun subsumsjon(subsumsjonObserver: SubsumsjonObserver, skjæringstidspunkt: LocalDate, organisasjonsnummer: String) {
             subsumsjonObserver.`§ 8-28 ledd 3 bokstav a`(
@@ -326,7 +324,7 @@ internal class Inntektshistorikk {
 
         override fun omregnetÅrsinntekt() = Inntekt.INGEN
 
-        override fun grunnlagForSammenligningsgrunnlag() = Inntekt.INGEN
+        override fun rapportertInntekt() = Inntekt.INGEN
 
         override fun skalErstattesAv(other: Inntektsopplysning) = other is IkkeRapportert && this.dato == other.dato
     }
@@ -380,13 +378,13 @@ internal class Inntektshistorikk {
 
             override fun omregnetÅrsinntekt(): Inntekt = beløp
 
-            override fun grunnlagForSammenligningsgrunnlag(): Inntekt = error("Sykepengegrunnlag har ikke grunnlag for sammenligningsgrunnlag")
+            override fun rapportertInntekt(): Inntekt = error("Sykepengegrunnlag har ikke grunnlag for sammenligningsgrunnlag")
 
             override fun skalErstattesAv(other: Inntektsopplysning) =
                 other is Sykepengegrunnlag && this.dato == other.dato && this.tidsstempel != other.tidsstempel
         }
 
-        internal class Sammenligningsgrunnlag(
+        internal class RapportertInntekt(
             dato: LocalDate,
             hendelseId: UUID,
             beløp: Inntekt,
@@ -400,7 +398,7 @@ internal class Inntektshistorikk {
             override val prioritet = 20
 
             override fun accept(visitor: InntekthistorikkVisitor) {
-                visitor.visitSkattSammenligningsgrunnlag(
+                visitor.visitSkattRapportertInntekt(
                     this,
                     dato,
                     hendelseId,
@@ -413,15 +411,15 @@ internal class Inntektshistorikk {
                 )
             }
 
-            override fun grunnlagForSammenligningsgrunnlag(dato: LocalDate) =
+            override fun rapportertInntekt(dato: LocalDate) =
                 takeIf { this.dato == dato && måned.isWithinRangeOf(dato, 12) }
 
-            override fun grunnlagForSammenligningsgrunnlag(): Inntekt = beløp
+            override fun rapportertInntekt(): Inntekt = beløp
 
             override fun omregnetÅrsinntekt(): Inntekt = error("Sammenligningsgrunnlag har ikke grunnlag for sykepengegrunnlag")
 
             override fun skalErstattesAv(other: Inntektsopplysning) =
-                other is Sammenligningsgrunnlag && this.dato == other.dato
+                other is RapportertInntekt && this.dato == other.dato
         }
     }
 
@@ -458,7 +456,7 @@ internal class Inntektshistorikk {
         ) =
             skatt.add(Skatt.Sykepengegrunnlag(dato, hendelseId, beløp, måned, type, fordel, beskrivelse, tidsstempel))
 
-        internal fun addSkattSammenligningsgrunnlag(
+        internal fun addRapportertInntekt(
             dato: LocalDate,
             hendelseId: UUID,
             beløp: Inntekt,
@@ -467,7 +465,7 @@ internal class Inntektshistorikk {
             fordel: String,
             beskrivelse: String
         ) =
-            skatt.add(Skatt.Sammenligningsgrunnlag(dato, hendelseId, beløp, måned, type, fordel, beskrivelse, tidsstempel))
+            skatt.add(Skatt.RapportertInntekt(dato, hendelseId, beløp, måned, type, fordel, beskrivelse, tidsstempel))
 
         private fun add(opplysning: Inntektsopplysning) {
             innslag.add(opplysning)

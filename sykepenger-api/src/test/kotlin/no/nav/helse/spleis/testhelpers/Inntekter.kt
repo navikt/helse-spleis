@@ -1,13 +1,13 @@
 package no.nav.helse.spleis.testhelpers
 
+import java.time.YearMonth
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.InntektCreator
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
-import java.time.YearMonth
 
-internal fun inntektperioderForSammenligningsgrunnlag(block: Inntektperioder.() -> Unit) = Inntektperioder(ArbeidsgiverInntekt.MånedligInntekt::Sammenligningsgrunnlag, block).inntekter()
+internal fun inntektperioderForSammenligningsgrunnlag(block: Inntektperioder.() -> Unit) = Inntektperioder(ArbeidsgiverInntekt.MånedligInntekt::RapportertInntekt, block).inntekter()
 internal fun inntektperioderForSykepengegrunnlag(block: Inntektperioder.() -> Unit) = Inntektperioder(ArbeidsgiverInntekt.MånedligInntekt::Sykepengegrunnlag, block).inntekter()
 
 internal class Inntektperioder(private val inntektCreator: InntektCreator, block: Inntektperioder.() -> Unit) {

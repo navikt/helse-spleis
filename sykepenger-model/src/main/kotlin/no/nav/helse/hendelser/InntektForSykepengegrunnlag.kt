@@ -1,13 +1,13 @@
 package no.nav.helse.hendelser
 
+import java.time.LocalDate
+import java.time.YearMonth
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.Companion.antallMåneder
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.Companion.harInntektFor
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonHendelse
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
-import java.time.YearMonth
 
 class InntektForSykepengegrunnlag(
     private val inntekter: List<ArbeidsgiverInntekt>,
@@ -46,8 +46,8 @@ class InntektForSykepengegrunnlag(
         }
     }
 
-    internal fun lagreInntekter(person: Person, skjæringstidspunkt: LocalDate, hendelse: PersonHendelse) =
-        ArbeidsgiverInntekt.lagreSykepengegrunnlag(inntekter, person, skjæringstidspunkt, hendelse)
+    internal fun lagreOmregnetÅrsinntekter(person: Person, skjæringstidspunkt: LocalDate, hendelse: PersonHendelse) =
+        ArbeidsgiverInntekt.lagreOmregnetÅrsinntekter(inntekter, person, skjæringstidspunkt, hendelse)
 
     class Arbeidsforhold(
         val orgnummer: String,

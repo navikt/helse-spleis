@@ -200,9 +200,9 @@ internal class Arbeidsgiver private constructor(
             return Opptjening.opptjening(arbeidsforhold, skjæringstidspunkt, subsumsjonObserver)
         }
 
-        internal fun List<Arbeidsgiver>.grunnlagForSammenligningsgrunnlag(skjæringstidspunkt: LocalDate) =
+        internal fun List<Arbeidsgiver>.rapporterteInntekter(skjæringstidspunkt: LocalDate) =
             this.mapNotNull { arbeidsgiver ->
-                arbeidsgiver.inntektshistorikk.grunnlagForSammenligningsgrunnlag(skjæringstidspunkt)
+                arbeidsgiver.inntektshistorikk.rapportertInntekt(skjæringstidspunkt)
                     ?.let { ArbeidsgiverInntektsopplysning(arbeidsgiver.organisasjonsnummer, it) }
             }
 
@@ -957,7 +957,7 @@ internal class Arbeidsgiver private constructor(
         }
     }
 
-    internal fun lagreSammenligningsgrunnlag(arbeidsgiverInntekt: ArbeidsgiverInntekt, skjæringstidspunkt: LocalDate, hendelse: PersonHendelse) {
+    internal fun lagreRapporterteInntekter(arbeidsgiverInntekt: ArbeidsgiverInntekt, skjæringstidspunkt: LocalDate, hendelse: PersonHendelse) {
         arbeidsgiverInntekt.lagreInntekter(inntektshistorikk, skjæringstidspunkt, hendelse.meldingsreferanseId())
     }
 

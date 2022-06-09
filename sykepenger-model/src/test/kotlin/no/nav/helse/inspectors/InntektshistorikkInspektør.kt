@@ -68,7 +68,7 @@ internal class InntektshistorikkInspektør(arbeidsgiver: Arbeidsgiver) : Arbeids
             Opplysning(
                 dato,
                 inntektsmelding.omregnetÅrsinntekt(dato, dato)?.omregnetÅrsinntekt(),
-                inntektsmelding.grunnlagForSammenligningsgrunnlag(dato)?.grunnlagForSammenligningsgrunnlag(),
+                inntektsmelding.rapportertInntekt(dato)?.rapportertInntekt(),
                 Kilde.INNTEKTSMELDING
             )
         )
@@ -86,7 +86,7 @@ internal class InntektshistorikkInspektør(arbeidsgiver: Arbeidsgiver) : Arbeids
             Opplysning(
                 dato,
                 infotrygd.omregnetÅrsinntekt(dato, dato)?.omregnetÅrsinntekt(),
-                infotrygd.grunnlagForSammenligningsgrunnlag(dato)?.grunnlagForSammenligningsgrunnlag(),
+                infotrygd.rapportertInntekt(dato)?.rapportertInntekt(),
                 Kilde.INFOTRYGD
             )
         )
@@ -108,8 +108,8 @@ internal class InntektshistorikkInspektør(arbeidsgiver: Arbeidsgiver) : Arbeids
         skattedato = dato
     }
 
-    override fun visitSkattSammenligningsgrunnlag(
-        sammenligningsgrunnlag: Inntektshistorikk.Skatt.Sammenligningsgrunnlag,
+    override fun visitSkattRapportertInntekt(
+        rapportertInntekt: Inntektshistorikk.Skatt.RapportertInntekt,
         dato: LocalDate,
         hendelseId: UUID,
         beløp: Inntekt,
@@ -127,7 +127,7 @@ internal class InntektshistorikkInspektør(arbeidsgiver: Arbeidsgiver) : Arbeids
             Opplysning(
                 skattedato,
                 skattComposite.omregnetÅrsinntekt(skattedato, skattedato)?.omregnetÅrsinntekt(),
-                skattComposite.grunnlagForSammenligningsgrunnlag(skattedato)?.grunnlagForSammenligningsgrunnlag(),
+                skattComposite.rapportertInntekt(skattedato)?.rapportertInntekt(),
                 Kilde.SKATT
             )
         )
@@ -145,7 +145,7 @@ internal class InntektshistorikkInspektør(arbeidsgiver: Arbeidsgiver) : Arbeids
             Opplysning(
                 dato,
                 saksbehandler.omregnetÅrsinntekt(dato, dato)?.omregnetÅrsinntekt(),
-                saksbehandler.grunnlagForSammenligningsgrunnlag(dato)?.grunnlagForSammenligningsgrunnlag(),
+                saksbehandler.rapportertInntekt(dato)?.rapportertInntekt(),
                 Kilde.SAKSBEHANDLER
             )
         )

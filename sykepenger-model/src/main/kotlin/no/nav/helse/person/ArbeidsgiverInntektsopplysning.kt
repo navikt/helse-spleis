@@ -41,7 +41,7 @@ internal class ArbeidsgiverInntektsopplysning(
             associate { it.orgnummer to it.inntektsopplysning.omregnetÅrsinntekt() }
 
         internal fun List<ArbeidsgiverInntektsopplysning>.sammenligningsgrunnlag(): Inntekt {
-            return map { it.inntektsopplysning.grunnlagForSammenligningsgrunnlag() }.summer()
+            return map { it.inntektsopplysning.rapportertInntekt() }.summer()
         }
 
         internal fun List<ArbeidsgiverInntektsopplysning>.inntektsopplysningPerArbeidsgiver() =

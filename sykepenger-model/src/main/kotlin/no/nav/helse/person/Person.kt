@@ -40,7 +40,6 @@ import no.nav.helse.person.Arbeidsgiver.Companion.finn
 import no.nav.helse.person.Arbeidsgiver.Companion.ghostPeriode
 import no.nav.helse.person.Arbeidsgiver.Companion.gjenopptaBehandling
 import no.nav.helse.person.Arbeidsgiver.Companion.gjenopptaBehandlingNy
-import no.nav.helse.person.Arbeidsgiver.Companion.grunnlagForSammenligningsgrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.harArbeidsgivereMedOverlappendeUtbetaltePerioder
 import no.nav.helse.person.Arbeidsgiver.Companion.harOverlappendeVedtaksperiode
 import no.nav.helse.person.Arbeidsgiver.Companion.harUtbetaltPeriode
@@ -49,6 +48,7 @@ import no.nav.helse.person.Arbeidsgiver.Companion.håndter
 import no.nav.helse.person.Arbeidsgiver.Companion.kanOverstyreTidslinje
 import no.nav.helse.person.Arbeidsgiver.Companion.kanStarteRevurdering
 import no.nav.helse.person.Arbeidsgiver.Companion.nåværendeVedtaksperioder
+import no.nav.helse.person.Arbeidsgiver.Companion.rapporterteInntekter
 import no.nav.helse.person.Arbeidsgiver.Companion.slettUtgåtteSykmeldingsperioder
 import no.nav.helse.person.Arbeidsgiver.Companion.startRevurdering
 import no.nav.helse.person.Vedtaksperiode.Companion.ALLE
@@ -608,13 +608,13 @@ class Person private constructor(
         finnArbeidsgiverForInntekter(orgnummer, hendelse).lagreOmregnetÅrsinntekt(arbeidsgiverInntekt, skjæringstidspunkt, hendelse)
     }
 
-    internal fun lagreGrunnlagForSammenligningsgrunnlag(
+    internal fun lagreRapporterteInntekter(
         orgnummer: String,
         arbeidsgiverInntekt: ArbeidsgiverInntekt,
         skjæringstidspunkt: LocalDate,
         hendelse: PersonHendelse
     ) {
-        finnArbeidsgiverForInntekter(orgnummer, hendelse).lagreSammenligningsgrunnlag(arbeidsgiverInntekt, skjæringstidspunkt, hendelse)
+        finnArbeidsgiverForInntekter(orgnummer, hendelse).lagreRapporterteInntekter(arbeidsgiverInntekt, skjæringstidspunkt, hendelse)
     }
 
     internal fun lagreSykepengegrunnlagFraInfotrygd(
@@ -653,7 +653,7 @@ class Person private constructor(
         )
 
     internal fun beregnSammenligningsgrunnlag(skjæringstidspunkt: LocalDate, subsumsjonObserver: SubsumsjonObserver): Sammenligningsgrunnlag {
-        val arbeidsgiverInntektsopplysninger = arbeidsgivere.grunnlagForSammenligningsgrunnlag(skjæringstidspunkt)
+        val arbeidsgiverInntektsopplysninger = arbeidsgivere.rapporterteInntekter(skjæringstidspunkt)
         val sammenligningsgrunnlag = Sammenligningsgrunnlag(arbeidsgiverInntektsopplysninger)
         subsumsjonObserver.`§ 8-30 ledd 2`(skjæringstidspunkt, sammenligningsgrunnlag.subsumsjonsformat())
         return sammenligningsgrunnlag
