@@ -462,6 +462,11 @@ internal class Vedtaksperiode private constructor(
         person.startRevurdering(this, hendelse)
     }
 
+    private fun revurderTidslinje(hendelse: OverstyrTidslinje) {
+        oppdaterHistorikk(hendelse)
+        person.startRevurdering(this, hendelse)
+    }
+
     internal fun periode() = periode
 
     private fun kontekst(hendelse: IAktivitetslogg) {
@@ -1140,9 +1145,8 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
             if (Toggle.NyRevurdering.disabled) return vedtaksperiode.person.overstyrUtkastRevurdering(hendelse)
-            vedtaksperiode.oppdaterHistorikk(hendelse)
             vedtaksperiode.emitVedtaksperiodeEndret(hendelse)
-            vedtaksperiode.person.startRevurdering(vedtaksperiode, hendelse)
+            vedtaksperiode.revurderTidslinje(hendelse)
         }
 
         override fun revurder(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
@@ -1987,7 +1991,8 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
-            vedtaksperiode.person.overstyrUtkastRevurdering(hendelse)
+            if (Toggle.NyRevurdering.disabled) return vedtaksperiode.person.overstyrUtkastRevurdering(hendelse)
+            vedtaksperiode.revurderTidslinje(hendelse)
         }
 
         override fun revurder(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
