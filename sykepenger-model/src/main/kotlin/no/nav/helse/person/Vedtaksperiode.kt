@@ -1240,35 +1240,19 @@ internal class Vedtaksperiode private constructor(
             infotrygdhistorikk: Infotrygdhistorikk,
             arbeidsgiverUtbetalingerFun: (SubsumsjonObserver) -> ArbeidsgiverUtbetalinger
         ) {
-            val tmpLog = Aktivitetslogg()
-            val periode = if (Toggle.NyRevurdering.disabled) vedtaksperiode.periode else vedtaksperiode.revurderingsperiode()
-            validation(tmpLog) {
-                onValidationFailed {
-                    ytelser.warn("Opplysninger fra Infotrygd har endret seg etter at vedtaket ble fattet. Undersøk om det er overlapp med periode fra Infotrygd.")
-                }
-                valider {
-                    infotrygdhistorikk.valider(
-                        this,
-                        arbeidsgiver,
-                        periode,
-                        vedtaksperiode.skjæringstidspunkt
-                    )
-                }
-            }
-            validation(ytelser) {
-                onValidationFailed {
-                    ytelser.warn("Validering av ytelser ved revurdering feilet. Utbetalingen må annulleres")
-                    vedtaksperiode.tilstand(ytelser, RevurderingFeilet)
-                }
-                valider { ytelser.valider(periode, vedtaksperiode.skjæringstidspunkt) }
+            ErrorsTilWarnings.wrap(ytelser) {
+                val periode = if (Toggle.NyRevurdering.disabled) vedtaksperiode.periode else vedtaksperiode.revurderingsperiode()
+                infotrygdhistorikk.valider(
+                    ytelser,
+                    arbeidsgiver,
+                    periode,
+                    vedtaksperiode.skjæringstidspunkt
+                )
+                ytelser.valider(periode, vedtaksperiode.skjæringstidspunkt)
                 val arbeidsgiverUtbetalinger = arbeidsgiverUtbetalingerFun(vedtaksperiode.jurist())
-                valider("Feil ved kalkulering av utbetalingstidslinjer") {
-                    arbeidsgiver.beregn(this, arbeidsgiverUtbetalinger, vedtaksperiode.periode)
-                }
-                onSuccess {
-                    tmpLog.accept(AktivitetsloggDeescalator(ytelser))
-                    vedtaksperiode.forsøkRevurdering(arbeidsgiverUtbetalinger.maksimumSykepenger, ytelser)
-                }
+                arbeidsgiver.beregn(ytelser, arbeidsgiverUtbetalinger, vedtaksperiode.periode)
+                check(!ytelser.hasErrorsOrWorse()) { "Skal ikke ha errors i validering av ytelser i revurdering." }
+                vedtaksperiode.forsøkRevurdering(arbeidsgiverUtbetalinger.maksimumSykepenger, ytelser)
             }
         }
 
@@ -1299,41 +1283,6 @@ internal class Vedtaksperiode private constructor(
             pågående: Vedtaksperiode?
         ) {
             vedtaksperiode.nesteRevurderingstilstand(hendelse, overstyrt, pågående)
-        }
-
-        /*
-            Bakgrunn for Deescalator:
-            Fordi vi ikke vil feile i revurdering om vi har errors fra validering av Infotrygdperioder
-            samler vi opp alle validerings-meldinger i en egen logg som vi holder utenfor validering av resten av
-            Ytelser, helt til vi vet at vi har lykkes.
-
-            Her kopierer vi alle valideringsmeldingene til hendelse, men skriver om
-            alle Error til Warn, slik at vi 1) ikke feiler og 2) forteller saksbehandler om situasjonen.
-        */
-        class AktivitetsloggDeescalator(private val hendelse: IAktivitetslogg) : AktivitetsloggVisitor {
-            override fun visitInfo(
-                kontekster: List<SpesifikkKontekst>,
-                aktivitet: Aktivitetslogg.Aktivitet.Info,
-                melding: String,
-                tidsstempel: String
-            ) =
-                hendelse.info(melding)
-
-            override fun visitWarn(
-                kontekster: List<SpesifikkKontekst>,
-                aktivitet: Aktivitetslogg.Aktivitet.Warn,
-                melding: String,
-                tidsstempel: String
-            ) =
-                hendelse.warn(melding)
-
-            override fun visitError(
-                kontekster: List<SpesifikkKontekst>,
-                aktivitet: Aktivitetslogg.Aktivitet.Error,
-                melding: String,
-                tidsstempel: String
-            ) =
-                hendelse.warn(melding)
         }
     }
 

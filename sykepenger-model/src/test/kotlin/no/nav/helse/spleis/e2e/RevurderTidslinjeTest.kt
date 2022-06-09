@@ -857,7 +857,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             TIL_UTBETALING,
             AVSLUTTET,
             AVVENTER_HISTORIKK_REVURDERING,
-            REVURDERING_FEILET
+            AVVENTER_SIMULERING_REVURDERING
         )
     }
 
@@ -1290,7 +1290,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
 
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
         assertWarning(
-            "Opplysninger fra Infotrygd har endret seg etter at vedtaket ble fattet. Undersøk om det er overlapp med periode fra Infotrygd.",
+            "Det er utbetalt en periode i Infotrygd etter perioden du skal behandle nå. Undersøk at antall forbrukte dager og grunnlag i Infotrygd er riktig",
             AktivitetsloggFilter.person()
         )
         assertWarning(
@@ -1341,9 +1341,9 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
 
         håndterYtelser(1.vedtaksperiode, foreldrepenger = 17.januar til 31.januar)
 
-        assertSisteTilstand(1.vedtaksperiode, REVURDERING_FEILET)
-        assertSisteTilstand(2.vedtaksperiode, REVURDERING_FEILET)
-        assertSisteTilstand(3.vedtaksperiode, REVURDERING_FEILET)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+        assertSisteTilstand(3.vedtaksperiode, AVVENTER_ARBEIDSGIVERE_REVURDERING)
     }
 
     @Test
@@ -1455,6 +1455,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             )
         )
 
+        assertWarning("Mangler inntekt for første utbetalingsdag i en av infotrygdperiodene", 1.vedtaksperiode.filter())
         assertTilstander(
             1.vedtaksperiode,
             START,

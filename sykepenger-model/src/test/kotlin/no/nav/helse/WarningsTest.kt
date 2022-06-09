@@ -41,7 +41,6 @@ internal class WarningsTest {
             "Arena inneholdt en eller flere AAP-perioder med ugyldig fom/tom",
             "Arena inneholdt en eller flere Dagpengeperioder med ugyldig fom/tom",
             "Endrer tidligere oppdrag. Kontroller simuleringen.",
-            "Validering av ytelser ved revurdering feilet. Utbetalingen må annulleres",
             "Perioden er lagt inn i Infotrygd, men ikke utbetalt. Fjern fra Infotrygd hvis det utbetales via speil.",
             "Minst én dag uten utbetaling på grunn av sykdomsgrad under 20 %%. Vurder å sende vedtaksbrev fra Infotrygd",
             "Vi fant ugyldige arbeidsforhold i Aareg, burde sjekkes opp nærmere",

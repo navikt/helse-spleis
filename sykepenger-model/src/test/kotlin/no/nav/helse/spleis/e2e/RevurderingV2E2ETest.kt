@@ -892,6 +892,19 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         assertTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING)
     }
 
+    @Test
+    fun `overlappende ytelser ved revurdering skal gi warning, ikke error`() {
+        nyttVedtak(1.januar, 31.januar)
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)))
+        håndterYtelser(
+            1.vedtaksperiode,
+            foreldrepenger = 1.januar til 10.januar
+        )
+
+        assertWarning("Har overlappende foreldrepengeperioder med syketilfelle")
+        assertNoErrors()
+    }
+
     private inline fun <reified D: Dag, reified UD: Utbetalingsdag>assertDag(dato: LocalDate, beløp: Double) {
         inspektør.sykdomshistorikk.sykdomstidslinje()[dato].let {
             assertTrue(it is D) { "Forventet ${D::class.simpleName} men var ${it::class.simpleName}"}
