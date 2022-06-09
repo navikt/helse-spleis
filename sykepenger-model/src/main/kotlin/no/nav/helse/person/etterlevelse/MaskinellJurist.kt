@@ -129,7 +129,7 @@ class MaskinellJurist private constructor(
         )
     }
 
-    override fun `§ 8-3 ledd 2 punktum 1`(oppfylt: Boolean, skjæringstidspunkt: LocalDate, inntektsgrunnlag: Inntekt, minimumInntekt: Inntekt) {
+    override fun `§ 8-3 ledd 2 punktum 1`(oppfylt: Boolean, skjæringstidspunkt: LocalDate, beregningsgrunnlag: Inntekt, minimumInntekt: Inntekt) {
         leggTil(
             EnkelSubsumsjon(
                 utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
@@ -139,7 +139,7 @@ class MaskinellJurist private constructor(
                 punktum = 1.punktum,
                 input = mapOf(
                     "skjæringstidspunkt" to skjæringstidspunkt,
-                    "grunnlagForSykepengegrunnlag" to inntektsgrunnlag.reflection { årlig, _, _, _ -> årlig },
+                    "grunnlagForSykepengegrunnlag" to beregningsgrunnlag.reflection { årlig, _, _, _ -> årlig },
                     "minimumInntekt" to minimumInntekt.reflection { årlig, _, _, _ -> årlig }
                 ),
                 output = emptyMap(),
@@ -169,7 +169,7 @@ class MaskinellJurist private constructor(
         erBegrenset: Boolean,
         maksimaltSykepengegrunnlag: Inntekt,
         skjæringstidspunkt: LocalDate,
-        inntektsgrunnlag: Inntekt
+        beregningsgrunnlag: Inntekt
     ) {
         leggTil(
             EnkelSubsumsjon(
@@ -181,7 +181,7 @@ class MaskinellJurist private constructor(
                 input = mapOf(
                     "maksimaltSykepengegrunnlag" to maksimaltSykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
                     "skjæringstidspunkt" to skjæringstidspunkt,
-                    "grunnlagForSykepengegrunnlag" to inntektsgrunnlag.reflection { årlig, _, _, _ -> årlig }
+                    "grunnlagForSykepengegrunnlag" to beregningsgrunnlag.reflection { årlig, _, _, _ -> årlig }
                 ),
                 output = mapOf(
                     "erBegrenset" to erBegrenset
@@ -608,7 +608,7 @@ class MaskinellJurist private constructor(
         oppfylt: Boolean,
         skjæringstidspunkt: LocalDate,
         alderPåSkjæringstidspunkt: Int,
-        inntektsgrunnlag: Inntekt,
+        beregningsgrunnlag: Inntekt,
         minimumInntekt: Inntekt
     ) {
         leggTil(
@@ -620,7 +620,7 @@ class MaskinellJurist private constructor(
                 input = mapOf(
                     "skjæringstidspunkt" to skjæringstidspunkt,
                     "alderPåSkjæringstidspunkt" to alderPåSkjæringstidspunkt,
-                    "grunnlagForSykepengegrunnlag" to inntektsgrunnlag.reflection { årlig, _, _, _ -> årlig },
+                    "grunnlagForSykepengegrunnlag" to beregningsgrunnlag.reflection { årlig, _, _, _ -> årlig },
                     "minimumInntekt" to minimumInntekt.reflection { årlig, _, _, _ -> årlig }
                 ),
                 output = emptyMap(),

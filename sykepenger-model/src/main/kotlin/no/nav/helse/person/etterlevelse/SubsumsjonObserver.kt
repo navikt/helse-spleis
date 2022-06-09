@@ -71,10 +71,10 @@ interface SubsumsjonObserver {
      *
      * @param oppfylt hvorvidt sykmeldte har inntekt lik eller større enn minimum inntekt
      * @param skjæringstidspunkt dato det tas utgangspunkt i ved vurdering av minimum inntekt
-     * @param inntektsgrunnlag total inntekt på tvers av alle relevante arbeidsgivere
-     * @param minimumInntekt minimum beløp [inntektsgrunnlag] må være lik eller større enn for at vilkåret skal være [oppfylt]
+     * @param beregningsgrunnlag total inntekt på tvers av alle relevante arbeidsgivere
+     * @param minimumInntekt minimum beløp [beregningsgrunnlag] må være lik eller større enn for at vilkåret skal være [oppfylt]
      */
-    fun `§ 8-3 ledd 2 punktum 1`(oppfylt: Boolean, skjæringstidspunkt: LocalDate, inntektsgrunnlag: Inntekt, minimumInntekt: Inntekt) {}
+    fun `§ 8-3 ledd 2 punktum 1`(oppfylt: Boolean, skjæringstidspunkt: LocalDate, beregningsgrunnlag: Inntekt, minimumInntekt: Inntekt) {}
 
 
     fun `§ 8-9 ledd 1`(oppfylt: Boolean, periode: Periode) {}
@@ -84,16 +84,16 @@ interface SubsumsjonObserver {
      *
      * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-10)
      *
-     * @param erBegrenset dersom hjemlen slår inn ved at [inntektsgrunnlag] blir begrenset til [maksimaltSykepengegrunnlag]
+     * @param erBegrenset dersom hjemlen slår inn ved at [beregningsgrunnlag] blir begrenset til [maksimaltSykepengegrunnlag]
      * @param maksimaltSykepengegrunnlag maksimalt årlig beløp utbetaling skal beregnes ut fra
      * @param skjæringstidspunkt dato [maksimaltSykepengegrunnlag] settes ut fra
-     * @param inntektsgrunnlag total inntekt på tvers av alle relevante arbeidsgivere
+     * @param beregningsgrunnlag total inntekt på tvers av alle relevante arbeidsgivere
      */
     fun `§ 8-10 ledd 2 punktum 1`(
         erBegrenset: Boolean,
         maksimaltSykepengegrunnlag: Inntekt,
         skjæringstidspunkt: LocalDate,
-        inntektsgrunnlag: Inntekt
+        beregningsgrunnlag: Inntekt
     ) {}
 
     /**
@@ -353,14 +353,14 @@ interface SubsumsjonObserver {
      * @param oppfylt dersom vedkommende har inntekt større enn eller lik to ganger grunnbeløpet. Det er en forutsetning at vedkommende er mellom 67 og 70 år
      * @param skjæringstidspunkt dato det tas utgangspunkt i ved vurdering av minimum inntekt
      * @param alderPåSkjæringstidspunkt alder på skjæringstidspunktet
-     * @param inntektsgrunnlag total inntekt på tvers av alle relevante arbeidsgivere
-     * @param minimumInntekt minimum beløp [inntektsgrunnlag] må være lik eller større enn for at vilkåret skal være [oppfylt]
+     * @param beregningsgrunnlag total inntekt på tvers av alle relevante arbeidsgivere
+     * @param minimumInntekt minimum beløp [beregningsgrunnlag] må være lik eller større enn for at vilkåret skal være [oppfylt]
      */
     fun `§ 8-51 ledd 2`(
         oppfylt: Boolean,
         skjæringstidspunkt: LocalDate,
         alderPåSkjæringstidspunkt: Int,
-        inntektsgrunnlag: Inntekt,
+        beregningsgrunnlag: Inntekt,
         minimumInntekt: Inntekt
     ) {}
 

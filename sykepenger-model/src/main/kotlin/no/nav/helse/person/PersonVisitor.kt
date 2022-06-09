@@ -131,7 +131,7 @@ internal interface SykepengegrunnlagVisitor : ArbeidsgiverInntektsopplysningVisi
         skjæringstidspunkt: LocalDate,
         sykepengegrunnlag: Inntekt,
         skjønnsmessigFastsattÅrsinntekt: Inntekt?,
-        inntektsgrunnlag: Inntekt,
+        beregningsgrunnlag: Inntekt,
         maksimalDagsats: Inntekt,
         `6G`: Inntekt,
         begrensning: Sykepengegrunnlag.Begrensning,

@@ -244,7 +244,7 @@ internal class PersonMediator(
             "hendelser" to event.hendelseIder,
             "skjæringstidspunkt" to event.skjæringstidspunkt,
             "sykepengegrunnlag" to event.sykepengegrunnlag,
-            "grunnlagForSykepengegrunnlag" to event.inntektsgrunnlag,
+            "grunnlagForSykepengegrunnlag" to event.beregningsgrunnlag,
             "grunnlagForSykepengegrunnlagPerArbeidsgiver" to event.omregnetÅrsinntektPerArbeidsgiver,
             "begrensning" to event.sykepengegrunnlagsbegrensning,
             "inntekt" to event.inntekt,

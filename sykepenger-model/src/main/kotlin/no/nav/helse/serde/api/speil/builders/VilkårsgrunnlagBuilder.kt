@@ -277,7 +277,7 @@ internal class VilkårsgrunnlagBuilder(
                 skjæringstidspunkt: LocalDate,
                 sykepengegrunnlag: Inntekt,
                 skjønnsmessigFastsattÅrsinntekt: Inntekt?,
-                inntektsgrunnlag: Inntekt,
+                beregningsgrunnlag: Inntekt,
                 maksimalDagsats: Inntekt,
                 `6G`: Inntekt,
                 begrensning: Sykepengegrunnlag.Begrensning,
@@ -289,7 +289,7 @@ internal class VilkårsgrunnlagBuilder(
 
                 this.sykepengegrunnlag = InntektBuilder(sykepengegrunnlag).build()
                 this.oppfyllerMinsteinntektskrav = oppfyllerMinsteinntektskrav
-                this.omregnetÅrsinntekt = InntektBuilder(inntektsgrunnlag).build().årlig
+                this.omregnetÅrsinntekt = InntektBuilder(beregningsgrunnlag).build().årlig
                 this.deaktiverteArbeidsforhold = deaktiverteArbeidsforhold
             }
 

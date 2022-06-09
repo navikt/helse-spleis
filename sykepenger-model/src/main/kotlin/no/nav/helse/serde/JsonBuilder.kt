@@ -877,7 +877,7 @@ internal class JsonBuilder : AbstractBuilder() {
             skjæringstidspunkt: LocalDate,
             sykepengegrunnlag: Inntekt,
             skjønnsmessigFastsattÅrsinntekt: Inntekt?,
-            inntektsgrunnlag: Inntekt,
+            beregningsgrunnlag: Inntekt,
             maksimalDagsats: Inntekt,
             `6G`: Inntekt,
             begrensning: Sykepengegrunnlag.Begrensning,

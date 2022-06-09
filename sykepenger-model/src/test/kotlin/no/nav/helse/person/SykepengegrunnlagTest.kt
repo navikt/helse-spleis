@@ -219,7 +219,7 @@ internal class SykepengegrunnlagTest {
             ),
             deaktiverteArbeidsforhold = emptyList(),
             vurdertInfotrygd = false,
-            skjønnsmessigFastsattÅrsinntekt = overstyrt
+            skjønnsmessigFastsattBeregningsgrunnlag = overstyrt
         )
         assertNotEquals(inntekt, sykepengegrunnlag.inspektør.sykepengegrunnlag)
         assertEquals(overstyrt, sykepengegrunnlag.inspektør.sykepengegrunnlag)
@@ -270,7 +270,7 @@ internal class SykepengegrunnlagTest {
                 ),
                 deaktiverteArbeidsforhold = emptyList(),
                 vurdertInfotrygd = false,
-                skjønnsmessigFastsattÅrsinntekt = 25000.månedlig
+                skjønnsmessigFastsattBeregningsgrunnlag = 25000.månedlig
             )
         )
         assertEquals(sykepengegrunnlag1, sykepengegrunnlag1.justerGrunnbeløp()) { "grunnbeløpet trenger ikke justering" }
@@ -282,7 +282,7 @@ internal class SykepengegrunnlagTest {
                 arbeidsgiverInntektsopplysninger = emptyList(),
                 deaktiverteArbeidsforhold = emptyList(),
                 vurdertInfotrygd = false,
-                skjønnsmessigFastsattÅrsinntekt = 25000.månedlig
+                skjønnsmessigFastsattBeregningsgrunnlag = 25000.månedlig
             )
         )
         assertNotEquals(
@@ -304,7 +304,7 @@ internal class SykepengegrunnlagTest {
                 ),
                 deaktiverteArbeidsforhold = emptyList(),
                 vurdertInfotrygd = false,
-                skjønnsmessigFastsattÅrsinntekt = 20000.månedlig
+                skjønnsmessigFastsattBeregningsgrunnlag = 20000.månedlig
             )
         )
         assertNotEquals(
@@ -326,7 +326,7 @@ internal class SykepengegrunnlagTest {
                 ),
                 deaktiverteArbeidsforhold = emptyList(),
                 vurdertInfotrygd = true,
-                skjønnsmessigFastsattÅrsinntekt = 25000.månedlig
+                skjønnsmessigFastsattBeregningsgrunnlag = 25000.månedlig
             )
         )
         assertNotEquals(
@@ -359,7 +359,7 @@ internal class SykepengegrunnlagTest {
         override fun `§ 8-3 ledd 2 punktum 1`(
             oppfylt: Boolean,
             skjæringstidspunkt: LocalDate,
-            inntektsgrunnlag: Inntekt,
+            beregningsgrunnlag: Inntekt,
             minimumInntekt: Inntekt
         ) {
             this.`§ 8-3 ledd 2 punktum 1` = oppfylt
@@ -369,7 +369,7 @@ internal class SykepengegrunnlagTest {
             oppfylt: Boolean,
             skjæringstidspunkt: LocalDate,
             alderPåSkjæringstidspunkt: Int,
-            inntektsgrunnlag: Inntekt,
+            beregningsgrunnlag: Inntekt,
             minimumInntekt: Inntekt
         ) {
            this.`§ 8-51 ledd 2` = oppfylt
