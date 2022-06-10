@@ -667,7 +667,9 @@ internal class Vedtaksperiode private constructor(
             harVedtaksperiodeWarnings = person.aktivitetslogg.logg(this)
                 .let { it.hasWarningsOrWorse() && !it.hasErrorsOrWorse() },
             hendelser = hendelseIder(),
-            makstid = tilstand.makstid(this, LocalDateTime.now())
+            makstid = tilstand.makstid(this, LocalDateTime.now()),
+            fom = periode.start,
+            tom = periode.endInclusive
         )
 
         person.vedtaksperiodeEndret(aktivitetslogg, event)

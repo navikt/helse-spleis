@@ -439,4 +439,13 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
             "AVSLUTTET"
         )
     }
+
+    @Test
+    fun `vedtaksperiode endret`() {
+        sendNySøknad(SoknadsperiodeDTO(1.januar, 31.januar, 100))
+        sendSøknad(listOf(SoknadsperiodeDTO(1.januar, 31.januar, 100)))
+        val vedtaksperiodeEndret = testRapid.inspektør.siste("vedtaksperiode_endret")
+        assertEquals(1.januar, LocalDate.parse(vedtaksperiodeEndret.path("fom").asText()))
+        assertEquals(31.januar, LocalDate.parse(vedtaksperiodeEndret.path("tom").asText()))
+    }
 }

@@ -202,7 +202,9 @@ internal class PersonMediator(
             "aktivitetslogg" to event.aktivitetslogg.toMap(),
             "harVedtaksperiodeWarnings" to event.harVedtaksperiodeWarnings,
             "hendelser" to event.hendelser,
-            "makstid" to event.makstid
+            "makstid" to event.makstid,
+            "fom" to event.fom,
+            "tom" to event.tom
         )))
     }
 

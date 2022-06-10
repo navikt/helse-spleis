@@ -20,7 +20,9 @@ interface PersonObserver {
         val aktivitetslogg: Map<String, List<Map<String, Any>>>,
         val harVedtaksperiodeWarnings: Boolean,
         val hendelser: Set<UUID>,
-        val makstid: LocalDateTime
+        val makstid: LocalDateTime,
+        val fom: LocalDate,
+        val tom: LocalDate
     )
 
     data class VedtaksperiodeForkastetEvent(
