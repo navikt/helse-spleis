@@ -412,7 +412,7 @@ internal class Arbeidsgiver private constructor(
             gjenståendeSykedager,
             forrige,
             organisasjonsnummer
-        ).also { nyUtbetaling(it) }
+        ).also { nyUtbetaling(aktivitetslogg, it) }
     }
 
     internal fun lagRevurdering(
@@ -435,12 +435,13 @@ internal class Arbeidsgiver private constructor(
             gjenståendeSykedager,
             forrige,
             organisasjonsnummer
-        ).also { nyUtbetaling(it) }
+        ).also { nyUtbetaling(aktivitetslogg, it) }
     }
 
-    private fun nyUtbetaling(utbetaling: Utbetaling) {
+    private fun nyUtbetaling(aktivitetslogg: IAktivitetslogg, utbetaling: Utbetaling) {
         utbetalinger.add(utbetaling)
         utbetaling.registrer(this)
+        utbetaling.opprett(aktivitetslogg)
     }
 
     internal fun utbetalFeriepenger(
@@ -628,7 +629,7 @@ internal class Arbeidsgiver private constructor(
 
         val sisteUtbetalte = Utbetaling.finnUtbetalingForAnnullering(utbetalinger, hendelse) ?: return
         val annullering = sisteUtbetalte.annuller(hendelse) ?: return
-        nyUtbetaling(annullering)
+        nyUtbetaling(hendelse, annullering)
         annullering.håndter(hendelse)
         håndter(hendelse) { håndter(it, annullering) }
     }
@@ -660,7 +661,7 @@ internal class Arbeidsgiver private constructor(
             ?: return hendelse.info("Utbetalingen for $organisasjonsnummer for perioden $sisteUtbetalte er ikke blitt endret. Grunnbeløpsregulering gjennomføres ikke.")
 
         hendelse.info("Etterutbetaler for $organisasjonsnummer for perioden $sisteUtbetalte")
-        nyUtbetaling(etterutbetaling)
+        nyUtbetaling(hendelse, etterutbetaling)
         etterutbetaling.håndter(hendelse)
     }
 

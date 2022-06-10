@@ -50,7 +50,7 @@ internal class TrengerInntektsmeldingTest : AbstractEndToEndMediatorTest() {
         sendSimulering(1, SimuleringMessage.Simuleringstatus.OK)
         sendUtbetalingsgodkjenning(1)
         sendUtbetaling()
-        assertUtbetalingTilstander(0, "IKKE_UTBETALT", "GODKJENT", "SENDT", "OVERFØRT", "UTBETALT")
+        assertUtbetalingTilstander(0, "NY", "IKKE_UTBETALT", "GODKJENT", "SENDT", "OVERFØRT", "UTBETALT")
         assertTilstander(
             1,
             "AVVENTER_BLOKKERENDE_PERIODE",

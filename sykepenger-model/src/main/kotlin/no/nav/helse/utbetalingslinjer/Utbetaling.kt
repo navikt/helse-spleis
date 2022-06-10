@@ -87,7 +87,7 @@ internal class Utbetaling private constructor(
         arbeidsgiverOppdrag,
         personOppdrag,
         LocalDateTime.now(),
-        Ubetalt,
+        Ny,
         type,
         maksdato,
         forbrukteSykedager,
@@ -136,7 +136,7 @@ internal class Utbetaling private constructor(
         observers.add(observer)
     }
 
-    internal fun gyldig() = tilstand != Forkastet
+    internal fun gyldig() = tilstand !in setOf(Ny, Forkastet)
     internal fun erUbetalt() = tilstand == Ubetalt
     internal fun erUtbetalt() = tilstand == Utbetalt || tilstand == Annullert
     private fun erAktiv() = erAvsluttet() || erInFlight()
@@ -173,6 +173,10 @@ internal class Utbetaling private constructor(
 
     internal fun kanForkastes(utbetalinger: List<Utbetaling>) =
         this.tilstand in listOf(Ubetalt, IkkeGodkjent, Forkastet) || utbetalinger.filter { it.erAnnullering() }.any(::hørerSammen)
+
+    internal fun opprett(hendelse: IAktivitetslogg) {
+        tilstand.opprett(this, hendelse)
+    }
 
     internal fun håndter(hendelse: Utbetalingsgodkjenning) {
         if (!hendelse.erRelevant(id)) return
@@ -622,6 +626,10 @@ internal class Utbetaling private constructor(
             hendelse.info("Forkaster ikke utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
         }
 
+        fun opprett(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {
+            hendelse.error("Forventet ikke å opprette utbetaling i tilstand=${this::class.simpleName}")
+        }
+
         fun godkjenn(
             utbetaling: Utbetaling,
             hendelse: IAktivitetslogg,
@@ -672,6 +680,12 @@ internal class Utbetaling private constructor(
         }
 
         fun entering(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {}
+    }
+
+    internal object Ny : Tilstand {
+        override fun opprett(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {
+            utbetaling.tilstand(Ubetalt, hendelse)
+        }
     }
 
     internal object Ubetalt : Tilstand {

@@ -3,6 +3,7 @@ package no.nav.helse.serde.reflection
 import no.nav.helse.utbetalingslinjer.Utbetaling
 
 enum class Utbetalingstatus(private val tilstand: Utbetaling.Tilstand) {
+    NY(Utbetaling.Ny),
     IKKE_UTBETALT(Utbetaling.Ubetalt),
     IKKE_GODKJENT(Utbetaling.IkkeGodkjent),
     GODKJENT(Utbetaling.Godkjent),

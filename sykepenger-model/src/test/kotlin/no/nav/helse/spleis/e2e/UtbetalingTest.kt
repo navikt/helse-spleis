@@ -41,7 +41,7 @@ internal class UtbetalingTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(2.februar, 28.februar, 100.prosent))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
 
-        assertEquals(ORGNUMMER, observatør.utbetaltEndretEventer.single().orgnummer())
+        assertEquals(ORGNUMMER, observatør.utbetaltEndretEventer.last().orgnummer())
     }
 
     @Test

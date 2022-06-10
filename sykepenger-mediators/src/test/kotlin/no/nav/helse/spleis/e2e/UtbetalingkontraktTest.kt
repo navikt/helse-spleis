@@ -21,6 +21,18 @@ import org.junit.jupiter.api.Test
 internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
 
     @Test
+    fun `ny utbetaling`() {
+        sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+        sendSøknad(listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
+        sendInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)), førsteFraværsdag = 3.januar)
+        sendYtelser(0)
+        sendVilkårsgrunnlag(0)
+        sendYtelser(0)
+        val utbetalingEndret = testRapid.inspektør.siste("utbetaling_endret")
+        assertUtbetalingEndret(utbetalingEndret, "NY", "IKKE_UTBETALT")
+    }
+
+    @Test
     fun `utbetaling utbetalt`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
@@ -33,6 +45,8 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
         sendUtbetaling()
         val utbetalt = testRapid.inspektør.siste("utbetaling_utbetalt")
         assertUtbetalt(utbetalt)
+        val utbetalingEndret = testRapid.inspektør.siste("utbetaling_endret")
+        assertUtbetalingEndret(utbetalingEndret, "OVERFØRT", "UTBETALT")
     }
 
     @Test
@@ -179,6 +193,8 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
         sendUtbetalingsgodkjenning(1)
         val utbetalt = testRapid.inspektør.siste("utbetaling_uten_utbetaling")
         assertUtbetalt(utbetalt)
+        val utbetalingEndret = testRapid.inspektør.siste("utbetaling_endret")
+        assertUtbetalingEndret(utbetalingEndret, "IKKE_UTBETALT", "GODKJENT_UTEN_UTBETALING")
     }
 
     @Test
@@ -196,6 +212,8 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
         sendUtbetaling()
         val utbetalt = testRapid.inspektør.siste("utbetaling_annullert")
         assertAnnullert(utbetalt, arbeidsgiverAnnulering = true, personAnnullering = false)
+        val utbetalingEndret = testRapid.inspektør.siste("utbetaling_endret")
+        assertUtbetalingEndret(utbetalingEndret, "OVERFØRT", "ANNULLERT", true)
     }
 
     @Test
@@ -247,6 +265,17 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
             assertTrue(avvisteDager.isNotEmpty())
             assertTrue(avvisteDager.all { it.hasNonNull("begrunnelser") })
         }
+    }
+
+    private fun assertUtbetalingEndret(melding: JsonNode, fra: String, til: String, annullering: Boolean = false) {
+        assertTrue(melding.path("utbetalingId").asText().isNotEmpty())
+        assertTrue(melding.path("type").asText().isNotEmpty())
+        assertTrue(melding.path("forrigeStatus").asText().isNotEmpty())
+        assertTrue(melding.path("gjeldendeStatus").asText().isNotEmpty())
+        assertEquals(fra, melding.path("forrigeStatus").asText())
+        assertEquals(til, melding.path("gjeldendeStatus").asText())
+        assertOppdragdetaljer(melding.path("arbeidsgiverOppdrag"), annullering)
+        assertOppdragdetaljer(melding.path("personOppdrag"), annullering)
     }
 
     private fun assertUtbetalt(melding: JsonNode) {

@@ -41,8 +41,8 @@ internal class EtterbetalingMediatorTest : AbstractEndToEndMediatorTest() {
         sendEtterbetalingMedHistorikk(gyldighetsdato = 1.oktober(2020))
         sendUtbetaling()
 
-        assertUtbetalingTilstander(0, "IKKE_UTBETALT", "GODKJENT", "SENDT", "OVERFØRT", "UTBETALT")
-        assertUtbetalingTilstander(1, "IKKE_UTBETALT", "GODKJENT", "SENDT", "OVERFØRT", "UTBETALT")
+        assertUtbetalingTilstander(0, "NY", "IKKE_UTBETALT", "GODKJENT", "SENDT", "OVERFØRT", "UTBETALT")
+        assertUtbetalingTilstander(1, "NY", "IKKE_UTBETALT", "GODKJENT", "SENDT", "OVERFØRT", "UTBETALT")
         assertUtbetalingtype(0, "UTBETALING")
         assertUtbetalingtype(1, "ETTERUTBETALING")
     }
