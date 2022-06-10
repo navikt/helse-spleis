@@ -2,7 +2,9 @@ package no.nav.helse.inspectors
 
 import java.time.LocalDate
 import java.time.LocalDateTime
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
+import no.nav.helse.hendelser.til
 import no.nav.helse.person.UtbetalingVisitor
 import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.Fagområde
@@ -38,6 +40,7 @@ internal class OppdragInspektør(oppdrag: Oppdrag) : UtbetalingVisitor {
     internal var avstemmingsnøkkel: Long? = null
     private var status: Oppdragstatus? = null
     private var simuleringsResultat: Simulering.SimuleringResultat? = null
+    internal lateinit var periode: Periode
 
     init {
         oppdrag.accept(this)
@@ -62,6 +65,7 @@ internal class OppdragInspektør(oppdrag: Oppdrag) : UtbetalingVisitor {
         erSimulert: Boolean,
         simuleringsResultat: Simulering.SimuleringResultat?
     ) {
+        this.periode = førstedato til sistedato
         this.fagsystemId = fagsystemId
         this.fagområde = fagområde
         this.endringskode = endringskode
