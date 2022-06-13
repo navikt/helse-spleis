@@ -197,7 +197,10 @@ internal class Vedtaksperiode private constructor(
 
     internal fun håndter(sykmelding: Sykmelding) = overlapperMed(sykmelding).also {
         if (!it) return it
+        val periodeFør = sykmelding.periode()
         sykmelding.trimLeft(periode.endInclusive)
+        kontekst(sykmelding)
+        sykmelding.info("Trimmer sykmelding som overlapper med vedtaksperiode. Før trimming $periodeFør, etter trimming ${sykmelding.periode()}")
     }
 
     internal fun håndter(søknad: Søknad) = overlapperMed(søknad).also {
