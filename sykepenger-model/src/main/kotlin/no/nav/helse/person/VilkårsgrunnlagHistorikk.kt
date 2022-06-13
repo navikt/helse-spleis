@@ -55,7 +55,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
     internal fun erRelevant(organisasjonsnummer: String, skjæringstidspunkter: List<LocalDate>) = sisteInnlag()?.erRelevant(organisasjonsnummer, skjæringstidspunkter) ?: false
 
     internal fun medInntekt(dato: LocalDate, økonomi: Økonomi, arbeidsgiverperiode: Arbeidsgiverperiode?) =
-        økonomi
+        sisteInnlag()?.medInntekt(dato, økonomi, arbeidsgiverperiode)
 
     internal class Innslag private constructor(
         internal val id: UUID,
@@ -107,6 +107,10 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             }
         }
 
+        internal fun medInntekt(dato: LocalDate, økonomi: Økonomi, arbeidsgiverperiode: Arbeidsgiverperiode?): Økonomi {
+            return VilkårsgrunnlagElement.medInntekt(vilkårsgrunnlag.values, dato, økonomi, arbeidsgiverperiode)
+        }
+
         override fun hashCode(): Int {
             return this.vilkårsgrunnlag.hashCode()
         }
@@ -155,6 +159,21 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             )
         )
         protected abstract fun vilkårsgrunnlagtype(): String
+
+        private fun medInntekt(dato: LocalDate, økonomi: Økonomi, arbeidsgiverperiode: Arbeidsgiverperiode?): Økonomi {
+            return sykepengegrunnlag.medInntekt(dato, økonomi, arbeidsgiverperiode)
+        }
+
+        internal companion object {
+            internal fun medInntekt(
+                elementer: MutableCollection<VilkårsgrunnlagElement>,
+                dato: LocalDate,
+                økonomi: Økonomi,
+                arbeidsgiverperiode: Arbeidsgiverperiode?
+            ): Økonomi {
+                return elementer.first().medInntekt(dato, økonomi, arbeidsgiverperiode)
+            }
+        }
     }
 
     internal class Grunnlagsdata(

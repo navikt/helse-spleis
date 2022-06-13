@@ -13,9 +13,11 @@ import no.nav.helse.person.Sykepengegrunnlag.Begrensning.VURDERT_I_INFOTRYGD
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.utbetalingstidslinje.Alder
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosent
+import no.nav.helse.økonomi.Økonomi
 
 internal class Sykepengegrunnlag(
     private val alder: Alder,
@@ -144,6 +146,10 @@ internal class Sykepengegrunnlag(
     internal fun inntektsopplysningPerArbeidsgiver(): Map<String, Inntektshistorikk.Inntektsopplysning> =
         arbeidsgiverInntektsopplysninger.inntektsopplysningPerArbeidsgiver()
 
+    internal fun medInntekt(dato: LocalDate, økonomi: Økonomi, arbeidsgiverperiode: Arbeidsgiverperiode?): Økonomi {
+        return økonomi
+    }
+
     internal fun build(builder: VedtakFattetBuilder) {
         builder
             .sykepengegrunnlag(this.sykepengegrunnlag)
@@ -169,7 +175,6 @@ internal class Sykepengegrunnlag(
         result = 31 * result + deaktiverteArbeidsforhold.hashCode()
         return result
     }
-
     override fun compareTo(other: Inntekt) = this.sykepengegrunnlag.compareTo(other)
 
     enum class Begrensning {

@@ -85,6 +85,39 @@ internal class VilkårsgrunnlagHistorikkTest {
     }
 
     @Test
+    fun `setter nyeste inntekt på økonomi`() {
+        val inntekt = 21000.månedlig
+        val inntekt2 = 25000.månedlig
+        historikk.lagre(VilkårsgrunnlagHistorikk.Grunnlagsdata(
+            skjæringstidspunkt = 1.januar,
+            sykepengegrunnlag = inntekt.sykepengegrunnlag,
+            sammenligningsgrunnlag = Sammenligningsgrunnlag(inntekt, emptyList()),
+            avviksprosent = 0.prosent,
+            opptjening = Opptjening(arbeidsforholdFraHistorikk, 1.januar til 31.januar),
+            medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
+            vurdertOk = true,
+            meldingsreferanseId = UUID.randomUUID(),
+            vilkårsgrunnlagId = UUID.randomUUID()
+        ))
+        historikk.lagre(VilkårsgrunnlagHistorikk.Grunnlagsdata(
+            skjæringstidspunkt = 3.januar,
+            sykepengegrunnlag = inntekt2.sykepengegrunnlag,
+            sammenligningsgrunnlag = Sammenligningsgrunnlag(inntekt, emptyList()),
+            avviksprosent = 0.prosent,
+            opptjening = Opptjening(arbeidsforholdFraHistorikk, 1.januar til 31.januar),
+            medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
+            vurdertOk = true,
+            meldingsreferanseId = UUID.randomUUID(),
+            vilkårsgrunnlagId = UUID.randomUUID()
+        ))
+        val økonomi: Økonomi = historikk.medInntekt(4.januar, Økonomi.ikkeBetalt(), null)
+        assertForventetFeil(
+            nå = { assertEquals(INGEN, økonomi.inspektør.aktuellDagsinntekt) },
+            ønsket = { assertEquals(inntekt2, økonomi.inspektør.aktuellDagsinntekt) }
+        )
+    }
+
+    @Test
     fun `setter ikke inntekt på økonomi om vurdering ikke er ok`() {
         val inntekt = 21000.månedlig
         historikk.lagre(VilkårsgrunnlagHistorikk.Grunnlagsdata(
