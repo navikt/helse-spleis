@@ -12,6 +12,7 @@ import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilderException
 import no.nav.helse.økonomi.Prosent
 import no.nav.helse.økonomi.Økonomi
 
@@ -55,7 +56,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
     internal fun erRelevant(organisasjonsnummer: String, skjæringstidspunkter: List<LocalDate>) = sisteInnlag()?.erRelevant(organisasjonsnummer, skjæringstidspunkter) ?: false
 
     internal fun medInntekt(dato: LocalDate, økonomi: Økonomi, arbeidsgiverperiode: Arbeidsgiverperiode?) =
-        sisteInnlag()?.medInntekt(dato, økonomi, arbeidsgiverperiode)
+        sisteInnlag()?.medInntekt(dato, økonomi, arbeidsgiverperiode) ?: throw UtbetalingstidslinjeBuilderException.ManglerInntektException(dato, emptyList())
 
     internal class Innslag private constructor(
         internal val id: UUID,

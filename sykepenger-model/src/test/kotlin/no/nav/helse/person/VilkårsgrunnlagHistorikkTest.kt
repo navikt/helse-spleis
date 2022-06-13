@@ -31,6 +31,7 @@ import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilderException
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -155,9 +156,14 @@ internal class VilkårsgrunnlagHistorikkTest {
                 assertEquals(INGEN, økonomi.inspektør.aktuellDagsinntekt)
              },
             ønsket = {
-                assertThrows<IllegalArgumentException> { historikk.medInntekt(31.desember(2017), Økonomi.ikkeBetalt(), null) }
+                assertThrows<UtbetalingstidslinjeBuilderException.ManglerInntektException> { historikk.medInntekt(31.desember(2017), Økonomi.ikkeBetalt(), null) }
             }
         )
+    }
+
+    @Test
+    fun `feiler dersom det ikke finnes noen innslag`() {
+        assertThrows<UtbetalingstidslinjeBuilderException.ManglerInntektException> { historikk.medInntekt(31.desember(2017), Økonomi.ikkeBetalt(), null) }
     }
 
     @Test
