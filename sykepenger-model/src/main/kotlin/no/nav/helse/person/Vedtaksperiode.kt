@@ -197,9 +197,7 @@ internal class Vedtaksperiode private constructor(
 
     internal fun håndter(sykmelding: Sykmelding) = overlapperMed(sykmelding).also {
         if (!it) return it
-        kontekst(sykmelding)
-        sykmelding.leggTil(hendelseIder)
-        tilstand.håndter(this, sykmelding)
+        sykmelding.trimLeft(periode.endInclusive)
     }
 
     internal fun håndter(søknad: Søknad) = overlapperMed(søknad).also {
@@ -914,16 +912,6 @@ internal class Vedtaksperiode private constructor(
             tidligere: Vedtaksperiode,
             hendelse: IAktivitetslogg
         ) {
-        }
-
-        fun håndter(vedtaksperiode: Vedtaksperiode, sykmelding: Sykmelding) {
-            overlappendeSykmeldingIkkeStøttet(vedtaksperiode, sykmelding)
-        }
-
-        private fun overlappendeSykmeldingIkkeStøttet(vedtaksperiode: Vedtaksperiode, sykmelding: Sykmelding) {
-            sykmelding.overlappIkkeStøttet(vedtaksperiode.periode)
-            if (!kanForkastes) return
-            vedtaksperiode.forkast(sykmelding)
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
