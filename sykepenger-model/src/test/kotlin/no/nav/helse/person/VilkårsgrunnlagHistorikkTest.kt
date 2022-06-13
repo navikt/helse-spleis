@@ -4,7 +4,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
@@ -21,6 +20,7 @@ import no.nav.helse.juni
 import no.nav.helse.person.Ledd.Companion.ledd
 import no.nav.helse.person.Paragraf.PARAGRAF_8_2
 import no.nav.helse.person.etterlevelse.MaskinellJurist
+import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.NullObserver
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
@@ -29,6 +29,7 @@ import no.nav.helse.sykepengegrunnlag
 import no.nav.helse.testhelpers.AP
 import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.tidslinjeOf
+import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilderException
@@ -53,9 +54,10 @@ internal class VilkårsgrunnlagHistorikkTest {
     private val inspektør get() = Vilkårgrunnlagsinspektør(historikk)
 
     companion object {
-        private val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold("123456789", 1.desember(2017)))
+        private const val ORGNR = "123456789"
+        private val arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(ORGNR, 1.desember(2017)))
         private val arbeidsforholdFraHistorikk = listOf(
-            Opptjening.ArbeidsgiverOpptjeningsgrunnlag("123456789", listOf(Arbeidsforholdhistorikk.Arbeidsforhold(1.desember(2017), null, false)))
+            Opptjening.ArbeidsgiverOpptjeningsgrunnlag(ORGNR, listOf(Arbeidsforholdhistorikk.Arbeidsforhold(1.desember(2017), null, false)))
         )
     }
 
@@ -69,7 +71,7 @@ internal class VilkårsgrunnlagHistorikkTest {
         val inntekt = 21000.månedlig
         historikk.lagre(VilkårsgrunnlagHistorikk.Grunnlagsdata(
             skjæringstidspunkt = 1.januar,
-            sykepengegrunnlag = inntekt.sykepengegrunnlag,
+            sykepengegrunnlag = inntekt.sykepengegrunnlag(ORGNR),
             sammenligningsgrunnlag = Sammenligningsgrunnlag(inntekt, emptyList()),
             avviksprosent = 0.prosent,
             opptjening = Opptjening(arbeidsforholdFraHistorikk, 1.januar til 31.januar),
@@ -78,11 +80,8 @@ internal class VilkårsgrunnlagHistorikkTest {
             meldingsreferanseId = UUID.randomUUID(),
             vilkårsgrunnlagId = UUID.randomUUID()
         ))
-        val økonomi: Økonomi = historikk.medInntekt(1.januar, Økonomi.ikkeBetalt(), null)
-        assertForventetFeil(
-            nå = { assertEquals(INGEN, økonomi.inspektør.aktuellDagsinntekt) },
-            ønsket = { assertEquals(inntekt, økonomi.inspektør.aktuellDagsinntekt) }
-        )
+        val økonomi: Økonomi = historikk.medInntekt(ORGNR, 1.januar, Økonomi.ikkeBetalt(), null, NormalArbeidstaker, NullObserver)
+        assertEquals(inntekt, økonomi.inspektør.aktuellDagsinntekt)
     }
 
     @Test
@@ -91,7 +90,7 @@ internal class VilkårsgrunnlagHistorikkTest {
         val inntekt2 = 25000.månedlig
         historikk.lagre(VilkårsgrunnlagHistorikk.Grunnlagsdata(
             skjæringstidspunkt = 1.januar,
-            sykepengegrunnlag = inntekt.sykepengegrunnlag,
+            sykepengegrunnlag = inntekt.sykepengegrunnlag(ORGNR),
             sammenligningsgrunnlag = Sammenligningsgrunnlag(inntekt, emptyList()),
             avviksprosent = 0.prosent,
             opptjening = Opptjening(arbeidsforholdFraHistorikk, 1.januar til 31.januar),
@@ -102,7 +101,7 @@ internal class VilkårsgrunnlagHistorikkTest {
         ))
         historikk.lagre(VilkårsgrunnlagHistorikk.Grunnlagsdata(
             skjæringstidspunkt = 3.januar,
-            sykepengegrunnlag = inntekt2.sykepengegrunnlag,
+            sykepengegrunnlag = inntekt2.sykepengegrunnlag(ORGNR),
             sammenligningsgrunnlag = Sammenligningsgrunnlag(inntekt, emptyList()),
             avviksprosent = 0.prosent,
             opptjening = Opptjening(arbeidsforholdFraHistorikk, 1.januar til 31.januar),
@@ -111,11 +110,8 @@ internal class VilkårsgrunnlagHistorikkTest {
             meldingsreferanseId = UUID.randomUUID(),
             vilkårsgrunnlagId = UUID.randomUUID()
         ))
-        val økonomi: Økonomi = historikk.medInntekt(4.januar, Økonomi.ikkeBetalt(), null)
-        assertForventetFeil(
-            nå = { assertEquals(INGEN, økonomi.inspektør.aktuellDagsinntekt) },
-            ønsket = { assertEquals(inntekt2, økonomi.inspektør.aktuellDagsinntekt) }
-        )
+        val økonomi: Økonomi = historikk.medInntekt(ORGNR, 4.januar, Økonomi.ikkeBetalt(), null, NormalArbeidstaker, NullObserver)
+        assertEquals(inntekt2, økonomi.inspektør.aktuellDagsinntekt)
     }
 
     @Test
@@ -123,7 +119,7 @@ internal class VilkårsgrunnlagHistorikkTest {
         val inntekt = 21000.månedlig
         historikk.lagre(VilkårsgrunnlagHistorikk.Grunnlagsdata(
             skjæringstidspunkt = 1.januar,
-            sykepengegrunnlag = inntekt.sykepengegrunnlag,
+            sykepengegrunnlag = inntekt.sykepengegrunnlag(ORGNR),
             sammenligningsgrunnlag = Sammenligningsgrunnlag(inntekt * 1.3, emptyList()),
             avviksprosent = 30.prosent,
             opptjening = Opptjening(arbeidsforholdFraHistorikk, 1.januar til 31.januar),
@@ -132,7 +128,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             meldingsreferanseId = UUID.randomUUID(),
             vilkårsgrunnlagId = UUID.randomUUID()
         ))
-        val økonomi: Økonomi = historikk.medInntekt(1.januar, Økonomi.ikkeBetalt(), null)
+        val økonomi: Økonomi = historikk.medInntekt(ORGNR, 1.januar, Økonomi.ikkeBetalt(), null, NormalArbeidstaker, NullObserver)
         assertEquals(INGEN, økonomi.inspektør.aktuellDagsinntekt)
     }
 
@@ -141,7 +137,7 @@ internal class VilkårsgrunnlagHistorikkTest {
         val inntekt = 21000.månedlig
         historikk.lagre(VilkårsgrunnlagHistorikk.Grunnlagsdata(
             skjæringstidspunkt = 1.januar,
-            sykepengegrunnlag = inntekt.sykepengegrunnlag,
+            sykepengegrunnlag = inntekt.sykepengegrunnlag(ORGNR),
             sammenligningsgrunnlag = Sammenligningsgrunnlag(inntekt, emptyList()),
             avviksprosent = 0.prosent,
             opptjening = Opptjening(arbeidsforholdFraHistorikk, 1.januar til 31.januar),
@@ -150,20 +146,29 @@ internal class VilkårsgrunnlagHistorikkTest {
             meldingsreferanseId = UUID.randomUUID(),
             vilkårsgrunnlagId = UUID.randomUUID()
         ))
-        assertForventetFeil(
-            nå = {
-                val økonomi: Økonomi = historikk.medInntekt(31.desember(2017), Økonomi.ikkeBetalt(), null)
-                assertEquals(INGEN, økonomi.inspektør.aktuellDagsinntekt)
-             },
-            ønsket = {
-                assertThrows<UtbetalingstidslinjeBuilderException.ManglerInntektException> { historikk.medInntekt(31.desember(2017), Økonomi.ikkeBetalt(), null) }
-            }
-        )
+        assertThrows<UtbetalingstidslinjeBuilderException.ManglerInntektException> { historikk.medInntekt(ORGNR, 31.desember(2017), Økonomi.ikkeBetalt(), null, NormalArbeidstaker, NullObserver) }
+    }
+
+    @Test
+    fun `feiler dersom inntekt ikke finnes for orgnr`() {
+        val inntekt = 21000.månedlig
+        historikk.lagre(VilkårsgrunnlagHistorikk.Grunnlagsdata(
+            skjæringstidspunkt = 1.januar,
+            sykepengegrunnlag = inntekt.sykepengegrunnlag("et annet orgnr"),
+            sammenligningsgrunnlag = Sammenligningsgrunnlag(inntekt, emptyList()),
+            avviksprosent = 0.prosent,
+            opptjening = Opptjening(arbeidsforholdFraHistorikk, 1.januar til 31.januar),
+            medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
+            vurdertOk = true,
+            meldingsreferanseId = UUID.randomUUID(),
+            vilkårsgrunnlagId = UUID.randomUUID()
+        ))
+        assertThrows<UtbetalingstidslinjeBuilderException.ManglerInntektException> { historikk.medInntekt(ORGNR, 31.desember(2017), Økonomi.ikkeBetalt(), null, NormalArbeidstaker, NullObserver) }
     }
 
     @Test
     fun `feiler dersom det ikke finnes noen innslag`() {
-        assertThrows<UtbetalingstidslinjeBuilderException.ManglerInntektException> { historikk.medInntekt(31.desember(2017), Økonomi.ikkeBetalt(), null) }
+        assertThrows<UtbetalingstidslinjeBuilderException.ManglerInntektException> { historikk.medInntekt(ORGNR, 31.desember(2017), Økonomi.ikkeBetalt(), null, NormalArbeidstaker, NullObserver) }
     }
 
     @Test

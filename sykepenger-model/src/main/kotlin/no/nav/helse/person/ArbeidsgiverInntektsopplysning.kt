@@ -1,9 +1,14 @@
 package no.nav.helse.person
 
+import java.time.LocalDate
 import no.nav.helse.person.Inntektshistorikk.Inntektsopplysning.Companion.valider
+import no.nav.helse.person.etterlevelse.SubsumsjonObserver
+import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.summer
+import no.nav.helse.økonomi.Økonomi
 
 internal class ArbeidsgiverInntektsopplysning(
     private val orgnummer: String,
@@ -46,5 +51,15 @@ internal class ArbeidsgiverInntektsopplysning(
 
         internal fun List<ArbeidsgiverInntektsopplysning>.inntektsopplysningPerArbeidsgiver() =
             associate { it.orgnummer to it.inntektsopplysning }
+
+        internal fun List<ArbeidsgiverInntektsopplysning>.medInntekt(organisasjonsnummer: String, skjæringstidspunkt: LocalDate, dato: LocalDate, økonomi: Økonomi, arbeidsgiverperiode: Arbeidsgiverperiode?, regler: ArbeidsgiverRegler, subsumsjonObserver: SubsumsjonObserver): Økonomi {
+            val inntekt = single { it.orgnummer == organisasjonsnummer }.inntektsopplysning.omregnetÅrsinntekt()
+            return økonomi.inntekt(
+                aktuellDagsinntekt = inntekt,
+                dekningsgrunnlag = inntekt.dekningsgrunnlag(dato, regler, subsumsjonObserver),
+                skjæringstidspunkt = skjæringstidspunkt,
+                arbeidsgiverperiode = arbeidsgiverperiode
+            )
+        }
     }
 }
