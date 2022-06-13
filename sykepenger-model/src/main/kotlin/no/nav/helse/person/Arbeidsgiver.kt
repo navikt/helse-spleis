@@ -1174,6 +1174,8 @@ internal class Arbeidsgiver private constructor(
         inntektshistorikk.build(filter, inntektsmeldingId)
     }
 
+    internal fun harSykmeldingsperiodeFør(dato: LocalDate) = sykmeldingsperioder.harSykmeldingsperiodeFør(dato)
+
     internal class JsonRestorer private constructor() {
         internal companion object {
             internal fun restore(
