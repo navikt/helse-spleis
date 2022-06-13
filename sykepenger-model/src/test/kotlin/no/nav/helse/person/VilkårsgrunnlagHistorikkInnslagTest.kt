@@ -6,7 +6,6 @@ import no.nav.helse.Fødselsnummer
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
-import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.sykepengegrunnlag
 import no.nav.helse.testhelpers.NAV
@@ -141,28 +140,10 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
     }
 
     private val testgrunnlag
-        get() = object : VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement {
-            override fun add(innslag: VilkårsgrunnlagHistorikk.Innslag) {
-                innslag.add(1.januar, this)
-            }
-
-            override fun build(builder: VedtakFattetBuilder) {}
-
+        get() = object : VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement(UUID.randomUUID(), 1.januar, Inntekt.INGEN.sykepengegrunnlag) {
             override fun accept(vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor) {}
-
-            override fun sykepengegrunnlag() = Inntekt.INGEN.sykepengegrunnlag
-
             override fun sammenligningsgrunnlagPerArbeidsgiver(): Map<String, Inntektshistorikk.Inntektsopplysning> = emptyMap()
-
-            override fun gjelderFlereArbeidsgivere() = false
-
             override fun valider(aktivitetslogg: Aktivitetslogg) {}
-
-            override fun toSpesifikkKontekst(): SpesifikkKontekst {
-                return SpesifikkKontekst(
-                    "testgrunnlag",
-                    emptyMap()
-                )
-            }
+            override fun vilkårsgrunnlagtype() = "testgrunnlag"
         }
 }
