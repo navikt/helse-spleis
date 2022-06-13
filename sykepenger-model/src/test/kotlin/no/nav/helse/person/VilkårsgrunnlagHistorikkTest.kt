@@ -4,12 +4,14 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Vilkårsgrunnlag
+import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.GrunnlagsdataInspektør
 import no.nav.helse.inspectors.SubsumsjonInspektør
 import no.nav.helse.inspectors.Vilkårgrunnlagsinspektør
@@ -32,6 +34,8 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import no.nav.helse.økonomi.Prosent.Companion.prosent
+import no.nav.helse.økonomi.Økonomi
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertInstanceOf
@@ -41,6 +45,7 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 internal class VilkårsgrunnlagHistorikkTest {
     private lateinit var historikk: VilkårsgrunnlagHistorikk
@@ -56,6 +61,70 @@ internal class VilkårsgrunnlagHistorikkTest {
     @BeforeEach
     fun setup() {
         historikk = VilkårsgrunnlagHistorikk()
+    }
+
+    @Test
+    fun `setter inntekt på økonomi`() {
+        val inntekt = 21000.månedlig
+        historikk.lagre(VilkårsgrunnlagHistorikk.Grunnlagsdata(
+            skjæringstidspunkt = 1.januar,
+            sykepengegrunnlag = inntekt.sykepengegrunnlag,
+            sammenligningsgrunnlag = Sammenligningsgrunnlag(inntekt, emptyList()),
+            avviksprosent = 0.prosent,
+            opptjening = Opptjening(arbeidsforholdFraHistorikk, 1.januar til 31.januar),
+            medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
+            vurdertOk = true,
+            meldingsreferanseId = UUID.randomUUID(),
+            vilkårsgrunnlagId = UUID.randomUUID()
+        ))
+        val økonomi: Økonomi = historikk.medInntekt(1.januar, Økonomi.ikkeBetalt(), null)
+        assertForventetFeil(
+            nå = { assertEquals(INGEN, økonomi.inspektør.aktuellDagsinntekt) },
+            ønsket = { assertEquals(inntekt, økonomi.inspektør.aktuellDagsinntekt) }
+        )
+    }
+
+    @Test
+    fun `setter ikke inntekt på økonomi om vurdering ikke er ok`() {
+        val inntekt = 21000.månedlig
+        historikk.lagre(VilkårsgrunnlagHistorikk.Grunnlagsdata(
+            skjæringstidspunkt = 1.januar,
+            sykepengegrunnlag = inntekt.sykepengegrunnlag,
+            sammenligningsgrunnlag = Sammenligningsgrunnlag(inntekt * 1.3, emptyList()),
+            avviksprosent = 30.prosent,
+            opptjening = Opptjening(arbeidsforholdFraHistorikk, 1.januar til 31.januar),
+            medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
+            vurdertOk = false,
+            meldingsreferanseId = UUID.randomUUID(),
+            vilkårsgrunnlagId = UUID.randomUUID()
+        ))
+        val økonomi: Økonomi = historikk.medInntekt(1.januar, Økonomi.ikkeBetalt(), null)
+        assertEquals(INGEN, økonomi.inspektør.aktuellDagsinntekt)
+    }
+
+    @Test
+    fun `feiler dersom inntekt ikke finnes`() {
+        val inntekt = 21000.månedlig
+        historikk.lagre(VilkårsgrunnlagHistorikk.Grunnlagsdata(
+            skjæringstidspunkt = 1.januar,
+            sykepengegrunnlag = inntekt.sykepengegrunnlag,
+            sammenligningsgrunnlag = Sammenligningsgrunnlag(inntekt, emptyList()),
+            avviksprosent = 0.prosent,
+            opptjening = Opptjening(arbeidsforholdFraHistorikk, 1.januar til 31.januar),
+            medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
+            vurdertOk = true,
+            meldingsreferanseId = UUID.randomUUID(),
+            vilkårsgrunnlagId = UUID.randomUUID()
+        ))
+        assertForventetFeil(
+            nå = {
+                val økonomi: Økonomi = historikk.medInntekt(31.desember(2017), Økonomi.ikkeBetalt(), null)
+                assertEquals(INGEN, økonomi.inspektør.aktuellDagsinntekt)
+             },
+            ønsket = {
+                assertThrows<IllegalArgumentException> { historikk.medInntekt(31.desember(2017), Økonomi.ikkeBetalt(), null) }
+            }
+        )
     }
 
     @Test
