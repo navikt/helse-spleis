@@ -1945,6 +1945,15 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `Replay av inntektsmelding, men inntektsmeldingen er allerde hensyntatt av perioden`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterInntektsmeldingReplay(inntektsmeldingId, 1.vedtaksperiode.id(ORGNUMMER))
+        assertNoWarning("Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.")
+    }
+
+    @Test
     fun `padding med arbeidsdager før arbeidsgiverperioden`() {
         håndterSykmelding(Sykmeldingsperiode(28.januar(2022), 16.februar(2022), 100.prosent))
         håndterSøknad(Sykdom(28.januar(2022), 16.februar(2022), 100.prosent))

@@ -218,6 +218,7 @@ internal class Vedtaksperiode private constructor(
         val sammenhengendePerioder = arbeidsgiver.finnSammehengendeVedtaksperioder(this)
         val overlapper = overlapperMedSammenhengende(inntektsmelding, sammenhengendePerioder, other, vedtaksperioder)
         return overlapper.also {
+            if (hendelseIder.ider().contains(inntektsmelding.meldingsreferanseId())) return@also
             if (it) inntektsmelding.leggTil(hendelseIder)
             if (!it) return@also inntektsmelding.trimLeft(periode.endInclusive)
             kontekst(inntektsmelding)
