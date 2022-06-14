@@ -52,14 +52,15 @@ internal class ArbeidsgiverInntektsopplysning(
         internal fun List<ArbeidsgiverInntektsopplysning>.inntektsopplysningPerArbeidsgiver() =
             associate { it.orgnummer to it.inntektsopplysning }
 
-        internal fun List<ArbeidsgiverInntektsopplysning>.medInntekt(organisasjonsnummer: String, skjæringstidspunkt: LocalDate, dato: LocalDate, økonomi: Økonomi, arbeidsgiverperiode: Arbeidsgiverperiode?, regler: ArbeidsgiverRegler, subsumsjonObserver: SubsumsjonObserver): Økonomi {
-            val inntekt = single { it.orgnummer == organisasjonsnummer }.inntektsopplysning.omregnetÅrsinntekt()
-            return økonomi.inntekt(
-                aktuellDagsinntekt = inntekt,
-                dekningsgrunnlag = inntekt.dekningsgrunnlag(dato, regler, subsumsjonObserver),
-                skjæringstidspunkt = skjæringstidspunkt,
-                arbeidsgiverperiode = arbeidsgiverperiode
-            )
+        internal fun List<ArbeidsgiverInntektsopplysning>.medInntekt(organisasjonsnummer: String, skjæringstidspunkt: LocalDate, dato: LocalDate, økonomi: Økonomi, arbeidsgiverperiode: Arbeidsgiverperiode?, regler: ArbeidsgiverRegler, subsumsjonObserver: SubsumsjonObserver): Økonomi? {
+            return singleOrNull { it.orgnummer == organisasjonsnummer }?.inntektsopplysning?.omregnetÅrsinntekt()?.let { inntekt ->
+                økonomi.inntekt(
+                    aktuellDagsinntekt = inntekt,
+                    dekningsgrunnlag = inntekt.dekningsgrunnlag(dato, regler, subsumsjonObserver),
+                    skjæringstidspunkt = skjæringstidspunkt,
+                    arbeidsgiverperiode = arbeidsgiverperiode
+                )
+            }
         }
     }
 }

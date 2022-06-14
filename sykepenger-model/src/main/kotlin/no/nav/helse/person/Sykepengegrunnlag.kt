@@ -148,7 +148,7 @@ internal class Sykepengegrunnlag(
     internal fun inntektsopplysningPerArbeidsgiver(): Map<String, Inntektshistorikk.Inntektsopplysning> =
         arbeidsgiverInntektsopplysninger.inntektsopplysningPerArbeidsgiver()
 
-    internal fun medInntekt(organisasjonsnummer: String, dato: LocalDate, økonomi: Økonomi, arbeidsgiverperiode: Arbeidsgiverperiode?, regler: ArbeidsgiverRegler, subsumsjonObserver: SubsumsjonObserver): Økonomi {
+    internal fun medInntekt(organisasjonsnummer: String, dato: LocalDate, økonomi: Økonomi, arbeidsgiverperiode: Arbeidsgiverperiode?, regler: ArbeidsgiverRegler, subsumsjonObserver: SubsumsjonObserver): Økonomi? {
         return arbeidsgiverInntektsopplysninger.medInntekt(organisasjonsnummer, skjæringstidspunkt, dato, økonomi, arbeidsgiverperiode, regler, subsumsjonObserver)
     }
 

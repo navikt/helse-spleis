@@ -85,6 +85,50 @@ internal class VilkårsgrunnlagHistorikkTest {
     }
 
     @Test
+    fun `setter ingen inntekt på økonomi`() {
+        val inntekt = 21000.månedlig
+        historikk.lagre(VilkårsgrunnlagHistorikk.Grunnlagsdata(
+            skjæringstidspunkt = 1.januar,
+            sykepengegrunnlag = inntekt.sykepengegrunnlag(ORGNR),
+            sammenligningsgrunnlag = Sammenligningsgrunnlag(inntekt, emptyList()),
+            avviksprosent = 0.prosent,
+            opptjening = Opptjening(arbeidsforholdFraHistorikk, 1.januar til 31.januar),
+            medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
+            vurdertOk = true,
+            meldingsreferanseId = UUID.randomUUID(),
+            vilkårsgrunnlagId = UUID.randomUUID()
+        ))
+        val økonomi: Økonomi = historikk.medIngenInntekt(1.januar, Økonomi.ikkeBetalt(), null)
+        assertEquals(INGEN, økonomi.inspektør.aktuellDagsinntekt)
+        assertEquals(1.januar, økonomi.inspektør.skjæringstidspunkt)
+    }
+
+    @Test
+    fun `setter inntekt hvis finnes`() {
+        val inntekt = 21000.månedlig
+        val skjæringstidspunkt = 2.januar
+        historikk.lagre(VilkårsgrunnlagHistorikk.Grunnlagsdata(
+            skjæringstidspunkt = skjæringstidspunkt,
+            sykepengegrunnlag = inntekt.sykepengegrunnlag(ORGNR, skjæringstidspunkt, skjæringstidspunkt),
+            sammenligningsgrunnlag = Sammenligningsgrunnlag(inntekt, emptyList()),
+            avviksprosent = 0.prosent,
+            opptjening = Opptjening(arbeidsforholdFraHistorikk, 1.januar til 31.januar),
+            medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
+            vurdertOk = true,
+            meldingsreferanseId = UUID.randomUUID(),
+            vilkårsgrunnlagId = UUID.randomUUID()
+        ))
+        historikk.medFrivilligInntekt(ORGNR, 1.januar, Økonomi.ikkeBetalt(), null, NormalArbeidstaker, NullObserver).also { økonomi ->
+            assertEquals(INGEN, økonomi.inspektør.aktuellDagsinntekt)
+            assertNull(økonomi.inspektør.skjæringstidspunkt)
+        }
+        historikk.medFrivilligInntekt(ORGNR, 3.januar, Økonomi.ikkeBetalt(), null, NormalArbeidstaker, NullObserver).also { økonomi ->
+            assertEquals(inntekt, økonomi.inspektør.aktuellDagsinntekt)
+            assertEquals(skjæringstidspunkt, økonomi.inspektør.skjæringstidspunkt)
+        }
+    }
+
+    @Test
     fun `setter nyeste inntekt på økonomi`() {
         val inntekt = 21000.månedlig
         val inntekt2 = 25000.månedlig

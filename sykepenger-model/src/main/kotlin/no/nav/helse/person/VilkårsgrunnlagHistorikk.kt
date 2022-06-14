@@ -59,7 +59,16 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
     internal fun erRelevant(organisasjonsnummer: String, skjæringstidspunkter: List<LocalDate>) = sisteInnlag()?.erRelevant(organisasjonsnummer, skjæringstidspunkter) ?: false
 
     internal fun medInntekt(organisasjonsnummer: String, dato: LocalDate, økonomi: Økonomi, arbeidsgiverperiode: Arbeidsgiverperiode?, regler: ArbeidsgiverRegler, subsumsjonObserver: SubsumsjonObserver) =
-        sisteInnlag()?.medInntekt(organisasjonsnummer, dato, økonomi, arbeidsgiverperiode, regler, subsumsjonObserver) ?: throw UtbetalingstidslinjeBuilderException.ManglerInntektException(dato, emptyList())
+        frivilligInntekt(organisasjonsnummer, dato, økonomi, arbeidsgiverperiode, regler, subsumsjonObserver) ?: throw UtbetalingstidslinjeBuilderException.ManglerInntektException(dato, emptyList())
+
+    internal fun medFrivilligInntekt(organisasjonsnummer: String, dato: LocalDate, økonomi: Økonomi, arbeidsgiverperiode: Arbeidsgiverperiode?, regler: ArbeidsgiverRegler, subsumsjonObserver: SubsumsjonObserver) =
+        frivilligInntekt(organisasjonsnummer, dato, økonomi, arbeidsgiverperiode, regler, subsumsjonObserver) ?: økonomi
+
+    internal fun medIngenInntekt(dato: LocalDate, økonomi: Økonomi, arbeidsgiverperiode: Arbeidsgiverperiode?) =
+        sisteInnlag()!!.medIngenInntekt(dato, økonomi, arbeidsgiverperiode)
+
+    private fun frivilligInntekt(organisasjonsnummer: String, dato: LocalDate, økonomi: Økonomi, arbeidsgiverperiode: Arbeidsgiverperiode?, regler: ArbeidsgiverRegler, subsumsjonObserver: SubsumsjonObserver) =
+        sisteInnlag()?.medInntekt(organisasjonsnummer, dato, økonomi, arbeidsgiverperiode, regler, subsumsjonObserver)
 
     internal class Innslag private constructor(
         internal val id: UUID,
@@ -115,6 +124,10 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             return VilkårsgrunnlagElement.medInntekt(vilkårsgrunnlag.values, organisasjonsnummer, dato, økonomi, arbeidsgiverperiode, regler, subsumsjonObserver)
         }
 
+        internal fun medIngenInntekt(dato: LocalDate, økonomi: Økonomi, arbeidsgiverperiode: Arbeidsgiverperiode?): Økonomi {
+            return VilkårsgrunnlagElement.medIngenInntekt(vilkårsgrunnlag.values, dato, økonomi, arbeidsgiverperiode)
+        }
+
         override fun hashCode(): Int {
             return this.vilkårsgrunnlag.hashCode()
         }
@@ -164,7 +177,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         )
         protected abstract fun vilkårsgrunnlagtype(): String
 
-        protected open fun medInntekt(organisasjonsnummer: String, dato: LocalDate, økonomi: Økonomi, arbeidsgiverperiode: Arbeidsgiverperiode?, regler: ArbeidsgiverRegler, subsumsjonObserver: SubsumsjonObserver): Økonomi {
+        protected open fun medInntekt(organisasjonsnummer: String, dato: LocalDate, økonomi: Økonomi, arbeidsgiverperiode: Arbeidsgiverperiode?, regler: ArbeidsgiverRegler, subsumsjonObserver: SubsumsjonObserver): Økonomi? {
             return sykepengegrunnlag.medInntekt(organisasjonsnummer, dato, økonomi, arbeidsgiverperiode, regler, subsumsjonObserver)
         }
 
@@ -178,10 +191,30 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                 regler: ArbeidsgiverRegler,
                 subsumsjonObserver: SubsumsjonObserver
             ): Økonomi? {
+                return finnVilkårsgrunnlag(elementer, dato)?.medInntekt(organisasjonsnummer, dato, økonomi, arbeidsgiverperiode, regler, subsumsjonObserver)
+            }
+
+            internal fun medIngenInntekt(
+                elementer: MutableCollection<VilkårsgrunnlagElement>,
+                dato: LocalDate,
+                økonomi: Økonomi,
+                arbeidsgiverperiode: Arbeidsgiverperiode?
+            ): Økonomi {
+                return økonomi.inntekt(
+                    aktuellDagsinntekt = INGEN,
+                    dekningsgrunnlag = INGEN,
+                    skjæringstidspunkt = finnVilkårsgrunnlag(elementer, dato)?.skjæringstidspunkt ?: dato,
+                    arbeidsgiverperiode = arbeidsgiverperiode
+                )
+            }
+
+            private fun finnVilkårsgrunnlag(
+                elementer: MutableCollection<VilkårsgrunnlagElement>,
+                dato: LocalDate
+            ): VilkårsgrunnlagElement? {
                 return elementer
                     .filter { it.skjæringstidspunkt <= dato }
                     .maxByOrNull { it.skjæringstidspunkt }
-                    ?.medInntekt(organisasjonsnummer, dato, økonomi, arbeidsgiverperiode, regler, subsumsjonObserver)
             }
         }
     }
@@ -211,7 +244,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             arbeidsgiverperiode: Arbeidsgiverperiode?,
             regler: ArbeidsgiverRegler,
             subsumsjonObserver: SubsumsjonObserver
-        ): Økonomi {
+        ): Økonomi? {
             if (!vurdertOk) return økonomi.inntekt(
                 aktuellDagsinntekt = INGEN,
                 skjæringstidspunkt = skjæringstidspunkt,
