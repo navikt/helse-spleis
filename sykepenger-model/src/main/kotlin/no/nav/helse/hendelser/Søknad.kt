@@ -6,7 +6,6 @@ import java.util.*
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.IAktivitetslogg
-import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.Person
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.etterlevelse.MaskinellJurist
@@ -65,7 +64,7 @@ class Søknad(
     internal fun harArbeidsdager() = perioder.filterIsInstance<Søknadsperiode.Arbeid>().isNotEmpty()
 
     override fun valider(periode: Periode, subsumsjonObserver: SubsumsjonObserver): IAktivitetslogg {
-        perioder.forEach { it.subsumsjon(subsumsjonObserver) }
+        perioder.forEach { it.subsumsjon(this, subsumsjonObserver) }
         perioder.forEach { it.valider(this) }
         andreInntektskilder.forEach { it.valider(this) }
         forUng(fødselsnummer.somFødselsnummer().alder())
@@ -138,7 +137,7 @@ class Søknad(
             if (periode.utenfor(søknad.sykdomsperiode)) søknad.warn(beskjed)
         }
 
-        internal open fun subsumsjon(subsumsjonObserver: SubsumsjonObserver) {}
+        internal open fun subsumsjon(søknad: Søknad, subsumsjonObserver: SubsumsjonObserver) {}
 
         class Sykdom(
             fom: LocalDate,
@@ -214,11 +213,17 @@ class Søknad(
                 Sykdomstidslinje.ukjent(periode.start, periode.endInclusive, kilde)
 
             override fun valider(søknad: Søknad) {
+                if (alleUtlandsdagerErFerie(søknad)) return
                 søknad.warn("Utenlandsopphold oppgitt i perioden i søknaden.")
             }
 
-            override fun subsumsjon(subsumsjonObserver: SubsumsjonObserver) {
+            override fun subsumsjon(søknad: Søknad, subsumsjonObserver: SubsumsjonObserver) {
                 subsumsjonObserver.`§ 8-9 ledd 1`(false, periode)
+            }
+
+            private fun alleUtlandsdagerErFerie(søknad:Søknad):Boolean {
+                val feriePerioder = søknad.perioder.filterIsInstance<Ferie>()
+                return this.periode.all { utlandsdag -> feriePerioder.any { ferie -> ferie.periode.contains(utlandsdag)} }
             }
         }
     }

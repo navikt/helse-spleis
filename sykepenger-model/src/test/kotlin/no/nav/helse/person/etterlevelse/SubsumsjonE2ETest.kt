@@ -358,6 +358,26 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `§ 8-9 ledd 1 - avslag ved utenlandsopphold, selv om utenlandsoppholdet er helt innenfor en ferie`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Utlandsopphold(20.januar, 31.januar), Ferie(20.januar, 31.januar))
+        SubsumsjonInspektør(jurist).assertIkkeOppfylt(
+            paragraf = PARAGRAF_8_9,
+            versjon = 1.juni(2021),
+            ledd = LEDD_1,
+            input = emptyMap(),
+            output = mapOf(
+                "perioder" to listOf(
+                    mapOf(
+                        "fom" to 20.januar,
+                        "tom" to 31.januar
+                    )
+                )
+            )
+        )
+    }
+
+    @Test
     fun `§ 8-10 ledd 2 punktum 1 - inntekt overstiger ikke maksimum sykepengegrunnlag`() {
         val maksimumSykepengegrunnlag2018 = (93634 * 6).årlig // 6G
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
