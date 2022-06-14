@@ -491,6 +491,10 @@ internal class Arbeidsgiver private constructor(
         opprettVedtaksperiodeOgHåndter(søknad)
     }
 
+    internal fun beholdSykmeldingsperioderEtter(dato: LocalDate) {
+        sykmeldingsperioder.fjern(dato)
+    }
+
     private fun opprettVedtaksperiodeOgHåndter(søknad: Søknad) {
         val vedtaksperiode = søknad.lagVedtaksperiode(person, this, jurist)
         if (person.harOverlappendeVedtaksperiode(søknad)) return registrerForkastetVedtaksperiode(vedtaksperiode, søknad)
