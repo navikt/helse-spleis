@@ -901,7 +901,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
             foreldrepenger = 1.januar til 10.januar
         )
 
-        assertWarning("Har overlappende foreldrepengeperioder med syketilfelle")
+        assertWarning("Det er utbetalt foreldrepenger i samme periode.")
         assertNoErrors()
     }
 

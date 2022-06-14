@@ -1,12 +1,12 @@
 package no.nav.helse.hendelser
 
 
+import java.time.LocalDate
+import java.util.UUID
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.Person
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
-import java.time.LocalDate
-import java.util.*
 
 class Ytelser(
     meldingsreferanseId: UUID,
@@ -40,11 +40,11 @@ class Ytelser(
     internal fun valider(periode: Periode, skjæringstidspunkt: LocalDate): Boolean {
         arbeidsavklaringspenger.valider(this, skjæringstidspunkt)
         dagpenger.valider(this, skjæringstidspunkt)
-        if (foreldrepermisjon.overlapper(periode)) error("Har overlappende foreldrepengeperioder med syketilfelle")
-        if (pleiepenger.overlapper(periode)) error("Har overlappende pleiepengeytelse med syketilfelle")
-        if (omsorgspenger.overlapper(periode)) error("Har overlappende omsorgspengerytelse med syketilfelle")
-        if (opplæringspenger.overlapper(periode)) error("Har overlappende opplæringspengerytelse med syketilfelle")
-        if (institusjonsopphold.overlapper(periode)) error("Har overlappende institusjonsopphold med syketilfelle")
+        if (foreldrepermisjon.overlapper(periode)) error("Det er utbetalt foreldrepenger i samme periode.")
+        if (pleiepenger.overlapper(periode)) error("Det er utbetalt pleiepenger i samme periode.")
+        if (omsorgspenger.overlapper(periode)) error("Det er utbetalt omsorgspenger i samme periode.")
+        if (opplæringspenger.overlapper(periode)) error("Det er utbetalt opplæringspenger i samme periode.")
+        if (institusjonsopphold.overlapper(periode)) error("Det er institusjonsopphold i perioden. Vurder retten til sykepenger.")
 
         return !hasErrorsOrWorse()
     }
