@@ -219,7 +219,7 @@ internal class Tidslinjeperioder(
             tidslinjeberegning.sammenslåttTidslinje(utbetaling.utbetalingstidslinje, periode.fom, periode.tom)
         val varsler = PeriodeVarslerBuilder(
             periode.aktivitetsloggForPeriode
-        ).build()
+        ).build(periode.hendelser)
         val utbetalingDTO = utbetaling.toDTO()
         return BeregnetPeriode(
             vedtaksperiodeId = periode.vedtaksperiodeId,
