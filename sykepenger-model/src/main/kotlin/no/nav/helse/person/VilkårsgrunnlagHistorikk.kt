@@ -177,7 +177,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         )
         protected abstract fun vilkårsgrunnlagtype(): String
 
-        protected open fun medInntekt(organisasjonsnummer: String, dato: LocalDate, økonomi: Økonomi, arbeidsgiverperiode: Arbeidsgiverperiode?, regler: ArbeidsgiverRegler, subsumsjonObserver: SubsumsjonObserver): Økonomi? {
+        private fun medInntekt(organisasjonsnummer: String, dato: LocalDate, økonomi: Økonomi, arbeidsgiverperiode: Arbeidsgiverperiode?, regler: ArbeidsgiverRegler, subsumsjonObserver: SubsumsjonObserver): Økonomi? {
             return sykepengegrunnlag.medInntekt(organisasjonsnummer, dato, økonomi, arbeidsgiverperiode, regler, subsumsjonObserver)
         }
 
@@ -230,27 +230,14 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         private val meldingsreferanseId: UUID?,
         vilkårsgrunnlagId: UUID
     ) : VilkårsgrunnlagElement(vilkårsgrunnlagId, skjæringstidspunkt, sykepengegrunnlag) {
-        override fun valider(aktivitetslogg: Aktivitetslogg) {}
+        override fun valider(aktivitetslogg: Aktivitetslogg) {
+            if (vurdertOk) return
+            aktivitetslogg.error("Vilkårsvurderingen er ikke vurdert ok")
+        }
 
         override fun sjekkAvviksprosent(aktivitetslogg: IAktivitetslogg): Boolean {
             if (avviksprosent == null) return true
             return Inntektsvurdering.sjekkAvvik(avviksprosent, aktivitetslogg, IAktivitetslogg::error)
-        }
-
-        override fun medInntekt(
-            organisasjonsnummer: String,
-            dato: LocalDate,
-            økonomi: Økonomi,
-            arbeidsgiverperiode: Arbeidsgiverperiode?,
-            regler: ArbeidsgiverRegler,
-            subsumsjonObserver: SubsumsjonObserver
-        ): Økonomi? {
-            if (!vurdertOk) return økonomi.inntekt(
-                aktuellDagsinntekt = INGEN,
-                skjæringstidspunkt = skjæringstidspunkt,
-                arbeidsgiverperiode = arbeidsgiverperiode
-            )
-            return super.medInntekt(organisasjonsnummer, dato, økonomi, arbeidsgiverperiode, regler, subsumsjonObserver)
         }
 
         override fun accept(vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor) {

@@ -159,7 +159,7 @@ internal class VilkårsgrunnlagHistorikkTest {
     }
 
     @Test
-    fun `setter ikke inntekt på økonomi om vurdering ikke er ok`() {
+    fun `setter inntekt på økonomi om vurdering ikke er ok`() {
         val inntekt = 21000.månedlig
         historikk.lagre(VilkårsgrunnlagHistorikk.Grunnlagsdata(
             skjæringstidspunkt = 1.januar,
@@ -173,7 +173,11 @@ internal class VilkårsgrunnlagHistorikkTest {
             vilkårsgrunnlagId = UUID.randomUUID()
         ))
         val økonomi: Økonomi = historikk.medInntekt(ORGNR, 1.januar, Økonomi.ikkeBetalt(), null, NormalArbeidstaker, NullObserver)
-        assertEquals(INGEN, økonomi.inspektør.aktuellDagsinntekt)
+        assertEquals(inntekt, økonomi.inspektør.aktuellDagsinntekt)
+
+        val aktivitetslogg = Aktivitetslogg()
+        historikk.vilkårsgrunnlagFor(1.januar)?.valider(aktivitetslogg)
+        assertTrue(aktivitetslogg.hasErrorsOrWorse())
     }
 
     @Test
