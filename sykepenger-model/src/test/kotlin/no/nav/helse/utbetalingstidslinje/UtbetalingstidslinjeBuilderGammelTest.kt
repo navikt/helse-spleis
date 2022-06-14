@@ -610,8 +610,7 @@ internal class UtbetalingstidslinjeBuilderGammelTest {
         (14.S).utbetalingslinjer(
             inntektsopplysningPerSkjæringstidspunkt = mapOf(
                 1.januar(2020) to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 1.januar(2020), hendelseId, 31000.månedlig)
-            ),
-            skjæringstidspunkter = listOf(1.januar(2020))
+            )
         )
         tidslinje.inspektør.navdager.assertDekningsgrunnlag(1.januar(2020) til 31.januar(2020), 31000.månedlig)
     }
@@ -622,8 +621,7 @@ internal class UtbetalingstidslinjeBuilderGammelTest {
         (10.S + 10.A + 10.S).utbetalingslinjer(
             inntektsopplysningPerSkjæringstidspunkt = mapOf(
                 21.januar(2020) to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 21.januar(2020), hendelseId, 30000.månedlig)
-            ),
-            skjæringstidspunkter = listOf(21.januar(2020))
+            )
         )
 
         tidslinje.inspektør.arbeidsgiverdager.assertDekningsgrunnlag(1.januar(2020) til 10.januar(2020), INGEN)
@@ -639,8 +637,7 @@ internal class UtbetalingstidslinjeBuilderGammelTest {
             inntektsopplysningPerSkjæringstidspunkt = mapOf(
                 1.januar(2020) to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 1.januar(2020), hendelseId, 31000.månedlig),
                 31.januar(2020) to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 31.januar(2020), hendelseId, 30000.månedlig)
-            ),
-            skjæringstidspunkter = listOf(1.januar(2020), 31.januar(2020))
+            )
         )
 
         tidslinje.inspektør.arbeidsgiverdager.assertDekningsgrunnlag(1.januar(2020) til 16.januar(2020), 31000.månedlig)
@@ -655,8 +652,7 @@ internal class UtbetalingstidslinjeBuilderGammelTest {
         (3.S + 2.A + 5.S + 2.A + 20.S).utbetalingslinjer(
             inntektsopplysningPerSkjæringstidspunkt = mapOf(
                 13.januar(2020) to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 13.januar(2020), hendelseId, 30000.månedlig)
-            ),
-            skjæringstidspunkter = listOf(13.januar(2020))
+            )
         )
 
         tidslinje.inspektør.arbeidsgiverdager.assertDekningsgrunnlag(1.januar(2020) til 3.januar(2020), INGEN)
@@ -676,8 +672,7 @@ internal class UtbetalingstidslinjeBuilderGammelTest {
         (5.S + 5.F + 15.S).utbetalingslinjer(
             inntektsopplysningPerSkjæringstidspunkt = mapOf(
                 1.januar(2020) to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 1.januar(2020), hendelseId, 30000.månedlig)
-            ),
-            skjæringstidspunkter = listOf(1.januar(2020))
+            )
         )
 
         tidslinje.inspektør.arbeidsgiverdager.assertDekningsgrunnlag(1.januar(2020) til 5.januar(2020), 30000.månedlig)
@@ -692,8 +687,7 @@ internal class UtbetalingstidslinjeBuilderGammelTest {
         (2.S + 1.A + 7.F + 17.S).utbetalingslinjer(
             inntektsopplysningPerSkjæringstidspunkt = mapOf(
                 11.januar(2020) to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 11.januar(2020), hendelseId, 30000.månedlig)
-            ),
-            skjæringstidspunkter = listOf(11.januar(2020))
+            )
         )
 
         tidslinje.inspektør.arbeidsgiverdager.assertDekningsgrunnlag(1.januar(2020) til 2.januar(2020), INGEN)
@@ -716,8 +710,7 @@ internal class UtbetalingstidslinjeBuilderGammelTest {
             inntektsopplysningPerSkjæringstidspunkt = mapOf(
                 1.januar(2020) to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 1.januar(2020), hendelseId, 30000.månedlig),
                 25.januar(2020) to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 25.januar(2020), hendelseId, 31000.månedlig)
-            ),
-            skjæringstidspunkter = listOf(1.januar(2020), 25.januar(2020))
+            )
         )
 
         tidslinje.inspektør.arbeidsgiverdager.assertDekningsgrunnlag(1.januar(2020) til 16.januar(2020), 30000.månedlig)
@@ -734,8 +727,7 @@ internal class UtbetalingstidslinjeBuilderGammelTest {
         (16.S + 2.A + 3.S).utbetalingslinjer(
             inntektsopplysningPerSkjæringstidspunkt = mapOf(
                 19.januar(2020) to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 19.januar(2020), hendelseId, 30000.månedlig)
-            ),
-            skjæringstidspunkter = listOf(19.januar(2020))
+            )
         )
         tidslinje.inspektør.arbeidsgiverdager.assertDekningsgrunnlag(1.januar(2020) til 16.januar(2020), INGEN)
         tidslinje.inspektør.arbeidsdager.assertDekningsgrunnlag(17.januar(2020) til 18.januar(2020), INGEN)
@@ -750,8 +742,7 @@ internal class UtbetalingstidslinjeBuilderGammelTest {
             (1.S + 11.A + 21.S).utbetalingslinjer(
                 inntektsopplysningPerSkjæringstidspunkt = mapOf(
                     13.januar(2020) to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 13.januar(2020), hendelseId, 30000.månedlig)
-                ),
-                skjæringstidspunkter = listOf(13.januar(2020), 1.januar(2020))
+                )
             )
         }
 
@@ -773,8 +764,7 @@ internal class UtbetalingstidslinjeBuilderGammelTest {
             (16.U + 1.R + 2.S).utbetalingslinjer(
                 inntektsopplysningPerSkjæringstidspunkt = mapOf(
                     20.januar(2020) to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 20.januar(2020), hendelseId, 30000.månedlig)
-                ),
-                skjæringstidspunkter = listOf(20.januar(2020), 3.januar(2020))
+                )
             )
         }
 
@@ -793,8 +783,7 @@ internal class UtbetalingstidslinjeBuilderGammelTest {
             (16.U + 2.A + 2.S).utbetalingslinjer(
                 inntektsopplysningPerSkjæringstidspunkt = mapOf(
                     22.januar(2020) to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 22.januar(2020), hendelseId, 30000.månedlig)
-                ),
-                skjæringstidspunkter = listOf(22.januar(2020), 4.januar(2020))
+                )
             )
         }
 
@@ -822,8 +811,7 @@ internal class UtbetalingstidslinjeBuilderGammelTest {
         (4.U + 1.A + 2.R + 12.U + 4.S).utbetalingslinjer(
             inntektsopplysningPerSkjæringstidspunkt = mapOf(
                 8.januar to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 8.januar, hendelseId, 31000.månedlig)
-            ),
-            skjæringstidspunkter = listOf(8.januar)
+            )
         )
         assertEquals(16, tidslinje.inspektør.arbeidsgiverperiodeDagTeller)
         assertEquals(3, tidslinje.inspektør.arbeidsdagTeller)
@@ -838,8 +826,7 @@ internal class UtbetalingstidslinjeBuilderGammelTest {
             inntektsopplysningPerSkjæringstidspunkt = mapOf(
                 12.februar to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 12.februar, hendelseId, 30000.månedlig),
                 1.januar to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 30000.månedlig)
-            ),
-            skjæringstidspunkter = listOf(1.januar, 5.februar, 12.februar)
+            )
         )
 
         assertEquals(20, tidslinje.inspektør.arbeidsgiverperiodeDagTeller)
@@ -853,8 +840,7 @@ internal class UtbetalingstidslinjeBuilderGammelTest {
             inntektsopplysningPerSkjæringstidspunkt = mapOf(
                 12.februar to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 12.februar, hendelseId, 30000.månedlig),
                 1.januar to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 30000.månedlig)
-            ),
-            skjæringstidspunkter = listOf(1.januar, 5.februar, 12.februar)
+            )
         )
 
         assertEquals(19, tidslinje.inspektør.arbeidsgiverperiodeDagTeller)
@@ -868,8 +854,7 @@ internal class UtbetalingstidslinjeBuilderGammelTest {
             inntektsopplysningPerSkjæringstidspunkt = mapOf(
                     1.januar to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 1.januar, hendelseId, 30000.månedlig),
                     3.februar to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 3.februar, hendelseId, 30000.månedlig)
-            ),
-            skjæringstidspunkter = listOf(1.januar, 3.februar)
+            )
         )
 
         assertEquals(16, tidslinje.inspektør.arbeidsgiverperiodeDagTeller)
@@ -890,8 +875,7 @@ internal class UtbetalingstidslinjeBuilderGammelTest {
             inntektsopplysningPerSkjæringstidspunkt = mapOf(
                     1.januar to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 1.januar, hendelseId, 30000.månedlig),
                     5.februar to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 5.februar, hendelseId, 30000.månedlig)
-            ),
-            skjæringstidspunkter = listOf(1.januar, 5.februar)
+            )
         )
 
         assertEquals(32, tidslinje.inspektør.arbeidsgiverperiodeDagTeller)
@@ -905,8 +889,7 @@ internal class UtbetalingstidslinjeBuilderGammelTest {
             inntektsopplysningPerSkjæringstidspunkt = mapOf(
                     1.januar to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 1.januar, hendelseId, 30000.månedlig),
                     5.februar to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 5.februar, hendelseId, 30000.månedlig)
-            ),
-            skjæringstidspunkter = listOf(1.januar, 5.februar)
+            )
         )
 
         assertEquals(16, tidslinje.inspektør.arbeidsgiverperiodeDagTeller)
@@ -921,8 +904,7 @@ internal class UtbetalingstidslinjeBuilderGammelTest {
             inntektsopplysningPerSkjæringstidspunkt = mapOf(
                 1.januar to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 1.januar, hendelseId, 30000.månedlig),
                 5.februar to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 5.februar, hendelseId, 30000.månedlig)
-            ),
-            skjæringstidspunkter = listOf(1.januar, 5.februar)
+            )
         )
 
         assertEquals(16, tidslinje.inspektør.arbeidsgiverperiodeDagTeller)
@@ -950,14 +932,13 @@ internal class UtbetalingstidslinjeBuilderGammelTest {
             }
 
     private fun Sykdomstidslinje.utbetalingslinjer(
-        inntektsopplysningPerSkjæringstidspunkt: Map<LocalDate, Inntektshistorikk.Inntektsopplysning?> = this@UtbetalingstidslinjeBuilderGammelTest.inntektsopplysningPerSkjæringstidspunkt,
-        skjæringstidspunkter: List<LocalDate> = listOf(1.januar, 1.februar, 1.mars),
+        inntektsopplysningPerSkjæringstidspunkt: Map<LocalDate, Inntektshistorikk.Inntektsopplysning> = this@UtbetalingstidslinjeBuilderGammelTest.inntektsopplysningPerSkjæringstidspunkt,
         betalteInfotrygddager: List<Periode> = emptyList()
     ) {
         val teller = Arbeidsgiverperiodeteller.NormalArbeidstaker
         val inntekter = Inntekter(
-            skjæringstidspunkter = skjæringstidspunkter,
-            inntektPerSkjæringstidspunkt = inntektsopplysningPerSkjæringstidspunkt,
+            organisasjonsnummer = "a1",
+            vilkårsgrunnlagHistorikk = inntektsopplysningPerSkjæringstidspunkt.somVilkårsgrunnlagHistorikk("a1"),
             regler = ArbeidsgiverRegler.Companion.NormalArbeidstaker,
             subsumsjonObserver = MaskinellJurist()
         )

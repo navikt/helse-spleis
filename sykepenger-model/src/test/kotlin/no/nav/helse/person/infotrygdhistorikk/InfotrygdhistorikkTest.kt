@@ -23,6 +23,7 @@ import no.nav.helse.testhelpers.A
 import no.nav.helse.testhelpers.S
 import no.nav.helse.testhelpers.opphold
 import no.nav.helse.testhelpers.resetSeed
+import no.nav.helse.testhelpers.somVilkårsgrunnlagHistorikk
 import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
@@ -538,10 +539,10 @@ internal class InfotrygdhistorikkTest {
         )))
         val sykdomstidslinje = 31.S
         val builder = UtbetalingstidslinjeBuilder(Inntekter(
-            skjæringstidspunkter = listOf(1.januar),
-            inntektPerSkjæringstidspunkt = mapOf(
+            organisasjonsnummer = "a1",
+            vilkårsgrunnlagHistorikk = mapOf(
                 1.januar to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 25000.månedlig)
-            ),
+            ).somVilkårsgrunnlagHistorikk("a1"),
             regler = ArbeidsgiverRegler.Companion.NormalArbeidstaker,
             subsumsjonObserver = MaskinellJurist()
         ))
@@ -557,10 +558,10 @@ internal class InfotrygdhistorikkTest {
         )))
         val sykdomstidslinje = 31.opphold + 28.S
         val builder = UtbetalingstidslinjeBuilder(Inntekter(
-            skjæringstidspunkter = listOf(1.januar),
-            inntektPerSkjæringstidspunkt = mapOf(
+            organisasjonsnummer = "a1",
+            vilkårsgrunnlagHistorikk = mapOf(
                 1.januar to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 25000.månedlig)
-            ),
+            ).somVilkårsgrunnlagHistorikk("a1"),
             regler = ArbeidsgiverRegler.Companion.NormalArbeidstaker,
             subsumsjonObserver = MaskinellJurist()
         ))

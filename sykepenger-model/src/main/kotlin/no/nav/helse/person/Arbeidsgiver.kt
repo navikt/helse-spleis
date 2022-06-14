@@ -334,10 +334,9 @@ internal class Arbeidsgiver private constructor(
 
     internal fun lagUtbetaling(
         builder: Utbetaling.Builder,
-        skjæringstidspunkter: List<LocalDate>,
-        inntektsopplysninger: Map<LocalDate, Inntektshistorikk.Inntektsopplysning?>?
+        vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk
     ) {
-        builder.arbeidsgiver(organisasjonsnummer, sykdomstidslinje(), skjæringstidspunkter, inntektsopplysninger, utbetalinger, refusjonshistorikk)
+        builder.arbeidsgiver(organisasjonsnummer, sykdomstidslinje(), vilkårsgrunnlagHistorikk, utbetalinger, refusjonshistorikk)
     }
 
     internal fun avventerRevurdering() = vedtaksperioder.avventerRevurdering()
@@ -1076,17 +1075,14 @@ internal class Arbeidsgiver private constructor(
 
     internal fun builder(
         regler: ArbeidsgiverRegler,
-        skjæringstidspunkter: List<LocalDate>,
-        inntektsopplysningPerSkjæringstidspunktPerArbeidsgiver: Map<LocalDate, Map<String, Inntektshistorikk.Inntektsopplysning>>?,
+        vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk,
         subsumsjonObserver: SubsumsjonObserver
     ): UtbetalingstidslinjeBuilder {
         val inntekter = Inntekter(
-            skjæringstidspunkter = skjæringstidspunkter,
-            inntektPerSkjæringstidspunkt = inntektsopplysningPerSkjæringstidspunktPerArbeidsgiver?.mapValues { (_, inntektsopplysningPerArbeidsgiver) ->
-                inntektsopplysningPerArbeidsgiver[organisasjonsnummer]
-            },
+            vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk,
             regler = regler,
-            subsumsjonObserver = subsumsjonObserver
+            subsumsjonObserver = subsumsjonObserver,
+            organisasjonsnummer = organisasjonsnummer
         )
         return UtbetalingstidslinjeBuilder(inntekter)
     }

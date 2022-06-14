@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.*
+import no.nav.helse.testhelpers.somVilkårsgrunnlagHistorikk
 
 internal class InfotrygdUtbetalingstidslinjedekoratørTest {
 
@@ -28,10 +29,10 @@ internal class InfotrygdUtbetalingstidslinjedekoratørTest {
     @Test
     fun `ekskluderer dager før første dag`() {
         val builder = UtbetalingstidslinjeBuilder(Inntekter(
-            skjæringstidspunkter = listOf(1.januar),
-            inntektPerSkjæringstidspunkt = mapOf(
+            vilkårsgrunnlagHistorikk = mapOf(
                 1.januar to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 25000.månedlig)
-            ),
+            ).somVilkårsgrunnlagHistorikk("a1"),
+            organisasjonsnummer = "a1",
             regler = NormalArbeidstaker,
             subsumsjonObserver = MaskinellJurist()
         ))

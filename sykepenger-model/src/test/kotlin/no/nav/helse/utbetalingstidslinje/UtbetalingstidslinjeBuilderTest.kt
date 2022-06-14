@@ -26,6 +26,7 @@ import no.nav.helse.testhelpers.S
 import no.nav.helse.testhelpers.U
 import no.nav.helse.testhelpers.opphold
 import no.nav.helse.testhelpers.resetSeed
+import no.nav.helse.testhelpers.somVilkårsgrunnlagHistorikk
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilderException.UforventetDagException
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Økonomi
@@ -558,15 +559,15 @@ internal class UtbetalingstidslinjeBuilderTest {
 
     private fun undersøke(tidslinje: Sykdomstidslinje, delegator: ((Arbeidsgiverperiodeteller, SykdomstidslinjeVisitor) -> SykdomstidslinjeVisitor)? = null) {
         val inntekter = Inntekter(
-            skjæringstidspunkter = listOf(1.januar),
-            inntektPerSkjæringstidspunkt = inntektsopplysningPerSkjæringstidspunkt,
+            organisasjonsnummer = "a1",
+            vilkårsgrunnlagHistorikk = inntektsopplysningPerSkjæringstidspunkt.somVilkårsgrunnlagHistorikk("a1"),
             regler = ArbeidsgiverRegler.Companion.NormalArbeidstaker,
             subsumsjonObserver = MaskinellJurist()
         )
         val builder = UtbetalingstidslinjeBuilder(inntekter)
         val periodebuilder = ArbeidsgiverperiodeBuilderBuilder()
         val arbeidsgiverperiodeBuilder = ArbeidsgiverperiodeBuilder(teller,
-            UtbetalingstidslinjeBuilderTest.Komposittmediator(periodebuilder, builder), MaskinellJurist())
+            Komposittmediator(periodebuilder, builder), MaskinellJurist())
         tidslinje.accept(delegator?.invoke(teller, arbeidsgiverperiodeBuilder) ?: arbeidsgiverperiodeBuilder)
         utbetalingstidslinje = builder.result()
         inspektør = utbetalingstidslinje.inspektør

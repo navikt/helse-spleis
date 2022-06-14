@@ -28,6 +28,7 @@ import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.testhelpers.S
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.testhelpers.resetSeed
+import no.nav.helse.testhelpers.somVilkårsgrunnlagHistorikk
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjerFilter
@@ -190,11 +191,10 @@ internal class UtbetalingBuilderTest {
         private fun Utbetaling.Builder.arbeidsgiver(
             organisasjonsnummer: String,
             sykdomstidslinje: Sykdomstidslinje,
-            vararg inntekter: Pair<LocalDate, Inntektsopplysning>,
-            skjæringstidspunkter: List<LocalDate> = inntekter.toMap().keys.toList()
+            vararg inntekter: Pair<LocalDate, Inntektsopplysning>
         ): Utbetaling.Builder {
             resetSeed()
-            return arbeidsgiver(organisasjonsnummer, sykdomstidslinje, skjæringstidspunkter, inntekter.toMap(), emptyList(), Refusjonshistorikk())
+            return arbeidsgiver(organisasjonsnummer, sykdomstidslinje, inntekter.toMap().somVilkårsgrunnlagHistorikk(organisasjonsnummer), emptyList(), Refusjonshistorikk())
         }
     }
 }

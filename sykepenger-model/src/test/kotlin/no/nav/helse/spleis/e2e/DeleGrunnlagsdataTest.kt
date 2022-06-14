@@ -11,7 +11,6 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
-import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.Periodetype
@@ -337,24 +336,14 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
             inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 15.desember(2017), INNTEKT, true))
         )
         håndterYtelser(2.vedtaksperiode)
-        håndterSimulering(2.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-        assertForkastetPeriodeTilstander(
-            1.vedtaksperiode,
-            START,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK,
-            AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK,
-            AVVENTER_GODKJENNING,
-            TIL_INFOTRYGD
-        )
-        inspektør.utbetalingUtbetalingstidslinje(1).inspektør.also {
-            assertEquals(15, it.navDagTeller)
-            assertEquals(0, it.arbeidsgiverperiodeDagTeller)
-            assertEquals(0, it.avvistDagTeller)
-        }
-    }
 
+        assertForventetFeil(
+            nå = {
+                assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING)
+            },
+            ønsket = {
+                assertSisteTilstand(2.vedtaksperiode, TIL_INFOTRYGD)
+            }
+        )
+    }
 }

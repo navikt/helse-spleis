@@ -26,6 +26,7 @@ import no.nav.helse.person.Refusjonshistorikk
 import no.nav.helse.person.SpesifikkKontekst
 import no.nav.helse.person.UtbetalingVisitor
 import no.nav.helse.person.Vedtaksperiode
+import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
@@ -988,8 +989,7 @@ internal class Utbetaling private constructor(
         internal fun arbeidsgiver(
             organisasjonsnummer: String,
             sykdomstidslinje: Sykdomstidslinje,
-            skjæringstidspunkter: List<LocalDate>,
-            inntektsopplysninger: Map<LocalDate, Inntektshistorikk.Inntektsopplysning?>?,
+            vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk,
             utbetalinger: List<Utbetaling>,
             refusjonshistorikk: Refusjonshistorikk
         ) = apply {
@@ -997,7 +997,7 @@ internal class Utbetaling private constructor(
                 this.UtbetalingstidslinjeBuilder(
                     organisasjonsnummer = organisasjonsnummer,
                     sykdomstidslinje = sykdomstidslinje,
-                    inntekter = Inntekter(skjæringstidspunkter, inntektsopplysninger, regler, subsumsjonObserver),
+                    inntekter = Inntekter(vilkårsgrunnlagHistorikk, organisasjonsnummer, regler, subsumsjonObserver),
                     refusjonshistorikk = refusjonshistorikk,
                     utbetalinger = utbetalinger
                 )

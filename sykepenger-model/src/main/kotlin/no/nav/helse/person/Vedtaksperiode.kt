@@ -2479,12 +2479,10 @@ internal class Vedtaksperiode private constructor(
 
         internal fun List<Vedtaksperiode>.lagUtbetalinger(
             builder: Utbetaling.Builder,
-            skjæringstidspunkter: List<LocalDate>,
-            inntektsopplysninger: Map<LocalDate, Map<String, Inntektshistorikk.Inntektsopplysning>>?
+            vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk
         ) {
             forEach { periode ->
-                val inntektsopplysningerForArbeidsgiver = inntektsopplysninger?.mapValues { (_, value) -> value[periode.organisasjonsnummer] }
-                periode.arbeidsgiver.lagUtbetaling(builder, skjæringstidspunkter, inntektsopplysningerForArbeidsgiver)
+                periode.arbeidsgiver.lagUtbetaling(builder, vilkårsgrunnlagHistorikk)
                 periode.utbetalinger.lagUtbetaling(builder, periode, periode.organisasjonsnummer)
             }
         }

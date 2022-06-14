@@ -1,5 +1,9 @@
 package no.nav.helse.utbetalingstidslinje
 
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
+import java.util.UUID
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.etterlevelse.MaskinellJurist
@@ -11,7 +15,14 @@ import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde.Companion.INGEN
-import no.nav.helse.testhelpers.*
+import no.nav.helse.testhelpers.ARB
+import no.nav.helse.testhelpers.AVV
+import no.nav.helse.testhelpers.FOR
+import no.nav.helse.testhelpers.FRI
+import no.nav.helse.testhelpers.NAV
+import no.nav.helse.testhelpers.resetSeed
+import no.nav.helse.testhelpers.somVilkårsgrunnlagHistorikk
+import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
@@ -21,10 +32,6 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.temporal.ChronoUnit
-import java.util.*
 import kotlin.reflect.KClass
 
 internal abstract class HistorieTest {
@@ -98,16 +105,10 @@ internal abstract class HistorieTest {
     }
 
     protected fun beregn(orgnr: String, vararg inntektsdatoer: LocalDate, regler: ArbeidsgiverRegler = NormalArbeidstaker): Utbetalingstidslinje {
-        val inntektshistorikk = Inntektshistorikk()
-        inntektshistorikk.append {
-            inntektsdatoer.forEach {
-                addInntektsmelding(it, UUID.randomUUID(), 25000.månedlig)
-            }
-        }
         val sykdomstidslinje = arbeidsgiverSykdomstidslinje.getValue(orgnr)
         val inntekter = Inntekter(
-            skjæringstidspunkter = infotrygdhistorikk.skjæringstidspunkter(arbeidsgiverSykdomstidslinje.values.toList()),
-            inntektPerSkjæringstidspunkt = inntektsdatoer.associateWith { Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), it, UUID.randomUUID(), 25000.månedlig) },
+            organisasjonsnummer = orgnr,
+            vilkårsgrunnlagHistorikk = inntektsdatoer.associateWith { Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), it, UUID.randomUUID(), 25000.månedlig) }.somVilkårsgrunnlagHistorikk(orgnr),
             regler = regler,
             subsumsjonObserver = MaskinellJurist()
         )

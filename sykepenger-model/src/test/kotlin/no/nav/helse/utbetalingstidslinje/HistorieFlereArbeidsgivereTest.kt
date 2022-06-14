@@ -14,7 +14,7 @@ internal class HistorieFlereArbeidsgivereTest : HistorieTest() {
         historie(utbetaling(17.januar, 31.januar, orgnr = AG1))
         addSykdomshistorikk(AG2, sykedager(1.februar, 28.februar))
         addSykdomshistorikk(AG1, sykedager(1.mars, 31.mars))
-        val utbetalingstidslinjeAG1 = beregn(AG1, 17.januar, 1.mars)
+        val utbetalingstidslinjeAG1 = beregn(AG1, 17.januar)
         assertSkjæringstidspunkt(utbetalingstidslinjeAG1, 1.mars til 31.mars, 17.januar)
         assertAlleDager(utbetalingstidslinjeAG1, 1.mars til 16.mars, ArbeidsgiverperiodeDag::class)
         assertAlleDager(utbetalingstidslinjeAG1, 17.mars til 31.mars, NavDag::class, NavHelgDag::class)

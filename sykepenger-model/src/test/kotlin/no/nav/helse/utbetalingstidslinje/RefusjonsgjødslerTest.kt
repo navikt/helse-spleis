@@ -344,16 +344,16 @@ internal class RefusjonsgjødslerTest {
         )
 
         private fun Sykdomstidslinje.utbetalingstidslinje(
-            inntektsopplysning: Map<LocalDate, Inntektshistorikk.Inntektsopplysning?>,
+            inntektsopplysning: Map<LocalDate, Inntektshistorikk.Inntektsopplysning>,
             delegator: ((Arbeidsgiverperiodeteller, SykdomstidslinjeVisitor) -> SykdomstidslinjeVisitor)? = null
         ): Utbetalingstidslinje {
             val tidslinjebuilder = UtbetalingstidslinjeBuilder(
                 Inntekter(
-                skjæringstidspunkter = inntektsopplysning.keys.toList(),
-                inntektPerSkjæringstidspunkt = inntektsopplysning,
-                regler = ArbeidsgiverRegler.Companion.NormalArbeidstaker,
-                subsumsjonObserver = MaskinellJurist()
-            )
+                    organisasjonsnummer = "a1",
+                    vilkårsgrunnlagHistorikk = inntektsopplysning.somVilkårsgrunnlagHistorikk("a1"),
+                    regler = ArbeidsgiverRegler.Companion.NormalArbeidstaker,
+                    subsumsjonObserver = MaskinellJurist()
+                )
             )
             val teller = Arbeidsgiverperiodeteller.NormalArbeidstaker
             val builder = ArbeidsgiverperiodeBuilder(teller, tidslinjebuilder, MaskinellJurist())

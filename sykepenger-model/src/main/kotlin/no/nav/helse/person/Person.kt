@@ -336,17 +336,16 @@ class Person private constructor(
         regler: ArbeidsgiverRegler = NormalArbeidstaker,
         subsumsjonObserver: SubsumsjonObserver
     ): ArbeidsgiverUtbetalinger {
-        val skjæringstidspunkter = skjæringstidspunkter()
         return ArbeidsgiverUtbetalinger(
             regler = regler,
             arbeidsgivere = arbeidsgivereMedSykdom().associateWith {
-                it.builder(regler, skjæringstidspunkter, vilkårsgrunnlagHistorikk.inntektsopplysninger(), subsumsjonObserver)
+                it.builder(regler, vilkårsgrunnlagHistorikk, subsumsjonObserver)
             },
             infotrygdhistorikk = infotrygdhistorikk,
             alder = fødselsnummer.alder(),
             dødsdato = dødsdato,
-            vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk,
-            subsumsjonObserver = subsumsjonObserver
+            subsumsjonObserver = subsumsjonObserver,
+            vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk
         )
     }
 
@@ -882,6 +881,6 @@ class Person private constructor(
             regler = NormalArbeidstaker
         ).apply {
             avvisInngangsvilkårfilter(AvvisInngangsvilkårfilter(vilkårsgrunnlagHistorikk))
-            vedtaksperioder.lagUtbetalinger(this, skjæringstidspunkter(), vilkårsgrunnlagHistorikk.inntektsopplysninger())
+            vedtaksperioder.lagUtbetalinger(this, vilkårsgrunnlagHistorikk)
         }
 }
