@@ -1579,6 +1579,9 @@ internal class Vedtaksperiode private constructor(
                     vilkårsgrunnlag = requireNotNull(person.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt))
                     ytelser.kontekst(vilkårsgrunnlag)
                 }
+                valider {
+                    vilkårsgrunnlag.valider(this)
+                }
                 onSuccess {
                     when (periodetype) {
                         in listOf(OVERGANG_FRA_IT, INFOTRYGDFORLENGELSE) -> {

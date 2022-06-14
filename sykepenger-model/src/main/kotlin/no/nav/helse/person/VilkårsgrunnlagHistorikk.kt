@@ -155,7 +155,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             innslag.add(skjæringstidspunkt, this)
         }
 
-        internal abstract fun valider(aktivitetslogg: Aktivitetslogg)
+        internal open fun valider(aktivitetslogg: IAktivitetslogg): Boolean = true
         internal abstract fun accept(vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor)
         internal fun sykepengegrunnlag() = sykepengegrunnlag
         internal abstract fun sammenligningsgrunnlagPerArbeidsgiver(): Map<String, Inntektshistorikk.Inntektsopplysning>
@@ -230,9 +230,9 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         private val meldingsreferanseId: UUID?,
         vilkårsgrunnlagId: UUID
     ) : VilkårsgrunnlagElement(vilkårsgrunnlagId, skjæringstidspunkt, sykepengegrunnlag) {
-        override fun valider(aktivitetslogg: Aktivitetslogg) {
-            if (vurdertOk) return
-            aktivitetslogg.error("Vilkårsvurderingen er ikke vurdert ok")
+        override fun valider(aktivitetslogg: IAktivitetslogg): Boolean {
+            sjekkAvviksprosent(aktivitetslogg)
+            return !aktivitetslogg.hasErrorsOrWorse()
         }
 
         override fun sjekkAvviksprosent(aktivitetslogg: IAktivitetslogg): Boolean {
@@ -320,8 +320,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             if (sykepengegrunnlag < gammeltGrunnbeløp) return
             aktivitetslogg.warn("Første utbetalingsdag er i Infotrygd og mellom 1. og 16. mai. Kontroller at riktig grunnbeløp er brukt.")
         }
-
-        override fun valider(aktivitetslogg: Aktivitetslogg) {}
 
         override fun accept(vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor) {
             vilkårsgrunnlagHistorikkVisitor.preVisitInfotrygdVilkårsgrunnlag(this, skjæringstidspunkt, sykepengegrunnlag, vilkårsgrunnlagId)

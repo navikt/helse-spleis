@@ -232,11 +232,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.januar til 18.januar))
 
         håndterYtelser(2.vedtaksperiode)
-        assertForventetFeil(
-            forklaring = "https://trello.com/c/edYRnoPm",
-            nå = { assertSisteTilstand(2.vedtaksperiode, AVVENTER_SIMULERING) },
-            ønsket = { assertSisteTilstand(2.vedtaksperiode, TIL_INFOTRYGD) }
-        )
+        assertSisteTilstand(2.vedtaksperiode, TIL_INFOTRYGD)
     }
 
     @Test
@@ -251,7 +247,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             INNTEKT,
             inntektsvurdering = Inntektsvurdering(
-                inntekter = listOf(sammenligningsgrunnlag(a1, 1.januar, INNTEKT.repeat(12))),
+                inntekter = listOf(sammenligningsgrunnlag(a1, 1.januar, (INNTEKT*1.3).repeat(12))),
             ),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
                 inntekter = listOf(

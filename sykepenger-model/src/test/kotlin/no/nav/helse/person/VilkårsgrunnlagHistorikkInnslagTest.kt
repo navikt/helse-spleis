@@ -143,7 +143,6 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
         get() = object : VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement(UUID.randomUUID(), 1.januar, Inntekt.INGEN.sykepengegrunnlag) {
             override fun accept(vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor) {}
             override fun sammenligningsgrunnlagPerArbeidsgiver(): Map<String, Inntektshistorikk.Inntektsopplysning> = emptyMap()
-            override fun valider(aktivitetslogg: Aktivitetslogg) {}
             override fun vilkårsgrunnlagtype() = "testgrunnlag"
         }
 }
