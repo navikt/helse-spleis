@@ -1,5 +1,7 @@
 package no.nav.helse.person
 
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Arbeidsavklaringspenger
@@ -20,7 +22,6 @@ import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.til
@@ -31,6 +32,7 @@ import no.nav.helse.oktober
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
@@ -42,8 +44,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import java.time.LocalDateTime
-import java.util.*
 
 internal class SimuleringHendelseTest : AbstractPersonTest() {
     private companion object {
@@ -123,40 +123,30 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
             fødselsnummer = UNG_PERSON_FNR_2018.toString(),
             organisasjonsnummer = ORGNUMMER,
             vedtaksperiodeId = "${1.vedtaksperiode.id(ORGNUMMER)}",
-            utbetalingshistorikk = Utbetalingshistorikk(
-                meldingsreferanseId = meldingsreferanseId,
-                aktørId = "aktørId",
-                fødselsnummer = UNG_PERSON_FNR_2018.toString(),
-                organisasjonsnummer = ORGNUMMER,
-                vedtaksperiodeId = "${1.vedtaksperiode.id(ORGNUMMER)}",
-                arbeidskategorikoder = emptyMap(),
-                harStatslønn = false,
+            infotrygdhistorikk = InfotrygdhistorikkElement.opprett(
+                oppdatert = LocalDateTime.now(),
+                hendelseId = meldingsreferanseId,
                 perioder = utbetalinger,
-                inntektshistorikk = emptyList(),
+                inntekter = emptyList(),
+                arbeidskategorikoder = emptyMap(),
                 ugyldigePerioder = emptyList(),
-                aktivitetslogg = it,
-                besvart = LocalDateTime.now()
+                harStatslønn = false
             ),
             foreldrepermisjon = Foreldrepermisjon(
                 foreldrepengeytelse = foreldrepengeYtelse,
                 svangerskapsytelse = svangerskapYtelse,
-                aktivitetslogg = it
             ),
             pleiepenger = Pleiepenger(
                 perioder = emptyList(),
-                aktivitetslogg = it
             ),
             omsorgspenger = Omsorgspenger(
                 perioder = emptyList(),
-                aktivitetslogg = it
             ),
             opplæringspenger = Opplæringspenger(
                 perioder = emptyList(),
-                aktivitetslogg = it
             ),
             institusjonsopphold = Institusjonsopphold(
                 perioder = emptyList(),
-                aktivitetslogg = it
             ),
             dødsinfo = Dødsinfo(null),
             arbeidsavklaringspenger = Arbeidsavklaringspenger(emptyList()),

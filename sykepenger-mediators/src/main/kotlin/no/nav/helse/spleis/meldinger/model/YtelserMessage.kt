@@ -34,10 +34,9 @@ internal class YtelserMessage(packet: JsonMessage) : BehovMessage(packet) {
     private val dagpenger: List<Pair<LocalDate, LocalDate>>
     private val ugyldigeDagpengeperioder: List<Pair<LocalDate, LocalDate>>
 
-    private val aktivitetslogg = Aktivitetslogg()
     private val utbetalingshistorikk = packet["@løsning.${Sykepengehistorikk.name}"].takeIf(JsonNode::isArray)?.let {
         UtbetalingshistorikkMessage(packet)
-            .utbetalingshistorikk(aktivitetslogg)
+            .infotrygdhistorikk(id)
     }
 
     private val foreldrepenger = packet["@løsning.${Foreldrepenger.name}.Foreldrepengeytelse"]
@@ -47,25 +46,24 @@ internal class YtelserMessage(packet: JsonMessage) : BehovMessage(packet) {
 
     private val foreldrepermisjon = Foreldrepermisjon(
         foreldrepengeytelse = foreldrepenger,
-        svangerskapsytelse = svangerskapsytelse,
-        aktivitetslogg = aktivitetslogg
+        svangerskapsytelse = svangerskapsytelse
     )
 
     private val pleiepenger =
-        Pleiepenger(packet["@løsning.${Behovtype.Pleiepenger.name}"].map(::asPeriode), aktivitetslogg)
+        Pleiepenger(packet["@løsning.${Behovtype.Pleiepenger.name}"].map(::asPeriode))
 
     private val omsorgspenger =
-        Omsorgspenger(packet["@løsning.${Behovtype.Omsorgspenger.name}"].map(::asPeriode), aktivitetslogg)
+        Omsorgspenger(packet["@løsning.${Behovtype.Omsorgspenger.name}"].map(::asPeriode))
 
     private val opplæringspenger =
-        Opplæringspenger(packet["@løsning.${Behovtype.Opplæringspenger.name}"].map(::asPeriode), aktivitetslogg)
+        Opplæringspenger(packet["@løsning.${Behovtype.Opplæringspenger.name}"].map(::asPeriode))
 
     private val institusjonsopphold = Institusjonsopphold(packet["@løsning.${Behovtype.Institusjonsopphold.name}"].map {
         Institusjonsoppholdsperiode(
             it.path("startdato").asLocalDate(),
             it.path("faktiskSluttdato").asOptionalLocalDate()
         )
-    }, aktivitetslogg)
+    })
 
     private val dødsinfo =
         Dødsinfo(packet["@løsning.${Behovtype.Dødsinfo.name}"].path("dødsdato").asOptionalLocalDate())
@@ -94,7 +92,7 @@ internal class YtelserMessage(packet: JsonMessage) : BehovMessage(packet) {
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
-            utbetalingshistorikk = utbetalingshistorikk,
+            infotrygdhistorikk = utbetalingshistorikk,
             foreldrepermisjon = foreldrepermisjon,
             pleiepenger = pleiepenger,
             omsorgspenger = omsorgspenger,
@@ -113,7 +111,7 @@ internal class YtelserMessage(packet: JsonMessage) : BehovMessage(packet) {
                     it.second
                 )
             }),
-            aktivitetslogg = aktivitetslogg
+            aktivitetslogg = Aktivitetslogg()
         ).also {
             if (ugyldigeArbeidsavklaringspengeperioder.isNotEmpty()) it.warn("Arena inneholdt en eller flere AAP-perioder med ugyldig fom/tom")
             if (ugyldigeDagpengeperioder.isNotEmpty()) it.warn("Arena inneholdt en eller flere Dagpengeperioder med ugyldig fom/tom")

@@ -25,7 +25,6 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.til
@@ -41,6 +40,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
+import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.sisteBehov
@@ -335,42 +335,32 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
             fødselsnummer = UNG_PERSON_FNR_2018.toString(),
             organisasjonsnummer = ORGNUMMER,
             vedtaksperiodeId = "${1.vedtaksperiode.id(ORGNUMMER)}",
-            utbetalingshistorikk = Utbetalingshistorikk(
-                meldingsreferanseId = meldingsreferanseId,
-                aktørId = "aktørId",
-                fødselsnummer = UNG_PERSON_FNR_2018.toString(),
-                organisasjonsnummer = ORGNUMMER,
-                vedtaksperiodeId = "${1.vedtaksperiode.id(ORGNUMMER)}",
-                arbeidskategorikoder = emptyMap(),
-                harStatslønn = false,
+            infotrygdhistorikk = InfotrygdhistorikkElement.opprett(
+                oppdatert = besvart,
+                hendelseId = meldingsreferanseId,
                 perioder = listOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER,17.januar(2017),  20.januar(2017),  100.prosent, 1000.daglig)),
-                inntektshistorikk = listOf(
+                inntekter = listOf(
                     Inntektsopplysning(ORGNUMMER, 17.januar(2017), 31000.månedlig, true)
                 ),
+                arbeidskategorikoder = emptyMap(),
                 ugyldigePerioder = emptyList(),
-                aktivitetslogg = Aktivitetslogg(),
-                besvart = besvart
+                harStatslønn = false
             ),
             foreldrepermisjon = Foreldrepermisjon(
                 foreldrepengeytelse = null,
-                svangerskapsytelse = null,
-                aktivitetslogg = Aktivitetslogg()
+                svangerskapsytelse = null
             ),
             pleiepenger = Pleiepenger(
-                perioder = emptyList(),
-                aktivitetslogg = Aktivitetslogg()
+                perioder = emptyList()
             ),
             omsorgspenger = Omsorgspenger(
-                perioder = emptyList(),
-                aktivitetslogg = Aktivitetslogg()
+                perioder = emptyList()
             ),
             opplæringspenger = Opplæringspenger(
-                perioder = emptyList(),
-                aktivitetslogg = Aktivitetslogg()
+                perioder = emptyList()
             ),
             institusjonsopphold = Institusjonsopphold(
-                perioder = emptyList(),
-                aktivitetslogg = Aktivitetslogg()
+                perioder = emptyList()
             ),
             dødsinfo = Dødsinfo(null),
             arbeidsavklaringspenger = Arbeidsavklaringspenger(emptyList()),

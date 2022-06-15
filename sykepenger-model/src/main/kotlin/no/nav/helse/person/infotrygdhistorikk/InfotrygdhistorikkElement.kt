@@ -30,7 +30,7 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.Fri
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.UkjentDag
 
-internal class InfotrygdhistorikkElement private constructor(
+class InfotrygdhistorikkElement private constructor(
     private val id: UUID,
     private val tidsstempel: LocalDateTime,
     private val hendelseId: UUID? = null,
@@ -52,7 +52,7 @@ internal class InfotrygdhistorikkElement private constructor(
         if (!erTom()) requireNotNull(hendelseId) { "HendelseID må være satt når elementet inneholder data" }
     }
 
-    internal companion object {
+    companion object {
         fun opprett(
             oppdatert: LocalDateTime,
             hendelseId: UUID,
@@ -76,7 +76,7 @@ internal class InfotrygdhistorikkElement private constructor(
                 lagretVilkårsgrunnlag = false
             )
 
-        fun opprettTom() =
+        internal fun opprettTom() =
             InfotrygdhistorikkElement(
                 id = UUID.randomUUID(),
                 tidsstempel = LocalDateTime.now(),

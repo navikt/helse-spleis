@@ -1,11 +1,32 @@
 package no.nav.helse.person
 
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.etterspurtBehov
-import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.Arbeidsavklaringspenger
+import no.nav.helse.hendelser.ArbeidsgiverInntekt
+import no.nav.helse.hendelser.Dagpenger
+import no.nav.helse.hendelser.Dødsinfo
+import no.nav.helse.hendelser.Foreldrepermisjon
+import no.nav.helse.hendelser.InntektForSykepengegrunnlag
+import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.Inntektsvurdering
+import no.nav.helse.hendelser.Institusjonsopphold
+import no.nav.helse.hendelser.Medlemskapsvurdering
+import no.nav.helse.hendelser.Omsorgspenger
+import no.nav.helse.hendelser.Opplæringspenger
+import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Pleiepenger
+import no.nav.helse.hendelser.Sykmelding
+import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.Vilkårsgrunnlag
+import no.nav.helse.hendelser.Ytelser
+import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.GrunnlagsdataInspektør
 import no.nav.helse.januar
 import no.nav.helse.mai
@@ -18,10 +39,10 @@ import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
-import java.time.LocalDateTime
-import java.util.*
 
 internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
     private lateinit var hendelse: ArbeidstakerHendelse
@@ -248,24 +269,12 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
         fødselsnummer = UNG_PERSON_FNR_2018.toString(),
         organisasjonsnummer = ORGNUMMER,
         vedtaksperiodeId = "${1.vedtaksperiode.id(ORGNUMMER)}",
-        utbetalingshistorikk = Utbetalingshistorikk(
-            meldingsreferanseId = UUID.randomUUID(),
-            aktørId = "aktørId",
-            fødselsnummer = UNG_PERSON_FNR_2018.toString(),
-            organisasjonsnummer = ORGNUMMER,
-            vedtaksperiodeId = "${1.vedtaksperiode.id(ORGNUMMER)}",
-            arbeidskategorikoder = emptyMap(),
-            harStatslønn = false,
-            perioder = emptyList(),
-            inntektshistorikk = emptyList(),
-            ugyldigePerioder = emptyList(),
-            besvart = LocalDateTime.now()
-        ),
-        foreldrepermisjon = Foreldrepermisjon(null, null, Aktivitetslogg()),
-        pleiepenger = Pleiepenger(emptyList(), Aktivitetslogg()),
-        omsorgspenger = Omsorgspenger(emptyList(), Aktivitetslogg()),
-        opplæringspenger = Opplæringspenger(emptyList(), Aktivitetslogg()),
-        institusjonsopphold = Institusjonsopphold(emptyList(), Aktivitetslogg()),
+        infotrygdhistorikk = null,
+        foreldrepermisjon = Foreldrepermisjon(null, null),
+        pleiepenger = Pleiepenger(emptyList()),
+        omsorgspenger = Omsorgspenger(emptyList()),
+        opplæringspenger = Opplæringspenger(emptyList()),
+        institusjonsopphold = Institusjonsopphold(emptyList()),
         dødsinfo = Dødsinfo(null),
         arbeidsavklaringspenger = Arbeidsavklaringspenger(emptyList()),
         dagpenger = Dagpenger(emptyList()),

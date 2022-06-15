@@ -63,6 +63,7 @@ import no.nav.helse.person.TilstandType
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
+import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.person.infotrygdhistorikk.UgyldigPeriode
@@ -736,12 +737,15 @@ class JsonBuilderTest {
         fødselsnummer = fnr.toString(),
         organisasjonsnummer = orgnummer,
         vedtaksperiodeId = vedtaksperiodeId,
-        arbeidskategorikoder = emptyMap(),
-        harStatslønn = false,
-        perioder = utbetalinger,
-        inntektshistorikk = inntektsopplysning,
-        ugyldigePerioder = ugyldigePerioder,
-        besvart = besvart
+        element = InfotrygdhistorikkElement.opprett(
+            oppdatert = besvart,
+            hendelseId = UUID.randomUUID(),
+            perioder = utbetalinger,
+            inntekter = inntektsopplysning,
+            arbeidskategorikoder = emptyMap(),
+            ugyldigePerioder = ugyldigePerioder,
+            harStatslønn = false
+        )
     )
 
     private fun ytelser(
@@ -758,19 +762,14 @@ class JsonBuilderTest {
             fødselsnummer = fnr.toString(),
             organisasjonsnummer = orgnummer,
             vedtaksperiodeId = vedtaksperiodeId,
-            utbetalingshistorikk = Utbetalingshistorikk(
-                meldingsreferanseId = hendelseId,
-                aktørId = aktørId,
-                fødselsnummer = fnr.toString(),
-                organisasjonsnummer = orgnummer,
-                vedtaksperiodeId = vedtaksperiodeId,
-                arbeidskategorikoder = emptyMap(),
-                harStatslønn = false,
+            infotrygdhistorikk = InfotrygdhistorikkElement.opprett(
+                oppdatert = LocalDateTime.now(),
+                hendelseId = hendelseId,
                 perioder = utbetalinger,
-                inntektshistorikk = inntektshistorikk,
+                inntekter = inntektshistorikk,
+                arbeidskategorikoder = emptyMap(),
                 ugyldigePerioder = ugyldigePerioder,
-                aktivitetslogg = it,
-                besvart = LocalDateTime.now()
+                harStatslønn = false
             ),
             foreldrepermisjon = Foreldrepermisjon(
                 foreldrepengeytelse = Periode(
@@ -780,24 +779,19 @@ class JsonBuilderTest {
                 svangerskapsytelse = Periode(
                     fom = 1.juli.minusYears(2),
                     tom = 31.juli.minusYears(2)
-                ),
-                aktivitetslogg = it
+                )
             ),
             pleiepenger = Pleiepenger(
-                perioder = emptyList(),
-                aktivitetslogg = it
+                perioder = emptyList()
             ),
             omsorgspenger = Omsorgspenger(
-                perioder = emptyList(),
-                aktivitetslogg = it
+                perioder = emptyList()
             ),
             opplæringspenger = Opplæringspenger(
-                perioder = emptyList(),
-                aktivitetslogg = it
+                perioder = emptyList()
             ),
             institusjonsopphold = Institusjonsopphold(
-                perioder = emptyList(),
-                aktivitetslogg = it
+                perioder = emptyList()
             ),
             dødsinfo = Dødsinfo(dødsdato),
             arbeidsavklaringspenger = Arbeidsavklaringspenger(emptyList()),

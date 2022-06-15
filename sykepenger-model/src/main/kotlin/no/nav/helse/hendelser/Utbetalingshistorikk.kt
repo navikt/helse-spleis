@@ -1,11 +1,10 @@
 package no.nav.helse.hendelser
 
+import java.util.UUID
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.ArbeidstakerHendelse
-import no.nav.helse.person.infotrygdhistorikk.*
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
+import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
+import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 
 class Utbetalingshistorikk(
     meldingsreferanseId: UUID,
@@ -13,23 +12,9 @@ class Utbetalingshistorikk(
     fødselsnummer: String,
     organisasjonsnummer: String,
     private val vedtaksperiodeId: String,
-    arbeidskategorikoder: Map<String, LocalDate>,
-    harStatslønn: Boolean,
-    perioder: List<Infotrygdperiode>,
-    inntektshistorikk: List<Inntektsopplysning>,
-    ugyldigePerioder: List<UgyldigPeriode>,
+    private val element: InfotrygdhistorikkElement,
     aktivitetslogg: Aktivitetslogg = Aktivitetslogg(),
-    besvart: LocalDateTime
 ) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer, aktørId, organisasjonsnummer, aktivitetslogg) {
-    private val element = InfotrygdhistorikkElement.opprett(
-        oppdatert = besvart,
-        hendelseId = meldingsreferanseId(),
-        perioder = perioder,
-        inntekter = inntektshistorikk,
-        arbeidskategorikoder = arbeidskategorikoder,
-        ugyldigePerioder = ugyldigePerioder,
-        harStatslønn = harStatslønn
-    )
 
     internal fun oppdaterHistorikk(historikk: Infotrygdhistorikk) {
         info("Oppdaterer Infotrygdhistorikk")

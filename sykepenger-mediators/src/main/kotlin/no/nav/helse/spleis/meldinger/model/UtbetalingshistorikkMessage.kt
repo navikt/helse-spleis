@@ -2,11 +2,13 @@ package no.nav.helse.spleis.meldinger.model
 
 import com.fasterxml.jackson.databind.JsonNode
 import java.time.LocalDate
+import java.util.UUID
 import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Friperiode
+import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.person.infotrygdhistorikk.PersonUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.UgyldigPeriode
@@ -108,20 +110,26 @@ internal class UtbetalingshistorikkMessage(packet: JsonMessage) : BehovMessage(p
         return fom != null && tom != null && tom >= fom
     }
 
-    internal fun utbetalingshistorikk(aktivitetslogg: Aktivitetslogg = Aktivitetslogg()) =
+    internal fun infotrygdhistorikk(meldingsreferanseId: UUID) =
+        InfotrygdhistorikkElement.opprett(
+            oppdatert = besvart,
+            hendelseId = meldingsreferanseId,
+            perioder = utbetalinger,
+            inntekter = inntektshistorikk,
+            arbeidskategorikoder = arbeidskategorikoder,
+            ugyldigePerioder = ugyldigePerioder,
+            harStatslønn = harStatslønn
+        )
+
+    private fun utbetalingshistorikk() =
         Utbetalingshistorikk(
             meldingsreferanseId = id,
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
-            arbeidskategorikoder = arbeidskategorikoder,
-            harStatslønn = harStatslønn,
-            perioder = utbetalinger,
-            inntektshistorikk = inntektshistorikk,
-            ugyldigePerioder = ugyldigePerioder,
-            aktivitetslogg = aktivitetslogg,
-            besvart = besvart
+            element = infotrygdhistorikk(id),
+            aktivitetslogg = Aktivitetslogg()
         )
 
     override fun behandle(mediator: IHendelseMediator, context: MessageContext) {

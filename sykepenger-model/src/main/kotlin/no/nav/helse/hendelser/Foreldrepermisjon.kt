@@ -1,14 +1,13 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.IAktivitetslogg
 
 class Foreldrepermisjon(
     private val foreldrepengeytelse: Periode?,
-    private val svangerskapsytelse: Periode?,
-    private val aktivitetslogg: Aktivitetslogg
+    private val svangerskapsytelse: Periode?
 ) {
 
-    internal fun overlapper(sykdomsperiode: Periode): Boolean {
+    internal fun overlapper(aktivitetslogg: IAktivitetslogg, sykdomsperiode: Periode): Boolean {
         if (foreldrepengeytelse == null && svangerskapsytelse == null) {
             aktivitetslogg.info("Bruker har ingen foreldrepenge- eller svangerskapsytelser")
             return false

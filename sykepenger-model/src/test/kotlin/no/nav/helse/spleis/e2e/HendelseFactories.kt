@@ -45,6 +45,7 @@ import no.nav.helse.person.AbstractPersonTest
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.TilstandType
+import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.serde.reflection.Utbetalingstatus
@@ -272,12 +273,15 @@ internal fun AbstractEndToEndTest.utbetalingshistorikk(
         fødselsnummer = fnr.toString(),
         organisasjonsnummer = orgnummer,
         vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer).toString(),
-        arbeidskategorikoder = emptyMap(),
-        harStatslønn = harStatslønn,
-        perioder = utbetalinger,
-        inntektshistorikk = inntektshistorikk,
-        ugyldigePerioder = emptyList(),
-        besvart = besvart
+        element = InfotrygdhistorikkElement.opprett(
+            oppdatert = besvart,
+            hendelseId = UUID.randomUUID(),
+            perioder = utbetalinger,
+            inntekter = inntektshistorikk,
+            arbeidskategorikoder = emptyMap(),
+            ugyldigePerioder = emptyList(),
+            harStatslønn = harStatslønn
+        )
     ).apply {
         hendelselogg = this
     }
@@ -361,49 +365,38 @@ internal fun AbstractEndToEndTest.ytelser(
         )
     }
 
-    val utbetalingshistorikk = if (!bedtOmSykepengehistorikk)
-        null
-    else
-        Utbetalingshistorikk(
-            meldingsreferanseId = meldingsreferanseId,
-            aktørId = AbstractPersonTest.AKTØRID,
-            fødselsnummer = fnr.toString(),
-            organisasjonsnummer = orgnummer,
-            vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer).toString(),
-            arbeidskategorikoder = arbeidskategorikoder,
-            harStatslønn = statslønn,
-            perioder = utbetalinger,
-            inntektshistorikk = inntektshistorikk,
-            ugyldigePerioder = emptyList(),
-            besvart = besvart
-        )
+    val element = InfotrygdhistorikkElement.opprett(
+        oppdatert = besvart,
+        hendelseId = meldingsreferanseId,
+        perioder = utbetalinger,
+        inntekter = inntektshistorikk,
+        arbeidskategorikoder = arbeidskategorikoder,
+        ugyldigePerioder = emptyList(),
+        harStatslønn = statslønn
+    ).takeIf { bedtOmSykepengehistorikk }
+
     return Ytelser(
         meldingsreferanseId = meldingsreferanseId,
         aktørId = AbstractPersonTest.AKTØRID,
         fødselsnummer = fnr.toString(),
         organisasjonsnummer = orgnummer,
         vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer).toString(),
-        utbetalingshistorikk = utbetalingshistorikk,
+        infotrygdhistorikk = element,
         foreldrepermisjon = Foreldrepermisjon(
             foreldrepengeytelse = foreldrepenger,
-            svangerskapsytelse = svangerskapspenger,
-            aktivitetslogg = aktivitetslogg
+            svangerskapsytelse = svangerskapspenger
         ),
         pleiepenger = Pleiepenger(
-            perioder = pleiepenger,
-            aktivitetslogg = aktivitetslogg
+            perioder = pleiepenger
         ),
         omsorgspenger = Omsorgspenger(
-            perioder = omsorgspenger,
-            aktivitetslogg = aktivitetslogg
+            perioder = omsorgspenger
         ),
         opplæringspenger = Opplæringspenger(
-            perioder = opplæringspenger,
-            aktivitetslogg = aktivitetslogg
+            perioder = opplæringspenger
         ),
         institusjonsopphold = Institusjonsopphold(
-            perioder = institusjonsoppholdsperioder,
-            aktivitetslogg = aktivitetslogg
+            perioder = institusjonsoppholdsperioder
         ),
         dødsinfo = Dødsinfo(dødsdato),
         arbeidsavklaringspenger = Arbeidsavklaringspenger(arbeidsavklaringspenger),
