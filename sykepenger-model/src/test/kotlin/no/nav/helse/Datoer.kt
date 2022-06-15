@@ -1,6 +1,7 @@
 package no.nav.helse
 
 import java.time.LocalDate
+import java.time.YearMonth
 
 // 2018 har blitt valgt fordi det starter på en mandag og er ikke et skuddår
 private const val startår = 2018
@@ -25,3 +26,16 @@ val Int.september get() = this.september(startår)
 val Int.oktober get() = this.oktober(startår)
 val Int.november get() = this.november(startår)
 val Int.desember get() = this.desember(startår)
+
+fun januar(år: Int) = YearMonth.of(år, 1)
+fun februar(år: Int) = YearMonth.of(år, 2)
+fun mars(år: Int) = YearMonth.of(år, 3)
+fun april(år: Int) = YearMonth.of(år, 4)
+fun mai(år: Int) = YearMonth.of(år, 5)
+fun juni(år: Int) = YearMonth.of(år, 6)
+fun juli(år: Int) = YearMonth.of(år, 7)
+fun august(år: Int) = YearMonth.of(år, 8)
+fun september(år: Int) = YearMonth.of(år, 9)
+fun oktober(år: Int) = YearMonth.of(år, 10)
+fun november(år: Int) = YearMonth.of(år, 11)
+fun desember(år: Int) = YearMonth.of(år, 12)

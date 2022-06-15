@@ -5,6 +5,7 @@ import java.time.YearMonth
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
+import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Inntektsvurdering
@@ -15,6 +16,8 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
+import no.nav.helse.november
+import no.nav.helse.oktober
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
@@ -26,6 +29,7 @@ import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
+import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -33,6 +37,53 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
+
+    private fun YearMonth.lønnsinntekt(inntekt: Inntekt = INNTEKT) =
+        ArbeidsgiverInntekt.MånedligInntekt.Sykepengegrunnlag(
+            yearMonth = this,
+            type = ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT,
+            inntekt = inntekt,
+            fordel = "fordel",
+            beskrivelse = "beskrivelse"
+        )
+
+    @Test
+    fun `negativt omregnet årsinntekt for ghost-arbeidsgiver`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterVilkårsgrunnlag(1.vedtaksperiode,
+            orgnummer = a1,
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
+                inntekter = listOf(
+                    ArbeidsgiverInntekt(a1, listOf(
+                        desember(2017).lønnsinntekt(INNTEKT),
+                        november(2017).lønnsinntekt(INNTEKT),
+                        oktober(2017).lønnsinntekt(INNTEKT)
+                    )),
+                    ArbeidsgiverInntekt(a2, listOf(
+                        desember(2017).lønnsinntekt(2500.månedlig),
+                        november(2017).lønnsinntekt((-3000).månedlig),
+                    )),
+                ), arbeidsforhold = emptyList()
+            ),
+            arbeidsforhold = listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(a1, 1.januar(2017), null),
+                Vilkårsgrunnlag.Arbeidsforhold(a2, 1.januar(2017), null)
+            )
+        )
+        assertForventetFeil(
+            forklaring = "vi må avklare hva vi ønsker å gjøre med sykepengegrunnlag hvor grunnlaget for en arbeidsgiver er negativt",
+            nå = {
+                assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
+            },
+            ønsket = {
+                assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD, orgnummer = a1)
+            }
+        )
+
+    }
 
     @Test
     fun `mer enn 25% avvik lager kun én errormelding i aktivitetsloggen`() {
