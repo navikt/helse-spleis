@@ -33,42 +33,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
-    @Test
-    fun `gjenbruker ikke vilkårsprøving når førstegangsbehandlingen kastes ut`() {
-        val inntektFraIT = INNTEKT/2
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent))
-        håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(17.januar, 31.januar, 100.prosent))
-        håndterSøknad(Sykdom(17.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
-        håndterYtelser(2.vedtaksperiode)
-        håndterVilkårsgrunnlag(2.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioderForSammenligningsgrunnlag {
-                1.januar(2017) til 1.desember(2017) inntekter {
-                    ORGNUMMER inntekt INNTEKT/2
-                }
-            }
-        ))
-        assertTrue(inspektør.periodeErForkastet(2.vedtaksperiode))
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
-        håndterUtbetalingshistorikk(3.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 31.januar, 100.prosent, inntektFraIT), inntektshistorikk = listOf(
-            Inntektsopplysning(ORGNUMMER, 17.januar, inntektFraIT, true)
-        ))
-        assertEquals(1.januar, inspektør.vedtaksperioder(3.vedtaksperiode).inspektør.skjæringstidspunkt)
-        val vilkårsgrunnlag = inspektør.vilkårsgrunnlag(3.vedtaksperiode)
-        assertNotNull(vilkårsgrunnlag)
-        val grunnlagsdataInspektør = vilkårsgrunnlag.inspektør
-        assertForventetFeil(
-            forklaring = "vi plukker opp vilkårsgrunnlaget som ble lagret ved vurdering av 2.vedtaksperiode",
-            nå = {
-                assertEquals(INNTEKT, grunnlagsdataInspektør.sykepengegrunnlag.inspektør.sykepengegrunnlag)
-            },
-            ønsket = {
-                assertEquals(inntektFraIT, grunnlagsdataInspektør.sykepengegrunnlag.inspektør.sykepengegrunnlag)
-            }
-        )
-    }
 
     @Test
     fun `mer enn 25% avvik lager kun én errormelding i aktivitetsloggen`() {
@@ -205,7 +169,46 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `skal ikke gjenbruke et vilkårsgrunnlag som feiler pga 25 prosent avvik`() {
+    fun `gjenbruker ikke vilkårsprøving når førstegangsbehandlingen kastes ut - med kort agp-periode som påvirker skjæringstidspunktet`() {
+        val inntektFraIT = INNTEKT/2
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(17.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(17.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterYtelser(2.vedtaksperiode)
+        håndterVilkårsgrunnlag(2.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioderForSammenligningsgrunnlag {
+                1.januar(2017) til 1.desember(2017) inntekter {
+                    ORGNUMMER inntekt INNTEKT/2
+                }
+            }
+        ))
+        assertTrue(inspektør.periodeErForkastet(2.vedtaksperiode))
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+        håndterUtbetalingshistorikk(3.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 31.januar, 100.prosent, inntektFraIT), inntektshistorikk = listOf(
+            Inntektsopplysning(ORGNUMMER, 17.januar, inntektFraIT, true)
+        ))
+        assertEquals(1.januar, inspektør.vedtaksperioder(3.vedtaksperiode).inspektør.skjæringstidspunkt)
+        val vilkårsgrunnlag = inspektør.vilkårsgrunnlag(3.vedtaksperiode)
+        assertNotNull(vilkårsgrunnlag)
+        val grunnlagsdataInspektør = vilkårsgrunnlag.inspektør
+        assertForventetFeil(
+            forklaring = "vi plukker opp vilkårsgrunnlaget som ble lagret ved vurdering av 2.vedtaksperiode",
+            nå = {
+                assertEquals(INNTEKT, grunnlagsdataInspektør.sykepengegrunnlag.inspektør.sykepengegrunnlag)
+            },
+            ønsket = {
+                assertEquals(inntektFraIT, grunnlagsdataInspektør.sykepengegrunnlag.inspektør.sykepengegrunnlag)
+            }
+        )
+    }
+
+    @Test
+    fun `gjenbruker ikke vilkårsprøving når førstegangsbehandlingen kastes ut`() {
+        val INNTEKT_FRA_IT = INNTEKT/2
+
         håndterSykmelding(Sykmeldingsperiode(1.januar, 17.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 17.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
@@ -228,10 +231,15 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(18.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(18.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 18.januar))
-
+        håndterUtbetalingshistorikk(2.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 17.januar, 100.prosent, INNTEKT_FRA_IT), inntektshistorikk = listOf(
+            Inntektsopplysning(ORGNUMMER, 17.januar, INNTEKT_FRA_IT, true)
+        ))
         håndterYtelser(2.vedtaksperiode)
-        assertSisteTilstand(2.vedtaksperiode, TIL_INFOTRYGD)
+        val vilkårsgrunnlag = inspektør.vilkårsgrunnlag(2.vedtaksperiode)
+        assertNotNull(vilkårsgrunnlag)
+        val grunnlagsdataInspektør = vilkårsgrunnlag.inspektør
+        assertEquals(INNTEKT_FRA_IT, grunnlagsdataInspektør.sykepengegrunnlag.inspektør.sykepengegrunnlag)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_SIMULERING)
     }
 
     @Test
