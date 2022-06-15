@@ -24,18 +24,17 @@ import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
+import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
 
 internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
     @Test
-    fun `lagrer ikke feil i vilkårsprøving`() {
+    fun `gjenbruker ikke vilkårsprøving når førstegangsbehandlingen kastes ut`() {
         val inntektFraIT = INNTEKT/2
         håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
@@ -57,16 +56,16 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
             Inntektsopplysning(ORGNUMMER, 17.januar, inntektFraIT, true)
         ))
         assertEquals(1.januar, inspektør.vedtaksperioder(3.vedtaksperiode).inspektør.skjæringstidspunkt)
-        val grunnlagsdataInspektør = inspektør.vilkårsgrunnlag(3.vedtaksperiode)?.inspektør
+        val vilkårsgrunnlag = inspektør.vilkårsgrunnlag(3.vedtaksperiode)
+        assertNotNull(vilkårsgrunnlag)
+        val grunnlagsdataInspektør = vilkårsgrunnlag.inspektør
         assertForventetFeil(
             forklaring = "vi plukker opp vilkårsgrunnlaget som ble lagret ved vurdering av 2.vedtaksperiode",
             nå = {
-                assertEquals(INNTEKT, grunnlagsdataInspektør?.sykepengegrunnlag?.inspektør?.sykepengegrunnlag)
-                assertFalse(grunnlagsdataInspektør?.vurdertOk ?: fail { "mangler vilkårsgrunnlag" })
+                assertEquals(INNTEKT, grunnlagsdataInspektør.sykepengegrunnlag.inspektør.sykepengegrunnlag)
             },
             ønsket = {
-                assertEquals(inntektFraIT, grunnlagsdataInspektør?.sykepengegrunnlag?.inspektør?.sykepengegrunnlag)
-                assertTrue(grunnlagsdataInspektør?.vurdertOk ?: fail { "mangler vilkårsgrunnlag" })
+                assertEquals(inntektFraIT, grunnlagsdataInspektør.sykepengegrunnlag.inspektør.sykepengegrunnlag)
             }
         )
     }
