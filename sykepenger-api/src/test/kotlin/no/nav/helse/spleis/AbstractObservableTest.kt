@@ -1,5 +1,8 @@
 package no.nav.helse.spleis
 
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.hendelser.Arbeidsavklaringspenger
 import no.nav.helse.hendelser.Dagpenger
 import no.nav.helse.hendelser.Dødsinfo
@@ -19,13 +22,13 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Person
+import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.somFødselsnummer
@@ -37,9 +40,6 @@ import no.nav.helse.utbetalingslinjer.Oppdragstatus.AKSEPTERT
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
 
 abstract class AbstractObservableTest {
     protected companion object {
@@ -175,48 +175,36 @@ abstract class AbstractObservableTest {
     ): Ytelser {
         val aktivitetslogg = Aktivitetslogg()
         val meldingsreferanseId = UUID.randomUUID()
-
-        val utbetalingshistorikk =
-            Utbetalingshistorikk(
-                meldingsreferanseId = meldingsreferanseId,
-                aktørId = AKTØRID,
-                fødselsnummer = fnr,
-                organisasjonsnummer = orgnummer,
-                vedtaksperiodeId = vedtaksperiodeIdInnhenter(orgnummer).toString(),
-                arbeidskategorikoder = arbeidskategorikoder,
-                harStatslønn = statslønn,
-                perioder = utbetalinger,
-                inntektshistorikk = inntektshistorikk,
-                ugyldigePerioder = emptyList(),
-                besvart = besvart
-            )
         return Ytelser(
             meldingsreferanseId = meldingsreferanseId,
             aktørId = AKTØRID,
             fødselsnummer = fnr,
             organisasjonsnummer = orgnummer,
             vedtaksperiodeId = vedtaksperiodeIdInnhenter(orgnummer).toString(),
-            utbetalingshistorikk = utbetalingshistorikk,
+            infotrygdhistorikk = InfotrygdhistorikkElement.opprett(
+                oppdatert = besvart,
+                hendelseId = meldingsreferanseId,
+                perioder = utbetalinger,
+                inntekter = inntektshistorikk,
+                arbeidskategorikoder = arbeidskategorikoder,
+                ugyldigePerioder = emptyList(),
+                harStatslønn = statslønn
+            ),
             foreldrepermisjon = Foreldrepermisjon(
                 foreldrepengeytelse = foreldrepenger,
-                svangerskapsytelse = svangerskapspenger,
-                aktivitetslogg = aktivitetslogg
+                svangerskapsytelse = svangerskapspenger
             ),
             pleiepenger = Pleiepenger(
-                perioder = pleiepenger,
-                aktivitetslogg = aktivitetslogg
+                perioder = pleiepenger
             ),
             omsorgspenger = Omsorgspenger(
-                perioder = omsorgspenger,
-                aktivitetslogg = aktivitetslogg
+                perioder = omsorgspenger
             ),
             opplæringspenger = Opplæringspenger(
-                perioder = opplæringspenger,
-                aktivitetslogg = aktivitetslogg
+                perioder = opplæringspenger
             ),
             institusjonsopphold = Institusjonsopphold(
-                perioder = institusjonsoppholdsperioder,
-                aktivitetslogg = aktivitetslogg
+                perioder = institusjonsoppholdsperioder
             ),
             dødsinfo = Dødsinfo(dødsdato),
             arbeidsavklaringspenger = Arbeidsavklaringspenger(arbeidsavklaringspenger),
