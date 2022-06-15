@@ -21,7 +21,7 @@ jobs:
       - name: create docker tag
         run: echo "TAG=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_ENV
     outputs:
-      image: docker.pkg.github.com/${{ github.repository }}/spleis-jobs:${{ env.TAG }}
+      image: ghcr.io/${{ github.repository }}/spleis-jobs:${{ env.TAG }}
 
   build:
     name: build docker image
@@ -39,7 +39,7 @@ jobs:
         run: docker build -f Dockerfile-jobs . --pull -t ${{ needs.set_version.outputs.image }}
       - name: push docker image
         run: |
-          docker login --username "$GITHUB_REPOSITORY" -p ${{ secrets.GITHUB_TOKEN }} https://docker.pkg.github.com
+          docker login ghcr.io --username "$GITHUB_REPOSITORY" -p ${{ secrets.GITHUB_TOKEN }}
           docker push ${{ needs.set_version.outputs.image }}
 
   snyk:
