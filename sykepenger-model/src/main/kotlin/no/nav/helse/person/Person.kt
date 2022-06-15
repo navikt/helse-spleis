@@ -51,6 +51,7 @@ import no.nav.helse.person.Arbeidsgiver.Companion.nåværendeVedtaksperioder
 import no.nav.helse.person.Arbeidsgiver.Companion.rapporterteInntekter
 import no.nav.helse.person.Arbeidsgiver.Companion.slettUtgåtteSykmeldingsperioder
 import no.nav.helse.person.Arbeidsgiver.Companion.startRevurdering
+import no.nav.helse.person.Arbeidsgiver.Companion.validerVilkårsgrunnlag
 import no.nav.helse.person.Vedtaksperiode.Companion.ALLE
 import no.nav.helse.person.Vedtaksperiode.Companion.lagUtbetalinger
 import no.nav.helse.person.builders.VedtakFattetBuilder
@@ -883,4 +884,9 @@ class Person private constructor(
             avvisInngangsvilkårfilter(AvvisInngangsvilkårfilter(vilkårsgrunnlagHistorikk))
             vedtaksperioder.lagUtbetalinger(this, vilkårsgrunnlagHistorikk)
         }
+
+    internal fun valider(aktivitetslogg: IAktivitetslogg, vilkårsgrunnlag: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement, skjæringstidspunkt: LocalDate): Boolean {
+        arbeidsgivere.validerVilkårsgrunnlag(aktivitetslogg, vilkårsgrunnlag, skjæringstidspunkt)
+        return !aktivitetslogg.hasErrorsOrWorse()
+    }
 }

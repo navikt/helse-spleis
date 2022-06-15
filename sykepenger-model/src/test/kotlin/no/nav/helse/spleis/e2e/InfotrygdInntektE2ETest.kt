@@ -82,11 +82,7 @@ internal class InfotrygdInntektE2ETest : AbstractEndToEndTest() {
             Inntektsopplysning(ORGNUMMER, 17.januar, INNTEKT, true)
         ))
         håndterYtelser(3.vedtaksperiode)
-        assertForventetFeil(
-            forklaring = "behøver ikke kreve inntekt for infotrygdperioder",
-            nå = { assertSisteTilstand(3.vedtaksperiode, TIL_INFOTRYGD) },
-            ønsket = { assertSisteTilstand(3.vedtaksperiode, AVVENTER_SIMULERING) }
-        )
+        assertSisteTilstand(3.vedtaksperiode, AVVENTER_SIMULERING)
     }
 
     @Test

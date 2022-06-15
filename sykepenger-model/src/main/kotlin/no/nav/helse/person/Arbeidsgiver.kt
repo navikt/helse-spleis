@@ -43,6 +43,7 @@ import no.nav.helse.person.Vedtaksperiode.Companion.IKKE_FERDIG_BEHANDLET
 import no.nav.helse.person.Vedtaksperiode.Companion.IKKE_FERDIG_REVURDERT
 import no.nav.helse.person.Vedtaksperiode.Companion.KLAR_TIL_BEHANDLING
 import no.nav.helse.person.Vedtaksperiode.Companion.REVURDERING_IGANGSATT
+import no.nav.helse.person.Vedtaksperiode.Companion.SKAL_INNGÅ_I_SYKEPENGEGRUNNLAG
 import no.nav.helse.person.Vedtaksperiode.Companion.avventerRevurdering
 import no.nav.helse.person.Vedtaksperiode.Companion.harOverlappendeUtbetaltePerioder
 import no.nav.helse.person.Vedtaksperiode.Companion.harUtbetaling
@@ -243,6 +244,12 @@ internal class Arbeidsgiver private constructor(
 
         internal fun Iterable<Arbeidsgiver>.harUtbetaltPeriode(skjæringstidspunkt: LocalDate) =
             flatMap { it.vedtaksperioder }.medSkjæringstidspunkt(skjæringstidspunkt).harUtbetaling()
+
+        internal fun Iterable<Arbeidsgiver>.validerVilkårsgrunnlag(aktivitetslogg: IAktivitetslogg, vilkårsgrunnlag: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement, skjæringstidspunkt: LocalDate) {
+            val vedtaksperioder = flatMap { it.vedtaksperioder }.filter(SKAL_INNGÅ_I_SYKEPENGEGRUNNLAG(skjæringstidspunkt))
+            val relevanteArbeidsgivere = filter { arbeidsgiver -> arbeidsgiver.vedtaksperioder.any { vedtaksperiode -> vedtaksperiode in vedtaksperioder } }.distinct().map { it.organisasjonsnummer }
+            vilkårsgrunnlag.valider(aktivitetslogg, relevanteArbeidsgivere)
+        }
 
         internal fun Iterable<Arbeidsgiver>.ghostPeriode(
             skjæringstidspunkt: LocalDate,

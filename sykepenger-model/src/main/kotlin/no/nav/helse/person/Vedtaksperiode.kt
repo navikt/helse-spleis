@@ -45,6 +45,8 @@ import no.nav.helse.person.Dokumentsporing.Companion.ider
 import no.nav.helse.person.Dokumentsporing.Companion.søknadIder
 import no.nav.helse.person.ForlengelseFraInfotrygd.IKKE_ETTERSPURT
 import no.nav.helse.person.InntektsmeldingInfo.Companion.ider
+import no.nav.helse.person.Periodetype.FORLENGELSE
+import no.nav.helse.person.Periodetype.FØRSTEGANGSBEHANDLING
 import no.nav.helse.person.Periodetype.INFOTRYGDFORLENGELSE
 import no.nav.helse.person.Periodetype.OVERGANG_FRA_IT
 import no.nav.helse.person.TilstandType.AVSLUTTET
@@ -1581,19 +1583,11 @@ internal class Vedtaksperiode private constructor(
                     ytelser.kontekst(vilkårsgrunnlag)
                 }
                 valider {
-                    vilkårsgrunnlag.valider(this)
+                    person.valider(this, vilkårsgrunnlag, vedtaksperiode.skjæringstidspunkt)
                 }
                 onSuccess {
-                    when (periodetype) {
-                        in listOf(OVERGANG_FRA_IT, INFOTRYGDFORLENGELSE) -> {
-                            vilkårsgrunnlag.sjekkGammeltSkjæringstidspunkt(ytelser)
-                        }
-                        else -> {
-                            if (vedtaksperiode.inntektsmeldingInfo == null) arbeidsgiver.finnTidligereInntektsmeldinginfo(
-                                vedtaksperiode.skjæringstidspunkt
-                            )
-                                ?.also { vedtaksperiode.kopierManglende(it) }
-                        }
+                    if (periodetype in listOf(FØRSTEGANGSBEHANDLING, FORLENGELSE) && vedtaksperiode.inntektsmeldingInfo == null) {
+                        arbeidsgiver.finnTidligereInntektsmeldinginfo(vedtaksperiode.skjæringstidspunkt)?.also { vedtaksperiode.kopierManglende(it) }
                     }
                 }
                 lateinit var arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger
@@ -2476,8 +2470,13 @@ internal class Vedtaksperiode private constructor(
         }
 
         internal val IKKE_FERDIG_BEHANDLET: VedtaksperiodeFilter = { !it.tilstand.erFerdigBehandlet }
+
         internal val ER_ELLER_HAR_VÆRT_AVSLUTTET: VedtaksperiodeFilter =
             { it.tilstand is AvsluttetUtenUtbetaling || it.utbetalinger.harAvsluttede() }
+
+        internal val SKAL_INNGÅ_I_SYKEPENGEGRUNNLAG = { skjæringstidspunkt: LocalDate ->
+            { vedtaksperiode: Vedtaksperiode -> vedtaksperiode.skjæringstidspunkt == skjæringstidspunkt && !vedtaksperiode.ingenUtbetaling() }
+        }
 
         internal val ALLE: VedtaksperiodeFilter = { true }
 

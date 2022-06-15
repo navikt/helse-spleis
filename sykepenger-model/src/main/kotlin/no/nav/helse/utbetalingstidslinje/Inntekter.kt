@@ -11,12 +11,9 @@ internal class Inntekter(
     private val regler: ArbeidsgiverRegler,
     private val subsumsjonObserver: SubsumsjonObserver
 ) {
-    internal fun medInntekt(dato: LocalDate, økonomi: Økonomi, arbeidsgiverperiode: Arbeidsgiverperiode?) =
-        vilkårsgrunnlagHistorikk.medInntekt(organisasjonsnummer, dato, økonomi, arbeidsgiverperiode, regler, subsumsjonObserver)
+    internal fun medInntekt(dato: LocalDate, arbeidsgiverperiode: Arbeidsgiverperiode?, økonomi: Økonomi = Økonomi.ikkeBetalt(arbeidsgiverperiode)) =
+        vilkårsgrunnlagHistorikk.medInntekt(organisasjonsnummer, dato, økonomi, arbeidsgiverperiode, regler, subsumsjonObserver) ?: økonomi
 
-    internal fun medFrivilligInntekt(dato: LocalDate, økonomi: Økonomi) =
-        vilkårsgrunnlagHistorikk.medFrivilligInntekt(organisasjonsnummer, dato, økonomi, null, regler, subsumsjonObserver)
-
-    internal fun medSkjæringstidspunkt(dato: LocalDate, økonomi: Økonomi, arbeidsgiverperiode: Arbeidsgiverperiode?) =
-        vilkårsgrunnlagHistorikk.medIngenInntekt(dato, økonomi, arbeidsgiverperiode)
+    internal fun utenInntekt(dato: LocalDate, økonomi: Økonomi, arbeidsgiverperiode: Arbeidsgiverperiode?) =
+        vilkårsgrunnlagHistorikk.utenInntekt(dato, økonomi, arbeidsgiverperiode)
 }

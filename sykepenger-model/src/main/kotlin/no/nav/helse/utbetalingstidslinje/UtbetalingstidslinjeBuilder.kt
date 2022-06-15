@@ -6,7 +6,6 @@ import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.erHelg
-import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Økonomi
 
 internal sealed class UtbetalingstidslinjeBuilderException(private val kort: String, message: String) : RuntimeException(message) {
@@ -15,20 +14,11 @@ internal sealed class UtbetalingstidslinjeBuilderException(private val kort: Str
         aktivitetslogg.error("Feil ved utbetalingstidslinjebygging: $kort")
     }
 
-    internal class ManglerInntektException(dagen: LocalDate, skjæringstidspunkter: List<LocalDate>) : UtbetalingstidslinjeBuilderException(
-        "Mangler inntekt for dag",
-        "Fant ikke inntekt for $dagen med skjæringstidspunkter $skjæringstidspunkter"
-    )
-
     internal class UforventetDagException(dag: Dag, melding: String) : UtbetalingstidslinjeBuilderException(
         "Forventet ikke ${dag::class.simpleName}",
         "Forventet ikke ${dag::class.simpleName} i utbetalingstidslinjen. Melding: $melding"
     )
 
-    internal class NegativDekningsgrunnlagException(dekningsgrunnlag: Inntekt, dagen: LocalDate, skjæringstidspunkt: LocalDate) : UtbetalingstidslinjeBuilderException(
-        "Dekningsgrunnlag er negativ",
-        "Dekningsgrunnlag for $dagen med skjæringstidspunkt $skjæringstidspunkt gir negativt beløp: $dekningsgrunnlag"
-    )
 }
 
 internal interface IUtbetalingstidslinjeBuilder : ArbeidsgiverperiodeMediator {
@@ -47,11 +37,11 @@ internal class UtbetalingstidslinjeBuilder(private val inntekter: Inntekter) : I
     }
 
     override fun fridag(dato: LocalDate) {
-        builder.addFridag(dato, inntekter.medFrivilligInntekt(dato, Økonomi.ikkeBetalt(nåværendeArbeidsgiverperiode)))
+        builder.addFridag(dato, inntekter.medInntekt(dato, nåværendeArbeidsgiverperiode))
     }
 
     override fun arbeidsdag(dato: LocalDate) {
-        builder.addArbeidsdag(dato, inntekter.medFrivilligInntekt(dato, Økonomi.ikkeBetalt(nåværendeArbeidsgiverperiode)))
+        builder.addArbeidsdag(dato, inntekter.medInntekt(dato, nåværendeArbeidsgiverperiode))
     }
 
     override fun arbeidsgiverperiodedag(
@@ -61,21 +51,21 @@ internal class UtbetalingstidslinjeBuilder(private val inntekter: Inntekter) : I
     ) {
         check(!kilde.erAvType(Sykmelding::class)) { "Kan ikke opprette arbeidsgiverperiodedag for $dato med kilde Sykmelding" }
         periodebuilder.arbeidsgiverperiodedag(dato, økonomi, kilde)
-        builder.addArbeidsgiverperiodedag(dato, inntekter.medFrivilligInntekt(dato, Økonomi.ikkeBetalt(nåværendeArbeidsgiverperiode)))
+        builder.addArbeidsgiverperiodedag(dato, inntekter.medInntekt(dato, nåværendeArbeidsgiverperiode))
     }
 
     override fun utbetalingsdag(dato: LocalDate, økonomi: Økonomi, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
         check(!kilde.erAvType(Sykmelding::class)) { "Kan ikke opprette utbetalingsdag for $dato med kilde Sykmelding" }
-        if (dato.erHelg()) return builder.addHelg(dato, inntekter.medSkjæringstidspunkt(dato, økonomi, nåværendeArbeidsgiverperiode))
-        builder.addNAVdag(dato, inntekter.medInntekt(dato, økonomi, nåværendeArbeidsgiverperiode))
+        if (dato.erHelg()) return builder.addHelg(dato, inntekter.utenInntekt(dato, økonomi, nåværendeArbeidsgiverperiode))
+        builder.addNAVdag(dato, inntekter.medInntekt(dato, nåværendeArbeidsgiverperiode, økonomi))
     }
 
     override fun foreldetDag(dato: LocalDate, økonomi: Økonomi) {
-        builder.addForeldetDag(dato, inntekter.medInntekt(dato, økonomi, nåværendeArbeidsgiverperiode))
+        builder.addForeldetDag(dato, inntekter.medInntekt(dato, nåværendeArbeidsgiverperiode, økonomi))
     }
 
     override fun avvistDag(dato: LocalDate, begrunnelse: Begrunnelse) {
-        builder.addAvvistDag(dato, inntekter.medFrivilligInntekt(dato, Økonomi.ikkeBetalt(nåværendeArbeidsgiverperiode)), listOf(begrunnelse))
+        builder.addAvvistDag(dato, inntekter.medInntekt(dato, nåværendeArbeidsgiverperiode), listOf(begrunnelse))
     }
 
     override fun arbeidsgiverperiodeAvbrutt() {

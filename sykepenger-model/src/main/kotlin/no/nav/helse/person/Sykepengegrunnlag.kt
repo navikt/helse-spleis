@@ -3,6 +3,7 @@ package no.nav.helse.person
 import java.time.LocalDate
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.Grunnbeløp.Companion.halvG
+import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.harInntekt
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.inntektsopplysningPerArbeidsgiver
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.medInntekt
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.omregnetÅrsinntekt
@@ -96,6 +97,14 @@ internal class Sykepengegrunnlag(
         if (oppfyllerMinsteinntektskrav) aktivitetslogg.info("Krav til minste sykepengegrunnlag er oppfylt")
         else aktivitetslogg.warn("Perioden er avslått på grunn av at inntekt er under krav til minste sykepengegrunnlag")
         return oppfyllerMinsteinntektskrav && !aktivitetslogg.hasErrorsOrWorse()
+    }
+
+    internal fun validerInntekt(aktivitetslogg: IAktivitetslogg, organisasjonsnummer: List<String>) {
+        val manglerInntekt = organisasjonsnummer.filterNot { arbeidsgiverInntektsopplysninger.harInntekt(it) }.takeUnless { it.isEmpty() } ?: return
+        manglerInntekt.forEach {
+            aktivitetslogg.info("Mangler inntekt for $it på skjæringstidspunkt $skjæringstidspunkt")
+        }
+        aktivitetslogg.error("Minst en arbeidsgiver inngår ikke i sykepengegrunnlaget")
     }
 
     internal fun justerGrunnbeløp() =

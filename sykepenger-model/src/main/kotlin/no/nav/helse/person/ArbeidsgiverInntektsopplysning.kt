@@ -39,6 +39,10 @@ internal class ArbeidsgiverInntektsopplysning(
         internal fun List<ArbeidsgiverInntektsopplysning>.valider(aktivitetslogg: IAktivitetslogg) {
             map { it.inntektsopplysning }.valider(aktivitetslogg)
         }
+
+        internal fun List<ArbeidsgiverInntektsopplysning>.harInntekt(organisasjonsnummer: String) =
+            any { it.orgnummer == organisasjonsnummer }
+
         internal fun List<ArbeidsgiverInntektsopplysning>.omregnetÅrsinntekt() =
             fold(INGEN) { acc, item -> item.omregnetÅrsinntekt(acc)}
 
