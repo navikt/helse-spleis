@@ -18,6 +18,7 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.inspectors.personLogg
@@ -61,6 +62,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
 
 internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
@@ -100,6 +102,68 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             ønsket = {
                 assertEquals(1.februar, inspektør.utbetaling(0).inspektør.arbeidsgiverOppdrag.førstedato)
                 fail("""\_(ツ)_/¯""")
+            }
+        )
+    }
+
+    @Test
+    fun `ulik arbeidsgiverperiode - flere arbeidsgivere`() {
+        håndterSykmelding(Sykmeldingsperiode(22.januar, 15.februar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(22.januar, 15.februar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(22.januar, 15.februar, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(22.januar, 15.februar, 100.prosent), orgnummer = a2)
+
+        håndterInntektsmelding(listOf(11.januar til 13.januar, 20.januar til 2.februar), orgnummer = a1)
+        val im = håndterInntektsmelding(listOf(16.februar til 3.mars), orgnummer = a2)
+
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, orgnummer = a2)
+
+        håndterSykmelding(Sykmeldingsperiode(16.februar, 10.mars, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(16.februar, 10.mars, 100.prosent), orgnummer = a2)
+        håndterInntektsmeldingReplay(im, 2.vedtaksperiode.id(a2))
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterVilkårsgrunnlag(1.vedtaksperiode,
+            orgnummer = a1,
+            inntektsvurdering = Inntektsvurdering(
+                inntekter = inntektperioderForSammenligningsgrunnlag {
+                    1.januar(2017) til 1.desember(2017) inntekter {
+                        a1 inntekt INNTEKT
+                        a2 inntekt INNTEKT
+                    }
+                }
+            ),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
+                inntekter = listOf(
+                    ArbeidsgiverInntekt(a1, listOf(
+                        desember(2017).lønnsinntekt(),
+                        november(2017).lønnsinntekt(),
+                        oktober(2017).lønnsinntekt()
+                    )),
+                    ArbeidsgiverInntekt(a2, listOf(
+                        desember(2017).lønnsinntekt(),
+                        november(2017).lønnsinntekt(),
+                        oktober(2017).lønnsinntekt(),
+                    )),
+                ), arbeidsforhold = emptyList()
+            ),
+            arbeidsforhold = listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(a1, 1.januar(2017), null),
+                Vilkårsgrunnlag.Arbeidsforhold(a2, 1.januar(2017), null)
+            )
+        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+
+        assertForventetFeil(
+            forklaring = "1.vedtaksperiode hos ag1 lager utbetaling på vegne av 1.vedtaksperiode hos ag2. dette smaker dårlig når perioden vil gå inn i AUU",
+            nå = {},
+            ønsket = {
+                assertDoesNotThrow { håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, orgnummer = a2) }
+                assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING, orgnummer = a1)
+                assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a2)
+                assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
             }
         )
     }

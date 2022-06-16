@@ -481,6 +481,15 @@ internal fun AbstractEndToEndTest.håndterInntektsmeldingReplay(
         .håndter(Person::håndter)
 }
 
+internal fun YearMonth.lønnsinntekt(inntekt: Inntekt = INNTEKT) =
+    ArbeidsgiverInntekt.MånedligInntekt.Sykepengegrunnlag(
+        yearMonth = this,
+        type = ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT,
+        inntekt = inntekt,
+        fordel = "fordel",
+        beskrivelse = "beskrivelse"
+    )
+
 internal fun AbstractEndToEndTest.håndterVilkårsgrunnlag(
     vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode,
     inntekt: Inntekt = INNTEKT,

@@ -29,7 +29,6 @@ import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
-import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -37,15 +36,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
-
-    private fun YearMonth.lønnsinntekt(inntekt: Inntekt = INNTEKT) =
-        ArbeidsgiverInntekt.MånedligInntekt.Sykepengegrunnlag(
-            yearMonth = this,
-            type = ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT,
-            inntekt = inntekt,
-            fordel = "fordel",
-            beskrivelse = "beskrivelse"
-        )
 
     @Test
     fun `negativt omregnet årsinntekt for ghost-arbeidsgiver`() {
