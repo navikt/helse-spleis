@@ -17,6 +17,8 @@ import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Inntekt.Companion.INGEN
+import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -206,6 +208,36 @@ internal class InntektshistorikkTest {
         assertEquals(1, inspektør.inntektTeller.size)
         assertEquals(22, inspektør.inntektTeller.first())
         assertEquals(INNTEKT, historikk.omregnetÅrsinntekt(1.januar, 1.januar)?.omregnetÅrsinntekt())
+    }
+
+    @Test
+    fun `Inntekt fra skatt siste tre måneder som tilsammen er et negativt beløp`() {
+        inntektperioderForSykepengegrunnlag {
+            1.oktober(2017) til 1.desember(2017) inntekter {
+                ORGNUMMER inntekt INNTEKT * -1
+            }
+        }.forEach { it.lagreInntekter(historikk, 1.januar, UUID.randomUUID()) }
+        val inntektsopplysning = historikk.omregnetÅrsinntekt(1.januar, 1.januar)
+        assertTrue(inntektsopplysning is Inntektshistorikk.SkattComposite)
+        assertEquals(INGEN, inntektsopplysning?.omregnetÅrsinntekt())
+    }
+
+    @Test
+    fun `Inntekt fra skatt er minst 0 kroner`() {
+        val skattComposite = Inntektshistorikk.SkattComposite(
+            UUID.randomUUID(), inntektsopplysninger = listOf(
+                Inntektshistorikk.Skatt.Sykepengegrunnlag(
+                    dato = 1.januar,
+                    hendelseId = UUID.randomUUID(),
+                    beløp = (-2500).daglig,
+                    måned = desember(2017),
+                    type = Inntektshistorikk.Skatt.Inntekttype.LØNNSINNTEKT,
+                    fordel = "fordel",
+                    beskrivelse = "beskrivelse"
+                )
+            )
+        )
+        assertEquals(INGEN, skattComposite.omregnetÅrsinntekt())
     }
 
     @Test

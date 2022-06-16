@@ -11,6 +11,7 @@ import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.subsumsjonsformat
 import no.nav.helse.person.filter.Utbetalingsfilter
 import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.summer
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning as InfotrygdhistorikkInntektsopplysning
 
@@ -282,6 +283,7 @@ internal class Inntektshistorikk {
             return inntekterSisteTreMåneder
                 .map(Skatt::omregnetÅrsinntekt)
                 .summer()
+                .coerceAtLeast(INGEN)
                 .div(3)
         }
 
