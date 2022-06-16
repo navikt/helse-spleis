@@ -38,6 +38,58 @@ import org.junit.jupiter.api.Test
 internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
 
     @Test
+    fun `skjæringstidspunkt måneden før inntektsmelding`() {
+        håndterSykmelding(Sykmeldingsperiode(26.januar, 8.februar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(26.januar, 8.februar, 100.prosent), orgnummer = a1)
+        håndterUtbetalingshistorikk(1.vedtaksperiode, orgnummer = a1)
+
+        håndterSykmelding(Sykmeldingsperiode(6.februar, 28.februar, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(6.februar, 28.februar, 100.prosent), orgnummer = a2)
+        håndterUtbetalingshistorikk(1.vedtaksperiode, orgnummer = a2)
+        håndterInntektsmelding(listOf(21.januar til 21.januar, 6.februar til 20.februar), orgnummer = a2)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        håndterVilkårsgrunnlag(1.vedtaksperiode,
+            orgnummer = a2,
+            inntektsvurdering = Inntektsvurdering(
+                inntekter = inntektperioderForSammenligningsgrunnlag {
+                    1.januar(2017) til 1.desember(2017) inntekter {
+                        a1 inntekt INNTEKT
+                        a2 inntekt INNTEKT
+                    }
+                }
+            ),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
+                inntekter = listOf(
+                    ArbeidsgiverInntekt(a1, listOf(
+                        desember(2017).lønnsinntekt(),
+                        november(2017).lønnsinntekt(),
+                        oktober(2017).lønnsinntekt()
+                    )),
+                    ArbeidsgiverInntekt(a2, listOf(
+                        desember(2017).lønnsinntekt(),
+                        november(2017).lønnsinntekt(),
+                        oktober(2017).lønnsinntekt(),
+                    )),
+                ), arbeidsforhold = emptyList()
+            ),
+            arbeidsforhold = listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(a1, 1.januar(2017), null),
+                Vilkårsgrunnlag.Arbeidsforhold(a2, 1.januar(2017), null)
+            )
+        )
+        assertForventetFeil(
+            forklaring = "vi må avklare hva vi ønsker å gjøre med sykepengegrunnlag hvor grunnlaget for begge arbeidsgiverne kommer fra skatt",
+            nå = {
+                assertError("Bruker mangler nødvendig inntekt ved validering av Vilkårsgrunnlag", 1.vedtaksperiode.filter(a2))
+                assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD, orgnummer = a2)
+            },
+            ønsket = {
+                assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
+            }
+        )
+    }
+
+    @Test
     fun `negativt omregnet årsinntekt for ghost-arbeidsgiver`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
