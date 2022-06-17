@@ -807,7 +807,7 @@ class Person private constructor(
         val sammenligningsgrunnlag = beregnSammenligningsgrunnlag(skjæringstidspunkt, subsumsjonObserver)
         val avviksprosent = sammenligningsgrunnlag.avviksprosent(sykepengegrunnlag, subsumsjonObserver)
 
-        val harAkseptabeltAvvik = Inntektsvurdering.validerAvvik(hendelse, avviksprosent) { _, maksimaltTillattAvvik ->
+        val harAkseptabeltAvvik = Inntektsvurdering.sjekkAvvik(avviksprosent, hendelse) { _, maksimaltTillattAvvik ->
             warn("Har mer enn %.0f %% avvik. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene.", maksimaltTillattAvvik)
         }
 
