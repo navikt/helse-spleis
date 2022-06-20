@@ -15,19 +15,21 @@ import javax.sql.DataSource
 @TestInstance(Lifecycle.PER_CLASS)
 class HendelseDaoTest {
 
-    private val UNG_PERSON_FNR = "12029240045"
-    private val postgres = PostgreSQLContainer<Nothing>("postgres:14")
-        .apply {
+    private companion object {
+        private val postgres = PostgreSQLContainer<Nothing>("postgres:14").apply {
             withReuse(true)
-            withLabel("app-navn", "spleis-hendelse-dao")
+            withLabel("app-navn", "spleis-api")
+            start()
         }
+    }
+
+    private val UNG_PERSON_FNR = "12029240045"
     private lateinit var dataSource: DataSource
     private lateinit var flyway: Flyway
     private val meldingsReferanse = UUID.randomUUID()
 
     @BeforeAll
     internal fun `start embedded environment`() {
-        postgres.start()
 
         dataSource = HikariDataSource(HikariConfig().apply {
             jdbcUrl = postgres.jdbcUrl
@@ -52,12 +54,6 @@ class HendelseDaoTest {
         flyway.clean()
         flyway.migrate()
         dataSource.lagreHendelse(meldingsReferanse)
-    }
-
-
-    @AfterAll
-    internal fun `stop embedded environment`() {
-        postgres.stop()
     }
 
     private fun DataSource.lagreHendelse(

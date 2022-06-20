@@ -11,7 +11,7 @@ object PostgresContainer {
     val instance by lazy {
         PostgreSQLContainer<Nothing>("postgres:14").apply {
             withReuse(true)
-            withLabel("app-navn", "spleis")
+            withLabel("app-navn", "spleis-mediators")
             start()
         }
     }

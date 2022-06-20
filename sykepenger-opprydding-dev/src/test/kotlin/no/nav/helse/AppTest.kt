@@ -11,9 +11,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.flywaydb.core.Flyway
 import org.intellij.lang.annotations.Language
-import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -22,16 +20,15 @@ import org.testcontainers.containers.PostgreSQLContainer
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class AppTest {
     private lateinit var testRapid: TestRapid
-    private lateinit var psqlContainer: PostgreSQLContainer<Nothing>
     private lateinit var dataSource: DataSource
     private lateinit var personRepository: PersonRepository
 
-    @BeforeAll
-    fun beforeAll() {
-        psqlContainer = PostgreSQLContainer<Nothing>("postgres:14")
-        psqlContainer.withReuse(true)
-        psqlContainer.withLabel("app-navn", "spleis-app")
-        psqlContainer.start()
+    private companion object {
+        private val psqlContainer = PostgreSQLContainer<Nothing>("postgres:14").apply {
+            withReuse(true)
+            withLabel("app-navn", "spleis-opprydding-dev")
+            start()
+        }
     }
 
     @BeforeEach
@@ -40,11 +37,6 @@ internal class AppTest {
         dataSource = runMigration(psqlContainer)
         personRepository = PersonRepository(dataSource)
         SlettPersonRiver(testRapid, personRepository)
-    }
-
-    @AfterAll
-    fun afterAll() {
-        psqlContainer.close()
     }
 
     @Test
@@ -129,6 +121,7 @@ internal class AppTest {
             .migrate()
         return dataSource
     }
+
 
     private fun createHikariConfig(psql: PostgreSQLContainer<Nothing>) =
         HikariConfig().apply {
