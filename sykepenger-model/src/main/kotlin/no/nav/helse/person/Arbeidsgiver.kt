@@ -333,9 +333,7 @@ internal class Arbeidsgiver private constructor(
         }
 
         internal fun List<Arbeidsgiver>.skjæringstidspunktperiode(skjæringstidspunkt: LocalDate) =
-            flatMap { it.vedtaksperioder }
-                .filter { it.gjelder(skjæringstidspunkt) }
-                .skjæringstidspunktperiode(skjæringstidspunkt)
+            flatMap { it.vedtaksperioder }.skjæringstidspunktperiode(skjæringstidspunkt)
     }
 
     private fun gjenopptaBehandling(gjenopptaBehandling: IAktivitetslogg) {

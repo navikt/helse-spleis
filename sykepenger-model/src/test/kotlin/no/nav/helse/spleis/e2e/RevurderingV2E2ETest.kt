@@ -914,6 +914,9 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(2.februar, Feriedag)))
         håndterYtelser(3.vedtaksperiode, foreldrepenger = 20.januar til 31.januar)
 
+        assertTilstand(1.vedtaksperiode, AVSLUTTET)
+        assertTilstand(2.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING)
+        assertTilstand(3.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
         assertNoWarnings(1.vedtaksperiode.filter())
         assertNoWarnings(2.vedtaksperiode.filter())
         assertNoWarnings(3.vedtaksperiode.filter())

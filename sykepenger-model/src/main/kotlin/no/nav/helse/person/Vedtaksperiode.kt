@@ -498,6 +498,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun validerYtelserForSkjæringstidspunkt(ytelser: Ytelser) {
         person.validerYtelserForSkjæringstidspunkt(ytelser, skjæringstidspunkt)
+        kontekst(ytelser) // resett kontekst til oss selv
     }
 
     // IM som replayes skal kunne påvirke alle perioder som er sammenhengende med replay-perioden, men også alle evt. påfølgende perioder.
@@ -1285,7 +1286,6 @@ internal class Vedtaksperiode private constructor(
                     ytelser.valider(vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt)
                 } else {
                     vedtaksperiode.validerYtelserForSkjæringstidspunkt(ytelser)
-                    vedtaksperiode.kontekst(ytelser)
                 }
                 val arbeidsgiverUtbetalinger = arbeidsgiverUtbetalingerFun(vedtaksperiode.jurist())
                 arbeidsgiver.beregn(ytelser, arbeidsgiverUtbetalinger, vedtaksperiode.periode)
@@ -1975,7 +1975,6 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun validerYtelser(ytelser: Ytelser, skjæringstidspunkt: LocalDate, infotrygdhistorikk: Infotrygdhistorikk) {
-        if (skjæringstidspunkt != this.skjæringstidspunkt) return
         kontekst(ytelser)
         tilstand.valider(this, periode, skjæringstidspunkt, arbeidsgiver, ytelser, infotrygdhistorikk)
     }
@@ -2747,11 +2746,13 @@ internal class Vedtaksperiode private constructor(
         )
 
         internal fun List<Vedtaksperiode>.validerYtelser(ytelser: Ytelser, skjæringstidspunkt: LocalDate, infotrygdhistorikk: Infotrygdhistorikk) {
-            forEach { it.validerYtelser(ytelser, skjæringstidspunkt, infotrygdhistorikk) }
+            filter { it.skjæringstidspunkt == skjæringstidspunkt }
+                .forEach { it.validerYtelser(ytelser, skjæringstidspunkt, infotrygdhistorikk) }
         }
 
         internal fun List<Vedtaksperiode>.skjæringstidspunktperiode(skjæringstidspunkt: LocalDate): Periode {
-            return skjæringstidspunkt til maxOf { it.periode.endInclusive }
+            val sisteDato = filter { it.skjæringstidspunkt == skjæringstidspunkt }.maxOf { it.periode.endInclusive }
+            return skjæringstidspunkt til sisteDato
         }
     }
 }
