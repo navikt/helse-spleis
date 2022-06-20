@@ -49,7 +49,7 @@ internal class RestApiTest {
 
     private val postgres = PostgreSQLContainer<Nothing>("postgres:14").apply {
         withReuse(true)
-        withLabel("app-navn", "spleis")
+        withLabel("app-navn", "spleis-rest-api")
     }
     private lateinit var dataSource: DataSource
     private lateinit var flyway: Flyway

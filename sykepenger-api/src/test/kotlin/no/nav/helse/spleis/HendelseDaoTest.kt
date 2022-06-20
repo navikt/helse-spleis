@@ -19,7 +19,7 @@ class HendelseDaoTest {
     private val postgres = PostgreSQLContainer<Nothing>("postgres:14")
         .apply {
             withReuse(true)
-            withLabel("app-navn", "spleis")
+            withLabel("app-navn", "spleis-hendelse-dao")
         }
     private lateinit var dataSource: DataSource
     private lateinit var flyway: Flyway
