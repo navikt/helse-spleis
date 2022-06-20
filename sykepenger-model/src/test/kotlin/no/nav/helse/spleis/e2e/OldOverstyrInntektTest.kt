@@ -1,6 +1,8 @@
 package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate
+import no.nav.helse.DisableToggle
+import no.nav.helse.Toggle
 import no.nav.helse.februar
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
@@ -19,7 +21,8 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-internal class OverstyrInntektTest : AbstractEndToEndTest() {
+@DisableToggle(Toggle.NyRevurdering::class)
+internal class OldOverstyrInntektTest : AbstractEndToEndTest() {
 
     @Test
     fun `skal kunne overstyre en inntekt i et enkelt case`() {
@@ -206,15 +209,15 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
             TilstandType.AVVENTER_GODKJENNING,
             TilstandType.TIL_UTBETALING,
             TilstandType.AVSLUTTET,
-            TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING,
+            TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING,
             TilstandType.AVVENTER_HISTORIKK_REVURDERING,
             TilstandType.AVVENTER_SIMULERING_REVURDERING,
             TilstandType.AVVENTER_GODKJENNING_REVURDERING,
-            TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING,
+            TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING,
             TilstandType.AVVENTER_HISTORIKK_REVURDERING,
             TilstandType.AVVENTER_SIMULERING_REVURDERING,
             TilstandType.AVVENTER_GODKJENNING_REVURDERING
-        )
+            )
     }
 
     @Test
@@ -223,6 +226,7 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
         forlengVedtak(1.februar, 28.februar)
 
         håndterOverstyrInntekt(inntekt = 20000.månedlig, skjæringstidspunkt = 1.januar)
+        håndterYtelser(1.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
 
@@ -230,6 +234,7 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
         assertEquals(28613, inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.totalbeløp())
 
         håndterOverstyrInntekt(inntekt = 25000.månedlig, skjæringstidspunkt = 1.januar)
+        håndterYtelser(1.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
 
@@ -247,7 +252,11 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
             TilstandType.AVVENTER_GODKJENNING,
             TilstandType.TIL_UTBETALING,
             TilstandType.AVSLUTTET,
+            TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING,
+            TilstandType.AVVENTER_HISTORIKK_REVURDERING,
             TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING,
+            TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING,
+            TilstandType.AVVENTER_HISTORIKK_REVURDERING,
             TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
         )
 
@@ -259,11 +268,11 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
             TilstandType.AVVENTER_GODKJENNING,
             TilstandType.TIL_UTBETALING,
             TilstandType.AVSLUTTET,
-            TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING,
+            TilstandType.AVVENTER_ARBEIDSGIVERE_REVURDERING,
             TilstandType.AVVENTER_HISTORIKK_REVURDERING,
             TilstandType.AVVENTER_SIMULERING_REVURDERING,
             TilstandType.AVVENTER_GODKJENNING_REVURDERING,
-            TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING,
+            TilstandType.AVVENTER_ARBEIDSGIVERE_REVURDERING,
             TilstandType.AVVENTER_HISTORIKK_REVURDERING,
             TilstandType.AVVENTER_SIMULERING_REVURDERING,
             TilstandType.AVVENTER_GODKJENNING_REVURDERING
@@ -276,10 +285,12 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
         forlengVedtak(1.februar, 28.februar)
 
         håndterOverstyrTidslinje((20.januar til 29.januar).map { manuellFeriedag(it) })
+        håndterYtelser(1.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
 
         håndterOverstyrInntekt(inntekt = 20000.månedlig, skjæringstidspunkt = 1.januar)
+        håndterYtelser(1.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
 
@@ -299,7 +310,10 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
             TilstandType.AVVENTER_GODKJENNING,
             TilstandType.TIL_UTBETALING,
             TilstandType.AVSLUTTET,
+            TilstandType.AVVENTER_HISTORIKK_REVURDERING,
             TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING,
+            TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING,
+            TilstandType.AVVENTER_HISTORIKK_REVURDERING,
             TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
         )
 
@@ -311,11 +325,11 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
             TilstandType.AVVENTER_GODKJENNING,
             TilstandType.TIL_UTBETALING,
             TilstandType.AVSLUTTET,
-            TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING,
+            TilstandType.AVVENTER_ARBEIDSGIVERE_REVURDERING,
             TilstandType.AVVENTER_HISTORIKK_REVURDERING,
             TilstandType.AVVENTER_SIMULERING_REVURDERING,
             TilstandType.AVVENTER_GODKJENNING_REVURDERING,
-            TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING,
+            TilstandType.AVVENTER_ARBEIDSGIVERE_REVURDERING,
             TilstandType.AVVENTER_HISTORIKK_REVURDERING,
             TilstandType.AVVENTER_SIMULERING_REVURDERING,
             TilstandType.AVVENTER_GODKJENNING_REVURDERING

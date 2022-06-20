@@ -1,21 +1,18 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.assertForventetFeil
+import no.nav.helse.DisableToggle
+import no.nav.helse.Toggle
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.oktober
 import no.nav.helse.person.TilstandType.AVSLUTTET
-import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
-import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
-import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_UFERDIG
-import no.nav.helse.person.nullstillTilstandsendringer
 import org.junit.jupiter.api.Test
 
-internal class OverstyrTidslinjeFlereAGTest : AbstractEndToEndTest() {
-
+@DisableToggle(Toggle.NyRevurdering::class)
+internal class OldOverstyrTidslinjeFlereAGTest : AbstractEndToEndTest() {
     @Test
     fun `kan ikke overstyre én AG hvis en annen AG har blitt godkjent`() {
         tilGodkjenning(1.januar, 31.januar, a1, a2)
@@ -25,17 +22,7 @@ internal class OverstyrTidslinjeFlereAGTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
         håndterOverstyrTidslinje((29.januar til 29.januar).map { manuellFeriedag(it) }, orgnummer = a2)
-        assertForventetFeil(
-            forklaring = "Burde sette i gang revurdering av begge arbeidsgiverne",
-            nå = {
-                assertNoErrors()
-            },
-            ønsket = {
-                nullstillTilstandsendringer()
-                assertTilstander(1.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = a1)
-                assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
-            }
-        )
+        assertError("Kan ikke overstyre en pågående behandling der én eller flere perioder er behandlet ferdig")
     }
 
     @Test

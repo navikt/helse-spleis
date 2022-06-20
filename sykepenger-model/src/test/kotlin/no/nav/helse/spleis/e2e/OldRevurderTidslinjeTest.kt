@@ -3,24 +3,31 @@ package no.nav.helse.spleis.e2e
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.DisableToggle
+import no.nav.helse.Toggle
 import no.nav.helse.antallEtterspurteBehov
+import no.nav.helse.april
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
+import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
+import no.nav.helse.juni
 import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.november
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.TilstandType.AVSLUTTET
+import no.nav.helse.person.TilstandType.AVVENTER_ARBEIDSGIVERE_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
@@ -28,7 +35,6 @@ import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
-import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_UFERDIG
@@ -39,7 +45,6 @@ import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.TilstandType.UTBETALING_FEILET
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
-import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Utbetaling
@@ -48,17 +53,19 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
+@DisableToggle(Toggle.NyRevurdering::class)
+internal class OldRevurderTidslinjeTest : AbstractEndToEndTest() {
 
     @Test
     fun `revurdere mens en periode er til utbetaling`() {
         nyttVedtak(1.januar, 31.januar)
         forlengTilGodkjentVedtak(1.februar, 28.februar)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
-        assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET, AVVENTER_REVURDERING)
+        assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET)
         assertTilstander(2.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING)
     }
 
@@ -68,101 +75,77 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         forlengTilGodkjentVedtak(1.februar, 28.februar)
         håndterUtbetalt(Oppdragstatus.FEIL)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
-        assertTilstander(
-            1.vedtaksperiode,
-            START,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK,
-            AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING,
-            TIL_UTBETALING,
-            AVSLUTTET,
-            AVVENTER_REVURDERING
-        )
-        assertTilstander(
-            2.vedtaksperiode,
-            START,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING,
-            TIL_UTBETALING,
-            UTBETALING_FEILET
-        )
+        assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET)
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, UTBETALING_FEILET)
     }
 
     @Test
-    fun `annullering etter revurdering med utbetaling feilet`() {
-        nyttVedtak(3.januar, 26.januar)
-        forlengVedtak(27.januar, 26.februar)
-
+    fun `annullering etter revurdering  med utbetaling feilet`() {
+        håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
+        val inntektsmeldingId = håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)))
+        håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
+        håndterInntektsmeldingReplay(inntektsmeldingId, 1.vedtaksperiode.id(ORGNUMMER))
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalt()
+        håndterSykmelding(Sykmeldingsperiode(29.januar, 26.februar, 100.prosent))
+        håndterSøknad(Sykdom(29.januar, 26.februar, 100.prosent))
+        håndterUtbetalingshistorikk(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
+        håndterUtbetalt()
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(26.januar, Dagtype.Feriedag)))
-
+        håndterYtelser(1.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt(Oppdragstatus.AVVIST)
-
         håndterAnnullerUtbetaling(fagsystemId = inspektør.utbetaling(1).inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
         assertTrue(hendelselogg.hasErrorsOrWorse()) { "kan pt. ikke annullere når siste utbetaling har feilet" }
-        assertTilstander(
-            1.vedtaksperiode,
-            START,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK,
-            AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING,
-            TIL_UTBETALING,
-            AVSLUTTET,
-            AVVENTER_GJENNOMFØRT_REVURDERING
-        )
-
-        assertTilstander(
-            2.vedtaksperiode,
-            START,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING,
-            TIL_UTBETALING,
-            AVSLUTTET,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
-            AVVENTER_HISTORIKK_REVURDERING,
-            AVVENTER_SIMULERING_REVURDERING,
-            AVVENTER_GODKJENNING_REVURDERING,
-            TIL_UTBETALING,
-            UTBETALING_FEILET
-        )
+        assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING)
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET, AVVENTER_ARBEIDSGIVERE_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, UTBETALING_FEILET)
     }
 
     @Test
     fun `annullering etter revurdering feilet`() {
-        nyttVedtak(3.januar, 26.januar)
-        forlengVedtak(29.januar, 26.februar)
-
+        håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
+        val inntektsmeldingId = håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)))
+        håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
+        håndterInntektsmeldingReplay(inntektsmeldingId, 1.vedtaksperiode.id(ORGNUMMER))
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalt()
+        håndterSykmelding(Sykmeldingsperiode(29.januar, 26.februar, 100.prosent))
+        håndterSøknad(Sykdom(29.januar, 26.februar, 100.prosent))
+        håndterUtbetalingshistorikk(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
+        håndterUtbetalt()
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(26.januar, Dagtype.Feriedag)))
+        håndterYtelser(1.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, utbetalingGodkjent = false)
-        nullstillTilstandsendringer()
         håndterAnnullerUtbetaling(fagsystemId = inspektør.utbetaling(1).inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
-        assertForkastetPeriodeTilstander(1.vedtaksperiode, REVURDERING_FEILET)
-        assertForkastetPeriodeTilstander(2.vedtaksperiode, REVURDERING_FEILET)
+        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, REVURDERING_FEILET)
+        assertForkastetPeriodeTilstander(2.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET, AVVENTER_ARBEIDSGIVERE_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, REVURDERING_FEILET)
     }
 
     @Test
     fun `to perioder - revurder dager i eldste`() {
         nyttVedtak(3.januar, 26.januar)
         forlengVedtak(27.januar, 14.februar)
-        nullstillTilstandsendringer()
 
         håndterOverstyrTidslinje((20.januar til 22.januar).map { manuellFeriedag(it) })
+        håndterYtelser(1.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
@@ -172,21 +155,55 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
 
         assertTilstander(
             1.vedtaksperiode,
+            START,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
             AVSLUTTET,
+            AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_GJENNOMFØRT_REVURDERING,
             AVSLUTTET
         )
 
         assertTilstander(
             2.vedtaksperiode,
+            START,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
             AVSLUTTET,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_ARBEIDSGIVERE_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING,
             AVVENTER_GODKJENNING_REVURDERING,
             TIL_UTBETALING,
             AVSLUTTET
         )
+    }
+
+    @Test
+    fun `revurdering blør ikke ned i sykdomstidslinja på vedtaksperiodenivå`() {
+        nyttVedtak(3.januar, 26.januar)
+        forlengVedtak(27.januar, 14.februar)
+
+        håndterOverstyrTidslinje((20.januar til 22.januar).map { manuellFeriedag(it) })
+        håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
+        håndterUtbetalt()
+
+        assertNoErrors()
+        assertEquals(3, inspektør.sykdomstidslinje.inspektør.dagteller[Dag.Feriedag::class])
+        assertNull(inspektør.vedtaksperiodeSykdomstidslinje(1.vedtaksperiode).inspektør.dagteller[Dag.Feriedag::class])
+        assertNull(inspektør.vedtaksperiodeSykdomstidslinje(2.vedtaksperiode).inspektør.dagteller[Dag.Feriedag::class])
     }
 
     @Test
@@ -224,7 +241,6 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
             AVSLUTTET,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING,
             AVVENTER_GODKJENNING_REVURDERING,
@@ -274,7 +290,6 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
             AVSLUTTET,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING,
             AVVENTER_GODKJENNING_REVURDERING,
@@ -291,16 +306,22 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
     @Test
     fun `kan ikke utvide perioden med sykedager`() {
         nyttVedtak(3.januar, 26.januar)
-        nullstillTilstandsendringer()
-
         håndterOverstyrTidslinje((25.januar til 14.februar).map { manuellSykedag(it) })
         håndterYtelser(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
 
         assertTilstander(
-            1.vedtaksperiode,
+            0,
+            START,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
             AVSLUTTET,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_GODKJENNING_REVURDERING,
             AVSLUTTET
@@ -333,7 +354,6 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
             AVSLUTTET,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_GODKJENNING_REVURDERING,
             AVSLUTTET
@@ -353,6 +373,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         assertNoErrors()
         assertEquals(3, inspektør.utbetalinger.size)
         assertFalse(inspektør.utbetaling(2).harUtbetalinger())
+
     }
 
     @Test
@@ -381,7 +402,6 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
             AVSLUTTET,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING,
             AVVENTER_GODKJENNING_REVURDERING,
@@ -410,8 +430,6 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
     fun `ledende uferdig periode som ikke har en utbetaling`() {
         nyttVedtak(3.januar, 26.januar)
         håndterSykmelding(Sykmeldingsperiode(27.januar, 14.februar, 100.prosent))
-        håndterSøknad(Sykdom(27.januar, 14.februar, 100.prosent))
-        nullstillTilstandsendringer()
 
         håndterOverstyrTidslinje((6.januar til 10.januar).map { manuellFeriedag(it) })
         håndterYtelser(1.vedtaksperiode)
@@ -419,19 +437,93 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
 
         assertTilstander(
             1.vedtaksperiode,
+            START,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
             AVSLUTTET,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_GODKJENNING_REVURDERING,
             AVSLUTTET
         )
+        assertNoErrors()
+    }
+
+    @Test
+    fun `forsøk på å revurdere eldre fagsystemId`() {
+        nyttVedtak(3.januar, 26.januar)
+        nyttVedtak(3.mars, 26.mars)
+        håndterOverstyrTidslinje((4.januar til 20.januar).map { manuellFeriedag(it) })
+        inspektør.sykdomstidslinje.inspektør.also { sykdomstidslinjeInspektør ->
+            assertTrue((4.januar til 20.januar).none { sykdomstidslinjeInspektør.dager[it] == Dag.Feriedag::class })
+        }
+        assertTrue(hendelselogg.hasErrorsOrWorse())
+        assertTilstander(
+            1.vedtaksperiode,
+            START,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET
+        )
         assertTilstander(
             2.vedtaksperiode,
+            START,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK,
-            AVVENTER_UFERDIG,
-            AVVENTER_HISTORIKK
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET
         )
-        assertNoErrors()
+    }
+
+    @Test
+    fun `forsøk på å revurdere eldre fagsystemId med nyere periode til godkjenning`() {
+        nyttVedtak(3.januar, 26.januar)
+        tilGodkjenning(3.mars, 26.mars, 100.prosent, 3.mars)
+        håndterOverstyrTidslinje((4.januar til 20.januar).map { manuellFeriedag(it) })
+        inspektør.sykdomstidslinje.inspektør.also { sykdomstidslinjeInspektør ->
+            assertTrue((4.januar til 20.januar).none { sykdomstidslinjeInspektør.dager[it] == Dag.Feriedag::class })
+        }
+        assertTrue(hendelselogg.hasErrorsOrWorse())
+        assertTilstander(
+            1.vedtaksperiode,
+            START,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET
+        )
+        assertTilstander(
+            2.vedtaksperiode,
+            START,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING
+        )
     }
 
     @Test
@@ -441,6 +533,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         forlengVedtak(21.februar, 10.mars)
 
         håndterOverstyrTidslinje((5.februar til 15.februar).map { manuellFeriedag(it) })
+        håndterYtelser(2.vedtaksperiode)
         håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)
         håndterUtbetalingsgodkjenning(3.vedtaksperiode)
@@ -471,6 +564,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
             AVSLUTTET,
+            AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_GJENNOMFØRT_REVURDERING,
             AVSLUTTET
         )
@@ -483,7 +577,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
             AVSLUTTET,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_ARBEIDSGIVERE_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING,
             AVVENTER_GODKJENNING_REVURDERING,
@@ -539,7 +633,6 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
             AVSLUTTET,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING,
             AVVENTER_GODKJENNING_REVURDERING,
@@ -547,6 +640,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             AVSLUTTET
         )
     }
+
 
     @Test
     fun `forsøk på å revurdere eldre fagsystemId med nyere perioder uten utbetaling, og periode med utbetaling etterpå`() {
@@ -557,7 +651,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         inspektør.sykdomstidslinje.inspektør.also { sykdomstidslinjeInspektør ->
             assertTrue((4.januar til 20.januar).none { sykdomstidslinjeInspektør.dager[it] == Dag.Feriedag::class })
         }
-
+        assertTrue(hendelselogg.hasErrorsOrWorse())
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -569,9 +663,44 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
-            AVSLUTTET,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
-            AVVENTER_HISTORIKK_REVURDERING
+            AVSLUTTET
+        )
+        assertTilstander(
+            2.vedtaksperiode,
+            START,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING
+        )
+    }
+
+    @Test
+    fun `forsøk på å revurdere eldre fagsystemId med nyere perioder med utbetaling, og periode uten utbetaling`() {
+        nyttVedtak(3.januar, 26.januar)
+        nyttVedtak(1.mai, 31.mai)
+        håndterSykmelding(Sykmeldingsperiode(1.juni, 14.juni, 100.prosent))
+
+        håndterOverstyrTidslinje((4.januar til 20.januar).map { manuellFeriedag(it) })
+        inspektør.sykdomstidslinje.inspektør.also { sykdomstidslinjeInspektør ->
+            assertTrue((4.januar til 20.januar).none { sykdomstidslinjeInspektør.dager[it] == Dag.Feriedag::class })
+        }
+        assertTrue(hendelselogg.hasErrorsOrWorse())
+        assertTilstander(
+            1.vedtaksperiode,
+            START,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET
         )
         assertTilstander(
             2.vedtaksperiode,
@@ -583,14 +712,14 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
-            AVVENTER_UFERDIG
+            TIL_UTBETALING,
+            AVSLUTTET
         )
     }
 
     @Test
     fun `revurderer siste utbetalte periode med bare ferie og permisjon`() {
         nyttVedtak(3.januar, 26.januar)
-        nullstillTilstandsendringer()
 
         håndterOverstyrTidslinje((3.januar til 20.januar).map { manuellFeriedag(it) } + (21.januar til 26.januar).map { manuellPermisjonsdag(it) })
         håndterYtelser(1.vedtaksperiode)
@@ -599,9 +728,17 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterUtbetalt()
 
         assertTilstander(
-            1.vedtaksperiode,
+            0,
+            START,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
             AVSLUTTET,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING,
             AVVENTER_GODKJENNING_REVURDERING,
@@ -645,7 +782,6 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
             AVSLUTTET,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING,
             AVVENTER_GODKJENNING_REVURDERING,
@@ -656,13 +792,37 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
 
     @Test
     fun `Feilet simulering fører til feilet revurdering`() {
-        nyttVedtak(1.januar, 31.januar)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        val inntektsmeldingId = håndterInntektsmelding(listOf(Periode(1.januar, 17.januar)), førsteFraværsdag = 1.januar)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmeldingReplay(inntektsmeldingId, 1.vedtaksperiode.id(ORGNUMMER))
+        håndterYtelser(1.vedtaksperiode, besvart = LocalDateTime.now().minusHours(24))
+        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
+        håndterYtelser(1.vedtaksperiode, besvart = LocalDateTime.now().minusHours(24))
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalt()
 
         håndterOverstyrTidslinje(listOf(manuellFeriedag(18.januar)))
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode, simuleringOK = false)
-        nullstillTilstandsendringer()
-        assertTilstander(1.vedtaksperiode, REVURDERING_FEILET)
+
+        assertTilstander(
+            1.vedtaksperiode,
+            START,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_SIMULERING_REVURDERING,
+            REVURDERING_FEILET
+        )
         assertWarning("Simulering av revurdert utbetaling feilet. Utbetalingen må annulleres", 1.vedtaksperiode.filter())
     }
 
@@ -699,7 +859,6 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
             AVSLUTTET,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING
         )
@@ -727,7 +886,6 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
             AVSLUTTET,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING,
             AVVENTER_GODKJENNING_REVURDERING
@@ -755,7 +913,6 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
             AVSLUTTET,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING,
             AVVENTER_GODKJENNING_REVURDERING,
@@ -777,7 +934,6 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
     @Test
     fun `revurder en revurdering`() {
         nyttVedtak(3.januar, 26.januar)
-        nullstillTilstandsendringer()
 
         håndterOverstyrTidslinje((20.januar til 22.januar).map { manuellFeriedag(it) })
         håndterYtelser(1.vedtaksperiode)
@@ -793,14 +949,21 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
 
         assertTilstander(
             1.vedtaksperiode,
+            START,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
             AVSLUTTET,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING,
             AVVENTER_GODKJENNING_REVURDERING,
             TIL_UTBETALING,
             AVSLUTTET,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING,
             AVVENTER_GODKJENNING_REVURDERING,
@@ -845,7 +1008,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
             AVSLUTTET,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING
         )
 
         assertTilstander(
@@ -857,8 +1020,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
             AVSLUTTET,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
-            AVVENTER_HISTORIKK_REVURDERING
+            AVVENTER_ARBEIDSGIVERE_REVURDERING
         )
         assertNoErrors()
     }
@@ -870,6 +1032,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         forlengVedtak(1.mars, 31.mars)
 
         håndterOverstyrTidslinje((15.februar til 28.februar).map { manuellFeriedag(it) })
+        håndterYtelser(2.vedtaksperiode)
         håndterYtelser(3.vedtaksperiode)
         håndterSimulering(3.vedtaksperiode)
         håndterUtbetalingsgodkjenning(3.vedtaksperiode)
@@ -898,6 +1061,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
             AVSLUTTET,
+            AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_GJENNOMFØRT_REVURDERING,
             AVSLUTTET
         )
@@ -911,7 +1075,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
             AVSLUTTET,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_ARBEIDSGIVERE_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING,
             AVVENTER_GODKJENNING_REVURDERING,
@@ -1018,6 +1182,63 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `feilet revurdering prodsak`() {
+        /* Vi ser flere innslag hvor revurdering har feilet og havnet i REVURDERING_FEILET. Det ser ut som ferie i etterfølgende periode er årsaken.
+        * Her er en feilende test. Værsågod :)
+        * */
+        nyttVedtak(3.januar, 26.januar)
+
+        håndterSykmelding(Sykmeldingsperiode(2.februar, 27.februar, 100.prosent))
+        håndterSøknad(Sykdom(2.februar, 27.februar, 100.prosent), Ferie(2.februar, 20.februar))
+
+        håndterOverstyrTidslinje((25.januar til 26.januar).map { manuellFeriedag(it) })
+        håndterYtelser(1.vedtaksperiode)
+
+        assertTilstander(
+            1.vedtaksperiode,
+            START,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_SIMULERING_REVURDERING,
+        )
+    }
+
+    @Test
+    fun `revurdere periode som etterfølges av forkastede perioder`() {
+        // Fremprovoserer et case hvor det at inntektsmeldingen kaster ut etterfølgende perioder fjerner låsene i sykdomshistorikken. Da kræsjer revurderingen
+        // fordi vi forsøker å låse opp perioder som ikke er låste.
+
+        nyttVedtak(1.januar, 31.januar)
+        forlengVedtak(1.februar, 28.februar)
+        forlengVedtak(1.mars, 31.mars)
+        håndterSykmelding(Sykmeldingsperiode(1.april, 10.april, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), refusjon = Refusjon(INNTEKT, 2.april))
+
+        håndterOverstyrTidslinje((1..31).map { ManuellOverskrivingDag(it.mars, Dagtype.Feriedag) })
+
+        assertTilstander(
+            3.vedtaksperiode,
+            START,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET,
+            AVVENTER_HISTORIKK_REVURDERING
+        )
+    }
+
+
+    @Test
     fun `etterspør ytelser ved påminnelser i avventer_historikk_revurdering`() {
         nyttVedtak(1.januar, 31.januar)
         assertEtterspurteYtelser(2, 1.vedtaksperiode)
@@ -1121,11 +1342,24 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
 
         håndterOverstyrTidslinje((20.januar til 26.januar).map { manuellFeriedag(it) })
 
-        håndterYtelser(3.vedtaksperiode, foreldrepenger = 17.januar til 31.januar)
+        håndterYtelser(1.vedtaksperiode, foreldrepenger = 17.januar til 31.januar)
 
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING)
-        assertSisteTilstand(2.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING)
-        assertSisteTilstand(3.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+        assertSisteTilstand(3.vedtaksperiode, AVVENTER_ARBEIDSGIVERE_REVURDERING)
+    }
+
+    @Test
+    fun `Om en revurdering blir stanset før den behandles så skal vi si fra at vi avviser den`() {
+        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(1.mars, 31.mars)
+
+        håndterOverstyrTidslinje((31.januar til 2.mars).map { manuellFeriedag(it) })
+
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
+
+        assertEquals(1, observatør.avvisteRevurderinger.size)
     }
 
     @Test
@@ -1237,7 +1471,6 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
             AVSLUTTET,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING
         )
@@ -1275,7 +1508,6 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
             AVSLUTTET,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING,
         )
@@ -1298,7 +1530,6 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             AVVENTER_HISTORIKK,
             AVVENTER_GODKJENNING,
             AVSLUTTET,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_GODKJENNING_REVURDERING,
             AVSLUTTET

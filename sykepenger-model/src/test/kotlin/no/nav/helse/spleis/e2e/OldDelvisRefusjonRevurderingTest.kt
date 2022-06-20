@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.DisableToggle
 import no.nav.helse.Toggle
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
@@ -8,11 +9,9 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
-import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_ARBEIDSGIVERE_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
-import no.nav.helse.person.TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
@@ -28,7 +27,8 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Test
 
-internal class DelvisRefusjonRevurderingTest : AbstractEndToEndTest() {
+@DisableToggle(Toggle.NyRevurdering::class)
+internal class OldDelvisRefusjonRevurderingTest : AbstractEndToEndTest() {
 
     @Test
     fun `korrigerende inntektsmelding med halvering av inntekt setter riktig refusjonsbeløp fra nyeste inntektsmelding`()  {
@@ -73,7 +73,7 @@ internal class DelvisRefusjonRevurderingTest : AbstractEndToEndTest() {
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
             AVSLUTTET,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_VILKÅRSPRØVING_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING
         )
@@ -179,6 +179,6 @@ internal class DelvisRefusjonRevurderingTest : AbstractEndToEndTest() {
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, orgnummer = a1, tilstand = AVVENTER_SIMULERING_REVURDERING)
-        assertSisteTilstand(1.vedtaksperiode, orgnummer = a2, tilstand = TilstandType.AVVENTER_REVURDERING)
+        assertSisteTilstand(1.vedtaksperiode, orgnummer = a2, tilstand = AVVENTER_ARBEIDSGIVERE_REVURDERING)
     }
 }
