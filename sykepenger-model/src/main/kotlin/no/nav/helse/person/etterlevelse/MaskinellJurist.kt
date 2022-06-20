@@ -232,6 +232,7 @@ class MaskinellJurist private constructor(
         val (dagerOppfylt, dagerIkkeOppfylt) =
             periode
                 .filter { it >= startdatoSykepengerettighet }
+                .sorted()
                 .partition { it <= maksdato }
 
         fun logg(utfall: Utfall, utfallFom: LocalDate, utfallTom: LocalDate) {
@@ -294,12 +295,7 @@ class MaskinellJurist private constructor(
     }
 
     override fun `§ 8-13 ledd 1`(periode: Periode, avvisteDager: List<LocalDate>, tidslinjer: List<List<SubsumsjonObserver.Tidslinjedag>>) {
-        fun periode(): List<LocalDate> {
-            return if (avvisteDager.isNotEmpty()) {
-                val avvisteDagerPeriode = Periode(avvisteDager.first(), avvisteDager.last())
-                periode.minus(avvisteDagerPeriode)
-            } else periode.toList()
-        }
+        fun periode() = periode.toList() - avvisteDager
 
         fun logg(utfall: Utfall, dager: List<LocalDate>) {
             dager.forEach { dagen ->
@@ -641,6 +637,7 @@ class MaskinellJurist private constructor(
         val (dagerOppfylt, dagerIkkeOppfylt) =
             periode
                 .filter { it >= startdatoSykepengerettighet }
+                .sorted()
                 .partition { it <= maksdato }
 
         fun logg(utfall: Utfall, utfallFom: LocalDate, utfallTom: LocalDate) {

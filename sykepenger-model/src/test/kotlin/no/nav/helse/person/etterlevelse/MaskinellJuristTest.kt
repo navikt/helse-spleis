@@ -48,6 +48,12 @@ internal class MaskinellJuristTest {
         )
     }
 
+    @Test
+    fun `avviste dager`(){
+        val vedtaksperiodeJurist = MaskinellJurist()
+        vedtaksperiodeJurist.`§ 8-13 ledd 1`(Periode(1.januar, 31.januar), listOf(16.januar, 15.januar), emptyList())
+    }
+
     private fun assertKontekster(subsumsjon: Subsumsjon, vararg kontekster: Pair<String, KontekstType>) {
         val inspektør = object : SubsumsjonVisitor {
             lateinit var kontekster: Map<String, KontekstType>
