@@ -42,7 +42,7 @@ internal class ApiTestServer(private val port: Int = randomPort()) {
     private val postgres = PostgreSQLContainer<Nothing>("postgres:14")
         .apply {
             withReuse(true)
-            withLabel("app-navn", "spleis")
+            withLabel("app-navn", "spleis-api-test")
         }
     private lateinit var dataSource: DataSource
     private lateinit var flyway: Flyway

@@ -17,6 +17,15 @@ Finn nyeste versjon av gradle her: https://gradle.org/releases/
 Husk å oppdater gradle versjon i build.gradle.kts filen
 ```gradleVersion = "$gradleVersjon"```
 
+## Protip for å kjøre tester raskere
+Finn filen .testcontainers.properties, ligger ofte på hjemmeområdet ditt eks:
+
+```~/.testcontainers.properties```
+
+legg til denne verdien
+
+```testcontainers.reuse.enable=true```
+
 ## Henvendelser
 Spørsmål knyttet til koden eller prosjektet kan stilles som issues her på GitHub.
 
