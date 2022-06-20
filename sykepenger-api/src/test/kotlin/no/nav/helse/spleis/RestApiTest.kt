@@ -45,11 +45,11 @@ internal class RestApiTest {
         private const val ORGNUMMER = "987654321"
         private val MELDINGSREFERANSE = UUID.randomUUID()
         private const val AKTØRID = "42"
-    }
-
-    private val postgres = PostgreSQLContainer<Nothing>("postgres:14").apply {
-        withReuse(true)
-        withLabel("app-navn", "spleis-rest-api")
+        private val postgres = PostgreSQLContainer<Nothing>("postgres:14").apply {
+            withReuse(true)
+            withLabel("app-navn", "spleis-api")
+            start()
+        }
     }
     private lateinit var dataSource: DataSource
     private lateinit var flyway: Flyway
@@ -63,8 +63,6 @@ internal class RestApiTest {
 
     @BeforeAll
     internal fun `start embedded environment`() {
-        postgres.start()
-
         //Stub ID provider (for authentication of REST endpoints)
         wireMockServer.start()
         await("vent på WireMockServer har startet")
@@ -120,7 +118,6 @@ internal class RestApiTest {
     internal fun `stop embedded environment`() {
         app.stop(1000L, 1000L)
         wireMockServer.stop()
-        postgres.stop()
     }
 
     @BeforeEach

@@ -39,11 +39,14 @@ import javax.sql.DataSource
 import no.nav.helse.spleis.config.DataSourceConfiguration
 
 internal class ApiTestServer(private val port: Int = randomPort()) {
-    private val postgres = PostgreSQLContainer<Nothing>("postgres:14")
-        .apply {
+
+    private companion object {
+        private val postgres = PostgreSQLContainer<Nothing>("postgres:14").apply {
             withReuse(true)
-            withLabel("app-navn", "spleis-api-test")
+            withLabel("app-navn", "spleis-api")
+            start()
         }
+    }
     private lateinit var dataSource: DataSource
     private lateinit var flyway: Flyway
 
@@ -63,7 +66,6 @@ internal class ApiTestServer(private val port: Int = randomPort()) {
     internal fun tearDown() {
         app.stop(1000L, 1000L)
         wireMockServer.stop()
-        postgres.stop()
     }
 
     internal fun start() {
@@ -72,8 +74,6 @@ internal class ApiTestServer(private val port: Int = randomPort()) {
 
         mockkStatic("no.nav.helse.spleis.NaisKt")
         every { any<Application>().nais(any()) } returns Unit
-
-        postgres.start()
 
         //Stub ID provider (for authentication of REST endpoints)
         wireMockServer.start()
