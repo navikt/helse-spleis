@@ -75,14 +75,7 @@ internal class MaksdatoE2ETest : AbstractEndToEndTest() {
         val deserialisertPerson = person.serialize().deserialize(MaskinellJurist())
         val deserialisertInspektør = TestArbeidsgiverInspektør(deserialisertPerson, ORGNUMMER)
         deserialisertInspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.avvistedager.forEach { avvistDag ->
-            assertForventetFeil(
-                nå = {
-                    assertEquals(listOf(Begrunnelse.SykepengedagerOppbrukt), avvistDag.begrunnelser)
-                },
-                ønsket = {
-                    assertEquals(listOf(SykepengedagerOppbruktOver67), avvistDag.begrunnelser)
-                }
-            )
+            assertEquals(listOf(SykepengedagerOppbruktOver67), avvistDag.begrunnelser)
         }
     }
 

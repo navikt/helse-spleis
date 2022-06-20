@@ -1287,7 +1287,7 @@ internal data class PersonData(
             internal companion object {
                 fun fraBegrunnelse(begrunnelse: Begrunnelse) = when (begrunnelse) {
                     is Begrunnelse.SykepengedagerOppbrukt -> SykepengedagerOppbrukt
-                    is Begrunnelse.SykepengedagerOppbruktOver67 -> SykepengedagerOppbrukt
+                    is Begrunnelse.SykepengedagerOppbruktOver67 -> SykepengedagerOppbruktOver67
                     is Begrunnelse.MinimumSykdomsgrad -> MinimumSykdomsgrad
                     is Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode -> EgenmeldingUtenforArbeidsgiverperiode
                     is Begrunnelse.MinimumInntekt -> MinimumInntekt
