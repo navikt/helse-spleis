@@ -1,13 +1,23 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.til
+import no.nav.helse.inspectors.TestArbeidsgiverInspektør
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
+import no.nav.helse.mai
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.TilstandType
+import no.nav.helse.person.etterlevelse.MaskinellJurist
+import no.nav.helse.serde.serialize
+import no.nav.helse.somFødselsnummer
+import no.nav.helse.utbetalingstidslinje.Begrunnelse
+import no.nav.helse.utbetalingstidslinje.Begrunnelse.SykepengedagerOppbruktOver67
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class MaksdatoE2ETest : AbstractEndToEndTest() {
@@ -51,6 +61,28 @@ internal class MaksdatoE2ETest : AbstractEndToEndTest() {
         assertError("Bruker er fortsatt syk 26 uker etter maksdato", siste.filter())
         assertSisteTilstand(siste, TilstandType.TIL_INFOTRYGD) {
             "Disse periodene skal kastes ut pr nå"
+        }
+    }
+
+    @Test
+    fun `oppbrukt sykepenger etter fylte 67 serialiseres til rett begrunnelse`() {
+        val fnr = "16104812345"
+        createTestPerson(fnr.somFødselsnummer())
+        nyttVedtak(17.januar, 1.mai)
+        inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.avvistedager.forEach { avvistDag ->
+            assertEquals(listOf(SykepengedagerOppbruktOver67), avvistDag.begrunnelser)
+        }
+        val deserialisertPerson = person.serialize().deserialize(MaskinellJurist())
+        val deserialisertInspektør = TestArbeidsgiverInspektør(deserialisertPerson, ORGNUMMER)
+        deserialisertInspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.avvistedager.forEach { avvistDag ->
+            assertForventetFeil(
+                nå = {
+                    assertEquals(listOf(Begrunnelse.SykepengedagerOppbrukt), avvistDag.begrunnelser)
+                },
+                ønsket = {
+                    assertEquals(listOf(SykepengedagerOppbruktOver67), avvistDag.begrunnelser)
+                }
+            )
         }
     }
 
