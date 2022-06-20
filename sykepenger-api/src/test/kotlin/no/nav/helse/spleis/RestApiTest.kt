@@ -47,7 +47,10 @@ internal class RestApiTest {
         private const val AKTØRID = "42"
     }
 
-    private val postgres = PostgreSQLContainer<Nothing>("postgres:14")
+    private val postgres = PostgreSQLContainer<Nothing>("postgres:14").apply {
+        withReuse(true)
+        withLabel("app-navn", "spleis")
+    }
     private lateinit var dataSource: DataSource
     private lateinit var flyway: Flyway
 

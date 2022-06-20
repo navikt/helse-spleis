@@ -10,6 +10,8 @@ import org.testcontainers.containers.PostgreSQLContainer
 object PostgresContainer {
     val instance by lazy {
         PostgreSQLContainer<Nothing>("postgres:14").apply {
+            withReuse(true)
+            withLabel("app-navn", "spleis")
             start()
         }
     }

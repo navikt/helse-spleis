@@ -29,6 +29,8 @@ internal class AppTest {
     @BeforeAll
     fun beforeAll() {
         psqlContainer = PostgreSQLContainer<Nothing>("postgres:14")
+        psqlContainer.withReuse(true)
+        psqlContainer.withLabel("app-navn", "spleis")
         psqlContainer.start()
     }
 

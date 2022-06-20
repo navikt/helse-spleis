@@ -27,6 +27,10 @@ internal class PersonRepositoryTest {
     @BeforeAll
     fun beforeAll() {
         psqlContainer = PostgreSQLContainer<Nothing>("postgres:14")
+            .apply{
+                withReuse(true)
+                withLabel("app-navn", "spleis")
+            }
         psqlContainer.start()
     }
 

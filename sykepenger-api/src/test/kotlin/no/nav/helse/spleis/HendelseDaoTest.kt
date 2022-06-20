@@ -17,6 +17,10 @@ class HendelseDaoTest {
 
     private val UNG_PERSON_FNR = "12029240045"
     private val postgres = PostgreSQLContainer<Nothing>("postgres:14")
+        .apply {
+            withReuse(true)
+            withLabel("app-navn", "spleis")
+        }
     private lateinit var dataSource: DataSource
     private lateinit var flyway: Flyway
     private val meldingsReferanse = UUID.randomUUID()
