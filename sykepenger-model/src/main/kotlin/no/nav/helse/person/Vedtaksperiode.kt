@@ -606,7 +606,7 @@ internal class Vedtaksperiode private constructor(
             person.antallArbeidsgivereMedRelevantArbeidsforhold(skjæringstidspunkt),
             jurist()
         )
-        person.lagreVilkårsgrunnlag(skjæringstidspunkt, vilkårsgrunnlag.grunnlagsdata())
+        person.lagreVilkårsgrunnlag(vilkårsgrunnlag.grunnlagsdata())
         if (vilkårsgrunnlag.hasErrorsOrWorse()) {
             return person.invaliderAllePerioder(vilkårsgrunnlag, null)
         }
@@ -1619,7 +1619,6 @@ internal class Vedtaksperiode private constructor(
                     person.lagreVilkårsgrunnlagFraInfotrygd(
                         vedtaksperiode.skjæringstidspunkt,
                         vedtaksperiode.periode(),
-                        ytelser,
                         vedtaksperiode.jurist()
                     )
                 }
@@ -2639,7 +2638,6 @@ internal class Vedtaksperiode private constructor(
             perioder: List<Vedtaksperiode>,
             organisasjonsnummer: String,
             sykdomstidslinje: Sykdomstidslinje,
-            periode: Periode,
             subsumsjonObserver: SubsumsjonObserver
         ): List<Arbeidsgiverperiode> {
             val samletSykdomstidslinje =
@@ -2648,7 +2646,6 @@ internal class Vedtaksperiode private constructor(
                 organisasjonsnummer,
                 sykdomshistorikkId,
                 samletSykdomstidslinje,
-                periode,
                 subsumsjonObserver
             )
         }

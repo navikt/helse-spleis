@@ -327,7 +327,7 @@ class Person private constructor(
         return infotrygdhistorikk.arbeidsgiverperiodeFor(organisasjonsnummer, sykdomshistorikkId)
     }
 
-    internal fun arbeidsgiverperiodeFor(orgnummer: String, sykdomshistorikkId: UUID, sykdomstidslinje: Sykdomstidslinje, periode: Periode, subsumsjonObserver: SubsumsjonObserver): List<Arbeidsgiverperiode> {
+    internal fun arbeidsgiverperiodeFor(orgnummer: String, sykdomshistorikkId: UUID, sykdomstidslinje: Sykdomstidslinje, subsumsjonObserver: SubsumsjonObserver): List<Arbeidsgiverperiode> {
         val periodebuilder = ArbeidsgiverperiodeBuilderBuilder()
         infotrygdhistorikk.build(orgnummer, sykdomstidslinje, periodebuilder, subsumsjonObserver)
         return periodebuilder.result().also {
@@ -403,16 +403,8 @@ class Person private constructor(
         observers.forEach { it.vedtaksperiodeIkkePåminnet(påminnelse.hendelseskontekst(), tilstandType) }
     }
 
-    internal fun opprettOppgaveForSpeilsaksbehandlere(aktivitetslogg: IAktivitetslogg, event: PersonObserver.OpprettOppgaveForSpeilsaksbehandlereEvent) {
-        observers.forEach { it.opprettOppgaveForSpeilsaksbehandlere(aktivitetslogg.hendelseskontekst(), event) }
-    }
-
     internal fun opprettOppgave(aktivitetslogg: IAktivitetslogg, event: PersonObserver.OpprettOppgaveEvent) {
         observers.forEach { it.opprettOppgave(aktivitetslogg.hendelseskontekst(), event) }
-    }
-
-    internal fun utsettOppgave(aktivitetslogg: IAktivitetslogg, event: PersonObserver.UtsettOppgaveEvent) {
-        observers.forEach { it.utsettOppgave(aktivitetslogg.hendelseskontekst(), event)}
     }
 
     internal fun vedtaksperiodeForkastet(aktivitetslogg: IAktivitetslogg, event: PersonObserver.VedtaksperiodeForkastetEvent) {
@@ -541,13 +533,6 @@ class Person private constructor(
     internal fun ghostPeriode(skjæringstidspunkt: LocalDate, deaktivert: Boolean) =
         arbeidsgivere.ghostPeriode(skjæringstidspunkt, vilkårsgrunnlagHistorikk.sisteId(), deaktivert)
 
-    internal fun <T> hentArbeidsforhold(creator: (orgnummer: String, ansattFom: LocalDate, ansattTom: LocalDate?, erAktiv: Boolean) -> T) =
-        skjæringstidspunkter().associateWith { skjæringstidspunkt ->
-            arbeidsgivere.flatMap { arbeidsgiver ->
-                arbeidsgiver.arbeidsforhold(skjæringstidspunkt, creator)
-            }
-        }
-
     private fun harNærliggendeUtbetaling(periode: Periode): Boolean {
         if (infotrygdhistorikk.harBetaltRettFør(periode)) return false
         return arbeidsgivere.any { it.harNærliggendeUtbetaling(periode.oppdaterTom(periode.endInclusive.plusYears(3))) }
@@ -580,16 +565,11 @@ class Person private constructor(
 
     internal fun vilkårsgrunnlagFor(skjæringstidspunkt: LocalDate) = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt)
 
-    internal fun lagreVilkårsgrunnlag(skjæringstidspunkt: LocalDate, vilkårsgrunnlag: VilkårsgrunnlagHistorikk.Grunnlagsdata) {
+    internal fun lagreVilkårsgrunnlag(vilkårsgrunnlag: VilkårsgrunnlagHistorikk.Grunnlagsdata) {
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag)
     }
 
-    internal fun lagreVilkårsgrunnlagFraInfotrygd(
-        skjæringstidspunkt: LocalDate,
-        periode: Periode,
-        hendelse: IAktivitetslogg,
-        subsumsjonObserver: SubsumsjonObserver
-    ) {
+    internal fun lagreVilkårsgrunnlagFraInfotrygd(skjæringstidspunkt: LocalDate, periode: Periode, subsumsjonObserver: SubsumsjonObserver) {
         infotrygdhistorikk.lagreVilkårsgrunnlag(skjæringstidspunkt, vilkårsgrunnlagHistorikk, ::kanOverskriveVilkårsgrunnlag) {
             beregnSykepengegrunnlagForInfotrygd(it, periode.start, subsumsjonObserver)
         }
