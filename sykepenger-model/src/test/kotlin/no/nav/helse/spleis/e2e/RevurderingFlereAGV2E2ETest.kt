@@ -9,6 +9,7 @@ import no.nav.helse.hendelser.Dagtype.Feriedag
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
+import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.juni
 import no.nav.helse.mai
@@ -567,5 +568,27 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
             assertTilstander(1.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING, AVSLUTTET)
             assertTilstander(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVSLUTTET)
         }
+    }
+
+    @Test
+    fun `validerer ytelser på alle arbeidsgivere ved revurdering av flere arbeidgivere`() {
+        nyeVedtak(1.januar, 31.januar, a1, a2)
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)), a1)
+
+        håndterYtelser(1.vedtaksperiode, foreldrepenger = 20.januar til 31.januar, orgnummer = a1)
+        assertWarning("Det er utbetalt foreldrepenger i samme periode.", 1.vedtaksperiode.filter(a1))
+        assertWarning("Det er utbetalt foreldrepenger i samme periode.", 1.vedtaksperiode.filter(a2))
+    }
+
+    @Test
+    fun `validerer ytelser for periode som strekker seg fra skjæringstidsunkt til siste tom`() {
+        nyeVedtak(1.januar, 31.januar, a1, a2)
+        forlengVedtak(1.februar, 28.februar, a1, a2)
+        forlengVedtak(1.mars, 31.mars, a2)
+
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)), a1)
+        håndterYtelser(2.vedtaksperiode, foreldrepenger = 20.mars til 31.mars, orgnummer = a1)
+
+        assertWarning("Det er utbetalt foreldrepenger i samme periode.", 3.vedtaksperiode.filter(a2))
     }
 }

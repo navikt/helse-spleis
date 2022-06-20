@@ -905,6 +905,47 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         assertNoErrors()
     }
 
+    @Test
+    fun `valider ytelser kun for de periodene som påvirkes av revurderingen`() {
+        nyttVedtak(1.januar, 31.januar)
+        forlengVedtak(1.februar, 28.februar)
+        forlengVedtak(1.mars, 31.mars)
+
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(2.februar, Feriedag)))
+        håndterYtelser(3.vedtaksperiode, foreldrepenger = 20.januar til 31.januar)
+
+        assertNoWarnings(1.vedtaksperiode.filter())
+        assertNoWarnings(2.vedtaksperiode.filter())
+        assertNoWarnings(3.vedtaksperiode.filter())
+    }
+
+    @Test
+    fun `ping-pong - valider ytelser for de periodene som påvirkes av revurderingen`() {
+        nyttVedtak(1.januar, 31.januar)
+
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.mars, 31.mars, 100.prosent))
+        håndterUtbetalingshistorikk(
+            2.vedtaksperiode,
+            ArbeidsgiverUtbetalingsperiode(a1, 1.februar, 28.februar, 100.prosent, INNTEKT),
+            inntektshistorikk = listOf(
+                Inntektsopplysning(a1, 1.februar, INNTEKT, true),
+            )
+        )
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt()
+        nullstillTilstandsendringer()
+
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)))
+        håndterYtelser(1.vedtaksperiode, foreldrepenger = 1.mars til 31.mars)
+
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING)
+        assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
+        assertWarning("Det er utbetalt foreldrepenger i samme periode.", 2.vedtaksperiode.filter())
+    }
+
     private inline fun <reified D: Dag, reified UD: Utbetalingsdag>assertDag(dato: LocalDate, beløp: Double) {
         inspektør.sykdomshistorikk.sykdomstidslinje()[dato].let {
             assertTrue(it is D) { "Forventet ${D::class.simpleName} men var ${it::class.simpleName}"}

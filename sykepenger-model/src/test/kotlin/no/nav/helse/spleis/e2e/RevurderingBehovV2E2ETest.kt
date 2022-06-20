@@ -12,6 +12,7 @@ import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
+import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
@@ -36,13 +37,15 @@ internal class RevurderingBehovV2E2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Henter ytelser for kun de periodene som blir revurdert`() {
+    fun `Henter ytelser for alle periodene på skjæringstidspunktet`() {
         nyttVedtak(1.januar, 31.januar)
         forlengVedtak(1.februar, 28.februar)
         forlengVedtak(1.mars, 31.mars)
+        nyttVedtak(1.mai, 31.mai)
+
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(20.mars, Feriedag)))
         håndterYtelser(3.vedtaksperiode)
-        assertYtelser(1.mars til 31.mars)
+        assertYtelser(1.januar til 31.mars)
     }
 
     @Test
@@ -82,7 +85,7 @@ internal class RevurderingBehovV2E2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Ping Pong - henter ytelser for første periode isolert, deretter for andre periode isolert`() {
+    fun `Ping Pong - henter ytelser for alle perioder på skjæringstidspunktet`() {
         nyttVedtak(1.januar, 31.januar)
 
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
@@ -99,13 +102,25 @@ internal class RevurderingBehovV2E2ETest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)))
-        assertYtelser(1.januar til 31.januar)
+
+        assertYtelser(1.januar til 31.mars)
 
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
-        assertYtelser(1.mars til 31.mars)
+
+        assertYtelser(1.januar til 31.mars)
+    }
+
+    @Test
+    fun `henter ytelser for periode som strekker seg fra skjæringstidsunkt til siste tom`() {
+        nyeVedtak(1.januar, 31.januar, a1, a2)
+        forlengVedtak(1.februar, 28.februar, a1, a2)
+        forlengVedtak(1.mars, 31.mars, a2)
+
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)), a1)
+        assertYtelser(1.januar til 31.mars)
     }
 
     private fun assertYtelser(periode: Periode) {

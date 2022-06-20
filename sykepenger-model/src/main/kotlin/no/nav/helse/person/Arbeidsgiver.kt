@@ -52,8 +52,10 @@ import no.nav.helse.person.Vedtaksperiode.Companion.kanStarteRevurdering
 import no.nav.helse.person.Vedtaksperiode.Companion.medSkjæringstidspunkt
 import no.nav.helse.person.Vedtaksperiode.Companion.nåværendeVedtaksperiode
 import no.nav.helse.person.Vedtaksperiode.Companion.periode
+import no.nav.helse.person.Vedtaksperiode.Companion.skjæringstidspunktperiode
 import no.nav.helse.person.Vedtaksperiode.Companion.senerePerioderPågående
 import no.nav.helse.person.Vedtaksperiode.Companion.startRevurdering
+import no.nav.helse.person.Vedtaksperiode.Companion.validerYtelser
 import no.nav.helse.person.builders.UtbetalingsdagerBuilder
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
@@ -325,6 +327,15 @@ internal class Arbeidsgiver private constructor(
         ) {
             arbeidsgivere.forEach { it.søppelbøtte(hendelse, filter, ForkastetÅrsak.IKKE_STØTTET) }
         }
+
+        internal fun List<Arbeidsgiver>.validerYtelserForSkjæringstidspunkt(ytelser: Ytelser, skjæringstidspunkt: LocalDate, infotrygdhistorikk: Infotrygdhistorikk) {
+            forEach { it.vedtaksperioder.validerYtelser(ytelser, skjæringstidspunkt, infotrygdhistorikk) }
+        }
+
+        internal fun List<Arbeidsgiver>.skjæringstidspunktperiode(skjæringstidspunkt: LocalDate) =
+            flatMap { it.vedtaksperioder }
+                .filter { it.gjelder(skjæringstidspunkt) }
+                .skjæringstidspunktperiode(skjæringstidspunkt)
     }
 
     private fun gjenopptaBehandling(gjenopptaBehandling: IAktivitetslogg) {

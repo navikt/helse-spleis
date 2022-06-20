@@ -49,9 +49,11 @@ import no.nav.helse.person.Arbeidsgiver.Companion.kanOverstyreTidslinje
 import no.nav.helse.person.Arbeidsgiver.Companion.kanStarteRevurdering
 import no.nav.helse.person.Arbeidsgiver.Companion.nåværendeVedtaksperioder
 import no.nav.helse.person.Arbeidsgiver.Companion.rapporterteInntekter
+import no.nav.helse.person.Arbeidsgiver.Companion.skjæringstidspunktperiode
 import no.nav.helse.person.Arbeidsgiver.Companion.slettUtgåtteSykmeldingsperioder
 import no.nav.helse.person.Arbeidsgiver.Companion.startRevurdering
 import no.nav.helse.person.Arbeidsgiver.Companion.validerVilkårsgrunnlag
+import no.nav.helse.person.Arbeidsgiver.Companion.validerYtelserForSkjæringstidspunkt
 import no.nav.helse.person.Vedtaksperiode.Companion.ALLE
 import no.nav.helse.person.Vedtaksperiode.Companion.lagUtbetalinger
 import no.nav.helse.person.builders.VedtakFattetBuilder
@@ -889,4 +891,10 @@ class Person private constructor(
         arbeidsgivere.validerVilkårsgrunnlag(aktivitetslogg, vilkårsgrunnlag, skjæringstidspunkt)
         return !aktivitetslogg.hasErrorsOrWorse()
     }
+
+    internal fun validerYtelserForSkjæringstidspunkt(ytelser: Ytelser, skjæringstidspunkt: LocalDate) {
+        arbeidsgivere.validerYtelserForSkjæringstidspunkt(ytelser, skjæringstidspunkt, infotrygdhistorikk)
+    }
+
+    internal fun skjæringstidspunktperiode(skjæringstidspunkt: LocalDate) = arbeidsgivere.skjæringstidspunktperiode(skjæringstidspunkt)
 }

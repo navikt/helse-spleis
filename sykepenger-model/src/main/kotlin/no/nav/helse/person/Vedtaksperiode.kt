@@ -22,6 +22,7 @@ import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.hendelser.Validation.Companion.validation
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
+import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
@@ -493,7 +494,11 @@ internal class Vedtaksperiode private constructor(
         return inntektsmelding.erRelevant(perioder.periode()) && relevantForReplay(other, perioder, vedtaksperioder)
     }
 
-    private fun revurderingsperiode() = arbeidsgiver.revurderingsperiode(this)
+    private fun skjæringstidspunktperiode() = person.skjæringstidspunktperiode(skjæringstidspunkt)
+
+    private fun validerYtelserForSkjæringstidspunkt(ytelser: Ytelser) {
+        person.validerYtelserForSkjæringstidspunkt(ytelser, skjæringstidspunkt)
+    }
 
     // IM som replayes skal kunne påvirke alle perioder som er sammenhengende med replay-perioden, men også alle evt. påfølgende perioder.
     // Dvs. IM skal -ikke- påvirke perioder _før_ replay-perioden som ikke er i sammenheng med vedtaksperioden som ba om replay
@@ -1052,6 +1057,15 @@ internal class Vedtaksperiode private constructor(
             )
             return håndterTidligereUferdigPeriode(vedtaksperiode, overstyrt, hendelse)
         }
+
+        fun valider(
+            vedtaksperiode: Vedtaksperiode,
+            periode: Periode,
+            skjæringstidspunkt: LocalDate,
+            arbeidsgiver: Arbeidsgiver,
+            ytelser: Ytelser,
+            infotrygdhistorikk: Infotrygdhistorikk
+        ) {}
     }
 
     internal object Start : Vedtaksperiodetilstand {
@@ -1091,6 +1105,18 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
             vedtaksperiode.oppdaterHistorikk(hendelse)
+        }
+
+        override fun valider(
+            vedtaksperiode: Vedtaksperiode,
+            periode: Periode,
+            skjæringstidspunkt: LocalDate,
+            arbeidsgiver: Arbeidsgiver,
+            ytelser: Ytelser,
+            infotrygdhistorikk: Infotrygdhistorikk
+        ) {
+            infotrygdhistorikk.valider(ytelser, arbeidsgiver, periode, skjæringstidspunkt)
+            ytelser.valider(periode, skjæringstidspunkt)
         }
 
         override fun håndterRevurderingFeilet(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
@@ -1159,6 +1185,18 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.revurderInntekt(hendelse)
         }
 
+        override fun valider(
+            vedtaksperiode: Vedtaksperiode,
+            periode: Periode,
+            skjæringstidspunkt: LocalDate,
+            arbeidsgiver: Arbeidsgiver,
+            ytelser: Ytelser,
+            infotrygdhistorikk: Infotrygdhistorikk
+        ) {
+            infotrygdhistorikk.valider(ytelser, arbeidsgiver, periode, skjæringstidspunkt)
+            ytelser.valider(periode, skjæringstidspunkt)
+        }
+
         override fun revurder(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {
             vedtaksperiode.tilstand(hendelse, AvventerVilkårsprøvingRevurdering)
             vedtaksperiode.tilstand.håndter(vedtaksperiode, hendelse)
@@ -1207,7 +1245,7 @@ internal class Vedtaksperiode private constructor(
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             hendelse.info("Forespør sykdoms- og inntektshistorikk")
             vedtaksperiode.utbetalinger.forkast(hendelse)
-            val periode = if (Toggle.NyRevurdering.disabled) vedtaksperiode.periode else vedtaksperiode.revurderingsperiode()
+            val periode = if (Toggle.NyRevurdering.disabled) vedtaksperiode.periode else vedtaksperiode.skjæringstidspunktperiode()
             vedtaksperiode.trengerYtelser(hendelse, periode)
             vedtaksperiode.finnArbeidsgiverperiode()?.firstOrNull()?.also {
                 if (it < 1.oktober(2021)) {
@@ -1237,19 +1275,35 @@ internal class Vedtaksperiode private constructor(
             arbeidsgiverUtbetalingerFun: (SubsumsjonObserver) -> ArbeidsgiverUtbetalinger
         ) {
             ErrorsTilWarnings.wrap(ytelser) {
-                val periode = if (Toggle.NyRevurdering.disabled) vedtaksperiode.periode else vedtaksperiode.revurderingsperiode()
-                infotrygdhistorikk.valider(
-                    ytelser,
-                    arbeidsgiver,
-                    periode,
-                    vedtaksperiode.skjæringstidspunkt
-                )
-                ytelser.valider(periode, vedtaksperiode.skjæringstidspunkt)
+                if (Toggle.NyRevurdering.disabled) {
+                    infotrygdhistorikk.valider(
+                        ytelser,
+                        arbeidsgiver,
+                        vedtaksperiode.periode,
+                        vedtaksperiode.skjæringstidspunkt
+                    )
+                    ytelser.valider(vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt)
+                } else {
+                    vedtaksperiode.validerYtelserForSkjæringstidspunkt(ytelser)
+                    vedtaksperiode.kontekst(ytelser)
+                }
                 val arbeidsgiverUtbetalinger = arbeidsgiverUtbetalingerFun(vedtaksperiode.jurist())
                 arbeidsgiver.beregn(ytelser, arbeidsgiverUtbetalinger, vedtaksperiode.periode)
                 check(!ytelser.hasErrorsOrWorse()) { "Skal ikke ha errors i validering av ytelser i revurdering." }
                 vedtaksperiode.forsøkRevurdering(arbeidsgiverUtbetalinger.maksimumSykepenger, ytelser)
             }
+        }
+
+        override fun valider(
+            vedtaksperiode: Vedtaksperiode,
+            periode: Periode,
+            skjæringstidspunkt: LocalDate,
+            arbeidsgiver: Arbeidsgiver,
+            ytelser: Ytelser,
+            infotrygdhistorikk: Infotrygdhistorikk
+        ) {
+            infotrygdhistorikk.valider(ytelser, arbeidsgiver, periode, skjæringstidspunkt)
+            ytelser.valider(periode, skjæringstidspunkt)
         }
 
         override fun håndterRevurderingFeilet(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
@@ -1919,6 +1973,12 @@ internal class Vedtaksperiode private constructor(
         if (overstyrt etter this) return
         kontekst(hendelse)
         tilstand.startRevurdering(this, hendelse, overstyrt, pågående)
+    }
+
+    private fun validerYtelser(ytelser: Ytelser, skjæringstidspunkt: LocalDate, infotrygdhistorikk: Infotrygdhistorikk) {
+        if (skjæringstidspunkt != this.skjæringstidspunkt) return
+        kontekst(ytelser)
+        tilstand.valider(this, periode, skjæringstidspunkt, arbeidsgiver, ytelser, infotrygdhistorikk)
     }
 
     internal object AvventerGodkjenningRevurdering : Vedtaksperiodetilstand {
@@ -2688,8 +2748,15 @@ internal class Vedtaksperiode private constructor(
             oppdatert = oppdatert,
             jurist = medVedtaksperiode
         )
-    }
 
+        internal fun List<Vedtaksperiode>.validerYtelser(ytelser: Ytelser, skjæringstidspunkt: LocalDate, infotrygdhistorikk: Infotrygdhistorikk) {
+            forEach { it.validerYtelser(ytelser, skjæringstidspunkt, infotrygdhistorikk) }
+        }
+
+        internal fun List<Vedtaksperiode>.skjæringstidspunktperiode(skjæringstidspunkt: LocalDate): Periode {
+            return skjæringstidspunkt til maxOf { it.periode.endInclusive }
+        }
+    }
 }
 
 
