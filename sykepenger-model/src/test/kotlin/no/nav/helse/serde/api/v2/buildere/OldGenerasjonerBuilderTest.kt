@@ -3,6 +3,7 @@ package no.nav.helse.serde.api.v2.buildere
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.DisableToggle
 import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.desember
@@ -93,7 +94,8 @@ import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
+@DisableToggle(Toggle.NyRevurdering::class)
+internal class OldGenerasjonerBuilderTest : AbstractEndToEndTest() {
 
     @Test
     fun `happy case`() {
@@ -475,6 +477,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         forlengVedtak(1.februar, 28.februar)
 
         håndterOverstyrTidslinje((29.januar til 31.januar).map { manuellFeriedag(it) })
+        håndterYtelser(1.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
 
         assertEquals(2, generasjoner.size)
@@ -498,6 +501,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         forlengVedtak(1.februar, 28.februar)
 
         håndterOverstyrTidslinje((29.januar til 31.januar).map { manuellFeriedag(it) })
+        håndterYtelser(1.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
 
@@ -522,11 +526,13 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         forlengVedtak(1.februar, 28.februar)
 
         håndterOverstyrTidslinje((29.januar til 31.januar).map { manuellFeriedag(it) })
+        håndterYtelser(1.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
         håndterOverstyrTidslinje((29.januar til 31.januar).map { manuellSykedag(it) })
+        håndterYtelser(1.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
 
         assertEquals(3, generasjoner.size)
@@ -556,11 +562,13 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         forlengVedtak(1.februar, 28.februar)
 
         håndterOverstyrTidslinje((29.januar til 31.januar).map { manuellFeriedag(it) })
+        håndterYtelser(1.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
         håndterOverstyrTidslinje((29.januar til 31.januar).map { manuellSykedag(it) })
+        håndterYtelser(1.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
@@ -710,6 +718,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         forlengVedtak(1.februar, 28.februar)
 
         håndterOverstyrTidslinje((29.januar til 31.januar).map { manuellFeriedag(it) })
+        håndterYtelser(1.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
@@ -739,6 +748,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         forlengVedtak(1.februar, 28.februar)
 
         håndterOverstyrTidslinje((29.januar til 31.januar).map { manuellFeriedag(it) })
+        håndterYtelser(1.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
@@ -1020,6 +1030,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         nyttVedtak(1.januar, 31.januar)
         forlengVedtak(1.februar, 28.februar)
         håndterOverstyrTidslinje((30.januar til 31.januar).map { manuellFeriedag(it) })
+        håndterYtelser(1.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
 
         0.generasjon {
@@ -1301,6 +1312,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         nyttVedtak(1.januar, 31.januar)
         forlengVedtak(1.februar, 28.februar)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Dagtype.Feriedag)))
+        håndterYtelser(1.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode, simuleringOK = false)
 
@@ -1336,6 +1348,8 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         forlengVedtak(1.februar, 28.februar, a1, a2)
 
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Dagtype.Feriedag)), orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)
 
         0.generasjon(a1) {
@@ -1470,7 +1484,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterAnnullerUtbetaling()
         håndterUtbetalt()
 
-        håndterAnnullerUtbetaling(fagsystemId = inspektør.sisteAvsluttedeUtbetalingForVedtaksperiode(1.vedtaksperiode).inspektør.arbeidsgiverOppdrag.fagsystemId())
+        håndterAnnullerUtbetaling(fagsystemId = inspektør.gjeldendeUtbetalingForVedtaksperiode(1.vedtaksperiode).inspektør.arbeidsgiverOppdrag.fagsystemId())
         håndterUtbetalt()
 
         assertEquals(2, generasjoner.size)
@@ -1503,12 +1517,12 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterAnnullerUtbetaling()
         håndterUtbetalt()
 
-        håndterAnnullerUtbetaling(fagsystemId = inspektør.sisteAvsluttedeUtbetalingForVedtaksperiode(1.vedtaksperiode).inspektør.arbeidsgiverOppdrag.fagsystemId())
+        håndterAnnullerUtbetaling(fagsystemId = inspektør.gjeldendeUtbetalingForVedtaksperiode(1.vedtaksperiode).inspektør.arbeidsgiverOppdrag.fagsystemId())
         håndterUtbetalt()
 
         nyttVedtak(1.juli, 31.juli)
 
-        håndterAnnullerUtbetaling(fagsystemId = inspektør.sisteAvsluttedeUtbetalingForVedtaksperiode(3.vedtaksperiode).inspektør.arbeidsgiverOppdrag.fagsystemId())
+        håndterAnnullerUtbetaling(fagsystemId = inspektør.gjeldendeUtbetalingForVedtaksperiode(3.vedtaksperiode).inspektør.arbeidsgiverOppdrag.fagsystemId())
         håndterUtbetalt()
 
         assertEquals(3, generasjoner.size)
@@ -1536,12 +1550,12 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         nyttVedtak(1.januar, 31.januar)
         nyttVedtak(1.mars, 31.mars)
 
-        håndterAnnullerUtbetaling(fagsystemId = inspektør.sisteAvsluttedeUtbetalingForVedtaksperiode(2.vedtaksperiode).inspektør.arbeidsgiverOppdrag.fagsystemId())
+        håndterAnnullerUtbetaling(fagsystemId = inspektør.gjeldendeUtbetalingForVedtaksperiode(2.vedtaksperiode).inspektør.arbeidsgiverOppdrag.fagsystemId())
         håndterUtbetalt()
 
         nyttVedtak(1.mai, 31.mai)
 
-        håndterAnnullerUtbetaling(fagsystemId = inspektør.sisteAvsluttedeUtbetalingForVedtaksperiode(3.vedtaksperiode).inspektør.arbeidsgiverOppdrag.fagsystemId())
+        håndterAnnullerUtbetaling(fagsystemId = inspektør.gjeldendeUtbetalingForVedtaksperiode(3.vedtaksperiode).inspektør.arbeidsgiverOppdrag.fagsystemId())
         håndterUtbetalt()
 
         assertEquals(3, generasjoner.size)
@@ -1564,7 +1578,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
             beregnetPeriode(1) medTilstand Utbetalt
         }
 
-        håndterAnnullerUtbetaling(fagsystemId = inspektør.sisteAvsluttedeUtbetalingForVedtaksperiode(1.vedtaksperiode).inspektør.arbeidsgiverOppdrag.fagsystemId())
+        håndterAnnullerUtbetaling(fagsystemId = inspektør.gjeldendeUtbetalingForVedtaksperiode(1.vedtaksperiode).inspektør.arbeidsgiverOppdrag.fagsystemId())
         håndterUtbetalt()
         assertEquals(3, generasjoner.size)
 
@@ -1592,12 +1606,12 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         nyttVedtak(1.januar, 31.januar)
         nyttVedtak(1.mars, 31.mars)
 
-        håndterAnnullerUtbetaling(fagsystemId = inspektør.sisteAvsluttedeUtbetalingForVedtaksperiode(2.vedtaksperiode).inspektør.arbeidsgiverOppdrag.fagsystemId())
+        håndterAnnullerUtbetaling(fagsystemId = inspektør.gjeldendeUtbetalingForVedtaksperiode(2.vedtaksperiode).inspektør.arbeidsgiverOppdrag.fagsystemId())
         håndterUtbetalt()
 
         nyttVedtak(1.mai, 31.mai)
 
-        håndterAnnullerUtbetaling(fagsystemId = inspektør.sisteAvsluttedeUtbetalingForVedtaksperiode(3.vedtaksperiode).inspektør.arbeidsgiverOppdrag.fagsystemId())
+        håndterAnnullerUtbetaling(fagsystemId = inspektør.gjeldendeUtbetalingForVedtaksperiode(3.vedtaksperiode).inspektør.arbeidsgiverOppdrag.fagsystemId())
         håndterUtbetalt()
 
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Dagtype.Feriedag)))
@@ -1632,7 +1646,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
             beregnetPeriode(1) medTilstand Utbetalt
         }
 
-        håndterAnnullerUtbetaling(fagsystemId = inspektør.sisteAvsluttedeUtbetalingForVedtaksperiode(1.vedtaksperiode).inspektør.arbeidsgiverOppdrag.fagsystemId())
+        håndterAnnullerUtbetaling(fagsystemId = inspektør.gjeldendeUtbetalingForVedtaksperiode(1.vedtaksperiode).inspektør.arbeidsgiverOppdrag.fagsystemId())
         håndterUtbetalt()
         assertEquals(5, generasjoner.size)
 

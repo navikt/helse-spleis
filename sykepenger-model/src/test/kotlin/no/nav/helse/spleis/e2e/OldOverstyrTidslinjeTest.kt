@@ -1,5 +1,7 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.DisableToggle
+import no.nav.helse.Toggle
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -9,19 +11,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
-import no.nav.helse.person.TilstandType.AVSLUTTET
-import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
-import no.nav.helse.person.TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
-import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
-import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
-import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
-import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
-import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
-import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
-import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
-import no.nav.helse.person.TilstandType.START
-import no.nav.helse.person.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.TilstandType
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -29,7 +19,8 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
 
-internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
+@DisableToggle(Toggle.NyRevurdering::class)
+internal class OldOverstyrTidslinjeTest : AbstractEndToEndTest() {
 
     @Test
     fun `kan ikke utbetale overstyrt utbetaling`() {
@@ -78,24 +69,24 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
         håndterOverstyrTidslinje(listOf(manuellArbeidsgiverdag(18.januar)))
         assertEquals(Utbetaling.Forkastet, inspektør.utbetalingtilstand(0))
-        assertNotEquals(AVVENTER_GODKJENNING, inspektør.sisteTilstand(1.vedtaksperiode))
+        assertNotEquals(TilstandType.AVVENTER_GODKJENNING, inspektør.sisteTilstand(1.vedtaksperiode))
 
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
         assertTilstander(
             0,
-            START,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK,
-            AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING
+            TilstandType.START,
+            TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            TilstandType.AVVENTER_BLOKKERENDE_PERIODE,
+            TilstandType.AVVENTER_HISTORIKK,
+            TilstandType.AVVENTER_VILKÅRSPRØVING,
+            TilstandType.AVVENTER_HISTORIKK,
+            TilstandType.AVVENTER_SIMULERING,
+            TilstandType.AVVENTER_GODKJENNING,
+            TilstandType.AVVENTER_HISTORIKK,
+            TilstandType.AVVENTER_SIMULERING,
+            TilstandType.AVVENTER_GODKJENNING
         )
         assertNotEquals(inspektør.utbetaling(0).inspektør.arbeidsgiverOppdrag.fagsystemId(), inspektør.utbetaling(1).inspektør.arbeidsgiverOppdrag.fagsystemId())
         assertEquals(19.januar, inspektør.utbetalinger.last().utbetalingstidslinje().sykepengeperiode()?.start)
@@ -113,7 +104,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
         håndterOverstyrTidslinje(listOf(manuellSykedag(22.januar, 30)))
 
-        assertNotEquals(AVVENTER_GODKJENNING, inspektør.sisteTilstand(1.vedtaksperiode))
+        assertNotEquals(TilstandType.AVVENTER_GODKJENNING, inspektør.sisteTilstand(1.vedtaksperiode))
 
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -136,7 +127,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
         håndterOverstyrTidslinje(listOf(manuellSykedag(22.januar, 0)))
 
-        assertNotEquals(AVVENTER_GODKJENNING, inspektør.sisteTilstand(1.vedtaksperiode))
+        assertNotEquals(TilstandType.AVVENTER_GODKJENNING, inspektør.sisteTilstand(1.vedtaksperiode))
 
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -158,7 +149,7 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
         håndterOverstyrTidslinje(listOf(manuellFeriedag(22.januar), manuellPermisjonsdag(23.januar)))
 
-        assertNotEquals(AVVENTER_GODKJENNING, inspektør.sisteTilstand(1.vedtaksperiode))
+        assertNotEquals(TilstandType.AVVENTER_GODKJENNING, inspektør.sisteTilstand(1.vedtaksperiode))
 
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
@@ -206,12 +197,74 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Overstyring av utkast til revurdering`() {
+    fun `Overstyring av utkast til revurdering sender senere perioder til AVVENTER_ARBEIDSGIVERE_REVURDERING`() {
         nyttVedtak(1.januar, 31.januar)
         forlengVedtak(1.februar, 28.februar)
         forlengVedtak(1.mars, 31.mars)
 
         håndterOverstyrTidslinje((20.januar til 29.januar).map { manuellFeriedag(it) })
+        håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+
+        // Denne overstyringen kommer før den forrige er ferdig prossessert
+        håndterOverstyrTidslinje((30.januar til 31.januar).map { manuellFeriedag(it) })
+
+        assertTilstander(
+            1.vedtaksperiode,
+            TilstandType.START,
+            TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            TilstandType.AVVENTER_BLOKKERENDE_PERIODE,
+            TilstandType.AVVENTER_HISTORIKK,
+            TilstandType.AVVENTER_VILKÅRSPRØVING,
+            TilstandType.AVVENTER_HISTORIKK,
+            TilstandType.AVVENTER_SIMULERING,
+            TilstandType.AVVENTER_GODKJENNING,
+            TilstandType.TIL_UTBETALING,
+            TilstandType.AVSLUTTET,
+            TilstandType.AVVENTER_HISTORIKK_REVURDERING,
+            TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING,
+            TilstandType.AVVENTER_HISTORIKK_REVURDERING
+        )
+
+        assertTilstander(
+            2.vedtaksperiode,
+            TilstandType.START,
+            TilstandType.AVVENTER_BLOKKERENDE_PERIODE,
+            TilstandType.AVVENTER_HISTORIKK,
+            TilstandType.AVVENTER_SIMULERING,
+            TilstandType.AVVENTER_GODKJENNING,
+            TilstandType.TIL_UTBETALING,
+            TilstandType.AVSLUTTET,
+            TilstandType.AVVENTER_ARBEIDSGIVERE_REVURDERING,
+            TilstandType.AVVENTER_HISTORIKK_REVURDERING,
+            TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING,
+            TilstandType.AVVENTER_ARBEIDSGIVERE_REVURDERING
+        )
+
+        assertTilstander(
+            3.vedtaksperiode,
+            TilstandType.START,
+            TilstandType.AVVENTER_BLOKKERENDE_PERIODE,
+            TilstandType.AVVENTER_HISTORIKK,
+            TilstandType.AVVENTER_SIMULERING,
+            TilstandType.AVVENTER_GODKJENNING,
+            TilstandType.TIL_UTBETALING,
+            TilstandType.AVSLUTTET,
+            TilstandType.AVVENTER_ARBEIDSGIVERE_REVURDERING,
+            TilstandType.AVVENTER_HISTORIKK_REVURDERING,
+            TilstandType.AVVENTER_ARBEIDSGIVERE_REVURDERING
+        )
+    }
+
+    @Test
+    fun `Overstyring av utkast til revurdering sender senere periode i AVVENTER_SIMULERING_REVURDERING til AVVENTER_ARBEIDSGIVERE_REVURDERING`() {
+        nyttVedtak(1.januar, 31.januar)
+        forlengVedtak(1.februar, 28.februar)
+        forlengVedtak(1.mars, 31.mars)
+
+        håndterOverstyrTidslinje((20.januar til 29.januar).map { manuellFeriedag(it) })
+        håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
         håndterYtelser(3.vedtaksperiode)
 
         // Denne overstyringen kommer før den forrige er ferdig prossessert
@@ -219,99 +272,107 @@ internal class OverstyrTidslinjeTest : AbstractEndToEndTest() {
 
         assertTilstander(
             1.vedtaksperiode,
-            START,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK,
-            AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING,
-            TIL_UTBETALING,
-            AVSLUTTET,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
+            TilstandType.START,
+            TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            TilstandType.AVVENTER_BLOKKERENDE_PERIODE,
+            TilstandType.AVVENTER_HISTORIKK,
+            TilstandType.AVVENTER_VILKÅRSPRØVING,
+            TilstandType.AVVENTER_HISTORIKK,
+            TilstandType.AVVENTER_SIMULERING,
+            TilstandType.AVVENTER_GODKJENNING,
+            TilstandType.TIL_UTBETALING,
+            TilstandType.AVSLUTTET,
+            TilstandType.AVVENTER_HISTORIKK_REVURDERING,
+            TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING,
+            TilstandType.AVVENTER_HISTORIKK_REVURDERING
         )
 
         assertTilstander(
             2.vedtaksperiode,
-            START,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING,
-            TIL_UTBETALING,
-            AVSLUTTET,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
+            TilstandType.START,
+            TilstandType.AVVENTER_BLOKKERENDE_PERIODE,
+            TilstandType.AVVENTER_HISTORIKK,
+            TilstandType.AVVENTER_SIMULERING,
+            TilstandType.AVVENTER_GODKJENNING,
+            TilstandType.TIL_UTBETALING,
+            TilstandType.AVSLUTTET,
+            TilstandType.AVVENTER_ARBEIDSGIVERE_REVURDERING,
+            TilstandType.AVVENTER_HISTORIKK_REVURDERING,
+            TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING,
+            TilstandType.AVVENTER_ARBEIDSGIVERE_REVURDERING
         )
 
         assertTilstander(
             3.vedtaksperiode,
-            START,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING,
-            TIL_UTBETALING,
-            AVSLUTTET,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
-            AVVENTER_HISTORIKK_REVURDERING,
-            AVVENTER_SIMULERING_REVURDERING,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
-            AVVENTER_HISTORIKK_REVURDERING
+            TilstandType.START,
+            TilstandType.AVVENTER_BLOKKERENDE_PERIODE,
+            TilstandType.AVVENTER_HISTORIKK,
+            TilstandType.AVVENTER_SIMULERING,
+            TilstandType.AVVENTER_GODKJENNING,
+            TilstandType.TIL_UTBETALING,
+            TilstandType.AVSLUTTET,
+            TilstandType.AVVENTER_ARBEIDSGIVERE_REVURDERING,
+            TilstandType.AVVENTER_HISTORIKK_REVURDERING,
+            TilstandType.AVVENTER_SIMULERING_REVURDERING,
+            TilstandType.AVVENTER_ARBEIDSGIVERE_REVURDERING
         )
     }
 
 
     @Test
     fun `skal kunne overstyre dagtype i utkast til revurdering ved revurdering av inntekt`() {
-            nyttVedtak(1.januar, 31.januar)
-            forlengVedtak(1.februar, 28.februar)
+        nyttVedtak(1.januar, 31.januar)
+        forlengVedtak(1.februar, 28.februar)
 
-            håndterOverstyrInntekt(inntekt = 20000.månedlig, skjæringstidspunkt = 1.januar)
-            håndterYtelser(2.vedtaksperiode)
-            håndterSimulering(2.vedtaksperiode)
+        håndterOverstyrInntekt(inntekt = 20000.månedlig, skjæringstidspunkt = 1.januar)
+        håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
 
-            håndterOverstyrTidslinje((20.januar til 29.januar).map { manuellFeriedag(it) })
-            håndterYtelser(2.vedtaksperiode)
-            håndterSimulering(2.vedtaksperiode)
+        håndterOverstyrTidslinje((20.januar til 29.januar).map { manuellFeriedag(it) })
+        håndterYtelser(1.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
 
-            // 23075 = round((20000 * 12) / 260) * 25 (25 nav-dager i januar + februar 2018)
-            assertEquals(23075, inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.totalbeløp())
-            assertEquals("SSSSSHH SSSSSHH SSSSSFF FFFFFFF FSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString().trim())
-            assertEquals("PPPPPPP PPPPPPP PPNNNFF FFFFFFF FNNNNHH NNNNNHH NNNNNHH NNNNNHH NNN", inspektør.sisteUtbetalingUtbetalingstidslinje().toString().trim())
+        // 23075 = round((20000 * 12) / 260) * 25 (25 nav-dager i januar + februar 2018)
+        assertEquals(23075, inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.totalbeløp())
+        assertEquals("SSSSSHH SSSSSHH SSSSSFF FFFFFFF FSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString().trim())
+        assertEquals("PPPPPPP PPPPPPP PPNNNFF FFFFFFF FNNNNHH NNNNNHH NNNNNHH NNNNNHH NNN", inspektør.sisteUtbetalingUtbetalingstidslinje().toString().trim())
 
-            assertTilstander(1.vedtaksperiode,
-                START,
-                AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-                AVVENTER_BLOKKERENDE_PERIODE,
-                AVVENTER_HISTORIKK,
-                AVVENTER_VILKÅRSPRØVING,
-                AVVENTER_HISTORIKK,
-                AVVENTER_SIMULERING,
-                AVVENTER_GODKJENNING,
-                TIL_UTBETALING,
-                AVSLUTTET,
-                AVVENTER_GJENNOMFØRT_REVURDERING,
-                AVVENTER_GJENNOMFØRT_REVURDERING,
-            )
+        assertTilstander(1.vedtaksperiode,
+            TilstandType.START,
+            TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            TilstandType.AVVENTER_BLOKKERENDE_PERIODE,
+            TilstandType.AVVENTER_HISTORIKK,
+            TilstandType.AVVENTER_VILKÅRSPRØVING,
+            TilstandType.AVVENTER_HISTORIKK,
+            TilstandType.AVVENTER_SIMULERING,
+            TilstandType.AVVENTER_GODKJENNING,
+            TilstandType.TIL_UTBETALING,
+            TilstandType.AVSLUTTET,
+            TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING,
+            TilstandType.AVVENTER_HISTORIKK_REVURDERING,
+            TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING,
+            TilstandType.AVVENTER_HISTORIKK_REVURDERING,
+            TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
+        )
 
-            assertTilstander(2.vedtaksperiode,
-                START,
-                AVVENTER_BLOKKERENDE_PERIODE,
-                AVVENTER_HISTORIKK,
-                AVVENTER_SIMULERING,
-                AVVENTER_GODKJENNING,
-                TIL_UTBETALING,
-                AVSLUTTET,
-                AVVENTER_GJENNOMFØRT_REVURDERING,
-                AVVENTER_HISTORIKK_REVURDERING,
-                AVVENTER_SIMULERING_REVURDERING,
-                AVVENTER_GODKJENNING_REVURDERING,
-                AVVENTER_GJENNOMFØRT_REVURDERING,
-                AVVENTER_HISTORIKK_REVURDERING,
-                AVVENTER_SIMULERING_REVURDERING,
-                AVVENTER_GODKJENNING_REVURDERING
-            )
-        }
+        assertTilstander(2.vedtaksperiode,
+            TilstandType.START,
+            TilstandType.AVVENTER_BLOKKERENDE_PERIODE,
+            TilstandType.AVVENTER_HISTORIKK,
+            TilstandType.AVVENTER_SIMULERING,
+            TilstandType.AVVENTER_GODKJENNING,
+            TilstandType.TIL_UTBETALING,
+            TilstandType.AVSLUTTET,
+            TilstandType.AVVENTER_ARBEIDSGIVERE_REVURDERING,
+            TilstandType.AVVENTER_HISTORIKK_REVURDERING,
+            TilstandType.AVVENTER_SIMULERING_REVURDERING,
+            TilstandType.AVVENTER_GODKJENNING_REVURDERING,
+            TilstandType.AVVENTER_ARBEIDSGIVERE_REVURDERING,
+            TilstandType.AVVENTER_HISTORIKK_REVURDERING,
+            TilstandType.AVVENTER_SIMULERING_REVURDERING,
+            TilstandType.AVVENTER_GODKJENNING_REVURDERING
+        )
+    }
 }

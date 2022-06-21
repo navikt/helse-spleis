@@ -4,7 +4,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.april
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
@@ -27,7 +26,6 @@ import no.nav.helse.mars
 import no.nav.helse.person.OppdragVisitor
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
-import no.nav.helse.person.TilstandType.AVVENTER_ARBEIDSGIVERE_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
@@ -35,10 +33,10 @@ import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
+import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
-import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.TilstandType.UTBETALING_FEILET
@@ -78,7 +76,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         håndterUtbetalt()
 
         assertTilstander(
-            0,
+            1.vedtaksperiode,
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
@@ -89,7 +87,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
             AVSLUTTET,
-            AVVENTER_VILKÅRSPRØVING_REVURDERING,
+            AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING,
             AVVENTER_GODKJENNING_REVURDERING,
@@ -171,7 +169,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         håndterOverstyrInntekt(inntekt = 32000.månedlig, skjæringstidspunkt = 1.januar)
 
         assertTilstander(
-            0,
+            1.vedtaksperiode,
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
@@ -182,6 +180,8 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
             AVSLUTTET,
+            AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING
         )
 
         assertTilstander(
@@ -196,9 +196,11 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
             AVSLUTTET,
+            AVVENTER_REVURDERING
         )
 
         assertEquals(2, inspektør.utbetalinger.size)
+        assertNoErrors()
     }
 
     @Test
@@ -217,106 +219,13 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
 
         håndterOverstyrInntekt(inntekt = 32000.månedlig, skjæringstidspunkt = 1.januar)
 
-        assertForventetFeil(
-            forklaring = "Denne er skrudd av i påvente av at vi skal støtte revurdering over skjæringstidspunkt",
-            nå = {
-                assertTilstander(
-                    1.vedtaksperiode,
-                    START,
-                    AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-                    AVVENTER_BLOKKERENDE_PERIODE,
-                    AVVENTER_HISTORIKK,
-                    AVVENTER_VILKÅRSPRØVING,
-                    AVVENTER_HISTORIKK,
-                    AVVENTER_SIMULERING,
-                    AVVENTER_GODKJENNING,
-                    TIL_UTBETALING,
-                    AVSLUTTET
-                )
-
-                assertTilstander(
-                    2.vedtaksperiode,
-                    START,
-                    AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-                    AVVENTER_BLOKKERENDE_PERIODE,
-                    AVVENTER_HISTORIKK,
-                    AVVENTER_VILKÅRSPRØVING,
-                    AVVENTER_HISTORIKK,
-                    AVVENTER_SIMULERING,
-                    AVVENTER_GODKJENNING,
-                    TIL_UTBETALING,
-                    AVSLUTTET
-                )
-
-                assertEquals(2, inspektør.utbetalinger.filter { it.inspektør.erUtbetalt }.size)
-            },
-            ønsket = {
-                håndterYtelser(1.vedtaksperiode)
-                håndterYtelser(2.vedtaksperiode)
-                håndterSimulering(2.vedtaksperiode)
-                håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
-                håndterUtbetalt()
-                assertTilstander(
-                    1.vedtaksperiode,
-                    START,
-                    AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-                    AVVENTER_BLOKKERENDE_PERIODE,
-                    AVVENTER_HISTORIKK,
-                    AVVENTER_VILKÅRSPRØVING,
-                    AVVENTER_HISTORIKK,
-                    AVVENTER_SIMULERING,
-                    AVVENTER_GODKJENNING,
-                    TIL_UTBETALING,
-                    AVSLUTTET,
-                    AVVENTER_VILKÅRSPRØVING_REVURDERING,
-                    AVVENTER_HISTORIKK_REVURDERING,
-                    AVVENTER_GJENNOMFØRT_REVURDERING,
-                    AVSLUTTET
-                )
-
-                assertTilstander(
-                    2.vedtaksperiode,
-                    START,
-                    AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-                    AVVENTER_BLOKKERENDE_PERIODE,
-                    AVVENTER_HISTORIKK,
-                    AVVENTER_VILKÅRSPRØVING,
-                    AVVENTER_HISTORIKK,
-                    AVVENTER_SIMULERING,
-                    AVVENTER_GODKJENNING,
-                    TIL_UTBETALING,
-                    AVSLUTTET,
-                    AVVENTER_ARBEIDSGIVERE_REVURDERING,
-                    AVVENTER_HISTORIKK_REVURDERING,
-                    AVVENTER_SIMULERING_REVURDERING,
-                    AVVENTER_GODKJENNING_REVURDERING,
-                    TIL_UTBETALING,
-                    AVSLUTTET
-                )
-
-                assertEquals(3, inspektør.utbetalinger.filter { it.inspektør.erUtbetalt }.size)
-            }
-        )
-    }
-
-    @Test
-    fun `kan ikke revurdere inntekt på vedtak med opphold og nytt skjæringstidspunkt etterpå`() {
-        nyttVedtak(1.januar, 26.januar, 100.prosent)
-
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 14.februar, 100.prosent))
-        håndterSøknad(Sykdom(1.februar, 14.februar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.februar)
-        håndterYtelser(2.vedtaksperiode)
-        håndterVilkårsgrunnlag(2.vedtaksperiode)
-        håndterYtelser(2.vedtaksperiode)
-        håndterSimulering(2.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt()
 
-        håndterOverstyrInntekt(inntekt = 32000.månedlig, skjæringstidspunkt = 1.januar)
-
         assertTilstander(
-            0,
+            1.vedtaksperiode,
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
@@ -326,11 +235,17 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
+            AVSLUTTET,
+            AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_SIMULERING_REVURDERING,
+            AVVENTER_GODKJENNING_REVURDERING,
+            TIL_UTBETALING,
             AVSLUTTET
         )
 
         assertTilstander(
-            1,
+            2.vedtaksperiode,
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
@@ -340,9 +255,13 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
-            AVSLUTTET
+            AVSLUTTET,
+            AVVENTER_REVURDERING,
+            AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING
         )
-        assertError("Kan kun revurdere siste skjæringstidspunkt")
+
+        assertEquals(3, inspektør.utbetalinger.filter { it.inspektør.erUtbetalt }.size)
     }
 
     @Test
@@ -362,7 +281,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
             AVSLUTTET,
-            AVVENTER_VILKÅRSPRØVING_REVURDERING,
+            AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING
         )
 
@@ -387,7 +306,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
             AVSLUTTET,
-            AVVENTER_VILKÅRSPRØVING_REVURDERING,
+            AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING
         )
 
@@ -414,7 +333,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
             AVSLUTTET,
-            AVVENTER_VILKÅRSPRØVING_REVURDERING,
+            AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING,
             AVVENTER_GODKJENNING_REVURDERING
@@ -521,7 +440,6 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 32000.månedlig, refusjon = Refusjon(32000.månedlig, null, emptyList()))
         håndterOverstyrInntekt(inntekt = 32000.månedlig, skjæringstidspunkt = 1.januar)
 
-        håndterYtelser(1.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
@@ -724,7 +642,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
             AVSLUTTET,
-            AVVENTER_VILKÅRSPRØVING_REVURDERING,
+            AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_GODKJENNING_REVURDERING,
             AVSLUTTET
@@ -775,7 +693,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
             AVSLUTTET,
-            AVVENTER_VILKÅRSPRØVING_REVURDERING,
+            AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_GODKJENNING_REVURDERING,
             AVSLUTTET
@@ -837,8 +755,29 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         nyttVedtak(1.januar, 31.januar)
         forlengTilGodkjentVedtak(1.februar, 28.februar)
         håndterOverstyrInntekt(INNTEKT/2, skjæringstidspunkt = 1.januar)
-        assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET)
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING)
+        assertTilstander(
+            1.vedtaksperiode,
+            START,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET,
+            AVVENTER_REVURDERING
+        )
+        assertTilstander(
+            2.vedtaksperiode,
+            START,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING
+        )
     }
 
     @Test
@@ -847,69 +786,92 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         forlengTilGodkjentVedtak(1.februar, 28.februar)
         håndterUtbetalt(status = Oppdragstatus.FEIL)
         håndterOverstyrInntekt(INNTEKT/2, skjæringstidspunkt = 1.januar)
-        assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET)
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, UTBETALING_FEILET)
+        assertTilstander(
+            1.vedtaksperiode,
+            START,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET,
+            AVVENTER_REVURDERING
+        )
+
+        assertTilstander(
+            2.vedtaksperiode,
+            START,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            UTBETALING_FEILET,
+        )
     }
-}
 
-private fun Oppdrag.skalHaEndringskode(kode: Endringskode, message: String = "") = accept(UtbetalingSkalHaEndringskode(kode, message))
+    private fun Oppdrag.skalHaEndringskode(kode: Endringskode, message: String = "") = accept(UtbetalingSkalHaEndringskode(kode, message))
 
-private class UtbetalingSkalHaEndringskode(private val ønsketEndringskode: Endringskode, private val message: String = "") : OppdragVisitor {
-    override fun preVisitOppdrag(
-        oppdrag: Oppdrag,
-        fagområde: Fagområde,
-        fagsystemId: String,
-        mottaker: String,
-        førstedato: LocalDate,
-        sistedato: LocalDate,
-        sisteArbeidsgiverdag: LocalDate?,
-        stønadsdager: Int,
-        totalBeløp: Int,
-        nettoBeløp: Int,
-        tidsstempel: LocalDateTime,
-        endringskode: Endringskode,
-        avstemmingsnøkkel: Long?,
-        status: Oppdragstatus?,
-        overføringstidspunkt: LocalDateTime?,
-        erSimulert: Boolean,
-        simuleringsResultat: Simulering.SimuleringResultat?
-    ) {
-        assertEquals(ønsketEndringskode, endringskode, message)
-    }
-}
-
-private fun Utbetalingslinje.assertUtbetalingslinje(
-    ønsketEndringskode: Endringskode,
-    ønsketDelytelseId: Int,
-    ønsketRefDelytelseId: Int? = null,
-    ønsketRefFagsystemId: String? = null,
-    ønsketDatoStatusFom: LocalDate? = null
-) {
-    val visitor = object : OppdragVisitor {
-        override fun visitUtbetalingslinje(
-            linje: Utbetalingslinje,
-            fom: LocalDate,
-            tom: LocalDate,
+    private class UtbetalingSkalHaEndringskode(private val ønsketEndringskode: Endringskode, private val message: String = "") : OppdragVisitor {
+        override fun preVisitOppdrag(
+            oppdrag: Oppdrag,
+            fagområde: Fagområde,
+            fagsystemId: String,
+            mottaker: String,
+            førstedato: LocalDate,
+            sistedato: LocalDate,
+            sisteArbeidsgiverdag: LocalDate?,
             stønadsdager: Int,
-            totalbeløp: Int,
-            satstype: Satstype,
-            beløp: Int?,
-            aktuellDagsinntekt: Int?,
-            grad: Int?,
-            delytelseId: Int,
-            refDelytelseId: Int?,
-            refFagsystemId: String?,
+            totalBeløp: Int,
+            nettoBeløp: Int,
+            tidsstempel: LocalDateTime,
             endringskode: Endringskode,
-            datoStatusFom: LocalDate?,
-            statuskode: String?,
-            klassekode: Klassekode
+            avstemmingsnøkkel: Long?,
+            status: Oppdragstatus?,
+            overføringstidspunkt: LocalDateTime?,
+            erSimulert: Boolean,
+            simuleringsResultat: Simulering.SimuleringResultat?
         ) {
-            assertEquals(ønsketEndringskode, endringskode)
-            assertEquals(ønsketDelytelseId, delytelseId)
-            assertEquals(ønsketRefDelytelseId, refDelytelseId)
-            assertEquals(ønsketRefFagsystemId, refFagsystemId)
-            assertEquals(ønsketDatoStatusFom, datoStatusFom)
+            assertEquals(ønsketEndringskode, endringskode, message)
         }
     }
-    accept(visitor)
+
+    private fun Utbetalingslinje.assertUtbetalingslinje(
+        ønsketEndringskode: Endringskode,
+        ønsketDelytelseId: Int,
+        ønsketRefDelytelseId: Int? = null,
+        ønsketRefFagsystemId: String? = null,
+        ønsketDatoStatusFom: LocalDate? = null
+    ) {
+        val visitor = object : OppdragVisitor {
+            override fun visitUtbetalingslinje(
+                linje: Utbetalingslinje,
+                fom: LocalDate,
+                tom: LocalDate,
+                stønadsdager: Int,
+                totalbeløp: Int,
+                satstype: Satstype,
+                beløp: Int?,
+                aktuellDagsinntekt: Int?,
+                grad: Int?,
+                delytelseId: Int,
+                refDelytelseId: Int?,
+                refFagsystemId: String?,
+                endringskode: Endringskode,
+                datoStatusFom: LocalDate?,
+                statuskode: String?,
+                klassekode: Klassekode
+            ) {
+                assertEquals(ønsketEndringskode, endringskode)
+                assertEquals(ønsketDelytelseId, delytelseId)
+                assertEquals(ønsketRefDelytelseId, refDelytelseId)
+                assertEquals(ønsketRefFagsystemId, refFagsystemId)
+                assertEquals(ønsketDatoStatusFom, datoStatusFom)
+            }
+        }
+        accept(visitor)
+    }
 }

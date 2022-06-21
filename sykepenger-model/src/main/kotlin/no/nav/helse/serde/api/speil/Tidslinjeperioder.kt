@@ -14,6 +14,7 @@ import no.nav.helse.person.Vedtaksperiode.AvventerGjennomførtRevurdering
 import no.nav.helse.person.Vedtaksperiode.AvventerGodkjenning
 import no.nav.helse.person.Vedtaksperiode.AvventerGodkjenningRevurdering
 import no.nav.helse.person.Vedtaksperiode.AvventerHistorikk
+import no.nav.helse.person.Vedtaksperiode.AvventerRevurdering
 import no.nav.helse.person.Vedtaksperiode.AvventerUferdig
 import no.nav.helse.person.Vedtaksperiode.AvventerVilkårsprøving
 import no.nav.helse.person.Vedtaksperiode.Vedtaksperiodetilstand
@@ -257,7 +258,12 @@ internal class Tidslinjeperioder(
         )
     }
 
-    private fun iVentetilstand(tilstand: Vedtaksperiodetilstand) = tilstand in listOf(AvventerBlokkerendePeriode, AvventerArbeidsgivereRevurdering, AvventerGjennomførtRevurdering)
+    private fun iVentetilstand(tilstand: Vedtaksperiodetilstand) = tilstand in listOf(
+        AvventerBlokkerendePeriode,
+        AvventerArbeidsgivereRevurdering,
+        AvventerGjennomførtRevurdering,
+        AvventerRevurdering
+    )
 
     private fun List<SammenslåttDag>.sisteNavDag() =
         lastOrNull { it.utbetalingstidslinjedagtype == UtbetalingstidslinjedagType.NavDag }

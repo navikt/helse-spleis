@@ -1,5 +1,7 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.DisableToggle
+import no.nav.helse.Toggle
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -17,7 +19,8 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-internal class UtbetalingTest : AbstractEndToEndTest() {
+@DisableToggle(Toggle.NyRevurdering::class)
+internal class OldUtbetalingTest : AbstractEndToEndTest() {
     val ANNET_ORGNUMMER = "foo"
 
     @Test
@@ -105,15 +108,15 @@ internal class UtbetalingTest : AbstractEndToEndTest() {
         nyttVedtak(1.januar, 31.januar, 100.prosent)
         forlengVedtak(1.februar, 28.februar)
 
-        håndterInntektsmelding(
-            listOf(1.januar til 16.januar), beregnetInntekt = 32000.månedlig, refusjon = Inntektsmelding.Refusjon(
-                32000.månedlig,
-                null,
-                emptyList()
-            )
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 32000.månedlig, refusjon = Inntektsmelding.Refusjon(
+            32000.månedlig,
+            null,
+            emptyList()
+        )
         )
         håndterOverstyrInntekt(inntekt = 32000.månedlig, skjæringstidspunkt = 1.januar)
 
+        håndterYtelser(1.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
