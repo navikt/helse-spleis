@@ -23,6 +23,13 @@ internal class V166UtbetalteDagerMedForHøyAvviksprosentTest: MigrationTest(V166
     }
 
     @Test
+    fun `feil i migrering endrer også vesjonsnummer`(){
+        val original = """{"skjemaVersjon": 165}"""
+        val expected = (serdeObjectMapper.readTree(original) as ObjectNode).put("skjemaVersjon", 166)
+        assertMigrationRaw("$expected", original)
+    }
+
+    @Test
     fun `en arbeidsgiver med avvik`() {
         val avvik = "/migrations/166/enArbeidsgiverMedAvvik.json".avvik()
         val forventetAvvik = listOf(

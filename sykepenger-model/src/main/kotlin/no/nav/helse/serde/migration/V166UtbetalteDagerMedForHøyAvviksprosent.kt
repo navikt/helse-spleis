@@ -13,8 +13,18 @@ internal class V166UtbetalteDagerMedForHøyAvviksprosent: JsonMigration(166) {
 
     override val description = "Identifiserer og logger dager som er utbetalt med en avviksprosent på over 25 %"
 
+    private fun finnAvvikOrNull(jsonNode: ObjectNode) = try {
+        finnAvvik(jsonNode)
+    } catch (throwable: Throwable) {
+        sikkerlogg.error("Feil ved identifisering av utbetalinger med avvikt over 25%: {}",
+            keyValue("fødselsnummer", jsonNode.path("fødselsnummer").asText()),
+            throwable
+        )
+        null
+    }
+
     override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
-        finnAvvik(jsonNode).forEach { avvik ->
+        finnAvvikOrNull(jsonNode)?.forEach { avvik ->
             sikkerlogg.warn("Utbetalt med avvik over 25%: {}, {}, {}, {}, {}, {}, {}",
                 keyValue("fødselsnummer", avvik.sykmeldt),
                 keyValue("aktørId", avvik.aktørId),
@@ -22,7 +32,7 @@ internal class V166UtbetalteDagerMedForHøyAvviksprosent: JsonMigration(166) {
                 keyValue("avviksprosent", avvik.avviksprosent),
                 keyValue("antallDager", avvik.antallDager),
                 keyValue("fom", avvik.periode.start),
-                keyValue("tom", avvik.periode.endInclusive),
+                keyValue("tom", avvik.periode.endInclusive)
             )
         }
     }
