@@ -10,6 +10,7 @@ import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.til
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.juni
 import no.nav.helse.mai
@@ -591,5 +592,24 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode, foreldrepenger = 20.mars til 31.mars, orgnummer = a1)
 
         assertWarning("Det er utbetalt foreldrepenger i samme periode.", 3.vedtaksperiode.filter(a2))
+    }
+
+    @Test
+    fun `forkaster gamle utbetalinger for flere AG`() {
+        nyeVedtak(1.januar, 31.januar, a1, a2)
+        forlengVedtak(1.februar, 28.februar, a1, a2)
+
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)), a1)
+        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
+
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(18.januar, Feriedag)), a1)
+        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
+
+        inspektør(a2).utbetalinger(2.vedtaksperiode).also { utbetalinger ->
+            assertEquals(1, utbetalinger.filter { it.inspektør.erUbetalt }.size)
+        }
+        inspektør(a2).utbetalinger(1.vedtaksperiode).also { utbetalinger ->
+            assertEquals(1, utbetalinger.filter { it.inspektør.erUbetalt }.size)
+        }
     }
 }

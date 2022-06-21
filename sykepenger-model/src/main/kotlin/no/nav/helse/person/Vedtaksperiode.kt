@@ -794,6 +794,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun lagRevurdering(maksimumSykepenger: Alder.MaksimumSykepenger, hendelse: ArbeidstakerHendelse) {
+        if (Toggle.NyRevurdering.enabled) utbetalinger.forkast(hendelse)
         utbetalingstidslinje = utbetalinger.lagRevurdering(fødselsnummer, this, periode, maksimumSykepenger, hendelse)
     }
 
@@ -1258,7 +1259,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             hendelse.info("Forespør sykdoms- og inntektshistorikk")
-            vedtaksperiode.utbetalinger.forkast(hendelse)
+            if (Toggle.NyRevurdering.disabled) vedtaksperiode.utbetalinger.forkast(hendelse)
             val periode = if (Toggle.NyRevurdering.disabled) vedtaksperiode.periode else vedtaksperiode.skjæringstidspunktperiode()
             vedtaksperiode.trengerYtelser(hendelse, periode)
             vedtaksperiode.finnArbeidsgiverperiode()?.firstOrNull()?.also {
