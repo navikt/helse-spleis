@@ -1441,6 +1441,7 @@ internal class Vedtaksperiode private constructor(
                 onSuccess {
                     infotrygdhistorikk.addInntekter(person, this)
                     if (vedtaksperiode.ingenUtbetaling()) {
+                        vedtaksperiode.utbetalinger.forkast(hendelse)
                         vedtaksperiode.tilstand(hendelse, AvsluttetUtenUtbetaling)
                     } else if (vedtaksperiode.harNødvendigInntektForVilkårsprøving()) {
                         info("Oppdaget at perioden startet i infotrygd")
