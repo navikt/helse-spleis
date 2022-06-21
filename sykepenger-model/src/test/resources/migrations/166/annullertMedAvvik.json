@@ -1,0 +1,121 @@
+{
+  "aktørId": "42",
+  "fødselsnummer": "12029240045",
+  "arbeidsgivere": [
+    {
+      "utbetalinger": [
+        {
+          "korrelasjonsId": "c47a213c-0463-432a-b75b-5bd518ff8acb",
+          "utbetalingstidslinje": {
+            "dager": [
+              {
+                "fom": "2018-01-01",
+                "tom": "2018-01-16",
+                "type": "ArbeidsgiverperiodeDag"
+              },
+              {
+                "fom": "2018-01-17",
+                "tom": "2018-01-19",
+                "type": "NavDag",
+                "skjæringstidspunkt": "2018-01-01",
+                "arbeidsgiverbeløp": 1431.0,
+                "personbeløp": 0.0
+              },
+              {
+                "fom": "2018-01-20",
+                "tom": "2018-01-21",
+                "type": "NavHelgDag"
+              },
+              {
+                "fom": "2018-01-22",
+                "tom": "2018-01-26",
+                "type": "NavDag",
+                "skjæringstidspunkt": "2018-01-01",
+                "arbeidsgiverbeløp": 1431.0,
+                "personbeløp": 0.0
+              },
+              {
+                "fom": "2018-01-27",
+                "tom": "2018-01-28",
+                "type": "NavHelgDag"
+              },
+              {
+                "fom": "2018-01-29",
+                "tom": "2018-01-31",
+                "type": "NavDag",
+                "skjæringstidspunkt": "2018-01-01",
+                "arbeidsgiverbeløp": 1431.0,
+                "personbeløp": 0.0
+              }
+            ]
+          },
+          "tidsstempel": "2022-06-21T15:17:32.321553",
+          "status": "UTBETALT",
+          "fom": "2018-01-17"
+        },
+        {
+          "korrelasjonsId": "c47a213c-0463-432a-b75b-5bd518ff8acb",
+          "utbetalingstidslinje": {
+            "dager": [
+              {
+                "fom": "2018-01-01",
+                "tom": "2018-01-16",
+                "type": "ArbeidsgiverperiodeDag"
+              },
+              {
+                "fom": "2018-01-17",
+                "tom": "2018-01-19",
+                "type": "NavDag",
+                "skjæringstidspunkt": "2018-01-01",
+                "arbeidsgiverbeløp": 1431.0,
+                "personbeløp": 0.0
+              },
+              {
+                "fom": "2018-01-20",
+                "tom": "2018-01-21",
+                "type": "NavHelgDag"
+              },
+              {
+                "fom": "2018-01-22",
+                "tom": "2018-01-26",
+                "type": "NavDag",
+                "skjæringstidspunkt": "2018-01-01",
+                "arbeidsgiverbeløp": 1431.0,
+                "personbeløp": 0.0
+              },
+              {
+                "fom": "2018-01-27",
+                "tom": "2018-01-28",
+                "type": "NavHelgDag"
+              },
+              {
+                "fom": "2018-01-29",
+                "tom": "2018-01-31",
+                "type": "NavDag",
+                "skjæringstidspunkt": "2018-01-01",
+                "arbeidsgiverbeløp": 1431.0,
+                "personbeløp": 0.0
+              }
+            ]
+          },
+          "tidsstempel": "2022-06-21T15:17:32.413944",
+          "status": "ANNULLERT",
+          "fom": "2018-01-17"
+        }
+      ],
+      "organisasjonsnummer": "987654321"
+    }
+  ],
+  "vilkårsgrunnlagHistorikk": [
+    {
+      "vilkårsgrunnlag": [
+        {
+          "skjæringstidspunkt": "2018-01-01",
+          "type": "Vilkårsprøving",
+          "avviksprosent": 0.5
+        }
+      ]
+    }
+  ],
+  "skjemaVersjon": 165
+}

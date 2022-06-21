@@ -57,6 +57,11 @@ internal class V166UtbetalteDagerMedForHøyAvviksprosentTest: MigrationTest(V166
         assertEquals(forventetAvvik, avvik)
     }
 
+    @Test
+    fun `annullert utbetaling med avvik`() {
+        assertEquals(emptyList<Avvik>(), "/migrations/166/annullertMedAvvik.json".avvik())
+    }
+
     private companion object {
         private fun String.avvik() = V166UtbetalteDagerMedForHøyAvviksprosent.finnAvvik(
             serdeObjectMapper.readTree(this.readResource()) as ObjectNode
