@@ -2205,7 +2205,10 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
             if (vedtaksperiode.utbetalinger.kanIkkeForsøkesPåNy()) {
                 return vedtaksperiode.utbetalinger.reberegnUtbetaling({
-                    vedtaksperiode.person.overstyrUtkastRevurdering(påminnelse)
+                    if (Toggle.NyRevurdering.disabled)
+                        vedtaksperiode.person.overstyrUtkastRevurdering(påminnelse)
+                    else
+                        vedtaksperiode.person.startRevurdering(vedtaksperiode, påminnelse)
                 }) {
                     vedtaksperiode.tilstand(påminnelse, AvventerHistorikk) {
                         påminnelse.info("Reberegner periode ettersom utbetaling er avvist og ikke kan forsøkes på nytt")
@@ -2217,6 +2220,20 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
             hendelse.info("Overstyrer ikke en vedtaksperiode med utbetaling som har feilet")
+        }
+
+        override fun startRevurdering(
+            vedtaksperiode: Vedtaksperiode,
+            hendelse: IAktivitetslogg,
+            overstyrt: Vedtaksperiode,
+            pågående: Vedtaksperiode?
+        ) {
+            if (Toggle.NyRevurdering.disabled)
+                return super.startRevurdering(vedtaksperiode, hendelse, overstyrt, pågående)
+
+            if (vedtaksperiode != overstyrt) return
+            check(pågående != null && vedtaksperiode == pågående) { "Skal ikke kunne restarte revurdering i $type dersom det ikke er oss selv som har igangsatt revurderingen" }
+            vedtaksperiode.tilstand(hendelse, AvventerGjennomførtRevurdering)
         }
 
         private fun sjekkUtbetalingstatus(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse) {

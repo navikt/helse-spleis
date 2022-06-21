@@ -1,5 +1,7 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.DisableToggle
+import no.nav.helse.Toggle
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.Inntektsmelding
@@ -11,6 +13,7 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.TilstandType.AVSLUTTET
+import no.nav.helse.person.TilstandType.AVVENTER_ARBEIDSGIVERE_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
@@ -24,7 +27,6 @@ import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.TilstandType.UTBETALING_FEILET
-import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.Fagområde
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
@@ -35,27 +37,27 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-internal class UtbetalingFeiletE2ETest : AbstractEndToEndTest() {
+@DisableToggle(Toggle.NyRevurdering::class)
+internal class OldUtbetalingFeiletE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `revurdering feilet med ett oppdrag status avvist som bygger på tidligere`() {
         nyttVedtak(1.januar, 31.januar)
         forlengVedtak(1.februar, 28.februar)
-        nullstillTilstandsendringer()
-
-        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
+        håndterOverstyrTidslinje(listOf(
+            ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)
+        ))
+        håndterYtelser(1.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt(Oppdragstatus.AVVIST)
-
         håndterPåminnelse(2.vedtaksperiode, UTBETALING_FEILET)
-
+        håndterYtelser(1.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
-
         val første = inspektør.utbetaling(0)
         assertEquals(Utbetaling.Forkastet, inspektør.utbetalingtilstand(2))
         inspektør.utbetaling(3).inspektør.also { utbetalingInspektør ->
@@ -70,28 +72,11 @@ internal class UtbetalingFeiletE2ETest : AbstractEndToEndTest() {
             assertTrue(utbetalingInspektør.arbeidsgiverOppdrag[0].erForskjell())
             assertTrue(utbetalingInspektør.arbeidsgiverOppdrag[1].erForskjell())
         }
-        assertTilstander(
-            1.vedtaksperiode,
-            AVSLUTTET,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
-            AVSLUTTET
-        )
-        assertTilstander(
-            2.vedtaksperiode,
-            AVSLUTTET,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
-            AVVENTER_HISTORIKK_REVURDERING,
-            AVVENTER_SIMULERING_REVURDERING,
-            AVVENTER_GODKJENNING_REVURDERING,
-            TIL_UTBETALING,
-            UTBETALING_FEILET,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
-            AVVENTER_HISTORIKK_REVURDERING,
-            AVVENTER_SIMULERING_REVURDERING,
-            AVVENTER_GODKJENNING_REVURDERING,
-            TIL_UTBETALING,
-            AVSLUTTET
-        )
+        assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET,
+            AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVSLUTTET)
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET,
+            AVVENTER_ARBEIDSGIVERE_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, UTBETALING_FEILET, AVVENTER_ARBEIDSGIVERE_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING,
+            AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVSLUTTET)
     }
 
     @Test
