@@ -5,6 +5,8 @@ import java.time.LocalDate
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
+import no.nav.helse.mai
+import no.nav.helse.mars
 import no.nav.helse.readResource
 import no.nav.helse.serde.migration.V166UtbetalteDagerMedForHøyAvviksprosent.Companion.Avvik
 import no.nav.helse.serde.serdeObjectMapper
@@ -61,6 +63,26 @@ internal class V166UtbetalteDagerMedForHøyAvviksprosentTest: MigrationTest(V166
     fun `annullert utbetaling med avvik`() {
         assertEquals(emptyList<Avvik>(), "/migrations/166/annullertMedAvvik.json".avvik())
     }
+
+    @Test
+    fun `to arbeidsgivere med avvik i forskjellige perioder`() {
+        val avvik = "/migrations/166/toArbeidsgivereMedAvvik.json".avvik()
+        val forventetAvvik = listOf(
+            forventetAvvik(
+                skjæringstidspunkt = 1.mai,
+                avvik = 0.4,
+                utbetaltePerioder = listOf(17.mai til 18.mai)
+            ),
+            forventetAvvik(
+                arbeidsgiver = "654321987",
+                skjæringstidspunkt = 1.mars,
+                avvik = 0.26,
+                utbetaltePerioder = listOf(19.mars til 20.mars)
+            )
+        )
+        assertEquals(forventetAvvik, avvik)
+    }
+
 
     private companion object {
         private fun String.avvik() = V166UtbetalteDagerMedForHøyAvviksprosent.finnAvvik(

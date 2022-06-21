@@ -33,6 +33,7 @@ internal class V166UtbetalteDagerMedForHøyAvviksprosent: JsonMigration(166) {
         private fun JsonNode.asLocalDate() = LocalDate.parse(asText())
         private fun JsonNode.asLocalDateTime() = LocalDateTime.parse(asText())
         private fun JsonNode.dager() = path("dato").takeIf { it.isTextual }?.let { listOf(it.asLocalDate()) } ?: Periode(path("fom").asLocalDate(), path("tom").asLocalDate()).toList()
+        private fun JsonNode.tom() = path("dato").takeIf { it.isTextual }?.asLocalDate() ?: path("tom").asLocalDate()
 
         internal data class Avvik(
             val sykmeldt: String,
@@ -43,7 +44,7 @@ internal class V166UtbetalteDagerMedForHøyAvviksprosent: JsonMigration(166) {
             private val utbetalteDager: List<LocalDate>
         ) {
             val avviksprosent = avvik * 100
-            val periode = utbetalteDager.sorted().let { Periode(it.first(), it.last()) }
+            val periode = utbetalteDager.toSortedSet().let { Periode(it.first(), it.last()) }
             val antallDager = utbetalteDager.size
         }
 
@@ -53,7 +54,7 @@ internal class V166UtbetalteDagerMedForHøyAvviksprosent: JsonMigration(166) {
 
             val nyesteVilkårsgrunnlag = jsonNode["vilkårsgrunnlagHistorikk"].firstOrNull() ?: return emptyList()
 
-            val skjæringstidspunktTilForHøyAvvik = nyesteVilkårsgrunnlag.path("vilkårsgrunnlag")
+            val skjæringstidspunktTilForHøytAvvik = nyesteVilkårsgrunnlag.path("vilkårsgrunnlag")
                 .filter { it.path("type").asText() == "Vilkårsprøving" }
                 .filter { it.hasNonNull("avviksprosent") }
                 .filter { it.path("avviksprosent").asDouble() > 0.25 }
@@ -74,7 +75,10 @@ internal class V166UtbetalteDagerMedForHøyAvviksprosent: JsonMigration(166) {
                     ?: return@forEach
 
                 val skjæringstidspunktTilUtbetalteDager = utbetalteUtbetalinger
-                    .flatMap { it.path("utbetalingstidslinje").path("dager") }
+                    .flatMap { utbetaling ->
+                        val utbetalingFom = utbetaling.path("fom").asLocalDate()
+                        utbetaling.path("utbetalingstidslinje").path("dager").filterNot { it.tom() < utbetalingFom }
+                    }
                     .filter { it.path("type").asText() == "NavDag" }
                     .filter { it.path("arbeidsgiverbeløp").asDouble() > 0 || it.path("personbeløp").asDouble() > 0 }
                     .groupBy { it.path("skjæringstidspunkt").asLocalDate() }
@@ -82,13 +86,13 @@ internal class V166UtbetalteDagerMedForHøyAvviksprosent: JsonMigration(166) {
                     .takeUnless { it.isEmpty() }
                     ?: return@forEach
 
-                skjæringstidspunktTilUtbetalteDager.filterKeys { it in skjæringstidspunktTilForHøyAvvik.keys }.forEach { (skjæringstidspunkt, utbetalteDager) ->
+                skjæringstidspunktTilUtbetalteDager.filterKeys { it in skjæringstidspunktTilForHøytAvvik.keys }.forEach { (skjæringstidspunkt, utbetalteDager) ->
                     avvik.add(Avvik(
                         sykmeldt = fødselsnummer,
                         aktørId = aktørId,
                         arbeidsgiver = organisasjonsnummer,
                         skjæringstidspunkt = skjæringstidspunkt,
-                        avvik = skjæringstidspunktTilForHøyAvvik.getValue(skjæringstidspunkt),
+                        avvik = skjæringstidspunktTilForHøytAvvik.getValue(skjæringstidspunkt),
                         utbetalteDager = utbetalteDager
                     ))
                 }
