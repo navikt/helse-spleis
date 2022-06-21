@@ -40,6 +40,7 @@ import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.Sykedag
+import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
@@ -79,11 +80,15 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         nyttVedtak(1.januar, 31.januar)
         forlengTilGodkjenning(1.februar, 28.februar)
         nullstillTilstandsendringer()
+
         assertDag<Sykedag, NavDag>(17.januar, 1431.0)
+
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)))
         håndterYtelser(1.vedtaksperiode)
+
         assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(17.januar, 0.0)
         assertDiff(-1431)
+
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
@@ -947,6 +952,48 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING)
         assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
         assertWarning("Det er utbetalt foreldrepenger i samme periode.", 2.vedtaksperiode.filter())
+    }
+
+    @Test
+    fun `ping-pong - riktig utbetalingsperiode`() {
+        nyttVedtak(1.januar, 31.januar)
+
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.mars, 31.mars, 100.prosent))
+        håndterUtbetalingshistorikk(
+            2.vedtaksperiode,
+            ArbeidsgiverUtbetalingsperiode(a1, 1.februar, 28.februar, 100.prosent, INNTEKT),
+            inntektshistorikk = listOf(
+                Inntektsopplysning(a1, 1.februar, INNTEKT, true),
+            )
+        )
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt()
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)))
+
+        håndterYtelser(1.vedtaksperiode)
+
+        inspektør.gjeldendeUtbetalingForVedtaksperiode(1.vedtaksperiode).inspektør.also {
+            assertEquals(Utbetaling.Utbetalingtype.REVURDERING, it.type)
+            assertEquals(Utbetaling.Ubetalt, it.tilstand)
+            assertEquals(17.januar til 31.januar, it.periode)
+        }
+
+        inspektør.gjeldendeUtbetalingForVedtaksperiode(2.vedtaksperiode).inspektør.also {
+            assertEquals(Utbetaling.Utbetalingtype.REVURDERING, it.type)
+            assertEquals(Utbetaling.Ubetalt, it.tilstand)
+            assertForventetFeil(
+                forklaring = "Utbetalingen skal gjelde for mars-perioden, ikke januar. Feilen ligger antakelig i hvordan vi beregner tidslinje",
+                nå = {
+                    assertEquals(18.januar til 31.januar, it.periode)
+                },
+                ønsket = {
+                    assertEquals(1.mars til 31.mars, it.periode)
+                }
+            )
+        }
     }
 
     private inline fun <reified D: Dag, reified UD: Utbetalingsdag>assertDag(dato: LocalDate, beløp: Double) {

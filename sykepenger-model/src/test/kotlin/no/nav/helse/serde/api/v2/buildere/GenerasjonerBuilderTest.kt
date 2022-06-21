@@ -1482,7 +1482,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterAnnullerUtbetaling()
         håndterUtbetalt()
 
-        håndterAnnullerUtbetaling(fagsystemId = inspektør.gjeldendeUtbetalingForVedtaksperiode(1.vedtaksperiode).inspektør.arbeidsgiverOppdrag.fagsystemId())
+        håndterAnnullerUtbetaling(fagsystemId = inspektør.sisteAvsluttedeUtbetalingForVedtaksperiode(1.vedtaksperiode).inspektør.arbeidsgiverOppdrag.fagsystemId())
         håndterUtbetalt()
 
         assertEquals(2, generasjoner.size)
@@ -1515,12 +1515,12 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterAnnullerUtbetaling()
         håndterUtbetalt()
 
-        håndterAnnullerUtbetaling(fagsystemId = inspektør.gjeldendeUtbetalingForVedtaksperiode(1.vedtaksperiode).inspektør.arbeidsgiverOppdrag.fagsystemId())
+        håndterAnnullerUtbetaling(fagsystemId = inspektør.sisteAvsluttedeUtbetalingForVedtaksperiode(1.vedtaksperiode).inspektør.arbeidsgiverOppdrag.fagsystemId())
         håndterUtbetalt()
 
         nyttVedtak(1.juli, 31.juli)
 
-        håndterAnnullerUtbetaling(fagsystemId = inspektør.gjeldendeUtbetalingForVedtaksperiode(3.vedtaksperiode).inspektør.arbeidsgiverOppdrag.fagsystemId())
+        håndterAnnullerUtbetaling(fagsystemId = inspektør.sisteAvsluttedeUtbetalingForVedtaksperiode(3.vedtaksperiode).inspektør.arbeidsgiverOppdrag.fagsystemId())
         håndterUtbetalt()
 
         assertEquals(3, generasjoner.size)
@@ -1548,12 +1548,12 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         nyttVedtak(1.januar, 31.januar)
         nyttVedtak(1.mars, 31.mars)
 
-        håndterAnnullerUtbetaling(fagsystemId = inspektør.gjeldendeUtbetalingForVedtaksperiode(2.vedtaksperiode).inspektør.arbeidsgiverOppdrag.fagsystemId())
+        håndterAnnullerUtbetaling(fagsystemId = inspektør.sisteAvsluttedeUtbetalingForVedtaksperiode(2.vedtaksperiode).inspektør.arbeidsgiverOppdrag.fagsystemId())
         håndterUtbetalt()
 
         nyttVedtak(1.mai, 31.mai)
 
-        håndterAnnullerUtbetaling(fagsystemId = inspektør.gjeldendeUtbetalingForVedtaksperiode(3.vedtaksperiode).inspektør.arbeidsgiverOppdrag.fagsystemId())
+        håndterAnnullerUtbetaling(fagsystemId = inspektør.sisteAvsluttedeUtbetalingForVedtaksperiode(3.vedtaksperiode).inspektør.arbeidsgiverOppdrag.fagsystemId())
         håndterUtbetalt()
 
         assertEquals(3, generasjoner.size)
@@ -1576,7 +1576,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
             beregnetPeriode(1) medTilstand Utbetalt
         }
 
-        håndterAnnullerUtbetaling(fagsystemId = inspektør.gjeldendeUtbetalingForVedtaksperiode(1.vedtaksperiode).inspektør.arbeidsgiverOppdrag.fagsystemId())
+        håndterAnnullerUtbetaling(fagsystemId = inspektør.sisteAvsluttedeUtbetalingForVedtaksperiode(1.vedtaksperiode).inspektør.arbeidsgiverOppdrag.fagsystemId())
         håndterUtbetalt()
         assertEquals(3, generasjoner.size)
 
@@ -1604,12 +1604,12 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         nyttVedtak(1.januar, 31.januar)
         nyttVedtak(1.mars, 31.mars)
 
-        håndterAnnullerUtbetaling(fagsystemId = inspektør.gjeldendeUtbetalingForVedtaksperiode(2.vedtaksperiode).inspektør.arbeidsgiverOppdrag.fagsystemId())
+        håndterAnnullerUtbetaling(fagsystemId = inspektør.sisteAvsluttedeUtbetalingForVedtaksperiode(2.vedtaksperiode).inspektør.arbeidsgiverOppdrag.fagsystemId())
         håndterUtbetalt()
 
         nyttVedtak(1.mai, 31.mai)
 
-        håndterAnnullerUtbetaling(fagsystemId = inspektør.gjeldendeUtbetalingForVedtaksperiode(3.vedtaksperiode).inspektør.arbeidsgiverOppdrag.fagsystemId())
+        håndterAnnullerUtbetaling(fagsystemId = inspektør.sisteAvsluttedeUtbetalingForVedtaksperiode(3.vedtaksperiode).inspektør.arbeidsgiverOppdrag.fagsystemId())
         håndterUtbetalt()
 
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Dagtype.Feriedag)))
@@ -1644,7 +1644,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
             beregnetPeriode(1) medTilstand Utbetalt
         }
 
-        håndterAnnullerUtbetaling(fagsystemId = inspektør.gjeldendeUtbetalingForVedtaksperiode(1.vedtaksperiode).inspektør.arbeidsgiverOppdrag.fagsystemId())
+        håndterAnnullerUtbetaling(fagsystemId = inspektør.sisteAvsluttedeUtbetalingForVedtaksperiode(1.vedtaksperiode).inspektør.arbeidsgiverOppdrag.fagsystemId())
         håndterUtbetalt()
         assertEquals(5, generasjoner.size)
 

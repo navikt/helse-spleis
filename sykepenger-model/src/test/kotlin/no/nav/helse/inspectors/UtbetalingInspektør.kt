@@ -32,7 +32,8 @@ internal class UtbetalingInspektør(utbetaling: Utbetaling) : UtbetalingVisitor 
     var nettobeløp by Delegates.notNull<Int>()
         private set
     private lateinit var status: Utbetaling.Tilstand
-    private lateinit var type: Utbetalingtype
+    internal lateinit var type: Utbetalingtype
+        private set
     var avstemmingsnøkkel: Long? = null
     val erUbetalt get() = status == Utbetaling.Ubetalt
     val erForkastet get() = status == Utbetaling.Forkastet

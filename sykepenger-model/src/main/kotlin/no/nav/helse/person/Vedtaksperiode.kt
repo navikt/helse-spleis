@@ -71,6 +71,7 @@ import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.TilstandType.UTBETALING_FEILET
+import no.nav.helse.person.VedtaksperiodeUtbetalinger.Companion.revurderingsperioder
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
@@ -773,20 +774,23 @@ internal class Vedtaksperiode private constructor(
         utbetalingstidslinje.harBrukerutbetalinger() || andreVedtaksperioder.any { it.utbetalingstidslinje.harBrukerutbetalinger() }
 
     private fun forsøkRevurdering(maksimumSykepenger: Alder.MaksimumSykepenger, hendelse: ArbeidstakerHendelse) {
+        if (Toggle.NyRevurdering.disabled) {
+            val vedtaksperioder = person.nåværendeVedtaksperioder(IKKE_FERDIG_REVURDERT)
+            vedtaksperioder.forEach { it.lagRevurdering(maksimumSykepenger, hendelse) }
+            val første = vedtaksperioder.first()
+            if (første == this) return første.forsøkRevurderingSteg2(vedtaksperioder.drop(1), hendelse)
 
-        val vedtaksperioder = person.nåværendeVedtaksperioder(IKKE_FERDIG_REVURDERT)
-        vedtaksperioder.forEach { it.lagRevurdering(maksimumSykepenger, hendelse) }
-        val første = vedtaksperioder.first()
-        if (første == this) return første.forsøkRevurderingSteg2(vedtaksperioder.drop(1), hendelse)
-
-        this.tilstand(hendelse, AvventerArbeidsgivereRevurdering)
-        Companion.gjenopptaBehandling(
-            hendelse,
-            person,
-            AvventerArbeidsgivereRevurdering,
-            AvventerHistorikkRevurdering,
-            IKKE_FERDIG_REVURDERT
-        )
+            this.tilstand(hendelse, AvventerArbeidsgivereRevurdering)
+            return Companion.gjenopptaBehandling(
+                hendelse,
+                person,
+                AvventerArbeidsgivereRevurdering,
+                AvventerHistorikkRevurdering,
+                IKKE_FERDIG_REVURDERT
+            )
+        }
+        person.lagRevurdering(this, maksimumSykepenger, hendelse)
+        høstingsresultaterRevurdering(hendelse)
     }
 
     private fun lagRevurdering(maksimumSykepenger: Alder.MaksimumSykepenger, hendelse: ArbeidstakerHendelse) {
@@ -1106,6 +1110,15 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
             vedtaksperiode.oppdaterHistorikk(hendelse)
+        }
+
+        override fun håndterRevurdertUtbetaling(
+            vedtaksperiode: Vedtaksperiode,
+            utbetaling: Utbetaling,
+            hendelse: ArbeidstakerHendelse
+        ) {
+            hendelse.info("Mottatt revurdert utbetaling fra en annen vedtaksperiode")
+            vedtaksperiode.mottaUtbetalingTilRevurdering(hendelse, utbetaling)
         }
 
         override fun valider(
@@ -2523,6 +2536,8 @@ internal class Vedtaksperiode private constructor(
 
         internal val REVURDERING_IGANGSATT: VedtaksperiodeFilter = { it.erITilstandForRevurdering() }
 
+        private val KAN_OPPRETTE_REVURDERING: VedtaksperiodeFilter = { it.tilstand in listOf(AvventerRevurdering, AvventerHistorikkRevurdering) }
+
         internal val KLAR_TIL_BEHANDLING: VedtaksperiodeFilter = {
             it.tilstand == AvventerBlokkerendePeriode || it.tilstand == AvventerGodkjenning
         }
@@ -2546,6 +2561,20 @@ internal class Vedtaksperiode private constructor(
                 periode.arbeidsgiver.lagUtbetaling(builder, vilkårsgrunnlagHistorikk)
                 periode.utbetalinger.lagUtbetaling(builder, periode, periode.organisasjonsnummer)
             }
+        }
+
+        internal fun List<Vedtaksperiode>.lagRevurdering(
+            vedtaksperiode: Vedtaksperiode,
+            maksimumSykepenger: Alder.MaksimumSykepenger,
+            hendelse: ArbeidstakerHendelse
+        ) {
+            val perioder =
+                filter { it.skjæringstidspunkt == vedtaksperiode.skjæringstidspunkt }
+                    .filter(KAN_OPPRETTE_REVURDERING)
+                    .map { it.utbetalinger to it }
+                    .revurderingsperioder()
+
+            perioder.forEach { it.lagRevurdering(maksimumSykepenger, hendelse) }
         }
 
         internal fun aktivitetsloggMedForegåendeUtenUtbetaling(vedtaksperiode: Vedtaksperiode): Aktivitetslogg {

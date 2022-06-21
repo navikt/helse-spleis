@@ -19,7 +19,6 @@ import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.godkjenning
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.IAktivitetslogg
-import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.Periodetype
 import no.nav.helse.person.Refusjonshistorikk
@@ -522,6 +521,14 @@ internal class Utbetaling private constructor(
             tidspunkt: LocalDateTime,
             automatiskBehandling: Boolean
         ): Vurdering = Vurdering(godkjent, ident, epost, tidspunkt, automatiskBehandling)
+
+        internal fun List<Pair<Utbetaling, Vedtaksperiode>>.sistePeriodeForUtbetalinger(): List<Vedtaksperiode> {
+            return fold(mutableMapOf<UUID, MutableList<Vedtaksperiode>>()) { acc, pair ->
+                val (utbetaling, vedtaksperiode) = pair
+                acc.getOrPut(utbetaling.korrelasjonsId) { mutableListOf() }.add(vedtaksperiode)
+                acc
+            }.map { it.value.maxOf { periode -> periode } }
+        }
     }
 
     internal fun accept(visitor: UtbetalingVisitor) {

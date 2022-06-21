@@ -47,6 +47,7 @@ import no.nav.helse.person.Arbeidsgiver.Companion.harVedtaksperiodeFor
 import no.nav.helse.person.Arbeidsgiver.Companion.håndter
 import no.nav.helse.person.Arbeidsgiver.Companion.kanOverstyreTidslinje
 import no.nav.helse.person.Arbeidsgiver.Companion.kanStarteRevurdering
+import no.nav.helse.person.Arbeidsgiver.Companion.lagRevurdering
 import no.nav.helse.person.Arbeidsgiver.Companion.nåværendeVedtaksperioder
 import no.nav.helse.person.Arbeidsgiver.Companion.rapporterteInntekter
 import no.nav.helse.person.Arbeidsgiver.Companion.skjæringstidspunktperiode
@@ -65,6 +66,7 @@ import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingslinjer.Utbetaling
+import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverUtbetalinger
@@ -529,6 +531,10 @@ class Person private constructor(
         }
 
     internal fun nåværendeVedtaksperioder(filter: VedtaksperiodeFilter) = arbeidsgivere.nåværendeVedtaksperioder(filter).sorted()
+
+    internal fun lagRevurdering(vedtaksperiode: Vedtaksperiode, maksimumSykepenger: Alder.MaksimumSykepenger, hendelse: ArbeidstakerHendelse) {
+        arbeidsgivere.lagRevurdering(vedtaksperiode, maksimumSykepenger, hendelse)
+    }
 
     internal fun ghostPeriode(skjæringstidspunkt: LocalDate, deaktivert: Boolean) =
         arbeidsgivere.ghostPeriode(skjæringstidspunkt, vilkårsgrunnlagHistorikk.sisteId(), deaktivert)

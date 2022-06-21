@@ -311,7 +311,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         nyttVedtak(1.mars, 31.mars, 100.prosent)
         nullstillTilstandsendringer()
 
-        val korrelasjonsIdPåUtbetaling1 = inspektør.gjeldendeUtbetalingForVedtaksperiode(1.vedtaksperiode).inspektør.korrelasjonsId
+        val korrelasjonsIdPåUtbetaling1 = inspektør.sisteAvsluttedeUtbetalingForVedtaksperiode(1.vedtaksperiode).inspektør.korrelasjonsId
 
         håndterOverstyrInntekt(inntekt = 32000.månedlig, skjæringstidspunkt = 1.januar)
         håndterYtelser(1.vedtaksperiode)
@@ -331,8 +331,8 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         )
 
         assertEquals(3, inspektør.utbetalinger.size)
-        val korrelasjonsIdPåUtbetaling2 = inspektør.gjeldendeUtbetalingForVedtaksperiode(1.vedtaksperiode).inspektør.korrelasjonsId
-        val korrelasjonsIdPåUtbetaling3 = inspektør.gjeldendeUtbetalingForVedtaksperiode(2.vedtaksperiode).inspektør.korrelasjonsId
+        val korrelasjonsIdPåUtbetaling2 = inspektør.sisteAvsluttedeUtbetalingForVedtaksperiode(1.vedtaksperiode).inspektør.korrelasjonsId
+        val korrelasjonsIdPåUtbetaling3 = inspektør.sisteAvsluttedeUtbetalingForVedtaksperiode(2.vedtaksperiode).inspektør.korrelasjonsId
 
         assertEquals(korrelasjonsIdPåUtbetaling1, korrelasjonsIdPåUtbetaling2)
         assertNotEquals(korrelasjonsIdPåUtbetaling2, korrelasjonsIdPåUtbetaling3)
@@ -350,8 +350,8 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         assertTilstander(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
 
         assertEquals(4, inspektør.utbetalinger.size)
-        val korrelasjonsIdPåUtbetaling4 = inspektør.gjeldendeUtbetalingForVedtaksperiode(1.vedtaksperiode).inspektør.korrelasjonsId
-        val korrelasjonsIdPåUtbetaling5 = inspektør.gjeldendeUtbetalingForVedtaksperiode(2.vedtaksperiode).inspektør.korrelasjonsId
+        val korrelasjonsIdPåUtbetaling4 = inspektør.sisteAvsluttedeUtbetalingForVedtaksperiode(1.vedtaksperiode).inspektør.korrelasjonsId
+        val korrelasjonsIdPåUtbetaling5 = inspektør.sisteAvsluttedeUtbetalingForVedtaksperiode(2.vedtaksperiode).inspektør.korrelasjonsId
 
         assertEquals(korrelasjonsIdPåUtbetaling3, korrelasjonsIdPåUtbetaling5)
         assertNotEquals(korrelasjonsIdPåUtbetaling4, korrelasjonsIdPåUtbetaling5)
@@ -383,9 +383,9 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
 
         assertEquals(3, inspektør.utbetalinger.size)
 
-        val utbetalingstidslinje = inspektør.gjeldendeUtbetalingForVedtaksperiode(1.vedtaksperiode).utbetalingstidslinje()
-        val korrelasjonsIdPåUtbetaling1 = inspektør.gjeldendeUtbetalingForVedtaksperiode(1.vedtaksperiode).inspektør.korrelasjonsId
-        val korrelasjonsIdPåUtbetaling2 = inspektør.gjeldendeUtbetalingForVedtaksperiode(2.vedtaksperiode).inspektør.korrelasjonsId
+        val utbetalingstidslinje = inspektør.sisteAvsluttedeUtbetalingForVedtaksperiode(1.vedtaksperiode).utbetalingstidslinje()
+        val korrelasjonsIdPåUtbetaling1 = inspektør.sisteAvsluttedeUtbetalingForVedtaksperiode(1.vedtaksperiode).inspektør.korrelasjonsId
+        val korrelasjonsIdPåUtbetaling2 = inspektør.sisteAvsluttedeUtbetalingForVedtaksperiode(2.vedtaksperiode).inspektør.korrelasjonsId
 
         assertEquals(korrelasjonsIdPåUtbetaling1, korrelasjonsIdPåUtbetaling2)
         assertDiff(506)

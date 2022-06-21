@@ -199,9 +199,9 @@ internal class GrunnbeløpsreguleringTest : AbstractEndToEndTest() {
         utbetaltForlengetVedtaksperiodeBegrensetAv6G(3, 1.august(2020), 31.august(2020))
         inspektør.utbetalinger.also { utbetalinger ->
             assertEquals(4, utbetalinger.size)
-            assertEquals(inspektør.gjeldendeUtbetalingForVedtaksperiode(1.vedtaksperiode), utbetalinger[0])
-            assertEquals(inspektør.gjeldendeUtbetalingForVedtaksperiode(2.vedtaksperiode), utbetalinger[1])
-            assertEquals(inspektør.gjeldendeUtbetalingForVedtaksperiode(3.vedtaksperiode), utbetalinger[3])
+            assertEquals(inspektør.sisteAvsluttedeUtbetalingForVedtaksperiode(1.vedtaksperiode), utbetalinger[0])
+            assertEquals(inspektør.sisteAvsluttedeUtbetalingForVedtaksperiode(2.vedtaksperiode), utbetalinger[1])
+            assertEquals(inspektør.sisteAvsluttedeUtbetalingForVedtaksperiode(3.vedtaksperiode), utbetalinger[3])
 
             assertEquals(utbetalinger[0].inspektør.arbeidsgiverOppdrag.fagsystemId(), utbetalinger[2].inspektør.arbeidsgiverOppdrag.fagsystemId())
             assertTrue(utbetalinger[2].inspektør.erEtterutbetaling)

@@ -49,11 +49,12 @@ import no.nav.helse.person.Vedtaksperiode.Companion.harOverlappendeUtbetaltePeri
 import no.nav.helse.person.Vedtaksperiode.Companion.harUtbetaling
 import no.nav.helse.person.Vedtaksperiode.Companion.iderMedUtbetaling
 import no.nav.helse.person.Vedtaksperiode.Companion.kanStarteRevurdering
+import no.nav.helse.person.Vedtaksperiode.Companion.lagRevurdering
 import no.nav.helse.person.Vedtaksperiode.Companion.medSkjæringstidspunkt
 import no.nav.helse.person.Vedtaksperiode.Companion.nåværendeVedtaksperiode
 import no.nav.helse.person.Vedtaksperiode.Companion.periode
-import no.nav.helse.person.Vedtaksperiode.Companion.skjæringstidspunktperiode
 import no.nav.helse.person.Vedtaksperiode.Companion.senerePerioderPågående
+import no.nav.helse.person.Vedtaksperiode.Companion.skjæringstidspunktperiode
 import no.nav.helse.person.Vedtaksperiode.Companion.startRevurdering
 import no.nav.helse.person.Vedtaksperiode.Companion.validerYtelser
 import no.nav.helse.person.builders.UtbetalingsdagerBuilder
@@ -74,6 +75,7 @@ import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.harNærliggendeUtbeta
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.utbetaltTidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
 import no.nav.helse.utbetalingslinjer.UtbetalingObserver
+import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverUtbetalinger
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
@@ -168,6 +170,10 @@ internal class Arbeidsgiver private constructor(
 
         internal fun Iterable<Arbeidsgiver>.harOverlappendeVedtaksperiode(hendelse: SykdomstidslinjeHendelse) =
             any { it.harOverlappendeVedtaksperiode(hendelse) }
+
+        internal fun List<Arbeidsgiver>.lagRevurdering(vedtaksperiode: Vedtaksperiode, maksimumSykepenger: Alder.MaksimumSykepenger, hendelse: ArbeidstakerHendelse) {
+            flatMap { it.vedtaksperioder }.lagRevurdering(vedtaksperiode, maksimumSykepenger, hendelse)
+        }
 
         internal fun List<Arbeidsgiver>.beregnSykepengegrunnlag(skjæringstidspunkt: LocalDate, periodeStart: LocalDate) =
             fold(emptyList<ArbeidsgiverInntektsopplysning>()) { inntektsopplysninger, arbeidsgiver ->

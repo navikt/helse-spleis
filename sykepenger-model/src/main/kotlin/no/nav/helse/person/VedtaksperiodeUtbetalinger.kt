@@ -6,6 +6,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
+import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.sistePeriodeForUtbetalinger
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.filter.Utbetalingsfilter
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
@@ -162,5 +163,12 @@ internal class VedtaksperiodeUtbetalinger(private val arbeidsgiver: Arbeidsgiver
             orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold,
             aktivitetslogg = aktivitetslogg
         )
+    }
+
+    internal companion object {
+        internal fun List<Pair<VedtaksperiodeUtbetalinger, Vedtaksperiode>>.revurderingsperioder() =
+            mapNotNull { (utbetalinger, periode) ->
+                utbetalinger.siste?.let { it to periode }
+            }.sistePeriodeForUtbetalinger()
     }
 }

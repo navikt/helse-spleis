@@ -32,7 +32,6 @@ import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype.REVURDERING
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 
 @EnableToggle(Toggle.NyRevurdering::class)
@@ -80,17 +79,19 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
             assertEquals(4, utbetalinger.size)
         }
 
+        inspektør(a2) {
+            assertEquals(REVURDERING, utbetalingstype(3.vedtaksperiode, 2))
+        }
+
         assertForventetFeil(
             forklaring = "Utbetalinger må være genreret før noe går til godkjenning fordi er avhengig av utbetalinger for å lage generasjoner",
             nå = {
                 inspektør(a2) {
-                    assertNull(utbetalingstype(3.vedtaksperiode, 2))
-                    assertEquals(6, utbetalinger.size)
+                    assertEquals(7, utbetalinger.size)
                 }
             },
             ønsket = {
                 inspektør(a2) {
-                    assertEquals(REVURDERING, utbetalingstype(3.vedtaksperiode, 2))
                     assertEquals(4, utbetalinger.size)
                 }
             }
