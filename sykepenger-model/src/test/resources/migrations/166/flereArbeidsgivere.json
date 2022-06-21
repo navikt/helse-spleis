@@ -1,0 +1,167 @@
+{
+  "aktørId": "42",
+  "fødselsnummer": "12029240045",
+  "arbeidsgivere": [
+    {
+      "utbetalinger": [
+        {
+          "korrelasjonsId": "52b1adae-85bf-49bb-bc3b-5bc848adfb9c",
+          "utbetalingstidslinje": {
+            "dager": [
+              {
+                "fom": "2021-01-01",
+                "tom": "2021-01-16",
+                "type": "ArbeidsgiverperiodeDag"
+              },
+              {
+                "dato": "2021-01-17",
+                "type": "NavHelgDag"
+              },
+              {
+                "fom": "2021-01-18",
+                "tom": "2021-01-22",
+                "type": "NavDag",
+                "skjæringstidspunkt": "2021-01-01",
+                "arbeidsgiverbeløp": 1170.0,
+                "personbeløp": 0.0
+              },
+              {
+                "fom": "2021-01-23",
+                "tom": "2021-01-24",
+                "type": "NavHelgDag"
+              },
+              {
+                "fom": "2021-01-25",
+                "tom": "2021-01-29",
+                "type": "NavDag",
+                "skjæringstidspunkt": "2021-01-01",
+                "arbeidsgiverbeløp": 1170.0,
+                "personbeløp": 0.0
+              },
+              {
+                "fom": "2021-01-30",
+                "tom": "2021-01-31",
+                "type": "NavHelgDag"
+              }
+            ]
+          },
+          "tidsstempel": "2022-06-21T13:50:03.178678",
+          "status": "UTBETALT",
+          "fom": "2021-01-18"
+        }
+      ],
+      "organisasjonsnummer": "987654321"
+    },
+    {
+      "utbetalinger": [
+        {
+          "korrelasjonsId": "6d2d0e1f-962c-4ece-bb98-3cb80fd3ccfd",
+          "utbetalingstidslinje": {
+            "dager": [
+              {
+                "fom": "2021-01-01",
+                "tom": "2021-01-16",
+                "type": "ArbeidsgiverperiodeDag"
+              },
+              {
+                "dato": "2021-01-17",
+                "type": "NavHelgDag"
+              },
+              {
+                "fom": "2021-01-18",
+                "tom": "2021-01-22",
+                "type": "NavDag",
+                "skjæringstidspunkt": "2021-01-01",
+                "arbeidsgiverbeløp": 1169.0,
+                "personbeløp": 0.0
+              },
+              {
+                "fom": "2021-01-23",
+                "tom": "2021-01-24",
+                "type": "NavHelgDag"
+              },
+              {
+                "fom": "2021-01-25",
+                "tom": "2021-01-29",
+                "type": "NavDag",
+                "skjæringstidspunkt": "2021-01-01",
+                "arbeidsgiverbeløp": 1169.0,
+                "personbeløp": 0.0
+              },
+              {
+                "fom": "2021-01-30",
+                "tom": "2021-01-31",
+                "type": "NavHelgDag"
+              }
+            ]
+          },
+          "tidsstempel": "2022-06-21T13:50:03.18239",
+          "status": "FORKASTET",
+          "fom": "2021-01-18"
+        },
+        {
+          "korrelasjonsId": "bd06d0d6-5adc-430a-b610-3ea9c0c7e61b",
+          "utbetalingstidslinje": {
+            "dager": [
+              {
+                "fom": "2021-01-01",
+                "tom": "2021-01-16",
+                "type": "ArbeidsgiverperiodeDag"
+              },
+              {
+                "dato": "2021-01-17",
+                "type": "NavHelgDag"
+              },
+              {
+                "fom": "2021-01-18",
+                "tom": "2021-01-22",
+                "type": "NavDag",
+                "skjæringstidspunkt": "2021-01-01",
+                "arbeidsgiverbeløp": 1169.0,
+                "personbeløp": 0.0
+              },
+              {
+                "fom": "2021-01-23",
+                "tom": "2021-01-24",
+                "type": "NavHelgDag"
+              },
+              {
+                "fom": "2021-01-25",
+                "tom": "2021-01-29",
+                "type": "NavDag",
+                "skjæringstidspunkt": "2021-01-01",
+                "arbeidsgiverbeløp": 1169.0,
+                "personbeløp": 0.0
+              },
+              {
+                "fom": "2021-01-30",
+                "tom": "2021-01-31",
+                "type": "NavHelgDag"
+              }
+            ]
+          },
+          "tidsstempel": "2022-06-21T13:50:03.388319",
+          "status": "UTBETALT",
+          "fom": "2021-01-18"
+        }
+      ],
+      "organisasjonsnummer": "654321987"
+    }
+  ],
+  "vilkårsgrunnlagHistorikk": [
+    {
+      "vilkårsgrunnlag": [
+        {
+          "skjæringstidspunkt": "2021-01-01",
+          "type": "Vilkårsprøving",
+          "avviksprosent": 0.5
+        },
+        {
+          "skjæringstidspunkt": "2021-01-01",
+          "type": "Infotrygd"
+        }
+      ]
+    }
+  ],
+  "skjemaVersjon": 165
+}
