@@ -82,7 +82,7 @@ internal class Økonomi private constructor(
             økonomiList.forEach { it.grunnbeløpgrense = grunnbeløp }
 
             val grunnlagForSykepengegrunnlag = økonomiList.map { it.aktuellDagsinntekt }.summer()
-            val sykepengegrunnlagBegrenset6G = minOf(grunnlagForSykepengegrunnlag, grunnbeløp).rundTilDaglig() // TODO: få sykepengegrunnlaget (etter 6g) fra Vilkårsgrunnlag
+            val sykepengegrunnlagBegrenset6G = minOf(grunnlagForSykepengegrunnlag, grunnbeløp) // TODO: få sykepengegrunnlaget (etter 6g) fra Sykepengegrunnlag
             val er6GBegrenset = grunnlagForSykepengegrunnlag > grunnbeløp
             val sykepengegrunnlag = (sykepengegrunnlagBegrenset6G * økonomiList.first().totalGrad).rundTilDaglig()
             fordel(økonomiList, totalArbeidsgiver, sykepengegrunnlag, { økonomi, inntekt -> økonomi.arbeidsgiverbeløp = inntekt }, arbeidsgiverBeløp)
@@ -273,8 +273,8 @@ internal class Økonomi private constructor(
     internal fun harPersonbeløp() = personbeløp!! > INGEN
 
     private fun _betal() {
-        val total = (dekningsgrunnlag.rundTilDaglig() * grad()).rundTilDaglig()
-        val gradertArbeidsgiverRefusjonsbeløp = (arbeidsgiverRefusjonsbeløp.rundTilDaglig() * grad()).rundTilDaglig()
+        val total = (dekningsgrunnlag * grad()).rundTilDaglig()
+        val gradertArbeidsgiverRefusjonsbeløp = (arbeidsgiverRefusjonsbeløp * grad()).rundTilDaglig()
         arbeidsgiverbeløp = gradertArbeidsgiverRefusjonsbeløp.coerceAtMost(total)
         personbeløp = (total - arbeidsgiverbeløp!!).coerceAtLeast(INGEN)
     }

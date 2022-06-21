@@ -359,11 +359,11 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
         håndterUtbetalt(orgnummer = a2)
 
-        assertEquals(693.0, inspektør(a2).utbetalinger.last().inspektør.utbetalingstidslinje[19.mars].økonomi.inspektør.arbeidsgiverbeløp?.reflection { _, _, daglig, _ -> daglig })
+        assertEquals(692.0, inspektør(a2).utbetalinger.last().inspektør.utbetalingstidslinje[19.mars].økonomi.inspektør.arbeidsgiverbeløp?.reflection { _, _, daglig, _ -> daglig })
         val a2Linje = inspektør(a2).utbetalinger.last().inspektør.arbeidsgiverOppdrag.last()
         assertEquals(17.mars, a2Linje.fom)
         assertEquals(30.mars, a2Linje.tom)
-        assertEquals(693, a2Linje.beløp)
+        assertEquals(692, a2Linje.beløp)
 
         assertNoWarnings()
     }

@@ -278,7 +278,6 @@ internal class VilkårsgrunnlagBuilder(
                 sykepengegrunnlag: Inntekt,
                 skjønnsmessigFastsattÅrsinntekt: Inntekt?,
                 beregningsgrunnlag: Inntekt,
-                maksimalDagsats: Inntekt,
                 `6G`: Inntekt,
                 begrensning: Sykepengegrunnlag.Begrensning,
                 deaktiverteArbeidsforhold: List<String>,

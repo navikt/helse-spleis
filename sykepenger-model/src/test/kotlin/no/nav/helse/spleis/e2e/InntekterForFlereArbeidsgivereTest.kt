@@ -291,17 +291,15 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
             forklaring = "8-28 b",
             nå = {
                 assertEquals(300000.årlig, person.vilkårsgrunnlagFor(1.januar)?.inspektør?.sykepengegrunnlag?.inspektør?.sykepengegrunnlag)
-                assertEquals(300000.årlig.rundTilDaglig(), person.vilkårsgrunnlagFor(1.januar)?.inspektør?.sykepengegrunnlag?.inspektør?.maksimalDagsats)
              },
             ønsket = {
                 assertEquals(552000.årlig, person.vilkårsgrunnlagFor(1.januar)?.inspektør?.sykepengegrunnlag?.inspektør?.sykepengegrunnlag)
-                assertEquals(552000.årlig.rundTilDaglig(), person.vilkårsgrunnlagFor(1.januar)?.inspektør?.sykepengegrunnlag?.inspektør?.maksimalDagsats)
             }
         )
     }
 
     @Test
-    fun `To arbeidsgivere, kun én blir forlenget - Samme dagsats for forlengelsen og førstengelsen`() {
+    fun `To arbeidsgivere, kun én blir forlenget - dagsats justeres pga lavere total sykdomsgrad`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a2)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
@@ -344,8 +342,12 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
         val utbetalingslinje1 = inspektør(a1).utbetalingslinjer(0)
         val utbetalingslinje2 = inspektør(a1).utbetalingslinjer(1)
 
+        assertEquals(1081, inspektør(a1).utbetaling(0).inspektør.arbeidsgiverOppdrag[0].beløp)
+        assertEquals(1080, inspektør(a2).utbetaling(0).inspektør.arbeidsgiverOppdrag[0].beløp)
+        assertEquals(1080, inspektør(a1).utbetaling(1).inspektør.arbeidsgiverOppdrag[1].beløp)
+
         assertNotEquals(utbetalingslinje1, utbetalingslinje2)
-        assertEquals(utbetalingslinje1.linjerUtenOpphør().last().beløp, utbetalingslinje2.linjerUtenOpphør().last().beløp)
+        assertNotEquals(utbetalingslinje1.linjerUtenOpphør().last().beløp, utbetalingslinje2.linjerUtenOpphør().last().beløp)
         assertEquals(utbetalingslinje1.fagsystemId(), utbetalingslinje2.fagsystemId())
     }
 

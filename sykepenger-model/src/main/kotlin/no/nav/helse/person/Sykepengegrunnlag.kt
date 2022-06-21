@@ -34,7 +34,6 @@ internal class Sykepengegrunnlag(
     private val `6G`: Inntekt = `6G` ?: Grunnbeløp.`6G`.beløp(skjæringstidspunkt, LocalDate.now())
     private val beregningsgrunnlag: Inntekt = skjønnsmessigFastsattBeregningsgrunnlag ?: arbeidsgiverInntektsopplysninger.omregnetÅrsinntekt()
     private val sykepengegrunnlag = beregningsgrunnlag.coerceAtMost(this.`6G`)
-    private val maksimalDagsats = sykepengegrunnlag.rundTilDaglig()
     private val begrensning = if (vurdertInfotrygd) VURDERT_I_INFOTRYGD else if (beregningsgrunnlag > this.`6G`) ER_6G_BEGRENSET else ER_IKKE_6G_BEGRENSET
 
     private val forhøyetInntektskrav = alder.forhøyetInntektskrav(skjæringstidspunkt)
@@ -123,7 +122,6 @@ internal class Sykepengegrunnlag(
             sykepengegrunnlag,
             skjønnsmessigFastsattBeregningsgrunnlag,
             beregningsgrunnlag,
-            maksimalDagsats,
             `6G`,
             begrensning,
             deaktiverteArbeidsforhold,
@@ -140,7 +138,6 @@ internal class Sykepengegrunnlag(
             sykepengegrunnlag,
             skjønnsmessigFastsattBeregningsgrunnlag,
             beregningsgrunnlag,
-            maksimalDagsats,
             `6G`,
             begrensning,
             deaktiverteArbeidsforhold,

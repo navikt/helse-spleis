@@ -1,12 +1,14 @@
 package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.inspectors.inspektør
-import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.testhelpers.NAV
 import no.nav.helse.januar
+import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.etterlevelse.MaskinellJurist
+import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.tidslinjeOf
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -45,7 +47,7 @@ internal class MaksimumUtbetalingFilterHendelseTest {
     fun `selv om utbetaling blir begrenset til 6G får utbetaling for tidslinje med gradert sykdom gradert utbetaling`() {
         val tidslinje = tidslinjeOf(12.NAV(3500.0, 50.0))
         tidslinje.betal()
-        assertEquals(10810.0, tidslinje.inspektør.totalUtbetaling())
+        assertEquals(10800.0, tidslinje.inspektør.totalUtbetaling())
     }
 
     @Test

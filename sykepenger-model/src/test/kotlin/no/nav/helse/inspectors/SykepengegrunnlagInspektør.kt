@@ -12,7 +12,6 @@ internal class SykepengegrunnlagInspektør(sykepengegrunnlag: Sykepengegrunnlag)
     lateinit var minsteinntekt: Inntekt
     var oppfyllerMinsteinntektskrav: Boolean by Delegates.notNull<Boolean>()
     lateinit var sykepengegrunnlag: Inntekt
-    lateinit var maksimalDagsats: Inntekt
     lateinit var beregningsgrunnlag: Inntekt
     var skjønnsmessigFastsattÅrsinntekt: Inntekt? = null
     lateinit var `6G`: Inntekt
@@ -27,7 +26,6 @@ internal class SykepengegrunnlagInspektør(sykepengegrunnlag: Sykepengegrunnlag)
         sykepengegrunnlag: Inntekt,
         skjønnsmessigFastsattÅrsinntekt: Inntekt?,
         beregningsgrunnlag: Inntekt,
-        maksimalDagsats: Inntekt,
         `6G`: Inntekt,
         begrensning: Sykepengegrunnlag.Begrensning,
         deaktiverteArbeidsforhold: List<String>,
@@ -39,7 +37,6 @@ internal class SykepengegrunnlagInspektør(sykepengegrunnlag: Sykepengegrunnlag)
         this.oppfyllerMinsteinntektskrav = oppfyllerMinsteinntektskrav
         this.`6G` = `6G`
         this.sykepengegrunnlag = sykepengegrunnlag
-        this.maksimalDagsats = maksimalDagsats
         this.skjønnsmessigFastsattÅrsinntekt = skjønnsmessigFastsattÅrsinntekt
         this.beregningsgrunnlag = beregningsgrunnlag
         this.deaktiverteArbeidsforhold = deaktiverteArbeidsforhold

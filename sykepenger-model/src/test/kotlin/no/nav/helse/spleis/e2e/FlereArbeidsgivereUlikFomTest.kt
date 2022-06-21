@@ -508,10 +508,14 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         assertEquals(15.mars, a2Linje.tom)
         assertEquals(532, a2Linje.beløp)
 
-        val a3Linje = inspektør(a3).utbetalinger.last().inspektør.arbeidsgiverOppdrag.single()
-        assertEquals(19.januar, a3Linje.fom)
-        assertEquals(28.februar, a3Linje.tom)
-        assertEquals(549, a3Linje.beløp)
+        val a3Linje1 = inspektør(a3).utbetalinger.last().inspektør.arbeidsgiverOppdrag[0]
+        assertEquals(19.januar, a3Linje1.fom)
+        assertEquals(15.februar, a3Linje1.tom)
+        assertEquals(549, a3Linje1.beløp)
+        val a3Linje2 = inspektør(a3).utbetalinger.last().inspektør.arbeidsgiverOppdrag[1]
+        assertEquals(16.februar, a3Linje2.fom)
+        assertEquals(28.februar, a3Linje2.tom)
+        assertEquals(548, a3Linje2.beløp)
 
         val a4Linje = inspektør(a4).utbetalinger.last().inspektør.arbeidsgiverOppdrag.single()
         assertEquals(20.januar, a4Linje.fom)
@@ -712,10 +716,14 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
 
         // Siden maksbeløpet blir større når vi får inn flere arbeidsgivere vil vi få en ekstra krone som blir med i kronerulleringen(avrunning), det fører
         // til at vi fordeler den til den arbeidsgiveren som tapte mest på avrunningen
-        val a3Linje = inspektør(a3).utbetalinger.last().inspektør.arbeidsgiverOppdrag.single()
+        val a3Linje = inspektør(a3).utbetalinger.last().inspektør.arbeidsgiverOppdrag[0]
         assertEquals(19.januar, a3Linje.fom)
-        assertEquals(15.mars, a3Linje.tom)
-        assertEquals(275, a3Linje.beløp)
+        assertEquals(19.januar, a3Linje.tom)
+        assertEquals(274, a3Linje.beløp)
+        val a3Linje2 = inspektør(a3).utbetalinger.last().inspektør.arbeidsgiverOppdrag[1]
+        assertEquals(20.januar, a3Linje2.fom)
+        assertEquals(15.mars, a3Linje2.tom)
+        assertEquals(275, a3Linje2.beløp)
 
         val a4Linje = inspektør(a4).utbetalinger.last().inspektør.arbeidsgiverOppdrag.single()
         assertEquals(20.januar, a4Linje.fom)
@@ -988,7 +996,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         val a2Linje = inspektør(a2).utbetalinger.last().inspektør.arbeidsgiverOppdrag.last()
         assertEquals(5.april, a2Linje.fom)
         assertEquals(25.april, a2Linje.tom)
-        assertEquals(1164, a2Linje.beløp)
+        assertEquals(1163, a2Linje.beløp)
 
     }
 
@@ -1049,7 +1057,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         val a2Linje = inspektør(a2).utbetalinger.last().inspektør.arbeidsgiverOppdrag.last()
         assertEquals(5.april, a2Linje.fom)
         assertEquals(25.april, a2Linje.tom)
-        assertEquals(815, a2Linje.beløp)
+        assertEquals(814, a2Linje.beløp)
     }
 
     @Test

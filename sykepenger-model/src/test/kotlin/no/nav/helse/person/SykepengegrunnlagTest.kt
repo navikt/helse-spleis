@@ -197,14 +197,12 @@ internal class SykepengegrunnlagTest {
         val `6G` = Grunnbeløp.`6G`.beløp(1.januar)
         val sykepengegrunnlag = `6G`.sykepengegrunnlag
         assertEquals(`6G`, sykepengegrunnlag.inspektør.sykepengegrunnlag)
-        assertEquals(`6G`.rundTilDaglig(), sykepengegrunnlag.inspektør.maksimalDagsats)
     }
     @Test
     fun `sykepengegrunnlaget skal ikke rundes av - under 6`() {
         val daglig = 255.5.daglig
         val sykepengegrunnlag = daglig.sykepengegrunnlag
         assertEquals(daglig, sykepengegrunnlag.inspektør.sykepengegrunnlag)
-        assertEquals(daglig.rundTilDaglig(), sykepengegrunnlag.inspektør.maksimalDagsats)
     }
 
     @Test
@@ -223,7 +221,6 @@ internal class SykepengegrunnlagTest {
         )
         assertNotEquals(inntekt, sykepengegrunnlag.inspektør.sykepengegrunnlag)
         assertEquals(overstyrt, sykepengegrunnlag.inspektør.sykepengegrunnlag)
-        assertEquals(overstyrt.rundTilDaglig(), sykepengegrunnlag.inspektør.maksimalDagsats)
         assertEquals(overstyrt, sykepengegrunnlag.inspektør.skjønnsmessigFastsattÅrsinntekt)
     }
 

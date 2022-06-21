@@ -38,7 +38,7 @@ internal class ØkonomiDagTest {
     fun `dekningsgrunnlag rundes opp`() {
         val a = tidslinjeOf(2.NAV(1200.75, 50.0))
         listOf(a).betal()
-        assertØkonomi(a, 601.0)
+        assertØkonomi(a, 600.0)
     }
 
     @Test
@@ -63,7 +63,7 @@ internal class ØkonomiDagTest {
         assertØkonomi(a, 231.0, 0.0)
         val b = tidslinjeOf(1.NAV(inntekt, 50))
         listOf(b).betal()
-        assertØkonomi(b, 116.0, 0.0)
+        assertØkonomi(b, 115.0, 0.0)
         val c = tidslinjeOf(1.NAV(inntekt, refusjonsbeløp = inntekt/2))
         listOf(c).betal()
         assertØkonomi(c, 115.0, 116.0)

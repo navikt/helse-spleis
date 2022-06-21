@@ -389,7 +389,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
             )
             assertUtbetalingsbeløp(
                 vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
-                forventetArbeidsgiverbeløp = 1081,
+                forventetArbeidsgiverbeløp = 1080,
                 forventetArbeidsgiverRefusjonsbeløp = 1431,
                 subset = 17.januar til 31.januar,
                 orgnummer = a1
@@ -417,7 +417,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
             )
             assertUtbetalingsbeløp(
                 vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
-                forventetArbeidsgiverbeløp = 1081,
+                forventetArbeidsgiverbeløp = 1080,
                 forventetArbeidsgiverRefusjonsbeløp = 1431,
                 subset = 6.februar til 10.februar,
                 orgnummer = a2
@@ -480,9 +480,16 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
             )
             assertUtbetalingsbeløp(
                 vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+                forventetArbeidsgiverbeløp = 1080,
+                forventetArbeidsgiverRefusjonsbeløp = 1431,
+                subset = 17.januar til 5.februar,
+                orgnummer = a1
+            )
+            assertUtbetalingsbeløp(
+                vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
                 forventetArbeidsgiverbeløp = 1081,
                 forventetArbeidsgiverRefusjonsbeløp = 1431,
-                subset = 17.januar til 10.februar,
+                subset = 6.februar til 10.februar,
                 orgnummer = a1
             )
             assertUtbetalingsbeløp(
@@ -585,14 +592,14 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
             )
             assertUtbetalingsbeløp(
                 vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
-                forventetArbeidsgiverbeløp = 1081,
+                forventetArbeidsgiverbeløp = 1080,
                 forventetArbeidsgiverRefusjonsbeløp = 1431,
                 subset = 17.januar til 20.januar,
                 orgnummer = a2
             )
             assertUtbetalingsbeløp(
                 vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
-                forventetArbeidsgiverbeløp = 1081,
+                forventetArbeidsgiverbeløp = 1080,
                 forventetArbeidsgiverRefusjonsbeløp = 1431,
                 subset = 21.januar til 5.februar,
                 orgnummer = a2
