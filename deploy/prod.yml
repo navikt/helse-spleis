@@ -60,3 +60,5 @@ spec:
     value: tbd-spleis-v1
   - name: KAFKA_RESET_POLICY
     value: none
+  - name: NyRevurdering
+    value: "false"
