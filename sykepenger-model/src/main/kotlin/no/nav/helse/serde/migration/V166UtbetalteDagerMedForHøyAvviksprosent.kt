@@ -25,14 +25,15 @@ internal class V166UtbetalteDagerMedForHøyAvviksprosent: JsonMigration(166) {
 
     override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         finnAvvikOrNull(jsonNode)?.forEach { avvik ->
-            sikkerlogg.warn("Utbetalt med avvik over 25%: {}, {}, {}, {}, {}, {}, {}",
+            sikkerlogg.warn("Utbetalt med avvik over 25%: {}, {}, {}, {}, {}, {}, {}, {}",
                 keyValue("fødselsnummer", avvik.sykmeldt),
                 keyValue("aktørId", avvik.aktørId),
                 keyValue("organisasjonsnummer", avvik.arbeidsgiver),
                 keyValue("avviksprosent", avvik.avviksprosent),
                 keyValue("antallDager", avvik.antallDager),
                 keyValue("fom", avvik.periode.start),
-                keyValue("tom", avvik.periode.endInclusive)
+                keyValue("tom", avvik.periode.endInclusive),
+                keyValue("skjæringstidspunkt", avvik.skjæringstidspunkt)
             )
         }
     }
