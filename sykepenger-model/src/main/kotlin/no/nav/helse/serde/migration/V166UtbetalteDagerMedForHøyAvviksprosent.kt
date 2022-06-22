@@ -91,6 +91,7 @@ internal class V166UtbetalteDagerMedForHøyAvviksprosent: JsonMigration(166) {
                     }
                     .filter { it.path("type").asText() == "NavDag" }
                     .filter { it.path("arbeidsgiverbeløp").asDouble() > 0 || it.path("personbeløp").asDouble() > 0 }
+                    .filter { it.hasNonNull("skjæringstidspunkt") }
                     .groupBy { it.path("skjæringstidspunkt").asLocalDate() }
                     .mapValues { entry -> entry.value.flatMap { it.dager() } }
                     .takeUnless { it.isEmpty() }
