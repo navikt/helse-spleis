@@ -1111,6 +1111,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
             vedtaksperiode.oppdaterHistorikk(hendelse)
+            vedtaksperiode.person.startRevurdering(vedtaksperiode, hendelse)
         }
 
         override fun håndterRevurdertUtbetaling(
@@ -1977,16 +1978,35 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun nesteRevurderingstilstand(hendelse: IAktivitetslogg, overstyrt: Vedtaksperiode, pågående: Vedtaksperiode?) {
+        // Jeg og revurderingen jeg hører til har en utbetaling in flight
         if (utbetalinger.utbetales()) return
-        if (pågående?.utbetalinger?.utbetales() == true || overstyrt.arbeidsgiver != this.arbeidsgiver) return tilstand(hendelse, AvventerRevurdering)
-        if (skjæringstidspunkt != overstyrt.skjæringstidspunkt) return tilstand(hendelse, AvventerRevurdering)
-        if (utbetalinger.hørerIkkeSammenMed(overstyrt.utbetalinger)) return tilstand(hendelse, AvventerRevurdering)
+
+        // en annen revurdering sin utbetaling er in flight
+        if (pågående?.utbetalinger?.utbetales() == true) return tilstand(hendelse, AvventerRevurdering)
+
+        // en annen arbeidsgiver revurderes
+        if (overstyrt.arbeidsgiver != this.arbeidsgiver) return tilstand(hendelse, AvventerRevurdering)
+
+        // Jeg har et senere skjæringstidspunkt enn den overstyrte perioden
+        if (skjæringstidspunkt > overstyrt.skjæringstidspunkt) return tilstand(hendelse, AvventerRevurdering)
+
+        // Det finnes en pågående revurdering _og_ jeg har et senere skjæringstidspunkt enn denne
+        if (pågående != null && skjæringstidspunkt > pågående.skjæringstidspunkt) return tilstand(hendelse, AvventerRevurdering)
+
+        // Jeg hører ikke sammen med den overstyrte perioden sin utbetaling (korrelasjonsid), men jeg har samme skjæringstidspunkt. Det er en Infotrygdperiode mellom meg og den overstyrte perioden.
+        if (utbetalinger.hørerIkkeSammenMed(overstyrt.utbetalinger) && skjæringstidspunkt == overstyrt.skjæringstidspunkt) return tilstand(hendelse, AvventerRevurdering)
+
+        // Jeg er ikke in flight, og det er heller ingen andre. Det er min arbeidsgiver som revurderes.
+        // Jeg har samme som eller et tidligere skjæringstidspunkt enn den overstyrte perioden.
+        // Hvis det finnes en pågående revurdering så har jeg samme som eller et tidligere skjæringstidspunkt enn revurderingen.
+        // Jeg _kan_ høre til den overstyrte periodens utbetaling, eller jeg _kan_ ha et tidligere skjæringstidspunkt enn
+        // den overstyrte perioden, _eller_ begge deler.
         tilstand(hendelse, AvventerGjennomførtRevurdering)
     }
 
     // ny revurderingsflyt
-    private fun startRevurdering(hendelse: IAktivitetslogg, overstyrt: Vedtaksperiode, pågående: Vedtaksperiode?) {
-        if (overstyrt etter this) return
+    private fun startRevurdering(hendelse: IAktivitetslogg, overstyrt: Vedtaksperiode, pågående: Vedtaksperiode?, førsteRevurderingsdag: LocalDate) {
+        if (overstyrt etter this && this.periode().endInclusive < førsteRevurderingsdag) return
         kontekst(hendelse)
         tilstand.startRevurdering(this, hendelse, overstyrt, pågående)
     }
@@ -2720,12 +2740,13 @@ internal class Vedtaksperiode private constructor(
         ) {
             val vedtaksperioder = this.values.flatten()
             val pågående = vedtaksperioder.pågående()
-            vedtaksperioder.forEach { it.startRevurdering(hendelse, overstyrt, pågående) }
 
-            val skjæringstidspunkt = overstyrt.skjæringstidspunkt
-            val siste = this.getValue(overstyrt.arbeidsgiver).lastOrNull {
-                it.tilstand == AvventerGjennomførtRevurdering && skjæringstidspunkt == it.skjæringstidspunkt
-            } ?: return
+            val førsteRevurderingsdag = vedtaksperioder.førsteRevurderingsdag() ?: overstyrt.periode().start
+            vedtaksperioder.forEach { it.startRevurdering(hendelse, overstyrt, pågående, førsteRevurderingsdag) }
+
+            val siste =
+                vedtaksperioder.lastOrNull { it.tilstand == AvventerGjennomførtRevurdering && (!it.utbetalinger.utbetales() || it.utbetalinger.harFeilet()) }
+                    ?: return
 
             siste.kontekst(hendelse)
             siste.tilstand(hendelse, AvventerHistorikkRevurdering)
@@ -2741,6 +2762,18 @@ internal class Vedtaksperiode private constructor(
                     UtbetalingFeilet
                 )
             }
+
+        private fun List<Vedtaksperiode>.førsteRevurderingsdag() =
+            filter {
+                it.tilstand in setOf(
+                    AvventerGjennomførtRevurdering,
+                    AvventerHistorikkRevurdering,
+                    AvventerSimuleringRevurdering,
+                    AvventerGodkjenningRevurdering,
+                    TilUtbetaling,
+                    UtbetalingFeilet
+                )
+            }.takeIf { it.isNotEmpty() }?.periode()?.start
 
         internal fun gjenopptaRevurdering(
             hendelse: IAktivitetslogg,
