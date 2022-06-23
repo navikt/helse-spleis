@@ -90,6 +90,20 @@ internal class V166UtbetalteDagerMedForHøyAvviksprosentTest: MigrationTest(V166
         assertEquals(forventetAvvik, avvik)
     }
 
+    @Test
+    fun `samme sykepengegrunnlag i infotrygd`() {
+        val avvik = "/migrations/166/sammeSykepengegrunnlagIInfotrygd.json".avvik()
+        val forventetAvvik = listOf(
+            forventetAvvik(
+                skjæringstidspunkt = 3.januar,
+                avvik = 0.25001,
+                utbetaltePerioder = listOf(19.januar til 19.januar, 22.januar til 26.januar),
+                sammeSykepengegrunnlagIInfotrygd = true
+            )
+        )
+        assertEquals(forventetAvvik, avvik)
+    }
+
 
     private companion object {
         private fun String.avvik() = V166UtbetalteDagerMedForHøyAvviksprosent.finnAvvik(
@@ -102,7 +116,8 @@ internal class V166UtbetalteDagerMedForHøyAvviksprosentTest: MigrationTest(V166
             arbeidsgiver: String = "987654321",
             skjæringstidspunkt: LocalDate,
             avvik: Double,
-            utbetaltePerioder: List<Periode>
-        ) = Avvik(sykmeldt, aktørId, arbeidsgiver, skjæringstidspunkt, avvik, utbetaltePerioder.flatMap { it.toList() })
+            utbetaltePerioder: List<Periode>,
+            sammeSykepengegrunnlagIInfotrygd: Boolean = false
+        ) = Avvik(sykmeldt, aktørId, arbeidsgiver, skjæringstidspunkt, avvik, utbetaltePerioder.flatMap { it.toList() }, sammeSykepengegrunnlagIInfotrygd)
     }
 }
