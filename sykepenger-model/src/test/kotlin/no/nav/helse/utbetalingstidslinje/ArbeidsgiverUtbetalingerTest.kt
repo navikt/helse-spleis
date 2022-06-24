@@ -402,7 +402,7 @@ internal class ArbeidsgiverUtbetalingerTest {
             vilkårsgrunnlagHistorikk,
             MaskinellJurist()
         ).also {
-            it.beregn(aktivitetslogg, "88888888", Periode(1.januar, 31.desember(2019)))
+            it.beregn(aktivitetslogg, "88888888", Periode(1.januar, 31.desember(2019)), mapOf(Periode(1.januar, 31.desember(2019)) to aktivitetslogg))
             maksdato = it.maksimumSykepenger.sisteDag()
             gjenståendeSykedager = it.maksimumSykepenger.gjenståendeDager()
             forbrukteSykedager = it.maksimumSykepenger.forbrukteDager()

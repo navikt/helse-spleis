@@ -1133,9 +1133,9 @@ internal class Arbeidsgiver private constructor(
         return infotrygdhistorikk.build(organisasjonsnummer, sykdomstidslinje, builder, subsumsjonObserver)
     }
 
-    internal fun beregn(aktivitetslogg: IAktivitetslogg, arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger, periode: Periode): Boolean {
+    internal fun beregn(aktivitetslogg: IAktivitetslogg, arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger, periode: Periode, perioder: Map<Periode, IAktivitetslogg>): Boolean {
         try {
-            arbeidsgiverUtbetalinger.beregn(aktivitetslogg, organisasjonsnummer, periode)
+            arbeidsgiverUtbetalinger.beregn(aktivitetslogg, organisasjonsnummer, periode, perioder)
         } catch (err: UtbetalingstidslinjeBuilderException) {
             err.logg(aktivitetslogg)
         }

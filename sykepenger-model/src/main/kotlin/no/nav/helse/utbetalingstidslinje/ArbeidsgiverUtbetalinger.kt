@@ -23,13 +23,15 @@ internal class ArbeidsgiverUtbetalinger(
         aktivitetslogg: IAktivitetslogg,
         organisasjonsnummer: String,
         periode: Periode,
-        virkningsdato: LocalDate = periode.endInclusive
+        perioder: Map<Periode, IAktivitetslogg>
     ) {
         val tidslinjer = arbeidsgivere
             .mapValues { (arbeidsgiver, builder) -> arbeidsgiver.build(subsumsjonObserver, infotrygdhistorikk, builder, periode) }
             .filterValues { it.isNotEmpty() }
         gjødsle(aktivitetslogg, periode, tidslinjer)
-        filtrer(aktivitetslogg, tidslinjer, periode, virkningsdato)
+        perioder.forEach { (periode, aktivitetsloog) ->
+            filtrer(aktivitetsloog, tidslinjer, periode, periode.endInclusive)
+        }
         tidslinjer.forEach { (arbeidsgiver, utbetalingstidslinje) ->
             arbeidsgiver.lagreUtbetalingstidslinjeberegning(organisasjonsnummer, utbetalingstidslinje, vilkårsgrunnlagHistorikk)
         }
