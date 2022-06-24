@@ -33,6 +33,7 @@ import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype.REVURDERING
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 @EnableToggle(Toggle.NyRevurdering::class)
@@ -610,6 +611,21 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
         }
         inspektør(a2).utbetalinger(1.vedtaksperiode).also { utbetalinger ->
             assertEquals(1, utbetalinger.filter { it.inspektør.erUbetalt }.size)
+        }
+    }
+
+    @Disabled
+    @Test
+    fun `ag1 har en kortere periode enn ag2, ag1 revurderes, ag2 sin utbetaling blir ikke kuttet`() {
+        nyeVedtak(1.januar, 31.januar, a1, a2)
+        forlengVedtak(1.februar, 28.februar, a1, a2)
+        forlengVedtak(1.mars, 31.mars, a2)
+
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)), orgnummer = a1)
+        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
+
+        inspektør(a2).gjeldendeUtbetalingForVedtaksperiode(3.vedtaksperiode).also {
+            assertEquals(17.januar til 31.mars, it.inspektør.periode)
         }
     }
 }
