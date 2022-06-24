@@ -6,6 +6,7 @@ import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype.Feriedag
+import no.nav.helse.hendelser.Dagtype.Sykedag
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
@@ -627,5 +628,27 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
         inspektør(a2).gjeldendeUtbetalingForVedtaksperiode(3.vedtaksperiode).also {
             assertEquals(17.januar til 31.mars, it.inspektør.periode)
         }
+    }
+
+    @Test
+    fun `Varsel på perioder hos begge AG dersom grad er under 20 prosent`() {
+        nyeVedtak(1.januar, 31.januar, a1, a2)
+
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Sykedag, 19)), orgnummer = a1)
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Sykedag, 19)), orgnummer = a2)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+
+        assertEquals(19, inspektør(a1).sykdomstidslinje.inspektør.grader[17.januar])
+        assertEquals(19, inspektør(a2).sykdomstidslinje.inspektør.grader[17.januar])
+        assertWarning("Minst én dag uten utbetaling på grunn av sykdomsgrad under 20 %. Vurder å sende vedtaksbrev fra Infotrygd", 1.vedtaksperiode.filter(a2))
+        no.nav.helse.assertForventetFeil(
+            forklaring = "Minst én dag uten utbetaling på grunn av sykdomsgrad under 20 %. Vurder å sende vedtaksbrev fra Infotrygd",
+            nå = {
+                assertNoWarning("Minst én dag uten utbetaling på grunn av sykdomsgrad under 20 %. Vurder å sende vedtaksbrev fra Infotrygd", 1.vedtaksperiode.filter(a1))
+            },
+            ønsket = {
+                assertWarning("Minst én dag uten utbetaling på grunn av sykdomsgrad under 20 %. Vurder å sende vedtaksbrev fra Infotrygd", 1.vedtaksperiode.filter(a1))
+            }
+        )
     }
 }

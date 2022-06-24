@@ -1035,6 +1035,30 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         }
     }
 
+    @Test
+    fun `Alle perioder som er en del av revurdering skal kunne avvise dager`() {
+        nyttVedtak(1.januar, 31.januar)
+        forlengVedtak(1.februar, 28.februar)
+
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Dagtype.Sykedag, 19)))
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(16.februar, Dagtype.Sykedag, 19)))
+        håndterYtelser(2.vedtaksperiode)
+
+        assertEquals(19, inspektør.sykdomstidslinje.inspektør.grader[17.januar])
+        assertWarning("Minst én dag uten utbetaling på grunn av sykdomsgrad under 20 %. Vurder å sende vedtaksbrev fra Infotrygd", 2.vedtaksperiode.filter())
+        assertForventetFeil(
+            forklaring = "Det er kun den siste perioden som går gjennom utbetalingstidslinjefilterne, men det burde være alle",
+            nå = {
+                assertNoWarning("Minst én dag uten utbetaling på grunn av sykdomsgrad under 20 %. Vurder å sende vedtaksbrev fra Infotrygd", 1.vedtaksperiode.filter())
+            },
+            ønsket = {
+                assertWarning("Minst én dag uten utbetaling på grunn av sykdomsgrad under 20 %. Vurder å sende vedtaksbrev fra Infotrygd", 1.vedtaksperiode.filter())
+            }
+        )
+    }
+
     private inline fun <reified D: Dag, reified UD: Utbetalingsdag>assertDag(dato: LocalDate, beløp: Double) {
         inspektør.sykdomshistorikk.sykdomstidslinje()[dato].let {
             assertTrue(it is D) { "Forventet ${D::class.simpleName} men var ${it::class.simpleName}"}
