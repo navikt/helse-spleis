@@ -1127,13 +1127,13 @@ internal class Arbeidsgiver private constructor(
         subsumsjonObserver: SubsumsjonObserver,
         infotrygdhistorikk: Infotrygdhistorikk,
         builder: IUtbetalingstidslinjeBuilder,
-        periode: Periode
+        kuttdato: LocalDate
     ): Utbetalingstidslinje {
-        val sykdomstidslinje = sykdomstidslinje().fremTilOgMed(periode.endInclusive).takeUnless { it.count() == 0 } ?: return Utbetalingstidslinje()
+        val sykdomstidslinje = sykdomstidslinje().fremTilOgMed(kuttdato).takeUnless { it.count() == 0 } ?: return Utbetalingstidslinje()
         return infotrygdhistorikk.build(organisasjonsnummer, sykdomstidslinje, builder, subsumsjonObserver)
     }
 
-    internal fun beregn(aktivitetslogg: IAktivitetslogg, arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger, periode: Periode, perioder: Map<Periode, IAktivitetslogg>): Boolean {
+    internal fun beregn(aktivitetslogg: IAktivitetslogg, arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger, periode: Periode, perioder: Map<Periode, Pair<IAktivitetslogg, SubsumsjonObserver>>): Boolean {
         try {
             arbeidsgiverUtbetalinger.beregn(aktivitetslogg, organisasjonsnummer, periode, perioder)
         } catch (err: UtbetalingstidslinjeBuilderException) {

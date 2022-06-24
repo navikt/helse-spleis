@@ -32,6 +32,7 @@ import no.nav.helse.person.Sammenligningsgrunnlag
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.arbeidsgiver
 import no.nav.helse.person.etterlevelse.MaskinellJurist
+import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
@@ -402,7 +403,7 @@ internal class ArbeidsgiverUtbetalingerTest {
             vilkårsgrunnlagHistorikk,
             MaskinellJurist()
         ).also {
-            it.beregn(aktivitetslogg, "88888888", Periode(1.januar, 31.desember(2019)), mapOf(Periode(1.januar, 31.desember(2019)) to aktivitetslogg))
+            it.beregn(aktivitetslogg, "88888888", Periode(1.januar, 31.desember(2019)), mapOf(Periode(1.januar, 31.desember(2019)) to (aktivitetslogg to SubsumsjonObserver.NullObserver)))
             maksdato = it.maksimumSykepenger.sisteDag()
             gjenståendeSykedager = it.maksimumSykepenger.gjenståendeDager()
             forbrukteSykedager = it.maksimumSykepenger.forbrukteDager()

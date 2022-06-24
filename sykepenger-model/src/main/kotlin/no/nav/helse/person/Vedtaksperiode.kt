@@ -1310,7 +1310,7 @@ internal class Vedtaksperiode private constructor(
                     vedtaksperiode.validerYtelserForSkjæringstidspunkt(ytelser)
                 }
                 val arbeidsgiverUtbetalinger = arbeidsgiverUtbetalingerFun(vedtaksperiode.jurist())
-                arbeidsgiver.beregn(ytelser, arbeidsgiverUtbetalinger, vedtaksperiode.periode, mapOf(vedtaksperiode.periode to ytelser))
+                arbeidsgiver.beregn(ytelser, arbeidsgiverUtbetalinger, vedtaksperiode.periode, mapOf(vedtaksperiode.periode to (ytelser to vedtaksperiode.jurist())))
                 check(!ytelser.hasErrorsOrWorse()) { "Skal ikke ha errors i validering av ytelser i revurdering." }
                 vedtaksperiode.forsøkRevurdering(arbeidsgiverUtbetalinger.maksimumSykepenger, ytelser)
             }
@@ -1674,7 +1674,7 @@ internal class Vedtaksperiode private constructor(
                         vedtaksperiode.skjæringstidspunkt
                     )
                     arbeidsgiverUtbetalinger = arbeidsgiverUtbetalingerFun(vedtaksperiode.jurist())
-                    arbeidsgiver.beregn(this, arbeidsgiverUtbetalinger, vedtaksperiode.periode, mapOf(vedtaksperiode.periode to this))
+                    arbeidsgiver.beregn(this, arbeidsgiverUtbetalinger, vedtaksperiode.periode, mapOf(vedtaksperiode.periode to (this to vedtaksperiode.jurist())))
                 }
                 onSuccess {
                     if (vedtaksperiode.person.harKunEttAnnetRelevantArbeidsforholdEnn(

@@ -17,25 +17,30 @@ internal class ArbeidsgiverUtbetalinger(
     private val vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk,
     private val subsumsjonObserver: SubsumsjonObserver
 ) {
-    internal lateinit var maksimumSykepenger: Alder.MaksimumSykepenger
+    private lateinit var maksimumSykepengedagerfilter: MaksimumSykepengedagerfilter
+    internal val maksimumSykepenger by lazy { maksimumSykepengedagerfilter.maksimumSykepenger() }
 
     internal fun beregn(
         aktivitetslogg: IAktivitetslogg,
         organisasjonsnummer: String,
-        periode: Periode,
-        perioder: Map<Periode, IAktivitetslogg>
+        beregningsperiode: Periode,
+        perioder: Map<Periode, Pair<IAktivitetslogg, SubsumsjonObserver>>
     ) {
-        val tidslinjer = arbeidsgivere
-            .mapValues { (arbeidsgiver, builder) -> arbeidsgiver.build(subsumsjonObserver, infotrygdhistorikk, builder, periode) }
-            .filterValues { it.isNotEmpty() }
-        gjødsle(aktivitetslogg, periode, tidslinjer)
-        perioder.forEach { (periode, aktivitetsloog) ->
-            filtrer(aktivitetsloog, tidslinjer, periode, periode.endInclusive)
+        val tidslinjerPerArbeidsgiver = tidslinjer(beregningsperiode.endInclusive)
+        val infotrygdtidslinje = infotrygdhistorikk.utbetalingstidslinje().kutt(beregningsperiode.endInclusive)
+        maksimumSykepengedagerfilter = MaksimumSykepengedagerfilter(alder, regler, infotrygdtidslinje)
+        gjødsle(aktivitetslogg, beregningsperiode, tidslinjerPerArbeidsgiver)
+        perioder.forEach { periode, (aktivitetslogg, subsumsjonObserver) ->
+            filtrer(aktivitetslogg, tidslinjerPerArbeidsgiver.values.toList(), periode, subsumsjonObserver)
         }
-        tidslinjer.forEach { (arbeidsgiver, utbetalingstidslinje) ->
+        tidslinjerPerArbeidsgiver.forEach { (arbeidsgiver, utbetalingstidslinje) ->
             arbeidsgiver.lagreUtbetalingstidslinjeberegning(organisasjonsnummer, utbetalingstidslinje, vilkårsgrunnlagHistorikk)
         }
     }
+
+    private fun tidslinjer(kuttdato: LocalDate) = arbeidsgivere
+        .mapValues { (arbeidsgiver, builder) -> arbeidsgiver.build(subsumsjonObserver, infotrygdhistorikk, builder, kuttdato) }
+        .filterValues { it.isNotEmpty() }
 
     private fun gjødsle(aktivitetslogg: IAktivitetslogg, periode: Periode, arbeidsgivere: Map<Arbeidsgiver, Utbetalingstidslinje>) {
         arbeidsgivere.forEach { (arbeidsgiver, tidslinje) ->
@@ -44,25 +49,19 @@ internal class ArbeidsgiverUtbetalinger(
                 refusjonshistorikk = arbeidsgiver.refusjonshistorikk,
                 infotrygdhistorikk = infotrygdhistorikk,
                 organisasjonsnummer = arbeidsgiver.organisasjonsnummer()
-
             ).gjødsle(aktivitetslogg, periode)
         }
     }
 
     private fun filtrer(
         aktivitetslogg: IAktivitetslogg,
-        arbeidsgivere: Map<Arbeidsgiver, Utbetalingstidslinje>,
+        tidslinjer: List<Utbetalingstidslinje>,
         periode: Periode,
-        virkningsdato: LocalDate,
+        subsumsjonObserver: SubsumsjonObserver,
     ) {
-        val tidslinjer = arbeidsgivere.values.toList()
-        val infotrygdtidslinje = infotrygdhistorikk.utbetalingstidslinje().kutt(periode.endInclusive)
         Sykdomsgradfilter.filter(tidslinjer, periode, aktivitetslogg, subsumsjonObserver)
         AvvisDagerEtterDødsdatofilter(dødsdato).filter(tidslinjer, periode, aktivitetslogg, subsumsjonObserver)
         AvvisInngangsvilkårfilter(vilkårsgrunnlagHistorikk).filter(tidslinjer, periode, aktivitetslogg, subsumsjonObserver)
-        maksimumSykepenger = MaksimumSykepengedagerfilter(alder, regler, infotrygdtidslinje).let {
-            it.filter(tidslinjer, periode, aktivitetslogg, subsumsjonObserver)
-            it.maksimumSykepenger()
-        }
-        MaksimumUtbetalingFilter { virkningsdato }.betal(tidslinjer, periode, aktivitetslogg, subsumsjonObserver) }
+        maksimumSykepengedagerfilter.filter(tidslinjer, periode, aktivitetslogg, subsumsjonObserver)
+        MaksimumUtbetalingFilter { periode.endInclusive }.betal(tidslinjer, periode, aktivitetslogg, subsumsjonObserver) }
 }
