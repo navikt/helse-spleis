@@ -28,9 +28,22 @@ internal class ArbeidsgiverUtbetalinger(
         val tidslinjer = arbeidsgivere
             .mapValues { (arbeidsgiver, builder) -> arbeidsgiver.build(subsumsjonObserver, infotrygdhistorikk, builder, periode) }
             .filterValues { it.isNotEmpty() }
+        gjødsle(aktivitetslogg, periode, tidslinjer)
         filtrer(aktivitetslogg, tidslinjer, periode, virkningsdato)
         tidslinjer.forEach { (arbeidsgiver, utbetalingstidslinje) ->
             arbeidsgiver.lagreUtbetalingstidslinjeberegning(organisasjonsnummer, utbetalingstidslinje, vilkårsgrunnlagHistorikk)
+        }
+    }
+
+    private fun gjødsle(aktivitetslogg: IAktivitetslogg, periode: Periode, arbeidsgivere: Map<Arbeidsgiver, Utbetalingstidslinje>) {
+        arbeidsgivere.forEach { (arbeidsgiver, tidslinje) ->
+            Refusjonsgjødsler(
+                tidslinje = tidslinje + arbeidsgiver.utbetalingstidslinje(infotrygdhistorikk),
+                refusjonshistorikk = arbeidsgiver.refusjonshistorikk,
+                infotrygdhistorikk = infotrygdhistorikk,
+                organisasjonsnummer = arbeidsgiver.organisasjonsnummer()
+
+            ).gjødsle(aktivitetslogg, periode)
         }
     }
 
@@ -48,14 +61,6 @@ internal class ArbeidsgiverUtbetalinger(
         maksimumSykepenger = MaksimumSykepengedagerfilter(alder, regler, infotrygdtidslinje).let {
             it.filter(tidslinjer, periode, aktivitetslogg, subsumsjonObserver)
             it.maksimumSykepenger()
-        }
-        arbeidsgivere.forEach { (arbeidsgiver, tidslinje) ->
-            Refusjonsgjødsler(
-                tidslinje = tidslinje + arbeidsgiver.utbetalingstidslinje(infotrygdhistorikk),
-                refusjonshistorikk = arbeidsgiver.refusjonshistorikk,
-                infotrygdhistorikk = infotrygdhistorikk,
-                organisasjonsnummer = arbeidsgiver.organisasjonsnummer()
-            ).gjødsle(aktivitetslogg, periode)
         }
         MaksimumUtbetalingFilter { virkningsdato }.betal(tidslinjer, periode, aktivitetslogg, subsumsjonObserver) }
 }
