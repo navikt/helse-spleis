@@ -1,12 +1,12 @@
 package no.nav.helse.utbetalingstidslinje
 
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.UtbetalingstidslinjeberegningVisitor
 import no.nav.helse.utbetalingslinjer.Utbetaling
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
 
 internal class Utbetalingstidslinjeberegning private constructor(
     private val id: UUID,
@@ -80,7 +80,7 @@ internal class Utbetalingstidslinjeberegning private constructor(
             maksdato: LocalDate,
             forbrukteSykedager: Int,
             gjenståendeSykedager: Int,
-            forrige: List<Utbetaling>,
+            forrige: Utbetaling,
             organisasjonsnummer: String
         ): Utbetaling {
             val beregning = beregnetUtbetalingstidslinjer.last()

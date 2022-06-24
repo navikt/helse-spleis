@@ -428,7 +428,7 @@ internal class Arbeidsgiver private constructor(
         forbrukteSykedager: Int,
         gjenståendeSykedager: Int,
         periode: Periode,
-        forrige: List<Utbetaling>
+        forrige: Utbetaling
     ): Utbetaling {
         return Utbetalingstidslinjeberegning.lagRevurdering(
             beregnetUtbetalingstidslinjer,

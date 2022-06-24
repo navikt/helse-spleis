@@ -8,6 +8,7 @@ import no.nav.helse.Fødselsnummer
 import no.nav.helse.hendelser.Hendelseskontekst
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
+import no.nav.helse.hendelser.til
 import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.Grunnbeløpsregulering
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
@@ -324,21 +325,24 @@ internal class Utbetaling private constructor(
             maksdato: LocalDate,
             forbrukteSykedager: Int,
             gjenståendeSykedager: Int,
-            forrige: List<Utbetaling> = emptyList()
+            forrige: Utbetaling
         ): Utbetaling {
+            val sisteUtbetaling = utbetalinger.aktive().lastOrNull { it.korrelasjonsId == forrige.korrelasjonsId } ?: forrige
+            val revurdertTidslinje = sisteUtbetaling.lagRevurdertTidslinje(utbetalingstidslinje, sisteDato)
+
             return Utbetaling(
-                utbetalinger.aktive().lastOrNull(),
+                sisteUtbetaling.takeIf { it.erAktiv() },
                 fødselsnummer,
                 beregningId,
                 organisasjonsnummer,
-                utbetalingstidslinje,
+                revurdertTidslinje,
                 Utbetalingtype.REVURDERING,
-                sisteDato,
+                revurdertTidslinje.periode().endInclusive,
                 aktivitetslogg,
                 maksdato,
                 forbrukteSykedager,
                 gjenståendeSykedager,
-                forrige.aktive().lastOrNull()
+                sisteUtbetaling.takeIf { it.erAktiv() }
             )
         }
 
@@ -529,6 +533,12 @@ internal class Utbetaling private constructor(
                 acc
             }.map { it.value.maxOf { periode -> periode } }
         }
+    }
+
+    private fun lagRevurdertTidslinje(nyUtbetalingstidslinje: Utbetalingstidslinje, sisteDato: LocalDate): Utbetalingstidslinje {
+        if (sisteDato >= utbetalingstidslinje.periode().endInclusive) return nyUtbetalingstidslinje
+        return nyUtbetalingstidslinje.kutt(sisteDato) + utbetalingstidslinje.subset(sisteDato.plusDays(1) til utbetalingstidslinje.periode().endInclusive)
+
     }
 
     internal fun accept(visitor: UtbetalingVisitor) {

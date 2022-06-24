@@ -6,12 +6,13 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
-import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.sistePeriodeForUtbetalinger
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.filter.Utbetalingsfilter
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.utbetalingslinjer.Utbetaling
+import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.aktive
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.harId
+import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.sistePeriodeForUtbetalinger
 import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 
@@ -110,7 +111,7 @@ internal class VedtaksperiodeUtbetalinger(private val arbeidsgiver: Arbeidsgiver
                 forbrukteSykedager = maksimumSykepenger.forbrukteDager(),
                 gjenståendeSykedager = maksimumSykepenger.gjenståendeDager(),
                 periode = periode,
-                forrige = utbetalinger
+                forrige = utbetalinger.aktive().last()
             ).also { arbeidsgiver.fordelRevurdertUtbetaling(vedtaksperiode, hendelse, it) }
         }
     }

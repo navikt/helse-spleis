@@ -216,14 +216,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
 
         håndterYtelser(3.vedtaksperiode)
         assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(15.februar, 0.0)
-        assertForventetFeil(
-            forklaring = """
-                Nye revurderinger må diffe mot forrige utbetaling uavhengig av om det er en utbetaling eller revurdering.
-                I tillegg må revurderinger alltid sørge for å kjøre frem hele utbetalingstidslinjen innenfor sin korrelasjonsid
-            """,
-            nå = { assertDiff(-2862) },
-            ønsket = { assertDiff(-1431) }
-        )
+        assertDiff(-1431)
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVSLUTTET)
         assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING)

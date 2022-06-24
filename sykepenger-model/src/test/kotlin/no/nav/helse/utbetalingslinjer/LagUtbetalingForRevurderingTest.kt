@@ -37,7 +37,6 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.Økonomi
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 @EnableToggle(Toggle.NyRevurdering::class)
@@ -106,7 +105,6 @@ internal class LagUtbetalingForRevurderingTest {
         assertEquals(utbetaling2.second, perioder.sistePeriodeForUtbetalinger()[0])
     }
 
-    @Disabled
     @Test
     fun `to forskjellige utbetalinger med samme skjæringstidspunkt (ping-pong)`() {
         val perioder = mutableListOf<Pair<Utbetaling, Vedtaksperiode>>()
@@ -121,7 +119,6 @@ internal class LagUtbetalingForRevurderingTest {
         assertEquals(utbetaling2.second, perioder.sistePeriodeForUtbetalinger()[1])
     }
 
-    @Disabled
     @Test
     fun `lag revurdering`() {
         val utbetaling = utbetaling(tidslinjeOf(16.AP, 15.NAV), utbetalt = true)
@@ -147,7 +144,6 @@ internal class LagUtbetalingForRevurderingTest {
         revurdering.assertDiff(-1200)
     }
 
-    @Disabled
     @Test
     fun `lag revurdering begrenset til kuttdato`() {
         val utbetaling = utbetaling(tidslinjeOf(16.AP, 15.NAV, 16.NAV), utbetalt = true)
@@ -177,7 +173,6 @@ internal class LagUtbetalingForRevurderingTest {
         }
     }
 
-    @Disabled
     @Test
     fun `lag revurdering begrenset til kuttdato og deretter ny revurdering`() {
         val utbetaling = utbetaling(tidslinjeOf(16.AP, 15.NAV, 16.NAV), utbetalt = true)
@@ -216,7 +211,6 @@ internal class LagUtbetalingForRevurderingTest {
         }
     }
 
-    @Disabled
     @Test
     fun `revurderingen kan strekkes forbi utbetalingen`() {
         val utbetaling = utbetaling(tidslinjeOf(16.AP, 15.NAV), utbetalt = true)
@@ -293,7 +287,7 @@ internal class LagUtbetalingForRevurderingTest {
             LocalDate.MAX,
             100,
             148,
-            listOf(forrige)
+            forrige
         ).also { utbetaling ->
             utbetaling.opprett(aktivitetslogg)
             if (utbetalt) {
