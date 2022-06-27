@@ -41,7 +41,7 @@ import no.nav.helse.person.Arbeidsgiver.Companion.ghostPeriode
 import no.nav.helse.person.Arbeidsgiver.Companion.gjenopptaBehandling
 import no.nav.helse.person.Arbeidsgiver.Companion.gjenopptaBehandlingNy
 import no.nav.helse.person.Arbeidsgiver.Companion.harArbeidsgivereMedOverlappendeUtbetaltePerioder
-import no.nav.helse.person.Arbeidsgiver.Companion.harOverlappendeVedtaksperiode
+import no.nav.helse.person.Arbeidsgiver.Companion.harOverlappendeEllerForlengerForkastetVedtaksperiode
 import no.nav.helse.person.Arbeidsgiver.Companion.harUtbetaltPeriode
 import no.nav.helse.person.Arbeidsgiver.Companion.harVedtaksperiodeFor
 import no.nav.helse.person.Arbeidsgiver.Companion.håndter
@@ -557,8 +557,8 @@ class Person private constructor(
         }
     }
 
-    internal fun harOverlappendeVedtaksperiode(hendelse: SykdomstidslinjeHendelse) =
-        arbeidsgivere.harOverlappendeVedtaksperiode(hendelse)
+    internal fun harOverlappendeEllerForlengerForkastetVedtaksperiode(hendelse: SykdomstidslinjeHendelse) =
+        arbeidsgivere.harOverlappendeEllerForlengerForkastetVedtaksperiode(hendelse)
 
     internal fun lagreDødsdato(dødsdato: LocalDate) {
         this.dødsdato = dødsdato

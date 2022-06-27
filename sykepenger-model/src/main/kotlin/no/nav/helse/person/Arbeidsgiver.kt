@@ -168,8 +168,8 @@ internal class Arbeidsgiver private constructor(
         internal fun Iterable<Arbeidsgiver>.nåværendeVedtaksperioder(filter: VedtaksperiodeFilter) =
             mapNotNull { it.vedtaksperioder.nåværendeVedtaksperiode(filter) }
 
-        internal fun Iterable<Arbeidsgiver>.harOverlappendeVedtaksperiode(hendelse: SykdomstidslinjeHendelse) =
-            any { it.harOverlappendeVedtaksperiode(hendelse) }
+        internal fun Iterable<Arbeidsgiver>.harOverlappendeEllerForlengerForkastetVedtaksperiode(hendelse: SykdomstidslinjeHendelse) =
+            any { it.harOverlappendeEllerForlengerForkastetVedtaksperiode(hendelse) }
 
         internal fun List<Arbeidsgiver>.lagRevurdering(vedtaksperiode: Vedtaksperiode, maksimumSykepenger: Alder.MaksimumSykepenger, hendelse: ArbeidstakerHendelse) {
             flatMap { it.vedtaksperioder }.lagRevurdering(vedtaksperiode, maksimumSykepenger, hendelse)
@@ -501,7 +501,7 @@ internal class Arbeidsgiver private constructor(
         sykmeldingsperioder.lagre(sykmelding.periode())
     }
 
-    private fun harOverlappendeVedtaksperiode(hendelse: SykdomstidslinjeHendelse): Boolean {
+    private fun harOverlappendeEllerForlengerForkastetVedtaksperiode(hendelse: SykdomstidslinjeHendelse): Boolean {
         ForkastetVedtaksperiode.overlapperMedForkastet(forkastede, hendelse)
         ForkastetVedtaksperiode.forlengerForkastet(forkastede, hendelse)
         return hendelse.hasErrorsOrWorse()
@@ -516,7 +516,7 @@ internal class Arbeidsgiver private constructor(
 
     private fun opprettVedtaksperiodeOgHåndter(søknad: Søknad) {
         val vedtaksperiode = søknad.lagVedtaksperiode(person, this, jurist)
-        if (person.harOverlappendeVedtaksperiode(søknad)) return registrerForkastetVedtaksperiode(vedtaksperiode, søknad)
+        if (person.harOverlappendeEllerForlengerForkastetVedtaksperiode(søknad)) return registrerForkastetVedtaksperiode(vedtaksperiode, søknad)
         if (noenHarHåndtert(søknad, Vedtaksperiode::håndter)) {
             if (søknad.hasErrorsOrWorse()) {
                 person.sendOppgaveEvent(søknad)

@@ -10,6 +10,8 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.inspectors.søppelbøtte
 import no.nav.helse.januar
 import no.nav.helse.mars
+import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
+import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
@@ -34,6 +36,14 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
     }
 
     @Test
+    fun `forlenger med forkastet periode hos annen arbeidsgiver`() = Toggle.ForkastForlengelseAvForkastetPeriode.enable {
+        (1.januar til 10.januar).forkast()
+        håndterSykmelding(Sykmeldingsperiode(11.januar, 16.januar, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(11.januar, 16.januar, 100.prosent), orgnummer = a2)
+        assertSisteForkastetPeriodeTilstand(a2, 1.vedtaksperiode, TIL_INFOTRYGD)
+    }
+
+    @Test
     fun `forlenger tidligere overlappende sykmelding`() = Toggle.ForkastForlengelseAvForkastetPeriode.enable {
         (1.januar til 10.januar).forkast()
         håndterSykmelding(Sykmeldingsperiode(9.januar, 15.januar, 100.prosent))
@@ -46,6 +56,18 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
         assertSisteForkastetPeriodeTilstand(ORGNUMMER, 1.vedtaksperiode, TIL_INFOTRYGD)
         assertSisteForkastetPeriodeTilstand(ORGNUMMER, 2.vedtaksperiode, TIL_INFOTRYGD)
         assertSisteForkastetPeriodeTilstand(ORGNUMMER, 3.vedtaksperiode, TIL_INFOTRYGD)
+    }
+
+    @Test
+    fun `Tar inn forlengelse selvom det er noe tidligere forkastet`() {
+        (1.januar til 10.januar).forkast()
+        tilGodkjenning(11.januar, 31.januar, ORGNUMMER)
+        Toggle.ForkastForlengelseAvForkastetPeriode.enable {
+            håndterSykmelding(Sykmeldingsperiode(1.februar, 14.februar, 100.prosent))
+            håndterSøknad(Sykdom(1.februar, 14.februar, 100.prosent))
+        }
+        assertTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING)
+        assertTilstand(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
     }
 
     @Test
