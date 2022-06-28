@@ -191,12 +191,12 @@ internal fun AbstractPersonTest.assertWarnings(vararg filtre: AktivitetsloggFilt
 
 internal fun AbstractPersonTest.assertWarning(warning: String, vararg filtre: AktivitetsloggFilter) {
     val warnings = collectWarnings(*filtre)
-    assertTrue(warnings.contains(warning), "fant ikke forventet warning. Warnings:\n${warnings.joinToString("\n")}")
+    assertTrue(warnings.contains(warning), "\nFant ikke forventet warning:\n\t$warning\nWarnings funnet:\n\t${warnings.joinToString("\n\t")}\n")
 }
 
 internal fun AbstractPersonTest.assertNoWarning(warning: String, vararg filtre: AktivitetsloggFilter) {
     val warnings = collectWarnings(*filtre)
-    assertFalse(warnings.contains(warning), "fant ikke forventet warning. Warnings:\n${warnings.joinToString("\n")}")
+    assertFalse(warnings.contains(warning), "\nFant ikke-forventet warning:\n\t$warning\nWarnings funnet:\n\t${warnings.joinToString("\n\t")}\n")
 }
 
 internal fun AbstractEndToEndTest.assertError(error: String, vararg filtre: AktivitetsloggFilter) {

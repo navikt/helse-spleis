@@ -76,7 +76,6 @@ import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.harNærliggendeUtbeta
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.utbetaltTidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
 import no.nav.helse.utbetalingslinjer.UtbetalingObserver
-import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverUtbetalinger
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
@@ -175,8 +174,12 @@ internal class Arbeidsgiver private constructor(
         internal fun Iterable<Arbeidsgiver>.harOverlappendeEllerForlengerForkastetVedtaksperiode(hendelse: SykdomstidslinjeHendelse) =
             any { it.harOverlappendeEllerForlengerForkastetVedtaksperiode(hendelse) }
 
-        internal fun List<Arbeidsgiver>.lagRevurdering(vedtaksperiode: Vedtaksperiode, maksimumSykepenger: Alder.MaksimumSykepenger, hendelse: ArbeidstakerHendelse) {
-            flatMap { it.vedtaksperioder }.lagRevurdering(vedtaksperiode, maksimumSykepenger, hendelse)
+        internal fun List<Arbeidsgiver>.lagRevurdering(
+            vedtaksperiode: Vedtaksperiode,
+            arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger,
+            hendelse: ArbeidstakerHendelse
+        ) {
+            flatMap { it.vedtaksperioder }.lagRevurdering(vedtaksperiode, arbeidsgiverUtbetalinger, hendelse)
         }
 
         internal fun List<Arbeidsgiver>.beregnSykepengegrunnlag(skjæringstidspunkt: LocalDate, periodeStart: LocalDate) =
@@ -1067,8 +1070,8 @@ internal class Arbeidsgiver private constructor(
 
     internal fun alleAndrePerioderErKlare(vedtaksperiode: Vedtaksperiode) = vedtaksperioder.filterNot { it == vedtaksperiode }.none(IKKE_FERDIG_REVURDERT)
 
-    internal fun fordelRevurdertUtbetaling(vedtaksperiode: Vedtaksperiode, hendelse: ArbeidstakerHendelse, utbetaling: Utbetaling) {
-        håndter(hendelse) { håndterRevurdertUtbetaling(vedtaksperiode, utbetaling, hendelse) }
+    internal fun fordelRevurdertUtbetaling(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg, utbetaling: Utbetaling) {
+        håndter(aktivitetslogg) { håndterRevurdertUtbetaling(vedtaksperiode, utbetaling, aktivitetslogg) }
     }
 
     override fun toSpesifikkKontekst(): SpesifikkKontekst {

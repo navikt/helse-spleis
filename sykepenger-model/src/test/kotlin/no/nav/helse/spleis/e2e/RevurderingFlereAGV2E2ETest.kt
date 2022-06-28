@@ -624,15 +624,7 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)
 
         inspektør(a2).gjeldendeUtbetalingForVedtaksperiode(3.vedtaksperiode).also {
-            assertForventetFeil(
-                forklaring = "AG2 sin utbetaling skal ikke kuttes. Skjer p.t. pga. at utbetalingstidslinjen blir beregnet og deretter kuttet basert på AG1 sin endInclusive",
-                nå = {
-                    assertEquals(17.januar til 28.februar, it.inspektør.periode)
-                },
-                ønsket = {
-                    assertEquals(17.januar til 31.mars, it.inspektør.periode)
-                }
-            )
+            assertEquals(17.januar til 31.mars, it.inspektør.periode)
         }
     }
 
@@ -647,14 +639,6 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
         assertEquals(19, inspektør(a1).sykdomstidslinje.inspektør.grader[17.januar])
         assertEquals(19, inspektør(a2).sykdomstidslinje.inspektør.grader[17.januar])
         assertWarning("Minst én dag uten utbetaling på grunn av sykdomsgrad under 20 %. Vurder å sende vedtaksbrev fra Infotrygd", 1.vedtaksperiode.filter(a2))
-        assertForventetFeil(
-            forklaring = "Minst én dag uten utbetaling på grunn av sykdomsgrad under 20 %. Vurder å sende vedtaksbrev fra Infotrygd",
-            nå = {
-                assertNoWarning("Minst én dag uten utbetaling på grunn av sykdomsgrad under 20 %. Vurder å sende vedtaksbrev fra Infotrygd", 1.vedtaksperiode.filter(a1))
-            },
-            ønsket = {
-                assertWarning("Minst én dag uten utbetaling på grunn av sykdomsgrad under 20 %. Vurder å sende vedtaksbrev fra Infotrygd", 1.vedtaksperiode.filter(a1))
-            }
-        )
+        assertWarning("Minst én dag uten utbetaling på grunn av sykdomsgrad under 20 %. Vurder å sende vedtaksbrev fra Infotrygd", 1.vedtaksperiode.filter(a1))
     }
 }

@@ -4,20 +4,29 @@ import java.time.LocalDate
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.IAktivitetslogg
+import no.nav.helse.person.Vedtaksperiode.Companion.RevurderingUtbetalinger
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 
 internal class ArbeidsgiverUtbetalinger(
-    private val regler: ArbeidsgiverRegler,
+    regler: ArbeidsgiverRegler,
+    alder: Alder,
     private val arbeidsgivere: Map<Arbeidsgiver, IUtbetalingstidslinjeBuilder>,
     private val infotrygdhistorikk: Infotrygdhistorikk,
-    private val alder: Alder,
     private val dødsdato: LocalDate?,
     private val vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk,
     private val subsumsjonObserver: SubsumsjonObserver
 ) {
-    private lateinit var maksimumSykepengedagerfilter: MaksimumSykepengedagerfilter
+    private val infotrygdtidslinje = infotrygdhistorikk.utbetalingstidslinje()
+    private val maksimumSykepengedagerfilter = MaksimumSykepengedagerfilter(alder, regler, infotrygdtidslinje)
+    private val filtere = listOf(
+        Sykdomsgradfilter,
+        AvvisDagerEtterDødsdatofilter(dødsdato),
+        AvvisInngangsvilkårfilter(vilkårsgrunnlagHistorikk),
+        maksimumSykepengedagerfilter,
+        MaksimumUtbetalingFilter(),
+    )
     internal val maksimumSykepenger by lazy { maksimumSykepengedagerfilter.maksimumSykepenger() }
 
     internal fun beregn(
@@ -27,8 +36,6 @@ internal class ArbeidsgiverUtbetalinger(
         perioder: Map<Periode, Pair<IAktivitetslogg, SubsumsjonObserver>>
     ) {
         val tidslinjerPerArbeidsgiver = tidslinjer(beregningsperiode.endInclusive)
-        val infotrygdtidslinje = infotrygdhistorikk.utbetalingstidslinje().kutt(beregningsperiode.endInclusive)
-        maksimumSykepengedagerfilter = MaksimumSykepengedagerfilter(alder, regler, infotrygdtidslinje)
         gjødsle(aktivitetslogg, beregningsperiode, tidslinjerPerArbeidsgiver)
         perioder.forEach { periode, (aktivitetslogg, subsumsjonObserver) ->
             filtrer(aktivitetslogg, tidslinjerPerArbeidsgiver.values.toList(), periode, subsumsjonObserver)
@@ -36,6 +43,20 @@ internal class ArbeidsgiverUtbetalinger(
         tidslinjerPerArbeidsgiver.forEach { (arbeidsgiver, utbetalingstidslinje) ->
             arbeidsgiver.lagreUtbetalingstidslinjeberegning(organisasjonsnummer, utbetalingstidslinje, vilkårsgrunnlagHistorikk)
         }
+    }
+
+    internal fun utbetal(
+        revurderingUtbetalinger: RevurderingUtbetalinger,
+        beregningsperiode: Periode,
+        organisasjonsnummer: String
+    ): MaksimumSykepengedagerfilter {
+        val tidslinjerPerArbeidsgiver = tidslinjer(beregningsperiode.endInclusive)
+        revurderingUtbetalinger.gjødsle(tidslinjerPerArbeidsgiver, infotrygdhistorikk)
+        revurderingUtbetalinger.filtrer(filtere, tidslinjerPerArbeidsgiver)
+        tidslinjerPerArbeidsgiver.forEach { (arbeidsgiver, utbetalingstidslinje) ->
+            arbeidsgiver.lagreUtbetalingstidslinjeberegning(organisasjonsnummer, utbetalingstidslinje, vilkårsgrunnlagHistorikk)
+        }
+        return maksimumSykepengedagerfilter
     }
 
     private fun tidslinjer(kuttdato: LocalDate) = arbeidsgivere

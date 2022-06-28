@@ -380,6 +380,7 @@ internal class ArbeidsgiverUtbetalingerTest {
 
         ArbeidsgiverUtbetalinger(
             NormalArbeidstaker,
+            fnr.alder(),
             mapOf(person.arbeidsgiver(ORGNUMMER) to object : IUtbetalingstidslinjeBuilder {
                 override fun result() = arbeidsgiverTidslinje
                 override fun fridag(dato: LocalDate) {}
@@ -398,7 +399,6 @@ internal class ArbeidsgiverUtbetalingerTest {
                 override fun avvistDag(dato: LocalDate, begrunnelse: Begrunnelse) {}
             }),
             infotrygdhistorikk,
-            fnr.alder(),
             null,
             vilkårsgrunnlagHistorikk,
             MaskinellJurist()

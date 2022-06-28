@@ -62,11 +62,11 @@ internal class VedtaksperiodeUtbetalinger(private val arbeidsgiver: Arbeidsgiver
     }
 
     internal fun mottaRevurdering(
-        hendelse: ArbeidstakerHendelse,
+        aktivitetslogg: IAktivitetslogg,
         utbetaling: Utbetaling,
         periode: Periode
     ): Utbetalingstidslinje {
-        return nyUtbetaling(hendelse, periode) { utbetaling }
+        return nyUtbetaling(aktivitetslogg, periode) { utbetaling }
     }
 
     internal fun lagUtbetaling(
@@ -101,18 +101,18 @@ internal class VedtaksperiodeUtbetalinger(private val arbeidsgiver: Arbeidsgiver
         vedtaksperiode: Vedtaksperiode,
         periode: Periode,
         maksimumSykepenger: Alder.MaksimumSykepenger,
-        hendelse: ArbeidstakerHendelse
+        aktivitetslogg: IAktivitetslogg
     ): Utbetalingstidslinje {
-        return nyUtbetaling(hendelse, periode) {
+        return nyUtbetaling(aktivitetslogg, periode) {
             arbeidsgiver.lagRevurdering(
-                aktivitetslogg = hendelse,
+                aktivitetslogg = aktivitetslogg,
                 fødselsnummer = fødselsnummer,
                 maksdato = maksimumSykepenger.sisteDag(),
                 forbrukteSykedager = maksimumSykepenger.forbrukteDager(),
                 gjenståendeSykedager = maksimumSykepenger.gjenståendeDager(),
                 periode = periode,
                 forrige = utbetalinger.aktive().last()
-            ).also { arbeidsgiver.fordelRevurdertUtbetaling(vedtaksperiode, hendelse, it) }
+            ).also { arbeidsgiver.fordelRevurdertUtbetaling(vedtaksperiode, aktivitetslogg, it) }
         }
     }
 

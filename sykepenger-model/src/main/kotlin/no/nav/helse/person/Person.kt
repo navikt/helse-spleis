@@ -67,7 +67,6 @@ import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingslinjer.Utbetaling
-import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverUtbetalinger
@@ -344,14 +343,14 @@ class Person private constructor(
     ): ArbeidsgiverUtbetalinger {
         return ArbeidsgiverUtbetalinger(
             regler = regler,
+            alder = fødselsnummer.alder(),
             arbeidsgivere = arbeidsgivereMedSykdom().associateWith {
                 it.builder(regler, vilkårsgrunnlagHistorikk, subsumsjonObserver)
             },
             infotrygdhistorikk = infotrygdhistorikk,
-            alder = fødselsnummer.alder(),
             dødsdato = dødsdato,
-            subsumsjonObserver = subsumsjonObserver,
-            vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk
+            vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk,
+            subsumsjonObserver = subsumsjonObserver
         )
     }
 
@@ -534,8 +533,12 @@ class Person private constructor(
     internal fun nåværendeVedtaksperioder(filter: VedtaksperiodeFilter) = arbeidsgivere.nåværendeVedtaksperioder(filter).sorted()
     internal fun vedtaksperioder(filter: VedtaksperiodeFilter) = arbeidsgivere.vedtaksperioder(filter).sorted()
 
-    internal fun lagRevurdering(vedtaksperiode: Vedtaksperiode, maksimumSykepenger: Alder.MaksimumSykepenger, hendelse: ArbeidstakerHendelse) {
-        arbeidsgivere.lagRevurdering(vedtaksperiode, maksimumSykepenger, hendelse)
+    internal fun lagRevurdering(
+        vedtaksperiode: Vedtaksperiode,
+        arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger,
+        hendelse: ArbeidstakerHendelse
+    ) {
+        arbeidsgivere.lagRevurdering(vedtaksperiode, arbeidsgiverUtbetalinger, hendelse)
     }
 
     internal fun ghostPeriode(skjæringstidspunkt: LocalDate, deaktivert: Boolean) =
