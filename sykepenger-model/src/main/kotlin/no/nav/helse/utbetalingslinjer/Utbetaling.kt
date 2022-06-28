@@ -337,7 +337,7 @@ internal class Utbetaling private constructor(
                 organisasjonsnummer,
                 revurdertTidslinje,
                 Utbetalingtype.REVURDERING,
-                revurdertTidslinje.periode().endInclusive,
+                maxOf(sisteUtbetaling.periode.endInclusive, sisteDato),
                 aktivitetslogg,
                 maksdato,
                 forbrukteSykedager,

@@ -231,6 +231,16 @@ internal class LagUtbetalingForRevurderingTest {
         }
     }
 
+    @Test
+    fun `revurderingen strekkes forbi utbetalingen, men kuttes`() {
+        val utbetaling = utbetaling(tidslinjeOf(16.AP, 15.NAV), utbetalt = true)
+        val revurdering = revurdering(tidslinjeOf(16.AP, 20.NAV), utbetaling, utbetaling, 31.januar)
+        revurdering.inspektør.utbetalingstidslinje.inspektør.apply {
+            assertEquals(1.januar, førstedag.dato)
+            assertEquals(31.januar, sistedag.dato)
+        }
+    }
+
     private fun utbetaling(
         tidslinje: Utbetalingstidslinje,
         tidligere: Utbetaling? = null,

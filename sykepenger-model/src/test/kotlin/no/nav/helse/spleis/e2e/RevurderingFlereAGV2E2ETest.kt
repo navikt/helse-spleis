@@ -34,7 +34,6 @@ import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype.REVURDERING
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 @EnableToggle(Toggle.NyRevurdering::class)
@@ -615,9 +614,8 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
         }
     }
 
-    @Disabled
     @Test
-    fun `ag1 har en kortere periode enn ag2, ag1 revurderes, ag2 sin utbetaling blir ikke kuttet`() {
+    fun `ag1 har en kortere periode enn ag2 - ag1 revurderes - ag2 sin utbetaling blir ikke kuttet`() {
         nyeVedtak(1.januar, 31.januar, a1, a2)
         forlengVedtak(1.februar, 28.februar, a1, a2)
         forlengVedtak(1.mars, 31.mars, a2)
@@ -626,7 +624,15 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)
 
         inspektør(a2).gjeldendeUtbetalingForVedtaksperiode(3.vedtaksperiode).also {
-            assertEquals(17.januar til 31.mars, it.inspektør.periode)
+            assertForventetFeil(
+                forklaring = "AG2 sin utbetaling skal ikke kuttes. Skjer p.t. pga. at utbetalingstidslinjen blir beregnet og deretter kuttet basert på AG1 sin endInclusive",
+                nå = {
+                    assertEquals(17.januar til 28.februar, it.inspektør.periode)
+                },
+                ønsket = {
+                    assertEquals(17.januar til 31.mars, it.inspektør.periode)
+                }
+            )
         }
     }
 
@@ -641,7 +647,7 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
         assertEquals(19, inspektør(a1).sykdomstidslinje.inspektør.grader[17.januar])
         assertEquals(19, inspektør(a2).sykdomstidslinje.inspektør.grader[17.januar])
         assertWarning("Minst én dag uten utbetaling på grunn av sykdomsgrad under 20 %. Vurder å sende vedtaksbrev fra Infotrygd", 1.vedtaksperiode.filter(a2))
-        no.nav.helse.assertForventetFeil(
+        assertForventetFeil(
             forklaring = "Minst én dag uten utbetaling på grunn av sykdomsgrad under 20 %. Vurder å sende vedtaksbrev fra Infotrygd",
             nå = {
                 assertNoWarning("Minst én dag uten utbetaling på grunn av sykdomsgrad under 20 %. Vurder å sende vedtaksbrev fra Infotrygd", 1.vedtaksperiode.filter(a1))
