@@ -1023,7 +1023,7 @@ internal class Arbeidsgiver private constructor(
     }
 
     private fun registrerForkastetVedtaksperiode(vedtaksperiode: Vedtaksperiode, hendelse: SykdomstidslinjeHendelse) {
-        hendelse.info("Oppretter forkastet vedtaksperiode ettersom Sykmelding inneholder errors")
+        hendelse.info("Oppretter forkastet vedtaksperiode ettersom Søknad inneholder errors")
         vedtaksperiode.forkast(hendelse, utbetalinger)
         forkastede.add(ForkastetVedtaksperiode(vedtaksperiode, ForkastetÅrsak.IKKE_STØTTET))
     }

@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate
 import java.time.LocalDateTime
+import no.nav.helse.Toggle
 import no.nav.helse.august
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsvurdering
@@ -378,7 +379,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `ubetalt periode, etter utbetalt, etterutbetales ikke`() {
+    fun `ubetalt periode, etter utbetalt, etterutbetales ikke`() = Toggle.ForkastForlengelseAvForkastetPeriode.disable {
         (10.juni to 30.juni).also { (fom, tom) ->
             håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent))
             håndterSøknad(Sykdom(fom, tom, 100.prosent), sendtTilNAVEllerArbeidsgiver = tom)

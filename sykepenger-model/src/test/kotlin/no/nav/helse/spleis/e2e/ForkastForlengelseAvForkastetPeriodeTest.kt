@@ -60,12 +60,12 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
 
     @Test
     fun `Tar inn forlengelse selvom det er noe tidligere forkastet`() {
-        (1.januar til 10.januar).forkast()
-        tilGodkjenning(11.januar, 31.januar, ORGNUMMER)
-        Toggle.ForkastForlengelseAvForkastetPeriode.enable {
-            håndterSykmelding(Sykmeldingsperiode(1.februar, 14.februar, 100.prosent))
-            håndterSøknad(Sykdom(1.februar, 14.februar, 100.prosent))
+        Toggle.ForkastForlengelseAvForkastetPeriode.disable {
+            (1.januar til 10.januar).forkast()
+            tilGodkjenning(11.januar, 31.januar, ORGNUMMER)
         }
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 14.februar, 100.prosent))
+        håndterSøknad(Sykdom(1.februar, 14.februar, 100.prosent))
         assertTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING)
         assertTilstand(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
     }

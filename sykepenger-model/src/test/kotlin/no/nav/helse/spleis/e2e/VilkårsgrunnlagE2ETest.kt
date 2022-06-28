@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate
 import java.time.YearMonth
+import no.nav.helse.Toggle
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
@@ -291,7 +292,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `gjenbruker ikke vilkårsprøving når førstegangsbehandlingen kastes ut`() {
+    fun `gjenbruker ikke vilkårsprøving når førstegangsbehandlingen kastes ut`() = Toggle.ForkastForlengelseAvForkastetPeriode.disable {
         val INNTEKT_FRA_IT = INNTEKT/2
 
         håndterSykmelding(Sykmeldingsperiode(1.januar, 17.januar, 100.prosent))
@@ -328,7 +329,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `skal ikke gjenbruke et vilkårsgrunnlag som feiler pga frilanser arbeidsforhold`() {
+    fun `skal ikke gjenbruke et vilkårsgrunnlag som feiler pga frilanser arbeidsforhold`() = Toggle.ForkastForlengelseAvForkastetPeriode.disable {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 17.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 17.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))

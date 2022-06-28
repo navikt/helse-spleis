@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate
+import no.nav.helse.Toggle
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
@@ -50,7 +51,7 @@ internal class StatslønnWarningTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Error for statslønn ved forlengelse av forkastet periode`() {
+    fun `Error for statslønn ved forlengelse av forkastet periode`() = Toggle.ForkastForlengelseAvForkastetPeriode.disable {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         val inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.desember(2017), INNTEKT, false))

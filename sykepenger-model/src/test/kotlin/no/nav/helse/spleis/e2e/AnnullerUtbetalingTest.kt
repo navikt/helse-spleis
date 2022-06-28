@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.Toggle
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
@@ -399,7 +400,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `forlengelse ved inflight annullering`() {
+    fun `forlengelse ved inflight annullering`() = Toggle.ForkastForlengelseAvForkastetPeriode.disable {
         /*
         Tidligere har vi kun basert oss på utbetalinger i en sluttilstand for å beregne ny utbetaling. Om vi hadde en annullering som var in-flight ville denne
         bli ignorert og det ville bli laget en utbetaling som strakk seg helt tilbake til første del av sammenhengende periode, noe som igjen vil føre til at vi

@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate
+import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.august
 import no.nav.helse.februar
@@ -182,7 +183,7 @@ internal class NyTilstandsflytInfotrygdTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Ping pong - venter ikke på inntektsmelding`() {
+    fun `Ping pong - venter ikke på inntektsmelding`() = Toggle.ForkastForlengelseAvForkastetPeriode.disable {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
@@ -205,7 +206,7 @@ internal class NyTilstandsflytInfotrygdTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Forlengelse av ping pong - periode 2 venter på IM`() {
+    fun `Forlengelse av ping pong - periode 2 venter på IM`() = Toggle.ForkastForlengelseAvForkastetPeriode.disable {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar),)
@@ -268,7 +269,7 @@ internal class NyTilstandsflytInfotrygdTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `oppdager at vi er en infotrygdforlengelse når infotrygdhistorikken tilstøter en periode i AvsluttetUtenUtbetaling`() {
+    fun `oppdager at vi er en infotrygdforlengelse når infotrygdhistorikken tilstøter en periode i AvsluttetUtenUtbetaling`() = Toggle.ForkastForlengelseAvForkastetPeriode.disable {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 9.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 9.januar, 100.prosent))
         person.invaliderAllePerioder(hendelselogg, null)
@@ -302,7 +303,7 @@ internal class NyTilstandsflytInfotrygdTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `forlengelse av ping-pong, ny periode som forlenger ping-pong-perioden går til AvventerHistorikk`() {
+    fun `forlengelse av ping-pong, ny periode som forlenger ping-pong-perioden går til AvventerHistorikk`() = Toggle.ForkastForlengelseAvForkastetPeriode.disable {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode)

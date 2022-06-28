@@ -1,6 +1,6 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.assertForventetFeil
+import no.nav.helse.Toggle
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
@@ -14,7 +14,6 @@ import no.nav.helse.person.TilstandType
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.serde.serialize
 import no.nav.helse.somFødselsnummer
-import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Begrunnelse.SykepengedagerOppbruktOver67
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -23,7 +22,7 @@ import org.junit.jupiter.api.Test
 internal class MaksdatoE2ETest : AbstractEndToEndTest() {
 
     @Test
-    fun `syk etter maksdato`() {
+    fun `syk etter maksdato`() = Toggle.ForkastForlengelseAvForkastetPeriode.disable {
         var forrigePeriode = 1.januar til 31.januar
         nyttVedtak(forrigePeriode.start, forrigePeriode.endInclusive, 100.prosent)
         // setter opp vedtaksperioder frem til 182 dager etter maksdato
@@ -43,7 +42,6 @@ internal class MaksdatoE2ETest : AbstractEndToEndTest() {
         assertSisteTilstand(siste, TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK) {
             "denne perioden skal under ingen omstendigheter utbetales fordi personen ikke har vært på arbeid etter maksdato"
         }
-
     }
 
     @Test

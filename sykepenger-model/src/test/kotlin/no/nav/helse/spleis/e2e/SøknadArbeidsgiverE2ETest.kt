@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.Toggle
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
@@ -212,7 +213,7 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `forkastede problemdager skal ikke skape problem ved utregning av arbeidsgiverperiode`() {
+    fun `forkastede problemdager skal ikke skape problem ved utregning av arbeidsgiverperiode`() = Toggle.ForkastForlengelseAvForkastetPeriode.disable {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), Papirsykmelding(27.desember(2017), 31.desember(2017)))
         assertTrue(hendelselogg.hasErrorsOrWorse()) // perioden blir forkastet pga papirsykmelding
@@ -222,14 +223,14 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `hensyntar forkastet historikk for å unngå å lage dårlig stemning`() {
+    fun `hensyntar forkastet historikk for å unngå å lage dårlig stemning`() = Toggle.ForkastForlengelseAvForkastetPeriode.disable {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent))
         person.søppelbøtte(hendelselogg, 1.januar til 20.januar)
         håndterSykmelding(Sykmeldingsperiode(21.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(21.januar, 31.januar, 100.prosent))
         håndterUtbetalingshistorikk(2.vedtaksperiode)
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK) // På grunn av den forkastede perioden går den ikke til AvsluttetUtenUtbetaling
     }
 
     @Test

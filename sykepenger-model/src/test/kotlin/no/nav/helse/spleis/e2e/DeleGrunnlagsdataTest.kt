@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
@@ -318,7 +319,7 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Bruker ikke vilkårsgrunnlag for annet skjæringstidpunkt ved beregning av utbetalingstidslinje, selv om skjæringstidspunktet er senere`() {
+    fun `Bruker ikke vilkårsgrunnlag for annet skjæringstidpunkt ved beregning av utbetalingstidslinje, selv om skjæringstidspunktet er senere`() = Toggle.ForkastForlengelseAvForkastetPeriode.disable {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 21.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 21.januar, 100.prosent))
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)))
@@ -326,7 +327,6 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Nei)
         håndterYtelser(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, utbetalingGodkjent = false)
-
 
         håndterSykmelding(Sykmeldingsperiode(22.januar, 10.februar, 100.prosent))
         håndterSøknad(Sykdom(22.januar, 10.februar, 100.prosent))

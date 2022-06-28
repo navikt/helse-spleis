@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.Toggle
 import no.nav.helse.august
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
@@ -216,7 +217,7 @@ internal class ForkastingTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `forkaster ikke påfølgende periode når tilstøtende forkastet periode ble avsluttet`() {
+    fun `forkaster ikke påfølgende periode når tilstøtende forkastet periode er annullert`() = Toggle.ForkastForlengelseAvForkastetPeriode.disable {
         nyttVedtak(29.august, 25.september)
         håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
         håndterUtbetalt()
@@ -228,7 +229,7 @@ internal class ForkastingTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `forkaster ikke påfølgende periode når den forkastede ikke var avsluttet`() {
+    fun `forkaster ikke påfølgende periode når den forkastede har et ugyldig vilkårsgrunnlag`() = Toggle.ForkastForlengelseAvForkastetPeriode.disable {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 21.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 21.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
@@ -249,7 +250,6 @@ internal class ForkastingTest : AbstractEndToEndTest() {
         )
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
     }
-
 
     @Test
     fun `forkaster ikke i til utbetaling ved overlapp`() {

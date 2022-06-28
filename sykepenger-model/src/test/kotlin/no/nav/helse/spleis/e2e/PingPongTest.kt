@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate
 import java.time.LocalDateTime
+import no.nav.helse.Toggle
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
 import no.nav.helse.desember
@@ -115,7 +116,7 @@ internal class PingPongTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `kort periode - infotrygd - spleis --- inntekt kommer fra infotrygd`() {
+    fun `kort periode - infotrygd - spleis --- inntekt kommer fra infotrygd`() = Toggle.ForkastForlengelseAvForkastetPeriode.disable {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode, besvart = LocalDate.EPOCH.atStartOfDay())
@@ -140,7 +141,7 @@ internal class PingPongTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `spleis - infotrygd - spleis --- inntekt kommer fra første periode`() {
+    fun `spleis - infotrygd - spleis --- inntekt kommer fra første periode`() = Toggle.ForkastForlengelseAvForkastetPeriode.disable {
         nyttVedtak(20.desember(2017), 16.januar)
         håndterSykmelding(Sykmeldingsperiode(17.januar, 26.januar, 100.prosent))
         håndterSøknad(Sykdom(17.januar, 26.januar, 100.prosent))

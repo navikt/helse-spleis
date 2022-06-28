@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.Toggle
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -74,7 +75,7 @@ internal class BerOmInntektsmeldingTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Sender ikke ut ManglendeInntektsmeldingEvent hvis vi har en tilstøtende forkastet sykeperiode - AvventerInntektsmeldingEllerHistorikk`() {
+    fun `Sender ikke ut ManglendeInntektsmeldingEvent hvis vi har en tilstøtende forkastet sykeperiode - AvventerInntektsmeldingEllerHistorikk`() = Toggle.ForkastForlengelseAvForkastetPeriode.disable {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 21.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 21.januar, 100.prosent))
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 1.januar)
