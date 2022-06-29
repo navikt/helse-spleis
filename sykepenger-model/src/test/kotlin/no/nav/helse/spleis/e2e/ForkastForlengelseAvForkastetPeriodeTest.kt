@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e
 
 import no.nav.helse.Toggle
 import no.nav.helse.april
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -12,6 +11,7 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.inspectors.søppelbøtte
 import no.nav.helse.januar
 import no.nav.helse.juni
+import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -218,16 +218,8 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
         nyPeriode(1.mars til 31.mars)
         nyPeriode(1.februar til 31.mars)
 
+        assertForkastetPeriodeTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, TIL_INFOTRYGD)
         assertForkastetPeriodeTilstander(3.vedtaksperiode, START, TIL_INFOTRYGD)
-        assertForventetFeil(
-            forklaring = "skal forkaste overlappende uferdig perioder",
-            nå = {
-                assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
-            },
-            ønsket = {
-                assertForkastetPeriodeTilstander(2.vedtaksperiode, START, TIL_INFOTRYGD)
-            }
-        )
     }
 
     @Test
@@ -240,20 +232,10 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
         nyPeriode(1.juni til 30.juni)
         nyPeriode(1.februar til 28.februar)
 
+        assertForkastetPeriodeTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, TIL_INFOTRYGD)
+        assertForkastetPeriodeTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, TIL_INFOTRYGD)
         assertTilstander(4.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
         assertForkastetPeriodeTilstander(5.vedtaksperiode, START, TIL_INFOTRYGD)
-
-        assertForventetFeil(
-            forklaring = "skal forkaste etterfølgede  uferdig perioder",
-            nå = {
-                assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
-                assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
-            },
-            ønsket = {
-                assertForkastetPeriodeTilstander(2.vedtaksperiode, START, TIL_INFOTRYGD)
-                assertForkastetPeriodeTilstander(3.vedtaksperiode, START, TIL_INFOTRYGD)
-            }
-        )
     }
 
     @Test
@@ -283,6 +265,42 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
         assertTilstand(3.vedtaksperiode, AVSLUTTET)
         assertTilstand(4.vedtaksperiode, AVSLUTTET)
         assertForkastetPeriodeTilstander(5.vedtaksperiode, START, TIL_INFOTRYGD)
+    }
+
+    @Test
+    fun `forkaster alle forlengelser`() {
+        nyPeriode(1.januar til 31.januar)
+        person.invaliderAllePerioder(hendelselogg, null)
+
+        nyPeriode(1.juni til 30.juni)
+        nyPeriode(1.april til 30.april)
+        nyPeriode(1.mars til 31.mars)
+        nyPeriode(1.mai til 31.mai)
+
+        nyPeriode(1.februar til 28.februar)
+
+        assertSisteForkastetPeriodeTilstand(ORGNUMMER, 1.vedtaksperiode, TIL_INFOTRYGD)
+        assertSisteForkastetPeriodeTilstand(ORGNUMMER, 2.vedtaksperiode, TIL_INFOTRYGD)
+        assertSisteForkastetPeriodeTilstand(ORGNUMMER, 3.vedtaksperiode, TIL_INFOTRYGD)
+        assertSisteForkastetPeriodeTilstand(ORGNUMMER, 4.vedtaksperiode, TIL_INFOTRYGD)
+        assertSisteForkastetPeriodeTilstand(ORGNUMMER, 5.vedtaksperiode, TIL_INFOTRYGD)
+        assertSisteForkastetPeriodeTilstand(ORGNUMMER, 6.vedtaksperiode, TIL_INFOTRYGD)
+    }
+
+    @Test
+    fun `forkaster forlengede vedtak på tvers av arbeidsgivere`() {
+        nyPeriode(1.januar til 31.januar, a1)
+        person.invaliderAllePerioder(hendelselogg, null)
+
+        nyPeriode(1.mars til 31.mars, a2)
+        nyPeriode(1.april til 30.april, a1)
+
+        nyPeriode(1.februar til 28.februar, a1)
+
+        assertSisteForkastetPeriodeTilstand(a1, 1.vedtaksperiode, TIL_INFOTRYGD)
+        assertSisteForkastetPeriodeTilstand(a1, 2.vedtaksperiode, TIL_INFOTRYGD)
+        assertSisteForkastetPeriodeTilstand(a1, 3.vedtaksperiode, TIL_INFOTRYGD)
+        assertSisteForkastetPeriodeTilstand(a2, 1.vedtaksperiode, TIL_INFOTRYGD)
     }
 
     private fun Periode.forkast() {

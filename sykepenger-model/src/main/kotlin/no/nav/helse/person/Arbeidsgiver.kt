@@ -42,6 +42,7 @@ import no.nav.helse.person.Vedtaksperiode.Companion.ER_ELLER_HAR_VÆRT_AVSLUTTET
 import no.nav.helse.person.Vedtaksperiode.Companion.IKKE_FERDIG_BEHANDLET
 import no.nav.helse.person.Vedtaksperiode.Companion.IKKE_FERDIG_REVURDERT
 import no.nav.helse.person.Vedtaksperiode.Companion.KLAR_TIL_BEHANDLING
+import no.nav.helse.person.Vedtaksperiode.Companion.OVERLAPPER_ELLER_FORLENGER
 import no.nav.helse.person.Vedtaksperiode.Companion.REVURDERING_IGANGSATT
 import no.nav.helse.person.Vedtaksperiode.Companion.SKAL_INNGÅ_I_SYKEPENGEGRUNNLAG
 import no.nav.helse.person.Vedtaksperiode.Companion.avventerRevurdering
@@ -167,6 +168,9 @@ internal class Arbeidsgiver private constructor(
 
         internal fun Iterable<Arbeidsgiver>.nåværendeVedtaksperioder(filter: VedtaksperiodeFilter) =
             mapNotNull { it.vedtaksperioder.nåværendeVedtaksperiode(filter) }
+
+        internal fun Iterable<Arbeidsgiver>.vedtaksperioder(filter: VedtaksperiodeFilter) =
+            map { it.vedtaksperioder.filter(filter) }.flatten()
 
         internal fun Iterable<Arbeidsgiver>.harOverlappendeEllerForlengerForkastetVedtaksperiode(hendelse: SykdomstidslinjeHendelse) =
             any { it.harOverlappendeEllerForlengerForkastetVedtaksperiode(hendelse) }
@@ -514,9 +518,15 @@ internal class Arbeidsgiver private constructor(
         opprettVedtaksperiodeOgHåndter(søknad)
     }
 
+
+
     private fun opprettVedtaksperiodeOgHåndter(søknad: Søknad) {
         val vedtaksperiode = søknad.lagVedtaksperiode(person, this, jurist)
-        if (person.harOverlappendeEllerForlengerForkastetVedtaksperiode(søknad)) return registrerForkastetVedtaksperiode(vedtaksperiode, søknad)
+        if (person.harOverlappendeEllerForlengerForkastetVedtaksperiode(søknad)) {
+            registrerForkastetVedtaksperiode(vedtaksperiode, søknad)
+            person.søppelbøtte(søknad, OVERLAPPER_ELLER_FORLENGER(vedtaksperiode))
+            return
+        }
         if (noenHarHåndtert(søknad, Vedtaksperiode::håndter)) {
             if (søknad.hasErrorsOrWorse()) {
                 person.sendOppgaveEvent(søknad)

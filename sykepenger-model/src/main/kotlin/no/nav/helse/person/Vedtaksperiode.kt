@@ -2575,6 +2575,17 @@ internal class Vedtaksperiode private constructor(
                 }
         }
 
+        internal val OVERLAPPER_ELLER_FORLENGER = fun (vedtaksperiode: Vedtaksperiode): VedtaksperiodeFilter {
+            val overlappende = vedtaksperiode.person.vedtaksperioder(OVERLAPPENDE(vedtaksperiode.periode()))
+            val forlengelser = vedtaksperiode.person.vedtaksperioder(ALLE).fold(mutableListOf(vedtaksperiode)) { identifiserteForlengelser, potensiellForlengelse ->
+                if (identifiserteForlengelser.any { forlengelse -> forlengelse.erVedtaksperiodeRettFør(potensiellForlengelse) }) {
+                    identifiserteForlengelser.add(potensiellForlengelse)
+                }
+                identifiserteForlengelser
+            }
+            return fun (other: Vedtaksperiode) = other in overlappende || other in forlengelser
+        }
+
         internal val IKKE_FERDIG_REVURDERT: VedtaksperiodeFilter = { it.ikkeFerdigRevurdert() }
 
         internal val AVVENTER_GODKJENT_REVURDERING: VedtaksperiodeFilter = { it.avventerRevurdering() }

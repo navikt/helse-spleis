@@ -55,6 +55,7 @@ import no.nav.helse.person.Arbeidsgiver.Companion.slettUtgåtteSykmeldingsperiod
 import no.nav.helse.person.Arbeidsgiver.Companion.startRevurdering
 import no.nav.helse.person.Arbeidsgiver.Companion.validerVilkårsgrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.validerYtelserForSkjæringstidspunkt
+import no.nav.helse.person.Arbeidsgiver.Companion.vedtaksperioder
 import no.nav.helse.person.Vedtaksperiode.Companion.ALLE
 import no.nav.helse.person.Vedtaksperiode.Companion.lagUtbetalinger
 import no.nav.helse.person.builders.VedtakFattetBuilder
@@ -531,6 +532,7 @@ class Person private constructor(
         }
 
     internal fun nåværendeVedtaksperioder(filter: VedtaksperiodeFilter) = arbeidsgivere.nåværendeVedtaksperioder(filter).sorted()
+    internal fun vedtaksperioder(filter: VedtaksperiodeFilter) = arbeidsgivere.vedtaksperioder(filter).sorted()
 
     internal fun lagRevurdering(vedtaksperiode: Vedtaksperiode, maksimumSykepenger: Alder.MaksimumSykepenger, hendelse: ArbeidstakerHendelse) {
         arbeidsgivere.lagRevurdering(vedtaksperiode, maksimumSykepenger, hendelse)
