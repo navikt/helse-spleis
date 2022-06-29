@@ -1,6 +1,8 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.Toggle
+import no.nav.helse.april
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -9,7 +11,9 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.inspectors.søppelbøtte
 import no.nav.helse.januar
+import no.nav.helse.juni
 import no.nav.helse.mars
+import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
@@ -204,6 +208,81 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
         håndterSøknad(Sykdom(2.mars, 31.mars, 100.prosent))
         assertSisteTilstand(4.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
         assertNoErrors(4.vedtaksperiode.filter())
+    }
+
+    @Test
+    fun `forkaster også overlappende perioder som er uferdig`(){
+        nyPeriode(1.januar til 31.januar)
+        person.invaliderAllePerioder(hendelselogg, null)
+
+        nyPeriode(1.mars til 31.mars)
+        nyPeriode(1.februar til 31.mars)
+
+        assertForkastetPeriodeTilstander(3.vedtaksperiode, START, TIL_INFOTRYGD)
+        assertForventetFeil(
+            forklaring = "skal forkaste overlappende uferdig perioder",
+            nå = {
+                assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
+            },
+            ønsket = {
+                assertForkastetPeriodeTilstander(2.vedtaksperiode, START, TIL_INFOTRYGD)
+            }
+        )
+    }
+
+    @Test
+    fun `forkaster også etterfølgende perioder som er uferdig`(){
+        nyPeriode(1.januar til 31.januar)
+        person.invaliderAllePerioder(hendelselogg, null)
+
+        nyPeriode(1.mars til 31.mars)
+        nyPeriode(1.april til 30.april)
+        nyPeriode(1.juni til 30.juni)
+        nyPeriode(1.februar til 28.februar)
+
+        assertTilstander(4.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
+        assertForkastetPeriodeTilstander(5.vedtaksperiode, START, TIL_INFOTRYGD)
+
+        assertForventetFeil(
+            forklaring = "skal forkaste etterfølgede  uferdig perioder",
+            nå = {
+                assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
+                assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
+            },
+            ønsket = {
+                assertForkastetPeriodeTilstander(2.vedtaksperiode, START, TIL_INFOTRYGD)
+                assertForkastetPeriodeTilstander(3.vedtaksperiode, START, TIL_INFOTRYGD)
+            }
+        )
+    }
+
+    @Test
+    fun `forkaster ikke overlappende perioder som er avsluttet`(){
+        nyPeriode(1.januar til 31.januar)
+        person.invaliderAllePerioder(hendelselogg, null)
+
+        nyttVedtak(1.mars, 31.mars)
+        nyPeriode(1.februar til 31.mars)
+
+        assertTilstand(2.vedtaksperiode, AVSLUTTET)
+        assertForkastetPeriodeTilstander(3.vedtaksperiode, START, TIL_INFOTRYGD)
+    }
+
+    @Test
+    fun `forkaster ikke etterfølgende perioder som er avsluttet`(){
+        nyPeriode(1.januar til 31.januar)
+        person.invaliderAllePerioder(hendelselogg, null)
+
+        nyttVedtak(1.mars, 31.mars)
+        forlengVedtak(1.april, 30.april)
+        nyttVedtak(1.juni, 30.juni)
+
+        nyPeriode(1.februar til 28.februar)
+
+        assertTilstand(2.vedtaksperiode, AVSLUTTET)
+        assertTilstand(3.vedtaksperiode, AVSLUTTET)
+        assertTilstand(4.vedtaksperiode, AVSLUTTET)
+        assertForkastetPeriodeTilstander(5.vedtaksperiode, START, TIL_INFOTRYGD)
     }
 
     private fun Periode.forkast() {
