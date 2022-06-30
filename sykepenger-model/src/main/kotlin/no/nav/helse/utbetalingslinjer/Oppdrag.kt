@@ -15,7 +15,7 @@ import java.time.LocalDateTime
 import java.util.*
 
 internal const val WARN_FORLENGER_OPPHØRT_OPPDRAG = "Utbetalingen forlenger et tidligere oppdrag som opphørte alle utbetalte dager. Sjekk simuleringen."
-internal const val WARN_OPPDRAG_FOM_ENDRET = "Utbetaling fra og med dato er endret. Kontroller simuleringen"
+internal const val WARN_OPPDRAG_FOM_ENDRET = "Utbetalingens fra og med-dato er endret. Kontroller simuleringen"
 
 internal class Oppdrag private constructor(
     private val mottaker: String,
@@ -239,7 +239,7 @@ internal class Oppdrag private constructor(
                 kjørFrem(eldre)
             }
             fomHarFlyttetSegFremover(eldre.kopierUtenOpphørslinjer()) -> {
-                aktivitetslogg.warn("Utbetaling opphører tidligere utbetaling. Kontroller simuleringen")
+                aktivitetslogg.warn(WARN_OPPDRAG_FOM_ENDRET)
                 returførOgKjørFrem(eldre.kopierUtenOpphørslinjer())
             }
             // utbetaling kan endres til å starte tidligere, eksempelvis via revurdering der feriedager egentlig er sykedager

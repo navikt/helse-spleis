@@ -50,7 +50,7 @@ internal class PingPongTest : AbstractEndToEndTest() {
             forklaring = "Fordi OppdragBuilder stopper ved første ukjente dag (les Infotrygd-dag), vil vi for perioden 1.mars - 31.mars lage et oppdrag som starter 10. februar." +
                 "Dette oppdraget matches så mot det forrige vi har utbetalt og vi kommer frem til at vi skal opphøre perioden 1.januar - 31.januar først.",
             nå = {
-                assertWarning("Utbetaling opphører tidligere utbetaling. Kontroller simuleringen", 3.vedtaksperiode.filter(ORGNUMMER))
+                assertWarning("Utbetalingens fra og med-dato er endret. Kontroller simuleringen", 3.vedtaksperiode.filter(ORGNUMMER))
                 val første = inspektør.utbetaling(0)
                 val utbetaling = inspektør.utbetaling(2)
                 val utbetalingInspektør = utbetaling.inspektør

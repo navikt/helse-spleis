@@ -54,7 +54,6 @@ internal class WarningsTest {
             "Opptjeningsvurdering må gjøres manuelt fordi opplysningene fra AA-registeret er ufullstendige",
             "Utbetalingen ble gjennomført, men med advarsel: \$melding",
             "Utbetalingen forlenger et tidligere oppdrag som opphørte alle utbetalte dager. Sjekk simuleringen.",
-            "Utbetaling fra og med dato er endret. Kontroller simuleringen",
             "Søknaden inneholder Permisjonsdager utenfor sykdomsvindu"
         )
 
