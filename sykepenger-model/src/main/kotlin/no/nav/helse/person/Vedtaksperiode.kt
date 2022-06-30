@@ -2597,8 +2597,6 @@ internal class Vedtaksperiode private constructor(
 
         internal val REVURDERING_IGANGSATT: VedtaksperiodeFilter = { it.erITilstandForRevurdering() }
 
-        private val KAN_OPPRETTE_REVURDERING: VedtaksperiodeFilter = { it.tilstand in listOf(AvventerRevurdering, AvventerHistorikkRevurdering) }
-
         internal val KLAR_TIL_BEHANDLING: VedtaksperiodeFilter = {
             it.tilstand == AvventerBlokkerendePeriode || it.tilstand == AvventerGodkjenning
         }
@@ -2863,9 +2861,9 @@ internal class Vedtaksperiode private constructor(
             private val utbetalingsperioder = vedtaksperioder.utbetalingsperioder(skjæringstidspunkt)
 
             internal fun utbetal(arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger) {
-                val maksimumSykepengedagerfilter = arbeidsgiverUtbetalinger.utbetal(this, beregningsperioder.periode(), organisasjonsnummer)
+                val maksimumSykepenger = arbeidsgiverUtbetalinger.utbetal(this, beregningsperioder.periode(), organisasjonsnummer)
                 utbetalingsperioder.forEach {
-                    it.lagRevurdering(maksimumSykepengedagerfilter.maksimumSykepenger(), it.aktivitetsloggkopi())
+                    it.lagRevurdering(maksimumSykepenger, it.aktivitetsloggkopi())
                 }
             }
 

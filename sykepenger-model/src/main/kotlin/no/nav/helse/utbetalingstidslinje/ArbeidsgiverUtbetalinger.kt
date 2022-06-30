@@ -49,14 +49,14 @@ internal class ArbeidsgiverUtbetalinger(
         revurderingUtbetalinger: RevurderingUtbetalinger,
         beregningsperiode: Periode,
         organisasjonsnummer: String
-    ): MaksimumSykepengedagerfilter {
+    ): Alder.MaksimumSykepenger {
         val tidslinjerPerArbeidsgiver = tidslinjer(beregningsperiode.endInclusive)
         revurderingUtbetalinger.gjødsle(tidslinjerPerArbeidsgiver, infotrygdhistorikk)
         revurderingUtbetalinger.filtrer(filtere, tidslinjerPerArbeidsgiver)
         tidslinjerPerArbeidsgiver.forEach { (arbeidsgiver, utbetalingstidslinje) ->
             arbeidsgiver.lagreUtbetalingstidslinjeberegning(organisasjonsnummer, utbetalingstidslinje, vilkårsgrunnlagHistorikk)
         }
-        return maksimumSykepengedagerfilter
+        return maksimumSykepengedagerfilter.maksimumSykepenger()
     }
 
     private fun tidslinjer(kuttdato: LocalDate) = arbeidsgivere
