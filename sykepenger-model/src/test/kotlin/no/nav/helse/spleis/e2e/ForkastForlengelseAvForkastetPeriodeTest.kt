@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e
 
 import no.nav.helse.Toggle
 import no.nav.helse.april
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -305,6 +304,37 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
     }
 
     @Test
+    fun `forkaster forlengede vedtak på tvers av arbeidsgivere - a2 overlapper med alle perioder til a1`() {
+        nyPeriode(1.januar til 31.januar, a1)
+        person.invaliderAllePerioder(hendelselogg, null)
+
+        nyPeriode(15.januar til 15.mars, a2)
+        nyPeriode(1.mars til 31.mars, a1)
+        nyPeriode(1.februar til 28.februar, a1)
+
+        assertSisteForkastetPeriodeTilstand(a1, 1.vedtaksperiode, TIL_INFOTRYGD)
+        assertSisteForkastetPeriodeTilstand(a1, 2.vedtaksperiode, TIL_INFOTRYGD)
+        assertSisteForkastetPeriodeTilstand(a1, 3.vedtaksperiode, TIL_INFOTRYGD)
+        assertSisteForkastetPeriodeTilstand(a2, 1.vedtaksperiode, TIL_INFOTRYGD)
+    }
+
+
+    @Test
+    fun `forkaster forlengede vedtak på tvers av arbeidsgivere - a2 overlapper med en periode til a1`() {
+        nyPeriode(1.januar til 31.januar, a1)
+        person.invaliderAllePerioder(hendelselogg, null)
+
+        nyPeriode(1.mars til 31.mars, a1)
+        nyPeriode(10.februar til 20.februar, a2)
+        nyPeriode(1.februar til 28.februar, a1)
+
+        assertSisteForkastetPeriodeTilstand(a1, 1.vedtaksperiode, TIL_INFOTRYGD)
+        assertSisteForkastetPeriodeTilstand(a1, 2.vedtaksperiode, TIL_INFOTRYGD)
+        assertSisteForkastetPeriodeTilstand(a1, 3.vedtaksperiode, TIL_INFOTRYGD)
+        assertSisteForkastetPeriodeTilstand(a2, 1.vedtaksperiode, TIL_INFOTRYGD)
+    }
+
+    @Test
     fun `forkaster ikke senere periode som hverken overlapper eller forlenger`() {
         nyPeriode(1.januar til 31.januar)
         person.invaliderAllePerioder(hendelselogg, null)
@@ -349,38 +379,6 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
         assertForkastetPeriodeTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, TIL_INFOTRYGD)
         assertForkastetPeriodeTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, TIL_INFOTRYGD)
         assertForkastetPeriodeTilstander(4.vedtaksperiode, START, TIL_INFOTRYGD)
-    }
-
-    @Test
-    fun `forkaster tidligere perioder uten gap`() {
-        nyPeriode(1.januar til 31.januar)
-
-        (1.februar til 28.februar).let { periode ->
-            nyPeriode(periode)
-            person.søppelbøtte(hendelselogg) { it.periode() == periode }
-        }
-
-        nyPeriode(1.april til 30.april)
-
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
-        assertForkastetPeriodeTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, TIL_INFOTRYGD)
-        assertSisteTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
-
-        nyPeriode(1.mars til 31.mars)
-
-        assertForkastetPeriodeTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, TIL_INFOTRYGD)
-        assertForkastetPeriodeTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, TIL_INFOTRYGD)
-        assertForkastetPeriodeTilstander(4.vedtaksperiode, START, TIL_INFOTRYGD)
-
-        assertForventetFeil(
-            forklaring = "Denne burde vel forkastes gitt at dette er et reelt scenario?",
-            nå = {
-                assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
-            },
-            ønsket = {
-                assertForkastetPeriodeTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, TIL_INFOTRYGD)
-            }
-        )
     }
 
     private fun Periode.forkast() {
