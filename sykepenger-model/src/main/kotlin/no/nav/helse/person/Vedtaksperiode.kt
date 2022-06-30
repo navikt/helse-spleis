@@ -2857,7 +2857,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperioder: List<Vedtaksperiode>,
             skjæringstidspunkt: LocalDate,
             private val organisasjonsnummer: String,
-            private val aktivitetslogg: ArbeidstakerHendelse
+            private val hendelse: ArbeidstakerHendelse
         ) {
             private val beregningsperioder = vedtaksperioder.revurderingsperioder(skjæringstidspunkt)
             private val utbetalingsperioder = vedtaksperioder.utbetalingsperioder(skjæringstidspunkt)
@@ -2892,7 +2892,7 @@ internal class Vedtaksperiode private constructor(
             }
 
             private fun Vedtaksperiode.aktivitetsloggkopi(): IAktivitetslogg {
-                return aktivitetslogg.barn().also {
+                return hendelse.barn().also {
                     it.kontekst(person)
                     kontekst(it)
                 }

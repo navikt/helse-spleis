@@ -43,6 +43,7 @@ import no.nav.helse.person.AbstractPersonTest
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.Arbeidsgiver
+import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonVisitor
@@ -132,9 +133,10 @@ internal fun AbstractEndToEndTest.nyeVedtak(
     fom: LocalDate,
     tom: LocalDate,
     vararg organisasjonsnummere: String,
+    inntekt: Inntekt = 20000.månedlig,
     inntekterBlock: Inntektperioder.() -> Unit = {
         organisasjonsnummere.forEach {
-            lagInntektperioder(it, fom, 20000.månedlig)
+            lagInntektperioder(it, fom, inntekt)
         }
     }
 ) {
@@ -822,15 +824,15 @@ internal fun AbstractEndToEndTest.håndterOverstyrTidslinje(
     overstyringsdager: List<ManuellOverskrivingDag> = listOf(ManuellOverskrivingDag(17.januar, Dagtype.Feriedag, 100)),
     orgnummer: String = AbstractPersonTest.ORGNUMMER,
     meldingsreferanseId: UUID = UUID.randomUUID()
-) {
-    OverstyrTidslinje(
+): ArbeidstakerHendelse {
+    return OverstyrTidslinje(
         meldingsreferanseId = meldingsreferanseId,
         fødselsnummer = AbstractPersonTest.UNG_PERSON_FNR_2018.toString(),
         aktørId = AbstractPersonTest.AKTØRID,
         organisasjonsnummer = orgnummer,
         dager = overstyringsdager,
         opprettet = LocalDateTime.now()
-    ).håndter(Person::håndter)
+    ).also { it.håndter(Person::håndter) }
 }
 
 internal fun AbstractEndToEndTest.håndterOverstyrArbeidsforhold(
