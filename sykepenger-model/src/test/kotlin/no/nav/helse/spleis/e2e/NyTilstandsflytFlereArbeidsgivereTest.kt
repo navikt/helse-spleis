@@ -18,6 +18,7 @@ import no.nav.helse.mars
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
+import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.TilstandType.START
@@ -566,6 +567,51 @@ internal class NyTilstandsflytFlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(5.februar til 20.februar), orgnummer = a2)
 
         assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer=a2)
+    }
+
+    @Test
+    fun `får tidligere sykmelding og søknad for en annen arbeidsgiver`() {
+        tilGodkjenning(1.februar, 28.februar, a1)
+        tilGodkjenning(1.januar, 31.januar, a2)
+
+        assertForventetFeil(
+            forklaring = "Må hensynta ag2: https://trello.com/c/Hd2zEt54",
+            nå = {
+                assertTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING, orgnummer=a1)
+                assertTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING, orgnummer=a2)
+            },
+            ønsket = {
+                assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer=a1)
+                assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer=a2)
+            }
+        )
+    }
+
+    @Test
+    fun `sykmelding og søknad i forlengelsen til a1 kommer før sykmelding til a2 - skal ikke ha flere perioder i AvventerGodkjenning`() {
+        nyeVedtak(1.januar, 31.januar, a2, a1)
+
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a1)
+        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(2.vedtaksperiode, orgnummer = a1)
+        assertTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING, a1)
+
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a2)
+
+        assertForventetFeil(
+            forklaring = "Må hensynta ag2: https://trello.com/c/Hd2zEt54",
+            nå = {
+                assertTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING, orgnummer=a1)
+                assertTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK, a2)
+            },
+            ønsket = {
+                // arbeidsgiveren spleis hører om først er per nå den som blir valgt først til å gå videre dersom periodenes tom er lik
+                assertTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer=a2)
+                assertTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer=a1)
+            }
+        )
     }
 
     private fun utbetalPeriodeEtterVilkårsprøving(vedtaksperiode: IdInnhenter, orgnummer: String) {
