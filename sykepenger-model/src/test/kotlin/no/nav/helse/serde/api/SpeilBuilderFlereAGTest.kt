@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
@@ -17,6 +18,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.november
 import no.nav.helse.oktober
+import no.nav.helse.person.arbeidsgiver
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.september
@@ -447,6 +449,52 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
             ),
             vilkårsgrunnlag?.inntekter?.find { it.organisasjonsnummer == a2 }
         )
+    }
+
+    @Test
+    fun `deaktiverte arbeidsforhold vises i speil selvom sammenligninggrunnlag og sykepengegrunnlag ikke er rapportert til A-ordningen enda`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode,
+            inntektsvurdering = Inntektsvurdering(
+                listOf(
+                    sammenligningsgrunnlag(a1, 1.januar, INNTEKT.repeat(12))
+                )
+            ),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
+                listOf(
+                    grunnlag(a1, 1.januar, INNTEKT.repeat(3))
+                ),
+                arbeidsforhold = emptyList()
+            ),
+            arbeidsforhold = listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null),
+                Vilkårsgrunnlag.Arbeidsforhold(a2, 1.desember(2017), null)
+            ),
+            orgnummer = a1
+        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+
+        håndterOverstyrArbeidsforhold(1.januar, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, true)))
+
+        val personDto = serializePersonForSpeil(person)
+        val vilkårsgrunnlag =
+            personDto.vilkårsgrunnlagHistorikk[person.nyesteIdForVilkårsgrunnlagHistorikk()]?.get(1.januar)
+
+        assertForventetFeil(
+            forklaring = "null",
+            nå = {
+                assertTrue(person.arbeidsgiver(a2).ghostPerioder().isEmpty())
+                assertEquals(listOf(a1), vilkårsgrunnlag?.inntekter?.map { it.organisasjonsnummer })
+            },
+            ønsket = {
+                assertTrue(person.arbeidsgiver(a2).ghostPerioder().isNotEmpty())
+                assertEquals(listOf(a1, a2), vilkårsgrunnlag?.inntekter?.map { it.organisasjonsnummer })
+            })
     }
 
     @Test
