@@ -21,9 +21,20 @@ internal class Inntektperioder(private val inntektCreator: InntektCreator, block
         .groupBy({ (arbeidsgiver, _) -> arbeidsgiver }) { (_, inntekter) ->
             inntekter
         }
-        .map { (arbeidsgiver, inntekter) -> ArbeidsgiverInntekt(arbeidsgiver.toString(), inntekter.flatten()) }
+        .map { (arbeidsgiver, inntekter) -> ArbeidsgiverInntekt(arbeidsgiver, inntekter.flatten()) }
+
 
     internal infix fun Periode.inntekter(block: Inntekter.() -> Unit) =
+        lagInntekter("fastloenn", ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, block)
+
+    internal infix fun Periode.sykepenger(block: Inntekter.() -> Unit) =
+        lagInntekter("sykepenger", ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.YTELSE_FRA_OFFENTLIGE, block)
+
+    private fun Periode.lagInntekter(
+        beskrivelse: String = "fastloenn",
+        type: ArbeidsgiverInntekt.MånedligInntekt.Inntekttype = ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT,
+        block: Inntekter.() -> Unit,
+    ) =
         this.map(YearMonth::from)
             .distinct()
             .flatMap { yearMonth ->
@@ -31,9 +42,9 @@ internal class Inntektperioder(private val inntektCreator: InntektCreator, block
                     inntektCreator(
                         yearMonth,
                         inntekt,
-                        ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT,
+                        type,
                         "kontantytelse",
-                        "fastloenn"
+                        beskrivelse
                     )
                 }.toList()
             }

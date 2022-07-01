@@ -6,6 +6,8 @@ import java.time.temporal.ChronoUnit
 import java.util.UUID
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.MånedligInntekt.Companion.harInntektFor
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.MånedligInntekt.Companion.nylig
+import no.nav.helse.hendelser.ArbeidsgiverInntekt.MånedligInntekt.Companion.utenOffentligeYtelser
+import no.nav.helse.hendelser.ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.YTELSE_FRA_OFFENTLIGE
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonHendelse
@@ -42,6 +44,9 @@ class ArbeidsgiverInntekt(
         internal fun List<ArbeidsgiverInntekt>.kilder(antallMåneder: Int) = this
             .map { ArbeidsgiverInntekt(it.arbeidsgiver, it.inntekter.nylig(månedFørSlutt(this, antallMåneder))) }
             .count { it.harInntekter() }
+
+        internal fun List<ArbeidsgiverInntekt>.utenOffentligeYtelser() =
+            map { ArbeidsgiverInntekt(it.arbeidsgiver, it.inntekter.utenOffentligeYtelser()) }
 
         internal fun List<ArbeidsgiverInntekt>.harInntektFor(orgnummer: String) = this.any { it.arbeidsgiver == orgnummer }
 
@@ -127,6 +132,8 @@ class ArbeidsgiverInntekt(
             }
 
             internal fun List<MånedligInntekt>.harInntektFor(måned: YearMonth) = this.any { it.yearMonth == måned }
+
+            internal fun List<MånedligInntekt>.utenOffentligeYtelser() = filter { it.type != YTELSE_FRA_OFFENTLIGE }
 
             internal fun månedFørSlutt(inntekter: List<MånedligInntekt>, antallMåneder: Int) =
                 inntekter.maxOfOrNull { it.yearMonth }?.minusMonths(antallMåneder.toLong() - 1)

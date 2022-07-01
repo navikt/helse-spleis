@@ -52,6 +52,32 @@ internal class FlereArbeidsgivereWarningsTest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `En arbeidsgiver og sykepenger fra Nav - får ingen warnings da dette ikke er en reell arbeidsgiver`() {
+        val periode = 1.januar(2021) til 31.januar(2021)
+        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
+        håndterUtbetalingshistorikk(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar(2021) til 16.januar(2021)), førsteFraværsdag = 1.januar(2021), orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a1)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioderForSammenligningsgrunnlag {
+                1.januar(2020) til 1.desember(2020) inntekter {
+                    a1 inntekt INNTEKT
+                }
+                1.januar(2020) til 1.desember(2020) sykepenger {
+                    a2 inntekt 1000.månedlig
+                }
+            }
+        ))
+        håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
+
+        assertNoWarnings(AktivitetsloggFilter.person())
+    }
+
+    @Test
     fun `Første arbeidsgiver blir ferdig behandlet før vi mottar sykmelding på neste arbeidsgiver`() {
         val periode = 1.januar(2021) til 31.januar(2021)
         håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
@@ -83,7 +109,6 @@ internal class FlereArbeidsgivereWarningsTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
 
-        assertWarning("Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold", AktivitetsloggFilter.person())
         håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
         håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
         håndterUtbetalingshistorikk(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a2)
