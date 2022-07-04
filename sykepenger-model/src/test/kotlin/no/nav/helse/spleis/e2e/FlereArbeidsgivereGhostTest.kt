@@ -19,6 +19,7 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.november
+import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.Inntektshistorikk.Skatt.Inntekttype.LØNNSINNTEKT
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
@@ -763,6 +764,8 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)!!
         assertTrue(vilkårsgrunnlag.gjelderFlereArbeidsgivere())
         assertEquals(2, vilkårsgrunnlag.sykepengegrunnlag().inntektsopplysningPerArbeidsgiver().size)
+        assertEquals(2, vilkårsgrunnlag.sammenligningsgrunnlagPerArbeidsgiver().size)
+        assertTrue(vilkårsgrunnlag.sammenligningsgrunnlagPerArbeidsgiver()[a2] is Inntektshistorikk.IkkeRapportert)
         assertEquals(setOf(a1, a2), vilkårsgrunnlag.sykepengegrunnlag().inntektsopplysningPerArbeidsgiver().keys)
 
         assertEquals(

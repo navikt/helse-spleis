@@ -218,8 +218,14 @@ internal class Arbeidsgiver private constructor(
 
         internal fun List<Arbeidsgiver>.inntekterForSammenligningsgrunnlag(skjæringstidspunkt: LocalDate) =
             this.mapNotNull { arbeidsgiver ->
-                arbeidsgiver.inntektshistorikk.rapportertInntekt(skjæringstidspunkt)
-                    ?.let { ArbeidsgiverInntektsopplysning(arbeidsgiver.organisasjonsnummer, it) }
+                val inntektsopplysning = arbeidsgiver.inntektshistorikk.rapportertInntekt(skjæringstidspunkt)
+                when {
+                    inntektsopplysning == null && arbeidsgiver.arbeidsforholdhistorikk.harIkkeDeaktivertArbeidsforholdNyereEnn(skjæringstidspunkt, MAKS_INNTEKT_GAP) -> {
+                        ArbeidsgiverInntektsopplysning(arbeidsgiver.organisasjonsnummer, IkkeRapportert(UUID.randomUUID(), skjæringstidspunkt))
+                    }
+                    inntektsopplysning != null -> ArbeidsgiverInntektsopplysning(arbeidsgiver.organisasjonsnummer, inntektsopplysning)
+                    else -> null
+                }
             }
 
         internal fun Iterable<Arbeidsgiver>.harVedtaksperiodeFor(skjæringstidspunkt: LocalDate) = any { arbeidsgiver ->
