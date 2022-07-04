@@ -1,14 +1,15 @@
 package no.nav.helse.person
 
+import java.time.LocalDate
+import java.util.UUID
 import no.nav.helse.hendelser.Periode.Companion.sammenhengende
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.Arbeidsforholdhistorikk.Arbeidsforhold.Companion.ansattVedSkjæringstidspunkt
 import no.nav.helse.person.Arbeidsforholdhistorikk.Arbeidsforhold.Companion.create
 import no.nav.helse.person.Arbeidsforholdhistorikk.Arbeidsforhold.Companion.erDeaktivert
-import no.nav.helse.person.Arbeidsforholdhistorikk.Arbeidsforhold.Companion.harArbeidsforholdSomErNyereEnn
+import no.nav.helse.person.Arbeidsforholdhistorikk.Arbeidsforhold.Companion.harDeaktivertArbeidsforholdSomErNyereEnn
+import no.nav.helse.person.Arbeidsforholdhistorikk.Arbeidsforhold.Companion.harIkkeDeaktivertArbeidsforholdSomErNyereEnn
 import no.nav.helse.person.Arbeidsforholdhistorikk.Arbeidsforhold.Companion.ikkeDeaktiverteArbeidsforhold
-import java.time.LocalDate
-import java.util.*
 
 internal class Arbeidsforholdhistorikk private constructor(
     private val historikk: MutableList<Innslag>
@@ -34,8 +35,15 @@ internal class Arbeidsforholdhistorikk private constructor(
         ?.ansattVedSkjæringstidspunkt(skjæringstidspunkt)
         ?: false
 
+    internal fun harIkkeDeaktivertArbeidsforholdNyereEnn(skjæringstidspunkt: LocalDate, antallMåneder: Long) =
+        sisteInnslag(skjæringstidspunkt)?.harIkkeDeaktivertArbeidsforholdSomErNyereEnn(skjæringstidspunkt, antallMåneder) ?: false
+
+    internal fun harDeaktivertArbeidsforholdNyereEnn(skjæringstidspunkt: LocalDate, antallMåneder: Long) =
+        sisteInnslag(skjæringstidspunkt)?.harDeaktivertArbeidsforholdSomErNyereEnn(skjæringstidspunkt, antallMåneder) ?: false
+
     internal fun harArbeidsforholdNyereEnn(skjæringstidspunkt: LocalDate, antallMåneder: Long) =
-        sisteInnslag(skjæringstidspunkt)?.harArbeidsforholdSomErNyereEnn(skjæringstidspunkt, antallMåneder) ?: false
+        harIkkeDeaktivertArbeidsforholdNyereEnn(skjæringstidspunkt, antallMåneder)
+            || harDeaktivertArbeidsforholdNyereEnn(skjæringstidspunkt, antallMåneder)
 
     internal fun aktiverArbeidsforhold(skjæringstidspunkt: LocalDate) {
         val nåværendeInnslag = requireNotNull(sisteInnslag(skjæringstidspunkt))
@@ -71,8 +79,11 @@ internal class Arbeidsforholdhistorikk private constructor(
         internal fun gjelder(skjæringstidspunkt: LocalDate) =
             this.skjæringstidspunkt == skjæringstidspunkt
 
-        internal fun harArbeidsforholdSomErNyereEnn(skjæringstidspunkt: LocalDate, antallMåneder: Long) =
-            arbeidsforhold.harArbeidsforholdSomErNyereEnn(skjæringstidspunkt, antallMåneder)
+        internal fun harIkkeDeaktivertArbeidsforholdSomErNyereEnn(skjæringstidspunkt: LocalDate, antallMåneder: Long) =
+            arbeidsforhold.harIkkeDeaktivertArbeidsforholdSomErNyereEnn(skjæringstidspunkt, antallMåneder)
+
+        internal fun harDeaktivertArbeidsforholdSomErNyereEnn(skjæringstidspunkt: LocalDate, antallMåneder: Long) =
+            arbeidsforhold.harDeaktivertArbeidsforholdSomErNyereEnn(skjæringstidspunkt, antallMåneder)
 
         internal fun deaktiverArbeidsforhold() = arbeidsforhold.map { it.deaktiver() }
 
@@ -114,8 +125,11 @@ internal class Arbeidsforholdhistorikk private constructor(
         companion object {
             const val MAKS_INNTEKT_GAP = 2L
 
-            internal fun List<Arbeidsforhold>.harArbeidsforholdSomErNyereEnn(skjæringstidspunkt: LocalDate, antallMåneder: Long) =
+            internal fun List<Arbeidsforhold>.harIkkeDeaktivertArbeidsforholdSomErNyereEnn(skjæringstidspunkt: LocalDate, antallMåneder: Long) =
                 any { it.harArbeidetMindreEnn(skjæringstidspunkt, antallMåneder) && it.gjelder(skjæringstidspunkt) && !it.deaktivert }
+
+            internal fun List<Arbeidsforhold>.harDeaktivertArbeidsforholdSomErNyereEnn(skjæringstidspunkt: LocalDate, antallMåneder: Long) =
+                any { it.harArbeidetMindreEnn(skjæringstidspunkt, antallMåneder) && it.gjelder(skjæringstidspunkt) && it.deaktivert }
 
             internal fun Collection<Arbeidsforhold>.erDeaktivert() = any { it.deaktivert }
             internal fun Collection<Arbeidsforhold>.opptjeningsperiode(skjæringstidspunkt: LocalDate) = filter { !it.deaktivert }

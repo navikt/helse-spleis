@@ -45,11 +45,11 @@ import no.nav.helse.person.Arbeidsgiver.Companion.harOverlappendeEllerForlengerF
 import no.nav.helse.person.Arbeidsgiver.Companion.harUtbetaltPeriode
 import no.nav.helse.person.Arbeidsgiver.Companion.harVedtaksperiodeFor
 import no.nav.helse.person.Arbeidsgiver.Companion.håndter
+import no.nav.helse.person.Arbeidsgiver.Companion.inntekterForSammenligningsgrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.kanOverstyreTidslinje
 import no.nav.helse.person.Arbeidsgiver.Companion.kanStarteRevurdering
 import no.nav.helse.person.Arbeidsgiver.Companion.lagRevurdering
 import no.nav.helse.person.Arbeidsgiver.Companion.nåværendeVedtaksperioder
-import no.nav.helse.person.Arbeidsgiver.Companion.rapporterteInntekter
 import no.nav.helse.person.Arbeidsgiver.Companion.skjæringstidspunktperiode
 import no.nav.helse.person.Arbeidsgiver.Companion.slettUtgåtteSykmeldingsperioder
 import no.nav.helse.person.Arbeidsgiver.Companion.startRevurdering
@@ -646,7 +646,7 @@ class Person private constructor(
         )
 
     internal fun beregnSammenligningsgrunnlag(skjæringstidspunkt: LocalDate, subsumsjonObserver: SubsumsjonObserver): Sammenligningsgrunnlag {
-        val arbeidsgiverInntektsopplysninger = arbeidsgivere.rapporterteInntekter(skjæringstidspunkt)
+        val arbeidsgiverInntektsopplysninger = arbeidsgivere.inntekterForSammenligningsgrunnlag(skjæringstidspunkt)
         val sammenligningsgrunnlag = Sammenligningsgrunnlag(arbeidsgiverInntektsopplysninger)
         subsumsjonObserver.`§ 8-30 ledd 2`(skjæringstidspunkt, sammenligningsgrunnlag.subsumsjonsformat())
         return sammenligningsgrunnlag

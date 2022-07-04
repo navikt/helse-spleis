@@ -253,16 +253,27 @@ internal class VilkårsgrunnlagBuilder(
             }
 
             fun build() = ISykepengegrunnlag(
-                inntekterPerArbeidsgiver = inntekterPerArbeidsgiver.toList() + sammenligningsgrunnlagForArbeidsgivereUtenSykepengegrunnlag(),
+                inntekterPerArbeidsgiver = inntekterPerArbeidsgiver.toList() + arbeidsgivereUtenSykepengegrunnlag() + deaktiverteArbeidsforholdUtenSammenligningsgrunnlag(),
                 sykepengegrunnlag = sykepengegrunnlag.årlig,
                 oppfyllerMinsteinntektskrav = oppfyllerMinsteinntektskrav,
                 maksUtbetalingPerDag = sykepengegrunnlag.daglig,
                 omregnetÅrsinntekt = omregnetÅrsinntekt
             )
 
-            private fun sammenligningsgrunnlagForArbeidsgivereUtenSykepengegrunnlag() = sammenligningsgrunnlagBuilder.orgnumre()
+            private fun arbeidsgivereUtenSykepengegrunnlag() = sammenligningsgrunnlagBuilder.orgnumre()
                 .filter { it !in inntekterPerArbeidsgiver.map { inntekt -> inntekt.arbeidsgiver } }
-                .filter { sammenligningsgrunnlagBuilder.sammenligningsgrunnlag(it, skjæringstidspunkt) != null}
+                .filter { sammenligningsgrunnlagBuilder.sammenligningsgrunnlag(it, skjæringstidspunkt) != null }
+                .map { orgnummer ->
+                    IArbeidsgiverinntekt(
+                        arbeidsgiver = orgnummer,
+                        omregnetÅrsinntekt = inntektshistorikkForAordningenBuilder.hentInntekt(orgnummer, skjæringstidspunkt),
+                        sammenligningsgrunnlag = sammenligningsgrunnlagBuilder.sammenligningsgrunnlag(orgnummer, skjæringstidspunkt),
+                        deaktivert = deaktiverteArbeidsforhold.contains(orgnummer)
+                    )
+                }
+
+            private fun deaktiverteArbeidsforholdUtenSammenligningsgrunnlag() = deaktiverteArbeidsforhold
+                .filter { sammenligningsgrunnlagBuilder.sammenligningsgrunnlag(it, skjæringstidspunkt) == null }
                 .map { orgnummer ->
                     IArbeidsgiverinntekt(
                         arbeidsgiver = orgnummer,

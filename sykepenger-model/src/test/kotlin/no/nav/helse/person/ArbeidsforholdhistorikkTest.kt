@@ -1,14 +1,17 @@
 package no.nav.helse.person
 
+import java.time.LocalDate
+import java.util.UUID
 import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.januar
 import no.nav.helse.juni
 import no.nav.helse.person.Arbeidsforholdhistorikk.Arbeidsforhold
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
-import java.util.*
 
 internal class ArbeidsforholdhistorikkTest {
 
@@ -148,7 +151,7 @@ internal class ArbeidsforholdhistorikkTest {
         historikk.lagre(arbeidsforhold1, 1.januar(2018))
         historikk.lagre(arbeidsforhold2, 1.januar(2022))
 
-        assertFalse(historikk.harArbeidsforholdNyereEnn(skjæringstidspunkt = 1.januar(2018), antallMåneder = 2L))
+        assertFalse(historikk.harIkkeDeaktivertArbeidsforholdNyereEnn(skjæringstidspunkt = 1.januar(2018), antallMåneder = 2L))
     }
 
     @Test

@@ -4,7 +4,6 @@ import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
@@ -485,16 +484,8 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
         val vilkårsgrunnlag =
             personDto.vilkårsgrunnlagHistorikk[person.nyesteIdForVilkårsgrunnlagHistorikk()]?.get(1.januar)
 
-        assertForventetFeil(
-            forklaring = "null",
-            nå = {
-                assertTrue(person.arbeidsgiver(a2).ghostPerioder().isEmpty())
-                assertEquals(listOf(a1), vilkårsgrunnlag?.inntekter?.map { it.organisasjonsnummer })
-            },
-            ønsket = {
-                assertTrue(person.arbeidsgiver(a2).ghostPerioder().isNotEmpty())
-                assertEquals(listOf(a1, a2), vilkårsgrunnlag?.inntekter?.map { it.organisasjonsnummer })
-            })
+        assertEquals(listOf(a1, a2), vilkårsgrunnlag?.inntekter?.map { it.organisasjonsnummer })
+        assertTrue(person.arbeidsgiver(a2).ghostPerioder().isNotEmpty())
     }
 
     @Test

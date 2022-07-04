@@ -201,7 +201,7 @@ internal class Arbeidsgiver private constructor(
                 inntektsopplysning?.subsumsjon(subsumsjonObserver, skjæringstidspunkt, arbeidsgiver.organisasjonsnummer)
                 when {
                     arbeidsgiver.harDeaktivertArbeidsforhold(skjæringstidspunkt) -> null
-                    inntektsopplysning == null && arbeidsgiver.arbeidsforholdhistorikk.harArbeidsforholdNyereEnn(skjæringstidspunkt, MAKS_INNTEKT_GAP) -> {
+                    inntektsopplysning == null && arbeidsgiver.arbeidsforholdhistorikk.harIkkeDeaktivertArbeidsforholdNyereEnn(skjæringstidspunkt, MAKS_INNTEKT_GAP) -> {
                         ArbeidsgiverInntektsopplysning(arbeidsgiver.organisasjonsnummer, IkkeRapportert(UUID.randomUUID(), skjæringstidspunkt))
                     }
                     inntektsopplysning != null -> ArbeidsgiverInntektsopplysning(arbeidsgiver.organisasjonsnummer, inntektsopplysning)
@@ -216,7 +216,7 @@ internal class Arbeidsgiver private constructor(
             return Opptjening.opptjening(arbeidsforhold, skjæringstidspunkt, subsumsjonObserver)
         }
 
-        internal fun List<Arbeidsgiver>.rapporterteInntekter(skjæringstidspunkt: LocalDate) =
+        internal fun List<Arbeidsgiver>.inntekterForSammenligningsgrunnlag(skjæringstidspunkt: LocalDate) =
             this.mapNotNull { arbeidsgiver ->
                 arbeidsgiver.inntektshistorikk.rapportertInntekt(skjæringstidspunkt)
                     ?.let { ArbeidsgiverInntektsopplysning(arbeidsgiver.organisasjonsnummer, it) }
