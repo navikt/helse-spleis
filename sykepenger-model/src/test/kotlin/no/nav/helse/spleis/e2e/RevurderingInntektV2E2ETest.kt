@@ -19,6 +19,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
+import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
@@ -51,6 +52,7 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 @EnableToggle(Toggle.NyRevurdering::class)
 internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
@@ -296,7 +298,10 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
     fun `revurder inntekt ukjent skjæringstidspunkt`() {
         nyttVedtak(1.januar, 31.januar, 100.prosent)
         nullstillTilstandsendringer()
-        håndterOverstyrInntekt(inntekt = 32000.månedlig, skjæringstidspunkt = 2.januar)
+        assertThrows<Aktivitetslogg.AktivitetException> {
+            håndterOverstyrInntekt(inntekt = 32000.månedlig, skjæringstidspunkt = 2.januar)
+        }
+        assertSevere("Kan ikke overstyre inntekt hvis vi ikke har en arbeidsgiver med sykdom for skjæringstidspunktet", AktivitetsloggFilter.person())
 
         assertTilstander(
             1.vedtaksperiode,

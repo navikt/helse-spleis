@@ -45,6 +45,7 @@ import no.nav.helse.person.Arbeidsgiver.Companion.harOverlappendeEllerForlengerF
 import no.nav.helse.person.Arbeidsgiver.Companion.harUtbetaltPeriode
 import no.nav.helse.person.Arbeidsgiver.Companion.harVedtaksperiodeFor
 import no.nav.helse.person.Arbeidsgiver.Companion.håndter
+import no.nav.helse.person.Arbeidsgiver.Companion.håndterOverstyringAvGhostInntekt
 import no.nav.helse.person.Arbeidsgiver.Companion.inntekterForSammenligningsgrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.kanOverstyreTidslinje
 import no.nav.helse.person.Arbeidsgiver.Companion.kanStarteRevurdering
@@ -293,10 +294,23 @@ class Person private constructor(
 
     fun håndter(hendelse: OverstyrInntekt) {
         hendelse.kontekst(this)
-        finnArbeidsgiver(hendelse).håndter(hendelse)
 
+        val erOverstyringAvGhostInntekt = !finnArbeidsgiver(hendelse).harSykdomFor(hendelse.skjæringstidspunkt)
+        if (erOverstyringAvGhostInntekt) {
+            return håndterOverstyringAvGhostInntekt(hendelse)
+        }
+
+        finnArbeidsgiver(hendelse).håndter(hendelse)
         if (hendelse.hasErrorsOrWorse()) {
             observers.forEach { it.revurderingAvvist(hendelse.hendelseskontekst(), hendelse.tilRevurderingAvvistEvent()) }
+        }
+    }
+
+    private fun håndterOverstyringAvGhostInntekt(hendelse: OverstyrInntekt) {
+        sikkerLogg.info("Ship-o-hoy nå er vi i overstyring av ghost-inntekt-flyten for $aktørId")
+        hendelse.valider(arbeidsgivere)
+        if (!arbeidsgivere.håndterOverstyringAvGhostInntekt(hendelse)) {
+            hendelse.severe("Kan ikke overstyre ghost-inntekt fordi ingen vedtaksperioder håndterte hendelsen")
         }
     }
 
@@ -591,6 +605,12 @@ class Person private constructor(
             overstyrArbeidsforhold.lagre(arbeidsgiver)
         }
     }
+
+    internal fun lagreInntekt(hendelse: OverstyrInntekt) {
+        val arbeidsgiver = finnArbeidsgiver(hendelse)
+        arbeidsgiver.addInntekt(hendelse)
+    }
+
 
     internal fun lagreOmregnetÅrsinntekt(
         orgnummer: String,

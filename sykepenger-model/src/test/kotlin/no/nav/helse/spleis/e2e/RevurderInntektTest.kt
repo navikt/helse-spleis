@@ -23,6 +23,7 @@ import no.nav.helse.juli
 import no.nav.helse.juni
 import no.nav.helse.mai
 import no.nav.helse.mars
+import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.OppdragVisitor
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
@@ -59,6 +60,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 internal class RevurderInntektTest : AbstractEndToEndTest() {
 
@@ -142,7 +144,10 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
     @Test
     fun `revurder inntekt ukjent skjæringstidspunkt`() {
         nyttVedtak(1.januar, 31.januar, 100.prosent)
-        håndterOverstyrInntekt(inntekt = 32000.månedlig, skjæringstidspunkt = 2.januar)
+        assertThrows<Aktivitetslogg.AktivitetException> {
+            håndterOverstyrInntekt(inntekt = 32000.månedlig, skjæringstidspunkt = 2.januar)
+        }
+        assertSevere("Kan ikke overstyre inntekt hvis vi ikke har en arbeidsgiver med sykdom for skjæringstidspunktet", AktivitetsloggFilter.person())
 
         assertTilstander(
             0,

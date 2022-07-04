@@ -165,6 +165,13 @@ internal class Arbeidsgiver private constructor(
             return false
         }
 
+        internal fun List<Arbeidsgiver>.håndterOverstyringAvGhostInntekt(overstyrInntekt: OverstyrInntekt): Boolean {
+            forEach { arbeidsgiver ->
+                if (arbeidsgiver.håndterOverstyringAvGhostInntekt(overstyrInntekt)) return true
+            }
+            return false
+        }
+
         internal fun Iterable<Arbeidsgiver>.nåværendeVedtaksperioder(filter: VedtaksperiodeFilter) =
             mapNotNull { it.vedtaksperioder.nåværendeVedtaksperiode(filter) }
 
@@ -876,6 +883,16 @@ internal class Arbeidsgiver private constructor(
         overstyrArbeidsforhold.kontekst(this)
         vedtaksperioder.forEach { vedtaksperiode ->
             if (vedtaksperiode.håndter(overstyrArbeidsforhold)) {
+                return true
+            }
+        }
+        return false
+    }
+
+    internal fun håndterOverstyringAvGhostInntekt(overstyrInntekt: OverstyrInntekt): Boolean {
+        overstyrInntekt.kontekst(this)
+        vedtaksperioder.forEach { vedtaksperiode ->
+            if (vedtaksperiode.håndterOverstyringAvGhostInntekt(overstyrInntekt)) {
                 return true
             }
         }

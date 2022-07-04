@@ -328,6 +328,13 @@ internal class Vedtaksperiode private constructor(
         return tilstand.håndter(this, overstyrArbeidsforhold)
     }
 
+    internal fun håndterOverstyringAvGhostInntekt(overstyrInntekt: OverstyrInntekt): Boolean {
+        if (!kanHåndtereOverstyring(overstyrInntekt)) return false
+        kontekst(overstyrInntekt)
+        overstyrInntekt.leggTil(hendelseIder)
+        return tilstand.håndterOverstyringAvGhostInntekt(this, overstyrInntekt)
+    }
+
     internal fun håndter(hendelse: OverstyrInntekt): Boolean {
         if (!kanHåndtereOverstyring(hendelse)) return false
         kontekst(hendelse)
@@ -1026,13 +1033,13 @@ internal class Vedtaksperiode private constructor(
         fun håndter(
             vedtaksperiode: Vedtaksperiode,
             overstyrArbeidsforhold: OverstyrArbeidsforhold
-        ): Boolean {
-            return false
-        }
+        ) = false
 
         fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: Utbetalingsgrunnlag) {}
 
         fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {}
+
+        fun håndterOverstyringAvGhostInntekt(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) = false
 
         fun revurder(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
             hendelse.error("Forventet ikke overstyring fra saksbehandler i %s", type.name)
@@ -1899,6 +1906,25 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.tilstand(hendelse, AvventerHistorikk)
         }
 
+        override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {
+            vedtaksperiode.arbeidsgiver.addInntekt(hendelse)
+            vedtaksperiode.tilstand(hendelse, AvventerVilkårsprøving)
+        }
+
+        override fun håndterOverstyringAvGhostInntekt(
+            vedtaksperiode: Vedtaksperiode,
+            hendelse: OverstyrInntekt
+        ): Boolean {
+            vedtaksperiode.person.lagreInntekt(hendelse)
+            vedtaksperiode.person.vilkårsprøvEtterNyInformasjonFraSaksbehandler(
+                hendelse,
+                vedtaksperiode.skjæringstidspunkt,
+                vedtaksperiode.jurist()
+            )
+            vedtaksperiode.tilstand(hendelse, AvventerHistorikk)
+            return true
+        }
+
         override fun håndter(vedtaksperiode: Vedtaksperiode, overstyrArbeidsforhold: OverstyrArbeidsforhold): Boolean {
             vedtaksperiode.person.lagreOverstyrArbeidsforhold(overstyrArbeidsforhold)
             vedtaksperiode.person.vilkårsprøvEtterNyInformasjonFraSaksbehandler(
@@ -1931,10 +1957,6 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.trengerGodkjenning(hendelse)
         }
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {
-            vedtaksperiode.arbeidsgiver.addInntekt(hendelse)
-            vedtaksperiode.tilstand(hendelse, AvventerVilkårsprøving)
-        }
     }
 
     private fun trengerGodkjenning(hendelse: IAktivitetslogg) {
