@@ -41,7 +41,15 @@ internal class TestPersonTest {
 
     @Test
     fun `kan sende sykmelding`() {
-        testperson.håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        testperson.arbeidsgiver(a1).håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         assertEquals(1, inspektør(a1).sykmeldingsperioder().size)
+    }
+
+    @Test
+    fun `kan sende sykmelding via testblokk`() {
+        val ag1 = testperson.arbeidsgiver(a1) {
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        }
+        assertEquals(1, ag1.inspektør.sykmeldingsperioder().size)
     }
 }

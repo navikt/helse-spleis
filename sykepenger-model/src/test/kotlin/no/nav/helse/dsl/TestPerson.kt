@@ -4,6 +4,7 @@ import java.time.format.DateTimeFormatter
 import no.nav.helse.Fødselsnummer
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
@@ -33,13 +34,25 @@ internal class TestPerson(
         it.addObserver(observatør)
     }
 
-    private val fabrikker = mutableMapOf<String, Hendelsefabrikk>()
-    private val String.fabrikk get() = fabrikker.getOrPut(this) { Hendelsefabrikk(aktørId, fødselsnummer, this) }
+    private val arbeidsgivere = mutableMapOf<String, TestArbeidsgiver>()
 
     internal fun <INSPEKTØR : PersonVisitor> inspiser(inspektør: (Person) -> INSPEKTØR) = inspektør(person)
 
-    internal fun håndterSykmelding(vararg sykmeldingsperiode: Sykmeldingsperiode, orgnummer: String) =
-        orgnummer.fabrikk.lagSykmelding(*sykmeldingsperiode).also { forrigeHendelse = it }.let { sykmelding ->
-            person.håndter(sykmelding)
+    internal fun arbeidsgiver(orgnummer: String, block: TestArbeidsgiver.() -> Any = { }) =
+        arbeidsgivere.getOrPut(orgnummer) { TestArbeidsgiver(orgnummer) }(block)
+
+    inner class TestArbeidsgiver(private val orgnummer: String) {
+        private val fabrikk = Hendelsefabrikk(aktørId, fødselsnummer, orgnummer)
+
+        internal val inspektør get() = TestArbeidsgiverInspektør(person, orgnummer)
+        internal fun håndterSykmelding(vararg sykmeldingsperiode: Sykmeldingsperiode) =
+            fabrikk.lagSykmelding(*sykmeldingsperiode).also { forrigeHendelse = it }.let { sykmelding ->
+                person.håndter(sykmelding)
+            }
+
+        operator fun invoke(block: TestArbeidsgiver.() -> Any): TestArbeidsgiver {
+            block(this)
+            return this
         }
+    }
 }
