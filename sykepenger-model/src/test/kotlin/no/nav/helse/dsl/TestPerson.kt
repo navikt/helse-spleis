@@ -1,8 +1,11 @@
 package no.nav.helse.dsl
 
 import java.time.format.DateTimeFormatter
+import java.util.UUID
 import no.nav.helse.Fødselsnummer
 import no.nav.helse.februar
+import no.nav.helse.hendelser.Hendelseskontekst
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
@@ -15,6 +18,7 @@ import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.somFødselsnummer
 import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.utbetalingstidslinje.Alder.Companion.alder
+import no.nav.helse.økonomi.Inntekt
 
 internal class TestPerson(
     private val observatør: PersonObserver,
@@ -35,7 +39,9 @@ internal class TestPerson(
 
     private lateinit var forrigeHendelse: IAktivitetslogg
 
+    private val vedtaksperiodesamler = Vedtaksperiodesamler()
     private val person = Person(aktørId, fødselsnummer, alder, jurist).also {
+        it.addObserver(vedtaksperiodesamler)
         it.addObserver(observatør)
     }
 
@@ -52,16 +58,38 @@ internal class TestPerson(
         return this
     }
 
+    private inner class Vedtaksperiodesamler : PersonObserver {
+        private val vedtaksperioder = mutableMapOf<String, MutableSet<UUID>>()
+
+        internal fun vedtaksperiodeId(orgnummer: String, indeks: Int) =
+            vedtaksperioder.getValue(orgnummer).elementAt(indeks)
+
+        override fun vedtaksperiodeEndret(
+            hendelseskontekst: Hendelseskontekst,
+            event: PersonObserver.VedtaksperiodeEndretEvent
+        ) {
+            val detaljer = mutableMapOf<String, String>().apply { hendelseskontekst.appendTo(this::put) }
+            val orgnr = detaljer.getValue("organisasjonsnummer")
+            val vedtaksperiodeId = UUID.fromString(detaljer.getValue("vedtaksperiodeId"))
+            vedtaksperioder.getOrPut(orgnr) { mutableSetOf() }.add(vedtaksperiodeId)
+        }
+    }
+
     inner class TestArbeidsgiver(private val orgnummer: String) {
         private val fabrikk = Hendelsefabrikk(aktørId, fødselsnummer, orgnummer)
 
         internal val inspektør get() = TestArbeidsgiverInspektør(person, orgnummer)
+
+        internal val Int.vedtaksperiode get() = vedtaksperiodesamler.vedtaksperiodeId(orgnummer, this - 1)
 
         internal fun håndterSykmelding(vararg sykmeldingsperiode: Sykmeldingsperiode) =
             fabrikk.lagSykmelding(*sykmeldingsperiode).håndter(Person::håndter)
 
         internal fun håndterSøknad(vararg perioder: Søknad.Søknadsperiode) =
             fabrikk.lagSøknad(*perioder).håndter(Person::håndter)
+
+        internal fun håndterInntektsmelding(arbeidsgiverperioder: List<Periode>, inntekt: Inntekt) =
+            fabrikk.lagInntektsmelding(arbeidsgiverperioder, inntekt).håndter(Person::håndter)
 
         operator fun invoke(testblokk: TestArbeidsgiver.() -> Any): TestArbeidsgiver {
             testblokk(this)

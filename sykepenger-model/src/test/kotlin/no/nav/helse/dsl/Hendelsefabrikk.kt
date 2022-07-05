@@ -4,9 +4,12 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.Fødselsnummer
+import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
+import no.nav.helse.økonomi.Inntekt
 
 internal class Hendelsefabrikk(
     private val aktørId: String,
@@ -16,6 +19,7 @@ internal class Hendelsefabrikk(
 
     private val sykmeldinger = mutableListOf<Sykmelding>()
     private val søknader = mutableListOf<Søknad>()
+    private val inntektsmeldinger = mutableMapOf<UUID, () -> Inntektsmelding>()
 
     internal fun lagSykmelding(
         vararg sykeperioder: Sykmeldingsperiode,
@@ -57,6 +61,36 @@ internal class Hendelsefabrikk(
         ).apply {
             søknader.add(this)
         }
+    }
+
+    internal fun lagInntektsmelding(
+        arbeidsgiverperioder: List<Periode>,
+        beregnetInntekt: Inntekt,
+        førsteFraværsdag: LocalDate = arbeidsgiverperioder.maxOf { it.start },
+        refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
+        harOpphørAvNaturalytelser: Boolean = false,
+        arbeidsforholdId: String? = null,
+        begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
+        id: UUID = UUID.randomUUID()
+    ): Inntektsmelding {
+        val inntektsmeldinggenerator = {
+            Inntektsmelding(
+                meldingsreferanseId = id,
+                refusjon = refusjon,
+                orgnummer = organisasjonsnummer,
+                fødselsnummer = fødselsnummer.toString(),
+                aktørId = aktørId,
+                førsteFraværsdag = førsteFraværsdag,
+                beregnetInntekt = beregnetInntekt,
+                arbeidsgiverperioder = arbeidsgiverperioder,
+                arbeidsforholdId = arbeidsforholdId,
+                begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
+                harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
+                mottatt = LocalDateTime.now()
+            )
+        }
+        inntektsmeldinger[id] = inntektsmeldinggenerator
+        return inntektsmeldinggenerator()
     }
 
 }
