@@ -396,7 +396,8 @@ class SerialisertPerson(val json: String) {
             val personData: PersonData = requireNotNull(serdeObjectMapper.treeToValue(jsonNode))
             return personData.createPerson(jurist)
         } catch (err: Exception) {
-            throw DeserializationException("Feil under oversetting til modellobjekter: ${err.message}", err)
+            val aktørId = jsonNode.path("aktørId").asText()
+            throw DeserializationException("Feil under oversetting til modellobjekter for aktør=$aktørId: ${err.message}", err)
         }
     }
 }
