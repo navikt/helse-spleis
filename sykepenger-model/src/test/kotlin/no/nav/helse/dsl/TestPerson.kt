@@ -4,9 +4,11 @@ import java.time.format.DateTimeFormatter
 import no.nav.helse.Fødselsnummer
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.Søknad
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.Person
+import no.nav.helse.person.PersonHendelse
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonVisitor
 import no.nav.helse.person.etterlevelse.MaskinellJurist
@@ -26,6 +28,9 @@ internal class TestPerson(
         internal val UNG_PERSON_FDATO_2018 = 12.februar(1992)
         internal val UNG_PERSON_FNR_2018: Fødselsnummer = "${UNG_PERSON_FDATO_2018.format(fnrformatter)}40045".somFødselsnummer()
         internal const val AKTØRID = "42"
+
+        internal operator fun String.invoke(testPerson: TestPerson, testblokk: TestArbeidsgiver.() -> Any = { }) =
+            testPerson.arbeidsgiver(this).invoke(testblokk)
     }
 
     private lateinit var forrigeHendelse: IAktivitetslogg
@@ -41,17 +46,25 @@ internal class TestPerson(
     internal fun arbeidsgiver(orgnummer: String, block: TestArbeidsgiver.() -> Any = { }) =
         arbeidsgivere.getOrPut(orgnummer) { TestArbeidsgiver(orgnummer) }(block)
 
+    private fun <T : PersonHendelse> T.håndter(håndter: Person.(T) -> Unit): T {
+        forrigeHendelse = this
+        person.håndter(this)
+        return this
+    }
+
     inner class TestArbeidsgiver(private val orgnummer: String) {
         private val fabrikk = Hendelsefabrikk(aktørId, fødselsnummer, orgnummer)
 
         internal val inspektør get() = TestArbeidsgiverInspektør(person, orgnummer)
-        internal fun håndterSykmelding(vararg sykmeldingsperiode: Sykmeldingsperiode) =
-            fabrikk.lagSykmelding(*sykmeldingsperiode).also { forrigeHendelse = it }.let { sykmelding ->
-                person.håndter(sykmelding)
-            }
 
-        operator fun invoke(block: TestArbeidsgiver.() -> Any): TestArbeidsgiver {
-            block(this)
+        internal fun håndterSykmelding(vararg sykmeldingsperiode: Sykmeldingsperiode) =
+            fabrikk.lagSykmelding(*sykmeldingsperiode).håndter(Person::håndter)
+
+        internal fun håndterSøknad(vararg perioder: Søknad.Søknadsperiode) =
+            fabrikk.lagSøknad(*perioder).håndter(Person::håndter)
+
+        operator fun invoke(testblokk: TestArbeidsgiver.() -> Any): TestArbeidsgiver {
+            testblokk(this)
             return this
         }
     }

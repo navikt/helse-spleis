@@ -1,6 +1,8 @@
 package no.nav.helse.dsl
 
+import no.nav.helse.dsl.TestPerson.Companion.invoke
 import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.Søknad
 import no.nav.helse.inspectors.PersonInspektør
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.januar
@@ -51,5 +53,15 @@ internal class TestPersonTest {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         }
         assertEquals(1, ag1.inspektør.sykmeldingsperioder().size)
+    }
+
+    @Test
+    fun `kan sende søknad`() {
+        a1(testperson) {
+            håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(3.januar, 26.januar, 100.prosent))
+
+            assertEquals(1, inspektør.vedtaksperiodeTeller)
+        }
     }
 }
