@@ -7,7 +7,6 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
-import no.nav.helse.person.ArbeidsgiverVisitor
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Dokumentsporing.Companion.ider
 import no.nav.helse.person.ForkastetVedtaksperiode
@@ -21,7 +20,6 @@ import no.nav.helse.person.PersonVisitor
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.VedtaksperiodeVisitor
-import no.nav.helse.person.VilkårsgrunnlagHistorikkVisitor
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Endringskode
@@ -41,7 +39,7 @@ import org.junit.jupiter.api.fail
 internal class TestArbeidsgiverInspektør(
     private val person: Person,
     val orgnummer: String
-) : ArbeidsgiverVisitor, VilkårsgrunnlagHistorikkVisitor {
+) : PersonVisitor {
     private val personInspektør = person.inspektør
 
     internal var vedtaksperiodeTeller: Int = 0

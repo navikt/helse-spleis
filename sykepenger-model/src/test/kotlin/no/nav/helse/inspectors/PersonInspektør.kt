@@ -30,7 +30,10 @@ internal class PersonInspektør(person: Person): PersonVisitor {
         private set
 
     internal lateinit var aktivitetslogg: Aktivitetslogg
+    internal lateinit var fødselsnummer: Fødselsnummer
+    internal lateinit var aktørId: String
     internal lateinit var fødselsdato: LocalDate
+    internal var dødsdato: LocalDate? = null
     internal lateinit var alder: Alder
     private val arbeidsgivere = mutableSetOf<String>()
     private val infotrygdelementerLagretInntekt = mutableListOf<Boolean>()
@@ -55,6 +58,9 @@ internal class PersonInspektør(person: Person): PersonVisitor {
         dødsdato: LocalDate?,
         vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk
     ) {
+        this.fødselsnummer = fødselsnummer
+        this.aktørId = aktørId
+        this.dødsdato = dødsdato
         this.vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk
     }
 
