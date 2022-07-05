@@ -54,7 +54,9 @@ import no.nav.helse.serde.api.dto.Tidslinjeperiode
 import no.nav.helse.serde.api.dto.UberegnetPeriode
 import no.nav.helse.serde.api.dto.Utbetalingstatus
 import no.nav.helse.serde.api.dto.Utbetalingtype
-import no.nav.helse.serde.api.dto.Utbetalingtype.*
+import no.nav.helse.serde.api.dto.Utbetalingtype.ANNULLERING
+import no.nav.helse.serde.api.dto.Utbetalingtype.REVURDERING
+import no.nav.helse.serde.api.dto.Utbetalingtype.UTBETALING
 import no.nav.helse.serde.api.dto.Vilkårsgrunnlag
 import no.nav.helse.serde.api.speil.builders.GenerasjonerBuilder
 import no.nav.helse.serde.api.speil.builders.InntektshistorikkForAOrdningenBuilder
@@ -894,6 +896,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
     @Test
     fun `periode som har tilstand TIL_INFOTRYGD sendes ikke med til Speil`() {
         val fyller18November2018 = "02110075045".somFødselsnummer()
+        createTestPerson(fyller18November2018)
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent), fnr = fyller18November2018)
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), fnr = fyller18November2018)
 
@@ -1739,7 +1742,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
 
         val generasjonerBuilder = GenerasjonerBuilder(
             søknadDTOer,
-            UNG_PERSON_FNR_2018,
+            UNG_PERSON_FNR_2018.alder(),
             person.arbeidsgiver(organisasjonsnummer)
         )
         return generasjonerBuilder.build()

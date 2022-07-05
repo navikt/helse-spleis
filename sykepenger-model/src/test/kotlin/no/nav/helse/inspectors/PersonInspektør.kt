@@ -15,6 +15,7 @@ import no.nav.helse.person.PersonVisitor
 import no.nav.helse.person.Sykepengegrunnlag
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
+import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosent
 
@@ -29,6 +30,8 @@ internal class PersonInspektør(person: Person): PersonVisitor {
         private set
 
     internal lateinit var aktivitetslogg: Aktivitetslogg
+    internal lateinit var fødselsdato: LocalDate
+    internal lateinit var alder: Alder
     private val arbeidsgivere = mutableSetOf<String>()
     private val infotrygdelementerLagretInntekt = mutableListOf<Boolean>()
     private val grunnlagsdata = mutableListOf<Pair<LocalDate,VilkårsgrunnlagHistorikk.Grunnlagsdata>>()
@@ -53,6 +56,11 @@ internal class PersonInspektør(person: Person): PersonVisitor {
         vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk
     ) {
         this.vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk
+    }
+
+    override fun visitAlder(alder: Alder, fødselsdato: LocalDate) {
+        this.alder = alder
+        this.fødselsdato = fødselsdato
     }
 
     override fun visitPersonAktivitetslogg(aktivitetslogg: Aktivitetslogg) {

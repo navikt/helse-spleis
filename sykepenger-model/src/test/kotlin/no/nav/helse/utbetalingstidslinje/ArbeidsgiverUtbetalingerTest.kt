@@ -296,7 +296,7 @@ internal class ArbeidsgiverUtbetalingerTest {
         historiskTidslinje: Utbetalingstidslinje,
         vilkårsgrunnlagElement: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement? = null
     ) {
-        val person = Person("aktørid", fnr, MaskinellJurist())
+        val person = Person("aktørid", fnr, fnr.alder(), MaskinellJurist())
         // seed arbeidsgiver med sykdomshistorikk
         val førsteDag = arbeidsgiverTidslinje.periode().start
         val sisteDag = arbeidsgiverTidslinje.periode().endInclusive

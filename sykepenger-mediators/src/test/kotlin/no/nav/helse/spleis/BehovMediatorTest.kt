@@ -14,11 +14,9 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Foreldrepeng
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling
 import no.nav.helse.person.ArbeidstakerHendelse
-import no.nav.helse.person.Person
 import no.nav.helse.person.SpesifikkKontekst
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.somFødselsnummer
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -60,11 +58,9 @@ class BehovMediatorTest {
     }
 
     private lateinit var aktivitetslogg: Aktivitetslogg
-    private lateinit var person: Person
 
     @BeforeEach
     fun setup() {
-        person = Person(aktørId, fødselsnummer.somFødselsnummer(), MaskinellJurist())
         aktivitetslogg = Aktivitetslogg()
         behovMediator = BehovMediator(mockk(relaxed = true))
         messages.clear()
@@ -73,7 +69,7 @@ class BehovMediatorTest {
     @Test
     fun `grupperer behov`() {
         val hendelse = TestHendelse("Hendelse1", aktivitetslogg.barn())
-        hendelse.kontekst(person)
+
         val arbeidsgiver1 = TestKontekst("Arbeidsgiver", "Arbeidsgiver 1")
         hendelse.kontekst(arbeidsgiver1)
         val vedtaksperiode1 = TestKontekst("Vedtaksperiode", "Vedtaksperiode 1")
@@ -134,7 +130,6 @@ class BehovMediatorTest {
     @Test
     fun `duplikatnøkler er ok når verdi er lik`() {
         val hendelse = TestHendelse("Hendelse1", aktivitetslogg.barn())
-        hendelse.kontekst(person)
         val arbeidsgiver1 = TestKontekst("Arbeidsgiver", "Arbeidsgiver 1")
         hendelse.kontekst(arbeidsgiver1)
         val vedtaksperiode1 = TestKontekst("Vedtaksperiode", "Vedtaksperiode 1")
@@ -156,7 +151,6 @@ class BehovMediatorTest {
     @Test
     fun `kan ikke produsere samme behov flere ganger`() {
         val hendelse = TestHendelse("Hendelse1", aktivitetslogg.barn())
-        hendelse.kontekst(person)
         val arbeidsgiver1 = TestKontekst("Arbeidsgiver", "Arbeidsgiver 1")
         hendelse.kontekst(arbeidsgiver1)
         val vedtaksperiode1 = TestKontekst("Vedtaksperiode", "Vedtaksperiode 1")
@@ -178,7 +172,6 @@ class BehovMediatorTest {
     @Test
     fun `kan ikke produsere samme behov`() {
         val hendelse = TestHendelse("Hendelse1", aktivitetslogg.barn())
-        hendelse.kontekst(person)
         val arbeidsgiver1 = TestKontekst("Arbeidsgiver", "Arbeidsgiver 1")
         hendelse.kontekst(arbeidsgiver1)
         val vedtaksperiode1 = TestKontekst("Vedtaksperiode", "Vedtaksperiode 1")
@@ -200,6 +193,10 @@ class BehovMediatorTest {
         private val melding: String,
         val logg: Aktivitetslogg
     ) : ArbeidstakerHendelse(UUID.randomUUID(), fødselsnummer, aktørId, "not_relevant", logg), Aktivitetskontekst {
+        private val person = person(MaskinellJurist())
+        init {
+            kontekst(person)
+        }
 
         override fun kontekst(kontekst: Aktivitetskontekst) {
             logg.kontekst(kontekst)

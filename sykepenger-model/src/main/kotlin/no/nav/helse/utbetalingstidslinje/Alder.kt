@@ -6,22 +6,27 @@ import java.time.LocalDate
 import java.time.Year
 import java.time.temporal.ChronoUnit.YEARS
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.person.AlderVisitor
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.plus
 import no.nav.helse.sykdomstidslinje.ukedager
 import no.nav.helse.ukedager
 
+// TODO: alder bør ha dødsdato for å regne alder riktig i tilfelle død
 internal class Alder(private val fødselsdato: LocalDate) {
     private val syttiårsdagen: LocalDate = fødselsdato.plusYears(70)
     private val sisteVirkedagFørFylte70år: LocalDate = syttiårsdagen.sisteVirkedagFør()
     private val redusertYtelseAlder: LocalDate = fødselsdato.plusYears(67)
     private val forhøyetInntektskravAlder: LocalDate = fødselsdato.plusYears(67)
 
-    private companion object {
+    internal companion object {
         private const val MAKS_SYKEPENGEDAGER_OVER_67 = 60
         private const val ALDER_FOR_FORHØYET_FERIEPENGESATS = 59
         private const val MINSTEALDER_UTEN_FULLMAKT_FRA_VERGE = 18
+
+        val LocalDate.alder get() = Alder(this)
+
         private fun LocalDate.sisteVirkedagFør(): LocalDate = this.minusDays(
             when (this.dayOfWeek) {
                 SUNDAY -> 2
@@ -29,6 +34,10 @@ internal class Alder(private val fødselsdato: LocalDate) {
                 else -> 1
             }
         )
+    }
+
+    internal fun accept(visitor: AlderVisitor) {
+        visitor.visitAlder(this, fødselsdato)
     }
 
     internal fun innenfor67årsgrense(dato: LocalDate) = dato <= redusertYtelseAlder

@@ -403,7 +403,7 @@ internal class LagUtbetalingForRevurderingTest {
         )
     }
 
-    private fun person() = Person(AKTØRID, FNR, maskinellJurist)
+    private fun person() = Person(AKTØRID, FNR, FNR.alder(), maskinellJurist)
     private fun arbeidsgiver(organisasjonsnummer: String) = Arbeidsgiver(person(), organisasjonsnummer, maskinellJurist)
     private fun søknad(søknadId: UUID, periode: Periode): Søknad {
         val søknadsperiode = Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent)

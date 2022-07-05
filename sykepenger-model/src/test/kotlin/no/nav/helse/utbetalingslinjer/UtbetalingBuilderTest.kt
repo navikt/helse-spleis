@@ -29,6 +29,7 @@ import no.nav.helse.testhelpers.S
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.testhelpers.resetSeed
 import no.nav.helse.testhelpers.somVilkårsgrunnlagHistorikk
+import no.nav.helse.utbetalingstidslinje.Alder.Companion.alder
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjerFilter
@@ -143,7 +144,7 @@ internal class UtbetalingBuilderTest {
     private fun nyBuilder(
         periode: Periode, infotrygdHistorikk:
         Infotrygdhistorikk = Infotrygdhistorikk()
-    ) = Utbetaling.Builder(fødselsnummer, aktivitetslogg, periode, NullObserver, null, infotrygdHistorikk, NormalArbeidstaker)
+    ) = Utbetaling.Builder(fødselsnummer, 1.januar(1970).alder, aktivitetslogg, periode, NullObserver, null, infotrygdHistorikk, NormalArbeidstaker)
 
     private fun vedtaksperiode(periode: Periode = 1.januar til 31.januar, organisasjonsnummer: String = this.organisasjonsnummer): Vedtaksperiode {
         val søknad = søknad(søknadId, periode)
@@ -168,7 +169,7 @@ internal class UtbetalingBuilderTest {
         )
     }
 
-    private fun person() = Person(aktørId, fødselsnummer, maskinellJurist)
+    private fun person() = Person(aktørId, fødselsnummer, fødselsnummer.alder(), maskinellJurist)
     private fun arbeidsgiver(organisasjonsnummer: String) = Arbeidsgiver(person(), organisasjonsnummer, maskinellJurist)
     private fun søknad(søknadId: UUID, periode: Periode): Søknad {
         val søknadsperiode = Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent)

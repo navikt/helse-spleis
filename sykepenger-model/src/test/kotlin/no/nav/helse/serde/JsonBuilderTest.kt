@@ -89,6 +89,8 @@ class JsonBuilderTest {
         private val orgnummer = "987654321"
     }
 
+    private val person get() = Person(aktørId, fnr, fnr.alder(), MaskinellJurist())
+
     @Test
     fun `gjenoppbygd Person skal være lik opprinnelig Person - The Jackson Way`() {
         val person = person()
@@ -138,7 +140,7 @@ class JsonBuilderTest {
     fun `Lagrer dødsdato på person`() {
         val fom = 1.januar
         val tom = 31.januar
-        val dødPerson = Person(aktørId, fnr, MaskinellJurist()).apply {
+        val dødPerson = person.apply {
             håndter(sykmelding(fom = fom, tom = tom))
             håndter(
                 søknad(
@@ -224,7 +226,7 @@ class JsonBuilderTest {
 
     @Test
     fun `En forlengelse med ny tilstandsflyt`() {
-        val person = Person(aktørId, fnr, MaskinellJurist()).apply {
+        val person = person.apply {
             håndter(sykmelding(fom = 1.januar, tom = 31.januar))
             håndter(
                 søknad(
@@ -240,7 +242,7 @@ class JsonBuilderTest {
 
     @Test
     fun `Person med ny tilstandsflyt som venter på inntektsmelding`() {
-        val person = Person(aktørId, fnr, MaskinellJurist()).apply {
+        val person = person.apply {
             håndter(sykmelding(fom = 1.januar, tom = 31.januar))
             håndter(
                 søknad(
@@ -276,7 +278,7 @@ class JsonBuilderTest {
         sendtSøknad: LocalDate = 1.april,
         søknadhendelseId: UUID = UUID.randomUUID()
     ): Person =
-        Person(aktørId, fnr, MaskinellJurist()).apply {
+        person.apply {
             håndter(sykmelding(fom = fom, tom = tom))
             håndter(
                 søknad(
@@ -306,7 +308,7 @@ class JsonBuilderTest {
         sendtSøknad: LocalDate = 1.april,
         søknadhendelseId: UUID = UUID.randomUUID()
     ): Person =
-        Person(aktørId, fnr, MaskinellJurist()).apply {
+        person.apply {
             håndter(sykmelding(fom = fom, tom = tom))
             håndter(
                 søknad(
@@ -342,7 +344,7 @@ class JsonBuilderTest {
         sendtSøknad: LocalDate = 1.april,
         søknadhendelseId: UUID = UUID.randomUUID()
     ): Person =
-        Person(aktørId, fnr, MaskinellJurist()).apply {
+        person.apply {
             håndter(sykmelding(fom = 1.januar, tom = 9.januar))
             håndter(
                 søknad(
@@ -363,7 +365,7 @@ class JsonBuilderTest {
         sendtSøknad: LocalDate = 1.april,
         søknadhendelseId: UUID = UUID.randomUUID()
     ): Person =
-        Person(aktørId, fnr, MaskinellJurist()).apply {
+        person.apply {
             håndter(sykmelding(fom = 1.januar, tom = 9.januar))
             håndter(
                 søknad(
@@ -385,7 +387,7 @@ class JsonBuilderTest {
         sendtSøknad: LocalDate = 1.april,
         søknadhendelseId: UUID = UUID.randomUUID()
     ): Person =
-        Person(aktørId, fnr, MaskinellJurist()).apply {
+        person.apply {
             håndter(sykmelding(fom = fom, tom = tom))
             håndter(
                 søknad(
@@ -415,7 +417,7 @@ class JsonBuilderTest {
     private fun refusjonOpphørerPerson(
         søknadhendelseId: UUID = UUID.randomUUID()
     ): Person =
-        Person(aktørId, fnr, MaskinellJurist()).apply {
+        person.apply {
             håndter(sykmelding(fom = 1.januar, tom = 9.januar))
             håndter(
                 søknad(
@@ -431,7 +433,7 @@ class JsonBuilderTest {
     private fun personMedInfotrygdForlengelse(søknadhendelseId: UUID = UUID.randomUUID()): Person {
         val refusjoner = listOf(ArbeidsgiverUtbetalingsperiode(orgnummer, 1.desember(2017), 31.desember(2017), 100.prosent, 31000.månedlig))
         val inntektshistorikk = listOf(Inntektsopplysning(orgnummer, 1.desember(2017), 31000.månedlig, true))
-        return Person(aktørId, fnr, MaskinellJurist()).apply {
+        return person.apply {
             håndter(sykmelding(fom = 1.januar, tom = 31.januar))
             håndter(søknad(fom = 1.januar, tom = 31.januar, hendelseId = søknadhendelseId))
             fangeVedtaksperiode()
@@ -456,7 +458,7 @@ class JsonBuilderTest {
         val refusjoner = listOf(ArbeidsgiverUtbetalingsperiode(orgnummer, 1.desember(2017), 24.desember(2017), 100.prosent, 31000.månedlig))
         val inntektshistorikk = listOf(Inntektsopplysning(orgnummer, 1.desember(2017), 31000.månedlig, true))
         val ugyldigePerioder = listOf(UgyldigPeriode(1.mai(2017), 20.mai(2017), 0), UgyldigPeriode(1.februar(2017), 31.januar(2017), 100))
-        return Person(aktørId, fnr, MaskinellJurist()).apply {
+        return person.apply {
             håndter(sykmelding(fom = 1.januar, tom = 31.januar))
             håndter(søknad(fom = 1.januar, tom = 31.januar, hendelseId = søknadhendelseId))
             fangeVedtaksperiode()
@@ -470,7 +472,7 @@ class JsonBuilderTest {
         sendtSøknad: LocalDate = 1.april,
         søknadhendelseId: UUID = UUID.randomUUID()
     ): Person =
-        Person(aktørId, fnr, MaskinellJurist()).apply {
+        person.apply {
             håndter(sykmelding(fom = fom, tom = tom))
             håndter(
                 søknad(
@@ -544,7 +546,7 @@ class JsonBuilderTest {
         sendtSøknad: LocalDate = 1.april,
         søknadhendelseId: UUID = UUID.randomUUID()
     ): Person =
-        Person(aktørId, fnr, MaskinellJurist()).apply {
+        person.apply {
             håndter(sykmelding(fom = fom, tom = tom))
             håndter(
                 søknad(

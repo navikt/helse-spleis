@@ -38,6 +38,7 @@ import no.nav.helse.utbetalingslinjer.Satstype
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje
+import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinjeberegning
@@ -46,7 +47,7 @@ import no.nav.helse.økonomi.Prosent
 import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Økonomi
 
-internal interface PersonVisitor : ArbeidsgiverVisitor, AktivitetsloggVisitor, VilkårsgrunnlagHistorikkVisitor, InfotrygdhistorikkVisitor {
+internal interface PersonVisitor : AlderVisitor, ArbeidsgiverVisitor, AktivitetsloggVisitor, VilkårsgrunnlagHistorikkVisitor, InfotrygdhistorikkVisitor {
     fun preVisitPerson(
         person: Person,
         opprettet: LocalDateTime,
@@ -66,6 +67,10 @@ internal interface PersonVisitor : ArbeidsgiverVisitor, AktivitetsloggVisitor, V
         dødsdato: LocalDate?,
         vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk
     ) {}
+}
+
+internal interface AlderVisitor {
+    fun visitAlder(alder: Alder, fødselsdato: LocalDate) {}
 }
 
 internal interface InfotrygdhistorikkVisitor {

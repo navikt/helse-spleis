@@ -68,6 +68,7 @@ import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingslinjer.Utbetaling
+import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverUtbetalinger
@@ -81,6 +82,7 @@ import kotlin.math.roundToInt
 class Person private constructor(
     private val aktørId: String,
     private val fødselsnummer: Fødselsnummer,
+    private val alder: Alder,
     private val arbeidsgivere: MutableList<Arbeidsgiver>,
     internal val aktivitetslogg: Aktivitetslogg,
     private val opprettet: LocalDateTime,
@@ -94,6 +96,7 @@ class Person private constructor(
         internal fun ferdigPerson(
             aktørId: String,
             fødselsnummer: Fødselsnummer,
+            alder: Alder,
             arbeidsgivere: MutableList<Arbeidsgiver>,
             aktivitetslogg: Aktivitetslogg,
             opprettet: LocalDateTime,
@@ -104,6 +107,7 @@ class Person private constructor(
         ): Person = Person(
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
+            alder = alder,
             arbeidsgivere = arbeidsgivere,
             aktivitetslogg = aktivitetslogg,
             opprettet = opprettet,
@@ -114,13 +118,15 @@ class Person private constructor(
         )
     }
 
-    constructor(
+    internal constructor(
         aktørId: String,
         fødselsnummer: Fødselsnummer,
+        alder: Alder,
         jurist: MaskinellJurist
     ) : this(
         aktørId,
         fødselsnummer,
+        alder,
         mutableListOf(),
         Aktivitetslogg(),
         LocalDateTime.now(),
@@ -134,7 +140,7 @@ class Person private constructor(
 
     fun håndter(sykmelding: Sykmelding) = håndter(sykmelding, "sykmelding")
 
-    fun håndter(søknad: Søknad) = håndter(søknad, "søknad")
+    fun håndter(søknad: Søknad) = håndter(søknad, "søknad") { søknad.forUng(alder) }
 
     fun håndter(inntektsmelding: Inntektsmelding) = håndter(inntektsmelding, "inntektsmelding")
 
@@ -145,10 +151,12 @@ class Person private constructor(
 
     private fun håndter(
         hendelse: SykdomstidslinjeHendelse,
-        hendelsesmelding: String
+        hendelsesmelding: String,
+        before: () -> Any = { }
     ) {
         registrer(hendelse, "Behandler $hendelsesmelding")
         val arbeidsgiver = finnEllerOpprettArbeidsgiver(hendelse)
+        before()
         hendelse.fortsettÅBehandle(arbeidsgiver)
     }
 
@@ -173,7 +181,7 @@ class Person private constructor(
         }
 
         val feriepengeberegner = Feriepengeberegner(
-            alder = fødselsnummer.alder(),
+            alder = alder,
             opptjeningsår = utbetalingshistorikk.opptjeningsår,
             utbetalingshistorikkForFeriepenger = utbetalingshistorikk,
             person = this
@@ -357,7 +365,7 @@ class Person private constructor(
     ): ArbeidsgiverUtbetalinger {
         return ArbeidsgiverUtbetalinger(
             regler = regler,
-            alder = fødselsnummer.alder(),
+            alder = alder,
             arbeidsgivere = arbeidsgivereMedSykdom().associateWith {
                 it.builder(regler, vilkårsgrunnlagHistorikk, subsumsjonObserver)
             },
@@ -500,6 +508,7 @@ class Person private constructor(
 
     internal fun accept(visitor: PersonVisitor) {
         visitor.preVisitPerson(this, opprettet, aktørId, fødselsnummer, dødsdato, vilkårsgrunnlagHistorikk)
+        alder.accept(visitor)
         visitor.visitPersonAktivitetslogg(aktivitetslogg)
         aktivitetslogg.accept(visitor)
         visitor.preVisitArbeidsgivere()
@@ -644,7 +653,7 @@ class Person private constructor(
         subsumsjonObserver: SubsumsjonObserver
     ): Sykepengegrunnlag {
         return Sykepengegrunnlag.opprett(
-            fødselsnummer.alder(),
+            alder,
             arbeidsgivere.beregnSykepengegrunnlag(skjæringstidspunkt, subsumsjonObserver),
             skjæringstidspunkt,
             subsumsjonObserver,
@@ -658,7 +667,7 @@ class Person private constructor(
         subsumsjonObserver: SubsumsjonObserver
     ) =
         Sykepengegrunnlag.opprettForInfotrygd(
-            fødselsnummer.alder(),
+            alder,
             arbeidsgivere.beregnSykepengegrunnlag(
                 skjæringstidspunkt,
                 personensSisteKjenteSykedagIDenSammenhengdendeSykeperioden
@@ -887,6 +896,7 @@ class Person private constructor(
     internal fun lagUtbetalinger(aktivitetslogg: IAktivitetslogg, periode: Periode, subsumsjonObserver: SubsumsjonObserver, vedtaksperioder: List<Vedtaksperiode>) =
         Utbetaling.Builder(
             fødselsnummer = fødselsnummer,
+            alder = alder,
             aktivitetslogg = aktivitetslogg,
             periode = periode,
             subsumsjonObserver = subsumsjonObserver,

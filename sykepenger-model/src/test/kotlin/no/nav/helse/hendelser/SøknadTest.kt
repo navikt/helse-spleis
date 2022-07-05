@@ -22,6 +22,7 @@ import no.nav.helse.mai
 import no.nav.helse.november
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.etterlevelse.MaskinellJurist
+import no.nav.helse.somFødselsnummer
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.Arbeidsdag
 import no.nav.helse.sykdomstidslinje.Dag.FriskHelgedag
@@ -40,7 +41,7 @@ internal class SøknadTest {
     private companion object {
         private const val UNG_PERSON_FNR_2018 = "12029240045"
         private val EN_PERIODE = Periode(1.januar, 31.januar)
-        val FYLLER_18_ÅR_2_NOVEMBER = "02110075045"
+        private const val FYLLER_18_ÅR_2_NOVEMBER = "02110075045"
     }
 
     private lateinit var søknad: Søknad
@@ -100,13 +101,15 @@ internal class SøknadTest {
     @Test
     fun `17 år på søknadstidspunkt gir error`() {
         søknad(Sykdom(1.januar, 10.januar, 100.prosent), fnr = FYLLER_18_ÅR_2_NOVEMBER, sendtTilNAVEllerArbeidsgiver = 1.november.atStartOfDay())
-        assertTrue(søknad.valider(EN_PERIODE, MaskinellJurist()).hasErrorsOrWorse())
+        assertTrue(søknad.forUng(FYLLER_18_ÅR_2_NOVEMBER.somFødselsnummer().alder()))
+        assertTrue(søknad.hasErrorsOrWorse())
     }
 
     @Test
     fun `18 år på søknadstidspunkt gir ikke error`() {
         søknad(Sykdom(1.januar, 10.januar, 100.prosent), fnr = FYLLER_18_ÅR_2_NOVEMBER, sendtTilNAVEllerArbeidsgiver = 2.november.atStartOfDay())
-        assertFalse(søknad.valider(EN_PERIODE, MaskinellJurist()).hasErrorsOrWorse())
+        assertFalse(søknad.forUng(FYLLER_18_ÅR_2_NOVEMBER.somFødselsnummer().alder()))
+        assertFalse(søknad.hasErrorsOrWorse())
     }
 
     @Test

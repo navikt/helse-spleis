@@ -31,6 +31,7 @@ import no.nav.helse.testhelpers.UTELATE
 import no.nav.helse.testhelpers.opphold
 import no.nav.helse.testhelpers.resetSeed
 import no.nav.helse.testhelpers.tidslinjeOf
+import no.nav.helse.utbetalingstidslinje.Alder.Companion.alder
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.Fridag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
@@ -775,7 +776,7 @@ internal class InfotrygdhistorikkElementTest {
     @Test
     fun `element uten inntekter låses ikke`() {
         val element = historikkelement(inntekter = emptyList())
-        element.addInntekter(Person("", "01010112345".somFødselsnummer(), MaskinellJurist()), aktivitetslogg)
+        element.addInntekter(Person("", "01010112345".somFødselsnummer(), 1.januar(1950).alder, MaskinellJurist()), aktivitetslogg)
         assertTrue(element.kanSlettes())
     }
 
@@ -786,7 +787,7 @@ internal class InfotrygdhistorikkElementTest {
                 Inntektsopplysning(ORGNUMMER, 1.januar, 1234.månedlig, true)
             )
         )
-        element.addInntekter(Person("", "01010112345".somFødselsnummer(), MaskinellJurist()), aktivitetslogg)
+        element.addInntekter(Person("", "01010112345".somFødselsnummer(), 1.januar(1950).alder, MaskinellJurist()), aktivitetslogg)
         assertFalse(element.kanSlettes())
     }
 

@@ -35,6 +35,7 @@ import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Fagområde.Sykepenger
 import no.nav.helse.utbetalingslinjer.Fagområde.SykepengerRefusjon
+import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.AvvisDagerEtterDødsdatofilter
 import no.nav.helse.utbetalingstidslinje.Inntekter
@@ -984,6 +985,7 @@ internal class Utbetaling private constructor(
 
     internal class Builder(
         private val fødselsnummer: Fødselsnummer,
+        private val alder: Alder,
         private val aktivitetslogg: IAktivitetslogg,
         private val periode: Periode,
         private val subsumsjonObserver: SubsumsjonObserver,
@@ -996,7 +998,7 @@ internal class Utbetaling private constructor(
         private var gjenståendeSykedager by Delegates.notNull<Int>()
         private var forbrukteSykedager by Delegates.notNull<Int>()
         private val infotrygdtidslinje = infotrygdhistorikk.utbetalingstidslinje().kutt(periode.endInclusive)
-        private val maksimumSykepengedagerfilter = MaksimumSykepengedagerfilter(fødselsnummer.alder(), regler, infotrygdtidslinje)
+        private val maksimumSykepengedagerfilter = MaksimumSykepengedagerfilter(alder, regler, infotrygdtidslinje)
         private val utbetalingstidslinjeBuildere = mutableMapOf<String, UtbetalingstidslinjeBuilder>()
 
         internal fun avvisInngangsvilkårfilter(avvisInngangsvilkårfilter: UtbetalingstidslinjerFilter) = apply {

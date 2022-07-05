@@ -1,21 +1,25 @@
 package no.nav.helse.serde
 
+import java.time.LocalDateTime
+import java.util.UUID
+import no.nav.helse.april
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.*
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Egenmelding
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Permisjon
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Utdanning
+import no.nav.helse.januar
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Person
-import no.nav.helse.somFødselsnummer
-import no.nav.helse.april
-import no.nav.helse.januar
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.LocalDateTime
-import java.util.*
 
 internal class SerialiseringAvDagerFraSøknadTest {
 
@@ -57,7 +61,7 @@ internal class SerialiseringAvDagerFraSøknadTest {
     internal fun setup() {
         aktivitetslogg = Aktivitetslogg()
 
-        person = Person(aktørId, fnr.somFødselsnummer(), MaskinellJurist()).apply {
+        person = sykmelding.person(MaskinellJurist()).apply {
             håndter(sykmelding)
             håndter(søknad)
         }

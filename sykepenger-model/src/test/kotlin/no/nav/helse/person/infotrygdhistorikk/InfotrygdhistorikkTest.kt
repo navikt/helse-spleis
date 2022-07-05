@@ -26,6 +26,7 @@ import no.nav.helse.testhelpers.resetSeed
 import no.nav.helse.testhelpers.somVilkårsgrunnlagHistorikk
 import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.utbetalingslinjer.Utbetaling
+import no.nav.helse.utbetalingstidslinje.Alder.Companion.alder
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.Inntekter
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilder
@@ -133,7 +134,7 @@ internal class InfotrygdhistorikkTest {
             oppdatert = tidsstempel,
             inntekter = emptyList()
         ))
-        historikk.addInntekter(Person("", "01010112345".somFødselsnummer(), MaskinellJurist()), aktivitetslogg)
+        historikk.addInntekter(Person("", "01010112345".somFødselsnummer(), 1.januar(1950).alder, MaskinellJurist()), aktivitetslogg)
         historikk.tøm()
         assertFalse(historikk.oppfriskNødvendig(aktivitetslogg, tidligsteDato))
         assertFalse(aktivitetslogg.behov().isNotEmpty()) { aktivitetslogg.toString() }
@@ -147,7 +148,7 @@ internal class InfotrygdhistorikkTest {
             oppdatert = tidsstempel,
             inntekter = listOf(Inntektsopplysning("orgnr", 1.januar, 1000.daglig, true))
         ))
-        historikk.addInntekter(Person("", "10101012345".somFødselsnummer(), MaskinellJurist()), aktivitetslogg)
+        historikk.addInntekter(Person("", "10101012345".somFødselsnummer(), 1.januar(1950).alder, MaskinellJurist()), aktivitetslogg)
         historikk.tøm()
         assertFalse(historikk.oppfriskNødvendig(aktivitetslogg, tidligsteDato))
         assertFalse(aktivitetslogg.behov().isNotEmpty()) { aktivitetslogg.toString() }

@@ -264,7 +264,7 @@ internal class HendelseMediator(
             ?.deserialize(
                 jurist = jurist
             ) { hendelseRepository.hentAlleHendelser(hendelse.fødselsnummer().somFødselsnummer()) }
-            ?: Person(aktørId = hendelse.aktørId(), fødselsnummer = hendelse.fødselsnummer().somFødselsnummer(), jurist = jurist)
+            ?: hendelse.person(jurist)
     }
 
     private fun finalize(

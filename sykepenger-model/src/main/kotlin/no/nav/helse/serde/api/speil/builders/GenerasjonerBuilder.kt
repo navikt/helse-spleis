@@ -3,7 +3,6 @@ package no.nav.helse.serde.api.speil.builders
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.Fødselsnummer
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.ArbeidsgiverVisitor
@@ -31,6 +30,7 @@ import no.nav.helse.serde.api.speil.VedtaksperiodeAkkumulator
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
+import no.nav.helse.utbetalingstidslinje.Alder
 
 internal data class GenerasjonIder(
     val beregningId: BeregningId,
@@ -47,7 +47,7 @@ internal typealias InntektsmeldingId = UUID
 // Besøker hele arbeidsgiver-treet
 internal class GenerasjonerBuilder(
     private val hendelser: List<HendelseDTO>,
-    private val fødselsnummer: Fødselsnummer,
+    private val alder: Alder,
     arbeidsgiver: Arbeidsgiver
 ) : ArbeidsgiverVisitor {
     private val vedtaksperiodeAkkumulator = VedtaksperiodeAkkumulator()
@@ -65,7 +65,7 @@ internal class GenerasjonerBuilder(
         vedtaksperiodeAkkumulator.supplerMedAnnulleringer(annulleringer)
         val tidslinjeberegninger = Tidslinjeberegninger(generasjonIderAkkumulator.toList(), sykdomshistorikkAkkumulator)
         val tidslinjeperioder = Tidslinjeperioder(
-            fødselsnummer = fødselsnummer,
+            alder = alder,
             forkastetVedtaksperiodeIder = forkastetVedtaksperiodeAkkumulator.toList(),
             refusjoner = refusjonerAkkumulator.getRefusjoner(),
             vedtaksperioder = vedtaksperiodeAkkumulator.toList(),

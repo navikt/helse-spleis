@@ -27,6 +27,7 @@ import no.nav.helse.utbetalingslinjer.Satstype
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje
+import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinjeberegning
@@ -245,6 +246,10 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk
     ) {
         delegatee.preVisitPerson(person, opprettet, aktørId, fødselsnummer, dødsdato, vilkårsgrunnlagHistorikk)
+    }
+
+    override fun visitAlder(alder: Alder, fødselsdato: LocalDate) {
+        delegatee.visitAlder(alder, fødselsdato)
     }
 
     override fun visitPersonAktivitetslogg(aktivitetslogg: Aktivitetslogg) {

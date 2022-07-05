@@ -66,6 +66,7 @@ import no.nav.helse.utbetalingslinjer.Satstype
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje
+import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -121,6 +122,10 @@ internal class JsonBuilder : AbstractBuilder() {
         private val arbeidsgivere = mutableListOf<MutableMap<String, Any?>>()
 
         fun build() = SerialisertPerson.medSkjemaversjon(serdeObjectMapper.valueToTree(personMap))
+
+        override fun visitAlder(alder: Alder, fødselsdato: LocalDate) {
+            personMap["fødselsdato"] = fødselsdato
+        }
 
         override fun visitPersonAktivitetslogg(aktivitetslogg: Aktivitetslogg) {
             personMap["aktivitetslogg"] = AktivitetsloggMap(aktivitetslogg).toMap()

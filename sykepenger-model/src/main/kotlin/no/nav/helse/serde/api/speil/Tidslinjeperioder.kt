@@ -3,7 +3,6 @@ package no.nav.helse.serde.api.speil
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.Fødselsnummer
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.Periodetype
@@ -52,6 +51,7 @@ import no.nav.helse.serde.api.speil.Tidslinjeberegninger.ITidslinjeberegning
 import no.nav.helse.serde.api.speil.builders.BeregningId
 import no.nav.helse.serde.api.speil.builders.InntektsmeldingId
 import no.nav.helse.serde.api.speil.builders.PeriodeVarslerBuilder
+import no.nav.helse.utbetalingstidslinje.Alder
 import kotlin.properties.Delegates
 
 internal class Generasjoner(perioder: Tidslinjeperioder) {
@@ -146,7 +146,7 @@ internal class Generasjoner(perioder: Tidslinjeperioder) {
 }
 
 internal class Tidslinjeperioder(
-    private val fødselsnummer: Fødselsnummer,
+    private val alder: Alder,
     private val forkastetVedtaksperiodeIder: List<UUID>,
     private val refusjoner: Map<InntektsmeldingId, Refusjon>,
     vedtaksperioder: List<IVedtaksperiode>,
@@ -282,7 +282,7 @@ internal class Tidslinjeperioder(
             utbetaling.gjenståendeSykedager,
             utbetaling.maksdato > sisteSykepengedag
         )
-        val alder = fødselsnummer.alder().let {
+        val alderSisteSykepengedag = alder.let {
             BeregnetPeriode.Alder(it.alderPåDato(sisteSykepengedag), it.innenfor70årsgrense(sisteSykepengedag))
         }
         val søknadsfrist = hendelser.finn<SøknadNavDTO>()?.let {
@@ -294,7 +294,7 @@ internal class Tidslinjeperioder(
             )
         }
 
-        return BeregnetPeriode.Vilkår(sykepengedager, alder, søknadsfrist)
+        return BeregnetPeriode.Vilkår(sykepengedager, alderSisteSykepengedag, søknadsfrist)
     }
 }
 

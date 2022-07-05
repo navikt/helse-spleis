@@ -1,6 +1,8 @@
 package no.nav.helse.person
 
 import java.util.UUID
+import no.nav.helse.person.etterlevelse.MaskinellJurist
+import no.nav.helse.somFødselsnummer
 
 internal class ErrorsTilWarnings(private val other: IAktivitetslogg) : IAktivitetslogg by other {
     override fun error(melding: String, vararg params: Any?) = warn(melding, params)
@@ -31,6 +33,12 @@ abstract class PersonHendelse protected constructor(
 
     fun aktørId() = aktørId
     fun fødselsnummer() = fødselsnummer
+    fun person(jurist: MaskinellJurist) = Person(
+        aktørId = aktørId,
+        fødselsnummer = fødselsnummer.somFødselsnummer(),
+        alder = fødselsnummer.somFødselsnummer().alder(), // TODO få alder/fødseldato fra hendelsen
+        jurist = jurist
+    )
 
     internal fun meldingsreferanseId() = meldingsreferanseId
 

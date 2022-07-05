@@ -10,7 +10,6 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
-import no.nav.helse.somFødselsnummer
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
@@ -67,14 +66,13 @@ class Søknad(
         perioder.forEach { it.subsumsjon(this, subsumsjonObserver) }
         perioder.forEach { it.valider(this) }
         andreInntektskilder.forEach { it.valider(this) }
-        forUng(fødselsnummer.somFødselsnummer().alder())
         if (permittert) warn("Søknaden inneholder permittering. Vurder om permittering har konsekvens for rett til sykepenger")
         merknaderFraSykmelding.forEach { it.valider(this) }
         if (sykdomstidslinje.any { it is Dag.ForeldetSykedag }) warn("Minst én dag er avslått på grunn av foreldelse. Vurder å sende vedtaksbrev fra Infotrygd")
         return this
     }
 
-    private fun forUng(alder: Alder) = alder.forUngForÅSøke(sendtTilNAVEllerArbeidsgiver.toLocalDate()).also {
+    internal fun forUng(alder: Alder) = alder.forUngForÅSøke(sendtTilNAVEllerArbeidsgiver.toLocalDate()).also {
         if (it) error(ERRORTEKST_PERSON_UNDER_18_ÅR)
     }
     private fun avskjæringsdato(): LocalDate = sendtTilNAVEllerArbeidsgiver.toLocalDate().minusMonths(3).withDayOfMonth(1)

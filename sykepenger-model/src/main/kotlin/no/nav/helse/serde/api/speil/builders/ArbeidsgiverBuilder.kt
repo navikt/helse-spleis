@@ -6,7 +6,7 @@ import no.nav.helse.serde.api.BuilderState
 import no.nav.helse.serde.api.dto.ArbeidsgiverDTO
 import no.nav.helse.serde.api.dto.GhostPeriodeDTO
 import no.nav.helse.serde.api.dto.HendelseDTO
-import no.nav.helse.somFødselsnummer
+import no.nav.helse.utbetalingstidslinje.Alder
 
 internal class ArbeidsgiverBuilder(
     private val arbeidsgiver: Arbeidsgiver,
@@ -14,7 +14,7 @@ internal class ArbeidsgiverBuilder(
     private val organisasjonsnummer: String
 ) : BuilderState() {
 
-    internal fun build(hendelser: List<HendelseDTO>, fødselsnummer: String): ArbeidsgiverDTO {
+    internal fun build(hendelser: List<HendelseDTO>, alder: Alder): ArbeidsgiverDTO {
         return ArbeidsgiverDTO(
             organisasjonsnummer = organisasjonsnummer,
             id = id,
@@ -28,7 +28,7 @@ internal class ArbeidsgiverBuilder(
                     deaktivert = it.deaktivert
                 )
             },
-            generasjoner = GenerasjonerBuilder(hendelser, fødselsnummer.somFødselsnummer(), arbeidsgiver).build()
+            generasjoner = GenerasjonerBuilder(hendelser, alder, arbeidsgiver).build()
         )
     }
 

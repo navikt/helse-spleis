@@ -5,9 +5,17 @@ import com.github.tomakehurst.wiremock.client.WireMock.stubFor
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
-import io.ktor.http.*
 import io.ktor.http.HttpHeaders.Authorization
-import io.ktor.server.engine.*
+import io.ktor.http.HttpMethod
+import io.ktor.http.HttpStatusCode
+import io.ktor.server.engine.ApplicationEngine
+import java.net.Socket
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
+import java.util.concurrent.TimeUnit.SECONDS
+import java.util.concurrent.atomic.AtomicInteger
+import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.hendelser.Inntektsmelding
@@ -17,26 +25,22 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.person.Person
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.serde.serialize
-import no.nav.helse.somFødselsnummer
 import no.nav.helse.spleis.config.AzureAdAppConfig
+import no.nav.helse.spleis.config.DataSourceConfiguration
 import no.nav.helse.spleis.config.KtorConfig
 import no.nav.helse.spleis.dao.HendelseDao
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.awaitility.Awaitility.await
 import org.flywaydb.core.Flyway
-import org.junit.jupiter.api.*
+import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.TestInstance.Lifecycle
 import org.testcontainers.containers.PostgreSQLContainer
-import java.net.Socket
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
-import java.util.concurrent.TimeUnit.SECONDS
-import java.util.concurrent.atomic.AtomicInteger
-import javax.sql.DataSource
-import no.nav.helse.spleis.config.DataSourceConfiguration
 
 @TestInstance(Lifecycle.PER_CLASS)
 internal class RestApiTest {
@@ -130,7 +134,7 @@ internal class RestApiTest {
         val sykeperioder = listOf(Sykmeldingsperiode(fom, tom, 100.prosent))
         val sykmelding = Sykmelding(
             meldingsreferanseId = UUID.randomUUID(),
-            fnr = "fnr",
+            fnr = UNG_PERSON_FNR,
             aktørId = "aktørId",
             orgnummer = ORGNUMMER,
             sykeperioder = sykeperioder,
@@ -144,7 +148,7 @@ internal class RestApiTest {
                 opphørsdato = null
             ),
             orgnummer = ORGNUMMER,
-            fødselsnummer = "fnr",
+            fødselsnummer = UNG_PERSON_FNR,
             aktørId = "aktørId",
             førsteFraværsdag = LocalDate.of(2018, 1, 1),
             beregnetInntekt = 12000.månedlig,
@@ -153,7 +157,7 @@ internal class RestApiTest {
             begrunnelseForReduksjonEllerIkkeUtbetalt = null,
             mottatt = LocalDateTime.now()
         )
-        val person = Person(AKTØRID, UNG_PERSON_FNR.somFødselsnummer(), MaskinellJurist())
+        val person = sykmelding.person(MaskinellJurist())
         person.håndter(sykmelding)
         person.håndter(inntektsmelding)
         dataSource.lagrePerson(AKTØRID, UNG_PERSON_FNR, person)

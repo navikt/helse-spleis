@@ -72,6 +72,7 @@ import no.nav.helse.utbetalingslinjer.Satstype
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje
 import no.nav.helse.utbetalingstidslinje.Alder
+import no.nav.helse.utbetalingstidslinje.Alder.Companion.alder
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
@@ -89,6 +90,7 @@ import no.nav.helse.økonomi.Økonomi
 internal data class PersonData(
     private val aktørId: String,
     private val fødselsnummer: String,
+    private val fødselsdato: LocalDate,
     private val arbeidsgivere: List<ArbeidsgiverData>,
     private val aktivitetslogg: AktivitetsloggData?,
     private val opprettet: LocalDateTime,
@@ -99,15 +101,17 @@ internal data class PersonData(
     private val arbeidsgivereliste = mutableListOf<Arbeidsgiver>()
     private val modelAktivitetslogg get() = aktivitetslogg?.konverterTilAktivitetslogg() ?: Aktivitetslogg()
     private val fnr by lazy { fødselsnummer.somFødselsnummer() }
+    private val alder by lazy { fødselsdato.alder }
 
     private fun person(jurist: MaskinellJurist) = Person.ferdigPerson(
         aktørId = aktørId,
         fødselsnummer = fnr,
+        alder = alder,
         arbeidsgivere = arbeidsgivereliste,
         aktivitetslogg = modelAktivitetslogg,
         opprettet = opprettet,
         infotrygdhistorikk = infotrygdhistorikk.tilModellObjekt(),
-        vilkårsgrunnlaghistorikk = vilkårsgrunnlagHistorikk.tilModellObjekt(fnr.alder()),
+        vilkårsgrunnlaghistorikk = vilkårsgrunnlagHistorikk.tilModellObjekt(alder),
         dødsdato = dødsdato,
         jurist = jurist
     )
@@ -120,6 +124,7 @@ internal data class PersonData(
                 person,
                 this.aktørId,
                 this.fødselsnummer,
+                this.alder,
                 personJurist
             )
         })
@@ -464,6 +469,7 @@ internal data class PersonData(
             person: Person,
             aktørId: String,
             fødselsnummer: String,
+            alder: Alder,
             jurist: MaskinellJurist
         ): Arbeidsgiver {
             val arbeidsgiverJurist = jurist.medOrganisasjonsnummer(organisasjonsnummer)
@@ -478,7 +484,7 @@ internal data class PersonData(
                 forkastedeliste,
                 modelUtbetalinger,
                 beregnetUtbetalingstidslinjer.map { it.tilBeregnetUtbetalingstidslinje() },
-                feriepengeutbetalinger.map { it.createFeriepengeutbetaling(fødselsnummer) },
+                feriepengeutbetalinger.map { it.createFeriepengeutbetaling(alder) },
                 refusjonshistorikk.parseRefusjon(),
                 arbeidsforholdhistorikk.tilArbeidsforholdhistorikk(),
                 inntektsmeldingInfo.tilInntektsmeldingInfoHistorikk(),
@@ -813,8 +819,8 @@ internal data class PersonData(
             private val sendTilOppdrag: Boolean,
             private val sendPersonoppdragTilOS: Boolean,
         ) {
-            internal fun createFeriepengeutbetaling(fødselsnummer: String): Feriepengeutbetaling {
-                val feriepengeberegner = createFeriepengeberegner(fødselsnummer)
+            internal fun createFeriepengeutbetaling(alder: Alder): Feriepengeutbetaling {
+                val feriepengeberegner = createFeriepengeberegner(alder)
                 return Feriepengeutbetaling.ferdigFeriepengeutbetaling(
                     feriepengeberegner = feriepengeberegner,
                     infotrygdFeriepengebeløpPerson = infotrygdFeriepengebeløpPerson,
@@ -828,8 +834,7 @@ internal data class PersonData(
                 )
             }
 
-            private fun createFeriepengeberegner(fødselsnummer: String): Feriepengeberegner {
-                val alder = fødselsnummer.somFødselsnummer().alder()
+            private fun createFeriepengeberegner(alder: Alder): Feriepengeberegner {
                 return Feriepengeberegner.ferdigFeriepengeberegner(
                     alder = alder,
                     opptjeningsår = opptjeningsår,
