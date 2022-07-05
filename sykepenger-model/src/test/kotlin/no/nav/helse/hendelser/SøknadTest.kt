@@ -22,6 +22,7 @@ import no.nav.helse.mai
 import no.nav.helse.november
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.etterlevelse.MaskinellJurist
+import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.Arbeidsdag
 import no.nav.helse.sykdomstidslinje.Dag.FriskHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.ProblemDag
@@ -70,6 +71,12 @@ internal class SøknadTest {
         søknad(Sykdom(1.januar, 10.januar, 100.prosent), Utlandsopphold(2.januar, 4.januar))
         assertTrue(søknad.valider(EN_PERIODE, MaskinellJurist()).hasWarningsOrWorse())
         assertEquals(10, søknad.sykdomstidslinje().count())
+    }
+
+    @Test
+    fun `søknad med overlappende ferie og permisjon`() {
+        søknad(Sykdom(1.januar, 1.januar, 100.prosent), Ferie(1.januar, 1.januar), Permisjon(1.januar, 1.januar))
+        assertEquals(Dag.Feriedag::class, søknad.sykdomstidslinje()[1.januar]::class)
     }
 
     @Test
