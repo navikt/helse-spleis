@@ -169,11 +169,11 @@ internal sealed class Dag(
     internal class ProblemDag(
         dato: LocalDate,
         kilde: SykdomstidslinjeHendelse.Hendelseskilde,
-        private val other: SykdomstidslinjeHendelse.Hendelseskilde?,
+        private val other: SykdomstidslinjeHendelse.Hendelseskilde,
         private val melding: String
     ) : Dag(dato, kilde) {
 
-        internal constructor(dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde, melding: String) : this(dato, kilde, null, melding)
+        internal constructor(dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde, melding: String) : this(dato, kilde, kilde, melding)
 
         override fun accept(visitor: SykdomstidslinjeVisitor) =
             visitor.visitDag(this, dato, kilde, other, melding)

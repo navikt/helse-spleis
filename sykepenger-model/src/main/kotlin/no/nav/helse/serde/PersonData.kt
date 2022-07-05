@@ -752,7 +752,7 @@ internal data class PersonData(
                     JsonDagType.PROBLEMDAG -> Dag.ProblemDag(
                         dato,
                         hendelseskilde,
-                        other?.parseKilde(),
+                        other!!.parseKilde(),
                         melding!!
                     )
                     JsonDagType.SYKEDAG -> if (dato.erHelg()) {
