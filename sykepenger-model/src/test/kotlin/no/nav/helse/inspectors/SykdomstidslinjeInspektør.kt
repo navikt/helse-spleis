@@ -1,13 +1,23 @@
 package no.nav.helse.inspectors
 
+import java.time.LocalDate
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.sykdomstidslinje.Dag
-import no.nav.helse.sykdomstidslinje.Dag.*
+import no.nav.helse.sykdomstidslinje.Dag.Arbeidsdag
+import no.nav.helse.sykdomstidslinje.Dag.ArbeidsgiverHelgedag
+import no.nav.helse.sykdomstidslinje.Dag.Arbeidsgiverdag
+import no.nav.helse.sykdomstidslinje.Dag.Feriedag
+import no.nav.helse.sykdomstidslinje.Dag.ForeldetSykedag
+import no.nav.helse.sykdomstidslinje.Dag.FriskHelgedag
+import no.nav.helse.sykdomstidslinje.Dag.Permisjonsdag
+import no.nav.helse.sykdomstidslinje.Dag.ProblemDag
+import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
+import no.nav.helse.sykdomstidslinje.Dag.Sykedag
+import no.nav.helse.sykdomstidslinje.Dag.UkjentDag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse.Hendelseskilde
 import no.nav.helse.økonomi.Økonomi
-import java.time.LocalDate
 import kotlin.reflect.KClass
 
 internal val Sykdomstidslinje.inspektør get() = SykdomstidslinjeInspektør(this)
@@ -106,6 +116,12 @@ internal class SykdomstidslinjeInspektør(tidslinje: Sykdomstidslinje) : Sykdoms
     override fun visitDag(dag: Permisjonsdag, dato: LocalDate, kilde: Hendelseskilde) =
         set(dag, dato, kilde)
 
-    override fun visitDag(dag: ProblemDag, dato: LocalDate, kilde: Hendelseskilde, melding: String) =
+    override fun visitDag(
+        dag: ProblemDag,
+        dato: LocalDate,
+        kilde: Hendelseskilde,
+        other: Hendelseskilde?,
+        melding: String
+    ) =
         set(dag, dato, kilde, melding)
 }

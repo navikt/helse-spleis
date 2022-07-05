@@ -22,10 +22,7 @@ internal sealed class Dag(
     companion object {
         internal val default: BesteStrategy = { venstre: Dag, høyre: Dag ->
             require(venstre.dato == høyre.dato) { "Støtter kun sammenlikning av dager med samme dato" }
-            if (venstre == høyre) venstre else ProblemDag(
-                høyre.dato, høyre.kilde,
-                "Kan ikke velge mellom ${venstre.name()} fra ${venstre.kilde} og ${høyre.name()} fra ${høyre.kilde}."
-            )
+            if (venstre == høyre) venstre else høyre.problem(venstre)
         }
 
         internal val override: BesteStrategy = { venstre: Dag, høyre: Dag ->
@@ -54,36 +51,19 @@ internal sealed class Dag(
 
         internal val noOverlap: BesteStrategy = { venstre: Dag, høyre: Dag ->
             require(venstre.dato == høyre.dato) { "Støtter kun sammenlikning av dager med samme dato" }
-            ProblemDag(
-                høyre.dato, høyre.kilde,
-                "Støtter ikke overlappende perioder (${venstre.kilde} og ${høyre.kilde})"
-            )
-        }
-
-        internal val fyll: BesteStrategy = { venstre: Dag, _: Dag ->
-            venstre
+            høyre.problem(venstre, "Støtter ikke overlappende perioder (${venstre.kilde} og ${høyre.kilde})")
         }
 
         internal val replace: BesteStrategy = { venstre: Dag, høyre: Dag ->
             if (høyre is UkjentDag) venstre
             else høyre
         }
-
-        /**
-         * Fordi vi ikke har (eller trenger) turnering for arbeidsgiversøknader trenger vi en strategi for å
-         * sørge for at arbeidsdager vinner over sykedager
-         */
-        internal val arbeidsdagerVinner: BesteStrategy = { venstre: Dag, høyre: Dag ->
-            require(venstre.dato == høyre.dato) { "Støtter kun sammenlikning av dager med samme dato" }
-            if (høyre is Arbeidsdag || høyre is FriskHelgedag) høyre
-            else venstre
-        }
     }
 
     internal fun kommerFra(hendelse: Melding) = kilde.erAvType(hendelse)
 
-    internal fun problem(other: Dag): Dag =
-        ProblemDag(dato, kilde, "Kan ikke velge mellom ${name()} fra $kilde og ${other.name()} fra ${other.kilde}.")
+    internal fun problem(other: Dag, melding: String = "Kan ikke velge mellom ${name()} fra $kilde og ${other.name()} fra ${other.kilde}."): Dag =
+        ProblemDag(dato, kilde, other.kilde, melding)
 
     override fun equals(other: Any?) =
         other != null && this::class == other::class && this.equals(other as Dag)
@@ -189,11 +169,14 @@ internal sealed class Dag(
     internal class ProblemDag(
         dato: LocalDate,
         kilde: SykdomstidslinjeHendelse.Hendelseskilde,
+        private val other: SykdomstidslinjeHendelse.Hendelseskilde?,
         private val melding: String
     ) : Dag(dato, kilde) {
 
+        internal constructor(dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde, melding: String) : this(dato, kilde, null, melding)
+
         override fun accept(visitor: SykdomstidslinjeVisitor) =
-            visitor.visitDag(this, dato, kilde, melding)
+            visitor.visitDag(this, dato, kilde, other, melding)
     }
 }
 

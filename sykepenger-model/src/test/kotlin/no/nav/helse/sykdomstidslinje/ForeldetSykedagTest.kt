@@ -1,19 +1,33 @@
 package no.nav.helse.sykdomstidslinje
 
-import no.nav.helse.*
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
+import no.nav.helse.april
+import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.januar
+import no.nav.helse.juni
+import no.nav.helse.mai
+import no.nav.helse.mars
 import no.nav.helse.person.SykdomstidslinjeVisitor
-import no.nav.helse.sykdomstidslinje.Dag.*
+import no.nav.helse.sykdomstidslinje.Dag.Arbeidsdag
+import no.nav.helse.sykdomstidslinje.Dag.ArbeidsgiverHelgedag
+import no.nav.helse.sykdomstidslinje.Dag.Arbeidsgiverdag
+import no.nav.helse.sykdomstidslinje.Dag.Feriedag
+import no.nav.helse.sykdomstidslinje.Dag.ForeldetSykedag
+import no.nav.helse.sykdomstidslinje.Dag.FriskHelgedag
+import no.nav.helse.sykdomstidslinje.Dag.ProblemDag
+import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
+import no.nav.helse.sykdomstidslinje.Dag.Sykedag
+import no.nav.helse.sykdomstidslinje.Dag.UkjentDag
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.Økonomi
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
 import kotlin.reflect.KClass
 
 internal class ForeldetSykedagTest {
@@ -135,7 +149,13 @@ internal class ForeldetSykedagTest {
             økonomi: Økonomi,
             kilde: SykdomstidslinjeHendelse.Hendelseskilde
         ) = inkrementer(dag::class)
-        override fun visitDag(dag: ProblemDag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde, melding: String) = inkrementer(dag::class)
+        override fun visitDag(
+            dag: ProblemDag,
+            dato: LocalDate,
+            kilde: SykdomstidslinjeHendelse.Hendelseskilde,
+            other: SykdomstidslinjeHendelse.Hendelseskilde?,
+            melding: String
+        ) = inkrementer(dag::class)
 
 
     }

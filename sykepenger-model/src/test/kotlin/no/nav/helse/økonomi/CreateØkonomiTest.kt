@@ -1,5 +1,7 @@
 package no.nav.helse.økonomi
 
+import java.time.LocalDate
+import java.util.UUID
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
@@ -14,11 +16,13 @@ import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertDoesNotThrow
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import java.time.LocalDate
-import java.util.*
 
 internal class CreateØkonomiTest {
 
@@ -166,6 +170,7 @@ internal class CreateØkonomiTest {
         PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.SYKEDAG,
         PersonData.ArbeidsgiverData.SykdomstidslinjeData.KildeData("type", UUID.randomUUID(), 1.januar.atStartOfDay()),
         grad,
+        null,
         null
     )
 

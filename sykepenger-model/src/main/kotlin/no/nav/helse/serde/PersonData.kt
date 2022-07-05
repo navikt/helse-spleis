@@ -703,6 +703,7 @@ internal data class PersonData(
                 private val type: JsonDagType,
                 private val kilde: KildeData,
                 private val grad: Double,
+                private val other: KildeData?,
                 private val melding: String?
             ) {
                 // Gjør så vi kan ha dato/fom og tom på samme nivå som resten av verdiene i dag
@@ -751,6 +752,7 @@ internal data class PersonData(
                     JsonDagType.PROBLEMDAG -> Dag.ProblemDag(
                         dato,
                         hendelseskilde,
+                        other?.parseKilde(),
                         melding!!
                     )
                     JsonDagType.SYKEDAG -> if (dato.erHelg()) {

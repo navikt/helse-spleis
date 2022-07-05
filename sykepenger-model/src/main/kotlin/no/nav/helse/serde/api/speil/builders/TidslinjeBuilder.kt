@@ -118,7 +118,13 @@ internal class SykdomstidslinjeBuilder(tidslinje: Sykdomstidslinje): Sykdomstids
     override fun visitDag(dag: Dag.Permisjonsdag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde) =
         leggTilDag(dag, dato, null, kilde)
 
-    override fun visitDag(dag: Dag.ProblemDag, dato: LocalDate, kilde: SykdomstidslinjeHendelse.Hendelseskilde, melding: String) =
+    override fun visitDag(
+        dag: Dag.ProblemDag,
+        dato: LocalDate,
+        kilde: SykdomstidslinjeHendelse.Hendelseskilde,
+        other: SykdomstidslinjeHendelse.Hendelseskilde?,
+        melding: String
+    ) =
         leggTilDag(dag, dato, null, kilde)
 
     private fun leggTilDag(dag: Dag, dato: LocalDate, økonomi: Økonomi?, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {

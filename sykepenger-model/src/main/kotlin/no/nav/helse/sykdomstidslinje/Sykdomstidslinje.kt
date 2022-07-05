@@ -68,6 +68,7 @@ internal class Sykdomstidslinje private constructor(
             dag: ProblemDag,
             dato: LocalDate,
             kilde: Hendelseskilde,
+            other: Hendelseskilde?,
             melding: String
         ) {
             problemmeldinger.add(melding)

@@ -1645,8 +1645,9 @@ internal class JsonBuilder : AbstractBuilder() {
             dag: Dag.ProblemDag,
             dato: LocalDate,
             kilde: Hendelseskilde,
+            other: Hendelseskilde?,
             melding: String
-        ) = leggTilDag(dato, DagJsonBuilder(PROBLEMDAG, kilde).melding(melding))
+        ) = leggTilDag(dato, DagJsonBuilder(PROBLEMDAG, kilde).annenKilde(other).melding(melding))
 
         private fun leggTilDag(dato: LocalDate, builder: DagJsonBuilder) {
             dateRanges.plus(dato, builder.build())
@@ -1657,8 +1658,13 @@ internal class JsonBuilder : AbstractBuilder() {
         private val type: JsonDagType,
         private val kilde: Hendelseskilde
     ) {
+        private var otherKilde: Hendelseskilde? = null
         private var melding: String? = null
         private var økonomiBuilder: ØkonomiJsonBuilder? = null
+
+        fun annenKilde(other: Hendelseskilde?) = apply {
+            this.otherKilde = other
+        }
 
         fun melding(melding: String?) = apply {
             this.melding = melding
@@ -1671,6 +1677,7 @@ internal class JsonBuilder : AbstractBuilder() {
         fun build() = mutableMapOf<String, Any>().apply {
             this["type"] = type
             this["kilde"] = kilde.toJson()
+            this.compute("other") { _, _ -> otherKilde?.toJson() }
             this.compute("melding") { _, _ -> melding }
             økonomiBuilder?.build()?.also { putAll(it) }
         }
