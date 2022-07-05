@@ -13,7 +13,6 @@ import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.sykdomstidslinje.Dag.Arbeidsdag
 import no.nav.helse.sykdomstidslinje.Dag.ArbeidsgiverHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.Arbeidsgiverdag
-import no.nav.helse.sykdomstidslinje.Dag.AvslåttDag
 import no.nav.helse.sykdomstidslinje.Dag.Companion.default
 import no.nav.helse.sykdomstidslinje.Dag.Companion.sammenhengendeSykdom
 import no.nav.helse.sykdomstidslinje.Dag.Feriedag
@@ -232,7 +231,6 @@ internal class Sykdomstidslinje private constructor(
                     is Permisjonsdag -> "P"
                     is FriskHelgedag -> "R"
                     is ForeldetSykedag -> "K"
-                    is AvslåttDag -> "☠"
                 }
         }?.trim() ?: "Tom tidslinje"
     }
@@ -372,20 +370,6 @@ internal class Sykdomstidslinje private constructor(
                 førsteDato.datesUntil(sisteDato.plusDays(1))
                     .collect(toMap<LocalDate, LocalDate, Dag>({ it }, { ProblemDag(it, kilde, melding) }))
             )
-
-        internal fun avslåttdager(
-            førsteDato: LocalDate,
-            sisteDato: LocalDate,
-            kilde: Hendelseskilde
-        ) = Sykdomstidslinje(
-            førsteDato.datesUntil(sisteDato.plusDays(1))
-                .collect(toMap<LocalDate, LocalDate, Dag>({ it }, { AvslåttDag(it, kilde) }))
-        )
-
-        internal fun ulikFerieinformasjon(sykdomstidslinje: Sykdomstidslinje, ferieperiode: Periode) =
-            ferieperiode
-                .filter { sykdomstidslinje.periode()?.contains(it) ?: false }
-                .any { sykdomstidslinje[it] !is Feriedag }
 
         internal fun gammelTidslinje(tidslinjer: List<Sykdomstidslinje>) =
             tidslinjer.map { Sykdomstidslinje(it.dager.filter { (_, dag ) -> dag !is ProblemDag }.toSortedMap(), it.periode) }.merge(sammenhengendeSykdom)

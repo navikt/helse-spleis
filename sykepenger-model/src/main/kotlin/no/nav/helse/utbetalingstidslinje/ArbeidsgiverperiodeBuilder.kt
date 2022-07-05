@@ -106,10 +106,6 @@ internal class ArbeidsgiverperiodeBuilder(
         tilstand.feriedag(this, dato)
     }
 
-    override fun visitDag(dag: Dag.AvslåttDag, dato: LocalDate, kilde: Hendelseskilde) {
-        tilstand.feriedag(this, dato)
-    }
-
     override fun visitDag(dag: Dag.ProblemDag, dato: LocalDate, kilde: Hendelseskilde, melding: String) {
         throw UtbetalingstidslinjeBuilderException.UforventetDagException(dag, melding)
     }

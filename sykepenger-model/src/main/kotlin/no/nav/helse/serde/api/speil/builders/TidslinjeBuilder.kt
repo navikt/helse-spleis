@@ -1,15 +1,19 @@
 package no.nav.helse.serde.api.speil.builders
 
-import no.nav.helse.hendelser.*
-import no.nav.helse.person.*
-import no.nav.helse.serde.api.dto.BegrunnelseDTO
-import no.nav.helse.sykdomstidslinje.*
-import no.nav.helse.utbetalingslinjer.Utbetaling
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
+import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.OverstyrTidslinje
+import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Sykmelding
+import no.nav.helse.hendelser.Søknad
+import no.nav.helse.person.SykdomshistorikkVisitor
+import no.nav.helse.person.SykdomstidslinjeVisitor
+import no.nav.helse.person.UtbetalingVisitor
+import no.nav.helse.person.Vedtaksperiode
+import no.nav.helse.person.VedtaksperiodeVisitor
 import no.nav.helse.serde.api.dto.AvvistDag
+import no.nav.helse.serde.api.dto.BegrunnelseDTO
 import no.nav.helse.serde.api.dto.NavDag
 import no.nav.helse.serde.api.dto.Sykdomstidslinjedag
 import no.nav.helse.serde.api.dto.SykdomstidslinjedagKildetype
@@ -18,6 +22,14 @@ import no.nav.helse.serde.api.dto.Utbetalingstidslinjedag
 import no.nav.helse.serde.api.dto.UtbetalingstidslinjedagMedGrad
 import no.nav.helse.serde.api.dto.UtbetalingstidslinjedagType
 import no.nav.helse.serde.api.dto.UtbetalingstidslinjedagUtenGrad
+import no.nav.helse.sykdomstidslinje.Dag
+import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
+import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
+import no.nav.helse.sykdomstidslinje.erHelg
+import no.nav.helse.utbetalingslinjer.Utbetaling
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import no.nav.helse.økonomi.Økonomi
 
 // Besøker hele sykdomshistorikk-treet
 internal class VedtaksperiodeSykdomstidslinjeBuilder(vedtaksperiode: Vedtaksperiode): VedtaksperiodeVisitor {
@@ -140,7 +152,6 @@ internal class SykdomstidslinjeBuilder(tidslinje: Sykdomstidslinje): Sykdomstids
         is Dag.SykHelgedag -> SykdomstidslinjedagType.SYK_HELGEDAG
         is Dag.Permisjonsdag -> SykdomstidslinjedagType.PERMISJONSDAG
         is Dag.ProblemDag -> SykdomstidslinjedagType.UBESTEMTDAG
-        is Dag.AvslåttDag -> SykdomstidslinjedagType.AVSLÅTT
     }
 }
 

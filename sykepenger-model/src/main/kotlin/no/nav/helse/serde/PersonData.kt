@@ -773,8 +773,7 @@ internal data class PersonData(
                 PROBLEMDAG,
                 SYKEDAG,
 
-                UKJENT_DAG,
-                AVSLÅTT_DAG
+                UKJENT_DAG
             }
 
             data class KildeData(

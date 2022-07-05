@@ -1,22 +1,26 @@
 package no.nav.helse.testhelpers
 
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
+import java.util.stream.Collectors
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.januar
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
+import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.sykdomstidslinje.Dag
-import no.nav.helse.sykdomstidslinje.Dag.*
+import no.nav.helse.sykdomstidslinje.Dag.FriskHelgedag
+import no.nav.helse.sykdomstidslinje.Dag.Permisjonsdag
+import no.nav.helse.sykdomstidslinje.Dag.ProblemDag
+import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
+import no.nav.helse.sykdomstidslinje.Dag.UkjentDag
+import no.nav.helse.sykdomstidslinje.Melding
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.Økonomi
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
-import java.util.stream.Collectors
-import no.nav.helse.person.Dokumentsporing
-import no.nav.helse.sykdomstidslinje.Melding
 
 private var threadLocalDagensDato = ThreadLocal.withInitial { 1.januar }
 private var dagensDato: LocalDate
@@ -104,12 +108,6 @@ internal val Int.UK
     get() = Sykdomstidslinje(
         dagensDato.datesUntil(dagensDato.plusDays(this.toLong() - 1).plusDays(1))
             .collect(Collectors.toMap<LocalDate, LocalDate, Dag>({ it }, { UkjentDag(it, SykdomstidslinjeHendelse.Hendelseskilde.INGEN) }))
-    ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
-
-internal val Int.AV
-    get() = Sykdomstidslinje(
-        dagensDato.datesUntil(dagensDato.plusDays(this.toLong() - 1).plusDays(1))
-            .collect(Collectors.toMap<LocalDate, LocalDate, Dag>({ it }, { AvslåttDag(it, SykdomstidslinjeHendelse.Hendelseskilde.INGEN) }))
     ).also { dagensDato = dagensDato.plusDays(this.toLong()) }
 
 internal val Int.PROBLEM
