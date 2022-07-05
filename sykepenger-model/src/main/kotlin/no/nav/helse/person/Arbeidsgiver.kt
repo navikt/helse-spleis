@@ -101,7 +101,6 @@ internal class Arbeidsgiver private constructor(
     private val utbetalinger: MutableList<Utbetaling>,
     private val beregnetUtbetalingstidslinjer: MutableList<Utbetalingstidslinjeberegning>,
     private val feriepengeutbetalinger: MutableList<Feriepengeutbetaling>,
-    private val refusjonOpphører: MutableList<LocalDate?>,
     internal val refusjonshistorikk: Refusjonshistorikk,
     private val arbeidsforholdhistorikk: Arbeidsforholdhistorikk,
     private val inntektsmeldingInfo: InntektsmeldingInfoHistorikk,
@@ -119,7 +118,6 @@ internal class Arbeidsgiver private constructor(
         utbetalinger = mutableListOf(),
         beregnetUtbetalingstidslinjer = mutableListOf(),
         feriepengeutbetalinger = mutableListOf(),
-        refusjonOpphører = mutableListOf(),
         refusjonshistorikk = Refusjonshistorikk(),
         arbeidsforholdhistorikk = Arbeidsforholdhistorikk(),
         inntektsmeldingInfo = InntektsmeldingInfoHistorikk(),
@@ -410,7 +408,6 @@ internal class Arbeidsgiver private constructor(
         refusjonshistorikk.accept(visitor)
         arbeidsforholdhistorikk.accept(visitor)
         inntektsmeldingInfo.accept(visitor)
-        visitor.visitRefusjonOpphører(refusjonOpphører)
         visitor.postVisitArbeidsgiver(this, id, organisasjonsnummer)
     }
 
@@ -563,13 +560,8 @@ internal class Arbeidsgiver private constructor(
         }
     }
 
-    internal fun cacheRefusjon(opphørsdato: LocalDate?) {
-        if (refusjonOpphører.firstOrNull() != opphørsdato) refusjonOpphører.add(0, opphørsdato)
-    }
-
     internal fun håndter(inntektsmelding: Inntektsmelding, vedtaksperiodeId: UUID? = null) {
         inntektsmelding.kontekst(this)
-        inntektsmelding.cacheRefusjon(this)
         inntektsmelding.cacheRefusjon(refusjonshistorikk)
         if (vedtaksperiodeId != null) inntektsmelding.info("Replayer inntektsmelding til påfølgende perioder som overlapper.")
         if (!noenHarHåndtert(inntektsmelding) { håndter(inntektsmelding, vedtaksperiodeId, vedtaksperioder.toList()) }) {
@@ -1249,7 +1241,6 @@ internal class Arbeidsgiver private constructor(
                 utbetalinger: List<Utbetaling>,
                 beregnetUtbetalingstidslinjer: List<Utbetalingstidslinjeberegning>,
                 feriepengeutbetalinger: List<Feriepengeutbetaling>,
-                refusjonOpphører: List<LocalDate?>,
                 refusjonshistorikk: Refusjonshistorikk,
                 arbeidsforholdhistorikk: Arbeidsforholdhistorikk,
                 inntektsmeldingInfo: InntektsmeldingInfoHistorikk,
@@ -1266,7 +1257,6 @@ internal class Arbeidsgiver private constructor(
                 utbetalinger.toMutableList(),
                 beregnetUtbetalingstidslinjer.toMutableList(),
                 feriepengeutbetalinger.toMutableList(),
-                refusjonOpphører.toMutableList(),
                 refusjonshistorikk,
                 arbeidsforholdhistorikk,
                 inntektsmeldingInfo,

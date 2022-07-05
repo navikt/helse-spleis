@@ -213,10 +213,6 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         delegatee.postVisitUtbetalingstidslinjeberegning(id, tidsstempel, organisasjonsnummer, sykdomshistorikkElementId, inntektshistorikkInnslagId, vilkårsgrunnlagHistorikkInnslagId)
     }
 
-    override fun visitRefusjonOpphører(refusjonOpphører: List<LocalDate?>) {
-        delegatee.visitRefusjonOpphører(refusjonOpphører)
-    }
-
     override fun visitBehov(
         kontekster: List<SpesifikkKontekst>,
         aktivitet: Aktivitetslogg.Aktivitet.Behov,

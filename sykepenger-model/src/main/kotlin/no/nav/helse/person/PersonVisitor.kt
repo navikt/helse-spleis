@@ -245,7 +245,6 @@ internal interface ArbeidsgiverVisitor : InntekthistorikkVisitor, Sykdomshistori
     fun preVisitForkastetPeriode(vedtaksperiode: Vedtaksperiode, forkastetÅrsak: ForkastetÅrsak) {}
     fun postVisitForkastetPeriode(vedtaksperiode: Vedtaksperiode, forkastetÅrsak: ForkastetÅrsak) {}
     fun postVisitForkastedePerioder(vedtaksperioder: List<ForkastetVedtaksperiode>) {}
-    fun visitRefusjonOpphører(refusjonOpphører: List<LocalDate?>) {}
     fun postVisitArbeidsgiver(
         arbeidsgiver: Arbeidsgiver,
         id: UUID,

@@ -5,7 +5,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon.Companion.cacheRefusjon
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon.Companion.endrerRefusjon
-import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon.Companion.minOf
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.IAktivitetslogg
@@ -195,12 +194,6 @@ class Inntektsmelding(
         }
     }
 
-    internal fun inntektenGjelderFor(periode: Periode) = sykdomstidslinje.sisteSkjæringstidspunkt() in periode
-
-    internal fun cacheRefusjon(arbeidsgiver: Arbeidsgiver) {
-        refusjon.cacheRefusjon(arbeidsgiver, beregnetInntekt, sykdomstidslinje.førsteDag())
-    }
-
     internal fun cacheRefusjon(refusjonshistorikk: Refusjonshistorikk) {
         refusjon.cacheRefusjon(refusjonshistorikk, meldingsreferanseId(), førsteFraværsdag, arbeidsgiverperioder)
     }
@@ -291,13 +284,6 @@ class Inntektsmelding(
 
         private fun endrerRefusjon(periode: Periode) =
             endringerIRefusjon.endrerRefusjon(periode)
-
-        internal fun cacheRefusjon(arbeidsgiver: Arbeidsgiver, beregnetInntekt: Inntekt, førsteDagIArbeidsgiverperioden: LocalDate) {
-            val refusjonsopphørsdato =
-                if (beregnetInntekt != beløp) førsteDagIArbeidsgiverperioden
-                else endringerIRefusjon.minOf(opphørsdato)
-            arbeidsgiver.cacheRefusjon(refusjonsopphørsdato)
-        }
 
         internal fun cacheRefusjon(
             refusjonshistorikk: Refusjonshistorikk,

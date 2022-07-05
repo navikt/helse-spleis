@@ -447,7 +447,6 @@ internal data class PersonData(
         private val utbetalinger: List<UtbetalingData>,
         private val beregnetUtbetalingstidslinjer: List<BeregnetUtbetalingstidslinjeData>,
         private val feriepengeutbetalinger: List<FeriepengeutbetalingData> = emptyList(),
-        private val refusjonOpphører: List<LocalDate?> = emptyList(),
         private val refusjonshistorikk: List<RefusjonData>,
         private val arbeidsforholdhistorikk: List<ArbeidsforholdhistorikkInnslagData> = listOf(),
         private val inntektsmeldingInfo: List<InntektsmeldingInfoHistorikkElementData>
@@ -480,7 +479,6 @@ internal data class PersonData(
                 modelUtbetalinger,
                 beregnetUtbetalingstidslinjer.map { it.tilBeregnetUtbetalingstidslinje() },
                 feriepengeutbetalinger.map { it.createFeriepengeutbetaling(fødselsnummer) },
-                refusjonOpphører,
                 refusjonshistorikk.parseRefusjon(),
                 arbeidsforholdhistorikk.tilArbeidsforholdhistorikk(),
                 inntektsmeldingInfo.tilInntektsmeldingInfoHistorikk(),

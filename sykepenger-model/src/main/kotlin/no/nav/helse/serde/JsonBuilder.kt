@@ -251,10 +251,6 @@ internal class JsonBuilder : AbstractBuilder() {
             pushState(UtbetalingstidslinjeberegningerState(beregningerList))
         }
 
-        override fun visitRefusjonOpphører(refusjonOpphører: List<LocalDate?>) {
-            this.refusjonOpphører.addAll(refusjonOpphører)
-        }
-
         override fun preVisitFeriepengeutbetalinger(feriepengeutbetalinger: List<Feriepengeutbetaling>) {
             pushState(FeriepengeutbetalingerState(feriepengeutbetalingListe))
         }
