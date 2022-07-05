@@ -224,7 +224,7 @@ internal class Vedtaksperiode private constructor(
         val overlapper = overlapperMedSammenhengende(inntektsmelding, sammenhengendePerioder, other, vedtaksperioder)
         return overlapper.also {
             if (erAlleredeHensyntatt(inntektsmelding)) {
-                sikkerlogg.warn("Vedtaksperiode med id=$id har allerede hensyntatt inntektsmeldingen med id=${inntektsmelding.meldingsreferanseId()}, replayes det en inntektsmelding unødvendig?")
+                sikkerlogg.info("Vedtaksperiode med id=$id har allerede hensyntatt inntektsmeldingen med id=${inntektsmelding.meldingsreferanseId()}, replayes det en inntektsmelding unødvendig?")
                 return@also
             }
             if (it) inntektsmelding.leggTil(hendelseIder)
@@ -237,7 +237,6 @@ internal class Vedtaksperiode private constructor(
 
     private fun erAlleredeHensyntatt(inntektsmelding: Inntektsmelding) =
         hendelseIder.ider().contains(inntektsmelding.meldingsreferanseId())
-
 
     internal fun håndterHistorikkFraInfotrygd(hendelse: IAktivitetslogg, infotrygdhistorikk: Infotrygdhistorikk) {
         tilstand.håndter(person, arbeidsgiver, this, hendelse, infotrygdhistorikk)
