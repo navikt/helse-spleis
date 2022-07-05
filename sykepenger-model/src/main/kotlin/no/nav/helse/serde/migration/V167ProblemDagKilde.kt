@@ -12,7 +12,7 @@ import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 internal class V167ProblemDagKilde: JsonMigration(167) {
     private companion object {
         private val ingenKilde = SykdomstidslinjeHendelse.Hendelseskilde(SykdomstidslinjeHendelse::class, UUID.randomUUID(), LocalDateTime.now()).let {
-            serdeObjectMapper.convertValue<ObjectNode>(it)
+            serdeObjectMapper.convertValue<ObjectNode>(it.toJson())
         }
         private val sammeKilde = { dag: JsonNode -> (dag.path("kilde") as ObjectNode) }
         private const val problemdag = "PROBLEMDAG"
