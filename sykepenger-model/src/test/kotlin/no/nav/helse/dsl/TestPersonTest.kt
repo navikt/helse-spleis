@@ -93,9 +93,9 @@ internal class TestPersonTest {
 
     @Test
     fun `kan teste utenfor arbeidsgiver-kontekst`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)), INNTEKT)
+        håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(3.januar, 26.januar, 100.prosent))
+        håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)))
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
@@ -137,6 +137,45 @@ internal class TestPersonTest {
                 AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_HISTORIKK,
                 AVVENTER_SIMULERING
+            )
+        }
+    }
+
+    @Test
+    fun `flere arbeidsgivere`() {
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(3.januar, 26.januar, 100.prosent))
+        }
+        a2 {
+            håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(3.januar, 26.januar, 100.prosent))
+        }
+        a1 {
+            håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)), INNTEKT)
+            assertTilstander(
+                1.vedtaksperiode,
+                START,
+                AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+                AVVENTER_BLOKKERENDE_PERIODE
+            )
+        }
+        a2 {
+            håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)), INNTEKT)
+            assertTilstander(
+                1.vedtaksperiode,
+                START,
+                AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+                AVVENTER_BLOKKERENDE_PERIODE
+            )
+        }
+        a1 {
+            assertTilstander(
+                1.vedtaksperiode,
+                START,
+                AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_HISTORIKK
             )
         }
     }
