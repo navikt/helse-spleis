@@ -21,6 +21,7 @@ import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
+import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
@@ -115,6 +116,31 @@ internal class Hendelsefabrikk(
         return inntektsmeldinggenerator()
     }
 
+    internal fun lagUtbetalingshistorikk(
+        vedtaksperiodeId: UUID,
+        utbetalinger: List<Infotrygdperiode> = listOf(),
+        inntektshistorikk: List<Inntektsopplysning> = emptyList(),
+        harStatslønn: Boolean = false,
+        besvart: LocalDateTime = LocalDateTime.now()
+    ) =
+        Utbetalingshistorikk(
+            meldingsreferanseId = UUID.randomUUID(),
+            aktørId = aktørId,
+            fødselsnummer = fødselsnummer.toString(),
+            organisasjonsnummer = organisasjonsnummer,
+            vedtaksperiodeId = vedtaksperiodeId.toString(),
+            element = InfotrygdhistorikkElement.opprett(
+                oppdatert = besvart,
+                hendelseId = UUID.randomUUID(),
+                perioder = utbetalinger,
+                inntekter = inntektshistorikk,
+                arbeidskategorikoder = emptyMap(),
+                ugyldigePerioder = emptyList(),
+                harStatslønn = harStatslønn
+            )
+        )
+
+
     internal fun lagVilkårsgrunnlag(
         vedtaksperiodeId: UUID,
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
@@ -135,11 +161,10 @@ internal class Hendelsefabrikk(
         )
     }
 
-
     internal fun lagYtelser(
         vedtaksperiodeId: UUID,
-        utbetalinger: List<Infotrygdperiode> = listOf(),
-        inntektshistorikk: List<Inntektsopplysning> = emptyList(),
+        utbetalinger: List<Infotrygdperiode>,
+        inntektshistorikk: List<Inntektsopplysning>,
         foreldrepenger: Periode? = null,
         svangerskapspenger: Periode? = null,
         pleiepenger: List<Periode> = emptyList(),
@@ -153,17 +178,34 @@ internal class Hendelsefabrikk(
         dagpenger: List<Periode> = emptyList(),
         besvart: LocalDateTime = LocalDateTime.now(),
     ): Ytelser {
-        val meldingsreferanseId = UUID.randomUUID()
+        val element = { meldingsreferanseId: UUID ->
+            InfotrygdhistorikkElement.opprett(
+                oppdatert = besvart,
+                hendelseId = meldingsreferanseId,
+                perioder = utbetalinger,
+                inntekter = inntektshistorikk,
+                arbeidskategorikoder = arbeidskategorikoder,
+                ugyldigePerioder = emptyList(),
+                harStatslønn = statslønn
+            )
+        }
+        return lagYtelser(vedtaksperiodeId, foreldrepenger, svangerskapspenger, pleiepenger, omsorgspenger, opplæringspenger, institusjonsoppholdsperioder, dødsdato, arbeidsavklaringspenger, dagpenger, element)
+    }
 
-        val element = InfotrygdhistorikkElement.opprett(
-            oppdatert = besvart,
-            hendelseId = meldingsreferanseId,
-            perioder = utbetalinger,
-            inntekter = inntektshistorikk,
-            arbeidskategorikoder = arbeidskategorikoder,
-            ugyldigePerioder = emptyList(),
-            harStatslønn = statslønn
-        )
+    internal fun lagYtelser(
+        vedtaksperiodeId: UUID,
+        foreldrepenger: Periode? = null,
+        svangerskapspenger: Periode? = null,
+        pleiepenger: List<Periode> = emptyList(),
+        omsorgspenger: List<Periode> = emptyList(),
+        opplæringspenger: List<Periode> = emptyList(),
+        institusjonsoppholdsperioder: List<Institusjonsopphold.Institusjonsoppholdsperiode> = emptyList(),
+        dødsdato: LocalDate? = null,
+        arbeidsavklaringspenger: List<Periode> = emptyList(),
+        dagpenger: List<Periode> = emptyList(),
+        element: (UUID) -> InfotrygdhistorikkElement? = { null }
+    ): Ytelser {
+        val meldingsreferanseId = UUID.randomUUID()
 
         return Ytelser(
             meldingsreferanseId = meldingsreferanseId,
@@ -171,7 +213,7 @@ internal class Hendelsefabrikk(
             fødselsnummer = fødselsnummer.toString(),
             organisasjonsnummer = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId.toString(),
-            infotrygdhistorikk = element,
+            infotrygdhistorikk = element(meldingsreferanseId),
             foreldrepermisjon = Foreldrepermisjon(
                 foreldrepengeytelse = foreldrepenger,
                 svangerskapsytelse = svangerskapspenger

@@ -1,6 +1,7 @@
 package no.nav.helse.dsl
 
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.util.UUID
@@ -8,6 +9,7 @@ import no.nav.helse.Fødselsnummer
 import no.nav.helse.februar
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
+import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
@@ -31,6 +33,7 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Omsorgspenge
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Opplæringspenger
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Pleiepenger
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Sykepengehistorikk
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.Person
@@ -38,6 +41,8 @@ import no.nav.helse.person.PersonHendelse
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonVisitor
 import no.nav.helse.person.etterlevelse.MaskinellJurist
+import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
+import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.somFødselsnummer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest.Companion.INNTEKT
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
@@ -103,8 +108,29 @@ internal class TestPerson(
         internal fun håndterSøknad(vararg perioder: Søknad.Søknadsperiode) =
             fabrikk.lagSøknad(*perioder).håndter(Person::håndter)
 
-        internal fun håndterInntektsmelding(arbeidsgiverperioder: List<Periode>, inntekt: Inntekt) =
-            fabrikk.lagInntektsmelding(arbeidsgiverperioder, inntekt).håndter(Person::håndter)
+        internal fun håndterInntektsmelding(
+            arbeidsgiverperioder: List<Periode>,
+            beregnetInntekt: Inntekt,
+            førsteFraværsdag: LocalDate = arbeidsgiverperioder.maxOf { it.start },
+            refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
+            harOpphørAvNaturalytelser: Boolean = false,
+            arbeidsforholdId: String? = null,
+            begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
+            id: UUID = UUID.randomUUID()
+        ) =
+            fabrikk.lagInntektsmelding(arbeidsgiverperioder, beregnetInntekt, førsteFraværsdag, refusjon, harOpphørAvNaturalytelser, arbeidsforholdId, begrunnelseForReduksjonEllerIkkeUtbetalt, id).håndter(Person::håndter)
+
+        internal fun håndterUtbetalingshistorikk(
+            vedtaksperiodeId: UUID,
+            utbetalinger: List<Infotrygdperiode> = listOf(),
+            inntektshistorikk: List<Inntektsopplysning> = emptyList(),
+            harStatslønn: Boolean = false,
+            besvart: LocalDateTime = LocalDateTime.now()
+        ) {
+            behovsamler.bekreftBehov(vedtaksperiodeId, Sykepengehistorikk)
+            fabrikk.lagUtbetalingshistorikk(vedtaksperiodeId, utbetalinger, inntektshistorikk, harStatslønn, besvart)
+                .håndter(Person::håndter)
+        }
 
         internal fun håndterVilkårsgrunnlag(
             vedtaksperiodeId: UUID = 1.vedtaksperiode,
@@ -119,9 +145,31 @@ internal class TestPerson(
                 .håndter(Person::håndter)
         }
 
-        internal fun håndterYtelser(vedtaksperiodeId: UUID) {
+        internal fun håndterYtelser(
+            vedtaksperiodeId: UUID,
+            utbetalinger: List<Infotrygdperiode> = listOf(),
+            inntektshistorikk: List<Inntektsopplysning> = emptyList(),
+            foreldrepenger: Periode? = null,
+            svangerskapspenger: Periode? = null,
+            pleiepenger: List<Periode> = emptyList(),
+            omsorgspenger: List<Periode> = emptyList(),
+            opplæringspenger: List<Periode> = emptyList(),
+            institusjonsoppholdsperioder: List<no.nav.helse.hendelser.Institusjonsopphold.Institusjonsoppholdsperiode> = emptyList(),
+            dødsdato: LocalDate? = null,
+            statslønn: Boolean = false,
+            arbeidskategorikoder: Map<String, LocalDate> = emptyMap(),
+            arbeidsavklaringspenger: List<Periode> = emptyList(),
+            dagpenger: List<Periode> = emptyList(),
+            besvart: LocalDateTime = LocalDateTime.now(),
+        ) {
             behovsamler.bekreftBehov(vedtaksperiodeId, Dagpenger, Arbeidsavklaringspenger, Dødsinfo, Institusjonsopphold, Opplæringspenger, Pleiepenger, Omsorgspenger, Foreldrepenger)
-            fabrikk.lagYtelser(vedtaksperiodeId).håndter(Person::håndter)
+
+            val hendelse = if (!behovsamler.harBehov(vedtaksperiodeId, Sykepengehistorikk)) {
+                fabrikk.lagYtelser(vedtaksperiodeId, foreldrepenger, svangerskapspenger, pleiepenger, omsorgspenger, opplæringspenger, institusjonsoppholdsperioder, dødsdato, arbeidsavklaringspenger, dagpenger)
+            } else {
+                fabrikk.lagYtelser(vedtaksperiodeId, utbetalinger, inntektshistorikk, foreldrepenger, svangerskapspenger, pleiepenger, omsorgspenger, opplæringspenger, institusjonsoppholdsperioder, dødsdato, statslønn, arbeidskategorikoder, arbeidsavklaringspenger, dagpenger, besvart)
+            }
+            hendelse.håndter(Person::håndter)
         }
 
         internal fun håndterSimulering(vedtaksperiodeId: UUID, simuleringOK: Boolean = true) {
@@ -135,7 +183,7 @@ internal class TestPerson(
             }
         }
 
-        internal fun håndterUtbetalingsgodkjenning(vedtaksperiodeId: UUID, godkjent: Boolean, automatiskBehandling: Boolean = true) {
+        internal fun håndterUtbetalingsgodkjenning(vedtaksperiodeId: UUID, godkjent: Boolean = true, automatiskBehandling: Boolean = true) {
             behovsamler.bekreftBehov(vedtaksperiodeId, Godkjenning)
             val (_, kontekst) = behovsamler.detaljerFor(vedtaksperiodeId, Godkjenning).single()
             val utbetalingId = UUID.fromString(kontekst.getValue("utbetalingId"))
@@ -143,7 +191,7 @@ internal class TestPerson(
                 .håndter(Person::håndter)
         }
 
-        internal fun håndterUtbetalt(status: Oppdragstatus) {
+        internal fun håndterUtbetalt(status: Oppdragstatus = Oppdragstatus.AKSEPTERT) {
             behovsamler.bekreftBehov(orgnummer, Utbetaling)
             behovsamler.detaljerFor(orgnummer, Utbetaling).forEach { (detaljer, kontekst) ->
                 val utbetalingId = UUID.fromString(kontekst.getValue("utbetalingId"))

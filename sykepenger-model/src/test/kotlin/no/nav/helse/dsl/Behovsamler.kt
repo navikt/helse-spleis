@@ -40,7 +40,7 @@ internal class Behovsamler : PersonObserver {
     internal fun bekreftBehov(filter: (Behov) -> Boolean, vararg behovtyper: Behovtype) {
         assertTrue(harBehov(filter, *behovtyper)) {
             val behover = behov.filter(filter)
-            "Forventer at $behovtyper skal være etterspurt. Fant bare: ${behover.joinToString { it.type.toString() }}"
+            "Forventer at ${behovtyper.joinToString { it.toString() }} skal være etterspurt. Fant bare: ${behover.joinToString { it.type.toString() }}"
         }
     }
 
