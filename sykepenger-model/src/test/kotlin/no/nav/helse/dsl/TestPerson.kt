@@ -1,13 +1,21 @@
 package no.nav.helse.dsl
 
+import java.time.LocalDate
+import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.util.UUID
 import no.nav.helse.Fødselsnummer
 import no.nav.helse.februar
+import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.Hendelseskontekst
+import no.nav.helse.hendelser.InntektForSykepengegrunnlag
+import no.nav.helse.hendelser.Inntektsvurdering
+import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
+import no.nav.helse.hendelser.Vilkårsgrunnlag
+import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.Person
@@ -16,6 +24,8 @@ import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonVisitor
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.somFødselsnummer
+import no.nav.helse.spleis.e2e.AbstractEndToEndTest.Companion.INNTEKT
+import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.utbetalingstidslinje.Alder.Companion.alder
 import no.nav.helse.økonomi.Inntekt
@@ -94,6 +104,18 @@ internal class TestPerson(
         internal fun håndterInntektsmelding(arbeidsgiverperioder: List<Periode>, inntekt: Inntekt) =
             fabrikk.lagInntektsmelding(arbeidsgiverperioder, inntekt).håndter(Person::håndter)
 
+        internal fun håndterVilkårsgrunnlag(
+            vedtaksperiodeId: UUID = 1.vedtaksperiode,
+            inntekt: Inntekt = INNTEKT,
+            medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
+            inntektsvurdering: Inntektsvurdering = lagStandardSammenligningsgrunnlag(orgnummer, inntekt, inspektør.skjæringstidspunkt(vedtaksperiodeId)),
+            inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag = lagStandardSykepengegrunnlag(orgnummer, inntekt, inspektør.skjæringstidspunkt(vedtaksperiodeId)),
+            arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold> = arbeidsgivere.map { (orgnr, _) -> Vilkårsgrunnlag.Arbeidsforhold(orgnr, LocalDate.EPOCH, null) }
+        ) {
+            fabrikk.lagVilkårsgrunnlag(vedtaksperiodeId, medlemskapstatus, arbeidsforhold, inntektsvurdering, inntektsvurderingForSykepengegrunnlag)
+                .håndter(Person::håndter)
+        }
+
         internal fun håndterYtelser(vedtaksperiodeId: UUID) =
             fabrikk.lagYtelser(vedtaksperiodeId).håndter(Person::håndter)
 
@@ -102,3 +124,28 @@ internal class TestPerson(
         }
     }
 }
+
+private fun lagStandardSammenligningsgrunnlag(orgnummer: String, inntekt: Inntekt, skjæringstidspunkt: LocalDate) =
+    Inntektsvurdering(
+        inntekter = inntektperioderForSammenligningsgrunnlag {
+            skjæringstidspunkt.minusMonths(12L).withDayOfMonth(1) til skjæringstidspunkt.minusMonths(1L).withDayOfMonth(1) inntekter {
+                orgnummer inntekt inntekt
+            }
+        }
+    )
+
+private fun lagStandardSykepengegrunnlag(orgnummer: String, inntekt: Inntekt, skjæringstidspunkt: LocalDate) =
+    InntektForSykepengegrunnlag(
+        inntekter = listOf(
+            ArbeidsgiverInntekt(orgnummer, (0..2).map {
+                val yearMonth = YearMonth.from(skjæringstidspunkt).minusMonths(3L - it)
+                ArbeidsgiverInntekt.MånedligInntekt.Sykepengegrunnlag(
+                    yearMonth = yearMonth,
+                    type = ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT,
+                    inntekt = inntekt,
+                    fordel = "fordel",
+                    beskrivelse = "beskrivelse"
+                )
+            })
+        ), arbeidsforhold = emptyList()
+    )

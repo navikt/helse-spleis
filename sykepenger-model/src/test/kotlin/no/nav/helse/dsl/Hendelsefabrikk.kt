@@ -8,8 +8,11 @@ import no.nav.helse.hendelser.Arbeidsavklaringspenger
 import no.nav.helse.hendelser.Dagpenger
 import no.nav.helse.hendelser.Dødsinfo
 import no.nav.helse.hendelser.Foreldrepermisjon
+import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Institusjonsopphold
+import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Omsorgspenger
 import no.nav.helse.hendelser.Opplæringspenger
 import no.nav.helse.hendelser.Periode
@@ -17,6 +20,7 @@ import no.nav.helse.hendelser.Pleiepenger
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
+import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
@@ -105,6 +109,27 @@ internal class Hendelsefabrikk(
         inntektsmeldinger[id] = inntektsmeldinggenerator
         return inntektsmeldinggenerator()
     }
+
+    internal fun lagVilkårsgrunnlag(
+        vedtaksperiodeId: UUID,
+        medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
+        arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold>,
+        inntektsvurdering: Inntektsvurdering,
+        inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag
+    ): Vilkårsgrunnlag {
+        return Vilkårsgrunnlag(
+            meldingsreferanseId = UUID.randomUUID(),
+            vedtaksperiodeId = vedtaksperiodeId.toString(),
+            aktørId = aktørId,
+            fødselsnummer = fødselsnummer,
+            orgnummer = organisasjonsnummer,
+            inntektsvurdering = inntektsvurdering,
+            medlemskapsvurdering = Medlemskapsvurdering(medlemskapstatus),
+            inntektsvurderingForSykepengegrunnlag = inntektsvurderingForSykepengegrunnlag,
+            arbeidsforhold = arbeidsforhold
+        )
+    }
+
 
     internal fun lagYtelser(
         vedtaksperiodeId: UUID,

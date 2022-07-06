@@ -467,6 +467,7 @@ internal class TestArbeidsgiverInspektør(
     internal fun sisteTilstand(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperiodeIdInnhenter.finn(tilstander)
 
     internal fun skjæringstidspunkt(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperiodeIdInnhenter.finn(skjæringstidspunkter)()
+    internal fun skjæringstidspunkt(vedtaksperiodeId: UUID) = vedtaksperiodeId.finn(skjæringstidspunkter)()
 
     internal fun utbetalingstidslinjer(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperiodeIdInnhenter.finn(utbetalingstidslinjer)
 
