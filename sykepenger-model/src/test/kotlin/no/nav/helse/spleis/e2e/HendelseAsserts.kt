@@ -270,6 +270,9 @@ internal fun AbstractEndToEndTest.collectSeveres(vararg filtre: AktivitetsloggFi
 
 internal fun interface AktivitetsloggFilter {
     companion object {
+        internal fun vedtaksperiode(vedtaksperiodeId: UUID): AktivitetsloggFilter = AktivitetsloggFilter { kontekst ->
+            kontekst.kontekstMap["vedtaksperiodeId"] == vedtaksperiodeId.toString()
+        }
         internal fun vedtaksperiode(idInnhenter: IdInnhenter, orgnummer: String): AktivitetsloggFilter = AktivitetsloggFilter { kontekst ->
             kontekst.kontekstMap["vedtaksperiodeId"] == idInnhenter.id(orgnummer).toString()
         }

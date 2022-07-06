@@ -446,6 +446,7 @@ internal class TestArbeidsgiverInspektør(
     internal fun maksdato(indeks: Int) = maksdatoer[indeks]
     internal fun maksdatoVedSisteVedtak() = utbetalinger.indexOfLast(Utbetaling::erAvsluttet).takeIf { it > -1 }?.let { index -> maksdato(index) }
     internal fun sisteMaksdato(vedtaksperiodeIdInnhenter: IdInnhenter) = maksdatoer.filterIndexed { index, _ -> index in vedtaksperiodeIdInnhenter.id(orgnummer).utbetalingsindeks }.last()
+    internal fun sisteMaksdato(vedtaksperiodeId: UUID) = maksdatoer.filterIndexed { index, _ -> index in vedtaksperiodeId.utbetalingsindeks }.last()
 
     internal fun forbrukteSykedager(indeks: Int) = forbrukteSykedagerer[indeks]
     internal fun gjenståendeSykedager(indeks: Int) = gjenståendeSykedagerer[indeks]
