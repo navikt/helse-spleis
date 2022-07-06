@@ -9,6 +9,7 @@ import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.januar
 import no.nav.helse.person.Person
 import no.nav.helse.person.TilstandType
+import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
@@ -16,7 +17,9 @@ import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
+import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.spleis.e2e.TestObservatør
+import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -70,6 +73,12 @@ internal class TestPersonTest {
     internal fun håndterSimulering(vedtaksperiodeId: UUID) =
         a1 { håndterSimulering(vedtaksperiodeId) }
 
+    internal fun håndterUtbetalingsgodkjenning(vedtaksperiodeId: UUID, godkjent: Boolean) =
+        a1 { håndterUtbetalingsgodkjenning(vedtaksperiodeId, godkjent) }
+
+    internal fun håndterUtbetalt(status: Oppdragstatus) =
+        a1 { håndterUtbetalt(status) }
+
     private fun assertTilstander(id: UUID, vararg tilstander: TilstandType) {
         a1 { assertTilstander(id, *tilstander) }
     }
@@ -104,6 +113,8 @@ internal class TestPersonTest {
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -113,7 +124,9 @@ internal class TestPersonTest {
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET
         )
     }
 
@@ -126,7 +139,7 @@ internal class TestPersonTest {
     }
 
     @Test
-    fun `kan sende vilkårsgrunnlag`() {
+    fun `kan sende utbetale`() {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
             håndterSøknad(Søknad.Søknadsperiode.Sykdom(3.januar, 26.januar, 100.prosent))
@@ -135,6 +148,8 @@ internal class TestPersonTest {
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+            håndterUtbetalt(Oppdragstatus.AKSEPTERT)
             assertTilstander(
                 1.vedtaksperiode,
                 START,
@@ -144,7 +159,9 @@ internal class TestPersonTest {
                 AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_HISTORIKK,
                 AVVENTER_SIMULERING,
-                AVVENTER_GODKJENNING
+                AVVENTER_GODKJENNING,
+                TIL_UTBETALING,
+                AVSLUTTET
             )
         }
     }

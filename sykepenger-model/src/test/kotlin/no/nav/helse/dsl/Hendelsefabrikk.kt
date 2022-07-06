@@ -23,10 +23,14 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
+import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
+import no.nav.helse.hendelser.utbetaling.UtbetalingOverført
+import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
+import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Inntekt
 
 internal class Hendelsefabrikk(
@@ -213,4 +217,54 @@ internal class Hendelsefabrikk(
             simuleringResultat = simuleringsresultat
         )
     }
+
+    internal fun lagUtbetalingsgodkjenning(
+        vedtaksperiodeId: UUID,
+        utbetalingGodkjent: Boolean,
+        automatiskBehandling: Boolean,
+        utbetalingId: UUID
+    ) = Utbetalingsgodkjenning(
+        meldingsreferanseId = UUID.randomUUID(),
+        aktørId = aktørId,
+        fødselsnummer = fødselsnummer.toString(),
+        organisasjonsnummer = organisasjonsnummer,
+        utbetalingId = utbetalingId,
+        vedtaksperiodeId = vedtaksperiodeId.toString(),
+        saksbehandler = "Ola Nordmann",
+        saksbehandlerEpost = "ola.nordmann@nav.no",
+        utbetalingGodkjent = utbetalingGodkjent,
+        godkjenttidspunkt = LocalDateTime.now(),
+        automatiskBehandling = automatiskBehandling,
+    )
+
+    internal fun lagUtbetalingOverført(utbetalingId: UUID, fagsystemId: String) =
+        UtbetalingOverført(
+            meldingsreferanseId = UUID.randomUUID(),
+            aktørId = aktørId,
+            fødselsnummer = fødselsnummer.toString(),
+            orgnummer = organisasjonsnummer,
+            fagsystemId = fagsystemId,
+            utbetalingId = utbetalingId.toString(),
+            avstemmingsnøkkel = 123456L,
+            overføringstidspunkt = LocalDateTime.now()
+        )
+
+    internal fun lagUtbetalinghendelse(
+        utbetalingId: UUID,
+        fagsystemId: String,
+        status: Oppdragstatus,
+        meldingsreferanseId: UUID = UUID.randomUUID()
+    ) =
+        UtbetalingHendelse(
+            meldingsreferanseId = meldingsreferanseId,
+            aktørId = aktørId,
+            fødselsnummer = fødselsnummer.toString(),
+            orgnummer = organisasjonsnummer,
+            fagsystemId = fagsystemId,
+            utbetalingId = utbetalingId.toString(),
+            status = status,
+            melding = "hei",
+            avstemmingsnøkkel = 123456L,
+            overføringstidspunkt = LocalDateTime.now()
+        )
 }

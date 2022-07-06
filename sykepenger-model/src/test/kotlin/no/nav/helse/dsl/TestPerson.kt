@@ -22,6 +22,7 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Arbeidsforho
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Dagpenger
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Dødsinfo
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Foreldrepenger
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.InntekterForSammenligningsgrunnlag
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.InntekterForSykepengegrunnlag
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Institusjonsopphold
@@ -30,6 +31,7 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Omsorgspenge
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Opplæringspenger
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Pleiepenger
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Utbetaling
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonHendelse
@@ -39,6 +41,7 @@ import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.somFødselsnummer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest.Companion.INNTEKT
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
+import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.utbetalingstidslinje.Alder.Companion.alder
 import no.nav.helse.økonomi.Inntekt
@@ -129,6 +132,26 @@ internal class TestPerson(
                 val utbetalingId = UUID.fromString(kontekst.getValue("utbetalingId"))
 
                 fabrikk.lagSimulering(vedtaksperiodeId, utbetalingId, fagsystemId, fagområde, simuleringOK, standardSimuleringsresultat(orgnummer)).håndter(Person::håndter)
+            }
+        }
+
+        internal fun håndterUtbetalingsgodkjenning(vedtaksperiodeId: UUID, godkjent: Boolean, automatiskBehandling: Boolean = true) {
+            behovsamler.bekreftBehov(vedtaksperiodeId, Godkjenning)
+            val (_, kontekst) = behovsamler.detaljerFor(vedtaksperiodeId, Godkjenning).single()
+            val utbetalingId = UUID.fromString(kontekst.getValue("utbetalingId"))
+            fabrikk.lagUtbetalingsgodkjenning(vedtaksperiodeId, godkjent, automatiskBehandling, utbetalingId)
+                .håndter(Person::håndter)
+        }
+
+        internal fun håndterUtbetalt(status: Oppdragstatus) {
+            behovsamler.bekreftBehov(orgnummer, Utbetaling)
+            behovsamler.detaljerFor(orgnummer, Utbetaling).forEach { (detaljer, kontekst) ->
+                val utbetalingId = UUID.fromString(kontekst.getValue("utbetalingId"))
+                val fagsystemId = detaljer.getValue("fagsystemId") as String
+                fabrikk.lagUtbetalingOverført(utbetalingId, fagsystemId)
+                    .håndter(Person::håndter)
+                fabrikk.lagUtbetalinghendelse(utbetalingId, fagsystemId, status)
+                    .håndter(Person::håndter)
             }
         }
 
