@@ -3,7 +3,7 @@ package no.nav.helse.hendelser
 import no.nav.helse.hendelser.OverstyrArbeidsforhold.ArbeidsforholdOverstyrt.Companion.overstyringFor
 import no.nav.helse.person.*
 import no.nav.helse.person.Arbeidsgiver.Companion.finn
-import no.nav.helse.person.Arbeidsgiver.Companion.harPeriodeSomBlokkererOverstyrArbeidsforhold
+import no.nav.helse.person.Arbeidsgiver.Companion.harPeriodeSomBlokkererOverstyring
 import java.time.LocalDate
 import java.util.*
 
@@ -25,7 +25,7 @@ class OverstyrArbeidsforhold(
         if (relevanteArbeidsgivere.any { it.harSykdomFor(skjæringstidspunkt) }) {
             severe("Kan ikke overstyre arbeidsforhold for en arbeidsgiver som har sykdom")
         }
-        if (arbeidsgivere.harPeriodeSomBlokkererOverstyrArbeidsforhold(skjæringstidspunkt)) {
+        if (arbeidsgivere.harPeriodeSomBlokkererOverstyring(skjæringstidspunkt)) {
             severe("Kan ikke overstyre arbeidsforhold for en pågående behandling der én eller flere perioder er behandlet ferdig")
         }
     }

@@ -150,7 +150,7 @@ internal class Arbeidsgiver private constructor(
         internal fun List<Arbeidsgiver>.kanStarteRevurdering(vedtaksperiode: Vedtaksperiode) =
             flatMap { it.vedtaksperioder }.kanStarteRevurdering(this, vedtaksperiode)
 
-        internal fun List<Arbeidsgiver>.harPeriodeSomBlokkererOverstyrArbeidsforhold(skjæringstidspunkt: LocalDate) = any { arbeidsgiver ->
+        internal fun List<Arbeidsgiver>.harPeriodeSomBlokkererOverstyring(skjæringstidspunkt: LocalDate) = any { arbeidsgiver ->
             arbeidsgiver.vedtaksperioder
                 .filter { vedtaksperiode -> vedtaksperiode.gjelder(skjæringstidspunkt) }
                 .any { vedtaksperiode -> vedtaksperiode.blokkererOverstyring() }

@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e
 import java.time.LocalDate
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
+import no.nav.helse.februar
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -12,6 +13,8 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.november
+import no.nav.helse.person.AbstractPersonTest
+import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
@@ -24,6 +27,7 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 internal class OverstyrGhostInntektTest : AbstractEndToEndTest() {
 
@@ -98,6 +102,39 @@ internal class OverstyrGhostInntektTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, orgnummer = a1)
+    }
+
+    @Test
+    fun `Kan ikke overstyre ghost-inntekt for en forlengelse som allerede har tidligere utbetalinger`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode, arbeidsforhold = listOf(
+                Arbeidsforhold(AbstractPersonTest.a1, LocalDate.EPOCH, null),
+                Arbeidsforhold(AbstractPersonTest.a2, 1.desember(2017), null)
+            )
+        )
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, utbetalingGodkjent = true)
+        håndterUtbetalt()
+        // ny periode
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent))
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        val skjæringstidspunkt = inspektør.skjæringstidspunkt(2.vedtaksperiode)
+        assertEquals(listOf(AbstractPersonTest.a1, AbstractPersonTest.a2).toList(), person.orgnummereMedRelevanteArbeidsforhold(skjæringstidspunkt).toList())
+        assertThrows<Aktivitetslogg.AktivitetException> {
+            håndterOverstyrInntekt(30000.månedlig, a2, skjæringstidspunkt)
+        }
+        assertSevere(
+            "Kan ikke overstyre inntekt for ghost for en pågående behandling der én eller flere perioder er behandlet ferdig",
+            AktivitetsloggFilter.person()
+        )
+        assertEquals(listOf(AbstractPersonTest.a1, AbstractPersonTest.a2), person.orgnummereMedRelevanteArbeidsforhold(skjæringstidspunkt))
     }
 
     @Test
