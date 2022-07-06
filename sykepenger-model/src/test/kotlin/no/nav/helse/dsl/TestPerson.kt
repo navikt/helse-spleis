@@ -16,6 +16,7 @@ import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
+import no.nav.helse.januar
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Arbeidsavklaringspenger
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.ArbeidsforholdV2
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Dagpenger
@@ -28,6 +29,7 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Medlemskap
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Omsorgspenger
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Opplæringspenger
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Pleiepenger
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Simulering
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonHendelse
@@ -119,6 +121,17 @@ internal class TestPerson(
             fabrikk.lagYtelser(vedtaksperiodeId).håndter(Person::håndter)
         }
 
+        internal fun håndterSimulering(vedtaksperiodeId: UUID, simuleringOK: Boolean = true) {
+            behovsamler.bekreftBehov(vedtaksperiodeId, Simulering)
+            behovsamler.detaljerFor(vedtaksperiodeId, Simulering).forEach { (detaljer, kontekst) ->
+                val fagsystemId = detaljer.getValue("fagsystemId") as String
+                val fagområde = detaljer.getValue("fagområde") as String
+                val utbetalingId = UUID.fromString(kontekst.getValue("utbetalingId"))
+
+                fabrikk.lagSimulering(vedtaksperiodeId, utbetalingId, fagsystemId, fagområde, simuleringOK, standardSimuleringsresultat(orgnummer)).håndter(Person::håndter)
+            }
+        }
+
         operator fun <R> invoke(testblokk: TestArbeidsgiver.() -> R): R {
             return testblokk(this)
         }
@@ -149,3 +162,42 @@ private fun lagStandardSykepengegrunnlag(orgnummer: String, inntekt: Inntekt, sk
             })
         ), arbeidsforhold = emptyList()
     )
+
+internal fun standardSimuleringsresultat(orgnummer: String) = no.nav.helse.hendelser.Simulering.SimuleringResultat(
+    totalbeløp = 2000,
+    perioder = listOf(
+        no.nav.helse.hendelser.Simulering.SimulertPeriode(
+            periode = Periode(17.januar, 20.januar),
+            utbetalinger = listOf(
+                no.nav.helse.hendelser.Simulering.SimulertUtbetaling(
+                    forfallsdato = 21.januar,
+                    utbetalesTil = no.nav.helse.hendelser.Simulering.Mottaker(
+                        id = orgnummer,
+                        navn = "Org Orgesen AS"
+                    ),
+                    feilkonto = false,
+                    detaljer = listOf(
+                        no.nav.helse.hendelser.Simulering.Detaljer(
+                            periode = Periode(17.januar, 20.januar),
+                            konto = "81549300",
+                            beløp = 2000,
+                            klassekode = no.nav.helse.hendelser.Simulering.Klassekode(
+                                kode = "SPREFAG-IOP",
+                                beskrivelse = "Sykepenger, Refusjon arbeidsgiver"
+                            ),
+                            uføregrad = 100,
+                            utbetalingstype = "YTEL",
+                            tilbakeføring = false,
+                            sats = no.nav.helse.hendelser.Simulering.Sats(
+                                sats = 1000.toDouble(),
+                                antall = 2,
+                                type = "DAG"
+                            ),
+                            refunderesOrgnummer = orgnummer
+                        )
+                    )
+                )
+            )
+        )
+    )
+)

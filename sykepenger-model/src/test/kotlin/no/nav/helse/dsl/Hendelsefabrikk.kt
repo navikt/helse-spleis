@@ -17,6 +17,7 @@ import no.nav.helse.hendelser.Omsorgspenger
 import no.nav.helse.hendelser.Opplæringspenger
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Pleiepenger
+import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
@@ -187,6 +188,29 @@ internal class Hendelsefabrikk(
             arbeidsavklaringspenger = Arbeidsavklaringspenger(arbeidsavklaringspenger),
             dagpenger = Dagpenger(dagpenger),
             aktivitetslogg = Aktivitetslogg()
+        )
+    }
+
+    internal fun lagSimulering(
+        vedtaksperiodeId: UUID,
+        utbetalingId: UUID,
+        fagsystemId: String,
+        fagområde: String,
+        simuleringOK: Boolean,
+        simuleringsresultat: Simulering.SimuleringResultat?
+    ): Simulering {
+        return Simulering(
+            meldingsreferanseId = UUID.randomUUID(),
+            vedtaksperiodeId = vedtaksperiodeId.toString(),
+            aktørId = aktørId,
+            fødselsnummer = fødselsnummer.toString(),
+            orgnummer = organisasjonsnummer,
+            fagsystemId = fagsystemId,
+            fagområde = fagområde,
+            simuleringOK = simuleringOK,
+            melding = "",
+            utbetalingId = utbetalingId,
+            simuleringResultat = simuleringsresultat
         )
     }
 }

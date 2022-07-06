@@ -30,6 +30,9 @@ internal class Behovsamler : PersonObserver {
         }
     }
 
+    internal fun detaljerFor(vedtaksperiodeId: UUID, behovtype: Behovtype) =
+        behovFor(vedtaksperiodeId).filter { it.type == behovtype }.map { it.detaljer() to it.kontekst() }
+
     internal fun kvitterBehov(vedtaksperiodeId: UUID) {
         val vedtaksperiodebehov = behovFor(vedtaksperiodeId).takeUnless { it.isEmpty() } ?: return
         println("Fjerner ${vedtaksperiodebehov.size} behov (${vedtaksperiodebehov.joinToString { it.type.toString() }})")
