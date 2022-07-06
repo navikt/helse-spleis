@@ -7,7 +7,6 @@ import java.util.UUID
 import no.nav.helse.Fødselsnummer
 import no.nav.helse.februar
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
-import no.nav.helse.hendelser.Hendelseskontekst
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Medlemskapsvurdering
@@ -17,6 +16,18 @@ import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Arbeidsavklaringspenger
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.ArbeidsforholdV2
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Dagpenger
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Dødsinfo
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Foreldrepenger
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.InntekterForSammenligningsgrunnlag
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.InntekterForSykepengegrunnlag
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Institusjonsopphold
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Medlemskap
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Omsorgspenger
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Opplæringspenger
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Pleiepenger
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonHendelse
@@ -49,12 +60,14 @@ internal class TestPerson(
 
     private lateinit var forrigeHendelse: IAktivitetslogg
 
+    private val behovsamler = Behovsamler()
     private val vedtaksperiodesamler = Vedtaksperiodesamler()
+
     private val person = Person(aktørId, fødselsnummer, alder, jurist).also {
         it.addObserver(vedtaksperiodesamler)
+        it.addObserver(behovsamler)
         it.addObserver(observatør)
     }
-
     private val arbeidsgivere = mutableMapOf<String, TestArbeidsgiver>()
 
     internal fun <INSPEKTØR : PersonVisitor> inspiser(inspektør: (Person) -> INSPEKTØR) = inspektør(person)
@@ -68,24 +81,8 @@ internal class TestPerson(
     private fun <T : PersonHendelse> T.håndter(håndter: Person.(T) -> Unit): T {
         forrigeHendelse = this
         person.håndter(this)
+        behovsamler.registrerBehov(forrigeHendelse)
         return this
-    }
-
-    private inner class Vedtaksperiodesamler : PersonObserver {
-        private val vedtaksperioder = mutableMapOf<String, MutableSet<UUID>>()
-
-        internal fun vedtaksperiodeId(orgnummer: String, indeks: Int) =
-            vedtaksperioder.getValue(orgnummer).elementAt(indeks)
-
-        override fun vedtaksperiodeEndret(
-            hendelseskontekst: Hendelseskontekst,
-            event: PersonObserver.VedtaksperiodeEndretEvent
-        ) {
-            val detaljer = mutableMapOf<String, String>().apply { hendelseskontekst.appendTo(this::put) }
-            val orgnr = detaljer.getValue("organisasjonsnummer")
-            val vedtaksperiodeId = UUID.fromString(detaljer.getValue("vedtaksperiodeId"))
-            vedtaksperioder.getOrPut(orgnr) { mutableSetOf() }.add(vedtaksperiodeId)
-        }
     }
 
     inner class TestArbeidsgiver(private val orgnummer: String) {
@@ -112,12 +109,15 @@ internal class TestPerson(
             inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag = lagStandardSykepengegrunnlag(orgnummer, inntekt, inspektør.skjæringstidspunkt(vedtaksperiodeId)),
             arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold> = arbeidsgivere.map { (orgnr, _) -> Vilkårsgrunnlag.Arbeidsforhold(orgnr, LocalDate.EPOCH, null) }
         ) {
+            behovsamler.bekreftBehov(vedtaksperiodeId, InntekterForSammenligningsgrunnlag, InntekterForSykepengegrunnlag, ArbeidsforholdV2, Medlemskap)
             fabrikk.lagVilkårsgrunnlag(vedtaksperiodeId, medlemskapstatus, arbeidsforhold, inntektsvurdering, inntektsvurderingForSykepengegrunnlag)
                 .håndter(Person::håndter)
         }
 
-        internal fun håndterYtelser(vedtaksperiodeId: UUID) =
+        internal fun håndterYtelser(vedtaksperiodeId: UUID) {
+            behovsamler.bekreftBehov(vedtaksperiodeId, Dagpenger, Arbeidsavklaringspenger, Dødsinfo, Institusjonsopphold, Opplæringspenger, Pleiepenger, Omsorgspenger, Foreldrepenger)
             fabrikk.lagYtelser(vedtaksperiodeId).håndter(Person::håndter)
+        }
 
         operator fun <R> invoke(testblokk: TestArbeidsgiver.() -> R): R {
             return testblokk(this)
