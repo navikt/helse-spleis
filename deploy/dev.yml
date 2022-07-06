@@ -56,5 +56,7 @@ spec:
     value: "true"
   - name: NyRevurdering
     value: "true"
+  - name: RevurdereInntektMedFlereArbeidsgivere
+    value: "true"
   - name: Bugfix
     value: "true"
