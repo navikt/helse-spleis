@@ -33,8 +33,8 @@ internal class TestPerson(
         internal val UNG_PERSON_FNR_2018: Fødselsnummer = "${UNG_PERSON_FDATO_2018.format(fnrformatter)}40045".somFødselsnummer()
         internal const val AKTØRID = "42"
 
-        internal operator fun String.invoke(testPerson: TestPerson, testblokk: TestArbeidsgiver.() -> Any = { }) =
-            testPerson.arbeidsgiver(this).invoke(testblokk)
+        internal operator fun <R> String.invoke(testPerson: TestPerson, testblokk: TestArbeidsgiver.() -> R) =
+            testPerson.arbeidsgiver(this, testblokk)
     }
 
     private lateinit var forrigeHendelse: IAktivitetslogg
@@ -49,8 +49,11 @@ internal class TestPerson(
 
     internal fun <INSPEKTØR : PersonVisitor> inspiser(inspektør: (Person) -> INSPEKTØR) = inspektør(person)
 
-    internal fun arbeidsgiver(orgnummer: String, block: TestArbeidsgiver.() -> Any = { }) =
-        arbeidsgivere.getOrPut(orgnummer) { TestArbeidsgiver(orgnummer) }(block)
+    internal fun arbeidsgiver(orgnummer: String) =
+        arbeidsgivere.getOrPut(orgnummer) { TestArbeidsgiver(orgnummer) }
+
+    internal fun <R> arbeidsgiver(orgnummer: String, block: TestArbeidsgiver.() -> R) =
+        arbeidsgiver(orgnummer)(block)
 
     private fun <T : PersonHendelse> T.håndter(håndter: Person.(T) -> Unit): T {
         forrigeHendelse = this
@@ -91,9 +94,8 @@ internal class TestPerson(
         internal fun håndterInntektsmelding(arbeidsgiverperioder: List<Periode>, inntekt: Inntekt) =
             fabrikk.lagInntektsmelding(arbeidsgiverperioder, inntekt).håndter(Person::håndter)
 
-        operator fun invoke(testblokk: TestArbeidsgiver.() -> Any): TestArbeidsgiver {
-            testblokk(this)
-            return this
+        operator fun <R> invoke(testblokk: TestArbeidsgiver.() -> R): R {
+            return testblokk(this)
         }
     }
 }

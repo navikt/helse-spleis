@@ -14,6 +14,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.spleis.e2e.TestObservatør
+import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -34,10 +35,27 @@ internal class TestPersonTest {
     private lateinit var observatør: TestObservatør
     private lateinit var testperson: TestPerson
 
+    private val Int.vedtaksperiode get() = testperson.arbeidsgiver(a1) { vedtaksperiode }
+
+    private val String.inspektør get() = inspektør(this)
+
     private fun inspektør(orgnummer: String) = testperson.inspiser(agInspektør(orgnummer))
 
     private operator fun String.invoke(testblokk: TestPerson.TestArbeidsgiver.() -> Any) =
         testperson.arbeidsgiver(this, testblokk)
+
+    private fun håndterSykmelding(vararg sykmeldingsperiode: Sykmeldingsperiode) =
+        a1 { håndterSykmelding(*sykmeldingsperiode) }
+
+    private fun håndterSøknad(vararg perioder: Søknad.Søknadsperiode) =
+        a1 { håndterSøknad(*perioder) }
+
+    private fun håndterInntektsmelding(arbeidsgiverperioder: List<Periode>, inntekt: Inntekt = INNTEKT) =
+        a1 { håndterInntektsmelding(arbeidsgiverperioder, inntekt) }
+
+    private fun assertTilstander(id: UUID, vararg tilstander: TilstandType) {
+        a1 { assertTilstander(id, *tilstander) }
+    }
 
     @BeforeEach
     fun setup() {
@@ -55,17 +73,25 @@ internal class TestPersonTest {
     }
 
     @Test
-    fun `kan sende sykmelding`() {
+    fun `kan sende sykmelding til arbeidsgiver`() {
         testperson.arbeidsgiver(a1).håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         assertEquals(1, inspektør(a1).sykmeldingsperioder().size)
     }
 
     @Test
+    fun `kan teste utenfor arbeidsgiver-kontekst`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)), INNTEKT)
+        assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
+    }
+
+    @Test
     fun `kan sende sykmelding via testblokk`() {
-        val ag1 = testperson.arbeidsgiver(a1) {
+        testperson.arbeidsgiver(a1) {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         }
-        assertEquals(1, ag1.inspektør.sykmeldingsperioder().size)
+        assertEquals(1, a1.inspektør.sykmeldingsperioder().size)
     }
 
     @Test
