@@ -94,6 +94,9 @@ internal class TestPerson(
         internal fun håndterInntektsmelding(arbeidsgiverperioder: List<Periode>, inntekt: Inntekt) =
             fabrikk.lagInntektsmelding(arbeidsgiverperioder, inntekt).håndter(Person::håndter)
 
+        internal fun håndterYtelser(vedtaksperiodeId: UUID) =
+            fabrikk.lagYtelser(vedtaksperiodeId).håndter(Person::håndter)
+
         operator fun <R> invoke(testblokk: TestArbeidsgiver.() -> R): R {
             return testblokk(this)
         }

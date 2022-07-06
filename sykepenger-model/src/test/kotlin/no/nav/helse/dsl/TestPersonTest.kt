@@ -12,6 +12,7 @@ import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
+import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.spleis.e2e.TestObservatør
 import no.nav.helse.økonomi.Inntekt
@@ -99,18 +100,19 @@ internal class TestPersonTest {
     }
 
     @Test
-    fun `kan sende inntektsmelding`() {
+    fun `kan sende vilkårsgrunnlag`() {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
             håndterSøknad(Søknad.Søknadsperiode.Sykdom(3.januar, 26.januar, 100.prosent))
             håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)), INNTEKT)
-
+            håndterYtelser(1.vedtaksperiode)
             assertTilstander(
                 1.vedtaksperiode,
                 START,
                 AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
                 AVVENTER_BLOKKERENDE_PERIODE,
-                AVVENTER_HISTORIKK
+                AVVENTER_HISTORIKK,
+                AVVENTER_VILKÅRSPRØVING
             )
         }
     }

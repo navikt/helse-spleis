@@ -4,11 +4,24 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.Fødselsnummer
+import no.nav.helse.hendelser.Arbeidsavklaringspenger
+import no.nav.helse.hendelser.Dagpenger
+import no.nav.helse.hendelser.Dødsinfo
+import no.nav.helse.hendelser.Foreldrepermisjon
 import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.Institusjonsopphold
+import no.nav.helse.hendelser.Omsorgspenger
+import no.nav.helse.hendelser.Opplæringspenger
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Pleiepenger
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
+import no.nav.helse.hendelser.Ytelser
+import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
+import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
+import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.økonomi.Inntekt
 
 internal class Hendelsefabrikk(
@@ -93,4 +106,62 @@ internal class Hendelsefabrikk(
         return inntektsmeldinggenerator()
     }
 
+    internal fun lagYtelser(
+        vedtaksperiodeId: UUID,
+        utbetalinger: List<Infotrygdperiode> = listOf(),
+        inntektshistorikk: List<Inntektsopplysning> = emptyList(),
+        foreldrepenger: Periode? = null,
+        svangerskapspenger: Periode? = null,
+        pleiepenger: List<Periode> = emptyList(),
+        omsorgspenger: List<Periode> = emptyList(),
+        opplæringspenger: List<Periode> = emptyList(),
+        institusjonsoppholdsperioder: List<Institusjonsopphold.Institusjonsoppholdsperiode> = emptyList(),
+        dødsdato: LocalDate? = null,
+        statslønn: Boolean = false,
+        arbeidskategorikoder: Map<String, LocalDate> = emptyMap(),
+        arbeidsavklaringspenger: List<Periode> = emptyList(),
+        dagpenger: List<Periode> = emptyList(),
+        besvart: LocalDateTime = LocalDateTime.now(),
+    ): Ytelser {
+        val meldingsreferanseId = UUID.randomUUID()
+
+        val element = InfotrygdhistorikkElement.opprett(
+            oppdatert = besvart,
+            hendelseId = meldingsreferanseId,
+            perioder = utbetalinger,
+            inntekter = inntektshistorikk,
+            arbeidskategorikoder = arbeidskategorikoder,
+            ugyldigePerioder = emptyList(),
+            harStatslønn = statslønn
+        )
+
+        return Ytelser(
+            meldingsreferanseId = meldingsreferanseId,
+            aktørId = aktørId,
+            fødselsnummer = fødselsnummer.toString(),
+            organisasjonsnummer = organisasjonsnummer,
+            vedtaksperiodeId = vedtaksperiodeId.toString(),
+            infotrygdhistorikk = element,
+            foreldrepermisjon = Foreldrepermisjon(
+                foreldrepengeytelse = foreldrepenger,
+                svangerskapsytelse = svangerskapspenger
+            ),
+            pleiepenger = Pleiepenger(
+                perioder = pleiepenger
+            ),
+            omsorgspenger = Omsorgspenger(
+                perioder = omsorgspenger
+            ),
+            opplæringspenger = Opplæringspenger(
+                perioder = opplæringspenger
+            ),
+            institusjonsopphold = Institusjonsopphold(
+                perioder = institusjonsoppholdsperioder
+            ),
+            dødsinfo = Dødsinfo(dødsdato),
+            arbeidsavklaringspenger = Arbeidsavklaringspenger(arbeidsavklaringspenger),
+            dagpenger = Dagpenger(dagpenger),
+            aktivitetslogg = Aktivitetslogg()
+        )
+    }
 }
