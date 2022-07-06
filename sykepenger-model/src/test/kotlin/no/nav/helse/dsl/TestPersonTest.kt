@@ -18,9 +18,7 @@ import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -39,10 +37,16 @@ internal class TestPersonTest {
 
     private val String.inspektør get() = inspektør(this)
 
+    private val TestPerson.TestArbeidsgiver.asserter get() = TestAssertions(observatør, inspektør, testperson.inspiser(personInspektør))
+
     private fun inspektør(orgnummer: String) = testperson.inspiser(agInspektør(orgnummer))
 
     private operator fun String.invoke(testblokk: TestPerson.TestArbeidsgiver.() -> Any) =
         testperson.arbeidsgiver(this, testblokk)
+
+    private fun TestPerson.TestArbeidsgiver.assertTilstander(id: UUID, vararg tilstander: TilstandType) {
+        asserter.assertTilstander(id, *tilstander)
+    }
 
     private fun håndterSykmelding(vararg sykmeldingsperiode: Sykmeldingsperiode) =
         a1 { håndterSykmelding(*sykmeldingsperiode) }
@@ -109,11 +113,5 @@ internal class TestPersonTest {
                 AVVENTER_HISTORIKK
             )
         }
-    }
-
-    internal fun TestPerson.TestArbeidsgiver.assertTilstander(id: UUID, vararg tilstander: TilstandType) {
-        assertFalse(inspektør.periodeErForkastet(id)) { "Perioden er forkastet med tilstander: ${observatør.tilstandsendringer[id]}:\n${testperson.inspiser(personInspektør).aktivitetslogg}" }
-        assertTrue(inspektør.periodeErIkkeForkastet(id)) { "Perioden er forkastet med tilstander: ${observatør.tilstandsendringer[id]}\n${testperson.inspiser(personInspektør).aktivitetslogg}" }
-        assertEquals(tilstander.asList(), observatør.tilstandsendringer[id])
     }
 }
