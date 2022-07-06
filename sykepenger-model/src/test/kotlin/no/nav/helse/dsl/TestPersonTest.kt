@@ -1,7 +1,6 @@
 package no.nav.helse.dsl
 
 import java.util.UUID
-import no.nav.helse.dsl.TestPerson.Companion.invoke
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
@@ -37,6 +36,9 @@ internal class TestPersonTest {
 
     private fun inspektør(orgnummer: String) = testperson.inspiser(agInspektør(orgnummer))
 
+    private operator fun String.invoke(testblokk: TestPerson.TestArbeidsgiver.() -> Any) =
+        testperson.arbeidsgiver(this, testblokk)
+
     @BeforeEach
     fun setup() {
         observatør = TestObservatør()
@@ -68,7 +70,7 @@ internal class TestPersonTest {
 
     @Test
     fun `kan sende inntektsmelding`() {
-        a1(testperson) {
+        a1 {
             håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
             håndterSøknad(Søknad.Søknadsperiode.Sykdom(3.januar, 26.januar, 100.prosent))
             håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)), INNTEKT)
