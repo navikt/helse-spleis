@@ -44,12 +44,12 @@ import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.somFødselsnummer
-import no.nav.helse.spleis.e2e.AbstractEndToEndTest.Companion.INNTEKT
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.utbetalingstidslinje.Alder.Companion.alder
 import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 
 internal class TestPerson(
     private val observatør: PersonObserver,
@@ -63,6 +63,8 @@ internal class TestPerson(
         internal val UNG_PERSON_FDATO_2018 = 12.februar(1992)
         internal val UNG_PERSON_FNR_2018: Fødselsnummer = "${UNG_PERSON_FDATO_2018.format(fnrformatter)}40045".somFødselsnummer()
         internal const val AKTØRID = "42"
+
+        internal val INNTEKT = 31000.00.månedlig
 
         internal operator fun <R> String.invoke(testPerson: TestPerson, testblokk: TestArbeidsgiver.() -> R) =
             testPerson.arbeidsgiver(this, testblokk)
@@ -102,11 +104,18 @@ internal class TestPerson(
 
         internal val Int.vedtaksperiode get() = vedtaksperiodesamler.vedtaksperiodeId(orgnummer, this - 1)
 
-        internal fun håndterSykmelding(vararg sykmeldingsperiode: Sykmeldingsperiode) =
-            fabrikk.lagSykmelding(*sykmeldingsperiode).håndter(Person::håndter)
+        internal fun håndterSykmelding(vararg sykmeldingsperiode: Sykmeldingsperiode,
+                                       sykmeldingSkrevet: LocalDateTime? = null,
+                                       mottatt: LocalDateTime? = null,) =
+            fabrikk.lagSykmelding(*sykmeldingsperiode, sykmeldingSkrevet = sykmeldingSkrevet, mottatt = mottatt).håndter(Person::håndter)
 
-        internal fun håndterSøknad(vararg perioder: Søknad.Søknadsperiode) =
-            fabrikk.lagSøknad(*perioder).håndter(Person::håndter)
+        internal fun håndterSøknad(
+            vararg perioder: Søknad.Søknadsperiode,
+            andreInntektskilder: List<Søknad.Inntektskilde> = emptyList(),
+            sendtTilNAVEllerArbeidsgiver: LocalDate? = null,
+            sykmeldingSkrevet: LocalDateTime? = null,
+        ) =
+            fabrikk.lagSøknad(*perioder, andreInntektskilder = andreInntektskilder, sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver, sykmeldingSkrevet = sykmeldingSkrevet).håndter(Person::håndter)
 
         internal fun håndterInntektsmelding(
             arbeidsgiverperioder: List<Periode>,
@@ -136,12 +145,22 @@ internal class TestPerson(
             vedtaksperiodeId: UUID = 1.vedtaksperiode,
             inntekt: Inntekt = INNTEKT,
             medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
-            inntektsvurdering: Inntektsvurdering = lagStandardSammenligningsgrunnlag(orgnummer, inntekt, inspektør.skjæringstidspunkt(vedtaksperiodeId)),
-            inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag = lagStandardSykepengegrunnlag(orgnummer, inntekt, inspektør.skjæringstidspunkt(vedtaksperiodeId)),
-            arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold> = arbeidsgivere.map { (orgnr, _) -> Vilkårsgrunnlag.Arbeidsforhold(orgnr, LocalDate.EPOCH, null) }
+            inntektsvurdering: Inntektsvurdering? = null,
+            inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag? = null,
+            arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold>? = null
         ) {
             behovsamler.bekreftBehov(vedtaksperiodeId, InntekterForSammenligningsgrunnlag, InntekterForSykepengegrunnlag, ArbeidsforholdV2, Medlemskap)
-            fabrikk.lagVilkårsgrunnlag(vedtaksperiodeId, medlemskapstatus, arbeidsforhold, inntektsvurdering, inntektsvurderingForSykepengegrunnlag)
+            fabrikk.lagVilkårsgrunnlag(
+                vedtaksperiodeId,
+                medlemskapstatus,
+                arbeidsforhold ?: arbeidsgivere.map { (orgnr, _) -> Vilkårsgrunnlag.Arbeidsforhold(orgnr, LocalDate.EPOCH, null) },
+                inntektsvurdering ?: lagStandardSammenligningsgrunnlag(
+                    orgnummer,
+                    inntekt,
+                    inspektør.skjæringstidspunkt(vedtaksperiodeId)
+                ),
+                inntektsvurderingForSykepengegrunnlag ?: lagStandardSykepengegrunnlag(orgnummer, inntekt, inspektør.skjæringstidspunkt(vedtaksperiodeId))
+            )
                 .håndter(Person::håndter)
         }
 

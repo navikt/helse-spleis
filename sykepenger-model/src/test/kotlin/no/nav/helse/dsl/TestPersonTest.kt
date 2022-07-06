@@ -1,6 +1,7 @@
 package no.nav.helse.dsl
 
 import no.nav.helse.april
+import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Periode

@@ -46,18 +46,19 @@ internal class Hendelsefabrikk(
 
     internal fun lagSykmelding(
         vararg sykeperioder: Sykmeldingsperiode,
-        id: UUID = UUID.randomUUID(),
-        sykmeldingSkrevet: LocalDateTime = Sykmeldingsperiode.periode(sykeperioder.toList())!!.start.atStartOfDay(),
+        sykmeldingSkrevet: LocalDateTime? = null,
         mottatt: LocalDateTime? = null,
+        id: UUID = UUID.randomUUID(),
     ): Sykmelding {
+        val sykmeldingSkrevetEkte = sykmeldingSkrevet ?: Sykmeldingsperiode.periode(sykeperioder.toList())!!.start.atStartOfDay()
         return Sykmelding(
             meldingsreferanseId = id,
             fnr = fødselsnummer.toString(),
             aktørId = aktørId,
             orgnummer = organisasjonsnummer,
             sykeperioder = listOf(*sykeperioder),
-            sykmeldingSkrevet = sykmeldingSkrevet,
-            mottatt = mottatt ?: sykmeldingSkrevet
+            sykmeldingSkrevet = sykmeldingSkrevetEkte,
+            mottatt = mottatt ?: sykmeldingSkrevetEkte
         ).apply {
             sykmeldinger.add(this)
         }
@@ -65,11 +66,12 @@ internal class Hendelsefabrikk(
 
     internal fun lagSøknad(
         vararg perioder: Søknad.Søknadsperiode,
-        id: UUID = UUID.randomUUID(),
         andreInntektskilder: List<Søknad.Inntektskilde> = emptyList(),
-        sendtTilNAVEllerArbeidsgiver: LocalDate = Søknad.Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive,
-        sykmeldingSkrevet: LocalDateTime? = null
+        sendtTilNAVEllerArbeidsgiver: LocalDate? = null,
+        sykmeldingSkrevet: LocalDateTime? = null,
+        id: UUID = UUID.randomUUID()
     ): Søknad {
+        val innsendt = sendtTilNAVEllerArbeidsgiver ?: Søknad.Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive
         return Søknad(
             meldingsreferanseId = id,
             fnr = fødselsnummer.toString(),
@@ -77,7 +79,7 @@ internal class Hendelsefabrikk(
             orgnummer = organisasjonsnummer,
             perioder = listOf(*perioder),
             andreInntektskilder = andreInntektskilder,
-            sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver.atStartOfDay(),
+            sendtTilNAVEllerArbeidsgiver = innsendt.atStartOfDay(),
             permittert = false,
             merknaderFraSykmelding = emptyList(),
             sykmeldingSkrevet = sykmeldingSkrevet ?: Søknad.Søknadsperiode.søknadsperiode(perioder.toList())!!.start.atStartOfDay()
