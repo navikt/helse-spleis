@@ -56,6 +56,7 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.Arb
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavHelgDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.UkjentDag
+import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -71,6 +72,26 @@ import kotlin.reflect.KClass
 
 @DisableToggle(Toggle.ForkastForlengelseAvForkastetPeriode::class)
 internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
+
+    @Test
+    fun `tillater ikke å overta brukerutbetaling-saker fra Infotrygd`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        val im = håndterInntektsmelding(listOf(1.januar til 16.januar), refusjon = Inntektsmelding.Refusjon(INGEN, null))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmeldingReplay(im, 1.vedtaksperiode.id(ORGNUMMER))
+        håndterYtelser(1.vedtaksperiode, inntektshistorikk = listOf(
+            Inntektsopplysning(ORGNUMMER, 17.januar, INNTEKT, false)
+        ), statslønn = true)
+        assertForventetFeil(
+            forklaring = "Vi skal ikke overta saker fra Infotrygd",
+            nå = {
+                assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING)
+            },
+            ønsket = {
+                assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
+            }
+        )
+    }
 
     @Test
     fun `setter riktig skjæringstidspunkt`() = Toggle.ForkastForlengelseAvForkastetPeriode.enable {
