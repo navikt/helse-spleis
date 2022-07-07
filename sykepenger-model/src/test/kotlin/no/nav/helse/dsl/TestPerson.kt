@@ -6,6 +6,7 @@ import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.util.UUID
 import no.nav.helse.Fødselsnummer
+import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
 import no.nav.helse.februar
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
@@ -15,6 +16,7 @@ import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
@@ -45,12 +47,16 @@ import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.somFødselsnummer
+import no.nav.helse.spleis.e2e.lagInntektperioder
+import no.nav.helse.testhelpers.Inntektperioder
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.utbetalingstidslinje.Alder.Companion.alder
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import no.nav.helse.økonomi.Prosentdel
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 
 internal class TestPerson(
     private val observatør: PersonObserver,
@@ -98,7 +104,7 @@ internal class TestPerson(
         return this
     }
 
-    inner class TestArbeidsgiver(private val orgnummer: String) {
+    inner class TestArbeidsgiver(internal val orgnummer: String) {
         private val fabrikk = Hendelsefabrikk(aktørId, fødselsnummer, orgnummer)
 
         internal val inspektør get() = TestArbeidsgiverInspektør(person, orgnummer)
@@ -116,7 +122,9 @@ internal class TestPerson(
             sendtTilNAVEllerArbeidsgiver: LocalDate? = null,
             sykmeldingSkrevet: LocalDateTime? = null,
         ) =
-            fabrikk.lagSøknad(*perioder, andreInntektskilder = andreInntektskilder, sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver, sykmeldingSkrevet = sykmeldingSkrevet).håndter(Person::håndter)
+            vedtaksperiodesamler.fangVedtaksperiode {
+                fabrikk.lagSøknad(*perioder, andreInntektskilder = andreInntektskilder, sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver, sykmeldingSkrevet = sykmeldingSkrevet).håndter(Person::håndter)
+            }
 
         internal fun håndterInntektsmelding(
             arbeidsgiverperioder: List<Periode>,
@@ -318,3 +326,26 @@ internal fun standardSimuleringsresultat(orgnummer: String) = no.nav.helse.hende
         )
     )
 )
+
+internal fun TestPerson.TestArbeidsgiver.nyttVedtak(
+    fom: LocalDate,
+    tom: LocalDate,
+    grad: Prosentdel = 100.prosent,
+    førsteFraværsdag: LocalDate = fom,
+    beregnetInntekt: Inntekt = INNTEKT,
+    refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
+    arbeidsgiverperiode: List<Periode> = emptyList(),
+    inntekterBlock: Inntektperioder.() -> Unit = { lagInntektperioder(orgnummer, fom, beregnetInntekt) }
+) {
+    håndterSykmelding(Sykmeldingsperiode(fom, tom, grad))
+    val vedtaksperiode = håndterSøknad(Sykdom(fom, tom, grad))
+    håndterInntektsmelding(arbeidsgiverperiode, beregnetInntekt, førsteFraværsdag, refusjon)
+    håndterYtelser(vedtaksperiode)
+    håndterVilkårsgrunnlag(vedtaksperiode, beregnetInntekt, inntektsvurdering = Inntektsvurdering(
+        inntekter = inntektperioderForSammenligningsgrunnlag(inntekterBlock)
+    ))
+    håndterYtelser(vedtaksperiode)
+    håndterSimulering(vedtaksperiode)
+    håndterUtbetalingsgodkjenning(vedtaksperiode)
+    håndterUtbetalt()
+}

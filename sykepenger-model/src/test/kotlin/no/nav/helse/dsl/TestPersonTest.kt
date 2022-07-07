@@ -264,4 +264,12 @@ internal class TestPersonTest : AbstractDslTest() {
             TilstandType.AVSLUTTET_UTEN_UTBETALING
         )
     }
+
+    @Test
+    fun nyttVedtak() {
+        a1 {
+            nyttVedtak(1.januar, 31.januar)
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+        }
+    }
 }
