@@ -217,7 +217,7 @@ internal class ForkastingTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `forkaster ikke påfølgende periode når tilstøtende forkastet periode er annullert`() = Toggle.ForkastForlengelseAvForkastetPeriode.disable {
+    fun `forkaster ikke påfølgende periode når tilstøtende forkastet periode er annullert`() = Toggle.IkkeForlengInfotrygdperioder.disable {
         nyttVedtak(29.august, 25.september)
         håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
         håndterUtbetalt()
@@ -229,7 +229,7 @@ internal class ForkastingTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `forkaster ikke påfølgende periode når den forkastede har et ugyldig vilkårsgrunnlag`() = Toggle.ForkastForlengelseAvForkastetPeriode.disable {
+    fun `forkaster ikke påfølgende periode når den forkastede har et ugyldig vilkårsgrunnlag`() = Toggle.IkkeForlengInfotrygdperioder.disable {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 21.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 21.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))

@@ -379,7 +379,7 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `ubetalt periode, etter utbetalt, etterutbetales ikke`() = Toggle.ForkastForlengelseAvForkastetPeriode.disable {
+    fun `ubetalt periode, etter utbetalt, etterutbetales ikke`() = Toggle.IkkeForlengInfotrygdperioder.disable {
         (10.juni to 30.juni).also { (fom, tom) ->
             håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent))
             håndterSøknad(Sykdom(fom, tom, 100.prosent), sendtTilNAVEllerArbeidsgiver = tom)

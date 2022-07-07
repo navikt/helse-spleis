@@ -5,7 +5,6 @@ import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon
 import no.nav.helse.hendelser.Inntektsvurdering
-import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -13,7 +12,6 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
-import no.nav.helse.november
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
@@ -27,7 +25,6 @@ import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
-import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -117,63 +114,6 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING
         )
-    }
-
-    @Test
-    fun `Arbeidsgiverperiode tilstøter Infotrygd`() {
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
-
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
-        håndterUtbetalingshistorikk(
-            1.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 31.januar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
-                Inntektsopplysning(ORGNUMMER, 17.januar, INNTEKT, true)
-            )
-        )
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt()
-        assertNoWarnings(1.vedtaksperiode.filter())
-    }
-
-    @Test
-    fun `Arbeidsgiverperiode tilstøter ikke Infotrygd`() {
-        håndterInntektsmelding(listOf(1.november(2017) til 16.november(2017)))
-
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
-        håndterUtbetalingshistorikk(
-            1.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 31.januar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
-                Inntektsopplysning(ORGNUMMER, 17.januar, INNTEKT, true)
-            )
-        )
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt()
-        assertWarning("Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler.", 1.vedtaksperiode.filter())
-    }
-
-    @Test
-    fun `Finner refusjon ved forlengelse fra Infotrygd`() {
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
-
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
-        håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
-        håndterUtbetalingshistorikk(
-            1.vedtaksperiode,
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 31.januar, 100.prosent, INNTEKT),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.februar, 28.februar, 100.prosent, INNTEKT),
-            inntektshistorikk = listOf(
-                Inntektsopplysning(ORGNUMMER, 17.januar, INNTEKT, true)
-            )
-        )
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt()
-        assertNoWarnings(1.vedtaksperiode.filter())
     }
 
     @Test
@@ -769,103 +709,6 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
             orgnummer = a2
         )
 
-    }
-
-    @Test
-    fun `en overgang fra Infotrygd uten inntektsmelding`() {
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 10.februar, 100.prosent))
-        håndterSøknad(Sykdom(1.februar, 10.februar, 100.prosent))
-        håndterUtbetalingshistorikk(
-            1.vedtaksperiode,
-            inntektshistorikk = listOf(
-                Inntektsopplysning(orgnummer = ORGNUMMER, sykepengerFom = 17.januar, inntekt = INNTEKT, refusjonTilArbeidsgiver = true)
-            ),
-            utbetalinger = arrayOf(
-                ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 31.januar, 100.prosent, INNTEKT)
-            )
-        )
-
-
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt()
-
-        assertWarning("Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler.", 1.vedtaksperiode.filter())
-    }
-
-    @Test
-    fun `en forlengelse av overgang fra Infotrygd uten inntektsmelding`() {
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 10.februar, 100.prosent))
-        håndterSøknad(Sykdom(1.februar, 10.februar, 100.prosent))
-
-        håndterUtbetalingshistorikk(
-            1.vedtaksperiode,
-            inntektshistorikk = listOf(
-                Inntektsopplysning(orgnummer = ORGNUMMER, sykepengerFom = 17.januar, inntekt = INNTEKT, refusjonTilArbeidsgiver = true)
-            ),
-            utbetalinger = arrayOf(
-                ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 31.januar, 100.prosent, INNTEKT)
-            )
-        )
-
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt()
-
-        forlengVedtak(11.februar, 28.februar)
-
-        assertWarning("Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler.", 1.vedtaksperiode.filter())
-        assertWarning("Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler.", 2.vedtaksperiode.filter())
-    }
-
-    @Test
-    fun `førstegangsbehandling i Spleis etter en overgang fra Infotrygd uten inntektsmelding `() {
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 10.februar, 100.prosent))
-
-        håndterSøknad(Sykdom(1.februar, 10.februar, 100.prosent))
-        håndterUtbetalingshistorikk(
-            1.vedtaksperiode,
-            inntektshistorikk = listOf(
-                Inntektsopplysning(orgnummer = ORGNUMMER, sykepengerFom = 17.januar, inntekt = INNTEKT, refusjonTilArbeidsgiver = true)
-            ),
-            utbetalinger = arrayOf(
-                ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 31.januar, 100.prosent, INNTEKT)
-            )
-        )
-
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt()
-
-        nyttVedtak(1.mars, 31.mars)
-
-        assertWarning("Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler.", 1.vedtaksperiode.filter())
-        assertNoWarnings(2.vedtaksperiode.filter(ORGNUMMER))
-    }
-
-    @Test
-    fun `Finner refusjon fra feil inntektsmelding ved Infotrygdforlengelse`() {
-        håndterSykmelding(Sykmeldingsperiode(22.januar, 31.januar, 100.prosent))
-        // Inntektsmelding blir ikke brukt ettersom det er forlengelse fra Infotrygd.
-        // Når vi ser etter refusjon for Infotrygdperioden finner vi alikevel frem til denne inntektsmeldingen og forsøker å finne
-        // refusjonsbeløp på 1-5.Januar som er før arbeidsgiverperioden
-        håndterInntektsmelding(listOf(Periode(6.januar, 21.januar)))
-        håndterSøknad(Sykdom(22.januar, 31.januar, 100.prosent))
-        håndterUtbetalingshistorikk(
-            1.vedtaksperiode,
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 21.januar, 100.prosent, 1000.daglig),
-            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true))
-        )
-
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt()
-
-        assertInfo("Refusjon gjelder ikke for hele utbetalingsperioden", 1.vedtaksperiode.filter())
     }
 
     @Test

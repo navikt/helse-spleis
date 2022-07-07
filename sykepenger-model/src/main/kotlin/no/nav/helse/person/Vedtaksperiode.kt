@@ -1669,7 +1669,7 @@ internal class Vedtaksperiode private constructor(
                     ytelser.kontekst(vilkårsgrunnlag)
                 }
                 valider {
-                    person.valider(this, vilkårsgrunnlag, vedtaksperiode.skjæringstidspunkt)
+                    person.valider(this, vilkårsgrunnlag, vedtaksperiode.skjæringstidspunkt, arbeidsgiver.finnVedtaksperiodeRettFør(vedtaksperiode) != null)
                 }
                 onSuccess {
                     if (periodetype in listOf(FØRSTEGANGSBEHANDLING, FORLENGELSE) && vedtaksperiode.inntektsmeldingInfo == null) {
@@ -2679,7 +2679,7 @@ internal class Vedtaksperiode private constructor(
             forkastede
                 .filter { it.sykdomstidslinje.erRettFør(hendelse.sykdomstidslinje()) }
                 .forEach {
-                    if (Toggle.ForkastForlengelseAvForkastetPeriode.enabled) {
+                    if (Toggle.IkkeForlengInfotrygdperioder.enabled) {
                         hendelse.error("Søknad forlenger en forkastet periode")
                         hendelse.info("Søknad forlenger forkastet vedtaksperiode ${it.id}, hendelse periode: ${hendelse.periode()}, vedtaksperiode periode: ${it.periode}")
                     } else {

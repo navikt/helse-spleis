@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate
-import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
@@ -12,16 +11,12 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
-import no.nav.helse.mars
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
-import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
-import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
-import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -162,39 +157,6 @@ internal class FlereArbeidsgivereForlengelserTest : AbstractEndToEndTest() {
             inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode),
             inspektør(a2).vilkårsgrunnlag(1.vedtaksperiode)
         )
-    }
-
-    @Test
-    fun `Periode som forlenger annen arbeidsgiver, men ikke seg selv, kastes ut fordi den mangler inntekt på skjæringstidspunkt`() {
-        håndterSykmelding(Sykmeldingsperiode(1.februar(2021), 28.februar(2021), 100.prosent), orgnummer = a1)
-        håndterSøknad(Sykdom(1.februar(2021), 28.februar(2021), 100.prosent), orgnummer = a1)
-        val inntektshistorikk = listOf(
-            Inntektsopplysning(a1, 1.januar(2021), INNTEKT, true)
-        )
-        val utbetalinger = arrayOf(
-            ArbeidsgiverUtbetalingsperiode(a1, 1.januar(2021), 31.januar(2021), 100.prosent, INNTEKT)
-        )
-        håndterUtbetalingshistorikk(1.vedtaksperiode, *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(orgnummer = a1)
-
-        håndterSykmelding(Sykmeldingsperiode(1.mars(2021), 31.mars(2021), 100.prosent), orgnummer = a1)
-        håndterSøknad(Sykdom(1.mars(2021), 31.mars(2021), 100.prosent), orgnummer = a1)
-
-        håndterUtbetalingshistorikk(2.vedtaksperiode, *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
-        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
-        håndterSimulering(2.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(orgnummer = a1)
-        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET, orgnummer = a1)
-
-        håndterSykmelding(Sykmeldingsperiode(1.april(2021), 30.april(2021), 100.prosent), orgnummer = a2)
-        håndterSøknad(Sykdom(1.april(2021), 30.april(2021), 100.prosent), orgnummer = a2)
-        håndterInntektsmelding(listOf(1.april(2021) til 30.april(2021)), førsteFraværsdag = 1.april(2021), orgnummer = a2)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
-        assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD, orgnummer = a2)
     }
 
     @Test

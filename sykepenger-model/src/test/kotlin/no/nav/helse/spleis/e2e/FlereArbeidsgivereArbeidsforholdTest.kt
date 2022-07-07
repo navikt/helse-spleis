@@ -23,8 +23,6 @@ import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.PersonVisitor
 import no.nav.helse.person.TilstandType
-import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
-import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.serde.reflection.castAsList
 import no.nav.helse.serde.reflection.castAsMap
 import no.nav.helse.sisteBehov
@@ -99,76 +97,6 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         )
         assertEquals(1, tellArbeidsforholdhistorikkinnslag(a1).size)
         assertEquals(1, tellArbeidsforholdhistorikkinnslag(a2).size)
-    }
-
-    @Test
-    fun `Infotrygdforlengelse av arbeidsgiver som ikke finnes i aareg, kan utbetales uten warning`() {
-        håndterInntektsmelding(listOf(17.januar til 31.januar), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent), orgnummer = a1)
-        håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a1)
-
-        val utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(a1, 1.februar, 28.februar, 100.prosent, 10000.månedlig))
-        val inntektshistorikk = listOf(Inntektsopplysning(a1, 1.februar, 10000.månedlig, true))
-        håndterUtbetalingshistorikk(1.vedtaksperiode, utbetalinger = utbetalinger, inntektshistorikk, orgnummer = a1)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(orgnummer = a1)
-
-        assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET, orgnummer = a1)
-        assertNoWarnings(1.vedtaksperiode.filter(a1))
-    }
-
-    @Test
-    fun `Tidligere periode fra gammel arbeidsgiver, deretter en infotrygdforlengelse fra nåværende arbeidsgiver, kan utbetales uten warning`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 18.januar, 100.prosent), orgnummer = a1)
-        håndterSøknad(Sykdom(1.januar, 18.januar, 100.prosent), orgnummer = a1)
-        håndterInntektsmelding(
-            listOf(1.januar til 16.januar),
-            førsteFraværsdag = 1.januar,
-            beregnetInntekt = 10000.månedlig,
-            orgnummer = a1
-        )
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        håndterVilkårsgrunnlag(
-            1.vedtaksperiode,
-            orgnummer = a1,
-            inntektsvurdering = Inntektsvurdering(
-                listOf(sammenligningsgrunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 10000.månedlig.repeat(12)))
-            ),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = listOf(grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 10000.månedlig.repeat(3)))
-            , arbeidsforhold = emptyList()
-            ),
-            arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null))
-        )
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(orgnummer = a1)
-
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent), orgnummer = a2)
-        håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a2)
-
-        håndterInntektsmelding(
-            listOf(29.januar til 13.februar),
-            beregnetInntekt = 10000.månedlig,
-            orgnummer = a2
-        )
-
-        val utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(a2, 14.februar, 28.februar, 100.prosent, 10000.månedlig))
-        val inntektshistorikk = listOf(Inntektsopplysning(a2, 14.februar, 10000.månedlig, true))
-        håndterUtbetalingshistorikk(1.vedtaksperiode, utbetalinger = utbetalinger, inntektshistorikk, orgnummer = a2)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
-        håndterSimulering(1.vedtaksperiode, orgnummer = a2)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
-        håndterUtbetalt(orgnummer = a2)
-
-        assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET, orgnummer = a2)
-        assertNoWarnings(1.vedtaksperiode.filter(a1))
-        assertNoErrors(1.vedtaksperiode.filter(a1))
-        assertNoWarnings(1.vedtaksperiode.filter(a2))
-        assertNoErrors(1.vedtaksperiode.filter(a2))
     }
 
     @Test

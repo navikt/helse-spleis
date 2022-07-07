@@ -400,7 +400,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `forlengelse ved inflight annullering`() = Toggle.ForkastForlengelseAvForkastetPeriode.disable {
+    fun `forlengelse ved inflight annullering`() = Toggle.IkkeForlengInfotrygdperioder.disable {
         /*
         Tidligere har vi kun basert oss på utbetalinger i en sluttilstand for å beregne ny utbetaling. Om vi hadde en annullering som var in-flight ville denne
         bli ignorert og det ville bli laget en utbetaling som strakk seg helt tilbake til første del av sammenhengende periode, noe som igjen vil føre til at vi

@@ -51,7 +51,7 @@ internal class StatslønnWarningTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Error for statslønn ved forlengelse av forkastet periode`() = Toggle.ForkastForlengelseAvForkastetPeriode.disable {
+    fun `Error for statslønn ved forlengelse av forkastet periode`() = Toggle.IkkeForlengInfotrygdperioder.disable {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         val inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.desember(2017), INNTEKT, false))

@@ -34,21 +34,6 @@ internal class SammenligningsgrunnlagBuilderTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `har ikke sammenligningsgrunnlag etter overgang fra Infotrygd`() {
-        val skjæringstidspunkt = 1.desember(2017)
-        val infotrygdperioder = arrayOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, skjæringstidspunkt, 31.desember(2017), 100.prosent, inntekt))
-        val inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, skjæringstidspunkt, inntekt, true))
-
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterUtbetalingshistorikk(1.vedtaksperiode, *infotrygdperioder, inntektshistorikk = inntektshistorikk)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-
-        assertEquals(null, grunnlag.sammenligningsgrunnlag(ORGNUMMER, skjæringstidspunkt))
-    }
-
-    @Test
     fun `har sammenligningsgrunnlag for alle arbeidsgivere`() {
         nyeVedtak(1.januar, 31.januar, AG1, AG2) {
             lagInntektperioder(fom = 1.januar, inntekt = 20000.månedlig, orgnummer = AG1)

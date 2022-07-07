@@ -19,7 +19,6 @@ import no.nav.helse.person.Periodetype.OVERGANG_FRA_IT
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
-import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -65,23 +64,6 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(29.januar, 23.februar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode, historikk, inntektshistorikk = inntekter)
         assertEquals(OVERGANG_FRA_IT, inspektør.periodetype(1.vedtaksperiode))
-    }
-
-    @Test
-    fun `periodetype er forlengelse fra Infotrygd hvis førstegangsbehandlingen skjedde i Infotrygd`() {
-        val historikk = ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 3.januar, 26.januar, 100.prosent, 1000.daglig)
-        val inntekter = listOf(Inntektsopplysning(ORGNUMMER, 3.januar(2018), 1000.daglig, true))
-        håndterSykmelding(Sykmeldingsperiode(29.januar, 23.februar, 100.prosent))
-        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(29.januar, 23.februar, 100.prosent))
-        håndterUtbetalingshistorikk(1.vedtaksperiode, historikk, inntektshistorikk = inntekter)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
-        håndterSykmelding(Sykmeldingsperiode(26.februar, 15.april, 100.prosent))
-        håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(26.februar, 15.april, 100.prosent))
-        assertEquals(OVERGANG_FRA_IT, inspektør.periodetype(1.vedtaksperiode))
-        assertEquals(INFOTRYGDFORLENGELSE, inspektør.periodetype(2.vedtaksperiode))
     }
 
     @Test

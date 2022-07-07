@@ -22,7 +22,7 @@ import org.junit.jupiter.api.Test
 internal class MaksdatoE2ETest : AbstractEndToEndTest() {
 
     @Test
-    fun `syk etter maksdato`() = Toggle.ForkastForlengelseAvForkastetPeriode.disable {
+    fun `syk etter maksdato`() = Toggle.IkkeForlengInfotrygdperioder.disable {
         var forrigePeriode = 1.januar til 31.januar
         nyttVedtak(forrigePeriode.start, forrigePeriode.endInclusive, 100.prosent)
         // setter opp vedtaksperioder frem til 182 dager etter maksdato

@@ -292,44 +292,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `gjenbruker ikke vilkårsprøving når førstegangsbehandlingen kastes ut`() = Toggle.ForkastForlengelseAvForkastetPeriode.disable {
-        val INNTEKT_FRA_IT = INNTEKT/2
-
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 17.januar, 100.prosent))
-        håndterSøknad(Sykdom(1.januar, 17.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
-
-        håndterYtelser(1.vedtaksperiode)
-
-        håndterVilkårsgrunnlag(
-            1.vedtaksperiode,
-            INNTEKT,
-            inntektsvurdering = Inntektsvurdering(
-                inntekter = listOf(sammenligningsgrunnlag(a1, 1.januar, (INNTEKT / 2).repeat(12))),
-            ),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = listOf(grunnlag(a1, 1.januar, INNTEKT.repeat(3))),
-                arbeidsforhold = emptyList()
-            ),
-            arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(a1, 1.desember(2017)))
-        )
-        assertError("Har mer enn 25 % avvik", 1.vedtaksperiode.filter())
-
-        håndterSykmelding(Sykmeldingsperiode(18.januar, 31.januar, 100.prosent))
-        håndterSøknad(Sykdom(18.januar, 31.januar, 100.prosent))
-        håndterUtbetalingshistorikk(2.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 17.januar, 100.prosent, INNTEKT_FRA_IT), inntektshistorikk = listOf(
-            Inntektsopplysning(ORGNUMMER, 17.januar, INNTEKT_FRA_IT, true)
-        ))
-        håndterYtelser(2.vedtaksperiode)
-        val vilkårsgrunnlag = inspektør.vilkårsgrunnlag(2.vedtaksperiode)
-        assertNotNull(vilkårsgrunnlag)
-        val grunnlagsdataInspektør = vilkårsgrunnlag.inspektør
-        assertEquals(INNTEKT_FRA_IT, grunnlagsdataInspektør.sykepengegrunnlag.inspektør.sykepengegrunnlag)
-        assertSisteTilstand(2.vedtaksperiode, AVVENTER_SIMULERING)
-    }
-
-    @Test
-    fun `skal ikke gjenbruke et vilkårsgrunnlag som feiler pga frilanser arbeidsforhold`() = Toggle.ForkastForlengelseAvForkastetPeriode.disable {
+    fun `skal ikke gjenbruke et vilkårsgrunnlag som feiler pga frilanser arbeidsforhold`() = Toggle.IkkeForlengInfotrygdperioder.disable {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 17.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 17.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))

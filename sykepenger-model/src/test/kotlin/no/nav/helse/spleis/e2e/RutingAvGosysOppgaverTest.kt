@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
@@ -389,34 +388,6 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
             Inntektsopplysning(ORGNUMMER, 17.januar, INNTEKT, true)
         ))
         person.søppelbøtte(hendelselogg, 1.februar til 28.februar)
-        assertTrue(observatør.opprettOppgaveEvent().any { søknadId in it.hendelser })
-        assertFalse(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().any { søknadId in it.hendelser })
-    }
-
-    @Test
-    fun `infotrygdforlengelse med spleis-utbetaling mellom`() {
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
-        håndterUtbetalingshistorikk(1.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 31.januar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
-            Inntektsopplysning(ORGNUMMER, 17.januar, INNTEKT, true)
-        ))
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt()
-
-        håndterSykmelding(Sykmeldingsperiode(1.april, 30.april, 100.prosent))
-        val søknadId = håndterSøknad(Sykdom(1.april, 30.april, 100.prosent))
-        håndterUtbetalingshistorikk(2.vedtaksperiode,
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 31.januar, 100.prosent, INNTEKT),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.mars, 31.mars, 100.prosent, INNTEKT),
-            inntektshistorikk = listOf(
-                Inntektsopplysning(ORGNUMMER, 17.januar, INNTEKT, true),
-                Inntektsopplysning(ORGNUMMER, 1.mars, INNTEKT, true)
-            )
-        )
-
-        person.søppelbøtte(hendelselogg, 1.april til 30.april)
         assertTrue(observatør.opprettOppgaveEvent().any { søknadId in it.hendelser })
         assertFalse(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().any { søknadId in it.hendelser })
     }

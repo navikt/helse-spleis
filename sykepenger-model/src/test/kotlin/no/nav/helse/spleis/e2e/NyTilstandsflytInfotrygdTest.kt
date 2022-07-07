@@ -9,12 +9,10 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.hendelser.til
-import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.IdInnhenter
-import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
@@ -22,28 +20,12 @@ import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.september
-import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Test
 
 internal class NyTilstandsflytInfotrygdTest : AbstractEndToEndTest() {
-
-    @Test
-    fun `enkel infotrygdforlengelse`() {
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
-
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
-        håndterUtbetalingshistorikk(
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
-            utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 31.januar, 100.prosent, INNTEKT)),
-            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true))
-        )
-        assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
-        utbetalPeriode(1.vedtaksperiode)
-    }
 
     @Test
     fun `Infotrygdhistorikk som ikke medfører forlengelse`() {
@@ -158,32 +140,7 @@ internal class NyTilstandsflytInfotrygdTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Forlengelse av en infotrygdforlengelse - skal ikke vente på inntektsmelding`() {
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
-        håndterUtbetalingshistorikk(
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
-            utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 31.januar, 100.prosent, INNTEKT)),
-            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true)),
-            besvart = LocalDate.EPOCH.atStartOfDay()
-        )
-        håndterYtelser(
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
-            utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 31.januar, 100.prosent, INNTEKT)),
-            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true)),
-            besvart = LocalDate.EPOCH.atStartOfDay()
-        )
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt()
-
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
-        håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
-        assertTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK)
-    }
-
-    @Test
-    fun `Ping pong - venter ikke på inntektsmelding`() = Toggle.ForkastForlengelseAvForkastetPeriode.disable {
+    fun `Ping pong - venter ikke på inntektsmelding`() = Toggle.IkkeForlengInfotrygdperioder.disable {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
@@ -206,7 +163,7 @@ internal class NyTilstandsflytInfotrygdTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Forlengelse av ping pong - periode 2 venter på IM`() = Toggle.ForkastForlengelseAvForkastetPeriode.disable {
+    fun `Forlengelse av ping pong - periode 2 venter på IM`() = Toggle.IkkeForlengInfotrygdperioder.disable {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar),)
@@ -269,7 +226,7 @@ internal class NyTilstandsflytInfotrygdTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `oppdager at vi er en infotrygdforlengelse når infotrygdhistorikken tilstøter en periode i AvsluttetUtenUtbetaling`() = Toggle.ForkastForlengelseAvForkastetPeriode.disable {
+    fun `oppdager at vi er en infotrygdforlengelse når infotrygdhistorikken tilstøter en periode i AvsluttetUtenUtbetaling`() = Toggle.IkkeForlengInfotrygdperioder.disable {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 9.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 9.januar, 100.prosent))
         person.invaliderAllePerioder(hendelselogg, null)
@@ -303,7 +260,7 @@ internal class NyTilstandsflytInfotrygdTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `forlengelse av ping-pong, ny periode som forlenger ping-pong-perioden går til AvventerHistorikk`() = Toggle.ForkastForlengelseAvForkastetPeriode.disable {
+    fun `forlengelse av ping-pong, ny periode som forlenger ping-pong-perioden går til AvventerHistorikk`() = Toggle.IkkeForlengInfotrygdperioder.disable {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
@@ -326,40 +283,6 @@ internal class NyTilstandsflytInfotrygdTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.april, 30.april, 100.prosent))
         håndterSøknad(Sykdom(1.april, 30.april, 100.prosent))
         assertSisteTilstand(4.vedtaksperiode, AVVENTER_HISTORIKK)
-    }
-
-    @Test
-    fun `annen arbeidsgiver forlenger infotrygdforlengelse`() {
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent), orgnummer = a1)
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a1)
-        håndterUtbetalingshistorikk(
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
-            utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 31.januar, 100.prosent, INNTEKT)),
-            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true)),
-            besvart = LocalDate.EPOCH.atStartOfDay(),
-            orgnummer = a1
-        )
-        håndterYtelser(
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
-            utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 31.januar, 100.prosent, INNTEKT)),
-            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true)),
-            besvart = LocalDate.EPOCH.atStartOfDay(),
-            orgnummer = a1
-        )
-        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(orgnummer = a1)
-
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent), orgnummer = a2)
-        håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a2)
-        håndterInntektsmelding(listOf(1.mars til 16.mars), orgnummer = a2)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
-        håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a2)
-        val vilkårsgrunnlag = inspektør(a2).vilkårsgrunnlag(1.vedtaksperiode)
-        assertNotNull(vilkårsgrunnlag)
-        assertFalse(vilkårsgrunnlag.inspektør.vurdertOk)
-        assertError("Bruker mangler nødvendig inntekt ved validering av Vilkårsgrunnlag", 1.vedtaksperiode.filter(a2))
-        assertTilstand(1.vedtaksperiode, TilstandType.TIL_INFOTRYGD, orgnummer = a2)
     }
 
     private fun utbetalPeriode(vedtaksperiode: IdInnhenter) {

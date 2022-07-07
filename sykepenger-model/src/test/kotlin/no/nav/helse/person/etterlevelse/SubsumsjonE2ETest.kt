@@ -427,39 +427,6 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `§ 8-10 ledd 2 punktum 1 - vurderes ved overgang fra Infotrygd`() {
-        val maksimumSykepengegrunnlag2018 = (93634 * 6).årlig // 6G
-        val inntekt = maksimumSykepengegrunnlag2018.plus(1.årlig)
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
-        håndterUtbetalingshistorikk(
-            1.vedtaksperiode,
-            utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 31.januar, 100.prosent, inntekt)),
-            inntektshistorikk = listOf(
-                Inntektsopplysning(ORGNUMMER, 1.januar, inntekt, true)
-            )
-        )
-        håndterYtelser()
-        håndterSimulering()
-        håndterUtbetalingsgodkjenning()
-        håndterUtbetalt()
-        SubsumsjonInspektør(jurist).assertBeregnet(
-            paragraf = PARAGRAF_8_10,
-            ledd = LEDD_2,
-            punktum = 1.punktum,
-            versjon = 1.januar(2020),
-            input = mapOf(
-                "maksimaltSykepengegrunnlag" to 561804.0,
-                "skjæringstidspunkt" to 1.januar,
-                "grunnlagForSykepengegrunnlag" to 561805.0
-            ),
-            output = mapOf(
-                "erBegrenset" to false // Infotrygd-inntekter er allerede begrenset til 6G
-            )
-        )
-    }
-
-    @Test
     fun `§ 8-10 ledd 3 - årlig inntekt omregnet til daglig`() {
         val inntekt = 260000.årlig
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))

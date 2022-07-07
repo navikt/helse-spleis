@@ -510,66 +510,6 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Ignorerer skatteinntekter hentet før vilkårsgrunnlag for infotrygd ble lagret`() {
-        /*
-        * Denne testen passer på at vi ikke tar med skatteinntekter ved overgang fra infotrygd.
-        * Tidligere hentet vi skatteinntekter i tilstanden Utbetalingsgrunnlag som lå rett før AvventerHistorikk.
-        * For de vedtaksperiodene som allerede hadde hentet skatteinntekter via denne tilstanden,
-        * ble skatteinntektene lagret og tatt med i sykepengegrunnlaget for infotrygd.
-        * Sykepengegrunnlaget for infotrygd skal utelukkende være basert på inntekter fra infotrygd
-        * */
-
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent), orgnummer = a1)
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a1)
-
-        val utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 31.januar, 100.prosent, INNTEKT))
-        val inntektshistorikk = listOf(Inntektsopplysning(a1, 17.januar, INNTEKT, true))
-
-        håndterUtbetalingshistorikk(1.vedtaksperiode, orgnummer = a1, utbetalinger = utbetalinger, inntektshistorikk = inntektshistorikk)
-
-        person.lagreArbeidsforhold(a1, listOf(Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH)), person.aktivitetslogg, 17.januar)
-        person.lagreArbeidsforhold(a2, listOf(Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH)), person.aktivitetslogg, 17.januar)
-
-        inspektør(a2).inntektInspektør.inntektshistorikk.append {
-            val hendelseId = UUID.randomUUID()
-            addSkattSykepengegrunnlag(17.januar, hendelseId, INNTEKT, YearMonth.of(2017, 12), LØNNSINNTEKT, "fordel", "beskrivelse")
-            addSkattSykepengegrunnlag(17.januar, hendelseId, INNTEKT, YearMonth.of(2017, 11), LØNNSINNTEKT, "fordel", "beskrivelse")
-            addSkattSykepengegrunnlag(17.januar, hendelseId, INNTEKT, YearMonth.of(2017, 10), LØNNSINNTEKT, "fordel", "beskrivelse")
-        }
-
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-
-        assertEquals(1431, inspektør(a1).arbeidsgiverOppdrag.last().first().beløp)
-    }
-
-    @Test
-    fun `Overgang fra infotrygd skal ikke få ghost warning selv om vi har lagret skatteinntekter i en gammel versjon av spleis`() {
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent), orgnummer = a1)
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a1)
-
-        val utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 31.januar, 100.prosent, INNTEKT))
-        val inntektshistorikk = listOf(Inntektsopplysning(a1, 17.januar, INNTEKT, true))
-
-        håndterUtbetalingshistorikk(1.vedtaksperiode, orgnummer = a1, utbetalinger = utbetalinger, inntektshistorikk = inntektshistorikk)
-
-        person.lagreArbeidsforhold(a1, listOf(Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH)), person.aktivitetslogg, 17.januar)
-        person.lagreArbeidsforhold(a2, listOf(Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH)), person.aktivitetslogg, 17.januar)
-
-        inspektør(a2).inntektInspektør.inntektshistorikk.append {
-            val hendelseId = UUID.randomUUID()
-            addSkattSykepengegrunnlag(17.januar, hendelseId, INNTEKT, YearMonth.of(2017, 12), LØNNSINNTEKT, "fordel", "beskrivelse")
-            addSkattSykepengegrunnlag(17.januar, hendelseId, INNTEKT, YearMonth.of(2017, 11), LØNNSINNTEKT, "fordel", "beskrivelse")
-            addSkattSykepengegrunnlag(17.januar, hendelseId, INNTEKT, YearMonth.of(2017, 10), LØNNSINNTEKT, "fordel", "beskrivelse")
-        }
-
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-
-        assertNoWarnings(1.vedtaksperiode.filter(a1))
-        assertNoErrors(1.vedtaksperiode.filter(a1))
-    }
-
-    @Test
     fun `Forlengelse etter ping-pong (Spleis-IT-Spleis) skal ikke få ghost warning`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)

@@ -381,34 +381,6 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Lager ikke utbetalinger for vedtaksperioder hos andre arbeidsgivere som ligger senere i tid enn den som er først totalt sett`() {
-        val periode = 1.februar(2021) til 28.februar(2021)
-        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
-        håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
-        val inntektshistorikk = listOf(
-            Inntektsopplysning(a1, 1.januar(2021), INNTEKT, true)
-        )
-        val utbetalinger = arrayOf(
-            ArbeidsgiverUtbetalingsperiode(a1, 1.januar(2021), 31.januar(2021), 100.prosent, INNTEKT)
-        )
-        håndterUtbetalingshistorikk(1.vedtaksperiode, *utbetalinger, inntektshistorikk = inntektshistorikk, orgnummer = a1)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1, inntektshistorikk = inntektshistorikk)
-        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true, orgnummer = a1)
-        håndterUtbetalt(orgnummer = a1)
-        val periode2 = 1.mars(2021) til 31.mars(2021)
-        val a2Periode = 2.april(2021) til 30.april(2021)
-        håndterSykmelding(Sykmeldingsperiode(periode2.start, periode2.endInclusive, 100.prosent), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(a2Periode.start, a2Periode.endInclusive, 100.prosent), orgnummer = a2)
-
-        håndterSøknad(Sykdom(periode2.start, periode2.endInclusive, 100.prosent), orgnummer = a1)
-        håndterYtelser(2.vedtaksperiode, orgnummer = a1, inntektshistorikk = inntektshistorikk)
-
-        assertEquals(0, inspektør(a2).ikkeUtbetalteUtbetalingerForVedtaksperiode(1.vedtaksperiode).size)
-        assertEquals(0, inspektør(a2).avsluttedeUtbetalingerForVedtaksperiode(1.vedtaksperiode).size)
-    }
-
-    @Test
     fun `tillater to arbeidsgivere med korte perioder, og forlengelse av disse`() {
         val periode = 1.januar(2021) til 14.januar(2021)
         håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
@@ -556,63 +528,6 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterUtbetalt(orgnummer = a2)
 
         assertNoWarnings()
-    }
-
-    @Test
-    fun `Tar hensyn til forkastede perioder ved beregning av maks dato`() {
-        //fom       tom      Arb.   forbrukt Akkumulert     gjenstående
-        //19/3/20	19/4/20	 AI     22	     22	            226
-        //27/4/20	3/6/20	 AI     28	     50	            198
-        //4/6/20	19/7/20	 AS     32	     82	            166	        166
-        //10/8/20	21/9/20	 AI     31	     113	        135	        129 -- 20/7 - 27/7 ligger som ferie i speil men sykemelding i infotrygd
-        //22/9/20	30/9/20	 AS     7	     120	        128	        122
-        //10/11/20	1/2/21	 BI     60	     180	        68	        101
-        //2/2/21	18/4/21	 BS     54	     234	        14	        47
-        //3/5/21	20/5/21	 BS     14	     248	        0	        32
-
-        val inntektshistorikkA1 = listOf(
-            Inntektsopplysning(a1, 1.januar, INNTEKT, true),
-        )
-        val inntektshistorikkA2 = listOf(
-            Inntektsopplysning(a1, 1.januar, INNTEKT, true),
-            Inntektsopplysning(a2, 1.juli, INNTEKT, true),
-        )
-        val ITPeriodeA1 = 1.januar til 31.januar
-        val ITPeriodeA2 = 1.juli til 31.juli
-
-        val spleisPeriodeA1 = 1.februar til 28.februar
-        val spleisPeriodeA2 = 1.august til 31.august
-        val utbetalingerA1 = arrayOf(
-            ArbeidsgiverUtbetalingsperiode(a1, ITPeriodeA1.start, ITPeriodeA1.endInclusive, 100.prosent, INNTEKT),
-        )
-        val utbetalingerA2 = arrayOf(
-            ArbeidsgiverUtbetalingsperiode(a1, ITPeriodeA1.start, ITPeriodeA1.endInclusive, 100.prosent, INNTEKT),
-            ArbeidsgiverUtbetalingsperiode(a2, ITPeriodeA2.start, ITPeriodeA2.endInclusive, 100.prosent, INNTEKT),
-        )
-
-        håndterSykmelding(Sykmeldingsperiode(spleisPeriodeA1.start, spleisPeriodeA1.endInclusive, 100.prosent), orgnummer = a1)
-        håndterSøknad(Sykdom(spleisPeriodeA1.start, spleisPeriodeA1.endInclusive, 100.prosent), orgnummer = a1)
-
-        håndterUtbetalingshistorikk(1.vedtaksperiode, *utbetalingerA1, inntektshistorikk = inntektshistorikkA1, orgnummer = a1, besvart = LocalDateTime.MIN)
-        håndterYtelser(1.vedtaksperiode, *utbetalingerA1, inntektshistorikk = inntektshistorikkA1, orgnummer = a1, besvart = LocalDateTime.MIN)
-
-        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(orgnummer = a1)
-
-        person.invaliderAllePerioder(hendelselogg, feilmelding = "Feil med vilje")
-
-        håndterSykmelding(Sykmeldingsperiode(spleisPeriodeA2.start, spleisPeriodeA2.endInclusive, 100.prosent), orgnummer = a2)
-        håndterSøknad(Sykdom(spleisPeriodeA2.start, spleisPeriodeA2.endInclusive, 100.prosent), orgnummer = a2)
-
-        håndterUtbetalingshistorikk(1.vedtaksperiode, *utbetalingerA2, inntektshistorikk = inntektshistorikkA2, orgnummer = a2, besvart = LocalDateTime.MIN)
-        håndterYtelser(1.vedtaksperiode, *utbetalingerA2, inntektshistorikk = inntektshistorikkA2, orgnummer = a2, besvart = LocalDateTime.MIN)
-
-        håndterSimulering(1.vedtaksperiode, orgnummer = a2)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
-        håndterUtbetalt(orgnummer = a2)
-
-        assertEquals(88, inspektør(a2).forbrukteSykedager(0))
     }
 
     @Test

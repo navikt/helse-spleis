@@ -450,62 +450,6 @@ internal class OldRevurderInntektTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `revurdering ved skjæringstidspunkt hos infotrygd`() {
-        val historikk1 = listOf(
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 29.januar(2018), 18.februar(2018), 100.prosent, 1000.daglig),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 19.februar(2018), 18.mars(2018), 100.prosent, 1000.daglig),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 19.mars(2018), 2.april(2018), 100.prosent, 1000.daglig),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 3.april(2018), 14.mai(2018), 100.prosent, 1000.daglig),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 15.mai(2018), 3.juni(2018), 100.prosent, 1000.daglig),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 4.juni(2018), 22.juni(2018), 100.prosent, 1000.daglig),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 18.mars(2020), 31.mars(2020), 100.prosent, 1000.daglig),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.april(2020), 30.april(2020), 100.prosent, 1000.daglig),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.mai(2020), 31.mai(2020), 100.prosent, 1000.daglig)
-        )
-        val inntektsopplysning1 = listOf(
-            Inntektsopplysning(ORGNUMMER, 18.mars(2020), INNTEKT, true),
-            Inntektsopplysning(ORGNUMMER, 29.januar(2018), INNTEKT, true)
-        )
-
-        håndterSykmelding(Sykmeldingsperiode(1.juni(2020), 30.juni(2020), 100.prosent))
-        håndterSøknadMedValidering(1.vedtaksperiode,
-            Søknad.Søknadsperiode.Sykdom(1.juni(2020), 30.juni(2020), 100.prosent)
-        )
-        håndterUtbetalingshistorikk(1.vedtaksperiode, *historikk1.toTypedArray(), inntektshistorikk = inntektsopplysning1)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt()
-
-        forlengVedtak(1.juli(2020), 30.juli(2020))
-        håndterOverstyrInntekt(inntekt = 35000.månedlig, skjæringstidspunkt = 18.mars(2020))
-
-        assertTilstander(
-            0,
-            TilstandType.START,
-            TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            TilstandType.AVVENTER_BLOKKERENDE_PERIODE,
-            TilstandType.AVVENTER_HISTORIKK,
-            TilstandType.AVVENTER_SIMULERING,
-            TilstandType.AVVENTER_GODKJENNING,
-            TilstandType.TIL_UTBETALING,
-            TilstandType.AVSLUTTET,
-        )
-
-        assertTilstander(
-            1,
-            TilstandType.START,
-            TilstandType.AVVENTER_BLOKKERENDE_PERIODE,
-            TilstandType.AVVENTER_HISTORIKK,
-            TilstandType.AVVENTER_SIMULERING,
-            TilstandType.AVVENTER_GODKJENNING,
-            TilstandType.TIL_UTBETALING,
-            TilstandType.AVSLUTTET,
-        )
-        assertErrors()
-    }
-
-    @Test
     fun `utbetaling_utbetalt tar med vedtaksperiode-ider for ett enkelt vedtak`() {
         nyttVedtak(1.januar, 31.januar, 100.prosent)
 

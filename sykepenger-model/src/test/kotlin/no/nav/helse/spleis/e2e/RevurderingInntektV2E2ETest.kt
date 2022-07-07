@@ -29,8 +29,6 @@ import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.TilstandType.UTBETALING_FEILET
-import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
-import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.Sykedag
@@ -537,35 +535,6 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         }
         assertDiff(2541)
         assertWarning(WARN_FORLENGER_OPPHØRT_OPPDRAG, AktivitetsloggFilter.person())
-    }
-
-
-    @Test
-    fun `revurdering ved skjæringstidspunkt hos infotrygd`() {
-        val historikk = listOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 31.januar, 100.prosent, 1000.daglig))
-        val inntektsopplysning = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true))
-
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
-        håndterUtbetalingshistorikk(1.vedtaksperiode, *historikk.toTypedArray(), inntektshistorikk = inntektsopplysning)
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt()
-
-        forlengVedtak(1.mars, 31.mars)
-        nullstillTilstandsendringer()
-        håndterOverstyrInntekt(inntekt = 35000.månedlig, skjæringstidspunkt = 1.januar)
-
-        assertTilstander(
-            1.vedtaksperiode,
-            AVSLUTTET
-        )
-        assertTilstander(
-            2.vedtaksperiode,
-            AVSLUTTET
-        )
-        assertErrors()
     }
 
     @Test

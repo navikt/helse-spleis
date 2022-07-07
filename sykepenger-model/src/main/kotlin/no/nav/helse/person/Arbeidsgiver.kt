@@ -271,10 +271,15 @@ internal class Arbeidsgiver private constructor(
         internal fun Iterable<Arbeidsgiver>.harUtbetaltPeriode(skjæringstidspunkt: LocalDate) =
             flatMap { it.vedtaksperioder }.medSkjæringstidspunkt(skjæringstidspunkt).harUtbetaling()
 
-        internal fun Iterable<Arbeidsgiver>.validerVilkårsgrunnlag(aktivitetslogg: IAktivitetslogg, vilkårsgrunnlag: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement, skjæringstidspunkt: LocalDate) {
+        internal fun Iterable<Arbeidsgiver>.validerVilkårsgrunnlag(
+            aktivitetslogg: IAktivitetslogg,
+            vilkårsgrunnlag: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement,
+            skjæringstidspunkt: LocalDate,
+            erForlengelse: Boolean
+        ) {
             val vedtaksperioder = flatMap { it.vedtaksperioder }.filter(SKAL_INNGÅ_I_SYKEPENGEGRUNNLAG(skjæringstidspunkt))
             val relevanteArbeidsgivere = filter { arbeidsgiver -> arbeidsgiver.vedtaksperioder.any { vedtaksperiode -> vedtaksperiode in vedtaksperioder } }.distinct().map { it.organisasjonsnummer }
-            vilkårsgrunnlag.valider(aktivitetslogg, relevanteArbeidsgivere)
+            vilkårsgrunnlag.valider(aktivitetslogg, relevanteArbeidsgivere, erForlengelse)
         }
 
         internal fun Iterable<Arbeidsgiver>.ghostPeriode(

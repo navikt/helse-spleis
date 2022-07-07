@@ -786,7 +786,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Replay av inntekstmelding med forkasting`() = Toggle.ForkastForlengelseAvForkastetPeriode.disable {
+    fun `Replay av inntekstmelding med forkasting`() = Toggle.IkkeForlengInfotrygdperioder.disable {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 10.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(11.januar, 16.januar, 100.prosent))
@@ -1163,7 +1163,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Ikke klipp inntektsmelding dersom vi overlapper med forkastet vedtaksperiode`() = Toggle.ForkastForlengelseAvForkastetPeriode.disable {
+    fun `Ikke klipp inntektsmelding dersom vi overlapper med forkastet vedtaksperiode`() = Toggle.IkkeForlengInfotrygdperioder.disable {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 10.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent))
         person.invaliderAllePerioder(hendelselogg, null)

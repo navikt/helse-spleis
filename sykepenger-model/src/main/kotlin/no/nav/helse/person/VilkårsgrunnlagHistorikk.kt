@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.Grunnbeløp
+import no.nav.helse.Toggle
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.til
@@ -170,13 +171,13 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             innslag.add(skjæringstidspunkt, this)
         }
 
-        internal fun valider(aktivitetslogg: IAktivitetslogg, organisasjonsnummer: List<String>): Boolean {
+        internal fun valider(aktivitetslogg: IAktivitetslogg, organisasjonsnummer: List<String>, erForlengelse: Boolean): Boolean {
             sykepengegrunnlag.validerInntekt(aktivitetslogg, organisasjonsnummer)
-            valider(aktivitetslogg)
+            valider(aktivitetslogg, erForlengelse)
             return !aktivitetslogg.hasErrorsOrWorse()
         }
 
-        protected open fun valider(aktivitetslogg: IAktivitetslogg) {}
+        protected open fun valider(aktivitetslogg: IAktivitetslogg, erForlengelse: Boolean) {}
 
         internal abstract fun accept(vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor)
         internal fun sykepengegrunnlag() = sykepengegrunnlag
@@ -274,7 +275,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         private val meldingsreferanseId: UUID?,
         vilkårsgrunnlagId: UUID
     ) : VilkårsgrunnlagElement(vilkårsgrunnlagId, skjæringstidspunkt, sykepengegrunnlag) {
-        override fun valider(aktivitetslogg: IAktivitetslogg) {
+        override fun valider(aktivitetslogg: IAktivitetslogg, harSpleisPeriodeForanEllerSkjæringstidpsunktIPerioden: Boolean) {
             sjekkAvviksprosent(aktivitetslogg)
         }
 
@@ -358,8 +359,12 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         sykepengegrunnlag: Sykepengegrunnlag,
         vilkårsgrunnlagId: UUID = UUID.randomUUID()
     ) : VilkårsgrunnlagElement(vilkårsgrunnlagId, skjæringstidspunkt, sykepengegrunnlag) {
-        override fun valider(aktivitetslogg: IAktivitetslogg) {
-            sjekkGammeltSkjæringstidspunkt(aktivitetslogg)
+        override fun valider(aktivitetslogg: IAktivitetslogg, erForlengelse: Boolean) {
+            if (erForlengelse) {
+                aktivitetslogg.info("Perioden har opphav i Infotrygd, men saken beholdes i Spleis fordi det er utbetalt i Spleis tidligere.")
+                return sjekkGammeltSkjæringstidspunkt(aktivitetslogg)
+            }
+            if (Toggle.IkkeForlengInfotrygdperioder.enabled) aktivitetslogg.error("Støtter ikke saker med vilkårsgrunnlag i Infotrygd")
         }
 
         private fun sjekkGammeltSkjæringstidspunkt(aktivitetslogg: IAktivitetslogg) {

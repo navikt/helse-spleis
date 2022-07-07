@@ -322,13 +322,6 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
         assertEquals(0, beregner.feriepengedatoer().size)
     }
 
-    @Test
-    fun `Teller ikke med dager fra opphørte utbetalingslinjer`() {
-        byggPersonMedOpphør()
-        val beregner = Feriepengeberegner(alder, Year.of(2018), utbetalingshistorikkForFeriepenger(), person)
-        assertEquals((16.januar til 28.februar).filterNot { it.erHelg() }, beregner.feriepengedatoer())
-    }
-
     private fun utbetalingshistorikkForFeriepenger(
         utbetalinger: List<UtbetalingshistorikkForFeriepenger.Utbetalingsperiode> = emptyList(),
         arbeidskategorikoder: UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder = UtbetalingshistorikkForFeriepenger.Arbeidskategorikoder(
@@ -440,51 +433,4 @@ internal class FeriepengeberegnerVisitorTest : AbstractEndToEndTest() {
         håndterUtbetalt(orgnummer = a2)
     }
 
-    private fun byggPersonMedOpphør(
-        arbeidsgiverperiode: Periode = 1.januar til 16.januar,
-        syktil: LocalDate = 31.januar,
-        orgnummer: String = ORGNUMMER
-    ) {
-        håndterSykmelding(Sykmeldingsperiode(arbeidsgiverperiode.start, syktil, 100.prosent), orgnummer = orgnummer)
-        håndterSøknadMedValidering(
-            observatør.sisteVedtaksperiode(),
-            Sykdom(arbeidsgiverperiode.start, syktil, 100.prosent),
-            orgnummer = orgnummer
-        )
-        håndterUtbetalingshistorikk(
-            observatør.sisteVedtaksperiode(),
-            orgnummer = orgnummer,
-            inntektshistorikk = listOf(Inntektsopplysning(orgnummer, 1.desember(2017), INNTEKT, true)),
-            besvart = LocalDateTime.now().minusMonths(1),
-            utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(orgnummer, 1.desember(2017), 31.desember(2017), 100.prosent, INNTEKT))
-        )
-        håndterYtelser(
-            observatør.sisteVedtaksperiode(),
-            orgnummer = orgnummer,
-            inntektshistorikk = listOf(Inntektsopplysning(orgnummer, 1.desember(2017), INNTEKT, true)),
-            besvart = LocalDateTime.now().minusMonths(1),
-            utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(orgnummer, 1.desember(2017), 31.desember(2017), 100.prosent, INNTEKT))
-        )
-
-        håndterSimulering(observatør.sisteVedtaksperiode(), orgnummer = orgnummer)
-        håndterUtbetalingsgodkjenning(observatør.sisteVedtaksperiode(), orgnummer = orgnummer)
-        håndterUtbetalt(orgnummer = orgnummer)
-
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 60.prosent), orgnummer = orgnummer)
-        håndterSøknadMedValidering(
-            observatør.sisteVedtaksperiode(),
-            Sykdom(1.februar, 28.februar, 60.prosent),
-            orgnummer = orgnummer
-        )
-        håndterYtelser(
-            observatør.sisteVedtaksperiode(),
-            orgnummer = orgnummer,
-            inntektshistorikk = listOf(Inntektsopplysning(orgnummer, 1.desember(2017), 40000.månedlig, true)),
-            utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(orgnummer, 1.desember(2017), 15.januar, 50.prosent, 40000.månedlig))
-        )
-
-        håndterSimulering(observatør.sisteVedtaksperiode(), orgnummer = orgnummer)
-        håndterUtbetalingsgodkjenning(observatør.sisteVedtaksperiode(), orgnummer = orgnummer)
-        håndterUtbetalt(orgnummer = orgnummer)
-    }
 }

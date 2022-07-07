@@ -80,6 +80,7 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 class JsonBuilderTest {
@@ -160,6 +161,7 @@ class JsonBuilderTest {
         testSerialiseringAvPerson(dødPerson)
     }
 
+    @Disabled
     @Test
     fun `Person med infotrygdforlengelse`() {
         testSerialiseringAvPerson(personMedInfotrygdForlengelse())

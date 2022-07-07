@@ -908,8 +908,13 @@ class Person private constructor(
             vedtaksperioder.lagUtbetalinger(this, vilkårsgrunnlagHistorikk)
         }
 
-    internal fun valider(aktivitetslogg: IAktivitetslogg, vilkårsgrunnlag: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement, skjæringstidspunkt: LocalDate): Boolean {
-        arbeidsgivere.validerVilkårsgrunnlag(aktivitetslogg, vilkårsgrunnlag, skjæringstidspunkt)
+    internal fun valider(
+        aktivitetslogg: IAktivitetslogg,
+        vilkårsgrunnlag: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement,
+        skjæringstidspunkt: LocalDate,
+        erForlengelse: Boolean
+    ): Boolean {
+        arbeidsgivere.validerVilkårsgrunnlag(aktivitetslogg, vilkårsgrunnlag, skjæringstidspunkt, erForlengelse)
         return !aktivitetslogg.hasErrorsOrWorse()
     }
 
