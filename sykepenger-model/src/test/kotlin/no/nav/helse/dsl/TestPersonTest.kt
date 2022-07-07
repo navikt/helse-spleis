@@ -11,6 +11,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
+import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
@@ -22,6 +23,7 @@ import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
+import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.spleis.e2e.assertInntektForDato
 import no.nav.helse.sykdomstidslinje.Dag
@@ -238,5 +240,28 @@ internal class TestPersonTest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
             håndterUtbetalt()
         }
+    }
+
+    @Test
+    fun `ingen historie med inntektsmelding, så søknad til arbeidsgiver`() {
+        håndterSykmelding(Sykmeldingsperiode(3.januar, 8.januar, 100.prosent))
+        val inntektsmeldingId = håndterInntektsmelding(arbeidsgiverperioder = listOf(Periode(3.januar, 18.januar)), førsteFraværsdag = 3.januar)
+        assertNoWarnings()
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(3.januar, 8.januar, 100.prosent))
+        håndterInntektsmeldingReplay(inntektsmeldingId, 1.vedtaksperiode)
+        assertNoErrors(1.vedtaksperiode.filter())
+        assertActivities()
+        inspektør.also {
+            assertInntektForDato(AbstractEndToEndTest.INNTEKT, 3.januar, inspektør = it)
+            assertEquals(2, it.sykdomshistorikk.size)
+            assertEquals(4, it.sykdomstidslinje.inspektør.dagteller[Dag.Sykedag::class])
+            assertEquals(2, it.sykdomstidslinje.inspektør.dagteller[Dag.SykHelgedag::class])
+        }
+        assertTilstander(
+            1.vedtaksperiode,
+            START,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            TilstandType.AVSLUTTET_UTEN_UTBETALING
+        )
     }
 }

@@ -1,15 +1,19 @@
 package no.nav.helse.dsl
 
 import java.util.UUID
+import no.nav.helse.Fødselsnummer
 import no.nav.helse.hendelser.Hendelseskontekst
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.TilstandType
 import org.junit.jupiter.api.Assertions.assertTrue
 
 internal class Behovsamler : PersonObserver {
     private val behov = mutableListOf<Behov>()
+    private val tilstander = mutableMapOf<UUID, TilstandType>()
+    private val replays = mutableSetOf<UUID>()
 
     internal fun registrerBehov(aktivitetslogg: IAktivitetslogg) {
         val nyeBehov = aktivitetslogg.behov().takeUnless { it.isEmpty() } ?: return
@@ -29,18 +33,22 @@ internal class Behovsamler : PersonObserver {
         return behovtyper.all { behovtype -> behovtype in behover }
     }
 
+    internal fun bekreftOgKvitterReplay(vedtaksperiodeId: UUID) {
+        assertTrue(replays.remove(vedtaksperiodeId)) { "Vedtaksperioden har ikke bedt om replay. Den står i ${tilstander.getValue(vedtaksperiodeId)}"}
+    }
+
     internal fun bekreftBehov(vedtaksperiodeId: UUID, vararg behovtyper: Behovtype) {
-        bekreftBehov(vedtaksperiodebehov(vedtaksperiodeId), *behovtyper)
+        bekreftBehov(vedtaksperiodebehov(vedtaksperiodeId), *behovtyper) { "Vedtaksperioden står i ${tilstander.getValue(vedtaksperiodeId)}"}
     }
 
     internal fun bekreftBehov(orgnummer: String, vararg behovtyper: Behovtype) {
         bekreftBehov(orgnummerbehov(orgnummer), *behovtyper)
     }
 
-    internal fun bekreftBehov(filter: (Behov) -> Boolean, vararg behovtyper: Behovtype) {
+    private fun bekreftBehov(filter: (Behov) -> Boolean, vararg behovtyper: Behovtype, melding: () -> String = { "" }) {
         assertTrue(harBehov(filter, *behovtyper)) {
             val behover = behov.filter(filter)
-            "Forventer at ${behovtyper.joinToString { it.toString() }} skal være etterspurt. Fant bare: ${behover.joinToString { it.type.toString() }}"
+            "Forventer at [${behovtyper.joinToString { it.toString() }}] skal være etterspurt. Fant bare: [${behover.joinToString { it.type.toString() }}]. ${melding()}"
         }
     }
 
@@ -52,11 +60,18 @@ internal class Behovsamler : PersonObserver {
     internal fun detaljerFor(filter: (Behov) -> Boolean, behovtype: Behovtype) =
         behov.filter { filter(it) && it.type == behovtype }.map { it.detaljer() to it.kontekst() }
 
-    internal fun kvitterBehov(vedtaksperiodeId: UUID) {
+    private fun kvitterVedtaksperiode(vedtaksperiodeId: UUID) {
         val vedtaksperiodebehov = behov.filter(vedtaksperiodebehov(vedtaksperiodeId)).takeUnless { it.isEmpty() } ?: return
         println("Fjerner ${vedtaksperiodebehov.size} behov (${vedtaksperiodebehov.joinToString { it.type.toString() }})")
         behov.removeAll { behov -> vedtaksperiodeId == behov.vedtaksperiodeId }
         println(" -> Det er nå ${behov.size} behov (${behov.joinToString { it.type.toString() }})")
+        if (replays.remove(vedtaksperiodeId)) {
+            println("-> Vedtaksperioden ba om replay, men det ble ikke utført")
+        }
+    }
+
+    override fun inntektsmeldingReplay(fødselsnummer: Fødselsnummer, vedtaksperiodeId: UUID) {
+        replays.add(vedtaksperiodeId)
     }
 
     override fun vedtaksperiodeEndret(
@@ -65,7 +80,8 @@ internal class Behovsamler : PersonObserver {
     ) {
         val detaljer = mutableMapOf<String, String>().apply { hendelseskontekst.appendTo(this::put) }
         val vedtaksperiodeId = UUID.fromString(detaljer.getValue("vedtaksperiodeId"))
-        kvitterBehov(vedtaksperiodeId)
+        tilstander[vedtaksperiodeId] = event.gjeldendeTilstand
+        kvitterVedtaksperiode(vedtaksperiodeId)
     }
 
     private companion object {

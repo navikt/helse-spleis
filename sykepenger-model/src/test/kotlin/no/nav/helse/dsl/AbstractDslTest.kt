@@ -86,6 +86,8 @@ internal abstract class AbstractDslTest {
         id: UUID = UUID.randomUUID()
     ) =
         this { håndterInntektsmelding(arbeidsgiverperioder, beregnetInntekt, førsteFraværsdag, refusjon, harOpphørAvNaturalytelser, arbeidsforholdId, begrunnelseForReduksjonEllerIkkeUtbetalt, id) }
+    protected fun String.håndterInntektsmeldingReplay(inntektsmeldingId: UUID, vedtaksperiodeId: UUID) =
+        this { håndterInntektsmeldingReplay(inntektsmeldingId, vedtaksperiodeId) }
     internal fun String.håndterUtbetalingshistorikk(
         vedtaksperiodeId: UUID,
         utbetalinger: List<Infotrygdperiode> = listOf(),
@@ -93,7 +95,7 @@ internal abstract class AbstractDslTest {
         harStatslønn: Boolean = false,
         besvart: LocalDateTime = LocalDateTime.now()
     ) =
-        this { håndterUtbetalingshistorikk(vedtaksperiodeId, utbetalinger, inntektshistorikk, harStatslønn) }
+        this { håndterUtbetalingshistorikk(vedtaksperiodeId, utbetalinger, inntektshistorikk, harStatslønn, besvart) }
     internal fun String.håndterVilkårsgrunnlag(
         vedtaksperiodeId: UUID,
         inntekt: Inntekt = INNTEKT,
@@ -131,8 +133,8 @@ internal abstract class AbstractDslTest {
         this { assertTilstander(id, *tilstander) }
     protected fun String.assertSisteTilstand(id: UUID, tilstand: TilstandType) =
         this { assertSisteTilstand(id, tilstand) }
-    protected fun String.assertNoErrors() =
-        this { asserter.assertNoErrors() }
+    protected fun String.assertNoErrors(vararg filtre: AktivitetsloggFilter) =
+        this { asserter.assertNoErrors(*filtre) }
     protected fun String.assertNoWarnings(vararg filtre: AktivitetsloggFilter) =
         this { asserter.assertNoWarnings(*filtre) }
 
@@ -164,6 +166,9 @@ internal abstract class AbstractDslTest {
         orgnummer: String = a1
     ) =
         a1.håndterInntektsmelding(arbeidsgiverperioder, beregnetInntekt, førsteFraværsdag, refusjon, harOpphørAvNaturalytelser, arbeidsforholdId, begrunnelseForReduksjonEllerIkkeUtbetalt, id)
+    protected fun håndterInntektsmeldingReplay(inntektsmeldingId: UUID, vedtaksperiodeId: UUID) =
+        a1.håndterInntektsmeldingReplay(inntektsmeldingId, vedtaksperiodeId)
+
     internal fun håndterUtbetalingshistorikk(
         vedtaksperiodeId: UUID,
         utbetalinger: List<Infotrygdperiode> = listOf(),
@@ -212,8 +217,8 @@ internal abstract class AbstractDslTest {
         a1.assertTilstander(id, *tilstander)
     protected fun assertSisteTilstand(id: UUID, tilstand: TilstandType) =
         a1.assertSisteTilstand(id, tilstand)
-    protected fun assertNoErrors() =
-        a1.assertNoErrors()
+    protected fun assertNoErrors(vararg filtre: AktivitetsloggFilter) =
+        a1.assertNoErrors(*filtre)
     protected fun assertNoWarnings(vararg filtre: AktivitetsloggFilter) =
         a1.assertNoWarnings(*filtre)
     protected fun assertActivities() {

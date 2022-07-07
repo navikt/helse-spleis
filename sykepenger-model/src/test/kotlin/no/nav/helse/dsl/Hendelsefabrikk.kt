@@ -10,6 +10,7 @@ import no.nav.helse.hendelser.Dødsinfo
 import no.nav.helse.hendelser.Foreldrepermisjon
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.InntektsmeldingReplay
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Institusjonsopphold
 import no.nav.helse.hendelser.Medlemskapsvurdering
@@ -117,6 +118,12 @@ internal class Hendelsefabrikk(
         inntektsmeldinger[id] = inntektsmeldinggenerator
         return inntektsmeldinggenerator()
     }
+
+    internal fun lagInntektsmeldingReplay(inntektsmeldingId: UUID, vedtaksperiodeId: UUID) =
+        InntektsmeldingReplay(
+            wrapped = inntektsmeldinger.getValue(inntektsmeldingId)(),
+            vedtaksperiodeId = vedtaksperiodeId
+        )
 
     internal fun lagUtbetalingshistorikk(
         vedtaksperiodeId: UUID,

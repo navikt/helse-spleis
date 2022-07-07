@@ -126,8 +126,25 @@ internal class TestPerson(
             arbeidsforholdId: String? = null,
             begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
             id: UUID = UUID.randomUUID()
-        ) =
-            fabrikk.lagInntektsmelding(arbeidsgiverperioder, beregnetInntekt, førsteFraværsdag, refusjon, harOpphørAvNaturalytelser, arbeidsforholdId, begrunnelseForReduksjonEllerIkkeUtbetalt, id).håndter(Person::håndter)
+        ): UUID {
+            fabrikk.lagInntektsmelding(
+                arbeidsgiverperioder,
+                beregnetInntekt,
+                førsteFraværsdag,
+                refusjon,
+                harOpphørAvNaturalytelser,
+                arbeidsforholdId,
+                begrunnelseForReduksjonEllerIkkeUtbetalt,
+                id
+            ).håndter(Person::håndter)
+            return id
+        }
+
+        internal fun håndterInntektsmeldingReplay(inntektsmeldingId: UUID, vedtaksperiodeId: UUID) {
+            behovsamler.bekreftOgKvitterReplay(vedtaksperiodeId)
+            fabrikk.lagInntektsmeldingReplay(inntektsmeldingId, vedtaksperiodeId)
+                .håndter(Person::håndter)
+        }
 
         internal fun håndterUtbetalingshistorikk(
             vedtaksperiodeId: UUID,
