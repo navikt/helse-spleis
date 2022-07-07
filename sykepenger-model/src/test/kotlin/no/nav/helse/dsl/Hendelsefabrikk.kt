@@ -18,6 +18,7 @@ import no.nav.helse.hendelser.Omsorgspenger
 import no.nav.helse.hendelser.Opplæringspenger
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Pleiepenger
+import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -25,10 +26,12 @@ import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
+import no.nav.helse.hendelser.utbetaling.AnnullerUtbetaling
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.UtbetalingOverført
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.TilstandType
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
@@ -317,5 +320,31 @@ internal class Hendelsefabrikk(
             melding = "hei",
             avstemmingsnøkkel = 123456L,
             overføringstidspunkt = LocalDateTime.now()
+        )
+
+    internal fun lagAnnullering(fagsystemId: String) =
+        AnnullerUtbetaling(
+            meldingsreferanseId = UUID.randomUUID(),
+            aktørId = aktørId,
+            fødselsnummer = fødselsnummer.toString(),
+            organisasjonsnummer = organisasjonsnummer,
+            fagsystemId = fagsystemId,
+            saksbehandlerIdent = "Ola Nordmann",
+            saksbehandlerEpost = "tbd@nav.no",
+            opprettet = LocalDateTime.now()
+        )
+
+    internal fun lagPåminnelse(vedtaksperiodeId: UUID, tilstand: TilstandType, tidspunkt: LocalDateTime) =
+        Påminnelse(
+            UUID.randomUUID(),
+            aktørId,
+            fødselsnummer.toString(),
+            organisasjonsnummer,
+            vedtaksperiodeId.toString(),
+            0,
+            tilstand,
+            LocalDateTime.now(),
+            tidspunkt,
+            LocalDateTime.now()
         )
 }

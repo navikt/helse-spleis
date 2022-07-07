@@ -88,7 +88,7 @@ internal abstract class AbstractDslTest {
         this { håndterInntektsmelding(arbeidsgiverperioder, beregnetInntekt, førsteFraværsdag, refusjon, harOpphørAvNaturalytelser, arbeidsforholdId, begrunnelseForReduksjonEllerIkkeUtbetalt, id) }
     protected fun String.håndterInntektsmeldingReplay(inntektsmeldingId: UUID, vedtaksperiodeId: UUID) =
         this { håndterInntektsmeldingReplay(inntektsmeldingId, vedtaksperiodeId) }
-    internal fun String.håndterUtbetalingshistorikk(
+    protected fun String.håndterUtbetalingshistorikk(
         vedtaksperiodeId: UUID,
         utbetalinger: List<Infotrygdperiode> = listOf(),
         inntektshistorikk: List<Inntektsopplysning> = emptyList(),
@@ -96,7 +96,7 @@ internal abstract class AbstractDslTest {
         besvart: LocalDateTime = LocalDateTime.now()
     ) =
         this { håndterUtbetalingshistorikk(vedtaksperiodeId, utbetalinger, inntektshistorikk, harStatslønn, besvart) }
-    internal fun String.håndterVilkårsgrunnlag(
+    protected fun String.håndterVilkårsgrunnlag(
         vedtaksperiodeId: UUID,
         inntekt: Inntekt = INNTEKT,
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
@@ -105,7 +105,7 @@ internal abstract class AbstractDslTest {
         arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold>? = null
     ) =
         this { håndterVilkårsgrunnlag(vedtaksperiodeId, inntekt, medlemskapstatus, inntektsvurdering, inntektsvurderingForSykepengegrunnlag, arbeidsforhold) }
-    internal fun String.håndterYtelser(
+    protected fun String.håndterYtelser(
         vedtaksperiodeId: UUID,
         utbetalinger: List<Infotrygdperiode> = listOf(),
         inntektshistorikk: List<Inntektsopplysning> = emptyList(),
@@ -123,18 +123,27 @@ internal abstract class AbstractDslTest {
         besvart: LocalDateTime = LocalDateTime.now(),
     ) =
         this { håndterYtelser(vedtaksperiodeId, utbetalinger, inntektshistorikk, foreldrepenger, svangerskapspenger, pleiepenger, omsorgspenger, opplæringspenger, institusjonsoppholdsperioder, dødsdato, statslønn, arbeidskategorikoder, arbeidsavklaringspenger, dagpenger, besvart) }
-    internal fun String.håndterSimulering(vedtaksperiodeId: UUID) =
+    protected fun String.håndterSimulering(vedtaksperiodeId: UUID) =
         this { håndterSimulering(vedtaksperiodeId) }
-    internal fun String.håndterUtbetalingsgodkjenning(vedtaksperiodeId: UUID, godkjent: Boolean) =
+    protected fun String.håndterUtbetalingsgodkjenning(vedtaksperiodeId: UUID, godkjent: Boolean) =
         this { håndterUtbetalingsgodkjenning(vedtaksperiodeId, godkjent) }
-    internal fun String.håndterUtbetalt(status: Oppdragstatus) =
+    protected fun String.håndterUtbetalt(status: Oppdragstatus) =
         this { håndterUtbetalt(status) }
+    protected fun String.håndterAnnullering(fagsystemId: String) =
+        this { håndterAnnullering(fagsystemId) }
+    protected fun String.håndterPåminnelse(vedtaksperiodeId: UUID, tilstand: TilstandType, tidspunkt: LocalDateTime = LocalDateTime.now()) =
+        this { håndterPåminnelse(vedtaksperiodeId, tilstand, tidspunkt) }
+
     protected fun String.assertTilstander(id: UUID, vararg tilstander: TilstandType) =
         this { assertTilstander(id, *tilstander) }
     protected fun String.assertSisteTilstand(id: UUID, tilstand: TilstandType) =
         this { assertSisteTilstand(id, tilstand) }
     protected fun String.assertNoErrors(vararg filtre: AktivitetsloggFilter) =
         this { asserter.assertNoErrors(*filtre) }
+    protected fun String.assertWarnings(vararg filtre: AktivitetsloggFilter) =
+        this { asserter.assertWarnings(*filtre) }
+    protected fun String.assertWarning(warning: String, vararg filtre: AktivitetsloggFilter) =
+        this { asserter.assertWarning(warning, *filtre) }
     protected fun String.assertNoWarnings(vararg filtre: AktivitetsloggFilter) =
         this { asserter.assertNoWarnings(*filtre) }
 
@@ -213,12 +222,21 @@ internal abstract class AbstractDslTest {
         a1.håndterUtbetalingsgodkjenning(vedtaksperiodeId, godkjent)
     internal fun håndterUtbetalt(status: Oppdragstatus = Oppdragstatus.AKSEPTERT, orgnummer: String = a1) =
         a1.håndterUtbetalt(status)
+    protected fun håndterAnnullering(fagsystemId: String) =
+        a1.håndterAnnullering(fagsystemId)
+    protected fun håndterPåminnelse(vedtaksperiodeId: UUID, tilstand: TilstandType, tidspunkt: LocalDateTime = LocalDateTime.now()) =
+        a1.håndterPåminnelse(vedtaksperiodeId, tilstand, tidspunkt)
+
     protected fun assertTilstander(id: UUID, vararg tilstander: TilstandType) =
         a1.assertTilstander(id, *tilstander)
     protected fun assertSisteTilstand(id: UUID, tilstand: TilstandType) =
         a1.assertSisteTilstand(id, tilstand)
     protected fun assertNoErrors(vararg filtre: AktivitetsloggFilter) =
         a1.assertNoErrors(*filtre)
+    protected fun assertWarnings(vararg filtre: AktivitetsloggFilter) =
+        a1.assertWarnings(*filtre)
+    protected fun assertWarning(warning: String, vararg filtre: AktivitetsloggFilter) =
+        a1.assertWarning(warning, *filtre)
     protected fun assertNoWarnings(vararg filtre: AktivitetsloggFilter) =
         a1.assertNoWarnings(*filtre)
     protected fun assertActivities() {

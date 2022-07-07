@@ -40,6 +40,7 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.PersonHendelse
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonVisitor
+import no.nav.helse.person.TilstandType
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
@@ -237,6 +238,15 @@ internal class TestPerson(
                 fabrikk.lagUtbetalinghendelse(utbetalingId, fagsystemId, status)
                     .håndter(Person::håndter)
             }
+        }
+
+        internal fun håndterAnnullering(fagsystemId: String) {
+            fabrikk.lagAnnullering(fagsystemId).håndter(Person::håndter)
+        }
+
+        internal fun håndterPåminnelse(vedtaksperiodeId: UUID, tilstand: TilstandType, tidspunkt: LocalDateTime = LocalDateTime.now()) {
+            fabrikk.lagPåminnelse(vedtaksperiodeId, tilstand, tidspunkt)
+                .håndter(Person::håndter)
         }
 
         operator fun <R> invoke(testblokk: TestArbeidsgiver.() -> R): R {
