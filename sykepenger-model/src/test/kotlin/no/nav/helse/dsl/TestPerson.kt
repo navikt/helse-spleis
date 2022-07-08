@@ -98,6 +98,9 @@ internal class TestPerson(
     internal fun <R> arbeidsgiver(orgnummer: String, block: TestArbeidsgiver.() -> R) =
         arbeidsgiver(orgnummer)(block)
 
+    internal operator fun <R> String.invoke(testblokk: TestArbeidsgiver.() -> R) =
+        arbeidsgiver(this, testblokk)
+
     private fun <T : PersonHendelse> T.håndter(håndter: Person.(T) -> Unit): T {
         forrigeHendelse = this
         person.håndter(this)
@@ -344,10 +347,10 @@ internal fun TestPerson.TestArbeidsgiver.nyttVedtak(
     beregnetInntekt: Inntekt = INNTEKT,
     refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
     arbeidsgiverperiode: List<Periode> = emptyList(),
+    status: Oppdragstatus = Oppdragstatus.AKSEPTERT,
     inntekterBlock: Inntektperioder.() -> Unit = { lagInntektperioder(orgnummer, fom, beregnetInntekt) }
 ) {
-    håndterSykmelding(Sykmeldingsperiode(fom, tom, grad))
-    val vedtaksperiode = håndterSøknad(Sykdom(fom, tom, grad)) ?: fail { "Det ble ikke opprettet noen vedtaksperiode" }
+    val vedtaksperiode = nyPeriode(fom til tom, grad)
     håndterInntektsmelding(arbeidsgiverperiode, beregnetInntekt, førsteFraværsdag, refusjon)
     håndterYtelser(vedtaksperiode)
     håndterVilkårsgrunnlag(vedtaksperiode, beregnetInntekt, inntektsvurdering = Inntektsvurdering(
@@ -356,5 +359,15 @@ internal fun TestPerson.TestArbeidsgiver.nyttVedtak(
     håndterYtelser(vedtaksperiode)
     håndterSimulering(vedtaksperiode)
     håndterUtbetalingsgodkjenning(vedtaksperiode)
-    håndterUtbetalt()
+    håndterUtbetalt(status)
+}
+
+internal fun TestPerson.TestArbeidsgiver.nyPeriode(periode: Periode, grad: Prosentdel = 100.prosent): UUID {
+    håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, grad))
+    return håndterSøknad(Sykdom(periode.start, periode.endInclusive, grad)) ?: fail { "Det ble ikke opprettet noen vedtaksperiode" }
+}
+
+internal fun TestPerson.nyPeriode(periode: Periode, vararg orgnummer: String, grad: Prosentdel = 100.prosent) {
+    orgnummer.forEach { it { håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, grad)) } }
+    orgnummer.forEach { it { håndterSøknad(Sykdom(periode.start, periode.endInclusive, grad)) } }
 }

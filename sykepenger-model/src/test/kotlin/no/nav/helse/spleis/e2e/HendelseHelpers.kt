@@ -1,21 +1,22 @@
 package no.nav.helse.spleis.e2e
 
 
-import no.nav.helse.desember
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode
-import no.nav.helse.person.*
-import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
-import no.nav.helse.serde.api.serializePersonForSpeil
+import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.Arbeidsforholdhistorikk
+import no.nav.helse.person.Arbeidsgiver
+import no.nav.helse.person.IdInnhenter
+import no.nav.helse.person.PersonVisitor
+import no.nav.helse.person.TilstandType
 import no.nav.helse.serde.api.dto.HendelseDTO
 import no.nav.helse.serde.api.dto.InntektsmeldingDTO
 import no.nav.helse.serde.api.dto.SykmeldingDTO
 import no.nav.helse.serde.api.dto.SøknadNavDTO
-import no.nav.helse.økonomi.Inntekt.Companion.daglig
-import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
+import no.nav.helse.serde.api.serializePersonForSpeil
 
 internal class EtterspurtBehov(
     private val type: Aktivitetslogg.Aktivitet.Behov.Behovtype,
@@ -105,26 +106,6 @@ internal fun AbstractEndToEndTest.tellArbeidsforholdINyesteHistorikkInnslag(orgn
     })
 
     return antall
-}
-
-internal fun AbstractEndToEndTest.historikk(orgnummer: String, sykedagstelling: Int = 0) {
-    person.håndter(
-        ytelser(
-            1.vedtaksperiode,
-            utbetalinger = utbetalinger(sykedagstelling, orgnummer),
-            orgnummer = orgnummer
-        )
-    )
-}
-
-private fun utbetalinger(dagTeller: Int, orgnummer: String): List<ArbeidsgiverUtbetalingsperiode> {
-    if (dagTeller == 0) return emptyList()
-    val førsteDato = 2.desember(2017).minusDays(
-        (
-            (dagTeller / 5 * 7) + dagTeller % 5
-            ).toLong()
-    )
-    return listOf(ArbeidsgiverUtbetalingsperiode(orgnummer, førsteDato, 1.desember(2017), 100.prosent, 100.daglig))
 }
 
 internal fun AbstractEndToEndTest.finnSkjæringstidspunkt(orgnummer: String, vedtaksperiodeIdInnhenter: IdInnhenter) =

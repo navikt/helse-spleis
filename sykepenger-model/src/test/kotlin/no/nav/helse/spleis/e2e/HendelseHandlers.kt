@@ -6,7 +6,6 @@ import java.time.Year
 import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.Fødselsnummer
-import no.nav.helse.desember
 import no.nav.helse.etterspurteBehov
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.Dagtype
@@ -38,7 +37,6 @@ import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
-import no.nav.helse.oktober
 import no.nav.helse.person.AbstractPersonTest
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
@@ -228,10 +226,11 @@ internal fun AbstractEndToEndTest.nyttVedtak(
     beregnetInntekt: Inntekt = INNTEKT,
     refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
     arbeidsgiverperiode: List<Periode>? = null,
+    status: Oppdragstatus = Oppdragstatus.AKSEPTERT,
     inntekterBlock: Inntektperioder.() -> Unit = { lagInntektperioder(orgnummer, fom, beregnetInntekt) }
 ) {
     tilGodkjent(fom, tom, grad, førsteFraværsdag, fnr = fnr, orgnummer = orgnummer, refusjon = refusjon, inntekterBlock = inntekterBlock, arbeidsgiverperiode = arbeidsgiverperiode, beregnetInntekt = beregnetInntekt)
-    håndterUtbetalt(status = Oppdragstatus.AKSEPTERT, fnr = fnr, orgnummer = orgnummer)
+    håndterUtbetalt(status = status, fnr = fnr, orgnummer = orgnummer)
 }
 
 internal fun AbstractEndToEndTest.tilGodkjent(
@@ -920,77 +919,9 @@ internal fun TIL_AVSLUTTET_FORLENGELSE(førsteAG: Boolean = true) =
 
 internal fun AbstractEndToEndTest.håndterOverstyringSykedag(periode: Periode) = håndterOverstyrTidslinje(periode.map { manuellSykedag(it) })
 
-internal fun AbstractEndToEndTest.prosessperiode(periode: Periode, orgnummer: String, sykedagstelling: Int = 0) {
-    gapPeriode(periode, orgnummer, sykedagstelling)
-    historikk(orgnummer, sykedagstelling)
-    betale(orgnummer)
-}
-
-internal fun AbstractEndToEndTest.gapPeriode(periode: Periode, orgnummer: String, sykedagstelling: Int = 0) {
-    nyPeriode(periode, orgnummer)
-    håndterInntektsmelding(
-        arbeidsgiverperioder = listOf(Periode(periode.start, periode.start.plusDays(15))),
-        førsteFraværsdag = periode.start,
-        orgnummer = orgnummer
-    )
-    historikk(orgnummer, sykedagstelling)
-    person.håndter(vilkårsgrunnlag(
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
-            orgnummer = orgnummer,
-            inntektsvurdering = Inntektsvurdering(
-                inntekter = inntektperioderForSammenligningsgrunnlag {
-                    1.januar(2017) til 1.desember(2017) inntekter {
-                        orgnummer inntekt INNTEKT
-                    }
-                }
-            ),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = inntektperioderForSykepengegrunnlag {
-                    1.oktober(2017) til 1.desember(2017) inntekter {
-                        orgnummer inntekt INNTEKT
-                    }
-                }, arbeidsforhold = emptyList()
-            )
-    )
-    )
-}
-
 internal fun AbstractEndToEndTest.nyPeriode(periode: Periode, vararg orgnummer: String = arrayOf(AbstractPersonTest.ORGNUMMER), grad: Prosentdel = 100.prosent, fnr: Fødselsnummer = AbstractPersonTest.UNG_PERSON_FNR_2018) {
     orgnummer.forEach { håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, grad), fnr = fnr, orgnummer = it) }
     orgnummer.forEach {
         håndterSøknad(Søknadsperiode.Sykdom(periode.start, periode.endInclusive, grad), fnr = fnr, orgnummer = it)
     }
-}
-
-internal fun AbstractEndToEndTest.betale(orgnummer: String) {
-    simulering(1.vedtaksperiode, orgnummer = orgnummer).forEach { simulering ->
-        person.håndter(simulering)
-    }
-    person.håndter(
-        utbetalingsgodkjenning(
-            1.vedtaksperiode,
-            true,
-            orgnummer = orgnummer,
-            automatiskBehandling = false
-        )
-    )
-    person.håndter(
-        UtbetalingOverført(
-            meldingsreferanseId = UUID.randomUUID(),
-            aktørId = AbstractPersonTest.AKTØRID,
-            fødselsnummer = AbstractPersonTest.UNG_PERSON_FNR_2018.toString(),
-            orgnummer = orgnummer,
-            fagsystemId = inspektør(orgnummer).fagsystemId(1.vedtaksperiode),
-            utbetalingId = person.personLogg.sisteBehov(Behovtype.Utbetaling).kontekst().getValue("utbetalingId"),
-            avstemmingsnøkkel = 123456L,
-            overføringstidspunkt = LocalDateTime.now()
-        )
-    )
-    person.håndter(
-        utbetaling(
-            inspektør(orgnummer).fagsystemId(1.vedtaksperiode),
-            status = Oppdragstatus.AKSEPTERT,
-            orgnummer = orgnummer
-        )
-    )
 }

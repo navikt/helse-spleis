@@ -1,7 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import java.time.LocalDateTime
-import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
 import no.nav.helse.desember
@@ -17,7 +15,6 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
-import no.nav.helse.juli
 import no.nav.helse.juni
 import no.nav.helse.mai
 import no.nav.helse.mars
@@ -35,8 +32,6 @@ import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.etterlevelse.MaskinellJurist
-import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
-import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
@@ -214,11 +209,11 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
 
     @Test
     fun `vedtaksperioder atskilt med betydelig tid`() {
-        prosessperiode(1.januar til 31.januar, a1)
+        nyttVedtak(1.januar, 31.januar, orgnummer = a1)
         assertNoErrors()
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
 
-        prosessperiode(1.mars til 31.mars, a2)
+        nyttVedtak(1.mars, 31.mars, orgnummer = a2)
         assertNoErrors()
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
     }
@@ -456,26 +451,27 @@ internal class FlereArbeidsgivereTest : AbstractEndToEndTest() {
             orgnummer = a2
         )
 
-        historikk(a1)
-        person.håndter(
-            vilkårsgrunnlag(
-                    vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
-                    medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Nei,
-                    orgnummer = a1,
-                    inntektsvurdering = Inntektsvurdering(
-                        inntekter = inntektperioderForSammenligningsgrunnlag {
-                            1.januar(2017) til 1.desember(2017) inntekter {
-                                a1 inntekt INNTEKT
-                            }
-                            1.januar(2017) til 1.desember(2017) inntekter {
-                                a2 inntekt INNTEKT
-                            }
-                        },
-                    ),
-                    inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList())
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode,
+            medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Nei,
+            orgnummer = a1,
+            inntektsvurdering = Inntektsvurdering(
+                inntekter = inntektperioderForSammenligningsgrunnlag {
+                    1.januar(2017) til 1.desember(2017) inntekter {
+                        a1 inntekt INNTEKT
+                    }
+                    1.januar(2017) til 1.desember(2017) inntekter {
+                        a2 inntekt INNTEKT
+                    }
+                },
+            ),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
+                inntekter = emptyList(),
+                arbeidsforhold = emptyList()
             )
         )
-        historikk(a1)
+        håndterYtelser(1.vedtaksperiode)
 
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)

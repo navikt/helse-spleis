@@ -161,9 +161,10 @@ internal abstract class AbstractDslTest {
         beregnetInntekt: Inntekt = INNTEKT,
         refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
         arbeidsgiverperiode: List<Periode> = emptyList(),
+        status: Oppdragstatus = Oppdragstatus.AKSEPTERT,
         inntekterBlock: Inntektperioder.() -> Unit = { lagInntektperioder(this@nyttVedtak, fom, beregnetInntekt) }
     ) =
-        this { nyttVedtak(fom, tom, grad, førsteFraværsdag, beregnetInntekt, refusjon, arbeidsgiverperiode, inntekterBlock) }
+        this { nyttVedtak(fom, tom, grad, førsteFraværsdag, beregnetInntekt, refusjon, arbeidsgiverperiode, status, inntekterBlock) }
 
 
     /* dsl for å gå direkte på arbeidsgiver1, eksempelvis i tester for det ikke er andre arbeidsgivere */
@@ -271,9 +272,10 @@ internal abstract class AbstractDslTest {
         beregnetInntekt: Inntekt = INNTEKT,
         refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
         arbeidsgiverperiode: List<Periode> = emptyList(),
+        status: Oppdragstatus = Oppdragstatus.AKSEPTERT,
         inntekterBlock: Inntektperioder.() -> Unit = { lagInntektperioder(a1, fom, beregnetInntekt) }
     ) =
-        a1.nyttVedtak(fom, tom, grad, førsteFraværsdag, beregnetInntekt, refusjon, arbeidsgiverperiode, inntekterBlock)
+        a1.nyttVedtak(fom, tom, grad, førsteFraværsdag, beregnetInntekt, refusjon, arbeidsgiverperiode, status, inntekterBlock)
 
 
     @BeforeEach
