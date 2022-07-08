@@ -1972,7 +1972,7 @@ internal class Vedtaksperiode private constructor(
             inntektskilde = inntektskilde,
             aktiveVedtaksperioder = aktiveVedtaksperioder,
             arbeidsforholdId = inntektsmeldingInfo?.arbeidsforholdId,
-            orgnummereMedRelevanteArbeidsforhold = person.orgnummereMedRelevanteArbeidsforhold(skjæringstidspunkt),
+            orgnummereMedRelevanteArbeidsforhold = (person.orgnummereMedRelevanteArbeidsforhold(skjæringstidspunkt) + aktiveVedtaksperioder.map { it.orgnummer }).distinct(),
             aktivitetslogg = person.aktivitetslogg.logg(this)
         )
     }
