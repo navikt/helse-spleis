@@ -350,6 +350,7 @@ class Aktivitetslogg(
                     skjæringstidspunkt: LocalDate,
                     vedtaksperiodeaktivitetslogg: Aktivitetslogg,
                     periodetype: Periodetype,
+                    førstegangsbehandling: Boolean,
                     utbetalingtype: Utbetalingtype,
                     inntektskilde: Inntektskilde,
                     aktiveVedtaksperioder: List<AktivVedtaksperiode>,
@@ -362,6 +363,7 @@ class Aktivitetslogg(
                             "periodeTom" to periodeTom.toString(),
                             "skjæringstidspunkt" to skjæringstidspunkt.toString(),
                             "periodetype" to periodetype.name,
+                            "førstegangsbehandling" to førstegangsbehandling,
                             "utbetalingtype" to utbetalingtype.name,
                             "inntektskilde" to inntektskilde.name,
                             "warnings" to Aktivitetslogg().apply {

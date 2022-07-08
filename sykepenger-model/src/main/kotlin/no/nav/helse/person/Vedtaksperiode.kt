@@ -1971,6 +1971,7 @@ internal class Vedtaksperiode private constructor(
             periode = periode,
             skjæringstidspunkt = skjæringstidspunkt,
             periodetype = periodetype,
+            førstegangsbehandling = periodetype == FØRSTEGANGSBEHANDLING,
             inntektskilde = inntektskilde,
             aktiveVedtaksperioder = aktiveVedtaksperioder,
             arbeidsforholdId = inntektsmeldingInfo?.arbeidsforholdId,
