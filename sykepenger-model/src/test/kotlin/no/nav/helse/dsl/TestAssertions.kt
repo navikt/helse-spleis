@@ -21,9 +21,13 @@ internal class TestAssertions(private val observatør: TestObservatør, private 
     internal fun assertTilstander(id: UUID, vararg tilstander: TilstandType) {
         assertFalse(inspektør.periodeErForkastet(id)) { "Perioden er forkastet med tilstander: ${observatør.tilstandsendringer[id]}:\n${personInspektør.aktivitetslogg}" }
         assertTrue(inspektør.periodeErIkkeForkastet(id)) { "Perioden er forkastet med tilstander: ${observatør.tilstandsendringer[id]}\n${personInspektør.aktivitetslogg}" }
-        assertEquals(tilstander.asList(), observatør.tilstandsendringer[id]) {
-            personInspektør.aktivitetslogg.toString()
-        }
+        assertEquals(tilstander.asList(), observatør.tilstandsendringer[id]) { personInspektør.aktivitetslogg.toString() }
+    }
+
+    internal fun assertForkastetPeriodeTilstander(id: UUID, vararg tilstander: TilstandType) {
+        assertTrue(inspektør.periodeErForkastet(id)) { "Perioden er ikke forkastet" }
+        assertFalse(inspektør.periodeErIkkeForkastet(id)) { "Perioden er ikke forkastet" }
+        assertEquals(tilstander.asList(), observatør.tilstandsendringer[id]) { personInspektør.aktivitetslogg.toString() }
     }
 
     internal fun assertInfo(forventet: String, vararg filtre: AktivitetsloggFilter) {

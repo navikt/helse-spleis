@@ -40,6 +40,11 @@ internal class TestArbeidsgiverInspektør(
     private val person: Person,
     val orgnummer: String
 ) : PersonVisitor {
+    internal companion object {
+        internal operator fun TestArbeidsgiverInspektør.invoke(blokk: TestArbeidsgiverInspektør.() -> Unit) {
+            this.apply(blokk)
+        }
+    }
     private val personInspektør = person.inspektør
 
     internal var vedtaksperiodeTeller: Int = 0
@@ -422,9 +427,13 @@ internal class TestArbeidsgiverInspektør(
     private val UUID.utbetalingsindeksOrNull get() = this.finnOrNull(vedtaksperiodeutbetalinger)
 
     internal fun sisteAvsluttedeUtbetalingForVedtaksperiode(vedtaksperiodeIdInnhenter: IdInnhenter) = avsluttedeUtbetalingerForVedtaksperiode(vedtaksperiodeIdInnhenter).last()
+    internal fun sisteAvsluttedeUtbetalingForVedtaksperiode(vedtaksperiodeId: UUID) = avsluttedeUtbetalingerForVedtaksperiode(vedtaksperiodeId).last()
     internal fun gjeldendeUtbetalingForVedtaksperiode(vedtaksperiodeIdInnhenter: IdInnhenter) = utbetalinger.filterIndexed { index, _ -> index in vedtaksperiodeIdInnhenter.id(orgnummer).utbetalingsindeks }.last()
+    internal fun gjeldendeUtbetalingForVedtaksperiode(vedtaksperiodeId: UUID) = utbetalinger.filterIndexed { index, _ -> index in vedtaksperiodeId.utbetalingsindeks }.last()
     internal fun ikkeUtbetalteUtbetalingerForVedtaksperiode(vedtaksperiodeIdInnhenter: IdInnhenter) = utbetalinger.filterIndexed { index, _ -> index in vedtaksperiodeIdInnhenter.id(orgnummer).utbetalingsindeks }.filter { it.inspektør.erUbetalt }
+    internal fun ikkeUtbetalteUtbetalingerForVedtaksperiode(vedtaksperiodeId: UUID) = utbetalinger.filterIndexed { index, _ -> index in vedtaksperiodeId.utbetalingsindeks }.filter { it.inspektør.erUbetalt }
     internal fun avsluttedeUtbetalingerForVedtaksperiode(vedtaksperiodeIdInnhenter: IdInnhenter) = utbetalinger.filterIndexed { index, _ -> index in vedtaksperiodeIdInnhenter.id(orgnummer).utbetalingsindeks }.filter { it.erAvsluttet() }
+    internal fun avsluttedeUtbetalingerForVedtaksperiode(vedtaksperiodeId: UUID) = utbetalinger.filterIndexed { index, _ -> index in vedtaksperiodeId.utbetalingsindeks }.filter { it.erAvsluttet() }
     internal fun utbetalinger(vedtaksperiodeIdInnhenter: IdInnhenter) = utbetalinger(vedtaksperiodeIdInnhenter.id(orgnummer))
     internal fun utbetalinger(vedtaksperiodeId: UUID) = vedtaksperiodeId.utbetalingsindeksOrNull?.let { indekser ->
         utbetalinger.filterIndexed { index, _ -> index in indekser }
@@ -463,6 +472,7 @@ internal class TestArbeidsgiverInspektør(
     internal fun forlengelseFraInfotrygd(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperiodeIdInnhenter.finn(forlengelserFraInfotrygd)
 
     internal fun vilkårsgrunnlag(vedtaksperiodeIdInnhenter: IdInnhenter) = person.vilkårsgrunnlagFor(skjæringstidspunkt(vedtaksperiodeIdInnhenter))
+    internal fun vilkårsgrunnlag(vedtaksperiodeId: UUID) = person.vilkårsgrunnlagFor(skjæringstidspunkt(vedtaksperiodeId))
 
     internal fun utbetalingslinjer(indeks: Int) = arbeidsgiverOppdrag[indeks]
 
@@ -475,6 +485,7 @@ internal class TestArbeidsgiverInspektør(
     internal fun utbetalingstidslinjer(vedtaksperiodeId: UUID) = vedtaksperiodeId.finn(utbetalingstidslinjer)
 
     internal fun vedtaksperioder(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperiodeIdInnhenter.finn(vedtaksperioder)
+    internal fun vedtaksperioder(vedtaksperiodeId: UUID) = vedtaksperiodeId.finn(vedtaksperioder)
 
     internal fun hendelseIder(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperiodeIdInnhenter.finn(hendelseIder).ider()
 

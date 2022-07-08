@@ -26,6 +26,7 @@ internal fun Person.søppelbøtte(hendelse: IAktivitetslogg, periode: Periode) =
     søppelbøtte(hendelse, Vedtaksperiode.TIDLIGERE_OG_ETTERGØLGENDE(periode))
 
 internal class PersonInspektør(person: Person): PersonVisitor {
+    internal val arbeidsgiverteller get() = arbeidsgivere.size
     internal lateinit var vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk
         private set
 

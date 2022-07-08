@@ -133,6 +133,7 @@ internal class TestPerson(
             andreInntektskilder: List<Søknad.Inntektskilde> = emptyList(),
             sendtTilNAVEllerArbeidsgiver: LocalDate? = null,
             sykmeldingSkrevet: LocalDateTime? = null,
+            orgnummer: String = ""
         ) =
             vedtaksperiodesamler.fangVedtaksperiode {
                 fabrikk.lagSøknad(*perioder, andreInntektskilder = andreInntektskilder, sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver, sykmeldingSkrevet = sykmeldingSkrevet).håndter(Person::håndter)
@@ -140,13 +141,14 @@ internal class TestPerson(
 
         internal fun håndterInntektsmelding(
             arbeidsgiverperioder: List<Periode>,
-            beregnetInntekt: Inntekt,
+            beregnetInntekt: Inntekt = INNTEKT,
             førsteFraværsdag: LocalDate = arbeidsgiverperioder.maxOf { it.start },
             refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
             harOpphørAvNaturalytelser: Boolean = false,
             arbeidsforholdId: String? = null,
             begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
-            id: UUID = UUID.randomUUID()
+            id: UUID = UUID.randomUUID(),
+            orgnummer: String = ""
         ): UUID {
             fabrikk.lagInntektsmelding(
                 arbeidsgiverperioder,
@@ -185,7 +187,8 @@ internal class TestPerson(
             medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
             inntektsvurdering: Inntektsvurdering? = null,
             inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag? = null,
-            arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold>? = null
+            arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold>? = null,
+            orgnummer: String = "aa"
         ) {
             behovsamler.bekreftBehov(vedtaksperiodeId, InntekterForSammenligningsgrunnlag, InntekterForSykepengegrunnlag, ArbeidsforholdV2, Medlemskap)
             fabrikk.lagVilkårsgrunnlag(
@@ -193,11 +196,11 @@ internal class TestPerson(
                 medlemskapstatus,
                 arbeidsforhold ?: arbeidsgivere.map { (orgnr, _) -> Vilkårsgrunnlag.Arbeidsforhold(orgnr, LocalDate.EPOCH, null) },
                 inntektsvurdering ?: lagStandardSammenligningsgrunnlag(
-                    orgnummer,
+                    this.orgnummer,
                     inntekt,
                     inspektør.skjæringstidspunkt(vedtaksperiodeId)
                 ),
-                inntektsvurderingForSykepengegrunnlag ?: lagStandardSykepengegrunnlag(orgnummer, inntekt, inspektør.skjæringstidspunkt(vedtaksperiodeId))
+                inntektsvurderingForSykepengegrunnlag ?: lagStandardSykepengegrunnlag(this.orgnummer, inntekt, inspektør.skjæringstidspunkt(vedtaksperiodeId))
             )
                 .håndter(Person::håndter)
         }
@@ -218,6 +221,7 @@ internal class TestPerson(
             arbeidsavklaringspenger: List<Periode> = emptyList(),
             dagpenger: List<Periode> = emptyList(),
             besvart: LocalDateTime = LocalDateTime.now(),
+            orgnummer: String = "aa"
         ) {
             behovsamler.bekreftBehov(vedtaksperiodeId, Dagpenger, Arbeidsavklaringspenger, Dødsinfo, Institusjonsopphold, Opplæringspenger, Pleiepenger, Omsorgspenger, Foreldrepenger)
 
@@ -364,7 +368,7 @@ internal fun TestPerson.TestArbeidsgiver.nyttVedtak(
 
 internal fun TestPerson.TestArbeidsgiver.nyPeriode(periode: Periode, grad: Prosentdel = 100.prosent): UUID {
     håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, grad))
-    return håndterSøknad(Sykdom(periode.start, periode.endInclusive, grad)) ?: fail { "Det ble ikke opprettet noen vedtaksperiode" }
+    return håndterSøknad(Sykdom(periode.start, periode.endInclusive, grad)) ?: fail { "Det ble ikke opprettet noen vedtaksperiode." }
 }
 
 internal fun TestPerson.nyPeriode(periode: Periode, vararg orgnummer: String, grad: Prosentdel = 100.prosent) {
