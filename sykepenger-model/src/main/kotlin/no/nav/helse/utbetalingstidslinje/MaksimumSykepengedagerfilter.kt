@@ -1,16 +1,16 @@
 package no.nav.helse.utbetalingstidslinje
 
+import java.time.LocalDate
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.UtbetalingsdagVisitor
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.subsumsjonsformat
+import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.UkjentDag
 import no.nav.helse.økonomi.Økonomi
-import java.time.LocalDate
-import no.nav.helse.utbetalingslinjer.Utbetaling
 
 internal class MaksimumSykepengedagerfilter(
     private val alder: Alder,
@@ -34,6 +34,9 @@ internal class MaksimumSykepengedagerfilter(
     private lateinit var beregnetTidslinje: Utbetalingstidslinje
     private lateinit var tidslinjegrunnlag: List<Utbetalingstidslinje>
 
+    private val tidslinjegrunnlagsubsumsjon by lazy { tidslinjegrunnlag.subsumsjonsformat() }
+    private val beregnetTidslinjesubsumsjon by lazy { beregnetTidslinje.subsumsjonsformat() }
+
     internal fun maksimumSykepenger() = maksimumSykepenger
 
     internal fun maksimumSykepenger(builder: Utbetaling.Builder) {
@@ -55,8 +58,8 @@ internal class MaksimumSykepengedagerfilter(
             val sakensStartdato = teller.startdatoSykepengerettighet() ?: return
             subsumsjonObserver.`§ 8-12 ledd 1 punktum 1`(
                 periode,
-                tidslinjegrunnlag.subsumsjonsformat(),
-                beregnetTidslinje.subsumsjonsformat(),
+                tidslinjegrunnlagsubsumsjon,
+                beregnetTidslinjesubsumsjon,
                 gjenståendeDager,
                 forbrukteDager,
                 sisteDag,
@@ -68,8 +71,8 @@ internal class MaksimumSykepengedagerfilter(
             val sakensStartdato = teller.startdatoSykepengerettighet() ?: return
             subsumsjonObserver.`§ 8-51 ledd 3`(
                 periode,
-                tidslinjegrunnlag.subsumsjonsformat(),
-                beregnetTidslinje.subsumsjonsformat(),
+                tidslinjegrunnlagsubsumsjon,
+                beregnetTidslinjesubsumsjon,
                 gjenståendeDager,
                 forbrukteDager,
                 sisteDag,
@@ -206,8 +209,8 @@ internal class MaksimumSykepengedagerfilter(
                 gjenståendeSykepengedager = maksimumSykepenger.gjenståendeDager(),
                 beregnetAntallOppholdsdager = opphold,
                 tilstrekkeligOppholdISykedager = TILSTREKKELIG_OPPHOLD_I_SYKEDAGER,
-                tidslinjegrunnlag = tidslinjegrunnlag.subsumsjonsformat(),
-                beregnetTidslinje = beregnetTidslinje.subsumsjonsformat(),
+                tidslinjegrunnlag = tidslinjegrunnlagsubsumsjon,
+                beregnetTidslinje = beregnetTidslinjesubsumsjon,
             )
             if (harTilstrekkeligOpphold) {
                 teller.resett()

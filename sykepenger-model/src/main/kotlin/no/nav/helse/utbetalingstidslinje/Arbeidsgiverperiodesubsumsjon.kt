@@ -1,12 +1,12 @@
 package no.nav.helse.utbetalingstidslinje
 
+import java.time.LocalDate
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.subsumsjonsformat
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
+import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.økonomi.Økonomi
-import java.time.LocalDate
-import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 
 internal class Arbeidsgiverperiodesubsumsjon(
     private val other: ArbeidsgiverperiodeMediator,
@@ -14,6 +14,7 @@ internal class Arbeidsgiverperiodesubsumsjon(
 ) : ArbeidsgiverperiodeMediator by (other) {
     private var sykdomstidslinje: Sykdomstidslinje = Sykdomstidslinje()
     private var tilstand: Tilstand = Initiell
+    private val sykdomstidslinjesubsumsjon by lazy { sykdomstidslinje.subsumsjonsformat() }
 
     internal fun tidslinje(tidslinje: Sykdomstidslinje) {
         this.sykdomstidslinje = tidslinje
@@ -35,7 +36,7 @@ internal class Arbeidsgiverperiodesubsumsjon(
     }
 
     override fun fridag(dato: LocalDate) {
-        subsumsjonObserver.`§ 8-17 ledd 2`(dato, sykdomstidslinje.subsumsjonsformat())
+        subsumsjonObserver.`§ 8-17 ledd 2`(dato, sykdomstidslinjesubsumsjon)
         tilstand.oppholdsdag(this, dato)
         other.fridag(dato)
     }
@@ -47,7 +48,7 @@ internal class Arbeidsgiverperiodesubsumsjon(
     ) {
         tilstand.arbeidsgiverperiodedag(this, dato, økonomi)
         subsumsjonObserver.`§ 8-17 ledd 1 bokstav a`(false, dagen = dato)
-        subsumsjonObserver.`§ 8-19 andre ledd`(dato, sykdomstidslinje.subsumsjonsformat())
+        subsumsjonObserver.`§ 8-19 andre ledd`(dato, sykdomstidslinjesubsumsjon)
         other.arbeidsgiverperiodedag(dato, økonomi, kilde)
     }
 
@@ -88,7 +89,7 @@ internal class Arbeidsgiverperiodesubsumsjon(
 
     private object Avbrutt : Tilstand {
         override fun oppholdsdag(parent: Arbeidsgiverperiodesubsumsjon, dato: LocalDate) {
-            parent.subsumsjonObserver.`§ 8-19 fjerde ledd`(dato, parent.sykdomstidslinje.subsumsjonsformat())
+            parent.subsumsjonObserver.`§ 8-19 fjerde ledd`(dato, parent.sykdomstidslinjesubsumsjon)
             parent.tilstand = Initiell
         }
 
@@ -116,15 +117,15 @@ internal class Arbeidsgiverperiodesubsumsjon(
         }
 
         override fun arbeidsgiverperiodedag(parent: Arbeidsgiverperiodesubsumsjon, dato: LocalDate, økonomi: Økonomi) {
-            parent.subsumsjonObserver.`§ 8-19 tredje ledd`(dato, parent.sykdomstidslinje.subsumsjonsformat())
+            parent.subsumsjonObserver.`§ 8-19 tredje ledd`(dato, parent.sykdomstidslinjesubsumsjon)
             parent.tilstand = PåbegyntArbeidsgiverperiode
         }
     }
 
     private object SisteDagOgOppholdIPåbegyntArbeidsgiverperiode : Tilstand {
         override fun arbeidsgiverperiodedag(parent: Arbeidsgiverperiodesubsumsjon, dato: LocalDate, økonomi: Økonomi) {
-            parent.subsumsjonObserver.`§ 8-19 første ledd`(dato, parent.sykdomstidslinje.subsumsjonsformat())
-            parent.subsumsjonObserver.`§ 8-19 tredje ledd`(dato, parent.sykdomstidslinje.subsumsjonsformat())
+            parent.subsumsjonObserver.`§ 8-19 første ledd`(dato, parent.sykdomstidslinjesubsumsjon)
+            parent.subsumsjonObserver.`§ 8-19 tredje ledd`(dato, parent.sykdomstidslinjesubsumsjon)
         }
 
         override fun utbetalingsdag(parent: Arbeidsgiverperiodesubsumsjon, dato: LocalDate, økonomi: Økonomi) {
@@ -135,7 +136,7 @@ internal class Arbeidsgiverperiodesubsumsjon(
 
     private object SisteDagIArbeidsgiverperioden : Tilstand {
         override fun arbeidsgiverperiodedag(parent: Arbeidsgiverperiodesubsumsjon, dato: LocalDate, økonomi: Økonomi) {
-            parent.subsumsjonObserver.`§ 8-19 første ledd`(dato, parent.sykdomstidslinje.subsumsjonsformat())
+            parent.subsumsjonObserver.`§ 8-19 første ledd`(dato, parent.sykdomstidslinjesubsumsjon)
         }
 
         override fun utbetalingsdag(parent: Arbeidsgiverperiodesubsumsjon, dato: LocalDate, økonomi: Økonomi) {
