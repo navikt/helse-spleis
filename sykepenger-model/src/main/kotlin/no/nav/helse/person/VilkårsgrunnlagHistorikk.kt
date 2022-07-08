@@ -7,6 +7,7 @@ import no.nav.helse.Grunnbeløp
 import no.nav.helse.Toggle
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Medlemskapsvurdering
+import no.nav.helse.hendelser.OverstyrInntekt
 import no.nav.helse.hendelser.til
 import no.nav.helse.mai
 import no.nav.helse.person.builders.VedtakFattetBuilder
@@ -171,12 +172,18 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             innslag.add(skjæringstidspunkt, this)
         }
 
+        internal fun valider(overstyrInntekt: OverstyrInntekt): Boolean {
+            validerOverstyrInntekt(overstyrInntekt)
+            return !overstyrInntekt.hasErrorsOrWorse()
+        }
+
         internal fun valider(aktivitetslogg: IAktivitetslogg, organisasjonsnummer: List<String>, erForlengelse: Boolean): Boolean {
             sykepengegrunnlag.validerInntekt(aktivitetslogg, organisasjonsnummer)
             valider(aktivitetslogg, erForlengelse)
             return !aktivitetslogg.hasErrorsOrWorse()
         }
 
+        protected open fun validerOverstyrInntekt(overstyrInntekt: OverstyrInntekt) {}
         protected open fun valider(aktivitetslogg: IAktivitetslogg, erForlengelse: Boolean) {}
 
         internal abstract fun accept(vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor)
@@ -359,6 +366,10 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         sykepengegrunnlag: Sykepengegrunnlag,
         vilkårsgrunnlagId: UUID = UUID.randomUUID()
     ) : VilkårsgrunnlagElement(vilkårsgrunnlagId, skjæringstidspunkt, sykepengegrunnlag) {
+        override fun validerOverstyrInntekt(overstyrInntekt: OverstyrInntekt) {
+            overstyrInntekt.error("Forespurt overstyring av inntekt hvor skjæringstidspunktet ligger i infotrygd")
+        }
+
         override fun valider(aktivitetslogg: IAktivitetslogg, erForlengelse: Boolean) {
             if (erForlengelse) {
                 aktivitetslogg.info("Perioden har opphav i Infotrygd, men saken beholdes i Spleis fordi det er utbetalt i Spleis tidligere.")

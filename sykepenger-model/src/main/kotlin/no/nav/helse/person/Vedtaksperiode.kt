@@ -47,7 +47,6 @@ import no.nav.helse.person.ForlengelseFraInfotrygd.IKKE_ETTERSPURT
 import no.nav.helse.person.InntektsmeldingInfo.Companion.ider
 import no.nav.helse.person.Periodetype.FORLENGELSE
 import no.nav.helse.person.Periodetype.FØRSTEGANGSBEHANDLING
-import no.nav.helse.person.Periodetype.INFOTRYGDFORLENGELSE
 import no.nav.helse.person.Periodetype.OVERGANG_FRA_IT
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
@@ -337,16 +336,10 @@ internal class Vedtaksperiode private constructor(
     internal fun håndter(hendelse: OverstyrInntekt): Boolean {
         if (!kanHåndtereOverstyring(hendelse)) return false
         kontekst(hendelse)
-        if (periodetype in listOf(OVERGANG_FRA_IT, INFOTRYGDFORLENGELSE)) {
-            hendelse.error("Forespurt overstyring av inntekt hvor skjæringstidspunktet ligger i infotrygd")
-            return true
-        }
-
         if (Toggle.RevurdereInntektMedFlereArbeidsgivere.disabled && inntektskilde == Inntektskilde.FLERE_ARBEIDSGIVERE) {
             hendelse.error("Forespurt overstyring av inntekt hvor personen har flere arbeidsgivere (inkl. ghosts)")
             return true
         }
-
         hendelse.loggførHendelsesreferanse(person)
         tilstand.håndter(this, hendelse)
         return true

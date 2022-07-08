@@ -308,7 +308,15 @@ class Person private constructor(
             return håndterOverstyringAvGhostInntekt(hendelse)
         }
 
-        finnArbeidsgiver(hendelse).håndter(hendelse)
+        val vilkårsgrunnlag = vilkårsgrunnlagFor(hendelse.skjæringstidspunkt)
+        if (vilkårsgrunnlag != null) {
+            if (vilkårsgrunnlag.valider(hendelse)) {
+                finnArbeidsgiver(hendelse).håndter(hendelse)
+            }
+        } else {
+            hendelse.error("Kan ikke overstyre inntekt uten at det foreligger et vilkårsgrunnlag")
+        }
+
         if (hendelse.hasErrorsOrWorse()) {
             observers.forEach { it.revurderingAvvist(hendelse.hendelseskontekst(), hendelse.tilRevurderingAvvistEvent()) }
         }
