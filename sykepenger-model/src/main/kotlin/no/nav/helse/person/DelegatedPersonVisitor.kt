@@ -63,7 +63,7 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         skjæringstidspunkt: LocalDate,
         grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata,
         sykepengegrunnlag: Sykepengegrunnlag,
-        sammenligningsgrunnlag: Inntekt,
+        sammenligningsgrunnlag: Sammenligningsgrunnlag,
         avviksprosent: Prosent?,
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
         vurdertOk: Boolean,
@@ -176,8 +176,8 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         delegatee.postVisitArbeidsgiverOpptjeningsgrunnlag(orgnummer, ansattPerioder)
     }
 
-    override fun preVisitArbeidsgiverInntektsopplysninger() {
-        delegatee.preVisitArbeidsgiverInntektsopplysninger()
+    override fun preVisitArbeidsgiverInntektsopplysninger(arbeidsgiverInntektopplysninger: List<ArbeidsgiverInntektsopplysning>) {
+        delegatee.preVisitArbeidsgiverInntektsopplysninger(arbeidsgiverInntektopplysninger)
     }
 
     override fun preVisitArbeidsgiverInntektsopplysning(arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning, orgnummer: String) {
@@ -188,8 +188,8 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         delegatee.postVisitArbeidsgiverInntektsopplysning(arbeidsgiverInntektsopplysning, orgnummer)
     }
 
-    override fun postVisitArbeidsgiverInntektsopplysninger() {
-        delegatee.postVisitArbeidsgiverInntektsopplysninger()
+    override fun postVisitArbeidsgiverInntektsopplysninger(arbeidsgiverInntektopplysninger: List<ArbeidsgiverInntektsopplysning>) {
+        delegatee.postVisitArbeidsgiverInntektsopplysninger(arbeidsgiverInntektopplysninger)
     }
 
     override fun preVisitUtbetalingstidslinjeberegning(
@@ -276,7 +276,7 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         skjæringstidspunkt: LocalDate,
         grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata,
         sykepengegrunnlag: Sykepengegrunnlag,
-        sammenligningsgrunnlag: Inntekt,
+        sammenligningsgrunnlag: Sammenligningsgrunnlag,
         avviksprosent: Prosent?,
         opptjening: Opptjening,
         vurdertOk: Boolean,

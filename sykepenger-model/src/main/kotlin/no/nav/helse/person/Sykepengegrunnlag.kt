@@ -4,7 +4,6 @@ import java.time.LocalDate
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.Grunnbeløp.Companion.halvG
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.harInntekt
-import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.inntektsopplysningPerArbeidsgiver
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.medInntekt
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.omregnetÅrsinntekt
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.omregnetÅrsinntektPerArbeidsgiver
@@ -129,9 +128,9 @@ internal class Sykepengegrunnlag(
             minsteinntekt,
             oppfyllerMinsteinntektskrav
         )
-        visitor.preVisitArbeidsgiverInntektsopplysninger()
+        visitor.preVisitArbeidsgiverInntektsopplysninger(arbeidsgiverInntektsopplysninger)
         arbeidsgiverInntektsopplysninger.forEach { it.accept(visitor) }
-        visitor.postVisitArbeidsgiverInntektsopplysninger()
+        visitor.postVisitArbeidsgiverInntektsopplysninger(arbeidsgiverInntektsopplysninger)
         visitor.postVisitSykepengegrunnlag(
             this,
             skjæringstidspunkt,
@@ -151,13 +150,21 @@ internal class Sykepengegrunnlag(
         subsumsjonObserver.`§ 8-30 ledd 2 punktum 1`(Prosent.MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT, beregningsgrunnlag, sammenligningsgrunnlag, avvik)
     }
 
-    internal fun inntektsopplysningPerArbeidsgiver(): Map<String, Inntektshistorikk.Inntektsopplysning> =
-        arbeidsgiverInntektsopplysninger.inntektsopplysningPerArbeidsgiver()
+    internal fun inntektskilde() = when {
+        arbeidsgiverInntektsopplysninger.size > 1 -> Inntektskilde.FLERE_ARBEIDSGIVERE
+        else -> Inntektskilde.EN_ARBEIDSGIVER
+    }
+
+    internal fun harInntektFraAOrdningen() =
+        arbeidsgiverInntektsopplysninger.any { it.harInntektFraAOrdningen() }
+
+    internal fun erRelevant(organisasjonsnummer: String) = arbeidsgiverInntektsopplysninger.any {
+        it.gjelder(organisasjonsnummer)
+    }
 
     internal fun medInntekt(organisasjonsnummer: String, dato: LocalDate, økonomi: Økonomi, arbeidsgiverperiode: Arbeidsgiverperiode?, regler: ArbeidsgiverRegler, subsumsjonObserver: SubsumsjonObserver): Økonomi? {
         return arbeidsgiverInntektsopplysninger.medInntekt(organisasjonsnummer, skjæringstidspunkt, dato, økonomi, arbeidsgiverperiode, regler, subsumsjonObserver)
     }
-
     internal fun build(builder: VedtakFattetBuilder) {
         builder
             .sykepengegrunnlag(this.sykepengegrunnlag)
@@ -165,7 +172,6 @@ internal class Sykepengegrunnlag(
             .begrensning(this.begrensning)
             .omregnetÅrsinntektPerArbeidsgiver(arbeidsgiverInntektsopplysninger.omregnetÅrsinntektPerArbeidsgiver())
     }
-
     override fun equals(other: Any?): Boolean {
         if (other !is Sykepengegrunnlag) return false
         return sykepengegrunnlag == other.sykepengegrunnlag
@@ -174,7 +180,6 @@ internal class Sykepengegrunnlag(
                  && begrensning == other.begrensning
                  && deaktiverteArbeidsforhold == other.deaktiverteArbeidsforhold
     }
-
     override fun hashCode(): Int {
         var result = sykepengegrunnlag.hashCode()
         result = 31 * result + arbeidsgiverInntektsopplysninger.hashCode()

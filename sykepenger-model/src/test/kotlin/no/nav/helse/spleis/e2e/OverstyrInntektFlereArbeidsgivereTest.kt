@@ -4,7 +4,9 @@ import no.nav.helse.EnableToggle
 import no.nav.helse.Toggle
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.inspectors.GrunnlagsdataInspektør
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
+import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.inntektsopplysningPerArbeidsgiver
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
@@ -27,8 +29,8 @@ internal class OverstyrInntektFlereArbeidsgivereTest: AbstractEndToEndTest() {
 
         assertInntektForDato(20000.månedlig, 1.januar, inspektør = inspektør(a1))
         assertInntektForDato(20000.månedlig, 1.januar, inspektør = inspektør(a2))
-        assertEquals(20000.månedlig, grunnlagsdataInspektør.sykepengegrunnlag.inntektsopplysningPerArbeidsgiver()[a1]?.omregnetÅrsinntekt())
-        assertEquals(20000.månedlig, grunnlagsdataInspektør.sykepengegrunnlag.inntektsopplysningPerArbeidsgiver()[a2]?.omregnetÅrsinntekt())
+        assertEquals(20000.månedlig, grunnlagsdataInspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysninger.inntektsopplysningPerArbeidsgiver()[a1]?.omregnetÅrsinntekt())
+        assertEquals(20000.månedlig, grunnlagsdataInspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysninger.inntektsopplysningPerArbeidsgiver()[a2]?.omregnetÅrsinntekt())
 
         håndterOverstyrInntekt(19000.månedlig, a1, 1.januar)
         håndterYtelser(1.vedtaksperiode)
@@ -39,8 +41,8 @@ internal class OverstyrInntektFlereArbeidsgivereTest: AbstractEndToEndTest() {
 
         assertInntektForDato(19000.månedlig, 1.januar, inspektør = inspektør(a1))
         assertInntektForDato(20000.månedlig, 1.januar, inspektør = inspektør(a2))
-        assertEquals(19000.månedlig, grunnlagsdataInspektør.sykepengegrunnlag.inntektsopplysningPerArbeidsgiver()[a1]?.omregnetÅrsinntekt())
-        assertEquals(20000.månedlig, grunnlagsdataInspektør.sykepengegrunnlag.inntektsopplysningPerArbeidsgiver()[a2]?.omregnetÅrsinntekt())
+        assertEquals(19000.månedlig, grunnlagsdataInspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysninger.inntektsopplysningPerArbeidsgiver()[a1]?.omregnetÅrsinntekt())
+        assertEquals(20000.månedlig, grunnlagsdataInspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysninger.inntektsopplysningPerArbeidsgiver()[a2]?.omregnetÅrsinntekt())
     }
 
     @Test
@@ -53,8 +55,8 @@ internal class OverstyrInntektFlereArbeidsgivereTest: AbstractEndToEndTest() {
         assertNoErrors()
         assertInntektForDato(20000.månedlig, 1.januar, inspektør = inspektør(a1))
         assertInntektForDato(20000.månedlig, 1.januar, inspektør = inspektør(a2))
-        assertEquals(20000.månedlig, grunnlagsdataInspektør.sykepengegrunnlag.inntektsopplysningPerArbeidsgiver()[a1]?.omregnetÅrsinntekt())
-        assertEquals(20000.månedlig, grunnlagsdataInspektør.sykepengegrunnlag.inntektsopplysningPerArbeidsgiver()[a2]?.omregnetÅrsinntekt())
+        assertEquals(20000.månedlig, grunnlagsdataInspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysninger.inntektsopplysningPerArbeidsgiver()[a1]?.omregnetÅrsinntekt())
+        assertEquals(20000.månedlig, grunnlagsdataInspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysninger.inntektsopplysningPerArbeidsgiver()[a2]?.omregnetÅrsinntekt())
     }
 
     @Test
@@ -79,7 +81,7 @@ internal class OverstyrInntektFlereArbeidsgivereTest: AbstractEndToEndTest() {
             }
         )
         assertInntektForDato(20000.månedlig, 1.januar, inspektør = inspektør(a1))
-        assertEquals(20000.månedlig, grunnlagsdataInspektør.sykepengegrunnlag.inntektsopplysningPerArbeidsgiver()[a1]?.omregnetÅrsinntekt())
+        assertEquals(20000.månedlig, grunnlagsdataInspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysninger.inntektsopplysningPerArbeidsgiver()[a1]?.omregnetÅrsinntekt())
     }
 
 }

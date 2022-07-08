@@ -15,6 +15,7 @@ import no.nav.helse.januar
 import no.nav.helse.november
 import no.nav.helse.person.AbstractPersonTest
 import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.inntektsopplysningPerArbeidsgiver
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
@@ -49,8 +50,8 @@ internal class OverstyrGhostInntektTest : AbstractEndToEndTest() {
         håndterOverstyrInntekt(500.månedlig, a2, 1.januar)
 
         assertInntektForDato(500.månedlig, 1.januar, inspektør = inspektør(a2))
-        assertEquals(500.månedlig, inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.sykepengegrunnlag()?.inntektsopplysningPerArbeidsgiver()?.get(a2)?.omregnetÅrsinntekt())
-        assertEquals(1000.månedlig, inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.sammenligningsgrunnlagPerArbeidsgiver()?.get(a2)?.rapportertInntekt())
+        assertEquals(500.månedlig, inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør?.sykepengegrunnlag?.inspektør?.arbeidsgiverInntektsopplysninger?.inntektsopplysningPerArbeidsgiver()?.get(a2)?.omregnetÅrsinntekt())
+        assertEquals(1000.månedlig, inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør?.sammenligningsgrunnlag1?.inspektør?.arbeidsgiverInntektsopplysninger?.inntektsopplysningPerArbeidsgiver()?.get(a2)?.rapportertInntekt())
 
         nullstillTilstandsendringer()
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
@@ -95,8 +96,8 @@ internal class OverstyrGhostInntektTest : AbstractEndToEndTest() {
         håndterOverstyrInntekt(500.månedlig, a2, 1.januar)
 
         assertInntektForDato(500.månedlig, 1.januar, inspektør = inspektør(a2))
-        assertEquals(500.månedlig, inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.sykepengegrunnlag()?.inntektsopplysningPerArbeidsgiver()?.get(a2)?.omregnetÅrsinntekt())
-        assertEquals(INGEN, inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.sammenligningsgrunnlagPerArbeidsgiver()?.get(a2)?.rapportertInntekt())
+        assertEquals(500.månedlig, inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør?.sykepengegrunnlag?.inspektør?.arbeidsgiverInntektsopplysninger?.inntektsopplysningPerArbeidsgiver()?.get(a2)?.omregnetÅrsinntekt())
+        assertEquals(INGEN, inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør?.sammenligningsgrunnlag1?.inspektør?.arbeidsgiverInntektsopplysninger?.inntektsopplysningPerArbeidsgiver()?.get(a2)?.rapportertInntekt())
 
         nullstillTilstandsendringer()
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
@@ -150,8 +151,8 @@ internal class OverstyrGhostInntektTest : AbstractEndToEndTest() {
         håndterOverstyrInntekt(500.månedlig, a2, 1.januar)
 
         assertInntektForDato(500.månedlig, 1.januar, inspektør = inspektør(a2))
-        assertEquals(500.månedlig, inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.sykepengegrunnlag()?.inntektsopplysningPerArbeidsgiver()?.get(a2)?.omregnetÅrsinntekt())
-        assertEquals(30000.månedlig, inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.sammenligningsgrunnlagPerArbeidsgiver()?.get(a2)?.rapportertInntekt())
+        assertEquals(500.månedlig, inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør?.sykepengegrunnlag?.inspektør?.arbeidsgiverInntektsopplysninger?.inntektsopplysningPerArbeidsgiver()?.get(a2)?.omregnetÅrsinntekt())
+        assertEquals(30000.månedlig, inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør?.sammenligningsgrunnlag1?.inspektør?.arbeidsgiverInntektsopplysninger?.inntektsopplysningPerArbeidsgiver()?.get(a2)?.rapportertInntekt())
 
         nullstillTilstandsendringer()
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)

@@ -11,9 +11,11 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.til
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.november
 import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.inntektsopplysningPerArbeidsgiver
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.serde.serialize
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -66,7 +68,7 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
         val vilkårsgrunnlag = person.vilkårsgrunnlagFor(skjæringstidspunkt)
         val serialisertPerson = person.serialize()
-        assertEquals(setOf(a1), vilkårsgrunnlag?.sykepengegrunnlag()?.inntektsopplysningPerArbeidsgiver()?.keys)
+        assertEquals(setOf(a1), vilkårsgrunnlag?.inspektør?.sykepengegrunnlag?.inspektør?.arbeidsgiverInntektsopplysninger?.inntektsopplysningPerArbeidsgiver()?.keys)
     }
 
     @Test
@@ -250,8 +252,8 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
         håndterOverstyrArbeidsforhold(1.januar, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a3, true)))
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         val vilkårsgrunnlag = person.vilkårsgrunnlagFor(1.januar)
-        assertEquals(setOf(a1, a2), vilkårsgrunnlag?.sykepengegrunnlag()?.inntektsopplysningPerArbeidsgiver()?.keys)
-        assertEquals(setOf(a1, a2, a3), vilkårsgrunnlag?.sammenligningsgrunnlagPerArbeidsgiver()?.keys)
+        assertEquals(setOf(a1, a2), vilkårsgrunnlag?.inspektør?.sykepengegrunnlag?.inspektør?.arbeidsgiverInntektsopplysninger?.inntektsopplysningPerArbeidsgiver()?.keys)
+        assertEquals(setOf(a1, a2, a3), vilkårsgrunnlag?.inspektør?.sammenligningsgrunnlag1?.inspektør?.arbeidsgiverInntektsopplysninger?.inntektsopplysningPerArbeidsgiver()?.keys)
     }
 
     @Test
@@ -285,7 +287,7 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
         val vilkårsgrunnlag = person.vilkårsgrunnlagFor(1.januar)
-        assertEquals(setOf(a2, a3), vilkårsgrunnlag?.sykepengegrunnlag()?.inntektsopplysningPerArbeidsgiver()?.keys)
+        assertEquals(setOf(a2, a3), vilkårsgrunnlag?.inspektør?.sykepengegrunnlag?.inspektør?.arbeidsgiverInntektsopplysninger?.inntektsopplysningPerArbeidsgiver()?.keys)
     }
 
     @Test

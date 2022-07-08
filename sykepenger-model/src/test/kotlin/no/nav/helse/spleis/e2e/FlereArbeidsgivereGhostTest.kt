@@ -17,6 +17,7 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.november
+import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.inntektsopplysningPerArbeidsgiver
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
@@ -409,7 +410,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
-        assertEquals(setOf(a1), inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.sykepengegrunnlag()?.inntektsopplysningPerArbeidsgiver()?.keys)
+        assertEquals(setOf(a1), inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør?.sykepengegrunnlag?.inspektør?.arbeidsgiverInntektsopplysninger?.inntektsopplysningPerArbeidsgiver()?.keys)
         assertEquals(Inntektskilde.EN_ARBEIDSGIVER, inspektør(a1).inntektskilde(1.vedtaksperiode))
     }
 
@@ -442,7 +443,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
-        assertEquals(setOf(a1, a2), inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.sykepengegrunnlag()?.inntektsopplysningPerArbeidsgiver()?.keys)
+        assertEquals(setOf(a1, a2), inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør?.sykepengegrunnlag?.inspektør?.arbeidsgiverInntektsopplysninger?.inntektsopplysningPerArbeidsgiver()?.keys)
         assertEquals(Inntektskilde.FLERE_ARBEIDSGIVERE, inspektør(a1).inntektskilde(1.vedtaksperiode))
     }
 
@@ -476,7 +477,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
-        assertEquals(setOf(a1), inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.sykepengegrunnlag()?.inntektsopplysningPerArbeidsgiver()?.keys)
+        assertEquals(setOf(a1), inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør?.sykepengegrunnlag?.inspektør?.arbeidsgiverInntektsopplysninger?.inntektsopplysningPerArbeidsgiver()?.keys)
         assertEquals(Inntektskilde.EN_ARBEIDSGIVER, inspektør(a1).inntektskilde(1.vedtaksperiode))
     }
 
@@ -699,16 +700,12 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterUtbetalt(orgnummer = a1)
 
         val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)!!
-        assertTrue(vilkårsgrunnlag.gjelderFlereArbeidsgivere())
-        assertEquals(2, vilkårsgrunnlag.sykepengegrunnlag().inntektsopplysningPerArbeidsgiver().size)
-        assertEquals(2, vilkårsgrunnlag.sammenligningsgrunnlagPerArbeidsgiver().size)
-        assertTrue(vilkårsgrunnlag.sammenligningsgrunnlagPerArbeidsgiver()[a2] is Inntektshistorikk.IkkeRapportert)
-        assertEquals(setOf(a1, a2), vilkårsgrunnlag.sykepengegrunnlag().inntektsopplysningPerArbeidsgiver().keys)
-
-        assertEquals(
-            Inntektskilde.FLERE_ARBEIDSGIVERE,
-            inspektør(a1).inntektskilde(1.vedtaksperiode)
-        )
+        assertEquals(Inntektskilde.FLERE_ARBEIDSGIVERE, vilkårsgrunnlag.inntektskilde())
+        assertEquals(2, vilkårsgrunnlag.inspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysninger.inntektsopplysningPerArbeidsgiver().size)
+        assertEquals(2, vilkårsgrunnlag.inspektør.sammenligningsgrunnlag1.inspektør.arbeidsgiverInntektsopplysninger.inntektsopplysningPerArbeidsgiver().size)
+        assertTrue(vilkårsgrunnlag.inspektør.sammenligningsgrunnlag1.inspektør.arbeidsgiverInntektsopplysninger.inntektsopplysningPerArbeidsgiver()[a2] is Inntektshistorikk.IkkeRapportert)
+        assertEquals(setOf(a1, a2), vilkårsgrunnlag.inspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysninger.inntektsopplysningPerArbeidsgiver().keys)
+        assertEquals(Inntektskilde.FLERE_ARBEIDSGIVERE, inspektør(a1).inntektskilde(1.vedtaksperiode))
         assertWarning("Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold", 1.vedtaksperiode.filter(a1))
     }
 

@@ -6,6 +6,7 @@ import java.util.UUID
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Opptjening
+import no.nav.helse.person.Sammenligningsgrunnlag
 import no.nav.helse.person.Sykepengegrunnlag
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.VilkårsgrunnlagHistorikkVisitor
@@ -35,7 +36,7 @@ internal class Vilkårgrunnlagsinspektør(historikk: VilkårsgrunnlagHistorikk) 
         skjæringstidspunkt: LocalDate,
         grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata,
         sykepengegrunnlag: Sykepengegrunnlag,
-        sammenligningsgrunnlag: Inntekt,
+        sammenligningsgrunnlag: Sammenligningsgrunnlag,
         avviksprosent: Prosent?,
         opptjening: Opptjening,
         vurdertOk: Boolean,
@@ -63,8 +64,9 @@ internal val VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement.inspektør get() 
 internal class GrunnlagsdataInspektør(grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement) : VilkårsgrunnlagHistorikkVisitor {
     internal lateinit var sykepengegrunnlag: Sykepengegrunnlag
         private set
-    internal lateinit var sammenligningsgrunnlag: Inntekt
+    internal lateinit var sammenligningsgrunnlag1: Sammenligningsgrunnlag
         private set
+    internal val sammenligningsgrunnlag: Inntekt get() = sammenligningsgrunnlag1.sammenligningsgrunnlag
     internal var avviksprosent: Prosent? = null
         private set
     internal var antallOpptjeningsdagerErMinst by Delegates.notNull<Int>()
@@ -85,7 +87,7 @@ internal class GrunnlagsdataInspektør(grunnlagsdata: VilkårsgrunnlagHistorikk.
         skjæringstidspunkt: LocalDate,
         grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata,
         sykepengegrunnlag: Sykepengegrunnlag,
-        sammenligningsgrunnlag: Inntekt,
+        sammenligningsgrunnlag: Sammenligningsgrunnlag,
         avviksprosent: Prosent?,
         opptjening: Opptjening,
         vurdertOk: Boolean,
@@ -94,7 +96,7 @@ internal class GrunnlagsdataInspektør(grunnlagsdata: VilkårsgrunnlagHistorikk.
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus
     ) {
         this.sykepengegrunnlag = sykepengegrunnlag
-        this.sammenligningsgrunnlag = sammenligningsgrunnlag
+        this.sammenligningsgrunnlag1 = sammenligningsgrunnlag
         this.avviksprosent = avviksprosent
         this.meldingsreferanseId = meldingsreferanseId
         this.harMinimumInntekt = harMinimumInntekt

@@ -827,9 +827,11 @@ class Person private constructor(
     }
 
     internal fun fyllUtPeriodeMedForventedeDager(hendelse: PersonHendelse, periode: Periode, skjæringstidspunkt: LocalDate) {
-        vilkårsgrunnlagFor(skjæringstidspunkt)!!.sykepengegrunnlag().inntektsopplysningPerArbeidsgiver().keys
-            .map { arbeidsgivere.finn(it)!! }
-            .forEach { it.fyllUtPeriodeMedForventedeDager(hendelse, periode) }
+        vilkårsgrunnlagFor(skjæringstidspunkt)!!.also { vilkårsgrunnlagElement ->
+            arbeidsgivere
+                .filter { vilkårsgrunnlagElement.erRelevant(it.organisasjonsnummer()) }
+                .forEach { it.fyllUtPeriodeMedForventedeDager(hendelse, periode) }
+        }
     }
 
     private fun arbeidsgivereMedRelevanteArbeidsforhold(skjæringstidspunkt: LocalDate): List<Arbeidsgiver> =

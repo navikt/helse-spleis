@@ -184,17 +184,16 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         protected open fun valider(aktivitetslogg: IAktivitetslogg, erForlengelse: Boolean) {}
 
         internal abstract fun accept(vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor)
-        internal fun sykepengegrunnlag() = sykepengegrunnlag
-        internal abstract fun sammenligningsgrunnlagPerArbeidsgiver(): Map<String, Inntektshistorikk.Inntektsopplysning>
+        internal open fun inngårISammenligningsgrunnlaget(organisasjonsnummer: String): Boolean = false
         internal fun build(builder: VedtakFattetBuilder) {
             sykepengegrunnlag.build(builder)
         }
 
         internal fun erRelevant(organisasjonsnummer: String): Boolean {
-            return sykepengegrunnlag.inntektsopplysningPerArbeidsgiver().containsKey(organisasjonsnummer)
-                    || sammenligningsgrunnlagPerArbeidsgiver().containsKey(organisasjonsnummer)
+            return sykepengegrunnlag.erRelevant(organisasjonsnummer) || inngårISammenligningsgrunnlaget(organisasjonsnummer)
         }
-        internal fun gjelderFlereArbeidsgivere() = sykepengegrunnlag.inntektsopplysningPerArbeidsgiver().size > 1
+        internal fun inntektskilde() = sykepengegrunnlag.inntektskilde()
+
         internal open fun sjekkAvviksprosent(aktivitetslogg: IAktivitetslogg): Boolean = true
 
         internal open fun avvis(tidslinjer: List<Utbetalingstidslinje>, skjæringstidspunkt: LocalDate) {}
@@ -284,7 +283,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         private val meldingsreferanseId: UUID?,
         vilkårsgrunnlagId: UUID
     ) : VilkårsgrunnlagElement(vilkårsgrunnlagId, skjæringstidspunkt, sykepengegrunnlag) {
-        override fun valider(aktivitetslogg: IAktivitetslogg, harSpleisPeriodeForanEllerSkjæringstidpsunktIPerioden: Boolean) {
+        override fun valider(aktivitetslogg: IAktivitetslogg, erForlengelse: Boolean) {
             sjekkAvviksprosent(aktivitetslogg)
         }
 
@@ -298,7 +297,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                 skjæringstidspunkt,
                 this,
                 sykepengegrunnlag,
-                sammenligningsgrunnlag.sammenligningsgrunnlag,
+                sammenligningsgrunnlag,
                 avviksprosent,
                 opptjening,
                 vurdertOk,
@@ -313,7 +312,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                 skjæringstidspunkt,
                 this,
                 sykepengegrunnlag,
-                sammenligningsgrunnlag.sammenligningsgrunnlag,
+                sammenligningsgrunnlag,
                 avviksprosent,
                 medlemskapstatus,
                 vurdertOk,
@@ -322,8 +321,8 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             )
         }
 
-        override fun sammenligningsgrunnlagPerArbeidsgiver() =
-            sammenligningsgrunnlag.inntektsopplysningPerArbeidsgiver()
+        override fun inngårISammenligningsgrunnlaget(organisasjonsnummer: String) =
+            sammenligningsgrunnlag.erRelevant(organisasjonsnummer)
 
         override fun avvis(tidslinjer: List<Utbetalingstidslinje>, skjæringstidspunkt: LocalDate) {
             val begrunnelser = mutableListOf<Begrunnelse>()
@@ -359,8 +358,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             )
         }
 
-        fun harInntektFraAOrdningen(): Boolean = sykepengegrunnlag.inntektsopplysningPerArbeidsgiver().values
-            .any { it is Inntektshistorikk.SkattComposite || it is Inntektshistorikk.IkkeRapportert }
+        internal fun harInntektFraAOrdningen(): Boolean = sykepengegrunnlag.harInntektFraAOrdningen()
     }
 
     internal class InfotrygdVilkårsgrunnlag(
@@ -402,8 +400,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                 vilkårsgrunnlagId
             )
         }
-
-        override fun sammenligningsgrunnlagPerArbeidsgiver() = emptyMap<String, Inntektshistorikk.Inntektsopplysning>()
 
         override fun vilkårsgrunnlagtype() = "Infotrygd"
 

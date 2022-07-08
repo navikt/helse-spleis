@@ -143,9 +143,9 @@ internal interface SykepengegrunnlagVisitor : ArbeidsgiverInntektsopplysningVisi
         minsteinntekt: Inntekt,
         oppfyllerMinsteinntektskrav: Boolean
     ) {}
-    fun preVisitArbeidsgiverInntektsopplysninger() {}
+    fun preVisitArbeidsgiverInntektsopplysninger(arbeidsgiverInntektopplysninger: List<ArbeidsgiverInntektsopplysning>) {}
 
-    fun postVisitArbeidsgiverInntektsopplysninger() {}
+    fun postVisitArbeidsgiverInntektsopplysninger(arbeidsgiverInntektopplysninger: List<ArbeidsgiverInntektsopplysning>) {}
 
     fun postVisitSykepengegrunnlag(
         sykepengegrunnlag1: Sykepengegrunnlag,
@@ -171,7 +171,7 @@ internal interface VilkårsgrunnlagHistorikkVisitor : SykepengegrunnlagVisitor, 
         skjæringstidspunkt: LocalDate,
         grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata,
         sykepengegrunnlag: Sykepengegrunnlag,
-        sammenligningsgrunnlag: Inntekt,
+        sammenligningsgrunnlag: Sammenligningsgrunnlag,
         avviksprosent: Prosent?,
         opptjening: Opptjening,
         vurdertOk: Boolean,
@@ -183,7 +183,7 @@ internal interface VilkårsgrunnlagHistorikkVisitor : SykepengegrunnlagVisitor, 
         skjæringstidspunkt: LocalDate,
         grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata,
         sykepengegrunnlag: Sykepengegrunnlag,
-        sammenligningsgrunnlag: Inntekt,
+        sammenligningsgrunnlag: Sammenligningsgrunnlag,
         avviksprosent: Prosent?,
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
         vurdertOk: Boolean,

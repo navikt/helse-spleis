@@ -1664,6 +1664,7 @@ internal class Vedtaksperiode private constructor(
                     person.valider(this, vilkårsgrunnlag, vedtaksperiode.skjæringstidspunkt, arbeidsgiver.finnVedtaksperiodeRettFør(vedtaksperiode) != null)
                 }
                 onSuccess {
+                    vedtaksperiode.inntektskilde = vilkårsgrunnlag.inntektskilde()
                     if (vedtaksperiode.inntektsmeldingInfo == null) {
                         arbeidsgiver.finnTidligereInntektsmeldinginfo(vedtaksperiode.skjæringstidspunkt)?.also { vedtaksperiode.kopierManglende(it) }
                     }
@@ -1685,16 +1686,8 @@ internal class Vedtaksperiode private constructor(
                         )
                     ) {
                         ytelser.warn("Den sykmeldte har skiftet arbeidsgiver, og det er beregnet at den nye arbeidsgiveren mottar refusjon lik forrige. Kontroller at dagsatsen blir riktig.")
-                    } else if (vedtaksperiode.skalHaWarningForFlereArbeidsforholdUtenSykdomEllerUlikStartdato(
-                            vilkårsgrunnlag
-                        )
-                    ) {
+                    } else if (vedtaksperiode.skalHaWarningForFlereArbeidsforholdUtenSykdomEllerUlikStartdato(vilkårsgrunnlag)) {
                         ytelser.warn("Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold")
-                    }
-                    if (vedtaksperiode.person.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt)!!
-                            .gjelderFlereArbeidsgivere()
-                    ) {
-                        vedtaksperiode.inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE
                     }
                     vedtaksperiode.forsøkUtbetaling(arbeidsgiverUtbetalinger.maksimumSykepenger, ytelser)
                 }

@@ -1,5 +1,7 @@
 package no.nav.helse.spleis.e2e
 
+import java.time.LocalDate
+import java.util.UUID
 import no.nav.helse.desember
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsvurdering
@@ -7,10 +9,12 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.til
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.Arbeidsforholdhistorikk
 import no.nav.helse.person.Arbeidsgiver
+import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.inntektsopplysningPerArbeidsgiver
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.PersonVisitor
@@ -22,8 +26,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
-import java.util.*
 
 internal class OpptjeningE2ETest : AbstractEndToEndTest() {
     @Test
@@ -106,7 +108,7 @@ internal class OpptjeningE2ETest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
 
-        assertEquals(setOf(a1), person.vilkårsgrunnlagFor(1.januar)?.sykepengegrunnlag()?.inntektsopplysningPerArbeidsgiver()?.keys)
+        assertEquals(setOf(a1), person.vilkårsgrunnlagFor(1.januar)?.inspektør?.sykepengegrunnlag?.inspektør?.arbeidsgiverInntektsopplysninger?.inntektsopplysningPerArbeidsgiver()?.keys)
         assertEquals(Inntektskilde.EN_ARBEIDSGIVER, inspektør(a1).inntektskilde(1.vedtaksperiode))
     }
 

@@ -16,6 +16,7 @@ import no.nav.helse.person.Inntektshistorikk.SkattComposite
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonVisitor
+import no.nav.helse.person.Sammenligningsgrunnlag
 import no.nav.helse.person.Sykepengegrunnlag
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.Grunnlagsdata
@@ -182,7 +183,7 @@ internal class VilkårsgrunnlagBuilder(
             skjæringstidspunkt: LocalDate,
             grunnlagsdata: Grunnlagsdata,
             sykepengegrunnlag: Sykepengegrunnlag,
-            sammenligningsgrunnlag: Inntekt,
+            sammenligningsgrunnlag: Sammenligningsgrunnlag,
             avviksprosent: Prosent?,
             opptjening: Opptjening,
             vurdertOk: Boolean,
@@ -202,7 +203,7 @@ internal class VilkårsgrunnlagBuilder(
                 skjæringstidspunkt, ISpleisGrunnlag(
                     skjæringstidspunkt = skjæringstidspunkt,
                     omregnetÅrsinntekt = compositeSykepengegrunnlag.omregnetÅrsinntekt,
-                    sammenligningsgrunnlag = InntektBuilder(sammenligningsgrunnlag).build().årlig,
+                    sammenligningsgrunnlag = InntektBuilder(sammenligningsgrunnlag.sammenligningsgrunnlag).build().årlig,
                     inntekter = compositeSykepengegrunnlag.inntekterPerArbeidsgiver,
                     sykepengegrunnlag = compositeSykepengegrunnlag.sykepengegrunnlag,
                     avviksprosent = avviksprosent?.prosent(),

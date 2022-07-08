@@ -1,6 +1,5 @@
 package no.nav.helse.person
 
-import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.inntektsopplysningPerArbeidsgiver
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.sammenligningsgrunnlag
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.økonomi.Inntekt
@@ -18,17 +17,15 @@ internal class Sammenligningsgrunnlag(
         arbeidsgiverInntektsopplysninger
     )
 
+    internal fun erRelevant(organisasjonsnummer: String) =
+        arbeidsgiverInntektsopplysninger.any { it.gjelder(organisasjonsnummer) }
 
     internal fun accept(visitor: VilkårsgrunnlagHistorikkVisitor) {
         visitor.preVisitSammenligningsgrunnlag(this, sammenligningsgrunnlag)
-        visitor.preVisitArbeidsgiverInntektsopplysninger()
+        visitor.preVisitArbeidsgiverInntektsopplysninger(arbeidsgiverInntektsopplysninger)
         arbeidsgiverInntektsopplysninger.forEach { it.accept(visitor) }
-        visitor.postVisitArbeidsgiverInntektsopplysninger()
+        visitor.postVisitArbeidsgiverInntektsopplysninger(arbeidsgiverInntektsopplysninger)
         visitor.postVisitSammenligningsgrunnlag(this, sammenligningsgrunnlag)
     }
-
-    internal fun inntektsopplysningPerArbeidsgiver(): Map<String, Inntektshistorikk.Inntektsopplysning> =
-        arbeidsgiverInntektsopplysninger.inntektsopplysningPerArbeidsgiver()
-
 
 }

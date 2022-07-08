@@ -18,6 +18,11 @@ internal class ArbeidsgiverInntektsopplysning(
         return acc + inntektsopplysning.omregnetÅrsinntekt()
     }
 
+    internal fun harInntektFraAOrdningen() =
+        inntektsopplysning is Inntektshistorikk.SkattComposite || inntektsopplysning is Inntektshistorikk.IkkeRapportert
+
+    internal fun gjelder(organisasjonsnummer: String) = organisasjonsnummer == orgnummer
+
     internal fun accept(visitor: ArbeidsgiverInntektsopplysningVisitor) {
         visitor.preVisitArbeidsgiverInntektsopplysning(this, orgnummer)
         inntektsopplysning.accept(visitor)

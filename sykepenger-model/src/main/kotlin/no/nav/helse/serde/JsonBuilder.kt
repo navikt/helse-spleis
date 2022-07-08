@@ -802,7 +802,7 @@ internal class JsonBuilder : AbstractBuilder() {
             skjæringstidspunkt: LocalDate,
             grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata,
             sykepengegrunnlag: Sykepengegrunnlag,
-            sammenligningsgrunnlag: Inntekt,
+            sammenligningsgrunnlag: Sammenligningsgrunnlag,
             avviksprosent: Prosent?,
             opptjening: Opptjening,
             vurdertOk: Boolean,
@@ -901,7 +901,7 @@ internal class JsonBuilder : AbstractBuilder() {
             skjæringstidspunkt: LocalDate,
             grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata,
             sykepengegrunnlag: Sykepengegrunnlag,
-            sammenligningsgrunnlag: Inntekt,
+            sammenligningsgrunnlag: Sammenligningsgrunnlag,
             avviksprosent: Prosent?,
             medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus,
             vurdertOk: Boolean,
@@ -965,7 +965,7 @@ internal class JsonBuilder : AbstractBuilder() {
             popState()
         }
 
-        override fun preVisitArbeidsgiverInntektsopplysninger() {
+        override fun preVisitArbeidsgiverInntektsopplysninger(arbeidsgiverInntektopplysninger: List<ArbeidsgiverInntektsopplysning>) {
             pushState(ArbeidsgiverInntektsopplysningerState(arbeidsgiverInntektsopplysninger))
         }
     }
@@ -983,7 +983,7 @@ internal class JsonBuilder : AbstractBuilder() {
             popState()
         }
 
-        override fun preVisitArbeidsgiverInntektsopplysninger() {
+        override fun preVisitArbeidsgiverInntektsopplysninger(arbeidsgiverInntektopplysninger: List<ArbeidsgiverInntektsopplysning>) {
             pushState(ArbeidsgiverInntektsopplysningerState(arbeidsgiverInntektsopplysninger))
         }
     }
@@ -1068,7 +1068,7 @@ internal class JsonBuilder : AbstractBuilder() {
             pushState(InntektsendringState(skatteopplysninger))
         }
 
-        override fun postVisitArbeidsgiverInntektsopplysninger() {
+        override fun postVisitArbeidsgiverInntektsopplysninger(arbeidsgiverInntektopplysninger: List<ArbeidsgiverInntektsopplysning>) {
             popState()
         }
 

@@ -30,6 +30,7 @@ import no.nav.helse.mars
 import no.nav.helse.november
 import no.nav.helse.oktober
 import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.inntektsopplysningPerArbeidsgiver
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
@@ -1156,7 +1157,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(1.vedtaksperiode)
 
         val inntektsopplysning =
-            inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.sykepengegrunnlag()?.inntektsopplysningPerArbeidsgiver()
+            inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør?.sykepengegrunnlag?.inspektør?.arbeidsgiverInntektsopplysninger?.inntektsopplysningPerArbeidsgiver()
                 ?.get(ORGNUMMER)
         assertEquals(INNTEKT, inntektsopplysning?.omregnetÅrsinntekt())
         assertInstanceOf(Inntektshistorikk.Inntektsmelding::class.java, inntektsopplysning)

@@ -12,11 +12,11 @@ import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonVisitor
+import no.nav.helse.person.Sammenligningsgrunnlag
 import no.nav.helse.person.Sykepengegrunnlag
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.utbetalingstidslinje.Alder
-import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosent
 
 internal val Person.inspektør get() = PersonInspektør(this)
@@ -36,7 +36,7 @@ internal class PersonInspektør(person: Person): PersonVisitor {
     internal lateinit var fødselsdato: LocalDate
     internal var dødsdato: LocalDate? = null
     internal lateinit var alder: Alder
-    private val arbeidsgivere = mutableSetOf<String>()
+    private val arbeidsgivere = mutableMapOf<String, Arbeidsgiver>()
     private val infotrygdelementerLagretInntekt = mutableListOf<Boolean>()
     private val grunnlagsdata = mutableListOf<Pair<LocalDate,VilkårsgrunnlagHistorikk.Grunnlagsdata>>()
     private val vilkårsgrunnlagHistorikkInnslag: MutableList<TestArbeidsgiverInspektør.InnslagId> = mutableListOf()
@@ -45,10 +45,12 @@ internal class PersonInspektør(person: Person): PersonVisitor {
         person.accept(this)
     }
 
+    internal fun arbeidsgiver(orgnummer: String) = arbeidsgivere[orgnummer]
     internal fun harLagretInntekt(indeks: Int) = infotrygdelementerLagretInntekt[indeks]
-    internal fun harArbeidsgiver(organisasjonsnummer: String) = organisasjonsnummer in arbeidsgivere
+    internal fun harArbeidsgiver(organisasjonsnummer: String) = organisasjonsnummer in arbeidsgivere.keys
     internal fun grunnlagsdata(indeks: Int) = grunnlagsdata[indeks].second
     internal fun vilkårsgrunnlagHistorikkInnslag() = vilkårsgrunnlagHistorikkInnslag.sortedByDescending { it.timestamp }.toList()
+
     internal fun antallGrunnlagsdata() = grunnlagsdata.size
 
     override fun preVisitPerson(
@@ -78,7 +80,7 @@ internal class PersonInspektør(person: Person): PersonVisitor {
         skjæringstidspunkt: LocalDate,
         grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata,
         sykepengegrunnlag: Sykepengegrunnlag,
-        sammenligningsgrunnlag: Inntekt,
+        sammenligningsgrunnlag: Sammenligningsgrunnlag,
         avviksprosent: Prosent?,
         opptjening: Opptjening,
         vurdertOk: Boolean,
@@ -106,6 +108,6 @@ internal class PersonInspektør(person: Person): PersonVisitor {
     }
 
     override fun preVisitArbeidsgiver(arbeidsgiver: Arbeidsgiver, id: UUID, organisasjonsnummer: String) {
-        this.arbeidsgivere.add(organisasjonsnummer)
+        this.arbeidsgivere[organisasjonsnummer] = arbeidsgiver
     }
 }
