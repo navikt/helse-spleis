@@ -13,7 +13,7 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
-import no.nav.helse.person.TilstandType
+import no.nav.helse.person.TilstandType.*
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -39,41 +39,39 @@ internal class OldOverstyrInntektTest : AbstractEndToEndTest() {
         håndterOverstyrInntekt(inntekt = overstyrtInntekt, orgnummer = ORGNUMMER, skjæringstidspunkt = fom)
 
         assertTilstander(1.vedtaksperiode,
-            TilstandType.START,
-            TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            TilstandType.AVVENTER_BLOKKERENDE_PERIODE,
-            TilstandType.AVVENTER_HISTORIKK,
-            TilstandType.AVVENTER_VILKÅRSPRØVING,
-            TilstandType.AVVENTER_HISTORIKK,
-            TilstandType.AVVENTER_SIMULERING,
-            TilstandType.AVVENTER_GODKJENNING,
-            TilstandType.AVVENTER_HISTORIKK,
-            TilstandType.AVVENTER_SIMULERING,
-            TilstandType.AVVENTER_GODKJENNING, // <-- Her står vi når vi overstyrer inntekt.
-            TilstandType.AVVENTER_VILKÅRSPRØVING)
+            START,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING, // <-- Her står vi når vi overstyrer inntekt.
+            AVVENTER_HISTORIKK)
 
         // dra saken til AVVENTER_GODKJENNING
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
         // assert at vi går gjennom restene av tilstandene som vanlig
         assertTilstander(1.vedtaksperiode,
-            TilstandType.START,
-            TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            TilstandType.AVVENTER_BLOKKERENDE_PERIODE,
-            TilstandType.AVVENTER_HISTORIKK,
-            TilstandType.AVVENTER_VILKÅRSPRØVING,
-            TilstandType.AVVENTER_HISTORIKK,
-            TilstandType.AVVENTER_SIMULERING,
-            TilstandType.AVVENTER_GODKJENNING,
-            TilstandType.AVVENTER_HISTORIKK,
-            TilstandType.AVVENTER_SIMULERING,
-            TilstandType.AVVENTER_GODKJENNING, // <-- Her sto vi da vi overstyrte inntekt.
-            TilstandType.AVVENTER_VILKÅRSPRØVING,
-            TilstandType.AVVENTER_HISTORIKK,
-            TilstandType.AVVENTER_SIMULERING,
-            TilstandType.AVVENTER_GODKJENNING) // <-- og her skal den nye, overstyrte inntekten vært benyttet
+            START,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING, // <-- Her sto vi da vi overstyrte inntekt.
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING) // <-- og her skal den nye, overstyrte inntekten vært benyttet
 
         // assert at vi bruker den nye inntekten i beregning av penger til sjuk.
         assertInntektForDato(overstyrtInntekt, fom, inspektør = inspektør)
@@ -86,20 +84,19 @@ internal class OldOverstyrInntektTest : AbstractEndToEndTest() {
         tilGodkjenning(fom, 31.januar(2021), 100.prosent, fom)
 
         håndterOverstyrInntekt(inntekt = overstyrtInntekt, orgnummer = ORGNUMMER, skjæringstidspunkt = fom)
-
-        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
 
         assertForkastetPeriodeTilstander(1.vedtaksperiode,
-            TilstandType.START,
-            TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            TilstandType.AVVENTER_BLOKKERENDE_PERIODE,
-            TilstandType.AVVENTER_HISTORIKK,
-            TilstandType.AVVENTER_VILKÅRSPRØVING,
-            TilstandType.AVVENTER_HISTORIKK,
-            TilstandType.AVVENTER_SIMULERING,
-            TilstandType.AVVENTER_GODKJENNING,
-            TilstandType.AVVENTER_VILKÅRSPRØVING,
-            TilstandType.TIL_INFOTRYGD)
+            START,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            AVVENTER_HISTORIKK,
+            TIL_INFOTRYGD)
     }
 
     @Test
@@ -199,24 +196,24 @@ internal class OldOverstyrInntektTest : AbstractEndToEndTest() {
         assertEquals(12694, inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.totalbeløp())
 
         assertTilstander(1.vedtaksperiode,
-            TilstandType.START,
-            TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            TilstandType.AVVENTER_BLOKKERENDE_PERIODE,
-            TilstandType.AVVENTER_HISTORIKK,
-            TilstandType.AVVENTER_VILKÅRSPRØVING,
-            TilstandType.AVVENTER_HISTORIKK,
-            TilstandType.AVVENTER_SIMULERING,
-            TilstandType.AVVENTER_GODKJENNING,
-            TilstandType.TIL_UTBETALING,
-            TilstandType.AVSLUTTET,
-            TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING,
-            TilstandType.AVVENTER_HISTORIKK_REVURDERING,
-            TilstandType.AVVENTER_SIMULERING_REVURDERING,
-            TilstandType.AVVENTER_GODKJENNING_REVURDERING,
-            TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING,
-            TilstandType.AVVENTER_HISTORIKK_REVURDERING,
-            TilstandType.AVVENTER_SIMULERING_REVURDERING,
-            TilstandType.AVVENTER_GODKJENNING_REVURDERING
+            START,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET,
+            AVVENTER_VILKÅRSPRØVING_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_SIMULERING_REVURDERING,
+            AVVENTER_GODKJENNING_REVURDERING,
+            AVVENTER_VILKÅRSPRØVING_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_SIMULERING_REVURDERING,
+            AVVENTER_GODKJENNING_REVURDERING
             )
     }
 
@@ -242,40 +239,40 @@ internal class OldOverstyrInntektTest : AbstractEndToEndTest() {
         assertEquals(35774, inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.totalbeløp())
 
         assertTilstander(1.vedtaksperiode,
-            TilstandType.START,
-            TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            TilstandType.AVVENTER_BLOKKERENDE_PERIODE,
-            TilstandType.AVVENTER_HISTORIKK,
-            TilstandType.AVVENTER_VILKÅRSPRØVING,
-            TilstandType.AVVENTER_HISTORIKK,
-            TilstandType.AVVENTER_SIMULERING,
-            TilstandType.AVVENTER_GODKJENNING,
-            TilstandType.TIL_UTBETALING,
-            TilstandType.AVSLUTTET,
-            TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING,
-            TilstandType.AVVENTER_HISTORIKK_REVURDERING,
-            TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING,
-            TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING,
-            TilstandType.AVVENTER_HISTORIKK_REVURDERING,
-            TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
+            START,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET,
+            AVVENTER_VILKÅRSPRØVING_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_VILKÅRSPRØVING_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_GJENNOMFØRT_REVURDERING
         )
 
         assertTilstander(2.vedtaksperiode,
-            TilstandType.START,
-            TilstandType.AVVENTER_BLOKKERENDE_PERIODE,
-            TilstandType.AVVENTER_HISTORIKK,
-            TilstandType.AVVENTER_SIMULERING,
-            TilstandType.AVVENTER_GODKJENNING,
-            TilstandType.TIL_UTBETALING,
-            TilstandType.AVSLUTTET,
-            TilstandType.AVVENTER_ARBEIDSGIVERE_REVURDERING,
-            TilstandType.AVVENTER_HISTORIKK_REVURDERING,
-            TilstandType.AVVENTER_SIMULERING_REVURDERING,
-            TilstandType.AVVENTER_GODKJENNING_REVURDERING,
-            TilstandType.AVVENTER_ARBEIDSGIVERE_REVURDERING,
-            TilstandType.AVVENTER_HISTORIKK_REVURDERING,
-            TilstandType.AVVENTER_SIMULERING_REVURDERING,
-            TilstandType.AVVENTER_GODKJENNING_REVURDERING
+            START,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET,
+            AVVENTER_ARBEIDSGIVERE_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_SIMULERING_REVURDERING,
+            AVVENTER_GODKJENNING_REVURDERING,
+            AVVENTER_ARBEIDSGIVERE_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_SIMULERING_REVURDERING,
+            AVVENTER_GODKJENNING_REVURDERING
         )
     }
 
@@ -300,39 +297,39 @@ internal class OldOverstyrInntektTest : AbstractEndToEndTest() {
         assertEquals("PPPPPPP PPPPPPP PPNNNFF FFFFFFF FNNNNHH NNNNNHH NNNNNHH NNNNNHH NNN", inspektør.sisteUtbetalingUtbetalingstidslinje().toString().trim())
 
         assertTilstander(1.vedtaksperiode,
-            TilstandType.START,
-            TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            TilstandType.AVVENTER_BLOKKERENDE_PERIODE,
-            TilstandType.AVVENTER_HISTORIKK,
-            TilstandType.AVVENTER_VILKÅRSPRØVING,
-            TilstandType.AVVENTER_HISTORIKK,
-            TilstandType.AVVENTER_SIMULERING,
-            TilstandType.AVVENTER_GODKJENNING,
-            TilstandType.TIL_UTBETALING,
-            TilstandType.AVSLUTTET,
-            TilstandType.AVVENTER_HISTORIKK_REVURDERING,
-            TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING,
-            TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING,
-            TilstandType.AVVENTER_HISTORIKK_REVURDERING,
-            TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
+            START,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_VILKÅRSPRØVING_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_GJENNOMFØRT_REVURDERING
         )
 
         assertTilstander(2.vedtaksperiode,
-            TilstandType.START,
-            TilstandType.AVVENTER_BLOKKERENDE_PERIODE,
-            TilstandType.AVVENTER_HISTORIKK,
-            TilstandType.AVVENTER_SIMULERING,
-            TilstandType.AVVENTER_GODKJENNING,
-            TilstandType.TIL_UTBETALING,
-            TilstandType.AVSLUTTET,
-            TilstandType.AVVENTER_ARBEIDSGIVERE_REVURDERING,
-            TilstandType.AVVENTER_HISTORIKK_REVURDERING,
-            TilstandType.AVVENTER_SIMULERING_REVURDERING,
-            TilstandType.AVVENTER_GODKJENNING_REVURDERING,
-            TilstandType.AVVENTER_ARBEIDSGIVERE_REVURDERING,
-            TilstandType.AVVENTER_HISTORIKK_REVURDERING,
-            TilstandType.AVVENTER_SIMULERING_REVURDERING,
-            TilstandType.AVVENTER_GODKJENNING_REVURDERING
+            START,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET,
+            AVVENTER_ARBEIDSGIVERE_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_SIMULERING_REVURDERING,
+            AVVENTER_GODKJENNING_REVURDERING,
+            AVVENTER_ARBEIDSGIVERE_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_SIMULERING_REVURDERING,
+            AVVENTER_GODKJENNING_REVURDERING
         )
     }
 
@@ -359,14 +356,6 @@ internal class OldOverstyrInntektTest : AbstractEndToEndTest() {
 
         håndterOverstyrInntekt(UnderMinstegrense, skjæringstidspunkt = 1.januar)
 
-        håndterVilkårsgrunnlag(
-            1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
-                listOf(
-                    sammenligningsgrunnlag(ORGNUMMER, 1.januar, OverMinstegrense.repeat(12)),
-                )
-            ),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter, arbeidsforhold = emptyList())
-        )
         håndterYtelser(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
 

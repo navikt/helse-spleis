@@ -735,7 +735,6 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterOverstyrInntekt(30000.månedlig, a1, 1.januar)
-        håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1) // Burde ikke skje
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
 

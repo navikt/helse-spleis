@@ -1900,7 +1900,12 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {
             vedtaksperiode.arbeidsgiver.addInntekt(hendelse)
-            vedtaksperiode.tilstand(hendelse, AvventerVilkårsprøving)
+            vedtaksperiode.person.vilkårsprøvEtterNyInformasjonFraSaksbehandler(
+                hendelse,
+                vedtaksperiode.skjæringstidspunkt,
+                vedtaksperiode.jurist()
+            )
+            vedtaksperiode.tilstand(hendelse, AvventerHistorikk)
         }
 
         override fun håndterOverstyringAvGhostInntekt(

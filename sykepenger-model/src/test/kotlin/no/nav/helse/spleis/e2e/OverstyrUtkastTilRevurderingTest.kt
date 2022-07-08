@@ -1,7 +1,12 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.februar
+import no.nav.helse.hendelser.InntektForSykepengegrunnlag
+import no.nav.helse.hendelser.Inntektsvurdering
+import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.til
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.TilstandType.AVSLUTTET
@@ -20,6 +25,10 @@ import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.Fridag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavHelgDag
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import no.nav.helse.økonomi.Inntekt.Companion.årlig
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -59,6 +68,199 @@ internal class OverstyrUtkastTilRevurderingTest: AbstractEndToEndTest() {
             AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING
+        )
+    }
+
+    @Test
+    fun `skal kunne overstyre inntekt i utkast til revurdering ved revurdering av tidslinje`() {
+        nyttVedtak(1.januar, 31.januar)
+        forlengVedtak(1.februar, 28.februar)
+
+        håndterOverstyrTidslinje((20.januar til 29.januar).map { manuellFeriedag(it) })
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+
+        håndterOverstyrInntekt(inntekt = 20000.månedlig, skjæringstidspunkt = 1.januar)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+
+        // 23075 = round((20000 * 12) / 260) * 25 (25 nav-dager i januar + februar 2018)
+        Assertions.assertEquals(23075, inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.totalbeløp())
+        Assertions.assertEquals(
+            "SSSSSHH SSSSSHH SSSSSFF FFFFFFF FSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS",
+            inspektør.sykdomshistorikk.sykdomstidslinje().toShortString().trim()
+        )
+        Assertions.assertEquals(
+            "PPPPPPP PPPPPPP PPNNNFF FFFFFFF FNNNNHH NNNNNHH NNNNNHH NNNNNHH NNN",
+            inspektør.sisteUtbetalingUtbetalingstidslinje().toString().trim()
+        )
+
+        assertTilstander(1.vedtaksperiode,
+            START,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET,
+            AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_GJENNOMFØRT_REVURDERING
+        )
+
+        assertTilstander(2.vedtaksperiode,
+            START,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET,
+            AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_SIMULERING_REVURDERING,
+            AVVENTER_GODKJENNING_REVURDERING,
+            AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_SIMULERING_REVURDERING,
+            AVVENTER_GODKJENNING_REVURDERING
+        )
+    }
+
+    @Test
+    fun `skal kunne overstyre inntekt i utkast til revurdering`() {
+        nyttVedtak(1.januar, 31.januar)
+
+        håndterOverstyrInntekt(inntekt = 20000.månedlig, skjæringstidspunkt = 1.januar)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+
+        // 10153 = round((20000 * 12) / 260) * 11 (11 nav-dager i januar 2018)
+        Assertions.assertEquals(10153, inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.totalbeløp())
+
+        håndterOverstyrInntekt(inntekt = 25000.månedlig, skjæringstidspunkt = 1.januar)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+
+        // 12694 = round((25000 * 12) / 260) * 11 (11 nav-dager i januar)
+        Assertions.assertEquals(12694, inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.totalbeløp())
+
+        assertTilstander(1.vedtaksperiode,
+            START,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET,
+            AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_SIMULERING_REVURDERING,
+            AVVENTER_GODKJENNING_REVURDERING,
+            AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_SIMULERING_REVURDERING,
+            AVVENTER_GODKJENNING_REVURDERING
+        )
+    }
+
+    @Test
+    fun `Ved overstyring av revurdering av inntekt til under krav til minste sykepengegrunnlag skal vi opphøre den opprinnelige utbetalingen`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, beregnetInntekt = 50000.årlig)
+        håndterYtelser(1.vedtaksperiode)
+        val inntekter = listOf(grunnlag(ORGNUMMER, 1.januar, 50000.årlig.repeat(3)))
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
+                listOf(
+                    sammenligningsgrunnlag(ORGNUMMER, 1.januar, 50000.årlig.repeat(12)),
+                )
+            ),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter, arbeidsforhold = emptyList())
+        )
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+
+        håndterOverstyrInntekt(48000.årlig, skjæringstidspunkt = 1.januar)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+
+        håndterOverstyrInntekt(46000.årlig, skjæringstidspunkt = 1.januar)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+
+        val utbetalinger = inspektør.utbetalinger
+        assertTrue(utbetalinger[0].inspektør.erUtbetalt)
+        assertTrue(utbetalinger[1].inspektør.erForkastet)
+        assertTrue(utbetalinger[2].inspektør.erUtbetalt)
+        Assertions.assertEquals(
+            utbetalinger.first().inspektør.arbeidsgiverOppdrag.nettoBeløp(),
+            -1 * utbetalinger.last().inspektør.arbeidsgiverOppdrag.nettoBeløp()
+        )
+        Assertions.assertEquals(1, utbetalinger.map { it.inspektør.arbeidsgiverOppdrag.fagsystemId() }.toSet().size)
+    }
+
+
+    @Test
+    fun `skal kunne overstyre inntekt i utkast til revurdering, også når det er snakk om flere perioder`() {
+        nyttVedtak(1.januar, 31.januar)
+        forlengVedtak(1.februar, 28.februar)
+
+        håndterOverstyrInntekt(inntekt = 20000.månedlig, skjæringstidspunkt = 1.januar)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+
+        // 28613 = round((20000 * 12) / 260) * 31 (31 nav-dager i januar + februar 2018)
+        Assertions.assertEquals(28613, inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.totalbeløp())
+
+        håndterOverstyrInntekt(inntekt = 25000.månedlig, skjæringstidspunkt = 1.januar)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+
+        // 35774 = round((25000 * 12) / 260) * 31 (31 nav-dager i januar + februar)
+        Assertions.assertEquals(35774, inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.totalbeløp())
+
+        assertTilstander(1.vedtaksperiode,
+            START,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET,
+            AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_GJENNOMFØRT_REVURDERING
+        )
+
+        assertTilstander(2.vedtaksperiode,
+            START,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            TIL_UTBETALING,
+            AVSLUTTET,
+            AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_SIMULERING_REVURDERING,
+            AVVENTER_GODKJENNING_REVURDERING,
+            AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_SIMULERING_REVURDERING,
+            AVVENTER_GODKJENNING_REVURDERING
         )
     }
 

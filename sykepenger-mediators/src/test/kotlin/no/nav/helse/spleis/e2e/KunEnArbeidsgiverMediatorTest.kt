@@ -213,7 +213,6 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         sendYtelser(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
         sendOverstyringInntekt(33000.0, 1.januar)
-        sendVilkårsgrunnlag(0)
         sendYtelser(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
         sendUtbetalingsgodkjenning(0, true)
@@ -232,7 +231,6 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
             "AVVENTER_HISTORIKK",
             "AVVENTER_SIMULERING",
             "AVVENTER_GODKJENNING",
-            "AVVENTER_VILKÅRSPRØVING",
             "AVVENTER_HISTORIKK",
             "AVVENTER_SIMULERING",
             "AVVENTER_GODKJENNING",
