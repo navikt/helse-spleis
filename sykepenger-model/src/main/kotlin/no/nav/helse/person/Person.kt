@@ -42,6 +42,7 @@ import no.nav.helse.person.Arbeidsgiver.Companion.gjenopptaBehandling
 import no.nav.helse.person.Arbeidsgiver.Companion.gjenopptaBehandlingNy
 import no.nav.helse.person.Arbeidsgiver.Companion.harArbeidsgivereMedOverlappendeUtbetaltePerioder
 import no.nav.helse.person.Arbeidsgiver.Companion.harOverlappendeEllerForlengerForkastetVedtaksperiode
+import no.nav.helse.person.Arbeidsgiver.Companion.harPeriodeSomBlokkererOverstyring
 import no.nav.helse.person.Arbeidsgiver.Companion.harUtbetaltPeriode
 import no.nav.helse.person.Arbeidsgiver.Companion.harVedtaksperiodeFor
 import no.nav.helse.person.Arbeidsgiver.Companion.håndter
@@ -931,4 +932,6 @@ class Person private constructor(
     }
 
     internal fun skjæringstidspunktperiode(skjæringstidspunkt: LocalDate) = arbeidsgivere.skjæringstidspunktperiode(skjæringstidspunkt)
+    internal fun harPeriodeSomBlokkererOverstyring(skjæringstidspunkt: LocalDate) =
+        arbeidsgivere.harPeriodeSomBlokkererOverstyring(skjæringstidspunkt)
 }

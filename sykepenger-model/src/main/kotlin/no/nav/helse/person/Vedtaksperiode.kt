@@ -1898,6 +1898,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {
+            if (vedtaksperiode.person.harPeriodeSomBlokkererOverstyring(hendelse.skjæringstidspunkt)) return
             vedtaksperiode.arbeidsgiver.addInntekt(hendelse)
             vedtaksperiode.person.vilkårsprøvEtterNyInformasjonFraSaksbehandler(
                 hendelse,
