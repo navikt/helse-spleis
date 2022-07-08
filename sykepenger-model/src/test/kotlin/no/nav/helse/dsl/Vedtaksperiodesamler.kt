@@ -3,7 +3,6 @@ package no.nav.helse.dsl
 import java.util.UUID
 import no.nav.helse.hendelser.Hendelseskontekst
 import no.nav.helse.person.PersonObserver
-import org.junit.jupiter.api.Assertions.assertNotEquals
 
 internal class Vedtaksperiodesamler : PersonObserver {
     private var sisteVedtaksperiode: UUID? = null
@@ -12,11 +11,10 @@ internal class Vedtaksperiodesamler : PersonObserver {
     internal fun vedtaksperiodeId(orgnummer: String, indeks: Int) =
         vedtaksperioder.getValue(orgnummer).elementAt(indeks)
 
-    internal fun fangVedtaksperiode(block: () -> Any): UUID {
+    internal fun fangVedtaksperiode(block: () -> Any): UUID? {
         val forrige = sisteVedtaksperiode
         block()
-        assertNotEquals(forrige, sisteVedtaksperiode) { "Det ble ikke opprettet noen vedtaksperiode, forrige er $forrige" }
-        return requireNotNull(sisteVedtaksperiode)
+        return sisteVedtaksperiode?.takeUnless { it == forrige }
     }
 
     override fun vedtaksperiodeEndret(

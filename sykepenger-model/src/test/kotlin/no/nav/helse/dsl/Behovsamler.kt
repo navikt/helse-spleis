@@ -33,6 +33,11 @@ internal class Behovsamler : PersonObserver {
         return behovtyper.all { behovtype -> behovtype in behover }
     }
 
+    internal fun bekreftBehovOppfylt() {
+        val ubesvarte = behov.filterNot { it.type == Behovtype.Sykepengehistorikk }.takeUnless { it.isEmpty() } ?: return
+        println("Etter testen er det ${behov.size} behov uten svar: [${behov.joinToString { it.type.toString() }}]")
+    }
+
     internal fun bekreftOgKvitterReplay(vedtaksperiodeId: UUID) {
         assertTrue(replays.remove(vedtaksperiodeId)) { "Vedtaksperioden har ikke bedt om replay. Den står i ${tilstander.getValue(vedtaksperiodeId)}"}
     }
@@ -54,9 +59,9 @@ internal class Behovsamler : PersonObserver {
 
     internal fun detaljerFor(orgnummer: String, behovtype: Behovtype) =
         detaljerFor(orgnummerbehov(orgnummer), behovtype)
-
     internal fun detaljerFor(vedtaksperiodeId: UUID, behovtype: Behovtype) =
         detaljerFor(vedtaksperiodebehov(vedtaksperiodeId), behovtype)
+
     internal fun detaljerFor(filter: (Behov) -> Boolean, behovtype: Behovtype) =
         behov.filter { filter(it) && it.type == behovtype }.map { it.detaljer() to it.kontekst() }
 
@@ -67,6 +72,15 @@ internal class Behovsamler : PersonObserver {
         println(" -> Det er nå ${behov.size} behov (${behov.joinToString { it.type.toString() }})")
         if (replays.remove(vedtaksperiodeId)) {
             println("-> Vedtaksperioden ba om replay, men det ble ikke utført")
+        }
+    }
+
+    override fun utbetalingUtbetalt(
+        hendelseskontekst: Hendelseskontekst,
+        event: PersonObserver.UtbetalingUtbetaltEvent
+    ) {
+        assertTrue(behov.removeAll { it.utbetalingId == event.utbetalingId }) {
+            "Utbetaling ble utbetalt, men ingen behov om utbetaling er registrert"
         }
     }
 
@@ -85,6 +99,8 @@ internal class Behovsamler : PersonObserver {
     }
 
     private companion object {
+        private val Behov.utbetalingId get() =
+            kontekst()["utbetalingId"]?.let { UUID.fromString(it) }
         private val Behov.vedtaksperiodeId get() =
             kontekst()["vedtaksperiodeId"]?.let { UUID.fromString(it) }
         private val Behov.orgnummer get() = kontekst()["organisasjonsnummer"]

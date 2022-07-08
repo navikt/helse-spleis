@@ -1,11 +1,11 @@
 package no.nav.helse
 
+import java.util.UUID
 import no.nav.helse.person.AbstractPersonTest
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.serde.reflection.castAsList
-import java.util.*
 
 internal fun IAktivitetslogg.antallEtterspurteBehov(vedtaksperiodeIdInnhenter: IdInnhenter, behovtype: Aktivitetslogg.Aktivitet.Behov.Behovtype, orgnummer: String = AbstractPersonTest.ORGNUMMER) =
     antallEtterspurteBehov(vedtaksperiodeIdInnhenter.id(orgnummer), behovtype)
@@ -18,6 +18,9 @@ internal fun IAktivitetslogg.etterspurteBehov(vedtaksperiodeIdInnhenter: IdInnhe
 
 internal fun IAktivitetslogg.sisteBehov(vedtaksperiodeIdInnhenter: IdInnhenter, orgnummer: String = AbstractPersonTest.ORGNUMMER) =
     behov().last { it.kontekst()["vedtaksperiodeId"] == vedtaksperiodeIdInnhenter.id(orgnummer).toString() }
+
+internal fun IAktivitetslogg.sisteBehov(vedtaksperiodeId: UUID) =
+    behov().last { it.kontekst()["vedtaksperiodeId"] == vedtaksperiodeId.toString() }
 
 internal fun IAktivitetslogg.sisteBehov(type: Aktivitetslogg.Aktivitet.Behov.Behovtype) =
     behov().last { it.type == type }

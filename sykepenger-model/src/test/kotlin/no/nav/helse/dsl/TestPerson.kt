@@ -57,6 +57,7 @@ import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import org.junit.jupiter.api.fail
 
 internal class TestPerson(
     private val observatør: PersonObserver,
@@ -102,6 +103,14 @@ internal class TestPerson(
         person.håndter(this)
         behovsamler.registrerBehov(forrigeHendelse)
         return this
+    }
+
+    internal fun forkastAlle() {
+        person.invaliderAllePerioder(forrigeHendelse, null)
+    }
+
+    internal fun bekreftBehovOppfylt() {
+        behovsamler.bekreftBehovOppfylt()
     }
 
     inner class TestArbeidsgiver(internal val orgnummer: String) {
@@ -252,8 +261,8 @@ internal class TestPerson(
             fabrikk.lagAnnullering(fagsystemId).håndter(Person::håndter)
         }
 
-        internal fun håndterPåminnelse(vedtaksperiodeId: UUID, tilstand: TilstandType, tidspunkt: LocalDateTime = LocalDateTime.now()) {
-            fabrikk.lagPåminnelse(vedtaksperiodeId, tilstand, tidspunkt)
+        internal fun håndterPåminnelse(vedtaksperiodeId: UUID, tilstand: TilstandType, tilstandsendringstidspunkt: LocalDateTime = LocalDateTime.now()) {
+            fabrikk.lagPåminnelse(vedtaksperiodeId, tilstand, tilstandsendringstidspunkt)
                 .håndter(Person::håndter)
         }
 
@@ -338,7 +347,7 @@ internal fun TestPerson.TestArbeidsgiver.nyttVedtak(
     inntekterBlock: Inntektperioder.() -> Unit = { lagInntektperioder(orgnummer, fom, beregnetInntekt) }
 ) {
     håndterSykmelding(Sykmeldingsperiode(fom, tom, grad))
-    val vedtaksperiode = håndterSøknad(Sykdom(fom, tom, grad))
+    val vedtaksperiode = håndterSøknad(Sykdom(fom, tom, grad)) ?: fail { "Det ble ikke opprettet noen vedtaksperiode" }
     håndterInntektsmelding(arbeidsgiverperiode, beregnetInntekt, førsteFraværsdag, refusjon)
     håndterYtelser(vedtaksperiode)
     håndterVilkårsgrunnlag(vedtaksperiode, beregnetInntekt, inntektsvurdering = Inntektsvurdering(

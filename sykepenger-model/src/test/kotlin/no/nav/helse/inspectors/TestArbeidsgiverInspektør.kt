@@ -425,7 +425,8 @@ internal class TestArbeidsgiverInspektør(
     internal fun gjeldendeUtbetalingForVedtaksperiode(vedtaksperiodeIdInnhenter: IdInnhenter) = utbetalinger.filterIndexed { index, _ -> index in vedtaksperiodeIdInnhenter.id(orgnummer).utbetalingsindeks }.last()
     internal fun ikkeUtbetalteUtbetalingerForVedtaksperiode(vedtaksperiodeIdInnhenter: IdInnhenter) = utbetalinger.filterIndexed { index, _ -> index in vedtaksperiodeIdInnhenter.id(orgnummer).utbetalingsindeks }.filter { it.inspektør.erUbetalt }
     internal fun avsluttedeUtbetalingerForVedtaksperiode(vedtaksperiodeIdInnhenter: IdInnhenter) = utbetalinger.filterIndexed { index, _ -> index in vedtaksperiodeIdInnhenter.id(orgnummer).utbetalingsindeks }.filter { it.erAvsluttet() }
-    internal fun utbetalinger(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperiodeIdInnhenter.id(orgnummer).utbetalingsindeksOrNull?.let { indekser ->
+    internal fun utbetalinger(vedtaksperiodeIdInnhenter: IdInnhenter) = utbetalinger(vedtaksperiodeIdInnhenter.id(orgnummer))
+    internal fun utbetalinger(vedtaksperiodeId: UUID) = vedtaksperiodeId.utbetalingsindeksOrNull?.let { indekser ->
         utbetalinger.filterIndexed { index, _ -> index in indekser }
     } ?: emptyList()
     internal fun utbetalingstype(vedtaksperiodeIdInnhenter: IdInnhenter, utbetalingIndex: Int) = vedtaksperiodeutbetalingstyper[vedtaksperiodeIdInnhenter.id(orgnummer).indeks]!!.getOrNull(utbetalingIndex)
@@ -471,6 +472,7 @@ internal class TestArbeidsgiverInspektør(
     internal fun skjæringstidspunkt(vedtaksperiodeId: UUID) = vedtaksperiodeId.finn(skjæringstidspunkter)()
 
     internal fun utbetalingstidslinjer(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperiodeIdInnhenter.finn(utbetalingstidslinjer)
+    internal fun utbetalingstidslinjer(vedtaksperiodeId: UUID) = vedtaksperiodeId.finn(utbetalingstidslinjer)
 
     internal fun vedtaksperioder(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperiodeIdInnhenter.finn(vedtaksperioder)
 
@@ -479,6 +481,7 @@ internal class TestArbeidsgiverInspektør(
     internal fun fagsystemId(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperiodeIdInnhenter.finn(fagsystemIder)
 
     internal fun inntektskilde(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperiodeIdInnhenter.finn(inntektskilder)
+    internal fun inntektskilde(vedtaksperiodeId: UUID) = vedtaksperiodeId.finn(inntektskilder)
 
     internal fun periodetype(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperiodeIdInnhenter.finn(periodetyper)()
 

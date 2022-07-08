@@ -334,7 +334,7 @@ internal class Hendelsefabrikk(
             opprettet = LocalDateTime.now()
         )
 
-    internal fun lagPåminnelse(vedtaksperiodeId: UUID, tilstand: TilstandType, tidspunkt: LocalDateTime) =
+    internal fun lagPåminnelse(vedtaksperiodeId: UUID, tilstand: TilstandType, tilstandsendringstidspunkt: LocalDateTime) =
         Påminnelse(
             UUID.randomUUID(),
             aktørId,
@@ -343,8 +343,8 @@ internal class Hendelsefabrikk(
             vedtaksperiodeId.toString(),
             0,
             tilstand,
+            tilstandsendringstidspunkt,
             LocalDateTime.now(),
-            tidspunkt,
             LocalDateTime.now()
         )
 }

@@ -22,8 +22,13 @@ import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.TestObservatør
+import no.nav.helse.spleis.e2e.lagInntektperioder
+import no.nav.helse.testhelpers.Inntektperioder
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Prosentdel
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 
@@ -51,6 +56,8 @@ internal abstract class AbstractDslTest {
     protected val inspektør: TestArbeidsgiverInspektør get() = a1.inspektør
 
     private val TestPerson.TestArbeidsgiver.asserter get() = TestAssertions(observatør, inspektør, testperson.inspiser(personInspektør))
+
+    protected fun forkastAlle() = testperson.forkastAlle()
 
     protected fun <INSPEKTØR : PersonVisitor> inspiser(inspektør: (Person) -> INSPEKTØR) = testperson.inspiser(inspektør)
     protected fun inspektør(orgnummer: String) = inspiser(agInspektør(orgnummer))
@@ -125,14 +132,14 @@ internal abstract class AbstractDslTest {
         this { håndterYtelser(vedtaksperiodeId, utbetalinger, inntektshistorikk, foreldrepenger, svangerskapspenger, pleiepenger, omsorgspenger, opplæringspenger, institusjonsoppholdsperioder, dødsdato, statslønn, arbeidskategorikoder, arbeidsavklaringspenger, dagpenger, besvart) }
     protected fun String.håndterSimulering(vedtaksperiodeId: UUID) =
         this { håndterSimulering(vedtaksperiodeId) }
-    protected fun String.håndterUtbetalingsgodkjenning(vedtaksperiodeId: UUID, godkjent: Boolean) =
+    protected fun String.håndterUtbetalingsgodkjenning(vedtaksperiodeId: UUID, godkjent: Boolean = true) =
         this { håndterUtbetalingsgodkjenning(vedtaksperiodeId, godkjent) }
     protected fun String.håndterUtbetalt(status: Oppdragstatus) =
         this { håndterUtbetalt(status) }
     protected fun String.håndterAnnullering(fagsystemId: String) =
         this { håndterAnnullering(fagsystemId) }
-    protected fun String.håndterPåminnelse(vedtaksperiodeId: UUID, tilstand: TilstandType, tidspunkt: LocalDateTime = LocalDateTime.now()) =
-        this { håndterPåminnelse(vedtaksperiodeId, tilstand, tidspunkt) }
+    protected fun String.håndterPåminnelse(vedtaksperiodeId: UUID, tilstand: TilstandType, tilstandsendringstidspunkt: LocalDateTime = LocalDateTime.now()) =
+        this { håndterPåminnelse(vedtaksperiodeId, tilstand, tilstandsendringstidspunkt) }
 
     protected fun String.assertTilstander(id: UUID, vararg tilstander: TilstandType) =
         this { assertTilstander(id, *tilstander) }
@@ -146,6 +153,18 @@ internal abstract class AbstractDslTest {
         this { asserter.assertWarning(warning, *filtre) }
     protected fun String.assertNoWarnings(vararg filtre: AktivitetsloggFilter) =
         this { asserter.assertNoWarnings(*filtre) }
+    protected fun String.nyttVedtak(
+        fom: LocalDate,
+        tom: LocalDate,
+        grad: Prosentdel = 100.prosent,
+        førsteFraværsdag: LocalDate = fom,
+        beregnetInntekt: Inntekt = INNTEKT,
+        refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
+        arbeidsgiverperiode: List<Periode> = emptyList(),
+        inntekterBlock: Inntektperioder.() -> Unit = { lagInntektperioder(this@nyttVedtak, fom, beregnetInntekt) }
+    ) =
+        this { nyttVedtak(fom, tom, grad, førsteFraværsdag, beregnetInntekt, refusjon, arbeidsgiverperiode, inntekterBlock) }
+
 
     /* dsl for å gå direkte på arbeidsgiver1, eksempelvis i tester for det ikke er andre arbeidsgivere */
     protected fun håndterSykmelding(
@@ -218,14 +237,14 @@ internal abstract class AbstractDslTest {
         a1.håndterYtelser(vedtaksperiodeId, utbetalinger, inntektshistorikk, foreldrepenger, svangerskapspenger, pleiepenger, omsorgspenger, opplæringspenger, institusjonsoppholdsperioder, dødsdato, statslønn, arbeidskategorikoder, arbeidsavklaringspenger, dagpenger, besvart)
     internal fun håndterSimulering(vedtaksperiodeId: UUID, orgnummer: String = a1) =
         a1.håndterSimulering(vedtaksperiodeId)
-    internal fun håndterUtbetalingsgodkjenning(vedtaksperiodeId: UUID, godkjent: Boolean, orgnummer: String = a1) =
+    internal fun håndterUtbetalingsgodkjenning(vedtaksperiodeId: UUID, godkjent: Boolean = true, orgnummer: String = a1) =
         a1.håndterUtbetalingsgodkjenning(vedtaksperiodeId, godkjent)
     internal fun håndterUtbetalt(status: Oppdragstatus = Oppdragstatus.AKSEPTERT, orgnummer: String = a1) =
         a1.håndterUtbetalt(status)
     protected fun håndterAnnullering(fagsystemId: String) =
         a1.håndterAnnullering(fagsystemId)
-    protected fun håndterPåminnelse(vedtaksperiodeId: UUID, tilstand: TilstandType, tidspunkt: LocalDateTime = LocalDateTime.now()) =
-        a1.håndterPåminnelse(vedtaksperiodeId, tilstand, tidspunkt)
+    protected fun håndterPåminnelse(vedtaksperiodeId: UUID, tilstand: TilstandType, tilstandsendringstidspunkt: LocalDateTime = LocalDateTime.now()) =
+        a1.håndterPåminnelse(vedtaksperiodeId, tilstand, tilstandsendringstidspunkt)
 
     protected fun assertTilstander(id: UUID, vararg tilstander: TilstandType) =
         a1.assertTilstander(id, *tilstander)
@@ -244,9 +263,27 @@ internal abstract class AbstractDslTest {
         assertTrue(inspektør.aktivitetslogg.hasActivities()) { inspektør.aktivitetslogg.toString() }
     }
 
+    protected fun nyttVedtak(
+        fom: LocalDate,
+        tom: LocalDate,
+        grad: Prosentdel = 100.prosent,
+        førsteFraværsdag: LocalDate = fom,
+        beregnetInntekt: Inntekt = INNTEKT,
+        refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
+        arbeidsgiverperiode: List<Periode> = emptyList(),
+        inntekterBlock: Inntektperioder.() -> Unit = { lagInntektperioder(a1, fom, beregnetInntekt) }
+    ) =
+        a1.nyttVedtak(fom, tom, grad, førsteFraværsdag, beregnetInntekt, refusjon, arbeidsgiverperiode, inntekterBlock)
+
+
     @BeforeEach
     fun setup() {
         observatør = TestObservatør()
         testperson = TestPerson(observatør)
+    }
+
+    @AfterEach
+    fun verify() {
+        testperson.bekreftBehovOppfylt()
     }
 }
