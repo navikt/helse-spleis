@@ -140,6 +140,12 @@ internal class Arbeidsgiver private constructor(
             }
         }
 
+        internal fun List<Arbeidsgiver>.relevanteArbeidsgivere(vilkårsgrunnlag: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?) =
+           filter { arbeidsgiver ->
+               vilkårsgrunnlag?.erRelevant(arbeidsgiver.organisasjonsnummer) == true
+                       || arbeidsgiver.vedtaksperioder.nåværendeVedtaksperiode(KLAR_TIL_BEHANDLING) != null
+           }.map { it.organisasjonsnummer }
+
         private fun Iterable<Arbeidsgiver>.senerePerioderPågående(vedtaksperiode: Vedtaksperiode) =
             any { it.senerePerioderPågående(vedtaksperiode) }
 

@@ -149,7 +149,6 @@ internal class VedtaksperiodeUtbetalinger(private val arbeidsgiver: Arbeidsgiver
         periodetype: Periodetype,
         førstegangsbehandling: Boolean,
         inntektskilde: Inntektskilde,
-        aktiveVedtaksperioder: List<Aktivitetslogg.Aktivitet.AktivVedtaksperiode>,
         arbeidsforholdId: String?,
         orgnummereMedRelevanteArbeidsforhold: List<String>,
         aktivitetslogg: Aktivitetslogg
@@ -161,9 +160,8 @@ internal class VedtaksperiodeUtbetalinger(private val arbeidsgiver: Arbeidsgiver
             periodetype = periodetype,
             førstegangsbehandling = førstegangsbehandling,
             inntektskilde = inntektskilde,
-            aktiveVedtaksperioder = aktiveVedtaksperioder,
-            arbeidsforholdId = arbeidsforholdId,
             orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold,
+            arbeidsforholdId = arbeidsforholdId,
             aktivitetslogg = aktivitetslogg
         )
     }

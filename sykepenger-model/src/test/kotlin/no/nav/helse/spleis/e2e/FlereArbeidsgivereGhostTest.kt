@@ -1,8 +1,6 @@
 package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate
-import java.time.YearMonth
-import java.util.UUID
 import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.februar
@@ -20,7 +18,6 @@ import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.november
 import no.nav.helse.person.Inntektshistorikk
-import no.nav.helse.person.Inntektshistorikk.Skatt.Inntekttype.LØNNSINNTEKT
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -785,9 +782,9 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         val skjæringstidspunkt = inspektør.skjæringstidspunkt(1.vedtaksperiode)
-        assertEquals(listOf(a1, a2).toList(), person.orgnummereMedRelevanteArbeidsforhold(skjæringstidspunkt).toList())
+        assertEquals(listOf(a1, a2).toList(), person.relevanteArbeidsgivere(skjæringstidspunkt).toList())
         håndterOverstyrArbeidsforhold(skjæringstidspunkt, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, true)))
-        assertEquals(listOf(a1), person.orgnummereMedRelevanteArbeidsforhold(skjæringstidspunkt))
+        assertEquals(listOf(a1), person.relevanteArbeidsgivere(skjæringstidspunkt))
         assertEquals(listOf(a2), person.vilkårsgrunnlagFor(1.januar)?.inspektør?.sykepengegrunnlag?.inspektør?.deaktiverteArbeidsforhold)
     }
 }

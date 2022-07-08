@@ -4,7 +4,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
-import java.util.UUID
 import no.nav.helse.hendelser.Hendelseskontekst
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov
@@ -353,7 +352,6 @@ class Aktivitetslogg(
                     førstegangsbehandling: Boolean,
                     utbetalingtype: Utbetalingtype,
                     inntektskilde: Inntektskilde,
-                    aktiveVedtaksperioder: List<AktivVedtaksperiode>,
                     orgnummereMedRelevanteArbeidsforhold: List<String>,
                     arbeidsforholdId: String?,
                 ) {
@@ -370,7 +368,6 @@ class Aktivitetslogg(
                                 aktiviteter.addAll(vedtaksperiodeaktivitetslogg.warn())
 
                             }.toMap(),
-                            "aktiveVedtaksperioder" to aktiveVedtaksperioder.map(AktivVedtaksperiode::toMap),
                             "orgnummereMedRelevanteArbeidsforhold" to orgnummereMedRelevanteArbeidsforhold,
                             "arbeidsforholdId" to arbeidsforholdId
                         )
@@ -439,18 +436,6 @@ class Aktivitetslogg(
             override fun accept(visitor: AktivitetsloggVisitor) {
                 visitor.visitSevere(kontekster, this, melding, tidsstempel)
             }
-        }
-
-        internal data class AktivVedtaksperiode(
-            val orgnummer: String,
-            val vedtaksperiodeId: UUID,
-            val periodetype: Periodetype
-        ) {
-            fun toMap() = mapOf<String, Any>(
-                "orgnummer" to orgnummer,
-                "vedtaksperiodeId" to vedtaksperiodeId.toString(),
-                "periodetype" to periodetype.name
-            )
         }
     }
 }

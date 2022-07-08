@@ -1,7 +1,18 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.*
-import no.nav.helse.hendelser.*
+import java.time.LocalDate
+import java.time.LocalDateTime
+import no.nav.helse.desember
+import no.nav.helse.februar
+import no.nav.helse.hendelser.InntektForSykepengegrunnlag
+import no.nav.helse.hendelser.Inntektsvurdering
+import no.nav.helse.hendelser.OverstyrArbeidsforhold
+import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.Søknad
+import no.nav.helse.hendelser.Vilkårsgrunnlag
+import no.nav.helse.hendelser.til
+import no.nav.helse.januar
+import no.nav.helse.november
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.serde.serialize
@@ -12,8 +23,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertInstanceOf
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import java.time.LocalDate
-import java.time.LocalDateTime
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD as TIL_INFOTRYGD1
 
 internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
@@ -32,9 +41,9 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         val skjæringstidspunkt = inspektør.skjæringstidspunkt(1.vedtaksperiode)
-        assertEquals(listOf(a1, a2).toList(), person.orgnummereMedRelevanteArbeidsforhold(skjæringstidspunkt).toList())
+        assertEquals(listOf(a1, a2).toList(), person.relevanteArbeidsgivere(skjæringstidspunkt).toList())
         håndterOverstyrArbeidsforhold(skjæringstidspunkt, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, true)))
-        assertEquals(listOf(a1), person.orgnummereMedRelevanteArbeidsforhold(skjæringstidspunkt))
+        assertEquals(listOf(a1), person.relevanteArbeidsgivere(skjæringstidspunkt))
     }
 
     @Test
@@ -82,7 +91,7 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         val skjæringstidspunkt = inspektør.skjæringstidspunkt(2.vedtaksperiode)
-        assertEquals(listOf(a1, a2).toList(), person.orgnummereMedRelevanteArbeidsforhold(skjæringstidspunkt).toList())
+        assertEquals(listOf(a1, a2).toList(), person.relevanteArbeidsgivere(skjæringstidspunkt).toList())
         assertThrows<Aktivitetslogg.AktivitetException> {
             håndterOverstyrArbeidsforhold(skjæringstidspunkt, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, true)))
         }
@@ -90,7 +99,7 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
             "Kan ikke overstyre arbeidsforhold for en pågående behandling der én eller flere perioder er behandlet ferdig",
             AktivitetsloggFilter.person()
         )
-        assertEquals(listOf(a1, a2), person.orgnummereMedRelevanteArbeidsforhold(skjæringstidspunkt))
+        assertEquals(listOf(a1, a2), person.relevanteArbeidsgivere(skjæringstidspunkt))
     }
 
     @Test

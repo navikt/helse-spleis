@@ -103,10 +103,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
         internal fun erRelevant(organisasjonsnummer: String, skjæringstidspunkter: List<LocalDate>) =
             skjæringstidspunkter.mapNotNull(vilkårsgrunnlag::get)
-                .any {
-                    it.sykepengegrunnlag().inntektsopplysningPerArbeidsgiver().containsKey(organisasjonsnummer)
-                            || it.sammenligningsgrunnlagPerArbeidsgiver().containsKey(organisasjonsnummer)
-                }
+                .any { it.erRelevant(organisasjonsnummer) }
 
         internal fun avvis(tidslinjer: List<Utbetalingstidslinje>) {
             vilkårsgrunnlag.forEach { (skjæringstidspunkt, element) ->
@@ -193,8 +190,13 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             sykepengegrunnlag.build(builder)
         }
 
+        internal fun erRelevant(organisasjonsnummer: String): Boolean {
+            return sykepengegrunnlag.inntektsopplysningPerArbeidsgiver().containsKey(organisasjonsnummer)
+                    || sammenligningsgrunnlagPerArbeidsgiver().containsKey(organisasjonsnummer)
+        }
         internal fun gjelderFlereArbeidsgivere() = sykepengegrunnlag.inntektsopplysningPerArbeidsgiver().size > 1
         internal open fun sjekkAvviksprosent(aktivitetslogg: IAktivitetslogg): Boolean = true
+
         internal open fun avvis(tidslinjer: List<Utbetalingstidslinje>, skjæringstidspunkt: LocalDate) {}
 
         final override fun toSpesifikkKontekst() = SpesifikkKontekst(

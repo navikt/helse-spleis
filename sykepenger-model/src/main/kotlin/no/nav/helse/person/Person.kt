@@ -51,6 +51,7 @@ import no.nav.helse.person.Arbeidsgiver.Companion.kanOverstyreTidslinje
 import no.nav.helse.person.Arbeidsgiver.Companion.kanStarteRevurdering
 import no.nav.helse.person.Arbeidsgiver.Companion.lagRevurdering
 import no.nav.helse.person.Arbeidsgiver.Companion.nåværendeVedtaksperioder
+import no.nav.helse.person.Arbeidsgiver.Companion.relevanteArbeidsgivere
 import no.nav.helse.person.Arbeidsgiver.Companion.skjæringstidspunktperiode
 import no.nav.helse.person.Arbeidsgiver.Companion.slettUtgåtteSykmeldingsperioder
 import no.nav.helse.person.Arbeidsgiver.Companion.startRevurdering
@@ -838,9 +839,8 @@ class Person private constructor(
     internal fun harVedtaksperiodeForArbeidsgiverMedUkjentArbeidsforhold(skjæringstidspunkt: LocalDate) =
         arbeidsgivere.any { it.harVedtaksperiodeMedUkjentArbeidsforhold(skjæringstidspunkt) }
 
-    internal fun orgnummereMedRelevanteArbeidsforhold(skjæringstidspunkt: LocalDate) = arbeidsgivere
-        .filter { vilkårsgrunnlagHistorikk.erRelevant(it.organisasjonsnummer(), listOf(skjæringstidspunkt)) }
-        .map { it.organisasjonsnummer() }
+    internal fun relevanteArbeidsgivere(skjæringstidspunkt: LocalDate) =
+        arbeidsgivere.relevanteArbeidsgivere(vilkårsgrunnlagFor(skjæringstidspunkt))
 
     internal fun harFlereArbeidsforholdMedUlikStartdato(skjæringstidspunkt: LocalDate) =
         arbeidsgivere.mapNotNull { it.finnFørsteFraværsdag(skjæringstidspunkt) }.sorted().distinct().count() > 1

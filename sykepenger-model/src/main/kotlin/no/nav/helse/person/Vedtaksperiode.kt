@@ -1956,13 +1956,6 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun trengerGodkjenning(hendelse: IAktivitetslogg) {
-        val aktiveVedtaksperioder = person.nåværendeVedtaksperioder(KLAR_TIL_BEHANDLING).map {
-            Aktivitetslogg.Aktivitet.AktivVedtaksperiode(
-                it.arbeidsgiver.organisasjonsnummer(),
-                it.id,
-                it.periodetype
-            )
-        }
         utbetalinger.godkjenning(
             hendelse = hendelse,
             periode = periode,
@@ -1970,9 +1963,8 @@ internal class Vedtaksperiode private constructor(
             periodetype = periodetype,
             førstegangsbehandling = periodetype == FØRSTEGANGSBEHANDLING,
             inntektskilde = inntektskilde,
-            aktiveVedtaksperioder = aktiveVedtaksperioder,
             arbeidsforholdId = inntektsmeldingInfo?.arbeidsforholdId,
-            orgnummereMedRelevanteArbeidsforhold = (person.orgnummereMedRelevanteArbeidsforhold(skjæringstidspunkt) + aktiveVedtaksperioder.map { it.orgnummer }).distinct(),
+            orgnummereMedRelevanteArbeidsforhold = person.relevanteArbeidsgivere(skjæringstidspunkt),
             aktivitetslogg = person.aktivitetslogg.logg(this)
         )
     }

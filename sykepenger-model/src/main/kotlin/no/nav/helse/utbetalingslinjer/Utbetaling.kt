@@ -221,7 +221,6 @@ internal class Utbetaling private constructor(
         periodetype: Periodetype,
         førstegangsbehandling: Boolean,
         inntektskilde: Inntektskilde,
-        aktiveVedtaksperioder: List<Aktivitetslogg.Aktivitet.AktivVedtaksperiode>,
         orgnummereMedRelevanteArbeidsforhold: List<String>,
         arbeidsforholdId: String?,
         aktivitetslogg: Aktivitetslogg
@@ -234,7 +233,6 @@ internal class Utbetaling private constructor(
             periodetype,
             førstegangsbehandling,
             inntektskilde,
-            aktiveVedtaksperioder,
             orgnummereMedRelevanteArbeidsforhold,
             arbeidsforholdId,
             aktivitetslogg,
@@ -691,7 +689,6 @@ internal class Utbetaling private constructor(
             periodetype: Periodetype,
             førstegangsbehandling: Boolean,
             inntektskilde: Inntektskilde,
-            aktiveVedtaksperioder: List<Aktivitetslogg.Aktivitet.AktivVedtaksperiode>,
             orgnummereMedRelevanteArbeidsforhold: List<String>,
             arbeidsforholdId: String?,
             aktivitetslogg: Aktivitetslogg,
@@ -732,7 +729,6 @@ internal class Utbetaling private constructor(
             periodetype: Periodetype,
             førstegangsbehandling: Boolean,
             inntektskilde: Inntektskilde,
-            aktiveVedtaksperioder: List<Aktivitetslogg.Aktivitet.AktivVedtaksperiode>,
             orgnummereMedRelevanteArbeidsforhold: List<String>,
             arbeidsforholdId: String?,
             aktivitetslogg: Aktivitetslogg,
@@ -748,7 +744,6 @@ internal class Utbetaling private constructor(
                 førstegangsbehandling = førstegangsbehandling,
                 utbetalingtype = utbetaling.type,
                 inntektskilde = inntektskilde,
-                aktiveVedtaksperioder = aktiveVedtaksperioder,
                 orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold,
                 arbeidsforholdId = arbeidsforholdId
             )

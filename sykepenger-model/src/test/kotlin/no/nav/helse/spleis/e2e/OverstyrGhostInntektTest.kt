@@ -126,7 +126,7 @@ internal class OverstyrGhostInntektTest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         val skjæringstidspunkt = inspektør.skjæringstidspunkt(2.vedtaksperiode)
-        assertEquals(listOf(AbstractPersonTest.a1, AbstractPersonTest.a2).toList(), person.orgnummereMedRelevanteArbeidsforhold(skjæringstidspunkt).toList())
+        assertEquals(listOf(AbstractPersonTest.a1, AbstractPersonTest.a2).toList(), person.relevanteArbeidsgivere(skjæringstidspunkt).toList())
         assertThrows<Aktivitetslogg.AktivitetException> {
             håndterOverstyrInntekt(30000.månedlig, a2, skjæringstidspunkt)
         }
@@ -134,7 +134,7 @@ internal class OverstyrGhostInntektTest : AbstractEndToEndTest() {
             "Kan ikke overstyre inntekt for ghost for en pågående behandling der én eller flere perioder er behandlet ferdig",
             AktivitetsloggFilter.person()
         )
-        assertEquals(listOf(AbstractPersonTest.a1, AbstractPersonTest.a2), person.orgnummereMedRelevanteArbeidsforhold(skjæringstidspunkt))
+        assertEquals(listOf(AbstractPersonTest.a1, AbstractPersonTest.a2), person.relevanteArbeidsgivere(skjæringstidspunkt))
     }
 
     @Test
