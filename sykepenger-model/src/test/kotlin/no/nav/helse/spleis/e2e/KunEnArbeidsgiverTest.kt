@@ -24,7 +24,6 @@ import no.nav.helse.november
 import no.nav.helse.oktober
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Inntektskilde
-import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -317,8 +316,8 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
         håndterUtbetalingshistorikk(
             1.vedtaksperiode,
-            listOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.desember(2017), 15.desember(2017), 100.prosent, 15000.daglig)),
-            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.desember(2017), INNTEKT, true))
+            listOf(ArbeidsgiverUtbetalingsperiode(a1, 1.desember(2017), 15.desember(2017), 100.prosent, 15000.daglig)),
+            inntektshistorikk = listOf(Inntektsopplysning(a1, 1.desember(2017), INNTEKT, true))
         )
         håndterInntektsmelding(listOf(Periode(3.januar, 18.januar)))
         håndterYtelser(1.vedtaksperiode)
@@ -358,8 +357,8 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
         håndterUtbetalingshistorikk(
             1.vedtaksperiode,
-            listOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.desember(2017), 16.desember(2017), 100.prosent, 15000.daglig)),
-            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.desember(2017), INNTEKT, true))
+            listOf(ArbeidsgiverUtbetalingsperiode(a1, 1.desember(2017), 16.desember(2017), 100.prosent, 15000.daglig)),
+            inntektshistorikk = listOf(Inntektsopplysning(a1, 1.desember(2017), INNTEKT, true))
         )
         assertNoErrors()
         assertNoWarnings()
@@ -370,11 +369,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
             assertEquals(18, it.sykdomstidslinje.inspektør.dagteller[Sykedag::class])
             assertEquals(6, it.sykdomstidslinje.inspektør.dagteller[SykHelgedag::class])
         }
-        assertTilstander(
-            1.vedtaksperiode,
-            START,
-            TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
-        )
+        assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
     }
 
     @Test
@@ -391,7 +386,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.september(2019) til 1.august(2020) inntekter {
-                    ORGNUMMER inntekt INNTEKT
+                    a1 inntekt INNTEKT
                 }
             }
         ))
@@ -861,7 +856,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.januar(2017) til 1.desember(2017) inntekter {
-                    ORGNUMMER inntekt INNTEKT
+                    a1 inntekt INNTEKT
                 }
                 1.januar(2017) til 1.januar(2017) inntekter {
                     "123412344" inntekt 1
@@ -890,7 +885,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.januar(2017) til 1.desember(2017) inntekter {
-                    ORGNUMMER inntekt INNTEKT
+                    a1 inntekt INNTEKT
                 }
                 1.januar(2017) til 1.januar(2017) inntekter {
                     "123412344" inntekt 1
@@ -947,8 +942,8 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         håndterUtbetalingshistorikk(1.vedtaksperiode, besvart = LocalDateTime.now().minusHours(24))
         håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
         håndterUtbetalingshistorikk(
-            1.vedtaksperiode, listOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 31.januar, 100.prosent, INNTEKT)),
-            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true))
+            1.vedtaksperiode, listOf(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar, 100.prosent, INNTEKT)),
+            inntektshistorikk = listOf(Inntektsopplysning(a1, 1.januar, INNTEKT, true))
         )
         assertTilstander(
             1.vedtaksperiode,
@@ -968,7 +963,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.desember(2019) til 1.november(2020) inntekter {
-                    ORGNUMMER inntekt INNTEKT
+                    a1 inntekt INNTEKT
                 }
             }
         ))
@@ -1016,7 +1011,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         håndterVilkårsgrunnlag(3.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.januar(2020) til 1.desember(2020) inntekter {
-                    ORGNUMMER inntekt INNTEKT
+                    a1 inntekt INNTEKT
                 }
             }
         ))
@@ -1052,7 +1047,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         håndterVilkårsgrunnlag(3.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.januar(2020) til 1.desember(2020) inntekter {
-                    ORGNUMMER inntekt INNTEKT
+                    a1 inntekt INNTEKT
                 }
             }
         ))
@@ -1090,7 +1085,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         håndterVilkårsgrunnlag(3.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.januar(2020) til 1.desember(2020) inntekter {
-                    ORGNUMMER inntekt INNTEKT
+                    a1 inntekt INNTEKT
                 }
             }
         ))
@@ -1111,8 +1106,8 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         håndterSøknad(Sykdom(1.januar(2020), 31.januar(2020), 100.prosent))
         håndterInntektsmelding(listOf(1.januar(2020) til 16.januar(2020)))
 
-        val utbetalinger = ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 28.desember, 100.prosent, INNTEKT)
-        val inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true))
+        val utbetalinger = ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 28.desember, 100.prosent, INNTEKT)
+        val inntektshistorikk = listOf(Inntektsopplysning(a1, 1.januar, INNTEKT, true))
 
         håndterYtelser(1.vedtaksperiode, listOf(utbetalinger), inntektshistorikk)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
