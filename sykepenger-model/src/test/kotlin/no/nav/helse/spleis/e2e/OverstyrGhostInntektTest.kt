@@ -200,6 +200,5 @@ internal class OverstyrGhostInntektTest : AbstractEndToEndTest() {
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-
     }
 }

@@ -95,7 +95,7 @@ internal fun AbstractEndToEndTest.håndterSykmelding(
     return id
 }
 
-internal fun AbstractEndToEndTest.tilGodkjenning(fom: LocalDate, tom: LocalDate, vararg organisasjonsnummere: String, inntekterBlock: Inntektperioder.() -> Unit = {
+internal fun AbstractEndToEndTest.tilGodkjenning(fom: LocalDate, tom: LocalDate, vararg organisasjonsnummere: String, beregnetInntekt: Inntekt = 20000.månedlig, inntekterBlock: Inntektperioder.() -> Unit = {
     fom.minusYears(1) til fom.minusMonths(1) inntekter {
         organisasjonsnummere.forEach {
             it inntekt 20000.månedlig
@@ -107,7 +107,7 @@ internal fun AbstractEndToEndTest.tilGodkjenning(fom: LocalDate, tom: LocalDate,
     organisasjonsnummere.forEach {
         håndterInntektsmelding(
             arbeidsgiverperioder = listOf(Periode(fom, fom.plusDays(15))),
-            beregnetInntekt = 20000.månedlig,
+            beregnetInntekt = beregnetInntekt,
             orgnummer = it
         )
     }
@@ -117,6 +117,7 @@ internal fun AbstractEndToEndTest.tilGodkjenning(fom: LocalDate, tom: LocalDate,
         håndterYtelser(vedtaksperiodeIdInnhenter = vedtaksperiode, orgnummer = organisasjonsnummer)
         håndterVilkårsgrunnlag(
             vedtaksperiodeIdInnhenter = vedtaksperiode,
+            inntekt = beregnetInntekt,
             orgnummer = organisasjonsnummer,
             inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
                 inntekterBlock()
