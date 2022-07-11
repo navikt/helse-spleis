@@ -1,8 +1,6 @@
 package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate
-import no.nav.helse.EnableToggle
-import no.nav.helse.Toggle
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsvurdering
@@ -30,7 +28,6 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-@EnableToggle(Toggle.RevurdereInntektMedFlereArbeidsgivere::class)
 internal class OverstyrInntektFlereArbeidsgivereTest: AbstractEndToEndTest() {
 
     val grunnlagsdataInspektør get() = GrunnlagsdataInspektør(inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!)
@@ -126,7 +123,7 @@ internal class OverstyrInntektFlereArbeidsgivereTest: AbstractEndToEndTest() {
     }
 
     @Test
-    fun `overstyring av inntekt for flere arbeidsgivere som fører til 25% avvik skal gi error -- ghost`() {
+    fun `overstyring av inntekt for flere arbeidsgivere som fører til 25 prosent avvik skal gi error -- ghost`() {
         tilOverstyring(
             sammenligningsgrunnlag = mapOf(a1 to 30000.månedlig, a2 to 1000.månedlig),
             sykepengegrunnlag = mapOf(a1 to 30000.månedlig, a2 to 1000.månedlig),
@@ -152,7 +149,7 @@ internal class OverstyrInntektFlereArbeidsgivereTest: AbstractEndToEndTest() {
     }
 
     @Test
-    fun `overstyring av inntekt for flere arbeidsgivere som fører til 25% avvik skal gi error`() {
+    fun `overstyring av inntekt for flere arbeidsgivere som fører til 25 prosent avvik skal gi error`() {
         tilGodkjenning(1.januar, 31.januar, a1, a2)
         håndterOverstyrInntekt(9999.månedlig, a1, 1.januar)
 
@@ -219,6 +216,13 @@ internal class OverstyrInntektFlereArbeidsgivereTest: AbstractEndToEndTest() {
         håndterOverstyrInntekt(8000.månedlig, skjæringstidspunkt = 1.januar, orgnummer = a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         assertError("Kan ikke fortsette på grunn av manglende funksjonalitet for utbetaling til bruker")
+    }
+
+    @Test
+    fun `Skal ikke revurdere inntekt for flere arbeidsgivere`() {
+        nyeVedtak(1.januar, 31.januar, a1, a2)
+        håndterOverstyrInntekt(19000.månedlig, skjæringstidspunkt = 1.januar, orgnummer = a1)
+        assertError("Forespurt revurdering av inntekt hvor personen har flere arbeidsgivere (inkl. ghosts)")
     }
 
     private fun tilOverstyring(

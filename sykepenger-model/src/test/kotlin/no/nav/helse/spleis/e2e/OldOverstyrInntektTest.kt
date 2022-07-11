@@ -13,7 +13,22 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
-import no.nav.helse.person.TilstandType.*
+import no.nav.helse.person.TilstandType.AVSLUTTET
+import no.nav.helse.person.TilstandType.AVVENTER_ARBEIDSGIVERE_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
+import no.nav.helse.person.TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
+import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
+import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
+import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
+import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
+import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
+import no.nav.helse.person.TilstandType.START
+import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -100,7 +115,7 @@ internal class OldOverstyrInntektTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `avviser overstyring av inntekt for saker med flere arbeidsgivere`() {
+    fun `avviser overstyring av inntekt for saker med flere arbeidsgivere`() = Toggle.OverstyrInntektMedFlereArbeidsgivere.disable {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a2)
 
@@ -136,7 +151,7 @@ internal class OldOverstyrInntektTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `avviser overstyring av inntekt for saker med 1 arbeidsgiver og ghost`() {
+    fun `avviser overstyring av inntekt for saker med 1 arbeidsgiver og ghost`() = Toggle.OverstyrInntektMedFlereArbeidsgivere.disable {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(

@@ -20,15 +20,10 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.Kilde
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
-import no.nav.helse.juli
-import no.nav.helse.juni
-import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.OppdragVisitor
 import no.nav.helse.person.TilstandType
-import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
-import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.Fagområde
 import no.nav.helse.utbetalingslinjer.Klassekode
@@ -38,7 +33,6 @@ import no.nav.helse.utbetalingslinjer.Satstype
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje
 import no.nav.helse.utbetalingslinjer.WARN_FORLENGER_OPPHØRT_OPPDRAG
-import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -521,7 +515,7 @@ internal class OldRevurderInntektTest : AbstractEndToEndTest() {
         håndterOverstyrInntekt(inntekt = 32000.månedlig, a1, 1.januar)
 
         Assertions.assertEquals(1, observatør.avvisteRevurderinger.size)
-        assertError("Forespurt overstyring av inntekt hvor personen har flere arbeidsgivere (inkl. ghosts)")
+        assertError("Forespurt revurdering av inntekt hvor personen har flere arbeidsgivere (inkl. ghosts)")
     }
 
     @Test
@@ -568,7 +562,7 @@ internal class OldRevurderInntektTest : AbstractEndToEndTest() {
 
         håndterOverstyrInntekt(32000.månedlig, a1, 1.januar)
         Assertions.assertEquals(1, observatør.avvisteRevurderinger.size)
-        assertError("Forespurt overstyring av inntekt hvor personen har flere arbeidsgivere (inkl. ghosts)")
+        assertError("Forespurt revurdering av inntekt hvor personen har flere arbeidsgivere (inkl. ghosts)")
     }
 
     @Test

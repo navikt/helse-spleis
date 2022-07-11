@@ -543,7 +543,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         håndterOverstyrInntekt(inntekt = 32000.månedlig, a1, 1.januar)
 
         assertEquals(1, observatør.avvisteRevurderinger.size)
-        assertError("Forespurt overstyring av inntekt hvor personen har flere arbeidsgivere (inkl. ghosts)")
+        assertError("Forespurt revurdering av inntekt hvor personen har flere arbeidsgivere (inkl. ghosts)")
     }
 
     @Test
@@ -587,7 +587,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
 
         håndterOverstyrInntekt(32000.månedlig, a1, 1.januar)
         assertEquals(1, observatør.avvisteRevurderinger.size)
-        assertError("Forespurt overstyring av inntekt hvor personen har flere arbeidsgivere (inkl. ghosts)")
+        assertError("Forespurt revurdering av inntekt hvor personen har flere arbeidsgivere (inkl. ghosts)")
     }
 
     @Test

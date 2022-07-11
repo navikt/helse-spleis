@@ -335,10 +335,6 @@ internal class Vedtaksperiode private constructor(
     internal fun håndter(hendelse: OverstyrInntekt): Boolean {
         if (!kanHåndtereOverstyring(hendelse)) return false
         kontekst(hendelse)
-        if (Toggle.RevurdereInntektMedFlereArbeidsgivere.disabled && inntektskilde == Inntektskilde.FLERE_ARBEIDSGIVERE) {
-            hendelse.error("Forespurt overstyring av inntekt hvor personen har flere arbeidsgivere (inkl. ghosts)")
-            return true
-        }
         hendelse.loggførHendelsesreferanse(person)
         tilstand.håndter(this, hendelse)
         return true
@@ -405,6 +401,22 @@ internal class Vedtaksperiode private constructor(
 
     private fun kanHåndtereOverstyring(hendelse: OverstyrInntekt): Boolean {
         return utbetalingstidslinje.isNotEmpty() && gjelder(hendelse.skjæringstidspunkt)
+    }
+
+    private fun kanOverstyreInntektForFlereArbeidsgivere(hendelse: OverstyrInntekt): Boolean {
+        if (Toggle.OverstyrInntektMedFlereArbeidsgivere.disabled && inntektskilde == Inntektskilde.FLERE_ARBEIDSGIVERE) {
+            hendelse.error("Forespurt overstyring av inntekt hvor personen har flere arbeidsgivere (inkl. ghosts)")
+            return false
+        }
+        return true
+    }
+
+    private fun kanRevurdereInntektForFlereArbeidsgivere(hendelse: OverstyrInntekt): Boolean {
+        if (Toggle.RevurdereInntektMedFlereArbeidsgivere.disabled && inntektskilde == Inntektskilde.FLERE_ARBEIDSGIVERE) {
+            hendelse.error("Forespurt revurdering av inntekt hvor personen har flere arbeidsgivere (inkl. ghosts)")
+            return false
+        }
+        return true
     }
 
     internal fun gjelder(skjæringstidspunkt: LocalDate) = this.skjæringstidspunkt == skjæringstidspunkt
@@ -1207,6 +1219,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {
+            if (!vedtaksperiode.kanRevurdereInntektForFlereArbeidsgivere(hendelse)) return
             if (Toggle.NyRevurdering.disabled) return vedtaksperiode.person.overstyrUtkastRevurdering(hendelse)
             vedtaksperiode.emitVedtaksperiodeEndret(hendelse)
             vedtaksperiode.revurderInntekt(hendelse)
@@ -1285,6 +1298,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {
+            if (!vedtaksperiode.kanRevurdereInntektForFlereArbeidsgivere(hendelse)) return
             if (Toggle.NyRevurdering.disabled) return super.håndter(vedtaksperiode, hendelse)
             vedtaksperiode.revurderInntekt(hendelse)
         }
@@ -1367,6 +1381,7 @@ internal class Vedtaksperiode private constructor(
             LocalDateTime.MAX
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {
+            if (!vedtaksperiode.kanRevurdereInntektForFlereArbeidsgivere(hendelse)) return
             vedtaksperiode.person.nyInntekt(hendelse)
             vedtaksperiode.person.vilkårsprøvEtterNyInformasjonFraSaksbehandler(
                 hendelse,
@@ -1795,6 +1810,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {
+            if (!vedtaksperiode.kanRevurdereInntektForFlereArbeidsgivere(hendelse)) return
             if (Toggle.NyRevurdering.disabled) return super.håndter(vedtaksperiode, hendelse)
             vedtaksperiode.revurderInntekt(hendelse)
         }
@@ -1891,6 +1907,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {
+            if (!vedtaksperiode.kanOverstyreInntektForFlereArbeidsgivere(hendelse)) return
             if (vedtaksperiode.person.harPeriodeSomBlokkererOverstyring(hendelse.skjæringstidspunkt)) return
             vedtaksperiode.arbeidsgiver.addInntekt(hendelse)
             vedtaksperiode.person.vilkårsprøvEtterNyInformasjonFraSaksbehandler(
@@ -2056,6 +2073,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {
+            if (!vedtaksperiode.kanRevurdereInntektForFlereArbeidsgivere(hendelse)) return
             if (Toggle.NyRevurdering.disabled) return vedtaksperiode.person.overstyrUtkastRevurdering(hendelse)
             vedtaksperiode.revurderInntekt(hendelse)
         }
@@ -2378,6 +2396,11 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {
+            if (!vedtaksperiode.kanRevurdereInntektForFlereArbeidsgivere(hendelse)) return
+
+            if (Toggle.RevurdereInntektMedFlereArbeidsgivere.disabled && vedtaksperiode.inntektskilde == Inntektskilde.FLERE_ARBEIDSGIVERE) {
+                hendelse.error("Forespurt revurdering av inntekt hvor personen har flere arbeidsgivere (inkl. ghosts)")
+            }
             if (!vedtaksperiode.person.kanRevurdereInntekt(hendelse.skjæringstidspunkt)) return hendelse.error("Kan ikke revurdere inntekt, da vi mangler datagrunnlag på skjæringstidspunktet")
             vedtaksperiode.person.igangsettRevurdering(hendelse, vedtaksperiode)
         }
@@ -2441,6 +2464,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {
+            if (!vedtaksperiode.kanRevurdereInntektForFlereArbeidsgivere(hendelse)) return
             if (Toggle.NyRevurdering.disabled) {
                 if (vedtaksperiode.person.kanRevurdereInntekt(hendelse.skjæringstidspunkt)) {
                     vedtaksperiode.person.igangsettRevurdering(hendelse, vedtaksperiode)
