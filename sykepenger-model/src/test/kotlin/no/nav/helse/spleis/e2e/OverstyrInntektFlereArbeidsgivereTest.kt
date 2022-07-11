@@ -194,6 +194,33 @@ internal class OverstyrInntektFlereArbeidsgivereTest: AbstractEndToEndTest() {
         assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
     }
 
+    @Test
+    fun `skal kaste ut vedtaksperioder dersom overstyring av inntekt kan føre til brukerutbetaling`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a2)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a2)
+
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1, beregnetInntekt = INNTEKT/4)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2, beregnetInntekt = INNTEKT/4)
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+
+        val inntektsvurdering = Inntektsvurdering(
+            listOf(
+                sammenligningsgrunnlag(a1, 1.januar, (INNTEKT/4).repeat(12)),
+                sammenligningsgrunnlag(a2, 1.januar, (INNTEKT/4).repeat(12))
+            )
+        )
+
+        håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1, inntektsvurdering = inntektsvurdering)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterOverstyrInntekt(8000.månedlig, skjæringstidspunkt = 1.januar, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        assertError("Kan ikke fortsette på grunn av manglende funksjonalitet for utbetaling til bruker")
+    }
+
     private fun tilOverstyring(
         fom: LocalDate = 1.januar,
         tom: LocalDate = 31.januar,
