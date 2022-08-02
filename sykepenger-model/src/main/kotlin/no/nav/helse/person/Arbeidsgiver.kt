@@ -150,7 +150,7 @@ internal class Arbeidsgiver private constructor(
             any { it.senerePerioderPågående(vedtaksperiode) }
 
         internal fun List<Arbeidsgiver>.startRevurdering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            associateWith { it.vedtaksperioder.toList() }.startRevurdering(vedtaksperiode, hendelse)
+            associateWith { it.vedtaksperioder.toList() }.startRevurdering(this, vedtaksperiode, hendelse)
         }
 
         internal fun List<Arbeidsgiver>.kanStarteRevurdering(vedtaksperiode: Vedtaksperiode) =
@@ -392,8 +392,8 @@ internal class Arbeidsgiver private constructor(
 
     internal fun avventerRevurdering() = vedtaksperioder.avventerRevurdering()
 
-    internal fun gjenopptaRevurdering(første: Vedtaksperiode, hendelse: IAktivitetslogg) {
-        Vedtaksperiode.gjenopptaRevurdering(hendelse, vedtaksperioder, første, this)
+    internal fun gjenopptaRevurdering(arbeidsgivere: List<Arbeidsgiver>, første: Vedtaksperiode, hendelse: IAktivitetslogg) {
+        Vedtaksperiode.gjenopptaRevurdering(arbeidsgivere, hendelse, vedtaksperioder, første, this)
     }
 
     internal fun accept(visitor: ArbeidsgiverVisitor) {

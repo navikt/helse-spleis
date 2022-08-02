@@ -1074,6 +1074,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         fun startRevurdering(
+            arbeidsgivere: List<Arbeidsgiver>,
             vedtaksperiode: Vedtaksperiode,
             hendelse: IAktivitetslogg,
             overstyrt: Vedtaksperiode,
@@ -1129,7 +1130,7 @@ internal class Vedtaksperiode private constructor(
         override fun gjenopptaBehandlingNy(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             if (!vedtaksperiode.person.kanStarteRevurdering(vedtaksperiode)) return
             vedtaksperiode.tilstand(hendelse, AvventerGjennomførtRevurdering)
-            vedtaksperiode.arbeidsgiver.gjenopptaRevurdering(vedtaksperiode, hendelse)
+            vedtaksperiode.person.gjenopptaRevurdering(vedtaksperiode.arbeidsgiver, vedtaksperiode, hendelse)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
@@ -1163,6 +1164,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun startRevurdering(
+            arbeidsgivere: List<Arbeidsgiver>,
             vedtaksperiode: Vedtaksperiode,
             hendelse: IAktivitetslogg,
             overstyrt: Vedtaksperiode,
@@ -1267,6 +1269,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun startRevurdering(
+            arbeidsgivere: List<Arbeidsgiver>,
             vedtaksperiode: Vedtaksperiode,
             hendelse: IAktivitetslogg,
             overstyrt: Vedtaksperiode,
@@ -1365,6 +1368,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun startRevurdering(
+            arbeidsgivere: List<Arbeidsgiver>,
             vedtaksperiode: Vedtaksperiode,
             hendelse: IAktivitetslogg,
             overstyrt: Vedtaksperiode,
@@ -1816,6 +1820,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun startRevurdering(
+            arbeidsgivere: List<Arbeidsgiver>,
             vedtaksperiode: Vedtaksperiode,
             hendelse: IAktivitetslogg,
             overstyrt: Vedtaksperiode,
@@ -2036,10 +2041,10 @@ internal class Vedtaksperiode private constructor(
     }
 
     // ny revurderingsflyt
-    private fun startRevurdering(hendelse: IAktivitetslogg, overstyrt: Vedtaksperiode, pågående: Vedtaksperiode?, førsteRevurderingsdag: LocalDate) {
+    private fun startRevurdering(arbeidsgivere: List<Arbeidsgiver>, hendelse: IAktivitetslogg, overstyrt: Vedtaksperiode, pågående: Vedtaksperiode?, førsteRevurderingsdag: LocalDate) {
         if (overstyrt etter this && this.periode().endInclusive < førsteRevurderingsdag) return
         kontekst(hendelse)
-        tilstand.startRevurdering(this, hendelse, overstyrt, pågående)
+        tilstand.startRevurdering(arbeidsgivere, this, hendelse, overstyrt, pågående)
     }
 
     private fun validerYtelser(ytelser: Ytelser, skjæringstidspunkt: LocalDate, infotrygdhistorikk: Infotrygdhistorikk) {
@@ -2118,6 +2123,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun startRevurdering(
+            arbeidsgivere: List<Arbeidsgiver>,
             vedtaksperiode: Vedtaksperiode,
             hendelse: IAktivitetslogg,
             overstyrt: Vedtaksperiode,
@@ -2275,13 +2281,13 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun startRevurdering(
+            arbeidsgivere: List<Arbeidsgiver>,
             vedtaksperiode: Vedtaksperiode,
             hendelse: IAktivitetslogg,
             overstyrt: Vedtaksperiode,
             pågående: Vedtaksperiode?
         ) {
-            if (Toggle.NyRevurdering.disabled)
-                return super.startRevurdering(vedtaksperiode, hendelse, overstyrt, pågående)
+            if (Toggle.NyRevurdering.disabled) return super.startRevurdering(arbeidsgivere, vedtaksperiode, hendelse, overstyrt, pågående)
 
             if (vedtaksperiode != overstyrt) return
             check(pågående != null && vedtaksperiode == pågående) { "Skal ikke kunne restarte revurdering i $type dersom det ikke er oss selv som har igangsatt revurderingen" }
@@ -2332,52 +2338,80 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.tilstand(hendelse, AvventerInntektsmeldingEllerHistorikk)
         }
 
+        override fun startRevurdering(
+            arbeidsgivere: List<Arbeidsgiver>,
+            vedtaksperiode: Vedtaksperiode,
+            hendelse: IAktivitetslogg,
+            overstyrt: Vedtaksperiode,
+            pågående: Vedtaksperiode?
+        ) {
+            if (vedtaksperiode.ingenUtbetaling()) return hendelse.info("Revurdering medfører ingen utbetaling, blir stående i avsluttet uten utbetaling")
+            if (!vedtaksperiode.harNødvendigInntektForVilkårsprøving() || !arbeidsgivere.harNødvendigInntekt(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode.start)) return hendelse.info("Avventer inntekt for minst én annen arbeidsgiver")
+            return vedtaksperiode.nesteRevurderingstilstand(hendelse, overstyrt, pågående)
+        }
+
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
+            if (Toggle.RevurdereAUU.enabled) return håndterInntektsmeldingNy(vedtaksperiode, inntektsmelding)
+            return håndterInntektsmeldingGammel(vedtaksperiode, inntektsmelding)
+        }
+
+        private fun håndterInntektsmeldingNy(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
             vedtaksperiode.håndterInntektsmelding(inntektsmelding, hvisIngenErrors = {
-                vedtaksperiode.emitVedtaksperiodeEndret(inntektsmelding)
-                val debugkeys = arrayOf(
+                if (!vedtaksperiode.alleAndreAvventerArbeidsgivere())
+                    inntektsmelding.validerMuligBrukerutbetaling()
+                if (inntektsmelding.hasErrorsOrWorse())
+                    vedtaksperiode.person.invaliderAllePerioder(inntektsmelding, null)
+            }) { AvsluttetUtenUtbetaling } // håndterInntektsmelding krever tilstandsendring, men vi må avvente til vi starter revurdering
+
+
+            // støttes ikke før vi støtter revurdering av eldre skjæringstidspunkt
+            if (vedtaksperiode.person.vedtaksperioder(NYERE_SKJÆRINGSTIDSPUNKT_MED_UTBETALING(vedtaksperiode)).isNotEmpty()) {
+                sikkerlogg.info(
+                    "inntektsmelding i auu: Kan ikke reberegne {} for {} {} fordi nyere skjæringstidspunkt blokkerer",
                     keyValue("vedtaksperiodeId", vedtaksperiode.id),
                     keyValue("aktørId", vedtaksperiode.aktørId),
                     keyValue("organisasjonsnummer", vedtaksperiode.organisasjonsnummer)
                 )
+                return vedtaksperiode.emitVedtaksperiodeEndret(inntektsmelding) // på stedet hvil!
+            }
+            if (vedtaksperiode.ingenUtbetaling()) vedtaksperiode.emitVedtaksperiodeEndret(inntektsmelding) // på stedet hvil!
+
+            vedtaksperiode.person.startRevurdering(vedtaksperiode, inntektsmelding)
+        }
+
+        private fun håndterInntektsmeldingGammel(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
+            val debugkeys = arrayOf(
+                keyValue("vedtaksperiodeId", vedtaksperiode.id),
+                keyValue("aktørId", vedtaksperiode.aktørId),
+                keyValue("organisasjonsnummer", vedtaksperiode.organisasjonsnummer)
+            )
+            val hvisIngenErrors = {
+                vedtaksperiode.emitVedtaksperiodeEndret(inntektsmelding)
                 when {
-                    vedtaksperiode.finnArbeidsgiverperiode() == null -> sikkerlogg.info(
-                        "inntektsmelding i auu: har ikke arbeidsgiverperiode etter mottak av im for {} {} {}. Perioden er mest sannsynlig erstattet med arbeidsdager",
-                        *debugkeys
-                    )
-                    vedtaksperiode.ingenUtbetaling() -> sikkerlogg.info(
-                        "inntektsmelding i auu: er fortsatt innenfor arbeidsgiverperioden etter mottak av im for {} {} {}",
-                        *debugkeys
-                    )
-                    !vedtaksperiode.arbeidsgiver.kanReberegnes(vedtaksperiode) -> sikkerlogg.info(
-                        "inntektsmelding i auu: Kan ikke reberegne {} for {} {} fordi nyere periode blokkerer",
-                        *debugkeys
-                    )
-                    else -> sikkerlogg.info(
-                        "inntektsmelding i auu: vil reberegne vedtaksperiode {} for {} {}",
-                        *debugkeys
-                    )
-                }
-            }) {
-                if (vedtaksperiode.ingenUtbetaling() || !vedtaksperiode.sykdomstidslinje.harSykedager()) {
-                    AvsluttetUtenUtbetaling
-                } else if (!vedtaksperiode.arbeidsgiver.kanReberegnes(vedtaksperiode)) {
-                    inntektsmelding.error("Kan ikke reberegne perioden fordi det er en nyere periode som er ferdig behandlet")
-                    AvsluttetUtenUtbetaling
-                } else if (vedtaksperiode.person.harVedtaksperiodeForAnnenArbeidsgiver(
-                        vedtaksperiode.arbeidsgiver,
-                        vedtaksperiode.skjæringstidspunkt
-                    )
-                ) {
-                    vedtaksperiode.person.invaliderAllePerioder(
-                        inntektsmelding,
-                        "Kan ikke flytte en vedtaksperiode i AVSLUTTET_UTEN_UTBETALING ved flere arbeidsgivere"
-                    )
-                    AvsluttetUtenUtbetaling
-                } else {
-                    return@håndterInntektsmelding AvsluttetUtenUtbetaling
+                    vedtaksperiode.finnArbeidsgiverperiode() == null -> sikkerlogg.info("inntektsmelding i auu: har ikke arbeidsgiverperiode etter mottak av im for {} {} {}. Perioden er mest sannsynlig erstattet med arbeidsdager", *debugkeys)
+                    vedtaksperiode.ingenUtbetaling() -> sikkerlogg.info("inntektsmelding i auu: er fortsatt innenfor arbeidsgiverperioden etter mottak av im for {} {} {}", *debugkeys)
+                    !vedtaksperiode.arbeidsgiver.kanReberegnes(vedtaksperiode) -> sikkerlogg.info("inntektsmelding i auu: Kan ikke reberegne {} for {} {} fordi nyere periode blokkerer", *debugkeys)
+                    else -> sikkerlogg.info("inntektsmelding i auu: vil reberegne vedtaksperiode {} for {} {}", *debugkeys)
                 }
             }
+            val nesteTilstand: () -> Vedtaksperiodetilstand = {
+                when {
+                    vedtaksperiode.ingenUtbetaling() || !vedtaksperiode.sykdomstidslinje.harSykedager() -> AvsluttetUtenUtbetaling
+                    !vedtaksperiode.arbeidsgiver.kanReberegnes(vedtaksperiode) -> {
+                        inntektsmelding.error("Kan ikke reberegne perioden fordi det er en nyere periode som er ferdig behandlet")
+                        AvsluttetUtenUtbetaling
+                    }
+                    vedtaksperiode.person.harVedtaksperiodeForAnnenArbeidsgiver(
+                        vedtaksperiode.arbeidsgiver,
+                        vedtaksperiode.skjæringstidspunkt
+                    ) -> {
+                        vedtaksperiode.person.invaliderAllePerioder(inntektsmelding, "Kan ikke flytte en vedtaksperiode i AVSLUTTET_UTEN_UTBETALING ved flere arbeidsgivere")
+                        AvsluttetUtenUtbetaling
+                    }
+                    else -> AvsluttetUtenUtbetaling
+                }
+            }
+            vedtaksperiode.håndterInntektsmelding(inntektsmelding, hvisIngenErrors = hvisIngenErrors, nesteTilstand = nesteTilstand)
         }
 
         override fun håndter(
@@ -2444,6 +2478,7 @@ internal class Vedtaksperiode private constructor(
 
         // ny revurderingsflyt
         override fun startRevurdering(
+            arbeidsgivere: List<Arbeidsgiver>,
             vedtaksperiode: Vedtaksperiode,
             hendelse: IAktivitetslogg,
             overstyrt: Vedtaksperiode,
@@ -2639,6 +2674,11 @@ internal class Vedtaksperiode private constructor(
             { vedtaksperiode: Vedtaksperiode -> vedtaksperiode.skjæringstidspunkt == skjæringstidspunkt && !vedtaksperiode.ingenUtbetaling() }
         }
 
+        internal val NYERE_SKJÆRINGSTIDSPUNKT_MED_UTBETALING = { segSelv: Vedtaksperiode ->
+            val skjæringstidspunkt = segSelv.skjæringstidspunkt
+            { vedtaksperiode: Vedtaksperiode -> vedtaksperiode.utbetalinger.harUtbetalinger() && vedtaksperiode.skjæringstidspunkt > skjæringstidspunkt }
+        }
+
         internal val ALLE: VedtaksperiodeFilter = { true }
 
         internal fun List<Vedtaksperiode>.lagUtbetalinger(
@@ -2776,6 +2816,7 @@ internal class Vedtaksperiode private constructor(
             sortedWith(compareBy({ it }, { arbeidsgivere.indexOf(it.arbeidsgiver) })).firstOrNull(IKKE_FERDIG_BEHANDLET) ?: other
 
         internal fun Map<Arbeidsgiver, List<Vedtaksperiode>>.startRevurdering(
+            arbeidsgivere: List<Arbeidsgiver>,
             overstyrt: Vedtaksperiode,
             hendelse: IAktivitetslogg
         ) {
@@ -2783,7 +2824,7 @@ internal class Vedtaksperiode private constructor(
             val pågående = vedtaksperioder.pågående()
 
             val førsteRevurderingsdag = vedtaksperioder.førsteRevurderingsdag() ?: overstyrt.periode().start
-            vedtaksperioder.forEach { it.startRevurdering(hendelse, overstyrt, pågående, førsteRevurderingsdag) }
+            vedtaksperioder.forEach { it.startRevurdering(arbeidsgivere, hendelse, overstyrt, pågående, førsteRevurderingsdag) }
 
             val siste =
                 vedtaksperioder.lastOrNull { it.tilstand == AvventerGjennomførtRevurdering && (!it.utbetalinger.utbetales() || it.utbetalinger.harFeilet()) }
@@ -2817,12 +2858,13 @@ internal class Vedtaksperiode private constructor(
             }.takeIf { it.isNotEmpty() }?.periode()?.start
 
         internal fun gjenopptaRevurdering(
+            arbeidsgivere: List<Arbeidsgiver>,
             hendelse: IAktivitetslogg,
             perioder: List<Vedtaksperiode>,
             første: Vedtaksperiode,
             arbeidsgiver: Arbeidsgiver
         ) {
-            mapOf(arbeidsgiver to perioder).startRevurdering(første, hendelse)
+            mapOf(arbeidsgiver to perioder).startRevurdering(arbeidsgivere, første, hendelse)
         }
 
         internal fun ferdigVedtaksperiode(

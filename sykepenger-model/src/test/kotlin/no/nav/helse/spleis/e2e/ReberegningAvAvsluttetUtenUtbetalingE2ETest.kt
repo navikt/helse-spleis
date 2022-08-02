@@ -1,5 +1,7 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.DisableToggle
+import no.nav.helse.Toggle
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -15,6 +17,7 @@ import no.nav.helse.person.TilstandType.START
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Test
 
+@DisableToggle(Toggle.RevurdereAUU::class)
 internal class ReberegningAvAvsluttetUtenUtbetalingE2ETest : AbstractEndToEndTest() {
 
     @Test

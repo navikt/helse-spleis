@@ -47,7 +47,7 @@ internal class VedtaksperiodeUtbetalinger(private val arbeidsgiver: Arbeidsgiver
     internal fun harAvsluttede() = utbetalinger.any { it.erAvsluttet() }
     internal fun harId(utbetalingId: UUID) = utbetalinger.harId(utbetalingId)
     internal fun hørerIkkeSammenMed(other: Utbetaling) = siste?.hørerSammen(other) == false
-    internal fun hørerIkkeSammenMed(other: VedtaksperiodeUtbetalinger) = hørerIkkeSammenMed(other.siste!!)
+    internal fun hørerIkkeSammenMed(other: VedtaksperiodeUtbetalinger) = other.siste != null && hørerIkkeSammenMed(other.siste!!)
     internal fun gjelderIkkeFor(hendelse: UtbetalingHendelse) = siste?.gjelderFor(hendelse) != true
     internal fun gjelderIkkeFor(hendelse: Utbetalingsgodkjenning) = siste?.gjelderFor(hendelse) != true
 

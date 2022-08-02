@@ -893,6 +893,10 @@ class Person private constructor(
         arbeidsgivere.gjenopptaBehandlingNy(hendelse)
     }
 
+    internal fun gjenopptaRevurdering(arbeidsgiver: Arbeidsgiver, vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+        arbeidsgiver.gjenopptaRevurdering(arbeidsgivere, vedtaksperiode, hendelse)
+    }
+
     internal fun startRevurdering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
         arbeidsgivere.startRevurdering(vedtaksperiode, hendelse)
     }
@@ -932,8 +936,8 @@ class Person private constructor(
     internal fun validerYtelserForSkjæringstidspunkt(ytelser: Ytelser, skjæringstidspunkt: LocalDate) {
         arbeidsgivere.validerYtelserForSkjæringstidspunkt(ytelser, skjæringstidspunkt, infotrygdhistorikk)
     }
-
     internal fun skjæringstidspunktperiode(skjæringstidspunkt: LocalDate) = arbeidsgivere.skjæringstidspunktperiode(skjæringstidspunkt)
+
     internal fun harPeriodeSomBlokkererOverstyring(skjæringstidspunkt: LocalDate) =
         arbeidsgivere.harPeriodeSomBlokkererOverstyring(skjæringstidspunkt)
 }
