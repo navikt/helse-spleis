@@ -18,8 +18,9 @@ internal class BehovMediator(private val sikkerLogg: Logger) {
     private fun håndter(context: MessageContext, hendelse: PersonHendelse, behov: List<Aktivitetslogg.Aktivitet.Behov>) {
         behov
             .groupBy { it.kontekst() }
-            .onEach { (_, behovMap) ->
-                require(behovMap.size == behovMap.map { it.type.name }.toSet().size) { "Kan ikke produsere samme behov på samme kontekst" }
+            .onEach { (kontekst, behovMap) ->
+                sikkerLogg.error("Forsøkte å sende duplikate behov på kontekst ${kontekst.entries.joinToString { "${it.key}=${it.value}" }}")
+                require(behovMap.size == behovMap.map { it.type.name }.toSet().size) { "Kan ikke produsere samme behov på samme kontekst. Forsøkte å be om ${behovMap.joinToString { it.type.name }}" }
             }
             .forEach { (kontekst, liste) ->
                 val behovMap = liste.associate { behov -> behov.type.name to behov.detaljer() }
