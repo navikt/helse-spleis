@@ -428,7 +428,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun revurderInntekt(hendelse: OverstyrInntekt) {
         person.nyInntekt(hendelse)
-        person.vilkårsprøvEtterNyInformasjonFraSaksbehandler(hendelse, skjæringstidspunkt, jurist(), null)
+        person.vilkårsprøvEtterNyInformasjonFraSaksbehandler(hendelse, skjæringstidspunkt, jurist(), null, null)
         person.startRevurdering(this, hendelse)
     }
 
@@ -565,7 +565,7 @@ internal class Vedtaksperiode private constructor(
 
         vilkårsgrunnlag.lagreRapporterteInntekter(person, skjæringstidspunkt)
 
-        val grunnlagForSykepengegrunnlag = person.beregnSykepengegrunnlag(skjæringstidspunkt, jurist(), null)
+        val grunnlagForSykepengegrunnlag = person.beregnSykepengegrunnlag(skjæringstidspunkt, jurist(), null, null)
         val sammenligningsgrunnlag = person.beregnSammenligningsgrunnlag(skjæringstidspunkt, jurist())
         val opptjening = person.beregnOpptjening(skjæringstidspunkt, jurist())
 
@@ -1200,6 +1200,7 @@ internal class Vedtaksperiode private constructor(
                     hendelse,
                     vedtaksperiode.skjæringstidspunkt,
                     vedtaksperiode.jurist(),
+                null,
                 null
             )
             }
@@ -1656,6 +1657,7 @@ internal class Vedtaksperiode private constructor(
                 hendelse,
                 vedtaksperiode.skjæringstidspunkt,
                 vedtaksperiode.jurist(),
+                null,
                 null
             )
             vedtaksperiode.tilstand(hendelse, AvventerHistorikk)
@@ -1670,6 +1672,7 @@ internal class Vedtaksperiode private constructor(
                 hendelse,
                 vedtaksperiode.skjæringstidspunkt,
                 vedtaksperiode.jurist(),
+                hendelse.forklaring,
                 hendelse.subsumsjon
             )
             vedtaksperiode.tilstand(hendelse, AvventerHistorikk)
@@ -1686,6 +1689,7 @@ internal class Vedtaksperiode private constructor(
                 overstyrArbeidsforhold,
                 vedtaksperiode.skjæringstidspunkt,
                 vedtaksperiode.jurist(),
+                null,
                 subsumsjon
             )
             vedtaksperiode.tilstand(overstyrArbeidsforhold, AvventerHistorikk)
@@ -2103,6 +2107,7 @@ internal class Vedtaksperiode private constructor(
                 hendelse,
                 vedtaksperiode.skjæringstidspunkt,
                 vedtaksperiode.jurist(),
+                    null,
                     null
                 )
                 vedtaksperiode.person.startRevurdering(vedtaksperiode, hendelse)

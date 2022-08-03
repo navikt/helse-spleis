@@ -184,7 +184,7 @@ internal class Arbeidsgiver private constructor(
                 else inntektsopplysninger + ArbeidsgiverInntektsopplysning(arbeidsgiver.organisasjonsnummer, inntektsopplysning)
             }
 
-        internal fun List<Arbeidsgiver>.beregnSykepengegrunnlag(skjæringstidspunkt: LocalDate, subsumsjonObserver: SubsumsjonObserver, subsumsjon: Subsumsjon?) =
+        internal fun List<Arbeidsgiver>.beregnSykepengegrunnlag(skjæringstidspunkt: LocalDate, subsumsjonObserver: SubsumsjonObserver, forklaring: String?, subsumsjon: Subsumsjon?) =
             mapNotNull { arbeidsgiver ->
                 val førsteFraværsdag = arbeidsgiver.finnFørsteFraværsdag(skjæringstidspunkt)
                 val inntektsopplysning = arbeidsgiver.inntektshistorikk.omregnetÅrsinntekt(skjæringstidspunkt, førsteFraværsdag)
@@ -194,7 +194,7 @@ internal class Arbeidsgiver private constructor(
                     skjæringstidspunkt = skjæringstidspunkt,
                     organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
                     startdatoArbeidsforhold = startdatoArbeidsforhold,
-                    "forklaring",
+                    forklaring = forklaring,
                     subsumsjon
                 )
                 when {

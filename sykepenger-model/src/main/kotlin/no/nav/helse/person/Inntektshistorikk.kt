@@ -132,7 +132,7 @@ internal class Inntektshistorikk {
             skjæringstidspunkt: LocalDate,
             organisasjonsnummer: String,
             startdatoArbeidsforhold: LocalDate?,
-            forklaring: String,
+            forklaring: String?,
             subsumsjon: Subsumsjon?
         ) = run {}
         override fun compareTo(other: Inntektsopplysning) =
@@ -180,10 +180,11 @@ internal class Inntektshistorikk {
             skjæringstidspunkt: LocalDate,
             organisasjonsnummer: String,
             startdatoArbeidsforhold: LocalDate?,
-            forklaring: String,
+            forklaring: String?,
             subsumsjon: Subsumsjon?
         ) {
             if(subsumsjon == null) return
+            requireNotNull(forklaring) { "Det skal være en forklaring fra saksbehandler ved overstyring av inntekt" }
             if (subsumsjon.paragraf == Paragraf.PARAGRAF_8_28.ref
                 && subsumsjon.ledd == Ledd.LEDD_3.nummer
                 && subsumsjon.bokstav == Bokstav.BOKSTAV_B.ref.toString()
@@ -356,7 +357,7 @@ internal class Inntektshistorikk {
             skjæringstidspunkt: LocalDate,
             organisasjonsnummer: String,
             startdatoArbeidsforhold: LocalDate?,
-            forklaring: String,
+            forklaring: String?,
             subsumsjon: Subsumsjon?
         ) {
             subsumsjonObserver.`§ 8-28 ledd 3 bokstav a`(

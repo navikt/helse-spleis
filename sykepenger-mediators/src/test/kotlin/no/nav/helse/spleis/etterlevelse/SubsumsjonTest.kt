@@ -40,7 +40,7 @@ internal class SubsumsjonTest : AbstractEndToEndMediatorTest() {
         val a2 = "ag2"
 
         tilGodkjenningMedGhost(a2 = a2)
-        sendOverstyringInntekt(1100.0, 1.januar, Subsumsjon("8-28", "3", "b"), a2)
+        sendOverstyringInntekt(1100.0, 1.januar, Subsumsjon("8-28", "3", "b"), a2, "Jeg, en saksbehandler, overstyrte pga 8-28 b")
         val subsumsjon = testRapid.inspektør.meldinger("subsumsjon")
             .map { it["subsumsjon"] }
             .first { it["paragraf"].asText() == "8-28" && it["bokstav"].asText() == "b" }
@@ -51,7 +51,7 @@ internal class SubsumsjonTest : AbstractEndToEndMediatorTest() {
         assertEquals(1.desember(2017), subsumsjon["input"]["startdatoArbeidsforhold"].asLocalDate())
         assertEquals(1.januar, subsumsjon["input"]["overstyrtInntektFraSaksbehandler"]["dato"].asLocalDate())
         assertEquals(1100.0, subsumsjon["input"]["overstyrtInntektFraSaksbehandler"]["beløp"].asDouble())
-        assertEquals("forklaring", subsumsjon["input"]["forklaring"].asText())
+        assertEquals("Jeg, en saksbehandler, overstyrte pga 8-28 b", subsumsjon["input"]["forklaring"].asText())
 
         assertEquals(13200.0, subsumsjon["output"]["beregnetGrunnlagForSykepengegrunnlagPrÅr"].asDouble())
         assertEquals(1100.0, subsumsjon["output"]["beregnetGrunnlagForSykepengegrunnlagPrMåned"].asDouble())
@@ -63,7 +63,7 @@ internal class SubsumsjonTest : AbstractEndToEndMediatorTest() {
         val a2 = "ag2"
 
         tilGodkjenningMedGhost(a2 = a2)
-        sendOverstyringInntekt(1100.0, 1.januar, Subsumsjon("8-28", "3", "c"), a2)
+        sendOverstyringInntekt(1100.0, 1.januar, Subsumsjon("8-28", "3", "c"), a2, "Jeg, en saksbehandler, overstyrte pga 8-28 c")
         val subsumsjon = testRapid.inspektør.meldinger("subsumsjon")
             .map { it["subsumsjon"] }
             .first { it["paragraf"].asText() == "8-28" && it["bokstav"].asText() == "c" }
@@ -73,7 +73,7 @@ internal class SubsumsjonTest : AbstractEndToEndMediatorTest() {
         assertEquals(1.januar, subsumsjon["input"]["skjæringstidspunkt"].asLocalDate())
         assertEquals(1.januar, subsumsjon["input"]["overstyrtInntektFraSaksbehandler"]["dato"].asLocalDate())
         assertEquals(1100.0, subsumsjon["input"]["overstyrtInntektFraSaksbehandler"]["beløp"].asDouble())
-        assertEquals("forklaring", subsumsjon["input"]["forklaring"].asText())
+        assertEquals("Jeg, en saksbehandler, overstyrte pga 8-28 c", subsumsjon["input"]["forklaring"].asText())
 
         assertEquals(13200.0, subsumsjon["output"]["beregnetGrunnlagForSykepengegrunnlagPrÅr"].asDouble())
         assertEquals(1100.0, subsumsjon["output"]["beregnetGrunnlagForSykepengegrunnlagPrMåned"].asDouble())
@@ -86,7 +86,7 @@ internal class SubsumsjonTest : AbstractEndToEndMediatorTest() {
         val a2 = "ag2"
 
         tilGodkjenningMedGhost(a2 = a2)
-        sendOverstyringInntekt(1100.0, 1.januar, Subsumsjon("8-28", "5", null), a2)
+        sendOverstyringInntekt(1100.0, 1.januar, Subsumsjon("8-28", "5", null), a2, "Jeg, en saksbehandler, overstyrte pga 8-28 (5)")
         val subsumsjon = testRapid.inspektør.meldinger("subsumsjon")
             .map { it["subsumsjon"] }
             .first { it["paragraf"].asText() == "8-28" && it["ledd"].asText() == "5" }
@@ -96,7 +96,7 @@ internal class SubsumsjonTest : AbstractEndToEndMediatorTest() {
         assertEquals(1.januar, subsumsjon["input"]["skjæringstidspunkt"].asLocalDate())
         assertEquals(1.januar, subsumsjon["input"]["overstyrtInntektFraSaksbehandler"]["dato"].asLocalDate())
         assertEquals(1100.0, subsumsjon["input"]["overstyrtInntektFraSaksbehandler"]["beløp"].asDouble())
-        assertEquals("forklaring", subsumsjon["input"]["forklaring"].asText())
+        assertEquals("Jeg, en saksbehandler, overstyrte pga 8-28 (5)", subsumsjon["input"]["forklaring"].asText())
 
         assertEquals(13200.0, subsumsjon["output"]["beregnetGrunnlagForSykepengegrunnlagPrÅr"].asDouble())
         assertEquals(1100.0, subsumsjon["output"]["beregnetGrunnlagForSykepengegrunnlagPrMåned"].asDouble())

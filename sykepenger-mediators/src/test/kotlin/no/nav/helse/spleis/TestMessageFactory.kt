@@ -863,14 +863,15 @@ internal class TestMessageFactory(
             ))
     }
 
-    fun lagOverstyringInntekt(inntekt: Double, skjæringstidspunkt: LocalDate, subsumsjon: Subsumsjon?, orgnummer: String = organisasjonsnummer): Pair<String, String> {
+    fun lagOverstyringInntekt(inntekt: Double, skjæringstidspunkt: LocalDate, subsumsjon: Subsumsjon?, orgnummer: String = organisasjonsnummer, forklaring: String): Pair<String, String> {
         return nyHendelse(
             "overstyr_inntekt", mutableMapOf<String, Any>(
                 "aktørId" to aktørId,
                 "fødselsnummer" to fødselsnummer,
                 "organisasjonsnummer" to orgnummer,
                 "månedligInntekt" to inntekt,
-                "skjæringstidspunkt" to skjæringstidspunkt
+                "skjæringstidspunkt" to skjæringstidspunkt,
+                "forklaring" to forklaring
             ).apply {
                 subsumsjon?.let {
                     this["subsumsjon"] = mutableMapOf(
@@ -912,7 +913,8 @@ internal class TestMessageFactory(
         skjæringstidspunkt: LocalDate,
         orgnummer: String = organisasjonsnummer,
         månedligInntekt: Double = 31000.0,
-        subsumsjonsMap: Map<String, Any>
+        subsumsjonsMap: Map<String, Any>,
+        forklaringMap: Map<String, String> = emptyMap()
     ): Pair<String, String> =
         nyHendelse(
         "overstyr_inntekt", mutableMapOf<String, Any>(
@@ -921,7 +923,7 @@ internal class TestMessageFactory(
             "organisasjonsnummer" to orgnummer,
             "skjæringstidspunkt" to skjæringstidspunkt,
             "månedligInntekt" to månedligInntekt,
-        ) + subsumsjonsMap
+        ) + forklaringMap + subsumsjonsMap
     )
 
     private fun nyHendelse(navn: String, hendelse: Map<String, Any>) =

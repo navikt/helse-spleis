@@ -701,11 +701,12 @@ class Person private constructor(
     internal fun beregnSykepengegrunnlag(
         skjæringstidspunkt: LocalDate,
         subsumsjonObserver: SubsumsjonObserver,
+        forklaring: String?,
         subsumsjon: Subsumsjon?
     ): Sykepengegrunnlag {
         return Sykepengegrunnlag.opprett(
             alder,
-            arbeidsgivere.beregnSykepengegrunnlag(skjæringstidspunkt, subsumsjonObserver, subsumsjon),
+            arbeidsgivere.beregnSykepengegrunnlag(skjæringstidspunkt, subsumsjonObserver, forklaring, subsumsjon),
             skjæringstidspunkt,
             subsumsjonObserver,
             arbeidsgivere.deaktiverteArbeidsforhold(skjæringstidspunkt).map { it.organisasjonsnummer() }
@@ -908,9 +909,9 @@ class Person private constructor(
         hendelse: PersonHendelse,
         skjæringstidspunkt: LocalDate,
         subsumsjonObserver: SubsumsjonObserver
-    , subsumsjon: Subsumsjon?) {
+    , forklaring: String?, subsumsjon: Subsumsjon?) {
 
-        val sykepengegrunnlag = beregnSykepengegrunnlag(skjæringstidspunkt, subsumsjonObserver, subsumsjon)
+        val sykepengegrunnlag = beregnSykepengegrunnlag(skjæringstidspunkt, subsumsjonObserver, forklaring, subsumsjon)
         val sammenligningsgrunnlag = beregnSammenligningsgrunnlag(skjæringstidspunkt, subsumsjonObserver)
         val avviksprosent = sammenligningsgrunnlag.avviksprosent(sykepengegrunnlag, subsumsjonObserver)
 

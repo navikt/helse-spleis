@@ -1243,7 +1243,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
 
         val subsumsjon = Subsumsjon("8-28", 3, "b")
-        håndterOverstyrInntekt(inntekt = 1500.månedlig, orgnummer = a2, 1.januar, subsumsjon = subsumsjon)
+        håndterOverstyrInntekt(inntekt = 1500.månedlig, orgnummer = a2, 1.januar, subsumsjon = subsumsjon, forklaring = "Jeg, en saksbehandler, overstyrte pga 8-28 b")
         SubsumsjonInspektør(jurist).assertBeregnet(
             versjon = 1.januar(2019),
             paragraf = PARAGRAF_8_28,
@@ -1257,7 +1257,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                     "dato" to 1.januar,
                     "beløp" to 1500.0,
                 ),
-                "forklaring" to "forklaring" // TODO
+                "forklaring" to "Jeg, en saksbehandler, overstyrte pga 8-28 b"
             ),
             output = mapOf(
                 "beregnetGrunnlagForSykepengegrunnlagPrÅr" to 18000.0,
@@ -1305,7 +1305,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
 
         val subsumsjon = Subsumsjon("8-28", 3, "c")
-        håndterOverstyrInntekt(inntekt = 1500.månedlig, orgnummer = a2, 1.januar, subsumsjon = subsumsjon)
+        håndterOverstyrInntekt(inntekt = 1500.månedlig, orgnummer = a2, 1.januar, subsumsjon = subsumsjon, forklaring = "Jeg, en saksbehandler, overstyrte pga 8-28 c")
         SubsumsjonInspektør(jurist).assertBeregnet(
             versjon = 1.januar(2019),
             paragraf = PARAGRAF_8_28,
@@ -1318,7 +1318,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                     "dato" to 1.januar,
                     "beløp" to 1500.0,
                 ),
-                "forklaring" to "forklaring"
+                "forklaring" to "Jeg, en saksbehandler, overstyrte pga 8-28 c"
             ),
             output = mapOf(
                 "beregnetGrunnlagForSykepengegrunnlagPrÅr" to 18000.0,
@@ -1368,7 +1368,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
 
         val subsumsjon = Subsumsjon("8-28", 5, null)
-        håndterOverstyrInntekt(inntekt = 1500.månedlig, orgnummer = a2, 1.januar, subsumsjon = subsumsjon)
+        håndterOverstyrInntekt(inntekt = 1500.månedlig, orgnummer = a2, 1.januar, subsumsjon = subsumsjon, forklaring = "Jeg, en saksbehandler, overstyrte pga 8-28 (5)")
         SubsumsjonInspektør(jurist).assertBeregnet(
             versjon = 1.januar(2019),
             paragraf = PARAGRAF_8_28,
@@ -1380,7 +1380,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                     "dato" to 1.januar,
                     "beløp" to 1500.0,
                 ),
-                "forklaring" to "forklaring"
+                "forklaring" to "Jeg, en saksbehandler, overstyrte pga 8-28 (5)"
             ),
             output = mapOf(
                 "beregnetGrunnlagForSykepengegrunnlagPrÅr" to 18000.0,
@@ -1388,7 +1388,6 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             )
         )
     }
-
 
     @Test
     fun `§ 8-29 - filter for inntekter som skal medregnes ved beregning av sykepengegrunnlaget for arbeidsforhold hvor sykdom ikke starter på skjæringstidspunktet`() {

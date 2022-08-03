@@ -23,6 +23,7 @@ class OverstyrInntekt(
     organisasjonsnummer: String,
     internal val inntekt: Inntekt,
     internal val skjæringstidspunkt: LocalDate,
+    internal val forklaring: String,
     internal val subsumsjon: Subsumsjon?
 ) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer, aktørId, organisasjonsnummer) {
     internal fun erRelevant(skjæringstidspunkt: LocalDate) = this.skjæringstidspunkt == skjæringstidspunkt

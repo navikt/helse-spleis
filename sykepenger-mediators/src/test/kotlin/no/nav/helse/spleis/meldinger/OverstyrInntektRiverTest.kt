@@ -27,6 +27,7 @@ internal class OverstyrInntektRiverTest: RiverTest() {
         assertNoErrors(
             testMessageFactory.lagOverstyrInntekt(
                 1.januar,
+                forklaringMap = mapOf("forklaring" to "forklaring"),
                 subsumsjonsMap = emptyMap()
             )
         )
@@ -34,6 +35,7 @@ internal class OverstyrInntektRiverTest: RiverTest() {
         assertNoErrors(
             testMessageFactory.lagOverstyrInntekt(
                 1.januar,
+                forklaringMap = mapOf("forklaring" to "forklaring"),
                 subsumsjonsMap = mapOf("subsumsjon" to mapOf(
                     "paragraf" to "8-28"
                 ))
@@ -43,6 +45,7 @@ internal class OverstyrInntektRiverTest: RiverTest() {
         assertNoErrors(
             testMessageFactory.lagOverstyrInntekt(
                 1.januar,
+                forklaringMap = mapOf("forklaring" to "forklaring"),
                 subsumsjonsMap = mapOf("subsumsjon" to mapOf(
                     "paragraf" to "8-28",
                     "ledd" to "3",
@@ -57,9 +60,22 @@ internal class OverstyrInntektRiverTest: RiverTest() {
         assertErrors(
             testMessageFactory.lagOverstyrInntekt(
                 1.januar,
+                forklaringMap = mapOf("forklaring" to "forklaring"),
                 subsumsjonsMap = mapOf("subsumsjon" to mapOf(
                     "ledd" to "3",
                     "bokstav" to "b"
+                ))
+            )
+        )
+    }
+
+    @Test
+    fun `skal feile hvis vi mangler forklaring fra saksbehandler`() {
+        assertErrors(
+            testMessageFactory.lagOverstyrInntekt(
+                1.januar,
+                subsumsjonsMap = mapOf("subsumsjon" to mapOf(
+                    "paragraf" to "8-28"
                 ))
             )
         )

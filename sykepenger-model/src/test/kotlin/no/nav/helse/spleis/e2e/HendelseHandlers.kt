@@ -810,6 +810,7 @@ internal fun AbstractEndToEndTest.håndterOverstyrInntekt(
     orgnummer: String = AbstractPersonTest.ORGNUMMER,
     skjæringstidspunkt: LocalDate,
     meldingsreferanseId: UUID = UUID.randomUUID(),
+    forklaring: String = "forklaring",
     subsumsjon: Subsumsjon? = null
 ) {
     OverstyrInntekt(
@@ -819,6 +820,7 @@ internal fun AbstractEndToEndTest.håndterOverstyrInntekt(
         organisasjonsnummer = orgnummer,
         inntekt = inntekt,
         skjæringstidspunkt = skjæringstidspunkt,
+        forklaring = forklaring,
         subsumsjon = subsumsjon
     ).håndter(Person::håndter)
 }

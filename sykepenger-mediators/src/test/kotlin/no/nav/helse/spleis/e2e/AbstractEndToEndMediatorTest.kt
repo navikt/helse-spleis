@@ -472,8 +472,8 @@ internal abstract class AbstractEndToEndMediatorTest {
         testRapid.sendTestMessage(message)
     }
 
-    protected fun sendOverstyringInntekt(inntekt: Double, skjæringstidspunkt: LocalDate, subsumsjon: Subsumsjon?, orgnummer: String = ORGNUMMER) {
-        val (_, message) = meldingsfabrikk.lagOverstyringInntekt(inntekt, skjæringstidspunkt, subsumsjon, orgnummer)
+    protected fun sendOverstyringInntekt(inntekt: Double, skjæringstidspunkt: LocalDate, subsumsjon: Subsumsjon?, orgnummer: String = ORGNUMMER, forklaring: String = "forklaring") {
+        val (_, message) = meldingsfabrikk.lagOverstyringInntekt(inntekt, skjæringstidspunkt, subsumsjon, orgnummer, forklaring)
         testRapid.sendTestMessage(message)
     }
 

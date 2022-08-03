@@ -17,6 +17,7 @@ internal class OverstyrInntektMessage(val packet: JsonMessage) : HendelseMessage
     private val aktørId = packet["aktørId"].asText()
     private val månedligInntekt = packet["månedligInntekt"].asDouble()
     private val skjæringstidspunkt = packet["skjæringstidspunkt"].asLocalDate()
+    private val forklaring = packet["forklaring"].asText()
     private val subsumsjon = packet["subsumsjon"].takeUnless(JsonNode::isMissingOrNull)?.let {
         Subsumsjon(
             paragraf = it["paragraf"].asText(),
@@ -34,7 +35,8 @@ internal class OverstyrInntektMessage(val packet: JsonMessage) : HendelseMessage
                 organisasjonsnummer = organisasjonsnummer,
                 inntekt = månedligInntekt.månedlig,
                 skjæringstidspunkt = skjæringstidspunkt,
-                subsumsjon = subsumsjon
+                subsumsjon = subsumsjon,
+                forklaring = forklaring
             ),
             context
         )
