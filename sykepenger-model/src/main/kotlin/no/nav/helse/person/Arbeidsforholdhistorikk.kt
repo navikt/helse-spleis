@@ -10,6 +10,7 @@ import no.nav.helse.person.Arbeidsforholdhistorikk.Arbeidsforhold.Companion.erDe
 import no.nav.helse.person.Arbeidsforholdhistorikk.Arbeidsforhold.Companion.harDeaktivertArbeidsforholdSomErNyereEnn
 import no.nav.helse.person.Arbeidsforholdhistorikk.Arbeidsforhold.Companion.harIkkeDeaktivertArbeidsforholdSomErNyereEnn
 import no.nav.helse.person.Arbeidsforholdhistorikk.Arbeidsforhold.Companion.ikkeDeaktiverteArbeidsforhold
+import no.nav.helse.person.Arbeidsforholdhistorikk.Arbeidsforhold.Companion.opptjeningsperiode
 
 internal class Arbeidsforholdhistorikk private constructor(
     private val historikk: MutableList<Innslag>
@@ -65,6 +66,10 @@ internal class Arbeidsforholdhistorikk private constructor(
     private fun sisteInnslag(skjæringstidspunkt: LocalDate) = historikk.lastOrNull { it.gjelder(skjæringstidspunkt) }
     internal fun <T> sisteArbeidsforhold(skjæringstidspunkt: LocalDate, creator: (LocalDate, LocalDate?, Boolean) -> T) =
         sisteInnslag(skjæringstidspunkt)?.arbeidsforhold?.create(creator) ?: emptyList()
+
+    internal fun startdatoFor(skjæringstidspunkt: LocalDate): LocalDate? =
+        sisteInnslag(skjæringstidspunkt)?.arbeidsforhold?.opptjeningsperiode(skjæringstidspunkt)?.start
+
 
     internal class Innslag(private val id: UUID, val arbeidsforhold: List<Arbeidsforhold>, private val skjæringstidspunkt: LocalDate) {
         internal fun accept(visitor: ArbeidsforholdhistorikkVisitor) {

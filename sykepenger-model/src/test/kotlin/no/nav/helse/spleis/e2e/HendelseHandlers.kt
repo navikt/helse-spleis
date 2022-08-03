@@ -21,6 +21,7 @@ import no.nav.helse.hendelser.OverstyrInntekt
 import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
+import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode
@@ -808,7 +809,8 @@ internal fun AbstractEndToEndTest.håndterOverstyrInntekt(
     inntekt: Inntekt = 31000.månedlig,
     orgnummer: String = AbstractPersonTest.ORGNUMMER,
     skjæringstidspunkt: LocalDate,
-    meldingsreferanseId: UUID = UUID.randomUUID()
+    meldingsreferanseId: UUID = UUID.randomUUID(),
+    subsumsjon: Subsumsjon? = null
 ) {
     OverstyrInntekt(
         meldingsreferanseId = meldingsreferanseId,
@@ -816,7 +818,8 @@ internal fun AbstractEndToEndTest.håndterOverstyrInntekt(
         aktørId = AbstractPersonTest.AKTØRID,
         organisasjonsnummer = orgnummer,
         inntekt = inntekt,
-        skjæringstidspunkt = skjæringstidspunkt
+        skjæringstidspunkt = skjæringstidspunkt,
+        subsumsjon = subsumsjon
     ).håndter(Person::håndter)
 }
 

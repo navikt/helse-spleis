@@ -11,6 +11,7 @@ import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -23,7 +24,9 @@ import no.nav.helse.juli
 import no.nav.helse.juni
 import no.nav.helse.mai
 import no.nav.helse.mars
+import no.nav.helse.november
 import no.nav.helse.oktober
+import no.nav.helse.person.Bokstav
 import no.nav.helse.person.Bokstav.BOKSTAV_A
 import no.nav.helse.person.FOLKETRYGDLOVENS_OPPRINNELSESDATO
 import no.nav.helse.person.Ledd.Companion.ledd
@@ -46,6 +49,7 @@ import no.nav.helse.person.Paragraf.PARAGRAF_8_51
 import no.nav.helse.person.Paragraf.PARAGRAF_8_9
 import no.nav.helse.person.Punktum.Companion.punktum
 import no.nav.helse.person.TilstandType
+import no.nav.helse.september
 import no.nav.helse.somFødselsnummer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertSisteTilstand
@@ -55,6 +59,7 @@ import no.nav.helse.spleis.e2e.grunnlag
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterInntektsmeldingMedValidering
 import no.nav.helse.spleis.e2e.håndterInntektsmeldingReplay
+import no.nav.helse.spleis.e2e.håndterOverstyrInntekt
 import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
@@ -1197,6 +1202,193 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             )
         )
     }
+
+    @Test
+    fun `§ 8-28 tredje ledd bokstav b - legger tiden arbeidsforholdet har var til grunn om det er nyere enn tre måneder`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 15.mars, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(1.januar, 15.mars, 100.prosent), orgnummer = a1)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            førsteFraværsdag = 1.januar,
+            refusjon = Inntektsmelding.Refusjon(31000.månedlig, null, emptyList()),
+            orgnummer = a1
+        )
+
+        val inntekter = listOf(
+            grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 31000.månedlig.repeat(3)),
+            grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 1000.månedlig.repeat(2))
+        )
+
+        val arbeidsforhold = listOf(
+            Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null),
+            Vilkårsgrunnlag.Arbeidsforhold(a2, 1.november(2017), null),
+            Vilkårsgrunnlag.Arbeidsforhold(a2, 1.oktober(2017), 31.oktober(2017)),
+            Vilkårsgrunnlag.Arbeidsforhold(a2, 1.april(2016), 3.mai(2016))
+        )
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterVilkårsgrunnlag(
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            inntektsvurdering = Inntektsvurdering(
+                listOf(
+                    sammenligningsgrunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 31000.månedlig.repeat(12)),
+                    sammenligningsgrunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 1000.månedlig.repeat(2))
+                )
+            ),
+            orgnummer = a1,
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter, arbeidsforhold = emptyList()),
+            arbeidsforhold = arbeidsforhold
+        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+
+        val subsumsjon = Subsumsjon("8-28", 3, "b")
+        håndterOverstyrInntekt(inntekt = 1500.månedlig, orgnummer = a2, 1.januar, subsumsjon = subsumsjon)
+        SubsumsjonInspektør(jurist).assertBeregnet(
+            versjon = 1.januar(2019),
+            paragraf = PARAGRAF_8_28,
+            ledd = 3.ledd,
+            bokstav = Bokstav.BOKSTAV_B,
+            input = mapOf(
+                "organisasjonsnummer" to a2,
+                "skjæringstidspunkt" to 1.januar,
+                "startdatoArbeidsforhold" to 1.oktober(2017),
+                "overstyrtInntektFraSaksbehandler" to mapOf(
+                    "dato" to 1.januar,
+                    "beløp" to 1500.0,
+                ),
+                "forklaring" to "forklaring" // TODO
+            ),
+            output = mapOf(
+                "beregnetGrunnlagForSykepengegrunnlagPrÅr" to 18000.0,
+                "beregnetGrunnlagForSykepengegrunnlagPrMåned" to 1500.0
+            ),
+        )
+    }
+
+    @Test
+    fun `§ 8-28 tredje ledd bokstav c - saksbehandler overstyrer inntekt pga varig lønnsendring som ikke ble hensyntatt`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 15.mars, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(1.januar, 15.mars, 100.prosent), orgnummer = a1)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            førsteFraværsdag = 1.januar,
+            refusjon = Inntektsmelding.Refusjon(31000.månedlig, null, emptyList()),
+            orgnummer = a1
+        )
+
+        val inntekter = listOf(
+            grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 31000.månedlig.repeat(3)),
+            grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 1000.månedlig.repeat(2))
+        )
+
+        val arbeidsforhold = listOf(
+            Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null),
+            Vilkårsgrunnlag.Arbeidsforhold(a2, 1.november(2017), null),
+            Vilkårsgrunnlag.Arbeidsforhold(a2, 1.april(2016), 3.mai(2016))
+        )
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterVilkårsgrunnlag(
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            inntektsvurdering = Inntektsvurdering(
+                listOf(
+                    sammenligningsgrunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 31000.månedlig.repeat(12)),
+                    sammenligningsgrunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 1000.månedlig.repeat(2))
+                )
+            ),
+            orgnummer = a1,
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter, arbeidsforhold = emptyList()),
+            arbeidsforhold = arbeidsforhold
+        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+
+        val subsumsjon = Subsumsjon("8-28", 3, "c")
+        håndterOverstyrInntekt(inntekt = 1500.månedlig, orgnummer = a2, 1.januar, subsumsjon = subsumsjon)
+        SubsumsjonInspektør(jurist).assertBeregnet(
+            versjon = 1.januar(2019),
+            paragraf = PARAGRAF_8_28,
+            ledd = 3.ledd,
+            bokstav = Bokstav.BOKSTAV_C,
+            input = mapOf(
+                "organisasjonsnummer" to a2,
+                "skjæringstidspunkt" to 1.januar,
+                "overstyrtInntektFraSaksbehandler" to mapOf(
+                    "dato" to 1.januar,
+                    "beløp" to 1500.0,
+                ),
+                "forklaring" to "forklaring"
+            ),
+            output = mapOf(
+                "beregnetGrunnlagForSykepengegrunnlagPrÅr" to 18000.0,
+                "beregnetGrunnlagForSykepengegrunnlagPrMåned" to 1500.0
+            )
+        )
+    }
+
+    @Test
+    fun `§ 8-28 femte ledd - saksbehandler overstyrer inntekt pga mangelfull rapportering til A-ordningen`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 15.mars, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(1.januar, 15.mars, 100.prosent), orgnummer = a1)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            førsteFraværsdag = 1.januar,
+            refusjon = Inntektsmelding.Refusjon(31000.månedlig, null, emptyList()),
+            orgnummer = a1
+        )
+
+        val inntekter = listOf(
+            grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 31000.månedlig.repeat(3)),
+            grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 1000.månedlig.repeat(2))
+        )
+
+        val arbeidsforhold = listOf(
+            Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null),
+            Vilkårsgrunnlag.Arbeidsforhold(a2, 1.november(2017), null),
+            Vilkårsgrunnlag.Arbeidsforhold(a2, 1.oktober(2017), 31.oktober(2017)),
+            Vilkårsgrunnlag.Arbeidsforhold(a2, 1.september(2017), 30.september(2017)),
+            Vilkårsgrunnlag.Arbeidsforhold(a2, 1.april(2016), 3.mai(2016))
+        )
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterVilkårsgrunnlag(
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            inntektsvurdering = Inntektsvurdering(
+                listOf(
+                    sammenligningsgrunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 31000.månedlig.repeat(12)),
+                    sammenligningsgrunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 1000.månedlig.repeat(2))
+                )
+            ),
+            orgnummer = a1,
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter, arbeidsforhold = emptyList()),
+            arbeidsforhold = arbeidsforhold
+        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+
+        val subsumsjon = Subsumsjon("8-28", 5, null)
+        håndterOverstyrInntekt(inntekt = 1500.månedlig, orgnummer = a2, 1.januar, subsumsjon = subsumsjon)
+        SubsumsjonInspektør(jurist).assertBeregnet(
+            versjon = 1.januar(2019),
+            paragraf = PARAGRAF_8_28,
+            ledd = 5.ledd,
+            input = mapOf(
+                "organisasjonsnummer" to a2,
+                "skjæringstidspunkt" to 1.januar,
+                "overstyrtInntektFraSaksbehandler" to mapOf(
+                    "dato" to 1.januar,
+                    "beløp" to 1500.0,
+                ),
+                "forklaring" to "forklaring"
+            ),
+            output = mapOf(
+                "beregnetGrunnlagForSykepengegrunnlagPrÅr" to 18000.0,
+                "beregnetGrunnlagForSykepengegrunnlagPrMåned" to 1500.0
+            )
+        )
+    }
+
 
     @Test
     fun `§ 8-29 - filter for inntekter som skal medregnes ved beregning av sykepengegrunnlaget for arbeidsforhold hvor sykdom ikke starter på skjæringstidspunktet`() {

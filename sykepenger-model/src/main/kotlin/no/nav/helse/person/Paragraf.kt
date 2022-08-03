@@ -66,9 +66,10 @@ enum class Punktum(private val nummer: Int) {
     }
 }
 
-enum class Bokstav(private val ref: Char) {
+enum class Bokstav(internal val ref: Char) {
     BOKSTAV_A('a'),
-    BOKSTAV_B('b');
+    BOKSTAV_B('b'),
+    BOKSTAV_C('c');
 
     init {
         val regex = "[a-zæøå]".toRegex()

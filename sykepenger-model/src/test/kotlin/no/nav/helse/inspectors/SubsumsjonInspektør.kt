@@ -1,15 +1,21 @@
 package no.nav.helse.inspectors
 
-import no.nav.helse.person.*
+import java.time.LocalDate
+import java.util.UUID
 import no.nav.helse.person.AbstractPersonTest.Companion.ORGNUMMER
+import no.nav.helse.person.Bokstav
+import no.nav.helse.person.IdInnhenter
+import no.nav.helse.person.Ledd
+import no.nav.helse.person.Paragraf
+import no.nav.helse.person.Punktum
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.etterlevelse.MaskinellJurist.KontekstType
 import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall
-import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall.*
+import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall.VILKAR_BEREGNET
+import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall.VILKAR_IKKE_OPPFYLT
+import no.nav.helse.person.etterlevelse.Subsumsjon.Utfall.VILKAR_OPPFYLT
 import no.nav.helse.person.etterlevelse.SubsumsjonVisitor
 import org.junit.jupiter.api.Assertions.assertEquals
-import java.time.LocalDate
-import java.util.*
 
 
 internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor {
@@ -62,12 +68,13 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
         input: Map<String, Any>,
         output: Map<String, Any>,
         vedtaksperiodeId: IdInnhenter? = null,
-        organisasjonsnummer: String = ORGNUMMER
+        organisasjonsnummer: String = ORGNUMMER,
+        utfall: Utfall = VILKAR_BEREGNET
     ) {
         val resultat = finnSubsumsjoner(paragraf, versjon, ledd, punktum, bokstav, VILKAR_BEREGNET, vedtaksperiodeId?.id(organisasjonsnummer))
         assertEquals(1, resultat.size, "Forventer kun en subsumsjon. Subsumsjoner funnet: $resultat")
         val subsumsjon = resultat.first()
-        assertEquals(VILKAR_BEREGNET, subsumsjon.utfall) { "Forventet oppfylt $paragraf $ledd $punktum" }
+        assertEquals(utfall, subsumsjon.utfall) { "Forventet oppfylt $paragraf $ledd $punktum" }
         assertResultat(input, output, subsumsjon)
     }
 

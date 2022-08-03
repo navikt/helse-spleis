@@ -19,6 +19,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.PersonPåminnelse
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Simulering
+import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Utbetalingsgrunnlag
@@ -699,11 +700,12 @@ class Person private constructor(
 
     internal fun beregnSykepengegrunnlag(
         skjæringstidspunkt: LocalDate,
-        subsumsjonObserver: SubsumsjonObserver
+        subsumsjonObserver: SubsumsjonObserver,
+        subsumsjon: Subsumsjon?
     ): Sykepengegrunnlag {
         return Sykepengegrunnlag.opprett(
             alder,
-            arbeidsgivere.beregnSykepengegrunnlag(skjæringstidspunkt, subsumsjonObserver),
+            arbeidsgivere.beregnSykepengegrunnlag(skjæringstidspunkt, subsumsjonObserver, subsumsjon),
             skjæringstidspunkt,
             subsumsjonObserver,
             arbeidsgivere.deaktiverteArbeidsforhold(skjæringstidspunkt).map { it.organisasjonsnummer() }
@@ -906,8 +908,9 @@ class Person private constructor(
         hendelse: PersonHendelse,
         skjæringstidspunkt: LocalDate,
         subsumsjonObserver: SubsumsjonObserver
-    ) {
-        val sykepengegrunnlag = beregnSykepengegrunnlag(skjæringstidspunkt, subsumsjonObserver)
+    , subsumsjon: Subsumsjon?) {
+
+        val sykepengegrunnlag = beregnSykepengegrunnlag(skjæringstidspunkt, subsumsjonObserver, subsumsjon)
         val sammenligningsgrunnlag = beregnSammenligningsgrunnlag(skjæringstidspunkt, subsumsjonObserver)
         val avviksprosent = sammenligningsgrunnlag.avviksprosent(sykepengegrunnlag, subsumsjonObserver)
 

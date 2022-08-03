@@ -888,6 +888,22 @@ internal class TestMessageFactory(
             ))
     }
 
+    fun lagOverstyrInntekt(
+        skjæringstidspunkt: LocalDate,
+        orgnummer: String = organisasjonsnummer,
+        månedligInntekt: Double = 31000.0,
+        subsumsjonsMap: Map<String, Any>
+    ): Pair<String, String> =
+        nyHendelse(
+        "overstyr_inntekt", mutableMapOf<String, Any>(
+            "aktørId" to aktørId,
+            "fødselsnummer" to fødselsnummer,
+            "organisasjonsnummer" to orgnummer,
+            "skjæringstidspunkt" to skjæringstidspunkt,
+            "månedligInntekt" to månedligInntekt,
+        ) + subsumsjonsMap
+    )
+
     private fun nyHendelse(navn: String, hendelse: Map<String, Any>) =
         JsonMessage.newMessage(navn, hendelse).let { it.id to it.toJson() }
 

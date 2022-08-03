@@ -16,6 +16,7 @@ import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Simulering
+import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Utbetalingsgrunnlag
@@ -183,11 +184,19 @@ internal class Arbeidsgiver private constructor(
                 else inntektsopplysninger + ArbeidsgiverInntektsopplysning(arbeidsgiver.organisasjonsnummer, inntektsopplysning)
             }
 
-        internal fun List<Arbeidsgiver>.beregnSykepengegrunnlag(skjæringstidspunkt: LocalDate, subsumsjonObserver: SubsumsjonObserver) =
+        internal fun List<Arbeidsgiver>.beregnSykepengegrunnlag(skjæringstidspunkt: LocalDate, subsumsjonObserver: SubsumsjonObserver, subsumsjon: Subsumsjon?) =
             mapNotNull { arbeidsgiver ->
                 val førsteFraværsdag = arbeidsgiver.finnFørsteFraværsdag(skjæringstidspunkt)
                 val inntektsopplysning = arbeidsgiver.inntektshistorikk.omregnetÅrsinntekt(skjæringstidspunkt, førsteFraværsdag)
-                inntektsopplysning?.subsumsjon(subsumsjonObserver, skjæringstidspunkt, arbeidsgiver.organisasjonsnummer)
+                val startdatoArbeidsforhold = arbeidsgiver.startdatoForArbeidsforhold(skjæringstidspunkt)
+                inntektsopplysning?.subsumsjon(
+                    subsumsjonObserver = subsumsjonObserver,
+                    skjæringstidspunkt = skjæringstidspunkt,
+                    organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
+                    startdatoArbeidsforhold = startdatoArbeidsforhold,
+                    "forklaring",
+                    subsumsjon
+                )
                 when {
                     arbeidsgiver.harDeaktivertArbeidsforhold(skjæringstidspunkt) -> null
                     inntektsopplysning == null && arbeidsgiver.arbeidsforholdhistorikk.harIkkeDeaktivertArbeidsforholdNyereEnn(skjæringstidspunkt, MAKS_INNTEKT_GAP) -> {
@@ -328,6 +337,10 @@ internal class Arbeidsgiver private constructor(
 
         internal fun List<Arbeidsgiver>.skjæringstidspunktperiode(skjæringstidspunkt: LocalDate) =
             flatMap { it.vedtaksperioder }.skjæringstidspunktperiode(skjæringstidspunkt)
+    }
+
+    private fun startdatoForArbeidsforhold(skjæringstidspunkt: LocalDate): LocalDate? {
+        return arbeidsforholdhistorikk.startdatoFor(skjæringstidspunkt)
     }
 
     internal fun lagUtbetaling(
@@ -823,7 +836,12 @@ internal class Arbeidsgiver private constructor(
 
     internal fun håndter(overstyrArbeidsforhold: OverstyrArbeidsforhold): Boolean {
         overstyrArbeidsforhold.kontekst(this)
-        return énHarHåndtert(overstyrArbeidsforhold, Vedtaksperiode::håndter)
+        vedtaksperioder.forEach { vedtaksperiode ->
+            if (vedtaksperiode.håndter(overstyrArbeidsforhold, null)) {
+                return true
+            }
+        }
+        return false
     }
 
     internal fun håndterOverstyringAvGhostInntekt(overstyrInntekt: OverstyrInntekt): Boolean {

@@ -292,6 +292,68 @@ interface SubsumsjonObserver {
     ) {}
 
     /**
+     * I arbeidsforhold som har vart så kort tid at det ikke er rapportert inntekt til a-ordningen
+     * for tre hele kalendermåneder, skal dette kortere tidsrommet legges til grunn.
+     *
+     * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-28)
+     *
+     * @param organisasjonsnummer arbeidsgiveren [grunnlagForSykepengegrunnlag] er beregnet for
+     * @param startdatoArbeidsforhold startdato hos arbeidsgiver [organisasjonsnummer]
+     * @param overstyrtInntektFraSaksbehandler inntekt saksbehandler har vurdert korrekt iht. § 8-28 (3) b
+     * @param skjæringstidspunkt dato som [grunnlagForSykepengegrunnlag] beregnes relativt til
+     * @param forklaring saksbehandler sin forklaring for overstyring av inntekt
+     * @param grunnlagForSykepengegrunnlag beregnet grunnlag basert på [overstyrtInntektFraSaksbehandler]
+     */
+    fun `§ 8-28 ledd 3 bokstav b`(
+        organisasjonsnummer: String,
+        startdatoArbeidsforhold: LocalDate,
+        overstyrtInntektFraSaksbehandler: Map<String, Any>,
+        skjæringstidspunkt: LocalDate,
+        forklaring: String,
+        grunnlagForSykepengegrunnlag: Inntekt
+    ) {}
+
+    /**
+     * I et arbeidsforhold der arbeidstakeren har fått varig lønnsendring i løpet av eller etter beregningsperioden,
+     * men før arbeidsuførhetstidspunktet, skal tidsrommet etter lønnsendringen legges til grunn.
+     *
+     * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-28)
+     *
+     * @param organisasjonsnummer arbeidsgiveren [grunnlagForSykepengegrunnlag] er beregnet for
+     * @param overstyrtInntektFraSaksbehandler inntekt saksbehandler har vurdert korrekt iht. § 8-28 (3) c
+     * @param skjæringstidspunkt dato som [grunnlagForSykepengegrunnlag] beregnes relativt til
+     * @param forklaring saksbehandler sin forklaring for overstyring av inntekt
+     * @param grunnlagForSykepengegrunnlag beregnet grunnlag basert på [overstyrtInntektFraSaksbehandler]
+     */
+    fun `§ 8-28 ledd 3 bokstav c`(
+        organisasjonsnummer: String,
+        overstyrtInntektFraSaksbehandler: Map<String, Any>,
+        skjæringstidspunkt: LocalDate,
+        forklaring: String,
+        grunnlagForSykepengegrunnlag: Inntekt
+    ) {}
+
+    /**
+     * Dersom rapporteringen til a-ordningen er mangelfull eller uriktig,
+     * fastsettes sykepengegrunnlaget ut fra den inntekten arbeidsgiver skulle ha rapportert til a-ordningen i beregningsperioden.
+     *
+     * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-28)
+     *
+     * @param organisasjonsnummer arbeidsgiveren [grunnlagForSykepengegrunnlag] er beregnet for
+     * @param overstyrtInntektFraSaksbehandler inntekt saksbehandler har vurdert korrekt iht. § 8-28 (3) c
+     * @param skjæringstidspunkt dato som [grunnlagForSykepengegrunnlag] beregnes relativt til
+     * @param forklaring saksbehandler sin forklaring for overstyring av inntekt
+     * @param grunnlagForSykepengegrunnlag beregnet grunnlag basert på [overstyrtInntektFraSaksbehandler]
+     */
+    fun `§ 8-28 ledd 5`(
+        organisasjonsnummer: String,
+        overstyrtInntektFraSaksbehandler: Map<String, Any>,
+        skjæringstidspunkt: LocalDate,
+        forklaring: String,
+        grunnlagForSykepengegrunnlag: Inntekt
+    ) {}
+
+    /**
      * Inntekter som legges til grunn for beregning av sykepengegrunnlag
      *
      * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-29)

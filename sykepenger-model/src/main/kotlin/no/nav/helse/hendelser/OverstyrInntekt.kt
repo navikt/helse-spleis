@@ -10,6 +10,11 @@ import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.økonomi.Inntekt
 
+class Subsumsjon(
+    internal val paragraf: String,
+    internal val ledd: Int?,
+    internal val bokstav: String?,
+)
 
 class OverstyrInntekt(
     meldingsreferanseId: UUID,
@@ -17,9 +22,9 @@ class OverstyrInntekt(
     aktørId: String,
     organisasjonsnummer: String,
     internal val inntekt: Inntekt,
-    internal val skjæringstidspunkt: LocalDate
+    internal val skjæringstidspunkt: LocalDate,
+    internal val subsumsjon: Subsumsjon?
 ) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer, aktørId, organisasjonsnummer) {
-
     internal fun erRelevant(skjæringstidspunkt: LocalDate) = this.skjæringstidspunkt == skjæringstidspunkt
 
     internal fun addInntekt(inntektshistorikk: Inntektshistorikk) {

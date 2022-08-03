@@ -6,6 +6,7 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.subsumsjonsformat
@@ -126,7 +127,14 @@ internal class Inntektshistorikk {
         fun rapportertInntekt(dato: LocalDate): Inntektsopplysning? = null
         fun rapportertInntekt(): Inntekt
         fun skalErstattesAv(other: Inntektsopplysning): Boolean
-        fun subsumsjon(subsumsjonObserver: SubsumsjonObserver, skjæringstidspunkt: LocalDate, organisasjonsnummer: String) = run {}
+        fun subsumsjon(
+            subsumsjonObserver: SubsumsjonObserver,
+            skjæringstidspunkt: LocalDate,
+            organisasjonsnummer: String,
+            startdatoArbeidsforhold: LocalDate?,
+            forklaring: String,
+            subsumsjon: Subsumsjon?
+        ) = run {}
         override fun compareTo(other: Inntektsopplysning) =
             (-this.dato.compareTo(other.dato)).takeUnless { it == 0 } ?: -this.prioritet.compareTo(other.prioritet)
 
@@ -166,6 +174,51 @@ internal class Inntektshistorikk {
             other is Saksbehandler && this.dato == other.dato
 
         override fun erNødvendigInntektForVilkårsprøving(harUtbetaling: Boolean) = true
+
+        override fun subsumsjon(
+            subsumsjonObserver: SubsumsjonObserver,
+            skjæringstidspunkt: LocalDate,
+            organisasjonsnummer: String,
+            startdatoArbeidsforhold: LocalDate?,
+            forklaring: String,
+            subsumsjon: Subsumsjon?
+        ) {
+            if(subsumsjon == null) return
+            if (subsumsjon.paragraf == Paragraf.PARAGRAF_8_28.ref
+                && subsumsjon.ledd == Ledd.LEDD_3.nummer
+                && subsumsjon.bokstav == Bokstav.BOKSTAV_B.ref.toString()
+            ) {
+                requireNotNull(startdatoArbeidsforhold) { "Fant ikke aktivt arbeidsforhold for skjæringstidspunktet i arbeidsforholdshistorikken" }
+                subsumsjonObserver.`§ 8-28 ledd 3 bokstav b`(
+                    organisasjonsnummer = organisasjonsnummer,
+                    startdatoArbeidsforhold = startdatoArbeidsforhold,
+                    overstyrtInntektFraSaksbehandler = mapOf("dato" to dato, "beløp" to beløp.reflection { _, månedlig, _, _ -> månedlig }),
+                    skjæringstidspunkt = skjæringstidspunkt,
+                    forklaring = forklaring,
+                    grunnlagForSykepengegrunnlag = omregnetÅrsinntekt()
+                )
+            } else if (subsumsjon.paragraf == Paragraf.PARAGRAF_8_28.ref
+                && subsumsjon.ledd == Ledd.LEDD_3.nummer
+                && subsumsjon.bokstav == Bokstav.BOKSTAV_C.ref.toString()
+            ) {
+                subsumsjonObserver.`§ 8-28 ledd 3 bokstav c`(
+                    organisasjonsnummer = organisasjonsnummer,
+                    overstyrtInntektFraSaksbehandler = mapOf("dato" to dato, "beløp" to beløp.reflection { _, månedlig, _, _ -> månedlig }),
+                    skjæringstidspunkt = skjæringstidspunkt,
+                    forklaring = forklaring,
+                    grunnlagForSykepengegrunnlag = omregnetÅrsinntekt()
+                )
+            } else if (subsumsjon.paragraf == Paragraf.PARAGRAF_8_28.ref && subsumsjon.ledd == Ledd.LEDD_5.nummer) {
+                subsumsjonObserver.`§ 8-28 ledd 5`(
+                    organisasjonsnummer = organisasjonsnummer,
+                    overstyrtInntektFraSaksbehandler = mapOf("dato" to dato, "beløp" to beløp.reflection { _, månedlig, _, _ -> månedlig }),
+                    skjæringstidspunkt = skjæringstidspunkt,
+                    forklaring = forklaring,
+                    grunnlagForSykepengegrunnlag = omregnetÅrsinntekt()
+                )
+            }
+
+        }
     }
 
     internal class Infotrygd(
@@ -298,7 +351,14 @@ internal class Inntektshistorikk {
                 .summer()
                 .div(12)
 
-        override fun subsumsjon(subsumsjonObserver: SubsumsjonObserver, skjæringstidspunkt: LocalDate, organisasjonsnummer: String) {
+        override fun subsumsjon(
+            subsumsjonObserver: SubsumsjonObserver,
+            skjæringstidspunkt: LocalDate,
+            organisasjonsnummer: String,
+            startdatoArbeidsforhold: LocalDate?,
+            forklaring: String,
+            subsumsjon: Subsumsjon?
+        ) {
             subsumsjonObserver.`§ 8-28 ledd 3 bokstav a`(
                 organisasjonsnummer = organisasjonsnummer,
                 skjæringstidspunkt = skjæringstidspunkt,

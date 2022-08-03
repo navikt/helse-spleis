@@ -14,6 +14,7 @@ import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Simulering
+import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Utbetalingsgrunnlag
@@ -312,11 +313,11 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
-    internal fun håndter(overstyrArbeidsforhold: OverstyrArbeidsforhold): Boolean {
+    internal fun håndter(overstyrArbeidsforhold: OverstyrArbeidsforhold, subsumsjon: Subsumsjon?): Boolean {
         if (!overstyrArbeidsforhold.erRelevant(skjæringstidspunkt)) return false
         kontekst(overstyrArbeidsforhold)
         overstyrArbeidsforhold.leggTil(hendelseIder)
-        return tilstand.håndter(this, overstyrArbeidsforhold)
+        return tilstand.håndter(this, overstyrArbeidsforhold, subsumsjon)
     }
 
     internal fun håndterOverstyringAvGhostInntekt(overstyrInntekt: OverstyrInntekt): Boolean {
@@ -427,7 +428,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun revurderInntekt(hendelse: OverstyrInntekt) {
         person.nyInntekt(hendelse)
-        person.vilkårsprøvEtterNyInformasjonFraSaksbehandler(hendelse, skjæringstidspunkt, jurist())
+        person.vilkårsprøvEtterNyInformasjonFraSaksbehandler(hendelse, skjæringstidspunkt, jurist(), null)
         person.startRevurdering(this, hendelse)
     }
 
@@ -564,7 +565,7 @@ internal class Vedtaksperiode private constructor(
 
         vilkårsgrunnlag.lagreRapporterteInntekter(person, skjæringstidspunkt)
 
-        val grunnlagForSykepengegrunnlag = person.beregnSykepengegrunnlag(skjæringstidspunkt, jurist())
+        val grunnlagForSykepengegrunnlag = person.beregnSykepengegrunnlag(skjæringstidspunkt, jurist(), null)
         val sammenligningsgrunnlag = person.beregnSammenligningsgrunnlag(skjæringstidspunkt, jurist())
         val opptjening = person.beregnOpptjening(skjæringstidspunkt, jurist())
 
@@ -898,7 +899,8 @@ internal class Vedtaksperiode private constructor(
 
         fun håndter(
             vedtaksperiode: Vedtaksperiode,
-            overstyrArbeidsforhold: OverstyrArbeidsforhold
+            overstyrArbeidsforhold: OverstyrArbeidsforhold,
+            subsumsjon: Subsumsjon?
         ) = false
 
         fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: Utbetalingsgrunnlag) {}
@@ -1197,8 +1199,9 @@ internal class Vedtaksperiode private constructor(
                 vedtaksperiode.person.vilkårsprøvEtterNyInformasjonFraSaksbehandler(
                     hendelse,
                     vedtaksperiode.skjæringstidspunkt,
-                    vedtaksperiode.jurist()
-                )
+                    vedtaksperiode.jurist(),
+                null
+            )
             }
             vedtaksperiode.tilstand(hendelse, AvventerHistorikkRevurdering)
         }
@@ -1652,7 +1655,8 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.person.vilkårsprøvEtterNyInformasjonFraSaksbehandler(
                 hendelse,
                 vedtaksperiode.skjæringstidspunkt,
-                vedtaksperiode.jurist()
+                vedtaksperiode.jurist(),
+                null
             )
             vedtaksperiode.tilstand(hendelse, AvventerHistorikk)
         }
@@ -1665,18 +1669,24 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.person.vilkårsprøvEtterNyInformasjonFraSaksbehandler(
                 hendelse,
                 vedtaksperiode.skjæringstidspunkt,
-                vedtaksperiode.jurist()
+                vedtaksperiode.jurist(),
+                hendelse.subsumsjon
             )
             vedtaksperiode.tilstand(hendelse, AvventerHistorikk)
             return true
         }
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, overstyrArbeidsforhold: OverstyrArbeidsforhold): Boolean {
+        override fun håndter(
+            vedtaksperiode: Vedtaksperiode,
+            overstyrArbeidsforhold: OverstyrArbeidsforhold,
+            subsumsjon: Subsumsjon?
+        ): Boolean {
             vedtaksperiode.person.lagreOverstyrArbeidsforhold(overstyrArbeidsforhold)
             vedtaksperiode.person.vilkårsprøvEtterNyInformasjonFraSaksbehandler(
                 overstyrArbeidsforhold,
                 vedtaksperiode.skjæringstidspunkt,
-                vedtaksperiode.jurist()
+                vedtaksperiode.jurist(),
+                subsumsjon
             )
             vedtaksperiode.tilstand(overstyrArbeidsforhold, AvventerHistorikk)
             return true
@@ -2092,9 +2102,11 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.person.vilkårsprøvEtterNyInformasjonFraSaksbehandler(
                 hendelse,
                 vedtaksperiode.skjæringstidspunkt,
-                vedtaksperiode.jurist()
-            )
-            vedtaksperiode.person.startRevurdering(vedtaksperiode, hendelse)
+                vedtaksperiode.jurist(),
+                    null
+                )
+                vedtaksperiode.person.startRevurdering(vedtaksperiode, hendelse)
+
         }
 
         override fun nyPeriodeFørMedNyFlyt(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Søknad) {

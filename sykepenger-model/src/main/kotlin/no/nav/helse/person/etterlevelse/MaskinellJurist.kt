@@ -11,6 +11,8 @@ import no.nav.helse.januar
 import no.nav.helse.juni
 import no.nav.helse.person.Bokstav
 import no.nav.helse.person.Bokstav.BOKSTAV_A
+import no.nav.helse.person.Bokstav.BOKSTAV_B
+import no.nav.helse.person.Bokstav.BOKSTAV_C
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Dokumentsporing.Companion.toMap
 import no.nav.helse.person.FOLKETRYGDLOVENS_OPPRINNELSESDATO
@@ -19,6 +21,7 @@ import no.nav.helse.person.Ledd.Companion.ledd
 import no.nav.helse.person.Ledd.LEDD_1
 import no.nav.helse.person.Ledd.LEDD_2
 import no.nav.helse.person.Ledd.LEDD_3
+import no.nav.helse.person.Ledd.LEDD_5
 import no.nav.helse.person.Paragraf
 import no.nav.helse.person.Paragraf.PARAGRAF_8_10
 import no.nav.helse.person.Paragraf.PARAGRAF_8_11
@@ -494,6 +497,94 @@ class MaskinellJurist private constructor(
                     "organisasjonsnummer" to organisasjonsnummer,
                     "inntekterSisteTreMåneder" to inntekterSisteTreMåneder,
                     "skjæringstidspunkt" to skjæringstidspunkt
+                ),
+                output = mapOf(
+                    "beregnetGrunnlagForSykepengegrunnlagPrÅr" to grunnlagForSykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
+                    "beregnetGrunnlagForSykepengegrunnlagPrMåned" to grunnlagForSykepengegrunnlag.reflection { _, månedlig, _, _ -> månedlig }
+                ),
+                kontekster = kontekster()
+            )
+        )
+    }
+
+    override fun `§ 8-28 ledd 3 bokstav b`(
+        organisasjonsnummer: String,
+        startdatoArbeidsforhold: LocalDate,
+        overstyrtInntektFraSaksbehandler: Map<String, Any>,
+        skjæringstidspunkt: LocalDate,
+        forklaring: String,
+        grunnlagForSykepengegrunnlag: Inntekt
+    ) {
+        leggTil(
+            EnkelSubsumsjon(
+                utfall = VILKAR_BEREGNET,
+                versjon = LocalDate.of(2019, 1, 1),
+                paragraf = PARAGRAF_8_28,
+                ledd = LEDD_3,
+                bokstav = BOKSTAV_B,
+                input = mapOf(
+                    "organisasjonsnummer" to organisasjonsnummer,
+                    "skjæringstidspunkt" to skjæringstidspunkt,
+                    "startdatoArbeidsforhold" to startdatoArbeidsforhold,
+                    "overstyrtInntektFraSaksbehandler" to overstyrtInntektFraSaksbehandler,
+                    "forklaring" to forklaring
+                ),
+                output = mapOf(
+                    "beregnetGrunnlagForSykepengegrunnlagPrÅr" to grunnlagForSykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
+                    "beregnetGrunnlagForSykepengegrunnlagPrMåned" to grunnlagForSykepengegrunnlag.reflection { _, månedlig, _, _ -> månedlig }
+                ),
+                kontekster = kontekster()
+            )
+        )
+    }
+
+    override fun `§ 8-28 ledd 3 bokstav c`(
+        organisasjonsnummer: String,
+        overstyrtInntektFraSaksbehandler: Map<String, Any>,
+        skjæringstidspunkt: LocalDate,
+        forklaring: String,
+        grunnlagForSykepengegrunnlag: Inntekt
+    ) {
+        leggTil(
+            EnkelSubsumsjon(
+                utfall = VILKAR_BEREGNET,
+                versjon = LocalDate.of(2019, 1, 1),
+                paragraf = PARAGRAF_8_28,
+                ledd = LEDD_3,
+                bokstav = BOKSTAV_C,
+                input = mapOf(
+                    "organisasjonsnummer" to organisasjonsnummer,
+                    "overstyrtInntektFraSaksbehandler" to overstyrtInntektFraSaksbehandler,
+                    "skjæringstidspunkt" to skjæringstidspunkt,
+                    "forklaring" to forklaring
+                ),
+                output = mapOf(
+                    "beregnetGrunnlagForSykepengegrunnlagPrÅr" to grunnlagForSykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
+                    "beregnetGrunnlagForSykepengegrunnlagPrMåned" to grunnlagForSykepengegrunnlag.reflection { _, månedlig, _, _ -> månedlig }
+                ),
+                kontekster = kontekster()
+            )
+        )
+    }
+
+    override fun `§ 8-28 ledd 5`(
+        organisasjonsnummer: String,
+        overstyrtInntektFraSaksbehandler: Map<String, Any>,
+        skjæringstidspunkt: LocalDate,
+        forklaring: String,
+        grunnlagForSykepengegrunnlag: Inntekt
+    ) {
+        leggTil(
+            EnkelSubsumsjon(
+                utfall = VILKAR_BEREGNET,
+                versjon = LocalDate.of(2019, 1, 1),
+                paragraf = PARAGRAF_8_28,
+                ledd = LEDD_5,
+                input = mapOf(
+                    "organisasjonsnummer" to organisasjonsnummer,
+                    "overstyrtInntektFraSaksbehandler" to overstyrtInntektFraSaksbehandler,
+                    "skjæringstidspunkt" to skjæringstidspunkt,
+                    "forklaring" to forklaring
                 ),
                 output = mapOf(
                     "beregnetGrunnlagForSykepengegrunnlagPrÅr" to grunnlagForSykepengegrunnlag.reflection { årlig, _, _, _ -> årlig },
