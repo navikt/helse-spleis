@@ -2363,6 +2363,7 @@ internal class Vedtaksperiode private constructor(
                     vedtaksperiode.person.invaliderAllePerioder(inntektsmelding, null)
             }) { AvsluttetUtenUtbetaling } // håndterInntektsmelding krever tilstandsendring, men vi må avvente til vi starter revurdering
 
+            if (inntektsmelding.hasErrorsOrWorse()) return
 
             // støttes ikke før vi støtter revurdering av eldre skjæringstidspunkt
             if (vedtaksperiode.person.vedtaksperioder(NYERE_SKJÆRINGSTIDSPUNKT_MED_UTBETALING(vedtaksperiode)).isNotEmpty()) {
@@ -2372,6 +2373,7 @@ internal class Vedtaksperiode private constructor(
                     keyValue("aktørId", vedtaksperiode.aktørId),
                     keyValue("organisasjonsnummer", vedtaksperiode.organisasjonsnummer)
                 )
+                inntektsmelding.info("Revurdering blokkeres fordi det finnes nyere skjæringstidspunkt, og det mangler funksjonalitet for å håndtere dette.")
                 return vedtaksperiode.emitVedtaksperiodeEndret(inntektsmelding) // på stedet hvil!
             }
             if (vedtaksperiode.ingenUtbetaling()) vedtaksperiode.emitVedtaksperiodeEndret(inntektsmelding) // på stedet hvil!
