@@ -41,6 +41,7 @@ import no.nav.helse.spleis.TestMessageFactory.InstitusjonsoppholdTestdata
 import no.nav.helse.spleis.TestMessageFactory.OmsorgspengerTestdata
 import no.nav.helse.spleis.TestMessageFactory.OpplæringspengerTestdata
 import no.nav.helse.spleis.TestMessageFactory.PleiepengerTestdata
+import no.nav.helse.spleis.TestMessageFactory.Subsumsjon
 import no.nav.helse.spleis.TestMessageFactory.UtbetalingshistorikkForFeriepengerTestdata
 import no.nav.helse.spleis.TestMessageFactory.UtbetalingshistorikkTestdata
 import no.nav.helse.spleis.db.HendelseRepository
@@ -471,8 +472,8 @@ internal abstract class AbstractEndToEndMediatorTest {
         testRapid.sendTestMessage(message)
     }
 
-    protected fun sendOverstyringInntekt(inntekt: Double, skjæringstidspunkt: LocalDate) {
-        val (_, message) = meldingsfabrikk.lagOverstyringInntekt(inntekt, skjæringstidspunkt)
+    protected fun sendOverstyringInntekt(inntekt: Double, skjæringstidspunkt: LocalDate, subsumsjon: Subsumsjon?, orgnummer: String = ORGNUMMER) {
+        val (_, message) = meldingsfabrikk.lagOverstyringInntekt(inntekt, skjæringstidspunkt, subsumsjon, orgnummer)
         testRapid.sendTestMessage(message)
     }
 

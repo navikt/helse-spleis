@@ -411,6 +411,13 @@ internal class TestMessageFactory(
         )
     }
 
+    data class Subsumsjon(
+        val paragraf: String,
+        val ledd: String?,
+        val bokstav: String?
+    )
+
+
 
     fun lagYtelser(
         vedtaksperiodeId: UUID,
@@ -856,15 +863,28 @@ internal class TestMessageFactory(
             ))
     }
 
-    fun lagOverstyringInntekt(inntekt: Double, skjæringstidspunkt: LocalDate): Pair<String, String> {
+    fun lagOverstyringInntekt(inntekt: Double, skjæringstidspunkt: LocalDate, subsumsjon: Subsumsjon?, orgnummer: String = organisasjonsnummer): Pair<String, String> {
         return nyHendelse(
-            "overstyr_inntekt", mutableMapOf(
+            "overstyr_inntekt", mutableMapOf<String, Any>(
                 "aktørId" to aktørId,
                 "fødselsnummer" to fødselsnummer,
-                "organisasjonsnummer" to organisasjonsnummer,
+                "organisasjonsnummer" to orgnummer,
                 "månedligInntekt" to inntekt,
                 "skjæringstidspunkt" to skjæringstidspunkt
-            ))
+            ).apply {
+                subsumsjon?.let {
+                    this["subsumsjon"] = mutableMapOf(
+                        "paragraf" to subsumsjon.paragraf,
+                    ).apply {
+                        subsumsjon.ledd?.let {
+                            this["ledd"] = subsumsjon.ledd
+                        }
+                        subsumsjon.bokstav?.let {
+                            this["bokstav"] = subsumsjon.bokstav
+                        }
+                    }
+                }
+            })
     }
 
 
