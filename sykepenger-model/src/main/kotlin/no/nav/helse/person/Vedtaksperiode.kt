@@ -1140,6 +1140,12 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.oppdaterHistorikk(hendelse)
             vedtaksperiode.person.startRevurdering(vedtaksperiode, hendelse)
         }
+        override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
+            vedtaksperiode.håndterInntektsmelding(inntektsmelding, hvisIngenErrors = {
+                inntektsmelding.info("Forsøker å gjenoppta revurdering")
+            }) { this }
+            vedtaksperiode.person.gjenopptaBehandlingNy(inntektsmelding)
+        }
 
         override fun håndterRevurdertUtbetaling(
             vedtaksperiode: Vedtaksperiode,
@@ -2367,8 +2373,9 @@ internal class Vedtaksperiode private constructor(
             overstyrt: Vedtaksperiode,
             pågående: Vedtaksperiode?
         ) {
-            if (vedtaksperiode.ingenUtbetaling()) return hendelse.info("Revurdering medfører ingen utbetaling, blir stående i avsluttet uten utbetaling")
-            if (!vedtaksperiode.harNødvendigInntektForVilkårsprøving() || !arbeidsgivere.harNødvendigInntekt(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode.start)) return hendelse.info("Avventer inntekt for minst én annen arbeidsgiver")
+            if (!vedtaksperiode.harNødvendigInntektForVilkårsprøving() || !arbeidsgivere.harNødvendigInntekt(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode.start)) return vedtaksperiode.tilstand(hendelse, AvventerRevurdering) {
+                hendelse.info("Avventer inntekt for minst én annen arbeidsgiver")
+            }
             return vedtaksperiode.nesteRevurderingstilstand(hendelse, overstyrt, pågående)
         }
 
@@ -2394,8 +2401,10 @@ internal class Vedtaksperiode private constructor(
                 inntektsmelding.info("Revurdering blokkeres fordi det finnes nyere skjæringstidspunkt, og det mangler funksjonalitet for å håndtere dette.")
                 return vedtaksperiode.emitVedtaksperiodeEndret(inntektsmelding) // på stedet hvil!
             }
-            if (vedtaksperiode.ingenUtbetaling()) vedtaksperiode.emitVedtaksperiodeEndret(inntektsmelding) // på stedet hvil!
-
+            if (vedtaksperiode.ingenUtbetaling()) {
+                vedtaksperiode.emitVedtaksperiodeEndret(inntektsmelding) // på stedet hvil!
+                return inntektsmelding.info("Revurdering medfører ingen utbetaling, blir stående i avsluttet uten utbetaling")
+            }
             vedtaksperiode.person.startRevurdering(vedtaksperiode, inntektsmelding)
         }
 
@@ -2505,6 +2514,7 @@ internal class Vedtaksperiode private constructor(
             overstyrt: Vedtaksperiode,
             pågående: Vedtaksperiode?
         ) {
+            vedtaksperiode.skjæringstidspunktFraInfotrygd = null
             vedtaksperiode.nesteRevurderingstilstand(hendelse, overstyrt, pågående)
         }
 
@@ -2697,7 +2707,9 @@ internal class Vedtaksperiode private constructor(
 
         internal val NYERE_SKJÆRINGSTIDSPUNKT_MED_UTBETALING = { segSelv: Vedtaksperiode ->
             val skjæringstidspunkt = segSelv.skjæringstidspunkt
-            { vedtaksperiode: Vedtaksperiode -> vedtaksperiode.utbetalinger.erAvsluttet() && vedtaksperiode.skjæringstidspunkt > skjæringstidspunkt }
+            { vedtaksperiode: Vedtaksperiode ->
+                vedtaksperiode.utbetalinger.erAvsluttet() && vedtaksperiode.skjæringstidspunkt > skjæringstidspunkt && vedtaksperiode.skjæringstidspunkt > segSelv.periode.endInclusive
+            }
         }
 
         internal val ALLE: VedtaksperiodeFilter = { true }
@@ -2830,7 +2842,7 @@ internal class Vedtaksperiode private constructor(
         // Finner eldste vedtaksperiode, foretrekker eldste arbeidsgiver ved likhet (ag1 før ag2)
         internal fun List<Vedtaksperiode>.kanStarteRevurdering(arbeidsgivere: List<Arbeidsgiver>, vedtaksperiode: Vedtaksperiode): Boolean {
             val pågående = pågående() ?: nesteRevurderingsperiode(arbeidsgivere, vedtaksperiode)
-            return vedtaksperiode == pågående
+            return vedtaksperiode == pågående && arbeidsgivere.harNødvendigInntekt(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode.start)
         }
 
         private fun List<Vedtaksperiode>.nesteRevurderingsperiode(arbeidsgivere: List<Arbeidsgiver>, other: Vedtaksperiode) =
