@@ -1187,6 +1187,12 @@ internal class Vedtaksperiode private constructor(
             if (Toggle.NyRevurdering.disabled) vedtaksperiode.person.gjenopptaBehandling(hendelse)
         }
 
+        override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
+            sikkerlogg.info("Vedtaksperiode {} i tilstand {} overlappet med inntektsmelding {}",
+                keyValue("vedtaksperiodeId", vedtaksperiode.id), keyValue("tilstand", type), keyValue("meldingsreferanseId", inntektsmelding.meldingsreferanseId()))
+            vedtaksperiode.håndterInntektsmelding(inntektsmelding) { this }
+        }
+
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
 
         override fun håndterRevurdertUtbetaling(
@@ -1303,6 +1309,10 @@ internal class Vedtaksperiode private constructor(
             }
         }
 
+        override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
+            vedtaksperiode.håndterInntektsmelding(inntektsmelding) { this }
+        }
+
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {
             if (!vedtaksperiode.kanRevurdereInntektForFlereArbeidsgivere(hendelse)) return
             if (Toggle.NyRevurdering.disabled) return super.håndter(vedtaksperiode, hendelse)
@@ -1321,6 +1331,7 @@ internal class Vedtaksperiode private constructor(
             infotrygdhistorikk: Infotrygdhistorikk,
             arbeidsgiverUtbetalingerFun: (SubsumsjonObserver) -> ArbeidsgiverUtbetalinger
         ) {
+            vedtaksperiode.skjæringstidspunktFraInfotrygd = person.skjæringstidspunkt(vedtaksperiode.periode)
             if (vedtaksperiode.person.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt) == null) return vedtaksperiode.tilstand(ytelser, AvventerVilkårsprøvingRevurdering) {
                 ytelser.info("Trenger å utføre vilkårsprøving før vi kan beregne utbetaling for revurderingen.")
             }
@@ -2036,7 +2047,7 @@ internal class Vedtaksperiode private constructor(
         if (overstyrt.arbeidsgiver != this.arbeidsgiver) return tilstand(hendelse, AvventerRevurdering)
 
         // Jeg har et senere skjæringstidspunkt enn den overstyrte perioden
-        if (skjæringstidspunkt > overstyrt.skjæringstidspunkt) return tilstand(hendelse, AvventerRevurdering)
+        if (skjæringstidspunkt > overstyrt.skjæringstidspunkt && overstyrt.tilstand == AvventerGjennomførtRevurdering) return tilstand(hendelse, AvventerRevurdering)
 
         // Det finnes en pågående revurdering _og_ jeg har et senere skjæringstidspunkt enn denne
         if (pågående != null && skjæringstidspunkt > pågående.skjæringstidspunkt) return tilstand(hendelse, AvventerRevurdering)
@@ -2368,17 +2379,13 @@ internal class Vedtaksperiode private constructor(
         }
 
         private fun håndterInntektsmeldingNy(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
-            vedtaksperiode.håndterInntektsmelding(inntektsmelding, hvisIngenErrors = {
-                if (!vedtaksperiode.alleAndreAvventerArbeidsgivere())
-                    inntektsmelding.validerMuligBrukerutbetaling()
-                if (inntektsmelding.hasErrorsOrWorse())
-                    vedtaksperiode.person.invaliderAllePerioder(inntektsmelding, null)
-            }) { AvsluttetUtenUtbetaling } // håndterInntektsmelding krever tilstandsendring, men vi må avvente til vi starter revurdering
+            val revurderingIkkeStøttet = vedtaksperiode.person.vedtaksperioder(NYERE_SKJÆRINGSTIDSPUNKT_MED_UTBETALING(vedtaksperiode)).isNotEmpty()
+            vedtaksperiode.håndterInntektsmelding(inntektsmelding) { this } // håndterInntektsmelding krever tilstandsendring, men vi må avvente til vi starter revurdering
 
             if (inntektsmelding.hasErrorsOrWorse()) return
 
             // støttes ikke før vi støtter revurdering av eldre skjæringstidspunkt
-            if (vedtaksperiode.person.vedtaksperioder(NYERE_SKJÆRINGSTIDSPUNKT_MED_UTBETALING(vedtaksperiode)).isNotEmpty()) {
+            if (revurderingIkkeStøttet) {
                 sikkerlogg.info(
                     "inntektsmelding i auu: Kan ikke reberegne {} for {} {} fordi nyere skjæringstidspunkt blokkerer",
                     keyValue("vedtaksperiodeId", vedtaksperiode.id),

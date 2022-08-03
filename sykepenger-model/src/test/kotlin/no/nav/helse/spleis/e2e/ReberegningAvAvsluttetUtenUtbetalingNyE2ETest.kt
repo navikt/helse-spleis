@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e
 import no.nav.helse.EnableToggle
 import no.nav.helse.Toggle
 import no.nav.helse.desember
+import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -26,8 +27,10 @@ import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.nullstillTilstandsendringer
+import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 @EnableToggle(Toggle.RevurdereAUU::class)
@@ -97,6 +100,85 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
     }
 
     @Test
+    fun `inntektsmelding gjør om kort periode til arbeidsdager`() {
+        håndterSykmelding(Sykmeldingsperiode(19.januar, 20.januar, 100.prosent))
+        håndterSøknad(Sykdom(18.januar, 20.januar, 100.prosent))
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+
+        håndterSykmelding(Sykmeldingsperiode(21.januar, 3.februar, 100.prosent))
+        håndterSøknad(Sykdom(21.januar, 3.februar, 100.prosent))
+        håndterUtbetalingshistorikk(2.vedtaksperiode)
+
+        nullstillTilstandsendringer()
+
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+
+        håndterInntektsmelding(listOf(10.januar til 20.januar, 28.januar til 1.februar))
+
+        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+
+        assertTrue(inspektør.sykdomstidslinje[21.januar] is Dag.FriskHelgedag)
+        assertTrue(inspektør.sykdomstidslinje[27.januar] is Dag.FriskHelgedag)
+
+        håndterYtelser(2.vedtaksperiode)
+
+        assertWarning("Første fraværsdag i inntektsmeldingen er ulik skjæringstidspunktet. Kontrollér at inntektsmeldingen er knyttet til riktig periode.", 1.vedtaksperiode.filter(a1))
+        assertNoWarnings(2.vedtaksperiode.filter(a1))
+
+        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_VILKÅRSPRØVING_REVURDERING)
+    }
+
+    @Test
+    fun `inntektsmelding gjør om kort periode til arbeidsdager etter utbetalt`() {
+        håndterSykmelding(Sykmeldingsperiode(19.januar, 20.januar, 100.prosent))
+        håndterSøknad(Sykdom(18.januar, 20.januar, 100.prosent))
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+
+        håndterSykmelding(Sykmeldingsperiode(21.januar, 3.februar, 100.prosent))
+        håndterSøknad(Sykdom(21.januar, 3.februar, 100.prosent))
+        håndterUtbetalingshistorikk(2.vedtaksperiode)
+
+        håndterSykmelding(Sykmeldingsperiode(4.februar, 28.februar, 100.prosent))
+        håndterSøknad(Sykdom(4.februar, 28.februar, 100.prosent))
+        håndterUtbetalingshistorikk(3.vedtaksperiode)
+        håndterInntektsmelding(listOf(19.januar til 3.februar))
+        håndterYtelser(3.vedtaksperiode)
+        håndterVilkårsgrunnlag(3.vedtaksperiode)
+        håndterYtelser(3.vedtaksperiode)
+        håndterSimulering(3.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(3.vedtaksperiode)
+        håndterUtbetalt()
+
+        nullstillTilstandsendringer()
+
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertSisteTilstand(3.vedtaksperiode, AVSLUTTET)
+
+        håndterInntektsmelding(listOf(10.januar til 20.januar, 28.januar til 1.februar))
+
+        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_GJENNOMFØRT_REVURDERING)
+        assertTilstander(3.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+
+        assertTrue(inspektør.sykdomstidslinje[21.januar] is Dag.FriskHelgedag)
+        assertTrue(inspektør.sykdomstidslinje[27.januar] is Dag.FriskHelgedag)
+
+        håndterYtelser(3.vedtaksperiode)
+
+        assertWarning("Første fraværsdag i inntektsmeldingen er ulik skjæringstidspunktet. Kontrollér at inntektsmeldingen er knyttet til riktig periode.", 1.vedtaksperiode.filter(a1))
+        assertNoWarnings(2.vedtaksperiode.filter(a1))
+        assertWarning("Første fraværsdag i inntektsmeldingen er ulik skjæringstidspunktet. Kontrollér at inntektsmeldingen er knyttet til riktig periode.", 3.vedtaksperiode.filter(a1))
+
+        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_GJENNOMFØRT_REVURDERING)
+        assertTilstander(3.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_VILKÅRSPRØVING_REVURDERING)
+    }
+
+    @Test
     fun `inntektsmelding gjør at kort periode faller utenfor agp - før vilkårsprøving`() {
         håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
@@ -118,6 +200,10 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
 
         håndterInntektsmelding(listOf(10.januar til 25.januar))
         håndterYtelser(2.vedtaksperiode)
+
+        assertNoWarnings(1.vedtaksperiode.filter(a1))
+        assertNoWarnings(2.vedtaksperiode.filter(a1))
+        assertNoWarnings(3.vedtaksperiode.filter(a1))
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_VILKÅRSPRØVING_REVURDERING)
@@ -179,8 +265,8 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         håndterInntektsmelding(listOf(10.januar til 25.januar))
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(3.vedtaksperiode, AVSLUTTET)
+        assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_GJENNOMFØRT_REVURDERING)
+        assertTilstander(3.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
     }
 
     @Test
