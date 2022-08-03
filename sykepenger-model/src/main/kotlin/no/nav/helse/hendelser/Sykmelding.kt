@@ -6,7 +6,9 @@ import java.util.UUID
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.IAktivitetslogg
+import no.nav.helse.person.Personopplysninger
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
+import no.nav.helse.somFødselsnummer
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.Companion.noOverlap
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -37,6 +39,8 @@ class Sykmelding(
         sykdomstidslinje = Sykmeldingsperiode.tidslinje(this, sykeperioder)
         periode = requireNotNull(sykdomstidslinje.periode())
     }
+
+    override fun personopplysninger() = Personopplysninger(fødselsnummer.somFødselsnummer(), aktørId)
 
     override fun valider(periode: Periode, subsumsjonObserver: SubsumsjonObserver): IAktivitetslogg {
         validerAtSykmeldingIkkeErForGammel()

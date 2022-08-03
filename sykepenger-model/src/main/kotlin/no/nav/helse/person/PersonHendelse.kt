@@ -1,8 +1,8 @@
 package no.nav.helse.person
 
 import java.util.UUID
+import no.nav.helse.Fødselsnummer
 import no.nav.helse.person.etterlevelse.MaskinellJurist
-import no.nav.helse.somFødselsnummer
 
 internal class ErrorsTilWarnings(private val other: IAktivitetslogg) : IAktivitetslogg by other {
     override fun error(melding: String, vararg params: Any?) = warn(melding, params)
@@ -10,6 +10,18 @@ internal class ErrorsTilWarnings(private val other: IAktivitetslogg) : IAktivite
     internal companion object {
         internal fun wrap(hendelse: PersonHendelse, block: () -> Unit) = hendelse.wrap(::ErrorsTilWarnings, block)
     }
+}
+
+class Personopplysninger(
+    private val fødselsnummer: Fødselsnummer,
+    private val aktørId: String
+) {
+    internal fun nyPerson(jurist: MaskinellJurist) = Person(
+        fødselsnummer = fødselsnummer,
+        aktørId = aktørId,
+        alder = fødselsnummer.alder(),
+        jurist = jurist
+    )
 }
 
 abstract class PersonHendelse protected constructor(
@@ -33,12 +45,11 @@ abstract class PersonHendelse protected constructor(
 
     fun aktørId() = aktørId
     fun fødselsnummer() = fødselsnummer
-    fun person(jurist: MaskinellJurist) = Person(
-        aktørId = aktørId,
-        fødselsnummer = fødselsnummer.somFødselsnummer(),
-        alder = fødselsnummer.somFødselsnummer().alder(), // TODO få alder/fødseldato fra hendelsen
-        jurist = jurist
-    )
+
+    open fun personopplysninger(): Personopplysninger =
+        throw IllegalStateException("${this::class.simpleName} inneholder ikke nødvendige personopplysninger.")
+
+    fun person(jurist: MaskinellJurist) = personopplysninger().nyPerson(jurist)
 
     internal fun meldingsreferanseId() = meldingsreferanseId
 

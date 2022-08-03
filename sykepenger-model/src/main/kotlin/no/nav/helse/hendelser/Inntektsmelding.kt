@@ -10,8 +10,10 @@ import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.InntektsmeldingInfo
+import no.nav.helse.person.Personopplysninger
 import no.nav.helse.person.Refusjonshistorikk
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
+import no.nav.helse.somFødselsnummer
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.Arbeidsdag
 import no.nav.helse.sykdomstidslinje.Dag.ArbeidsgiverHelgedag
@@ -74,6 +76,8 @@ class Inntektsmelding(
         arbeidsgiverperiode = arbeidsgivertidslinje.periode()
         sykdomstidslinje = listOf(arbeidsgivertidslinje, førsteFraværsdagGaptidslinje(arbeidsgiverperiode)).merge(beste)
     }
+
+    override fun personopplysninger() = Personopplysninger(fødselsnummer.somFødselsnummer(), aktørId)
 
     private fun arbeidsgivertidslinje(): Sykdomstidslinje {
         val tidslinje = arbeidsgiverperioder.map(::asArbeidsgivertidslinje).merge()
