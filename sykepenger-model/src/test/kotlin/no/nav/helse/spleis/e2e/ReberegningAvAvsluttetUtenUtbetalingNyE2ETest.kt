@@ -89,6 +89,33 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
     }
 
     @Test
+    fun `inntektsmelding gjør at kort periode faller utenfor agp`() {
+        håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar, 100.prosent))
+        håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+
+        håndterSykmelding(Sykmeldingsperiode(21.januar, 27.januar, 100.prosent))
+        håndterSøknad(Sykdom(21.januar, 27.januar, 100.prosent))
+        håndterUtbetalingshistorikk(2.vedtaksperiode)
+
+        håndterSykmelding(Sykmeldingsperiode(28.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(28.januar, 31.januar, 100.prosent))
+        håndterUtbetalingshistorikk(3.vedtaksperiode)
+
+        nullstillTilstandsendringer()
+
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertSisteTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
+
+        håndterInntektsmelding(listOf(10.januar til 25.januar))
+
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+        assertSisteTilstand(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+    }
+
+    @Test
     fun `revurderer ikke avsluttet periode dersom perioden fortsatt er innenfor agp etter IM selv ved flere mindre`() {
         håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
