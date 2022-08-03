@@ -111,7 +111,7 @@ internal class VedtaksperiodeUtbetalinger(private val arbeidsgiver: Arbeidsgiver
                 forbrukteSykedager = maksimumSykepenger.forbrukteDager(),
                 gjenståendeSykedager = maksimumSykepenger.gjenståendeDager(),
                 periode = periode,
-                forrige = utbetalinger.aktive().last()
+                forrige = utbetalinger.aktive().lastOrNull()
             ).also { arbeidsgiver.fordelRevurdertUtbetaling(vedtaksperiode, aktivitetslogg, it) }
         }
     }

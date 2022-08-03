@@ -68,7 +68,6 @@ import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.TilstandType.UTBETALING_FEILET
-import no.nav.helse.person.VedtaksperiodeUtbetalinger.Companion.revurderingsperioder
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
@@ -611,7 +610,15 @@ internal class Vedtaksperiode private constructor(
         håndterSøknad(søknad) { nesteTilstand }
     }
 
-    private fun håndter(vilkårsgrunnlag: Vilkårsgrunnlag, nesteTilstand: Vedtaksperiodetilstand) {
+    private fun håndterVilkårsgrunnlag(vilkårsgrunnlag: Vilkårsgrunnlag, nesteTilstand: Vedtaksperiodetilstand) {
+        vilkårsgrunnlag.lagreArbeidsforhold(person, skjæringstidspunkt)
+        vilkårsgrunnlag.lagreSkatteinntekter(person, skjæringstidspunkt)
+        vilkårsgrunnlag.loggUkjenteArbeidsforhold(person, skjæringstidspunkt)
+
+        if (person.harVedtaksperiodeForArbeidsgiverMedUkjentArbeidsforhold(skjæringstidspunkt)) {
+            vilkårsgrunnlag.warn("Arbeidsgiver er ikke registrert i Aa-registeret.")
+        }
+
         vilkårsgrunnlag.lagreRapporterteInntekter(person, skjæringstidspunkt)
 
         val grunnlagForSykepengegrunnlag = person.beregnSykepengegrunnlag(skjæringstidspunkt, jurist())
@@ -729,10 +736,6 @@ internal class Vedtaksperiode private constructor(
 
     private fun alleAndreAvventerArbeidsgivere() = overlappendeVedtaksperioder().all {
         it == this || it.tilstand == AvventerBlokkerendePeriode
-    }
-
-    private fun forberedMuligUtbetaling(vilkårsgrunnlag: Vilkårsgrunnlag) {
-        håndter(vilkårsgrunnlag, AvventerHistorikk)
     }
 
     /**
@@ -1318,6 +1321,10 @@ internal class Vedtaksperiode private constructor(
             infotrygdhistorikk: Infotrygdhistorikk,
             arbeidsgiverUtbetalingerFun: (SubsumsjonObserver) -> ArbeidsgiverUtbetalinger
         ) {
+            if (vedtaksperiode.person.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt) == null) return vedtaksperiode.tilstand(ytelser, AvventerVilkårsprøvingRevurdering) {
+                ytelser.info("Trenger å utføre vilkårsprøving før vi kan beregne utbetaling for revurderingen.")
+            }
+
             ErrorsTilWarnings.wrap(ytelser) {
                 if (Toggle.NyRevurdering.disabled) {
                     infotrygdhistorikk.valider(
@@ -1383,6 +1390,18 @@ internal class Vedtaksperiode private constructor(
 
         override fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime): LocalDateTime =
             LocalDateTime.MAX
+
+        override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+            vedtaksperiode.trengerVilkårsgrunnlag(hendelse)
+        }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
+            vedtaksperiode.trengerVilkårsgrunnlag(påminnelse)
+        }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {
+            vedtaksperiode.håndterVilkårsgrunnlag(vilkårsgrunnlag, AvventerHistorikkRevurdering)
+        }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {
             if (!vedtaksperiode.kanRevurdereInntektForFlereArbeidsgivere(hendelse)) return
@@ -1550,14 +1569,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {
-            vilkårsgrunnlag.lagreArbeidsforhold(vedtaksperiode.person, vedtaksperiode.skjæringstidspunkt)
-            vilkårsgrunnlag.lagreSkatteinntekter(vedtaksperiode.person, vedtaksperiode.skjæringstidspunkt)
-            vilkårsgrunnlag.loggUkjenteArbeidsforhold(vedtaksperiode.person, vedtaksperiode.skjæringstidspunkt)
-
-            if (vedtaksperiode.person.harVedtaksperiodeForArbeidsgiverMedUkjentArbeidsforhold(vedtaksperiode.skjæringstidspunkt)) {
-                vilkårsgrunnlag.warn("Arbeidsgiver er ikke registrert i Aa-registeret.")
-            }
-            vedtaksperiode.forberedMuligUtbetaling(vilkårsgrunnlag)
+            vedtaksperiode.håndterVilkårsgrunnlag(vilkårsgrunnlag, AvventerHistorikk)
         }
     }
 
@@ -2678,7 +2690,7 @@ internal class Vedtaksperiode private constructor(
 
         internal val NYERE_SKJÆRINGSTIDSPUNKT_MED_UTBETALING = { segSelv: Vedtaksperiode ->
             val skjæringstidspunkt = segSelv.skjæringstidspunkt
-            { vedtaksperiode: Vedtaksperiode -> vedtaksperiode.utbetalinger.harUtbetalinger() && vedtaksperiode.skjæringstidspunkt > skjæringstidspunkt }
+            { vedtaksperiode: Vedtaksperiode -> vedtaksperiode.utbetalinger.erAvsluttet() && vedtaksperiode.skjæringstidspunkt > skjæringstidspunkt }
         }
 
         internal val ALLE: VedtaksperiodeFilter = { true }
@@ -2973,11 +2985,7 @@ internal class Vedtaksperiode private constructor(
                 filter(ALLE_REVURDERINGSTILSTANDER)
                     .filter { it.skjæringstidspunkt == skjæringstidspunkt }
 
-            private fun List<Vedtaksperiode>.utbetalingsperioder(skjæringstidspunkt: LocalDate) =
-                filter { it.skjæringstidspunkt == skjæringstidspunkt }
-                    .filter(KAN_OPPRETTE_REVURDERING)
-                    .map { it.utbetalinger to it }
-                    .revurderingsperioder()
+            private fun List<Vedtaksperiode>.utbetalingsperioder(skjæringstidspunkt: LocalDate) = filter(KAN_OPPRETTE_REVURDERING(skjæringstidspunkt))
 
             private companion object {
                 private val ALLE_REVURDERINGSTILSTANDER: VedtaksperiodeFilter = {
@@ -2992,8 +3000,14 @@ internal class Vedtaksperiode private constructor(
                     )
                 }
 
-                private val KAN_OPPRETTE_REVURDERING: VedtaksperiodeFilter =
-                    { it.tilstand in listOf(AvventerRevurdering, AvventerHistorikkRevurdering) }
+                /* perioder som kan opprette revurdering er sist på skjæringstidspunktet per arbeidsgiver (hensyntatt pingpong).
+                       de som står i AvventerHistorikkRevurdering er allerede funnet, men det kan være flere i samme arbeidsgiver pga. ping-pong eller en annen arbeidsgiver som venter.
+                       Felles for disse er at de står i AvventerRevurdering, og de kan identifiseres ved at de ikke blir forlenget av noen andre vedtaksperioder,
+                        denne sjekken finner også de som naturligvis er sist per skjæringstidspunkt per arbeidsgiver også */
+                private val KAN_OPPRETTE_REVURDERING = { skjæringstidspunkt: LocalDate ->
+                    { vedtaksperiode: Vedtaksperiode -> vedtaksperiode.skjæringstidspunkt == skjæringstidspunkt &&
+                            (vedtaksperiode.tilstand == AvventerHistorikkRevurdering || (vedtaksperiode.tilstand == AvventerRevurdering && vedtaksperiode.arbeidsgiver.finnVedtaksperiodeRettEtter(vedtaksperiode) == null)) }
+                }
             }
         }
     }

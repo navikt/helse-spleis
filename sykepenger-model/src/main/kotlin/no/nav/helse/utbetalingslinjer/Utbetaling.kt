@@ -326,24 +326,24 @@ internal class Utbetaling private constructor(
             maksdato: LocalDate,
             forbrukteSykedager: Int,
             gjenståendeSykedager: Int,
-            forrige: Utbetaling
+            forrige: Utbetaling?
         ): Utbetaling {
-            val sisteUtbetaling = utbetalinger.aktive().lastOrNull { it.korrelasjonsId == forrige.korrelasjonsId } ?: forrige
-            val revurdertTidslinje = sisteUtbetaling.lagRevurdertTidslinje(utbetalingstidslinje, sisteDato)
+            val sisteUtbetaling = forrige?.let { utbetalinger.aktive().lastOrNull { it.korrelasjonsId == forrige.korrelasjonsId } } ?: forrige
+            val revurdertTidslinje = sisteUtbetaling?.lagRevurdertTidslinje(utbetalingstidslinje, sisteDato) ?: utbetalingstidslinje
 
             return Utbetaling(
-                sisteUtbetaling.takeIf { it.erAktiv() },
+                sisteUtbetaling?.takeIf { it.erAktiv() },
                 fødselsnummer,
                 beregningId,
                 organisasjonsnummer,
                 revurdertTidslinje,
                 Utbetalingtype.REVURDERING,
-                maxOf(sisteUtbetaling.periode.endInclusive, sisteDato),
+                sisteUtbetaling?.let { maxOf(sisteUtbetaling.periode.endInclusive, sisteDato) } ?: sisteDato,
                 aktivitetslogg,
                 maksdato,
                 forbrukteSykedager,
                 gjenståendeSykedager,
-                sisteUtbetaling.takeIf { it.erAktiv() }
+                sisteUtbetaling?.takeIf { it.erAktiv() }
             )
         }
 

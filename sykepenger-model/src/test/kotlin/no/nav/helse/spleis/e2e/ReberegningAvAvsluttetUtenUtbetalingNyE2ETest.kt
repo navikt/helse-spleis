@@ -2,6 +2,8 @@ package no.nav.helse.spleis.e2e
 
 import no.nav.helse.EnableToggle
 import no.nav.helse.Toggle
+import no.nav.helse.desember
+import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
@@ -12,13 +14,19 @@ import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
+import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_UFERDIG
+import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
 import no.nav.helse.person.TilstandType.START
+import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.nullstillTilstandsendringer
+import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Test
 
@@ -89,7 +97,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
     }
 
     @Test
-    fun `inntektsmelding gjør at kort periode faller utenfor agp`() {
+    fun `inntektsmelding gjør at kort periode faller utenfor agp - før vilkårsprøving`() {
         håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
@@ -109,10 +117,70 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         assertSisteTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
 
         håndterInntektsmelding(listOf(10.januar til 25.januar))
+        håndterYtelser(2.vedtaksperiode)
 
-        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
-        assertSisteTilstand(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_VILKÅRSPRØVING_REVURDERING)
+        assertTilstander(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE)
+    }
+
+    @Test
+    fun `inntektsmelding gjør at kort periode faller utenfor agp - etter vilkårsprøving`() {
+        håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar, 100.prosent))
+        håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+
+        håndterSykmelding(Sykmeldingsperiode(21.januar, 27.januar, 100.prosent))
+        håndterSøknad(Sykdom(21.januar, 27.januar, 100.prosent))
+        håndterUtbetalingshistorikk(2.vedtaksperiode)
+
+        håndterSykmelding(Sykmeldingsperiode(28.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(28.januar, 31.januar, 100.prosent))
+        håndterUtbetalingshistorikk(3.vedtaksperiode)
+        håndterInntektsmelding(listOf(12.januar til 27.januar))
+        håndterYtelser(3.vedtaksperiode)
+        håndterVilkårsgrunnlag(3.vedtaksperiode)
+        håndterYtelser(3.vedtaksperiode)
+        håndterSimulering(3.vedtaksperiode)
+
+        nullstillTilstandsendringer()
+
+        håndterInntektsmelding(listOf(10.januar til 25.januar))
+        håndterYtelser(2.vedtaksperiode)
+
+        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_VILKÅRSPRØVING_REVURDERING)
+        assertTilstander(3.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_UFERDIG)
+    }
+
+    @Test
+    fun `inntektsmelding gjør at kort periode faller utenfor agp - etter utbetalt`() {
+        håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar, 100.prosent))
+        håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+
+        håndterSykmelding(Sykmeldingsperiode(21.januar, 27.januar, 100.prosent))
+        håndterSøknad(Sykdom(21.januar, 27.januar, 100.prosent))
+        håndterUtbetalingshistorikk(2.vedtaksperiode)
+
+        håndterSykmelding(Sykmeldingsperiode(28.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(28.januar, 31.januar, 100.prosent))
+        håndterUtbetalingshistorikk(3.vedtaksperiode)
+        håndterInntektsmelding(listOf(12.januar til 27.januar))
+        håndterYtelser(3.vedtaksperiode)
+        håndterVilkårsgrunnlag(3.vedtaksperiode)
+        håndterYtelser(3.vedtaksperiode)
+        håndterSimulering(3.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(3.vedtaksperiode)
+        håndterUtbetalt()
+
+        nullstillTilstandsendringer()
+
+        håndterInntektsmelding(listOf(10.januar til 25.januar))
+
+        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(3.vedtaksperiode, AVSLUTTET)
     }
 
     @Test
@@ -350,10 +418,42 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
 
         nullstillTilstandsendringer()
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a2, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioderForSammenligningsgrunnlag {
+                1.januar(2017) til 1.desember(2017) inntekter {
+                    a1 inntekt INNTEKT
+                    a2 inntekt INNTEKT
+                }
+            }
+        ))
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_REVURDERING, orgnummer = a1)
-        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a2)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_VILKÅRSPRØVING_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, orgnummer = a2)
         assertTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
         assertTilstander(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
+
+        nullstillTilstandsendringer()
+        håndterUtbetalt(orgnummer = a2)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+
+        assertTilstander(1.vedtaksperiode, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, orgnummer = a1)
+        assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVSLUTTET, orgnummer = a2)
+        assertTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
+        assertTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
+
+        nullstillTilstandsendringer()
+        håndterUtbetalt(orgnummer = a1)
+
+        assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVSLUTTET, orgnummer = a1)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
+        assertTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, orgnummer = a1)
+        assertTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
+
     }
 }

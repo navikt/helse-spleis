@@ -5,7 +5,6 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.oktober
 import no.nav.helse.person.TilstandType.AVSLUTTET
-import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
@@ -54,6 +53,10 @@ internal class OverstyrTidslinjeFlereAGTest : AbstractEndToEndTest() {
         tilGodkjenning(1.oktober, 30.oktober, a2)
 
         håndterOverstyrTidslinje((29.januar til 29.januar).map { manuellFeriedag(it) }, orgnummer = a1)
+
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_UFERDIG, a2)
+
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)

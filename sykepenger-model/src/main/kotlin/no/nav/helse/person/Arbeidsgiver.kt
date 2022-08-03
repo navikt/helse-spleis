@@ -456,7 +456,7 @@ internal class Arbeidsgiver private constructor(
         forbrukteSykedager: Int,
         gjenståendeSykedager: Int,
         periode: Periode,
-        forrige: Utbetaling
+        forrige: Utbetaling?
     ): Utbetaling {
         return Utbetalingstidslinjeberegning.lagRevurdering(
             beregnetUtbetalingstidslinjer,
@@ -1068,6 +1068,11 @@ internal class Arbeidsgiver private constructor(
     internal fun finnVedtaksperiodeRettFør(vedtaksperiode: Vedtaksperiode) =
         vedtaksperioder.firstOrNull { other ->
             other.erVedtaksperiodeRettFør(vedtaksperiode)
+        }
+
+    internal fun finnVedtaksperiodeRettEtter(vedtaksperiode: Vedtaksperiode) =
+        vedtaksperioder.firstOrNull { other ->
+            vedtaksperiode.erVedtaksperiodeRettFør(other)
         }
 
     internal fun finnSykeperioderAvsluttetUtenUtbetalingRettFør(vedtaksperiode: Vedtaksperiode) =
