@@ -227,19 +227,13 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
     private fun inntektsmelding(
         beregnetInntekt: Inntekt,
         arbeidsgiverperioder: List<Periode> = listOf(Periode(1.januar, 16.januar))
-    ) =
-        Inntektsmelding(
-            meldingsreferanseId = UUID.randomUUID(),
+    ) = a1Hendelsefabrikk.lagInntektsmelding(
             refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
-            orgnummer = ORGNUMMER,
-            fødselsnummer = UNG_PERSON_FNR_2018.toString(),
-            aktørId = "aktørId",
             førsteFraværsdag = 1.januar,
             beregnetInntekt = beregnetInntekt,
             arbeidsgiverperioder = arbeidsgiverperioder,
             arbeidsforholdId = null,
-            begrunnelseForReduksjonEllerIkkeUtbetalt = null,
-            mottatt = LocalDateTime.now()
+            begrunnelseForReduksjonEllerIkkeUtbetalt = null
         ).apply {
             hendelse = this
         }

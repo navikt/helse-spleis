@@ -18,6 +18,7 @@ import java.util.concurrent.atomic.AtomicInteger
 import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmelding
@@ -46,6 +47,7 @@ import org.testcontainers.containers.PostgreSQLContainer
 internal class RestApiTest {
     private companion object {
         private const val UNG_PERSON_FNR = "12029240045"
+        private val UNG_PERSON_FØDSELSDATO = 12.februar(1992)
         private const val ORGNUMMER = "987654321"
         private val MELDINGSREFERANSE = UUID.randomUUID()
         private const val AKTØRID = "42"
@@ -149,6 +151,7 @@ internal class RestApiTest {
             ),
             orgnummer = ORGNUMMER,
             fødselsnummer = UNG_PERSON_FNR,
+            fødselsdato = UNG_PERSON_FØDSELSDATO,
             aktørId = "aktørId",
             førsteFraværsdag = LocalDate.of(2018, 1, 1),
             beregnetInntekt = 12000.månedlig,

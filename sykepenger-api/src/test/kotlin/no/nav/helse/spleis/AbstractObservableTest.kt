@@ -3,6 +3,7 @@ package no.nav.helse.spleis
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.februar
 import no.nav.helse.hendelser.Arbeidsavklaringspenger
 import no.nav.helse.hendelser.Dagpenger
 import no.nav.helse.hendelser.Dødsinfo
@@ -44,6 +45,7 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 abstract class AbstractObservableTest {
     protected companion object {
         const val UNG_PERSON_FNR = "12029240045"
+        val UNG_PERSON_FØDSELSDATO = 12.februar(1992)
         const val ORGNUMMER = "987654321"
         const val AKTØRID = "42"
         val INNTEKTSMELDING_ID: UUID = UUID.randomUUID()
@@ -108,11 +110,13 @@ abstract class AbstractObservableTest {
         harOpphørAvNaturalytelser: Boolean = false,
         arbeidsforholdId: String? = null,
         fnr: String = UNG_PERSON_FNR,
+        fødselsdato: LocalDate = UNG_PERSON_FØDSELSDATO
     ): Inntektsmelding = Inntektsmelding(
         meldingsreferanseId = id,
         refusjon = refusjon,
         orgnummer = orgnummer,
         fødselsnummer = fnr,
+        fødselsdato = fødselsdato,
         aktørId = AKTØRID,
         førsteFraværsdag = førsteFraværsdag,
         beregnetInntekt = beregnetInntekt,
@@ -124,24 +128,24 @@ abstract class AbstractObservableTest {
     )
 
     protected fun vilkårsgrunnlag(
-            vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode,
-            medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
-            orgnummer: String = ORGNUMMER,
-            arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold> = listOf(Vilkårsgrunnlag.Arbeidsforhold(orgnummer.toString(), FOM.minusYears(1))),
-            inntektsvurdering: Inntektsvurdering = Inntektsvurdering(
+        vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode,
+        medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
+        orgnummer: String = ORGNUMMER,
+        arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold> = listOf(Vilkårsgrunnlag.Arbeidsforhold(orgnummer, FOM.minusYears(1))),
+        inntektsvurdering: Inntektsvurdering = Inntektsvurdering(
                     inntekter = inntektperioderForSammenligningsgrunnlag {
                         Periode(FOM.minusYears(1), FOM.minusDays(1)) inntekter {
                             ORGNUMMER inntekt INNTEKT
                         }
                     }
             ),
-            inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag = InntektForSykepengegrunnlag(
+        inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag = InntektForSykepengegrunnlag(
                     inntekter = inntektperioderForSykepengegrunnlag {
                         Periode(FOM.minusMonths(3), FOM.minusDays(1)) inntekter {
                             ORGNUMMER inntekt INNTEKT
                         }
                     }, arbeidsforhold = emptyList()),
-            fnr: String = UNG_PERSON_FNR
+        fnr: String = UNG_PERSON_FNR
     ): Vilkårsgrunnlag = Vilkårsgrunnlag(
             meldingsreferanseId = UUID.randomUUID(),
             vedtaksperiodeId = vedtaksperiodeIdInnhenter(orgnummer).toString(),

@@ -7,6 +7,7 @@ import java.util.UUID
 import no.nav.helse.Fødselsnummer
 import no.nav.helse.april
 import no.nav.helse.desember
+import no.nav.helse.dsl.Hendelsefabrikk
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Medlemskapsvurdering
@@ -20,7 +21,6 @@ import no.nav.helse.inspectors.UtbetalingstidslinjeInspektør
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
-import no.nav.helse.person.AbstractPersonTest
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsforholdhistorikk
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning
@@ -71,6 +71,12 @@ internal class ArbeidsgiverUtbetalingerTest {
         val PERSON_68_ÅR_1_DESEMBER_2018 = "01125112345".somFødselsnummer()
         val PERSON_70_ÅR_1_FEBRUAR_2018 = "01024812345".somFødselsnummer()
         val ORGNUMMER = "888888888"
+        val hendelsefabrikk = Hendelsefabrikk(
+            fødselsnummer = UNG_PERSON_FNR_2018,
+            organisasjonsnummer = ORGNUMMER,
+            aktørId = "aktørId",
+            fødselsdato = 12.februar(1992)
+        )
     }
 
     @Test
@@ -347,19 +353,14 @@ internal class ArbeidsgiverUtbetalingerTest {
         )
 
         person.håndter(
-            inntektsmelding = Inntektsmelding(
-                meldingsreferanseId = UUID.randomUUID(),
+            inntektsmelding = hendelsefabrikk.lagInntektsmelding(
                 refusjon = Inntektsmelding.Refusjon(30000.månedlig, null),
-                orgnummer = ORGNUMMER,
-                fødselsnummer = AbstractPersonTest.UNG_PERSON_FNR_2018.toString(),
-                aktørId = AbstractPersonTest.AKTØRID,
                 førsteFraværsdag = førsteDag,
                 beregnetInntekt = 30000.månedlig,
                 arbeidsgiverperioder = listOf(),
                 arbeidsforholdId = null,
                 begrunnelseForReduksjonEllerIkkeUtbetalt = null,
-                harOpphørAvNaturalytelser = false,
-                mottatt = LocalDateTime.now()
+                harOpphørAvNaturalytelser = false
             )
         )
         aktivitetslogg = Aktivitetslogg()

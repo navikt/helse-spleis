@@ -1,10 +1,10 @@
 package no.nav.helse.person
 
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.august
 import no.nav.helse.desember
+import no.nav.helse.dsl.Hendelsefabrikk
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
@@ -14,6 +14,7 @@ import no.nav.helse.januar
 import no.nav.helse.november
 import no.nav.helse.oktober
 import no.nav.helse.person.etterlevelse.MaskinellJurist
+import no.nav.helse.somFødselsnummer
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.økonomi.Inntekt
@@ -35,9 +36,17 @@ internal class InntektshistorikkTest {
 
     private companion object {
         const val UNG_PERSON_FNR_2018 = "12029240045"
+        val UNG_PERSON_FØDSELSDATO = 12.februar(1992)
+
         const val AKTØRID = "42"
         const val ORGNUMMER = "987654321"
         val INNTEKT = 31000.00.månedlig
+        val hendelsefabrikk = Hendelsefabrikk(
+            aktørId = AKTØRID,
+            fødselsnummer = UNG_PERSON_FNR_2018.somFødselsnummer(),
+            fødselsdato = UNG_PERSON_FØDSELSDATO,
+            organisasjonsnummer = ORGNUMMER
+        )
     }
 
     @BeforeEach
@@ -328,17 +337,12 @@ internal class InntektshistorikkTest {
         beregnetInntekt: Inntekt = INNTEKT,
         førsteFraværsdag: LocalDate = 1.januar,
         arbeidsgiverperioder: List<Periode> = listOf(1.januar til 16.januar)
-    ) = Inntektsmelding(
-        meldingsreferanseId = UUID.randomUUID(),
+    ) = hendelsefabrikk.lagInntektsmelding(
         refusjon = Inntektsmelding.Refusjon(INNTEKT, null, emptyList()),
-        orgnummer = ORGNUMMER,
-        fødselsnummer = UNG_PERSON_FNR_2018,
-        aktørId = AKTØRID,
         førsteFraværsdag = førsteFraværsdag,
         beregnetInntekt = beregnetInntekt,
         arbeidsgiverperioder = arbeidsgiverperioder,
         arbeidsforholdId = null,
-        begrunnelseForReduksjonEllerIkkeUtbetalt = null,
-        mottatt = LocalDateTime.now()
+        begrunnelseForReduksjonEllerIkkeUtbetalt = null
     )
 }

@@ -8,6 +8,7 @@ import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.asOptionalLocalDate
 import no.nav.helse.rapids_rivers.isMissingOrNull
+import no.nav.helse.somFødselsnummer
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 
@@ -48,7 +49,8 @@ internal open class InntektsmeldingMessage(packet: JsonMessage) : HendelseMessag
             arbeidsforholdId = arbeidsforholdId,
             begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
             harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
-            mottatt = mottatt
+            mottatt = mottatt,
+            fødselsdato = fødselsnummer.somFødselsnummer().fødselsdato // TODO: Skal hentes fra packet
         )
 
     override fun behandle(mediator: IHendelseMediator, context: MessageContext) {

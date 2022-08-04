@@ -188,19 +188,13 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
 
     private fun inntektsmelding(
         refusjon: Inntektsmelding.Refusjon
-    ) =
-        Inntektsmelding(
-            meldingsreferanseId = UUID.randomUUID(),
+    ) = a1Hendelsefabrikk.lagInntektsmelding(
             refusjon = refusjon,
-            orgnummer = ORGNUMMER,
-            fødselsnummer = UNG_PERSON_FNR_2018.toString(),
-            aktørId = "aktørId",
             førsteFraværsdag = førsteSykedag,
             beregnetInntekt = 31000.månedlig,
             arbeidsgiverperioder = listOf(Periode(førsteSykedag, førsteSykedag.plusDays(15))),
             arbeidsforholdId = null,
-            begrunnelseForReduksjonEllerIkkeUtbetalt = null,
-            mottatt = LocalDateTime.now()
+            begrunnelseForReduksjonEllerIkkeUtbetalt = null
         ).apply {
             hendelse = this
         }

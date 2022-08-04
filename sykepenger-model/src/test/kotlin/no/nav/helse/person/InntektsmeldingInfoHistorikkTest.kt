@@ -7,12 +7,20 @@ import no.nav.helse.januar
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.LocalDateTime
 import java.util.*
+import no.nav.helse.dsl.Hendelsefabrikk
+import no.nav.helse.februar
+import no.nav.helse.somFødselsnummer
 
 internal class InntektsmeldingInfoHistorikkTest {
 
     private lateinit var historikk: InntektsmeldingInfoHistorikk
+    private val hendelsefabrikk = Hendelsefabrikk(
+        organisasjonsnummer = "orgnr",
+        fødselsnummer = "12029212345".somFødselsnummer(),
+        aktørId = "aktør",
+        fødselsdato = 12.februar(1992)
+    )
 
     @BeforeEach
     fun setup() {
@@ -38,17 +46,13 @@ internal class InntektsmeldingInfoHistorikkTest {
     }
 
     private fun inntektsmelding(id: UUID, arbeidsforholdId: String? = null) =
-        Inntektsmelding(
-            meldingsreferanseId = id,
+        hendelsefabrikk.lagInntektsmelding(
+            id = id,
             refusjon = Inntektsmelding.Refusjon(null, null),
-            orgnummer = "orgnr",
-            fødselsnummer = "fnr",
-            aktørId = "aktør",
             førsteFraværsdag = 1.januar,
             beregnetInntekt = INNTEKT,
             arbeidsgiverperioder = emptyList(),
             arbeidsforholdId = arbeidsforholdId,
-            begrunnelseForReduksjonEllerIkkeUtbetalt = null,
-            mottatt = LocalDateTime.now()
+            begrunnelseForReduksjonEllerIkkeUtbetalt = null
         )
 }

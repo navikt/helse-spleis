@@ -36,6 +36,7 @@ class Inntektsmelding(
     orgnummer: String,
     fødselsnummer: String,
     aktørId: String,
+    private val fødselsdato: LocalDate,
     private val førsteFraværsdag: LocalDate?,
     private val beregnetInntekt: Inntekt,
     private val arbeidsgiverperioder: List<Periode>,
@@ -77,7 +78,7 @@ class Inntektsmelding(
         sykdomstidslinje = listOf(arbeidsgivertidslinje, førsteFraværsdagGaptidslinje(arbeidsgiverperiode)).merge(beste)
     }
 
-    override fun personopplysninger() = Personopplysninger(fødselsnummer.somFødselsnummer(), aktørId)
+    override fun personopplysninger() = Personopplysninger(fødselsnummer.somFødselsnummer(), aktørId, fødselsdato)
 
     private fun arbeidsgivertidslinje(): Sykdomstidslinje {
         val tidslinje = arbeidsgiverperioder.map(::asArbeidsgivertidslinje).merge()

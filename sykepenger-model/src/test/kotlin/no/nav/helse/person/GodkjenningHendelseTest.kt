@@ -31,7 +31,6 @@ import no.nav.helse.oktober
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
-import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.sisteBehov
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
@@ -129,7 +128,6 @@ internal class GodkjenningHendelseTest : AbstractPersonTest() {
     }
 
     private fun ytelser(
-        utbetalinger: List<Infotrygdperiode> = emptyList(),
         foreldrepengeYtelse: Periode? = null,
         svangerskapYtelse: Periode? = null
     ) = Aktivitetslogg().let {
@@ -196,18 +194,13 @@ internal class GodkjenningHendelseTest : AbstractPersonTest() {
         }
 
     private fun inntektsmelding() =
-        Inntektsmelding(
-            meldingsreferanseId = UUID.randomUUID(),
+        a1Hendelsefabrikk.lagInntektsmelding(
             refusjon = Inntektsmelding.Refusjon(31000.månedlig, null, emptyList()),
-            orgnummer = ORGNUMMER,
-            fødselsnummer = UNG_PERSON_FNR_2018.toString(),
-            aktørId = "aktørId",
             førsteFraværsdag = førsteSykedag,
             beregnetInntekt = 31000.månedlig,
             arbeidsgiverperioder = listOf(Periode(førsteSykedag, førsteSykedag.plusDays(16))),
             arbeidsforholdId = null,
             begrunnelseForReduksjonEllerIkkeUtbetalt = null,
-            mottatt = LocalDateTime.now()
         ).apply {
             hendelse = this
         }

@@ -60,18 +60,13 @@ internal class InntektsmeldingHendelseTest : AbstractPersonTest() {
 
     @Test
     fun `ferie i inntektsmelding vinner over sykedager i sykmelding`() {
-        val inntektsmelding = Inntektsmelding(
-            meldingsreferanseId = UUID.randomUUID(),
+        val inntektsmelding = a1Hendelsefabrikk.lagInntektsmelding(
             refusjon = Inntektsmelding.Refusjon(INNTEKT_PR_MÅNED, null, emptyList()),
-            orgnummer = ORGNUMMER,
-            fødselsnummer = UNG_PERSON_FNR_2018.toString(),
-            aktørId = AKTØRID,
             førsteFraværsdag = 1.januar,
             beregnetInntekt = INNTEKT_PR_MÅNED,
             arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
             arbeidsforholdId = null,
-            begrunnelseForReduksjonEllerIkkeUtbetalt = null,
-            mottatt = LocalDateTime.now()
+            begrunnelseForReduksjonEllerIkkeUtbetalt = null
         )
         assertFalse(inntektsmelding.valider(Periode(1.januar, 31.januar), MaskinellJurist()).hasErrorsOrWorse())
         person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 20.januar, 100.prosent)))
@@ -82,21 +77,14 @@ internal class InntektsmeldingHendelseTest : AbstractPersonTest() {
 
     private fun inntektsmelding(
         beregnetInntekt: Inntekt = 1000.månedlig,
-        førsteFraværsdag: LocalDate = 1.januar,
-        virksomhetsnummer: String = ORGNUMMER
-    ) =
-        Inntektsmelding(
-            meldingsreferanseId = UUID.randomUUID(),
+        førsteFraværsdag: LocalDate = 1.januar
+    ) = a1Hendelsefabrikk.lagInntektsmelding(
             refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
-            orgnummer = virksomhetsnummer.toString(),
-            fødselsnummer = UNG_PERSON_FNR_2018.toString(),
-            aktørId = AKTØRID,
             førsteFraværsdag = førsteFraværsdag,
             beregnetInntekt = beregnetInntekt,
             arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
             arbeidsforholdId = null,
-            begrunnelseForReduksjonEllerIkkeUtbetalt = null,
-            mottatt = LocalDateTime.now()
+            begrunnelseForReduksjonEllerIkkeUtbetalt = null
         )
 
     private fun sykmelding(vararg sykeperioder: Sykmeldingsperiode, orgnr: String = ORGNUMMER) = Sykmelding(

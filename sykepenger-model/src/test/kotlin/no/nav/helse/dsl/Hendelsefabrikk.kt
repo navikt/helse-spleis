@@ -96,7 +96,7 @@ internal class Hendelsefabrikk(
     internal fun lagInntektsmelding(
         arbeidsgiverperioder: List<Periode>,
         beregnetInntekt: Inntekt,
-        førsteFraværsdag: LocalDate = arbeidsgiverperioder.maxOf { it.start },
+        førsteFraværsdag: LocalDate? = arbeidsgiverperioder.maxOf { it.start },
         refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(beregnetInntekt, null, emptyList()),
         harOpphørAvNaturalytelser: Boolean = false,
         arbeidsforholdId: String? = null,
@@ -116,7 +116,8 @@ internal class Hendelsefabrikk(
                 arbeidsforholdId = arbeidsforholdId,
                 begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
                 harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
-                mottatt = LocalDateTime.now()
+                mottatt = LocalDateTime.now(),
+                fødselsdato = fødselsdato
             )
         }
         inntektsmeldinger[id] = inntektsmeldinggenerator

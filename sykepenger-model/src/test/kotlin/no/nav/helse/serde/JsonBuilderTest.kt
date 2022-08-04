@@ -8,6 +8,7 @@ import java.util.UUID
 import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.desember
+import no.nav.helse.dsl.Hendelsefabrikk
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Arbeidsavklaringspenger
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
@@ -88,6 +89,12 @@ class JsonBuilderTest {
         private const val aktørId = "12345"
         private val fnr = "12029240045".somFødselsnummer()
         private val orgnummer = "987654321"
+        private val hendelsefabrikk = Hendelsefabrikk(
+            fødselsnummer = fnr,
+            organisasjonsnummer = orgnummer,
+            aktørId = aktørId,
+            fødselsdato = 12.februar(1992)
+        )
     }
 
     private val person get() = Person(aktørId, fnr, fnr.alder(), MaskinellJurist())
@@ -691,18 +698,14 @@ class JsonBuilderTest {
         fom: LocalDate,
         perioder: List<Periode> = listOf(Periode(fom, fom.plusDays(15))),
         refusjon: Inntektsmelding.Refusjon = Inntektsmelding.Refusjon(31000.månedlig, null, emptyList())
-    ) = Inntektsmelding(
-        meldingsreferanseId = hendelseId,
+    ) = hendelsefabrikk.lagInntektsmelding(
+        id = hendelseId,
         refusjon = refusjon,
-        orgnummer = orgnummer,
-        fødselsnummer = fnr.toString(),
-        aktørId = aktørId,
         førsteFraværsdag = fom,
         beregnetInntekt = 31000.månedlig,
         arbeidsgiverperioder = perioder,
         arbeidsforholdId = null,
-        begrunnelseForReduksjonEllerIkkeUtbetalt = null,
-        mottatt = LocalDateTime.now()
+        begrunnelseForReduksjonEllerIkkeUtbetalt = null
     )
 
     private fun vilkårsgrunnlag(

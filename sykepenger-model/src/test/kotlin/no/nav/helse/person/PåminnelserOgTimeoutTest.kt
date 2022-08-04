@@ -161,7 +161,7 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
         person.håndter(simulering())
         person.håndter(utbetalingsgodkjenning())
         assertEquals(1, hendelse.behov().size)
-        person.håndter(utbetalingpåminnelse(inspektør.utbetalingId(0), Utbetalingstatus.SENDT))
+        person.håndter(utbetalingpåminnelse(inspektør.utbetalingId(0)))
         assertEquals(TIL_UTBETALING, inspektør.sisteTilstand(1.vedtaksperiode))
         assertEquals(1, hendelse.behov().size)
     }
@@ -226,19 +226,13 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
     private fun inntektsmelding(
         vararg arbeidsgiverperiode: Periode = arrayOf(Periode(1.januar, 1.januar.plusDays(15))),
         førsteFraværsdag: LocalDate = 1.januar
-    ) =
-        Inntektsmelding(
-            meldingsreferanseId = UUID.randomUUID(),
+    ) = a1Hendelsefabrikk.lagInntektsmelding(
             refusjon = Inntektsmelding.Refusjon(31000.månedlig, null, emptyList()),
-            orgnummer = ORGNUMMER,
-            fødselsnummer = UNG_PERSON_FNR_2018.toString(),
-            aktørId = "aktørId",
             førsteFraværsdag = førsteFraværsdag,
             beregnetInntekt = 31000.månedlig,
             arbeidsgiverperioder = arbeidsgiverperiode.toList(),
             arbeidsforholdId = null,
-            begrunnelseForReduksjonEllerIkkeUtbetalt = null,
-            mottatt = LocalDateTime.now()
+            begrunnelseForReduksjonEllerIkkeUtbetalt = null
         ).apply {
             hendelse = this
         }
@@ -404,13 +398,13 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
         hendelse = this
     }
 
-    private fun utbetalingpåminnelse(utbetalingId: UUID, status: Utbetalingstatus) = Utbetalingpåminnelse(
+    private fun utbetalingpåminnelse(utbetalingId: UUID) = Utbetalingpåminnelse(
         meldingsreferanseId = UUID.randomUUID(),
         aktørId = "aktørId",
         fødselsnummer = UNG_PERSON_FNR_2018.toString(),
         organisasjonsnummer = ORGNUMMER,
         utbetalingId = utbetalingId,
-        status = status,
+        status = Utbetalingstatus.SENDT,
         antallGangerPåminnet = 1,
         endringstidspunkt = LocalDateTime.now(),
         påminnelsestidspunkt = LocalDateTime.now()

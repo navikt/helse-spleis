@@ -1,22 +1,29 @@
 package no.nav.helse.person
 
 import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.desember
+import no.nav.helse.dsl.Hendelsefabrikk
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
+import no.nav.helse.somFødselsnummer
 import no.nav.helse.økonomi.Inntekt
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-internal class SykmeldingsperioderTest() {
+internal class SykmeldingsperioderTest {
+
+    private val hendelsefabrikk = Hendelsefabrikk(
+        organisasjonsnummer = "ORGNUMMER",
+        fødselsnummer = "12029212345".somFødselsnummer(),
+        aktørId = "AKTØRID",
+        fødselsdato = 12.februar(1992)
+    )
 
     @Test
     fun `Kan lagre Sykmeldingsperioder`() {
@@ -195,22 +202,15 @@ internal class SykmeldingsperioderTest() {
     private fun inntektsmelding(
         arbeidsgiverperioder: List<Periode>,
         førsteFraværsdag: LocalDate
-    ): Inntektsmelding =
-        Inntektsmelding(
-            meldingsreferanseId = UUID.randomUUID(),
+    ): Inntektsmelding = hendelsefabrikk.lagInntektsmelding(
             refusjon = Inntektsmelding.Refusjon(null, null),
-            orgnummer = "ORGNUMMER",
-            fødselsnummer = "FNR",
-            aktørId = "AKTØRID",
             førsteFraværsdag = førsteFraværsdag,
             beregnetInntekt = Inntekt.INGEN,
             arbeidsgiverperioder = arbeidsgiverperioder,
             arbeidsforholdId = null,
             begrunnelseForReduksjonEllerIkkeUtbetalt = null,
-            harOpphørAvNaturalytelser = false,
-            mottatt = LocalDateTime.now()
+            harOpphørAvNaturalytelser = false
         )
-
 
     class Inspektør() : SykmeldingsperioderVisitor {
 

@@ -1,22 +1,41 @@
 package no.nav.helse.sykdomstidslinje
 
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.desember
+import no.nav.helse.dsl.Hendelsefabrikk
 import no.nav.helse.februar
-import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Sykmelding
+import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode
+import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.perioder
-import no.nav.helse.testhelpers.*
+import no.nav.helse.somFødselsnummer
+import no.nav.helse.testhelpers.A
+import no.nav.helse.testhelpers.F
+import no.nav.helse.testhelpers.H
+import no.nav.helse.testhelpers.P
+import no.nav.helse.testhelpers.S
+import no.nav.helse.testhelpers.U
+import no.nav.helse.testhelpers.UK
+import no.nav.helse.testhelpers.opphold
+import no.nav.helse.testhelpers.resetSeed
 import no.nav.helse.tournament.Dagturnering
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
 
 internal class SkjæringstidspunktTest {
 
@@ -403,28 +422,28 @@ internal class SkjæringstidspunktTest {
         førsteFraværsdag: LocalDate = 1.januar,
         refusjonOpphørsdato: LocalDate = 31.desember,
         endringerIRefusjon: List<Inntektsmelding.Refusjon.EndringIRefusjon> = emptyList()
-    ): Inntektsmelding {
-        return Inntektsmelding(
-            meldingsreferanseId = UUID.randomUUID(),
-            refusjon = Inntektsmelding.Refusjon(refusjonBeløp, refusjonOpphørsdato, endringerIRefusjon),
-            orgnummer = ORGNUMMER,
-            fødselsnummer = UNG_PERSON_FNR_2018,
-            aktørId = AKTØRID,
-            førsteFraværsdag = førsteFraværsdag,
-            beregnetInntekt = beregnetInntekt,
-            arbeidsgiverperioder = arbeidsgiverperioder,
-            arbeidsforholdId = null,
-            begrunnelseForReduksjonEllerIkkeUtbetalt = null,
-            mottatt = LocalDateTime.now()
-        )
-    }
+    ) = hendelsefabrikk.lagInntektsmelding(
+        refusjon = Inntektsmelding.Refusjon(refusjonBeløp, refusjonOpphørsdato, endringerIRefusjon),
+        førsteFraværsdag = førsteFraværsdag,
+        beregnetInntekt = beregnetInntekt,
+        arbeidsgiverperioder = arbeidsgiverperioder,
+        arbeidsforholdId = null,
+        begrunnelseForReduksjonEllerIkkeUtbetalt = null
+    )
 
     private companion object {
         private const val UNG_PERSON_FNR_2018 = "12029240045"
+        private val UNG_PERSON_FØDSELSDATO = 12.februar(1992)
         private const val AKTØRID = "42"
         private const val ORGNUMMER = "987654321"
         private const val INNTEKT = 31000.00
         private val INNTEKT_PR_MÅNED = INNTEKT.månedlig
+        private val hendelsefabrikk = Hendelsefabrikk(
+            organisasjonsnummer = ORGNUMMER,
+            fødselsnummer = UNG_PERSON_FNR_2018.somFødselsnummer(),
+            aktørId = AKTØRID,
+            fødselsdato = UNG_PERSON_FØDSELSDATO
+        )
 
         private fun assertDagenErSkjæringstidspunkt(
             dagen: LocalDate,

@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.desember
+import no.nav.helse.dsl.Hendelsefabrikk
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
@@ -15,6 +16,7 @@ import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.september
+import no.nav.helse.somFødselsnummer
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -31,7 +33,12 @@ internal class InfotrygdInntektsopplysningTest {
         private const val ORGNR = "123456789"
         private val INNTEKT = 31000.00.månedlig
         private val DATO = 1.januar
-        private val PERIODE = Periode(1.februar, 28.februar)
+        private val hendelsefabrikk = Hendelsefabrikk(
+            aktørId = "aktørId",
+            fødselsnummer = "12029112345".somFødselsnummer(),
+            organisasjonsnummer = ORGNR,
+            fødselsdato = 12.februar(1992)
+        )
     }
 
     private lateinit var historikk: Inntektshistorikk
@@ -279,17 +286,12 @@ internal class InfotrygdInntektsopplysningTest {
         beregnetInntekt: Inntekt = INNTEKT,
         førsteFraværsdag: LocalDate = 1.januar,
         arbeidsgiverperioder: List<Periode> = listOf(1.januar til 16.januar)
-    ) = Inntektsmelding(
-        meldingsreferanseId = UUID.randomUUID(),
+    ) = hendelsefabrikk.lagInntektsmelding(
         refusjon = Inntektsmelding.Refusjon(INNTEKT, null, emptyList()),
-        orgnummer = ORGNR,
-        fødselsnummer = "fnr",
-        aktørId = "aktør",
         førsteFraværsdag = førsteFraværsdag,
         beregnetInntekt = beregnetInntekt,
         arbeidsgiverperioder = arbeidsgiverperioder,
         arbeidsforholdId = null,
-        begrunnelseForReduksjonEllerIkkeUtbetalt = null,
-        mottatt = LocalDateTime.now()
+        begrunnelseForReduksjonEllerIkkeUtbetalt = null
     )
 }

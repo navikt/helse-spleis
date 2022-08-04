@@ -278,20 +278,14 @@ internal class VilkårsgrunnlagTest : AbstractPersonTest() {
         sykmeldingSkrevet = LocalDateTime.now()
     )
 
-    private fun inntektsmelding() =
-        Inntektsmelding(
-            meldingsreferanseId = UUID.randomUUID(),
-            refusjon = Inntektsmelding.Refusjon(INNTEKT, null, emptyList()),
-            orgnummer = ORGNUMMER,
-            fødselsnummer = UNG_PERSON_FNR_2018.toString(),
-            aktørId = AKTØRID,
-            førsteFraværsdag = 1.januar,
-            beregnetInntekt = INNTEKT,
-            arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
-            arbeidsforholdId = null,
-            begrunnelseForReduksjonEllerIkkeUtbetalt = null,
-            mottatt = LocalDateTime.now()
-        )
+    private fun inntektsmelding() = a1Hendelsefabrikk.lagInntektsmelding(
+        refusjon = Inntektsmelding.Refusjon(INNTEKT, null, emptyList()),
+        førsteFraværsdag = 1.januar,
+        beregnetInntekt = INNTEKT,
+        arbeidsgiverperioder = listOf(Periode(1.januar, 16.januar)),
+        arbeidsforholdId = null,
+        begrunnelseForReduksjonEllerIkkeUtbetalt = null
+    )
 
     private fun ytelser() = Ytelser(
         meldingsreferanseId = UUID.randomUUID(),

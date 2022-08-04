@@ -2,6 +2,8 @@ package no.nav.helse.person
 
 import java.util.UUID
 import no.nav.helse.Fødselsnummer
+import no.nav.helse.dsl.Hendelsefabrikk
+import no.nav.helse.februar
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.somFødselsnummer
@@ -13,10 +15,18 @@ internal abstract class AbstractPersonTest {
 
     internal companion object {
         val UNG_PERSON_FNR_2018: Fødselsnummer = "12029240045".somFødselsnummer()
+        val UNG_PERSON_FØDSELSDATO = 12.februar(1992)
         const val AKTØRID = "42"
         val ORGNUMMER: String = "987654321"
 
+
         val a1: String = ORGNUMMER
+        val a1Hendelsefabrikk = Hendelsefabrikk(
+            aktørId = AKTØRID,
+            fødselsnummer = UNG_PERSON_FNR_2018,
+            fødselsdato = UNG_PERSON_FØDSELSDATO,
+            organisasjonsnummer = ORGNUMMER
+        )
         val a2: String = "654321987"
         val a3: String = "321987654"
         val a4: String = "456789123"

@@ -1,8 +1,10 @@
 package no.nav.helse.person
 
+import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.Fødselsnummer
 import no.nav.helse.person.etterlevelse.MaskinellJurist
+import no.nav.helse.utbetalingstidslinje.Alder.Companion.alder
 
 internal class ErrorsTilWarnings(private val other: IAktivitetslogg) : IAktivitetslogg by other {
     override fun error(melding: String, vararg params: Any?) = warn(melding, params)
@@ -14,12 +16,13 @@ internal class ErrorsTilWarnings(private val other: IAktivitetslogg) : IAktivite
 
 class Personopplysninger(
     private val fødselsnummer: Fødselsnummer,
-    private val aktørId: String
+    private val aktørId: String,
+    private val fødselsdato: LocalDate = fødselsnummer.fødselsdato
 ) {
     internal fun nyPerson(jurist: MaskinellJurist) = Person(
         fødselsnummer = fødselsnummer,
         aktørId = aktørId,
-        alder = fødselsnummer.alder(),
+        alder = fødselsdato.alder,
         jurist = jurist
     )
 }
