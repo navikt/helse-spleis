@@ -1599,9 +1599,18 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, gjenopptaBehandling: IAktivitetslogg) {
+            gjenopptaBehandlingNy(vedtaksperiode, gjenopptaBehandling)
+        }
+
+                override fun gjenopptaBehandlingNy(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             if (!vedtaksperiode.harNødvendigInntektForVilkårsprøving())
-                return vedtaksperiode.tilstand(gjenopptaBehandling, AvventerInntektsmeldingEllerHistorikk)
-            vedtaksperiode.tilstand(gjenopptaBehandling, AvventerHistorikk)
+                return vedtaksperiode.tilstand(hendelse, AvventerInntektsmeldingEllerHistorikk)
+            vedtaksperiode.tilstand(hendelse, AvventerHistorikk)
+        }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
+            påminnelse.info("Håndterer påminnelse ved å forsøke å gjenoppta, i tilfelle perioden er stuck")
+            vedtaksperiode.person.gjenopptaBehandlingNy(påminnelse)
         }
     }
 
