@@ -2052,7 +2052,7 @@ internal class Vedtaksperiode private constructor(
         if (overstyrt.arbeidsgiver != this.arbeidsgiver) return tilstand(hendelse, AvventerRevurdering)
 
         // Jeg har et senere skjæringstidspunkt enn den overstyrte perioden
-        if (skjæringstidspunkt > overstyrt.skjæringstidspunkt && overstyrt.tilstand == AvventerGjennomførtRevurdering) return tilstand(hendelse, AvventerRevurdering)
+        if (skjæringstidspunkt > overstyrt.skjæringstidspunkt) return tilstand(hendelse, AvventerRevurdering)
 
         // Det finnes en pågående revurdering _og_ jeg har et senere skjæringstidspunkt enn denne
         if (pågående != null && skjæringstidspunkt > pågående.skjæringstidspunkt) return tilstand(hendelse, AvventerRevurdering)
