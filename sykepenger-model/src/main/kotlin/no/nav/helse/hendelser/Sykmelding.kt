@@ -20,11 +20,11 @@ class Sykmelding(
     meldingsreferanseId: UUID,
     fnr: String,
     aktørId: String,
+    private val fødselsdato: LocalDate,
     orgnummer: String,
     sykeperioder: List<Sykmeldingsperiode>,
-    private val sykmeldingSkrevet: LocalDateTime,
-    private val mottatt: LocalDateTime,
-    private val erFremtidig: Boolean = false
+    sykmeldingSkrevet: LocalDateTime,
+    private val mottatt: LocalDateTime
 ) : SykdomstidslinjeHendelse(meldingsreferanseId, fnr, aktørId, orgnummer, sykmeldingSkrevet) {
 
     private val sykdomstidslinje: Sykdomstidslinje
@@ -40,7 +40,7 @@ class Sykmelding(
         periode = requireNotNull(sykdomstidslinje.periode())
     }
 
-    override fun personopplysninger() = Personopplysninger(fødselsnummer.somFødselsnummer(), aktørId)
+    override fun personopplysninger() = Personopplysninger(fødselsnummer.somFødselsnummer(), aktørId, fødselsdato)
 
     override fun valider(periode: Periode, subsumsjonObserver: SubsumsjonObserver): IAktivitetslogg {
         validerAtSykmeldingIkkeErForGammel()
@@ -51,39 +51,10 @@ class Sykmelding(
         if (periode.endInclusive < mottatt.toLocalDate().minusMonths(6)) error(ERRORTEKST_FOR_GAMMEL)
     }
 
-    internal fun nyVedtaksperiode() {
-        info("Lager ny vedtaksperiode fra ${if (erFremtidig) "Fremtidig" else "Ny"} søknad")
-    }
-
     override fun sykdomstidslinje() = sykdomstidslinje
 
     override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) {
         arbeidsgiver.håndter(this)
-    }
-
-    internal fun overlappIkkeStøttet(other: Periode) {
-        val slutterFør = this.periode.start < other.start
-        val slutterEtter = this.periode.endInclusive > other.endInclusive
-        val starterSammeDag = this.periode.start == other.start
-        val slutterSammeDag = this.periode.endInclusive == other.endInclusive
-        val hvorfor = when {
-            slutterFør -> when {
-                slutterEtter -> "starter før og slutter etter vedtaksperioden"
-                slutterSammeDag -> "starter før vedtaksperioden, slutter samme dag"
-                else -> "starter før vedtaksperioden, slutter inni"
-            }
-            slutterEtter -> when {
-                starterSammeDag -> "slutter etter vedtaksperioden, starter samme dag"
-                else -> "slutter etter vedtaksperioden, starter inni"
-            }
-            this.periode != other -> when {
-                starterSammeDag -> "perioden er inni vedtaksperioden (starter samme dag)"
-                slutterSammeDag -> "perioden er inni vedtaksperioden (slutter samme dag)"
-                else -> "perioden er inni vedtaksperioden (starter og slutter inni)"
-            }
-            else -> "nøyaktig samme periode som vedtaksperioden"
-        }
-        error("Mottatt overlappende sykmeldinger - $hvorfor")
     }
 
     override fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) {

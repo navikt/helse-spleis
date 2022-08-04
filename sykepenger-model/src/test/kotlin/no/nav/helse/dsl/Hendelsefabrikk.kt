@@ -63,7 +63,8 @@ internal class Hendelsefabrikk(
             orgnummer = organisasjonsnummer,
             sykeperioder = listOf(*sykeperioder),
             sykmeldingSkrevet = sykmeldingSkrevetEkte,
-            mottatt = mottatt ?: sykmeldingSkrevetEkte
+            mottatt = mottatt ?: sykmeldingSkrevetEkte,
+            fødselsdato = fødselsdato
         ).apply {
             sykmeldinger.add(this)
         }

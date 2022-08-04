@@ -1,8 +1,6 @@
 package no.nav.helse.person
 
 import java.time.LocalDateTime
-import java.util.UUID
-import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
@@ -36,13 +34,9 @@ internal class SykmeldingHendelseTest : AbstractEndToEndTest() {
         assertEquals(2, inspektør.sykmeldingsperioder().size)
     }
 
-    private fun sykmelding(vararg sykeperioder: Sykmeldingsperiode, orgnummer: String = "987654321") =
-        Sykmelding(
-            meldingsreferanseId = UUID.randomUUID(),
-            fnr = UNG_PERSON_FNR_2018.toString(),
-            aktørId = "12345",
-            orgnummer = orgnummer,
-            sykeperioder = sykeperioder.toList(),
+    private fun sykmelding(vararg sykeperioder: Sykmeldingsperiode) =
+        a1Hendelsefabrikk.lagSykmelding(
+            sykeperioder = sykeperioder,
             sykmeldingSkrevet = Sykmeldingsperiode.periode(sykeperioder.toList())?.start?.atStartOfDay() ?: LocalDateTime.now(),
             mottatt = Sykmeldingsperiode.periode(sykeperioder.toList())!!.endInclusive.atStartOfDay()
         )

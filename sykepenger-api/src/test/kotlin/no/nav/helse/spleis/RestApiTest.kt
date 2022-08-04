@@ -137,6 +137,7 @@ internal class RestApiTest {
         val sykmelding = Sykmelding(
             meldingsreferanseId = UUID.randomUUID(),
             fnr = UNG_PERSON_FNR,
+            fødselsdato = UNG_PERSON_FØDSELSDATO,
             aktørId = "aktørId",
             orgnummer = ORGNUMMER,
             sykeperioder = sykeperioder,

@@ -28,7 +28,6 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Pleiepenger
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Simulering
-import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode
@@ -110,19 +109,15 @@ internal fun AbstractEndToEndTest.sykmelding(
     sykmeldingSkrevet: LocalDateTime? = null,
     mottatt: LocalDateTime? = null,
     fnr: Fødselsnummer = AbstractPersonTest.UNG_PERSON_FNR_2018,
-): Sykmelding {
-    return Sykmelding(
-        meldingsreferanseId = id,
-        fnr = fnr.toString(),
-        aktørId = AKTØRID,
-        orgnummer = orgnummer,
-        sykeperioder = listOf(*sykeperioder),
+    fødselsdato: LocalDate = UNG_PERSON_FØDSELSDATO
+) = Hendelsefabrikk(AKTØRID, fnr, orgnummer, fødselsdato).lagSykmelding(
+        id = id,
+        sykeperioder = sykeperioder,
         sykmeldingSkrevet = sykmeldingSkrevet ?: Sykmeldingsperiode.periode(sykeperioder.toList())?.start?.atStartOfDay() ?: LocalDateTime.now(),
         mottatt = mottatt ?: Sykmeldingsperiode.periode(sykeperioder.toList())?.start?.atStartOfDay() ?: LocalDateTime.now()
     ).apply {
         hendelselogg = this
     }
-}
 
 internal fun AbstractEndToEndTest.søknad(
     id: UUID,

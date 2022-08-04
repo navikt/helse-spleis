@@ -20,7 +20,6 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Pleiepenger
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Simulering
-import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode
@@ -210,13 +209,8 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
                 100.prosent
             )
         )
-    ) =
-        Sykmelding(
-            meldingsreferanseId = UUID.randomUUID(),
-            fnr = UNG_PERSON_FNR_2018.toString(),
-            aktørId = "12345",
-            orgnummer = ORGNUMMER,
-            sykeperioder = perioder.toList(),
+    ) = a1Hendelsefabrikk.lagSykmelding(
+            sykeperioder = perioder,
             sykmeldingSkrevet = Sykmeldingsperiode.periode(perioder.toList())?.start?.atStartOfDay() ?: LocalDateTime.now(),
             mottatt = Sykmeldingsperiode.periode(perioder.toList())!!.endInclusive.atStartOfDay()
         ).apply {

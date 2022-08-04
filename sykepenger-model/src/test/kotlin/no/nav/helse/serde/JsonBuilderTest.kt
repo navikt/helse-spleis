@@ -25,7 +25,6 @@ import no.nav.helse.hendelser.Opplæringspenger
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Pleiepenger
 import no.nav.helse.hendelser.Simulering
-import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -663,12 +662,9 @@ class JsonBuilderTest {
         hendelseId: UUID = UUID.randomUUID(),
         fom: LocalDate = 1.januar,
         tom: LocalDate = 31.januar
-    ) = Sykmelding(
-        meldingsreferanseId = hendelseId,
-        fnr = fnr.toString(),
-        aktørId = aktørId,
-        orgnummer = orgnummer,
-        sykeperioder = listOf(Sykmeldingsperiode(fom, tom, 100.prosent)),
+    ) = hendelsefabrikk.lagSykmelding(
+        id = hendelseId,
+        sykeperioder = arrayOf(Sykmeldingsperiode(fom, tom, 100.prosent)),
         sykmeldingSkrevet = fom.atStartOfDay(),
         mottatt = tom.atStartOfDay()
     )

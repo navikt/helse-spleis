@@ -5,7 +5,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode
@@ -87,12 +86,8 @@ internal class InntektsmeldingHendelseTest : AbstractPersonTest() {
             begrunnelseForReduksjonEllerIkkeUtbetalt = null
         )
 
-    private fun sykmelding(vararg sykeperioder: Sykmeldingsperiode, orgnr: String = ORGNUMMER) = Sykmelding(
-        meldingsreferanseId = UUID.randomUUID(),
-        fnr = UNG_PERSON_FNR_2018.toString(),
-        aktørId = AKTØRID,
-        orgnummer = orgnr,
-        sykeperioder = sykeperioder.toList(),
+    private fun sykmelding(vararg sykeperioder: Sykmeldingsperiode) = a1Hendelsefabrikk.lagSykmelding(
+        sykeperioder = sykeperioder,
         sykmeldingSkrevet = Sykmeldingsperiode.periode(sykeperioder.toList())?.start?.atStartOfDay() ?: LocalDateTime.now(),
         mottatt = Sykmeldingsperiode.periode(sykeperioder.toList())!!.endInclusive.atStartOfDay()
     )

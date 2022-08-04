@@ -1,9 +1,9 @@
 package no.nav.helse.spleis.meldinger.model
 
+import java.time.LocalDate
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import java.time.LocalDate
 
 internal class NySøknadBuilder : SøknadBuilder() {
     private val sykemeldingsperioder = mutableListOf<Sykmeldingsperiode>()
@@ -29,6 +29,6 @@ internal class NySøknadBuilder : SøknadBuilder() {
         sykeperioder = sykemeldingsperioder,
         sykmeldingSkrevet = sykmeldingSkrevet,
         mottatt = opprettet,
-        erFremtidig = fremtidigSøknad
+        fødselsdato = fødselsdato
     )
 }

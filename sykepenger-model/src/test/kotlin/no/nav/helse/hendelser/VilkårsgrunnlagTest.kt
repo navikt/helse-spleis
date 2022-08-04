@@ -255,12 +255,9 @@ internal class VilkårsgrunnlagTest : AbstractPersonTest() {
         arbeidsforhold = arbeidsforhold
     )
 
-    private fun sykmelding() = Sykmelding(
-        meldingsreferanseId = UUID.randomUUID(),
-        fnr = UNG_PERSON_FNR_2018.toString(),
-        aktørId = AKTØRID,
-        orgnummer = ORGNUMMER,
-        sykeperioder = listOf(Sykmeldingsperiode(16.januar, 30.januar, 100.prosent)),
+    private fun sykmelding() = a1Hendelsefabrikk.lagSykmelding(
+        sykeperioder = arrayOf(Sykmeldingsperiode(16.januar, 30.januar, 100.prosent)),
+        id = UUID.randomUUID(),
         sykmeldingSkrevet = 1.april.atStartOfDay(),
         mottatt = 1.april.atStartOfDay()
     )

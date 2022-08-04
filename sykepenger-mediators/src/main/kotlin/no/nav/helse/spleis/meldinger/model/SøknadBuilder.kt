@@ -9,6 +9,7 @@ internal abstract class SøknadBuilder {
     protected lateinit var sykmeldingSkrevet: LocalDateTime
     protected lateinit var fnr: String
     protected lateinit var aktørId: String
+    protected lateinit var fødselsdato: LocalDate
     protected lateinit var organisasjonsnummer: String
     protected lateinit var opprettet: LocalDateTime
     private lateinit var fom: LocalDate
@@ -20,6 +21,7 @@ internal abstract class SøknadBuilder {
     internal fun sykmeldingSkrevet(sykmeldingSkrevet: LocalDateTime) = apply { this.sykmeldingSkrevet = sykmeldingSkrevet }
     internal fun fnr(fnr: String) = apply { this.fnr = fnr }
     internal fun aktørId(aktørId: String) = apply { this.aktørId = aktørId }
+    internal fun fødselsdato(fødselsdato: LocalDate) = apply { this.fødselsdato = fødselsdato }
     internal fun organisasjonsnummer(organisasjonsnummer: String) = apply { this.organisasjonsnummer = organisasjonsnummer }
     internal fun opprettet(opprettet: LocalDateTime) = apply { this.opprettet = opprettet }
     internal fun fom(fom: LocalDate) = apply { this.fom = fom }

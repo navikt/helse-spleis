@@ -69,9 +69,11 @@ abstract class AbstractObservableTest {
         sykmeldingSkrevet: LocalDateTime = FOM.atStartOfDay(),
         mottatt: LocalDateTime = TOM.plusDays(1).atStartOfDay(),
         fnr: String = UNG_PERSON_FNR,
+        fødselsdato: LocalDate = UNG_PERSON_FØDSELSDATO
     ): Sykmelding = Sykmelding(
         meldingsreferanseId = id,
         fnr = fnr,
+        fødselsdato = fødselsdato,
         aktørId = AKTØRID,
         orgnummer = orgnummer,
         sykeperioder = sykeperioder,

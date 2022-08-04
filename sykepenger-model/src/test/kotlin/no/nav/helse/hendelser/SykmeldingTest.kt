@@ -1,21 +1,33 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.sykdomstidslinje.Dag.*
+import java.time.LocalDateTime
+import no.nav.helse.dsl.Hendelsefabrikk
+import no.nav.helse.februar
 import no.nav.helse.januar
 import no.nav.helse.juli
+import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.etterlevelse.MaskinellJurist
+import no.nav.helse.somFødselsnummer
+import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
+import no.nav.helse.sykdomstidslinje.Dag.Sykedag
+import no.nav.helse.sykdomstidslinje.Dag.UkjentDag
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import java.time.LocalDateTime
-import java.util.*
 
 internal class SykmeldingTest {
 
     private companion object {
         const val UNG_PERSON_FNR_2018 = "12029240045"
+        val hendelsefabrikk = Hendelsefabrikk(
+            aktørId = "12345",
+            organisasjonsnummer = "987654321",
+            fødselsnummer = UNG_PERSON_FNR_2018.somFødselsnummer(),
+            fødselsdato = 12.februar(1992)
+        )
     }
 
     private lateinit var sykmelding: Sykmelding
@@ -61,12 +73,8 @@ internal class SykmeldingTest {
     private fun sykmelding(vararg sykeperioder: Sykmeldingsperiode, mottatt: LocalDateTime? = null) {
         val tidligsteFom = Sykmeldingsperiode.periode(sykeperioder.toList())?.start?.atStartOfDay()
         val sisteTom = Sykmeldingsperiode.periode(sykeperioder.toList())?.endInclusive?.atStartOfDay()
-        sykmelding = Sykmelding(
-            meldingsreferanseId = UUID.randomUUID(),
-            fnr = UNG_PERSON_FNR_2018,
-            aktørId = "12345",
-            orgnummer = "987654321",
-            sykeperioder = sykeperioder.toList(),
+        sykmelding = hendelsefabrikk.lagSykmelding(
+            sykeperioder = sykeperioder,
             sykmeldingSkrevet = tidligsteFom ?: LocalDateTime.now(),
             mottatt = mottatt ?: sisteTom ?: LocalDateTime.now()
         )

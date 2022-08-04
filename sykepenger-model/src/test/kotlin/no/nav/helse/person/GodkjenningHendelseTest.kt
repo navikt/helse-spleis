@@ -17,7 +17,6 @@ import no.nav.helse.hendelser.Opplæringspenger
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Pleiepenger
 import no.nav.helse.hendelser.Simulering
-import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -165,12 +164,8 @@ internal class GodkjenningHendelseTest : AbstractPersonTest() {
     }
 
     private fun sykmelding() =
-        Sykmelding(
-            meldingsreferanseId = UUID.randomUUID(),
-            fnr = UNG_PERSON_FNR_2018.toString(),
-            aktørId = "aktørId",
-            orgnummer = ORGNUMMER,
-            sykeperioder = listOf(Sykmeldingsperiode(førsteSykedag, sisteSykedag, 100.prosent)),
+        a1Hendelsefabrikk.lagSykmelding(
+            sykeperioder = arrayOf(Sykmeldingsperiode(førsteSykedag, sisteSykedag, 100.prosent)),
             sykmeldingSkrevet = førsteSykedag.atStartOfDay(),
             mottatt = sisteSykedag.atStartOfDay()
         ).apply {

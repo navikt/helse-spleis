@@ -19,7 +19,6 @@ import no.nav.helse.hendelser.Omsorgspenger
 import no.nav.helse.hendelser.Opplæringspenger
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Pleiepenger
-import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode
@@ -195,12 +194,8 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
 
     private fun sykmelding(
         perioder: List<Sykmeldingsperiode> = listOf(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-    ) = Sykmelding(
-        meldingsreferanseId = UUID.randomUUID(),
-        fnr = UNG_PERSON_FNR_2018.toString(),
-        aktørId = "aktørId",
-        orgnummer = ORGNUMMER,
-        sykeperioder = perioder,
+    ) = a1Hendelsefabrikk.lagSykmelding(
+        sykeperioder = perioder.toTypedArray(),
         sykmeldingSkrevet = Sykmeldingsperiode.periode(perioder)?.start?.atStartOfDay() ?: LocalDateTime.now(),
         mottatt = Sykmeldingsperiode.periode(perioder.toList())!!.endInclusive.atStartOfDay()
     ).apply {

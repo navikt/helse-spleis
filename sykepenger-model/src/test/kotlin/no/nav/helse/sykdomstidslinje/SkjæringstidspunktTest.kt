@@ -389,12 +389,8 @@ internal class SkjæringstidspunktTest {
 
 
     private fun sykmelding(vararg sykeperioder: Sykmeldingsperiode): Sykmelding {
-        return Sykmelding(
-            meldingsreferanseId = UUID.randomUUID(),
-            fnr = UNG_PERSON_FNR_2018,
-            aktørId = AKTØRID,
-            orgnummer = ORGNUMMER,
-            sykeperioder = sykeperioder.toList(),
+        return hendelsefabrikk.lagSykmelding(
+            sykeperioder = sykeperioder,
             sykmeldingSkrevet = Sykmeldingsperiode.periode(sykeperioder.toList())?.start?.atStartOfDay() ?: LocalDateTime.now(),
             mottatt = Sykmeldingsperiode.periode(sykeperioder.toList())?.start?.atStartOfDay() ?: LocalDateTime.now(),
         )

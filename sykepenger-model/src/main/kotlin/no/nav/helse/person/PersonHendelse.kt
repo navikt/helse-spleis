@@ -17,7 +17,7 @@ internal class ErrorsTilWarnings(private val other: IAktivitetslogg) : IAktivite
 class Personopplysninger(
     private val fødselsnummer: Fødselsnummer,
     private val aktørId: String,
-    private val fødselsdato: LocalDate = fødselsnummer.fødselsdato
+    private val fødselsdato: LocalDate = fødselsnummer.fødselsdato // TODO: Skal ikke ha default når Søknad er håndtert
 ) {
     internal fun nyPerson(jurist: MaskinellJurist) = Person(
         fødselsnummer = fødselsnummer,

@@ -12,7 +12,6 @@ import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -307,12 +306,8 @@ internal class ArbeidsgiverUtbetalingerTest {
         val førsteDag = arbeidsgiverTidslinje.periode().start
         val sisteDag = arbeidsgiverTidslinje.periode().endInclusive
         person.håndter(
-            Sykmelding(
-                meldingsreferanseId = UUID.randomUUID(),
-                fnr = UNG_PERSON_FNR_2018.toString(),
-                aktørId = "",
-                orgnummer = ORGNUMMER,
-                sykeperioder = listOf(Sykmeldingsperiode(førsteDag, sisteDag, 100.prosent)),
+            hendelsefabrikk.lagSykmelding(
+                sykeperioder = arrayOf(Sykmeldingsperiode(førsteDag, sisteDag, 100.prosent)),
                 sykmeldingSkrevet = 1.januar.atStartOfDay(),
                 mottatt = 1.januar.atStartOfDay()
             )

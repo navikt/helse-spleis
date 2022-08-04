@@ -3,7 +3,8 @@ package no.nav.helse.serde
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.april
-import no.nav.helse.hendelser.Sykmelding
+import no.nav.helse.dsl.Hendelsefabrikk
+import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
@@ -16,6 +17,7 @@ import no.nav.helse.januar
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Person
 import no.nav.helse.person.etterlevelse.MaskinellJurist
+import no.nav.helse.somFødselsnummer
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -52,6 +54,12 @@ internal class SerialiseringAvDagerFraSøknadTest {
     private val aktørId = "12345"
     private val fnr = "12029240045"
     private val orgnummer = "987654321"
+    private val hendelsefabrikk = Hendelsefabrikk(
+        aktørId = aktørId,
+        fødselsnummer = fnr.somFødselsnummer(),
+        organisasjonsnummer = orgnummer,
+        fødselsdato = 12.februar(1992)
+    )
 
     private lateinit var aktivitetslogg: Aktivitetslogg
 
@@ -67,12 +75,8 @@ internal class SerialiseringAvDagerFraSøknadTest {
         }
     }
 
-    private val sykmelding get() = Sykmelding(
-        meldingsreferanseId = UUID.randomUUID(),
-        fnr = fnr,
-        aktørId = aktørId,
-        orgnummer = orgnummer,
-        sykeperioder = listOf(Sykmeldingsperiode(1.januar, 2.januar, 100.prosent)),
+    private val sykmelding get() = hendelsefabrikk.lagSykmelding(
+        sykeperioder = arrayOf(Sykmeldingsperiode(1.januar, 2.januar, 100.prosent)),
         sykmeldingSkrevet = 4.april.atStartOfDay(),
         mottatt = 4.april.atStartOfDay()
     )
