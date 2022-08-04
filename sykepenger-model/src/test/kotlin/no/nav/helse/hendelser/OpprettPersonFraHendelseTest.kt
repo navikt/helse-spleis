@@ -2,6 +2,7 @@ package no.nav.helse.hendelser
 
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.desember
 import no.nav.helse.dsl.Hendelsefabrikk
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.januar
@@ -18,7 +19,8 @@ internal class OpprettPersonFraHendelseTest {
     private val fabrikk = Hendelsefabrikk(
         aktørId = "aktørid",
         fødselsnummer = "01019212345".somFødselsnummer(),
-        organisasjonsnummer = "orgnum"
+        organisasjonsnummer = "orgnum",
+        fødselsdato = 24.desember(2000)
     )
 
     @Test
@@ -39,7 +41,9 @@ internal class OpprettPersonFraHendelseTest {
     @Test
     fun `andre hendelser skal ikke kunne opprette ny person`() {
         assertThrows<IllegalStateException> {
-            fabrikk.lagPåminnelse(UUID.randomUUID(), AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, LocalDateTime.now()).person(MaskinellJurist())
+            fabrikk.lagPåminnelse(UUID.randomUUID(), AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, LocalDateTime.now()).person(
+                MaskinellJurist()
+            )
         }
     }
 }

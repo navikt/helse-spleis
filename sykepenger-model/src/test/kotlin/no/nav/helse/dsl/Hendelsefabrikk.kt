@@ -41,7 +41,8 @@ import no.nav.helse.økonomi.Inntekt
 internal class Hendelsefabrikk(
     private val aktørId: String,
     private val fødselsnummer: Fødselsnummer,
-    private val organisasjonsnummer: String
+    private val organisasjonsnummer: String,
+    private val fødselsdato: LocalDate
 ) {
 
     private val sykmeldinger = mutableListOf<Sykmelding>()

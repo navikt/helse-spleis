@@ -51,7 +51,6 @@ import no.nav.helse.spleis.e2e.lagInntektperioder
 import no.nav.helse.testhelpers.Inntektperioder
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
-import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.utbetalingstidslinje.Alder.Companion.alder
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -63,8 +62,8 @@ internal class TestPerson(
     private val observatør: PersonObserver,
     private val aktørId: String = AKTØRID,
     private val fødselsnummer: Fødselsnummer = UNG_PERSON_FNR_2018,
-    alder: Alder = UNG_PERSON_FDATO_2018.alder,
-    private val jurist: MaskinellJurist = MaskinellJurist()
+    private val fødselsdato: LocalDate = UNG_PERSON_FDATO_2018,
+    jurist: MaskinellJurist = MaskinellJurist()
 ) {
     internal companion object {
         private val fnrformatter = DateTimeFormatter.ofPattern("ddMMyy")
@@ -83,7 +82,7 @@ internal class TestPerson(
     private val behovsamler = Behovsamler()
     private val vedtaksperiodesamler = Vedtaksperiodesamler()
 
-    private val person = Person(aktørId, fødselsnummer, alder, jurist).also {
+    private val person = Person(aktørId, fødselsnummer, fødselsdato.alder, jurist).also {
         it.addObserver(vedtaksperiodesamler)
         it.addObserver(behovsamler)
         it.addObserver(observatør)
@@ -117,7 +116,7 @@ internal class TestPerson(
     }
 
     inner class TestArbeidsgiver(internal val orgnummer: String) {
-        private val fabrikk = Hendelsefabrikk(aktørId, fødselsnummer, orgnummer)
+        private val fabrikk = Hendelsefabrikk(aktørId, fødselsnummer, orgnummer, fødselsdato)
 
         internal val inspektør get() = TestArbeidsgiverInspektør(person, orgnummer)
 
