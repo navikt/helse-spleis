@@ -2404,6 +2404,7 @@ internal class Vedtaksperiode private constructor(
                 inntektsmelding.info("Revurdering blokkeres fordi det finnes nyere skjæringstidspunkt, og det mangler funksjonalitet for å håndtere dette.")
                 return vedtaksperiode.emitVedtaksperiodeEndret(inntektsmelding) // på stedet hvil!
             }
+            inntektsmelding.info("Igangsetter revurdering ettersom det skal utbetales noe i perioden likevel")
             vedtaksperiode.person.startRevurdering(vedtaksperiode, inntektsmelding)
         }
 
