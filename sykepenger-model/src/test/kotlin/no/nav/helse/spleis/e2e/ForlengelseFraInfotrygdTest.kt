@@ -606,7 +606,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Person uten refusjon til arbeidsgiver blir ikke behandlet i Spleis`() { // TODO
+    fun `Person uten refusjon til arbeidsgiver blir ikke behandlet i Spleis`() {
         nyPeriode(7.oktober(2019) til 22.oktober(2020))
         person.invaliderAllePerioder(hendelselogg, null)
         // seeder personen med historisk refusjonsopplysning

@@ -12,7 +12,7 @@ import no.nav.helse.spleis.e2e.AbstractEndToEndMediatorTest.Companion.UNG_PERSON
 import no.nav.helse.spleis.e2e.AbstractEndToEndMediatorTest.Companion.UNG_PERSON_FØDSELSDATO
 import org.junit.jupiter.api.Test
 
-internal class OverstyrArbeidsforholdRiverTest: RiverTest() {
+internal class OverstyrArbeidsforholdRiverTest : RiverTest() {
     override fun river(rapidsConnection: RapidsConnection, mediator: IMessageMediator) {
         OverstyrArbeidsforholdRiver(rapidsConnection, mediator)
     }
@@ -28,10 +28,20 @@ internal class OverstyrArbeidsforholdRiverTest: RiverTest() {
     @Test
     fun `kan mappe melding om overstyring av arbeidsforhold til modell uten feil`() {
         assertNoErrors(
-            testMessageFactory.lagOverstyrArbeidsforhold(1.januar, listOf(
-                ArbeidsforholdOverstyrt(ORGNUMMER, false),
-                ArbeidsforholdOverstyrt("987654322", true),
-            ))
+            testMessageFactory.lagOverstyrArbeidsforhold(
+                1.januar, listOf(
+                    ArbeidsforholdOverstyrt(
+                        ORGNUMMER,
+                        false,
+                        "Dette arbeidsforholdet gjelder"
+                    ),
+                    ArbeidsforholdOverstyrt(
+                        "987654322",
+                        true,
+                        "Dette arbeidsforholdet gjelder ikke"
+                    ),
+                )
+            )
         )
     }
 
@@ -40,5 +50,17 @@ internal class OverstyrArbeidsforholdRiverTest: RiverTest() {
         assertErrors(
             testMessageFactory.lagOverstyrArbeidsforhold(1.januar, emptyList())
         )
+    }
+
+    @Test
+    fun `feiler ved manglende forklaring`() {
+        assertErrors(
+            testMessageFactory.lagOverstyrArbeidsforhold(
+                1.januar, listOf(
+                    ArbeidsforholdOverstyrt(ORGNUMMER, false, null),
+                )
+            )
+        )
+
     }
 }

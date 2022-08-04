@@ -135,6 +135,14 @@ internal class Inntektshistorikk {
             forklaring: String?,
             subsumsjon: Subsumsjon?
         ) = run {}
+
+        fun subsumsjon(
+            subsumsjonObserver: SubsumsjonObserver,
+            skjæringstidspunkt: LocalDate,
+            organisasjonsnummer: String,
+            forklaring: String,
+            oppfylt: Boolean
+        ) = run {}
         override fun compareTo(other: Inntektsopplysning) =
             (-this.dato.compareTo(other.dato)).takeUnless { it == 0 } ?: -this.prioritet.compareTo(other.prioritet)
 
@@ -369,6 +377,22 @@ internal class Inntektshistorikk {
             subsumsjonObserver.`§ 8-29`(skjæringstidspunkt, omregnetÅrsinntekt(), inntektsopplysninger.subsumsjonsformat(), organisasjonsnummer)
         }
 
+        override fun subsumsjon(
+            subsumsjonObserver: SubsumsjonObserver,
+            skjæringstidspunkt: LocalDate,
+            organisasjonsnummer: String,
+            forklaring: String,
+            oppfylt: Boolean
+        ) {
+            subsumsjonObserver.`§ 8-15`(
+                skjæringstidspunkt = skjæringstidspunkt,
+                organisasjonsnummer = organisasjonsnummer,
+                inntekterSisteTreMåneder = inntekterSisteTreMåneder.subsumsjonsformat(),
+                forklaring = forklaring,
+                oppfylt = oppfylt
+            )
+        }
+
         override fun skalErstattesAv(other: Inntektsopplysning): Boolean =
             this.inntektsopplysninger.any { it.skalErstattesAv(other) }
                 || (other is SkattComposite && other.inntektsopplysninger.any { this.skalErstattesAv(it) })
@@ -389,6 +413,22 @@ internal class Inntektshistorikk {
         override fun omregnetÅrsinntekt() = Inntekt.INGEN
 
         override fun rapportertInntekt() = Inntekt.INGEN
+
+        override fun subsumsjon(
+            subsumsjonObserver: SubsumsjonObserver,
+            skjæringstidspunkt: LocalDate,
+            organisasjonsnummer: String,
+            forklaring: String,
+            oppfylt: Boolean
+        ) {
+            subsumsjonObserver.`§ 8-15`(
+                skjæringstidspunkt = skjæringstidspunkt,
+                organisasjonsnummer = organisasjonsnummer,
+                inntekterSisteTreMåneder = emptyList(),
+                forklaring = forklaring,
+                oppfylt = oppfylt
+            )
+        }
 
         override fun skalErstattesAv(other: Inntektsopplysning) = other is IkkeRapportert && this.dato == other.dato
     }

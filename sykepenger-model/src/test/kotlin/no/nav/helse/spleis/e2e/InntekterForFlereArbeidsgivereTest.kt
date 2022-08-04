@@ -39,7 +39,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
 
-// TODO: tester for at sykepengegrunnlaget er riktig
 internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
 
     private val a1Inspektør get() = TestArbeidsgiverInspektør(person, a1)
@@ -351,7 +350,6 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertEquals(utbetalingslinje1.fagsystemId(), utbetalingslinje2.fagsystemId())
     }
 
-    //FIXME: Testnavn
     @Test
     fun `To arbeidsgivere gikk inn i en bar og vet om hverandre`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)

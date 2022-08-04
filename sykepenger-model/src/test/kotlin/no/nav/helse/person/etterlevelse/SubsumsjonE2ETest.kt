@@ -10,6 +10,7 @@ import no.nav.helse.februar
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Inntektsvurdering
+import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -37,6 +38,7 @@ import no.nav.helse.person.Paragraf.PARAGRAF_8_10
 import no.nav.helse.person.Paragraf.PARAGRAF_8_11
 import no.nav.helse.person.Paragraf.PARAGRAF_8_12
 import no.nav.helse.person.Paragraf.PARAGRAF_8_13
+import no.nav.helse.person.Paragraf.PARAGRAF_8_15
 import no.nav.helse.person.Paragraf.PARAGRAF_8_16
 import no.nav.helse.person.Paragraf.PARAGRAF_8_17
 import no.nav.helse.person.Paragraf.PARAGRAF_8_19
@@ -59,6 +61,7 @@ import no.nav.helse.spleis.e2e.grunnlag
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterInntektsmeldingMedValidering
 import no.nav.helse.spleis.e2e.håndterInntektsmeldingReplay
+import no.nav.helse.spleis.e2e.håndterOverstyrArbeidsforhold
 import no.nav.helse.spleis.e2e.håndterOverstyrInntekt
 import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSykmelding
@@ -363,7 +366,11 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
     @Test
     fun `§ 8-9 ledd 1 - avslag ved utenlandsopphold, selv om utenlandsoppholdet er helt innenfor en ferie`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Utlandsopphold(20.januar, 31.januar), Ferie(20.januar, 31.januar))
+        håndterSøknad(
+            Sykdom(1.januar, 31.januar, 100.prosent),
+            Utlandsopphold(20.januar, 31.januar),
+            Ferie(20.januar, 31.januar)
+        )
         SubsumsjonInspektør(jurist).assertIkkeOppfylt(
             paragraf = PARAGRAF_8_9,
             versjon = 1.juni(2021),
@@ -668,7 +675,10 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
     fun `§8-12 ledd 2 - Bruker har ikke vært arbeidsfør i 26 uker`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar(2018), 31.desember(2018), 100.prosent))
         val inntektsmeldingId = håndterInntektsmelding(listOf(Periode(1.januar(2018), 16.januar(2018))))
-        håndterSøknad(Sykdom(1.januar(2018), 31.desember(2018), 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.januar(2018))
+        håndterSøknad(
+            Sykdom(1.januar(2018), 31.desember(2018), 100.prosent),
+            sendtTilNAVEllerArbeidsgiver = 1.januar(2018)
+        )
         håndterInntektsmeldingReplay(inntektsmeldingId, 1.vedtaksperiode.id(ORGNUMMER))
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
@@ -678,7 +688,10 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
         håndterSykmelding(Sykmeldingsperiode(1.januar(2019), 31.januar(2019), 100.prosent))
-        håndterSøknad(Sykdom(1.januar(2019), 31.januar(2019), 100.prosent), sendtTilNAVEllerArbeidsgiver = 31.januar(2019))
+        håndterSøknad(
+            Sykdom(1.januar(2019), 31.januar(2019), 100.prosent),
+            sendtTilNAVEllerArbeidsgiver = 31.januar(2019)
+        )
         håndterYtelser(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
         håndterUtbetalt()
@@ -853,6 +866,215 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                         "tom" to 31.januar
                     )
                 )
+            )
+        )
+    }
+
+    @Test
+    fun `§ 8-15 - lager subsumsjon ved deaktivering av ghostarbeidsforhold`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 15.mars, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(1.januar, 15.mars, 100.prosent), orgnummer = a1)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            førsteFraværsdag = 1.januar,
+            refusjon = Inntektsmelding.Refusjon(31000.månedlig, null, emptyList()),
+            orgnummer = a1
+        )
+
+        val inntekter = listOf(
+            grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 31000.månedlig.repeat(3)),
+            grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 1000.månedlig.repeat(2))
+        )
+
+        val arbeidsforhold = listOf(
+            Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null),
+            Vilkårsgrunnlag.Arbeidsforhold(a2, 1.november(2017), null)
+        )
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterVilkårsgrunnlag(
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            inntektsvurdering = Inntektsvurdering(
+                listOf(
+                    sammenligningsgrunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 31000.månedlig.repeat(12)),
+                    sammenligningsgrunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 1000.månedlig.repeat(2))
+                )
+            ),
+            orgnummer = a1,
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
+                inntekter = inntekter,
+                arbeidsforhold = emptyList()
+            ),
+            arbeidsforhold = arbeidsforhold
+        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+
+        håndterOverstyrArbeidsforhold(
+            1.januar,
+            listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, true, "Jeg, en saksbehandler, overstyrte pga 8-15"))
+        )
+        SubsumsjonInspektør(jurist).assertOppfylt(
+            versjon = 18.desember(1998),
+            paragraf = PARAGRAF_8_15,
+            input = mapOf(
+                "organisasjonsnummer" to a2,
+                "skjæringstidspunkt" to 1.januar,
+                "inntekterSisteTreMåneder" to
+                        listOf(
+                            mapOf(
+                                "beløp" to 1000.0,
+                                "årMåned" to YearMonth.of(2017, 11),
+                                "type" to "LØNNSINNTEKT",
+                                "fordel" to "Juidy inntekt",
+                                "beskrivelse" to "Juidy fordel"
+                            ),
+                            mapOf(
+                                "beløp" to 1000.0,
+                                "årMåned" to YearMonth.of(2017, 12),
+                                "type" to "LØNNSINNTEKT",
+                                "fordel" to "Juidy inntekt",
+                                "beskrivelse" to "Juidy fordel"
+                            )
+                        ),
+
+                "forklaring" to "Jeg, en saksbehandler, overstyrte pga 8-15"
+            ),
+            output = mapOf(
+                "arbeidsforholdAvbrutt" to a2
+            )
+        )
+    }
+
+    @Test
+    fun `§ 8-15 - lager subsumsjon ved deaktivering av ghostarbeidsforhold uten inntekt`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 15.mars, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(1.januar, 15.mars, 100.prosent), orgnummer = a1)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            førsteFraværsdag = 1.januar,
+            refusjon = Inntektsmelding.Refusjon(31000.månedlig, null, emptyList()),
+            orgnummer = a1
+        )
+
+        val inntekter = listOf(
+            grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 31000.månedlig.repeat(3)),
+        )
+
+        val arbeidsforhold = listOf(
+            Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null),
+            Vilkårsgrunnlag.Arbeidsforhold(a2, 1.november(2017), null)
+        )
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterVilkårsgrunnlag(
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            inntektsvurdering = Inntektsvurdering(
+                listOf(
+                    sammenligningsgrunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 31000.månedlig.repeat(12)),
+                )
+            ),
+            orgnummer = a1,
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
+                inntekter = inntekter,
+                arbeidsforhold = emptyList()
+            ),
+            arbeidsforhold = arbeidsforhold
+        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+
+        håndterOverstyrArbeidsforhold(
+            1.januar,
+            listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, true, "Jeg, en saksbehandler, overstyrte pga 8-15"))
+        )
+        SubsumsjonInspektør(jurist).assertOppfylt(
+            versjon = 18.desember(1998),
+            paragraf = PARAGRAF_8_15,
+            input = mapOf(
+                "organisasjonsnummer" to a2,
+                "skjæringstidspunkt" to 1.januar,
+                "inntekterSisteTreMåneder" to emptyList<Map<String, Any>>(),
+                "forklaring" to "Jeg, en saksbehandler, overstyrte pga 8-15"
+            ),
+            output = mapOf(
+                "arbeidsforholdAvbrutt" to a2
+            )
+        )
+    }
+
+    @Test
+    fun `§ 8-15 - lager subsumsjon ved reaktivering av ghostarbeidsforhold`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 15.mars, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(1.januar, 15.mars, 100.prosent), orgnummer = a1)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            førsteFraværsdag = 1.januar,
+            refusjon = Inntektsmelding.Refusjon(31000.månedlig, null, emptyList()),
+            orgnummer = a1
+        )
+
+        val inntekter = listOf(
+            grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 31000.månedlig.repeat(3)),
+            grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 1000.månedlig.repeat(2))
+        )
+
+        val arbeidsforhold = listOf(
+            Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null),
+            Vilkårsgrunnlag.Arbeidsforhold(a2, 1.november(2017), null)
+        )
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterVilkårsgrunnlag(
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            inntektsvurdering = Inntektsvurdering(
+                listOf(
+                    sammenligningsgrunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 31000.månedlig.repeat(12)),
+                    sammenligningsgrunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 1000.månedlig.repeat(2))
+                )
+            ),
+            orgnummer = a1,
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
+                inntekter = inntekter,
+                arbeidsforhold = emptyList()
+            ),
+            arbeidsforhold = arbeidsforhold
+        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+
+        håndterOverstyrArbeidsforhold(
+            1.januar,
+            listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, false, "Jeg, en saksbehandler, overstyrte pga 8-15"))
+        )
+        SubsumsjonInspektør(jurist).assertIkkeOppfylt(
+            versjon = 18.desember(1998),
+            paragraf = PARAGRAF_8_15,
+            input = mapOf(
+                "organisasjonsnummer" to a2,
+                "skjæringstidspunkt" to 1.januar,
+                "inntekterSisteTreMåneder" to
+                        listOf(
+                            mapOf(
+                                "beløp" to 1000.0,
+                                "årMåned" to YearMonth.of(2017, 11),
+                                "type" to "LØNNSINNTEKT",
+                                "fordel" to "Juidy inntekt",
+                                "beskrivelse" to "Juidy fordel"
+                            ),
+                            mapOf(
+                                "beløp" to 1000.0,
+                                "årMåned" to YearMonth.of(2017, 12),
+                                "type" to "LØNNSINNTEKT",
+                                "fordel" to "Juidy inntekt",
+                                "beskrivelse" to "Juidy fordel"
+                            )
+                        ),
+
+                "forklaring" to "Jeg, en saksbehandler, overstyrte pga 8-15"
+            ),
+            output = mapOf(
+                "aktivtArbeidsforhold" to a2
             )
         )
     }
@@ -1160,7 +1382,10 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                 )
             ),
             orgnummer = a1,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter, arbeidsforhold = emptyList()),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
+                inntekter = inntekter,
+                arbeidsforhold = emptyList()
+            ),
             arbeidsforhold = arbeidsforhold
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
@@ -1236,14 +1461,23 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                 )
             ),
             orgnummer = a1,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter, arbeidsforhold = emptyList()),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
+                inntekter = inntekter,
+                arbeidsforhold = emptyList()
+            ),
             arbeidsforhold = arbeidsforhold
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
 
         val subsumsjon = Subsumsjon("8-28", 3, "b")
-        håndterOverstyrInntekt(inntekt = 1500.månedlig, orgnummer = a2, 1.januar, subsumsjon = subsumsjon, forklaring = "Jeg, en saksbehandler, overstyrte pga 8-28 b")
+        håndterOverstyrInntekt(
+            inntekt = 1500.månedlig,
+            orgnummer = a2,
+            1.januar,
+            subsumsjon = subsumsjon,
+            forklaring = "Jeg, en saksbehandler, overstyrte pga 8-28 b"
+        )
         SubsumsjonInspektør(jurist).assertBeregnet(
             versjon = 1.januar(2019),
             paragraf = PARAGRAF_8_28,
@@ -1298,14 +1532,23 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                 )
             ),
             orgnummer = a1,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter, arbeidsforhold = emptyList()),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
+                inntekter = inntekter,
+                arbeidsforhold = emptyList()
+            ),
             arbeidsforhold = arbeidsforhold
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
 
         val subsumsjon = Subsumsjon("8-28", 3, "c")
-        håndterOverstyrInntekt(inntekt = 1500.månedlig, orgnummer = a2, 1.januar, subsumsjon = subsumsjon, forklaring = "Jeg, en saksbehandler, overstyrte pga 8-28 c")
+        håndterOverstyrInntekt(
+            inntekt = 1500.månedlig,
+            orgnummer = a2,
+            1.januar,
+            subsumsjon = subsumsjon,
+            forklaring = "Jeg, en saksbehandler, overstyrte pga 8-28 c"
+        )
         SubsumsjonInspektør(jurist).assertBeregnet(
             versjon = 1.januar(2019),
             paragraf = PARAGRAF_8_28,
@@ -1361,14 +1604,23 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                 )
             ),
             orgnummer = a1,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter, arbeidsforhold = emptyList()),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
+                inntekter = inntekter,
+                arbeidsforhold = emptyList()
+            ),
             arbeidsforhold = arbeidsforhold
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
 
         val subsumsjon = Subsumsjon("8-28", 5, null)
-        håndterOverstyrInntekt(inntekt = 1500.månedlig, orgnummer = a2, 1.januar, subsumsjon = subsumsjon, forklaring = "Jeg, en saksbehandler, overstyrte pga 8-28 (5)")
+        håndterOverstyrInntekt(
+            inntekt = 1500.månedlig,
+            orgnummer = a2,
+            1.januar,
+            subsumsjon = subsumsjon,
+            forklaring = "Jeg, en saksbehandler, overstyrte pga 8-28 (5)"
+        )
         SubsumsjonInspektør(jurist).assertBeregnet(
             versjon = 1.januar(2019),
             paragraf = PARAGRAF_8_28,
@@ -1420,7 +1672,10 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                 )
             ),
             orgnummer = a1,
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter, arbeidsforhold = emptyList()),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
+                inntekter = inntekter,
+                arbeidsforhold = emptyList()
+            ),
             arbeidsforhold = arbeidsforhold
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
@@ -1647,8 +1902,18 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
 
-        SubsumsjonInspektør(jurist).assertIkkeVurdert(PARAGRAF_8_30, LEDD_2, punktum = 1.punktum, vedtaksperiodeId = 1.vedtaksperiode)
-        SubsumsjonInspektør(jurist).assertVurdert(PARAGRAF_8_30, LEDD_2, punktum = 1.punktum, vedtaksperiodeId = 2.vedtaksperiode)
+        SubsumsjonInspektør(jurist).assertIkkeVurdert(
+            PARAGRAF_8_30,
+            LEDD_2,
+            punktum = 1.punktum,
+            vedtaksperiodeId = 1.vedtaksperiode
+        )
+        SubsumsjonInspektør(jurist).assertVurdert(
+            PARAGRAF_8_30,
+            LEDD_2,
+            punktum = 1.punktum,
+            vedtaksperiodeId = 2.vedtaksperiode
+        )
     }
 
     @Test

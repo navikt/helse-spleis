@@ -932,9 +932,15 @@ internal class Arbeidsgiver private constructor(
         hendelse.addInntekt(inntektshistorikk)
     }
 
-    internal fun lagreOverstyrArbeidsforhold(skjæringstidspunkt: LocalDate, overstyring: OverstyrArbeidsforhold.ArbeidsforholdOverstyrt) {
-        overstyring.lagre(skjæringstidspunkt, arbeidsforholdhistorikk)
+    internal fun lagreOverstyrArbeidsforhold(skjæringstidspunkt: LocalDate, overstyring: OverstyrArbeidsforhold.ArbeidsforholdOverstyrt, subsumsjonObserver: SubsumsjonObserver) {
+        val ghostInntekt = inntektshistorikk.nyesteInnslag()?.omregnetÅrsinntekt(skjæringstidspunkt, null) ?: lagIkkeRapportertInntekt(skjæringstidspunkt)
+        overstyring.lagre(skjæringstidspunkt, arbeidsforholdhistorikk, subsumsjonObserver, ghostInntekt)
     }
+
+    private fun lagIkkeRapportertInntekt(skjæringstidspunkt: LocalDate) =
+        if (arbeidsforholdhistorikk.harArbeidsforholdNyereEnn(skjæringstidspunkt, 3))
+            IkkeRapportert(UUID.randomUUID(), skjæringstidspunkt)
+        else null
 
     internal fun lagreSykepengegrunnlagFraInfotrygd(inntektsopplysninger: List<Inntektsopplysning>, hendelseId: UUID) {
         Inntektsopplysning.lagreInntekter(inntektsopplysninger, inntektshistorikk, hendelseId)

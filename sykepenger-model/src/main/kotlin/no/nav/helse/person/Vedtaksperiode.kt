@@ -1684,7 +1684,7 @@ internal class Vedtaksperiode private constructor(
             overstyrArbeidsforhold: OverstyrArbeidsforhold,
             subsumsjon: Subsumsjon?
         ): Boolean {
-            vedtaksperiode.person.lagreOverstyrArbeidsforhold(overstyrArbeidsforhold)
+            vedtaksperiode.person.lagreOverstyrArbeidsforhold(overstyrArbeidsforhold, vedtaksperiode.jurist())
             vedtaksperiode.person.vilkårsprøvEtterNyInformasjonFraSaksbehandler(
                 overstyrArbeidsforhold,
                 vedtaksperiode.skjæringstidspunkt,

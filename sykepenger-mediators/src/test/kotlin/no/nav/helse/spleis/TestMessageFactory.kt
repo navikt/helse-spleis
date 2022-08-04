@@ -134,7 +134,10 @@ internal class TestMessageFactory(
             soknadsperioder = perioder.toList(),
             opprettet = LocalDateTime.now(),
             sykmeldingSkrevet = fom!!.atStartOfDay(),
-            merknaderFraSykmelding = listOf(MerknadDTO("EN_MERKANDSTYPE", null), MerknadDTO("EN_ANNEN_MERKANDSTYPE", "tekstlig begrunnelse"))
+            merknaderFraSykmelding = listOf(
+                MerknadDTO("EN_MERKANDSTYPE", null),
+                MerknadDTO("EN_ANNEN_MERKANDSTYPE", "tekstlig begrunnelse")
+            )
         )
         return nyHendelse("sendt_søknad_nav", sendtSøknad.toMap(fødselsdato))
     }
@@ -176,14 +179,16 @@ internal class TestMessageFactory(
         opphørsdatoForRefusjon: LocalDate? = null,
         meldingId: String = UUID.randomUUID().toString(),
         orgnummer: String = organisasjonsnummer
-    ) = nyHendelse("inntektsmelding", lagInntektsmelding(
+    ) = nyHendelse(
+        "inntektsmelding", lagInntektsmelding(
             arbeidsgiverperiode,
             førsteFraværsdag,
             opphørAvNaturalytelser,
             beregnetInntekt,
             orgnummer,
             opphørsdatoForRefusjon
-        ).toMap(fødselsdato))
+        ).toMap(fødselsdato)
+    )
 
     fun lagInnteksmeldingReplay(
         vedtaksperiodeId: UUID,
@@ -195,7 +200,12 @@ internal class TestMessageFactory(
         UUID.fromString(node.path("@id").asText()) to node.toString()
     }
 
-    fun lagUtbetalingshistorikk(vedtaksperiodeId: UUID, tilstand: TilstandType, sykepengehistorikk: List<UtbetalingshistorikkTestdata> = emptyList(), besvart: LocalDateTime = LocalDateTime.now()): Pair<String, String> {
+    fun lagUtbetalingshistorikk(
+        vedtaksperiodeId: UUID,
+        tilstand: TilstandType,
+        sykepengehistorikk: List<UtbetalingshistorikkTestdata> = emptyList(),
+        besvart: LocalDateTime = LocalDateTime.now()
+    ): Pair<String, String> {
         return lagBehovMedLøsning(
             vedtaksperiodeId = vedtaksperiodeId,
             tilstand = tilstand,
@@ -205,48 +215,49 @@ internal class TestMessageFactory(
         )
     }
 
-    fun lagUtbetalingshistorikkForFeriepenger(testdata: UtbetalingshistorikkForFeriepengerTestdata) = lagBehovMedLøsning(
-        vedtaksperiodeId = null,
-        tilstand = null,
-        behov = listOf("SykepengehistorikkForFeriepenger"),
-        ekstraFelter = mapOf(
-            "SykepengehistorikkForFeriepenger" to mapOf(
-                "historikkFom" to testdata.fom.toString(),
-                "historikkTom" to testdata.tom.toString()
-            )
-        ),
-        løsninger = mapOf(
-            "SykepengehistorikkForFeriepenger" to mapOf(
-                "feriepengerSkalBeregnesManuelt" to testdata.feriepengerSkalBeregnesManuelt,
-                "utbetalinger" to testdata.utbetalinger.map {
-                    mapOf(
-                        "fom" to it.fom,
-                        "tom" to it.tom,
-                        "utbetalt" to it.utbetalt,
-                        "dagsats" to it.dagsats,
-                        "typeKode" to it.typekode,
-                        "utbetalingsGrad" to it.utbetalingsgrad,
-                        "orgnummer" to it.organisasjonsnummer
-                    )
-                },
-                "feriepengehistorikk" to testdata.feriepengehistorikk.map {
-                    mapOf(
-                        "orgnummer" to it.orgnummer,
-                        "beløp" to it.beløp,
-                        "fom" to it.fom,
-                        "tom" to it.tom
-                    )
-                },
-                "arbeidskategorikoder" to testdata.arbeidskategorikoder.map {
-                    mapOf(
-                        "kode" to it.kode,
-                        "fom" to it.fom,
-                        "tom" to it.tom
-                    )
-                }
+    fun lagUtbetalingshistorikkForFeriepenger(testdata: UtbetalingshistorikkForFeriepengerTestdata) =
+        lagBehovMedLøsning(
+            vedtaksperiodeId = null,
+            tilstand = null,
+            behov = listOf("SykepengehistorikkForFeriepenger"),
+            ekstraFelter = mapOf(
+                "SykepengehistorikkForFeriepenger" to mapOf(
+                    "historikkFom" to testdata.fom.toString(),
+                    "historikkTom" to testdata.tom.toString()
+                )
+            ),
+            løsninger = mapOf(
+                "SykepengehistorikkForFeriepenger" to mapOf(
+                    "feriepengerSkalBeregnesManuelt" to testdata.feriepengerSkalBeregnesManuelt,
+                    "utbetalinger" to testdata.utbetalinger.map {
+                        mapOf(
+                            "fom" to it.fom,
+                            "tom" to it.tom,
+                            "utbetalt" to it.utbetalt,
+                            "dagsats" to it.dagsats,
+                            "typeKode" to it.typekode,
+                            "utbetalingsGrad" to it.utbetalingsgrad,
+                            "orgnummer" to it.organisasjonsnummer
+                        )
+                    },
+                    "feriepengehistorikk" to testdata.feriepengehistorikk.map {
+                        mapOf(
+                            "orgnummer" to it.orgnummer,
+                            "beløp" to it.beløp,
+                            "fom" to it.fom,
+                            "tom" to it.tom
+                        )
+                    },
+                    "arbeidskategorikoder" to testdata.arbeidskategorikoder.map {
+                        mapOf(
+                            "kode" to it.kode,
+                            "fom" to it.fom,
+                            "tom" to it.tom
+                        )
+                    }
+                )
             )
         )
-    )
 
     class UtbetalingshistorikkForFeriepengerTestdata(
         val fom: LocalDate,
@@ -381,14 +392,15 @@ internal class TestMessageFactory(
 
     data class ArbeidsforholdOverstyrt(
         val orgnummer: String,
-        val deaktivert: Boolean
+        val deaktivert: Boolean,
+        val forklaring: String?
     )
 
     data class InntekterForSykepengegrunnlagFraLøsning(
         val måned: YearMonth,
         val inntekter: List<Inntekt>,
         val arbeidsforhold: List<Arbeidsforhold>
-        ) {
+    ) {
 
         data class Inntekt(
             val beløp: Double,
@@ -412,11 +424,10 @@ internal class TestMessageFactory(
     }
 
     data class Subsumsjon(
-        val paragraf: String,
+        val paragraf: String?,
         val ledd: String?,
         val bokstav: String?
     )
-
 
 
     fun lagYtelser(
@@ -863,7 +874,13 @@ internal class TestMessageFactory(
             ))
     }
 
-    fun lagOverstyringInntekt(inntekt: Double, skjæringstidspunkt: LocalDate, subsumsjon: Subsumsjon?, orgnummer: String = organisasjonsnummer, forklaring: String): Pair<String, String> {
+    fun lagOverstyringInntekt(
+        inntekt: Double,
+        skjæringstidspunkt: LocalDate,
+        subsumsjon: Subsumsjon?,
+        orgnummer: String = organisasjonsnummer,
+        forklaring: String
+    ): Pair<String, String> {
         return nyHendelse(
             "overstyr_inntekt", mutableMapOf<String, Any>(
                 "aktørId" to aktørId,
@@ -901,12 +918,16 @@ internal class TestMessageFactory(
                 "organisasjonsnummer" to orgnummer,
                 "skjæringstidspunkt" to skjæringstidspunkt,
                 "overstyrteArbeidsforhold" to overstyrteArbeidsforhold.map {
-                    mapOf(
+                    mutableMapOf<String, Any>(
                         "orgnummer" to it.orgnummer,
                         "deaktivert" to it.deaktivert
-                    )
-                }
-            ))
+                    ).apply {
+                        it.forklaring?.let { forklaring ->
+                            this["forklaring"] = forklaring
+                        }
+                    }
+                })
+        )
     }
 
     fun lagOverstyrInntekt(
@@ -917,14 +938,14 @@ internal class TestMessageFactory(
         forklaringMap: Map<String, String> = emptyMap()
     ): Pair<String, String> =
         nyHendelse(
-        "overstyr_inntekt", mutableMapOf<String, Any>(
-            "aktørId" to aktørId,
-            "fødselsnummer" to fødselsnummer,
-            "organisasjonsnummer" to orgnummer,
-            "skjæringstidspunkt" to skjæringstidspunkt,
-            "månedligInntekt" to månedligInntekt,
-        ) + forklaringMap + subsumsjonsMap
-    )
+            "overstyr_inntekt", mutableMapOf<String, Any>(
+                "aktørId" to aktørId,
+                "fødselsnummer" to fødselsnummer,
+                "organisasjonsnummer" to orgnummer,
+                "skjæringstidspunkt" to skjæringstidspunkt,
+                "månedligInntekt" to månedligInntekt,
+            ) + forklaringMap + subsumsjonsMap
+        )
 
     private fun nyHendelse(navn: String, hendelse: Map<String, Any>) =
         JsonMessage.newMessage(navn, hendelse).let { it.id to it.toJson() }

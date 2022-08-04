@@ -648,9 +648,9 @@ class Person private constructor(
         }
     }
 
-    internal fun lagreOverstyrArbeidsforhold(overstyrArbeidsforhold: OverstyrArbeidsforhold) {
+    internal fun lagreOverstyrArbeidsforhold(overstyrArbeidsforhold: OverstyrArbeidsforhold, subsumsjonObserver: SubsumsjonObserver) {
         arbeidsgivere.forEach { arbeidsgiver ->
-            overstyrArbeidsforhold.lagre(arbeidsgiver)
+            overstyrArbeidsforhold.lagre(arbeidsgiver, subsumsjonObserver)
         }
     }
 

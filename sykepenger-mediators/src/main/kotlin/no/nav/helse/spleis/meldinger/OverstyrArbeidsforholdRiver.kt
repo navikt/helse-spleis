@@ -21,7 +21,7 @@ internal class OverstyrArbeidsforholdRiver(
         message.requireKey("aktørId", "fødselsnummer", "organisasjonsnummer")
         message.require("skjæringstidspunkt", JsonNode::asLocalDate)
         message.requireArray("overstyrteArbeidsforhold") {
-            requireKey("orgnummer")
+            requireKey("orgnummer", "forklaring")
             require("deaktivert", JsonNode::asBoolean)
         }
         message.require("overstyrteArbeidsforhold") { require(!it.isEmpty) }

@@ -27,6 +27,7 @@ import no.nav.helse.person.Paragraf.PARAGRAF_8_10
 import no.nav.helse.person.Paragraf.PARAGRAF_8_11
 import no.nav.helse.person.Paragraf.PARAGRAF_8_12
 import no.nav.helse.person.Paragraf.PARAGRAF_8_13
+import no.nav.helse.person.Paragraf.PARAGRAF_8_15
 import no.nav.helse.person.Paragraf.PARAGRAF_8_16
 import no.nav.helse.person.Paragraf.PARAGRAF_8_17
 import no.nav.helse.person.Paragraf.PARAGRAF_8_19
@@ -355,6 +356,37 @@ class MaskinellJurist private constructor(
                 )
             )
         }
+    }
+
+    override fun `§ 8-15`(
+        skjæringstidspunkt: LocalDate,
+        organisasjonsnummer: String,
+        inntekterSisteTreMåneder: List<Map<String, Any>>,
+        forklaring: String,
+        oppfylt: Boolean
+    ) {
+        leggTil(
+            EnkelSubsumsjon(
+                utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
+                versjon = LocalDate.of(1998, 12, 18),
+                paragraf = PARAGRAF_8_15,
+                ledd = null,
+                punktum = null,
+                bokstav = null,
+                input = mapOf(
+                    "organisasjonsnummer" to organisasjonsnummer,
+                    "skjæringstidspunkt" to skjæringstidspunkt,
+                    "inntekterSisteTreMåneder" to inntekterSisteTreMåneder,
+                    "forklaring" to forklaring
+                ),
+                kontekster = kontekster(),
+                output = if (oppfylt) {
+                    mapOf("arbeidsforholdAvbrutt" to organisasjonsnummer)
+                } else {
+                    mapOf("aktivtArbeidsforhold" to organisasjonsnummer)
+                }
+            )
+        )
     }
 
     override fun `§ 8-16 ledd 1`(dato: LocalDate, dekningsgrad: Double, inntekt: Double, dekningsgrunnlag: Double) {

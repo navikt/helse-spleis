@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.meldinger
 
+import java.time.LocalDate
 import no.nav.helse.januar
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spleis.IMessageMediator
@@ -19,7 +20,8 @@ internal class OverstyrInntektRiverTest: RiverTest() {
         UNG_PERSON_FNR_2018,
         AKTØRID,
         ORGNUMMER,
-        INNTEKT
+        INNTEKT,
+        LocalDate.of(1992, 2, 12)
     )
 
     @Test

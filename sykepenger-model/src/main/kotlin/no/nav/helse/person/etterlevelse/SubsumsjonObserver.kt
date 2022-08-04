@@ -191,6 +191,19 @@ interface SubsumsjonObserver {
     fun `§ 8-13 ledd 2`(periode: Periode, tidslinjer: List<List<Tidslinjedag>>, grense: Double, dagerUnderGrensen: List<LocalDate>) {}
 
     /**
+     * Retten til sykepenger etter dette kapitlet faller bort når arbeidsforholdet midlertidig avbrytes i mer enn 14 dager
+     *
+     * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/§8-15)
+     *
+     * @param skjæringstidspunkt dato som aktive arbeidsforhold beregnes for
+     * @param organisasjonsnummer arbeidsgiveren som vurderes
+     * @param inntekterSisteTreMåneder månedlig inntekt for de tre siste måneder før skjæringstidspunktet
+     * @param forklaring saksbehandler sin forklaring for overstyring av arbeidsforhold
+     * @param oppfylt **true** dersom [organisasjonsnummer] har avbrudd mer enn 14 dager
+     */
+    fun `§ 8-15`(skjæringstidspunkt: LocalDate, organisasjonsnummer: String, inntekterSisteTreMåneder: List<Map<String, Any>>, forklaring: String, oppfylt: Boolean){}
+
+    /**
      * Fastsettelse av dekningsgrunnlag
      *
      * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/%C2%A78-16)

@@ -10,12 +10,6 @@ import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.økonomi.Inntekt
 
-class Subsumsjon(
-    internal val paragraf: String,
-    internal val ledd: Int?,
-    internal val bokstav: String?,
-)
-
 class OverstyrInntekt(
     meldingsreferanseId: UUID,
     fødselsnummer: String,

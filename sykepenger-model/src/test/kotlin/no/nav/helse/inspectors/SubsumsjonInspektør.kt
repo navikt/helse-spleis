@@ -68,20 +68,19 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
         input: Map<String, Any>,
         output: Map<String, Any>,
         vedtaksperiodeId: IdInnhenter? = null,
-        organisasjonsnummer: String = ORGNUMMER,
-        utfall: Utfall = VILKAR_BEREGNET
+        organisasjonsnummer: String = ORGNUMMER
     ) {
         val resultat = finnSubsumsjoner(paragraf, versjon, ledd, punktum, bokstav, VILKAR_BEREGNET, vedtaksperiodeId?.id(organisasjonsnummer))
         assertEquals(1, resultat.size, "Forventer kun en subsumsjon. Subsumsjoner funnet: $resultat")
         val subsumsjon = resultat.first()
-        assertEquals(utfall, subsumsjon.utfall) { "Forventet oppfylt $paragraf $ledd $punktum" }
+        assertEquals(VILKAR_BEREGNET, subsumsjon.utfall) { "Forventet oppfylt $paragraf $ledd $punktum" }
         assertResultat(input, output, subsumsjon)
     }
 
     internal fun assertOppfylt(
         paragraf: Paragraf,
         versjon: LocalDate,
-        ledd: Ledd,
+        ledd: Ledd? = null,
         punktum: Punktum? = null,
         bokstav: Bokstav? = null,
         input: Map<String, Any>? = null,
@@ -100,7 +99,7 @@ internal class SubsumsjonInspektør(jurist: MaskinellJurist) : SubsumsjonVisitor
     internal fun assertIkkeOppfylt(
         paragraf: Paragraf,
         versjon: LocalDate,
-        ledd: Ledd,
+        ledd: Ledd? = null,
         punktum: Punktum? = null,
         bokstav: Bokstav? = null,
         input: Map<String, Any>? = null,
