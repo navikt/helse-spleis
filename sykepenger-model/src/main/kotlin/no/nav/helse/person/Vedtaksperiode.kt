@@ -2389,7 +2389,10 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.håndterInntektsmelding(inntektsmelding) { this } // håndterInntektsmelding krever tilstandsendring, men vi må avvente til vi starter revurdering
 
             if (inntektsmelding.hasErrorsOrWorse()) return
-
+            if (vedtaksperiode.ingenUtbetaling()) {
+                vedtaksperiode.emitVedtaksperiodeEndret(inntektsmelding) // på stedet hvil!
+                return inntektsmelding.info("Revurdering medfører ingen utbetaling, blir stående i avsluttet uten utbetaling")
+            }
             // støttes ikke før vi støtter revurdering av eldre skjæringstidspunkt
             if (revurderingIkkeStøttet) {
                 sikkerlogg.info(
@@ -2400,10 +2403,6 @@ internal class Vedtaksperiode private constructor(
                 )
                 inntektsmelding.info("Revurdering blokkeres fordi det finnes nyere skjæringstidspunkt, og det mangler funksjonalitet for å håndtere dette.")
                 return vedtaksperiode.emitVedtaksperiodeEndret(inntektsmelding) // på stedet hvil!
-            }
-            if (vedtaksperiode.ingenUtbetaling()) {
-                vedtaksperiode.emitVedtaksperiodeEndret(inntektsmelding) // på stedet hvil!
-                return inntektsmelding.info("Revurdering medfører ingen utbetaling, blir stående i avsluttet uten utbetaling")
             }
             vedtaksperiode.person.startRevurdering(vedtaksperiode, inntektsmelding)
         }
