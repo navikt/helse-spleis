@@ -949,13 +949,6 @@ class Person private constructor(
         }
     }
 
-    internal fun loggførHendelsesreferanse(
-        orgnummer: String,
-        skjæringstidspunkt: LocalDate,
-        hendelse: OverstyrInntekt
-    ) =
-        arbeidsgivere.forEach { it.loggførHendelsesreferanse(orgnummer, skjæringstidspunkt, hendelse) }
-
     private var gjenopptaBehandlingNy = false
     internal fun gjenopptaBehandlingNy(hendelse: IAktivitetslogg) {
         gjenopptaBehandlingNy = true

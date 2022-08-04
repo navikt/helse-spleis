@@ -39,6 +39,7 @@ import no.nav.helse.person.Vedtaksperiode.Companion.ER_ELLER_HAR_VÆRT_AVSLUTTET
 import no.nav.helse.person.Vedtaksperiode.Companion.IKKE_FERDIG_BEHANDLET
 import no.nav.helse.person.Vedtaksperiode.Companion.IKKE_FERDIG_REVURDERT
 import no.nav.helse.person.Vedtaksperiode.Companion.KLAR_TIL_BEHANDLING
+import no.nav.helse.person.Vedtaksperiode.Companion.MED_SKJÆRINGSTIDSPUNKT
 import no.nav.helse.person.Vedtaksperiode.Companion.OVERLAPPER_ELLER_FORLENGER
 import no.nav.helse.person.Vedtaksperiode.Companion.SKAL_INNGÅ_I_SYKEPENGEGRUNNLAG
 import no.nav.helse.person.Vedtaksperiode.Companion.avventerRevurdering
@@ -143,25 +144,14 @@ internal class Arbeidsgiver private constructor(
         internal fun List<Arbeidsgiver>.kanStarteRevurdering(vedtaksperiode: Vedtaksperiode) =
             flatMap { it.vedtaksperioder }.kanStarteRevurdering(this, vedtaksperiode)
 
-        internal fun List<Arbeidsgiver>.harPeriodeSomBlokkererOverstyring(skjæringstidspunkt: LocalDate) = any { arbeidsgiver ->
-            arbeidsgiver.vedtaksperioder
-                .filter { vedtaksperiode -> vedtaksperiode.gjelder(skjæringstidspunkt) }
-                .any { vedtaksperiode -> vedtaksperiode.blokkererOverstyring() }
-        }
+        internal fun List<Arbeidsgiver>.harPeriodeSomBlokkererOverstyring(skjæringstidspunkt: LocalDate) =
+            flatMap { it.vedtaksperioder }.any { vedtaksperiode -> vedtaksperiode.blokkererOverstyring(skjæringstidspunkt) }
 
-        internal fun List<Arbeidsgiver>.håndter(overstyrArbeidsforhold: OverstyrArbeidsforhold): Boolean {
-            forEach { arbeidsgiver ->
-                if (arbeidsgiver.håndter(overstyrArbeidsforhold)) return true
-            }
-            return false
-        }
+        internal fun List<Arbeidsgiver>.håndter(overstyrArbeidsforhold: OverstyrArbeidsforhold) =
+            any { it.håndter(overstyrArbeidsforhold) }
 
-        internal fun List<Arbeidsgiver>.håndterOverstyringAvGhostInntekt(overstyrInntekt: OverstyrInntekt): Boolean {
-            forEach { arbeidsgiver ->
-                if (arbeidsgiver.håndterOverstyringAvGhostInntekt(overstyrInntekt)) return true
-            }
-            return false
-        }
+        internal fun List<Arbeidsgiver>.håndterOverstyringAvGhostInntekt(overstyrInntekt: OverstyrInntekt) =
+            any { it.håndterOverstyringAvGhostInntekt(overstyrInntekt) }
 
         internal fun Iterable<Arbeidsgiver>.nåværendeVedtaksperioder(filter: VedtaksperiodeFilter) =
             mapNotNull { it.vedtaksperioder.nåværendeVedtaksperiode(filter) }
@@ -226,9 +216,8 @@ internal class Arbeidsgiver private constructor(
                 }
             }
 
-        internal fun Iterable<Arbeidsgiver>.harVedtaksperiodeFor(skjæringstidspunkt: LocalDate) = any { arbeidsgiver ->
-            arbeidsgiver.vedtaksperioder.any { vedtaksperiode -> vedtaksperiode.gjelder(skjæringstidspunkt) }
-        }
+        internal fun Iterable<Arbeidsgiver>.harVedtaksperiodeFor(skjæringstidspunkt: LocalDate) =
+            any { it.harSykdomFor(skjæringstidspunkt) }
 
         internal fun Iterable<Arbeidsgiver>.harArbeidsgivereMedOverlappendeUtbetaltePerioder(orgnummer: String, periode: Periode) = this
             .filter { it.organisasjonsnummer != orgnummer }
@@ -841,27 +830,17 @@ internal class Arbeidsgiver private constructor(
 
     internal fun håndter(hendelse: OverstyrInntekt) {
         hendelse.kontekst(this)
-        énHarHåndtert(hendelse, Vedtaksperiode::håndter)
+        énHarHåndtert(hendelse) { håndter(it, vedtaksperioder) }
     }
 
     internal fun håndter(overstyrArbeidsforhold: OverstyrArbeidsforhold): Boolean {
         overstyrArbeidsforhold.kontekst(this)
-        vedtaksperioder.forEach { vedtaksperiode ->
-            if (vedtaksperiode.håndter(overstyrArbeidsforhold)) {
-                return true
-            }
-        }
-        return false
+        return énHarHåndtert(overstyrArbeidsforhold, Vedtaksperiode::håndter)
     }
 
     internal fun håndterOverstyringAvGhostInntekt(overstyrInntekt: OverstyrInntekt): Boolean {
         overstyrInntekt.kontekst(this)
-        vedtaksperioder.forEach { vedtaksperiode ->
-            if (vedtaksperiode.håndterOverstyringAvGhostInntekt(overstyrInntekt)) {
-                return true
-            }
-        }
-        return false
+        return énHarHåndtert(overstyrInntekt, Vedtaksperiode::håndterOverstyringAvGhostInntekt)
     }
 
     internal fun oppdaterSykdom(hendelse: SykdomstidslinjeHendelse) = sykdomshistorikk.håndter(hendelse)
@@ -885,7 +864,7 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun ghostPerioder(): List<GhostPeriode> = person.skjæringstidspunkterFraSpleis()
-        .filter { skjæringstidspunkt -> vedtaksperioder.none { it.gjelder(skjæringstidspunkt) } }
+        .filter { skjæringstidspunkt -> vedtaksperioder.none(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt)) }
         .filter(::erGhost)
         .mapNotNull { skjæringstidspunkt -> person.ghostPeriode(skjæringstidspunkt, arbeidsforholdhistorikk.harDeaktivertArbeidsforhold(skjæringstidspunkt)) }
 
@@ -961,9 +940,8 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun lagreOmregnetÅrsinntekt(arbeidsgiverInntekt: ArbeidsgiverInntekt, skjæringstidspunkt: LocalDate, hendelse: PersonHendelse) {
-        if (harRelevantArbeidsforhold(skjæringstidspunkt)) {
-            arbeidsgiverInntekt.lagreInntekter(inntektshistorikk, skjæringstidspunkt, hendelse.meldingsreferanseId())
-        }
+        if (!harRelevantArbeidsforhold(skjæringstidspunkt)) return
+        arbeidsgiverInntekt.lagreInntekter(inntektshistorikk, skjæringstidspunkt, hendelse.meldingsreferanseId())
     }
 
     internal fun lagreRapporterteInntekter(arbeidsgiverInntekt: ArbeidsgiverInntekt, skjæringstidspunkt: LocalDate, hendelse: PersonHendelse) {
@@ -1055,13 +1033,12 @@ internal class Arbeidsgiver private constructor(
 
     internal fun harSpleisSykdom() = sykdomshistorikk.harSykdom()
 
-    internal fun harSykdomFor(skjæringstidspunkt: LocalDate) = vedtaksperioder.any { it.gjelder(skjæringstidspunkt) }
+    internal fun harSykdomFor(skjæringstidspunkt: LocalDate) =
+        vedtaksperioder.any(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt))
 
     internal fun finnFørsteFraværsdag(skjæringstidspunkt: LocalDate): LocalDate? {
-        if (harSykdomFor(skjæringstidspunkt)) {
-            return sykdomstidslinje().subset(finnSammenhengendePeriode(skjæringstidspunkt).periode()).sisteSkjæringstidspunkt()
-        }
-        return null
+        if (!harSykdomFor(skjæringstidspunkt)) return null
+        return sykdomstidslinje().subset(finnSammenhengendePeriode(skjæringstidspunkt).periode()).sisteSkjæringstidspunkt()
     }
 
     internal fun periodetype(periode: Periode): Periodetype {
@@ -1150,12 +1127,7 @@ internal class Arbeidsgiver private constructor(
     internal fun harRelevantArbeidsforhold(skjæringstidspunkt: LocalDate) = arbeidsforholdhistorikk.harRelevantArbeidsforhold(skjæringstidspunkt)
 
     internal fun harVedtaksperiodeMedUkjentArbeidsforhold(skjæringstidspunkt: LocalDate) =
-        !harRelevantArbeidsforhold(skjæringstidspunkt) && vedtaksperioder.any { it.gjelder(skjæringstidspunkt) }
-
-    internal fun loggførHendelsesreferanse(organisasjonsnummer: String, skjæringstidspunkt: LocalDate, overstyrInntekt: OverstyrInntekt) {
-        if (this.organisasjonsnummer != organisasjonsnummer) return
-        vedtaksperioder.filter { it.gjelder(skjæringstidspunkt) }.forEach { it.loggførHendelsesreferanse(overstyrInntekt) }
-    }
+        !harRelevantArbeidsforhold(skjæringstidspunkt) && harSykdomFor(skjæringstidspunkt)
 
     internal fun harFerdigstiltPeriode() = vedtaksperioder.any(ER_ELLER_HAR_VÆRT_AVSLUTTET) || forkastede.harAvsluttedePerioder()
 

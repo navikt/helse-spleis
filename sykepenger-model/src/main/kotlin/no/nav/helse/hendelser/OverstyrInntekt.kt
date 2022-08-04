@@ -7,7 +7,6 @@ import no.nav.helse.person.Arbeidsgiver.Companion.harPeriodeSomBlokkererOverstyr
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Inntektshistorikk
-import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.økonomi.Inntekt
 
@@ -33,9 +32,6 @@ class OverstyrInntekt(
             errors = this.errorsAndWorse()
         )
 
-    internal fun loggførHendelsesreferanse(person: Person) {
-        person.loggførHendelsesreferanse(organisasjonsnummer, skjæringstidspunkt, this)
-    }
 
     internal fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) {
         hendelseIder.add(Dokumentsporing.overstyrInntekt(meldingsreferanseId()))

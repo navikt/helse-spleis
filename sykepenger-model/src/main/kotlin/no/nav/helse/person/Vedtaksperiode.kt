@@ -324,10 +324,12 @@ internal class Vedtaksperiode private constructor(
         return tilstand.håndterOverstyringAvGhostInntekt(this, overstyrInntekt)
     }
 
-    internal fun håndter(hendelse: OverstyrInntekt): Boolean {
+    internal fun håndter(hendelse: OverstyrInntekt, vedtaksperioder: Iterable<Vedtaksperiode>): Boolean {
         if (!kanHåndtereOverstyring(hendelse)) return false
         kontekst(hendelse)
-        hendelse.loggførHendelsesreferanse(person)
+        vedtaksperioder.filter(MED_SKJÆRINGSTIDSPUNKT(hendelse.skjæringstidspunkt)).forEach {
+            hendelse.leggTil(it.hendelseIder)
+        }
         tilstand.håndter(this, hendelse)
         return true
     }
@@ -343,7 +345,7 @@ internal class Vedtaksperiode private constructor(
         return tilstand.kanReberegnes
     }
 
-    internal fun blokkererOverstyring() = !(tilstand.kanReberegnes || tilstand.type == AVVENTER_GODKJENNING)
+    internal fun blokkererOverstyring(skjæringstidspunkt: LocalDate) = skjæringstidspunkt == this.skjæringstidspunkt && !(tilstand.kanReberegnes || tilstand.type == AVVENTER_GODKJENNING)
 
     internal fun håndterRevurdertUtbetaling(
         other: Vedtaksperiode,
@@ -365,7 +367,7 @@ internal class Vedtaksperiode private constructor(
         this.sykdomstidslinje.erRettFør(other.sykdomstidslinje) && this.tilstand == AvsluttetUtenUtbetaling
 
     private fun kanHåndtereOverstyring(hendelse: OverstyrInntekt): Boolean {
-        return utbetalingstidslinje.isNotEmpty() && gjelder(hendelse.skjæringstidspunkt)
+        return utbetalingstidslinje.isNotEmpty() && hendelse.skjæringstidspunkt == this.skjæringstidspunkt
     }
 
     private fun kanOverstyreInntektForFlereArbeidsgivere(hendelse: OverstyrInntekt): Boolean {
@@ -383,8 +385,6 @@ internal class Vedtaksperiode private constructor(
         }
         return true
     }
-
-    internal fun gjelder(skjæringstidspunkt: LocalDate) = this.skjæringstidspunkt == skjæringstidspunkt
 
     private fun harNødvendigInntektForVilkårsprøving() =
         arbeidsgiver.harNødvendigInntektForVilkårsprøving(skjæringstidspunkt, periode.start)
@@ -1705,8 +1705,6 @@ internal class Vedtaksperiode private constructor(
             AVSLUTTET_UTEN_UTBETALING
         ).contains(tilstand.type)
 
-    internal fun loggførHendelsesreferanse(hendelse: OverstyrInntekt) = hendelse.leggTil(hendelseIder)
-
     internal fun gjenopptaBehandlingNy(hendelse: IAktivitetslogg) {
         hendelse.kontekst(arbeidsgiver)
         kontekst(hendelse)
@@ -2248,6 +2246,10 @@ internal class Vedtaksperiode private constructor(
             { vedtaksperiode: Vedtaksperiode ->
                 vedtaksperiode.utbetalinger.erAvsluttet() && vedtaksperiode.skjæringstidspunkt > skjæringstidspunkt && vedtaksperiode.skjæringstidspunkt > segSelv.periode.endInclusive
             }
+        }
+
+        internal val MED_SKJÆRINGSTIDSPUNKT = { skjæringstidspunkt: LocalDate ->
+            { vedtaksperiode: Vedtaksperiode -> vedtaksperiode.skjæringstidspunkt == skjæringstidspunkt }
         }
 
         internal val ALLE: VedtaksperiodeFilter = { true }
