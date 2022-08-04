@@ -1,7 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.EnableToggle
-import no.nav.helse.Toggle
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype.Feriedag
 import no.nav.helse.hendelser.Dagtype.Sykedag
@@ -22,7 +20,6 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-@EnableToggle(Toggle.NyRevurdering::class)
 internal class RevurderingUtbetalingerTest: AbstractEndToEndTest() {
 
     @Test

@@ -3,8 +3,6 @@ package no.nav.helse.utbetalingslinjer
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.EnableToggle
-import no.nav.helse.Toggle
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Søknad
@@ -39,7 +37,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-@EnableToggle(Toggle.NyRevurdering::class)
 internal class LagUtbetalingForRevurderingTest {
 
     private lateinit var maskinellJurist: MaskinellJurist

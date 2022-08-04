@@ -54,8 +54,6 @@ spec:
     value: earliest
   - name: GraphQLPlayground
     value: "true"
-  - name: NyRevurdering
-    value: "true"
   - name: RevurdereInntektMedFlereArbeidsgivere
     value: "true"
   - name: Bugfix

@@ -1,8 +1,6 @@
 package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate
-import no.nav.helse.EnableToggle
-import no.nav.helse.Toggle
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype.Feriedag
 import no.nav.helse.hendelser.ManuellOverskrivingDag
@@ -23,7 +21,6 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-@EnableToggle(Toggle.NyRevurdering::class)
 internal class RevurderingBehovV2E2ETest : AbstractEndToEndTest() {
 
     @Test

@@ -798,38 +798,13 @@ internal class Vedtaksperiode private constructor(
         arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger,
         hendelse: ArbeidstakerHendelse
     ) {
-        if (Toggle.NyRevurdering.disabled) {
-            arbeidsgiver.beregn(hendelse, arbeidsgiverUtbetalinger, periode(), mapOf(periode to (hendelse to jurist())))
-            check(!hendelse.hasErrorsOrWorse()) { "Skal ikke ha errors i validering av ytelser i revurdering." }
-            val vedtaksperioder = person.nåværendeVedtaksperioder(IKKE_FERDIG_REVURDERT)
-            vedtaksperioder.forEach { it.lagRevurdering(arbeidsgiverUtbetalinger.maksimumSykepenger, hendelse) }
-            val første = vedtaksperioder.first()
-            if (første == this) return første.forsøkRevurderingSteg2(vedtaksperioder.drop(1), hendelse)
-
-            this.tilstand(hendelse, AvventerArbeidsgivereRevurdering)
-            return Companion.gjenopptaBehandling(
-                hendelse,
-                person,
-                AvventerArbeidsgivereRevurdering,
-                AvventerHistorikkRevurdering,
-                IKKE_FERDIG_REVURDERT
-            )
-        }
         person.lagRevurdering(this, arbeidsgiverUtbetalinger, hendelse)
         høstingsresultaterRevurdering(hendelse)
     }
 
     private fun lagRevurdering(maksimumSykepenger: Alder.MaksimumSykepenger, aktivitetslogg: IAktivitetslogg) {
-        if (Toggle.NyRevurdering.enabled) utbetalinger.forkast(aktivitetslogg)
+        utbetalinger.forkast(aktivitetslogg)
         utbetalingstidslinje = utbetalinger.lagRevurdering(fødselsnummer, this, periode, maksimumSykepenger, aktivitetslogg)
-    }
-
-    private fun forsøkRevurderingSteg2(andreVedtaksperioder: List<Vedtaksperiode>, hendelse: ArbeidstakerHendelse) {
-        when {
-            !andreVedtaksperioder.erKlareTilGodkjenning() -> tilstand(hendelse, AvventerArbeidsgivereRevurdering)
-            !arbeidsgiver.alleAndrePerioderErKlare(this) -> tilstand(hendelse, AvventerGjennomførtRevurdering)
-            else -> høstingsresultaterRevurdering(hendelse)
-        }
     }
 
     private fun høstingsresultaterRevurdering(hendelse: ArbeidstakerHendelse) {
@@ -851,10 +826,6 @@ internal class Vedtaksperiode private constructor(
     private fun mottaUtbetalingTilRevurdering(aktivitetslogg: IAktivitetslogg, utbetaling: Utbetaling) {
         utbetalingstidslinje = utbetalinger.mottaRevurdering(aktivitetslogg, utbetaling, periode)
     }
-
-    private fun List<Vedtaksperiode>.erKlareTilGodkjenning() = this
-        .filter { this@Vedtaksperiode.periode.overlapperMed(it.periode) }
-        .all { it.tilstand == AvventerArbeidsgivereRevurdering }
 
     private fun harArbeidsgivereMedOverlappendeUtbetaltePerioder(periode: Periode) =
         person.harArbeidsgivereMedOverlappendeUtbetaltePerioder(organisasjonsnummer, periode)
@@ -1189,10 +1160,6 @@ internal class Vedtaksperiode private constructor(
         override fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime): LocalDateTime =
             LocalDateTime.MAX
 
-        override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            if (Toggle.NyRevurdering.disabled) vedtaksperiode.person.gjenopptaBehandling(hendelse)
-        }
-
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
             sikkerlogg.info("Vedtaksperiode {} i tilstand {} overlappet med inntektsmelding {}",
                 keyValue("vedtaksperiodeId", vedtaksperiode.id), keyValue("tilstand", type), keyValue("meldingsreferanseId", inntektsmelding.meldingsreferanseId()))
@@ -1214,8 +1181,7 @@ internal class Vedtaksperiode private constructor(
             gjenopptaBehandlingNy(vedtaksperiode, gjenopptaBehandling)
 
         override fun gjenopptaBehandlingNy(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            if (Toggle.NyRevurdering.disabled && !vedtaksperiode.utbetalinger.erAvsluttet()) return
-            if (Toggle.NyRevurdering.enabled && vedtaksperiode.arbeidsgiver.avventerRevurdering()) return
+            if (vedtaksperiode.arbeidsgiver.avventerRevurdering()) return
             hendelse.info("Går til avsluttet fordi revurdering er fullført via en annen vedtaksperiode")
             vedtaksperiode.tilstand(hendelse, Avsluttet)
         }
@@ -1225,7 +1191,6 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
-            if (Toggle.NyRevurdering.disabled) return vedtaksperiode.person.overstyrUtkastRevurdering(hendelse)
             vedtaksperiode.emitVedtaksperiodeEndret(hendelse)
             vedtaksperiode.revurderTidslinje(hendelse)
         }
@@ -1237,7 +1202,6 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {
             if (!vedtaksperiode.kanRevurdereInntektForFlereArbeidsgivere(hendelse)) return
-            if (Toggle.NyRevurdering.disabled) return vedtaksperiode.person.overstyrUtkastRevurdering(hendelse)
             vedtaksperiode.emitVedtaksperiodeEndret(hendelse)
             vedtaksperiode.revurderInntekt(hendelse)
         }
@@ -1302,8 +1266,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             hendelse.info("Forespør sykdoms- og inntektshistorikk")
-            if (Toggle.NyRevurdering.disabled) vedtaksperiode.utbetalinger.forkast(hendelse)
-            val periode = if (Toggle.NyRevurdering.disabled) vedtaksperiode.periode else vedtaksperiode.skjæringstidspunktperiode()
+            val periode = vedtaksperiode.skjæringstidspunktperiode()
             vedtaksperiode.trengerYtelser(hendelse, periode)
             vedtaksperiode.finnArbeidsgiverperiode()?.firstOrNull()?.also {
                 if (it < 1.oktober(2021)) {
@@ -1321,7 +1284,6 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {
             if (!vedtaksperiode.kanRevurdereInntektForFlereArbeidsgivere(hendelse)) return
-            if (Toggle.NyRevurdering.disabled) return super.håndter(vedtaksperiode, hendelse)
             vedtaksperiode.revurderInntekt(hendelse)
         }
 
@@ -1342,17 +1304,7 @@ internal class Vedtaksperiode private constructor(
             }
 
             ErrorsTilWarnings.wrap(ytelser) {
-                if (Toggle.NyRevurdering.disabled) {
-                    infotrygdhistorikk.valider(
-                        ytelser,
-                        arbeidsgiver,
-                        vedtaksperiode.periode,
-                        vedtaksperiode.skjæringstidspunkt
-                    )
-                    ytelser.valider(vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt)
-                } else {
-                    vedtaksperiode.validerYtelserForSkjæringstidspunkt(ytelser)
-                }
+                vedtaksperiode.validerYtelserForSkjæringstidspunkt(ytelser)
                 val arbeidsgiverUtbetalinger = arbeidsgiverUtbetalingerFun(vedtaksperiode.jurist())
                 vedtaksperiode.forsøkRevurdering(arbeidsgiverUtbetalinger, ytelser)
             }
@@ -1853,7 +1805,6 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {
             if (!vedtaksperiode.kanRevurdereInntektForFlereArbeidsgivere(hendelse)) return
-            if (Toggle.NyRevurdering.disabled) return super.håndter(vedtaksperiode, hendelse)
             vedtaksperiode.revurderInntekt(hendelse)
         }
 
@@ -2106,7 +2057,6 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
-            if (Toggle.NyRevurdering.disabled) return vedtaksperiode.person.overstyrUtkastRevurdering(hendelse)
             vedtaksperiode.revurderTidslinje(hendelse)
         }
 
@@ -2117,7 +2067,6 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {
             if (!vedtaksperiode.kanRevurdereInntektForFlereArbeidsgivere(hendelse)) return
-            if (Toggle.NyRevurdering.disabled) return vedtaksperiode.person.overstyrUtkastRevurdering(hendelse)
             vedtaksperiode.revurderInntekt(hendelse)
         }
 
@@ -2192,7 +2141,6 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
-            vedtaksperiode.person.overstyrUtkastRevurdering(hendelse)
         }
 
         override fun håndterRevurderingFeilet(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
@@ -2269,22 +2217,6 @@ internal class Vedtaksperiode private constructor(
             hendelse.error("Blokkerer revurdering fordi periode er i UtbetalingFeilet")
         }
 
-        override fun håndterTidligereUferdigPeriode(
-            vedtaksperiode: Vedtaksperiode,
-            tidligere: Vedtaksperiode,
-            hendelse: IAktivitetslogg
-        ) {
-            if (Toggle.NyRevurdering.disabled) return vedtaksperiode.tilstand(hendelse, AvventerArbeidsgivereRevurdering)
-        }
-
-        override fun håndterTidligereTilstøtendeUferdigPeriode(
-            vedtaksperiode: Vedtaksperiode,
-            tidligere: Vedtaksperiode,
-            hendelse: IAktivitetslogg
-        ) {
-            if (Toggle.NyRevurdering.disabled) return vedtaksperiode.tilstand(hendelse, AvventerArbeidsgivereRevurdering)
-        }
-
         override fun håndter(
             person: Person,
             arbeidsgiver: Arbeidsgiver,
@@ -2301,10 +2233,7 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
             if (vedtaksperiode.utbetalinger.kanIkkeForsøkesPåNy()) {
                 return vedtaksperiode.utbetalinger.reberegnUtbetaling({
-                    if (Toggle.NyRevurdering.disabled)
-                        vedtaksperiode.person.overstyrUtkastRevurdering(påminnelse)
-                    else
-                        vedtaksperiode.person.startRevurdering(vedtaksperiode, påminnelse)
+                    vedtaksperiode.person.startRevurdering(vedtaksperiode, påminnelse)
                 }) {
                     vedtaksperiode.tilstand(påminnelse, AvventerHistorikk) {
                         påminnelse.info("Reberegner periode ettersom utbetaling er avvist og ikke kan forsøkes på nytt")
@@ -2325,8 +2254,6 @@ internal class Vedtaksperiode private constructor(
             overstyrt: Vedtaksperiode,
             pågående: Vedtaksperiode?
         ) {
-            if (Toggle.NyRevurdering.disabled) return super.startRevurdering(arbeidsgivere, vedtaksperiode, hendelse, overstyrt, pågående)
-
             if (vedtaksperiode != overstyrt) return
             check(pågående != null && vedtaksperiode == pågående) { "Skal ikke kunne restarte revurdering i $type dersom det ikke er oss selv som har igangsatt revurderingen" }
             vedtaksperiode.tilstand(hendelse, AvventerGjennomførtRevurdering)
@@ -2470,12 +2397,9 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {
             if (!vedtaksperiode.kanRevurdereInntektForFlereArbeidsgivere(hendelse)) return
-
             if (Toggle.RevurdereInntektMedFlereArbeidsgivere.disabled && vedtaksperiode.inntektskilde == Inntektskilde.FLERE_ARBEIDSGIVERE) {
                 hendelse.error("Forespurt revurdering av inntekt hvor personen har flere arbeidsgivere (inkl. ghosts)")
             }
-            if (!vedtaksperiode.person.kanRevurdereInntekt(hendelse.skjæringstidspunkt)) return hendelse.error("Kan ikke revurdere inntekt, da vi mangler datagrunnlag på skjæringstidspunktet")
-            vedtaksperiode.person.igangsettRevurdering(hendelse, vedtaksperiode)
         }
 
         override fun revurder(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {
@@ -2529,10 +2453,6 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
-            if (Toggle.NyRevurdering.disabled) return vedtaksperiode.person.igangsettRevurdering(
-                hendelse,
-                vedtaksperiode
-            )
             vedtaksperiode.låsOpp()
             vedtaksperiode.oppdaterHistorikk(hendelse)
             vedtaksperiode.lås()
@@ -2541,21 +2461,13 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {
             if (!vedtaksperiode.kanRevurdereInntektForFlereArbeidsgivere(hendelse)) return
-            if (Toggle.NyRevurdering.disabled) {
-                if (vedtaksperiode.person.kanRevurdereInntekt(hendelse.skjæringstidspunkt)) {
-                    vedtaksperiode.person.igangsettRevurdering(hendelse, vedtaksperiode)
-                } else {
-                    hendelse.error("Kan ikke revurdere inntekt, da vi mangler datagrunnlag på skjæringstidspunktet")
-                }
-            } else {
-                vedtaksperiode.person.nyInntekt(hendelse)
-                vedtaksperiode.person.vilkårsprøvEtterNyInformasjonFraSaksbehandler(
-                    hendelse,
-                    vedtaksperiode.skjæringstidspunkt,
-                    vedtaksperiode.jurist()
-                )
-                vedtaksperiode.person.startRevurdering(vedtaksperiode, hendelse)
-            }
+            vedtaksperiode.person.nyInntekt(hendelse)
+            vedtaksperiode.person.vilkårsprøvEtterNyInformasjonFraSaksbehandler(
+                hendelse,
+                vedtaksperiode.skjæringstidspunkt,
+                vedtaksperiode.jurist()
+            )
+            vedtaksperiode.person.startRevurdering(vedtaksperiode, hendelse)
         }
 
         override fun revurder(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {

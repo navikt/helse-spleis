@@ -2,8 +2,6 @@ package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.helse.EnableToggle
-import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
@@ -52,7 +50,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
-@EnableToggle(Toggle.NyRevurdering::class)
 internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
 
     @Test

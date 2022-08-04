@@ -3,7 +3,6 @@ package no.nav.helse.serde.api.v2.buildere
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.februar
@@ -1671,7 +1670,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `revurdering av tidligere skjæringstidspunkt`() = Toggle.NyRevurdering.enable {
+    fun `revurdering av tidligere skjæringstidspunkt`() {
         nyttVedtak(1.januar, 31.januar)
         nyttVedtak(1.mars, 31.mars)
 
