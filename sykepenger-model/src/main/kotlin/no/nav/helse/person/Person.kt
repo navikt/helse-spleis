@@ -43,7 +43,6 @@ import no.nav.helse.person.Arbeidsgiver.Companion.harArbeidsgivereMedOverlappend
 import no.nav.helse.person.Arbeidsgiver.Companion.harOverlappendeEllerForlengerForkastetVedtaksperiode
 import no.nav.helse.person.Arbeidsgiver.Companion.harPeriodeSomBlokkererOverstyring
 import no.nav.helse.person.Arbeidsgiver.Companion.harUtbetaltPeriode
-import no.nav.helse.person.Arbeidsgiver.Companion.harVedtaksperiodeFor
 import no.nav.helse.person.Arbeidsgiver.Companion.håndter
 import no.nav.helse.person.Arbeidsgiver.Companion.håndterOverstyringAvGhostInntekt
 import no.nav.helse.person.Arbeidsgiver.Companion.inntekterForSammenligningsgrunnlag
@@ -744,11 +743,6 @@ class Person private constructor(
             Arbeidsgiver(this, arbeidsgiver, jurist)
         }
     }
-
-    internal fun harVedtaksperiodeForAnnenArbeidsgiver(arbeidsgiver: Arbeidsgiver, skjæringstidspunkt: LocalDate) =
-        arbeidsgivere
-            .filter { it != arbeidsgiver }
-            .harVedtaksperiodeFor(skjæringstidspunkt)
 
     internal fun harFlereArbeidsgivereMedSykdom() = arbeidsgivere.count(Arbeidsgiver::harSykdomEllerForventerSøknad) > 1
 

@@ -216,9 +216,6 @@ internal class Arbeidsgiver private constructor(
                 }
             }
 
-        internal fun Iterable<Arbeidsgiver>.harVedtaksperiodeFor(skjæringstidspunkt: LocalDate) =
-            any { it.harSykdomFor(skjæringstidspunkt) }
-
         internal fun Iterable<Arbeidsgiver>.harArbeidsgivereMedOverlappendeUtbetaltePerioder(orgnummer: String, periode: Periode) = this
             .filter { it.organisasjonsnummer != orgnummer }
             .any { it.vedtaksperioder.harOverlappendeUtbetaltePerioder(periode) }
@@ -963,8 +960,6 @@ internal class Arbeidsgiver private constructor(
     }
 
     private fun harDeaktivertArbeidsforhold(skjæringstidspunkt: LocalDate) = arbeidsforholdhistorikk.harDeaktivertArbeidsforhold(skjæringstidspunkt)
-
-    internal fun kanReberegnes(vedtaksperiode: Vedtaksperiode) = vedtaksperioder.all { it.kanReberegne(vedtaksperiode) }
 
     private fun registrerNyVedtaksperiode(vedtaksperiode: Vedtaksperiode) {
         vedtaksperioder.add(vedtaksperiode)

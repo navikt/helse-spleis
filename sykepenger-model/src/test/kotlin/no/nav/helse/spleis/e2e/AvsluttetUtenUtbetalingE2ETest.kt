@@ -1,7 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.Toggle
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -160,52 +158,7 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
     }
 
     @Test
-    fun `arbeidsgiverperiode med brudd i helg`() = Toggle.RevurdereAUU.disable {
-        håndterSykmelding(Sykmeldingsperiode(4.januar, 5.januar, 100.prosent))
-        håndterSøknad(Sykdom(4.januar, 5.januar, 100.prosent))
-        håndterUtbetalingshistorikk(1.vedtaksperiode)
-        håndterSykmelding(Sykmeldingsperiode(8.januar, 12.januar, 100.prosent))
-        håndterSøknad(Sykdom(8.januar, 12.januar, 100.prosent))
-        håndterUtbetalingshistorikk(2.vedtaksperiode)
-        håndterSykmelding(Sykmeldingsperiode(13.januar, 19.januar, 100.prosent))
-        håndterSøknad(Sykdom(13.januar, 19.januar, 100.prosent))
-        håndterUtbetalingshistorikk(3.vedtaksperiode)
-        håndterSykmelding(Sykmeldingsperiode(20.januar, 1.februar, 100.prosent))
-        håndterSøknad(Sykdom(20.januar, 1.februar, 100.prosent))
-        håndterUtbetalingshistorikk(4.vedtaksperiode)
-
-        assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(4.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
-
-        // 6. og 7. januar blir FriskHelg og medfører brudd i arbeidsgiverperioden
-        // og dermed ble også skjæringstidspunktet forskjøvet til 8. januar
-        håndterInntektsmelding(
-            listOf(
-                1.januar til 3.januar, //3
-                4.januar til 5.januar, // 2
-                // 6. og 7. januar er helg
-                8.januar til 12.januar,// 5
-                13.januar til 18.januar // 6
-            ), 8.januar
-        )
-
-        assertForventetFeil(
-            forklaring = "Støtter ikke å reberegne ved inntektsmelding i AVSLUTTET_UTEN_UTBETALING",
-            nå = {
-                assertSisteTilstand(3.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-                assertSisteTilstand(4.vedtaksperiode, AVVENTER_HISTORIKK)
-            },
-            ønsket = {
-                assertSisteTilstand(3.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
-                assertSisteTilstand(4.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
-            }
-        )
-    }
-
-    @Test
-    fun `arbeidsgiverperiode med brudd i helg (toggle)`() = Toggle.RevurdereAUU.enable {
+    fun `arbeidsgiverperiode med brudd i helg (toggle)`() {
         håndterSykmelding(Sykmeldingsperiode(4.januar, 5.januar, 100.prosent))
         håndterSøknad(Sykdom(4.januar, 5.januar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode)

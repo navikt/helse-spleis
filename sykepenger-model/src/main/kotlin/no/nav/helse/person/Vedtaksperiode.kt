@@ -340,12 +340,8 @@ internal class Vedtaksperiode private constructor(
         tilstand.nyPeriodeFørMedNyFlyt(this, ny, hendelse)
     }
 
-    internal fun kanReberegne(other: Vedtaksperiode): Boolean {
-        if (other etter this || other == this) return true
-        return tilstand.kanReberegnes
-    }
-
-    internal fun blokkererOverstyring(skjæringstidspunkt: LocalDate) = skjæringstidspunkt == this.skjæringstidspunkt && !(tilstand.kanReberegnes || tilstand.type == AVVENTER_GODKJENNING)
+    internal fun blokkererOverstyring(skjæringstidspunkt: LocalDate) =
+        skjæringstidspunkt == this.skjæringstidspunkt && !tilstand.kanReberegnes
 
     internal fun håndterRevurdertUtbetaling(
         other: Vedtaksperiode,
@@ -1579,7 +1575,6 @@ internal class Vedtaksperiode private constructor(
 
     internal object AvventerGodkjenning : Vedtaksperiodetilstand {
         override val type = AVVENTER_GODKJENNING
-        override val kanReberegnes = false
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.trengerGodkjenning(hendelse)
@@ -1962,11 +1957,6 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
-            if (Toggle.RevurdereAUU.enabled) return håndterInntektsmeldingNy(vedtaksperiode, inntektsmelding)
-            return håndterInntektsmeldingGammel(vedtaksperiode, inntektsmelding)
-        }
-
-        private fun håndterInntektsmeldingNy(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
             val revurderingIkkeStøttet = vedtaksperiode.person.vedtaksperioder(NYERE_SKJÆRINGSTIDSPUNKT_MED_UTBETALING(vedtaksperiode)).isNotEmpty()
             vedtaksperiode.håndterInntektsmelding(inntektsmelding) { this } // håndterInntektsmelding krever tilstandsendring, men vi må avvente til vi starter revurdering
 
@@ -1988,41 +1978,6 @@ internal class Vedtaksperiode private constructor(
             }
             inntektsmelding.info("Igangsetter revurdering ettersom det skal utbetales noe i perioden likevel")
             vedtaksperiode.person.startRevurdering(vedtaksperiode, inntektsmelding)
-        }
-
-        private fun håndterInntektsmeldingGammel(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
-            val debugkeys = arrayOf(
-                keyValue("vedtaksperiodeId", vedtaksperiode.id),
-                keyValue("aktørId", vedtaksperiode.aktørId),
-                keyValue("organisasjonsnummer", vedtaksperiode.organisasjonsnummer)
-            )
-            val hvisIngenErrors = {
-                vedtaksperiode.emitVedtaksperiodeEndret(inntektsmelding)
-                when {
-                    vedtaksperiode.finnArbeidsgiverperiode() == null -> sikkerlogg.info("inntektsmelding i auu: har ikke arbeidsgiverperiode etter mottak av im for {} {} {}. Perioden er mest sannsynlig erstattet med arbeidsdager", *debugkeys)
-                    vedtaksperiode.ingenUtbetaling() -> sikkerlogg.info("inntektsmelding i auu: er fortsatt innenfor arbeidsgiverperioden etter mottak av im for {} {} {}", *debugkeys)
-                    !vedtaksperiode.arbeidsgiver.kanReberegnes(vedtaksperiode) -> sikkerlogg.info("inntektsmelding i auu: Kan ikke reberegne {} for {} {} fordi nyere periode blokkerer", *debugkeys)
-                    else -> sikkerlogg.info("inntektsmelding i auu: vil reberegne vedtaksperiode {} for {} {}", *debugkeys)
-                }
-            }
-            val nesteTilstand: () -> Vedtaksperiodetilstand = {
-                when {
-                    vedtaksperiode.ingenUtbetaling() || !vedtaksperiode.sykdomstidslinje.harSykedager() -> AvsluttetUtenUtbetaling
-                    !vedtaksperiode.arbeidsgiver.kanReberegnes(vedtaksperiode) -> {
-                        inntektsmelding.error("Kan ikke reberegne perioden fordi det er en nyere periode som er ferdig behandlet")
-                        AvsluttetUtenUtbetaling
-                    }
-                    vedtaksperiode.person.harVedtaksperiodeForAnnenArbeidsgiver(
-                        vedtaksperiode.arbeidsgiver,
-                        vedtaksperiode.skjæringstidspunkt
-                    ) -> {
-                        vedtaksperiode.person.invaliderAllePerioder(inntektsmelding, "Kan ikke flytte en vedtaksperiode i AVSLUTTET_UTEN_UTBETALING ved flere arbeidsgivere")
-                        AvsluttetUtenUtbetaling
-                    }
-                    else -> AvsluttetUtenUtbetaling
-                }
-            }
-            vedtaksperiode.håndterInntektsmelding(inntektsmelding, hvisIngenErrors = hvisIngenErrors, nesteTilstand = nesteTilstand)
         }
 
         override fun håndter(
