@@ -75,7 +75,9 @@ internal class Hendelsefabrikk(
         andreInntektskilder: List<Søknad.Inntektskilde> = emptyList(),
         sendtTilNAVEllerArbeidsgiver: LocalDate? = null,
         sykmeldingSkrevet: LocalDateTime? = null,
-        id: UUID = UUID.randomUUID()
+        id: UUID = UUID.randomUUID(),
+        merknaderFraSykmelding: List<Søknad.Merknad> = emptyList(),
+        permittert: Boolean = false,
     ): Søknad {
         val innsendt = sendtTilNAVEllerArbeidsgiver ?: Søknad.Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive
         return Søknad(
@@ -86,9 +88,10 @@ internal class Hendelsefabrikk(
             perioder = listOf(*perioder),
             andreInntektskilder = andreInntektskilder,
             sendtTilNAVEllerArbeidsgiver = innsendt.atStartOfDay(),
-            permittert = false,
-            merknaderFraSykmelding = emptyList(),
-            sykmeldingSkrevet = sykmeldingSkrevet ?: Søknad.Søknadsperiode.søknadsperiode(perioder.toList())!!.start.atStartOfDay()
+            permittert = permittert,
+            merknaderFraSykmelding = merknaderFraSykmelding,
+            sykmeldingSkrevet = sykmeldingSkrevet ?: Søknad.Søknadsperiode.søknadsperiode(perioder.toList())!!.start.atStartOfDay(),
+            fødselsdato = fødselsdato
         ).apply {
             søknader.add(this)
         }

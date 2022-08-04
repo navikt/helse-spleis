@@ -126,22 +126,16 @@ internal fun AbstractEndToEndTest.søknad(
     sendtTilNAVEllerArbeidsgiver: LocalDate = Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive,
     orgnummer: String = AbstractPersonTest.ORGNUMMER,
     sykmeldingSkrevet: LocalDateTime? = null,
-    fnr: Fødselsnummer = AbstractPersonTest.UNG_PERSON_FNR_2018
-): Søknad {
-    return Søknad(
-        meldingsreferanseId = id,
-        fnr = fnr.toString(),
-        aktørId = AKTØRID,
-        orgnummer = orgnummer,
-        perioder = listOf(*perioder),
-        andreInntektskilder = andreInntektskilder,
-        sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver.atStartOfDay(),
-        permittert = false,
-        merknaderFraSykmelding = emptyList(),
-        sykmeldingSkrevet = sykmeldingSkrevet ?: Søknadsperiode.søknadsperiode(perioder.toList())!!.start.atStartOfDay()
-    ).apply {
-        hendelselogg = this
-    }
+    fnr: Fødselsnummer = AbstractPersonTest.UNG_PERSON_FNR_2018,
+    fødselsdato: LocalDate = UNG_PERSON_FØDSELSDATO
+) = Hendelsefabrikk(AKTØRID, fnr, orgnummer, fødselsdato).lagSøknad(
+    id = id,
+    perioder = perioder,
+    andreInntektskilder = andreInntektskilder,
+    sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver,
+    sykmeldingSkrevet = sykmeldingSkrevet ?: Søknadsperiode.søknadsperiode(perioder.toList())!!.start.atStartOfDay()
+).apply {
+    hendelselogg = this
 }
 
 internal fun AbstractEndToEndTest.inntektsmeldingReplay(

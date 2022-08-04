@@ -21,7 +21,6 @@ import no.nav.helse.hendelser.Pleiepenger
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
@@ -186,17 +185,9 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
             )
         )
     ) =
-        Søknad(
-            meldingsreferanseId = UUID.randomUUID(),
-            fnr = UNG_PERSON_FNR_2018.toString(),
-            aktørId = "12345",
-            orgnummer = ORGNUMMER,
-            perioder = perioder.toList(),
-            andreInntektskilder = emptyList(),
-            sendtTilNAVEllerArbeidsgiver = 20.januar.atStartOfDay(),
-            permittert = false,
-            merknaderFraSykmelding = emptyList(),
-            sykmeldingSkrevet = LocalDateTime.now()
+        a1Hendelsefabrikk.lagSøknad(
+            perioder = perioder,
+            sendtTilNAVEllerArbeidsgiver = 20.januar
         ).apply {
             hendelse = this
         }

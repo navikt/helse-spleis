@@ -2,7 +2,6 @@ package no.nav.helse.serde
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.LocalTime
 import java.time.Year
 import java.util.UUID
 import no.nav.helse.Toggle
@@ -154,7 +153,7 @@ class JsonBuilderTest {
                     hendelseId = UUID.randomUUID(),
                     fom = fom,
                     tom = tom,
-                    sendtSøknad = tom.atStartOfDay()
+                    sendtSøknad = tom
                 )
             )
             fangeSykdomstidslinje()
@@ -241,7 +240,7 @@ class JsonBuilderTest {
                     hendelseId = UUID.randomUUID(),
                     fom = 1.januar,
                     tom = 31.januar,
-                    sendtSøknad = 1.februar.atStartOfDay()
+                    sendtSøknad = 1.februar
                 )
             )
         }
@@ -257,7 +256,7 @@ class JsonBuilderTest {
                     hendelseId = UUID.randomUUID(),
                     fom = 1.januar,
                     tom = 31.januar,
-                    sendtSøknad = 1.februar.atStartOfDay()
+                    sendtSøknad = 1.februar
                 )
             )
 
@@ -267,7 +266,7 @@ class JsonBuilderTest {
                     hendelseId = UUID.randomUUID(),
                     fom = 1.februar,
                     tom = 28.februar,
-                    sendtSøknad = 1.mars.atStartOfDay()
+                    sendtSøknad = 1.mars
                 )
             )
             håndter(inntektsmelding(fom = 1.januar))
@@ -293,7 +292,7 @@ class JsonBuilderTest {
                     hendelseId = søknadhendelseId,
                     fom = fom,
                     tom = tom,
-                    sendtSøknad = sendtSøknad.atStartOfDay()
+                    sendtSøknad = sendtSøknad
                 )
             )
             fangeSykdomstidslinje()
@@ -323,7 +322,7 @@ class JsonBuilderTest {
                     hendelseId = søknadhendelseId,
                     fom = fom,
                     tom = tom,
-                    sendtSøknad = sendtSøknad.atStartOfDay()
+                    sendtSøknad = sendtSøknad
                 )
             )
             fangeVedtaksperiode()
@@ -358,7 +357,7 @@ class JsonBuilderTest {
                 søknad(
                     fom = 1.januar,
                     tom = 9.januar,
-                    sendtSøknad = sendtSøknad.atStartOfDay(),
+                    sendtSøknad = sendtSøknad,
                     hendelseId = søknadhendelseId
                 )
             )
@@ -379,7 +378,7 @@ class JsonBuilderTest {
                 søknad(
                     fom = 1.januar,
                     tom = 9.januar,
-                    sendtSøknad = sendtSøknad.atStartOfDay(),
+                    sendtSøknad = sendtSøknad,
                     perioder = listOf(
                         Sykdom(1.januar, 9.januar, 100.prosent)
                     ),
@@ -402,7 +401,7 @@ class JsonBuilderTest {
                     hendelseId = søknadhendelseId,
                     fom = fom,
                     tom = tom,
-                    sendtSøknad = sendtSøknad.atStartOfDay()
+                    sendtSøknad = sendtSøknad
                 )
             )
             fangeVedtaksperiode()
@@ -487,7 +486,7 @@ class JsonBuilderTest {
                     hendelseId = søknadhendelseId,
                     fom = fom,
                     tom = tom,
-                    sendtSøknad = sendtSøknad.atStartOfDay()
+                    sendtSøknad = sendtSøknad
                 )
             )
             fangeSykdomstidslinje()
@@ -561,7 +560,7 @@ class JsonBuilderTest {
                     hendelseId = søknadhendelseId,
                     fom = fom,
                     tom = tom,
-                    sendtSøknad = sendtSøknad.atStartOfDay()
+                    sendtSøknad = sendtSøknad
                 )
             )
             fangeSykdomstidslinje()
@@ -673,20 +672,14 @@ class JsonBuilderTest {
         hendelseId: UUID = UUID.randomUUID(),
         fom: LocalDate = 1.januar,
         tom: LocalDate = 31.januar,
-        sendtSøknad: LocalDateTime = tom.plusDays(5).atTime(LocalTime.NOON),
+        sendtSøknad: LocalDate = tom.plusDays(5),
         perioder: List<Søknad.Søknadsperiode> = listOf(Sykdom(fom, tom, 100.prosent)),
         andreInntektsKilder: List<Søknad.Inntektskilde> = emptyList()
-    ) = Søknad(
-        meldingsreferanseId = hendelseId,
-        fnr = fnr.toString(),
-        aktørId = aktørId,
-        orgnummer = orgnummer,
-        perioder = perioder,
+    ) = hendelsefabrikk.lagSøknad(
+        id = hendelseId,
+        perioder = perioder.toTypedArray(),
         andreInntektskilder = andreInntektsKilder,
-        sendtTilNAVEllerArbeidsgiver = sendtSøknad,
-        permittert = false,
-        merknaderFraSykmelding = emptyList(),
-        sykmeldingSkrevet = LocalDateTime.now()
+        sendtTilNAVEllerArbeidsgiver = sendtSøknad
     )
 
     private fun inntektsmelding(

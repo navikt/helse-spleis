@@ -15,6 +15,7 @@ internal class SendtSøknadBuilder : SøknadBuilder() {
         meldingsreferanseId = meldingsreferanseId,
         fnr = fnr,
         aktørId = aktørId,
+        fødselsdato = fødselsdato,
         orgnummer = organisasjonsnummer,
         perioder = perioder,
         andreInntektskilder = inntektskilder,
@@ -45,7 +46,7 @@ internal class SendtSøknadBuilder : SøknadBuilder() {
     }
 
     override fun merknader(type: String, beskrivelse: String?) = apply {
-        merkander.add(Merknad(type, beskrivelse))
+        merkander.add(Merknad(type))
     }
 
     override fun papirsykmelding(fom: LocalDate, tom: LocalDate) = apply {

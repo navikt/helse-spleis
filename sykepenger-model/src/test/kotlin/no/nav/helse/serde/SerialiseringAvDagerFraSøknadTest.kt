@@ -1,12 +1,9 @@
 package no.nav.helse.serde
 
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.april
 import no.nav.helse.dsl.Hendelsefabrikk
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Egenmelding
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
@@ -81,12 +78,8 @@ internal class SerialiseringAvDagerFraSøknadTest {
         mottatt = 4.april.atStartOfDay()
     )
 
-    private val søknad get() = Søknad(
-        meldingsreferanseId = UUID.randomUUID(),
-        fnr = fnr,
-        aktørId = aktørId,
-        orgnummer = orgnummer,
-        perioder = listOf(
+    private val søknad get() = hendelsefabrikk.lagSøknad(
+        perioder = arrayOf(
             Sykdom(1.januar,  2.januar, 100.prosent),
             Egenmelding(2.januar, 2.januar),
             Arbeid(3.januar, 3.januar),
@@ -94,11 +87,7 @@ internal class SerialiseringAvDagerFraSøknadTest {
             Permisjon(5.januar, 5.januar),
             Utdanning(5.januar, 5.januar)
         ),
-        andreInntektskilder = emptyList(),
-        sendtTilNAVEllerArbeidsgiver = 5.januar.atStartOfDay(),
-        permittert = false,
-        merknaderFraSykmelding = emptyList(),
-        sykmeldingSkrevet = LocalDateTime.now()
+        sendtTilNAVEllerArbeidsgiver = 5.januar
     )
 }
 

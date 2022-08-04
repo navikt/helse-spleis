@@ -19,7 +19,6 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Pleiepenger
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
@@ -165,17 +164,9 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
     }
 
     private fun søknad() =
-        Søknad(
-            meldingsreferanseId = UUID.randomUUID(),
-            fnr = UNG_PERSON_FNR_2018.toString(),
-            aktørId = "aktørId",
-            orgnummer = ORGNUMMER,
-            perioder = listOf(Sykdom(førsteSykedag, sisteSykedag, 100.prosent)),
-            andreInntektskilder = emptyList(),
-            sendtTilNAVEllerArbeidsgiver = sisteSykedag.atStartOfDay(),
-            permittert = false,
-            merknaderFraSykmelding = emptyList(),
-            sykmeldingSkrevet = LocalDateTime.now()
+        a1Hendelsefabrikk.lagSøknad(
+            perioder = arrayOf(Sykdom(førsteSykedag, sisteSykedag, 100.prosent)),
+            sendtTilNAVEllerArbeidsgiver = sisteSykedag
         ).apply {
             hendelse = this
         }

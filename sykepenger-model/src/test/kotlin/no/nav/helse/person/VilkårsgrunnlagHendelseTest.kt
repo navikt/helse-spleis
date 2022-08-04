@@ -20,7 +20,6 @@ import no.nav.helse.hendelser.Opplæringspenger
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Pleiepenger
 import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
@@ -204,17 +203,9 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
 
     private fun søknad(
         perioder: List<Søknadsperiode> = listOf(Sykdom(1.januar, 31.januar, 100.prosent))
-    ) = Søknad(
-        meldingsreferanseId = UUID.randomUUID(),
-        fnr = UNG_PERSON_FNR_2018.toString(),
-        aktørId = "aktørId",
-        orgnummer = ORGNUMMER,
-        perioder = perioder,
-        andreInntektskilder = emptyList(),
-        sendtTilNAVEllerArbeidsgiver = 31.januar.atStartOfDay(),
-        permittert = false,
-        merknaderFraSykmelding = emptyList(),
-        sykmeldingSkrevet = LocalDateTime.now()
+    ) = a1Hendelsefabrikk.lagSøknad(
+        perioder = perioder.toTypedArray(),
+        sendtTilNAVEllerArbeidsgiver = 31.januar
     ).apply {
         hendelse = this
     }

@@ -24,6 +24,7 @@ class Søknad(
     meldingsreferanseId: UUID,
     fnr: String,
     aktørId: String,
+    private val fødselsdato: LocalDate,
     orgnummer: String,
     private val perioder: List<Søknadsperiode>,
     private val andreInntektskilder: List<Inntektskilde>,
@@ -51,7 +52,7 @@ class Søknad(
             .subset(sykdomsperiode)
     }
 
-    override fun personopplysninger() = Personopplysninger(fødselsnummer.somFødselsnummer(), aktørId)
+    override fun personopplysninger() = Personopplysninger(fødselsnummer.somFødselsnummer(), aktørId, fødselsdato)
 
     override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) {
         arbeidsgiver.håndter(this)
@@ -101,7 +102,7 @@ class Søknad(
         )
     }
 
-    class Merknad(private val type: String, beskrivelse: String?) {
+    class Merknad(private val type: String) {
         internal fun valider(aktivitetslogg: IAktivitetslogg) {
             if (type == "UGYLDIG_TILBAKEDATERING" || type == "TILBAKEDATERING_KREVER_FLERE_OPPLYSNINGER") {
                 aktivitetslogg.warn("Sykmeldingen er tilbakedatert, vurder fra og med dato for utbetaling.")

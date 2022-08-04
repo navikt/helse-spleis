@@ -3,6 +3,7 @@ package no.nav.helse.utbetalingslinjer
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.dsl.Hendelsefabrikk
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Søknad
@@ -47,6 +48,12 @@ internal class LagUtbetalingForRevurderingTest {
         private val FNR = "12029240045".somFødselsnummer()
         private const val ORGNUMMER = "123456789"
         private val SØKNAD = UUID.randomUUID()
+        private val hendelsefabrikk = Hendelsefabrikk(
+            aktørId = AKTØRID,
+            fødselsnummer = FNR,
+            organisasjonsnummer = ORGNUMMER,
+            fødselsdato = 12.februar(1992)
+        )
     }
 
     @BeforeEach
@@ -378,7 +385,7 @@ internal class LagUtbetalingForRevurderingTest {
     }.also { MaksimumUtbetalingFilter { 1.januar }.betal(listOf(tidslinje), tidslinje.periode(), aktivitetslogg, MaskinellJurist()) }
 
     private fun vedtaksperiode(periode: Periode = 1.januar til 31.januar, organisasjonsnummer: String = ORGNUMMER): Vedtaksperiode {
-        val søknad = søknad(SØKNAD, periode)
+        val søknad = søknad(periode)
         val sykdomstidslinje = periode.associateWith {
             Dag.Sykedag(
                 it,
@@ -402,9 +409,12 @@ internal class LagUtbetalingForRevurderingTest {
 
     private fun person() = Person(AKTØRID, FNR, FNR.alder(), maskinellJurist)
     private fun arbeidsgiver(organisasjonsnummer: String) = Arbeidsgiver(person(), organisasjonsnummer, maskinellJurist)
-    private fun søknad(søknadId: UUID, periode: Periode): Søknad {
+    private fun søknad(periode: Periode): Søknad {
         val søknadsperiode = Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent)
-        return Søknad(søknadId, FNR.toString(), AKTØRID, ORGNUMMER, listOf(søknadsperiode), emptyList(), LocalDateTime.now(), false, emptyList(), LocalDateTime.now())
+        return hendelsefabrikk.lagSøknad(
+            id = SØKNAD,
+            perioder = arrayOf(søknadsperiode)
+        )
     }
 
     private fun Utbetaling.assertDiff(diff: Int) {

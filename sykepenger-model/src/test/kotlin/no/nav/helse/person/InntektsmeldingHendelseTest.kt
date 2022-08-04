@@ -2,11 +2,9 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.inspectors.personLogg
@@ -92,17 +90,12 @@ internal class InntektsmeldingHendelseTest : AbstractPersonTest() {
         mottatt = Sykmeldingsperiode.periode(sykeperioder.toList())!!.endInclusive.atStartOfDay()
     )
 
-    private fun søknad(vararg perioder: Søknadsperiode, orgnummer: String = ORGNUMMER) =
-        Søknad(
-            meldingsreferanseId = UUID.randomUUID(),
-            fnr = UNG_PERSON_FNR_2018.toString(),
-            aktørId = "12345",
-            orgnummer = orgnummer,
-            perioder = listOf(*perioder),
-            andreInntektskilder = emptyList(),
-            sendtTilNAVEllerArbeidsgiver = Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive.atStartOfDay(),
-            permittert = false,
-            merknaderFraSykmelding = emptyList(),
-            sykmeldingSkrevet = LocalDateTime.now()
-        )
+    private fun søknad(vararg perioder: Søknadsperiode) = a1Hendelsefabrikk.lagSøknad(
+        perioder = arrayOf(*perioder),
+        andreInntektskilder = emptyList(),
+        sendtTilNAVEllerArbeidsgiver = Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive,
+        permittert = false,
+        merknaderFraSykmelding = emptyList(),
+        sykmeldingSkrevet = LocalDateTime.now()
+    )
 }

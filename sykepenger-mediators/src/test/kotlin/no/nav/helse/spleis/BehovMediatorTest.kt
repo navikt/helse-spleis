@@ -8,6 +8,7 @@ import io.mockk.mockk
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.desember
 import no.nav.helse.person.Aktivitetskontekst
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Foreldrepenger
@@ -38,7 +39,6 @@ class BehovMediatorTest {
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
             .registerModule(JavaTimeModule())
 
-        private val message = TestHendelseMessage(fødselsnummer)
     }
 
     private val messages = mutableListOf<Pair<String?, String>>()
@@ -205,7 +205,8 @@ class BehovMediatorTest {
 
         override fun personopplysninger() = Personopplysninger(
             fødselsnummer = fødselsnummer.somFødselsnummer(),
-            aktørId = aktørId
+            aktørId = aktørId,
+            fødselsdato = 24.desember(2000)
         )
     }
 }

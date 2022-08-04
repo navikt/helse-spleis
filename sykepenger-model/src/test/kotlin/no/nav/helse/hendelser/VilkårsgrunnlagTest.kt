@@ -262,17 +262,9 @@ internal class VilkårsgrunnlagTest : AbstractPersonTest() {
         mottatt = 1.april.atStartOfDay()
     )
 
-    private fun søknad() = Søknad(
-        meldingsreferanseId = UUID.randomUUID(),
-        fnr = UNG_PERSON_FNR_2018.toString(),
-        aktørId = AKTØRID,
-        orgnummer = ORGNUMMER,
-        perioder = listOf(Sykdom(16.januar, 30.januar, 100.prosent)),
-        andreInntektskilder = emptyList(),
-        sendtTilNAVEllerArbeidsgiver = 30.januar.atStartOfDay(),
-        permittert = false,
-        merknaderFraSykmelding = emptyList(),
-        sykmeldingSkrevet = LocalDateTime.now()
+    private fun søknad() = a1Hendelsefabrikk.lagSøknad(
+        perioder = arrayOf(Sykdom(16.januar, 30.januar, 100.prosent)),
+        sendtTilNAVEllerArbeidsgiver = 30.januar
     )
 
     private fun inntektsmelding() = a1Hendelsefabrikk.lagInntektsmelding(

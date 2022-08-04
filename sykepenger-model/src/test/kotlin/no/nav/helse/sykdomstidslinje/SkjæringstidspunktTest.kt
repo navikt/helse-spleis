@@ -2,7 +2,6 @@ package no.nav.helse.sykdomstidslinje
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.desember
 import no.nav.helse.dsl.Hendelsefabrikk
 import no.nav.helse.februar
@@ -397,17 +396,9 @@ internal class SkjæringstidspunktTest {
     }
 
     private fun søknad(vararg perioder: Søknadsperiode): Søknad {
-        return Søknad(
-            meldingsreferanseId = UUID.randomUUID(),
-            fnr = UNG_PERSON_FNR_2018,
-            aktørId = AKTØRID,
-            orgnummer = ORGNUMMER,
-            perioder = listOf(*perioder),
-            andreInntektskilder = emptyList(),
-            sendtTilNAVEllerArbeidsgiver = Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive.atStartOfDay(),
-            permittert = false,
-            merknaderFraSykmelding = emptyList(),
-            sykmeldingSkrevet = LocalDateTime.now()
+        return hendelsefabrikk.lagSøknad(
+            perioder = perioder,
+            sendtTilNAVEllerArbeidsgiver = Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive
         )
     }
 

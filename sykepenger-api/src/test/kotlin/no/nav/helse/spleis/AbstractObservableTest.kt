@@ -89,6 +89,7 @@ abstract class AbstractObservableTest {
         orgnummer: String = ORGNUMMER,
         sykmeldingSkrevet: LocalDateTime = FOM.atStartOfDay(),
         fnr: String = UNG_PERSON_FNR,
+        fødselsdato: LocalDate = UNG_PERSON_FØDSELSDATO
     ): Søknad = Søknad(
         meldingsreferanseId = id,
         fnr = fnr,
@@ -99,7 +100,8 @@ abstract class AbstractObservableTest {
         sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver.atStartOfDay(),
         permittert = false,
         merknaderFraSykmelding = emptyList(),
-        sykmeldingSkrevet = sykmeldingSkrevet
+        sykmeldingSkrevet = sykmeldingSkrevet,
+        fødselsdato = fødselsdato
     )
 
     protected fun inntektsmelding(

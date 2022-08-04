@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.Fødselsnummer
+import no.nav.helse.dsl.Hendelsefabrikk
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Søknad
@@ -51,6 +52,12 @@ internal class UtbetalingBuilderTest {
     private val organisasjonsnummer = "987654321"
     private val maskinellJurist = MaskinellJurist()
     private val søknadId = UUID.randomUUID()
+    private val hendelsefabrikk = Hendelsefabrikk(
+        aktørId = aktørId,
+        fødselsnummer = fødselsnummer,
+        organisasjonsnummer = organisasjonsnummer,
+        fødselsdato = 12.februar(1992)
+    )
 
     @BeforeEach
     internal fun clear() {
@@ -173,7 +180,10 @@ internal class UtbetalingBuilderTest {
     private fun arbeidsgiver(organisasjonsnummer: String) = Arbeidsgiver(person(), organisasjonsnummer, maskinellJurist)
     private fun søknad(søknadId: UUID, periode: Periode): Søknad {
         val søknadsperiode = Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent)
-        return Søknad(søknadId, fødselsnummer.toString(), aktørId, organisasjonsnummer, listOf(søknadsperiode), emptyList(), LocalDateTime.now(), false, emptyList(), LocalDateTime.now())
+        return hendelsefabrikk.lagSøknad(
+            id = søknadId,
+            perioder = arrayOf(søknadsperiode)
+        )
     }
 
     private companion object {

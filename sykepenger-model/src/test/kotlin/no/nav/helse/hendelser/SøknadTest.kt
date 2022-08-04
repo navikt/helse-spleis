@@ -1,8 +1,9 @@
 package no.nav.helse.hendelser
 
+import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.desember
+import no.nav.helse.dsl.Hendelsefabrikk
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Søknad.Inntektskilde
 import no.nav.helse.hendelser.Søknad.Merknad
@@ -40,8 +41,20 @@ internal class SøknadTest {
 
     private companion object {
         private const val UNG_PERSON_FNR_2018 = "12029240045"
+        private val ungPersonFnr2018Hendelsefabrikk = Hendelsefabrikk(
+            fødselsnummer = UNG_PERSON_FNR_2018.somFødselsnummer(),
+            aktørId = "12345",
+            organisasjonsnummer = "987654321",
+            fødselsdato = 12.februar(1992)
+        )
         private val EN_PERIODE = Periode(1.januar, 31.januar)
         private const val FYLLER_18_ÅR_2_NOVEMBER = "02110075045"
+        private val fyller18År2NovemberHendelsefabrikk = Hendelsefabrikk(
+            fødselsnummer = FYLLER_18_ÅR_2_NOVEMBER.somFødselsnummer(),
+            aktørId = "12345",
+            organisasjonsnummer = "987654321",
+            fødselsdato = 2.november(2000)
+        )
     }
 
     private lateinit var søknad: Søknad
@@ -100,14 +113,14 @@ internal class SøknadTest {
 
     @Test
     fun `17 år på søknadstidspunkt gir error`() {
-        søknad(Sykdom(1.januar, 10.januar, 100.prosent), fnr = FYLLER_18_ÅR_2_NOVEMBER, sendtTilNAVEllerArbeidsgiver = 1.november.atStartOfDay())
+        søknad(Sykdom(1.januar, 10.januar, 100.prosent), hendelsefabrikk = fyller18År2NovemberHendelsefabrikk, sendtTilNAVEllerArbeidsgiver = 1.november)
         assertTrue(søknad.forUng(FYLLER_18_ÅR_2_NOVEMBER.somFødselsnummer().alder()))
         assertTrue(søknad.hasErrorsOrWorse())
     }
 
     @Test
     fun `18 år på søknadstidspunkt gir ikke error`() {
-        søknad(Sykdom(1.januar, 10.januar, 100.prosent), fnr = FYLLER_18_ÅR_2_NOVEMBER, sendtTilNAVEllerArbeidsgiver = 2.november.atStartOfDay())
+        søknad(Sykdom(1.januar, 10.januar, 100.prosent), hendelsefabrikk = fyller18År2NovemberHendelsefabrikk, sendtTilNAVEllerArbeidsgiver = 2.november)
         assertFalse(søknad.forUng(FYLLER_18_ÅR_2_NOVEMBER.somFødselsnummer().alder()))
         assertFalse(søknad.hasErrorsOrWorse())
     }
@@ -290,7 +303,7 @@ internal class SøknadTest {
 
     @Test
     fun `søknad med tilbakedateringmerknad får warning`() {
-        søknad(Sykdom(1.januar, 31.januar, 20.prosent, 80.prosent), merknaderFraSykmelding = listOf(Merknad("UGYLDIG_TILBAKEDATERING", null)))
+        søknad(Sykdom(1.januar, 31.januar, 20.prosent, 80.prosent), merknaderFraSykmelding = listOf(Merknad("UGYLDIG_TILBAKEDATERING")))
         søknad.valider(EN_PERIODE, MaskinellJurist())
         assertTrue(søknad.hasWarningsOrWorse())
     }
@@ -337,15 +350,18 @@ internal class SøknadTest {
         assertTrue(søknad.hentErrors().contains("Søknaden inneholder andre inntektskilder enn ANDRE_ARBEIDSFORHOLD"))
     }
 
-    private fun søknad(vararg perioder: Søknadsperiode, andreInntektskilder: List<Inntektskilde> = emptyList(), permittert: Boolean = false, merknaderFraSykmelding: List<Merknad> = emptyList(), fnr: String = UNG_PERSON_FNR_2018, sendtTilNAVEllerArbeidsgiver: LocalDateTime? = null) {
-        søknad = Søknad(
-            meldingsreferanseId = UUID.randomUUID(),
-            fnr = fnr,
-            aktørId = "12345",
-            orgnummer = "987654321",
-            perioder = listOf(*perioder),
+    private fun søknad(
+        vararg perioder: Søknadsperiode,
+        andreInntektskilder: List<Inntektskilde> = emptyList(),
+        permittert: Boolean = false,
+        merknaderFraSykmelding: List<Merknad> = emptyList(),
+        hendelsefabrikk: Hendelsefabrikk = ungPersonFnr2018Hendelsefabrikk,
+        sendtTilNAVEllerArbeidsgiver: LocalDate? = null
+    ) {
+        søknad = hendelsefabrikk.lagSøknad(
+            perioder = perioder,
             andreInntektskilder = andreInntektskilder,
-            sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver ?: Søknadsperiode.søknadsperiode(perioder.toList())?.endInclusive?.atStartOfDay() ?: LocalDateTime.now(),
+            sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver ?: Søknadsperiode.søknadsperiode(perioder.toList())?.endInclusive ?: LocalDate.now(),
             permittert = permittert,
             merknaderFraSykmelding = merknaderFraSykmelding,
             sykmeldingSkrevet = LocalDateTime.now()

@@ -1,18 +1,17 @@
 package no.nav.helse.sykdomstidslinje
 
 import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.april
+import no.nav.helse.dsl.Hendelsefabrikk
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.januar
 import no.nav.helse.juni
 import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.person.SykdomstidslinjeVisitor
+import no.nav.helse.somFødselsnummer
 import no.nav.helse.sykdomstidslinje.Dag.Arbeidsdag
 import no.nav.helse.sykdomstidslinje.Dag.ArbeidsgiverHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.Arbeidsgiverdag
@@ -36,6 +35,12 @@ internal class ForeldetSykedagTest {
         private const val UNG_PERSON_FNR_2018 = "12029240045"
         private const val AKTØRID = "42"
         private const val ORGNUMMER = "987654321"
+        private val hendelefabrikk = Hendelsefabrikk(
+            fødselsnummer = UNG_PERSON_FNR_2018.somFødselsnummer(),
+            aktørId = AKTØRID,
+            organisasjonsnummer = ORGNUMMER,
+            fødselsdato = 12.februar(1992)
+        )
     }
 
     @Test fun `omgående innsending`() {
@@ -74,20 +79,10 @@ internal class ForeldetSykedagTest {
         }
     }
 
-    private fun søknad(sendtTilNAV: LocalDate): Søknad {
-        return Søknad(
-            meldingsreferanseId = UUID.randomUUID(),
-            fnr = UNG_PERSON_FNR_2018,
-            aktørId = AKTØRID,
-            orgnummer = ORGNUMMER,
-            perioder = listOf(Sykdom(18.januar, 14.februar, 100.prosent)), // 10 sykedag januar & februar
-            andreInntektskilder = emptyList(),
-            sendtTilNAVEllerArbeidsgiver = sendtTilNAV.atStartOfDay(),
-            permittert = false,
-            merknaderFraSykmelding = emptyList(),
-            sykmeldingSkrevet = LocalDateTime.now()
-        )
-    }
+    private fun søknad(sendtTilNAV: LocalDate) = hendelefabrikk.lagSøknad(
+        perioder = arrayOf(Sykdom(18.januar, 14.februar, 100.prosent)), // 10 sykedag januar & februar
+        sendtTilNAVEllerArbeidsgiver = sendtTilNAV
+    )
 
     private fun undersøke(søknad: SykdomstidslinjeHendelse): TestInspektør {
         return TestInspektør(søknad)
