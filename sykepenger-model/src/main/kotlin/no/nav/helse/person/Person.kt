@@ -560,10 +560,6 @@ class Person private constructor(
         hendelse.info(melding)
     }
 
-    internal fun revurderingHarFeilet(event: IAktivitetslogg) {
-        arbeidsgivere.forEach { it.håndterRevurderingFeilet(event) }
-    }
-
     private fun finnEllerOpprettArbeidsgiver(hendelse: ArbeidstakerHendelse) =
         finnEllerOpprettArbeidsgiver(hendelse.organisasjonsnummer(), hendelse)
 

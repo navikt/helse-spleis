@@ -239,7 +239,7 @@ class Utbetaling(
 
     fun hørerSammen(other: Utbetaling) = korrelasjonsId == other.korrelasjonsId
 
-    internal fun revurderingFeilet(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) = (erForkastetRevurdering() || status == Utbetalingstatus.Ubetalt) && tilstand == Vedtaksperiode.RevurderingFeilet
+    internal fun revurderingFeilet(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) = (erForkastetRevurdering() || status in setOf(Utbetalingstatus.IkkeGodkjent, Utbetalingstatus.Ubetalt)) && tilstand == Vedtaksperiode.RevurderingFeilet
     internal fun utbetalingFeilet(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) = erUtbetalingFeilet() && tilstand == Vedtaksperiode.UtbetalingFeilet
 
     data class Vurdering(

@@ -654,14 +654,14 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Feilet simulering fører til feilet revurdering`() {
+    fun `Feilet simulering gir warning`() {
         nyttVedtak(1.januar, 31.januar)
 
         håndterOverstyrTidslinje(listOf(manuellFeriedag(18.januar)))
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode, simuleringOK = false)
         nullstillTilstandsendringer()
-        assertTilstander(1.vedtaksperiode, REVURDERING_FEILET)
+        assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
         assertWarning("Simulering av revurdert utbetaling feilet. Utbetalingen må annulleres", 1.vedtaksperiode.filter())
     }
 

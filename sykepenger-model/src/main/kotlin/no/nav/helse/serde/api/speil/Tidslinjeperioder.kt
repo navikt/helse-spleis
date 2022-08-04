@@ -7,7 +7,6 @@ import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.Periodetype
 import no.nav.helse.person.Vedtaksperiode.AvsluttetUtenUtbetaling
-import no.nav.helse.person.Vedtaksperiode.AvventerArbeidsgivereRevurdering
 import no.nav.helse.person.Vedtaksperiode.AvventerBlokkerendePeriode
 import no.nav.helse.person.Vedtaksperiode.AvventerGjennomførtRevurdering
 import no.nav.helse.person.Vedtaksperiode.AvventerGodkjenning
@@ -260,7 +259,6 @@ internal class Tidslinjeperioder(
 
     private fun iVentetilstand(tilstand: Vedtaksperiodetilstand) = tilstand in listOf(
         AvventerBlokkerendePeriode,
-        AvventerArbeidsgivereRevurdering,
         AvventerGjennomførtRevurdering,
         AvventerRevurdering
     )

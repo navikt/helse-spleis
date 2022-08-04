@@ -668,12 +668,6 @@ internal class Arbeidsgiver private constructor(
         etterutbetaling.håndter(hendelse)
     }
 
-    fun håndterRevurderingFeilet(event: IAktivitetslogg) {
-        vedtaksperioder.forEach {
-            it.håndterRevurderingFeilet(event)
-        }
-    }
-
     private fun reberegnUtbetalte(
         aktivitetslogg: IAktivitetslogg,
         arbeidsgivere: List<Arbeidsgiver>,

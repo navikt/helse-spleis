@@ -144,7 +144,8 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
 
         håndterOverstyrTidslinje()
         håndterYtelser()
-        håndterSimulering(simuleringOK = false)
+        håndterSimulering()
+        håndterUtbetalingsgodkjenning(utbetalingGodkjent = false)
         håndterAnnullerUtbetaling()
 
         0.generasjon {
@@ -154,7 +155,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
 
         1.generasjon {
             assertEquals(1, perioder.size)
-            beregnetPeriode(0) er Utbetalingstatus.Forkastet avType REVURDERING medTilstand RevurderingFeilet
+            beregnetPeriode(0) er Utbetalingstatus.IkkeGodkjent avType REVURDERING medTilstand RevurderingFeilet
         }
 
         2.generasjon {
@@ -1274,7 +1275,8 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         nyttVedtak(1.januar, 31.januar)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Dagtype.Feriedag)))
         håndterYtelser()
-        håndterSimulering(simuleringOK = false)
+        håndterSimulering()
+        håndterUtbetalingsgodkjenning(utbetalingGodkjent = false)
         nullstillTilstandsendringer()
         håndterAnnullerUtbetaling()
         håndterUtbetalt()
@@ -1289,7 +1291,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
 
         1.generasjon {
             assertEquals(1, perioder.size)
-            beregnetPeriode(0) er Utbetalingstatus.Forkastet avType REVURDERING medTilstand RevurderingFeilet
+            beregnetPeriode(0) er Utbetalingstatus.IkkeGodkjent avType REVURDERING medTilstand RevurderingFeilet
         }
 
         2.generasjon {
@@ -1304,12 +1306,13 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         forlengVedtak(1.februar, 28.februar)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Dagtype.Feriedag)))
         håndterYtelser(2.vedtaksperiode)
-        håndterSimulering(2.vedtaksperiode, simuleringOK = false)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, utbetalingGodkjent = false)
 
         0.generasjon {
             assertEquals(2, perioder.size)
-            beregnetPeriode(0) er Utbetalingstatus.Ubetalt avType REVURDERING medTilstand RevurderingFeilet
-            beregnetPeriode(1) er Utbetalingstatus.Ubetalt avType REVURDERING medTilstand RevurderingFeilet
+            beregnetPeriode(0) er Utbetalingstatus.IkkeGodkjent avType REVURDERING medTilstand RevurderingFeilet
+            beregnetPeriode(1) er Utbetalingstatus.IkkeGodkjent avType REVURDERING medTilstand RevurderingFeilet
         }
 
         1.generasjon {
@@ -1390,7 +1393,8 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
 
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(18.januar, Dagtype.Feriedag)))
         håndterYtelser()
-        håndterSimulering(simuleringOK = false)
+        håndterSimulering()
+        håndterUtbetalingsgodkjenning(utbetalingGodkjent = false)
 
         assertEquals(2, generasjoner.size)
 
