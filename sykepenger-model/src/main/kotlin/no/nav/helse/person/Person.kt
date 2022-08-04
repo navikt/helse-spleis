@@ -38,7 +38,6 @@ import no.nav.helse.person.Arbeidsgiver.Companion.beregnSykepengegrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.deaktiverteArbeidsforhold
 import no.nav.helse.person.Arbeidsgiver.Companion.finn
 import no.nav.helse.person.Arbeidsgiver.Companion.ghostPeriode
-import no.nav.helse.person.Arbeidsgiver.Companion.gjenopptaBehandling
 import no.nav.helse.person.Arbeidsgiver.Companion.gjenopptaBehandlingNy
 import no.nav.helse.person.Arbeidsgiver.Companion.harArbeidsgivereMedOverlappendeUtbetaltePerioder
 import no.nav.helse.person.Arbeidsgiver.Companion.harOverlappendeEllerForlengerForkastetVedtaksperiode
@@ -411,10 +410,6 @@ class Person private constructor(
         )
     }
 
-    internal fun gjenopptaBehandling(hendelse: IAktivitetslogg) {
-        arbeidsgivere.gjenopptaBehandling(hendelse)
-    }
-
     internal fun annullert(hendelseskontekst: Hendelseskontekst, event: PersonObserver.UtbetalingAnnullertEvent) {
         observers.forEach { it.annullering(hendelseskontekst, event) }
     }
@@ -754,9 +749,6 @@ class Person private constructor(
         }
     }
 
-    internal fun kanRevurdereInntekt(skjæringstidspunkt: LocalDate) =
-        vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) != null
-
     internal fun harVedtaksperiodeForAnnenArbeidsgiver(arbeidsgiver: Arbeidsgiver, skjæringstidspunkt: LocalDate) =
         arbeidsgivere
             .filter { it != arbeidsgiver }
@@ -780,7 +772,6 @@ class Person private constructor(
     internal fun søppelbøtte(hendelse: IAktivitetslogg, filter: VedtaksperiodeFilter) {
         infotrygdhistorikk.tøm()
         Arbeidsgiver.søppelbøtte(arbeidsgivere, hendelse, filter)
-        gjenopptaBehandling(hendelse)
         gjenopptaBehandlingNy(hendelse)
     }
 

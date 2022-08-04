@@ -268,7 +268,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         håndterUtbetalt()
         assertTilstander(1.vedtaksperiode, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING)
         assertTilstander(2.vedtaksperiode, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
-        assertTilstander(3.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_REVURDERING)
+        assertTilstander(3.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING, AVSLUTTET, AVVENTER_REVURDERING)
         assertTilstander(4.vedtaksperiode, TIL_UTBETALING, AVSLUTTET, AVVENTER_REVURDERING)
 
         nullstillTilstandsendringer()

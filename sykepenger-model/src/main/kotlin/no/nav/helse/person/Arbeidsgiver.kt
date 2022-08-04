@@ -35,15 +35,11 @@ import no.nav.helse.person.ForkastetVedtaksperiode.Companion.harAvsluttedePeriod
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.håndterInntektsmeldingReplay
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.iderMedUtbetaling
 import no.nav.helse.person.Inntektshistorikk.IkkeRapportert
-import no.nav.helse.person.Vedtaksperiode.AvventerArbeidsgivereRevurdering
-import no.nav.helse.person.Vedtaksperiode.AvventerHistorikkRevurdering
-import no.nav.helse.person.Vedtaksperiode.Companion.AVVENTER_GODKJENT_REVURDERING
 import no.nav.helse.person.Vedtaksperiode.Companion.ER_ELLER_HAR_VÆRT_AVSLUTTET
 import no.nav.helse.person.Vedtaksperiode.Companion.IKKE_FERDIG_BEHANDLET
 import no.nav.helse.person.Vedtaksperiode.Companion.IKKE_FERDIG_REVURDERT
 import no.nav.helse.person.Vedtaksperiode.Companion.KLAR_TIL_BEHANDLING
 import no.nav.helse.person.Vedtaksperiode.Companion.OVERLAPPER_ELLER_FORLENGER
-import no.nav.helse.person.Vedtaksperiode.Companion.REVURDERING_IGANGSATT
 import no.nav.helse.person.Vedtaksperiode.Companion.SKAL_INNGÅ_I_SYKEPENGEGRUNNLAG
 import no.nav.helse.person.Vedtaksperiode.Companion.avventerRevurdering
 import no.nav.helse.person.Vedtaksperiode.Companion.harOverlappendeUtbetaltePerioder
@@ -130,15 +126,6 @@ internal class Arbeidsgiver private constructor(
 
     internal companion object {
         internal fun List<Arbeidsgiver>.finn(orgnr: String) = find { it.organisasjonsnummer() == orgnr }
-
-        internal fun List<Arbeidsgiver>.kanOverstyreTidslinje(hendelse: OverstyrTidslinje): Boolean {
-            val overlappendePerioder = flatMap { it.overlappendePerioder(hendelse) }
-            return when {
-                overlappendePerioder.any(KLAR_TIL_BEHANDLING) -> overlappendePerioder.all(KLAR_TIL_BEHANDLING)
-                overlappendePerioder.any(REVURDERING_IGANGSATT) -> overlappendePerioder.all(REVURDERING_IGANGSATT)
-                else -> true
-            }
-        }
 
         internal fun List<Arbeidsgiver>.relevanteArbeidsgivere(vilkårsgrunnlag: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?) =
            filter { arbeidsgiver ->
@@ -318,10 +305,6 @@ internal class Arbeidsgiver private constructor(
             ) }
         }
 
-        internal fun Iterable<Arbeidsgiver>.gjenopptaBehandling(gjenopptaBehandling: IAktivitetslogg) = forEach { arbeidsgiver ->
-            arbeidsgiver.gjenopptaBehandling(gjenopptaBehandling)
-        }
-
         /*
             sjekker at vi har inntekt for første fraværsdag for alle arbeidsgivere med sykdom for skjæringstidspunkt
          */
@@ -338,9 +321,8 @@ internal class Arbeidsgiver private constructor(
             .any { it.sykmeldingsperioder.harSykmeldingsperiodeI(YearMonth.from(skjæringstidspunkt)) }
 
         internal fun Iterable<Arbeidsgiver>.gjenopptaBehandlingNy(aktivitetslogg: IAktivitetslogg) {
-            val førstePeriode = nåværendeVedtaksperioder(IKKE_FERDIG_BEHANDLET)
-                .sortedBy { it.periode().endInclusive }
-                .firstOrNull() ?: return
+            val førstePeriode = (nåværendeVedtaksperioder(IKKE_FERDIG_REVURDERT).takeUnless { it.isEmpty() } ?: nåværendeVedtaksperioder(IKKE_FERDIG_BEHANDLET))
+                .minOrNull() ?: return
 
             if (førstePeriode.trengerSøknadISammeMåned(this)) return
             if (!førstePeriode.kanGjenopptaBehandling(this)) return
@@ -369,18 +351,6 @@ internal class Arbeidsgiver private constructor(
 
         internal fun List<Arbeidsgiver>.skjæringstidspunktperiode(skjæringstidspunkt: LocalDate) =
             flatMap { it.vedtaksperioder }.skjæringstidspunktperiode(skjæringstidspunkt)
-    }
-
-    private fun gjenopptaBehandling(gjenopptaBehandling: IAktivitetslogg) {
-        gjenopptaBehandling.kontekst(this)
-        énHarHåndtert(gjenopptaBehandling, Vedtaksperiode::gjenopptaBehandling)
-        Vedtaksperiode.gjenopptaBehandling(
-            hendelse = gjenopptaBehandling,
-            person = person,
-            nåværendeTilstand = AvventerArbeidsgivereRevurdering,
-            nesteTilstand = AvventerHistorikkRevurdering,
-            filter = IKKE_FERDIG_REVURDERT
-        )
     }
 
     internal fun lagUtbetaling(
@@ -900,25 +870,6 @@ internal class Arbeidsgiver private constructor(
         return false
     }
 
-    internal fun førstePeriodeTilRevurdering(hendelse: PersonHendelse) = vedtaksperioder
-        .filter(AVVENTER_GODKJENT_REVURDERING)
-        .minOrNull()
-        ?: hendelse.severe("Fant ikke periode til revurdering, selv om vi kommer fra en periode til revurdering?!")
-
-    internal fun oppdaterHistorikkRevurdering(hendelse: OverstyrTidslinje) {
-        hendelse.info("Oppdaterer sykdomshistorikk med overstyrte dager")
-        val overlappendePerioder = overlappendePerioder(hendelse)
-        overlappendePerioder.forEach {
-            // Vi har hatt en bug der vi opprettet nye elementer i sykdomshistorikken uten å kopiere låser. Derfor er låsene inkonsistente
-            // og vi må i revurderingsøyemed sjekke før vi låser opp.
-            if (sykdomshistorikk.sykdomstidslinje().erLåst(it.periode())) {
-                låsOpp(it.periode())
-            }
-        }
-        oppdaterSykdom(hendelse)
-        overlappendePerioder.forEach { lås(it.periode()) }
-    }
-
     internal fun oppdaterSykdom(hendelse: SykdomstidslinjeHendelse) = sykdomshistorikk.håndter(hendelse)
 
     private fun sykdomstidslinje(): Sykdomstidslinje {
@@ -1039,20 +990,9 @@ internal class Arbeidsgiver private constructor(
         sykdomshistorikk.fjernDager(perioder.map { it.periode() })
     }
 
-    internal fun startRevurderingForAlleBerørtePerioder(hendelse: ArbeidstakerHendelse, vedtaksperiode: Vedtaksperiode) {
-        hendelse.kontekst(this)
-        håndter(hendelse) { nyRevurderingFør(vedtaksperiode, hendelse) }
-        if (hendelse.hasErrorsOrWorse()) {
-            hendelse.info("Revurdering blokkeres, gjenopptar behandling")
-            return person.gjenopptaBehandling(hendelse)
-        }
-    }
-
     private fun harDeaktivertArbeidsforhold(skjæringstidspunkt: LocalDate) = arbeidsforholdhistorikk.harDeaktivertArbeidsforhold(skjæringstidspunkt)
 
     internal fun kanReberegnes(vedtaksperiode: Vedtaksperiode) = vedtaksperioder.all { it.kanReberegne(vedtaksperiode) }
-
-    internal fun overlappendePerioder(hendelse: SykdomstidslinjeHendelse) = vedtaksperioder.filter { hendelse.erRelevant(it.periode()) }
 
     private fun registrerNyVedtaksperiode(vedtaksperiode: Vedtaksperiode) {
         vedtaksperioder.add(vedtaksperiode)
@@ -1096,8 +1036,6 @@ internal class Arbeidsgiver private constructor(
 
     internal fun harNærliggendeUtbetaling(periode: Periode) =
         utbetalinger.harNærliggendeUtbetaling(periode)
-
-    internal fun alleAndrePerioderErKlare(vedtaksperiode: Vedtaksperiode) = vedtaksperioder.filterNot { it == vedtaksperiode }.none(IKKE_FERDIG_REVURDERT)
 
     internal fun fordelRevurdertUtbetaling(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg, utbetaling: Utbetaling) {
         håndter(aktivitetslogg) { håndterRevurdertUtbetaling(vedtaksperiode, utbetaling, aktivitetslogg) }
