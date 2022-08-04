@@ -1565,7 +1565,7 @@ internal class Vedtaksperiode private constructor(
             tidligere: Vedtaksperiode,
             hendelse: IAktivitetslogg
         ) {
-            vedtaksperiode.tilstand(hendelse, AvventerUferdig)
+            vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode)
         }
 
         override fun håndterTidligereTilstøtendeUferdigPeriode(
@@ -1573,7 +1573,7 @@ internal class Vedtaksperiode private constructor(
             tidligere: Vedtaksperiode,
             hendelse: IAktivitetslogg
         ) {
-            vedtaksperiode.tilstand(hendelse, AvventerUferdig)
+            vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
@@ -1602,15 +1602,16 @@ internal class Vedtaksperiode private constructor(
             gjenopptaBehandlingNy(vedtaksperiode, gjenopptaBehandling)
         }
 
-                override fun gjenopptaBehandlingNy(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+        override fun gjenopptaBehandlingNy(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             if (!vedtaksperiode.harNødvendigInntektForVilkårsprøving())
                 return vedtaksperiode.tilstand(hendelse, AvventerInntektsmeldingEllerHistorikk)
             vedtaksperiode.tilstand(hendelse, AvventerHistorikk)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            påminnelse.info("Håndterer påminnelse ved å forsøke å gjenoppta, i tilfelle perioden er stuck")
-            vedtaksperiode.person.gjenopptaBehandlingNy(påminnelse)
+            vedtaksperiode.tilstand(påminnelse, AvventerBlokkerendePeriode) {
+                påminnelse.info("Bytter til Avventer blokkerende periode for å migrere oss bort fra AvventerUferdig")
+            }
         }
     }
 
@@ -1641,7 +1642,7 @@ internal class Vedtaksperiode private constructor(
             tidligere: Vedtaksperiode,
             hendelse: IAktivitetslogg
         ) {
-            vedtaksperiode.tilstand(hendelse, AvventerUferdig)
+            vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode)
         }
 
         override fun håndterTidligereTilstøtendeUferdigPeriode(
@@ -1649,7 +1650,7 @@ internal class Vedtaksperiode private constructor(
             tidligere: Vedtaksperiode,
             hendelse: IAktivitetslogg
         ) {
-            vedtaksperiode.tilstand(hendelse, AvventerUferdig)
+            vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
@@ -1789,7 +1790,7 @@ internal class Vedtaksperiode private constructor(
             tidligere: Vedtaksperiode,
             hendelse: IAktivitetslogg
         ) {
-            vedtaksperiode.tilstand(hendelse, AvventerUferdig)
+            vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode)
         }
 
         override fun håndterTidligereTilstøtendeUferdigPeriode(
@@ -1797,7 +1798,7 @@ internal class Vedtaksperiode private constructor(
             tidligere: Vedtaksperiode,
             hendelse: IAktivitetslogg
         ) {
-            vedtaksperiode.tilstand(hendelse, AvventerUferdig)
+            vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
@@ -1906,7 +1907,7 @@ internal class Vedtaksperiode private constructor(
             tidligere: Vedtaksperiode,
             hendelse: IAktivitetslogg
         ) {
-            vedtaksperiode.tilstand(hendelse, AvventerUferdig)
+            vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode)
         }
 
         override fun håndterTidligereTilstøtendeUferdigPeriode(
@@ -1914,7 +1915,7 @@ internal class Vedtaksperiode private constructor(
             tidligere: Vedtaksperiode,
             hendelse: IAktivitetslogg
         ) {
-            vedtaksperiode.tilstand(hendelse, AvventerUferdig)
+            vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {

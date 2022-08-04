@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsvurdering
@@ -20,7 +19,6 @@ import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
-import no.nav.helse.person.TilstandType.AVVENTER_UFERDIG
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.nullstillTilstandsendringer
@@ -309,24 +307,11 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
             AVVENTER_HISTORIKK_REVURDERING,
             orgnummer = aadvokatene
         )
-        assertForventetFeil(
-            forklaring = "AvventerUferdig er deprecated, skal erstattes av AvventerBlokkerendePeriode",
-            nå = {
-                assertTilstander(
-                    1.vedtaksperiode,
-                    AVVENTER_GODKJENNING,
-                    AVVENTER_UFERDIG,
-                    orgnummer = haandtverkerne
-                )
-            },
-            ønsket = {
-                assertTilstander(
-                    1.vedtaksperiode,
-                    AVVENTER_GODKJENNING,
-                    AVVENTER_BLOKKERENDE_PERIODE,
-                    orgnummer = haandtverkerne
-                )
-            }
+        assertTilstander(
+            1.vedtaksperiode,
+            AVVENTER_GODKJENNING,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            orgnummer = haandtverkerne
         )
     }
 

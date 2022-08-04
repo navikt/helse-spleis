@@ -149,6 +149,7 @@ class Person private constructor(
     fun håndter(inntektsmelding: InntektsmeldingReplay) {
         registrer(inntektsmelding, "Behandler replay av inntektsmelding")
         finnArbeidsgiver(inntektsmelding).håndter(inntektsmelding)
+        håndterGjenoppta(inntektsmelding)
     }
 
     private fun håndter(
@@ -160,16 +161,19 @@ class Person private constructor(
         val arbeidsgiver = finnEllerOpprettArbeidsgiver(hendelse)
         before()
         hendelse.fortsettÅBehandle(arbeidsgiver)
+        håndterGjenoppta(hendelse)
     }
 
     fun håndter(infotrygdendring: Infotrygdendring) {
         infotrygdendring.kontekst(this)
+        håndterGjenoppta(infotrygdendring)
     }
 
     fun håndter(utbetalingshistorikk: Utbetalingshistorikk) {
         utbetalingshistorikk.kontekst(this)
         utbetalingshistorikk.oppdaterHistorikk(infotrygdhistorikk)
         finnArbeidsgiver(utbetalingshistorikk).håndter(utbetalingshistorikk, infotrygdhistorikk)
+        håndterGjenoppta(utbetalingshistorikk)
     }
 
     fun håndter(utbetalingshistorikk: UtbetalingshistorikkForFeriepenger) {
@@ -224,56 +228,66 @@ class Person private constructor(
         finnArbeidsgiver(ytelser).håndter(ytelser, infotrygdhistorikk) { subsumsjonObserver ->
             arbeidsgiverUtbetalinger(subsumsjonObserver = subsumsjonObserver)
         }
+        håndterGjenoppta(ytelser)
     }
 
     fun håndter(utbetalingsgodkjenning: Utbetalingsgodkjenning) {
         registrer(utbetalingsgodkjenning, "Behandler utbetalingsgodkjenning")
         finnArbeidsgiver(utbetalingsgodkjenning).håndter(utbetalingsgodkjenning)
+        håndterGjenoppta(utbetalingsgodkjenning)
     }
 
     fun håndter(vilkårsgrunnlag: Vilkårsgrunnlag) {
         registrer(vilkårsgrunnlag, "Behandler vilkårsgrunnlag")
         finnArbeidsgiver(vilkårsgrunnlag).håndter(vilkårsgrunnlag)
+        håndterGjenoppta(vilkårsgrunnlag)
     }
 
     fun håndter(utbetalingsgrunnlag: Utbetalingsgrunnlag) {
         registrer(utbetalingsgrunnlag, "Behandler utbetalingsgrunnlag")
         finnArbeidsgiver(utbetalingsgrunnlag).håndter(utbetalingsgrunnlag)
+        håndterGjenoppta(utbetalingsgrunnlag)
     }
 
     fun håndter(simulering: Simulering) {
         registrer(simulering, "Behandler simulering")
         finnArbeidsgiver(simulering).håndter(simulering)
+        håndterGjenoppta(simulering)
     }
 
     fun håndter(utbetaling: UtbetalingOverført) {
         registrer(utbetaling, "Behandler utbetaling overført")
         finnArbeidsgiver(utbetaling).håndter(utbetaling)
+        håndterGjenoppta(utbetaling)
     }
 
     fun håndter(utbetaling: UtbetalingHendelse) {
         registrer(utbetaling, "Behandler utbetaling")
         finnArbeidsgiver(utbetaling).håndter(utbetaling)
+        håndterGjenoppta(utbetaling)
     }
 
     fun håndter(påminnelse: Utbetalingpåminnelse) {
         påminnelse.kontekst(this)
         finnArbeidsgiver(påminnelse).håndter(påminnelse)
+        håndterGjenoppta(påminnelse)
     }
 
     fun håndter(påminnelse: PersonPåminnelse) {
         påminnelse.kontekst(this)
         påminnelse.info("Håndterer påminnelse for person")
+        håndterGjenoppta(påminnelse)
     }
 
     fun håndter(påminnelse: Påminnelse) {
         try {
             påminnelse.kontekst(this)
-            if (finnArbeidsgiver(påminnelse).håndter(påminnelse)) return
+            if (finnArbeidsgiver(påminnelse).håndter(påminnelse)) return håndterGjenoppta(påminnelse)
         } catch (err: Aktivitetslogg.AktivitetException) {
             påminnelse.error("Fikk påminnelse uten at vi fant arbeidsgiver eller vedtaksperiode")
         }
         observers.forEach { påminnelse.vedtaksperiodeIkkeFunnet(it) }
+        håndterGjenoppta(påminnelse)
     }
 
     fun håndter(avstemming: Avstemming) {
@@ -281,6 +295,7 @@ class Person private constructor(
         avstemming.info("Avstemmer utbetalinger og vedtaksperioder")
         val result = Avstemmer(this).toMap()
         observers.forEach { it.avstemt(avstemming.hendelseskontekst(), result) }
+        håndterGjenoppta(avstemming)
     }
 
     fun håndter(hendelse: OverstyrTidslinje) {
@@ -294,12 +309,14 @@ class Person private constructor(
         if (hendelse.hasErrorsOrWorse()) {
             observers.forEach { it.revurderingAvvist(hendelse.hendelseskontekst(), hendelse.tilRevurderingAvvistEvent()) }
         }
+        håndterGjenoppta(hendelse)
     }
 
     fun håndterNy(hendelse: OverstyrTidslinje) {
         check(Toggle.NyRevurdering.enabled)
         hendelse.kontekst(this)
         finnArbeidsgiver(hendelse).håndter(hendelse)
+        håndterGjenoppta(hendelse)
     }
 
     fun håndter(hendelse: OverstyrInntekt) {
@@ -322,6 +339,7 @@ class Person private constructor(
         if (hendelse.hasErrorsOrWorse()) {
             observers.forEach { it.revurderingAvvist(hendelse.hendelseskontekst(), hendelse.tilRevurderingAvvistEvent()) }
         }
+        håndterGjenoppta(hendelse)
     }
 
     private fun håndterOverstyringAvGhostInntekt(hendelse: OverstyrInntekt) {
@@ -330,6 +348,7 @@ class Person private constructor(
         if (!arbeidsgivere.håndterOverstyringAvGhostInntekt(hendelse)) {
             hendelse.severe("Kan ikke overstyre ghost-inntekt fordi ingen vedtaksperioder håndterte hendelsen")
         }
+        håndterGjenoppta(hendelse)
     }
 
     fun håndter(overstyrArbeidsforhold: OverstyrArbeidsforhold) {
@@ -339,18 +358,20 @@ class Person private constructor(
         if (!arbeidsgivere.håndter(overstyrArbeidsforhold)) {
             overstyrArbeidsforhold.severe("Kan ikke overstyre arbeidsforhold fordi ingen vedtaksperioder håndterte hendelsen")
         }
+        håndterGjenoppta(overstyrArbeidsforhold)
     }
 
     fun håndter(hendelse: AnnullerUtbetaling) {
         hendelse.kontekst(this)
-        arbeidsgivere.finn(hendelse.organisasjonsnummer())?.håndter(hendelse)
-            ?: hendelse.error("Finner ikke arbeidsgiver")
+        arbeidsgivere.finn(hendelse.organisasjonsnummer())?.håndter(hendelse) ?: hendelse.error("Finner ikke arbeidsgiver")
+        håndterGjenoppta(hendelse)
     }
 
     fun håndter(hendelse: Grunnbeløpsregulering) {
         hendelse.kontekst(this)
         arbeidsgivere.finn(hendelse.organisasjonsnummer())?.håndter(arbeidsgivere, hendelse, vilkårsgrunnlagHistorikk)
             ?: hendelse.error("Finner ikke arbeidsgiver")
+        håndterGjenoppta(hendelse)
     }
 
     fun addObserver(observer: PersonObserver) {
@@ -889,8 +910,16 @@ class Person private constructor(
     internal fun loggførHendelsesreferanse(orgnummer: String, skjæringstidspunkt: LocalDate, hendelse: OverstyrInntekt) =
         arbeidsgivere.forEach { it.loggførHendelsesreferanse(orgnummer, skjæringstidspunkt, hendelse) }
 
+    private var gjenopptaBehandlingNy = false
     internal fun gjenopptaBehandlingNy(hendelse: IAktivitetslogg) {
-        arbeidsgivere.gjenopptaBehandlingNy(hendelse)
+        gjenopptaBehandlingNy = true
+    }
+
+    private fun håndterGjenoppta(hendelse: IAktivitetslogg) {
+        while (gjenopptaBehandlingNy) {
+            gjenopptaBehandlingNy = false
+            arbeidsgivere.gjenopptaBehandlingNy(hendelse)
+        }
     }
 
     internal fun gjenopptaRevurdering(arbeidsgiver: Arbeidsgiver, vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
