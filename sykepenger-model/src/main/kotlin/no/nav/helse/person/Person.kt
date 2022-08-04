@@ -38,7 +38,7 @@ import no.nav.helse.person.Arbeidsgiver.Companion.beregnSykepengegrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.deaktiverteArbeidsforhold
 import no.nav.helse.person.Arbeidsgiver.Companion.finn
 import no.nav.helse.person.Arbeidsgiver.Companion.ghostPeriode
-import no.nav.helse.person.Arbeidsgiver.Companion.gjenopptaBehandlingNy
+import no.nav.helse.person.Arbeidsgiver.Companion.gjenopptaBehandling
 import no.nav.helse.person.Arbeidsgiver.Companion.harArbeidsgivereMedOverlappendeUtbetaltePerioder
 import no.nav.helse.person.Arbeidsgiver.Companion.harOverlappendeEllerForlengerForkastetVedtaksperiode
 import no.nav.helse.person.Arbeidsgiver.Companion.harPeriodeSomBlokkererOverstyring
@@ -762,7 +762,7 @@ class Person private constructor(
     internal fun søppelbøtte(hendelse: IAktivitetslogg, filter: VedtaksperiodeFilter) {
         infotrygdhistorikk.tøm()
         Arbeidsgiver.søppelbøtte(arbeidsgivere, hendelse, filter)
-        gjenopptaBehandlingNy(hendelse)
+        gjenopptaBehandling(hendelse)
     }
 
     private fun emitOpprettOppgaveForSpeilsaksbehandlereEvent(hendelse: IAktivitetslogg, hendelseIder: Set<UUID>) {
@@ -944,14 +944,14 @@ class Person private constructor(
     }
 
     private var gjenopptaBehandlingNy = false
-    internal fun gjenopptaBehandlingNy(hendelse: IAktivitetslogg) {
+    internal fun gjenopptaBehandling(hendelse: IAktivitetslogg) {
         gjenopptaBehandlingNy = true
     }
 
     private fun håndterGjenoppta(hendelse: IAktivitetslogg) {
         while (gjenopptaBehandlingNy) {
             gjenopptaBehandlingNy = false
-            arbeidsgivere.gjenopptaBehandlingNy(hendelse)
+            arbeidsgivere.gjenopptaBehandling(hendelse)
         }
     }
 

@@ -134,8 +134,8 @@ internal class Arbeidsgiver private constructor(
                        || arbeidsgiver.vedtaksperioder.nåværendeVedtaksperiode(KLAR_TIL_BEHANDLING) != null
            }.map { it.organisasjonsnummer }
 
-        private fun Iterable<Arbeidsgiver>.senerePerioderPågående(vedtaksperiode: Vedtaksperiode) =
-            any { it.senerePerioderPågående(vedtaksperiode) }
+        internal fun Iterable<Arbeidsgiver>.senerePerioderPågående(vedtaksperiode: Vedtaksperiode) =
+            any { it.vedtaksperioder.senerePerioderPågående(vedtaksperiode) }
 
         internal fun List<Arbeidsgiver>.startRevurdering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             associateWith { it.vedtaksperioder.toList() }.startRevurdering(this, vedtaksperiode, hendelse)
@@ -305,18 +305,13 @@ internal class Arbeidsgiver private constructor(
         internal fun Iterable<Arbeidsgiver>.trengerSøknadISammeMåned(skjæringstidspunkt: LocalDate) = this
             .filter { !it.harSykdomFor(skjæringstidspunkt) }
             .any { it.sykmeldingsperioder.harSykmeldingsperiodeI(YearMonth.from(skjæringstidspunkt)) }
+        internal fun Iterable<Arbeidsgiver>.trengerSøknadFør(periode: Periode) = this
+            .any { !it.sykmeldingsperioder.kanFortsetteBehandling(periode) }
 
-        internal fun Iterable<Arbeidsgiver>.gjenopptaBehandlingNy(aktivitetslogg: IAktivitetslogg) {
+        internal fun Iterable<Arbeidsgiver>.gjenopptaBehandling(aktivitetslogg: IAktivitetslogg) {
             val førstePeriode = (nåværendeVedtaksperioder(IKKE_FERDIG_REVURDERT).takeUnless { it.isEmpty() } ?: nåværendeVedtaksperioder(IKKE_FERDIG_BEHANDLET))
                 .minOrNull() ?: return
-
-            if (førstePeriode.trengerSøknadISammeMåned(this)) return
-            if (!førstePeriode.kanGjenopptaBehandling(this)) return
-            if (senerePerioderPågående(førstePeriode)) return
-
-            if (all { it.sykmeldingsperioder.kanFortsetteBehandling(førstePeriode.periode()) }) {
-                førstePeriode.gjenopptaBehandlingNy(aktivitetslogg)
-            }
+            førstePeriode.gjenopptaBehandling(aktivitetslogg, this)
         }
 
         internal fun Iterable<Arbeidsgiver>.slettUtgåtteSykmeldingsperioder(tom: LocalDate) = forEach {
@@ -997,9 +992,6 @@ internal class Arbeidsgiver private constructor(
 
     internal fun finnForkastetSykeperiodeRettFør(vedtaksperiode: Vedtaksperiode) =
         ForkastetVedtaksperiode.finnForkastetSykeperiodeRettFør(forkastede, vedtaksperiode)
-
-    internal fun senerePerioderPågående(vedtaksperiode: Vedtaksperiode) =
-        vedtaksperioder.senerePerioderPågående(vedtaksperiode)
 
     internal fun harNærliggendeUtbetaling(periode: Periode) =
         utbetalinger.harNærliggendeUtbetaling(periode)
