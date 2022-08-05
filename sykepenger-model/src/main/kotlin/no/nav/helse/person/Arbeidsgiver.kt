@@ -43,6 +43,7 @@ import no.nav.helse.person.Vedtaksperiode.Companion.MED_SKJÆRINGSTIDSPUNKT
 import no.nav.helse.person.Vedtaksperiode.Companion.OVERLAPPER_ELLER_FORLENGER
 import no.nav.helse.person.Vedtaksperiode.Companion.SKAL_INNGÅ_I_SYKEPENGEGRUNNLAG
 import no.nav.helse.person.Vedtaksperiode.Companion.avventerRevurdering
+import no.nav.helse.person.Vedtaksperiode.Companion.harNødvendigInntekt
 import no.nav.helse.person.Vedtaksperiode.Companion.harOverlappendeUtbetaltePerioder
 import no.nav.helse.person.Vedtaksperiode.Companion.harUtbetaling
 import no.nav.helse.person.Vedtaksperiode.Companion.iderMedUtbetaling
@@ -291,16 +292,11 @@ internal class Arbeidsgiver private constructor(
             ) }
         }
 
-        /*
-            sjekker at vi har inntekt for første fraværsdag for alle arbeidsgivere med sykdom for skjæringstidspunkt
+        /* krever inntekt for alle vedtaksperioder som deler skjæringstidspunkt,
+            men tillater at det ikke er inntekt for perioder innenfor arbeidsgiverperioden/uten utbetaling
          */
-        internal fun Iterable<Arbeidsgiver>.harNødvendigInntekt(skjæringstidspunkt: LocalDate, start: LocalDate) =
-                filter {
-                    it.vedtaksperioder
-                        .medSkjæringstidspunkt(skjæringstidspunkt)
-                        .any(IKKE_FERDIG_BEHANDLET)
-                }
-                .all { it.harNødvendigInntektForVilkårsprøving(skjæringstidspunkt, start) }
+        internal fun Iterable<Arbeidsgiver>.harNødvendigInntekt(skjæringstidspunkt: LocalDate) =
+                flatMap { it.vedtaksperioder }.harNødvendigInntekt(skjæringstidspunkt)
 
         internal fun Iterable<Arbeidsgiver>.trengerSøknadISammeMåned(skjæringstidspunkt: LocalDate) = this
             .filter { !it.harSykdomFor(skjæringstidspunkt) }
@@ -894,13 +890,8 @@ internal class Arbeidsgiver private constructor(
 
     internal fun finnSammenhengendePeriode(skjæringstidspunkt: LocalDate) = vedtaksperioder.medSkjæringstidspunkt(skjæringstidspunkt)
 
-    internal fun harNødvendigInntektForVilkårsprøving(skjæringstidspunkt: LocalDate, periodeStart: LocalDate): Boolean {
-        return inntektshistorikk.harNødvendigInntektForVilkårsprøving(
-            skjæringstidspunkt,
-            periodeStart,
-            finnFørsteFraværsdag(skjæringstidspunkt),
-            harSykdomFor(skjæringstidspunkt)
-        )
+    internal fun harNødvendigInntektForVilkårsprøving(skjæringstidspunkt: LocalDate, periodeStart: LocalDate, ingenUtbetaling: Boolean): Boolean {
+        return inntektshistorikk.harNødvendigInntektForVilkårsprøving(skjæringstidspunkt, periodeStart, finnFørsteFraværsdag(skjæringstidspunkt), !ingenUtbetaling)
     }
 
     internal fun addInntekt(inntektsmelding: Inntektsmelding, skjæringstidspunkt: LocalDate, subsumsjonObserver: SubsumsjonObserver) {

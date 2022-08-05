@@ -45,10 +45,10 @@ internal class Inntektshistorikk {
         it.harInntektsmelding(førsteFraværsdag)
     }
 
-    internal fun harNødvendigInntektForVilkårsprøving(skjæringstidspunkt: LocalDate, periodeStart: LocalDate, førsteFraværsdag: LocalDate?, harSykdomForSkjæringstidspunkt: Boolean): Boolean {
+    internal fun harNødvendigInntektForVilkårsprøving(skjæringstidspunkt: LocalDate, periodeStart: LocalDate, førsteFraværsdag: LocalDate?, harUtbetaling: Boolean): Boolean {
         if (førsteFraværsdag != null && harInntektsmelding(førsteFraværsdag)) return true
         val inntektsopplysning = omregnetÅrsinntekt(skjæringstidspunkt, periodeStart, førsteFraværsdag) ?: return false
-        return inntektsopplysning.erNødvendigInntektForVilkårsprøving(harSykdomForSkjæringstidspunkt)
+        return inntektsopplysning.erNødvendigInntektForVilkårsprøving(harUtbetaling)
     }
 
     internal fun omregnetÅrsinntekt(skjæringstidspunkt: LocalDate, dato: LocalDate, førsteFraværsdag: LocalDate?): Inntektsopplysning? =
@@ -133,7 +133,7 @@ internal class Inntektshistorikk {
         fun kanLagres(other: Inntektsopplysning) = true
         fun harInntektsmelding(førsteFraværsdag: LocalDate) = false
         fun build(filter: Utbetalingsfilter.Builder, inntektsmeldingId: UUID) {}
-        fun erNødvendigInntektForVilkårsprøving(harSykdom: Boolean) = false
+        fun erNødvendigInntektForVilkårsprøving(harUtbetaling: Boolean) = false
 
         companion object {
             internal fun List<Inntektsopplysning>.valider(aktivitetslogg: IAktivitetslogg) {
@@ -165,7 +165,7 @@ internal class Inntektshistorikk {
         override fun skalErstattesAv(other: Inntektsopplysning) =
             other is Saksbehandler && this.dato == other.dato
 
-        override fun erNødvendigInntektForVilkårsprøving(harSykdom: Boolean) = true
+        override fun erNødvendigInntektForVilkårsprøving(harUtbetaling: Boolean) = true
     }
 
     internal class Infotrygd(
@@ -189,7 +189,7 @@ internal class Inntektshistorikk {
 
         override fun rapportertInntekt(): Inntekt = error("Infotrygd har ikke grunnlag for sammenligningsgrunnlag")
 
-        override fun erNødvendigInntektForVilkårsprøving(harSykdom: Boolean) = harSykdom
+        override fun erNødvendigInntektForVilkårsprøving(harUtbetaling: Boolean) = harUtbetaling
 
         override fun skalErstattesAv(other: Inntektsopplysning) =
             other is Infotrygd && this.dato == other.dato
@@ -234,7 +234,7 @@ internal class Inntektshistorikk {
             visitor.visitInntektsmelding(this, id, dato, hendelseId, beløp, tidsstempel)
         }
 
-        override fun erNødvendigInntektForVilkårsprøving(harSykdom: Boolean) = harSykdom
+        override fun erNødvendigInntektForVilkårsprøving(harUtbetaling: Boolean) = harUtbetaling
 
         override fun harInntektsmelding(førsteFraværsdag: LocalDate) =
             førsteFraværsdag == dato
@@ -263,7 +263,8 @@ internal class Inntektshistorikk {
 
         private val inntekterSisteTreMåneder = inntektsopplysninger.filter { it.erRelevant(3) }
 
-        override fun erNødvendigInntektForVilkårsprøving(harSykdom: Boolean) = !harSykdom
+        // a-inntekt er bare brukandes dersom vedtaksperioden ikke har utbetaling/er innenfor agp
+        override fun erNødvendigInntektForVilkårsprøving(harUtbetaling: Boolean) = !harUtbetaling
 
         override fun accept(visitor: InntekthistorikkVisitor) {
             visitor.preVisitSkatt(this, id, dato)
