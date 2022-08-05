@@ -1,5 +1,7 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.assertForventetFeil
+import no.nav.helse.august
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsvurdering
@@ -7,6 +9,8 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
+import no.nav.helse.juli
+import no.nav.helse.juni
 import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.person.TilstandType.AVSLUTTET
@@ -696,6 +700,210 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVSLUTTET, orgnummer = a2)
         assertTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, orgnummer = a1)
         assertTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
-
     }
+
+    @Test
+    fun `arbeidsgiver 2 er utenfor arbeidsgiverperioden, men ikke arbeidsgiver 1 - arbeidsgiver 2 blir opprettet først`() {
+        håndterSykmelding(Sykmeldingsperiode(17.juni(2022), 21.juni(2022), 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(17.juni(2022), 21.juni(2022), 100.prosent), orgnummer = a2)
+        håndterUtbetalingshistorikk(1.vedtaksperiode, orgnummer = a2)
+
+        håndterSykmelding(Sykmeldingsperiode(17.juni(2022), 21.juni(2022), 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(17.juni(2022), 21.juni(2022), 100.prosent), orgnummer = a1)
+        håndterUtbetalingshistorikk(1.vedtaksperiode, orgnummer = a1)
+
+        håndterSykmelding(Sykmeldingsperiode(22.juni(2022), 3.juli(2022), 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(22.juni(2022), 3.juli(2022), 100.prosent), orgnummer = a1)
+        håndterUtbetalingshistorikk(2.vedtaksperiode, orgnummer = a1)
+
+        håndterSykmelding(Sykmeldingsperiode(22.juni(2022), 3.juli(2022), 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(22.juni(2022), 3.juli(2022), 100.prosent), orgnummer = a2)
+        håndterUtbetalingshistorikk(2.vedtaksperiode, orgnummer = a2)
+
+        håndterSykmelding(Sykmeldingsperiode(20.juli(2022), 28.juli(2022), 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(20.juli(2022), 28.juli(2022), 100.prosent), orgnummer = a2)
+        håndterUtbetalingshistorikk(3.vedtaksperiode, orgnummer = a2)
+
+        håndterSykmelding(Sykmeldingsperiode(29.juli(2022), 3.august(2022), 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(29.juli(2022), 3.august(2022), 100.prosent), orgnummer = a2)
+        håndterUtbetalingshistorikk(4.vedtaksperiode, orgnummer = a2)
+
+        nullstillTilstandsendringer()
+
+        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a1)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a2)
+        assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a1)
+        assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a2)
+        assertTilstander(3.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a2)
+        assertTilstander(4.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a2)
+
+        nullstillTilstandsendringer()
+
+        håndterInntektsmelding(listOf(
+            7.juni(2022) til 7.juni(2022),
+            9.juni(2022) til 10.juni(2022),
+            17.juni(2022) til 29.juni(2022)
+        ), orgnummer = a2)
+
+        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a1)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING, orgnummer = a2)
+        assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_REVURDERING, orgnummer = a1)
+        assertForventetFeil(
+            forklaring = "Arbeidsgiver 2 blir opprettet først, og er derfor først til å motta startRevurdering-signal." +
+                    "Den kommer frem til at alle arbeidsgiverne har nødvendig inntekt, ettersom arbeidsgiver 1 har kun perioder i AvsluttetUtenUtbetaling på" +
+                    "dette tidspunktet (og disse telles ikke med når vi avgjør om periodene har nødvendig inntekt).",
+            nå = {
+                assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a2)
+            },
+            ønsket = {
+                assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_REVURDERING, orgnummer = a2)
+            }
+        )
+        assertTilstander(3.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_REVURDERING, orgnummer = a2)
+        assertTilstander(4.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_REVURDERING, orgnummer = a2)
+    }
+
+    @Test
+    fun `arbeidsgiver 2 er utenfor arbeidsgiverperioden, men ikke arbeidsgiver 1 - arbeidsgiver 1 blir opprettet først`() {
+        håndterSykmelding(Sykmeldingsperiode(17.juni(2022), 21.juni(2022), 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(17.juni(2022), 21.juni(2022), 100.prosent), orgnummer = a1)
+        håndterUtbetalingshistorikk(1.vedtaksperiode, orgnummer = a1)
+
+        håndterSykmelding(Sykmeldingsperiode(17.juni(2022), 21.juni(2022), 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(17.juni(2022), 21.juni(2022), 100.prosent), orgnummer = a2)
+        håndterUtbetalingshistorikk(1.vedtaksperiode, orgnummer = a2)
+
+        håndterSykmelding(Sykmeldingsperiode(22.juni(2022), 3.juli(2022), 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(22.juni(2022), 3.juli(2022), 100.prosent), orgnummer = a1)
+        håndterUtbetalingshistorikk(2.vedtaksperiode, orgnummer = a1)
+
+        håndterSykmelding(Sykmeldingsperiode(22.juni(2022), 3.juli(2022), 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(22.juni(2022), 3.juli(2022), 100.prosent), orgnummer = a2)
+        håndterUtbetalingshistorikk(2.vedtaksperiode, orgnummer = a2)
+
+        håndterSykmelding(Sykmeldingsperiode(20.juli(2022), 28.juli(2022), 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(20.juli(2022), 28.juli(2022), 100.prosent), orgnummer = a2)
+        håndterUtbetalingshistorikk(3.vedtaksperiode, orgnummer = a2)
+
+        håndterSykmelding(Sykmeldingsperiode(29.juli(2022), 3.august(2022), 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(29.juli(2022), 3.august(2022), 100.prosent), orgnummer = a2)
+        håndterUtbetalingshistorikk(4.vedtaksperiode, orgnummer = a2)
+
+        nullstillTilstandsendringer()
+
+        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a1)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a2)
+        assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a1)
+        assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a2)
+        assertTilstander(3.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a2)
+        assertTilstander(4.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a2)
+
+        nullstillTilstandsendringer()
+
+        håndterInntektsmelding(listOf(
+            7.juni(2022) til 7.juni(2022),
+            9.juni(2022) til 10.juni(2022),
+            17.juni(2022) til 29.juni(2022)
+        ), orgnummer = a2)
+
+        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a1)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING, orgnummer = a2)
+        assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_REVURDERING, orgnummer = a1)
+        assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_REVURDERING, orgnummer = a2)
+        assertTilstander(3.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_REVURDERING, orgnummer = a2)
+        assertTilstander(4.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_REVURDERING, orgnummer = a2)
+    }
+
+    @Test
+    fun `arbeidsgiver 1 er utenfor arbeidsgiverperioden, men ikke arbeidsgiver 2 - arbeidsgiver 1 blir opprettet først`() {
+        håndterSykmelding(Sykmeldingsperiode(17.juni(2022), 21.juni(2022), 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(17.juni(2022), 21.juni(2022), 100.prosent), orgnummer = a1)
+        håndterUtbetalingshistorikk(1.vedtaksperiode, orgnummer = a1)
+
+        håndterSykmelding(Sykmeldingsperiode(17.juni(2022), 21.juni(2022), 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(17.juni(2022), 21.juni(2022), 100.prosent), orgnummer = a2)
+        håndterUtbetalingshistorikk(1.vedtaksperiode, orgnummer = a2)
+
+        håndterSykmelding(Sykmeldingsperiode(22.juni(2022), 3.juli(2022), 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(22.juni(2022), 3.juli(2022), 100.prosent), orgnummer = a1)
+        håndterUtbetalingshistorikk(2.vedtaksperiode, orgnummer = a1)
+
+        håndterSykmelding(Sykmeldingsperiode(22.juni(2022), 3.juli(2022), 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(22.juni(2022), 3.juli(2022), 100.prosent), orgnummer = a2)
+        håndterUtbetalingshistorikk(2.vedtaksperiode, orgnummer = a2)
+
+        håndterSykmelding(Sykmeldingsperiode(20.juli(2022), 28.juli(2022), 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(20.juli(2022), 28.juli(2022), 100.prosent), orgnummer = a1)
+        håndterUtbetalingshistorikk(3.vedtaksperiode, orgnummer = a1)
+
+        håndterSykmelding(Sykmeldingsperiode(29.juli(2022), 3.august(2022), 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(29.juli(2022), 3.august(2022), 100.prosent), orgnummer = a1)
+        håndterUtbetalingshistorikk(4.vedtaksperiode, orgnummer = a1)
+
+        nullstillTilstandsendringer()
+
+        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a1)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a2)
+        assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a1)
+        assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a2)
+        assertTilstander(3.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a1)
+        assertTilstander(4.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a1)
+
+        nullstillTilstandsendringer()
+
+        håndterInntektsmelding(listOf(
+            7.juni(2022) til 7.juni(2022),
+            9.juni(2022) til 10.juni(2022),
+            17.juni(2022) til 29.juni(2022)
+        ), orgnummer = a1)
+
+        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING, orgnummer = a1)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a2)
+
+        assertForventetFeil(
+            forklaring = "Arbeidsgiver 1 blir opprettet først, og er derfor først til å motta startRevurdering-signal." +
+                    "Den kommer frem til at alle arbeidsgiverne har nødvendig inntekt, ettersom arbeidsgiver 2 har kun perioder i AvsluttetUtenUtbetaling på" +
+                    "dette tidspunktet (og disse telles ikke med når vi avgjør om periodene har nødvendig inntekt).",
+            nå = {
+                assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a1)
+            },
+            ønsket = {
+                assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_REVURDERING, orgnummer = a1)
+            }
+        )
+
+        assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_REVURDERING, orgnummer = a2)
+        assertTilstander(3.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_REVURDERING, orgnummer = a1)
+        assertTilstander(4.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_REVURDERING, orgnummer = a1)
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
