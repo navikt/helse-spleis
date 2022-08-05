@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsvurdering
@@ -10,6 +11,7 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
+import no.nav.helse.juni
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -75,6 +77,27 @@ internal class FlereArbeidsgivereWarningsTest : AbstractEndToEndTest() {
         håndterUtbetalt(orgnummer = a1)
 
         assertNoWarnings(AktivitetsloggFilter.person())
+    }
+
+    @Test
+    fun `overlappende periode i avsluttet uten utbetaling hos annen arbeidsgiver medfører ikke warning`() {
+        håndterSykmelding(Sykmeldingsperiode(17.juni(2022), 21.juni(2022), 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(17.juni(2022), 21.juni(2022), 100.prosent), orgnummer = a1)
+        håndterUtbetalingshistorikk(1.vedtaksperiode, orgnummer = a1)
+
+        håndterSykmelding(Sykmeldingsperiode(17.juni(2022), 21.juni(2022), 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(17.juni(2022), 21.juni(2022), 100.prosent), orgnummer = a2)
+        håndterUtbetalingshistorikk(1.vedtaksperiode, orgnummer = a2)
+
+        assertForventetFeil(
+            forklaring = "Det er unødvendig å lage warning på en periode som ikke har blitt utbetalt",
+            nå = {
+                assertWarning("Denne personen har en utbetaling for samme periode for en annen arbeidsgiver. Kontroller at beregningene for begge arbeidsgiverne er korrekte.", 1.vedtaksperiode.filter(a2))
+            },
+            ønsket = {
+                assertNoWarnings(1.vedtaksperiode.filter(a2))
+            }
+        )
     }
 
     @Test
