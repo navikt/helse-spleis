@@ -3,6 +3,7 @@ package no.nav.helse
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 
 class FødselsnummerTest {
@@ -36,5 +37,12 @@ class FødselsnummerTest {
         assertThrows<RuntimeException> { "Jørgen Hattemaker".somFødselsnummer() }
         assertThrows<RuntimeException> { "".somFødselsnummer() }
         assertThrows<RuntimeException> { "1".somFødselsnummer() }
+    }
+
+    @Test
+    fun `identitetsnummer hvor seks første siffer ikke er fødselsdato er også gyldige`() {
+        assertDoesNotThrow { "32120012345".somFødselsnummer() }
+        assertDoesNotThrow { "31130012345".somFødselsnummer() }
+        assertDoesNotThrow { "32130012345".somFødselsnummer() }
     }
 }
