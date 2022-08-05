@@ -50,7 +50,8 @@ internal class TestMessageFactory(
 
         private fun SykepengesoknadDTO.toMap(fødselsdato: LocalDate): Map<String, Any> =
             objectMapper.convertValue<Map<String, Any>>(this).plus("fødselsdato" to "$fødselsdato")
-        private fun Inntektsmelding.toMap(): Map<String, Any> = objectMapper.convertValue(this)
+        private fun Inntektsmelding.toMap(fødselsdato: LocalDate): Map<String, Any> =
+            objectMapper.convertValue<Map<String, Any>>(this).plus("fødselsdato" to "$fødselsdato")
     }
 
     fun lagNySøknad(
@@ -182,7 +183,7 @@ internal class TestMessageFactory(
             beregnetInntekt,
             orgnummer,
             opphørsdatoForRefusjon
-        ).toMap())
+        ).toMap(fødselsdato))
 
     fun lagInnteksmeldingReplay(
         vedtaksperiodeId: UUID,

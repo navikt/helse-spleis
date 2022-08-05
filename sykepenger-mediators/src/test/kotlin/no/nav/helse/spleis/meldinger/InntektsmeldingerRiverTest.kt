@@ -14,10 +14,12 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
+import no.nav.helse.mai
 import no.nav.inntektsmeldingkontrakt.Inntektsmelding as Inntektsmeldingkontrakt
 
 internal class InntektsmeldingerRiverTest : RiverTest() {
 
+    private val fødselsdato = 17.mai(1995)
     private val InvalidJson = "foo"
     private val UnknownJson = "{\"foo\": \"bar\"}"
     private val ValidInntektsmelding = Inntektsmeldingkontrakt(
@@ -67,7 +69,7 @@ internal class InntektsmeldingerRiverTest : RiverTest() {
     private val ValidInntektsmeldingWithUnknownFieldsJson =
         ValidInntektsmelding.put(UUID.randomUUID().toString(), "foobar").toJson()
 
-    private val ValidInntektsmeldingMedOpphørAvNaturalytelser = ValidInntektsmelding.set<JsonNode>(
+    private val ValidInntektsmeldingMedOpphørAvNaturalytelser = ValidInntektsmelding.set<ObjectNode>(
         "opphoerAvNaturalytelser",
         listOf(OpphoerAvNaturalytelse(ELEKTRONISKKOMMUNIKASJON, LocalDate.now(), BigDecimal(589.00))).toJsonNode()
     ).toJson()
@@ -89,6 +91,7 @@ internal class InntektsmeldingerRiverTest : RiverTest() {
         assertNoErrors(ValidInntektsmeldingUtenRefusjon)
         assertNoErrors(ValidInntektsmeldingMedOpphørAvNaturalytelser)
     }
+    private fun ObjectNode.toJson(): String = put("fødselsdato", "$fødselsdato").toString()
 }
 
 private val objectMapper = jacksonObjectMapper()
@@ -100,7 +103,5 @@ private fun Inntektsmeldingkontrakt.asObjectNode(): ObjectNode = objectMapper.va
     put("@event_name", "inntektsmelding")
     put("@opprettet", LocalDateTime.now().toString())
 }
-
-private fun JsonNode.toJson(): String = objectMapper.writeValueAsString(this)
 
 private fun List<OpphoerAvNaturalytelse>.toJsonNode(): JsonNode = objectMapper.valueToTree(this)
