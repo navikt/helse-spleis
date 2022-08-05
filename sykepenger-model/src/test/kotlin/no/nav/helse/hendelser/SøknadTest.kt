@@ -30,6 +30,7 @@ import no.nav.helse.sykdomstidslinje.Dag.FriskHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.ProblemDag
 import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.Sykedag
+import no.nav.helse.utbetalingstidslinje.Alder.Companion.alder
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -41,19 +42,21 @@ internal class SøknadTest {
 
     private companion object {
         private const val UNG_PERSON_FNR_2018 = "12029240045"
+        private val februar12 = 12.februar(1992)
         private val ungPersonFnr2018Hendelsefabrikk = Hendelsefabrikk(
             fødselsnummer = UNG_PERSON_FNR_2018.somFødselsnummer(),
             aktørId = "12345",
             organisasjonsnummer = "987654321",
-            fødselsdato = 12.februar(1992)
+            fødselsdato = februar12
         )
         private val EN_PERIODE = Periode(1.januar, 31.januar)
         private const val FYLLER_18_ÅR_2_NOVEMBER = "02110075045"
+        private val november2 = 2.november(2000)
         private val fyller18År2NovemberHendelsefabrikk = Hendelsefabrikk(
             fødselsnummer = FYLLER_18_ÅR_2_NOVEMBER.somFødselsnummer(),
             aktørId = "12345",
             organisasjonsnummer = "987654321",
-            fødselsdato = 2.november(2000)
+            fødselsdato = november2
         )
     }
 
@@ -114,14 +117,14 @@ internal class SøknadTest {
     @Test
     fun `17 år på søknadstidspunkt gir error`() {
         søknad(Sykdom(1.januar, 10.januar, 100.prosent), hendelsefabrikk = fyller18År2NovemberHendelsefabrikk, sendtTilNAVEllerArbeidsgiver = 1.november)
-        assertTrue(søknad.forUng(FYLLER_18_ÅR_2_NOVEMBER.somFødselsnummer().alder()))
+        assertTrue(søknad.forUng(november2.alder))
         assertTrue(søknad.hasErrorsOrWorse())
     }
 
     @Test
     fun `18 år på søknadstidspunkt gir ikke error`() {
         søknad(Sykdom(1.januar, 10.januar, 100.prosent), hendelsefabrikk = fyller18År2NovemberHendelsefabrikk, sendtTilNAVEllerArbeidsgiver = 2.november)
-        assertFalse(søknad.forUng(FYLLER_18_ÅR_2_NOVEMBER.somFødselsnummer().alder()))
+        assertFalse(søknad.forUng(november2.alder))
         assertFalse(søknad.hasErrorsOrWorse())
     }
 

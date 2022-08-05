@@ -35,6 +35,7 @@ import no.nav.helse.spleis.e2e.assertWarning
 import no.nav.helse.sykepengegrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
+import no.nav.helse.utbetalingstidslinje.Alder.Companion.alder
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosent
@@ -53,7 +54,7 @@ internal class VilkårsgrunnlagTest : AbstractPersonTest() {
 
     @BeforeEach
     fun setup() {
-        person = Person(AKTØRID, UNG_PERSON_FNR_2018, UNG_PERSON_FNR_2018.alder(), MaskinellJurist())
+        person = Person(AKTØRID, UNG_PERSON_FNR_2018, UNG_PERSON_FØDSELSDATO.alder, MaskinellJurist())
         person.addObserver(observatør)
         person.håndter(sykmelding())
         person.håndter(søknad())

@@ -15,8 +15,8 @@ import no.nav.helse.person.Paragraf.PARAGRAF_8_3
 import no.nav.helse.person.Punktum.Companion.punktum
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.plus
-import no.nav.helse.somFødselsnummer
 import no.nav.helse.ukedager
+import no.nav.helse.utbetalingstidslinje.Alder.Companion.alder
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -25,17 +25,17 @@ import org.junit.jupiter.api.Test
 internal class AlderTest {
 
     private companion object {
-        val FYLLER_67_ÅR_1_JANUAR_2018 = "01015149945".somFødselsnummer().alder()
-        val FYLLER_18_ÅR_2_NOVEMBER_2018 = "02110075045".somFødselsnummer().alder()
-        val FYLLER_70_ÅR_10_JANUAR_2018 = "10014812345".somFødselsnummer().alder()
-        val FYLLER_70_ÅR_13_JANUAR_2018 = "13014812345".somFødselsnummer().alder()
-        val FYLLER_70_ÅR_14_JANUAR_2018 = "14014812345".somFødselsnummer().alder()
-        val FYLLER_70_ÅR_15_JANUAR_2018 = "15014812345".somFødselsnummer().alder()
+        val FYLLER_67_ÅR_1_JANUAR_2018 = 1.januar(1951).alder
+        val FYLLER_18_ÅR_2_NOVEMBER_2018 = 2.november(2000).alder
+        val FYLLER_70_ÅR_10_JANUAR_2018 = 10.januar(1948).alder
+        val FYLLER_70_ÅR_13_JANUAR_2018 = 13.januar(1948).alder
+        val FYLLER_70_ÅR_14_JANUAR_2018 = 14.januar(1948).alder
+        val FYLLER_70_ÅR_15_JANUAR_2018 = 15.januar(1948).alder
     }
 
     @Test
     fun `alder på gitt dato`() {
-        val alder = "12029240045".somFødselsnummer().alder()
+        val alder = 12.februar(1992).alder
         assertEquals(25, alder.alderPåDato(11.februar))
         assertEquals(26, alder.alderPåDato(12.februar))
     }

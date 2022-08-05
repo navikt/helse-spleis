@@ -9,6 +9,7 @@ import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mai
+import no.nav.helse.oktober
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.etterlevelse.MaskinellJurist
@@ -65,7 +66,7 @@ internal class MaksdatoE2ETest : AbstractEndToEndTest() {
     @Test
     fun `oppbrukt sykepenger etter fylte 67 serialiseres til rett begrunnelse`() {
         val fnr = "16104812345"
-        createTestPerson(fnr.somFødselsnummer())
+        createTestPerson(fnr.somFødselsnummer(), 16.oktober(1948))
         nyttVedtak(17.januar, 1.mai)
         inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.avvistedager.forEach { avvistDag ->
             assertEquals(listOf(SykepengedagerOppbruktOver67), avvistDag.begrunnelser)

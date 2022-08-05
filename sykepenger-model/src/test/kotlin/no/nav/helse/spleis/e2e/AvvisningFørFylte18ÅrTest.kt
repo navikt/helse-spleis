@@ -21,7 +21,7 @@ internal class AvvisningFørFylte18ÅrTest : AbstractEndToEndTest() {
 
     @BeforeEach
     fun setup() {
-        createTestPerson(FYLLER_18_ÅR_2_NOVEMBER)
+        createTestPerson(FYLLER_18_ÅR_2_NOVEMBER, 2.november(2000))
     }
 
     @Test

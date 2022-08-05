@@ -44,6 +44,7 @@ import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.UTELATE
 import no.nav.helse.testhelpers.Utbetalingsdager
 import no.nav.helse.testhelpers.tidslinjeOf
+import no.nav.helse.utbetalingstidslinje.Alder.Companion.alder
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -65,9 +66,13 @@ internal class ArbeidsgiverUtbetalingerTest {
 
     private companion object {
         val UNG_PERSON_FNR_2018 = "12029240045".somFødselsnummer()
+        val UNG_PERSON_2018_FØDSELSDATO = 12.februar(1992)
         val PERSON_67_ÅR_5_JANUAR_FNR_2018 = "05015112345".somFødselsnummer()
+        val PERSON_67_ÅR_5_JANUAR_2018_FØDSELSDATO = 5.januar(1951)
         val PERSON_68_ÅR_1_DESEMBER_2018 = "01125112345".somFødselsnummer()
+        val PERSON_68_ÅR_1_DESEMBER_2018_FØDSELDATO = 1.desember(1951)
         val PERSON_70_ÅR_1_FEBRUAR_2018 = "01024812345".somFødselsnummer()
+        val PERSON_70_ÅR_1_FEBRUAR_2018_FØDSELSDATO = 1.februar(1948)
         val ORGNUMMER = "888888888"
         val hendelsefabrikk = Hendelsefabrikk(
             fødselsnummer = UNG_PERSON_FNR_2018,
@@ -79,7 +84,7 @@ internal class ArbeidsgiverUtbetalingerTest {
 
     @Test
     fun `uavgrenset utbetaling`() {
-        undersøke(UNG_PERSON_FNR_2018, 12.NAV)
+        undersøke(UNG_PERSON_FNR_2018, 12.NAV, fødselsdato = UNG_PERSON_2018_FØDSELSDATO)
         assertEquals(12, inspektør.size)
         assertEquals(10, inspektør.navDagTeller)
         assertEquals(2, inspektør.navHelgDagTeller)
@@ -103,7 +108,7 @@ internal class ArbeidsgiverUtbetalingerTest {
             meldingsreferanseId = UUID.randomUUID(),
             vilkårsgrunnlagId = UUID.randomUUID()
         )
-        undersøke(UNG_PERSON_FNR_2018, 5.NAV(12), 7.NAV, vilkårsgrunnlagElement = vilkårsgrunnlagElement)
+        undersøke(UNG_PERSON_FNR_2018, 5.NAV(12), 7.NAV, vilkårsgrunnlagElement = vilkårsgrunnlagElement, fødselsdato = UNG_PERSON_2018_FØDSELSDATO)
 
         assertEquals(12, inspektør.size)
         assertEquals(0, inspektør.navDagTeller)
@@ -117,7 +122,7 @@ internal class ArbeidsgiverUtbetalingerTest {
 
     @Test
     fun `avgrenset betaling pga maksimum inntekt`() {
-        undersøke(UNG_PERSON_FNR_2018, 5.NAV(3500), 7.NAV)
+        undersøke(UNG_PERSON_FNR_2018, 5.NAV(3500), 7.NAV, fødselsdato = UNG_PERSON_2018_FØDSELSDATO)
 
         assertEquals(12, inspektør.size)
         assertEquals(10, inspektør.navDagTeller)
@@ -130,7 +135,7 @@ internal class ArbeidsgiverUtbetalingerTest {
 
     @Test
     fun `avgrenset betaling pga minimun sykdomsgrad`() {
-        undersøke(UNG_PERSON_FNR_2018, 5.NAV(1200, 19.0), 2.ARB, 5.NAV)
+        undersøke(UNG_PERSON_FNR_2018, 5.NAV(1200, 19.0), 2.ARB, 5.NAV, fødselsdato = UNG_PERSON_2018_FØDSELSDATO)
 
         assertEquals(12, inspektør.size)
         assertEquals(5, inspektør.avvistDagTeller)
@@ -142,7 +147,7 @@ internal class ArbeidsgiverUtbetalingerTest {
 
     @Test
     fun `avgrenset betaling pga oppbrukte sykepengedager`() {
-        undersøke(PERSON_67_ÅR_5_JANUAR_FNR_2018, 7.UTELATE, 91.NAV)
+        undersøke(PERSON_67_ÅR_5_JANUAR_FNR_2018, 7.UTELATE, 91.NAV, fødselsdato = PERSON_67_ÅR_5_JANUAR_2018_FØDSELSDATO)
 
         assertEquals(91, inspektør.size)
         assertEquals(60, inspektør.navDagTeller)
@@ -157,7 +162,7 @@ internal class ArbeidsgiverUtbetalingerTest {
 
     @Test
     fun `avgrenset betaling pga oppbrukte sykepengedager i tillegg til beløpsgrenser`() {
-        undersøke(PERSON_67_ÅR_5_JANUAR_FNR_2018, 7.UTELATE, 98.NAV)
+        undersøke(PERSON_67_ÅR_5_JANUAR_FNR_2018, 7.UTELATE, 98.NAV, fødselsdato = PERSON_67_ÅR_5_JANUAR_2018_FØDSELSDATO)
 
         assertEquals(98, inspektør.size)
         assertEquals(60, inspektør.navDagTeller)
@@ -175,7 +180,8 @@ internal class ArbeidsgiverUtbetalingerTest {
         undersøke(
             PERSON_67_ÅR_5_JANUAR_FNR_2018,
             tidslinjeOf(35.UTELATE, 68.NAV),
-            tidslinjeOf(7.UTELATE, 26.NAV)
+            tidslinjeOf(7.UTELATE, 26.NAV),
+            fødselsdato = PERSON_67_ÅR_5_JANUAR_2018_FØDSELSDATO
         )
 
         assertEquals(68, inspektør.size)
@@ -190,7 +196,7 @@ internal class ArbeidsgiverUtbetalingerTest {
 
     @Test
     fun `beregn maksdato i et sykdomsforløp som slutter på en fredag`() {
-        undersøke(UNG_PERSON_FNR_2018, 16.AP, 4.NAV)
+        undersøke(UNG_PERSON_FNR_2018, 16.AP, 4.NAV, fødselsdato = UNG_PERSON_2018_FØDSELSDATO)
         assertEquals(28.desember, maksdato) // 3 dager already paid, 245 left. So should be fredag!
         assertEquals(245, gjenståendeSykedager)
         assertTrue(aktivitetslogg.hasActivities())
@@ -199,49 +205,49 @@ internal class ArbeidsgiverUtbetalingerTest {
 
     @Test
     fun `beregn maksdato i et sykdomsforløp med opphold i sykdom`() {
-        undersøke(UNG_PERSON_FNR_2018, 2.ARB, 16.AP, 7.ARB, 8.NAV)
+        undersøke(UNG_PERSON_FNR_2018, 2.ARB, 16.AP, 7.ARB, 8.NAV, fødselsdato = UNG_PERSON_2018_FØDSELSDATO)
         assertEquals(8.januar(2019), maksdato)
         assertEquals(242, gjenståendeSykedager)
     }
 
     @Test
     fun `beregn maksdato (med rest) der den ville falt på en lørdag`() { //(351.S + 1.F + 1.S)
-        undersøke(UNG_PERSON_FNR_2018, 16.AP, 335.NAV, 1.FRI, 1.NAV)
+        undersøke(UNG_PERSON_FNR_2018, 16.AP, 335.NAV, 1.FRI, 1.NAV, fødselsdato = UNG_PERSON_2018_FØDSELSDATO)
         assertEquals(31.desember, maksdato)
         assertEquals(8, gjenståendeSykedager)
     }
 
     @Test
     fun `beregn maksdato (med rest) der den ville falt på en søndag`() { //(23.S + 2.F + 1.S)
-        undersøke(UNG_PERSON_FNR_2018, 16.AP, 7.NAV, 2.FRI, 1.NAV)
+        undersøke(UNG_PERSON_FNR_2018, 16.AP, 7.NAV, 2.FRI, 1.NAV, fødselsdato = UNG_PERSON_2018_FØDSELSDATO)
         assertEquals(1.januar(2019), maksdato)
         assertEquals(242, gjenståendeSykedager)
     }
 
     @Test
     fun `maksdato forskyves av ferie etterfulgt av sykedager`() { //21.S + 3.F + 1.S)
-        undersøke(UNG_PERSON_FNR_2018, 16.AP, 5.NAV, 3.FRI, 1.NAV)
+        undersøke(UNG_PERSON_FNR_2018, 16.AP, 5.NAV, 3.FRI, 1.NAV, fødselsdato = UNG_PERSON_2018_FØDSELSDATO)
         assertEquals(2.januar(2019), maksdato)
         assertEquals(244, gjenståendeSykedager)
     }
 
     @Test
     fun `maksdato forskyves ikke av ferie på tampen av sykdomstidslinjen`() { //(21.S + 3.F)
-        undersøke(UNG_PERSON_FNR_2018, 16.AP, 5.NAV, 3.FRI)
+        undersøke(UNG_PERSON_FNR_2018, 16.AP, 5.NAV, 3.FRI, fødselsdato = UNG_PERSON_2018_FØDSELSDATO)
         assertEquals(2.januar(2019), maksdato)
         assertEquals(245, gjenståendeSykedager)
     }
 
     @Test
     fun `maksdato forskyves ikke av ferie etterfulgt av arbeidsdag på tampen av sykdomstidslinjen`() { //(21.S + 3.F + 1.A)
-        undersøke(UNG_PERSON_FNR_2018, 16.AP, 5.NAV, 3.FRI, 1.ARB)
+        undersøke(UNG_PERSON_FNR_2018, 16.AP, 5.NAV, 3.FRI, 1.ARB, fødselsdato = UNG_PERSON_2018_FØDSELSDATO)
         assertEquals(3.januar(2019), maksdato)
         assertEquals(245, gjenståendeSykedager)
     }
 
     @Test
     fun `setter maksdato når ingen dager er brukt`() { //(16.S)
-        undersøke(UNG_PERSON_FNR_2018, 16.AP)
+        undersøke(UNG_PERSON_FNR_2018, 16.AP, fødselsdato = UNG_PERSON_2018_FØDSELSDATO)
         assertEquals(28.desember, maksdato)
         assertEquals(248, gjenståendeSykedager)
         assertEquals(0, forbrukteSykedager)
@@ -249,7 +255,7 @@ internal class ArbeidsgiverUtbetalingerTest {
 
     @Test
     fun `når sykepengeperioden går over maksdato, så skal utbetaling stoppe ved maksdato`() { //(249.NAV)
-        undersøke(UNG_PERSON_FNR_2018, 16.AP, 349.NAV)
+        undersøke(UNG_PERSON_FNR_2018, 16.AP, 349.NAV, fødselsdato = UNG_PERSON_2018_FØDSELSDATO)
         assertEquals(28.desember, maksdato)
         assertEquals(0, gjenståendeSykedager)
         assertEquals(248, inspektør.navDagTeller)
@@ -259,7 +265,7 @@ internal class ArbeidsgiverUtbetalingerTest {
 
     @Test
     fun `når personen fyller 67 blir antall gjenværende dager 60`() {
-        undersøke(PERSON_67_ÅR_5_JANUAR_FNR_2018, 16.AP, 94.NAV)
+        undersøke(PERSON_67_ÅR_5_JANUAR_FNR_2018, 16.AP, 94.NAV, fødselsdato = PERSON_67_ÅR_5_JANUAR_2018_FØDSELSDATO)
         assertEquals(10.april, maksdato)
         assertEquals(0, gjenståendeSykedager)
         assertEquals(60, inspektør.navDagTeller)
@@ -269,7 +275,7 @@ internal class ArbeidsgiverUtbetalingerTest {
 
     @Test
     fun `når personen fyller 67 og 248 dager er brukt opp`() {
-        undersøke(PERSON_68_ÅR_1_DESEMBER_2018, 16.AP, 366.NAV)
+        undersøke(PERSON_68_ÅR_1_DESEMBER_2018, 16.AP, 366.NAV, fødselsdato = PERSON_68_ÅR_1_DESEMBER_2018_FØDSELDATO)
         assertEquals(28.desember, maksdato)
         assertEquals(0, gjenståendeSykedager)
         assertTrue(aktivitetslogg.hentInfo().contains("Maks antall sykepengedager er nådd i perioden"))
@@ -278,7 +284,7 @@ internal class ArbeidsgiverUtbetalingerTest {
 
     @Test
     fun `når personen fyller 70 skal det ikke utbetales sykepenger`() {
-        undersøke(PERSON_70_ÅR_1_FEBRUAR_2018, 1.NAV, startdato = 1.februar)
+        undersøke(PERSON_70_ÅR_1_FEBRUAR_2018, 1.NAV, startdato = 1.februar, fødselsdato = PERSON_70_ÅR_1_FEBRUAR_2018_FØDSELSDATO)
         assertEquals(31.januar, maksdato)
         assertEquals(0, gjenståendeSykedager)
         assertEquals(0, forbrukteSykedager)
@@ -288,19 +294,21 @@ internal class ArbeidsgiverUtbetalingerTest {
         fnr: Fødselsnummer,
         vararg utbetalingsdager: Utbetalingsdager,
         vilkårsgrunnlagElement: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement? = null,
-        startdato: LocalDate = 1.januar
+        startdato: LocalDate = 1.januar,
+        fødselsdato: LocalDate
     ) {
         val tidslinje = tidslinjeOf(*utbetalingsdager, startDato = startdato)
-        undersøke(fnr, tidslinje, tidslinjeOf(), vilkårsgrunnlagElement)
+        undersøke(fnr, tidslinje, tidslinjeOf(), vilkårsgrunnlagElement, fødselsdato)
     }
 
     private fun undersøke(
         fnr: Fødselsnummer,
         arbeidsgiverTidslinje: Utbetalingstidslinje,
         historiskTidslinje: Utbetalingstidslinje,
-        vilkårsgrunnlagElement: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement? = null
+        vilkårsgrunnlagElement: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement? = null,
+        fødselsdato: LocalDate
     ) {
-        val person = Person("aktørid", fnr, fnr.alder(), MaskinellJurist())
+        val person = Person("aktørid", fnr, fødselsdato.alder, MaskinellJurist())
         // seed arbeidsgiver med sykdomshistorikk
         val førsteDag = arbeidsgiverTidslinje.periode().start
         val sisteDag = arbeidsgiverTidslinje.periode().endInclusive
@@ -324,7 +332,7 @@ internal class ArbeidsgiverUtbetalingerTest {
         vilkårsgrunnlagHistorikk.lagre(
             vilkårsgrunnlagElement ?: VilkårsgrunnlagHistorikk.Grunnlagsdata(
                 skjæringstidspunkt = 1.januar,
-                sykepengegrunnlag = 30000.månedlig.sykepengegrunnlag(fnr.alder()),
+                sykepengegrunnlag = 30000.månedlig.sykepengegrunnlag(fødselsdato.alder),
                 sammenligningsgrunnlag = sammenligningsgrunnlag(30000.månedlig),
                 avviksprosent = Prosent.prosent(0.0),
                 opptjening = Opptjening.opptjening(listOf(
@@ -368,7 +376,7 @@ internal class ArbeidsgiverUtbetalingerTest {
 
         ArbeidsgiverUtbetalinger(
             NormalArbeidstaker,
-            fnr.alder(),
+            fødselsdato.alder,
             mapOf(person.arbeidsgiver(ORGNUMMER) to object : IUtbetalingstidslinjeBuilder {
                 override fun result() = arbeidsgiverTidslinje
                 override fun fridag(dato: LocalDate) {}

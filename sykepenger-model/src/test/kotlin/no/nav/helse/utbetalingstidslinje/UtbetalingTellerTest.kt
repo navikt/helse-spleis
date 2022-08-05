@@ -1,14 +1,18 @@
 package no.nav.helse.utbetalingstidslinje
 
-import no.nav.helse.*
+import java.time.LocalDate
+import no.nav.helse.desember
+import no.nav.helse.februar
+import no.nav.helse.januar
+import no.nav.helse.mai
+import no.nav.helse.utbetalingstidslinje.Alder.Companion.alder
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
 
 internal class UtbetalingTellerTest {
-    private val UNG_PERSON_FNR_2018 = "15010052345".somFødselsnummer().alder()
-    private val PERSON_67_ÅR_FNR_2018 = "15015112345".somFødselsnummer().alder()
-    private val PERSON_70_ÅR_FNR_2018 = "15014812345".somFødselsnummer().alder()
+    private val UNG_PERSON_FNR_2018 = 15.januar(2000).alder
+    private val PERSON_67_ÅR_FNR_2018 = 15.januar(1951).alder
+    private val PERSON_70_ÅR_FNR_2018 = 15.januar(1948).alder
     private lateinit var grense: UtbetalingTeller
 
     @Test
@@ -70,11 +74,11 @@ internal class UtbetalingTellerTest {
         undersøke(21.mai, UNG_PERSON_FNR_2018, 243, 14.mai)
         undersøke(22.mai, UNG_PERSON_FNR_2018, 242, 14.mai)
         undersøke(28.desember, UNG_PERSON_FNR_2018, 1, 17.januar)
-        undersøke(9.februar, "12024812345".somFødselsnummer().alder(), 1, 17.januar)
-        undersøke(22.januar, "12024812345".somFødselsnummer().alder(), 57, 17.januar)
-        undersøke(7.mai, "12025112345".somFødselsnummer().alder(), 65, 17.januar)
-        undersøke(12.februar, "12025112345".somFødselsnummer().alder(), 247, 9.februar)
-        undersøke(13.februar, "12025112345".somFødselsnummer().alder(), 246, 9.februar)
+        undersøke(9.februar, 12.februar(1948).alder, 1, 17.januar)
+        undersøke(22.januar, 12.februar(1948).alder, 57, 17.januar)
+        undersøke(7.mai, 12.februar(1951).alder, 65, 17.januar)
+        undersøke(12.februar, 12.februar(1951).alder, 247, 9.februar)
+        undersøke(13.februar, 12.februar(1951).alder, 246, 9.februar)
     }
 
     private fun undersøke(expected: LocalDate, alder: Alder, dager: Int, sisteUtbetalingsdag: LocalDate) {

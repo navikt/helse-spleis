@@ -67,6 +67,7 @@ import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.aktive
+import no.nav.helse.utbetalingstidslinje.Alder.Companion.alder
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag
@@ -960,7 +961,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
     @Test
     fun `Teller ikke med dager fra opphørte utbetalingslinjer`() {
         byggPersonMedOpphør()
-        val beregner = Feriepengeberegner(UNG_PERSON_FNR_2018.alder(), Year.of(2018), utbetalingshistorikkForFeriepenger(), person)
+        val beregner = Feriepengeberegner(UNG_PERSON_FØDSELSDATO.alder, Year.of(2018), utbetalingshistorikkForFeriepenger(), person)
         assertEquals((16.januar til 28.februar).filterNot { it.erHelg() }, beregner.feriepengedatoer())
     }
 
@@ -1251,7 +1252,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             inntekter = inntektperioderForSammenligningsgrunnlag {
                 1.april(2020) til 1.mars(2021) inntekter {
                     a1 inntekt INNTEKT
-                    a2 inntekt Inntekt.INGEN
+                    a2 inntekt INGEN
                 }
             }
         ))

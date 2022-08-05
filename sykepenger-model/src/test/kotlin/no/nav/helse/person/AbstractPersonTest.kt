@@ -1,5 +1,6 @@
 package no.nav.helse.person
 
+import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.Fødselsnummer
 import no.nav.helse.dsl.Hendelsefabrikk
@@ -9,6 +10,7 @@ import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.somFødselsnummer
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.TestObservatør
+import no.nav.helse.utbetalingstidslinje.Alder.Companion.alder
 import org.junit.jupiter.api.BeforeEach
 
 internal abstract class AbstractPersonTest {
@@ -42,12 +44,12 @@ internal abstract class AbstractPersonTest {
 
     @BeforeEach
     internal fun createTestPerson() {
-        createTestPerson(UNG_PERSON_FNR_2018)
+        createTestPerson(UNG_PERSON_FNR_2018, UNG_PERSON_FØDSELSDATO)
     }
 
-    protected fun createTestPerson(fødselsnummer: Fødselsnummer): Person {
+    protected fun createTestPerson(fødselsnummer: Fødselsnummer, fødseldato: LocalDate): Person {
         jurist = MaskinellJurist()
-        person = Person(AKTØRID, fødselsnummer, fødselsnummer.alder(), jurist)
+        person = Person(AKTØRID, fødselsnummer, fødseldato.alder, jurist)
         observatør = TestObservatør().also { person.addObserver(it) }
         return person
     }

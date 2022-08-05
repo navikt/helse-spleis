@@ -1,26 +1,22 @@
 package no.nav.helse.utbetalingstidslinje
 
-import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.til
-import no.nav.helse.hentErrors
-import no.nav.helse.inspectors.inspektør
-import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.sykdomstidslinje.erHelg
-import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.februar
+import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.til
+import no.nav.helse.hentErrors
 import no.nav.helse.hentInfo
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.juli
 import no.nav.helse.juni
 import no.nav.helse.mars
 import no.nav.helse.oktober
+import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.NullObserver
-import no.nav.helse.somFødselsnummer
+import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.testhelpers.AP
 import no.nav.helse.testhelpers.ARB
 import no.nav.helse.testhelpers.FRI
@@ -30,15 +26,19 @@ import no.nav.helse.testhelpers.NAVDAGER
 import no.nav.helse.testhelpers.UTELATE
 import no.nav.helse.testhelpers.Utbetalingsdager
 import no.nav.helse.testhelpers.tidslinjeOf
+import no.nav.helse.utbetalingstidslinje.Alder.Companion.alder
+import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 
 internal class MaksimumSykepengedagerfilterTest {
     private companion object {
-        private const val UNG_PERSON_FNR_2018 = "12029240045"
-        private const val PERSON_70_ÅR_10_JANUAR_2018 = "10014812345"
-        private const val PERSON_67_ÅR_11_JANUAR_2018 = "11015112345"
+        private val UNG_PERSON_FNR_2018 = 12.februar(1992)
+        private val PERSON_70_ÅR_10_JANUAR_2018 = 10.januar(1948)
+        private val PERSON_67_ÅR_11_JANUAR_2018 = 11.januar(1951)
     }
 
     private lateinit var maksimumSykepenger: Alder.MaksimumSykepenger
@@ -541,12 +541,12 @@ internal class MaksimumSykepengedagerfilterTest {
     private fun Periode.utenHelg() = filterNot { it.erHelg() }
 
     private fun Utbetalingstidslinje.utbetalingsavgrenser(
-        fnr: String,
+        fødselsdato: LocalDate,
         periode: Periode? = null,
         personTidslinje: Utbetalingstidslinje = Utbetalingstidslinje()
     ): List<LocalDate> {
         maksimumSykepenger = MaksimumSykepengedagerfilter(
-            fnr.somFødselsnummer().alder(),
+            fødselsdato.alder,
             NormalArbeidstaker,
             personTidslinje
         ).let {

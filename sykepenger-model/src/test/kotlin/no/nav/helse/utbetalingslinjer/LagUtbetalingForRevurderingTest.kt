@@ -30,6 +30,7 @@ import no.nav.helse.testhelpers.FRI
 import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.sistePeriodeForUtbetalinger
+import no.nav.helse.utbetalingstidslinje.Alder.Companion.alder
 import no.nav.helse.utbetalingstidslinje.MaksimumUtbetalingFilter
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -46,6 +47,7 @@ internal class LagUtbetalingForRevurderingTest {
     private companion object {
         private const val AKTØRID = "42"
         private val FNR = "12029240045".somFødselsnummer()
+        private val fødselsdato = 12.februar(1992)
         private const val ORGNUMMER = "123456789"
         private val SØKNAD = UUID.randomUUID()
         private val hendelsefabrikk = Hendelsefabrikk(
@@ -407,7 +409,7 @@ internal class LagUtbetalingForRevurderingTest {
         )
     }
 
-    private fun person() = Person(AKTØRID, FNR, FNR.alder(), maskinellJurist)
+    private fun person() = Person(AKTØRID, FNR, fødselsdato.alder, maskinellJurist)
     private fun arbeidsgiver(organisasjonsnummer: String) = Arbeidsgiver(person(), organisasjonsnummer, maskinellJurist)
     private fun søknad(periode: Periode): Søknad {
         val søknadsperiode = Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent)

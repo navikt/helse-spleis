@@ -11,9 +11,9 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
-import no.nav.helse.somFødselsnummer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest.Companion.INNTEKT
 import no.nav.helse.sykepengegrunnlag
+import no.nav.helse.utbetalingstidslinje.Alder.Companion.alder
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
@@ -28,7 +28,7 @@ import kotlin.properties.Delegates
 
 internal class SykepengegrunnlagTest {
     private companion object {
-        private val FNR_67_ÅR_FEBRUAR_2021 = "01025400065".somFødselsnummer()
+        private val fødseldato67år =  1.februar(1954)
     }
 
     @Test
@@ -43,7 +43,7 @@ internal class SykepengegrunnlagTest {
 
     @Test
     fun `minimum inntekt tom 67 år - må være 0,5 G`() {
-        val alder = FNR_67_ÅR_FEBRUAR_2021.alder()
+        val alder = fødseldato67år.alder
         val skjæringstidspunkt = 1.februar(2021)
         val halvG = Grunnbeløp.halvG.beløp(skjæringstidspunkt)
 
@@ -70,7 +70,7 @@ internal class SykepengegrunnlagTest {
 
     @Test
     fun `minimum inntekt etter 67 år - må være 2 G`() {
-        val alder = FNR_67_ÅR_FEBRUAR_2021.alder()
+        val alder = fødseldato67år.alder
         val skjæringstidspunkt = 2.februar(2021)
         val `2G` = Grunnbeløp.`2G`.beløp(skjæringstidspunkt)
 
@@ -97,7 +97,7 @@ internal class SykepengegrunnlagTest {
 
     @Test
     fun `mindre enn 2G, men skjæringstidspunkt er før virkningen av minsteinntekt`() {
-        val alder = FNR_67_ÅR_FEBRUAR_2021.alder()
+        val alder = fødseldato67år.alder
         val skjæringstidspunkt = 23.mai(2021)
         val `2G_2021` = Grunnbeløp.`2G`.beløp(skjæringstidspunkt)
         val `2G_2020` = Grunnbeløp.`2G`.beløp(30.april(2021))
@@ -124,7 +124,7 @@ internal class SykepengegrunnlagTest {
     }
     @Test
     fun `mindre enn 2G, og skjæringstidspunkt er etter virkningen av minsteinntekt`() {
-        val alder = FNR_67_ÅR_FEBRUAR_2021.alder()
+        val alder = fødseldato67år.alder
         val skjæringstidspunkt = 24.mai(2021)
         val `2G_2021` = Grunnbeløp.`2G`.beløp(skjæringstidspunkt)
         var aktivitetslogg = Aktivitetslogg()
@@ -147,7 +147,7 @@ internal class SykepengegrunnlagTest {
 
     @Test
     fun `begrunnelse tom 67 år - minsteinntekt oppfylt`() {
-        val alder = FNR_67_ÅR_FEBRUAR_2021.alder()
+        val alder = fødseldato67år.alder
         val skjæringstidspunkt = 1.februar(2021)
         val halvG = Grunnbeløp.halvG.beløp(skjæringstidspunkt)
 
@@ -159,7 +159,7 @@ internal class SykepengegrunnlagTest {
 
     @Test
     fun `begrunnelse tom 67 år`() {
-        val alder = FNR_67_ÅR_FEBRUAR_2021.alder()
+        val alder = fødseldato67år.alder
         val skjæringstidspunkt = 1.februar(2021)
         val halvG = Grunnbeløp.halvG.beløp(skjæringstidspunkt)
 
@@ -170,7 +170,7 @@ internal class SykepengegrunnlagTest {
     }
     @Test
     fun `begrunnelse etter 67 år`() {
-        val alder = FNR_67_ÅR_FEBRUAR_2021.alder()
+        val alder = fødseldato67år.alder
         val skjæringstidspunkt = 2.februar(2021)
         val `2G` = Grunnbeløp.`2G`.beløp(skjæringstidspunkt)
 
@@ -210,7 +210,7 @@ internal class SykepengegrunnlagTest {
         val inntekt = 10000.månedlig
         val overstyrt = 15000.månedlig
         val sykepengegrunnlag = Sykepengegrunnlag(
-            alder = AbstractPersonTest.UNG_PERSON_FNR_2018.alder(),
+            alder = AbstractPersonTest.UNG_PERSON_FØDSELSDATO.alder,
             skjæringstidspunkt = 1.januar,
             arbeidsgiverInntektsopplysninger = listOf(
                 ArbeidsgiverInntektsopplysning("orgnr", Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), inntekt))
@@ -230,7 +230,7 @@ internal class SykepengegrunnlagTest {
         val hendelseId = UUID.randomUUID()
         val tidsstempel = LocalDateTime.now()
         val sykepengegrunnlag1 = Sykepengegrunnlag(
-            alder = AbstractPersonTest.UNG_PERSON_FNR_2018.alder(),
+            alder = AbstractPersonTest.UNG_PERSON_FØDSELSDATO.alder,
             skjæringstidspunkt = 1.januar,
             arbeidsgiverInntektsopplysninger = listOf(
                 ArbeidsgiverInntektsopplysning(
@@ -251,7 +251,7 @@ internal class SykepengegrunnlagTest {
         assertEquals(
             sykepengegrunnlag1,
             Sykepengegrunnlag(
-                alder = AbstractPersonTest.UNG_PERSON_FNR_2018.alder(),
+                alder = AbstractPersonTest.UNG_PERSON_FØDSELSDATO.alder,
                 skjæringstidspunkt = 1.januar,
                 arbeidsgiverInntektsopplysninger = listOf(
                     ArbeidsgiverInntektsopplysning(
@@ -274,7 +274,7 @@ internal class SykepengegrunnlagTest {
         assertNotEquals(
             sykepengegrunnlag1,
             Sykepengegrunnlag(
-                alder = AbstractPersonTest.UNG_PERSON_FNR_2018.alder(),
+                alder = AbstractPersonTest.UNG_PERSON_FØDSELSDATO.alder,
                 skjæringstidspunkt = 1.januar,
                 arbeidsgiverInntektsopplysninger = emptyList(),
                 deaktiverteArbeidsforhold = emptyList(),
@@ -285,7 +285,7 @@ internal class SykepengegrunnlagTest {
         assertNotEquals(
             sykepengegrunnlag1,
             Sykepengegrunnlag(
-                alder = AbstractPersonTest.UNG_PERSON_FNR_2018.alder(),
+                alder = AbstractPersonTest.UNG_PERSON_FØDSELSDATO.alder,
                 skjæringstidspunkt = 1.januar,
                 arbeidsgiverInntektsopplysninger = listOf(
                     ArbeidsgiverInntektsopplysning(
@@ -307,7 +307,7 @@ internal class SykepengegrunnlagTest {
         assertNotEquals(
             sykepengegrunnlag1,
             Sykepengegrunnlag(
-                alder = AbstractPersonTest.UNG_PERSON_FNR_2018.alder(),
+                alder = AbstractPersonTest.UNG_PERSON_FØDSELSDATO.alder,
                 skjæringstidspunkt = 1.januar,
                 arbeidsgiverInntektsopplysninger = listOf(
                     ArbeidsgiverInntektsopplysning(
@@ -329,7 +329,7 @@ internal class SykepengegrunnlagTest {
         assertNotEquals(
             sykepengegrunnlag1,
             Sykepengegrunnlag(
-                alder = AbstractPersonTest.UNG_PERSON_FNR_2018.alder(),
+                alder = AbstractPersonTest.UNG_PERSON_FØDSELSDATO.alder,
                 skjæringstidspunkt = 1.januar,
                 arbeidsgiverInntektsopplysninger = listOf(
                     ArbeidsgiverInntektsopplysning(

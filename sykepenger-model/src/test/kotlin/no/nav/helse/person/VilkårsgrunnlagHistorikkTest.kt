@@ -30,6 +30,7 @@ import no.nav.helse.testhelpers.AP
 import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.testhelpers.tidslinjeOf
+import no.nav.helse.utbetalingstidslinje.Alder.Companion.alder
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -701,6 +702,7 @@ internal class VilkårsgrunnlagHistorikkTest {
     fun `Avslår vilkår for minimum inntekt med riktig begrunnelse for dem mellom 67 og 70`() {
         val vilkårsgrunnlagHistorikk = VilkårsgrunnlagHistorikk()
         val fødselsnummer = "01015036963".somFødselsnummer()
+        val fødselsdato = 1.januar(1950)
         val vilkårsgrunnlag = Vilkårsgrunnlag(
                 meldingsreferanseId = UUID.randomUUID(),
                 vedtaksperiodeId = UUID.randomUUID().toString(),
@@ -713,7 +715,7 @@ internal class VilkårsgrunnlagHistorikkTest {
                 arbeidsforhold = arbeidsforhold
         )
         vilkårsgrunnlag.valider(
-            10.månedlig.sykepengegrunnlag(fødselsnummer.alder()),
+            10.månedlig.sykepengegrunnlag(fødselsdato.alder),
             sammenligningsgrunnlag(10.månedlig, 1.januar),
             1.januar,
             Opptjening.opptjening(arbeidsforholdFraHistorikk, 1.januar, MaskinellJurist()),

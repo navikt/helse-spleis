@@ -25,6 +25,7 @@ import no.nav.helse.juli
 import no.nav.helse.juni
 import no.nav.helse.mai
 import no.nav.helse.mars
+import no.nav.helse.november
 import no.nav.helse.oktober
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.REVURDERING_FEILET
@@ -86,6 +87,7 @@ import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
+import no.nav.helse.utbetalingstidslinje.Alder.Companion.alder
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -896,7 +898,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
     @Test
     fun `periode som har tilstand TIL_INFOTRYGD sendes ikke med til Speil`() {
         val fyller18November2018 = "02110075045".somFødselsnummer()
-        createTestPerson(fyller18November2018)
+        createTestPerson(fyller18November2018, 2.november(2000))
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent), fnr = fyller18November2018)
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), fnr = fyller18November2018)
 
@@ -1745,7 +1747,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
 
         val generasjonerBuilder = GenerasjonerBuilder(
             søknadDTOer,
-            UNG_PERSON_FNR_2018.alder(),
+            UNG_PERSON_FØDSELSDATO.alder,
             person.arbeidsgiver(organisasjonsnummer)
         )
         return generasjonerBuilder.build()

@@ -2,7 +2,7 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.helse.Fødselsnummer
+import no.nav.helse.februar
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -11,6 +11,7 @@ import no.nav.helse.sykepengegrunnlag
 import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.testhelpers.tidslinjeOf
+import no.nav.helse.utbetalingstidslinje.Alder.Companion.alder
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
@@ -24,8 +25,7 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
     private lateinit var innslag: VilkårsgrunnlagHistorikk.Innslag
 
     private companion object {
-        private const val UNG_PERSON_FNR_2018 = "12029240045"
-        private val ALDER = Fødselsnummer.tilFødselsnummer(UNG_PERSON_FNR_2018).alder()
+        private val ALDER = 12.februar(1992).alder
     }
 
     @BeforeEach

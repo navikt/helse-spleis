@@ -49,6 +49,7 @@ internal class UtbetalingBuilderTest {
     private lateinit var aktivitetslogg: Aktivitetslogg
     private val aktørId = "111111111111111"
     private val fødselsnummer = Fødselsnummer.tilFødselsnummer("12029240045")
+    private val fødselsdato = 12.februar(1992)
     private val organisasjonsnummer = "987654321"
     private val maskinellJurist = MaskinellJurist()
     private val søknadId = UUID.randomUUID()
@@ -176,7 +177,7 @@ internal class UtbetalingBuilderTest {
         )
     }
 
-    private fun person() = Person(aktørId, fødselsnummer, fødselsnummer.alder(), maskinellJurist)
+    private fun person() = Person(aktørId, fødselsnummer, fødselsdato.alder, maskinellJurist)
     private fun arbeidsgiver(organisasjonsnummer: String) = Arbeidsgiver(person(), organisasjonsnummer, maskinellJurist)
     private fun søknad(søknadId: UUID, periode: Periode): Søknad {
         val søknadsperiode = Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent)

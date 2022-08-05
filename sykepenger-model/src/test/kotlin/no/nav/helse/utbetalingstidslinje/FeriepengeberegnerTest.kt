@@ -6,13 +6,14 @@ import no.nav.helse.hendelser.til
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.Year
+import no.nav.helse.utbetalingstidslinje.Alder.Companion.alder
 
 internal class FeriepengeberegnerTest {
     private companion object {
         private const val ORGNUMMER = "123456789"
-        private val UNG: Alder = "01026000014".somFødselsnummer().alder()
+        private val UNG: Alder = 1.februar(1960).alder
         private const val UNG_SATS = 0.102
-        private val GAMMEL: Alder = "01025900065".somFødselsnummer().alder()
+        private val GAMMEL: Alder = 1.februar(1959).alder
         private const val GAMMEL_SATS = 0.125
     }
 

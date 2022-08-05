@@ -74,6 +74,7 @@ import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Utbetaling
+import no.nav.helse.utbetalingstidslinje.Alder.Companion.alder
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -86,6 +87,7 @@ class JsonBuilderTest {
     companion object {
         private const val aktørId = "12345"
         private val fnr = "12029240045".somFødselsnummer()
+        private val fødselsdato = 12.februar(1992)
         private val orgnummer = "987654321"
         private val hendelsefabrikk = Hendelsefabrikk(
             fødselsnummer = fnr,
@@ -95,7 +97,7 @@ class JsonBuilderTest {
         )
     }
 
-    private val person get() = Person(aktørId, fnr, fnr.alder(), MaskinellJurist())
+    private val person get() = Person(aktørId, fnr, fødselsdato.alder, MaskinellJurist())
 
     @Test
     fun `gjenoppbygd Person skal være lik opprinnelig Person - The Jackson Way`() {
