@@ -665,11 +665,6 @@ internal class Vedtaksperiode private constructor(
         person.vedtakFattet(hendelse.hendelseskontekst(), builder.result())
     }
 
-    private fun gjenopptaBehandling(hendelse: IAktivitetslogg, nesteTilstand: Vedtaksperiodetilstand) {
-        kontekst(hendelse)
-        tilstand(hendelse, nesteTilstand)
-    }
-
     private fun overlappendeVedtaksperioder() =
         person.nåværendeVedtaksperioder(IKKE_FERDIG_BEHANDLET).filter { periode.overlapperMed(it.periode) }
 
@@ -2279,29 +2274,6 @@ internal class Vedtaksperiode private constructor(
             inntektsmelding: Inntektsmelding
         ) =
             forkastede.any { it.periode.overlapperMed(inntektsmelding.periode()) }
-
-        private fun List<Vedtaksperiode>.alleNåværendeErKlare(
-            første: Vedtaksperiode,
-            klarTilstand: Vedtaksperiodetilstand
-        ) =
-            this
-                .filter { første.periode.overlapperMed(it.periode) }
-                .all { it.tilstand == klarTilstand }
-
-
-        internal fun gjenopptaBehandling(
-            hendelse: IAktivitetslogg,
-            person: Person,
-            nåværendeTilstand: Vedtaksperiodetilstand,
-            nesteTilstand: Vedtaksperiodetilstand,
-            filter: VedtaksperiodeFilter = IKKE_FERDIG_BEHANDLET
-        ) {
-            val nåværende = person.nåværendeVedtaksperioder(filter)
-            val første = nåværende.firstOrNull() ?: return
-            if (nåværende.alleNåværendeErKlare(første, nåværendeTilstand)) {
-                første.gjenopptaBehandling(hendelse, nesteTilstand)
-            }
-        }
 
         internal fun Iterable<Vedtaksperiode>.harOverlappendeUtbetaltePerioder(periode: Periode) =
             any { it.periode().overlapperMed(periode) && it.harPassertPunktetHvorViOppdagerFlereArbeidsgivere() }
