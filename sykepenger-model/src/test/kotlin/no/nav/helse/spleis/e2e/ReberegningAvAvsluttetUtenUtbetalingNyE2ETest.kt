@@ -1,10 +1,12 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
@@ -854,9 +856,6 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         assertTilstander(4.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_REVURDERING, orgnummer = a1)
     }
 
-
-
-
     @Test
     fun `arbeidsgiver 1 er utenfor arbeidsgiverperioden, men ikke arbeidsgiver 2 - feil ved revurdering forkaster periodene`() {
         håndterSykmelding(Sykmeldingsperiode(17.juni(2022), 21.juni(2022), 100.prosent), orgnummer = a1)
@@ -902,5 +901,55 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = a2)
         assertForkastetPeriodeTilstander(3.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = a1)
         assertForkastetPeriodeTilstander(4.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = a1)
+    }
+
+    @Test
+    fun `revvurdering etter periode til godkjenning`() {
+        håndterSykmelding(Sykmeldingsperiode(1.juni, 16.juni, 100.prosent))
+        håndterSøknad(Sykdom(1.juni, 16.juni, 100.prosent))
+
+        håndterSykmelding(Sykmeldingsperiode(17.juni, 30.juni, 100.prosent))
+        håndterSøknad(Sykdom(17.juni, 30.juni, 100.prosent))
+        håndterInntektsmelding(listOf(1.juni til 16.juni))
+        håndterYtelser(2.vedtaksperiode)
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, utbetalingGodkjent = false)
+
+        håndterSykmelding(Sykmeldingsperiode(13.juli, 20.juli, 100.prosent))
+        håndterSøknad(Sykdom(13.juli, 20.juli, 100.prosent), Søknad.Søknadsperiode.Ferie(13.juli, 20.juli))
+
+        håndterSykmelding(Sykmeldingsperiode(25.juli, 31.juli, 100.prosent))
+        håndterSøknad(Sykdom(25.juli, 31.juli, 100.prosent), Søknad.Søknadsperiode.Ferie(25.juli, 31.juli))
+
+        nullstillTilstandsendringer()
+
+        // todo: første fraværsdag-dagen vinner over feriedagen 13.juli og blir en "arbeidsgiverdag".
+        // denne dagen blir en AvvistDag på utbetalingstidslinjen fordi egenmeldingsdager etter arbeidsgiverpereioden avvises. Dette medfører warning, som igjen medfører
+        // at perioden går til godkjenning.
+        håndterInntektsmelding(listOf(1.juni til 16.juni), førsteFraværsdag = 13.juli)
+        håndterYtelser(3.vedtaksperiode)
+        håndterVilkårsgrunnlag(3.vedtaksperiode)
+        håndterYtelser(3.vedtaksperiode)
+
+        nullstillTilstandsendringer()
+        håndterInntektsmelding(listOf(1.juni til 16.juni), førsteFraværsdag = 25.juli)
+
+        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+
+        assertForventetFeil(
+            forklaring = "teknisk sett har det ikke vært utbetaling på arbeidsgiverperioden ennå (siden 17.juni-30.juni ble forkastet), men" +
+                    "det er nok ikke lurt å putte vedtaksperiode nr 4 i AvsluttetUtenUtbetaling uansett." +
+                    "Det er også problemet med dagtypen 13. juli som er bidragsyter til problemet (dog et separat problem)",
+            nå = {
+                assertTilstander(3.vedtaksperiode, AVVENTER_GODKJENNING)
+                assertTilstander(4.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+            },
+            ønsket = {
+                assertTilstander(3.vedtaksperiode, AVVENTER_GODKJENNING)
+                assertTilstander(4.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE)
+            }
+        )
     }
 }
