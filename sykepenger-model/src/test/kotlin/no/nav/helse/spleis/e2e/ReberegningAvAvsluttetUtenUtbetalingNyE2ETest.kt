@@ -175,6 +175,32 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
     }
 
     @Test
+    fun `avvik i inntekt ved vilkårsprøving`() {
+        håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar, 100.prosent))
+        håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+
+        håndterSykmelding(Sykmeldingsperiode(21.januar, 27.januar, 100.prosent))
+        håndterSøknad(Sykdom(21.januar, 27.januar, 100.prosent))
+        håndterUtbetalingshistorikk(2.vedtaksperiode)
+
+        nullstillTilstandsendringer()
+
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+
+        håndterInntektsmelding(listOf(10.januar til 25.januar), beregnetInntekt = INNTEKT)
+        håndterYtelser(2.vedtaksperiode)
+        håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT * 2)
+
+        assertNoWarnings(1.vedtaksperiode.filter(a1))
+        assertWarning("Har mer enn 25 % avvik", 2.vedtaksperiode.filter(a1))
+
+        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_VILKÅRSPRØVING_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+    }
+
+    @Test
     fun `inntektsmelding gjør at kort periode faller utenfor agp - før vilkårsprøving`() {
         håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))

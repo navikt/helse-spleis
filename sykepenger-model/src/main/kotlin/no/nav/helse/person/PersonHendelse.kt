@@ -7,7 +7,7 @@ import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.utbetalingstidslinje.Alder.Companion.alder
 
 internal class ErrorsTilWarnings(private val other: IAktivitetslogg) : IAktivitetslogg by other {
-    override fun error(melding: String, vararg params: Any?) = warn(melding, params)
+    override fun error(melding: String, vararg params: Any?) = warn(melding, *params)
 
     internal companion object {
         internal fun wrap(hendelse: PersonHendelse, block: () -> Unit) = hendelse.wrap(::ErrorsTilWarnings, block)
