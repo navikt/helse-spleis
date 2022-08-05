@@ -2364,11 +2364,10 @@ internal class Vedtaksperiode private constructor(
             val førsteRevurderingsdag = vedtaksperioder.førsteRevurderingsdag() ?: overstyrt.periode().start
             vedtaksperioder.forEach { it.startRevurdering(arbeidsgivere, hendelse, overstyrt, pågående, førsteRevurderingsdag) }
 
-            val siste =
-                vedtaksperioder.lastOrNull { it.tilstand == AvventerGjennomførtRevurdering && (!it.utbetalinger.utbetales() || it.utbetalinger.harFeilet()) }
-                    ?: return
-
+            val siste = vedtaksperioder.lastOrNull { it.tilstand == AvventerGjennomførtRevurdering } ?: return
             siste.kontekst(hendelse)
+            hendelse.info("Forsøker å igangsette revurdering for $siste")
+            if (vedtaksperioder.any { it.tilstand in setOf(TilUtbetaling, UtbetalingFeilet) }) return hendelse.info("Det er en pågående utbetaling, avventer igangsetting av revurdering.")
             siste.tilstand(hendelse, AvventerHistorikkRevurdering)
         }
 
