@@ -2367,7 +2367,7 @@ internal class Vedtaksperiode private constructor(
             val siste = vedtaksperioder.lastOrNull { it.tilstand == AvventerGjennomførtRevurdering } ?: return
             siste.kontekst(hendelse)
             hendelse.info("Forsøker å igangsette revurdering for $siste")
-            if (vedtaksperioder.any { it.tilstand in setOf(TilUtbetaling, UtbetalingFeilet) }) return hendelse.info("Det er en pågående utbetaling, avventer igangsetting av revurdering.")
+            if (vedtaksperioder.pågående() != null) return hendelse.info("Det er en pågående utbetaling, avventer igangsetting av revurdering.")
             siste.tilstand(hendelse, AvventerHistorikkRevurdering)
         }
 
