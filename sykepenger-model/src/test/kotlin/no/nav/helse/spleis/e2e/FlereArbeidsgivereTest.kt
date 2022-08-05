@@ -901,7 +901,14 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         a2 { håndterInntektsmelding(listOf(1.januar til 16.januar)) }
         a1 { håndterSøknad(Sykdom(17.januar, 31.januar, 100.prosent)) }
         a2 { håndterSøknad(Sykdom(17.januar, 31.januar, 100.prosent)) }
-        a2 { assertTilstander(2.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE)  }
+        a1 {
+            assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
+            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
+        }
+        a2 {
+            assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING)
+            assertTilstander(2.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE)
+        }
     }
 
     @Test
