@@ -917,11 +917,14 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, utbetalingGodkjent = false)
 
+        // todo: vi mener arbeidsgiverperioden avbrytes 17. juli pga. 16 dager opphold siden 30. juni (hele perioden 13. juli-20.juli er ferie).
+        //      syk+opphold+ferie => ferie regnes som opphold, ikke sykdom
+        // Pga. mottatt inntektsmelding så ser dette rart ut
         håndterSykmelding(Sykmeldingsperiode(13.juli, 20.juli, 100.prosent))
         håndterSøknad(Sykdom(13.juli, 20.juli, 100.prosent), Søknad.Søknadsperiode.Ferie(13.juli, 20.juli))
 
         håndterSykmelding(Sykmeldingsperiode(25.juli, 31.juli, 100.prosent))
-        håndterSøknad(Sykdom(25.juli, 31.juli, 100.prosent), Søknad.Søknadsperiode.Ferie(25.juli, 31.juli))
+        håndterSøknad(Sykdom(25.juli, 31.juli, 100.prosent))
 
         nullstillTilstandsendringer()
 
