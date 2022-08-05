@@ -39,7 +39,8 @@ internal class TestMessageFactory(
     private val fødselsnummer: String,
     private val aktørId: String,
     private val organisasjonsnummer: String,
-    private val inntekt: Double
+    private val inntekt: Double,
+    private val fødselsdato: LocalDate
 ) {
 
     private companion object {
@@ -47,7 +48,8 @@ internal class TestMessageFactory(
             .registerModule(JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
-        private fun SykepengesoknadDTO.toMap(): Map<String, Any> = objectMapper.convertValue(this)
+        private fun SykepengesoknadDTO.toMap(fødselsdato: LocalDate): Map<String, Any> =
+            objectMapper.convertValue<Map<String, Any>>(this).plus("fødselsdato" to "$fødselsdato")
         private fun Inntektsmelding.toMap(): Map<String, Any> = objectMapper.convertValue(this)
     }
 
@@ -75,7 +77,7 @@ internal class TestMessageFactory(
             opprettet = opprettet,
             sykmeldingSkrevet = fom.atStartOfDay()
         )
-        return nyHendelse("ny_søknad", nySøknad.toMap())
+        return nyHendelse("ny_søknad", nySøknad.toMap(fødselsdato))
     }
 
     fun lagSøknadArbeidsgiver(
@@ -101,7 +103,7 @@ internal class TestMessageFactory(
             opprettet = LocalDateTime.now(),
             sykmeldingSkrevet = fom.atStartOfDay()
         )
-        return nyHendelse("sendt_søknad_arbeidsgiver", sendtSøknad.toMap())
+        return nyHendelse("sendt_søknad_arbeidsgiver", sendtSøknad.toMap(fødselsdato))
     }
 
     fun lagSøknadNav(
@@ -133,7 +135,7 @@ internal class TestMessageFactory(
             sykmeldingSkrevet = fom!!.atStartOfDay(),
             merknaderFraSykmelding = listOf(MerknadDTO("EN_MERKANDSTYPE", null), MerknadDTO("EN_ANNEN_MERKANDSTYPE", "tekstlig begrunnelse"))
         )
-        return nyHendelse("sendt_søknad_nav", sendtSøknad.toMap())
+        return nyHendelse("sendt_søknad_nav", sendtSøknad.toMap(fødselsdato))
     }
 
     private fun lagInntektsmelding(

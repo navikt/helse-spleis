@@ -9,6 +9,7 @@ import no.nav.helse.spleis.e2e.AbstractEndToEndMediatorTest.Companion.AKTØRID
 import no.nav.helse.spleis.e2e.AbstractEndToEndMediatorTest.Companion.INNTEKT
 import no.nav.helse.spleis.e2e.AbstractEndToEndMediatorTest.Companion.ORGNUMMER
 import no.nav.helse.spleis.e2e.AbstractEndToEndMediatorTest.Companion.UNG_PERSON_FNR_2018
+import no.nav.helse.spleis.e2e.AbstractEndToEndMediatorTest.Companion.UNG_PERSON_FØDSELSDATO
 import org.junit.jupiter.api.Test
 
 internal class OverstyrArbeidsforholdRiverTest: RiverTest() {
@@ -20,7 +21,8 @@ internal class OverstyrArbeidsforholdRiverTest: RiverTest() {
         UNG_PERSON_FNR_2018,
         AKTØRID,
         ORGNUMMER,
-        INNTEKT
+        INNTEKT,
+        UNG_PERSON_FØDSELSDATO
     )
 
     @Test

@@ -6,6 +6,7 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
 import javax.sql.DataSource
+import no.nav.helse.februar
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.januar
@@ -65,12 +66,13 @@ import org.junit.jupiter.api.TestInstance
 internal abstract class AbstractEndToEndMediatorTest {
     internal companion object {
         internal const val UNG_PERSON_FNR_2018 = "12029240045"
+        internal val UNG_PERSON_FØDSELSDATO = 12.februar(1992)
         internal const val AKTØRID = "42"
         internal const val ORGNUMMER = "987654321"
         internal const val INNTEKT = 31000.00
     }
 
-    protected val meldingsfabrikk = TestMessageFactory(UNG_PERSON_FNR_2018, AKTØRID, ORGNUMMER, INNTEKT)
+    protected val meldingsfabrikk = TestMessageFactory(UNG_PERSON_FNR_2018, AKTØRID, ORGNUMMER, INNTEKT, UNG_PERSON_FØDSELSDATO)
     protected val testRapid = TestRapid()
     private lateinit var dataSource: DataSource
     private lateinit var hendelseMediator: HendelseMediator

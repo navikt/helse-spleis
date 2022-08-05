@@ -1,20 +1,31 @@
 package no.nav.helse.spleis.meldinger
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.spleis.IMessageMediator
-import no.nav.syfo.kafka.felles.*
-import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
+import no.nav.helse.desember
+import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.spleis.IMessageMediator
+import no.nav.syfo.kafka.felles.ArbeidsgiverDTO
+import no.nav.syfo.kafka.felles.ArbeidsgiverForskuttererDTO
+import no.nav.syfo.kafka.felles.ArbeidssituasjonDTO
+import no.nav.syfo.kafka.felles.FravarDTO
+import no.nav.syfo.kafka.felles.PeriodeDTO
+import no.nav.syfo.kafka.felles.SkjultVerdi
+import no.nav.syfo.kafka.felles.SoknadsperiodeDTO
+import no.nav.syfo.kafka.felles.SoknadsstatusDTO
+import no.nav.syfo.kafka.felles.SoknadstypeDTO
+import no.nav.syfo.kafka.felles.SykepengesoknadDTO
+import no.nav.syfo.kafka.felles.SykmeldingstypeDTO
+import org.junit.jupiter.api.Test
 
 internal class NyeSøknaderRiverTest : RiverTest() {
 
+    private val fødselsdato = 12.desember(1995)
     private val InvalidJson = "foo"
     private val UnknownJson = "{\"foo\": \"bar\"}"
     private val ValidSøknad = SykepengesoknadDTO(
@@ -72,16 +83,15 @@ internal class NyeSøknaderRiverTest : RiverTest() {
         assertNoErrors(ValidNySøknad)
         assertNoErrors(ValidNySøknadUtenPerioder)
     }
+    private fun SykepengesoknadDTO.toJson(): String = asObjectNode().medFødselsdato().toString()
+    private fun ObjectNode.toJson(): String = medFødselsdato().toString()
+    private fun ObjectNode.medFødselsdato() = put("fødselsdato", "$fødselsdato")
 }
-
 private val objectMapper = jacksonObjectMapper()
     .registerModule(JavaTimeModule())
     .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-
 private fun SykepengesoknadDTO.asObjectNode(): ObjectNode = objectMapper.valueToTree<ObjectNode>(this).apply {
     put("@id", UUID.randomUUID().toString())
     put("@event_name", if (this["status"].asText() == "NY") "ny_søknad" else "ukjent")
     put("@opprettet", LocalDateTime.now().toString())
 }
-private fun SykepengesoknadDTO.toJson(): String = asObjectNode().toString()
-private fun JsonNode.toJson(): String = objectMapper.writeValueAsString(this)

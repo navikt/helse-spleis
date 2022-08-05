@@ -69,6 +69,7 @@ internal class SendtArbeidsgiverSøknaderRiverTest : RiverTest() {
   "andreInntektskilder": [],
   "soktUtenlandsopphold": null,
   "arbeidsgiverForskutterer": null,
-  "merknaderFraSykmelding": null
+  "merknaderFraSykmelding": null,
+  "fødselsdato": "1992-12-02"
 }""".trimIndent()
 }

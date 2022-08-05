@@ -1,21 +1,34 @@
 package no.nav.helse.spleis.meldinger
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
+import no.nav.helse.desember
 import no.nav.helse.januar
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spleis.IMessageMediator
-import no.nav.syfo.kafka.felles.*
+import no.nav.syfo.kafka.felles.ArbeidsgiverDTO
+import no.nav.syfo.kafka.felles.ArbeidsgiverForskuttererDTO
+import no.nav.syfo.kafka.felles.ArbeidssituasjonDTO
+import no.nav.syfo.kafka.felles.FravarDTO
+import no.nav.syfo.kafka.felles.FravarstypeDTO
+import no.nav.syfo.kafka.felles.MerknadDTO
+import no.nav.syfo.kafka.felles.PeriodeDTO
+import no.nav.syfo.kafka.felles.SkjultVerdi
+import no.nav.syfo.kafka.felles.SoknadsperiodeDTO
+import no.nav.syfo.kafka.felles.SoknadsstatusDTO
+import no.nav.syfo.kafka.felles.SoknadstypeDTO
+import no.nav.syfo.kafka.felles.SykepengesoknadDTO
+import no.nav.syfo.kafka.felles.SykmeldingstypeDTO
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
 
 internal class SendtNavSøknaderRiverTest : RiverTest() {
 
+    private val fødselsdato = 12.desember(1995)
     private val invalidJson = "foo"
     private val unknownJson = "{\"foo\": \"bar\"}"
     private fun validSøknad(
@@ -157,6 +170,9 @@ internal class SendtNavSøknaderRiverTest : RiverTest() {
         assertNoErrors(validSøknad().copy(merknaderFraSykmelding = listOf(MerknadDTO("UGYLDIG_TILBAKEDATERING", null))).toJson())
         assertNoErrors(validSøknad().copy(merknaderFraSykmelding = listOf(MerknadDTO("TILBAKEDATERING_KREVER_FLERE_OPPLYSNINGER", "En beskrivelse"))).toJson())
     }
+    private fun SykepengesoknadDTO.toJson(): String = asObjectNode().medFødselsdato().toString()
+    private fun ObjectNode.toJson(): String = medFødselsdato().toString()
+    private fun ObjectNode.medFødselsdato() = put("fødselsdato", "$fødselsdato")
 }
 
 private val objectMapper = jacksonObjectMapper()
@@ -168,6 +184,3 @@ private fun SykepengesoknadDTO.asObjectNode(): ObjectNode = objectMapper.valueTo
     put("@event_name", if (this["status"].asText() == "SENDT") "sendt_søknad_nav" else "ukjent")
     put("@opprettet", LocalDateTime.now().toString())
 }
-
-private fun SykepengesoknadDTO.toJson(): String = asObjectNode().toString()
-private fun JsonNode.toJson(): String = objectMapper.writeValueAsString(this)

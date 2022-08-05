@@ -8,9 +8,10 @@ import no.nav.helse.spleis.TestMessageFactory
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.util.*
+import no.nav.helse.april
 
 internal class UtbetalingsgrunnlagRiverTest : RiverTest() {
-    val messageFactory = TestMessageFactory("20046913370", "69", "98765432", 420.69)
+    val messageFactory = TestMessageFactory("20046913370", "69", "98765432", 420.69, 20.april(1969))
 
     override fun river(rapidsConnection: RapidsConnection, mediator: IMessageMediator) {
         UtbetalingsgrunnlagRiver(rapidsConnection, mediator)

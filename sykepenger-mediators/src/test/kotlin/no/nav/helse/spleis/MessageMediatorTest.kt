@@ -4,6 +4,7 @@ import io.mockk.mockk
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.desember
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.januar
 import no.nav.helse.person.TilstandType
@@ -159,7 +160,7 @@ internal class MessageMediatorTest {
     }
 
     private companion object {
-        private val meldingsfabrikk = TestMessageFactory("12121278911", "1234567891234", "orgnr", 31000.0)
+        private val meldingsfabrikk = TestMessageFactory("12121278911", "1234567891234", "orgnr", 31000.0, 12.desember(1912))
         private val testRapid = TestRapid()
         private val hendelseMediator = TestHendelseMediator()
 

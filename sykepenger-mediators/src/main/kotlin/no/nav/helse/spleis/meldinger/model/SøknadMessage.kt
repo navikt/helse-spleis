@@ -5,7 +5,6 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asLocalDateTime
-import no.nav.helse.somFødselsnummer
 import no.nav.helse.spleis.IHendelseMediator
 
 // Understands a JSON message representing a Søknad
@@ -27,7 +26,7 @@ internal abstract class SøknadMessage(private val packet: JsonMessage, private 
             .fnr(fødselsnummer)
             .opprettet(packet["opprettet"].asLocalDateTime())
             .aktørId(packet["aktorId"].asText())
-            .fødselsdato(fødselsnummer.somFødselsnummer().fødselsdato) // TODO: Skal hentes fra packet
+            .fødselsdato(packet["fødselsdato"].asLocalDate())
             .sykmeldingSkrevet(sykmeldingSkrevet)
             .organisasjonsnummer(packet["arbeidsgiver.orgnummer"].asText())
             .fom(packet["fom"].asLocalDate())

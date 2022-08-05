@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.*
+import no.nav.helse.spleis.e2e.AbstractEndToEndMediatorTest.Companion.UNG_PERSON_FØDSELSDATO
 
 internal class VilkårsgrunnlagRiverTest : RiverTest() {
     override fun river(rapidsConnection: RapidsConnection, mediator: IMessageMediator) {
@@ -23,7 +24,8 @@ internal class VilkårsgrunnlagRiverTest : RiverTest() {
         UNG_PERSON_FNR_2018,
         AKTØRID,
         ORGNUMMER,
-        INNTEKT
+        INNTEKT,
+        UNG_PERSON_FØDSELSDATO
     )
 
     @Test
