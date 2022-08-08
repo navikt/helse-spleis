@@ -203,10 +203,6 @@ class Inntektsmelding(
         refusjon.cacheRefusjon(refusjonshistorikk, meldingsreferanseId(), førsteFraværsdag, arbeidsgiverperioder)
     }
 
-    internal fun validerMuligBrukerutbetaling() {
-        refusjon.validerMuligBrukerutbetaling(this, beregnetInntekt)
-    }
-
     internal fun inntektsmeldingsinfo() = InntektsmeldingInfo(id = meldingsreferanseId(), arbeidsforholdId = arbeidsforholdId)
 
     override fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) {
@@ -270,18 +266,6 @@ class Inntektsmelding(
                 endringerIRefusjon.isNotEmpty() -> aktivitetslogg.info("Arbeidsgiver har endringer i refusjon")
             }
             return aktivitetslogg
-        }
-
-        internal fun validerMuligBrukerutbetaling(
-            aktivitetslogg: IAktivitetslogg,
-            beregnetInntekt: Inntekt
-        ) {
-            when {
-                (beløp == null || beløp <= Inntekt.INGEN) -> aktivitetslogg.error("Arbeidsgiver forskutterer ikke (mistenker brukerutbetaling ved flere arbeidsgivere)")
-                beløp != beregnetInntekt -> aktivitetslogg.error("Inntektsmelding inneholder beregnet inntekt og refusjon som avviker med hverandre (mistenker brukerutbetaling ved flere arbeidsgivere)")
-                opphørsdato != null -> aktivitetslogg.error("Arbeidsgiver opphører refusjon (mistenker brukerutbetaling ved flere arbeidsgivere)")
-                endringerIRefusjon.isNotEmpty() -> aktivitetslogg.error("Arbeidsgiver har endringer i refusjon (mistenker brukerutbetaling ved flere arbeidsgivere)")
-            }
         }
 
         private fun opphørerRefusjon(periode: Periode) =

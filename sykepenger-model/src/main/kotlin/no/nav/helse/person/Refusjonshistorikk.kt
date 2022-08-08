@@ -1,5 +1,8 @@
 package no.nav.helse.person
 
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.Refusjonshistorikk.Refusjon.Companion.leggTilRefusjon
@@ -8,9 +11,6 @@ import no.nav.helse.person.Refusjonshistorikk.Refusjon.Companion.somTilstøterAr
 import no.nav.helse.person.Refusjonshistorikk.Refusjon.Companion.somTrefferFørsteFraværsdag
 import no.nav.helse.person.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.beløp
 import no.nav.helse.økonomi.Inntekt
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
 
 internal class Refusjonshistorikk {
     private val refusjoner = mutableListOf<Refusjon>()
@@ -70,6 +70,15 @@ internal class Refusjonshistorikk {
         }
 
         internal fun erFørFørsteDagIArbeidsgiverperioden(dag: LocalDate) = dag < førsteDagIArbeidsgiverperioden()
+
+        internal fun validerBrukerutbetaling(aktivitetslogg: IAktivitetslogg, inntekt: Inntekt) {
+            when {
+                (beløp == null || beløp <= Inntekt.INGEN) -> aktivitetslogg.error("Arbeidsgiver forskutterer ikke (mistenker brukerutbetaling ved flere arbeidsgivere)")
+                beløp != inntekt -> aktivitetslogg.error("Inntektsmelding inneholder beregnet inntekt og refusjon som avviker med hverandre (mistenker brukerutbetaling ved flere arbeidsgivere)")
+                sisteRefusjonsdag != null -> aktivitetslogg.error("Arbeidsgiver opphører refusjon (mistenker brukerutbetaling ved flere arbeidsgivere)")
+                endringerIRefusjon.isNotEmpty() -> aktivitetslogg.error("Arbeidsgiver har endringer i refusjon (mistenker brukerutbetaling ved flere arbeidsgivere)")
+            }
+        }
 
         internal fun beløp(dag: LocalDate): Inntekt {
             if (sisteRefusjonsdag != null && dag > sisteRefusjonsdag) return Inntekt.INGEN

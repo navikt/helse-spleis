@@ -495,20 +495,16 @@ internal class Vedtaksperiode private constructor(
         tilstand.entering(this, event)
     }
 
-    private fun håndterInntektsmelding(
-        hendelse: Inntektsmelding,
-        hvisIngenErrors: () -> Unit = {},
-        nesteTilstand: () -> Vedtaksperiodetilstand
+    private fun håndterInntektsmelding(hendelse: Inntektsmelding, nesteTilstand: Vedtaksperiodetilstand
     ) {
         periode = hendelse.oppdaterFom(periode)
         oppdaterHistorikk(hendelse)
         inntektsmeldingInfo = arbeidsgiver.addInntektsmelding(skjæringstidspunkt, hendelse, jurist())
         hendelse.valider(periode, skjæringstidspunkt, finnArbeidsgiverperiode(), jurist())
         if (hendelse.hasErrorsOrWorse()) return forkast(hendelse, SENERE_INCLUSIVE(this))
-        hvisIngenErrors()
         hendelse.info("Fullført behandling av inntektsmelding")
         if (hendelse.hasErrorsOrWorse()) return
-        tilstand(hendelse, nesteTilstand())
+        tilstand(hendelse, nesteTilstand)
     }
 
     private fun oppdaterHistorikk(hendelse: SykdomstidslinjeHendelse) {
@@ -664,13 +660,6 @@ internal class Vedtaksperiode private constructor(
         utbetalinger.build(builder)
         person.build(skjæringstidspunkt, builder)
         person.vedtakFattet(hendelse.hendelseskontekst(), builder.result())
-    }
-
-    private fun overlappendeVedtaksperioder() =
-        person.nåværendeVedtaksperioder(IKKE_FERDIG_BEHANDLET).filter { periode.overlapperMed(it.periode) }
-
-    private fun alleAndreAvventerArbeidsgivere() = overlappendeVedtaksperioder().all {
-        it == this || it.tilstand == AvventerBlokkerendePeriode
     }
 
     /**
@@ -986,9 +975,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.person.startRevurdering(vedtaksperiode, hendelse)
         }
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
-            vedtaksperiode.håndterInntektsmelding(inntektsmelding, hvisIngenErrors = {
-                inntektsmelding.info("Forsøker å gjenoppta revurdering")
-            }) { this }
+            vedtaksperiode.håndterInntektsmelding(inntektsmelding, this)
             vedtaksperiode.person.gjenopptaBehandling(inntektsmelding)
         }
 
@@ -1033,7 +1020,7 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
             sikkerlogg.info("Vedtaksperiode {} i tilstand {} overlappet med inntektsmelding {}",
                 keyValue("vedtaksperiodeId", vedtaksperiode.id), keyValue("tilstand", type), keyValue("meldingsreferanseId", inntektsmelding.meldingsreferanseId()))
-            vedtaksperiode.håndterInntektsmelding(inntektsmelding) { this }
+            vedtaksperiode.håndterInntektsmelding(inntektsmelding, this)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
@@ -1120,7 +1107,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
-            vedtaksperiode.håndterInntektsmelding(inntektsmelding) { this }
+            vedtaksperiode.håndterInntektsmelding(inntektsmelding, this)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {
@@ -1224,12 +1211,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
-            vedtaksperiode.håndterInntektsmelding(inntektsmelding, hvisIngenErrors = {
-                if (!vedtaksperiode.alleAndreAvventerArbeidsgivere())
-                    inntektsmelding.validerMuligBrukerutbetaling()
-                if (inntektsmelding.hasErrorsOrWorse())
-                    vedtaksperiode.person.invaliderAllePerioder(inntektsmelding, null)
-            }) { AvventerBlokkerendePeriode }
+            vedtaksperiode.håndterInntektsmelding(inntektsmelding, AvventerBlokkerendePeriode)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
@@ -1303,6 +1285,8 @@ internal class Vedtaksperiode private constructor(
             hendelse: IAktivitetslogg
         ) {
             when {
+                vedtaksperiode.arbeidsgiver.validerBrukerutbetaling(hendelse, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode) ->
+                    vedtaksperiode.person.invaliderAllePerioder(hendelse, "Forkaster perioden pga. brukerutbetaling")
                 arbeidsgivere.trengerSøknadISammeMåned(vedtaksperiode.skjæringstidspunkt) -> return hendelse.info(
                     "Gjenopptar ikke behandling fordi minst én arbeidsgiver venter på søknad for sykmelding i samme måned som skjæringstidspunktet"
                 )
@@ -1988,7 +1972,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
             val revurderingIkkeStøttet = vedtaksperiode.person.vedtaksperioder(NYERE_SKJÆRINGSTIDSPUNKT_MED_UTBETALING(vedtaksperiode)).isNotEmpty()
-            vedtaksperiode.håndterInntektsmelding(inntektsmelding) { this } // håndterInntektsmelding krever tilstandsendring, men vi må avvente til vi starter revurdering
+            vedtaksperiode.håndterInntektsmelding(inntektsmelding, this) // håndterInntektsmelding krever tilstandsendring, men vi må avvente til vi starter revurdering
 
             if (inntektsmelding.hasErrorsOrWorse()) return
             if (vedtaksperiode.ingenUtbetaling()) {
@@ -2231,6 +2215,10 @@ internal class Vedtaksperiode private constructor(
 
         internal val KLAR_TIL_BEHANDLING: VedtaksperiodeFilter = {
             it.tilstand == AvventerBlokkerendePeriode || it.tilstand == AvventerGodkjenning
+        }
+
+        internal val ALLE_AVVENTER_ARBEIDSGIVERE: VedtaksperiodeFilter = { other: Vedtaksperiode ->
+            other.tilstand.erFerdigBehandlet || other.tilstand == AvventerBlokkerendePeriode
         }
 
         internal val IKKE_FERDIG_BEHANDLET: VedtaksperiodeFilter = { !it.tilstand.erFerdigBehandlet }
