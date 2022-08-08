@@ -14,6 +14,7 @@ import no.nav.helse.person.filter.Utbetalingsfilter
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.summer
+import org.slf4j.LoggerFactory
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning as InfotrygdhistorikkInntektsopplysning
 
 internal class Inntektshistorikk {
@@ -22,6 +23,7 @@ internal class Inntektshistorikk {
 
     internal companion object {
         internal val NULLUUID: UUID = UUID.fromString("00000000-0000-0000-0000-000000000000")
+        private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
     }
 
     internal fun accept(visitor: InntekthistorikkVisitor) {
@@ -225,6 +227,8 @@ internal class Inntektshistorikk {
                     forklaring = forklaring,
                     grunnlagForSykepengegrunnlag = omregnetÅrsinntekt()
                 )
+            } else {
+                sikkerLogg.warn("Overstyring av ghost: inntekt ble overstyrt med ukjent årsak: $forklaring")
             }
 
         }
@@ -426,9 +430,9 @@ internal class Inntektshistorikk {
             visitor.visitIkkeRapportert(id, dato, tidsstempel)
         }
 
-        override fun omregnetÅrsinntekt() = Inntekt.INGEN
+        override fun omregnetÅrsinntekt() = INGEN
 
-        override fun rapportertInntekt() = Inntekt.INGEN
+        override fun rapportertInntekt() = INGEN
 
         override fun subsumerArbeidsforhold(
             subsumsjonObserver: SubsumsjonObserver,
