@@ -945,7 +945,6 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.håndterSøknad(søknad) {
                 when {
                     !vedtaksperiode.harNødvendigInntektForVilkårsprøving() -> AvventerInntektsmeldingEllerHistorikk
-                    vedtaksperiode.ingenUtbetaling() -> AvsluttetUtenUtbetaling
                     else -> AvventerBlokkerendePeriode
                 }
             }
