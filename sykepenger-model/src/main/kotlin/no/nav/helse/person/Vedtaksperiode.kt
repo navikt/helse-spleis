@@ -1229,22 +1229,7 @@ internal class Vedtaksperiode private constructor(
                     inntektsmelding.validerMuligBrukerutbetaling()
                 if (inntektsmelding.hasErrorsOrWorse())
                     vedtaksperiode.person.invaliderAllePerioder(inntektsmelding, null)
-            }) {
-                when {
-                    vedtaksperiode.ingenUtbetaling() -> AvventerBlokkerendePeriode
-                    !vedtaksperiode.harNødvendigInntektForVilkårsprøving() -> {
-                        sikkerlogg.info(
-                            "Vedtaksperiode {}, {}, {}, {} har håndtert en IM men mangler fortsatt nødvendig inntekt",
-                            keyValue("fødselsnummer", vedtaksperiode.fødselsnummer),
-                            keyValue("aktørId", vedtaksperiode.aktørId),
-                            keyValue("organisasjonsnummer", vedtaksperiode.organisasjonsnummer),
-                            keyValue("vedtaksperiodeId", vedtaksperiode.id)
-                        )
-                        AvventerInntektsmeldingEllerHistorikk
-                    }
-                    else -> AvventerBlokkerendePeriode
-                }
-            }
+            }) { AvventerBlokkerendePeriode }
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
