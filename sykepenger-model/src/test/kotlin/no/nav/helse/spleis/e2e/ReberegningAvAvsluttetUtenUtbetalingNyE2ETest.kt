@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
 import no.nav.helse.desember
 import no.nav.helse.februar
@@ -498,7 +497,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         håndterSykmelding(Sykmeldingsperiode(21.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(21.januar, 31.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(5.januar til 20.januar))
-        assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
     }
 
@@ -940,19 +939,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         håndterInntektsmelding(listOf(1.juni til 16.juni), førsteFraværsdag = 25.juli)
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-
-        assertForventetFeil(
-            forklaring = "teknisk sett har det ikke vært utbetaling på arbeidsgiverperioden ennå (siden 17.juni-30.juni ble forkastet), men" +
-                    "det er nok ikke lurt å putte vedtaksperiode nr 4 i AvsluttetUtenUtbetaling uansett." +
-                    "Det er også problemet med dagtypen 13. juli som er bidragsyter til problemet (dog et separat problem)",
-            nå = {
-                assertTilstander(3.vedtaksperiode, AVVENTER_GODKJENNING)
-                assertTilstander(4.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
-            },
-            ønsket = {
-                assertTilstander(3.vedtaksperiode, AVVENTER_GODKJENNING)
-                assertTilstander(4.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE)
-            }
-        )
+        assertTilstander(3.vedtaksperiode, AVVENTER_GODKJENNING)
+        assertTilstander(4.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE)
     }
 }

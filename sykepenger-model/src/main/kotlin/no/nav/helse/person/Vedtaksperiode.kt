@@ -1212,7 +1212,7 @@ internal class Vedtaksperiode private constructor(
             if (vedtaksperiode.arbeidsgiver.finnForkastetSykeperiodeRettFør(vedtaksperiode) == null) {
                 vedtaksperiode.trengerInntektsmelding(hendelse.hendelseskontekst())
             }
-            vedtaksperiode.trengerHistorikkFraInfotrygd(hendelse)
+            vedtaksperiode.person.gjenopptaBehandling(hendelse)
         }
 
         override fun leaving(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
@@ -1227,7 +1227,7 @@ internal class Vedtaksperiode private constructor(
                     vedtaksperiode.person.invaliderAllePerioder(inntektsmelding, null)
             }) {
                 when {
-                    vedtaksperiode.ingenUtbetaling() -> AvsluttetUtenUtbetaling
+                    vedtaksperiode.ingenUtbetaling() -> AvventerBlokkerendePeriode
                     !vedtaksperiode.harNødvendigInntektForVilkårsprøving() -> {
                         sikkerlogg.info(
                             "Vedtaksperiode {}, {}, {}, {} har håndtert en IM men mangler fortsatt nødvendig inntekt",
@@ -1287,7 +1287,11 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            vedtaksperiode.trengerHistorikkFraInfotrygd(påminnelse)
+            vedtaksperiode.person.gjenopptaBehandling(påminnelse)
+        }
+
+        override fun gjenopptaBehandling(vedtaksperiode: Vedtaksperiode, arbeidsgivere: Iterable<Arbeidsgiver>, hendelse: IAktivitetslogg) {
+            vedtaksperiode.trengerHistorikkFraInfotrygd(hendelse)
         }
     }
 
@@ -1316,11 +1320,12 @@ internal class Vedtaksperiode private constructor(
                 arbeidsgivere.trengerSøknadFør(vedtaksperiode.periode) -> return hendelse.info(
                     "Gjenopptar ikke behandling fordi minst én arbeidsgiver venter på søknad for sykmelding i samme måned som skjæringstidspunktet"
                 )
-                !arbeidsgivere.harNødvendigInntekt(vedtaksperiode.skjæringstidspunkt) -> return hendelse.info(
-                    "Gjenopptar ikke behandling fordi minst én arbeidsgiver ikke har tilstrekkelig inntekt for skjæringstidspunktet"
-                )
                 arbeidsgivere.senerePerioderPågående(vedtaksperiode) -> return hendelse.info(
                     "Gjenopptar ikke behandling fordi det finnes pågående revurderinger."
+                )
+                vedtaksperiode.ingenUtbetaling() -> vedtaksperiode.tilstand(hendelse, AvsluttetUtenUtbetaling)
+                !arbeidsgivere.harNødvendigInntekt(vedtaksperiode.skjæringstidspunkt) -> return hendelse.info(
+                    "Gjenopptar ikke behandling fordi minst én arbeidsgiver ikke har tilstrekkelig inntekt for skjæringstidspunktet"
                 )
                 else -> vedtaksperiode.tilstand(hendelse, AvventerHistorikk)
             }

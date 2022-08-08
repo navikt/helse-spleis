@@ -57,12 +57,19 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         }
         a2 {
             assertEquals(1.januar, inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.skjæringstidspunkt)
-            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
         }
         a1 {
             håndterYtelser(2.vedtaksperiode)
-            assertSisteTilstand(2.vedtaksperiode, AVVENTER_SIMULERING)
+            håndterSimulering(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+            håndterUtbetalt()
+            assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
         }
+        a2 {
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        }
+
     }
 
     @Test
@@ -73,7 +80,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             håndterUtbetalingshistorikk(1.vedtaksperiode)
         }
         a2 {
-            håndterUtbetalingshistorikk(1.vedtaksperiode)
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         }
         a1 {
             håndterSøknad(Sykdom(15.januar, 31.januar, 100.prosent))
@@ -906,7 +913,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
         }
         a2 {
-            assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING)
+            assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE)
             assertTilstander(2.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE)
         }
     }
