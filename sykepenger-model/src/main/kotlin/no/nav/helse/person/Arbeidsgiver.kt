@@ -191,7 +191,7 @@ internal class Arbeidsgiver private constructor(
                 val førsteFraværsdag = arbeidsgiver.finnFørsteFraværsdag(skjæringstidspunkt)
                 val inntektsopplysning = arbeidsgiver.inntektshistorikk.omregnetÅrsinntekt(skjæringstidspunkt, førsteFraværsdag)
                 val startdatoArbeidsforhold = arbeidsgiver.startdatoForArbeidsforhold(skjæringstidspunkt)
-                inntektsopplysning?.subsumsjon(
+                inntektsopplysning?.subsumerSykepengegrunnlag(
                     subsumsjonObserver = subsumsjonObserver,
                     skjæringstidspunkt = skjæringstidspunkt,
                     organisasjonsnummer = arbeidsgiver.organisasjonsnummer,

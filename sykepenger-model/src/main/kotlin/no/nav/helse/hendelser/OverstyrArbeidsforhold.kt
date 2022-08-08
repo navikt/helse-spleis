@@ -68,10 +68,10 @@ class OverstyrArbeidsforhold(
             requireNotNull(inntekterSisteTreMåneder) {"En ghost skal ha inntekt fra A-ordningen dersom arbeidsforholdet er eldre enn 3 måneder"}
             if (deaktivert) {
                 arbeidsforholdhistorikk.deaktiverArbeidsforhold(skjæringstidspunkt)
-                inntekterSisteTreMåneder.subsumsjon(subsumsjonObserver, skjæringstidspunkt, orgnummer, forklaring, true)
+                inntekterSisteTreMåneder.subsumerArbeidsforhold(subsumsjonObserver, skjæringstidspunkt, orgnummer, forklaring, true)
             } else {
                 arbeidsforholdhistorikk.aktiverArbeidsforhold(skjæringstidspunkt)
-                inntekterSisteTreMåneder.subsumsjon(subsumsjonObserver, skjæringstidspunkt, orgnummer, forklaring, false)
+                inntekterSisteTreMåneder.subsumerArbeidsforhold(subsumsjonObserver, skjæringstidspunkt, orgnummer, forklaring, false)
             }
         }
     }

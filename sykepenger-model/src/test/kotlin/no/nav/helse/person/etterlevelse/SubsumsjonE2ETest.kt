@@ -1080,6 +1080,69 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `§ 8-15 - lager subsumsjon ved deaktivering av ghostarbeidsforhold når inntekt har blitt overstyrt først`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 15.mars, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(1.januar, 15.mars, 100.prosent), orgnummer = a1)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            førsteFraværsdag = 1.januar,
+            refusjon = Inntektsmelding.Refusjon(31000.månedlig, null, emptyList()),
+            orgnummer = a1
+        )
+
+        val inntekter = listOf(
+            grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 31000.månedlig.repeat(3)),
+            grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 1000.månedlig.repeat(2))
+        )
+
+        val arbeidsforhold = listOf(
+            Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null),
+            Vilkårsgrunnlag.Arbeidsforhold(a2, 1.november(2017), null)
+        )
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterVilkårsgrunnlag(
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            inntektsvurdering = Inntektsvurdering(
+                listOf(
+                    sammenligningsgrunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 31000.månedlig.repeat(12)),
+                    sammenligningsgrunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 1000.månedlig.repeat(2))
+                )
+            ),
+            orgnummer = a1,
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
+                inntekter = inntekter,
+                arbeidsforhold = emptyList()
+            ),
+            arbeidsforhold = arbeidsforhold
+        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+
+        håndterOverstyrInntekt(1001.månedlig, a2, 1.januar)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+
+        håndterOverstyrArbeidsforhold(
+            1.januar,
+            listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, false, "Jeg, en saksbehandler, overstyrte pga 8-15"))
+        )
+        SubsumsjonInspektør(jurist).assertIkkeOppfylt(
+            versjon = 18.desember(1998),
+            paragraf = PARAGRAF_8_15,
+            input = mapOf(
+                "organisasjonsnummer" to a2,
+                "skjæringstidspunkt" to 1.januar,
+                "inntekterSisteTreMåneder" to emptyList<Map<String, Any>>(),
+                "forklaring" to "Jeg, en saksbehandler, overstyrte pga 8-15"
+            ),
+            output = mapOf(
+                "aktivtArbeidsforhold" to a2
+            )
+        )
+    }
+
+    @Test
     fun `§ 8-16 ledd 1 - dekningsgrad`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))

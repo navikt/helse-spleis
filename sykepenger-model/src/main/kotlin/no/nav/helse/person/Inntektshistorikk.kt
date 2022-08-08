@@ -127,7 +127,7 @@ internal class Inntektshistorikk {
         fun rapportertInntekt(dato: LocalDate): Inntektsopplysning? = null
         fun rapportertInntekt(): Inntekt
         fun skalErstattesAv(other: Inntektsopplysning): Boolean
-        fun subsumsjon(
+        fun subsumerSykepengegrunnlag(
             subsumsjonObserver: SubsumsjonObserver,
             skjæringstidspunkt: LocalDate,
             organisasjonsnummer: String,
@@ -136,7 +136,7 @@ internal class Inntektshistorikk {
             subsumsjon: Subsumsjon?
         ) = run {}
 
-        fun subsumsjon(
+        fun subsumerArbeidsforhold(
             subsumsjonObserver: SubsumsjonObserver,
             skjæringstidspunkt: LocalDate,
             organisasjonsnummer: String,
@@ -183,7 +183,7 @@ internal class Inntektshistorikk {
 
         override fun erNødvendigInntektForVilkårsprøving(harUtbetaling: Boolean) = true
 
-        override fun subsumsjon(
+        override fun subsumerSykepengegrunnlag(
             subsumsjonObserver: SubsumsjonObserver,
             skjæringstidspunkt: LocalDate,
             organisasjonsnummer: String,
@@ -227,6 +227,22 @@ internal class Inntektshistorikk {
                 )
             }
 
+        }
+
+        override fun subsumerArbeidsforhold(
+            subsumsjonObserver: SubsumsjonObserver,
+            skjæringstidspunkt: LocalDate,
+            organisasjonsnummer: String,
+            forklaring: String,
+            oppfylt: Boolean
+        ) {
+            subsumsjonObserver.`§ 8-15`(
+                skjæringstidspunkt,
+                organisasjonsnummer,
+                emptyList(),
+                forklaring,
+                oppfylt
+            )
         }
     }
 
@@ -360,7 +376,7 @@ internal class Inntektshistorikk {
                 .summer()
                 .div(12)
 
-        override fun subsumsjon(
+        override fun subsumerSykepengegrunnlag(
             subsumsjonObserver: SubsumsjonObserver,
             skjæringstidspunkt: LocalDate,
             organisasjonsnummer: String,
@@ -377,7 +393,7 @@ internal class Inntektshistorikk {
             subsumsjonObserver.`§ 8-29`(skjæringstidspunkt, omregnetÅrsinntekt(), inntektsopplysninger.subsumsjonsformat(), organisasjonsnummer)
         }
 
-        override fun subsumsjon(
+        override fun subsumerArbeidsforhold(
             subsumsjonObserver: SubsumsjonObserver,
             skjæringstidspunkt: LocalDate,
             organisasjonsnummer: String,
@@ -414,7 +430,7 @@ internal class Inntektshistorikk {
 
         override fun rapportertInntekt() = Inntekt.INGEN
 
-        override fun subsumsjon(
+        override fun subsumerArbeidsforhold(
             subsumsjonObserver: SubsumsjonObserver,
             skjæringstidspunkt: LocalDate,
             organisasjonsnummer: String,
