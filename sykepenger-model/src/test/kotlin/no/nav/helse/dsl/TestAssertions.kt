@@ -1,10 +1,13 @@
 package no.nav.helse.dsl
 
+import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.inspectors.PersonInspektør
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.AktivitetsloggVisitor
+import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.inntektsopplysningPerArbeidsgiver
 import no.nav.helse.person.SpesifikkKontekst
 import no.nav.helse.person.TilstandType
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
@@ -28,6 +31,10 @@ internal class TestAssertions(private val observatør: TestObservatør, private 
         assertTrue(inspektør.periodeErForkastet(id)) { "Perioden er ikke forkastet" }
         assertFalse(inspektør.periodeErIkkeForkastet(id)) { "Perioden er ikke forkastet" }
         assertEquals(tilstander.asList(), observatør.tilstandsendringer[id]) { personInspektør.aktivitetslogg.toString() }
+    }
+
+    internal fun assertArbeidsgivereISykepengegrunnlag(skjæringstidspunkt: LocalDate, vararg arbeidsgivere: String) {
+        assertEquals(arbeidsgivere.toSet(), personInspektør.grunnlagsdata(skjæringstidspunkt).inspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysninger.inntektsopplysningPerArbeidsgiver().keys)
     }
 
     internal fun assertInfo(forventet: String, vararg filtre: AktivitetsloggFilter) {

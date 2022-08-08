@@ -18,6 +18,7 @@ import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.økonomi.Prosent
+import org.junit.jupiter.api.fail
 
 internal val Person.inspektør get() = PersonInspektør(this)
 internal val Person.personLogg get() = inspektør.aktivitetslogg
@@ -49,6 +50,7 @@ internal class PersonInspektør(person: Person): PersonVisitor {
     internal fun harLagretInntekt(indeks: Int) = infotrygdelementerLagretInntekt[indeks]
     internal fun harArbeidsgiver(organisasjonsnummer: String) = organisasjonsnummer in arbeidsgivere.keys
     internal fun grunnlagsdata(indeks: Int) = grunnlagsdata[indeks].second
+    internal fun grunnlagsdata(skjæringstidspunkt: LocalDate) = grunnlagsdata.firstOrNull { it.first == skjæringstidspunkt }?.second ?: fail("Fant ikke grunnlagsdata på skjæringstidspunkt $skjæringstidspunkt")
     internal fun vilkårsgrunnlagHistorikkInnslag() = vilkårsgrunnlagHistorikkInnslag.sortedByDescending { it.timestamp }.toList()
 
     internal fun antallGrunnlagsdata() = grunnlagsdata.size

@@ -16,6 +16,8 @@ import no.nav.helse.hendelser.Institusjonsopphold
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Omsorgspenger
 import no.nav.helse.hendelser.Opplæringspenger
+import no.nav.helse.hendelser.OverstyrArbeidsforhold
+import no.nav.helse.hendelser.OverstyrArbeidsforhold.ArbeidsforholdOverstyrt
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Pleiepenger
 import no.nav.helse.hendelser.Påminnelse
@@ -352,5 +354,14 @@ internal class Hendelsefabrikk(
             tilstandsendringstidspunkt,
             LocalDateTime.now(),
             LocalDateTime.now()
+        )
+
+    internal fun lagOverstyrArbeidsforhold(skjæringstidspunkt: LocalDate, vararg overstyrteArbeidsforhold: ArbeidsforholdOverstyrt) =
+        OverstyrArbeidsforhold(
+            meldingsreferanseId = UUID.randomUUID(),
+            fødselsnummer = fødselsnummer.toString(),
+            aktørId = aktørId,
+            skjæringstidspunkt = skjæringstidspunkt,
+            overstyrteArbeidsforhold = overstyrteArbeidsforhold.toList()
         )
 }

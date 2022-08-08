@@ -72,39 +72,6 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Kan ikke overstyre arbeidsforhold for en forlengelse som allerede har tidligere utbetalinger`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
-        håndterYtelser(1.vedtaksperiode)
-        håndterVilkårsgrunnlag(
-            1.vedtaksperiode, arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, 1.desember(2017), null)
-            )
-        )
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, utbetalingGodkjent = true)
-        håndterUtbetalt()
-        // ny periode
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent))
-        håndterYtelser(2.vedtaksperiode)
-        håndterSimulering(2.vedtaksperiode)
-        val skjæringstidspunkt = inspektør.skjæringstidspunkt(2.vedtaksperiode)
-        assertEquals(listOf(a1, a2).toList(), person.relevanteArbeidsgivere(skjæringstidspunkt).toList())
-        assertThrows<Aktivitetslogg.AktivitetException> {
-            håndterOverstyrArbeidsforhold(skjæringstidspunkt, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, true, "forklaring")))
-        }
-        assertSevere(
-            "Kan ikke overstyre arbeidsforhold for en pågående behandling der én eller flere perioder er behandlet ferdig",
-            AktivitetsloggFilter.person()
-        )
-        assertEquals(listOf(a1, a2), person.relevanteArbeidsgivere(skjæringstidspunkt))
-    }
-
-    @Test
     fun `godtar overstyring uavhengig av rekkefølgen på arbeidsgivere`() {
         nyttVedtak(1.januar(2017), 31.januar(2017), orgnummer = a1)
 

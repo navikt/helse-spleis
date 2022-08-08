@@ -7,7 +7,6 @@ import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsforholdhistorikk
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Arbeidsgiver.Companion.finn
-import no.nav.helse.person.Arbeidsgiver.Companion.harPeriodeSomBlokkererOverstyring
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.PersonHendelse
@@ -31,9 +30,6 @@ class OverstyrArbeidsforhold(
             }
         if (relevanteArbeidsgivere.any { it.harSykdomFor(skjæringstidspunkt) }) {
             severe("Kan ikke overstyre arbeidsforhold for en arbeidsgiver som har sykdom")
-        }
-        if (arbeidsgivere.harPeriodeSomBlokkererOverstyring(skjæringstidspunkt)) {
-            severe("Kan ikke overstyre arbeidsforhold for en pågående behandling der én eller flere perioder er behandlet ferdig")
         }
     }
 

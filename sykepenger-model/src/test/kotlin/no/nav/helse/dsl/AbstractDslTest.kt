@@ -79,6 +79,9 @@ internal abstract class AbstractDslTest {
     protected fun TestPerson.TestArbeidsgiver.assertForkastetPeriodeTilstander(id: UUID, vararg tilstand: TilstandType, orgnummer: String = a1) {
         asserter.assertForkastetPeriodeTilstander(id, *tilstand)
     }
+    protected fun TestPerson.TestArbeidsgiver.assertArbeidsgivereIVilkårsgrunnlag(skjæringstidspunkt: LocalDate, vararg arbeidsgivere: String) {
+        asserter.assertArbeidsgivereISykepengegrunnlag(skjæringstidspunkt, *arbeidsgivere)
+    }
     protected fun TestPerson.TestArbeidsgiver.assertNoErrors(vararg filtre: AktivitetsloggFilter) =
         asserter.assertNoErrors(*filtre)
     protected fun TestPerson.TestArbeidsgiver.assertWarnings(vararg filtre: AktivitetsloggFilter) =
@@ -159,7 +162,7 @@ internal abstract class AbstractDslTest {
         this { håndterAnnullering(fagsystemId) }
     protected fun String.håndterPåminnelse(vedtaksperiodeId: UUID, tilstand: TilstandType, tilstandsendringstidspunkt: LocalDateTime = LocalDateTime.now()) =
         this { håndterPåminnelse(vedtaksperiodeId, tilstand, tilstandsendringstidspunkt) }
-
+    protected fun nullstillTilstandsendringer() = observatør.nullstillTilstandsendringer()
     protected fun String.assertTilstander(id: UUID, vararg tilstander: TilstandType) =
         this { assertTilstander(id, *tilstander) }
     protected fun String.assertSisteTilstand(id: UUID, tilstand: TilstandType) =
