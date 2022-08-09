@@ -8,14 +8,14 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.*
-import no.nav.helse.dsl.Hendelsefabrikk
+import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.februar
 import no.nav.helse.somFødselsnummer
 
 internal class InntektsmeldingInfoHistorikkTest {
 
     private lateinit var historikk: InntektsmeldingInfoHistorikk
-    private val hendelsefabrikk = Hendelsefabrikk(
+    private val hendelsefabrikk = ArbeidsgiverHendelsefabrikk(
         organisasjonsnummer = "orgnr",
         fødselsnummer = "12029212345".somFødselsnummer(),
         aktørId = "aktør",

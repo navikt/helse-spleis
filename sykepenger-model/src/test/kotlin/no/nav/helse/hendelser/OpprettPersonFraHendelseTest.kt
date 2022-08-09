@@ -3,7 +3,7 @@ package no.nav.helse.hendelser
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.desember
-import no.nav.helse.dsl.Hendelsefabrikk
+import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.januar
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
@@ -16,7 +16,7 @@ import org.junit.jupiter.api.assertThrows
 
 internal class OpprettPersonFraHendelseTest {
 
-    private val fabrikk = Hendelsefabrikk(
+    private val fabrikk = ArbeidsgiverHendelsefabrikk(
         aktørId = "aktørid",
         fødselsnummer = "01019212345".somFødselsnummer(),
         organisasjonsnummer = "orgnum",

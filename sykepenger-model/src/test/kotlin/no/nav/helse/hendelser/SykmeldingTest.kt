@@ -1,7 +1,7 @@
 package no.nav.helse.hendelser
 
 import java.time.LocalDateTime
-import no.nav.helse.dsl.Hendelsefabrikk
+import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.februar
 import no.nav.helse.januar
 import no.nav.helse.juli
@@ -22,7 +22,7 @@ internal class SykmeldingTest {
 
     private companion object {
         const val UNG_PERSON_FNR_2018 = "12029240045"
-        val hendelsefabrikk = Hendelsefabrikk(
+        val hendelsefabrikk = ArbeidsgiverHendelsefabrikk(
             aktørId = "12345",
             organisasjonsnummer = "987654321",
             fødselsnummer = UNG_PERSON_FNR_2018.somFødselsnummer(),

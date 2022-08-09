@@ -17,8 +17,6 @@ import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Omsorgspenger
 import no.nav.helse.hendelser.Opplæringspenger
-import no.nav.helse.hendelser.OverstyrArbeidsforhold
-import no.nav.helse.hendelser.OverstyrArbeidsforhold.ArbeidsforholdOverstyrt
 import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Pleiepenger
@@ -42,7 +40,7 @@ import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Inntekt
 
-internal class Hendelsefabrikk(
+internal class ArbeidsgiverHendelsefabrikk(
     private val aktørId: String,
     private val fødselsnummer: Fødselsnummer,
     private val organisasjonsnummer: String,
@@ -356,15 +354,6 @@ internal class Hendelsefabrikk(
             tilstandsendringstidspunkt,
             LocalDateTime.now(),
             LocalDateTime.now()
-        )
-
-    internal fun lagOverstyrArbeidsforhold(skjæringstidspunkt: LocalDate, vararg overstyrteArbeidsforhold: ArbeidsforholdOverstyrt) =
-        OverstyrArbeidsforhold(
-            meldingsreferanseId = UUID.randomUUID(),
-            fødselsnummer = fødselsnummer.toString(),
-            aktørId = aktørId,
-            skjæringstidspunkt = skjæringstidspunkt,
-            overstyrteArbeidsforhold = overstyrteArbeidsforhold.toList()
         )
 
     internal fun lagHåndterOverstyrTidslinje(overstyringsdager: List<ManuellOverskrivingDag>) =

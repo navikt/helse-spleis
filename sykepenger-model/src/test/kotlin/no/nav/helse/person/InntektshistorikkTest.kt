@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.august
 import no.nav.helse.desember
-import no.nav.helse.dsl.Hendelsefabrikk
+import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
@@ -41,7 +41,7 @@ internal class InntektshistorikkTest {
         const val AKTØRID = "42"
         const val ORGNUMMER = "987654321"
         val INNTEKT = 31000.00.månedlig
-        val hendelsefabrikk = Hendelsefabrikk(
+        val hendelsefabrikk = ArbeidsgiverHendelsefabrikk(
             aktørId = AKTØRID,
             fødselsnummer = UNG_PERSON_FNR_2018.somFødselsnummer(),
             fødselsdato = UNG_PERSON_FØDSELSDATO,

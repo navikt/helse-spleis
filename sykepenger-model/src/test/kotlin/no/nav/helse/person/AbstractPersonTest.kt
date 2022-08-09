@@ -3,7 +3,7 @@ package no.nav.helse.person
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.Fødselsnummer
-import no.nav.helse.dsl.Hendelsefabrikk
+import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.februar
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.person.etterlevelse.MaskinellJurist
@@ -23,7 +23,7 @@ internal abstract class AbstractPersonTest {
 
 
         val a1: String = ORGNUMMER
-        val a1Hendelsefabrikk = Hendelsefabrikk(
+        val a1Hendelsefabrikk = ArbeidsgiverHendelsefabrikk(
             aktørId = AKTØRID,
             fødselsnummer = UNG_PERSON_FNR_2018,
             fødselsdato = UNG_PERSON_FØDSELSDATO,

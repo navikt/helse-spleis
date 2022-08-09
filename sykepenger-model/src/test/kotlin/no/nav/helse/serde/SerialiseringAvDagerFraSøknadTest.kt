@@ -1,7 +1,7 @@
 package no.nav.helse.serde
 
 import no.nav.helse.april
-import no.nav.helse.dsl.Hendelsefabrikk
+import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
@@ -51,7 +51,7 @@ internal class SerialiseringAvDagerFraSøknadTest {
     private val aktørId = "12345"
     private val fnr = "12029240045"
     private val orgnummer = "987654321"
-    private val hendelsefabrikk = Hendelsefabrikk(
+    private val hendelsefabrikk = ArbeidsgiverHendelsefabrikk(
         aktørId = aktørId,
         fødselsnummer = fnr.somFødselsnummer(),
         organisasjonsnummer = orgnummer,

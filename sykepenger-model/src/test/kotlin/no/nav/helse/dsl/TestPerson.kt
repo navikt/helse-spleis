@@ -9,7 +9,6 @@ import no.nav.helse.Fødselsnummer
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
 import no.nav.helse.februar
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
-import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Inntektsvurdering
@@ -84,6 +83,7 @@ internal class TestPerson(
 
     private val behovsamler = Behovsamler()
     private val vedtaksperiodesamler = Vedtaksperiodesamler()
+    private val personHendelsefabrikk = PersonHendelsefabrikk(aktørId, fødselsnummer)
 
     private val person = Person(aktørId, fødselsnummer, fødselsdato.alder, jurist).also {
         it.addObserver(vedtaksperiodesamler)
@@ -118,8 +118,17 @@ internal class TestPerson(
         behovsamler.bekreftBehovOppfylt()
     }
 
+    internal fun håndterOverstyrArbeidsforhold(skjæringstidspunkt: LocalDate, vararg overstyrteArbeidsforhold: ArbeidsforholdOverstyrt) {
+        personHendelsefabrikk.lagOverstyrArbeidsforhold(skjæringstidspunkt, *overstyrteArbeidsforhold)
+            .håndter(Person::håndter)
+    }
+
+    operator fun <R> invoke(testblokk: TestPerson.() -> R): R {
+        return testblokk(this)
+    }
+
     inner class TestArbeidsgiver(internal val orgnummer: String) {
-        private val fabrikk = Hendelsefabrikk(aktørId, fødselsnummer, orgnummer, fødselsdato)
+        private val arbeidsgiverHendelsefabrikk = ArbeidsgiverHendelsefabrikk(aktørId, fødselsnummer, orgnummer, fødselsdato)
 
         internal val inspektør get() = TestArbeidsgiverInspektør(person, orgnummer)
 
@@ -128,7 +137,7 @@ internal class TestPerson(
         internal fun håndterSykmelding(vararg sykmeldingsperiode: Sykmeldingsperiode,
                                        sykmeldingSkrevet: LocalDateTime? = null,
                                        mottatt: LocalDateTime? = null,) =
-            fabrikk.lagSykmelding(*sykmeldingsperiode, sykmeldingSkrevet = sykmeldingSkrevet, mottatt = mottatt).håndter(Person::håndter)
+            arbeidsgiverHendelsefabrikk.lagSykmelding(*sykmeldingsperiode, sykmeldingSkrevet = sykmeldingSkrevet, mottatt = mottatt).håndter(Person::håndter)
 
         internal fun håndterSøknad(
             vararg perioder: Søknad.Søknadsperiode,
@@ -138,7 +147,7 @@ internal class TestPerson(
             orgnummer: String = ""
         ) =
             vedtaksperiodesamler.fangVedtaksperiode {
-                fabrikk.lagSøknad(*perioder, andreInntektskilder = andreInntektskilder, sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver, sykmeldingSkrevet = sykmeldingSkrevet).håndter(Person::håndter)
+                arbeidsgiverHendelsefabrikk.lagSøknad(*perioder, andreInntektskilder = andreInntektskilder, sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver, sykmeldingSkrevet = sykmeldingSkrevet).håndter(Person::håndter)
             }
 
         internal fun håndterInntektsmelding(
@@ -152,7 +161,7 @@ internal class TestPerson(
             id: UUID = UUID.randomUUID(),
             orgnummer: String = ""
         ): UUID {
-            fabrikk.lagInntektsmelding(
+            arbeidsgiverHendelsefabrikk.lagInntektsmelding(
                 arbeidsgiverperioder,
                 beregnetInntekt,
                 førsteFraværsdag,
@@ -167,7 +176,7 @@ internal class TestPerson(
 
         internal fun håndterInntektsmeldingReplay(inntektsmeldingId: UUID, vedtaksperiodeId: UUID) {
             behovsamler.bekreftOgKvitterReplay(vedtaksperiodeId)
-            fabrikk.lagInntektsmeldingReplay(inntektsmeldingId, vedtaksperiodeId)
+            arbeidsgiverHendelsefabrikk.lagInntektsmeldingReplay(inntektsmeldingId, vedtaksperiodeId)
                 .håndter(Person::håndter)
         }
 
@@ -179,7 +188,7 @@ internal class TestPerson(
             besvart: LocalDateTime = LocalDateTime.now()
         ) {
             behovsamler.bekreftBehov(vedtaksperiodeId, Sykepengehistorikk)
-            fabrikk.lagUtbetalingshistorikk(vedtaksperiodeId, utbetalinger, inntektshistorikk, harStatslønn, besvart)
+            arbeidsgiverHendelsefabrikk.lagUtbetalingshistorikk(vedtaksperiodeId, utbetalinger, inntektshistorikk, harStatslønn, besvart)
                 .håndter(Person::håndter)
         }
 
@@ -193,7 +202,7 @@ internal class TestPerson(
             orgnummer: String = "aa"
         ) {
             behovsamler.bekreftBehov(vedtaksperiodeId, InntekterForSammenligningsgrunnlag, InntekterForSykepengegrunnlag, ArbeidsforholdV2, Medlemskap)
-            fabrikk.lagVilkårsgrunnlag(
+            arbeidsgiverHendelsefabrikk.lagVilkårsgrunnlag(
                 vedtaksperiodeId,
                 medlemskapstatus,
                 arbeidsforhold ?: arbeidsgivere.map { (orgnr, _) -> Vilkårsgrunnlag.Arbeidsforhold(orgnr, LocalDate.EPOCH, null) },
@@ -228,9 +237,9 @@ internal class TestPerson(
             behovsamler.bekreftBehov(vedtaksperiodeId, Dagpenger, Arbeidsavklaringspenger, Dødsinfo, Institusjonsopphold, Opplæringspenger, Pleiepenger, Omsorgspenger, Foreldrepenger)
 
             val hendelse = if (!behovsamler.harBehov(vedtaksperiodeId, Sykepengehistorikk)) {
-                fabrikk.lagYtelser(vedtaksperiodeId, foreldrepenger, svangerskapspenger, pleiepenger, omsorgspenger, opplæringspenger, institusjonsoppholdsperioder, dødsdato, arbeidsavklaringspenger, dagpenger)
+                arbeidsgiverHendelsefabrikk.lagYtelser(vedtaksperiodeId, foreldrepenger, svangerskapspenger, pleiepenger, omsorgspenger, opplæringspenger, institusjonsoppholdsperioder, dødsdato, arbeidsavklaringspenger, dagpenger)
             } else {
-                fabrikk.lagYtelser(vedtaksperiodeId, utbetalinger, inntektshistorikk, foreldrepenger, svangerskapspenger, pleiepenger, omsorgspenger, opplæringspenger, institusjonsoppholdsperioder, dødsdato, statslønn, arbeidskategorikoder, arbeidsavklaringspenger, dagpenger, besvart)
+                arbeidsgiverHendelsefabrikk.lagYtelser(vedtaksperiodeId, utbetalinger, inntektshistorikk, foreldrepenger, svangerskapspenger, pleiepenger, omsorgspenger, opplæringspenger, institusjonsoppholdsperioder, dødsdato, statslønn, arbeidskategorikoder, arbeidsavklaringspenger, dagpenger, besvart)
             }
             hendelse.håndter(Person::håndter)
         }
@@ -242,7 +251,7 @@ internal class TestPerson(
                 val fagområde = detaljer.getValue("fagområde") as String
                 val utbetalingId = UUID.fromString(kontekst.getValue("utbetalingId"))
 
-                fabrikk.lagSimulering(vedtaksperiodeId, utbetalingId, fagsystemId, fagområde, simuleringOK, standardSimuleringsresultat(orgnummer)).håndter(Person::håndter)
+                arbeidsgiverHendelsefabrikk.lagSimulering(vedtaksperiodeId, utbetalingId, fagsystemId, fagområde, simuleringOK, standardSimuleringsresultat(orgnummer)).håndter(Person::håndter)
             }
         }
 
@@ -250,7 +259,7 @@ internal class TestPerson(
             behovsamler.bekreftBehov(vedtaksperiodeId, Godkjenning)
             val (_, kontekst) = behovsamler.detaljerFor(vedtaksperiodeId, Godkjenning).single()
             val utbetalingId = UUID.fromString(kontekst.getValue("utbetalingId"))
-            fabrikk.lagUtbetalingsgodkjenning(vedtaksperiodeId, godkjent, automatiskBehandling, utbetalingId)
+            arbeidsgiverHendelsefabrikk.lagUtbetalingsgodkjenning(vedtaksperiodeId, godkjent, automatiskBehandling, utbetalingId)
                 .håndter(Person::håndter)
         }
 
@@ -259,29 +268,29 @@ internal class TestPerson(
             behovsamler.detaljerFor(orgnummer, Utbetaling).forEach { (detaljer, kontekst) ->
                 val utbetalingId = UUID.fromString(kontekst.getValue("utbetalingId"))
                 val fagsystemId = detaljer.getValue("fagsystemId") as String
-                fabrikk.lagUtbetalingOverført(utbetalingId, fagsystemId)
+                arbeidsgiverHendelsefabrikk.lagUtbetalingOverført(utbetalingId, fagsystemId)
                     .håndter(Person::håndter)
-                fabrikk.lagUtbetalinghendelse(utbetalingId, fagsystemId, status)
+                arbeidsgiverHendelsefabrikk.lagUtbetalinghendelse(utbetalingId, fagsystemId, status)
                     .håndter(Person::håndter)
             }
         }
 
         internal fun håndterAnnullering(fagsystemId: String) {
-            fabrikk.lagAnnullering(fagsystemId).håndter(Person::håndter)
+            arbeidsgiverHendelsefabrikk.lagAnnullering(fagsystemId).håndter(Person::håndter)
         }
 
         internal fun håndterPåminnelse(vedtaksperiodeId: UUID, tilstand: TilstandType, tilstandsendringstidspunkt: LocalDateTime = LocalDateTime.now()) {
-            fabrikk.lagPåminnelse(vedtaksperiodeId, tilstand, tilstandsendringstidspunkt)
+            arbeidsgiverHendelsefabrikk.lagPåminnelse(vedtaksperiodeId, tilstand, tilstandsendringstidspunkt)
                 .håndter(Person::håndter)
         }
 
         internal fun håndterOverstyrArbeidsforhold(skjæringstidspunkt: LocalDate, vararg overstyrteArbeidsforhold: ArbeidsforholdOverstyrt) {
-            fabrikk.lagOverstyrArbeidsforhold(skjæringstidspunkt, *overstyrteArbeidsforhold)
+            personHendelsefabrikk.lagOverstyrArbeidsforhold(skjæringstidspunkt, *overstyrteArbeidsforhold)
                 .håndter(Person::håndter)
         }
 
         internal fun håndterOverstyrTidslinje(overstyringsdager: List<ManuellOverskrivingDag>) =
-            fabrikk.lagHåndterOverstyrTidslinje(overstyringsdager)
+            arbeidsgiverHendelsefabrikk.lagHåndterOverstyrTidslinje(overstyringsdager)
                 .håndter(Person::håndter)
 
         operator fun <R> invoke(testblokk: TestArbeidsgiver.() -> R): R {

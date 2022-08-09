@@ -2,7 +2,7 @@ package no.nav.helse.sykdomstidslinje
 
 import java.time.LocalDate
 import no.nav.helse.april
-import no.nav.helse.dsl.Hendelsefabrikk
+import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -35,7 +35,7 @@ internal class ForeldetSykedagTest {
         private const val UNG_PERSON_FNR_2018 = "12029240045"
         private const val AKTØRID = "42"
         private const val ORGNUMMER = "987654321"
-        private val hendelefabrikk = Hendelsefabrikk(
+        private val hendelefabrikk = ArbeidsgiverHendelsefabrikk(
             fødselsnummer = UNG_PERSON_FNR_2018.somFødselsnummer(),
             aktørId = AKTØRID,
             organisasjonsnummer = ORGNUMMER,

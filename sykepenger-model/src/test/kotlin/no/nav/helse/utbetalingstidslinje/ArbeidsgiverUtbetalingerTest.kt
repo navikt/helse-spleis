@@ -7,7 +7,7 @@ import java.util.UUID
 import no.nav.helse.Fødselsnummer
 import no.nav.helse.april
 import no.nav.helse.desember
-import no.nav.helse.dsl.Hendelsefabrikk
+import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Medlemskapsvurdering
@@ -74,7 +74,7 @@ internal class ArbeidsgiverUtbetalingerTest {
         val PERSON_70_ÅR_1_FEBRUAR_2018 = "01024812345".somFødselsnummer()
         val PERSON_70_ÅR_1_FEBRUAR_2018_FØDSELSDATO = 1.februar(1948)
         val ORGNUMMER = "888888888"
-        val hendelsefabrikk = Hendelsefabrikk(
+        val hendelsefabrikk = ArbeidsgiverHendelsefabrikk(
             fødselsnummer = UNG_PERSON_FNR_2018,
             organisasjonsnummer = ORGNUMMER,
             aktørId = "aktørId",

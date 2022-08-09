@@ -7,7 +7,7 @@ import java.util.UUID
 import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.desember
-import no.nav.helse.dsl.Hendelsefabrikk
+import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Arbeidsavklaringspenger
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
@@ -89,7 +89,7 @@ class JsonBuilderTest {
         private val fnr = "12029240045".somFødselsnummer()
         private val fødselsdato = 12.februar(1992)
         private val orgnummer = "987654321"
-        private val hendelsefabrikk = Hendelsefabrikk(
+        private val hendelsefabrikk = ArbeidsgiverHendelsefabrikk(
             fødselsnummer = fnr,
             organisasjonsnummer = orgnummer,
             aktørId = aktørId,

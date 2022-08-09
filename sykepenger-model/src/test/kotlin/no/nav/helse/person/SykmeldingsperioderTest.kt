@@ -2,7 +2,7 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import no.nav.helse.desember
-import no.nav.helse.dsl.Hendelsefabrikk
+import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
@@ -18,7 +18,7 @@ import org.junit.jupiter.api.Test
 
 internal class SykmeldingsperioderTest {
 
-    private val hendelsefabrikk = Hendelsefabrikk(
+    private val hendelsefabrikk = ArbeidsgiverHendelsefabrikk(
         organisasjonsnummer = "ORGNUMMER",
         fødselsnummer = "12029212345".somFødselsnummer(),
         aktørId = "AKTØRID",

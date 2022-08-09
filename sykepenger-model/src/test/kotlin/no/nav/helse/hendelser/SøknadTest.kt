@@ -3,7 +3,7 @@ package no.nav.helse.hendelser
 import java.time.LocalDate
 import java.time.LocalDateTime
 import no.nav.helse.desember
-import no.nav.helse.dsl.Hendelsefabrikk
+import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Søknad.Inntektskilde
 import no.nav.helse.hendelser.Søknad.Merknad
@@ -43,7 +43,7 @@ internal class SøknadTest {
     private companion object {
         private const val UNG_PERSON_FNR_2018 = "12029240045"
         private val februar12 = 12.februar(1992)
-        private val ungPersonFnr2018Hendelsefabrikk = Hendelsefabrikk(
+        private val ungPersonFnr2018Hendelsefabrikk = ArbeidsgiverHendelsefabrikk(
             fødselsnummer = UNG_PERSON_FNR_2018.somFødselsnummer(),
             aktørId = "12345",
             organisasjonsnummer = "987654321",
@@ -52,7 +52,7 @@ internal class SøknadTest {
         private val EN_PERIODE = Periode(1.januar, 31.januar)
         private const val FYLLER_18_ÅR_2_NOVEMBER = "02110075045"
         private val november2 = 2.november(2000)
-        private val fyller18År2NovemberHendelsefabrikk = Hendelsefabrikk(
+        private val fyller18År2NovemberHendelsefabrikk = ArbeidsgiverHendelsefabrikk(
             fødselsnummer = FYLLER_18_ÅR_2_NOVEMBER.somFødselsnummer(),
             aktørId = "12345",
             organisasjonsnummer = "987654321",
@@ -358,7 +358,7 @@ internal class SøknadTest {
         andreInntektskilder: List<Inntektskilde> = emptyList(),
         permittert: Boolean = false,
         merknaderFraSykmelding: List<Merknad> = emptyList(),
-        hendelsefabrikk: Hendelsefabrikk = ungPersonFnr2018Hendelsefabrikk,
+        hendelsefabrikk: ArbeidsgiverHendelsefabrikk = ungPersonFnr2018Hendelsefabrikk,
         sendtTilNAVEllerArbeidsgiver: LocalDate? = null
     ) {
         søknad = hendelsefabrikk.lagSøknad(

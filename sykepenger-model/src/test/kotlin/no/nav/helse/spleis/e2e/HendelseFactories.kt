@@ -6,7 +6,7 @@ import java.time.Year
 import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.Fødselsnummer
-import no.nav.helse.dsl.Hendelsefabrikk
+import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.etterspurteBehov
 import no.nav.helse.hendelser.Arbeidsavklaringspenger
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
@@ -110,7 +110,7 @@ internal fun AbstractEndToEndTest.sykmelding(
     mottatt: LocalDateTime? = null,
     fnr: Fødselsnummer = AbstractPersonTest.UNG_PERSON_FNR_2018,
     fødselsdato: LocalDate = UNG_PERSON_FØDSELSDATO
-) = Hendelsefabrikk(AKTØRID, fnr, orgnummer, fødselsdato).lagSykmelding(
+) = ArbeidsgiverHendelsefabrikk(AKTØRID, fnr, orgnummer, fødselsdato).lagSykmelding(
         id = id,
         sykeperioder = sykeperioder,
         sykmeldingSkrevet = sykmeldingSkrevet ?: Sykmeldingsperiode.periode(sykeperioder.toList())?.start?.atStartOfDay() ?: LocalDateTime.now(),
@@ -128,7 +128,7 @@ internal fun AbstractEndToEndTest.søknad(
     sykmeldingSkrevet: LocalDateTime? = null,
     fnr: Fødselsnummer = AbstractPersonTest.UNG_PERSON_FNR_2018,
     fødselsdato: LocalDate = UNG_PERSON_FØDSELSDATO
-) = Hendelsefabrikk(AKTØRID, fnr, orgnummer, fødselsdato).lagSøknad(
+) = ArbeidsgiverHendelsefabrikk(AKTØRID, fnr, orgnummer, fødselsdato).lagSøknad(
     id = id,
     perioder = perioder,
     andreInntektskilder = andreInntektskilder,
@@ -164,7 +164,7 @@ internal fun AbstractEndToEndTest.inntektsmelding(
     fødselsdato: LocalDate = UNG_PERSON_FØDSELSDATO
 ): Inntektsmelding {
     val inntektsmeldinggenerator = {
-        Hendelsefabrikk(AKTØRID, fnr, orgnummer, fødselsdato).lagInntektsmelding(
+        ArbeidsgiverHendelsefabrikk(AKTØRID, fnr, orgnummer, fødselsdato).lagInntektsmelding(
             id = id,
             refusjon = refusjon,
             førsteFraværsdag = førsteFraværsdag,

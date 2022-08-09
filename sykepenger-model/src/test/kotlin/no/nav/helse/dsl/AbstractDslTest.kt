@@ -277,7 +277,7 @@ internal abstract class AbstractDslTest {
         bareÈnArbeidsgiver(a1).håndterPåminnelse(vedtaksperiodeId, tilstand, tilstandsendringstidspunkt)
 
     protected fun håndterOverstyrArbeidsforhold(skjæringstidspunkt: LocalDate, vararg overstyrteArbeidsforhold: OverstyrArbeidsforhold.ArbeidsforholdOverstyrt) =
-        a1 { håndterOverstyrArbeidsforhold(skjæringstidspunkt, *overstyrteArbeidsforhold) } // denne meldingen er ikke knyttet til en konkret arbeidsgiver, vi bare bruker medlingsfabrikken til a1
+        testperson { håndterOverstyrArbeidsforhold(skjæringstidspunkt, *overstyrteArbeidsforhold) }
 
     protected fun assertArbeidsgivereISykepengegrunnlag(skjæringstidspunkt: LocalDate, vararg arbeidsgivere: String) =
         a1 { assertArbeidsgivereISykepengegrunnlag(skjæringstidspunkt, *arbeidsgivere) } // denne asserten er ikke knyttet til en konkret arbeidsgiver, vi bare bruker asserteren til a1

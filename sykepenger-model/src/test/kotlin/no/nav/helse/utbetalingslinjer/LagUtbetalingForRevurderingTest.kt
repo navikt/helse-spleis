@@ -3,7 +3,7 @@ package no.nav.helse.utbetalingslinjer
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.dsl.Hendelsefabrikk
+import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Søknad
@@ -50,7 +50,7 @@ internal class LagUtbetalingForRevurderingTest {
         private val fødselsdato = 12.februar(1992)
         private const val ORGNUMMER = "123456789"
         private val SØKNAD = UUID.randomUUID()
-        private val hendelsefabrikk = Hendelsefabrikk(
+        private val hendelsefabrikk = ArbeidsgiverHendelsefabrikk(
             aktørId = AKTØRID,
             fødselsnummer = FNR,
             organisasjonsnummer = ORGNUMMER,

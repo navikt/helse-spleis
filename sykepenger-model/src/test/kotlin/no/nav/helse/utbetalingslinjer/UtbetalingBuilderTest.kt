@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.Fødselsnummer
-import no.nav.helse.dsl.Hendelsefabrikk
+import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Søknad
@@ -53,7 +53,7 @@ internal class UtbetalingBuilderTest {
     private val organisasjonsnummer = "987654321"
     private val maskinellJurist = MaskinellJurist()
     private val søknadId = UUID.randomUUID()
-    private val hendelsefabrikk = Hendelsefabrikk(
+    private val hendelsefabrikk = ArbeidsgiverHendelsefabrikk(
         aktørId = aktørId,
         fødselsnummer = fødselsnummer,
         organisasjonsnummer = organisasjonsnummer,

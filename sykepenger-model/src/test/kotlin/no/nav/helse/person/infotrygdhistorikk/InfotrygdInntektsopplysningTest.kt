@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.desember
-import no.nav.helse.dsl.Hendelsefabrikk
+import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
@@ -33,7 +33,7 @@ internal class InfotrygdInntektsopplysningTest {
         private const val ORGNR = "123456789"
         private val INNTEKT = 31000.00.månedlig
         private val DATO = 1.januar
-        private val hendelsefabrikk = Hendelsefabrikk(
+        private val hendelsefabrikk = ArbeidsgiverHendelsefabrikk(
             aktørId = "aktørId",
             fødselsnummer = "12029112345".somFødselsnummer(),
             organisasjonsnummer = ORGNR,

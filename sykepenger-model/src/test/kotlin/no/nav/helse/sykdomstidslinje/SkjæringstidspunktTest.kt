@@ -3,7 +3,7 @@ package no.nav.helse.sykdomstidslinje
 import java.time.LocalDate
 import java.time.LocalDateTime
 import no.nav.helse.desember
-import no.nav.helse.dsl.Hendelsefabrikk
+import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
@@ -425,7 +425,7 @@ internal class SkjæringstidspunktTest {
         private const val ORGNUMMER = "987654321"
         private const val INNTEKT = 31000.00
         private val INNTEKT_PR_MÅNED = INNTEKT.månedlig
-        private val hendelsefabrikk = Hendelsefabrikk(
+        private val hendelsefabrikk = ArbeidsgiverHendelsefabrikk(
             organisasjonsnummer = ORGNUMMER,
             fødselsnummer = UNG_PERSON_FNR_2018.somFødselsnummer(),
             aktørId = AKTØRID,

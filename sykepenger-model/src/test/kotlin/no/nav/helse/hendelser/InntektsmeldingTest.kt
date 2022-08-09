@@ -2,7 +2,7 @@ package no.nav.helse.hendelser
 
 import java.time.LocalDate
 import no.nav.helse.desember
-import no.nav.helse.dsl.Hendelsefabrikk
+import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding.Companion.WARN_UENIGHET_ARBEIDSGIVERPERIODE
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon
@@ -34,7 +34,7 @@ import org.junit.jupiter.api.assertThrows
 
 internal class InntektsmeldingTest {
 
-    private val hendelsefabrikk = Hendelsefabrikk(
+    private val hendelsefabrikk = ArbeidsgiverHendelsefabrikk(
         organisasjonsnummer = "88888888",
         fødselsnummer = "12029240045".somFødselsnummer(),
         aktørId = "100010101010",
