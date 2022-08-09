@@ -1,5 +1,7 @@
 package no.nav.helse.spleis.e2e
 
+import java.time.LocalDateTime
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
 import no.nav.helse.desember
 import no.nav.helse.februar
@@ -29,6 +31,7 @@ import no.nav.helse.person.TilstandType.REVURDERING_FEILET
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
@@ -900,6 +903,37 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = a2)
         assertForkastetPeriodeTilstander(3.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = a1)
         assertForkastetPeriodeTilstander(4.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = a1)
+    }
+
+    @Test
+    fun `utbetalinger i infotrygd etterpå`() {
+        håndterSykmelding(Sykmeldingsperiode(5.februar, 20.februar, 100.prosent))
+        håndterSøknad(Sykdom(5.februar, 20.februar, 100.prosent))
+        håndterUtbetalingshistorikk(1.vedtaksperiode, besvart = LocalDateTime.now().minusHours(48))
+
+        håndterSykmelding(Sykmeldingsperiode(21.februar, 11.mars, 100.prosent))
+        håndterSøknad(Sykdom(21.februar, 11.mars, 100.prosent))
+        håndterUtbetalingshistorikk(2.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 15.februar, 11.mars, 100.prosent, INNTEKT))
+
+
+        håndterInntektsmelding(listOf(
+            15.januar til 15.januar,
+            26.januar til 30.januar,
+            5.februar til 14.februar
+        ))
+
+        assertForventetFeil(
+            forklaring = "selv om 1.vedtaksperiode ikke skal være i AUU mer, er perioden betalt i Infotrygd og bør ikke revurderes." +
+                    "Dersom revurdering startes, burde perioden avbryte revurdering som følge av AVVENTER_HISTORIKK_REVURDERING" +
+                    "ved at perioden overlapper med Infotrygd",
+            nå = {
+                assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+            },
+            ønsket = {
+                assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING)
+            }
+        )
+        assertForkastetPeriodeTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, TIL_INFOTRYGD)
     }
 
     @Test
