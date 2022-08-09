@@ -1783,6 +1783,23 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(
+            vedtaksperiode: Vedtaksperiode,
+            overstyrArbeidsforhold: OverstyrArbeidsforhold,
+            subsumsjon: Subsumsjon?
+        ): Boolean {
+            vedtaksperiode.person.lagreOverstyrArbeidsforhold(overstyrArbeidsforhold, vedtaksperiode.jurist())
+            vedtaksperiode.person.vilkårsprøvEtterNyInformasjonFraSaksbehandler(
+                overstyrArbeidsforhold,
+                vedtaksperiode.skjæringstidspunkt,
+                vedtaksperiode.jurist(),
+                null,
+                subsumsjon
+            )
+            vedtaksperiode.person.startRevurdering(vedtaksperiode, overstyrArbeidsforhold)
+            return true
+        }
+
+        override fun håndter(
             person: Person,
             arbeidsgiver: Arbeidsgiver,
             vedtaksperiode: Vedtaksperiode,

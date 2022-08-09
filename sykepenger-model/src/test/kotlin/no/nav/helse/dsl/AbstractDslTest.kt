@@ -79,7 +79,7 @@ internal abstract class AbstractDslTest {
     protected fun TestPerson.TestArbeidsgiver.assertForkastetPeriodeTilstander(id: UUID, vararg tilstand: TilstandType, orgnummer: String = a1) {
         asserter.assertForkastetPeriodeTilstander(id, *tilstand)
     }
-    protected fun TestPerson.TestArbeidsgiver.assertArbeidsgivereIVilkårsgrunnlag(skjæringstidspunkt: LocalDate, vararg arbeidsgivere: String) {
+    protected fun TestPerson.TestArbeidsgiver.assertArbeidsgivereISykepengegrunnlag(skjæringstidspunkt: LocalDate, vararg arbeidsgivere: String) {
         asserter.assertArbeidsgivereISykepengegrunnlag(skjæringstidspunkt, *arbeidsgivere)
     }
     protected fun TestPerson.TestArbeidsgiver.assertNoErrors(vararg filtre: AktivitetsloggFilter) =
