@@ -7,7 +7,7 @@ import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.Søknad
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
@@ -937,6 +937,36 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
     }
 
     @Test
+    fun `arbeidsgiver angrer på innsendt arbeidsgiverperiode`() {
+        håndterSykmelding(Sykmeldingsperiode(5.februar, 20.februar, 100.prosent))
+        håndterSøknad(Sykdom(5.februar, 20.februar, 100.prosent), Ferie(10.februar, 20.februar))
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+        nullstillTilstandsendringer()
+        håndterInntektsmelding(listOf(
+            29.januar til 13.februar
+        ))
+        håndterInntektsmelding(listOf(
+            22.januar til 6.februar
+        ))
+
+        assertForventetFeil(
+            forklaring = "revurderingsoppgavene er manuelle så riktig løsning (enn så lenge) bør kanskje innebære en warning" +
+                    "om at vi har mottatt flere inntektsmeldinger, med utfall at saksbehandler avviser revurderingen (og periodene/dagene blir forkastet) ?",
+            nå = {
+                assertTrue(inspektør.sykdomstidslinje[10.februar] is Dag.ArbeidsgiverHelgedag)
+                assertTrue(inspektør.sykdomstidslinje[11.februar] is Dag.ArbeidsgiverHelgedag)
+                assertTrue(inspektør.sykdomstidslinje[13.februar] is Dag.Arbeidsgiverdag)
+            },
+            ønsket = {
+                assertTrue(inspektør.sykdomstidslinje[10.februar] is Dag.Feriedag)
+                assertTrue(inspektør.sykdomstidslinje[11.februar] is Dag.Feriedag)
+                assertTrue(inspektør.sykdomstidslinje[13.februar] is Dag.Feriedag)
+            }
+        )
+        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+    }
+
+    @Test
     fun `revvurdering etter periode til godkjenning`() {
         håndterSykmelding(Sykmeldingsperiode(1.juni, 16.juni, 100.prosent))
         håndterSøknad(Sykdom(1.juni, 16.juni, 100.prosent))
@@ -954,7 +984,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         //      syk+opphold+ferie => ferie regnes som opphold, ikke sykdom
         // Pga. mottatt inntektsmelding så ser dette rart ut
         håndterSykmelding(Sykmeldingsperiode(13.juli, 20.juli, 100.prosent))
-        håndterSøknad(Sykdom(13.juli, 20.juli, 100.prosent), Søknad.Søknadsperiode.Ferie(13.juli, 20.juli))
+        håndterSøknad(Sykdom(13.juli, 20.juli, 100.prosent), Ferie(13.juli, 20.juli))
 
         håndterSykmelding(Sykmeldingsperiode(25.juli, 31.juli, 100.prosent))
         håndterSøknad(Sykdom(25.juli, 31.juli, 100.prosent))
