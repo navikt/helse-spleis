@@ -9,6 +9,7 @@ import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Institusjonsopphold
 import no.nav.helse.hendelser.Medlemskapsvurdering
+import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
@@ -274,6 +275,12 @@ internal abstract class AbstractDslTest {
         bareÈnArbeidsgiver(a1).håndterAnnullering(fagsystemId)
     protected fun håndterPåminnelse(vedtaksperiodeId: UUID, tilstand: TilstandType, tilstandsendringstidspunkt: LocalDateTime = LocalDateTime.now()) =
         bareÈnArbeidsgiver(a1).håndterPåminnelse(vedtaksperiodeId, tilstand, tilstandsendringstidspunkt)
+
+    protected fun håndterOverstyrArbeidsforhold(skjæringstidspunkt: LocalDate, vararg overstyrteArbeidsforhold: OverstyrArbeidsforhold.ArbeidsforholdOverstyrt) =
+        a1 { håndterOverstyrArbeidsforhold(skjæringstidspunkt, *overstyrteArbeidsforhold) } // denne meldingen er ikke knyttet til en konkret arbeidsgiver, vi bare bruker medlingsfabrikken til a1
+
+    protected fun assertArbeidsgivereISykepengegrunnlag(skjæringstidspunkt: LocalDate, vararg arbeidsgivere: String) =
+        a1 { assertArbeidsgivereISykepengegrunnlag(skjæringstidspunkt, *arbeidsgivere) } // denne asserten er ikke knyttet til en konkret arbeidsgiver, vi bare bruker asserteren til a1
 
     protected fun assertTilstander(id: UUID, vararg tilstander: TilstandType) =
         bareÈnArbeidsgiver(a1).assertTilstander(id, *tilstander)

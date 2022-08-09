@@ -321,7 +321,94 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
 
     @Test
     fun `flere arbeidsgivere med sykdom`() {
-        // TODO
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        }
+        a2 {
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        }
+        a1 { håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT) }
+        a2 { håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT) }
+
+        a1 {
+            håndterYtelser(1.vedtaksperiode)
+            håndterVilkårsgrunnlag(
+                1.vedtaksperiode,
+                arbeidsforhold = listOf(
+                    Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null),
+                    Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null),
+                    Vilkårsgrunnlag.Arbeidsforhold(a3, 1.desember(2017), null)
+                ),
+                inntektsvurdering = Inntektsvurdering(
+                    listOf(
+                        sammenligningsgrunnlag(a1, 1.januar, INNTEKT.repeat(12)),
+                        sammenligningsgrunnlag(a2, 1.januar, INNTEKT.repeat(12)),
+                        sammenligningsgrunnlag(a3, 1.januar, INNTEKT.repeat(12))
+                    )
+                ),
+                inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
+                    inntekter = listOf(
+                        grunnlag(a1, 1.januar, INNTEKT.repeat(3)),
+                        grunnlag(a2, 1.januar, INNTEKT.repeat(3)),
+                        grunnlag(a3, 1.januar, INNTEKT.repeat(3))
+                    ),
+                    arbeidsforhold = emptyList()
+                )
+            )
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+        }
+        a2 {
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+        }
+        assertArbeidsgivereISykepengegrunnlag(1.januar, a1, a2, a3)
+        nullstillTilstandsendringer()
+        håndterOverstyrArbeidsforhold(1.januar, ArbeidsforholdOverstyrt(a3, true, "test"))
+        a1 {
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+        }
+        a2 {
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+        }
+        a1 {
+            assertTilstander(
+                1.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_GJENNOMFØRT_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+                TIL_UTBETALING,
+                AVSLUTTET
+            )
+        }
+        a2 {
+            assertTilstander(
+                1.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_GJENNOMFØRT_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+                TIL_UTBETALING,
+                AVSLUTTET
+            )
+        }
+        assertArbeidsgivereISykepengegrunnlag(1.januar, a1, a2)
     }
 
 
