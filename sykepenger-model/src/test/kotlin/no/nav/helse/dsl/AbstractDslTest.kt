@@ -58,7 +58,8 @@ internal abstract class AbstractDslTest {
     protected val String.inspektør get() = inspektør(this)
     protected val inspektør: TestArbeidsgiverInspektør get() = bareÈnArbeidsgiver(a1).inspektør
 
-    private val TestPerson.TestArbeidsgiver.asserter get() = TestAssertions(observatør, inspektør, testperson.inspiser(personInspektør))
+    private val TestPerson.TestArbeidsgiver.testArbeidsgiverAsserter get() = TestArbeidsgiverAssertions(observatør, inspektør, testperson.inspiser(personInspektør))
+    private val testPersonAsserter get() = TestPersonAssertions(testperson.inspiser(personInspektør))
 
     protected fun forkastAlle() = testperson.forkastAlle()
 
@@ -69,28 +70,27 @@ internal abstract class AbstractDslTest {
         testperson.arbeidsgiver(this, testblokk)
 
     protected fun TestPerson.TestArbeidsgiver.assertTilstander(id: UUID, vararg tilstander: TilstandType, orgnummer: String = a1) {
-        asserter.assertTilstander(id, *tilstander)
+        testArbeidsgiverAsserter.assertTilstander(id, *tilstander)
     }
     protected fun TestPerson.TestArbeidsgiver.assertTilstand(id: UUID, tilstand: TilstandType, orgnummer: String = a1) {
         assertSisteTilstand(id, tilstand)
     }
     protected fun TestPerson.TestArbeidsgiver.assertSisteTilstand(id: UUID, tilstand: TilstandType, orgnummer: String = a1) {
-        asserter.assertSisteTilstand(id, tilstand)
+        testArbeidsgiverAsserter.assertSisteTilstand(id, tilstand)
     }
     protected fun TestPerson.TestArbeidsgiver.assertForkastetPeriodeTilstander(id: UUID, vararg tilstand: TilstandType, orgnummer: String = a1) {
-        asserter.assertForkastetPeriodeTilstander(id, *tilstand)
+        testArbeidsgiverAsserter.assertForkastetPeriodeTilstander(id, *tilstand)
     }
-    protected fun TestPerson.TestArbeidsgiver.assertArbeidsgivereISykepengegrunnlag(skjæringstidspunkt: LocalDate, vararg arbeidsgivere: String) {
-        asserter.assertArbeidsgivereISykepengegrunnlag(skjæringstidspunkt, *arbeidsgivere)
-    }
+    protected fun assertArbeidsgivereISykepengegrunnlag(skjæringstidspunkt: LocalDate, vararg arbeidsgivere: String) =
+        testPersonAsserter.assertArbeidsgivereISykepengegrunnlag(skjæringstidspunkt, *arbeidsgivere)
     protected fun TestPerson.TestArbeidsgiver.assertNoErrors(vararg filtre: AktivitetsloggFilter) =
-        asserter.assertNoErrors(*filtre)
+        testArbeidsgiverAsserter.assertNoErrors(*filtre)
     protected fun TestPerson.TestArbeidsgiver.assertWarnings(vararg filtre: AktivitetsloggFilter) =
-        asserter.assertWarnings(*filtre)
+        testArbeidsgiverAsserter.assertWarnings(*filtre)
     protected fun TestPerson.TestArbeidsgiver.assertWarning(warning: String, vararg filtre: AktivitetsloggFilter) =
-        asserter.assertWarning(warning, *filtre)
+        testArbeidsgiverAsserter.assertWarning(warning, *filtre)
     protected fun TestPerson.TestArbeidsgiver.assertNoWarnings(vararg filtre: AktivitetsloggFilter) =
-        asserter.assertNoWarnings(*filtre)
+        testArbeidsgiverAsserter.assertNoWarnings(*filtre)
     protected fun nyPeriode(periode: Periode, vararg orgnummer: String, grad: Prosentdel = 100.prosent) {
         testperson.nyPeriode(periode, *orgnummer, grad = grad)
     }
@@ -278,9 +278,6 @@ internal abstract class AbstractDslTest {
 
     protected fun håndterOverstyrArbeidsforhold(skjæringstidspunkt: LocalDate, vararg overstyrteArbeidsforhold: OverstyrArbeidsforhold.ArbeidsforholdOverstyrt) =
         testperson { håndterOverstyrArbeidsforhold(skjæringstidspunkt, *overstyrteArbeidsforhold) }
-
-    protected fun assertArbeidsgivereISykepengegrunnlag(skjæringstidspunkt: LocalDate, vararg arbeidsgivere: String) =
-        a1 { assertArbeidsgivereISykepengegrunnlag(skjæringstidspunkt, *arbeidsgivere) } // denne asserten er ikke knyttet til en konkret arbeidsgiver, vi bare bruker asserteren til a1
 
     protected fun assertTilstander(id: UUID, vararg tilstander: TilstandType) =
         bareÈnArbeidsgiver(a1).assertTilstander(id, *tilstander)
