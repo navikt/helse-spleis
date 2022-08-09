@@ -13,11 +13,13 @@ import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingReplay
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Institusjonsopphold
+import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Omsorgspenger
 import no.nav.helse.hendelser.Opplæringspenger
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrArbeidsforhold.ArbeidsforholdOverstyrt
+import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Pleiepenger
 import no.nav.helse.hendelser.Påminnelse
@@ -363,5 +365,15 @@ internal class Hendelsefabrikk(
             aktørId = aktørId,
             skjæringstidspunkt = skjæringstidspunkt,
             overstyrteArbeidsforhold = overstyrteArbeidsforhold.toList()
+        )
+
+    internal fun lagHåndterOverstyrTidslinje(overstyringsdager: List<ManuellOverskrivingDag>) =
+        OverstyrTidslinje(
+            meldingsreferanseId = UUID.randomUUID(),
+            fødselsnummer = fødselsnummer.toString(),
+            aktørId = aktørId,
+            organisasjonsnummer = organisasjonsnummer,
+            dager = overstyringsdager,
+            opprettet = LocalDateTime.now()
         )
 }

@@ -437,6 +437,19 @@ internal class Vedtaksperiode private constructor(
         person.startRevurdering(this, hendelse)
     }
 
+    private fun revurderArbeidsforhold(hendelse: OverstyrArbeidsforhold, subsumsjon: Subsumsjon?): Boolean {
+        person.lagreOverstyrArbeidsforhold(hendelse, jurist())
+        person.vilkårsprøvEtterNyInformasjonFraSaksbehandler(
+            hendelse,
+            skjæringstidspunkt,
+            jurist(),
+            null,
+            subsumsjon
+        )
+        person.startRevurdering(this, hendelse)
+        return true
+    }
+
     internal fun periode() = periode
 
     private fun kontekst(hendelse: IAktivitetslogg) {
@@ -973,6 +986,13 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.oppdaterHistorikk(hendelse)
             vedtaksperiode.person.startRevurdering(vedtaksperiode, hendelse)
         }
+
+        override fun håndter(
+            vedtaksperiode: Vedtaksperiode,
+            overstyrArbeidsforhold: OverstyrArbeidsforhold,
+            subsumsjon: Subsumsjon?
+        ) = vedtaksperiode.revurderArbeidsforhold(overstyrArbeidsforhold, subsumsjon)
+
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
             vedtaksperiode.håndterInntektsmelding(inntektsmelding, this)
             vedtaksperiode.person.gjenopptaBehandling(inntektsmelding)
@@ -1062,6 +1082,12 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.revurderInntekt(hendelse)
         }
 
+        override fun håndter(
+            vedtaksperiode: Vedtaksperiode,
+            overstyrArbeidsforhold: OverstyrArbeidsforhold,
+            subsumsjon: Subsumsjon?
+        ) = vedtaksperiode.revurderArbeidsforhold(overstyrArbeidsforhold, subsumsjon)
+
         override fun valider(
             vedtaksperiode: Vedtaksperiode,
             periode: Periode,
@@ -1113,6 +1139,12 @@ internal class Vedtaksperiode private constructor(
             if (!vedtaksperiode.kanRevurdereInntektForFlereArbeidsgivere(hendelse)) return
             vedtaksperiode.revurderInntekt(hendelse)
         }
+
+        override fun håndter(
+            vedtaksperiode: Vedtaksperiode,
+            overstyrArbeidsforhold: OverstyrArbeidsforhold,
+            subsumsjon: Subsumsjon?
+        ) = vedtaksperiode.revurderArbeidsforhold(overstyrArbeidsforhold, subsumsjon)
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
             vedtaksperiode.trengerYtelser(påminnelse)
@@ -1564,6 +1596,12 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.revurderInntekt(hendelse)
         }
 
+        override fun håndter(
+            vedtaksperiode: Vedtaksperiode,
+            overstyrArbeidsforhold: OverstyrArbeidsforhold,
+            subsumsjon: Subsumsjon?
+        ) = vedtaksperiode.revurderArbeidsforhold(overstyrArbeidsforhold, subsumsjon)
+
         override fun startRevurdering(
             arbeidsgivere: List<Arbeidsgiver>,
             vedtaksperiode: Vedtaksperiode,
@@ -1786,18 +1824,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             overstyrArbeidsforhold: OverstyrArbeidsforhold,
             subsumsjon: Subsumsjon?
-        ): Boolean {
-            vedtaksperiode.person.lagreOverstyrArbeidsforhold(overstyrArbeidsforhold, vedtaksperiode.jurist())
-            vedtaksperiode.person.vilkårsprøvEtterNyInformasjonFraSaksbehandler(
-                overstyrArbeidsforhold,
-                vedtaksperiode.skjæringstidspunkt,
-                vedtaksperiode.jurist(),
-                null,
-                subsumsjon
-            )
-            vedtaksperiode.person.startRevurdering(vedtaksperiode, overstyrArbeidsforhold)
-            return true
-        }
+        ) = vedtaksperiode.revurderArbeidsforhold(overstyrArbeidsforhold, subsumsjon)
 
         override fun håndter(
             person: Person,
@@ -2102,18 +2129,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             overstyrArbeidsforhold: OverstyrArbeidsforhold,
             subsumsjon: Subsumsjon?
-        ): Boolean {
-            vedtaksperiode.person.lagreOverstyrArbeidsforhold(overstyrArbeidsforhold, vedtaksperiode.jurist())
-            vedtaksperiode.person.vilkårsprøvEtterNyInformasjonFraSaksbehandler(
-                overstyrArbeidsforhold,
-                vedtaksperiode.skjæringstidspunkt,
-                vedtaksperiode.jurist(),
-                null,
-                subsumsjon
-            )
-            vedtaksperiode.person.startRevurdering(vedtaksperiode, overstyrArbeidsforhold)
-            return true
-        }
+        ) = vedtaksperiode.revurderArbeidsforhold(overstyrArbeidsforhold, subsumsjon)
 
         override fun nyPeriodeFørMedNyFlyt(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Søknad) {
             if (Toggle.RevurdereOutOfOrder.disabled) return super.nyPeriodeFørMedNyFlyt(vedtaksperiode, ny, hendelse)

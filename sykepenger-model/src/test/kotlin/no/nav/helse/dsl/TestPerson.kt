@@ -9,9 +9,11 @@ import no.nav.helse.Fødselsnummer
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
 import no.nav.helse.februar
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
+import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Inntektsvurdering
+import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.OverstyrArbeidsforhold.ArbeidsforholdOverstyrt
 import no.nav.helse.hendelser.Periode
@@ -277,6 +279,10 @@ internal class TestPerson(
             fabrikk.lagOverstyrArbeidsforhold(skjæringstidspunkt, *overstyrteArbeidsforhold)
                 .håndter(Person::håndter)
         }
+
+        internal fun håndterOverstyrTidslinje(overstyringsdager: List<ManuellOverskrivingDag>) =
+            fabrikk.lagHåndterOverstyrTidslinje(overstyringsdager)
+                .håndter(Person::håndter)
 
         operator fun <R> invoke(testblokk: TestArbeidsgiver.() -> R): R {
             return testblokk(this)
