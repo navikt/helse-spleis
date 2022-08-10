@@ -1801,6 +1801,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
+            if (!vedtaksperiode.utbetalinger.harAvsluttede()) return påminnelse.info("Perioden er kandidat til å reberegnes pga. perioden stammer fra Avsluttet uten utbetaling")
             vedtaksperiode.trengerGodkjenning(påminnelse)
         }
 
