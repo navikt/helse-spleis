@@ -1150,12 +1150,14 @@ internal class Vedtaksperiode private constructor(
             infotrygdhistorikk: Infotrygdhistorikk,
             arbeidsgiverUtbetalingerFun: (SubsumsjonObserver) -> ArbeidsgiverUtbetalinger
         ) {
-            if (vedtaksperiode.person.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt) == null) return vedtaksperiode.tilstand(ytelser, AvventerVilkårsprøvingRevurdering) {
-                ytelser.info("Trenger å utføre vilkårsprøving før vi kan beregne utbetaling for revurderingen.")
-            }
+            val vilkårsgrunnlag = vedtaksperiode.person.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt)
+                ?: return vedtaksperiode.tilstand(ytelser, AvventerVilkårsprøvingRevurdering) {
+                    ytelser.info("Trenger å utføre vilkårsprøving før vi kan beregne utbetaling for revurderingen.")
+                }
 
             ErrorsTilWarnings.wrap(ytelser) {
                 vedtaksperiode.validerYtelserForSkjæringstidspunkt(ytelser)
+                person.valider(ytelser, vilkårsgrunnlag, vedtaksperiode.skjæringstidspunkt, true)
                 val arbeidsgiverUtbetalinger = arbeidsgiverUtbetalingerFun(vedtaksperiode.jurist())
                 vedtaksperiode.forsøkRevurdering(arbeidsgiverUtbetalinger, ytelser)
             }
