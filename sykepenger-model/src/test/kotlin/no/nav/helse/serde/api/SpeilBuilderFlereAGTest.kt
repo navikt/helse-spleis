@@ -4,7 +4,6 @@ import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
-import no.nav.helse.Toggle
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
@@ -708,7 +707,7 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Finner riktig ghostpølse etter overstyring av ghost-inntekt selvom begge arbeidsgiverne har saksbehandlerinntekt`() = Toggle.RevurdereInntektMedFlereArbeidsgivere.enable {
+    fun `Finner riktig ghostpølse etter overstyring av ghost-inntekt selvom begge arbeidsgiverne har saksbehandlerinntekt`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
