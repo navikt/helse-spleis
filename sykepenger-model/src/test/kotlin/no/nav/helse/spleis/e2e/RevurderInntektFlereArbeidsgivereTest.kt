@@ -1,65 +1,75 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.Toggle
-import no.nav.helse.hendelser.*
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.inspectors.Kilde
-import no.nav.helse.januar
-import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Test
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
+import no.nav.helse.EnableToggle
+import no.nav.helse.Toggle
+import no.nav.helse.dsl.AbstractDslTest
+import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
+import no.nav.helse.dsl.nyttVedtak
+import no.nav.helse.hendelser.InntektForSykepengegrunnlag
+import no.nav.helse.hendelser.Inntektsvurdering
+import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.Vilkårsgrunnlag
+import no.nav.helse.hendelser.til
+import no.nav.helse.inspectors.Kilde.SAKSBEHANDLER
+import no.nav.helse.januar
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import org.junit.jupiter.api.Test
 
-internal class RevurderInntektFlereArbeidsgivereTest: AbstractEndToEndTest() {
-    private companion object {
-        val AG1 = "123456789"
-        val AG2 = "987654321"
-    }
+@EnableToggle(Toggle.RevurdereInntektMedFlereArbeidsgivere::class)
+internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
 
     @Test
     fun `kun den arbeidsgiveren som har fått overstyrt inntekt som faktisk lagrer inntekten`() {
-        nyttVedtak(1.januar(2017), 31.januar(2017), 100.prosent, orgnummer= AG2) // gammelt vedtak
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = AG1)
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = AG1)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = AG1)
-        håndterYtelser(orgnummer = AG1)
-        val skjæringstidspunkt = inspektør(AG1).skjæringstidspunkt(1.vedtaksperiode)
-        håndterVilkårsgrunnlag(
-            1.vedtaksperiode, orgnummer = AG1, inntektsvurdering = Inntektsvurdering(
-                inntekter = listOf(
-                    sammenligningsgrunnlag(AG1, skjæringstidspunkt, INNTEKT.repeat(12))
+        a2 {
+            nyttVedtak(1.januar(2017), 31.januar(2017), 100.prosent) // gammelt vedtak
+        }
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+            håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterYtelser(1.vedtaksperiode)
+            håndterVilkårsgrunnlag(
+                1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
+                    inntekter = listOf(
+                        sammenligningsgrunnlag(a1, 1.januar, INNTEKT.repeat(12))
+                    )
+                ),
+                inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
+                    inntekter = listOf(
+                        grunnlag(a1, 1.januar, INNTEKT.repeat(3))
+                    ), arbeidsforhold = emptyList()
+                ),
+                arbeidsforhold = listOf(
+                    Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null),
+                    Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null)
                 )
-            ),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = listOf(
-                    grunnlag(AG1, skjæringstidspunkt, INNTEKT.repeat(3))
-                ), arbeidsforhold = emptyList()
-            ),
-            arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(AG1, LocalDate.EPOCH, null),
-                Vilkårsgrunnlag.Arbeidsforhold(AG2, LocalDate.EPOCH, null)
             )
-        )
-        håndterYtelser(orgnummer = AG1)
-        håndterSimulering(orgnummer = AG1)
-        håndterUtbetalingsgodkjenning(orgnummer = AG1)
-        håndterUtbetalt(orgnummer = AG1)
-
-        håndterOverstyrInntekt(orgnummer = AG1, skjæringstidspunkt = 1.januar)
-        assertEquals(1, inspektør(AG1).inntektInspektør.antallOpplysinger(Kilde.SAKSBEHANDLER))
-        assertEquals(0, inspektør(AG2).inntektInspektør.antallOpplysinger(Kilde.SAKSBEHANDLER))
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+            håndterOverstyrInntekt(skjæringstidspunkt = 1.januar, inntekt = 25000.månedlig)
+            assertAntallInntektsopplysninger(1, SAKSBEHANDLER)
+        }
+        a2 {
+            assertAntallInntektsopplysninger(0, SAKSBEHANDLER)
+        }
     }
 
     @Test
     fun `alle perioder for alle arbeidsgivere med aktuelt skjæringstidspunkt skal ha hendelseIden`() {
-        Toggle.RevurdereInntektMedFlereArbeidsgivere.enable {
-            nyeVedtak(1.januar, 31.januar, AG1, AG2)
-            val hendelseId = UUID.randomUUID()
-            håndterOverstyrInntekt(orgnummer = AG1, skjæringstidspunkt = 1.januar, meldingsreferanseId = hendelseId)
-
-            assertHarHendelseIder(1.vedtaksperiode, hendelseId, orgnummer = AG1)
-            assertHarIkkeHendelseIder(1.vedtaksperiode, hendelseId, orgnummer = AG2)
+        (a1 og a2).nyeVedtak(1.januar til 31.januar)
+        val hendelseId = UUID.randomUUID()
+        a1 {
+            håndterOverstyrInntekt(hendelseId, 1.januar, 25000.månedlig)
+            assertHarHendelseIder(1.vedtaksperiode, hendelseId)
+        }
+        a2 {
+            assertHarIkkeHendelseIder(1.vedtaksperiode, hendelseId)
         }
     }
 }

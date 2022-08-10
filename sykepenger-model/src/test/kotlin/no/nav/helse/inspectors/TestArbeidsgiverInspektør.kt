@@ -488,6 +488,7 @@ internal class TestArbeidsgiverInspektør(
     internal fun vedtaksperioder(vedtaksperiodeId: UUID) = vedtaksperiodeId.finn(vedtaksperioder)
 
     internal fun hendelseIder(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperiodeIdInnhenter.finn(hendelseIder).ider()
+    internal fun hendelseIder(vedtaksperiodeId: UUID) = vedtaksperiodeId.finn(hendelseIder).ider()
 
     internal fun fagsystemId(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperiodeIdInnhenter.finn(fagsystemIder)
 

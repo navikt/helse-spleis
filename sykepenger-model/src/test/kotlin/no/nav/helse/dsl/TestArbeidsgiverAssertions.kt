@@ -1,6 +1,7 @@
 package no.nav.helse.dsl
 
 import java.util.UUID
+import no.nav.helse.inspectors.Kilde
 import no.nav.helse.inspectors.PersonInspektør
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.person.Aktivitetslogg
@@ -28,6 +29,16 @@ internal class TestArbeidsgiverAssertions(private val observatør: TestObservat�
         assertTrue(inspektør.periodeErForkastet(id)) { "Perioden er ikke forkastet" }
         assertFalse(inspektør.periodeErIkkeForkastet(id)) { "Perioden er ikke forkastet" }
         assertEquals(tilstander.asList(), observatør.tilstandsendringer[id]) { personInspektør.aktivitetslogg.toString() }
+    }
+
+    internal fun assertHarHendelseIder(vedtaksperiodeId: UUID, vararg hendelseIder: UUID) {
+        assertTrue(inspektør.hendelseIder(vedtaksperiodeId).containsAll(hendelseIder.toSet()))
+    }
+    internal fun assertHarIkkeHendelseIder(vedtaksperiodeId: UUID, vararg hendelseIder: UUID) {
+        assertEquals(emptySet<UUID>(), inspektør.hendelseIder(vedtaksperiodeId).intersect(hendelseIder.toSet()))
+    }
+    internal fun assertAntallInntektsopplysninger(antall: Int, inntektskilde: Kilde) {
+        assertEquals(antall, inspektør.inntektInspektør.antallOpplysinger(inntektskilde))
     }
 
     internal fun assertInfo(forventet: String, vararg filtre: AktivitetsloggFilter) {

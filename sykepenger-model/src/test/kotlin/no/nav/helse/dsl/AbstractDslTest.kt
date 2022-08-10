@@ -13,7 +13,10 @@ import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
+import no.nav.helse.hendelser.til
+import no.nav.helse.inspectors.Kilde
 import no.nav.helse.inspectors.PersonInspektør
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.person.Person
@@ -25,8 +28,10 @@ import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.TestObservatør
 import no.nav.helse.spleis.e2e.lagInntektperioder
 import no.nav.helse.testhelpers.Inntektperioder
+import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.AfterEach
@@ -48,6 +53,10 @@ internal abstract class AbstractDslTest {
         protected val personInspektør = { person: Person -> PersonInspektør(person) }
         @JvmStatic
         protected val agInspektør = { orgnummer: String -> { person: Person -> TestArbeidsgiverInspektør(person, orgnummer) } }
+        @JvmStatic
+        protected infix fun String.og(annen: String) = listOf(this, annen)
+        @JvmStatic
+        protected infix fun List<String>.og(annen: String) = this.plus(annen)
     }
     protected lateinit var observatør: TestObservatør
     private lateinit var testperson: TestPerson
@@ -68,6 +77,42 @@ internal abstract class AbstractDslTest {
 
     protected operator fun <R> String.invoke(testblokk: TestPerson.TestArbeidsgiver.() -> R) =
         testperson.arbeidsgiver(this, testblokk)
+    protected fun List<String>.nyeVedtak(
+        periode: Periode, grad: Prosentdel = 100.prosent, inntekt: Inntekt = 20000.månedlig,
+        inntekterBlock: Inntektperioder.() -> Unit = {
+            this@nyeVedtak.forEach {
+                lagInntektperioder(it, periode.start, inntekt)
+            }
+        }
+    ) {
+        forEach {
+            it {
+                håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, grad))
+                håndterSøknad(Sykdom(periode.start, periode.endInclusive, grad))
+            }
+        }
+        forEach { it {
+            håndterInntektsmelding(listOf(periode.start til periode.start.plusDays(15)), beregnetInntekt = inntekt)
+        }}
+        (first()){
+            håndterYtelser(1.vedtaksperiode)
+            håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
+                inntektperioderForSammenligningsgrunnlag {
+                    inntekterBlock()
+                })
+            )
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+        }
+        drop(1).forEach { it {
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+        }}
+    }
 
     protected fun TestPerson.TestArbeidsgiver.assertTilstander(id: UUID, vararg tilstander: TilstandType, orgnummer: String = a1) {
         testArbeidsgiverAsserter.assertTilstander(id, *tilstander)
@@ -83,6 +128,12 @@ internal abstract class AbstractDslTest {
     }
     protected fun assertArbeidsgivereISykepengegrunnlag(skjæringstidspunkt: LocalDate, vararg arbeidsgivere: String) =
         testPersonAsserter.assertArbeidsgivereISykepengegrunnlag(skjæringstidspunkt, *arbeidsgivere)
+    protected fun TestPerson.TestArbeidsgiver.assertHarHendelseIder(vedtaksperiodeId: UUID, vararg hendelseIder: UUID) =
+        testArbeidsgiverAsserter.assertHarHendelseIder(vedtaksperiodeId, *hendelseIder)
+    protected fun TestPerson.TestArbeidsgiver.assertHarIkkeHendelseIder(vedtaksperiodeId: UUID, vararg hendelseIder: UUID) =
+        testArbeidsgiverAsserter.assertHarIkkeHendelseIder(vedtaksperiodeId, *hendelseIder)
+    protected fun TestPerson.TestArbeidsgiver.assertAntallInntektsopplysninger(antall: Int, inntektskilde: Kilde) =
+        testArbeidsgiverAsserter.assertAntallInntektsopplysninger(antall, inntektskilde)
     protected fun TestPerson.TestArbeidsgiver.assertNoErrors(vararg filtre: AktivitetsloggFilter) =
         testArbeidsgiverAsserter.assertNoErrors(*filtre)
     protected fun TestPerson.TestArbeidsgiver.assertWarnings(vararg filtre: AktivitetsloggFilter) =
