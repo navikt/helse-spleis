@@ -1,6 +1,13 @@
 package no.nav.helse
 
 import java.time.DayOfWeek
+import java.time.DayOfWeek.FRIDAY
+import java.time.DayOfWeek.MONDAY
+import java.time.DayOfWeek.SATURDAY
+import java.time.DayOfWeek.SUNDAY
+import java.time.DayOfWeek.THURSDAY
+import java.time.DayOfWeek.TUESDAY
+import java.time.DayOfWeek.WEDNESDAY
 import java.time.LocalDate
 
 fun Int.januar(year: Int): LocalDate = LocalDate.of(year, 1, this)
@@ -33,17 +40,19 @@ internal class Ukedager(private val antallUkedager: Int) {
     operator fun plus(other: LocalDate): LocalDate = other.plusDays(dager(other).toLong())
 }
 
+internal val LocalDate.forrigeDag get() = this.minusDays(1)
+internal val LocalDate.nesteDag get() = this.plusDays(1)
 internal fun LocalDate.førsteArbeidsdag(): LocalDate = this + 0.ukedager
 internal fun LocalDate.nesteArbeidsdag(): LocalDate = this + 1.ukedager
 
-private val helgedager = listOf(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY)
+private val helgedager = listOf(SATURDAY, SUNDAY)
 internal fun LocalDate.erHelg() = this.dayOfWeek in helgedager
 
 internal fun LocalDate.erRettFør(other: LocalDate): Boolean =
     this < other && when (this.dayOfWeek) {
-        DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY, DayOfWeek.THURSDAY, DayOfWeek.SUNDAY -> this.plusDays(1) == other
-        DayOfWeek.FRIDAY -> other in this.plusDays(1)..this.plusDays(3)
-        DayOfWeek.SATURDAY -> other in this.plusDays(1)..this.plusDays(2)
+        MONDAY, TUESDAY, WEDNESDAY, THURSDAY, SUNDAY -> this.plusDays(1) == other
+        FRIDAY -> other in this.plusDays(1)..this.plusDays(3)
+        SATURDAY -> other in this.plusDays(1)..this.plusDays(2)
         else -> false
     }
 
@@ -54,7 +63,7 @@ internal fun ClosedRange<LocalDate>.ukedager(): Int {
     if (epochStart >= epochEnd) return 0
     val dagerMellom = (epochEnd - epochStart).toInt()
     val heleHelger = (dagerMellom + start.dayOfWeek.value - 1) / 7 * 2
-    val justerFørsteHelg = if (start.dayOfWeek == DayOfWeek.SUNDAY) 1 else 0
-    val justerSisteHelg = if (endInclusive.dayOfWeek == DayOfWeek.SUNDAY) 1 else 0
+    val justerFørsteHelg = if (start.dayOfWeek == SUNDAY) 1 else 0
+    val justerSisteHelg = if (endInclusive.dayOfWeek == SUNDAY) 1 else 0
     return dagerMellom - heleHelger + justerFørsteHelg - justerSisteHelg
 }

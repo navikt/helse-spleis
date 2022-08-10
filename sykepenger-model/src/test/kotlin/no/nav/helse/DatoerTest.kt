@@ -5,6 +5,8 @@ import java.time.DayOfWeek.SUNDAY
 import java.time.LocalDate
 import no.nav.helse.hendelser.til
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
@@ -95,6 +97,47 @@ internal class DatoerTest {
     @Test
     fun `ukedager mellom - hensyntar skuddår`() {
         assertEquals(1, (28.februar(2016)..1.mars(2016)).ukedager())
+    }
+
+    @Test
+    fun `forrige og neste dag`() {
+        val mandag = 1.januar
+        assertEquals(31.desember(2017), mandag.forrigeDag)
+        assertEquals(2.januar, mandag.nesteDag)
+
+        val tirsdag = 2.januar
+        assertEquals(1.januar, tirsdag.forrigeDag)
+        assertEquals(3.januar, tirsdag.nesteDag)
+
+        val fredag = 5.januar
+        assertEquals(4.januar, fredag.forrigeDag)
+        assertEquals(6.januar, fredag.nesteDag)
+    }
+
+    @Test
+    fun `er rett før`() {
+        val mandag = 1.januar
+        val tirsdag = mandag.nesteDag
+        val onsdag = tirsdag.nesteDag
+        val torsdag = onsdag.nesteDag
+        val fredag = torsdag.nesteDag
+        val lørdag = fredag.nesteDag
+        val søndag = lørdag.nesteDag
+
+        assertTrue(31.desember(2017).erRettFør(mandag)) { "søndag er rett før mandag" }
+        assertFalse(31.desember(2017).erRettFør(tirsdag)) { "søndag er ikke rett før tirsdag" }
+        assertTrue(30.desember(2017).erRettFør(mandag)) { "lørdag er rett før mandag" }
+        assertTrue(29.desember(2017).erRettFør(mandag)) { "fredag er rett før mandag" }
+        assertFalse(28.desember(2017).erRettFør(mandag)) { "forrige torsdag er ikke rett før mandag" }
+        assertFalse(mandag.erRettFør(mandag)) { "mandag er ikke rett før seg selv" }
+
+        assertFalse(søndag.erRettFør(tirsdag)) { "søndag er ikke rett før tirsdag" }
+        assertTrue(mandag.erRettFør(tirsdag)) { "tirsdag er rett før mandag" }
+
+        assertFalse(torsdag.erRettFør(lørdag)) { "torsdag er ikke rett før lørdag" }
+        assertTrue(fredag.erRettFør(lørdag)) { "fredag er rett før lørdag" }
+        assertTrue(fredag.erRettFør(søndag)) { "fredag er rett før søndag" }
+        assertTrue(lørdag.erRettFør(søndag)) { "lørdag er rett før søndag" }
     }
 
     @Disabled
