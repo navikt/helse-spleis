@@ -5,6 +5,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.Fødselsnummer
+import no.nav.helse.Toggle
 import no.nav.helse.hendelser.Hendelseskontekst
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
@@ -337,7 +338,7 @@ internal class Utbetaling private constructor(
                 beregningId,
                 organisasjonsnummer,
                 revurdertTidslinje,
-                Utbetalingtype.REVURDERING,
+                Utbetalingtype.REVURDERING.takeUnless { forrige == null && Toggle.UtbetalingtypeVedRevurderingAvAuu.enabled } ?: Utbetalingtype.UTBETALING,
                 sisteUtbetaling?.let { maxOf(sisteUtbetaling.periode.endInclusive, sisteDato) } ?: sisteDato,
                 aktivitetslogg,
                 maksdato,
