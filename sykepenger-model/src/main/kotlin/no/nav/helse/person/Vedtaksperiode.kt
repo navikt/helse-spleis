@@ -1801,7 +1801,6 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            if (!vedtaksperiode.utbetalinger.harAvsluttede()) return vedtaksperiode.tilstand(påminnelse, AvventerHistorikkRevurdering)
             vedtaksperiode.trengerGodkjenning(påminnelse)
         }
 
