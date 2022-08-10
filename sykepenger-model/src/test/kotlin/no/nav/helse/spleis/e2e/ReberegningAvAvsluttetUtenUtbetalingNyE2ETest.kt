@@ -262,7 +262,8 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         håndterYtelser(2.vedtaksperiode)
 
         assertWarning("Første fraværsdag i inntektsmeldingen er ulik skjæringstidspunktet. Kontrollér at inntektsmeldingen er knyttet til riktig periode.", 1.vedtaksperiode.filter(a1))
-        assertNoWarnings(2.vedtaksperiode.filter(a1))
+        assertWarning("Denne perioden var tidligere regnet som innenfor arbeidsgiverperioden", 2.vedtaksperiode.filter(a1))
+        //assertNoWarnings(2.vedtaksperiode.filter(a1))
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_VILKÅRSPRØVING_REVURDERING)
@@ -307,7 +308,8 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         håndterYtelser(3.vedtaksperiode)
 
         assertWarning("Første fraværsdag i inntektsmeldingen er ulik skjæringstidspunktet. Kontrollér at inntektsmeldingen er knyttet til riktig periode.", 1.vedtaksperiode.filter(a1))
-        assertNoWarnings(2.vedtaksperiode.filter(a1))
+        assertWarning("Denne perioden var tidligere regnet som innenfor arbeidsgiverperioden", 2.vedtaksperiode.filter(a1))
+        //assertNoWarnings(2.vedtaksperiode.filter(a1))
         assertNoWarnings(3.vedtaksperiode.filter(a1))
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
@@ -365,7 +367,8 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         håndterYtelser(2.vedtaksperiode)
 
         assertNoWarnings(1.vedtaksperiode.filter(a1))
-        assertNoWarnings(2.vedtaksperiode.filter(a1))
+        assertWarning("Denne perioden var tidligere regnet som innenfor arbeidsgiverperioden", 2.vedtaksperiode.filter(a1))
+        // assertNoWarnings(2.vedtaksperiode.filter(a1))
         assertNoWarnings(3.vedtaksperiode.filter(a1))
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)

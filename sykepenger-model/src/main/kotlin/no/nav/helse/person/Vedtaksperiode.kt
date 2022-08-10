@@ -2000,6 +2000,7 @@ internal class Vedtaksperiode private constructor(
             overstyrt: Vedtaksperiode,
             pågående: Vedtaksperiode?
         ) {
+            hendelse.warn("Denne perioden var tidligere regnet som innenfor arbeidsgiverperioden")
             if (!vedtaksperiode.harNødvendigInntektForVilkårsprøving() || !arbeidsgivere.harNødvendigInntekt(vedtaksperiode.skjæringstidspunkt)) return vedtaksperiode.tilstand(hendelse, AvventerRevurdering) {
                 hendelse.info("Avventer inntekt for minst én annen arbeidsgiver")
             }
