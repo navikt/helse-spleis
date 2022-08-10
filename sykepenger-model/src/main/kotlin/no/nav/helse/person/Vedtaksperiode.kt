@@ -369,14 +369,6 @@ internal class Vedtaksperiode private constructor(
         return utbetalingstidslinje.isNotEmpty() && hendelse.skjæringstidspunkt == this.skjæringstidspunkt
     }
 
-    private fun kanOverstyreInntektForFlereArbeidsgivere(hendelse: OverstyrInntekt): Boolean {
-        if (Toggle.OverstyrInntektMedFlereArbeidsgivere.disabled && inntektskilde == Inntektskilde.FLERE_ARBEIDSGIVERE) {
-            hendelse.error("Forespurt overstyring av inntekt hvor personen har flere arbeidsgivere (inkl. ghosts)")
-            return false
-        }
-        return true
-    }
-
     private fun kanRevurdereInntektForFlereArbeidsgivere(hendelse: OverstyrInntekt): Boolean {
         if (Toggle.RevurdereInntektMedFlereArbeidsgivere.disabled && inntektskilde == Inntektskilde.FLERE_ARBEIDSGIVERE) {
             hendelse.error("Forespurt revurdering av inntekt hvor personen har flere arbeidsgivere (inkl. ghosts)")
@@ -1656,7 +1648,6 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {
-            if (!vedtaksperiode.kanOverstyreInntektForFlereArbeidsgivere(hendelse)) return
             if (vedtaksperiode.person.harPeriodeSomBlokkererOverstyring(hendelse.skjæringstidspunkt)) return
             vedtaksperiode.arbeidsgiver.addInntekt(hendelse)
             vedtaksperiode.person.vilkårsprøvEtterNyInformasjonFraSaksbehandler(
@@ -2054,9 +2045,6 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {
             if (!vedtaksperiode.kanRevurdereInntektForFlereArbeidsgivere(hendelse)) return
-            if (Toggle.RevurdereInntektMedFlereArbeidsgivere.disabled && vedtaksperiode.inntektskilde == Inntektskilde.FLERE_ARBEIDSGIVERE) {
-                hendelse.error("Forespurt revurdering av inntekt hvor personen har flere arbeidsgivere (inkl. ghosts)")
-            }
         }
     }
 
