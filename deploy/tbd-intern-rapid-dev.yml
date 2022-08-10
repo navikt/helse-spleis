@@ -1,0 +1,31 @@
+---
+apiVersion: kafka.nais.io/v1
+kind: Topic
+metadata:
+    name: intern-rapid.v1
+    namespace: tbd
+    labels:
+        team: tbd
+spec:
+    pool: nav-dev
+    config:  # optional; all fields are optional too; defaults shown
+        cleanupPolicy: delete  # delete, compact
+        minimumInSyncReplicas: 1
+        partitions: 6
+        replication: 3  # see min/max requirements
+        retentionBytes: -1  # -1 means unlimited
+        retentionHours: 168  # -1 means unlimited
+    acl:
+        - team: tbd
+          application: spesialist
+          access: readwrite
+        - team: tbd
+          application: helse-spleis
+          access: readwrite
+        - team: tbd
+          application: spleis-api
+          access: readwrite
+        - team: tbd
+          application: spleis-avstemming
+          access: readwrite
+        # og så sikkert noe tømlo-relaterte greier
