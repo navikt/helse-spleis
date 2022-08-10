@@ -1,11 +1,13 @@
 package no.nav.helse.utbetalingslinjer
 
+import java.time.LocalDate
+import no.nav.helse.erHelg
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.OppdragVisitor
-import no.nav.helse.sykdomstidslinje.erHelg
-import no.nav.helse.utbetalingslinjer.Endringskode.*
+import no.nav.helse.utbetalingslinjer.Endringskode.ENDR
+import no.nav.helse.utbetalingslinjer.Endringskode.NY
+import no.nav.helse.utbetalingslinjer.Endringskode.UEND
 import no.nav.helse.utbetalingslinjer.Klassekode.RefusjonIkkeOpplysningspliktig
-import java.time.LocalDate
 
 internal class Utbetalingslinje internal constructor(
     internal var fom: LocalDate,

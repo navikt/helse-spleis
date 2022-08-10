@@ -3,13 +3,13 @@ package no.nav.helse.serde.migration
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
-import net.logstash.logback.argument.StructuredArgument
-import net.logstash.logback.argument.StructuredArguments.keyValue
-import no.nav.helse.hendelser.Periode
-import no.nav.helse.sykdomstidslinje.erHelg
-import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
+import net.logstash.logback.argument.StructuredArgument
+import net.logstash.logback.argument.StructuredArguments.keyValue
+import no.nav.helse.erHelg
+import no.nav.helse.hendelser.Periode
+import org.slf4j.LoggerFactory
 
 internal class V130TrimmeUtbetalingstidslinje : JsonMigration(version = 130) {
     override val description = "Fjerner innledende arbeidsdager og fridager på Utbetalingstidslinje forårsaket av historisk bug hvor vi ikke trimmet ordentlig"

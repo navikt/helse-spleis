@@ -1,13 +1,12 @@
 package no.nav.helse
 
-import no.nav.helse.hendelser.til
-import no.nav.helse.sykdomstidslinje.ukedager
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Disabled
-import org.junit.jupiter.api.Test
 import java.time.DayOfWeek.SATURDAY
 import java.time.DayOfWeek.SUNDAY
 import java.time.LocalDate
+import no.nav.helse.hendelser.til
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Disabled
+import org.junit.jupiter.api.Test
 
 internal class DatoerTest {
 

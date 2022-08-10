@@ -5,6 +5,8 @@ import java.time.LocalDate
 import java.util.Objects
 import java.util.SortedMap
 import java.util.stream.Collectors.toMap
+import no.nav.helse.erHelg
+import no.nav.helse.erRettFør
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.contains
 import no.nav.helse.hendelser.til

@@ -1,11 +1,11 @@
 package no.nav.helse.serde.api.sporing
 
+import java.util.UUID
+import no.nav.helse.erRettFør
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.ForkastetVedtaksperiode
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.serde.api.BuilderState
-import no.nav.helse.sykdomstidslinje.erRettFør
-import java.util.*
 
 internal class ArbeidsgiverBuilder(
     private val organisasjonsnummer: String

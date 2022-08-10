@@ -2,8 +2,8 @@ package no.nav.helse.testhelpers
 
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
+import no.nav.helse.erHelg
 import no.nav.helse.plus
-import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.ukedager
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje

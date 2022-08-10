@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.Fødselsnummer
+import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.inspectors.personLogg
@@ -15,7 +16,6 @@ import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.Person
 import no.nav.helse.person.SpesifikkKontekst
 import no.nav.helse.person.TilstandType
-import no.nav.helse.sykdomstidslinje.erHelg
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
 import org.junit.jupiter.api.Assertions.assertEquals

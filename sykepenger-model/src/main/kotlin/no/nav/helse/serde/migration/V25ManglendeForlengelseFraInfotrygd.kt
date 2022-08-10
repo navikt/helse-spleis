@@ -2,8 +2,8 @@ package no.nav.helse.serde.migration
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
-import no.nav.helse.sykdomstidslinje.erRettFør
 import java.time.LocalDate
+import no.nav.helse.erRettFør
 
 internal class V25ManglendeForlengelseFraInfotrygd : JsonMigration(version = 25) {
     override val description = "Legger til riktig periodetype"

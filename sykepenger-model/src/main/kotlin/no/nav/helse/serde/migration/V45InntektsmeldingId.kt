@@ -2,9 +2,9 @@ package no.nav.helse.serde.migration
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
-import no.nav.helse.sykdomstidslinje.erRettFør
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
+import no.nav.helse.erRettFør
 
 internal class V45InntektsmeldingId : JsonMigration(version = 45) {
     override val description: String = "setter inntektsmeldingId på tidligere førstegangsbehandlinger, og deres forlengelser"

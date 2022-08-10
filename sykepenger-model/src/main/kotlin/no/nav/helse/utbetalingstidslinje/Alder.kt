@@ -10,7 +10,6 @@ import no.nav.helse.person.AlderVisitor
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.plus
-import no.nav.helse.sykdomstidslinje.ukedager
 import no.nav.helse.ukedager
 
 // TODO: alder bør ha dødsdato for å regne alder riktig i tilfelle død

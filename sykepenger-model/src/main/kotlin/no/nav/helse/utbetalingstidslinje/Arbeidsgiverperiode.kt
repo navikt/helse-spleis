@@ -1,15 +1,15 @@
 package no.nav.helse.utbetalingstidslinje
 
+import java.time.DayOfWeek
+import java.time.LocalDate
+import no.nav.helse.erHelg
+import no.nav.helse.erRettFør
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.Periodetype
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
-import no.nav.helse.sykdomstidslinje.erHelg
-import no.nav.helse.sykdomstidslinje.erRettFør
-import java.time.DayOfWeek
-import java.time.LocalDate
 
 internal class Arbeidsgiverperiode private constructor(private val perioder: List<Periode>, førsteUtbetalingsdag: LocalDate?) : Iterable<LocalDate>, Comparable<LocalDate> {
     constructor(perioder: List<Periode>) : this(perioder, null)

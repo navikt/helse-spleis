@@ -1,10 +1,9 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.sykdomstidslinje.erRettFør
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
-import no.nav.helse.førsteArbeidsdag
+import no.nav.helse.erRettFør
 import no.nav.helse.nesteArbeidsdag
 
 // Understands beginning and end of a time interval
