@@ -293,7 +293,11 @@ internal class TestPerson(
             arbeidsgiverHendelsefabrikk.lagHåndterOverstyrTidslinje(overstyringsdager)
                 .håndter(Person::håndter)
 
-        internal fun håndterOverstyrInntekt(hendelseId: UUID = UUID.randomUUID(), skjæringstidspunkt: LocalDate, inntekt: Inntekt) =
+        internal fun håndterOverstyrInntekt(
+            skjæringstidspunkt: LocalDate,
+            inntekt: Inntekt,
+            hendelseId: UUID = UUID.randomUUID()
+        ) =
             arbeidsgiverHendelsefabrikk.lagOverstyrInntekt(hendelseId, skjæringstidspunkt, inntekt)
                 .håndter(Person::håndter)
 

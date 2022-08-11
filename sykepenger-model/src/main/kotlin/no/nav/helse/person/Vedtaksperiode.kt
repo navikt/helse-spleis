@@ -2559,7 +2559,8 @@ internal class Vedtaksperiode private constructor(
                         AvventerSimuleringRevurdering,
                         AvventerGodkjenningRevurdering,
                         TilUtbetaling,
-                        UtbetalingFeilet
+                        UtbetalingFeilet,
+                        Avsluttet
                     )
                 }
 
