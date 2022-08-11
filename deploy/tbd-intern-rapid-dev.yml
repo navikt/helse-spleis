@@ -2,6 +2,8 @@
 apiVersion: kafka.nais.io/v1
 kind: Topic
 metadata:
+    annotations:
+        kafka.nais.io/removeDataWhenResourceIsDeleted: "true"
     name: intern-rapid.v1
     namespace: tbd
     labels:
