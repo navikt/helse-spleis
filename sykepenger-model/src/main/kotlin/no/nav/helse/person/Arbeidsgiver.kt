@@ -922,8 +922,8 @@ internal class Arbeidsgiver private constructor(
         return inntektshistorikk.harNødvendigInntektForVilkårsprøving(skjæringstidspunkt, periodeStart, finnFørsteFraværsdag(skjæringstidspunkt), !ingenUtbetaling)
     }
 
-    internal fun addInntekt(inntektsmelding: Inntektsmelding, skjæringstidspunkt: LocalDate, subsumsjonObserver: SubsumsjonObserver) {
-        inntektsmelding.addInntekt(inntektshistorikk, skjæringstidspunkt, subsumsjonObserver)
+    internal fun addInntekt(inntektsmelding: Inntektsmelding, førsteFraværsdag: LocalDate, subsumsjonObserver: SubsumsjonObserver) {
+        inntektsmelding.addInntekt(inntektshistorikk, førsteFraværsdag, subsumsjonObserver)
     }
 
     internal fun finnTidligereInntektsmeldinginfo(skjæringstidspunkt: LocalDate) = inntektsmeldingInfo.finn(skjæringstidspunkt)

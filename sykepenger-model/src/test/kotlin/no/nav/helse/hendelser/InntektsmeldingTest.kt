@@ -181,8 +181,8 @@ internal class InntektsmeldingTest {
         inntektsmelding(emptyList(), førsteFraværsdag = 3.januar)
         inntektsmelding.padLeft(1.januar)
         val tidslinje = inntektsmelding.sykdomstidslinje()
-        assertEquals(3.januar, tidslinje.førsteDag())
-        assertTrue(tidslinje[3.januar] is Arbeidsgiverdag)
+        assertNull(tidslinje.periode())
+        assertTrue(tidslinje[3.januar] is UkjentDag)
     }
 
     @Test
@@ -194,11 +194,11 @@ internal class InntektsmeldingTest {
         inntektsmelding.padLeft(1.januar)
         val tidslinje = inntektsmelding.sykdomstidslinje()
         assertEquals(1.januar, tidslinje.førsteDag())
-        assertEquals(25.januar, tidslinje.sisteDag())
+        assertEquals(18.januar, tidslinje.sisteDag())
         assertTrue(tidslinje[1.januar] is Arbeidsgiverdag)
         assertFalse(tidslinje[19.januar] is Arbeidsdag)
         assertFalse(tidslinje[24.januar] is Arbeidsdag)
-        assertTrue(tidslinje[25.januar] is Arbeidsgiverdag)
+        assertTrue(tidslinje[25.januar] is UkjentDag)
     }
 
     @Test
@@ -210,12 +210,12 @@ internal class InntektsmeldingTest {
         inntektsmelding.padLeft(20.januar)
         val tidslinje = inntektsmelding.sykdomstidslinje()
         assertEquals(1.januar, tidslinje.førsteDag())
-        assertEquals(25.januar, tidslinje.sisteDag())
+        assertEquals(18.januar, tidslinje.sisteDag())
         assertTrue(tidslinje[1.januar] is Arbeidsgiverdag)
         assertFalse(tidslinje[19.januar] is Arbeidsdag)
         assertFalse(tidslinje[20.januar] is FriskHelgedag)
         assertFalse(tidslinje[24.januar] is Arbeidsdag)
-        assertTrue(tidslinje[25.januar] is Arbeidsgiverdag)
+        assertTrue(tidslinje[25.januar] is UkjentDag)
     }
 
     @Test
@@ -227,12 +227,12 @@ internal class InntektsmeldingTest {
         inntektsmelding.padLeft(31.desember(2017))
         val tidslinje = inntektsmelding.sykdomstidslinje()
         assertEquals(31.desember(2017), tidslinje.førsteDag())
-        assertEquals(25.januar, tidslinje.sisteDag())
+        assertEquals(18.januar, tidslinje.sisteDag())
         assertTrue(tidslinje[31.desember(2017)] is FriskHelgedag)
         assertFalse(tidslinje[19.januar] is Arbeidsdag)
         assertFalse(tidslinje[20.januar] is FriskHelgedag)
         assertFalse(tidslinje[24.januar] is Arbeidsdag)
-        assertTrue(tidslinje[25.januar] is Arbeidsgiverdag)
+        assertTrue(tidslinje[25.januar] is UkjentDag)
     }
 
     @Test
@@ -315,8 +315,9 @@ internal class InntektsmeldingTest {
         val aktivitetslogg = inntektsmelding.valider(Periode(1.januar, 31.januar), MaskinellJurist())
         assertTrue(aktivitetslogg.hentInfo().contains("Inntektsmeldingen mangler arbeidsgiverperiode. Vurder om vilkårene for sykepenger er oppfylt, og om det skal være arbeidsgiverperiode"))
         assertFalse(aktivitetslogg.hasWarningsOrWorse())
-        assertEquals(1.januar, nyTidslinje.periode()?.start)
-        assertEquals(1.januar, nyTidslinje.periode()?.endInclusive)
+        assertEquals(1.januar til 1.januar, inntektsmelding.periode())
+        assertNull(nyTidslinje.periode()?.start)
+        assertNull(nyTidslinje.periode()?.endInclusive)
     }
 
     @Test
@@ -326,8 +327,8 @@ internal class InntektsmeldingTest {
         val aktivitetslogg = inntektsmelding.valider(Periode(1.januar, 31.januar), MaskinellJurist())
         assertTrue(aktivitetslogg.hentInfo().contains("Inntektsmeldingen mangler arbeidsgiverperiode. Vurder om vilkårene for sykepenger er oppfylt, og om det skal være arbeidsgiverperiode"))
         assertTrue(aktivitetslogg.hentErrors().contains("Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden på grunn av: begrunnelse"))
-        assertEquals(1.januar, nyTidslinje.periode()?.start)
-        assertEquals(1.januar, nyTidslinje.periode()?.endInclusive)
+        assertNull(nyTidslinje.periode()?.start)
+        assertNull(nyTidslinje.periode()?.endInclusive)
     }
 
     @Test
@@ -354,18 +355,18 @@ internal class InntektsmeldingTest {
     }
 
     @Test
-    fun `første fraværsdag etter arbeidsgiverperiode blir arbeidsgiverdag`() {
+    fun `første fraværsdag etter arbeidsgiverperiode blir ikke arbeidsgiverdag`() {
         inntektsmelding(listOf(Periode(1.januar, 1.januar)), førsteFraværsdag = 3.januar)
         val nyTidslinje = inntektsmelding.sykdomstidslinje()
         assertEquals(Arbeidsgiverdag::class, nyTidslinje[1.januar]::class)
         assertEquals(UkjentDag::class, nyTidslinje[2.januar]::class)
-        assertEquals(Arbeidsgiverdag::class, nyTidslinje[3.januar]::class)
+        assertEquals(UkjentDag::class, nyTidslinje[3.januar]::class)
     }
 
     @Test
     fun `arbeidsgiverperioden i inntektsmelding kan være tom`() {
         inntektsmelding(emptyList())
-        assertEquals(1.januar, inntektsmelding.sykdomstidslinje().periode()?.start)
+        assertNull(inntektsmelding.sykdomstidslinje().periode()?.start)
     }
 
     @Test
@@ -402,7 +403,8 @@ internal class InntektsmeldingTest {
     fun `bruker første fraværsdag som TOM hvis både ferieperioder og arbeidsgiverperioder i inntektsmeldingen er tomme`() {
         inntektsmelding(emptyList(), førsteFraværsdag = 2.januar)
 
-        assertEquals(Periode(2.januar, 2.januar), inntektsmelding.sykdomstidslinje().periode())
+        assertEquals(Periode(2.januar, 2.januar), inntektsmelding.periode())
+        assertNull(inntektsmelding.sykdomstidslinje().periode())
     }
 
     @Test
@@ -431,11 +433,12 @@ internal class InntektsmeldingTest {
         )
         val nyTidslinje = inntektsmelding.sykdomstidslinje()
 
-        assertEquals(22.januar, nyTidslinje.sisteSkjæringstidspunkt())
+        assertEquals(5.januar, nyTidslinje.sisteSkjæringstidspunkt())
+        assertEquals(22.januar.somPeriode(), inntektsmelding.periode())
         assertEquals(Arbeidsgiverdag::class, nyTidslinje[5.januar]::class)
         assertEquals(ArbeidsgiverHelgedag::class, nyTidslinje[20.januar]::class)
         assertEquals(FriskHelgedag::class, nyTidslinje[21.januar]::class)
-        assertEquals(Arbeidsgiverdag::class, nyTidslinje[22.januar]::class)
+        assertEquals(UkjentDag::class, nyTidslinje[22.januar]::class)
     }
 
     @Test
@@ -466,11 +469,12 @@ internal class InntektsmeldingTest {
         )
         val nyTidslinje = inntektsmelding.sykdomstidslinje()
 
-        assertEquals(21.januar, nyTidslinje.sisteSkjæringstidspunkt())
+        assertEquals(4.januar, nyTidslinje.sisteSkjæringstidspunkt())
+        assertEquals(21.januar.somPeriode(), inntektsmelding.periode())
         assertEquals(Arbeidsgiverdag::class, nyTidslinje[4.januar]::class)
         assertEquals(Arbeidsgiverdag::class, nyTidslinje[19.januar]::class)
         assertEquals(FriskHelgedag::class, nyTidslinje[20.januar]::class)
-        assertEquals(ArbeidsgiverHelgedag::class, nyTidslinje[21.januar]::class)
+        assertEquals(UkjentDag::class, nyTidslinje[21.januar]::class)
     }
 
     @Test
@@ -481,12 +485,13 @@ internal class InntektsmeldingTest {
         )
         val nyTidslinje = inntektsmelding.sykdomstidslinje()
 
-        assertEquals(22.januar, nyTidslinje.sisteSkjæringstidspunkt())
+        assertEquals(4.januar, nyTidslinje.sisteSkjæringstidspunkt())
+        assertEquals(22.januar.somPeriode(), inntektsmelding.periode())
         assertEquals(Arbeidsgiverdag::class, nyTidslinje[4.januar]::class)
         assertEquals(Arbeidsgiverdag::class, nyTidslinje[19.januar]::class)
         assertEquals(FriskHelgedag::class, nyTidslinje[20.januar]::class)
         assertEquals(FriskHelgedag::class, nyTidslinje[21.januar]::class)
-        assertEquals(Arbeidsgiverdag::class, nyTidslinje[22.januar]::class)
+        assertEquals(UkjentDag::class, nyTidslinje[22.januar]::class)
     }
 
 
@@ -498,13 +503,14 @@ internal class InntektsmeldingTest {
         )
         val nyTidslinje = inntektsmelding.sykdomstidslinje()
 
-        assertEquals(22.januar, nyTidslinje.sisteSkjæringstidspunkt())
+        assertEquals(22.januar.somPeriode(), inntektsmelding.periode())
+        assertEquals(3.januar, nyTidslinje.sisteSkjæringstidspunkt())
         assertEquals(Arbeidsgiverdag::class, nyTidslinje[3.januar]::class)
         assertEquals(Arbeidsgiverdag::class, nyTidslinje[18.januar]::class)
         assertEquals(UkjentDag::class, nyTidslinje[19.januar]::class)
         assertEquals(UkjentDag::class, nyTidslinje[20.januar]::class)
         assertEquals(UkjentDag::class, nyTidslinje[21.januar]::class)
-        assertEquals(Arbeidsgiverdag::class, nyTidslinje[22.januar]::class)
+        assertEquals(UkjentDag::class, nyTidslinje[22.januar]::class)
     }
 
     @Test
@@ -515,13 +521,14 @@ internal class InntektsmeldingTest {
         )
         val nyTidslinje = inntektsmelding.sykdomstidslinje()
 
-        assertEquals(23.januar, nyTidslinje.sisteSkjæringstidspunkt())
+        assertEquals(23.januar til 23.januar, inntektsmelding.periode())
+        assertEquals(4.januar, nyTidslinje.sisteSkjæringstidspunkt())
         assertEquals(Arbeidsgiverdag::class, nyTidslinje[4.januar]::class)
         assertEquals(Arbeidsgiverdag::class, nyTidslinje[19.januar]::class)
         assertEquals(UkjentDag::class, nyTidslinje[20.januar]::class)
         assertEquals(UkjentDag::class, nyTidslinje[21.januar]::class)
         assertEquals(UkjentDag::class, nyTidslinje[22.januar]::class)
-        assertEquals(Arbeidsgiverdag::class, nyTidslinje[23.januar]::class)
+        assertEquals(UkjentDag::class, nyTidslinje[23.januar]::class)
     }
 
     @Test

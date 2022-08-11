@@ -1034,15 +1034,12 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         // denne dagen blir en AvvistDag på utbetalingstidslinjen fordi egenmeldingsdager etter arbeidsgiverpereioden avvises. Dette medfører warning, som igjen medfører
         // at perioden går til godkjenning.
         håndterInntektsmelding(listOf(1.juni til 16.juni), førsteFraværsdag = 13.juli)
-        håndterYtelser(3.vedtaksperiode)
-        håndterVilkårsgrunnlag(3.vedtaksperiode)
-        håndterYtelser(3.vedtaksperiode)
 
         nullstillTilstandsendringer()
         håndterInntektsmelding(listOf(1.juni til 16.juni), førsteFraværsdag = 25.juli)
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(3.vedtaksperiode, AVVENTER_GODKJENNING)
+        assertTilstander(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
         assertTilstander(4.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE)
     }
 }

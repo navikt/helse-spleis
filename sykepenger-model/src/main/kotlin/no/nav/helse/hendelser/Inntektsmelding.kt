@@ -3,8 +3,12 @@ package no.nav.helse.hendelser
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon.Companion.cacheRefusjon
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon.Companion.endrerRefusjon
+import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
+import no.nav.helse.hendelser.Periode.Companion.periode
+import no.nav.helse.nesteDag
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.IAktivitetslogg
@@ -14,21 +18,15 @@ import no.nav.helse.person.Personopplysninger
 import no.nav.helse.person.Refusjonshistorikk
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.somFødselsnummer
-import no.nav.helse.sykdomstidslinje.Dag
-import no.nav.helse.sykdomstidslinje.Dag.Arbeidsdag
-import no.nav.helse.sykdomstidslinje.Dag.ArbeidsgiverHelgedag
-import no.nav.helse.sykdomstidslinje.Dag.Arbeidsgiverdag
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
-import no.nav.helse.sykdomstidslinje.Dag.Feriedag
-import no.nav.helse.sykdomstidslinje.Dag.FriskHelgedag
-import no.nav.helse.sykdomstidslinje.Dag.Sykedag
-import no.nav.helse.sykdomstidslinje.Dag.UkjentDag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykdomstidslinje.merge
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.contract
 
 class Inntektsmelding(
     meldingsreferanseId: UUID,
@@ -39,72 +37,44 @@ class Inntektsmelding(
     private val fødselsdato: LocalDate,
     private val førsteFraværsdag: LocalDate?,
     private val beregnetInntekt: Inntekt,
-    private val arbeidsgiverperioder: List<Periode>,
+    arbeidsgiverperioder: List<Periode>,
     private val arbeidsforholdId: String?,
     private val begrunnelseForReduksjonEllerIkkeUtbetalt: String?,
     private val harOpphørAvNaturalytelser: Boolean = false,
     mottatt: LocalDateTime
 ) : SykdomstidslinjeHendelse(meldingsreferanseId, fødselsnummer, aktørId, orgnummer, mottatt) {
-
     internal companion object {
         internal const val WARN_UENIGHET_ARBEIDSGIVERPERIODE = "Inntektsmeldingen og vedtaksløsningen er uenige om beregningen av arbeidsgiverperioden. Undersøk hva som er riktig arbeidsgiverperiode."
         internal const val WARN_ULIKHET_FØRSTE_FRAVÆRSDAG_OG_SKJÆRINGSTIDSPUNKT = "Første fraværsdag i inntektsmeldingen er ulik skjæringstidspunktet. Kontrollér at inntektsmeldingen er knyttet til riktig periode."
     }
 
-    private val beste = { venstre: Dag, høyre: Dag ->
-        when {
-            venstre::class == høyre::class -> venstre
-            venstre is UkjentDag -> høyre
-            høyre is UkjentDag -> venstre
-            venstre is Arbeidsgiverdag || venstre is ArbeidsgiverHelgedag -> venstre
-            høyre is Arbeidsgiverdag || høyre is ArbeidsgiverHelgedag -> høyre
-            venstre is Sykedag -> venstre
-            høyre is Sykedag -> høyre
-            venstre is Feriedag && høyre is Arbeidsdag -> venstre
-            høyre is Feriedag && venstre is Arbeidsdag -> høyre
-            venstre is Feriedag && høyre is FriskHelgedag -> venstre
-            høyre is Feriedag && venstre is FriskHelgedag -> høyre
-            else -> høyre.problem(venstre)
-        }
+    private val arbeidsgiverperioder = arbeidsgiverperioder.grupperSammenhengendePerioder()
+    private val arbeidsgiverperiode = this.arbeidsgiverperioder.periode()
+    private val overlappsperiode = when {
+        // første fraværsdag er oppgitt etter arbeidsgiverperioden
+        arbeidsgiverperiode == null || førsteFraværsdagErEtterArbeidsgiverperioden(førsteFraværsdag) -> førsteFraværsdag?.somPeriode()
+        // kant-i-kant
+        førsteFraværsdag?.forrigeDag == arbeidsgiverperiode.endInclusive -> arbeidsgiverperiode.oppdaterTom(arbeidsgiverperiode.endInclusive.nesteDag)
+        else -> arbeidsgiverperiode
     }
-
-    private val arbeidsgiverperiode: Periode?
     private var sykdomstidslinje: Sykdomstidslinje
 
     init {
         if (arbeidsgiverperioder.isEmpty() && førsteFraværsdag == null) severe("Arbeidsgiverperiode er tom og førsteFraværsdag er null")
-        val arbeidsgivertidslinje = arbeidsgivertidslinje()
-        arbeidsgiverperiode = arbeidsgivertidslinje.periode()
-        sykdomstidslinje = listOf(arbeidsgivertidslinje, førsteFraværsdagGaptidslinje(arbeidsgiverperiode)).merge(beste)
+        sykdomstidslinje = arbeidsgivertidslinje()
     }
 
     override fun personopplysninger() = Personopplysninger(fødselsnummer.somFødselsnummer(), aktørId, fødselsdato)
 
     private fun arbeidsgivertidslinje(): Sykdomstidslinje {
-        val tidslinje = arbeidsgiverperioder.map(::asArbeidsgivertidslinje).merge()
-        val periode = tidslinje.periode() ?: return tidslinje
-        val resultat = Sykdomstidslinje.arbeidsdager(periode, kilde).merge(tidslinje, replace)
-        if (!førsteFraværsdagKantIKant(periode)) return resultat
-        return resultat + førsteFraværsdagtidslinje()
-    }
-
-    private fun førsteFraværsdagKantIKant(periode: Periode?): Boolean {
-        if (periode == null) return false
-        return førsteFraværsdag == periode.endInclusive.plusDays(1)
-    }
-
-    private fun førsteFraværsdagGaptidslinje(arbeidsgiverperiode: Periode?): Sykdomstidslinje {
-        if (førsteFraværsdag == null || førsteFraværsdagKantIKant(arbeidsgiverperiode)) return Sykdomstidslinje()
-        val tidslinje = førsteFraværsdagtidslinje()
-        if (arbeidsgiverperiode == null) return tidslinje
-        if (!arbeidsgiverperiode.erRettFør(førsteFraværsdag)) return tidslinje
-        val gapdager = arbeidsgiverperiode.periodeMellom(førsteFraværsdag) ?: return tidslinje
-        return Sykdomstidslinje.arbeidsdager(gapdager, kilde) + tidslinje
-    }
-
-    private fun førsteFraværsdagtidslinje(): Sykdomstidslinje {
-        if (førsteFraværsdag == null) return Sykdomstidslinje()
-        return Sykdomstidslinje.arbeidsgiverdager(førsteFraværsdag, førsteFraværsdag, 100.prosent, kilde)
+        val arbeidsdager = arbeidsgiverperiode?.let { Sykdomstidslinje.arbeidsdager(arbeidsgiverperiode, kilde) } ?: return Sykdomstidslinje()
+        val friskHelg = førsteFraværsdag
+            ?.takeIf { arbeidsgiverperiode.erRettFør(førsteFraværsdag) }
+            ?.let { arbeidsgiverperiode.periodeMellom(førsteFraværsdag) }
+            ?.let { Sykdomstidslinje.arbeidsdager(it, kilde) }
+            ?: Sykdomstidslinje()
+        val arbeidsgiverdager = arbeidsgiverperioder.map(::asArbeidsgivertidslinje).merge()
+        return arbeidsdager.merge(arbeidsgiverdager, replace).merge(friskHelg)
     }
 
     private fun asArbeidsgivertidslinje(periode: Periode) = Sykdomstidslinje.arbeidsgiverdager(periode.start, periode.endInclusive, 100.prosent, kilde)
@@ -120,10 +90,7 @@ class Inntektsmelding(
         sykdomstidslinje += Sykdomstidslinje.arbeidsdager(dato, førsteDag.minusDays(1), this.kilde)
     }
 
-    override fun overlappsperiode(): Periode? {
-        if (førsteFraværsdagErEtterArbeidsgiverperioden()) return førsteFraværsdag?.somPeriode()
-        return arbeidsgiverperiode
-    }
+    override fun overlappsperiode() = overlappsperiode
 
     internal fun erRelevant(periode: Periode, perioder: List<Periode>): Boolean {
         val relevantePerioder = perioder.dropWhile { !erRelevant(it) }
@@ -135,14 +102,18 @@ class Inntektsmelding(
             return false
         }
 
-        if (førsteFraværsdagErEtterArbeidsgiverperioden() && perioder.size != relevantePerioder.size)
+        if (førsteFraværsdagErEtterArbeidsgiverperioden(førsteFraværsdag) && perioder.size != relevantePerioder.size)
             warn("Vi har mottatt en inntektsmelding i en løpende sykmeldingsperiode med oppgitt første/bestemmende fraværsdag som er ulik tidligere fastsatt skjæringstidspunkt.")
         return true
     }
 
-    private fun førsteFraværsdagErEtterArbeidsgiverperioden(): Boolean {
+    @OptIn(ExperimentalContracts::class)
+    private fun førsteFraværsdagErEtterArbeidsgiverperioden(førsteFraværsdag: LocalDate?): Boolean {
+        contract {
+            returns(true) implies (førsteFraværsdag != null)
+        }
         if (førsteFraværsdag == null) return false
-        return arbeidsgiverperiode?.slutterEtter(førsteFraværsdag) != true
+        return arbeidsgiverperiode == null || førsteFraværsdag > arbeidsgiverperiode.endInclusive.nesteDag
     }
 
     internal fun valider(periode: Periode, skjæringstidspunkt: LocalDate, arbeidsgiverperiode: Arbeidsgiverperiode?, subsumsjonObserver: SubsumsjonObserver): IAktivitetslogg {
@@ -170,21 +141,19 @@ class Inntektsmelding(
     }
 
     private fun validerArbeidsgiverperiode(arbeidsgiverperiode: Arbeidsgiverperiode) {
-        if (førsteFraværsdagErEtterArbeidsgiverperioden() || arbeidsgiverperiode.sammenlign(arbeidsgiverperioder)) return
+        if (førsteFraværsdagErEtterArbeidsgiverperioden(førsteFraværsdag) || arbeidsgiverperiode.sammenlign(arbeidsgiverperioder)) return
         warn(WARN_UENIGHET_ARBEIDSGIVERPERIODE)
     }
 
     override fun fortsettÅBehandle(arbeidsgiver: Arbeidsgiver) = arbeidsgiver.håndter(this)
 
     private var inntektLagret = false
-    internal fun addInntekt(inntektshistorikk: Inntektshistorikk, skjæringstidspunktVedtaksperiode: LocalDate, subsumsjonObserver: SubsumsjonObserver) {
+    internal fun addInntekt(inntektshistorikk: Inntektshistorikk, førsteFraværsdagFraSpleis: LocalDate, subsumsjonObserver: SubsumsjonObserver) {
         if (inntektLagret) return
         inntektLagret = true
-        val skjæringstidspunkt = (sykdomstidslinje.sisteSkjæringstidspunkt() ?: return).takeUnless {
-            førsteFraværsdagErEtterArbeidsgiverperioden() && it > skjæringstidspunktVedtaksperiode
-        } ?: skjæringstidspunktVedtaksperiode
 
-        if (skjæringstidspunkt != førsteFraværsdag) {
+        val inntektsdato = if (førsteFraværsdagErEtterArbeidsgiverperioden(førsteFraværsdag)) minOf(førsteFraværsdagFraSpleis, førsteFraværsdag) else arbeidsgiverperioder.maxOf { it.start }
+        if (inntektsdato != førsteFraværsdag) {
             warn(WARN_ULIKHET_FØRSTE_FRAVÆRSDAG_OG_SKJÆRINGSTIDSPUNKT)
         }
 
@@ -192,7 +161,7 @@ class Inntektsmelding(
         subsumsjonObserver.`§ 8-10 ledd 3`(årligInntekt, dagligInntekt)
         inntektshistorikk.append {
             addInntektsmelding(
-                skjæringstidspunkt,
+                inntektsdato,
                 meldingsreferanseId(),
                 beregnetInntekt
             )

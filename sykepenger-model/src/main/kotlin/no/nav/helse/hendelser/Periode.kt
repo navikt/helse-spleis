@@ -23,7 +23,8 @@ open class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Ite
 
         fun Iterable<LocalDate>.grupperSammenhengendePerioder() = this
             .grupperSammenhengendePerioder { periode, dato -> periode.endInclusive.plusDays(1) != dato }
-
+        internal fun Iterable<Iterable<LocalDate>>.grupperSammenhengendePerioder() = flatten().grupperSammenhengendePerioder()
+        internal fun Iterable<Periode>.periode() = if (!iterator().hasNext()) null else minOf { it.start } til maxOf { it.endInclusive }
         fun List<Periode>.grupperSammenhengendePerioderMedHensynTilHelg() = this
             .flatMap { periode -> periode.map { it } }
             .grupperSammenhengendePerioder { periode, dato -> !periode.endInclusive.erRettFør(dato) }
