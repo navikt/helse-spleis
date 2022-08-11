@@ -5,7 +5,9 @@ import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
 import no.nav.helse.desember
 import no.nav.helse.februar
+import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.Inntektsvurdering
+import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -36,6 +38,7 @@ import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -125,6 +128,39 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING, REVURDERING_FEILET)
+    }
+
+    @Test
+    fun `tildele utbetaling etter reberegning`() {
+        håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar, 100.prosent))
+        håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+
+        håndterSykmelding(Sykmeldingsperiode(21.januar, 27.januar, 100.prosent))
+        håndterSøknad(Sykdom(21.januar, 27.januar, 100.prosent))
+        håndterUtbetalingshistorikk(2.vedtaksperiode)
+
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
+        håndterYtelser(2.vedtaksperiode)
+        håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        nullstillTilstandsendringer()
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(27.januar, Dagtype.Feriedag)))
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt()
+
+        val vedtaksperiode1Utbetalinger = inspektør.utbetalinger(1.vedtaksperiode)
+        val vedtaksperiode2Utbetalinger = inspektør.utbetalinger(2.vedtaksperiode)
+        assertEquals(2, vedtaksperiode1Utbetalinger.size)
+        assertEquals(2, vedtaksperiode2Utbetalinger.size)
+        assertTrue(vedtaksperiode1Utbetalinger.first().hørerSammen(vedtaksperiode2Utbetalinger.first()))
+        assertTrue(vedtaksperiode1Utbetalinger.last().hørerSammen(vedtaksperiode2Utbetalinger.last()))
+
+        assertTilstander(1.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING, AVSLUTTET)
+        assertTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVSLUTTET,)
     }
 
     @Test
