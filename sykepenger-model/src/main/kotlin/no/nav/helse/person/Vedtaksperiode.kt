@@ -539,7 +539,6 @@ internal class Vedtaksperiode private constructor(
             egendefinertFeiltekst
                 ?: "Mottatt flere søknader for perioden - det støttes ikke før replay av hendelser er på plass"
         )
-        if (!tilstand.kanForkastes) return
         forkast(søknad)
     }
 
@@ -785,7 +784,6 @@ internal class Vedtaksperiode private constructor(
     internal sealed interface Vedtaksperiodetilstand : Aktivitetskontekst {
         val type: TilstandType
         val erFerdigBehandlet: Boolean get() = false
-        val kanForkastes: Boolean get() = true
 
         /**
          *  en periode som kan reberegnes er en periode hvor vi ikke har kommet med forslag til en utbetaling, dvs. alle tilstander før AvventerGodkjenning
@@ -1870,7 +1868,6 @@ internal class Vedtaksperiode private constructor(
 
     internal object TilUtbetaling : Vedtaksperiodetilstand {
         override val type = TIL_UTBETALING
-        override val kanForkastes = false
         override val kanReberegnes = false
 
 
@@ -1922,7 +1919,6 @@ internal class Vedtaksperiode private constructor(
 
     internal object UtbetalingFeilet : Vedtaksperiodetilstand {
         override val type = UTBETALING_FEILET
-        override val kanForkastes = false
         override val kanReberegnes = false
 
         override fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime): LocalDateTime =
@@ -1982,7 +1978,6 @@ internal class Vedtaksperiode private constructor(
         override val type = AVSLUTTET_UTEN_UTBETALING
 
         override val erFerdigBehandlet = true
-        override val kanForkastes = false
 
         override fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime): LocalDateTime =
             LocalDateTime.MAX
@@ -2055,7 +2050,6 @@ internal class Vedtaksperiode private constructor(
         override val type = AVSLUTTET
 
         override val erFerdigBehandlet = true
-        override val kanForkastes = false
         override val kanReberegnes = false
 
         override fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime): LocalDateTime =
