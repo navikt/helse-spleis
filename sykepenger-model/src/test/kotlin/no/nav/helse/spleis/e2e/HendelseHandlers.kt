@@ -420,6 +420,7 @@ internal fun AbstractEndToEndTest.håndterSøknad(
     orgnummer: String = AbstractPersonTest.ORGNUMMER,
     sykmeldingSkrevet: LocalDateTime? = null,
     fnr: Fødselsnummer = AbstractPersonTest.UNG_PERSON_FNR_2018,
+    korrigerer: UUID? = null
 ): UUID {
     søknad(
         id,
@@ -428,7 +429,8 @@ internal fun AbstractEndToEndTest.håndterSøknad(
         sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver,
         orgnummer = orgnummer,
         sykmeldingSkrevet = sykmeldingSkrevet,
-        fnr = fnr
+        fnr = fnr,
+        korrigerer = korrigerer
     ).håndter(Person::håndter)
     søknader[id] = Triple(sendtTilNAVEllerArbeidsgiver, andreInntektskilder, perioder)
     return id

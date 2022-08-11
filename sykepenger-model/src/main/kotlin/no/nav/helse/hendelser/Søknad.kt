@@ -31,7 +31,8 @@ class Søknad(
     private val sendtTilNAVEllerArbeidsgiver: LocalDateTime,
     private val permittert: Boolean,
     private val merknaderFraSykmelding: List<Merknad>,
-    sykmeldingSkrevet: LocalDateTime
+    sykmeldingSkrevet: LocalDateTime,
+    private val korrigerer: UUID?
 ) : SykdomstidslinjeHendelse(meldingsreferanseId, fnr, aktørId, orgnummer, sykmeldingSkrevet, Søknad::class) {
 
     private val sykdomsperiode: Periode
@@ -80,7 +81,10 @@ class Søknad(
     internal fun forUng(alder: Alder) = alder.forUngForÅSøke(sendtTilNAVEllerArbeidsgiver.toLocalDate()).also {
         if (it) error(ERRORTEKST_PERSON_UNDER_18_ÅR)
     }
-    private fun avskjæringsdato(): LocalDate = sendtTilNAVEllerArbeidsgiver.toLocalDate().minusMonths(3).withDayOfMonth(1)
+    private fun avskjæringsdato(): LocalDate = when (korrigerer) {
+        null -> sendtTilNAVEllerArbeidsgiver.toLocalDate().minusMonths(3).withDayOfMonth(1)
+        else -> LocalDate.MIN // det er tidspunktet den originale søknaden ble sendt inn som er bestemmende for foreldelse
+    }
 
     override fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) {
         hendelseIder.add(Dokumentsporing.søknad(meldingsreferanseId()))

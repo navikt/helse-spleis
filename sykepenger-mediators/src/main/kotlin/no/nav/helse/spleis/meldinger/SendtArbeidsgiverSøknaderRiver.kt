@@ -30,7 +30,7 @@ internal class SendtArbeidsgiverSøknaderRiver(
             require("fom", JsonNode::asLocalDate)
             interestedIn("tom") { it.asLocalDate() }
         }
-        message.interestedIn("arbeidGjenopptatt", "andreInntektskilder", "permitteringer", "merknaderFraSykmelding")
+        message.interestedIn("arbeidGjenopptatt", "andreInntektskilder", "permitteringer", "merknaderFraSykmelding", "korrigerer")
         message.requireValue("status", "SENDT")
         message.require("sendtArbeidsgiver", JsonNode::asLocalDateTime)
         message.forbid("sendtNav")

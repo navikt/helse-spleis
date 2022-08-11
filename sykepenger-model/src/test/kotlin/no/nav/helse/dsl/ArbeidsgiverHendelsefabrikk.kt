@@ -81,6 +81,7 @@ internal class ArbeidsgiverHendelsefabrikk(
         id: UUID = UUID.randomUUID(),
         merknaderFraSykmelding: List<Søknad.Merknad> = emptyList(),
         permittert: Boolean = false,
+        korrigerer: UUID? = null
     ): Søknad {
         val innsendt = sendtTilNAVEllerArbeidsgiver ?: Søknad.Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive
         return Søknad(
@@ -94,7 +95,8 @@ internal class ArbeidsgiverHendelsefabrikk(
             permittert = permittert,
             merknaderFraSykmelding = merknaderFraSykmelding,
             sykmeldingSkrevet = sykmeldingSkrevet ?: Søknad.Søknadsperiode.søknadsperiode(perioder.toList())!!.start.atStartOfDay(),
-            fødselsdato = fødselsdato
+            fødselsdato = fødselsdato,
+            korrigerer = korrigerer
         ).apply {
             søknader.add(this)
         }

@@ -5,11 +5,13 @@ import no.nav.helse.hendelser.Søknad.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.*
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import java.time.LocalDate
+import java.util.UUID
 
 internal class SendtSøknadBuilder : SøknadBuilder() {
     private val perioder = mutableListOf<Søknadsperiode>()
     private val merkander = mutableListOf<Merknad>()
     private val inntektskilder = mutableListOf<Inntektskilde>()
+    private var korrigerer: UUID? = null
 
     internal fun build() = Søknad(
         meldingsreferanseId = meldingsreferanseId,
@@ -22,7 +24,8 @@ internal class SendtSøknadBuilder : SøknadBuilder() {
         sendtTilNAVEllerArbeidsgiver = innsendt!!,
         permittert = permittert,
         merknaderFraSykmelding = merkander,
-        sykmeldingSkrevet = sykmeldingSkrevet
+        sykmeldingSkrevet = sykmeldingSkrevet,
+        korrigerer = korrigerer
     )
 
     override fun inntektskilde(sykmeldt: Boolean, type: String) = apply {
@@ -70,5 +73,9 @@ internal class SendtSøknadBuilder : SøknadBuilder() {
                 arbeidshelse = arbeidshelse?.prosent
             )
         )
+    }
+
+    fun korrigerer(korrigerer: UUID) {
+        this.korrigerer = korrigerer
     }
 }
