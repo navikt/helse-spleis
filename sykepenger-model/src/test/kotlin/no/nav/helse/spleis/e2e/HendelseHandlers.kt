@@ -99,7 +99,7 @@ internal fun AbstractEndToEndTest.håndterSykmelding(
 internal fun AbstractEndToEndTest.tilGodkjenning(fom: LocalDate, tom: LocalDate, vararg organisasjonsnummere: String, beregnetInntekt: Inntekt = 20000.månedlig, inntekterBlock: Inntektperioder.() -> Unit = {
     fom.minusYears(1) til fom.minusMonths(1) inntekter {
         organisasjonsnummere.forEach {
-            it inntekt 20000.månedlig
+            it inntekt beregnetInntekt
         }
     }
 }) {
@@ -141,7 +141,7 @@ internal fun AbstractEndToEndTest.nyeVedtak(
     }
 ) {
     require(organisasjonsnummere.isNotEmpty()) { "Må inneholde minst ett organisasjonsnummer" }
-    tilGodkjenning(fom, tom, *organisasjonsnummere, inntekterBlock = inntekterBlock)
+    tilGodkjenning(fom, tom, *organisasjonsnummere, inntekterBlock = inntekterBlock, beregnetInntekt = inntekt)
     val (første, resten) = organisasjonsnummere.first() to organisasjonsnummere.drop(1)
 
     første.let { organisasjonsnummer ->

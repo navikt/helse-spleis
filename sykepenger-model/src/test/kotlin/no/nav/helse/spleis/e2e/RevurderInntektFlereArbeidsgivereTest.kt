@@ -17,7 +17,6 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.Kilde.SAKSBEHANDLER
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
-import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
@@ -26,10 +25,10 @@ import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -37,11 +36,12 @@ import org.junit.jupiter.api.Test
 internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
 
     @Test
-    fun `happy case -- revurder inntekt når a1 og a2 er i Avsluttet`() {
+    fun `over 6G -- revurder inntekt ned på a1 når begge er i Avsluttet`() {
         (a1 og a2).nyeVedtak(1.januar til 31.januar, inntekt = 32000.månedlig)
         nullstillTilstandsendringer()
         a1 { assertDag(17.januar, 1081.0.daglig, aktuellDagsinntekt = 32000.månedlig) }
         a2 { assertDag(17.januar, 1080.0.daglig, aktuellDagsinntekt = 32000.månedlig) }
+
         a1 {
             håndterOverstyrInntekt(1.januar, 31000.månedlig)
             håndterYtelser(1.vedtaksperiode)
@@ -79,6 +79,89 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
             assertDag(17.januar, 1098.0.daglig, aktuellDagsinntekt = 32000.månedlig)
         }
 
+    }
+    @Test
+    fun `over 6G -- revurder inntekt opp på a1 påvirker ikke utbetaling når refusjon er uendret`() {
+        (a1 og a2).nyeVedtak(1.januar til 31.januar, inntekt = 32000.månedlig)
+        a1 { assertDag(17.januar, 1081.0.daglig, aktuellDagsinntekt = 32000.månedlig, personbeløp = INGEN) }
+        a2 { assertDag(17.januar, 1080.0.daglig, aktuellDagsinntekt = 32000.månedlig, personbeløp = INGEN) }
+
+        a1 {
+            håndterOverstyrInntekt(1.januar, 33000.månedlig)
+            håndterYtelser(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            assertDag(17.januar, 1081.0.daglig, aktuellDagsinntekt = 33000.månedlig, personbeløp = INGEN)
+        }
+        a2 {
+            håndterYtelser(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            assertDag(17.januar, 1080.0.daglig, aktuellDagsinntekt = 32000.månedlig, personbeløp = INGEN)
+        }
+    }
+    @Test
+    fun `over 6G -- revurder inntekt opp på a1 påvirker utbetaling når refusjon er endret`() {
+        (a1 og a2).nyeVedtak(1.januar til 31.januar, inntekt = 32000.månedlig)
+        a1 { assertDag(17.januar, 1081.0.daglig, aktuellDagsinntekt = 32000.månedlig, personbeløp = INGEN) }
+        a2 { assertDag(17.januar, 1080.0.daglig, aktuellDagsinntekt = 32000.månedlig, personbeløp = INGEN) }
+
+        a1 {
+            håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 33000.månedlig)
+            håndterOverstyrInntekt(1.januar, 33000.månedlig)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+            assertDag(17.januar, 1097.0.daglig, aktuellDagsinntekt = 33000.månedlig, personbeløp = INGEN)
+        }
+        a2 {
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+            // TODO: 🤔 Her er det ikke juridisk avklart om vi får lov til å trekke tilbake penger fra ag2 💸
+            assertDag(17.januar, 1064.0.daglig, aktuellDagsinntekt = 32000.månedlig, personbeløp = INGEN)
+        }
+    }
+    @Test
+    fun `under 6G -- revurder inntekt opp på a1 gir brukerutbetaling når refusjon er uendret`() {
+        (a1 og a2).nyeVedtak(1.januar til 31.januar, inntekt = 15000.månedlig)
+        a1 { assertDag(17.januar, 692.0.daglig, aktuellDagsinntekt = 15000.månedlig, personbeløp = INGEN) }
+        a2 { assertDag(17.januar, 692.0.daglig, aktuellDagsinntekt = 15000.månedlig, personbeløp = INGEN) }
+
+        a1 {
+            håndterOverstyrInntekt(1.januar, 16500.månedlig)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+            assertDag(17.januar, 692.0.daglig, aktuellDagsinntekt = 16500.månedlig, personbeløp = 70.daglig)
+        }
+        a2 {
+            håndterYtelser(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            assertDag(17.januar, 692.0.daglig, aktuellDagsinntekt = 15000.månedlig, personbeløp = INGEN)
+        }
+    }
+    @Test
+    fun `under 6G -- revurder inntekt opp på a1 gir økt arbeidsgiverutbetaling når refusjon er endret`() {
+        (a1 og a2).nyeVedtak(1.januar til 31.januar, inntekt = 15000.månedlig)
+        a1 { assertDag(17.januar, 692.0.daglig, aktuellDagsinntekt = 15000.månedlig, personbeløp = INGEN) }
+        a2 { assertDag(17.januar, 692.0.daglig, aktuellDagsinntekt = 15000.månedlig, personbeløp = INGEN) }
+
+        a1 {
+            håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 16500.månedlig)
+            håndterOverstyrInntekt(1.januar, 16500.månedlig)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+            assertDag(17.januar, 762.0.daglig, aktuellDagsinntekt = 16500.månedlig, personbeløp = INGEN)
+        }
+        a2 {
+            håndterYtelser(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            assertDag(17.januar, 692.0.daglig, aktuellDagsinntekt = 15000.månedlig, personbeløp = INGEN)
+        }
     }
 
     @Test
