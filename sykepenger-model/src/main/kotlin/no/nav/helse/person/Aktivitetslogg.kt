@@ -31,7 +31,7 @@ class Aktivitetslogg(
         visitor.postVisitAktivitetslogg(this)
     }
 
-    internal fun register(observer: AktivitetsloggObserver) {
+    override fun register(observer: AktivitetsloggObserver) {
         observers.add(observer)
     }
 
@@ -477,6 +477,8 @@ interface IAktivitetslogg {
     fun hendelseskontekster(): Map<String, String>
     fun hendelseskontekst(): Hendelseskontekst
     fun toMap(): Map<String, List<Map<String, Any>>>
+
+    fun register(observer: AktivitetsloggObserver) {}
 }
 
 internal interface AktivitetsloggVisitor {
