@@ -171,6 +171,7 @@ internal class Tidslinjeperioder(
                     beregnetPeriode(
                         periode = periode,
                         utbetaling = utbetaling,
+                        utbetalinger = periode.utbetalinger,
                         tidslinjeberegning = tidslinjeberegning,
                         erForkastet = erForkastet(periode.vedtaksperiodeId),
                         refusjon = refusjon
@@ -211,6 +212,7 @@ internal class Tidslinjeperioder(
     private fun beregnetPeriode(
         periode: IVedtaksperiode,
         utbetaling: IUtbetaling,
+        utbetalinger: List<IUtbetaling>,
         tidslinjeberegning: ITidslinjeberegning,
         erForkastet: Boolean,
         refusjon: Refusjon?
@@ -243,7 +245,10 @@ internal class Tidslinjeperioder(
             refusjon = refusjon,
             periodetilstand = when {
                 utbetalingDTO.erAnnullering() -> if (utbetalingDTO.status != Utbetalingstatus.Annullert) TilAnnullering else Annullert
-                utbetalingDTO.revurderingFeilet(periode.tilstand) -> Periodetilstand.RevurderingFeilet
+                utbetalingDTO.revurderingFeilet(periode.tilstand) -> when {
+                    utbetalinger.all { it.toDTO().revurderingFeilet(periode.tilstand) } && erForkastet -> Annullert
+                    else -> Periodetilstand.RevurderingFeilet
+                }
                 utbetalingDTO.utbetalingFeilet(periode.tilstand) -> Periodetilstand.UtbetalingFeilet
                 utbetalingDTO.kanUtbetales() -> when {
                     utbetalingDTO.utbetalt() -> if (sammenslåttTidslinje.inneholderSykepengedager()) Utbetalt else IngenUtbetaling
