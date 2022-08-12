@@ -881,7 +881,7 @@ class Person private constructor(
         vilkårsgrunnlagFor(skjæringstidspunkt)!!.also { vilkårsgrunnlagElement ->
             arbeidsgivere
                 .filter { vilkårsgrunnlagElement.erRelevant(it.organisasjonsnummer()) }
-                .forEach { it.fyllUtPeriodeMedForventedeDager(hendelse, periode) }
+                .forEach { it.fyllUtPeriodeMedForventedeDager(hendelse, skjæringstidspunkt, periode) }
         }
     }
 

@@ -1155,6 +1155,7 @@ internal class Vedtaksperiode private constructor(
             ErrorsTilWarnings.wrap(ytelser) {
                 vedtaksperiode.validerYtelserForSkjæringstidspunkt(ytelser)
                 person.valider(ytelser, vilkårsgrunnlag, vedtaksperiode.skjæringstidspunkt, true)
+                person.fyllUtPeriodeMedForventedeDager(ytelser, vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt)
                 val arbeidsgiverUtbetalinger = arbeidsgiverUtbetalingerFun(vedtaksperiode.jurist())
                 vedtaksperiode.forsøkRevurdering(arbeidsgiverUtbetalinger, ytelser)
             }

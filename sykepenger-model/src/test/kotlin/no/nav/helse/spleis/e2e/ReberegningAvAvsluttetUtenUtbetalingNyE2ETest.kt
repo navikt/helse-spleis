@@ -1099,19 +1099,9 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
 
         inspektør(a1).sisteUtbetalingUtbetalingstidslinje()[17.januar].let {
-            assertForventetFeil(
-                forklaring = "ghost-arbeidsgiveren hensyntas ikke ved beregning av utbetaling",
-                nå = {
-                    assertEquals(1431.daglig, it.økonomi.inspektør.arbeidsgiverbeløp)
-                    assertEquals(0.daglig, it.økonomi.inspektør.personbeløp)
-                    assertEquals(beregnetInntektA1, it.økonomi.inspektør.aktuellDagsinntekt)
-                },
-                ønsket = {
-                    assertEquals(1063.daglig, it.økonomi.inspektør.arbeidsgiverbeløp)
-                    assertEquals(0.daglig, it.økonomi.inspektør.personbeløp)
-                    assertEquals(beregnetInntektA1, it.økonomi.inspektør.aktuellDagsinntekt)
-                }
-            )
+            assertEquals(1063.daglig, it.økonomi.inspektør.arbeidsgiverbeløp)
+            assertEquals(0.daglig, it.økonomi.inspektør.personbeløp)
+            assertEquals(beregnetInntektA1, it.økonomi.inspektør.aktuellDagsinntekt)
         }
 
         assertTilstander(

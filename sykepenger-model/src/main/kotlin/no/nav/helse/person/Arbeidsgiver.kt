@@ -1132,8 +1132,12 @@ internal class Arbeidsgiver private constructor(
         }
     }
 
-    internal fun fyllUtPeriodeMedForventedeDager(hendelse: PersonHendelse, periode: Periode) {
-        sykdomshistorikk.fyllUtPeriodeMedForventedeDager(hendelse, periode)
+    internal fun fyllUtPeriodeMedForventedeDager(
+        hendelse: PersonHendelse,
+        skjæringstidspunkt: LocalDate,
+        periode: Periode
+    ) {
+        sykdomshistorikk.fyllUtPeriodeMedForventedeDager(hendelse, periode.oppdaterFom(skjæringstidspunkt))
     }
 
     internal fun harRelevantArbeidsforhold(skjæringstidspunkt: LocalDate) = arbeidsforholdhistorikk.harRelevantArbeidsforhold(skjæringstidspunkt)
