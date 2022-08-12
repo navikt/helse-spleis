@@ -22,7 +22,6 @@ import no.nav.helse.person.ForkastetVedtaksperiode
 import no.nav.helse.person.ForkastetÅrsak
 import no.nav.helse.person.ForlengelseFraInfotrygd
 import no.nav.helse.person.Inntektshistorikk
-import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.InntektsmeldingInfo
 import no.nav.helse.person.InntektsmeldingInfoHistorikk
 import no.nav.helse.person.Opptjening
@@ -881,7 +880,6 @@ internal data class PersonData(
             private val utbetalinger: List<UUID>,
             private val utbetalingstidslinje: UtbetalingstidslinjeData,
             private val forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
-            private val inntektskilde: Inntektskilde,
             private val opprettet: LocalDateTime,
             private val oppdatert: LocalDateTime
         ) {
@@ -921,7 +919,6 @@ internal data class PersonData(
                         this.utbetalinger.map { utbetalinger.getValue(it) }),
                     utbetalingstidslinje = this.utbetalingstidslinje.konverterTilUtbetalingstidslinje(),
                     forlengelseFraInfotrygd = forlengelseFraInfotrygd,
-                    inntektskilde = inntektskilde,
                     opprettet = opprettet,
                     oppdatert = oppdatert,
                     medVedtaksperiode = jurist

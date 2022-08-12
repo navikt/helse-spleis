@@ -105,7 +105,6 @@ internal class Vedtaksperiode private constructor(
     private val utbetalinger: VedtaksperiodeUtbetalinger,
     private var utbetalingstidslinje: Utbetalingstidslinje = Utbetalingstidslinje(),
     private var forlengelseFraInfotrygd: ForlengelseFraInfotrygd = IKKE_ETTERSPURT,
-    private var inntektskilde: Inntektskilde,
     private val opprettet: LocalDateTime,
     private var oppdatert: LocalDateTime = opprettet,
     jurist: MaskinellJurist
@@ -114,6 +113,7 @@ internal class Vedtaksperiode private constructor(
     private val jurist = jurist.medVedtaksperiode(id, hendelseIder, sykmeldingsperiode)
     private val skjæringstidspunkt get() = skjæringstidspunktFraInfotrygd ?: person.skjæringstidspunkt(periode)
     private val periodetype get() = arbeidsgiver.periodetype(periode)
+    private val inntektskilde get() = person.vilkårsgrunnlagFor(skjæringstidspunkt)?.inntektskilde() ?: Inntektskilde.EN_ARBEIDSGIVER
 
     internal constructor(
         søknad: Søknad,
@@ -142,7 +142,6 @@ internal class Vedtaksperiode private constructor(
         sykmeldingsperiode = periode,
         utbetalinger = VedtaksperiodeUtbetalinger(arbeidsgiver),
         utbetalingstidslinje = Utbetalingstidslinje(),
-        inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
         opprettet = LocalDateTime.now(),
         jurist = jurist
     ) {
@@ -1474,7 +1473,6 @@ internal class Vedtaksperiode private constructor(
                     person.valider(this, vilkårsgrunnlag, vedtaksperiode.skjæringstidspunkt, arbeidsgiver.finnVedtaksperiodeRettFør(vedtaksperiode) != null)
                 }
                 onSuccess {
-                    vedtaksperiode.inntektskilde = vilkårsgrunnlag.inntektskilde()
                     if (vedtaksperiode.inntektsmeldingInfo == null) {
                         arbeidsgiver.finnTidligereInntektsmeldinginfo(vedtaksperiode.skjæringstidspunkt)?.also { vedtaksperiode.kopierManglende(it) }
                     }
@@ -1723,7 +1721,7 @@ internal class Vedtaksperiode private constructor(
             skjæringstidspunkt = skjæringstidspunkt,
             periodetype = periodetype,
             førstegangsbehandling = periodetype == FØRSTEGANGSBEHANDLING,
-            inntektskilde = inntektskilde,
+            inntektskilde = requireNotNull(person.vilkårsgrunnlagFor(skjæringstidspunkt)?.inntektskilde()),
             arbeidsforholdId = inntektsmeldingInfo?.arbeidsforholdId,
             orgnummereMedRelevanteArbeidsforhold = person.relevanteArbeidsgivere(skjæringstidspunkt),
             aktivitetslogg = person.aktivitetslogg.logg(this)
@@ -2461,7 +2459,6 @@ internal class Vedtaksperiode private constructor(
             utbetalinger: VedtaksperiodeUtbetalinger,
             utbetalingstidslinje: Utbetalingstidslinje,
             forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
-            inntektskilde: Inntektskilde,
             opprettet: LocalDateTime,
             oppdatert: LocalDateTime,
             medVedtaksperiode: MaskinellJurist
@@ -2482,7 +2479,6 @@ internal class Vedtaksperiode private constructor(
             utbetalinger = utbetalinger,
             utbetalingstidslinje = utbetalingstidslinje,
             forlengelseFraInfotrygd = forlengelseFraInfotrygd,
-            inntektskilde = inntektskilde,
             opprettet = opprettet,
             oppdatert = oppdatert,
             jurist = medVedtaksperiode
