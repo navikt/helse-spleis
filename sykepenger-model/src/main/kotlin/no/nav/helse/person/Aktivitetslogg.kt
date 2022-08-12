@@ -10,14 +10,14 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov
 import no.nav.helse.serde.reflection.AktivitetsloggMap
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
 
-// Understands issues that arose when analyzing a JSON message
-// Implements Collecting Parameter in Refactoring by Martin Fowler
-// Implements Visitor pattern to traverse the messages
 
 interface AktivitetsloggObserver {
     fun aktivitet(label: Char, melding: String, kontekster: List<SpesifikkKontekst>, tidsstempel: String)
 }
 
+// Understands issues that arose when analyzing a JSON message
+// Implements Collecting Parameter in Refactoring by Martin Fowler
+// Implements Visitor pattern to traverse the messages
 class Aktivitetslogg(
     private var forelder: Aktivitetslogg? = null
 ) : IAktivitetslogg {
@@ -404,6 +404,9 @@ class Aktivitetslogg(
                 Omsorgspenger,
                 Opplæringspenger,
                 Institusjonsopphold,
+
+                @Deprecated("Behovet er ikke i bruk, men beholdes for derserialisering av aktivitetsloggen")
+                EgenAnsatt,
                 Godkjenning,
                 Simulering,
                 Utbetaling,
