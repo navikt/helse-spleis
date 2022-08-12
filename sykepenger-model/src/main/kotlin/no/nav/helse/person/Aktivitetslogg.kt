@@ -13,16 +13,26 @@ import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
 // Understands issues that arose when analyzing a JSON message
 // Implements Collecting Parameter in Refactoring by Martin Fowler
 // Implements Visitor pattern to traverse the messages
+
+interface AktivitetsloggObserver {
+    fun aktivitet(label: Char, melding: String, kontekster: List<SpesifikkKontekst>, tidsstempel: String)
+}
+
 class Aktivitetslogg(
     private var forelder: Aktivitetslogg? = null
 ) : IAktivitetslogg {
     internal val aktiviteter = mutableListOf<Aktivitet>()
     private val kontekster = mutableListOf<Aktivitetskontekst>()  // Doesn't need serialization
+    private val observers = mutableListOf<AktivitetsloggObserver>()
 
     internal fun accept(visitor: AktivitetsloggVisitor) {
         visitor.preVisitAktivitetslogg(this)
         aktiviteter.forEach { it.accept(visitor) }
         visitor.postVisitAktivitetslogg(this)
+    }
+
+    internal fun register(observer: AktivitetsloggObserver) {
+        observers.add(observer)
     }
 
     override fun info(melding: String, vararg params: Any?) {
@@ -48,6 +58,7 @@ class Aktivitetslogg(
     }
 
     private fun add(aktivitet: Aktivitet) {
+        observers.forEach { aktivitet.notify(it) }
         this.aktiviteter.add(aktivitet)
         forelder?.add(aktivitet)
     }
@@ -166,6 +177,10 @@ class Aktivitetslogg(
 
         internal abstract fun accept(visitor: AktivitetsloggVisitor)
 
+        internal open fun notify(observer: AktivitetsloggObserver) {
+            observer.aktivitet(label, melding, kontekster, tidsstempel)
+        }
+
         operator fun contains(kontekst: Aktivitetskontekst) = kontekst.toSpesifikkKontekst() in kontekster
         internal class Info(
             kontekster: List<SpesifikkKontekst>,
@@ -182,7 +197,6 @@ class Aktivitetslogg(
             override fun accept(visitor: AktivitetsloggVisitor) {
                 visitor.visitInfo(kontekster, this, melding, tidsstempel)
             }
-
         }
 
         internal class Warn(
@@ -200,7 +214,6 @@ class Aktivitetslogg(
             override fun accept(visitor: AktivitetsloggVisitor) {
                 visitor.visitWarn(kontekster, this, melding, tidsstempel)
             }
-
         }
 
         class Behov(
@@ -381,6 +394,8 @@ class Aktivitetslogg(
                 visitor.visitBehov(kontekster, this, type, melding, detaljer, tidsstempel)
             }
 
+            override fun notify(observer: AktivitetsloggObserver) {}
+
             enum class Behovtype {
                 Sykepengehistorikk,
                 SykepengehistorikkForFeriepenger,
@@ -389,7 +404,6 @@ class Aktivitetslogg(
                 Omsorgspenger,
                 Opplæringspenger,
                 Institusjonsopphold,
-                EgenAnsatt,
                 Godkjenning,
                 Simulering,
                 Utbetaling,
