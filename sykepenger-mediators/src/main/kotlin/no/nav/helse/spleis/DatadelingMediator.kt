@@ -1,4 +1,4 @@
-package no.nav.helse
+package no.nav.helse.spleis
 
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.person.AktivitetsloggObserver

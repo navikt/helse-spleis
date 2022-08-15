@@ -1,6 +1,5 @@
 package no.nav.helse.spleis
 
-import no.nav.helse.DatadelingMediator
 import no.nav.helse.hendelser.Avstemming
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingReplay

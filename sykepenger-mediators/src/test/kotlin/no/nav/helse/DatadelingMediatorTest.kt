@@ -5,6 +5,7 @@ import no.nav.helse.person.Aktivitetskontekst
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.PersonHendelse
 import no.nav.helse.person.SpesifikkKontekst
+import no.nav.helse.spleis.DatadelingMediator
 import no.nav.helse.spleis.meldinger.TestRapid
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
