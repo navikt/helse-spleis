@@ -4,7 +4,6 @@ import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
@@ -546,30 +545,6 @@ internal class NyTilstandsflytEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK)
-    }
-
-    @Test
-    fun `søknad som slutter med noe annet enn sykdom rydder ikke tilstrekkelig opp i sykmeldingsperioder`() {
-        val periode = 1.januar til 21.januar
-        val arbeidsgiverperiode = 1.januar til 16.januar
-        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
-        håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
-        håndterSøknad(Sykdom(arbeidsgiverperiode.start, arbeidsgiverperiode.endInclusive, 100.prosent), Ferie(17.januar, 21.januar), orgnummer = a2)
-
-        håndterInntektsmelding(listOf(arbeidsgiverperiode), orgnummer = a1)
-        håndterInntektsmelding(listOf(arbeidsgiverperiode), orgnummer = a2)
-
-        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a2)
-
-        assertForventetFeil(
-            forklaring = """
-                Ferien for a2 henger igjen i sykmeldingsperioder og blokkerer a1 for å gå videre. 
-                Slettes basert på søknad.periode().endInclusive som sjekker mot sykdomstidslinjen som slutter 16.januar, ikke 21.januar
-            """,
-            nå = { assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1) },
-            ønsket = { assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1) }
-        )
     }
 
     private fun utbetalPeriodeEtterVilkårsprøving(vedtaksperiode: IdInnhenter) {
