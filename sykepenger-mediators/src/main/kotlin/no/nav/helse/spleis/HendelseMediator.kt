@@ -1,5 +1,6 @@
 package no.nav.helse.spleis
 
+import no.nav.helse.DatadelingMediator
 import no.nav.helse.hendelser.Avstemming
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingReplay
@@ -253,10 +254,11 @@ internal class HendelseMediator(
         val jurist = MaskinellJurist()
         val person = person(hendelse, jurist)
         val personMediator = PersonMediator(person, message, hendelse, hendelseRepository)
+        val datadelingMediator = DatadelingMediator(hendelse)
         val subsumsjonMediator = SubsumsjonMediator(jurist, hendelse.fødselsnummer(), message, versjonAvKode)
         person.addObserver(VedtaksperiodeProbe)
         handler(person)
-        finalize(context, personMediator, subsumsjonMediator, hendelse)
+        finalize(context, personMediator, subsumsjonMediator, datadelingMediator, hendelse)
     }
 
     private fun person(hendelse: PersonHendelse, jurist: MaskinellJurist): Person {
@@ -271,10 +273,12 @@ internal class HendelseMediator(
         context: MessageContext,
         personMediator: PersonMediator,
         subsumsjonMediator: SubsumsjonMediator,
+        datadelingMediator: DatadelingMediator,
         hendelse: PersonHendelse
     ) {
         personMediator.finalize(rapidsConnection, context, lagrePersonDao)
         subsumsjonMediator.finalize(context)
+        datadelingMediator.finalize(context)
         if (!hendelse.hasActivities()) return
         if (hendelse.hasErrorsOrWorse()) sikkerLogg.info("aktivitetslogg inneholder errors:\n${hendelse.toLogString()}")
         else sikkerLogg.info("aktivitetslogg inneholder meldinger:\n${hendelse.toLogString()}")

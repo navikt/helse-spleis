@@ -54,7 +54,7 @@ abstract class PersonHendelse protected constructor(
 
     fun person(jurist: MaskinellJurist) = personopplysninger().nyPerson(jurist)
 
-    internal fun meldingsreferanseId() = meldingsreferanseId
+    fun meldingsreferanseId() = meldingsreferanseId
 
     final override fun toSpesifikkKontekst() = this.javaClass.canonicalName.split('.').last().let {
         SpesifikkKontekst(it, mapOf(
@@ -86,4 +86,8 @@ abstract class PersonHendelse protected constructor(
     override fun hendelseskontekster() = aktivitetslogg.hendelseskontekster()
     override fun hendelseskontekst() = aktivitetslogg.hendelseskontekst()
     override fun toMap() = aktivitetslogg.toMap()
+
+    override fun register(observer: AktivitetsloggObserver) {
+        aktivitetslogg.register(observer)
+    }
 }
