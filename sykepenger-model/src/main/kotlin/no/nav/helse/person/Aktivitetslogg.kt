@@ -478,7 +478,7 @@ interface IAktivitetslogg {
     fun hendelseskontekst(): Hendelseskontekst
     fun toMap(): Map<String, List<Map<String, Any>>>
 
-    fun register(observer: AktivitetsloggObserver) {}
+    fun register(observer: AktivitetsloggObserver)
 }
 
 internal interface AktivitetsloggVisitor {
@@ -537,6 +537,13 @@ class SpesifikkKontekst(internal val kontekstType: String, internal val kontekst
         kontekstType + kontekstMap.entries.joinToString(separator = "") { " ${it.key}: ${it.value}" }
 
     internal fun sammeType(other: Aktivitetskontekst) = this.kontekstType == other.toSpesifikkKontekst().kontekstType
+
+    fun toMap(): Map<String, Any> {
+        return mapOf(
+            "konteksttype" to kontekstType,
+            "kontekstmap" to kontekstMap
+        )
+    }
 
     override fun equals(other: Any?) =
         this === other ||
