@@ -41,6 +41,7 @@ import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
+import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.sisteBehov
 import no.nav.helse.sykdomstidslinje.Dag
@@ -963,6 +964,72 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = a2)
         assertForkastetPeriodeTilstander(3.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = a1)
         assertForkastetPeriodeTilstander(4.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = a1)
+    }
+
+    @Test
+    fun `infotrygd har plutselig utbetalt`() {
+        håndterSykmelding(Sykmeldingsperiode(10.januar, 20.januar, 100.prosent))
+        håndterSøknad(Sykdom(10.januar, 20.januar, 100.prosent))
+        håndterUtbetalingshistorikk(1.vedtaksperiode, besvart = LocalDateTime.now().minusHours(24))
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterYtelser(1.vedtaksperiode, besvart = LocalDateTime.now().minusHours(24))
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode, besvart = LocalDateTime.now().minusHours(24))
+        håndterSimulering(1.vedtaksperiode)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
+
+        nullstillTilstandsendringer()
+        håndterPåminnelse(1.vedtaksperiode, påminnetTilstand = AVVENTER_GODKJENNING_REVURDERING)
+        val utbetalinger = listOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 20.januar, 100.prosent, INNTEKT))
+        val inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true))
+        håndterUtbetalingshistorikk(1.vedtaksperiode, *utbetalinger.toTypedArray(), inntektshistorikk = inntektshistorikk)
+        håndterYtelser(1.vedtaksperiode)
+
+        assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
+        assertWarning("Utbetaling i Infotrygd overlapper med vedtaksperioden", 1.vedtaksperiode.filter())
+        assertForventetFeil(
+            forklaring = "Periode sin implementasjon av slutter etter mener at en 1-1 overlapp er etter, vi er ikke overbeviste",
+            nå = {
+                assertWarning("Det er utbetalt en periode i Infotrygd etter perioden du skal behandle nå. Undersøk at antall forbrukte dager og grunnlag i Infotrygd er riktig", 1.vedtaksperiode.filter())
+            },
+            ønsket = {
+                assertNoWarning("Det er utbetalt en periode i Infotrygd etter perioden du skal behandle nå. Undersøk at antall forbrukte dager og grunnlag i Infotrygd er riktig", 1.vedtaksperiode.filter())
+            }
+        )
+    }
+
+    @Test
+    fun `infotrygd har plutselig utbetalt, flere arbeidsgivere`() {
+        håndterSykmelding(Sykmeldingsperiode(10.januar, 20.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(10.januar, 20.januar, 100.prosent), orgnummer = a1)
+        håndterUtbetalingshistorikk(1.vedtaksperiode, besvart = LocalDateTime.now().minusHours(24), orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a1)
+
+        håndterSykmelding(Sykmeldingsperiode(10.januar, 20.januar, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(10.januar, 20.januar, 100.prosent), orgnummer = a2)
+        håndterUtbetalingshistorikk(1.vedtaksperiode, besvart = LocalDateTime.now().minusHours(24), orgnummer = a2)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a2)
+
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, besvart = LocalDateTime.now().minusHours(24), orgnummer = a1)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, besvart = LocalDateTime.now().minusHours(24), orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = a2)
+
+        nullstillTilstandsendringer()
+        håndterPåminnelse(1.vedtaksperiode, påminnetTilstand = AVVENTER_GODKJENNING_REVURDERING)
+        val utbetalinger = listOf(ArbeidsgiverUtbetalingsperiode(a1, 17.januar, 20.januar, 100.prosent, INNTEKT))
+        val inntektshistorikk = listOf(Inntektsopplysning(a1, 1.januar, INNTEKT, true))
+        håndterUtbetalingshistorikk(1.vedtaksperiode, *utbetalinger.toTypedArray(), inntektshistorikk = inntektshistorikk)
+        håndterYtelser(1.vedtaksperiode)
+
+        assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
+        assertWarning("Utbetaling i Infotrygd overlapper med vedtaksperioden", 1.vedtaksperiode.filter())
     }
 
     @Test
