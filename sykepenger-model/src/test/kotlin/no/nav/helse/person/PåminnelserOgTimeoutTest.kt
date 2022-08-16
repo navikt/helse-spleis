@@ -227,7 +227,7 @@ internal class PåminnelserOgTimeoutTest : AbstractPersonTest() {
             meldingsreferanseId = UUID.randomUUID(),
             vedtaksperiodeId = "${1.vedtaksperiode.id(ORGNUMMER)}",
             aktørId = "aktørId",
-            fødselsnummer = UNG_PERSON_FNR_2018,
+            personidentifikator = UNG_PERSON_FNR_2018,
             orgnummer = ORGNUMMER,
             inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
                 1.januar(2017) til 1.desember(2017) inntekter {

@@ -14,7 +14,7 @@ import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
-import no.nav.helse.somFødselsnummer
+import no.nav.helse.somPersonidentifikator
 import no.nav.helse.sykdomstidslinje.Dag.Arbeidsdag
 import no.nav.helse.sykdomstidslinje.Dag.ArbeidsgiverHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.Arbeidsgiverdag
@@ -36,7 +36,7 @@ internal class InntektsmeldingTest {
 
     private val hendelsefabrikk = ArbeidsgiverHendelsefabrikk(
         organisasjonsnummer = "88888888",
-        fødselsnummer = "12029240045".somFødselsnummer(),
+        personidentifikator = "12029240045".somPersonidentifikator(),
         aktørId = "100010101010",
         fødselsdato = 12.februar(1992)
     )

@@ -67,7 +67,7 @@ import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.person.infotrygdhistorikk.UgyldigPeriode
 import no.nav.helse.sisteBehov
-import no.nav.helse.somFødselsnummer
+import no.nav.helse.somPersonidentifikator
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
@@ -86,11 +86,11 @@ import org.junit.jupiter.api.Test
 class JsonBuilderTest {
     companion object {
         private const val aktørId = "12345"
-        private val fnr = "12029240045".somFødselsnummer()
+        private val fnr = "12029240045".somPersonidentifikator()
         private val fødselsdato = 12.februar(1992)
         private val orgnummer = "987654321"
         private val hendelsefabrikk = ArbeidsgiverHendelsefabrikk(
-            fødselsnummer = fnr,
+            personidentifikator = fnr,
             organisasjonsnummer = orgnummer,
             aktørId = aktørId,
             fødselsdato = 12.februar(1992)
@@ -716,7 +716,7 @@ class JsonBuilderTest {
         meldingsreferanseId = UUID.randomUUID(),
         vedtaksperiodeId = vedtaksperiodeId,
         aktørId = aktørId,
-        fødselsnummer = fnr,
+        personidentifikator = fnr,
         orgnummer = orgnummer,
         inntektsvurdering = Inntektsvurdering(inntektsvurdering),
         medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),

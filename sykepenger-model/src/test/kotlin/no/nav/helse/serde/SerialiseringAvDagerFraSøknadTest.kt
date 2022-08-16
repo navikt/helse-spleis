@@ -14,7 +14,7 @@ import no.nav.helse.januar
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Person
 import no.nav.helse.person.etterlevelse.MaskinellJurist
-import no.nav.helse.somFødselsnummer
+import no.nav.helse.somPersonidentifikator
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -53,7 +53,7 @@ internal class SerialiseringAvDagerFraSøknadTest {
     private val orgnummer = "987654321"
     private val hendelsefabrikk = ArbeidsgiverHendelsefabrikk(
         aktørId = aktørId,
-        fødselsnummer = fnr.somFødselsnummer(),
+        personidentifikator = fnr.somPersonidentifikator(),
         organisasjonsnummer = orgnummer,
         fødselsdato = 12.februar(1992)
     )

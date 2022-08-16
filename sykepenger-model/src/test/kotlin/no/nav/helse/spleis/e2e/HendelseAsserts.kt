@@ -2,7 +2,7 @@ package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.helse.Fødselsnummer
+import no.nav.helse.Personidentifikator
 import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
@@ -279,8 +279,8 @@ internal fun interface AktivitetsloggFilter {
             kontekst.kontekstMap["vedtaksperiodeId"] == idInnhenter.id(orgnummer).toString()
         }
 
-        internal fun person(fødselsnummer: Fødselsnummer = AbstractPersonTest.UNG_PERSON_FNR_2018): AktivitetsloggFilter = AktivitetsloggFilter { kontekst ->
-            kontekst.kontekstMap["fødselsnummer"] == fødselsnummer.toString()
+        internal fun person(personidentifikator: Personidentifikator = AbstractPersonTest.UNG_PERSON_FNR_2018): AktivitetsloggFilter = AktivitetsloggFilter { kontekst ->
+            kontekst.kontekstMap["fødselsnummer"] == personidentifikator.toString()
         }
     }
 

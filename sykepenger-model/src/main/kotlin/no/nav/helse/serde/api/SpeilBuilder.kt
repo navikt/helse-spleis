@@ -2,7 +2,7 @@ package no.nav.helse.serde.api
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import no.nav.helse.Fødselsnummer
+import no.nav.helse.Personidentifikator
 import no.nav.helse.person.Person
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.serde.AbstractBuilder
@@ -33,11 +33,11 @@ internal class SpeilBuilder(private val hendelser: List<HendelseDTO>) : Abstract
         person: Person,
         opprettet: LocalDateTime,
         aktørId: String,
-        fødselsnummer: Fødselsnummer,
+        personidentifikator: Personidentifikator,
         dødsdato: LocalDate?,
         vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk
     ) {
-        personBuilder = PersonBuilder(this, person, fødselsnummer, aktørId, dødsdato, vilkårsgrunnlagHistorikk, SNAPSHOT_VERSJON)
+        personBuilder = PersonBuilder(this, person, personidentifikator, aktørId, dødsdato, vilkårsgrunnlagHistorikk, SNAPSHOT_VERSJON)
         pushState(personBuilder)
     }
 }

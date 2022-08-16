@@ -52,7 +52,7 @@ import no.nav.helse.person.Paragraf.PARAGRAF_8_9
 import no.nav.helse.person.Punktum.Companion.punktum
 import no.nav.helse.person.TilstandType
 import no.nav.helse.september
-import no.nav.helse.somFødselsnummer
+import no.nav.helse.somPersonidentifikator
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.finnSkjæringstidspunkt
@@ -143,7 +143,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `§ 8-3 ledd 1 punktum 2 - fyller 70`() {
-        val fnr = "20014835841".somFødselsnummer()
+        val fnr = "20014835841".somPersonidentifikator()
         createTestPerson(fnr, 20.januar(1948))
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), fnr = fnr)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), fnr = fnr)
@@ -189,7 +189,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `§ 8-3 ledd 1 punktum 2 - blir aldri 70`() {
-        val fnr = "01024835841".somFødselsnummer()
+        val fnr = "01024835841".somPersonidentifikator()
         createTestPerson(fnr, 1.februar(1948))
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), fnr = fnr)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), fnr = fnr)
@@ -218,7 +218,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `§ 8-3 ledd 1 punktum 2 - er alltid 70`() {
-        val fnr = "01014835841".somFødselsnummer()
+        val fnr = "01014835841".somPersonidentifikator()
         createTestPerson(fnr, 1.januar(1948))
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), fnr = fnr)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), fnr = fnr)
@@ -247,7 +247,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `§ 8-3 ledd 1 punktum 2 - er alltid 70 uten NAVdager`() {
-        val fnr = "01014835841".somFødselsnummer()
+        val fnr = "01014835841".somPersonidentifikator()
         createTestPerson(fnr, 1.januar(1948))
         håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent), fnr = fnr)
         håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent), fnr = fnr)
@@ -2105,7 +2105,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `§ 8-51 ledd 2 - har minimum inntekt 2G - over 67 år`() {
-        val personOver67år = "01014500065".somFødselsnummer()
+        val personOver67år = "01014500065".somPersonidentifikator()
         createTestPerson(personOver67år, 1.januar(1945))
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), fnr = personOver67år)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), fnr = personOver67år)
@@ -2131,7 +2131,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `§ 8-51 ledd 2 - har inntekt mindre enn 2G - over 67 år`() {
-        val personOver67år = "01014500065".somFødselsnummer()
+        val personOver67år = "01014500065".somPersonidentifikator()
         createTestPerson(personOver67år, 1.januar(1945))
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), fnr = personOver67år)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), fnr = personOver67år)
@@ -2157,7 +2157,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `§ 8-51 ledd 3 - 60 sykedager etter fylte 67 år - frisk på 60-årsdagen så total sykedager blir en dag mindre uten at maksdato endres`() {
-        val personOver67år = "01025100065".somFødselsnummer()
+        val personOver67år = "01025100065".somPersonidentifikator()
         createTestPerson(personOver67år, 1.februar(1951))
 
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), fnr = personOver67år)
@@ -2241,7 +2241,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `§ 8-51 ledd 3 - 60 sykedager etter fylte 67 år - frisk dagen etter 67-årsdagen så maksdato flyttes en dag`() {
-        val personOver67år = "01025100065".somFødselsnummer()
+        val personOver67år = "01025100065".somPersonidentifikator()
         createTestPerson(personOver67år, 1.februar(1951))
 
         håndterSykmelding(Sykmeldingsperiode(1.januar, 1.februar, 100.prosent), fnr = personOver67år)
@@ -2325,7 +2325,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `§ 8-51 ledd 3 - 60 sykedager etter fylte 67 år - syk 60 dager etter fylte 67 år`() {
-        val personOver67år = "01025100065".somFødselsnummer()
+        val personOver67år = "01025100065".somPersonidentifikator()
         createTestPerson(personOver67år, 1.februar(1951))
         nyttVedtak(1.januar, 31.januar, fnr = personOver67år)
         forlengVedtak(1.februar, 28.februar, fnr = personOver67år)
@@ -2447,7 +2447,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
 
     @Test
     fun `§ 8-51 ledd 3 - 60 sykedager etter fylte 67 år - syk 61 dager etter fylte 67 år`() {
-        val personOver67år = "01025100065".somFødselsnummer()
+        val personOver67år = "01025100065".somPersonidentifikator()
         createTestPerson(personOver67år, 1.februar(1951))
         nyttVedtak(1.januar, 31.januar, fnr = personOver67år)
         forlengVedtak(1.februar, 28.februar, fnr = personOver67år)

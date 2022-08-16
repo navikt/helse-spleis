@@ -16,7 +16,7 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asOptionalLocalDate
 import no.nav.helse.rapids_rivers.asYearMonth
-import no.nav.helse.somFødselsnummer
+import no.nav.helse.somPersonidentifikator
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 
@@ -98,7 +98,7 @@ internal class VilkårsgrunnlagMessage(packet: JsonMessage) : BehovMessage(packe
             meldingsreferanseId = this.id,
             vedtaksperiodeId = vedtaksperiodeId,
             aktørId = aktørId,
-            fødselsnummer = fødselsnummer.somFødselsnummer(),
+            personidentifikator = fødselsnummer.somPersonidentifikator(),
             orgnummer = organisasjonsnummer,
             inntektsvurdering = Inntektsvurdering(
                 inntekter = inntekterForSammenligningsgrunnlag

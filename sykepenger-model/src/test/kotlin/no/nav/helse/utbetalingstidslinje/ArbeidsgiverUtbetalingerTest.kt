@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
-import no.nav.helse.Fødselsnummer
+import no.nav.helse.Personidentifikator
 import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
@@ -34,7 +34,7 @@ import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
-import no.nav.helse.somFødselsnummer
+import no.nav.helse.somPersonidentifikator
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykepengegrunnlag
 import no.nav.helse.testhelpers.AP
@@ -65,17 +65,17 @@ internal class ArbeidsgiverUtbetalingerTest {
     private lateinit var aktivitetslogg: Aktivitetslogg
 
     private companion object {
-        val UNG_PERSON_FNR_2018 = "12029240045".somFødselsnummer()
+        val UNG_PERSON_FNR_2018 = "12029240045".somPersonidentifikator()
         val UNG_PERSON_2018_FØDSELSDATO = 12.februar(1992)
-        val PERSON_67_ÅR_5_JANUAR_FNR_2018 = "05015112345".somFødselsnummer()
+        val PERSON_67_ÅR_5_JANUAR_FNR_2018 = "05015112345".somPersonidentifikator()
         val PERSON_67_ÅR_5_JANUAR_2018_FØDSELSDATO = 5.januar(1951)
-        val PERSON_68_ÅR_1_DESEMBER_2018 = "01125112345".somFødselsnummer()
+        val PERSON_68_ÅR_1_DESEMBER_2018 = "01125112345".somPersonidentifikator()
         val PERSON_68_ÅR_1_DESEMBER_2018_FØDSELDATO = 1.desember(1951)
-        val PERSON_70_ÅR_1_FEBRUAR_2018 = "01024812345".somFødselsnummer()
+        val PERSON_70_ÅR_1_FEBRUAR_2018 = "01024812345".somPersonidentifikator()
         val PERSON_70_ÅR_1_FEBRUAR_2018_FØDSELSDATO = 1.februar(1948)
         val ORGNUMMER = "888888888"
         val hendelsefabrikk = ArbeidsgiverHendelsefabrikk(
-            fødselsnummer = UNG_PERSON_FNR_2018,
+            personidentifikator = UNG_PERSON_FNR_2018,
             organisasjonsnummer = ORGNUMMER,
             aktørId = "aktørId",
             fødselsdato = 12.februar(1992)
@@ -291,7 +291,7 @@ internal class ArbeidsgiverUtbetalingerTest {
     }
 
     private fun undersøke(
-        fnr: Fødselsnummer,
+        fnr: Personidentifikator,
         vararg utbetalingsdager: Utbetalingsdager,
         vilkårsgrunnlagElement: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement? = null,
         startdato: LocalDate = 1.januar,
@@ -302,7 +302,7 @@ internal class ArbeidsgiverUtbetalingerTest {
     }
 
     private fun undersøke(
-        fnr: Fødselsnummer,
+        fnr: Personidentifikator,
         arbeidsgiverTidslinje: Utbetalingstidslinje,
         historiskTidslinje: Utbetalingstidslinje,
         vilkårsgrunnlagElement: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement? = null,

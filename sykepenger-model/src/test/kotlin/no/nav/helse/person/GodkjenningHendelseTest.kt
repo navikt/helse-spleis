@@ -196,7 +196,7 @@ internal class GodkjenningHendelseTest : AbstractPersonTest() {
             meldingsreferanseId = UUID.randomUUID(),
             vedtaksperiodeId = "${1.vedtaksperiode.id(ORGNUMMER)}",
             aktørId = "aktørId",
-            fødselsnummer = UNG_PERSON_FNR_2018,
+            personidentifikator = UNG_PERSON_FNR_2018,
             orgnummer = ORGNUMMER,
             inntektsvurdering = Inntektsvurdering(
                 inntektperioderForSammenligningsgrunnlag {

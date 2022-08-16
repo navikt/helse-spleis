@@ -14,7 +14,7 @@ import no.nav.helse.januar
 import no.nav.helse.november
 import no.nav.helse.oktober
 import no.nav.helse.person.etterlevelse.MaskinellJurist
-import no.nav.helse.somFødselsnummer
+import no.nav.helse.somPersonidentifikator
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.økonomi.Inntekt
@@ -43,7 +43,7 @@ internal class InntektshistorikkTest {
         val INNTEKT = 31000.00.månedlig
         val hendelsefabrikk = ArbeidsgiverHendelsefabrikk(
             aktørId = AKTØRID,
-            fødselsnummer = UNG_PERSON_FNR_2018.somFødselsnummer(),
+            personidentifikator = UNG_PERSON_FNR_2018.somPersonidentifikator(),
             fødselsdato = UNG_PERSON_FØDSELSDATO,
             organisasjonsnummer = ORGNUMMER
         )

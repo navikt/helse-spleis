@@ -32,7 +32,7 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
-import no.nav.helse.somFødselsnummer
+import no.nav.helse.somPersonidentifikator
 import no.nav.helse.spleis.testhelpers.TestObservatør
 import no.nav.helse.spleis.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.spleis.testhelpers.inntektperioderForSykepengegrunnlag
@@ -155,7 +155,7 @@ abstract class AbstractObservableTest {
             meldingsreferanseId = UUID.randomUUID(),
             vedtaksperiodeId = vedtaksperiodeIdInnhenter(orgnummer).toString(),
             aktørId = AKTØRID,
-            fødselsnummer = fnr.somFødselsnummer(),
+            personidentifikator = fnr.somPersonidentifikator(),
             orgnummer = orgnummer,
             inntektsvurdering = inntektsvurdering,
             medlemskapsvurdering = Medlemskapsvurdering(medlemskapstatus),

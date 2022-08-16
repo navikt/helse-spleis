@@ -5,7 +5,7 @@ import java.time.LocalDateTime
 import java.time.Year
 import java.time.YearMonth
 import java.util.UUID
-import no.nav.helse.Fødselsnummer
+import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
@@ -103,18 +103,18 @@ internal class JsonBuilder : AbstractBuilder() {
         person: Person,
         opprettet: LocalDateTime,
         aktørId: String,
-        fødselsnummer: Fødselsnummer,
+        personidentifikator: Personidentifikator,
         dødsdato: LocalDate?,
         vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk
     ) {
-        personBuilder = PersonState(fødselsnummer, aktørId, opprettet, dødsdato)
+        personBuilder = PersonState(personidentifikator, aktørId, opprettet, dødsdato)
         pushState(personBuilder)
     }
 
-    private class PersonState(fødselsnummer: Fødselsnummer, aktørId: String, opprettet: LocalDateTime, dødsdato: LocalDate?) : BuilderState() {
+    private class PersonState(personidentifikator: Personidentifikator, aktørId: String, opprettet: LocalDateTime, dødsdato: LocalDate?) : BuilderState() {
         private val personMap = mutableMapOf<String, Any?>(
             "aktørId" to aktørId,
-            "fødselsnummer" to fødselsnummer.toString(),
+            "fødselsnummer" to personidentifikator.toString(),
             "opprettet" to opprettet,
             "dødsdato" to dødsdato
         )
@@ -149,7 +149,7 @@ internal class JsonBuilder : AbstractBuilder() {
             person: Person,
             opprettet: LocalDateTime,
             aktørId: String,
-            fødselsnummer: Fødselsnummer,
+            personidentifikator: Personidentifikator,
             dødsdato: LocalDate?,
             vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk
         ) {

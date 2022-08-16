@@ -5,7 +5,7 @@ import java.util.UUID
 import javax.sql.DataSource
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageProblems
-import no.nav.helse.somFødselsnummer
+import no.nav.helse.somPersonidentifikator
 import no.nav.helse.spleis.e2e.SpleisDataSource.migratedDb
 import no.nav.helse.spleis.e2e.resetDatabase
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
@@ -17,7 +17,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 
-private val fnr = "01011012345".somFødselsnummer()
+private val fnr = "01011012345".somPersonidentifikator()
 // primært for å slutte å ha teite sql-feil
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class HendelseRepositoryTest {

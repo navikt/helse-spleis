@@ -8,7 +8,7 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.januar
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.etterlevelse.MaskinellJurist
-import no.nav.helse.somFødselsnummer
+import no.nav.helse.somPersonidentifikator
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Test
@@ -18,7 +18,7 @@ internal class OpprettPersonFraHendelseTest {
 
     private val fabrikk = ArbeidsgiverHendelsefabrikk(
         aktørId = "aktørid",
-        fødselsnummer = "01019212345".somFødselsnummer(),
+        personidentifikator = "01019212345".somPersonidentifikator(),
         organisasjonsnummer = "orgnum",
         fødselsdato = 24.desember(2000)
     )

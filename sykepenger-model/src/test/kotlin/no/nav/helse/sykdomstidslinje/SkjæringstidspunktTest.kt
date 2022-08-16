@@ -15,7 +15,7 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.perioder
-import no.nav.helse.somFødselsnummer
+import no.nav.helse.somPersonidentifikator
 import no.nav.helse.testhelpers.A
 import no.nav.helse.testhelpers.F
 import no.nav.helse.testhelpers.H
@@ -428,7 +428,7 @@ internal class SkjæringstidspunktTest {
         private val INNTEKT_PR_MÅNED = INNTEKT.månedlig
         private val hendelsefabrikk = ArbeidsgiverHendelsefabrikk(
             organisasjonsnummer = ORGNUMMER,
-            fødselsnummer = UNG_PERSON_FNR_2018.somFødselsnummer(),
+            personidentifikator = UNG_PERSON_FNR_2018.somPersonidentifikator(),
             aktørId = AKTØRID,
             fødselsdato = UNG_PERSON_FØDSELSDATO
         )

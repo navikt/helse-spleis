@@ -5,7 +5,7 @@ import java.time.LocalDateTime
 import java.time.Year
 import java.time.YearMonth
 import java.util.UUID
-import no.nav.helse.Fødselsnummer
+import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
@@ -241,11 +241,11 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         person: Person,
         opprettet: LocalDateTime,
         aktørId: String,
-        fødselsnummer: Fødselsnummer,
+        personidentifikator: Personidentifikator,
         dødsdato: LocalDate?,
         vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk
     ) {
-        delegatee.preVisitPerson(person, opprettet, aktørId, fødselsnummer, dødsdato, vilkårsgrunnlagHistorikk)
+        delegatee.preVisitPerson(person, opprettet, aktørId, personidentifikator, dødsdato, vilkårsgrunnlagHistorikk)
     }
 
     override fun visitAlder(alder: Alder, fødselsdato: LocalDate) {
@@ -402,11 +402,11 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         person: Person,
         opprettet: LocalDateTime,
         aktørId: String,
-        fødselsnummer: Fødselsnummer,
+        personidentifikator: Personidentifikator,
         dødsdato: LocalDate?,
         vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk
     ) {
-        delegatee.postVisitPerson(person, opprettet, aktørId, fødselsnummer, dødsdato, vilkårsgrunnlagHistorikk)
+        delegatee.postVisitPerson(person, opprettet, aktørId, personidentifikator, dødsdato, vilkårsgrunnlagHistorikk)
     }
 
     override fun preVisitArbeidsgiver(arbeidsgiver: Arbeidsgiver, id: UUID, organisasjonsnummer: String) {

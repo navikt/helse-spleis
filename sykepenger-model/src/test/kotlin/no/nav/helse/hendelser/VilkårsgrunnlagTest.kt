@@ -248,7 +248,7 @@ internal class VilkårsgrunnlagTest : AbstractPersonTest() {
         meldingsreferanseId = UUID.randomUUID(),
         vedtaksperiodeId = vedtaksperiodeId(),
         aktørId = AKTØRID,
-        fødselsnummer = UNG_PERSON_FNR_2018,
+        personidentifikator = UNG_PERSON_FNR_2018,
         orgnummer = ORGNUMMER,
         inntektsvurdering = Inntektsvurdering(inntektsmåneder),
         medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),

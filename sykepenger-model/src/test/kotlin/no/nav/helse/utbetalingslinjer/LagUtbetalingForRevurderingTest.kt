@@ -20,7 +20,7 @@ import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Person
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.etterlevelse.MaskinellJurist
-import no.nav.helse.somFødselsnummer
+import no.nav.helse.somPersonidentifikator
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
@@ -46,13 +46,13 @@ internal class LagUtbetalingForRevurderingTest {
 
     private companion object {
         private const val AKTØRID = "42"
-        private val FNR = "12029240045".somFødselsnummer()
+        private val FNR = "12029240045".somPersonidentifikator()
         private val fødselsdato = 12.februar(1992)
         private const val ORGNUMMER = "123456789"
         private val SØKNAD = UUID.randomUUID()
         private val hendelsefabrikk = ArbeidsgiverHendelsefabrikk(
             aktørId = AKTØRID,
-            fødselsnummer = FNR,
+            personidentifikator = FNR,
             organisasjonsnummer = ORGNUMMER,
             fødselsdato = 12.februar(1992)
         )

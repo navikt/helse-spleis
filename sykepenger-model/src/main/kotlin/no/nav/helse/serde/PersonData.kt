@@ -56,7 +56,7 @@ import no.nav.helse.serde.PersonData.VilkårsgrunnlagInnslagData.Companion.tilMo
 import no.nav.helse.serde.mapping.JsonMedlemskapstatus
 import no.nav.helse.serde.reflection.Inntektsopplysningskilde
 import no.nav.helse.serde.reflection.Utbetalingstatus
-import no.nav.helse.somFødselsnummer
+import no.nav.helse.somPersonidentifikator
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -99,12 +99,12 @@ internal data class PersonData(
 ) {
     private val arbeidsgivereliste = mutableListOf<Arbeidsgiver>()
     private val modelAktivitetslogg get() = aktivitetslogg?.konverterTilAktivitetslogg() ?: Aktivitetslogg()
-    private val fnr by lazy { fødselsnummer.somFødselsnummer() }
+    private val fnr by lazy { fødselsnummer.somPersonidentifikator() }
     private val alder by lazy { fødselsdato.alder }
 
     private fun person(jurist: MaskinellJurist) = Person.ferdigPerson(
         aktørId = aktørId,
-        fødselsnummer = fnr,
+        personidentifikator = fnr,
         alder = alder,
         arbeidsgivere = arbeidsgivereliste,
         aktivitetslogg = modelAktivitetslogg,
@@ -116,7 +116,7 @@ internal data class PersonData(
     )
 
     internal fun createPerson(jurist: MaskinellJurist): Person {
-        val personJurist = jurist.medFødselsnummer(fødselsnummer.somFødselsnummer())
+        val personJurist = jurist.medFødselsnummer(fødselsnummer.somPersonidentifikator())
         val person = person(personJurist)
         arbeidsgivereliste.addAll(this.arbeidsgivere.map {
             it.konverterTilArbeidsgiver(

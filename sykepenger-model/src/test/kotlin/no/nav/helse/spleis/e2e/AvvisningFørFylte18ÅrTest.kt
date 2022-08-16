@@ -7,7 +7,7 @@ import no.nav.helse.oktober
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
-import no.nav.helse.somFødselsnummer
+import no.nav.helse.somPersonidentifikator
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Test
 
 internal class AvvisningFørFylte18ÅrTest : AbstractEndToEndTest() {
     private companion object {
-        val FYLLER_18_ÅR_2_NOVEMBER = "02110075045".somFødselsnummer()
+        val FYLLER_18_ÅR_2_NOVEMBER = "02110075045".somPersonidentifikator()
     }
 
     @BeforeEach

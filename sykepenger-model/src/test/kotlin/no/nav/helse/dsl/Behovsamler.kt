@@ -1,7 +1,7 @@
 package no.nav.helse.dsl
 
 import java.util.UUID
-import no.nav.helse.Fødselsnummer
+import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.Hendelseskontekst
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
@@ -84,7 +84,7 @@ internal class Behovsamler : PersonObserver {
         }
     }
 
-    override fun inntektsmeldingReplay(fødselsnummer: Fødselsnummer, vedtaksperiodeId: UUID) {
+    override fun inntektsmeldingReplay(personidentifikator: Personidentifikator, vedtaksperiodeId: UUID) {
         replays.add(vedtaksperiodeId)
     }
 

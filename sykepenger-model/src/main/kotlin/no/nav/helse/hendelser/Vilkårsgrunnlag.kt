@@ -2,7 +2,7 @@ package no.nav.helse.hendelser
 
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.helse.Fødselsnummer
+import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.Periode.Companion.sammenhengende
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Companion.grupperArbeidsforholdPerOrgnummer
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Companion.opptjeningsperiode
@@ -22,13 +22,13 @@ class Vilkårsgrunnlag(
     meldingsreferanseId: UUID,
     private val vedtaksperiodeId: String,
     aktørId: String,
-    fødselsnummer: Fødselsnummer,
+    personidentifikator: Personidentifikator,
     orgnummer: String,
     private val inntektsvurdering: Inntektsvurdering,
     private val medlemskapsvurdering: Medlemskapsvurdering,
     private val inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag,
     arbeidsforhold: List<Arbeidsforhold>
-) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer.toString(), aktørId, orgnummer) {
+) : ArbeidstakerHendelse(meldingsreferanseId, personidentifikator.toString(), aktørId, orgnummer) {
     private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
     private var grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata? = null
     private val arbeidsforhold = arbeidsforhold.filter { it.orgnummer.isNotBlank() }

@@ -17,7 +17,7 @@ import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.serde.PersonData
 import no.nav.helse.serde.PersonData.InfotrygdhistorikkElementData.Companion.tilModellObjekt
-import no.nav.helse.somFødselsnummer
+import no.nav.helse.somPersonidentifikator
 import no.nav.helse.sykepengegrunnlag
 import no.nav.helse.testhelpers.A
 import no.nav.helse.testhelpers.S
@@ -134,7 +134,7 @@ internal class InfotrygdhistorikkTest {
             oppdatert = tidsstempel,
             inntekter = emptyList()
         ))
-        historikk.addInntekter(Person("", "01010112345".somFødselsnummer(), 1.januar(1950).alder, MaskinellJurist()), aktivitetslogg)
+        historikk.addInntekter(Person("", "01010112345".somPersonidentifikator(), 1.januar(1950).alder, MaskinellJurist()), aktivitetslogg)
         historikk.tøm()
         assertFalse(historikk.oppfriskNødvendig(aktivitetslogg, tidligsteDato))
         assertFalse(aktivitetslogg.behov().isNotEmpty()) { aktivitetslogg.toString() }
@@ -148,7 +148,7 @@ internal class InfotrygdhistorikkTest {
             oppdatert = tidsstempel,
             inntekter = listOf(Inntektsopplysning("orgnr", 1.januar, 1000.daglig, true))
         ))
-        historikk.addInntekter(Person("", "10101012345".somFødselsnummer(), 1.januar(1950).alder, MaskinellJurist()), aktivitetslogg)
+        historikk.addInntekter(Person("", "10101012345".somPersonidentifikator(), 1.januar(1950).alder, MaskinellJurist()), aktivitetslogg)
         historikk.tøm()
         assertFalse(historikk.oppfriskNødvendig(aktivitetslogg, tidligsteDato))
         assertFalse(aktivitetslogg.behov().isNotEmpty()) { aktivitetslogg.toString() }

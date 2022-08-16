@@ -3,7 +3,7 @@ package no.nav.helse.person
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.Fødselsnummer
+import no.nav.helse.Personidentifikator
 import no.nav.helse.Toggle
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.Avstemming
@@ -81,7 +81,7 @@ import kotlin.math.roundToInt
 
 class Person private constructor(
     private val aktørId: String,
-    private val fødselsnummer: Fødselsnummer,
+    private val personidentifikator: Personidentifikator,
     private val alder: Alder,
     private val arbeidsgivere: MutableList<Arbeidsgiver>,
     internal val aktivitetslogg: Aktivitetslogg,
@@ -95,7 +95,7 @@ class Person private constructor(
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
         internal fun ferdigPerson(
             aktørId: String,
-            fødselsnummer: Fødselsnummer,
+            personidentifikator: Personidentifikator,
             alder: Alder,
             arbeidsgivere: MutableList<Arbeidsgiver>,
             aktivitetslogg: Aktivitetslogg,
@@ -106,7 +106,7 @@ class Person private constructor(
             jurist: MaskinellJurist
         ): Person = Person(
             aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
+            personidentifikator = personidentifikator,
             alder = alder,
             arbeidsgivere = arbeidsgivere,
             aktivitetslogg = aktivitetslogg,
@@ -120,12 +120,12 @@ class Person private constructor(
 
     internal constructor(
         aktørId: String,
-        fødselsnummer: Fødselsnummer,
+        personidentifikator: Personidentifikator,
         alder: Alder,
         jurist: MaskinellJurist
     ) : this(
         aktørId,
-        fødselsnummer,
+        personidentifikator,
         alder,
         mutableListOf(),
         Aktivitetslogg(),
@@ -133,7 +133,7 @@ class Person private constructor(
         Infotrygdhistorikk(),
         VilkårsgrunnlagHistorikk(),
         null,
-        jurist.medFødselsnummer(fødselsnummer)
+        jurist.medFødselsnummer(personidentifikator)
     )
 
     private val observers = mutableListOf<PersonObserver>()
@@ -214,7 +214,7 @@ class Person private constructor(
         }
         arbeidsgivere.beregnFeriepengerForAlleArbeidsgivere(
             aktørId,
-            fødselsnummer,
+            personidentifikator,
             feriepengeberegner,
             utbetalingshistorikk
         )
@@ -447,7 +447,7 @@ class Person private constructor(
 
     internal fun inntektsmeldingReplay(vedtaksperiodeId: UUID) {
         observers.forEach {
-            it.inntektsmeldingReplay(fødselsnummer, vedtaksperiodeId)
+            it.inntektsmeldingReplay(personidentifikator, vedtaksperiodeId)
         }
     }
 
@@ -539,7 +539,7 @@ class Person private constructor(
         arbeidsgiverperiode.periodetype(orgnummer, periode, skjæringstidspunkt, infotrygdhistorikk)
 
     internal fun accept(visitor: PersonVisitor) {
-        visitor.preVisitPerson(this, opprettet, aktørId, fødselsnummer, dødsdato, vilkårsgrunnlagHistorikk)
+        visitor.preVisitPerson(this, opprettet, aktørId, personidentifikator, dødsdato, vilkårsgrunnlagHistorikk)
         alder.accept(visitor)
         visitor.visitPersonAktivitetslogg(aktivitetslogg)
         aktivitetslogg.accept(visitor)
@@ -548,11 +548,11 @@ class Person private constructor(
         visitor.postVisitArbeidsgivere()
         infotrygdhistorikk.accept(visitor)
         vilkårsgrunnlagHistorikk.accept(visitor)
-        visitor.postVisitPerson(this, opprettet, aktørId, fødselsnummer, dødsdato, vilkårsgrunnlagHistorikk)
+        visitor.postVisitPerson(this, opprettet, aktørId, personidentifikator, dødsdato, vilkårsgrunnlagHistorikk)
     }
 
     override fun toSpesifikkKontekst(): SpesifikkKontekst {
-        return SpesifikkKontekst("Person", mapOf("fødselsnummer" to fødselsnummer.toString(), "aktørId" to aktørId))
+        return SpesifikkKontekst("Person", mapOf("fødselsnummer" to personidentifikator.toString(), "aktørId" to aktørId))
     }
 
     private fun registrer(hendelse: PersonHendelse, melding: String) {
@@ -852,7 +852,7 @@ class Person private constructor(
         if (arbeidsgivereMedSykdom.containsAll(orgnummerFraAAreg)) {
             sikkerLogg.info("Ingen spøkelser, har sykdom hos alle kjente arbeidsgivere antall=${arbeidsgivereMedSykdom.size}")
         } else {
-            sikkerLogg.info("Vi har kontakt med spøkelser, fnr=$fødselsnummer, antall=${orgnummerFraAAreg.size}")
+            sikkerLogg.info("Vi har kontakt med spøkelser, fnr=$personidentifikator, antall=${orgnummerFraAAreg.size}")
         }
     }
 
@@ -865,11 +865,11 @@ class Person private constructor(
         val spleisOrgnummerManglerIAAreg = kjenteOrgnummer.filter { !orgnummerMedSpleisSykdom.contains(it) }
         val nyeOrgnummer = orgnummerFraAAreg.filter { !kjenteOrgnummer.contains(it) }
         if (spleisOrgnummerManglerIAAreg.isNotEmpty()) {
-            sikkerLogg.info("Fant arbeidsgivere i spleis som ikke er i AAReg(${manglerIAAReg}), opprettet(${nyeOrgnummer}) for $fødselsnummer")
+            sikkerLogg.info("Fant arbeidsgivere i spleis som ikke er i AAReg(${manglerIAAReg}), opprettet(${nyeOrgnummer}) for $personidentifikator")
         } else if (manglerIAAReg.isNotEmpty()) {
-            sikkerLogg.info("Fant arbeidsgivere i IT som ikke er i AAReg(${manglerIAAReg}), opprettet(${nyeOrgnummer}) for $fødselsnummer")
+            sikkerLogg.info("Fant arbeidsgivere i IT som ikke er i AAReg(${manglerIAAReg}), opprettet(${nyeOrgnummer}) for $personidentifikator")
         } else {
-            sikkerLogg.info("AAReg kjenner til alle arbeidsgivere i spleis, opprettet (${nyeOrgnummer}) for $fødselsnummer")
+            sikkerLogg.info("AAReg kjenner til alle arbeidsgivere i spleis, opprettet (${nyeOrgnummer}) for $personidentifikator")
         }
     }
 
@@ -985,7 +985,7 @@ class Person private constructor(
         vedtaksperioder: List<Vedtaksperiode>
     ) =
         Utbetaling.Builder(
-            fødselsnummer = fødselsnummer,
+            personidentifikator = personidentifikator,
             alder = alder,
             aktivitetslogg = aktivitetslogg,
             periode = periode,

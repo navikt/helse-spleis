@@ -29,7 +29,7 @@ import no.nav.helse.person.PersonHendelse
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.somFødselsnummer
+import no.nav.helse.somPersonidentifikator
 import no.nav.helse.spleis.db.HendelseRepository
 import no.nav.helse.spleis.db.LagrePersonDao
 import no.nav.helse.spleis.db.PersonRepository
@@ -261,10 +261,10 @@ internal class HendelseMediator(
     }
 
     private fun person(hendelse: PersonHendelse, jurist: MaskinellJurist): Person {
-        return personRepository.hentPerson(hendelse.fødselsnummer().somFødselsnummer())
+        return personRepository.hentPerson(hendelse.fødselsnummer().somPersonidentifikator())
             ?.deserialize(
                 jurist = jurist
-            ) { hendelseRepository.hentAlleHendelser(hendelse.fødselsnummer().somFødselsnummer()) }
+            ) { hendelseRepository.hentAlleHendelser(hendelse.fødselsnummer().somPersonidentifikator()) }
             ?: hendelse.person(jurist)
     }
 

@@ -23,7 +23,7 @@ import no.nav.helse.mai
 import no.nav.helse.november
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.etterlevelse.MaskinellJurist
-import no.nav.helse.somFødselsnummer
+import no.nav.helse.somPersonidentifikator
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.Arbeidsdag
 import no.nav.helse.sykdomstidslinje.Dag.FriskHelgedag
@@ -44,7 +44,7 @@ internal class SøknadTest {
         private const val UNG_PERSON_FNR_2018 = "12029240045"
         private val februar12 = 12.februar(1992)
         private val ungPersonFnr2018Hendelsefabrikk = ArbeidsgiverHendelsefabrikk(
-            fødselsnummer = UNG_PERSON_FNR_2018.somFødselsnummer(),
+            personidentifikator = UNG_PERSON_FNR_2018.somPersonidentifikator(),
             aktørId = "12345",
             organisasjonsnummer = "987654321",
             fødselsdato = februar12
@@ -53,7 +53,7 @@ internal class SøknadTest {
         private const val FYLLER_18_ÅR_2_NOVEMBER = "02110075045"
         private val november2 = 2.november(2000)
         private val fyller18År2NovemberHendelsefabrikk = ArbeidsgiverHendelsefabrikk(
-            fødselsnummer = FYLLER_18_ÅR_2_NOVEMBER.somFødselsnummer(),
+            personidentifikator = FYLLER_18_ÅR_2_NOVEMBER.somPersonidentifikator(),
             aktørId = "12345",
             organisasjonsnummer = "987654321",
             fødselsdato = november2

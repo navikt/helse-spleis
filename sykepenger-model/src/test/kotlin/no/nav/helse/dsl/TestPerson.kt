@@ -5,7 +5,7 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.util.UUID
-import no.nav.helse.Fødselsnummer
+import no.nav.helse.Personidentifikator
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
 import no.nav.helse.februar
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
@@ -48,7 +48,7 @@ import no.nav.helse.person.TilstandType
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
-import no.nav.helse.somFødselsnummer
+import no.nav.helse.somPersonidentifikator
 import no.nav.helse.spleis.e2e.lagInntektperioder
 import no.nav.helse.testhelpers.Inntektperioder
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
@@ -63,14 +63,14 @@ import org.junit.jupiter.api.fail
 internal class TestPerson(
     private val observatør: PersonObserver,
     private val aktørId: String = AKTØRID,
-    private val fødselsnummer: Fødselsnummer = UNG_PERSON_FNR_2018,
+    private val personidentifikator: Personidentifikator = UNG_PERSON_FNR_2018,
     private val fødselsdato: LocalDate = UNG_PERSON_FDATO_2018,
     jurist: MaskinellJurist = MaskinellJurist()
 ) {
     internal companion object {
         private val fnrformatter = DateTimeFormatter.ofPattern("ddMMyy")
         internal val UNG_PERSON_FDATO_2018 = 12.februar(1992)
-        internal val UNG_PERSON_FNR_2018: Fødselsnummer = "${UNG_PERSON_FDATO_2018.format(fnrformatter)}40045".somFødselsnummer()
+        internal val UNG_PERSON_FNR_2018: Personidentifikator = "${UNG_PERSON_FDATO_2018.format(fnrformatter)}40045".somPersonidentifikator()
         internal const val AKTØRID = "42"
 
         internal val INNTEKT = 31000.00.månedlig
@@ -83,9 +83,9 @@ internal class TestPerson(
 
     private val behovsamler = Behovsamler()
     private val vedtaksperiodesamler = Vedtaksperiodesamler()
-    private val personHendelsefabrikk = PersonHendelsefabrikk(aktørId, fødselsnummer)
+    private val personHendelsefabrikk = PersonHendelsefabrikk(aktørId, personidentifikator)
 
-    private val person = Person(aktørId, fødselsnummer, fødselsdato.alder, jurist).also {
+    private val person = Person(aktørId, personidentifikator, fødselsdato.alder, jurist).also {
         it.addObserver(vedtaksperiodesamler)
         it.addObserver(behovsamler)
         it.addObserver(observatør)
@@ -128,7 +128,7 @@ internal class TestPerson(
     }
 
     inner class TestArbeidsgiver(internal val orgnummer: String) {
-        private val arbeidsgiverHendelsefabrikk = ArbeidsgiverHendelsefabrikk(aktørId, fødselsnummer, orgnummer, fødselsdato)
+        private val arbeidsgiverHendelsefabrikk = ArbeidsgiverHendelsefabrikk(aktørId, personidentifikator, orgnummer, fødselsdato)
 
         internal val inspektør get() = TestArbeidsgiverInspektør(person, orgnummer)
 

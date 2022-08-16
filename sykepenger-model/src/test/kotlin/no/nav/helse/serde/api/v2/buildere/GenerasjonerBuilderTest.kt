@@ -74,7 +74,7 @@ import no.nav.helse.serde.api.speil.builders.GenerasjonerBuilder
 import no.nav.helse.serde.api.speil.builders.InntektshistorikkForAOrdningenBuilder
 import no.nav.helse.serde.api.speil.builders.OppsamletSammenligningsgrunnlagBuilder
 import no.nav.helse.serde.api.speil.builders.VilkårsgrunnlagBuilder
-import no.nav.helse.somFødselsnummer
+import no.nav.helse.somPersonidentifikator
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
 import no.nav.helse.spleis.e2e.assertSisteTilstand
@@ -911,7 +911,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
 
     @Test
     fun `periode som har tilstand TIL_INFOTRYGD sendes ikke med til Speil`() {
-        val fyller18November2018 = "02110075045".somFødselsnummer()
+        val fyller18November2018 = "02110075045".somPersonidentifikator()
         createTestPerson(fyller18November2018, 2.november(2000))
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent), fnr = fyller18November2018)
         håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), fnr = fyller18November2018)

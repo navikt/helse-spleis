@@ -20,7 +20,7 @@ import no.nav.helse.person.Periodetype
 import no.nav.helse.person.Person
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.etterlevelse.MaskinellJurist
-import no.nav.helse.somFødselsnummer
+import no.nav.helse.somPersonidentifikator
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykepengegrunnlag
 import no.nav.helse.testhelpers.A
@@ -776,7 +776,7 @@ internal class InfotrygdhistorikkElementTest {
     @Test
     fun `element uten inntekter låses ikke`() {
         val element = historikkelement(inntekter = emptyList())
-        element.addInntekter(Person("", "01010112345".somFødselsnummer(), 1.januar(1950).alder, MaskinellJurist()), aktivitetslogg)
+        element.addInntekter(Person("", "01010112345".somPersonidentifikator(), 1.januar(1950).alder, MaskinellJurist()), aktivitetslogg)
         assertTrue(element.kanSlettes())
     }
 
@@ -787,7 +787,7 @@ internal class InfotrygdhistorikkElementTest {
                 Inntektsopplysning(ORGNUMMER, 1.januar, 1234.månedlig, true)
             )
         )
-        element.addInntekter(Person("", "01010112345".somFødselsnummer(), 1.januar(1950).alder, MaskinellJurist()), aktivitetslogg)
+        element.addInntekter(Person("", "01010112345".somPersonidentifikator(), 1.januar(1950).alder, MaskinellJurist()), aktivitetslogg)
         assertFalse(element.kanSlettes())
     }
 

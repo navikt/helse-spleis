@@ -9,7 +9,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
-import no.nav.helse.somFødselsnummer
+import no.nav.helse.somPersonidentifikator
 import no.nav.helse.økonomi.Inntekt
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -20,7 +20,7 @@ internal class SykmeldingsperioderTest {
 
     private val hendelsefabrikk = ArbeidsgiverHendelsefabrikk(
         organisasjonsnummer = "ORGNUMMER",
-        fødselsnummer = "12029212345".somFødselsnummer(),
+        personidentifikator = "12029212345".somPersonidentifikator(),
         aktørId = "AKTØRID",
         fødselsdato = 12.februar(1992)
     )

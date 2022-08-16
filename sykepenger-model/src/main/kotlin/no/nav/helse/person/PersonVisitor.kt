@@ -5,7 +5,7 @@ import java.time.LocalDateTime
 import java.time.Year
 import java.time.YearMonth
 import java.util.UUID
-import no.nav.helse.Fødselsnummer
+import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
@@ -52,7 +52,7 @@ internal interface PersonVisitor : AlderVisitor, ArbeidsgiverVisitor, Aktivitets
         person: Person,
         opprettet: LocalDateTime,
         aktørId: String,
-        fødselsnummer: Fødselsnummer,
+        personidentifikator: Personidentifikator,
         dødsdato: LocalDate?,
         vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk
     ) {}
@@ -63,7 +63,7 @@ internal interface PersonVisitor : AlderVisitor, ArbeidsgiverVisitor, Aktivitets
         person: Person,
         opprettet: LocalDateTime,
         aktørId: String,
-        fødselsnummer: Fødselsnummer,
+        personidentifikator: Personidentifikator,
         dødsdato: LocalDate?,
         vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk
     ) {}

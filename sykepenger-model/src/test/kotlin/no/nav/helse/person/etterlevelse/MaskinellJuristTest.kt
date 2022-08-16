@@ -7,7 +7,7 @@ import no.nav.helse.person.Ledd
 import no.nav.helse.person.Paragraf
 import no.nav.helse.person.Punktum
 import no.nav.helse.person.etterlevelse.MaskinellJurist.*
-import no.nav.helse.somFødselsnummer
+import no.nav.helse.somPersonidentifikator
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -18,7 +18,7 @@ internal class MaskinellJuristTest {
     @Test
     fun `jurist lytter på endringer av kontekst`() {
         val vedtaksperiodeJurist = MaskinellJurist()
-            .medFødselsnummer("10052088033".somFødselsnummer())
+            .medFødselsnummer("10052088033".somPersonidentifikator())
             .medOrganisasjonsnummer("123456789")
             .medVedtaksperiode(UUID.fromString("6bce6c83-28ab-4a8c-b7f6-8402988bc8fc"), emptySet(), Periode(1.januar, 31.januar))
 
@@ -35,7 +35,7 @@ internal class MaskinellJuristTest {
     @Test
     fun `alltid nyeste kontekst som gjelder`() {
         val arbeidsgiverJurist = MaskinellJurist()
-            .medFødselsnummer("10052088033".somFødselsnummer())
+            .medFødselsnummer("10052088033".somPersonidentifikator())
             .medOrganisasjonsnummer("123456789")
             .medOrganisasjonsnummer("987654321")
 

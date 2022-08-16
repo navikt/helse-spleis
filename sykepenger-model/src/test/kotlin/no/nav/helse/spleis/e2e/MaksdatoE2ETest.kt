@@ -14,7 +14,7 @@ import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.serde.serialize
-import no.nav.helse.somFødselsnummer
+import no.nav.helse.somPersonidentifikator
 import no.nav.helse.utbetalingstidslinje.Begrunnelse.SykepengedagerOppbruktOver67
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -66,7 +66,7 @@ internal class MaksdatoE2ETest : AbstractEndToEndTest() {
     @Test
     fun `oppbrukt sykepenger etter fylte 67 serialiseres til rett begrunnelse`() {
         val fnr = "16104812345"
-        createTestPerson(fnr.somFødselsnummer(), 16.oktober(1948))
+        createTestPerson(fnr.somPersonidentifikator(), 16.oktober(1948))
         nyttVedtak(17.januar, 1.mai)
         inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.avvistedager.forEach { avvistDag ->
             assertEquals(listOf(SykepengedagerOppbruktOver67), avvistDag.begrunnelser)

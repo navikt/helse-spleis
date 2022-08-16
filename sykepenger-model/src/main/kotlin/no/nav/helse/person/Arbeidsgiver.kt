@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
-import no.nav.helse.Fødselsnummer
+import no.nav.helse.Personidentifikator
 import no.nav.helse.Toggle
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.Hendelseskontekst
@@ -291,13 +291,13 @@ internal class Arbeidsgiver private constructor(
 
         internal fun Iterable<Arbeidsgiver>.beregnFeriepengerForAlleArbeidsgivere(
             aktørId: String,
-            fødselsnummer: Fødselsnummer,
+            personidentifikator: Personidentifikator,
             feriepengeberegner: Feriepengeberegner,
             utbetalingshistorikkForFeriepenger: UtbetalingshistorikkForFeriepenger
         ) {
             forEach { it.utbetalFeriepenger(
                 aktørId,
-                fødselsnummer,
+                personidentifikator,
                 feriepengeberegner,
                 utbetalingshistorikkForFeriepenger
             ) }
@@ -450,7 +450,7 @@ internal class Arbeidsgiver private constructor(
 
     internal fun utbetalFeriepenger(
         aktørId: String,
-        fødselsnummer: Fødselsnummer,
+        personidentifikator: Personidentifikator,
         feriepengeberegner: Feriepengeberegner,
         utbetalingshistorikkForFeriepenger: UtbetalingshistorikkForFeriepenger
     ) {
@@ -458,7 +458,7 @@ internal class Arbeidsgiver private constructor(
 
         val feriepengeutbetaling = Feriepengeutbetaling.Builder(
             aktørId,
-            fødselsnummer,
+            personidentifikator,
             organisasjonsnummer,
             feriepengeberegner,
             utbetalingshistorikkForFeriepenger,

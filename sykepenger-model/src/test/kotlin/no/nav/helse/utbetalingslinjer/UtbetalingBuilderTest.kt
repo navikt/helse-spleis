@@ -3,7 +3,7 @@ package no.nav.helse.utbetalingslinjer
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.Fødselsnummer
+import no.nav.helse.Personidentifikator
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
@@ -48,14 +48,14 @@ internal class UtbetalingBuilderTest {
 
     private lateinit var aktivitetslogg: Aktivitetslogg
     private val aktørId = "111111111111111"
-    private val fødselsnummer = Fødselsnummer.tilFødselsnummer("12029240045")
+    private val personidentifikator = Personidentifikator.somPersonidentifikator("12029240045")
     private val fødselsdato = 12.februar(1992)
     private val organisasjonsnummer = "987654321"
     private val maskinellJurist = MaskinellJurist()
     private val søknadId = UUID.randomUUID()
     private val hendelsefabrikk = ArbeidsgiverHendelsefabrikk(
         aktørId = aktørId,
-        fødselsnummer = fødselsnummer,
+        personidentifikator = personidentifikator,
         organisasjonsnummer = organisasjonsnummer,
         fødselsdato = 12.februar(1992)
     )
@@ -152,7 +152,7 @@ internal class UtbetalingBuilderTest {
     private fun nyBuilder(
         periode: Periode, infotrygdHistorikk:
         Infotrygdhistorikk = Infotrygdhistorikk()
-    ) = Utbetaling.Builder(fødselsnummer, 1.januar(1970).alder, aktivitetslogg, periode, NullObserver, null, infotrygdHistorikk, NormalArbeidstaker)
+    ) = Utbetaling.Builder(personidentifikator, 1.januar(1970).alder, aktivitetslogg, periode, NullObserver, null, infotrygdHistorikk, NormalArbeidstaker)
 
     private fun vedtaksperiode(periode: Periode = 1.januar til 31.januar, organisasjonsnummer: String = this.organisasjonsnummer): Vedtaksperiode {
         val søknad = søknad(søknadId, periode)
@@ -168,7 +168,7 @@ internal class UtbetalingBuilderTest {
             arbeidsgiver = arbeidsgiver(organisasjonsnummer = organisasjonsnummer),
             søknad = søknad,
             aktørId = aktørId,
-            fødselsnummer = fødselsnummer.toString(),
+            fødselsnummer = personidentifikator.toString(),
             organisasjonsnummer = organisasjonsnummer,
             sykdomstidslinje = Sykdomstidslinje(sykdomstidslinje),
             dokumentsporing = Dokumentsporing.søknad(søknadId),
@@ -177,7 +177,7 @@ internal class UtbetalingBuilderTest {
         )
     }
 
-    private fun person() = Person(aktørId, fødselsnummer, fødselsdato.alder, maskinellJurist)
+    private fun person() = Person(aktørId, personidentifikator, fødselsdato.alder, maskinellJurist)
     private fun arbeidsgiver(organisasjonsnummer: String) = Arbeidsgiver(person(), organisasjonsnummer, maskinellJurist)
     private fun søknad(søknadId: UUID, periode: Periode): Søknad {
         val søknadsperiode = Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent)

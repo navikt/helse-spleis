@@ -3,7 +3,7 @@ package no.nav.helse.inspectors
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.Fødselsnummer
+import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Aktivitetslogg
@@ -32,7 +32,7 @@ internal class PersonInspektør(person: Person): PersonVisitor {
         private set
 
     internal lateinit var aktivitetslogg: Aktivitetslogg
-    internal lateinit var fødselsnummer: Fødselsnummer
+    internal lateinit var personidentifikator: Personidentifikator
     internal lateinit var aktørId: String
     internal lateinit var fødselsdato: LocalDate
     internal var dødsdato: LocalDate? = null
@@ -59,11 +59,11 @@ internal class PersonInspektør(person: Person): PersonVisitor {
         person: Person,
         opprettet: LocalDateTime,
         aktørId: String,
-        fødselsnummer: Fødselsnummer,
+        personidentifikator: Personidentifikator,
         dødsdato: LocalDate?,
         vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk
     ) {
-        this.fødselsnummer = fødselsnummer
+        this.personidentifikator = personidentifikator
         this.aktørId = aktørId
         this.dødsdato = dødsdato
         this.vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk

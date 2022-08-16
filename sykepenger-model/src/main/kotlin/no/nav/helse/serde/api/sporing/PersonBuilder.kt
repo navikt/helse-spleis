@@ -1,6 +1,6 @@
 package no.nav.helse.serde.api.sporing
 
-import no.nav.helse.Fødselsnummer
+import no.nav.helse.Personidentifikator
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Person
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
@@ -12,12 +12,12 @@ import java.util.*
 
 internal class PersonBuilder(builder: AbstractBuilder) : BuilderState(builder) {
     private val arbeidsgivere = mutableListOf<ArbeidsgiverBuilder>()
-    private lateinit var fødselsnummer: Fødselsnummer
+    private lateinit var personidentifikator: Personidentifikator
     private lateinit var aktørId: String
 
     internal fun build(): PersonDTO {
         return PersonDTO(
-            fødselsnummer = fødselsnummer.toString(),
+            fødselsnummer = personidentifikator.toString(),
             aktørId = aktørId,
             arbeidsgivere = arbeidsgivere.map { it.build() },
         )
@@ -37,11 +37,11 @@ internal class PersonBuilder(builder: AbstractBuilder) : BuilderState(builder) {
         person: Person,
         opprettet: LocalDateTime,
         aktørId: String,
-        fødselsnummer: Fødselsnummer,
+        personidentifikator: Personidentifikator,
         dødsdato: LocalDate?,
         vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk
     ) {
-        this.fødselsnummer = fødselsnummer
+        this.personidentifikator = personidentifikator
         this.aktørId = aktørId
         popState()
     }

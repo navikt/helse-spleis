@@ -18,7 +18,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.serde.api.dto.BegrunnelseDTO
-import no.nav.helse.somFødselsnummer
+import no.nav.helse.somPersonidentifikator
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -27,11 +27,11 @@ import org.junit.jupiter.api.Test
 @EnableToggle(Toggle.SendFeriepengeOppdrag::class)
 internal class AvvisningEtterFylte70ÅrTest : AbstractEndToEndTest() {
     companion object {
-        private val FYLLER_70_TIENDE_JANUAR = "10014812345".somFødselsnummer()
+        private val FYLLER_70_TIENDE_JANUAR = "10014812345".somPersonidentifikator()
         private val FYLLER_70_TIENDE_JANUAR_FØDSELSDATO = 10.januar(1948)
-        private val FYLLER_70_FJORTENDE_JANUAR = "14014812345".somFødselsnummer()
+        private val FYLLER_70_FJORTENDE_JANUAR = "14014812345".somPersonidentifikator()
         private val FYLLER_70_FJORTENDE_JANUAR_FØDSELSDATO = 14.januar(1948)
-        private val FYLLER_70_TOOGTYVENDE_JANUAR = "22014812345".somFødselsnummer()
+        private val FYLLER_70_TOOGTYVENDE_JANUAR = "22014812345".somPersonidentifikator()
         private val FYLLER_70_TOOGTYVENDE_JANUAR_FØDSELSDATO = 22.januar(1948)
     }
 

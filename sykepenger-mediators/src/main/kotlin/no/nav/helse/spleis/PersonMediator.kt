@@ -9,7 +9,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.prometheus.client.Summary
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.helse.Fødselsnummer
+import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.Hendelseskontekst
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
@@ -94,8 +94,8 @@ internal class PersonMediator(
         meldinger.add(Pakke(fødselsnummer, eventName, message))
     }
 
-    override fun inntektsmeldingReplay(fødselsnummer: Fødselsnummer, vedtaksperiodeId: UUID) {
-        hendelseRepository.finnInntektsmeldinger(fødselsnummer).forEach { inntektsmelding ->
+    override fun inntektsmeldingReplay(personidentifikator: Personidentifikator, vedtaksperiodeId: UUID) {
+        hendelseRepository.finnInntektsmeldinger(personidentifikator).forEach { inntektsmelding ->
             createReplayMessage(inntektsmelding, mapOf(
                 "@event_name" to "inntektsmelding_replay",
                 "vedtaksperiodeId" to vedtaksperiodeId
@@ -315,13 +315,13 @@ internal class PersonMediator(
     }
 
     private fun skalIkkeMasePåArbeidsgiver(fnr: String, orgnr: String, fom: LocalDate, tom: LocalDate): Boolean {
-        val gjeldendePeriode = hendelseRepository.finnSøknader(Fødselsnummer.tilFødselsnummer(fnr))
+        val gjeldendePeriode = hendelseRepository.finnSøknader(Personidentifikator.somPersonidentifikator(fnr))
             .flatMap { søknad -> Periode(søknad["fom"].asLocalDate(), søknad["tom"].asLocalDate()) }
             .grupperSammenhengendePerioder()
             .firstOrNull { it.contains(fom) || it.contains(tom) }
 
         return hendelseRepository
-            .finnInntektsmeldinger(Fødselsnummer.tilFødselsnummer(fnr))
+            .finnInntektsmeldinger(Personidentifikator.somPersonidentifikator(fnr))
             .filterNot { it["foersteFravaersdag"] == null }
             .filter { it["virksomhetsnummer"].asText() == orgnr }
             .map { inntektsmelding ->

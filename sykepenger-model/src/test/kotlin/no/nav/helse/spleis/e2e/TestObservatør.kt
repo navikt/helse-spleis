@@ -1,7 +1,7 @@
 package no.nav.helse.spleis.e2e
 
 import java.util.UUID
-import no.nav.helse.Fødselsnummer
+import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.Hendelseskontekst
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.PersonObserver
@@ -94,7 +94,7 @@ internal class TestObservatør : PersonObserver {
         trengerIkkeInntektsmeldingVedtaksperioder.add(event)
     }
 
-    override fun inntektsmeldingReplay(fødselsnummer: Fødselsnummer, vedtaksperiodeId: UUID) {
+    override fun inntektsmeldingReplay(personidentifikator: Personidentifikator, vedtaksperiodeId: UUID) {
         inntektsmeldingReplayEventer.add(vedtaksperiodeId)
     }
 

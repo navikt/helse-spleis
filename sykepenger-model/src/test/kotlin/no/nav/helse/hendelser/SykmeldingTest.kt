@@ -7,7 +7,7 @@ import no.nav.helse.januar
 import no.nav.helse.juli
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.etterlevelse.MaskinellJurist
-import no.nav.helse.somFødselsnummer
+import no.nav.helse.somPersonidentifikator
 import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.Sykedag
 import no.nav.helse.sykdomstidslinje.Dag.UkjentDag
@@ -25,7 +25,7 @@ internal class SykmeldingTest {
         val hendelsefabrikk = ArbeidsgiverHendelsefabrikk(
             aktørId = "12345",
             organisasjonsnummer = "987654321",
-            fødselsnummer = UNG_PERSON_FNR_2018.somFødselsnummer(),
+            personidentifikator = UNG_PERSON_FNR_2018.somPersonidentifikator(),
             fødselsdato = 12.februar(1992)
         )
     }

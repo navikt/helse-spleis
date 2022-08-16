@@ -24,7 +24,7 @@ import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.NullObserve
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
-import no.nav.helse.somFødselsnummer
+import no.nav.helse.somPersonidentifikator
 import no.nav.helse.sykepengegrunnlag
 import no.nav.helse.testhelpers.AP
 import no.nav.helse.testhelpers.NAV
@@ -222,7 +222,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             meldingsreferanseId = UUID.randomUUID(),
             vedtaksperiodeId = UUID.randomUUID().toString(),
             aktørId = "AKTØR_ID",
-            fødselsnummer = "20043769969".somFødselsnummer(),
+            personidentifikator = "20043769969".somPersonidentifikator(),
             orgnummer = "ORGNUMMER",
             inntektsvurdering = Inntektsvurdering(emptyList()),
             medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
@@ -250,7 +250,7 @@ internal class VilkårsgrunnlagHistorikkTest {
                 meldingsreferanseId = UUID.randomUUID(),
                 vedtaksperiodeId = UUID.randomUUID().toString(),
                 aktørId = "AKTØR_ID",
-                fødselsnummer = "20043769969".somFødselsnummer(),
+                personidentifikator = "20043769969".somPersonidentifikator(),
                 orgnummer = "ORGNUMMER",
                 inntektsvurdering = Inntektsvurdering(emptyList()),
                 medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
@@ -277,7 +277,7 @@ internal class VilkårsgrunnlagHistorikkTest {
                 meldingsreferanseId = UUID.randomUUID(),
                 vedtaksperiodeId = UUID.randomUUID().toString(),
                 aktørId = "AKTØR_ID",
-                fødselsnummer = "20043769969".somFødselsnummer(),
+                personidentifikator = "20043769969".somPersonidentifikator(),
                 orgnummer = "ORGNUMMER",
                 inntektsvurdering = Inntektsvurdering(emptyList()),
                 medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
@@ -288,7 +288,7 @@ internal class VilkårsgrunnlagHistorikkTest {
                 meldingsreferanseId = UUID.randomUUID(),
                 vedtaksperiodeId = UUID.randomUUID().toString(),
                 aktørId = "AKTØR_ID",
-                fødselsnummer = "20043769969".somFødselsnummer(),
+                personidentifikator = "20043769969".somPersonidentifikator(),
                 orgnummer = "ORGNUMMER",
                 inntektsvurdering = Inntektsvurdering(emptyList()),
                 medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Nei),
@@ -332,7 +332,7 @@ internal class VilkårsgrunnlagHistorikkTest {
                 meldingsreferanseId = UUID.randomUUID(),
                 vedtaksperiodeId = UUID.randomUUID().toString(),
                 aktørId = "AKTØR_ID",
-                fødselsnummer = "20043769969".somFødselsnummer(),
+                personidentifikator = "20043769969".somPersonidentifikator(),
                 orgnummer = "ORGNUMMER",
                 inntektsvurdering = Inntektsvurdering(emptyList()),
                 medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
@@ -367,7 +367,7 @@ internal class VilkårsgrunnlagHistorikkTest {
                 meldingsreferanseId = UUID.randomUUID(),
                 vedtaksperiodeId = UUID.randomUUID().toString(),
                 aktørId = "AKTØR_ID",
-                fødselsnummer = "20043769969".somFødselsnummer(),
+                personidentifikator = "20043769969".somPersonidentifikator(),
                 orgnummer = "ORGNUMMER",
                 inntektsvurdering = Inntektsvurdering(emptyList()),
                 medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
@@ -416,7 +416,7 @@ internal class VilkårsgrunnlagHistorikkTest {
                 meldingsreferanseId = UUID.randomUUID(),
                 vedtaksperiodeId = UUID.randomUUID().toString(),
                 aktørId = "AKTØR_ID",
-                fødselsnummer = "20043769969".somFødselsnummer(),
+                personidentifikator = "20043769969".somPersonidentifikator(),
                 orgnummer = "ORGNUMMER",
                 inntektsvurdering = Inntektsvurdering(emptyList()),
                 medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
@@ -444,7 +444,7 @@ internal class VilkårsgrunnlagHistorikkTest {
                 meldingsreferanseId = UUID.randomUUID(),
                 vedtaksperiodeId = UUID.randomUUID().toString(),
                 aktørId = "AKTØR_ID",
-                fødselsnummer = "20043769969".somFødselsnummer(),
+                personidentifikator = "20043769969".somPersonidentifikator(),
                 orgnummer = "ORGNUMMER",
                 inntektsvurdering = Inntektsvurdering(emptyList()),
                 medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Nei),
@@ -572,7 +572,7 @@ internal class VilkårsgrunnlagHistorikkTest {
                 meldingsreferanseId = UUID.randomUUID(),
                 vedtaksperiodeId = UUID.randomUUID().toString(),
                 aktørId = "AKTØR_ID",
-                fødselsnummer = "20043769969".somFødselsnummer(),
+                personidentifikator = "20043769969".somPersonidentifikator(),
                 orgnummer = "ORGNUMMER",
                 inntektsvurdering = Inntektsvurdering(emptyList()),
                 medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Nei),
@@ -591,7 +591,7 @@ internal class VilkårsgrunnlagHistorikkTest {
                 meldingsreferanseId = UUID.randomUUID(),
                 vedtaksperiodeId = UUID.randomUUID().toString(),
                 aktørId = "AKTØR_ID",
-                fødselsnummer = "20043769969".somFødselsnummer(),
+                personidentifikator = "20043769969".somPersonidentifikator(),
                 orgnummer = "ORGNUMMER",
                 inntektsvurdering = Inntektsvurdering(emptyList()),
                 medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
@@ -620,7 +620,7 @@ internal class VilkårsgrunnlagHistorikkTest {
                 meldingsreferanseId = UUID.randomUUID(),
                 vedtaksperiodeId = UUID.randomUUID().toString(),
                 aktørId = "AKTØR_ID",
-                fødselsnummer = "20043769969".somFødselsnummer(),
+                personidentifikator = "20043769969".somPersonidentifikator(),
                 orgnummer = "ORGNUMMER",
                 inntektsvurdering = Inntektsvurdering(emptyList()),
                 medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Nei),
@@ -639,7 +639,7 @@ internal class VilkårsgrunnlagHistorikkTest {
                 meldingsreferanseId = UUID.randomUUID(),
                 vedtaksperiodeId = UUID.randomUUID().toString(),
                 aktørId = "AKTØR_ID",
-                fødselsnummer = "20043769969".somFødselsnummer(),
+                personidentifikator = "20043769969".somPersonidentifikator(),
                 orgnummer = "ORGNUMMER",
                 inntektsvurdering = Inntektsvurdering(emptyList()),
                 medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
@@ -668,7 +668,7 @@ internal class VilkårsgrunnlagHistorikkTest {
                 meldingsreferanseId = UUID.randomUUID(),
                 vedtaksperiodeId = UUID.randomUUID().toString(),
                 aktørId = "AKTØR_ID",
-                fødselsnummer = "20043769969".somFødselsnummer(),
+                personidentifikator = "20043769969".somPersonidentifikator(),
                 orgnummer = "ORGNUMMER",
                 inntektsvurdering = Inntektsvurdering(emptyList()),
                 medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
@@ -701,13 +701,13 @@ internal class VilkårsgrunnlagHistorikkTest {
     @Test
     fun `Avslår vilkår for minimum inntekt med riktig begrunnelse for dem mellom 67 og 70`() {
         val vilkårsgrunnlagHistorikk = VilkårsgrunnlagHistorikk()
-        val fødselsnummer = "01015036963".somFødselsnummer()
+        val fødselsnummer = "01015036963".somPersonidentifikator()
         val fødselsdato = 1.januar(1950)
         val vilkårsgrunnlag = Vilkårsgrunnlag(
                 meldingsreferanseId = UUID.randomUUID(),
                 vedtaksperiodeId = UUID.randomUUID().toString(),
                 aktørId = "AKTØR_ID",
-                fødselsnummer = fødselsnummer,
+                personidentifikator = fødselsnummer,
                 orgnummer = "ORGNUMMER",
                 inntektsvurdering = Inntektsvurdering(emptyList()),
                 medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
@@ -779,7 +779,7 @@ internal class VilkårsgrunnlagHistorikkTest {
                 meldingsreferanseId = UUID.randomUUID(),
                 vedtaksperiodeId = UUID.randomUUID().toString(),
                 aktørId = "AKTØR_ID",
-                fødselsnummer = "20043769969".somFødselsnummer(),
+                personidentifikator = "20043769969".somPersonidentifikator(),
                 orgnummer = "ORGNUMMER",
                 inntektsvurdering = Inntektsvurdering(emptyList()),
                 medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),

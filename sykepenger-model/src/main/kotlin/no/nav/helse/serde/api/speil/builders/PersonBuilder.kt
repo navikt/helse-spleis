@@ -3,7 +3,7 @@ package no.nav.helse.serde.api.speil.builders
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.Fødselsnummer
+import no.nav.helse.Personidentifikator
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Person
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
@@ -16,7 +16,7 @@ import no.nav.helse.utbetalingstidslinje.Alder
 internal class PersonBuilder(
     builder: AbstractBuilder,
     private val person: Person,
-    private val fødselsnummer: Fødselsnummer,
+    private val personidentifikator: Personidentifikator,
     private val aktørId: String,
     private val dødsdato: LocalDate?,
     private val vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk,
@@ -32,7 +32,7 @@ internal class PersonBuilder(
         val vilkårsgrunnlagHistorikk = VilkårsgrunnlagBuilder(person, sammenligningsgrunnlagBuilder, inntektshistorikkForAordningenBuilder).build()
 
         return PersonDTO(
-            fødselsnummer = fødselsnummer.toString(),
+            fødselsnummer = personidentifikator.toString(),
             aktørId = aktørId,
             arbeidsgivere = arbeidsgivere.map { it.build(hendelser, alder) },
             vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk.toDTO(),
@@ -61,7 +61,7 @@ internal class PersonBuilder(
         person: Person,
         opprettet: LocalDateTime,
         aktørId: String,
-        fødselsnummer: Fødselsnummer,
+        personidentifikator: Personidentifikator,
         dødsdato: LocalDate?,
         vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk
     ) {

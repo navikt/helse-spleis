@@ -19,7 +19,7 @@ import no.nav.helse.person.Personopplysninger
 import no.nav.helse.person.SpesifikkKontekst
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.somFødselsnummer
+import no.nav.helse.somPersonidentifikator
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -204,7 +204,7 @@ class BehovMediatorTest {
         }
 
         override fun personopplysninger() = Personopplysninger(
-            fødselsnummer = fødselsnummer.somFødselsnummer(),
+            personidentifikator = fødselsnummer.somPersonidentifikator(),
             aktørId = aktørId,
             fødselsdato = 24.desember(2000)
         )

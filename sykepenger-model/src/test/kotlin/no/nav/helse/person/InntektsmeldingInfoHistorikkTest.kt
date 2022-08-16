@@ -10,14 +10,14 @@ import org.junit.jupiter.api.Test
 import java.util.*
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.februar
-import no.nav.helse.somFødselsnummer
+import no.nav.helse.somPersonidentifikator
 
 internal class InntektsmeldingInfoHistorikkTest {
 
     private lateinit var historikk: InntektsmeldingInfoHistorikk
     private val hendelsefabrikk = ArbeidsgiverHendelsefabrikk(
         organisasjonsnummer = "orgnr",
-        fødselsnummer = "12029212345".somFødselsnummer(),
+        personidentifikator = "12029212345".somPersonidentifikator(),
         aktørId = "aktør",
         fødselsdato = 12.februar(1992)
     )

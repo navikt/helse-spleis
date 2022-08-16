@@ -16,7 +16,7 @@ import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.september
-import no.nav.helse.somFødselsnummer
+import no.nav.helse.somPersonidentifikator
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -35,7 +35,7 @@ internal class InfotrygdInntektsopplysningTest {
         private val DATO = 1.januar
         private val hendelsefabrikk = ArbeidsgiverHendelsefabrikk(
             aktørId = "aktørId",
-            fødselsnummer = "12029112345".somFødselsnummer(),
+            personidentifikator = "12029112345".somPersonidentifikator(),
             organisasjonsnummer = ORGNR,
             fødselsdato = 12.februar(1992)
         )

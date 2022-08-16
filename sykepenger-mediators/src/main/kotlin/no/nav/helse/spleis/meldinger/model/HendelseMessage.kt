@@ -7,7 +7,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asLocalDateTime
-import no.nav.helse.somFødselsnummer
+import no.nav.helse.somPersonidentifikator
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.db.HendelseRepository
 import org.slf4j.Logger
@@ -23,7 +23,7 @@ internal abstract class HendelseMessage(private val packet: JsonMessage) {
     internal abstract fun behandle(mediator: IHendelseMediator, context: MessageContext)
 
     internal fun lagreMelding(repository: HendelseRepository) {
-        repository.lagreMelding(this, fødselsnummer.somFødselsnummer(), id, toJson())
+        repository.lagreMelding(this, fødselsnummer.somPersonidentifikator(), id, toJson())
     }
 
     internal fun logReplays(logger: Logger, size: Int) {

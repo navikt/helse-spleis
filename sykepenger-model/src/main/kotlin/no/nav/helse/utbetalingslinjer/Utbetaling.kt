@@ -4,7 +4,7 @@ import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.Fødselsnummer
+import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.Hendelseskontekst
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
@@ -984,7 +984,7 @@ internal class Utbetaling private constructor(
     enum class Utbetalingtype { UTBETALING, ETTERUTBETALING, ANNULLERING, REVURDERING, FERIEPENGER }
 
     internal class Builder(
-        private val fødselsnummer: Fødselsnummer,
+        private val personidentifikator: Personidentifikator,
         private val alder: Alder,
         private val aktivitetslogg: IAktivitetslogg,
         private val periode: Periode,
@@ -1092,7 +1092,7 @@ internal class Utbetaling private constructor(
                 fun build(utbetalingstidslinje: Utbetalingstidslinje): Pair<Vedtaksperiode, Utbetaling> {
                     return vedtaksperiode to lagUtbetaling(
                         utbetalinger = utbetalinger,
-                        fødselsnummer = fødselsnummer.toString(),
+                        fødselsnummer = personidentifikator.toString(),
                         beregningId = beregningId,
                         organisasjonsnummer = organisasjonsnummer,
                         utbetalingstidslinje = utbetalingstidslinje,

@@ -8,7 +8,7 @@ import java.util.UUID
 import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.Fødselsnummer
+import no.nav.helse.Personidentifikator
 import no.nav.helse.serde.migration.Json
 import no.nav.helse.serde.migration.Navn
 import no.nav.helse.spleis.PostgresProbe
@@ -70,7 +70,7 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         melding.lagreMelding(this)
     }
 
-    internal fun finnInntektsmeldinger(fnr: Fødselsnummer): List<JsonNode> =
+    internal fun finnInntektsmeldinger(fnr: Personidentifikator): List<JsonNode> =
         sessionOf(dataSource).use { session ->
             session.run(
                 queryOf(
@@ -82,7 +82,7 @@ internal class HendelseRepository(private val dataSource: DataSource) {
             )
         }
 
-    internal fun finnSøknader(fnr: Fødselsnummer): List<JsonNode> =
+    internal fun finnSøknader(fnr: Personidentifikator): List<JsonNode> =
         sessionOf(dataSource).use { session ->
             session.run(
                 queryOf(
@@ -94,13 +94,13 @@ internal class HendelseRepository(private val dataSource: DataSource) {
             )
         }
 
-    internal fun lagreMelding(melding: HendelseMessage, fødselsnummer: Fødselsnummer, meldingId: UUID, json: String) {
+    internal fun lagreMelding(melding: HendelseMessage, personidentifikator: Personidentifikator, meldingId: UUID, json: String) {
         val meldingtype = meldingstype(melding) ?: return
         sessionOf(dataSource).use { session ->
             session.run(
                 queryOf(
                     "INSERT INTO melding (fnr, melding_id, melding_type, data) VALUES (?, ?, ?, (to_json(?::json))) ON CONFLICT(melding_id) DO NOTHING",
-                    fødselsnummer.toLong(),
+                    personidentifikator.toLong(),
                     meldingId.toString(),
                     meldingtype.name,
                     json
@@ -155,12 +155,12 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         else -> null.also { log.warn("ukjent meldingstype ${melding::class.simpleName}: melding lagres ikke") }
     }
 
-    internal fun hentAlleHendelser(fødselsnummer: Fødselsnummer): Map<UUID, Pair<Navn, Json>> {
+    internal fun hentAlleHendelser(personidentifikator: Personidentifikator): Map<UUID, Pair<Navn, Json>> {
         return sessionOf(dataSource).use { session ->
             session.run(
                 queryOf(
                     "SELECT melding_id, melding_type, data FROM melding WHERE fnr = ? AND melding_type IN (?, ?, ?, ?, ?, ?, ?)",
-                    fødselsnummer.toLong(), NY_SØKNAD.name, SENDT_SØKNAD_ARBEIDSGIVER.name, SENDT_SØKNAD_NAV.name, INNTEKTSMELDING.name, OVERSTYRTIDSLINJE.name,
+                    personidentifikator.toLong(), NY_SØKNAD.name, SENDT_SØKNAD_ARBEIDSGIVER.name, SENDT_SØKNAD_NAV.name, INNTEKTSMELDING.name, OVERSTYRTIDSLINJE.name,
                     OVERSTYRINNTEKT.name, VILKÅRSGRUNNLAG.name
                 ).map {
                     UUID.fromString(it.string("melding_id")) to Pair<Navn, Json>(

@@ -17,7 +17,7 @@ import no.nav.helse.person.InntektsmeldingInfo
 import no.nav.helse.person.Personopplysninger
 import no.nav.helse.person.Refusjonshistorikk
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
-import no.nav.helse.somFødselsnummer
+import no.nav.helse.somPersonidentifikator
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
@@ -64,7 +64,7 @@ class Inntektsmelding(
         sykdomstidslinje = arbeidsgivertidslinje()
     }
 
-    override fun personopplysninger() = Personopplysninger(fødselsnummer.somFødselsnummer(), aktørId, fødselsdato)
+    override fun personopplysninger() = Personopplysninger(fødselsnummer.somPersonidentifikator(), aktørId, fødselsdato)
 
     private fun arbeidsgivertidslinje(): Sykdomstidslinje {
         val arbeidsdager = arbeidsgiverperiode?.let { Sykdomstidslinje.arbeidsdager(arbeidsgiverperiode, kilde) } ?: return Sykdomstidslinje()

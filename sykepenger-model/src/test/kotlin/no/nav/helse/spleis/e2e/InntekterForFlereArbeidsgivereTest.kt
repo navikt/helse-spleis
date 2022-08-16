@@ -447,7 +447,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
             meldingsreferanseId = UUID.randomUUID(),
             vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer).toString(),
             aktørId = AKTØRID,
-            fødselsnummer = UNG_PERSON_FNR_2018,
+            personidentifikator = UNG_PERSON_FNR_2018,
             orgnummer = orgnummer,
             inntektsvurdering = Inntektsvurdering(
                 inntekter = inntekter

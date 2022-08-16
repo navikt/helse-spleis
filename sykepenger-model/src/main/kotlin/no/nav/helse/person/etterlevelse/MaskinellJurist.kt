@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.time.Year
 import java.time.format.DateTimeFormatter
 import java.util.UUID
-import no.nav.helse.Fødselsnummer
+import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.januar
@@ -65,8 +65,8 @@ class MaskinellJurist private constructor(
 
     private fun kontekster(): Map<String, KontekstType> = this.kontekster.toMap()
 
-    fun medFødselsnummer(fødselsnummer: Fødselsnummer) =
-        kopierMedKontekst(mapOf(fødselsnummer.toString() to KontekstType.Fødselsnummer) + kontekster.filterNot { it.value == KontekstType.Fødselsnummer })
+    fun medFødselsnummer(personidentifikator: Personidentifikator) =
+        kopierMedKontekst(mapOf(personidentifikator.toString() to KontekstType.Fødselsnummer) + kontekster.filterNot { it.value == KontekstType.Fødselsnummer })
 
     fun medOrganisasjonsnummer(organisasjonsnummer: String) =
         kopierMedKontekst(mapOf(organisasjonsnummer to KontekstType.Organisasjonsnummer) + kontekster.filterNot { it.value == KontekstType.Organisasjonsnummer })

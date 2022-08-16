@@ -4,7 +4,7 @@ import java.time.LocalDateTime
 import java.time.Month
 import java.time.Year
 import java.util.UUID
-import no.nav.helse.Fødselsnummer
+import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.person.Aktivitetskontekst
@@ -144,7 +144,7 @@ internal class Feriepengeutbetaling private constructor(
 
     internal class Builder(
         private val aktørId: String,
-        private val fødselsnummer: Fødselsnummer,
+        private val personidentifikator: Personidentifikator,
         private val orgnummer: String,
         private val feriepengeberegner: Feriepengeberegner,
         private val utbetalingshistorikkForFeriepenger: UtbetalingshistorikkForFeriepenger,
@@ -233,7 +233,7 @@ internal class Feriepengeutbetaling private constructor(
                     ?: genererUtbetalingsreferanse(UUID.randomUUID())
 
             var personoppdrag = Oppdrag(
-                mottaker = fødselsnummer.toString(),
+                mottaker = personidentifikator.toString(),
                 fagområde = Fagområde.Sykepenger,
                 linjer = listOf(
                     Utbetalingslinje(
