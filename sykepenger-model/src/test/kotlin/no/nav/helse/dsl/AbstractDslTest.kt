@@ -77,6 +77,27 @@ internal abstract class AbstractDslTest {
 
     protected operator fun <R> String.invoke(testblokk: TestPerson.TestArbeidsgiver.() -> R) =
         testperson.arbeidsgiver(this, testblokk)
+
+    protected fun List<String>.forlengVedtak(periode: Periode, grad: Prosentdel = 100.prosent) {
+        forEach {
+            it {
+                håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, grad))
+                håndterSøknad(Sykdom(periode.start, periode.endInclusive, grad))
+            }
+        }
+        (first()){
+            håndterYtelser(observatør.sisteVedtaksperiodeId(orgnummer))
+            håndterSimulering(observatør.sisteVedtaksperiodeId(orgnummer))
+            håndterUtbetalingsgodkjenning(observatør.sisteVedtaksperiodeId(orgnummer))
+            håndterUtbetalt()
+        }
+        drop(1).forEach { it {
+            håndterYtelser(observatør.sisteVedtaksperiodeId(orgnummer))
+            håndterSimulering(observatør.sisteVedtaksperiodeId(orgnummer))
+            håndterUtbetalingsgodkjenning(observatør.sisteVedtaksperiodeId(orgnummer))
+            håndterUtbetalt()
+        }}
+    }
     protected fun List<String>.nyeVedtak(
         periode: Periode, grad: Prosentdel = 100.prosent, inntekt: Inntekt = 20000.månedlig,
         inntekterBlock: Inntektperioder.() -> Unit = {
@@ -95,21 +116,21 @@ internal abstract class AbstractDslTest {
             håndterInntektsmelding(listOf(periode.start til periode.start.plusDays(15)), beregnetInntekt = inntekt)
         }}
         (first()){
-            håndterYtelser(1.vedtaksperiode)
-            håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
+            håndterYtelser(observatør.sisteVedtaksperiodeId(orgnummer))
+            håndterVilkårsgrunnlag(observatør.sisteVedtaksperiodeId(orgnummer), inntektsvurdering = Inntektsvurdering(
                 inntektperioderForSammenligningsgrunnlag {
                     inntekterBlock()
                 })
             )
-            håndterYtelser(1.vedtaksperiode)
-            håndterSimulering(1.vedtaksperiode)
-            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterYtelser(observatør.sisteVedtaksperiodeId(orgnummer))
+            håndterSimulering(observatør.sisteVedtaksperiodeId(orgnummer))
+            håndterUtbetalingsgodkjenning(observatør.sisteVedtaksperiodeId(orgnummer))
             håndterUtbetalt()
         }
         drop(1).forEach { it {
-            håndterYtelser(1.vedtaksperiode)
-            håndterSimulering(1.vedtaksperiode)
-            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterYtelser(observatør.sisteVedtaksperiodeId(orgnummer))
+            håndterSimulering(observatør.sisteVedtaksperiodeId(orgnummer))
+            håndterUtbetalingsgodkjenning(observatør.sisteVedtaksperiodeId(orgnummer))
             håndterUtbetalt()
         }}
     }

@@ -4,10 +4,12 @@ import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.EnableToggle
 import no.nav.helse.Toggle
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.TestPerson
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
 import no.nav.helse.dsl.nyttVedtak
+import no.nav.helse.februar
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -18,10 +20,14 @@ import no.nav.helse.inspectors.Kilde.SAKSBEHANDLER
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.person.TilstandType.AVSLUTTET
+import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.spleis.e2e.grunnlag
@@ -168,27 +174,306 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
     }
 
     @Test
-    fun `3 arbeidsgivere`() {
-        (a1 og a2 og a3).nyeVedtak(1.januar til 31.januar)
+    fun `3 arbeidsgivere -- justerer inntekten ned på a1`() {
+        (a1 og a2 og a3).nyeVedtak(1.januar til 31.januar, inntekt = 32000.månedlig)
+        nullstillTilstandsendringer()
+        a1 { assertDag(17.januar, 721.0.daglig, aktuellDagsinntekt = 32000.månedlig) }
+        a2 { assertDag(17.januar, 720.0.daglig, aktuellDagsinntekt = 32000.månedlig) }
+        a2 { assertDag(17.januar, 720.0.daglig, aktuellDagsinntekt = 32000.månedlig) }
+
         a1 {
-            håndterOverstyrInntekt(1.januar, 25000.månedlig)
+            håndterOverstyrInntekt(1.januar, 31000.månedlig)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+            assertTilstander(
+                1.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_GJENNOMFØRT_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+                TIL_UTBETALING,
+                AVSLUTTET
+            )
+            assertDag(17.januar, 705.0.daglig, aktuellDagsinntekt = 31000.månedlig)
         }
-        // TODO
+        a2 {
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+            assertTilstander(
+                1.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_GJENNOMFØRT_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+                TIL_UTBETALING,
+                AVSLUTTET
+            )
+            assertDag(17.januar, 728.0.daglig, aktuellDagsinntekt = 32000.månedlig)
+        }
+        a3 {
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+            assertTilstander(
+                1.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_GJENNOMFØRT_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+                TIL_UTBETALING,
+                AVSLUTTET
+            )
+            assertDag(17.januar, 728.0.daglig, aktuellDagsinntekt = 32000.månedlig)
+        }
     }
 
     @Test
-    fun `a1 er avsluttet og a2 er til godkjenning -- revurderer a1`() {
-        // TODO
+    fun `a1 er avsluttet og a2 er i AvventerGodkjenning -- revurderer a1`() {
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        }
+        a2 {
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        }
+        a1 { håndterInntektsmelding(listOf(1.januar til 16.januar)) }
+        a2 { håndterInntektsmelding(listOf(1.januar til 16.januar)) }
+        a1 {
+            håndterYtelser(1.vedtaksperiode)
+            håndterVilkårsgrunnlag(
+                1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
+                    inntekter = listOf(
+                        sammenligningsgrunnlag(a1, 1.januar, INNTEKT.repeat(12)),
+                        sammenligningsgrunnlag(a2, 1.januar, INNTEKT.repeat(12)),
+                    )
+                ),
+                inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
+                    inntekter = listOf(
+                        grunnlag(a1, 1.januar, INNTEKT.repeat(3)),
+                        grunnlag(a2, 1.januar, INNTEKT.repeat(3))
+                    ), arbeidsforhold = emptyList()
+                ),
+                arbeidsforhold = listOf(
+                    Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null),
+                    Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null)
+                )
+            )
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+        }
+        a2 {
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+        }
+        nullstillTilstandsendringer()
+        a1 {
+            håndterOverstyrInntekt(1.januar, 32000.månedlig)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+            assertTilstander(
+                1.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_GJENNOMFØRT_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+                TIL_UTBETALING,
+                AVSLUTTET
+            )
+        }
+        a2 {
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+            assertTilstander(
+                1.vedtaksperiode,
+                AVVENTER_GODKJENNING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_HISTORIKK,
+                AVVENTER_SIMULERING,
+                AVVENTER_GODKJENNING,
+                TIL_UTBETALING,
+                AVSLUTTET
+            )
+        }
+    }
+
+    @Test
+    fun `a1 er avsluttet og a2 er til AvventerGodkjenningRevurdering -- revurderer a1`() {
+        (a1 og a2).nyeVedtak(1.januar til 31.januar, inntekt = 32000.månedlig)
+        nullstillTilstandsendringer()
+        a1 {
+            håndterOverstyrInntekt(1.januar, 31000.månedlig)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+        }
+        a2 {
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+        }
+        nullstillTilstandsendringer()
+        a1 {
+            håndterOverstyrInntekt(1.januar, 31000.månedlig)
+            håndterYtelser(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_GJENNOMFØRT_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+                AVSLUTTET
+            )
+        }
+        a2 {
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+            assertTilstander(
+                1.vedtaksperiode,
+                AVVENTER_GODKJENNING_REVURDERING,
+                AVVENTER_REVURDERING,
+                AVVENTER_GJENNOMFØRT_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+                TIL_UTBETALING,
+                AVSLUTTET
+            )
+        }
     }
 
     @Test
     fun `a1 er avsluttet og a2 er til godkjenning -- overstyrer a2`() {
-        // TODO
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        }
+        a2 {
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        }
+        a1 { håndterInntektsmelding(listOf(1.januar til 16.januar)) }
+        a2 { håndterInntektsmelding(listOf(1.januar til 16.januar)) }
+        a1 {
+            håndterYtelser(1.vedtaksperiode)
+            håndterVilkårsgrunnlag(
+                1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
+                    inntekter = listOf(
+                        sammenligningsgrunnlag(a1, 1.januar, INNTEKT.repeat(12)),
+                        sammenligningsgrunnlag(a2, 1.januar, INNTEKT.repeat(12)),
+                    )
+                ),
+                inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
+                    inntekter = listOf(
+                        grunnlag(a1, 1.januar, INNTEKT.repeat(3)),
+                        grunnlag(a2, 1.januar, INNTEKT.repeat(3))
+                    ), arbeidsforhold = emptyList()
+                ),
+                arbeidsforhold = listOf(
+                    Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null),
+                    Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null)
+                )
+            )
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+        }
+        a2 {
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterOverstyrInntekt(1.januar, 32000.månedlig)
+            assertForventetFeil(
+                forklaring = "Feature ikke støttet enda: https://trello.com/c/aiYZO1VK",
+                nå = {
+                    assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
+                },
+                ønsket = {
+                    assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+                }
+            )
+        }
+        a1 {
+            assertForventetFeil(
+                forklaring = "Feature ikke støttet enda: https://trello.com/c/aiYZO1VK",
+                nå = {
+                    assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+                },
+                ønsket = {
+                    assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+                }
+            )
+        }
     }
 
     @Test
     fun `revurderer forlengelse`() {
-        // TODO
+        (a1 og a2).nyeVedtak(1.januar til 31.januar)
+        (a1 og a2).forlengVedtak(1.februar til 28.februar)
+        nullstillTilstandsendringer()
+        a1 {
+            håndterOverstyrInntekt(1.januar, 32000.månedlig)
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+            håndterUtbetalt()
+            assertTilstander(
+                2.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_GJENNOMFØRT_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+                TIL_UTBETALING,
+                AVSLUTTET
+            )
+            assertTilstander(
+                1.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_GJENNOMFØRT_REVURDERING,
+                AVSLUTTET
+            )
+        }
+        a2 {
+            håndterYtelser(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+            assertTilstander(
+                2.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_GJENNOMFØRT_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+                AVSLUTTET
+            )
+            assertTilstander(
+                1.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_GJENNOMFØRT_REVURDERING,
+                AVSLUTTET
+            )
+        }
     }
 
     @Test
