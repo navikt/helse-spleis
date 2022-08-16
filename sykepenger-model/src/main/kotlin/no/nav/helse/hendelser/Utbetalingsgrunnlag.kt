@@ -38,7 +38,7 @@ class Utbetalingsgrunnlag(
             .filter { it.gjelder(skjæringstidspunkt) }
             .grupperArbeidsforholdPerOrgnummer().forEach { (orgnummer, arbeidsforhold) ->
             if (arbeidsforhold.any { it.erSøppel() }) {
-                warn("Vi fant ugyldige arbeidsforhold i Aareg, burde sjekkes opp nærmere") // TODO: må ses på av en voksen
+                varsel("Vi fant ugyldige arbeidsforhold i Aareg, burde sjekkes opp nærmere") // TODO: må ses på av en voksen
             }
             person.lagreArbeidsforhold(orgnummer, arbeidsforhold, this, skjæringstidspunkt)
         }

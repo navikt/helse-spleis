@@ -23,7 +23,7 @@ class UtbetalingHendelse(
         if (status == AVVIST || status == FEIL) {
             info("Utbetaling feilet med status $status. Feilmelding fra Oppdragsystemet: $melding")
             funksjonellFeil("Utbetaling feilet med status $status")
-        } else if (status == AKSEPTERT_MED_FEIL) warn("Utbetalingen ble gjennomført, men med advarsel: $melding")
+        } else if (status == AKSEPTERT_MED_FEIL) varsel("Utbetalingen ble gjennomført, men med advarsel: $melding")
     }
 
     internal fun skalForsøkesIgjen() = status == FEIL

@@ -12,11 +12,11 @@ class Medlemskapsvurdering(
                 true
             }
             Medlemskapstatus.VetIkke -> {
-                aktivitetslogg.warn("Vurder lovvalg og medlemskap")
+                aktivitetslogg.varsel("Vurder lovvalg og medlemskap")
                 true
             }
             Medlemskapstatus.Nei -> {
-                aktivitetslogg.warn("Perioden er avslått på grunn av at den sykmeldte ikke er medlem av Folketrygden")
+                aktivitetslogg.varsel("Perioden er avslått på grunn av at den sykmeldte ikke er medlem av Folketrygden")
                 false
             }
         }

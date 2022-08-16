@@ -31,7 +31,7 @@ internal class Refusjonsgjødsler(
         if (infotrygdhistorikk.harBrukerutbetalingerFor(organisasjonsnummer, utbetalingsperiode.periode())) {
             aktivitetslogg.funksjonellFeil("Finner ikke informasjon om refusjon i inntektsmelding og personen har brukerutbetaling")
         } else {
-            aktivitetslogg.warn("Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler.")
+            aktivitetslogg.varsel("Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler.")
         }
     }
 

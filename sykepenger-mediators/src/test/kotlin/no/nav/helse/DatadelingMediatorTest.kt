@@ -25,7 +25,7 @@ internal class DatadelingMediatorTest {
 
     @Test
     fun `datadelingMediator fanger opp nye aktiviteter på hendelsen`() {
-        testhendelse.warn("Dette er et varsel")
+        testhendelse.varsel("Dette er et varsel")
         datadelingMediator.finalize(testRapid)
         assertEquals(1, testRapid.inspektør.antall())
         assertNotNull(testRapid.inspektør.siste("aktivitetslogg_ny_aktivitet"))
@@ -49,7 +49,7 @@ internal class DatadelingMediatorTest {
     @Test
     fun nivåer() {
         testhendelse.info("Dette er en infomelding")
-        testhendelse.warn("Dette er et varsel")
+        testhendelse.varsel("Dette er et varsel")
         testhendelse.funksjonellFeil("Dette er en error")
         try {
             testhendelse.logiskFeil("Dette er en severe")

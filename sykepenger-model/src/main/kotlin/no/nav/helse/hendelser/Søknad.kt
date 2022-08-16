@@ -74,9 +74,9 @@ class Søknad(
         perioder.forEach { it.subsumsjon(this, subsumsjonObserver) }
         perioder.forEach { it.valider(this) }
         andreInntektskilder.forEach { it.valider(this) }
-        if (permittert) warn("Søknaden inneholder permittering. Vurder om permittering har konsekvens for rett til sykepenger")
+        if (permittert) varsel("Søknaden inneholder permittering. Vurder om permittering har konsekvens for rett til sykepenger")
         merknaderFraSykmelding.forEach { it.valider(this) }
-        if (sykdomstidslinje.any { it is Dag.ForeldetSykedag }) warn("Minst én dag er avslått på grunn av foreldelse. Vurder å sende vedtaksbrev fra Infotrygd")
+        if (sykdomstidslinje.any { it is Dag.ForeldetSykedag }) varsel("Minst én dag er avslått på grunn av foreldelse. Vurder å sende vedtaksbrev fra Infotrygd")
         return this
     }
 
@@ -117,7 +117,7 @@ class Søknad(
     class Merknad(private val type: String) {
         internal fun valider(aktivitetslogg: IAktivitetslogg) {
             if (type == "UGYLDIG_TILBAKEDATERING" || type == "TILBAKEDATERING_KREVER_FLERE_OPPLYSNINGER") {
-                aktivitetslogg.warn("Sykmeldingen er tilbakedatert, vurder fra og med dato for utbetaling.")
+                aktivitetslogg.varsel("Sykmeldingen er tilbakedatert, vurder fra og med dato for utbetaling.")
             }
         }
     }
@@ -148,7 +148,7 @@ class Søknad(
         internal open fun valider(søknad: Søknad) {}
 
         internal fun valider(søknad: Søknad, beskjed: String) {
-            if (periode.utenfor(søknad.sykdomsperiode)) søknad.warn(beskjed)
+            if (periode.utenfor(søknad.sykdomsperiode)) søknad.varsel(beskjed)
         }
 
         internal open fun subsumsjon(søknad: Søknad, subsumsjonObserver: SubsumsjonObserver) {}
@@ -188,7 +188,7 @@ class Søknad(
                 Sykdomstidslinje.ukjent(periode.start, periode.endInclusive, kilde)
 
             override fun valider(søknad: Søknad) =
-                søknad.warn("Utdanning oppgitt i perioden i søknaden.")
+                søknad.varsel("Utdanning oppgitt i perioden i søknaden.")
         }
 
         class Permisjon(fom: LocalDate, tom: LocalDate) : Søknadsperiode(fom, tom) {
@@ -206,7 +206,7 @@ class Søknad(
                     søknad.info("Søknaden inneholder egenmeldingsdager som er mer enn $tidslinjegrense dager før sykmeldingsperioden")
                 }
                 if (periode.endInclusive > søknad.sykdomsperiode.endInclusive) {
-                    søknad.warn("Søknaden inneholder egenmeldingsdager etter sykmeldingsperioden")
+                    søknad.varsel("Søknaden inneholder egenmeldingsdager etter sykmeldingsperioden")
                 }
             }
 
@@ -228,7 +228,7 @@ class Søknad(
 
             override fun valider(søknad: Søknad) {
                 if (alleUtlandsdagerErFerie(søknad)) return
-                søknad.warn("Utenlandsopphold oppgitt i perioden i søknaden.")
+                søknad.varsel("Utenlandsopphold oppgitt i perioden i søknaden.")
             }
 
             override fun subsumsjon(søknad: Søknad, subsumsjonObserver: SubsumsjonObserver) {
@@ -248,7 +248,7 @@ class Søknad(
     ) {
         fun valider(aktivitetslogg: IAktivitetslogg) {
             if (type == "ANNET") {
-                aktivitetslogg.warn("Det er oppgitt annen inntektskilde i søknaden. Vurder inntekt.")
+                aktivitetslogg.varsel("Det er oppgitt annen inntektskilde i søknaden. Vurder inntekt.")
             } else if (type != "ANDRE_ARBEIDSFORHOLD") {
                 aktivitetslogg.funksjonellFeil("Søknaden inneholder andre inntektskilder enn ANDRE_ARBEIDSFORHOLD")
             }
@@ -256,7 +256,7 @@ class Søknad(
 
         fun validerIkkeSykmeldt(aktivitetslogg: IAktivitetslogg) {
             if (!sykmeldt) return
-            aktivitetslogg.warn("Den sykmeldte har oppgitt å ha andre arbeidsforhold med sykmelding i søknaden.")
+            aktivitetslogg.varsel("Den sykmeldte har oppgitt å ha andre arbeidsforhold med sykmelding i søknaden.")
         }
     }
 }

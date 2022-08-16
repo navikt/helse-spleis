@@ -913,11 +913,11 @@ class Person private constructor(
         val sammenligningsgrunnlag = beregnSammenligningsgrunnlag(skjæringstidspunkt, subsumsjonObserver)
         val avviksprosent = sammenligningsgrunnlag.avviksprosent(sykepengegrunnlag, subsumsjonObserver)
 
-        val harAkseptabeltAvvik = Inntektsvurdering.sjekkAvvik(avviksprosent, hendelse, IAktivitetslogg::warn, "Har mer enn 25 % avvik. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene.")
+        val harAkseptabeltAvvik = Inntektsvurdering.sjekkAvvik(avviksprosent, hendelse, IAktivitetslogg::varsel, "Har mer enn 25 % avvik. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene.")
 
         val opptjening = beregnOpptjening(skjæringstidspunkt, subsumsjonObserver)
         if (!opptjening.erOppfylt()) {
-            hendelse.warn("Perioden er avslått på grunn av manglende opptjening")
+            hendelse.varsel("Perioden er avslått på grunn av manglende opptjening")
         }
 
         when (val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt)) {

@@ -25,7 +25,7 @@ internal class AktivitetsloggObserverTest {
         aktivitetslogg.kontekst(vedtaksperiodekontekst)
 
         aktivitetslogg.info("Dette er en info-melding")
-        aktivitetslogg.warn("Dette er et varsel")
+        aktivitetslogg.varsel("Dette er et varsel")
         aktivitetslogg.funksjonellFeil("Dette er en error")
         try {
             aktivitetslogg.logiskFeil("Dette er en severe")

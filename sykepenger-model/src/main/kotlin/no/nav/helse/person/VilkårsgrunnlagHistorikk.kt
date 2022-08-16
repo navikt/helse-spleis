@@ -382,7 +382,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             if (skjæringstidspunkt !in 1.mai(2021) til 16.mai(2021)) return
             val gammeltGrunnbeløp = Grunnbeløp.`6G`.beløp(LocalDate.of(2021, 4, 30))
             if (sykepengegrunnlag < gammeltGrunnbeløp) return
-            aktivitetslogg.warn("Første utbetalingsdag er i Infotrygd og mellom 1. og 16. mai. Kontroller at riktig grunnbeløp er brukt.")
+            aktivitetslogg.varsel("Første utbetalingsdag er i Infotrygd og mellom 1. og 16. mai. Kontroller at riktig grunnbeløp er brukt.")
         }
 
         override fun accept(vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor) {

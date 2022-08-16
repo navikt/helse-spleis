@@ -113,8 +113,8 @@ internal class YtelserMessage(packet: JsonMessage) : BehovMessage(packet) {
             }),
             aktivitetslogg = Aktivitetslogg()
         ).also {
-            if (ugyldigeArbeidsavklaringspengeperioder.isNotEmpty()) it.warn("Arena inneholdt en eller flere AAP-perioder med ugyldig fom/tom")
-            if (ugyldigeDagpengeperioder.isNotEmpty()) it.warn("Arena inneholdt en eller flere Dagpengeperioder med ugyldig fom/tom")
+            if (ugyldigeArbeidsavklaringspengeperioder.isNotEmpty()) it.varsel("Arena inneholdt en eller flere AAP-perioder med ugyldig fom/tom")
+            if (ugyldigeDagpengeperioder.isNotEmpty()) it.varsel("Arena inneholdt en eller flere Dagpengeperioder med ugyldig fom/tom")
         }
 
     override fun behandle(mediator: IHendelseMediator, context: MessageContext) {

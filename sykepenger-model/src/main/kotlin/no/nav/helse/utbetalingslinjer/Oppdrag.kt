@@ -235,16 +235,16 @@ internal class Oppdrag private constructor(
             erTomt() -> annulleringsoppdrag(eldre)
             // "fom" kan flytte seg fremover i tid dersom man, eksempelvis, revurderer en utbetalt periode til å starte med ikke-utbetalte dager (f.eks. ferie)
             eldre.ingenUtbetalteDager() -> {
-                aktivitetslogg.warn(WARN_FORLENGER_OPPHØRT_OPPDRAG)
+                aktivitetslogg.varsel(WARN_FORLENGER_OPPHØRT_OPPDRAG)
                 kjørFrem(eldre)
             }
             fomHarFlyttetSegFremover(eldre.kopierUtenOpphørslinjer()) -> {
-                aktivitetslogg.warn(WARN_OPPDRAG_FOM_ENDRET)
+                aktivitetslogg.varsel(WARN_OPPDRAG_FOM_ENDRET)
                 returførOgKjørFrem(eldre.kopierUtenOpphørslinjer())
             }
             // utbetaling kan endres til å starte tidligere, eksempelvis via revurdering der feriedager egentlig er sykedager
             fomHarFlyttetSegBakover(eldre.kopierUtenOpphørslinjer()) -> {
-                aktivitetslogg.warn(WARN_OPPDRAG_FOM_ENDRET)
+                aktivitetslogg.varsel(WARN_OPPDRAG_FOM_ENDRET)
                 kjørFrem(eldre.kopierUtenOpphørslinjer())
             }
             // fom er lik, men endring kan oppstå overalt ellers
@@ -315,7 +315,7 @@ internal class Oppdrag private constructor(
         add(this.indexOf(nåværende), tidligere.opphørslinje(tidligere.fom))
         nåværende.kobleTil(linkTo)
         tilstand = Ny()
-        aktivitetslogg.warn("Endrer tidligere oppdrag. Kontroller simuleringen.")
+        aktivitetslogg.varsel("Endrer tidligere oppdrag. Kontroller simuleringen.")
     }
 
     private fun opphørOppdrag(tidligere: Oppdrag) =

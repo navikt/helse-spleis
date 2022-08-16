@@ -29,7 +29,7 @@ internal class AktivitetsloggBehovTest {
         val vedtaksperiode1 = TestKontekst("Vedtaksperiode", "Vedtaksperiode 1")
         hendelse1.kontekst(vedtaksperiode1)
         hendelse1.behov(Godkjenning, "Trenger godkjenning")
-        hendelse1.warn("Advarsel")
+        hendelse1.varsel("Advarsel")
         val hendelse2 = TestHendelse("Hendelse2", aktivitetslogg.barn())
         hendelse2.kontekst(person)
         val arbeidsgiver2 = TestKontekst("Arbeidsgiver", "Arbeidsgiver 2")

@@ -199,7 +199,7 @@ class InfotrygdhistorikkElement private constructor(
         }
         validerStatslønn(aktivitetslogg, periodetype)
         if (harNyereOpplysninger(organisasjonsnummer, periode))
-            aktivitetslogg.warn("Det er utbetalt en periode i Infotrygd etter perioden du skal behandle nå. Undersøk at antall forbrukte dager og grunnlag i Infotrygd er riktig")
+            aktivitetslogg.varsel("Det er utbetalt en periode i Infotrygd etter perioden du skal behandle nå. Undersøk at antall forbrukte dager og grunnlag i Infotrygd er riktig")
         return valider(aktivitetslogg, perioder, periode, skjæringstidspunkt)
     }
 

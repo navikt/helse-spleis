@@ -17,7 +17,7 @@ internal class Opptjening (
 
     internal fun valider(aktivitetslogg: IAktivitetslogg): Boolean {
         val erOppfylt = erOppfylt()
-        if (!erOppfylt) aktivitetslogg.warn("Perioden er avslått på grunn av manglende opptjening")
+        if (!erOppfylt) aktivitetslogg.varsel("Perioden er avslått på grunn av manglende opptjening")
         return erOppfylt
     }
 

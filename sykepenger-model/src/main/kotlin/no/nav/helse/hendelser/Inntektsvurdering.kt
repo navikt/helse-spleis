@@ -27,7 +27,7 @@ class Inntektsvurdering(private val inntekter: List<ArbeidsgiverInntekt>) {
     ): Boolean {
         if (inntekter.antallMåneder() > 12) aktivitetslogg.funksjonellFeil("Forventer 12 eller færre inntektsmåneder")
         if (inntekter.utenOffentligeYtelser().kilder(3) > antallArbeidsgivereFraAareg) {
-            aktivitetslogg.warn("Bruker har flere inntektskilder de siste tre månedene enn arbeidsforhold som er oppdaget i Aa-registeret.")
+            aktivitetslogg.varsel("Bruker har flere inntektskilder de siste tre månedene enn arbeidsforhold som er oppdaget i Aa-registeret.")
         }
         avviksprosent = grunnlagForSykepengegrunnlag.avviksprosent(sammenligningsgrunnlag, subsumsjonObserver)
         return sjekkAvvik(avviksprosent, aktivitetslogg, IAktivitetslogg::funksjonellFeil, "Har mer enn 25 % avvik")

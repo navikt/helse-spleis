@@ -559,7 +559,7 @@ internal class Vedtaksperiode private constructor(
         vilkårsgrunnlag.loggUkjenteArbeidsforhold(person, skjæringstidspunkt)
 
         if (person.harVedtaksperiodeForArbeidsgiverMedUkjentArbeidsforhold(skjæringstidspunkt)) {
-            vilkårsgrunnlag.warn("Arbeidsgiver er ikke registrert i Aa-registeret.")
+            vilkårsgrunnlag.varsel("Arbeidsgiver er ikke registrert i Aa-registeret.")
         }
 
         vilkårsgrunnlag.lagreRapporterteInntekter(person, skjæringstidspunkt)
@@ -822,7 +822,7 @@ internal class Vedtaksperiode private constructor(
 
         fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
             inntektsmelding.trimLeft(vedtaksperiode.periode.endInclusive)
-            inntektsmelding.warn("Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.")
+            inntektsmelding.varsel("Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.")
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {
@@ -941,7 +941,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
             if (vedtaksperiode.harArbeidsgivereMedOverlappendeUtbetaltePerioder(vedtaksperiode.periode)) {
-                søknad.warn("Denne personen har en utbetaling for samme periode for en annen arbeidsgiver. Kontroller at beregningene for begge arbeidsgiverne er korrekte.")
+                søknad.varsel("Denne personen har en utbetaling for samme periode for en annen arbeidsgiver. Kontroller at beregningene for begge arbeidsgiverne er korrekte.")
             }
 
             vedtaksperiode.håndterSøknad(søknad) {
@@ -1495,9 +1495,9 @@ internal class Vedtaksperiode private constructor(
                             vedtaksperiode.organisasjonsnummer
                         )
                     ) {
-                        ytelser.warn("Den sykmeldte har skiftet arbeidsgiver, og det er beregnet at den nye arbeidsgiveren mottar refusjon lik forrige. Kontroller at dagsatsen blir riktig.")
+                        ytelser.varsel("Den sykmeldte har skiftet arbeidsgiver, og det er beregnet at den nye arbeidsgiveren mottar refusjon lik forrige. Kontroller at dagsatsen blir riktig.")
                     } else if (vedtaksperiode.skalHaWarningForFlereArbeidsforholdUtenSykdomEllerUlikStartdato(vilkårsgrunnlag)) {
-                        ytelser.warn("Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold")
+                        ytelser.varsel("Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold")
                     }
                     vedtaksperiode.forsøkUtbetaling(arbeidsgiverUtbetalinger.maksimumSykepenger, ytelser)
                 }
@@ -1576,7 +1576,7 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, simulering: Simulering) {
             ErrorsTilWarnings.wrap(simulering) {
                 if (vedtaksperiode.utbetalinger.valider(simulering).hasWarningsOrWorse()) {
-                    simulering.warn("Simulering av revurdert utbetaling feilet. Utbetalingen må annulleres")
+                    simulering.varsel("Simulering av revurdert utbetaling feilet. Utbetalingen må annulleres")
                 }
             }
             if (!vedtaksperiode.utbetalinger.erKlarForGodkjenning()) return simulering.info("Kan ikke gå videre da begge oppdragene ikke er simulert.")
@@ -1843,7 +1843,7 @@ internal class Vedtaksperiode private constructor(
                 utbetalingsgodkjenning,
                 when {
                     vedtaksperiode.utbetalinger.erAvvist() -> RevurderingFeilet.also {
-                        utbetalingsgodkjenning.warn("Utbetaling av revurdert periode ble avvist av saksbehandler. Utbetalingen må annulleres")
+                        utbetalingsgodkjenning.varsel("Utbetaling av revurdert periode ble avvist av saksbehandler. Utbetalingen må annulleres")
                     }
                     vedtaksperiode.utbetalinger.harUtbetalinger() -> TilUtbetaling
                     else -> Avsluttet
@@ -2011,7 +2011,7 @@ internal class Vedtaksperiode private constructor(
             overstyrt: Vedtaksperiode,
             pågående: Vedtaksperiode?
         ) {
-            hendelse.warn("Denne perioden var tidligere regnet som innenfor arbeidsgiverperioden")
+            hendelse.varsel("Denne perioden var tidligere regnet som innenfor arbeidsgiverperioden")
             if (!vedtaksperiode.harNødvendigInntektForVilkårsprøving() || !arbeidsgivere.harNødvendigInntekt(vedtaksperiode.skjæringstidspunkt)) return vedtaksperiode.tilstand(hendelse, AvventerRevurdering) {
                 hendelse.info("Avventer inntekt for minst én annen arbeidsgiver")
             }

@@ -106,7 +106,7 @@ internal class WarningsTest {
             }
 
         /* Warnings */
-        private val warningRegex = "warn\\(\"(.*?)\"".toRegex()
+        private val warningRegex = "varsel\\(\"(.*?)\"".toRegex()
 
         private fun finnNormaleWarnings() = finn("main", warningRegex) {
             " ${it.lowercase()}".inneholderEnAv(" sikkerlogg.", " log.", " logg.", " logger.")

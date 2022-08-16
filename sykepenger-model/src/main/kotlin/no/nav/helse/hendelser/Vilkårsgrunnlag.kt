@@ -98,7 +98,7 @@ class Vilkårsgrunnlag(
             .filter { it.erDelAvOpptjeningsperiode(opptjeningsperiode) }
             .grupperArbeidsforholdPerOrgnummer().forEach { (orgnummer, arbeidsforhold) ->
                 if (arbeidsforhold.any { it.erSøppel() }) {
-                    warn("Vi fant ugyldige arbeidsforhold i Aareg, burde sjekkes opp nærmere") // TODO: må ses på av en voksen
+                    varsel("Vi fant ugyldige arbeidsforhold i Aareg, burde sjekkes opp nærmere") // TODO: må ses på av en voksen
                 }
                 person.lagreArbeidsforhold(orgnummer, arbeidsforhold, this, skjæringstidspunkt)
             }
@@ -153,7 +153,7 @@ class Vilkårsgrunnlag(
                 skjæringstidspunkt: LocalDate
             ): Int {
                 if (arbeidsforhold.any(Arbeidsforhold::erSøppel))
-                    aktivitetslogg.warn("Opptjeningsvurdering må gjøres manuelt fordi opplysningene fra AA-registeret er ufullstendige")
+                    aktivitetslogg.varsel("Opptjeningsvurdering må gjøres manuelt fordi opplysningene fra AA-registeret er ufullstendige")
 
                 val ranges = arbeidsforhold.mapNotNull { it.periode(skjæringstidspunkt) }
                 if (ranges.none { skjæringstidspunkt in it }) {

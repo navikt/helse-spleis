@@ -95,7 +95,7 @@ internal class AktivitetsloggTest {
         val vedtaksperiode1 = TestKontekst("Vedtaksperiode", "Vedtaksperiode 1")
         hendelse1.kontekst(vedtaksperiode1)
         hendelse1.behov(Aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning, "Trenger godkjenning")
-        hendelse1.warn("Advarsel")
+        hendelse1.varsel("Advarsel")
         val hendelse2 = TestHendelse("Hendelse2", aktivitetslogg.barn())
         hendelse2.kontekst(person)
         val arbeidsgiver2 = TestKontekst("Arbeidsgiver", "Arbeidsgiver 2")
@@ -122,7 +122,7 @@ internal class AktivitetsloggTest {
     @Test
     fun `warning oppdaget`() {
         val melding = "Warning explanation"
-        aktivitetslogg.warn(melding)
+        aktivitetslogg.varsel(melding)
         assertFalse(aktivitetslogg.hasErrorsOrWorse())
         assertTrue(aktivitetslogg.toString().contains(melding))
         assertWarn(melding)
@@ -176,7 +176,7 @@ internal class AktivitetsloggTest {
         val vedtaksperiode1 = TestKontekst("Vedtaksperiode", "Vedtaksperiode 1")
         hendelse1.kontekst(vedtaksperiode1)
         hendelse1.info("info message")
-        hendelse1.warn("warn message")
+        hendelse1.varsel("warn message")
         hendelse1.funksjonellFeil("error message")
         val hendelse2 = TestHendelse("Hendelse2", aktivitetslogg.barn())
         hendelse2.kontekst(person)

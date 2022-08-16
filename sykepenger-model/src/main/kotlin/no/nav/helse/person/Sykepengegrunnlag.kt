@@ -93,7 +93,7 @@ internal class Sykepengegrunnlag(
     internal fun valider(aktivitetslogg: IAktivitetslogg): Boolean {
         arbeidsgiverInntektsopplysninger.valider(aktivitetslogg)
         if (oppfyllerMinsteinntektskrav) aktivitetslogg.info("Krav til minste sykepengegrunnlag er oppfylt")
-        else aktivitetslogg.warn("Perioden er avslått på grunn av at inntekt er under krav til minste sykepengegrunnlag")
+        else aktivitetslogg.varsel("Perioden er avslått på grunn av at inntekt er under krav til minste sykepengegrunnlag")
         return oppfyllerMinsteinntektskrav && !aktivitetslogg.hasErrorsOrWorse()
     }
 
