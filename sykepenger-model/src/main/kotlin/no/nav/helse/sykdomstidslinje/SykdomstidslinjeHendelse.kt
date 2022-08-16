@@ -10,6 +10,7 @@ import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
+import no.nav.helse.hendelser.Periode.Companion.aldri
 import no.nav.helse.person.Dokumentsporing
 import kotlin.reflect.KClass
 
@@ -75,7 +76,6 @@ abstract class SykdomstidslinjeHendelse(
         nesteFom = dato.plusDays(1)
     }
 
-    private val aldri = LocalDate.MIN til LocalDate.MIN
     private fun trimmetForbi() = periode() == aldri
 
     internal fun periode(): Periode {

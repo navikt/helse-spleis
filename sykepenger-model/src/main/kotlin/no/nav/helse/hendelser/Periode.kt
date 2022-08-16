@@ -17,6 +17,8 @@ open class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Ite
     }
 
     companion object {
+        internal val aldri = LocalDate.MIN til LocalDate.MIN
+
         private val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
 
         fun List<Periode>.slutterEtter(grense: LocalDate) = any { it.slutterEtter(grense) }
