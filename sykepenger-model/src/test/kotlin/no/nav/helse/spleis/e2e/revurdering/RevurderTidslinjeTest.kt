@@ -1101,10 +1101,6 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
 
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
         assertWarning(
-            "Det er utbetalt en periode i Infotrygd etter perioden du skal behandle nå. Undersøk at antall forbrukte dager og grunnlag i Infotrygd er riktig",
-            AktivitetsloggFilter.person()
-        )
-        assertWarning(
             "Utbetaling i Infotrygd overlapper med vedtaksperioden",
             AktivitetsloggFilter.person()
         )

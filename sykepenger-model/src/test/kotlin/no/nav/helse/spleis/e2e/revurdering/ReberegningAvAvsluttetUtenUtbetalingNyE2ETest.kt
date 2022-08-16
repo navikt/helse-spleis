@@ -1013,15 +1013,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
 
         assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
         assertWarning("Utbetaling i Infotrygd overlapper med vedtaksperioden", 1.vedtaksperiode.filter())
-        assertForventetFeil(
-            forklaring = "Periode sin implementasjon av slutter etter mener at en 1-1 overlapp er etter, vi er ikke overbeviste",
-            nå = {
-                assertWarning("Det er utbetalt en periode i Infotrygd etter perioden du skal behandle nå. Undersøk at antall forbrukte dager og grunnlag i Infotrygd er riktig", 1.vedtaksperiode.filter())
-            },
-            ønsket = {
-                assertNoWarning("Det er utbetalt en periode i Infotrygd etter perioden du skal behandle nå. Undersøk at antall forbrukte dager og grunnlag i Infotrygd er riktig", 1.vedtaksperiode.filter())
-            }
-        )
+        assertNoWarning("Det er utbetalt en periode i Infotrygd etter perioden du skal behandle nå. Undersøk at antall forbrukte dager og grunnlag i Infotrygd er riktig", 1.vedtaksperiode.filter())
     }
 
     @Test

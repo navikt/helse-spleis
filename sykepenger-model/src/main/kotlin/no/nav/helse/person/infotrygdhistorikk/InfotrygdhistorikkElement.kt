@@ -273,7 +273,9 @@ class InfotrygdhistorikkElement private constructor(
     }
 
     private fun harNyereOpplysninger(orgnummer: String, periode: Periode): Boolean {
-        return utbetalinger(orgnummer).any { it.slutterEtter(periode.endInclusive) }
+        return utbetalinger(orgnummer).any { utbetalingsperiode ->
+            utbetalingsperiode.endInclusive > periode.endInclusive
+        }
     }
 
     private fun utbetalinger(organisasjonsnummer: String) =
