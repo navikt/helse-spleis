@@ -42,7 +42,6 @@ internal class WarningsTest {
             "Arena inneholdt en eller flere Dagpengeperioder med ugyldig fom/tom",
             "Endrer tidligere oppdrag. Kontroller simuleringen.",
             "Perioden er lagt inn i Infotrygd, men ikke utbetalt. Fjern fra Infotrygd hvis det utbetales via speil.",
-            "Minst én dag uten utbetaling på grunn av sykdomsgrad under 20 %%. Vurder å sende vedtaksbrev fra Infotrygd",
             "Vi fant ugyldige arbeidsforhold i Aareg, burde sjekkes opp nærmere",
             "Bruker har mottatt dagpenger innenfor 4 uker før skjæringstidspunktet. Kontroller om bruker er dagpengemottaker. Kombinerte ytelser støttes foreløpig ikke av systemet",
             "Perioden er avslått på grunn av at den sykmeldte ikke er medlem av Folketrygden",

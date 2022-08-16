@@ -39,16 +39,16 @@ class Aktivitetslogg(
         add(Aktivitet.Info(kontekster.toSpesifikk(), String.format(melding, *params)))
     }
 
-    override fun warn(melding: String, vararg params: Any?) {
-        add(Aktivitet.Warn(kontekster.toSpesifikk(), String.format(melding, *params)))
+    override fun warn(melding: String) {
+        add(Aktivitet.Warn(kontekster.toSpesifikk(), melding))
     }
 
     override fun behov(type: Behov.Behovtype, melding: String, detaljer: Map<String, Any?>) {
         add(Behov(type, kontekster.toSpesifikk(), melding, detaljer))
     }
 
-    override fun error(melding: String, vararg params: Any?) {
-        add(Aktivitet.Error(kontekster.toSpesifikk(), String.format(melding, *params)))
+    override fun error(melding: String) {
+        add(Aktivitet.Error(kontekster.toSpesifikk(), melding))
     }
 
     override fun severe(melding: String, vararg params: Any?): Nothing {
@@ -459,9 +459,9 @@ class Aktivitetslogg(
 
 interface IAktivitetslogg {
     fun info(melding: String, vararg params: Any?)
-    fun warn(melding: String, vararg params: Any?)
+    fun warn(melding: String)
     fun behov(type: Behov.Behovtype, melding: String, detaljer: Map<String, Any?> = emptyMap())
-    fun error(melding: String, vararg params: Any?)
+    fun error(melding: String)
     fun severe(melding: String, vararg params: Any?): Nothing
 
     fun hasActivities(): Boolean

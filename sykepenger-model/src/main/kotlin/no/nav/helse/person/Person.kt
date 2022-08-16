@@ -58,7 +58,6 @@ import no.nav.helse.person.Arbeidsgiver.Companion.validerVilkårsgrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.validerYtelserForSkjæringstidspunkt
 import no.nav.helse.person.Arbeidsgiver.Companion.vedtaksperioder
 import no.nav.helse.person.Vedtaksperiode.Companion.ALLE
-import no.nav.helse.person.Vedtaksperiode.Companion.lagUtbetalinger
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
@@ -67,14 +66,12 @@ import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
-import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverUtbetalinger
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverperiodeBuilderBuilder
-import no.nav.helse.utbetalingstidslinje.AvvisInngangsvilkårfilter
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
 import org.slf4j.LoggerFactory
 import kotlin.math.roundToInt
@@ -915,12 +912,7 @@ class Person private constructor(
         val sammenligningsgrunnlag = beregnSammenligningsgrunnlag(skjæringstidspunkt, subsumsjonObserver)
         val avviksprosent = sammenligningsgrunnlag.avviksprosent(sykepengegrunnlag, subsumsjonObserver)
 
-        val harAkseptabeltAvvik = Inntektsvurdering.sjekkAvvik(avviksprosent, hendelse) { _, maksimaltTillattAvvik ->
-            warn(
-                "Har mer enn %.0f %% avvik. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene.",
-                maksimaltTillattAvvik
-            )
-        }
+        val harAkseptabeltAvvik = Inntektsvurdering.sjekkAvvik(avviksprosent, hendelse, IAktivitetslogg::warn, "Har mer enn 25 % avvik. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene.")
 
         val opptjening = beregnOpptjening(skjæringstidspunkt, subsumsjonObserver)
         if (!opptjening.erOppfylt()) {
@@ -977,26 +969,6 @@ class Person private constructor(
     internal fun slettUtgåtteSykmeldingsperioder(tom: LocalDate) {
         arbeidsgivere.slettUtgåtteSykmeldingsperioder(tom)
     }
-
-    internal fun lagUtbetalinger(
-        aktivitetslogg: IAktivitetslogg,
-        periode: Periode,
-        subsumsjonObserver: SubsumsjonObserver,
-        vedtaksperioder: List<Vedtaksperiode>
-    ) =
-        Utbetaling.Builder(
-            personidentifikator = personidentifikator,
-            alder = alder,
-            aktivitetslogg = aktivitetslogg,
-            periode = periode,
-            subsumsjonObserver = subsumsjonObserver,
-            dødsdato = dødsdato,
-            infotrygdhistorikk = infotrygdhistorikk,
-            regler = NormalArbeidstaker
-        ).apply {
-            avvisInngangsvilkårfilter(AvvisInngangsvilkårfilter(vilkårsgrunnlagHistorikk))
-            vedtaksperioder.lagUtbetalinger(this, vilkårsgrunnlagHistorikk)
-        }
 
     internal fun valider(
         aktivitetslogg: IAktivitetslogg,

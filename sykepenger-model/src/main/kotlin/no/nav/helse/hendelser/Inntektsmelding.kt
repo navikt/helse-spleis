@@ -127,8 +127,7 @@ class Inntektsmelding(
         if (arbeidsgiverperioder.isEmpty()) info("Inntektsmeldingen mangler arbeidsgiverperiode. Vurder om vilkårene for sykepenger er oppfylt, og om det skal være arbeidsgiverperiode")
         begrunnelseForReduksjonEllerIkkeUtbetalt?.takeIf(String::isNotBlank)?.also {
             error(
-                "Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden på grunn av: %s",
-                it
+                "Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden på grunn av: %s".format(it)
             )
         }
         if (harOpphørAvNaturalytelser) error("Brukeren har opphold i naturalytelser")

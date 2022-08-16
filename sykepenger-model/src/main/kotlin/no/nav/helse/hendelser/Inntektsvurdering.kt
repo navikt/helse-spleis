@@ -30,19 +30,19 @@ class Inntektsvurdering(private val inntekter: List<ArbeidsgiverInntekt>) {
             aktivitetslogg.warn("Bruker har flere inntektskilder de siste tre månedene enn arbeidsforhold som er oppdaget i Aa-registeret.")
         }
         avviksprosent = grunnlagForSykepengegrunnlag.avviksprosent(sammenligningsgrunnlag, subsumsjonObserver)
-        return sjekkAvvik(avviksprosent, aktivitetslogg, IAktivitetslogg::error)
+        return sjekkAvvik(avviksprosent, aktivitetslogg, IAktivitetslogg::error, "Har mer enn 25 % avvik")
     }
 
     internal fun lagreRapporterteInntekter(person: Person, skjæringstidspunkt: LocalDate, hendelse: PersonHendelse) =
         ArbeidsgiverInntekt.lagreRapporterteInntekter(inntekter, person, skjæringstidspunkt, hendelse)
 
     internal companion object {
-        internal fun sjekkAvvik(avvik: Prosent, aktivitetslogg: IAktivitetslogg, onFailure: IAktivitetslogg.(melding: String, tillattAvvik: Double) -> Unit): Boolean {
+        internal fun sjekkAvvik(avvik: Prosent, aktivitetslogg: IAktivitetslogg, onFailure: IAktivitetslogg.(melding: String) -> Unit, melding: String): Boolean {
             val harAkseptabeltAvvik = harAkseptabeltAvvik(avvik)
             if (harAkseptabeltAvvik) {
                 aktivitetslogg.info("Har %.0f %% eller mindre avvik i inntekt (%.2f %%)", MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT.prosent(), avvik.prosent())
             } else {
-                onFailure(aktivitetslogg, "Har mer enn %.0f %% avvik", MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT.prosent())
+                onFailure(aktivitetslogg, melding)
             }
             return harAkseptabeltAvvik
         }

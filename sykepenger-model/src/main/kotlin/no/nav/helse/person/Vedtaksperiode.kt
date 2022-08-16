@@ -826,7 +826,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {
-            vilkårsgrunnlag.error("Forventet ikke vilkårsgrunnlag i %s", type.name)
+            vilkårsgrunnlag.error("Forventet ikke vilkårsgrunnlag i %s".format(type.name))
         }
 
         fun håndter(
@@ -857,7 +857,7 @@ internal class Vedtaksperiode private constructor(
             infotrygdhistorikk: Infotrygdhistorikk,
             arbeidsgiverUtbetalingerFun: (SubsumsjonObserver) -> ArbeidsgiverUtbetalinger
         ) {
-            ytelser.error("Forventet ikke ytelsehistorikk i %s", type.name)
+            ytelser.error("Forventet ikke ytelsehistorikk i %s".format(type.name))
         }
 
         fun håndter(
@@ -866,7 +866,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             utbetalingsgodkjenning: Utbetalingsgodkjenning
         ) {
-            utbetalingsgodkjenning.error("Forventet ikke utbetalingsgodkjenning i %s", type.name)
+            utbetalingsgodkjenning.error("Forventet ikke utbetalingsgodkjenning i %s".format(type.name))
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
@@ -874,18 +874,18 @@ internal class Vedtaksperiode private constructor(
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, simulering: Simulering) {
-            simulering.error("Forventet ikke simulering i %s", type.name)
+            simulering.error("Forventet ikke simulering i %s".format(type.name))
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: UtbetalingHendelse) {
-            hendelse.error("Forventet ikke utbetaling i %s", type.name)
+            hendelse.error("Forventet ikke utbetaling i %s".format(type.name))
         }
 
         fun håndter(
             vedtaksperiode: Vedtaksperiode,
             hendelse: OverstyrTidslinje
         ) {
-            hendelse.error("Forventet ikke overstyring fra saksbehandler i %s", type.name)
+            hendelse.error("Forventet ikke overstyring fra saksbehandler i %s".format(type.name))
         }
 
         fun håndter(
@@ -2296,16 +2296,6 @@ internal class Vedtaksperiode private constructor(
         internal fun Iterable<Vedtaksperiode>.harNødvendigInntekt(skjæringstidspunkt: LocalDate) = this
             .filter(SKAL_INNGÅ_I_SYKEPENGEGRUNNLAG(skjæringstidspunkt))
             .all { it.harNødvendigInntektForVilkårsprøving() }
-
-        internal fun List<Vedtaksperiode>.lagUtbetalinger(
-            builder: Utbetaling.Builder,
-            vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk
-        ) {
-            forEach { periode ->
-                periode.arbeidsgiver.lagUtbetaling(builder, vilkårsgrunnlagHistorikk)
-                periode.utbetalinger.lagUtbetaling(builder, periode, periode.organisasjonsnummer)
-            }
-        }
 
         internal fun List<Vedtaksperiode>.lagRevurdering(
             vedtaksperiode: Vedtaksperiode,

@@ -90,15 +90,15 @@ data class UgyldigPeriode(
     private val utbetalingsgrad: Int?
 ) {
     internal fun valider(aktivitetslogg: IAktivitetslogg) {
-        aktivitetslogg.error("Det er en ugyldig utbetalingsperiode i Infotrygd%s", feiltekst()?.let { " ($it)" } ?: "")
+        aktivitetslogg.error(feiltekst())
     }
 
     private fun feiltekst() = when {
-        fom == null || tom == null -> "mangler fom- eller tomdato"
-        fom > tom -> "fom er nyere enn tom"
-        utbetalingsgrad == null -> "utbetalingsgrad mangler"
-        utbetalingsgrad <= 0 -> "utbetalingsgrad er mindre eller lik 0"
-        else -> null
+        fom == null || tom == null -> "Det er en ugyldig utbetalingsperiode i Infotrygd (mangler fom- eller tomdato)"
+        fom > tom -> "Det er en ugyldig utbetalingsperiode i Infotrygd (fom er nyere enn tom)"
+        utbetalingsgrad == null -> "Det er en ugyldig utbetalingsperiode i Infotrygd (utbetalingsgrad mangler)"
+        utbetalingsgrad <= 0 -> "Det er en ugyldig utbetalingsperiode i Infotrygd (utbetalingsgrad er mindre eller lik 0)"
+        else -> "Det er en ugyldig utbetalingsperiode i Infotrygd"
     }
 
     internal fun toMap() = mapOf<String, Any?>(
