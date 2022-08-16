@@ -33,6 +33,7 @@ import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.UtbetalingOverført
 import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
+import no.nav.helse.person.Arbeidsgiver.Companion.beholdReelleSykmeldingsperioder
 import no.nav.helse.person.Arbeidsgiver.Companion.beregnFeriepengerForAlleArbeidsgivere
 import no.nav.helse.person.Arbeidsgiver.Companion.beregnOpptjening
 import no.nav.helse.person.Arbeidsgiver.Companion.beregnSykepengegrunnlag
@@ -989,4 +990,8 @@ class Person private constructor(
 
     internal fun harPeriodeSomBlokkererOverstyring(skjæringstidspunkt: LocalDate) =
         arbeidsgivere.harPeriodeSomBlokkererOverstyring(skjæringstidspunkt)
+
+    internal fun beholdReelleSykmeldingsperioder() {
+        arbeidsgivere.beholdReelleSykmeldingsperioder()
+    }
 }

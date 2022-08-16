@@ -44,6 +44,10 @@ internal class Sykmeldingsperioder(
 
     fun blirTruffetAv(inntektsmelding: SykdomstidslinjeHendelse) = perioder.any(inntektsmelding::erRelevant)
     internal fun harSykmeldingsperiodeFør(dato: LocalDate) = perioder.any { it.start < dato }
+
+    internal fun beholdReelleSykmeldingsperioder() {
+        perioder = perioder.filterNot { it == aldri }
+    }
 }
 internal interface SykmeldingsperioderVisitor {
     fun preVisitSykmeldingsperioder(sykmeldingsperioder: Sykmeldingsperioder) {}

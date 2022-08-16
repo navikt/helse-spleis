@@ -144,6 +144,9 @@ internal class Arbeidsgiver private constructor(
         internal fun List<Arbeidsgiver>.startRevurdering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             associateWith { it.vedtaksperioder.toList() }.startRevurdering(this, vedtaksperiode, hendelse)
         }
+        internal fun Iterable<Arbeidsgiver>.beholdReelleSykmeldingsperioder() {
+            forEach { it.beholdReelleSykmeldingsperioder() }
+        }
 
         internal fun List<Arbeidsgiver>.kanStarteRevurdering(vedtaksperiode: Vedtaksperiode) =
             flatMap { it.vedtaksperioder }.kanStarteRevurdering(this, vedtaksperiode)
@@ -339,6 +342,10 @@ internal class Arbeidsgiver private constructor(
 
         internal fun List<Arbeidsgiver>.skjæringstidspunktperiode(skjæringstidspunkt: LocalDate) =
             flatMap { it.vedtaksperioder }.skjæringstidspunktperiode(skjæringstidspunkt)
+    }
+
+    private fun beholdReelleSykmeldingsperioder() {
+        sykmeldingsperioder.beholdReelleSykmeldingsperioder()
     }
 
     internal fun validerBrukerutbetaling(hendelse: IAktivitetslogg, skjæringstidspunkt: LocalDate, periode: Periode): Boolean {
