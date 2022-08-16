@@ -23,10 +23,10 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-internal class RevurderKorrigertSøknadTest : AbstractEndToEndTest() {
+internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
 
     @Test
-    fun `Korrigert søknad ved avsluttet periode - skal sette i gang en revurdering` () = Toggle.RevurderKorrigertSøknad.enable {
+    fun `Korrigert søknad ved avsluttet periode - skal sette i gang en revurdering` () = Toggle.RevurderKorrigertSoknad.enable {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))

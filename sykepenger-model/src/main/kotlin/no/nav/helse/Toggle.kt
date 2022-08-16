@@ -127,5 +127,5 @@ abstract class Toggle internal constructor(enabled: Boolean = false, private val
     object RevurdereInntektMedFlereArbeidsgivere : Toggle("RevurdereInntektMedFlereArbeidsgivere", false)
     object IkkeForlengInfotrygdperioder : Toggle(true)
     object RevurdereOutOfOrder : Toggle(false)
-    object RevurderKorrigertSøknad : Toggle("RevurderKorrigertSøknad", false)
+    object RevurderKorrigertSoknad : Toggle("RevurderKorrigertSoknad", false)
 }

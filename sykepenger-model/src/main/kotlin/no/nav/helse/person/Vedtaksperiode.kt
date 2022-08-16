@@ -2140,7 +2140,7 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
-            if (Toggle.RevurderKorrigertSøknad.enabled){
+            if (Toggle.RevurderKorrigertSoknad.enabled){
                 vedtaksperiode.låsOpp()
                 vedtaksperiode.oppdaterHistorikk(søknad)
                 vedtaksperiode.lås()

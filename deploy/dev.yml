@@ -58,5 +58,5 @@ spec:
     value: "true"
   - name: UtbetalingtypeAuu
     value: "true"
-  - name: RevurderKorrigertSøknad
+  - name: RevurderKorrigertSoknad
     value: "true"
