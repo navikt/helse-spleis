@@ -12,10 +12,12 @@ import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.OverstyrArbeidsforhold.ArbeidsforholdOverstyrt
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.til
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.TilstandType.AVSLUTTET
@@ -31,7 +33,12 @@ import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.spleis.e2e.grunnlag
 import no.nav.helse.spleis.e2e.repeat
 import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Inntekt.Companion.daglig
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class RevurderArbeidsforholdTest: AbstractDslTest() {
@@ -414,8 +421,53 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
         assertArbeidsgivereISykepengegrunnlag(1.januar, a1, a2)
     }
 
+    @Test
+    fun `over 6G -- deaktiverer og aktiverer arbeidsforhold medfører tilbakekreving`() {
+        val inntekt = 33000.månedlig
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+            håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = inntekt)
+            håndterYtelser(1.vedtaksperiode)
+            håndterVilkårsgrunnlagMedGhostArbeidsforhold(1.vedtaksperiode, inntekt = inntekt)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+            assertPeriode(17.januar til 31.januar, 1080.daglig)
+            håndterOverstyrArbeidsforhold(1.januar, ArbeidsforholdOverstyrt(a2, deaktivert = true, "deaktiverer a2"))
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+            assertPeriode(17.januar til 31.januar, 1523.daglig)
+            håndterOverstyrArbeidsforhold(1.januar, ArbeidsforholdOverstyrt(a2, deaktivert = false, "aktiverer a2 igjen"))
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+            // TODO: 🤔 Her er det ikke juridisk avklart om vi får lov til å trekke tilbake penger fra ag2: https://trello.com/c/6dWvZ50u 💸
+            assertPeriode(17.januar til 31.januar, 1080.daglig)
+        }
+    }
 
-    private fun TestPerson.TestArbeidsgiver.håndterVilkårsgrunnlagMedGhostArbeidsforhold(vedtaksperiode: UUID, skjæringstidspunkt: LocalDate = 1.januar) {
+    private fun TestPerson.TestArbeidsgiver.assertDag(dato: LocalDate, arbeidsgiverbeløp: Inntekt, personbeløp: Inntekt) {
+        inspektør(orgnummer).sisteUtbetalingUtbetalingstidslinje()[dato].let {
+            if (it is Utbetalingstidslinje.Utbetalingsdag.NavHelgDag) return
+            assertEquals(arbeidsgiverbeløp, it.økonomi.inspektør.arbeidsgiverbeløp)
+            assertEquals(personbeløp, it.økonomi.inspektør.personbeløp)
+        }
+    }
+    private fun TestPerson.TestArbeidsgiver.assertPeriode(
+        periode: Periode,
+        arbeidsgiverbeløp: Inntekt,
+        personbeløp: Inntekt = Inntekt.INGEN
+    ) =
+        periode.forEach { assertDag(it, arbeidsgiverbeløp, personbeløp) }
+
+
+    private fun TestPerson.TestArbeidsgiver.håndterVilkårsgrunnlagMedGhostArbeidsforhold(vedtaksperiode: UUID, skjæringstidspunkt: LocalDate = 1.januar, inntekt: Inntekt = INNTEKT) {
         håndterVilkårsgrunnlag(
             vedtaksperiode,
             arbeidsforhold = listOf(
@@ -424,14 +476,14 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
             ),
             inntektsvurdering = Inntektsvurdering(
                 listOf(
-                    sammenligningsgrunnlag(a1, skjæringstidspunkt, INNTEKT.repeat(12)),
-                    sammenligningsgrunnlag(a2, skjæringstidspunkt, INNTEKT.repeat(12))
+                    sammenligningsgrunnlag(a1, skjæringstidspunkt, inntekt.repeat(12)),
+                    sammenligningsgrunnlag(a2, skjæringstidspunkt, inntekt.repeat(12))
                 )
             ),
             inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
                 inntekter = listOf(
-                    grunnlag(a1, skjæringstidspunkt, INNTEKT.repeat(3)),
-                    grunnlag(a2, skjæringstidspunkt, INNTEKT.repeat(3))
+                    grunnlag(a1, skjæringstidspunkt, inntekt.repeat(3)),
+                    grunnlag(a2, skjæringstidspunkt, inntekt.repeat(3))
                 ),
                 arbeidsforhold = emptyList()
             )

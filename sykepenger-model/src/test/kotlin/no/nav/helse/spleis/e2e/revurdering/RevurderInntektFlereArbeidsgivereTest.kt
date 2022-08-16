@@ -121,7 +121,7 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
-            // TODO: 🤔 Her er det ikke juridisk avklart om vi får lov til å trekke tilbake penger fra ag2 💸
+            // TODO: 🤔 Her er det ikke juridisk avklart om vi får lov til å trekke tilbake penger fra ag2: https://trello.com/c/6dWvZ50u 💸
             assertDag(17.januar, 1064.0.daglig, aktuellDagsinntekt = 32000.månedlig, personbeløp = INGEN)
         }
     }
