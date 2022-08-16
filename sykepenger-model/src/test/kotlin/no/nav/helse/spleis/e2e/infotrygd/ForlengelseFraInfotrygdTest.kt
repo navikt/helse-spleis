@@ -1604,7 +1604,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING
         )
-        assertTrue(person.personLogg.warn().toString().contains("Første utbetalingsdag er i Infotrygd og mellom 1. og 16. mai. Kontroller at riktig grunnbeløp er brukt."))
+        assertTrue(person.personLogg.varsel().toString().contains("Første utbetalingsdag er i Infotrygd og mellom 1. og 16. mai. Kontroller at riktig grunnbeløp er brukt."))
     }
 
     @Test

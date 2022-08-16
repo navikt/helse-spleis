@@ -40,7 +40,7 @@ class Aktivitetslogg(
     }
 
     override fun varsel(melding: String) {
-        add(Aktivitet.Warn(kontekster.toSpesifikk(), melding))
+        add(Aktivitet.Varsel(kontekster.toSpesifikk(), melding))
     }
 
     override fun behov(type: Behov.Behovtype, melding: String, detaljer: Map<String, Any?>) {
@@ -48,11 +48,11 @@ class Aktivitetslogg(
     }
 
     override fun funksjonellFeil(melding: String) {
-        add(Aktivitet.Error(kontekster.toSpesifikk(), melding))
+        add(Aktivitet.FunksjonellFeil(kontekster.toSpesifikk(), melding))
     }
 
     override fun logiskFeil(melding: String, vararg params: Any?): Nothing {
-        add(Aktivitet.Severe(kontekster.toSpesifikk(), String.format(melding, *params)))
+        add(Aktivitet.LogiskFeil(kontekster.toSpesifikk(), String.format(melding, *params)))
 
         throw AktivitetException(this)
     }
@@ -67,9 +67,9 @@ class Aktivitetslogg(
 
     override fun harAktiviteter() = info().isNotEmpty() || harVarslerEllerVerre() || behov().isNotEmpty()
 
-    override fun harVarslerEllerVerre() = warn().isNotEmpty() || harFunksjonelleFeilEllerVerre()
+    override fun harVarslerEllerVerre() = varsel().isNotEmpty() || harFunksjonelleFeilEllerVerre()
 
-    override fun harFunksjonelleFeilEllerVerre() = error().isNotEmpty() || severe().isNotEmpty()
+    override fun harFunksjonelleFeilEllerVerre() = funksjonellFeil().isNotEmpty() || logiskFeil().isNotEmpty()
 
     override fun barn() = Aktivitetslogg(this)
 
@@ -128,10 +128,10 @@ class Aktivitetslogg(
     override fun hendelseskontekst(): Hendelseskontekst = Hendelseskontekst(hendelseskontekster())
 
     private fun info() = Aktivitet.Info.filter(aktiviteter)
-    internal fun warn() = Aktivitet.Warn.filter(aktiviteter)
+    internal fun varsel() = Aktivitet.Varsel.filter(aktiviteter)
     override fun behov() = Behov.filter(aktiviteter)
-    private fun error() = Aktivitet.Error.filter(aktiviteter)
-    private fun severe() = Aktivitet.Severe.filter(aktiviteter)
+    private fun funksjonellFeil() = Aktivitet.FunksjonellFeil.filter(aktiviteter)
+    private fun logiskFeil() = Aktivitet.LogiskFeil.filter(aktiviteter)
 
     companion object {
         private val MODELL_KONTEKSTER: Array<String> = arrayOf("Person", "Arbeidsgiver", "Vedtaksperiode")
@@ -199,14 +199,14 @@ class Aktivitetslogg(
             }
         }
 
-        internal class Warn(
+        internal class Varsel(
             kontekster: List<SpesifikkKontekst>,
             private val melding: String,
             private val tidsstempel: String = LocalDateTime.now().format(tidsstempelformat)
         ) : Aktivitet(25, 'W', melding, tidsstempel, kontekster) {
             companion object {
-                internal fun filter(aktiviteter: List<Aktivitet>): List<Warn> {
-                    return aktiviteter.filterIsInstance<Warn>()
+                internal fun filter(aktiviteter: List<Aktivitet>): List<Varsel> {
+                    return aktiviteter.filterIsInstance<Varsel>()
                 }
 
             }
@@ -378,7 +378,7 @@ class Aktivitetslogg(
                             "utbetalingtype" to utbetalingtype.name,
                             "inntektskilde" to inntektskilde.name,
                             "warnings" to Aktivitetslogg().apply {
-                                aktiviteter.addAll(vedtaksperiodeaktivitetslogg.warn())
+                                aktiviteter.addAll(vedtaksperiodeaktivitetslogg.varsel())
 
                             }.toMap(),
                             "orgnummereMedRelevanteArbeidsforhold" to orgnummereMedRelevanteArbeidsforhold,
@@ -423,14 +423,14 @@ class Aktivitetslogg(
             }
         }
 
-        internal class Error(
+        internal class FunksjonellFeil(
             kontekster: List<SpesifikkKontekst>,
             private val melding: String,
             private val tidsstempel: String = LocalDateTime.now().format(tidsstempelformat)
         ) : Aktivitet(75, 'E', melding, tidsstempel, kontekster) {
             companion object {
-                internal fun filter(aktiviteter: List<Aktivitet>): List<Error> {
-                    return aktiviteter.filterIsInstance<Error>()
+                internal fun filter(aktiviteter: List<Aktivitet>): List<FunksjonellFeil> {
+                    return aktiviteter.filterIsInstance<FunksjonellFeil>()
                 }
             }
 
@@ -439,14 +439,14 @@ class Aktivitetslogg(
             }
         }
 
-        internal class Severe(
+        internal class LogiskFeil(
             kontekster: List<SpesifikkKontekst>,
             private val melding: String,
             private val tidsstempel: String = LocalDateTime.now().format(tidsstempelformat)
         ) : Aktivitet(100, 'S', melding, tidsstempel, kontekster) {
             companion object {
-                internal fun filter(aktiviteter: List<Aktivitet>): List<Severe> {
-                    return aktiviteter.filterIsInstance<Severe>()
+                internal fun filter(aktiviteter: List<Aktivitet>): List<LogiskFeil> {
+                    return aktiviteter.filterIsInstance<LogiskFeil>()
                 }
             }
 
@@ -493,7 +493,7 @@ internal interface AktivitetsloggVisitor {
 
     fun visitVarsel(
         kontekster: List<SpesifikkKontekst>,
-        aktivitet: Aktivitetslogg.Aktivitet.Warn,
+        aktivitet: Aktivitetslogg.Aktivitet.Varsel,
         melding: String,
         tidsstempel: String
     ) {
@@ -511,7 +511,7 @@ internal interface AktivitetsloggVisitor {
 
     fun visitFunksjonellFeil(
         kontekster: List<SpesifikkKontekst>,
-        aktivitet: Aktivitetslogg.Aktivitet.Error,
+        aktivitet: Aktivitetslogg.Aktivitet.FunksjonellFeil,
         melding: String,
         tidsstempel: String
     ) {
@@ -519,7 +519,7 @@ internal interface AktivitetsloggVisitor {
 
     fun visitLogiskFeil(
         kontekster: List<SpesifikkKontekst>,
-        aktivitet: Aktivitetslogg.Aktivitet.Severe,
+        aktivitet: Aktivitetslogg.Aktivitet.LogiskFeil,
         melding: String,
         tidsstempel: String
     ) {

@@ -1363,6 +1363,6 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterUtbetalingshistorikk(1.vedtaksperiode, utbetalinger = utbetlinger, inntektshistorikk = inntektshistorikk)
         håndterYtelser(1.vedtaksperiode)
 
-        assertFalse(person.personLogg.warn().toString().contains("Første utbetalingsdag er i Infotrygd og mellom 1. og 16. mai. Kontroller at riktig grunnbeløp er brukt."))
+        assertFalse(person.personLogg.varsel().toString().contains("Første utbetalingsdag er i Infotrygd og mellom 1. og 16. mai. Kontroller at riktig grunnbeløp er brukt."))
     }
 }

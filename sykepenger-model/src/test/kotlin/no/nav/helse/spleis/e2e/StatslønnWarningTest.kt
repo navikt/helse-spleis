@@ -36,7 +36,7 @@ internal class StatslønnWarningTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
-        assertTrue(person.personLogg.warn().isEmpty())
+        assertTrue(person.personLogg.varsel().isEmpty())
     }
 
     @Test

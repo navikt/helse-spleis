@@ -2,10 +2,10 @@ package no.nav.helse.serde.reflection
 
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov
-import no.nav.helse.person.Aktivitetslogg.Aktivitet.Error
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.FunksjonellFeil
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Info
-import no.nav.helse.person.Aktivitetslogg.Aktivitet.Severe
-import no.nav.helse.person.Aktivitetslogg.Aktivitet.Warn
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.LogiskFeil
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Varsel
 import no.nav.helse.person.AktivitetsloggVisitor
 import no.nav.helse.person.SpesifikkKontekst
 import no.nav.helse.serde.PersonData.AktivitetsloggData.Alvorlighetsgrad
@@ -33,7 +33,7 @@ internal class AktivitetsloggMap(aktivitetslogg: Aktivitetslogg) : Aktivitetslog
         leggTilMelding(kontekster, INFO, melding, tidsstempel)
     }
 
-    override fun visitVarsel(kontekster: List<SpesifikkKontekst>, aktivitet: Warn, melding: String, tidsstempel: String) {
+    override fun visitVarsel(kontekster: List<SpesifikkKontekst>, aktivitet: Varsel, melding: String, tidsstempel: String) {
         leggTilMelding(kontekster, WARN, melding, tidsstempel)
     }
 
@@ -48,11 +48,11 @@ internal class AktivitetsloggMap(aktivitetslogg: Aktivitetslogg) : Aktivitetslog
         leggTilBehov(kontekster, BEHOV, type, melding, detaljer, tidsstempel)
     }
 
-    override fun visitFunksjonellFeil(kontekster: List<SpesifikkKontekst>, aktivitet: Error, melding: String, tidsstempel: String) {
+    override fun visitFunksjonellFeil(kontekster: List<SpesifikkKontekst>, aktivitet: FunksjonellFeil, melding: String, tidsstempel: String) {
         leggTilMelding(kontekster, ERROR, melding, tidsstempel)
     }
 
-    override fun visitLogiskFeil(kontekster: List<SpesifikkKontekst>, aktivitet: Severe, melding: String, tidsstempel: String) {
+    override fun visitLogiskFeil(kontekster: List<SpesifikkKontekst>, aktivitet: LogiskFeil, melding: String, tidsstempel: String) {
         leggTilMelding(kontekster, SEVERE, melding, tidsstempel)
     }
 

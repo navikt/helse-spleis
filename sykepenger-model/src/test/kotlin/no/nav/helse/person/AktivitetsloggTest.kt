@@ -224,7 +224,7 @@ internal class AktivitetsloggTest {
     private fun assertVarsel(message: String, aktivitetslogg: Aktivitetslogg = this.aktivitetslogg) {
         var visitorCalled = false
         aktivitetslogg.accept(object : AktivitetsloggVisitor {
-            override fun visitVarsel(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Warn, melding: String, tidsstempel: String) {
+            override fun visitVarsel(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Varsel, melding: String, tidsstempel: String) {
                 visitorCalled = true
                 assertEquals(message, melding)
             }
@@ -235,7 +235,7 @@ internal class AktivitetsloggTest {
     private fun assertFunksjonellFeil(message: String, aktivitetslogg: Aktivitetslogg = this.aktivitetslogg) {
         var visitorCalled = false
         aktivitetslogg.accept(object : AktivitetsloggVisitor {
-            override fun visitFunksjonellFeil(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Error, melding: String, tidsstempel: String) {
+            override fun visitFunksjonellFeil(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.FunksjonellFeil, melding: String, tidsstempel: String) {
                 visitorCalled = true
                 assertTrue(message in aktivitet.toString(), aktivitetslogg.toString())
             }
@@ -246,7 +246,7 @@ internal class AktivitetsloggTest {
     private fun assertLogiskFeil(message: String, aktivitetslogg: Aktivitetslogg = this.aktivitetslogg) {
         var visitorCalled = false
         aktivitetslogg.accept(object : AktivitetsloggVisitor {
-            override fun visitLogiskFeil(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Severe, melding: String, tidsstempel: String) {
+            override fun visitLogiskFeil(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.LogiskFeil, melding: String, tidsstempel: String) {
                 visitorCalled = true
                 assertEquals(message, melding)
             }

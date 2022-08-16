@@ -804,7 +804,7 @@ class Person private constructor(
         aktivitetslogg.accept(object : AktivitetsloggVisitor {
             override fun visitFunksjonellFeil(
                 kontekster: List<SpesifikkKontekst>,
-                aktivitet: Aktivitetslogg.Aktivitet.Error,
+                aktivitet: Aktivitetslogg.Aktivitet.FunksjonellFeil,
                 melding: String,
                 tidsstempel: String
             ) {

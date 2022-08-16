@@ -17,9 +17,7 @@ import kotlin.math.roundToInt
 internal class UtbetalingslinjeForskjellTest {
 
     private companion object {
-        private const val UNG_PERSON_FNR_2018 = "12029240045"
         private const val ORGNUMMER = "987654321"
-        private const val FAGSYSTEMID = "FAGSYSTEMID"
     }
 
     private lateinit var aktivitetslogg: Aktivitetslogg
@@ -358,7 +356,7 @@ internal class UtbetalingslinjeForskjellTest {
             14.januar to 20.januar endringskode NY pekerPå actual[0]
         ), actual)
         assertTrue(aktivitetslogg.harVarslerEllerVerre())
-        assertTrue(aktivitetslogg.warn().map(Aktivitetslogg.Aktivitet::toString).any { it.contains(WARN_OPPDRAG_FOM_ENDRET) })
+        assertTrue(aktivitetslogg.varsel().map(Aktivitetslogg.Aktivitet::toString).any { it.contains(WARN_OPPDRAG_FOM_ENDRET) })
     }
 
     @Test
@@ -693,7 +691,7 @@ internal class UtbetalingslinjeForskjellTest {
     }
 
     @Test
-    fun `potpourri`() {
+    fun potpourri() {
         val original = linjer(
             1.januar to 5.januar,
             6.januar to 12.januar grad 50,
@@ -1034,53 +1032,45 @@ internal class UtbetalingslinjeForskjellTest {
         private var datoStatusFom: LocalDate? = null
         private var refDelytelseId: Int? = null
 
-        internal infix fun grad(percentage: Number): TestUtbetalingslinje {
+        infix fun grad(percentage: Number): TestUtbetalingslinje {
             grad = percentage.toDouble().roundToInt()
             return this
         }
 
-        internal infix fun dagsats(amount: Int): TestUtbetalingslinje {
+        infix fun dagsats(amount: Int): TestUtbetalingslinje {
             dagsats = amount
             return this
         }
 
-        internal infix fun endringskode(kode: Endringskode): TestUtbetalingslinje {
+        infix fun endringskode(kode: Endringskode): TestUtbetalingslinje {
             endringskode = kode
             return this
         }
 
-        internal infix fun opphører(dato: LocalDate): TestUtbetalingslinje {
+        infix fun opphører(dato: LocalDate): TestUtbetalingslinje {
             datoStatusFom = dato
             return this
         }
 
-        internal infix fun satstype(satstype: Satstype): TestUtbetalingslinje {
+        infix fun satstype(satstype: Satstype): TestUtbetalingslinje {
             this.satstype = satstype
             return this
         }
 
-        internal infix fun pekerPå(id: Int): TestUtbetalingslinje {
-            refDelytelseId = id
-            return this
-        }
-
-        internal infix fun pekerPå(other: Utbetalingslinje): TestUtbetalingslinje {
+        infix fun pekerPå(other: Utbetalingslinje): TestUtbetalingslinje {
             delytelseId = other.id + 1
             refDelytelseId = other.id
             return this
         }
 
-        internal infix fun endrer(other: Utbetalingslinje): TestUtbetalingslinje {
+        infix fun endrer(other: Utbetalingslinje): TestUtbetalingslinje {
             endringskode(ENDR)
             delytelseId = other.id
             return this
         }
 
-        internal infix fun forskjell(other: Oppdrag) = this.asUtbetalingslinjer() - other
+        fun asUtbetalingslinje() = Utbetalingslinje(fom, tom, satstype, dagsats, dagsats, grad, endringskode = endringskode, datoStatusFom = datoStatusFom, refDelytelseId = refDelytelseId, delytelseId = delytelseId)
 
-        internal fun asUtbetalingslinje() = Utbetalingslinje(fom, tom, satstype, dagsats, dagsats, grad, endringskode = endringskode, datoStatusFom = datoStatusFom, refDelytelseId = refDelytelseId, delytelseId = delytelseId)
-
-        private fun asUtbetalingslinjer() = linjer(asUtbetalingslinje())
     }
 
     private infix fun LocalDate.to(other: LocalDate) = TestUtbetalingslinje(this, other)

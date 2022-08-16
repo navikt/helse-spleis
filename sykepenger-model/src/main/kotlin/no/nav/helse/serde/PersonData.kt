@@ -396,7 +396,7 @@ internal data class PersonData(
                         melding,
                         tidsstempel
                     )
-                    Alvorlighetsgrad.WARN -> Aktivitetslogg.Aktivitet.Warn(
+                    Alvorlighetsgrad.WARN -> Aktivitetslogg.Aktivitet.Varsel(
                         kontekster,
                         melding,
                         tidsstempel
@@ -408,12 +408,12 @@ internal data class PersonData(
                         detaljer,
                         tidsstempel
                     )
-                    Alvorlighetsgrad.ERROR -> Aktivitetslogg.Aktivitet.Error(
+                    Alvorlighetsgrad.ERROR -> Aktivitetslogg.Aktivitet.FunksjonellFeil(
                         kontekster,
                         melding,
                         tidsstempel
                     )
-                    Alvorlighetsgrad.SEVERE -> Aktivitetslogg.Aktivitet.Severe(
+                    Alvorlighetsgrad.SEVERE -> Aktivitetslogg.Aktivitet.LogiskFeil(
                         kontekster,
                         melding,
                         tidsstempel
