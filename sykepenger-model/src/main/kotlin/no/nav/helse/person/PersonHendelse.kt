@@ -73,7 +73,7 @@ abstract class PersonHendelse protected constructor(
     override fun behov(type: Aktivitetslogg.Aktivitet.Behov.Behovtype, melding: String, detaljer: Map<String, Any?>) =
         aktivitetslogg.behov(type, melding, detaljer)
     override fun funksjonellFeil(melding: String) = aktivitetslogg.funksjonellFeil(melding)
-    override fun severe(melding: String, vararg params: Any?) = aktivitetslogg.severe(melding, *params)
+    override fun logiskFeil(melding: String, vararg params: Any?) = aktivitetslogg.logiskFeil(melding, *params)
     override fun hasActivities() = aktivitetslogg.hasActivities()
     override fun hasWarningsOrWorse() = aktivitetslogg.hasWarningsOrWorse()
     override fun hasErrorsOrWorse() = aktivitetslogg.hasErrorsOrWorse()

@@ -26,10 +26,10 @@ class OverstyrArbeidsforhold(
         val relevanteArbeidsgivere = overstyrteArbeidsforhold
             .map { overstyring ->
                 arbeidsgivere.finn(overstyring.orgnummer)
-                    ?: severe("Kan ikke overstyre arbeidsforhold for en arbeidsgiver vi ikke kjenner til")
+                    ?: logiskFeil("Kan ikke overstyre arbeidsforhold for en arbeidsgiver vi ikke kjenner til")
             }
         if (relevanteArbeidsgivere.any { it.harSykdomFor(skjæringstidspunkt) }) {
-            severe("Kan ikke overstyre arbeidsforhold for en arbeidsgiver som har sykdom")
+            logiskFeil("Kan ikke overstyre arbeidsforhold for en arbeidsgiver som har sykdom")
         }
     }
 

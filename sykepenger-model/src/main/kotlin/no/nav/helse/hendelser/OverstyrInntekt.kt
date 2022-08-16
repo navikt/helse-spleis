@@ -39,10 +39,10 @@ class OverstyrInntekt(
 
     internal fun valider(arbeidsgivere: MutableList<Arbeidsgiver>) {
         if (arbeidsgivere.none { it.harSykdomFor(skjæringstidspunkt) }) {
-            severe("Kan ikke overstyre inntekt hvis vi ikke har en arbeidsgiver med sykdom for skjæringstidspunktet")
+            logiskFeil("Kan ikke overstyre inntekt hvis vi ikke har en arbeidsgiver med sykdom for skjæringstidspunktet")
         }
         if (arbeidsgivere.harPeriodeSomBlokkererOverstyring(skjæringstidspunkt)) {
-            severe("Kan ikke overstyre inntekt for ghost for en pågående behandling der én eller flere perioder er behandlet ferdig")
+            logiskFeil("Kan ikke overstyre inntekt for ghost for en pågående behandling der én eller flere perioder er behandlet ferdig")
         }
     }
 }

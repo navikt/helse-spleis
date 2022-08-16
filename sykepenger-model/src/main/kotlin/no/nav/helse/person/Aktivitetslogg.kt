@@ -51,7 +51,7 @@ class Aktivitetslogg(
         add(Aktivitet.Error(kontekster.toSpesifikk(), melding))
     }
 
-    override fun severe(melding: String, vararg params: Any?): Nothing {
+    override fun logiskFeil(melding: String, vararg params: Any?): Nothing {
         add(Aktivitet.Severe(kontekster.toSpesifikk(), String.format(melding, *params)))
 
         throw AktivitetException(this)
@@ -462,7 +462,7 @@ interface IAktivitetslogg {
     fun warn(melding: String)
     fun behov(type: Behov.Behovtype, melding: String, detaljer: Map<String, Any?> = emptyMap())
     fun funksjonellFeil(melding: String)
-    fun severe(melding: String, vararg params: Any?): Nothing
+    fun logiskFeil(melding: String, vararg params: Any?): Nothing
 
     fun hasActivities(): Boolean
     fun hasWarningsOrWorse(): Boolean

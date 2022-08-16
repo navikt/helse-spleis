@@ -28,7 +28,7 @@ internal class AktivitetsloggObserverTest {
         aktivitetslogg.warn("Dette er et varsel")
         aktivitetslogg.funksjonellFeil("Dette er en error")
         try {
-            aktivitetslogg.severe("Dette er en severe")
+            aktivitetslogg.logiskFeil("Dette er en severe")
         } catch (_: Exception) {}
 
         testObserver.assertAktivitet('I', "Dette er en info-melding", listOf(personkontekst, arbeidsgiverkontekst, vedtaksperiodekontekst))

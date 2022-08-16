@@ -60,7 +60,7 @@ class Inntektsmelding(
     private var sykdomstidslinje: Sykdomstidslinje
 
     init {
-        if (arbeidsgiverperioder.isEmpty() && førsteFraværsdag == null) severe("Arbeidsgiverperiode er tom og førsteFraværsdag er null")
+        if (arbeidsgiverperioder.isEmpty() && førsteFraværsdag == null) logiskFeil("Arbeidsgiverperiode er tom og førsteFraværsdag er null")
         sykdomstidslinje = arbeidsgivertidslinje()
     }
 

@@ -44,7 +44,7 @@ internal class AktivitetsloggTest {
     @Test
     fun `severe oppdaget og kaster exception`() {
         val melding = "Severe error"
-        assertThrows<Aktivitetslogg.AktivitetException> { aktivitetslogg.severe(melding) }
+        assertThrows<Aktivitetslogg.AktivitetException> { aktivitetslogg.logiskFeil(melding) }
         assertTrue(aktivitetslogg.hasErrorsOrWorse())
         assertTrue(aktivitetslogg.toString().contains(melding))
         assertSevere(melding)

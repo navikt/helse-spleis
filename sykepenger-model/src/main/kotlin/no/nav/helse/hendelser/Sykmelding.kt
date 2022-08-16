@@ -35,7 +35,7 @@ class Sykmelding(
     }
 
     init {
-        if (sykeperioder.isEmpty()) severe("Ingen sykeperioder")
+        if (sykeperioder.isEmpty()) logiskFeil("Ingen sykeperioder")
         sykdomstidslinje = Sykmeldingsperiode.tidslinje(this, sykeperioder)
         periode = requireNotNull(sykdomstidslinje.periode())
     }
@@ -75,7 +75,7 @@ class Sykmeldingsperiode(
             perioder.map { it.tidslinje(sykmelding.kilde) }
                 .merge(noOverlap)
                 .also { tidslinje ->
-                    if (tidslinje.any { it is Dag.ProblemDag }) sykmelding.severe("Sykeperioder overlapper")
+                    if (tidslinje.any { it is Dag.ProblemDag }) sykmelding.logiskFeil("Sykeperioder overlapper")
                 }
 
         internal fun periode(perioder: List<Sykmeldingsperiode>) =

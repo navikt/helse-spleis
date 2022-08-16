@@ -52,7 +52,7 @@ internal class DatadelingMediatorTest {
         testhendelse.warn("Dette er et varsel")
         testhendelse.funksjonellFeil("Dette er en error")
         try {
-            testhendelse.severe("Dette er en severe")
+            testhendelse.logiskFeil("Dette er en severe")
         } catch (_: Exception) {}
         datadelingMediator.finalize(testRapid)
 

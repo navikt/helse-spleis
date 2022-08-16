@@ -338,7 +338,7 @@ class Person private constructor(
         sikkerLogg.info("Ship-o-hoy nå er vi i overstyring av ghost-inntekt-flyten for $aktørId")
         hendelse.valider(arbeidsgivere)
         if (!arbeidsgivere.håndterOverstyringAvGhostInntekt(hendelse)) {
-            hendelse.severe("Kan ikke overstyre ghost-inntekt fordi ingen vedtaksperioder håndterte hendelsen")
+            hendelse.logiskFeil("Kan ikke overstyre ghost-inntekt fordi ingen vedtaksperioder håndterte hendelsen")
         }
         håndterGjenoppta(hendelse)
     }
@@ -348,7 +348,7 @@ class Person private constructor(
         overstyrArbeidsforhold.valider(arbeidsgivere)
 
         if (!arbeidsgivere.håndter(overstyrArbeidsforhold)) {
-            overstyrArbeidsforhold.severe("Kan ikke overstyre arbeidsforhold fordi ingen vedtaksperioder håndterte hendelsen")
+            overstyrArbeidsforhold.logiskFeil("Kan ikke overstyre arbeidsforhold fordi ingen vedtaksperioder håndterte hendelsen")
         }
         håndterGjenoppta(overstyrArbeidsforhold)
     }
@@ -569,7 +569,7 @@ class Person private constructor(
 
     private fun finnArbeidsgiver(hendelse: ArbeidstakerHendelse) =
         hendelse.organisasjonsnummer().let { orgnr ->
-            arbeidsgivere.finn(orgnr) ?: hendelse.severe("Finner ikke arbeidsgiver")
+            arbeidsgivere.finn(orgnr) ?: hendelse.logiskFeil("Finner ikke arbeidsgiver")
         }
 
     private fun MutableList<Arbeidsgiver>.finnEllerOpprett(orgnr: String, creator: () -> Arbeidsgiver) =
