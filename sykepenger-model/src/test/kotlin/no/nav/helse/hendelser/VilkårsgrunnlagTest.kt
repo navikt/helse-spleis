@@ -31,7 +31,7 @@ import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.Vedtaksperiode.Vedtaksperiodetilstand
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
-import no.nav.helse.spleis.e2e.assertWarning
+import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.sykepengegrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
@@ -122,7 +122,7 @@ internal class VilkårsgrunnlagTest : AbstractPersonTest() {
         person.håndter(vilkårsgrunnlag)
         assertGrunnlagsdata(INNTEKT, Prosent.ratio(0.0), 28, true)
         assertEquals(TilstandType.AVVENTER_HISTORIKK, hentTilstand()?.type)
-        assertWarning("Arbeidsgiver er ikke registrert i Aa-registeret.", AktivitetsloggFilter.person())
+        assertVarsel("Arbeidsgiver er ikke registrert i Aa-registeret.", AktivitetsloggFilter.person())
     }
 
     @Test

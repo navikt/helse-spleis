@@ -30,7 +30,7 @@ import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertTilstander
-import no.nav.helse.spleis.e2e.assertWarning
+import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.forlengelseTilGodkjenning
 import no.nav.helse.spleis.e2e.førstegangTilGodkjenning
@@ -584,8 +584,8 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)), a1)
 
         håndterYtelser(1.vedtaksperiode, foreldrepenger = 20.januar til 31.januar, orgnummer = a1)
-        assertWarning("Det er utbetalt foreldrepenger i samme periode.", 1.vedtaksperiode.filter(a1))
-        assertWarning("Det er utbetalt foreldrepenger i samme periode.", 1.vedtaksperiode.filter(a2))
+        assertVarsel("Det er utbetalt foreldrepenger i samme periode.", 1.vedtaksperiode.filter(a1))
+        assertVarsel("Det er utbetalt foreldrepenger i samme periode.", 1.vedtaksperiode.filter(a2))
     }
 
     @Test
@@ -597,7 +597,7 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)), a1)
         håndterYtelser(2.vedtaksperiode, foreldrepenger = 20.mars til 31.mars, orgnummer = a1)
 
-        assertWarning("Det er utbetalt foreldrepenger i samme periode.", 3.vedtaksperiode.filter(a2))
+        assertVarsel("Det er utbetalt foreldrepenger i samme periode.", 3.vedtaksperiode.filter(a2))
     }
 
     @Test
@@ -643,7 +643,7 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
 
         assertEquals(19, inspektør(a1).sykdomstidslinje.inspektør.grader[17.januar])
         assertEquals(19, inspektør(a2).sykdomstidslinje.inspektør.grader[17.januar])
-        assertWarning("Minst én dag uten utbetaling på grunn av sykdomsgrad under 20 %. Vurder å sende vedtaksbrev fra Infotrygd", 1.vedtaksperiode.filter(a2))
-        assertWarning("Minst én dag uten utbetaling på grunn av sykdomsgrad under 20 %. Vurder å sende vedtaksbrev fra Infotrygd", 1.vedtaksperiode.filter(a1))
+        assertVarsel("Minst én dag uten utbetaling på grunn av sykdomsgrad under 20 %. Vurder å sende vedtaksbrev fra Infotrygd", 1.vedtaksperiode.filter(a2))
+        assertVarsel("Minst én dag uten utbetaling på grunn av sykdomsgrad under 20 %. Vurder å sende vedtaksbrev fra Infotrygd", 1.vedtaksperiode.filter(a1))
     }
 }

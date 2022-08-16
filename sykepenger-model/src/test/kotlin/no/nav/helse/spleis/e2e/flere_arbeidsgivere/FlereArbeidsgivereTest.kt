@@ -225,12 +225,12 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
     fun `vedtaksperioder atskilt med betydelig tid`() {
         a1 {
             nyttVedtak(1.januar, 31.januar)
-            assertNoErrors()
+            assertIngenFunksjonelleFeil()
             assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET)
         }
         a2 {
             nyttVedtak(1.mars, 31.mars)
-            assertNoErrors()
+            assertIngenFunksjonelleFeil()
             assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET)
         }
     }
@@ -503,7 +503,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         }
         a2 {
             assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_BLOKKERENDE_PERIODE)
-            assertWarnings()
+            assertVarsler()
         }
         a1 {
             inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.also { tidslinjeInspektør ->
@@ -554,7 +554,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
             håndterUtbetalt()
-            assertNoWarnings()
+            assertIngenVarsler()
         }
     }
 
@@ -631,7 +631,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
                 TilstandType.TIL_UTBETALING,
                 TilstandType.AVSLUTTET
             )
-            assertNoErrors()
+            assertIngenFunksjonelleFeil()
             Assertions.assertEquals(1, inspektør.avsluttedeUtbetalingerForVedtaksperiode(1.vedtaksperiode).size)
             Assertions.assertEquals(0, inspektør.ikkeUtbetalteUtbetalingerForVedtaksperiode(1.vedtaksperiode).size)
             Assertions.assertEquals(1, inspektør.avsluttedeUtbetalingerForVedtaksperiode(2.vedtaksperiode).size)
@@ -658,7 +658,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
                 TilstandType.AVVENTER_SIMULERING,
                 TilstandType.AVVENTER_GODKJENNING
             )
-            assertNoErrors()
+            assertIngenFunksjonelleFeil()
             Assertions.assertEquals(1, inspektør.avsluttedeUtbetalingerForVedtaksperiode(1.vedtaksperiode).size)
             Assertions.assertEquals(0, inspektør.ikkeUtbetalteUtbetalingerForVedtaksperiode(1.vedtaksperiode).size)
             Assertions.assertEquals(0, inspektør.avsluttedeUtbetalingerForVedtaksperiode(2.vedtaksperiode).size)
@@ -874,7 +874,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             håndterYtelser(2.vedtaksperiode)
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
-            assertNoErrors(2.vedtaksperiode.filter())
+            assertIngenFunksjonelleFeil(2.vedtaksperiode.filter())
             Assertions.assertEquals(Inntektskilde.EN_ARBEIDSGIVER, a1.inspektør.inntektskilde(2.vedtaksperiode))
         }
         a2 {

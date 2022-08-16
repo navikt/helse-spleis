@@ -99,7 +99,7 @@ internal class StatslønnWarningTest : AbstractEndToEndTest() {
             AVVENTER_HISTORIKK,
             TIL_INFOTRYGD
         )
-        assertError("Det er lagt inn statslønn i Infotrygd, undersøk at utbetalingen blir riktig.", 1.vedtaksperiode.filter())
+        assertFunksjonellFeil("Det er lagt inn statslønn i Infotrygd, undersøk at utbetalingen blir riktig.", 1.vedtaksperiode.filter())
 
         assertForkastetPeriodeTilstander(
             2.vedtaksperiode,
@@ -109,7 +109,7 @@ internal class StatslønnWarningTest : AbstractEndToEndTest() {
             AVVENTER_HISTORIKK,
             TIL_INFOTRYGD
         )
-        assertError(
+        assertFunksjonellFeil(
             "Det er lagt inn statslønn i Infotrygd, undersøk at utbetalingen blir riktig.",
             2.vedtaksperiode.filter()
         )

@@ -46,48 +46,48 @@ internal class TestArbeidsgiverAssertions(private val observat√∏r: TestObservat√
         assertEquals(1, info.count { it == forventet }, "fant ikke ett tilfelle av info. Info:\n${info.joinToString("\n")}")
     }
 
-    internal fun assertNoInfo(forventet: String, vararg filtre: AktivitetsloggFilter) {
+    internal fun assertIngenInfo(forventet: String, vararg filtre: AktivitetsloggFilter) {
         val info = collectInfo(*filtre)
         assertEquals(0, info.count { it == forventet }, "fant uventet info. Info:\n${info.joinToString("\n")}")
     }
 
-    internal fun assertNoWarnings(vararg filtre: AktivitetsloggFilter) {
-        val warnings = collectWarnings(*filtre)
+    internal fun assertIngenVarsler(vararg filtre: AktivitetsloggFilter) {
+        val warnings = collectVarsler(*filtre)
         assertTrue(warnings.isEmpty(), "Forventet ingen warnings. Warnings:\n${warnings.joinToString("\n")}")
     }
 
-    internal fun assertWarnings(vararg filtre: AktivitetsloggFilter) {
-        assertTrue(collectWarnings(*filtre).isNotEmpty(), "Forventet warnings, fant ingen")
+    internal fun assertVarsler(vararg filtre: AktivitetsloggFilter) {
+        assertTrue(collectVarsler(*filtre).isNotEmpty(), "Forventet warnings, fant ingen")
     }
 
-    internal fun assertWarning(warning: String, vararg filtre: AktivitetsloggFilter) {
-        val warnings = collectWarnings(*filtre)
+    internal fun assertVarsel(warning: String, vararg filtre: AktivitetsloggFilter) {
+        val warnings = collectVarsler(*filtre)
         assertTrue(warnings.contains(warning), "\nFant ikke forventet warning:\n\t$warning\nWarnings funnet:\n\t${warnings.joinToString("\n\t")}\n")
     }
 
-    internal fun assertNoWarning(warning: String, vararg filtre: AktivitetsloggFilter) {
-        val warnings = collectWarnings(*filtre)
+    internal fun assertIngenVarsel(warning: String, vararg filtre: AktivitetsloggFilter) {
+        val warnings = collectVarsler(*filtre)
         assertFalse(warnings.contains(warning), "\nFant ikke-forventet warning:\n\t$warning\nWarnings funnet:\n\t${warnings.joinToString("\n\t")}\n")
     }
 
-    internal fun assertError(error: String, vararg filtre: AktivitetsloggFilter) {
-        val errors = collectErrors(*filtre)
+    internal fun assertFunksjonellFeil(error: String, vararg filtre: AktivitetsloggFilter) {
+        val errors = collectFunksjonelleFeil(*filtre)
         assertTrue(errors.contains(error), "fant ikke forventet error. Errors:\n${errors.joinToString("\n")}")
     }
 
-    internal fun assertErrors(vararg filtre: AktivitetsloggFilter) {
-        val errors = collectErrors(*filtre)
+    internal fun assertFunksjonelleFeil(vararg filtre: AktivitetsloggFilter) {
+        val errors = collectFunksjonelleFeil(*filtre)
         assertTrue(errors.isNotEmpty(), "forventet errors, fant ingen.")
     }
 
 
-    internal fun assertNoErrors(vararg filtre: AktivitetsloggFilter) {
-        val errors = collectErrors(*filtre)
+    internal fun assertIngenFunksjonelleFeil(vararg filtre: AktivitetsloggFilter) {
+        val errors = collectFunksjonelleFeil(*filtre)
         assertTrue(errors.isEmpty(), "forventet ingen errors. Errors: \n${errors.joinToString("\n")}")
     }
 
-    internal fun assertSevere(severe: String, vararg filtre: AktivitetsloggFilter) {
-        val severes = collectSeveres(*filtre)
+    internal fun assertLogiskFeil(severe: String, vararg filtre: AktivitetsloggFilter) {
+        val severes = collectLogiskeFeil(*filtre)
         assertTrue(severes.contains(severe), "fant ikke forventet severe. Severes:\n${severes.joinToString("\n")}")
     }
 
@@ -103,7 +103,7 @@ internal class TestArbeidsgiverAssertions(private val observat√∏r: TestObservat√
         return info
     }
 
-    private fun collectWarnings(vararg filtre: AktivitetsloggFilter): MutableList<String> {
+    private fun collectVarsler(vararg filtre: AktivitetsloggFilter): MutableList<String> {
         val warnings = mutableListOf<String>()
         personInspekt√∏r.aktivitetslogg.accept(object : AktivitetsloggVisitor {
             override fun visitWarn(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Warn, melding: String, tidsstempel: String) {
@@ -115,7 +115,7 @@ internal class TestArbeidsgiverAssertions(private val observat√∏r: TestObservat√
         return warnings
     }
 
-    internal fun collectErrors(vararg filtre: AktivitetsloggFilter): MutableList<String> {
+    private fun collectFunksjonelleFeil(vararg filtre: AktivitetsloggFilter): MutableList<String> {
         val errors = mutableListOf<String>()
         personInspekt√∏r.aktivitetslogg.accept(object : AktivitetsloggVisitor {
             override fun visitError(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Error, melding: String, tidsstempel: String) {
@@ -127,7 +127,7 @@ internal class TestArbeidsgiverAssertions(private val observat√∏r: TestObservat√
         return errors
     }
 
-    internal fun collectSeveres(vararg filtre: AktivitetsloggFilter): MutableList<String> {
+    private fun collectLogiskeFeil(vararg filtre: AktivitetsloggFilter): MutableList<String> {
         val severes = mutableListOf<String>()
         personInspekt√∏r.aktivitetslogg.accept(object : AktivitetsloggVisitor {
             override fun visitSevere(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Severe, melding: String, tidsstempel: String) {

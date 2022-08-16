@@ -16,10 +16,10 @@ import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.inntektsoppl
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.TilstandType
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
-import no.nav.helse.spleis.e2e.assertNoWarning
-import no.nav.helse.spleis.e2e.assertNoWarnings
+import no.nav.helse.spleis.e2e.assertIngenVarsel
+import no.nav.helse.spleis.e2e.assertIngenVarsler
 import no.nav.helse.spleis.e2e.assertTilstander
-import no.nav.helse.spleis.e2e.assertWarning
+import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.finnSkjæringstidspunkt
 import no.nav.helse.spleis.e2e.grunnlag
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
@@ -945,8 +945,8 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
-        assertWarning("Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold", 1.vedtaksperiode.filter(a1))
-        assertNoWarning("Den sykmeldte har skiftet arbeidsgiver, og det er beregnet at den nye arbeidsgiveren mottar refusjon lik forrige. Kontroller at dagsatsen blir riktig.", 1.vedtaksperiode.filter(a1))
+        assertVarsel("Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold", 1.vedtaksperiode.filter(a1))
+        assertIngenVarsel("Den sykmeldte har skiftet arbeidsgiver, og det er beregnet at den nye arbeidsgiveren mottar refusjon lik forrige. Kontroller at dagsatsen blir riktig.", 1.vedtaksperiode.filter(a1))
 
     }
 
@@ -999,7 +999,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
             )
         )
 
-        assertNoWarnings()
+        assertIngenVarsler()
 
     }
 

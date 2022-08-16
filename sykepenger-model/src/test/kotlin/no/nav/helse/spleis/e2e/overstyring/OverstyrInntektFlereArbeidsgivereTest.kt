@@ -23,13 +23,13 @@ import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
-import no.nav.helse.spleis.e2e.assertError
+import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
 import no.nav.helse.spleis.e2e.assertInntektForDato
-import no.nav.helse.spleis.e2e.assertNoErrors
+import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
 import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
-import no.nav.helse.spleis.e2e.assertWarning
+import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.grunnlag
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterOverstyrInntekt
@@ -85,7 +85,7 @@ internal class OverstyrInntektFlereArbeidsgivereTest: AbstractEndToEndTest() {
         assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
 
         håndterOverstyrInntekt(19000.månedlig, a2, 1.januar)
-        assertNoErrors()
+        assertIngenFunksjonelleFeil()
         assertInntektForDato(20000.månedlig, 1.januar, inspektør = inspektør(a1))
         assertInntektForDato(20000.månedlig, 1.januar, inspektør = inspektør(a2))
         assertEquals(20000.månedlig, grunnlagsdataInspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysninger.inntektsopplysningPerArbeidsgiver()[a1]?.omregnetÅrsinntekt())
@@ -161,7 +161,7 @@ internal class OverstyrInntektFlereArbeidsgivereTest: AbstractEndToEndTest() {
 
         nullstillTilstandsendringer()
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        assertError("Har mer enn 25 % avvik", 1.vedtaksperiode.filter())
+        assertFunksjonellFeil("Har mer enn 25 % avvik", 1.vedtaksperiode.filter())
         assertForkastetPeriodeTilstander(
             1.vedtaksperiode,
             AVVENTER_HISTORIKK,
@@ -181,7 +181,7 @@ internal class OverstyrInntektFlereArbeidsgivereTest: AbstractEndToEndTest() {
 
         nullstillTilstandsendringer()
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        assertError("Har mer enn 25 % avvik", 1.vedtaksperiode.filter())
+        assertFunksjonellFeil("Har mer enn 25 % avvik", 1.vedtaksperiode.filter())
         assertForkastetPeriodeTilstander(
             1.vedtaksperiode,
             AVVENTER_HISTORIKK,
@@ -207,8 +207,8 @@ internal class OverstyrInntektFlereArbeidsgivereTest: AbstractEndToEndTest() {
         }
         håndterOverstyrInntekt(1500.månedlig, a1, 1.januar)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        assertWarning("Perioden er avslått på grunn av at inntekt er under krav til minste sykepengegrunnlag", 1.vedtaksperiode.filter(a1))
-        assertNoErrors()
+        assertVarsel("Perioden er avslått på grunn av at inntekt er under krav til minste sykepengegrunnlag", 1.vedtaksperiode.filter(a1))
+        assertIngenFunksjonelleFeil()
         assertTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING, orgnummer = a1)
         assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
     }
@@ -237,14 +237,14 @@ internal class OverstyrInntektFlereArbeidsgivereTest: AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterOverstyrInntekt(8000.månedlig, skjæringstidspunkt = 1.januar, orgnummer = a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        assertError("Kan ikke fortsette på grunn av manglende funksjonalitet for utbetaling til bruker")
+        assertFunksjonellFeil("Kan ikke fortsette på grunn av manglende funksjonalitet for utbetaling til bruker")
     }
 
     @Test
     fun `Skal ikke revurdere inntekt for flere arbeidsgivere`() {
         nyeVedtak(1.januar, 31.januar, a1, a2)
         håndterOverstyrInntekt(19000.månedlig, skjæringstidspunkt = 1.januar, orgnummer = a1)
-        assertError("Forespurt revurdering av inntekt hvor personen har flere arbeidsgivere (inkl. ghosts)")
+        assertFunksjonellFeil("Forespurt revurdering av inntekt hvor personen har flere arbeidsgivere (inkl. ghosts)")
     }
 
     private fun tilOverstyring(

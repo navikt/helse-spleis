@@ -23,9 +23,9 @@ import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.september
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
-import no.nav.helse.spleis.e2e.assertErrors
+import no.nav.helse.spleis.e2e.assertFunksjonelleFeil
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
-import no.nav.helse.spleis.e2e.assertNoWarnings
+import no.nav.helse.spleis.e2e.assertIngenVarsler
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
@@ -90,7 +90,7 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
     fun `Støtter ikke korrigerende søknad på utbetalt vedtaksperiode`() {
         nyttVedtak(1.januar, 31.januar)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(31.januar, 31.januar))
-        assertErrors()
+        assertFunksjonelleFeil()
     }
 
     @Test
@@ -144,8 +144,8 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
         assertTilstander(
             2.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK
         )
-        assertNoWarnings(1.vedtaksperiode.filter())
-        assertNoWarnings(2.vedtaksperiode.filter())
+        assertIngenVarsler(1.vedtaksperiode.filter())
+        assertIngenVarsler(2.vedtaksperiode.filter())
     }
 
     @Test
@@ -161,8 +161,8 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
         }
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
-        assertNoWarnings(1.vedtaksperiode.filter())
-        assertNoWarnings(2.vedtaksperiode.filter())
+        assertIngenVarsler(1.vedtaksperiode.filter())
+        assertIngenVarsler(2.vedtaksperiode.filter())
     }
 
     @Test
@@ -179,8 +179,8 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
         }
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
-        assertNoWarnings(1.vedtaksperiode.filter())
-        assertNoWarnings(2.vedtaksperiode.filter())
+        assertIngenVarsler(1.vedtaksperiode.filter())
+        assertIngenVarsler(2.vedtaksperiode.filter())
     }
 
     @Test
@@ -204,9 +204,9 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
-        assertNoWarnings(1.vedtaksperiode.filter())
-        assertNoWarnings(2.vedtaksperiode.filter())
-        assertNoWarnings(3.vedtaksperiode.filter())
+        assertIngenVarsler(1.vedtaksperiode.filter())
+        assertIngenVarsler(2.vedtaksperiode.filter())
+        assertIngenVarsler(3.vedtaksperiode.filter())
     }
 
     @Test
@@ -220,7 +220,7 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
             assertTrue(it[31.januar] is Feriedag)
         }
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
-        assertNoWarnings(1.vedtaksperiode.filter())
+        assertIngenVarsler(1.vedtaksperiode.filter())
     }
 
     @Test
@@ -242,7 +242,7 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING
         )
-        assertNoWarnings(1.vedtaksperiode.filter())
+        assertIngenVarsler(1.vedtaksperiode.filter())
     }
 
     @Test
@@ -266,7 +266,7 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK
         )
-        assertNoWarnings(1.vedtaksperiode.filter())
+        assertIngenVarsler(1.vedtaksperiode.filter())
     }
 
     @Test
@@ -293,7 +293,7 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
             AVVENTER_SIMULERING,
             AVVENTER_HISTORIKK
         )
-        assertNoWarnings(1.vedtaksperiode.filter())
+        assertIngenVarsler(1.vedtaksperiode.filter())
     }
 
     @Test
@@ -322,7 +322,7 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
             AVVENTER_GODKJENNING,
             AVVENTER_HISTORIKK
         )
-        assertNoWarnings(1.vedtaksperiode.filter())
+        assertIngenVarsler(1.vedtaksperiode.filter())
     }
 
     @Test

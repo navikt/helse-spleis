@@ -14,8 +14,8 @@ import no.nav.helse.januar
 import no.nav.helse.juni
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
-import no.nav.helse.spleis.e2e.assertNoWarnings
-import no.nav.helse.spleis.e2e.assertWarning
+import no.nav.helse.spleis.e2e.assertIngenVarsler
+import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.grunnlag
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterSimulering
@@ -40,7 +40,7 @@ internal class FlereArbeidsgivereWarningsTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 16.januar, 100.prosent), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent), orgnummer = a2)
-        assertNoWarnings(1.vedtaksperiode.filter(orgnummer = a2))
+        assertIngenVarsler(1.vedtaksperiode.filter(orgnummer = a2))
     }
 
     @Test
@@ -64,7 +64,7 @@ internal class FlereArbeidsgivereWarningsTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
 
-        assertWarning("Bruker har flere inntektskilder de siste tre månedene enn arbeidsforhold som er oppdaget i Aa-registeret.",
+        assertVarsel("Bruker har flere inntektskilder de siste tre månedene enn arbeidsforhold som er oppdaget i Aa-registeret.",
             AktivitetsloggFilter.person()
         )
         Assertions.assertFalse(
@@ -96,7 +96,7 @@ internal class FlereArbeidsgivereWarningsTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
 
-        assertNoWarnings(AktivitetsloggFilter.person())
+        assertIngenVarsler(AktivitetsloggFilter.person())
     }
 
     @Test
@@ -112,13 +112,13 @@ internal class FlereArbeidsgivereWarningsTest : AbstractEndToEndTest() {
         assertForventetFeil(
             forklaring = "Det er unødvendig å lage warning på en periode som ikke har blitt utbetalt",
             nå = {
-                assertWarning(
+                assertVarsel(
                     "Denne personen har en utbetaling for samme periode for en annen arbeidsgiver. Kontroller at beregningene for begge arbeidsgiverne er korrekte.",
                     1.vedtaksperiode.filter(a2)
                 )
             },
             ønsket = {
-                assertNoWarnings(1.vedtaksperiode.filter(a2))
+                assertIngenVarsler(1.vedtaksperiode.filter(a2))
             }
         )
     }
@@ -167,11 +167,11 @@ internal class FlereArbeidsgivereWarningsTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true, orgnummer = a2)
         håndterUtbetalt(orgnummer = a2)
 
-        assertWarning(
+        assertVarsel(
             "Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold",
             AktivitetsloggFilter.person()
         )
-        assertWarning(
+        assertVarsel(
             "Denne personen har en utbetaling for samme periode for en annen arbeidsgiver. Kontroller at beregningene for begge arbeidsgiverne er korrekte.",
             AktivitetsloggFilter.person()
         )
@@ -210,7 +210,7 @@ internal class FlereArbeidsgivereWarningsTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
 
-        assertWarning("Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold",
+        assertVarsel("Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold",
             AktivitetsloggFilter.person()
         )
 
@@ -219,11 +219,11 @@ internal class FlereArbeidsgivereWarningsTest : AbstractEndToEndTest() {
         håndterUtbetalingshistorikk(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a2)
         håndterInntektsmelding(listOf(1.januar(2021) til 16.januar(2021)), førsteFraværsdag = 1.januar(2021), orgnummer = a2)
 
-        assertWarning(
+        assertVarsel(
             "Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold",
             AktivitetsloggFilter.person()
         )
-        assertWarning(
+        assertVarsel(
             "Denne personen har en utbetaling for samme periode for en annen arbeidsgiver. Kontroller at beregningene for begge arbeidsgiverne er korrekte.",
             AktivitetsloggFilter.person()
         )

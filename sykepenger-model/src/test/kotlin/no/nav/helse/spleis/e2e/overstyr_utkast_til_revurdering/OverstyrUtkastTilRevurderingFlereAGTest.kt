@@ -12,7 +12,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
-import no.nav.helse.spleis.e2e.assertNoErrors
+import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
 import no.nav.helse.spleis.e2e.assertUtbetalingsdag
 import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.håndterOverstyrTidslinje
@@ -57,7 +57,7 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
             assertUtbetalingsdag(utbetalingstidslinje[29.januar], expectedDagtype = Fridag::class, 50.0)
             assertUtbetalingsdag(utbetalingstidslinje[30.januar], expectedDagtype = Fridag::class, 50.0)
             assertUtbetalingsdag(utbetalingstidslinje[31.januar], expectedDagtype = Fridag::class, 50.0)
-            assertNoErrors()
+            assertIngenFunksjonelleFeil()
             assertTilstander(
                 1.vedtaksperiode,
                 AVSLUTTET,
@@ -83,7 +83,7 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
 
         inspektør(AG2) {
             val utbetalingstidslinje = sisteUtbetalingUtbetalingstidslinje()
-            assertNoErrors()
+            assertIngenFunksjonelleFeil()
             assertUtbetalingsdag(utbetalingstidslinje[29.januar], expectedDagtype = NavDag::class, 50.0)
             assertUtbetalingsdag(utbetalingstidslinje[30.januar], expectedDagtype = NavDag::class, 50.0)
             assertUtbetalingsdag(utbetalingstidslinje[31.januar], expectedDagtype = NavDag::class, 50.0)
@@ -120,7 +120,7 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
         håndterOverstyrTidslinje((30.januar til 31.januar).map { manuellFeriedag(it) }, orgnummer = AG1)
 
         inspektør(AG1) {
-            assertNoErrors()
+            assertIngenFunksjonelleFeil()
             assertTilstander(
                 1.vedtaksperiode,
                 AVSLUTTET,
@@ -140,7 +140,7 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
         }
 
         inspektør(AG2) {
-            assertNoErrors()
+            assertIngenFunksjonelleFeil()
             assertTilstander(
                 1.vedtaksperiode,
                 AVSLUTTET,
@@ -172,7 +172,7 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
             assertUtbetalingsdag(utbetalingstidslinje[29.januar], expectedDagtype = Fridag::class, 50.0)
             assertUtbetalingsdag(utbetalingstidslinje[30.januar], expectedDagtype = NavDag::class, 50.0)
             assertUtbetalingsdag(utbetalingstidslinje[31.januar], expectedDagtype = NavDag::class, 50.0)
-            assertNoErrors()
+            assertIngenFunksjonelleFeil()
             assertTilstander(
                 1.vedtaksperiode,
                 AVSLUTTET,
@@ -195,7 +195,7 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
             assertUtbetalingsdag(utbetalingstidslinje[29.januar], expectedDagtype = NavDag::class, 50.0)
             assertUtbetalingsdag(utbetalingstidslinje[30.januar], expectedDagtype = Fridag::class, 50.0)
             assertUtbetalingsdag(utbetalingstidslinje[31.januar], expectedDagtype = Fridag::class, 50.0)
-            assertNoErrors()
+            assertIngenFunksjonelleFeil()
             assertTilstander(
                 1.vedtaksperiode,
                 AVSLUTTET,
@@ -234,7 +234,7 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
             assertUtbetalingsdag(utbetalingstidslinje[1.februar], expectedDagtype = NavDag::class, 50.0)
             assertUtbetalingsdag(utbetalingstidslinje[2.februar], expectedDagtype = NavDag::class, 50.0)
 
-            assertNoErrors()
+            assertIngenFunksjonelleFeil()
             assertTilstander(
                 1.vedtaksperiode,
                 AVSLUTTET,
@@ -260,7 +260,7 @@ internal class OverstyrUtkastTilRevurderingFlereAGTest : AbstractEndToEndTest() 
             assertUtbetalingsdag(utbetalingstidslinje[1.februar], expectedDagtype = Fridag::class, 50.0)
             assertUtbetalingsdag(utbetalingstidslinje[2.februar], expectedDagtype = Fridag::class, 50.0)
 
-            assertNoErrors()
+            assertIngenFunksjonelleFeil()
             assertTilstander(
                 1.vedtaksperiode,
                 AVSLUTTET,

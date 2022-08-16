@@ -27,7 +27,7 @@ import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
-import no.nav.helse.spleis.e2e.assertNoErrors
+import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
@@ -135,7 +135,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
                 TIL_UTBETALING,
                 AVSLUTTET
             )
-            assertNoErrors()
+            assertIngenFunksjonelleFeil()
             assertEquals(3, utbetalinger.filter { it.erAvsluttet() }.size)
         }
 
@@ -150,7 +150,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
                 TIL_UTBETALING,
                 AVSLUTTET
             )
-            assertNoErrors()
+            assertIngenFunksjonelleFeil()
             assertEquals(3, utbetalinger.filter { it.erAvsluttet() }.size)
         }
     }
@@ -180,7 +180,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
                 TIL_UTBETALING,
                 AVSLUTTET
             )
-            assertNoErrors()
+            assertIngenFunksjonelleFeil()
             assertEquals(2, utbetalinger.filter { it.erAvsluttet() }.size)
         }
 
@@ -194,7 +194,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
                 AVVENTER_GODKJENNING_REVURDERING,
                 AVSLUTTET
             )
-            assertNoErrors()
+            assertIngenFunksjonelleFeil()
             assertEquals(2, utbetalinger.filter { it.erAvsluttet() }.size)
         }
     }
@@ -232,7 +232,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
                 START,
                 AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
             )
-            assertNoErrors()
+            assertIngenFunksjonelleFeil()
             assertEquals(2, utbetalinger.filter { it.erAvsluttet() }.size)
         }
 
@@ -246,7 +246,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
                 AVVENTER_GODKJENNING_REVURDERING,
                 AVSLUTTET
             )
-            assertNoErrors()
+            assertIngenFunksjonelleFeil()
             assertEquals(2, utbetalinger.filter { it.erAvsluttet() }.size)
         }
     }
@@ -284,7 +284,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
                 TIL_UTBETALING,
                 AVSLUTTET
             )
-            assertNoErrors()
+            assertIngenFunksjonelleFeil()
             assertEquals(2, avsluttedeUtbetalingerForVedtaksperiode(1.vedtaksperiode).size)
             assertEquals(2, avsluttedeUtbetalingerForVedtaksperiode(2.vedtaksperiode).size)
         }
@@ -306,7 +306,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
                 AVVENTER_GODKJENNING_REVURDERING,
                 AVSLUTTET
             )
-            assertNoErrors()
+            assertIngenFunksjonelleFeil()
             assertEquals(2, avsluttedeUtbetalingerForVedtaksperiode(1.vedtaksperiode).size)
             assertEquals(2, avsluttedeUtbetalingerForVedtaksperiode(2.vedtaksperiode).size)
         }
@@ -363,7 +363,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
                 AVVENTER_SIMULERING_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING
             )
-            assertNoErrors()
+            assertIngenFunksjonelleFeil()
             assertEquals(1, avsluttedeUtbetalingerForVedtaksperiode(1.vedtaksperiode).size)
             assertEquals(1, ikkeUtbetalteUtbetalingerForVedtaksperiode(1.vedtaksperiode).size)
             assertEquals(1, avsluttedeUtbetalingerForVedtaksperiode(2.vedtaksperiode).size)
@@ -381,7 +381,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
                 AVSLUTTET,
                 AVVENTER_REVURDERING
             )
-            assertNoErrors()
+            assertIngenFunksjonelleFeil()
             assertEquals(1, avsluttedeUtbetalingerForVedtaksperiode(1.vedtaksperiode).size)
             assertEquals(1, ikkeUtbetalteUtbetalingerForVedtaksperiode(1.vedtaksperiode).size)
             assertEquals(1, avsluttedeUtbetalingerForVedtaksperiode(2.vedtaksperiode).size)

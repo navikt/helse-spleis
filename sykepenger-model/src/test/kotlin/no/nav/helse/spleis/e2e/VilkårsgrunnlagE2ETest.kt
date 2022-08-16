@@ -81,7 +81,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         assertForventetFeil(
             forklaring = "vi må avklare hva vi ønsker å gjøre med sykepengegrunnlag hvor grunnlaget for begge arbeidsgiverne kommer fra skatt",
             nå = {
-                assertError("Bruker mangler nødvendig inntekt ved validering av Vilkårsgrunnlag", 1.vedtaksperiode.filter(a2))
+                assertFunksjonellFeil("Bruker mangler nødvendig inntekt ved validering av Vilkårsgrunnlag", 1.vedtaksperiode.filter(a2))
                 assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD, orgnummer = a2)
             },
             ønsket = {
@@ -135,7 +135,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
             }
         ))
 
-        assertError("Har mer enn 25 % avvik", 1.vedtaksperiode.filter())
+        assertFunksjonellFeil("Har mer enn 25 % avvik", 1.vedtaksperiode.filter())
     }
 
     @Test
@@ -147,7 +147,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(emptyList()))
 
-        assertError("Har mer enn 25 % avvik", 1.vedtaksperiode.filter())
+        assertFunksjonellFeil("Har mer enn 25 % avvik", 1.vedtaksperiode.filter())
     }
 
     @Test
@@ -251,7 +251,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
             }
         ))
 
-        assertError("Har mer enn 25 % avvik")
+        assertFunksjonellFeil("Har mer enn 25 % avvik")
     }
 
     @Test
@@ -327,7 +327,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
                 Vilkårsgrunnlag.Arbeidsforhold(a2, 1.desember(2017))
             )
         )
-        assertError("Fant frilanserinntekt på en arbeidsgiver de siste 3 månedene", 1.vedtaksperiode.filter())
+        assertFunksjonellFeil("Fant frilanserinntekt på en arbeidsgiver de siste 3 månedene", 1.vedtaksperiode.filter())
 
         håndterSykmelding(Sykmeldingsperiode(18.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(18.januar, 31.januar, 100.prosent))

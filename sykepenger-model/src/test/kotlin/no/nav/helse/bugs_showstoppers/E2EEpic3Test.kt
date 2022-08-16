@@ -49,7 +49,7 @@ import no.nav.helse.serde.serialize
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertActivities
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
-import no.nav.helse.spleis.e2e.assertNoErrors
+import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
@@ -158,7 +158,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(15.januar, 16.januar, 100.prosent))
         håndterUtbetalingshistorikk(3.vedtaksperiode)
 
-        assertNoErrors()
+        assertIngenFunksjonelleFeil()
         assertActivities(person)
         assertTilstander(
             2.vedtaksperiode,

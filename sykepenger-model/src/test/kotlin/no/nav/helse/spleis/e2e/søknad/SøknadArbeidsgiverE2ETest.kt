@@ -24,7 +24,7 @@ import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
-import no.nav.helse.spleis.e2e.assertError
+import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
@@ -556,7 +556,7 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 18.januar, 100.prosent), Arbeid(17.januar, 18.januar))
         assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
         assertEquals(Utbetaling.Forkastet, inspektør.utbetalingtilstand(0))
-        assertError("Mottatt flere søknader for perioden - siste søknad inneholder arbeidsdag", 1.vedtaksperiode.filter())
+        assertFunksjonellFeil("Mottatt flere søknader for perioden - siste søknad inneholder arbeidsdag", 1.vedtaksperiode.filter())
     }
 
 }

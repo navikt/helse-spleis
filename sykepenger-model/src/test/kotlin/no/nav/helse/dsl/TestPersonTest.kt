@@ -147,7 +147,7 @@ internal class TestPersonTest : AbstractDslTest() {
             assertEquals(0, it.size)
         }
         håndterUtbetalt(Oppdragstatus.AKSEPTERT)
-        assertNoErrors()
+        assertIngenFunksjonelleFeil()
         assertActivities()
         inspektør.also {
             assertInntektForDato(INNTEKT, 3.januar, inspektør = it)

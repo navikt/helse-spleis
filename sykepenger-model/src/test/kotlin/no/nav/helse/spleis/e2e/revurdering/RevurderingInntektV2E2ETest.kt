@@ -30,13 +30,13 @@ import no.nav.helse.person.TilstandType.UTBETALING_FEILET
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
-import no.nav.helse.spleis.e2e.assertError
+import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertHarHendelseIder
 import no.nav.helse.spleis.e2e.assertHarIkkeHendelseIder
-import no.nav.helse.spleis.e2e.assertSevere
+import no.nav.helse.spleis.e2e.assertLogiskFeil
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
-import no.nav.helse.spleis.e2e.assertWarning
+import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.finnSkjæringstidspunkt
 import no.nav.helse.spleis.e2e.forlengTilGodkjentVedtak
 import no.nav.helse.spleis.e2e.forlengVedtak
@@ -325,7 +325,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         assertThrows<Aktivitetslogg.AktivitetException> {
             håndterOverstyrInntekt(inntekt = 32000.månedlig, skjæringstidspunkt = 2.januar)
         }
-        assertSevere("Kan ikke overstyre inntekt hvis vi ikke har en arbeidsgiver med sykdom for skjæringstidspunktet",
+        assertLogiskFeil("Kan ikke overstyre inntekt hvis vi ikke har en arbeidsgiver med sykdom for skjæringstidspunktet",
             AktivitetsloggFilter.person()
         )
 
@@ -440,7 +440,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
 
-        assertWarning("Har mer enn 25 % avvik. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene.",
+        assertVarsel("Har mer enn 25 % avvik. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene.",
             AktivitetsloggFilter.person()
         )
         assertEquals(1, inspektør.utbetalinger.size)
@@ -455,7 +455,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
 
-        assertWarning("Har mer enn 25 % avvik. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene.",
+        assertVarsel("Har mer enn 25 % avvik. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene.",
             AktivitetsloggFilter.person()
         )
         assertEquals(1, inspektør.utbetalinger.size)
@@ -482,11 +482,11 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         assertEquals(2, inspektør.utbetalinger.size)
         assertDiff(-15741)
 
-        assertWarning(
+        assertVarsel(
             "Har mer enn 25 % avvik. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene.",
             AktivitetsloggFilter.person()
         )
-        assertWarning(
+        assertVarsel(
             "Perioden er avslått på grunn av at inntekt er under krav til minste sykepengegrunnlag",
             AktivitetsloggFilter.person()
         )
@@ -514,11 +514,11 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         assertEquals(2, inspektør.utbetalinger.size)
         assertDiff(-2541)
 
-        assertWarning(
+        assertVarsel(
             "Har mer enn 25 % avvik. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene.",
             AktivitetsloggFilter.person()
         )
-        assertWarning(
+        assertVarsel(
             "Perioden er avslått på grunn av at inntekt er under krav til minste sykepengegrunnlag",
             AktivitetsloggFilter.person()
         )
@@ -566,7 +566,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
             }
         }
         assertDiff(2541)
-        assertWarning(WARN_FORLENGER_OPPHØRT_OPPDRAG, AktivitetsloggFilter.person())
+        assertVarsel(WARN_FORLENGER_OPPHØRT_OPPDRAG, AktivitetsloggFilter.person())
     }
 
     @Test
@@ -575,7 +575,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         håndterOverstyrInntekt(inntekt = 32000.månedlig, a1, 1.januar)
 
         assertEquals(1, observatør.avvisteRevurderinger.size)
-        assertError("Forespurt revurdering av inntekt hvor personen har flere arbeidsgivere (inkl. ghosts)")
+        assertFunksjonellFeil("Forespurt revurdering av inntekt hvor personen har flere arbeidsgivere (inkl. ghosts)")
     }
 
     @Test
@@ -619,7 +619,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
 
         håndterOverstyrInntekt(32000.månedlig, a1, 1.januar)
         assertEquals(1, observatør.avvisteRevurderinger.size)
-        assertError("Forespurt revurdering av inntekt hvor personen har flere arbeidsgivere (inkl. ghosts)")
+        assertFunksjonellFeil("Forespurt revurdering av inntekt hvor personen har flere arbeidsgivere (inkl. ghosts)")
     }
 
     @Test

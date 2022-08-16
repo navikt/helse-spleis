@@ -37,12 +37,12 @@ import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
-import no.nav.helse.spleis.e2e.assertNoErrors
-import no.nav.helse.spleis.e2e.assertNoWarnings
+import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
+import no.nav.helse.spleis.e2e.assertIngenVarsler
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
-import no.nav.helse.spleis.e2e.assertWarning
+import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.forlengTilGodkjenning
 import no.nav.helse.spleis.e2e.forlengTilSimulering
 import no.nav.helse.spleis.e2e.forlengVedtak
@@ -944,8 +944,8 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
             foreldrepenger = 1.januar til 10.januar
         )
 
-        assertWarning("Det er utbetalt foreldrepenger i samme periode.")
-        assertNoErrors()
+        assertVarsel("Det er utbetalt foreldrepenger i samme periode.")
+        assertIngenFunksjonelleFeil()
     }
 
     @Test
@@ -960,9 +960,9 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         assertTilstand(1.vedtaksperiode, AVSLUTTET)
         assertTilstand(2.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING)
         assertTilstand(3.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
-        assertNoWarnings(1.vedtaksperiode.filter())
-        assertNoWarnings(2.vedtaksperiode.filter())
-        assertNoWarnings(3.vedtaksperiode.filter())
+        assertIngenVarsler(1.vedtaksperiode.filter())
+        assertIngenVarsler(2.vedtaksperiode.filter())
+        assertIngenVarsler(3.vedtaksperiode.filter())
     }
 
     @Test
@@ -989,7 +989,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING)
         assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
-        assertWarning("Det er utbetalt foreldrepenger i samme periode.", 2.vedtaksperiode.filter())
+        assertVarsel("Det er utbetalt foreldrepenger i samme periode.", 2.vedtaksperiode.filter())
     }
 
     @Test
@@ -1038,8 +1038,8 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
 
         assertEquals(19, inspektør.sykdomstidslinje.inspektør.grader[17.januar])
-        assertWarning("Minst én dag uten utbetaling på grunn av sykdomsgrad under 20 %. Vurder å sende vedtaksbrev fra Infotrygd", 2.vedtaksperiode.filter())
-        assertWarning("Minst én dag uten utbetaling på grunn av sykdomsgrad under 20 %. Vurder å sende vedtaksbrev fra Infotrygd", 1.vedtaksperiode.filter())
+        assertVarsel("Minst én dag uten utbetaling på grunn av sykdomsgrad under 20 %. Vurder å sende vedtaksbrev fra Infotrygd", 2.vedtaksperiode.filter())
+        assertVarsel("Minst én dag uten utbetaling på grunn av sykdomsgrad under 20 %. Vurder å sende vedtaksbrev fra Infotrygd", 1.vedtaksperiode.filter())
     }
 
     private inline fun <reified D: Dag, reified UD: Utbetalingsdag>assertDag(dato: LocalDate, beløp: Double) {

@@ -17,8 +17,8 @@ import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.sisteBehov
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
-import no.nav.helse.spleis.e2e.assertNoWarnings
-import no.nav.helse.spleis.e2e.assertWarnings
+import no.nav.helse.spleis.e2e.assertIngenVarsler
+import no.nav.helse.spleis.e2e.assertVarsler
 import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.håndterOverstyrInntekt
 import no.nav.helse.spleis.e2e.håndterOverstyrTidslinje
@@ -78,10 +78,10 @@ internal class RevurderingBehovV2E2ETest : AbstractEndToEndTest() {
         håndterOverstyrInntekt(30000.månedlig, skjæringstidspunkt = 1.januar)
         val utbetalinger = listOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar,  31.januar, 100.prosent, INNTEKT))
         val inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true))
-        assertNoWarnings()
+        assertIngenVarsler()
         håndterYtelser(3.vedtaksperiode, utbetalinger = utbetalinger.toTypedArray(), inntektshistorikk = inntektshistorikk)
         assertYtelser(1.januar til 31.mars)
-        assertWarnings()
+        assertVarsler()
     }
 
     @Test
@@ -90,10 +90,10 @@ internal class RevurderingBehovV2E2ETest : AbstractEndToEndTest() {
         forlengVedtak(1.februar, 28.februar)
         forlengVedtak(1.mars, 31.mars)
         håndterOverstyrInntekt(30000.månedlig, skjæringstidspunkt = 1.januar)
-        assertNoWarnings()
+        assertIngenVarsler()
         håndterYtelser(3.vedtaksperiode, pleiepenger = listOf(1.januar til 31.januar))
         assertYtelser(1.januar til 31.mars)
-        assertWarnings()
+        assertVarsler()
     }
 
     @Test

@@ -134,14 +134,14 @@ internal abstract class AbstractDslTest {
         testArbeidsgiverAsserter.assertHarIkkeHendelseIder(vedtaksperiodeId, *hendelseIder)
     protected fun TestPerson.TestArbeidsgiver.assertAntallInntektsopplysninger(antall: Int, inntektskilde: Kilde) =
         testArbeidsgiverAsserter.assertAntallInntektsopplysninger(antall, inntektskilde)
-    protected fun TestPerson.TestArbeidsgiver.assertNoErrors(vararg filtre: AktivitetsloggFilter) =
-        testArbeidsgiverAsserter.assertNoErrors(*filtre)
-    protected fun TestPerson.TestArbeidsgiver.assertWarnings(vararg filtre: AktivitetsloggFilter) =
-        testArbeidsgiverAsserter.assertWarnings(*filtre)
-    protected fun TestPerson.TestArbeidsgiver.assertWarning(warning: String, vararg filtre: AktivitetsloggFilter) =
-        testArbeidsgiverAsserter.assertWarning(warning, *filtre)
-    protected fun TestPerson.TestArbeidsgiver.assertNoWarnings(vararg filtre: AktivitetsloggFilter) =
-        testArbeidsgiverAsserter.assertNoWarnings(*filtre)
+    protected fun TestPerson.TestArbeidsgiver.assertIngenFunksjonelleFeil(vararg filtre: AktivitetsloggFilter) =
+        testArbeidsgiverAsserter.assertIngenFunksjonelleFeil(*filtre)
+    protected fun TestPerson.TestArbeidsgiver.assertVarsler(vararg filtre: AktivitetsloggFilter) =
+        testArbeidsgiverAsserter.assertVarsler(*filtre)
+    protected fun TestPerson.TestArbeidsgiver.assertVarsel(warning: String, vararg filtre: AktivitetsloggFilter) =
+        testArbeidsgiverAsserter.assertVarsel(warning, *filtre)
+    protected fun TestPerson.TestArbeidsgiver.assertIngenVarsler(vararg filtre: AktivitetsloggFilter) =
+        testArbeidsgiverAsserter.assertIngenVarsler(*filtre)
     protected fun nyPeriode(periode: Periode, vararg orgnummer: String, grad: Prosentdel = 100.prosent) {
         testperson.nyPeriode(periode, *orgnummer, grad = grad)
     }
@@ -219,14 +219,14 @@ internal abstract class AbstractDslTest {
         this { assertTilstander(id, *tilstander) }
     protected fun String.assertSisteTilstand(id: UUID, tilstand: TilstandType) =
         this { assertSisteTilstand(id, tilstand) }
-    protected fun String.assertNoErrors(vararg filtre: AktivitetsloggFilter) =
-        this { assertNoErrors(*filtre) }
-    protected fun String.assertWarnings(vararg filtre: AktivitetsloggFilter) =
-        this { assertWarnings(*filtre) }
-    protected fun String.assertWarning(warning: String, vararg filtre: AktivitetsloggFilter) =
-        this { assertWarning(warning, *filtre) }
-    protected fun String.assertNoWarnings(vararg filtre: AktivitetsloggFilter) =
-        this { assertNoWarnings(*filtre) }
+    protected fun String.assertIngenFunksjonelleFeil(vararg filtre: AktivitetsloggFilter) =
+        this { assertIngenFunksjonelleFeil(*filtre) }
+    protected fun String.assertVarsler(vararg filtre: AktivitetsloggFilter) =
+        this { assertVarsler(*filtre) }
+    protected fun String.assertVarsel(warning: String, vararg filtre: AktivitetsloggFilter) =
+        this { assertVarsel(warning, *filtre) }
+    protected fun String.assertIngenVarsler(vararg filtre: AktivitetsloggFilter) =
+        this { assertIngenVarsler(*filtre) }
     protected fun String.nyttVedtak(
         fom: LocalDate,
         tom: LocalDate,
@@ -334,14 +334,14 @@ internal abstract class AbstractDslTest {
         bareÈnArbeidsgiver(a1).assertTilstander(id, *tilstander)
     protected fun assertSisteTilstand(id: UUID, tilstand: TilstandType, orgnummer: String = a1) =
         bareÈnArbeidsgiver(a1).assertSisteTilstand(id, tilstand)
-    protected fun assertNoErrors(vararg filtre: AktivitetsloggFilter) =
-        bareÈnArbeidsgiver(a1).assertNoErrors(*filtre)
-    protected fun assertWarnings(vararg filtre: AktivitetsloggFilter) =
-        bareÈnArbeidsgiver(a1).assertWarnings(*filtre)
-    protected fun assertWarning(warning: String, vararg filtre: AktivitetsloggFilter) =
-        bareÈnArbeidsgiver(a1).assertWarning(warning, *filtre)
-    protected fun assertNoWarnings(vararg filtre: AktivitetsloggFilter) =
-        bareÈnArbeidsgiver(a1).assertNoWarnings(*filtre)
+    protected fun assertIngenFunksjonelleFeil(vararg filtre: AktivitetsloggFilter) =
+        bareÈnArbeidsgiver(a1).assertIngenFunksjonelleFeil(*filtre)
+    protected fun assertVarsler(vararg filtre: AktivitetsloggFilter) =
+        bareÈnArbeidsgiver(a1).assertVarsler(*filtre)
+    protected fun assertVarsel(warning: String, vararg filtre: AktivitetsloggFilter) =
+        bareÈnArbeidsgiver(a1).assertVarsel(warning, *filtre)
+    protected fun assertIngenVarsler(vararg filtre: AktivitetsloggFilter) =
+        bareÈnArbeidsgiver(a1).assertIngenVarsler(*filtre)
     protected fun assertActivities() {
         val inspektør = inspiser(personInspektør)
         assertTrue(inspektør.aktivitetslogg.harAktiviteter()) { inspektør.aktivitetslogg.toString() }

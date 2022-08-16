@@ -25,7 +25,7 @@ internal class BerOmInntektsmeldingTest : AbstractEndToEndTest() {
         val søknadId = håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
 
-        assertNoErrors()
+        assertIngenFunksjonelleFeil()
         assertTilstander(
             1.vedtaksperiode,
             START,

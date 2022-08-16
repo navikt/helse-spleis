@@ -17,12 +17,11 @@ import no.nav.helse.november
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.inntektsopplysningPerArbeidsgiver
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
-import no.nav.helse.serde.serialize
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
-import no.nav.helse.spleis.e2e.assertSevere
+import no.nav.helse.spleis.e2e.assertLogiskFeil
 import no.nav.helse.spleis.e2e.assertSisteForkastetPeriodeTilstand
-import no.nav.helse.spleis.e2e.assertWarning
+import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.grunnlag
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterOverstyrArbeidsforhold
@@ -84,7 +83,6 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         val vilkårsgrunnlag = person.vilkårsgrunnlagFor(skjæringstidspunkt)
-        val serialisertPerson = person.serialize()
         assertEquals(setOf(a1), vilkårsgrunnlag?.inspektør?.sykepengegrunnlag?.inspektør?.arbeidsgiverInntektsopplysninger?.inntektsopplysningPerArbeidsgiver()?.keys)
     }
 
@@ -157,7 +155,7 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
         assertThrows<Aktivitetslogg.AktivitetException> {
             håndterOverstyrArbeidsforhold(1.januar, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a3, true, "forklaring")))
         }
-        assertSevere("Kan ikke overstyre arbeidsforhold for en arbeidsgiver vi ikke kjenner til",
+        assertLogiskFeil("Kan ikke overstyre arbeidsforhold for en arbeidsgiver vi ikke kjenner til",
             AktivitetsloggFilter.person()
         )
     }
@@ -200,7 +198,7 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
         assertThrows<Aktivitetslogg.AktivitetException> {
             håndterOverstyrArbeidsforhold(1.januar, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, true, "forklaring")))
         }
-        assertSevere("Kan ikke overstyre arbeidsforhold for en arbeidsgiver som har sykdom",
+        assertLogiskFeil("Kan ikke overstyre arbeidsforhold for en arbeidsgiver som har sykdom",
             AktivitetsloggFilter.person()
         )
     }
@@ -314,7 +312,7 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
         assertThrows<Aktivitetslogg.AktivitetException> {
             håndterOverstyrArbeidsforhold(1.januar, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, true, "forklaring")))
         }
-        assertSevere("Kan ikke overstyre arbeidsforhold fordi ingen vedtaksperioder håndterte hendelsen",
+        assertLogiskFeil("Kan ikke overstyre arbeidsforhold fordi ingen vedtaksperioder håndterte hendelsen",
             AktivitetsloggFilter.person()
         )
     }
@@ -351,7 +349,7 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterOverstyrArbeidsforhold(1.januar, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, true, "forklaring")))
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        assertWarning("Perioden er avslått på grunn av at inntekt er under krav til minste sykepengegrunnlag", 1.vedtaksperiode.filter(a1))
+        assertVarsel("Perioden er avslått på grunn av at inntekt er under krav til minste sykepengegrunnlag", 1.vedtaksperiode.filter(a1))
     }
 
     @Test
@@ -386,7 +384,7 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterOverstyrArbeidsforhold(1.januar, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, true, "forklaring")))
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        assertWarning("Har mer enn 25 % avvik. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene.", 1.vedtaksperiode.filter(a1)) // takk dent. (fredet kommentar)
+        assertVarsel("Har mer enn 25 % avvik. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene.", 1.vedtaksperiode.filter(a1)) // takk dent. (fredet kommentar)
     }
 
     @Test
@@ -420,7 +418,7 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
         håndterOverstyrArbeidsforhold(1.januar, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, true, "forklaring")))
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
-        assertWarning(
+        assertVarsel(
             "Perioden er avslått på grunn av manglende opptjening",
             1.vedtaksperiode.filter(a1)
         )

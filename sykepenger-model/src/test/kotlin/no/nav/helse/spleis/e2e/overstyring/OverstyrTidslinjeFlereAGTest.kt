@@ -12,7 +12,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
-import no.nav.helse.spleis.e2e.assertNoErrors
+import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.håndterOverstyrTidslinje
@@ -39,7 +39,7 @@ internal class OverstyrTidslinjeFlereAGTest : AbstractEndToEndTest() {
         assertForventetFeil(
             forklaring = "Burde sette i gang revurdering av begge arbeidsgiverne",
             nå = {
-                assertNoErrors()
+                assertIngenFunksjonelleFeil()
             },
             ønsket = {
                 nullstillTilstandsendringer()

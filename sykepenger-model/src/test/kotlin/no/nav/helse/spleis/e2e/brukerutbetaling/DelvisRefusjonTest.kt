@@ -25,15 +25,15 @@ import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
-import no.nav.helse.spleis.e2e.assertError
+import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
 import no.nav.helse.spleis.e2e.assertInfo
-import no.nav.helse.spleis.e2e.assertNoWarnings
+import no.nav.helse.spleis.e2e.assertIngenVarsler
 import no.nav.helse.spleis.e2e.assertSisteForkastetPeriodeTilstand
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertUtbetalingsbeløp
-import no.nav.helse.spleis.e2e.assertWarning
+import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.finnSkjæringstidspunkt
 import no.nav.helse.spleis.e2e.grunnlag
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
@@ -750,7 +750,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterUtbetalt()
 
         assertInfo("Refusjon gjelder ikke for hele utbetalingsperioden", 1.vedtaksperiode.filter())
-        assertWarning("Første fraværsdag i inntektsmeldingen er ulik skjæringstidspunktet. Kontrollér at inntektsmeldingen er knyttet til riktig periode.", 1.vedtaksperiode.filter())
+        assertVarsel("Første fraværsdag i inntektsmeldingen er ulik skjæringstidspunktet. Kontrollér at inntektsmeldingen er knyttet til riktig periode.", 1.vedtaksperiode.filter())
     }
 
     @Test
@@ -768,7 +768,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterUtbetalt()
 
         assertInfo("Refusjon gjelder ikke for hele utbetalingsperioden", 1.vedtaksperiode.filter())
-        assertWarning("Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.", 1.vedtaksperiode.filter())
+        assertVarsel("Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.", 1.vedtaksperiode.filter())
     }
 
     @Test
@@ -790,8 +790,8 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
         håndterYtelser(2.vedtaksperiode)
 
-        assertNoWarnings(1.vedtaksperiode.filter())
-        assertNoWarnings(2.vedtaksperiode.filter())
+        assertIngenVarsler(1.vedtaksperiode.filter())
+        assertIngenVarsler(2.vedtaksperiode.filter())
         assertInfo("Refusjon gjelder ikke for hele utbetalingsperioden", 2.vedtaksperiode.filter())
     }
 
@@ -804,7 +804,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1, refusjon = Inntektsmelding.Refusjon(
             INNTEKT, 30.januar, emptyList()))
         assertSisteForkastetPeriodeTilstand(a1, 1.vedtaksperiode, TIL_INFOTRYGD)
-        assertError("Arbeidsgiver opphører refusjon (mistenker brukerutbetaling ved flere arbeidsgivere)", 1.vedtaksperiode.filter(a1))
+        assertFunksjonellFeil("Arbeidsgiver opphører refusjon (mistenker brukerutbetaling ved flere arbeidsgivere)", 1.vedtaksperiode.filter(a1))
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
         assertSisteForkastetPeriodeTilstand(a2, 1.vedtaksperiode, TIL_INFOTRYGD)
     }
@@ -821,7 +821,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
             refusjon = Inntektsmelding.Refusjon(INNTEKT, null, listOf(EndringIRefusjon(INNTEKT /2, 30.januar)))
         )
         assertSisteForkastetPeriodeTilstand(a1, 1.vedtaksperiode, TIL_INFOTRYGD)
-        assertError("Arbeidsgiver har endringer i refusjon (mistenker brukerutbetaling ved flere arbeidsgivere)", 1.vedtaksperiode.filter(a1))
+        assertFunksjonellFeil("Arbeidsgiver har endringer i refusjon (mistenker brukerutbetaling ved flere arbeidsgivere)", 1.vedtaksperiode.filter(a1))
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
         assertSisteForkastetPeriodeTilstand(a2, 1.vedtaksperiode, TIL_INFOTRYGD)
     }
@@ -838,7 +838,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
             refusjon = Inntektsmelding.Refusjon(INNTEKT /2, null, emptyList())
         )
         assertSisteForkastetPeriodeTilstand(a1, 1.vedtaksperiode, TIL_INFOTRYGD)
-        assertError("Inntektsmelding inneholder beregnet inntekt og refusjon som avviker med hverandre (mistenker brukerutbetaling ved flere arbeidsgivere)", 1.vedtaksperiode.filter(a1))
+        assertFunksjonellFeil("Inntektsmelding inneholder beregnet inntekt og refusjon som avviker med hverandre (mistenker brukerutbetaling ved flere arbeidsgivere)", 1.vedtaksperiode.filter(a1))
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
         assertSisteForkastetPeriodeTilstand(a2, 1.vedtaksperiode, TIL_INFOTRYGD)
     }
@@ -855,7 +855,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
             refusjon = Inntektsmelding.Refusjon(INGEN, null, emptyList())
         )
         assertSisteForkastetPeriodeTilstand(a1, 1.vedtaksperiode, TIL_INFOTRYGD)
-        assertError("Arbeidsgiver forskutterer ikke (mistenker brukerutbetaling ved flere arbeidsgivere)", 1.vedtaksperiode.filter(a1))
+        assertFunksjonellFeil("Arbeidsgiver forskutterer ikke (mistenker brukerutbetaling ved flere arbeidsgivere)", 1.vedtaksperiode.filter(a1))
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
         assertSisteForkastetPeriodeTilstand(a2, 1.vedtaksperiode, TIL_INFOTRYGD)
     }

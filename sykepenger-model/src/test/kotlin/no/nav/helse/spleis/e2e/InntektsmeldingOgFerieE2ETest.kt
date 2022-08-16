@@ -30,19 +30,19 @@ internal class InntektsmeldingOgFerieE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         assertForventetFeil(
             nå = {
-                assertNoWarning("Sykmeldte har oppgitt ferie første dag i arbeidsgiverperioden.", 1.vedtaksperiode.filter(ORGNUMMER))
+                assertIngenVarsel("Sykmeldte har oppgitt ferie første dag i arbeidsgiverperioden.", 1.vedtaksperiode.filter(ORGNUMMER))
             },
             ønsket = {
                 // TODO: https://trello.com/c/92DhehGa
-                assertWarning("Sykmeldte har oppgitt ferie første dag i arbeidsgiverperioden.", 1.vedtaksperiode.filter(ORGNUMMER))
+                assertVarsel("Sykmeldte har oppgitt ferie første dag i arbeidsgiverperioden.", 1.vedtaksperiode.filter(ORGNUMMER))
             }
         )
-        assertWarning("Denne perioden var tidligere regnet som innenfor arbeidsgiverperioden", 1.vedtaksperiode.filter(ORGNUMMER))
+        assertVarsel("Denne perioden var tidligere regnet som innenfor arbeidsgiverperioden", 1.vedtaksperiode.filter(ORGNUMMER))
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
     }
 
     @Test
-    fun `ferieforlengelse`() {
+    fun ferieforlengelse() {
         nyttVedtak(1.januar, 31.januar)
         håndterSykmelding(Sykmeldingsperiode(1.februar, 20.februar, 100.prosent))
         nullstillTilstandsendringer()

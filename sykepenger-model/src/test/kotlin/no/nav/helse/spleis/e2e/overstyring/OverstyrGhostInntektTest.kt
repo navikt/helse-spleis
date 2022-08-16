@@ -23,13 +23,13 @@ import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
-import no.nav.helse.spleis.e2e.assertError
+import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
 import no.nav.helse.spleis.e2e.assertInntektForDato
-import no.nav.helse.spleis.e2e.assertNoWarning
-import no.nav.helse.spleis.e2e.assertSevere
+import no.nav.helse.spleis.e2e.assertIngenVarsel
+import no.nav.helse.spleis.e2e.assertLogiskFeil
 import no.nav.helse.spleis.e2e.assertTilstander
-import no.nav.helse.spleis.e2e.assertWarning
+import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.grunnlag
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterOverstyrInntekt
@@ -160,7 +160,7 @@ internal class OverstyrGhostInntektTest : AbstractEndToEndTest() {
         assertThrows<Aktivitetslogg.AktivitetException> {
             håndterOverstyrInntekt(30000.månedlig, a2, skjæringstidspunkt)
         }
-        assertSevere(
+        assertLogiskFeil(
             "Kan ikke overstyre inntekt for ghost for en pågående behandling der én eller flere perioder er behandlet ferdig",
             AktivitetsloggFilter.person()
         )
@@ -194,13 +194,13 @@ internal class OverstyrGhostInntektTest : AbstractEndToEndTest() {
         assertForventetFeil(
             forklaring = "Burde ha enten warning eller error, https://trello.com/c/gk0F7acS",
             nå = {
-                assertWarning("Har mer enn 25 % avvik. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene.")
-                assertError("Har mer enn 25 % avvik")
+                assertVarsel("Har mer enn 25 % avvik. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene.")
+                assertFunksjonellFeil("Har mer enn 25 % avvik")
             },
             ønsket = {
                 // Eller omvendt om det er det vi ønsker å gå for
-                assertNoWarning("Har mer enn 25 % avvik. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene.")
-                assertError("Har mer enn 25 % avvik")
+                assertIngenVarsel("Har mer enn 25 % avvik. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene.")
+                assertFunksjonellFeil("Har mer enn 25 % avvik")
             }
         )
     }

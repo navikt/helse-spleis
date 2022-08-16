@@ -39,7 +39,7 @@ internal class IkkeHåndtertHendelseTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent), mottatt = 5.desember.atStartOfDay())
         assertEquals(0, observatør.hendelseIkkeHåndtertEventer.size)
         assertEquals(emptyList<Periode>(), inspektør.sykmeldingsperioder())
-        assertError("Søknadsperioden kan ikke være eldre enn 6 måneder fra mottattidspunkt")
+        assertFunksjonellFeil("Søknadsperioden kan ikke være eldre enn 6 måneder fra mottattidspunkt")
     }
 
     @Test

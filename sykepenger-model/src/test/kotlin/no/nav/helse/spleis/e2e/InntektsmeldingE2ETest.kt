@@ -346,7 +346,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 15.januar)))
-        assertWarning(WARN_UENIGHET_ARBEIDSGIVERPERIODE, 1.vedtaksperiode.filter())
+        assertVarsel(WARN_UENIGHET_ARBEIDSGIVERPERIODE, 1.vedtaksperiode.filter())
     }
 
     @Test
@@ -354,7 +354,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(2.januar, 15.januar)))
-        assertWarning(WARN_UENIGHET_ARBEIDSGIVERPERIODE, 1.vedtaksperiode.filter())
+        assertVarsel(WARN_UENIGHET_ARBEIDSGIVERPERIODE, 1.vedtaksperiode.filter())
     }
 
     @Test
@@ -366,7 +366,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             listOf(Periode(1.januar, 16.januar)),
             førsteFraværsdag = 1.februar
         )
-        assertNoWarnings(1.vedtaksperiode.filter())
+        assertIngenVarsler(1.vedtaksperiode.filter())
     }
 
     @Test
@@ -504,7 +504,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING
         )
-        assertWarning(
+        assertVarsel(
             "Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.",
             AktivitetsloggFilter.person()
         )
@@ -829,8 +829,8 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             1.februar til 10.februar
         ) // simulerer feil etter at perioden har bedt om replay; f.eks. ved at Utbetalingshistorikk inneholder feil, etc.
         håndterInntektsmeldingReplay(im, 4.vedtaksperiode.id(ORGNUMMER))
-        assertNoWarnings(1.vedtaksperiode.filter())
-        assertNoWarnings(2.vedtaksperiode.filter())
+        assertIngenVarsler(1.vedtaksperiode.filter())
+        assertIngenVarsler(2.vedtaksperiode.filter())
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
         assertForkastetPeriodeTilstander(
@@ -1111,15 +1111,15 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(8.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(8.januar, 20.januar, 100.prosent))
         håndterInntektsmelding(listOf(8.januar til 23.januar))
-        assertNoErrors(2.vedtaksperiode.filter())
+        assertIngenFunksjonelleFeil(2.vedtaksperiode.filter())
         val tidslinje = inspektør.sykdomstidslinje
         assertTrue((1.januar til 7.januar).all { tidslinje[it] is Dag.Arbeidsdag || tidslinje[it] is Dag.FriskHelgedag })
         assertTrue((8.januar til 23.januar).all { tidslinje[it] is Dag.Sykedag || tidslinje[it] is Dag.SykHelgedag || tidslinje[it] is Dag.Arbeidsgiverdag || tidslinje[it] is Dag.ArbeidsgiverHelgedag })
-        assertNoWarning(
+        assertIngenVarsel(
             "Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.",
             1.vedtaksperiode.filter()
         )
-        assertNoWarning(
+        assertIngenVarsel(
             "Vi har mottatt en inntektsmelding i en løpende sykmeldingsperiode med oppgitt første/bestemmende fraværsdag som er ulik tidligere fastsatt skjæringstidspunkt.",
             2.vedtaksperiode.filter()
         )
@@ -1135,18 +1135,18 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
         val inntektsmeldingId = håndterInntektsmelding(listOf(10.januar til 25.januar), førsteFraværsdag = 10.januar)
         håndterSykmelding(Sykmeldingsperiode(10.januar, 31.januar, 100.prosent))
-        assertNoWarnings(2.vedtaksperiode.filter())
+        assertIngenVarsler(2.vedtaksperiode.filter())
         håndterSøknad(Sykdom(10.januar, 31.januar, 100.prosent))
-        assertNoWarnings(2.vedtaksperiode.filter())
+        assertIngenVarsler(2.vedtaksperiode.filter())
         håndterInntektsmeldingReplay(inntektsmeldingId, 2.vedtaksperiode.id(ORGNUMMER))
-        assertNoWarnings(2.vedtaksperiode.filter())
+        assertIngenVarsler(2.vedtaksperiode.filter())
         håndterYtelser(2.vedtaksperiode)
-        assertNoWarnings(2.vedtaksperiode.filter())
+        assertIngenVarsler(2.vedtaksperiode.filter())
         håndterVilkårsgrunnlag(2.vedtaksperiode)
-        assertNoWarnings(2.vedtaksperiode.filter())
+        assertIngenVarsler(2.vedtaksperiode.filter())
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
-        assertNoWarnings(2.vedtaksperiode.filter())
+        assertIngenVarsler(2.vedtaksperiode.filter())
     }
 
     @Test
@@ -1161,7 +1161,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
-        assertNoWarnings(1.vedtaksperiode.filter())
+        assertIngenVarsler(1.vedtaksperiode.filter())
     }
 
     @Test
@@ -1464,7 +1464,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
         )
-        assertWarning(
+        assertVarsel(
             "Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.",
             AktivitetsloggFilter.person()
         )
@@ -1499,7 +1499,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
         )
-        assertWarning(
+        assertVarsel(
             "Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.",
             AktivitetsloggFilter.person()
         )
@@ -1563,27 +1563,27 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertTrue((17.januar til 31.januar).all { tidslinje[it] is Dag.Sykedag || tidslinje[it] is Dag.SykHelgedag })
         assertFalse((1.februar til 11.februar).all { tidslinje[it] is Dag.Arbeidsdag || tidslinje[it] is Dag.FriskHelgedag })
         assertTrue((12.februar til 28.februar).all { tidslinje[it] is Dag.Sykedag || tidslinje[it] is Dag.SykHelgedag })
-        assertNoWarning(
+        assertIngenVarsel(
             "Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.",
             1.vedtaksperiode.filter()
         )
-        assertNoWarning(
+        assertIngenVarsel(
             "Vi har mottatt en inntektsmelding i en løpende sykmeldingsperiode med oppgitt første/bestemmende fraværsdag som er ulik tidligere fastsatt skjæringstidspunkt.",
             1.vedtaksperiode.filter()
         )
-        assertNoWarning(
+        assertIngenVarsel(
             "Første fraværsdag i inntektsmeldingen er ulik skjæringstidspunktet. Kontrollér at inntektsmeldingen er knyttet til riktig periode.",
             1.vedtaksperiode.filter()
         )
-        assertWarning(
+        assertVarsel(
             "Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.",
             2.vedtaksperiode.filter()
         )
-        assertWarning(
+        assertVarsel(
             "Vi har mottatt en inntektsmelding i en løpende sykmeldingsperiode med oppgitt første/bestemmende fraværsdag som er ulik tidligere fastsatt skjæringstidspunkt.",
             2.vedtaksperiode.filter()
         )
-        assertNoWarning(
+        assertIngenVarsel(
             "Første fraværsdag i inntektsmeldingen er ulik skjæringstidspunktet. Kontrollér at inntektsmeldingen er knyttet til riktig periode.",
             2.vedtaksperiode.filter()
         )
@@ -1606,31 +1606,31 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertTrue((17.januar til 31.januar).all { tidslinje[it] is Dag.Sykedag || tidslinje[it] is Dag.SykHelgedag })
         assertFalse((1.februar til 11.februar).all { tidslinje[it] is Dag.Arbeidsdag || tidslinje[it] is Dag.FriskHelgedag })
         assertTrue((12.februar til 28.februar).all { tidslinje[it] is Dag.Sykedag || tidslinje[it] is Dag.SykHelgedag })
-        assertNoWarning(
+        assertIngenVarsel(
             "Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.",
             1.vedtaksperiode.filter()
         )
-        assertNoWarning(
+        assertIngenVarsel(
             "Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.",
             2.vedtaksperiode.filter()
         )
-        assertNoWarning(
+        assertIngenVarsel(
             "Første fraværsdag i inntektsmeldingen er ulik skjæringstidspunktet. Kontrollér at inntektsmeldingen er knyttet til riktig periode.",
             2.vedtaksperiode.filter()
         )
-        assertNoWarning(
+        assertIngenVarsel(
             "Vi har mottatt en inntektsmelding i en løpende sykmeldingsperiode med oppgitt første/bestemmende fraværsdag som er ulik tidligere fastsatt skjæringstidspunkt.",
             2.vedtaksperiode.filter()
         )
-        assertWarning(
+        assertVarsel(
             "Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.",
             3.vedtaksperiode.filter()
         )
-        assertWarning(
+        assertVarsel(
             "Vi har mottatt en inntektsmelding i en løpende sykmeldingsperiode med oppgitt første/bestemmende fraværsdag som er ulik tidligere fastsatt skjæringstidspunkt.",
             3.vedtaksperiode.filter()
         )
-        assertNoWarning(
+        assertIngenVarsel(
             "Første fraværsdag i inntektsmeldingen er ulik skjæringstidspunktet. Kontrollér at inntektsmeldingen er knyttet til riktig periode.",
             3.vedtaksperiode.filter()
         )
@@ -1725,7 +1725,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
         håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)), 4.januar)
-        assertWarning(
+        assertVarsel(
             "Første fraværsdag i inntektsmeldingen er ulik skjæringstidspunktet. Kontrollér at inntektsmeldingen er knyttet til riktig periode.",
             1.vedtaksperiode.filter()
         )
@@ -1804,8 +1804,8 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
         håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
-        assertNoErrors(1.vedtaksperiode.filter())
-        assertNoErrors(2.vedtaksperiode.filter())
+        assertIngenFunksjonelleFeil(1.vedtaksperiode.filter())
+        assertIngenFunksjonelleFeil(2.vedtaksperiode.filter())
         assertActivities(person)
         assertNotNull(inspektør.sisteMaksdato(2.vedtaksperiode))
         assertTilstander(
@@ -1841,7 +1841,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             listOf(Periode(3.januar, 7.januar), Periode(15.januar, 20.januar), Periode(23.januar, 28.januar))
         )
 
-        assertNoErrors()
+        assertIngenFunksjonelleFeil()
         assertActivities(person)
         assertTilstander(
             1.vedtaksperiode,
@@ -1879,7 +1879,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
         håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
-        assertNoErrors()
+        assertIngenFunksjonelleFeil()
         assertActivities(person)
         assertNotNull(inspektør.sisteMaksdato(1.vedtaksperiode))
         assertNotNull(inspektør.sisteMaksdato(2.vedtaksperiode))
@@ -1913,8 +1913,8 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
         håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
         håndterInntektsmelding(listOf(3.januar til 18.januar), 3.januar)
-        assertNoErrors()
-        assertNoWarnings()
+        assertIngenFunksjonelleFeil()
+        assertIngenVarsler()
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
@@ -1925,7 +1925,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 23.februar, 100.prosent))
         håndterSøknad(Sykdom(1.februar, 23.februar, 100.prosent))
         håndterInntektsmelding(listOf(3.januar til 18.januar), førsteFraværsdag = 1.februar) // Touches prior periode
-        assertNoErrors()
+        assertIngenFunksjonelleFeil()
 
         håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
@@ -1933,7 +1933,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
         håndterUtbetalt(Oppdragstatus.AKSEPTERT)
-        assertNoErrors()
+        assertIngenFunksjonelleFeil()
 
         assertNotNull(inspektør.sisteMaksdato(1.vedtaksperiode))
         assertNotNull(inspektør.sisteMaksdato(2.vedtaksperiode))
@@ -1982,23 +1982,23 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSimulering(3.vedtaksperiode)
         håndterUtbetalingsgodkjenning(3.vedtaksperiode)
 
-        assertNoWarning(
+        assertIngenVarsel(
             "Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.",
             1.vedtaksperiode.filter()
         )
-        assertNoWarning(
+        assertIngenVarsel(
             "Første fraværsdag i inntektsmeldingen er ulik skjæringstidspunktet. Kontrollér at inntektsmeldingen er knyttet til riktig periode.",
             2.vedtaksperiode.filter()
         )
-        assertNoWarning(
+        assertIngenVarsel(
             "Vi har mottatt en inntektsmelding i en løpende sykmeldingsperiode med oppgitt første/bestemmende fraværsdag som er ulik tidligere fastsatt skjæringstidspunkt.",
             2.vedtaksperiode.filter()
         )
-        assertWarning(
+        assertVarsel(
             "Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.",
             2.vedtaksperiode.filter()
         )
-        assertWarning(
+        assertVarsel(
             "Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.",
             3.vedtaksperiode.filter()
         )
@@ -2018,7 +2018,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
 
         håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode)
-        assertNoErrors(2.vedtaksperiode.filter(ORGNUMMER))
+        assertIngenFunksjonelleFeil(2.vedtaksperiode.filter(ORGNUMMER))
     }
 
     @Test
@@ -2027,7 +2027,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "begrunnelse")
         assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
-        assertError(
+        assertFunksjonellFeil(
             "Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden på grunn av: begrunnelse",
             1.vedtaksperiode.filter()
         )
@@ -2039,7 +2039,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterInntektsmeldingReplay(inntektsmeldingId, 1.vedtaksperiode.id(ORGNUMMER))
-        assertNoWarning("Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.")
+        assertIngenVarsel("Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.")
     }
 
     @Test

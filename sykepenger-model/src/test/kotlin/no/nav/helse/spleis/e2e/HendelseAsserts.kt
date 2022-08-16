@@ -12,7 +12,6 @@ import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.AktivitetsloggVisitor
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.IdInnhenter
-import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.Person
 import no.nav.helse.person.SpesifikkKontekst
 import no.nav.helse.person.TilstandType
@@ -50,12 +49,6 @@ internal fun <T : ArbeidstakerHendelse> AbstractEndToEndTest.assertIkkeEtterspur
     }
 }
 
-internal fun AbstractEndToEndTest.assertAlleBehovBesvart() {
-    assertTrue(ikkeBesvarteBehov.isEmpty()) {
-        "Ikke alle behov er besvart. Mangler fortsatt svar på behovene $ikkeBesvarteBehov"
-    }
-}
-
 internal inline fun <reified R : Utbetalingstidslinje.Utbetalingsdag> assertUtbetalingsdag(dag: Utbetalingstidslinje.Utbetalingsdag, expectedDagtype: KClass<R>, expectedTotalgrad: Double = 100.0) {
     dag.let {
         it.økonomi.medData { _, _, _, _, totalGrad, _, _, _, _ ->
@@ -81,17 +74,6 @@ internal fun AbstractEndToEndTest.assertUtbetalingsbeløp(
             assertEquals(0, personbeløp)
         }
     }
-}
-
-internal fun AbstractEndToEndTest.assertHendelseIder(
-    vararg hendelseIder: UUID,
-    orgnummer: String,
-    vedtaksperiodeIndeks: Int = 2,
-) {
-    assertEquals(
-        hendelseIder.toSet(),
-        inspektør(orgnummer).hendelseIder(vedtaksperiodeIndeks.vedtaksperiode)
-    )
 }
 
 internal fun AbstractEndToEndTest.assertHarHendelseIder(
@@ -122,14 +104,6 @@ internal fun AbstractEndToEndTest.assertTilstand(
     assertEquals(tilstand, sisteTilstand) {
         "Forventet at perioden skal stå i tilstand $tilstand, mens den står faktisk i $sisteTilstand\n${person.personLogg}"
     }
-}
-
-internal fun AbstractEndToEndTest.assertInntektskilde(
-    orgnummer: String,
-    inntektskilde: Inntektskilde,
-    vedtaksperiodeIndeks: Int = 1
-) {
-    assertEquals(inntektskilde, inspektør(orgnummer).inntektskilde(vedtaksperiodeIndeks.vedtaksperiode))
 }
 
 
@@ -175,48 +149,48 @@ internal fun AbstractEndToEndTest.assertInfo(forventet: String, vararg filtre: A
     assertEquals(1, info.count { it == forventet }, "fant ikke ett tilfelle av info. Info:\n${info.joinToString("\n")}")
 }
 
-internal fun AbstractEndToEndTest.assertNoInfo(forventet: String, vararg filtre: AktivitetsloggFilter) {
+internal fun AbstractEndToEndTest.assertIngenInfo(forventet: String, vararg filtre: AktivitetsloggFilter) {
     val info = collectInfo(*filtre)
     assertEquals(0, info.count { it == forventet }, "fant uventet info. Info:\n${info.joinToString("\n")}")
 }
 
-internal fun AbstractPersonTest.assertNoWarnings(vararg filtre: AktivitetsloggFilter) {
-    val warnings = collectWarnings(*filtre)
+internal fun AbstractPersonTest.assertIngenVarsler(vararg filtre: AktivitetsloggFilter) {
+    val warnings = collectVarsler(*filtre)
     assertTrue(warnings.isEmpty(), "Forventet ingen warnings. Warnings:\n${warnings.joinToString("\n")}")
 }
 
-internal fun AbstractPersonTest.assertWarnings(vararg filtre: AktivitetsloggFilter) {
-    assertTrue(collectWarnings(*filtre).isNotEmpty(), "Forventet warnings, fant ingen")
+internal fun AbstractPersonTest.assertVarsler(vararg filtre: AktivitetsloggFilter) {
+    assertTrue(collectVarsler(*filtre).isNotEmpty(), "Forventet warnings, fant ingen")
 }
 
-internal fun AbstractPersonTest.assertWarning(warning: String, vararg filtre: AktivitetsloggFilter) {
-    val warnings = collectWarnings(*filtre)
+internal fun AbstractPersonTest.assertVarsel(warning: String, vararg filtre: AktivitetsloggFilter) {
+    val warnings = collectVarsler(*filtre)
     assertTrue(warnings.contains(warning), "\nFant ikke forventet warning:\n\t$warning\nWarnings funnet:\n\t${warnings.joinToString("\n\t")}\n")
 }
 
-internal fun AbstractPersonTest.assertNoWarning(warning: String, vararg filtre: AktivitetsloggFilter) {
-    val warnings = collectWarnings(*filtre)
+internal fun AbstractPersonTest.assertIngenVarsel(warning: String, vararg filtre: AktivitetsloggFilter) {
+    val warnings = collectVarsler(*filtre)
     assertFalse(warnings.contains(warning), "\nFant ikke-forventet warning:\n\t$warning\nWarnings funnet:\n\t${warnings.joinToString("\n\t")}\n")
 }
 
-internal fun AbstractEndToEndTest.assertError(error: String, vararg filtre: AktivitetsloggFilter) {
-    val errors = collectErrors(*filtre)
+internal fun AbstractEndToEndTest.assertFunksjonellFeil(error: String, vararg filtre: AktivitetsloggFilter) {
+    val errors = collectFunksjonelleFeil(*filtre)
     assertTrue(errors.contains(error), "fant ikke forventet error. Errors:\n${errors.joinToString("\n")}")
 }
 
-internal fun AbstractPersonTest.assertErrors(vararg filtre: AktivitetsloggFilter) {
-    val errors = collectErrors(*filtre)
+internal fun AbstractPersonTest.assertFunksjonelleFeil(vararg filtre: AktivitetsloggFilter) {
+    val errors = collectFunksjonelleFeil(*filtre)
     assertTrue(errors.isNotEmpty(), "forventet errors, fant ingen.")
 }
 
 
-internal fun AbstractPersonTest.assertNoErrors(vararg filtre: AktivitetsloggFilter) {
-    val errors = collectErrors(*filtre)
+internal fun AbstractPersonTest.assertIngenFunksjonelleFeil(vararg filtre: AktivitetsloggFilter) {
+    val errors = collectFunksjonelleFeil(*filtre)
     assertTrue(errors.isEmpty(), "forventet ingen errors. Errors: \n${errors.joinToString("\n")}")
 }
 
-internal fun AbstractEndToEndTest.assertSevere(severe: String, vararg filtre: AktivitetsloggFilter) {
-    val severes = collectSeveres(*filtre)
+internal fun AbstractEndToEndTest.assertLogiskFeil(severe: String, vararg filtre: AktivitetsloggFilter) {
+    val severes = collectLogiskeFeil(*filtre)
     assertTrue(severes.contains(severe), "fant ikke forventet severe. Severes:\n${severes.joinToString("\n")}")
 }
 
@@ -232,7 +206,7 @@ private fun AbstractEndToEndTest.collectInfo(vararg filtre: AktivitetsloggFilter
     return info
 }
 
-private fun AbstractPersonTest.collectWarnings(vararg filtre: AktivitetsloggFilter): MutableList<String> {
+private fun AbstractPersonTest.collectVarsler(vararg filtre: AktivitetsloggFilter): MutableList<String> {
     val warnings = mutableListOf<String>()
     person.personLogg.accept(object : AktivitetsloggVisitor {
         override fun visitWarn(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Warn, melding: String, tidsstempel: String) {
@@ -244,7 +218,7 @@ private fun AbstractPersonTest.collectWarnings(vararg filtre: AktivitetsloggFilt
     return warnings
 }
 
-internal fun AbstractPersonTest.collectErrors(vararg filtre: AktivitetsloggFilter): MutableList<String> {
+internal fun AbstractPersonTest.collectFunksjonelleFeil(vararg filtre: AktivitetsloggFilter): MutableList<String> {
     val errors = mutableListOf<String>()
     person.personLogg.accept(object : AktivitetsloggVisitor {
         override fun visitError(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Error, melding: String, tidsstempel: String) {
@@ -256,7 +230,7 @@ internal fun AbstractPersonTest.collectErrors(vararg filtre: AktivitetsloggFilte
     return errors
 }
 
-internal fun AbstractEndToEndTest.collectSeveres(vararg filtre: AktivitetsloggFilter): MutableList<String> {
+internal fun AbstractEndToEndTest.collectLogiskeFeil(vararg filtre: AktivitetsloggFilter): MutableList<String> {
     val severes = mutableListOf<String>()
     person.personLogg.accept(object : AktivitetsloggVisitor {
         override fun visitSevere(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Severe, melding: String, tidsstempel: String) {

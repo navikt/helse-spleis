@@ -44,10 +44,10 @@ import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
 import no.nav.helse.spleis.e2e.assertHarHendelseIder
 import no.nav.helse.spleis.e2e.assertHarIkkeHendelseIder
-import no.nav.helse.spleis.e2e.assertNoErrors
+import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
-import no.nav.helse.spleis.e2e.assertWarning
+import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.forlengPeriode
 import no.nav.helse.spleis.e2e.forlengTilGodkjentVedtak
 import no.nav.helse.spleis.e2e.forlengVedtak
@@ -197,7 +197,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
         håndterUtbetalt()
 
-        assertNoErrors()
+        assertIngenFunksjonelleFeil()
 
         assertTilstander(
             1.vedtaksperiode,
@@ -229,7 +229,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
         håndterUtbetalt()
 
-        assertNoErrors()
+        assertIngenFunksjonelleFeil()
         assertTilstander(
             0,
             START,
@@ -278,7 +278,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
         håndterUtbetalt()
 
-        assertNoErrors()
+        assertIngenFunksjonelleFeil()
 
         assertTilstander(
             0,
@@ -379,7 +379,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             AVVENTER_HISTORIKK
         )
 
-        assertNoErrors()
+        assertIngenFunksjonelleFeil()
         assertEquals(3, inspektør.utbetalinger.size)
         assertFalse(inspektør.utbetaling(2).harUtbetalinger())
     }
@@ -429,7 +429,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             AVVENTER_HISTORIKK
         )
         val revurdering = inspektør.utbetaling(2)
-        assertNoErrors()
+        assertIngenFunksjonelleFeil()
         assertEquals(2, revurdering.inspektør.arbeidsgiverOppdrag.size)
         assertEquals(19.januar, revurdering.inspektør.arbeidsgiverOppdrag[0].datoStatusFom())
         assertEquals(23.januar til 26.januar, revurdering.inspektør.arbeidsgiverOppdrag[1].periode)
@@ -460,7 +460,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK
         )
-        assertNoErrors()
+        assertIngenFunksjonelleFeil()
     }
 
     @Test
@@ -638,7 +638,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             AVSLUTTET,
         )
 
-        assertNoErrors()
+        assertIngenFunksjonelleFeil()
         assertEquals(2, inspektør.utbetalinger.size)
         assertEquals(6, inspektør.forbrukteSykedager(0))
         assertEquals(0, inspektør.forbrukteSykedager(1))
@@ -680,7 +680,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             AVVENTER_GODKJENNING_REVURDERING,
             REVURDERING_FEILET
         )
-        assertWarning("Utbetaling av revurdert periode ble avvist av saksbehandler. Utbetalingen må annulleres", 1.vedtaksperiode.filter())
+        assertVarsel("Utbetaling av revurdert periode ble avvist av saksbehandler. Utbetalingen må annulleres", 1.vedtaksperiode.filter())
     }
 
     @Test
@@ -692,7 +692,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode, simuleringOK = false)
         nullstillTilstandsendringer()
         assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
-        assertWarning("Simulering av revurdert utbetaling feilet. Utbetalingen må annulleres", 1.vedtaksperiode.filter())
+        assertVarsel("Simulering av revurdert utbetaling feilet. Utbetalingen må annulleres", 1.vedtaksperiode.filter())
     }
 
     @Test
@@ -800,7 +800,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK
         )
-        assertNoErrors()
+        assertIngenFunksjonelleFeil()
     }
 
     @Test
@@ -837,7 +837,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             AVSLUTTET
         )
 
-        assertNoErrors()
+        assertIngenFunksjonelleFeil()
         assertEquals(6, inspektør.forbrukteSykedager(0))
         assertEquals(5, inspektør.forbrukteSykedager(1))
         assertEquals(4, inspektør.forbrukteSykedager(2))
@@ -889,7 +889,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING
         )
-        assertNoErrors()
+        assertIngenFunksjonelleFeil()
     }
 
     @Test
@@ -947,7 +947,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             TIL_UTBETALING,
             AVSLUTTET
         )
-        assertNoErrors()
+        assertIngenFunksjonelleFeil()
         assertEquals(0, inspektør.ikkeUtbetalteUtbetalingerForVedtaksperiode(1.vedtaksperiode).size)
         assertEquals(0, inspektør.ikkeUtbetalteUtbetalingerForVedtaksperiode(2.vedtaksperiode).size)
         assertEquals(0, inspektør.ikkeUtbetalteUtbetalingerForVedtaksperiode(3.vedtaksperiode).size)
@@ -1100,7 +1100,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         )
 
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
-        assertWarning(
+        assertVarsel(
             "Utbetaling i Infotrygd overlapper med vedtaksperioden",
             AktivitetsloggFilter.person()
         )
@@ -1132,7 +1132,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         )
 
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
-        assertWarning(
+        assertVarsel(
             "Det er utbetalt en periode i Infotrygd etter perioden du skal behandle nå. Undersøk at antall forbrukte dager og grunnlag i Infotrygd er riktig",
             AktivitetsloggFilter.person()
         )
@@ -1249,7 +1249,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             )
         )
 
-        assertWarning("Mangler inntekt for første utbetalingsdag i en av infotrygdperiodene", 1.vedtaksperiode.filter())
+        assertVarsel("Mangler inntekt for første utbetalingsdag i en av infotrygdperiodene", 1.vedtaksperiode.filter())
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -1353,7 +1353,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.mars, 31.mars, 100.prosent, INNTEKT),
             inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.mars, INNTEKT, true))
         )
-        assertWarning(
+        assertVarsel(
             "Det er utbetalt en periode i Infotrygd etter perioden du skal behandle nå. Undersøk at antall forbrukte dager og grunnlag i Infotrygd er riktig",
             1.vedtaksperiode.filter()
         )

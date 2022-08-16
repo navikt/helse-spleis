@@ -57,7 +57,7 @@ internal class MaksdatoE2ETest : AbstractEndToEndTest() {
         // oppretter forlengelse fom 182 dager etter maksdato
         forrigePeriode = nyPeriodeMedYtelser(forrigePeriode)
         val siste = observatør.sisteVedtaksperiode()
-        assertError("Bruker er fortsatt syk 26 uker etter maksdato", siste.filter())
+        assertFunksjonellFeil("Bruker er fortsatt syk 26 uker etter maksdato", siste.filter())
         assertSisteTilstand(siste, TilstandType.TIL_INFOTRYGD) {
             "Disse periodene skal kastes ut pr nå"
         }

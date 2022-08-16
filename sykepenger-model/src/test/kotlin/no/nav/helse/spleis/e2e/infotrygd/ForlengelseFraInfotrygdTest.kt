@@ -63,19 +63,19 @@ import no.nav.helse.september
 import no.nav.helse.serde.api.speil.builders.OppsamletSammenligningsgrunnlagBuilder
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertActivities
-import no.nav.helse.spleis.e2e.assertError
-import no.nav.helse.spleis.e2e.assertErrors
+import no.nav.helse.spleis.e2e.assertFunksjonellFeil
+import no.nav.helse.spleis.e2e.assertFunksjonelleFeil
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
 import no.nav.helse.spleis.e2e.assertInfo
 import no.nav.helse.spleis.e2e.assertInntektForDato
-import no.nav.helse.spleis.e2e.assertNoErrors
-import no.nav.helse.spleis.e2e.assertNoWarning
-import no.nav.helse.spleis.e2e.assertNoWarnings
+import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
+import no.nav.helse.spleis.e2e.assertIngenVarsel
+import no.nav.helse.spleis.e2e.assertIngenVarsler
 import no.nav.helse.spleis.e2e.assertSisteForkastetPeriodeTilstand
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
-import no.nav.helse.spleis.e2e.assertWarning
+import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.finnSkjæringstidspunkt
 import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.grunnlag
@@ -1146,8 +1146,8 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
 
         inspektør.also {
-            assertNoErrors(1.vedtaksperiode.filter())
-            assertNoWarnings(1.vedtaksperiode.filter())
+            assertIngenFunksjonelleFeil(1.vedtaksperiode.filter())
+            assertIngenVarsler(1.vedtaksperiode.filter())
             assertActivities(person)
             assertInntektForDato(45000.månedlig, 27.juli(2020), inspektør = it)
             assertEquals(1, it.sykdomshistorikk.size)
@@ -1179,7 +1179,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.juli, 31.juli, 100.prosent))
         håndterSøknad(Sykdom(1.juli, 31.juli, 100.prosent))
 
-        assertNoErrors()
+        assertIngenFunksjonelleFeil()
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -1210,7 +1210,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.juli, 31.juli, 100.prosent))
         håndterSøknad(Sykdom(1.juli, 31.juli, 100.prosent))
 
-        assertNoErrors()
+        assertIngenFunksjonelleFeil()
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -1293,7 +1293,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
                 }
             }
         ))
-        assertNoWarnings(1.vedtaksperiode.filter(a2))
+        assertIngenVarsler(1.vedtaksperiode.filter(a2))
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a2, inntektshistorikk = inntektshistorikk)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
@@ -1368,10 +1368,10 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         håndterUtbetalt(orgnummer = a2)
 
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
-        assertNoWarnings(1.vedtaksperiode.filter(a1))
-        assertNoErrors(1.vedtaksperiode.filter(a1))
-        assertNoWarnings(1.vedtaksperiode.filter(a2))
-        assertNoErrors(1.vedtaksperiode.filter(a2))
+        assertIngenVarsler(1.vedtaksperiode.filter(a1))
+        assertIngenFunksjonelleFeil(1.vedtaksperiode.filter(a1))
+        assertIngenVarsler(1.vedtaksperiode.filter(a2))
+        assertIngenFunksjonelleFeil(1.vedtaksperiode.filter(a2))
     }
 
     @Test
@@ -1389,7 +1389,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         håndterUtbetalt(orgnummer = a1)
 
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
-        assertNoWarnings(1.vedtaksperiode.filter(a1))
+        assertIngenVarsler(1.vedtaksperiode.filter(a1))
     }
 
     @Test
@@ -1417,7 +1417,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             2.vedtaksperiode,
             AVSLUTTET
         )
-        assertErrors()
+        assertFunksjonelleFeil()
     }
 
     @Test
@@ -1578,7 +1578,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         val vilkårsgrunnlag = inspektør(a2).vilkårsgrunnlag(1.vedtaksperiode)
         assertNotNull(vilkårsgrunnlag)
         assertFalse(vilkårsgrunnlag.inspektør.vurdertOk)
-        assertError("Bruker mangler nødvendig inntekt ved validering av Vilkårsgrunnlag", 1.vedtaksperiode.filter(a2))
+        assertFunksjonellFeil("Bruker mangler nødvendig inntekt ved validering av Vilkårsgrunnlag", 1.vedtaksperiode.filter(a2))
         assertTilstand(1.vedtaksperiode, TIL_INFOTRYGD, orgnummer = a2)
     }
 
@@ -2111,7 +2111,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             ),
             arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(a1, 1.desember(2017)))
         )
-        assertError("Har mer enn 25 % avvik", 1.vedtaksperiode.filter())
+        assertFunksjonellFeil("Har mer enn 25 % avvik", 1.vedtaksperiode.filter())
 
         håndterSykmelding(Sykmeldingsperiode(18.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(18.januar, 31.januar, 100.prosent))
@@ -2152,8 +2152,8 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
-        assertNoWarnings(1.vedtaksperiode.filter(a1))
-        assertNoErrors(1.vedtaksperiode.filter(a1))
+        assertIngenVarsler(1.vedtaksperiode.filter(a1))
+        assertIngenFunksjonelleFeil(1.vedtaksperiode.filter(a1))
     }
 
     @Test
@@ -2173,11 +2173,11 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.mars, 20.mars, 50.prosent))
         håndterInntektsmelding(arbeidsgiverperioder = listOf(1.mars til 16.mars), førsteFraværsdag = 1.mars)
 
-        assertNoWarning("Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.", 1.vedtaksperiode.filter())
-        assertWarning("Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler.", 1.vedtaksperiode.filter())
-        assertWarning("Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.", 2.vedtaksperiode.filter())
-        assertNoWarning("Vi har mottatt en inntektsmelding i en løpende sykmeldingsperiode med oppgitt første/bestemmende fraværsdag som er ulik tidligere fastsatt skjæringstidspunkt.", 2.vedtaksperiode.filter())
-        assertNoWarning("Første fraværsdag i inntektsmeldingen er ulik skjæringstidspunktet. Kontrollér at inntektsmeldingen er knyttet til riktig periode.", 2.vedtaksperiode.filter())
+        assertIngenVarsel("Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.", 1.vedtaksperiode.filter())
+        assertVarsel("Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler.", 1.vedtaksperiode.filter())
+        assertVarsel("Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.", 2.vedtaksperiode.filter())
+        assertIngenVarsel("Vi har mottatt en inntektsmelding i en løpende sykmeldingsperiode med oppgitt første/bestemmende fraværsdag som er ulik tidligere fastsatt skjæringstidspunkt.", 2.vedtaksperiode.filter())
+        assertIngenVarsel("Første fraværsdag i inntektsmeldingen er ulik skjæringstidspunktet. Kontrollér at inntektsmeldingen er knyttet til riktig periode.", 2.vedtaksperiode.filter())
     }
 
     @Test
@@ -2195,7 +2195,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
-        assertWarning("Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler.", 1.vedtaksperiode.filter())
+        assertVarsel("Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler.", 1.vedtaksperiode.filter())
     }
 
     @Test
@@ -2213,7 +2213,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
-        assertNoWarnings(1.vedtaksperiode.filter())
+        assertIngenVarsler(1.vedtaksperiode.filter())
     }
 
     @Test
@@ -2256,7 +2256,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
-        assertNoWarnings(1.vedtaksperiode.filter())
+        assertIngenVarsler(1.vedtaksperiode.filter())
     }
 
     @Test
@@ -2281,8 +2281,8 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
 
         forlengVedtak(11.februar, 28.februar)
 
-        assertWarning("Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler.", 1.vedtaksperiode.filter())
-        assertWarning("Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler.", 2.vedtaksperiode.filter())
+        assertVarsel("Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler.", 1.vedtaksperiode.filter())
+        assertVarsel("Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler.", 2.vedtaksperiode.filter())
     }
 
     @Test
@@ -2305,7 +2305,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
-        assertWarning("Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler.", 1.vedtaksperiode.filter())
+        assertVarsel("Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler.", 1.vedtaksperiode.filter())
     }
 
     @Test
@@ -2330,8 +2330,8 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
 
         nyttVedtak(1.mars, 31.mars)
 
-        assertWarning("Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler.", 1.vedtaksperiode.filter())
-        assertNoWarnings(2.vedtaksperiode.filter(ORGNUMMER))
+        assertVarsel("Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler.", 1.vedtaksperiode.filter())
+        assertIngenVarsler(2.vedtaksperiode.filter(ORGNUMMER))
     }
 
     @Test
@@ -2372,7 +2372,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             )
         )
         håndterYtelser(2.vedtaksperiode)
-        assertErrors(2.vedtaksperiode.filter(ORGNUMMER))
+        assertFunksjonelleFeil(2.vedtaksperiode.filter(ORGNUMMER))
         assertSisteTilstand(2.vedtaksperiode, TIL_INFOTRYGD)
     }
 

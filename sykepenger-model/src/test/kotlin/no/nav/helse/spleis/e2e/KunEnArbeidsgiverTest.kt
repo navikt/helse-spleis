@@ -69,7 +69,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
             assertEquals(0, it.size)
         }
         håndterUtbetalt(Oppdragstatus.AKSEPTERT)
-        assertNoErrors()
+        assertIngenFunksjonelleFeil()
         assertActivities()
         inspektør.also {
             assertInntektForDato(INNTEKT, 3.januar, inspektør = it)
@@ -103,9 +103,9 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 8.januar, 100.prosent))
         håndterSøknad(Sykdom(3.januar, 8.januar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
-        assertNoWarnings()
+        assertIngenVarsler()
         håndterInntektsmelding(arbeidsgiverperioder = listOf(3.januar til 18.januar), INNTEKT)
-        assertNoErrors()
+        assertIngenFunksjonelleFeil()
         assertActivities()
         inspektør.also {
             assertInntektForDato(INNTEKT, 3.januar, inspektør = it)
@@ -132,7 +132,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         håndterYtelser(3.vedtaksperiode)
         håndterVilkårsgrunnlag(3.vedtaksperiode, INNTEKT)
 
-        assertNoErrors()
+        assertIngenFunksjonelleFeil()
         assertActivities()
         inspektør.also {
             assertInntektForDato(INNTEKT, 3.januar, inspektør = it)
@@ -179,7 +179,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
 
         håndterInntektsmelding(listOf(3.januar til 4.januar, 8.januar til 21.januar), INNTEKT)
 
-        assertNoErrors()
+        assertIngenFunksjonelleFeil()
         assertActivities()
         inspektør.also {
             assertInntektForDato(INNTEKT, 8.januar, inspektør = it)
@@ -214,10 +214,10 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
     fun `ingen historie med inntektsmelding, så søknad til arbeidsgiver`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 8.januar, 100.prosent))
         val inntektsmeldingId = håndterInntektsmelding(listOf(3.januar til 18.januar), INNTEKT)
-        assertNoWarnings()
+        assertIngenVarsler()
         håndterSøknad(Sykdom(3.januar, 8.januar, 100.prosent))
         håndterInntektsmeldingReplay(inntektsmeldingId, 1.vedtaksperiode)
-        assertNoErrors(1.vedtaksperiode.filter())
+        assertIngenFunksjonelleFeil(1.vedtaksperiode.filter())
         assertActivities()
         inspektør.also {
             assertInntektForDato(INNTEKT, 3.januar, inspektør = it)
@@ -245,7 +245,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(Oppdragstatus.AKSEPTERT)
-        assertNoErrors()
+        assertIngenFunksjonelleFeil()
         assertActivities()
         inspektør.also {
             assertInntektForDato(INNTEKT, 3.januar, inspektør = it)
@@ -274,9 +274,9 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
     fun `Søknad med utenlandsopphold og studieopphold gir warning`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
         håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent), Utlandsopphold(11.januar, 15.januar), Utdanning(16.januar, 18.januar))
-        assertWarnings()
-        assertWarning("Utdanning oppgitt i perioden i søknaden.", 1.vedtaksperiode.filter())
-        assertWarning("Utenlandsopphold oppgitt i perioden i søknaden.", 1.vedtaksperiode.filter())
+        assertVarsler()
+        assertVarsel("Utdanning oppgitt i perioden i søknaden.", 1.vedtaksperiode.filter())
+        assertVarsel("Utenlandsopphold oppgitt i perioden i søknaden.", 1.vedtaksperiode.filter())
         inspektør.also {
             assertEquals(1, it.sykdomshistorikk.size)
             assertEquals(18, it.sykdomstidslinje.inspektør.dagteller[Sykedag::class])
@@ -289,7 +289,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
         håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.mai)
         håndterInntektsmelding(listOf(3.januar til 18.januar), INNTEKT)
-        assertNoErrors()
+        assertIngenFunksjonelleFeil()
         assertActivities()
         inspektør.also {
             assertInntektForDato(INNTEKT, 3.januar, inspektør = it)
@@ -324,7 +324,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(Oppdragstatus.AKSEPTERT)
-        assertNoErrors()
+        assertIngenFunksjonelleFeil()
         assertActivities()
         inspektør.also {
             assertInntektForDato(INNTEKT, 3.januar, inspektør = it)
@@ -358,8 +358,8 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
             listOf(ArbeidsgiverUtbetalingsperiode(a1, 1.desember(2017), 16.desember(2017), 100.prosent, 15000.daglig)),
             inntektshistorikk = listOf(Inntektsopplysning(a1, 1.desember(2017), INNTEKT, true))
         )
-        assertNoErrors()
-        assertNoWarnings()
+        assertIngenFunksjonelleFeil()
+        assertIngenVarsler()
         assertActivities()
         inspektør.also {
             assertInntektForDato(null, 2.januar, inspektør = it)
@@ -391,7 +391,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         ))
         håndterYtelser(1.vedtaksperiode)
 
-        assertNoErrors()
+        assertIngenFunksjonelleFeil()
         assertActivities()
         inspektør.also {
             assertInntektForDato(INNTEKT, 21.september(2020), inspektør = it)
@@ -427,7 +427,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
 
-        assertNoErrors()
+        assertIngenFunksjonelleFeil()
         assertActivities()
         inspektør.also {
             assertInntektForDato(INNTEKT, 4.januar, inspektør = it)
@@ -446,7 +446,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         håndterSykmelding(Sykmeldingsperiode(21.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(21.januar, 31.januar, 100.prosent), Ferie(21.januar, 31.januar))
         håndterYtelser(2.vedtaksperiode, arbeidsavklaringspenger = listOf(3.januar.minusDays(60) til 5.januar.minusDays(60)))
-        assertWarnings(2.vedtaksperiode.filter())
+        assertVarsler(2.vedtaksperiode.filter())
         assertTilstander(
             2.vedtaksperiode,
             START,
@@ -479,7 +479,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
         håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
-        assertNoErrors()
+        assertIngenFunksjonelleFeil()
         assertActivities()
         assertNotNull(inspektør.sisteMaksdato(1.vedtaksperiode))
         assertNotNull(inspektør.sisteMaksdato(2.vedtaksperiode))
@@ -532,7 +532,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
         håndterUtbetalt(Oppdragstatus.AKSEPTERT)
-        assertNoErrors()
+        assertIngenFunksjonelleFeil()
         assertActivities()
         inspektør.also {
             assertNotNull(it.sisteMaksdato(1.vedtaksperiode))
@@ -582,7 +582,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
-        assertNoErrors()
+        assertIngenFunksjonelleFeil()
         assertActivities()
         assertNotNull(inspektør.sisteMaksdato(1.vedtaksperiode))
         assertTilstander(
@@ -626,7 +626,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
         håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
-        assertNoErrors()
+        assertIngenFunksjonelleFeil()
         assertActivities()
         assertNotNull(inspektør.sisteMaksdato(1.vedtaksperiode))
         assertTilstander(
@@ -677,7 +677,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
         håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
-        assertNoErrors()
+        assertIngenFunksjonelleFeil()
         assertActivities()
         assertNotNull(inspektør.sisteMaksdato(2.vedtaksperiode))
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
@@ -714,7 +714,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, true)
         håndterUtbetalt(Oppdragstatus.AKSEPTERT)
 
-        assertNoErrors()
+        assertIngenFunksjonelleFeil()
         assertActivities()
         inspektør.also {
             assertEquals(3.januar, it.skjæringstidspunkt(1.vedtaksperiode))
@@ -794,7 +794,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
 
-        assertNoErrors()
+        assertIngenFunksjonelleFeil()
         assertActivities()
         assertNotNull(inspektør.sisteMaksdato(1.vedtaksperiode))
         assertTilstander(
@@ -1118,7 +1118,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
-        assertNoWarnings(1.vedtaksperiode.filter())
+        assertIngenVarsler(1.vedtaksperiode.filter())
     }
 
     @Test

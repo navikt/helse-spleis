@@ -117,7 +117,7 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
         assertForkastetPeriodeTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, TIL_INFOTRYGD)
         assertForkastetPeriodeTilstander(3.vedtaksperiode, START, TIL_INFOTRYGD)
         assertForkastetPeriodeTilstander(4.vedtaksperiode, START, TIL_INFOTRYGD)
-        assertError("Overlappende søknad starter før, eller slutter etter, opprinnelig periode", 1.vedtaksperiode.filter())
+        assertFunksjonellFeil("Overlappende søknad starter før, eller slutter etter, opprinnelig periode", 1.vedtaksperiode.filter())
     }
 
     @Test
@@ -139,7 +139,7 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
         håndterSykmelding(Sykmeldingsperiode(16.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(16.januar, 31.januar, 100.prosent))
         assertSisteForkastetPeriodeTilstand(ORGNUMMER, 2.vedtaksperiode, TIL_INFOTRYGD)
-        assertError("Søknad forlenger en forkastet periode", 2.vedtaksperiode.filter())
+        assertFunksjonellFeil("Søknad forlenger en forkastet periode", 2.vedtaksperiode.filter())
     }
 
     @Test
@@ -159,7 +159,7 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
         håndterSykmelding(Sykmeldingsperiode(22.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(22.januar, 31.januar, 100.prosent))
         assertSisteForkastetPeriodeTilstand(ORGNUMMER, 2.vedtaksperiode, TIL_INFOTRYGD)
-        assertError("Søknad forlenger en forkastet periode", 2.vedtaksperiode.filter())
+        assertFunksjonellFeil("Søknad forlenger en forkastet periode", 2.vedtaksperiode.filter())
     }
 
     @Test
@@ -179,7 +179,7 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
         håndterSykmelding(Sykmeldingsperiode(23.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(23.januar, 31.januar, 100.prosent))
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
-        assertNoErrors(2.vedtaksperiode.filter())
+        assertIngenFunksjonelleFeil(2.vedtaksperiode.filter())
     }
 
     @Test
@@ -189,7 +189,7 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
         håndterSykmelding(Sykmeldingsperiode(23.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(23.januar, 31.januar, 100.prosent))
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
-        assertNoInfo("Søknad forlenger en forkastet periode", 2.vedtaksperiode.filter())
+        assertIngenInfo("Søknad forlenger en forkastet periode", 2.vedtaksperiode.filter())
     }
 
     @Test
@@ -199,15 +199,15 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
         håndterSykmelding(Sykmeldingsperiode(16.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(16.januar, 31.januar, 100.prosent))
         assertSisteForkastetPeriodeTilstand(ORGNUMMER, 2.vedtaksperiode, TIL_INFOTRYGD)
-        assertError("Søknad forlenger en forkastet periode", 2.vedtaksperiode.filter())
+        assertFunksjonellFeil("Søknad forlenger en forkastet periode", 2.vedtaksperiode.filter())
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
         assertSisteForkastetPeriodeTilstand(ORGNUMMER, 3.vedtaksperiode, TIL_INFOTRYGD)
-        assertError("Søknad forlenger en forkastet periode", 3.vedtaksperiode.filter())
+        assertFunksjonellFeil("Søknad forlenger en forkastet periode", 3.vedtaksperiode.filter())
         håndterSykmelding(Sykmeldingsperiode(2.mars, 31.mars, 100.prosent))
         håndterSøknad(Sykdom(2.mars, 31.mars, 100.prosent))
         assertSisteTilstand(4.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
-        assertNoErrors(4.vedtaksperiode.filter())
+        assertIngenFunksjonelleFeil(4.vedtaksperiode.filter())
     }
 
     @Test

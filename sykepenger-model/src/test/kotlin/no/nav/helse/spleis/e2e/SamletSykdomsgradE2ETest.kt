@@ -117,8 +117,8 @@ internal class SamletSykdomsgradE2ETest: AbstractEndToEndTest() {
 
         assertForventetFeil(
             forklaring = "når vi mottar korrigert søknad ligger det igjen warnings fra før som ikke lengre gjelder",
-            nå = { assertWarning("Minst én dag uten utbetaling på grunn av sykdomsgrad under 20 %. Vurder å sende vedtaksbrev fra Infotrygd") },
-            ønsket = { assertNoWarnings() }
+            nå = { assertVarsel("Minst én dag uten utbetaling på grunn av sykdomsgrad under 20 %. Vurder å sende vedtaksbrev fra Infotrygd") },
+            ønsket = { assertIngenVarsler() }
         )
     }
 
@@ -140,7 +140,7 @@ internal class SamletSykdomsgradE2ETest: AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-        assertWarning("Minst én dag uten utbetaling på grunn av sykdomsgrad under 20 %. Vurder å sende vedtaksbrev fra Infotrygd", 1.vedtaksperiode.filter())
-        assertNoWarnings(2.vedtaksperiode.filter())
+        assertVarsel("Minst én dag uten utbetaling på grunn av sykdomsgrad under 20 %. Vurder å sende vedtaksbrev fra Infotrygd", 1.vedtaksperiode.filter())
+        assertIngenVarsler(2.vedtaksperiode.filter())
     }
 }

@@ -72,7 +72,7 @@ internal class OpptjeningE2ETest : AbstractEndToEndTest() {
         val grunnlagsdata = person.vilkårsgrunnlagFor(1.januar) as VilkårsgrunnlagHistorikk.Grunnlagsdata
         assertEquals(1, grunnlagsdata.opptjening.opptjeningsdager())
         assertEquals(false, grunnlagsdata.opptjening.erOppfylt())
-        assertWarning("Perioden er avslått på grunn av manglende opptjening", 1.vedtaksperiode.filter(orgnummer = a1))
+        assertVarsel("Perioden er avslått på grunn av manglende opptjening", 1.vedtaksperiode.filter(orgnummer = a1))
     }
 
     @Test

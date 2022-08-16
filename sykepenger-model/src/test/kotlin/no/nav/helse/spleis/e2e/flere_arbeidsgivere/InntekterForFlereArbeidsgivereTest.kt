@@ -31,7 +31,7 @@ import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertInntektForDato
-import no.nav.helse.spleis.e2e.assertNoErrors
+import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.finnSkjæringstidspunkt
 import no.nav.helse.spleis.e2e.grunnlag
@@ -73,7 +73,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
             orgnummer = a1,
             inntekt = 16000.månedlig,
         )
-        assertNoErrors()
+        assertIngenFunksjonelleFeil()
 
         vilkårsgrunnlag(
             1.vedtaksperiode,
@@ -107,7 +107,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
             )
         ).håndter(Person::håndter)
 
-        assertNoErrors()
+        assertIngenFunksjonelleFeil()
 
         assertInntektForDato(16000.månedlig, 1.januar, inspektør = a1Inspektør)
         assertInntektForDato(null, 1.januar, inspektør = a2Inspektør)
