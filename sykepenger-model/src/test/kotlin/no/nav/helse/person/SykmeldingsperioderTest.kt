@@ -25,6 +25,9 @@ internal class SykmeldingsperioderTest {
         fødselsdato = 12.februar(1992)
     )
 
+    private fun Sykmeldingsperioder.lagre(periode: Periode) =
+        lagre(hendelsefabrikk.lagSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent)))
+
     @Test
     fun `Kan lagre Sykmeldingsperioder`() {
         val sykmeldingsperioder = Sykmeldingsperioder()

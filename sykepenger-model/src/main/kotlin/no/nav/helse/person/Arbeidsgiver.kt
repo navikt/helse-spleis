@@ -496,7 +496,7 @@ internal class Arbeidsgiver private constructor(
         sykmelding.validerAtSykmeldingIkkeErForGammel()
         if (sykmelding.hasErrorsOrWorse()) return
         håndter(sykmelding, Vedtaksperiode::håndter)
-        sykmeldingsperioder.lagre(sykmelding.periode())
+        sykmeldingsperioder.lagre(sykmelding)
     }
 
     private fun harOverlappendeEllerForlengerForkastetVedtaksperiode(hendelse: SykdomstidslinjeHendelse): Boolean {

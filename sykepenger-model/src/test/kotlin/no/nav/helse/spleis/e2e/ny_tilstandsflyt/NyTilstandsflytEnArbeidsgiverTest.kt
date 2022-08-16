@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e.ny_tilstandsflyt
 
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -563,6 +564,16 @@ internal class NyTilstandsflytEnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK)
+    }
+
+    @Test
+    fun `korrigert sykmelding skal ikke blokkere for behandlingen av den første`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent)) // dup
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        assertEquals(emptyList<Periode>(), inspektør.sykmeldingsperioder())
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
     }
 
     private fun utbetalPeriodeEtterVilkårsprøving(vedtaksperiode: IdInnhenter) {

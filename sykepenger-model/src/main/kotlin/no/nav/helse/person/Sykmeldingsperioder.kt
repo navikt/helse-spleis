@@ -3,6 +3,8 @@ package no.nav.helse.person
 import java.time.LocalDate
 import java.time.YearMonth
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Periode.Companion.aldri
+import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.til
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 
@@ -16,10 +18,13 @@ internal class Sykmeldingsperioder(
         visitor.postVisitSykmeldingsperioder(this)
     }
 
-    internal fun lagre(periode: Periode) {
+    internal fun lagre(sykmelding: Sykmelding) {
+        val periode = sykmelding.periode()
+        if (periode == aldri) return sykmelding.info("Sykmeldingsperiode har allerede blitt tidligere håndtert, mistenker korrigert sykmelding")
         val (overlappendePerioder, gapPerioder) = perioder.partition { it.overlapperMed(periode) }
         val sammenhengendePerioder = overlappendePerioder + listOf(periode)
         val nyPeriode = sammenhengendePerioder.minOf { it.start } til sammenhengendePerioder.maxOf { it.endInclusive }
+        sykmelding.info("Legger til ny periode $nyPeriode i sykmeldingsperioder")
         perioder = (gapPerioder + listOf(nyPeriode)).sortedBy { it.start }
     }
 
