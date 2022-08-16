@@ -212,7 +212,7 @@ class Aktivitetslogg(
             }
 
             override fun accept(visitor: AktivitetsloggVisitor) {
-                visitor.visitWarn(kontekster, this, melding, tidsstempel)
+                visitor.visitVarsel(kontekster, this, melding, tidsstempel)
             }
         }
 
@@ -435,7 +435,7 @@ class Aktivitetslogg(
             }
 
             override fun accept(visitor: AktivitetsloggVisitor) {
-                visitor.visitError(kontekster, this, melding, tidsstempel)
+                visitor.visitFunksjonellFeil(kontekster, this, melding, tidsstempel)
             }
         }
 
@@ -451,7 +451,7 @@ class Aktivitetslogg(
             }
 
             override fun accept(visitor: AktivitetsloggVisitor) {
-                visitor.visitSevere(kontekster, this, melding, tidsstempel)
+                visitor.visitLogiskFeil(kontekster, this, melding, tidsstempel)
             }
         }
     }
@@ -491,7 +491,7 @@ internal interface AktivitetsloggVisitor {
     ) {
     }
 
-    fun visitWarn(
+    fun visitVarsel(
         kontekster: List<SpesifikkKontekst>,
         aktivitet: Aktivitetslogg.Aktivitet.Warn,
         melding: String,
@@ -509,7 +509,7 @@ internal interface AktivitetsloggVisitor {
     ) {
     }
 
-    fun visitError(
+    fun visitFunksjonellFeil(
         kontekster: List<SpesifikkKontekst>,
         aktivitet: Aktivitetslogg.Aktivitet.Error,
         melding: String,
@@ -517,7 +517,7 @@ internal interface AktivitetsloggVisitor {
     ) {
     }
 
-    fun visitSevere(
+    fun visitLogiskFeil(
         kontekster: List<SpesifikkKontekst>,
         aktivitet: Aktivitetslogg.Aktivitet.Severe,
         melding: String,

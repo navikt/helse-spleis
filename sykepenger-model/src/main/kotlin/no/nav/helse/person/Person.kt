@@ -802,7 +802,7 @@ class Person private constructor(
     internal fun emitHendelseIkkeHåndtert(hendelse: SykdomstidslinjeHendelse) {
         val errorMeldinger = mutableListOf<String>()
         aktivitetslogg.accept(object : AktivitetsloggVisitor {
-            override fun visitError(
+            override fun visitFunksjonellFeil(
                 kontekster: List<SpesifikkKontekst>,
                 aktivitet: Aktivitetslogg.Aktivitet.Error,
                 melding: String,

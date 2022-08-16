@@ -77,12 +77,6 @@ class OverstyrTidslinje(
         arbeidsgiver.håndter(this)
     }
 
-    internal fun tilRevurderingAvvistEvent(): PersonObserver.RevurderingAvvistEvent =
-        PersonObserver.RevurderingAvvistEvent(
-            fødselsnummer = fødselsnummer,
-            errors = this.errorsAndWorse()
-        )
-
     override fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) {
         hendelseIder.add(Dokumentsporing.overstyrTidslinje(meldingsreferanseId()))
     }

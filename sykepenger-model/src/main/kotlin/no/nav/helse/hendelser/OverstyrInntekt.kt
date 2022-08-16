@@ -29,7 +29,7 @@ class OverstyrInntekt(
     internal fun tilRevurderingAvvistEvent(): PersonObserver.RevurderingAvvistEvent =
         PersonObserver.RevurderingAvvistEvent(
             fødselsnummer = fødselsnummer,
-            errors = this.errorsAndWorse()
+            errors = this.funksjonelleFeilOgVerre()
         )
 
 

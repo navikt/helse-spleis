@@ -33,7 +33,7 @@ internal class AktivitetsloggMap(aktivitetslogg: Aktivitetslogg) : Aktivitetslog
         leggTilMelding(kontekster, INFO, melding, tidsstempel)
     }
 
-    override fun visitWarn(kontekster: List<SpesifikkKontekst>, aktivitet: Warn, melding: String, tidsstempel: String) {
+    override fun visitVarsel(kontekster: List<SpesifikkKontekst>, aktivitet: Warn, melding: String, tidsstempel: String) {
         leggTilMelding(kontekster, WARN, melding, tidsstempel)
     }
 
@@ -48,11 +48,11 @@ internal class AktivitetsloggMap(aktivitetslogg: Aktivitetslogg) : Aktivitetslog
         leggTilBehov(kontekster, BEHOV, type, melding, detaljer, tidsstempel)
     }
 
-    override fun visitError(kontekster: List<SpesifikkKontekst>, aktivitet: Error, melding: String, tidsstempel: String) {
+    override fun visitFunksjonellFeil(kontekster: List<SpesifikkKontekst>, aktivitet: Error, melding: String, tidsstempel: String) {
         leggTilMelding(kontekster, ERROR, melding, tidsstempel)
     }
 
-    override fun visitSevere(kontekster: List<SpesifikkKontekst>, aktivitet: Severe, melding: String, tidsstempel: String) {
+    override fun visitLogiskFeil(kontekster: List<SpesifikkKontekst>, aktivitet: Severe, melding: String, tidsstempel: String) {
         leggTilMelding(kontekster, SEVERE, melding, tidsstempel)
     }
 

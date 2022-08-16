@@ -18,20 +18,20 @@ abstract class ArbeidstakerHendelse protected constructor(
         "organisasjonsnummer" to organisasjonsnummer()
     )
 
-    fun errorsAndWorse(): List<String> {
-        val meldingsoppsamler = ErrorsAndWorse()
+    fun funksjonelleFeilOgVerre(): List<String> {
+        val meldingsoppsamler = FunksjonelleFeilOgVerre()
         aktivitetslogg.accept(meldingsoppsamler)
         return meldingsoppsamler.meldinger()
     }
 
-    internal class ErrorsAndWorse: AktivitetsloggVisitor {
+    internal class FunksjonelleFeilOgVerre: AktivitetsloggVisitor {
         private val meldinger = mutableListOf<String>()
         fun meldinger() = meldinger.toList()
-        override fun visitError(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Error, melding: String, tidsstempel: String) {
+        override fun visitFunksjonellFeil(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Error, melding: String, tidsstempel: String) {
             meldinger.add(melding)
         }
 
-        override fun visitSevere(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Severe, melding: String, tidsstempel: String) {
+        override fun visitLogiskFeil(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Severe, melding: String, tidsstempel: String) {
             meldinger.add(melding)
         }
     }

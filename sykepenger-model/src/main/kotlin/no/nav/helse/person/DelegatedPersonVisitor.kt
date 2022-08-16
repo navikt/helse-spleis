@@ -47,8 +47,8 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         delegatee.visitInfo(kontekster, aktivitet, melding, tidsstempel)
     }
 
-    override fun visitWarn(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Warn, melding: String, tidsstempel: String) {
-        delegatee.visitWarn(kontekster, aktivitet, melding, tidsstempel)
+    override fun visitVarsel(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Warn, melding: String, tidsstempel: String) {
+        delegatee.visitVarsel(kontekster, aktivitet, melding, tidsstempel)
     }
 
     override fun preVisitUtbetalingstidslinjeberegninger(beregninger: List<Utbetalingstidslinjeberegning>) {
@@ -225,12 +225,12 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         delegatee.visitBehov(kontekster, aktivitet, type, melding, detaljer, tidsstempel)
     }
 
-    override fun visitError(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Error, melding: String, tidsstempel: String) {
-        delegatee.visitError(kontekster, aktivitet, melding, tidsstempel)
+    override fun visitFunksjonellFeil(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Error, melding: String, tidsstempel: String) {
+        delegatee.visitFunksjonellFeil(kontekster, aktivitet, melding, tidsstempel)
     }
 
-    override fun visitSevere(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Severe, melding: String, tidsstempel: String) {
-        delegatee.visitSevere(kontekster, aktivitet, melding, tidsstempel)
+    override fun visitLogiskFeil(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Severe, melding: String, tidsstempel: String) {
+        delegatee.visitLogiskFeil(kontekster, aktivitet, melding, tidsstempel)
     }
 
     override fun postVisitAktivitetslogg(aktivitetslogg: Aktivitetslogg) {
