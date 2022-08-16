@@ -43,13 +43,13 @@ abstract class Utbetalingsperiode(
     }
 
     private fun validerRelevant(aktivitetslogg: IAktivitetslogg, nødnummer: Nødnummer) {
-        if (orgnr in nødnummer) aktivitetslogg.error("Det er registrert utbetaling på nødnummer")
+        if (orgnr in nødnummer) aktivitetslogg.funksjonellFeil("Det er registrert utbetaling på nødnummer")
     }
 
     override fun validerOverlapp(aktivitetslogg: IAktivitetslogg, periode: Periode) {
         if (!overlapperMed(periode)) return
         aktivitetslogg.info("Utbetaling i Infotrygd %s til %s overlapper med vedtaksperioden", start, endInclusive)
-        aktivitetslogg.error("Utbetaling i Infotrygd overlapper med vedtaksperioden")
+        aktivitetslogg.funksjonellFeil("Utbetaling i Infotrygd overlapper med vedtaksperioden")
     }
 
     override fun gjelder(nødnummer: Nødnummer) = this.orgnr in nødnummer
@@ -90,7 +90,7 @@ data class UgyldigPeriode(
     private val utbetalingsgrad: Int?
 ) {
     internal fun valider(aktivitetslogg: IAktivitetslogg) {
-        aktivitetslogg.error(feiltekst())
+        aktivitetslogg.funksjonellFeil(feiltekst())
     }
 
     private fun feiltekst() = when {

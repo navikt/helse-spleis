@@ -39,7 +39,7 @@ internal class Validation private constructor(private val hendelse: IAktivitetsl
 
     private fun onValidationFailed(feilmelding: String?) {
         hasErrors = true
-        feilmelding?.also { error(it) }
+        feilmelding?.also { funksjonellFeil(it) }
         errorBlock(this)
     }
 }

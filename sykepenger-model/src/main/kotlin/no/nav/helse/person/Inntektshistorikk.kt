@@ -156,7 +156,7 @@ internal class Inntektshistorikk {
         companion object {
             internal fun List<Inntektsopplysning>.valider(aktivitetslogg: IAktivitetslogg) {
                 if (all { it is SkattComposite }) {
-                    aktivitetslogg.error("Bruker mangler nødvendig inntekt ved validering av Vilkårsgrunnlag")
+                    aktivitetslogg.funksjonellFeil("Bruker mangler nødvendig inntekt ved validering av Vilkårsgrunnlag")
                 }
             }
         }

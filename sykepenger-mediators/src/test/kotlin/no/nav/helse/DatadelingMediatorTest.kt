@@ -50,7 +50,7 @@ internal class DatadelingMediatorTest {
     fun nivåer() {
         testhendelse.info("Dette er en infomelding")
         testhendelse.warn("Dette er et varsel")
-        testhendelse.error("Dette er en error")
+        testhendelse.funksjonellFeil("Dette er en error")
         try {
             testhendelse.severe("Dette er en severe")
         } catch (_: Exception) {}

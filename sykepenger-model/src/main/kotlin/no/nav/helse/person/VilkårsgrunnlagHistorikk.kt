@@ -289,7 +289,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
         override fun sjekkAvviksprosent(aktivitetslogg: IAktivitetslogg): Boolean {
             if (avviksprosent == null) return true
-            return Inntektsvurdering.sjekkAvvik(avviksprosent, aktivitetslogg, IAktivitetslogg::error, "Har mer enn 25 % avvik")
+            return Inntektsvurdering.sjekkAvvik(avviksprosent, aktivitetslogg, IAktivitetslogg::funksjonellFeil, "Har mer enn 25 % avvik")
         }
 
         override fun accept(vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor) {
@@ -367,7 +367,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         vilkårsgrunnlagId: UUID = UUID.randomUUID()
     ) : VilkårsgrunnlagElement(vilkårsgrunnlagId, skjæringstidspunkt, sykepengegrunnlag) {
         override fun validerOverstyrInntekt(overstyrInntekt: OverstyrInntekt) {
-            overstyrInntekt.error("Forespurt overstyring av inntekt hvor skjæringstidspunktet ligger i infotrygd")
+            overstyrInntekt.funksjonellFeil("Forespurt overstyring av inntekt hvor skjæringstidspunktet ligger i infotrygd")
         }
 
         override fun valider(aktivitetslogg: IAktivitetslogg, erForlengelse: Boolean) {
@@ -375,7 +375,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                 aktivitetslogg.info("Perioden har opphav i Infotrygd, men saken beholdes i Spleis fordi det er utbetalt i Spleis tidligere.")
                 return sjekkGammeltSkjæringstidspunkt(aktivitetslogg)
             }
-            if (Toggle.IkkeForlengInfotrygdperioder.enabled) aktivitetslogg.error("Støtter ikke saker med vilkårsgrunnlag i Infotrygd")
+            if (Toggle.IkkeForlengInfotrygdperioder.enabled) aktivitetslogg.funksjonellFeil("Støtter ikke saker med vilkårsgrunnlag i Infotrygd")
         }
 
         private fun sjekkGammeltSkjæringstidspunkt(aktivitetslogg: IAktivitetslogg) {

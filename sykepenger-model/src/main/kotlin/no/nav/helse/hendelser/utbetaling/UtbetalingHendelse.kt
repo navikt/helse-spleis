@@ -22,7 +22,7 @@ class UtbetalingHendelse(
     internal fun valider() = this.apply {
         if (status == AVVIST || status == FEIL) {
             info("Utbetaling feilet med status $status. Feilmelding fra Oppdragsystemet: $melding")
-            error("Utbetaling feilet med status $status")
+            funksjonellFeil("Utbetaling feilet med status $status")
         } else if (status == AKSEPTERT_MED_FEIL) warn("Utbetalingen ble gjennomført, men med advarsel: $melding")
     }
 

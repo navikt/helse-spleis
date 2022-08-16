@@ -33,6 +33,6 @@ internal class Nødnummer private constructor(private val nødnumre: Set<String>
 
     internal fun valider(aktivitetslogg: IAktivitetslogg, orgnummer: String) {
         if (orgnummer !in nødnumre) return
-        aktivitetslogg.error("Det er registrert bruk av på nødnummer")
+        aktivitetslogg.funksjonellFeil("Det er registrert bruk av på nødnummer")
     }
 }

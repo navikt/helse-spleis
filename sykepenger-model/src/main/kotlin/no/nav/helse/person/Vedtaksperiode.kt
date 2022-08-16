@@ -370,7 +370,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun kanRevurdereInntektForFlereArbeidsgivere(hendelse: OverstyrInntekt): Boolean {
         if (Toggle.RevurdereInntektMedFlereArbeidsgivere.disabled && inntektskilde == Inntektskilde.FLERE_ARBEIDSGIVERE) {
-            hendelse.error("Forespurt revurdering av inntekt hvor personen har flere arbeidsgivere (inkl. ghosts)")
+            hendelse.funksjonellFeil("Forespurt revurdering av inntekt hvor personen har flere arbeidsgivere (inkl. ghosts)")
             return false
         }
         return true
@@ -526,7 +526,7 @@ internal class Vedtaksperiode private constructor(
                 hendelse,
                 "Invaliderer alle perioder pga flere arbeidsgivere og feil i søknad"
             )
-            hendelse.error("Invaliderer alle perioder for arbeidsgiver pga feil i søknad")
+            hendelse.funksjonellFeil("Invaliderer alle perioder for arbeidsgiver pga feil i søknad")
             return forkast(hendelse)
         }
         nesteTilstand()?.also { tilstand(hendelse, it) }
@@ -534,7 +534,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun overlappendeSøknadIkkeStøttet(søknad: Søknad, egendefinertFeiltekst: String? = null) {
         søknad.trimLeft(periode.endInclusive)
-        søknad.error(
+        søknad.funksjonellFeil(
             egendefinertFeiltekst
                 ?: "Mottatt flere søknader for perioden - det støttes ikke før replay av hendelser er på plass"
         )
@@ -798,7 +798,7 @@ internal class Vedtaksperiode private constructor(
             .plusDays(110)
 
         fun håndterMakstid(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            påminnelse.error("Gir opp fordi tilstanden er nådd makstid")
+            påminnelse.funksjonellFeil("Gir opp fordi tilstanden er nådd makstid")
             vedtaksperiode.forkast(påminnelse)
         }
 
@@ -812,7 +812,7 @@ internal class Vedtaksperiode private constructor(
 
         fun nyPeriodeFørMedNyFlyt(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Søknad) {
             if (Toggle.RevurdereOutOfOrder.enabled) return
-            hendelse.error("Mottatt søknad out of order")
+            hendelse.funksjonellFeil("Mottatt søknad out of order")
             vedtaksperiode.forkast(hendelse)
         }
 
@@ -826,7 +826,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {
-            vilkårsgrunnlag.error("Forventet ikke vilkårsgrunnlag i %s".format(type.name))
+            vilkårsgrunnlag.funksjonellFeil("Forventet ikke vilkårsgrunnlag i %s".format(type.name))
         }
 
         fun håndter(
@@ -857,7 +857,7 @@ internal class Vedtaksperiode private constructor(
             infotrygdhistorikk: Infotrygdhistorikk,
             arbeidsgiverUtbetalingerFun: (SubsumsjonObserver) -> ArbeidsgiverUtbetalinger
         ) {
-            ytelser.error("Forventet ikke ytelsehistorikk i %s".format(type.name))
+            ytelser.funksjonellFeil("Forventet ikke ytelsehistorikk i %s".format(type.name))
         }
 
         fun håndter(
@@ -866,7 +866,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             utbetalingsgodkjenning: Utbetalingsgodkjenning
         ) {
-            utbetalingsgodkjenning.error("Forventet ikke utbetalingsgodkjenning i %s".format(type.name))
+            utbetalingsgodkjenning.funksjonellFeil("Forventet ikke utbetalingsgodkjenning i %s".format(type.name))
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
@@ -874,18 +874,18 @@ internal class Vedtaksperiode private constructor(
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, simulering: Simulering) {
-            simulering.error("Forventet ikke simulering i %s".format(type.name))
+            simulering.funksjonellFeil("Forventet ikke simulering i %s".format(type.name))
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: UtbetalingHendelse) {
-            hendelse.error("Forventet ikke utbetaling i %s".format(type.name))
+            hendelse.funksjonellFeil("Forventet ikke utbetaling i %s".format(type.name))
         }
 
         fun håndter(
             vedtaksperiode: Vedtaksperiode,
             hendelse: OverstyrTidslinje
         ) {
-            hendelse.error("Forventet ikke overstyring fra saksbehandler i %s".format(type.name))
+            hendelse.funksjonellFeil("Forventet ikke overstyring fra saksbehandler i %s".format(type.name))
         }
 
         fun håndter(
@@ -1426,7 +1426,7 @@ internal class Vedtaksperiode private constructor(
             val periodetype = vedtaksperiode.periodetype
             validation(ytelser) {
                 onValidationFailed {
-                    if (!ytelser.hasErrorsOrWorse()) error("Behandling av Ytelser feilet, årsak ukjent")
+                    if (!ytelser.hasErrorsOrWorse()) funksjonellFeil("Behandling av Ytelser feilet, årsak ukjent")
                     vedtaksperiode.forkast(ytelser)
                 }
                 onSuccess {
@@ -1907,7 +1907,7 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: UtbetalingHendelse) {
             when {
                 vedtaksperiode.utbetalinger.harFeilet() -> vedtaksperiode.tilstand(hendelse, UtbetalingFeilet) {
-                    hendelse.error("Utbetaling ble ikke gjennomført")
+                    hendelse.funksjonellFeil("Utbetaling ble ikke gjennomført")
                 }
                 vedtaksperiode.utbetalinger.erUtbetalt() -> vedtaksperiode.tilstand(hendelse, Avsluttet) {
                     hendelse.info("OK fra Oppdragssystemet")
@@ -2165,7 +2165,7 @@ internal class Vedtaksperiode private constructor(
             hendelse: IAktivitetslogg
         ) {
             if (vedtaksperiode.utbetalinger.harAvsluttede()) return hendelse.info("Gjenopptar ikke revurdering feilet fordi perioden har tidligere avsluttede utbetalinger. Må behandles manuelt vha annullering.")
-            hendelse.error("Forkaster avvist revurdering ettersom vedtaksperioden ikke har tidligere utbetalte utbetalinger.")
+            hendelse.funksjonellFeil("Forkaster avvist revurdering ettersom vedtaksperioden ikke har tidligere utbetalte utbetalinger.")
             vedtaksperiode.forkast(hendelse, SENERE_INCLUSIVE(vedtaksperiode))
         }
 
@@ -2335,7 +2335,7 @@ internal class Vedtaksperiode private constructor(
             forkastede
                 .filter { it.periode.overlapperMed(hendelse.periode()) }
                 .forEach {
-                    hendelse.error("Søknad overlapper med forkastet vedtaksperiode")
+                    hendelse.funksjonellFeil("Søknad overlapper med forkastet vedtaksperiode")
                     hendelse.info("Søknad overlapper med forkastet vedtaksperiode ${it.id}, hendelse periode: ${hendelse.periode()}, vedtaksperiode periode: ${it.periode}")
                 }
         }
@@ -2345,7 +2345,7 @@ internal class Vedtaksperiode private constructor(
                 .filter { it.sykdomstidslinje.erRettFør(hendelse.sykdomstidslinje()) }
                 .forEach {
                     if (Toggle.IkkeForlengInfotrygdperioder.enabled) {
-                        hendelse.error("Søknad forlenger en forkastet periode")
+                        hendelse.funksjonellFeil("Søknad forlenger en forkastet periode")
                         hendelse.info("Søknad forlenger forkastet vedtaksperiode ${it.id}, hendelse periode: ${hendelse.periode()}, vedtaksperiode periode: ${it.periode}")
                     } else {
                         hendelse.info("Søknad forlenger forkastet vedtaksperiode")

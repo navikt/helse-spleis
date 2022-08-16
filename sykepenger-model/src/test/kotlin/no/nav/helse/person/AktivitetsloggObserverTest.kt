@@ -26,7 +26,7 @@ internal class AktivitetsloggObserverTest {
 
         aktivitetslogg.info("Dette er en info-melding")
         aktivitetslogg.warn("Dette er et varsel")
-        aktivitetslogg.error("Dette er en error")
+        aktivitetslogg.funksjonellFeil("Dette er en error")
         try {
             aktivitetslogg.severe("Dette er en severe")
         } catch (_: Exception) {}

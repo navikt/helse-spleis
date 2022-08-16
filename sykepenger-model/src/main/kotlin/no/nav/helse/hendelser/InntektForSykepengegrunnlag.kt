@@ -20,9 +20,9 @@ class InntektForSykepengegrunnlag(
     internal fun valider(
         aktivitetslogg: IAktivitetslogg,
     ): IAktivitetslogg {
-        if (inntekter.antallMåneder() > 3L) aktivitetslogg.error("Forventer maks 3 inntektsmåneder")
+        if (inntekter.antallMåneder() > 3L) aktivitetslogg.funksjonellFeil("Forventer maks 3 inntektsmåneder")
         if (finnerFrilansinntektDeSiste3Månedene())
-            aktivitetslogg.error("Fant frilanserinntekt på en arbeidsgiver de siste 3 månedene")
+            aktivitetslogg.funksjonellFeil("Fant frilanserinntekt på en arbeidsgiver de siste 3 månedene")
         return aktivitetslogg
     }
 

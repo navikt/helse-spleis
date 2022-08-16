@@ -48,7 +48,7 @@ class Sykmelding(
     }
 
     internal fun validerAtSykmeldingIkkeErForGammel() {
-        if (periode.endInclusive < mottatt.toLocalDate().minusMonths(6)) error(ERRORTEKST_FOR_GAMMEL)
+        if (periode.endInclusive < mottatt.toLocalDate().minusMonths(6)) funksjonellFeil(ERRORTEKST_FOR_GAMMEL)
     }
 
     override fun sykdomstidslinje() = sykdomstidslinje

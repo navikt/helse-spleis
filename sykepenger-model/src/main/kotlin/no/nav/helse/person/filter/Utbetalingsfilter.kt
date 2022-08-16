@@ -29,14 +29,14 @@ internal class Utbetalingsfilter private constructor(
     }
 
     private fun flereArbeidsgivere(aktivitetslogg: IAktivitetslogg) {
-        if (utbetalingstidslinjerHarBrukerutbetaling) aktivitetslogg.error("Utbetalingstidslinje inneholder brukerutbetaling")
-        else if (utbetaling.harBrukerutbetaling()) aktivitetslogg.error("Utbetaling inneholder brukerutbetaling (men ikke for den aktuelle vedtaksperioden)")
+        if (utbetalingstidslinjerHarBrukerutbetaling) aktivitetslogg.funksjonellFeil("Utbetalingstidslinje inneholder brukerutbetaling")
+        else if (utbetaling.harBrukerutbetaling()) aktivitetslogg.funksjonellFeil("Utbetaling inneholder brukerutbetaling (men ikke for den aktuelle vedtaksperioden)")
     }
 
     private fun inntektsmeldingForGammel() = inntektsmeldingtidsstempel < LocalDateTime.now().minusHours(24)
 
     private fun enArbeidsgiver(aktivitetslogg: IAktivitetslogg) {
-        if (utbetalingstidslinjerHarBrukerutbetaling && inntektsmeldingForGammel()) aktivitetslogg.error("Ikke kandidat for brukerutbetaling ettersom inntektsmelding ble mottatt for mer enn 24 timer siden")
+        if (utbetalingstidslinjerHarBrukerutbetaling && inntektsmeldingForGammel()) aktivitetslogg.funksjonellFeil("Ikke kandidat for brukerutbetaling ettersom inntektsmelding ble mottatt for mer enn 24 timer siden")
     }
 
     class Builder {

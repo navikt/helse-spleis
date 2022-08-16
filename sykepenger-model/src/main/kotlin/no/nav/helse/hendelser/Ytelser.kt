@@ -44,11 +44,11 @@ class Ytelser(
     internal fun valider(periode: Periode, skjæringstidspunkt: LocalDate): Boolean {
         arbeidsavklaringspenger.valider(this, skjæringstidspunkt)
         dagpenger.valider(this, skjæringstidspunkt)
-        if (foreldrepermisjon.overlapper(this, periode)) error("Det er utbetalt foreldrepenger i samme periode.")
-        if (pleiepenger.overlapper(this, periode)) error("Det er utbetalt pleiepenger i samme periode.")
-        if (omsorgspenger.overlapper(this, periode)) error("Det er utbetalt omsorgspenger i samme periode.")
-        if (opplæringspenger.overlapper(this, periode)) error("Det er utbetalt opplæringspenger i samme periode.")
-        if (institusjonsopphold.overlapper(this, periode)) error("Det er institusjonsopphold i perioden. Vurder retten til sykepenger.")
+        if (foreldrepermisjon.overlapper(this, periode)) funksjonellFeil("Det er utbetalt foreldrepenger i samme periode.")
+        if (pleiepenger.overlapper(this, periode)) funksjonellFeil("Det er utbetalt pleiepenger i samme periode.")
+        if (omsorgspenger.overlapper(this, periode)) funksjonellFeil("Det er utbetalt omsorgspenger i samme periode.")
+        if (opplæringspenger.overlapper(this, periode)) funksjonellFeil("Det er utbetalt opplæringspenger i samme periode.")
+        if (institusjonsopphold.overlapper(this, periode)) funksjonellFeil("Det er institusjonsopphold i perioden. Vurder retten til sykepenger.")
 
         return !hasErrorsOrWorse()
     }

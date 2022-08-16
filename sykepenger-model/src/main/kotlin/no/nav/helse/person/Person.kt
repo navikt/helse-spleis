@@ -286,7 +286,7 @@ class Person private constructor(
             påminnelse.kontekst(this)
             if (finnArbeidsgiver(påminnelse).håndter(påminnelse)) return håndterGjenoppta(påminnelse)
         } catch (err: Aktivitetslogg.AktivitetException) {
-            påminnelse.error("Fikk påminnelse uten at vi fant arbeidsgiver eller vedtaksperiode")
+            påminnelse.funksjonellFeil("Fikk påminnelse uten at vi fant arbeidsgiver eller vedtaksperiode")
         }
         observers.forEach { påminnelse.vedtaksperiodeIkkeFunnet(it) }
         håndterGjenoppta(påminnelse)
@@ -320,7 +320,7 @@ class Person private constructor(
                 finnArbeidsgiver(hendelse).håndter(hendelse)
             }
         } else {
-            hendelse.error("Kan ikke overstyre inntekt uten at det foreligger et vilkårsgrunnlag")
+            hendelse.funksjonellFeil("Kan ikke overstyre inntekt uten at det foreligger et vilkårsgrunnlag")
         }
 
         if (hendelse.hasErrorsOrWorse()) {
@@ -356,14 +356,14 @@ class Person private constructor(
     fun håndter(hendelse: AnnullerUtbetaling) {
         hendelse.kontekst(this)
         arbeidsgivere.finn(hendelse.organisasjonsnummer())?.håndter(hendelse)
-            ?: hendelse.error("Finner ikke arbeidsgiver")
+            ?: hendelse.funksjonellFeil("Finner ikke arbeidsgiver")
         håndterGjenoppta(hendelse)
     }
 
     fun håndter(hendelse: Grunnbeløpsregulering) {
         hendelse.kontekst(this)
         arbeidsgivere.finn(hendelse.organisasjonsnummer())?.håndter(arbeidsgivere, hendelse, vilkårsgrunnlagHistorikk)
-            ?: hendelse.error("Finner ikke arbeidsgiver")
+            ?: hendelse.funksjonellFeil("Finner ikke arbeidsgiver")
         håndterGjenoppta(hendelse)
     }
 
@@ -756,7 +756,7 @@ class Person private constructor(
         Arbeidsgiver.ingenUkjenteArbeidsgivere(arbeidsgivere, vedtaksperiode, infotrygdhistorikk, skjæringstidspunkt)
 
     internal fun invaliderAllePerioder(hendelse: IAktivitetslogg, feilmelding: String?) {
-        feilmelding?.also(hendelse::error)
+        feilmelding?.also(hendelse::funksjonellFeil)
         søppelbøtte(hendelse, ALLE)
     }
 
@@ -935,8 +935,8 @@ class Person private constructor(
                 vilkårsgrunnlagHistorikk.lagre(grunnlagselement)
             }
 
-            is VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag -> hendelse.error("Vilkårsgrunnlaget ligger i infotrygd. Det er ikke støttet i revurdering eller overstyring.")
-            else -> hendelse.error("Fant ikke vilkårsgrunnlag. Kan ikke vilkårsprøve på nytt etter ny informasjon fra saksbehandler.")
+            is VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag -> hendelse.funksjonellFeil("Vilkårsgrunnlaget ligger i infotrygd. Det er ikke støttet i revurdering eller overstyring.")
+            else -> hendelse.funksjonellFeil("Fant ikke vilkårsgrunnlag. Kan ikke vilkårsprøve på nytt etter ny informasjon fra saksbehandler.")
         }
     }
 

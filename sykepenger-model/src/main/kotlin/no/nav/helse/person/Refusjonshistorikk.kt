@@ -73,10 +73,10 @@ internal class Refusjonshistorikk {
 
         internal fun validerBrukerutbetaling(aktivitetslogg: IAktivitetslogg, inntekt: Inntekt) {
             when {
-                (beløp == null || beløp <= Inntekt.INGEN) -> aktivitetslogg.error("Arbeidsgiver forskutterer ikke (mistenker brukerutbetaling ved flere arbeidsgivere)")
-                beløp != inntekt -> aktivitetslogg.error("Inntektsmelding inneholder beregnet inntekt og refusjon som avviker med hverandre (mistenker brukerutbetaling ved flere arbeidsgivere)")
-                sisteRefusjonsdag != null -> aktivitetslogg.error("Arbeidsgiver opphører refusjon (mistenker brukerutbetaling ved flere arbeidsgivere)")
-                endringerIRefusjon.isNotEmpty() -> aktivitetslogg.error("Arbeidsgiver har endringer i refusjon (mistenker brukerutbetaling ved flere arbeidsgivere)")
+                (beløp == null || beløp <= Inntekt.INGEN) -> aktivitetslogg.funksjonellFeil("Arbeidsgiver forskutterer ikke (mistenker brukerutbetaling ved flere arbeidsgivere)")
+                beløp != inntekt -> aktivitetslogg.funksjonellFeil("Inntektsmelding inneholder beregnet inntekt og refusjon som avviker med hverandre (mistenker brukerutbetaling ved flere arbeidsgivere)")
+                sisteRefusjonsdag != null -> aktivitetslogg.funksjonellFeil("Arbeidsgiver opphører refusjon (mistenker brukerutbetaling ved flere arbeidsgivere)")
+                endringerIRefusjon.isNotEmpty() -> aktivitetslogg.funksjonellFeil("Arbeidsgiver har endringer i refusjon (mistenker brukerutbetaling ved flere arbeidsgivere)")
             }
         }
 

@@ -7,7 +7,7 @@ import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.utbetalingstidslinje.Alder.Companion.alder
 
 internal class ErrorsTilWarnings(private val other: IAktivitetslogg) : IAktivitetslogg by other {
-    override fun error(melding: String) = warn(melding)
+    override fun funksjonellFeil(melding: String) = warn(melding)
 
     internal companion object {
         internal fun wrap(hendelse: PersonHendelse, block: () -> Unit) = hendelse.wrap(::ErrorsTilWarnings, block)
@@ -72,7 +72,7 @@ abstract class PersonHendelse protected constructor(
     override fun warn(melding: String) = aktivitetslogg.warn(melding)
     override fun behov(type: Aktivitetslogg.Aktivitet.Behov.Behovtype, melding: String, detaljer: Map<String, Any?>) =
         aktivitetslogg.behov(type, melding, detaljer)
-    override fun error(melding: String) = aktivitetslogg.error(melding)
+    override fun funksjonellFeil(melding: String) = aktivitetslogg.funksjonellFeil(melding)
     override fun severe(melding: String, vararg params: Any?) = aktivitetslogg.severe(melding, *params)
     override fun hasActivities() = aktivitetslogg.hasActivities()
     override fun hasWarningsOrWorse() = aktivitetslogg.hasWarningsOrWorse()

@@ -81,7 +81,7 @@ class Søknad(
     }
 
     internal fun forUng(alder: Alder) = alder.forUngForÅSøke(sendtTilNAVEllerArbeidsgiver.toLocalDate()).also {
-        if (it) error(ERRORTEKST_PERSON_UNDER_18_ÅR)
+        if (it) funksjonellFeil(ERRORTEKST_PERSON_UNDER_18_ÅR)
     }
     private fun avskjæringsdato(): LocalDate = when (korrigerer) {
         null -> sendtTilNAVEllerArbeidsgiver.toLocalDate().minusMonths(3).withDayOfMonth(1)
@@ -163,7 +163,7 @@ class Søknad(
             private val sykdomsgrad = søknadsgrad ?: sykmeldingsgrad
 
             override fun valider(søknad: Søknad) {
-                if (søknadsgrad != null && søknadsgrad > sykmeldingsgrad) søknad.error("Bruker har oppgitt at de har jobbet mindre enn sykmelding tilsier")
+                if (søknadsgrad != null && søknadsgrad > sykmeldingsgrad) søknad.funksjonellFeil("Bruker har oppgitt at de har jobbet mindre enn sykmelding tilsier")
             }
 
             override fun sykdomstidslinje(sykdomsperiode: Periode, avskjæringsdato: LocalDate, kilde: Hendelseskilde) =
@@ -180,7 +180,7 @@ class Søknad(
                 Sykdomstidslinje.problemdager(periode.start, periode.endInclusive, kilde, "Papirdager ikke støttet")
 
             override fun valider(søknad: Søknad) =
-                søknad.error("Søknaden inneholder en Papirsykmeldingsperiode")
+                søknad.funksjonellFeil("Søknaden inneholder en Papirsykmeldingsperiode")
         }
 
         class Utdanning(fom: LocalDate, tom: LocalDate) : Søknadsperiode(fom, tom) {
@@ -250,7 +250,7 @@ class Søknad(
             if (type == "ANNET") {
                 aktivitetslogg.warn("Det er oppgitt annen inntektskilde i søknaden. Vurder inntekt.")
             } else if (type != "ANDRE_ARBEIDSFORHOLD") {
-                aktivitetslogg.error("Søknaden inneholder andre inntektskilder enn ANDRE_ARBEIDSFORHOLD")
+                aktivitetslogg.funksjonellFeil("Søknaden inneholder andre inntektskilder enn ANDRE_ARBEIDSFORHOLD")
             }
         }
 

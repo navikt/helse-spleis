@@ -214,7 +214,7 @@ class InfotrygdhistorikkElement private constructor(
 
     private fun validerStatslønn(aktivitetslogg: IAktivitetslogg, periodetype: Periodetype) {
         if (harStatslønn && periodetype in arrayOf(Periodetype.OVERGANG_FRA_IT, Periodetype.INFOTRYGDFORLENGELSE)) {
-            aktivitetslogg.error("Det er lagt inn statslønn i Infotrygd, undersøk at utbetalingen blir riktig.")
+            aktivitetslogg.funksjonellFeil("Det er lagt inn statslønn i Infotrygd, undersøk at utbetalingen blir riktig.")
         }
     }
 
@@ -230,7 +230,7 @@ class InfotrygdhistorikkElement private constructor(
         perioder.validerInntektForPerioder(aktivitetslogg, inntekter, nødnummer)
 
         aktivitetslogg.info("Sjekker arbeidskategorikoder")
-        if (!erNormalArbeidstaker(skjæringstidspunkt)) aktivitetslogg.error("Personen er ikke registrert som normal arbeidstaker i Infotrygd")
+        if (!erNormalArbeidstaker(skjæringstidspunkt)) aktivitetslogg.funksjonellFeil("Personen er ikke registrert som normal arbeidstaker i Infotrygd")
 
         return !aktivitetslogg.hasErrorsOrWorse()
     }

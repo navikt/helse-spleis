@@ -11,7 +11,7 @@ import no.nav.helse.økonomi.Økonomi
 internal sealed class UtbetalingstidslinjeBuilderException(private val kort: String, message: String) : RuntimeException(message) {
     internal fun logg(aktivitetslogg: IAktivitetslogg) {
         aktivitetslogg.info("Feilmelding: $message")
-        aktivitetslogg.error("Feil ved utbetalingstidslinjebygging: $kort")
+        aktivitetslogg.funksjonellFeil("Feil ved utbetalingstidslinjebygging: $kort")
     }
 
     internal class UforventetDagException(dag: Dag, melding: String) : UtbetalingstidslinjeBuilderException(

@@ -34,11 +34,11 @@ class Utbetalingsgodkjenning(
     internal fun valider(): IAktivitetslogg {
         when {
             !utbetalingGodkjent && !automatiskBehandling -> {
-                error("Utbetaling markert som ikke godkjent av saksbehandler")
+                funksjonellFeil("Utbetaling markert som ikke godkjent av saksbehandler")
                 info("Utbetaling markert som ikke godkjent av saksbehandler $saksbehandler $godkjenttidspunkt")
             }
             !utbetalingGodkjent && automatiskBehandling -> {
-                error("Utbetaling markert som ikke godkjent automatisk")
+                funksjonellFeil("Utbetaling markert som ikke godkjent automatisk")
                 info("Utbetaling markert som ikke godkjent automatisk $godkjenttidspunkt")
             }
             utbetalingGodkjent && !automatiskBehandling ->

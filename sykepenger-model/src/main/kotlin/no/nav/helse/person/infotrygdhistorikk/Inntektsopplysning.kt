@@ -30,8 +30,8 @@ class Inntektsopplysning private constructor(
 
     internal fun valider(aktivitetslogg: IAktivitetslogg, skjæringstidspunkt: LocalDate, nødnummer: Nødnummer): Boolean {
         if (!erRelevant(skjæringstidspunkt)) return true
-        if (orgnummer.isBlank()) aktivitetslogg.error("Organisasjonsnummer for inntektsopplysning fra Infotrygd mangler")
-        else if (orgnummer in nødnummer) aktivitetslogg.error("Det er registrert bruk av på nødnummer")
+        if (orgnummer.isBlank()) aktivitetslogg.funksjonellFeil("Organisasjonsnummer for inntektsopplysning fra Infotrygd mangler")
+        else if (orgnummer in nødnummer) aktivitetslogg.funksjonellFeil("Det er registrert bruk av på nødnummer")
         return !aktivitetslogg.hasErrorsOrWorse()
     }
 
@@ -100,7 +100,7 @@ class Inntektsopplysning private constructor(
         ) {
             val relevanteInntektsopplysninger = filter { it.erRelevant(skjæringstidspunkt) }
             if (relevanteInntektsopplysninger.distinctBy { it.orgnummer }.size > 1) {
-                return aktivitetslogg.error("Støtter ikke overgang fra infotrygd for flere arbeidsgivere")
+                return aktivitetslogg.funksjonellFeil("Støtter ikke overgang fra infotrygd for flere arbeidsgivere")
             }
         }
 

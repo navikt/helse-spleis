@@ -102,7 +102,7 @@ internal class Sykepengegrunnlag(
         manglerInntekt.forEach {
             aktivitetslogg.info("Mangler inntekt for $it på skjæringstidspunkt $skjæringstidspunkt")
         }
-        aktivitetslogg.error("Minst en arbeidsgiver inngår ikke i sykepengegrunnlaget")
+        aktivitetslogg.funksjonellFeil("Minst en arbeidsgiver inngår ikke i sykepengegrunnlaget")
     }
 
     internal fun justerGrunnbeløp() =

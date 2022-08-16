@@ -17,7 +17,7 @@ internal class ErrorsTilWarningsTest {
     @Test
     fun `error blir error om det logges på kilden`() {
         val errorsTilWarnings = ErrorsTilWarnings(aktivitetslogg)
-        aktivitetslogg.error("Det er en feil")
+        aktivitetslogg.funksjonellFeil("Det er en feil")
         assertTrue(aktivitetslogg.hasErrorsOrWorse())
         assertTrue(errorsTilWarnings.hasErrorsOrWorse())
     }
@@ -25,7 +25,7 @@ internal class ErrorsTilWarningsTest {
     @Test
     fun `error blir warning om det logges på wrapperen`() {
         val errorsTilWarnings = ErrorsTilWarnings(aktivitetslogg)
-        errorsTilWarnings.error("Det er en feil med wrapperen")
+        errorsTilWarnings.funksjonellFeil("Det er en feil med wrapperen")
         assertTrue(aktivitetslogg.hasWarningsOrWorse())
         assertFalse(aktivitetslogg.hasErrorsOrWorse())
         assertTrue(errorsTilWarnings.hasWarningsOrWorse())

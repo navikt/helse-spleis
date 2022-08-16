@@ -113,7 +113,7 @@ internal class AktivitetsloggTest {
     @Test
     fun `error oppdaget`() {
         val melding = "Error"
-        aktivitetslogg.error(melding)
+        aktivitetslogg.funksjonellFeil(melding)
         assertTrue(aktivitetslogg.hasErrorsOrWorse())
         assertTrue(aktivitetslogg.toString().contains(melding))
         assertError(melding)
@@ -137,7 +137,7 @@ internal class AktivitetsloggTest {
             assertInfo(it, aktivitetslogg)
         }
         "error message".also {
-            hendelse.error(it)
+            hendelse.funksjonellFeil(it)
             assertError(it, hendelse.logg)
             assertError(it, aktivitetslogg)
         }
@@ -157,7 +157,7 @@ internal class AktivitetsloggTest {
             assertInfo(it, aktivitetslogg)
         }
         "error message".also {
-            hendelse.error(it)
+            hendelse.funksjonellFeil(it)
             assertError(it, hendelse.logg)
             assertError(it, aktivitetslogg)
             assertError("Hendelse", aktivitetslogg)
@@ -177,7 +177,7 @@ internal class AktivitetsloggTest {
         hendelse1.kontekst(vedtaksperiode1)
         hendelse1.info("info message")
         hendelse1.warn("warn message")
-        hendelse1.error("error message")
+        hendelse1.funksjonellFeil("error message")
         val hendelse2 = TestHendelse("Hendelse2", aktivitetslogg.barn())
         hendelse2.kontekst(person)
         val arbeidsgiver2 = TestKontekst("Arbeidsgiver", "Arbeidsgiver 2")
@@ -185,7 +185,7 @@ internal class AktivitetsloggTest {
         val vedtaksperiode2 = TestKontekst("Vedtaksperiode", "Vedtaksperiode 2")
         hendelse2.kontekst(vedtaksperiode2)
         hendelse2.info("info message")
-        hendelse2.error("error message")
+        hendelse2.funksjonellFeil("error message")
         assertEquals(5, aktivitetslogg.aktivitetsteller())
         assertEquals(3, aktivitetslogg.logg(vedtaksperiode1).aktivitetsteller())
         assertEquals(2, aktivitetslogg.logg(arbeidsgiver2).aktivitetsteller())

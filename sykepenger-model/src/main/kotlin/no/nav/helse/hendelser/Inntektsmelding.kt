@@ -126,11 +126,11 @@ class Inntektsmelding(
         refusjon.valider(this, periode, beregnetInntekt)
         if (arbeidsgiverperioder.isEmpty()) info("Inntektsmeldingen mangler arbeidsgiverperiode. Vurder om vilkårene for sykepenger er oppfylt, og om det skal være arbeidsgiverperiode")
         begrunnelseForReduksjonEllerIkkeUtbetalt?.takeIf(String::isNotBlank)?.also {
-            error(
+            funksjonellFeil(
                 "Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden på grunn av: %s".format(it)
             )
         }
-        if (harOpphørAvNaturalytelser) error("Brukeren har opphold i naturalytelser")
+        if (harOpphørAvNaturalytelser) funksjonellFeil("Brukeren har opphold i naturalytelser")
         return this
     }
 
@@ -225,7 +225,7 @@ class Inntektsmelding(
             beregnetInntekt: Inntekt
         ): IAktivitetslogg {
             when {
-                beregnetInntekt <= Inntekt.INGEN -> aktivitetslogg.error("Inntektsmelding inneholder ikke beregnet inntekt")
+                beregnetInntekt <= Inntekt.INGEN -> aktivitetslogg.funksjonellFeil("Inntektsmelding inneholder ikke beregnet inntekt")
                 (beløp == null || beløp <= Inntekt.INGEN) -> aktivitetslogg.info("Arbeidsgiver forskutterer ikke (krever ikke refusjon)")
                 beløp != beregnetInntekt -> aktivitetslogg.info("Inntektsmelding inneholder beregnet inntekt og refusjon som avviker med hverandre")
                 opphørerRefusjon(periode) -> aktivitetslogg.info("Arbeidsgiver opphører refusjon i perioden")
