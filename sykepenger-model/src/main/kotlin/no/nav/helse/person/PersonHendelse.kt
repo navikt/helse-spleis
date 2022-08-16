@@ -6,11 +6,11 @@ import no.nav.helse.Personidentifikator
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.utbetalingstidslinje.Alder.Companion.alder
 
-internal class ErrorsTilWarnings(private val other: IAktivitetslogg) : IAktivitetslogg by other {
+internal class FunksjonelleFeilTilVarsler(private val other: IAktivitetslogg) : IAktivitetslogg by other {
     override fun funksjonellFeil(melding: String) = varsel(melding)
 
     internal companion object {
-        internal fun wrap(hendelse: PersonHendelse, block: () -> Unit) = hendelse.wrap(::ErrorsTilWarnings, block)
+        internal fun wrap(hendelse: PersonHendelse, block: () -> Unit) = hendelse.wrap(::FunksjonelleFeilTilVarsler, block)
     }
 }
 

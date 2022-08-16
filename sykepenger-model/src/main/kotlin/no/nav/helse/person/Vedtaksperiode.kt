@@ -1152,7 +1152,7 @@ internal class Vedtaksperiode private constructor(
                     ytelser.info("Trenger å utføre vilkårsprøving før vi kan beregne utbetaling for revurderingen.")
                 }
 
-            ErrorsTilWarnings.wrap(ytelser) {
+            FunksjonelleFeilTilVarsler.wrap(ytelser) {
                 vedtaksperiode.validerYtelserForSkjæringstidspunkt(ytelser)
                 person.valider(ytelser, vilkårsgrunnlag, vedtaksperiode.skjæringstidspunkt, true)
                 person.fyllUtPeriodeMedForventedeDager(ytelser, vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt)
@@ -1199,12 +1199,12 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {
-            ErrorsTilWarnings.wrap(vilkårsgrunnlag) { vedtaksperiode.håndterVilkårsgrunnlag(vilkårsgrunnlag, AvventerHistorikkRevurdering) }
+            FunksjonelleFeilTilVarsler.wrap(vilkårsgrunnlag) { vedtaksperiode.håndterVilkårsgrunnlag(vilkårsgrunnlag, AvventerHistorikkRevurdering) }
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {
             if (!vedtaksperiode.kanRevurdereInntektForFlereArbeidsgivere(hendelse)) return
-            ErrorsTilWarnings.wrap(hendelse) {
+            FunksjonelleFeilTilVarsler.wrap(hendelse) {
                 vedtaksperiode.person.nyInntekt(hendelse)
                 vedtaksperiode.person.vilkårsprøvEtterNyInformasjonFraSaksbehandler(
                     hendelse,
@@ -1574,7 +1574,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, simulering: Simulering) {
-            ErrorsTilWarnings.wrap(simulering) {
+            FunksjonelleFeilTilVarsler.wrap(simulering) {
                 if (vedtaksperiode.utbetalinger.valider(simulering).harVarslerEllerVerre()) {
                     simulering.varsel("Simulering av revurdert utbetaling feilet. Utbetalingen må annulleres")
                 }
