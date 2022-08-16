@@ -2139,6 +2139,16 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
 
+        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
+            if (Toggle.RevurderKorrigertSøknad.enabled){
+                vedtaksperiode.låsOpp()
+                vedtaksperiode.oppdaterHistorikk(søknad)
+                vedtaksperiode.lås()
+                vedtaksperiode.person.startRevurdering(vedtaksperiode, søknad)
+            } else {
+                super.håndter(vedtaksperiode, søknad)
+            }
+        }
     }
 
     internal object RevurderingFeilet : Vedtaksperiodetilstand {
