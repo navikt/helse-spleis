@@ -10,14 +10,15 @@ import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.IdInnhenter
-import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET
+import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
@@ -618,22 +619,13 @@ internal class NyTilstandsflytFlereArbeidsgivereTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
         håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
-        håndterSøknad(Sykdom(arbeidsgiverperiode.start, arbeidsgiverperiode.endInclusive, 100.prosent),
-            Søknad.Søknadsperiode.Ferie(17.januar, 21.januar), orgnummer = a2)
+        håndterSøknad(Sykdom(arbeidsgiverperiode.start, arbeidsgiverperiode.endInclusive, 100.prosent), Ferie(17.januar, 21.januar), orgnummer = a2)
 
         håndterInntektsmelding(listOf(arbeidsgiverperiode), orgnummer = a1)
         håndterInntektsmelding(listOf(arbeidsgiverperiode), orgnummer = a2)
 
-        assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET_UTEN_UTBETALING, orgnummer = a2)
-
-        assertForventetFeil(
-            forklaring = """
-                Ferien for a2 henger igjen i sykmeldingsperioder og blokkerer a1 for å gå videre. 
-                Slettes basert på søknad.periode().endInclusive som sjekker mot sykdomstidslinjen som slutter 16.januar, ikke 21.januar
-            """,
-            nå = { assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1) },
-            ønsket = { assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1) }
-        )
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a2)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
     }
 
     private fun utbetalPeriodeEtterVilkårsprøving(vedtaksperiode: IdInnhenter, orgnummer: String) {

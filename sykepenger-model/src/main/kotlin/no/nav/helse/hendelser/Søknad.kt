@@ -3,11 +3,13 @@ package no.nav.helse.hendelser
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Companion.søknadsperiode
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.Person
 import no.nav.helse.person.Personopplysninger
+import no.nav.helse.person.Sykmeldingsperioder
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
@@ -104,6 +106,12 @@ class Søknad(
             periode = periode,
             jurist = jurist
         )
+    }
+
+    internal fun slettSykmeldingsperioderSomDekkes(sykmeldingsperioder: Sykmeldingsperioder, person: Person) {
+        val sisteDag = søknadsperiode(perioder)!!.endInclusive
+        sykmeldingsperioder.fjern(sisteDag)
+        person.slettUtgåtteSykmeldingsperioder(sisteDag)
     }
 
     class Merknad(private val type: String) {

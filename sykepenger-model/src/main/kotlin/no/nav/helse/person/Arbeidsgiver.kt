@@ -507,8 +507,7 @@ internal class Arbeidsgiver private constructor(
 
     internal fun håndter(søknad: Søknad) {
         søknad.kontekst(this)
-        sykmeldingsperioder.fjern(søknad.periode().endInclusive)
-        person.slettUtgåtteSykmeldingsperioder(søknad.periode().endInclusive)
+        søknad.slettSykmeldingsperioderSomDekkes(sykmeldingsperioder, person)
         opprettVedtaksperiodeOgHåndter(søknad)
     }
 
