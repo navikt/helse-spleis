@@ -39,8 +39,8 @@ internal class MaksimumUtbetalingFilterHendelseTest {
         val tidslinje = tidslinjeOf(12.NAV(3500.0), 14.NAV(1200.0))
         tidslinje.betal()
         assertEquals(21610.0 + 12000.0, tidslinje.inspektør.totalUtbetaling())
-        assertTrue(aktivitetslogg.hasActivities())
-        assertFalse(aktivitetslogg.hasWarningsOrWorse())
+        assertTrue(aktivitetslogg.harAktiviteter())
+        assertFalse(aktivitetslogg.harVarslerEllerVerre())
     }
 
     @Test
@@ -55,8 +55,8 @@ internal class MaksimumUtbetalingFilterHendelseTest {
         val tidslinje = tidslinjeOf(12.NAV(1200.0, 50.0))
         tidslinje.betal()
         assertEquals(6000.0, tidslinje.inspektør.totalUtbetaling())
-        assertTrue(aktivitetslogg.hasActivities())
-        assertFalse(aktivitetslogg.hasWarningsOrWorse())
+        assertTrue(aktivitetslogg.harAktiviteter())
+        assertFalse(aktivitetslogg.harVarslerEllerVerre())
     }
 
     private fun Utbetalingstidslinje.betal() {

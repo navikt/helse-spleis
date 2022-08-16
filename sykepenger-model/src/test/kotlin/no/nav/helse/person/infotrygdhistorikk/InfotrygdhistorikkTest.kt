@@ -295,13 +295,13 @@ internal class InfotrygdhistorikkTest {
     @Test
     fun `tom historikk validerer`() {
         assertTrue(historikk.valider(aktivitetslogg, Periodetype.FØRSTEGANGSBEHANDLING, 1.januar til 31.januar, 1.januar, "ag1"))
-        assertFalse(aktivitetslogg.hasErrorsOrWorse())
+        assertFalse(aktivitetslogg.harFunksjonelleFeilEllerVerre())
     }
 
     @Test
     fun `overlapper ikke med tom historikk`() {
         assertTrue(historikk.validerOverlappende(aktivitetslogg, 1.januar til 31.januar, 1.januar))
-        assertFalse(aktivitetslogg.hasErrorsOrWorse())
+        assertFalse(aktivitetslogg.harFunksjonelleFeilEllerVerre())
     }
 
     @Test
@@ -312,19 +312,19 @@ internal class InfotrygdhistorikkTest {
         ))
         aktivitetslogg.barn().also {
             assertFalse(historikk.validerOverlappende(it, 10.januar til 31.januar, 10.januar))
-            assertTrue(it.hasErrorsOrWorse())
+            assertTrue(it.harFunksjonelleFeilEllerVerre())
         }
         aktivitetslogg.barn().also {
             assertFalse(historikk.validerOverlappende(it, 1.januar til 5.januar, 1.januar))
-            assertTrue(it.hasErrorsOrWorse())
+            assertTrue(it.harFunksjonelleFeilEllerVerre())
         }
         aktivitetslogg.barn().also {
             assertTrue(historikk.validerOverlappende(it, 1.januar til 4.januar, 1.januar))
-            assertFalse(it.hasErrorsOrWorse())
+            assertFalse(it.harFunksjonelleFeilEllerVerre())
         }
         aktivitetslogg.barn().also {
             assertTrue(historikk.validerOverlappende(it, 11.januar til 31.januar, 11.januar))
-            assertFalse(it.hasErrorsOrWorse())
+            assertFalse(it.harFunksjonelleFeilEllerVerre())
         }
     }
 
@@ -347,7 +347,7 @@ internal class InfotrygdhistorikkTest {
     fun `hensyntar ikke statslønn i overlapp-validering`() {
         historikk.oppdaterHistorikk(historikkelement(harStatslønn = true))
         assertTrue(historikk.validerOverlappende(aktivitetslogg, 1.januar til 31.januar, 1.januar))
-        assertFalse(aktivitetslogg.hasWarningsOrWorse())
+        assertFalse(aktivitetslogg.harVarslerEllerVerre())
     }
 
     @Test
@@ -355,19 +355,19 @@ internal class InfotrygdhistorikkTest {
         historikk.oppdaterHistorikk(historikkelement(harStatslønn = true))
         aktivitetslogg.barn().also {
             assertTrue(historikk.valider(it, Periodetype.FØRSTEGANGSBEHANDLING, 1.januar til 31.januar, 1.januar, "ag1"))
-            assertFalse(it.hasWarningsOrWorse())
+            assertFalse(it.harVarslerEllerVerre())
         }
         aktivitetslogg.barn().also {
             assertTrue(historikk.valider(it, Periodetype.FORLENGELSE, 1.januar til 31.januar, 1.januar, "ag1"))
-            assertFalse(it.hasWarningsOrWorse())
+            assertFalse(it.harVarslerEllerVerre())
         }
         aktivitetslogg.barn().also {
             assertFalse(historikk.valider(it, Periodetype.INFOTRYGDFORLENGELSE, 1.januar til 31.januar, 1.januar, "ag1"))
-            assertTrue(it.hasWarningsOrWorse())
+            assertTrue(it.harVarslerEllerVerre())
         }
         aktivitetslogg.barn().also {
             assertFalse(historikk.valider(it, Periodetype.OVERGANG_FRA_IT, 1.januar til 31.januar, 1.januar, "ag1"))
-            assertTrue(it.hasErrorsOrWorse())
+            assertTrue(it.harFunksjonelleFeilEllerVerre())
         }
     }
 
@@ -379,15 +379,15 @@ internal class InfotrygdhistorikkTest {
         ), inntekter = listOf(Inntektsopplysning("ag1", 1.februar, 1000.daglig, true))))
         aktivitetslogg.barn().also {
             assertTrue(historikk.valider(it, Periodetype.FØRSTEGANGSBEHANDLING, 1.januar til 31.januar, 1.januar, "ag1"))
-            assertTrue(it.hasWarningsOrWorse())
+            assertTrue(it.harVarslerEllerVerre())
         }
         aktivitetslogg.barn().also {
             assertTrue(historikk.valider(it, Periodetype.FØRSTEGANGSBEHANDLING, 20.februar til 28.februar, 20.februar, "ag1"))
-            assertFalse(it.hasWarningsOrWorse())
+            assertFalse(it.harVarslerEllerVerre())
         }
         aktivitetslogg.barn().also {
             assertTrue(historikk.valider(it, Periodetype.FØRSTEGANGSBEHANDLING, 1.april til 5.april, 1.april, "ag1"))
-            assertFalse(it.hasWarningsOrWorse())
+            assertFalse(it.harVarslerEllerVerre())
         }
     }
 

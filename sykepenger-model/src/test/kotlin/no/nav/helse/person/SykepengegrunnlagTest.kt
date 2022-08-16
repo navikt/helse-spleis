@@ -52,7 +52,7 @@ internal class SykepengegrunnlagTest {
         var aktivitetslogg = Aktivitetslogg()
         var validert = sykepengegrunnlag.valider(aktivitetslogg)
         assertTrue(validert)
-        assertFalse(aktivitetslogg.hasWarningsOrWorse())
+        assertFalse(aktivitetslogg.harVarslerEllerVerre())
         assertTrue(sykepengegrunnlag.inspektør.oppfyllerMinsteinntektskrav)
         assertEquals(halvG, sykepengegrunnlag.inspektør.minsteinntekt)
         assertTrue(observer.`§ 8-3 ledd 2 punktum 1`)
@@ -64,7 +64,7 @@ internal class SykepengegrunnlagTest {
         assertFalse(forLiteSykepengegrunnlag.inspektør.oppfyllerMinsteinntektskrav)
         assertEquals(halvG, forLiteSykepengegrunnlag.inspektør.minsteinntekt)
         assertFalse(validert)
-        assertTrue(aktivitetslogg.hasWarningsOrWorse())
+        assertTrue(aktivitetslogg.harVarslerEllerVerre())
         assertFalse(observer.`§ 8-3 ledd 2 punktum 1`)
     }
 
@@ -81,7 +81,7 @@ internal class SykepengegrunnlagTest {
         assertTrue(sykepengegrunnlag.inspektør.oppfyllerMinsteinntektskrav)
         assertEquals(`2G`, sykepengegrunnlag.inspektør.minsteinntekt)
         assertTrue(validert)
-        assertFalse(aktivitetslogg.hasWarningsOrWorse())
+        assertFalse(aktivitetslogg.harVarslerEllerVerre())
         assertTrue(observer.`§ 8-51 ledd 2`)
 
         observer = MinsteinntektSubsumsjonObservatør()
@@ -91,7 +91,7 @@ internal class SykepengegrunnlagTest {
         assertFalse(forLiteSykepengegrunnlag.inspektør.oppfyllerMinsteinntektskrav)
         assertEquals(`2G`, forLiteSykepengegrunnlag.inspektør.minsteinntekt)
         assertFalse(validert)
-        assertTrue(aktivitetslogg.hasWarningsOrWorse())
+        assertTrue(aktivitetslogg.harVarslerEllerVerre())
         assertFalse(observer.`§ 8-51 ledd 2`)
     }
 
@@ -110,7 +110,7 @@ internal class SykepengegrunnlagTest {
         assertTrue(sykepengegrunnlag.inspektør.oppfyllerMinsteinntektskrav)
         assertEquals(`2G_2020`, sykepengegrunnlag.inspektør.minsteinntekt)
         assertTrue(validert)
-        assertFalse(aktivitetslogg.hasWarningsOrWorse())
+        assertFalse(aktivitetslogg.harVarslerEllerVerre())
         assertTrue(observer.`§ 8-51 ledd 2`)
 
         aktivitetslogg = Aktivitetslogg()
@@ -119,7 +119,7 @@ internal class SykepengegrunnlagTest {
         assertTrue(forLiteSykepengegrunnlag.inspektør.oppfyllerMinsteinntektskrav)
         assertEquals(`2G_2020`, forLiteSykepengegrunnlag.inspektør.minsteinntekt)
         assertTrue(validert)
-        assertFalse(aktivitetslogg.hasWarningsOrWorse())
+        assertFalse(aktivitetslogg.harVarslerEllerVerre())
         assertTrue(observer.`§ 8-51 ledd 2`)
     }
     @Test
@@ -134,7 +134,7 @@ internal class SykepengegrunnlagTest {
         assertTrue(sykepengegrunnlag.inspektør.oppfyllerMinsteinntektskrav)
         assertEquals(`2G_2021`, sykepengegrunnlag.inspektør.minsteinntekt)
         assertTrue(validert)
-        assertFalse(aktivitetslogg.hasWarningsOrWorse())
+        assertFalse(aktivitetslogg.harVarslerEllerVerre())
 
         aktivitetslogg = Aktivitetslogg()
         val forLiteSykepengegrunnlag = (`2G_2021` - 1.daglig).sykepengegrunnlag(alder, "orgnr", skjæringstidspunkt)
@@ -142,7 +142,7 @@ internal class SykepengegrunnlagTest {
         assertFalse(forLiteSykepengegrunnlag.inspektør.oppfyllerMinsteinntektskrav)
         assertEquals(`2G_2021`, forLiteSykepengegrunnlag.inspektør.minsteinntekt)
         assertFalse(validert)
-        assertTrue(aktivitetslogg.hasWarningsOrWorse())
+        assertTrue(aktivitetslogg.harVarslerEllerVerre())
     }
 
     @Test

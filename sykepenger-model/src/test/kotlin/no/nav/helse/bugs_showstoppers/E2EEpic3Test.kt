@@ -607,7 +607,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 10.januar, 100.prosent))
         håndterSøknad(Sykdom(3.januar, 10.januar, 100.prosent))
         håndterInntektsmelding(listOf(3.januar til 4.januar, 9.januar til 10.januar), 3.januar)
-        assertTrue(person.personLogg.hasWarningsOrWorse())
+        assertTrue(person.personLogg.harVarslerEllerVerre())
         inspektør.also {
             assertEquals(4, it.sykdomstidslinje.inspektør.dagteller[Sykedag::class])
             assertEquals(2, it.sykdomstidslinje.inspektør.dagteller[FriskHelgedag::class])
@@ -845,7 +845,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             AVSLUTTET
         )
 
-        assertTrue(person.personLogg.hasWarningsOrWorse())
+        assertTrue(person.personLogg.harVarslerEllerVerre())
         inspektør.also {
             it.utbetalingstidslinjer(1.vedtaksperiode).inspektør.also { tidslinjeInspektør ->
                 assertEquals(16, tidslinjeInspektør.arbeidsgiverperiodeDagTeller)
@@ -890,7 +890,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             AVSLUTTET
         )
 
-        assertFalse(person.personLogg.hasWarningsOrWorse())
+        assertFalse(person.personLogg.harVarslerEllerVerre())
         inspektør.also {
             it.utbetalingstidslinjer(1.vedtaksperiode).inspektør.also { tidslinjeInspektør ->
                 assertEquals(16, tidslinjeInspektør.arbeidsgiverperiodeDagTeller)
@@ -934,7 +934,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             AVSLUTTET
         )
 
-        assertTrue(person.personLogg.hasWarningsOrWorse())
+        assertTrue(person.personLogg.harVarslerEllerVerre())
         inspektør.also {
             it.utbetalingstidslinjer(2.vedtaksperiode).inspektør.also { tidslinjeInspektør ->
                 assertEquals(16, tidslinjeInspektør.arbeidsgiverperiodeDagTeller)
@@ -982,7 +982,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             AVSLUTTET
         )
 
-        assertTrue(person.personLogg.hasWarningsOrWorse())
+        assertTrue(person.personLogg.harVarslerEllerVerre())
         inspektør.also {
             it.utbetalingstidslinjer(1.vedtaksperiode).inspektør.also { tidslinjeInspektør ->
                 assertEquals(16, tidslinjeInspektør.arbeidsgiverperiodeDagTeller)
@@ -1026,7 +1026,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             AVSLUTTET
         )
 
-        assertTrue(person.personLogg.hasWarningsOrWorse())
+        assertTrue(person.personLogg.harVarslerEllerVerre())
         inspektør.also {
             it.utbetalingstidslinjer(2.vedtaksperiode).inspektør.also { tidslinjeInspektør ->
                 assertEquals(16, tidslinjeInspektør.arbeidsgiverperiodeDagTeller)
@@ -1082,7 +1082,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             AVSLUTTET
         )
 
-        assertTrue(person.personLogg.hasWarningsOrWorse())
+        assertTrue(person.personLogg.harVarslerEllerVerre())
         inspektør.also {
             it.utbetalingstidslinjer(1.vedtaksperiode).inspektør.also { tidslinjeInspektør ->
                 assertEquals(16, tidslinjeInspektør.arbeidsgiverperiodeDagTeller)
@@ -1129,7 +1129,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             AVSLUTTET
         )
 
-        assertTrue(person.personLogg.hasWarningsOrWorse())
+        assertTrue(person.personLogg.harVarslerEllerVerre())
         inspektør.also {
             it.utbetalingstidslinjer(2.vedtaksperiode).inspektør.also { tidslinjeInspektør ->
                 assertEquals(16, tidslinjeInspektør.arbeidsgiverperiodeDagTeller)
@@ -1167,7 +1167,7 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         assertEquals(Periodetype.FØRSTEGANGSBEHANDLING, inspektør.periodetype(1.vedtaksperiode))
 
-        assertFalse(person.personLogg.hasWarningsOrWorse())
+        assertFalse(person.personLogg.harVarslerEllerVerre())
         assertTilstander(
             1.vedtaksperiode,
             START,

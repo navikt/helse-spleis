@@ -109,9 +109,9 @@ internal class InntektsmeldingTest {
         val tidslinjeFør = inntektsmelding.sykdomstidslinje()
         assertFalse(inntektsmelding.erRelevant(førstePeriode, perioder))
         assertEquals(tidslinjeFør, inntektsmelding.sykdomstidslinje())
-        assertFalse(inntektsmelding.hasWarningsOrWorse())
+        assertFalse(inntektsmelding.harVarslerEllerVerre())
         assertTrue(inntektsmelding.erRelevant(andrePeriode, perioder))
-        assertTrue(inntektsmelding.hasWarningsOrWorse())
+        assertTrue(inntektsmelding.harVarslerEllerVerre())
         assertTrue(inntektsmelding.erRelevant(tredjePeriode, perioder))
         assertEquals(tidslinjeFør, inntektsmelding.sykdomstidslinje())
     }
@@ -130,7 +130,7 @@ internal class InntektsmeldingTest {
         val tidslinjeEtter = inntektsmelding.sykdomstidslinje()
         assertTrue(tidslinjeEtter[1.januar] is Arbeidsdag)
         assertTrue(tidslinjeEtter[2.januar] is Arbeidsdag)
-        assertFalse(inntektsmelding.hasWarningsOrWorse())
+        assertFalse(inntektsmelding.harVarslerEllerVerre())
     }
 
     @Test
@@ -147,7 +147,7 @@ internal class InntektsmeldingTest {
         val tidslinjeEtter = inntektsmelding.sykdomstidslinje()
         assertTrue(tidslinjeEtter[1.januar] is Arbeidsdag)
         assertTrue(tidslinjeEtter[2.januar] is Arbeidsdag)
-        assertFalse(inntektsmelding.hasWarningsOrWorse())
+        assertFalse(inntektsmelding.harVarslerEllerVerre())
     }
 
     @Test
@@ -162,7 +162,7 @@ internal class InntektsmeldingTest {
         val tidslinjeEtter = inntektsmelding.sykdomstidslinje()
         assertNotEquals(tidslinjeFør, tidslinjeEtter)
         assertTrue((1.januar til 31.januar).all { tidslinjeEtter[it] is Arbeidsdag || tidslinjeEtter[it] is FriskHelgedag })
-        assertFalse(inntektsmelding.hasWarningsOrWorse())
+        assertFalse(inntektsmelding.harVarslerEllerVerre())
     }
 
     @Test
@@ -314,7 +314,7 @@ internal class InntektsmeldingTest {
         val nyTidslinje = inntektsmelding.sykdomstidslinje()
         val aktivitetslogg = inntektsmelding.valider(Periode(1.januar, 31.januar), MaskinellJurist())
         assertTrue(aktivitetslogg.hentInfo().contains("Inntektsmeldingen mangler arbeidsgiverperiode. Vurder om vilkårene for sykepenger er oppfylt, og om det skal være arbeidsgiverperiode"))
-        assertFalse(aktivitetslogg.hasWarningsOrWorse())
+        assertFalse(aktivitetslogg.harVarslerEllerVerre())
         assertEquals(1.januar til 1.januar, inntektsmelding.periode())
         assertNull(nyTidslinje.periode()?.start)
         assertNull(nyTidslinje.periode()?.endInclusive)
@@ -377,7 +377,7 @@ internal class InntektsmeldingTest {
             )
         )
         inntektsmelding.valider(Periode(1.januar, 31.januar), MaskinellJurist())
-        assertFalse(inntektsmelding.hasErrorsOrWorse())
+        assertFalse(inntektsmelding.harFunksjonelleFeilEllerVerre())
     }
 
     @Test
@@ -422,7 +422,7 @@ internal class InntektsmeldingTest {
             listOf(Periode(1.januar, 10.januar)),
             begrunnelseForReduksjonEllerIkkeUtbetalt = ""
         )
-        assertFalse(inntektsmelding.valider(Periode(1.januar, 31.januar), MaskinellJurist()).hasErrorsOrWorse())
+        assertFalse(inntektsmelding.valider(Periode(1.januar, 31.januar), MaskinellJurist()).harFunksjonelleFeilEllerVerre())
     }
 
     @Test

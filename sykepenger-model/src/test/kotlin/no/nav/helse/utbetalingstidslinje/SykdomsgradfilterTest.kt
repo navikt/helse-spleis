@@ -25,7 +25,7 @@ internal class SykdomsgradfilterTest {
         assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
         assertEquals(3, inspektør.navDagTeller)
         assertEquals(2, inspektør.navHelgDagTeller)
-        assertFalse(aktivitetslogg.hasWarningsOrWorse())
+        assertFalse(aktivitetslogg.harVarslerEllerVerre())
     }
 
     @Test
@@ -37,7 +37,7 @@ internal class SykdomsgradfilterTest {
         assertEquals(3, inspektør.avvistDagTeller)
         assertEquals(4, inspektør.navHelgDagTeller)
         assertEquals(8, inspektør.navDagTeller)
-        assertTrue(aktivitetslogg.hasWarningsOrWorse())
+        assertTrue(aktivitetslogg.harVarslerEllerVerre())
     }
 
     @Test
@@ -49,7 +49,7 @@ internal class SykdomsgradfilterTest {
         assertEquals(3, inspektør.avvistDagTeller)
         assertEquals(4, inspektør.navHelgDagTeller)
         assertEquals(8, inspektør.navDagTeller)
-        assertFalse(aktivitetslogg.hasWarningsOrWorse())
+        assertFalse(aktivitetslogg.harVarslerEllerVerre())
     }
 
     @Test
@@ -61,7 +61,7 @@ internal class SykdomsgradfilterTest {
         assertEquals(3, inspektør.avvistDagTeller)
         assertEquals(4, inspektør.navHelgDagTeller)
         assertEquals(8, inspektør.navDagTeller)
-        assertFalse(aktivitetslogg.hasWarningsOrWorse())
+        assertFalse(aktivitetslogg.harVarslerEllerVerre())
     }
 
     @Test

@@ -10,6 +10,6 @@ internal class NødnummerTest {
     fun `bruk av nødnummer støttes ikke`() {
         val aktivitetslogg = Aktivitetslogg()
         Nødnummer.Sykepenger.valider(aktivitetslogg, "973626108")
-        assertTrue(aktivitetslogg.hasErrorsOrWorse())
+        assertTrue(aktivitetslogg.harFunksjonelleFeilEllerVerre())
     }
 }

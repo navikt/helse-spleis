@@ -83,8 +83,8 @@ internal class MaksimumSykepengedagerfilterTest {
     fun `ingen warning om avvist dag ikke er innenfor perioden`() {
         val tidslinje = tidslinjeOf(16.AP, 249.NAVDAGER)
         assertEquals(listOf(31.desember), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018, Periode(1.januar, 30.desember)))
-        assertTrue(aktivitetslogg.hasActivities())
-        assertFalse(aktivitetslogg.hasWarningsOrWorse())
+        assertTrue(aktivitetslogg.harAktiviteter())
+        assertFalse(aktivitetslogg.harVarslerEllerVerre())
     }
 
     @Test
@@ -479,14 +479,14 @@ internal class MaksimumSykepengedagerfilterTest {
     fun `ikke error dersom 26 uker med sammenhengende sykdom etter maksdato og utenfor vedtaksperioden`() {
         val tidslinje = tidslinjeOf(248.NAVDAGER, 182.NAV, 1.NAVDAGER)
         tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018, tidslinje.periode().start til tidslinje.periode().endInclusive.minusDays(1))
-        assertFalse(aktivitetslogg.hasErrorsOrWorse())
+        assertFalse(aktivitetslogg.harFunksjonelleFeilEllerVerre())
     }
 
     @Test
     fun `ikke error dersom 26 uker med sammenhengende sykdom etter maksdato og eldre enn vedtaksperioden`() {
         val tidslinje = tidslinjeOf(248.NAVDAGER, 182.NAV, 1.NAVDAGER, 1.ARB, 31.NAV)
         tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018, 14.juni(2019) til 15.juli(2019))
-        assertFalse(aktivitetslogg.hasErrorsOrWorse())
+        assertFalse(aktivitetslogg.harFunksjonelleFeilEllerVerre())
     }
 
     @Test
@@ -496,7 +496,7 @@ internal class MaksimumSykepengedagerfilterTest {
         tidslinje.inspektør.avvistedatoer.forEach { dato ->
             assertEquals(listOf(Begrunnelse.SykepengedagerOppbrukt), tidslinje.inspektør.begrunnelse(dato))
         }
-        assertFalse(aktivitetslogg.hasErrorsOrWorse())
+        assertFalse(aktivitetslogg.harFunksjonelleFeilEllerVerre())
         assertFalse(tidslinje.last().dato.erHelg())
     }
 

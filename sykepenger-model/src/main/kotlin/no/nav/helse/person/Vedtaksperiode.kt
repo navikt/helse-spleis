@@ -505,9 +505,9 @@ internal class Vedtaksperiode private constructor(
         oppdaterHistorikk(hendelse)
         inntektsmeldingInfo = arbeidsgiver.addInntektsmelding(skjæringstidspunkt, hendelse, jurist())
         hendelse.valider(periode, skjæringstidspunkt, finnArbeidsgiverperiode(), jurist())
-        if (hendelse.hasErrorsOrWorse()) return forkast(hendelse, SENERE_INCLUSIVE(this))
+        if (hendelse.harFunksjonelleFeilEllerVerre()) return forkast(hendelse, SENERE_INCLUSIVE(this))
         hendelse.info("Fullført behandling av inntektsmelding")
-        if (hendelse.hasErrorsOrWorse()) return
+        if (hendelse.harFunksjonelleFeilEllerVerre()) return
         tilstand(hendelse, nesteTilstand)
     }
 
@@ -521,7 +521,7 @@ internal class Vedtaksperiode private constructor(
         oppdaterHistorikk(hendelse)
         if (!person.harFlereArbeidsgivereMedSykdom()) hendelse.validerIkkeOppgittFlereArbeidsforholdMedSykmelding()
         hendelse.valider(periode, jurist())
-        if (hendelse.hasErrorsOrWorse()) {
+        if (hendelse.harFunksjonelleFeilEllerVerre()) {
             if (person.harFlereArbeidsgivereMedSykdom()) return person.invaliderAllePerioder(
                 hendelse,
                 "Invaliderer alle perioder pga flere arbeidsgivere og feil i søknad"
@@ -577,7 +577,7 @@ internal class Vedtaksperiode private constructor(
             jurist()
         )
         person.lagreVilkårsgrunnlag(vilkårsgrunnlag.grunnlagsdata())
-        if (vilkårsgrunnlag.hasErrorsOrWorse()) {
+        if (vilkårsgrunnlag.harFunksjonelleFeilEllerVerre()) {
             return person.invaliderAllePerioder(vilkårsgrunnlag, null)
         }
         vilkårsgrunnlag.info("Vilkårsgrunnlag vurdert")
@@ -644,7 +644,7 @@ internal class Vedtaksperiode private constructor(
             forrigeTilstand = previousState.type,
             aktivitetslogg = aktivitetslogg.toMap(),
             harVedtaksperiodeWarnings = person.aktivitetslogg.logg(this)
-                .let { it.hasWarningsOrWorse() && !it.hasErrorsOrWorse() },
+                .let { it.harVarslerEllerVerre() && !it.harFunksjonelleFeilEllerVerre() },
             hendelser = hendelseIder(),
             makstid = tilstand.makstid(this, LocalDateTime.now()),
             fom = periode.start,
@@ -1426,7 +1426,7 @@ internal class Vedtaksperiode private constructor(
             val periodetype = vedtaksperiode.periodetype
             validation(ytelser) {
                 onValidationFailed {
-                    if (!ytelser.hasErrorsOrWorse()) funksjonellFeil("Behandling av Ytelser feilet, årsak ukjent")
+                    if (!ytelser.harFunksjonelleFeilEllerVerre()) funksjonellFeil("Behandling av Ytelser feilet, årsak ukjent")
                     vedtaksperiode.forkast(ytelser)
                 }
                 onSuccess {
@@ -1545,7 +1545,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, simulering: Simulering) {
-            if (vedtaksperiode.utbetalinger.valider(simulering).hasErrorsOrWorse())
+            if (vedtaksperiode.utbetalinger.valider(simulering).harFunksjonelleFeilEllerVerre())
                 return vedtaksperiode.forkast(simulering)
 
             if (!vedtaksperiode.utbetalinger.erKlarForGodkjenning()) return
@@ -1575,7 +1575,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, simulering: Simulering) {
             ErrorsTilWarnings.wrap(simulering) {
-                if (vedtaksperiode.utbetalinger.valider(simulering).hasWarningsOrWorse()) {
+                if (vedtaksperiode.utbetalinger.valider(simulering).harVarslerEllerVerre()) {
                     simulering.varsel("Simulering av revurdert utbetaling feilet. Utbetalingen må annulleres")
                 }
             }
@@ -1618,7 +1618,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
             vedtaksperiode.håndterOverlappendeSøknad(søknad, AvventerHistorikk)
-            if (søknad.hasErrorsOrWorse()) return
+            if (søknad.harFunksjonelleFeilEllerVerre()) return
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
@@ -2022,7 +2022,7 @@ internal class Vedtaksperiode private constructor(
             val revurderingIkkeStøttet = vedtaksperiode.person.vedtaksperioder(NYERE_SKJÆRINGSTIDSPUNKT_MED_UTBETALING(vedtaksperiode)).isNotEmpty()
             vedtaksperiode.håndterInntektsmelding(inntektsmelding, this) // håndterInntektsmelding krever tilstandsendring, men vi må avvente til vi starter revurdering
 
-            if (inntektsmelding.hasErrorsOrWorse()) return
+            if (inntektsmelding.harFunksjonelleFeilEllerVerre()) return
             if (vedtaksperiode.ingenUtbetaling()) {
                 vedtaksperiode.emitVedtaksperiodeEndret(inntektsmelding) // på stedet hvil!
                 return inntektsmelding.info("Revurdering medfører ingen utbetaling, blir stående i avsluttet uten utbetaling")

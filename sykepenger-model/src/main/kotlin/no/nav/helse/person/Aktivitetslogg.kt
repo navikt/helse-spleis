@@ -65,11 +65,11 @@ class Aktivitetslogg(
 
     private fun MutableList<Aktivitetskontekst>.toSpesifikk() = this.map { it.toSpesifikkKontekst() }
 
-    override fun hasActivities() = info().isNotEmpty() || hasWarningsOrWorse() || behov().isNotEmpty()
+    override fun harAktiviteter() = info().isNotEmpty() || harVarslerEllerVerre() || behov().isNotEmpty()
 
-    override fun hasWarningsOrWorse() = warn().isNotEmpty() || hasErrorsOrWorse()
+    override fun harVarslerEllerVerre() = warn().isNotEmpty() || harFunksjonelleFeilEllerVerre()
 
-    override fun hasErrorsOrWorse() = error().isNotEmpty() || severe().isNotEmpty()
+    override fun harFunksjonelleFeilEllerVerre() = error().isNotEmpty() || severe().isNotEmpty()
 
     override fun barn() = Aktivitetslogg(this)
 
@@ -464,9 +464,9 @@ interface IAktivitetslogg {
     fun funksjonellFeil(melding: String)
     fun logiskFeil(melding: String, vararg params: Any?): Nothing
 
-    fun hasActivities(): Boolean
-    fun hasWarningsOrWorse(): Boolean
-    fun hasErrorsOrWorse(): Boolean
+    fun harAktiviteter(): Boolean
+    fun harVarslerEllerVerre(): Boolean
+    fun harFunksjonelleFeilEllerVerre(): Boolean
 
     fun aktivitetsteller(): Int
     fun behov(): List<Behov>

@@ -344,7 +344,7 @@ internal abstract class AbstractDslTest {
         bareÈnArbeidsgiver(a1).assertNoWarnings(*filtre)
     protected fun assertActivities() {
         val inspektør = inspiser(personInspektør)
-        assertTrue(inspektør.aktivitetslogg.hasActivities()) { inspektør.aktivitetslogg.toString() }
+        assertTrue(inspektør.aktivitetslogg.harAktiviteter()) { inspektør.aktivitetslogg.toString() }
     }
 
     protected fun nyttVedtak(

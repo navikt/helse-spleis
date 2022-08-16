@@ -59,7 +59,7 @@ internal class InntektForSykepengegrunnlagTest {
             )
         )
         val inntektForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter, arbeidsforhold = emptyList())
-        assertFalse(inntektForSykepengegrunnlag.valider(aktivitetslogg).hasErrorsOrWorse())
+        assertFalse(inntektForSykepengegrunnlag.valider(aktivitetslogg).harFunksjonelleFeilEllerVerre())
     }
 
     @Test
@@ -77,7 +77,7 @@ internal class InntektForSykepengegrunnlagTest {
             ),
         )
         val inntektForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter, arbeidsforhold = emptyList())
-        assertTrue(inntektForSykepengegrunnlag.valider(aktivitetslogg).hasErrorsOrWorse())
+        assertTrue(inntektForSykepengegrunnlag.valider(aktivitetslogg).harFunksjonelleFeilEllerVerre())
     }
 
     @Test
@@ -95,7 +95,7 @@ internal class InntektForSykepengegrunnlagTest {
             ),
         )
         val inntektForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter, arbeidsforhold = emptyList())
-        assertFalse(inntektForSykepengegrunnlag.valider(aktivitetslogg).hasErrorsOrWorse())
+        assertFalse(inntektForSykepengegrunnlag.valider(aktivitetslogg).harFunksjonelleFeilEllerVerre())
     }
 
     @Test
@@ -128,7 +128,7 @@ internal class InntektForSykepengegrunnlagTest {
             )
         )
         val inntektForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter, arbeidsforhold)
-        assertTrue(inntektForSykepengegrunnlag.valider(aktivitetslogg).hasErrorsOrWorse())
+        assertTrue(inntektForSykepengegrunnlag.valider(aktivitetslogg).harFunksjonelleFeilEllerVerre())
     }
 
     @Test
@@ -157,7 +157,7 @@ internal class InntektForSykepengegrunnlagTest {
             )
         )
         val inntektForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter, arbeidsforhold)
-        assertFalse(inntektForSykepengegrunnlag.valider(aktivitetslogg).hasErrorsOrWorse())
+        assertFalse(inntektForSykepengegrunnlag.valider(aktivitetslogg).harFunksjonelleFeilEllerVerre())
     }
 
     @Test
@@ -187,7 +187,7 @@ internal class InntektForSykepengegrunnlagTest {
         )
 
         val inntektForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter, arbeidsforhold)
-        assertFalse(inntektForSykepengegrunnlag.valider(aktivitetslogg).hasErrorsOrWorse())
+        assertFalse(inntektForSykepengegrunnlag.valider(aktivitetslogg).harFunksjonelleFeilEllerVerre())
     }
 
     @Test
@@ -205,7 +205,7 @@ internal class InntektForSykepengegrunnlagTest {
             ),
         )
         val inntektForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter, emptyList())
-        assertFalse(inntektForSykepengegrunnlag.valider(aktivitetslogg).hasErrorsOrWorse())
+        assertFalse(inntektForSykepengegrunnlag.valider(aktivitetslogg).harFunksjonelleFeilEllerVerre())
     }
 
     @Test

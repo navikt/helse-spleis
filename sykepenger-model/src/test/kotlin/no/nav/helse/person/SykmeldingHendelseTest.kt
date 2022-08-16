@@ -16,9 +16,9 @@ internal class SykmeldingHendelseTest : AbstractEndToEndTest() {
     @Test
     fun `Sykmelding skaper Arbeidsgiver og Sykmeldingsperiode`() {
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100.prosent)))
-        assertFalse(person.personLogg.hasErrorsOrWorse())
-        assertTrue(person.personLogg.hasActivities())
-        assertFalse(person.personLogg.hasErrorsOrWorse())
+        assertFalse(person.personLogg.harFunksjonelleFeilEllerVerre())
+        assertTrue(person.personLogg.harAktiviteter())
+        assertFalse(person.personLogg.harFunksjonelleFeilEllerVerre())
         assertEquals(0, inspektør.vedtaksperiodeTeller)
         assertEquals(1, inspektør.sykmeldingsperioder().size)
     }
@@ -27,9 +27,9 @@ internal class SykmeldingHendelseTest : AbstractEndToEndTest() {
     fun `To søknader uten overlapp`() {
         person.håndter(sykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100.prosent)))
         person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 10.januar, 100.prosent)))
-        assertFalse(person.personLogg.hasErrorsOrWorse())
-        assertTrue(person.personLogg.hasActivities())
-        assertFalse(person.personLogg.hasErrorsOrWorse())
+        assertFalse(person.personLogg.harFunksjonelleFeilEllerVerre())
+        assertTrue(person.personLogg.harAktiviteter())
+        assertFalse(person.personLogg.harFunksjonelleFeilEllerVerre())
         assertEquals(0, inspektør.vedtaksperiodeTeller)
         assertEquals(2, inspektør.sykmeldingsperioder().size)
     }

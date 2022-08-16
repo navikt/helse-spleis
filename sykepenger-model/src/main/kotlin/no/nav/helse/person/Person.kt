@@ -323,7 +323,7 @@ class Person private constructor(
             hendelse.funksjonellFeil("Kan ikke overstyre inntekt uten at det foreligger et vilkårsgrunnlag")
         }
 
-        if (hendelse.hasErrorsOrWorse()) {
+        if (hendelse.harFunksjonelleFeilEllerVerre()) {
             observers.forEach {
                 it.revurderingAvvist(
                     hendelse.hendelseskontekst(),
@@ -978,7 +978,7 @@ class Person private constructor(
         erForlengelse: Boolean
     ): Boolean {
         arbeidsgivere.validerVilkårsgrunnlag(aktivitetslogg, vilkårsgrunnlag, skjæringstidspunkt, erForlengelse)
-        return !aktivitetslogg.hasErrorsOrWorse()
+        return !aktivitetslogg.harFunksjonelleFeilEllerVerre()
     }
 
     internal fun validerYtelserForSkjæringstidspunkt(ytelser: Ytelser, skjæringstidspunkt: LocalDate) {

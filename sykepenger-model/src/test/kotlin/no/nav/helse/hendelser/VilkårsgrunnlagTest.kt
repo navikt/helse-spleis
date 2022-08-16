@@ -89,7 +89,7 @@ internal class VilkårsgrunnlagTest : AbstractPersonTest() {
         person.håndter(vilkårsgrunnlag)
         assertGrunnlagsdata(INNTEKT, Prosent.ratio(0.0), 27, false)
         assertEquals(TilstandType.AVVENTER_HISTORIKK, hentTilstand()?.type)
-        assertTrue(vilkårsgrunnlag.hasWarningsOrWorse())
+        assertTrue(vilkårsgrunnlag.harVarslerEllerVerre())
     }
 
     @Test
@@ -100,7 +100,7 @@ internal class VilkårsgrunnlagTest : AbstractPersonTest() {
         person.håndter(vilkårsgrunnlag)
         assertGrunnlagsdata(INNTEKT, Prosent.ratio(0.0), 0, false)
         assertEquals(TilstandType.AVVENTER_HISTORIKK, hentTilstand()?.type)
-        assertTrue(vilkårsgrunnlag.hasWarningsOrWorse())
+        assertTrue(vilkårsgrunnlag.harVarslerEllerVerre())
     }
 
     @Test
@@ -111,7 +111,7 @@ internal class VilkårsgrunnlagTest : AbstractPersonTest() {
         person.håndter(vilkårsgrunnlag)
         assertGrunnlagsdata(INNTEKT, Prosent.ratio(0.0), 28, true)
         assertEquals(TilstandType.AVVENTER_HISTORIKK, hentTilstand()?.type)
-        assertFalse(vilkårsgrunnlag.hasWarningsOrWorse())
+        assertFalse(vilkårsgrunnlag.harVarslerEllerVerre())
     }
 
     @Test
@@ -133,7 +133,7 @@ internal class VilkårsgrunnlagTest : AbstractPersonTest() {
         person.håndter(vilkårsgrunnlag)
         assertGrunnlagsdata(INNTEKT, Prosent.ratio(0.0), 0, false)
         assertEquals(TilstandType.AVVENTER_HISTORIKK, hentTilstand()?.type)
-        assertTrue(vilkårsgrunnlag.hasWarningsOrWorse())
+        assertTrue(vilkårsgrunnlag.harVarslerEllerVerre())
     }
 
     @Test
@@ -158,7 +158,7 @@ internal class VilkårsgrunnlagTest : AbstractPersonTest() {
             subsumsjonObserver = MaskinellJurist()
         )
 
-        assertFalse(vilkårsgrunnlag.hasWarningsOrWorse())
+        assertFalse(vilkårsgrunnlag.harVarslerEllerVerre())
     }
 
     private fun assertGrunnlagsdata(

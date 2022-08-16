@@ -25,7 +25,7 @@ internal class Utbetalingsfilter private constructor(
             EN_ARBEIDSGIVER -> enArbeidsgiver(aktivitetslogg)
             FLERE_ARBEIDSGIVERE -> flereArbeidsgivere(aktivitetslogg)
         }
-        return !aktivitetslogg.hasErrorsOrWorse()
+        return !aktivitetslogg.harFunksjonelleFeilEllerVerre()
     }
 
     private fun flereArbeidsgivere(aktivitetslogg: IAktivitetslogg) {

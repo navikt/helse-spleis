@@ -38,7 +38,7 @@ abstract class Utbetalingsperiode(
 
     override fun valider(aktivitetslogg: IAktivitetslogg, periode: Periode, skjæringstidspunkt: LocalDate, nødnummer: Nødnummer) {
         validerOverlapp(aktivitetslogg, periode)
-        if (aktivitetslogg.hasErrorsOrWorse() || this.endInclusive < skjæringstidspunkt) return
+        if (aktivitetslogg.harFunksjonelleFeilEllerVerre() || this.endInclusive < skjæringstidspunkt) return
         validerRelevant(aktivitetslogg, nødnummer)
     }
 

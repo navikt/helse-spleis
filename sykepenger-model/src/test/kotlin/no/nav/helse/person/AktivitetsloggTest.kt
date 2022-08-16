@@ -38,14 +38,14 @@ internal class AktivitetsloggTest {
 
     @Test
     fun `har ingen feil ved default`() {
-        assertFalse(aktivitetslogg.hasErrorsOrWorse())
+        assertFalse(aktivitetslogg.harFunksjonelleFeilEllerVerre())
     }
 
     @Test
     fun `severe oppdaget og kaster exception`() {
         val melding = "Severe error"
         assertThrows<Aktivitetslogg.AktivitetException> { aktivitetslogg.logiskFeil(melding) }
-        assertTrue(aktivitetslogg.hasErrorsOrWorse())
+        assertTrue(aktivitetslogg.harFunksjonelleFeilEllerVerre())
         assertTrue(aktivitetslogg.toString().contains(melding))
         assertSevere(melding)
     }
@@ -114,7 +114,7 @@ internal class AktivitetsloggTest {
     fun `error oppdaget`() {
         val melding = "Error"
         aktivitetslogg.funksjonellFeil(melding)
-        assertTrue(aktivitetslogg.hasErrorsOrWorse())
+        assertTrue(aktivitetslogg.harFunksjonelleFeilEllerVerre())
         assertTrue(aktivitetslogg.toString().contains(melding))
         assertError(melding)
     }
@@ -123,7 +123,7 @@ internal class AktivitetsloggTest {
     fun `warning oppdaget`() {
         val melding = "Warning explanation"
         aktivitetslogg.varsel(melding)
-        assertFalse(aktivitetslogg.hasErrorsOrWorse())
+        assertFalse(aktivitetslogg.harFunksjonelleFeilEllerVerre())
         assertTrue(aktivitetslogg.toString().contains(melding))
         assertWarn(melding)
     }

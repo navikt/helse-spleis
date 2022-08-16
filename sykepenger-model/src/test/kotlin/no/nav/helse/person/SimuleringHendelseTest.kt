@@ -56,7 +56,7 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
         håndterYtelser()
         håndterSimuleringer()
         assertEquals(AVVENTER_GODKJENNING, inspektør.sisteTilstand(1.vedtaksperiode))
-        assertFalse(person.personLogg.hasWarningsOrWorse())
+        assertFalse(person.personLogg.harVarslerEllerVerre())
     }
 
     @Test
@@ -75,7 +75,7 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
             Fagområde.Sykepenger to Pair(true, 1431)
         ))
         assertEquals(AVVENTER_GODKJENNING, inspektør.sisteTilstand(1.vedtaksperiode))
-        assertFalse(person.personLogg.hasWarningsOrWorse())
+        assertFalse(person.personLogg.harVarslerEllerVerre())
     }
 
     @Test
@@ -85,7 +85,7 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
             Fagområde.SykepengerRefusjon to Pair(true, 1431)
         ))
         assertEquals(AVVENTER_SIMULERING, inspektør.sisteTilstand(1.vedtaksperiode))
-        assertFalse(person.personLogg.hasWarningsOrWorse())
+        assertFalse(person.personLogg.harVarslerEllerVerre())
     }
 
     @Test
@@ -95,7 +95,7 @@ internal class SimuleringHendelseTest : AbstractPersonTest() {
             Fagområde.Sykepenger to Pair(true, 1431)
         ))
         assertEquals(AVVENTER_GODKJENNING, inspektør.sisteTilstand(1.vedtaksperiode))
-        assertFalse(person.personLogg.hasWarningsOrWorse())
+        assertFalse(person.personLogg.harVarslerEllerVerre())
     }
 
     private fun håndterYtelser(

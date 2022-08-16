@@ -22,6 +22,6 @@ internal class UtbetalingstidslinjeBuilderExceptionTest {
         val melding = "Kan ikke velge"
         UtbetalingstidslinjeBuilderException.UforventetDagException(Dag.ProblemDag(1.januar, TestEvent.søknad, melding), melding)
             .logg(aktivitetslogg)
-        assertTrue(aktivitetslogg.hasErrorsOrWorse())
+        assertTrue(aktivitetslogg.harFunksjonelleFeilEllerVerre())
     }
 }

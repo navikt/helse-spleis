@@ -136,7 +136,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterUtbetalt(Oppdragstatus.AVVIST)
 
         håndterAnnullerUtbetaling(fagsystemId = inspektør.utbetaling(1).inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
-        assertTrue(hendelselogg.hasErrorsOrWorse()) { "kan pt. ikke annullere når siste utbetaling har feilet" }
+        assertTrue(hendelselogg.harFunksjonelleFeilEllerVerre()) { "kan pt. ikke annullere når siste utbetaling har feilet" }
         assertTilstander(
             1.vedtaksperiode,
             START,

@@ -34,7 +34,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
     fun `avvis hvis arbeidsgiver er ukjent`() {
         nyttVedtak(3.januar, 26.januar, 100.prosent, 3.januar)
         håndterAnnullerUtbetaling(orgnummer = a2)
-        assertTrue(person.personLogg.hasErrorsOrWorse(), person.personLogg.toString())
+        assertTrue(person.personLogg.harFunksjonelleFeilEllerVerre(), person.personLogg.toString())
     }
 
     @Test
@@ -75,13 +75,13 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         nyttVedtak(3.januar, 26.januar, 100.prosent, 3.januar)
         val behovTeller = person.personLogg.behov().size
         håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
-        assertFalse(person.personLogg.hasErrorsOrWorse()) { "${person.aktivitetslogg}"}
+        assertFalse(person.personLogg.harFunksjonelleFeilEllerVerre()) { "${person.aktivitetslogg}"}
         val behov = person.personLogg.sisteBehov(Behovtype.Utbetaling)
         @Suppress("UNCHECKED_CAST")
         val statusForUtbetaling = (behov.detaljer()["linjer"] as List<Map<String, Any>>)[0]["statuskode"]
         assertEquals("OPPH", statusForUtbetaling)
         håndterUtbetalt(status = Oppdragstatus.AKSEPTERT)
-        assertFalse(person.personLogg.hasErrorsOrWorse())
+        assertFalse(person.personLogg.harFunksjonelleFeilEllerVerre())
         assertEquals(2, inspektør.arbeidsgiverOppdrag.size)
         assertEquals(1, person.personLogg.behov().size - behovTeller)
         inspektør.arbeidsgiverOppdrag[1].inspektør.also {
@@ -132,7 +132,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
     fun `Annuller oppdrag som er under utbetaling feiler`() {
         tilGodkjent(3.januar, 26.januar, 100.prosent, 3.januar)
         håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
-        assertTrue(hendelselogg.hasErrorsOrWorse())
+        assertTrue(hendelselogg.harFunksjonelleFeilEllerVerre())
         assertIngenAnnulleringsbehov()
     }
 
@@ -141,7 +141,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         tilGodkjent(3.januar, 26.januar, 100.prosent, 3.januar)
         håndterUtbetalt(status = Oppdragstatus.FEIL)
         håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
-        assertTrue(hendelselogg.hasErrorsOrWorse())
+        assertTrue(hendelselogg.harFunksjonelleFeilEllerVerre())
         assertIngenAnnulleringsbehov()
     }
 
@@ -150,7 +150,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         nyttVedtak(3.januar, 26.januar, 100.prosent, 3.januar)
         tilGodkjent(1.mars, 31.mars, 100.prosent, 1.mars)
         håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
-        assertTrue(hendelselogg.hasErrorsOrWorse())
+        assertTrue(hendelselogg.harFunksjonelleFeilEllerVerre())
         assertIngenAnnulleringsbehov()
     }
 
@@ -164,7 +164,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         nyttVedtak(3.januar, 26.januar, 100.prosent, 3.januar)
         håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
         håndterUtbetalt(status = Oppdragstatus.FEIL)
-        assertTrue(hendelselogg.hasErrorsOrWorse())
+        assertTrue(hendelselogg.harFunksjonelleFeilEllerVerre())
         assertEquals(2, inspektør.arbeidsgiverOppdrag.size)
     }
 
@@ -175,7 +175,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
             assertEquals(AVSLUTTET, inspektør.sisteTilstand(1.vedtaksperiode))
         }
         håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
-        assertFalse(person.personLogg.hasErrorsOrWorse(), person.personLogg.toString())
+        assertFalse(person.personLogg.harFunksjonelleFeilEllerVerre(), person.personLogg.toString())
         inspektør.also {
             assertEquals(AVSLUTTET, inspektør.sisteTilstand(1.vedtaksperiode))
             assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
@@ -193,7 +193,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
             assertEquals(AVVENTER_HISTORIKK, inspektør.sisteTilstand(3.vedtaksperiode))
         }
         håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
-        assertFalse(person.personLogg.hasErrorsOrWorse(), person.personLogg.toString())
+        assertFalse(person.personLogg.harFunksjonelleFeilEllerVerre(), person.personLogg.toString())
         inspektør.also {
             assertEquals(AVSLUTTET, inspektør.sisteTilstand(1.vedtaksperiode))
             assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
@@ -227,7 +227,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
             assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
         }
         håndterUtbetalt(status = Oppdragstatus.AKSEPTERT)
-        assertFalse(person.personLogg.hasErrorsOrWorse(), person.personLogg.toString())
+        assertFalse(person.personLogg.harFunksjonelleFeilEllerVerre(), person.personLogg.toString())
         inspektør.also {
             assertEquals(AVSLUTTET, inspektør.sisteTilstand(1.vedtaksperiode))
             assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
@@ -243,7 +243,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
             assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
         }
         håndterUtbetalt(status = Oppdragstatus.AVVIST)
-        assertTrue(person.personLogg.hasErrorsOrWorse())
+        assertTrue(person.personLogg.harFunksjonelleFeilEllerVerre())
         inspektør.also {
             assertEquals(AVSLUTTET, inspektør.sisteTilstand(1.vedtaksperiode))
             assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
@@ -262,7 +262,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         }
         val behovTeller = person.personLogg.behov().size
         håndterAnnullerUtbetaling(fagsystemId = inspektør.arbeidsgiverOppdrag.last().fagsystemId())
-        assertFalse(person.personLogg.hasErrorsOrWorse(), person.personLogg.toString())
+        assertFalse(person.personLogg.harFunksjonelleFeilEllerVerre(), person.personLogg.toString())
         assertEquals(1, person.personLogg.behov().size - behovTeller, person.personLogg.toString())
         inspektør.also {
             assertEquals(AVSLUTTET, inspektør.sisteTilstand(1.vedtaksperiode))
@@ -361,7 +361,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
 
         assertEquals(0, observatør.annulleringer.size)
 
-        assertTrue(person.personLogg.hasErrorsOrWorse())
+        assertTrue(person.personLogg.harFunksjonelleFeilEllerVerre())
     }
 
     @Test
@@ -450,7 +450,7 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.mars, 20.mars, 100.prosent), Søknad.Søknadsperiode.Ferie(17.mars, 20.mars))
         håndterInntektsmeldingMedValidering(2.vedtaksperiode, listOf(1.mars til 16.mars))
         håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
-        assertFalse(hendelselogg.hasErrorsOrWorse())
+        assertFalse(hendelselogg.harFunksjonelleFeilEllerVerre())
         assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
         assertFalse(inspektør.periodeErForkastet(2.vedtaksperiode))
     }

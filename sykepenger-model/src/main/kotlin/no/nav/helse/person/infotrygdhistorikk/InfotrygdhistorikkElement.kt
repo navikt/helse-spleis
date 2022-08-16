@@ -232,7 +232,7 @@ class InfotrygdhistorikkElement private constructor(
         aktivitetslogg.info("Sjekker arbeidskategorikoder")
         if (!erNormalArbeidstaker(skjæringstidspunkt)) aktivitetslogg.funksjonellFeil("Personen er ikke registrert som normal arbeidstaker i Infotrygd")
 
-        return !aktivitetslogg.hasErrorsOrWorse()
+        return !aktivitetslogg.harFunksjonelleFeilEllerVerre()
     }
 
     internal fun utbetalingstidslinje() =

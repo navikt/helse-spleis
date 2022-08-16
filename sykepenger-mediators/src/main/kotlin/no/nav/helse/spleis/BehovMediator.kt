@@ -9,7 +9,7 @@ import org.slf4j.Logger
 internal class BehovMediator(private val sikkerLogg: Logger) {
     internal fun håndter(context: MessageContext, hendelse: PersonHendelse) {
         hendelse.kontekster().forEach {
-            if (!it.hasErrorsOrWorse()) {
+            if (!it.harFunksjonelleFeilEllerVerre()) {
                 håndter(context, hendelse, it.behov())
             }
         }

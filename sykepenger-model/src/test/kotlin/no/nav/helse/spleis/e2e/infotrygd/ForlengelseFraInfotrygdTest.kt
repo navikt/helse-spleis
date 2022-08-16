@@ -1638,7 +1638,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             AVSLUTTET
         )
 
-        assertTrue(person.personLogg.hasWarningsOrWorse())
+        assertTrue(person.personLogg.harVarslerEllerVerre())
         inspektør.also {
             it.utbetalingstidslinjer(1.vedtaksperiode).inspektør.also { tidslinjeInspektør ->
                 assertEquals(16, tidslinjeInspektør.arbeidsgiverperiodeDagTeller)
@@ -1709,7 +1709,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             AVSLUTTET
         )
 
-        assertTrue(person.personLogg.hasWarningsOrWorse())
+        assertTrue(person.personLogg.harVarslerEllerVerre())
         inspektør.also {
             it.utbetalingstidslinjer(3.vedtaksperiode).inspektør.also { tidslinjeInspektør ->
                 assertEquals(16, tidslinjeInspektør.arbeidsgiverperiodeDagTeller)

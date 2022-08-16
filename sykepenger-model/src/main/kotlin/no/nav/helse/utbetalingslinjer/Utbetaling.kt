@@ -616,7 +616,7 @@ internal class Utbetaling private constructor(
         hendelse.valider()
         val nesteTilstand = when {
             tilstand == Sendt && hendelse.skalForsøkesIgjen() -> return // utbetaling gjør retry ved neste påminnelse
-            hendelse.hasErrorsOrWorse() -> UtbetalingFeilet
+            hendelse.harFunksjonelleFeilEllerVerre() -> UtbetalingFeilet
             type == Utbetalingtype.ANNULLERING -> Annullert
             else -> Utbetalt
         }

@@ -48,7 +48,7 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
     @Test
     fun `ingen inntekt`() {
         håndterVilkårsgrunnlag(inntekter = emptyList(), arbeidsforhold = ansattSidenStart2017())
-        assertTrue(person.aktivitetslogg.hasErrorsOrWorse())
+        assertTrue(person.aktivitetslogg.harFunksjonelleFeilEllerVerre())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TIL_INFOTRYGD, inspektør.sisteTilstand(1.vedtaksperiode))
         assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))

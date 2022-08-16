@@ -32,7 +32,7 @@ class Inntektsopplysning private constructor(
         if (!erRelevant(skjæringstidspunkt)) return true
         if (orgnummer.isBlank()) aktivitetslogg.funksjonellFeil("Organisasjonsnummer for inntektsopplysning fra Infotrygd mangler")
         else if (orgnummer in nødnummer) aktivitetslogg.funksjonellFeil("Det er registrert bruk av på nødnummer")
-        return !aktivitetslogg.hasErrorsOrWorse()
+        return !aktivitetslogg.harFunksjonelleFeilEllerVerre()
     }
 
     internal fun accept(visitor: InfotrygdhistorikkVisitor) {

@@ -49,8 +49,8 @@ internal class InntektsmeldingHendelseTest : AbstractPersonTest() {
         person.håndter(søknad(Sykdom(6.januar, 20.januar, 100.prosent)))
         person.håndter(inntektsmelding())
         person.håndter(inntektsmelding())
-        assertTrue(person.personLogg.hasWarningsOrWorse())
-        assertFalse(person.personLogg.hasErrorsOrWorse())
+        assertTrue(person.personLogg.harVarslerEllerVerre())
+        assertFalse(person.personLogg.harFunksjonelleFeilEllerVerre())
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TilstandType.AVVENTER_HISTORIKK, inspektør.sisteTilstand(1.vedtaksperiode))
     }
@@ -65,7 +65,7 @@ internal class InntektsmeldingHendelseTest : AbstractPersonTest() {
             arbeidsforholdId = null,
             begrunnelseForReduksjonEllerIkkeUtbetalt = null
         )
-        assertFalse(inntektsmelding.valider(Periode(1.januar, 31.januar), MaskinellJurist()).hasErrorsOrWorse())
+        assertFalse(inntektsmelding.valider(Periode(1.januar, 31.januar), MaskinellJurist()).harFunksjonelleFeilEllerVerre())
         person.håndter(sykmelding(Sykmeldingsperiode(6.januar, 20.januar, 100.prosent)))
         person.håndter(søknad(Sykdom(6.januar, 20.januar, 100.prosent)))
         person.håndter(inntektsmelding)

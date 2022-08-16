@@ -171,13 +171,13 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
         internal fun valider(overstyrInntekt: OverstyrInntekt): Boolean {
             validerOverstyrInntekt(overstyrInntekt)
-            return !overstyrInntekt.hasErrorsOrWorse()
+            return !overstyrInntekt.harFunksjonelleFeilEllerVerre()
         }
 
         internal fun valider(aktivitetslogg: IAktivitetslogg, organisasjonsnummer: List<String>, erForlengelse: Boolean): Boolean {
             sykepengegrunnlag.validerInntekt(aktivitetslogg, organisasjonsnummer)
             valider(aktivitetslogg, erForlengelse)
-            return !aktivitetslogg.hasErrorsOrWorse()
+            return !aktivitetslogg.harFunksjonelleFeilEllerVerre()
         }
 
         protected open fun validerOverstyrInntekt(overstyrInntekt: OverstyrInntekt) {}

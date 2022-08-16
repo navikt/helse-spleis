@@ -47,7 +47,7 @@ internal class StatslønnWarningTest : AbstractEndToEndTest() {
         val historikk = arrayOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.desember(2017),  31.desember(2017), 100.prosent, 15000.daglig))
         håndterYtelser(1.vedtaksperiode, *historikk, statslønn = true)
 
-        assertTrue(person.personLogg.hasErrorsOrWorse())
+        assertTrue(person.personLogg.harFunksjonelleFeilEllerVerre())
     }
 
     @Test

@@ -26,16 +26,16 @@ internal class Validation private constructor(private val hendelse: IAktivitetsl
     }
 
     internal inline fun valider(feilmelding: String? = null, isValid: Validation.() -> Boolean) {
-        if (hasErrorsOrWorse()) return
+        if (harFunksjonelleFeilEllerVerre()) return
         if (isValid(this)) return
         onValidationFailed(feilmelding)
     }
 
     internal inline fun onSuccess(successBlock: Validation.() -> Unit) {
-        if (!hasErrorsOrWorse()) successBlock(this)
+        if (!harFunksjonelleFeilEllerVerre()) successBlock(this)
     }
 
-    override fun hasErrorsOrWorse() = hasErrors || hendelse.hasErrorsOrWorse()
+    override fun harFunksjonelleFeilEllerVerre() = hasErrors || hendelse.harFunksjonelleFeilEllerVerre()
 
     private fun onValidationFailed(feilmelding: String?) {
         hasErrors = true

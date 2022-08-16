@@ -174,7 +174,7 @@ internal class VilkårsgrunnlagHistorikkTest {
 
         val aktivitetslogg = Aktivitetslogg()
         historikk.vilkårsgrunnlagFor(1.januar)?.valider(aktivitetslogg, listOf(ORGNR), false)
-        assertTrue(aktivitetslogg.hasErrorsOrWorse())
+        assertTrue(aktivitetslogg.harFunksjonelleFeilEllerVerre())
     }
 
     @Test

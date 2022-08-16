@@ -353,7 +353,7 @@ internal class Arbeidsgiver private constructor(
         val førsteFraværsdag = finnFørsteFraværsdag(skjæringstidspunkt)
         val inntekt = inntektshistorikk.omregnetÅrsinntekt(skjæringstidspunkt, førsteFraværsdag)?.omregnetÅrsinntekt() ?: return false
         refusjonshistorikk.finnRefusjon(periode, hendelse)?.validerBrukerutbetaling(hendelse, inntekt)
-        return hendelse.hasErrorsOrWorse()
+        return hendelse.harFunksjonelleFeilEllerVerre()
     }
 
     private fun startdatoForArbeidsforhold(skjæringstidspunkt: LocalDate): LocalDate? {
@@ -501,7 +501,7 @@ internal class Arbeidsgiver private constructor(
 
     internal fun håndter(sykmelding: Sykmelding) {
         sykmelding.validerAtSykmeldingIkkeErForGammel()
-        if (sykmelding.hasErrorsOrWorse()) return
+        if (sykmelding.harFunksjonelleFeilEllerVerre()) return
         håndter(sykmelding, Vedtaksperiode::håndter)
         sykmeldingsperioder.lagre(sykmelding)
     }
@@ -509,7 +509,7 @@ internal class Arbeidsgiver private constructor(
     private fun harOverlappendeEllerForlengerForkastetVedtaksperiode(hendelse: SykdomstidslinjeHendelse): Boolean {
         ForkastetVedtaksperiode.overlapperMedForkastet(forkastede, hendelse)
         ForkastetVedtaksperiode.forlengerForkastet(forkastede, hendelse)
-        return hendelse.hasErrorsOrWorse()
+        return hendelse.harFunksjonelleFeilEllerVerre()
     }
 
     internal fun håndter(søknad: Søknad) {
@@ -526,7 +526,7 @@ internal class Arbeidsgiver private constructor(
             return
         }
         if (noenHarHåndtert(søknad, Vedtaksperiode::håndter)) {
-            if (søknad.hasErrorsOrWorse()) {
+            if (søknad.harFunksjonelleFeilEllerVerre()) {
                 person.sendOppgaveEvent(søknad)
                 person.emitHendelseIkkeHåndtert(søknad)
             } else {
@@ -538,7 +538,7 @@ internal class Arbeidsgiver private constructor(
         registrerNyVedtaksperiode(vedtaksperiode)
         håndter(søknad) { nyPeriodeMedNyFlyt(vedtaksperiode, søknad) }
         vedtaksperiode.håndter(søknad)
-        if (søknad.hasErrorsOrWorse()) {
+        if (søknad.harFunksjonelleFeilEllerVerre()) {
             søknad.info("Forsøkte å opprette en ny vedtaksperiode, men den ble forkastet før den rakk å spørre om inntektsmeldingReplay. " +
                     "Ber om inntektsmeldingReplay så vi kan opprette gosys-oppgaver for inntektsmeldinger som ville ha truffet denne vedtaksperioden")
             vedtaksperiode.trengerInntektsmeldingReplay()
@@ -1108,7 +1108,7 @@ internal class Arbeidsgiver private constructor(
         } catch (err: UtbetalingstidslinjeBuilderException) {
             err.logg(aktivitetslogg)
         }
-        return !aktivitetslogg.hasErrorsOrWorse()
+        return !aktivitetslogg.harFunksjonelleFeilEllerVerre()
     }
 
     private fun <Hendelse : IAktivitetslogg> håndter(hendelse: Hendelse, håndterer: Vedtaksperiode.(Hendelse) -> Unit) {

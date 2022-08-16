@@ -278,8 +278,8 @@ internal class HendelseMediator(
         personMediator.finalize(rapidsConnection, context, lagrePersonDao)
         subsumsjonMediator.finalize(context)
         datadelingMediator.finalize(context)
-        if (!hendelse.hasActivities()) return
-        if (hendelse.hasErrorsOrWorse()) sikkerLogg.info("aktivitetslogg inneholder errors:\n${hendelse.toLogString()}")
+        if (!hendelse.harAktiviteter()) return
+        if (hendelse.harFunksjonelleFeilEllerVerre()) sikkerLogg.info("aktivitetslogg inneholder errors:\n${hendelse.toLogString()}")
         else sikkerLogg.info("aktivitetslogg inneholder meldinger:\n${hendelse.toLogString()}")
         behovMediator.håndter(context, hendelse)
     }

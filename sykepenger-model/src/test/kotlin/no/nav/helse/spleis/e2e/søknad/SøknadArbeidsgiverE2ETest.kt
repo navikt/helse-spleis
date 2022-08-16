@@ -231,7 +231,7 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
     fun `forkastede problemdager skal ikke skape problem ved utregning av arbeidsgiverperiode`() = Toggle.IkkeForlengInfotrygdperioder.disable {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), Papirsykmelding(27.desember(2017), 31.desember(2017)))
-        assertTrue(hendelselogg.hasErrorsOrWorse()) // perioden blir forkastet pga papirsykmelding
+        assertTrue(hendelselogg.harFunksjonelleFeilEllerVerre()) // perioden blir forkastet pga papirsykmelding
         håndterSykmelding(Sykmeldingsperiode(21.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(21.januar, 31.januar, 100.prosent))
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)

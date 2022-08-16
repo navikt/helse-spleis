@@ -120,7 +120,7 @@ internal class SykdomstidslinjeTest {
         val tidslinje = Sykdomstidslinje.problemdager(1.mandag, 1.mandag, TestEvent.testkilde, "Dette er en problemdag")
         val aktivitetslogg = Aktivitetslogg()
         assertFalse(tidslinje.valider(aktivitetslogg))
-        assertTrue(aktivitetslogg.hasErrorsOrWorse())
+        assertTrue(aktivitetslogg.harFunksjonelleFeilEllerVerre())
     }
 
     @Test

@@ -753,7 +753,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK
         )
-        assertFalse(person.aktivitetslogg.logg(inspektør.vedtaksperioder(1.vedtaksperiode)).hasWarningsOrWorse())
+        assertFalse(person.aktivitetslogg.logg(inspektør.vedtaksperioder(1.vedtaksperiode)).harVarslerEllerVerre())
     }
 
     @Test
@@ -1749,7 +1749,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             listOf(Periode(3.januar, 18.januar)),
             3.januar
         )
-        assertFalse(person.personLogg.hasWarningsOrWorse())
+        assertFalse(person.personLogg.harVarslerEllerVerre())
         assertTilstander(
             1.vedtaksperiode,
             START,

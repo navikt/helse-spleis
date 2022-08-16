@@ -150,7 +150,7 @@ internal class UtbetalingslinjeForskjellTest {
         assertEquals(5, actual.stønadsdager())
         assertNotEquals(original.fagsystemId, actual.fagsystemId)
         assertEquals(NY, actual.endringskode)
-        assertFalse(aktivitetslogg.hasWarningsOrWorse())
+        assertFalse(aktivitetslogg.harVarslerEllerVerre())
     }
 
     @Test
@@ -162,7 +162,7 @@ internal class UtbetalingslinjeForskjellTest {
         assertEquals(0, actual.stønadsdager())
         assertNotEquals(original.fagsystemId, actual.fagsystemId)
         assertEquals(NY, actual.endringskode)
-        assertFalse(aktivitetslogg.hasWarningsOrWorse())
+        assertFalse(aktivitetslogg.harVarslerEllerVerre())
     }
 
     @Test
@@ -174,7 +174,7 @@ internal class UtbetalingslinjeForskjellTest {
         assertEquals(0, actual.stønadsdager())
         assertEquals(original.fagsystemId, actual.fagsystemId)
         assertEquals(ENDR, actual.endringskode)
-        assertFalse(aktivitetslogg.hasWarningsOrWorse())
+        assertFalse(aktivitetslogg.harVarslerEllerVerre())
     }
 
     @Test
@@ -185,7 +185,7 @@ internal class UtbetalingslinjeForskjellTest {
         assertUtbetalinger(linjer(5.februar to 9.februar), actual)
         assertEquals(original.fagsystemId, actual.fagsystemId)
         assertEquals(NY, actual.endringskode)
-        assertFalse(aktivitetslogg.hasWarningsOrWorse())
+        assertFalse(aktivitetslogg.harVarslerEllerVerre())
     }
 
     @Test
@@ -196,7 +196,7 @@ internal class UtbetalingslinjeForskjellTest {
         assertUtbetalinger(linjer(5.februar to 9.februar), actual)
         assertNotEquals(original.fagsystemId, actual.fagsystemId)
         assertEquals(NY, actual.endringskode)
-        assertFalse(aktivitetslogg.hasWarningsOrWorse())
+        assertFalse(aktivitetslogg.harVarslerEllerVerre())
     }
 
     @Test
@@ -208,7 +208,7 @@ internal class UtbetalingslinjeForskjellTest {
         assertEquals(original.fagsystemId, actual.fagsystemId)
         assertEquals(30, actual.stønadsdager())
         assertEquals(ENDR, actual.endringskode)
-        assertTrue(aktivitetslogg.hasWarningsOrWorse())
+        assertTrue(aktivitetslogg.harVarslerEllerVerre())
     }
 
     @Test
@@ -220,7 +220,7 @@ internal class UtbetalingslinjeForskjellTest {
         assertEquals(original.fagsystemId, actual.fagsystemId)
         assertEquals(10, actual.stønadsdager())
         assertEquals(ENDR, actual.endringskode)
-        assertFalse(aktivitetslogg.hasWarningsOrWorse())
+        assertFalse(aktivitetslogg.harVarslerEllerVerre())
     }
 
     @Test
@@ -357,7 +357,7 @@ internal class UtbetalingslinjeForskjellTest {
             1.januar to 2.januar endringskode NY pekerPå revised.last(),
             14.januar to 20.januar endringskode NY pekerPå actual[0]
         ), actual)
-        assertTrue(aktivitetslogg.hasWarningsOrWorse())
+        assertTrue(aktivitetslogg.harVarslerEllerVerre())
         assertTrue(aktivitetslogg.warn().map(Aktivitetslogg.Aktivitet::toString).any { it.contains(WARN_OPPDRAG_FOM_ENDRET) })
     }
 
@@ -632,7 +632,7 @@ internal class UtbetalingslinjeForskjellTest {
         assertEquals(NY, actual[1].endringskode)
         assertEquals(original[0].id, actual[1].refId)
         assertEquals(original[0].id + 1, actual[1].id)
-        assertFalse(aktivitetslogg.hasWarningsOrWorse())
+        assertFalse(aktivitetslogg.harVarslerEllerVerre())
     }
 
     @Test
@@ -647,7 +647,7 @@ internal class UtbetalingslinjeForskjellTest {
         assertEquals(NY, actual[1].endringskode)
         assertEquals(original[0].id + 1, actual[0].id)  // chained off of last of original
         assertEquals(actual[0].id + 1, actual[1].id)
-        assertFalse(aktivitetslogg.hasWarningsOrWorse())
+        assertFalse(aktivitetslogg.harVarslerEllerVerre())
     }
 
     @Test
@@ -662,7 +662,7 @@ internal class UtbetalingslinjeForskjellTest {
         assertEquals(NY, actual[1].endringskode)
         assertEquals(original[0].id + 1, actual[0].id)  // chained off of last of original
         assertEquals(actual[0].id + 1, actual[1].id)
-        assertFalse(aktivitetslogg.hasWarningsOrWorse())
+        assertFalse(aktivitetslogg.harVarslerEllerVerre())
     }
 
     @Test
@@ -689,7 +689,7 @@ internal class UtbetalingslinjeForskjellTest {
         assertEquals(original[0].id + 1, actual[1].id)
         assertEquals(UEND, actual[0].endringskode)
         assertEquals(NY, actual[1].endringskode)
-        assertFalse(aktivitetslogg.hasWarningsOrWorse())
+        assertFalse(aktivitetslogg.harVarslerEllerVerre())
     }
 
     @Test
@@ -716,7 +716,7 @@ internal class UtbetalingslinjeForskjellTest {
             18.januar to 19.januar grad 80 endringskode NY pekerPå actual[1],
             1.februar to 9.februar endringskode NY pekerPå actual[2]
         ), actual)
-        assertFalse(aktivitetslogg.hasWarningsOrWorse())
+        assertFalse(aktivitetslogg.harVarslerEllerVerre())
     }
 
     @Test
@@ -744,7 +744,7 @@ internal class UtbetalingslinjeForskjellTest {
         ), actual)
         assertEquals(original.fagsystemId, actual.fagsystemId)
         assertEquals(ENDR, actual.endringskode)
-        assertFalse(aktivitetslogg.hasWarningsOrWorse())
+        assertFalse(aktivitetslogg.harVarslerEllerVerre())
     }
 
     @Test
@@ -755,7 +755,7 @@ internal class UtbetalingslinjeForskjellTest {
         assertUtbetalinger(linjer(1.januar to 10.januar endringskode NY pekerPå original.last()), actual)
         assertEquals(original.fagsystemId, actual.fagsystemId)
         assertEquals(ENDR, actual.endringskode)
-        assertTrue(aktivitetslogg.hasWarningsOrWorse())
+        assertTrue(aktivitetslogg.harVarslerEllerVerre())
     }
 
     @Test
@@ -766,7 +766,7 @@ internal class UtbetalingslinjeForskjellTest {
         assertUtbetalinger(linjer(1.januar to 3.januar endringskode NY), actual)
         assertNotEquals(original.fagsystemId, actual.fagsystemId)
         assertEquals(NY, actual.endringskode)
-        assertFalse(aktivitetslogg.hasWarningsOrWorse())
+        assertFalse(aktivitetslogg.harVarslerEllerVerre())
     }
 
     @Test
@@ -777,7 +777,7 @@ internal class UtbetalingslinjeForskjellTest {
         assertUtbetalinger(linjer(1.januar to 3.januar endringskode NY pekerPå original.last()), actual)
         assertEquals(original.fagsystemId, actual.fagsystemId)
         assertEquals(ENDR, actual.endringskode)
-        assertTrue(aktivitetslogg.hasWarningsOrWorse())
+        assertTrue(aktivitetslogg.harVarslerEllerVerre())
     }
 
     @Test
@@ -799,7 +799,7 @@ internal class UtbetalingslinjeForskjellTest {
             20.januar to 26.januar endringskode NY pekerPå actual[1]
         ), actual)
         assertEquals(original.fagsystemId, actual.fagsystemId)
-        assertFalse(aktivitetslogg.hasWarningsOrWorse())
+        assertFalse(aktivitetslogg.harVarslerEllerVerre())
     }
 
     @Test fun `slett nøyaktig en periode`() {
@@ -814,7 +814,7 @@ internal class UtbetalingslinjeForskjellTest {
         )
         assertEquals(original.fagsystemId, actual.fagsystemId)
         assertEquals(ENDR, actual.endringskode)
-        assertTrue(aktivitetslogg.hasWarningsOrWorse())
+        assertTrue(aktivitetslogg.harVarslerEllerVerre())
     }
 
     @Test fun `original andre periode samsvarer delvis med ny`() {
@@ -827,7 +827,7 @@ internal class UtbetalingslinjeForskjellTest {
         ), actual)
         assertEquals(original.fagsystemId, actual.fagsystemId)
         assertEquals(ENDR, actual.endringskode)
-        assertTrue(aktivitetslogg.hasWarningsOrWorse())
+        assertTrue(aktivitetslogg.harVarslerEllerVerre())
     }
 
     @Test fun `perioden min starter midt i en original periode`() {
@@ -840,7 +840,7 @@ internal class UtbetalingslinjeForskjellTest {
         ), actual)
         assertEquals(original.fagsystemId, actual.fagsystemId)
         assertEquals(ENDR, actual.endringskode)
-        assertTrue(aktivitetslogg.hasWarningsOrWorse())
+        assertTrue(aktivitetslogg.harVarslerEllerVerre())
     }
 
     @Test fun `ny er tom`() {
@@ -849,7 +849,7 @@ internal class UtbetalingslinjeForskjellTest {
         val actual = recalculated - original
         assertUtbetalinger(tomtOppdrag(), actual)
         assertNotEquals(original.fagsystemId, actual.fagsystemId)
-        assertFalse(aktivitetslogg.hasWarningsOrWorse())
+        assertFalse(aktivitetslogg.harVarslerEllerVerre())
     }
 
     @Test fun `originalen har hale å slette`() {
@@ -858,7 +858,7 @@ internal class UtbetalingslinjeForskjellTest {
         val actual = recalculated - original
         assertUtbetalinger(linjer(1.januar to 5.januar endrer original.last()), actual)
         assertEquals(original.fagsystemId, actual.fagsystemId)
-        assertFalse(aktivitetslogg.hasWarningsOrWorse())
+        assertFalse(aktivitetslogg.harVarslerEllerVerre())
     }
 
     @Test fun `Sletting hvor alt blir sendt på nytt`() {
@@ -870,7 +870,7 @@ internal class UtbetalingslinjeForskjellTest {
             7.januar to 10.januar endringskode NY pekerPå actual[0]
         ), actual)
         assertEquals(original.fagsystemId, actual.fagsystemId)
-        assertFalse(aktivitetslogg.hasWarningsOrWorse())
+        assertFalse(aktivitetslogg.harVarslerEllerVerre())
     }
 
     @Test fun `Sletting med UEND`() {
@@ -891,7 +891,7 @@ internal class UtbetalingslinjeForskjellTest {
 
         assertEquals(original.fagsystemId, actual.fagsystemId)
         assertEquals(ENDR, actual.endringskode)
-        assertFalse(aktivitetslogg.hasWarningsOrWorse())
+        assertFalse(aktivitetslogg.harVarslerEllerVerre())
     }
 
     @Test fun `slette fra hode og hale av originalen`() {
@@ -904,7 +904,7 @@ internal class UtbetalingslinjeForskjellTest {
         ), actual)
         assertEquals(original.fagsystemId, actual.fagsystemId)
         assertEquals(ENDR, actual.endringskode)
-        assertTrue(aktivitetslogg.hasWarningsOrWorse())
+        assertTrue(aktivitetslogg.harVarslerEllerVerre())
     }
 
     @Test
@@ -928,7 +928,7 @@ internal class UtbetalingslinjeForskjellTest {
 
         assertEquals(original.fagsystemId, actual.fagsystemId)
         assertEquals(ENDR, actual.endringskode)
-        assertTrue(aktivitetslogg.hasWarningsOrWorse())
+        assertTrue(aktivitetslogg.harVarslerEllerVerre())
     }
 
     @Test
@@ -949,7 +949,7 @@ internal class UtbetalingslinjeForskjellTest {
         assertEquals(original.fagsystemId, actual.fagsystemId)
         assertEquals(ENDR, actual.endringskode)
         assertEquals(0, actual.stønadsdager())
-        assertFalse(aktivitetslogg.hasWarningsOrWorse())
+        assertFalse(aktivitetslogg.harVarslerEllerVerre())
     }
 
     @Test

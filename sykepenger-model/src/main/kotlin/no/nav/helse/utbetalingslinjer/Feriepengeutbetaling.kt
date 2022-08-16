@@ -96,7 +96,7 @@ internal class Feriepengeutbetaling private constructor(
 
         utbetalingHendelse.info("Behandler svar fra Oppdrag/UR/spenn for feriepenger")
         utbetalingHendelse.valider()
-        val utbetaltOk = !utbetalingHendelse.hasErrorsOrWorse()
+        val utbetaltOk = !utbetalingHendelse.harFunksjonelleFeilEllerVerre()
         lagreInformasjon(utbetalingHendelse, utbetaltOk)
 
         if (!utbetaltOk) {

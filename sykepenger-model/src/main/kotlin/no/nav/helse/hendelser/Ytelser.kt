@@ -50,6 +50,6 @@ class Ytelser(
         if (opplæringspenger.overlapper(this, periode)) funksjonellFeil("Det er utbetalt opplæringspenger i samme periode.")
         if (institusjonsopphold.overlapper(this, periode)) funksjonellFeil("Det er institusjonsopphold i perioden. Vurder retten til sykepenger.")
 
-        return !hasErrorsOrWorse()
+        return !harFunksjonelleFeilEllerVerre()
     }
 }
