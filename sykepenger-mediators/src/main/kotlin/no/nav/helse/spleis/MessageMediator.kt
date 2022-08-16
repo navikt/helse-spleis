@@ -27,7 +27,6 @@ import no.nav.helse.spleis.meldinger.UtbetalingerOverførtRiver
 import no.nav.helse.spleis.meldinger.UtbetalingerRiver
 import no.nav.helse.spleis.meldinger.UtbetalingpåminnelserRiver
 import no.nav.helse.spleis.meldinger.UtbetalingsgodkjenningerRiver
-import no.nav.helse.spleis.meldinger.UtbetalingsgrunnlagRiver
 import no.nav.helse.spleis.meldinger.UtbetalingshistorikkForFeriepengerRiver
 import no.nav.helse.spleis.meldinger.UtbetalingshistorikkRiver
 import no.nav.helse.spleis.meldinger.VilkårsgrunnlagRiver
@@ -56,7 +55,6 @@ internal class MessageMediator(
             UtbetalingshistorikkForFeriepengerRiver(it, this)
             YtelserRiver(it, this)
             VilkårsgrunnlagRiver(it, this)
-            UtbetalingsgrunnlagRiver(it, this)
             UtbetalingsgodkjenningerRiver(it, this)
             UtbetalingerOverførtRiver(it, this)
             UtbetalingerRiver(it, this)

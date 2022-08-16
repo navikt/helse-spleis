@@ -19,7 +19,6 @@ import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Søknad
-import no.nav.helse.hendelser.Utbetalingsgrunnlag
 import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.hendelser.Vilkårsgrunnlag
@@ -599,11 +598,6 @@ internal class Arbeidsgiver private constructor(
     internal fun håndter(vilkårsgrunnlag: Vilkårsgrunnlag) {
         vilkårsgrunnlag.kontekst(this)
         håndter(vilkårsgrunnlag, Vedtaksperiode::håndter)
-    }
-
-    internal fun håndter(utbetalingsgrunnlag: Utbetalingsgrunnlag) {
-        utbetalingsgrunnlag.kontekst(this)
-        håndter(utbetalingsgrunnlag, Vedtaksperiode::håndter)
     }
 
     internal fun håndter(simulering: Simulering) {

@@ -22,7 +22,6 @@ import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Søknad
-import no.nav.helse.hendelser.Utbetalingsgrunnlag
 import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.hendelser.Vilkårsgrunnlag
@@ -243,12 +242,6 @@ class Person private constructor(
         registrer(vilkårsgrunnlag, "Behandler vilkårsgrunnlag")
         finnArbeidsgiver(vilkårsgrunnlag).håndter(vilkårsgrunnlag)
         håndterGjenoppta(vilkårsgrunnlag)
-    }
-
-    fun håndter(utbetalingsgrunnlag: Utbetalingsgrunnlag) {
-        registrer(utbetalingsgrunnlag, "Behandler utbetalingsgrunnlag")
-        finnArbeidsgiver(utbetalingsgrunnlag).håndter(utbetalingsgrunnlag)
-        håndterGjenoppta(utbetalingsgrunnlag)
     }
 
     fun håndter(simulering: Simulering) {

@@ -17,7 +17,6 @@ import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Søknad
-import no.nav.helse.hendelser.Utbetalingsgrunnlag
 import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.hendelser.Validation.Companion.validation
 import no.nav.helse.hendelser.Vilkårsgrunnlag
@@ -268,12 +267,6 @@ internal class Vedtaksperiode private constructor(
         if (!vilkårsgrunnlag.erRelevant(id)) return
         kontekst(vilkårsgrunnlag)
         tilstand.håndter(this, vilkårsgrunnlag)
-    }
-
-    internal fun håndter(utbetalingsgrunnlag: Utbetalingsgrunnlag) {
-        if (!utbetalingsgrunnlag.erRelevant(id)) return
-        kontekst(utbetalingsgrunnlag)
-        tilstand.håndter(this, utbetalingsgrunnlag)
     }
 
     internal fun håndter(simulering: Simulering) {
@@ -893,8 +886,6 @@ internal class Vedtaksperiode private constructor(
             overstyrArbeidsforhold: OverstyrArbeidsforhold,
             subsumsjon: Subsumsjon?
         ) = false
-
-        fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: Utbetalingsgrunnlag) {}
 
         fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {}
 

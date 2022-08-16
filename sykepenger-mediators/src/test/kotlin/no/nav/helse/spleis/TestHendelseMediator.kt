@@ -12,7 +12,6 @@ import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Søknad
-import no.nav.helse.hendelser.Utbetalingsgrunnlag
 import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.hendelser.Vilkårsgrunnlag
@@ -44,7 +43,6 @@ import no.nav.helse.spleis.meldinger.model.UtbetalingMessage
 import no.nav.helse.spleis.meldinger.model.UtbetalingOverførtMessage
 import no.nav.helse.spleis.meldinger.model.UtbetalingpåminnelseMessage
 import no.nav.helse.spleis.meldinger.model.UtbetalingsgodkjenningMessage
-import no.nav.helse.spleis.meldinger.model.UtbetalingsgrunnlagMessage
 import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkForFeriepengerMessage
 import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkMessage
 import no.nav.helse.spleis.meldinger.model.VilkårsgrunnlagMessage
@@ -175,10 +173,6 @@ internal class TestHendelseMediator : IHendelseMediator {
 
     override fun behandle(message: VilkårsgrunnlagMessage, vilkårsgrunnlag: Vilkårsgrunnlag, context: MessageContext) {
         lestVilkårsgrunnlag = true
-    }
-
-    override fun behandle(message: UtbetalingsgrunnlagMessage, utbetalingsgrunnlag: Utbetalingsgrunnlag, context: MessageContext) {
-        lestUtbetalingshistorikk = true
     }
 
     override fun behandle(message: UtbetalingsgodkjenningMessage, utbetalingsgodkjenning: Utbetalingsgodkjenning, context: MessageContext) {

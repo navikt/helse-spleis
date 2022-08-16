@@ -25,7 +25,6 @@ import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.SIMULERING
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.UTBETALING
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.UTBETALINGPÅMINNELSE
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.UTBETALINGSGODKJENNING
-import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.UTBETALINGSGRUNNLAG
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.UTBETALING_OVERFØRT
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.VILKÅRSGRUNNLAG
 import no.nav.helse.spleis.db.HendelseRepository.Meldingstype.YTELSER
@@ -48,7 +47,6 @@ import no.nav.helse.spleis.meldinger.model.UtbetalingMessage
 import no.nav.helse.spleis.meldinger.model.UtbetalingOverførtMessage
 import no.nav.helse.spleis.meldinger.model.UtbetalingpåminnelseMessage
 import no.nav.helse.spleis.meldinger.model.UtbetalingsgodkjenningMessage
-import no.nav.helse.spleis.meldinger.model.UtbetalingsgrunnlagMessage
 import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkForFeriepengerMessage
 import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkMessage
 import no.nav.helse.spleis.meldinger.model.VilkårsgrunnlagMessage
@@ -145,7 +143,6 @@ internal class HendelseRepository(private val dataSource: DataSource) {
         is OverstyrTidslinjeMessage -> OVERSTYRTIDSLINJE
         is OverstyrInntektMessage -> OVERSTYRINNTEKT
         is OverstyrArbeidsforholdMessage -> OVERSTYRARBEIDSFORHOLD
-        is UtbetalingsgrunnlagMessage -> UTBETALINGSGRUNNLAG
         is UtbetalingshistorikkForFeriepengerMessage -> null //TODO: Skal lagres som UTBETALINGSHISTORIKK_FOR_FERIEPENGER
         is MigrateMessage,
         is AvstemmingMessage,
