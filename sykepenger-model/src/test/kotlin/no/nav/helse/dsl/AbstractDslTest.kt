@@ -78,6 +78,9 @@ internal abstract class AbstractDslTest {
     protected operator fun <R> String.invoke(testblokk: TestPerson.TestArbeidsgiver.() -> R) =
         testperson.arbeidsgiver(this, testblokk)
 
+    protected operator fun <R> List<String>.invoke(testblokk: TestPerson.TestArbeidsgiver.() -> R) =
+        forEach { organisasjonsnummer -> organisasjonsnummer { testblokk() } }
+
     protected fun List<String>.forlengVedtak(periode: Periode, grad: Prosentdel = 100.prosent) {
         forEach {
             it {

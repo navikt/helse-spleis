@@ -19,6 +19,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.Kilde.SAKSBEHANDLER
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
+import no.nav.helse.mars
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
@@ -477,28 +478,113 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
     }
 
     @Test
-    fun `revurder inntekt i AvventerHistorikkRevurdering`() {
-        // TODO
+    fun `revurder inntekt når a1 står i AvventerHistorikkRevurdering`() {
+        (a1 og a2).nyeVedtak(1.januar til 31.januar)
+        nullstillTilstandsendringer()
+        a1 {
+            håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 23000.månedlig)
+            håndterOverstyrInntekt(1.januar, 22000.månedlig)
+            håndterOverstyrInntekt(1.januar, 23000.månedlig)
+            håndterYtelser(1.vedtaksperiode)
+
+            assertTilstander(
+                1.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_GJENNOMFØRT_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_GJENNOMFØRT_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING
+            )
+            assertDag(17.januar, 1062.daglig, aktuellDagsinntekt = 23000.månedlig)
+        }
+        a2 {
+            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
+        }
     }
     @Test
-    fun `revurder inntekt i AvventerSimuleringRevurdering`() {
-        // TODO
+    fun `revurder inntekt når a1 står i AvventerSimuleringRevurdering`() {
+        (a1 og a2).nyeVedtak(1.januar til 31.januar)
+        nullstillTilstandsendringer()
+        a1 {
+            håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 23000.månedlig)
+            håndterOverstyrInntekt(1.januar, 22000.månedlig)
+            håndterYtelser(1.vedtaksperiode)
+            håndterOverstyrInntekt(1.januar, 23000.månedlig)
+            håndterYtelser(1.vedtaksperiode)
+
+            assertTilstander(
+                1.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_GJENNOMFØRT_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+                AVVENTER_GJENNOMFØRT_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING
+            )
+            assertDag(17.januar, 1062.daglig, aktuellDagsinntekt = 23000.månedlig)
+        }
+        a2 {
+            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
+        }
     }
     @Test
-    fun `revurder inntekt i AvventerGjennomførtRevurdering`() {
-        // TODO
+    fun `revurder inntekt når a1 står i AvventerGodkjenningRevurdering`() {
+        (a1 og a2).nyeVedtak(1.januar til 31.januar)
+        nullstillTilstandsendringer()
+        a1 {
+            håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 23000.månedlig)
+            håndterOverstyrInntekt(1.januar, 22000.månedlig)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterOverstyrInntekt(1.januar, 23000.månedlig)
+            håndterYtelser(1.vedtaksperiode)
+
+            assertTilstander(
+                1.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_GJENNOMFØRT_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+                AVVENTER_GJENNOMFØRT_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING
+            )
+            assertDag(17.januar, 1062.daglig, aktuellDagsinntekt = 23000.månedlig)
+        }
+        a2 {
+            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
+        }
     }
 
     @Test
     fun `revurderer tidligere skjæringstidspunkt`() {
-        // TODO
+        (a1 og a2).nyeVedtak(1.januar til 31.januar)
+        (a1 og a2).nyeVedtak(1.mars til 31.mars)
+        nullstillTilstandsendringer()
+        a1 {
+            håndterOverstyrInntekt(1.januar, 19000.månedlig)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+            assertDag(17.januar, 877.daglig, aktuellDagsinntekt = 19000.månedlig)
+        }
+        a2 {
+            håndterYtelser(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+            assertDag(17.januar, 923.daglig, aktuellDagsinntekt = 20000.månedlig)
+        }
+        (a1 og a2) {
+            håndterYtelser(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+            assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
+        }
     }
-
-    @Test
-    fun `noe med 25 warning`() {
-        // TODO
-    }
-
     @Test
     fun `kun den arbeidsgiveren som har fått overstyrt inntekt som faktisk lagrer inntekten`() {
         a2 {
@@ -550,15 +636,11 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
         }
     }
 
-    private fun TestPerson.TestArbeidsgiver.assertDag(dato: LocalDate, arbeidsgiverbeløp: Inntekt, personbeløp: Inntekt = Inntekt.INGEN, aktuellDagsinntekt: Inntekt = Inntekt.INGEN) {
+    private fun TestPerson.TestArbeidsgiver.assertDag(dato: LocalDate, arbeidsgiverbeløp: Inntekt, personbeløp: Inntekt = INGEN, aktuellDagsinntekt: Inntekt = INGEN) {
         inspektør.sisteUtbetalingUtbetalingstidslinje()[dato].let {
             assertEquals(arbeidsgiverbeløp, it.økonomi.inspektør.arbeidsgiverbeløp)
             assertEquals(personbeløp, it.økonomi.inspektør.personbeløp)
             assertEquals(aktuellDagsinntekt, it.økonomi.inspektør.aktuellDagsinntekt)
         }
-    }
-
-    private fun assertDiff(diff: Int) {
-        assertEquals(diff, inspektør.utbetalinger.last().inspektør.nettobeløp)
     }
 }
