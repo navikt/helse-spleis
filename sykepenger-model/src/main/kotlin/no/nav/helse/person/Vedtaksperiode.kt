@@ -1020,6 +1020,7 @@ internal class Vedtaksperiode private constructor(
             sikkerlogg.info("Vedtaksperiode {} i tilstand {} overlappet med inntektsmelding {}",
                 keyValue("vedtaksperiodeId", vedtaksperiode.id), keyValue("tilstand", type), keyValue("meldingsreferanseId", inntektsmelding.meldingsreferanseId()))
             vedtaksperiode.håndterInntektsmelding(inntektsmelding, this)
+            vedtaksperiode.person.startRevurdering(vedtaksperiode, inntektsmelding)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
@@ -1561,6 +1562,9 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
+            if (vedtaksperiode.person.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt) == null) return vedtaksperiode.tilstand(påminnelse, AvventerHistorikkRevurdering) {
+                påminnelse.info("Reberegner perioden ettersom skjæringstidspunktet har flyttet seg")
+            }
             vedtaksperiode.utbetalinger.simuler(påminnelse)
         }
 

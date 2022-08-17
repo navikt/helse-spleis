@@ -163,6 +163,12 @@ internal fun AbstractPersonTest.assertVarsler(vararg filtre: AktivitetsloggFilte
     assertTrue(collectVarsler(*filtre).isNotEmpty(), "Forventet warnings, fant ingen")
 }
 
+internal fun AbstractPersonTest.assertVarsler(warnings: List<String>, vararg filtre: AktivitetsloggFilter) {
+    assertVarsler(*filtre)
+    val ekteWarnings = collectVarsler(*filtre)
+    assertTrue(warnings.containsAll(ekteWarnings)) { "Forventet ikke warnings: ${ekteWarnings.filterNot { it in warnings }}"}
+}
+
 internal fun AbstractPersonTest.assertVarsel(warning: String, vararg filtre: AktivitetsloggFilter) {
     val warnings = collectVarsler(*filtre)
     assertTrue(warnings.contains(warning), "\nFant ikke forventet warning:\n\t$warning\nWarnings funnet:\n\t${warnings.joinToString("\n\t")}\n")

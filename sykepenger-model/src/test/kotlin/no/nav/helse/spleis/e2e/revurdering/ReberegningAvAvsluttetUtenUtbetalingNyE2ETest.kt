@@ -51,6 +51,7 @@ import no.nav.helse.spleis.e2e.assertIngenVarsler
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
+import no.nav.helse.spleis.e2e.assertVarsler
 import no.nav.helse.spleis.e2e.finnSkjæringstidspunkt
 import no.nav.helse.spleis.e2e.grunnlag
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
@@ -1077,6 +1078,31 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
             }
         )
         assertForkastetPeriodeTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, TIL_INFOTRYGD)
+    }
+
+    @Test
+    fun `endrer arbeidsgiverperiode etter igangsatt revurdering`() {
+        håndterSykmelding(Sykmeldingsperiode(5.februar, 11.februar, 100.prosent))
+        håndterSøknad(Sykdom(5.februar, 11.februar, 100.prosent))
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+        håndterSykmelding(Sykmeldingsperiode(12.februar, 20.februar, 100.prosent))
+        håndterSøknad(Sykdom(12.februar, 20.februar, 100.prosent))
+        nullstillTilstandsendringer()
+        håndterInntektsmelding(listOf(
+            24.januar til 8.februar
+        ))
+        håndterYtelser(2.vedtaksperiode)
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterInntektsmelding(listOf(
+            22.januar til 6.februar
+        ))
+        håndterSimulering(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        assertVarsler(listOf("Denne perioden var tidligere regnet som innenfor arbeidsgiverperioden"), 1.vedtaksperiode.filter(ORGNUMMER))
+        assertVarsler(listOf("Denne perioden var tidligere regnet som innenfor arbeidsgiverperioden"), 2.vedtaksperiode.filter(ORGNUMMER))
+        assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_GJENNOMFØRT_REVURDERING)
+        assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_VILKÅRSPRØVING_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_VILKÅRSPRØVING_REVURDERING)
     }
 
     @Test
