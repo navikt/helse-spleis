@@ -1,17 +1,17 @@
 package no.nav.helse.sykdomstidslinje
 
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Periode.Companion.aldri
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.ArbeidstakerHendelse
+import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
-import no.nav.helse.hendelser.Periode.Companion.aldri
-import no.nav.helse.person.Dokumentsporing
 import kotlin.reflect.KClass
 
 internal typealias Melding = KClass<out SykdomstidslinjeHendelse>
@@ -101,5 +101,7 @@ abstract class SykdomstidslinjeHendelse(
     override fun hashCode(): Int {
         return meldingsreferanseId().hashCode()
     }
+
+    internal fun omsluttesAv(periode: Periode) = periode.start <= periode().start && periode.endInclusive >= periode().endInclusive
 }
 

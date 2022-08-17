@@ -2132,6 +2132,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
             if (Toggle.RevurderKorrigertSoknad.enabled){
+                if (!søknad.omsluttesAv(vedtaksperiode.periode())) return super.håndter(vedtaksperiode, søknad)
                 vedtaksperiode.låsOpp()
                 vedtaksperiode.oppdaterHistorikk(søknad)
                 vedtaksperiode.lås()
