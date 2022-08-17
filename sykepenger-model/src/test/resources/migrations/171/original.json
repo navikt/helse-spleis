@@ -1,0 +1,50 @@
+{
+  "arbeidsgivere": [
+    {
+      "vedtaksperioder": [
+        {
+          "sykdomstidslinje": {
+            "dager": []
+          }
+        }
+      ],
+      "forkastede": [
+        {
+          "vedtaksperiode": {
+            "sykdomstidslinje": {
+              "dager": []
+            }
+          }
+        },
+        {
+          "vedtaksperiode": {
+            "sykdomstidslinje": {
+              "dager": [
+                {
+                  "fom": "2018-01-01",
+                  "tom": "2018-01-01",
+                  "type": "PROBLEMDAG",
+                  "kilde": {
+                    "type": "Søknad",
+                    "id": "a886ac31-264b-4bb7-9701-fa01bb88a3bf",
+                    "tidsstempel": "2018-01-01T00:00:00"
+                  },
+                  "melding": "Kan ikke velge mellom Permisjonsdag fra Søknad og Feriedag fra Søknad",
+                  "grad": 100.0
+                }
+              ]
+            }
+          }
+        },
+        {
+          "vedtaksperiode": {
+            "sykdomstidslinje": {
+              "dager": []
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "skjemaVersjon": 170
+}
