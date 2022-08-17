@@ -85,7 +85,15 @@ interface SubsumsjonObserver {
     fun `§ 8-3 ledd 2 punktum 1`(oppfylt: Boolean, skjæringstidspunkt: LocalDate, beregningsgrunnlag: Inntekt, minimumInntekt: Inntekt) {}
 
 
-    fun `§ 8-9 ledd 1`(oppfylt: Boolean, periode: Periode) {}
+    /**
+     * Vilkår for rett til sykepenger at medlemmet oppholder seg i Norge.
+     *
+     * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/§8-9)
+     *
+     * @param oppfylt hvorvidt sykmeldte har oppholdt seg i Norge i søknadsperioden
+     * @param søknadsperiode perioden det søkes sykepenger for
+     */
+    fun `§ 8-9 ledd 1`(oppfylt: Boolean, søknadsperiode: Periode) {}
 
     /**
      * Vurdering av maksimalt sykepengegrunnlag

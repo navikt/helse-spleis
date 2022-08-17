@@ -152,8 +152,8 @@ class MaskinellJurist private constructor(
         )
     }
 
-    override fun `§ 8-9 ledd 1`(oppfylt: Boolean, periode: Periode) {
-        periode.forEach {
+    override fun `§ 8-9 ledd 1`(oppfylt: Boolean, søknadsperiode: Periode) {
+        søknadsperiode.forEach {
             leggTil(
                 GrupperbarSubsumsjon(
                     dato = it,
