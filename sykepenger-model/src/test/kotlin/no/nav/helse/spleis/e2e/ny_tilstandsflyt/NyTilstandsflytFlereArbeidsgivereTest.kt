@@ -10,7 +10,6 @@ import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.til
@@ -18,7 +17,6 @@ import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.TilstandType.AVSLUTTET
-import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
@@ -28,7 +26,6 @@ import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
 import no.nav.helse.spleis.e2e.assertIngenVarsel
-import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
@@ -610,22 +607,6 @@ internal class NyTilstandsflytFlereArbeidsgivereTest : AbstractEndToEndTest() {
                 assertTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer=a1)
             }
         )
-    }
-
-    @Test
-    fun `søknad som slutter med noe annet enn sykdom rydder ikke tilstrekkelig opp i sykmeldingsperioder`() {
-        val periode = 1.januar til 21.januar
-        val arbeidsgiverperiode = 1.januar til 16.januar
-        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a2)
-        håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)
-        håndterSøknad(Sykdom(arbeidsgiverperiode.start, arbeidsgiverperiode.endInclusive, 100.prosent), Ferie(17.januar, 21.januar), orgnummer = a2)
-
-        håndterInntektsmelding(listOf(arbeidsgiverperiode), orgnummer = a1)
-        håndterInntektsmelding(listOf(arbeidsgiverperiode), orgnummer = a2)
-
-        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a2)
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
     }
 
     private fun utbetalPeriodeEtterVilkårsprøving(vedtaksperiode: IdInnhenter, orgnummer: String) {

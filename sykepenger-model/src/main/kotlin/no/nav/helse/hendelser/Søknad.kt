@@ -3,7 +3,7 @@ package no.nav.helse.hendelser
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.Companion.søknadsperiode
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Companion.inneholderDagerEtter
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.IAktivitetslogg
@@ -48,6 +48,7 @@ class Søknad(
     init {
         if (perioder.isEmpty()) logiskFeil("Søknad må inneholde perioder")
         sykdomsperiode = Søknadsperiode.sykdomsperiode(perioder) ?: logiskFeil("Søknad inneholder ikke sykdomsperioder")
+        if (perioder.inneholderDagerEtter(sykdomsperiode.endInclusive)) info("Søknad inneholder dager etter siste sykdomsdag")
         sykdomstidslinje = perioder
             .map { it.sykdomstidslinje(sykdomsperiode, avskjæringsdato(), kilde) }
             .filter { it.periode()?.start?.isAfter(sykdomsperiode.start.minusDays(tidslinjegrense)) ?: false }
@@ -109,7 +110,7 @@ class Søknad(
     }
 
     internal fun slettSykmeldingsperioderSomDekkes(sykmeldingsperioder: Sykmeldingsperioder, person: Person) {
-        val sisteDag = søknadsperiode(perioder)!!.endInclusive
+        val sisteDag = periode().endInclusive
         sykmeldingsperioder.fjern(sisteDag)
         person.slettUtgåtteSykmeldingsperioder(sisteDag)
     }
@@ -128,6 +129,9 @@ class Søknad(
         internal companion object {
             fun sykdomsperiode(liste: List<Søknadsperiode>) =
                 søknadsperiode(liste.filterIsInstance<Sykdom>())
+
+            fun List<Søknadsperiode>.inneholderDagerEtter(sisteSykdomsdato: LocalDate) =
+                any { it.periode.endInclusive > sisteSykdomsdato }
 
             fun søknadsperiode(liste: List<Søknadsperiode>) =
                 liste
