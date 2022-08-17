@@ -80,7 +80,7 @@ internal class SerialiseringAvDagerFraSøknadTest {
 
     private val søknad get() = hendelsefabrikk.lagSøknad(
         perioder = arrayOf(
-            Sykdom(1.januar,  2.januar, 100.prosent),
+            Sykdom(1.januar, 5.januar, 100.prosent),
             Egenmelding(2.januar, 2.januar),
             Arbeid(3.januar, 3.januar),
             Ferie(4.januar, 4.januar),

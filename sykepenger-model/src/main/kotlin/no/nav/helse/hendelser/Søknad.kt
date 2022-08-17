@@ -48,7 +48,7 @@ class Søknad(
     init {
         if (perioder.isEmpty()) logiskFeil("Søknad må inneholde perioder")
         sykdomsperiode = Søknadsperiode.sykdomsperiode(perioder) ?: logiskFeil("Søknad inneholder ikke sykdomsperioder")
-        if (perioder.inneholderDagerEtter(sykdomsperiode.endInclusive)) info("Søknad inneholder dager etter siste sykdomsdag")
+        if (perioder.inneholderDagerEtter(sykdomsperiode.endInclusive)) logiskFeil("Søknad inneholder dager etter siste sykdomsdag")
         sykdomstidslinje = perioder
             .map { it.sykdomstidslinje(sykdomsperiode, avskjæringsdato(), kilde) }
             .filter { it.periode()?.start?.isAfter(sykdomsperiode.start.minusDays(tidslinjegrense)) ?: false }
