@@ -135,8 +135,7 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
     @Test
     fun `under 6G -- revurder inntekt opp på a1 gir brukerutbetaling når refusjon er uendret`() {
         (a1 og a2).nyeVedtak(1.januar til 31.januar, inntekt = 15000.månedlig)
-        a1 { assertDag(17.januar, 692.0.daglig, aktuellDagsinntekt = 15000.månedlig, personbeløp = INGEN) }
-        a2 { assertDag(17.januar, 692.0.daglig, aktuellDagsinntekt = 15000.månedlig, personbeløp = INGEN) }
+        (a1 og a2) { assertDag(17.januar, 692.0.daglig, aktuellDagsinntekt = 15000.månedlig, personbeløp = INGEN) }
 
         a1 {
             håndterOverstyrInntekt(1.januar, 16500.månedlig)
@@ -155,8 +154,7 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
     @Test
     fun `under 6G -- revurder inntekt opp på a1 gir økt arbeidsgiverutbetaling når refusjon er endret`() {
         (a1 og a2).nyeVedtak(1.januar til 31.januar, inntekt = 15000.månedlig)
-        a1 { assertDag(17.januar, 692.0.daglig, aktuellDagsinntekt = 15000.månedlig, personbeløp = INGEN) }
-        a2 { assertDag(17.januar, 692.0.daglig, aktuellDagsinntekt = 15000.månedlig, personbeløp = INGEN) }
+        (a1 og a2) { assertDag(17.januar, 692.0.daglig, aktuellDagsinntekt = 15000.månedlig, personbeløp = INGEN) }
 
         a1 {
             håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 16500.månedlig)
@@ -179,8 +177,7 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
         (a1 og a2 og a3).nyeVedtak(1.januar til 31.januar, inntekt = 32000.månedlig)
         nullstillTilstandsendringer()
         a1 { assertDag(17.januar, 721.0.daglig, aktuellDagsinntekt = 32000.månedlig) }
-        a2 { assertDag(17.januar, 720.0.daglig, aktuellDagsinntekt = 32000.månedlig) }
-        a2 { assertDag(17.januar, 720.0.daglig, aktuellDagsinntekt = 32000.månedlig) }
+        (a2 og a3) { assertDag(17.januar, 720.0.daglig, aktuellDagsinntekt = 32000.månedlig) }
 
         a1 {
             håndterOverstyrInntekt(1.januar, 31000.månedlig)
@@ -200,25 +197,7 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
             )
             assertDag(17.januar, 705.0.daglig, aktuellDagsinntekt = 31000.månedlig)
         }
-        a2 {
-            håndterYtelser(1.vedtaksperiode)
-            håndterSimulering(1.vedtaksperiode)
-            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-            håndterUtbetalt()
-            assertTilstander(
-                1.vedtaksperiode,
-                AVSLUTTET,
-                AVVENTER_REVURDERING,
-                AVVENTER_GJENNOMFØRT_REVURDERING,
-                AVVENTER_HISTORIKK_REVURDERING,
-                AVVENTER_SIMULERING_REVURDERING,
-                AVVENTER_GODKJENNING_REVURDERING,
-                TIL_UTBETALING,
-                AVSLUTTET
-            )
-            assertDag(17.januar, 728.0.daglig, aktuellDagsinntekt = 32000.månedlig)
-        }
-        a3 {
+        (a2 og a3) {
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -240,16 +219,11 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
 
     @Test
     fun `a1 er avsluttet og a2 er i AvventerGodkjenning -- revurderer a1`() {
-        a1 {
+        (a1 og a2) {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         }
-        a2 {
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        }
-        a1 { håndterInntektsmelding(listOf(1.januar til 16.januar)) }
-        a2 { håndterInntektsmelding(listOf(1.januar til 16.januar)) }
+        (a1 og a2) { håndterInntektsmelding(listOf(1.januar til 16.januar)) }
         a1 {
             håndterYtelser(1.vedtaksperiode)
             håndterVilkårsgrunnlag(
