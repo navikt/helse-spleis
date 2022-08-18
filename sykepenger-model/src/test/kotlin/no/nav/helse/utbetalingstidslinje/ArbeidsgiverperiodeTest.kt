@@ -5,9 +5,14 @@ import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
-import no.nav.helse.person.etterlevelse.MaskinellJurist
+import no.nav.helse.person.etterlevelse.SubsumsjonObserver
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode.Companion.finn
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class ArbeidsgiverperiodeTest {
@@ -62,9 +67,9 @@ internal class ArbeidsgiverperiodeTest {
     @Test
     fun `ingen utbetaling dersom perioden er innenfor arbeidsgiverperioden eller før det utbetales noe`() {
         agp(1.januar til 16.januar).utbetalingsdag(23.januar).also { agp ->
-            assertTrue(agp.ingenUtbetaling(31.desember(2017) til 5.januar, MaskinellJurist()))
-            assertTrue(agp.ingenUtbetaling(15.januar til 22.januar, MaskinellJurist()))
-            assertFalse(agp.ingenUtbetaling(15.januar til 23.januar, MaskinellJurist()))
+            assertTrue(agp.ingenUtbetaling(31.desember(2017) til 5.januar, Sykdomstidslinje(), SubsumsjonObserver.NullObserver))
+            assertTrue(agp.ingenUtbetaling(15.januar til 22.januar, Sykdomstidslinje(), SubsumsjonObserver.NullObserver))
+            assertFalse(agp.ingenUtbetaling(15.januar til 23.januar, Sykdomstidslinje(), SubsumsjonObserver.NullObserver))
         }
     }
 

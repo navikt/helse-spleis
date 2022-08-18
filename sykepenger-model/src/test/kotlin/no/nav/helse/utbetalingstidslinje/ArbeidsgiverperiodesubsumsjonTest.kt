@@ -201,7 +201,11 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
         var `§ 8-19 tredje ledd - beregning` = 0
         var `§ 8-19 fjerde ledd - beregning` = 0
 
-        override fun `§ 8-17 ledd 1 bokstav a`(oppfylt: Boolean, dagen: LocalDate) {
+        override fun `§ 8-17 ledd 1 bokstav a`(
+            oppfylt: Boolean,
+            dagen: LocalDate,
+            sykdomstidslinje: List<SubsumsjonObserver.Tidslinjedag>
+        ) {
             subsumsjoner += 1
             if (oppfylt) `§ 8-17 første ledd bokstav a - oppfylt` += 1
             else `§ 8-17 første ledd bokstav a - ikke oppfylt` += 1

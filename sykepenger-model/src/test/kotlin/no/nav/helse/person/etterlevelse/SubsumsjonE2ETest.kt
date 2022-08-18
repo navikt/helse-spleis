@@ -1187,7 +1187,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             ledd = 1.ledd,
             bokstav = BOKSTAV_A,
             versjon = 1.januar,
-            input = emptyMap(),
+            input = mapOf( "sykdomstidslinje" to listOf(mapOf("fom" to 1.januar, "tom" to 31.januar, "dagtype" to "SYKEDAG", "grad" to 100))),
             output = mapOf(
                 "perioder" to listOf(mapOf("fom" to 17.januar, "tom" to 17.januar))
             )
@@ -1208,7 +1208,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             ledd = 1.ledd,
             bokstav = BOKSTAV_A,
             versjon = 1.januar,
-            input = emptyMap(),
+            input = mapOf( "sykdomstidslinje" to listOf(mapOf("fom" to 4.januar, "tom" to 22.januar, "dagtype" to "SYKEDAG", "grad" to 100))),
             output = mapOf(
                 "perioder" to listOf(mapOf("fom" to 22.januar, "tom" to 22.januar))
             )
@@ -1228,7 +1228,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             ledd = 1.ledd,
             bokstav = BOKSTAV_A,
             versjon = 1.januar(2018),
-            input = emptyMap(),
+            input = mapOf( "sykdomstidslinje" to listOf(mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "SYKEDAG", "grad" to 100))) ,
             output = mapOf(
                 "perioder" to listOf(mapOf("fom" to 1.januar, "tom" to 16.januar))
             )
@@ -1248,7 +1248,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             ledd = 1.ledd,
             bokstav = BOKSTAV_A,
             versjon = 1.januar(2018),
-            input = emptyMap(),
+            input = mapOf( "sykdomstidslinje" to listOf(mapOf("fom" to 1.januar, "tom" to 31.januar, "dagtype" to "SYKEDAG", "grad" to 100))),
             output = mapOf(
                 "perioder" to listOf(mapOf("fom" to 1.januar, "tom" to 16.januar))
             )
@@ -1268,7 +1268,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             ledd = 1.ledd,
             bokstav = BOKSTAV_A,
             versjon = 1.januar(2018),
-            input = emptyMap(),
+            input = mapOf( "sykdomstidslinje" to listOf(mapOf("fom" to 1.januar, "tom" to 10.januar, "dagtype" to "SYKEDAG", "grad" to 100), mapOf("fom" to 12.januar, "tom" to 31.januar, "dagtype" to "SYKEDAG", "grad" to 100))),
             output = mapOf(
                 "perioder" to listOf(
                     mapOf("fom" to 1.januar, "tom" to 10.januar),

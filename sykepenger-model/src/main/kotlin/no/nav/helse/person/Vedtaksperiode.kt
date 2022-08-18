@@ -775,7 +775,7 @@ internal class Vedtaksperiode private constructor(
             SubsumsjonObserver.NullObserver
         ) // TODO: skal vi logge ved beregning av agp?
 
-    private fun ingenUtbetaling() = Arbeidsgiverperiode.ingenUtbetaling(finnArbeidsgiverperiode(), periode, jurist())
+    private fun ingenUtbetaling() = Arbeidsgiverperiode.ingenUtbetaling(finnArbeidsgiverperiode(), periode, sykdomstidslinje, jurist())
 
     // Gang of four State pattern
     internal sealed interface Vedtaksperiodetilstand : Aktivitetskontekst {

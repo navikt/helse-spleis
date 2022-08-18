@@ -411,7 +411,11 @@ class MaskinellJurist private constructor(
         )
     }
 
-    override fun `§ 8-17 ledd 1 bokstav a`(oppfylt: Boolean, dagen: LocalDate) {
+    override fun `§ 8-17 ledd 1 bokstav a`(
+        oppfylt: Boolean,
+        dagen: LocalDate,
+        sykdomstidslinje: List<SubsumsjonObserver.Tidslinjedag>
+    ) {
         leggTil(
             GrupperbarSubsumsjon(
                 utfall = if (oppfylt) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
@@ -420,16 +424,19 @@ class MaskinellJurist private constructor(
                 paragraf = PARAGRAF_8_17,
                 ledd = 1.ledd,
                 bokstav = BOKSTAV_A,
-                input = emptyMap(),
+                input = mapOf("sykdomstidslinje" to sykdomstidslinje.dager(periode())),
                 output = emptyMap(),
                 kontekster = kontekster()
             )
         )
     }
 
-    override fun `§ 8-17 ledd 1 bokstav a - arbeidsgiversøknad`(periode: Iterable<LocalDate>) {
+    override fun `§ 8-17 ledd 1 bokstav a - arbeidsgiversøknad`(
+        periode: Iterable<LocalDate>,
+        sykdomstidslinje: List<SubsumsjonObserver.Tidslinjedag>
+    ) {
         periode.forEach {
-            `§ 8-17 ledd 1 bokstav a`(false, it)
+            `§ 8-17 ledd 1 bokstav a`(false, it, sykdomstidslinje)
         }
     }
 

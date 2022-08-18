@@ -47,7 +47,7 @@ internal class Arbeidsgiverperiodesubsumsjon(
         kilde: SykdomstidslinjeHendelse.Hendelseskilde
     ) {
         tilstand.arbeidsgiverperiodedag(this, dato, økonomi)
-        subsumsjonObserver.`§ 8-17 ledd 1 bokstav a`(false, dagen = dato)
+        subsumsjonObserver.`§ 8-17 ledd 1 bokstav a`(false, dagen = dato, sykdomstidslinjesubsumsjon)
         subsumsjonObserver.`§ 8-19 andre ledd`(dato, sykdomstidslinjesubsumsjon)
         other.arbeidsgiverperiodedag(dato, økonomi, kilde)
     }
@@ -129,7 +129,7 @@ internal class Arbeidsgiverperiodesubsumsjon(
         }
 
         override fun utbetalingsdag(parent: Arbeidsgiverperiodesubsumsjon, dato: LocalDate, økonomi: Økonomi) {
-            parent.subsumsjonObserver.`§ 8-17 ledd 1 bokstav a`(true, dagen = dato)
+            parent.subsumsjonObserver.`§ 8-17 ledd 1 bokstav a`(true, dagen = dato, parent.sykdomstidslinjesubsumsjon)
             parent.tilstand = Initiell
         }
     }
@@ -140,7 +140,7 @@ internal class Arbeidsgiverperiodesubsumsjon(
         }
 
         override fun utbetalingsdag(parent: Arbeidsgiverperiodesubsumsjon, dato: LocalDate, økonomi: Økonomi) {
-            parent.subsumsjonObserver.`§ 8-17 ledd 1 bokstav a`(true, dagen = dato)
+            parent.subsumsjonObserver.`§ 8-17 ledd 1 bokstav a`(true, dagen = dato, parent.sykdomstidslinjesubsumsjon)
             parent.tilstand = Initiell
         }
     }

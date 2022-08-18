@@ -231,7 +231,7 @@ interface SubsumsjonObserver {
      * @param oppfylt **true** dersom [dagen] er etter arbeidsgiverperioden
      * @param dagen aktuelle dagen for vurdering
      */
-    fun `§ 8-17 ledd 1 bokstav a`(oppfylt: Boolean, dagen: LocalDate) {}
+    fun `§ 8-17 ledd 1 bokstav a`(oppfylt: Boolean, dagen: LocalDate, sykdomstidslinje: List<Tidslinjedag>) {}
 
     /**
      * Vurdering av når utbetaling av sykepenger tidligst skal starte
@@ -240,7 +240,10 @@ interface SubsumsjonObserver {
      *
      * @param periode arbeidsgiversøknad-perioden
      */
-    fun `§ 8-17 ledd 1 bokstav a - arbeidsgiversøknad`(periode: Iterable<LocalDate>) {}
+    fun `§ 8-17 ledd 1 bokstav a - arbeidsgiversøknad`(
+        periode: Iterable<LocalDate>,
+        sykdomstidslinje: List<Tidslinjedag>
+    ) {}
 
     /**
      * Trygden yter ikke sykepenger for lovpålagt ferie og permisjon
