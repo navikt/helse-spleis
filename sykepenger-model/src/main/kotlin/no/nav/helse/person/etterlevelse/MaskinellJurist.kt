@@ -216,7 +216,7 @@ class MaskinellJurist private constructor(
         )
     }
 
-    override fun `§ 8-11 første ledd`(dato: LocalDate) {
+    override fun `§ 8-11 ledd 1`(dato: LocalDate) {
         leggTil(
             GrupperbarSubsumsjon(
                 dato = dato,

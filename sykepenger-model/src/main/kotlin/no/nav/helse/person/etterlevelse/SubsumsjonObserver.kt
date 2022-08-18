@@ -129,7 +129,7 @@ interface SubsumsjonObserver {
      *
      * @param dato dagen vilkåret ikke er oppfylt for
      */
-    fun `§ 8-11 første ledd`(dato: LocalDate) {}
+    fun `§ 8-11 ledd 1`(dato: LocalDate) {}
 
     /**
      * Vurdering av maksimalt antall sykepengedager

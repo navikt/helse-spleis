@@ -212,7 +212,7 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
             `§ 8-17 ledd 2` += 1
         }
 
-        override fun `§ 8-11 første ledd`(dato: LocalDate) {
+        override fun `§ 8-11 ledd 1`(dato: LocalDate) {
             subsumsjoner += 1
             `§ 8-11 første ledd` += 1
         }

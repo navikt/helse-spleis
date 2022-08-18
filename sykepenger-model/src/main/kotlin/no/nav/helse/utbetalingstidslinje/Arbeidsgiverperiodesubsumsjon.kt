@@ -54,7 +54,7 @@ internal class Arbeidsgiverperiodesubsumsjon(
 
     override fun utbetalingsdag(dato: LocalDate, økonomi: Økonomi, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
         // på første navdag etter fullført agp
-        if (dato.erHelg()) subsumsjonObserver.`§ 8-11 første ledd`(dato)
+        if (dato.erHelg()) subsumsjonObserver.`§ 8-11 ledd 1`(dato)
         else tilstand.utbetalingsdag(this, dato, økonomi)
         other.utbetalingsdag(dato, økonomi, kilde)
     }
