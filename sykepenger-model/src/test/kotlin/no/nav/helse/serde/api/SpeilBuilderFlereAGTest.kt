@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
@@ -17,7 +18,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.november
 import no.nav.helse.oktober
-import no.nav.helse.person.TilstandType
+import no.nav.helse.person.TilstandType.*
 import no.nav.helse.person.arbeidsgiver
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
@@ -30,6 +31,7 @@ import no.nav.helse.serde.api.dto.Inntektkilde
 import no.nav.helse.serde.api.dto.OmregnetÅrsinntekt
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertTilstand
+import no.nav.helse.spleis.e2e.forlengTilGodkjenning
 import no.nav.helse.spleis.e2e.grunnlag
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterOverstyrArbeidsforhold
@@ -658,6 +660,69 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `a2 dukker opp midt i et syketilfelle men er ghost ved førstegangsbehandlingen til a1`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterVilkårsgrunnlag(
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
+                1.januar(2017) til 1.desember(2017) inntekter {
+                    a1 inntekt INNTEKT
+                    a2 inntekt 1000
+                }
+            }),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntektperioderForSykepengegrunnlag {
+                1.oktober(2017) til 1.desember(2017) inntekter {
+                    a1 inntekt INNTEKT
+                    a2 inntekt 1000
+                }
+            }, emptyList()),
+            arbeidsforhold = listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null),
+                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null)
+            )
+        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt()
+        assertTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+
+        forlengTilGodkjenning(1. februar, 28.februar, orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a2)
+        håndterInntektsmelding(listOf(1.februar til 16.februar), beregnetInntekt = 1000.månedlig, orgnummer = a2)
+        assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
+        assertTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING, orgnummer = a1)
+
+        val speilJson = serializePersonForSpeil(person)
+        val ghostPerioder = speilJson.arbeidsgivere.single { it.organisasjonsnummer == a2 }.ghostPerioder
+
+        assertForventetFeil(
+            forklaring = "a2 er ansett som ghost ved førstegangsbehandlingen til a1",
+            nå = {
+                assertEquals(0, ghostPerioder.size)
+            },
+            ønsket = {
+                assertEquals(1, ghostPerioder.size)
+                val actual = ghostPerioder.first()
+                val expected =
+                    GhostPeriodeDTO(
+                        id = UUID.randomUUID(),
+                        fom = 1.januar,
+                        tom = 31.januar,
+                        skjæringstidspunkt = inspektør.skjæringstidspunkt(1.vedtaksperiode),
+                        vilkårsgrunnlagHistorikkInnslagId = person.nyesteIdForVilkårsgrunnlagHistorikk(),
+                        deaktivert = false
+                    )
+                assertTrue(areEquals(expected, actual))
+            }
+        )
+    }
+
+    @Test
     fun `Ghostpølse forsvinner ikke etter overstyring av ghost-inntekt`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), orgnummer = a1)
@@ -687,7 +752,7 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
         håndterOverstyrInntekt(9000.månedlig, a2, 1.januar)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        assertTilstand(1.vedtaksperiode, TilstandType.AVVENTER_GODKJENNING, a1)
+        assertTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING, a1)
 
         val speilJson = serializePersonForSpeil(person)
         val perioder = speilJson.arbeidsgivere.single { it.organisasjonsnummer == a2 }.ghostPerioder
