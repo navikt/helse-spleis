@@ -1561,6 +1561,9 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
+            if (vedtaksperiode.person.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt) == null) return vedtaksperiode.tilstand(påminnelse, AvventerHistorikkRevurdering) {
+                påminnelse.info("Reberegner perioden ettersom skjæringstidspunktet har flyttet seg")
+            }
             vedtaksperiode.utbetalinger.simuler(påminnelse)
         }
 
