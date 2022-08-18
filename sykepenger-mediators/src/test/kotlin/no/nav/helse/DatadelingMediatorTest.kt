@@ -1,5 +1,6 @@
 package no.nav.helse
 
+import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.person.Aktivitetskontekst
 import no.nav.helse.person.Aktivitetslogg
@@ -42,6 +43,9 @@ internal class DatadelingMediatorTest {
         assertEquals("Info", info["nivå"].asText())
         assertEquals("Dette er en infomelding", info["melding"].asText())
         assertNotNull(info["tidsstempel"].asText())
+        assertDoesNotThrow {
+            LocalDateTime.parse(info["tidsstempel"].asText())
+        }
         assertEquals("TestHendelse", info["kontekster"][0]["konteksttype"].asText())
         assertEquals("Person", info["kontekster"][1]["konteksttype"].asText())
     }
