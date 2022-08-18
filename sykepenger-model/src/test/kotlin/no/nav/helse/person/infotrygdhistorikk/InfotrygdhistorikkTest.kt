@@ -546,9 +546,9 @@ internal class InfotrygdhistorikkTest {
                 1.januar to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 25000.månedlig)
             ).somVilkårsgrunnlagHistorikk("a1"),
             regler = ArbeidsgiverRegler.Companion.NormalArbeidstaker,
-            subsumsjonObserver = MaskinellJurist()
+            subsumsjonObserver = SubsumsjonObserver.NullObserver
         ))
-        val utbetalingstidslinje = historikk.build("ag1", sykdomstidslinje, builder, MaskinellJurist())
+        val utbetalingstidslinje = historikk.build("ag1", sykdomstidslinje, builder, SubsumsjonObserver.NullObserver)
         assertEquals(1.januar til 31.januar, utbetalingstidslinje.periode())
     }
 

@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.*
+import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.testhelpers.somVilkårsgrunnlagHistorikk
 
 internal class InfotrygdUtbetalingstidslinjedekoratørTest {
@@ -38,7 +39,7 @@ internal class InfotrygdUtbetalingstidslinjedekoratørTest {
         ))
         val dekoratør = InfotrygdUtbetalingstidslinjedekoratør(builder, 1.februar)
         val tidslinje = 31.S + 28.S
-        tidslinje.accept(ArbeidsgiverperiodeBuilder(Arbeidsgiverperiodeteller.NormalArbeidstaker, dekoratør, MaskinellJurist()))
+        tidslinje.accept(ArbeidsgiverperiodeBuilder(Arbeidsgiverperiodeteller.NormalArbeidstaker, dekoratør, SubsumsjonObserver.NullObserver))
         assertEquals(1.februar til 28.februar, builder.result().periode())
     }
 }

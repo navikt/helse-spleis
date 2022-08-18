@@ -102,7 +102,7 @@ internal class ArbeidsgiverUtbetalingerTest {
             sykepengegrunnlag = 1000.månedlig.sykepengegrunnlag,
             sammenligningsgrunnlag = sammenligningsgrunnlag(1000.månedlig),
             avviksprosent = Prosent.prosent(0.0),
-            opptjening = Opptjening.opptjening(emptyList(), 1.januar, MaskinellJurist()),
+            opptjening = Opptjening.opptjening(emptyList(), 1.januar, SubsumsjonObserver.NullObserver),
             medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
             vurdertOk = false,
             meldingsreferanseId = UUID.randomUUID(),
@@ -339,7 +339,7 @@ internal class ArbeidsgiverUtbetalingerTest {
                     Opptjening.ArbeidsgiverOpptjeningsgrunnlag(ORGNUMMER, listOf(
                         Arbeidsforholdhistorikk.Arbeidsforhold(1.januar.minusYears(1), null, false)
                     ))
-                ), 1.januar, MaskinellJurist()),
+                ), 1.januar, SubsumsjonObserver.NullObserver),
                 medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
                 vurdertOk = true,
                 meldingsreferanseId = UUID.randomUUID(),
@@ -397,7 +397,7 @@ internal class ArbeidsgiverUtbetalingerTest {
             infotrygdhistorikk,
             null,
             vilkårsgrunnlagHistorikk,
-            MaskinellJurist()
+            SubsumsjonObserver.NullObserver
         ).also {
             it.beregn(aktivitetslogg, "88888888", Periode(1.januar, 31.desember(2019)), mapOf(Periode(1.januar, 31.desember(2019)) to (aktivitetslogg to SubsumsjonObserver.NullObserver)))
             maksdato = it.maksimumSykepenger.sisteDag()

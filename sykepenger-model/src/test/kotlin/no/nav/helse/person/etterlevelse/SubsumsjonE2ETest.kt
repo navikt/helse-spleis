@@ -465,7 +465,9 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             paragraf = PARAGRAF_8_11,
             ledd = LEDD_1,
             versjon = FOLKETRYGDLOVENS_OPPRINNELSESDATO,
-            input = emptyMap(),
+            input = mapOf(
+                "periode" to mapOf("fom" to 1.januar, "tom" to 31.januar)
+            ),
             output = mapOf(
                 "perioder" to listOf(
                     mapOf("fom" to 20.januar, "tom" to 21.januar),

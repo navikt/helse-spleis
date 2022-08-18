@@ -224,7 +224,7 @@ class MaskinellJurist private constructor(
                 ledd = 1.ledd,
                 utfall = VILKAR_IKKE_OPPFYLT,
                 versjon = FOLKETRYGDLOVENS_OPPRINNELSESDATO,
-                input = emptyMap(),
+                input = mapOf("periode" to mapOf( "fom" to periode().start, "tom" to periode().endInclusive)),
                 output = emptyMap(),
                 kontekster = kontekster()
             )
