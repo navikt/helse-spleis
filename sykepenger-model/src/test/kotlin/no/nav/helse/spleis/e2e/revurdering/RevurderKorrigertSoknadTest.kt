@@ -13,11 +13,13 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.TilstandType.AVSLUTTET
+import no.nav.helse.person.TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertTilstand
+import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
 import no.nav.helse.spleis.e2e.håndterYtelser
@@ -112,5 +114,40 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
                 assertEquals(0, inspektør.sykdomstidslinje.subset(1.januar til 31.januar).inspektør.dagteller[Feriedag::class])
                 assertEquals(8, inspektør.sykdomstidslinje.subset(1.januar til 31.januar).inspektør.dagteller[SykHelgedag::class])
             })
+    }
+
+
+    @Test
+    fun `Avsluttet periode med en forlengelse får en korrigerende søknad - skal sette i gang revurdering`() {
+        nyttVedtak(1.januar, 31.januar)
+        forlengVedtak(1.februar, 28.februar)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(17.januar, 18.januar))
+
+        assertTilstand(1.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING)
+        assertTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+        assertEquals(21, inspektør.sykdomstidslinje.subset(1.januar til 31.januar).inspektør.dagteller[Sykedag::class])
+        assertEquals(2, inspektør.sykdomstidslinje.subset(1.januar til 31.januar).inspektør.dagteller[Feriedag::class])
+        assertEquals(8, inspektør.sykdomstidslinje.subset(1.januar til 31.januar).inspektør.dagteller[SykHelgedag::class])
+
+    }
+
+    @Test
+    fun `Avsluttet forlengelse får en overlappende søknad - skal sette i gang revurdering`() {
+
+    }
+
+    @Test
+    fun `Overlappende søknad treffer førstegangsbehandling og forlengelse - skal ikke sette i gang revurdering`() {
+
+    }
+
+    @Test
+    fun `Avsluttet forlengelse får en overlappende søknad som slutter etter - skal ikke sette i gang revurdering`() {
+
+    }
+
+    @Test
+    fun `Avsluttet periode med forlengelse får en overlappende søknad som starter før - skal ikke sette i gang revurdering`() {
+
     }
 }
