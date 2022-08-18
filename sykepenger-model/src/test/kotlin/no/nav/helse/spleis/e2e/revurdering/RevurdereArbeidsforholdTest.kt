@@ -452,12 +452,20 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
             // TODO: 🤔 Her er det ikke juridisk avklart om vi får lov til å trekke tilbake penger fra ag2: https://trello.com/c/6dWvZ50u 💸
             assertPeriode(17.januar til 31.januar, 1080.daglig)
             assertForventetFeil(
-                forklaring = "Vi mangler å identifisere når dette skjer",
+                forklaring = """ Vi mangler å identifisere når dette skjer.
+                        "Vi har ikke prioritert å gjøre det fordi det er et usannsynlig tilfelle.
+                        "Det blir vanligere når man tillater å revurdere ghost-inntekt. """,
                 nå = {
-                    assertIngenInfo("Aktiveringen av et ghost-arbeidsforhold har trukket tilbake penger på en eller flere arbeidsgivere", AktivitetsloggFilter.person())
+                    assertIngenInfo(
+                        "Endring av ghost har trukket tilbake penger på en eller flere arbeidsgivere",
+                        AktivitetsloggFilter.person()
+                    )
                 },
                 ønsket = {
-                    assertInfo("Aktiveringen av et ghost-arbeidsforhold har trukket tilbake penger på en eller flere arbeidsgivere", AktivitetsloggFilter.person())
+                    assertInfo(
+                        "Endring av ghost har trukket tilbake penger på en eller flere arbeidsgivere",
+                        AktivitetsloggFilter.person()
+                    )
                 }
             )
         }
