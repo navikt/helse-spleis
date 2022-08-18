@@ -11,7 +11,7 @@ import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.SykdomstidslinjeVisitor
-import no.nav.helse.person.etterlevelse.MaskinellJurist
+import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.serde.reflection.ReflectInstance.Companion.get
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
@@ -561,12 +561,12 @@ internal class UtbetalingstidslinjeBuilderTest {
             organisasjonsnummer = "a1",
             vilkårsgrunnlagHistorikk = inntektsopplysningPerSkjæringstidspunkt.somVilkårsgrunnlagHistorikk("a1"),
             regler = ArbeidsgiverRegler.Companion.NormalArbeidstaker,
-            subsumsjonObserver = MaskinellJurist()
+            subsumsjonObserver = SubsumsjonObserver.NullObserver
         )
         val builder = UtbetalingstidslinjeBuilder(inntekter)
         val periodebuilder = ArbeidsgiverperiodeBuilderBuilder()
         val arbeidsgiverperiodeBuilder = ArbeidsgiverperiodeBuilder(teller,
-            Komposittmediator(periodebuilder, builder), MaskinellJurist())
+            Komposittmediator(periodebuilder, builder), SubsumsjonObserver.NullObserver)
         tidslinje.accept(delegator?.invoke(teller, arbeidsgiverperiodeBuilder) ?: arbeidsgiverperiodeBuilder)
         utbetalingstidslinje = builder.result()
         inspektør = utbetalingstidslinje.inspektør

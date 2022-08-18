@@ -2,7 +2,7 @@ package no.nav.helse.person
 
 import java.util.*
 
-internal data class Dokumentsporing private constructor(private val id: UUID, private val type: Type) {
+data class Dokumentsporing private constructor(private val id: UUID, private val type: Type) {
 
     companion object {
         internal fun sykmelding(id: UUID) = Dokumentsporing(id, Type.Sykmelding)

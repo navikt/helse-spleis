@@ -1,5 +1,7 @@
 package no.nav.helse.utbetalingstidslinje
 
+import java.time.LocalDate
+import java.util.UUID
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
@@ -7,21 +9,34 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.Inntektshistorikk
-import no.nav.helse.person.etterlevelse.MaskinellJurist
+import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.testhelpers.*
+import no.nav.helse.testhelpers.A
+import no.nav.helse.testhelpers.F
+import no.nav.helse.testhelpers.H
+import no.nav.helse.testhelpers.K
+import no.nav.helse.testhelpers.R
+import no.nav.helse.testhelpers.S
+import no.nav.helse.testhelpers.U
+import no.nav.helse.testhelpers.UK
+import no.nav.helse.testhelpers.opphold
+import no.nav.helse.testhelpers.resetSeed
+import no.nav.helse.testhelpers.somVilkårsgrunnlagHistorikk
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.*
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.Fridag
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavHelgDag
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
-import java.time.LocalDate
-import java.util.*
 
 internal class UtbetalingstidslinjeBuilderGammelTest {
     private val hendelseId = UUID.randomUUID()
@@ -940,10 +955,10 @@ internal class UtbetalingstidslinjeBuilderGammelTest {
             organisasjonsnummer = "a1",
             vilkårsgrunnlagHistorikk = inntektsopplysningPerSkjæringstidspunkt.somVilkårsgrunnlagHistorikk("a1"),
             regler = ArbeidsgiverRegler.Companion.NormalArbeidstaker,
-            subsumsjonObserver = MaskinellJurist()
+            subsumsjonObserver = SubsumsjonObserver.NullObserver
         )
         val builder = UtbetalingstidslinjeBuilder(inntekter)
-        val arbeidsgiverperiodeBuilder = ArbeidsgiverperiodeBuilder(teller, builder, MaskinellJurist())
+        val arbeidsgiverperiodeBuilder = ArbeidsgiverperiodeBuilder(teller, builder, SubsumsjonObserver.NullObserver)
         val dekoratør = Infotrygddekoratør(teller, arbeidsgiverperiodeBuilder, betalteInfotrygddager)
         this.accept(dekoratør)
         tidslinje = builder.result()

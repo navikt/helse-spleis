@@ -1,18 +1,20 @@
 package no.nav.helse.utbetalingstidslinje
 
+import java.time.LocalDate
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.SykdomstidslinjeVisitor
-import no.nav.helse.person.etterlevelse.MaskinellJurist
+import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.A
 import no.nav.helse.testhelpers.S
 import no.nav.helse.testhelpers.opphold
 import no.nav.helse.testhelpers.resetSeed
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
 
 internal class ArbeidsgiverperiodeBuilderBuilderTest {
 
@@ -69,7 +71,7 @@ internal class ArbeidsgiverperiodeBuilderBuilderTest {
 
     private fun undersøke(tidslinje: Sykdomstidslinje, delegator: ((Arbeidsgiverperiodeteller, SykdomstidslinjeVisitor) -> SykdomstidslinjeVisitor)? = null) {
         val periodebuilder = ArbeidsgiverperiodeBuilderBuilder()
-        val arbeidsgiverperiodeBuilder = ArbeidsgiverperiodeBuilder(teller, periodebuilder, MaskinellJurist())
+        val arbeidsgiverperiodeBuilder = ArbeidsgiverperiodeBuilder(teller, periodebuilder, SubsumsjonObserver.NullObserver)
         tidslinje.accept(delegator?.invoke(teller, arbeidsgiverperiodeBuilder) ?: arbeidsgiverperiodeBuilder)
         perioder.addAll(periodebuilder.result())
     }

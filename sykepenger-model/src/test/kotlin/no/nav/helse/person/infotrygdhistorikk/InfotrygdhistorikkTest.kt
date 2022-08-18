@@ -15,6 +15,7 @@ import no.nav.helse.person.Periodetype
 import no.nav.helse.person.Person
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.etterlevelse.MaskinellJurist
+import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.serde.PersonData
 import no.nav.helse.serde.PersonData.InfotrygdhistorikkElementData.Companion.tilModellObjekt
 import no.nav.helse.somPersonidentifikator
@@ -564,9 +565,9 @@ internal class InfotrygdhistorikkTest {
                 1.januar to Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 25000.månedlig)
             ).somVilkårsgrunnlagHistorikk("a1"),
             regler = ArbeidsgiverRegler.Companion.NormalArbeidstaker,
-            subsumsjonObserver = MaskinellJurist()
+            subsumsjonObserver = SubsumsjonObserver.NullObserver
         ))
-        val utbetalingstidslinje = historikk.build("ag1", sykdomstidslinje, builder, MaskinellJurist())
+        val utbetalingstidslinje = historikk.build("ag1", sykdomstidslinje, builder, SubsumsjonObserver.NullObserver)
         assertEquals(1.februar til 28.februar, utbetalingstidslinje.periode())
     }
 

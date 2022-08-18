@@ -51,8 +51,15 @@ import no.nav.helse.økonomi.Prosent
 class MaskinellJurist private constructor(
     private val parent: MaskinellJurist?,
     private val kontekster: Map<String, KontekstType>,
-    private var periode: Periode? = null
+    vedtaksperiode: Periode? = null
 ) : SubsumsjonObserver {
+
+    private val periode: () -> Periode
+
+    init {
+        // Når periode blir kalt av en subsumsjon skal vi være i kontekst av en vedtaksperiode.
+        periode =  { checkNotNull(vedtaksperiode){"MaksinellJurist må være i kontekst av en vedtaksperiode for å registrere subsumsjonen"} }
+    }
 
     private var subsumsjoner = listOf<Subsumsjon>()
 
@@ -71,7 +78,7 @@ class MaskinellJurist private constructor(
     fun medOrganisasjonsnummer(organisasjonsnummer: String) =
         kopierMedKontekst(mapOf(organisasjonsnummer to KontekstType.Organisasjonsnummer) + kontekster.filterNot { it.value == KontekstType.Organisasjonsnummer })
 
-    internal fun medVedtaksperiode(vedtaksperiodeId: UUID, hendelseIder: Set<Dokumentsporing>, periode: Periode) =
+    fun medVedtaksperiode(vedtaksperiodeId: UUID, hendelseIder: Set<Dokumentsporing>, periode: Periode) =
         kopierMedKontekst(
             mapOf(vedtaksperiodeId.toString() to KontekstType.Vedtaksperiode) + hendelseIder.toMap()
                 .map { it.key.toString() to it.value.tilKontekst() } + kontekster,
@@ -435,7 +442,7 @@ class MaskinellJurist private constructor(
                 paragraf = PARAGRAF_8_17,
                 ledd = LEDD_2,
                 input = mapOf(
-                    "beregnetTidslinje" to sykdomstidslinje.dager(periode)
+                    "beregnetTidslinje" to sykdomstidslinje.dager(periode())
                 ),
                 output = emptyMap(),
                 kontekster = kontekster()

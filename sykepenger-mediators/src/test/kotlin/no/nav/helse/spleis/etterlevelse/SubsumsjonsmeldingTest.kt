@@ -16,6 +16,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.slf4j.LoggerFactory
 import java.net.URI
+import java.util.UUID
+import no.nav.helse.hendelser.Periode
 
 internal class SubsumsjonsmeldingTest {
     private val fnr = "12029240045"
@@ -31,6 +33,7 @@ internal class SubsumsjonsmeldingTest {
         jurist = MaskinellJurist()
             .medFødselsnummer(fnr.somPersonidentifikator())
             .medOrganisasjonsnummer("123456789")
+            .medVedtaksperiode(UUID.randomUUID(), emptySet(), Periode(1.januar, 31.januar))
         subsumsjonMediator = SubsumsjonMediator(jurist, fnr, TestHendelseMessage(fnr), versjonAvKode)
         testRapid = TestRapid()
     }

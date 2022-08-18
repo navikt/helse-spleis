@@ -1,30 +1,43 @@
 package no.nav.helse.utbetalingstidslinje
 
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
-import no.nav.helse.person.*
-import no.nav.helse.person.etterlevelse.MaskinellJurist
+import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.AktivitetsloggVisitor
+import no.nav.helse.person.Inntektshistorikk
+import no.nav.helse.person.Refusjonshistorikk
+import no.nav.helse.person.SpesifikkKontekst
+import no.nav.helse.person.SykdomstidslinjeVisitor
+import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.PersonUtbetalingsperiode
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.testhelpers.*
+import no.nav.helse.testhelpers.A
+import no.nav.helse.testhelpers.S
+import no.nav.helse.testhelpers.U
+import no.nav.helse.testhelpers.opphold
+import no.nav.helse.testhelpers.resetSeed
+import no.nav.helse.testhelpers.somVilkårsgrunnlagHistorikk
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.Økonomi
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertDoesNotThrow
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
 
 internal class RefusjonsgjødslerTest {
 
@@ -352,11 +365,11 @@ internal class RefusjonsgjødslerTest {
                     organisasjonsnummer = "a1",
                     vilkårsgrunnlagHistorikk = inntektsopplysning.somVilkårsgrunnlagHistorikk("a1"),
                     regler = ArbeidsgiverRegler.Companion.NormalArbeidstaker,
-                    subsumsjonObserver = MaskinellJurist()
+                    subsumsjonObserver = SubsumsjonObserver.NullObserver
                 )
             )
             val teller = Arbeidsgiverperiodeteller.NormalArbeidstaker
-            val builder = ArbeidsgiverperiodeBuilder(teller, tidslinjebuilder, MaskinellJurist())
+            val builder = ArbeidsgiverperiodeBuilder(teller, tidslinjebuilder, SubsumsjonObserver.NullObserver)
             this.accept(delegator?.invoke(teller, builder) ?: builder)
             val tidslinje = tidslinjebuilder.result()
             verifiserRekkefølge(tidslinje)
