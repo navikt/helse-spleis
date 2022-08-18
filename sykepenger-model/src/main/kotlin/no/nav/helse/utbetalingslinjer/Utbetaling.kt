@@ -35,6 +35,7 @@ import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Fagområde.Sykepenger
 import no.nav.helse.utbetalingslinjer.Fagområde.SykepengerRefusjon
+import no.nav.helse.utbetalingslinjer.Oppdrag.Companion.trekkerTilbakePenger
 import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.AvvisDagerEtterDødsdatofilter
@@ -158,6 +159,7 @@ internal class Utbetaling private constructor(
         if (arbeidsgiverOppdrag.isEmpty() && personOppdrag.isEmpty()) return false
         return periode.overlapperMed(other.oppdaterFom(other.start.minusDays(16)))
     }
+    internal fun trekkerTilbakePenger() = listOf(arbeidsgiverOppdrag, personOppdrag).trekkerTilbakePenger()
 
     // this kan revurdere other gitt at fagsystemId == other.fagsystemId,
     // og at this er lik den siste aktive utbetalingen for fagsystemIden

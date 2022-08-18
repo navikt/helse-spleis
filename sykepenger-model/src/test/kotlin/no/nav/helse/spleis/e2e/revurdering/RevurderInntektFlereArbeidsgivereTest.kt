@@ -11,6 +11,7 @@ import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
 import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.februar
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
+import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -31,6 +32,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
+import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.grunnlag
 import no.nav.helse.spleis.e2e.repeat
 import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
@@ -106,6 +108,7 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
             håndterYtelser(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             assertDag(17.januar, 1080.0.daglig, aktuellDagsinntekt = 32000.månedlig, personbeløp = INGEN)
+            assertIngenInfo("Arbeidsgiveren som initierte revurderingen har trukket tilbake penger på en eller flere andre arbeidsgivere", AktivitetsloggFilter.person())
         }
     }
     @Test
@@ -130,6 +133,31 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
             håndterUtbetalt()
             // TODO: 🤔 Her er det ikke juridisk avklart om vi får lov til å trekke tilbake penger fra ag2: https://trello.com/c/6dWvZ50u 💸
             assertDag(17.januar, 1064.0.daglig, aktuellDagsinntekt = 32000.månedlig, personbeløp = INGEN)
+            assertInfo("Arbeidsgiveren som initierte revurderingen har trukket tilbake penger på en eller flere andre arbeidsgivere", AktivitetsloggFilter.person())
+        }
+    }
+
+    @Test
+    fun `Å flytte penger fra arbeidsgiveroppdrag til personoppdrag skal ikke logge at arbeidsgiveren har fått trukket penger`() {
+        (a1 og a2).nyeVedtak(1.januar til 31.januar, inntekt = 15000.månedlig)
+        a2 {
+            håndterInntektsmelding(
+                listOf(1.januar til 16.januar),
+                beregnetInntekt = 15000.månedlig,
+                refusjon = Refusjon(7500.månedlig, opphørsdato = null)
+            )
+        }
+        a1 {
+            håndterOverstyrInntekt(1.januar, 15000.månedlig)
+            håndterYtelser(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        }
+        a2 {
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+            assertIngenInfo("Arbeidsgiveren som initierte revurderingen har trukket tilbake penger på en eller flere andre arbeidsgivere", AktivitetsloggFilter.person())
         }
     }
     @Test
@@ -149,6 +177,7 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
             håndterYtelser(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             assertDag(17.januar, 692.0.daglig, aktuellDagsinntekt = 15000.månedlig, personbeløp = INGEN)
+            assertIngenInfo("Arbeidsgiveren som initierte revurderingen har trukket tilbake penger på en eller flere andre arbeidsgivere", AktivitetsloggFilter.person())
         }
     }
     @Test
@@ -169,6 +198,7 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
             håndterYtelser(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             assertDag(17.januar, 692.0.daglig, aktuellDagsinntekt = 15000.månedlig, personbeløp = INGEN)
+            assertIngenInfo("Arbeidsgiveren som initierte revurderingen har trukket tilbake penger på en eller flere andre arbeidsgivere", AktivitetsloggFilter.person())
         }
     }
 

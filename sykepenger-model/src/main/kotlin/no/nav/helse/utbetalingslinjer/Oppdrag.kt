@@ -40,6 +40,8 @@ internal class Oppdrag private constructor(
                 ?.let { liste -> Periode(liste.minOf { it.førstedato }, liste.maxOf { it.sistedato }) }
         }
 
+        internal fun List<Oppdrag>.trekkerTilbakePenger() = sumOf { it.nettoBeløp() } < 0
+
         internal fun stønadsdager(vararg oppdrag: Oppdrag): Int {
             return Utbetalingslinje.stønadsdager(oppdrag.toList().flatten())
         }

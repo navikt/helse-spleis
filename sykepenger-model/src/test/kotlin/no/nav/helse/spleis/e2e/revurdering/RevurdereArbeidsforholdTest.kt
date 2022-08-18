@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e.revurdering
 
 import java.time.LocalDate
 import java.util.UUID
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.TestPerson
@@ -30,6 +31,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
+import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.grunnlag
 import no.nav.helse.spleis.e2e.repeat
 import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
@@ -449,6 +451,15 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
             håndterUtbetalt()
             // TODO: 🤔 Her er det ikke juridisk avklart om vi får lov til å trekke tilbake penger fra ag2: https://trello.com/c/6dWvZ50u 💸
             assertPeriode(17.januar til 31.januar, 1080.daglig)
+            assertForventetFeil(
+                forklaring = "Vi mangler å identifisere når dette skjer",
+                nå = {
+                    assertIngenInfo("Aktiveringen av et ghost-arbeidsforhold har trukket tilbake penger på en eller flere arbeidsgivere", AktivitetsloggFilter.person())
+                },
+                ønsket = {
+                    assertInfo("Aktiveringen av et ghost-arbeidsforhold har trukket tilbake penger på en eller flere arbeidsgivere", AktivitetsloggFilter.person())
+                }
+            )
         }
     }
 
