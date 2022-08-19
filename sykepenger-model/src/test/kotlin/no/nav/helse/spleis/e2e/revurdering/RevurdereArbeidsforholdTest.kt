@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e.revurdering
 
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.TestPerson
@@ -31,7 +30,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
-import no.nav.helse.spleis.e2e.AktivitetsloggFilter
+import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.person
 import no.nav.helse.spleis.e2e.grunnlag
 import no.nav.helse.spleis.e2e.repeat
 import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
@@ -449,25 +448,80 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
-            // TODO: 🤔 Her er det ikke juridisk avklart om vi får lov til å trekke tilbake penger fra ag2: https://trello.com/c/6dWvZ50u 💸
             assertPeriode(17.januar til 31.januar, 1080.daglig)
-            assertForventetFeil(
-                forklaring = """ Vi mangler å identifisere når dette skjer.
-                        "Vi har ikke prioritert å gjøre det fordi det er et usannsynlig tilfelle.
-                        "Det blir vanligere når man tillater å revurdere ghost-inntekt. """,
-                nå = {
-                    assertIngenInfo(
-                        "Endring av ghost har trukket tilbake penger på en eller flere arbeidsgivere",
-                        AktivitetsloggFilter.person()
+            assertInfo("En endring hos en arbeidsgiver har medført at det trekkes tilbake penger hos andre arbeidsgivere", person())
+        }
+    }
+
+    @Test
+    fun `over 6G -- deaktiverer og aktiverer arbeidsforhold medfører tilbakekreving flere arbeidsgivere`() {
+        val inntekt = 23000.månedlig
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        }
+        a2 {
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        }
+        a1 { håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = inntekt) }
+        a2 { håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = inntekt) }
+
+        a1 {
+            håndterYtelser(1.vedtaksperiode)
+            håndterVilkårsgrunnlag(
+                1.vedtaksperiode,
+                arbeidsforhold = listOf(
+                    Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null),
+                    Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null),
+                    Vilkårsgrunnlag.Arbeidsforhold(a3, 1.desember(2017), null)
+                ),
+                inntektsvurdering = Inntektsvurdering(
+                    listOf(
+                        sammenligningsgrunnlag(a1, 1.januar, inntekt.repeat(12)),
+                        sammenligningsgrunnlag(a2, 1.januar, inntekt.repeat(12)),
+                        sammenligningsgrunnlag(a3, 1.januar, inntekt.repeat(12))
                     )
-                },
-                ønsket = {
-                    assertInfo(
-                        "Endring av ghost har trukket tilbake penger på en eller flere arbeidsgivere",
-                        AktivitetsloggFilter.person()
-                    )
-                }
+                ),
+                inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
+                    inntekter = listOf(
+                        grunnlag(a1, 1.januar, inntekt.repeat(3)),
+                        grunnlag(a2, 1.januar, inntekt.repeat(3)),
+                        grunnlag(a3, 1.januar, inntekt.repeat(3))
+                    ),
+                    arbeidsforhold = emptyList()
+                )
             )
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+        }
+        a2 {
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+        }
+
+        håndterOverstyrArbeidsforhold(1.januar, ArbeidsforholdOverstyrt(a3, true, "deaktiverer a3"))
+
+        (a1 og a2) {
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+        }
+        håndterOverstyrArbeidsforhold(1.januar, ArbeidsforholdOverstyrt(a3, false, "aktiverer a3 igjen"))
+
+        (a1 og a2) {
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+            assertInfo("En endring hos en arbeidsgiver har medført at det trekkes tilbake penger hos andre arbeidsgivere", person())
         }
     }
 

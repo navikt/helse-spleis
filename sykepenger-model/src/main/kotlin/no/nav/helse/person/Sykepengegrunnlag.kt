@@ -190,6 +190,8 @@ internal class Sykepengegrunnlag(
     }
     override fun compareTo(other: Inntekt) = this.sykepengegrunnlag.compareTo(other)
 
+    internal fun er6GBegrenset() = begrensning == ER_6G_BEGRENSET
+
     enum class Begrensning {
         ER_6G_BEGRENSET, ER_IKKE_6G_BEGRENSET, VURDERT_I_INFOTRYGD
     }

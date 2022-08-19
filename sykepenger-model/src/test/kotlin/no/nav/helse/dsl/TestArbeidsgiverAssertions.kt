@@ -43,7 +43,7 @@ internal class TestArbeidsgiverAssertions(private val observat√∏r: TestObservat√
 
     internal fun assertInfo(forventet: String, vararg filtre: AktivitetsloggFilter) {
         val info = collectInfo(*filtre)
-        assertEquals(1, info.count { it == forventet }, "fant ikke ett tilfelle av info. Info:\n${info.joinToString("\n")}")
+        assertTrue(info.any { it == forventet }, "fant ikke ett tilfelle av info. Info:\n${info.joinToString("\n")}")
     }
 
     internal fun assertIngenInfo(forventet: String, vararg filtre: AktivitetsloggFilter) {

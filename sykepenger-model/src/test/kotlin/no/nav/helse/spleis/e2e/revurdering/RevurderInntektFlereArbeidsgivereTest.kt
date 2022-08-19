@@ -108,7 +108,7 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
             håndterYtelser(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             assertDag(17.januar, 1080.0.daglig, aktuellDagsinntekt = 32000.månedlig, personbeløp = INGEN)
-            assertIngenInfo("Arbeidsgiveren som initierte revurderingen har trukket tilbake penger på en eller flere andre arbeidsgivere", AktivitetsloggFilter.person())
+            assertIngenInfo("En endring hos en arbeidsgiver har medført at det trekkes tilbake penger hos andre arbeidsgivere", AktivitetsloggFilter.person())
         }
     }
     @Test
@@ -131,9 +131,8 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
-            // TODO: 🤔 Her er det ikke juridisk avklart om vi får lov til å trekke tilbake penger fra ag2: https://trello.com/c/6dWvZ50u 💸
             assertDag(17.januar, 1064.0.daglig, aktuellDagsinntekt = 32000.månedlig, personbeløp = INGEN)
-            assertInfo("Arbeidsgiveren som initierte revurderingen har trukket tilbake penger på en eller flere andre arbeidsgivere", AktivitetsloggFilter.person())
+            assertInfo("En endring hos en arbeidsgiver har medført at det trekkes tilbake penger hos andre arbeidsgivere", AktivitetsloggFilter.person())
         }
     }
 
@@ -157,7 +156,7 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
-            assertIngenInfo("Arbeidsgiveren som initierte revurderingen har trukket tilbake penger på en eller flere andre arbeidsgivere", AktivitetsloggFilter.person())
+            assertIngenInfo("En endring hos en arbeidsgiver har medført at det trekkes tilbake penger hos andre arbeidsgivere", AktivitetsloggFilter.person())
         }
     }
     @Test
@@ -177,7 +176,7 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
             håndterYtelser(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             assertDag(17.januar, 692.0.daglig, aktuellDagsinntekt = 15000.månedlig, personbeløp = INGEN)
-            assertIngenInfo("Arbeidsgiveren som initierte revurderingen har trukket tilbake penger på en eller flere andre arbeidsgivere", AktivitetsloggFilter.person())
+            assertIngenInfo("En endring hos en arbeidsgiver har medført at det trekkes tilbake penger hos andre arbeidsgivere", AktivitetsloggFilter.person())
         }
     }
     @Test
@@ -198,7 +197,7 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
             håndterYtelser(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             assertDag(17.januar, 692.0.daglig, aktuellDagsinntekt = 15000.månedlig, personbeløp = INGEN)
-            assertIngenInfo("Arbeidsgiveren som initierte revurderingen har trukket tilbake penger på en eller flere andre arbeidsgivere", AktivitetsloggFilter.person())
+            assertIngenInfo("En endring hos en arbeidsgiver har medført at det trekkes tilbake penger hos andre arbeidsgivere", AktivitetsloggFilter.person())
         }
     }
 

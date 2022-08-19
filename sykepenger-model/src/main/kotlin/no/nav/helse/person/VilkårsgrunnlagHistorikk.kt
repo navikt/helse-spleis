@@ -27,6 +27,8 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
     private fun sisteInnlag() = historikk.firstOrNull()
 
+    private fun forrigeInnslag() = historikk.elementAtOrNull(1)
+
     internal fun accept(visitor: VilkårsgrunnlagHistorikkVisitor) {
         visitor.preVisitVilkårsgrunnlagHistorikk()
         historikk.forEach { it.accept(visitor) }
@@ -69,6 +71,11 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
     internal fun utenInntekt(dato: LocalDate, økonomi: Økonomi, arbeidsgiverperiode: Arbeidsgiverperiode?) =
         sisteInnlag()!!.utenInntekt(dato, økonomi, arbeidsgiverperiode)
+
+    internal fun blitt6GBegrensetSidenSist(skjæringstidspunkt: LocalDate): Boolean {
+        if (sisteInnlag()?.vilkårsgrunnlagFor(skjæringstidspunkt)?.er6GBegrenset() == false) return false
+        return forrigeInnslag()?.vilkårsgrunnlagFor(skjæringstidspunkt)?.er6GBegrenset() == false
+    }
 
     internal class Innslag private constructor(
         internal val id: UUID,
@@ -231,6 +238,8 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                 subsumsjonObserver
             )
         }
+
+        internal fun er6GBegrenset() = sykepengegrunnlag.er6GBegrenset()
 
         internal companion object {
             internal fun medInntekt(

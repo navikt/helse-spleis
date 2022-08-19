@@ -724,16 +724,18 @@ internal class Vedtaksperiode private constructor(
     private fun lagRevurdering(
         maksimumSykepenger: Alder.MaksimumSykepenger,
         aktivitetslogg: IAktivitetslogg,
-        orgnummerSomInitierer: String
+        orgnummer: String
     ) {
         utbetalinger.forkast(aktivitetslogg)
         utbetalingstidslinje = utbetalinger.lagRevurdering(fødselsnummer, this, periode, maksimumSykepenger, aktivitetslogg)
-        loggDersomViTrekkerTilbakePengerPåAnnenArbeidsgiver(orgnummerSomInitierer, aktivitetslogg)
+        loggDersomViTrekkerTilbakePengerPåAnnenArbeidsgiver(orgnummer, aktivitetslogg)
     }
 
-    private fun loggDersomViTrekkerTilbakePengerPåAnnenArbeidsgiver(orgnummerSomInitierer: String, aktivitetslogg: IAktivitetslogg) {
-        if (orgnummerSomInitierer != organisasjonsnummer && utbetalinger.trekkerTilbakePenger()) {
-            aktivitetslogg.info("Arbeidsgiveren som initierte revurderingen har trukket tilbake penger på en eller flere andre arbeidsgivere")
+    private fun loggDersomViTrekkerTilbakePengerPåAnnenArbeidsgiver(orgnummer: String, aktivitetslogg: IAktivitetslogg) {
+        if (!utbetalinger.trekkerTilbakePenger()) return
+
+        if (orgnummer != organisasjonsnummer || person.blitt6GBegrensetSidenSist(skjæringstidspunkt)) {
+            aktivitetslogg.info("En endring hos en arbeidsgiver har medført at det trekkes tilbake penger hos andre arbeidsgivere")
         }
     }
 
@@ -2524,16 +2526,16 @@ internal class Vedtaksperiode private constructor(
         internal class RevurderingUtbetalinger(
             vedtaksperioder: List<Vedtaksperiode>,
             skjæringstidspunkt: LocalDate,
-            private val orgnummerSomInitierer: String,
+            private val orgnummer: String,
             private val hendelse: ArbeidstakerHendelse
         ) {
             private val beregningsperioder = vedtaksperioder.revurderingsperioder(skjæringstidspunkt)
             private val utbetalingsperioder = vedtaksperioder.utbetalingsperioder(skjæringstidspunkt)
 
             internal fun utbetal(arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger) {
-                val maksimumSykepenger = arbeidsgiverUtbetalinger.utbetal(this, beregningsperioder.periode(), orgnummerSomInitierer)
+                val maksimumSykepenger = arbeidsgiverUtbetalinger.utbetal(this, beregningsperioder.periode(), orgnummer)
                 utbetalingsperioder.forEach {
-                    it.lagRevurdering(maksimumSykepenger, it.aktivitetsloggkopi(), orgnummerSomInitierer)
+                    it.lagRevurdering(maksimumSykepenger, it.aktivitetsloggkopi(), orgnummer)
                 }
             }
 
