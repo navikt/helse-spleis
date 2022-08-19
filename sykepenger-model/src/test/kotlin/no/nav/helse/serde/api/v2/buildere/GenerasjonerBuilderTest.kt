@@ -1802,6 +1802,8 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
         håndterUtbetalt()
 
+        håndterYtelser(2.vedtaksperiode)
+
         assertEquals(1, generasjoner.size)
         0.generasjon {
             assertEquals(2, perioder.size)
@@ -1810,7 +1812,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         }
 
         assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVSLUTTET)
-        assertTilstander(2.vedtaksperiode, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+        assertTilstander(2.vedtaksperiode, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING)
     }
 
     @Test

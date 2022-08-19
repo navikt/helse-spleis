@@ -1020,8 +1020,8 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         }
 
         inspektør.gjeldendeUtbetalingForVedtaksperiode(2.vedtaksperiode).inspektør.also {
-            assertEquals(Utbetaling.Utbetalingtype.REVURDERING, it.type)
-            assertEquals(Utbetaling.Ubetalt, it.tilstand)
+            assertEquals(Utbetaling.Utbetalingtype.UTBETALING, it.type)
+            assertEquals(Utbetaling.Utbetalt, it.tilstand)
             assertEquals(1.mars til 31.mars, it.periode)
         }
     }

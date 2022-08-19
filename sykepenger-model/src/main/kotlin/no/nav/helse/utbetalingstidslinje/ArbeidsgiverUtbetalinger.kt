@@ -4,6 +4,7 @@ import java.time.LocalDate
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.IAktivitetslogg
+import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.Vedtaksperiode.Companion.RevurderingUtbetalinger
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
@@ -46,17 +47,22 @@ internal class ArbeidsgiverUtbetalinger(
     }
 
     internal fun utbetal(
+        hendelse: IAktivitetslogg,
         revurderingUtbetalinger: RevurderingUtbetalinger,
         beregningsperiode: Periode,
-        organisasjonsnummer: String
-    ): Alder.MaksimumSykepenger {
+        orgnummer: String,
+        utbetalingsperioder: Map<Arbeidsgiver, Vedtaksperiode>
+    ) {
         val tidslinjerPerArbeidsgiver = tidslinjer(beregningsperiode.endInclusive)
         revurderingUtbetalinger.gjødsle(tidslinjerPerArbeidsgiver, infotrygdhistorikk)
         revurderingUtbetalinger.filtrer(filtere, tidslinjerPerArbeidsgiver)
         tidslinjerPerArbeidsgiver.forEach { (arbeidsgiver, utbetalingstidslinje) ->
-            arbeidsgiver.lagreUtbetalingstidslinjeberegning(organisasjonsnummer, utbetalingstidslinje, vilkårsgrunnlagHistorikk)
+            arbeidsgiver.lagreUtbetalingstidslinjeberegning(orgnummer, utbetalingstidslinje, vilkårsgrunnlagHistorikk)
         }
-        return maksimumSykepengedagerfilter.maksimumSykepenger()
+        tidslinjerPerArbeidsgiver.forEach { (arbeidsgiver, utbetalingstidslinje) ->
+            // TODO: kan sende med utbetalingstidslinje for å unngå 'utbetalingstidslinjeberegning'
+            utbetalingsperioder[arbeidsgiver]?.lagRevurdering(hendelse.barn(), orgnummer, maksimumSykepenger)
+        }
     }
 
     private fun tidslinjer(kuttdato: LocalDate) = arbeidsgivere

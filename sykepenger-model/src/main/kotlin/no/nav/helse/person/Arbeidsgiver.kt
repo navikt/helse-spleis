@@ -419,6 +419,7 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun lagRevurdering(
+        vedtaksperiode: Vedtaksperiode,
         aktivitetslogg: IAktivitetslogg,
         fødselsnummer: String,
         maksdato: LocalDate,
@@ -438,10 +439,14 @@ internal class Arbeidsgiver private constructor(
             gjenståendeSykedager,
             forrige,
             organisasjonsnummer
-        ).also { nyUtbetaling(aktivitetslogg, it) }
+        ).also {
+            nyUtbetaling(aktivitetslogg, it)
+            fordelRevurdertUtbetaling(aktivitetslogg.barn().also { logg -> logg.kontekst(person) }, it, vedtaksperiode)
+        }
     }
 
     private fun nyUtbetaling(aktivitetslogg: IAktivitetslogg, utbetaling: Utbetaling) {
+        utbetalinger.lastOrNull()?.forkast(aktivitetslogg)
         utbetalinger.add(utbetaling)
         utbetaling.registrer(this)
         utbetaling.opprett(aktivitetslogg)
@@ -1014,8 +1019,8 @@ internal class Arbeidsgiver private constructor(
     internal fun harNærliggendeUtbetaling(periode: Periode) =
         utbetalinger.harNærliggendeUtbetaling(periode)
 
-    internal fun fordelRevurdertUtbetaling(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg, utbetaling: Utbetaling) {
-        håndter(aktivitetslogg) { håndterRevurdertUtbetaling(vedtaksperiode, utbetaling, aktivitetslogg) }
+    private fun fordelRevurdertUtbetaling(aktivitetslogg: IAktivitetslogg, utbetaling: Utbetaling, other: Vedtaksperiode) {
+        håndter(aktivitetslogg) { håndterRevurdertUtbetaling(utbetaling, aktivitetslogg, other) }
     }
 
     override fun toSpesifikkKontekst(): SpesifikkKontekst {

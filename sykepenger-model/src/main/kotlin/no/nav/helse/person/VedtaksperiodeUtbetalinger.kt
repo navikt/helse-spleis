@@ -12,7 +12,6 @@ import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.aktive
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.harId
-import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.sistePeriodeForUtbetalinger
 import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 
@@ -27,6 +26,8 @@ internal class VedtaksperiodeUtbetalinger(private val arbeidsgiver: Arbeidsgiver
         utbetalinger.forEach { it.accept(visitor) }
         visitor.postVisitVedtakserperiodeUtbetalinger(utbetalinger)
     }
+
+    private fun forrigeUtbetalte() = utbetalinger.aktive().lastOrNull()
 
     internal fun harUtbetaling() = siste != null && siste!!.gyldig()
     internal fun trekkerTilbakePenger() = siste?.trekkerTilbakePenger() == true
@@ -53,8 +54,8 @@ internal class VedtaksperiodeUtbetalinger(private val arbeidsgiver: Arbeidsgiver
     internal fun erHistorikkEndretSidenBeregning(infotrygdhistorikk: Infotrygdhistorikk) =
         infotrygdhistorikk.harEndretHistorikk(siste!!)
 
-    internal fun reberegnUtbetaling(hvisRevurdering: () -> Unit, hvisUtbetaling: () -> Unit) =
-        siste!!.reberegnUtbetaling(hvisRevurdering, hvisUtbetaling)
+    internal fun reberegnUtbetaling(hendelse: IAktivitetslogg, hvisRevurdering: () -> Unit, hvisUtbetaling: () -> Unit) =
+        siste!!.reberegnUtbetaling(hendelse, hvisRevurdering, hvisUtbetaling)
 
     internal fun forkast(hendelse: IAktivitetslogg) {
         siste?.forkast(hendelse)
@@ -95,33 +96,31 @@ internal class VedtaksperiodeUtbetalinger(private val arbeidsgiver: Arbeidsgiver
         }
     }
 
-    internal fun lagRevurdering(
-        fødselsnummer: String,
-        vedtaksperiode: Vedtaksperiode,
-        periode: Periode,
-        maksimumSykepenger: Alder.MaksimumSykepenger,
-        aktivitetslogg: IAktivitetslogg
-    ): Utbetalingstidslinje {
-        return nyUtbetaling(aktivitetslogg, periode) {
-            arbeidsgiver.lagRevurdering(
-                aktivitetslogg = aktivitetslogg,
-                fødselsnummer = fødselsnummer,
-                maksdato = maksimumSykepenger.sisteDag(),
-                forbrukteSykedager = maksimumSykepenger.forbrukteDager(),
-                gjenståendeSykedager = maksimumSykepenger.gjenståendeDager(),
-                periode = periode,
-                forrige = utbetalinger.aktive().lastOrNull()
-            ).also { arbeidsgiver.fordelRevurdertUtbetaling(vedtaksperiode, aktivitetslogg, it) }
-        }
-    }
-
     private fun nyUtbetaling(
         hendelse: IAktivitetslogg,
         periode: Periode,
         generator: () -> Utbetaling
     ): Utbetalingstidslinje {
-        siste?.forkast(hendelse)
         return generator().also { utbetalinger.add(it) }.utbetalingstidslinje(periode)
+    }
+
+    fun lagRevurdering(
+        vedtaksperiode: Vedtaksperiode,
+        fødselsnummer: String,
+        aktivitetslogg: IAktivitetslogg,
+        maksimumSykepenger: Alder.MaksimumSykepenger,
+        periode: Periode
+    ) {
+        arbeidsgiver.lagRevurdering(
+            vedtaksperiode = vedtaksperiode,
+            aktivitetslogg = aktivitetslogg,
+            fødselsnummer = fødselsnummer,
+            maksdato = maksimumSykepenger.sisteDag(),
+            forbrukteSykedager = maksimumSykepenger.forbrukteDager(),
+            gjenståendeSykedager = maksimumSykepenger.gjenståendeDager(),
+            periode = periode,
+            forrige = forrigeUtbetalte()
+        )
     }
 
     internal fun build(builder: VedtakFattetBuilder) {
@@ -131,16 +130,16 @@ internal class VedtaksperiodeUtbetalinger(private val arbeidsgiver: Arbeidsgiver
     internal fun build(builder: Utbetalingsfilter.Builder) {
         builder.utbetaling(siste!!)
     }
-
     internal fun overlapperMed(other: VedtaksperiodeUtbetalinger): Boolean {
         if (!this.harUtbetalinger() || !other.harUtbetalinger()) return false
         return this.siste!!.overlapperMed(other.siste!!)
     }
+
     internal fun valider(simulering: Simulering) = siste!!.valider(simulering)
 
     internal fun erKlarForGodkjenning() = siste!!.erKlarForGodkjenning()
-
     internal fun simuler(hendelse: IAktivitetslogg) = siste!!.simuler(hendelse)
+
     internal fun godkjenning(
         hendelse: IAktivitetslogg,
         periode: Periode,
@@ -163,12 +162,5 @@ internal class VedtaksperiodeUtbetalinger(private val arbeidsgiver: Arbeidsgiver
             arbeidsforholdId = arbeidsforholdId,
             aktivitetslogg = aktivitetslogg
         )
-    }
-
-    internal companion object {
-        internal fun List<Pair<VedtaksperiodeUtbetalinger, Vedtaksperiode>>.revurderingsperioder() =
-            mapNotNull { (utbetalinger, periode) ->
-                utbetalinger.siste?.let { it to periode }
-            }.sistePeriodeForUtbetalinger()
     }
 }

@@ -149,8 +149,9 @@ internal class Utbetaling private constructor(
     internal fun kanIkkeForsøkesPåNy() = Oppdrag.kanIkkeForsøkesPåNy(arbeidsgiverOppdrag, personOppdrag)
     private fun erAnnullering() = type == Utbetalingtype.ANNULLERING
 
-    internal fun reberegnUtbetaling(hvisRevurdering: () -> Unit, hvisUtbetaling: () -> Unit) {
+    internal fun reberegnUtbetaling(hendelse: IAktivitetslogg, hvisRevurdering: () -> Unit, hvisUtbetaling: () -> Unit) {
         check(kanIkkeForsøkesPåNy())
+        forkast(hendelse)
         if (type == Utbetalingtype.REVURDERING) return hvisRevurdering()
         return hvisUtbetaling()
     }

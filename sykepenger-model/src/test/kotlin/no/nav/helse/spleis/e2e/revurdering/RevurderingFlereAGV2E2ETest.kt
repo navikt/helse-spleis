@@ -53,8 +53,6 @@ import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype.REVURDERING
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertDoesNotThrow
-import org.junit.jupiter.api.assertThrows
 
 internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
 
@@ -665,17 +663,7 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
 
         nullstillTilstandsendringer()
 
-        val ytelser = { håndterYtelser(1.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(a2, 17.januar, 18.februar, 100.prosent, INNTEKT), orgnummer = a1) }
-
-        assertForventetFeil(
-            nå = {
-                assertThrows<NoSuchElementException> { ytelser() }
-                assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a1)
-            },
-            ønsket = {
-                assertDoesNotThrow { ytelser() }
-                assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, orgnummer = a1)
-            }
-        )
+        håndterYtelser(1.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(a2, 17.januar, 18.februar, 100.prosent, INNTEKT), orgnummer = a1)
+        assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, orgnummer = a1)
     }
 }
