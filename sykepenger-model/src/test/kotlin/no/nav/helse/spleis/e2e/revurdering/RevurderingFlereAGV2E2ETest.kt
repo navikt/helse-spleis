@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e.revurdering
 
+import java.time.LocalDateTime
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
@@ -27,6 +28,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertTilstander
@@ -34,13 +36,16 @@ import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.forlengelseTilGodkjenning
 import no.nav.helse.spleis.e2e.førstegangTilGodkjenning
+import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterOverstyrTidslinje
 import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
 import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
+import no.nav.helse.spleis.e2e.håndterUtbetalingshistorikk
 import no.nav.helse.spleis.e2e.håndterUtbetalt
 import no.nav.helse.spleis.e2e.håndterYtelser
+import no.nav.helse.spleis.e2e.nyPeriode
 import no.nav.helse.spleis.e2e.nyeVedtak
 import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.spleis.e2e.tilGodkjenning
@@ -48,6 +53,8 @@ import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype.REVURDERING
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
+import org.junit.jupiter.api.assertThrows
 
 internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
 
@@ -645,5 +652,30 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
         assertEquals(19, inspektør(a2).sykdomstidslinje.inspektør.grader[17.januar])
         assertVarsel("Minst én dag uten utbetaling på grunn av sykdomsgrad under 20 %. Vurder å sende vedtaksbrev fra Infotrygd", 1.vedtaksperiode.filter(a2))
         assertVarsel("Minst én dag uten utbetaling på grunn av sykdomsgrad under 20 %. Vurder å sende vedtaksbrev fra Infotrygd", 1.vedtaksperiode.filter(a1))
+    }
+
+    @Test
+    fun `revurdere på en eldre arbeidsgiver - infotrygd har utbetalt `() {
+        nyeVedtak(1.januar, 31.januar, a1)
+        nyPeriode(1.februar til 18.februar, a2)
+        håndterUtbetalingshistorikk(1.vedtaksperiode, orgnummer = a2, besvart = LocalDateTime.now().minusHours(48))
+
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)), orgnummer = a1)
+
+        nullstillTilstandsendringer()
+
+        val ytelser = { håndterYtelser(1.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(a2, 17.januar, 18.februar, 100.prosent, INNTEKT), orgnummer = a1) }
+
+        assertForventetFeil(
+            nå = {
+                assertThrows<NoSuchElementException> { ytelser() }
+                assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a1)
+            },
+            ønsket = {
+                assertDoesNotThrow { ytelser() }
+                assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, orgnummer = a1)
+            }
+        )
     }
 }
