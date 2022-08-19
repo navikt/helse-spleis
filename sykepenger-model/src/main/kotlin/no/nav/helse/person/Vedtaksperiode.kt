@@ -526,7 +526,6 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun overlappendeSøknadIkkeStøttet(søknad: Søknad, egendefinertFeiltekst: String? = null) {
-        søknad.trimLeft(periode.endInclusive)
         søknad.funksjonellFeil(
             egendefinertFeiltekst
                 ?: "Mottatt flere søknader for perioden - det støttes ikke før replay av hendelser er på plass"
