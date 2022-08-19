@@ -128,26 +128,59 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
         assertEquals(21, inspektør.sykdomstidslinje.subset(1.januar til 31.januar).inspektør.dagteller[Sykedag::class])
         assertEquals(2, inspektør.sykdomstidslinje.subset(1.januar til 31.januar).inspektør.dagteller[Feriedag::class])
         assertEquals(8, inspektør.sykdomstidslinje.subset(1.januar til 31.januar).inspektør.dagteller[SykHelgedag::class])
-
     }
 
     @Test
     fun `Avsluttet forlengelse får en overlappende søknad - skal sette i gang revurdering`() {
+        nyttVedtak(1.januar, 31.januar, 50.prosent)
+        forlengVedtak(1.februar, 28.februar, 50.prosent)
+        håndterSykmelding(Sykmeldingsperiode(5.februar, 20.februar, 100.prosent))
+        håndterSøknad(Sykdom(5.februar, 20.februar, 100.prosent))
 
+        assertTilstand(1.vedtaksperiode, AVSLUTTET)
+        assertTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+        håndterYtelser(2.vedtaksperiode)
+        (1..4).forEach {
+            assertEquals(50.prosent, inspektør.utbetalingstidslinjer(2.vedtaksperiode)[it.februar].økonomi.inspektør.grad)
+        }
+        (5..20).forEach {
+            assertEquals(100.prosent, inspektør.utbetalingstidslinjer(2.vedtaksperiode)[it.februar].økonomi.inspektør.grad)
+        }
+        (21..28).forEach {
+            assertEquals(50.prosent, inspektør.utbetalingstidslinjer(2.vedtaksperiode)[it.februar].økonomi.inspektør.grad)
+        }
     }
 
     @Test
     fun `Overlappende søknad treffer førstegangsbehandling og forlengelse - skal ikke sette i gang revurdering`() {
+        nyttVedtak(1.januar, 31.januar, 50.prosent)
+        forlengVedtak(1.februar, 28.februar, 50.prosent)
+        håndterSykmelding(Sykmeldingsperiode(15.januar, 15.februar, 100.prosent))
+        håndterSøknad(Sykdom(15.januar, 15.februar, 100.prosent))
 
+        assertTilstand(1.vedtaksperiode, AVSLUTTET)
+        assertTilstand(2.vedtaksperiode, AVSLUTTET)
     }
 
     @Test
     fun `Avsluttet forlengelse får en overlappende søknad som slutter etter - skal ikke sette i gang revurdering`() {
+        nyttVedtak(1.januar, 31.januar, 50.prosent)
+        forlengVedtak(1.februar, 28.februar, 50.prosent)
+        håndterSykmelding(Sykmeldingsperiode(15.februar, 15.mars, 100.prosent))
+        håndterSøknad(Sykdom(15.februar, 15.mars, 100.prosent))
 
+        assertTilstand(1.vedtaksperiode, AVSLUTTET)
+        assertTilstand(2.vedtaksperiode, AVSLUTTET)
     }
 
     @Test
     fun `Avsluttet periode med forlengelse får en overlappende søknad som starter før - skal ikke sette i gang revurdering`() {
+        nyttVedtak(1.januar, 31.januar, 50.prosent)
+        forlengVedtak(1.februar, 28.februar, 50.prosent)
+        håndterSykmelding(Sykmeldingsperiode(15.desember(2017), 15.januar, 100.prosent))
+        håndterSøknad(Sykdom(15.desember(2017), 15.januar, 100.prosent))
 
+        assertTilstand(1.vedtaksperiode, AVSLUTTET)
+        assertTilstand(2.vedtaksperiode, AVSLUTTET)
     }
 }
