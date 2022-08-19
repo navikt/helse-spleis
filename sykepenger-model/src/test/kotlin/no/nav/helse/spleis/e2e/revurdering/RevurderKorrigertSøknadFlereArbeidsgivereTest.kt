@@ -4,6 +4,7 @@ import no.nav.helse.EnableToggle
 import no.nav.helse.Toggle
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.lagStandardSammenligningsgrunnlag
+import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
@@ -34,9 +35,8 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
         listOf(a1, a2).nyeVedtak(1.januar til 31.januar)
         a1 {
             håndterSøknad(
-                Sykdom(1.januar, 31.januar, 100.prosent),
-                Arbeid(17.januar, 18.januar),
-                Sykdom(24.januar, 25.januar, 50.prosent)
+                Sykdom(1.januar, 31.januar, 50.prosent),
+                Arbeid(30.januar, 31.januar)
             )
             assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
 
@@ -45,8 +45,8 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             assertEquals(21, inspektør.sykdomstidslinje.inspektør.dagteller[Sykedag::class])
             assertEquals(2, inspektør.sykdomstidslinje.inspektør.dagteller[Arbeidsdag::class])
             assertEquals(8, inspektør.sykdomstidslinje.inspektør.dagteller[SykHelgedag::class])
-            assertTrue(inspektør.utbetalingstidslinjer(1.vedtaksperiode)[17.januar] is Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag)
-            assertTrue(inspektør.utbetalingstidslinjer(1.vedtaksperiode)[18.januar] is Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag)
+            assertTrue(inspektør.utbetalingstidslinjer(1.vedtaksperiode)[17.januar] is Utbetalingstidslinje.Utbetalingsdag.NavDag)
+            assertTrue(inspektør.utbetalingstidslinjer(1.vedtaksperiode)[18.januar] is Utbetalingstidslinje.Utbetalingsdag.NavDag)
         }
 
         a2 {
@@ -98,6 +98,64 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
 
         a2 {
             assertTilstand(1.vedtaksperiode, AVSLUTTET)
+        }
+    }
+
+    @Test
+    fun `Vedtaksperiodene til a1 og a2 er kant-i-kant og det kommer en korrigerende søknad for a1 - setter ikke i gang revurdering`() {
+        val periodeAg1 = 1.januar til 31.januar
+        val periodeAg2 = 1.februar til 28.februar
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(periodeAg1.start, periodeAg1.endInclusive, 100.prosent))
+            håndterSøknad(Sykdom(periodeAg1.start, periodeAg1.endInclusive, 100.prosent))
+        }
+        a2 {
+            håndterSykmelding(Sykmeldingsperiode(periodeAg2.start, periodeAg2.endInclusive, 100.prosent))
+            håndterSøknad(Sykdom(periodeAg2.start, periodeAg2.endInclusive, 100.prosent))
+            håndterInntektsmelding(listOf(periodeAg2.start til periodeAg2.start.plusDays(15)), beregnetInntekt = 20000.månedlig)
+        }
+        a1 {
+            håndterInntektsmelding(listOf(periodeAg1.start til periodeAg1.start.plusDays(15)), beregnetInntekt = 20000.månedlig)
+            håndterYtelser(1.vedtaksperiode)
+            håndterVilkårsgrunnlag(
+                1.vedtaksperiode,
+                inntektsvurdering = listOf(a1, a2).lagStandardSammenligningsgrunnlag(20000.månedlig, periodeAg1.start),
+                inntektsvurderingForSykepengegrunnlag = listOf(a1, a2).lagStandardSykepengegrunnlag(20000.månedlig, periodeAg1.start)
+            )
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+            assertTilstand(1.vedtaksperiode, AVSLUTTET)
+        }
+        a2 {
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+            assertTilstand(1.vedtaksperiode, AVSLUTTET)
+        }
+        a1 {
+            håndterSøknad(Sykdom(1.januar, 31.januar, 50.prosent))
+            assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+        }
+        a2 {
+            assertTilstand(1.vedtaksperiode, AVVENTER_REVURDERING)
+        }
+        a1 {
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+
+            assertTilstand(1.vedtaksperiode, AVSLUTTET)
+        }
+        a2 {
+            assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+            håndterYtelser(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            assertTilstand(1.vedtaksperiode, AVSLUTTET)
+
         }
     }
 }

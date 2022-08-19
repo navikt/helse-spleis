@@ -343,6 +343,23 @@ private fun lagStandardSykepengegrunnlag(orgnummer: String, inntekt: Inntekt, sk
         ), arbeidsforhold = emptyList()
     )
 
+internal fun List<String>.lagStandardSykepengegrunnlag(inntekt: Inntekt, skjæringstidspunkt: LocalDate) =
+    InntektForSykepengegrunnlag(
+        inntekter = map { orgnummer ->
+            ArbeidsgiverInntekt(orgnummer, (0..2).map {
+                val yearMonth = YearMonth.from(skjæringstidspunkt).minusMonths(3L - it)
+                ArbeidsgiverInntekt.MånedligInntekt.Sykepengegrunnlag(
+                    yearMonth = yearMonth,
+                    type = ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT,
+                    inntekt = inntekt,
+                    fordel = "fordel",
+                    beskrivelse = "beskrivelse"
+                )
+            })
+        },
+        arbeidsforhold = emptyList()
+    )
+
 internal fun standardSimuleringsresultat(orgnummer: String) = no.nav.helse.hendelser.Simulering.SimuleringResultat(
     totalbeløp = 2000,
     perioder = listOf(
