@@ -36,6 +36,7 @@ import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.grunnlag
 import no.nav.helse.spleis.e2e.repeat
 import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
+import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
@@ -286,17 +287,19 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
         a1 {
             håndterOverstyrInntekt(1.januar, 32000.månedlig)
             håndterYtelser(1.vedtaksperiode)
-            håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-            håndterUtbetalt()
+            val utbetalinger = inspektør.utbetalinger(1.vedtaksperiode)
+            assertEquals(2, utbetalinger.size)
+            val arbeidsgiverOppdrag = utbetalinger.last().inspektør.arbeidsgiverOppdrag
+            assertEquals(1, arbeidsgiverOppdrag.size)
+            assertEquals(Endringskode.UEND, arbeidsgiverOppdrag[0].inspektør.endringskode)
+            assertDag(17.januar, 1081.daglig, aktuellDagsinntekt = 32000.månedlig)
             assertTilstander(
                 1.vedtaksperiode,
                 AVSLUTTET,
                 AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
-                AVVENTER_SIMULERING_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING,
-                TIL_UTBETALING,
                 AVSLUTTET
             )
         }
@@ -305,6 +308,7 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
+            assertDag(17.januar, 1080.daglig, aktuellDagsinntekt = 31000.månedlig)
             assertTilstander(
                 1.vedtaksperiode,
                 AVVENTER_GODKJENNING,

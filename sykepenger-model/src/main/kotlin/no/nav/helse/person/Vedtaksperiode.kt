@@ -2543,15 +2543,14 @@ internal class Vedtaksperiode private constructor(
             }
 
             internal fun gjødsle(tidslinjer: Map<Arbeidsgiver, Utbetalingstidslinje>, infotrygdhistorikk: Infotrygdhistorikk) {
+                val period = beregningsperioder.periode()
                 tidslinjer.forEach { (arbeidsgiver, tidslinje) ->
-                    val perioder = beregningsperioder.filter { it.arbeidsgiver == arbeidsgiver }
-                        .map { it.periode to it.aktivitetsloggkopi() }
                     Refusjonsgjødsler(
                         tidslinje = tidslinje + arbeidsgiver.utbetalingstidslinje(infotrygdhistorikk),
                         refusjonshistorikk = arbeidsgiver.refusjonshistorikk,
                         infotrygdhistorikk = infotrygdhistorikk,
                         organisasjonsnummer = arbeidsgiver.organisasjonsnummer()
-                    ).gjødsle(hendelse, perioder)
+                    ).gjødsle(beregningsperioder.firstOrNull { it.arbeidsgiver == arbeidsgiver }?.aktivitetsloggkopi() ?: hendelse, period)
                 }
             }
 
@@ -2595,8 +2594,7 @@ internal class Vedtaksperiode private constructor(
                         AvventerSimuleringRevurdering,
                         AvventerGodkjenningRevurdering,
                         TilUtbetaling,
-                        UtbetalingFeilet,
-                        Avsluttet
+                        UtbetalingFeilet
                     )
                 }
             }
