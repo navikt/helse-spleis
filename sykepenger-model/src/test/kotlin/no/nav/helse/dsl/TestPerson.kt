@@ -316,6 +316,17 @@ private fun lagStandardSammenligningsgrunnlag(orgnummer: String, inntekt: Inntek
         }
     )
 
+internal fun List<String>.lagStandardSammenligningsgrunnlag(inntekt: Inntekt, skjæringstidspunkt: LocalDate) =
+    Inntektsvurdering(
+        inntekter = inntektperioderForSammenligningsgrunnlag {
+            skjæringstidspunkt.minusMonths(12L).withDayOfMonth(1) til skjæringstidspunkt.minusMonths(1L).withDayOfMonth(1) inntekter {
+                forEach { orgnummer ->
+                    orgnummer inntekt inntekt
+                }
+            }
+        }
+    )
+
 private fun lagStandardSykepengegrunnlag(orgnummer: String, inntekt: Inntekt, skjæringstidspunkt: LocalDate) =
     InntektForSykepengegrunnlag(
         inntekter = listOf(
