@@ -2,6 +2,7 @@ package no.nav.helse.utbetalingstidslinje
 
 import java.time.LocalDate
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.økonomi.betal
@@ -14,11 +15,9 @@ internal class MaksimumUtbetalingFilter(
 
     override fun filter(
         tidslinjer: List<Utbetalingstidslinje>,
-        periode: Periode,
-        aktivitetslogg: IAktivitetslogg,
-        subsumsjonObserver: SubsumsjonObserver
+        perioder: List<Triple<Periode, IAktivitetslogg, SubsumsjonObserver>>
     ): List<Utbetalingstidslinje> {
-        val virkningsdato = virkningsdato(periode)
+        val virkningsdato = virkningsdato(perioder.map { it.first }.periode()!!)
 
         Utbetalingstidslinje.periode(tidslinjer).forEach { dato ->
             tidslinjer.map { it[dato].økonomi }.also { økonomiList ->
@@ -30,11 +29,12 @@ internal class MaksimumUtbetalingFilter(
                 }
             }
         }
-        if (harRedusertUtbetaling)
-            aktivitetslogg.info("Redusert utbetaling minst én dag på grunn av inntekt over 6G")
-        else
-            aktivitetslogg.info("Utbetaling har ikke blitt redusert på grunn av 6G")
-
+        perioder.forEach { (_, aktivitetslogg, _) ->
+            if (harRedusertUtbetaling)
+                aktivitetslogg.info("Redusert utbetaling minst én dag på grunn av inntekt over 6G")
+            else
+                aktivitetslogg.info("Utbetaling har ikke blitt redusert på grunn av 6G")
+        }
         return tidslinjer
     }
 

@@ -11,9 +11,7 @@ internal class AvvisInngangsvilkårfilter(
 
     override fun filter(
         tidslinjer: List<Utbetalingstidslinje>,
-        periode: Periode,
-        aktivitetslogg: IAktivitetslogg,
-        subsumsjonObserver: SubsumsjonObserver
+        perioder: List<Triple<Periode, IAktivitetslogg, SubsumsjonObserver>>
     ): List<Utbetalingstidslinje> {
         vilkårsgrunnlagHistorikk.avvisInngangsvilkår(tidslinjer)
         return tidslinjer

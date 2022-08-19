@@ -2555,13 +2555,10 @@ internal class Vedtaksperiode private constructor(
             }
 
             internal fun filtrer(filtere: List<UtbetalingstidslinjerFilter>, tidslinjer: Map<Arbeidsgiver, Utbetalingstidslinje>) {
-                beregningsperioder.forEach { vedtaksperiode ->
-                    val aktivitetslogg = vedtaksperiode.aktivitetsloggkopi()
-                    val jurist = vedtaksperiode.jurist()
-                    val periode = vedtaksperiode.periode()
-                    filtere.forEach {
-                        it.filter(tidslinjer.values.toList(), periode, aktivitetslogg, jurist)
-                    }
+                val perioder = beregningsperioder
+                    .map { Triple(it.periode, it.aktivitetsloggkopi(), it.jurist) }
+                filtere.forEach {
+                    it.filter(tidslinjer.values.toList(), perioder)
                 }
             }
 

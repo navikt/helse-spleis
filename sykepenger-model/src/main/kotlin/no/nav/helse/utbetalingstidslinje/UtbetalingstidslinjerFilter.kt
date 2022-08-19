@@ -10,5 +10,11 @@ internal interface UtbetalingstidslinjerFilter {
         periode: Periode,
         aktivitetslogg: IAktivitetslogg,
         subsumsjonObserver: SubsumsjonObserver
+    ): List<Utbetalingstidslinje> =
+        filter(tidslinjer, listOf(Triple(periode, aktivitetslogg, subsumsjonObserver)))
+
+    fun filter(
+        tidslinjer: List<Utbetalingstidslinje>,
+        perioder: List<Triple<Periode, IAktivitetslogg, SubsumsjonObserver>>
     ): List<Utbetalingstidslinje>
 }
