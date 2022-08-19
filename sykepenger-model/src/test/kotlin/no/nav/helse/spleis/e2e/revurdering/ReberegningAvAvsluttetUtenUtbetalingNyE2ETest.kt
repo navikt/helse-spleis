@@ -70,11 +70,13 @@ import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.spleis.e2e.repeat
 import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
 import no.nav.helse.sykdomstidslinje.Dag
+import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -1082,6 +1084,9 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
 
     @Test
     fun `endrer arbeidsgiverperiode etter igangsatt revurdering`() {
+        val forMyeInntekt = INNTEKT * 1.2
+        val riktigInntekt = INNTEKT
+
         håndterSykmelding(Sykmeldingsperiode(5.februar, 11.februar, 100.prosent))
         håndterSøknad(Sykdom(5.februar, 11.februar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
@@ -1090,19 +1095,42 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         nullstillTilstandsendringer()
         håndterInntektsmelding(listOf(
             24.januar til 8.februar
-        ))
+        ), beregnetInntekt = forMyeInntekt)
         håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode)
+        val gammeltVilkårsgrunnlag = inspektør.vilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterInntektsmelding(listOf(
             22.januar til 6.februar
-        ))
+        ), beregnetInntekt = riktigInntekt)
         håndterSimulering(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        val nyttVilkårsgrunnlag = inspektør.vilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+
         assertVarsler(listOf("Denne perioden var tidligere regnet som innenfor arbeidsgiverperioden"), 1.vedtaksperiode.filter(ORGNUMMER))
         assertVarsler(listOf("Denne perioden var tidligere regnet som innenfor arbeidsgiverperioden"), 2.vedtaksperiode.filter(ORGNUMMER))
+
+        assertNotNull(gammeltVilkårsgrunnlag)
+        assertNotNull(nyttVilkårsgrunnlag)
+        assertNotEquals(gammeltVilkårsgrunnlag, nyttVilkårsgrunnlag)
+
+        assertEquals(forMyeInntekt, gammeltVilkårsgrunnlag.inspektør.sykepengegrunnlag.inspektør.sykepengegrunnlag)
+        assertEquals(riktigInntekt, nyttVilkårsgrunnlag.inspektør.sykepengegrunnlag.inspektør.sykepengegrunnlag)
+
+        val utbetaling = inspektør.gjeldendeUtbetalingForVedtaksperiode(2.vedtaksperiode)
+        val utbetalingInspektør = utbetaling.inspektør
+
+        val førsteUtbetalingsdag = utbetalingInspektør.utbetalingstidslinje[7.februar]
+        assertForventetFeil(
+            forklaring = "gammelt vilkårsgrunnlag, som ikke lenger er gjeldende, brukes for å sette inntekt på utbetalingen",
+            nå = { assertEquals(forMyeInntekt, førsteUtbetalingsdag.økonomi.inspektør.aktuellDagsinntekt) },
+            ønsket = { assertEquals(riktigInntekt, førsteUtbetalingsdag.økonomi.inspektør.aktuellDagsinntekt) }
+        )
+
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_GJENNOMFØRT_REVURDERING)
-        assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_VILKÅRSPRØVING_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_VILKÅRSPRØVING_REVURDERING)
+        assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_VILKÅRSPRØVING_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_VILKÅRSPRØVING_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING)
     }
 
     @Test
