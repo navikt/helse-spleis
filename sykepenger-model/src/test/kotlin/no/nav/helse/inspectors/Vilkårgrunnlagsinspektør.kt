@@ -18,7 +18,7 @@ internal val VilkårsgrunnlagHistorikk.inspektør get() = Vilkårgrunnlagsinspek
 
 internal class Vilkårgrunnlagsinspektør(historikk: VilkårsgrunnlagHistorikk) : VilkårsgrunnlagHistorikkVisitor {
     val vilkårsgrunnlagTeller = mutableMapOf<Int, Int>()
-    var innslag = -1
+    private var innslag = -1
 
     init {
         historikk.accept(this)

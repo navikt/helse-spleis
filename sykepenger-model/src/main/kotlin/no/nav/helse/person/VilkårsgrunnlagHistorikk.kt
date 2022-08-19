@@ -12,6 +12,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.mai
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
+import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
@@ -45,6 +46,10 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
     internal fun build(skjæringstidspunkt: LocalDate, builder: VedtakFattetBuilder) {
         vilkårsgrunnlagFor(skjæringstidspunkt)?.build(builder)
+    }
+
+    internal fun oppdaterHistorikk(sykdomstidslinje: Sykdomstidslinje) {
+
     }
 
     internal fun vilkårsgrunnlagFor(skjæringstidspunkt: LocalDate) =

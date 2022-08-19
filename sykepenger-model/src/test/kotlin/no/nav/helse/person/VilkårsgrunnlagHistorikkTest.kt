@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
@@ -28,7 +29,9 @@ import no.nav.helse.somPersonidentifikator
 import no.nav.helse.sykepengegrunnlag
 import no.nav.helse.testhelpers.AP
 import no.nav.helse.testhelpers.NAV
+import no.nav.helse.testhelpers.S
 import no.nav.helse.testhelpers.assertNotNull
+import no.nav.helse.testhelpers.resetSeed
 import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.utbetalingstidslinje.Alder.Companion.alder
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler.Companion.NormalArbeidstaker
@@ -63,6 +66,45 @@ internal class VilkårsgrunnlagHistorikkTest {
     @BeforeEach
     fun setup() {
         historikk = VilkårsgrunnlagHistorikk()
+    }
+
+    @Test
+    fun `fjerner vilkårsgrunnlag som ikke gjelder lengre`() {
+        val inntekt = 21000.månedlig
+        val gammeltSkjæringstidspunkt = 10.januar
+        val nyttSkjæringstidspunkt = 1.januar
+
+        historikk.lagre(VilkårsgrunnlagHistorikk.Grunnlagsdata(
+            skjæringstidspunkt = gammeltSkjæringstidspunkt,
+            sykepengegrunnlag = inntekt.sykepengegrunnlag(ORGNR),
+            sammenligningsgrunnlag = Sammenligningsgrunnlag(inntekt, emptyList()),
+            avviksprosent = 0.prosent,
+            opptjening = Opptjening(arbeidsforholdFraHistorikk, 1.januar til 31.januar),
+            medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
+            vurdertOk = true,
+            meldingsreferanseId = UUID.randomUUID(),
+            vilkårsgrunnlagId = UUID.randomUUID()
+        ))
+
+        val sykdomstidslinje = resetSeed(nyttSkjæringstidspunkt) { 31.S }
+        val skjæringstidspunkter = sykdomstidslinje.skjæringstidspunkter()
+        assertEquals(listOf(nyttSkjæringstidspunkt), skjæringstidspunkter)
+
+        assertEquals(1, historikk.inspektør.vilkårsgrunnlagTeller.size)
+        historikk.oppdaterHistorikk(sykdomstidslinje)
+
+        assertForventetFeil(
+            nå = {
+                assertEquals(1, historikk.inspektør.vilkårsgrunnlagTeller.size)
+            },
+            ønsket = {
+                assertEquals(2, historikk.inspektør.vilkårsgrunnlagTeller.size)
+                assertEquals(0, historikk.inspektør.vilkårsgrunnlagTeller[0]) { "det siste innslaget skal være tomt" }
+                assertEquals(1, historikk.inspektør.vilkårsgrunnlagTeller[1])
+                assertNull(historikk.vilkårsgrunnlagFor(gammeltSkjæringstidspunkt)) { "skal ikke beholde vilkårsgrunnlag for skjæringstidspunkter som ikke finnes" }
+                assertNull(historikk.vilkårsgrunnlagFor(nyttSkjæringstidspunkt)) { "skal ikke ha vilkårsgrunnlag for skjæringstidspunkt som ikke er vilkårsprøvd" }
+            }
+        )
     }
 
     @Test
@@ -825,9 +867,9 @@ internal class VilkårsgrunnlagHistorikkTest {
         val grunnlag1 = VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag(skjæringstidspunkt, sykepengegrunnlag)
         val grunnlag2 = VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag(skjæringstidspunkt, sykepengegrunnlag)
         historikk.lagre(grunnlag1)
-        val før = historikk.inspektør.innslag
+        val før = historikk.inspektør.vilkårsgrunnlagTeller.size
         historikk.lagre(grunnlag2)
-        val etter = historikk.inspektør.innslag
+        val etter = historikk.inspektør.vilkårsgrunnlagTeller.size
         assertEquals(grunnlag1, grunnlag2)
         assertEquals(0, etter - før)
     }
