@@ -499,6 +499,10 @@ internal abstract class AbstractEndToEndMediatorTest {
         )
     }
 
+    protected fun assertTilstand(vedtaksperiodeIndeks: Int, tilstand: String) {
+        assertEquals(tilstand, testRapid.inspektør.tilstander(testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks)).lastOrNull())
+    }
+
     protected fun assertUtbetalingTilstander(utbetalingIndeks: Int, vararg tilstand: String) {
         assertEquals(
             tilstand.toList(),
