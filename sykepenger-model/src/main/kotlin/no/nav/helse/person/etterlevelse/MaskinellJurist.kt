@@ -1,5 +1,6 @@
 package no.nav.helse.person.etterlevelse
 
+import java.io.Serializable
 import java.time.LocalDate
 import java.time.Year
 import java.time.format.DateTimeFormatter
@@ -159,8 +160,8 @@ class MaskinellJurist private constructor(
         )
     }
 
-    override fun `§ 8-9 ledd 1`(oppfylt: Boolean, søknadsperiode: Periode) {
-        søknadsperiode.forEach {
+    override fun `§ 8-9 ledd 1`(oppfylt: Boolean, utlandsperiode: Periode, søknadsperioder: List<Map<String, Serializable>>) {
+        utlandsperiode.forEach {
             leggTil(
                 GrupperbarSubsumsjon(
                     dato = it,
@@ -168,7 +169,7 @@ class MaskinellJurist private constructor(
                     versjon = 1.juni(2021),
                     paragraf = PARAGRAF_8_9,
                     ledd = LEDD_1,
-                    input = emptyMap(),
+                    input = mapOf( "soknadsPerioder" to søknadsperioder),
                     output = emptyMap(),
                     kontekster = kontekster()
                 )

@@ -1,5 +1,6 @@
 package no.nav.helse.person.etterlevelse
 
+import java.io.Serializable
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Year
@@ -91,9 +92,10 @@ interface SubsumsjonObserver {
      * Lovdata: [lenke](https://lovdata.no/lov/1997-02-28-19/§8-9)
      *
      * @param oppfylt hvorvidt sykmeldte har oppholdt seg i Norge i søknadsperioden
-     * @param søknadsperiode perioden det søkes sykepenger for
+     * @param utlandsperiode perioden burker har oppgitt å ha vært i utlandet
+     * @param søknadsperioder perioder i søknaden som ligger til grunn
      */
-    fun `§ 8-9 ledd 1`(oppfylt: Boolean, søknadsperiode: Periode) {}
+    fun `§ 8-9 ledd 1`(oppfylt: Boolean, utlandsperiode: Periode, søknadsperioder: List<Map<String, Serializable>>) {}
 
     /**
      * Vurdering av maksimalt sykepengegrunnlag

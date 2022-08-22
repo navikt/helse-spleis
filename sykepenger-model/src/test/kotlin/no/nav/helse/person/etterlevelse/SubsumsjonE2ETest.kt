@@ -351,9 +351,69 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             paragraf = PARAGRAF_8_9,
             versjon = 1.juni(2021),
             ledd = LEDD_1,
-            input = emptyMap(),
+            input = mapOf(
+                "soknadsPerioder" to listOf(
+                    mapOf(
+                        "fom" to 1.januar,
+                        "tom" to 31.januar,
+                        "type" to "sykdom"
+                    ),
+                    mapOf(
+                        "fom" to 20.januar,
+                        "tom" to 31.januar,
+                        "type" to "utlandsopphold"
+                    )
+                )
+            ),
             output = mapOf(
                 "perioder" to listOf(
+                    mapOf(
+                        "fom" to 20.januar,
+                        "tom" to 31.januar
+                    )
+                )
+            )
+        )
+    }
+
+    @Test
+    fun `§ 8-9 ledd 1 - en subsumsjon for to utenlandsopphold`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(
+            Sykdom(1.januar, 31.januar, 100.prosent),
+            Utlandsopphold(15.januar, 17.januar),
+            Utlandsopphold(20.januar, 31.januar)
+        )
+        SubsumsjonInspektør(jurist).assertIkkeOppfylt(
+            paragraf = PARAGRAF_8_9,
+            versjon = 1.juni(2021),
+            ledd = LEDD_1,
+            input = mapOf(
+                "soknadsPerioder" to listOf(
+                    mapOf(
+                        "fom" to 1.januar,
+                        "tom" to 31.januar,
+                        "type" to "sykdom"
+                    ),
+                    mapOf(
+                        "fom" to 15.januar,
+                        "tom" to 17.januar,
+                        "type" to "utlandsopphold"
+                    ),
+                    mapOf(
+                        "fom" to 20.januar,
+                        "tom" to 31.januar,
+                        "type" to "utlandsopphold"
+                    )
+                )
+
+            ),
+            output = mapOf(
+                "perioder" to listOf(
+                    mapOf(
+                        "fom" to 15.januar,
+                        "tom" to 17.januar
+                    ),
                     mapOf(
                         "fom" to 20.januar,
                         "tom" to 31.januar
@@ -375,7 +435,25 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             paragraf = PARAGRAF_8_9,
             versjon = 1.juni(2021),
             ledd = LEDD_1,
-            input = emptyMap(),
+            input = mapOf(
+                "soknadsPerioder" to listOf(
+                    mapOf(
+                        "fom" to 1.januar,
+                        "tom" to 31.januar,
+                        "type" to "sykdom"
+                    ),
+                    mapOf(
+                        "fom" to 20.januar,
+                        "tom" to 31.januar,
+                        "type" to "utlandsopphold"
+                    ),
+                    mapOf(
+                        "fom" to 20.januar,
+                        "tom" to 31.januar,
+                        "type" to "ferie"
+                    )
+                )
+            ),
             output = mapOf(
                 "perioder" to listOf(
                     mapOf(
@@ -914,7 +992,13 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
 
         håndterOverstyrArbeidsforhold(
             1.januar,
-            listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, true, "Jeg, en saksbehandler, overstyrte pga 8-15"))
+            listOf(
+                OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(
+                    a2,
+                    true,
+                    "Jeg, en saksbehandler, overstyrte pga 8-15"
+                )
+            )
         )
         SubsumsjonInspektør(jurist).assertOppfylt(
             versjon = 18.desember(1998),
@@ -988,7 +1072,13 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
 
         håndterOverstyrArbeidsforhold(
             1.januar,
-            listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, true, "Jeg, en saksbehandler, overstyrte pga 8-15"))
+            listOf(
+                OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(
+                    a2,
+                    true,
+                    "Jeg, en saksbehandler, overstyrte pga 8-15"
+                )
+            )
         )
         SubsumsjonInspektør(jurist).assertOppfylt(
             versjon = 18.desember(1998),
@@ -1047,7 +1137,13 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
 
         håndterOverstyrArbeidsforhold(
             1.januar,
-            listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, false, "Jeg, en saksbehandler, overstyrte pga 8-15"))
+            listOf(
+                OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(
+                    a2,
+                    false,
+                    "Jeg, en saksbehandler, overstyrte pga 8-15"
+                )
+            )
         )
         SubsumsjonInspektør(jurist).assertIkkeOppfylt(
             versjon = 18.desember(1998),
@@ -1127,7 +1223,13 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
 
         håndterOverstyrArbeidsforhold(
             1.januar,
-            listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, false, "Jeg, en saksbehandler, overstyrte pga 8-15"))
+            listOf(
+                OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(
+                    a2,
+                    false,
+                    "Jeg, en saksbehandler, overstyrte pga 8-15"
+                )
+            )
         )
         SubsumsjonInspektør(jurist).assertIkkeOppfylt(
             versjon = 18.desember(1998),
@@ -1187,7 +1289,16 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             ledd = 1.ledd,
             bokstav = BOKSTAV_A,
             versjon = 1.januar,
-            input = mapOf( "sykdomstidslinje" to listOf(mapOf("fom" to 1.januar, "tom" to 31.januar, "dagtype" to "SYKEDAG", "grad" to 100))),
+            input = mapOf(
+                "sykdomstidslinje" to listOf(
+                    mapOf(
+                        "fom" to 1.januar,
+                        "tom" to 31.januar,
+                        "dagtype" to "SYKEDAG",
+                        "grad" to 100
+                    )
+                )
+            ),
             output = mapOf(
                 "perioder" to listOf(mapOf("fom" to 17.januar, "tom" to 17.januar))
             )
@@ -1208,7 +1319,16 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             ledd = 1.ledd,
             bokstav = BOKSTAV_A,
             versjon = 1.januar,
-            input = mapOf( "sykdomstidslinje" to listOf(mapOf("fom" to 4.januar, "tom" to 22.januar, "dagtype" to "SYKEDAG", "grad" to 100))),
+            input = mapOf(
+                "sykdomstidslinje" to listOf(
+                    mapOf(
+                        "fom" to 4.januar,
+                        "tom" to 22.januar,
+                        "dagtype" to "SYKEDAG",
+                        "grad" to 100
+                    )
+                )
+            ),
             output = mapOf(
                 "perioder" to listOf(mapOf("fom" to 22.januar, "tom" to 22.januar))
             )
@@ -1228,7 +1348,16 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             ledd = 1.ledd,
             bokstav = BOKSTAV_A,
             versjon = 1.januar(2018),
-            input = mapOf( "sykdomstidslinje" to listOf(mapOf("fom" to 1.januar, "tom" to 16.januar, "dagtype" to "SYKEDAG", "grad" to 100))) ,
+            input = mapOf(
+                "sykdomstidslinje" to listOf(
+                    mapOf(
+                        "fom" to 1.januar,
+                        "tom" to 16.januar,
+                        "dagtype" to "SYKEDAG",
+                        "grad" to 100
+                    )
+                )
+            ),
             output = mapOf(
                 "perioder" to listOf(mapOf("fom" to 1.januar, "tom" to 16.januar))
             )
@@ -1248,7 +1377,16 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             ledd = 1.ledd,
             bokstav = BOKSTAV_A,
             versjon = 1.januar(2018),
-            input = mapOf( "sykdomstidslinje" to listOf(mapOf("fom" to 1.januar, "tom" to 31.januar, "dagtype" to "SYKEDAG", "grad" to 100))),
+            input = mapOf(
+                "sykdomstidslinje" to listOf(
+                    mapOf(
+                        "fom" to 1.januar,
+                        "tom" to 31.januar,
+                        "dagtype" to "SYKEDAG",
+                        "grad" to 100
+                    )
+                )
+            ),
             output = mapOf(
                 "perioder" to listOf(mapOf("fom" to 1.januar, "tom" to 16.januar))
             )
@@ -1268,7 +1406,16 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             ledd = 1.ledd,
             bokstav = BOKSTAV_A,
             versjon = 1.januar(2018),
-            input = mapOf( "sykdomstidslinje" to listOf(mapOf("fom" to 1.januar, "tom" to 10.januar, "dagtype" to "SYKEDAG", "grad" to 100), mapOf("fom" to 12.januar, "tom" to 31.januar, "dagtype" to "SYKEDAG", "grad" to 100))),
+            input = mapOf(
+                "sykdomstidslinje" to listOf(
+                    mapOf(
+                        "fom" to 1.januar,
+                        "tom" to 10.januar,
+                        "dagtype" to "SYKEDAG",
+                        "grad" to 100
+                    ), mapOf("fom" to 12.januar, "tom" to 31.januar, "dagtype" to "SYKEDAG", "grad" to 100)
+                )
+            ),
             output = mapOf(
                 "perioder" to listOf(
                     mapOf("fom" to 1.januar, "tom" to 10.januar),

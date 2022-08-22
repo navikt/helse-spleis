@@ -1,9 +1,11 @@
 package no.nav.helse.hendelser
 
+import java.io.Serializable
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Companion.inneholderDagerEtter
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Companion.subsumsjonsFormat
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.IAktivitetslogg
@@ -73,7 +75,7 @@ class Søknad(
     internal fun harArbeidsdager() = perioder.filterIsInstance<Søknadsperiode.Arbeid>().isNotEmpty()
 
     override fun valider(periode: Periode, subsumsjonObserver: SubsumsjonObserver): IAktivitetslogg {
-        perioder.forEach { it.subsumsjon(this, subsumsjonObserver) }
+        perioder.forEach { it.subsumsjon(this.perioder.subsumsjonsFormat(), subsumsjonObserver) }
         perioder.forEach { it.valider(this) }
         andreInntektskilder.forEach { it.valider(this) }
         if (permittert) varsel("Søknaden inneholder permittering. Vurder om permittering har konsekvens for rett til sykepenger")
@@ -125,7 +127,7 @@ class Søknad(
         }
     }
 
-    sealed class Søknadsperiode(fom: LocalDate, tom: LocalDate) {
+    sealed class Søknadsperiode(fom: LocalDate, tom: LocalDate, private val navn: String) {
         protected val periode = Periode(fom, tom)
 
         internal companion object {
@@ -134,6 +136,10 @@ class Søknad(
 
             fun List<Søknadsperiode>.inneholderDagerEtter(sisteSykdomsdato: LocalDate) =
                 any { it.periode.endInclusive > sisteSykdomsdato }
+
+            fun List<Søknadsperiode>.subsumsjonsFormat(): List<Map<String, Serializable>> {
+                return map { mapOf("fom" to it.periode.start, "tom" to it.periode.endInclusive, "type" to it.navn) }
+            }
 
             fun søknadsperiode(liste: List<Søknadsperiode>) =
                 liste
@@ -157,14 +163,14 @@ class Søknad(
             if (periode.utenfor(søknad.sykdomsperiode)) søknad.varsel(beskjed)
         }
 
-        internal open fun subsumsjon(søknad: Søknad, subsumsjonObserver: SubsumsjonObserver) {}
+        internal open fun subsumsjon(søknadsperioder: List<Map<String, Serializable>>, subsumsjonObserver: SubsumsjonObserver) {}
 
         class Sykdom(
             fom: LocalDate,
             tom: LocalDate,
             private val sykmeldingsgrad: Prosentdel,
             arbeidshelse: Prosentdel? = null
-        ) : Søknadsperiode(fom, tom) {
+        ) : Søknadsperiode(fom, tom, "sykdom") {
             private val søknadsgrad = arbeidshelse?.not()
             private val sykdomsgrad = søknadsgrad ?: sykmeldingsgrad
 
@@ -176,12 +182,12 @@ class Søknad(
                 Sykdomstidslinje.sykedager(periode.start, periode.endInclusive, avskjæringsdato, sykdomsgrad, kilde)
         }
 
-        class Ferie(fom: LocalDate, tom: LocalDate) : Søknadsperiode(fom, tom) {
+        class Ferie(fom: LocalDate, tom: LocalDate) : Søknadsperiode(fom, tom, "ferie") {
             override fun sykdomstidslinje(sykdomsperiode: Periode, avskjæringsdato: LocalDate, kilde: Hendelseskilde) =
                 Sykdomstidslinje.feriedager(periode.start, periode.endInclusive, kilde).subset(sykdomsperiode.oppdaterTom(periode))
         }
 
-        class Papirsykmelding(fom: LocalDate, tom: LocalDate) : Søknadsperiode(fom, tom) {
+        class Papirsykmelding(fom: LocalDate, tom: LocalDate) : Søknadsperiode(fom, tom, "papirsykmelding") {
             override fun sykdomstidslinje(sykdomsperiode: Periode, avskjæringsdato: LocalDate, kilde: Hendelseskilde) =
                 Sykdomstidslinje.problemdager(periode.start, periode.endInclusive, kilde, "Papirdager ikke støttet")
 
@@ -189,7 +195,7 @@ class Søknad(
                 søknad.funksjonellFeil("Søknaden inneholder en Papirsykmeldingsperiode")
         }
 
-        class Utdanning(fom: LocalDate, tom: LocalDate) : Søknadsperiode(fom, tom) {
+        class Utdanning(fom: LocalDate, tom: LocalDate) : Søknadsperiode(fom, tom, "utdanning") {
             override fun sykdomstidslinje(sykdomsperiode: Periode, avskjæringsdato: LocalDate, kilde: Hendelseskilde) =
                 Sykdomstidslinje.ukjent(periode.start, periode.endInclusive, kilde)
 
@@ -197,7 +203,7 @@ class Søknad(
                 søknad.varsel("Utdanning oppgitt i perioden i søknaden.")
         }
 
-        class Permisjon(fom: LocalDate, tom: LocalDate) : Søknadsperiode(fom, tom) {
+        class Permisjon(fom: LocalDate, tom: LocalDate) : Søknadsperiode(fom, tom, "permisjon") {
             override fun sykdomstidslinje(sykdomsperiode: Periode, avskjæringsdato: LocalDate, kilde: Hendelseskilde) =
                 Sykdomstidslinje.permisjonsdager(periode.start, periode.endInclusive, kilde)
 
@@ -206,7 +212,7 @@ class Søknad(
             }
         }
 
-        class Egenmelding(fom: LocalDate, tom: LocalDate) : Søknadsperiode(fom, tom) {
+        class Egenmelding(fom: LocalDate, tom: LocalDate) : Søknadsperiode(fom, tom, "egenmelding") {
             override fun valider(søknad: Søknad) {
                 if (periode.start < søknad.sykdomsperiode.start.minusDays(tidslinjegrense)) {
                     søknad.info("Søknaden inneholder egenmeldingsdager som er mer enn $tidslinjegrense dager før sykmeldingsperioden")
@@ -220,7 +226,7 @@ class Søknad(
                 Sykdomstidslinje()
         }
 
-        class Arbeid(fom: LocalDate, tom: LocalDate) : Søknadsperiode(fom, tom) {
+        class Arbeid(fom: LocalDate, tom: LocalDate) : Søknadsperiode(fom, tom, "arbeid") {
             override fun valider(søknad: Søknad) =
                 valider(søknad, "Søknaden inneholder Arbeidsdager utenfor sykdomsvindu")
 
@@ -228,7 +234,7 @@ class Søknad(
                 Sykdomstidslinje.arbeidsdager(periode.start, periode.endInclusive, kilde)
         }
 
-        class Utlandsopphold(fom: LocalDate, tom: LocalDate) : Søknadsperiode(fom, tom) {
+        class Utlandsopphold(fom: LocalDate, tom: LocalDate) : Søknadsperiode(fom, tom, "utlandsopphold") {
             override fun sykdomstidslinje(sykdomsperiode: Periode, avskjæringsdato: LocalDate, kilde: Hendelseskilde) =
                 Sykdomstidslinje.ukjent(periode.start, periode.endInclusive, kilde)
 
@@ -237,8 +243,8 @@ class Søknad(
                 søknad.varsel("Utenlandsopphold oppgitt i perioden i søknaden.")
             }
 
-            override fun subsumsjon(søknad: Søknad, subsumsjonObserver: SubsumsjonObserver) {
-                subsumsjonObserver.`§ 8-9 ledd 1`(false, periode)
+            override fun subsumsjon(søknadsperioder: List<Map<String, Serializable>>, subsumsjonObserver: SubsumsjonObserver) {
+                subsumsjonObserver.`§ 8-9 ledd 1`(false, periode, søknadsperioder)
             }
 
             private fun alleUtlandsdagerErFerie(søknad:Søknad):Boolean {
