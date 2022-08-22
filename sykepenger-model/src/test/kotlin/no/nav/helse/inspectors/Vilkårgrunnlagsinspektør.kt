@@ -30,6 +30,7 @@ internal class Vilkårgrunnlagsinspektør(historikk: VilkårsgrunnlagHistorikk) 
 
     override fun preVisitInnslag(innslag: VilkårsgrunnlagHistorikk.Innslag, id: UUID, opprettet: LocalDateTime) {
         this.innslag += 1
+        vilkårsgrunnlagTeller[this.innslag] = 0
     }
 
     override fun preVisitGrunnlagsdata(
@@ -44,7 +45,7 @@ internal class Vilkårgrunnlagsinspektør(historikk: VilkårsgrunnlagHistorikk) 
         vilkårsgrunnlagId: UUID,
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus
     ) {
-        val teller = vilkårsgrunnlagTeller.getOrDefault(innslag, 0)
+        val teller = vilkårsgrunnlagTeller.getValue(innslag)
         vilkårsgrunnlagTeller[innslag] = teller.inc()
     }
 

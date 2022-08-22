@@ -45,13 +45,14 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
     internal fun sisteId() = sisteInnlag()!!.id
 
-
     internal fun build(skjæringstidspunkt: LocalDate, builder: VedtakFattetBuilder) {
         vilkårsgrunnlagFor(skjæringstidspunkt)?.build(builder)
     }
 
     internal fun oppdaterHistorikk(sykdomstidslinje: Sykdomstidslinje) {
-
+        val nyttInnslag = sisteInnlag()?.oppdaterHistorikk(sykdomstidslinje) ?: return
+        if (nyttInnslag == sisteInnlag()) return
+        historikk.add(0, nyttInnslag)
     }
 
     internal fun vilkårsgrunnlagFor(skjæringstidspunkt: LocalDate) =
@@ -80,13 +81,15 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
     internal class Innslag private constructor(
         internal val id: UUID,
         private val opprettet: LocalDateTime,
-        private val vilkårsgrunnlag: MutableMap<LocalDate, VilkårsgrunnlagElement> = mutableMapOf()
+        private val vilkårsgrunnlag: MutableMap<LocalDate, VilkårsgrunnlagElement>
     ) {
-        internal constructor(other: Innslag?, elementer: List<VilkårsgrunnlagElement>) : this(
+        internal constructor(vilkårsgrunnlag: Map<LocalDate, VilkårsgrunnlagElement>) : this(
             UUID.randomUUID(),
-            LocalDateTime.now()
-        ) {
-            if (other != null) this.vilkårsgrunnlag.putAll(other.vilkårsgrunnlag)
+            LocalDateTime.now(),
+            vilkårsgrunnlag.toMutableMap()
+        )
+
+        internal constructor(other: Innslag?, elementer: List<VilkårsgrunnlagElement>) : this(other?.vilkårsgrunnlag?.toMap()?: emptyMap()) {
             elementer.forEach { it.add(this) }
         }
 
@@ -159,16 +162,18 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             return this.vilkårsgrunnlag == other.vilkårsgrunnlag
         }
 
+        internal fun oppdaterHistorikk(sykdomstidslinje: Sykdomstidslinje): Innslag {
+            val gyldigeSkjæringstidspunkt = sykdomstidslinje.skjæringstidspunkter()
+            val gyldigeVilkårsgrunnlag = vilkårsgrunnlag.filter { (key, _)-> gyldigeSkjæringstidspunkt.contains(key) }
+            return Innslag(gyldigeVilkårsgrunnlag)
+        }
+
         internal companion object {
             fun gjenopprett(
                 id: UUID,
                 opprettet: LocalDateTime,
                 elementer: Map<LocalDate, VilkårsgrunnlagElement>
-            ): Innslag {
-                return Innslag(id, opprettet).also {
-                    it.vilkårsgrunnlag.putAll(elementer)
-                }
-            }
+            ): Innslag = Innslag(id, opprettet, elementer.toMutableMap())
         }
     }
 

@@ -93,18 +93,11 @@ internal class VilkårsgrunnlagHistorikkTest {
         assertEquals(1, historikk.inspektør.vilkårsgrunnlagTeller.size)
         historikk.oppdaterHistorikk(sykdomstidslinje)
 
-        assertForventetFeil(
-            nå = {
-                assertEquals(1, historikk.inspektør.vilkårsgrunnlagTeller.size)
-            },
-            ønsket = {
-                assertEquals(2, historikk.inspektør.vilkårsgrunnlagTeller.size)
-                assertEquals(0, historikk.inspektør.vilkårsgrunnlagTeller[0]) { "det siste innslaget skal være tomt" }
-                assertEquals(1, historikk.inspektør.vilkårsgrunnlagTeller[1])
-                assertNull(historikk.vilkårsgrunnlagFor(gammeltSkjæringstidspunkt)) { "skal ikke beholde vilkårsgrunnlag for skjæringstidspunkter som ikke finnes" }
-                assertNull(historikk.vilkårsgrunnlagFor(nyttSkjæringstidspunkt)) { "skal ikke ha vilkårsgrunnlag for skjæringstidspunkt som ikke er vilkårsprøvd" }
-            }
-        )
+        assertEquals(2, historikk.inspektør.vilkårsgrunnlagTeller.size)
+        assertEquals(0, historikk.inspektør.vilkårsgrunnlagTeller[0]) { "det siste innslaget skal være tomt" }
+        assertEquals(1, historikk.inspektør.vilkårsgrunnlagTeller[1])
+        assertNull(historikk.vilkårsgrunnlagFor(gammeltSkjæringstidspunkt)) { "skal ikke beholde vilkårsgrunnlag for skjæringstidspunkter som ikke finnes" }
+        assertNull(historikk.vilkårsgrunnlagFor(nyttSkjæringstidspunkt)) { "skal ikke ha vilkårsgrunnlag for skjæringstidspunkt som ikke er vilkårsprøvd" }
     }
 
     @Test
