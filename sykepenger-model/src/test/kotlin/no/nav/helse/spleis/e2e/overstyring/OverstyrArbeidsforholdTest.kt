@@ -318,6 +318,43 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `kan ikke overstyre arbeidsforhold dersom vedtaksperioden er i AvventerSimulering`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode,
+            arbeidsforhold = listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null),
+                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null)
+            ),
+            inntektsvurdering = Inntektsvurdering(
+                listOf(
+                    sammenligningsgrunnlag(a1, 1.januar, INNTEKT.repeat(12)),
+                    sammenligningsgrunnlag(a2, 1.januar, 1000.månedlig.repeat(1))
+                )
+            ),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
+                inntekter = listOf(
+                    grunnlag(a1, 1.januar, INNTEKT.repeat(3)),
+                    grunnlag(a2, 1.januar, 1000.månedlig.repeat(1))
+                ),
+                arbeidsforhold = emptyList()
+            ),
+            orgnummer = a1
+        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        assertThrows<Aktivitetslogg.AktivitetException> {
+            håndterOverstyrArbeidsforhold(1.januar, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, true, "forklaring")))
+        }
+        assertLogiskFeil("Kan ikke overstyre arbeidsforhold fordi ingen vedtaksperioder håndterte hendelsen",
+            AktivitetsloggFilter.person()
+        )
+    }
+
+    @Test
     fun `vi vilkårsprøver krav om minimum inntekt ved overstyring av arbeidsforhold`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
