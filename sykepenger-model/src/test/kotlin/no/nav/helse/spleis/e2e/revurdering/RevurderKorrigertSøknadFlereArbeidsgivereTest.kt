@@ -1,21 +1,31 @@
 package no.nav.helse.spleis.e2e.revurdering
 
+import java.time.LocalDate
 import no.nav.helse.EnableToggle
 import no.nav.helse.Toggle
 import no.nav.helse.dsl.AbstractDslTest
+import no.nav.helse.dsl.TestPerson
 import no.nav.helse.dsl.lagStandardSammenligningsgrunnlag
 import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.februar
+import no.nav.helse.hendelser.InntektForSykepengegrunnlag
+import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
+import no.nav.helse.mars
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
+import no.nav.helse.spleis.e2e.grunnlag
+import no.nav.helse.spleis.e2e.repeat
+import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.Arbeidsdag
 import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
@@ -156,6 +166,97 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             assertTilstand(1.vedtaksperiode, AVSLUTTET)
 
+        }
+    }
+
+    @Test
+    fun `Korrigerende søknad på tidligere periode med gap, men i samme sykefraværstilfelle - setter i gang en revurdering`() {
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        }
+        a2 {
+            håndterSykmelding(Sykmeldingsperiode(25.januar, 25.februar, 100.prosent))
+            håndterSøknad(Sykdom(25.januar, 25.februar, 100.prosent))
+        }
+        a1 {
+            håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = TestPerson.INNTEKT)
+            håndterSykmelding(Sykmeldingsperiode(24.februar, 24.mars, 100.prosent))
+            håndterSøknad(Sykdom(24.februar, 24.mars, 100.prosent))
+            håndterInntektsmelding(listOf(24.februar til 11.mars), beregnetInntekt = TestPerson.INNTEKT)
+        }
+        a2 {
+            håndterInntektsmelding(listOf(25.januar til 9.februar), beregnetInntekt = TestPerson.INNTEKT)
+        }
+        a1 {
+            håndterYtelser(1.vedtaksperiode)
+            håndterVilkårsgrunnlag(  1.vedtaksperiode,
+                arbeidsforhold = listOf(
+                    Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null),
+                    Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null)
+                ),
+                inntektsvurdering = Inntektsvurdering(
+                    listOf(
+                        sammenligningsgrunnlag(a1, 1.januar, TestPerson.INNTEKT.repeat(12)),
+                        sammenligningsgrunnlag(a2, 1.januar, TestPerson.INNTEKT.repeat(12))
+                    )
+                ),
+                inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
+                    inntekter = listOf(
+                        grunnlag(a1, 1.januar, TestPerson.INNTEKT.repeat(3)),
+                        grunnlag(a2, 1.januar, TestPerson.INNTEKT.repeat(3))
+                    ),
+                    arbeidsforhold = emptyList()
+                )
+            )
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+        }
+
+        a2 {
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+        }
+
+        a1 {
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+            håndterUtbetalt()
+        }
+
+        a1 {
+            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(18.januar, 19.januar))
+            assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+            assertTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
+            assertEquals(21, inspektør.sykdomstidslinje.subset(1.januar til 31.januar).inspektør.dagteller[Sykedag::class])
+            assertEquals(2, inspektør.sykdomstidslinje.subset(1.januar til 31.januar).inspektør.dagteller[Dag.Feriedag::class])
+            assertEquals(8, inspektør.sykdomstidslinje.subset(1.januar til 31.januar).inspektør.dagteller[SykHelgedag::class])
+        }
+
+        a2 {
+            assertTilstand(1.vedtaksperiode, AVVENTER_REVURDERING)
+        }
+    }
+
+    @Test
+    fun `Korrigerende søknad for tidligere skjæringstidspunkt - setter ikke i gang en revurdering`() {
+        listOf(a1, a2).nyeVedtak(1.januar til 31.januar)
+        listOf(a1, a2).nyeVedtak(1.mars til 31.mars)
+
+        a2 {
+            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(18.januar, 19.januar))
+            assertTilstand(1.vedtaksperiode, AVSLUTTET)
+            assertTilstand(2.vedtaksperiode, AVSLUTTET)
+        }
+
+        a1 {
+            assertTilstand(1.vedtaksperiode, AVSLUTTET)
+            assertTilstand(2.vedtaksperiode, AVSLUTTET)
         }
     }
 }

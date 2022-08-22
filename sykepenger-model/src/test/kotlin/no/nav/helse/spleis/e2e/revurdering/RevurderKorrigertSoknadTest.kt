@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e.revurdering
 
 import no.nav.helse.EnableToggle
 import no.nav.helse.Toggle
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -15,7 +14,6 @@ import no.nav.helse.mars
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
-import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertTilstand
@@ -30,6 +28,7 @@ import no.nav.helse.sykdomstidslinje.Dag.Sykedag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.Fridag
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -96,26 +95,26 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
         nyttVedtak(1.januar, 31.januar)
         nyttVedtak(1.mars, 31.mars)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(17.januar, 18.januar))
-        assertForventetFeil(
-            forklaring = "ikke implementert enda",
-            nå = {
-                assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
-                assertTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
+        assertTilstand(1.vedtaksperiode, AVSLUTTET)
+        assertTilstand(2.vedtaksperiode, AVSLUTTET)
 
-                assertEquals(21, inspektør.sykdomstidslinje.subset(1.januar til 31.januar).inspektør.dagteller[Sykedag::class])
-                assertEquals(2, inspektør.sykdomstidslinje.subset(1.januar til 31.januar).inspektør.dagteller[Feriedag::class])
-                assertEquals(8, inspektør.sykdomstidslinje.subset(1.januar til 31.januar).inspektør.dagteller[SykHelgedag::class])
-            },
-            ønsket = {
-                assertTilstand(1.vedtaksperiode, AVSLUTTET)
-                assertTilstand(2.vedtaksperiode, AVSLUTTET)
-
-                assertEquals(23, inspektør.sykdomstidslinje.subset(1.januar til 31.januar).inspektør.dagteller[Sykedag::class])
-                assertEquals(0, inspektør.sykdomstidslinje.subset(1.januar til 31.januar).inspektør.dagteller[Feriedag::class])
-                assertEquals(8, inspektør.sykdomstidslinje.subset(1.januar til 31.januar).inspektør.dagteller[SykHelgedag::class])
-            })
+        assertEquals(23, inspektør.sykdomstidslinje.subset(1.januar til 31.januar).inspektør.dagteller[Sykedag::class])
+        assertNull(inspektør.sykdomstidslinje.subset(1.januar til 31.januar).inspektør.dagteller[Feriedag::class])
+        assertEquals(8, inspektør.sykdomstidslinje.subset(1.januar til 31.januar).inspektør.dagteller[SykHelgedag::class])
     }
 
+    @Test
+    fun `Korrigerende søknad setter i gang en revurdering på siste skjæringstidspunkt`() {
+        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(1.mars, 31.mars)
+        håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), Ferie(15.mars, 16.mars))
+        assertTilstand(1.vedtaksperiode, AVSLUTTET)
+        assertTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+
+        assertEquals(20, inspektør.sykdomstidslinje.subset(1.mars til 31.mars).inspektør.dagteller[Sykedag::class])
+        assertEquals(2, inspektør.sykdomstidslinje.subset(1.mars til 31.mars).inspektør.dagteller[Feriedag::class])
+        assertEquals(9, inspektør.sykdomstidslinje.subset(1.mars til 31.mars).inspektør.dagteller[SykHelgedag::class])
+    }
 
     @Test
     fun `Avsluttet periode med en forlengelse får en korrigerende søknad - skal sette i gang revurdering`() {

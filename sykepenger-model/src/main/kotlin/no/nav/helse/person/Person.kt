@@ -985,4 +985,7 @@ class Person private constructor(
 
     internal fun harPeriodeSomBlokkererOverstyring(skjæringstidspunkt: LocalDate) =
         arbeidsgivere.harPeriodeSomBlokkererOverstyring(skjæringstidspunkt)
+
+    internal fun harSkjæringstidspunktSenereEnn(skjæringstidspunkt: LocalDate) =
+        skjæringstidspunkter().any { it.isAfter(skjæringstidspunkt) }
 }
