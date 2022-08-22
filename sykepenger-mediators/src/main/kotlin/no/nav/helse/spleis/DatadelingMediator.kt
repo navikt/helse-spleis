@@ -22,12 +22,11 @@ class DatadelingMediator(private val hendelse: PersonHendelse): AktivitetsloggOb
     }
 
     override fun aktivitet(label: Char, melding: String, kontekster: List<SpesifikkKontekst>, tidsstempel: String) {
-        val tidsstempel = try { LocalDateTime.parse(tidsstempel, formatter) } catch (_: Exception) { LocalDateTime.parse(tidsstempel) }
         aktiviteter.add(
             mapOf(
                 "nivå" to label.toFulltext(),
                 "melding" to melding,
-                "tidsstempel" to tidsstempel,
+                "tidsstempel" to LocalDateTime.parse(tidsstempel, formatter),
                 "kontekster" to kontekster.map { it.toMap() }
             )
         )
