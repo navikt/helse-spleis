@@ -128,14 +128,16 @@ internal fun AbstractEndToEndTest.søknad(
     sykmeldingSkrevet: LocalDateTime? = null,
     fnr: Personidentifikator = AbstractPersonTest.UNG_PERSON_FNR_2018,
     fødselsdato: LocalDate = UNG_PERSON_FØDSELSDATO,
-    korrigerer: UUID? = null
+    korrigerer: UUID? = null,
+    opprinneligSendt: LocalDate? = null
 ) = ArbeidsgiverHendelsefabrikk(AKTØRID, fnr, orgnummer, fødselsdato).lagSøknad(
     id = id,
     perioder = perioder,
     andreInntektskilder = andreInntektskilder,
     sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver,
     sykmeldingSkrevet = sykmeldingSkrevet ?: Søknadsperiode.søknadsperiode(perioder.toList())!!.start.atStartOfDay(),
-    korrigerer = korrigerer
+    korrigerer = korrigerer,
+    opprinneligSendt = opprinneligSendt
 ).apply {
     hendelselogg = this
 }

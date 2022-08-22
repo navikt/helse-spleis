@@ -34,7 +34,8 @@ class Søknad(
     private val permittert: Boolean,
     private val merknaderFraSykmelding: List<Merknad>,
     sykmeldingSkrevet: LocalDateTime,
-    private val korrigerer: UUID?
+    private val korrigerer: UUID?,
+    private val opprinneligSendt: LocalDateTime? = null
 ) : SykdomstidslinjeHendelse(meldingsreferanseId, fnr, aktørId, orgnummer, sykmeldingSkrevet, Søknad::class) {
 
     private val sykdomsperiode: Periode
@@ -86,7 +87,8 @@ class Søknad(
     }
     private fun avskjæringsdato(): LocalDate = when (korrigerer) {
         null -> sendtTilNAVEllerArbeidsgiver.toLocalDate().minusMonths(3).withDayOfMonth(1)
-        else -> LocalDate.MIN // det er tidspunktet den originale søknaden ble sendt inn som er bestemmende for foreldelse
+        else -> opprinneligSendt?.toLocalDate()?.minusMonths(3)?.withDayOfMonth(1) ?: LocalDate.MIN
+        //else -> LocalDate.MIN // det er tidspunktet den originale søknaden ble sendt inn som er bestemmende for foreldelse
     }
 
     override fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) {

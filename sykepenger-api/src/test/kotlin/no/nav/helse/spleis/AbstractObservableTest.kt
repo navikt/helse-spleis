@@ -102,7 +102,8 @@ abstract class AbstractObservableTest {
         merknaderFraSykmelding = emptyList(),
         sykmeldingSkrevet = sykmeldingSkrevet,
         fødselsdato = fødselsdato,
-        korrigerer = null
+        korrigerer = null,
+        opprinneligSendt = null
     )
 
     protected fun inntektsmelding(
