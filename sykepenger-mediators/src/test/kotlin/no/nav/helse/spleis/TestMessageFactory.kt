@@ -908,14 +908,12 @@ internal class TestMessageFactory(
 
     fun lagOverstyrArbeidsforhold(
         skjæringstidspunkt: LocalDate,
-        overstyrteArbeidsforhold: List<ArbeidsforholdOverstyrt>,
-        orgnummer: String = organisasjonsnummer
+        overstyrteArbeidsforhold: List<ArbeidsforholdOverstyrt>
     ): Pair<String, String> {
         return nyHendelse(
             "overstyr_arbeidsforhold", mutableMapOf(
                 "aktørId" to aktørId,
                 "fødselsnummer" to fødselsnummer,
-                "organisasjonsnummer" to orgnummer,
                 "skjæringstidspunkt" to skjæringstidspunkt,
                 "overstyrteArbeidsforhold" to overstyrteArbeidsforhold.map {
                     mutableMapOf<String, Any>(

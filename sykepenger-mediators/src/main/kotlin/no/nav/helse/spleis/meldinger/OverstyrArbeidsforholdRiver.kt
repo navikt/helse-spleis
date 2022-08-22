@@ -18,7 +18,8 @@ internal class OverstyrArbeidsforholdRiver(
     override fun createMessage(packet: JsonMessage) = OverstyrArbeidsforholdMessage(packet)
 
     override fun validate(message: JsonMessage) {
-        message.requireKey("aktørId", "fødselsnummer", "organisasjonsnummer")
+        message.requireKey("aktørId", "fødselsnummer")
+        message.rejectKey("organisasjonsnummer")
         message.require("skjæringstidspunkt", JsonNode::asLocalDate)
         message.requireArray("overstyrteArbeidsforhold") {
             requireKey("orgnummer", "forklaring")
