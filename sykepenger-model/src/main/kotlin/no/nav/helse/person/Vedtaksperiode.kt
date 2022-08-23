@@ -198,8 +198,7 @@ internal class Vedtaksperiode private constructor(
 
     internal fun hendelseIder() = hendelseIder.ider()
 
-    internal fun håndter(sykmelding: Sykmelding) = overlapperMed(sykmelding).also {
-        if (!it) return it
+    internal fun håndter(sykmelding: Sykmelding) {
         val periodeFør = sykmelding.periode()
         sykmelding.trimLeft(periode.endInclusive)
         kontekst(sykmelding)

@@ -577,20 +577,12 @@ internal class NyTilstandsflytEnArbeidsgiverTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `tilbakedatert sykmelding kan hindre at tidligere periode kan gå videre`() {
+    fun `tilbakedatert sykmelding som ikke overlapper skal ikke hindre at tidligere periode kan gå videre`() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(31.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.februar til 16.februar))
-        assertForventetFeil(
-            forklaring = "Dersom bruker sender inn søknad for 31.januar så vil saken kunne behandles. " +
-                    "Men dersom bruker avbryter søknaden for 31.januar eller aldri sender den inn så er vi stuck",
-            nå = {
-                assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
-            },
-            ønsket = {
-                assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
-            }
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK
         )
     }
 
