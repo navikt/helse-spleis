@@ -9,6 +9,15 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
+import no.nav.helse.flex.sykepengesoknad.kafka.ArbeidsgiverDTO
+import no.nav.helse.flex.sykepengesoknad.kafka.FravarDTO
+import no.nav.helse.flex.sykepengesoknad.kafka.InntektskildeDTO
+import no.nav.helse.flex.sykepengesoknad.kafka.MerknadDTO
+import no.nav.helse.flex.sykepengesoknad.kafka.PeriodeDTO
+import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
+import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsstatusDTO
+import no.nav.helse.flex.sykepengesoknad.kafka.SoknadstypeDTO
+import no.nav.helse.flex.sykepengesoknad.kafka.SykepengesoknadDTO
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.*
@@ -24,16 +33,6 @@ import no.nav.inntektsmeldingkontrakt.OpphoerAvNaturalytelse
 import no.nav.inntektsmeldingkontrakt.Periode
 import no.nav.inntektsmeldingkontrakt.Refusjon
 import no.nav.inntektsmeldingkontrakt.Status
-import no.nav.syfo.kafka.felles.ArbeidsgiverDTO
-import no.nav.syfo.kafka.felles.FravarDTO
-import no.nav.syfo.kafka.felles.InntektskildeDTO
-import no.nav.syfo.kafka.felles.MerknadDTO
-import no.nav.syfo.kafka.felles.PeriodeDTO
-import no.nav.syfo.kafka.felles.SkjultVerdi
-import no.nav.syfo.kafka.felles.SoknadsperiodeDTO
-import no.nav.syfo.kafka.felles.SoknadsstatusDTO
-import no.nav.syfo.kafka.felles.SoknadstypeDTO
-import no.nav.syfo.kafka.felles.SykepengesoknadDTO
 
 internal class TestMessageFactory(
     private val fødselsnummer: String,
@@ -48,10 +47,16 @@ internal class TestMessageFactory(
             .registerModule(JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
-        private fun SykepengesoknadDTO.toMap(fødselsdato: LocalDate): Map<String, Any> =
-            objectMapper.convertValue<Map<String, Any>>(this).plus("fødselsdato" to "$fødselsdato")
-        private fun Inntektsmelding.toMap(fødselsdato: LocalDate): Map<String, Any> =
-            objectMapper.convertValue<Map<String, Any>>(this).plus("fødselsdato" to "$fødselsdato")
+        private fun SykepengesoknadDTO.toMapMedFelterFraSpedisjon(fødselsdato: LocalDate, aktørId: String): Map<String, Any> =
+            objectMapper
+                .convertValue<Map<String, Any>>(this)
+                .plus("fødselsdato" to "$fødselsdato")
+                .plus("aktorId" to "$aktørId")
+        private fun Inntektsmelding.toMapMedFelterFraSpedisjon(fødselsdato: LocalDate, aktørId: String): Map<String, Any> =
+            objectMapper
+                .convertValue<Map<String, Any>>(this)
+                .plus("fødselsdato" to "$fødselsdato")
+                .plus("aktorId" to "$aktørId")
     }
 
     fun lagNySøknad(
@@ -64,8 +69,7 @@ internal class TestMessageFactory(
             status = SoknadsstatusDTO.NY,
             id = UUID.randomUUID().toString(),
             sykmeldingId = UUID.randomUUID().toString(),
-            aktorId = aktørId,
-            fodselsnummer = SkjultVerdi(fødselsnummer),
+            fnr = fødselsnummer,
             arbeidsgiver = ArbeidsgiverDTO(orgnummer = orgnummer),
             fom = fom,
             tom = perioder.maxOfOrNull { it.tom!! },
@@ -78,7 +82,7 @@ internal class TestMessageFactory(
             opprettet = opprettet,
             sykmeldingSkrevet = fom.atStartOfDay()
         )
-        return nyHendelse("ny_søknad", nySøknad.toMap(fødselsdato))
+        return nyHendelse("ny_søknad", nySøknad.toMapMedFelterFraSpedisjon(fødselsdato, aktørId))
     }
 
     fun lagSøknadArbeidsgiver(
@@ -89,8 +93,7 @@ internal class TestMessageFactory(
         val sendtSøknad = SykepengesoknadDTO(
             status = SoknadsstatusDTO.SENDT,
             id = UUID.randomUUID().toString(),
-            aktorId = aktørId,
-            fodselsnummer = SkjultVerdi(fødselsnummer),
+            fnr = fødselsnummer,
             arbeidsgiver = ArbeidsgiverDTO(orgnummer = organisasjonsnummer),
             fom = fom,
             tom = perioder.maxOfOrNull { it.tom!! },
@@ -104,7 +107,7 @@ internal class TestMessageFactory(
             opprettet = LocalDateTime.now(),
             sykmeldingSkrevet = fom.atStartOfDay()
         )
-        return nyHendelse("sendt_søknad_arbeidsgiver", sendtSøknad.toMap(fødselsdato))
+        return nyHendelse("sendt_søknad_arbeidsgiver", sendtSøknad.toMapMedFelterFraSpedisjon(fødselsdato, aktørId))
     }
 
     fun lagSøknadNav(
@@ -113,14 +116,15 @@ internal class TestMessageFactory(
         egenmeldinger: List<PeriodeDTO> = emptyList(),
         andreInntektskilder: List<InntektskildeDTO>? = null,
         sendtNav: LocalDateTime? = perioder.maxOfOrNull { it.tom!! }?.atStartOfDay(),
-        orgnummer: String = organisasjonsnummer
+        orgnummer: String = organisasjonsnummer,
+        korrigerer: UUID? = null,
+        opprinneligSendt: LocalDateTime? = null
     ): Pair<String, String> {
         val fom = perioder.minOfOrNull { it.fom!! }
         val sendtSøknad = SykepengesoknadDTO(
             status = SoknadsstatusDTO.SENDT,
             id = UUID.randomUUID().toString(),
-            aktorId = aktørId,
-            fodselsnummer = SkjultVerdi(fødselsnummer),
+            fnr = fødselsnummer,
             arbeidsgiver = ArbeidsgiverDTO(orgnummer = orgnummer),
             fom = fom,
             tom = perioder.maxOfOrNull { it.tom!! },
@@ -130,6 +134,8 @@ internal class TestMessageFactory(
             papirsykmeldinger = emptyList(),
             egenmeldinger = egenmeldinger,
             fravar = fravær,
+            korrigerer = korrigerer?.toString(),
+            opprinneligSendt = opprinneligSendt,
             andreInntektskilder = andreInntektskilder,
             soknadsperioder = perioder.toList(),
             opprettet = LocalDateTime.now(),
@@ -139,7 +145,7 @@ internal class TestMessageFactory(
                 MerknadDTO("EN_ANNEN_MERKANDSTYPE", "tekstlig begrunnelse")
             )
         )
-        return nyHendelse("sendt_søknad_nav", sendtSøknad.toMap(fødselsdato))
+        return nyHendelse("sendt_søknad_nav", sendtSøknad.toMapMedFelterFraSpedisjon(fødselsdato, aktørId))
     }
 
     private fun lagInntektsmelding(
@@ -187,7 +193,7 @@ internal class TestMessageFactory(
             beregnetInntekt,
             orgnummer,
             opphørsdatoForRefusjon
-        ).toMap(fødselsdato)
+        ).toMapMedFelterFraSpedisjon(fødselsdato, aktørId)
     )
 
     fun lagInnteksmeldingReplay(

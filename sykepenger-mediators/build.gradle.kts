@@ -3,7 +3,7 @@ val mainClass = "no.nav.helse.AppKt"
 val rapidsAndRiversVersion = "2022.05.19-14.18.e3dc97b518d8"
 val testcontainersPostgresqlVersion = "1.17.1"
 val innteksmeldingKontraktVersion = "2020.04.06-ab8f786"
-val syfokafkaVersion = "2021.02.15-14.09-103a1544"
+val syfokafkaVersion = "2022.08.23-10.31-21b5aa2b"
 val mockkVersion = "1.12.4"
 
 dependencies {
@@ -13,7 +13,7 @@ dependencies {
         exclude("com.fasterxml.jackson.core")
     }
     testImplementation("com.github.navikt:inntektsmelding-kontrakt:$innteksmeldingKontraktVersion")
-    testImplementation("com.github.navikt:syfokafka:$syfokafkaVersion")
+    testImplementation("com.github.navikt:sykepengesoknad-kafka:$syfokafkaVersion")
     testImplementation("io.mockk:mockk:$mockkVersion")
 }
 

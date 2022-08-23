@@ -10,30 +10,29 @@ import java.util.UUID
 import no.nav.helse.desember
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spleis.IMessageMediator
-import no.nav.syfo.kafka.felles.ArbeidsgiverDTO
-import no.nav.syfo.kafka.felles.ArbeidsgiverForskuttererDTO
-import no.nav.syfo.kafka.felles.ArbeidssituasjonDTO
-import no.nav.syfo.kafka.felles.FravarDTO
-import no.nav.syfo.kafka.felles.PeriodeDTO
-import no.nav.syfo.kafka.felles.SkjultVerdi
-import no.nav.syfo.kafka.felles.SoknadsperiodeDTO
-import no.nav.syfo.kafka.felles.SoknadsstatusDTO
-import no.nav.syfo.kafka.felles.SoknadstypeDTO
-import no.nav.syfo.kafka.felles.SykepengesoknadDTO
-import no.nav.syfo.kafka.felles.SykmeldingstypeDTO
+import no.nav.helse.flex.sykepengesoknad.kafka.ArbeidsgiverDTO
+import no.nav.helse.flex.sykepengesoknad.kafka.ArbeidsgiverForskuttererDTO
+import no.nav.helse.flex.sykepengesoknad.kafka.ArbeidssituasjonDTO
+import no.nav.helse.flex.sykepengesoknad.kafka.FravarDTO
+import no.nav.helse.flex.sykepengesoknad.kafka.PeriodeDTO
+import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
+import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsstatusDTO
+import no.nav.helse.flex.sykepengesoknad.kafka.SoknadstypeDTO
+import no.nav.helse.flex.sykepengesoknad.kafka.SykepengesoknadDTO
+import no.nav.helse.flex.sykepengesoknad.kafka.SykmeldingstypeDTO
 import org.junit.jupiter.api.Test
 
 internal class NyeSøknaderRiverTest : RiverTest() {
 
     private val fødselsdato = 12.desember(1995)
+    private val aktørId = "42"
     private val InvalidJson = "foo"
     private val UnknownJson = "{\"foo\": \"bar\"}"
     private val ValidSøknad = SykepengesoknadDTO(
         id = UUID.randomUUID().toString(),
         type = SoknadstypeDTO.ARBEIDSTAKERE,
         status = SoknadsstatusDTO.NY,
-        aktorId = "aktørId",
-        fodselsnummer = SkjultVerdi("fødselsnummer"),
+        fnr = "fødselsnummer",
         sykmeldingId = UUID.randomUUID().toString(),
         arbeidsgiver = ArbeidsgiverDTO(navn = "arbeidsgiver", orgnummer = "orgnr"),
         arbeidssituasjon = ArbeidssituasjonDTO.ARBEIDSTAKER,
@@ -83,9 +82,9 @@ internal class NyeSøknaderRiverTest : RiverTest() {
         assertNoErrors(ValidNySøknad)
         assertNoErrors(ValidNySøknadUtenPerioder)
     }
-    private fun SykepengesoknadDTO.toJson(): String = asObjectNode().medFødselsdato().toString()
-    private fun ObjectNode.toJson(): String = medFødselsdato().toString()
-    private fun ObjectNode.medFødselsdato() = put("fødselsdato", "$fødselsdato")
+    private fun SykepengesoknadDTO.toJson(): String = asObjectNode().medFelterFraSpedisjon().toString()
+    private fun ObjectNode.toJson(): String = medFelterFraSpedisjon().toString()
+    private fun ObjectNode.medFelterFraSpedisjon() = put("fødselsdato", "$fødselsdato").put("aktorId", "$aktørId")
 }
 private val objectMapper = jacksonObjectMapper()
     .registerModule(JavaTimeModule())

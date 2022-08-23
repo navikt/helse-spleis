@@ -7,7 +7,7 @@ import no.nav.helse.februar
 import no.nav.helse.januar
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.inntektsmeldingkontrakt.Periode
-import no.nav.syfo.kafka.felles.SoknadsperiodeDTO
+import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow

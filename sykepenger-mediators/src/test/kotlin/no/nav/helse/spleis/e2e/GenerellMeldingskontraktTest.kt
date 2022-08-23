@@ -6,7 +6,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.januar
 import no.nav.inntektsmeldingkontrakt.Periode
-import no.nav.syfo.kafka.felles.SoknadsperiodeDTO
+import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue

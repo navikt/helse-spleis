@@ -8,9 +8,9 @@ import no.nav.helse.person.TilstandType
 import no.nav.helse.spleis.TestMessageFactory
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.inntektsmeldingkontrakt.Periode
-import no.nav.syfo.kafka.felles.InntektskildeDTO
-import no.nav.syfo.kafka.felles.InntektskildetypeDTO
-import no.nav.syfo.kafka.felles.SoknadsperiodeDTO
+import no.nav.helse.flex.sykepengesoknad.kafka.InntektskildeDTO
+import no.nav.helse.flex.sykepengesoknad.kafka.InntektskildetypeDTO
+import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 

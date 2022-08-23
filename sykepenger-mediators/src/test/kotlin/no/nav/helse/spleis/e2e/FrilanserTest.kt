@@ -5,7 +5,7 @@ import no.nav.helse.januar
 import no.nav.helse.spleis.TestMessageFactory.InntekterForSykepengegrunnlagFraLøsning
 import no.nav.helse.spleis.TestMessageFactory.InntekterForSykepengegrunnlagFraLøsning.Arbeidsforhold
 import no.nav.inntektsmeldingkontrakt.Periode
-import no.nav.syfo.kafka.felles.SoknadsperiodeDTO
+import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import org.junit.jupiter.api.Test
 
 

@@ -52,10 +52,10 @@ import no.nav.helse.spleis.meldinger.TestRapid
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.inntektsmeldingkontrakt.OpphoerAvNaturalytelse
 import no.nav.inntektsmeldingkontrakt.Periode
-import no.nav.syfo.kafka.felles.FravarDTO
-import no.nav.syfo.kafka.felles.InntektskildeDTO
-import no.nav.syfo.kafka.felles.PeriodeDTO
-import no.nav.syfo.kafka.felles.SoknadsperiodeDTO
+import no.nav.helse.flex.sykepengesoknad.kafka.FravarDTO
+import no.nav.helse.flex.sykepengesoknad.kafka.InntektskildeDTO
+import no.nav.helse.flex.sykepengesoknad.kafka.PeriodeDTO
+import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -120,7 +120,9 @@ internal abstract class AbstractEndToEndMediatorTest {
         egenmeldinger: List<PeriodeDTO> = emptyList(),
         andreInntektskilder: List<InntektskildeDTO>? = null,
         sendtNav: LocalDateTime? = perioder.maxOfOrNull { it.tom!! }?.atStartOfDay(),
-        orgnummer: String = ORGNUMMER
+        orgnummer: String = ORGNUMMER,
+        korrigerer: UUID? = null,
+        opprinneligSendt: LocalDateTime? = null
     ): UUID {
         val (id, message) = meldingsfabrikk.lagSøknadNav(
                 perioder = perioder,
@@ -128,7 +130,9 @@ internal abstract class AbstractEndToEndMediatorTest {
                 egenmeldinger = egenmeldinger,
                 andreInntektskilder = andreInntektskilder,
                 sendtNav = sendtNav,
-                orgnummer = orgnummer
+                orgnummer = orgnummer,
+                korrigerer = korrigerer,
+                opprinneligSendt = opprinneligSendt
             )
 
         testRapid.sendTestMessage(message)

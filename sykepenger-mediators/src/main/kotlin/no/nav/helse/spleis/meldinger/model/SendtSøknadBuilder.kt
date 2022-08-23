@@ -5,6 +5,7 @@ import no.nav.helse.hendelser.Søknad.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.*
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 
 internal class SendtSøknadBuilder : SøknadBuilder() {
@@ -12,6 +13,7 @@ internal class SendtSøknadBuilder : SøknadBuilder() {
     private val merkander = mutableListOf<Merknad>()
     private val inntektskilder = mutableListOf<Inntektskilde>()
     private var korrigerer: UUID? = null
+    private var opprinneligSendt: LocalDateTime? = null
 
     internal fun build() = Søknad(
         meldingsreferanseId = meldingsreferanseId,
@@ -25,7 +27,8 @@ internal class SendtSøknadBuilder : SøknadBuilder() {
         permittert = permittert,
         merknaderFraSykmelding = merkander,
         sykmeldingSkrevet = sykmeldingSkrevet,
-        korrigerer = korrigerer
+        korrigerer = korrigerer,
+        opprinneligSendt = opprinneligSendt
     )
 
     override fun inntektskilde(sykmeldt: Boolean, type: String) = apply {
@@ -77,5 +80,8 @@ internal class SendtSøknadBuilder : SøknadBuilder() {
 
     fun korrigerer(korrigerer: UUID) {
         this.korrigerer = korrigerer
+    }
+    fun opprinneligSendt(opprinneligSendt: LocalDateTime) {
+        this.opprinneligSendt = opprinneligSendt
     }
 }

@@ -43,6 +43,9 @@ internal class SendtSøknadNavMessage(packet: JsonMessage, private val builder: 
             packet["korrigerer"].takeUnless(JsonNode::isMissingOrNull)?.let {
                 builder.korrigerer(UUID.fromString(it.asText()))
             }
+            packet["opprinneligSendt"].takeUnless(JsonNode::isMissingOrNull)?.let {
+                builder.opprinneligSendt(it.asLocalDateTime())
+            }
             builder.arbeidsgjennopptatt(packet["arbeidGjenopptatt"].asOptionalLocalDate())
         }
     }

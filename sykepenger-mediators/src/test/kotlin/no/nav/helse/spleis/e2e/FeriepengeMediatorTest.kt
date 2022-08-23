@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e
 import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.desember
+import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.januar
 import no.nav.helse.juni
 import no.nav.helse.mai
@@ -12,7 +13,6 @@ import no.nav.helse.september
 import no.nav.helse.spleis.TestMessageFactory
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.inntektsmeldingkontrakt.Periode
-import no.nav.syfo.kafka.felles.SoknadsperiodeDTO
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue

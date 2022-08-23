@@ -11,24 +11,24 @@ import no.nav.helse.desember
 import no.nav.helse.januar
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.spleis.IMessageMediator
-import no.nav.syfo.kafka.felles.ArbeidsgiverDTO
-import no.nav.syfo.kafka.felles.ArbeidsgiverForskuttererDTO
-import no.nav.syfo.kafka.felles.ArbeidssituasjonDTO
-import no.nav.syfo.kafka.felles.FravarDTO
-import no.nav.syfo.kafka.felles.FravarstypeDTO
-import no.nav.syfo.kafka.felles.MerknadDTO
-import no.nav.syfo.kafka.felles.PeriodeDTO
-import no.nav.syfo.kafka.felles.SkjultVerdi
-import no.nav.syfo.kafka.felles.SoknadsperiodeDTO
-import no.nav.syfo.kafka.felles.SoknadsstatusDTO
-import no.nav.syfo.kafka.felles.SoknadstypeDTO
-import no.nav.syfo.kafka.felles.SykepengesoknadDTO
-import no.nav.syfo.kafka.felles.SykmeldingstypeDTO
+import no.nav.helse.flex.sykepengesoknad.kafka.ArbeidsgiverDTO
+import no.nav.helse.flex.sykepengesoknad.kafka.ArbeidsgiverForskuttererDTO
+import no.nav.helse.flex.sykepengesoknad.kafka.ArbeidssituasjonDTO
+import no.nav.helse.flex.sykepengesoknad.kafka.FravarDTO
+import no.nav.helse.flex.sykepengesoknad.kafka.FravarstypeDTO
+import no.nav.helse.flex.sykepengesoknad.kafka.MerknadDTO
+import no.nav.helse.flex.sykepengesoknad.kafka.PeriodeDTO
+import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
+import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsstatusDTO
+import no.nav.helse.flex.sykepengesoknad.kafka.SoknadstypeDTO
+import no.nav.helse.flex.sykepengesoknad.kafka.SykepengesoknadDTO
+import no.nav.helse.flex.sykepengesoknad.kafka.SykmeldingstypeDTO
 import org.junit.jupiter.api.Test
 
 internal class SendtNavSøknaderRiverTest : RiverTest() {
 
     private val fødselsdato = 12.desember(1995)
+    private val aktørId = "42"
     private val invalidJson = "foo"
     private val unknownJson = "{\"foo\": \"bar\"}"
     private fun validSøknad(
@@ -55,8 +55,7 @@ internal class SendtNavSøknaderRiverTest : RiverTest() {
         id = UUID.randomUUID().toString(),
         type = SoknadstypeDTO.ARBEIDSTAKERE,
         status = status,
-        aktorId = "aktørId",
-        fodselsnummer = SkjultVerdi("fødselsnummer"),
+        fnr = "fødselsnummer",
         sykmeldingId = UUID.randomUUID().toString(),
         arbeidsgiver = ArbeidsgiverDTO(navn = "arbeidsgiver", orgnummer = "orgnr"),
         arbeidssituasjon = ArbeidssituasjonDTO.ARBEIDSTAKER,
@@ -170,9 +169,9 @@ internal class SendtNavSøknaderRiverTest : RiverTest() {
         assertNoErrors(validSøknad().copy(merknaderFraSykmelding = listOf(MerknadDTO("UGYLDIG_TILBAKEDATERING", null))).toJson())
         assertNoErrors(validSøknad().copy(merknaderFraSykmelding = listOf(MerknadDTO("TILBAKEDATERING_KREVER_FLERE_OPPLYSNINGER", "En beskrivelse"))).toJson())
     }
-    private fun SykepengesoknadDTO.toJson(): String = asObjectNode().medFødselsdato().toString()
-    private fun ObjectNode.toJson(): String = medFødselsdato().toString()
-    private fun ObjectNode.medFødselsdato() = put("fødselsdato", "$fødselsdato")
+    private fun SykepengesoknadDTO.toJson(): String = asObjectNode().medFelterFraSpedisjon().toString()
+    private fun ObjectNode.toJson(): String = medFelterFraSpedisjon().toString()
+    private fun ObjectNode.medFelterFraSpedisjon() = put("fødselsdato", "$fødselsdato").put("aktorId", "$aktørId")
 }
 
 private val objectMapper = jacksonObjectMapper()

@@ -21,9 +21,10 @@ import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.inntektsmeldingkontrakt.Naturalytelse
 import no.nav.inntektsmeldingkontrakt.OpphoerAvNaturalytelse
 import no.nav.inntektsmeldingkontrakt.Periode
-import no.nav.syfo.kafka.felles.FravarDTO
-import no.nav.syfo.kafka.felles.FravarstypeDTO
-import no.nav.syfo.kafka.felles.SoknadsperiodeDTO
+import no.nav.helse.flex.sykepengesoknad.kafka.FravarDTO
+import no.nav.helse.flex.sykepengesoknad.kafka.FravarstypeDTO
+import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
+import no.nav.helse.mai
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -108,6 +109,29 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
             "AVVENTER_SIMULERING",
             "AVVENTER_GODKJENNING",
             "TIL_INFOTRYGD"
+        )
+    }
+
+    @Test
+    fun `Korrigert søknad medfører foreldede dager og ingen utbetaling`() {
+        sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100))
+        val søknadId = sendSøknad(
+            listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)),
+            sendtNav = 1.mai.atStartOfDay()
+        )
+        sendSøknad(
+            listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)),
+            sendtNav = 2.mai.atStartOfDay(),
+            korrigerer = søknadId,
+            opprinneligSendt = 1.mai.atStartOfDay()
+        )
+        sendInntektsmelding(listOf(Periode(fom = 1.januar, tom = 16.januar)), førsteFraværsdag = 1.januar)
+
+        assertTilstander(
+            0,
+            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
+            "AVVENTER_BLOKKERENDE_PERIODE",
+            "AVSLUTTET_UTEN_UTBETALING"
         )
     }
 

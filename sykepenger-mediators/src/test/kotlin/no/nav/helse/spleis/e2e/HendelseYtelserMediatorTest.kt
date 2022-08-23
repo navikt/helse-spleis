@@ -9,7 +9,7 @@ import no.nav.helse.spleis.TestMessageFactory.OpplæringspengerTestdata
 import no.nav.helse.spleis.TestMessageFactory.PleiepengerTestdata
 import no.nav.helse.spleis.TestMessageFactory.UtbetalingshistorikkTestdata
 import no.nav.inntektsmeldingkontrakt.Periode
-import no.nav.syfo.kafka.felles.SoknadsperiodeDTO
+import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import org.junit.jupiter.api.Test
 
 internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {

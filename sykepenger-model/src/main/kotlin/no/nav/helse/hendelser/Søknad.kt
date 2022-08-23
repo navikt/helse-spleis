@@ -37,7 +37,7 @@ class Søknad(
     private val merknaderFraSykmelding: List<Merknad>,
     sykmeldingSkrevet: LocalDateTime,
     private val korrigerer: UUID?,
-    private val opprinneligSendt: LocalDateTime? = null
+    private val opprinneligSendt: LocalDateTime?
 ) : SykdomstidslinjeHendelse(meldingsreferanseId, fnr, aktørId, orgnummer, sykmeldingSkrevet, Søknad::class) {
 
     private val sykdomsperiode: Periode
