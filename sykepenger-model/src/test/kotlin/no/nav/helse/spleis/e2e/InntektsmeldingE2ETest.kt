@@ -37,6 +37,7 @@ import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
+import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
@@ -2040,6 +2041,45 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterInntektsmeldingReplay(inntektsmeldingId, 1.vedtaksperiode.id(ORGNUMMER))
         assertIngenVarsel("Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.")
+    }
+
+    @Test
+    fun `arbeidsgiverperioden starter tidligere`() {
+        håndterSykmelding(Sykmeldingsperiode(3.januar, 10.januar, 100.prosent))
+        håndterSøknad(Sykdom(3.januar, 10.januar, 100.prosent))
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+
+        håndterSykmelding(Sykmeldingsperiode(12.januar, 16.januar, 100.prosent))
+        håndterSøknad(Sykdom(12.januar, 16.januar, 100.prosent))
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+
+        håndterSykmelding(Sykmeldingsperiode(19.januar, 21.januar, 100.prosent))
+        håndterSøknad(Sykdom(19.januar, 21.januar, 100.prosent))
+        assertSisteTilstand(3.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 19.januar)
+
+        assertTrue(inspektør.sykdomstidslinje[1.januar] is Dag.Arbeidsgiverdag)
+        assertTrue(inspektør.sykdomstidslinje[2.januar] is Dag.Arbeidsgiverdag)
+        assertTrue(inspektør.sykdomstidslinje[11.januar] is Dag.Arbeidsgiverdag)
+
+        assertForventetFeil(
+            forklaring = "inntektsmelding bør være relevant for korte (dog spredte) arbeidsgiverperiode-" +
+                    "vedtaksperioder, selv om første fraværsdag er oppgitt etterpå (men bare om det ikke foreligger" +
+                    "utbetaling mellom …)",
+            nå = {
+                assertEquals(3.januar til 10.januar, inspektør.periode(1.vedtaksperiode))
+                assertEquals(12.januar til 16.januar, inspektør.periode(2.vedtaksperiode))
+            },
+            ønsket = {
+                assertEquals(1.januar til 10.januar, inspektør.periode(1.vedtaksperiode))
+                assertEquals(11.januar til 16.januar, inspektør.periode(2.vedtaksperiode))
+            })
+
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertSisteTilstand(3.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
     }
 
     @Test
