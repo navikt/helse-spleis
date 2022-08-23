@@ -193,3 +193,6 @@ spec:
         - team: tbd
           application: sparkel-skjermet-endret
           access: readwrite
+        - team: tbd
+          application: sparsom
+          access: readwrite
