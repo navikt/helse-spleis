@@ -55,10 +55,10 @@ class DatadelingMediator(private val hendelse: PersonHendelse): AktivitetsloggOb
 
     private fun Char.toFulltext(): String {
         return when (this) {
-            'I' -> "Info"
-            'W' -> "Warning"
-            'E' -> "Error"
-            'S' -> "Severe"
+            'I' -> "INFO"
+            'W' -> "VARSEL"
+            'E' -> "FUNKSJONELL_FEIL"
+            'S' -> "LOGISK_FEIL"
             else -> throw IllegalArgumentException("$this er ikke en støttet aktivitetstype")
         }
     }

@@ -40,7 +40,7 @@ internal class DatadelingMediatorTest {
         assertEquals(1, testRapid.inspektør.antall())
 
         val info = testRapid.inspektør.siste("aktivitetslogg_ny_aktivitet")["aktiviteter"][0]
-        assertEquals("Info", info["nivå"].asText())
+        assertEquals("INFO", info["nivå"].asText())
         assertEquals("Dette er en infomelding", info["melding"].asText())
         assertNotNull(info["tidsstempel"].asText())
         assertDoesNotThrow {
@@ -70,6 +70,22 @@ internal class DatadelingMediatorTest {
         testhendelse.behov(Aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning, "melding")
         datadelingMediator.finalize(testRapid)
         assertEquals(0, testRapid.inspektør.antall())
+    }
+
+    @Test
+    fun mapping() {
+        testhendelse.kontekst(TestKontekst("Person", "Person 1"))
+        testhendelse.info("Dette er en infomelding")
+        testhendelse.varsel("Dette er en infomelding")
+        testhendelse.funksjonellFeil("Dette er en infomelding")
+        try { testhendelse.logiskFeil("Dette er en infomelding") } catch (_: Exception) {}
+        datadelingMediator.finalize(testRapid)
+
+        val info = testRapid.inspektør.siste("aktivitetslogg_ny_aktivitet")["aktiviteter"]
+        assertEquals("INFO", info[0]["nivå"].asText())
+        assertEquals("VARSEL", info[1]["nivå"].asText())
+        assertEquals("FUNKSJONELL_FEIL", info[2]["nivå"].asText())
+        assertEquals("LOGISK_FEIL", info[3]["nivå"].asText())
     }
 
     private class TestHendelse(fødselsnummer: String) : PersonHendelse(UUID.randomUUID(), fødselsnummer, "1234567891011", Aktivitetslogg())
