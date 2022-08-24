@@ -47,7 +47,6 @@ internal class WarningsTest {
             "Perioden er avslått på grunn av at den sykmeldte ikke er medlem av Folketrygden",
             "Bruker har mottatt AAP innenfor 6 måneder før skjæringstidspunktet. Kontroller at brukeren har rett til sykepenger",
             "Søknaden inneholder permittering. Vurder om permittering har konsekvens for rett til sykepenger",
-            "Minst én dag er avslått på grunn av foreldelse. Vurder å sende vedtaksbrev fra Infotrygd",
             "Sykmeldingen er tilbakedatert, vurder fra og med dato for utbetaling.",
             "Søknaden inneholder egenmeldingsdager etter sykmeldingsperioden",
             "Opptjeningsvurdering må gjøres manuelt fordi opplysningene fra AA-registeret er ufullstendige",
