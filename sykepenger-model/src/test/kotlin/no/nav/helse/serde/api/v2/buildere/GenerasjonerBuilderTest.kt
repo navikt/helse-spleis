@@ -132,7 +132,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
 
         0.generasjon {
             assertEquals(1, perioder.size)
-            uberegnetPeriode(0) harTidslinje (1.januar til 31.januar to FORELDET_SYKEDAG) medTilstand IngenUtbetaling
+            uberegnetPeriode(0) harTidslinje (1.januar til 31.januar to FORELDET_SYKEDAG) medTilstand ForberederGodkjenning
         }
     }
 

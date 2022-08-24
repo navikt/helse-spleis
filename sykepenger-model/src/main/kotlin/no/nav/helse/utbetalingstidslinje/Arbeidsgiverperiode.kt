@@ -51,9 +51,14 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
         sykdomstidslinje: Sykdomstidslinje,
         subsumsjonObserver: SubsumsjonObserver
     ): Boolean {
-        if (!dekker(periode)) return erFørsteUtbetalingsdagFørEllerLik(periode.endInclusive)
+        if (!dekker(periode)) return erFørsteUtbetalingsdagFørEllerLik(periode.endInclusive) || harForeledeDagerEtterArbeidsgiverperioden(sykdomstidslinje)
         subsumsjonObserver.`§ 8-17 ledd 1 bokstav a - arbeidsgiversøknad`(this, sykdomstidslinje.subsumsjonsformat())
         return false
+    }
+
+    private fun harForeledeDagerEtterArbeidsgiverperioden(sykdomstidslinje: Sykdomstidslinje): Boolean {
+        if (fiktiv()) return false
+        return sykdomstidslinje.harForeldedeDagerEtter(arbeidsgiverperioden.endInclusive)
     }
 
     internal fun dekker(periode: Periode): Boolean {
