@@ -861,7 +861,11 @@ internal class Arbeidsgiver private constructor(
         return énHarHåndtert(overstyrInntekt, Vedtaksperiode::håndterOverstyringAvGhostInntekt)
     }
 
-    internal fun oppdaterSykdom(hendelse: SykdomstidslinjeHendelse) = sykdomshistorikk.håndter(hendelse)
+    internal fun oppdaterSykdom(hendelse: SykdomstidslinjeHendelse): Sykdomstidslinje {
+        val sykdomstidslinje = sykdomshistorikk.håndter(hendelse)
+        person.sykdomshistorikkEndret(hendelse)
+        return sykdomstidslinje
+    }
 
     private fun sykdomstidslinje(): Sykdomstidslinje {
         val sykdomstidslinje = if (sykdomshistorikk.harSykdom()) sykdomshistorikk.sykdomstidslinje() else Sykdomstidslinje()

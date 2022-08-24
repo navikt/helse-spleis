@@ -1,8 +1,6 @@
 package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate
-import java.time.YearMonth
-import no.nav.helse.Toggle
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
@@ -288,57 +286,6 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
             ønsket = {
                 assertEquals(inntektFraIT, grunnlagsdataInspektør.sykepengegrunnlag.inspektør.sykepengegrunnlag)
             }
-        )
-    }
-
-    @Test
-    fun `skal ikke gjenbruke et vilkårsgrunnlag som feiler pga frilanser arbeidsforhold`() = Toggle.IkkeForlengInfotrygdperioder.disable {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 17.januar, 100.prosent))
-        håndterSøknad(Sykdom(1.januar, 17.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
-
-        håndterYtelser(1.vedtaksperiode)
-
-        håndterVilkårsgrunnlag(
-            1.vedtaksperiode,
-            INNTEKT,
-            inntektsvurdering = Inntektsvurdering(
-                inntekter = listOf(sammenligningsgrunnlag(a1, 1.januar, (INNTEKT*1.3).repeat(12))),
-            ),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = listOf(
-                    grunnlag(a1, 1.januar, INNTEKT.repeat(3)),
-                    grunnlag(a2, 1.januar, INNTEKT.repeat(1))
-                ),
-                arbeidsforhold = listOf(
-                    InntektForSykepengegrunnlag.Arbeidsforhold(
-                        orgnummer = a2,
-                        månedligeArbeidsforhold = listOf(
-                            InntektForSykepengegrunnlag.MånedligArbeidsforhold(
-                                yearMonth = YearMonth.of(2017, 12),
-                                erFrilanser = true
-                            )
-                        ),
-                    )
-                )
-            ),
-            arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, 1.desember(2017)),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, 1.desember(2017))
-            )
-        )
-        assertFunksjonellFeil("Fant frilanserinntekt på en arbeidsgiver de siste 3 månedene", 1.vedtaksperiode.filter())
-
-        håndterSykmelding(Sykmeldingsperiode(18.januar, 31.januar, 100.prosent))
-        håndterSøknad(Sykdom(18.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 18.januar))
-
-        håndterYtelser(2.vedtaksperiode)
-
-        assertForventetFeil(
-            forklaring = "https://trello.com/c/edYRnoPm",
-            nå = { assertSisteTilstand(2.vedtaksperiode, AVVENTER_SIMULERING) },
-            ønsket = { assertSisteTilstand(2.vedtaksperiode, TIL_INFOTRYGD) }
         )
     }
 

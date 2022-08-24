@@ -12,7 +12,6 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.mai
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
@@ -49,8 +48,9 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         vilkårsgrunnlagFor(skjæringstidspunkt)?.build(builder)
     }
 
-    internal fun oppdaterHistorikk(sykdomstidslinje: Sykdomstidslinje) {
-        val nyttInnslag = sisteInnlag()?.oppdaterHistorikk(sykdomstidslinje) ?: return
+    internal fun oppdaterHistorikk(aktivitetslogg: IAktivitetslogg, skjæringstidspunkter: List<LocalDate>) {
+        if (Toggle.ForkasteVilkårsgrunnlag.disabled) return
+        val nyttInnslag = sisteInnlag()?.oppdaterHistorikk(aktivitetslogg, skjæringstidspunkter) ?: return
         if (nyttInnslag == sisteInnlag()) return
         historikk.add(0, nyttInnslag)
     }
@@ -162,9 +162,10 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             return this.vilkårsgrunnlag == other.vilkårsgrunnlag
         }
 
-        internal fun oppdaterHistorikk(sykdomstidslinje: Sykdomstidslinje): Innslag {
-            val gyldigeSkjæringstidspunkt = sykdomstidslinje.skjæringstidspunkter()
-            val gyldigeVilkårsgrunnlag = vilkårsgrunnlag.filter { (key, _)-> gyldigeSkjæringstidspunkt.contains(key) }
+        internal fun oppdaterHistorikk(aktivitetslogg: IAktivitetslogg, skjæringstidspunkter: List<LocalDate>): Innslag {
+            val gyldigeVilkårsgrunnlag = vilkårsgrunnlag.filter { (key, _)-> key in skjæringstidspunkter }
+            val diff = this.vilkårsgrunnlag.size - gyldigeVilkårsgrunnlag.size
+            if (diff > 0) aktivitetslogg.info("Fjernet $diff vilkårsgrunnlagselementer")
             return Innslag(gyldigeVilkårsgrunnlag)
         }
 

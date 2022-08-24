@@ -755,9 +755,14 @@ class Person private constructor(
         søppelbøtte(hendelse, ALLE)
     }
 
+    internal fun sykdomshistorikkEndret(aktivitetslogg: IAktivitetslogg) {
+        vilkårsgrunnlagHistorikk.oppdaterHistorikk(aktivitetslogg, skjæringstidspunkter())
+    }
+
     internal fun søppelbøtte(hendelse: IAktivitetslogg, filter: VedtaksperiodeFilter) {
         infotrygdhistorikk.tøm()
         Arbeidsgiver.søppelbøtte(arbeidsgivere, hendelse, filter)
+        sykdomshistorikkEndret(hendelse)
         gjenopptaBehandling(hendelse)
     }
 

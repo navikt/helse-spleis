@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
-import no.nav.helse.assertForventetFeil
+import no.nav.helse.Toggle
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
@@ -69,7 +69,7 @@ internal class VilkårsgrunnlagHistorikkTest {
     }
 
     @Test
-    fun `fjerner vilkårsgrunnlag som ikke gjelder lengre`() {
+    fun `fjerner vilkårsgrunnlag som ikke gjelder lengre`() = Toggle.ForkasteVilkårsgrunnlag.enable {
         val inntekt = 21000.månedlig
         val gammeltSkjæringstidspunkt = 10.januar
         val nyttSkjæringstidspunkt = 1.januar
@@ -91,7 +91,7 @@ internal class VilkårsgrunnlagHistorikkTest {
         assertEquals(listOf(nyttSkjæringstidspunkt), skjæringstidspunkter)
 
         assertEquals(1, historikk.inspektør.vilkårsgrunnlagTeller.size)
-        historikk.oppdaterHistorikk(sykdomstidslinje)
+        historikk.oppdaterHistorikk(Aktivitetslogg(), sykdomstidslinje.skjæringstidspunkter())
 
         assertEquals(2, historikk.inspektør.vilkårsgrunnlagTeller.size)
         assertEquals(0, historikk.inspektør.vilkårsgrunnlagTeller[0]) { "det siste innslaget skal være tomt" }
