@@ -11,7 +11,6 @@ import no.nav.helse.testhelpers.S
 import no.nav.helse.testhelpers.opphold
 import no.nav.helse.testhelpers.resetSeed
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -29,7 +28,7 @@ internal class ArbeidsgiverperiodeBuilderBuilderTest {
         undersøke(31.S)
         assertEquals(1, perioder.size)
         assertEquals(listOf(1.januar til 16.januar), perioder.first())
-        assertFalse(perioder.first().erFørsteUtbetalingsdagEtter(31.januar))
+        assertTrue(perioder.first().erFørsteUtbetalingsdagFørEllerLik(31.januar))
         assertTrue(perioder.first().hørerTil(17.januar til 31.januar))
         assertTrue(17.januar til 31.januar in perioder.first())
     }
@@ -41,7 +40,7 @@ internal class ArbeidsgiverperiodeBuilderBuilderTest {
         }
         assertEquals(1, perioder.size)
         assertEquals(emptyList<LocalDate>(), perioder.first())
-        assertFalse(perioder.first().erFørsteUtbetalingsdagEtter(31.januar))
+        assertTrue(perioder.first().erFørsteUtbetalingsdagFørEllerLik(31.januar))
         assertTrue(perioder.first().hørerTil(17.januar til 31.januar))
         assertTrue(17.januar til 31.januar in perioder.first())
     }
@@ -53,7 +52,7 @@ internal class ArbeidsgiverperiodeBuilderBuilderTest {
         }
         assertEquals(1, perioder.size)
         assertEquals(listOf(1.januar til 16.januar), perioder.first())
-        assertFalse(perioder.first().erFørsteUtbetalingsdagEtter(31.januar))
+        assertTrue(perioder.first().erFørsteUtbetalingsdagFørEllerLik(31.januar))
         assertTrue(perioder.first().hørerTil(17.januar til 31.januar))
         assertTrue(17.januar til 31.januar in perioder.first())
     }

@@ -52,24 +52,24 @@ internal class ArbeidsgiverperiodeTest {
 
     @Test
     fun `har betalt`() {
-        assertTrue(agp(1.januar til 16.januar).erFørsteUtbetalingsdagEtter(17.januar))
-        assertFalse(agp(1.januar til 16.januar).utbetalingsdag(17.januar).erFørsteUtbetalingsdagEtter(17.januar))
-        assertFalse(agp(1.januar til 16.januar).utbetalingsdag(17.januar).erFørsteUtbetalingsdagEtter(18.januar))
-        assertTrue(agp(1.januar til 16.januar).utbetalingsdag(18.januar).erFørsteUtbetalingsdagEtter(17.januar))
+        assertFalse(agp(1.januar til 16.januar).erFørsteUtbetalingsdagFørEllerLik(17.januar))
+        assertTrue(agp(1.januar til 16.januar).utbetalingsdag(17.januar).erFørsteUtbetalingsdagFørEllerLik(17.januar))
+        assertTrue(agp(1.januar til 16.januar).utbetalingsdag(17.januar).erFørsteUtbetalingsdagFørEllerLik(18.januar))
+        assertFalse(agp(1.januar til 16.januar).utbetalingsdag(18.januar).erFørsteUtbetalingsdagFørEllerLik(17.januar))
     }
 
     @Test
     fun `helg regnes ikke som betalt`() {
-        assertTrue(agp(1.januar til 16.januar).utbetalingsdag(20.januar).erFørsteUtbetalingsdagEtter(20.januar))
-        assertTrue(Arbeidsgiverperiode.fiktiv(20.januar).erFørsteUtbetalingsdagEtter(20.januar))
+        assertFalse(agp(1.januar til 16.januar).utbetalingsdag(20.januar).erFørsteUtbetalingsdagFørEllerLik(20.januar))
+        assertFalse(Arbeidsgiverperiode.fiktiv(20.januar).erFørsteUtbetalingsdagFørEllerLik(20.januar))
     }
 
     @Test
     fun `ingen utbetaling dersom perioden er innenfor arbeidsgiverperioden eller før det utbetales noe`() {
         agp(1.januar til 16.januar).utbetalingsdag(23.januar).also { agp ->
-            assertTrue(agp.ingenUtbetaling(31.desember(2017) til 5.januar, Sykdomstidslinje(), SubsumsjonObserver.NullObserver))
-            assertTrue(agp.ingenUtbetaling(15.januar til 22.januar, Sykdomstidslinje(), SubsumsjonObserver.NullObserver))
-            assertFalse(agp.ingenUtbetaling(15.januar til 23.januar, Sykdomstidslinje(), SubsumsjonObserver.NullObserver))
+            assertFalse(agp.forventerInntekt(31.desember(2017) til 5.januar, Sykdomstidslinje(), SubsumsjonObserver.NullObserver))
+            assertFalse(agp.forventerInntekt(15.januar til 22.januar, Sykdomstidslinje(), SubsumsjonObserver.NullObserver))
+            assertTrue(agp.forventerInntekt(15.januar til 23.januar, Sykdomstidslinje(), SubsumsjonObserver.NullObserver))
         }
     }
 

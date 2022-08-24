@@ -46,14 +46,14 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
     operator fun contains(periode: Periode) =
         innflytelseperioden.overlapperMed(periode)
 
-    internal fun ingenUtbetaling(
+    internal fun forventerInntekt(
         periode: Periode,
         sykdomstidslinje: Sykdomstidslinje,
         subsumsjonObserver: SubsumsjonObserver
     ): Boolean {
-        if (!dekker(periode)) return erFørsteUtbetalingsdagEtter(periode.endInclusive)
+        if (!dekker(periode)) return erFørsteUtbetalingsdagFørEllerLik(periode.endInclusive)
         subsumsjonObserver.`§ 8-17 ledd 1 bokstav a - arbeidsgiversøknad`(this, sykdomstidslinje.subsumsjonsformat())
-        return true
+        return false
     }
 
     internal fun dekker(periode: Periode): Boolean {
@@ -72,7 +72,7 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
         return otherSiste == thisSiste || (thisSiste.erHelg() && otherSiste.erRettFør(thisSiste)) || (otherSiste.erHelg() && thisSiste.erRettFør(otherSiste))
     }
 
-    internal fun erFørsteUtbetalingsdagEtter(dato: LocalDate) = utbetalingsdager.firstOrNull()?.start?.let { dato < it } ?: true
+    internal fun erFørsteUtbetalingsdagFørEllerLik(dato: LocalDate) = utbetalingsdager.firstOrNull()?.start?.let { dato >= it } ?: false
 
     internal fun periodetype(organisasjonsnummer: String, other: Periode, skjæringstidspunkt: LocalDate, infotrygdhistorikk: Infotrygdhistorikk): Periodetype {
         val førsteUtbetalingsdag = utbetalingsdager.firstOrNull()?.start
@@ -110,13 +110,13 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
     internal companion object {
         internal fun fiktiv(førsteUtbetalingsdag: LocalDate) = Arbeidsgiverperiode(emptyList(), førsteUtbetalingsdag)
 
-        internal fun ingenUtbetaling(
+        internal fun forventerInntekt(
             arbeidsgiverperiode: Arbeidsgiverperiode?,
             periode: Periode,
             sykdomstidslinje: Sykdomstidslinje,
             subsumsjonObserver: SubsumsjonObserver
         ) =
-            arbeidsgiverperiode?.ingenUtbetaling(periode, sykdomstidslinje, subsumsjonObserver) ?: true
+            arbeidsgiverperiode?.forventerInntekt(periode, sykdomstidslinje, subsumsjonObserver) ?: false
 
         internal fun List<Arbeidsgiverperiode>.finn(periode: Periode) = firstOrNull { arbeidsgiverperiode ->
             periode in arbeidsgiverperiode

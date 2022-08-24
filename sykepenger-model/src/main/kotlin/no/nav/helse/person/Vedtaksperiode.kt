@@ -365,7 +365,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun harNødvendigInntektForVilkårsprøving() =
-        arbeidsgiver.harNødvendigInntektForVilkårsprøving(skjæringstidspunkt, periode.start, ingenUtbetaling())
+        arbeidsgiver.harNødvendigInntektForVilkårsprøving(skjæringstidspunkt, periode.start, !forventerInntekt())
 
     private fun låsOpp() = arbeidsgiver.låsOpp(periode)
     private fun lås() = arbeidsgiver.lås(periode)
@@ -774,7 +774,7 @@ internal class Vedtaksperiode private constructor(
             SubsumsjonObserver.NullObserver
         ) // TODO: skal vi logge ved beregning av agp?
 
-    private fun ingenUtbetaling() = Arbeidsgiverperiode.ingenUtbetaling(finnArbeidsgiverperiode(), periode, sykdomstidslinje, jurist())
+    private fun forventerInntekt() = Arbeidsgiverperiode.forventerInntekt(finnArbeidsgiverperiode(), periode, sykdomstidslinje, jurist())
 
     // Gang of four State pattern
     internal sealed interface Vedtaksperiodetilstand : Aktivitetskontekst {
@@ -1280,7 +1280,7 @@ internal class Vedtaksperiode private constructor(
                 }
                 onSuccess {
                     infotrygdhistorikk.addInntekter(person, this)
-                    if (vedtaksperiode.ingenUtbetaling()) {
+                    if (!vedtaksperiode.forventerInntekt()) {
                         vedtaksperiode.utbetalinger.forkast(hendelse)
                         vedtaksperiode.tilstand(hendelse, AvsluttetUtenUtbetaling)
                     } else if (vedtaksperiode.harNødvendigInntektForVilkårsprøving()) {
@@ -1330,7 +1330,7 @@ internal class Vedtaksperiode private constructor(
                 arbeidsgivere.senerePerioderPågående(vedtaksperiode) -> return hendelse.info(
                     "Gjenopptar ikke behandling fordi det finnes pågående revurderinger."
                 )
-                vedtaksperiode.ingenUtbetaling() -> vedtaksperiode.tilstand(hendelse, AvsluttetUtenUtbetaling)
+                !vedtaksperiode.forventerInntekt() -> vedtaksperiode.tilstand(hendelse, AvsluttetUtenUtbetaling)
                 !arbeidsgivere.harNødvendigInntekt(vedtaksperiode.skjæringstidspunkt) -> return hendelse.info(
                     "Gjenopptar ikke behandling fordi minst én arbeidsgiver ikke har tilstrekkelig inntekt for skjæringstidspunktet"
                 )
@@ -1518,7 +1518,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun loggInnenforArbeidsgiverperiode() {
-        if (!ingenUtbetaling()) return
+        if (forventerInntekt()) return
         sikkerlogg.info(
             "Vedtaksperioden {} for {} er egentlig innenfor arbeidsgiverperioden ved {}",
             keyValue("vedtaksperiodeId", id), keyValue("fnr", fødselsnummer), keyValue("tilstand", tilstand.type)
@@ -2036,7 +2036,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.håndterInntektsmelding(inntektsmelding, this) // håndterInntektsmelding krever tilstandsendring, men vi må avvente til vi starter revurdering
 
             if (inntektsmelding.harFunksjonelleFeilEllerVerre()) return
-            if (vedtaksperiode.ingenUtbetaling()) {
+            if (!vedtaksperiode.forventerInntekt()) {
                 vedtaksperiode.emitVedtaksperiodeEndret(inntektsmelding) // på stedet hvil!
                 return inntektsmelding.info("Revurdering medfører ingen utbetaling, blir stående i avsluttet uten utbetaling")
             }
@@ -2306,7 +2306,7 @@ internal class Vedtaksperiode private constructor(
 
         internal val SKAL_INNGÅ_I_SYKEPENGEGRUNNLAG = { skjæringstidspunkt: LocalDate ->
             { vedtaksperiode: Vedtaksperiode ->
-                MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt)(vedtaksperiode) && !vedtaksperiode.ingenUtbetaling()
+                MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt)(vedtaksperiode) && vedtaksperiode.forventerInntekt()
             }
         }
 
