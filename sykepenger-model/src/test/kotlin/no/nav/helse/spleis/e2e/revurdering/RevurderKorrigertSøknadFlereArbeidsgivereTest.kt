@@ -37,6 +37,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 @EnableToggle(Toggle.RevurderKorrigertSoknad::class)
@@ -597,6 +598,122 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             håndterYtelser(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             assertTilstand(1.vedtaksperiode, AVSLUTTET)
+        }
+    }
+
+    @Test
+    @Disabled("en bug i finnSkjæringstidspunkt som må rettes opp i")
+    fun `To arbeidsgivere med ett sykefraværstilfelle og gap over 16 dager på den ene arbeidsgiveren - korrigerende søknad på arbeidsgiver uten gap setter i gang revurdering og gir nytt skjæringstidspunkt`() {
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        }
+        a2 {
+            håndterSykmelding(Sykmeldingsperiode(25.januar, 25.februar, 100.prosent))
+            håndterSøknad(Sykdom(25.januar, 25.februar, 100.prosent))
+        }
+        a1 {
+            håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 15000.00.månedlig)
+            håndterSykmelding(Sykmeldingsperiode(24.februar, 24.mars, 100.prosent))
+            håndterSøknad(Sykdom(24.februar, 24.mars, 100.prosent))
+            håndterInntektsmelding(listOf(24.februar til 11.mars), beregnetInntekt = 17000.00.månedlig)
+        }
+        a2 {
+            håndterInntektsmelding(listOf(25.januar til 9.februar), beregnetInntekt = 16000.00.månedlig)
+        }
+        a1 {
+            håndterYtelser(1.vedtaksperiode)
+            håndterVilkårsgrunnlag(  1.vedtaksperiode,
+                arbeidsforhold = listOf(
+                    Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null),
+                    Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null)
+                ),
+                inntektsvurdering = Inntektsvurdering(
+                    listOf(
+                        sammenligningsgrunnlag(a1, 1.januar, 15000.00.månedlig.repeat(12)),
+                        sammenligningsgrunnlag(a2, 1.januar, 16000.00.månedlig.repeat(12))
+                    )
+                ),
+                inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
+                    inntekter = listOf(
+                        grunnlag(a1, 1.januar, 15000.00.månedlig.repeat(3)),
+                        grunnlag(a2, 1.januar, 16000.00.månedlig.repeat(3))
+                    ),
+                    arbeidsforhold = emptyList()
+                )
+            )
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+        }
+
+        a2 {
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+        }
+
+        a1 {
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+            håndterUtbetalt()
+        }
+
+        a2 {
+            håndterSøknad(Sykdom(25.januar, 25.februar, 100.prosent), Arbeid(20.februar, 25.februar))
+            assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+        }
+
+        a1 {
+            assertTilstand(1.vedtaksperiode, AVVENTER_REVURDERING)
+            assertTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
+        }
+
+        a2 {
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+
+            assertTilstand(1.vedtaksperiode, AVSLUTTET)
+            (20..25).forEach {
+                assertTrue(inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.februar] is Utbetalingsdag.Arbeidsdag)
+            }
+        }
+
+        a1 {
+            håndterYtelser(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            assertTilstand(1.vedtaksperiode, AVSLUTTET)
+            assertTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+            håndterYtelser(2.vedtaksperiode)
+            håndterVilkårsgrunnlag(2.vedtaksperiode,
+                arbeidsforhold = listOf(
+                    Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null),
+                    Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null)
+                ),
+                inntektsvurdering = Inntektsvurdering(
+                    listOf(
+                        sammenligningsgrunnlag(a1, 24.februar, 15000.00.månedlig.repeat(12)),
+                        sammenligningsgrunnlag(a2, 24.februar, 16000.00.månedlig.repeat(12))
+                    )
+                ),
+                inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
+                    inntekter = listOf(
+                        grunnlag(a1, 24.februar, 15000.00.månedlig.repeat(3)),
+                        grunnlag(a2, 24.februar, 16000.00.månedlig.repeat(3))
+                    ),
+                    arbeidsforhold = emptyList()
+                )
+            )
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+            håndterUtbetalt()
+            assertTilstand(2.vedtaksperiode, AVSLUTTET)
         }
     }
 }
