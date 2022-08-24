@@ -1,7 +1,6 @@
 package no.nav.helse.spleis
 
 import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.person.AktivitetsloggObserver
 import no.nav.helse.person.PersonHendelse
@@ -13,7 +12,6 @@ import org.slf4j.LoggerFactory
 class DatadelingMediator(private val hendelse: PersonHendelse): AktivitetsloggObserver {
     private companion object {
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
-        private val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")
     }
 
     private val aktiviteter = mutableListOf<Map<String, Any>>()
@@ -21,12 +19,12 @@ class DatadelingMediator(private val hendelse: PersonHendelse): AktivitetsloggOb
         hendelse.register(this)
     }
 
-    override fun aktivitet(label: Char, melding: String, kontekster: List<SpesifikkKontekst>, tidsstempel: String) {
+    override fun aktivitet(label: Char, melding: String, kontekster: List<SpesifikkKontekst>, tidsstempel: LocalDateTime) {
         aktiviteter.add(
             mapOf(
                 "nivå" to label.toFulltext(),
                 "melding" to melding,
-                "tidsstempel" to LocalDateTime.parse(tidsstempel, formatter),
+                "tidsstempel" to tidsstempel,
                 "kontekster" to kontekster.map { it.toMap() }
             )
         )
