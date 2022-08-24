@@ -11,7 +11,7 @@ import no.nav.helse.serde.reflection.AktivitetsloggMap
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
 
 
-interface AktivitetsloggObserver {
+fun interface AktivitetsloggObserver {
     fun aktivitet(label: Char, melding: String, kontekster: List<SpesifikkKontekst>, tidsstempel: LocalDateTime)
 }
 

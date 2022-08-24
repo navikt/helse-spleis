@@ -2,12 +2,17 @@ package no.nav.helse.serde.migration
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
+import no.nav.helse.person.AktivitetsloggObserver
 import org.slf4j.LoggerFactory
 
 internal class V128FjerneUgyldigSimuleringsResultat : JsonMigration(version = 128) {
     override val description = "Fjerne ugyldige simuleringsResultat som ble lagret på oppdragene ifbm. 846541b"
 
-    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
+    override fun doMigration(
+        jsonNode: ObjectNode,
+        meldingerSupplier: MeldingerSupplier,
+        observer: AktivitetsloggObserver
+    ) {
         jsonNode["arbeidsgivere"].forEach { arbeidsgiver ->
             arbeidsgiver["utbetalinger"].forEach { utbetaling ->
                 val arbeidsgiverOppdrag = utbetaling["arbeidsgiverOppdrag"] as ObjectNode

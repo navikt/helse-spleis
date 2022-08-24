@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import net.logstash.logback.argument.StructuredArguments
+import no.nav.helse.person.AktivitetsloggObserver
 import org.slf4j.LoggerFactory
 
 internal class V150MigrerVedtaksperioderTilNyTilstandsflyt : JsonMigration(version = 150) {
@@ -35,7 +36,8 @@ internal class V150MigrerVedtaksperioderTilNyTilstandsflyt : JsonMigration(versi
 
     override fun doMigration(
         jsonNode: ObjectNode,
-        meldingerSupplier: MeldingerSupplier
+        meldingerSupplier: MeldingerSupplier,
+        observer: AktivitetsloggObserver
     ) {
         val fødselsnummer = jsonNode["fødselsnummer"].asText()
         jsonNode["arbeidsgivere"]

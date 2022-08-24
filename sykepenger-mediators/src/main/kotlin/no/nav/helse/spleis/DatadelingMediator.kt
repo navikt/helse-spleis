@@ -12,8 +12,10 @@ import org.slf4j.LoggerFactory
 class DatadelingMediator(private val hendelse: PersonHendelse): AktivitetsloggObserver {
     private companion object {
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
+        private const val MaksimaltAntallAktiviteterPerMelding = 500
     }
 
+    private val meldinger = mutableListOf<String>()
     private val aktiviteter = mutableListOf<Map<String, Any>>()
     init {
         hendelse.register(this)
@@ -28,17 +30,30 @@ class DatadelingMediator(private val hendelse: PersonHendelse): AktivitetsloggOb
                 "kontekster" to kontekster.map { it.toMap() }
             )
         )
+        sjekkMeldingsgrense()
+    }
+
+    private fun sjekkMeldingsgrense() {
+        if (aktiviteter.size < MaksimaltAntallAktiviteterPerMelding) return
+        lagMelding()
+    }
+
+    private fun lagMelding() {
+        if (aktiviteter.isEmpty()) return
+        meldinger.add(aktiviteter.toJson())
+        aktiviteter.clear()
     }
 
     internal fun finalize(context: MessageContext) {
-        if (aktiviteter.isEmpty()) return
+        lagMelding()
+        if (meldinger.isEmpty()) return
         sikkerlogg.info(
-            "Publiserer aktiviteter som følge av hendelse med {}, {}, {}",
+            "Publiserer aktiviteter (fordelt på ${meldinger.size} meldinger (${meldinger.joinToString { "${it.length} bytes" }})) som følge av hendelse med {}, {}, {}",
             keyValue("hendelseId", hendelse.meldingsreferanseId()),
             keyValue("fødselsnummer", hendelse.fødselsnummer()),
             keyValue("aktørId", hendelse.aktørId())
         )
-        context.publish(hendelse.fødselsnummer(), aktiviteter.toJson())
+        meldinger.forEach { context.publish(hendelse.fødselsnummer(), it) }
     }
 
     private fun MutableList<Map<String, Any>>.toJson(): String {

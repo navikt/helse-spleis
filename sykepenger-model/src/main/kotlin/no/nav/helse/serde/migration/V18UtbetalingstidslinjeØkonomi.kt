@@ -2,23 +2,28 @@ package no.nav.helse.serde.migration
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter.ISO_DATE
+import java.util.UUID
 import no.nav.helse.Grunnbeløp
+import no.nav.helse.person.AktivitetsloggObserver
 import no.nav.helse.serde.migration.Inntektshistorikk.Inntektsendring.Kilde.INNTEKTSMELDING
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter.ISO_DATE
-import java.util.*
 
 internal class V18UtbetalingstidslinjeØkonomi : JsonMigration(version = 18) {
     override val description = "utvide økonomifelt i Utbetalingstidslinjer"
 
     private lateinit var inntektshistorikk: Inntektshistorikk
 
-    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
+    override fun doMigration(
+        jsonNode: ObjectNode,
+        meldingerSupplier: MeldingerSupplier,
+        observer: AktivitetsloggObserver
+    ) {
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
             arbeidsgiver.path("utbetalinger").forEach { utbetaling ->
                 opprettØkonomi(utbetaling.path("utbetalingstidslinje").path("dager"))

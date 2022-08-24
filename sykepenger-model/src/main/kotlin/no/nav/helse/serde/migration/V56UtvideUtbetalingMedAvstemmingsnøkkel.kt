@@ -2,6 +2,7 @@ package no.nav.helse.serde.migration
 
 import com.fasterxml.jackson.databind.node.ObjectNode
 import java.time.LocalDateTime
+import no.nav.helse.person.AktivitetsloggObserver
 
 internal class V56UtvideUtbetalingMedAvstemmingsnøkkel : JsonMigration(version = 56) {
     private companion object {
@@ -15,7 +16,11 @@ internal class V56UtvideUtbetalingMedAvstemmingsnøkkel : JsonMigration(version 
 
     override val description: String = "Utvider Utbetaling med avstemmingsnøkkel"
 
-    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
+    override fun doMigration(
+        jsonNode: ObjectNode,
+        meldingerSupplier: MeldingerSupplier,
+        observer: AktivitetsloggObserver
+    ) {
         val konteksttyper = konteksttyper(jsonNode)
         val kontekstdetaljer = kontekstdetaljer(jsonNode)
 

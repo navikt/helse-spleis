@@ -1,11 +1,16 @@
 package no.nav.helse.serde.migration
 
 import com.fasterxml.jackson.databind.node.ObjectNode
+import no.nav.helse.person.AktivitetsloggObserver
 
 internal class V51PatcheGamleAnnulleringer : JsonMigration(version = 51) {
     override val description: String = "Patcher gamle annulleringer av allerede annullerte utbetalinger"
 
-    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
+    override fun doMigration(
+        jsonNode: ObjectNode,
+        meldingerSupplier: MeldingerSupplier,
+        observer: AktivitetsloggObserver
+    ) {
         val annullerteFagsystemIder = mutableSetOf<String>()
 
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->

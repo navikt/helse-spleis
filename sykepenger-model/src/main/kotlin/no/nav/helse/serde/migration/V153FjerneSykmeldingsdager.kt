@@ -7,6 +7,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
+import no.nav.helse.person.AktivitetsloggObserver
 import no.nav.helse.serde.serdeObjectMapper
 import org.slf4j.LoggerFactory
 
@@ -46,7 +47,11 @@ internal class V153FjerneSykmeldingsdager : JsonMigration(version = 153) {
 
      */
 
-    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
+    override fun doMigration(
+        jsonNode: ObjectNode,
+        meldingerSupplier: MeldingerSupplier,
+        observer: AktivitetsloggObserver
+    ) {
         val fødselsnummer = jsonNode.path("fødselsnummer").asText()
         val aktørId = jsonNode.path("aktørId").asText()
         val lanseringsdato = LocalDateTime.of(2022, 4, 25, 20, 0, 0)

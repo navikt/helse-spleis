@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.treeToValue
+import no.nav.helse.person.AktivitetsloggObserver
 import no.nav.helse.person.Person
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.serde.migration.JsonMigration
@@ -93,6 +94,7 @@ import no.nav.helse.serde.migration.V170TildelingUtbetaling
 import no.nav.helse.serde.migration.V171FjerneForkastedePerioderUtenSykdomstidslinje
 import no.nav.helse.serde.migration.V172LoggeUbrukteVilkårsgrunnlag
 import no.nav.helse.serde.migration.V173FjerneUbrukteVilkårsgrunnlag
+import no.nav.helse.serde.migration.V174AktivitetsloggDatadump
 import no.nav.helse.serde.migration.V17ForkastedePerioder
 import no.nav.helse.serde.migration.V18UtbetalingstidslinjeØkonomi
 import no.nav.helse.serde.migration.V19KlippOverlappendeVedtaksperioder
@@ -369,7 +371,8 @@ class SerialisertPerson(val json: String) {
             V170TildelingUtbetaling(),
             V171FjerneForkastedePerioderUtenSykdomstidslinje(),
             V172LoggeUbrukteVilkårsgrunnlag(),
-            V173FjerneUbrukteVilkårsgrunnlag()
+            V173FjerneUbrukteVilkårsgrunnlag(),
+            V174AktivitetsloggDatadump()
         )
 
         fun gjeldendeVersjon() = JsonMigration.gjeldendeVersjon(migrations)
@@ -389,9 +392,9 @@ class SerialisertPerson(val json: String) {
 
     val skjemaVersjon = gjeldendeVersjon()
 
-    private fun migrate(jsonNode: JsonNode, meldingerSupplier: MeldingerSupplier) {
+    private fun migrate(jsonNode: JsonNode, meldingerSupplier: MeldingerSupplier, observer: AktivitetsloggObserver) {
         try {
-            migrations.migrate(jsonNode, meldingerSupplier)
+            migrations.migrate(jsonNode, meldingerSupplier, observer)
         } catch (err: Exception) {
             throw JsonMigrationException("Feil under migrering: ${err.message}", err)
         }
@@ -399,10 +402,11 @@ class SerialisertPerson(val json: String) {
 
     fun deserialize(
         jurist: MaskinellJurist,
+        observer: AktivitetsloggObserver = AktivitetsloggObserver { _, _, _, _ -> },
         meldingerSupplier: MeldingerSupplier = MeldingerSupplier.empty
     ): Person {
         val jsonNode = serdeObjectMapper.readTree(json)
-        migrate(jsonNode, meldingerSupplier)
+        migrate(jsonNode, meldingerSupplier, observer)
 
         try {
             val personData: PersonData = requireNotNull(serdeObjectMapper.treeToValue(jsonNode))

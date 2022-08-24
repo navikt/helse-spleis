@@ -6,6 +6,7 @@ import java.time.LocalDate
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
+import no.nav.helse.person.AktivitetsloggObserver
 import no.nav.helse.serde.serdeObjectMapper
 import org.slf4j.LoggerFactory
 
@@ -42,7 +43,11 @@ internal class V152SlettGamleSykmeldingsperioder : JsonMigration(version = 152) 
 
      */
 
-    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
+    override fun doMigration(
+        jsonNode: ObjectNode,
+        meldingerSupplier: MeldingerSupplier,
+        observer: AktivitetsloggObserver
+    ) {
         val fødselsnummer = jsonNode.fødselsnummer()
         jsonNode["arbeidsgivere"]
             .forEach { arbeidsgiverNode ->

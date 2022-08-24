@@ -3,6 +3,7 @@ package no.nav.helse.serde.migration
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import java.util.UUID
+import no.nav.helse.person.AktivitetsloggObserver
 import org.slf4j.LoggerFactory
 
 fun interface MeldingerSupplier {
@@ -17,9 +18,10 @@ typealias Json = String
 
 internal fun List<JsonMigration>.migrate(
     jsonNode: JsonNode,
-    meldingerSupplier: MeldingerSupplier = MeldingerSupplier.empty
+    meldingerSupplier: MeldingerSupplier = MeldingerSupplier.empty,
+    aktivitetsloggObserver: AktivitetsloggObserver = AktivitetsloggObserver { _, _, _, _ -> }
 ) =
-    JsonMigration.migrate(this, jsonNode, MemoizedMeldingerSupplier(meldingerSupplier))
+    JsonMigration.migrate(this, jsonNode, MemoizedMeldingerSupplier(meldingerSupplier), aktivitetsloggObserver)
 
 private class MemoizedMeldingerSupplier(private val supplier: MeldingerSupplier): MeldingerSupplier {
     private val meldinger: Map<UUID, Pair<Navn, Json>> by lazy { supplier.hentMeldinger() }
@@ -37,12 +39,13 @@ internal abstract class JsonMigration(private val version: Int) {
         internal fun migrate(
             migrations: List<JsonMigration>,
             jsonNode: JsonNode,
-            supplier: MeldingerSupplier
+            supplier: MeldingerSupplier,
+            observer: AktivitetsloggObserver
         ) = jsonNode.apply {
             require(this is ObjectNode) { "Kan kun migrere ObjectNodes" }
             val sortedMigrations = migrations.sortedBy { it.version }
             require(sortedMigrations.windowed(2).none { (a, b) -> a.version == b.version }) { "Versjoner må være unike" }
-            sortedMigrations.forEach { it.migrate(this, supplier) }
+            sortedMigrations.forEach { it.migrate(this, supplier, observer) }
         }
 
         internal fun medSkjemaversjon(migrations: List<JsonMigration>, jsonNode: JsonNode): ObjectNode =
@@ -61,13 +64,17 @@ internal abstract class JsonMigration(private val version: Int) {
 
     protected abstract val description: String
 
-    private fun migrate(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
+    private fun migrate(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier, observer: AktivitetsloggObserver) {
         if (!shouldMigrate(jsonNode)) return
-        doMigration(jsonNode, meldingerSupplier)
+        doMigration(jsonNode, meldingerSupplier, observer)
         after(jsonNode)
     }
 
-    protected abstract fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier)
+    protected abstract fun doMigration(
+        jsonNode: ObjectNode,
+        meldingerSupplier: MeldingerSupplier,
+        observer: AktivitetsloggObserver
+    )
 
     protected open fun shouldMigrate(jsonNode: JsonNode) =
         skjemaVersjon(jsonNode) < version

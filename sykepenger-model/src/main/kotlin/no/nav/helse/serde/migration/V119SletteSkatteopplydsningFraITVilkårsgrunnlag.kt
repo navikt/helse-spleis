@@ -1,14 +1,19 @@
 package no.nav.helse.serde.migration
 
 import com.fasterxml.jackson.databind.node.ObjectNode
-import no.nav.helse.Grunnbeløp
 import java.time.LocalDate
+import no.nav.helse.Grunnbeløp
+import no.nav.helse.person.AktivitetsloggObserver
 
 internal class V119SletteSkatteopplydsningFraITVilkårsgrunnlag : JsonMigration(version = 119) {
 
     override val description: String = "Slette inntektsopplysninger fra skatt som har blitt lagt til vilkårsgrunnlag fra infotrygd ved en feil"
 
-    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
+    override fun doMigration(
+        jsonNode: ObjectNode,
+        meldingerSupplier: MeldingerSupplier,
+        observer: AktivitetsloggObserver
+    ) {
         jsonNode["vilkårsgrunnlagHistorikk"]
             .flatMap { it["vilkårsgrunnlag"] }
             .filter { "Infotrygd" == it["type"]?.asText() }

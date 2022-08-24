@@ -7,6 +7,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.person.AktivitetsloggObserver
 import org.slf4j.LoggerFactory
 import kotlin.math.absoluteValue
 
@@ -24,7 +25,11 @@ internal class V166UtbetalteDagerMedForHøyAvviksprosent: JsonMigration(166) {
         null
     }
 
-    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
+    override fun doMigration(
+        jsonNode: ObjectNode,
+        meldingerSupplier: MeldingerSupplier,
+        observer: AktivitetsloggObserver
+    ) {
         finnAvvikOrNull(jsonNode)?.forEach { avvik ->
             sikkerlogg.warn("Utbetalt med avvik over 25%: {}, {}, {}, {}, {}, {}, {}, {}, {}",
                 keyValue("fødselsnummer", avvik.sykmeldt),

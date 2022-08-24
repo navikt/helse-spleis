@@ -3,11 +3,16 @@ package no.nav.helse.serde.migration
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import java.time.LocalDate
+import no.nav.helse.person.AktivitetsloggObserver
 
 internal class V44MaksdatoIkkeNullable : JsonMigration(version = 44) {
     override val description: String = "gjør maksdato til ikke-null vha LocalDate.MAX som nullobjekt"
 
-    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
+    override fun doMigration(
+        jsonNode: ObjectNode,
+        meldingerSupplier: MeldingerSupplier,
+        observer: AktivitetsloggObserver
+    ) {
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
             settMaksdatoDefault(arbeidsgiver.path("vedtaksperioder"))
             settMaksdatoDefaultForkastede(arbeidsgiver.path("forkastede"))

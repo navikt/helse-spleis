@@ -1,12 +1,17 @@
 package no.nav.helse.serde.migration
 
 import com.fasterxml.jackson.databind.node.ObjectNode
+import no.nav.helse.person.AktivitetsloggObserver
 import kotlin.math.roundToInt
 
 internal class V8LeggerTilLønnIUtbetalingslinjer : JsonMigration(version = 8) {
     override val description = "Legger til lønn i utbetalingslinjer basert på dagsats og grad"
 
-    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
+    override fun doMigration(
+        jsonNode: ObjectNode,
+        meldingerSupplier: MeldingerSupplier,
+        observer: AktivitetsloggObserver
+    ) {
         jsonNode["arbeidsgivere"].forEach { arbeidsgiver ->
             arbeidsgiver["utbetalinger"].forEach { utbetaling ->
                 utbetaling["arbeidsgiverOppdrag"]["linjer"].forEach { linje ->

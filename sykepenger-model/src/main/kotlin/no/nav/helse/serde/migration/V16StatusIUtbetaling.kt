@@ -4,13 +4,18 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
+import no.nav.helse.person.AktivitetsloggObserver
 import kotlin.math.absoluteValue
 
 internal class V16StatusIUtbetaling : JsonMigration(version = 16) {
 
     override val description = "Legger til statusfelt på utbetaling"
 
-    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
+    override fun doMigration(
+        jsonNode: ObjectNode,
+        meldingerSupplier: MeldingerSupplier,
+        observer: AktivitetsloggObserver
+    ) {
         val meldinger = jsonNode["aktivitetslogg"]["aktiviteter"].map {
             it["melding"].textValue() to LocalDateTime.parse(
                 it["tidsstempel"].textValue(),

@@ -2,11 +2,16 @@ package no.nav.helse.serde.migration
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
+import no.nav.helse.person.AktivitetsloggObserver
 
 internal class V97RenameDagsatsTilSats : JsonMigration(version = 97) {
     override val description: String = "Endrer navn fra dagsats til sats"
 
-    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
+    override fun doMigration(
+        jsonNode: ObjectNode,
+        meldingerSupplier: MeldingerSupplier,
+        observer: AktivitetsloggObserver
+    ) {
         jsonNode["arbeidsgivere"]
             .flatMap { it["utbetalinger"] }
             .forEach {

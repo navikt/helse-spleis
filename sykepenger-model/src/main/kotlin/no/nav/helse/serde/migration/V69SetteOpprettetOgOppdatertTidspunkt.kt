@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import no.nav.helse.person.AktivitetsloggObserver
 
 internal class V69SetteOpprettetOgOppdatertTidspunkt : JsonMigration(version = 69) {
     private companion object {
@@ -14,7 +15,11 @@ internal class V69SetteOpprettetOgOppdatertTidspunkt : JsonMigration(version = 6
 
     override val description: String = "Sette opprettet- og oppdatert-tidspunkt for Vedtaksperiode"
 
-    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
+    override fun doMigration(
+        jsonNode: ObjectNode,
+        meldingerSupplier: MeldingerSupplier,
+        observer: AktivitetsloggObserver
+    ) {
         val kontekster = kontekster(jsonNode)
         val aktiviteter = jsonNode
             .path("aktivitetslogg")

@@ -6,13 +6,18 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import java.time.LocalDate
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.person.AktivitetsloggObserver
 import no.nav.helse.serde.serdeObjectMapper
 import org.slf4j.LoggerFactory
 
 internal class V163ForkasteTommeVedtaksperioder: JsonMigration(version = 163) {
     override val description = "Rydder opp i vedtaksperioder som har tom sykdomstidslinje"
 
-    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
+    override fun doMigration(
+        jsonNode: ObjectNode,
+        meldingerSupplier: MeldingerSupplier,
+        observer: AktivitetsloggObserver
+    ) {
         val fødselsnummer = jsonNode.path("fødselsnummer").asText()
         val aktørId = jsonNode.path("aktørId").asText()
 

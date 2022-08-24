@@ -2,6 +2,7 @@ package no.nav.helse.serde.migration
 
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
+import no.nav.helse.person.AktivitetsloggObserver
 
 internal class V170TildelingUtbetaling: JsonMigration(170) {
     private companion object {
@@ -13,7 +14,11 @@ internal class V170TildelingUtbetaling: JsonMigration(170) {
     }
     override val description = "Fikse tildeling av utbetaling"
 
-    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
+    override fun doMigration(
+        jsonNode: ObjectNode,
+        meldingerSupplier: MeldingerSupplier,
+        observer: AktivitetsloggObserver
+    ) {
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
             arbeidsgiver.path("vedtaksperioder").forEach { vedtaksperiode ->
                 val vedtaksperiodeId = vedtaksperiode.path("id").asText()

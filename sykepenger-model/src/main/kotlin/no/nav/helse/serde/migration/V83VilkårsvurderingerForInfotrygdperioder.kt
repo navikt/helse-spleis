@@ -2,12 +2,17 @@ package no.nav.helse.serde.migration
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
+import no.nav.helse.person.AktivitetsloggObserver
 import no.nav.helse.serde.serdeObjectMapper
 
 internal class V83VilkårsvurderingerForInfotrygdperioder : JsonMigration(version = 83) {
     override val description: String = "Legger til skjæringstidspunkt på vilkårsvurderinger fra infotrygdperioder"
 
-    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
+    override fun doMigration(
+        jsonNode: ObjectNode,
+        meldingerSupplier: MeldingerSupplier,
+        observer: AktivitetsloggObserver
+    ) {
         val originaleHistorikkElementer = jsonNode["vilkårsgrunnlagHistorikk"]
             .filter { it["type"].asText() == "Vilkårsprøving" }
 

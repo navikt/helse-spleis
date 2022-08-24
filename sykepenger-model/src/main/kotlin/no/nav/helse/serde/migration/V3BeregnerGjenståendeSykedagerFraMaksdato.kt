@@ -4,11 +4,16 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
+import no.nav.helse.person.AktivitetsloggObserver
 
 internal class V3BeregnerGjenståendeSykedagerFraMaksdato : JsonMigration(version = 3) {
     override val description = "Beregner gjenstående sykedager fra maksdato og legger til dette i vedtaksperioden"
 
-    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
+    override fun doMigration(
+        jsonNode: ObjectNode,
+        meldingerSupplier: MeldingerSupplier,
+        observer: AktivitetsloggObserver
+    ) {
         jsonNode["arbeidsgivere"].forEach { arbeidsgiver ->
             val utbetalingsdager =
                 arbeidsgiver["utbetalinger"]

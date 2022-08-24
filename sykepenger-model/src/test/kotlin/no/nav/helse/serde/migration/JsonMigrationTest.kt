@@ -3,12 +3,13 @@ package no.nav.helse.serde.migration
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import java.util.UUID
+import no.nav.helse.person.AktivitetsloggObserver
 import no.nav.helse.serde.migration.JsonMigration.Companion.skjemaVersjon
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import java.util.*
 
 internal class JsonMigrationTest {
     private val objectMapper = jacksonObjectMapper()
@@ -24,13 +25,21 @@ internal class JsonMigrationTest {
         listOf(
             object : JsonMigration(1) {
                 override val description = ""
-                override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
+                override fun doMigration(
+                    jsonNode: ObjectNode,
+                    meldingerSupplier: MeldingerSupplier,
+                    observer: AktivitetsloggObserver
+                ) {
                     meldinger.add(meldingerSupplier.hentMeldinger())
                 }
             },
             object : JsonMigration(2) {
                 override val description = ""
-                override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
+                override fun doMigration(
+                    jsonNode: ObjectNode,
+                    meldingerSupplier: MeldingerSupplier,
+                    observer: AktivitetsloggObserver
+                ) {
                     meldinger.add(meldingerSupplier.hentMeldinger())
                 }
             }
@@ -127,7 +136,11 @@ internal class JsonMigrationTest {
         JsonMigration(version) {
         override val description = "Test migration"
 
-        override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
+        override fun doMigration(
+            jsonNode: ObjectNode,
+            meldingerSupplier: MeldingerSupplier,
+            observer: AktivitetsloggObserver
+        ) {
             jsonNode.put(field, value)
         }
     }

@@ -2,13 +2,18 @@ package no.nav.helse.serde.migration
 
 import com.fasterxml.jackson.databind.node.ObjectNode
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
+import no.nav.helse.person.AktivitetsloggObserver
 
 internal class V77UtbetalingBeregningId : JsonMigration(version = 77) {
     override val description: String = "Legger på beregningId på Utbetaling"
     private val ukjentBeregningId = UUID.fromString("00000000-0000-0000-0000-000000000000")
 
-    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
+    override fun doMigration(
+        jsonNode: ObjectNode,
+        meldingerSupplier: MeldingerSupplier,
+        observer: AktivitetsloggObserver
+    ) {
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
             val beregninger = arbeidsgiver.path("beregnetUtbetalingstidslinjer").map { element ->
                 UUID.fromString(element.path("id").asText()) to LocalDateTime.parse(element.path("tidsstempel").asText())

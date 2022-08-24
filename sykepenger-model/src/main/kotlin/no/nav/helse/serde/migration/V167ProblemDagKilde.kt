@@ -6,6 +6,7 @@ import com.fasterxml.jackson.module.kotlin.convertValue
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.person.AktivitetsloggObserver
 import no.nav.helse.serde.serdeObjectMapper
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 
@@ -20,7 +21,11 @@ internal class V167ProblemDagKilde: JsonMigration(167) {
 
     override val description = "ProblemDag peker på begge kildene"
 
-    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
+    override fun doMigration(
+        jsonNode: ObjectNode,
+        meldingerSupplier: MeldingerSupplier,
+        observer: AktivitetsloggObserver
+    ) {
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
             val problemdager = mutableMapOf<LocalDate, ObjectNode>()
 

@@ -3,14 +3,15 @@ package no.nav.helse.serde.migration
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
+import java.time.LocalDate
+import java.util.UUID
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
+import no.nav.helse.person.AktivitetsloggObserver
 import no.nav.helse.serde.migration.V147LagreArbeidsforholdForOpptjening.Arbeidsforhold
 import no.nav.helse.serde.migration.V147LagreArbeidsforholdForOpptjening.Opptjeningsgrunnlag
 import no.nav.helse.serde.serdeObjectMapper
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
-import java.util.*
 
 internal class V147LagreArbeidsforholdForOpptjening : JsonMigration(version = 147) {
     override val description: String =
@@ -26,7 +27,11 @@ internal class V147LagreArbeidsforholdForOpptjening : JsonMigration(version = 14
     * Om vi ikke finner via meldingsreferanse
     *   - lag dummyopptjening
     * */
-    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
+    override fun doMigration(
+        jsonNode: ObjectNode,
+        meldingerSupplier: MeldingerSupplier,
+        observer: AktivitetsloggObserver
+    ) {
         val meldinger = meldingerSupplier.hentMeldinger()
         val vilkårsgrunnlagMeldinger =
             meldinger.filterValues { it.first == "VILKÅRSGRUNNLAG" }

@@ -2,6 +2,7 @@ package no.nav.helse.serde.migration
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
+import no.nav.helse.person.AktivitetsloggObserver
 import org.slf4j.LoggerFactory
 
 internal class V93MeldingsreferanseIdPåGrunnlagsdata : JsonMigration(version = 93) {
@@ -10,7 +11,11 @@ internal class V93MeldingsreferanseIdPåGrunnlagsdata : JsonMigration(version = 
 
     private val log = LoggerFactory.getLogger("tjenestekall")
 
-    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
+    override fun doMigration(
+        jsonNode: ObjectNode,
+        meldingerSupplier: MeldingerSupplier,
+        observer: AktivitetsloggObserver
+    ) {
         jsonNode.path("vilkårsgrunnlagHistorikk")
             .forEach { vilkårsgrunnlag ->
                 if (vilkårsgrunnlag["type"].asText() != "Vilkårsprøving") return@forEach

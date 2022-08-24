@@ -1,6 +1,7 @@
 package no.nav.helse.serde.migration
 
 import com.fasterxml.jackson.databind.node.ObjectNode
+import no.nav.helse.person.AktivitetsloggObserver
 
 internal class V113MigrerVekkFraFjernetTilstandTilAnnullering : JsonMigration(version = 113) {
     override val description: String = "Det ligger igjen 3 vedtaksperioder med status til_annullering etter at tilstanden ble fjernet"
@@ -11,7 +12,11 @@ internal class V113MigrerVekkFraFjernetTilstandTilAnnullering : JsonMigration(ve
         "c68f4dfc-39f4-41aa-adec-4851f14b9d9c"
     )
 
-    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
+    override fun doMigration(
+        jsonNode: ObjectNode,
+        meldingerSupplier: MeldingerSupplier,
+        observer: AktivitetsloggObserver
+    ) {
         jsonNode.path("arbeidsgivere")
             .flatMap { arbeidsgiver -> arbeidsgiver.path("vedtaksperioder") }
             .filter { it["tilstand"]?.asText() == "TIL_ANNULLERING" }

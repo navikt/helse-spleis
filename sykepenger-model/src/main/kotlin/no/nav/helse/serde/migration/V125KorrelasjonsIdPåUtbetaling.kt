@@ -1,15 +1,20 @@
 package no.nav.helse.serde.migration
 
 import com.fasterxml.jackson.databind.node.ObjectNode
+import java.util.UUID
+import no.nav.helse.person.AktivitetsloggObserver
 import no.nav.helse.utbetalingstidslinje.decodeUtbetalingsreferanse
 import org.slf4j.LoggerFactory
-import java.util.*
 
 internal class V125KorrelasjonsIdPåUtbetaling : JsonMigration(version = 125) {
 
     override val description = "Setter korrelasjonsId på utbetalinger"
 
-    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
+    override fun doMigration(
+        jsonNode: ObjectNode,
+        meldingerSupplier: MeldingerSupplier,
+        observer: AktivitetsloggObserver
+    ) {
         jsonNode["arbeidsgivere"].forEach { arbeidsgiver ->
             val erstatningsIder = mutableMapOf<String, UUID>()
             arbeidsgiver["utbetalinger"].forEach { utbetaling ->

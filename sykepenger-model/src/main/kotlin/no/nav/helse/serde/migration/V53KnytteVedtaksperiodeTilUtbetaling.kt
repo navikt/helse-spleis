@@ -2,11 +2,12 @@ package no.nav.helse.serde.migration
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
-import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import java.util.concurrent.TimeUnit
+import no.nav.helse.person.AktivitetsloggObserver
+import org.slf4j.LoggerFactory
 
 internal class V53KnytteVedtaksperiodeTilUtbetaling : JsonMigration(version = 53) {
     private companion object {
@@ -24,7 +25,11 @@ internal class V53KnytteVedtaksperiodeTilUtbetaling : JsonMigration(version = 53
 
     private val log = LoggerFactory.getLogger("tjenestekall")
 
-    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
+    override fun doMigration(
+        jsonNode: ObjectNode,
+        meldingerSupplier: MeldingerSupplier,
+        observer: AktivitetsloggObserver
+    ) {
         val konteksttyper = konteksttyper(jsonNode)
         val kontekstdetaljer = kontekstdetaljer(jsonNode)
 

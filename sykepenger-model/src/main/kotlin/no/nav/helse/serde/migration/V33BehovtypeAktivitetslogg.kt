@@ -2,12 +2,17 @@ package no.nav.helse.serde.migration
 
 import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.InntekterForSammenligningsgrunnlag
+import no.nav.helse.person.AktivitetsloggObserver
 
 internal class V33BehovtypeAktivitetslogg : JsonMigration(version = 33) {
 
     override val description = "Migrerer navneendring for behovtype InntekterForSammenligningsgrunnlag i aktivitetslogg"
 
-    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
+    override fun doMigration(
+        jsonNode: ObjectNode,
+        meldingerSupplier: MeldingerSupplier,
+        observer: AktivitetsloggObserver
+    ) {
         val aktivitetslogg = jsonNode["aktivitetslogg"] as ObjectNode
 
         aktivitetslogg["aktiviteter"]

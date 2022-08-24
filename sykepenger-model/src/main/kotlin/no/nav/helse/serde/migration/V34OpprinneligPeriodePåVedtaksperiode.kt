@@ -3,11 +3,16 @@ package no.nav.helse.serde.migration
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import java.time.LocalDate
+import no.nav.helse.person.AktivitetsloggObserver
 
 internal class V34OpprinneligPeriodePåVedtaksperiode : JsonMigration(version = 34) {
     override val description: String = "Setter opprinneligPeriode = periode dersom nøkkel ikke eksisterer"
 
-    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
+    override fun doMigration(
+        jsonNode: ObjectNode,
+        meldingerSupplier: MeldingerSupplier,
+        observer: AktivitetsloggObserver
+    ) {
         for (arbeidsgiver in jsonNode["arbeidsgivere"]) {
             kopierHendelseIderFraHistorikk(arbeidsgiver["vedtaksperioder"])
             kopierHendelseIderFraHistorikk(arbeidsgiver["forkastede"])

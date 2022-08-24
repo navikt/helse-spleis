@@ -2,6 +2,7 @@ package no.nav.helse.serde.migration
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
+import no.nav.helse.person.AktivitetsloggObserver
 import kotlin.math.max
 import kotlin.math.min
 
@@ -11,7 +12,11 @@ internal class V5BegrensGradTilMellom0Og100 : JsonMigration(version = 5) {
     private val hendelsetidslinjeKey = "hendelseSykdomstidslinje"
     private val beregnetTidslinjeKey = "beregnetSykdomstidslinje"
 
-    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
+    override fun doMigration(
+        jsonNode: ObjectNode,
+        meldingerSupplier: MeldingerSupplier,
+        observer: AktivitetsloggObserver
+    ) {
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
             arbeidsgiver.path("vedtaksperioder").forEach { periode ->
                 periode.path("sykdomshistorikk").forEach { historikkElement ->

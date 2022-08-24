@@ -2,13 +2,18 @@ package no.nav.helse.serde.migration
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
+import no.nav.helse.person.AktivitetsloggObserver
 import org.slf4j.LoggerFactory
 
 internal class V123FlytteDataInnIOppdrag : JsonMigration(version = 123) {
 
     override val description = "Flytte avstemmingsnøkkel og overføringstidspunkt fra utbetaling til oppdrag, samt legge til oppdragstatus"
 
-    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
+    override fun doMigration(
+        jsonNode: ObjectNode,
+        meldingerSupplier: MeldingerSupplier,
+        observer: AktivitetsloggObserver
+    ) {
         jsonNode["arbeidsgivere"].forEach { arbeidsgiver ->
             arbeidsgiver["utbetalinger"].forEach { utbetaling ->
                 val arbeidsgiverOppdrag = utbetaling["arbeidsgiverOppdrag"] as ObjectNode

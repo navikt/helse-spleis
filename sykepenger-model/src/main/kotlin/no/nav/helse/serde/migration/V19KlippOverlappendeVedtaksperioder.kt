@@ -3,8 +3,9 @@ package no.nav.helse.serde.migration
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import org.slf4j.LoggerFactory
 import java.time.LocalDate
+import no.nav.helse.person.AktivitetsloggObserver
+import org.slf4j.LoggerFactory
 
 internal class V19KlippOverlappendeVedtaksperioder : JsonMigration(version = 19) {
     override val description = "Klipper overlappende vedtaksperioder etter omskriving av sykdomstidslinje"
@@ -15,7 +16,11 @@ internal class V19KlippOverlappendeVedtaksperioder : JsonMigration(version = 19)
     private val datoKey = "dato"
     private val log = LoggerFactory.getLogger(this.javaClass.name)
 
-    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
+    override fun doMigration(
+        jsonNode: ObjectNode,
+        meldingerSupplier: MeldingerSupplier,
+        observer: AktivitetsloggObserver
+    ) {
         var tom: LocalDate? = null
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
             arbeidsgiver.path("vedtaksperioder").forEach { periode ->

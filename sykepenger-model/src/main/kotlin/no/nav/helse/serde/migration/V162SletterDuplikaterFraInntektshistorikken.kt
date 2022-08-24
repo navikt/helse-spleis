@@ -2,6 +2,8 @@ package no.nav.helse.serde.migration
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
+import no.nav.helse.person.AktivitetsloggObserver
+
 private typealias VedtaksperiodeID = String
 private typealias InntektsoppsysningsID = String
 internal class V162SletterDuplikaterFraInntektshistorikken : JsonMigration(version = 162) {
@@ -12,7 +14,11 @@ internal class V162SletterDuplikaterFraInntektshistorikken : JsonMigration(versi
         "dd4e8eec-7b6e-4f01-9d49-73310b4916ce" to "fc1823d4-0764-4900-a728-aee6da161e33"
     )
 
-    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
+    override fun doMigration(
+        jsonNode: ObjectNode,
+        meldingerSupplier: MeldingerSupplier,
+        observer: AktivitetsloggObserver
+    ) {
         tilfeller.forEach { (vedtaksperiodeID, inntektsopplysningID) -> migrerEttTilfelle(vedtaksperiodeID, inntektsopplysningID, jsonNode) }
     }
 

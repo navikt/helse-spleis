@@ -2,12 +2,17 @@ package no.nav.helse.serde.migration
 
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
+import no.nav.helse.person.AktivitetsloggObserver
 
 internal class V17ForkastedePerioder : JsonMigration(version = 17) {
 
     override val description = "Legger til forkastede perioder"
 
-    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
+    override fun doMigration(
+        jsonNode: ObjectNode,
+        meldingerSupplier: MeldingerSupplier,
+        observer: AktivitetsloggObserver
+    ) {
         jsonNode["arbeidsgivere"].forEach { arbeidsgiver ->
             val index = arbeidsgiver["vedtaksperioder"].indexOfLast { vedtaksperiode ->
                 vedtaksperiode["tilstand"].textValue() == "TIL_INFOTRYGD"

@@ -3,6 +3,7 @@ package no.nav.helse.serde.migration
 import com.fasterxml.jackson.databind.node.ObjectNode
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import no.nav.helse.person.AktivitetsloggObserver
 
 internal class V71SetteOpprettetTidspunkt : JsonMigration(version = 71) {
     private companion object {
@@ -11,7 +12,11 @@ internal class V71SetteOpprettetTidspunkt : JsonMigration(version = 71) {
     }
     override val description: String = "Sette opprettet-tidspunkt for Person"
 
-    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
+    override fun doMigration(
+        jsonNode: ObjectNode,
+        meldingerSupplier: MeldingerSupplier,
+        observer: AktivitetsloggObserver
+    ) {
         val tidligste = jsonNode
             .path("aktivitetslogg")
             .path("aktiviteter")

@@ -3,6 +3,7 @@ package no.nav.helse.serde.migration
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import net.logstash.logback.argument.StructuredArguments.keyValue
+import no.nav.helse.person.AktivitetsloggObserver
 import org.slf4j.LoggerFactory
 
 internal class V155FjerneProblemdager : JsonMigration(version = 155) {
@@ -11,7 +12,11 @@ internal class V155FjerneProblemdager : JsonMigration(version = 155) {
     private val targetElementId = "8b2454f7-7083-44ce-bb1c-b28405bd5326"
     private val targetVedtaksperiodeId = "8dc174a9-0a58-483b-9287-63a6dfd14896"
 
-    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
+    override fun doMigration(
+        jsonNode: ObjectNode,
+        meldingerSupplier: MeldingerSupplier,
+        observer: AktivitetsloggObserver
+    ) {
         val arbeidsgiver = jsonNode["arbeidsgivere"].singleOrNull { it.path("id").asText() == targetArbeidsgiverId } ?: return
         val element = arbeidsgiver.path("sykdomshistorikk").single { it.path("id").asText() == targetElementId } as ObjectNode
         val vedtaksperiode = arbeidsgiver.path("vedtaksperioder").single { it.path("id").asText() == targetVedtaksperiodeId }

@@ -2,6 +2,7 @@ package no.nav.helse.serde.migration
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
+import no.nav.helse.person.AktivitetsloggObserver
 
 
 internal class V2Medlemskapstatus : JsonMigration(version = 2) {
@@ -11,7 +12,11 @@ internal class V2Medlemskapstatus : JsonMigration(version = 2) {
     private val medlemskapstatusKey = "medlemskapstatus"
     private val vetIkke = "VET_IKKE"
 
-    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
+    override fun doMigration(
+        jsonNode: ObjectNode,
+        meldingerSupplier: MeldingerSupplier,
+        observer: AktivitetsloggObserver
+    ) {
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
             arbeidsgiver.path("vedtaksperioder").forEach { periode ->
                 migrerVilkårsvurdering(periode.path("dataForVilkårsvurdering"))

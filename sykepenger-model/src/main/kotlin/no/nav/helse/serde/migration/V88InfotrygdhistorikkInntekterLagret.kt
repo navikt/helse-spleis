@@ -2,11 +2,16 @@ package no.nav.helse.serde.migration
 
 import com.fasterxml.jackson.databind.node.ObjectNode
 import java.time.LocalDateTime
+import no.nav.helse.person.AktivitetsloggObserver
 
 internal class V88InfotrygdhistorikkInntekterLagret : JsonMigration(version = 88) {
     override val description: String = "Infotrygdhistorikk med statslønn"
 
-    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
+    override fun doMigration(
+        jsonNode: ObjectNode,
+        meldingerSupplier: MeldingerSupplier,
+        observer: AktivitetsloggObserver
+    ) {
         val hendelseIder = jsonNode.path("arbeidsgivere").flatMap { arbeidsgiver ->
             arbeidsgiver.path("inntektshistorikk").flatMap { innslag ->
                 innslag.path("inntektsopplysninger").filter { opplysning ->

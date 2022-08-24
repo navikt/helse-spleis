@@ -1,6 +1,7 @@
 package no.nav.helse.serde.migration
 
 import com.fasterxml.jackson.databind.node.ObjectNode
+import no.nav.helse.person.AktivitetsloggObserver
 
 internal class V9FjernerGamleSykdomstidslinjer : JsonMigration(version = 9) {
 
@@ -8,7 +9,11 @@ internal class V9FjernerGamleSykdomstidslinjer : JsonMigration(version = 9) {
     private val hendelsetidslinjeKey = "hendelseSykdomstidslinje"
     private val beregnetTidslinjeKey = "beregnetSykdomstidslinje"
 
-    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
+    override fun doMigration(
+        jsonNode: ObjectNode,
+        meldingerSupplier: MeldingerSupplier,
+        observer: AktivitetsloggObserver
+    ) {
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
             arbeidsgiver.path("vedtaksperioder").forEach { periode ->
                 periode.path("sykdomshistorikk").forEach { historikkElement ->

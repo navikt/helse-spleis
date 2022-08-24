@@ -2,15 +2,20 @@ package no.nav.helse.serde.migration
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
-import no.nav.helse.serde.serdeObjectMapper
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
+import no.nav.helse.person.AktivitetsloggObserver
+import no.nav.helse.serde.serdeObjectMapper
 
 internal class V90HendelsekildeTidsstempel : JsonMigration(version = 90) {
     override val description: String = "Setter tidsstempel på hendelsekilde"
     private val tidsstempler = mutableMapOf<UUID, LocalDateTime>()
 
-    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
+    override fun doMigration(
+        jsonNode: ObjectNode,
+        meldingerSupplier: MeldingerSupplier,
+        observer: AktivitetsloggObserver
+    ) {
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
             val elementtidsstempler = arbeidsgiver.path("sykdomshistorikk")
                 .filter { element -> element.hasNonNull("hendelseId") }

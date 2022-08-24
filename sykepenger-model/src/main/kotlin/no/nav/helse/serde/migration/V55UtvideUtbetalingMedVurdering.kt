@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import no.nav.helse.person.AktivitetsloggObserver
 
 internal class V55UtvideUtbetalingMedVurdering : JsonMigration(version = 55) {
     private companion object {
@@ -19,7 +20,11 @@ internal class V55UtvideUtbetalingMedVurdering : JsonMigration(version = 55) {
 
     override val description: String = "Utvider Utbetaling med vurdering"
 
-    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
+    override fun doMigration(
+        jsonNode: ObjectNode,
+        meldingerSupplier: MeldingerSupplier,
+        observer: AktivitetsloggObserver
+    ) {
         val kontekster = kontekster(jsonNode)
         val aktiviteter = jsonNode
             .path("aktivitetslogg")

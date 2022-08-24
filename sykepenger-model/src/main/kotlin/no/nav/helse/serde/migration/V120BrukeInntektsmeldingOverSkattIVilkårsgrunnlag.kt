@@ -3,6 +3,7 @@ package no.nav.helse.serde.migration
 import com.fasterxml.jackson.databind.node.ObjectNode
 import java.time.LocalDate
 import java.time.LocalDateTime
+import no.nav.helse.person.AktivitetsloggObserver
 
 internal class V120BrukeInntektsmeldingOverSkattIVilkårsgrunnlag : JsonMigration(version = 120){
 
@@ -10,7 +11,11 @@ internal class V120BrukeInntektsmeldingOverSkattIVilkårsgrunnlag : JsonMigratio
 
     override val description = "Rekjører migrering V114 for alle vilkårsgrunnlag som ble opprettet i migreringen på grunn av en bug i V114"
 
-    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
+    override fun doMigration(
+        jsonNode: ObjectNode,
+        meldingerSupplier: MeldingerSupplier,
+        observer: AktivitetsloggObserver
+    ) {
         val (_, sisteVilkårsgrunnlagHisorikkInnslagFørV114BleInnført) = jsonNode["vilkårsgrunnlagHistorikk"]
             .map { LocalDateTime.parse(it["opprettet"].asText()) to it }
             .filter { (opprettet, _) -> opprettet.toLocalDate() < dagenV114BleInnført }

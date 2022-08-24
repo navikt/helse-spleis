@@ -3,10 +3,11 @@ package no.nav.helse.serde.migration
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
-import no.nav.helse.serde.serdeObjectMapper
 import java.time.LocalDate.EPOCH
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
+import no.nav.helse.person.AktivitetsloggObserver
+import no.nav.helse.serde.serdeObjectMapper
 
 internal class V105VilkårsgrunnlagMedGenerasjoner(
     private val uuid: UUID = UUID.randomUUID(),
@@ -14,7 +15,11 @@ internal class V105VilkårsgrunnlagMedGenerasjoner(
 ) : JsonMigration(version = 105) {
     override val description: String = "VilkårsgrunnlagHistorikk skal være generasjonsbasert"
 
-    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
+    override fun doMigration(
+        jsonNode: ObjectNode,
+        meldingerSupplier: MeldingerSupplier,
+        observer: AktivitetsloggObserver
+    ) {
         if (jsonNode["vilkårsgrunnlagHistorikk"] == null || jsonNode["vilkårsgrunnlagHistorikk"].isEmpty) return
         jsonNode.replace("vilkårsgrunnlagHistorikk", konverterTilInnslag(jsonNode.withArray("vilkårsgrunnlagHistorikk")))
     }
