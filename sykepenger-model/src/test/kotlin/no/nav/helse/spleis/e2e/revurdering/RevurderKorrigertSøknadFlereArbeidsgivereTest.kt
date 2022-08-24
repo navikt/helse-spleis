@@ -603,7 +603,7 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
 
     @Test
     @Disabled("en bug i finnSkjæringstidspunkt som må rettes opp i")
-    fun `To arbeidsgivere med ett sykefraværstilfelle og gap over 16 dager på den ene arbeidsgiveren - korrigerende søknad på arbeidsgiver uten gap setter i gang revurdering og gir nytt skjæringstidspunkt`() {
+    fun `To arbeidsgivere med ett sykefraværstilfelle og gap over 16 dager - korrigerende søknad setter i gang revurdering`() {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
