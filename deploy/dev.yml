@@ -60,5 +60,5 @@ spec:
     value: "true"
   - name: RevurderKorrigertSoknad
     value: "true"
-  - name: ForkasteVilkårsgrunnlag
+  - name: ForkasteVilkarsgrunnlag
     value: "true"
