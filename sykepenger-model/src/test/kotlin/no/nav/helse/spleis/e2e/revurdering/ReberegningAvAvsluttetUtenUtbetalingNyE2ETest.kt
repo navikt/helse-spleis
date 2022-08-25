@@ -42,6 +42,7 @@ import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
+import no.nav.helse.person.infotrygdhistorikk.PersonUtbetalingsperiode
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.sisteBehov
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
@@ -75,10 +76,12 @@ import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndTest() {
 
@@ -166,6 +169,87 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING, REVURDERING_FEILET)
+    }
+
+    @Test
+    fun `infotrygd har utbetalt perioden - vi har kun arbeidsgiverperiode`() {
+        håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar, 100.prosent))
+        håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
+        håndterUtbetalingshistorikk(1.vedtaksperiode, besvart = LocalDateTime.MIN)
+
+        håndterSykmelding(Sykmeldingsperiode(21.januar, 27.januar, 100.prosent))
+        håndterSøknad(Sykdom(21.januar, 27.januar, 100.prosent))
+        håndterUtbetalingshistorikk(2.vedtaksperiode, besvart = LocalDateTime.MIN)
+
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
+        håndterYtelser(2.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 27.januar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
+            Inntektsopplysning(ORGNUMMER, 17.januar, INNTEKT, true)
+        ))
+        håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
+        håndterYtelser(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        nullstillTilstandsendringer()
+
+        assertTilstander(1.vedtaksperiode, AVSLUTTET)
+        assertTilstander(2.vedtaksperiode, AVSLUTTET)
+    }
+
+    @Test
+    fun `infotrygd har utbetalt perioden - vi har ingenting`() {
+        håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar, 100.prosent))
+        håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
+        håndterUtbetalingshistorikk(1.vedtaksperiode, besvart = LocalDateTime.MIN)
+
+        håndterSykmelding(Sykmeldingsperiode(21.januar, 27.januar, 100.prosent))
+        håndterSøknad(Sykdom(21.januar, 27.januar, 100.prosent))
+        håndterUtbetalingshistorikk(2.vedtaksperiode, besvart = LocalDateTime.MIN)
+
+        nullstillTilstandsendringer()
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT)
+        håndterYtelser(2.vedtaksperiode, PersonUtbetalingsperiode(ORGNUMMER, 1.januar, 27.januar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
+            Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, false)
+        ))
+        håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
+
+        assertForventetFeil(
+            forklaring = "må kaste ut perioder utbetalt i infotrygd",
+            nå = {
+                 assertThrows<RuntimeException> { håndterYtelser(2.vedtaksperiode) }
+            },
+            ønsket = {
+                assertDoesNotThrow { håndterYtelser(2.vedtaksperiode) }
+            }
+        )
+    }
+
+    @Test
+    fun `infotrygd har utbetalt perioden - vi har ingenting - flere ag`() {
+        håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent), orgnummer = a1)
+        håndterUtbetalingshistorikk(1.vedtaksperiode, besvart = LocalDateTime.MIN, orgnummer = a1)
+
+        håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent), orgnummer = a2)
+        håndterUtbetalingshistorikk(1.vedtaksperiode, besvart = LocalDateTime.MIN, orgnummer = a2)
+
+        håndterSykmelding(Sykmeldingsperiode(21.januar, 27.januar, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(21.januar, 27.januar, 100.prosent), orgnummer = a2)
+        håndterUtbetalingshistorikk(2.vedtaksperiode, besvart = LocalDateTime.MIN, orgnummer = a2)
+
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT, orgnummer = a2)
+        håndterYtelser(2.vedtaksperiode, PersonUtbetalingsperiode(a2, 1.januar, 27.januar, 100.prosent, INNTEKT), inntektshistorikk = listOf(
+            Inntektsopplysning(a2, 1.januar, INNTEKT, false)
+        ), orgnummer = a2)
+        håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT, orgnummer = a2)
+        assertForventetFeil(
+            forklaring = "må kaste ut perioder utbetalt i infotrygd",
+            nå = {
+                assertThrows<RuntimeException> { håndterYtelser(2.vedtaksperiode, orgnummer = a2) }
+            },
+            ønsket = {
+                assertDoesNotThrow { håndterYtelser(2.vedtaksperiode, orgnummer = a2) }
+            }
+        )
     }
 
     @Test
