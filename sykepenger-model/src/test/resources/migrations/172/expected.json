@@ -1,0 +1,23 @@
+{
+  "arbeidsgivere": [
+    {
+      "beregnetUtbetalingstidslinjer": [
+        {
+          "vilkårsgrunnlagHistorikkInnslagId": "9fa9960e-313b-4099-8b37-2df61989eccc"
+        }
+      ]
+    }
+  ],
+  "vilkårsgrunnlagHistorikk": [
+    {
+      "id": "b9ef8676-c976-4e9f-9b1d-3e96a77d8c3c"
+    },
+    {
+      "id": "9fa9960e-313b-4099-8b37-2df61989eccc"
+    },
+    {
+      "id": "5fea42c1-e0e4-44ca-afcc-2c21062a3b97"
+    }
+  ],
+  "skjemaVersjon": 172
+}

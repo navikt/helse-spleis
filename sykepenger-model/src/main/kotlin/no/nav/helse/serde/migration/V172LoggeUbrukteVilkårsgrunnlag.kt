@@ -16,12 +16,12 @@ internal class V172LoggeUbrukteVilkårsgrunnlag : JsonMigration(version = 172) {
         }.toSet()
         val ubrukteVilkårsgrunnlag = mutableSetOf<String>()
         jsonNode.path("vilkårsgrunnlagHistorikk").forEachIndexed { index, innslag ->
-            if (index == 0) return // hopper over første element, da vi alltid vil beholde dette
+            if (index == 0) return@forEachIndexed // hopper over første element, da vi alltid vil beholde dette
             val id = innslag.path("id").asText()
             if (id !in brukteInnslag) ubrukteVilkårsgrunnlag.add(id)
         }
         if (ubrukteVilkårsgrunnlag.isEmpty()) return
-        sikkerlogg.info("person {} har {} ubrukte vilkårsgrunnlag-innslag", keyValue("aktørId", aktørId), ubrukteVilkårsgrunnlag.size)
+        sikkerlogg.info("person {} har {} ubrukte vilkårsgrunnlag-innslag\n{}", keyValue("aktørId", aktørId), ubrukteVilkårsgrunnlag.size, ubrukteVilkårsgrunnlag)
     }
 
     private companion object {
