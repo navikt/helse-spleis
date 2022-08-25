@@ -17,7 +17,7 @@ internal class PåminnelserRiver(
     override val riverName = "Påminnelse"
 
     override fun validate(message: JsonMessage) {
-        message.demand("påminnelsestidspunkt") { require(it.asLocalDateTime() > LocalDateTime.now().minusHours(3)) }
+        message.demand("påminnelsestidspunkt") { require(it.asLocalDateTime() > LocalDateTime.now().minusHours(24)) }
         message.requireKey("antallGangerPåminnet", "vedtaksperiodeId",
             "organisasjonsnummer", "fødselsnummer", "aktørId")
         message.require("tilstandsendringstidspunkt", JsonNode::asLocalDateTime)
