@@ -181,6 +181,8 @@ internal class Sykdomstidslinje private constructor(
 
     internal fun harSykedager() = any { it is Sykedag || it is SykHelgedag || it is ForeldetSykedag }
 
+    internal fun harForeldedeDager() = any { it is ForeldetSykedag }
+
     internal fun harForeldedeDagerEtter(dato: LocalDate) = fraOgMed(dato.nesteDag).any { it is ForeldetSykedag }
 
     private fun sisteOppholdsdag() = periode?.lastOrNull { erOppholdsdag(it) }

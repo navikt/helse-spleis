@@ -2071,7 +2071,7 @@ internal class Vedtaksperiode private constructor(
                 val harIngenAktiveUtbetalinger = !vedtaksperiode.utbetalinger.harAktive()
                 val kanTrekkesTilbakeUtenÅMedføreRevurdering = erPåSisteSkjæringstidspunkt && harIngenAktiveUtbetalinger
                 sikkerlogg.info(
-                    "Oppdaget periode i AvsluttetUtenUtbetaling med foreldede dager utenfor agp: {}, {}, {}, {}, {}",
+                    "Oppdaget periode i AvsluttetUtenUtbetaling med foreldede dager utenfor agp: {}, {}, {}, {}, {}, {}, {}, {}",
                     keyValue("fodselsnummer", vedtaksperiode.fødselsnummer),
                     keyValue("aktorId", vedtaksperiode.aktørId),
                     keyValue("vedtaksperiodeId", vedtaksperiode.id),
@@ -2093,7 +2093,7 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
-    internal fun skalLoggeDersomPeriodenSkalTilManuellGrunnetForeldelse() = forventerInntekt()
+    internal fun skalLoggeDersomPeriodenSkalTilManuellGrunnetForeldelse() = forventerInntekt() && sykdomstidslinje.harForeldedeDager()
 
     internal object Avsluttet : Vedtaksperiodetilstand {
         override val type = AVSLUTTET
