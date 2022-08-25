@@ -2064,7 +2064,25 @@ internal class Vedtaksperiode private constructor(
         ) {
         }
 
-        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
+        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
+            if (vedtaksperiode.skalLoggeDersomPeriodenSkalTilManuellGrunnetForeldelse()) {
+                val revurderingIkkeStøttet = vedtaksperiode.person.vedtaksperioder(NYERE_SKJÆRINGSTIDSPUNKT_MED_UTBETALING(vedtaksperiode)).isNotEmpty()
+                val erPåSisteSkjæringstidspunkt = !vedtaksperiode.person.harSkjæringstidspunktSenereEnn(vedtaksperiode.skjæringstidspunkt)
+                val harIngenAktiveUtbetalinger = !vedtaksperiode.utbetalinger.harAktive()
+                val kanTrekkesTilbakeUtenÅMedføreRevurdering = erPåSisteSkjæringstidspunkt && harIngenAktiveUtbetalinger
+                sikkerlogg.info(
+                    "Oppdaget periode i AvsluttetUtenUtbetaling med foreldede dager utenfor agp: {}, {}, {}, {}, {}",
+                    keyValue("fodselsnummer", vedtaksperiode.fødselsnummer),
+                    keyValue("aktorId", vedtaksperiode.aktørId),
+                    keyValue("vedtaksperiodeId", vedtaksperiode.id),
+                    keyValue("fom", vedtaksperiode.periode.start),
+                    keyValue("tom", vedtaksperiode.periode.endInclusive),
+                    keyValue("skjæringstidspunkt", vedtaksperiode.skjæringstidspunkt),
+                    keyValue("revurderingIkkeStøttet", revurderingIkkeStøttet),
+                    keyValue("kanTrekkesTilbakeUtenÅMedføreRevurdering", kanTrekkesTilbakeUtenÅMedføreRevurdering),
+                )
+            }
+        }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
             hendelse.info("Overstyrer ikke en vedtaksperiode som er avsluttet uten utbetaling")
@@ -2074,6 +2092,8 @@ internal class Vedtaksperiode private constructor(
             if (!vedtaksperiode.kanRevurdereInntektForFlereArbeidsgivere(hendelse)) return
         }
     }
+
+    internal fun skalLoggeDersomPeriodenSkalTilManuellGrunnetForeldelse() = forventerInntekt()
 
     internal object Avsluttet : Vedtaksperiodetilstand {
         override val type = AVSLUTTET

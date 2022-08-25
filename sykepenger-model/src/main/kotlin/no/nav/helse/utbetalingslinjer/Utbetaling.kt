@@ -141,7 +141,7 @@ internal class Utbetaling private constructor(
     internal fun gyldig() = tilstand !in setOf(Ny, Forkastet)
     internal fun erUbetalt() = tilstand == Ubetalt
     internal fun erUtbetalt() = tilstand == Utbetalt || tilstand == Annullert
-    private fun erAktiv() = erAvsluttet() || erInFlight()
+    internal fun erAktiv() = erAvsluttet() || erInFlight()
     internal fun erInFlight() = tilstand in listOf(Godkjent, Sendt, Overført, UtbetalingFeilet)
     internal fun erAvsluttet() = erUtbetalt() || tilstand == GodkjentUtenUtbetaling
     internal fun erAvvist() = tilstand == IkkeGodkjent
