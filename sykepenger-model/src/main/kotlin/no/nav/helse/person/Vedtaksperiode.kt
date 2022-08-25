@@ -328,10 +328,10 @@ internal class Vedtaksperiode private constructor(
         return true
     }
 
-    internal fun nyPeriodeMedNyFlyt(ny: Vedtaksperiode, hendelse: Søknad) {
+    internal fun nyPeriode(ny: Vedtaksperiode, hendelse: Søknad) {
         if (ny etter this || ny == this) return
         kontekst(hendelse)
-        tilstand.nyPeriodeFørMedNyFlyt(this, ny, hendelse)
+        tilstand.nyPeriodeFør(this, ny, hendelse)
     }
 
     internal fun blokkererOverstyring(skjæringstidspunkt: LocalDate) =
@@ -807,7 +807,7 @@ internal class Vedtaksperiode private constructor(
             )
         }
 
-        fun nyPeriodeFørMedNyFlyt(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Søknad) {
+        fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Søknad) {
             if (Toggle.RevurdereOutOfOrder.enabled) return
             hendelse.funksjonellFeil("Mottatt søknad out of order")
             vedtaksperiode.forkast(hendelse)
@@ -1252,7 +1252,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.håndterOverlappendeSøknad(søknad)
         }
 
-        override fun nyPeriodeFørMedNyFlyt(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Søknad) {}
+        override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Søknad) {}
 
         override fun startRevurdering(
             arbeidsgivere: List<Arbeidsgiver>,
@@ -1311,7 +1311,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.håndterOverlappendeSøknad(søknad)
         }
 
-        override fun nyPeriodeFørMedNyFlyt(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Søknad) {}
+        override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Søknad) {}
 
         override fun gjenopptaBehandling(
             vedtaksperiode: Vedtaksperiode,
@@ -1356,7 +1356,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.trengerVilkårsgrunnlag(hendelse)
         }
 
-        override fun nyPeriodeFørMedNyFlyt(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Søknad) {
+        override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Søknad) {
             vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode)
         }
 
@@ -1414,7 +1414,7 @@ internal class Vedtaksperiode private constructor(
             hendelse.info("Forespør sykdoms- og inntektshistorikk")
         }
 
-        override fun nyPeriodeFørMedNyFlyt(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Søknad) {
+        override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Søknad) {
             vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode)
         }
 
@@ -1543,7 +1543,7 @@ internal class Vedtaksperiode private constructor(
             trengerSimulering(vedtaksperiode, hendelse)
         }
 
-        override fun nyPeriodeFørMedNyFlyt(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Søknad) {
+        override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Søknad) {
             vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode)
         }
 
@@ -1626,7 +1626,7 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.trengerGodkjenning(hendelse)
         }
 
-        override fun nyPeriodeFørMedNyFlyt(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Søknad) {
+        override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Søknad) {
             vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode)
         }
 
@@ -2165,8 +2165,8 @@ internal class Vedtaksperiode private constructor(
             subsumsjon: Subsumsjon?
         ) = vedtaksperiode.revurderArbeidsforhold(overstyrArbeidsforhold, subsumsjon)
 
-        override fun nyPeriodeFørMedNyFlyt(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Søknad) {
-            if (Toggle.RevurdereOutOfOrder.disabled) return super.nyPeriodeFørMedNyFlyt(vedtaksperiode, ny, hendelse)
+        override fun nyPeriodeFør(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Søknad) {
+            if (Toggle.RevurdereOutOfOrder.disabled) return super.nyPeriodeFør(vedtaksperiode, ny, hendelse)
             vedtaksperiode.tilstand(hendelse, AvventerRevurdering)
         }
 

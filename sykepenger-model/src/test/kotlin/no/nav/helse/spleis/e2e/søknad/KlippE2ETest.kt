@@ -1,4 +1,4 @@
-package no.nav.helse.spleis.e2e.ny_tilstandsflyt
+package no.nav.helse.spleis.e2e.søknad
 
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -28,7 +28,7 @@ import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Test
 
-internal class NyTilstandsflytKlippTest : AbstractEndToEndTest() {
+internal class KlippTest : AbstractEndToEndTest() {
 
     @Test
     fun `drawio -- HAPPY CASE`() {

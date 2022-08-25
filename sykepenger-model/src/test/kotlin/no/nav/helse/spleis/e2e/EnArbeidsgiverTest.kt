@@ -1,4 +1,4 @@
-package no.nav.helse.spleis.e2e.ny_tilstandsflyt
+package no.nav.helse.spleis.e2e
 
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
@@ -24,31 +24,13 @@ import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
-import no.nav.helse.spleis.e2e.AbstractEndToEndTest
-import no.nav.helse.spleis.e2e.assertFunksjonellFeil
-import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
-import no.nav.helse.spleis.e2e.assertSisteTilstand
-import no.nav.helse.spleis.e2e.assertTilstand
-import no.nav.helse.spleis.e2e.assertTilstander
-import no.nav.helse.spleis.e2e.håndterInntektsmelding
-import no.nav.helse.spleis.e2e.håndterInntektsmeldingReplay
-import no.nav.helse.spleis.e2e.håndterPåminnelse
-import no.nav.helse.spleis.e2e.håndterSimulering
-import no.nav.helse.spleis.e2e.håndterSykmelding
-import no.nav.helse.spleis.e2e.håndterSøknad
-import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
-import no.nav.helse.spleis.e2e.håndterUtbetalingshistorikk
-import no.nav.helse.spleis.e2e.håndterUtbetalt
-import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
-import no.nav.helse.spleis.e2e.håndterYtelser
-import no.nav.helse.spleis.e2e.tilGodkjenning
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-internal class NyTilstandsflytEnArbeidsgiverTest : AbstractEndToEndTest() {
+internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
 
     @Test
     fun `drawio -- misc -- oppvarming`() {

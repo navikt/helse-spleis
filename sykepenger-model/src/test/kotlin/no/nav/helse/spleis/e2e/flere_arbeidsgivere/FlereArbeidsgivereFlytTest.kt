@@ -1,4 +1,4 @@
-package no.nav.helse.spleis.e2e.ny_tilstandsflyt
+package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
 import java.time.LocalDate
 import no.nav.helse.assertForventetFeil
@@ -52,7 +52,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
-internal class NyTilstandsflytFlereArbeidsgivereTest : AbstractEndToEndTest() {
+internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
 
     @Test
     fun `En periode i AvventerTidligerEllerOverlappendePerioder for hver arbeidsgiver - kun en periode skal gå videre`() {

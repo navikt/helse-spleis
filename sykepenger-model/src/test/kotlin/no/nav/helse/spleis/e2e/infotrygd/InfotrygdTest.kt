@@ -1,4 +1,4 @@
-package no.nav.helse.spleis.e2e.ny_tilstandsflyt
+package no.nav.helse.spleis.e2e.infotrygd
 
 import java.time.LocalDate
 import no.nav.helse.Toggle
@@ -39,7 +39,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Test
 
-internal class NyTilstandsflytInfotrygdTest : AbstractEndToEndTest() {
+internal class InfotrygdTest : AbstractEndToEndTest() {
 
     @Test
     fun `Infotrygdhistorikk som ikke medfører forlengelse`() {
