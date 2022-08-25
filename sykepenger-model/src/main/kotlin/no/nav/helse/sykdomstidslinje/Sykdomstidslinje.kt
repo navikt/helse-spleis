@@ -243,6 +243,8 @@ internal class Sykdomstidslinje private constructor(
         }?.trim() ?: "Tom tidslinje"
     }
 
+    internal fun sykdomsperiode() = kuttEtterSisteSykedag().periode
+
     internal companion object {
 
         internal fun sisteRelevanteSkjæringstidspunktForPerioden(periode: Periode, tidslinjer: List<Sykdomstidslinje>) = samletTidslinje(tidslinjer)

@@ -110,7 +110,7 @@ internal class Vedtaksperiode private constructor(
 ) : Aktivitetskontekst, Comparable<Vedtaksperiode> {
 
     private val jurist = jurist.medVedtaksperiode(id, hendelseIder, sykmeldingsperiode)
-    private val skjæringstidspunkt get() = skjæringstidspunktFraInfotrygd ?: person.skjæringstidspunkt(periode)
+    private val skjæringstidspunkt get() = skjæringstidspunktFraInfotrygd ?: person.skjæringstidspunkt(sykdomstidslinje.sykdomsperiode() ?: periode)
     private val periodetype get() = arbeidsgiver.periodetype(periode)
     private val inntektskilde get() = person.vilkårsgrunnlagFor(skjæringstidspunkt)?.inntektskilde() ?: Inntektskilde.EN_ARBEIDSGIVER
 
@@ -1441,7 +1441,7 @@ internal class Vedtaksperiode private constructor(
                     vedtaksperiode.forkast(ytelser)
                 }
                 onSuccess {
-                    vedtaksperiode.skjæringstidspunktFraInfotrygd = person.skjæringstidspunkt(vedtaksperiode.periode)
+                    vedtaksperiode.skjæringstidspunktFraInfotrygd = person.skjæringstidspunkt(vedtaksperiode.sykdomstidslinje.sykdomsperiode() ?: vedtaksperiode.periode)
                 }
                 valider {
                     infotrygdhistorikk.valider(
@@ -2114,7 +2114,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun leaving(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
-            vedtaksperiode.skjæringstidspunktFraInfotrygd = vedtaksperiode.person.skjæringstidspunkt(vedtaksperiode.periode)
+            vedtaksperiode.skjæringstidspunktFraInfotrygd = vedtaksperiode.person.skjæringstidspunkt(vedtaksperiode.sykdomstidslinje.sykdomsperiode() ?: vedtaksperiode.periode)
             vedtaksperiode.låsOpp()
         }
 
