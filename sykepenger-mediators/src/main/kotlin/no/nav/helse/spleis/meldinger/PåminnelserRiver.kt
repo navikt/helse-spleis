@@ -23,7 +23,6 @@ internal class PåminnelserRiver(
         message.require("tilstandsendringstidspunkt", JsonNode::asLocalDateTime)
         message.require("påminnelsestidspunkt", JsonNode::asLocalDateTime)
         message.require("nestePåminnelsestidspunkt", JsonNode::asLocalDateTime)
-        message.rejectValue("tilstand", "AVSLUTTET_UTEN_UTBETALING")
         message.requireAny("tilstand", TilstandType.values().map(Enum<*>::name))
     }
 
