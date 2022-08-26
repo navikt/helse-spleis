@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import java.time.LocalDate
-import no.nav.helse.person.AktivitetsloggObserver
 import org.slf4j.LoggerFactory
 
 internal class V19KlippOverlappendeVedtaksperioder : JsonMigration(version = 19) {
@@ -16,11 +15,7 @@ internal class V19KlippOverlappendeVedtaksperioder : JsonMigration(version = 19)
     private val datoKey = "dato"
     private val log = LoggerFactory.getLogger(this.javaClass.name)
 
-    override fun doMigration(
-        jsonNode: ObjectNode,
-        meldingerSupplier: MeldingerSupplier,
-        observer: AktivitetsloggObserver
-    ) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         var tom: LocalDate? = null
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
             arbeidsgiver.path("vedtaksperioder").forEach { periode ->

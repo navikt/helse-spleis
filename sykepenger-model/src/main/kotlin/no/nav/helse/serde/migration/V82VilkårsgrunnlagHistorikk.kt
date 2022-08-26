@@ -2,15 +2,10 @@ package no.nav.helse.serde.migration
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
-import no.nav.helse.person.AktivitetsloggObserver
 
 internal class V82VilkårsgrunnlagHistorikk : JsonMigration(version = 82) {
     override val description: String = "Flytter dataForVilkårsvurdering opp til personnivå"
-    override fun doMigration(
-        jsonNode: ObjectNode,
-        meldingerSupplier: MeldingerSupplier,
-        observer: AktivitetsloggObserver
-    ) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         val vilkårsgrunnlagHistorikk = mutableMapOf<String, JsonNode>()
 
         hentVilkårsgrunnlag(vilkårsgrunnlagHistorikk, jsonNode["arbeidsgivere"]

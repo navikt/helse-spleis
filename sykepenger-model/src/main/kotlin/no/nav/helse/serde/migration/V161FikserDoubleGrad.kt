@@ -2,7 +2,6 @@ package no.nav.helse.serde.migration
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
-import no.nav.helse.person.AktivitetsloggObserver
 import kotlin.math.roundToInt
 
 internal class V161FikserDoubleGrad : JsonMigration(version = 161) {
@@ -10,11 +9,7 @@ internal class V161FikserDoubleGrad : JsonMigration(version = 161) {
             "Desimalet skyldes unøyaktigheter med doubles."
 
 
-    override fun doMigration(
-        jsonNode: ObjectNode,
-        meldingerSupplier: MeldingerSupplier,
-        observer: AktivitetsloggObserver
-    ) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
             arbeidsgiver.path("utbetalinger").forEach { utbetaling ->
                 migrerUtbetalingstidslinje(utbetaling.path("utbetalingstidslinje"))

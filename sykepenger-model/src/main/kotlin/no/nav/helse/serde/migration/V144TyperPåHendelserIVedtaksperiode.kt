@@ -3,7 +3,6 @@ package no.nav.helse.serde.migration
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import java.util.UUID
-import no.nav.helse.person.AktivitetsloggObserver
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.serde.serdeObjectMapper
 import org.slf4j.LoggerFactory
@@ -15,11 +14,7 @@ internal class V144TyperPåHendelserIVedtaksperiode : JsonMigration(version = 14
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
     }
 
-    override fun doMigration(
-        jsonNode: ObjectNode,
-        meldingerSupplier: MeldingerSupplier,
-        observer: AktivitetsloggObserver
-    ) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         val meldinger: Map<UUID, Pair<Navn, Json>> = meldingerSupplier.hentMeldinger()
         jsonNode["arbeidsgivere"]
             .flatMap { it["vedtaksperioder"] }

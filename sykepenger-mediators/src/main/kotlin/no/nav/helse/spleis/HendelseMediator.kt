@@ -23,7 +23,6 @@ import no.nav.helse.hendelser.utbetaling.UtbetalingOverført
 import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.AktivitetsloggObserver
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonHendelse
 import no.nav.helse.person.etterlevelse.MaskinellJurist
@@ -243,20 +242,19 @@ internal class HendelseMediator(
         handler: (Person) -> Unit
     ) {
         val jurist = MaskinellJurist()
-        val datadelingMediator = DatadelingMediator(hendelse)
-        val person = person(hendelse, jurist, datadelingMediator)
+        val person = person(hendelse, jurist)
         val personMediator = PersonMediator(person, message, hendelse, hendelseRepository)
+        val datadelingMediator = DatadelingMediator(hendelse)
         val subsumsjonMediator = SubsumsjonMediator(jurist, hendelse.fødselsnummer(), message, versjonAvKode)
         person.addObserver(VedtaksperiodeProbe)
         handler(person)
         finalize(context, personMediator, subsumsjonMediator, datadelingMediator, hendelse)
     }
 
-    private fun person(hendelse: PersonHendelse, jurist: MaskinellJurist, observer: AktivitetsloggObserver): Person {
+    private fun person(hendelse: PersonHendelse, jurist: MaskinellJurist): Person {
         return personRepository.hentPerson(hendelse.fødselsnummer().somPersonidentifikator())
             ?.deserialize(
-                jurist = jurist,
-                observer = observer
+                jurist = jurist
             ) { hendelseRepository.hentAlleHendelser(hendelse.fødselsnummer().somPersonidentifikator()) }
             ?: hendelse.person(jurist)
     }

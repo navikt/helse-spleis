@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import java.util.UUID
-import no.nav.helse.person.AktivitetsloggObserver
 import no.nav.helse.serde.mapping.JsonDagType
 import no.nav.helse.serde.migration.V6LeggTilNySykdomstidslinje.JsonDagTypePreV10.ARBEIDSDAG_INNTEKTSMELDING
 import no.nav.helse.serde.migration.V6LeggTilNySykdomstidslinje.JsonDagTypePreV10.ARBEIDSDAG_SØKNAD
@@ -40,11 +39,7 @@ internal class V6LeggTilNySykdomstidslinje : JsonMigration(version = 6) {
     private val søknad = "Søknad"
     private val sykmelding = "Sykmelding"
 
-    override fun doMigration(
-        jsonNode: ObjectNode,
-        meldingerSupplier: MeldingerSupplier,
-        observer: AktivitetsloggObserver
-    ) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
             arbeidsgiver.path("vedtaksperioder").forEach { periode ->
                 val hendelser = collectHendelseIds(periode)

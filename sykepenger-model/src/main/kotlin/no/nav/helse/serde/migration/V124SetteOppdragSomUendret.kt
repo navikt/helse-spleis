@@ -1,18 +1,13 @@
 package no.nav.helse.serde.migration
 
 import com.fasterxml.jackson.databind.node.ObjectNode
-import no.nav.helse.person.AktivitetsloggObserver
 import org.slf4j.LoggerFactory
 
 internal class V124SetteOppdragSomUendret : JsonMigration(version = 124) {
 
     override val description = "Setter Oppdrag uten endringer til UEND"
 
-    override fun doMigration(
-        jsonNode: ObjectNode,
-        meldingerSupplier: MeldingerSupplier,
-        observer: AktivitetsloggObserver
-    ) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         jsonNode["arbeidsgivere"].forEach { arbeidsgiver ->
             arbeidsgiver["utbetalinger"].forEach { utbetaling ->
                 val arbeidsgiverOppdrag = utbetaling["arbeidsgiverOppdrag"] as ObjectNode

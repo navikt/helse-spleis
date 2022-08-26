@@ -5,16 +5,11 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.erRettFør
-import no.nav.helse.person.AktivitetsloggObserver
 
 internal class V45InntektsmeldingId : JsonMigration(version = 45) {
     override val description: String = "setter inntektsmeldingId på tidligere førstegangsbehandlinger, og deres forlengelser"
 
-    override fun doMigration(
-        jsonNode: ObjectNode,
-        meldingerSupplier: MeldingerSupplier,
-        observer: AktivitetsloggObserver
-    ) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
             settInntektsmeldingerId(arbeidsgiver.path("vedtaksperioder"))
         }

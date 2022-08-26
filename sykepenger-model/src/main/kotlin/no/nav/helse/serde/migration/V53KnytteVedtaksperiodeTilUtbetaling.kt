@@ -6,7 +6,6 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import java.util.concurrent.TimeUnit
-import no.nav.helse.person.AktivitetsloggObserver
 import org.slf4j.LoggerFactory
 
 internal class V53KnytteVedtaksperiodeTilUtbetaling : JsonMigration(version = 53) {
@@ -25,11 +24,7 @@ internal class V53KnytteVedtaksperiodeTilUtbetaling : JsonMigration(version = 53
 
     private val log = LoggerFactory.getLogger("tjenestekall")
 
-    override fun doMigration(
-        jsonNode: ObjectNode,
-        meldingerSupplier: MeldingerSupplier,
-        observer: AktivitetsloggObserver
-    ) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         val konteksttyper = konteksttyper(jsonNode)
         val kontekstdetaljer = kontekstdetaljer(jsonNode)
 

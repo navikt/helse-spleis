@@ -2,16 +2,11 @@ package no.nav.helse.serde.migration
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
-import no.nav.helse.person.AktivitetsloggObserver
 
 internal class V39SetterAutomatiskBehandlingPåVedtaksperiode : JsonMigration(version = 39) {
     override val description: String = "Setter automatiskBehandling = false på alle godkjente vedtaksperioder"
 
-    override fun doMigration(
-        jsonNode: ObjectNode,
-        meldingerSupplier: MeldingerSupplier,
-        observer: AktivitetsloggObserver
-    ) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         jsonNode["arbeidsgivere"].forEach { arbeidsgiver ->
             vedtaksperioder(arbeidsgiver["vedtaksperioder"])
             forkastede(arbeidsgiver["forkastede"])

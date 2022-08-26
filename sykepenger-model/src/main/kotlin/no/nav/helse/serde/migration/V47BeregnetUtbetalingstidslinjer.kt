@@ -1,16 +1,11 @@
 package no.nav.helse.serde.migration
 
 import com.fasterxml.jackson.databind.node.ObjectNode
-import no.nav.helse.person.AktivitetsloggObserver
 
 internal class V47BeregnetUtbetalingstidslinjer : JsonMigration(version = 47) {
     override val description: String = "Lager lister over beregnede utbetalingstidslinjer"
 
-    override fun doMigration(
-        jsonNode: ObjectNode,
-        meldingerSupplier: MeldingerSupplier,
-        observer: AktivitetsloggObserver
-    ) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
             val linjer = (arbeidsgiver as ObjectNode).putArray("beregnetUtbetalingstidslinjer")
 

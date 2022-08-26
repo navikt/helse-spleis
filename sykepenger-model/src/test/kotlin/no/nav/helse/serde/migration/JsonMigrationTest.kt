@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import java.util.UUID
-import no.nav.helse.person.AktivitetsloggObserver
 import no.nav.helse.serde.migration.JsonMigration.Companion.skjemaVersjon
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -25,21 +24,13 @@ internal class JsonMigrationTest {
         listOf(
             object : JsonMigration(1) {
                 override val description = ""
-                override fun doMigration(
-                    jsonNode: ObjectNode,
-                    meldingerSupplier: MeldingerSupplier,
-                    observer: AktivitetsloggObserver
-                ) {
+                override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
                     meldinger.add(meldingerSupplier.hentMeldinger())
                 }
             },
             object : JsonMigration(2) {
                 override val description = ""
-                override fun doMigration(
-                    jsonNode: ObjectNode,
-                    meldingerSupplier: MeldingerSupplier,
-                    observer: AktivitetsloggObserver
-                ) {
+                override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
                     meldinger.add(meldingerSupplier.hentMeldinger())
                 }
             }
@@ -136,11 +127,7 @@ internal class JsonMigrationTest {
         JsonMigration(version) {
         override val description = "Test migration"
 
-        override fun doMigration(
-            jsonNode: ObjectNode,
-            meldingerSupplier: MeldingerSupplier,
-            observer: AktivitetsloggObserver
-        ) {
+        override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
             jsonNode.put(field, value)
         }
     }

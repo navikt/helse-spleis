@@ -5,17 +5,12 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.convertValue
 import java.time.LocalDate
 import java.time.LocalDateTime
-import no.nav.helse.person.AktivitetsloggObserver
 import no.nav.helse.serde.serdeObjectMapper
 
 internal class V158LeggerTilPersonoppdragForFeriepenger : JsonMigration(version = 158) {
     override val description: String = "Legger til personoppdrag i feriepengerutbetalinger"
 
-    override fun doMigration(
-        jsonNode: ObjectNode,
-        meldingerSupplier: MeldingerSupplier,
-        observer: AktivitetsloggObserver
-    ) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         val fødselsnummer = jsonNode["fødselsnummer"].asText()
         jsonNode["arbeidsgivere"]
             .map { it["feriepengeutbetalinger"] }

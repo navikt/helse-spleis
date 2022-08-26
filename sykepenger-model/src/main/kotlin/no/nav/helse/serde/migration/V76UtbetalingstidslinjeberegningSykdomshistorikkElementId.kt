@@ -3,16 +3,11 @@ package no.nav.helse.serde.migration
 import com.fasterxml.jackson.databind.node.ObjectNode
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.person.AktivitetsloggObserver
 
 internal class V76UtbetalingstidslinjeberegningSykdomshistorikkElementId : JsonMigration(version = 76) {
     override val description: String = "Legger på sykdomshistorikkelementId på Utbetalingstidslinjeberegning"
 
-    override fun doMigration(
-        jsonNode: ObjectNode,
-        meldingerSupplier: MeldingerSupplier,
-        observer: AktivitetsloggObserver
-    ) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
             val sykdomshistorikkelementer = arbeidsgiver.path("sykdomshistorikk").map { element ->
                 UUID.fromString(element.path("id").asText()) to LocalDateTime.parse(element.path("tidsstempel").asText())

@@ -4,18 +4,13 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import java.time.LocalDateTime
-import no.nav.helse.person.AktivitetsloggObserver
 import org.slf4j.LoggerFactory
 
 internal class V26SykdomshistorikkMerge : JsonMigration(version = 26) {
     private val log = LoggerFactory.getLogger("sykdomshistorikk-merge")
     override val description = "Legger inn en sykdomstidslinje i arbeidsgiver som er sammensatt fra vedtaksperioder"
 
-    override fun doMigration(
-        jsonNode: ObjectNode,
-        meldingerSupplier: MeldingerSupplier,
-        observer: AktivitetsloggObserver
-    ) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         val arbeidsgivere = jsonNode.path("arbeidsgivere")
 
         // Check for trashed vedtaksperioder with no history. These can not be migrated and must be removed.

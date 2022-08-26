@@ -9,17 +9,12 @@ import net.logstash.logback.argument.StructuredArgument
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.person.AktivitetsloggObserver
 import org.slf4j.LoggerFactory
 
 internal class V130TrimmeUtbetalingstidslinje : JsonMigration(version = 130) {
     override val description = "Fjerner innledende arbeidsdager og fridager på Utbetalingstidslinje forårsaket av historisk bug hvor vi ikke trimmet ordentlig"
 
-    override fun doMigration(
-        jsonNode: ObjectNode,
-        meldingerSupplier: MeldingerSupplier,
-        observer: AktivitetsloggObserver
-    ) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         val sizeBefore = jsonNode.toString().length
 
         jsonNode["arbeidsgivere"].forEach { arbeidsgiver ->

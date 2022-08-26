@@ -4,18 +4,13 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.convertValue
-import no.nav.helse.person.AktivitetsloggObserver
 import no.nav.helse.serde.serdeObjectMapper
 
 internal class V12Aktivitetslogg : JsonMigration(version = 12) {
 
     override val description = "Lager en liste av kontekster på aktivitetslogg-nivå"
 
-    override fun doMigration(
-        jsonNode: ObjectNode,
-        meldingerSupplier: MeldingerSupplier,
-        observer: AktivitetsloggObserver
-    ) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         val aktivitetslogg = jsonNode["aktivitetslogg"] as ObjectNode
         val kontekster = mutableSetOf<JsonNode>()
         val aktiviteter = aktivitetslogg["aktiviteter"].onEach { aktivitet ->

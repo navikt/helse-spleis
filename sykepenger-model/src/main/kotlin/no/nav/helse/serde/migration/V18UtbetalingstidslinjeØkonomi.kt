@@ -7,7 +7,6 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter.ISO_DATE
 import java.util.UUID
 import no.nav.helse.Grunnbeløp
-import no.nav.helse.person.AktivitetsloggObserver
 import no.nav.helse.serde.migration.Inntektshistorikk.Inntektsendring.Kilde.INNTEKTSMELDING
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.økonomi.Inntekt
@@ -19,11 +18,7 @@ internal class V18UtbetalingstidslinjeØkonomi : JsonMigration(version = 18) {
 
     private lateinit var inntektshistorikk: Inntektshistorikk
 
-    override fun doMigration(
-        jsonNode: ObjectNode,
-        meldingerSupplier: MeldingerSupplier,
-        observer: AktivitetsloggObserver
-    ) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
             arbeidsgiver.path("utbetalinger").forEach { utbetaling ->
                 opprettØkonomi(utbetaling.path("utbetalingstidslinje").path("dager"))

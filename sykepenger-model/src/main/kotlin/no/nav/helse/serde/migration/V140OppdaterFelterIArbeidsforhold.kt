@@ -1,16 +1,11 @@
 package no.nav.helse.serde.migration
 
 import com.fasterxml.jackson.databind.node.ObjectNode
-import no.nav.helse.person.AktivitetsloggObserver
 
 internal class V140OppdaterFelterIArbeidsforhold : JsonMigration(version = 140) {
     override val description: String = "Fjerner orgnummer, legger til erAktivt og renamer fom og tom til ansattFom og ansattTom i arbeidsforholdshistorikken"
 
-    override fun doMigration(
-        jsonNode: ObjectNode,
-        meldingerSupplier: MeldingerSupplier,
-        observer: AktivitetsloggObserver
-    ) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         jsonNode["arbeidsgivere"]
             .flatMap { it["arbeidsforholdhistorikk"] }
             .flatMap { it["arbeidsforhold"] }

@@ -1,7 +1,6 @@
 package no.nav.helse.serde.migration
 
 import com.fasterxml.jackson.databind.node.ObjectNode
-import no.nav.helse.person.AktivitetsloggObserver
 
 internal class V89RetteOppFeilTilstand : JsonMigration(version = 89) {
     override val description: String = "Setter riktig tilstand etter en liten bug"
@@ -12,11 +11,7 @@ internal class V89RetteOppFeilTilstand : JsonMigration(version = 89) {
         "b30e6003-f4df-4cb0-b08d-ea24008600a1",
     )
 
-    override fun doMigration(
-        jsonNode: ObjectNode,
-        meldingerSupplier: MeldingerSupplier,
-        observer: AktivitetsloggObserver
-    ) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
             arbeidsgiver.path("vedtaksperioder").firstOrNull {
                 vedtaksperiodeIder.contains(it.path("id").asText())

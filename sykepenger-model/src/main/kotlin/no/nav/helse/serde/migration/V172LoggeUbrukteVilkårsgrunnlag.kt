@@ -2,13 +2,12 @@ package no.nav.helse.serde.migration
 
 import com.fasterxml.jackson.databind.node.ObjectNode
 import net.logstash.logback.argument.StructuredArguments.keyValue
-import no.nav.helse.person.AktivitetsloggObserver
 import org.slf4j.LoggerFactory
 
 internal class V172LoggeUbrukteVilkårsgrunnlag : JsonMigration(version = 172) {
     override val description = """Logger ubrukte vilkårsgrunnlaginnslag"""
 
-    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier, observer: AktivitetsloggObserver) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         val aktørId = jsonNode.path("aktørId").asText()
         val brukteInnslag = jsonNode.path("arbeidsgivere").flatMap { arbeidsgiver ->
             arbeidsgiver.path("beregnetUtbetalingstidslinjer").map { beregning ->

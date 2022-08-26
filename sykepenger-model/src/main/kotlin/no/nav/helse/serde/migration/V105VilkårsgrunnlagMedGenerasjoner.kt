@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import java.time.LocalDate.EPOCH
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.person.AktivitetsloggObserver
 import no.nav.helse.serde.serdeObjectMapper
 
 internal class V105VilkårsgrunnlagMedGenerasjoner(
@@ -15,11 +14,7 @@ internal class V105VilkårsgrunnlagMedGenerasjoner(
 ) : JsonMigration(version = 105) {
     override val description: String = "VilkårsgrunnlagHistorikk skal være generasjonsbasert"
 
-    override fun doMigration(
-        jsonNode: ObjectNode,
-        meldingerSupplier: MeldingerSupplier,
-        observer: AktivitetsloggObserver
-    ) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         if (jsonNode["vilkårsgrunnlagHistorikk"] == null || jsonNode["vilkårsgrunnlagHistorikk"].isEmpty) return
         jsonNode.replace("vilkårsgrunnlagHistorikk", konverterTilInnslag(jsonNode.withArray("vilkårsgrunnlagHistorikk")))
     }

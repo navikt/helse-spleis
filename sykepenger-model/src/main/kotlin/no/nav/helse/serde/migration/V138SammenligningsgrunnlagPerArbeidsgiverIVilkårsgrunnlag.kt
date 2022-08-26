@@ -1,16 +1,11 @@
 package no.nav.helse.serde.migration
 
 import com.fasterxml.jackson.databind.node.ObjectNode
-import no.nav.helse.person.AktivitetsloggObserver
 
 internal class V138SammenligningsgrunnlagPerArbeidsgiverIVilkårsgrunnlag : JsonMigration(version = 138) {
     override val description = "Migrer inn sammenligningsgrunnlag per arbeidsgiver i vilkårsgrunnlaget"
 
-    override fun doMigration(
-        jsonNode: ObjectNode,
-        meldingerSupplier: MeldingerSupplier,
-        observer: AktivitetsloggObserver
-    ) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         val sammenligningsgrunnlagFraHistorikk = jsonNode["arbeidsgivere"]
             .map { arbeidsgiver ->
                 arbeidsgiver["organisasjonsnummer"].asText() to arbeidsgiver["inntektshistorikk"]

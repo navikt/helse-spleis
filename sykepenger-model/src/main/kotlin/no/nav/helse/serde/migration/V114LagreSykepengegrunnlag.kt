@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import java.time.LocalDate
 import no.nav.helse.Grunnbeløp
-import no.nav.helse.person.AktivitetsloggObserver
 import org.slf4j.LoggerFactory
 
 internal class V114LagreSykepengegrunnlag : JsonMigration(version = 114) {
@@ -173,11 +172,7 @@ internal class V114LagreSykepengegrunnlag : JsonMigration(version = 114) {
                 ?.takeIf { it.has("kilde") && it["kilde"].asText() == "INFOTRYGD" }
     }
 
-    override fun doMigration(
-        jsonNode: ObjectNode,
-        meldingerSupplier: MeldingerSupplier,
-        observer: AktivitetsloggObserver
-    ) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         jsonNode["vilkårsgrunnlagHistorikk"].flatMap {
             it["vilkårsgrunnlag"]
         }.forEach { genererSykepengegrunnlag((it as ObjectNode), jsonNode) }

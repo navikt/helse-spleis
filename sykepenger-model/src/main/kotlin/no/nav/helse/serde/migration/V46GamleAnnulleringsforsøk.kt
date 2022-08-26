@@ -1,7 +1,6 @@
 package no.nav.helse.serde.migration
 
 import com.fasterxml.jackson.databind.node.ObjectNode
-import no.nav.helse.person.AktivitetsloggObserver
 import org.slf4j.LoggerFactory
 
 internal class V46GamleAnnulleringsforsøk : JsonMigration(version = 46) {
@@ -12,11 +11,7 @@ internal class V46GamleAnnulleringsforsøk : JsonMigration(version = 46) {
      * Disse utbetalingene sjekkes og annulleres utenfor spleis og vi anter herfra at de er ferdig annullert
      */
 
-    override fun doMigration(
-        jsonNode: ObjectNode,
-        meldingerSupplier: MeldingerSupplier,
-        observer: AktivitetsloggObserver
-    ) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
             arbeidsgiver.path("utbetalinger")
                 .filter { it["arbeidsgiverOppdrag"]["linjer"].size() == 1 }

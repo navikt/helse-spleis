@@ -2,16 +2,11 @@ package no.nav.helse.serde.migration
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
-import no.nav.helse.person.AktivitetsloggObserver
 
 internal class V131FjernHelgedagFraSykdomstidslinje : JsonMigration(version = 131) {
     override val description = "Fjerner SYK_HELGEDAG og ARBEIDSGIVER_HELGEDAG fra sykdomstidslinjer"
 
-    override fun doMigration(
-        jsonNode: ObjectNode,
-        meldingerSupplier: MeldingerSupplier,
-        observer: AktivitetsloggObserver
-    ) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         jsonNode["arbeidsgivere"].forEach { arbeidsgiver ->
             arbeidsgiver["vedtaksperioder"].forEach { vedtaksperiode ->
                 migrer(vedtaksperiode["sykdomstidslinje"])

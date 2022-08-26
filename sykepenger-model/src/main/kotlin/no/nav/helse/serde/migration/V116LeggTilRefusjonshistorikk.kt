@@ -3,17 +3,12 @@ package no.nav.helse.serde.migration
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
-import no.nav.helse.person.AktivitetsloggObserver
 import no.nav.helse.serde.serdeObjectMapper
 
 internal class V116LeggTilRefusjonshistorikk : JsonMigration(version = 116) {
     override val description = "Legger til refusjonshistorikk"
 
-    override fun doMigration(
-        jsonNode: ObjectNode,
-        meldingerSupplier: MeldingerSupplier,
-        observer: AktivitetsloggObserver
-    ) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         val inntektsmeldinger = meldingerSupplier.hentMeldinger()
             .mapValues { (_, melding) ->
                 val (_, json) = melding

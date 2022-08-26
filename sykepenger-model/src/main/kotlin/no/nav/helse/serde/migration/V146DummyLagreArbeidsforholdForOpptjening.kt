@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.helse.person.AktivitetsloggObserver
 import no.nav.helse.serde.serdeObjectMapper
 import org.slf4j.LoggerFactory
 
@@ -12,11 +11,7 @@ internal class V146DummyLagreArbeidsforholdForOpptjening : JsonMigration(version
     override val description: String = "Lagrer arbeidsforhold relevant til opptjening i vilkårsgrunnlag og arbeidsforhold-historikken"
     private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
 
-    override fun doMigration(
-        jsonNode: ObjectNode,
-        meldingerSupplier: MeldingerSupplier,
-        observer: AktivitetsloggObserver
-    ) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         /*
          [v] hent vilkårsgrunnlag
          [v] finn tilhørende vedtaksperiode, hent skjæringstidspunkt

@@ -3,7 +3,6 @@ package no.nav.helse.serde.migration
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import net.logstash.logback.argument.StructuredArguments.keyValue
-import no.nav.helse.person.AktivitetsloggObserver
 import org.slf4j.LoggerFactory
 import kotlin.math.roundToInt
 
@@ -12,11 +11,7 @@ internal class V160FikserDoubleGrad : JsonMigration(version = 160) {
             "Desimalet skyldes unøyaktigheter med doubles."
 
 
-    override fun doMigration(
-        jsonNode: ObjectNode,
-        meldingerSupplier: MeldingerSupplier,
-        observer: AktivitetsloggObserver
-    ) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         val aktørId = jsonNode.path("aktørId").asText()
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
             val orgnr = arbeidsgiver.path("organisasjonsnummer").asText()

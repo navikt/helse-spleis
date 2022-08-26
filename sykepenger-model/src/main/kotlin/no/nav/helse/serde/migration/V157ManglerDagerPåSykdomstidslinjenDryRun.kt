@@ -9,18 +9,13 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
-import no.nav.helse.person.AktivitetsloggObserver
 import org.slf4j.LoggerFactory
 
 internal class V157ManglerDagerPåSykdomstidslinjenDryRun: JsonMigration(version = 157) {
     override val description =
         "Logger alle vedtaksperioder som inneholder dager som ikke er på sykdomstidslinjen"
 
-    override fun doMigration(
-        jsonNode: ObjectNode,
-        meldingerSupplier: MeldingerSupplier,
-        observer: AktivitetsloggObserver
-    ) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         val fødselsnummer = jsonNode.path("fødselsnummer").asText()
         val aktørId = jsonNode.path("aktørId").asText()
 

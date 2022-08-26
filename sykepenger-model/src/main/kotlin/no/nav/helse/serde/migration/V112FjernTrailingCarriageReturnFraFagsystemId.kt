@@ -2,17 +2,12 @@ package no.nav.helse.serde.migration
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
-import no.nav.helse.person.AktivitetsloggObserver
 
 internal class V112FjernTrailingCarriageReturnFraFagsystemId : JsonMigration(version = 112) {
     override val description: String = "Vi hadde en bug i genereringen av fagsystemId, som gjorde at \\r\\n ble lagt til på slutten"
 
 
-    override fun doMigration(
-        jsonNode: ObjectNode,
-        meldingerSupplier: MeldingerSupplier,
-        observer: AktivitetsloggObserver
-    ) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         jsonNode.path("arbeidsgivere")
             .flatMap { arbeidsgiver -> arbeidsgiver.path("utbetalinger") }
             .flatMap { listOf(it["arbeidsgiverOppdrag"], it["personOppdrag"]) }

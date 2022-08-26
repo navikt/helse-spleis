@@ -4,17 +4,12 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import java.time.LocalDate
 import no.nav.helse.Grunnbeløp
-import no.nav.helse.person.AktivitetsloggObserver
 
 internal class V118LeggTilBegrensningPåSykepengegrunnlag : JsonMigration(version = 118) {
 
     override val description: String = "Legg til begrensning på sykepengegrunnlag"
 
-    override fun doMigration(
-        jsonNode: ObjectNode,
-        meldingerSupplier: MeldingerSupplier,
-        observer: AktivitetsloggObserver
-    ) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         jsonNode["vilkårsgrunnlagHistorikk"].forEach { historikk ->
             historikk["vilkårsgrunnlag"].forEach { vilkårsgrunnlag ->
                 val sykepengegrunnlag = vilkårsgrunnlag.get("sykepengegrunnlag")

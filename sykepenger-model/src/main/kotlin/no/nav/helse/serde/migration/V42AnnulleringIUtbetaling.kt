@@ -1,16 +1,11 @@
 package no.nav.helse.serde.migration
 
 import com.fasterxml.jackson.databind.node.ObjectNode
-import no.nav.helse.person.AktivitetsloggObserver
 
 internal class V42AnnulleringIUtbetaling : JsonMigration(version = 42) {
     override val description: String = "Benytter et flagg for å skille mellom vanlige utbetalinger og annulleringer"
 
-    override fun doMigration(
-        jsonNode: ObjectNode,
-        meldingerSupplier: MeldingerSupplier,
-        observer: AktivitetsloggObserver
-    ) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         jsonNode["arbeidsgivere"]
             .flatMap { it["utbetalinger"] }
             .map { it as ObjectNode }

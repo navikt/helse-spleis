@@ -2,7 +2,6 @@ package no.nav.helse.serde.migration
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
-import no.nav.helse.person.AktivitetsloggObserver
 import org.slf4j.LoggerFactory
 
 internal class V61MigrereUtbetaltePerioderITilInfotrygd : JsonMigration(version = 61) {
@@ -10,11 +9,7 @@ internal class V61MigrereUtbetaltePerioderITilInfotrygd : JsonMigration(version 
 
     override val description: String = "Setter utbetalte forkastede perioder i TIL_INFOTRYGD til AVSLUTTET"
 
-    override fun doMigration(
-        jsonNode: ObjectNode,
-        meldingerSupplier: MeldingerSupplier,
-        observer: AktivitetsloggObserver
-    ) {
+    override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         jsonNode
             .path("arbeidsgivere")
             .forEach { arbeidsgiver ->
