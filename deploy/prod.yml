@@ -48,6 +48,7 @@ spec:
             users:
               - name: spleis-api
               - name: spleis-avstemming
+              - name: sparsom
         flags:
           - name: maintenance_work_mem
             value: "1048576"
