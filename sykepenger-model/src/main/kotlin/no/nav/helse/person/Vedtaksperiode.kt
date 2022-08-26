@@ -1877,6 +1877,17 @@ internal class Vedtaksperiode private constructor(
         ) {
             vedtaksperiode.nesteRevurderingstilstand(hendelse, overstyrt, pågående)
         }
+
+        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
+            if (Toggle.RevurderKorrigertSoknad.enabled){
+                if (!søknad.omsluttesAv(vedtaksperiode.periode())) return super.håndter(vedtaksperiode, søknad)
+                if (vedtaksperiode.person.harSkjæringstidspunktSenereEnn(vedtaksperiode.skjæringstidspunkt)) return super.håndter(vedtaksperiode, søknad)
+                vedtaksperiode.oppdaterHistorikk(søknad)
+                vedtaksperiode.person.startRevurdering(vedtaksperiode, søknad)
+            } else {
+                super.håndter(vedtaksperiode, søknad)
+            }
+        }
     }
 
     // TODO: slett tilstand

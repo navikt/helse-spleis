@@ -12,14 +12,19 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.TilstandType.AVSLUTTET
+import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.forlengVedtak
+import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
+import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
+import no.nav.helse.spleis.e2e.håndterUtbetalt
 import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.sykdomstidslinje.Dag.Feriedag
@@ -181,5 +186,42 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
 
         assertTilstand(1.vedtaksperiode, AVSLUTTET)
         assertTilstand(2.vedtaksperiode, AVSLUTTET)
+    }
+    @Test
+    fun `Korrigerende søknad for periode i AvventerGodkjenningRevurdering - setter i gang en overstyring av revurderingen`() {
+        nyttVedtak(1.januar, 31.januar, 100.prosent)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 50.prosent))
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        assertTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
+
+        håndterSøknad(Sykdom(1.januar, 31.januar, 50.prosent), Ferie(22.januar, 26.januar))
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+        assertTilstand(1.vedtaksperiode, AVSLUTTET)
+
+        (17..21).forEach {
+            assertEquals(50.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.januar].økonomi.inspektør.grad)
+        }
+        (27..31).forEach {
+            assertEquals(50.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.januar].økonomi.inspektør.grad)
+        }
+        (22..26).forEach {
+            assertTrue(inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.januar] is Fridag)
+        }
+    }
+    @Test
+    fun `Korrigerende søknad for førstegangsbehandling med forlengelse i avventerGodkjenning - setter i gang en revurdering`() {
+        nyttVedtak(1.januar, 31.januar, 100.prosent)
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 50.prosent), Ferie(22.januar, 26.januar))
+
+        assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+        assertTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
     }
 }

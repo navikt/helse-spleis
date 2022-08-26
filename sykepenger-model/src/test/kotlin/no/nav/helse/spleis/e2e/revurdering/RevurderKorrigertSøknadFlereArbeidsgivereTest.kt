@@ -21,6 +21,7 @@ import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
@@ -602,7 +603,7 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
     }
 
     @Test
-    @Disabled("en bug i finnSkjæringstidspunkt som må rettes opp i")
+    @Disabled("ikke implemnentert enda - avventer bug i håndtering av inntektsmelding")
     fun `To arbeidsgivere med ett sykefraværstilfelle og gap over 16 dager - korrigerende søknad setter i gang revurdering`() {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
@@ -792,6 +793,40 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
+        }
+    }
+    @Test
+    fun `Korrigerende søknad for periode i AvventerGodkjenningRevurdering - setter i gang en overstyring av revurderingen`() {
+        listOf(a1, a2).nyeVedtak(1.januar til 31.januar)
+        a1 {
+            håndterSøknad(
+                Sykdom(1.januar, 31.januar, 100.prosent),
+                Arbeid(30.januar, 31.januar)
+            )
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            assertTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
+
+            håndterSøknad(
+                Sykdom(1.januar, 31.januar, 50.prosent),
+                Arbeid(30.januar, 31.januar)
+            )
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+            assertTilstand(1.vedtaksperiode, AVSLUTTET)
+
+            assertEquals(9, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.navDagTeller)
+            assertEquals(2, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.arbeidsdagTeller)
+
+            (17..29).forEach{
+                assertEquals(50.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.januar].økonomi.inspektør.grad)
+            }
+        }
+
+        a2 {
+            assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
         }
     }
 }
