@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e.søknad
 
-import no.nav.helse.Toggle
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
@@ -8,7 +7,6 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.Papirsykmelding
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Permisjon
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Utdanning
@@ -41,7 +39,6 @@ import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
@@ -225,27 +222,6 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
         )
         håndterUtbetalingshistorikk(1.vedtaksperiode)
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING)
-    }
-
-    @Test
-    fun `forkastede problemdager skal ikke skape problem ved utregning av arbeidsgiverperiode`() = Toggle.IkkeForlengInfotrygdperioder.disable {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar, 100.prosent))
-        håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), Papirsykmelding(27.desember(2017), 31.desember(2017)))
-        assertTrue(hendelselogg.harFunksjonelleFeilEllerVerre()) // perioden blir forkastet pga papirsykmelding
-        håndterSykmelding(Sykmeldingsperiode(21.januar, 31.januar, 100.prosent))
-        håndterSøknad(Sykdom(21.januar, 31.januar, 100.prosent))
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
-    }
-
-    @Test
-    fun `hensyntar forkastet historikk for å unngå å lage dårlig stemning`() = Toggle.IkkeForlengInfotrygdperioder.disable {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar, 100.prosent))
-        håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent))
-        person.søppelbøtte(hendelselogg, 1.januar til 20.januar)
-        håndterSykmelding(Sykmeldingsperiode(21.januar, 31.januar, 100.prosent))
-        håndterSøknad(Sykdom(21.januar, 31.januar, 100.prosent))
-        håndterUtbetalingshistorikk(2.vedtaksperiode)
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK) // På grunn av den forkastede perioden går den ikke til AvsluttetUtenUtbetaling
     }
 
     @Test

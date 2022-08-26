@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.Toggle
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
@@ -11,19 +10,21 @@ import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.oktober
 import no.nav.helse.person.IdInnhenter
-import no.nav.helse.person.TilstandType
+import no.nav.helse.person.TilstandType.START
+import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.serde.serialize
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.utbetalingstidslinje.Begrunnelse.SykepengedagerOppbruktOver67
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
 
 internal class MaksdatoE2ETest : AbstractEndToEndTest() {
 
     @Test
-    fun `syk etter maksdato`() = Toggle.IkkeForlengInfotrygdperioder.disable {
+    fun `syk etter maksdato`() {
         var forrigePeriode = 1.januar til 31.januar
         nyttVedtak(forrigePeriode.start, forrigePeriode.endInclusive, 100.prosent)
         // setter opp vedtaksperioder frem til 182 dager etter maksdato
@@ -33,16 +34,14 @@ internal class MaksdatoE2ETest : AbstractEndToEndTest() {
         }
         // oppretter forlengelse fom 182 dager etter maksdato: denne blir kastet til Infotrygd
         forrigePeriode = nyPeriodeMedYtelser(forrigePeriode)
-        assertSisteTilstand(observatør.sisteVedtaksperiode(), TilstandType.TIL_INFOTRYGD) {
+        val nestSiste = observatør.sisteVedtaksperiode()
+        assertSisteTilstand(nestSiste, TIL_INFOTRYGD) {
             "Disse periodene skal kastes ut pr nå"
         }
         forrigePeriode = nyPeriode(forrigePeriode)
         val siste = observatør.sisteVedtaksperiode()
-        val inntektsmeldingId = inntektsmeldinger.keys.also { check(it.size == 1) { "forventer bare én inntektsmelding" } }.first()
-        håndterInntektsmeldingReplay(inntektsmeldingId, siste.id(ORGNUMMER))
-        assertSisteTilstand(siste, TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK) {
-            "denne perioden skal under ingen omstendigheter utbetales fordi personen ikke har vært på arbeid etter maksdato"
-        }
+        assertNotEquals(nestSiste, siste)
+        assertForkastetPeriodeTilstander(siste, START, TIL_INFOTRYGD)
     }
 
     @Test
@@ -58,7 +57,7 @@ internal class MaksdatoE2ETest : AbstractEndToEndTest() {
         forrigePeriode = nyPeriodeMedYtelser(forrigePeriode)
         val siste = observatør.sisteVedtaksperiode()
         assertFunksjonellFeil("Bruker er fortsatt syk 26 uker etter maksdato", siste.filter())
-        assertSisteTilstand(siste, TilstandType.TIL_INFOTRYGD) {
+        assertSisteTilstand(siste, TIL_INFOTRYGD) {
             "Disse periodene skal kastes ut pr nå"
         }
     }

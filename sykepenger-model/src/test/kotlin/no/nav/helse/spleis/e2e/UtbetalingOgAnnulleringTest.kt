@@ -1,11 +1,7 @@
 package no.nav.helse.spleis.e2e
 
-import java.time.LocalDate
 import java.time.LocalDateTime
-import no.nav.helse.Toggle
-import no.nav.helse.august
 import no.nav.helse.februar
-import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -13,9 +9,6 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
-import no.nav.helse.juli
-import no.nav.helse.juni
-import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.PersonObserver
@@ -30,16 +23,11 @@ import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.TilstandType.UTBETALING_FEILET
-import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
-import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.serde.api.dto.BegrunnelseDTO
 import no.nav.helse.serde.reflection.Utbetalingstatus
-import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.aktive
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -376,68 +364,6 @@ internal class UtbetalingOgAnnulleringTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         val utbetalingUtbetalingstidslinje = inspektør.utbetalingUtbetalingstidslinje(0)
         assertEquals(3.januar til 26.januar, utbetalingUtbetalingstidslinje.periode())
-    }
-
-    @Test
-    fun `ubetalt periode, etter utbetalt, etterutbetales ikke`() = Toggle.IkkeForlengInfotrygdperioder.disable {
-        (10.juni to 30.juni).also { (fom, tom) ->
-            håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent))
-            håndterSøknad(Sykdom(fom, tom, 100.prosent), sendtTilNAVEllerArbeidsgiver = tom)
-            håndterInntektsmelding(listOf(fom til fom.plusDays(15)))
-        }
-        (1.juli to 31.juli).also { (fom, tom) ->
-            håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent))
-            håndterSøknad(Sykdom(fom, tom, 100.prosent))
-        }
-
-        håndterYtelser(1.vedtaksperiode)
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioderForSammenligningsgrunnlag {
-                1.juni(2017) til 1.mai(2018) inntekter {
-                    ORGNUMMER inntekt INNTEKT
-                }
-            }
-        ))
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt()
-        håndterPåminnelse(
-            2.vedtaksperiode,
-            AVVENTER_HISTORIKK,
-            tilstandsendringstidspunkt = LocalDate.EPOCH.atStartOfDay()
-        ) // forkast
-
-        (1.august to 31.august).also { (fom, tom) ->
-            håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent))
-            håndterSøknad(Sykdom(fom, tom, 100.prosent))
-        }
-        val historikk = ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.juli, 31.juli, 100.prosent, 1000.daglig)
-        val inntekter = listOf(Inntektsopplysning(ORGNUMMER, 1.juli, INNTEKT, true))
-        håndterUtbetalingshistorikk(3.vedtaksperiode, historikk, inntektshistorikk = inntekter)
-        håndterYtelser(3.vedtaksperiode)
-        håndterSimulering(3.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(3.vedtaksperiode, true)
-        håndterUtbetalt()
-
-        inspektør.utbetalingUtbetalingstidslinje(0).also { utbetalingUtbetalingstidslinje ->
-            assertEquals(10.juni til 30.juni, utbetalingUtbetalingstidslinje.periode())
-        }
-        inspektør.utbetaling(0).also { utbetaling ->
-            assertEquals(26.juni, utbetaling.inspektør.arbeidsgiverOppdrag.førstedato)
-            assertEquals(29.juni, utbetaling.inspektør.arbeidsgiverOppdrag.sistedato)
-            assertEquals(1, utbetaling.inspektør.arbeidsgiverOppdrag.size)
-        }
-        inspektør.utbetalingUtbetalingstidslinje(1).also { utbetalingUtbetalingstidslinje ->
-            assertEquals(10.juni til 31.august, utbetalingUtbetalingstidslinje.periode())
-            assertEquals(Utbetalingstidslinje.Utbetalingsdag.UkjentDag::class, utbetalingUtbetalingstidslinje[1.juli]::class)
-            assertEquals(Utbetalingstidslinje.Utbetalingsdag.UkjentDag::class, utbetalingUtbetalingstidslinje[31.juli]::class)
-        }
-        inspektør.utbetaling(1).also { utbetaling ->
-            assertEquals(1.august, utbetaling.inspektør.arbeidsgiverOppdrag.førstedato)
-            assertEquals(31.august, utbetaling.inspektør.arbeidsgiverOppdrag.sistedato)
-            assertEquals(1, utbetaling.inspektør.arbeidsgiverOppdrag.size)
-        }
     }
 
     @Test

@@ -395,7 +395,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                 aktivitetslogg.info("Perioden har opphav i Infotrygd, men saken beholdes i Spleis fordi det er utbetalt i Spleis tidligere.")
                 return sjekkGammeltSkjæringstidspunkt(aktivitetslogg)
             }
-            if (Toggle.IkkeForlengInfotrygdperioder.enabled) aktivitetslogg.funksjonellFeil("Støtter ikke saker med vilkårsgrunnlag i Infotrygd")
+            aktivitetslogg.funksjonellFeil("Støtter ikke saker med vilkårsgrunnlag i Infotrygd")
         }
 
         private fun sjekkGammeltSkjæringstidspunkt(aktivitetslogg: IAktivitetslogg) {

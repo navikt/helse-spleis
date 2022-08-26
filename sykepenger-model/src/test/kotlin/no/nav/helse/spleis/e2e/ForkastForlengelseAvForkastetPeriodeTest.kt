@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
@@ -16,8 +15,6 @@ import no.nav.helse.juni
 import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.person.TilstandType.AVSLUTTET
-import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
-import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
@@ -42,7 +39,7 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
     }
 
     @Test
-    fun `forlenger med forkastet periode hos annen arbeidsgiver`() = Toggle.IkkeForlengInfotrygdperioder.enable {
+    fun `forlenger med forkastet periode hos annen arbeidsgiver`() {
         (1.januar til 10.januar).forkast()
         håndterSykmelding(Sykmeldingsperiode(11.januar, 16.januar, 100.prosent), orgnummer = a2)
         håndterSøknad(Sykdom(11.januar, 16.januar, 100.prosent), orgnummer = a2)
@@ -50,7 +47,7 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
     }
 
     @Test
-    fun `forlenger tidligere overlappende sykmelding`() = Toggle.IkkeForlengInfotrygdperioder.enable {
+    fun `forlenger tidligere overlappende sykmelding`() {
         (1.januar til 10.januar).forkast()
         håndterSykmelding(Sykmeldingsperiode(9.januar, 15.januar, 100.prosent))
         håndterSøknad(Sykdom(9.januar, 15.januar, 100.prosent))
@@ -65,41 +62,7 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
     }
 
     @Test
-    fun `Tar inn forlengelse selvom det er noe tidligere forkastet`() {
-        Toggle.IkkeForlengInfotrygdperioder.disable {
-            (1.januar til 10.januar).forkast()
-            tilGodkjenning(11.januar, 31.januar, ORGNUMMER)
-        }
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 14.februar, 100.prosent))
-        håndterSøknad(Sykdom(1.februar, 14.februar, 100.prosent))
-        assertTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING)
-        assertTilstand(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
-    }
-
-    @Test
-    fun `søknader som overlapper uten toggle`() = Toggle.IkkeForlengInfotrygdperioder.disable {
-        håndterSykmelding(Sykmeldingsperiode(15.januar, 30.januar, 100.prosent))
-        håndterSøknad(Sykdom(15.januar, 30.januar, 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(31.januar, 15.februar, 100.prosent))
-        håndterSøknad(Sykdom(31.januar, 15.februar, 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(16.januar, 31.januar, 100.prosent)) // overlapper med vedtaksperiode 1 og vedtaksperiode 2
-        håndterSøknad(Sykdom(16.januar, 31.januar, 100.prosent)) // overlapper med vedtaksperiode 1 og vedtaksperiode 2
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 16.februar, 100.prosent)) // overlapper med vedtaksperiode 2
-        håndterSøknad(Sykdom(1.februar, 16.februar, 100.prosent)) // overlapper med vedtaksperiode 2
-        håndterSykmelding(Sykmeldingsperiode(19.februar, 8.mars, 100.prosent)) // forlenger overlappende
-        håndterSøknad(Sykdom(19.februar, 8.mars, 100.prosent)) // forlenger overlappende
-        assertEquals(4, inspektør.vedtaksperiodeTeller)
-        assertTrue(observatør.hendelseider(1.vedtaksperiode.id(ORGNUMMER)).isNotEmpty())
-        assertTrue(observatør.hendelseider(2.vedtaksperiode.id(ORGNUMMER)).isNotEmpty())
-        assertTrue(observatør.hendelseider(3.vedtaksperiode.id(ORGNUMMER)).isNotEmpty())
-        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, TIL_INFOTRYGD)
-        assertForkastetPeriodeTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, TIL_INFOTRYGD)
-        assertForkastetPeriodeTilstander(3.vedtaksperiode, START, TIL_INFOTRYGD)
-        assertTilstander(4.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
-    }
-
-    @Test
-    fun `søknader som overlapper med toggle`() = Toggle.IkkeForlengInfotrygdperioder.enable {
+    fun `søknader som overlapper med toggle`() {
         håndterSykmelding(Sykmeldingsperiode(15.januar, 30.januar, 100.prosent))
         håndterSøknad(Sykdom(15.januar, 30.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(31.januar, 15.februar, 100.prosent))
@@ -123,7 +86,7 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
     }
 
     @Test
-    fun `ny periode etter forkastede`() = Toggle.IkkeForlengInfotrygdperioder.enable {
+    fun `ny periode etter forkastede`() {
         (1.januar til 10.januar).forkast()
         håndterSykmelding(Sykmeldingsperiode(9.januar, 15.januar, 100.prosent))
         håndterSøknad(Sykdom(9.januar, 15.januar, 100.prosent))
@@ -135,7 +98,7 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
     }
 
     @Test
-    fun `forkaster periode som er forlengelse av forkastet periode`() = Toggle.IkkeForlengInfotrygdperioder.enable {
+    fun `forkaster periode som er forlengelse av forkastet periode`() {
         (1.januar til 15.januar).forkast()
         assertSisteForkastetPeriodeTilstand(ORGNUMMER, 1.vedtaksperiode, TIL_INFOTRYGD)
         håndterSykmelding(Sykmeldingsperiode(16.januar, 31.januar, 100.prosent))
@@ -145,17 +108,7 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
     }
 
     @Test
-    fun `logger periode som er forlengelse av forkastet periode`() = Toggle.IkkeForlengInfotrygdperioder.disable {
-        (1.januar til 15.januar).forkast()
-        assertSisteForkastetPeriodeTilstand(ORGNUMMER, 1.vedtaksperiode, TIL_INFOTRYGD)
-        håndterSykmelding(Sykmeldingsperiode(16.januar, 31.januar, 100.prosent))
-        håndterSøknad(Sykdom(16.januar, 31.januar, 100.prosent))
-        assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
-        assertInfo("Søknad forlenger forkastet vedtaksperiode", 2.vedtaksperiode.filter())
-    }
-
-    @Test
-    fun `forkaster periode som er forlengelse av forkastet periode over helg`() = Toggle.IkkeForlengInfotrygdperioder.enable {
+    fun `forkaster periode som er forlengelse av forkastet periode over helg`() {
         (1.januar til 19.januar).forkast()
         assertSisteForkastetPeriodeTilstand(ORGNUMMER, 1.vedtaksperiode, TIL_INFOTRYGD)
         håndterSykmelding(Sykmeldingsperiode(22.januar, 31.januar, 100.prosent))
@@ -165,17 +118,7 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
     }
 
     @Test
-    fun `logger periode som er forlengelse av forkastet periode over helg`() = Toggle.IkkeForlengInfotrygdperioder.disable {
-        (1.januar til 19.januar).forkast()
-        assertSisteForkastetPeriodeTilstand(ORGNUMMER, 1.vedtaksperiode, TIL_INFOTRYGD)
-        håndterSykmelding(Sykmeldingsperiode(22.januar, 31.januar, 100.prosent))
-        håndterSøknad(Sykdom(22.januar, 31.januar, 100.prosent))
-        assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
-        assertInfo("Søknad forlenger forkastet vedtaksperiode", 2.vedtaksperiode.filter())
-    }
-
-    @Test
-    fun `forkaster ikke periode som har gap til forkastet periode`() = Toggle.IkkeForlengInfotrygdperioder.enable {
+    fun `forkaster ikke periode som har gap til forkastet periode`() {
         (1.januar til 19.januar).forkast()
         assertSisteForkastetPeriodeTilstand(ORGNUMMER, 1.vedtaksperiode, TIL_INFOTRYGD)
         håndterSykmelding(Sykmeldingsperiode(23.januar, 31.januar, 100.prosent))
@@ -185,7 +128,7 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
     }
 
     @Test
-    fun `logger ikke periode som har gap til forkastet periode`() = Toggle.IkkeForlengInfotrygdperioder.disable {
+    fun `logger ikke periode som har gap til forkastet periode`() {
         (1.januar til 19.januar).forkast()
         assertSisteForkastetPeriodeTilstand(ORGNUMMER, 1.vedtaksperiode, TIL_INFOTRYGD)
         håndterSykmelding(Sykmeldingsperiode(23.januar, 31.januar, 100.prosent))
@@ -195,7 +138,7 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
     }
 
     @Test
-    fun `fortsetter å forkaste gjentatte forlengelser av kastede perioder`() = Toggle.IkkeForlengInfotrygdperioder.enable {
+    fun `fortsetter å forkaste gjentatte forlengelser av kastede perioder`() {
         (1.januar til 15.januar).forkast()
         assertSisteForkastetPeriodeTilstand(ORGNUMMER, 1.vedtaksperiode, TIL_INFOTRYGD)
         håndterSykmelding(Sykmeldingsperiode(16.januar, 31.januar, 100.prosent))

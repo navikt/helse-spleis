@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.Toggle
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
@@ -17,7 +16,6 @@ import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
-import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.sisteBehov
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
@@ -397,21 +395,6 @@ internal class AnnullerUtbetalingTest : AbstractEndToEndTest() {
         assertTrue(annullering.inspektør.erAnnullering)
         assertEquals(19.januar, annullering.inspektør.arbeidsgiverOppdrag.førstedato)
         assertEquals(26.januar, annullering.inspektør.arbeidsgiverOppdrag.sistedato)
-    }
-
-    @Test
-    fun `forlengelse ved inflight annullering`() = Toggle.IkkeForlengInfotrygdperioder.disable {
-        /*
-        Tidligere har vi kun basert oss på utbetalinger i en sluttilstand for å beregne ny utbetaling. Om vi hadde en annullering som var in-flight ville denne
-        bli ignorert og det ville bli laget en utbetaling som strakk seg helt tilbake til første del av sammenhengende periode, noe som igjen vil føre til at vi
-        lager en duplikat utbetaling.
-         */
-        nyttVedtak(3.januar, 26.januar, 100.prosent, 3.januar)
-        håndterAnnullerUtbetaling(fagsystemId = inspektør.fagsystemId(1.vedtaksperiode))
-
-        håndterSykmelding(Sykmeldingsperiode(27.januar, 14.februar, 100.prosent))
-        håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(27.januar, 14.februar, 100.prosent))
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
     }
 
     @Test

@@ -1,7 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import java.time.LocalDate
-import no.nav.helse.Toggle
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
@@ -9,13 +7,7 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
-import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
-import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
-import no.nav.helse.person.TilstandType.START
-import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
-import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -48,70 +40,5 @@ internal class StatslønnWarningTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, *historikk, statslønn = true)
 
         assertTrue(person.personLogg.harFunksjonelleFeilEllerVerre())
-    }
-
-    @Test
-    fun `Error for statslønn ved forlengelse av forkastet periode`() = Toggle.IkkeForlengInfotrygdperioder.disable {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        val inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.desember(2017), INNTEKT, false))
-        val perioder1 = arrayOf(
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.desember(2017), 31.desember(2017), 100.prosent, INNTEKT)
-        )
-        håndterUtbetalingshistorikk(
-            1.vedtaksperiode,
-            utbetalinger = perioder1,
-            inntektshistorikk = inntektshistorikk,
-            statslønn = true,
-            besvart = LocalDate.EPOCH.atStartOfDay()
-        )
-        håndterYtelser(
-            1.vedtaksperiode,
-            utbetalinger = perioder1,
-            inntektshistorikk = inntektshistorikk,
-            statslønn = true,
-            besvart = LocalDate.EPOCH.atStartOfDay()
-        )
-
-        val perioder2 = perioder1 + ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 31.januar, 100.prosent, INNTEKT)
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
-        håndterUtbetalingshistorikk(
-            2.vedtaksperiode,
-            utbetalinger = perioder2,
-            inntektshistorikk = inntektshistorikk,
-            statslønn = true,
-            besvart = LocalDate.EPOCH.atStartOfDay()
-        )
-        håndterYtelser(
-            2.vedtaksperiode,
-            utbetalinger = perioder2,
-            inntektshistorikk = inntektshistorikk,
-            statslønn = true,
-            besvart = LocalDate.EPOCH.atStartOfDay()
-        )
-
-        assertForkastetPeriodeTilstander(
-            1.vedtaksperiode,
-            START,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK,
-            TIL_INFOTRYGD
-        )
-        assertFunksjonellFeil("Det er lagt inn statslønn i Infotrygd, undersøk at utbetalingen blir riktig.", 1.vedtaksperiode.filter())
-
-        assertForkastetPeriodeTilstander(
-            2.vedtaksperiode,
-            START,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK,
-            TIL_INFOTRYGD
-        )
-        assertFunksjonellFeil(
-            "Det er lagt inn statslønn i Infotrygd, undersøk at utbetalingen blir riktig.",
-            2.vedtaksperiode.filter()
-        )
     }
 }

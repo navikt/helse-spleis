@@ -3,7 +3,6 @@ package no.nav.helse.spleis.e2e
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
-import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
@@ -23,7 +22,6 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.inspectors.personLogg
-import no.nav.helse.inspectors.søppelbøtte
 import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.mars
@@ -812,36 +810,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         )
     }
 
-    @Test
-    fun `Replay av inntekstmelding med forkasting`() = Toggle.IkkeForlengInfotrygdperioder.disable {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 10.januar, 100.prosent))
-        håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(11.januar, 16.januar, 100.prosent))
-        håndterSøknad(Sykdom(16.januar, 16.januar, 100.prosent))
-
-        håndterSykmelding(Sykmeldingsperiode(17.januar, 31.januar, 100.prosent))
-        håndterSøknad(Sykdom(17.januar, 31.januar, 100.prosent))
-        val im = håndterInntektsmeldingMedValidering(3.vedtaksperiode, listOf(1.januar til 16.januar))
-        person.søppelbøtte(hendelselogg, 17.januar til 31.januar) // simulerer forkastelse av januar-perioden
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 10.februar, 100.prosent))
-        håndterSøknad(Sykdom(1.februar, 10.februar, 100.prosent))
-        person.søppelbøtte(
-            hendelselogg,
-            1.februar til 10.februar
-        ) // simulerer feil etter at perioden har bedt om replay; f.eks. ved at Utbetalingshistorikk inneholder feil, etc.
-        håndterInntektsmeldingReplay(im, 4.vedtaksperiode.id(ORGNUMMER))
-        assertIngenVarsler(1.vedtaksperiode.filter())
-        assertIngenVarsler(2.vedtaksperiode.filter())
-        assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
-        assertForkastetPeriodeTilstander(
-            4.vedtaksperiode,
-            START,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            TIL_INFOTRYGD
-        )
-    }
-
     // TODO: sanitycheck
     @Test
     fun `Inntektsmelding utvider ikke vedtaksperiode bakover over tidligere forkastet periode`() {
@@ -1187,25 +1155,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
                 ?.get(ORGNUMMER)
         assertEquals(INNTEKT, inntektsopplysning?.omregnetÅrsinntekt())
         assertInstanceOf(Inntektshistorikk.Inntektsmelding::class.java, inntektsopplysning)
-    }
-
-    @Test
-    fun `Ikke klipp inntektsmelding dersom vi overlapper med forkastet vedtaksperiode`() = Toggle.IkkeForlengInfotrygdperioder.disable {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 10.januar, 100.prosent))
-        håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent))
-        person.invaliderAllePerioder(hendelselogg, null)
-
-        håndterSykmelding(Sykmeldingsperiode(11.januar, 31.januar, 100.prosent))
-        håndterSøknad(Sykdom(11.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(
-            listOf(
-                1.januar til 16.januar
-            ), førsteFraværsdag = 1.januar
-        )
-        håndterYtelser(2.vedtaksperiode)
-        håndterVilkårsgrunnlag(2.vedtaksperiode)
-
-        assertEquals(1.januar til 31.januar, inspektør.vedtaksperioder(2.vedtaksperiode).periode())
     }
 
     @Test

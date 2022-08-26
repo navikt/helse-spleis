@@ -2379,12 +2379,8 @@ internal class Vedtaksperiode private constructor(
             forkastede
                 .filter { it.sykdomstidslinje.erRettFør(hendelse.sykdomstidslinje()) }
                 .forEach {
-                    if (Toggle.IkkeForlengInfotrygdperioder.enabled) {
-                        hendelse.funksjonellFeil("Søknad forlenger en forkastet periode")
-                        hendelse.info("Søknad forlenger forkastet vedtaksperiode ${it.id}, hendelse periode: ${hendelse.periode()}, vedtaksperiode periode: ${it.periode}")
-                    } else {
-                        hendelse.info("Søknad forlenger forkastet vedtaksperiode")
-                    }
+                    hendelse.funksjonellFeil("Søknad forlenger en forkastet periode")
+                    hendelse.info("Søknad forlenger forkastet vedtaksperiode ${it.id}, hendelse periode: ${hendelse.periode()}, vedtaksperiode periode: ${it.periode}")
                 }
         }
 

@@ -126,7 +126,6 @@ abstract class Toggle internal constructor(enabled: Boolean = false, private val
     object GraphQLPlayground : Toggle("GraphQLPlayground", false)
     object SendFeriepengeOppdrag : Toggle(true)
     object RevurdereInntektMedFlereArbeidsgivere : Toggle("RevurdereInntektMedFlereArbeidsgivere", false)
-    object IkkeForlengInfotrygdperioder : Toggle(true)
     object RevurdereOutOfOrder : Toggle(false)
     object RevurderKorrigertSoknad : Toggle("RevurderKorrigertSoknad", false)
 }
