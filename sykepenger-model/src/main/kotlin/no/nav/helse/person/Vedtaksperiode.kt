@@ -1236,6 +1236,10 @@ internal class Vedtaksperiode private constructor(
             FunksjonelleFeilTilVarsler.wrap(vilkårsgrunnlag) { vedtaksperiode.håndterVilkårsgrunnlag(vilkårsgrunnlag, AvventerHistorikkRevurdering) }
         }
 
+        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
+            vedtaksperiode.håndterOverlappendeSøknadRevurdering(søknad)
+        }
+
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {
             if (!vedtaksperiode.kanRevurdereInntektForFlereArbeidsgivere(hendelse)) return
             FunksjonelleFeilTilVarsler.wrap(hendelse) {
@@ -1249,6 +1253,16 @@ internal class Vedtaksperiode private constructor(
             )
             }
             vedtaksperiode.tilstand(hendelse, AvventerHistorikkRevurdering)
+        }
+
+        override fun startRevurdering(
+            arbeidsgivere: List<Arbeidsgiver>,
+            vedtaksperiode: Vedtaksperiode,
+            hendelse: IAktivitetslogg,
+            overstyrt: Vedtaksperiode,
+            pågående: Vedtaksperiode?
+        ) {
+            vedtaksperiode.nesteRevurderingstilstand(hendelse, overstyrt, pågående)
         }
     }
 

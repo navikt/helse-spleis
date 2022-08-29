@@ -5,6 +5,7 @@ import no.nav.helse.Toggle
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
@@ -17,15 +18,18 @@ import no.nav.helse.person.TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.forlengVedtak
+import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
 import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
 import no.nav.helse.spleis.e2e.håndterUtbetalt
+import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.sykdomstidslinje.Dag.Feriedag
@@ -258,6 +262,36 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
         }
         (22..26).forEach {
             assertTrue(inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.januar] is Fridag)
+        }
+    }
+    @Test
+    fun `Korrigerende søknad for periode i AvventerVilkårsprøvingRevurdering - setter i gang en overstyring av revurderingen`() {
+        nyttVedtak(1.januar, 31.januar, 100.prosent)
+        forlengVedtak(1.februar, 28.februar, 100.prosent)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Arbeid(22.januar, 31.januar))
+        assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+
+        håndterInntektsmelding(listOf(1.januar til 16.januar), 1.februar)
+        assertTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+        håndterYtelser(2.vedtaksperiode)
+
+        assertTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING_REVURDERING)
+        håndterSøknad(Sykdom(1.februar, 28.februar, 50.prosent))
+        håndterYtelser(2.vedtaksperiode)
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt()
+        assertTilstand(1.vedtaksperiode, AVSLUTTET)
+        assertTilstand(2.vedtaksperiode, AVSLUTTET)
+
+        (1..28).forEach {
+            assertEquals(50.prosent, inspektør.utbetalingstidslinjer(2.vedtaksperiode)[it.februar].økonomi.inspektør.grad)
         }
     }
     @Test

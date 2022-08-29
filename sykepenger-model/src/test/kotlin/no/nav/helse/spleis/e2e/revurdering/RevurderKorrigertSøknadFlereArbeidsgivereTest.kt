@@ -25,6 +25,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
 import no.nav.helse.spleis.e2e.grunnlag
 import no.nav.helse.spleis.e2e.repeat
 import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
@@ -38,7 +39,6 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 @EnableToggle(Toggle.RevurderKorrigertSoknad::class)
@@ -603,7 +603,6 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
     }
 
     @Test
-    @Disabled("ikke implemnentert enda - avventer bug i håndtering av inntektsmelding")
     fun `To arbeidsgivere med ett sykefraværstilfelle og gap over 16 dager - korrigerende søknad setter i gang revurdering`() {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
@@ -617,7 +616,6 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 15000.00.månedlig)
             håndterSykmelding(Sykmeldingsperiode(24.februar, 24.mars, 100.prosent))
             håndterSøknad(Sykdom(24.februar, 24.mars, 100.prosent))
-            håndterInntektsmelding(listOf(24.februar til 11.mars), beregnetInntekt = 17000.00.månedlig)
         }
         a2 {
             håndterInntektsmelding(listOf(25.januar til 9.februar), beregnetInntekt = 16000.00.månedlig)
@@ -669,6 +667,7 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
         }
 
         a1 {
+            håndterInntektsmelding(listOf(24.februar til 11.mars), beregnetInntekt = 17000.00.månedlig)
             assertTilstand(1.vedtaksperiode, AVVENTER_REVURDERING)
             assertTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
         }
@@ -690,6 +689,10 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             assertTilstand(1.vedtaksperiode, AVSLUTTET)
             assertTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+            håndterYtelser(2.vedtaksperiode)
+
+            assertTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING_REVURDERING)
+            håndterSøknad(Sykdom(24.februar, 24.mars, 50.prosent))
             håndterYtelser(2.vedtaksperiode)
             håndterVilkårsgrunnlag(2.vedtaksperiode,
                 arbeidsforhold = listOf(
@@ -715,6 +718,9 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
             håndterUtbetalt()
             assertTilstand(2.vedtaksperiode, AVSLUTTET)
+            (12..24).forEach {
+                assertEquals(50.prosent, inspektør.utbetalingstidslinjer(2.vedtaksperiode)[it.mars].økonomi.inspektør.grad)
+            }
         }
     }
 
@@ -862,6 +868,7 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
         }
     }
+
     @Test
     fun `Korrigerende søknad for periode i AvventerHistorikkRevurdering - setter i gang en overstyring av revurderingen`() {
         listOf(a1, a2).nyeVedtak(1.januar til 31.januar)
