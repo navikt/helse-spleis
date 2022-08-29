@@ -7,6 +7,7 @@
         </encoder>
     </appender>
 
+    <logger name="tjenestekall" level="INFO" />
     <logger name="kafka" level="ERROR" />
     <logger name="org.apache.zookeeper" level="ERROR" />
     <logger name="org.apache.kafka" level="ERROR" />
@@ -16,7 +17,7 @@
     <logger name="org.eclipse" level="WARN" />
     <logger name="io.netty" level="WARN" />
 
-    <root level="DEBUG">
+    <root level="OFF">
         <appender-ref ref="CONSOLE"/>
     </root>
 </configuration>
