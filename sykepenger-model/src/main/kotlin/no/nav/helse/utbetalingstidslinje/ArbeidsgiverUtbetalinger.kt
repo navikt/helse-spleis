@@ -59,15 +59,17 @@ internal class ArbeidsgiverUtbetalinger(
         tidslinjerPerArbeidsgiver.forEach { (arbeidsgiver, utbetalingstidslinje) ->
             arbeidsgiver.lagreUtbetalingstidslinjeberegning(orgnummer, utbetalingstidslinje, vilkårsgrunnlagHistorikk)
         }
-        tidslinjerPerArbeidsgiver.forEach { (arbeidsgiver, utbetalingstidslinje) ->
-            // TODO: kan sende med utbetalingstidslinje for å unngå 'utbetalingstidslinjeberegning'
-            utbetalingsperioder[arbeidsgiver]?.lagRevurdering(hendelse.barn(), orgnummer, maksimumSykepenger)
-        }
+        tidslinjerPerArbeidsgiver
+            .filterValues { utbetalingstidslinje -> utbetalingstidslinje.isNotEmpty() }
+            .forEach { (arbeidsgiver, utbetalingstidslinje) ->
+                // TODO: kan sende med utbetalingstidslinje for å unngå 'utbetalingstidslinjeberegning'
+                utbetalingsperioder[arbeidsgiver]?.lagRevurdering(hendelse.barn(), orgnummer, maksimumSykepenger)
+            }
     }
 
     private fun tidslinjer(kuttdato: LocalDate) = arbeidsgivere
         .mapValues { (arbeidsgiver, builder) -> arbeidsgiver.build(subsumsjonObserver, infotrygdhistorikk, builder, kuttdato) }
-        .filterValues { it.isNotEmpty() }
+        //.filterValues { it.isNotEmpty() }
 
     private fun gjødsle(aktivitetslogg: IAktivitetslogg, periode: Periode, arbeidsgivere: Map<Arbeidsgiver, Utbetalingstidslinje>) {
         arbeidsgivere.forEach { (arbeidsgiver, tidslinje) ->

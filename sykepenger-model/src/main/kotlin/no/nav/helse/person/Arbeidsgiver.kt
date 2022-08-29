@@ -45,6 +45,7 @@ import no.nav.helse.person.Vedtaksperiode.Companion.OVERLAPPENDE
 import no.nav.helse.person.Vedtaksperiode.Companion.OVERLAPPER_ELLER_FORLENGER
 import no.nav.helse.person.Vedtaksperiode.Companion.SKAL_INNGÅ_I_SYKEPENGEGRUNNLAG
 import no.nav.helse.person.Vedtaksperiode.Companion.avventerRevurdering
+import no.nav.helse.person.Vedtaksperiode.Companion.feiletRevurdering
 import no.nav.helse.person.Vedtaksperiode.Companion.harNødvendigInntekt
 import no.nav.helse.person.Vedtaksperiode.Companion.harOverlappendeUtbetaltePerioder
 import no.nav.helse.person.Vedtaksperiode.Companion.harUtbetaling
@@ -360,6 +361,7 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun avventerRevurdering() = vedtaksperioder.avventerRevurdering()
+    internal fun feiletRevurdering(vedtaksperiode: Vedtaksperiode) = vedtaksperioder.feiletRevurdering(vedtaksperiode)
 
     internal fun gjenopptaRevurdering(arbeidsgivere: List<Arbeidsgiver>, første: Vedtaksperiode, hendelse: IAktivitetslogg) {
         Vedtaksperiode.gjenopptaRevurdering(arbeidsgivere, hendelse, vedtaksperioder, første, this)

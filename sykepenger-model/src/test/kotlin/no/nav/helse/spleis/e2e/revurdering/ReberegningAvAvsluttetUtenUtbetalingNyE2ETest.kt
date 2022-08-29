@@ -76,12 +76,10 @@ import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 
 internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndTest() {
 
@@ -210,16 +208,11 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
             Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, false)
         ))
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
+        nullstillTilstandsendringer()
+        håndterYtelser(2.vedtaksperiode)
 
-        assertForventetFeil(
-            forklaring = "må kaste ut perioder utbetalt i infotrygd",
-            nå = {
-                 assertThrows<RuntimeException> { håndterYtelser(2.vedtaksperiode) }
-            },
-            ønsket = {
-                assertDoesNotThrow { håndterYtelser(2.vedtaksperiode) }
-            }
-        )
+        assertForkastetPeriodeTilstander(1.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING, REVURDERING_FEILET)
+        assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, REVURDERING_FEILET)
     }
 
     @Test
@@ -241,15 +234,13 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
             Inntektsopplysning(a2, 1.januar, INNTEKT, false)
         ), orgnummer = a2)
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT, orgnummer = a2)
-        assertForventetFeil(
-            forklaring = "må kaste ut perioder utbetalt i infotrygd",
-            nå = {
-                assertThrows<RuntimeException> { håndterYtelser(2.vedtaksperiode, orgnummer = a2) }
-            },
-            ønsket = {
-                assertDoesNotThrow { håndterYtelser(2.vedtaksperiode, orgnummer = a2) }
-            }
-        )
+        nullstillTilstandsendringer()
+        håndterYtelser(2.vedtaksperiode, orgnummer = a2)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+
+        assertTilstander(1.vedtaksperiode, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, orgnummer = a1)
+        assertTilstander(1.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING, REVURDERING_FEILET, orgnummer = a2)
+        assertTilstander(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, REVURDERING_FEILET, orgnummer = a2)
     }
 
     @Test

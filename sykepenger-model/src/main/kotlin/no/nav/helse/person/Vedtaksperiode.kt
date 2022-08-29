@@ -734,6 +734,11 @@ internal class Vedtaksperiode private constructor(
     private fun høstingsresultaterRevurdering(hendelse: ArbeidstakerHendelse) {
         hendelse.info("Videresender utbetaling til alle vedtaksperioder innenfor samme fagsystemid som er til revurdering")
         when {
+            !utbetalinger.erUbetalt() -> {
+                tilstand(hendelse, RevurderingFeilet) {
+                    hendelse.info("""Det har ikke blitt laget noen utbetaling fordi Infotrygd har overlappende utbetaling""")
+                }
+            }
             !utbetalinger.harUtbetalinger() -> {
                 tilstand(hendelse, AvventerGodkjenningRevurdering) {
                     hendelse.info("""Saken oppfyller krav for behandling, settes til "Avventer godkjenning" fordi ingenting skal utbetales""")
@@ -1049,13 +1054,16 @@ internal class Vedtaksperiode private constructor(
             hendelse: IAktivitetslogg
         ) {
             if (vedtaksperiode.arbeidsgiver.avventerRevurdering()) return
-            if (vedtaksperiode.utbetalinger.erAvvist()) {
+            if (feiletRevurdering(vedtaksperiode)) {
                 hendelse.info("Går til revurdering feilet fordi revurdering er avvist")
                 return vedtaksperiode.tilstand(hendelse, RevurderingFeilet)
             }
             hendelse.info("Går til avsluttet fordi revurdering er fullført via en annen vedtaksperiode")
             vedtaksperiode.tilstand(hendelse, Avsluttet)
         }
+
+        private fun feiletRevurdering(vedtaksperiode: Vedtaksperiode) =
+            vedtaksperiode.utbetalinger.erAvvist() || vedtaksperiode.arbeidsgiver.feiletRevurdering(vedtaksperiode)
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: UtbetalingHendelse) {
             hendelse.info("Kvittering håndteres av vedtaksperioden som har håndtert utbetaling av revurderingen.")
@@ -2437,6 +2445,8 @@ internal class Vedtaksperiode private constructor(
         }
 
         internal fun List<Vedtaksperiode>.avventerRevurdering() = pågående() != null
+        internal fun List<Vedtaksperiode>.feiletRevurdering(other: Vedtaksperiode) =
+            any { it.tilstand == RevurderingFeilet && it.skjæringstidspunkt == other.skjæringstidspunkt }
 
         internal fun Iterable<Vedtaksperiode>.senerePerioderPågående(vedtaksperiode: Vedtaksperiode) =
             this.pågående()?.let { it etter vedtaksperiode } ?: false
@@ -2583,6 +2593,7 @@ internal class Vedtaksperiode private constructor(
             }
 
             internal fun filtrer(filtere: List<UtbetalingstidslinjerFilter>, tidslinjer: Map<Arbeidsgiver, Utbetalingstidslinje>) {
+                if (tidslinjer.all { it.value.isEmpty() }) return
                 val perioder = beregningsperioder
                     .map { Triple(it.periode, it.aktivitetsloggkopi(), it.jurist) }
                 filtere.forEach {
