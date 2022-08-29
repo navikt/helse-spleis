@@ -540,6 +540,17 @@ internal class Vedtaksperiode private constructor(
         håndterSøknad(søknad) { nesteTilstand }
     }
 
+    private fun håndterOverlappendeSøknadRevurdering(søknad: Søknad) {
+        if (Toggle.RevurderKorrigertSoknad.enabled){
+            if (!søknad.omsluttesAv(periode())) return overlappendeSøknadIkkeStøttet(søknad)
+            if (person.harSkjæringstidspunktSenereEnn(skjæringstidspunkt)) return overlappendeSøknadIkkeStøttet(søknad)
+            oppdaterHistorikk(søknad)
+            person.startRevurdering(this, søknad)
+        } else {
+            return overlappendeSøknadIkkeStøttet(søknad)
+        }
+    }
+
     private fun håndterVilkårsgrunnlag(vilkårsgrunnlag: Vilkårsgrunnlag, nesteTilstand: Vedtaksperiodetilstand) {
         vilkårsgrunnlag.lagreArbeidsforhold(person, skjæringstidspunkt)
         vilkårsgrunnlag.lagreSkatteinntekter(person, skjæringstidspunkt)
@@ -1887,14 +1898,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
-            if (Toggle.RevurderKorrigertSoknad.enabled){
-                if (!søknad.omsluttesAv(vedtaksperiode.periode())) return super.håndter(vedtaksperiode, søknad)
-                if (vedtaksperiode.person.harSkjæringstidspunktSenereEnn(vedtaksperiode.skjæringstidspunkt)) return super.håndter(vedtaksperiode, søknad)
-                vedtaksperiode.oppdaterHistorikk(søknad)
-                vedtaksperiode.person.startRevurdering(vedtaksperiode, søknad)
-            } else {
-                super.håndter(vedtaksperiode, søknad)
-            }
+            vedtaksperiode.håndterOverlappendeSøknadRevurdering(søknad)
         }
     }
 
