@@ -238,6 +238,29 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
         }
     }
     @Test
+    fun `Korrigerende søknad for periode i AvventerHistorikkRevurdering - setter i gang en overstyring av revurderingen`() {
+        nyttVedtak(1.januar, 31.januar, 100.prosent)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 50.prosent))
+        assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+
+        håndterSøknad(Sykdom(1.januar, 31.januar, 50.prosent), Ferie(22.januar, 26.januar))
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+        assertTilstand(1.vedtaksperiode, AVSLUTTET)
+
+        (17..21).forEach {
+            assertEquals(50.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.januar].økonomi.inspektør.grad)
+        }
+        (27..31).forEach {
+            assertEquals(50.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.januar].økonomi.inspektør.grad)
+        }
+        (22..26).forEach {
+            assertTrue(inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.januar] is Fridag)
+        }
+    }
+    @Test
     fun `Korrigerende søknad for førstegangsbehandling med forlengelse i avventerGodkjenning - setter i gang en revurdering`() {
         nyttVedtak(1.januar, 31.januar, 100.prosent)
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
