@@ -1627,6 +1627,10 @@ internal class Vedtaksperiode private constructor(
             subsumsjon: Subsumsjon?
         ) = vedtaksperiode.revurderArbeidsforhold(overstyrArbeidsforhold, subsumsjon)
 
+        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
+            vedtaksperiode.håndterOverlappendeSøknadRevurdering(søknad)
+        }
+
         override fun startRevurdering(
             arbeidsgivere: List<Arbeidsgiver>,
             vedtaksperiode: Vedtaksperiode,
