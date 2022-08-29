@@ -13,7 +13,6 @@ import no.nav.helse.person.infotrygdhistorikk.PersonUtbetalingsperiode
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class NødnummerE2ETest : AbstractEndToEndTest() {
@@ -55,18 +54,6 @@ internal class NødnummerE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `slår ut på forlengelse med inntektsopplysning med nødnummer`() {
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
-        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.februar, 28.februar, 100.prosent))
-        håndterUtbetalingshistorikk(1.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 31.januar, 100.prosent, 500.daglig), inntektshistorikk = listOf(
-            Inntektsopplysning(nødnummer, 17.januar, 500.daglig, false),
-            Inntektsopplysning(ORGNUMMER, 17.januar, 500.daglig, true)
-        ))
-        assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode)) { person.personLogg.toString() }
-        assertFunksjonellFeil("Det er registrert bruk av på nødnummer", 1.vedtaksperiode.filter())
-    }
-
-    @Test
     fun `slår ikke ut på utbetaling med nødnummer innenfor samme agp`() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
         håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.februar, 28.februar, 100.prosent))
@@ -74,29 +61,5 @@ internal class NødnummerE2ETest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, PersonUtbetalingsperiode(nødnummer, 17.januar, 18.januar, 100.prosent, 500.daglig), inntektshistorikk = listOf(Inntektsopplysning(nødnummer, 17.januar, 500.daglig, false)))
         assertFalse(inspektør.periodeErForkastet(1.vedtaksperiode)) { person.personLogg.toString() }
         assertFalse(person.inspektør.harArbeidsgiver(nødnummer))
-    }
-
-    @Test
-    fun `slår ut på utbetaling med nødnummer med samme skjæringstidspunkt`() {
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
-        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.februar, 28.februar, 100.prosent))
-        håndterUtbetalingshistorikk(1.vedtaksperiode, PersonUtbetalingsperiode(nødnummer, 17.januar, 31.januar, 100.prosent, 500.daglig), inntektshistorikk = listOf(Inntektsopplysning(nødnummer, 17.januar, 500.daglig, false)))
-        assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
-        assertFunksjonellFeil("Det er registrert utbetaling på nødnummer", 1.vedtaksperiode.filter())
-        assertFunksjonellFeil("Det er registrert bruk av på nødnummer", 1.vedtaksperiode.filter())
-    }
-
-    @Test
-    fun `slår ut på forlengelse med utbetaling med nødnummer`() {
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
-        håndterSøknadMedValidering(1.vedtaksperiode, Sykdom(1.februar, 28.februar, 100.prosent))
-        håndterUtbetalingshistorikk(1.vedtaksperiode, PersonUtbetalingsperiode(nødnummer, 17.januar, 19.januar, 100.prosent, 500.daglig), ArbeidsgiverUtbetalingsperiode(
-            ORGNUMMER, 20.januar, 31.januar, 100.prosent, 1000.daglig), inntektshistorikk = listOf(
-            Inntektsopplysning(nødnummer, 17.januar, 500.daglig, false),
-            Inntektsopplysning(ORGNUMMER, 20.januar, 500.daglig, true)
-        ))
-        assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
-        assertFunksjonellFeil("Det er registrert utbetaling på nødnummer", 1.vedtaksperiode.filter())
-        assertFunksjonellFeil("Det er registrert bruk av på nødnummer", 1.vedtaksperiode.filter())
     }
 }

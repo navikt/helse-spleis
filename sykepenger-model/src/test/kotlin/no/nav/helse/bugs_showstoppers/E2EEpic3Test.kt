@@ -2,7 +2,6 @@ package no.nav.helse.bugs_showstoppers
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import no.nav.helse.Grunnbeløp
 import no.nav.helse.april
 import no.nav.helse.august
 import no.nav.helse.desember
@@ -39,13 +38,9 @@ import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
-import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
-import no.nav.helse.person.infotrygdhistorikk.Friperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.september
-import no.nav.helse.serde.SerialisertPerson
-import no.nav.helse.serde.serialize
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertActivities
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
@@ -1236,35 +1231,6 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `skal ikke lage ny arbeidsgiverperiode ved forkasting`() {
-        håndterSykmelding(Sykmeldingsperiode(30.juni(2020), 14.august(2020), 100.prosent))
-        håndterSøknad(Sykdom(30.juni(2020), 14.august(2020), 100.prosent))
-        håndterSøknad(Sykdom(30.juni(2020), 14.august(2020), 100.prosent))
-
-        håndterInntektsmelding(listOf(Periode(30.juni(2020), 14.juli(2020))), førsteFraværsdag = 30.juni(2020))
-
-        håndterSykmelding(Sykmeldingsperiode(30.juni(2020), 22.august(2020), 100.prosent))
-        håndterSøknad(Sykdom(30.juni(2020), 22.august(2020), 100.prosent))
-
-        håndterSykmelding(Sykmeldingsperiode(23.august(2020), 14.september(2020), 100.prosent))
-        håndterSøknad(Sykdom(23.august(2020), 14.september(2020), 100.prosent))
-
-        person = SerialisertPerson(person.serialize().json).deserialize(MaskinellJurist())
-
-        val historikk = ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.august(2020), 22.august(2020), 100.prosent, 1000.daglig)
-        val inntekter = listOf(Inntektsopplysning(ORGNUMMER, 17.august(2020), INNTEKT, true))
-
-        håndterUtbetalingshistorikk(2.vedtaksperiode, historikk, inntektshistorikk = inntekter)
-        håndterYtelser(2.vedtaksperiode)
-
-        inspektør.also {
-            it.utbetalingstidslinjer(2.vedtaksperiode).inspektør.also { tidslinjeInspektør ->
-                assertEquals(0, tidslinjeInspektør.arbeidsgiverperiodeDagTeller)
-            }
-        }
-    }
-
-    @Test
     fun `Avsluttet vedtaksperiode forkastes ikke ved overlapp`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 30.januar, 100.prosent))
         val innteksmeldingId = håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 1.januar)
@@ -1280,25 +1246,6 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(9.januar, 31.januar, 100.prosent))
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-    }
-
-    @Test
-    fun `Kan ta inn ferie fra IT som overlapper med perioden`() {
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Ferie(1.februar, 28.februar))
-
-        håndterUtbetalingshistorikk(
-            1.vedtaksperiode,
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 31.januar, 100.prosent, 1000.daglig),
-            Friperiode(1.februar, 28.februar),
-            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true))
-        )
-
-        inspektør.also {
-            assertEquals(1.februar, it.sykdomstidslinje.førsteDag())
-            assertEquals(28.februar, it.sykdomstidslinje.sisteDag())
-            assertEquals(28, it.sykdomstidslinje.inspektør.dagteller[Feriedag::class])
-        }
     }
 
     @Test
@@ -1346,23 +1293,5 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
         assertEquals(28.desember, inspektør.maksdatoVedSisteVedtak())
         nyttVedtak(1.mai, 21.mai)
         assertEquals(12.april(2019), inspektør.maksdatoVedSisteVedtak())
-    }
-
-
-    @Test
-    fun `Legger ikke på warning hvis inntekt ikke blir begrenset av gammel 6G`() {
-        håndterSykmelding(Sykmeldingsperiode(12.juli(2021), 1.august(2021), 100.prosent))
-        håndterSøknad(Sykdom(12.juli(2021), 1.august(2021), 100.prosent))
-
-        val inntektLavereEnnGammeltGBeløp = Grunnbeløp.`6G`.beløp(LocalDate.of(2021, 4, 30)).minus(1.00.daglig)
-        val inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 2.mai(2021), inntektLavereEnnGammeltGBeløp, true))
-        val utbetlinger = arrayOf(
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 2.mai(2021), 21.juni(2021), 100.prosent, 1000.daglig),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 22.juni(2021), 11.juli(2021), 100.prosent, 1000.daglig)
-        )
-        håndterUtbetalingshistorikk(1.vedtaksperiode, utbetalinger = utbetlinger, inntektshistorikk = inntektshistorikk)
-        håndterYtelser(1.vedtaksperiode)
-
-        assertFalse(person.personLogg.varsel().toString().contains("Første utbetalingsdag er i Infotrygd og mellom 1. og 16. mai. Kontroller at riktig grunnbeløp er brukt."))
     }
 }

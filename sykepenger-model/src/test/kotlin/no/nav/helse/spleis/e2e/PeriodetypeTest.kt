@@ -16,6 +16,9 @@ import no.nav.helse.person.Periodetype.FORLENGELSE
 import no.nav.helse.person.Periodetype.FØRSTEGANGSBEHANDLING
 import no.nav.helse.person.Periodetype.INFOTRYGDFORLENGELSE
 import no.nav.helse.person.Periodetype.OVERGANG_FRA_IT
+import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
+import no.nav.helse.person.TilstandType.START
+import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
@@ -251,7 +254,9 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
         )
 
         assertEquals(OVERGANG_FRA_IT, inspektør.periodetype(1.vedtaksperiode))
-        assertEquals(INFOTRYGDFORLENGELSE, inspektør.periodetype(2.vedtaksperiode))
+        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, TIL_INFOTRYGD)
+        assertEquals(OVERGANG_FRA_IT, inspektør.periodetype(2.vedtaksperiode))
+        assertForkastetPeriodeTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, TIL_INFOTRYGD)
     }
 
     @Test

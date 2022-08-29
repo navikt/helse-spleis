@@ -52,7 +52,8 @@ internal class WarningsTest {
             "Opptjeningsvurdering må gjøres manuelt fordi opplysningene fra AA-registeret er ufullstendige",
             "Utbetalingen ble gjennomført, men med advarsel: \$melding",
             "Utbetalingen forlenger et tidligere oppdrag som opphørte alle utbetalte dager. Sjekk simuleringen.",
-            "Søknaden inneholder Permisjonsdager utenfor sykdomsvindu"
+            "Søknaden inneholder Permisjonsdager utenfor sykdomsvindu",
+            "Første utbetalingsdag er i Infotrygd og mellom 1. og 16. mai. Kontroller at riktig grunnbeløp er brukt."
         )
 
         val nyeWarningerSomManglerEksplisittTest = ikkeTestedeWarnings.minus(warningerSomManglerEksplisittTest)

@@ -20,8 +20,6 @@ import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.inntektsoppl
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.TilstandType
-import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
-import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
 import no.nav.helse.spleis.e2e.assertIngenVarsel
@@ -38,7 +36,6 @@ import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
 import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
-import no.nav.helse.spleis.e2e.håndterUtbetalingshistorikk
 import no.nav.helse.spleis.e2e.håndterUtbetalt
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
@@ -638,73 +635,6 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         )
 
         assertVarsel("Den sykmeldte har oppgitt å ha andre arbeidsforhold med sykmelding i søknaden.")
-    }
-
-    @Test
-    fun `Forlengelse etter ping-pong (Spleis-IT-Spleis) skal ikke få ghost warning`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-
-        håndterInntektsmelding(
-            listOf(1.januar til 16.januar),
-            førsteFraværsdag = 1.januar,
-            beregnetInntekt = 30000.månedlig,
-            orgnummer = a1
-        )
-
-        val inntekter = listOf(
-            grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 30000.månedlig.repeat(3)),
-            grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 35000.månedlig.repeat(3))
-        )
-
-        val arbeidsforhold = listOf(
-            Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a1, ansattFom = LocalDate.EPOCH, ansattTom = null),
-            Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a2, ansattFom = LocalDate.EPOCH, ansattTom = null)
-        )
-
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-
-        håndterVilkårsgrunnlag(
-            1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
-                listOf(
-                    sammenligningsgrunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 30000.månedlig.repeat(12)),
-                    sammenligningsgrunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 35000.månedlig.repeat(12))
-                )
-            ),
-            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                inntekter = inntekter,
-                arbeidsforhold = emptyList()
-            ),
-            arbeidsforhold = arbeidsforhold,
-            orgnummer = a1
-        )
-
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-        håndterUtbetalt(orgnummer = a1)
-
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent), orgnummer = a1)
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a1)
-
-        val utbetalinger = arrayOf(
-            ArbeidsgiverUtbetalingsperiode(
-                a1,
-                1.februar,
-                28.februar,
-                100.prosent,
-                30000.månedlig
-            )
-        )
-        val inntektshistorikk = listOf(Inntektsopplysning(a1, 1.februar, 30000.månedlig, true))
-
-        håndterUtbetalingshistorikk(2.vedtaksperiode, orgnummer = a1, utbetalinger = utbetalinger, inntektshistorikk = inntektshistorikk)
-
-        assertTilstand(2.vedtaksperiode, TilstandType.AVVENTER_HISTORIKK, orgnummer = a1)
-        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
-
-        assertVarsel("Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold", 1.vedtaksperiode.filter(a1))
-        assertIngenVarsler(2.vedtaksperiode.filter(orgnummer = a1))
     }
 
     @Test

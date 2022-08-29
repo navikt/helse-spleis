@@ -149,7 +149,7 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
             utbetalteSykeperioder = listOf(
                 UtbetalingshistorikkTestdata.UtbetaltSykeperiode(
                     fom = 1.januar,
-                    tom = 2.januar,
+                    tom = 1.januar,
                     dagsats = 1400.0,
                     typekode = "5",
                     utbetalingsgrad = "100",
@@ -166,14 +166,10 @@ internal class HendelseYtelserMediatorTest : AbstractEndToEndMediatorTest() {
             )
         ))
         sendUtbetalingshistorikk(vedtaksperiodeIndeks = 0, sykepengehistorikk = historikk)
-        sendYtelser(vedtaksperiodeIndeks = 0, sykepengehistorikk = historikk)
 
         assertTilstander(
             0,
-            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
-            "AVVENTER_BLOKKERENDE_PERIODE",
-            "AVVENTER_HISTORIKK",
-            "TIL_INFOTRYGD"
+            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK"
         )
     }
 

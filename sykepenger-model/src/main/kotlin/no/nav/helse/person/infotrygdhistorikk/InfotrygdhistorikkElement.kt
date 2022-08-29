@@ -263,8 +263,8 @@ class InfotrygdhistorikkElement private constructor(
     }
 
     internal fun harBetaltRettFør(periode: Periode): Boolean {
-        return perioder.filterIsInstance<Utbetalingsperiode>().any {
-            it.erRettFør(periode)
+        return perioder.any {
+            it !is UkjentInfotrygdperiode && it.erRettFør(periode)
         }
     }
 

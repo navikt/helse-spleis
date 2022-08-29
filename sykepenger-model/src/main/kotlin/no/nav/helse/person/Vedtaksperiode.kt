@@ -510,11 +510,6 @@ internal class Vedtaksperiode private constructor(
         if (!person.harFlereArbeidsgivereMedSykdom()) hendelse.validerIkkeOppgittFlereArbeidsforholdMedSykmelding()
         hendelse.valider(periode, jurist())
         if (hendelse.harFunksjonelleFeilEllerVerre()) {
-            if (person.harFlereArbeidsgivereMedSykdom()) return person.invaliderAllePerioder(
-                hendelse,
-                "Invaliderer alle perioder pga flere arbeidsgivere og feil i søknad"
-            )
-            hendelse.funksjonellFeil("Invaliderer alle perioder for arbeidsgiver pga feil i søknad")
             return forkast(hendelse)
         }
         nesteTilstand()?.also { tilstand(hendelse, it) }
@@ -576,7 +571,7 @@ internal class Vedtaksperiode private constructor(
         )
         person.lagreVilkårsgrunnlag(vilkårsgrunnlag.grunnlagsdata())
         if (vilkårsgrunnlag.harFunksjonelleFeilEllerVerre()) {
-            return person.invaliderAllePerioder(vilkårsgrunnlag, null)
+            return forkast(vilkårsgrunnlag)
         }
         vilkårsgrunnlag.info("Vilkårsgrunnlag vurdert")
         tilstand(vilkårsgrunnlag, nesteTilstand)
@@ -695,10 +690,8 @@ internal class Vedtaksperiode private constructor(
 
         when {
             utbetalingsfilter.kanIkkeUtbetales(hendelse) -> {
-                person.invaliderAllePerioder(
-                    hendelse,
-                    "Kan ikke fortsette på grunn av manglende funksjonalitet for utbetaling til bruker"
-                )
+                hendelse.funksjonellFeil("Kan ikke fortsette på grunn av manglende funksjonalitet for utbetaling til bruker")
+                forkast(hendelse)
             }
             ingenUtbetaling -> {
                 tilstand(hendelse, AvventerGodkjenning) {
@@ -1314,7 +1307,10 @@ internal class Vedtaksperiode private constructor(
             infotrygdhistorikk: Infotrygdhistorikk
         ) {
             validation(hendelse) {
-                onValidationFailed { person.invaliderAllePerioder(hendelse, null) }
+                onValidationFailed { vedtaksperiode.forkast(hendelse) }
+                valider("Forlenger en Infotrygdperiode på tvers av arbeidsgivere") {
+                    !infotrygdhistorikk.harBetaltRettFør(vedtaksperiode.periode)
+                }
                 valider {
                     infotrygdhistorikk.validerOverlappende(
                         this,
@@ -1363,8 +1359,10 @@ internal class Vedtaksperiode private constructor(
             hendelse: IAktivitetslogg
         ) {
             when {
-                vedtaksperiode.arbeidsgiver.validerBrukerutbetaling(hendelse, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode) ->
-                    vedtaksperiode.person.invaliderAllePerioder(hendelse, "Forkaster perioden pga. brukerutbetaling")
+                vedtaksperiode.arbeidsgiver.validerBrukerutbetaling(hendelse, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode) -> {
+                    hendelse.funksjonellFeil("Forkaster perioden pga. brukerutbetaling")
+                    vedtaksperiode.forkast(hendelse)
+                }
                 arbeidsgivere.trengerSøknadISammeMåned(vedtaksperiode.skjæringstidspunkt) -> return hendelse.info(
                     "Gjenopptar ikke behandling fordi minst én arbeidsgiver venter på søknad for sykmelding i samme måned som skjæringstidspunktet"
                 )
@@ -2339,10 +2337,10 @@ internal class Vedtaksperiode private constructor(
         // Fredet funksjonsnavn
         internal val TIDLIGERE_OG_ETTERGØLGENDE = fun(periode: Periode): VedtaksperiodeFilter {
             // forkaster perioder som er før/overlapper med oppgitt periode, eller som er sammenhengende med
-            // perioden som overlapper (per arbeidsgiver!).
+            // perioden som overlapper (per skjæringstidpunkt!).
             return fun(segSelv: Vedtaksperiode) =
                 segSelv.person.nåværendeVedtaksperioder(OVERLAPPENDE(periode)).any { other ->
-                    other.arbeidsgiver == segSelv.arbeidsgiver && (segSelv <= other || other.skjæringstidspunkt == segSelv.skjæringstidspunkt)
+                    segSelv <= other || other.skjæringstidspunkt == segSelv.skjæringstidspunkt
                 }
         }
 

@@ -20,7 +20,6 @@ import no.nav.helse.spleis.e2e.håndterSøknad
 import no.nav.helse.spleis.e2e.håndterUtbetalingshistorikk
 import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.nyttVedtak
-import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -56,19 +55,6 @@ internal class PingPongTest : AbstractEndToEndTest() {
                 assertFalse(true)
             }
         )
-    }
-
-    @Test
-    fun `riktig skjæringstidspunkt ved spleis - infotrygd - spleis`() {
-        nyttVedtak(1.januar, 31.januar, 100.prosent)
-
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
-        håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
-        val historie = ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.februar,  28.februar, 100.prosent, 1000.daglig)
-        val inntekter = listOf(Inntektsopplysning(ORGNUMMER, 1.februar, INNTEKT, true))
-        håndterUtbetalingshistorikk(2.vedtaksperiode, historie, inntektshistorikk = inntekter)
-        håndterYtelser(2.vedtaksperiode)
-        assertEquals(1.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
     }
 
     @Test

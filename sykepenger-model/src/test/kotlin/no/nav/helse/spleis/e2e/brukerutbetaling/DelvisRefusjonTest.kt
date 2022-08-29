@@ -22,11 +22,9 @@ import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
-import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
-import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
-import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
+import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertInfo
 import no.nav.helse.spleis.e2e.assertIngenVarsler
 import no.nav.helse.spleis.e2e.assertSisteForkastetPeriodeTilstand
@@ -41,7 +39,6 @@ import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
 import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
-import no.nav.helse.spleis.e2e.håndterUtbetalingshistorikk
 import no.nav.helse.spleis.e2e.håndterUtbetalt
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
@@ -624,64 +621,6 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING
-        )
-    }
-
-    @Test
-    fun `korrigerende inntektsmelding endrer på refusjonsbeløp med infotrygdforlengelse`() {
-        håndterInntektsmelding(
-            listOf(1.januar til 16.januar),
-            refusjon = Inntektsmelding.Refusjon(INNTEKT, null, emptyList())
-        )
-        håndterInntektsmelding(
-            listOf(1.januar til 16.januar),
-            refusjon = Inntektsmelding.Refusjon(INNTEKT / 2, null, emptyList())
-        )
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 50.prosent))
-        håndterSøknad(Sykdom(1.februar, 28.februar, 50.prosent))
-        håndterUtbetalingshistorikk(
-            1.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 31.januar, 50.prosent, INNTEKT / 2),
-            inntektshistorikk = listOf(
-                Inntektsopplysning(ORGNUMMER, 17.januar, INNTEKT, true)
-            )
-        )
-        håndterYtelser(1.vedtaksperiode)
-        assertForkastetPeriodeTilstander(
-            1.vedtaksperiode,
-            START,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK,
-            TIL_INFOTRYGD
-        )
-    }
-
-    @Test
-    fun `korrigerende inntektsmelding endrer på refusjonsbeløp med infotrygdforlengelse og gap`() {
-        håndterInntektsmelding(
-            listOf(1.januar til 16.januar),
-            refusjon = Inntektsmelding.Refusjon(INNTEKT, null, emptyList())
-        )
-        håndterInntektsmelding(
-            listOf(1.januar til 16.januar),
-            refusjon = Inntektsmelding.Refusjon(INNTEKT / 2, null, emptyList())
-        )
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 50.prosent))
-        håndterSøknad(Sykdom(1.februar, 28.februar, 50.prosent))
-        håndterUtbetalingshistorikk(
-            1.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 18.januar, 31.januar, 50.prosent, INNTEKT / 2),
-            inntektshistorikk = listOf(
-                Inntektsopplysning(ORGNUMMER, 18.januar, INNTEKT, true)
-            )
-        )
-        håndterYtelser(1.vedtaksperiode)
-        assertForkastetPeriodeTilstander(
-            1.vedtaksperiode,
-            START,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK,
-            TIL_INFOTRYGD
         )
     }
 
