@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e.søknad
 
 import no.nav.helse.assertForventetFeil
-import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -192,16 +191,6 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
             nå = { assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE) },
             ønsket = { assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING) }
         )
-    }
-
-    @Test
-    fun `bare ferie - etter infotrygdutbetaling`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(1.januar, 31.januar))
-        håndterUtbetalingshistorikk(1.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.desember(2017), 31.desember(2017), 100.prosent, INNTEKT), inntektshistorikk = listOf(
-            Inntektsopplysning(ORGNUMMER, 1.desember(2017), INNTEKT, true)
-        ))
-        assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
     }
 
     @Test

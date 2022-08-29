@@ -1311,6 +1311,9 @@ internal class Vedtaksperiode private constructor(
         ) {
             validation(hendelse) {
                 onValidationFailed { person.invaliderAllePerioder(hendelse, null) }
+                valider("Forlenger en Infotrygdperiode på tvers av arbeidsgivere") {
+                    !infotrygdhistorikk.harBetaltRettFør(vedtaksperiode.periode)
+                }
                 valider {
                     infotrygdhistorikk.validerOverlappende(
                         this,

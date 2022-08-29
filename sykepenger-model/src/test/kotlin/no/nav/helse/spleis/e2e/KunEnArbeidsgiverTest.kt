@@ -938,25 +938,6 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
     }
 
     @Test
-    fun `forsikrer oss om at vi plukker opp forlengelser fra infotrygd ved sen behandling`() {
-        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
-        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
-        håndterUtbetalingshistorikk(1.vedtaksperiode, besvart = LocalDateTime.now().minusHours(24))
-        håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
-        håndterUtbetalingshistorikk(
-            1.vedtaksperiode, listOf(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar, 100.prosent, INNTEKT)),
-            inntektshistorikk = listOf(Inntektsopplysning(a1, 1.januar, INNTEKT, true))
-        )
-        assertTilstander(
-            1.vedtaksperiode,
-            START,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK
-        )
-    }
-
-    @Test
     fun `Inntektskilde i godkjenningsbehov for en arbeidsgiver`() {
         håndterSykmelding(Sykmeldingsperiode(1.desember(2020), 31.desember(2020), 100.prosent))
         håndterSøknad(Sykdom(1.desember(2020), 31.desember(2020), 100.prosent))

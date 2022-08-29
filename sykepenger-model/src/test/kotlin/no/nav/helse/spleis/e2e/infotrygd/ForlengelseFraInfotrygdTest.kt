@@ -1,10 +1,14 @@
 package no.nav.helse.spleis.e2e.infotrygd
 
 import java.time.LocalDate
+import java.time.LocalDateTime
+import no.nav.helse.desember
+import no.nav.helse.dsl.TestPerson
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.søppelbøtte
@@ -22,15 +26,18 @@ import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
+import no.nav.helse.person.infotrygdhistorikk.Friperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
+import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertSisteForkastetPeriodeTilstand
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterInntektsmeldingReplay
+import no.nav.helse.spleis.e2e.håndterPåminnelse
 import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
@@ -187,7 +194,15 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `enkel infotrygdforlengelse`() {
+    fun `forlenger ferieperiode i Infotrygd på samme arbeidsgiver`() {
+        nyPeriode(1.februar til 28.februar)
+        håndterUtbetalingshistorikk(1.vedtaksperiode, Friperiode(1.januar, 31.januar), inntektshistorikk = emptyList())
+        assertForlengerInfotrygdperiode()
+        assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
+    }
+
+    @Test
+    fun `forlenger utbetaling i Infotrygd på samme arbeidsgiver`() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
 
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
@@ -196,7 +211,50 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
             utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 31.januar, 100.prosent, INNTEKT)),
             inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true))
         )
-        assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
+        assertForlengerInfotrygdperiode()
+        assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD, orgnummer = a1)
+    }
+
+    @Test
+    fun `forlenger utbetaling i Infotrygd på annen arbeidsgiver`() {
+        nyPeriode(1.februar til 28.februar, a1)
+        håndterUtbetalingshistorikk(1.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(a2, 1.januar, 31.januar, 100.prosent, INNTEKT), inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true)))
+        assertForlengerInfotrygdperiode()
+        assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD, orgnummer = a1)
+    }
+
+    @Test
+    fun `forsikrer oss om at vi plukker opp forlengelser fra infotrygd ved sen behandling`() {
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+        håndterUtbetalingshistorikk(1.vedtaksperiode, besvart = LocalDateTime.now().minusHours(24))
+        håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
+        håndterUtbetalingshistorikk(
+            1.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar, 100.prosent, INNTEKT),
+            inntektshistorikk = listOf(Inntektsopplysning(a1, 1.januar, TestPerson.INNTEKT, true))
+        )
+        assertForlengerInfotrygdperiode()
+        assertForkastetPeriodeTilstander(
+            1.vedtaksperiode,
+            START,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            TIL_INFOTRYGD
+        )
+    }
+
+    @Test
+    fun `bare ferie - etter infotrygdutbetaling`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Søknad.Søknadsperiode.Ferie(1.januar, 31.januar))
+        håndterUtbetalingshistorikk(1.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.desember(2017), 31.desember(2017), 100.prosent, INNTEKT), inntektshistorikk = listOf(
+            Inntektsopplysning(ORGNUMMER, 1.desember(2017), INNTEKT, true)
+        ))
+        assertForlengerInfotrygdperiode()
+        assertForkastetPeriodeTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, TIL_INFOTRYGD)
+    }
+
+    private fun assertForlengerInfotrygdperiode() {
+        assertFunksjonellFeil("Forlenger en Infotrygdperiode på tvers av arbeidsgivere")
     }
 
     private fun assertAlleDager(utbetalingstidslinje: Utbetalingstidslinje, periode: Periode, vararg dager: KClass<out Utbetalingstidslinje.Utbetalingsdag>) {
