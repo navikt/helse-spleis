@@ -13,22 +13,27 @@ import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.til
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.TilstandType.AVSLUTTET
+import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
+import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
 import no.nav.helse.spleis.e2e.assertIngenVarsel
+import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
+import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.grunnlag
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterPåminnelse
@@ -46,6 +51,7 @@ import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
 import no.nav.helse.spleis.e2e.tilGodkjenning
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
+import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -94,6 +100,65 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
             orgnummer = a1
+        )
+    }
+
+    @Test
+    fun `Periode i AUU for a2 hensyntas på utbetalingen til a1`() {
+        nyeVedtak(1.januar, 31.januar, a1, a2, inntekt = 40000.månedlig)
+        forlengVedtak(1.februar, 28.februar, a1)
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 10.mars, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(1.mars, 10.mars, 100.prosent), orgnummer = a2)
+        håndterUtbetalingshistorikk(2.vedtaksperiode, orgnummer = a2)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a2)
+
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 10.mars, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(1.mars, 10.mars, 100.prosent), orgnummer = a1)
+        håndterYtelser(3.vedtaksperiode, orgnummer = a1)
+
+        assertEquals(1080.daglig, inspektør(a1).utbetalingstidslinjer(3.vedtaksperiode)[1.mars].økonomi.inspektør.arbeidsgiverbeløp)
+    }
+
+
+    @Test
+    fun `flere AG - kort periode har gap på arbeidsgivernivå men er sammenhengende på personnivå - skal vi inn i AUU?`() {
+        nyeVedtak(1.januar, 31.januar, a1, a2)
+        forlengVedtak(1.februar, 28.februar, a1)
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 10.mars, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(1.mars, 10.mars, 100.prosent), orgnummer = a2)
+        håndterUtbetalingshistorikk(2.vedtaksperiode, orgnummer = a2)
+        assertForventetFeil(
+            forklaring = "Skal vi inn i AUU da?",
+            nå = {
+                assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a2)
+            },
+            ønsket = {
+                assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
+            })
+    }
+
+    @Test
+    fun `flere AG - samme skjæringstidspunkt men perioder hulter til bulter - sender feilaktig flere perioder til behandling`() {
+        nyeVedtak(1.januar, 31.januar, a1, a2)
+        forlengVedtak(1.februar, 28.februar, a1)
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a2)
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 19.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(1.mars, 31.mars, 19.prosent), orgnummer = a1)
+        håndterYtelser(3.vedtaksperiode, orgnummer = a1)
+        assertForventetFeil(
+            forklaring = "Vi skal ikke ha to perioder til behandling på en gang. " +
+                    "I tillegg avviser vi de 16 første dagene på AG1 fordi det er ny arbeidsgiverperipde på AG2 (usikker)",
+            nå = {
+                assertSisteTilstand(3.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a1)
+                assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
+                assertEquals(12, inspektør(a1).utbetalingstidslinjer(3.vedtaksperiode).inspektør.avvistDagTeller)
+            },
+            ønsket = {
+                assertSisteTilstand(3.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a1)
+                assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
+                assertEquals(0, inspektør(a1).utbetalingstidslinjer(3.vedtaksperiode).inspektør.avvistDagTeller)
+            }
         )
     }
 
