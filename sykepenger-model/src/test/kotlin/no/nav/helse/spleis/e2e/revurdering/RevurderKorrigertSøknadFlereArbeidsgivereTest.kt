@@ -901,4 +901,32 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
         }
     }
+
+    @Test
+    fun `Korrigerende søknad for periode i AvventerRevurdering - setter i gang en overstyring av revurderingen`() {
+        listOf(a1, a2).nyeVedtak(1.januar til 31.januar)
+        a1 {
+            håndterSøknad(Sykdom(1.januar, 31.januar, 50.prosent))
+        }
+        a2 {
+            assertTilstand(1.vedtaksperiode, AVVENTER_REVURDERING)
+            håndterSøknad(Sykdom(1.januar, 31.januar, 50.prosent))
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+            (17..31).forEach {
+                assertEquals(50.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.januar].økonomi.inspektør.grad)
+            }
+        }
+        a1 {
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+            (17..31).forEach {
+                assertEquals(50.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.januar].økonomi.inspektør.grad)
+            }
+        }
+    }
 }

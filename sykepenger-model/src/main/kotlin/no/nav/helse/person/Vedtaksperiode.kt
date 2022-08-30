@@ -999,6 +999,10 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.person.gjenopptaBehandling(inntektsmelding)
         }
 
+        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
+            vedtaksperiode.håndterOverlappendeSøknadRevurdering(søknad)
+        }
+
         override fun håndterRevurdertUtbetaling(
             vedtaksperiode: Vedtaksperiode,
             utbetaling: Utbetaling,
