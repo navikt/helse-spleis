@@ -175,3 +175,6 @@ spec:
         - team: tbd
           application: sparsom
           access: readwrite
+        - team: tbd
+          application: speaker
+          access: readwrite
