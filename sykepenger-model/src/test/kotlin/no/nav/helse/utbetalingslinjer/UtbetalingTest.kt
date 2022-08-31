@@ -52,7 +52,7 @@ internal class UtbetalingTest {
     }
 
     @BeforeEach
-    private fun initEach() {
+    internal fun initEach() {
         aktivitetslogg = Aktivitetslogg()
     }
 
