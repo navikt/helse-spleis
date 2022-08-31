@@ -121,24 +121,17 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
 
 
     @Test
-    fun `flere AG - kort periode har gap på arbeidsgivernivå men er sammenhengende på personnivå - skal vi inn i AUU?`() {
+    fun `flere AG - kort periode har gap på arbeidsgivernivå men er sammenhengende på personnivå - kort periode`() {
         nyeVedtak(1.januar, 31.januar, a1, a2)
         forlengVedtak(1.februar, 28.februar, a1)
         håndterSykmelding(Sykmeldingsperiode(1.mars, 10.mars, 100.prosent), orgnummer = a2)
         håndterSøknad(Sykdom(1.mars, 10.mars, 100.prosent), orgnummer = a2)
         håndterUtbetalingshistorikk(2.vedtaksperiode, orgnummer = a2)
-        assertForventetFeil(
-            forklaring = "Skal vi inn i AUU da?",
-            nå = {
-                assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a2)
-            },
-            ønsket = {
-                assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
-            })
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a2)
     }
 
     @Test
-    fun `flere AG - samme skjæringstidspunkt men perioder hulter til bulter - sender feilaktig flere perioder til behandling`() {
+    fun `flere AG - periode har gap på arbeidsgivernivå men er sammenhengende på personnivå - sender feilaktig flere perioder til behandling`() {
         nyeVedtak(1.januar, 31.januar, a1, a2)
         forlengVedtak(1.februar, 28.februar, a1)
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent), orgnummer = a2)
@@ -148,7 +141,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
         håndterYtelser(3.vedtaksperiode, orgnummer = a1)
         assertForventetFeil(
             forklaring = "Vi skal ikke ha to perioder til behandling på en gang. " +
-                    "I tillegg avviser vi de 16 første dagene på AG1 fordi det er ny arbeidsgiverperipde på AG2 (usikker)",
+                    "I tillegg avviser vi de 16 første dagene på AG1 fordi det er ny arbeidsgiverperiode på AG2",
             nå = {
                 assertSisteTilstand(3.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a1)
                 assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
