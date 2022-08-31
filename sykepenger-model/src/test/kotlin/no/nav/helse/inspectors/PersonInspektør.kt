@@ -46,6 +46,7 @@ internal class PersonInspektør(person: Person): PersonVisitor {
         person.accept(this)
     }
 
+    internal fun vedtaksperioder() = arbeidsgivere.mapValues { it.value.inspektør.aktiveVedtaksperioder() }
     internal fun arbeidsgiver(orgnummer: String) = arbeidsgivere[orgnummer]
     internal fun harLagretInntekt(indeks: Int) = infotrygdelementerLagretInntekt[indeks]
     internal fun harArbeidsgiver(organisasjonsnummer: String) = organisasjonsnummer in arbeidsgivere.keys

@@ -19,12 +19,10 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.januar
-import no.nav.helse.person.AbstractPersonTest.Companion.ORGNUMMER
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Arbeidsavklaringspenger
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.ArbeidsforholdV2
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.Dagpenger
@@ -48,12 +46,8 @@ import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonVisitor
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.etterlevelse.MaskinellJurist
-import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
-import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
-import no.nav.helse.readResource
-import no.nav.helse.serde.SerialisertPerson
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.spleis.e2e.lagInntektperioder
 import no.nav.helse.testhelpers.Inntektperioder
@@ -438,35 +432,3 @@ internal fun TestPerson.nyPeriode(periode: Periode, vararg orgnummer: String, gr
     orgnummer.forEach { it { håndterSøknad(Sykdom(periode.start, periode.endInclusive, grad)) } }
 }
 
-val overgangFraInfotrygd get() = SerialisertPerson("/personer/infotrygdforlengelse.json".readResource()).deserialize(MaskinellJurist()).also { person ->
-    person.håndter(
-        Utbetalingshistorikk(
-            UUID.randomUUID(), "", "", ORGNUMMER, UUID.randomUUID().toString(),
-            InfotrygdhistorikkElement.opprett(
-                LocalDateTime.now(),
-                UUID.randomUUID(),
-                listOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 31.januar, 100.prosent, INNTEKT)),
-                listOf(Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true)),
-                emptyMap(),
-                emptyList(),
-                false
-            ),
-        ),
-    )
-}
-val pingPongPerson get() = SerialisertPerson("/personer/pingpong.json".readResource()).deserialize(MaskinellJurist()).also { person ->
-    person.håndter(
-        Utbetalingshistorikk(
-            UUID.randomUUID(), "", "", ORGNUMMER, UUID.randomUUID().toString(),
-            InfotrygdhistorikkElement.opprett(
-                LocalDateTime.now(),
-                UUID.randomUUID(),
-                listOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.februar, 28.februar, 100.prosent, INNTEKT)),
-                listOf(Inntektsopplysning(ORGNUMMER, 1.februar, INNTEKT, true)),
-                emptyMap(),
-                emptyList(),
-                false
-            ),
-        ),
-    )
-}

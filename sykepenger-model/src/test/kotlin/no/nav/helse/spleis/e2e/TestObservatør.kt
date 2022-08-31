@@ -3,13 +3,18 @@ package no.nav.helse.spleis.e2e
 import java.util.UUID
 import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.Hendelseskontekst
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.IdInnhenter
+import no.nav.helse.person.Person
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.PersonObserver.VedtaksperiodeEndretEvent
 import no.nav.helse.person.TilstandType
 import org.junit.jupiter.api.fail
 
-internal class TestObservatør : PersonObserver {
+internal class TestObservatør(person: Person? = null) : PersonObserver {
+    init {
+        person?.addObserver(this)
+    }
     internal val tilstandsendringer = mutableMapOf<UUID, MutableList<TilstandType>>()
     val utbetalteVedtaksperioder = mutableListOf<UUID>()
     val manglendeInntektsmeldingVedtaksperioder = mutableListOf<PersonObserver.ManglendeInntektsmeldingEvent>()
@@ -25,7 +30,7 @@ internal class TestObservatør : PersonObserver {
     private val utsettOppgaveEventer = mutableListOf<PersonObserver.UtsettOppgaveEvent>()
 
     private lateinit var sisteVedtaksperiode: UUID
-    private val vedtaksperioder = mutableMapOf<String, MutableSet<UUID>>()
+    private val vedtaksperioder = person?.inspektør?.vedtaksperioder()?.mapValues { it.value.toMutableSet() }?.toMutableMap() ?: mutableMapOf()
     private val vedtaksperiodeendringer = mutableMapOf<UUID, MutableList<VedtaksperiodeEndretEvent>>()
 
     private val forkastedeEventer = mutableMapOf<UUID, PersonObserver.VedtaksperiodeForkastetEvent>()
@@ -80,7 +85,7 @@ internal class TestObservatør : PersonObserver {
         sisteVedtaksperiode = hendelseskontekst.vedtaksperiodeId()
         vedtaksperiodeendringer.getOrPut(hendelseskontekst.vedtaksperiodeId()) { mutableListOf(event) }.add(event)
         vedtaksperioder.getOrPut(hendelseskontekst.orgnummer()) { mutableSetOf() }.add(sisteVedtaksperiode)
-        tilstandsendringer.getOrPut(hendelseskontekst.vedtaksperiodeId()) { mutableListOf(TilstandType.START) }.add(event.gjeldendeTilstand)
+        tilstandsendringer.getOrPut(hendelseskontekst.vedtaksperiodeId()) { mutableListOf(event.forrigeTilstand) }.add(event.gjeldendeTilstand)
         if (event.gjeldendeTilstand == TilstandType.AVSLUTTET) utbetalteVedtaksperioder.add(hendelseskontekst.vedtaksperiodeId())
     }
 

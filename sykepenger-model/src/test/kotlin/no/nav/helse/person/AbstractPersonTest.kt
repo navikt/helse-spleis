@@ -1,16 +1,26 @@
 package no.nav.helse.person
 
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.Personidentifikator
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
+import no.nav.helse.dsl.TestPerson
 import no.nav.helse.februar
+import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
+import no.nav.helse.januar
 import no.nav.helse.person.etterlevelse.MaskinellJurist
+import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
+import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
+import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
+import no.nav.helse.readResource
+import no.nav.helse.serde.SerialisertPerson
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.TestObservatør
 import no.nav.helse.utbetalingstidslinje.Alder.Companion.alder
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.BeforeEach
 
 internal abstract class AbstractPersonTest {
@@ -32,6 +42,39 @@ internal abstract class AbstractPersonTest {
         val a2: String = "654321987"
         val a3: String = "321987654"
         val a4: String = "456789123"
+
+        private fun overgangFraInfotrygdPerson(jurist: MaskinellJurist) = SerialisertPerson("/personer/infotrygdforlengelse.json".readResource()).deserialize(jurist).also { person ->
+            person.håndter(
+                Utbetalingshistorikk(
+                    UUID.randomUUID(), "", "", ORGNUMMER, UUID.randomUUID().toString(),
+                    InfotrygdhistorikkElement.opprett(
+                        LocalDateTime.now(),
+                        UUID.randomUUID(),
+                        listOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar, 31.januar, 100.prosent, TestPerson.INNTEKT)),
+                        listOf(Inntektsopplysning(ORGNUMMER, 1.januar, TestPerson.INNTEKT, true)),
+                        emptyMap(),
+                        emptyList(),
+                        false
+                    ),
+                ),
+            )
+        }
+        private fun pingPongPerson(jurist: MaskinellJurist) = SerialisertPerson("/personer/pingpong.json".readResource()).deserialize(jurist).also { person ->
+            person.håndter(
+                Utbetalingshistorikk(
+                    UUID.randomUUID(), "", "", ORGNUMMER, UUID.randomUUID().toString(),
+                    InfotrygdhistorikkElement.opprett(
+                        LocalDateTime.now(),
+                        UUID.randomUUID(),
+                        listOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.februar, 28.februar, 100.prosent, TestPerson.INNTEKT)),
+                        listOf(Inntektsopplysning(ORGNUMMER, 1.februar, TestPerson.INNTEKT, true)),
+                        emptyMap(),
+                        emptyList(),
+                        false
+                    ),
+                ),
+            )
+        }
     }
 
     lateinit var person: Person
@@ -47,10 +90,16 @@ internal abstract class AbstractPersonTest {
         createTestPerson(UNG_PERSON_FNR_2018, UNG_PERSON_FØDSELSDATO)
     }
 
-    protected fun createTestPerson(personidentifikator: Personidentifikator, fødseldato: LocalDate): Person {
+    protected fun createTestPerson(personidentifikator: Personidentifikator, fødseldato: LocalDate) = createTestPerson { jurist ->
+        Person(AKTØRID, personidentifikator, fødseldato.alder, jurist)
+    }
+    protected fun createPingPongPerson() = createTestPerson { jurist -> pingPongPerson(jurist) }
+    protected fun createOvergangFraInfotrygdPerson() = createTestPerson { jurist -> overgangFraInfotrygdPerson(jurist) }
+
+    protected fun createTestPerson(block: (jurist: MaskinellJurist) -> Person) : Person {
         jurist = MaskinellJurist()
-        person = Person(AKTØRID, personidentifikator, fødseldato.alder, jurist)
-        observatør = TestObservatør().also { person.addObserver(it) }
+        person = block(jurist)
+        observatør = TestObservatør(person)
         return person
     }
 
