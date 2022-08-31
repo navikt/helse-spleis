@@ -452,7 +452,7 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
 
-        person.invaliderAllePerioder(hendelselogg, null)
+        forkastAlle(hendelselogg)
 
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
@@ -473,7 +473,7 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
-        person.invaliderAllePerioder(hendelselogg, null)
+        forkastAlle(hendelselogg)
 
         assertForkastetPeriodeTilstander(2.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE, TIL_INFOTRYGD)
     }
@@ -520,7 +520,7 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
 
-        person.invaliderAllePerioder(hendelselogg, null)
+        forkastAlle(hendelselogg)
         assertEquals(
             1.januar til 31.januar,
             observatør.trengerIkkeInntektsmeldingVedtaksperioder.map { it.fom til it.tom }.single())

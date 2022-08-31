@@ -80,6 +80,7 @@ import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
+import no.nav.helse.spleis.e2e.forkastAlle
 import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.håndterAnnullerUtbetaling
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
@@ -232,7 +233,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
     fun `arbeidsgivere uten vedtaksperioder filtreres bort`() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
-        person.invaliderAllePerioder(hendelselogg, null)
+        forkastAlle(hendelselogg)
         assertEquals(0, generasjoner.size)
     }
 

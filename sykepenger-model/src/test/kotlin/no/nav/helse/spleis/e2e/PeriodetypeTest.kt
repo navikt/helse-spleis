@@ -264,7 +264,7 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
 
-        person.invaliderAllePerioder(hendelselogg, null)
+        forkastAlle(hendelselogg)
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
@@ -291,7 +291,7 @@ internal class PeriodetypeTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
 
-        person.invaliderAllePerioder(hendelselogg, null)
+        forkastAlle(hendelselogg)
 
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 50.prosent))
         håndterSøknad(Sykdom(1.mars, 31.mars, 50.prosent))

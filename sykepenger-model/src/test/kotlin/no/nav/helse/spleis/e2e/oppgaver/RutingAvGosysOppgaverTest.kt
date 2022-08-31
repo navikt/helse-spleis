@@ -22,6 +22,7 @@ import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertIngenVarsel
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertVarsel
+import no.nav.helse.spleis.e2e.forkastAlle
 import no.nav.helse.spleis.e2e.håndterAnnullerUtbetaling
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterSimulering
@@ -52,7 +53,7 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(16.februar, 25.februar, 100.prosent))
         val søknadHendelseId = håndterSøknad(Sykdom(16.februar, 20.februar, 80.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), 16.februar)
-        person.invaliderAllePerioder(hendelselogg, null)
+        forkastAlle(hendelselogg)
 
         assertTrue(observatør.opprettOppgaveEvent().isEmpty())
         assertTrue(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().any { søknadHendelseId in it.hendelser })
@@ -67,7 +68,7 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(16.februar, 25.februar, 100.prosent))
 
         val søknadHendelseId = håndterSøknad(Sykdom(16.februar, 20.februar, 80.prosent))
-        person.invaliderAllePerioder(hendelselogg, null)
+        forkastAlle(hendelselogg)
 
         assertTrue(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().isEmpty())
         assertTrue(observatør.opprettOppgaveEvent().any { søknadHendelseId in it.hendelser })
@@ -79,11 +80,11 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 3.februar, 100.prosent))
         håndterSøknad(Sykdom(1.februar, 3.februar, 100.prosent))
-        person.invaliderAllePerioder(hendelselogg, null)
+        forkastAlle(hendelselogg)
 
         håndterSykmelding(Sykmeldingsperiode(17.februar, 20.februar, 80.prosent))
         val søknadId = håndterSøknad(Sykdom(17.februar, 20.februar, 80.prosent))
-        person.invaliderAllePerioder(hendelselogg, null)
+        forkastAlle(hendelselogg)
         håndterUtbetalingshistorikk(2.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.februar, 3.februar, 100.prosent, 2000.daglig), inntektshistorikk = listOf(
             Inntektsopplysning(ORGNUMMER, 1.februar, 2000.daglig, true)
         ))
@@ -98,7 +99,7 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
         nyttVedtak(1.januar, 31.januar)
         håndterSykmelding(Sykmeldingsperiode(17.februar, 5.mars, 80.prosent))
         val søknadHendelseId = håndterSøknad(Sykdom(17.februar, 5.mars, 80.prosent))
-        person.invaliderAllePerioder(hendelselogg, null)
+        forkastAlle(hendelselogg)
 
         assertTrue(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().isEmpty())
         assertTrue(observatør.opprettOppgaveEvent().any { søknadHendelseId in it.hendelser })
@@ -138,7 +139,7 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(1.februar(2014), 28.februar(2014), 80.prosent))
         val søknadHendelseId = håndterSøknad(Sykdom(1.februar(2014), 28.februar(2014), 80.prosent))
-        person.invaliderAllePerioder(hendelselogg, null)
+        forkastAlle(hendelselogg)
 
         assertTrue(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().isEmpty())
         assertTrue(observatør.opprettOppgaveEvent().any { søknadHendelseId in it.hendelser })
@@ -153,7 +154,7 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
         val søknadHendelseId = håndterSøknad(Sykdom(20.februar, 11.mars, 80.prosent))
 
         håndterInntektsmelding(listOf(5.februar til 20.februar))
-        person.invaliderAllePerioder(hendelselogg, null)
+        forkastAlle(hendelselogg)
 
         assertTrue(observatør.opprettOppgaveEvent().isEmpty())
         assertTrue(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().any { søknadHendelseId in it.hendelser })
@@ -206,7 +207,7 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar))
-        person.invaliderAllePerioder(hendelselogg, null)
+        forkastAlle(hendelselogg)
 
         assertTrue(observatør.opprettOppgaveEvent().any { inntektsmeldingId in it.hendelser })
     }
@@ -217,7 +218,7 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
 
         val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar))
-        person.invaliderAllePerioder(hendelselogg, null )
+        forkastAlle(hendelselogg)
 
         assertTrue(observatør.opprettOppgaveEvent().any { inntektsmeldingId in it.hendelser })
     }
@@ -319,7 +320,7 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.mai, 26.mai, 100.prosent))
         håndterSøknad(Sykdom(1.mai, 26.mai, 100.prosent))
         val inntektsmeldingId = håndterInntektsmelding(listOf(1.mars til 16.mars), førsteFraværsdag = 1.mai) // NB - det er kanskje ikke realistisk at AG setter førsteFraværsdag etter ferie?
-        person.invaliderAllePerioder(hendelselogg, null)
+        forkastAlle(hendelselogg)
 
         assertIngenVarsel("Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.", 1.vedtaksperiode.filter())
         assertIngenVarsel("Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.", 2.vedtaksperiode.filter())
@@ -341,7 +342,7 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(22.januar, 24.januar, 100.prosent))
         håndterSøknad(Sykdom(22.januar, 24.januar, 100.prosent))
-        person.invaliderAllePerioder(hendelselogg, null)
+        forkastAlle(hendelselogg)
 
         håndterSykmelding(Sykmeldingsperiode(22.januar, 22.januar, 100.prosent))
         val søknadId = håndterSøknad(Sykdom(22.januar, 22.januar, 100.prosent))

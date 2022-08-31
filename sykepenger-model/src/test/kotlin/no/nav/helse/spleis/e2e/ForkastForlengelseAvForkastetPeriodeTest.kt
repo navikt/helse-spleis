@@ -158,7 +158,7 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
     @Test
     fun `forkaster også overlappende perioder som er uferdig`(){
         nyPeriode(1.januar til 31.januar)
-        person.invaliderAllePerioder(hendelselogg, null)
+        forkastAlle(hendelselogg)
 
         nyPeriode(1.mars til 31.mars)
         nyPeriode(1.februar til 31.mars)
@@ -170,7 +170,7 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
     @Test
     fun `forkaster også etterfølgende perioder som er uferdig`(){
         nyPeriode(1.januar til 31.januar)
-        person.invaliderAllePerioder(hendelselogg, null)
+        forkastAlle(hendelselogg)
 
         nyPeriode(1.mars til 31.mars)
         nyPeriode(1.april til 30.april)
@@ -186,7 +186,7 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
     @Test
     fun `forkaster ikke overlappende perioder som er avsluttet`(){
         nyPeriode(1.januar til 31.januar)
-        person.invaliderAllePerioder(hendelselogg, null)
+        forkastAlle(hendelselogg)
 
         nyttVedtak(1.mars, 31.mars)
         nyPeriode(1.februar til 31.mars)
@@ -198,7 +198,7 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
     @Test
     fun `forkaster ikke etterfølgende perioder som er avsluttet`(){
         nyPeriode(1.januar til 31.januar)
-        person.invaliderAllePerioder(hendelselogg, null)
+        forkastAlle(hendelselogg)
 
         nyttVedtak(1.mars, 31.mars)
         forlengVedtak(1.april, 30.april)
@@ -215,7 +215,7 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
     @Test
     fun `forkaster alle forlengelser`() {
         nyPeriode(1.januar til 31.januar)
-        person.invaliderAllePerioder(hendelselogg, null)
+        forkastAlle(hendelselogg)
 
         nyPeriode(1.juni til 30.juni)
         nyPeriode(1.april til 30.april)
@@ -235,7 +235,7 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
     @Test
     fun `forkaster forlengede vedtak på tvers av arbeidsgivere`() {
         nyPeriode(1.januar til 31.januar, a1)
-        person.invaliderAllePerioder(hendelselogg, null)
+        forkastAlle(hendelselogg)
 
         nyPeriode(1.mars til 31.mars, a2)
         nyPeriode(1.april til 30.april, a1)
@@ -251,7 +251,7 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
     @Test
     fun `forkaster forlengede vedtak på tvers av arbeidsgivere - a2 overlapper med alle perioder til a1`() {
         nyPeriode(1.januar til 31.januar, a1)
-        person.invaliderAllePerioder(hendelselogg, null)
+        forkastAlle(hendelselogg)
 
         nyPeriode(15.januar til 15.mars, a2)
         nyPeriode(1.mars til 31.mars, a1)
@@ -267,7 +267,7 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
     @Test
     fun `forkaster forlengede vedtak på tvers av arbeidsgivere - a2 overlapper med en periode til a1`() {
         nyPeriode(1.januar til 31.januar, a1)
-        person.invaliderAllePerioder(hendelselogg, null)
+        forkastAlle(hendelselogg)
 
         nyPeriode(1.mars til 31.mars, a1)
         nyPeriode(10.februar til 20.februar, a2)
@@ -282,7 +282,7 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractEndToEndTest()
     @Test
     fun `forkaster ikke senere periode som hverken overlapper eller forlenger`() {
         nyPeriode(1.januar til 31.januar)
-        person.invaliderAllePerioder(hendelselogg, null)
+        forkastAlle(hendelselogg)
 
         nyPeriode(1.mars til 31.mars)
         nyPeriode(1.april til 30.april)

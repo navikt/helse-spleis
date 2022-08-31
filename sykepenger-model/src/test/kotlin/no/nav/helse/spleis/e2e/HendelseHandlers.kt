@@ -43,6 +43,7 @@ import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.ArbeidstakerHendelse
+import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonVisitor
@@ -935,3 +936,5 @@ internal fun AbstractEndToEndTest.nyPeriode(periode: Periode, vararg orgnummer: 
         håndterSøknad(Søknadsperiode.Sykdom(periode.start, periode.endInclusive, grad), fnr = fnr, orgnummer = it)
     }
 }
+
+internal fun AbstractEndToEndTest.forkastAlle(hendelse: IAktivitetslogg) = person.søppelbøtte(hendelse) { true }

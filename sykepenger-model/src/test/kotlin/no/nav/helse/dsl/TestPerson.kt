@@ -111,7 +111,7 @@ internal class TestPerson(
     }
 
     internal fun forkastAlle() {
-        person.invaliderAllePerioder(forrigeHendelse, null)
+        person.søppelbøtte(forrigeHendelse) { true }
     }
 
     internal fun bekreftBehovOppfylt() {

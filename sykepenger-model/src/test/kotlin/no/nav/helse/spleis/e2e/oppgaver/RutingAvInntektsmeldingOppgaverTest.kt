@@ -8,6 +8,7 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
+import no.nav.helse.spleis.e2e.forkastAlle
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterInntektsmeldingReplay
 import no.nav.helse.spleis.e2e.håndterSimulering
@@ -67,7 +68,7 @@ internal class RutingAvInntektsmeldingOppgaverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar(2017), 31.januar(2017), 100.prosent))
         val søknadId1 = håndterSøknad(Sykdom(1.januar(2017), 31.januar(2017), 100.prosent))
         val inntektsmeldingId1 = håndterInntektsmelding(listOf(1.januar(2017) til 16.januar(2017)))
-        person.invaliderAllePerioder(hendelselogg, null)
+        forkastAlle(hendelselogg)
 
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         val inntektsmeldingId2 = håndterInntektsmelding(listOf(1.januar til 16.januar))

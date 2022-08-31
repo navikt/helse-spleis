@@ -56,7 +56,6 @@ import no.nav.helse.person.Arbeidsgiver.Companion.startRevurdering
 import no.nav.helse.person.Arbeidsgiver.Companion.validerVilkårsgrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.validerYtelserForSkjæringstidspunkt
 import no.nav.helse.person.Arbeidsgiver.Companion.vedtaksperioder
-import no.nav.helse.person.Vedtaksperiode.Companion.ALLE
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
@@ -749,11 +748,6 @@ class Person private constructor(
 
     internal fun ingenUkjenteArbeidsgivere(vedtaksperiode: Vedtaksperiode, skjæringstidspunkt: LocalDate) =
         Arbeidsgiver.ingenUkjenteArbeidsgivere(arbeidsgivere, vedtaksperiode, infotrygdhistorikk, skjæringstidspunkt)
-
-    internal fun invaliderAllePerioder(hendelse: IAktivitetslogg, feilmelding: String?) {
-        feilmelding?.also(hendelse::funksjonellFeil)
-        søppelbøtte(hendelse, ALLE)
-    }
 
     internal fun sykdomshistorikkEndret(aktivitetslogg: IAktivitetslogg) {
         vilkårsgrunnlagHistorikk.oppdaterHistorikk(aktivitetslogg, skjæringstidspunkter())
