@@ -1381,11 +1381,10 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            vedtaksperiode.arbeidsgiver.beholdSykmeldingsperioderEtter(vedtaksperiode.periode.endInclusive)
+            vedtaksperiode.person.gjenopptaBehandling(påminnelse)
             if (vedtaksperiode.arbeidsgiver.harSykmeldingsperiodeFør(vedtaksperiode.periode.endInclusive.plusDays(1))) {
                 sikkerlogg.warn("Har sykmeldingsperiode før eller lik tom. VedtaksperiodeId=${vedtaksperiode.id}, aktørId=${påminnelse.aktørId()}")
             }
-            vedtaksperiode.person.gjenopptaBehandling(påminnelse)
         }
     }
 

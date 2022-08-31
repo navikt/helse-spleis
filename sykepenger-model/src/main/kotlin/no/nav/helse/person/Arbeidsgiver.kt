@@ -505,10 +505,6 @@ internal class Arbeidsgiver private constructor(
         sykmeldingsperioder.lagre(sykmelding)
     }
 
-    internal fun beholdSykmeldingsperioderEtter(dato: LocalDate) {
-        sykmeldingsperioder.fjern(dato)
-    }
-
     private fun harOverlappendeEllerForlengerForkastetVedtaksperiode(hendelse: SykdomstidslinjeHendelse): Boolean {
         ForkastetVedtaksperiode.overlapperMedForkastet(forkastede, hendelse)
         ForkastetVedtaksperiode.forlengerForkastet(forkastede, hendelse)
