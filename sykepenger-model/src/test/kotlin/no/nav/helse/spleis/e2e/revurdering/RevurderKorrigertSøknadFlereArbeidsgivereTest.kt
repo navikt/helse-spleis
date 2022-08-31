@@ -8,8 +8,10 @@ import no.nav.helse.dsl.TestPerson
 import no.nav.helse.dsl.lagStandardSammenligningsgrunnlag
 import no.nav.helse.dsl.lagStandardSykepengegrunnlag
 import no.nav.helse.februar
+import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsvurdering
+import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
@@ -926,6 +928,40 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             håndterUtbetalt()
             (17..31).forEach {
                 assertEquals(50.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.januar].økonomi.inspektør.grad)
+            }
+        }
+    }
+
+    @Test
+    fun `Korrigerende søknad for periode i AvventerGjennomførtRevurdering - setter i gang en overstyring av revurderingen`() {
+        listOf(a1, a2).nyeVedtak(1.januar til 31.januar)
+        listOf(a1, a2).forlengVedtak(1.februar til 28.februar)
+        nullstillTilstandsendringer()
+        a1 {
+            håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Dagtype.Feriedag)))
+            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING)
+            assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+        }
+        a2 {
+            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
+            assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
+        }
+        a1 {
+            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(17.januar, 18.januar))
+            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING)
+            assertTilstander(2.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_GJENNOMFØRT_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_GJENNOMFØRT_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING
+            )
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+            håndterUtbetalt()
+            (17..18).forEach {
+                assertTrue(inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.januar] is Utbetalingsdag.Fridag)
             }
         }
     }
