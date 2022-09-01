@@ -151,6 +151,10 @@ internal class Arbeidsgiver private constructor(
         internal fun List<Arbeidsgiver>.harPeriodeSomBlokkererOverstyring(skjæringstidspunkt: LocalDate) =
             flatMap { it.vedtaksperioder }.any { vedtaksperiode -> vedtaksperiode.blokkererOverstyring(skjæringstidspunkt) }
 
+        internal fun List<Arbeidsgiver>.nyPeriode(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
+            flatMap { it.vedtaksperioder }.forEach { it.nyPeriode(vedtaksperiode, søknad) }
+        }
+
         internal fun List<Arbeidsgiver>.håndter(overstyrArbeidsforhold: OverstyrArbeidsforhold) =
             any { it.håndter(overstyrArbeidsforhold) }
 
@@ -530,12 +534,11 @@ internal class Arbeidsgiver private constructor(
                 person.emitHendelseIkkeHåndtert(søknad)
             } else {
                 person.emitUtsettOppgaveEvent(søknad)
-                // TODO: person.emitHendelseHåndtert(søknad, liste av vedtaksperioder som har håndtert)
             }
             return
         }
         registrerNyVedtaksperiode(vedtaksperiode)
-        håndter(søknad) { nyPeriode(vedtaksperiode, søknad) }
+        håndter(søknad) { person.nyPeriode(vedtaksperiode, søknad)}
         vedtaksperiode.håndter(søknad)
         if (søknad.harFunksjonelleFeilEllerVerre()) {
             søknad.info("Forsøkte å opprette en ny vedtaksperiode, men den ble forkastet før den rakk å spørre om inntektsmeldingReplay. " +

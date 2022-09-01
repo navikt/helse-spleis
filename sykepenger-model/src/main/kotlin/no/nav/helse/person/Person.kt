@@ -48,6 +48,7 @@ import no.nav.helse.person.Arbeidsgiver.Companion.håndterOverstyringAvGhostInnt
 import no.nav.helse.person.Arbeidsgiver.Companion.inntekterForSammenligningsgrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.kanStarteRevurdering
 import no.nav.helse.person.Arbeidsgiver.Companion.lagRevurdering
+import no.nav.helse.person.Arbeidsgiver.Companion.nyPeriode
 import no.nav.helse.person.Arbeidsgiver.Companion.nåværendeVedtaksperioder
 import no.nav.helse.person.Arbeidsgiver.Companion.relevanteArbeidsgivere
 import no.nav.helse.person.Arbeidsgiver.Companion.skjæringstidspunktperiode
@@ -984,6 +985,10 @@ class Person private constructor(
 
     internal fun harPeriodeSomBlokkererOverstyring(skjæringstidspunkt: LocalDate) =
         arbeidsgivere.harPeriodeSomBlokkererOverstyring(skjæringstidspunkt)
+
+    internal fun nyPeriode(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
+        arbeidsgivere.nyPeriode(vedtaksperiode, søknad)
+    }
 
     internal fun harSkjæringstidspunktSenereEnn(skjæringstidspunkt: LocalDate) =
         skjæringstidspunkter().any { it.isAfter(skjæringstidspunkt) }

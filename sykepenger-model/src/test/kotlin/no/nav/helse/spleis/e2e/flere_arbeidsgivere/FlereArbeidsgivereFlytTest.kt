@@ -22,10 +22,14 @@ import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
+import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
+import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
+import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
 import no.nav.helse.spleis.e2e.assertIngenVarsel
@@ -33,6 +37,7 @@ import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
+import no.nav.helse.spleis.e2e.forlengTilGodkjenning
 import no.nav.helse.spleis.e2e.forkastAlle
 import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.grunnlag
@@ -134,23 +139,23 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
     @Test
     fun `flere AG - periode har gap på arbeidsgivernivå men er sammenhengende på personnivå - sender feilaktig flere perioder til behandling`() {
         nyeVedtak(1.januar, 31.januar, a1, a2)
-        forlengVedtak(1.februar, 28.februar, a1)
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent), orgnummer = a2)
-        håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a2)
+        forlengVedtak(1.februar, 28.februar, orgnummer = a1)
+        forlengTilGodkjenning(1.mars, 31.mars, orgnummer = a2)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING, orgnummer = a2)
+
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 19.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(1.mars, 31.mars, 19.prosent), orgnummer = a1)
         håndterYtelser(3.vedtaksperiode, orgnummer = a1)
+
+        assertSisteTilstand(3.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a1)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
+
         assertForventetFeil(
-            forklaring = "Vi skal ikke ha to perioder til behandling på en gang. " +
-                    "I tillegg avviser vi de 16 første dagene på AG1 fordi det er ny arbeidsgiverperiode på AG2",
+            forklaring = "vi avviser de 16 første dagene på AG1 fordi det er ny arbeidsgiverperiode på AG2: https://trello.com/c/NKpQWdsd",
             nå = {
-                assertSisteTilstand(3.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a1)
-                assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
                 assertEquals(12, inspektør(a1).utbetalingstidslinjer(3.vedtaksperiode).inspektør.avvistDagTeller)
             },
             ønsket = {
-                assertSisteTilstand(3.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a1)
-                assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
                 assertEquals(0, inspektør(a1).utbetalingstidslinjer(3.vedtaksperiode).inspektør.avvistDagTeller)
             }
         )
@@ -230,15 +235,22 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
         assertTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
 
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a1)
-        assertTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
-        assertTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
+        assertForventetFeil(
+            forklaring = "Må revurdere fordi søknad overlapper med utbetalt periode hos annen arbeidsgiver. " +
+                    "Ta en klype med salt på ønsket asserts",
+            nå = {
+                assertTilstand(2.vedtaksperiode, TIL_INFOTRYGD, orgnummer = a1)
+                assertTilstand(2.vedtaksperiode, TIL_INFOTRYGD, orgnummer = a2)
+            },
+            ønsket = {
+                // Litt usikker på hvem av arbeidsgiverne som blir revurdert først, men alle må revurderes
+                assertTilstand(1.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = a2)
+                assertTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
 
-        utbetalPeriodeEtterVilkårsprøving(2.vedtaksperiode, orgnummer = a2)
-        assertTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
-        assertTilstand(2.vedtaksperiode, AVSLUTTET, orgnummer = a2)
-
-        utbetalPeriodeEtterVilkårsprøving(2.vedtaksperiode, orgnummer = a1)
-        assertTilstand(2.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+                assertTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
+                assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a1)
+            }
+        )
     }
 
     @Test
@@ -628,16 +640,30 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
         tilGodkjenning(1.februar, 28.februar, a1)
         tilGodkjenning(1.januar, 31.januar, a2)
 
-        assertForventetFeil(
-            forklaring = "Må hensynta ag2: https://trello.com/c/Hd2zEt54",
-            nå = {
-                assertTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING, orgnummer=a1)
-                assertTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING, orgnummer=a2)
-            },
-            ønsket = {
-                assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer=a1)
-                assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer=a2)
-            }
+        assertTilstander(
+            1.vedtaksperiode,
+            START,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            orgnummer = a1
+        )
+        assertTilstander(
+            1.vedtaksperiode,
+            START,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_SIMULERING,
+            AVVENTER_GODKJENNING,
+            orgnummer = a2
         )
     }
 
@@ -654,18 +680,9 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent), orgnummer = a2)
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a2)
 
-        assertForventetFeil(
-            forklaring = "Må hensynta ag2: https://trello.com/c/Hd2zEt54",
-            nå = {
-                assertTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING, orgnummer=a1)
-                assertTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK, a2)
-            },
-            ønsket = {
-                // arbeidsgiveren spleis hører om først er per nå den som blir valgt først til å gå videre dersom periodenes tom er lik
-                assertTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer=a2)
-                assertTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer=a1)
-            }
-        )
+        // arbeidsgiveren spleis hører om først er den som blir valgt først til å gå videre i gjenopptaBehandling dersom periodenes tom er lik
+        assertTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer=a2)
+        assertTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer=a1)
     }
 
     private fun utbetalPeriodeEtterVilkårsprøving(vedtaksperiode: IdInnhenter, orgnummer: String) {

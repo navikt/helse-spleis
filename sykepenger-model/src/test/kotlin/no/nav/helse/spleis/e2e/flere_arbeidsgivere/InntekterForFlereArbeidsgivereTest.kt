@@ -27,8 +27,13 @@ import no.nav.helse.oktober
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.Person
 import no.nav.helse.person.TilstandType.AVSLUTTET
+import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
+import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
+import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
+import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertInntektForDato
 import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
@@ -371,7 +376,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `To arbeidsgivere gikk inn i en bar og vet om hverandre`() {
+    fun `To arbeidsgivere gikk inn i en bar - og første arbeidsgiver ble ferdig behandlet før vi mottok sykmelding på neste arbeidsgiver`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, orgnummer = a1)
@@ -407,20 +412,21 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertEquals(1, inspektør(a1).arbeidsgiverOppdrag.size)
         assertEquals(0, inspektør(a2).arbeidsgiverOppdrag.size)
 
+        nullstillTilstandsendringer()
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a2)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a2)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, orgnummer = a2)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
-        håndterSimulering(1.vedtaksperiode, orgnummer = a2)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
-        håndterUtbetalt(orgnummer = a2)
+        assertForventetFeil(
+            forklaring = "Må revurdere a1",
+            nå = {
+                assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD, orgnummer = a2)
+            },
+            ønsket = {
+                håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, orgnummer = a2)
 
-
-        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
-        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
-
-        assertEquals(1, inspektør(a1).arbeidsgiverOppdrag.size)
-        assertEquals(1, inspektør(a2).arbeidsgiverOppdrag.size)
+                assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a1)
+                assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
+            }
+        )
     }
 
     private fun nyPeriode(

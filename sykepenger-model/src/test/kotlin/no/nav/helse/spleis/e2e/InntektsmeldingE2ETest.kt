@@ -1280,7 +1280,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertTrue(inspektør.sykdomstidslinje[27.oktober] is Dag.ArbeidsgiverHelgedag)
     }
 
-    // TODO: Denne testen gir ikke nødvendigvis mening
     @Test
     fun `vilkårsvurdering med flere arbeidsgivere skal ikke medføre at vi går til avventer historikk fra mottatt sykmelding ferdig forlengelse uten IM`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
@@ -1332,6 +1331,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
+            AVVENTER_BLOKKERENDE_PERIODE,
             orgnummer = a1
         )
         assertTilstander(

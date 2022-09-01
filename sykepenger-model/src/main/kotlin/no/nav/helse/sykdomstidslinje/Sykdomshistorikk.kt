@@ -39,6 +39,7 @@ internal class Sykdomshistorikk private constructor(
 
     internal fun fjernDager(perioder: List<Periode>) {
         if (perioder.isEmpty()) return
+        if (isEmpty()) return
         val periode = sykdomstidslinje().periode() ?: return
         if (perioder.none { periode.overlapperMed(it) }) return
         elementer.add(0, Element.opprettReset(this, perioder))
