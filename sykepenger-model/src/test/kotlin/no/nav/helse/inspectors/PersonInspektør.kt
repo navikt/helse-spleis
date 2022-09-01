@@ -14,6 +14,7 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.PersonVisitor
 import no.nav.helse.person.Sammenligningsgrunnlag
 import no.nav.helse.person.Sykepengegrunnlag
+import no.nav.helse.person.TilstandType
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.økonomi.Prosent
@@ -46,6 +47,11 @@ internal class PersonInspektør(person: Person): PersonVisitor {
     }
 
     internal fun vedtaksperioder() = arbeidsgivere.mapValues { it.value.inspektør.aktiveVedtaksperioder() }
+    internal fun sisteVedtaksperiodeTilstander() = mutableMapOf<UUID, TilstandType>().apply {
+        arbeidsgivere.forEach { (_, arbeidsgiver) ->
+            putAll(arbeidsgiver.inspektør.sisteVedtaksperiodeTilstander())
+        }
+    }
     internal fun arbeidsgiver(orgnummer: String) = arbeidsgivere[orgnummer]
     internal fun harLagretInntekt(indeks: Int) = infotrygdelementerLagretInntekt[indeks]
     internal fun harArbeidsgiver(organisasjonsnummer: String) = organisasjonsnummer in arbeidsgivere.keys

@@ -11,19 +11,22 @@ import no.nav.helse.person.ForlengelseFraInfotrygd
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.InntektsmeldingInfo
 import no.nav.helse.person.Periodetype
+import no.nav.helse.person.TilstandType
 import no.nav.helse.person.Vedtaksperiode
 
 internal val Arbeidsgiver.inspektør get() = ArbeidsgiverInspektør(this)
 
 internal class ArbeidsgiverInspektør(arbeidsgiver: Arbeidsgiver): ArbeidsgiverVisitor {
     private val vedtaksperioder: MutableMap<UUID, Vedtaksperiode> = mutableMapOf()
-    private var aktivePerioder: List<Vedtaksperiode> = emptyList()
+    private var aktiveVedtaksperioder: List<Vedtaksperiode> = emptyList()
+    private val sisteVedtaksperiodeTilstander: MutableMap<UUID, TilstandType> = mutableMapOf()
 
     init {
         arbeidsgiver.accept(this)
     }
 
-    internal fun aktiveVedtaksperioder() = aktivePerioder.map { vedtaksperiode -> vedtaksperioder.entries.single { it.value == vedtaksperiode }.key }
+    internal fun aktiveVedtaksperioder() = aktiveVedtaksperioder.map { vedtaksperiode -> vedtaksperioder.entries.single { it.value == vedtaksperiode }.key }
+    internal fun sisteVedtaksperiodeTilstander() = sisteVedtaksperiodeTilstander
 
     override fun preVisitVedtaksperiode(
         vedtaksperiode: Vedtaksperiode,
@@ -42,9 +45,10 @@ internal class ArbeidsgiverInspektør(arbeidsgiver: Arbeidsgiver): ArbeidsgiverV
         inntektskilde: Inntektskilde
     ) {
         vedtaksperioder[id] = vedtaksperiode
+        sisteVedtaksperiodeTilstander[id] = tilstand.type
     }
 
     override fun preVisitPerioder(vedtaksperioder: List<Vedtaksperiode>) {
-        aktivePerioder = vedtaksperioder
+        aktiveVedtaksperioder = vedtaksperioder
     }
 }

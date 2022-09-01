@@ -849,23 +849,8 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    @Disabled("TODO: Lage støtte for historiske infotrygdforlengelser")
     fun `revurdere nyeste periode når vi har vært innom Infotrygd, deretter eldste periode`() {
-        nyttVedtak(1.januar, 31.januar)
-
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.mars, 31.mars, 100.prosent))
-        håndterUtbetalingshistorikk(
-            2.vedtaksperiode,
-            ArbeidsgiverUtbetalingsperiode(a1, 1.februar, 28.februar, 100.prosent, INNTEKT),
-            inntektshistorikk = listOf(
-                Inntektsopplysning(a1, 1.februar, INNTEKT, true)
-            )
-        )
-        håndterYtelser(2.vedtaksperiode)
-        håndterSimulering(2.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-        håndterUtbetalt()
+        createPingPongPerson()
 
         nullstillTilstandsendringer()
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.mars, Feriedag)))
