@@ -284,7 +284,7 @@ internal class Vedtaksperiode private constructor(
         if (utbetalinger.hørerIkkeSammenMed(annullering)) return
         kontekst(hendelse)
         hendelse.info("Forkaster denne, og senere perioder, som følge av annullering.")
-        forkast(hendelse, SENERE_INCLUSIVE(this))
+        forkast(hendelse)
     }
 
     internal fun håndter(påminnelse: Påminnelse): Boolean {
@@ -399,8 +399,8 @@ internal class Vedtaksperiode private constructor(
         return true
     }
 
-    private fun forkast(hendelse: IAktivitetslogg, filter: VedtaksperiodeFilter = TIDLIGERE_OG_ETTERGØLGENDE(periode)) {
-        person.søppelbøtte(hendelse, filter)
+    private fun forkast(hendelse: IAktivitetslogg ) {
+        person.søppelbøtte(hendelse, TIDLIGERE_OG_ETTERGØLGENDE(this))
     }
 
     private fun erUtbetalt() = tilstand == Avsluttet && utbetalinger.erAvsluttet()
@@ -2250,7 +2250,7 @@ internal class Vedtaksperiode private constructor(
         ) {
             if (vedtaksperiode.utbetalinger.harUtbetalt()) return hendelse.info("Gjenopptar ikke revurdering feilet fordi perioden har tidligere avsluttede utbetalinger. Må behandles manuelt vha annullering.")
             hendelse.funksjonellFeil("Forkaster avvist revurdering ettersom vedtaksperioden ikke har tidligere utbetalte utbetalinger.")
-            vedtaksperiode.forkast(hendelse, SENERE_INCLUSIVE(vedtaksperiode))
+            vedtaksperiode.forkast(hendelse)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
@@ -2334,13 +2334,11 @@ internal class Vedtaksperiode private constructor(
         }
 
         // Fredet funksjonsnavn
-        internal val TIDLIGERE_OG_ETTERGØLGENDE = fun(periode: Periode): VedtaksperiodeFilter {
+        internal val TIDLIGERE_OG_ETTERGØLGENDE = fun(segSelv: Vedtaksperiode): VedtaksperiodeFilter {
             // forkaster perioder som er før/overlapper med oppgitt periode, eller som er sammenhengende med
             // perioden som overlapper (per skjæringstidpunkt!).
-            return fun(segSelv: Vedtaksperiode) =
-                segSelv.person.nåværendeVedtaksperioder(OVERLAPPENDE(periode)).any { other ->
-                    segSelv <= other || other.skjæringstidspunkt == segSelv.skjæringstidspunkt
-                }
+            val skjæringstidspunkt = segSelv.skjæringstidspunkt
+            return fun(other: Vedtaksperiode) = other.periode.start >= segSelv.periode.start || other.skjæringstidspunkt == skjæringstidspunkt
         }
 
         internal val OVERLAPPER_ELLER_FORLENGER = fun (vedtaksperiode: Vedtaksperiode): VedtaksperiodeFilter {

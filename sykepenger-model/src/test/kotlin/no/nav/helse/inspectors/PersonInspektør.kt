@@ -14,7 +14,6 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.PersonVisitor
 import no.nav.helse.person.Sammenligningsgrunnlag
 import no.nav.helse.person.Sykepengegrunnlag
-import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.økonomi.Prosent
@@ -24,7 +23,7 @@ internal val Person.inspektør get() = PersonInspektør(this)
 internal val Person.personLogg get() = inspektør.aktivitetslogg
 
 internal fun Person.søppelbøtte(hendelse: IAktivitetslogg, periode: Periode) =
-    søppelbøtte(hendelse, Vedtaksperiode.TIDLIGERE_OG_ETTERGØLGENDE(periode))
+    søppelbøtte(hendelse) { it.periode().start >= periode.start }
 
 internal class PersonInspektør(person: Person): PersonVisitor {
     internal val arbeidsgiverteller get() = arbeidsgivere.size

@@ -346,7 +346,7 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `To perioder med gap, den siste venter på at den første skal bli ferdig - dersom den første blir forkastet skal den siste perioden gå videre`() {
+    fun `To perioder med gap, den siste venter på at den første skal bli ferdig - dersom den første blir forkastet skal den siste perioden forkastes`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(1.mai, 31.mai, 100.prosent))
 
@@ -361,7 +361,7 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
         )
 
         assertTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
-        assertTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK)
+        assertTilstand(2.vedtaksperiode, TIL_INFOTRYGD)
     }
 
     @Test
