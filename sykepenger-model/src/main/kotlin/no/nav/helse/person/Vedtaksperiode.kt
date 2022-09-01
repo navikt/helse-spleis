@@ -493,7 +493,7 @@ internal class Vedtaksperiode private constructor(
         oppdaterHistorikk(hendelse)
         inntektsmeldingInfo = arbeidsgiver.addInntektsmelding(skjæringstidspunkt, hendelse, jurist())
         hendelse.valider(periode, skjæringstidspunkt, finnArbeidsgiverperiode(), jurist())
-        if (hendelse.harFunksjonelleFeilEllerVerre()) return forkast(hendelse, SENERE_INCLUSIVE(this))
+        if (hendelse.harFunksjonelleFeilEllerVerre()) return forkast(hendelse)
         hendelse.info("Fullført behandling av inntektsmelding")
         if (hendelse.harFunksjonelleFeilEllerVerre()) return
         tilstand(hendelse, nesteTilstand)

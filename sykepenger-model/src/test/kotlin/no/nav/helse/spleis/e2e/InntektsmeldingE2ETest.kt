@@ -73,18 +73,8 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(11.januar, 25.januar, 100.prosent))
         håndterSøknad(Sykdom(11.januar, 25.januar, 100.prosent))
         håndterInntektsmelding(emptyList(), 17.januar, begrunnelseForReduksjonEllerIkkeUtbetalt = "BetvilerArbeidsufoerhet")
-        håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
-        håndterUtbetalingshistorikk(1.vedtaksperiode)
-        assertForventetFeil(
-            nå = {
-                assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-                assertSisteTilstand(2.vedtaksperiode, TIL_INFOTRYGD)
-            },
-            ønsket = {
-                assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
-                assertSisteTilstand(2.vedtaksperiode, TIL_INFOTRYGD)
-            }
-        )
+        assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
+        assertSisteTilstand(2.vedtaksperiode, TIL_INFOTRYGD)
     }
 
     @Test
