@@ -2067,6 +2067,16 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.person.gjenopptaBehandling(hendelse)
         }
 
+        override fun nyPeriodeTidligereEllerOverlappende(
+            vedtaksperiode: Vedtaksperiode,
+            ny: Vedtaksperiode,
+            hendelse: Søknad
+        ) {
+            if (vedtaksperiode.organisasjonsnummer != ny.organisasjonsnummer) return
+            super.nyPeriodeTidligereEllerOverlappende(vedtaksperiode, ny, hendelse)
+        }
+
+
         override fun startRevurdering(
             arbeidsgivere: List<Arbeidsgiver>,
             vedtaksperiode: Vedtaksperiode,
