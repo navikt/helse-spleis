@@ -47,7 +47,6 @@ import no.nav.helse.person.Vedtaksperiode.Companion.SKAL_INNGÅ_I_SYKEPENGEGRUNN
 import no.nav.helse.person.Vedtaksperiode.Companion.avventerRevurdering
 import no.nav.helse.person.Vedtaksperiode.Companion.feiletRevurdering
 import no.nav.helse.person.Vedtaksperiode.Companion.harNødvendigInntekt
-import no.nav.helse.person.Vedtaksperiode.Companion.harOverlappendeUtbetaltePerioder
 import no.nav.helse.person.Vedtaksperiode.Companion.harUtbetaling
 import no.nav.helse.person.Vedtaksperiode.Companion.iderMedUtbetaling
 import no.nav.helse.person.Vedtaksperiode.Companion.kanStarteRevurdering
@@ -231,10 +230,6 @@ internal class Arbeidsgiver private constructor(
                     else -> null
                 }
             }
-
-        internal fun Iterable<Arbeidsgiver>.harArbeidsgivereMedOverlappendeUtbetaltePerioder(orgnummer: String, periode: Periode) = this
-            .filter { it.organisasjonsnummer != orgnummer }
-            .any { it.vedtaksperioder.harOverlappendeUtbetaltePerioder(periode) }
 
         internal fun List<Arbeidsgiver>.deaktiverteArbeidsforhold(skjæringstidspunkt: LocalDate) =
             this.filter { it.arbeidsforholdhistorikk.harDeaktivertArbeidsforhold(skjæringstidspunkt) }

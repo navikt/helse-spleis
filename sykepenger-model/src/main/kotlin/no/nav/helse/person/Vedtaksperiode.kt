@@ -761,9 +761,6 @@ internal class Vedtaksperiode private constructor(
         utbetalingstidslinje = utbetalinger.mottaRevurdering(aktivitetslogg, utbetaling, periode)
     }
 
-    private fun harArbeidsgivereMedOverlappendeUtbetaltePerioder(periode: Periode) =
-        person.harArbeidsgivereMedOverlappendeUtbetaltePerioder(organisasjonsnummer, periode)
-
     private fun Vedtaksperiodetilstand.påminnelse(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
         if (!påminnelse.gjelderTilstand(type)) return vedtaksperiode.person.vedtaksperiodeIkkePåminnet(påminnelse, type)
         vedtaksperiode.person.vedtaksperiodePåminnet(påminnelse)
@@ -946,10 +943,6 @@ internal class Vedtaksperiode private constructor(
         override val type = START
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
-            if (vedtaksperiode.harArbeidsgivereMedOverlappendeUtbetaltePerioder(vedtaksperiode.periode)) {
-                søknad.varsel("Denne personen har en utbetaling for samme periode for en annen arbeidsgiver. Kontroller at beregningene for begge arbeidsgiverne er korrekte.")
-            }
-
             vedtaksperiode.håndterSøknad(søknad) {
                 when {
                     !vedtaksperiode.harNødvendigInntektForVilkårsprøving() -> AvventerInntektsmeldingEllerHistorikk
@@ -1790,17 +1783,6 @@ internal class Vedtaksperiode private constructor(
         )
     }
 
-    internal fun harPassertPunktetHvorViOppdagerFlereArbeidsgivere(): Boolean =
-        listOf(
-            AVVENTER_GODKJENNING,
-            AVVENTER_GODKJENNING_REVURDERING,
-            AVVENTER_SIMULERING,
-            AVVENTER_SIMULERING_REVURDERING,
-            AVSLUTTET,
-            REVURDERING_FEILET,
-            AVSLUTTET_UTEN_UTBETALING
-        ).contains(tilstand.type)
-
     internal fun gjenopptaBehandling(hendelse: IAktivitetslogg, arbeidsgivere: Iterable<Arbeidsgiver>) {
         hendelse.kontekst(arbeidsgiver)
         kontekst(hendelse)
@@ -2447,9 +2429,6 @@ internal class Vedtaksperiode private constructor(
             inntektsmelding: Inntektsmelding
         ) =
             forkastede.any { it.periode.overlapperMed(inntektsmelding.periode()) }
-
-        internal fun Iterable<Vedtaksperiode>.harOverlappendeUtbetaltePerioder(periode: Periode) =
-            any { it.periode().overlapperMed(periode) && it.harPassertPunktetHvorViOppdagerFlereArbeidsgivere() }
 
         internal fun List<Vedtaksperiode>.iderMedUtbetaling(utbetalingId: UUID) =
             filter { it.utbetalinger.harId(utbetalingId) }.map { it.id }

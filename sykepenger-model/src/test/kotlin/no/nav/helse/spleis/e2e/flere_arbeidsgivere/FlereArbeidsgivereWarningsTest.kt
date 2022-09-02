@@ -109,30 +109,6 @@ internal class FlereArbeidsgivereWarningsTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `overlappende periode i avsluttet uten utbetaling hos annen arbeidsgiver medfører ikke warning`() {
-        håndterSykmelding(Sykmeldingsperiode(17.juni(2022), 21.juni(2022), 100.prosent), orgnummer = a1)
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(17.juni(2022), 21.juni(2022), 100.prosent), orgnummer = a1)
-        håndterUtbetalingshistorikk(1.vedtaksperiode, orgnummer = a1)
-
-        håndterSykmelding(Sykmeldingsperiode(17.juni(2022), 21.juni(2022), 100.prosent), orgnummer = a2)
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(17.juni(2022), 21.juni(2022), 100.prosent), orgnummer = a2)
-        håndterUtbetalingshistorikk(1.vedtaksperiode, orgnummer = a2)
-
-        assertForventetFeil(
-            forklaring = "Det er unødvendig å lage warning på en periode som ikke har blitt utbetalt",
-            nå = {
-                assertVarsel(
-                    "Denne personen har en utbetaling for samme periode for en annen arbeidsgiver. Kontroller at beregningene for begge arbeidsgiverne er korrekte.",
-                    1.vedtaksperiode.filter(a2)
-                )
-            },
-            ønsket = {
-                assertIngenVarsler(1.vedtaksperiode.filter(a2))
-            }
-        )
-    }
-
-    @Test
     fun `Første arbeidsgiver har blitt sendt til godkjenning før vi mottar sykmelding på neste arbeidsgiver`() {
         val periode = 1.januar(2021) til 31.januar(2021)
         håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent), orgnummer = a1)

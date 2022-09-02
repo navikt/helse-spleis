@@ -39,7 +39,6 @@ import no.nav.helse.person.Arbeidsgiver.Companion.deaktiverteArbeidsforhold
 import no.nav.helse.person.Arbeidsgiver.Companion.finn
 import no.nav.helse.person.Arbeidsgiver.Companion.ghostPeriode
 import no.nav.helse.person.Arbeidsgiver.Companion.gjenopptaBehandling
-import no.nav.helse.person.Arbeidsgiver.Companion.harArbeidsgivereMedOverlappendeUtbetaltePerioder
 import no.nav.helse.person.Arbeidsgiver.Companion.harOverlappendeEllerForlengerForkastetVedtaksperiode
 import no.nav.helse.person.Arbeidsgiver.Companion.harPeriodeSomBlokkererOverstyring
 import no.nav.helse.person.Arbeidsgiver.Companion.harUtbetaltPeriode
@@ -823,9 +822,6 @@ class Person private constructor(
             )
         }
     }
-
-    internal fun harArbeidsgivereMedOverlappendeUtbetaltePerioder(organisasjonsnummer: String, periode: Periode) =
-        arbeidsgivere.harArbeidsgivereMedOverlappendeUtbetaltePerioder(organisasjonsnummer, periode)
 
     internal fun lagreArbeidsforhold(
         orgnummer: String,
