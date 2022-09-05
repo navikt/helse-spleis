@@ -550,6 +550,7 @@ internal class Vedtaksperiode private constructor(
     private fun validerOverlappendeSøknadRevurdering(søknad: Søknad){
         if (!søknad.omsluttesAv(periode())) return søknad.funksjonellFeil("Overlappende søknad starter før, eller slutter etter, opprinnelig periode")
         if (person.harSkjæringstidspunktSenereEnn(skjæringstidspunkt)) return søknad.funksjonellFeil("Mottatt flere søknader for annen periode enn siste skjæringstidspunkt")
+        if (søknad.harArbeidsdager()) return søknad.funksjonellFeil("Mottatt flere søknader for perioden - siste søknad inneholder arbeidsdag")
         søknad.valider(periode, jurist())
     }
 

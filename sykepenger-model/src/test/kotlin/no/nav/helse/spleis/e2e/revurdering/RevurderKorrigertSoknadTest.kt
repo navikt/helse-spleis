@@ -31,7 +31,6 @@ import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.forlengVedtak
-import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterOverstyrTidslinje
 import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSykmelding
@@ -41,6 +40,7 @@ import no.nav.helse.spleis.e2e.håndterUtbetalt
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.nyttVedtak
+import no.nav.helse.sykdomstidslinje.Dag.Arbeidsdag
 import no.nav.helse.sykdomstidslinje.Dag.Feriedag
 import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.Sykedag
@@ -276,12 +276,12 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
     @Test
     fun `Korrigerende søknad for periode i AvventerRevurdering - setter i gang en overstyring av revurderingen`() {
         nyttVedtak(1.januar, 31.januar, 100.prosent)
-        forlengVedtak(1.februar, 28.februar, 100.prosent)
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Arbeid(22.januar, 31.januar))
+        nyttVedtak(15.februar, 15.mars, 100.prosent)
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(18.januar, Dagtype.Feriedag)))
+
         assertTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
 
-        håndterSøknad(Sykdom(1.februar, 28.februar, 50.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar), 1.februar)
+        håndterSøknad(Sykdom(15.februar, 15.mars, 100.prosent, 50.prosent))
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -289,44 +289,36 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
 
         assertTilstand(1.vedtaksperiode, AVSLUTTET)
         håndterYtelser(2.vedtaksperiode)
-        håndterVilkårsgrunnlag(2.vedtaksperiode)
-        håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
 
-        (1..28).forEach {
+        (15..28).forEach {
             assertEquals(50.prosent, inspektør.utbetalingstidslinjer(2.vedtaksperiode)[it.februar].økonomi.inspektør.grad)
+        }
+        (1..15).forEach {
+            assertEquals(50.prosent, inspektør.utbetalingstidslinjer(2.vedtaksperiode)[it.mars].økonomi.inspektør.grad)
         }
     }
     @Test
     fun `Korrigerende søknad for periode i AvventerVilkårsprøvingRevurdering - setter i gang en overstyring av revurderingen`() {
         nyttVedtak(1.januar, 31.januar, 100.prosent)
-        forlengVedtak(1.februar, 28.februar, 100.prosent)
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Arbeid(22.januar, 31.januar))
-        assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.desember(2017), Dagtype.Egenmeldingsdag), ManuellOverskrivingDag(1.januar, Dagtype.Egenmeldingsdag)))
+
+        håndterYtelser(1.vedtaksperiode)
+        assertTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING_REVURDERING)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent, 50.prosent))
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
-        håndterInntektsmelding(listOf(1.januar til 16.januar), 1.februar)
-        assertTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
-        håndterYtelser(2.vedtaksperiode)
-
-        assertTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING_REVURDERING)
-        håndterSøknad(Sykdom(1.februar, 28.februar, 50.prosent))
-        håndterYtelser(2.vedtaksperiode)
-        håndterVilkårsgrunnlag(2.vedtaksperiode)
-        håndterYtelser(2.vedtaksperiode)
-        håndterSimulering(2.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-        håndterUtbetalt()
         assertTilstand(1.vedtaksperiode, AVSLUTTET)
-        assertTilstand(2.vedtaksperiode, AVSLUTTET)
 
-        (1..28).forEach {
-            assertEquals(50.prosent, inspektør.utbetalingstidslinjer(2.vedtaksperiode)[it.februar].økonomi.inspektør.grad)
+        (16..31).forEach {
+            assertEquals(50.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.januar].økonomi.inspektør.grad)
         }
     }
     @Test
@@ -423,5 +415,42 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 50.prosent, 20.prosent))
         assertTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
         assertFunksjonellFeil("Bruker har oppgitt at de har jobbet mindre enn sykmelding tilsier", 1.vedtaksperiode.filter())
+    }
+
+    @Test
+    fun `Korrigerende søknad med Arbeidsdager setter ikke igang revurdering`() {
+        nyttVedtak(1.januar, 31.januar, 50.prosent)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 50.prosent), Ferie(17.januar, 18.januar))
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        assertTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 50.prosent, 20.prosent))
+        assertTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
+        assertFunksjonellFeil("Bruker har oppgitt at de har jobbet mindre enn sykmelding tilsier", 1.vedtaksperiode.filter())
+    }
+
+    @Test
+    fun `Korrigert søknad med friskmelding for avsluttet periode setter ikke i gang revurdering`() {
+        nyttVedtak(1.januar, 31.januar, 100.prosent)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Arbeid(20.januar, 31.januar))
+
+        assertNull(inspektør.sykdomstidslinje.subset(1.januar til 31.januar).inspektør.dagteller[Arbeidsdag::class])
+        assertTilstand(1.vedtaksperiode, AVSLUTTET)
+        assertFunksjonellFeil("Mottatt flere søknader for perioden - siste søknad inneholder arbeidsdag")
+    }
+
+    @Test
+    fun `Korrigert søknad med friskmelding for periode i AvventerGodkjenningRevurdering - setter ikke i gang revurdering`() {
+        nyttVedtak(1.januar, 31.januar, 100.prosent)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent, 20.prosent))
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+
+        assertTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Arbeid(20.januar, 31.januar))
+        assertNull(inspektør.sykdomstidslinje.subset(1.januar til 31.januar).inspektør.dagteller[Arbeidsdag::class])
+
+        assertTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
+        assertFunksjonellFeil("Mottatt flere søknader for perioden - siste søknad inneholder arbeidsdag")
     }
 }

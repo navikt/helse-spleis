@@ -13,7 +13,6 @@ import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
@@ -27,12 +26,10 @@ import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
-import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
 import no.nav.helse.spleis.e2e.grunnlag
 import no.nav.helse.spleis.e2e.repeat
 import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
-import no.nav.helse.sykdomstidslinje.Dag
-import no.nav.helse.sykdomstidslinje.Dag.Arbeidsdag
+import no.nav.helse.sykdomstidslinje.Dag.Feriedag
 import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.Sykedag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag
@@ -45,20 +42,21 @@ import org.junit.jupiter.api.Test
 
 @EnableToggle(Toggle.RevurderKorrigertSoknad::class)
 internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest() {
+
     @Test
     fun `Korrigerende søknad hos en arbeidsgiver - setter i gang revurdering`() {
         listOf(a1, a2).nyeVedtak(1.januar til 31.januar)
         a1 {
             håndterSøknad(
                 Sykdom(1.januar, 31.januar, 50.prosent),
-                Arbeid(30.januar, 31.januar)
+                Ferie(30.januar, 31.januar)
             )
             assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
 
             håndterYtelser(1.vedtaksperiode)
             assertTilstand(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
             assertEquals(21, inspektør.sykdomstidslinje.inspektør.dagteller[Sykedag::class])
-            assertEquals(2, inspektør.sykdomstidslinje.inspektør.dagteller[Arbeidsdag::class])
+            assertEquals(2, inspektør.sykdomstidslinje.inspektør.dagteller[Feriedag::class])
             assertEquals(8, inspektør.sykdomstidslinje.inspektør.dagteller[SykHelgedag::class])
             assertTrue(inspektør.utbetalingstidslinjer(1.vedtaksperiode)[17.januar] is NavDag)
             assertTrue(inspektør.utbetalingstidslinjer(1.vedtaksperiode)[18.januar] is NavDag)
@@ -245,7 +243,7 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             )
             assertEquals(
                 2,
-                inspektør.sykdomstidslinje.subset(1.januar til 31.januar).inspektør.dagteller[Dag.Feriedag::class]
+                inspektør.sykdomstidslinje.subset(1.januar til 31.januar).inspektør.dagteller[Feriedag::class]
             )
             assertEquals(
                 8,
@@ -324,7 +322,7 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
         listOf(a1, a2).forlengVedtak(1.februar til 28.februar)
 
         a1 {
-            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Arbeid(27.februar, 28.februar))
+            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Ferie(27.februar, 28.februar))
             assertTilstand(1.vedtaksperiode, AVSLUTTET)
             assertTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
         }
@@ -341,8 +339,8 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             håndterUtbetalt()
 
             assertTilstand(2.vedtaksperiode, AVSLUTTET)
-            assertTrue(inspektør.utbetalingstidslinjer(2.vedtaksperiode)[27.februar] is Utbetalingsdag.Arbeidsdag)
-            assertTrue(inspektør.utbetalingstidslinjer(2.vedtaksperiode)[28.februar] is Utbetalingsdag.Arbeidsdag)
+            assertTrue(inspektør.utbetalingstidslinjer(2.vedtaksperiode)[27.februar] is Utbetalingsdag.Fridag)
+            assertTrue(inspektør.utbetalingstidslinjer(2.vedtaksperiode)[28.februar] is Utbetalingsdag.Fridag)
             assertEquals(18, inspektør.utbetalingstidslinjer(2.vedtaksperiode).inspektør.navDagTeller)
         }
 
@@ -360,7 +358,7 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
         listOf(a1, a2).nyeVedtak(1.mars til 31.mars)
 
         a1 {
-            håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), Arbeid(29.mars, 31.mars))
+            håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), Ferie(29.mars, 31.mars))
             assertTilstand(1.vedtaksperiode, AVSLUTTET)
             assertTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
         }
@@ -377,8 +375,8 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             håndterUtbetalt()
 
             assertTilstand(2.vedtaksperiode, AVSLUTTET)
-            assertTrue(inspektør.utbetalingstidslinjer(2.vedtaksperiode)[29.mars] is Utbetalingsdag.Arbeidsdag)
-            assertTrue(inspektør.utbetalingstidslinjer(2.vedtaksperiode)[30.mars] is Utbetalingsdag.Arbeidsdag)
+            assertTrue(inspektør.utbetalingstidslinjer(2.vedtaksperiode)[29.mars] is Utbetalingsdag.Fridag)
+            assertTrue(inspektør.utbetalingstidslinjer(2.vedtaksperiode)[30.mars] is Utbetalingsdag.Fridag)
             assertEquals(8, inspektør.utbetalingstidslinjer(2.vedtaksperiode).inspektør.navDagTeller)
         }
 
@@ -605,219 +603,20 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
     }
 
     @Test
-    fun `To arbeidsgivere med ett sykefraværstilfelle og gap over 16 dager - korrigerende søknad setter i gang revurdering`() {
-        a1 {
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        }
-        a2 {
-            håndterSykmelding(Sykmeldingsperiode(25.januar, 25.februar, 100.prosent))
-            håndterSøknad(Sykdom(25.januar, 25.februar, 100.prosent))
-        }
-        a1 {
-            håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 15000.00.månedlig)
-            håndterSykmelding(Sykmeldingsperiode(24.februar, 24.mars, 100.prosent))
-            håndterSøknad(Sykdom(24.februar, 24.mars, 100.prosent))
-        }
-        a2 {
-            håndterInntektsmelding(listOf(25.januar til 9.februar), beregnetInntekt = 16000.00.månedlig)
-        }
-        a1 {
-            håndterYtelser(1.vedtaksperiode)
-            håndterVilkårsgrunnlag(  1.vedtaksperiode,
-                arbeidsforhold = listOf(
-                    Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null),
-                    Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null)
-                ),
-                inntektsvurdering = Inntektsvurdering(
-                    listOf(
-                        sammenligningsgrunnlag(a1, 1.januar, 15000.00.månedlig.repeat(12)),
-                        sammenligningsgrunnlag(a2, 1.januar, 16000.00.månedlig.repeat(12))
-                    )
-                ),
-                inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                    inntekter = listOf(
-                        grunnlag(a1, 1.januar, 15000.00.månedlig.repeat(3)),
-                        grunnlag(a2, 1.januar, 16000.00.månedlig.repeat(3))
-                    ),
-                    arbeidsforhold = emptyList()
-                )
-            )
-            håndterYtelser(1.vedtaksperiode)
-            håndterSimulering(1.vedtaksperiode)
-            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-            håndterUtbetalt()
-        }
-
-        a2 {
-            håndterYtelser(1.vedtaksperiode)
-            håndterSimulering(1.vedtaksperiode)
-            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-            håndterUtbetalt()
-        }
-
-        a1 {
-            håndterYtelser(2.vedtaksperiode)
-            håndterSimulering(2.vedtaksperiode)
-            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-            håndterUtbetalt()
-        }
-
-        a2 {
-            håndterSøknad(Sykdom(25.januar, 25.februar, 100.prosent), Arbeid(20.februar, 25.februar))
-            assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
-        }
-
-        a1 {
-            håndterInntektsmelding(listOf(24.februar til 11.mars), beregnetInntekt = 17000.00.månedlig)
-            assertTilstand(1.vedtaksperiode, AVVENTER_REVURDERING)
-            assertTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
-        }
-
-        a2 {
-            håndterYtelser(1.vedtaksperiode)
-            håndterSimulering(1.vedtaksperiode)
-            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-            håndterUtbetalt()
-
-            assertTilstand(1.vedtaksperiode, AVSLUTTET)
-            (20..25).forEach {
-                assertTrue(inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.februar] is Utbetalingsdag.Arbeidsdag)
-            }
-        }
-
-        a1 {
-            håndterYtelser(1.vedtaksperiode)
-            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-            assertTilstand(1.vedtaksperiode, AVSLUTTET)
-            assertTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
-            håndterYtelser(2.vedtaksperiode)
-
-            assertTilstand(2.vedtaksperiode, AVVENTER_VILKÅRSPRØVING_REVURDERING)
-            håndterSøknad(Sykdom(24.februar, 24.mars, 50.prosent))
-            håndterYtelser(2.vedtaksperiode)
-            håndterVilkårsgrunnlag(2.vedtaksperiode,
-                arbeidsforhold = listOf(
-                    Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null),
-                    Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null)
-                ),
-                inntektsvurdering = Inntektsvurdering(
-                    listOf(
-                        sammenligningsgrunnlag(a1, 24.februar, 15000.00.månedlig.repeat(12)),
-                        sammenligningsgrunnlag(a2, 24.februar, 16000.00.månedlig.repeat(12))
-                    )
-                ),
-                inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                    inntekter = listOf(
-                        grunnlag(a1, 24.februar, 15000.00.månedlig.repeat(3)),
-                        grunnlag(a2, 24.februar, 16000.00.månedlig.repeat(3))
-                    ),
-                    arbeidsforhold = emptyList()
-                )
-            )
-            håndterYtelser(2.vedtaksperiode)
-            håndterSimulering(2.vedtaksperiode)
-            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-            håndterUtbetalt()
-            assertTilstand(2.vedtaksperiode, AVSLUTTET)
-            (12..24).forEach {
-                assertEquals(50.prosent, inspektør.utbetalingstidslinjer(2.vedtaksperiode)[it.mars].økonomi.inspektør.grad)
-            }
-        }
-    }
-
-    @Test
-    fun `To arbeidsgivere med ett sykefraværstilfelle og gap over 16 dager - korrigerende søknad revurderer uten vilkårsprøving`() {
-        a1 {
-            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        }
-        a2 {
-            håndterSykmelding(Sykmeldingsperiode(25.januar, 25.februar, 100.prosent))
-            håndterSøknad(Sykdom(25.januar, 25.februar, 100.prosent))
-        }
-        a1 {
-            håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 15000.00.månedlig)
-            håndterSykmelding(Sykmeldingsperiode(24.februar, 24.mars, 100.prosent))
-            håndterSøknad(Sykdom(24.februar, 24.mars, 100.prosent))
-            håndterInntektsmelding(listOf(24.februar til 11.mars), beregnetInntekt = 17000.00.månedlig)
-        }
-        a2 {
-            håndterInntektsmelding(listOf(25.januar til 9.februar), beregnetInntekt = 16000.00.månedlig)
-        }
-        a1 {
-            håndterYtelser(1.vedtaksperiode)
-            håndterVilkårsgrunnlag(  1.vedtaksperiode,
-                arbeidsforhold = listOf(
-                    Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null),
-                    Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null)
-                ),
-                inntektsvurdering = Inntektsvurdering(
-                    listOf(
-                        sammenligningsgrunnlag(a1, 1.januar, 15000.00.månedlig.repeat(12)),
-                        sammenligningsgrunnlag(a2, 1.januar, 16000.00.månedlig.repeat(12))
-                    )
-                ),
-                inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                    inntekter = listOf(
-                        grunnlag(a1, 1.januar, 15000.00.månedlig.repeat(3)),
-                        grunnlag(a2, 1.januar, 16000.00.månedlig.repeat(3))
-                    ),
-                    arbeidsforhold = emptyList()
-                )
-            )
-            håndterYtelser(1.vedtaksperiode)
-            håndterSimulering(1.vedtaksperiode)
-            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-            håndterUtbetalt()
-        }
-
-        a2 {
-            håndterYtelser(1.vedtaksperiode)
-            håndterSimulering(1.vedtaksperiode)
-            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-            håndterUtbetalt()
-        }
-
-        a1 {
-            håndterYtelser(2.vedtaksperiode)
-            håndterSimulering(2.vedtaksperiode)
-            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-            håndterUtbetalt()
-        }
-
-        a2 {
-            håndterSøknad(Sykdom(25.januar, 25.februar, 100.prosent), Arbeid(20.februar, 25.februar))
-            assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
-        }
-
-        a1 {
-            assertTilstand(1.vedtaksperiode, AVVENTER_REVURDERING)
-            assertTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
-        }
-
-        a2 {
-            håndterYtelser(1.vedtaksperiode)
-            håndterSimulering(1.vedtaksperiode)
-            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-            håndterUtbetalt()
-        }
-    }
-    @Test
     fun `Korrigerende søknad for periode i AvventerGodkjenningRevurdering - setter i gang en overstyring av revurderingen`() {
         listOf(a1, a2).nyeVedtak(1.januar til 31.januar)
         a1 {
             håndterSøknad(
                 Sykdom(1.januar, 31.januar, 100.prosent),
-                Arbeid(30.januar, 31.januar)
+                Ferie(30.januar, 31.januar)
             )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             assertTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
 
             håndterSøknad(
-                Sykdom(1.januar, 31.januar, 50.prosent),
-                Arbeid(30.januar, 31.januar)
+                Sykdom(1.januar, 31.januar, 100.prosent, 50.prosent),
+                Ferie(30.januar, 31.januar)
             )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -826,7 +625,7 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             assertTilstand(1.vedtaksperiode, AVSLUTTET)
 
             assertEquals(9, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.navDagTeller)
-            assertEquals(2, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.arbeidsdagTeller)
+            assertEquals(2, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.fridagTeller)
 
             (17..29).forEach{
                 assertEquals(50.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.januar].økonomi.inspektør.grad)
@@ -837,20 +636,21 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
         }
     }
+
     @Test
     fun `Korrigerende søknad for periode i AvventerSimuleringRevurdering - setter i gang en overstyring av revurderingen`() {
         listOf(a1, a2).nyeVedtak(1.januar til 31.januar)
         a1 {
             håndterSøknad(
                 Sykdom(1.januar, 31.januar, 100.prosent),
-                Arbeid(30.januar, 31.januar)
+                Ferie(30.januar, 31.januar)
             )
             håndterYtelser(1.vedtaksperiode)
             assertTilstand(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
 
             håndterSøknad(
-                Sykdom(1.januar, 31.januar, 50.prosent),
-                Arbeid(30.januar, 31.januar)
+                Sykdom(1.januar, 31.januar, 100.prosent, 50.prosent),
+                Ferie(30.januar, 31.januar)
             )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -859,7 +659,7 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             assertTilstand(1.vedtaksperiode, AVSLUTTET)
 
             assertEquals(9, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.navDagTeller)
-            assertEquals(2, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.arbeidsdagTeller)
+            assertEquals(2, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.fridagTeller)
 
             (17..29).forEach{
                 assertEquals(50.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.januar].økonomi.inspektør.grad)
@@ -877,13 +677,13 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
         a1 {
             håndterSøknad(
                 Sykdom(1.januar, 31.januar, 100.prosent),
-                Arbeid(30.januar, 31.januar)
+                Ferie(30.januar, 31.januar)
             )
             assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
 
             håndterSøknad(
-                Sykdom(1.januar, 31.januar, 50.prosent),
-                Arbeid(30.januar, 31.januar)
+                Sykdom(1.januar, 31.januar, 100.prosent, 50.prosent),
+                Ferie(30.januar, 31.januar)
             )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -892,7 +692,7 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             assertTilstand(1.vedtaksperiode, AVSLUTTET)
 
             assertEquals(9, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.navDagTeller)
-            assertEquals(2, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.arbeidsdagTeller)
+            assertEquals(2, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.fridagTeller)
 
             (17..29).forEach{
                 assertEquals(50.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.januar].økonomi.inspektør.grad)
