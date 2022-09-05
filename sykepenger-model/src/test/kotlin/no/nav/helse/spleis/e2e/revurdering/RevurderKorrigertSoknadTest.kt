@@ -10,6 +10,7 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Utdanning
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -21,16 +22,17 @@ import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
-import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
+import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
+import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.forlengVedtak
-import no.nav.helse.spleis.e2e.håndterOverstyrTidslinje
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
+import no.nav.helse.spleis.e2e.håndterOverstyrTidslinje
 import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
@@ -73,7 +75,7 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
 
         assertTilstand(1.vedtaksperiode, AVSLUTTET)
         assertEquals(1.januar til 31.januar, inspektør.sykdomstidslinje.periode())
-        assertFunksjonellFeil("Mottatt flere søknader for perioden - det støttes ikke før replay av hendelser er på plass", 1.vedtaksperiode.filter())
+        assertFunksjonellFeil("Overlappende søknad starter før, eller slutter etter, opprinnelig periode", 1.vedtaksperiode.filter())
     }
 
     @Test
@@ -84,7 +86,7 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
 
         assertTilstand(1.vedtaksperiode, AVSLUTTET)
         assertEquals(1.januar til 31.januar, inspektør.sykdomstidslinje.periode())
-        assertFunksjonellFeil("Mottatt flere søknader for perioden - det støttes ikke før replay av hendelser er på plass", 1.vedtaksperiode.filter())
+        assertFunksjonellFeil("Overlappende søknad starter før, eller slutter etter, opprinnelig periode", 1.vedtaksperiode.filter())
     }
 
     @Test
@@ -373,5 +375,53 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
         (17..18).forEach {
             assertTrue(inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.januar] is Fridag)
         }
+    }
+
+    @Test
+    fun `Korrigerende søknad for periode i Avsluttet med utdanning gir varsel`() {
+        nyttVedtak(1.januar, 31.januar, 100.prosent)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Utdanning(20.januar, 31.januar))
+        håndterYtelser(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+
+        assertTilstand(1.vedtaksperiode, AVSLUTTET)
+        assertVarsel("Utdanning oppgitt i perioden i søknaden.", 1.vedtaksperiode.filter())
+    }
+
+    @Test
+    fun `Korrigerende søknad for periode i AvventerGodkjenningRevurdering med utdanning gir varsel`() {
+        nyttVedtak(1.januar, 31.januar, 100.prosent)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 50.prosent))
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        assertTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Utdanning(20.januar, 31.januar))
+        håndterYtelser(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+
+        assertTilstand(1.vedtaksperiode, AVSLUTTET)
+        assertVarsel("Utdanning oppgitt i perioden i søknaden.", 1.vedtaksperiode.filter())
+    }
+
+    @Test
+    fun `Korrigerende søknad med error for periode i Avsluttet setter ikke igang revurdering`() {
+        nyttVedtak(1.januar, 31.januar, 50.prosent)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 50.prosent, 20.prosent))
+
+        assertTilstand(1.vedtaksperiode, AVSLUTTET)
+        assertFunksjonellFeil("Bruker har oppgitt at de har jobbet mindre enn sykmelding tilsier", 1.vedtaksperiode.filter())
+    }
+
+    @Test
+    fun `Korrigerende søknad med error for periode i AvventerGodkjenningRevurdering setter ikke igang revurdering`() {
+        nyttVedtak(1.januar, 31.januar, 50.prosent)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 50.prosent), Ferie(17.januar, 18.januar))
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        assertTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 50.prosent, 20.prosent))
+        assertTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
+        assertFunksjonellFeil("Bruker har oppgitt at de har jobbet mindre enn sykmelding tilsier", 1.vedtaksperiode.filter())
     }
 }

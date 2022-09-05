@@ -538,13 +538,19 @@ internal class Vedtaksperiode private constructor(
 
     private fun håndterOverlappendeSøknadRevurdering(søknad: Søknad) {
         if (Toggle.RevurderKorrigertSoknad.enabled){
-            if (!søknad.omsluttesAv(periode())) return overlappendeSøknadIkkeStøttet(søknad)
-            if (person.harSkjæringstidspunktSenereEnn(skjæringstidspunkt)) return overlappendeSøknadIkkeStøttet(søknad)
+            validerOverlappendeSøknadRevurdering(søknad)
+            if (søknad.harFunksjonelleFeilEllerVerre()) return forkast(søknad)
             oppdaterHistorikk(søknad)
             person.startRevurdering(this, søknad)
         } else {
             return overlappendeSøknadIkkeStøttet(søknad)
         }
+    }
+
+    private fun validerOverlappendeSøknadRevurdering(søknad: Søknad){
+        if (!søknad.omsluttesAv(periode())) return søknad.funksjonellFeil("Overlappende søknad starter før, eller slutter etter, opprinnelig periode")
+        if (person.harSkjæringstidspunktSenereEnn(skjæringstidspunkt)) return søknad.funksjonellFeil("Mottatt flere søknader for annen periode enn siste skjæringstidspunkt")
+        søknad.valider(periode, jurist())
     }
 
     private fun håndterVilkårsgrunnlag(vilkårsgrunnlag: Vilkårsgrunnlag, nesteTilstand: Vedtaksperiodetilstand) {
@@ -2216,8 +2222,8 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
             if (Toggle.RevurderKorrigertSoknad.enabled){
-                if (!søknad.omsluttesAv(vedtaksperiode.periode())) return super.håndter(vedtaksperiode, søknad)
-                if (vedtaksperiode.person.harSkjæringstidspunktSenereEnn(vedtaksperiode.skjæringstidspunkt)) return super.håndter(vedtaksperiode, søknad)
+                vedtaksperiode.validerOverlappendeSøknadRevurdering(søknad)
+                if (søknad.harFunksjonelleFeilEllerVerre()) return vedtaksperiode.forkast(søknad)
                 vedtaksperiode.låsOpp()
                 vedtaksperiode.oppdaterHistorikk(søknad)
                 vedtaksperiode.lås()
