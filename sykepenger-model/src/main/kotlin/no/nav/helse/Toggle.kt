@@ -127,5 +127,5 @@ abstract class Toggle internal constructor(enabled: Boolean = false, private val
     object SendFeriepengeOppdrag : Toggle(false)
     object RevurdereInntektMedFlereArbeidsgivere : Toggle("RevurdereInntektMedFlereArbeidsgivere", false)
     object RevurdereOutOfOrder : Toggle(false)
-    object RevurderKorrigertSoknad : Toggle("RevurderKorrigertSoknad", true)
+    object RevurderKorrigertSoknad : Toggle("RevurderKorrigertSoknad", false)
 }
