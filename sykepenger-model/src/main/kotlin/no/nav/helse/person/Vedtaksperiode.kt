@@ -1159,6 +1159,7 @@ internal class Vedtaksperiode private constructor(
             ny: Vedtaksperiode,
             hendelse: Søknad
         ) {
+            hendelse.info("Søknaden har trigget en revurdering fordi det er en tidligere eller overlappende periode")
             vedtaksperiode.person.startRevurdering(vedtaksperiode, hendelse)
         }
 
@@ -2238,6 +2239,7 @@ internal class Vedtaksperiode private constructor(
         ) = vedtaksperiode.revurderArbeidsforhold(overstyrArbeidsforhold, subsumsjon)
 
         override fun nyPeriodeTidligereEllerOverlappende(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Søknad) {
+            hendelse.info("Søknaden har trigget en revurdering fordi det er en tidligere eller overlappende periode")
             vedtaksperiode.person.startRevurdering(vedtaksperiode, hendelse)
         }
 
