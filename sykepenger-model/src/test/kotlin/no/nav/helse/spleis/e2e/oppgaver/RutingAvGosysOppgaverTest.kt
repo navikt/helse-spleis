@@ -127,6 +127,7 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(1.februar(2016), 28.februar(2016), 80.prosent))
         val søknadHendelseId = håndterSøknad(Sykdom(1.februar(2016), 28.februar(2016), 80.prosent))
+        forkastAlle(hendelselogg)
 
         assertTrue(observatør.opprettOppgaveEvent().isEmpty())
         assertTrue(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().any { søknadHendelseId in it.hendelser })
@@ -152,6 +153,7 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
 
         håndterSykmelding(Sykmeldingsperiode(20.februar, 11.mars, 80.prosent))
         val søknadHendelseId = håndterSøknad(Sykdom(20.februar, 11.mars, 80.prosent))
+        forkastAlle(hendelselogg)
 
         assertTrue(observatør.opprettOppgaveEvent().isEmpty())
         assertTrue(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().any { søknadHendelseId in it.hendelser })

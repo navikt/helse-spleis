@@ -41,6 +41,7 @@ import no.nav.helse.person.Arbeidsgiver.Companion.ghostPeriode
 import no.nav.helse.person.Arbeidsgiver.Companion.gjenopptaBehandling
 import no.nav.helse.person.Arbeidsgiver.Companion.harOverlappendeEllerForlengerForkastetVedtaksperiode
 import no.nav.helse.person.Arbeidsgiver.Companion.harPeriodeSomBlokkererOverstyring
+import no.nav.helse.person.Arbeidsgiver.Companion.harUferdigPeriodeFør
 import no.nav.helse.person.Arbeidsgiver.Companion.harUtbetaltPeriode
 import no.nav.helse.person.Arbeidsgiver.Companion.håndter
 import no.nav.helse.person.Arbeidsgiver.Companion.håndterOverstyringAvGhostInntekt
@@ -981,6 +982,8 @@ class Person private constructor(
 
     internal fun harPeriodeSomBlokkererOverstyring(skjæringstidspunkt: LocalDate) =
         arbeidsgivere.harPeriodeSomBlokkererOverstyring(skjæringstidspunkt)
+
+    internal fun harUferdigPeriodeFør(periode: Periode) = arbeidsgivere.harUferdigPeriodeFør(periode)
 
     internal fun nyPeriode(vedtaksperiode: Vedtaksperiode, søknad: Søknad) =
         arbeidsgivere.nyPeriode(vedtaksperiode, søknad)

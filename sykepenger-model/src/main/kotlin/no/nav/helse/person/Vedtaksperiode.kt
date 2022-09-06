@@ -958,8 +958,17 @@ internal class Vedtaksperiode private constructor(
                     else -> AvventerBlokkerendePeriode
                 }
             }
-
             søknad.info("Fullført behandling av søknad")
+        }
+
+        override fun startRevurdering(
+            arbeidsgivere: List<Arbeidsgiver>,
+            vedtaksperiode: Vedtaksperiode,
+            hendelse: IAktivitetslogg,
+            overstyrt: Vedtaksperiode,
+            pågående: Vedtaksperiode?
+        ) {
+            hendelse.info("Søknad har trigget en revurdering, men må selv vente på inntektsmelding før den kan reagere på signalet")
         }
     }
 
@@ -982,6 +991,9 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
             vedtaksperiode.oppdaterHistorikk(hendelse)
             vedtaksperiode.person.startRevurdering(vedtaksperiode, hendelse)
+        }
+        override fun nyPeriodeTidligereEllerOverlappende(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Søknad) {
+
         }
 
         override fun håndter(
@@ -1141,6 +1153,14 @@ internal class Vedtaksperiode private constructor(
                     )
                 }
             }
+        }
+
+        override fun nyPeriodeTidligereEllerOverlappende(
+            vedtaksperiode: Vedtaksperiode,
+            ny: Vedtaksperiode,
+            hendelse: Søknad
+        ) {
+            vedtaksperiode.person.startRevurdering(vedtaksperiode, hendelse)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
@@ -1803,6 +1823,9 @@ internal class Vedtaksperiode private constructor(
         // Jeg og revurderingen jeg hører til har en utbetaling in flight
         if (utbetalinger.utbetales()) return
 
+        // Vi har noen andre uferdige perioder før oss
+        if (person.harUferdigPeriodeFør(periode)) return tilstand(hendelse, AvventerRevurdering)
+
         // en annen revurdering sin utbetaling er in flight
         if (pågående?.utbetalinger?.utbetales() == true) return tilstand(hendelse, AvventerRevurdering)
 
@@ -2216,8 +2239,7 @@ internal class Vedtaksperiode private constructor(
         ) = vedtaksperiode.revurderArbeidsforhold(overstyrArbeidsforhold, subsumsjon)
 
         override fun nyPeriodeTidligereEllerOverlappende(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Søknad) {
-            if (Toggle.RevurdereOutOfOrder.disabled) return super.nyPeriodeTidligereEllerOverlappende(vedtaksperiode, ny, hendelse)
-            vedtaksperiode.tilstand(hendelse, AvventerRevurdering)
+            vedtaksperiode.person.startRevurdering(vedtaksperiode, hendelse)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
@@ -2327,6 +2349,17 @@ internal class Vedtaksperiode private constructor(
             RevurderingFeilet
         )
 
+        private val FØR_AVSLUTTET_TILSTANDER = listOf(
+            Start,
+            AvventerInntektsmeldingEllerHistorikk,
+            AvventerBlokkerendePeriode,
+            AvventerHistorikk,
+            AvventerVilkårsprøving,
+            AvventerSimulering,
+            AvventerGodkjenning,
+            TilUtbetaling
+        )
+
         internal val SENERE_INCLUSIVE = fun(senereEnnDenne: Vedtaksperiode): VedtaksperiodeFilter {
             return fun(vedtaksperiode: Vedtaksperiode) = vedtaksperiode >= senereEnnDenne
         }
@@ -2358,6 +2391,10 @@ internal class Vedtaksperiode private constructor(
 
         internal val KLAR_TIL_BEHANDLING: VedtaksperiodeFilter = {
             it.tilstand == AvventerBlokkerendePeriode || it.tilstand == AvventerGodkjenning
+        }
+
+        internal val FØR_AVSLUTTET: VedtaksperiodeFilter = {
+            it.tilstand in FØR_AVSLUTTET_TILSTANDER
         }
 
         internal val ALLE_AVVENTER_ARBEIDSGIVERE: VedtaksperiodeFilter = { other: Vedtaksperiode ->

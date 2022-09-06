@@ -37,6 +37,7 @@ import no.nav.helse.person.ForkastetVedtaksperiode.Companion.iderMedUtbetaling
 import no.nav.helse.person.Inntektshistorikk.IkkeRapportert
 import no.nav.helse.person.Vedtaksperiode.Companion.ALLE_AVVENTER_ARBEIDSGIVERE
 import no.nav.helse.person.Vedtaksperiode.Companion.ER_ELLER_HAR_VÆRT_AVSLUTTET
+import no.nav.helse.person.Vedtaksperiode.Companion.FØR_AVSLUTTET
 import no.nav.helse.person.Vedtaksperiode.Companion.IKKE_FERDIG_BEHANDLET
 import no.nav.helse.person.Vedtaksperiode.Companion.IKKE_FERDIG_REVURDERT
 import no.nav.helse.person.Vedtaksperiode.Companion.KLAR_TIL_BEHANDLING
@@ -150,8 +151,13 @@ internal class Arbeidsgiver private constructor(
         internal fun List<Arbeidsgiver>.harPeriodeSomBlokkererOverstyring(skjæringstidspunkt: LocalDate) =
             flatMap { it.vedtaksperioder }.any { vedtaksperiode -> vedtaksperiode.blokkererOverstyring(skjæringstidspunkt) }
 
+        internal fun List<Arbeidsgiver>.harUferdigPeriodeFør(periode: Periode) =
+            nåværendeVedtaksperioder(FØR_AVSLUTTET).any { it.periode().start < periode.start }
+
         internal fun List<Arbeidsgiver>.nyPeriode(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
-            flatMap { it.vedtaksperioder }.forEach { it.nyPeriode(vedtaksperiode, søknad) }
+            flatMap { it.vedtaksperioder }.forEach {
+                it.nyPeriode(vedtaksperiode, søknad)
+            }
         }
 
         internal fun List<Arbeidsgiver>.håndter(overstyrArbeidsforhold: OverstyrArbeidsforhold) =
@@ -533,7 +539,8 @@ internal class Arbeidsgiver private constructor(
             return
         }
         registrerNyVedtaksperiode(vedtaksperiode)
-        håndter(søknad) { person.nyPeriode(vedtaksperiode, søknad)}
+        person.nyPeriode(vedtaksperiode, søknad)
+        håndter(søknad) {}
         vedtaksperiode.håndter(søknad)
         if (søknad.harFunksjonelleFeilEllerVerre()) {
             søknad.info("Forsøkte å opprette en ny vedtaksperiode, men den ble forkastet før den rakk å spørre om inntektsmeldingReplay. " +
@@ -923,6 +930,8 @@ internal class Arbeidsgiver private constructor(
     internal fun harNødvendigInntektForVilkårsprøving(skjæringstidspunkt: LocalDate, periodeStart: LocalDate, ingenUtbetaling: Boolean): Boolean {
         return inntektshistorikk.harNødvendigInntektForVilkårsprøving(skjæringstidspunkt, periodeStart, finnFørsteFraværsdag(skjæringstidspunkt), !ingenUtbetaling)
     }
+
+    internal fun harInntektsmelding(skjæringstidspunkt: LocalDate) = inntektshistorikk.harInntektsmelding(finnFørsteFraværsdag(skjæringstidspunkt) ?: skjæringstidspunkt)
 
     internal fun addInntekt(inntektsmelding: Inntektsmelding, førsteFraværsdag: LocalDate, subsumsjonObserver: SubsumsjonObserver) {
         inntektsmelding.addInntekt(inntektshistorikk, førsteFraværsdag, subsumsjonObserver)

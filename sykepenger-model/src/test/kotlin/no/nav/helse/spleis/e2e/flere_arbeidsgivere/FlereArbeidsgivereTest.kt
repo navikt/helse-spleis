@@ -25,7 +25,9 @@ import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
+import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
+import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.spleis.e2e.grunnlag
@@ -1011,9 +1013,11 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
     }
 
     @Test
-    fun `Burde ikke kunne opprette vedtaksperiode før utbetalt periode ved flere AG`() {
+    fun `Burde revurdere utbetalt periode dersom det kommer en eldre periode fra en annen AG`() {
         a2 { nyttVedtak(1.mars, 31.mars) }
         a1 { nyPeriode(1.januar til 31.januar) }
-        assertTrue(a1.inspektør.periodeErForkastet(1.vedtaksperiode(a1)))
+
+        a2 { assertSisteTilstand(1.vedtaksperiode, AVVENTER_REVURDERING) }
+        a1 { assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK) }
     }
 }

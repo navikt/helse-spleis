@@ -236,19 +236,21 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
 
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a1)
         assertForventetFeil(
-            forklaring = "Må revurdere fordi søknad overlapper med utbetalt periode hos annen arbeidsgiver. " +
-                    "Ta en klype med salt på ønsket asserts",
+            forklaring = "Må revurdere fordi søknad overlapper med utbetalt periode hos annen arbeidsgiver" +
+                        "Er det rart at ag2 blir trukket ut til gå gjennom revurdering før ag1?",
             nå = {
-                assertTilstand(2.vedtaksperiode, TIL_INFOTRYGD, orgnummer = a1)
-                assertTilstand(2.vedtaksperiode, TIL_INFOTRYGD, orgnummer = a2)
-            },
-            ønsket = {
-                // Litt usikker på hvem av arbeidsgiverne som blir revurdert først, men alle må revurderes
-                assertTilstand(1.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = a2)
-                assertTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
+                assertTilstand(1.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = a1)
+                assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a2)
 
                 assertTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
+                assertTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
+            },
+            ønsket = {
                 assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a1)
+                assertTilstand(1.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = a2)
+
+                assertTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
+                assertTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
             }
         )
     }
