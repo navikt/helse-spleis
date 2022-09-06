@@ -19,6 +19,7 @@ internal val VilkårsgrunnlagHistorikk.inspektør get() = Vilkårgrunnlagsinspek
 internal class Vilkårgrunnlagsinspektør(historikk: VilkårsgrunnlagHistorikk) : VilkårsgrunnlagHistorikkVisitor {
     val vilkårsgrunnlagTeller = mutableMapOf<Int, Int>()
     private var innslag = -1
+    internal val aktiveSpleisSkjæringstidspunkt = mutableSetOf<LocalDate>()
 
     init {
         historikk.accept(this)
@@ -46,6 +47,7 @@ internal class Vilkårgrunnlagsinspektør(historikk: VilkårsgrunnlagHistorikk) 
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus
     ) {
         val teller = vilkårsgrunnlagTeller.getValue(innslag)
+        if (innslag == 0) aktiveSpleisSkjæringstidspunkt.add(skjæringstidspunkt)
         vilkårsgrunnlagTeller[innslag] = teller.inc()
     }
 

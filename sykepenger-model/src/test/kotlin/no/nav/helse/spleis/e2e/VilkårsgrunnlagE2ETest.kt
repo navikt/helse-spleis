@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate
+import no.nav.helse.Toggle
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
@@ -17,6 +18,7 @@ import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.november
 import no.nav.helse.oktober
+import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
@@ -336,4 +338,38 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
 
         assertEquals(4, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
     }
+    
+    @Test
+    fun `Forkaster ikke vilkårsgrunnlag om det er en periode i AUU med samme skjæringstidspunkt som den som blir annullert`() = Toggle.ForkasteVilkårsgrunnlag.enable {
+        nyPeriode(1.januar til 16.januar)
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        nyPeriode(17.januar til 31.januar)
+        håndterYtelser(2.vedtaksperiode)
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt()
+        assertVilkårsgrunnlagFraSpleisFor(1.januar)
+        håndterAnnullerUtbetaling()
+        assertForventetFeil(
+            forklaring = "Sletter ikke vilkårsgrunnlaget lagret 1.januar pga. AUU-perioden",
+            ønsket = { assertIngenVilkårsgrunnlagFraSpleis() },
+            nå = { assertVilkårsgrunnlagFraSpleisFor(1.januar) }
+        )
+    }
+
+    @Test
+    fun `Forkaster vilkårsgrunnlag når periode annulleres`() = Toggle.ForkasteVilkårsgrunnlag.enable {
+        nyttVedtak(1.januar, 31.januar)
+        assertVilkårsgrunnlagFraSpleisFor(1.januar)
+        håndterAnnullerUtbetaling()
+        assertIngenVilkårsgrunnlagFraSpleis()
+    }
+
+    private fun assertVilkårsgrunnlagFraSpleisFor(vararg skjæringstidspunkt: LocalDate) {
+        assertEquals(skjæringstidspunkt.toSet(), person.inspektør.vilkårsgrunnlagHistorikk.inspektør.aktiveSpleisSkjæringstidspunkt)
+    }
+    private fun assertIngenVilkårsgrunnlagFraSpleis() = assertVilkårsgrunnlagFraSpleisFor()
 }
