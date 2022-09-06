@@ -10,7 +10,6 @@ import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.Permisjon
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Utdanning
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Utlandsopphold
@@ -572,8 +571,8 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
 
     @Test
     fun `Sender ikke avsluttet periode til infotrygd når man mottar en ugyldig søknad i etterkant`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 21.januar, 100.prosent))
-        håndterSøknad(Sykdom(1.januar, 21.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 21.januar, 50.prosent))
+        håndterSøknad(Sykdom(1.januar, 21.januar, 50.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), INNTEKT)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
@@ -598,7 +597,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
             TIL_UTBETALING,
             AVSLUTTET
         )
-        håndterSøknad(Sykdom(1.januar, 21.januar, 100.prosent), Permisjon(21.januar, 21.januar))
+        håndterSøknad(Sykdom(1.januar, 21.januar, 50.prosent, 20.prosent))
         assertTilstander(
             1.vedtaksperiode,
             START,
