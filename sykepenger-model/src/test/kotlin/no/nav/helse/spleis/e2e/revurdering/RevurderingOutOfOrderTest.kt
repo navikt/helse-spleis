@@ -109,6 +109,94 @@ internal class RevurderingOutOfOrderTest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `out-of-order søknad medfører revurdering -- AvsluttetUtenUtbetaling`() {
+        nyPeriode(1.februar til 10.februar)
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+        nyPeriode(1.januar til 31.januar)
+
+        val februarId = 1.vedtaksperiode
+        val januarId = 2.vedtaksperiode
+
+        assertSisteTilstand(februarId, AVVENTER_REVURDERING)
+        assertSisteTilstand(januarId, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
+
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterYtelser(januarId)
+        håndterVilkårsgrunnlag(januarId)
+        håndterYtelser(januarId)
+        håndterSimulering(januarId)
+        håndterUtbetalingsgodkjenning(januarId)
+        håndterUtbetalt()
+
+        assertSisteTilstand(februarId, AVVENTER_HISTORIKK_REVURDERING)
+        assertSisteTilstand(januarId, AVSLUTTET)
+
+        håndterYtelser(februarId)
+        håndterSimulering(februarId)
+        håndterUtbetalingsgodkjenning(februarId)
+        håndterUtbetalt()
+
+        assertSisteTilstand(januarId, AVSLUTTET)
+        assertSisteTilstand(februarId, AVSLUTTET)
+        assertUtbetalingsbeløp(
+            januarId,
+            forventetArbeidsgiverbeløp = 1431,
+            forventetArbeidsgiverRefusjonsbeløp = 1431,
+            subset = 17.januar til 31.januar
+        )
+        assertUtbetalingsbeløp(
+            februarId,
+            forventetArbeidsgiverbeløp = 1431,
+            forventetArbeidsgiverRefusjonsbeløp = 1431,
+            subset = 1.februar til 28.februar
+        )
+    }
+
+    @Test
+    fun `out-of-order søknad medfører revurdering -- AvsluttetUtenUtbetaling med GAP`() {
+        nyPeriode(1.februar til 10.februar)
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+        nyPeriode(1.januar til 30.januar)
+
+        val februarId = 1.vedtaksperiode
+        val januarId = 2.vedtaksperiode
+
+        assertSisteTilstand(februarId, AVVENTER_REVURDERING) // er vi sikre på at denne må revurderes hvis det er gap til forrige?
+        assertSisteTilstand(januarId, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
+
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterYtelser(januarId)
+        håndterVilkårsgrunnlag(januarId)
+        håndterYtelser(januarId)
+        håndterSimulering(januarId)
+        håndterUtbetalingsgodkjenning(januarId)
+        håndterUtbetalt()
+
+        assertSisteTilstand(januarId, AVSLUTTET)
+        assertSisteTilstand(februarId, AVVENTER_HISTORIKK_REVURDERING) // Kommer seg ikke videre fra AvventerRevurdering på grunn av kanStarteRevurdering-sjekk
+
+        håndterYtelser(februarId)
+        håndterSimulering(februarId)
+        håndterUtbetalingsgodkjenning(februarId)
+        håndterUtbetalt()
+
+        assertSisteTilstand(januarId, AVSLUTTET)
+        assertSisteTilstand(februarId, AVSLUTTET)
+        assertUtbetalingsbeløp(
+            januarId,
+            forventetArbeidsgiverbeløp = 1431,
+            forventetArbeidsgiverRefusjonsbeløp = 1431,
+            subset = 17.januar til 31.januar
+        )
+        assertUtbetalingsbeløp(
+            februarId,
+            forventetArbeidsgiverbeløp = 1431,
+            forventetArbeidsgiverRefusjonsbeløp = 1431,
+            subset = 1.februar til 28.februar
+        )
+    }
+
+    @Test
     fun `out-of-order søknad medfører revurdering -- AvventerHistorikkRevurdering`() {
         nyttVedtak(1.februar, 28.februar)
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(28.februar, Feriedag)))

@@ -2128,7 +2128,8 @@ internal class Vedtaksperiode private constructor(
             hendelse: Søknad
         ) {
             if (vedtaksperiode.organisasjonsnummer != ny.organisasjonsnummer) return
-            super.nyPeriodeTidligereEllerOverlappende(vedtaksperiode, ny, hendelse)
+            hendelse.info("Søknaden har trigget en revurdering fordi det er en tidligere eller overlappende periode")
+            vedtaksperiode.person.startRevurdering(vedtaksperiode, hendelse)
         }
 
         override fun startRevurdering(
