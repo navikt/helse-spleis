@@ -823,7 +823,6 @@ internal class Vedtaksperiode private constructor(
         }
 
         fun nyPeriodeTidligereEllerOverlappende(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Søknad) {
-            if (Toggle.RevurdereOutOfOrder.enabled) return
             if (ny før vedtaksperiode) hendelse.funksjonellFeil("Mottatt søknad out of order")
             if (ny.periode().overlapperMed(vedtaksperiode.periode())) hendelse.funksjonellFeil("Mottatt overlappende søknad")
             vedtaksperiode.forkast(hendelse)
