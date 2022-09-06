@@ -540,6 +540,7 @@ internal class Vedtaksperiode private constructor(
         if (Toggle.RevurderKorrigertSoknad.enabled){
             validerOverlappendeSøknadRevurdering(søknad)
             if (søknad.harFunksjonelleFeilEllerVerre()) return forkast(søknad)
+            søknad.info("Søknad har trigget en revurdering")
             oppdaterHistorikk(søknad)
             person.startRevurdering(this, søknad)
         } else {
@@ -2225,6 +2226,7 @@ internal class Vedtaksperiode private constructor(
             if (Toggle.RevurderKorrigertSoknad.enabled){
                 vedtaksperiode.validerOverlappendeSøknadRevurdering(søknad)
                 if (søknad.harFunksjonelleFeilEllerVerre()) return vedtaksperiode.forkast(søknad)
+                søknad.info("Søknad har trigget en revurdering")
                 vedtaksperiode.låsOpp()
                 vedtaksperiode.oppdaterHistorikk(søknad)
                 vedtaksperiode.lås()
