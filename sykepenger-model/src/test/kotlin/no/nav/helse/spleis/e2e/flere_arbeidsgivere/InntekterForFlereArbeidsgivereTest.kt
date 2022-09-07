@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.Toggle
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
@@ -26,22 +27,18 @@ import no.nav.helse.november
 import no.nav.helse.oktober
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.Person
-import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
-import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.START
-import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
-import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
-import no.nav.helse.spleis.e2e.assertInntektForDato
 import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
+import no.nav.helse.spleis.e2e.assertInntektForDato
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertUtbetalingsbeløp
@@ -383,7 +380,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `To arbeidsgivere gikk inn i en bar - og første arbeidsgiver ble ferdig behandlet før vi mottok sykmelding på neste arbeidsgiver`() {
+    fun `To arbeidsgivere gikk inn i en bar - og første arbeidsgiver ble ferdig behandlet før vi mottok sykmelding på neste arbeidsgiver`() = Toggle.RevurderOutOfOrder.enable {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 30000.månedlig, orgnummer = a1)

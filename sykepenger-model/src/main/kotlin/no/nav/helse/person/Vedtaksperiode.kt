@@ -780,6 +780,11 @@ internal class Vedtaksperiode private constructor(
         håndter(vedtaksperiode, påminnelse)
     }
 
+    private fun revurderNyPeriodeTidligereEllerOverlappende(vedtaksperiode: Vedtaksperiode, hendelse: Søknad) {
+        hendelse.info("Søknaden har trigget en revurdering fordi det er en tidligere eller overlappende periode")
+        vedtaksperiode.person.startRevurdering(vedtaksperiode, hendelse)
+    }
+
     override fun toString() =
         "${this.periode.start} - ${this.periode.endInclusive} (${this.tilstand::class.simpleName})"
 
@@ -997,8 +1002,11 @@ internal class Vedtaksperiode private constructor(
             ny: Vedtaksperiode,
             hendelse: Søknad
         ) {
-            hendelse.info("Søknaden har trigget en revurdering fordi det er en tidligere eller overlappende periode")
-            vedtaksperiode.person.startRevurdering(vedtaksperiode, hendelse)
+            if (Toggle.RevurderOutOfOrder.enabled) {
+                vedtaksperiode.revurderNyPeriodeTidligereEllerOverlappende(vedtaksperiode, hendelse)
+            } else {
+                super.nyPeriodeTidligereEllerOverlappende(vedtaksperiode, ny, hendelse)
+            }
         }
 
         override fun håndter(
@@ -1074,8 +1082,11 @@ internal class Vedtaksperiode private constructor(
             ny: Vedtaksperiode,
             hendelse: Søknad
         ) {
-            hendelse.info("Søknaden har trigget en revurdering fordi det er en tidligere eller overlappende periode")
-            vedtaksperiode.person.startRevurdering(vedtaksperiode, hendelse)
+            if (Toggle.RevurderOutOfOrder.enabled) {
+                vedtaksperiode.revurderNyPeriodeTidligereEllerOverlappende(vedtaksperiode, hendelse)
+            } else {
+                super.nyPeriodeTidligereEllerOverlappende(vedtaksperiode, ny, hendelse)
+            }
         }
 
         override fun håndterRevurdertUtbetaling(
@@ -1174,8 +1185,11 @@ internal class Vedtaksperiode private constructor(
             ny: Vedtaksperiode,
             hendelse: Søknad
         ) {
-            hendelse.info("Søknaden har trigget en revurdering fordi det er en tidligere eller overlappende periode")
-            vedtaksperiode.person.startRevurdering(vedtaksperiode, hendelse)
+            if (Toggle.RevurderOutOfOrder.enabled) {
+                vedtaksperiode.revurderNyPeriodeTidligereEllerOverlappende(vedtaksperiode, hendelse)
+            } else {
+                super.nyPeriodeTidligereEllerOverlappende(vedtaksperiode, ny, hendelse)
+            }
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
@@ -1271,8 +1285,11 @@ internal class Vedtaksperiode private constructor(
             ny: Vedtaksperiode,
             hendelse: Søknad
         ) {
-            hendelse.info("Søknaden har trigget en revurdering fordi det er en tidligere eller overlappende periode")
-            vedtaksperiode.person.startRevurdering(vedtaksperiode, hendelse)
+            if (Toggle.RevurderOutOfOrder.enabled) {
+                vedtaksperiode.revurderNyPeriodeTidligereEllerOverlappende(vedtaksperiode, hendelse)
+            } else {
+                super.nyPeriodeTidligereEllerOverlappende(vedtaksperiode, ny, hendelse)
+            }
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
@@ -1680,8 +1697,11 @@ internal class Vedtaksperiode private constructor(
             ny: Vedtaksperiode,
             hendelse: Søknad
         ) {
-            hendelse.info("Søknaden har trigget en revurdering fordi det er en tidligere eller overlappende periode")
-            vedtaksperiode.person.startRevurdering(vedtaksperiode, hendelse)
+            if (Toggle.RevurderOutOfOrder.enabled) {
+                vedtaksperiode.revurderNyPeriodeTidligereEllerOverlappende(vedtaksperiode, hendelse)
+            } else {
+                super.nyPeriodeTidligereEllerOverlappende(vedtaksperiode, ny, hendelse)
+            }
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, simulering: Simulering) {
@@ -1916,8 +1936,11 @@ internal class Vedtaksperiode private constructor(
             ny: Vedtaksperiode,
             hendelse: Søknad
         ) {
-            hendelse.info("Søknaden har trigget en revurdering fordi det er en tidligere eller overlappende periode")
-            vedtaksperiode.person.startRevurdering(vedtaksperiode, hendelse)
+            if (Toggle.RevurderOutOfOrder.enabled) {
+                vedtaksperiode.revurderNyPeriodeTidligereEllerOverlappende(vedtaksperiode, hendelse)
+            } else {
+                super.nyPeriodeTidligereEllerOverlappende(vedtaksperiode, ny, hendelse)
+            }
         }
 
         override fun håndter(
@@ -2128,8 +2151,11 @@ internal class Vedtaksperiode private constructor(
             hendelse: Søknad
         ) {
             if (vedtaksperiode.organisasjonsnummer != ny.organisasjonsnummer) return
-            hendelse.info("Søknaden har trigget en revurdering fordi det er en tidligere eller overlappende periode")
-            vedtaksperiode.person.startRevurdering(vedtaksperiode, hendelse)
+            if (Toggle.RevurderOutOfOrder.enabled) {
+                vedtaksperiode.revurderNyPeriodeTidligereEllerOverlappende(vedtaksperiode, hendelse)
+            } else {
+                super.nyPeriodeTidligereEllerOverlappende(vedtaksperiode, ny, hendelse)
+            }
         }
 
         override fun startRevurdering(
@@ -2281,8 +2307,11 @@ internal class Vedtaksperiode private constructor(
         ) = vedtaksperiode.revurderArbeidsforhold(overstyrArbeidsforhold, subsumsjon)
 
         override fun nyPeriodeTidligereEllerOverlappende(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Søknad) {
-            hendelse.info("Søknaden har trigget en revurdering fordi det er en tidligere eller overlappende periode")
-            vedtaksperiode.person.startRevurdering(vedtaksperiode, hendelse)
+            if (Toggle.RevurderOutOfOrder.enabled) {
+                vedtaksperiode.revurderNyPeriodeTidligereEllerOverlappende(vedtaksperiode, hendelse)
+            } else {
+                super.nyPeriodeTidligereEllerOverlappende(vedtaksperiode, ny, hendelse)
+            }
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}

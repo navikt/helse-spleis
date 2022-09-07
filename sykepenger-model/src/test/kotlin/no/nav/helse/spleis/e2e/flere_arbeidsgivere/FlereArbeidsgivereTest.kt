@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
+import no.nav.helse.Toggle
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
 import no.nav.helse.desember
@@ -25,7 +26,6 @@ import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
-import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.START
@@ -1013,7 +1013,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
     }
 
     @Test
-    fun `Burde revurdere utbetalt periode dersom det kommer en eldre periode fra en annen AG`() {
+    fun `Burde revurdere utbetalt periode dersom det kommer en eldre periode fra en annen AG`() = Toggle.RevurderOutOfOrder.enable {
         a2 { nyttVedtak(1.mars, 31.mars) }
         a1 { nyPeriode(1.januar til 31.januar) }
 

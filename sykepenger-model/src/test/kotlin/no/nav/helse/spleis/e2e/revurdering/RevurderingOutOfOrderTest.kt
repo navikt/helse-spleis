@@ -1,6 +1,8 @@
 package no.nav.helse.spleis.e2e.revurdering
 
 import java.time.LocalDate
+import no.nav.helse.EnableToggle
+import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
@@ -63,6 +65,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Test
 
+@EnableToggle(Toggle.RevurderOutOfOrder::class)
 internal class RevurderingOutOfOrderTest : AbstractEndToEndTest() {
 
     @Test
@@ -130,50 +133,6 @@ internal class RevurderingOutOfOrderTest : AbstractEndToEndTest() {
 
         assertSisteTilstand(februarId, AVVENTER_HISTORIKK_REVURDERING)
         assertSisteTilstand(januarId, AVSLUTTET)
-
-        håndterYtelser(februarId)
-        håndterSimulering(februarId)
-        håndterUtbetalingsgodkjenning(februarId)
-        håndterUtbetalt()
-
-        assertSisteTilstand(januarId, AVSLUTTET)
-        assertSisteTilstand(februarId, AVSLUTTET)
-        assertUtbetalingsbeløp(
-            januarId,
-            forventetArbeidsgiverbeløp = 1431,
-            forventetArbeidsgiverRefusjonsbeløp = 1431,
-            subset = 17.januar til 31.januar
-        )
-        assertUtbetalingsbeløp(
-            februarId,
-            forventetArbeidsgiverbeløp = 1431,
-            forventetArbeidsgiverRefusjonsbeløp = 1431,
-            subset = 1.februar til 28.februar
-        )
-    }
-
-    @Test
-    fun `out-of-order søknad medfører revurdering -- AvsluttetUtenUtbetaling med GAP`() {
-        nyPeriode(1.februar til 10.februar)
-        håndterUtbetalingshistorikk(1.vedtaksperiode)
-        nyPeriode(1.januar til 30.januar)
-
-        val februarId = 1.vedtaksperiode
-        val januarId = 2.vedtaksperiode
-
-        assertSisteTilstand(februarId, AVVENTER_REVURDERING) // er vi sikre på at denne må revurderes hvis det er gap til forrige?
-        assertSisteTilstand(januarId, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
-
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
-        håndterYtelser(januarId)
-        håndterVilkårsgrunnlag(januarId)
-        håndterYtelser(januarId)
-        håndterSimulering(januarId)
-        håndterUtbetalingsgodkjenning(januarId)
-        håndterUtbetalt()
-
-        assertSisteTilstand(januarId, AVSLUTTET)
-        assertSisteTilstand(februarId, AVVENTER_HISTORIKK_REVURDERING) // Kommer seg ikke videre fra AvventerRevurdering på grunn av kanStarteRevurdering-sjekk
 
         håndterYtelser(februarId)
         håndterSimulering(februarId)

@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
 import java.time.LocalDate
+import no.nav.helse.Toggle
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
@@ -29,7 +30,6 @@ import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
-import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
 import no.nav.helse.spleis.e2e.assertIngenVarsel
@@ -37,8 +37,8 @@ import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
-import no.nav.helse.spleis.e2e.forlengTilGodkjenning
 import no.nav.helse.spleis.e2e.forkastAlle
+import no.nav.helse.spleis.e2e.forlengTilGodkjenning
 import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.grunnlag
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
@@ -239,11 +239,20 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
             forklaring = "Må revurdere fordi søknad overlapper med utbetalt periode hos annen arbeidsgiver" +
                         "Er det rart at ag2 blir trukket ut til gå gjennom revurdering før ag1?",
             nå = {
-                assertTilstand(1.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = a1)
-                assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a2)
+                if (Toggle.RevurderOutOfOrder.enabled) {
+                    assertTilstand(1.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = a1)
+                    assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a2)
 
-                assertTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
-                assertTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
+                    assertTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
+                    assertTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
+                } else {
+                    assertTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+                    assertTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
+
+                    assertTilstand(2.vedtaksperiode, TIL_INFOTRYGD, orgnummer = a1)
+                    assertTilstand(2.vedtaksperiode, TIL_INFOTRYGD, orgnummer = a2)
+                }
+
             },
             ønsket = {
                 assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a1)
