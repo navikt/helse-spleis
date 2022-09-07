@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e.revurdering
 
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype.Feriedag
 import no.nav.helse.hendelser.Dagtype.Sykedag
@@ -11,6 +12,7 @@ import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.håndterOverstyrTidslinje
+import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.nyeVedtak
 import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.testhelpers.AP
@@ -20,6 +22,7 @@ import no.nav.helse.utbetalingstidslinje.Sykdomsgradfilter
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.AvvistDag
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -102,6 +105,37 @@ internal class RevurderingUtbetalingerTest: AbstractEndToEndTest() {
         assertFalse(tidslinje[17.januar] is AvvistDag)
         utbetalinger.filtrer(listOf(Sykdomsgradfilter), mapOf(inspektør.arbeidsgiver to tidslinje))
         assertTrue(tidslinje[17.januar] is AvvistDag)
+    }
+
+
+    @Test
+    fun `Ved revurdering av forlengelse blir den siste vedtaksperiodens gjenstående sykedager plassert på alle vedtaksperiodene som revurderes`() {
+        nyttVedtak(1.januar, 31.januar)
+        forlengVedtak(1.februar, 28.februar)
+        assertEquals(237, inspektør.gjenståendeSykedager(1.vedtaksperiode))
+        assertEquals(217, inspektør.gjenståendeSykedager(2.vedtaksperiode))
+
+        Assertions.assertNotEquals(
+            inspektør.gjenståendeSykedager(1.vedtaksperiode),
+            inspektør.gjenståendeSykedager(2.vedtaksperiode)
+        )
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(4.januar, Feriedag)))
+
+        håndterYtelser(2.vedtaksperiode)
+        assertForventetFeil(
+            forklaring = "ved revurdering av forlengelser kjører vi maksimum sykepengefilteret for siste vedtaksperiode " +
+                    "over alle sammenhengende perioder og gjenstående sykedager på de tidligere vedtaksperiodene blir feil," +
+                    "bør se på hvordan vi beregner utbetalingstidslinjer i revurderingsløpet, " +
+                    "kanskje maksimumsykepengefilter må kjøres per vedtaksperiode",
+            nå = {
+                assertEquals(217, inspektør.gjenståendeSykedager(1.vedtaksperiode))
+                assertEquals(217, inspektør.gjenståendeSykedager(2.vedtaksperiode))
+            },
+            ønsket = {
+                assertEquals(237, inspektør.gjenståendeSykedager(1.vedtaksperiode))
+                assertEquals(217, inspektør.gjenståendeSykedager(2.vedtaksperiode))
+            }
+        )
     }
 
     @Test
