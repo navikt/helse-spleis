@@ -43,12 +43,12 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         delegatee.preVisitAktivitetslogg(aktivitetslogg)
     }
 
-    override fun visitInfo(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Info, melding: String, tidsstempel: String) {
-        delegatee.visitInfo(kontekster, aktivitet, melding, tidsstempel)
+    override fun visitInfo(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Info, melding: String, tidsstempel: String) {
+        delegatee.visitInfo(id, kontekster, aktivitet, melding, tidsstempel)
     }
 
-    override fun visitVarsel(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Varsel, melding: String, tidsstempel: String) {
-        delegatee.visitVarsel(kontekster, aktivitet, melding, tidsstempel)
+    override fun visitVarsel(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Varsel, melding: String, tidsstempel: String) {
+        delegatee.visitVarsel(id, kontekster, aktivitet, melding, tidsstempel)
     }
 
     override fun preVisitUtbetalingstidslinjeberegninger(beregninger: List<Utbetalingstidslinjeberegning>) {
@@ -215,6 +215,7 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
     }
 
     override fun visitBehov(
+        id: UUID,
         kontekster: List<SpesifikkKontekst>,
         aktivitet: Aktivitetslogg.Aktivitet.Behov,
         type: Aktivitetslogg.Aktivitet.Behov.Behovtype,
@@ -222,15 +223,15 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         detaljer: Map<String, Any?>,
         tidsstempel: String
     ) {
-        delegatee.visitBehov(kontekster, aktivitet, type, melding, detaljer, tidsstempel)
+        delegatee.visitBehov(id, kontekster, aktivitet, type, melding, detaljer, tidsstempel)
     }
 
-    override fun visitFunksjonellFeil(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.FunksjonellFeil, melding: String, tidsstempel: String) {
-        delegatee.visitFunksjonellFeil(kontekster, aktivitet, melding, tidsstempel)
+    override fun visitFunksjonellFeil(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.FunksjonellFeil, melding: String, tidsstempel: String) {
+        delegatee.visitFunksjonellFeil(id, kontekster, aktivitet, melding, tidsstempel)
     }
 
-    override fun visitLogiskFeil(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.LogiskFeil, melding: String, tidsstempel: String) {
-        delegatee.visitLogiskFeil(kontekster, aktivitet, melding, tidsstempel)
+    override fun visitLogiskFeil(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.LogiskFeil, melding: String, tidsstempel: String) {
+        delegatee.visitLogiskFeil(id, kontekster, aktivitet, melding, tidsstempel)
     }
 
     override fun postVisitAktivitetslogg(aktivitetslogg: Aktivitetslogg) {

@@ -1,6 +1,7 @@
 package no.nav.helse.person
 
 import java.time.LocalDate
+import java.util.UUID
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -213,7 +214,7 @@ internal class AktivitetsloggTest {
     private fun assertInfo(message: String, aktivitetslogg: Aktivitetslogg = this.aktivitetslogg) {
         var visitorCalled = false
         aktivitetslogg.accept(object : AktivitetsloggVisitor {
-            override fun visitInfo(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Info, melding: String, tidsstempel: String) {
+            override fun visitInfo(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Info, melding: String, tidsstempel: String) {
                 visitorCalled = true
                 assertEquals(message, melding)
             }
@@ -224,7 +225,7 @@ internal class AktivitetsloggTest {
     private fun assertVarsel(message: String, aktivitetslogg: Aktivitetslogg = this.aktivitetslogg) {
         var visitorCalled = false
         aktivitetslogg.accept(object : AktivitetsloggVisitor {
-            override fun visitVarsel(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Varsel, melding: String, tidsstempel: String) {
+            override fun visitVarsel(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Varsel, melding: String, tidsstempel: String) {
                 visitorCalled = true
                 assertEquals(message, melding)
             }
@@ -235,7 +236,7 @@ internal class AktivitetsloggTest {
     private fun assertFunksjonellFeil(message: String, aktivitetslogg: Aktivitetslogg = this.aktivitetslogg) {
         var visitorCalled = false
         aktivitetslogg.accept(object : AktivitetsloggVisitor {
-            override fun visitFunksjonellFeil(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.FunksjonellFeil, melding: String, tidsstempel: String) {
+            override fun visitFunksjonellFeil(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.FunksjonellFeil, melding: String, tidsstempel: String) {
                 visitorCalled = true
                 assertTrue(message in aktivitet.toString(), aktivitetslogg.toString())
             }
@@ -246,7 +247,7 @@ internal class AktivitetsloggTest {
     private fun assertLogiskFeil(message: String, aktivitetslogg: Aktivitetslogg = this.aktivitetslogg) {
         var visitorCalled = false
         aktivitetslogg.accept(object : AktivitetsloggVisitor {
-            override fun visitLogiskFeil(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.LogiskFeil, melding: String, tidsstempel: String) {
+            override fun visitLogiskFeil(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.LogiskFeil, melding: String, tidsstempel: String) {
                 visitorCalled = true
                 assertEquals(message, melding)
             }

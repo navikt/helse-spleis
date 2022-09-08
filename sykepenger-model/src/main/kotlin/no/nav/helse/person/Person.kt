@@ -798,6 +798,7 @@ class Person private constructor(
         val errorMeldinger = mutableListOf<String>()
         aktivitetslogg.accept(object : AktivitetsloggVisitor {
             override fun visitFunksjonellFeil(
+                id: UUID,
                 kontekster: List<SpesifikkKontekst>,
                 aktivitet: Aktivitetslogg.Aktivitet.FunksjonellFeil,
                 melding: String,

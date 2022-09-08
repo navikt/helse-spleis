@@ -203,7 +203,7 @@ internal fun AbstractEndToEndTest.assertLogiskFeil(severe: String, vararg filtre
 private fun AbstractEndToEndTest.collectInfo(vararg filtre: AktivitetsloggFilter): MutableList<String> {
     val info = mutableListOf<String>()
     person.personLogg.accept(object : AktivitetsloggVisitor {
-        override fun visitInfo(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Info, melding: String, tidsstempel: String) {
+        override fun visitInfo(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Info, melding: String, tidsstempel: String) {
             if (filtre.all { filter -> kontekster.any { filter.filtrer(it) } }) {
                 info.add(melding)
             }
@@ -215,7 +215,7 @@ private fun AbstractEndToEndTest.collectInfo(vararg filtre: AktivitetsloggFilter
 private fun AbstractPersonTest.collectVarsler(vararg filtre: AktivitetsloggFilter): MutableList<String> {
     val warnings = mutableListOf<String>()
     person.personLogg.accept(object : AktivitetsloggVisitor {
-        override fun visitVarsel(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Varsel, melding: String, tidsstempel: String) {
+        override fun visitVarsel(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Varsel, melding: String, tidsstempel: String) {
             if (filtre.all { filter -> kontekster.any { filter.filtrer(it) } }) {
                 warnings.add(melding)
             }
@@ -227,7 +227,7 @@ private fun AbstractPersonTest.collectVarsler(vararg filtre: AktivitetsloggFilte
 internal fun AbstractPersonTest.collectFunksjonelleFeil(vararg filtre: AktivitetsloggFilter): MutableList<String> {
     val errors = mutableListOf<String>()
     person.personLogg.accept(object : AktivitetsloggVisitor {
-        override fun visitFunksjonellFeil(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.FunksjonellFeil, melding: String, tidsstempel: String) {
+        override fun visitFunksjonellFeil(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.FunksjonellFeil, melding: String, tidsstempel: String) {
             if (filtre.all { filter -> kontekster.any { filter.filtrer(it) } }) {
                 errors.add(melding)
             }
@@ -239,7 +239,7 @@ internal fun AbstractPersonTest.collectFunksjonelleFeil(vararg filtre: Aktivitet
 internal fun AbstractEndToEndTest.collectLogiskeFeil(vararg filtre: AktivitetsloggFilter): MutableList<String> {
     val severes = mutableListOf<String>()
     person.personLogg.accept(object : AktivitetsloggVisitor {
-        override fun visitLogiskFeil(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.LogiskFeil, melding: String, tidsstempel: String) {
+        override fun visitLogiskFeil(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.LogiskFeil, melding: String, tidsstempel: String) {
             if (filtre.all { filter -> kontekster.any { filter.filtrer(it) } }) {
                 severes.add(melding)
             }

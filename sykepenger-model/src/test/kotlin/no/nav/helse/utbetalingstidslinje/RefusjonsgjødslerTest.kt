@@ -386,7 +386,7 @@ internal class RefusjonsgjødslerTest {
             val meldinger = mutableListOf<String>()
 
             accept(object : AktivitetsloggVisitor {
-                override fun visitInfo(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Info, melding: String, tidsstempel: String) {
+                override fun visitInfo(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Info, melding: String, tidsstempel: String) {
                     meldinger.add(melding)
                 }
             })
@@ -398,7 +398,7 @@ internal class RefusjonsgjødslerTest {
             val meldinger = mutableListOf<String>()
 
             accept(object : AktivitetsloggVisitor {
-                override fun visitVarsel(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Varsel, melding: String, tidsstempel: String) {
+                override fun visitVarsel(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Varsel, melding: String, tidsstempel: String) {
                     meldinger.add(melding)
                 }
             })
@@ -410,7 +410,7 @@ internal class RefusjonsgjødslerTest {
             val meldinger = mutableListOf<String>()
 
             accept(object : AktivitetsloggVisitor {
-                override fun visitFunksjonellFeil(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.FunksjonellFeil, melding: String, tidsstempel: String) {
+                override fun visitFunksjonellFeil(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.FunksjonellFeil, melding: String, tidsstempel: String) {
                     meldinger.add(melding)
                 }
             })

@@ -168,7 +168,7 @@ internal class RefusjonshistorikkTest {
         val meldinger = mutableListOf<String>()
 
         accept(object : AktivitetsloggVisitor {
-            override fun visitInfo(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Info, melding: String, tidsstempel: String) {
+            override fun visitInfo(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Info, melding: String, tidsstempel: String) {
                 meldinger.add(melding)
             }
         })

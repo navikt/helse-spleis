@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
+import java.util.UUID
 import no.nav.helse.hendelser.Hendelseskontekst
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov
@@ -36,23 +37,23 @@ class Aktivitetslogg(
     }
 
     override fun info(melding: String, vararg params: Any?) {
-        add(Aktivitet.Info(kontekster.toSpesifikk(), String.format(melding, *params)))
+        add(Aktivitet.Info.opprett(kontekster.toSpesifikk(), String.format(melding, *params)))
     }
 
     override fun varsel(melding: String) {
-        add(Aktivitet.Varsel(kontekster.toSpesifikk(), melding))
+        add(Aktivitet.Varsel.opprett(kontekster.toSpesifikk(), melding))
     }
 
     override fun behov(type: Behov.Behovtype, melding: String, detaljer: Map<String, Any?>) {
-        add(Behov(type, kontekster.toSpesifikk(), melding, detaljer))
+        add(Behov.opprett(type, kontekster.toSpesifikk(), melding, detaljer))
     }
 
     override fun funksjonellFeil(melding: String) {
-        add(Aktivitet.FunksjonellFeil(kontekster.toSpesifikk(), melding))
+        add(Aktivitet.FunksjonellFeil.opprett(kontekster.toSpesifikk(), melding))
     }
 
     override fun logiskFeil(melding: String, vararg params: Any?): Nothing {
-        add(Aktivitet.LogiskFeil(kontekster.toSpesifikk(), String.format(melding, *params)))
+        add(Aktivitet.LogiskFeil.opprett(kontekster.toSpesifikk(), String.format(melding, *params)))
 
         throw AktivitetException(this)
     }
@@ -148,6 +149,7 @@ class Aktivitetslogg(
     }
 
     sealed class Aktivitet(
+        protected val id: UUID,
         private val alvorlighetsgrad: Int,
         private val label: Char,
         private var melding: String,
@@ -182,51 +184,61 @@ class Aktivitetslogg(
         }
 
         operator fun contains(kontekst: Aktivitetskontekst) = kontekst.toSpesifikkKontekst() in kontekster
-        internal class Info(
+        internal class Info private constructor(
+            id: UUID,
             kontekster: List<SpesifikkKontekst>,
             private val melding: String,
             private val tidsstempel: String = LocalDateTime.now().format(tidsstempelformat)
-        ) : Aktivitet(0, 'I', melding, tidsstempel, kontekster) {
+        ) : Aktivitet(id, 0, 'I', melding, tidsstempel, kontekster) {
             companion object {
                 internal fun filter(aktiviteter: List<Aktivitet>): List<Info> {
                     return aktiviteter.filterIsInstance<Info>()
                 }
 
+                internal fun gjennopprett(id: UUID, kontekster: List<SpesifikkKontekst>, melding: String, tidsstempel: String) = Info(id, kontekster, melding, tidsstempel)
+                internal fun opprett(kontekster: List<SpesifikkKontekst>, melding: String) = Info(UUID.randomUUID(), kontekster, melding)
             }
 
             override fun accept(visitor: AktivitetsloggVisitor) {
-                visitor.visitInfo(kontekster, this, melding, tidsstempel)
+                visitor.visitInfo(id, kontekster, this, melding, tidsstempel)
             }
         }
 
-        internal class Varsel(
+        internal class Varsel private constructor(
+            id: UUID,
             kontekster: List<SpesifikkKontekst>,
             private val melding: String,
             private val tidsstempel: String = LocalDateTime.now().format(tidsstempelformat)
-        ) : Aktivitet(25, 'W', melding, tidsstempel, kontekster) {
+        ) : Aktivitet(id, 25, 'W', melding, tidsstempel, kontekster) {
             companion object {
                 internal fun filter(aktiviteter: List<Aktivitet>): List<Varsel> {
                     return aktiviteter.filterIsInstance<Varsel>()
                 }
-
+                internal fun gjennopprett(id: UUID, kontekster: List<SpesifikkKontekst>, melding: String, tidsstempel: String) = Varsel(id, kontekster, melding, tidsstempel)
+                internal fun opprett(kontekster: List<SpesifikkKontekst>, melding: String) = Varsel(UUID.randomUUID(), kontekster, melding)
             }
 
             override fun accept(visitor: AktivitetsloggVisitor) {
-                visitor.visitVarsel(kontekster, this, melding, tidsstempel)
+                visitor.visitVarsel(id, kontekster, this, melding, tidsstempel)
             }
         }
 
-        class Behov(
+        class Behov private constructor(
+            id: UUID,
             val type: Behovtype,
             kontekster: List<SpesifikkKontekst>,
             private val melding: String,
             private val detaljer: Map<String, Any?> = emptyMap(),
             private val tidsstempel: String = LocalDateTime.now().format(tidsstempelformat)
-        ) : Aktivitet(50, 'N', melding, tidsstempel, kontekster) {
+        ) : Aktivitet(id, 50, 'N', melding, tidsstempel, kontekster) {
             companion object {
                 internal fun filter(aktiviteter: List<Aktivitet>): List<Behov> {
                     return aktiviteter.filterIsInstance<Behov>()
                 }
+
+                internal fun gjennopprett(id: UUID, type: Behovtype, kontekster: List<SpesifikkKontekst>, melding: String, detaljer: Map<String, Any?>, tidsstempel: String) =
+                    Behov(id, type, kontekster, melding, detaljer, tidsstempel)
+                internal fun opprett(type: Behovtype, kontekster: List<SpesifikkKontekst>, melding: String, detaljer: Map<String, Any?>) = Behov(UUID.randomUUID(), type, kontekster, melding, detaljer)
 
                 internal fun utbetalingshistorikk(
                     aktivitetslogg: IAktivitetslogg,
@@ -391,7 +403,7 @@ class Aktivitetslogg(
             fun detaljer() = detaljer
 
             override fun accept(visitor: AktivitetsloggVisitor) {
-                visitor.visitBehov(kontekster, this, type, melding, detaljer, tidsstempel)
+                visitor.visitBehov(id, kontekster, this, type, melding, detaljer, tidsstempel)
             }
 
             override fun notify(observer: AktivitetsloggObserver) {}
@@ -423,35 +435,42 @@ class Aktivitetslogg(
             }
         }
 
-        internal class FunksjonellFeil(
+        internal class FunksjonellFeil private constructor(
+            id: UUID,
             kontekster: List<SpesifikkKontekst>,
             private val melding: String,
             private val tidsstempel: String = LocalDateTime.now().format(tidsstempelformat)
-        ) : Aktivitet(75, 'E', melding, tidsstempel, kontekster) {
+        ) : Aktivitet(id, 75, 'E', melding, tidsstempel, kontekster) {
             companion object {
                 internal fun filter(aktiviteter: List<Aktivitet>): List<FunksjonellFeil> {
                     return aktiviteter.filterIsInstance<FunksjonellFeil>()
                 }
+                internal fun gjennopprett(id: UUID, kontekster: List<SpesifikkKontekst>, melding: String, tidsstempel: String) = FunksjonellFeil(id, kontekster, melding, tidsstempel)
+                internal fun opprett(kontekster: List<SpesifikkKontekst>, melding: String) = FunksjonellFeil(UUID.randomUUID(), kontekster, melding)
             }
 
             override fun accept(visitor: AktivitetsloggVisitor) {
-                visitor.visitFunksjonellFeil(kontekster, this, melding, tidsstempel)
+                visitor.visitFunksjonellFeil(id, kontekster, this, melding, tidsstempel)
             }
         }
 
-        internal class LogiskFeil(
+        internal class LogiskFeil private constructor(
+            id: UUID,
             kontekster: List<SpesifikkKontekst>,
             private val melding: String,
             private val tidsstempel: String = LocalDateTime.now().format(tidsstempelformat)
-        ) : Aktivitet(100, 'S', melding, tidsstempel, kontekster) {
+        ) : Aktivitet(id, 100, 'S', melding, tidsstempel, kontekster) {
             companion object {
                 internal fun filter(aktiviteter: List<Aktivitet>): List<LogiskFeil> {
                     return aktiviteter.filterIsInstance<LogiskFeil>()
                 }
+
+                internal fun gjennopprett(id: UUID, kontekster: List<SpesifikkKontekst>, melding: String, tidsstempel: String) = LogiskFeil(id, kontekster, melding, tidsstempel)
+                internal fun opprett(kontekster: List<SpesifikkKontekst>, melding: String) = LogiskFeil(UUID.randomUUID(), kontekster, melding)
             }
 
             override fun accept(visitor: AktivitetsloggVisitor) {
-                visitor.visitLogiskFeil(kontekster, this, melding, tidsstempel)
+                visitor.visitLogiskFeil(id, kontekster, this, melding, tidsstempel)
             }
         }
     }
@@ -484,6 +503,7 @@ interface IAktivitetslogg {
 internal interface AktivitetsloggVisitor {
     fun preVisitAktivitetslogg(aktivitetslogg: Aktivitetslogg) {}
     fun visitInfo(
+        id: UUID,
         kontekster: List<SpesifikkKontekst>,
         aktivitet: Aktivitetslogg.Aktivitet.Info,
         melding: String,
@@ -492,6 +512,7 @@ internal interface AktivitetsloggVisitor {
     }
 
     fun visitVarsel(
+        id: UUID,
         kontekster: List<SpesifikkKontekst>,
         aktivitet: Aktivitetslogg.Aktivitet.Varsel,
         melding: String,
@@ -500,6 +521,7 @@ internal interface AktivitetsloggVisitor {
     }
 
     fun visitBehov(
+        id: UUID,
         kontekster: List<SpesifikkKontekst>,
         aktivitet: Behov,
         type: Behov.Behovtype,
@@ -510,6 +532,7 @@ internal interface AktivitetsloggVisitor {
     }
 
     fun visitFunksjonellFeil(
+        id: UUID,
         kontekster: List<SpesifikkKontekst>,
         aktivitet: Aktivitetslogg.Aktivitet.FunksjonellFeil,
         melding: String,
@@ -518,6 +541,7 @@ internal interface AktivitetsloggVisitor {
     }
 
     fun visitLogiskFeil(
+        id: UUID,
         kontekster: List<SpesifikkKontekst>,
         aktivitet: Aktivitetslogg.Aktivitet.LogiskFeil,
         melding: String,
