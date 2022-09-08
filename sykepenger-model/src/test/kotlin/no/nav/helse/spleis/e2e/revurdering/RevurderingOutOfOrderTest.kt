@@ -14,10 +14,12 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold
 import no.nav.helse.hendelser.til
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.juni
 import no.nav.helse.mai
 import no.nav.helse.mars
+import no.nav.helse.person.Periodetype
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -39,6 +41,7 @@ import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
 import no.nav.helse.spleis.e2e.assertSisteTilstand
+import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertUtbetalingsbeløp
 import no.nav.helse.spleis.e2e.finnSkjæringstidspunkt
@@ -63,6 +66,7 @@ import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
 import no.nav.helse.spleis.e2e.tilGodkjent
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 @EnableToggle(Toggle.RevurderOutOfOrder::class)
@@ -769,6 +773,58 @@ internal class RevurderingOutOfOrderTest : AbstractEndToEndTest() {
                 assertTilstander(2.vedtaksperiode, AVVENTER_REVURDERING)
                 assertSisteTilstand(3.vedtaksperiode, AVVENTER_HISTORIKK)
             }
+        )
+    }
+
+    @Test
+    fun `to perioder på rad kommer out of order - skal revuderes i riktig rekkefølge`() {
+        val marsId = 1.vedtaksperiode
+        nyttVedtak(1.mars, 31.mars)
+        assertTilstand(marsId, AVSLUTTET)
+
+        nyPeriode(1.februar til 28.februar)
+        håndterInntektsmelding(listOf(1.februar til 16.februar))
+        val februarId = 2.vedtaksperiode
+        håndterYtelser(februarId)
+        håndterVilkårsgrunnlag(februarId)
+        håndterYtelser(februarId)
+        håndterSimulering(februarId)
+        håndterUtbetalingsgodkjenning(februarId)
+        håndterUtbetalt()
+
+        håndterYtelser(marsId)
+        håndterSimulering(marsId)
+        assertTilstand(marsId, AVVENTER_GODKJENNING_REVURDERING)
+        assertTilstand(februarId, AVSLUTTET)
+
+
+        nyPeriode(1.januar til 31.januar)
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        val januarId = 3.vedtaksperiode
+        håndterYtelser(januarId)
+        håndterVilkårsgrunnlag(januarId)
+        håndterYtelser(januarId)
+        håndterSimulering(januarId)
+        håndterUtbetalingsgodkjenning(januarId)
+        håndterUtbetalt()
+
+        assertEquals(Periodetype.FØRSTEGANGSBEHANDLING, inspektør.vedtaksperioder(januarId).inspektør.periodetype)
+        assertEquals(Periodetype.FORLENGELSE, inspektør.vedtaksperioder(februarId).inspektør.periodetype)
+        assertEquals(Periodetype.FORLENGELSE, inspektør.vedtaksperioder(marsId).inspektør.periodetype)
+
+        assertForventetFeil(
+
+            forklaring = "",
+            nå = {
+                assertTilstand(januarId, AVSLUTTET)
+                assertTilstand(februarId, AVVENTER_HISTORIKK_REVURDERING) // Når denne utbetales feiler det fordi betalingen allerede er sendt til oppdrag (?)
+                assertTilstand(marsId, AVVENTER_REVURDERING)
+            },
+            ønsket = {
+                assertTilstand(januarId, AVSLUTTET)
+                assertTilstand(februarId, AVVENTER_GJENNOMFØRT_REVURDERING)
+                assertTilstand(marsId, AVVENTER_HISTORIKK_REVURDERING)
+            },
         )
     }
 
