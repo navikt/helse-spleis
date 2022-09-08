@@ -17,7 +17,7 @@ internal class PeriodeVarslerBuilder(
         aktivitetslogg.accept(this)
     }
 
-    override fun visitVarsel(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Varsel, melding: String, tidsstempel: String) {
+    override fun visitVarsel(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Varsel, melding: String, tidsstempel: String) {
         kontekster.find { it.kontekstType == "Vedtaksperiode" }
             ?.let { it.kontekstMap["vedtaksperiodeId"] }
             ?.let(UUID::fromString)

@@ -1,5 +1,6 @@
 package no.nav.helse.serde.reflection
 
+import java.util.UUID
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.FunksjonellFeil
@@ -29,15 +30,16 @@ internal class AktivitetsloggMap(aktivitetslogg: Aktivitetslogg) : Aktivitetslog
         "kontekster" to alleKontekster.keys.toList()
     )
 
-    override fun visitInfo(kontekster: List<SpesifikkKontekst>, aktivitet: Info, melding: String, tidsstempel: String) {
-        leggTilMelding(kontekster, INFO, melding, tidsstempel)
+    override fun visitInfo(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Info, melding: String, tidsstempel: String) {
+        leggTilMelding(id, kontekster, INFO, melding, tidsstempel)
     }
 
-    override fun visitVarsel(kontekster: List<SpesifikkKontekst>, aktivitet: Varsel, melding: String, tidsstempel: String) {
-        leggTilMelding(kontekster, WARN, melding, tidsstempel)
+    override fun visitVarsel(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Varsel, melding: String, tidsstempel: String) {
+        leggTilMelding(id, kontekster, WARN, melding, tidsstempel)
     }
 
     override fun visitBehov(
+        id: UUID,
         kontekster: List<SpesifikkKontekst>,
         aktivitet: Behov,
         type: Behov.Behovtype,
@@ -45,20 +47,21 @@ internal class AktivitetsloggMap(aktivitetslogg: Aktivitetslogg) : Aktivitetslog
         detaljer: Map<String, Any?>,
         tidsstempel: String
     ) {
-        leggTilBehov(kontekster, BEHOV, type, melding, detaljer, tidsstempel)
+        leggTilBehov(id, kontekster, BEHOV, type, melding, detaljer, tidsstempel)
     }
 
-    override fun visitFunksjonellFeil(kontekster: List<SpesifikkKontekst>, aktivitet: FunksjonellFeil, melding: String, tidsstempel: String) {
-        leggTilMelding(kontekster, ERROR, melding, tidsstempel)
+    override fun visitFunksjonellFeil(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: FunksjonellFeil, melding: String, tidsstempel: String) {
+        leggTilMelding(id, kontekster, ERROR, melding, tidsstempel)
     }
 
-    override fun visitLogiskFeil(kontekster: List<SpesifikkKontekst>, aktivitet: LogiskFeil, melding: String, tidsstempel: String) {
-        leggTilMelding(kontekster, SEVERE, melding, tidsstempel)
+    override fun visitLogiskFeil(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: LogiskFeil, melding: String, tidsstempel: String) {
+        leggTilMelding(id, kontekster, SEVERE, melding, tidsstempel)
     }
 
-    private fun leggTilMelding(kontekster: List<SpesifikkKontekst>, alvorlighetsgrad: Alvorlighetsgrad, melding: String, tidsstempel: String, detaljer: Map<String, Any> = emptyMap()) {
+    private fun leggTilMelding(id: UUID, kontekster: List<SpesifikkKontekst>, alvorlighetsgrad: Alvorlighetsgrad, melding: String, tidsstempel: String, detaljer: Map<String, Any> = emptyMap()) {
         aktiviteter.add(
             mutableMapOf(
+                "id" to id.toString(),
                 "kontekster" to kontekstIndices(kontekster),
                 "alvorlighetsgrad" to alvorlighetsgrad.name,
                 "melding" to melding,
@@ -69,6 +72,7 @@ internal class AktivitetsloggMap(aktivitetslogg: Aktivitetslogg) : Aktivitetslog
     }
 
     private fun leggTilBehov(
+        id: UUID,
         kontekster: List<SpesifikkKontekst>,
         alvorlighetsgrad: Alvorlighetsgrad,
         type: Behov.Behovtype,
@@ -78,6 +82,7 @@ internal class AktivitetsloggMap(aktivitetslogg: Aktivitetslogg) : Aktivitetslog
     ) {
         aktiviteter.add(
             mutableMapOf(
+                "id" to id.toString(),
                 "kontekster" to kontekstIndices(kontekster),
                 "alvorlighetsgrad" to alvorlighetsgrad.name,
                 "behovtype" to type.toString(),

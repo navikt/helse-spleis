@@ -384,6 +384,7 @@ internal data class PersonData(
             private val label: Char,
             private val behovtype: String?,
             private val melding: String,
+            private val id: UUID,
             private val tidsstempel: String,
             private val kontekster: List<Int>,
             private val detaljer: Map<String, Any>
@@ -391,29 +392,34 @@ internal data class PersonData(
             internal fun parseAktivitet(spesifikkKontekster: List<SpesifikkKontekst>): Aktivitetslogg.Aktivitet {
                 val kontekster = kontekster.map { index -> spesifikkKontekster[index] }
                 return when (alvorlighetsgrad) {
-                    Alvorlighetsgrad.INFO -> Aktivitetslogg.Aktivitet.Info(
+                    Alvorlighetsgrad.INFO -> Aktivitetslogg.Aktivitet.Info.gjennopprett(
+                        id,
                         kontekster,
                         melding,
                         tidsstempel
                     )
-                    Alvorlighetsgrad.WARN -> Aktivitetslogg.Aktivitet.Varsel(
+                    Alvorlighetsgrad.WARN -> Aktivitetslogg.Aktivitet.Varsel.gjennopprett(
+                        id,
                         kontekster,
                         melding,
                         tidsstempel
                     )
-                    Alvorlighetsgrad.BEHOV -> Aktivitetslogg.Aktivitet.Behov(
+                    Alvorlighetsgrad.BEHOV -> Aktivitetslogg.Aktivitet.Behov.gjennopprett(
+                        id,
                         Aktivitetslogg.Aktivitet.Behov.Behovtype.valueOf(behovtype!!),
                         kontekster,
                         melding,
                         detaljer,
                         tidsstempel
                     )
-                    Alvorlighetsgrad.ERROR -> Aktivitetslogg.Aktivitet.FunksjonellFeil(
+                    Alvorlighetsgrad.ERROR -> Aktivitetslogg.Aktivitet.FunksjonellFeil.gjennopprett(
+                        id,
                         kontekster,
                         melding,
                         tidsstempel
                     )
-                    Alvorlighetsgrad.SEVERE -> Aktivitetslogg.Aktivitet.LogiskFeil(
+                    Alvorlighetsgrad.SEVERE -> Aktivitetslogg.Aktivitet.LogiskFeil.gjennopprett(
+                        id,
                         kontekster,
                         melding,
                         tidsstempel

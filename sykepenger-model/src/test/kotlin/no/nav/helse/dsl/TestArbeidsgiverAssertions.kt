@@ -94,7 +94,7 @@ internal class TestArbeidsgiverAssertions(private val observatør: TestObservat�
     private fun collectInfo(vararg filtre: AktivitetsloggFilter): MutableList<String> {
         val info = mutableListOf<String>()
         personInspektør.aktivitetslogg.accept(object : AktivitetsloggVisitor {
-            override fun visitInfo(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Info, melding: String, tidsstempel: String) {
+            override fun visitInfo(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Info, melding: String, tidsstempel: String) {
                 if (filtre.all { filter -> kontekster.any { filter.filtrer(it) } }) {
                     info.add(melding)
                 }
@@ -106,7 +106,7 @@ internal class TestArbeidsgiverAssertions(private val observatør: TestObservat�
     private fun collectVarsler(vararg filtre: AktivitetsloggFilter): MutableList<String> {
         val warnings = mutableListOf<String>()
         personInspektør.aktivitetslogg.accept(object : AktivitetsloggVisitor {
-            override fun visitVarsel(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Varsel, melding: String, tidsstempel: String) {
+            override fun visitVarsel(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Varsel, melding: String, tidsstempel: String) {
                 if (filtre.all { filter -> kontekster.any { filter.filtrer(it) } }) {
                     warnings.add(melding)
                 }
@@ -118,7 +118,7 @@ internal class TestArbeidsgiverAssertions(private val observatør: TestObservat�
     private fun collectFunksjonelleFeil(vararg filtre: AktivitetsloggFilter): MutableList<String> {
         val errors = mutableListOf<String>()
         personInspektør.aktivitetslogg.accept(object : AktivitetsloggVisitor {
-            override fun visitFunksjonellFeil(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.FunksjonellFeil, melding: String, tidsstempel: String) {
+            override fun visitFunksjonellFeil(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.FunksjonellFeil, melding: String, tidsstempel: String) {
                 if (filtre.all { filter -> kontekster.any { filter.filtrer(it) } }) {
                     errors.add(melding)
                 }
@@ -130,7 +130,7 @@ internal class TestArbeidsgiverAssertions(private val observatør: TestObservat�
     private fun collectLogiskeFeil(vararg filtre: AktivitetsloggFilter): MutableList<String> {
         val severes = mutableListOf<String>()
         personInspektør.aktivitetslogg.accept(object : AktivitetsloggVisitor {
-            override fun visitLogiskFeil(kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.LogiskFeil, melding: String, tidsstempel: String) {
+            override fun visitLogiskFeil(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.LogiskFeil, melding: String, tidsstempel: String) {
                 if (filtre.all { filter -> kontekster.any { filter.filtrer(it) } }) {
                     severes.add(melding)
                 }
