@@ -83,7 +83,7 @@ internal class RevurderingOutOfOrderTest : AbstractEndToEndTest() {
         assertSisteTilstand(februarId, AVVENTER_REVURDERING)
         assertSisteTilstand(januarId, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
 
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 35000.månedlig)
         håndterYtelser(januarId)
         håndterVilkårsgrunnlag(januarId)
         håndterYtelser(januarId)
@@ -93,25 +93,47 @@ internal class RevurderingOutOfOrderTest : AbstractEndToEndTest() {
 
         assertSisteTilstand(februarId, AVVENTER_HISTORIKK_REVURDERING)
         assertSisteTilstand(januarId, AVSLUTTET)
-
         håndterYtelser(februarId)
-        håndterSimulering(februarId)
-        håndterUtbetalingsgodkjenning(februarId)
-        håndterUtbetalt()
-
-        assertSisteTilstand(januarId, AVSLUTTET)
-        assertSisteTilstand(februarId, AVSLUTTET)
-        assertUtbetalingsbeløp(
-            januarId,
-            forventetArbeidsgiverbeløp = 1431,
-            forventetArbeidsgiverRefusjonsbeløp = 1431,
-            subset = 17.januar til 31.januar
-        )
-        assertUtbetalingsbeløp(
-            februarId,
-            forventetArbeidsgiverbeløp = 1431,
-            forventetArbeidsgiverRefusjonsbeløp = 1431,
-            subset = 1.februar til 28.februar
+        assertForventetFeil(
+            forklaring = "Februar-perioden beregner ikke utbetaling utifra det nye vilkårsgrunnlaget på skjæringstidspunkt 1.januar",
+            nå = {
+                håndterSimulering(februarId)
+                håndterUtbetalingsgodkjenning(februarId)
+                håndterUtbetalt()
+                assertEquals(1.februar, inspektør.skjæringstidspunkt(februarId))
+                assertUtbetalingsbeløp(
+                    januarId,
+                    forventetArbeidsgiverbeløp = 1615,
+                    forventetArbeidsgiverRefusjonsbeløp = 1615,
+                    subset = 17.januar til 31.januar
+                )
+                assertUtbetalingsbeløp(
+                    februarId,
+                    forventetArbeidsgiverbeløp = 1431,
+                    forventetArbeidsgiverRefusjonsbeløp = 1615,
+                    subset = 1.februar til 28.februar
+                )
+            },
+            ønsket = {
+                håndterVilkårsgrunnlag(februarId)
+                håndterYtelser(februarId)
+                håndterSimulering(februarId)
+                håndterUtbetalingsgodkjenning(februarId)
+                håndterUtbetalt()
+                assertEquals(1.januar, inspektør.skjæringstidspunkt(februarId))
+                assertUtbetalingsbeløp(
+                    januarId,
+                    forventetArbeidsgiverbeløp = 1615,
+                    forventetArbeidsgiverRefusjonsbeløp = 1615,
+                    subset = 17.januar til 31.januar
+                )
+                assertUtbetalingsbeløp(
+                    februarId,
+                    forventetArbeidsgiverbeløp = 1615,
+                    forventetArbeidsgiverRefusjonsbeløp = 1431,
+                    subset = 1.februar til 28.februar
+                )
+            }
         )
     }
 
