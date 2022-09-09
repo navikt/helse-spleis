@@ -14,8 +14,8 @@ import org.junit.jupiter.api.Test
 internal class IkkeHåndtertHendelseTest : AbstractEndToEndTest() {
     @Test
     fun `håndterer hendelse_ikke_håndtert ved korrigerende søknad av utbetalt periode`() {
-        håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
-        håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 50.prosent))
+        håndterSøknad(Sykdom(3.januar, 26.januar, 50.prosent))
         håndterInntektsmelding(listOf(3.januar til 18.januar), førsteFraværsdag = 3.januar)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -24,14 +24,10 @@ internal class IkkeHåndtertHendelseTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
-        val søknadId = håndterSøknad(Sykdom(3.januar, 26.januar, 80.prosent))
+        val søknadId = håndterSøknad(Sykdom(3.januar, 26.januar, 50.prosent, 20.prosent))
 
         val hendelseIkkeHåndtert = observatør.hendelseIkkeHåndtert(søknadId)
         assertNotNull(hendelseIkkeHåndtert)
-        assertEquals(
-            listOf("Mottatt flere søknader for perioden - det støttes ikke før replay av hendelser er på plass"),
-            hendelseIkkeHåndtert?.årsaker
-        )
     }
 
     @Test
@@ -44,8 +40,8 @@ internal class IkkeHåndtertHendelseTest : AbstractEndToEndTest() {
 
     @Test
     fun `tar bare med errors som er relatert til hendelse`() {
-        håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
-        håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 50.prosent))
+        håndterSøknad(Sykdom(3.januar, 26.januar, 50.prosent))
         håndterInntektsmelding(listOf(3.januar til 18.januar))
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -56,12 +52,11 @@ internal class IkkeHåndtertHendelseTest : AbstractEndToEndTest() {
         person.håndter(ytelser(1.vedtaksperiode)) // for å legge på en feil som ikke skal være med i hendelse_ikke_håndtert
         håndterUtbetalt()
 
-        val søknadId = håndterSøknad(Sykdom(3.januar, 25.januar, 80.prosent))
+        val søknadId = håndterSøknad(Sykdom(3.januar, 26.januar, 50.prosent, 20.prosent))
 
         val hendelseIkkeHåndtert = observatør.hendelseIkkeHåndtert(søknadId)
-        assertNotNull(hendelseIkkeHåndtert)
         assertEquals(
-            listOf("Mottatt flere søknader for perioden - det støttes ikke før replay av hendelser er på plass"),
+            listOf("Bruker har oppgitt at de har jobbet mindre enn sykmelding tilsier"),
             hendelseIkkeHåndtert?.årsaker
         )
     }
