@@ -22,15 +22,13 @@ internal abstract class MigrationTest(private val migration: () -> JsonMigration
         expectedJson: String,
         originalJson: String,
         jsonCompareMode: JSONCompareMode = JSONCompareMode.STRICT
-    ) {
-        assertMigrationRaw(expectedJson.readResource(), originalJson.readResource(), jsonCompareMode)
-    }
+    ) = assertMigrationRaw(expectedJson.readResource(), originalJson.readResource(), jsonCompareMode)
 
     protected fun assertMigrationRaw(
         expectedJson: String,
         originalJson: String,
         jsonCompareMode: JSONCompareMode = JSONCompareMode.STRICT
-    ) {
+    ): JsonNode {
         val expected = toNode(expectedJson)
         val migrert = migrer(originalJson)
         println(migrert.toString())
@@ -40,5 +38,6 @@ internal abstract class MigrationTest(private val migration: () -> JsonMigration
             migrert.toString(),
             jsonCompareMode
         )
+        return migrert
     }
 }
