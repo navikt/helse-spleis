@@ -2,6 +2,7 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import java.util.UUID
+import no.nav.helse.Aktivitetskode
 import no.nav.helse.Personidentifikator
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.utbetalingstidslinje.Alder.Companion.alder
@@ -74,6 +75,10 @@ abstract class PersonHendelse protected constructor(
         aktivitetslogg.behov(type, melding, detaljer)
     override fun funksjonellFeil(melding: String) = aktivitetslogg.funksjonellFeil(melding)
     override fun logiskFeil(melding: String, vararg params: Any?) = aktivitetslogg.logiskFeil(melding, *params)
+    override fun kreverHandling(kode: Aktivitetskode) = aktivitetslogg.kreverHandling(kode)
+    override fun varsel(kode: Aktivitetskode) = aktivitetslogg.varsel(kode)
+    override fun funksjonellFeil(kode: Aktivitetskode) = aktivitetslogg.funksjonellFeil(kode)
+    override fun handlingStrategi(handlingStrategi: HandlingStrategi) = aktivitetslogg.handlingStrategi(handlingStrategi)
     override fun harAktiviteter() = aktivitetslogg.harAktiviteter()
     override fun harVarslerEllerVerre() = aktivitetslogg.harVarslerEllerVerre()
     override fun harFunksjonelleFeilEllerVerre() = aktivitetslogg.harFunksjonelleFeilEllerVerre()

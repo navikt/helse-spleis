@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.util.UUID
+import no.nav.helse.Aktivitetskode
 import no.nav.helse.hendelser.Hendelseskontekst
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov
@@ -25,6 +26,7 @@ class Aktivitetslogg(
     internal val aktiviteter = mutableListOf<Aktivitet>()
     private val kontekster = mutableListOf<Aktivitetskontekst>()  // Doesn't need serialization
     private val observers = mutableListOf<AktivitetsloggObserver>()
+    private lateinit var handlingStrategi: HandlingStrategi
 
     internal fun accept(visitor: AktivitetsloggVisitor) {
         visitor.preVisitAktivitetslogg(this)
@@ -42,6 +44,18 @@ class Aktivitetslogg(
 
     override fun varsel(melding: String) {
         add(Aktivitet.Varsel.opprett(kontekster.toSpesifikk(), melding))
+    }
+
+    override fun kreverHandling(kode: Aktivitetskode) {
+        handlingStrategi.handle(this, kode)
+    }
+
+    override fun varsel(kode: Aktivitetskode) {
+        add(kode.varsel(kontekster.toSpesifikk()))
+    }
+
+    override fun funksjonellFeil(kode: Aktivitetskode) {
+        add(kode.funksjonellFeil(kontekster.toSpesifikk()))
     }
 
     override fun behov(type: Behov.Behovtype, melding: String, detaljer: Map<String, Any?>) {
@@ -83,6 +97,11 @@ class Aktivitetslogg(
         val index = kontekster.indexOfFirst { spesifikkKontekst.sammeType(it) }
         if (index >= 0) fjernKonteksterFraOgMed(index)
         kontekster.add(kontekst)
+    }
+
+    override fun handlingStrategi(handlingStrategi: HandlingStrategi) {
+        this.handlingStrategi = handlingStrategi
+        forelder?.handlingStrategi = handlingStrategi
     }
 
     private fun fjernKonteksterFraOgMed(indeks: Int) {
@@ -476,9 +495,28 @@ class Aktivitetslogg(
     }
 }
 
+interface HandlingStrategi {
+    fun handle(aktivitetslogg: IAktivitetslogg, kode: Aktivitetskode)
+}
+
+class DefaultStrategi: HandlingStrategi {
+    override fun handle(aktivitetslogg: IAktivitetslogg, kode: Aktivitetskode) {
+        aktivitetslogg.funksjonellFeil(kode)
+    }
+}
+
+class RevurderingStrategi: HandlingStrategi {
+    override fun handle(aktivitetslogg: IAktivitetslogg, kode: Aktivitetskode) {
+        aktivitetslogg.varsel(kode)
+    }
+}
+
 interface IAktivitetslogg {
     fun info(melding: String, vararg params: Any?)
     fun behov(type: Behov.Behovtype, melding: String, detaljer: Map<String, Any?> = emptyMap())
+    fun kreverHandling(kode: Aktivitetskode)
+    fun varsel(kode: Aktivitetskode)
+    fun funksjonellFeil(kode: Aktivitetskode)
     fun varsel(melding: String)
     fun funksjonellFeil(melding: String)
     fun logiskFeil(melding: String, vararg params: Any?): Nothing
@@ -490,6 +528,7 @@ interface IAktivitetslogg {
     fun aktivitetsteller(): Int
     fun behov(): List<Behov>
     fun barn(): Aktivitetslogg
+    fun handlingStrategi(handlingStrategi: HandlingStrategi)
     fun kontekst(kontekst: Aktivitetskontekst)
     fun kontekst(person: Person)
     fun kontekster(): List<IAktivitetslogg>

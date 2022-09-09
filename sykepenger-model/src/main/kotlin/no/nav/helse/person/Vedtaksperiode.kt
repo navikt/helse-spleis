@@ -436,6 +436,7 @@ internal class Vedtaksperiode private constructor(
         hendelse.kontekst(arbeidsgiver)
         hendelse.kontekst(this)
         hendelse.kontekst(this.tilstand)
+        hendelse.handlingStrategi(this.tilstand.handlingStrategi())
     }
 
     private fun overlapperMed(hendelse: SykdomstidslinjeHendelse) = hendelse.erRelevant(this.periode)
@@ -819,6 +820,7 @@ internal class Vedtaksperiode private constructor(
          */
         val kanReberegnes: Boolean get() = true
 
+        fun handlingStrategi(): HandlingStrategi = DefaultStrategi()
         fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {}
 
         fun makstid(
