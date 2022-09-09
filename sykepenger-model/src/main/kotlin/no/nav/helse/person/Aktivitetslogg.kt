@@ -38,14 +38,6 @@ class Aktivitetslogg(
         observers.add(observer)
     }
 
-    override fun info(melding: String, vararg params: Any?) {
-        add(Aktivitet.Info.opprett(kontekster.toSpesifikk(), String.format(melding, *params)))
-    }
-
-    override fun varsel(melding: String) {
-        add(Aktivitet.Varsel.opprett(kontekster.toSpesifikk(), melding))
-    }
-
     override fun kreverHandling(kode: Aktivitetskode) {
         handlingStrategi.handle(this, kode)
     }
@@ -58,6 +50,14 @@ class Aktivitetslogg(
         add(kode.funksjonellFeil(kontekster.toSpesifikk()))
     }
 
+    override fun info(melding: String, vararg params: Any?) {
+        add(Aktivitet.Info.opprett(kontekster.toSpesifikk(), String.format(melding, *params)))
+    }
+
+    override fun varsel(melding: String) {
+        add(Aktivitet.Varsel.opprett(kontekster.toSpesifikk(), melding))
+    }
+
     override fun behov(type: Behov.Behovtype, melding: String, detaljer: Map<String, Any?>) {
         add(Behov.opprett(type, kontekster.toSpesifikk(), melding, detaljer))
     }
@@ -68,7 +68,6 @@ class Aktivitetslogg(
 
     override fun logiskFeil(melding: String, vararg params: Any?): Nothing {
         add(Aktivitet.LogiskFeil.opprett(kontekster.toSpesifikk(), String.format(melding, *params)))
-
         throw AktivitetException(this)
     }
 
