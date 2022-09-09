@@ -780,7 +780,15 @@ internal class Vedtaksperiode private constructor(
         håndter(vedtaksperiode, påminnelse)
     }
 
-    private fun revurderNyPeriodeTidligereEllerOverlappende(vedtaksperiode: Vedtaksperiode, hendelse: Søknad) {
+    private fun revurderNyPeriodeTidligereEllerOverlappende(
+        vedtaksperiode: Vedtaksperiode,
+        hendelse: Søknad,
+        ny: Vedtaksperiode,
+        outOfOrderIkkeStøttet: () -> Unit
+    ) {
+        if (Toggle.RevurderOutOfOrder.disabled) return outOfOrderIkkeStøttet()
+        if (Toggle.RevurderOutOfOrderForlengelser.disabled && vedtaksperiode.person.finnesEnVedtaksperiodeRettFør(ny)) return outOfOrderIkkeStøttet()
+
         val harForeldedeDager = hendelse.sykdomstidslinje().harForeldedeDager()
         val alderPåSøknad = hendelse.dagerSøknadHarVærtTilgjengligForInnsending()
         sikkerlogg.info(
@@ -1010,16 +1018,8 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.person.startRevurdering(vedtaksperiode, hendelse)
         }
 
-        override fun nyPeriodeTidligereEllerOverlappende(
-            vedtaksperiode: Vedtaksperiode,
-            ny: Vedtaksperiode,
-            hendelse: Søknad
-        ) {
-            if (Toggle.RevurderOutOfOrder.enabled) {
-                vedtaksperiode.revurderNyPeriodeTidligereEllerOverlappende(vedtaksperiode, hendelse)
-            } else {
-                super.nyPeriodeTidligereEllerOverlappende(vedtaksperiode, ny, hendelse)
-            }
+        override fun nyPeriodeTidligereEllerOverlappende(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Søknad) {
+            vedtaksperiode.revurderNyPeriodeTidligereEllerOverlappende(vedtaksperiode, hendelse, ny) { super.nyPeriodeTidligereEllerOverlappende(vedtaksperiode, ny, hendelse)}
         }
 
         override fun håndter(
@@ -1095,11 +1095,7 @@ internal class Vedtaksperiode private constructor(
             ny: Vedtaksperiode,
             hendelse: Søknad
         ) {
-            if (Toggle.RevurderOutOfOrder.enabled) {
-                vedtaksperiode.revurderNyPeriodeTidligereEllerOverlappende(vedtaksperiode, hendelse)
-            } else {
-                super.nyPeriodeTidligereEllerOverlappende(vedtaksperiode, ny, hendelse)
-            }
+            vedtaksperiode.revurderNyPeriodeTidligereEllerOverlappende(vedtaksperiode, hendelse, ny) { super.nyPeriodeTidligereEllerOverlappende(vedtaksperiode, ny, hendelse) }
         }
 
         override fun håndterRevurdertUtbetaling(
@@ -1198,11 +1194,7 @@ internal class Vedtaksperiode private constructor(
             ny: Vedtaksperiode,
             hendelse: Søknad
         ) {
-            if (Toggle.RevurderOutOfOrder.enabled) {
-                vedtaksperiode.revurderNyPeriodeTidligereEllerOverlappende(vedtaksperiode, hendelse)
-            } else {
-                super.nyPeriodeTidligereEllerOverlappende(vedtaksperiode, ny, hendelse)
-            }
+            vedtaksperiode.revurderNyPeriodeTidligereEllerOverlappende(vedtaksperiode, hendelse, ny) { super.nyPeriodeTidligereEllerOverlappende(vedtaksperiode, ny, hendelse) }
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
@@ -1298,11 +1290,7 @@ internal class Vedtaksperiode private constructor(
             ny: Vedtaksperiode,
             hendelse: Søknad
         ) {
-            if (Toggle.RevurderOutOfOrder.enabled) {
-                vedtaksperiode.revurderNyPeriodeTidligereEllerOverlappende(vedtaksperiode, hendelse)
-            } else {
-                super.nyPeriodeTidligereEllerOverlappende(vedtaksperiode, ny, hendelse)
-            }
+            vedtaksperiode.revurderNyPeriodeTidligereEllerOverlappende(vedtaksperiode, hendelse, ny) { super.nyPeriodeTidligereEllerOverlappende(vedtaksperiode, ny, hendelse) }
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
@@ -1710,11 +1698,7 @@ internal class Vedtaksperiode private constructor(
             ny: Vedtaksperiode,
             hendelse: Søknad
         ) {
-            if (Toggle.RevurderOutOfOrder.enabled) {
-                vedtaksperiode.revurderNyPeriodeTidligereEllerOverlappende(vedtaksperiode, hendelse)
-            } else {
-                super.nyPeriodeTidligereEllerOverlappende(vedtaksperiode, ny, hendelse)
-            }
+            vedtaksperiode.revurderNyPeriodeTidligereEllerOverlappende(vedtaksperiode, hendelse, ny) { super.nyPeriodeTidligereEllerOverlappende(vedtaksperiode, ny, hendelse) }
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, simulering: Simulering) {
@@ -1949,11 +1933,7 @@ internal class Vedtaksperiode private constructor(
             ny: Vedtaksperiode,
             hendelse: Søknad
         ) {
-            if (Toggle.RevurderOutOfOrder.enabled) {
-                vedtaksperiode.revurderNyPeriodeTidligereEllerOverlappende(vedtaksperiode, hendelse)
-            } else {
-                super.nyPeriodeTidligereEllerOverlappende(vedtaksperiode, ny, hendelse)
-            }
+            vedtaksperiode.revurderNyPeriodeTidligereEllerOverlappende(vedtaksperiode, hendelse, ny) { super.nyPeriodeTidligereEllerOverlappende(vedtaksperiode, ny, hendelse) }
         }
 
         override fun håndter(
@@ -2164,11 +2144,7 @@ internal class Vedtaksperiode private constructor(
             hendelse: Søknad
         ) {
             if (vedtaksperiode.organisasjonsnummer != ny.organisasjonsnummer) return
-            if (Toggle.RevurderOutOfOrder.enabled) {
-                vedtaksperiode.revurderNyPeriodeTidligereEllerOverlappende(vedtaksperiode, hendelse)
-            } else {
-                super.nyPeriodeTidligereEllerOverlappende(vedtaksperiode, ny, hendelse)
-            }
+            vedtaksperiode.revurderNyPeriodeTidligereEllerOverlappende(vedtaksperiode, hendelse, ny) { super.nyPeriodeTidligereEllerOverlappende(vedtaksperiode, ny, hendelse) }
         }
 
         override fun startRevurdering(
@@ -2299,12 +2275,12 @@ internal class Vedtaksperiode private constructor(
             subsumsjon: Subsumsjon?
         ) = vedtaksperiode.revurderArbeidsforhold(overstyrArbeidsforhold, subsumsjon)
 
-        override fun nyPeriodeTidligereEllerOverlappende(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Søknad) {
-            if (Toggle.RevurderOutOfOrder.enabled) {
-                vedtaksperiode.revurderNyPeriodeTidligereEllerOverlappende(vedtaksperiode, hendelse)
-            } else {
-                super.nyPeriodeTidligereEllerOverlappende(vedtaksperiode, ny, hendelse)
-            }
+        override fun nyPeriodeTidligereEllerOverlappende(
+            vedtaksperiode: Vedtaksperiode,
+            ny: Vedtaksperiode,
+            hendelse: Søknad
+        ) {
+            vedtaksperiode.revurderNyPeriodeTidligereEllerOverlappende(vedtaksperiode, hendelse, ny) { super.nyPeriodeTidligereEllerOverlappende(vedtaksperiode, ny, hendelse) }
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
