@@ -3,6 +3,7 @@ package no.nav.helse.hendelser
 import java.io.Serializable
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 import java.util.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Companion.inneholderDagerEtter
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Companion.subsumsjonsFormat
@@ -118,6 +119,8 @@ class Søknad(
         sykmeldingsperioder.fjern(sisteDag)
         person.slettUtgåtteSykmeldingsperioder(sisteDag)
     }
+
+    internal fun dagerSøknadHarVærtTilgjengligForInnsending() = ChronoUnit.DAYS.between(sendtTilNAVEllerArbeidsgiver, sykdomsperiode.endInclusive.plusDays(1).atStartOfDay())
 
     class Merknad(private val type: String) {
         internal fun valider(aktivitetslogg: IAktivitetslogg) {

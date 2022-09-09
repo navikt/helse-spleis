@@ -781,6 +781,19 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun revurderNyPeriodeTidligereEllerOverlappende(vedtaksperiode: Vedtaksperiode, hendelse: Søknad) {
+        val harForeldedeDager = hendelse.sykdomstidslinje().harForeldedeDager()
+        val alderPåSøknad = hendelse.dagerSøknadHarVærtTilgjengligForInnsending()
+        sikkerlogg.info(
+            "Søknaden har trigget en revurdering fordi det er en tidligere eller overlappende periode: {}, {}, {}, {}, {}, {}, {}, {}",
+            keyValue("fodselsnummer", vedtaksperiode.fødselsnummer),
+            keyValue("aktorId", vedtaksperiode.aktørId),
+            keyValue("vedtaksperiodeId", vedtaksperiode.id),
+            keyValue("fom", vedtaksperiode.periode.start.toString()),
+            keyValue("tom", vedtaksperiode.periode.endInclusive.toString()),
+            keyValue("skjæringstidspunkt", vedtaksperiode.skjæringstidspunkt),
+            keyValue("harForeldedeDager", harForeldedeDager),
+            keyValue("antallDagerBrukerVentetMedInnsending", alderPåSøknad),
+        )
         hendelse.info("Søknaden har trigget en revurdering fordi det er en tidligere eller overlappende periode")
         vedtaksperiode.person.startRevurdering(vedtaksperiode, hendelse)
     }
