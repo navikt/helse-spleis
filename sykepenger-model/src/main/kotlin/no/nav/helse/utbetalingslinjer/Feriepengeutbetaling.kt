@@ -5,6 +5,7 @@ import java.time.Month
 import java.time.Year
 import java.util.UUID
 import no.nav.helse.Personidentifikator
+import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.person.Aktivitetskontekst
@@ -13,6 +14,7 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.PersonHendelse
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.SpesifikkKontekst
+import no.nav.helse.person.infotrygdhistorikk.Nødnummer
 import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
 import no.nav.helse.utbetalingstidslinje.Feriepengeberegner
@@ -274,23 +276,34 @@ internal class Feriepengeutbetaling private constructor(
                 """
                 Nøkkelverdier om feriepengeberegning
                 AktørId: $aktørId
-                Arbeidsgiver: $orgnummer
-                IT har utbetalt til arbeidsgiver: $infotrygdHarUtbetaltTilArbeidsgiver
-                Hva vi har beregnet at IT har utbetalt til arbeidsgiver: $hvaViHarBeregnetAtInfotrygdHarUtbetaltTilArbeidsgiver
-                Hva vi har beregnet at IT har utbetalt til person for denne AG: $hvaViHarBeregnetAtInfotrygdHarUtbetaltTilPersonForDenneAktuelleArbeidsgiver
-                Diff mellom hva vi har beregnet at IT har utbetalt til person for denne AG og hva vi syns de burde ha betalt: $differanseMellomTotalOgAlleredeUtbetaltAvInfotrygdTilPerson
-                IT sin personandel: $infotrygdFeriepengebeløpPerson
-                IT sin arbeidsgiverandel: $infotrygdFeriepengebeløpArbeidsgiver
-                Spleis sin arbeidsgiverandel: $spleisFeriepengebeløpArbeidsgiver
+                Arbeidsgiver: $orgnummer${if(Nødnummer.Sykepenger.contains(orgnummer)) " (NØDNUMMER)" else ""}
+                
+                - ARBEIDSGIVER:
+                Alle feriepengeutbetalinger fra Infotrygd (alle ytelser): $infotrygdHarUtbetaltTilArbeidsgiver
+                Vår beregning av hva Infotrygd burde utbetalt av feriepenger for sykepenger: $hvaViHarBeregnetAtInfotrygdHarUtbetaltTilArbeidsgiver
+                Infotrygd skal betale: $infotrygdFeriepengebeløpArbeidsgiver
+                Spleis skal betale: $spleisFeriepengebeløpArbeidsgiver
                 Totalt feriepengebeløp: $totaltFeriepengebeløpArbeidsgiver
-                Differanse: $differanseMellomTotalOgAlleredeUtbetaltAvInfotrygd
-                Oppdrag: ${oppdrag.toHendelseMap()}
-                Personoppdrag: ${personoppdrag.toHendelseMap()}
-                Datoer: ${feriepengeberegner.feriepengedatoer()}
-                Differanse fra forrige sendte oppdrag: ${forrigeSendteOppdrag?.totalbeløp()?.minus(oppdrag.totalbeløp())}
+                Infotrygd-utbetalingen må korrigeres med: $differanseMellomTotalOgAlleredeUtbetaltAvInfotrygd
+                
+                - PERSON:
+                Alle feriepengeutbetalinger fra Infotrygd (alle ytelser): ${utbetalingshistorikkForFeriepenger.utbetalteFeriepengerTilPerson()}
+                Vår beregning av hva Infotrygd burde utbetalt av feriepenger for sykepenger: $hvaViHarBeregnetAtInfotrygdHarUtbetaltTilPersonForDenneAktuelleArbeidsgiver
+                Infotrygd skal betale: $infotrygdFeriepengebeløpPerson
+                Spleis skal betale: 0.0 Fordi Spleis ikke utbetalte til person i 2021
+                Infotrygd-utbetalingen må korrigeres med: $differanseMellomTotalOgAlleredeUtbetaltAvInfotrygdTilPerson
+
+                - GENERELT:         
+                ${feriepengeberegner.feriepengedatoer().let { datoer -> "Datoer vi skal utbetale feriepenger for (${datoer.size}): ${datoer.grupperSammenhengendePerioder()}"}}
+                
+                - OPPDRAG:
+                Skal sende arbeidsgiveroppdrag til OS: $sendTilOppdrag
+                Differanse fra forrige sendte arbeidsgoiveroppdrag: ${forrigeSendteOppdrag?.totalbeløp()?.minus(oppdrag.totalbeløp())}
+                Arbeidsgiveroppdrag: ${oppdrag.toHendelseMap()}
+                
+                Skal sende personoppdrag til OS: $sendPersonoppdragTilOS
                 Differanse fra forrige sendte personoppdrag: ${forrigeSendteOppdragForPerson?.totalbeløp()?.minus(personoppdrag.totalbeløp())}
-                Skal sendes til oppdrag: $sendTilOppdrag
-                Skal personoppdrag sendes: $sendPersonoppdragTilOS
+                Personoppdrag: ${personoppdrag.toHendelseMap()}
                 """.trimIndent()
             )
 

@@ -173,6 +173,10 @@ class Person private constructor(
     fun håndter(utbetalingshistorikk: UtbetalingshistorikkForFeriepenger) {
         utbetalingshistorikk.kontekst(this)
 
+        if (Toggle.SendFeriepengeOppdrag.enabled) {
+            utbetalingshistorikk.info("Starter beregning av feriepenger")
+        }
+
         if (utbetalingshistorikk.skalBeregnesManuelt) {
             val msg = "Person er markert for manuell beregning av feriepenger - aktørId: $aktørId"
             sikkerLogg.info(msg)
