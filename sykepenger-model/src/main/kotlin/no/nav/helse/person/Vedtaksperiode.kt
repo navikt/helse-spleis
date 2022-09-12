@@ -786,11 +786,22 @@ internal class Vedtaksperiode private constructor(
         ny: Vedtaksperiode,
         outOfOrderIkkeStøttet: () -> Unit
     ) {
+        val harForeldedeDager = hendelse.sykdomstidslinje().harForeldedeDager()
+        val alderPåSøknad = hendelse.dagerSøknadHarVærtTilgjengligForInnsending()
+        sikkerlogg.info(
+            "Søknaden hadde trigget en revurdering fordi det er en tidligere eller overlappende periode: {}, {}, {}, {}, {}, {}, {}, {}",
+            keyValue("fodselsnummer", vedtaksperiode.fødselsnummer),
+            keyValue("aktorId", vedtaksperiode.aktørId),
+            keyValue("vedtaksperiodeId", vedtaksperiode.id),
+            keyValue("fom", vedtaksperiode.periode.start.toString()),
+            keyValue("tom", vedtaksperiode.periode.endInclusive.toString()),
+            keyValue("skjæringstidspunkt", vedtaksperiode.skjæringstidspunkt),
+            keyValue("harForeldedeDager", harForeldedeDager),
+            keyValue("antallDagerBrukerVentetMedInnsending", alderPåSøknad),
+        )
         if (Toggle.RevurderOutOfOrder.disabled) return outOfOrderIkkeStøttet()
         if (Toggle.RevurderOutOfOrderForlengelser.disabled && vedtaksperiode.person.finnesEnVedtaksperiodeRettFør(ny)) return outOfOrderIkkeStøttet()
 
-        val harForeldedeDager = hendelse.sykdomstidslinje().harForeldedeDager()
-        val alderPåSøknad = hendelse.dagerSøknadHarVærtTilgjengligForInnsending()
         sikkerlogg.info(
             "Søknaden har trigget en revurdering fordi det er en tidligere eller overlappende periode: {}, {}, {}, {}, {}, {}, {}, {}",
             keyValue("fodselsnummer", vedtaksperiode.fødselsnummer),
