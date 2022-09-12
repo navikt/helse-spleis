@@ -37,7 +37,9 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.extension.ExtendWith
 
+@ExtendWith(DeferredLog::class)
 internal abstract class AbstractDslTest {
     internal companion object {
         @JvmStatic
@@ -60,6 +62,7 @@ internal abstract class AbstractDslTest {
     }
     protected lateinit var observatør: TestObservatør
     private lateinit var testperson: TestPerson
+    private lateinit var deferredLog: DeferredLog
 
     protected fun Int.vedtaksperiode(orgnummer: String) = orgnummer { vedtaksperiode }
     protected val Int.vedtaksperiode get() = vedtaksperiode(bareÈnArbeidsgiver(a1))
@@ -393,11 +396,14 @@ internal abstract class AbstractDslTest {
     @BeforeEach
     fun setup() {
         observatør = TestObservatør()
-        testperson = TestPerson(observatør)
+        deferredLog = DeferredLog()
+        testperson = TestPerson(observatør = observatør, deferredLog = deferredLog)
     }
 
     @AfterEach
     fun verify() {
         testperson.bekreftBehovOppfylt()
     }
+
+    fun dumpLog() = deferredLog.dumpLog()
 }

@@ -10,16 +10,16 @@ import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.TilstandType
 import org.junit.jupiter.api.Assertions.assertTrue
 
-internal class Behovsamler : PersonObserver {
+internal class Behovsamler(private val log: DeferredLog) : PersonObserver {
     private val behov = mutableListOf<Behov>()
     private val tilstander = mutableMapOf<UUID, TilstandType>()
     private val replays = mutableSetOf<UUID>()
 
     internal fun registrerBehov(aktivitetslogg: IAktivitetslogg) {
         val nyeBehov = aktivitetslogg.behov().takeUnless { it.isEmpty() } ?: return
-        println("Registrerer ${nyeBehov.size} nye behov (${nyeBehov.joinToString { it.type.toString() }})")
+        log.info("Registrerer ${nyeBehov.size} nye behov (${nyeBehov.joinToString { it.type.toString() }})")
         behov.addAll(nyeBehov)
-        println(" -> Det er nå ${behov.size} behov (${behov.joinToString { it.type.toString() }})")
+        log.info(" -> Det er nå ${behov.size} behov (${behov.joinToString { it.type.toString() }})")
     }
 
     internal fun harBehov(vedtaksperiodeId: UUID, vararg behovtyper: Behovtype) =
@@ -35,7 +35,7 @@ internal class Behovsamler : PersonObserver {
 
     internal fun bekreftBehovOppfylt() {
         val ubesvarte = behov.filterNot { it.type == Behovtype.Sykepengehistorikk }.takeUnless { it.isEmpty() } ?: return
-        println("Etter testen er det ${behov.size} behov uten svar: [${behov.joinToString { it.type.toString() }}]")
+        log.info("Etter testen er det ${behov.size} behov uten svar: [${behov.joinToString { it.type.toString() }}]")
     }
 
     internal fun bekreftOgKvitterReplay(vedtaksperiodeId: UUID) {
@@ -67,11 +67,11 @@ internal class Behovsamler : PersonObserver {
 
     private fun kvitterVedtaksperiode(vedtaksperiodeId: UUID) {
         val vedtaksperiodebehov = behov.filter(vedtaksperiodebehov(vedtaksperiodeId)).takeUnless { it.isEmpty() } ?: return
-        println("Fjerner ${vedtaksperiodebehov.size} behov (${vedtaksperiodebehov.joinToString { it.type.toString() }})")
+        log.info("Fjerner ${vedtaksperiodebehov.size} behov (${vedtaksperiodebehov.joinToString { it.type.toString() }})")
         behov.removeAll { behov -> vedtaksperiodeId == behov.vedtaksperiodeId }
-        println(" -> Det er nå ${behov.size} behov (${behov.joinToString { it.type.toString() }})")
+        log.info(" -> Det er nå ${behov.size} behov (${behov.joinToString { it.type.toString() }})")
         if (replays.remove(vedtaksperiodeId)) {
-            println("-> Vedtaksperioden ba om replay, men det ble ikke utført")
+            log.info("-> Vedtaksperioden ba om replay, men det ble ikke utført")
         }
     }
 

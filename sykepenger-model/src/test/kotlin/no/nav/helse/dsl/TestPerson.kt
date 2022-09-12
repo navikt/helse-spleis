@@ -65,6 +65,7 @@ internal class TestPerson(
     private val aktørId: String = AKTØRID,
     private val personidentifikator: Personidentifikator = UNG_PERSON_FNR_2018,
     private val fødselsdato: LocalDate = UNG_PERSON_FDATO_2018,
+    deferredLog: DeferredLog = DeferredLog(),
     jurist: MaskinellJurist = MaskinellJurist()
 ) {
     internal companion object {
@@ -81,7 +82,7 @@ internal class TestPerson(
 
     private lateinit var forrigeHendelse: IAktivitetslogg
 
-    private val behovsamler = Behovsamler()
+    private val behovsamler = Behovsamler(deferredLog)
     private val vedtaksperiodesamler = Vedtaksperiodesamler()
     private val personHendelsefabrikk = PersonHendelsefabrikk(aktørId, personidentifikator)
 
