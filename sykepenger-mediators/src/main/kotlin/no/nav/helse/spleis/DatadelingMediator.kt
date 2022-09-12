@@ -1,6 +1,7 @@
 package no.nav.helse.spleis
 
 import java.time.LocalDateTime
+import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.person.AktivitetsloggObserver
 import no.nav.helse.person.PersonHendelse
@@ -19,9 +20,10 @@ class DatadelingMediator(private val hendelse: PersonHendelse): AktivitetsloggOb
         hendelse.register(this)
     }
 
-    override fun aktivitet(label: Char, melding: String, kontekster: List<SpesifikkKontekst>, tidsstempel: LocalDateTime) {
+    override fun aktivitet(id: UUID, label: Char, melding: String, kontekster: List<SpesifikkKontekst>, tidsstempel: LocalDateTime) {
         aktiviteter.add(
             mapOf(
+                "id" to id,
                 "nivå" to label.toFulltext(),
                 "melding" to melding,
                 "tidsstempel" to tidsstempel,

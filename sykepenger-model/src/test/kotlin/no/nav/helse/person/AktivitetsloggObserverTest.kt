@@ -1,6 +1,7 @@
 package no.nav.helse.person
 
 import java.time.LocalDateTime
+import java.util.UUID
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -50,7 +51,7 @@ internal class AktivitetsloggObserverTest {
 
     private val testObserver = object : AktivitetsloggObserver {
         private val aktiviteter = mutableListOf<Map<String, Any>>()
-        override fun aktivitet(label: Char, melding: String, kontekster: List<SpesifikkKontekst>, tidsstempel: LocalDateTime) {
+        override fun aktivitet(id: UUID, label: Char, melding: String, kontekster: List<SpesifikkKontekst>, tidsstempel: LocalDateTime) {
             aktiviteter.add(mapOf("type" to label, "melding" to melding, "kontekster" to kontekster))
         }
 

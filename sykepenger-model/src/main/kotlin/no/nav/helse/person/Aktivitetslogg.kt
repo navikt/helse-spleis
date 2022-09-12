@@ -13,7 +13,7 @@ import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
 
 
 interface AktivitetsloggObserver {
-    fun aktivitet(label: Char, melding: String, kontekster: List<SpesifikkKontekst>, tidsstempel: LocalDateTime)
+    fun aktivitet(id: UUID, label: Char, melding: String, kontekster: List<SpesifikkKontekst>, tidsstempel: LocalDateTime)
 }
 
 // Understands issues that arose when analyzing a JSON message
@@ -180,7 +180,7 @@ class Aktivitetslogg(
         internal abstract fun accept(visitor: AktivitetsloggVisitor)
 
         internal open fun notify(observer: AktivitetsloggObserver) {
-            observer.aktivitet(label, melding, kontekster, LocalDateTime.parse(tidsstempel, tidsstempelformat))
+            observer.aktivitet(id, label, melding, kontekster, LocalDateTime.parse(tidsstempel, tidsstempelformat))
         }
 
         operator fun contains(kontekst: Aktivitetskontekst) = kontekst.toSpesifikkKontekst() in kontekster
