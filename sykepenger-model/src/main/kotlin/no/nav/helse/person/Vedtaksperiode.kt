@@ -343,7 +343,11 @@ internal class Vedtaksperiode private constructor(
         tilstand.håndterRevurdertUtbetaling(this, revurdertUtbetaling, aktivitetslogg, other)
     }
 
-    override fun compareTo(other: Vedtaksperiode) = this.periode.endInclusive.compareTo(other.periode.endInclusive)
+    override fun compareTo(other: Vedtaksperiode): Int {
+        val delta = this.periode.start.compareTo(other.periode.start)
+        if (delta != 0) return delta
+        return this.periode.endInclusive.compareTo(other.periode.endInclusive)
+    }
     internal infix fun før(other: Vedtaksperiode) = this < other
     internal infix fun etter(other: Vedtaksperiode) = this > other
 

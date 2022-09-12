@@ -489,13 +489,13 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, orgnummer = a1)
 
             håndterInntektsmelding(arbeidsgiverperioder = listOf(21.januar til 5.februar), orgnummer = a1)
-            assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
-            assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
 
-            håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+            håndterYtelser(1.vedtaksperiode, orgnummer = a2)
             håndterVilkårsgrunnlag(
                 vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
-                orgnummer = a1,
+                orgnummer = a2,
                 inntektsvurdering = Inntektsvurdering(
                     listOf(
                         sammenligningsgrunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), INNTEKT.repeat(12)),
@@ -509,17 +509,17 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
                     ), arbeidsforhold = emptyList()
                 )
             )
-            håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-            håndterSimulering(1.vedtaksperiode, orgnummer = a1)
-            håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
-            håndterUtbetalt(orgnummer = a1)
-            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
-            assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
-
             håndterYtelser(1.vedtaksperiode, orgnummer = a2)
             håndterSimulering(1.vedtaksperiode, orgnummer = a2)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
             håndterUtbetalt(orgnummer = a2)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
+
+            håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+            håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+            håndterUtbetalt(orgnummer = a1)
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
 

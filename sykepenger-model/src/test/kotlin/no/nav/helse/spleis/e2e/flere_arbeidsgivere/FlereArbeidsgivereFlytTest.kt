@@ -308,23 +308,23 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
 
         håndterInntektsmelding(listOf(2.januar til 17.januar), førsteFraværsdag = 20.januar, orgnummer = a2)
 
-        assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
+        assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
+        assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
+        assertTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
+
+        utbetalPeriode(1.vedtaksperiode, orgnummer = a1, 1.januar)
+
+        assertTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
         assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
         assertTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
 
-        utbetalPeriode(1.vedtaksperiode, orgnummer = a2, 1.januar)
 
-        assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
+        utbetalPeriodeEtterVilkårsprøving(1.vedtaksperiode, orgnummer = a2)
+        assertTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
         assertTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
         assertTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
 
-
         utbetalPeriodeEtterVilkårsprøving(2.vedtaksperiode, orgnummer = a2)
-        assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
-        assertTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
-        assertTilstand(2.vedtaksperiode, AVSLUTTET, orgnummer = a2)
-
-        utbetalPeriodeEtterVilkårsprøving(1.vedtaksperiode, orgnummer = a1)
         assertTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
         assertTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
         assertTilstand(2.vedtaksperiode, AVSLUTTET, orgnummer = a2)

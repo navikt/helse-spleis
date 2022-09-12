@@ -236,11 +236,10 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT, orgnummer = a2)
         nullstillTilstandsendringer()
         håndterYtelser(2.vedtaksperiode, orgnummer = a2)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
-        assertTilstander(1.vedtaksperiode, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, orgnummer = a1)
-        assertTilstander(1.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING, REVURDERING_FEILET, orgnummer = a2)
-        assertTilstander(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, REVURDERING_FEILET, orgnummer = a2)
+        assertForkastetPeriodeTilstander(1.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = a1)
+        assertForkastetPeriodeTilstander(1.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING, REVURDERING_FEILET, orgnummer = a2)
+        assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, REVURDERING_FEILET, orgnummer = a2)
     }
 
     @Test

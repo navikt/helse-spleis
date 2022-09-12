@@ -532,20 +532,20 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
 
-        håndterYtelser(1.vedtaksperiode, orgnummer = a4)
-        håndterSimulering(1.vedtaksperiode, orgnummer = a4)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a4)
-        håndterUtbetalt(orgnummer = a4)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(orgnummer = a2)
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a3)
         håndterSimulering(1.vedtaksperiode, orgnummer = a3)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a3)
         håndterUtbetalt(orgnummer = a3)
 
-        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
-        håndterSimulering(1.vedtaksperiode, orgnummer = a2)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
-        håndterUtbetalt(orgnummer = a2)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a4)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a4)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a4)
+        håndterUtbetalt(orgnummer = a4)
 
         val a1Linje = inspektør(a1).utbetalinger.last().inspektør.arbeidsgiverOppdrag.single()
         Assertions.assertEquals(17.januar, a1Linje.fom)
