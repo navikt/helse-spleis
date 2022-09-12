@@ -540,7 +540,6 @@ internal class Arbeidsgiver private constructor(
         }
         registrerNyVedtaksperiode(vedtaksperiode)
         person.nyPeriode(vedtaksperiode, søknad)
-        håndter(søknad) {}
         vedtaksperiode.håndter(søknad)
         if (søknad.harFunksjonelleFeilEllerVerre()) {
             søknad.info("Forsøkte å opprette en ny vedtaksperiode, men den ble forkastet før den rakk å spørre om inntektsmeldingReplay. " +
