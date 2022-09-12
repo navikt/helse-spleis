@@ -21,7 +21,7 @@
     {
       "vilkårsgrunnlag": [
         {
-          "skjæringstidspunkt": "2018-01-17",
+          "skjæringstidspunkt": "2018-01-01",
           "type": "Infotrygd",
           "sykepengegrunnlag": {
             "sykepengegrunnlag": 372000.0,
@@ -278,5 +278,5 @@
       ]
     }
   ],
-  "skjemaVersjon": 176
+  "skjemaVersjon": 177
 }
