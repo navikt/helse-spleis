@@ -36,7 +36,7 @@ class Søknad(
     private val sendtTilNAVEllerArbeidsgiver: LocalDateTime,
     private val permittert: Boolean,
     private val merknaderFraSykmelding: List<Merknad>,
-    sykmeldingSkrevet: LocalDateTime,
+    private val sykmeldingSkrevet: LocalDateTime,
     private val korrigerer: UUID?,
     private val opprinneligSendt: LocalDateTime?
 ) : SykdomstidslinjeHendelse(meldingsreferanseId, fnr, aktørId, orgnummer, sykmeldingSkrevet, Søknad::class) {
@@ -120,7 +120,8 @@ class Søknad(
         person.slettUtgåtteSykmeldingsperioder(sisteDag)
     }
 
-    internal fun dagerSøknadHarVærtTilgjengligForInnsending() = ChronoUnit.DAYS.between(sendtTilNAVEllerArbeidsgiver, sykdomsperiode.endInclusive.plusDays(1).atStartOfDay())
+    internal fun dagerMellomPeriodenVarFerdigOgSøknadenVarSendt() = ChronoUnit.DAYS.between(sendtTilNAVEllerArbeidsgiver, sykdomsperiode.endInclusive.plusDays(1).atStartOfDay())
+    internal fun dagerMellomPeriodenVarFerdigOgSykmeldingenSkrevet() = ChronoUnit.DAYS.between(sykmeldingSkrevet, sykdomsperiode.endInclusive.plusDays(1).atStartOfDay())
 
     class Merknad(private val type: String) {
         internal fun valider(aktivitetslogg: IAktivitetslogg) {

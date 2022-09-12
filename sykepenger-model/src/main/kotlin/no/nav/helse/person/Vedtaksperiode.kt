@@ -791,31 +791,38 @@ internal class Vedtaksperiode private constructor(
         outOfOrderIkkeStøttet: () -> Unit
     ) {
         val harForeldedeDager = hendelse.sykdomstidslinje().harForeldedeDager()
-        val alderPåSøknad = hendelse.dagerSøknadHarVærtTilgjengligForInnsending()
+        val dagerMellomPeriodenVarFerdigOgSøknadenVarSendt = hendelse.dagerMellomPeriodenVarFerdigOgSøknadenVarSendt()
+        val dagerMellomPeriodenVarFerdigOgSykmeldingenSkrevet = hendelse.dagerMellomPeriodenVarFerdigOgSykmeldingenSkrevet()
         sikkerlogg.info(
-            "Søknaden hadde trigget en revurdering fordi det er en tidligere eller overlappende periode: {}, {}, {}, {}, {}, {}, {}, {}",
+            "Søknaden hadde trigget en revurdering fordi det er en tidligere eller overlappende periode: {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}",
             keyValue("fodselsnummer", vedtaksperiode.fødselsnummer),
             keyValue("aktorId", vedtaksperiode.aktørId),
             keyValue("vedtaksperiodeId", vedtaksperiode.id),
             keyValue("fom", vedtaksperiode.periode.start.toString()),
             keyValue("tom", vedtaksperiode.periode.endInclusive.toString()),
+            keyValue("søknadFom", ny.periode.endInclusive.toString()),
+            keyValue("søknadTom", ny.periode.endInclusive.toString()),
             keyValue("skjæringstidspunkt", vedtaksperiode.skjæringstidspunkt),
             keyValue("harForeldedeDager", harForeldedeDager),
-            keyValue("antallDagerBrukerVentetMedInnsending", alderPåSøknad),
+            keyValue("dagerMellomPeriodenVarFerdigOgSøknadenVarSendt", dagerMellomPeriodenVarFerdigOgSøknadenVarSendt),
+            keyValue("dagerMellomPeriodenVarFerdigOgSykmeldingenSkrevet", dagerMellomPeriodenVarFerdigOgSykmeldingenSkrevet)
         )
         if (Toggle.RevurderOutOfOrder.disabled) return outOfOrderIkkeStøttet()
         if (Toggle.RevurderOutOfOrderForlengelser.disabled && vedtaksperiode.person.finnesEnVedtaksperiodeRettFør(ny)) return outOfOrderIkkeStøttet()
 
         sikkerlogg.info(
-            "Søknaden har trigget en revurdering fordi det er en tidligere eller overlappende periode: {}, {}, {}, {}, {}, {}, {}, {}",
+            "Søknaden har trigget en revurdering fordi det er en tidligere eller overlappende periode: {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}",
             keyValue("fodselsnummer", vedtaksperiode.fødselsnummer),
             keyValue("aktorId", vedtaksperiode.aktørId),
             keyValue("vedtaksperiodeId", vedtaksperiode.id),
             keyValue("fom", vedtaksperiode.periode.start.toString()),
             keyValue("tom", vedtaksperiode.periode.endInclusive.toString()),
+            keyValue("søknadFom", ny.periode.endInclusive.toString()),
+            keyValue("søknadTom", ny.periode.endInclusive.toString()),
             keyValue("skjæringstidspunkt", vedtaksperiode.skjæringstidspunkt),
             keyValue("harForeldedeDager", harForeldedeDager),
-            keyValue("antallDagerBrukerVentetMedInnsending", alderPåSøknad),
+            keyValue("dagerMellomPeriodenVarFerdigOgSøknadenVarSendt", dagerMellomPeriodenVarFerdigOgSøknadenVarSendt),
+            keyValue("dagerMellomPeriodenVarFerdigOgSykmeldingenSkrevet", dagerMellomPeriodenVarFerdigOgSykmeldingenSkrevet)
         )
         hendelse.info("Søknaden har trigget en revurdering fordi det er en tidligere eller overlappende periode")
         vedtaksperiode.person.startRevurdering(vedtaksperiode, hendelse)
