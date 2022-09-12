@@ -54,6 +54,7 @@ import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.assertVarsler
 import no.nav.helse.spleis.e2e.finnSkjæringstidspunkt
+import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.grunnlag
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterInntektsmeldingMedValidering
@@ -1328,4 +1329,60 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
             AVVENTER_GODKJENNING_REVURDERING
         )
     }
+
+    @Test
+    fun `revurdere etter at én arbeidsgiver har blitt til to`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode, orgnummer = a1,
+            inntektsvurdering = Inntektsvurdering(
+                listOf(
+                    sammenligningsgrunnlag(a1, 1.januar, 31000.månedlig.repeat(12)),
+                    sammenligningsgrunnlag(a2, 1.januar, 31000.månedlig.repeat(12)),
+                )
+            ),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
+                listOf(
+                    grunnlag(a1, 1.januar, 31000.månedlig.repeat(3)),
+                    grunnlag(a2, 1.januar, 31000.månedlig.repeat(3)),
+                ), arbeidsforhold = emptyList()
+            ),
+            arbeidsforhold = listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH),
+                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH)
+            )
+        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
+
+        forlengVedtak(1.februar, 28.februar, orgnummer = a1)
+
+        håndterSykmelding(Sykmeldingsperiode(10.mars, 22.mars, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(10.mars, 22.mars, 100.prosent), orgnummer = a2)
+
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a1)
+
+        håndterOverstyrTidslinje(listOf(
+            ManuellOverskrivingDag(27.februar, Dagtype.Feriedag)
+        ))
+
+        håndterYtelser(2.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(2.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
+
+        nullstillTilstandsendringer()
+
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertTilstander(2.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertTilstander(3.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
+        assertTilstander(1.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = a2)
+    }
+
 }
