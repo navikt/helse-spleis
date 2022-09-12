@@ -32,11 +32,14 @@ internal object BrukteVilkårsgrunnlag {
             .path("vilkårsgrunnlag")
             .sortedBy { it.skjæringstidspunkt }
 
+        var endret = false
+
         val brukteVilkårsgrunnlag = serdeObjectMapper.createArrayNode().apply {
             sykefraværstilfeller.forEach { sykefraværstilfelle ->
                 val vilkårgrunnlag = sorterteVilkårsgrunnlag.lastOrNull { vilkårsgrunnlag -> vilkårsgrunnlag.skjæringstidspunkt in sykefraværstilfelle } ?: return@forEach
                 val skjæringstidspunkt = sykefraværstilfelle.start
                 if (vilkårgrunnlag.skjæringstidspunkt != skjæringstidspunkt) {
+                    endret = true
                     sikkerlogg.info("Flytter skjæringstidspunktet til vilkårsgrunnlag ${vilkårgrunnlag.vilkårsgrunnlagId} fra ${vilkårgrunnlag.skjæringstidspunkt} til $skjæringstidspunkt for aktørId=$aktørId")
                 }
                 val vilkårsgrunnlagMedRiktigSkjæringstidspunkt = (vilkårgrunnlag as ObjectNode).put("skjæringstidspunkt", skjæringstidspunkt.toString())
@@ -46,8 +49,13 @@ internal object BrukteVilkårsgrunnlag {
 
         val forkastedeVilkårsgrunnlag = sorterteVilkårsgrunnlag.map { it.vilkårsgrunnlagId } - brukteVilkårsgrunnlag.map { it.vilkårsgrunnlagId }
         if (forkastedeVilkårsgrunnlag.isNotEmpty()){
+            endret = true
             sikkerlogg.info("Forkaster vilkårsgrunnlag $forkastedeVilkårsgrunnlag for aktørId=$aktørId")
         }
-        return brukteVilkårsgrunnlag
+
+        return if (endret) {
+            sikkerlogg.info("Endrer vilkårsgrunnlag for aktørId=$aktørId")
+            brukteVilkårsgrunnlag
+        } else null
     }
 }
