@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.skyscreamer.jsonassert.JSONCompareMode.STRICT_ORDER
 
-internal class V176ForkastUbrukteVilkårsgrunnlagTest : MigrationTest(V176ForkastUbrukteVilkårsgrunnlag()) {
+internal class V176ForkastUbrukteVilkårsgrunnlagTest : MigrationTest(V176LoggingAvForkastOgFlyttVilkårsgrunnlag()) {
 
     @Test
     fun `Ping-Pong, AUU - IT - AVSLUTTET`() {
@@ -16,6 +16,9 @@ internal class V176ForkastUbrukteVilkårsgrunnlagTest : MigrationTest(V176Forkas
             expectedJson = "/migrations/176/ping-pong-auu-it-avsluttet_expected.json"
         )
     }
+
+    @Test
+    fun `Revurdering fører til nytt skjæringstidspunkt`() {}
 
 
     private fun assertForkastetVilkårsgrunnlag(originalJson: String, expectedJson: String) =
