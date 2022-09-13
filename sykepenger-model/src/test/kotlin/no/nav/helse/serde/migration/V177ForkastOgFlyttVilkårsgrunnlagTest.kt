@@ -4,9 +4,11 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.readResource
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
+import org.junit.jupiter.api.assertThrows
 import org.skyscreamer.jsonassert.JSONCompareMode.STRICT_ORDER
 
 internal class V177ForkastOgFlyttVilkårsgrunnlagTest : MigrationTest(V177ForkastOgFlyttVilkårsgrunnlag()) {
@@ -29,7 +31,26 @@ internal class V177ForkastOgFlyttVilkårsgrunnlagTest : MigrationTest(V177Forkas
     }
 
     @Test
-    fun `Revurdering fører til nytt skjæringstidspunkt`() {}
+    fun `Revurdering fører til nytt skjæringstidspunkt bakover`() {
+        assertForventetFeil(
+            forklaring = "velge feil vilkårsgrunnlag når vi flytter skjæringstidspunktet bakover i tid",
+            nå = {
+                assertThrows<AssertionError> {
+                    assertForkastetVilkårsgrunnlag(
+                        originalJson = "/migrations/177/revurder-skjæringstidspunkt-bakover_original.json",
+                        expectedJson = "/migrations/177/revurder-skjæringstidspunkt-bakover_expected.json"
+                    )
+                }
+            },
+            ønsket = {
+                assertForkastetVilkårsgrunnlag(
+                    originalJson = "/migrations/177/revurder-skjæringstidspunkt-bakover_original.json",
+                    expectedJson = "/migrations/177/revurder-skjæringstidspunkt-bakover_expected.json"
+                )
+            }
+
+        )
+    }
 
 
     private fun assertForkastetVilkårsgrunnlag(originalJson: String, expectedJson: String) =
