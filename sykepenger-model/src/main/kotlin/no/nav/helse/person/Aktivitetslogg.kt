@@ -151,7 +151,7 @@ class Aktivitetslogg(
     sealed class Aktivitet(
         protected val id: UUID,
         private val alvorlighetsgrad: Int,
-        private val label: Char,
+        protected val label: Char,
         private var melding: String,
         private val tidsstempel: String,
         internal val kontekster: List<SpesifikkKontekst>
@@ -220,6 +220,10 @@ class Aktivitetslogg(
 
             override fun accept(visitor: AktivitetsloggVisitor) {
                 visitor.visitVarsel(id, kontekster, this, melding, tidsstempel)
+            }
+
+            override fun notify(observer: AktivitetsloggObserver) {
+                observer.aktivitet(id, label, melding, kontekster, LocalDateTime.parse(tidsstempel, tidsstempelformat))
             }
         }
 
