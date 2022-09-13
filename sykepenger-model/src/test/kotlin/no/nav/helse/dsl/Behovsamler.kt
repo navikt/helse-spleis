@@ -17,9 +17,9 @@ internal class Behovsamler(private val log: DeferredLog) : PersonObserver {
 
     internal fun registrerBehov(aktivitetslogg: IAktivitetslogg) {
         val nyeBehov = aktivitetslogg.behov().takeUnless { it.isEmpty() } ?: return
-        log.info("Registrerer ${nyeBehov.size} nye behov (${nyeBehov.joinToString { it.type.toString() }})")
+        log.log("Registrerer ${nyeBehov.size} nye behov (${nyeBehov.joinToString { it.type.toString() }})")
         behov.addAll(nyeBehov)
-        log.info(" -> Det er nå ${behov.size} behov (${behov.joinToString { it.type.toString() }})")
+        log.log(" -> Det er nå ${behov.size} behov (${behov.joinToString { it.type.toString() }})")
     }
 
     internal fun harBehov(vedtaksperiodeId: UUID, vararg behovtyper: Behovtype) =
@@ -35,7 +35,7 @@ internal class Behovsamler(private val log: DeferredLog) : PersonObserver {
 
     internal fun bekreftBehovOppfylt() {
         val ubesvarte = behov.filterNot { it.type == Behovtype.Sykepengehistorikk }.takeUnless { it.isEmpty() } ?: return
-        log.info("Etter testen er det ${behov.size} behov uten svar: [${behov.joinToString { it.type.toString() }}]")
+        log.log("Etter testen er det ${behov.size} behov uten svar: [${behov.joinToString { it.type.toString() }}]")
     }
 
     internal fun bekreftOgKvitterReplay(vedtaksperiodeId: UUID) {
@@ -67,11 +67,11 @@ internal class Behovsamler(private val log: DeferredLog) : PersonObserver {
 
     private fun kvitterVedtaksperiode(vedtaksperiodeId: UUID) {
         val vedtaksperiodebehov = behov.filter(vedtaksperiodebehov(vedtaksperiodeId)).takeUnless { it.isEmpty() } ?: return
-        log.info("Fjerner ${vedtaksperiodebehov.size} behov (${vedtaksperiodebehov.joinToString { it.type.toString() }})")
+        log.log("Fjerner ${vedtaksperiodebehov.size} behov (${vedtaksperiodebehov.joinToString { it.type.toString() }})")
         behov.removeAll { behov -> vedtaksperiodeId == behov.vedtaksperiodeId }
-        log.info(" -> Det er nå ${behov.size} behov (${behov.joinToString { it.type.toString() }})")
+        log.log(" -> Det er nå ${behov.size} behov (${behov.joinToString { it.type.toString() }})")
         if (replays.remove(vedtaksperiodeId)) {
-            log.info("-> Vedtaksperioden ba om replay, men det ble ikke utført")
+            log.log("-> Vedtaksperioden ba om replay, men det ble ikke utført")
         }
     }
 

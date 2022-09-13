@@ -39,7 +39,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.extension.ExtendWith
 
-@ExtendWith(DeferredLog::class)
+@ExtendWith(DeferredLogging::class)
 internal abstract class AbstractDslTest {
     internal companion object {
         @JvmStatic

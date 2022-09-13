@@ -4,17 +4,13 @@ import org.junit.jupiter.api.extension.ExtensionContext
 import org.junit.jupiter.api.extension.TestWatcher
 
 class DeferredLog: TestWatcher {
+    private val meldinger: MutableList<String> = mutableListOf()
+    fun log(melding: String) { meldinger.add(melding) }
+    fun dumpLog() { meldinger.forEach { println(it) } }
+}
 
-    private val info: MutableList<String> = mutableListOf()
-    fun info(melding: String) {
-        info.add(melding)
-    }
-
+class DeferredLogging: TestWatcher {
     override fun testFailed(context: ExtensionContext, cause: Throwable?) {
         (context.testInstance.get() as AbstractDslTest).dumpLog()
-    }
-
-    fun dumpLog() {
-        info.forEach { println(it) }
     }
 }
