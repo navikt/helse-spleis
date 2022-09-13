@@ -6,15 +6,16 @@ import no.nav.helse.person.PersonObserver
 
 internal class Vedtaksperiodesamler : PersonObserver {
     private var sisteVedtaksperiode: UUID? = null
+    private var sisteOpprettetVedtaksperiode: UUID? = null
     private val vedtaksperioder = mutableMapOf<String, MutableSet<UUID>>()
 
     internal fun vedtaksperiodeId(orgnummer: String, indeks: Int) =
         vedtaksperioder.getValue(orgnummer).elementAt(indeks)
 
     internal fun fangVedtaksperiode(block: () -> Any): UUID? {
-        val forrige = sisteVedtaksperiode
+        val forrigeOpprettetVedtaksperiode = sisteOpprettetVedtaksperiode
         block()
-        return sisteVedtaksperiode?.takeUnless { it == forrige }
+        return sisteOpprettetVedtaksperiode?.takeUnless { it == forrigeOpprettetVedtaksperiode }
     }
 
     override fun vedtaksperiodeEndret(
@@ -26,6 +27,8 @@ internal class Vedtaksperiodesamler : PersonObserver {
         val vedtaksperiodeId = UUID.fromString(detaljer.getValue("vedtaksperiodeId"))
 
         sisteVedtaksperiode = vedtaksperiodeId
-        vedtaksperioder.getOrPut(orgnr) { mutableSetOf() }.add(vedtaksperiodeId)
+        if (vedtaksperioder.getOrPut(orgnr) { mutableSetOf() }.add(vedtaksperiodeId)) {
+            sisteOpprettetVedtaksperiode = sisteVedtaksperiode
+        }
     }
 }

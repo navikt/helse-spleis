@@ -809,6 +809,7 @@ internal class Vedtaksperiode private constructor(
         )
         if (Toggle.RevurderOutOfOrder.disabled) return outOfOrderIkkeStøttet()
         if (Toggle.RevurderOutOfOrderForlengelser.disabled && vedtaksperiode.person.finnesEnVedtaksperiodeRettFør(ny)) return outOfOrderIkkeStøttet()
+        if (!ny.forventerInntekt()) return
 
         sikkerlogg.info(
             "Søknaden har trigget en revurdering fordi det er en tidligere eller overlappende periode: {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}",

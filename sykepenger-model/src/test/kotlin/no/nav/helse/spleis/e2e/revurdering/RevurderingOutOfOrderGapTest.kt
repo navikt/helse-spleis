@@ -71,12 +71,18 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, besvart = LocalDate.EPOCH.atStartOfDay())
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING_REVURDERING)
 
-        nyPeriode(1.januar til 15.januar)
+        nyPeriode(1.januar til 18.januar)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_REVURDERING)
 
-        håndterUtbetalingshistorikk(2.vedtaksperiode)
-        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterYtelser(2.vedtaksperiode)
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt()
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -115,7 +121,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `out of order periode uten utbetaling trigger revurdering`() {
+    fun `out of order periode uten utbetaling trigger ikke revurdering`() {
         nyttVedtak(1.mai, 31.mai)
         forlengVedtak(1.juni, 30.juni)
         nullstillTilstandsendringer()
@@ -129,16 +135,11 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         )
         assertTilstander(
             1.vedtaksperiode,
-            AVSLUTTET,
-            AVVENTER_REVURDERING,
-            AVVENTER_GJENNOMFØRT_REVURDERING
+            AVSLUTTET
         )
         assertTilstander(
             2.vedtaksperiode,
-            AVSLUTTET,
-            AVVENTER_REVURDERING,
-            AVVENTER_GJENNOMFØRT_REVURDERING,
-            AVVENTER_HISTORIKK_REVURDERING
+            AVSLUTTET
         )
     }
 

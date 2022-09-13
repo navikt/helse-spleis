@@ -166,7 +166,7 @@ internal class RevurderingOutOfOrderForlengelserTest : AbstractEndToEndTest() {
                 håndterSimulering(februarId)
                 håndterUtbetalingsgodkjenning(februarId)
                 håndterUtbetalt()
-                assertEquals(1.februar, inspektør.skjæringstidspunkt(februarId))
+                assertEquals(1.januar, inspektør.skjæringstidspunkt(februarId))
                 assertUtbetalingsbeløp(
                     januarId,
                     forventetArbeidsgiverbeløp = 1615,
@@ -181,8 +181,6 @@ internal class RevurderingOutOfOrderForlengelserTest : AbstractEndToEndTest() {
                 )
             },
             ønsket = {
-                håndterVilkårsgrunnlag(februarId)
-                håndterYtelser(februarId)
                 håndterSimulering(februarId)
                 håndterUtbetalingsgodkjenning(februarId)
                 håndterUtbetalt()
@@ -196,7 +194,7 @@ internal class RevurderingOutOfOrderForlengelserTest : AbstractEndToEndTest() {
                 assertUtbetalingsbeløp(
                     februarId,
                     forventetArbeidsgiverbeløp = 1615,
-                    forventetArbeidsgiverRefusjonsbeløp = 1431,
+                    forventetArbeidsgiverRefusjonsbeløp = 1615,
                     subset = 1.februar til 28.februar
                 )
             }
