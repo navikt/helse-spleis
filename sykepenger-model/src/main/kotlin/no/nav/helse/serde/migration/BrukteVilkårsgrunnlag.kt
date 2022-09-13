@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import java.time.LocalDate
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.serde.serdeObjectMapper
 import org.slf4j.LoggerFactory
@@ -16,6 +17,17 @@ internal object BrukteVilkårsgrunnlag {
     private val JsonNode.skjæringstidspunkt get() = path("skjæringstidspunkt").dato
     private val JsonNode.tom get() = path("tom").dato
     private val JsonNode.vilkårsgrunnlagId get() = path("vilkårsgrunnlagId").asText()
+    private val JsonNode.fraInfotrygd get() = path("type").asText() == "Infotrygd"
+    private val JsonNode.fraSpleis get() = path("type").asText() == "Vilkårsprøving"
+
+    private fun List<JsonNode>.finnRiktigVilkårsgrunnlag(sykefraværstilfelle: Periode): JsonNode? {
+        val skjæringstidspunkt = sykefraværstilfelle.start
+
+        val fraInfotrygd = filter { it.fraInfotrygd }.lastOrNull { vilkårsgrunnlag -> vilkårsgrunnlag.skjæringstidspunkt in sykefraværstilfelle }
+
+        return fraInfotrygd ?: filter { it.fraSpleis }.singleOrNull { it.skjæringstidspunkt == skjæringstidspunkt }
+    }
+
 
     internal fun brukteVilkårsgrunnlag(jsonNode: ObjectNode) : ArrayNode? {
         val vilkårsgrunnlagHistorikk = jsonNode.path("vilkårsgrunnlagHistorikk") as ArrayNode
@@ -36,7 +48,7 @@ internal object BrukteVilkårsgrunnlag {
 
         val brukteVilkårsgrunnlag = serdeObjectMapper.createArrayNode().apply {
             sykefraværstilfeller.forEach { sykefraværstilfelle ->
-                val vilkårgrunnlag = sorterteVilkårsgrunnlag.lastOrNull { vilkårsgrunnlag -> vilkårsgrunnlag.skjæringstidspunkt in sykefraværstilfelle } ?: return@forEach
+                val vilkårgrunnlag = sorterteVilkårsgrunnlag.finnRiktigVilkårsgrunnlag(sykefraværstilfelle) ?: return@forEach
                 val skjæringstidspunkt = sykefraværstilfelle.start
                 if (vilkårgrunnlag.skjæringstidspunkt != skjæringstidspunkt) {
                     endret = true
@@ -59,3 +71,4 @@ internal object BrukteVilkårsgrunnlag {
         } else null
     }
 }
+
