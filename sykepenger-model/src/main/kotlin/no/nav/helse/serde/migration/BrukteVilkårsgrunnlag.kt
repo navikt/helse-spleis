@@ -20,6 +20,23 @@ internal object BrukteVilkårsgrunnlag {
     private val JsonNode.fraInfotrygd get() = path("type").asText() == "Infotrygd"
     private val JsonNode.fraSpleis get() = path("type").asText() == "Vilkårsprøving"
 
+
+    private fun List<JsonNode>.loggSprøInfotrygdVilkårsgrunnlag(sykefraværstilfelle: Periode, aktørId: String) {
+        val vilkårsgrunnlagFraInfotrygd = filter { it.fraInfotrygd && it.skjæringstidspunkt in sykefraværstilfelle}
+        if (vilkårsgrunnlagFraInfotrygd.size > 1) {
+            sikkerlogg.info("Fant ${vilkårsgrunnlagFraInfotrygd.size} vilkårsgrunnlag fra infotrygd innenfor sykefraværstilfelle $sykefraværstilfelle for aktørId=$aktørId")
+        }
+    }
+
+    private fun List<JsonNode>.loggSprøSpleisVilkårsgrunnlag(sykefraværstilfelle: Periode, aktørId: String) {
+        val skjæringstidspunkt = sykefraværstilfelle.start
+        val vilkårsgrunnlagFraSpleis = filter { it.fraSpleis && it.skjæringstidspunkt == skjæringstidspunkt }
+        if (vilkårsgrunnlagFraSpleis.size > 1) {
+            sikkerlogg.info("Fant ${vilkårsgrunnlagFraSpleis.size} vilkårsgrunnlag fra spleis på skjæringstidspunkt $skjæringstidspunkt for aktørId=$aktørId")
+        }
+    }
+
+
     private fun List<JsonNode>.finnRiktigVilkårsgrunnlag(sykefraværstilfelle: Periode): JsonNode? {
         val skjæringstidspunkt = sykefraværstilfelle.start
 
@@ -48,6 +65,8 @@ internal object BrukteVilkårsgrunnlag {
 
         val brukteVilkårsgrunnlag = serdeObjectMapper.createArrayNode().apply {
             sykefraværstilfeller.forEach { sykefraværstilfelle ->
+                sorterteVilkårsgrunnlag.loggSprøInfotrygdVilkårsgrunnlag(sykefraværstilfelle, aktørId)
+                sorterteVilkårsgrunnlag.loggSprøSpleisVilkårsgrunnlag(sykefraværstilfelle, aktørId)
                 val vilkårgrunnlag = sorterteVilkårsgrunnlag.finnRiktigVilkårsgrunnlag(sykefraværstilfelle) ?: return@forEach
                 val skjæringstidspunkt = sykefraværstilfelle.start
                 if (vilkårgrunnlag.skjæringstidspunkt != skjæringstidspunkt) {
@@ -71,4 +90,6 @@ internal object BrukteVilkårsgrunnlag {
         } else null
     }
 }
+
+
 
