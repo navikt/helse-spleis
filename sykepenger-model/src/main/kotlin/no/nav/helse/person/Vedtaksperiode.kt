@@ -808,7 +808,7 @@ internal class Vedtaksperiode private constructor(
             keyValue("dagerMellomPeriodenVarFerdigOgSykmeldingenSkrevet", dagerMellomPeriodenVarFerdigOgSykmeldingenSkrevet)
         )
         if (Toggle.RevurderOutOfOrder.disabled) return outOfOrderIkkeStøttet()
-        if (Toggle.RevurderOutOfOrderForlengelser.disabled && vedtaksperiode.person.finnesEnVedtaksperiodeRettFør(ny)) return outOfOrderIkkeStøttet()
+        if (Toggle.RevurderOutOfOrderForlengelser.disabled && vedtaksperiode.person.finnesEnVedtaksperiodeRettEtter(ny)) return outOfOrderIkkeStøttet()
         if (!ny.forventerInntekt()) return
 
         sikkerlogg.info(

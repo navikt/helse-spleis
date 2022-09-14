@@ -13,6 +13,7 @@ import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.Periodetype
 import no.nav.helse.person.TilstandType.AVSLUTTET
+import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
@@ -197,6 +198,23 @@ internal class RevurderingOutOfOrderForlengelserTest : AbstractEndToEndTest() {
                     forventetArbeidsgiverRefusjonsbeløp = 1615,
                     subset = 1.februar til 28.februar
                 )
+            }
+        )
+    }
+
+    @Test
+    fun `en kort out-of-order søknad som flytter skjæringstidspunkt skal trigge revurdering`() = Toggle.RevurderOutOfOrderForlengelser.enable {
+        nyttVedtak(1.februar, 28.februar)
+        nyPeriode(20.januar til 31.januar)
+        håndterUtbetalingshistorikk(2.vedtaksperiode)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertForventetFeil(
+            forklaring = "skal revurderes fordi skjæringstidspunktet flyttes",
+            nå = {
+                assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+            },
+            ønsket = {
+                assertSisteTilstand(1.vedtaksperiode, AVVENTER_REVURDERING)
             }
         )
     }

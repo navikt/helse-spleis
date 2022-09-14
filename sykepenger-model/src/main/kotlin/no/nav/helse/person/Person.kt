@@ -965,6 +965,6 @@ class Person private constructor(
     internal fun harSkjæringstidspunktSenereEnn(skjæringstidspunkt: LocalDate) =
         skjæringstidspunkter().any { it.isAfter(skjæringstidspunkt) }
 
-    internal fun finnesEnVedtaksperiodeRettFør(ny: Vedtaksperiode) =
+    internal fun finnesEnVedtaksperiodeRettEtter(ny: Vedtaksperiode) =
         arbeidsgivere.any { it.finnVedtaksperiodeRettEtter(ny) != null }
 }
