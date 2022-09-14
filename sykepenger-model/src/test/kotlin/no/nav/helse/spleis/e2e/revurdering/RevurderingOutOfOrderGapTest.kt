@@ -52,12 +52,14 @@ import no.nav.helse.spleis.e2e.håndterUtbetalt
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.nyPeriode
+import no.nav.helse.spleis.e2e.nyeVedtak
 import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.spleis.e2e.repeat
 import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
 import no.nav.helse.spleis.e2e.tilGodkjent
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
 @EnableToggle(Toggle.RevurderOutOfOrder::class)
@@ -141,6 +143,149 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
             2.vedtaksperiode,
             AVSLUTTET
         )
+    }
+
+    @Test
+    fun `out of order periode uten utbetaling trigger ikke revurdering -- flere ag`() {
+        nyeVedtak(1.mai, 31.mai, a1, a2)
+        nullstillTilstandsendringer()
+        nyPeriode(1.januar til 15.januar, a1)
+        håndterUtbetalingshistorikk(2.vedtaksperiode, orgnummer = a1)
+        assertTilstander(
+            2.vedtaksperiode,
+            START,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVSLUTTET_UTEN_UTBETALING,
+            orgnummer = a1
+        )
+        assertTilstander(
+            1.vedtaksperiode,
+            AVSLUTTET,
+            orgnummer = a1
+        )
+        assertTilstander(
+            1.vedtaksperiode,
+            AVSLUTTET,
+            orgnummer = a2
+        )
+    }
+
+    @Test
+    fun `Burde revurdere utbetalt periode dersom det kommer en eldre periode fra en annen AG`() = Toggle.RevurderOutOfOrder.enable {
+        nyttVedtak(1.mars, 31.mars, orgnummer = a2)
+        nyPeriode(1.januar til 31.januar, a1)
+
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = a2)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, orgnummer = a1)
+    }
+
+    @Test
+    fun `out of order som overlapper med eksisterende -- flere ag`() {
+        nyttVedtak(1.mars, 31.mars, orgnummer = a2)
+        nyPeriode(20.februar til 15.mars, a1)
+
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
+        assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD, orgnummer = a1)
+    }
+
+    @Test
+    fun `out of order som overlapper med eksisterende`() {
+        nyttVedtak(1.mars, 31.mars, orgnummer = a1)
+        nyPeriode(20.februar til 15.mars, a1)
+
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(2.vedtaksperiode, TIL_INFOTRYGD, orgnummer = a1)
+    }
+
+    @Test
+    fun `To arbeidsgivere gikk inn i en bar - og første arbeidsgiver ble ferdig behandlet før vi mottok sykmelding på neste arbeidsgiver`() = Toggle.RevurderOutOfOrder.enable {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 30000.månedlig, orgnummer = a1)
+
+        val inntektsvurdering = Inntektsvurdering(
+            listOf(
+                sammenligningsgrunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 30000.månedlig.repeat(12)),
+                sammenligningsgrunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 35000.månedlig.repeat(12))
+            )
+        )
+        val ivForSykepengegrunnlag = InntektForSykepengegrunnlag(
+            inntekter = listOf(
+                grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 30000.månedlig.repeat(3)),
+                grunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 35000.månedlig.repeat(3))
+            )
+            , arbeidsforhold = emptyList()
+        )
+        val arbeidsforhold = listOf(Arbeidsforhold(a1, LocalDate.EPOCH), Arbeidsforhold(a2, LocalDate.EPOCH))
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode,
+            orgnummer = a1,
+            inntektsvurdering = inntektsvurdering,
+            inntektsvurderingForSykepengegrunnlag = ivForSykepengegrunnlag,
+            arbeidsforhold = arbeidsforhold
+        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
+        assertUtbetalingsbeløp(
+            1.vedtaksperiode,
+            forventetArbeidsgiverbeløp = 997,
+            forventetArbeidsgiverRefusjonsbeløp = 1385,
+            orgnummer = a1,
+            subset = 17.januar til 31.januar
+        )
+
+        Assertions.assertEquals(1, inspektør(a1).arbeidsgiverOppdrag.size)
+        Assertions.assertEquals(0, inspektør(a2).arbeidsgiverOppdrag.size)
+
+        nullstillTilstandsendringer()
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a2)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, orgnummer = a2)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 30000.månedlig, orgnummer = a2)
+
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt()
+
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertTilstander(
+            1.vedtaksperiode,
+            START,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_HISTORIKK,
+            orgnummer = a2
+        )
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(orgnummer = a2)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
+        assertUtbetalingsbeløp(
+            1.vedtaksperiode,
+            forventetArbeidsgiverbeløp = 1081,
+            forventetArbeidsgiverRefusjonsbeløp = 1385,
+            orgnummer = a1,
+            subset = 17.januar til 31.januar
+        )
+        assertUtbetalingsbeløp(
+            1.vedtaksperiode,
+            forventetArbeidsgiverbeløp = 1080,
+            forventetArbeidsgiverRefusjonsbeløp = 1385,
+            orgnummer = a2,
+            subset = 17.januar til 31.januar
+        )
+        Assertions.assertEquals(2, inspektør(a1).utbetalinger.size)
+        Assertions.assertEquals(1, inspektør(a2).utbetalinger.size)
     }
 
     @Test

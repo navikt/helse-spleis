@@ -1005,6 +1005,11 @@ internal class Arbeidsgiver private constructor(
             vedtaksperiode.erVedtaksperiodeRettFør(other)
         }
 
+    internal fun finnVedtaksperiodeSomOverlapperOgStarterFør(vedtaksperiode: Vedtaksperiode) =
+        vedtaksperioder.firstOrNull { other ->
+            vedtaksperiode.starterFørOgOverlapperMed(other)
+        }
+
     internal fun finnSykeperioderAvsluttetUtenUtbetalingRettFør(vedtaksperiode: Vedtaksperiode) =
         finnSykeperioderAvsluttetUtenUtbetalingRettFør(vedtaksperiode, emptyList())
 

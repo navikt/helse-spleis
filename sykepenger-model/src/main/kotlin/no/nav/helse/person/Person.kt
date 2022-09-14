@@ -967,4 +967,7 @@ class Person private constructor(
 
     internal fun finnesEnVedtaksperiodeRettEtter(ny: Vedtaksperiode) =
         arbeidsgivere.any { it.finnVedtaksperiodeRettEtter(ny) != null }
+
+    internal fun finnesEnVedtaksperiodeSomOverlapperOgStarterFør(ny: Vedtaksperiode) =
+        arbeidsgivere.any { it.finnVedtaksperiodeSomOverlapperOgStarterFør(ny) != null }
 }

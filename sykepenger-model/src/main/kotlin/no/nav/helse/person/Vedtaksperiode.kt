@@ -354,6 +354,9 @@ internal class Vedtaksperiode private constructor(
     internal fun erVedtaksperiodeRettFør(other: Vedtaksperiode) =
         this.sykdomstidslinje.erRettFør(other.sykdomstidslinje)
 
+    internal fun starterFørOgOverlapperMed(other: Vedtaksperiode) =
+        this.periode.overlapperMed(other.periode) && this før other
+
     internal fun erSykeperiodeAvsluttetUtenUtbetalingRettFør(other: Vedtaksperiode) =
         this.sykdomstidslinje.erRettFør(other.sykdomstidslinje) && this.tilstand == AvsluttetUtenUtbetaling
 
@@ -808,6 +811,7 @@ internal class Vedtaksperiode private constructor(
             keyValue("dagerMellomPeriodenVarFerdigOgSykmeldingenSkrevet", dagerMellomPeriodenVarFerdigOgSykmeldingenSkrevet)
         )
         if (Toggle.RevurderOutOfOrder.disabled) return outOfOrderIkkeStøttet()
+        if (Toggle.RevurderOutOfOrderForlengelser.disabled && vedtaksperiode.person.finnesEnVedtaksperiodeSomOverlapperOgStarterFør(ny)) return outOfOrderIkkeStøttet()
         if (Toggle.RevurderOutOfOrderForlengelser.disabled && vedtaksperiode.person.finnesEnVedtaksperiodeRettEtter(ny)) return outOfOrderIkkeStøttet()
         if (!ny.forventerInntekt()) return
 
