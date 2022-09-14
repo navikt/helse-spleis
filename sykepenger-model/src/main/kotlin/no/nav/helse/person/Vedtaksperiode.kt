@@ -1849,10 +1849,6 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            if (vedtaksperiode.person.nåværendeVedtaksperioder(IKKE_FERDIG_BEHANDLET).min() != vedtaksperiode) {
-                påminnelse.info("Trekker perioden tilbake da den ikke regnes å være tidligste lengre")
-                return vedtaksperiode.tilstand(påminnelse, AvventerBlokkerendePeriode)
-            }
             vedtaksperiode.trengerHistorikkFraInfotrygd(påminnelse)
         }
 
