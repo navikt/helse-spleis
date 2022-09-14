@@ -36,6 +36,13 @@ internal class V177ForkastOgFlyttVilkårsgrunnlagTest : MigrationTest(V177Forkas
         )
     }
 
+    @Test
+    fun `Et spleis vilkårsgrunnlag på skjæringstidspunktet og flere vilkårsgrunnlag fra infotrygd for samme sykefraværstilfelle - velger siste vilkårsgrunnlag fra infotrygd`() {
+        assertForkastetVilkårsgrunnlag(
+            originalJson = "/migrations/177/flere-vilkårsgrunnlag-fra-it_original.json",
+            expectedJson = "/migrations/177/flere-vilkårsgrunnlag-fra-it_expected.json"
+        )
+    }
 
     private fun assertForkastetVilkårsgrunnlag(originalJson: String, expectedJson: String) =
         assertMigration(expectedJson, originalJson, STRICT_ORDER).assertIdOgOpprettet()
