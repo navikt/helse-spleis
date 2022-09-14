@@ -43,7 +43,6 @@ import no.nav.helse.person.Vedtaksperiode.Companion.IKKE_FERDIG_REVURDERT
 import no.nav.helse.person.Vedtaksperiode.Companion.KLAR_TIL_BEHANDLING
 import no.nav.helse.person.Vedtaksperiode.Companion.MED_SKJÆRINGSTIDSPUNKT
 import no.nav.helse.person.Vedtaksperiode.Companion.OVERLAPPENDE
-import no.nav.helse.person.Vedtaksperiode.Companion.OVERLAPPER_ELLER_FORLENGER
 import no.nav.helse.person.Vedtaksperiode.Companion.SKAL_INNGÅ_I_SYKEPENGEGRUNNLAG
 import no.nav.helse.person.Vedtaksperiode.Companion.TIDLIGERE_OG_ETTERGØLGENDE
 import no.nav.helse.person.Vedtaksperiode.Companion.avventerRevurdering
@@ -524,19 +523,13 @@ internal class Arbeidsgiver private constructor(
     }
 
     private fun opprettVedtaksperiodeOgHåndter(søknad: Søknad) {
-        val vedtaksperiode = søknad.lagVedtaksperiode(person, this, jurist)
-        if (person.harOverlappendeEllerForlengerForkastetVedtaksperiode(søknad)) {
-            registrerForkastetVedtaksperiode(vedtaksperiode, søknad)
-            person.søppelbøtte(søknad, OVERLAPPER_ELLER_FORLENGER(vedtaksperiode))
-            return
-        }
         if (noenHarHåndtert(søknad, Vedtaksperiode::håndter)) {
-            if (søknad.harFunksjonelleFeilEllerVerre()) {
-                person.sendOppgaveEvent(søknad)
-                person.emitHendelseIkkeHåndtert(søknad)
-            } else {
-                person.emitUtsettOppgaveEvent(søknad)
-            }
+            if (!søknad.harFunksjonelleFeilEllerVerre()) return person.emitUtsettOppgaveEvent(søknad)
+        }
+        val vedtaksperiode = søknad.lagVedtaksperiode(person, this, jurist)
+        if (søknad.harFunksjonelleFeilEllerVerre() || person.harOverlappendeEllerForlengerForkastetVedtaksperiode(søknad)) {
+            registrerForkastetVedtaksperiode(vedtaksperiode, søknad)
+            person.søppelbøtte(søknad, TIDLIGERE_OG_ETTERGØLGENDE(vedtaksperiode))
             return
         }
         registrerNyVedtaksperiode(vedtaksperiode)

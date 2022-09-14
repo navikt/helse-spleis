@@ -181,7 +181,6 @@ interface PersonObserver {
     fun feriepengerUtbetalt(hendelseskontekst: Hendelseskontekst, event: FeriepengerUtbetaltEvent) {}
     fun annullering(hendelseskontekst: Hendelseskontekst, event: UtbetalingAnnullertEvent) {}
     fun avstemt(hendelseskontekst: Hendelseskontekst, result: Map<String, Any>) {}
-    fun hendelseIkkeHåndtert(hendelseskontekst: Hendelseskontekst, event: HendelseIkkeHåndtertEvent) {}
     fun vedtakFattet(hendelseskontekst: Hendelseskontekst, event: VedtakFattetEvent) {}
     fun revurderingAvvist(hendelseskontekst: Hendelseskontekst, event: RevurderingAvvistEvent) {}
 }

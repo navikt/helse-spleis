@@ -24,7 +24,6 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
     val feriepengerUtbetaltEventer = mutableListOf<PersonObserver.FeriepengerUtbetaltEvent>()
     val utbetaltEndretEventer = mutableListOf<ObservedEvent<PersonObserver.UtbetalingEndretEvent>>()
     val vedtakFattetEvent = mutableMapOf<UUID, PersonObserver.VedtakFattetEvent>()
-    val hendelseIkkeHåndtertEventer =  mutableMapOf<UUID, PersonObserver.HendelseIkkeHåndtertEvent>()
     val opprettOppgaverTilSpeilsaksbehandlerEventer = mutableListOf<PersonObserver.OpprettOppgaveForSpeilsaksbehandlereEvent>()
     val opprettOppgaverEventer = mutableListOf<PersonObserver.OpprettOppgaveEvent>()
     private val utsettOppgaveEventer = mutableListOf<PersonObserver.UtsettOppgaveEvent>()
@@ -54,7 +53,6 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
     fun opprettOppgaveForSpeilsaksbehandlereEvent() = opprettOppgaverTilSpeilsaksbehandlerEventer.toList()
     fun opprettOppgaveEvent() = opprettOppgaverEventer.toList()
     fun utsettOppgaveEventer() = utsettOppgaveEventer.toList()
-    fun hendelseIkkeHåndtert(hendelseId: UUID) = hendelseIkkeHåndtertEventer.get(hendelseId)
 
     override fun avstemt(hendelseskontekst: Hendelseskontekst, result: Map<String, Any>) {
         avstemming = result
@@ -110,10 +108,6 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
 
     override fun vedtaksperiodeForkastet(hendelseskontekst: Hendelseskontekst, event: PersonObserver.VedtaksperiodeForkastetEvent) {
         forkastedeEventer[hendelseskontekst.vedtaksperiodeId()] = event
-    }
-
-    override fun hendelseIkkeHåndtert(hendelseskontekst: Hendelseskontekst, event: PersonObserver.HendelseIkkeHåndtertEvent) {
-        hendelseIkkeHåndtertEventer[event.hendelseId] = event
     }
 
     override fun opprettOppgaveForSpeilsaksbehandlere(hendelseskontekst: Hendelseskontekst, event: PersonObserver.OpprettOppgaveForSpeilsaksbehandlereEvent) {

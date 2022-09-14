@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e
 import java.util.UUID
 import no.nav.helse.august
 import no.nav.helse.februar
+import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.januar
 import no.nav.helse.juli
 import no.nav.helse.mars
@@ -10,7 +11,6 @@ import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.september
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.inntektsmeldingkontrakt.Periode
-import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -63,18 +63,17 @@ internal class TrengerInntektsmeldingTest : AbstractEndToEndMediatorTest() {
             "AVSLUTTET"
         )
         sendNySøknad(SoknadsperiodeDTO(fom = 20.juli(2021), tom = 13.august(2021), sykmeldingsgrad = 100))
-        sendSøknadUtenVedtaksperiode(listOf(SoknadsperiodeDTO(fom = 20.juli(2021), tom = 13.august(2021), sykmeldingsgrad = 100)))
+        sendSøknad(listOf(SoknadsperiodeDTO(fom = 20.juli(2021), tom = 13.august(2021), sykmeldingsgrad = 100)))
 
         sendNySøknad(SoknadsperiodeDTO(fom = 14.august(2021), tom = 6.september(2021), sykmeldingsgrad = 100))
-        sendSøknadUtenVedtaksperiode(listOf(SoknadsperiodeDTO(fom = 14.august(2021), tom = 6.september(2021), sykmeldingsgrad = 100)))
+        sendSøknad(listOf(SoknadsperiodeDTO(fom = 14.august(2021), tom = 6.september(2021), sykmeldingsgrad = 100)))
 
         sendNySøknad(SoknadsperiodeDTO(fom = 7.september(2021), tom = 30.september(2021), sykmeldingsgrad = 100))
         sendSøknad(listOf(SoknadsperiodeDTO(fom = 7.september(2021), tom = 30.september(2021), sykmeldingsgrad = 100)))
 
-        assertTilstander(
-            2,
-            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
-        )
+        assertTilstander(2, "TIL_INFOTRYGD")
+        assertTilstander(3, "TIL_INFOTRYGD")
+        assertTilstander(4, "TIL_INFOTRYGD")
 
         assertEquals(
             testRapid.inspektør.meldinger("trenger_ikke_inntektsmelding").size,
@@ -107,14 +106,12 @@ internal class TrengerInntektsmeldingTest : AbstractEndToEndMediatorTest() {
         )
 
         sendNySøknad(SoknadsperiodeDTO(fom = 1.februar, tom = 28.februar, sykmeldingsgrad = 100))
-        sendSøknadUtenVedtaksperiode(listOf(SoknadsperiodeDTO(fom = 1.februar, tom = 28.februar, sykmeldingsgrad = 100)))
+        sendSøknad(listOf(SoknadsperiodeDTO(fom = 1.februar, tom = 28.februar, sykmeldingsgrad = 100)))
 
         sendNySøknad(SoknadsperiodeDTO(fom = 28.februar, tom = 16.mars, sykmeldingsgrad = 100))
         sendSøknad(listOf(SoknadsperiodeDTO(fom = 28.februar, tom = 16.mars, sykmeldingsgrad = 100)))
-        assertTilstander(
-            1,
-            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK"
-        )
+        assertTilstander(1, "TIL_INFOTRYGD")
+        assertTilstander(2, "TIL_INFOTRYGD")
 
         assertEquals(1, testRapid.inspektør.meldinger("trenger_inntektsmelding").size)
         assertEquals(17.januar, testRapid.inspektør.siste("trenger_inntektsmelding")["fom"].asLocalDate())

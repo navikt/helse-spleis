@@ -7,6 +7,10 @@ import java.time.YearMonth
 import java.util.UUID
 import javax.sql.DataSource
 import no.nav.helse.februar
+import no.nav.helse.flex.sykepengesoknad.kafka.FravarDTO
+import no.nav.helse.flex.sykepengesoknad.kafka.InntektskildeDTO
+import no.nav.helse.flex.sykepengesoknad.kafka.PeriodeDTO
+import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.januar
@@ -52,10 +56,6 @@ import no.nav.helse.spleis.meldinger.TestRapid
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.inntektsmeldingkontrakt.OpphoerAvNaturalytelse
 import no.nav.inntektsmeldingkontrakt.Periode
-import no.nav.helse.flex.sykepengesoknad.kafka.FravarDTO
-import no.nav.helse.flex.sykepengesoknad.kafka.InntektskildeDTO
-import no.nav.helse.flex.sykepengesoknad.kafka.PeriodeDTO
-import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -137,19 +137,6 @@ internal abstract class AbstractEndToEndMediatorTest {
 
         testRapid.sendTestMessage(message)
         return id.toUUID()
-    }
-
-    protected fun sendSøknadUtenVedtaksperiode(perioder: List<SoknadsperiodeDTO>) {
-        val (_, message) = meldingsfabrikk.lagSøknadNav(
-                perioder = perioder,
-                fravær = emptyList(),
-                egenmeldinger = emptyList(),
-                andreInntektskilder = null,
-                sendtNav = perioder.maxOfOrNull { it.tom!! }?.atStartOfDay(),
-                orgnummer = ORGNUMMER
-            )
-
-        testRapid.sendTestMessage(message)
     }
 
     protected fun sendKorrigerendeSøknad(

@@ -290,13 +290,6 @@ internal class PersonMediator(
         )))
     }
 
-    override fun hendelseIkkeHåndtert(hendelseskontekst: Hendelseskontekst, event: PersonObserver.HendelseIkkeHåndtertEvent) {
-        queueMessage(hendelseskontekst, JsonMessage.newMessage("hendelse_ikke_håndtert", mapOf(
-            "hendelseId" to event.hendelseId,
-            "årsaker" to event.årsaker
-        )))
-    }
-
     private fun leggPåStandardfelter(hendelseskontekst: Hendelseskontekst, outgoingMessage: JsonMessage) = outgoingMessage.apply {
         hendelseskontekst.appendTo(this::set)
     }

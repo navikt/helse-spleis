@@ -798,37 +798,6 @@ class Person private constructor(
         }
     }
 
-    internal fun emitHendelseIkkeHåndtert(hendelse: SykdomstidslinjeHendelse) {
-        val errorMeldinger = mutableListOf<String>()
-        aktivitetslogg.accept(object : AktivitetsloggVisitor {
-            override fun visitFunksjonellFeil(
-                id: UUID,
-                kontekster: List<SpesifikkKontekst>,
-                aktivitet: Aktivitetslogg.Aktivitet.FunksjonellFeil,
-                melding: String,
-                tidsstempel: String
-            ) {
-                if (kontekster
-                        .mapNotNull { it.kontekstMap["meldingsreferanseId"] }
-                        .map(UUID::fromString)
-                        .contains(hendelse.meldingsreferanseId())
-                ) {
-                    errorMeldinger.add(melding)
-                }
-            }
-        })
-
-        observers.forEach {
-            it.hendelseIkkeHåndtert(
-                hendelse.hendelseskontekst(),
-                PersonObserver.HendelseIkkeHåndtertEvent(
-                    hendelse.meldingsreferanseId(),
-                    errorMeldinger,
-                )
-            )
-        }
-    }
-
     internal fun lagreArbeidsforhold(
         orgnummer: String,
         arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold>,

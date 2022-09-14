@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e.oppgaver
 
 import no.nav.helse.april
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -40,7 +39,6 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -103,22 +101,6 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
 
         assertTrue(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().isEmpty())
         assertTrue(observatør.opprettOppgaveEvent().any { søknadHendelseId in it.hendelser })
-    }
-
-    @Test
-    fun `inntektsmelding som overlapper med utbetalt periode skal til ny kø`() {
-        // Utbetaling 17. mars til 31. mars (AGP 1-16. mars)
-        nyttVedtak(1.mars, 31.mars)
-        val imHendelseId = håndterInntektsmelding(listOf(20.februar til 1.mars))
-        assertForventetFeil(
-            forklaring = "Nært forestående feature - https://trello.com/c/eG2Awz44",
-            nå = { assertTrue(observatør.hendelseIkkeHåndtertEventer.isEmpty()) },
-            ønsket = {
-                // assertTrue(observatør.<nytt event her>.harRelatertUtbetaling)
-                assertFalse(observatør.hendelseIkkeHåndtertEventer.isEmpty())
-                assertNotNull(observatør.hendelseIkkeHåndtert(imHendelseId))
-            }
-        )
     }
 
     @Test
