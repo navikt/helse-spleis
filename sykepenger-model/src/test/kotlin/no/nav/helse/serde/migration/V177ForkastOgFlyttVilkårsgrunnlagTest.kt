@@ -29,6 +29,15 @@ internal class V177ForkastOgFlyttVilkårsgrunnlagTest : MigrationTest(V177Forkas
     }
 
     @Test
+    fun `Tom vilkårsgrunnlaghistorikk`() {
+        val json = toNode("/migrations/177/tom-vilkårsgrunnlaghistorikk.json".readResource()) as ObjectNode
+        assertMigrationRaw(
+            originalJson = "${json.put("skjemaVersjon", 176)}",
+            expectedJson = "${json.put("skjemaVersjon", 177)}"
+        )
+    }
+
+    @Test
     fun `Revurdering fører til nytt skjæringstidspunkt bakover`() {
         assertForkastetVilkårsgrunnlag(
             originalJson = "/migrations/177/revurder-skjæringstidspunkt-bakover_original.json",

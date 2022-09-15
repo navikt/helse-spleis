@@ -1,0 +1,16 @@
+{
+  "aktørId": "42",
+  "arbeidsgivere": [
+    {
+      "vedtaksperioder": [
+        {
+          "fom": "2018-01-01",
+          "tom": "2018-01-31",
+          "tilstand": "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
+          "skjæringstidspunkt": "2018-01-01"
+        }
+      ]
+    }
+  ],
+  "vilkårsgrunnlagHistorikk": []
+}
