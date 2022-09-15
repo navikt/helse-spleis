@@ -65,6 +65,9 @@ import no.nav.helse.spleis.graphql.dto.GraphQLVilkarsgrunnlag
 import no.nav.helse.spleis.graphql.dto.GraphQLVilkarsgrunnlaghistorikk
 import no.nav.helse.spleis.graphql.dto.GraphQLVilkarsgrunnlagtype
 import no.nav.helse.spleis.graphql.dto.GraphQLVurdering
+import kotlin.Double.Companion.NEGATIVE_INFINITY
+import kotlin.Double.Companion.NaN
+import kotlin.Double.Companion.POSITIVE_INFINITY
 
 private fun mapDag(dag: SammenslåttDag) = GraphQLDag(
     dato = dag.dagen,
@@ -382,10 +385,13 @@ private fun mapInntekt(inntekt: Arbeidsgiverinntekt) = GraphQLArbeidsgiverinntek
     deaktivert = inntekt.deaktivert
 )
 
+private fun GraphQLSpleisVilkarsgrunnlag.harUgyldigAvviksprosent() =
+    avviksprosent in setOf(POSITIVE_INFINITY, NEGATIVE_INFINITY, NaN)
+
 internal fun mapVilkårsgrunnlag(id: UUID, vilkårsgrunnlag: List<Vilkårsgrunnlag>) =
     GraphQLVilkarsgrunnlaghistorikk(
         id = id,
-        grunnlag = vilkårsgrunnlag.map { grunnlag ->
+        grunnlag = vilkårsgrunnlag.mapNotNull { grunnlag ->
             when (grunnlag) {
                 is SpleisVilkårsgrunnlag -> GraphQLSpleisVilkarsgrunnlag(
                     skjaeringstidspunkt = grunnlag.skjæringstidspunkt,
@@ -401,7 +407,7 @@ internal fun mapVilkårsgrunnlag(id: UUID, vilkårsgrunnlag: List<Vilkårsgrunnl
                     oppfyllerKravOmMinstelonn = grunnlag.oppfyllerKravOmMinstelønn,
                     oppfyllerKravOmOpptjening = grunnlag.oppfyllerKravOmOpptjening,
                     oppfyllerKravOmMedlemskap = grunnlag.oppfyllerKravOmMedlemskap
-                )
+                ).takeUnless { it.harUgyldigAvviksprosent() }
                 is InfotrygdVilkårsgrunnlag -> GraphQLInfotrygdVilkarsgrunnlag(
                     skjaeringstidspunkt = grunnlag.skjæringstidspunkt,
                     omregnetArsinntekt = grunnlag.omregnetÅrsinntekt,
