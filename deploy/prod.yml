@@ -50,8 +50,26 @@ spec:
               - name: spleis-avstemming
               - name: sparsom
         flags:
+          - name: max_wal_size
+            value: "10240"
           - name: maintenance_work_mem
-            value: "1048576"
+            value: "41943040"
+          - name: max_connections
+            value: "150"
+          - name: work_mem
+            value: "5242880"
+          - name: effective_cache_size
+            value: "18350080"
+          - name: random_page_cost
+            value: "1.2"
+          - name: max_worker_processes
+            value: "32"
+          - name: max_parallel_workers_per_gather
+            value: "4"
+          - name: max_parallel_workers
+            value: "24"
+          - name: max_parallel_maintenance_workers
+            value: "24"
   secureLogs:
     enabled: true
   env:
