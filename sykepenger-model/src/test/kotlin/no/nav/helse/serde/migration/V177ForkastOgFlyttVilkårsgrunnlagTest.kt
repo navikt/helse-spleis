@@ -4,9 +4,11 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.readResource
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
+import org.junit.jupiter.api.assertThrows
 import org.skyscreamer.jsonassert.JSONCompareMode.STRICT_ORDER
 
 internal class V177ForkastOgFlyttVilkårsgrunnlagTest : MigrationTest(V177ForkastOgFlyttVilkårsgrunnlag()) {
@@ -50,6 +52,21 @@ internal class V177ForkastOgFlyttVilkårsgrunnlagTest : MigrationTest(V177Forkas
         assertForkastetVilkårsgrunnlag(
             originalJson = "/migrations/177/flere-vilkårsgrunnlag-fra-it_original.json",
             expectedJson = "/migrations/177/flere-vilkårsgrunnlag-fra-it_expected.json"
+        )
+    }
+
+    @Test
+    fun `Ignorerer vilkårsgrunnlag fra infotrygd om vi ikke har noen forkastede perioder som overlapper med sykefraværsperioden`() {
+        val test = {
+            assertForkastetVilkårsgrunnlag(
+                originalJson = "/migrations/177/vilkårsgrunnlag-fra-infotrygd-men-ingen-forkastet-periode_original.json",
+                expectedJson = "/migrations/177/vilkårsgrunnlag-fra-infotrygd-men-ingen-forkastet-periode_expected.json"
+            )
+        }
+        assertForventetFeil(
+            forklaring = "Vi velger infotrygdvilkårsgrunnlag uavhengig av om vi har forkastet perioder eller ei",
+            nå = { assertThrows<AssertionError>(test) },
+            ønsket = test
         )
     }
 
