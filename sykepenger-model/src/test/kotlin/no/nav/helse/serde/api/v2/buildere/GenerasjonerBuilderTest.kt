@@ -3,6 +3,7 @@ package no.nav.helse.serde.api.v2.buildere
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.erHelg
@@ -32,6 +33,7 @@ import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
@@ -1861,6 +1863,32 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, utbetalingGodkjent = false)
 
         assertEquals(0, generasjoner.size)
+    }
+
+    @Test
+    fun `out of order med gap`() = Toggle.RevurderOutOfOrder.enable {
+        nyttVedtak(1.mars, 31.mars, orgnummer = a1)
+        tilGodkjenning(1.januar, 31.januar, a1)
+
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_REVURDERING)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING)
+
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt()
+        håndterYtelser(1.vedtaksperiode)
+
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
+
+        0.generasjon {
+            assertEquals(2, perioder.size)
+            beregnetPeriode(0) er Utbetalingstatus.Ubetalt avType REVURDERING fra (1.mars til 31.mars) medTilstand TilGodkjenning
+            beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medTilstand Utbetalt
+        }
+        1.generasjon {
+            assertEquals(1, perioder.size)
+            beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.mars til 31.mars) medTilstand Utbetalt
+        }
     }
 
     private fun BeregnetPeriode.assertAldersvilkår(expectedOppfylt: Boolean, expectedAlderSisteSykedag: Int) {

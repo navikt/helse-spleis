@@ -110,6 +110,12 @@ internal class Generasjoner(perioder: Tidslinjeperioder) {
             this.perioder.removeAll(perioder.filter { it.venter() })
         }
 
+        private fun fjernOutOfOrder(skalFlyttes: List<Tidslinjeperiode>) {
+            val sortertePerioder = perioder.sortedByDescending { it.fom }
+            val skalFjernes = skalFlyttes.filter { sortertePerioder.indexOf(it) != 0 && it.opprettet > sortertePerioder[0].opprettet }
+            this.perioder.removeAll(skalFjernes)
+        }
+
         private fun utvidMed(perioder: List<Tidslinjeperiode>) {
             this.perioder.addAll(perioder)
         }
@@ -125,6 +131,7 @@ internal class Generasjoner(perioder: Tidslinjeperioder) {
                     val (skalFlyttes, skalIkkeFlyttes) =
                         generasjon.kandidaterSomSkalFlyttesTilNesteGenerasjon(nesteGenerasjon, this)
                     nesteGenerasjon.utvidMed(skalFlyttes)
+                    generasjon.fjernOutOfOrder(skalFlyttes)
                     generasjon.fjernPerioderSomVenter(skalFlyttes)
                     generasjon.erstattet = skalIkkeFlyttes.isEmpty()
                 }
