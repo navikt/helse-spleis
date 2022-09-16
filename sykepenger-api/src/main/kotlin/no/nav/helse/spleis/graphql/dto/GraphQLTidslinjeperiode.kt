@@ -131,6 +131,7 @@ enum class GraphQLPeriodetilstand {
     ForberederGodkjenning,
     ManglerInformasjon,
     VenterPaAnnenPeriode,
+    UtbetaltVenterPaAnnenPeriode,
     TilGodkjenning;
 }
 

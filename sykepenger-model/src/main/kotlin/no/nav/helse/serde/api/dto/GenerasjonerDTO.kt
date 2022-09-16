@@ -29,6 +29,7 @@ enum class Periodetilstand {
     RevurderingFeilet,
     ForberederGodkjenning,
     ManglerInformasjon,
+    UtbetaltVenterPåAnnenPeriode,
     VenterPåAnnenPeriode,
     TilGodkjenning,
     IngenUtbetaling,
