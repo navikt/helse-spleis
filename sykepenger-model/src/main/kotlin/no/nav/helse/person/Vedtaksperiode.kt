@@ -1438,10 +1438,6 @@ internal class Vedtaksperiode private constructor(
             hendelse: IAktivitetslogg
         ) {
             when {
-                vedtaksperiode.arbeidsgiver.validerBrukerutbetaling(hendelse, vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode) -> {
-                    hendelse.funksjonellFeil("Forkaster perioden pga. brukerutbetaling")
-                    vedtaksperiode.forkast(hendelse)
-                }
                 arbeidsgivere.trengerSøknadISammeMåned(vedtaksperiode.skjæringstidspunkt) -> return hendelse.info(
                     "Gjenopptar ikke behandling fordi minst én arbeidsgiver venter på søknad for sykmelding i samme måned som skjæringstidspunktet"
                 )
@@ -2415,14 +2411,6 @@ internal class Vedtaksperiode private constructor(
             TilUtbetaling
         )
 
-        internal val SENERE_INCLUSIVE = fun(senereEnnDenne: Vedtaksperiode): VedtaksperiodeFilter {
-            return fun(vedtaksperiode: Vedtaksperiode) = vedtaksperiode >= senereEnnDenne
-        }
-
-        internal val OVERLAPPENDE = fun(periode: Periode): VedtaksperiodeFilter {
-            return fun(other: Vedtaksperiode) = other.periode.overlapperMed(periode)
-        }
-
         // Fredet funksjonsnavn
         internal val TIDLIGERE_OG_ETTERGØLGENDE = fun(segSelv: Vedtaksperiode): VedtaksperiodeFilter {
             // forkaster perioder som er før/overlapper med oppgitt periode, eller som er sammenhengende med
@@ -2439,10 +2427,6 @@ internal class Vedtaksperiode private constructor(
 
         internal val FØR_AVSLUTTET: VedtaksperiodeFilter = {
             it.tilstand in FØR_AVSLUTTET_TILSTANDER
-        }
-
-        internal val ALLE_AVVENTER_ARBEIDSGIVERE: VedtaksperiodeFilter = { other: Vedtaksperiode ->
-            other.tilstand.erFerdigBehandlet || other.tilstand == AvventerBlokkerendePeriode
         }
 
         internal val IKKE_FERDIG_BEHANDLET: VedtaksperiodeFilter = { !it.tilstand.erFerdigBehandlet }

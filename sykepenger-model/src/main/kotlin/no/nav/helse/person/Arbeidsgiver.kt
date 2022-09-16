@@ -35,14 +35,12 @@ import no.nav.helse.person.ForkastetVedtaksperiode.Companion.harAvsluttedePeriod
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.håndterInntektsmeldingReplay
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.iderMedUtbetaling
 import no.nav.helse.person.Inntektshistorikk.IkkeRapportert
-import no.nav.helse.person.Vedtaksperiode.Companion.ALLE_AVVENTER_ARBEIDSGIVERE
 import no.nav.helse.person.Vedtaksperiode.Companion.ER_ELLER_HAR_VÆRT_AVSLUTTET
 import no.nav.helse.person.Vedtaksperiode.Companion.FØR_AVSLUTTET
 import no.nav.helse.person.Vedtaksperiode.Companion.IKKE_FERDIG_BEHANDLET
 import no.nav.helse.person.Vedtaksperiode.Companion.IKKE_FERDIG_REVURDERT
 import no.nav.helse.person.Vedtaksperiode.Companion.KLAR_TIL_BEHANDLING
 import no.nav.helse.person.Vedtaksperiode.Companion.MED_SKJÆRINGSTIDSPUNKT
-import no.nav.helse.person.Vedtaksperiode.Companion.OVERLAPPENDE
 import no.nav.helse.person.Vedtaksperiode.Companion.SKAL_INNGÅ_I_SYKEPENGEGRUNNLAG
 import no.nav.helse.person.Vedtaksperiode.Companion.TIDLIGERE_OG_ETTERGØLGENDE
 import no.nav.helse.person.Vedtaksperiode.Companion.avventerRevurdering
@@ -343,14 +341,6 @@ internal class Arbeidsgiver private constructor(
 
         internal fun List<Arbeidsgiver>.skjæringstidspunktperiode(skjæringstidspunkt: LocalDate) =
             flatMap { it.vedtaksperioder }.skjæringstidspunktperiode(skjæringstidspunkt)
-    }
-
-    internal fun validerBrukerutbetaling(hendelse: IAktivitetslogg, skjæringstidspunkt: LocalDate, periode: Periode): Boolean {
-        if (person.nåværendeVedtaksperioder(OVERLAPPENDE(periode)).all(ALLE_AVVENTER_ARBEIDSGIVERE)) return false
-        val førsteFraværsdag = finnFørsteFraværsdag(skjæringstidspunkt)
-        val inntekt = inntektshistorikk.omregnetÅrsinntekt(skjæringstidspunkt, førsteFraværsdag)?.omregnetÅrsinntekt() ?: return false
-        refusjonshistorikk.finnRefusjon(periode, hendelse)?.validerBrukerutbetaling(hendelse, inntekt)
-        return hendelse.harFunksjonelleFeilEllerVerre()
     }
 
     private fun startdatoForArbeidsforhold(skjæringstidspunkt: LocalDate): LocalDate? {

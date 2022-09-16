@@ -20,13 +20,10 @@ import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
-import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
-import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertInfo
 import no.nav.helse.spleis.e2e.assertIngenVarsler
-import no.nav.helse.spleis.e2e.assertSisteForkastetPeriodeTilstand
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertUtbetalingsbeløp
@@ -744,71 +741,6 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         assertIngenVarsler(1.vedtaksperiode.filter())
         assertIngenVarsler(2.vedtaksperiode.filter())
         assertInfo("Refusjon gjelder ikke for hele utbetalingsperioden", 2.vedtaksperiode.filter())
-    }
-
-    @Test
-    fun `to arbeidsgivere, om første har opphør i refusjon kastes begge ut`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a2)
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a2)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1, refusjon = Inntektsmelding.Refusjon(
-            INNTEKT, 30.januar, emptyList()))
-        assertSisteForkastetPeriodeTilstand(a1, 1.vedtaksperiode, TIL_INFOTRYGD)
-        assertFunksjonellFeil("Arbeidsgiver opphører refusjon (mistenker brukerutbetaling ved flere arbeidsgivere)", 1.vedtaksperiode.filter(a1))
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
-        assertSisteForkastetPeriodeTilstand(a2, 1.vedtaksperiode, TIL_INFOTRYGD)
-    }
-
-    @Test
-    fun `to arbeidsgivere, om første har endring i refusjon kastes begge ut`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a2)
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a2)
-        håndterInntektsmelding(
-            listOf(1.januar til 16.januar),
-            orgnummer = a1,
-            refusjon = Inntektsmelding.Refusjon(INNTEKT, null, listOf(EndringIRefusjon(INNTEKT /2, 30.januar)))
-        )
-        assertSisteForkastetPeriodeTilstand(a1, 1.vedtaksperiode, TIL_INFOTRYGD)
-        assertFunksjonellFeil("Arbeidsgiver har endringer i refusjon (mistenker brukerutbetaling ved flere arbeidsgivere)", 1.vedtaksperiode.filter(a1))
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
-        assertSisteForkastetPeriodeTilstand(a2, 1.vedtaksperiode, TIL_INFOTRYGD)
-    }
-
-    @Test
-    fun `to arbeidsgivere, om første refunderer delvis kastes begge ut`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a2)
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a2)
-        håndterInntektsmelding(
-            listOf(1.januar til 16.januar),
-            orgnummer = a1,
-            refusjon = Inntektsmelding.Refusjon(INNTEKT /2, null, emptyList())
-        )
-        assertSisteForkastetPeriodeTilstand(a1, 1.vedtaksperiode, TIL_INFOTRYGD)
-        assertFunksjonellFeil("Inntektsmelding inneholder beregnet inntekt og refusjon som avviker med hverandre (mistenker brukerutbetaling ved flere arbeidsgivere)", 1.vedtaksperiode.filter(a1))
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
-        assertSisteForkastetPeriodeTilstand(a2, 1.vedtaksperiode, TIL_INFOTRYGD)
-    }
-
-    @Test
-    fun `to arbeidsgivere, om første ikke refunderer`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a2)
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a2)
-        håndterInntektsmelding(
-            listOf(1.januar til 16.januar),
-            orgnummer = a1,
-            refusjon = Inntektsmelding.Refusjon(INGEN, null, emptyList())
-        )
-        assertSisteForkastetPeriodeTilstand(a1, 1.vedtaksperiode, TIL_INFOTRYGD)
-        assertFunksjonellFeil("Arbeidsgiver forskutterer ikke (mistenker brukerutbetaling ved flere arbeidsgivere)", 1.vedtaksperiode.filter(a1))
-        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a2)
-        assertSisteForkastetPeriodeTilstand(a2, 1.vedtaksperiode, TIL_INFOTRYGD)
     }
 
     @Test
