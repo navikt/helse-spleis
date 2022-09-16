@@ -353,6 +353,7 @@ private fun mapTilstand(tilstand: Periodetilstand) = when (tilstand) {
     Periodetilstand.ManglerInformasjon -> GraphQLPeriodetilstand.ManglerInformasjon
     Periodetilstand.VenterPåAnnenPeriode -> GraphQLPeriodetilstand.VenterPaAnnenPeriode
     Periodetilstand.TilGodkjenning -> GraphQLPeriodetilstand.TilGodkjenning
+    Periodetilstand.UtbetaltVenterPåAnnenPeriode -> GraphQLPeriodetilstand.UtbetaltVenterPaAnnenPeriode
 }
 
 private fun mapInntekt(inntekt: Arbeidsgiverinntekt) = GraphQLArbeidsgiverinntekt(
