@@ -22,10 +22,10 @@ import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
-import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
-import no.nav.helse.spleis.e2e.assertInntektForDato
+import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
+import no.nav.helse.spleis.e2e.assertInntektForDato
 import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
@@ -47,6 +47,7 @@ import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class OverstyrInntektFlereArbeidsgivereTest: AbstractEndToEndTest() {
@@ -213,7 +214,7 @@ internal class OverstyrInntektFlereArbeidsgivereTest: AbstractEndToEndTest() {
     }
 
     @Test
-    fun `skal kaste ut vedtaksperioder dersom overstyring av inntekt kan føre til brukerutbetaling`() {
+    fun `overstyring av inntekt kan føre til brukerutbetaling`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a2)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
@@ -236,7 +237,27 @@ internal class OverstyrInntektFlereArbeidsgivereTest: AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterOverstyrInntekt(8000.månedlig, skjæringstidspunkt = 1.januar, orgnummer = a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        assertFunksjonellFeil("Kan ikke fortsette på grunn av manglende funksjonalitet for utbetaling til bruker")
+
+        inspektør(a1).utbetaling(1).also { utbetaling ->
+            assertEquals(1, utbetaling.inspektør.arbeidsgiverOppdrag.size)
+            utbetaling.inspektør.arbeidsgiverOppdrag[0].inspektør.also { linje ->
+                assertEquals(358, linje.beløp)
+                assertEquals(17.januar til 31.januar, linje.fom til linje.tom)
+            }
+            assertEquals(1, utbetaling.inspektør.personOppdrag.size)
+            utbetaling.inspektør.personOppdrag[0].inspektør.also { linje ->
+                assertEquals(11, linje.beløp)
+                assertEquals(17.januar til 31.januar, linje.fom til linje.tom)
+            }
+        }
+        inspektør(a2).utbetaling(1).also { utbetaling ->
+            assertEquals(1, utbetaling.inspektør.arbeidsgiverOppdrag.size)
+            utbetaling.inspektør.arbeidsgiverOppdrag[0].inspektør.also { linje ->
+                assertEquals(358, linje.beløp)
+                assertEquals(17.januar til 31.januar, linje.fom til linje.tom)
+            }
+            assertTrue(utbetaling.inspektør.personOppdrag.isEmpty())
+        }
     }
 
     @Test

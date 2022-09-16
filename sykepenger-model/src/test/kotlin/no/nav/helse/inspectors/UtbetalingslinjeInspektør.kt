@@ -1,11 +1,11 @@
 package no.nav.helse.inspectors
 
+import java.time.LocalDate
 import no.nav.helse.person.OppdragVisitor
 import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.Klassekode
 import no.nav.helse.utbetalingslinjer.Satstype
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje
-import java.time.LocalDate
 import kotlin.properties.Delegates
 
 internal val Utbetalingslinje.inspektør get() = UtbetalingslinjeInspektør(this)
@@ -17,6 +17,9 @@ internal class UtbetalingslinjeInspektør(utbetalingslinje: Utbetalingslinje) : 
         private set
 
     internal lateinit var tom: LocalDate
+        private set
+
+    internal var beløp: Int? = null
         private set
 
     internal var delytelseId by Delegates.notNull<Int>()
@@ -60,5 +63,6 @@ internal class UtbetalingslinjeInspektør(utbetalingslinje: Utbetalingslinje) : 
         this.refDelytelseId = refDelytelseId
         this.datoStatusFom = datoStatusFom
         this.refFagsystemId = refFagsystemId
+        this.beløp = beløp
     }
 }

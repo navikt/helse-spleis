@@ -73,7 +73,6 @@ import no.nav.helse.person.TilstandType.UTBETALING_FEILET
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
-import no.nav.helse.person.filter.Utbetalingsfilter
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -695,20 +694,8 @@ internal class Vedtaksperiode private constructor(
     private fun høstingsresultater(hendelse: ArbeidstakerHendelse, andreVedtaksperioder: List<Vedtaksperiode>) {
         val ingenUtbetaling = !utbetalinger.harUtbetalinger()
         val kunArbeidsgiverdager = utbetalingstidslinje.kunArbeidsgiverdager()
-        val harBrukerutbetaling = harBrukerutbetaling(andreVedtaksperioder)
-
-        val utbetalingsfilter = Utbetalingsfilter.Builder()
-            .inntektkilde(inntektskilde)
-            .also { utbetalinger.build(it) }
-            .also { inntektsmeldingInfo?.build(it, arbeidsgiver) }
-            .utbetalingstidslinjerHarBrukerutbetaling(harBrukerutbetaling)
-            .build()
 
         when {
-            utbetalingsfilter.kanIkkeUtbetales(hendelse) -> {
-                hendelse.funksjonellFeil("Kan ikke fortsette på grunn av manglende funksjonalitet for utbetaling til bruker")
-                forkast(hendelse)
-            }
             ingenUtbetaling -> {
                 tilstand(hendelse, AvventerGodkjenning) {
                     if (kunArbeidsgiverdager)

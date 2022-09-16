@@ -2,7 +2,6 @@ package no.nav.helse.person
 
 import java.util.Objects
 import java.util.UUID
-import no.nav.helse.person.filter.Utbetalingsfilter
 
 internal class InntektsmeldingInfo(
     private val id: UUID,
@@ -20,10 +19,6 @@ internal class InntektsmeldingInfo(
     override fun equals(other: Any?): Boolean {
         if (other !is InntektsmeldingInfo) return false
         return this.id == other.id && this.arbeidsforholdId == other.arbeidsforholdId
-    }
-
-    internal fun build(filter: Utbetalingsfilter.Builder, arbeidsgiver: Arbeidsgiver) {
-        arbeidsgiver.build(filter, id)
     }
 
     override fun hashCode() = Objects.hash(id, arbeidsforholdId)

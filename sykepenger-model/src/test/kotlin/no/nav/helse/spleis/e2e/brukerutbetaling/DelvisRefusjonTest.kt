@@ -23,7 +23,6 @@ import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
-import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertInfo
 import no.nav.helse.spleis.e2e.assertIngenVarsler
@@ -625,7 +624,7 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `to arbeidsgivere hvor andre arbeidsgiver har brukerutbetaling kaster ut alle perioder på personen`() {
+    fun `to arbeidsgivere hvor andre arbeidsgiver har delvis refusjon`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a2)
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
@@ -652,26 +651,39 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         )
 
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(orgnummer = a2)
 
-        assertForkastetPeriodeTilstander(
-            1.vedtaksperiode,
-            START,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK,
-            AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK,
-            TIL_INFOTRYGD,
-            orgnummer = a1
-        )
-        assertForkastetPeriodeTilstander(
-            1.vedtaksperiode,
-            START,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            TIL_INFOTRYGD,
-            orgnummer = a2
-        )
+        inspektør(a1).utbetaling(0).also { utbetaling ->
+            assertEquals(2, utbetaling.inspektør.arbeidsgiverOppdrag.size)
+            utbetaling.inspektør.arbeidsgiverOppdrag[0].inspektør.also { linje ->
+                assertEquals(1081, linje.beløp)
+                assertEquals(17.januar til 19.januar, linje.fom til linje.tom)
+            }
+            utbetaling.inspektør.arbeidsgiverOppdrag[1].inspektør.also { linje ->
+                assertEquals(1431, linje.beløp)
+                assertEquals(20.januar til 31.januar, linje.fom til linje.tom)
+            }
+            assertTrue(utbetaling.inspektør.personOppdrag.isEmpty())
+        }
+        inspektør(a2).utbetaling(1).also { utbetaling ->
+            assertEquals(1, utbetaling.inspektør.arbeidsgiverOppdrag.size)
+            utbetaling.inspektør.arbeidsgiverOppdrag[0].inspektør.also { linje ->
+                assertEquals(1080, linje.beløp)
+                assertEquals(17.januar til 19.januar, linje.fom til linje.tom)
+            }
+
+            assertEquals(1, utbetaling.inspektør.personOppdrag.size)
+            utbetaling.inspektør.personOppdrag[0].inspektør.also { linje ->
+                assertEquals(730, linje.beløp)
+                assertEquals(20.januar til 31.januar, linje.fom til linje.tom)
+            }
+        }
 
     }
 
@@ -818,25 +830,25 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
             )
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(orgnummer = a2)
 
-        assertForkastetPeriodeTilstander(
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
-            START,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK,
-            AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK,
-            TIL_INFOTRYGD,
-            orgnummer = a1
-        )
-        assertForkastetPeriodeTilstander(
-            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
-            START,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            TIL_INFOTRYGD,
-            orgnummer = a2
-        )
+        inspektør(a1).utbetaling(0).also { utbetaling ->
+            val linje = utbetaling.inspektør.arbeidsgiverOppdrag[0].inspektør
+            assertEquals(1431, linje.beløp)
+            assertEquals(17.januar til 31.januar, linje.fom til linje.tom)
+            assertTrue(utbetaling.inspektør.personOppdrag.isEmpty())
+        }
+        inspektør(a2).utbetaling(1).also { utbetaling ->
+            val linje = utbetaling.inspektør.personOppdrag[0].inspektør
+            assertEquals(730, linje.beløp)
+            assertEquals(17.januar til 31.januar, linje.fom til linje.tom)
+            assertTrue(utbetaling.inspektør.arbeidsgiverOppdrag.isEmpty())
+        }
     }
 }

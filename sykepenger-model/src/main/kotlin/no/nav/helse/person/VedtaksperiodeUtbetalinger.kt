@@ -7,7 +7,6 @@ import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.builders.VedtakFattetBuilder
-import no.nav.helse.person.filter.Utbetalingsfilter
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.aktive
@@ -129,9 +128,6 @@ internal class VedtaksperiodeUtbetalinger(private val arbeidsgiver: Arbeidsgiver
         siste?.build(builder)
     }
 
-    internal fun build(builder: Utbetalingsfilter.Builder) {
-        builder.utbetaling(siste!!)
-    }
     internal fun overlapperMed(other: VedtaksperiodeUtbetalinger): Boolean {
         if (!this.harUtbetalinger() || !other.harUtbetalinger()) return false
         return this.siste!!.overlapperMed(other.siste!!)

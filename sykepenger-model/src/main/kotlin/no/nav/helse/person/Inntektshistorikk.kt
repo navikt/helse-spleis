@@ -10,7 +10,6 @@ import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.subsumsjonsformat
-import no.nav.helse.person.filter.Utbetalingsfilter
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.summer
@@ -108,10 +107,6 @@ internal class Inntektshistorikk {
                 .mapNotNull { it.omregnetÅrsinntekt(periode) }
                 .firstOrNull()
 
-        internal fun build(filter: Utbetalingsfilter.Builder, inntektsmeldingId: UUID) {
-            inntekter.forEach { it.build(filter, inntektsmeldingId) }
-        }
-
         internal fun erDuplikat(inntektsopplysning: InfotrygdhistorikkInntektsopplysning) =
             inntekter.filterIsInstance<Infotrygd>().any { it.erDuplikat(inntektsopplysning) }
 
@@ -150,7 +145,6 @@ internal class Inntektshistorikk {
 
         fun kanLagres(other: Inntektsopplysning) = true
         fun harInntektsmelding(førsteFraværsdag: LocalDate) = false
-        fun build(filter: Utbetalingsfilter.Builder, inntektsmeldingId: UUID) {}
         fun erNødvendigInntektForVilkårsprøving(harUtbetaling: Boolean) = false
 
         companion object {
@@ -306,11 +300,6 @@ internal class Inntektshistorikk {
         private val tidsstempel: LocalDateTime = LocalDateTime.now()
     ) : Inntektsopplysning {
         override val prioritet = 60
-
-        override fun build(filter: Utbetalingsfilter.Builder, inntektsmeldingId: UUID) {
-            if (hendelseId != inntektsmeldingId) return
-            filter.inntektsmeldingtidsstempel(tidsstempel)
-        }
 
         override fun accept(visitor: InntekthistorikkVisitor) {
             visitor.visitInntektsmelding(this, id, dato, hendelseId, beløp, tidsstempel)
@@ -598,10 +587,6 @@ internal class Inntektshistorikk {
 
     internal fun restore(block: RestoreJsonMode.() -> Unit) {
         RestoreJsonMode(this).apply(block)
-    }
-
-    internal fun build(filter: Utbetalingsfilter.Builder, inntektsmeldingId: UUID) {
-        nyesteInnslag()?.build(filter, inntektsmeldingId)
     }
 
     internal fun filtrerBortKjenteInntekter(inntektsopplysninger: List<InfotrygdhistorikkInntektsopplysning>): List<InfotrygdhistorikkInntektsopplysning> {

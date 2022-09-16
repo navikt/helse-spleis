@@ -62,7 +62,6 @@ import no.nav.helse.person.Vedtaksperiode.Companion.validerYtelser
 import no.nav.helse.person.builders.UtbetalingsdagerBuilder
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
-import no.nav.helse.person.filter.Utbetalingsfilter
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.serde.reflection.Utbetalingstatus
@@ -1162,10 +1161,6 @@ internal class Arbeidsgiver private constructor(
         arbeidsforholdhistorikk.sisteArbeidsforhold(skjæringstidspunkt) { ansattFom: LocalDate, ansattTom: LocalDate?, erAktiv: Boolean ->
             creator(organisasjonsnummer, ansattFom, ansattTom, erAktiv)
         }
-
-    internal fun build(filter: Utbetalingsfilter.Builder, inntektsmeldingId: UUID) {
-        inntektshistorikk.build(filter, inntektsmeldingId)
-    }
 
     internal fun harSykmeldingsperiodeFør(dato: LocalDate) = sykmeldingsperioder.harSykmeldingsperiodeFør(dato)
 
