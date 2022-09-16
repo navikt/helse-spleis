@@ -1,0 +1,162 @@
+{
+  "aktørId": "42",
+  "arbeidsgivere": [
+    {
+      "vedtaksperioder": [
+        {
+          "fom": "2018-04-01",
+          "tom": "2018-04-30",
+          "tilstand": "AVVENTER_SIMULERING",
+          "skjæringstidspunkt": "2018-01-17"
+        }
+      ],
+      "forkastede": [
+        {
+          "vedtaksperiode": {
+            "fom": "2018-01-01",
+            "tom": "2018-01-31"
+          }
+        },
+        {
+          "vedtaksperiode": {
+            "fom": "2018-02-01",
+            "tom": "2018-02-28"
+          }
+        },
+        {
+          "vedtaksperiode": {
+            "fom": "2018-03-01",
+            "tom": "2018-03-31"
+          }
+        }
+      ]
+    }
+  ],
+  "vilkårsgrunnlagHistorikk": [
+    {
+      "id": "{id}",
+      "opprettet": "{opprettet}",
+      "vilkårsgrunnlag": [
+        {
+          "skjæringstidspunkt": "2018-01-17",
+          "type": "Infotrygd",
+          "sykepengegrunnlag": {
+            "sykepengegrunnlag": 372000.0,
+            "inntektsgrunnlag": 372000.0,
+            "grunnbeløp": 561804.0,
+            "arbeidsgiverInntektsopplysninger": [
+              {
+                "orgnummer": "987654321",
+                "inntektsopplysning": {
+                  "id": "0222f5db-1f3a-4e9e-a466-ec8091bef966",
+                  "dato": "2018-02-01",
+                  "hendelseId": "e0c09966-c208-4442-a247-04011371c341",
+                  "beløp": 31000.0,
+                  "kilde": "INFOTRYGD",
+                  "tidsstempel": "2022-09-14T15:23:18.065518"
+                }
+              }
+            ],
+            "begrensning": "VURDERT_I_INFOTRYGD",
+            "deaktiverteArbeidsforhold": [],
+            "vurdertInfotrygd": true,
+            "minsteinntekt": 46817.0,
+            "oppfyllerMinsteinntektskrav": true
+          },
+          "vilkårsgrunnlagId": "240fc688-478a-4da2-92e1-24ee7754b8b1"
+        }
+      ]
+    },
+    {
+      "id": "a1409adb-7e14-42eb-954b-c417c0533abf",
+      "opprettet": "2022-09-14T15:23:18.093776",
+      "vilkårsgrunnlag": [
+        {
+          "skjæringstidspunkt": "2018-01-17",
+          "type": "Infotrygd",
+          "sykepengegrunnlag": {
+            "sykepengegrunnlag": 372000.0,
+            "inntektsgrunnlag": 372000.0,
+            "grunnbeløp": 561804.0,
+            "arbeidsgiverInntektsopplysninger": [
+              {
+                "orgnummer": "987654321",
+                "inntektsopplysning": {
+                  "id": "b574fcfa-6290-4ecd-b760-01dd3e6292fe",
+                  "dato": "2018-01-17",
+                  "hendelseId": "1511aa52-409d-4000-ba76-e6d025d8e81d",
+                  "beløp": 31000.0,
+                  "kilde": "INFOTRYGD",
+                  "tidsstempel": "2022-09-14T15:23:18.03815"
+                }
+              }
+            ],
+            "begrensning": "VURDERT_I_INFOTRYGD",
+            "deaktiverteArbeidsforhold": [],
+            "vurdertInfotrygd": true,
+            "minsteinntekt": 46817.0,
+            "oppfyllerMinsteinntektskrav": true
+          },
+          "vilkårsgrunnlagId": "e0e5ba02-4e5b-408b-9d5d-628045738280"
+        },
+        {
+          "skjæringstidspunkt": "2018-02-01",
+          "type": "Infotrygd",
+          "sykepengegrunnlag": {
+            "sykepengegrunnlag": 372000.0,
+            "inntektsgrunnlag": 372000.0,
+            "grunnbeløp": 561804.0,
+            "arbeidsgiverInntektsopplysninger": [
+              {
+                "orgnummer": "987654321",
+                "inntektsopplysning": {
+                  "id": "0222f5db-1f3a-4e9e-a466-ec8091bef966",
+                  "dato": "2018-02-01",
+                  "hendelseId": "e0c09966-c208-4442-a247-04011371c341",
+                  "beløp": 31000.0,
+                  "kilde": "INFOTRYGD",
+                  "tidsstempel": "2022-09-14T15:23:18.065518"
+                }
+              }
+            ],
+            "begrensning": "VURDERT_I_INFOTRYGD",
+            "deaktiverteArbeidsforhold": [],
+            "vurdertInfotrygd": true,
+            "minsteinntekt": 46817.0,
+            "oppfyllerMinsteinntektskrav": true
+          },
+          "vilkårsgrunnlagId": "240fc688-478a-4da2-92e1-24ee7754b8b1"
+        },
+        {
+          "skjæringstidspunkt": "2018-03-01",
+          "type": "Infotrygd",
+          "sykepengegrunnlag": {
+            "sykepengegrunnlag": 0.0,
+            "inntektsgrunnlag": 0.0,
+            "grunnbeløp": 561804.0,
+            "arbeidsgiverInntektsopplysninger": [
+              {
+                "orgnummer": "987654321",
+                "inntektsopplysning": {
+                  "id": "dac755f1-207f-4fed-a91c-36bae8e48c7f",
+                  "dato": "2018-03-01",
+                  "hendelseId": "9e9c7a0f-c994-46b2-8351-c7580f00358b",
+                  "beløp": 31000.0,
+                  "kilde": "INFOTRYGD",
+                  "tidsstempel": "2022-09-14T15:23:18.087604"
+                }
+              }
+            ],
+            "begrensning": "VURDERT_I_INFOTRYGD",
+            "deaktiverteArbeidsforhold": [],
+            "vurdertInfotrygd": true,
+            "minsteinntekt": 46817.0,
+            "oppfyllerMinsteinntektskrav": true
+          },
+          "vilkårsgrunnlagId": "ca56c1d4-ae32-4a18-92e1-016580ddb6b8"
+        }
+      ]
+    }
+  ],
+  "skjemaVersjon": 177
+}

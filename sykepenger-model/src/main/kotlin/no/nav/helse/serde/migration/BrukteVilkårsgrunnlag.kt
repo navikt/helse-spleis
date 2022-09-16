@@ -19,12 +19,13 @@ internal object BrukteVilkårsgrunnlag {
     private val JsonNode.tom get() = path("tom").dato
     private val JsonNode.vilkårsgrunnlagId get() = path("vilkårsgrunnlagId").asText()
     private val JsonNode.fraInfotrygd get() = path("type").asText() == "Infotrygd"
+    private val JsonNode.gyldigSykepengegrunnlag get() = path("sykepengegrunnlag").path("sykepengegrunnlag").asDouble() > 0
     private val JsonNode.fraSpleis get() = path("type").asText() == "Vilkårsprøving"
 
     private fun List<JsonNode>.finnInfotrygdVilkårsgrunnlag(sykefraværstilfelle: Periode, forkastedePerioder: List<Periode>): JsonNode? {
         if (forkastedePerioder.none { it.overlapperMed(sykefraværstilfelle) || it.erRettFør(sykefraværstilfelle) }) return null
 
-        return filter { it.fraInfotrygd }.lastOrNull { vilkårsgrunnlag -> vilkårsgrunnlag.skjæringstidspunkt in sykefraværstilfelle }
+        return filter { it.fraInfotrygd }.filter { it.gyldigSykepengegrunnlag }.lastOrNull { vilkårsgrunnlag -> vilkårsgrunnlag.skjæringstidspunkt in sykefraværstilfelle }
     }
 
     private fun List<JsonNode>.finnSpleisVilkårsgrunnlag(sykefraværstilfelle: Periode): JsonNode? {

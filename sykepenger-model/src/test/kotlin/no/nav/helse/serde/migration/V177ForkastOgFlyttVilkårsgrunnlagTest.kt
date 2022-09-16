@@ -80,11 +80,20 @@ internal class V177ForkastOgFlyttVilkårsgrunnlagTest : MigrationTest(V177Forkas
         )
     }
 
+    @Test
+    fun `Ignorerer vilkårsgrunnlag fra infotrygd hvor sykepengegrunnlaget er 0`() {
+        assertForkastetVilkårsgrunnlag(
+            originalJson = "/migrations/177/ignorerer-infotrygdgrunnlag-med-sykepengegrunnlag-0_original.json",
+            expectedJson = "/migrations/177/ignorerer-infotrygdgrunnlag-med-sykepengegrunnlag-0_expected.json"
+        )
+    }
+
     private fun assertForkastetVilkårsgrunnlag(originalJson: String, expectedJson: String) {
         val migrert = migrer(originalJson.readResource())
+        val sisteInnslag = migrert.path("vilkårsgrunnlagHistorikk")[0]
         val expected = expectedJson.readResource()
-            .replace("{id}", migrert.path("vilkårsgrunnlagHistorikk")[0].path("id").asText())
-            .replace("{opprettet}", migrert.path("vilkårsgrunnlagHistorikk")[0].path("opprettet").asText())
+            .replace("{id}", sisteInnslag.path("id").asText())
+            .replace("{opprettet}", sisteInnslag.path("opprettet").asText())
         assertJson(migrert.toString(), expected)
     }
 }
