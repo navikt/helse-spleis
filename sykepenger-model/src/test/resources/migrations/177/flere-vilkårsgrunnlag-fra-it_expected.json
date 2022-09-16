@@ -34,6 +34,8 @@
   ],
   "vilkårsgrunnlagHistorikk": [
     {
+      "id": "{id}",
+      "opprettet": "{opprettet}",
       "vilkårsgrunnlag": [
         {
           "skjæringstidspunkt": "2018-01-17",

@@ -32,12 +32,20 @@ internal abstract class MigrationTest(private val migration: () -> JsonMigration
         val expected = toNode(expectedJson)
         val migrert = migrer(originalJson)
         println(migrert.toString())
+        assertJson(migrert.toString(), expected.toString(), jsonCompareMode)
+        return migrert
+    }
+
+    protected fun assertJson(
+        actual: String,
+        expected: String,
+        jsonCompareMode: JSONCompareMode = JSONCompareMode.STRICT
+    ) {
         JSONAssert.assertEquals(
-            "\n$expected\n$migrert\n",
-            expected.toString(),
-            migrert.toString(),
+            "\n$expected\n$actual\n",
+            expected,
+            actual,
             jsonCompareMode
         )
-        return migrert
     }
 }

@@ -14,11 +14,21 @@
           "tilstand": "AVSLUTTET",
           "skjæringstidspunkt": "2018-01-01"
         }
+      ],
+      "forkastede": [
+        {
+          "vedtaksperiode": {
+            "fom": "2018-01-17",
+            "tom": "2018-01-31"
+          }
+        }
       ]
     }
   ],
   "vilkårsgrunnlagHistorikk": [
     {
+      "id": "{id}",
+      "opprettet": "{opprettet}",
       "vilkårsgrunnlag": [
         {
           "skjæringstidspunkt": "2018-01-01",

@@ -1,13 +1,8 @@
 package no.nav.helse.serde.migration
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.readResource
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertDoesNotThrow
-import org.skyscreamer.jsonassert.JSONCompareMode.STRICT_ORDER
 
 internal class V177ForkastOgFlyttVilkårsgrunnlagTest : MigrationTest(V177ForkastOgFlyttVilkårsgrunnlag()) {
 
@@ -85,13 +80,12 @@ internal class V177ForkastOgFlyttVilkårsgrunnlagTest : MigrationTest(V177Forkas
         )
     }
 
-    private fun assertForkastetVilkårsgrunnlag(originalJson: String, expectedJson: String) =
-        assertMigration(expectedJson, originalJson, STRICT_ORDER).assertIdOgOpprettet()
-
-    private fun JsonNode.assertIdOgOpprettet() {
-        path("vilkårsgrunnlagHistorikk").forEach { innslag ->
-            assertDoesNotThrow { UUID.fromString(innslag.path("id").asText())}
-            assertDoesNotThrow { LocalDateTime.parse(innslag.path("opprettet").asText()) }
-        }
+    private fun assertForkastetVilkårsgrunnlag(originalJson: String, expectedJson: String) {
+        val migrert = migrer(originalJson.readResource())
+        val expected = expectedJson.readResource()
+            .replace("{id}", migrert.path("vilkårsgrunnlagHistorikk")[0].path("id").asText())
+            .replace("{opprettet}", migrert.path("vilkårsgrunnlagHistorikk")[0].path("opprettet").asText())
+        assertJson(migrert.toString(), expected)
     }
 }
+
