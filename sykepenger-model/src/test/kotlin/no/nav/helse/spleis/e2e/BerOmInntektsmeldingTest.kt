@@ -4,17 +4,52 @@ import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.til
 import no.nav.helse.januar
+import no.nav.helse.mars
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
+import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class BerOmInntektsmeldingTest : AbstractEndToEndTest() {
+
+    @Test
+    fun `Ber ikke om inntektsmelding på korte perioder`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 15.januar, 100.prosent))
+        val søknadId = håndterSøknad(Sykdom(1.januar, 15.januar, 100.prosent))
+        assertIngenFunksjonelleFeil()
+        assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
+        assertEquals(0, observatør.manglendeInntektsmeldingVedtaksperioder.size)
+    }
+
+    @Test
+    fun `Ber ikke om inntektsmelding på korte perioder med uferdige periode hos annen ag`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterUtbetalingshistorikk(1.vedtaksperiode, orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 15.mars, 100.prosent), orgnummer = a2)
+        val søknadId = håndterSøknad(Sykdom(1.mars, 15.mars, 100.prosent), orgnummer = a2)
+
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING, orgnummer = a1)
+        assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, orgnummer = a2)
+        assertEquals(1, observatør.manglendeInntektsmeldingVedtaksperioder.size)
+        assertTrue(observatør.manglendeInntektsmeldingVedtaksperioder.none { event ->
+            søknadId in event.søknadIder
+        })
+    }
 
     @Test
     fun `Ber om inntektsmelding når vi ankommer AvventerInntektsmeldingEllerHistorikk`() {

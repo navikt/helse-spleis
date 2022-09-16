@@ -1350,7 +1350,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.trengerInntektsmeldingReplay()
-            if (vedtaksperiode.arbeidsgiver.finnForkastetSykeperiodeRettFør(vedtaksperiode) == null) {
+            if (vedtaksperiode.forventerInntekt()) {
                 vedtaksperiode.trengerInntektsmelding(hendelse.hendelseskontekst())
             }
             vedtaksperiode.person.gjenopptaBehandling(hendelse)

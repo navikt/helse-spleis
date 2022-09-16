@@ -1,14 +1,11 @@
 package no.nav.helse.spleis.e2e
 
 import java.util.UUID
-import no.nav.helse.august
 import no.nav.helse.februar
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.januar
-import no.nav.helse.juli
 import no.nav.helse.mars
 import no.nav.helse.rapids_rivers.asLocalDate
-import no.nav.helse.september
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.inntektsmeldingkontrakt.Periode
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -17,68 +14,20 @@ import org.junit.jupiter.api.Test
 internal class TrengerInntektsmeldingTest : AbstractEndToEndMediatorTest() {
 
     @Test
-    fun `trenger_inntektsmelding`() {
-        sendNySøknad(SoknadsperiodeDTO(fom = 21.juli(2021), tom = 4.august(2021), sykmeldingsgrad = 100))
-        val søknadId = sendSøknad(listOf(SoknadsperiodeDTO(fom = 21.juli(2021), tom = 4.august(2021), sykmeldingsgrad = 100)))
+    fun `trenger ikke inntektsmelding for periode innenfor arbeidsgiverperioden`() {
+        sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 14.januar, sykmeldingsgrad = 100))
+        sendSøknad(listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 14.januar, sykmeldingsgrad = 100)))
+        sendUtbetalingshistorikk(0)
+        assertEquals(0, testRapid.inspektør.meldinger("trenger_inntektsmelding").size)
+    }
+
+    @Test
+    fun `trenger inntektsmelding for periode utenfor arbeidsgiverperioden`() {
+        sendNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 17.januar, sykmeldingsgrad = 100))
+        val søknadId = sendSøknad(listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 17.januar, sykmeldingsgrad = 100)))
         sendUtbetalingshistorikk(0)
         val melding = testRapid.inspektør.siste("trenger_inntektsmelding")
         assertEquals(søknadId, UUID.fromString(melding["søknadIder"].toList().single().asText()))
-    }
-
-
-    @Test
-    fun `sender ikke trenger_inntektsmelding i tilfeller hvor vi egentlig har fått inntektsmelding, men har kastet søkander som følge av overlapp og fått kunstig gap`() {
-        sendNySøknad(SoknadsperiodeDTO(fom = 21.juli(2021), tom = 4.august(2021), sykmeldingsgrad = 100))
-        sendSøknad(listOf(SoknadsperiodeDTO(fom = 21.juli(2021), tom = 4.august(2021), sykmeldingsgrad = 100)))
-        sendUtbetalingshistorikk(0)
-        sendInntektsmelding(
-            listOf(Periode(fom = 21.juli(2021), tom =  5.august(2021))),
-            førsteFraværsdag = 21.juli(2021)
-        )
-        assertTilstander(
-            0,
-            "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
-            "AVSLUTTET_UTEN_UTBETALING",
-            "AVSLUTTET_UTEN_UTBETALING"
-        )
-
-        sendNySøknad(SoknadsperiodeDTO(fom = 5.august(2021), tom = 3.september(2021), sykmeldingsgrad = 100))
-        sendSøknad(listOf(SoknadsperiodeDTO(fom = 5.august(2021), tom = 3.september(2021), sykmeldingsgrad = 100)))
-        sendYtelserUtenSykepengehistorikk(1)
-        sendVilkårsgrunnlag(1, skjæringstidspunkt = 21.juli(2021))
-        sendYtelserUtenSykepengehistorikk(1)
-        sendSimulering(1, SimuleringMessage.Simuleringstatus.OK)
-        sendUtbetalingsgodkjenning(1)
-        sendUtbetaling()
-        assertUtbetalingTilstander(0, "NY", "IKKE_UTBETALT", "GODKJENT", "SENDT", "OVERFØRT", "UTBETALT")
-        assertTilstander(
-            1,
-            "AVVENTER_BLOKKERENDE_PERIODE",
-            "AVVENTER_HISTORIKK",
-            "AVVENTER_VILKÅRSPRØVING",
-            "AVVENTER_HISTORIKK",
-            "AVVENTER_SIMULERING",
-            "AVVENTER_GODKJENNING",
-            "TIL_UTBETALING",
-            "AVSLUTTET"
-        )
-        sendNySøknad(SoknadsperiodeDTO(fom = 20.juli(2021), tom = 13.august(2021), sykmeldingsgrad = 100))
-        sendSøknad(listOf(SoknadsperiodeDTO(fom = 20.juli(2021), tom = 13.august(2021), sykmeldingsgrad = 100)))
-
-        sendNySøknad(SoknadsperiodeDTO(fom = 14.august(2021), tom = 6.september(2021), sykmeldingsgrad = 100))
-        sendSøknad(listOf(SoknadsperiodeDTO(fom = 14.august(2021), tom = 6.september(2021), sykmeldingsgrad = 100)))
-
-        sendNySøknad(SoknadsperiodeDTO(fom = 7.september(2021), tom = 30.september(2021), sykmeldingsgrad = 100))
-        sendSøknad(listOf(SoknadsperiodeDTO(fom = 7.september(2021), tom = 30.september(2021), sykmeldingsgrad = 100)))
-
-        assertTilstander(2, "TIL_INFOTRYGD")
-        assertTilstander(3, "TIL_INFOTRYGD")
-        assertTilstander(4, "TIL_INFOTRYGD")
-
-        assertEquals(
-            testRapid.inspektør.meldinger("trenger_ikke_inntektsmelding").size,
-            testRapid.inspektør.meldinger("trenger_inntektsmelding").size
-        )
     }
 
     @Test

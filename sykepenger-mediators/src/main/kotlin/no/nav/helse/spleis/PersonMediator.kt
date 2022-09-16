@@ -7,12 +7,9 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.prometheus.client.Summary
-import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.Hendelseskontekst
-import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonHendelse
@@ -21,8 +18,6 @@ import no.nav.helse.person.TilstandType
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.rapids_rivers.asLocalDate
-import no.nav.helse.rapids_rivers.asOptionalLocalDate
 import no.nav.helse.serde.serialize
 import no.nav.helse.spleis.db.HendelseRepository
 import no.nav.helse.spleis.db.LagrePersonDao
@@ -271,10 +266,6 @@ internal class PersonMediator(
     }
 
     override fun manglerInntektsmelding(hendelseskontekst: Hendelseskontekst, orgnr: String, event: PersonObserver.ManglendeInntektsmeldingEvent) {
-        if (skalIkkeMasePåArbeidsgiver(hendelse.fødselsnummer(), orgnr, event.fom, event.tom)) {
-            hendelse.info("Hindrer publisering av trenger_inntektsmelding - har allerede fått inntektsmelding, men perioden er mistolket som gap")
-            return
-        }
         queueMessage(hendelseskontekst , JsonMessage.newMessage("trenger_inntektsmelding", mapOf(
             "fom" to event.fom,
             "tom" to event.tom,
@@ -306,34 +297,6 @@ internal class PersonMediator(
             }
         }
     }
-
-    private fun skalIkkeMasePåArbeidsgiver(fnr: String, orgnr: String, fom: LocalDate, tom: LocalDate): Boolean {
-        val gjeldendePeriode = hendelseRepository.finnSøknader(Personidentifikator.somPersonidentifikator(fnr))
-            .flatMap { søknad -> Periode(søknad["fom"].asLocalDate(), søknad["tom"].asLocalDate()) }
-            .grupperSammenhengendePerioder()
-            .firstOrNull { it.contains(fom) || it.contains(tom) }
-
-        return hendelseRepository
-            .finnInntektsmeldinger(Personidentifikator.somPersonidentifikator(fnr))
-            .filterNot { it["foersteFravaersdag"] == null }
-            .filter { it["virksomhetsnummer"].asText() == orgnr }
-            .map { inntektsmelding ->
-                inntektsmelding["foersteFravaersdag"].asOptionalLocalDate() to
-                    if (inntektsmelding["arbeidsgiverperioder"].isEmpty) Periode(LocalDate.MIN, LocalDate.MIN)
-                    else Periode(
-                        inntektsmelding["arbeidsgiverperioder"].minOf { it["fom"].asLocalDate() },
-                        inntektsmelding["arbeidsgiverperioder"].maxOf { it["tom"].asLocalDate() }
-                    )
-            }
-            .any { (førsteFraværsdag, sammenslåttArbeidsgiverperiode) -> gjeldendePeriode?.fårInntektFra(førsteFraværsdag, sammenslåttArbeidsgiverperiode) ?: false }
-    }
-
-    private fun Periode.fårInntektFra(førsteFraværsdag: LocalDate?, arbeidsgiverperiode: Periode): Boolean {
-        if (førsteFraværsdag.erEtterPeriode(arbeidsgiverperiode)) return førsteFraværsdag in this
-        return this.overlapperMed(arbeidsgiverperiode)
-    }
-
-    private fun LocalDate?.erEtterPeriode (periode: Periode) = this?.let { periode.endInclusive < this } ?: false
 
     private data class Pakke (
         private val fødselsnummer: String,
