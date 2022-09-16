@@ -56,11 +56,42 @@ internal class V177ForkastOgFlyttVilkårsgrunnlagTest : MigrationTest(V177Forkas
     }
 
     @Test
+    fun `Velger vilkårsgrunnlag fra infotrygd om vi har forkastede perioder rett før sykefraværsperioden`() {
+        assertForkastetVilkårsgrunnlag(
+            originalJson = "/migrations/177/vilkårsgrunnlag-fra-infotrygd-og-forkastet-periode-rett-før_original.json",
+            expectedJson = "/migrations/177/vilkårsgrunnlag-fra-infotrygd-og-forkastet-periode-rett-før_expected.json"
+        )
+    }
+
+    @Test
+    fun `Velger vilkårsgrunnlag fra infotrygd om vi har forkastede perioder som overlapper sykefraværsperioden`() {
+        assertForkastetVilkårsgrunnlag(
+            originalJson = "/migrations/177/vilkårsgrunnlag-fra-infotrygd-og-forkastet-periode-rett-før_original.json",
+            expectedJson = "/migrations/177/vilkårsgrunnlag-fra-infotrygd-og-forkastet-periode-rett-før_expected.json"
+        )
+    }
+
+    @Test
     fun `Ignorerer vilkårsgrunnlag fra infotrygd om vi ikke har noen forkastede perioder som overlapper med sykefraværsperioden`() {
         val test = {
             assertForkastetVilkårsgrunnlag(
                 originalJson = "/migrations/177/vilkårsgrunnlag-fra-infotrygd-men-ingen-forkastet-periode_original.json",
                 expectedJson = "/migrations/177/vilkårsgrunnlag-fra-infotrygd-men-ingen-forkastet-periode_expected.json"
+            )
+        }
+        assertForventetFeil(
+            forklaring = "Vi velger infotrygdvilkårsgrunnlag uavhengig av om vi har forkastet perioder eller ei",
+            nå = { assertThrows<AssertionError>(test) },
+            ønsket = test
+        )
+    }
+
+    @Test
+    fun `Ignorerer vilkårsgrunnlag fra infotrygd om vi har en forkastet periode som hverken er kant-til-kant eller overlapper med sykefraværsperioden`() {
+        val test = {
+            assertForkastetVilkårsgrunnlag(
+                originalJson = "/migrations/177/vilkårsgrunnlag-fra-infotrygd-og-forkastet-periode-før_original.json",
+                expectedJson = "/migrations/177/vilkårsgrunnlag-fra-infotrygd-og-forkastet-periode-før_expected.json"
             )
         }
         assertForventetFeil(
