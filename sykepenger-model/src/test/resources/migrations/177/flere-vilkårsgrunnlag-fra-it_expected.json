@@ -9,6 +9,26 @@
           "tilstand": "AVVENTER_SIMULERING",
           "skjæringstidspunkt": "2018-01-17"
         }
+      ],
+      "forkastede": [
+        {
+          "vedtaksperiode": {
+            "fom": "2018-01-01",
+            "tom": "2018-01-31"
+          }
+        },
+        {
+          "vedtaksperiode": {
+            "fom": "2018-02-01",
+            "tom": "2018-02-28"
+          }
+        },
+        {
+          "vedtaksperiode": {
+            "fom": "2018-03-01",
+            "tom": "2018-03-31"
+          }
+        }
       ]
     }
   ],

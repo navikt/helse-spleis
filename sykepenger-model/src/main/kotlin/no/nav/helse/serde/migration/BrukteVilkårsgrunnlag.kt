@@ -15,34 +15,27 @@ internal object BrukteVilkårsgrunnlag {
 
     private val JsonNode.dato get() = LocalDate.parse(asText())
     private val JsonNode.skjæringstidspunkt get() = path("skjæringstidspunkt").dato
+    private val JsonNode.fom get() = path("fom").dato
     private val JsonNode.tom get() = path("tom").dato
     private val JsonNode.vilkårsgrunnlagId get() = path("vilkårsgrunnlagId").asText()
     private val JsonNode.fraInfotrygd get() = path("type").asText() == "Infotrygd"
     private val JsonNode.fraSpleis get() = path("type").asText() == "Vilkårsprøving"
 
+    private fun List<JsonNode>.finnInfotrygdVilkårsgrunnlag(sykefraværstilfelle: Periode, forkastedePerioder: List<Periode>): JsonNode? {
+        if (forkastedePerioder.none { it.overlapperMed(sykefraværstilfelle) || it.erRettFør(sykefraværstilfelle) }) return null
 
-    private fun List<JsonNode>.loggSprøInfotrygdVilkårsgrunnlag(sykefraværstilfelle: Periode, aktørId: String) {
-        val vilkårsgrunnlagFraInfotrygd = filter { it.fraInfotrygd && it.skjæringstidspunkt in sykefraværstilfelle}
-        if (vilkårsgrunnlagFraInfotrygd.size > 1) {
-            sikkerlogg.info("Fant ${vilkårsgrunnlagFraInfotrygd.size} vilkårsgrunnlag fra infotrygd innenfor sykefraværstilfelle $sykefraværstilfelle for aktørId=$aktørId")
-        }
+        return filter { it.fraInfotrygd }.lastOrNull { vilkårsgrunnlag -> vilkårsgrunnlag.skjæringstidspunkt in sykefraværstilfelle }
     }
 
-    private fun List<JsonNode>.loggSprøSpleisVilkårsgrunnlag(sykefraværstilfelle: Periode, aktørId: String) {
+    private fun List<JsonNode>.finnSpleisVilkårsgrunnlag(sykefraværstilfelle: Periode): JsonNode? {
         val skjæringstidspunkt = sykefraværstilfelle.start
-        val vilkårsgrunnlagFraSpleis = filter { it.fraSpleis && it.skjæringstidspunkt == skjæringstidspunkt }
-        if (vilkårsgrunnlagFraSpleis.size > 1) {
-            sikkerlogg.info("Fant ${vilkårsgrunnlagFraSpleis.size} vilkårsgrunnlag fra spleis på skjæringstidspunkt $skjæringstidspunkt for aktørId=$aktørId")
-        }
+        return filter { it.fraSpleis }.singleOrNull { it.skjæringstidspunkt == skjæringstidspunkt }
     }
 
+    private fun List<JsonNode>.finnRiktigVilkårsgrunnlag(sykefraværstilfelle: Periode, forkastedePerioder: List<Periode>): JsonNode? {
+        val fraInfotrygd = finnInfotrygdVilkårsgrunnlag(sykefraværstilfelle, forkastedePerioder)
 
-    private fun List<JsonNode>.finnRiktigVilkårsgrunnlag(sykefraværstilfelle: Periode): JsonNode? {
-        val skjæringstidspunkt = sykefraværstilfelle.start
-
-        val fraInfotrygd = filter { it.fraInfotrygd }.lastOrNull { vilkårsgrunnlag -> vilkårsgrunnlag.skjæringstidspunkt in sykefraværstilfelle }
-
-        return fraInfotrygd ?: filter { it.fraSpleis }.singleOrNull { it.skjæringstidspunkt == skjæringstidspunkt }
+        return fraInfotrygd ?: finnSpleisVilkårsgrunnlag(sykefraværstilfelle)
     }
 
 
@@ -57,6 +50,11 @@ internal object BrukteVilkårsgrunnlag {
             .groupBy { it.skjæringstidspunkt }
             .map { (skjæringstidspunkt, vedtaksperioder) -> skjæringstidspunkt til vedtaksperioder.maxOf { it.tom }}
 
+        val forkastedePerioder = jsonNode.path("arbeidsgivere")
+            .flatMap { it.path("forkastede") }
+            .map { it.path("vedtaksperiode") }
+            .map { it.fom til it.tom }
+
         val sorterteVilkårsgrunnlag = sisteInnslag.deepCopy<JsonNode>()
             .path("vilkårsgrunnlag")
             .sortedBy { it.skjæringstidspunkt }
@@ -65,9 +63,7 @@ internal object BrukteVilkårsgrunnlag {
 
         val brukteVilkårsgrunnlag = serdeObjectMapper.createArrayNode().apply {
             sykefraværstilfeller.forEach { sykefraværstilfelle ->
-                sorterteVilkårsgrunnlag.loggSprøInfotrygdVilkårsgrunnlag(sykefraværstilfelle, aktørId)
-                sorterteVilkårsgrunnlag.loggSprøSpleisVilkårsgrunnlag(sykefraværstilfelle, aktørId)
-                val vilkårgrunnlag = sorterteVilkårsgrunnlag.finnRiktigVilkårsgrunnlag(sykefraværstilfelle) ?: return@forEach
+                val vilkårgrunnlag = sorterteVilkårsgrunnlag.finnRiktigVilkårsgrunnlag(sykefraværstilfelle, forkastedePerioder) ?: return@forEach
                 val skjæringstidspunkt = sykefraværstilfelle.start
                 if (vilkårgrunnlag.skjæringstidspunkt != skjæringstidspunkt) {
                     endret = true
