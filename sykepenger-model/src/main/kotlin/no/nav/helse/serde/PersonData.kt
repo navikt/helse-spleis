@@ -13,6 +13,8 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.Aktivitetslogg.Aktivitet
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.Arbeidsforholdhistorikk
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning
@@ -32,6 +34,7 @@ import no.nav.helse.person.SpesifikkKontekst
 import no.nav.helse.person.Sykepengegrunnlag
 import no.nav.helse.person.Sykmeldingsperioder
 import no.nav.helse.person.TilstandType
+import no.nav.helse.person.Varselkode
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.VedtaksperiodeUtbetalinger
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
@@ -383,47 +386,21 @@ internal data class PersonData(
             private val alvorlighetsgrad: Alvorlighetsgrad,
             private val label: Char,
             private val behovtype: String?,
+            private val kode: Varselkode?,
             private val melding: String,
             private val id: UUID,
             private val tidsstempel: String,
             private val kontekster: List<Int>,
             private val detaljer: Map<String, Any>
         ) {
-            internal fun parseAktivitet(spesifikkKontekster: List<SpesifikkKontekst>): Aktivitetslogg.Aktivitet {
+            internal fun parseAktivitet(spesifikkKontekster: List<SpesifikkKontekst>): Aktivitet {
                 val kontekster = kontekster.map { index -> spesifikkKontekster[index] }
                 return when (alvorlighetsgrad) {
-                    Alvorlighetsgrad.INFO -> Aktivitetslogg.Aktivitet.Info.gjennopprett(
-                        id,
-                        kontekster,
-                        melding,
-                        tidsstempel
-                    )
-                    Alvorlighetsgrad.WARN -> Aktivitetslogg.Aktivitet.Varsel.gjennopprett(
-                        id,
-                        kontekster,
-                        melding,
-                        tidsstempel
-                    )
-                    Alvorlighetsgrad.BEHOV -> Aktivitetslogg.Aktivitet.Behov.gjennopprett(
-                        id,
-                        Aktivitetslogg.Aktivitet.Behov.Behovtype.valueOf(behovtype!!),
-                        kontekster,
-                        melding,
-                        detaljer,
-                        tidsstempel
-                    )
-                    Alvorlighetsgrad.ERROR -> Aktivitetslogg.Aktivitet.FunksjonellFeil.gjennopprett(
-                        id,
-                        kontekster,
-                        melding,
-                        tidsstempel
-                    )
-                    Alvorlighetsgrad.SEVERE -> Aktivitetslogg.Aktivitet.LogiskFeil.gjennopprett(
-                        id,
-                        kontekster,
-                        melding,
-                        tidsstempel
-                    )
+                    Alvorlighetsgrad.INFO -> Aktivitet.Info.gjennopprett(id, kontekster, melding, tidsstempel)
+                    Alvorlighetsgrad.WARN -> Aktivitet.Varsel.gjennopprett(id, kontekster, kode, melding, tidsstempel)
+                    Alvorlighetsgrad.BEHOV -> Aktivitet.Behov.gjennopprett(id, Behovtype.valueOf(behovtype!!), kontekster, melding, detaljer, tidsstempel)
+                    Alvorlighetsgrad.ERROR -> Aktivitet.FunksjonellFeil.gjennopprett(id, kontekster, melding, tidsstempel)
+                    Alvorlighetsgrad.SEVERE -> Aktivitet.LogiskFeil.gjennopprett(id, kontekster, melding, tidsstempel)
                 }
             }
 

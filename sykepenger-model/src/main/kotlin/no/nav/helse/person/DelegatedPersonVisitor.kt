@@ -47,8 +47,8 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         delegatee.visitInfo(id, kontekster, aktivitet, melding, tidsstempel)
     }
 
-    override fun visitVarsel(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Varsel, melding: String, tidsstempel: String) {
-        delegatee.visitVarsel(id, kontekster, aktivitet, melding, tidsstempel)
+    override fun visitVarsel(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Varsel, kode: Varselkode?, melding: String, tidsstempel: String) {
+        delegatee.visitVarsel(id, kontekster, aktivitet, kode, melding, tidsstempel)
     }
 
     override fun preVisitUtbetalingstidslinjeberegninger(beregninger: List<Utbetalingstidslinjeberegning>) {

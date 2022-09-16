@@ -8,6 +8,7 @@ import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.AktivitetsloggVisitor
 import no.nav.helse.person.SpesifikkKontekst
 import no.nav.helse.person.TilstandType
+import no.nav.helse.person.Varselkode
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.TestObservatør
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -106,7 +107,7 @@ internal class TestArbeidsgiverAssertions(private val observatør: TestObservat�
     private fun collectVarsler(vararg filtre: AktivitetsloggFilter): MutableList<String> {
         val warnings = mutableListOf<String>()
         personInspektør.aktivitetslogg.accept(object : AktivitetsloggVisitor {
-            override fun visitVarsel(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Varsel, melding: String, tidsstempel: String) {
+            override fun visitVarsel(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Varsel, kode: Varselkode?, melding: String, tidsstempel: String) {
                 if (filtre.all { filter -> kontekster.any { filter.filtrer(it) } }) {
                     warnings.add(melding)
                 }

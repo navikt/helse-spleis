@@ -15,6 +15,7 @@ import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.Person
 import no.nav.helse.person.SpesifikkKontekst
 import no.nav.helse.person.TilstandType
+import no.nav.helse.person.Varselkode
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -215,7 +216,7 @@ private fun AbstractEndToEndTest.collectInfo(vararg filtre: AktivitetsloggFilter
 private fun AbstractPersonTest.collectVarsler(vararg filtre: AktivitetsloggFilter): MutableList<String> {
     val warnings = mutableListOf<String>()
     person.personLogg.accept(object : AktivitetsloggVisitor {
-        override fun visitVarsel(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Varsel, melding: String, tidsstempel: String) {
+        override fun visitVarsel(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Varsel, kode: Varselkode?, melding: String, tidsstempel: String) {
             if (filtre.all { filter -> kontekster.any { filter.filtrer(it) } }) {
                 warnings.add(melding)
             }

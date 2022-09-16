@@ -15,6 +15,7 @@ import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.Refusjonshistorikk
 import no.nav.helse.person.SpesifikkKontekst
 import no.nav.helse.person.SykdomstidslinjeVisitor
+import no.nav.helse.person.Varselkode
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
@@ -398,7 +399,7 @@ internal class RefusjonsgjødslerTest {
             val meldinger = mutableListOf<String>()
 
             accept(object : AktivitetsloggVisitor {
-                override fun visitVarsel(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Varsel, melding: String, tidsstempel: String) {
+                override fun visitVarsel(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Varsel, kode: Varselkode?, melding: String, tidsstempel: String) {
                     meldinger.add(melding)
                 }
             })

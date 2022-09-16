@@ -225,7 +225,7 @@ internal class AktivitetsloggTest {
     private fun assertVarsel(message: String, aktivitetslogg: Aktivitetslogg = this.aktivitetslogg) {
         var visitorCalled = false
         aktivitetslogg.accept(object : AktivitetsloggVisitor {
-            override fun visitVarsel(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Varsel, melding: String, tidsstempel: String) {
+            override fun visitVarsel(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Varsel, kode: Varselkode?, melding: String, tidsstempel: String) {
                 visitorCalled = true
                 assertEquals(message, melding)
             }

@@ -9,6 +9,7 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.LogiskFeil
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Varsel
 import no.nav.helse.person.AktivitetsloggVisitor
 import no.nav.helse.person.SpesifikkKontekst
+import no.nav.helse.person.Varselkode
 import no.nav.helse.serde.PersonData.AktivitetsloggData.Alvorlighetsgrad
 import no.nav.helse.serde.PersonData.AktivitetsloggData.Alvorlighetsgrad.BEHOV
 import no.nav.helse.serde.PersonData.AktivitetsloggData.Alvorlighetsgrad.ERROR
@@ -34,8 +35,8 @@ internal class AktivitetsloggMap(aktivitetslogg: Aktivitetslogg) : Aktivitetslog
         leggTilMelding(id, kontekster, INFO, melding, tidsstempel)
     }
 
-    override fun visitVarsel(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Varsel, melding: String, tidsstempel: String) {
-        leggTilMelding(id, kontekster, WARN, melding, tidsstempel)
+    override fun visitVarsel(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Varsel, kode: Varselkode?, melding: String, tidsstempel: String) {
+        leggTilVarsel(id, kontekster, kode, melding, tidsstempel)
     }
 
     override fun visitBehov(
@@ -68,6 +69,21 @@ internal class AktivitetsloggMap(aktivitetslogg: Aktivitetslogg) : Aktivitetslog
                 "detaljer" to detaljer,
                 "tidsstempel" to tidsstempel
             )
+        )
+    }
+
+    private fun leggTilVarsel(id: UUID, kontekster: List<SpesifikkKontekst>, kode: Varselkode?, melding: String, tidsstempel: String) {
+        aktiviteter.add(
+            mutableMapOf(
+                "id" to id.toString(),
+                "kontekster" to kontekstIndices(kontekster),
+                "alvorlighetsgrad" to WARN.name,
+                "melding" to melding,
+                "detaljer" to emptyMap<String, Any>(),
+                "tidsstempel" to tidsstempel
+            ).apply {
+                if (kode != null) put("kode", kode)
+            }
         )
     }
 

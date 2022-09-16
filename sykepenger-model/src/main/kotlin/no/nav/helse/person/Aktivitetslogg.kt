@@ -207,6 +207,7 @@ class Aktivitetslogg(
         internal class Varsel private constructor(
             id: UUID,
             kontekster: List<SpesifikkKontekst>,
+            private val kode: Varselkode? = null,
             private val melding: String,
             private val tidsstempel: String = LocalDateTime.now().format(tidsstempelformat)
         ) : Aktivitet(id, 25, 'W', melding, tidsstempel, kontekster) {
@@ -214,12 +215,15 @@ class Aktivitetslogg(
                 internal fun filter(aktiviteter: List<Aktivitet>): List<Varsel> {
                     return aktiviteter.filterIsInstance<Varsel>()
                 }
-                internal fun gjennopprett(id: UUID, kontekster: List<SpesifikkKontekst>, melding: String, tidsstempel: String) = Varsel(id, kontekster, melding, tidsstempel)
-                internal fun opprett(kontekster: List<SpesifikkKontekst>, melding: String) = Varsel(UUID.randomUUID(), kontekster, melding)
+                internal fun gjennopprett(id: UUID, kontekster: List<SpesifikkKontekst>, kode: Varselkode?, melding: String, tidsstempel: String) =
+                    Varsel(id, kontekster, kode, melding, tidsstempel)
+
+                internal fun opprett(kontekster: List<SpesifikkKontekst>, melding: String) =
+                    Varsel(UUID.randomUUID(), kontekster, melding = melding)
             }
 
             override fun accept(visitor: AktivitetsloggVisitor) {
-                visitor.visitVarsel(id, kontekster, this, melding, tidsstempel)
+                visitor.visitVarsel(id, kontekster, this, kode, melding, tidsstempel)
             }
 
             override fun notify(observer: AktivitetsloggObserver) {
@@ -519,6 +523,7 @@ internal interface AktivitetsloggVisitor {
         id: UUID,
         kontekster: List<SpesifikkKontekst>,
         aktivitet: Aktivitetslogg.Aktivitet.Varsel,
+        kode: Varselkode?,
         melding: String,
         tidsstempel: String
     ) {
