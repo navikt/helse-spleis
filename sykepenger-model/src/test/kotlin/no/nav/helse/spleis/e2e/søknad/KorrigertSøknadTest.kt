@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e.søknad
 
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -22,6 +23,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.september
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
@@ -137,6 +139,38 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
         )
         assertIngenVarsler(1.vedtaksperiode.filter())
         assertIngenVarsler(2.vedtaksperiode.filter())
+    }
+
+    @Test
+    fun `nytt skjæringstidspunkt på forlengelse etter friskmelding på førstegangsbehandling`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+
+        nullstillTilstandsendringer()
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Arbeid(25.januar, 31.januar))
+
+        assertForventetFeil(
+            forklaring = "pt. går 2.vedtaksperiode til avventer blokkerende fordi det foreligger inntekt når søknaden kommer inn." +
+                    "dette kan/er uheldig fordi ting kan skje på periodene foran som gjør at det premisset ikke holder over tid." +
+                    "2.vedtaksperiode bør derfor kanskje alltid gå til AvventerInntektsmeldingEllerHistorikk fra Start," +
+                    "nettopp for å kunne håndtere å motta egen inntektsmelding.",
+            nå = {
+                assertForkastetPeriodeTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, TIL_INFOTRYGD)
+                assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, TIL_INFOTRYGD)
+            },
+            ønsket = {
+                assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_HISTORIKK)
+                assertTilstander(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
+            }
+        )
     }
 
     @Test
