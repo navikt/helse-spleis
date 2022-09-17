@@ -34,12 +34,12 @@ internal fun Application.spannerApi(dataSource: DataSource, authProviderName: St
         authenticate(authProviderName) {
             get("/api/person-json") {
                 withContext(Dispatchers.IO) {
-                    val fnr = fnr(personDao)
-                    val person = personDao.hentPersonFraFnr(fnr) ?: throw NotFoundException("Kunne ikke finne person for fødselsnummer")
+                    val ident = fnr(personDao)
+                    val person = personDao.hentPersonFraFnr(ident) ?: throw NotFoundException("Kunne ikke finne person for fødselsnummer")
                     call.respond(
                         person.deserialize(
                             jurist = MaskinellJurist()
-                        ) { hendelseDao.hentAlleHendelser(fnr) }.serialize().json
+                        ) { hendelseDao.hentAlleHendelser(ident) }.serialize().json
                     )
                 }
             }

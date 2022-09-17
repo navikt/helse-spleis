@@ -175,6 +175,12 @@ internal class RestApiTest {
         sessionOf(this).use {
             it.run(
                 queryOf(
+                    "INSERT INTO unike_person (aktor_id, fnr) VALUES (?, ?)",
+                    aktørId.toLong(), fødselsnummer.toLong()
+                ).asExecute
+            )
+            it.run(
+                queryOf(
                     "INSERT INTO person (aktor_id, fnr, skjema_versjon, data) VALUES (?, ?, ?, (to_json(?::json)))",
                     aktørId.toLong(), fødselsnummer.toLong(), serialisertPerson.skjemaVersjon, serialisertPerson.json
                 ).asExecute
