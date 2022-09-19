@@ -88,7 +88,8 @@ internal object BrukteVilkårsgrunnlag {
                     endret = true
                     sikkerlogg.info("Flytter skjæringstidspunktet til vilkårsgrunnlag ${vilkårgrunnlag.vilkårsgrunnlagId} fra ${vilkårgrunnlag.skjæringstidspunkt} til $skjæringstidspunkt for aktørId=$aktørId")
                 }
-                val vilkårsgrunnlagMedRiktigSkjæringstidspunkt = (vilkårgrunnlag as ObjectNode).put("skjæringstidspunkt", skjæringstidspunkt.toString())
+                val vilkårsgrunnlagMedRiktigSkjæringstidspunkt = vilkårgrunnlag.deepCopy<ObjectNode>()
+                    .put("skjæringstidspunkt", skjæringstidspunkt.toString())
                 add(vilkårsgrunnlagMedRiktigSkjæringstidspunkt)
             }
         }
