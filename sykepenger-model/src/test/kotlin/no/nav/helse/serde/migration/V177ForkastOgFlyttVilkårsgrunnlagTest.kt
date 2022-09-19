@@ -88,6 +88,14 @@ internal class V177ForkastOgFlyttVilkårsgrunnlagTest : MigrationTest(V177Forkas
         )
     }
 
+    @Test
+    fun `Ignorerer vilkårsgrunnlag fra spleis hvor avviksprosenten er Infinity`() {
+        assertForkastetVilkårsgrunnlag(
+            originalJson = "/migrations/177/ignorerer-spleisgrunnlag-med-avviksprosent-infinity_original.json",
+            expectedJson = "/migrations/177/ignorerer-spleisgrunnlag-med-avviksprosent-infinity_expected.json"
+        )
+    }
+
     private fun assertForkastetVilkårsgrunnlag(originalJson: String, expectedJson: String) {
         val migrert = migrer(originalJson.readResource())
         val sisteInnslag = migrert.path("vilkårsgrunnlagHistorikk")[0]
