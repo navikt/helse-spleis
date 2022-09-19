@@ -49,18 +49,18 @@ internal class V178ForkastOgFlyttVilkårsgrunnlagTest : MigrationTest(V178Forkas
     }
 
     @Test
-    fun `Velger vilkårsgrunnlag fra infotrygd om vi har forkastede perioder rett før sykefraværsperioden`() {
+    fun `Velger vilkårsgrunnlag fra infotrygd om vi har utbetalte perioder i Infotrygd rett før sykefraværsperioden`() {
         assertForkastetVilkårsgrunnlag(
-            originalJson = "/migrations/178/vilkårsgrunnlag-fra-infotrygd-og-forkastet-periode-rett-før_original.json",
-            expectedJson = "/migrations/178/vilkårsgrunnlag-fra-infotrygd-og-forkastet-periode-rett-før_expected.json"
+            originalJson = "/migrations/178/vilkårsgrunnlag-fra-infotrygd-og-utbetalt-periode-rett-før_original.json",
+            expectedJson = "/migrations/178/vilkårsgrunnlag-fra-infotrygd-og-utbetalt-periode-rett-før_expected.json"
         )
     }
 
     @Test
-    fun `Velger vilkårsgrunnlag fra infotrygd om vi har forkastede perioder som overlapper sykefraværsperioden`() {
+    fun `Velger vilkårsgrunnlag fra infotrygd om vi har utbetalte perioder i Infotrygd som overlapper sykefraværsperioden`() {
         assertForkastetVilkårsgrunnlag(
-            originalJson = "/migrations/178/vilkårsgrunnlag-fra-infotrygd-og-forkastet-periode-som-overlapper_original.json",
-            expectedJson = "/migrations/178/vilkårsgrunnlag-fra-infotrygd-og-forkastet-periode-som-overlapper_expected.json"
+            originalJson = "/migrations/178/vilkårsgrunnlag-fra-infotrygd-og-utbetalt-periode-som-overlapper_original.json",
+            expectedJson = "/migrations/178/vilkårsgrunnlag-fra-infotrygd-og-utbetalt-periode-som-overlapper_expected.json"
         )
     }
 
@@ -73,10 +73,10 @@ internal class V178ForkastOgFlyttVilkårsgrunnlagTest : MigrationTest(V178Forkas
     }
 
     @Test
-    fun `Ignorerer vilkårsgrunnlag fra infotrygd om vi har en forkastet periode som hverken er kant-til-kant eller overlapper med sykefraværsperioden`() {
+    fun `Ignorerer vilkårsgrunnlag fra infotrygd om vi har en utbetalt periode i Infotrygd som hverken er kant-til-kant eller overlapper med sykefraværsperioden`() {
         assertForkastetVilkårsgrunnlag(
-            originalJson = "/migrations/178/vilkårsgrunnlag-fra-infotrygd-og-forkastet-periode-før_original.json",
-            expectedJson = "/migrations/178/vilkårsgrunnlag-fra-infotrygd-og-forkastet-periode-før_expected.json"
+            originalJson = "/migrations/178/vilkårsgrunnlag-fra-infotrygd-og-utbetalt-periode-før_original.json",
+            expectedJson = "/migrations/178/vilkårsgrunnlag-fra-infotrygd-og-utbetalt-periode-før_expected.json"
         )
     }
 
