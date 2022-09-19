@@ -41,7 +41,11 @@ class Aktivitetslogg(
     }
 
     override fun varsel(melding: String) {
-        add(Aktivitet.Varsel.opprett(kontekster.toSpesifikk(), melding))
+        add(Aktivitet.Varsel.opprett(kontekster.toSpesifikk(), melding = melding))
+    }
+
+    override fun varsel(kode: Varselkode) {
+        add(kode.varsel(kontekster.toSpesifikk()))
     }
 
     override fun behov(type: Behov.Behovtype, melding: String, detaljer: Map<String, Any?>) {
@@ -218,8 +222,8 @@ class Aktivitetslogg(
                 internal fun gjennopprett(id: UUID, kontekster: List<SpesifikkKontekst>, kode: Varselkode?, melding: String, tidsstempel: String) =
                     Varsel(id, kontekster, kode, melding, tidsstempel)
 
-                internal fun opprett(kontekster: List<SpesifikkKontekst>, melding: String) =
-                    Varsel(UUID.randomUUID(), kontekster, melding = melding)
+                internal fun opprett(kontekster: List<SpesifikkKontekst>, kode: Varselkode? = null, melding: String) =
+                    Varsel(UUID.randomUUID(), kontekster, kode, melding = melding)
             }
 
             override fun accept(visitor: AktivitetsloggVisitor) {
@@ -488,6 +492,7 @@ interface IAktivitetslogg {
     fun info(melding: String, vararg params: Any?)
     fun behov(type: Behov.Behovtype, melding: String, detaljer: Map<String, Any?> = emptyMap())
     fun varsel(melding: String)
+    fun varsel(kode: Varselkode)
     fun funksjonellFeil(melding: String)
     fun logiskFeil(melding: String, vararg params: Any?): Nothing
 

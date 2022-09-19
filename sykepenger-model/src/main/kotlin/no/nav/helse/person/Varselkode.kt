@@ -95,5 +95,8 @@ enum class Varselkode(private val melding: String, private val deprekert: Boolea
         require(this.name.matches(regex)) {"Ugyldig varselkode-format: ${this.name}"}
     }
 
+    internal fun varsel(kontekster: List<SpesifikkKontekst>): Aktivitetslogg.Aktivitet.Varsel =
+        Aktivitetslogg.Aktivitet.Varsel.opprett(kontekster, this, melding)
+
     override fun toString() = "${this.name}: $melding"
 }

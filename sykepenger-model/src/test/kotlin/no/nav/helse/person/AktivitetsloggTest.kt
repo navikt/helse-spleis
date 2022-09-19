@@ -2,6 +2,7 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import java.util.UUID
+import no.nav.helse.person.Varselkode.A_SY_1
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -211,6 +212,25 @@ internal class AktivitetsloggTest {
         assertEquals(param2, aktivitetslogg.behov().first().detaljer()["param2"])
     }
 
+    @Test
+    fun `varselkode blir til varsel`() {
+        val hendelse = TestHendelse(aktivitetslogg.barn())
+        hendelse.kontekst(person)
+        hendelse.varsel(A_SY_1)
+        assertEquals(1, aktivitetslogg.varsel().size)
+        assertVarsel(A_SY_1)
+    }
+
+    @Test
+    fun `varsel uten kode blir ikke til varsel med kode`() {
+        val hendelse = TestHendelse(aktivitetslogg.barn())
+        hendelse.kontekst(person)
+        hendelse.varsel(melding = "En melding")
+        assertEquals(1, aktivitetslogg.varsel().size)
+        assertVarsel(forventetKode = null)
+        assertVarsel(message = "En melding")
+    }
+
     private fun assertInfo(message: String, aktivitetslogg: Aktivitetslogg = this.aktivitetslogg) {
         var visitorCalled = false
         aktivitetslogg.accept(object : AktivitetsloggVisitor {
@@ -228,6 +248,17 @@ internal class AktivitetsloggTest {
             override fun visitVarsel(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Varsel, kode: Varselkode?, melding: String, tidsstempel: String) {
                 visitorCalled = true
                 assertEquals(message, melding)
+            }
+        })
+        assertTrue(visitorCalled)
+    }
+
+    private fun assertVarsel(forventetKode: Varselkode?, aktivitetslogg: Aktivitetslogg = this.aktivitetslogg) {
+        var visitorCalled = false
+        aktivitetslogg.accept(object : AktivitetsloggVisitor {
+            override fun visitVarsel(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Varsel, kode: Varselkode?, melding: String, tidsstempel: String) {
+                visitorCalled = true
+                assertEquals(forventetKode, kode)
             }
         })
         assertTrue(visitorCalled)
