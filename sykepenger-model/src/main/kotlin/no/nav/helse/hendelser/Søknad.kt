@@ -127,7 +127,7 @@ class Søknad(
     class Merknad(private val type: String) {
         internal fun valider(aktivitetslogg: IAktivitetslogg) {
             if (type == "UGYLDIG_TILBAKEDATERING" || type == "TILBAKEDATERING_KREVER_FLERE_OPPLYSNINGER") {
-                aktivitetslogg.varsel("Sykmeldingen er tilbakedatert, vurder fra og med dato for utbetaling.")
+                aktivitetslogg.varsel(RV_SØ_3)
             }
         }
     }

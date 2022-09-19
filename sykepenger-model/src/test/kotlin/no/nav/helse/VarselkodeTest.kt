@@ -6,8 +6,7 @@ import java.nio.file.Paths
 import no.nav.helse.person.AktivitetsloggObserverTest
 import no.nav.helse.person.AktivitetsloggTest
 import no.nav.helse.person.Varselkode
-import no.nav.helse.person.Varselkode.RV_SØ_2
-import no.nav.helse.person.Varselkode.values
+import no.nav.helse.person.Varselkode.*
 import no.nav.helse.person.varselkodeformat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -15,31 +14,43 @@ import kotlin.io.path.extension
 import kotlin.io.path.pathString
 
 internal class VarselkodeTest {
-    private val alleVarselkoder = values()
 
     @Test
     fun `alle varselkoder testes eksplisitt`() {
-        val ikkeTestedeVarselkoder = alleVarselkoder.toMutableSet()
-
-        finnAlleVarselKoderITest().forEach { kode ->
-            ikkeTestedeVarselkoder.removeIf { (it == kode) }
+        val aktiveVarselkoder = Varselkode.aktiveVarselkoder.toSet()
+        val ikkeTestedeVarselkoder = aktiveVarselkoder.toMutableSet().apply {
+            removeAll(finnAlleVarselkoderITest().toSet())
         }
 
-        val varselkoderSomManglerEksplisittTest = alleVarselkoder.toSet().filterNot { it in setOf(RV_SØ_2) }.toSet() // Overgangsperiode til vi har overført alle varsler til Varselkode
+        val varselkoderSomKjentManglerTest = listOf(
+            RV_SY_1, RV_SØ_1, RV_SØ_2, RV_SØ_3, RV_SØ_4, RV_SØ_5, RV_SØ_6, RV_SØ_7, RV_SØ_8, RV_SØ_9,
+            RV_SØ_10, RV_IM_1, RV_IM_2, RV_IM_3, RV_IM_4, RV_IM_5, RV_IM_6, RV_RE_1, RV_IT_1, RV_IT_2,
+            RV_IT_3, RV_IT_4, RV_IT_5, RV_VV_1, RV_VV_2, RV_VV_4, RV_VV_5, RV_VV_6, RV_VV_7, RV_OV_1,
+            RV_OV_2, RV_MV_1, RV_MV_2, RV_IV_1, RV_IV_2, RV_SV_1, RV_SV_2, RV_AY_1, RV_AY_2, RV_AY_3,
+            RV_AY_4, RV_AY_5, RV_AY_6, RV_AY_7, RV_AY_8, RV_AY_9, RV_SI_1, RV_SI_2, RV_UT_1, RV_UT_2,
+            RV_OS_1, RV_OS_2, RV_OS_3, RV_RV_1
+        )
 
-        val nyeVarselkoderSomManglerEksplisittTest = ikkeTestedeVarselkoder.minus(varselkoderSomManglerEksplisittTest)
-        val varselkoderSomNåTestesEkplisitt = varselkoderSomManglerEksplisittTest.minus(ikkeTestedeVarselkoder)
+        val varselkoderSomNåManglerTest = ikkeTestedeVarselkoder.minus(varselkoderSomKjentManglerTest.toSet())
+        val (varselkoderSomFortsattErGyldige, varselkoderSomIkkeFinnesLenger) = varselkoderSomKjentManglerTest.partition { it in aktiveVarselkoder }
+        val varselkoderSomNåTestesEksplisitt = varselkoderSomFortsattErGyldige.minus(aktiveVarselkoder)
 
         assertForventetFeil(
             forklaring = "Ikke alle varselkoder testes eksplisitt",
-            ønsket = { assertEquals(emptySet<Varselkode>(), ikkeTestedeVarselkoder) },
-            nå = { assertEquals(emptySet<Varselkode>(), nyeVarselkoderSomManglerEksplisittTest) {
-                "Legg til eksplisitt test for nye varselkoder! _ikke_ legg den i listen av varselkoder som mangler eksplisitt test."
-            }}
+            ønsket = { assertEquals(emptySet<Varselkode>(), aktiveVarselkoder) },
+            nå = {
+                assertEquals(emptySet<Varselkode>(), varselkoderSomNåManglerTest) {
+                    "Du har tatt i bruk en ny varselkode! Legg til eksplisitt test for nye varselkoder! _ikke_ legg den i listen av varselkoder som mangler eksplisitt test."
+                }
+            }
         )
 
-        assertEquals(emptySet<Varselkode>(), varselkoderSomNåTestesEkplisitt) {
-            "Finnes nå eksplisitt tester for disse varselkoder. Fjern dem fra listen over varselkoder som mangler eksplisitt test."
+        assertEquals(emptySet<Varselkode>(), varselkoderSomIkkeFinnesLenger.toSet()) {
+            "Disse varselkodene er ikke lenger i bruk. Du kan fjerne de fra listen av varsler som kjent mangler test."
+        }
+
+        assertEquals(emptySet<Varselkode>(), varselkoderSomNåTestesEksplisitt.toSet()) {
+            "Disse varselkodene finnes det nå test for. Du kan fjerne de fra listen av varsler som kjent mangler test."
         }
     }
 
@@ -68,7 +79,7 @@ internal class VarselkodeTest {
                     .toSet()
             }
 
-        private fun finnAlleVarselKoderITest() = finn("test", "($varselkodeformat)".toRegex(), ignorePath = { path ->
+        private fun finnAlleVarselkoderITest() = finn("test", "($varselkodeformat)".toRegex(), ignorePath = { path ->
             path.slutterPåEnAv("${VarselkodeTest::class.simpleName}.kt", "${this::class.simpleName}.kt", "${AktivitetsloggTest::class.simpleName}.kt", "${AktivitetsloggObserverTest::class.simpleName}.kt")
         }).map { enumValueOf<Varselkode>(it) }.distinct()
     }

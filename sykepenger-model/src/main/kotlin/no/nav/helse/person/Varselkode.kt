@@ -11,14 +11,14 @@ enum class Varselkode(private val melding: String, private val deprekert: Boolea
     // SØ: Søknad
     RV_SØ_1("Søknaden inneholder permittering. Vurder om permittering har konsekvens for rett til sykepenger"),
     RV_SØ_2("Minst én dag er avslått på grunn av foreldelse. Vurder å sende vedtaksbrev fra Infotrygd"),
-    RV_SØ_4("Sykmeldingen er tilbakedatert, vurder fra og med dato for utbetaling."),
-    RV_SØ_5("Utdanning oppgitt i perioden i søknaden."),
-    RV_SØ_6("Søknaden inneholder Permisjonsdager utenfor sykdomsvindu"),
-    RV_SØ_7("Søknaden inneholder egenmeldingsdager etter sykmeldingsperioden"),
-    RV_SØ_8("Søknaden inneholder Arbeidsdager utenfor sykdomsvindu"),
-    RV_SØ_9("Utenlandsopphold oppgitt i perioden i søknaden."),
-    RV_SØ_10("Det er oppgitt annen inntektskilde i søknaden. Vurder inntekt."),
-    RV_SØ_11("Den sykmeldte har oppgitt å ha andre arbeidsforhold med sykmelding i søknaden."),
+    RV_SØ_3("Sykmeldingen er tilbakedatert, vurder fra og med dato for utbetaling."),
+    RV_SØ_4("Utdanning oppgitt i perioden i søknaden."),
+    RV_SØ_5("Søknaden inneholder Permisjonsdager utenfor sykdomsvindu"),
+    RV_SØ_6("Søknaden inneholder egenmeldingsdager etter sykmeldingsperioden"),
+    RV_SØ_7("Søknaden inneholder Arbeidsdager utenfor sykdomsvindu"),
+    RV_SØ_8("Utenlandsopphold oppgitt i perioden i søknaden."),
+    RV_SØ_9("Det er oppgitt annen inntektskilde i søknaden. Vurder inntekt."),
+    RV_SØ_10("Den sykmeldte har oppgitt å ha andre arbeidsforhold med sykmelding i søknaden."),
 
     // IM: Inntektsmelding
     RV_IM_1("Vi har mottatt en inntektsmelding i en løpende sykmeldingsperiode med oppgitt første/bestemmende fraværsdag som er ulik tidligere fastsatt skjæringstidspunkt."),
@@ -99,4 +99,8 @@ enum class Varselkode(private val melding: String, private val deprekert: Boolea
         Aktivitetslogg.Aktivitet.Varsel.opprett(kontekster, this, melding)
 
     override fun toString() = "${this.name}: $melding"
+
+    internal companion object {
+        internal val aktiveVarselkoder = values().filterNot { it.deprekert }
+    }
 }
