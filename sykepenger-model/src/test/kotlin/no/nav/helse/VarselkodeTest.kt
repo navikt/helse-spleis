@@ -3,9 +3,11 @@ package no.nav.helse
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
+import no.nav.helse.person.AktivitetsloggObserverTest
 import no.nav.helse.person.AktivitetsloggTest
 import no.nav.helse.person.Varselkode
-import no.nav.helse.person.Varselkode.*
+import no.nav.helse.person.Varselkode.RV_SØ_2
+import no.nav.helse.person.Varselkode.values
 import no.nav.helse.person.varselkodeformat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -67,7 +69,7 @@ internal class VarselkodeTest {
             }
 
         private fun finnAlleVarselKoderITest() = finn("test", "($varselkodeformat)".toRegex(), ignorePath = { path ->
-            path.slutterPåEnAv("${VarselkodeTest::class.simpleName}.kt", "${this::class.simpleName}.kt", "${AktivitetsloggTest::class.simpleName}.kt")
+            path.slutterPåEnAv("${VarselkodeTest::class.simpleName}.kt", "${this::class.simpleName}.kt", "${AktivitetsloggTest::class.simpleName}.kt", "${AktivitetsloggObserverTest::class.simpleName}.kt")
         }).map { enumValueOf<Varselkode>(it) }.distinct()
     }
 }

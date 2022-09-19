@@ -6,6 +6,7 @@ import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.person.AktivitetsloggObserver
 import no.nav.helse.person.PersonHendelse
 import no.nav.helse.person.SpesifikkKontekst
+import no.nav.helse.person.Varselkode
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import org.slf4j.LoggerFactory
@@ -20,16 +21,23 @@ class DatadelingMediator(private val hendelse: PersonHendelse): AktivitetsloggOb
         hendelse.register(this)
     }
 
-    override fun aktivitet(id: UUID, label: Char, melding: String, kontekster: List<SpesifikkKontekst>, tidsstempel: LocalDateTime) {
-        aktiviteter.add(
-            mapOf(
-                "id" to id,
-                "nivå" to label.toFulltext(),
-                "melding" to melding,
-                "tidsstempel" to tidsstempel,
-                "kontekster" to kontekster.map { it.toMap() }
-            )
+    private fun aktivitetMap(id: UUID, label: Char, melding: String, kontekster: List<SpesifikkKontekst>, tidsstempel: LocalDateTime) =
+        mapOf(
+            "id" to id,
+            "nivå" to label.toFulltext(),
+            "melding" to melding,
+            "tidsstempel" to tidsstempel,
+            "kontekster" to kontekster.map { it.toMap() }
         )
+
+    override fun aktivitet(id: UUID, label: Char, melding: String, kontekster: List<SpesifikkKontekst>, tidsstempel: LocalDateTime) {
+        aktiviteter.add(aktivitetMap(id, label, melding, kontekster, tidsstempel))
+    }
+
+    override fun varsel(id: UUID, label: Char, kode: Varselkode?, melding: String, kontekster: List<SpesifikkKontekst>, tidsstempel: LocalDateTime) {
+        val aktivitetMap = aktivitetMap(id, label, melding, kontekster, tidsstempel).toMutableMap()
+        if (kode != null) aktivitetMap["varselkode"] = kode
+        aktiviteter.add(aktivitetMap.toMap())
     }
 
     internal fun finalize(context: MessageContext) {

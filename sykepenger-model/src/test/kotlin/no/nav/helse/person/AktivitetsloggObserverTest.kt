@@ -2,6 +2,7 @@ package no.nav.helse.person
 
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.person.Varselkode.RV_SØ_1
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -33,10 +34,21 @@ internal class AktivitetsloggObserverTest {
             aktivitetslogg.logiskFeil("Dette er en severe")
         } catch (_: Exception) {}
 
-        testObserver.assertAktivitet('I', "Dette er en info-melding", listOf(personkontekst, arbeidsgiverkontekst, vedtaksperiodekontekst))
-        testObserver.assertAktivitet('W', "Dette er et varsel", listOf(personkontekst, arbeidsgiverkontekst, vedtaksperiodekontekst))
-        testObserver.assertAktivitet('E', "Dette er en error", listOf(personkontekst, arbeidsgiverkontekst, vedtaksperiodekontekst))
-        testObserver.assertAktivitet('S', "Dette er en severe", listOf(personkontekst, arbeidsgiverkontekst, vedtaksperiodekontekst))
+        testObserver.assertAktivitet('I', melding = "Dette er en info-melding", kontekster = listOf(personkontekst, arbeidsgiverkontekst, vedtaksperiodekontekst))
+        testObserver.assertAktivitet('W', melding = "Dette er et varsel", kontekster = listOf(personkontekst, arbeidsgiverkontekst, vedtaksperiodekontekst))
+        testObserver.assertAktivitet('E', melding = "Dette er en error", kontekster = listOf(personkontekst, arbeidsgiverkontekst, vedtaksperiodekontekst))
+        testObserver.assertAktivitet('S', melding = "Dette er en severe", kontekster = listOf(personkontekst, arbeidsgiverkontekst, vedtaksperiodekontekst))
+    }
+
+    @Test
+    fun `fanger opp varsler som blir opprettet av varselkode`() {
+        val personkontekst = TestKontekst("Person", "Person 1")
+
+        aktivitetslogg.register(testObserver)
+        aktivitetslogg.kontekst(personkontekst)
+        aktivitetslogg.varsel(RV_SØ_1)
+
+        testObserver.assertAktivitet('W', RV_SØ_1, melding = "Søknaden inneholder permittering. Vurder om permittering har konsekvens for rett til sykepenger", kontekster = listOf(personkontekst))
     }
 
     @Test
@@ -55,8 +67,26 @@ internal class AktivitetsloggObserverTest {
             aktiviteter.add(mapOf("type" to label, "melding" to melding, "kontekster" to kontekster))
         }
 
-        fun assertAktivitet(type: Char, melding: String, kontekster: List<Aktivitetskontekst>) {
-            assertTrue(aktiviteter.contains(mapOf("type" to type, "melding" to melding, "kontekster" to kontekster.map { it.toSpesifikkKontekst() })))
+        override fun varsel(id: UUID, label: Char, kode: Varselkode?, melding: String, kontekster: List<SpesifikkKontekst>, tidsstempel: LocalDateTime) {
+            val actual = mutableMapOf(
+                "type" to label,
+                "melding" to melding,
+                "kontekster" to kontekster
+            ).apply {
+                if (kode != null) put("varselkode", kode)
+            }.toMap()
+            aktiviteter.add(actual)
+        }
+
+        fun assertAktivitet(type: Char, kode: Varselkode? = null, melding: String, kontekster: List<Aktivitetskontekst>) {
+            val expected = mutableMapOf(
+                    "type" to type,
+                    "melding" to melding,
+                    "kontekster" to kontekster.map { it.toSpesifikkKontekst() }
+                ).apply {
+                    if (kode != null) put("varselkode", kode)
+                }.toMap()
+            assertTrue(aktiviteter.contains(expected))
         }
 
         fun isEmpty() = aktiviteter.isEmpty()

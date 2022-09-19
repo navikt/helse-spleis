@@ -14,6 +14,7 @@ import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
 
 interface AktivitetsloggObserver {
     fun aktivitet(id: UUID, label: Char, melding: String, kontekster: List<SpesifikkKontekst>, tidsstempel: LocalDateTime)
+    fun varsel(id: UUID, label: Char, kode: Varselkode?, melding: String, kontekster: List<SpesifikkKontekst>, tidsstempel: LocalDateTime)
 }
 
 // Understands issues that arose when analyzing a JSON message
@@ -231,7 +232,7 @@ class Aktivitetslogg(
             }
 
             override fun notify(observer: AktivitetsloggObserver) {
-                observer.aktivitet(id, label, melding, kontekster, LocalDateTime.parse(tidsstempel, tidsstempelformat))
+                observer.varsel(id, label, kode, melding, kontekster, LocalDateTime.parse(tidsstempel, tidsstempelformat))
             }
         }
 

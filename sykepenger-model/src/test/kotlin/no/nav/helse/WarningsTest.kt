@@ -4,6 +4,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.time.LocalDate
+import no.nav.helse.person.AktivitetsloggObserverTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
@@ -128,7 +129,7 @@ internal class WarningsTest {
         private val tekstRegex = "\"(.*?)\"".toRegex()
 
         private fun finnAlleTeksterITester() = finn("test", tekstRegex, ignorePath = { path ->
-            path.slutterPåEnAv("${WarningsTest::class.simpleName}.kt", "${this::class.simpleName}.kt")
+            path.slutterPåEnAv("${WarningsTest::class.simpleName}.kt", "${this::class.simpleName}.kt", "${AktivitetsloggObserverTest::class.simpleName}.kt")
         })
     }
 }
