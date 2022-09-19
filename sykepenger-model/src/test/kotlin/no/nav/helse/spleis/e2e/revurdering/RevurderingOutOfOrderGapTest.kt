@@ -560,7 +560,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `kort periode, lang periode kommer out of order - hva skjer da mon tru`() {
+    fun `kort periode, lang periode kommer out of order - kort periode trenger ikke å sendes til saksbehandler`() {
         nyPeriode(1.mars til 16.mars)
         håndterUtbetalingshistorikk(1.vedtaksperiode)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
@@ -580,21 +580,12 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
 
         håndterYtelser(1.vedtaksperiode)
-        assertForventetFeil(
-            forklaring = "Kort periode som ikke får utbetaling pga revurdering skal lukkes som AvsluttetUtenUtbetaling",
-            nå = {
-                assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING_REVURDERING)
-                assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
-            },
-            ønsket = {
-                assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-                assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
-            }
-        )
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
     }
 
     @Test
-    fun `kort periode, lang periode kommer out of order og fører til utbetaling på kort periode`() {
+    fun `kort periode, lang periode kommer out of order og fører til utbetaling på kort periode som nå trenger IM`() {
         nyPeriode(1.mars til 16.mars)
         håndterUtbetalingshistorikk(1.vedtaksperiode)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
@@ -610,26 +601,19 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
 
-        assertForventetFeil(
-            forklaring = "Kort periode som skal revurderes er stuck i AvventerRevurdering",
-            nå = {
-                assertSisteTilstand(1.vedtaksperiode, AVVENTER_REVURDERING)
-                assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
-            },
-            ønsket = {
-                håndterYtelser(1.vedtaksperiode)
-                assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING_REVURDERING)
-                assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
+        håndterInntektsmelding(listOf(1.februar til 16.februar), førsteFraværsdag = 1.mars)
+        håndterYtelser(1.vedtaksperiode)
 
-                håndterVilkårsgrunnlag(1.vedtaksperiode)
-                håndterYtelser(1.vedtaksperiode)
-                håndterSimulering(1.vedtaksperiode)
-                håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-                håndterUtbetalt()
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING_REVURDERING)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
 
-                assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
-                assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
-            }
-        )
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
     }
 }

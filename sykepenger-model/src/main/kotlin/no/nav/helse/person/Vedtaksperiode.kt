@@ -1238,6 +1238,10 @@ internal class Vedtaksperiode private constructor(
             infotrygdhistorikk: Infotrygdhistorikk,
             arbeidsgiverUtbetalingerFun: (SubsumsjonObserver) -> ArbeidsgiverUtbetalinger
         ) {
+            if (!vedtaksperiode.utbetalinger.harUtbetaling() && !vedtaksperiode.forventerInntekt()) {
+                return vedtaksperiode.tilstand(ytelser, AvsluttetUtenUtbetaling)
+            }
+
             val vilkårsgrunnlag = vedtaksperiode.person.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt)
                 ?: return vedtaksperiode.tilstand(ytelser, AvventerVilkårsprøvingRevurdering) {
                     ytelser.info("Trenger å utføre vilkårsprøving før vi kan beregne utbetaling for revurderingen.")
