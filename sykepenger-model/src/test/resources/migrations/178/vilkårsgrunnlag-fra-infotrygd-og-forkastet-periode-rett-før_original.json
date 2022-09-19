@@ -9,14 +9,6 @@
           "tilstand": "AVVENTER_HISTORIKK",
           "skjæringstidspunkt": "2018-01-01"
         }
-      ],
-      "forkastede": [
-        {
-          "vedtaksperiode": {
-            "fom": "2017-12-01",
-            "tom": "2017-12-28"
-          }
-        }
       ]
     }
   ],
@@ -279,6 +271,17 @@
             "oppfyllerMinsteinntektskrav": true
           },
           "vilkårsgrunnlagId": "c1945704-3ede-46bc-b2b2-ee7d159ba9cd"
+        }
+      ]
+    }
+  ],
+  "infotrygdhistorikk": [
+    {
+      "arbeidsgiverutbetalingsperioder": [],
+      "personutbetalingsperioder": [
+        {
+          "fom": "2017-12-01",
+          "tom": "2017-12-31"
         }
       ]
     }

@@ -25,9 +25,8 @@ internal object BrukteVilkårsgrunnlag {
     private val JsonNode.tilstand get() = path("tilstand").asText()
 
 
-    private fun List<JsonNode>.finnInfotrygdVilkårsgrunnlag(sykefraværstilfelle: Periode, forkastedePerioder: List<Periode>): JsonNode? {
-        if (forkastedePerioder.none { it.overlapperMed(sykefraværstilfelle) || it.erRettFør(sykefraværstilfelle) }) return null
-
+    private fun List<JsonNode>.finnInfotrygdVilkårsgrunnlag(sykefraværstilfelle: Periode, perioderUtbetaltIInfotrygd: List<Periode>): JsonNode? {
+        if (perioderUtbetaltIInfotrygd.none { it.overlapperMed(sykefraværstilfelle) || it.erRettFør(sykefraværstilfelle) }) return null
         return filter { it.fraInfotrygd && it.gyldigSykepengegrunnlag }.lastOrNull { vilkårsgrunnlag -> vilkårsgrunnlag.skjæringstidspunkt in sykefraværstilfelle }
     }
 
@@ -36,9 +35,8 @@ internal object BrukteVilkårsgrunnlag {
         return filter { it.fraSpleis && it.gyldigAvviksprosent }.singleOrNull { it.skjæringstidspunkt == skjæringstidspunkt }
     }
 
-    private fun List<JsonNode>.finnRiktigVilkårsgrunnlag(sykefraværstilfelle: Periode, forkastedePerioder: List<Periode>): JsonNode? {
-        val fraInfotrygd = finnInfotrygdVilkårsgrunnlag(sykefraværstilfelle, forkastedePerioder)
-
+    private fun List<JsonNode>.finnRiktigVilkårsgrunnlag(sykefraværstilfelle: Periode, perioderUtbetaltIInfotrygd: List<Periode>): JsonNode? {
+        val fraInfotrygd = finnInfotrygdVilkårsgrunnlag(sykefraværstilfelle, perioderUtbetaltIInfotrygd)
         return fraInfotrygd ?: finnSpleisVilkårsgrunnlag(sykefraværstilfelle)
     }
 
@@ -64,10 +62,13 @@ internal object BrukteVilkårsgrunnlag {
                 vedtaksperioder.filter { it.fom == førsteFom }.map { it.tilstand }
             }
 
-        val forkastedePerioder = jsonNode.path("arbeidsgivere")
-            .flatMap { it.path("forkastede") }
-            .map { it.path("vedtaksperiode") }
-            .map { it.fom til it.tom }
+        val perioderUtbetaltIInfotrygd = jsonNode.path("infotrygdhistorikk")
+            .firstOrNull()?.let { sisteInfotrygdInnslag ->
+                val arbeidsgiverutbetalingsperioder = sisteInfotrygdInnslag.path("arbeidsgiverutbetalingsperioder").map { it.fom til it.tom }
+                val personutbetalingsperioder = sisteInfotrygdInnslag.path("personutbetalingsperioder").map { it.fom til it.tom }
+                arbeidsgiverutbetalingsperioder + personutbetalingsperioder
+            } ?: emptyList()
+
 
         val sorterteVilkårsgrunnlag = sisteInnslag.deepCopy<JsonNode>()
             .path("vilkårsgrunnlag")
@@ -77,7 +78,7 @@ internal object BrukteVilkårsgrunnlag {
 
         val brukteVilkårsgrunnlag = serdeObjectMapper.createArrayNode().apply {
             sykefraværstilfeller.forEach { sykefraværstilfelle ->
-                val vilkårgrunnlag = sorterteVilkårsgrunnlag.finnRiktigVilkårsgrunnlag(sykefraværstilfelle, forkastedePerioder)
+                val vilkårgrunnlag = sorterteVilkårsgrunnlag.finnRiktigVilkårsgrunnlag(sykefraværstilfelle, perioderUtbetaltIInfotrygd)
                 if (vilkårgrunnlag == null) {
                     sikkerlogg.info("Fant ikke vilkårsgrunnlag for sykefraværstilfellet $sykefraværstilfelle med tilstander ${tilstanderPerSkjæringstidspunkt[sykefraværstilfelle.start]} for aktørId=$aktørId")
                     return@forEach

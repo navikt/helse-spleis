@@ -9,64 +9,10 @@
           "tilstand": "AVVENTER_SIMULERING",
           "skjæringstidspunkt": "2018-01-17"
         }
-      ],
-      "forkastede": [
-        {
-          "vedtaksperiode": {
-            "fom": "2018-01-01",
-            "tom": "2018-01-31"
-          }
-        },
-        {
-          "vedtaksperiode": {
-            "fom": "2018-02-01",
-            "tom": "2018-02-28"
-          }
-        },
-        {
-          "vedtaksperiode": {
-            "fom": "2018-03-01",
-            "tom": "2018-03-31"
-          }
-        }
       ]
     }
   ],
   "vilkårsgrunnlagHistorikk": [
-    {
-      "id": "{id}",
-      "opprettet": "{opprettet}",
-      "vilkårsgrunnlag": [
-        {
-          "skjæringstidspunkt": "2018-01-17",
-          "type": "Infotrygd",
-          "sykepengegrunnlag": {
-            "sykepengegrunnlag": 372000.0,
-            "inntektsgrunnlag": 372000.0,
-            "grunnbeløp": 561804.0,
-            "arbeidsgiverInntektsopplysninger": [
-              {
-                "orgnummer": "987654321",
-                "inntektsopplysning": {
-                  "id": "dac755f1-207f-4fed-a91c-36bae8e48c7f",
-                  "dato": "2018-03-01",
-                  "hendelseId": "9e9c7a0f-c994-46b2-8351-c7580f00358b",
-                  "beløp": 31000.0,
-                  "kilde": "INFOTRYGD",
-                  "tidsstempel": "2022-09-14T15:23:18.087604"
-                }
-              }
-            ],
-            "begrensning": "VURDERT_I_INFOTRYGD",
-            "deaktiverteArbeidsforhold": [],
-            "vurdertInfotrygd": true,
-            "minsteinntekt": 46817.0,
-            "oppfyllerMinsteinntektskrav": true
-          },
-          "vilkårsgrunnlagId": "ca56c1d4-ae32-4a18-92e1-016580ddb6b8"
-        }
-      ]
-    },
     {
       "id": "a1409adb-7e14-42eb-954b-c417c0533abf",
       "opprettet": "2022-09-14T15:23:18.093776",
@@ -1032,5 +978,26 @@
       ]
     }
   ],
-  "skjemaVersjon": 178
+  "infotrygdhistorikk": [
+    {
+      "arbeidsgiverutbetalingsperioder": [
+        {
+          "fom": "2018-01-01",
+          "tom": "2018-01-31"
+        },
+        {
+          "fom": "2018-02-01",
+          "tom": "2018-02-28"
+        }
+
+      ],
+      "personutbetalingsperioder": [
+        {
+          "fom": "2018-03-01",
+          "tom": "2018-03-31"
+        }
+      ]
+    }
+  ],
+  "skjemaVersjon": 177
 }
