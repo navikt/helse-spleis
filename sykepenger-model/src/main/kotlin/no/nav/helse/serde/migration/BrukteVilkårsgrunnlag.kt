@@ -22,6 +22,8 @@ internal object BrukteVilkårsgrunnlag {
     private val JsonNode.gyldigSykepengegrunnlag get() = path("sykepengegrunnlag").path("sykepengegrunnlag").asDouble() > 0
     private val JsonNode.gyldigAvviksprosent get() = path("avviksprosent").asDouble() != Double.POSITIVE_INFINITY
     private val JsonNode.fraSpleis get() = path("type").asText() == "Vilkårsprøving"
+    private val JsonNode.tilstand get() = path("tilstand").asText()
+
 
     private fun List<JsonNode>.finnInfotrygdVilkårsgrunnlag(sykefraværstilfelle: Periode, forkastedePerioder: List<Periode>): JsonNode? {
         if (forkastedePerioder.none { it.overlapperMed(sykefraværstilfelle) || it.erRettFør(sykefraværstilfelle) }) return null
@@ -46,11 +48,21 @@ internal object BrukteVilkårsgrunnlag {
         val sisteInnslag = vilkårsgrunnlagHistorikk.firstOrNull() ?: return null
         val aktørId = jsonNode.path("aktørId").asText()
 
-        val sykefraværstilfeller = jsonNode.path("arbeidsgivere")
+        val vedtaksperioderPerSkjæringstidspunkt = jsonNode.path("arbeidsgivere")
             .flatMap { it.path("vedtaksperioder") }
-            .filterNot { it.path("tilstand").asText() == "AVSLUTTET_UTEN_UTBETALING" }
+            .filterNot { it.tilstand == "AVSLUTTET_UTEN_UTBETALING" }
             .groupBy { it.skjæringstidspunkt }
-            .map { (skjæringstidspunkt, vedtaksperioder) -> skjæringstidspunkt til vedtaksperioder.maxOf { it.tom }}
+
+        val sykefraværstilfeller = vedtaksperioderPerSkjæringstidspunkt
+            .map { (skjæringstidspunkt, vedtaksperioder) ->
+                skjæringstidspunkt til vedtaksperioder.maxOf { it.tom }
+            }
+
+        val tilstanderPerSkjæringstidspunkt = vedtaksperioderPerSkjæringstidspunkt
+            .mapValues { (_, vedtaksperioder) ->
+                val førsteFom = vedtaksperioder.minOf { it.fom }
+                vedtaksperioder.filter { it.fom == førsteFom }.map { it.tilstand }
+            }
 
         val forkastedePerioder = jsonNode.path("arbeidsgivere")
             .flatMap { it.path("forkastede") }
@@ -65,7 +77,11 @@ internal object BrukteVilkårsgrunnlag {
 
         val brukteVilkårsgrunnlag = serdeObjectMapper.createArrayNode().apply {
             sykefraværstilfeller.forEach { sykefraværstilfelle ->
-                val vilkårgrunnlag = sorterteVilkårsgrunnlag.finnRiktigVilkårsgrunnlag(sykefraværstilfelle, forkastedePerioder) ?: return@forEach
+                val vilkårgrunnlag = sorterteVilkårsgrunnlag.finnRiktigVilkårsgrunnlag(sykefraværstilfelle, forkastedePerioder)
+                if (vilkårgrunnlag == null) {
+                    sikkerlogg.info("Fant ikke vilkårsgrunnlag for sykefraværstilfellet $sykefraværstilfelle med tilstander ${tilstanderPerSkjæringstidspunkt[sykefraværstilfelle.start]} for aktørId=$aktørId")
+                    return@forEach
+                }
                 val skjæringstidspunkt = sykefraværstilfelle.start
                 if (vilkårgrunnlag.skjæringstidspunkt != skjæringstidspunkt) {
                     endret = true
