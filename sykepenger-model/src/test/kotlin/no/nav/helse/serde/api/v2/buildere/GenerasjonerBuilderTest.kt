@@ -61,6 +61,7 @@ import no.nav.helse.serde.api.dto.Periodetilstand.TilGodkjenning
 import no.nav.helse.serde.api.dto.Periodetilstand.TilUtbetaling
 import no.nav.helse.serde.api.dto.Periodetilstand.UtbetalingFeilet
 import no.nav.helse.serde.api.dto.Periodetilstand.Utbetalt
+import no.nav.helse.serde.api.dto.Periodetilstand.UtbetaltVenterPåAnnenPeriode
 import no.nav.helse.serde.api.dto.Periodetilstand.VenterPåAnnenPeriode
 import no.nav.helse.serde.api.dto.SykdomstidslinjedagType
 import no.nav.helse.serde.api.dto.SykdomstidslinjedagType.FORELDET_SYKEDAG
@@ -97,6 +98,7 @@ import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.manuellFeriedag
 import no.nav.helse.spleis.e2e.manuellSykedag
+import no.nav.helse.spleis.e2e.nyPeriode
 import no.nav.helse.spleis.e2e.nyeVedtak
 import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.spleis.e2e.søknadDTOer
@@ -1369,8 +1371,8 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         }
         0.generasjon(a2) {
             assertEquals(2, perioder.size)
-            beregnetPeriode(0) medTilstand VenterPåAnnenPeriode
-            beregnetPeriode(1) medTilstand VenterPåAnnenPeriode
+            beregnetPeriode(0) medTilstand UtbetaltVenterPåAnnenPeriode
+            beregnetPeriode(1) medTilstand UtbetaltVenterPåAnnenPeriode
         }
 
         håndterSimulering(2.vedtaksperiode, orgnummer = a1)
@@ -1382,8 +1384,8 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         }
         0.generasjon(a2) {
             assertEquals(2, perioder.size)
-            beregnetPeriode(0) medTilstand VenterPåAnnenPeriode
-            beregnetPeriode(1) medTilstand VenterPåAnnenPeriode
+            beregnetPeriode(0) medTilstand UtbetaltVenterPåAnnenPeriode
+            beregnetPeriode(1) medTilstand UtbetaltVenterPåAnnenPeriode
         }
 
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, orgnummer = a1)
@@ -1702,7 +1704,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         assertEquals(1, generasjoner.size)
         0.generasjon {
             assertEquals(2, perioder.size)
-            beregnetPeriode(0) medTilstand Utbetalt
+            beregnetPeriode(0) medTilstand UtbetaltVenterPåAnnenPeriode
             beregnetPeriode(1) medTilstand Utbetalt
         }
 
@@ -1711,12 +1713,12 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         assertEquals(2, generasjoner.size)
         0.generasjon {
             assertEquals(2, perioder.size)
-            beregnetPeriode(0) medTilstand Utbetalt
+            beregnetPeriode(0) medTilstand UtbetaltVenterPåAnnenPeriode
             beregnetPeriode(1) medTilstand ForberederGodkjenning
         }
         1.generasjon {
             assertEquals(2, perioder.size)
-            beregnetPeriode(0) medTilstand Utbetalt
+            beregnetPeriode(0) medTilstand UtbetaltVenterPåAnnenPeriode
             beregnetPeriode(1) medTilstand Utbetalt
         }
     }
@@ -1866,12 +1868,39 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `Kort periode i AvventerRevurdering skal mappes til VenterPåAnnenPeriode`() {
+        nyttVedtak(1.januar, 31.januar)
+        nyPeriode(1.mars til 16.mars)
+        håndterUtbetalingshistorikk(2.vedtaksperiode)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
+        håndterYtelser(1.vedtaksperiode)
+
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
+
+        0.generasjon {
+            assertEquals(2, perioder.size)
+            uberegnetPeriode(0) medTilstand VenterPåAnnenPeriode
+            beregnetPeriode(1) medTilstand ForberederGodkjenning
+        }
+    }
+
+    @Test
     fun `out of order med gap`() = Toggle.RevurderOutOfOrder.enable {
         nyttVedtak(1.mars, 31.mars, orgnummer = a1)
         tilGodkjenning(1.januar, 31.januar, a1)
 
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_REVURDERING)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING)
+
+        0.generasjon {
+            assertEquals(2, perioder.size)
+            beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.mars til 31.mars) medTilstand UtbetaltVenterPåAnnenPeriode
+            beregnetPeriode(1) er Utbetalingstatus.Ubetalt avType UTBETALING fra (1.januar til 31.januar) medTilstand TilGodkjenning
+        }
 
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()

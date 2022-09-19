@@ -28,6 +28,7 @@ import no.nav.helse.serde.api.dto.Periodetilstand.ManglerInformasjon
 import no.nav.helse.serde.api.dto.Periodetilstand.TilAnnullering
 import no.nav.helse.serde.api.dto.Periodetilstand.TilGodkjenning
 import no.nav.helse.serde.api.dto.Periodetilstand.Utbetalt
+import no.nav.helse.serde.api.dto.Periodetilstand.UtbetaltVenterPåAnnenPeriode
 import no.nav.helse.serde.api.dto.Periodetilstand.VenterPåAnnenPeriode
 import no.nav.helse.serde.api.dto.Refusjon
 import no.nav.helse.serde.api.dto.SammenslåttDag
@@ -208,6 +209,7 @@ internal class Tidslinjeperioder(
             periodetilstand = when (periode.tilstand) {
                 is AvsluttetUtenUtbetaling -> IngenUtbetaling
                 is AvventerUferdig,
+                is AvventerRevurdering,
                 is AvventerBlokkerendePeriode -> VenterPåAnnenPeriode
                 is AvventerHistorikk,
                 is AvventerVilkårsprøving -> ForberederGodkjenning
@@ -258,6 +260,7 @@ internal class Tidslinjeperioder(
                 }
                 utbetalingDTO.utbetalingFeilet(periode.tilstand) -> Periodetilstand.UtbetalingFeilet
                 utbetalingDTO.kanUtbetales() -> when {
+                    utbetalingDTO.venterPåRevurdering(periode.tilstand) -> UtbetaltVenterPåAnnenPeriode
                     utbetalingDTO.utbetalt() -> if (sammenslåttTidslinje.inneholderSykepengedager()) Utbetalt else IngenUtbetaling
                     utbetalingDTO.utbetales() -> Periodetilstand.TilUtbetaling
                     utbetalingDTO.tilGodkjenning() -> TilGodkjenning

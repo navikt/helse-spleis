@@ -242,6 +242,7 @@ class Utbetaling(
 
     internal fun revurderingFeilet(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) = (erForkastetRevurdering() || status in setOf(Utbetalingstatus.IkkeGodkjent, Utbetalingstatus.Ubetalt)) && tilstand == Vedtaksperiode.RevurderingFeilet
     internal fun utbetalingFeilet(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) = erUtbetalingFeilet() && tilstand == Vedtaksperiode.UtbetalingFeilet
+    internal fun venterPåRevurdering(tilstand: Vedtaksperiode.Vedtaksperiodetilstand) = tilstand == Vedtaksperiode.AvventerRevurdering
 
     data class Vurdering(
         val godkjent: Boolean,
