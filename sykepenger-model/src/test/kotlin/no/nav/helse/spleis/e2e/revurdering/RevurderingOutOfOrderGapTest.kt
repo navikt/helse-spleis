@@ -558,4 +558,78 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
             }
         )
     }
+
+    @Test
+    fun `kort periode, lang periode kommer out of order - hva skjer da mon tru`() {
+        nyPeriode(1.mars til 16.mars)
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+
+        nyPeriode(1.januar til 31.januar)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_REVURDERING)
+
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterYtelser(2.vedtaksperiode)
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt()
+
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
+
+        håndterYtelser(1.vedtaksperiode)
+        assertForventetFeil(
+            forklaring = "Kort periode som ikke får utbetaling pga revurdering skal lukkes som AvsluttetUtenUtbetaling",
+            nå = {
+                assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING_REVURDERING)
+                assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
+            },
+            ønsket = {
+                assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+                assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
+            }
+        )
+    }
+
+    @Test
+    fun `kort periode, lang periode kommer out of order og fører til utbetaling på kort periode`() {
+        nyPeriode(1.mars til 16.mars)
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+
+        nyPeriode(1.februar til 25.februar)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_REVURDERING)
+
+        håndterInntektsmelding(listOf(1.februar til 16.februar))
+        håndterYtelser(2.vedtaksperiode)
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt()
+
+        assertForventetFeil(
+            forklaring = "Kort periode som skal revurderes er stuck i AvventerRevurdering",
+            nå = {
+                assertSisteTilstand(1.vedtaksperiode, AVVENTER_REVURDERING)
+                assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
+            },
+            ønsket = {
+                håndterYtelser(1.vedtaksperiode)
+                assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING_REVURDERING)
+                assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
+
+                håndterVilkårsgrunnlag(1.vedtaksperiode)
+                håndterYtelser(1.vedtaksperiode)
+                håndterSimulering(1.vedtaksperiode)
+                håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+                håndterUtbetalt()
+
+                assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+                assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
+            }
+        )
+    }
 }
