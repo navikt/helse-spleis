@@ -98,7 +98,10 @@ internal class V178ForkastOgFlyttVilkårsgrunnlagTest : MigrationTest(V178Forkas
 
     @Test
     fun `Om vi mangler vilkårsgrunnlag fra Spleis skal vi bruke vilkårsgrunnlag fra Infotrygd selv om det ikke er noen relevante Infotrygdutbetalinger`() {
-        // TODO: Skrive denne testen
+        assertForkastetVilkårsgrunnlag(
+            originalJson = "/migrations/178/vilkårsgrunnlag-fra-infotrygd-om-spleis-mangler_original.json",
+            expectedJson = "/migrations/178/vilkårsgrunnlag-fra-infotrygd-om-spleis-mangler_expected.json"
+        )
     }
 
     private fun assertForkastetVilkårsgrunnlag(originalJson: String, expectedJson: String) {
