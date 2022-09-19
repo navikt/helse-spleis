@@ -13,6 +13,7 @@ import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.Person
 import no.nav.helse.person.Personopplysninger
 import no.nav.helse.person.Sykmeldingsperioder
+import no.nav.helse.person.Varselkode.*
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
@@ -81,7 +82,7 @@ class Søknad(
         andreInntektskilder.forEach { it.valider(this) }
         if (permittert) varsel("Søknaden inneholder permittering. Vurder om permittering har konsekvens for rett til sykepenger")
         merknaderFraSykmelding.forEach { it.valider(this) }
-        if (sykdomstidslinje.any { it is Dag.ForeldetSykedag }) varsel("Minst én dag er avslått på grunn av foreldelse. Vurder å sende vedtaksbrev fra Infotrygd")
+        if (sykdomstidslinje.any { it is Dag.ForeldetSykedag }) varsel(RV_SØ_2)
         return this
     }
 

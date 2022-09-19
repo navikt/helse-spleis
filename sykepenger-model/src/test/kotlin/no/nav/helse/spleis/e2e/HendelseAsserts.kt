@@ -175,6 +175,11 @@ internal fun AbstractPersonTest.assertVarsel(warning: String, vararg filtre: Akt
     assertTrue(warnings.contains(warning), "\nFant ikke forventet warning:\n\t$warning\nWarnings funnet:\n\t${warnings.joinToString("\n\t")}\n")
 }
 
+internal fun AbstractPersonTest.assertVarsel(varsel: Varselkode, vararg filtre: AktivitetsloggFilter) {
+    val varselkoder = collectVarselkoder(*filtre)
+    assertTrue(varselkoder.contains(varsel), "\nFant ikke forventet varselkode:\n\t$varsel\nVarselkoder funnet:\n\t${varselkoder.joinToString("\n\t")}\n")
+}
+
 internal fun AbstractPersonTest.assertIngenVarsel(warning: String, vararg filtre: AktivitetsloggFilter) {
     val warnings = collectVarsler(*filtre)
     assertFalse(warnings.contains(warning), "\nFant ikke-forventet warning:\n\t$warning\nWarnings funnet:\n\t${warnings.joinToString("\n\t")}\n")
@@ -223,6 +228,17 @@ private fun AbstractPersonTest.collectVarsler(vararg filtre: AktivitetsloggFilte
         }
     })
     return warnings
+}
+private fun AbstractPersonTest.collectVarselkoder(vararg filtre: AktivitetsloggFilter): List<Varselkode> {
+    val varselkoder = mutableListOf<Varselkode>()
+    person.personLogg.accept(object : AktivitetsloggVisitor {
+        override fun visitVarsel(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Varsel, kode: Varselkode?, melding: String, tidsstempel: String) {
+            if (filtre.all { filter -> kontekster.any { filter.filtrer(it) } } && kode != null) {
+                varselkoder.add(kode)
+            }
+        }
+    })
+    return varselkoder
 }
 
 internal fun AbstractPersonTest.collectFunksjonelleFeil(vararg filtre: AktivitetsloggFilter): MutableList<String> {
