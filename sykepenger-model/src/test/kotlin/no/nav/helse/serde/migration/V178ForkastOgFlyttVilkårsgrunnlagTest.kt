@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.helse.readResource
 import org.junit.jupiter.api.Test
 
-internal class V177ForkastOgFlyttVilkårsgrunnlagTest : MigrationTest(V177ForkastOgFlyttVilkårsgrunnlag()) {
+internal class V178ForkastOgFlyttVilkårsgrunnlagTest : MigrationTest(V178ForkastOgFlyttVilkårsgrunnlag()) {
 
     @Test
     fun `Ping-Pong, AUU - IT - AVSLUTTET`() {
@@ -18,8 +18,8 @@ internal class V177ForkastOgFlyttVilkårsgrunnlagTest : MigrationTest(V177Forkas
     fun `Kun vilkårsgrunnlag på skjæringstidspunkt skal ikke gi nytt innslag`() {
         val json = toNode("/migrations/177/kun-vilkårsgrunnlag-på-skjæringstidspunkt.json".readResource()) as ObjectNode
         assertMigrationRaw(
-            originalJson = "${json.put("skjemaVersjon", 176)}",
-            expectedJson = "${json.put("skjemaVersjon", 177)}"
+            originalJson = "${json.put("skjemaVersjon", 177)}",
+            expectedJson = "${json.put("skjemaVersjon", 178)}"
         )
     }
 
@@ -27,8 +27,8 @@ internal class V177ForkastOgFlyttVilkårsgrunnlagTest : MigrationTest(V177Forkas
     fun `Tom vilkårsgrunnlaghistorikk`() {
         val json = toNode("/migrations/177/tom-vilkårsgrunnlaghistorikk.json".readResource()) as ObjectNode
         assertMigrationRaw(
-            originalJson = "${json.put("skjemaVersjon", 176)}",
-            expectedJson = "${json.put("skjemaVersjon", 177)}"
+            originalJson = "${json.put("skjemaVersjon", 177)}",
+            expectedJson = "${json.put("skjemaVersjon", 178)}"
         )
     }
 

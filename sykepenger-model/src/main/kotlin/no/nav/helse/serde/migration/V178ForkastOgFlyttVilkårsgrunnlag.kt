@@ -7,7 +7,7 @@ import java.util.UUID
 import no.nav.helse.serde.migration.BrukteVilkårsgrunnlag.brukteVilkårsgrunnlag
 import no.nav.helse.serde.serdeObjectMapper
 
-internal class V177ForkastOgFlyttVilkårsgrunnlag: JsonMigration(version = 177) {
+internal class V178ForkastOgFlyttVilkårsgrunnlag: JsonMigration(version = 178) {
 
     override val description =
         "Rydder opp i vilkårsgrunnlag ved å:" +
