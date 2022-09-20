@@ -1,4 +1,4 @@
-package no.nav.helse.spleis.e2e
+package no.nav.helse.spleis.e2e.inntektsmelding
 
 import java.time.LocalDate
 import no.nav.helse.assertForventetFeil
@@ -22,6 +22,24 @@ import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.nullstillTilstandsendringer
+import no.nav.helse.spleis.e2e.AbstractEndToEndTest
+import no.nav.helse.spleis.e2e.assertIngenVarsel
+import no.nav.helse.spleis.e2e.assertTilstander
+import no.nav.helse.spleis.e2e.assertVarsel
+import no.nav.helse.spleis.e2e.grunnlag
+import no.nav.helse.spleis.e2e.håndterInntektsmelding
+import no.nav.helse.spleis.e2e.håndterInntektsmeldingReplay
+import no.nav.helse.spleis.e2e.håndterSimulering
+import no.nav.helse.spleis.e2e.håndterSykmelding
+import no.nav.helse.spleis.e2e.håndterSøknad
+import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
+import no.nav.helse.spleis.e2e.håndterUtbetalingshistorikk
+import no.nav.helse.spleis.e2e.håndterUtbetalt
+import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
+import no.nav.helse.spleis.e2e.håndterYtelser
+import no.nav.helse.spleis.e2e.nyttVedtak
+import no.nav.helse.spleis.e2e.repeat
+import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Test
