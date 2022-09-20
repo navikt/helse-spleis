@@ -20,6 +20,7 @@ import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.inntektsoppl
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.TilstandType
+import no.nav.helse.person.Varselkode.RV_SØ_10
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
 import no.nav.helse.spleis.e2e.assertIngenVarsel
@@ -634,7 +635,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             orgnummer = a1
         )
 
-        assertVarsel("Den sykmeldte har oppgitt å ha andre arbeidsforhold med sykmelding i søknaden.")
+        assertVarsel(RV_SØ_10)
     }
 
     @Test

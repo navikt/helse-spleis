@@ -20,6 +20,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.Varselkode.RV_SØ_7
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.assertIngenVarsler
@@ -52,7 +53,7 @@ internal class SøknadMedDagerUtenforPeriodeE2ETest: AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Arbeid(20.januar, 31.januar))
         håndterUtbetalingshistorikk(2.vedtaksperiode)
-        assertVarsel("Søknaden inneholder Arbeidsdager utenfor sykdomsvindu", AktivitetsloggFilter.person())
+        assertVarsel(RV_SØ_7, AktivitetsloggFilter.person())
         assertTilstander(
             1.vedtaksperiode,
             START,

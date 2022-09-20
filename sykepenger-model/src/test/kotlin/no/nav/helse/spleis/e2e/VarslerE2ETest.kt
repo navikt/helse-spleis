@@ -1,14 +1,17 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.desember
+import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.januar
 import no.nav.helse.person.Varselkode.RV_SØ_1
+import no.nav.helse.person.Varselkode.RV_SØ_10
 import no.nav.helse.person.Varselkode.RV_SØ_2
 import no.nav.helse.person.Varselkode.RV_SØ_3
 import no.nav.helse.person.Varselkode.RV_SØ_4
 import no.nav.helse.person.Varselkode.RV_SØ_5
+import no.nav.helse.person.Varselkode.RV_SØ_7
 import no.nav.helse.person.Varselkode.RV_SØ_8
 import no.nav.helse.person.Varselkode.RV_SØ_9
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -61,6 +64,15 @@ internal class VarslerE2ETest: AbstractEndToEndTest() {
     }
 
     @Test
+    fun `søknad med arbeidsdager mellom to perioder bridger ikke de to periodene`(){
+        håndterSøknad(
+            Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent),
+            Søknad.Søknadsperiode.Arbeid(20.januar, 31.januar)
+        )
+        assertVarsel(RV_SØ_7, 1.vedtaksperiode.filter())
+    }
+
+    @Test
     fun `Søknad med utenlandsopphold og studieopphold gir warning`() {
         håndterSøknad(
             Søknad.Søknadsperiode.Sykdom(3.januar, 26.januar, 100.prosent),
@@ -76,5 +88,14 @@ internal class VarslerE2ETest: AbstractEndToEndTest() {
             andreInntektskilder = listOf(Søknad.Inntektskilde(true, "ANNET")),
         )
         assertVarsel(RV_SØ_9, 1.vedtaksperiode.filter())
+    }
+
+    @Test
+    fun `varsel - Den sykmeldte har oppgitt å ha andre arbeidsforhold med sykmelding i søknaden`() {
+        håndterSøknad(
+            Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent),
+            andreInntektskilder = listOf(Søknad.Inntektskilde(true, "ANDRE_ARBEIDSFORHOLD"))
+        )
+        assertVarsel(RV_SØ_10, 1.vedtaksperiode.filter())
     }
 }

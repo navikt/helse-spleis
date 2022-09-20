@@ -17,11 +17,12 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Utdanning
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Utlandsopphold
 import no.nav.helse.hentErrors
-import no.nav.helse.hentWarnings
+import no.nav.helse.hentVarselkoder
 import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.november
 import no.nav.helse.person.Aktivitetslogg.AktivitetException
+import no.nav.helse.person.Varselkode.RV_SØ_9
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.sykdomstidslinje.Dag
@@ -328,7 +329,7 @@ internal class SøknadTest {
     fun `inntektskilde med type ANNET skal gi warning istedenfor error`() {
         søknad(Sykdom(1.januar, 31.januar, 100.prosent), andreInntektskilder = listOf(Inntektskilde(true, "ANNET")))
         søknad.valider(EN_PERIODE, MaskinellJurist())
-        assertTrue(søknad.hentWarnings().contains("Det er oppgitt annen inntektskilde i søknaden. Vurder inntekt."))
+        assertTrue(søknad.hentVarselkoder().contains(RV_SØ_9))
         assertTrue(søknad.hentErrors().isEmpty())
     }
 

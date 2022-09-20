@@ -5,6 +5,7 @@ import no.nav.helse.person.AbstractPersonTest
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.IdInnhenter
+import no.nav.helse.person.Varselkode
 import no.nav.helse.serde.reflection.castAsList
 
 internal fun IAktivitetslogg.antallEtterspurteBehov(vedtaksperiodeIdInnhenter: IdInnhenter, behovtype: Aktivitetslogg.Aktivitet.Behov.Behovtype, orgnummer: String = AbstractPersonTest.ORGNUMMER) =
@@ -59,6 +60,12 @@ private fun IAktivitetslogg.hent(alvorlighetsgrad: String) = toMap()["aktivitete
     .filter { it["alvorlighetsgrad"] == alvorlighetsgrad }
     .map { it["melding"] }
     .mapNotNull { it.toString() }
+
+internal fun IAktivitetslogg.hentVarselkoder() = toMap()["aktiviteter"]
+    .castAsList<Map<String, Any>>()
+    .filter { it["alvorlighetsgrad"] == "WARN" }
+    .map { it["kode"] }
+    .mapNotNull { enumValueOf<Varselkode>(it.toString()) }
 
 internal fun IAktivitetslogg.hentErrors() = hent("ERROR")
 internal fun IAktivitetslogg.hentWarnings() = hent("WARN")

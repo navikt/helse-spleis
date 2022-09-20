@@ -276,7 +276,7 @@ class Søknad(
 
         fun validerIkkeSykmeldt(aktivitetslogg: IAktivitetslogg) {
             if (!sykmeldt) return
-            aktivitetslogg.varsel("Den sykmeldte har oppgitt å ha andre arbeidsforhold med sykmelding i søknaden.")
+            aktivitetslogg.varsel(RV_SØ_10)
         }
     }
 }
