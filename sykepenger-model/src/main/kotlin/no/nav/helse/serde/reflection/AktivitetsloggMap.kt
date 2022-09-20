@@ -82,7 +82,7 @@ internal class AktivitetsloggMap(aktivitetslogg: Aktivitetslogg) : Aktivitetslog
                 "detaljer" to emptyMap<String, Any>(),
                 "tidsstempel" to tidsstempel
             ).apply {
-                if (kode != null) put("kode", kode)
+                if (kode != null) put("kode", kode.name)
             }
         )
     }
