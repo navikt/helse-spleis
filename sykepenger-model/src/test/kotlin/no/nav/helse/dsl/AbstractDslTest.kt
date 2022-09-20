@@ -22,6 +22,7 @@ import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonVisitor
 import no.nav.helse.person.TilstandType
+import no.nav.helse.person.Varselkode
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
@@ -167,6 +168,8 @@ internal abstract class AbstractDslTest {
         testArbeidsgiverAsserter.assertVarsler(*filtre)
     protected fun TestPerson.TestArbeidsgiver.assertVarsel(warning: String, vararg filtre: AktivitetsloggFilter) =
         testArbeidsgiverAsserter.assertVarsel(warning, *filtre)
+    protected fun TestPerson.TestArbeidsgiver.assertVarsel(kode: Varselkode, vararg filtre: AktivitetsloggFilter) =
+        testArbeidsgiverAsserter.assertVarsel(kode, *filtre)
     protected fun TestPerson.TestArbeidsgiver.assertIngenVarsler(vararg filtre: AktivitetsloggFilter) =
         testArbeidsgiverAsserter.assertIngenVarsler(*filtre)
     protected fun TestPerson.TestArbeidsgiver.assertInfo(forventet: String, vararg filtre: AktivitetsloggFilter) =
@@ -257,6 +260,8 @@ internal abstract class AbstractDslTest {
         this { assertVarsler(*filtre) }
     protected fun String.assertVarsel(warning: String, vararg filtre: AktivitetsloggFilter) =
         this { assertVarsel(warning, *filtre) }
+    protected fun String.assertVarsel(kode: Varselkode, vararg filtre: AktivitetsloggFilter) =
+        this { assertVarsel(kode, *filtre) }
     protected fun String.assertIngenVarsler(vararg filtre: AktivitetsloggFilter) =
         this { assertIngenVarsler(*filtre) }
     protected fun String.nyttVedtak(
@@ -372,6 +377,8 @@ internal abstract class AbstractDslTest {
         bareÈnArbeidsgiver(a1).assertVarsler(*filtre)
     protected fun assertVarsel(warning: String, vararg filtre: AktivitetsloggFilter) =
         bareÈnArbeidsgiver(a1).assertVarsel(warning, *filtre)
+    protected fun assertVarsel(kode: Varselkode, vararg filtre: AktivitetsloggFilter) =
+        bareÈnArbeidsgiver(a1).assertVarsel(kode, *filtre)
     protected fun assertIngenVarsler(vararg filtre: AktivitetsloggFilter) =
         bareÈnArbeidsgiver(a1).assertIngenVarsler(*filtre)
     protected fun assertActivities() {

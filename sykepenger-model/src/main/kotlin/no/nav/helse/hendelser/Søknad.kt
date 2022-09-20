@@ -204,8 +204,7 @@ class Søknad(
             override fun sykdomstidslinje(sykdomsperiode: Periode, avskjæringsdato: LocalDate, kilde: Hendelseskilde) =
                 Sykdomstidslinje.ukjent(periode.start, periode.endInclusive, kilde)
 
-            override fun valider(søknad: Søknad) =
-                søknad.varsel("Utdanning oppgitt i perioden i søknaden.")
+            override fun valider(søknad: Søknad) = søknad.varsel(RV_SØ_4)
         }
 
         class Permisjon(fom: LocalDate, tom: LocalDate) : Søknadsperiode(fom, tom, "permisjon") {

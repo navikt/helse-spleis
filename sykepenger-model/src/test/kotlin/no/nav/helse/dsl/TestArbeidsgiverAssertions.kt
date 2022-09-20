@@ -66,6 +66,11 @@ internal class TestArbeidsgiverAssertions(private val observat√∏r: TestObservat√
         assertTrue(warnings.contains(warning), "\nFant ikke forventet warning:\n\t$warning\nWarnings funnet:\n\t${warnings.joinToString("\n\t")}\n")
     }
 
+    internal fun assertVarsel(kode: Varselkode, vararg filtre: AktivitetsloggFilter) {
+        val varselkoder = collectVarselkoder(*filtre)
+        assertTrue(varselkoder.contains(kode), "\nFant ikke forventet varselkode:\n\t$kode\nVarselkoder funnet:\n\t${varselkoder.joinToString("\n\t")}\n")
+    }
+
     internal fun assertIngenVarsel(warning: String, vararg filtre: AktivitetsloggFilter) {
         val warnings = collectVarsler(*filtre)
         assertFalse(warnings.contains(warning), "\nFant ikke-forventet warning:\n\t$warning\nWarnings funnet:\n\t${warnings.joinToString("\n\t")}\n")
@@ -110,6 +115,18 @@ internal class TestArbeidsgiverAssertions(private val observat√∏r: TestObservat√
             override fun visitVarsel(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Varsel, kode: Varselkode?, melding: String, tidsstempel: String) {
                 if (filtre.all { filter -> kontekster.any { filter.filtrer(it) } }) {
                     warnings.add(melding)
+                }
+            }
+        })
+        return warnings
+    }
+
+    private fun collectVarselkoder(vararg filtre: AktivitetsloggFilter): MutableList<Varselkode> {
+        val warnings = mutableListOf<Varselkode>()
+        personInspekt√∏r.aktivitetslogg.accept(object : AktivitetsloggVisitor {
+            override fun visitVarsel(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Varsel, kode: Varselkode?, melding: String, tidsstempel: String) {
+                if (filtre.all { filter -> kontekster.any { filter.filtrer(it) } } && kode != null) {
+                    warnings.add(kode)
                 }
             }
         })

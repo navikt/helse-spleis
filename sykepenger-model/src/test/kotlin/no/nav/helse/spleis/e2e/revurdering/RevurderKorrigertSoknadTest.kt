@@ -23,6 +23,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
+import no.nav.helse.person.Varselkode.RV_SØ_4
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
@@ -377,7 +378,7 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
 
         assertTilstand(1.vedtaksperiode, AVSLUTTET)
-        assertVarsel("Utdanning oppgitt i perioden i søknaden.", 1.vedtaksperiode.filter())
+        assertVarsel(RV_SØ_4, 1.vedtaksperiode.filter())
     }
 
     @Test
@@ -393,7 +394,7 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
         håndterUtbetalt()
 
         assertTilstand(1.vedtaksperiode, AVSLUTTET)
-        assertVarsel("Utdanning oppgitt i perioden i søknaden.", 1.vedtaksperiode.filter())
+        assertVarsel(RV_SØ_4, 1.vedtaksperiode.filter())
     }
 
     @Test

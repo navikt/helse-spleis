@@ -33,6 +33,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.TilstandType.UTBETALING_FEILET
+import no.nav.helse.person.Varselkode.RV_SØ_4
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.september
@@ -274,7 +275,7 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 26.januar, 100.prosent))
         håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent), Utlandsopphold(11.januar, 15.januar), Utdanning(16.januar, 18.januar))
         assertVarsler()
-        assertVarsel("Utdanning oppgitt i perioden i søknaden.", 1.vedtaksperiode.filter())
+        assertVarsel(RV_SØ_4, 1.vedtaksperiode.filter())
         assertVarsel("Utenlandsopphold oppgitt i perioden i søknaden.", 1.vedtaksperiode.filter())
         inspektør.also {
             assertEquals(1, it.sykdomshistorikk.size)
