@@ -71,6 +71,24 @@ internal class BerOmInntektsmeldingTest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `Ber ikke om inntektsmelding ved forlengelser`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        val søknadId1 = håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+
+        assertIngenFunksjonelleFeil()
+        assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
+        assertEquals(1, observatør.manglendeInntektsmeldingVedtaksperioder.size)
+        assertEquals(
+            PersonObserver.ManglendeInntektsmeldingEvent(1.januar, 31.januar, setOf(søknadId1)),
+            observatør.manglendeInntektsmeldingVedtaksperioder.single()
+        )
+    }
+
+    @Test
     fun `Sender ut event om at vi ikke trenger inntektsmelding når vi forlater AvventerInntektsmeldingEllerHistorikk`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))

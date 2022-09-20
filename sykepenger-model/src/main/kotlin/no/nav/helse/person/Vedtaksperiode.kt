@@ -617,6 +617,8 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun trengerInntektsmelding(hendelseskontekst: Hendelseskontekst) {
+        if (!forventerInntekt()) return
+        if (arbeidsgiver.finnVedtaksperiodeRettFør(this) != null) return
         this.person.trengerInntektsmelding(
             hendelseskontekst,
             this.organisasjonsnummer,
@@ -1358,9 +1360,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.trengerInntektsmeldingReplay()
-            if (vedtaksperiode.forventerInntekt()) {
-                vedtaksperiode.trengerInntektsmelding(hendelse.hendelseskontekst())
-            }
+            vedtaksperiode.trengerInntektsmelding(hendelse.hendelseskontekst())
             vedtaksperiode.person.gjenopptaBehandling(hendelse)
         }
 
