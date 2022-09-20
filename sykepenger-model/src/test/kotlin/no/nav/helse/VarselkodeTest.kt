@@ -23,7 +23,7 @@ internal class VarselkodeTest {
         }.toSet()
 
         val varselkoderSomKjentManglerTest = listOf(
-            RV_SY_1, RV_SØ_1, RV_SØ_3, RV_SØ_5, RV_SØ_6, RV_SØ_7, RV_SØ_8, RV_SØ_9,
+            RV_SY_1, RV_SØ_1, RV_SØ_5, RV_SØ_6, RV_SØ_7, RV_SØ_8, RV_SØ_9,
             RV_SØ_10, RV_IM_1, RV_IM_2, RV_IM_3, RV_IM_4, RV_IM_5, RV_IM_6, RV_RE_1, RV_IT_1, RV_IT_2,
             RV_IT_3, RV_IT_4, RV_IT_5, RV_VV_1, RV_VV_2, RV_VV_4, RV_VV_5, RV_VV_6, RV_VV_7, RV_OV_1,
             RV_OV_2, RV_MV_1, RV_MV_2, RV_IV_1, RV_IV_2, RV_SV_1, RV_SV_2, RV_AY_1, RV_AY_2, RV_AY_3,

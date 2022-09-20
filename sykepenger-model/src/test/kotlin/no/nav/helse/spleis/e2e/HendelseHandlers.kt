@@ -422,7 +422,8 @@ internal fun AbstractEndToEndTest.håndterSøknad(
     sykmeldingSkrevet: LocalDateTime? = null,
     fnr: Personidentifikator = AbstractPersonTest.UNG_PERSON_FNR_2018,
     korrigerer: UUID? = null,
-    opprinneligSendt: LocalDate? = null
+    opprinneligSendt: LocalDate? = null,
+    merknaderFraSykmelding: List<Søknad.Merknad> = emptyList()
 ): UUID {
     søknad(
         id,
@@ -433,7 +434,8 @@ internal fun AbstractEndToEndTest.håndterSøknad(
         sykmeldingSkrevet = sykmeldingSkrevet,
         fnr = fnr,
         korrigerer = korrigerer,
-        opprinneligSendt = opprinneligSendt
+        opprinneligSendt = opprinneligSendt,
+        merknaderFraSykmelding = merknaderFraSykmelding
     ).håndter(Person::håndter)
     søknader[id] = Triple(sendtTilNAVEllerArbeidsgiver, andreInntektskilder, perioder)
     return id
