@@ -31,6 +31,7 @@ internal class WarningsTest {
         }
     }
 
+    @Disabled
     @Test
     fun `alle warnings testes eksplisitt`() {
         val ikkeTestedeWarnings = alleWarnings.toMutableSet()
