@@ -102,10 +102,13 @@ internal object BrukteVilkårsgrunnlag {
             }
         }
 
-        val forkastedeVilkårsgrunnlag = sorterteVilkårsgrunnlag.map { it.vilkårsgrunnlagId } - brukteVilkårsgrunnlag.map { it.vilkårsgrunnlagId }
+        val vilkårsgrunnlagFør = sorterteVilkårsgrunnlag.associate { it.skjæringstidspunkt to it.vilkårsgrunnlagId }
+        val vilkårsgrunnlagEtter = brukteVilkårsgrunnlag.associate { it.skjæringstidspunkt to it.vilkårsgrunnlagId }
+        val forkastedeVilkårsgrunnlag = vilkårsgrunnlagFør.filterNot { (_, vilkårsgrunnlagId) -> vilkårsgrunnlagId in vilkårsgrunnlagEtter.values }
+
         if (forkastedeVilkårsgrunnlag.isNotEmpty()){
             endret = true
-            sikkerlogg.info("Forkaster vilkårsgrunnlag $forkastedeVilkårsgrunnlag for aktørId=$aktørId")
+            sikkerlogg.info("Forkaster vilkårsgrunnlag for skjæringstidspunkter ${forkastedeVilkårsgrunnlag.keys} med vilkårsgrunnlagIder ${forkastedeVilkårsgrunnlag.values} for aktørId=$aktørId")
         }
 
         return if (endret) {
