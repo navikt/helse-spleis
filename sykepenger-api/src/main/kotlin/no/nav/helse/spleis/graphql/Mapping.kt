@@ -3,8 +3,8 @@ package no.nav.helse.spleis.graphql
 import java.util.UUID
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.Periodetype
-import no.nav.helse.serde.api.dto.BegrunnelseDTO
 import no.nav.helse.serde.api.dto.Arbeidsgiverinntekt
+import no.nav.helse.serde.api.dto.BegrunnelseDTO
 import no.nav.helse.serde.api.dto.BeregnetPeriode
 import no.nav.helse.serde.api.dto.HendelseDTO
 import no.nav.helse.serde.api.dto.InfotrygdVilkårsgrunnlag
@@ -386,13 +386,13 @@ private fun mapInntekt(inntekt: Arbeidsgiverinntekt) = GraphQLArbeidsgiverinntek
     deaktivert = inntekt.deaktivert
 )
 
-private fun GraphQLSpleisVilkarsgrunnlag.harUgyldigAvviksprosent() =
-    avviksprosent in setOf(POSITIVE_INFINITY, NEGATIVE_INFINITY, NaN)
+private fun Double?.mapAvviksprosent() =
+    if (this in setOf(POSITIVE_INFINITY, NEGATIVE_INFINITY, NaN)) 100.0 else this
 
 internal fun mapVilkårsgrunnlag(id: UUID, vilkårsgrunnlag: List<Vilkårsgrunnlag>) =
     GraphQLVilkarsgrunnlaghistorikk(
         id = id,
-        grunnlag = vilkårsgrunnlag.mapNotNull { grunnlag ->
+        grunnlag = vilkårsgrunnlag.map { grunnlag ->
             when (grunnlag) {
                 is SpleisVilkårsgrunnlag -> GraphQLSpleisVilkarsgrunnlag(
                     skjaeringstidspunkt = grunnlag.skjæringstidspunkt,
@@ -400,7 +400,7 @@ internal fun mapVilkårsgrunnlag(id: UUID, vilkårsgrunnlag: List<Vilkårsgrunnl
                     sammenligningsgrunnlag = grunnlag.sammenligningsgrunnlag,
                     sykepengegrunnlag = grunnlag.sykepengegrunnlag,
                     inntekter = grunnlag.inntekter.map { inntekt -> mapInntekt(inntekt) },
-                    avviksprosent = grunnlag.avviksprosent,
+                    avviksprosent = grunnlag.avviksprosent.mapAvviksprosent(),
                     grunnbelop = grunnlag.grunnbeløp,
                     sykepengegrunnlagsgrense = mapSykepengergrunnlagsgrense(grunnlag.sykepengegrunnlagsgrense),
                     antallOpptjeningsdagerErMinst = grunnlag.antallOpptjeningsdagerErMinst,
@@ -408,7 +408,7 @@ internal fun mapVilkårsgrunnlag(id: UUID, vilkårsgrunnlag: List<Vilkårsgrunnl
                     oppfyllerKravOmMinstelonn = grunnlag.oppfyllerKravOmMinstelønn,
                     oppfyllerKravOmOpptjening = grunnlag.oppfyllerKravOmOpptjening,
                     oppfyllerKravOmMedlemskap = grunnlag.oppfyllerKravOmMedlemskap
-                ).takeUnless { it.harUgyldigAvviksprosent() }
+                )
                 is InfotrygdVilkårsgrunnlag -> GraphQLInfotrygdVilkarsgrunnlag(
                     skjaeringstidspunkt = grunnlag.skjæringstidspunkt,
                     omregnetArsinntekt = grunnlag.omregnetÅrsinntekt,

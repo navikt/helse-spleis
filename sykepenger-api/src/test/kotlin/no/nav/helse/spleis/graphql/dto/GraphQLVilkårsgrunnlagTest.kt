@@ -15,44 +15,48 @@ import kotlin.Double.Companion.POSITIVE_INFINITY
 internal class GraphQLVilkårsgrunnlagTest {
 
     @Test
-    fun `ignorerer ei vilkårsgrunnlag med normal avviksprosent`() {
+    fun `mapper vilkårsgrunnlag med normal avviksprosent`() {
         val graphQlGrunnlag = mapVilkårsgrunnlag(UUID.randomUUID(), listOf(spleisVilkårsgrunnlag(
             avviksprosent = 25.0
-        ))).grunnlag
-
-        assertEquals(1, graphQlGrunnlag.size)
+        )))
+        assertAvviksprosent(25.0, graphQlGrunnlag)
     }
 
     @Test
-    fun `ignorerer vilkårsgrunnlag med Infinity avviksprosent`() {
+    fun `mapper vilkårsgrunnlag med Infinity avviksprosent til 100`() {
         val graphQlGrunnlag = mapVilkårsgrunnlag(UUID.randomUUID(), listOf(spleisVilkårsgrunnlag(
             avviksprosent = POSITIVE_INFINITY
-        ))).grunnlag
-
-        assertEquals(emptyList<GraphQLVilkarsgrunnlag>(), graphQlGrunnlag)
+        )))
+        assertAvviksprosent(100.0, graphQlGrunnlag)
     }
 
     @Test
-    fun `ignorerer vilkårsgrunnlag med -Infinity avviksprosent`() {
+    fun `mapper vilkårsgrunnlag med -Infinity avviksprosent til 100`() {
         val graphQlGrunnlag = mapVilkårsgrunnlag(UUID.randomUUID(), listOf(spleisVilkårsgrunnlag(
             avviksprosent = NEGATIVE_INFINITY
-        ))).grunnlag
-
-        assertEquals(emptyList<GraphQLVilkarsgrunnlag>(), graphQlGrunnlag)
+        )))
+        assertAvviksprosent(100.0, graphQlGrunnlag)
     }
 
     @Test
-    fun `ignorerer vilkårsgrunnlag med NaN avviksprosent`() {
+    fun `mapper vilkårsgrunnlag med NaN avviksprosent til 100`() {
         val graphQlGrunnlag = mapVilkårsgrunnlag(UUID.randomUUID(), listOf(spleisVilkårsgrunnlag(
             avviksprosent = NaN
-        ))).grunnlag
+        )))
+        assertAvviksprosent(100.0, graphQlGrunnlag)
+    }
 
-        assertEquals(emptyList<GraphQLVilkarsgrunnlag>(), graphQlGrunnlag)
+    @Test
+    fun `mapper vilkårsgrunnlag med avviksprosent null`() {
+        val graphQlGrunnlag = mapVilkårsgrunnlag(UUID.randomUUID(), listOf(spleisVilkårsgrunnlag(
+            avviksprosent = null
+        )))
+        assertAvviksprosent(null, graphQlGrunnlag)
     }
 
     private fun spleisVilkårsgrunnlag(
         skjæringstidpunkt: LocalDate = 1.januar(2018),
-        avviksprosent: Double) = SpleisVilkårsgrunnlag(
+        avviksprosent: Double?) = SpleisVilkårsgrunnlag(
         skjæringstidspunkt = skjæringstidpunkt,
         omregnetÅrsinntekt = 500000.0,
         sammenligningsgrunnlag = 500000.0,
@@ -67,4 +71,8 @@ internal class GraphQLVilkårsgrunnlagTest {
         oppfyllerKravOmOpptjening = true,
         oppfyllerKravOmMedlemskap = true
     )
+
+    private fun assertAvviksprosent(avviksprosent: Double?, historikk: GraphQLVilkarsgrunnlaghistorikk){
+        assertEquals(avviksprosent, historikk.grunnlag.filterIsInstance<GraphQLSpleisVilkarsgrunnlag>().first().avviksprosent)
+    }
 }
