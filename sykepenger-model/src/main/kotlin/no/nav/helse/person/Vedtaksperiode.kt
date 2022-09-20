@@ -2246,6 +2246,10 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.låsOpp()
         }
 
+        override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
+            inntektsmelding.trimLeft(vedtaksperiode.periode.endInclusive)
+        }
+
         override fun håndter(
             person: Person,
             arbeidsgiver: Arbeidsgiver,

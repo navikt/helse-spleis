@@ -1946,7 +1946,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             "Vi har mottatt en inntektsmelding i en løpende sykmeldingsperiode med oppgitt første/bestemmende fraværsdag som er ulik tidligere fastsatt skjæringstidspunkt.",
             2.vedtaksperiode.filter()
         )
-        assertVarsel(
+        assertIngenVarsel(
             "Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.",
             2.vedtaksperiode.filter()
         )
