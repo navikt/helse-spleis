@@ -130,7 +130,8 @@ internal fun AbstractEndToEndTest.søknad(
     fødselsdato: LocalDate = UNG_PERSON_FØDSELSDATO,
     korrigerer: UUID? = null,
     opprinneligSendt: LocalDate? = null,
-    merknaderFraSykmelding: List<Søknad.Merknad> = emptyList()
+    merknaderFraSykmelding: List<Søknad.Merknad> = emptyList(),
+    permittert: Boolean = false
 ) = ArbeidsgiverHendelsefabrikk(AKTØRID, fnr, orgnummer, fødselsdato).lagSøknad(
     id = id,
     perioder = perioder,
@@ -139,7 +140,8 @@ internal fun AbstractEndToEndTest.søknad(
     sykmeldingSkrevet = sykmeldingSkrevet ?: Søknadsperiode.søknadsperiode(perioder.toList())!!.start.atStartOfDay(),
     korrigerer = korrigerer,
     opprinneligSendt = opprinneligSendt,
-    merknaderFraSykmelding = merknaderFraSykmelding
+    merknaderFraSykmelding = merknaderFraSykmelding,
+    permittert = permittert
 ).apply {
     hendelselogg = this
 }

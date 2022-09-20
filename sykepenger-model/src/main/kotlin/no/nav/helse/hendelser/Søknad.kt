@@ -80,7 +80,7 @@ class Søknad(
         perioder.forEach { it.subsumsjon(this.perioder.subsumsjonsFormat(), subsumsjonObserver) }
         perioder.forEach { it.valider(this) }
         andreInntektskilder.forEach { it.valider(this) }
-        if (permittert) varsel("Søknaden inneholder permittering. Vurder om permittering har konsekvens for rett til sykepenger")
+        if (permittert) varsel(RV_SØ_1)
         merknaderFraSykmelding.forEach { it.valider(this) }
         if (sykdomstidslinje.any { it is Dag.ForeldetSykedag }) varsel(RV_SØ_2)
         return this

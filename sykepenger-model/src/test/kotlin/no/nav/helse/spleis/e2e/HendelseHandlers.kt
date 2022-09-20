@@ -423,7 +423,8 @@ internal fun AbstractEndToEndTest.håndterSøknad(
     fnr: Personidentifikator = AbstractPersonTest.UNG_PERSON_FNR_2018,
     korrigerer: UUID? = null,
     opprinneligSendt: LocalDate? = null,
-    merknaderFraSykmelding: List<Søknad.Merknad> = emptyList()
+    merknaderFraSykmelding: List<Søknad.Merknad> = emptyList(),
+    permittert: Boolean = false
 ): UUID {
     søknad(
         id,
@@ -435,7 +436,8 @@ internal fun AbstractEndToEndTest.håndterSøknad(
         fnr = fnr,
         korrigerer = korrigerer,
         opprinneligSendt = opprinneligSendt,
-        merknaderFraSykmelding = merknaderFraSykmelding
+        merknaderFraSykmelding = merknaderFraSykmelding,
+        permittert = permittert
     ).håndter(Person::håndter)
     søknader[id] = Triple(sendtTilNAVEllerArbeidsgiver, andreInntektskilder, perioder)
     return id
