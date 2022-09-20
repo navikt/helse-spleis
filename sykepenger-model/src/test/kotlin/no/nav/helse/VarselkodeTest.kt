@@ -20,10 +20,10 @@ internal class VarselkodeTest {
         val aktiveVarselkoder = Varselkode.aktiveVarselkoder.toSet()
         val ikkeTestedeVarselkoder = aktiveVarselkoder.toMutableSet().apply {
             removeAll(finnAlleVarselkoderITest().toSet())
-        }
+        }.toSet()
 
         val varselkoderSomKjentManglerTest = listOf(
-            RV_SY_1, RV_SØ_1, RV_SØ_2, RV_SØ_3, RV_SØ_4, RV_SØ_5, RV_SØ_6, RV_SØ_7, RV_SØ_8, RV_SØ_9,
+            RV_SY_1, RV_SØ_1, RV_SØ_3, RV_SØ_4, RV_SØ_5, RV_SØ_6, RV_SØ_7, RV_SØ_8, RV_SØ_9,
             RV_SØ_10, RV_IM_1, RV_IM_2, RV_IM_3, RV_IM_4, RV_IM_5, RV_IM_6, RV_RE_1, RV_IT_1, RV_IT_2,
             RV_IT_3, RV_IT_4, RV_IT_5, RV_VV_1, RV_VV_2, RV_VV_4, RV_VV_5, RV_VV_6, RV_VV_7, RV_OV_1,
             RV_OV_2, RV_MV_1, RV_MV_2, RV_IV_1, RV_IV_2, RV_SV_1, RV_SV_2, RV_AY_1, RV_AY_2, RV_AY_3,
@@ -32,20 +32,20 @@ internal class VarselkodeTest {
         )
 
         val varselkoderSomNåManglerTest = ikkeTestedeVarselkoder.minus(varselkoderSomKjentManglerTest.toSet())
-        val (varselkoderSomFortsattErGyldige, varselkoderSomIkkeFinnesLenger) = varselkoderSomKjentManglerTest.partition { it in aktiveVarselkoder }
-        val varselkoderSomNåTestesEksplisitt = varselkoderSomFortsattErGyldige.minus(aktiveVarselkoder)
+        val (varselkoderSomFortsattBrukes, varselkoderSomIkkeBrukesLenger) = varselkoderSomKjentManglerTest.partition { it in aktiveVarselkoder }
+        val varselkoderSomNåTestesEksplisitt = varselkoderSomFortsattBrukes.minus(ikkeTestedeVarselkoder)
 
         assertForventetFeil(
             forklaring = "Ikke alle varselkoder testes eksplisitt",
             ønsket = { assertEquals(emptySet<Varselkode>(), aktiveVarselkoder) },
             nå = {
                 assertEquals(emptySet<Varselkode>(), varselkoderSomNåManglerTest) {
-                    "Du har tatt i bruk en ny varselkode! Legg til eksplisitt test for nye varselkoder! _ikke_ legg den i listen av varselkoder som mangler eksplisitt test."
+                    "Du har tatt i bruk en ny varselkode! Legg til eksplisitt test for nye varselkoder. _Ikke_ legg den i listen av varselkoder som mangler eksplisitt test."
                 }
             }
         )
 
-        assertEquals(emptySet<Varselkode>(), varselkoderSomIkkeFinnesLenger.toSet()) {
+        assertEquals(emptySet<Varselkode>(), varselkoderSomIkkeBrukesLenger.toSet()) {
             "Disse varselkodene er ikke lenger i bruk. Du kan fjerne de fra listen av varsler som kjent mangler test."
         }
 
