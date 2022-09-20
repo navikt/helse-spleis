@@ -13,6 +13,7 @@ import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.Person
 import no.nav.helse.person.Personopplysninger
 import no.nav.helse.person.Sykmeldingsperioder
+import no.nav.helse.person.Varselkode
 import no.nav.helse.person.Varselkode.*
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.etterlevelse.MaskinellJurist
@@ -167,6 +168,9 @@ class Søknad(
         internal fun valider(søknad: Søknad, beskjed: String) {
             if (periode.utenfor(søknad.sykdomsperiode)) søknad.varsel(beskjed)
         }
+        internal fun valider(søknad: Søknad, varselkode: Varselkode) {
+            if (periode.utenfor(søknad.sykdomsperiode)) søknad.varsel(varselkode)
+        }
 
         internal open fun subsumsjon(søknadsperioder: List<Map<String, Serializable>>, subsumsjonObserver: SubsumsjonObserver) {}
 
@@ -212,7 +216,7 @@ class Søknad(
                 Sykdomstidslinje.permisjonsdager(periode.start, periode.endInclusive, kilde)
 
             override fun valider(søknad: Søknad) {
-                valider(søknad, "Søknaden inneholder Permisjonsdager utenfor sykdomsvindu")
+                valider(søknad, RV_SØ_5)
             }
         }
 
