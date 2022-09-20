@@ -20,7 +20,6 @@ internal object BrukteVilkårsgrunnlag {
     private val JsonNode.vilkårsgrunnlagId get() = path("vilkårsgrunnlagId").asText()
     private val JsonNode.fraInfotrygd get() = path("type").asText() == "Infotrygd"
     private val JsonNode.gyldigSykepengegrunnlag get() = path("sykepengegrunnlag").path("sykepengegrunnlag").asDouble() > 0
-    private val JsonNode.gyldigAvviksprosent get() = path("avviksprosent").asDouble() != Double.POSITIVE_INFINITY
     private val JsonNode.fraSpleis get() = path("type").asText() == "Vilkårsprøving"
     private val JsonNode.tilstand get() = path("tilstand").asText()
 
@@ -33,7 +32,7 @@ internal object BrukteVilkårsgrunnlag {
 
     private fun List<JsonNode>.finnSpleisVilkårsgrunnlag(sykefraværstilfelle: Periode): JsonNode? {
         val skjæringstidspunkt = sykefraværstilfelle.start
-        return filter { it.fraSpleis && it.gyldigAvviksprosent }.singleOrNull { it.skjæringstidspunkt == skjæringstidspunkt }
+        return filter { it.fraSpleis }.singleOrNull { it.skjæringstidspunkt == skjæringstidspunkt }
     }
 
     private fun List<JsonNode>.finnRiktigVilkårsgrunnlag(sykefraværstilfelle: Periode, perioderUtbetaltIInfotrygd: List<Periode>): JsonNode? {
