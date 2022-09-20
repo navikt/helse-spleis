@@ -35,4 +35,13 @@ internal class VarslerE2ETest: AbstractEndToEndTest() {
         )
         assertVarsel(Varselkode.RV_SØ_5, 1.vedtaksperiode.filter())
     }
+
+    @Test
+    fun `varsel - Det er oppgitt annen inntektskilde i søknaden, Vurder inntekt`() {
+        håndterSøknad(
+            Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent),
+            andreInntektskilder = listOf(Søknad.Inntektskilde(true, "ANNET")),
+        )
+        assertVarsel(Varselkode.RV_SØ_9, 1.vedtaksperiode.filter())
+    }
 }

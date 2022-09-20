@@ -226,7 +226,7 @@ class Søknad(
                     søknad.info("Søknaden inneholder egenmeldingsdager som er mer enn $tidslinjegrense dager før sykmeldingsperioden")
                 }
                 if (periode.endInclusive > søknad.sykdomsperiode.endInclusive) {
-                    søknad.varsel("Søknaden inneholder egenmeldingsdager etter sykmeldingsperioden")
+                    søknad.varsel(RV_SØ_6)
                 }
             }
 
@@ -236,7 +236,7 @@ class Søknad(
 
         class Arbeid(fom: LocalDate, tom: LocalDate) : Søknadsperiode(fom, tom, "arbeid") {
             override fun valider(søknad: Søknad) =
-                valider(søknad, "Søknaden inneholder Arbeidsdager utenfor sykdomsvindu")
+                valider(søknad, RV_SØ_7)
 
             override fun sykdomstidslinje(sykdomsperiode: Periode, avskjæringsdato: LocalDate, kilde: Hendelseskilde) =
                 Sykdomstidslinje.arbeidsdager(periode.start, periode.endInclusive, kilde)
@@ -248,7 +248,7 @@ class Søknad(
 
             override fun valider(søknad: Søknad) {
                 if (alleUtlandsdagerErFerie(søknad)) return
-                søknad.varsel("Utenlandsopphold oppgitt i perioden i søknaden.")
+                søknad.varsel(RV_SØ_8)
             }
 
             override fun subsumsjon(søknadsperioder: List<Map<String, Serializable>>, subsumsjonObserver: SubsumsjonObserver) {
@@ -268,7 +268,7 @@ class Søknad(
     ) {
         fun valider(aktivitetslogg: IAktivitetslogg) {
             if (type == "ANNET") {
-                aktivitetslogg.varsel("Det er oppgitt annen inntektskilde i søknaden. Vurder inntekt.")
+                aktivitetslogg.varsel(RV_SØ_9)
             } else if (type != "ANDRE_ARBEIDSFORHOLD") {
                 aktivitetslogg.funksjonellFeil("Søknaden inneholder andre inntektskilder enn ANDRE_ARBEIDSFORHOLD")
             }

@@ -47,13 +47,14 @@ internal class WarningsTest {
             "Bruker har mottatt dagpenger innenfor 4 uker før skjæringstidspunktet. Kontroller om bruker er dagpengemottaker. Kombinerte ytelser støttes foreløpig ikke av systemet",
             "Perioden er avslått på grunn av at den sykmeldte ikke er medlem av Folketrygden",
             "Bruker har mottatt AAP innenfor 6 måneder før skjæringstidspunktet. Kontroller at brukeren har rett til sykepenger",
-            "Søknaden inneholder permittering. Vurder om permittering har konsekvens for rett til sykepenger",
-            "Søknaden inneholder egenmeldingsdager etter sykmeldingsperioden",
             "Opptjeningsvurdering må gjøres manuelt fordi opplysningene fra AA-registeret er ufullstendige",
             "Utbetalingen ble gjennomført, men med advarsel: \$melding",
             "Utbetalingen forlenger et tidligere oppdrag som opphørte alle utbetalte dager. Sjekk simuleringen.",
-            "Søknaden inneholder Permisjonsdager utenfor sykdomsvindu",
-            "Første utbetalingsdag er i Infotrygd og mellom 1. og 16. mai. Kontroller at riktig grunnbeløp er brukt."
+            "Første utbetalingsdag er i Infotrygd og mellom 1. og 16. mai. Kontroller at riktig grunnbeløp er brukt.",
+            // disse under er erstattet med varselkode, dukker nå opp
+
+            // disse er det nå skrevet tester for med varselkode
+            "Søknaden inneholder Permisjonsdager utenfor sykdomsvindu"
         )
 
         val nyeWarningerSomManglerEksplisittTest = ikkeTestedeWarnings.minus(warningerSomManglerEksplisittTest)
