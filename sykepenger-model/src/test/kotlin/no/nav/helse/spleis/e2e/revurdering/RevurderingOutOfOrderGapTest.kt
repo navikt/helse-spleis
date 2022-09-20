@@ -36,6 +36,8 @@ import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
+import no.nav.helse.spleis.e2e.assertInfo
+import no.nav.helse.spleis.e2e.assertIngenInfo
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertUtbetalingsbeløp
@@ -570,6 +572,8 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         nyPeriode(1.januar til 31.januar)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_REVURDERING)
 
+        assertIngenInfo("Revurdering førte til at vedtaksperioden trenger inntektsmelding", 1.vedtaksperiode.filter())
+
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode)
@@ -594,6 +598,8 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
 
         nyPeriode(1.februar til 25.februar)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_REVURDERING)
+
+        assertInfo("Revurdering førte til at vedtaksperioden trenger inntektsmelding", 1.vedtaksperiode.filter())
 
         håndterInntektsmelding(listOf(1.februar til 16.februar))
         håndterYtelser(2.vedtaksperiode)

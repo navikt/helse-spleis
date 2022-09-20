@@ -1017,6 +1017,10 @@ internal class Vedtaksperiode private constructor(
         override fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime): LocalDateTime =
             LocalDateTime.MAX
 
+        override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+            if(vedtaksperiode.forventerInntekt()) hendelse.info("Revurdering førte til at vedtaksperioden trenger inntektsmelding")
+        }
+
         override fun gjenopptaBehandling(
             vedtaksperiode: Vedtaksperiode,
             arbeidsgivere: Iterable<Arbeidsgiver>,
