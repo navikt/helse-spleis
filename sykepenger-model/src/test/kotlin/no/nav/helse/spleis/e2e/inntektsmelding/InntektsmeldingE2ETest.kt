@@ -42,6 +42,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.Varselkode.RV_IM_1
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.sisteBehov
@@ -1101,7 +1102,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             1.vedtaksperiode.filter()
         )
         assertIngenVarsel(
-            "Vi har mottatt en inntektsmelding i en løpende sykmeldingsperiode med oppgitt første/bestemmende fraværsdag som er ulik tidligere fastsatt skjæringstidspunkt.",
+            RV_IM_1,
             2.vedtaksperiode.filter()
         )
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
@@ -1530,7 +1531,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             1.vedtaksperiode.filter()
         )
         assertIngenVarsel(
-            "Vi har mottatt en inntektsmelding i en løpende sykmeldingsperiode med oppgitt første/bestemmende fraværsdag som er ulik tidligere fastsatt skjæringstidspunkt.",
+            RV_IM_1,
             1.vedtaksperiode.filter()
         )
         assertIngenVarsel(
@@ -1542,7 +1543,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             2.vedtaksperiode.filter()
         )
         assertVarsel(
-            "Vi har mottatt en inntektsmelding i en løpende sykmeldingsperiode med oppgitt første/bestemmende fraværsdag som er ulik tidligere fastsatt skjæringstidspunkt.",
+            RV_IM_1,
             2.vedtaksperiode.filter()
         )
         assertIngenVarsel(
@@ -1581,7 +1582,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             2.vedtaksperiode.filter()
         )
         assertIngenVarsel(
-            "Vi har mottatt en inntektsmelding i en løpende sykmeldingsperiode med oppgitt første/bestemmende fraværsdag som er ulik tidligere fastsatt skjæringstidspunkt.",
+            RV_IM_1,
             2.vedtaksperiode.filter()
         )
         assertVarsel(
@@ -1589,7 +1590,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             3.vedtaksperiode.filter()
         )
         assertVarsel(
-            "Vi har mottatt en inntektsmelding i en løpende sykmeldingsperiode med oppgitt første/bestemmende fraværsdag som er ulik tidligere fastsatt skjæringstidspunkt.",
+            RV_IM_1,
             3.vedtaksperiode.filter()
         )
         assertIngenVarsel(
@@ -1943,7 +1944,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             2.vedtaksperiode.filter()
         )
         assertIngenVarsel(
-            "Vi har mottatt en inntektsmelding i en løpende sykmeldingsperiode med oppgitt første/bestemmende fraværsdag som er ulik tidligere fastsatt skjæringstidspunkt.",
+            RV_IM_1,
             2.vedtaksperiode.filter()
         )
         assertIngenVarsel(

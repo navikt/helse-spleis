@@ -4,7 +4,9 @@ import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
+import no.nav.helse.hendelser.til
 import no.nav.helse.januar
+import no.nav.helse.person.Varselkode.RV_IM_1
 import no.nav.helse.person.Varselkode.RV_SØ_1
 import no.nav.helse.person.Varselkode.RV_SØ_10
 import no.nav.helse.person.Varselkode.RV_SØ_2
@@ -98,4 +100,12 @@ internal class VarslerE2ETest: AbstractEndToEndTest() {
         )
         assertVarsel(RV_SØ_10, 1.vedtaksperiode.filter())
     }
-}
+
+    @Test
+    fun `ny inntektsmelding med første fraværsdag i en sammenhengende periode`() {
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 10.januar, 100.prosent))
+        val imId = håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 23.januar)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(11.januar, 31.januar, 100.prosent))
+        håndterInntektsmeldingReplay(imId, 2.vedtaksperiode.id(ORGNUMMER))
+        assertVarsel(RV_IM_1, 2.vedtaksperiode.filter())
+    }}
