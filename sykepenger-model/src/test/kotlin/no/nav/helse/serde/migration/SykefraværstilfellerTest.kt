@@ -63,7 +63,7 @@ private val json = """{
       "vedtaksperioder": [
         {
           "fom": "2017-12-15",
-          "tom": "2017-12-31",
+          "tom": "2017-12-29",
           "tilstand": "AVSLUTTET_UTEN_UTBETALING",
           "skjæringstidspunkt": "2017-12-15"
         },
@@ -89,9 +89,19 @@ private val json = """{
       "vedtaksperioder": [
         {
           "fom": "2018-03-01",
-          "tom": "2018-03-31",
+          "tom": "2018-03-29",
           "tilstand": "AVSLUTTET",
           "skjæringstidspunkt": "2018-01-01"
+        }
+      ], 
+      "forkastede": [
+        {
+          "vedtaksperiode": {
+            "fom": "2018-03-30",
+            "tom": "2018-03-31",
+            "tilstand": "TIL_INFOTRYGD",
+            "skjæringstidspunkt": "2018-01-01"
+          }
         }
       ]
     }

@@ -24,7 +24,13 @@ internal object Sykefraværstilfeller {
             .flatMap { it.path("vedtaksperioder") }
             .filterNot { it.tilstand == "AVSLUTTET_UTEN_UTBETALING" }
 
-        return aktiveVedtaksperioder.map { Vedtaksperiode(it.skjæringstidspunkt, it.fom til it.tom, it.tilstand) }
+        val forkastedeVedtaksperioder = person.path("arbeidsgivere")
+            .flatMap { it.path("forkastede") }
+            .map { it.path("vedtaksperiode") }
+
+        val alleVedtaksperioder = aktiveVedtaksperioder + forkastedeVedtaksperioder
+
+        return alleVedtaksperioder.map { Vedtaksperiode(it.skjæringstidspunkt, it.fom til it.tom, it.tilstand) }
     }
 
     internal fun sykefraværstilfeller(vedtaksperioder: List<Vedtaksperiode>): Set<Sykefraværstilfelle>{
