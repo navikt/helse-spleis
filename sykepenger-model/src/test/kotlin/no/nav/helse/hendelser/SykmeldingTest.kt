@@ -4,7 +4,6 @@ import java.time.LocalDateTime
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.februar
 import no.nav.helse.januar
-import no.nav.helse.juli
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.somPersonidentifikator
@@ -14,7 +13,6 @@ import no.nav.helse.sykdomstidslinje.Dag.UkjentDag
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
@@ -56,18 +54,6 @@ internal class SykmeldingTest {
         assertThrows<Aktivitetslogg.AktivitetException> {
             sykmelding(Sykmeldingsperiode(10.januar, 12.januar, 100.prosent), Sykmeldingsperiode(1.januar, 12.januar, 100.prosent))
         }
-    }
-
-    @Test
-    fun `sykmelding ikke eldre enn 6 måneder får ikke error`() {
-        sykmelding(Sykmeldingsperiode(1.januar, 12.januar, 100.prosent), mottatt = 12.juli.atStartOfDay())
-        assertFalse(sykmelding.valider(sykmelding.periode(), MaskinellJurist()).harFunksjonelleFeilEllerVerre())
-    }
-
-    @Test
-    fun `sykmelding eldre enn 6 måneder får error`() {
-        sykmelding(Sykmeldingsperiode(1.januar, 12.januar, 100.prosent), mottatt = 13.juli.atStartOfDay())
-        assertTrue(sykmelding.valider(sykmelding.periode(), MaskinellJurist()).harFunksjonelleFeilEllerVerre())
     }
 
     private fun sykmelding(vararg sykeperioder: Sykmeldingsperiode, mottatt: LocalDateTime? = null) {

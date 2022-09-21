@@ -5,7 +5,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Dokumentsporing
-import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.Personopplysninger
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.somPersonidentifikator
@@ -42,14 +41,7 @@ class Sykmelding(
 
     override fun personopplysninger() = Personopplysninger(fødselsnummer.somPersonidentifikator(), aktørId, fødselsdato)
 
-    override fun valider(periode: Periode, subsumsjonObserver: SubsumsjonObserver): IAktivitetslogg {
-        validerAtSykmeldingIkkeErForGammel()
-        return this
-    }
-
-    internal fun validerAtSykmeldingIkkeErForGammel() {
-        if (periode.endInclusive < mottatt.toLocalDate().minusMonths(6)) funksjonellFeil(ERRORTEKST_FOR_GAMMEL)
-    }
+    override fun valider(periode: Periode, subsumsjonObserver: SubsumsjonObserver) = this
 
     override fun sykdomstidslinje() = sykdomstidslinje
 
