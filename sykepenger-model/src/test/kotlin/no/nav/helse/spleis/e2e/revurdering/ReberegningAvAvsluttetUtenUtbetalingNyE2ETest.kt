@@ -40,6 +40,7 @@ import no.nav.helse.person.TilstandType.REVURDERING_FEILET
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.Varselkode.RV_IM_2
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.person.infotrygdhistorikk.PersonUtbetalingsperiode
@@ -410,7 +411,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
 
         håndterYtelser(2.vedtaksperiode)
 
-        assertVarsel("Første fraværsdag i inntektsmeldingen er ulik skjæringstidspunktet. Kontrollér at inntektsmeldingen er knyttet til riktig periode.", 1.vedtaksperiode.filter(a1))
+        assertVarsel(RV_IM_2, 1.vedtaksperiode.filter(a1))
         assertVarsel("Denne perioden var tidligere regnet som innenfor arbeidsgiverperioden", 2.vedtaksperiode.filter(a1))
         //assertNoWarnings(2.vedtaksperiode.filter(a1))
 
@@ -456,7 +457,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
 
         håndterYtelser(3.vedtaksperiode)
 
-        assertVarsel("Første fraværsdag i inntektsmeldingen er ulik skjæringstidspunktet. Kontrollér at inntektsmeldingen er knyttet til riktig periode.", 1.vedtaksperiode.filter(a1))
+        assertVarsel(RV_IM_2, 1.vedtaksperiode.filter(a1))
         assertVarsel("Denne perioden var tidligere regnet som innenfor arbeidsgiverperioden", 2.vedtaksperiode.filter(a1))
         //assertNoWarnings(2.vedtaksperiode.filter(a1))
         assertIngenVarsler(3.vedtaksperiode.filter(a1))

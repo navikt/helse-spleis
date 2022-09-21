@@ -10,6 +10,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.personLogg
 import no.nav.helse.januar
 import no.nav.helse.mars
+import no.nav.helse.person.Varselkode.RV_IM_2
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -74,12 +75,12 @@ internal class VarselOmFlereInntektsmeldingerTest : AbstractEndToEndTest() {
             nå = {
                 assertIngenVarsel("Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.", 2.vedtaksperiode.filter())
                 assertIngenVarsel("Inntektsmeldingen og vedtaksløsningen er uenige om beregningen av arbeidsgiverperioden. Undersøk hva som er riktig arbeidsgiverperiode.", 2.vedtaksperiode.filter())
-                assertIngenVarsel("Første fraværsdag i inntektsmeldingen er ulik skjæringstidspunktet. Kontrollér at inntektsmeldingen er knyttet til riktig periode.", 2.vedtaksperiode.filter())
+                assertIngenVarsel(RV_IM_2, 2.vedtaksperiode.filter())
             },
             ønsket = {
                 assertVarsel("Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.", 2.vedtaksperiode.filter())
                 assertVarsel("Inntektsmeldingen og vedtaksløsningen er uenige om beregningen av arbeidsgiverperioden. Undersøk hva som er riktig arbeidsgiverperiode.", 2.vedtaksperiode.filter())
-                assertVarsel("Første fraværsdag i inntektsmeldingen er ulik skjæringstidspunktet. Kontrollér at inntektsmeldingen er knyttet til riktig periode.", 2.vedtaksperiode.filter())
+                assertVarsel(RV_IM_2, 2.vedtaksperiode.filter())
             }
         )
     }

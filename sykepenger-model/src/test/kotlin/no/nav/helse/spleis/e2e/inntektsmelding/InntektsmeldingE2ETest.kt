@@ -43,6 +43,7 @@ import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.Varselkode.RV_IM_1
+import no.nav.helse.person.Varselkode.RV_IM_2
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.sisteBehov
@@ -1530,26 +1531,14 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             "Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.",
             1.vedtaksperiode.filter()
         )
-        assertIngenVarsel(
-            RV_IM_1,
-            1.vedtaksperiode.filter()
-        )
-        assertIngenVarsel(
-            "Første fraværsdag i inntektsmeldingen er ulik skjæringstidspunktet. Kontrollér at inntektsmeldingen er knyttet til riktig periode.",
-            1.vedtaksperiode.filter()
-        )
+        assertIngenVarsel(RV_IM_1, 1.vedtaksperiode.filter())
+        assertIngenVarsel(RV_IM_2, 1.vedtaksperiode.filter())
         assertVarsel(
             "Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.",
             2.vedtaksperiode.filter()
         )
-        assertVarsel(
-            RV_IM_1,
-            2.vedtaksperiode.filter()
-        )
-        assertIngenVarsel(
-            "Første fraværsdag i inntektsmeldingen er ulik skjæringstidspunktet. Kontrollér at inntektsmeldingen er knyttet til riktig periode.",
-            2.vedtaksperiode.filter()
-        )
+        assertVarsel(RV_IM_1, 2.vedtaksperiode.filter())
+        assertIngenVarsel(RV_IM_2, 2.vedtaksperiode.filter())
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
     }
@@ -1578,7 +1567,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             2.vedtaksperiode.filter()
         )
         assertIngenVarsel(
-            "Første fraværsdag i inntektsmeldingen er ulik skjæringstidspunktet. Kontrollér at inntektsmeldingen er knyttet til riktig periode.",
+            RV_IM_2,
             2.vedtaksperiode.filter()
         )
         assertIngenVarsel(
@@ -1594,7 +1583,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             3.vedtaksperiode.filter()
         )
         assertIngenVarsel(
-            "Første fraværsdag i inntektsmeldingen er ulik skjæringstidspunktet. Kontrollér at inntektsmeldingen er knyttet til riktig periode.",
+            RV_IM_2,
             3.vedtaksperiode.filter()
         )
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
@@ -1679,7 +1668,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(3.januar, 26.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(3.januar, 18.januar)), 4.januar)
         assertVarsel(
-            "Første fraværsdag i inntektsmeldingen er ulik skjæringstidspunktet. Kontrollér at inntektsmeldingen er knyttet til riktig periode.",
+            RV_IM_2,
             1.vedtaksperiode.filter()
         )
         assertTilstander(
@@ -1940,7 +1929,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             1.vedtaksperiode.filter()
         )
         assertIngenVarsel(
-            "Første fraværsdag i inntektsmeldingen er ulik skjæringstidspunktet. Kontrollér at inntektsmeldingen er knyttet til riktig periode.",
+            RV_IM_2,
             2.vedtaksperiode.filter()
         )
         assertIngenVarsel(

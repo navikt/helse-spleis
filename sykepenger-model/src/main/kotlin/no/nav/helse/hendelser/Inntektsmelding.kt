@@ -16,7 +16,9 @@ import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.InntektsmeldingInfo
 import no.nav.helse.person.Personopplysninger
 import no.nav.helse.person.Refusjonshistorikk
+import no.nav.helse.person.Varselkode
 import no.nav.helse.person.Varselkode.RV_IM_1
+import no.nav.helse.person.Varselkode.RV_IM_2
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
@@ -46,7 +48,6 @@ class Inntektsmelding(
 ) : SykdomstidslinjeHendelse(meldingsreferanseId, fødselsnummer, aktørId, orgnummer, mottatt) {
     internal companion object {
         internal const val WARN_UENIGHET_ARBEIDSGIVERPERIODE = "Inntektsmeldingen og vedtaksløsningen er uenige om beregningen av arbeidsgiverperioden. Undersøk hva som er riktig arbeidsgiverperiode."
-        internal const val WARN_ULIKHET_FØRSTE_FRAVÆRSDAG_OG_SKJÆRINGSTIDSPUNKT = "Første fraværsdag i inntektsmeldingen er ulik skjæringstidspunktet. Kontrollér at inntektsmeldingen er knyttet til riktig periode."
     }
 
     private val arbeidsgiverperioder = arbeidsgiverperioder.grupperSammenhengendePerioder()
@@ -137,7 +138,7 @@ class Inntektsmelding(
 
     private fun validerFørsteFraværsdag(skjæringstidspunkt: LocalDate) {
         if (førsteFraværsdag == null || førsteFraværsdag == skjæringstidspunkt) return
-        varsel(WARN_ULIKHET_FØRSTE_FRAVÆRSDAG_OG_SKJÆRINGSTIDSPUNKT)
+        varsel(RV_IM_2)
     }
 
     private fun validerArbeidsgiverperiode(arbeidsgiverperiode: Arbeidsgiverperiode) {
@@ -154,7 +155,7 @@ class Inntektsmelding(
 
         val inntektsdato = if (førsteFraværsdagErEtterArbeidsgiverperioden(førsteFraværsdag)) minOf(førsteFraværsdagFraSpleis, førsteFraværsdag) else arbeidsgiverperioder.maxOf { it.start }
         if (inntektsdato != førsteFraværsdag) {
-            varsel(WARN_ULIKHET_FØRSTE_FRAVÆRSDAG_OG_SKJÆRINGSTIDSPUNKT)
+            varsel(RV_IM_2)
         }
 
         val (årligInntekt, dagligInntekt) = beregnetInntekt.reflection { årlig, _, daglig, _ -> årlig to daglig }

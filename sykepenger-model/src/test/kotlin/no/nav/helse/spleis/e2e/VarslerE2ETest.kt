@@ -6,7 +6,9 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
+import no.nav.helse.person.Varselkode
 import no.nav.helse.person.Varselkode.RV_IM_1
+import no.nav.helse.person.Varselkode.RV_IM_2
 import no.nav.helse.person.Varselkode.RV_SØ_1
 import no.nav.helse.person.Varselkode.RV_SØ_10
 import no.nav.helse.person.Varselkode.RV_SØ_2
@@ -102,10 +104,18 @@ internal class VarslerE2ETest: AbstractEndToEndTest() {
     }
 
     @Test
-    fun `ny inntektsmelding med første fraværsdag i en sammenhengende periode`() {
+    fun `varsel - Vi har mottatt en inntektsmelding i en løpende sykmeldingsperiode med oppgitt første - bestemmende fraværsdag som er ulik tidligere fastsatt skjæringstidspunkt`() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 10.januar, 100.prosent))
         val imId = håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 23.januar)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(11.januar, 31.januar, 100.prosent))
         håndterInntektsmeldingReplay(imId, 2.vedtaksperiode.id(ORGNUMMER))
         assertVarsel(RV_IM_1, 2.vedtaksperiode.filter())
-    }}
+    }
+
+    @Test
+    fun `varsel - Første fraværsdag i inntektsmeldingen er ulik skjæringstidspunktet, Kontrollér at inntektsmeldingen er knyttet til riktig periode`() {
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 23.januar)
+        assertVarsel(RV_IM_2, 1.vedtaksperiode.filter())
+    }
+}
