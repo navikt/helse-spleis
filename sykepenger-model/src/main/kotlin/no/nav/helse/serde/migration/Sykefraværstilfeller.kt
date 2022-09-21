@@ -19,12 +19,12 @@ internal object Sykefraværstilfeller {
     private val JsonNode.tom get() = path("tom").dato
     private val JsonNode.tilstand get() = path("tilstand").asText()
 
-    internal fun sykefraværstilfeller(person: JsonNode): Set<Sykefraværstilfelle> {
+    internal fun vedtaksperioder(person: JsonNode): List<Vedtaksperiode> {
         val aktiveVedtaksperioder = person.path("arbeidsgivere")
             .flatMap { it.path("vedtaksperioder") }
             .filterNot { it.tilstand == "AVSLUTTET_UTEN_UTBETALING" }
 
-        return sykefraværstilfeller(aktiveVedtaksperioder.map { Vedtaksperiode(it.skjæringstidspunkt, it.fom til it.tom) })
+        return aktiveVedtaksperioder.map { Vedtaksperiode(it.skjæringstidspunkt, it.fom til it.tom, it.tilstand) }
     }
 
     internal fun sykefraværstilfeller(vedtaksperioder: List<Vedtaksperiode>): Set<Sykefraværstilfelle>{
@@ -40,8 +40,8 @@ internal object Sykefraværstilfeller {
     private fun List<Vedtaksperiode>.skjæringstidspunkterFor(periode: Periode) =
         filter { periode.overlapperMed(it.periode) }.map { it.skjæringstidspunkt }.toSet()
 
-    internal class Vedtaksperiode(val skjæringstidspunkt: LocalDate, val periode: Periode)
-    internal data class Sykefraværstilfelle(val skjæringstidspunkter: Set<LocalDate>, val periode: Periode)
-
-
+    internal data class Vedtaksperiode(val skjæringstidspunkt: LocalDate, val periode: Periode, val tilstand: String)
+    internal data class Sykefraværstilfelle(val skjæringstidspunkter: Set<LocalDate>, val periode: Periode) {
+        internal val tidligsteSkjæringstidspunkt = skjæringstidspunkter.min()
+    }
 }

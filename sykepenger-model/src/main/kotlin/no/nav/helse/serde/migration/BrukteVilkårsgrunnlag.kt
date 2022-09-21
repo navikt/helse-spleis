@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import java.time.LocalDate
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
+import no.nav.helse.serde.migration.Sykefraværstilfeller.sykefraværstilfeller
+import no.nav.helse.serde.migration.Sykefraværstilfeller.vedtaksperioder
 import no.nav.helse.serde.serdeObjectMapper
 import org.slf4j.LoggerFactory
 
@@ -21,7 +23,6 @@ internal object BrukteVilkårsgrunnlag {
     private val JsonNode.fraInfotrygd get() = path("type").asText() == "Infotrygd"
     private val JsonNode.gyldigSykepengegrunnlag get() = path("sykepengegrunnlag").path("sykepengegrunnlag").asDouble() > 0
     private val JsonNode.fraSpleis get() = path("type").asText() == "Vilkårsprøving"
-    private val JsonNode.tilstand get() = path("tilstand").asText()
 
     private fun List<Periode>.rettFørEllerOverlapperMed(periode: Periode) =
         any { it.overlapperMed(periode) || it.erRettFør(periode) }
@@ -53,21 +54,9 @@ internal object BrukteVilkårsgrunnlag {
         val sisteInnslag = vilkårsgrunnlagHistorikk.firstOrNull() ?: return null
         val aktørId = jsonNode.path("aktørId").asText()
 
-        val vedtaksperioderPerSkjæringstidspunkt = jsonNode.path("arbeidsgivere")
-            .flatMap { it.path("vedtaksperioder") }
-            .filterNot { it.tilstand == "AVSLUTTET_UTEN_UTBETALING" }
-            .groupBy { it.skjæringstidspunkt }
-
-        val sykefraværstilfeller = vedtaksperioderPerSkjæringstidspunkt
-            .map { (skjæringstidspunkt, vedtaksperioder) ->
-                skjæringstidspunkt til vedtaksperioder.maxOf { it.tom }
-            }
-
-        val tilstanderPerSkjæringstidspunkt = vedtaksperioderPerSkjæringstidspunkt
-            .mapValues { (_, vedtaksperioder) ->
-                val førsteFom = vedtaksperioder.minOf { it.fom }
-                vedtaksperioder.filter { it.fom == førsteFom }.map { it.tilstand }
-            }
+        val vedtaksperioder = vedtaksperioder(jsonNode)
+        val sykefraværstilfeller = sykefraværstilfeller(vedtaksperioder)
+        val tilstanderPerSkjæringstidspunkt = vedtaksperioder.groupBy { it.skjæringstidspunkt }.mapValues { (_, vedtaksperioder) -> vedtaksperioder.map { it.tilstand } }
 
         val perioderUtbetaltIInfotrygd = jsonNode.path("infotrygdhistorikk")
             .firstOrNull()?.let { sisteInfotrygdInnslag ->
@@ -85,19 +74,21 @@ internal object BrukteVilkårsgrunnlag {
 
         val brukteVilkårsgrunnlag = serdeObjectMapper.createArrayNode().apply {
             sykefraværstilfeller.forEach { sykefraværstilfelle ->
-                val vilkårgrunnlag = sorterteVilkårsgrunnlag.finnRiktigVilkårsgrunnlag(sykefraværstilfelle, perioderUtbetaltIInfotrygd)
+                val vilkårgrunnlag = sorterteVilkårsgrunnlag.finnRiktigVilkårsgrunnlag(sykefraværstilfelle.periode, perioderUtbetaltIInfotrygd)
                 if (vilkårgrunnlag == null) {
-                    sikkerlogg.info("Fant ikke vilkårsgrunnlag for sykefraværstilfellet $sykefraværstilfelle med tilstander ${tilstanderPerSkjæringstidspunkt[sykefraværstilfelle.start]} for aktørId=$aktørId")
+                    sikkerlogg.info("Fant ikke vilkårsgrunnlag for sykefraværstilfellet ${sykefraværstilfelle.periode} med tilstander ${tilstanderPerSkjæringstidspunkt[sykefraværstilfelle.tidligsteSkjæringstidspunkt]} for aktørId=$aktørId")
                     return@forEach
                 }
-                val skjæringstidspunkt = sykefraværstilfelle.start
-                if (vilkårgrunnlag.skjæringstidspunkt != skjæringstidspunkt) {
-                    endret = true
-                    sikkerlogg.info("Flytter skjæringstidspunktet til vilkårsgrunnlag ${vilkårgrunnlag.vilkårsgrunnlagId} fra ${vilkårgrunnlag.skjæringstidspunkt} til $skjæringstidspunkt for aktørId=$aktørId")
+                sykefraværstilfelle.skjæringstidspunkter.forEach { skjæringstidspunkt ->
+                    if (vilkårgrunnlag.skjæringstidspunkt != skjæringstidspunkt) {
+                        endret = true
+                        sikkerlogg.info("Kopierer vilkårsgrunnlag ${vilkårgrunnlag.vilkårsgrunnlagId} fra ${vilkårgrunnlag.skjæringstidspunkt} til $skjæringstidspunkt for aktørId=$aktørId")
+                    }
+
+                    val vilkårsgrunnlagMedRiktigSkjæringstidspunkt = vilkårgrunnlag.deepCopy<ObjectNode>()
+                        .put("skjæringstidspunkt", skjæringstidspunkt.toString())
+                    add(vilkårsgrunnlagMedRiktigSkjæringstidspunkt)
                 }
-                val vilkårsgrunnlagMedRiktigSkjæringstidspunkt = vilkårgrunnlag.deepCopy<ObjectNode>()
-                    .put("skjæringstidspunkt", skjæringstidspunkt.toString())
-                add(vilkårsgrunnlagMedRiktigSkjæringstidspunkt)
             }
         }
 

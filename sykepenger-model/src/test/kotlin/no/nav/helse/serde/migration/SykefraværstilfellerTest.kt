@@ -8,6 +8,7 @@ import no.nav.helse.mars
 import no.nav.helse.serde.migration.Sykefraværstilfeller.Sykefraværstilfelle
 import no.nav.helse.serde.migration.Sykefraværstilfeller.Vedtaksperiode
 import no.nav.helse.serde.migration.Sykefraværstilfeller.sykefraværstilfeller
+import no.nav.helse.serde.migration.Sykefraværstilfeller.vedtaksperioder
 import no.nav.helse.serde.serdeObjectMapper
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -18,9 +19,9 @@ internal class SykefraværstilfellerTest {
     @Test
     fun `sammenhengende periode hvor tidligste skjæringstidspunkt er før perioden`() {
         val vedtaksperioder = listOf(
-            Vedtaksperiode(skjæringstidspunkt = 1.januar, periode = 1.januar til 31.januar),
-            Vedtaksperiode(skjæringstidspunkt = 15.desember(2017), periode = 1.februar til 28.februar),
-            Vedtaksperiode(skjæringstidspunkt = 1.januar, periode = 1.mars til 31.mars)
+            Vedtaksperiode(skjæringstidspunkt = 1.januar, periode = 1.januar til 31.januar, "AVSLUTTET"),
+            Vedtaksperiode(skjæringstidspunkt = 15.desember(2017), periode = 1.februar til 28.februar, "AVSLUTTET"),
+            Vedtaksperiode(skjæringstidspunkt = 1.januar, periode = 1.mars til 31.mars, "AVSLUTTET")
         )
         val forventet = setOf(Sykefraværstilfelle(setOf(15.desember(2017), 1.januar), 15.desember(2017) til 31.mars))
         assertEquals(forventet, sykefraværstilfeller(vedtaksperioder))
@@ -29,8 +30,8 @@ internal class SykefraværstilfellerTest {
     @Test
     fun `fjerner duplikate sykefraværstilfeller`() {
         val vedtaksperioder = listOf(
-            Vedtaksperiode(skjæringstidspunkt = 1.januar, periode = 1.januar til 5.januar),
-            Vedtaksperiode(skjæringstidspunkt = 1.januar, periode = 8.januar til 31.januar),
+            Vedtaksperiode(skjæringstidspunkt = 1.januar, periode = 1.januar til 5.januar, "AVSLUTTET"),
+            Vedtaksperiode(skjæringstidspunkt = 1.januar, periode = 8.januar til 31.januar, "AVSLUTTET"),
         )
         val forventet = setOf(Sykefraværstilfelle(setOf(1.januar), 1.januar til 31.januar))
         assertEquals(forventet, sykefraværstilfeller(vedtaksperioder))
@@ -39,9 +40,9 @@ internal class SykefraværstilfellerTest {
     @Test
     fun `perioder med helg mellom, men i samme sykefraværstilfellet hvor tidligste skjæringstidspunkt er før perioden`() {
         val vedtaksperioder = listOf(
-            Vedtaksperiode(skjæringstidspunkt = 1.januar, periode = 1.januar til 5.januar),
-            Vedtaksperiode(skjæringstidspunkt = 1.januar, periode = 8.januar til 12.januar),
-            Vedtaksperiode(skjæringstidspunkt = 1.januar, periode = 15.januar til 19.januar),
+            Vedtaksperiode(skjæringstidspunkt = 1.januar, periode = 1.januar til 5.januar, "AVSLUTTET"),
+            Vedtaksperiode(skjæringstidspunkt = 1.januar, periode = 8.januar til 12.januar, "AVSLUTTET"),
+            Vedtaksperiode(skjæringstidspunkt = 1.januar, periode = 15.januar til 19.januar, "AVSLUTTET"),
         )
         val forventet = setOf(Sykefraværstilfelle(setOf(1.januar), 1.januar til 19.januar))
         assertEquals(forventet, sykefraværstilfeller(vedtaksperioder))
@@ -50,9 +51,9 @@ internal class SykefraværstilfellerTest {
     @Test
     fun `finner sykefraværstilfeller fra aktive vedtaksperioder i person-json`() {
         val forventet = setOf(Sykefraværstilfelle(setOf(1.januar), 1.januar til 31.mars))
-        assertEquals(forventet, sykefraværstilfeller(serdeObjectMapper.readTree(json)))
+        val vedtaksperioder = vedtaksperioder(serdeObjectMapper.readTree(json))
+        assertEquals(forventet, sykefraværstilfeller(vedtaksperioder))
     }
-
 }
 
 @Language("Json")

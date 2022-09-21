@@ -96,6 +96,14 @@ internal class V178ForkastOgFlyttVilkårsgrunnlagTest : MigrationTest(V178Forkas
         )
     }
 
+    @Test
+    fun `Flere skjæringstidspunkt innenfor sykefraværstilfellet`() {
+        assertForkastetVilkårsgrunnlag(
+            originalJson = "/migrations/178/flere-skjæringstidspunkt-innenfor-sykefraværstilfellet_original.json",
+            expectedJson = "/migrations/178/flere-skjæringstidspunkt-innenfor-sykefraværstilfellet_expected.json"
+        )
+    }
+
     private fun assertForkastetVilkårsgrunnlag(originalJson: String, expectedJson: String) {
         val migrert = migrer(originalJson.readResource())
         val sisteInnslag = migrert.path("vilkårsgrunnlagHistorikk")[0]
