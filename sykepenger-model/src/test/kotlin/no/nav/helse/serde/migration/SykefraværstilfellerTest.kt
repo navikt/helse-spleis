@@ -18,6 +18,11 @@ internal class SykefraværstilfellerTest {
             Sykefraværstilfeller.Vedtaksperiode(skjæringstidspunkt = 15.desember(2017), periode = 1.februar til 28.februar),
             Sykefraværstilfeller.Vedtaksperiode(skjæringstidspunkt = 1.januar, periode = 1.mars til 31.mars)
         )
-        assertEquals(mapOf(15.desember(2017) to (1.januar til 31.mars)), sykefraværstilfeller(vedtaksperioder))
+        assertEquals(listOf(15.desember(2017) til 31.mars), sykefraværstilfeller(vedtaksperioder))
+    }
+
+    @Test
+    fun `perioder med helg mellom, men i samme sykefraværstilfellet hvor tidligste skjæringstidspunkt er før perioden`(){
+
     }
 }
