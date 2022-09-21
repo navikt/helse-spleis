@@ -5,8 +5,6 @@ internal const val varselkodeformat = "RV_\\D{2}_\\d{1,3}"
 private val regex = "^$varselkodeformat$".toRegex()
 
 enum class Varselkode(private val melding: String, private val avviklet: Boolean = false) {
-    // SY: Sykmelding
-    RV_SY_1("Søknadsperioden kan ikke være eldre enn 6 måneder fra mottattidspunkt"),
 
     // SØ: Søknad
     RV_SØ_1("Søknaden inneholder permittering. Vurder om permittering har konsekvens for rett til sykepenger"),

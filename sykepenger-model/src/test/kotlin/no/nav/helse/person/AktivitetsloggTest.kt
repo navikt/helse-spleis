@@ -2,7 +2,7 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.helse.person.Varselkode.RV_SY_1
+import no.nav.helse.person.Varselkode.RV_SØ_1
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -216,9 +216,9 @@ internal class AktivitetsloggTest {
     fun `varselkode blir til varsel`() {
         val hendelse = TestHendelse(aktivitetslogg.barn())
         hendelse.kontekst(person)
-        hendelse.varsel(RV_SY_1)
+        hendelse.varsel(RV_SØ_1)
         assertEquals(1, aktivitetslogg.varsel().size)
-        assertVarsel(RV_SY_1)
+        assertVarsel(RV_SØ_1)
     }
 
     @Test
