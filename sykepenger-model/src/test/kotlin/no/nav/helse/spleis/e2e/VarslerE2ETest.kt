@@ -6,18 +6,7 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
-import no.nav.helse.person.Varselkode
-import no.nav.helse.person.Varselkode.RV_IM_1
-import no.nav.helse.person.Varselkode.RV_IM_2
-import no.nav.helse.person.Varselkode.RV_SØ_1
-import no.nav.helse.person.Varselkode.RV_SØ_10
-import no.nav.helse.person.Varselkode.RV_SØ_2
-import no.nav.helse.person.Varselkode.RV_SØ_3
-import no.nav.helse.person.Varselkode.RV_SØ_4
-import no.nav.helse.person.Varselkode.RV_SØ_5
-import no.nav.helse.person.Varselkode.RV_SØ_7
-import no.nav.helse.person.Varselkode.RV_SØ_8
-import no.nav.helse.person.Varselkode.RV_SØ_9
+import no.nav.helse.person.Varselkode.*
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Test
 
@@ -117,5 +106,12 @@ internal class VarslerE2ETest: AbstractEndToEndTest() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 23.januar)
         assertVarsel(RV_IM_2, 1.vedtaksperiode.filter())
+    }
+
+    @Test
+    fun `varsel - Inntektsmeldingen og vedtaksløsningen er uenige om beregningen av arbeidsgiverperioden, Undersøk hva som er riktig arbeidsgiverperiode`() {
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 15.januar, 17.januar til 18.januar))
+        assertVarsel(RV_IM_3, 1.vedtaksperiode.filter())
     }
 }

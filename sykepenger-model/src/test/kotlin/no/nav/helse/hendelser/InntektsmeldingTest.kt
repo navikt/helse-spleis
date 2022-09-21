@@ -4,14 +4,15 @@ import java.time.LocalDate
 import no.nav.helse.desember
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.februar
-import no.nav.helse.hendelser.Inntektsmelding.Companion.WARN_UENIGHET_ARBEIDSGIVERPERIODE
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon
 import no.nav.helse.hentErrors
 import no.nav.helse.hentInfo
+import no.nav.helse.hentVarselkoder
 import no.nav.helse.hentWarnings
 import no.nav.helse.januar
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Inntektshistorikk
+import no.nav.helse.person.Varselkode.RV_IM_3
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.somPersonidentifikator
@@ -239,23 +240,23 @@ internal class InntektsmeldingTest {
     fun `uenighet om arbeidsgiverperiode`() {
         inntektsmelding(listOf(1.januar til 10.januar, 11.januar til 16.januar))
         inntektsmelding.valider(1.februar til 28.februar, 1.januar, Arbeidsgiverperiode(listOf(1.januar til 16.januar)), SubsumsjonObserver.NullObserver)
-        assertFalse(WARN_UENIGHET_ARBEIDSGIVERPERIODE in inntektsmelding.hentWarnings())
+        assertFalse(RV_IM_3 in inntektsmelding.hentVarselkoder())
 
         inntektsmelding(listOf(1.januar til 10.januar, 12.januar til 17.januar))
         inntektsmelding.valider(1.februar til 28.februar, 1.januar, Arbeidsgiverperiode(listOf(1.januar til 16.januar)), SubsumsjonObserver.NullObserver)
-        assertTrue(WARN_UENIGHET_ARBEIDSGIVERPERIODE in inntektsmelding.hentWarnings())
+        assertTrue(RV_IM_3 in inntektsmelding.hentVarselkoder())
 
         inntektsmelding(listOf(12.januar til 27.januar))
         inntektsmelding.valider(1.februar til 28.februar, 11.januar, Arbeidsgiverperiode(listOf(11.januar til 27.januar)), SubsumsjonObserver.NullObserver)
-        assertFalse(WARN_UENIGHET_ARBEIDSGIVERPERIODE in inntektsmelding.hentWarnings())
+        assertFalse(RV_IM_3 in inntektsmelding.hentVarselkoder())
 
         inntektsmelding(listOf(12.januar til 27.januar))
         inntektsmelding.valider(1.februar til 28.februar, 13.januar, Arbeidsgiverperiode(listOf(13.januar til 28.januar)), SubsumsjonObserver.NullObserver)
-        assertFalse(WARN_UENIGHET_ARBEIDSGIVERPERIODE in inntektsmelding.hentWarnings())
+        assertFalse(RV_IM_3 in inntektsmelding.hentVarselkoder())
 
         inntektsmelding(emptyList())
         inntektsmelding.valider(1.februar til 28.februar, 1.januar, Arbeidsgiverperiode(listOf(1.januar til 16.januar)), SubsumsjonObserver.NullObserver)
-        assertFalse(WARN_UENIGHET_ARBEIDSGIVERPERIODE in inntektsmelding.hentWarnings())
+        assertFalse(RV_IM_3 in inntektsmelding.hentVarselkoder())
     }
 
     @Test
