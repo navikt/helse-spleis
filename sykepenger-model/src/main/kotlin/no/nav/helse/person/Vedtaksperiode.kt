@@ -70,6 +70,7 @@ import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.TilstandType.UTBETALING_FEILET
+import no.nav.helse.person.Varselkode.RV_IM_4
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
@@ -876,7 +877,7 @@ internal class Vedtaksperiode private constructor(
 
         fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
             inntektsmelding.trimLeft(vedtaksperiode.periode.endInclusive)
-            inntektsmelding.varsel("Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.")
+            inntektsmelding.varsel(RV_IM_4)
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {

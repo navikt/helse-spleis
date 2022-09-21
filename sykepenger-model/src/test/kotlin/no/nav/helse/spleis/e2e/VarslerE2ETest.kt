@@ -114,4 +114,12 @@ internal class VarslerE2ETest: AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.januar til 15.januar, 17.januar til 18.januar))
         assertVarsel(RV_IM_3, 1.vedtaksperiode.filter())
     }
+
+    @Test
+    fun `varsel - "Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn, Utbetal kun hvis det blir korrekt"`() {
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        assertVarsel(RV_IM_4, 1.vedtaksperiode.filter())
+    }
 }

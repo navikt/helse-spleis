@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e.inntektsmelding
 
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
+import no.nav.helse.person.Varselkode.RV_IM_4
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertIngenVarsel
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
@@ -16,7 +17,7 @@ internal class KorrigerendeInntektsmeldingTest: AbstractEndToEndTest() {
 
         håndterInntektsmelding(listOf(1.januar til 16.januar))
 
-        assertIngenVarsel("Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.")
+        assertIngenVarsel(RV_IM_4)
     }
 
 }

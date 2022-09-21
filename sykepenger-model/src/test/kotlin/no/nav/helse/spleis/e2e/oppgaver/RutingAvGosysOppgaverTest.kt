@@ -15,6 +15,7 @@ import no.nav.helse.mars
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.person.Varselkode.RV_IM_4
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
@@ -303,9 +304,9 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
         val inntektsmeldingId = håndterInntektsmelding(listOf(1.mars til 16.mars), førsteFraværsdag = 1.mai) // NB - det er kanskje ikke realistisk at AG setter førsteFraværsdag etter ferie?
         forkastAlle(hendelselogg)
 
-        assertIngenVarsel("Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.", 1.vedtaksperiode.filter())
-        assertIngenVarsel("Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.", 2.vedtaksperiode.filter())
-        assertVarsel("Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.", 3.vedtaksperiode.filter())
+        assertIngenVarsel(RV_IM_4, 1.vedtaksperiode.filter())
+        assertIngenVarsel(RV_IM_4, 2.vedtaksperiode.filter())
+        assertVarsel(RV_IM_4, 3.vedtaksperiode.filter())
         assertTrue(observatør.opprettOppgaveEvent().isEmpty())
         assertTrue(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().any { inntektsmeldingId in it.hendelser })
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)

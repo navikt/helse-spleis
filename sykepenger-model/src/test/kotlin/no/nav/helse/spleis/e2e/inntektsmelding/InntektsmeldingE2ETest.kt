@@ -44,6 +44,7 @@ import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.Varselkode.RV_IM_1
 import no.nav.helse.person.Varselkode.RV_IM_2
 import no.nav.helse.person.Varselkode.RV_IM_3
+import no.nav.helse.person.Varselkode.RV_IM_4
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.sisteBehov
@@ -523,7 +524,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             AVVENTER_GODKJENNING
         )
         assertVarsel(
-            "Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.",
+            RV_IM_4,
             AktivitetsloggFilter.person()
         )
     }
@@ -1099,7 +1100,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertTrue((1.januar til 7.januar).all { tidslinje[it] is Dag.Arbeidsdag || tidslinje[it] is Dag.FriskHelgedag })
         assertTrue((8.januar til 23.januar).all { tidslinje[it] is Dag.Sykedag || tidslinje[it] is Dag.SykHelgedag || tidslinje[it] is Dag.Arbeidsgiverdag || tidslinje[it] is Dag.ArbeidsgiverHelgedag })
         assertIngenVarsel(
-            "Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.",
+            RV_IM_4,
             1.vedtaksperiode.filter()
         )
         assertIngenVarsel(
@@ -1429,7 +1430,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             AVVENTER_GODKJENNING,
         )
         assertVarsel(
-            "Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.",
+            RV_IM_4,
             AktivitetsloggFilter.person()
         )
         assertTrue(inspektør.utbetaling(1).inspektør.personOppdrag.harUtbetalinger())
@@ -1464,7 +1465,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             AVVENTER_GODKJENNING,
         )
         assertVarsel(
-            "Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.",
+            RV_IM_4,
             AktivitetsloggFilter.person()
         )
         assertForventetFeil(
@@ -1528,13 +1529,13 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertFalse((1.februar til 11.februar).all { tidslinje[it] is Dag.Arbeidsdag || tidslinje[it] is Dag.FriskHelgedag })
         assertTrue((12.februar til 28.februar).all { tidslinje[it] is Dag.Sykedag || tidslinje[it] is Dag.SykHelgedag })
         assertIngenVarsel(
-            "Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.",
+            RV_IM_4,
             1.vedtaksperiode.filter()
         )
         assertIngenVarsel(RV_IM_1, 1.vedtaksperiode.filter())
         assertIngenVarsel(RV_IM_2, 1.vedtaksperiode.filter())
         assertVarsel(
-            "Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.",
+            RV_IM_4,
             2.vedtaksperiode.filter()
         )
         assertVarsel(RV_IM_1, 2.vedtaksperiode.filter())
@@ -1559,11 +1560,11 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertFalse((1.februar til 11.februar).all { tidslinje[it] is Dag.Arbeidsdag || tidslinje[it] is Dag.FriskHelgedag })
         assertTrue((12.februar til 28.februar).all { tidslinje[it] is Dag.Sykedag || tidslinje[it] is Dag.SykHelgedag })
         assertIngenVarsel(
-            "Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.",
+            RV_IM_4,
             1.vedtaksperiode.filter()
         )
         assertIngenVarsel(
-            "Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.",
+            RV_IM_4,
             2.vedtaksperiode.filter()
         )
         assertIngenVarsel(
@@ -1575,7 +1576,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             2.vedtaksperiode.filter()
         )
         assertVarsel(
-            "Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.",
+            RV_IM_4,
             3.vedtaksperiode.filter()
         )
         assertVarsel(
@@ -1925,7 +1926,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(3.vedtaksperiode)
 
         assertIngenVarsel(
-            "Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.",
+            RV_IM_4,
             1.vedtaksperiode.filter()
         )
         assertIngenVarsel(
@@ -1937,11 +1938,11 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             2.vedtaksperiode.filter()
         )
         assertIngenVarsel(
-            "Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.",
+            RV_IM_4,
             2.vedtaksperiode.filter()
         )
         assertVarsel(
-            "Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.",
+            RV_IM_4,
             3.vedtaksperiode.filter()
         )
         assertEquals(17.januar til 31.mars, inspektør.utbetalinger.last().inspektør.periode)
@@ -1981,7 +1982,7 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterInntektsmeldingReplay(inntektsmeldingId, 1.vedtaksperiode.id(ORGNUMMER))
-        assertIngenVarsel("Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.")
+        assertIngenVarsel(RV_IM_4)
     }
 
     @Test

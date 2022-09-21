@@ -21,6 +21,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.Varselkode.RV_IM_4
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -136,8 +137,8 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING
         )
-        assertIngenVarsel("Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.", 1.vedtaksperiode.filter())
-        assertVarsel("Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt.", 2.vedtaksperiode.filter())
+        assertIngenVarsel(RV_IM_4, 1.vedtaksperiode.filter())
+        assertVarsel(RV_IM_4, 2.vedtaksperiode.filter())
         assertEquals(inspektør.vilkårsgrunnlag(1.vedtaksperiode), inspektør.vilkårsgrunnlag(2.vedtaksperiode))
         assertEquals(18.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
         assertEquals(18.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
