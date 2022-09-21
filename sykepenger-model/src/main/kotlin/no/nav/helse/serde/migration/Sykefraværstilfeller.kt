@@ -19,7 +19,7 @@ internal object Sykefraværstilfeller {
     private val JsonNode.tom get() = path("tom").dato
     private val JsonNode.tilstand get() = path("tilstand").asText()
 
-    internal fun sykefraværstilfeller(person: JsonNode): Set<Periode> {
+    internal fun sykefraværstilfeller(person: JsonNode): Set<Sykefraværstilfelle> {
         val aktiveVedtaksperioder = person.path("arbeidsgivere")
             .flatMap { it.path("vedtaksperioder") }
             .filterNot { it.tilstand == "AVSLUTTET_UTEN_UTBETALING" }
@@ -27,16 +27,21 @@ internal object Sykefraværstilfeller {
         return sykefraværstilfeller(aktiveVedtaksperioder.map { Vedtaksperiode(it.skjæringstidspunkt, it.fom til it.tom) })
     }
 
-    internal fun sykefraværstilfeller(vedtaksperioder: List<Vedtaksperiode>): Set<Periode>{
+    internal fun sykefraværstilfeller(vedtaksperioder: List<Vedtaksperiode>): Set<Sykefraværstilfelle>{
         val sammenhengendePerioder = vedtaksperioder.map { it.periode }.grupperSammenhengendePerioderMedHensynTilHelg()
         return sammenhengendePerioder.map { sammenhengendePeriode ->
-            val tidligsteSkjæringstidspunkt = vedtaksperioder.tidligsteSkjæringstidspunktFor(sammenhengendePeriode)
-            tidligsteSkjæringstidspunkt til sammenhengendePeriode.endInclusive
+            val skjæringstidspunkter = vedtaksperioder.skjæringstidspunkterFor(sammenhengendePeriode)
+            val tidligsteSkjæringstidspunkt = skjæringstidspunkter.min()
+            val periode = tidligsteSkjæringstidspunkt til sammenhengendePeriode.endInclusive
+            Sykefraværstilfelle(skjæringstidspunkter, periode)
         }.toSet()
     }
 
-    private fun List<Vedtaksperiode>.tidligsteSkjæringstidspunktFor(periode: Periode) =
-        filter { periode.overlapperMed(it.periode) }.minOf { it.skjæringstidspunkt }
+    private fun List<Vedtaksperiode>.skjæringstidspunkterFor(periode: Periode) =
+        filter { periode.overlapperMed(it.periode) }.map { it.skjæringstidspunkt }.toSet()
 
     internal class Vedtaksperiode(val skjæringstidspunkt: LocalDate, val periode: Periode)
+    internal data class Sykefraværstilfelle(val skjæringstidspunkter: Set<LocalDate>, val periode: Periode)
+
+
 }

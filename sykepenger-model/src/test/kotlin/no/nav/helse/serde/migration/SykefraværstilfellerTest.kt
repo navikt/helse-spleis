@@ -5,6 +5,7 @@ import no.nav.helse.februar
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
+import no.nav.helse.serde.migration.Sykefraværstilfeller.Sykefraværstilfelle
 import no.nav.helse.serde.migration.Sykefraværstilfeller.Vedtaksperiode
 import no.nav.helse.serde.migration.Sykefraværstilfeller.sykefraværstilfeller
 import no.nav.helse.serde.serdeObjectMapper
@@ -21,7 +22,8 @@ internal class SykefraværstilfellerTest {
             Vedtaksperiode(skjæringstidspunkt = 15.desember(2017), periode = 1.februar til 28.februar),
             Vedtaksperiode(skjæringstidspunkt = 1.januar, periode = 1.mars til 31.mars)
         )
-        assertEquals(setOf(15.desember(2017) til 31.mars), sykefraværstilfeller(vedtaksperioder))
+        val forventet = setOf(Sykefraværstilfelle(setOf(15.desember(2017), 1.januar), 15.desember(2017) til 31.mars))
+        assertEquals(forventet, sykefraværstilfeller(vedtaksperioder))
     }
 
     @Test
@@ -30,7 +32,8 @@ internal class SykefraværstilfellerTest {
             Vedtaksperiode(skjæringstidspunkt = 1.januar, periode = 1.januar til 5.januar),
             Vedtaksperiode(skjæringstidspunkt = 1.januar, periode = 8.januar til 31.januar),
         )
-        assertEquals(setOf(1.januar til 31.januar), sykefraværstilfeller(vedtaksperioder))
+        val forventet = setOf(Sykefraværstilfelle(setOf(1.januar), 1.januar til 31.januar))
+        assertEquals(forventet, sykefraværstilfeller(vedtaksperioder))
     }
 
     @Test
@@ -40,13 +43,16 @@ internal class SykefraværstilfellerTest {
             Vedtaksperiode(skjæringstidspunkt = 1.januar, periode = 8.januar til 12.januar),
             Vedtaksperiode(skjæringstidspunkt = 1.januar, periode = 15.januar til 19.januar),
         )
-        assertEquals(setOf(1.januar til 19.januar), sykefraværstilfeller(vedtaksperioder))
+        val forventet = setOf(Sykefraværstilfelle(setOf(1.januar), 1.januar til 19.januar))
+        assertEquals(forventet, sykefraværstilfeller(vedtaksperioder))
     }
 
     @Test
     fun `finner sykefraværstilfeller fra aktive vedtaksperioder i person-json`() {
-        assertEquals(setOf(1.januar til 31.mars), sykefraværstilfeller(serdeObjectMapper.readTree(json)))
+        val forventet = setOf(Sykefraværstilfelle(setOf(1.januar), 1.januar til 31.mars))
+        assertEquals(forventet, sykefraværstilfeller(serdeObjectMapper.readTree(json)))
     }
+
 }
 
 @Language("Json")
