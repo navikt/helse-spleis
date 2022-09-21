@@ -13,6 +13,7 @@ import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold
 import no.nav.helse.hendelser.til
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.juni
 import no.nav.helse.mai
@@ -64,6 +65,7 @@ import no.nav.helse.spleis.e2e.tilGodkjent
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 @EnableToggle(Toggle.RevurderOutOfOrder::class)
@@ -638,5 +640,26 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         assertFunksjonellFeil("Søknaden inneholder andre inntektskilder enn ANDRE_ARBEIDSFORHOLD", 2.vedtaksperiode.filter())
         assertForkastetPeriodeTilstander(2.vedtaksperiode, START, TIL_INFOTRYGD)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+    }
+
+    @Test
+    fun `out-of-order som fører til nådd maksdato skal avslå riktige dager`() {
+        (1..12).forEach {
+            nyttVedtak(fom = LocalDate.of(2017, it, 1), tom = LocalDate.of(2017, it, 27))
+        }
+
+        nyttVedtak(1.januar, 30.januar)
+        assertEquals(6, inspektør.gjenståendeSykedager(13.vedtaksperiode))
+
+        nyttVedtak(1.mai, 24.mai)
+        assertEquals(0, inspektør.gjenståendeSykedager(14.vedtaksperiode))
+
+        nyttVedtak(1.mars, 26.mars)
+        håndterYtelser(14.vedtaksperiode)
+
+        //Når out-of-order perioden for mars kommer inn, så er det dager i mai som skal bli avvist pga maksdato
+        assertEquals(0, inspektør.gjenståendeSykedager(15.vedtaksperiode))
+        assertEquals(0, inspektør.utbetalingstidslinjer(15.vedtaksperiode).inspektør.avvistDagTeller)
+        assertEquals(6, inspektør.utbetalingstidslinjer(14.vedtaksperiode).inspektør.avvistDagTeller)
     }
 }
