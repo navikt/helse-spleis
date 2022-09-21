@@ -31,9 +31,6 @@ internal class SendtSøknadNavMessage(packet: JsonMessage, private val builder: 
             packet["andreInntektskilder"].forEach {
                 builder.inntektskilde(sykmeldt = it["sykmeldt"].asBoolean(), type = it["type"].asText())
             }
-            packet["egenmeldinger"].forEach {
-                builder.egenmelding(fom = it.path("fom").asLocalDate(), tom = it.path("tom").asLocalDate())
-            }
             packet["fravar"].forEach {
                 val fraværstype = it["type"].asText()
                 val fom = it.path("fom").asLocalDate()

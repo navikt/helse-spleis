@@ -43,12 +43,6 @@ internal class SendtArbeidsgiverSøknaderRiverTest : RiverTest() {
   "avsendertype": "BRUKER",
   "ettersending": false,
   "sykmeldingId": "sykmeldingid",
-  "egenmeldinger": [
-    {
-      "fom": "2020-01-01",
-      "tom": "2020-01-01"
-    }
-  ],
   "soknadsperioder": [
     {
       "fom": "2020-01-01",

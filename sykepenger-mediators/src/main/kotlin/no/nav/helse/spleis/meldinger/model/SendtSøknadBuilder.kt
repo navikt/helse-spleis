@@ -59,10 +59,6 @@ internal class SendtSøknadBuilder : SøknadBuilder() {
         perioder.add(Papirsykmelding(fom = fom, tom = tom))
     }
 
-    override fun egenmelding(fom: LocalDate, tom: LocalDate) = apply {
-        perioder.add(Egenmelding(fom = fom, tom = tom))
-    }
-
     override fun arbeidsgjennopptatt(fom: LocalDate, tom: LocalDate) = apply {
         perioder.add(Arbeid(fom, tom))
     }

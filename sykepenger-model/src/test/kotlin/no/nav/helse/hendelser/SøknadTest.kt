@@ -2,14 +2,12 @@ package no.nav.helse.hendelser
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import no.nav.helse.desember
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Søknad.Inntektskilde
 import no.nav.helse.hendelser.Søknad.Merknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.Egenmelding
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Papirsykmelding
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Permisjon
@@ -212,28 +210,6 @@ internal class SøknadTest {
     }
 
     @Test
-    fun `egenmelding ligger utenfor sykdomsvindu`() {
-        søknad(Sykdom(5.januar, 12.januar, 100.prosent), Egenmelding(2.januar, 3.januar))
-        assertFalse(søknad.valider(EN_PERIODE, MaskinellJurist()).harFunksjonelleFeilEllerVerre())
-        assertEquals(8, søknad.sykdomstidslinje().count())
-        assertEquals(6, søknad.sykdomstidslinje().filterIsInstance<Sykedag>().size)
-        assertEquals(2, søknad.sykdomstidslinje().filterIsInstance<SykHelgedag>().size)
-        assertEquals(5.januar til 12.januar, søknad.sykdomstidslinje().periode())
-    }
-
-    @Test
-    fun `egenmelding ligger etter sykdomsvindu`() {
-        assertThrows<AktivitetException> { søknad(Sykdom(5.januar, 12.januar, 100.prosent), Egenmelding(13.januar, 17.januar)) }
-    }
-
-    @Test
-    fun `egenmelding ligger langt utenfor sykdomsvindu`() {
-        søknad(Sykdom(5.januar, 12.januar, 100.prosent), Egenmelding(19.desember(2017), 20.desember(2017)))
-        assertFalse(søknad.valider(EN_PERIODE, MaskinellJurist()).harFunksjonelleFeilEllerVerre())
-        assertEquals(8, søknad.sykdomstidslinje().count())
-    }
-
-    @Test
     fun `søknad uten andre inntektskilder`() {
         søknad(Sykdom(5.januar, 12.januar, 100.prosent), andreInntektskilder = emptyList())
         assertFalse(søknad.valider(EN_PERIODE, MaskinellJurist()).harFunksjonelleFeilEllerVerre())
@@ -306,14 +282,6 @@ internal class SøknadTest {
         assertEquals(4, søknad.sykdomstidslinje().filterIsInstance<SykHelgedag>().size)
         assertEquals(13, søknad.sykdomstidslinje().filterIsInstance<Arbeidsdag>().size)
         assertEquals(4, søknad.sykdomstidslinje().filterIsInstance<FriskHelgedag>().size)
-    }
-
-    @Test
-    fun `turnering mellom arbeidsgiverdager og sykedager`() {
-        søknad(Sykdom(1.januar, 31.januar, 100.prosent), Egenmelding(15.januar, 31.januar))
-
-        assertEquals(23, søknad.sykdomstidslinje().filterIsInstance<Sykedag>().size)
-        assertEquals(8, søknad.sykdomstidslinje().filterIsInstance<SykHelgedag>().size)
     }
 
     @Test

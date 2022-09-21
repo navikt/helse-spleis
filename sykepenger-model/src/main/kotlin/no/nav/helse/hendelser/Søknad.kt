@@ -220,20 +220,6 @@ class Søknad(
             }
         }
 
-        class Egenmelding(fom: LocalDate, tom: LocalDate) : Søknadsperiode(fom, tom, "egenmelding") {
-            override fun valider(søknad: Søknad) {
-                if (periode.start < søknad.sykdomsperiode.start.minusDays(tidslinjegrense)) {
-                    søknad.info("Søknaden inneholder egenmeldingsdager som er mer enn $tidslinjegrense dager før sykmeldingsperioden")
-                }
-                if (periode.endInclusive > søknad.sykdomsperiode.endInclusive) {
-                    søknad.varsel(RV_SØ_6)
-                }
-            }
-
-            override fun sykdomstidslinje(sykdomsperiode: Periode, avskjæringsdato: LocalDate, kilde: Hendelseskilde) =
-                Sykdomstidslinje()
-        }
-
         class Arbeid(fom: LocalDate, tom: LocalDate) : Søknadsperiode(fom, tom, "arbeid") {
             override fun valider(søknad: Søknad) =
                 valider(søknad, RV_SØ_7)

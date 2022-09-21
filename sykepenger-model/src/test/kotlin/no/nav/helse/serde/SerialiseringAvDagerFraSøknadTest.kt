@@ -5,7 +5,6 @@ import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.Egenmelding
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Permisjon
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -81,7 +80,6 @@ internal class SerialiseringAvDagerFraSøknadTest {
     private val søknad get() = hendelsefabrikk.lagSøknad(
         perioder = arrayOf(
             Sykdom(1.januar, 5.januar, 100.prosent),
-            Egenmelding(2.januar, 2.januar),
             Arbeid(3.januar, 3.januar),
             Ferie(4.januar, 4.januar),
             Permisjon(5.januar, 5.januar),

@@ -17,10 +17,6 @@ internal class SendtArbeidsgiverSøknaderRiver(
 
     override fun validate(message: JsonMessage) {
         message.requireKey("id")
-        message.requireArray("egenmeldinger") {
-            require("fom", JsonNode::asLocalDate)
-            require("tom", JsonNode::asLocalDate)
-        }
         message.requireArray("papirsykmeldinger") {
             require("fom", JsonNode::asLocalDate)
             require("tom", JsonNode::asLocalDate)

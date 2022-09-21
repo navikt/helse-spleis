@@ -4,7 +4,7 @@ package no.nav.helse.person
 internal const val varselkodeformat = "RV_\\D{2}_\\d{1,3}"
 private val regex = "^$varselkodeformat$".toRegex()
 
-enum class Varselkode(private val melding: String, private val deprekert: Boolean = false) {
+enum class Varselkode(private val melding: String, private val avviklet: Boolean = false) {
     // SY: Sykmelding
     RV_SY_1("Søknadsperioden kan ikke være eldre enn 6 måneder fra mottattidspunkt"),
 
@@ -14,7 +14,7 @@ enum class Varselkode(private val melding: String, private val deprekert: Boolea
     RV_SØ_3("Sykmeldingen er tilbakedatert, vurder fra og med dato for utbetaling."),
     RV_SØ_4("Utdanning oppgitt i perioden i søknaden."),
     RV_SØ_5("Søknaden inneholder Permisjonsdager utenfor sykdomsvindu"),
-    RV_SØ_6("Søknaden inneholder egenmeldingsdager etter sykmeldingsperioden"),
+    RV_SØ_6("Søknaden inneholder egenmeldingsdager etter sykmeldingsperioden", avviklet = true),
     RV_SØ_7("Søknaden inneholder Arbeidsdager utenfor sykdomsvindu"),
     RV_SØ_8("Utenlandsopphold oppgitt i perioden i søknaden."),
     RV_SØ_9("Det er oppgitt annen inntektskilde i søknaden. Vurder inntekt."),
@@ -101,6 +101,6 @@ enum class Varselkode(private val melding: String, private val deprekert: Boolea
     override fun toString() = "${this.name}: $melding"
 
     internal companion object {
-        internal val aktiveVarselkoder = values().filterNot { it.deprekert }
+        internal val aktiveVarselkoder = values().filterNot { it.avviklet }
     }
 }

@@ -12,7 +12,6 @@ import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
-import no.nav.helse.hendelser.Søknad.Søknadsperiode.Egenmelding
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
@@ -25,7 +24,6 @@ import no.nav.helse.juni
 import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.november
-import no.nav.helse.oktober
 import no.nav.helse.person.Periodetype
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
@@ -40,7 +38,6 @@ import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
-import no.nav.helse.september
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertActivities
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
@@ -327,27 +324,6 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `ignorerer egenmeldingsdag i søknaden langt tilbake i tid`() {
-        håndterSykmelding(Sykmeldingsperiode(6.januar(2020), 23.januar(2020), 100.prosent))
-        håndterSøknad(
-            Egenmelding(
-                24.september(2019),
-                24.september(2019)
-            ), // ignored because it's too long ago relative to 6.januar
-            Sykdom(6.januar(2020), 23.januar(2020), 100.prosent)
-        )
-        håndterInntektsmelding(
-            arbeidsgiverperioder = listOf(
-                Periode(24.september(2019), 24.september(2019)),
-                Periode(27.september(2019), 6.oktober(2019)),
-                Periode(14.oktober(2019), 18.oktober(2019))
-            ),
-            førsteFraværsdag = 24.september(2019)
-        )
-        assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
-    }
-
-    @Test
     fun `person med gammel sykmelding`() {
         // OBS: Disse kastes ikke ut fordi de er for gamle. De kastes ut fordi de kommer out of order
         håndterSykmelding(Sykmeldingsperiode(13.januar(2020), 31.januar(2020), 100.prosent))
@@ -615,31 +591,6 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             AVVENTER_BLOKKERENDE_PERIODE,
             AVSLUTTET_UTEN_UTBETALING
         )
-    }
-
-    @Test
-    fun `Egenmelding i søknad overstyres av inntektsmelding når IM mottas først`() {
-        håndterSykmelding(Sykmeldingsperiode(20.februar(2020), 8.mars(2020), 100.prosent))
-        håndterInntektsmelding(listOf(Periode(20.februar(2020), 5.mars(2020))), 20.februar(2020))
-        håndterSøknad(Egenmelding(17.februar(2020), 19.februar(2020)), Sykdom(20.februar(2020), 8.mars(2020), 100.prosent))
-
-        inspektør.also {
-            assertEquals(20.februar(2020), it.sykdomstidslinje.førsteDag())
-        }
-    }
-
-    @Test
-    fun `Egenmelding i søknad overstyres av inntektsmelding når IM mottas sist`() {
-        håndterSykmelding(Sykmeldingsperiode(20.februar(2020), 8.mars(2020), 100.prosent))
-        håndterSøknad(Egenmelding(17.februar(2020), 19.februar(2020)), Sykdom(20.februar(2020), 8.mars(2020), 100.prosent))
-        håndterInntektsmelding(listOf(Periode(20.februar(2020), 5.mars(2020))), 20.februar(2020))
-
-        inspektør.also {
-            assertNull(it.sykdomstidslinje.inspektør.dagteller[Arbeidsgiverdag::class])
-            assertEquals(6, it.sykdomstidslinje.inspektør.dagteller[SykHelgedag::class])
-            assertEquals(12, it.sykdomstidslinje.inspektør.dagteller[Sykedag::class])
-            assertEquals(20.februar(2020), it.sykdomstidslinje.førsteDag())
-        }
     }
 
     @Test
