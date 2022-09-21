@@ -64,6 +64,7 @@ class DatadelingMediator(private val hendelse: PersonHendelse): AktivitetsloggOb
     private fun Char.toFulltext(): String {
         return when (this) {
             'I' -> "INFO"
+            'N' -> "BEHOV"
             'W' -> "VARSEL"
             'E' -> "FUNKSJONELL_FEIL"
             'S' -> "LOGISK_FEIL"

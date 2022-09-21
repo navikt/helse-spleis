@@ -3,6 +3,7 @@ package no.nav.helse.person
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.person.Varselkode.RV_SØ_1
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -52,13 +53,13 @@ internal class AktivitetsloggObserverTest {
     }
 
     @Test
-    fun `fanger ikke opp behov`() {
+    fun `fanger opp behov`() {
         val personkontekst = TestKontekst("Person", "Person 1")
 
         aktivitetslogg.register(testObserver)
         aktivitetslogg.kontekst(personkontekst)
         aktivitetslogg.behov(Aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning, "Dette er et behov", emptyMap())
-        assertTrue(testObserver.isEmpty())
+        assertFalse(testObserver.isEmpty())
     }
 
     private val testObserver = object : AktivitetsloggObserver {

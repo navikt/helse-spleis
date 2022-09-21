@@ -419,8 +419,6 @@ class Aktivitetslogg(
                 visitor.visitBehov(id, kontekster, this, type, melding, detaljer, tidsstempel)
             }
 
-            override fun notify(observer: AktivitetsloggObserver) {}
-
             enum class Behovtype {
                 Sykepengehistorikk,
                 SykepengehistorikkForFeriepenger,

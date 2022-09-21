@@ -8,7 +8,9 @@ import no.nav.helse.person.PersonHendelse
 import no.nav.helse.person.SpesifikkKontekst
 import no.nav.helse.spleis.DatadelingMediator
 import no.nav.helse.spleis.meldinger.TestRapid
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertDoesNotThrow
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -66,10 +68,10 @@ internal class DatadelingMediatorTest {
     }
 
     @Test
-    fun `publiserer ikke behov-aktiviteter`() {
+    fun `publiserer behov-aktiviteter`() {
         testhendelse.behov(Aktivitetslogg.Aktivitet.Behov.Behovtype.Godkjenning, "melding")
         datadelingMediator.finalize(testRapid)
-        assertEquals(0, testRapid.inspektør.antall())
+        assertEquals(1, testRapid.inspektør.antall())
     }
 
     @Test
