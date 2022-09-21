@@ -39,9 +39,11 @@ import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertInfo
 import no.nav.helse.spleis.e2e.assertIngenInfo
+import no.nav.helse.spleis.e2e.assertIngenVarsel
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertUtbetalingsbeløp
+import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.finnSkjæringstidspunkt
 import no.nav.helse.spleis.e2e.forlengTilGodkjenning
 import no.nav.helse.spleis.e2e.forlengVedtak
@@ -661,5 +663,25 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         assertEquals(0, inspektør.gjenståendeSykedager(15.vedtaksperiode))
         assertEquals(0, inspektør.utbetalingstidslinjer(15.vedtaksperiode).inspektør.avvistDagTeller)
         assertEquals(6, inspektør.utbetalingstidslinjer(14.vedtaksperiode).inspektør.avvistDagTeller)
+    }
+
+    @Test
+    fun `Warning ved out-of-order`() {
+        nyttVedtak(1.mars, 31.mars)
+        forlengVedtak(1.april, 30.april)
+        forlengVedtak(1.mai, 31.mai)
+
+        nyttVedtak(1.januar, 31.januar)
+
+        assertForventetFeil(
+            forklaring = "Ikke implementert",
+            nå = {},
+            ønsket = {
+                assertVarsel("Det er utbetalt sykepenger i Speil for en senere periode enn denne.", 4.vedtaksperiode.filter())
+                assertIngenVarsel("Det er utbetalt sykepenger i Speil for en senere periode enn denne.", 1.vedtaksperiode.filter())
+                assertIngenVarsel("Det er utbetalt sykepenger i Speil for en senere periode enn denne.", 2.vedtaksperiode.filter())
+                assertIngenVarsel("Det er utbetalt sykepenger i Speil for en senere periode enn denne.", 3.vedtaksperiode.filter())
+            }
+        )
     }
 }
