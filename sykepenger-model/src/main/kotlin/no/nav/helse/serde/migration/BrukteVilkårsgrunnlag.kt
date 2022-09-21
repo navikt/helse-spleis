@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import java.time.LocalDate
+import java.util.UUID
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.serde.migration.Sykefraværstilfeller.sykefraværstilfeller
@@ -79,14 +80,16 @@ internal object BrukteVilkårsgrunnlag {
                     sikkerlogg.info("Fant ikke vilkårsgrunnlag for sykefraværstilfellet ${sykefraværstilfelle.periode} med tilstander ${tilstanderPerSkjæringstidspunkt[sykefraværstilfelle.tidligsteSkjæringstidspunkt]} for aktørId=$aktørId")
                     return@forEach
                 }
-                sykefraværstilfelle.skjæringstidspunkter.forEach { skjæringstidspunkt ->
+                sykefraværstilfelle.skjæringstidspunkter.forEachIndexed {index, skjæringstidspunkt ->
                     if (vilkårgrunnlag.skjæringstidspunkt != skjæringstidspunkt) {
                         endret = true
                         sikkerlogg.info("Kopierer vilkårsgrunnlag ${vilkårgrunnlag.vilkårsgrunnlagId} fra ${vilkårgrunnlag.skjæringstidspunkt} til $skjæringstidspunkt for aktørId=$aktørId")
                     }
+                    val vilkårsgrunnlagId = if (index == 0) vilkårgrunnlag.vilkårsgrunnlagId else "${UUID.randomUUID()}"
 
                     val vilkårsgrunnlagMedRiktigSkjæringstidspunkt = vilkårgrunnlag.deepCopy<ObjectNode>()
                         .put("skjæringstidspunkt", skjæringstidspunkt.toString())
+                        .put("vilkårsgrunnlagId", vilkårsgrunnlagId)
                     add(vilkårsgrunnlagMedRiktigSkjæringstidspunkt)
                 }
             }

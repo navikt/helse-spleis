@@ -107,9 +107,11 @@ internal class V178ForkastOgFlyttVilkårsgrunnlagTest : MigrationTest(V178Forkas
     private fun assertForkastetVilkårsgrunnlag(originalJson: String, expectedJson: String) {
         val migrert = migrer(originalJson.readResource())
         val sisteInnslag = migrert.path("vilkårsgrunnlagHistorikk")[0]
+        val sisteGrunnlag = sisteInnslag.path("vilkårsgrunnlag").lastOrNull()
         val expected = expectedJson.readResource()
             .replace("{id}", sisteInnslag.path("id").asText())
             .replace("{opprettet}", sisteInnslag.path("opprettet").asText())
+            .replace("{sisteVilkårsgrunnlagId}", sisteGrunnlag?.path("vilkårsgrunnlagId")?.asText()?:"")
         assertJson(migrert.toString(), expected)
     }
 }

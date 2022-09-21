@@ -83,7 +83,7 @@
             "minsteinntekt": 46817.0,
             "oppfyllerMinsteinntektskrav": true
           },
-          "vilkårsgrunnlagId": "e0e5ba02-4e5b-408b-9d5d-628045738280"
+          "vilkårsgrunnlagId": "{sisteVilkårsgrunnlagId}"
         }
       ]
     },
