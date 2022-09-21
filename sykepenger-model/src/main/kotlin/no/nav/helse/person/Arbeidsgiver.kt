@@ -493,8 +493,6 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun håndter(sykmelding: Sykmelding) {
-        sykmelding.validerAtSykmeldingIkkeErForGammel()
-        if (sykmelding.harFunksjonelleFeilEllerVerre()) return
         håndter(sykmelding, Vedtaksperiode::håndter)
         sykmeldingsperioder.lagre(sykmelding)
     }
