@@ -97,9 +97,6 @@ class Vilkårsgrunnlag(
         arbeidsforhold
             .filter { it.erDelAvOpptjeningsperiode(opptjeningsperiode) }
             .grupperArbeidsforholdPerOrgnummer().forEach { (orgnummer, arbeidsforhold) ->
-                if (arbeidsforhold.any { it.erSøppel() }) {
-                    varsel("Vi fant ugyldige arbeidsforhold i Aareg, burde sjekkes opp nærmere") // TODO: må ses på av en voksen
-                }
                 person.lagreArbeidsforhold(orgnummer, arbeidsforhold, this, skjæringstidspunkt)
             }
     }
