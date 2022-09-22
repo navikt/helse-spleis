@@ -164,4 +164,18 @@ internal class VarslerE2ETest: AbstractEndToEndTest() {
             }
         )
     }
+
+    @Test
+    fun `varsel - Arbeidsgiver er ikke registrert i Aa-registeret`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode,
+            orgnummer = a1,
+            arbeidsforhold = emptyList()
+        )
+        assertVarsel(RV_VV_1, 1.vedtaksperiode.filter())
+    }
 }

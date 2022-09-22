@@ -71,6 +71,7 @@ import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.TilstandType.UTBETALING_FEILET
 import no.nav.helse.person.Varselkode.RV_IM_4
+import no.nav.helse.person.Varselkode.RV_VV_1
 import no.nav.helse.person.Varselkode.RV_VV_8
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.etterlevelse.MaskinellJurist
@@ -569,7 +570,7 @@ internal class Vedtaksperiode private constructor(
         vilkårsgrunnlag.loggUkjenteArbeidsforhold(person, skjæringstidspunkt)
 
         if (person.harVedtaksperiodeForArbeidsgiverMedUkjentArbeidsforhold(skjæringstidspunkt)) {
-            vilkårsgrunnlag.varsel("Arbeidsgiver er ikke registrert i Aa-registeret.")
+            vilkårsgrunnlag.varsel(RV_VV_1)
         }
 
         vilkårsgrunnlag.lagreRapporterteInntekter(person, skjæringstidspunkt)

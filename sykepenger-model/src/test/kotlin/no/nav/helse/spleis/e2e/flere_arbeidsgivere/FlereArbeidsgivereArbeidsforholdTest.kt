@@ -22,6 +22,8 @@ import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.PersonVisitor
 import no.nav.helse.person.TilstandType
+import no.nav.helse.person.Varselkode
+import no.nav.helse.person.Varselkode.RV_VV_1
 import no.nav.helse.serde.reflection.castAsList
 import no.nav.helse.serde.reflection.castAsMap
 import no.nav.helse.sisteBehov
@@ -638,7 +640,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a1)
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)
 
-        assertVarsel("Arbeidsgiver er ikke registrert i Aa-registeret.", 1.vedtaksperiode.filter(a1))
+        assertVarsel(RV_VV_1, 1.vedtaksperiode.filter(a1))
     }
 
     @Test

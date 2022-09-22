@@ -27,6 +27,8 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.PersonVisitor
 import no.nav.helse.person.Sammenligningsgrunnlag
 import no.nav.helse.person.TilstandType
+import no.nav.helse.person.Varselkode
+import no.nav.helse.person.Varselkode.RV_VV_1
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.Vedtaksperiode.Vedtaksperiodetilstand
 import no.nav.helse.person.etterlevelse.MaskinellJurist
@@ -122,7 +124,7 @@ internal class VilkårsgrunnlagTest : AbstractPersonTest() {
         person.håndter(vilkårsgrunnlag)
         assertGrunnlagsdata(INNTEKT, Prosent.ratio(0.0), 28, true)
         assertEquals(TilstandType.AVVENTER_HISTORIKK, hentTilstand()?.type)
-        assertVarsel("Arbeidsgiver er ikke registrert i Aa-registeret.", AktivitetsloggFilter.person())
+        assertVarsel(RV_VV_1, AktivitetsloggFilter.person())
     }
 
     @Test
