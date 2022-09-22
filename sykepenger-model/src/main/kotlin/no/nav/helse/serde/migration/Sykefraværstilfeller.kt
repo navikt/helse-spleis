@@ -23,19 +23,24 @@ internal object Sykefraværstilfeller {
         val aktiveVedtaksperioder = person.path("arbeidsgivere")
             .flatMap { it.path("vedtaksperioder") }
             .filterNot { it.tilstand == "AVSLUTTET_UTEN_UTBETALING" }
+            .map { AktivVedtaksperiode(it.skjæringstidspunkt, it.fom til it.tom, it.tilstand) }
 
         val forkastedeVedtaksperioder = person.path("arbeidsgivere")
             .flatMap { it.path("forkastede") }
             .map { it.path("vedtaksperiode") }
+            .map { ForkastetVedtaksperiode(it.skjæringstidspunkt, it.fom til it.tom, it.tilstand) }
 
-        val alleVedtaksperioder = aktiveVedtaksperioder + forkastedeVedtaksperioder
-
-        return alleVedtaksperioder.map { Vedtaksperiode(it.skjæringstidspunkt, it.fom til it.tom, it.tilstand) }
+        return aktiveVedtaksperioder + forkastedeVedtaksperioder
     }
 
     internal fun sykefraværstilfeller(vedtaksperioder: List<Vedtaksperiode>): Set<Sykefraværstilfelle>{
         val sammenhengendePerioder = vedtaksperioder.map { it.periode }.grupperSammenhengendePerioderMedHensynTilHelg()
-        return sammenhengendePerioder.map { sammenhengendePeriode ->
+        val sammenhengendeAktivePerioder = vedtaksperioder
+            .filterIsInstance<AktivVedtaksperiode>()
+            .map { it.periode }.grupperSammenhengendePerioderMedHensynTilHelg()
+        return sammenhengendePerioder
+            .filter { sammenhengendePeriode -> sammenhengendeAktivePerioder.any { it.overlapperMed(sammenhengendePeriode) } }
+            .map { sammenhengendePeriode ->
             val skjæringstidspunkter = vedtaksperioder.skjæringstidspunkterFor(sammenhengendePeriode)
             val tidligsteSkjæringstidspunkt = skjæringstidspunkter.min()
             val periode = tidligsteSkjæringstidspunkt til sammenhengendePeriode.endInclusive
@@ -46,7 +51,10 @@ internal object Sykefraværstilfeller {
     private fun List<Vedtaksperiode>.skjæringstidspunkterFor(periode: Periode) =
         filter { periode.overlapperMed(it.periode) }.map { it.skjæringstidspunkt }.toSet()
 
-    internal data class Vedtaksperiode(val skjæringstidspunkt: LocalDate, val periode: Periode, val tilstand: String)
+    internal sealed class Vedtaksperiode(val skjæringstidspunkt: LocalDate, val periode: Periode, val tilstand: String)
+    internal class AktivVedtaksperiode(skjæringstidspunkt: LocalDate, periode: Periode, tilstand: String) : Vedtaksperiode(skjæringstidspunkt, periode, tilstand)
+    internal class ForkastetVedtaksperiode(skjæringstidspunkt: LocalDate, periode: Periode, tilstand: String) : Vedtaksperiode(skjæringstidspunkt, periode, tilstand)
+
     internal data class Sykefraværstilfelle(val skjæringstidspunkter: Set<LocalDate>, val periode: Periode) {
         internal val tidligsteSkjæringstidspunkt = skjæringstidspunkter.min()
     }
