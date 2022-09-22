@@ -4,12 +4,18 @@ import java.time.LocalDate
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
+import no.nav.helse.hendelser.InntektForSykepengegrunnlag
+import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
+import no.nav.helse.mars
+import no.nav.helse.person.TilstandType
 import no.nav.helse.person.Varselkode.*
+import no.nav.helse.person.Vedtaksperiode
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Test
 
@@ -177,6 +183,60 @@ internal class VarslerE2ETest: AbstractEndToEndTest() {
             arbeidsforhold = emptyList()
         )
         assertVarsel(RV_VV_1, 1.vedtaksperiode.filter())
+    }
+
+    @Test
+    fun `varsel - Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(4.januar, 31.januar, 100.prosent), orgnummer = a2)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(4.januar, 31.januar, 100.prosent), orgnummer = a2)
+
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            førsteFraværsdag = 1.januar,
+            beregnetInntekt = 10000.månedlig,
+            orgnummer = a1
+        )
+        håndterInntektsmelding(
+            listOf(4.januar til 19.januar),
+            førsteFraværsdag = 4.januar,
+            beregnetInntekt = 19000.månedlig,
+            orgnummer = a2
+        )
+        val inntekter = listOf(
+            grunnlag(
+                a1, finnSkjæringstidspunkt(
+                    a1, 1.vedtaksperiode
+                ), 10000.månedlig.repeat(3)
+            ),
+            grunnlag(
+                a2, finnSkjæringstidspunkt(
+                    a1, 1.vedtaksperiode
+                ), 20000.månedlig.repeat(3)
+            )
+        )
+        val arbeidsforhold = listOf(
+            Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a1, ansattFom = LocalDate.EPOCH, ansattTom = null),
+            Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a2, ansattFom = LocalDate.EPOCH, ansattTom = null)
+        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
+                listOf(
+                    sammenligningsgrunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 10000.månedlig.repeat(12)),
+                    sammenligningsgrunnlag(a2, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 20000.månedlig.repeat(12))
+                )
+            ),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
+                inntekter = inntekter,
+                arbeidsforhold = emptyList()
+            ),
+            arbeidsforhold = arbeidsforhold,
+            orgnummer = a1
+        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(a1))
     }
 
     @Test

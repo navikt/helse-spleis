@@ -17,6 +17,8 @@ import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
+import no.nav.helse.person.Varselkode
+import no.nav.helse.person.Varselkode.RV_VV_2
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.assertIngenVarsler
@@ -75,7 +77,7 @@ internal class FlereArbeidsgivereWarningsTest : AbstractEndToEndTest() {
         )
         Assertions.assertFalse(
             person.personLogg.toString()
-                .contains("Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold")
+                .contains(RV_VV_2.name)
         )
     }
 
@@ -138,7 +140,8 @@ internal class FlereArbeidsgivereWarningsTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
 
-        assertVarsel("Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold",
+        assertVarsel(
+            RV_VV_2,
             AktivitetsloggFilter.person()
         )
 
@@ -148,7 +151,7 @@ internal class FlereArbeidsgivereWarningsTest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.januar(2021) til 16.januar(2021)), førsteFraværsdag = 1.januar(2021), orgnummer = a2)
 
         assertVarsel(
-            "Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold",
+            RV_VV_2,
             AktivitetsloggFilter.person()
         )
         assertTilstander(

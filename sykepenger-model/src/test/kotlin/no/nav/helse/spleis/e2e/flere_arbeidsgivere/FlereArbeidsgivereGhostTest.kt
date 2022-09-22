@@ -22,6 +22,7 @@ import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.Varselkode.RV_VV_8
 import no.nav.helse.person.Varselkode.RV_SØ_10
+import no.nav.helse.person.Varselkode.RV_VV_2
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
 import no.nav.helse.spleis.e2e.assertIngenVarsel
@@ -205,7 +206,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
 
         assertVarsler()
-        assertVarsel("Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold", 1.vedtaksperiode.filter(a1))
+        assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(a1))
         assertIngenVarsel(RV_VV_8, 1.vedtaksperiode.filter(a1))
         Assertions.assertEquals(
             Inntektskilde.FLERE_ARBEIDSGIVERE,
@@ -688,7 +689,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
 
         håndterYtelser(2.vedtaksperiode, orgnummer = a1)
 
-        assertVarsel("Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold", 1.vedtaksperiode.filter(a1))
+        assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(a1))
         assertIngenVarsler(2.vedtaksperiode.filter(orgnummer = a1))
     }
 
@@ -800,7 +801,7 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
             vilkårsgrunnlag.inspektør.sykepengegrunnlag.inspektør.arbeidsgiverInntektsopplysninger.inntektsopplysningPerArbeidsgiver().keys
         )
         Assertions.assertEquals(Inntektskilde.FLERE_ARBEIDSGIVERE, inspektør(a1).inntektskilde(1.vedtaksperiode))
-        assertVarsel("Flere arbeidsgivere, ulikt starttidspunkt for sykefraværet eller ikke fravær fra alle arbeidsforhold", 1.vedtaksperiode.filter(a1))
+        assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(a1))
     }
 
     @Test
