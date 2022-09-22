@@ -1544,7 +1544,6 @@ internal class Vedtaksperiode private constructor(
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.loggInnenforArbeidsgiverperiode()
             vedtaksperiode.trengerYtelser(hendelse)
-            vedtaksperiode.utbetalinger.forkast(hendelse)
             hendelse.info("Forespør sykdoms- og inntektshistorikk")
         }
 
@@ -1677,6 +1676,13 @@ internal class Vedtaksperiode private constructor(
             trengerSimulering(vedtaksperiode, hendelse)
         }
 
+        override fun leaving(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
+            if (vedtaksperiode.utbetalinger.erKlarForGodkjenning()) return
+            aktivitetslogg.info("Forkaster utbetalingen fordi utbetalingen er ikke simulert, " +
+                    "og perioden endrer tilstand")
+            vedtaksperiode.utbetalinger.forkast(aktivitetslogg)
+        }
+
         override fun nyPeriodeTidligereEllerOverlappende(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Søknad) {
             vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode)
         }
@@ -1770,6 +1776,10 @@ internal class Vedtaksperiode private constructor(
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.trengerGodkjenning(hendelse)
+        }
+
+        override fun leaving(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
+            vedtaksperiode.utbetalinger.forkast(aktivitetslogg)
         }
 
         override fun nyPeriodeTidligereEllerOverlappende(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Søknad) {

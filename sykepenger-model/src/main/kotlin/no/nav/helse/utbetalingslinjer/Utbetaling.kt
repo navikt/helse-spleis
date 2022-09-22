@@ -648,9 +648,7 @@ internal class Utbetaling private constructor(
     override fun toString() = "$type(${Utbetalingstatus.fraTilstand(tilstand)}) - $periode"
 
     internal interface Tilstand {
-        fun forkast(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {
-            hendelse.info("Forkaster ikke utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
-        }
+        fun forkast(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {}
 
         fun opprett(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {
             hendelse.funksjonellFeil("Forventet ikke å opprette utbetaling i tilstand=${this::class.simpleName}")

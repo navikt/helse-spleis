@@ -38,15 +38,26 @@ import no.nav.helse.spleis.e2e.håndterUtbetalingshistorikk
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.nyttVedtak
+import no.nav.helse.spleis.e2e.tilSimulering
 import no.nav.helse.sykdomstidslinje.Dag.Feriedag
 import no.nav.helse.sykdomstidslinje.Dag.Permisjonsdag
 import no.nav.helse.sykdomstidslinje.Dag.Sykedag
+import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class KorrigertSøknadTest : AbstractEndToEndTest() {
+
+    @Test
+    fun `korrigert søknad i avventer simulering - forkaster utbetalingen`() {
+        tilSimulering(3.januar, 26.januar, 100.prosent, 3.januar)
+        nullstillTilstandsendringer()
+        håndterSøknad(Sykdom(3.januar, 26.januar, 80.prosent))
+        assertEquals(Utbetaling.Forkastet, inspektør.utbetalinger(1.vedtaksperiode).single().inspektør.tilstand)
+        assertTilstander(1.vedtaksperiode, AVVENTER_SIMULERING, AVVENTER_HISTORIKK)
+    }
 
     @Test
     fun `Arbeidsdag i søknad nr 2 kaster ut perioden`() {

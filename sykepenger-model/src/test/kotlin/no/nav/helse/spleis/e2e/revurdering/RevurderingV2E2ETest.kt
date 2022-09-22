@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e.revurdering
 
 import java.time.LocalDate
-import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
@@ -19,7 +18,6 @@ import no.nav.helse.juni
 import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.person.TilstandType.AVSLUTTET
-import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
@@ -28,12 +26,9 @@ import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
-import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
-import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
-import no.nav.helse.person.Varselkode
 import no.nav.helse.person.Varselkode.RV_VV_4
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
@@ -41,14 +36,12 @@ import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
 import no.nav.helse.spleis.e2e.assertIngenVarsler
-import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.forlengTilGodkjenning
 import no.nav.helse.spleis.e2e.forlengTilSimulering
 import no.nav.helse.spleis.e2e.forlengVedtak
-import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterOverstyrTidslinje
 import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSykmelding
@@ -56,9 +49,7 @@ import no.nav.helse.spleis.e2e.håndterSøknad
 import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
 import no.nav.helse.spleis.e2e.håndterUtbetalingshistorikk
 import no.nav.helse.spleis.e2e.håndterUtbetalt
-import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
-import no.nav.helse.spleis.e2e.nyPeriode
 import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.spleis.e2e.tilGodkjenning
 import no.nav.helse.spleis.e2e.tilGodkjent
@@ -67,6 +58,7 @@ import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.Sykedag
 import no.nav.helse.utbetalingslinjer.Utbetaling
+import no.nav.helse.utbetalingslinjer.Utbetaling.Forkastet
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
@@ -114,6 +106,9 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
 
         assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(17.januar, 0.0)
         assertDiff(-1431)
+        val utbetalinger = inspektør.utbetalinger(2.vedtaksperiode)
+        assertEquals(1, utbetalinger.size)
+        assertEquals(Forkastet, utbetalinger.single().inspektør.tilstand)
 
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
