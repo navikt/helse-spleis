@@ -21,6 +21,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.TilstandType.START
+import no.nav.helse.person.Varselkode.RV_IM_5
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertIngenVarsel
@@ -54,11 +55,11 @@ internal class InntektsmeldingOgFerieE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         assertForventetFeil(
             nå = {
-                assertIngenVarsel("Sykmeldte har oppgitt ferie første dag i arbeidsgiverperioden.", 1.vedtaksperiode.filter(ORGNUMMER))
+                assertIngenVarsel(RV_IM_5, 1.vedtaksperiode.filter(ORGNUMMER))
             },
             ønsket = {
                 // TODO: https://trello.com/c/92DhehGa
-                assertVarsel("Sykmeldte har oppgitt ferie første dag i arbeidsgiverperioden.", 1.vedtaksperiode.filter(ORGNUMMER))
+                assertVarsel(RV_IM_5, 1.vedtaksperiode.filter(ORGNUMMER))
             }
         )
         assertVarsel("Denne perioden var tidligere regnet som innenfor arbeidsgiverperioden", 1.vedtaksperiode.filter(ORGNUMMER))

@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -141,5 +142,26 @@ internal class VarslerE2ETest: AbstractEndToEndTest() {
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         assertVarsel(RV_VV_8, 1.vedtaksperiode.filter())
+    }
+
+    @Test
+    fun `varsel - Sykmeldte har oppgitt ferie første dag i arbeidsgiverperioden`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(
+            Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent),
+            Søknad.Søknadsperiode.Ferie(1.januar, 20.januar),
+            Søknad.Søknadsperiode.Ferie(25.januar, 31.januar)
+        )
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        assertForventetFeil(
+            nå = {
+                assertIngenVarsel(RV_IM_5, 1.vedtaksperiode.filter(ORGNUMMER))
+            },
+            ønsket = {
+                // TODO: https://trello.com/c/92DhehGa
+                assertVarsel(RV_IM_5, 1.vedtaksperiode.filter(ORGNUMMER))
+            }
+        )
     }
 }
