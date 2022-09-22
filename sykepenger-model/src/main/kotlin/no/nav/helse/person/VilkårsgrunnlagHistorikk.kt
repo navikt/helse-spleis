@@ -10,6 +10,7 @@ import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.OverstyrInntekt
 import no.nav.helse.hendelser.til
 import no.nav.helse.mai
+import no.nav.helse.person.Varselkode.RV_VV_3
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
@@ -402,7 +403,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             if (skjæringstidspunkt !in 1.mai(2021) til 16.mai(2021)) return
             val gammeltGrunnbeløp = Grunnbeløp.`6G`.beløp(LocalDate.of(2021, 4, 30))
             if (sykepengegrunnlag < gammeltGrunnbeløp) return
-            aktivitetslogg.varsel(Varselkode.RV_VV_3)  // denne warningen bør kunne fjernes når det er få eller ikke lenger flere infotrygdforlengelser i spleis
+            aktivitetslogg.varsel(RV_VV_3)  // denne warningen bør kunne fjernes når det er få eller ikke lenger flere infotrygdforlengelser i spleis
         }
 
         override fun accept(vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor) {

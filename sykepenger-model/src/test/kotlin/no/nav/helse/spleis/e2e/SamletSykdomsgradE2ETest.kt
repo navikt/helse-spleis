@@ -16,6 +16,8 @@ import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.Varselkode
+import no.nav.helse.person.Varselkode.RV_VV_4
 import no.nav.helse.utbetalingslinjer.Utbetaling.GodkjentUtenUtbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Sendt
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -117,7 +119,7 @@ internal class SamletSykdomsgradE2ETest: AbstractEndToEndTest() {
 
         assertForventetFeil(
             forklaring = "når vi mottar korrigert søknad ligger det igjen warnings fra før som ikke lengre gjelder",
-            nå = { assertVarsel("Minst én dag uten utbetaling på grunn av sykdomsgrad under 20 %. Vurder å sende vedtaksbrev fra Infotrygd") },
+            nå = { assertVarsel(RV_VV_4) },
             ønsket = { assertIngenVarsler() }
         )
     }
@@ -140,7 +142,7 @@ internal class SamletSykdomsgradE2ETest: AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-        assertVarsel("Minst én dag uten utbetaling på grunn av sykdomsgrad under 20 %. Vurder å sende vedtaksbrev fra Infotrygd", 1.vedtaksperiode.filter())
+        assertVarsel(RV_VV_4, 1.vedtaksperiode.filter())
         assertIngenVarsler(2.vedtaksperiode.filter())
     }
 }

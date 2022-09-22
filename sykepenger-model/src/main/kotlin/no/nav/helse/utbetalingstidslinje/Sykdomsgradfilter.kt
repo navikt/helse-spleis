@@ -3,6 +3,8 @@ package no.nav.helse.utbetalingstidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.person.IAktivitetslogg
+import no.nav.helse.person.Varselkode
+import no.nav.helse.person.Varselkode.RV_VV_4
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.subsumsjonsformat
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Companion.avvis
@@ -29,7 +31,7 @@ internal object Sykdomsgradfilter: UtbetalingstidslinjerFilter {
             val avvisteDager = avvisteDager(tidslinjer, periode, Begrunnelse.MinimumSykdomsgrad)
             val harAvvisteDager = avvisteDager.isNotEmpty()
             subsumsjonObserver.`§ 8-13 ledd 1`(periode, avvisteDager.map { it.dato }, tidslinjerForSubsumsjon)
-            if (harAvvisteDager) aktivitetslogg.varsel("Minst én dag uten utbetaling på grunn av sykdomsgrad under 20 %. Vurder å sende vedtaksbrev fra Infotrygd")
+            if (harAvvisteDager) aktivitetslogg.varsel(RV_VV_4)
             else aktivitetslogg.info("Ingen avviste dager på grunn av 20 %% samlet sykdomsgrad-regel for denne perioden")
         }
         return tidslinjer

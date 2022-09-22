@@ -4,8 +4,11 @@ import java.time.LocalDate
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
+import no.nav.helse.hendelser.Dagtype
+import no.nav.helse.hendelser.Dagtype.Feriedag
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsvurdering
+import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Vilkårsgrunnlag
@@ -13,10 +16,31 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.TilstandType
-import no.nav.helse.person.Varselkode.*
-import no.nav.helse.person.Vedtaksperiode
+import no.nav.helse.person.Varselkode
+import no.nav.helse.person.Varselkode.RV_IM_1
+import no.nav.helse.person.Varselkode.RV_IM_2
+import no.nav.helse.person.Varselkode.RV_IM_3
+import no.nav.helse.person.Varselkode.RV_IM_4
+import no.nav.helse.person.Varselkode.RV_IM_5
+import no.nav.helse.person.Varselkode.RV_RE_1
+import no.nav.helse.person.Varselkode.RV_SØ_1
+import no.nav.helse.person.Varselkode.RV_SØ_10
+import no.nav.helse.person.Varselkode.RV_SØ_2
+import no.nav.helse.person.Varselkode.RV_SØ_3
+import no.nav.helse.person.Varselkode.RV_SØ_4
+import no.nav.helse.person.Varselkode.RV_SØ_5
+import no.nav.helse.person.Varselkode.RV_SØ_7
+import no.nav.helse.person.Varselkode.RV_SØ_8
+import no.nav.helse.person.Varselkode.RV_SØ_9
+import no.nav.helse.person.Varselkode.RV_VV_1
+import no.nav.helse.person.Varselkode.RV_VV_2
+import no.nav.helse.person.Varselkode.RV_VV_4
+import no.nav.helse.person.Varselkode.RV_VV_8
+import no.nav.helse.person.nullstillTilstandsendringer
+import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
 internal class VarslerE2ETest: AbstractEndToEndTest() {
@@ -237,6 +261,17 @@ internal class VarslerE2ETest: AbstractEndToEndTest() {
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(a1))
+    }
+
+    @Test
+    fun `Varsel - Minst én dag uten utbetaling på grunn av sykdomsgrad under 20 %, Vurder å sende vedtaksbrev fra Infotrygd`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 19.prosent), orgnummer = a1)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 19.prosent), orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        assertVarsel(RV_VV_4, 1.vedtaksperiode.filter(a1))
     }
 
     @Test

@@ -29,6 +29,8 @@ import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.Varselkode
+import no.nav.helse.person.Varselkode.RV_VV_4
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
@@ -564,8 +566,8 @@ internal class RevurderingFlereAGV2E2ETest: AbstractEndToEndTest() {
 
         assertEquals(19, inspektør(a1).sykdomstidslinje.inspektør.grader[17.januar])
         assertEquals(19, inspektør(a2).sykdomstidslinje.inspektør.grader[17.januar])
-        assertVarsel("Minst én dag uten utbetaling på grunn av sykdomsgrad under 20 %. Vurder å sende vedtaksbrev fra Infotrygd", 1.vedtaksperiode.filter(a2))
-        assertVarsel("Minst én dag uten utbetaling på grunn av sykdomsgrad under 20 %. Vurder å sende vedtaksbrev fra Infotrygd", 1.vedtaksperiode.filter(a1))
+        assertVarsel(RV_VV_4, 1.vedtaksperiode.filter(a2))
+        assertVarsel(RV_VV_4, 1.vedtaksperiode.filter(a1))
     }
 
     @Test

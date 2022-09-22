@@ -33,6 +33,8 @@ import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.Varselkode
+import no.nav.helse.person.Varselkode.RV_VV_4
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.person.nullstillTilstandsendringer
@@ -914,8 +916,8 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
         håndterYtelser(2.vedtaksperiode)
 
         assertEquals(19, inspektør.sykdomstidslinje.inspektør.grader[17.januar])
-        assertVarsel("Minst én dag uten utbetaling på grunn av sykdomsgrad under 20 %. Vurder å sende vedtaksbrev fra Infotrygd", 2.vedtaksperiode.filter())
-        assertVarsel("Minst én dag uten utbetaling på grunn av sykdomsgrad under 20 %. Vurder å sende vedtaksbrev fra Infotrygd", 1.vedtaksperiode.filter())
+        assertVarsel(RV_VV_4, 2.vedtaksperiode.filter())
+        assertVarsel(RV_VV_4, 1.vedtaksperiode.filter())
     }
 
     private inline fun <reified D: Dag, reified UD: Utbetalingsdag>assertDag(dato: LocalDate, beløp: Double) {
