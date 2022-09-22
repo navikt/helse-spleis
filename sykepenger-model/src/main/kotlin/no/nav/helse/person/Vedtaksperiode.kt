@@ -996,6 +996,10 @@ internal class Vedtaksperiode private constructor(
         override val type = START
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
+            val harSenereUtbetalinger = vedtaksperiode.person.vedtaksperioder(NYERE_SKJÆRINGSTIDSPUNKT_MED_UTBETALING(vedtaksperiode)).isNotEmpty()
+            if(Toggle.RevurderOutOfOrder.enabled && harSenereUtbetalinger) {
+                søknad.varsel("Det er utbetalt sykepenger i Speil for en senere periode enn denne.")
+            }
             vedtaksperiode.håndterSøknad(søknad) {
                 when {
                     !vedtaksperiode.harNødvendigInntektForVilkårsprøving() -> AvventerInntektsmeldingEllerHistorikk

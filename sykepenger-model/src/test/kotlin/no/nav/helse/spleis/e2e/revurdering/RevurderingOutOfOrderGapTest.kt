@@ -673,15 +673,9 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
 
         nyttVedtak(1.januar, 31.januar)
 
-        assertForventetFeil(
-            forklaring = "Ikke implementert",
-            nå = {},
-            ønsket = {
-                assertVarsel("Det er utbetalt sykepenger i Speil for en senere periode enn denne.", 4.vedtaksperiode.filter())
-                assertIngenVarsel("Det er utbetalt sykepenger i Speil for en senere periode enn denne.", 1.vedtaksperiode.filter())
-                assertIngenVarsel("Det er utbetalt sykepenger i Speil for en senere periode enn denne.", 2.vedtaksperiode.filter())
-                assertIngenVarsel("Det er utbetalt sykepenger i Speil for en senere periode enn denne.", 3.vedtaksperiode.filter())
-            }
-        )
+        assertVarsel("Det er utbetalt sykepenger i Speil for en senere periode enn denne.", 4.vedtaksperiode.filter())
+        assertIngenVarsel("Det er utbetalt sykepenger i Speil for en senere periode enn denne.", 1.vedtaksperiode.filter())
+        assertIngenVarsel("Det er utbetalt sykepenger i Speil for en senere periode enn denne.", 2.vedtaksperiode.filter())
+        assertIngenVarsel("Det er utbetalt sykepenger i Speil for en senere periode enn denne.", 3.vedtaksperiode.filter())
     }
 }
