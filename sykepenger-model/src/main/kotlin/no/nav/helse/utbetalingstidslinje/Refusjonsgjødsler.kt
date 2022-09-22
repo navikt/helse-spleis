@@ -3,6 +3,7 @@ package no.nav.helse.utbetalingstidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.Refusjonshistorikk
+import no.nav.helse.person.Varselkode.RV_RE_1
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import org.slf4j.LoggerFactory
 
@@ -30,7 +31,7 @@ internal class Refusjonsgjødsler(
         if (infotrygdhistorikk.harBrukerutbetalingerFor(organisasjonsnummer, utbetalingsperiode.periode())) {
             aktivitetslogg.funksjonellFeil("Finner ikke informasjon om refusjon i inntektsmelding og personen har brukerutbetaling")
         } else {
-            aktivitetslogg.varsel("Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler.")
+            aktivitetslogg.varsel(RV_RE_1)
         }
     }
 

@@ -178,4 +178,20 @@ internal class VarslerE2ETest: AbstractEndToEndTest() {
         )
         assertVarsel(RV_VV_1, 1.vedtaksperiode.filter())
     }
+
+    @Test
+    fun `varsel - Fant ikke refusjonsgrad for perioden - Undersøk oppgitt refusjon før du utbetaler`() {
+        val imId = håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 25.februar)
+        nyPeriode(1.januar til 10.januar)
+        nyPeriode(11.januar til 31.januar)
+        nyPeriode(1.februar til 28.februar)
+        håndterInntektsmeldingReplay(imId, 1.vedtaksperiode.id(ORGNUMMER))
+        håndterInntektsmeldingReplay(imId, 2.vedtaksperiode.id(ORGNUMMER))
+        håndterInntektsmeldingReplay(imId, 3.vedtaksperiode.id(ORGNUMMER))
+        håndterUtbetalingshistorikk(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        assertVarsel(RV_RE_1, 2.vedtaksperiode.filter())
+    }
 }
