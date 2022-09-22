@@ -6,8 +6,10 @@ import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
+import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsvurdering
+import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -50,6 +52,7 @@ import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.forlengelseTilGodkjenning
 import no.nav.helse.spleis.e2e.grunnlag
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
+import no.nav.helse.spleis.e2e.håndterOverstyrTidslinje
 import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
@@ -666,16 +669,34 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Warning ved out-of-order`() {
+    fun `Warning ved out-of-order - én warning for perioden som trigger out-of-order, én warning for de som blir påvirket av out-of-order`() {
         nyttVedtak(1.mars, 31.mars)
         forlengVedtak(1.april, 30.april)
         forlengVedtak(1.mai, 31.mai)
 
         nyttVedtak(1.januar, 31.januar)
 
-        assertVarsel("Det er utbetalt sykepenger i Speil for en senere periode enn denne.", 4.vedtaksperiode.filter())
-        assertIngenVarsel("Det er utbetalt sykepenger i Speil for en senere periode enn denne.", 1.vedtaksperiode.filter())
-        assertIngenVarsel("Det er utbetalt sykepenger i Speil for en senere periode enn denne.", 2.vedtaksperiode.filter())
-        assertIngenVarsel("Det er utbetalt sykepenger i Speil for en senere periode enn denne.", 3.vedtaksperiode.filter())
+        assertVarsel("Det er behandlet en søknad i Speil for en senere periode enn denne.", 4.vedtaksperiode.filter())
+        assertIngenVarsel("Saken må revurderes fordi det har blitt behandlet en tidligere periode som kan ha betydning.", 4.vedtaksperiode.filter())
+        assertVarsel("Saken må revurderes fordi det har blitt behandlet en tidligere periode som kan ha betydning.", 1.vedtaksperiode.filter())
+        assertVarsel("Saken må revurderes fordi det har blitt behandlet en tidligere periode som kan ha betydning.", 2.vedtaksperiode.filter())
+        assertVarsel("Saken må revurderes fordi det har blitt behandlet en tidligere periode som kan ha betydning.", 3.vedtaksperiode.filter())
+    }
+
+    @Test
+    fun `Warning ved out-of-order - dukker ikke opp i revurderinger som ikke er out-of-order`() {
+        nyttVedtak(1.mars, 31.mars)
+        forlengVedtak(1.april, 30.april)
+        forlengVedtak(1.mai, 31.mai)
+
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.mars, Dagtype.Sykedag, 50)))
+
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING)
+        assertSisteTilstand(3.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+
+        assertIngenVarsel("Saken må revurderes fordi det har blitt behandlet en tidligere periode som kan ha betydning.", 1.vedtaksperiode.filter())
+        assertIngenVarsel("Saken må revurderes fordi det har blitt behandlet en tidligere periode som kan ha betydning.", 2.vedtaksperiode.filter())
+        assertIngenVarsel("Saken må revurderes fordi det har blitt behandlet en tidligere periode som kan ha betydning.", 3.vedtaksperiode.filter())
     }
 }

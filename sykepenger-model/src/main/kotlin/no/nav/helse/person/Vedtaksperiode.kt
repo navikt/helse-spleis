@@ -808,6 +808,8 @@ internal class Vedtaksperiode private constructor(
         if (Toggle.RevurderOutOfOrderForlengelser.disabled && vedtaksperiode.person.finnesEnVedtaksperiodeRettEtter(ny)) return outOfOrderIkkeStøttet()
         if (!ny.forventerInntekt()) return
 
+        hendelse.varsel("Saken må revurderes fordi det har blitt behandlet en tidligere periode som kan ha betydning.")
+
         sikkerlogg.info(
             "Søknaden har trigget en revurdering fordi det er en tidligere eller overlappende periode: {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}",
             keyValue("fodselsnummer", vedtaksperiode.fødselsnummer),
@@ -999,7 +1001,7 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
             val harSenereUtbetalinger = vedtaksperiode.person.vedtaksperioder(NYERE_SKJÆRINGSTIDSPUNKT_MED_UTBETALING(vedtaksperiode)).isNotEmpty()
             if(Toggle.RevurderOutOfOrder.enabled && harSenereUtbetalinger) {
-                søknad.varsel("Det er utbetalt sykepenger i Speil for en senere periode enn denne.")
+                søknad.varsel("Det er behandlet en søknad i Speil for en senere periode enn denne.")
             }
             vedtaksperiode.håndterSøknad(søknad) {
                 when {
