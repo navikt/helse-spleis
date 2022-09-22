@@ -59,7 +59,7 @@ internal object BrukteVilkårsgrunnlag {
 
         val vedtaksperioder = vedtaksperioder(jsonNode)
         val sykefraværstilfeller = sykefraværstilfeller(vedtaksperioder)
-        val tilstanderPerSkjæringstidspunkt = vedtaksperioder.groupBy { it.skjæringstidspunkt }.mapValues { (_, vedtaksperioder) -> vedtaksperioder.map { it.tilstand } }
+        val tilstanderPerSkjæringstidspunkt = vedtaksperioder.groupBy { it.skjæringstidspunkt }.mapValues { (_, vedtaksperioder) -> vedtaksperioder.map { it.tilstand() } }
 
         val perioderUtbetaltIInfotrygd = jsonNode.path("infotrygdhistorikk")
             .firstOrNull()?.let { sisteInfotrygdInnslag ->

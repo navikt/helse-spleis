@@ -51,9 +51,13 @@ internal object Sykefraværstilfeller {
     private fun List<Vedtaksperiode>.skjæringstidspunkterFor(periode: Periode) =
         filter { periode.overlapperMed(it.periode) }.map { it.skjæringstidspunkt }.toSet()
 
-    internal sealed class Vedtaksperiode(val skjæringstidspunkt: LocalDate, val periode: Periode, val tilstand: String)
+    internal sealed class Vedtaksperiode(val skjæringstidspunkt: LocalDate, val periode: Periode, protected val tilstand: String) {
+        open fun tilstand() = tilstand
+    }
     internal class AktivVedtaksperiode(skjæringstidspunkt: LocalDate, periode: Periode, tilstand: String) : Vedtaksperiode(skjæringstidspunkt, periode, tilstand)
-    internal class ForkastetVedtaksperiode(skjæringstidspunkt: LocalDate, periode: Periode, tilstand: String) : Vedtaksperiode(skjæringstidspunkt, periode, tilstand)
+    internal class ForkastetVedtaksperiode(skjæringstidspunkt: LocalDate, periode: Periode, tilstand: String) : Vedtaksperiode(skjæringstidspunkt, periode, tilstand) {
+        override fun tilstand() = "$tilstand (Forkastet)"
+    }
 
     internal data class Sykefraværstilfelle(val skjæringstidspunkter: Set<LocalDate>, val periode: Periode) {
         internal val tidligsteSkjæringstidspunkt = skjæringstidspunkter.min()
