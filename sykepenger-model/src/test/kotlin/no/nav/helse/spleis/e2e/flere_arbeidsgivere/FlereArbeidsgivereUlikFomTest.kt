@@ -15,11 +15,14 @@ import no.nav.helse.mars
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.inntektsopplysningPerArbeidsgiver
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.TilstandType
+import no.nav.helse.person.TilstandType.AVSLUTTET
+import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.Varselkode.RV_VV_2
 import no.nav.helse.person.Varselkode.RV_VV_8
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertIngenVarsel
 import no.nav.helse.spleis.e2e.assertIngenVarsler
+import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.finnSkjæringstidspunkt
@@ -29,18 +32,39 @@ import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
 import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
+import no.nav.helse.spleis.e2e.håndterUtbetalingshistorikk
 import no.nav.helse.spleis.e2e.håndterUtbetalt
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
+import no.nav.helse.spleis.e2e.nyPeriode
 import no.nav.helse.spleis.e2e.repeat
 import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
+
+    @Test
+    fun `kort periode hos en ag2 skal ikke få fordelt utbetaling`() {
+        nyPeriode(1.januar til 20.januar, a1)
+        håndterUtbetalingshistorikk(1.vedtaksperiode, orgnummer = a1)
+        nyPeriode(5.januar til 20.januar, a2)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
+        assertEquals(1, inspektør(a1).utbetalinger(1.vedtaksperiode).size)
+        assertEquals(0, inspektør(a2).utbetalinger(1.vedtaksperiode).size)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a2)
+    }
 
     @Test
     fun `To førstegangsbehandlinger med ulik fom i forskjellige måneder - skal bruke skatteinntekter for arbeidsgiver med senest fom`() {

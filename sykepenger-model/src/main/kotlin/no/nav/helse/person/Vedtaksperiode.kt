@@ -694,6 +694,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun lagUtbetaling(maksimumSykepenger: Alder.MaksimumSykepenger, hendelse: ArbeidstakerHendelse) {
+        if (!forventerInntekt()) return
         utbetalingstidslinje = utbetalinger.lagUtbetaling(fødselsnummer, periode, maksimumSykepenger, hendelse)
     }
 
@@ -1418,7 +1419,6 @@ internal class Vedtaksperiode private constructor(
                 onSuccess {
                     infotrygdhistorikk.addInntekter(person, this)
                     if (!vedtaksperiode.forventerInntekt()) {
-                        vedtaksperiode.utbetalinger.forkast(hendelse)
                         vedtaksperiode.tilstand(hendelse, AvsluttetUtenUtbetaling)
                     } else if (vedtaksperiode.harNødvendigInntektForVilkårsprøving()) {
                         info("Oppdaget at perioden startet i infotrygd")
