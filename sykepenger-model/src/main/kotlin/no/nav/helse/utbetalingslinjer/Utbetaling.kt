@@ -141,7 +141,7 @@ internal class Utbetaling private constructor(
     internal fun gyldig() = tilstand !in setOf(Ny, Forkastet)
     internal fun erUbetalt() = tilstand == Ubetalt
     internal fun erUtbetalt() = tilstand == Utbetalt || tilstand == Annullert
-    internal fun erAktiv() = erAvsluttet() || erInFlight()
+    private fun erAktiv() = erAvsluttet() || erInFlight()
     internal fun erInFlight() = tilstand in listOf(Godkjent, Sendt, Overført, UtbetalingFeilet)
     internal fun erAvsluttet() = erUtbetalt() || tilstand == GodkjentUtenUtbetaling
     internal fun erAvvist() = tilstand == IkkeGodkjent
@@ -174,9 +174,6 @@ internal class Utbetaling private constructor(
     internal fun harBrukerutbetaling() = personOppdrag.harUtbetalinger()
 
     internal fun erKlarForGodkjenning() = personOppdrag.erKlarForGodkjenning() && arbeidsgiverOppdrag.erKlarForGodkjenning()
-
-    internal fun kanForkastes(utbetalinger: List<Utbetaling>) =
-        this.tilstand in listOf(Ubetalt, IkkeGodkjent, Forkastet) || utbetalinger.filter { it.erAnnullering() }.any(::hørerSammen)
 
     internal fun opprett(hendelse: IAktivitetslogg) {
         tilstand.opprett(this, hendelse)
@@ -536,6 +533,14 @@ internal class Utbetaling private constructor(
                 acc.getOrPut(utbetaling.korrelasjonsId) { mutableListOf() }.add(vedtaksperiode)
                 acc
             }.map { it.value.maxOf { periode -> periode } }
+        }
+
+        // kan forkaste dersom ingen utbetalinger er utbetalt/in flight, eller de er annullert
+        fun kanForkastes(utbetalinger: List<Utbetaling>, alleUtbetalinger: List<Utbetaling>): Boolean {
+            val annulleringer = alleUtbetalinger.filter { it.erAnnullering() }
+            return utbetalinger.filter { it.erAktiv() }.all { utbetaling ->
+                annulleringer.any { annullering -> annullering.hørerSammen(utbetaling) }
+            }
         }
     }
 

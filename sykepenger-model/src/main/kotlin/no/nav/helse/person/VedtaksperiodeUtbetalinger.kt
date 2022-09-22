@@ -42,10 +42,9 @@ internal class VedtaksperiodeUtbetalinger(private val arbeidsgiver: Arbeidsgiver
     internal fun kanIkkeForsøkesPåNy() = siste?.kanIkkeForsøkesPåNy() == true
 
     internal fun kanForkastes(other: List<Utbetaling>) =
-        utbetalinger.isEmpty() || siste!!.kanForkastes(other)
+        Utbetaling.kanForkastes(utbetalinger, other)
     internal fun harAvsluttede() = utbetalinger.any { it.erAvsluttet() }
     internal fun harUtbetalt() = utbetalinger.any { it.erUtbetalt() }
-    internal fun harAktive() = utbetalinger.any { it.erAktiv() }
     internal fun harId(utbetalingId: UUID) = utbetalinger.harId(utbetalingId)
     internal fun hørerIkkeSammenMed(other: Utbetaling) = utbetalinger.lastOrNull { it.gyldig() }?.hørerSammen(other) == false
     internal fun hørerIkkeSammenMed(other: VedtaksperiodeUtbetalinger) = other.siste != null && hørerIkkeSammenMed(other.siste!!)

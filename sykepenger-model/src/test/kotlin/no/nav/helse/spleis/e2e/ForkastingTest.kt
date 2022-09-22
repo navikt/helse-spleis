@@ -1,7 +1,9 @@
 package no.nav.helse.spleis.e2e
 
 import no.nav.helse.februar
+import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
+import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Papirsykmelding
@@ -9,15 +11,21 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.januar
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
+import no.nav.helse.person.TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
+import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
+import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
+import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
+import no.nav.helse.person.TilstandType.REVURDERING_FEILET
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
+import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -264,5 +272,66 @@ internal class ForkastingTest : AbstractEndToEndTest() {
             AVVENTER_GODKJENNING,
             TIL_INFOTRYGD
         )
+    }
+
+    @Test
+    fun `forkaster ikke revurderinger - avventer simulering revurdering`() {
+        nyttVedtak(3.januar, 26.januar)
+        nullstillTilstandsendringer()
+        håndterOverstyrTidslinje(listOf(
+            ManuellOverskrivingDag(26.januar, Dagtype.Feriedag)
+        ))
+        håndterYtelser(1.vedtaksperiode)
+        person.søppelbøtte(hendelselogg) { true }
+        assertEquals(Utbetaling.Utbetalt, inspektør.utbetalingtilstand(0))
+        assertEquals(Utbetaling.Ubetalt, inspektør.utbetalingtilstand(1))
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING)
+    }
+
+    @Test
+    fun `forkaster ikke revurderinger - avventer godkjenning revurdering`() {
+        nyttVedtak(3.januar, 26.januar)
+        nullstillTilstandsendringer()
+        håndterOverstyrTidslinje(listOf(
+            ManuellOverskrivingDag(26.januar, Dagtype.Feriedag)
+        ))
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        person.søppelbøtte(hendelselogg) { true }
+        assertEquals(Utbetaling.Utbetalt, inspektør.utbetalingtilstand(0))
+        assertEquals(Utbetaling.Ubetalt, inspektør.utbetalingtilstand(1))
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
+    }
+
+    @Test
+    fun `forkaster ikke revurderinger - til utbetaling`() {
+        nyttVedtak(3.januar, 26.januar)
+        nullstillTilstandsendringer()
+        håndterOverstyrTidslinje(listOf(
+            ManuellOverskrivingDag(26.januar, Dagtype.Feriedag)
+        ))
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        person.søppelbøtte(hendelselogg) { true }
+        assertEquals(Utbetaling.Utbetalt, inspektør.utbetalingtilstand(0))
+        assertEquals(Utbetaling.Sendt, inspektør.utbetalingtilstand(1))
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING)
+    }
+
+    @Test
+    fun `forkaster ikke revurderinger - revurdering feilet`() {
+        nyttVedtak(3.januar, 26.januar)
+        nullstillTilstandsendringer()
+        håndterOverstyrTidslinje(listOf(
+            ManuellOverskrivingDag(26.januar, Dagtype.Feriedag)
+        ))
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, utbetalingGodkjent = false)
+        person.søppelbøtte(hendelselogg) { true }
+        assertEquals(Utbetaling.Utbetalt, inspektør.utbetalingtilstand(0))
+        assertEquals(Utbetaling.IkkeGodkjent, inspektør.utbetalingtilstand(1))
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, REVURDERING_FEILET)
     }
 }

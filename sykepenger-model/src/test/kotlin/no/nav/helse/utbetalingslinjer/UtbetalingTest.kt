@@ -310,11 +310,20 @@ internal class UtbetalingTest {
     }
 
     @Test
+    fun `kan forkaste uten utbetalinger`() {
+        val tidslinje = tidslinjeOf(16.AP, 15.NAV)
+        beregnUtbetalinger(tidslinje)
+        val utbetaling = opprettUbetaltUtbetaling(tidslinje)
+        assertTrue(Utbetaling.kanForkastes(emptyList(), emptyList()))
+    }
+
+
+    @Test
     fun `kan forkaste ubetalt utbetaling`() {
         val tidslinje = tidslinjeOf(16.AP, 15.NAV)
         beregnUtbetalinger(tidslinje)
         val utbetaling = opprettUbetaltUtbetaling(tidslinje)
-        assertTrue(utbetaling.kanForkastes(emptyList()))
+        assertTrue(Utbetaling.kanForkastes(listOf(utbetaling), listOf(utbetaling)))
     }
 
     @Test
@@ -323,7 +332,7 @@ internal class UtbetalingTest {
         beregnUtbetalinger(tidslinje)
         val utbetaling = opprettUbetaltUtbetaling(tidslinje)
         godkjenn(utbetaling, false)
-        assertTrue(utbetaling.kanForkastes(emptyList()))
+        assertTrue(Utbetaling.kanForkastes(listOf(utbetaling), listOf(utbetaling)))
     }
 
     @Test
@@ -332,7 +341,7 @@ internal class UtbetalingTest {
         beregnUtbetalinger(tidslinje)
         val utbetaling = opprettUbetaltUtbetaling(tidslinje)
         utbetaling.forkast(Aktivitetslogg())
-        assertTrue(utbetaling.kanForkastes(emptyList()))
+        assertTrue(Utbetaling.kanForkastes(listOf(utbetaling), listOf(utbetaling)))
     }
 
     @Test
@@ -340,11 +349,11 @@ internal class UtbetalingTest {
         val tidslinje = tidslinjeOf(16.AP, 15.NAV)
         beregnUtbetalinger(tidslinje)
         val utbetaling = opprettGodkjentUtbetaling(tidslinje)
-        assertFalse(utbetaling.kanForkastes(emptyList()))
+        assertFalse(Utbetaling.kanForkastes(listOf(utbetaling), listOf(utbetaling)))
         overfør(utbetaling, utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
-        assertFalse(utbetaling.kanForkastes(emptyList()))
+        assertFalse(Utbetaling.kanForkastes(listOf(utbetaling), listOf(utbetaling)))
         kvittèr(utbetaling, utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
-        assertFalse(utbetaling.kanForkastes(emptyList()))
+        assertFalse(Utbetaling.kanForkastes(listOf(utbetaling), listOf(utbetaling)))
     }
 
     @Test
@@ -354,17 +363,16 @@ internal class UtbetalingTest {
         val utbetaling = opprettGodkjentUtbetaling(tidslinje)
         overfør(utbetaling, utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
         kvittèr(utbetaling, utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), status = AVVIST)
-        assertFalse(utbetaling.kanForkastes(emptyList()))
+        assertFalse(Utbetaling.kanForkastes(listOf(utbetaling), listOf(utbetaling)))
     }
 
     @Test
     fun `kan forkaste annullert utbetaling`() {
         val tidslinje = tidslinjeOf(16.AP, 15.NAV)
         beregnUtbetalinger(tidslinje)
-        val utbetaling = opprettUtbetaling(tidslinje).let {
-            annuller(it, it.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
-        } ?: fail { "Kunne ikke annullere" }
-        assertTrue(utbetaling.kanForkastes(emptyList()))
+        val utbetaling = opprettUtbetaling(tidslinje)
+        val annullering = annuller(utbetaling, utbetaling.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId()) ?: fail { "Kunne ikke annullere" }
+        assertTrue(Utbetaling.kanForkastes(listOf(utbetaling), listOf(annullering)))
     }
 
     @Test
@@ -375,7 +383,7 @@ internal class UtbetalingTest {
         val annullert = opprettUtbetaling(tidslinje.kutt(17.februar), tidligere = utbetaling).let {
             annuller(it, it.inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
         } ?: fail { "Kunne ikke annullere" }
-        assertTrue(utbetaling.kanForkastes(listOf(annullert)))
+        assertTrue(Utbetaling.kanForkastes(listOf(utbetaling), listOf(annullert)))
     }
 
     @Test
