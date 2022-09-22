@@ -17,6 +17,7 @@ import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
+import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.Varselkode.RV_VV_2
 import no.nav.helse.person.Varselkode.RV_VV_8
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
@@ -39,6 +40,7 @@ import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.nyPeriode
 import no.nav.helse.spleis.e2e.repeat
 import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
+import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions
@@ -49,7 +51,7 @@ import org.junit.jupiter.api.Test
 internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
 
     @Test
-    fun `kort periode hos en ag2 skal ikke få fordelt utbetaling`() {
+    fun `kort periode hos en ag2 forkaster utbetaling`() {
         nyPeriode(1.januar til 20.januar, a1)
         håndterUtbetalingshistorikk(1.vedtaksperiode, orgnummer = a1)
         nyPeriode(5.januar til 20.januar, a2)
@@ -61,9 +63,30 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
         assertEquals(1, inspektør(a1).utbetalinger(1.vedtaksperiode).size)
-        assertEquals(0, inspektør(a2).utbetalinger(1.vedtaksperiode).size)
+        assertEquals(Utbetaling.Forkastet, inspektør(a2).utbetalinger(1.vedtaksperiode).single().inspektør.tilstand)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a2)
+    }
+
+    @Test
+    fun `ag2 forkaster utbetaling tildelt av ag1`() {
+        nyPeriode(1.januar til 20.januar, a1)
+        håndterUtbetalingshistorikk(1.vedtaksperiode, orgnummer = a1)
+        nyPeriode(1.januar til 20.januar, a2)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT/2, orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT/2, orgnummer = a2)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
+        assertEquals(1, inspektør(a1).utbetalinger(1.vedtaksperiode).size)
+        val ag2Utbetalinger = inspektør(a2).utbetalinger(1.vedtaksperiode)
+        assertEquals(1, ag2Utbetalinger.size)
+        assertEquals(Utbetaling.Forkastet, ag2Utbetalinger.single().inspektør.tilstand)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
     }
 
     @Test
