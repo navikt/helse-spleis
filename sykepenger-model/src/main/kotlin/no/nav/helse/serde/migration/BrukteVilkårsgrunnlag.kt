@@ -29,7 +29,8 @@ internal object BrukteVilkårsgrunnlag {
         any { it.overlapperMed(periode) || it.erRettFør(periode) }
 
     private fun List<JsonNode>.finnInfotrygdVilkårsgrunnlag(sykefraværstilfelle: Periode): JsonNode? {
-        return filter { it.fraInfotrygd && it.gyldigSykepengegrunnlag }.lastOrNull { vilkårsgrunnlag -> vilkårsgrunnlag.skjæringstidspunkt in sykefraværstilfelle }
+        val infotrygdVilkårsgrunnlag = filter { it.fraInfotrygd }.filter { it.skjæringstidspunkt in sykefraværstilfelle }
+        return infotrygdVilkårsgrunnlag.lastOrNull { it.gyldigSykepengegrunnlag } ?: infotrygdVilkårsgrunnlag.lastOrNull()
     }
 
     private fun List<JsonNode>.finnSpleisVilkårsgrunnlag(sykefraværstilfelle: Periode): JsonNode? {
@@ -43,7 +44,8 @@ internal object BrukteVilkårsgrunnlag {
         return when {
             fraInfotrygd == null && fraSpleis == null -> null
             fraInfotrygd != null && fraSpleis != null -> {
-                if (perioderUtbetaltIInfotrygd.rettFørEllerOverlapperMed(sykefraværstilfelle)) fraInfotrygd
+                if (!fraInfotrygd.gyldigSykepengegrunnlag) fraSpleis
+                else if (perioderUtbetaltIInfotrygd.rettFørEllerOverlapperMed(sykefraværstilfelle)) fraInfotrygd
                 else fraSpleis
             }
             else -> fraInfotrygd ?: fraSpleis
