@@ -120,6 +120,15 @@ internal class V178ForkastOgFlyttVilkårsgrunnlagTest : MigrationTest(V178Forkas
         )
     }
 
+    @Test
+    fun `Vilkårsgrunnlaget fra Spleis ligger på et av flere skjæringstidspunkt innenfor sykefraværstilfellet (ikke første)`() {
+        val json = toNode("/migrations/178/vilkårsgrunnlag-fra-spleis-på-at-annet-en-første-skjæringstidspunkt.json".readResource()) as ObjectNode
+        assertMigrationRaw(
+            originalJson = "${json.put("skjemaVersjon", 177)}",
+            expectedJson = "${json.put("skjemaVersjon", 178)}"
+        )
+    }
+
     private fun assertForkastetVilkårsgrunnlag(originalJson: String, expectedJson: String) {
         val migrert = migrer(originalJson.readResource())
         val sisteInnslag = migrert.path("vilkårsgrunnlagHistorikk")[0]

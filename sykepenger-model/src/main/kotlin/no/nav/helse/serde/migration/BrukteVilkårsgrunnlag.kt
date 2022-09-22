@@ -7,6 +7,8 @@ import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
+import no.nav.helse.serde.migration.Sykefraværstilfeller.Sykefraværstilfelle
+import no.nav.helse.serde.migration.Sykefraværstilfeller.Vedtaksperiode.Companion.aktiveSkjæringstidspunkter
 import no.nav.helse.serde.migration.Sykefraværstilfeller.sykefraværstilfeller
 import no.nav.helse.serde.migration.Sykefraværstilfeller.vedtaksperioder
 import no.nav.helse.serde.serdeObjectMapper
@@ -33,19 +35,18 @@ internal object BrukteVilkårsgrunnlag {
         return infotrygdVilkårsgrunnlag.lastOrNull { it.gyldigSykepengegrunnlag } ?: infotrygdVilkårsgrunnlag.lastOrNull()
     }
 
-    private fun List<JsonNode>.finnSpleisVilkårsgrunnlag(sykefraværstilfelle: Periode): JsonNode? {
-        val skjæringstidspunkt = sykefraværstilfelle.start
-        return filter { it.fraSpleis }.singleOrNull { it.skjæringstidspunkt == skjæringstidspunkt }
+    private fun List<JsonNode>.finnSpleisVilkårsgrunnlag(skjæringtidspunkter: Set<LocalDate>): JsonNode? {
+        return filter { it.fraSpleis }.lastOrNull { it.skjæringstidspunkt in skjæringtidspunkter }
     }
 
-    private fun List<JsonNode>.finnRiktigVilkårsgrunnlag(sykefraværstilfelle: Periode, perioderUtbetaltIInfotrygd: List<Periode>): JsonNode? {
-        val fraInfotrygd = finnInfotrygdVilkårsgrunnlag(sykefraværstilfelle)
-        val fraSpleis = finnSpleisVilkårsgrunnlag(sykefraværstilfelle)
+    private fun List<JsonNode>.finnRiktigVilkårsgrunnlag(sykefraværstilfelle: Sykefraværstilfelle, perioderUtbetaltIInfotrygd: List<Periode>): JsonNode? {
+        val fraInfotrygd = finnInfotrygdVilkårsgrunnlag(sykefraværstilfelle.periode)
+        val fraSpleis = finnSpleisVilkårsgrunnlag(sykefraværstilfelle.skjæringstidspunkter)
         return when {
             fraInfotrygd == null && fraSpleis == null -> null
             fraInfotrygd != null && fraSpleis != null -> {
                 if (!fraInfotrygd.gyldigSykepengegrunnlag) fraSpleis
-                else if (perioderUtbetaltIInfotrygd.rettFørEllerOverlapperMed(sykefraværstilfelle)) fraInfotrygd
+                else if (perioderUtbetaltIInfotrygd.rettFørEllerOverlapperMed(sykefraværstilfelle.periode)) fraInfotrygd
                 else fraSpleis
             }
             else -> fraInfotrygd ?: fraSpleis
@@ -58,6 +59,7 @@ internal object BrukteVilkårsgrunnlag {
         val aktørId = jsonNode.path("aktørId").asText()
 
         val vedtaksperioder = vedtaksperioder(jsonNode)
+        val aktiveSkjæringstidspunkter = vedtaksperioder.aktiveSkjæringstidspunkter()
         val sykefraværstilfeller = sykefraværstilfeller(vedtaksperioder)
         val tilstanderPerSkjæringstidspunkt = vedtaksperioder.groupBy { it.skjæringstidspunkt }.mapValues { (_, vedtaksperioder) -> vedtaksperioder.map { it.tilstand() } }
 
@@ -77,12 +79,12 @@ internal object BrukteVilkårsgrunnlag {
 
         val brukteVilkårsgrunnlag = serdeObjectMapper.createArrayNode().apply {
             sykefraværstilfeller.forEach { sykefraværstilfelle ->
-                val vilkårgrunnlag = sorterteVilkårsgrunnlag.finnRiktigVilkårsgrunnlag(sykefraværstilfelle.periode, perioderUtbetaltIInfotrygd)
+                val vilkårgrunnlag = sorterteVilkårsgrunnlag.finnRiktigVilkårsgrunnlag(sykefraværstilfelle, perioderUtbetaltIInfotrygd)
                 if (vilkårgrunnlag == null) {
                     sikkerlogg.info("Fant ikke vilkårsgrunnlag for sykefraværstilfellet ${sykefraværstilfelle.periode} med tilstander ${tilstanderPerSkjæringstidspunkt[sykefraværstilfelle.tidligsteSkjæringstidspunkt]} for aktørId=$aktørId")
                     return@forEach
                 }
-                sykefraværstilfelle.skjæringstidspunkter.forEachIndexed {index, skjæringstidspunkt ->
+                sykefraværstilfelle.skjæringstidspunkter.filter { it in aktiveSkjæringstidspunkter }.forEachIndexed {index, skjæringstidspunkt ->
                     if (vilkårgrunnlag.skjæringstidspunkt != skjæringstidspunkt) {
                         endret = true
                         sikkerlogg.info("Kopierer vilkårsgrunnlag ${vilkårgrunnlag.vilkårsgrunnlagId} fra ${vilkårgrunnlag.skjæringstidspunkt} til $skjæringstidspunkt for aktørId=$aktørId")
