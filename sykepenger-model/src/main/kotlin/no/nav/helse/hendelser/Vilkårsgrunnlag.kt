@@ -132,40 +132,7 @@ class Vilkårsgrunnlag(
         internal fun harArbeidetMindreEnnTreMåneder(skjæringstidspunkt: LocalDate) = ansattFom > skjæringstidspunkt.withDayOfMonth(1).minusMonths(3)
 
         internal companion object {
-            internal fun List<Arbeidsforhold>.toEtterlevelseMap() = map {
-                mapOf(
-                    "orgnummer" to it.orgnummer,
-                    "fom" to it.ansattFom,
-                    "tom" to it.ansattTom
-                )
-            }
-
-            private fun LocalDate.datesUntilReversed(tom: LocalDate) = tom.toEpochDay().downTo(this.toEpochDay())
-                .asSequence()
-                .map(LocalDate::ofEpochDay)
-
-            fun opptjeningsdager(
-                arbeidsforhold: List<Arbeidsforhold>,
-                aktivitetslogg: IAktivitetslogg,
-                skjæringstidspunkt: LocalDate
-            ): Int {
-                if (arbeidsforhold.any(Arbeidsforhold::erSøppel))
-                    aktivitetslogg.varsel("Opptjeningsvurdering må gjøres manuelt fordi opplysningene fra AA-registeret er ufullstendige")
-
-                val ranges = arbeidsforhold.mapNotNull { it.periode(skjæringstidspunkt) }
-                if (ranges.none { skjæringstidspunkt in it }) {
-                    aktivitetslogg.info("Personen er ikke i arbeid ved skjæringstidspunktet")
-                    return 0
-                }
-
-                val min = ranges.minOf { it.start }
-                return min.datesUntilReversed(skjæringstidspunkt.minusDays(1))
-                    .takeWhile { cursor -> ranges.any { periode -> cursor in periode } }
-                    .count()
-            }
-
             internal fun List<Arbeidsforhold>.grupperArbeidsforholdPerOrgnummer() = groupBy { it.orgnummer }
-
             internal fun Iterable<Arbeidsforhold>.opptjeningsperiode(skjæringstidspunkt: LocalDate) = mapNotNull { it.periode(skjæringstidspunkt) }
                 .sammenhengende(skjæringstidspunkt)
         }
