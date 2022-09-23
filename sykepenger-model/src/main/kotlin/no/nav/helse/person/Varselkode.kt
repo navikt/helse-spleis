@@ -32,8 +32,8 @@ enum class Varselkode(private val melding: String, private val avviklet: Boolean
     RV_IT_1("Det er utbetalt en periode i Infotrygd etter perioden du skal behandle nå. Undersøk at antall forbrukte dager og grunnlag i Infotrygd er riktig"),
     RV_IT_2("Perioden er lagt inn i Infotrygd, men ikke utbetalt. Fjern fra Infotrygd hvis det utbetales via speil.", avviklet = true),
     RV_IT_3("Utbetaling i Infotrygd overlapper med vedtaksperioden"), // funksjonellFeil
-    RV_IT_4("Det er registrert utbetaling på nødnummer"), //TODO: funksjonellFeil
-    RV_IT_5("Mangler inntekt for første utbetalingsdag i en av infotrygdperiodene"), //TODO: funksjonellFeil
+    RV_IT_4("Det er registrert utbetaling på nødnummer"), // funksjonellFeil
+    RV_IT_5("Mangler inntekt for første utbetalingsdag i en av infotrygdperiodene"), // funksjonellFeil
 
     // VV: Vilkårsvurdering
     RV_VV_1("Arbeidsgiver er ikke registrert i Aa-registeret."),

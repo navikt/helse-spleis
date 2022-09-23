@@ -1,17 +1,18 @@
 package no.nav.helse.person.infotrygdhistorikk
 
+import java.time.DayOfWeek
+import java.time.LocalDate
+import java.util.Objects
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.InfotrygdhistorikkVisitor
+import no.nav.helse.person.Varselkode.RV_IT_5
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning.Companion.fjern
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning.Companion.harInntekterFor
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import java.time.DayOfWeek
-import java.time.LocalDate
-import java.util.*
 
 abstract class Infotrygdperiode(fom: LocalDate, tom: LocalDate) : Periode(fom, tom) {
     internal open fun sykdomstidslinje(kilde: SykdomstidslinjeHendelse.Hendelseskilde): Sykdomstidslinje = Sykdomstidslinje()
@@ -58,7 +59,7 @@ abstract class Infotrygdperiode(fom: LocalDate, tom: LocalDate) : Periode(fom, t
 
             if (inntekter.fjern(nødnummer).harInntekterFor(førsteUtbetalingsdager)) return
             aktivitetslogg.info("Mangler inntekt for første utbetalingsdag i en av infotrygdperiodene: $førsteUtbetalingsdager")
-            aktivitetslogg.funksjonellFeil("Mangler inntekt for første utbetalingsdag i en av infotrygdperiodene")
+            aktivitetslogg.funksjonellFeil(RV_IT_5)
         }
 
         internal fun Iterable<Infotrygdperiode>.harBrukerutbetalingFor(organisasjonsnummer: String, periode: Periode) = this

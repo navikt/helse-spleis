@@ -38,6 +38,7 @@ import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.TilstandType.UTBETALING_FEILET
 import no.nav.helse.person.Varselkode.RV_IT_1
 import no.nav.helse.person.Varselkode.RV_IT_3
+import no.nav.helse.person.Varselkode.RV_IT_5
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.person.nullstillTilstandsendringer
@@ -1245,7 +1246,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             )
         )
 
-        assertVarsel("Mangler inntekt for første utbetalingsdag i en av infotrygdperiodene", 1.vedtaksperiode.filter())
+        assertVarsel(RV_IT_5, 1.vedtaksperiode.filter())
         assertTilstander(
             1.vedtaksperiode,
             START,
