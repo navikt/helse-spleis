@@ -129,6 +129,24 @@ internal class V178ForkastOgFlyttVilkårsgrunnlagTest : MigrationTest(V178Forkas
         )
     }
 
+    @Test
+    fun `Forventet at vi ikke finner vilkårsgrunnlag for perioe i avventer_inntektsmelding_eller_historikk`() {
+        val json = toNode("/migrations/178/avventer-inntektsmelding-eller-historikk.json".readResource()) as ObjectNode
+        assertMigrationRaw(
+            originalJson = "${json.put("skjemaVersjon", 177)}",
+            expectedJson = "${json.put("skjemaVersjon", 178)}"
+        )
+    }
+
+    @Test
+    fun `Forventet at vi ikke finner vilkårsgrunnlag for perioe i avventer_inntektsmelding_eller_historikk uten historikk`() {
+        val json = toNode("/migrations/178/avventer-inntektsmelding-eller-historikk-uten-historikk.json".readResource()) as ObjectNode
+        assertMigrationRaw(
+            originalJson = "${json.put("skjemaVersjon", 177)}",
+            expectedJson = "${json.put("skjemaVersjon", 178)}"
+        )
+    }
+
     private fun assertForkastetVilkårsgrunnlag(originalJson: String, expectedJson: String) {
         val migrert = migrer(originalJson.readResource())
         val sisteInnslag = migrert.path("vilkårsgrunnlagHistorikk")[0]
