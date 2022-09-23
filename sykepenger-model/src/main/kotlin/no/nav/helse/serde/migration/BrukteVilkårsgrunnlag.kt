@@ -114,7 +114,7 @@ internal object BrukteVilkårsgrunnlag {
     }
 
     private class Sikkerlogg(private val aktørId: String, private val id: String) {
-        fun info(melding: String) = sikkerlogg.info("$melding for {}", keyValue("aktørId", aktørId), keyValue("componentId", id))
+        fun info(melding: String) = sikkerlogg.info("$melding for {}", keyValue("aktørId", aktørId), keyValue("module", id))
 
         private companion object {
             private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
