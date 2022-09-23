@@ -380,6 +380,6 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(utbetalingGodkjent = true, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
 
-        assertVarsel(RV_IV_1, AktivitetsloggFilter.person())
+        assertVarsel(RV_IV_1, 1.vedtaksperiode.filter(a1))
     }
 }
