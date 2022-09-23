@@ -57,6 +57,10 @@ class Aktivitetslogg(
         add(Aktivitet.FunksjonellFeil.opprett(kontekster.toSpesifikk(), melding))
     }
 
+    override fun funksjonellFeil(kode: Varselkode) {
+        add(kode.funksjonellFeil(kontekster.toSpesifikk()))
+    }
+
     override fun logiskFeil(melding: String, vararg params: Any?): Nothing {
         add(Aktivitet.LogiskFeil.opprett(kontekster.toSpesifikk(), String.format(melding, *params)))
 
@@ -493,6 +497,7 @@ interface IAktivitetslogg {
     fun varsel(melding: String)
     fun varsel(kode: Varselkode)
     fun funksjonellFeil(melding: String)
+    fun funksjonellFeil(kode: Varselkode)
     fun logiskFeil(melding: String, vararg params: Any?): Nothing
 
     fun harAktiviteter(): Boolean

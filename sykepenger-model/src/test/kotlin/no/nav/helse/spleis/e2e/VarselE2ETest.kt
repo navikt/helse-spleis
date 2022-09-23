@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate
+import java.time.LocalDateTime
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
@@ -16,6 +17,7 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
+import no.nav.helse.person.Varselkode
 import no.nav.helse.person.Varselkode.RV_IM_1
 import no.nav.helse.person.Varselkode.RV_IM_2
 import no.nav.helse.person.Varselkode.RV_IM_3
@@ -43,6 +45,7 @@ import no.nav.helse.person.Varselkode.RV_VV_8
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
+import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Test
@@ -381,5 +384,29 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
         håndterUtbetalt(orgnummer = a1)
 
         assertVarsel(RV_IV_1, 1.vedtaksperiode.filter(a1))
+    }
+
+    @Test
+    fun `varsel - Utbetaling i Infotrygd overlapper med vedtaksperioden`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterYtelser(besvart = LocalDateTime.now().minusYears(1))
+        håndterVilkårsgrunnlag()
+        håndterYtelser(besvart = LocalDateTime.now().minusYears(1))
+        håndterSimulering()
+        håndterUtbetalingsgodkjenning()
+        håndterUtbetalt()
+
+        håndterOverstyrTidslinje((20.januar til 26.januar).map { manuellFeriedag(it) })
+
+        håndterYtelser(
+            1.vedtaksperiode,
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 31.januar, 100.prosent, 1000.daglig),
+            inntektshistorikk = listOf(
+                Inntektsopplysning(ORGNUMMER, 17.januar, INNTEKT, true)
+            )
+        )
+        assertVarsel(Varselkode.RV_IT_3, 1.vedtaksperiode.filter())
     }
 }

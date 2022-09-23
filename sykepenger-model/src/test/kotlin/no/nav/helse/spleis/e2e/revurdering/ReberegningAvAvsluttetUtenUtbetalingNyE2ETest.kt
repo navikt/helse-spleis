@@ -42,6 +42,7 @@ import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.Varselkode.RV_IM_2
 import no.nav.helse.person.Varselkode.RV_IT_1
+import no.nav.helse.person.Varselkode.RV_IT_3
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.person.infotrygdhistorikk.PersonUtbetalingsperiode
@@ -1092,7 +1093,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         håndterYtelser(1.vedtaksperiode)
 
         assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
-        assertVarsel("Utbetaling i Infotrygd overlapper med vedtaksperioden", 1.vedtaksperiode.filter())
+        assertVarsel(RV_IT_3, 1.vedtaksperiode.filter())
         assertIngenVarsel(RV_IT_1, 1.vedtaksperiode.filter())
     }
 
@@ -1125,7 +1126,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         håndterYtelser(1.vedtaksperiode)
 
         assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
-        assertVarsel("Utbetaling i Infotrygd overlapper med vedtaksperioden", 1.vedtaksperiode.filter())
+        assertVarsel(RV_IT_3, 1.vedtaksperiode.filter())
     }
 
     @Test

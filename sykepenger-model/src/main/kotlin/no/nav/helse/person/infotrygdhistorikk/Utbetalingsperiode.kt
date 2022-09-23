@@ -6,6 +6,7 @@ import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.InfotrygdhistorikkVisitor
+import no.nav.helse.person.Varselkode.RV_IT_3
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -49,7 +50,7 @@ abstract class Utbetalingsperiode(
     override fun validerOverlapp(aktivitetslogg: IAktivitetslogg, periode: Periode) {
         if (!overlapperMed(periode)) return
         aktivitetslogg.info("Utbetaling i Infotrygd %s til %s overlapper med vedtaksperioden", start, endInclusive)
-        aktivitetslogg.funksjonellFeil("Utbetaling i Infotrygd overlapper med vedtaksperioden")
+        aktivitetslogg.funksjonellFeil(RV_IT_3)
     }
 
     override fun gjelder(nødnummer: Nødnummer) = this.orgnr in nødnummer
