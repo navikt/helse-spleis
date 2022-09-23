@@ -25,6 +25,7 @@ internal object BrukteVilkårsgrunnlag {
     private val JsonNode.fraInfotrygd get() = path("type").asText() == "Infotrygd"
     private val JsonNode.gyldigSykepengegrunnlag get() = path("sykepengegrunnlag").path("sykepengegrunnlag").asDouble() > 0
     private val JsonNode.fraSpleis get() = path("type").asText() == "Vilkårsprøving"
+    private val JsonNode.vilkårsgrunnlagstype get() = if (fraSpleis) "Spleisvilkårsgrunnlag" else "Infotrygdvilkårsgrunnlag"
 
     private fun List<Periode>.rettFørEllerOverlapperMed(periode: Periode) =
         any { it.overlapperMed(periode) || it.erRettFør(periode) }
@@ -60,6 +61,7 @@ internal object BrukteVilkårsgrunnlag {
         val vedtaksperioder = vedtaksperioder(jsonNode)
         val aktiveSkjæringstidspunkter = vedtaksperioder.aktiveSkjæringstidspunkter()
         val sykefraværstilfeller = sykefraværstilfeller(vedtaksperioder)
+        sikkerlogg.info("Fant ${sykefraværstilfeller.size} sykefraværstilfeller ${sykefraværstilfeller.map { it.periode }}")
         val tilstanderPerSkjæringstidspunkt = vedtaksperioder.groupBy { it.skjæringstidspunkt }.mapValues { (_, vedtaksperioder) -> vedtaksperioder.map { it.tilstand() } }
 
         val perioderUtbetaltIInfotrygd = jsonNode.path("infotrygdhistorikk")
@@ -86,7 +88,7 @@ internal object BrukteVilkårsgrunnlag {
                 sykefraværstilfelle.skjæringstidspunkter.filter { it in aktiveSkjæringstidspunkter }.forEachIndexed { index, skjæringstidspunkt ->
                     if (vilkårgrunnlag.skjæringstidspunkt != skjæringstidspunkt) {
                         endret = true
-                        sikkerlogg.info("Kopierer vilkårsgrunnlag ${vilkårgrunnlag.vilkårsgrunnlagId} fra ${vilkårgrunnlag.skjæringstidspunkt} til $skjæringstidspunkt")
+                        sikkerlogg.info("Kopierer ${vilkårgrunnlag.vilkårsgrunnlagstype} ${vilkårgrunnlag.vilkårsgrunnlagId} fra ${vilkårgrunnlag.skjæringstidspunkt} til $skjæringstidspunkt ifbm. sykefraværstilfellet ${sykefraværstilfelle.periode}")
                     }
                     val vilkårsgrunnlagId = if (index == 0) vilkårgrunnlag.vilkårsgrunnlagId else {
                         endret = true
@@ -111,7 +113,7 @@ internal object BrukteVilkårsgrunnlag {
         }
 
         return if (endret) {
-            sikkerlogg.info("Legger til nytt innslag i vilkårsgrunnlaghistorikken")
+            sikkerlogg.info("Legger til nytt innslag i vilkårsgrunnlaghistorikken for skjæringstidspunkter ${vilkårsgrunnlagEtter.keys}")
             brukteVilkårsgrunnlag
         } else {
             sikkerlogg.info("Trenger ikke nytt innslag i vilkårsgrunnlaghistorikken")
