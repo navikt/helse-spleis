@@ -11,13 +11,9 @@ import no.nav.helse.person.InfotrygdhistorikkVisitor
 import no.nav.helse.person.Periodetype
 import no.nav.helse.person.Person
 import no.nav.helse.person.SykdomstidslinjeVisitor
-import no.nav.helse.person.Sykepengegrunnlag
 import no.nav.helse.person.Varselkode.RV_IT_1
-import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode.Companion.harBrukerutbetalingFor
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode.Companion.validerInntektForPerioder
-import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning.Companion.fjern
-import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning.Companion.lagreVilkårsgrunnlag
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Dag.Companion.sammenhengendeSykdom
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -183,14 +179,6 @@ class InfotrygdhistorikkElement private constructor(
 
     internal fun addInntekter(person: Person, aktivitetslogg: IAktivitetslogg) {
         lagretInntekter = Inntektsopplysning.addInntekter(inntekter, person, aktivitetslogg, id, nødnummer)
-    }
-
-    internal fun lagreVilkårsgrunnlag(
-        vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk,
-        sykepengegrunnlagFor: (skjæringstidspunkt: LocalDate) -> Sykepengegrunnlag
-    ) {
-        lagretVilkårsgrunnlag = true
-        inntekter.fjern(nødnummer).lagreVilkårsgrunnlag(vilkårsgrunnlagHistorikk, sykepengegrunnlagFor)
     }
 
     internal fun valider(aktivitetslogg: IAktivitetslogg, periodetype: Periodetype, periode: Periode, skjæringstidspunkt: LocalDate, organisasjonsnummer: String): Boolean {

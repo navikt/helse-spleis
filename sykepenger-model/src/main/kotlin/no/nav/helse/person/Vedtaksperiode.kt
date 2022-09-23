@@ -1600,13 +1600,6 @@ internal class Vedtaksperiode private constructor(
                 }
                 onSuccess { infotrygdhistorikk.addInntekter(person, this) }
                 onSuccess {
-                    person.lagreVilkårsgrunnlagFraInfotrygd(
-                        vedtaksperiode.skjæringstidspunkt,
-                        vedtaksperiode.periode(),
-                        vedtaksperiode.jurist()
-                    )
-                }
-                onSuccess {
                     if (person.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt) == null) {
                         return@håndter vedtaksperiode.tilstand(ytelser, AvventerVilkårsprøving) {
                             // TODO: Mangler ofte vilkårsgrunnlag for perioder (https://logs.adeo.no/goto/844ac8a834ecd9c7ee5022ba0f89e569).
