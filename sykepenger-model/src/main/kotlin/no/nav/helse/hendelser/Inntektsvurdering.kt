@@ -8,6 +8,7 @@ import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonHendelse
 import no.nav.helse.person.Sykepengegrunnlag
+import no.nav.helse.person.Varselkode.RV_IV_1
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosent
@@ -26,9 +27,7 @@ class Inntektsvurdering(private val inntekter: List<ArbeidsgiverInntekt>) {
         subsumsjonObserver: SubsumsjonObserver
     ): Boolean {
         if (inntekter.antallMåneder() > 12) aktivitetslogg.funksjonellFeil("Forventer 12 eller færre inntektsmåneder")
-        if (inntekter.utenOffentligeYtelser().kilder(3) > antallArbeidsgivereFraAareg) {
-            aktivitetslogg.varsel("Bruker har flere inntektskilder de siste tre månedene enn arbeidsforhold som er oppdaget i Aa-registeret.")
-        }
+        if (inntekter.utenOffentligeYtelser().kilder(3) > antallArbeidsgivereFraAareg) aktivitetslogg.varsel(RV_IV_1)
         avviksprosent = grunnlagForSykepengegrunnlag.avviksprosent(sammenligningsgrunnlag, subsumsjonObserver)
         return sjekkAvvik(avviksprosent, aktivitetslogg, IAktivitetslogg::funksjonellFeil, "Har mer enn 25 % avvik")
     }

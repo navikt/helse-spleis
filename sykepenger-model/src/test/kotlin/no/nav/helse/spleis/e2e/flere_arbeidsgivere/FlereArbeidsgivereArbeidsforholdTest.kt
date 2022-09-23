@@ -22,7 +22,7 @@ import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.PersonVisitor
 import no.nav.helse.person.TilstandType
-import no.nav.helse.person.Varselkode
+import no.nav.helse.person.Varselkode.RV_IV_1
 import no.nav.helse.person.Varselkode.RV_VV_1
 import no.nav.helse.person.Varselkode.RV_VV_2
 import no.nav.helse.serde.reflection.castAsList
@@ -92,7 +92,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
             person.personLogg.toString()
                 .contains(RV_VV_2.name)
         )
-        assertVarsel("Bruker har flere inntektskilder de siste tre månedene enn arbeidsforhold som er oppdaget i Aa-registeret.", 1.vedtaksperiode.filter())
+        assertVarsel(RV_IV_1, 1.vedtaksperiode.filter())
     }
 
     @Test
@@ -678,7 +678,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
 
-        assertVarsel("Bruker har flere inntektskilder de siste tre månedene enn arbeidsforhold som er oppdaget i Aa-registeret.", 1.vedtaksperiode.filter(a1))
+        assertVarsel(RV_IV_1, 1.vedtaksperiode.filter(a1))
         assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET, orgnummer = a1)
     }
 

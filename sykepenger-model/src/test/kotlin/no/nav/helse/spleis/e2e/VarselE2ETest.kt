@@ -22,6 +22,7 @@ import no.nav.helse.person.Varselkode.RV_IM_3
 import no.nav.helse.person.Varselkode.RV_IM_4
 import no.nav.helse.person.Varselkode.RV_IM_5
 import no.nav.helse.person.Varselkode.RV_IT_1
+import no.nav.helse.person.Varselkode.RV_IV_1
 import no.nav.helse.person.Varselkode.RV_MV_1
 import no.nav.helse.person.Varselkode.RV_MV_2
 import no.nav.helse.person.Varselkode.RV_OV_1
@@ -41,6 +42,7 @@ import no.nav.helse.person.Varselkode.RV_VV_4
 import no.nav.helse.person.Varselkode.RV_VV_8
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
+import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Test
@@ -356,5 +358,28 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Nei)
 
         assertVarsel(RV_MV_2, 1.vedtaksperiode.filter())
+    }
+
+    @Test
+    fun `varsel - Bruker har flere inntektskilder de siste tre månedene enn arbeidsforhold som er oppdaget i Aa-registeret`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterUtbetalingshistorikk(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 1.januar, orgnummer = a1)
+        håndterYtelser(inntektshistorikk = emptyList(), orgnummer = a1)
+        håndterVilkårsgrunnlag(orgnummer = a1, inntektsvurdering = Inntektsvurdering(
+            inntekter = inntektperioderForSammenligningsgrunnlag {
+                1.januar(2017) til 1.desember(2017) inntekter {
+                    a1 inntekt INNTEKT
+                    a2 inntekt 1000.månedlig
+                }
+            }
+        ))
+        håndterYtelser(inntektshistorikk = emptyList(), orgnummer = a1)
+        håndterSimulering(orgnummer = a1)
+        håndterUtbetalingsgodkjenning(utbetalingGodkjent = true, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
+
+        assertVarsel(RV_IV_1, AktivitetsloggFilter.person())
     }
 }

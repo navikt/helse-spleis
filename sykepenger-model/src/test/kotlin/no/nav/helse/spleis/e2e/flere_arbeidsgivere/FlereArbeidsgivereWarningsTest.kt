@@ -17,7 +17,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
-import no.nav.helse.person.Varselkode
+import no.nav.helse.person.Varselkode.RV_IV_1
 import no.nav.helse.person.Varselkode.RV_VV_2
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
@@ -72,13 +72,8 @@ internal class FlereArbeidsgivereWarningsTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
 
-        assertVarsel("Bruker har flere inntektskilder de siste tre månedene enn arbeidsforhold som er oppdaget i Aa-registeret.",
-            AktivitetsloggFilter.person()
-        )
-        Assertions.assertFalse(
-            person.personLogg.toString()
-                .contains(RV_VV_2.name)
-        )
+        assertVarsel(RV_IV_1, AktivitetsloggFilter.person())
+        Assertions.assertFalse(person.personLogg.toString().contains(RV_VV_2.name))
     }
 
     @Test
