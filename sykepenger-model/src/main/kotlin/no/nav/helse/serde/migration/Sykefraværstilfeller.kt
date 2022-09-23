@@ -34,18 +34,23 @@ internal object Sykefraværstilfeller {
     }
 
     internal fun sykefraværstilfeller(vedtaksperioder: List<Vedtaksperiode>): Set<Sykefraværstilfelle>{
-        val sammenhengendePerioder = vedtaksperioder.map { it.periode }.grupperSammenhengendePerioderMedHensynTilHelg()
+        val sammenhengendePerioder = vedtaksperioder
+            .map { it.periode }
+            .grupperSammenhengendePerioderMedHensynTilHelg()
+
         val sammenhengendeAktivePerioder = vedtaksperioder
             .filterIsInstance<AktivVedtaksperiode>()
-            .map { it.periode }.grupperSammenhengendePerioderMedHensynTilHelg()
+            .map { it.periode }
+            .grupperSammenhengendePerioderMedHensynTilHelg()
+
         return sammenhengendePerioder
             .filter { sammenhengendePeriode -> sammenhengendeAktivePerioder.any { it.overlapperMed(sammenhengendePeriode) } }
             .map { sammenhengendePeriode ->
-            val skjæringstidspunkter = vedtaksperioder.skjæringstidspunkterFor(sammenhengendePeriode)
-            val tidligsteSkjæringstidspunkt = skjæringstidspunkter.min()
-            val periode = tidligsteSkjæringstidspunkt til sammenhengendePeriode.endInclusive
-            Sykefraværstilfelle(skjæringstidspunkter, periode)
-        }.toSet()
+                val skjæringstidspunkter = vedtaksperioder.skjæringstidspunkterFor(sammenhengendePeriode)
+                val tidligsteSkjæringstidspunkt = skjæringstidspunkter.min()
+                val periode = tidligsteSkjæringstidspunkt til sammenhengendePeriode.endInclusive
+                Sykefraværstilfelle(skjæringstidspunkter, periode)
+            }.toSet()
     }
 
     private fun List<Vedtaksperiode>.skjæringstidspunkterFor(periode: Periode) =

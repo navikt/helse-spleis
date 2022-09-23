@@ -15,7 +15,7 @@ internal class V176LoggingAvForkastOgFlyttVilkårsgrunnlag : JsonMigration(versi
 
     override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         try {
-            brukteVilkårsgrunnlag(jsonNode)
+            brukteVilkårsgrunnlag(jsonNode, "V176LoggingAvForkastOgFlyttVilkårsgrunnlag")
         } catch (e: Exception) {
             sikkerlogg.error("Feil ved utleding av relevante vilkårsgrunnlag for aktørId=${jsonNode.path("aktørId").asText()}", e)
         }

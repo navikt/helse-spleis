@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import java.time.LocalDate
 import java.util.UUID
+import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.serde.migration.Sykefraværstilfeller.Sykefraværstilfelle
@@ -15,8 +16,6 @@ import no.nav.helse.serde.serdeObjectMapper
 import org.slf4j.LoggerFactory
 
 internal object BrukteVilkårsgrunnlag {
-
-    private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 
     private val JsonNode.dato get() = LocalDate.parse(asText())
     private val JsonNode.skjæringstidspunkt get() = path("skjæringstidspunkt").dato
@@ -53,10 +52,10 @@ internal object BrukteVilkårsgrunnlag {
         }
     }
 
-    internal fun brukteVilkårsgrunnlag(jsonNode: ObjectNode) : ArrayNode? {
+    internal fun brukteVilkårsgrunnlag(jsonNode: ObjectNode, id: String) : ArrayNode? {
         val vilkårsgrunnlagHistorikk = jsonNode.path("vilkårsgrunnlagHistorikk") as ArrayNode
         val sisteInnslag = vilkårsgrunnlagHistorikk.firstOrNull() ?: return null
-        val aktørId = jsonNode.path("aktørId").asText()
+        val sikkerlogg = Sikkerlogg(aktørId = jsonNode.path("aktørId").asText(), id = id)
 
         val vedtaksperioder = vedtaksperioder(jsonNode)
         val aktiveSkjæringstidspunkter = vedtaksperioder.aktiveSkjæringstidspunkter()
@@ -81,13 +80,13 @@ internal object BrukteVilkårsgrunnlag {
             sykefraværstilfeller.forEach { sykefraværstilfelle ->
                 val vilkårgrunnlag = sorterteVilkårsgrunnlag.finnRiktigVilkårsgrunnlag(sykefraværstilfelle, perioderUtbetaltIInfotrygd)
                 if (vilkårgrunnlag == null) {
-                    sikkerlogg.info("Fant ikke vilkårsgrunnlag for sykefraværstilfellet ${sykefraværstilfelle.periode} med tilstander ${tilstanderPerSkjæringstidspunkt[sykefraværstilfelle.tidligsteSkjæringstidspunkt]} for aktørId=$aktørId")
+                    sikkerlogg.info("Fant ikke vilkårsgrunnlag for sykefraværstilfellet ${sykefraværstilfelle.periode} med tilstander ${tilstanderPerSkjæringstidspunkt[sykefraværstilfelle.tidligsteSkjæringstidspunkt]}")
                     return@forEach
                 }
-                sykefraværstilfelle.skjæringstidspunkter.filter { it in aktiveSkjæringstidspunkter }.forEachIndexed {index, skjæringstidspunkt ->
+                sykefraværstilfelle.skjæringstidspunkter.filter { it in aktiveSkjæringstidspunkter }.forEachIndexed { index, skjæringstidspunkt ->
                     if (vilkårgrunnlag.skjæringstidspunkt != skjæringstidspunkt) {
                         endret = true
-                        sikkerlogg.info("Kopierer vilkårsgrunnlag ${vilkårgrunnlag.vilkårsgrunnlagId} fra ${vilkårgrunnlag.skjæringstidspunkt} til $skjæringstidspunkt for aktørId=$aktørId")
+                        sikkerlogg.info("Kopierer vilkårsgrunnlag ${vilkårgrunnlag.vilkårsgrunnlagId} fra ${vilkårgrunnlag.skjæringstidspunkt} til $skjæringstidspunkt")
                     }
                     val vilkårsgrunnlagId = if (index == 0) vilkårgrunnlag.vilkårsgrunnlagId else "${UUID.randomUUID()}"
 
@@ -105,13 +104,21 @@ internal object BrukteVilkårsgrunnlag {
 
         if (forkastedeVilkårsgrunnlag.isNotEmpty()){
             endret = true
-            sikkerlogg.info("Forkaster vilkårsgrunnlag for skjæringstidspunkter ${forkastedeVilkårsgrunnlag.keys} med vilkårsgrunnlagIder ${forkastedeVilkårsgrunnlag.values} for aktørId=$aktørId")
+            sikkerlogg.info("Forkaster vilkårsgrunnlag for skjæringstidspunkter ${forkastedeVilkårsgrunnlag.keys} med vilkårsgrunnlagIder ${forkastedeVilkårsgrunnlag.values}")
         }
 
         return if (endret) {
-            sikkerlogg.info("Endrer vilkårsgrunnlag for aktørId=$aktørId")
+            sikkerlogg.info("Endrer vilkårsgrunnlag")
             brukteVilkårsgrunnlag
         } else null
+    }
+
+    private class Sikkerlogg(private val aktørId: String, private val id: String) {
+        fun info(melding: String) = sikkerlogg.info("$melding for {}", keyValue("aktørId", aktørId), keyValue("componentId", id))
+
+        private companion object {
+            private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
+        }
     }
 }
 

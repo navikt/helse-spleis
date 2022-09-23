@@ -15,7 +15,7 @@ internal class V178ForkastOgFlyttVilkårsgrunnlag: JsonMigration(version = 178) 
             "2. flytte vilkårsgrunnlag til skjæringstidspunkt, f.eks. fordi det var lagret på første utbetalingsdag i infotrygd"
 
     override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
-        val brukteVilkårsgrunnlag = brukteVilkårsgrunnlag(jsonNode) ?: return
+        val brukteVilkårsgrunnlag = brukteVilkårsgrunnlag(jsonNode, "V178ForkastOgFlyttVilkårsgrunnlag") ?: return
         val vilkårsgrunnlagHistorikk = jsonNode.path("vilkårsgrunnlagHistorikk") as ArrayNode
         val nyttInnslag = serdeObjectMapper.createObjectNode().apply {
             put("id", "${UUID.randomUUID()}")
