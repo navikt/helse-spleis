@@ -8,9 +8,10 @@ import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.ManuellOverskrivingDag
+import no.nav.helse.hendelser.OverstyrArbeidsforhold.ArbeidsforholdOverstyrt
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
-import no.nav.helse.hendelser.Vilkårsgrunnlag
+import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
@@ -20,6 +21,7 @@ import no.nav.helse.person.Varselkode.RV_IM_3
 import no.nav.helse.person.Varselkode.RV_IM_4
 import no.nav.helse.person.Varselkode.RV_IM_5
 import no.nav.helse.person.Varselkode.RV_IT_1
+import no.nav.helse.person.Varselkode.RV_OV_1
 import no.nav.helse.person.Varselkode.RV_RE_1
 import no.nav.helse.person.Varselkode.RV_SØ_1
 import no.nav.helse.person.Varselkode.RV_SØ_10
@@ -163,8 +165,8 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
             1.vedtaksperiode,
             orgnummer = a1,
             arbeidsforhold = listOf(
-                Vilkårsgrunnlag.Arbeidsforhold(a1, ansattFom = LocalDate.EPOCH, ansattTom = 31.desember(2017)),
-                Vilkårsgrunnlag.Arbeidsforhold(a2, ansattFom = 1.januar, ansattTom = null)
+                Arbeidsforhold(a1, ansattFom = LocalDate.EPOCH, ansattTom = 31.desember(2017)),
+                Arbeidsforhold(a2, ansattFom = 1.januar, ansattTom = null)
             )
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
@@ -238,8 +240,8 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
             )
         )
         val arbeidsforhold = listOf(
-            Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a1, ansattFom = LocalDate.EPOCH, ansattTom = null),
-            Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a2, ansattFom = LocalDate.EPOCH, ansattTom = null)
+            Arbeidsforhold(orgnummer = a1, ansattFom = LocalDate.EPOCH, ansattTom = null),
+            Arbeidsforhold(orgnummer = a2, ansattFom = LocalDate.EPOCH, ansattTom = null)
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterVilkårsgrunnlag(
@@ -298,5 +300,36 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
             inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.mars, INNTEKT, true))
         )
         assertVarsel(RV_IT_1, 1.vedtaksperiode.filter())
+    }
+
+    @Test
+    fun `varsel - Perioden er avslått på grunn av manglende opptjening`() {
+        nyPeriode(1.januar til 31.januar)
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterYtelser()
+        håndterVilkårsgrunnlag(arbeidsforhold = listOf(Arbeidsforhold(ORGNUMMER, ansattFom = 31.desember(2017), ansattTom = null)))
+        assertVarsel(RV_OV_1, 1.vedtaksperiode.filter())
+    }
+
+    @Test
+    fun `varsel revurdering - Perioden er avslått på grunn av manglende opptjening`() {
+        nyPeriode(1.januar til 31.januar)
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterYtelser()
+        håndterVilkårsgrunnlag(
+            arbeidsforhold = listOf(Arbeidsforhold(ORGNUMMER, 31.desember(2017), null), Arbeidsforhold(a2, LocalDate.EPOCH, 5.januar)),
+            inntektsvurdering = Inntektsvurdering(listOf(sammenligningsgrunnlag(a2, 1.januar, INNTEKT.repeat(12)))),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
+                inntekter = listOf(grunnlag(a2, 1.januar, 1000.månedlig.repeat(3))),
+                arbeidsforhold = emptyList()
+            ),
+        )
+        håndterYtelser()
+        håndterSimulering()
+        håndterUtbetalingsgodkjenning()
+        håndterUtbetalt()
+        assertIngenVarsel(RV_OV_1, 1.vedtaksperiode.filter())
+        håndterOverstyrArbeidsforhold(1.januar, listOf(ArbeidsforholdOverstyrt(a2, true, "forklaring")))
+        assertVarsel(RV_OV_1, 1.vedtaksperiode.filter())
     }
 }

@@ -57,6 +57,7 @@ import no.nav.helse.person.Arbeidsgiver.Companion.startRevurdering
 import no.nav.helse.person.Arbeidsgiver.Companion.validerVilkårsgrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.validerYtelserForSkjæringstidspunkt
 import no.nav.helse.person.Arbeidsgiver.Companion.vedtaksperioder
+import no.nav.helse.person.Varselkode.RV_OV_1
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
@@ -882,9 +883,7 @@ class Person private constructor(
         val harAkseptabeltAvvik = Inntektsvurdering.sjekkAvvik(avviksprosent, hendelse, IAktivitetslogg::varsel, "Har mer enn 25 % avvik. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene.")
 
         val opptjening = beregnOpptjening(skjæringstidspunkt, subsumsjonObserver)
-        if (!opptjening.erOppfylt()) {
-            hendelse.varsel("Perioden er avslått på grunn av manglende opptjening")
-        }
+        if (!opptjening.erOppfylt()) hendelse.varsel(RV_OV_1)
 
         when (val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt)) {
             is VilkårsgrunnlagHistorikk.Grunnlagsdata -> {

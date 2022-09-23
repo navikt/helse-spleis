@@ -18,6 +18,7 @@ import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.inntektsoppl
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.PersonVisitor
+import no.nav.helse.person.Varselkode.RV_OV_1
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.spleis.e2e.OpptjeningE2ETest.ArbeidsforholdVisitor.Companion.assertHarArbeidsforhold
 import no.nav.helse.spleis.e2e.OpptjeningE2ETest.ArbeidsforholdVisitor.Companion.assertHarIkkeArbeidsforhold
@@ -72,7 +73,7 @@ internal class OpptjeningE2ETest : AbstractEndToEndTest() {
         val grunnlagsdata = person.vilkårsgrunnlagFor(1.januar) as VilkårsgrunnlagHistorikk.Grunnlagsdata
         assertEquals(1, grunnlagsdata.opptjening.opptjeningsdager())
         assertEquals(false, grunnlagsdata.opptjening.erOppfylt())
-        assertVarsel("Perioden er avslått på grunn av manglende opptjening", 1.vedtaksperiode.filter(orgnummer = a1))
+        assertVarsel(RV_OV_1, 1.vedtaksperiode.filter(orgnummer = a1))
     }
 
     @Test

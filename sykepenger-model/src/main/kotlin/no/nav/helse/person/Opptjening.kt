@@ -7,6 +7,7 @@ import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Companion.
 import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Companion.opptjeningsperiode
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import java.time.LocalDate
+import no.nav.helse.person.Varselkode.RV_OV_1
 
 internal class Opptjening (
     private val arbeidsforhold: List<ArbeidsgiverOpptjeningsgrunnlag>,
@@ -17,7 +18,7 @@ internal class Opptjening (
 
     internal fun valider(aktivitetslogg: IAktivitetslogg): Boolean {
         val erOppfylt = erOppfylt()
-        if (!erOppfylt) aktivitetslogg.varsel("Perioden er avslått på grunn av manglende opptjening")
+        if (!erOppfylt) aktivitetslogg.varsel(RV_OV_1)
         return erOppfylt
     }
 
