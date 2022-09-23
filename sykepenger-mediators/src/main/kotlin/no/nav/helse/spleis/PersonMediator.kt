@@ -194,8 +194,6 @@ internal class PersonMediator(
         queueMessage(hendelseskontekst, JsonMessage.newMessage("vedtaksperiode_endret", mapOf(
             "gjeldendeTilstand" to event.gjeldendeTilstand,
             "forrigeTilstand" to event.forrigeTilstand,
-            "aktivitetslogg" to event.aktivitetslogg.toMap(),
-            "harVedtaksperiodeWarnings" to event.harVedtaksperiodeWarnings,
             "hendelser" to event.hendelser,
             "makstid" to event.makstid,
             "fom" to event.fom,

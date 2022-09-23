@@ -4,9 +4,9 @@ import com.fasterxml.jackson.databind.JsonNode
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.januar
 import no.nav.inntektsmeldingkontrakt.Periode
-import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -48,10 +48,8 @@ internal class GenerellMeldingskontraktTest : AbstractEndToEndMediatorTest() {
         assertSporingsinformasjon(melding, originalMeldingId, originalMeldingtype)
         assertTrue(melding.path("gjeldendeTilstand").asText().isNotEmpty())
         assertTrue(melding.path("forrigeTilstand").asText().isNotEmpty())
-        assertTrue(melding.path("aktivitetslogg").isObject)
-        assertTrue(melding.path("aktivitetslogg").path("aktiviteter").isArray)
-        assertTrue(melding.path("aktivitetslogg").path("kontekster").isArray)
-        assertTrue(melding.path("harVedtaksperiodeWarnings").isBoolean)
+        assertDato(melding.path("fom").asText())
+        assertDato(melding.path("tom").asText())
         assertTrue(melding.path("hendelser").isArray)
         assertDatotid(melding.path("makstid").asText())
     }
