@@ -12,6 +12,7 @@ import no.nav.helse.person.Periodetype
 import no.nav.helse.person.Person
 import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.person.Sykepengegrunnlag
+import no.nav.helse.person.Varselkode.RV_IT_1
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode.Companion.harBrukerutbetalingFor
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode.Companion.validerInntektForPerioder
@@ -199,7 +200,7 @@ class InfotrygdhistorikkElement private constructor(
         }
         validerStatslønn(aktivitetslogg, periodetype)
         if (harNyereOpplysninger(organisasjonsnummer, periode))
-            aktivitetslogg.varsel("Det er utbetalt en periode i Infotrygd etter perioden du skal behandle nå. Undersøk at antall forbrukte dager og grunnlag i Infotrygd er riktig")
+            aktivitetslogg.varsel(RV_IT_1)
         return valider(aktivitetslogg, perioder, periode, skjæringstidspunkt)
     }
 

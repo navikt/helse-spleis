@@ -5,7 +5,6 @@ import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
-import no.nav.helse.hendelser.Dagtype.Feriedag
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.ManuellOverskrivingDag
@@ -15,13 +14,12 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
-import no.nav.helse.person.TilstandType
-import no.nav.helse.person.Varselkode
 import no.nav.helse.person.Varselkode.RV_IM_1
 import no.nav.helse.person.Varselkode.RV_IM_2
 import no.nav.helse.person.Varselkode.RV_IM_3
 import no.nav.helse.person.Varselkode.RV_IM_4
 import no.nav.helse.person.Varselkode.RV_IM_5
+import no.nav.helse.person.Varselkode.RV_IT_1
 import no.nav.helse.person.Varselkode.RV_RE_1
 import no.nav.helse.person.Varselkode.RV_SØ_1
 import no.nav.helse.person.Varselkode.RV_SØ_10
@@ -36,14 +34,13 @@ import no.nav.helse.person.Varselkode.RV_VV_1
 import no.nav.helse.person.Varselkode.RV_VV_2
 import no.nav.helse.person.Varselkode.RV_VV_4
 import no.nav.helse.person.Varselkode.RV_VV_8
-import no.nav.helse.person.nullstillTilstandsendringer
-import no.nav.helse.sykdomstidslinje.Dag
+import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
+import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
-internal class VarslerE2ETest: AbstractEndToEndTest() {
+internal class VarselE2ETest: AbstractEndToEndTest() {
 
     @Test
     fun `varsel - Søknaden inneholder permittering, Vurder om permittering har konsekvens for rett til sykepenger`() {
@@ -264,7 +261,7 @@ internal class VarslerE2ETest: AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Varsel - Minst én dag uten utbetaling på grunn av sykdomsgrad under 20 %, Vurder å sende vedtaksbrev fra Infotrygd`() {
+    fun `varsel - Minst én dag uten utbetaling på grunn av sykdomsgrad under 20 %, Vurder å sende vedtaksbrev fra Infotrygd`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 19.prosent), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 19.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
@@ -288,5 +285,18 @@ internal class VarslerE2ETest: AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         assertVarsel(RV_RE_1, 2.vedtaksperiode.filter())
+    }
+
+    @Test
+    fun `varsel - Det er utbetalt en periode i Infotrygd etter perioden du skal behandle nå - Undersøk at antall forbrukte dager og grunnlag i Infotrygd er riktig`() {
+        nyttVedtak(1.januar, 31.januar)
+
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(20.januar, Dagtype.Sykedag, 80)))
+        håndterYtelser(
+            1.vedtaksperiode,
+            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.mars, 31.mars, 100.prosent, INNTEKT),
+            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.mars, INNTEKT, true))
+        )
+        assertVarsel(RV_IT_1, 1.vedtaksperiode.filter())
     }
 }
