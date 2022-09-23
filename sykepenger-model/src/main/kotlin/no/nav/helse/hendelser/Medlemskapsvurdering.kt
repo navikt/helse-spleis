@@ -2,6 +2,7 @@ package no.nav.helse.hendelser
 
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.Varselkode.RV_MV_1
+import no.nav.helse.person.Varselkode.RV_MV_2
 
 class Medlemskapsvurdering(
     internal val medlemskapstatus: Medlemskapstatus
@@ -17,7 +18,7 @@ class Medlemskapsvurdering(
                 true
             }
             Medlemskapstatus.Nei -> {
-                aktivitetslogg.varsel("Perioden er avslått på grunn av at den sykmeldte ikke er medlem av Folketrygden")
+                aktivitetslogg.varsel(RV_MV_2)
                 false
             }
         }
