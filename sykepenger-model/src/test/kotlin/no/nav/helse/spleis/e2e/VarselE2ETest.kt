@@ -24,6 +24,7 @@ import no.nav.helse.person.Varselkode.RV_IM_3
 import no.nav.helse.person.Varselkode.RV_IM_4
 import no.nav.helse.person.Varselkode.RV_IM_5
 import no.nav.helse.person.Varselkode.RV_IT_1
+import no.nav.helse.person.Varselkode.RV_IT_4
 import no.nav.helse.person.Varselkode.RV_IV_1
 import no.nav.helse.person.Varselkode.RV_MV_1
 import no.nav.helse.person.Varselkode.RV_MV_2
@@ -408,5 +409,24 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
             )
         )
         assertVarsel(Varselkode.RV_IT_3, 1.vedtaksperiode.filter())
+    }
+
+    @Test
+    fun `varsel - Det er registrert utbetaling på nødnummer`() {
+        val nødnummer = "973626108"
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterYtelser(besvart = LocalDateTime.now().minusYears(1))
+        håndterVilkårsgrunnlag()
+        håndterYtelser(besvart = LocalDateTime.now().minusYears(1))
+        håndterSimulering()
+        håndterUtbetalingsgodkjenning()
+        håndterUtbetalt()
+
+        håndterOverstyrTidslinje((20.januar til 26.januar).map { manuellFeriedag(it) })
+
+        håndterYtelser(1.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(nødnummer, 1.februar, 15.februar, 100.prosent, INNTEKT))
+        assertVarsel(RV_IT_4, 1.vedtaksperiode.filter())
     }
 }

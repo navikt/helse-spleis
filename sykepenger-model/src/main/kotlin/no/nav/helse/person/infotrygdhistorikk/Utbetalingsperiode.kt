@@ -7,6 +7,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.InfotrygdhistorikkVisitor
 import no.nav.helse.person.Varselkode.RV_IT_3
+import no.nav.helse.person.Varselkode.RV_IT_4
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -44,7 +45,7 @@ abstract class Utbetalingsperiode(
     }
 
     private fun validerRelevant(aktivitetslogg: IAktivitetslogg, nødnummer: Nødnummer) {
-        if (orgnr in nødnummer) aktivitetslogg.funksjonellFeil("Det er registrert utbetaling på nødnummer")
+        if (orgnr in nødnummer) aktivitetslogg.funksjonellFeil(RV_IT_4)
     }
 
     override fun validerOverlapp(aktivitetslogg: IAktivitetslogg, periode: Periode) {
