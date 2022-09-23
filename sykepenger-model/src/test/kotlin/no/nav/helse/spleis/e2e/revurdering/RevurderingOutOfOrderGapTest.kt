@@ -66,6 +66,7 @@ import no.nav.helse.spleis.e2e.nyeVedtak
 import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.spleis.e2e.repeat
 import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
+import no.nav.helse.spleis.e2e.tilGodkjenning
 import no.nav.helse.spleis.e2e.tilGodkjent
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -698,5 +699,15 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         assertIngenVarsel("Saken må revurderes fordi det har blitt behandlet en tidligere periode som kan ha betydning.", 1.vedtaksperiode.filter())
         assertIngenVarsel("Saken må revurderes fordi det har blitt behandlet en tidligere periode som kan ha betydning.", 2.vedtaksperiode.filter())
         assertIngenVarsel("Saken må revurderes fordi det har blitt behandlet en tidligere periode som kan ha betydning.", 3.vedtaksperiode.filter())
+    }
+
+    @Test
+    fun `Out of order kastes ut når det finnes en forkastet periode senere i tid`() {
+        tilGodkjenning(1.februar, 25.februar, ORGNUMMER)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, false)
+        assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
+
+        nyPeriode(1.januar til 25.januar)
+        assertSisteTilstand(2.vedtaksperiode, TIL_INFOTRYGD)
     }
 }

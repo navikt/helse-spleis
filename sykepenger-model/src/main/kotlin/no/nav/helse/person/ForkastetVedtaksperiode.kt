@@ -44,8 +44,8 @@ internal class ForkastetVedtaksperiode(
         private fun Iterable<ForkastetVedtaksperiode>.finnForkastetVedtaksperiode(vedtaksperiodeId: UUID): ForkastetVedtaksperiode? =
             firstOrNull { it.vedtaksperiode.harId(vedtaksperiodeId) }
 
-        internal fun overlapperMedForkastet(forkastede: Iterable<ForkastetVedtaksperiode>, hendelse: SykdomstidslinjeHendelse) {
-            Vedtaksperiode.overlapperMedForkastet(forkastede.perioder(), hendelse)
+        internal fun harNyereForkastetPeriode(forkastede: Iterable<ForkastetVedtaksperiode>, hendelse: SykdomstidslinjeHendelse) {
+            Vedtaksperiode.harNyereForkastetPeriode(forkastede.perioder(), hendelse)
         }
         internal fun forlengerForkastet(forkastede: Iterable<ForkastetVedtaksperiode>, hendelse: SykdomstidslinjeHendelse) {
             Vedtaksperiode.forlengerForkastet(forkastede.perioder(), hendelse)

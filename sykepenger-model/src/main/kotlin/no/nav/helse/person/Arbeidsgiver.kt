@@ -169,8 +169,8 @@ internal class Arbeidsgiver private constructor(
         internal fun Iterable<Arbeidsgiver>.vedtaksperioder(filter: VedtaksperiodeFilter) =
             map { it.vedtaksperioder.filter(filter) }.flatten()
 
-        internal fun Iterable<Arbeidsgiver>.harOverlappendeEllerForlengerForkastetVedtaksperiode(hendelse: SykdomstidslinjeHendelse) =
-            any { it.harOverlappendeEllerForlengerForkastetVedtaksperiode(hendelse) }
+        internal fun Iterable<Arbeidsgiver>.harForkastetVedtaksperiodeSomBlokkerBehandling(hendelse: SykdomstidslinjeHendelse) =
+            any { it.harForkastetVedtaksperiodeSomBlokkerBehandling(hendelse) }
 
         internal fun List<Arbeidsgiver>.lagRevurdering(
             vedtaksperiode: Vedtaksperiode,
@@ -497,8 +497,8 @@ internal class Arbeidsgiver private constructor(
         sykmeldingsperioder.lagre(sykmelding)
     }
 
-    private fun harOverlappendeEllerForlengerForkastetVedtaksperiode(hendelse: SykdomstidslinjeHendelse): Boolean {
-        ForkastetVedtaksperiode.overlapperMedForkastet(forkastede, hendelse)
+    private fun harForkastetVedtaksperiodeSomBlokkerBehandling(hendelse: SykdomstidslinjeHendelse): Boolean {
+        ForkastetVedtaksperiode.harNyereForkastetPeriode(forkastede, hendelse)
         ForkastetVedtaksperiode.forlengerForkastet(forkastede, hendelse)
         return hendelse.harFunksjonelleFeilEllerVerre()
     }
@@ -514,7 +514,7 @@ internal class Arbeidsgiver private constructor(
             if (!søknad.harFunksjonelleFeilEllerVerre()) return person.emitUtsettOppgaveEvent(søknad)
         }
         val vedtaksperiode = søknad.lagVedtaksperiode(person, this, jurist)
-        if (søknad.harFunksjonelleFeilEllerVerre() || person.harOverlappendeEllerForlengerForkastetVedtaksperiode(søknad)) {
+        if (søknad.harFunksjonelleFeilEllerVerre() || person.harForkastetVedtaksperiodeSomBlokkerBehandling(søknad)) {
             registrerForkastetVedtaksperiode(vedtaksperiode, søknad)
             person.søppelbøtte(søknad, TIDLIGERE_OG_ETTERGØLGENDE(vedtaksperiode))
             return

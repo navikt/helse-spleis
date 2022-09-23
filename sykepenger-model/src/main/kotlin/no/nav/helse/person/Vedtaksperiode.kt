@@ -2515,12 +2515,12 @@ internal class Vedtaksperiode private constructor(
 
         internal fun List<Vedtaksperiode>.harUtbetaling() = any { it.erUtbetalt() }
 
-        internal fun overlapperMedForkastet(forkastede: Iterable<Vedtaksperiode>, hendelse: SykdomstidslinjeHendelse) {
+        internal fun harNyereForkastetPeriode(forkastede: Iterable<Vedtaksperiode>, hendelse: SykdomstidslinjeHendelse) {
             forkastede
-                .filter { it.periode.overlapperMed(hendelse.periode()) }
+                .filter { it.periode().endInclusive >= hendelse.periode().start }
                 .forEach {
-                    hendelse.funksjonellFeil("Søknad overlapper med forkastet vedtaksperiode")
-                    hendelse.info("Søknad overlapper med forkastet vedtaksperiode ${it.id}, hendelse periode: ${hendelse.periode()}, vedtaksperiode periode: ${it.periode}")
+                    hendelse.funksjonellFeil("Søknad overlapper med, eller er før, en forkastet vedtaksperiode")
+                    hendelse.info("Søknad overlapper med, eller er før, en forkastet vedtaksperiode ${it.id}, hendelse periode: ${hendelse.periode()}, vedtaksperiode periode: ${it.periode}")
                 }
         }
 
