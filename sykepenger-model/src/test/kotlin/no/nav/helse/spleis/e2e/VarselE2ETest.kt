@@ -8,6 +8,7 @@ import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.ManuellOverskrivingDag
+import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.OverstyrArbeidsforhold.ArbeidsforholdOverstyrt
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
@@ -21,6 +22,7 @@ import no.nav.helse.person.Varselkode.RV_IM_3
 import no.nav.helse.person.Varselkode.RV_IM_4
 import no.nav.helse.person.Varselkode.RV_IM_5
 import no.nav.helse.person.Varselkode.RV_IT_1
+import no.nav.helse.person.Varselkode.RV_MV_1
 import no.nav.helse.person.Varselkode.RV_OV_1
 import no.nav.helse.person.Varselkode.RV_RE_1
 import no.nav.helse.person.Varselkode.RV_SØ_1
@@ -331,5 +333,16 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
         assertIngenVarsel(RV_OV_1, 1.vedtaksperiode.filter())
         håndterOverstyrArbeidsforhold(1.januar, listOf(ArbeidsforholdOverstyrt(a2, true, "forklaring")))
         assertVarsel(RV_OV_1, 1.vedtaksperiode.filter())
+    }
+
+    @Test
+    fun `varsel - Vurder lovvalg og medlemskap`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterYtelser()
+        håndterVilkårsgrunnlag(medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.VetIkke)
+
+        assertVarsel(RV_MV_1, 1.vedtaksperiode.filter())
     }
 }

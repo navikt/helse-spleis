@@ -9,10 +9,12 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.IdInnhenter
+import no.nav.helse.person.Varselkode.RV_MV_1
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.serde.api.dto.AktivitetDTO
 import no.nav.helse.serde.api.speil.builders.PeriodeVarslerBuilder
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
+import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterSimulering
@@ -25,7 +27,6 @@ import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class PeriodeVarslerBuilderTest: AbstractEndToEndTest() {
@@ -41,7 +42,7 @@ internal class PeriodeVarslerBuilderTest: AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
 
-        assertTrue(aktiviteter(1.vedtaksperiode).any { it.alvorlighetsgrad == "W" && it.melding == "Vurder lovvalg og medlemskap" })
+        assertVarsel(RV_MV_1, 1.vedtaksperiode.filter())
         assertEquals(0, aktiviteter(2.vedtaksperiode).size)
     }
 
@@ -86,7 +87,7 @@ internal class PeriodeVarslerBuilderTest: AbstractEndToEndTest() {
 
         nyttVedtak(4.mars, 31.mars)
 
-        assertTrue(aktiviteter(1.vedtaksperiode).any { it.alvorlighetsgrad == "W" && it.melding == "Vurder lovvalg og medlemskap" })
+        assertVarsel(RV_MV_1, 1.vedtaksperiode.filter())
         assertEquals(0, aktiviteter(2.vedtaksperiode).size)
         assertEquals(0, aktiviteter(3.vedtaksperiode).size)
     }

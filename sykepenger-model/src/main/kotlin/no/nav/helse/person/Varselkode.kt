@@ -45,7 +45,7 @@ enum class Varselkode(private val melding: String, private val avviklet: Boolean
 
     // VV: Opptjeningsvurdering
     RV_OV_1("Perioden er avslått på grunn av manglende opptjening"),
-    RV_OV_2("Opptjeningsvurdering må gjøres manuelt fordi opplysningene fra AA-registeret er ufullstendige"),
+    RV_OV_2("Opptjeningsvurdering må gjøres manuelt fordi opplysningene fra AA-registeret er ufullstendige"), // TODO: Ikke i bruk
 
     // MV: Medlemskapsvurdering
     RV_MV_1("Vurder lovvalg og medlemskap"),

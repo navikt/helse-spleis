@@ -1,6 +1,7 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.person.IAktivitetslogg
+import no.nav.helse.person.Varselkode.RV_MV_1
 
 class Medlemskapsvurdering(
     internal val medlemskapstatus: Medlemskapstatus
@@ -12,7 +13,7 @@ class Medlemskapsvurdering(
                 true
             }
             Medlemskapstatus.VetIkke -> {
-                aktivitetslogg.varsel("Vurder lovvalg og medlemskap")
+                aktivitetslogg.varsel(RV_MV_1)
                 true
             }
             Medlemskapstatus.Nei -> {
