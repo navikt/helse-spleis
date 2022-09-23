@@ -53,9 +53,9 @@ internal object BrukteVilkårsgrunnlag {
     }
 
     internal fun brukteVilkårsgrunnlag(jsonNode: ObjectNode, id: String) : ArrayNode? {
-        val vilkårsgrunnlagHistorikk = jsonNode.path("vilkårsgrunnlagHistorikk") as ArrayNode
-        val sisteInnslag = vilkårsgrunnlagHistorikk.firstOrNull() ?: return null
         val sikkerlogg = Sikkerlogg(aktørId = jsonNode.path("aktørId").asText(), id = id)
+        val vilkårsgrunnlagHistorikk = jsonNode.path("vilkårsgrunnlagHistorikk") as ArrayNode
+        val sisteInnslag = vilkårsgrunnlagHistorikk.firstOrNull() ?: return sikkerlogg.info("Har ingen innslag i vilkårsgrunnlaghistorikken").let { null }
 
         val vedtaksperioder = vedtaksperioder(jsonNode)
         val aktiveSkjæringstidspunkter = vedtaksperioder.aktiveSkjæringstidspunkter()
@@ -88,11 +88,14 @@ internal object BrukteVilkårsgrunnlag {
                         endret = true
                         sikkerlogg.info("Kopierer vilkårsgrunnlag ${vilkårgrunnlag.vilkårsgrunnlagId} fra ${vilkårgrunnlag.skjæringstidspunkt} til $skjæringstidspunkt")
                     }
-                    val vilkårsgrunnlagId = if (index == 0) vilkårgrunnlag.vilkårsgrunnlagId else "${UUID.randomUUID()}"
-
+                    val vilkårsgrunnlagId = if (index == 0) vilkårgrunnlag.vilkårsgrunnlagId else {
+                        endret = true
+                        "${UUID.randomUUID()}"
+                    }
                     val vilkårsgrunnlagMedRiktigSkjæringstidspunkt = vilkårgrunnlag.deepCopy<ObjectNode>()
-                        .put("skjæringstidspunkt", skjæringstidspunkt.toString())
+                        .put("skjæringstidspunkt", "$skjæringstidspunkt")
                         .put("vilkårsgrunnlagId", vilkårsgrunnlagId)
+
                     add(vilkårsgrunnlagMedRiktigSkjæringstidspunkt)
                 }
             }
@@ -108,9 +111,12 @@ internal object BrukteVilkårsgrunnlag {
         }
 
         return if (endret) {
-            sikkerlogg.info("Endrer vilkårsgrunnlag")
+            sikkerlogg.info("Legger til nytt innslag i vilkårsgrunnlaghistorikken")
             brukteVilkårsgrunnlag
-        } else null
+        } else {
+            sikkerlogg.info("Trenger ikke nytt innslag i vilkårsgrunnlaghistorikken")
+            null
+        }
     }
 
     private class Sikkerlogg(private val aktørId: String, private val id: String) {
@@ -121,6 +127,3 @@ internal object BrukteVilkårsgrunnlag {
         }
     }
 }
-
-
-
