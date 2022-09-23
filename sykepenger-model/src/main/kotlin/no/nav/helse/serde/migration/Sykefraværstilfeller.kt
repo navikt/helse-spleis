@@ -58,6 +58,7 @@ internal object Sykefraværstilfeller {
 
     internal sealed class Vedtaksperiode(val skjæringstidspunkt: LocalDate, val periode: Periode, protected val tilstand: String) {
         open fun tilstand() = tilstand
+        override fun toString() = "$periode med skjæringstidspunkt $skjæringstidspunkt"
         internal companion object {
             internal fun Iterable<Vedtaksperiode>.aktiveSkjæringstidspunkter() = filterIsInstance<AktivVedtaksperiode>().map { it.skjæringstidspunkt }.toSet()
         }
