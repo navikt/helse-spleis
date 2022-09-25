@@ -39,6 +39,7 @@ import no.nav.helse.person.Varselkode.RV_MV_1
 import no.nav.helse.person.Varselkode.RV_MV_2
 import no.nav.helse.person.Varselkode.RV_OV_1
 import no.nav.helse.person.Varselkode.RV_RE_1
+import no.nav.helse.person.Varselkode.RV_SI_1
 import no.nav.helse.person.Varselkode.RV_SV_1
 import no.nav.helse.person.Varselkode.RV_SV_2
 import no.nav.helse.person.Varselkode.RV_SØ_1
@@ -56,6 +57,7 @@ import no.nav.helse.person.Varselkode.RV_VV_4
 import no.nav.helse.person.Varselkode.RV_VV_8
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
+import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.september
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
@@ -497,5 +499,15 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)), orgnummer = a1)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         assertVarsel(RV_SV_2)
+    }
+
+    @Test
+    fun `varsel - Feil under simulering`() {
+        nyttVedtak(1.januar, 31.januar)
+
+        håndterOverstyrTidslinje(listOf(manuellFeriedag(18.januar)))
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode, simuleringOK = false)
+        assertVarsel(RV_SI_1, 1.vedtaksperiode.filter())
     }
 }
