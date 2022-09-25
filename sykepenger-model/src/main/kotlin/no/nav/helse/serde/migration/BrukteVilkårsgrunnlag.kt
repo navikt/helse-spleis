@@ -80,6 +80,8 @@ internal object BrukteVilkårsgrunnlag {
             .path("vilkårsgrunnlag")
             .sortedBy { it.skjæringstidspunkt }
 
+        val skjæringstidspunktLagtTil = mutableSetOf<LocalDate>()
+
         var endret = false
 
         val brukteVilkårsgrunnlag = serdeObjectMapper.createArrayNode().apply {
@@ -93,6 +95,8 @@ internal object BrukteVilkårsgrunnlag {
                     return@forEach
                 }
                 sykefraværstilfelle.skjæringstidspunkter.filter { it in aktiveSkjæringstidspunkter }.forEachIndexed { index, skjæringstidspunkt ->
+                    if (skjæringstidspunkt in skjæringstidspunktLagtTil) return@forEachIndexed
+
                     if (vilkårgrunnlag.skjæringstidspunkt != skjæringstidspunkt) {
                         endret = true
                         sikkerlogg.info("Kopierer ${vilkårgrunnlag.vilkårsgrunnlagstype} ${vilkårgrunnlag.vilkårsgrunnlagId} fra ${vilkårgrunnlag.skjæringstidspunkt} til $skjæringstidspunkt ifbm. sykefraværstilfellet ${sykefraværstilfelle.periode}")
@@ -105,6 +109,7 @@ internal object BrukteVilkårsgrunnlag {
                         .put("skjæringstidspunkt", "$skjæringstidspunkt")
                         .put("vilkårsgrunnlagId", vilkårsgrunnlagId)
 
+                    skjæringstidspunktLagtTil.add(skjæringstidspunkt)
                     add(vilkårsgrunnlagMedRiktigSkjæringstidspunkt)
                 }
             }
