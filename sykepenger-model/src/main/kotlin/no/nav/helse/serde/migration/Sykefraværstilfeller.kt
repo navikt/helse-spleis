@@ -43,13 +43,18 @@ internal object Sykefraværstilfeller {
             .map { it.periode }
             .grupperSammenhengendePerioderMedHensynTilHelg()
 
+        val dagerISpleis = sammenhengendeAktivePerioder.flatten().sorted()
+
         return sammenhengendePerioder
             .filter { sammenhengendePeriode -> sammenhengendeAktivePerioder.any { it.overlapperMed(sammenhengendePeriode) } }
             .map { sammenhengendePeriode ->
                 val skjæringstidspunkter = vedtaksperioder.skjæringstidspunkterFor(sammenhengendePeriode)
                 val tidligsteSkjæringstidspunkt = skjæringstidspunkter.min()
-                val periode = tidligsteSkjæringstidspunkt til sammenhengendePeriode.endInclusive
-                Sykefraværstilfelle(skjæringstidspunkter, periode)
+                Sykefraværstilfelle(
+                    skjæringstidspunkter = skjæringstidspunkter,
+                    periode = tidligsteSkjæringstidspunkt til sammenhengendePeriode.endInclusive,
+                    sisteDagISpleis = dagerISpleis.last { it in sammenhengendePeriode }
+                )
             }.toSet()
     }
 
@@ -68,7 +73,11 @@ internal object Sykefraværstilfeller {
         override fun tilstand() = "$tilstand (Forkastet)"
     }
 
-    internal data class Sykefraværstilfelle(val skjæringstidspunkter: Set<LocalDate>, val periode: Periode) {
+    internal data class Sykefraværstilfelle(
+        val skjæringstidspunkter: Set<LocalDate>,
+        val periode: Periode,
+        private val sisteDagISpleis: LocalDate) {
         internal val tidligsteSkjæringstidspunkt = skjæringstidspunkter.min()
+        internal val periodeFremTilSisteDagISpleis = periode.start til sisteDagISpleis
     }
 }
