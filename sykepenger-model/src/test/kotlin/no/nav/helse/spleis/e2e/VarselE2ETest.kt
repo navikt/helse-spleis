@@ -6,6 +6,7 @@ import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
 import no.nav.helse.desember
 import no.nav.helse.februar
+import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsvurdering
@@ -14,14 +15,17 @@ import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.OverstyrArbeidsforhold.ArbeidsforholdOverstyrt
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
+import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.november
+import no.nav.helse.oktober
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.Varselkode
 import no.nav.helse.person.Varselkode.RV_IM_1
 import no.nav.helse.person.Varselkode.RV_IM_2
@@ -36,6 +40,7 @@ import no.nav.helse.person.Varselkode.RV_MV_2
 import no.nav.helse.person.Varselkode.RV_OV_1
 import no.nav.helse.person.Varselkode.RV_RE_1
 import no.nav.helse.person.Varselkode.RV_SV_1
+import no.nav.helse.person.Varselkode.RV_SV_2
 import no.nav.helse.person.Varselkode.RV_SØ_1
 import no.nav.helse.person.Varselkode.RV_SØ_10
 import no.nav.helse.person.Varselkode.RV_SØ_2
@@ -473,5 +478,24 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
         håndterVilkårsgrunnlag(inntekt = 100.månedlig)
         håndterYtelser()
         assertVarsel(RV_SV_1)
+    }
+
+    @Test
+    fun `varsel - Minst en arbeidsgiver inngår ikke i sykepengegrunnlaget`() {
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt()
+
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a2)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, orgnummer = a2)
+
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)), orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        assertVarsel(RV_SV_2)
     }
 }

@@ -12,6 +12,7 @@ import no.nav.helse.person.Sykepengegrunnlag.Begrensning.ER_6G_BEGRENSET
 import no.nav.helse.person.Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
 import no.nav.helse.person.Sykepengegrunnlag.Begrensning.VURDERT_I_INFOTRYGD
 import no.nav.helse.person.Varselkode.RV_SV_1
+import no.nav.helse.person.Varselkode.RV_SV_2
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.utbetalingstidslinje.Alder
@@ -103,7 +104,7 @@ internal class Sykepengegrunnlag(
         manglerInntekt.forEach {
             aktivitetslogg.info("Mangler inntekt for $it på skjæringstidspunkt $skjæringstidspunkt")
         }
-        aktivitetslogg.funksjonellFeil("Minst en arbeidsgiver inngår ikke i sykepengegrunnlaget")
+        aktivitetslogg.funksjonellFeil(RV_SV_2)
     }
 
     internal fun justerGrunnbeløp() =
