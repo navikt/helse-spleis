@@ -71,6 +71,7 @@ import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.TilstandType.UTBETALING_FEILET
 import no.nav.helse.person.Varselkode.RV_IM_4
+import no.nav.helse.person.Varselkode.RV_SI_2
 import no.nav.helse.person.Varselkode.RV_VV_1
 import no.nav.helse.person.Varselkode.RV_VV_2
 import no.nav.helse.person.Varselkode.RV_VV_8
@@ -1741,7 +1742,7 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, simulering: Simulering) {
             FunksjonelleFeilTilVarsler.wrap(simulering) {
                 if (vedtaksperiode.utbetalinger.valider(simulering).harVarslerEllerVerre()) {
-                    simulering.varsel("Simulering av revurdert utbetaling feilet. Utbetalingen må annulleres")
+                    simulering.varsel(RV_SI_2)
                 }
             }
             if (!vedtaksperiode.utbetalinger.erKlarForGodkjenning()) return simulering.info("Kan ikke gå videre da begge oppdragene ikke er simulert.")

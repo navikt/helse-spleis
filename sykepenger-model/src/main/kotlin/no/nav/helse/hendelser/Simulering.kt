@@ -6,6 +6,7 @@ import no.nav.helse.utbetalingslinjer.Oppdrag
 import java.time.LocalDate
 import java.util.*
 import no.nav.helse.person.Varselkode
+import no.nav.helse.person.Varselkode.RV_SI_1
 import no.nav.helse.person.Varselkode.RV_SI_2
 
 class Simulering(
@@ -32,7 +33,7 @@ class Simulering(
         if (!oppdrag.erRelevant(fagsystemId, fagområde)) return@apply
         if (!simuleringOK) {
             info("Feil under simulering: $melding")
-            funksjonellFeil(RV_SI_2)
+            funksjonellFeil(RV_SI_1)
         }
         if (simuleringResultat == null) info("Ingenting ble simulert")
     }
