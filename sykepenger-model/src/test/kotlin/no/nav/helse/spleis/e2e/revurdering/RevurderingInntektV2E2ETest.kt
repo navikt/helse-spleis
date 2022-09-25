@@ -27,6 +27,8 @@ import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.TilstandType.UTBETALING_FEILET
+import no.nav.helse.person.Varselkode
+import no.nav.helse.person.Varselkode.RV_SV_1
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
@@ -486,10 +488,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
             "Har mer enn 25 % avvik. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene.",
             AktivitetsloggFilter.person()
         )
-        assertVarsel(
-            "Perioden er avslått på grunn av at inntekt er under krav til minste sykepengegrunnlag",
-            AktivitetsloggFilter.person()
-        )
+        assertVarsel(RV_SV_1, AktivitetsloggFilter.person())
         assertFalse(utbetalingTilRevurdering.utbetalingstidslinje().harUtbetalinger())
     }
 
@@ -518,10 +517,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
             "Har mer enn 25 % avvik. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene.",
             AktivitetsloggFilter.person()
         )
-        assertVarsel(
-            "Perioden er avslått på grunn av at inntekt er under krav til minste sykepengegrunnlag",
-            AktivitetsloggFilter.person()
-        )
+        assertVarsel(RV_SV_1, AktivitetsloggFilter.person())
         assertFalse(utbetalingTilRevurdering.utbetalingstidslinje().harUtbetalinger())
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()

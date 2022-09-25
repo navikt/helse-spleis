@@ -20,6 +20,8 @@ import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.person.Varselkode
+import no.nav.helse.person.Varselkode.RV_SV_1
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
@@ -207,7 +209,7 @@ internal class OverstyrInntektFlereArbeidsgivereTest: AbstractEndToEndTest() {
         }
         håndterOverstyrInntekt(1500.månedlig, a1, 1.januar)
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        assertVarsel("Perioden er avslått på grunn av at inntekt er under krav til minste sykepengegrunnlag", 1.vedtaksperiode.filter(a1))
+        assertVarsel(RV_SV_1, 1.vedtaksperiode.filter(a1))
         assertIngenFunksjonelleFeil()
         assertTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING, orgnummer = a1)
         assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)

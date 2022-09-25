@@ -18,6 +18,7 @@ import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.inntektsopplysningPerArbeidsgiver
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.Varselkode.RV_OV_1
+import no.nav.helse.person.Varselkode.RV_SV_1
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.assertLogiskFeil
@@ -387,7 +388,7 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterOverstyrArbeidsforhold(1.januar, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, true, "forklaring")))
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        assertVarsel("Perioden er avslått på grunn av at inntekt er under krav til minste sykepengegrunnlag", 1.vedtaksperiode.filter(a1))
+        assertVarsel(RV_SV_1, 1.vedtaksperiode.filter(a1))
     }
 
     @Test

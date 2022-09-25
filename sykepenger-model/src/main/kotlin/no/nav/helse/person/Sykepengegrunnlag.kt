@@ -11,6 +11,7 @@ import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.valider
 import no.nav.helse.person.Sykepengegrunnlag.Begrensning.ER_6G_BEGRENSET
 import no.nav.helse.person.Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
 import no.nav.helse.person.Sykepengegrunnlag.Begrensning.VURDERT_I_INFOTRYGD
+import no.nav.helse.person.Varselkode.RV_SV_1
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.utbetalingstidslinje.Alder
@@ -93,7 +94,7 @@ internal class Sykepengegrunnlag(
     internal fun valider(aktivitetslogg: IAktivitetslogg): Boolean {
         arbeidsgiverInntektsopplysninger.valider(aktivitetslogg)
         if (oppfyllerMinsteinntektskrav) aktivitetslogg.info("Krav til minste sykepengegrunnlag er oppfylt")
-        else aktivitetslogg.varsel("Perioden er avslått på grunn av at inntekt er under krav til minste sykepengegrunnlag")
+        else aktivitetslogg.varsel(RV_SV_1)
         return oppfyllerMinsteinntektskrav && !aktivitetslogg.harFunksjonelleFeilEllerVerre()
     }
 

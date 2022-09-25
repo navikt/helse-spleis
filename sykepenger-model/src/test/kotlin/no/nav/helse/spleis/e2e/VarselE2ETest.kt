@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e
 import java.time.LocalDate
 import java.time.LocalDateTime
 import no.nav.helse.assertForventetFeil
+import no.nav.helse.august
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
@@ -18,6 +19,9 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.november
+import no.nav.helse.person.TilstandType
+import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
+import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.Varselkode
 import no.nav.helse.person.Varselkode.RV_IM_1
 import no.nav.helse.person.Varselkode.RV_IM_2
@@ -31,6 +35,7 @@ import no.nav.helse.person.Varselkode.RV_MV_1
 import no.nav.helse.person.Varselkode.RV_MV_2
 import no.nav.helse.person.Varselkode.RV_OV_1
 import no.nav.helse.person.Varselkode.RV_RE_1
+import no.nav.helse.person.Varselkode.RV_SV_1
 import no.nav.helse.person.Varselkode.RV_SØ_1
 import no.nav.helse.person.Varselkode.RV_SØ_10
 import no.nav.helse.person.Varselkode.RV_SØ_2
@@ -46,6 +51,7 @@ import no.nav.helse.person.Varselkode.RV_VV_4
 import no.nav.helse.person.Varselkode.RV_VV_8
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
+import no.nav.helse.september
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -456,5 +462,16 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
         )
 
         assertVarsel(Varselkode.RV_IT_5, 1.vedtaksperiode.filter())
+    }
+
+    @Test
+    fun `varsel - Perioden er avslått på grunn av at inntekt er under krav til minste sykepengegrunnlag`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 100.månedlig)
+        håndterYtelser()
+        håndterVilkårsgrunnlag(inntekt = 100.månedlig)
+        håndterYtelser()
+        assertVarsel(RV_SV_1)
     }
 }
