@@ -66,7 +66,13 @@ internal object BrukteVilkårsgrunnlag {
         val aktiveSkjæringstidspunkter = vedtaksperioder.aktiveSkjæringstidspunkter()
         val sykefraværstilfeller = sykefraværstilfeller(vedtaksperioder)
         sikkerlogg.info("Fant ${sykefraværstilfeller.size} sykefraværstilfeller ${sykefraværstilfeller.map { it.periode }}")
-        val tilstanderPerSkjæringstidspunkt = vedtaksperioder.groupBy { it.skjæringstidspunkt }.mapValues { (_, vedtaksperioder) -> vedtaksperioder.map { it.tilstand() } }
+        val tilstanderPerSkjæringstidspunkt = vedtaksperioder
+            .groupBy { it.skjæringstidspunkt }
+            .mapValues { (_, vedtaksperioder) ->
+                val førsteFom = vedtaksperioder.minOf { it.periode.start }
+                vedtaksperioder.filter { it.periode.start == førsteFom }
+            }
+            .mapValues { (_, vedtaksperioder) -> vedtaksperioder.map { it.tilstand() } }
 
         val perioderUtbetaltIInfotrygd = jsonNode.path("infotrygdhistorikk")
             .firstOrNull()?.let { sisteInfotrygdInnslag ->
