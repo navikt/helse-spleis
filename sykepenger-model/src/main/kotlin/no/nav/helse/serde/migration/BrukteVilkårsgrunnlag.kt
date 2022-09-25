@@ -39,14 +39,18 @@ internal object BrukteVilkårsgrunnlag {
         return filter { it.fraSpleis }.lastOrNull { it.skjæringstidspunkt in skjæringtidspunkter }
     }
 
-    private fun List<JsonNode>.finnRiktigVilkårsgrunnlag(sykefraværstilfelle: Sykefraværstilfelle, perioderUtbetaltIInfotrygd: List<Periode>): JsonNode? {
-        val fraInfotrygd = finnInfotrygdVilkårsgrunnlag(sykefraværstilfelle.periode)
+    private fun List<JsonNode>.finnRiktigVilkårsgrunnlag(
+        sykefraværstilfelle: Sykefraværstilfelle,
+        perioderUtbetaltIInfotrygd: List<Periode>,
+        periode: (sykefraværstilfelle: Sykefraværstilfelle) -> Periode): JsonNode? {
+        val benyttetPeriode = periode(sykefraværstilfelle)
+        val fraInfotrygd = finnInfotrygdVilkårsgrunnlag(benyttetPeriode)
         val fraSpleis = finnSpleisVilkårsgrunnlag(sykefraværstilfelle.skjæringstidspunkter)
         return when {
             fraInfotrygd == null && fraSpleis == null -> null
             fraInfotrygd != null && fraSpleis != null -> {
                 if (!fraInfotrygd.gyldigSykepengegrunnlag) fraSpleis
-                else if (perioderUtbetaltIInfotrygd.rettFørEllerOverlapperMed(sykefraværstilfelle.periode)) fraInfotrygd
+                else if (perioderUtbetaltIInfotrygd.rettFørEllerOverlapperMed(benyttetPeriode)) fraInfotrygd
                 else fraSpleis
             }
             else -> fraInfotrygd ?: fraSpleis
@@ -80,7 +84,10 @@ internal object BrukteVilkårsgrunnlag {
 
         val brukteVilkårsgrunnlag = serdeObjectMapper.createArrayNode().apply {
             sykefraværstilfeller.forEach { sykefraværstilfelle ->
-                val vilkårgrunnlag = sorterteVilkårsgrunnlag.finnRiktigVilkårsgrunnlag(sykefraværstilfelle, perioderUtbetaltIInfotrygd)
+                val vilkårgrunnlag =
+                    sorterteVilkårsgrunnlag.finnRiktigVilkårsgrunnlag(sykefraværstilfelle, perioderUtbetaltIInfotrygd) { it.periodeFremTilSisteDagISpleis }
+                    ?:sorterteVilkårsgrunnlag.finnRiktigVilkårsgrunnlag(sykefraværstilfelle, perioderUtbetaltIInfotrygd) { it.periode }
+
                 if (vilkårgrunnlag == null) {
                     sikkerlogg.info("Fant ikke vilkårsgrunnlag for sykefraværstilfellet ${sykefraværstilfelle.periode} med tilstander ${tilstanderPerSkjæringstidspunkt[sykefraværstilfelle.tidligsteSkjæringstidspunkt]}")
                     return@forEach

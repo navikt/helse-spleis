@@ -147,6 +147,14 @@ internal class V178ForkastOgFlyttVilkårsgrunnlagTest : MigrationTest(V178Forkas
         )
     }
 
+    @Test
+    fun `velger vilkårsgrunnlag fra Spleis om det fra Infotrygd er etter siste dag i Spleis`() {
+        assertForkastetVilkårsgrunnlag(
+            originalJson = "/migrations/178/leter-først-frem-til-siste-dag-i-spleis_original.json",
+            expectedJson = "/migrations/178/leter-først-frem-til-siste-dag-i-spleis_expected.json"
+        )
+    }
+
     private fun assertForkastetVilkårsgrunnlag(originalJson: String, expectedJson: String) {
         val migrert = migrer(originalJson.readResource())
         val sisteInnslag = migrert.path("vilkårsgrunnlagHistorikk")[0]
