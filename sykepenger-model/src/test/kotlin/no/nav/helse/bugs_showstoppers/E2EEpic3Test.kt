@@ -520,59 +520,6 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             AVVENTER_SIMULERING
         )
     }
-
-    @Test
-    fun `dobbeltbehandling av første periode aborterer behandling av andre periode`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar(2020), 31.januar(2020), 100.prosent))
-        håndterSøknad(Sykdom(1.januar(2020), 31.januar(2020), 100.prosent))
-        håndterInntektsmelding(
-            arbeidsgiverperioder = listOf(Periode(1.januar(2020), 16.januar(2020))),
-            førsteFraværsdag = 1.januar(2020)
-        )
-        håndterYtelser(1.vedtaksperiode, besvart = LocalDateTime.now().minusHours(24))
-        håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT, inntektsvurdering = Inntektsvurdering(
-            inntekter = inntektperioderForSammenligningsgrunnlag {
-                1.januar(2019) til 1.desember(2019) inntekter {
-                    ORGNUMMER inntekt INNTEKT
-                }
-            }
-        ))
-        håndterYtelser(1.vedtaksperiode, besvart = LocalDateTime.now().minusHours(24))
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
-        håndterUtbetalt(Oppdragstatus.AKSEPTERT)
-
-        håndterSykmelding(Sykmeldingsperiode(1.februar(2020), 28.februar(2020), 100.prosent))
-        håndterSøknad(Sykdom(1.februar(2020), 28.februar(2020), 100.prosent))
-        håndterYtelser(
-            vedtaksperiodeIdInnhenter = 2.vedtaksperiode,
-            utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar(2020), 31.januar(2020), 100.prosent, 1400.daglig)),
-            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 17.januar(2020), 1400.daglig, true))
-        )
-
-        assertTilstander(
-            1.vedtaksperiode,
-            START,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK,
-            AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING,
-            TIL_UTBETALING,
-            AVSLUTTET
-        )
-
-        assertTilstander(
-            2.vedtaksperiode,
-            START,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING
-        )
-    }
-
     @Test
     fun `helg i gap i arbeidsgiverperioden`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 10.januar, 100.prosent))

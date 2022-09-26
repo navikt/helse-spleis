@@ -40,6 +40,7 @@ abstract class Utbetalingsperiode(
 
     override fun valider(aktivitetslogg: IAktivitetslogg, periode: Periode, skjæringstidspunkt: LocalDate, nødnummer: Nødnummer) {
         validerOverlapp(aktivitetslogg, periode)
+        validerRettFør(aktivitetslogg, periode)
         if (aktivitetslogg.harFunksjonelleFeilEllerVerre() || this.endInclusive < skjæringstidspunkt) return
         validerRelevant(aktivitetslogg, nødnummer)
     }
@@ -48,10 +49,15 @@ abstract class Utbetalingsperiode(
         if (orgnr in nødnummer) aktivitetslogg.funksjonellFeil(RV_IT_4)
     }
 
-    override fun validerOverlapp(aktivitetslogg: IAktivitetslogg, periode: Periode) {
+    private fun validerOverlapp(aktivitetslogg: IAktivitetslogg, periode: Periode) {
         if (!overlapperMed(periode)) return
         aktivitetslogg.info("Utbetaling i Infotrygd %s til %s overlapper med vedtaksperioden", start, endInclusive)
         aktivitetslogg.funksjonellFeil(RV_IT_3)
+    }
+
+    private fun validerRettFør(aktivitetslogg: IAktivitetslogg, periode: Periode) {
+        if (!this.erRettFør(periode)) return
+        aktivitetslogg.funksjonellFeil( "Forlenger en Infotrygdperiode på tvers av arbeidsgivere")
     }
 
     override fun gjelder(nødnummer: Nødnummer) = this.orgnr in nødnummer

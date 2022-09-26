@@ -6,6 +6,7 @@ import no.nav.helse.desember
 import no.nav.helse.dsl.TestPerson
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
@@ -31,6 +32,7 @@ import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
+import no.nav.helse.spleis.e2e.assertIngenVarsler
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
@@ -47,6 +49,8 @@ import no.nav.helse.spleis.e2e.håndterUtbetalt
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.nyPeriode
+import no.nav.helse.spleis.e2e.nyttVedtak
+import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.Arbeidsdag
@@ -141,14 +145,17 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `lagrer ikke inntekt fra infotrygd uten utbetaling som vilkårsgrunnlag i spleis`() {
+    fun `inntekter uten utbetalinger fra Infotrygd stopper ikke behandling i Spleis`() {
         val inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, INNTEKT, true))
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode, inntektshistorikk = inntektshistorikk)
-        håndterInntektsmelding(listOf(1.januar til 31.januar))
-        håndterYtelser(1.vedtaksperiode, inntektshistorikk = inntektshistorikk)
-        assertTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        assertTilstand(1.vedtaksperiode, AVVENTER_SIMULERING)
+        assertIngenVarsler()
     }
 
     @Test
@@ -221,6 +228,29 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         ))
         assertForlengerInfotrygdperiode()
         assertForkastetPeriodeTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, TIL_INFOTRYGD)
+    }
+
+    @Test
+    fun `dobbeltbehandling av første periode aborterer behandling av andre periode`() {
+        nyttVedtak(1.januar, 31.januar)
+
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+        håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
+        håndterYtelser(
+            vedtaksperiodeIdInnhenter = 2.vedtaksperiode,
+            utbetalinger = arrayOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 17.januar, 31.januar, 100.prosent, 1400.daglig)),
+            inntektshistorikk = listOf(Inntektsopplysning(ORGNUMMER, 17.januar, 1400.daglig, true))
+        )
+
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+
+        assertForkastetPeriodeTilstander(
+            2.vedtaksperiode,
+            START,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_HISTORIKK,
+            TIL_INFOTRYGD
+        )
     }
 
     private fun assertForlengerInfotrygdperiode() {

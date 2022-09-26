@@ -180,18 +180,6 @@ internal class Arbeidsgiver private constructor(
             flatMap { it.vedtaksperioder }.lagRevurdering(vedtaksperiode, arbeidsgiverUtbetalinger, hendelse)
         }
 
-        internal fun List<Arbeidsgiver>.beregnSykepengegrunnlag(skjæringstidspunkt: LocalDate, periodeStart: LocalDate) =
-            fold(emptyList<ArbeidsgiverInntektsopplysning>()) { inntektsopplysninger, arbeidsgiver ->
-                val inntektsopplysning = arbeidsgiver.inntektshistorikk.omregnetÅrsinntekt(
-                    skjæringstidspunkt,
-                    maxOf(skjæringstidspunkt, periodeStart),
-                    arbeidsgiver.finnFørsteFraværsdag(skjæringstidspunkt)
-
-                )
-                if (inntektsopplysning == null || inntektsopplysning !is Inntektshistorikk.Infotrygd) inntektsopplysninger
-                else inntektsopplysninger + ArbeidsgiverInntektsopplysning(arbeidsgiver.organisasjonsnummer, inntektsopplysning)
-            }
-
         internal fun List<Arbeidsgiver>.beregnSykepengegrunnlag(skjæringstidspunkt: LocalDate, subsumsjonObserver: SubsumsjonObserver, forklaring: String?, subsumsjon: Subsumsjon?) =
             mapNotNull { arbeidsgiver ->
                 val førsteFraværsdag = arbeidsgiver.finnFørsteFraværsdag(skjæringstidspunkt)
@@ -910,8 +898,13 @@ internal class Arbeidsgiver private constructor(
 
     internal fun finnSammenhengendePeriode(skjæringstidspunkt: LocalDate) = vedtaksperioder.medSkjæringstidspunkt(skjæringstidspunkt)
 
-    internal fun harNødvendigInntektForVilkårsprøving(skjæringstidspunkt: LocalDate, periodeStart: LocalDate, ingenUtbetaling: Boolean): Boolean {
-        return inntektshistorikk.harNødvendigInntektForVilkårsprøving(skjæringstidspunkt, periodeStart, finnFørsteFraværsdag(skjæringstidspunkt), !ingenUtbetaling)
+    internal fun harNødvendigInntektForVilkårsprøving(skjæringstidspunkt: LocalDate, ingenUtbetaling: Boolean): Boolean {
+        if (person.vilkårsgrunnlagFor(skjæringstidspunkt) != null) return true
+        return inntektshistorikk.harNødvendigInntektForVilkårsprøving(
+            skjæringstidspunkt,
+            finnFørsteFraværsdag(skjæringstidspunkt),
+            !ingenUtbetaling
+        )
     }
 
     internal fun addInntekt(inntektsmelding: Inntektsmelding, førsteFraværsdag: LocalDate, subsumsjonObserver: SubsumsjonObserver) {

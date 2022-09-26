@@ -377,7 +377,7 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun harNødvendigInntektForVilkårsprøving() =
-        arbeidsgiver.harNødvendigInntektForVilkårsprøving(skjæringstidspunkt, periode.start, !forventerInntekt())
+        arbeidsgiver.harNødvendigInntektForVilkårsprøving(skjæringstidspunkt, !forventerInntekt())
 
     private fun låsOpp() = arbeidsgiver.låsOpp(periode)
     private fun lås() = arbeidsgiver.lås(periode)
@@ -900,9 +900,10 @@ internal class Vedtaksperiode private constructor(
             validation(hendelse) {
                 onValidationFailed { vedtaksperiode.forkast(hendelse) }
                 valider {
-                    infotrygdhistorikk.validerOverlappende(
+                    infotrygdhistorikk.valider(
                         this,
-                        arbeidsgiver.avgrensetPeriode(vedtaksperiode.periode),
+                        arbeidsgiver,
+                        vedtaksperiode.periode,
                         vedtaksperiode.skjæringstidspunkt
                     )
                 }
@@ -1407,13 +1408,11 @@ internal class Vedtaksperiode private constructor(
         ) {
             validation(hendelse) {
                 onValidationFailed { vedtaksperiode.forkast(hendelse) }
-                valider("Forlenger en Infotrygdperiode på tvers av arbeidsgivere") {
-                    !infotrygdhistorikk.harBetaltRettFør(vedtaksperiode.periode)
-                }
                 valider {
-                    infotrygdhistorikk.validerOverlappende(
+                    infotrygdhistorikk.valider(
                         this,
-                        arbeidsgiver.avgrensetPeriode(vedtaksperiode.periode),
+                        arbeidsgiver,
+                        vedtaksperiode.periode,
                         vedtaksperiode.skjæringstidspunkt
                     )
                 }

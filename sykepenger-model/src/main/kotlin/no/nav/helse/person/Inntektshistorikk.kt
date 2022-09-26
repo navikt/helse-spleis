@@ -7,7 +7,6 @@ import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Subsumsjon
-import no.nav.helse.hendelser.til
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.subsumsjonsformat
 import no.nav.helse.økonomi.Inntekt
@@ -47,16 +46,11 @@ internal class Inntektshistorikk {
         it.harInntektsmelding(førsteFraværsdag)
     }
 
-    internal fun harNødvendigInntektForVilkårsprøving(skjæringstidspunkt: LocalDate, periodeStart: LocalDate, førsteFraværsdag: LocalDate?, harUtbetaling: Boolean): Boolean {
+    internal fun harNødvendigInntektForVilkårsprøving(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?, harUtbetaling: Boolean): Boolean {
         if (førsteFraværsdag != null && harInntektsmelding(førsteFraværsdag)) return true
-        val inntektsopplysning = omregnetÅrsinntekt(skjæringstidspunkt, periodeStart, førsteFraværsdag) ?: return false
+        val inntektsopplysning = omregnetÅrsinntekt(skjæringstidspunkt, førsteFraværsdag) ?: return false
         return inntektsopplysning.erNødvendigInntektForVilkårsprøving(harUtbetaling)
     }
-
-    internal fun omregnetÅrsinntekt(skjæringstidspunkt: LocalDate, dato: LocalDate, førsteFraværsdag: LocalDate?): Inntektsopplysning? =
-        omregnetÅrsinntekt(skjæringstidspunkt, førsteFraværsdag) ?: skjæringstidspunkt
-            .takeIf { it <= dato }
-            ?.let { nyesteInnslag()?.omregnetÅrsinntektInfotrygd(it til dato) }
 
     internal fun omregnetÅrsinntekt(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?): Inntektsopplysning? =
         nyesteInnslag()?.omregnetÅrsinntekt(skjæringstidspunkt, førsteFraværsdag)
@@ -265,7 +259,7 @@ internal class Inntektshistorikk {
 
         override fun rapportertInntekt(): Inntekt = error("Infotrygd har ikke grunnlag for sammenligningsgrunnlag")
 
-        override fun erNødvendigInntektForVilkårsprøving(harUtbetaling: Boolean) = harUtbetaling
+        override fun erNødvendigInntektForVilkårsprøving(harUtbetaling: Boolean) = false
 
         override fun skalErstattesAv(other: Inntektsopplysning) =
             other is Infotrygd && this.dato == other.dato
