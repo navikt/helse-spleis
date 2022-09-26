@@ -1868,12 +1868,9 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Kort periode i AvventerRevurdering skal mappes til VenterPåAnnenPeriode`() {
+    fun `Utbetalt periode i AvventerRevurdering skal mappes til UtbetaltVenterPåAnnenPeriode`() {
         nyttVedtak(1.januar, 31.januar)
-        nyPeriode(1.mars til 16.mars)
-        håndterUtbetalingshistorikk(2.vedtaksperiode)
-        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
-        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        nyttVedtak(1.mars, 31.mars)
 
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
         håndterYtelser(1.vedtaksperiode)
@@ -1883,7 +1880,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
 
         0.generasjon {
             assertEquals(2, perioder.size)
-            uberegnetPeriode(0) medTilstand VenterPåAnnenPeriode
+            beregnetPeriode(0) medTilstand UtbetaltVenterPåAnnenPeriode
             beregnetPeriode(1) medTilstand ForberederGodkjenning
         }
     }

@@ -578,7 +578,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
 
         nyPeriode(1.januar til 31.januar)
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_REVURDERING)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
 
         assertIngenInfo("Revurdering førte til at vedtaksperioden trenger inntektsmelding", 1.vedtaksperiode.filter())
 
@@ -590,10 +590,9 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalt()
 
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
 
-        håndterYtelser(1.vedtaksperiode)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
     }
@@ -723,12 +722,36 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
 
         nyttVedtak(1.januar, 31.januar)
 
-        assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING)
-
-        håndterYtelser(2.vedtaksperiode)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+    }
+
+    @Test
+    fun `Korte perioder skal ikke revurderes dersom de forblir innenfor AGP`() {
+        nyPeriode(1.mars til 10.mars)
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+        nyPeriode(11.mars til 16.mars)
+        håndterUtbetalingshistorikk(2.vedtaksperiode)
+
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+
+        nyttVedtak(1.januar, 31.januar)
+
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+    }
+
+    @Test
+    fun `Ferie med tidligere sykdom - ferie revurderes`() {
+        håndterSykmelding(Sykmeldingsperiode(5.februar, 28.februar, 100.prosent))
+        håndterSøknad(Sykdom(5.februar, 28.februar, 100.prosent), Søknad.Søknadsperiode.Ferie(5.februar, 28.februar))
+        håndterInntektsmelding(listOf(5.februar til 21.februar))
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+
+        nyttVedtak(1.januar, 31.januar)
+
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
     }
 
     @Test
