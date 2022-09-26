@@ -90,9 +90,8 @@ internal class Inntektshistorikk {
 
         internal fun omregnetÅrsinntekt(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?) =
             inntekter
-                .sorted()
                 .mapNotNull { it.omregnetÅrsinntekt(skjæringstidspunkt, førsteFraværsdag) }
-                .firstOrNull()
+                .minOrNull()
 
         internal fun rapportertInntekt(dato: LocalDate) =
             inntekter
@@ -310,8 +309,12 @@ internal class Inntektshistorikk {
         override fun harInntektsmelding(førsteFraværsdag: LocalDate) =
             førsteFraværsdag == dato
 
-        override fun omregnetÅrsinntekt(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?) =
-            takeIf { (førsteFraværsdag != null && YearMonth.from(skjæringstidspunkt) == YearMonth.from(førsteFraværsdag) && it.dato == førsteFraværsdag) || it.dato == skjæringstidspunkt }
+        override fun omregnetÅrsinntekt(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?): Inntektsopplysning? {
+            if (dato == skjæringstidspunkt) return this
+            if (førsteFraværsdag == null || dato != førsteFraværsdag) return null
+            if (YearMonth.from(skjæringstidspunkt) == YearMonth.from(førsteFraværsdag)) return this
+            return IkkeRapportert(UUID.randomUUID(), skjæringstidspunkt)
+        }
 
         override fun omregnetÅrsinntekt(): Inntekt = beløp
 

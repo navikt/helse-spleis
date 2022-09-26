@@ -6,7 +6,6 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.assertForventetFeil
-import no.nav.helse.desember
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.Inntektsvurdering
@@ -15,12 +14,10 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold
 import no.nav.helse.hendelser.til
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
-import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
-import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.serde.api.dto.Arbeidsgiverinntekt
-import no.nav.helse.serde.api.dto.InfotrygdVilkårsgrunnlag
 import no.nav.helse.serde.api.dto.InntekterFraAOrdningen
 import no.nav.helse.serde.api.dto.Inntektkilde
 import no.nav.helse.serde.api.dto.SpleisVilkårsgrunnlag
@@ -37,7 +34,6 @@ import no.nav.helse.spleis.e2e.håndterOverstyrInntekt
 import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
-import no.nav.helse.spleis.e2e.håndterUtbetalingshistorikk
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.lagInntektperioder
@@ -48,7 +44,6 @@ import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 
 internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
@@ -136,7 +131,7 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
         val generasjoner = vilkårsgrunnlag.build().toDTO()
         assertEquals(2, generasjoner.size)
 
-        val førsteGenerasjon = requireNotNull(generasjoner[innslag.last().id]?.vilkårsgrunnlagSpleis(1.januar))
+        val førsteGenerasjon = requireNotNull(generasjoner[innslag.last().inspektør.id]?.vilkårsgrunnlagSpleis(1.januar))
         assertSpleisVilkårsprøving(
             vilkårsgrunnlag = førsteGenerasjon,
             sammenligningsgrunnlag = 372000.0,
@@ -179,7 +174,7 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
         val innslag = inspektør.vilkårsgrunnlagHistorikkInnslag()
         val generasjoner = vilkårsgrunnlag.build().toDTO()
 
-        val førsteGenerasjon = requireNotNull(generasjoner[innslag.last().id]?.vilkårsgrunnlagSpleis(1.januar))
+        val førsteGenerasjon = requireNotNull(generasjoner[innslag.single().inspektør.id]?.vilkårsgrunnlagSpleis(1.januar))
         assertSpleisVilkårsprøving(
             vilkårsgrunnlag = førsteGenerasjon,
             sammenligningsgrunnlag = 480000.0,
@@ -368,16 +363,6 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
         )
     }
 
-    private fun assertInfotrygdVilkårsprøving(
-        vilkårsgrunnlag: InfotrygdVilkårsgrunnlag,
-        skjæringstidspunkt: LocalDate,
-    ) {
-        assertEquals(Vilkårsgrunnlagtype.INFOTRYGD, vilkårsgrunnlag.vilkårsgrunnlagtype)
-        assertEquals(skjæringstidspunkt, vilkårsgrunnlag.skjæringstidspunkt)
-        assertNull(vilkårsgrunnlag.sammenligningsgrunnlag)
-        assertEquals(480000.0, vilkårsgrunnlag.omregnetÅrsinntekt)
-    }
-
     private fun assertSpleisVilkårsprøving(
         vilkårsgrunnlag: SpleisVilkårsgrunnlag,
         sammenligningsgrunnlag: Double,
@@ -418,10 +403,6 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
 
     private fun Map<LocalDate, Vilkårsgrunnlag>.vilkårsgrunnlagSpleis(skjæringstidspunkt: LocalDate): SpleisVilkårsgrunnlag {
         return requireNotNull(this[skjæringstidspunkt] as SpleisVilkårsgrunnlag)
-    }
-
-    private fun Map<LocalDate, Vilkårsgrunnlag>.vilkårsgrunnlagInfotrygd(skjæringstidspunkt: LocalDate): InfotrygdVilkårsgrunnlag {
-        return requireNotNull(this[skjæringstidspunkt] as InfotrygdVilkårsgrunnlag)
     }
 
     private fun Map<UUID, Map<LocalDate, Vilkårsgrunnlag>>.første() = this.values.first()

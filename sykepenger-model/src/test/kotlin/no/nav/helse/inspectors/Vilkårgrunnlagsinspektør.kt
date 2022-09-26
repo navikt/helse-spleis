@@ -15,6 +15,7 @@ import no.nav.helse.økonomi.Prosent
 import kotlin.properties.Delegates
 
 internal val VilkårsgrunnlagHistorikk.inspektør get() = Vilkårgrunnlagsinspektør(this)
+internal val VilkårsgrunnlagHistorikk.Innslag.inspektør get() = VilkårgrunnlagInnslagInspektør(this)
 
 internal class Vilkårgrunnlagsinspektør(historikk: VilkårsgrunnlagHistorikk) : VilkårsgrunnlagHistorikkVisitor {
     val vilkårsgrunnlagTeller = mutableMapOf<Int, Int>()
@@ -59,6 +60,44 @@ internal class Vilkårgrunnlagsinspektør(historikk: VilkårsgrunnlagHistorikk) 
     ) {
         val teller = vilkårsgrunnlagTeller.getOrDefault(innslag, 0)
         vilkårsgrunnlagTeller[innslag] = teller.inc()
+    }
+}
+
+internal class VilkårgrunnlagInnslagInspektør(innslag: VilkårsgrunnlagHistorikk.Innslag) : VilkårsgrunnlagHistorikkVisitor {
+    internal lateinit var id: UUID
+        private set
+    internal val elementer = mutableListOf<VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement>()
+
+    init {
+        innslag.accept(this)
+    }
+
+    override fun preVisitInnslag(innslag: VilkårsgrunnlagHistorikk.Innslag, id: UUID, opprettet: LocalDateTime) {
+        this.id = id
+    }
+
+    override fun preVisitGrunnlagsdata(
+        skjæringstidspunkt: LocalDate,
+        grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata,
+        sykepengegrunnlag: Sykepengegrunnlag,
+        sammenligningsgrunnlag: Sammenligningsgrunnlag,
+        avviksprosent: Prosent?,
+        opptjening: Opptjening,
+        vurdertOk: Boolean,
+        meldingsreferanseId: UUID?,
+        vilkårsgrunnlagId: UUID,
+        medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus
+    ) {
+        elementer.add(grunnlagsdata)
+    }
+
+    override fun preVisitInfotrygdVilkårsgrunnlag(
+        infotrygdVilkårsgrunnlag: VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag,
+        skjæringstidspunkt: LocalDate,
+        sykepengegrunnlag: Sykepengegrunnlag,
+        vilkårsgrunnlagId: UUID
+    ) {
+        elementer.add(infotrygdVilkårsgrunnlag)
     }
 }
 

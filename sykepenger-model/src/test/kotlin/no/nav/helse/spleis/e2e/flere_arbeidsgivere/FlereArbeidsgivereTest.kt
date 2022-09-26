@@ -22,7 +22,17 @@ import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.oktober
 import no.nav.helse.person.Inntektskilde
-import no.nav.helse.person.TilstandType.*
+import no.nav.helse.person.TilstandType.AVSLUTTET
+import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
+import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
+import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
+import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
+import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
+import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
+import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
+import no.nav.helse.person.TilstandType.START
+import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.spleis.e2e.grunnlag
 import no.nav.helse.spleis.e2e.repeat
@@ -34,6 +44,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -377,7 +388,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
     }
 
     @Test
-    fun `Tillater ikke førstegangsbehandling av flere arbeidsgivere der inntekt i inntektsmelding ikke er på samme dato - hvis datoene er i forskjellig måned`() {
+    fun `Tillater førstegangsbehandling av ag2 dersom inntektsmelding ikke er i samme måned som skjæringstidspunkt - uten skatteinntekter for ag2`() {
         val periode = 31.desember(2020) til 31.januar(2021)
         a1 { håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent)) }
         a2 { håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent)) }
@@ -415,10 +426,73 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
                 }
             ))
             håndterYtelser(1.vedtaksperiode)
-            assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING)
 
         }
-        a2 { assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD) }
+        a2 { assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE) }
+
+        inspiser(personInspektør).also { inspektør ->
+            val vilkårsgrunnlagInnslag = inspektør.vilkårsgrunnlagHistorikkInnslag()
+            assertEquals(1, vilkårsgrunnlagInnslag.size)
+            vilkårsgrunnlagInnslag.single().id
+        }
+    }
+
+    @Test
+    fun `Tillater førstegangsbehandling av ag2 dersom inntektsmelding ikke er i samme måned som skjæringstidspunkt - med skatteinntekter for ag2`() {
+        val periode = 31.desember(2020) til 31.januar(2021)
+        a1 { håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent)) }
+        a2 { håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent)) }
+        a1 {
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent))
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
+            håndterUtbetalingshistorikk(1.vedtaksperiode, inntektshistorikk = emptyList())
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
+        }
+        a2 { håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent)) }
+        a1 { assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK) }
+        a2 { assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK) }
+        a1 {
+            håndterInntektsmelding(listOf(31.desember(2020) til 15.januar(2021))
+            )
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+        }
+        a2 {
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
+            håndterInntektsmelding(
+                arbeidsgiverperioder = listOf(1.januar(2021) til 3.januar(2021), 6.januar(2021) til 18.januar(2021)),
+                beregnetInntekt = 1000.månedlig
+            )
+        }
+        a1 { assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK) }
+        a2 { assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE) }
+        a1 {
+            håndterYtelser(1.vedtaksperiode)
+            håndterVilkårsgrunnlag(
+                1.vedtaksperiode,
+                inntektsvurdering = Inntektsvurdering(
+                    inntekter = inntektperioderForSammenligningsgrunnlag {
+                        1.januar(2020) til 1.desember(2020) inntekter {
+                            a1 inntekt TestPerson.INNTEKT
+                            a2 inntekt 1000.månedlig
+                        }
+                    }
+                ),
+                inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
+                    inntekter = inntektperioderForSykepengegrunnlag {
+                        1.oktober(2020) til 1.desember(2020) inntekter {
+                            a1 inntekt TestPerson.INNTEKT
+                            a2 inntekt 1000.månedlig
+                        }
+                    },
+                    arbeidsforhold = emptyList()
+                )
+            )
+            håndterYtelser(1.vedtaksperiode)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING)
+
+        }
+        a2 { assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE) }
     }
 
     @Test

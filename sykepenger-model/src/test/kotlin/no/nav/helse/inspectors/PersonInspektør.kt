@@ -40,7 +40,7 @@ internal class PersonInspektør(person: Person): PersonVisitor {
     private val arbeidsgivere = mutableMapOf<String, Arbeidsgiver>()
     private val infotrygdelementerLagretInntekt = mutableListOf<Boolean>()
     private val grunnlagsdata = mutableListOf<Pair<LocalDate,VilkårsgrunnlagHistorikk.Grunnlagsdata>>()
-    private val vilkårsgrunnlagHistorikkInnslag: MutableList<TestArbeidsgiverInspektør.InnslagId> = mutableListOf()
+    private val vilkårsgrunnlagHistorikkInnslag: MutableList<VilkårsgrunnlagHistorikk.Innslag> = mutableListOf()
 
     init {
         person.accept(this)
@@ -57,7 +57,7 @@ internal class PersonInspektør(person: Person): PersonVisitor {
     internal fun harArbeidsgiver(organisasjonsnummer: String) = organisasjonsnummer in arbeidsgivere.keys
     internal fun grunnlagsdata(indeks: Int) = grunnlagsdata[indeks].second
     internal fun grunnlagsdata(skjæringstidspunkt: LocalDate) = grunnlagsdata.firstOrNull { it.first == skjæringstidspunkt }?.second ?: fail("Fant ikke grunnlagsdata på skjæringstidspunkt $skjæringstidspunkt")
-    internal fun vilkårsgrunnlagHistorikkInnslag() = vilkårsgrunnlagHistorikkInnslag.sortedByDescending { it.timestamp }.toList()
+    internal fun vilkårsgrunnlagHistorikkInnslag() = vilkårsgrunnlagHistorikkInnslag.toList()
 
     internal fun antallGrunnlagsdata() = grunnlagsdata.size
 
@@ -100,7 +100,7 @@ internal class PersonInspektør(person: Person): PersonVisitor {
     }
 
     override fun preVisitInnslag(innslag: VilkårsgrunnlagHistorikk.Innslag, id: UUID, opprettet: LocalDateTime) {
-        vilkårsgrunnlagHistorikkInnslag.add(TestArbeidsgiverInspektør.InnslagId(id, opprettet))
+        vilkårsgrunnlagHistorikkInnslag.add(innslag)
     }
 
     override fun preVisitInfotrygdhistorikkElement(
