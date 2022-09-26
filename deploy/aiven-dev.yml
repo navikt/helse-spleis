@@ -199,3 +199,6 @@ spec:
         - team: tbd
           application: speaker
           access: readwrite
+        - team: tbd
+          application: sondre-halvorsen
+          access: read
