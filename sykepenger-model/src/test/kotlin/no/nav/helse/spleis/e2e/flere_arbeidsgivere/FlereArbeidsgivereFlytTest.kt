@@ -554,6 +554,36 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
         )
     }
 
+    @Test
+    fun `To arbeidsgivere, skjæringstidspunkt i måneden før ag2, ag2 sin forlengelse skal ikke vente på inntektsmelding etter inntektsmelding er mottatt`() {
+        val periode1 = 31.januar til 20.februar
+        val periode2 = 1.februar til 17.februar
+        val periode3 = 18.februar til 25.februar
+        håndterSykmelding(Sykmeldingsperiode(periode1.start, periode1.endInclusive, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(periode1.start, periode1.endInclusive, 100.prosent), orgnummer = a1)
+        håndterUtbetalingshistorikk(1.vedtaksperiode, orgnummer = a1)
+
+        håndterSykmelding(Sykmeldingsperiode(periode2.start, periode2.endInclusive, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(periode2.start, periode2.endInclusive, 100.prosent), orgnummer = a2)
+
+        håndterInntektsmelding(
+            listOf(31.januar til 15.februar),
+            førsteFraværsdag = 31.januar,
+            orgnummer = a1
+        )
+        håndterInntektsmelding(
+            listOf(1.februar til 16.februar),
+            førsteFraværsdag = 1.februar,
+            orgnummer = a2
+        )
+        håndterSykmelding(Sykmeldingsperiode(periode3.start, periode3.endInclusive, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(periode3.start, periode3.endInclusive, 100.prosent), orgnummer = a2)
+
+        assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a1)
+        assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
+    }
+
     @Disabled
     @Test
     fun `forlengelse av sykdom hos AG2 hvor sykdom startet hos AG1 en annen mnd enn skjæringstidspunkt, vedtaksperiode 2 for AG2 skal ikke vente på IM`() {
