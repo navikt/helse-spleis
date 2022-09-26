@@ -43,6 +43,7 @@ import no.nav.helse.spleis.e2e.forlengTilGodkjenning
 import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.grunnlag
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
+import no.nav.helse.spleis.e2e.håndterOverstyrInntekt
 import no.nav.helse.spleis.e2e.håndterPåminnelse
 import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSykmelding
@@ -433,7 +434,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `En arbeidsgiver uten sykdom, blir syk i forlengelsen - skal vente på inntektsmelding før den går til AvventerTidligereEllerOverlappendePerioder`() {
+    fun `En arbeidsgiver uten sykdom, blir syk i forlengelsen - skal vente på inntektsmelding`() {
         val periode1 = 1.januar(2021) til 31.januar(2021)
         val periode2 = 1.februar(2021) til 28.februar(2021)
         håndterSykmelding(Sykmeldingsperiode(periode1.start, periode1.endInclusive, 100.prosent), orgnummer = a1)
@@ -485,6 +486,72 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
             orgnummer = a2
         )
         assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
+    }
+
+    @Test
+    fun `En arbeidsgiver uten sykdom, blir syk i forlengelsen - skal vente på inntektsmelding selv om saksbehandler har overstyrt ghostinntekten`() {
+        val periode1 = 1.januar til 31.januar
+        val periode2 = 1.februar til 28.februar
+        håndterSykmelding(Sykmeldingsperiode(periode1.start, periode1.endInclusive, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(periode1.start, periode1.endInclusive, 100.prosent), orgnummer = a1)
+        håndterUtbetalingshistorikk(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a1)
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            førsteFraværsdag = 1.januar,
+            orgnummer = a1
+        )
+        håndterYtelser(1.vedtaksperiode, inntektshistorikk = emptyList(), orgnummer = a1)
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode,
+            orgnummer = a1,
+            inntektsvurdering = Inntektsvurdering(
+                inntekter = inntektperioderForSammenligningsgrunnlag {
+                    1.januar(2017) til 1.desember(2017) inntekter {
+                        a1 inntekt INNTEKT
+                        a2 inntekt 1000.månedlig
+                    }
+                }
+            ),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
+                listOf(
+                    grunnlag(a1, 1.januar, INNTEKT.repeat(3)),
+                    grunnlag(a2, 1.januar, 1000.månedlig.repeat(3))
+                ), arbeidsforhold = emptyList()
+            ),
+            arbeidsforhold = listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null),
+                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null)
+            )
+        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterOverstyrInntekt(1200.månedlig, orgnummer = a2, skjæringstidspunkt = 1.januar)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
+
+
+        håndterSykmelding(Sykmeldingsperiode(periode2.start, periode2.endInclusive, 100.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(periode2.start, periode2.endInclusive, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(periode2.start, periode2.endInclusive, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(periode2.start, periode2.endInclusive, 100.prosent), orgnummer = a2)
+
+        assertForventetFeil(
+            forklaring = "https://trello.com/c/M40xy4t3",
+            nå = {
+                assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
+            },
+            ønsket = {
+                assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, orgnummer = a2)
+                håndterInntektsmelding(
+                    listOf(1.februar til 16.februar),
+                    førsteFraværsdag = 1.februar,
+                    orgnummer = a2
+                )
+                assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
+            }
+        )
     }
 
     @Disabled
