@@ -1001,7 +1001,8 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
             val harSenereUtbetalinger = vedtaksperiode.person.vedtaksperioder(NYERE_SKJÆRINGSTIDSPUNKT_MED_UTBETALING(vedtaksperiode)).isNotEmpty()
-            if(Toggle.RevurderOutOfOrder.enabled && harSenereUtbetalinger) {
+            val harSenereAUU = vedtaksperiode.person.vedtaksperioder(NYERE_SKJÆRINGSTIDSPUNKT_UTEN_UTBETALING(vedtaksperiode)).isNotEmpty()
+            if (Toggle.RevurderOutOfOrder.enabled && (harSenereUtbetalinger || harSenereAUU)) {
                 søknad.varsel("Det er behandlet en søknad i Speil for en senere periode enn denne.")
             }
             vedtaksperiode.håndterSøknad(søknad) {
@@ -2484,6 +2485,13 @@ internal class Vedtaksperiode private constructor(
             val skjæringstidspunkt = segSelv.skjæringstidspunkt
             { vedtaksperiode: Vedtaksperiode ->
                 vedtaksperiode.utbetalinger.erAvsluttet() && vedtaksperiode.skjæringstidspunkt > skjæringstidspunkt && vedtaksperiode.skjæringstidspunkt > segSelv.periode.endInclusive
+            }
+        }
+
+        internal val NYERE_SKJÆRINGSTIDSPUNKT_UTEN_UTBETALING = { segSelv: Vedtaksperiode ->
+            val skjæringstidspunkt = segSelv.skjæringstidspunkt
+            { vedtaksperiode: Vedtaksperiode ->
+                vedtaksperiode.tilstand == AvsluttetUtenUtbetaling && vedtaksperiode.skjæringstidspunkt > skjæringstidspunkt && vedtaksperiode.skjæringstidspunkt > segSelv.periode.endInclusive
             }
         }
 

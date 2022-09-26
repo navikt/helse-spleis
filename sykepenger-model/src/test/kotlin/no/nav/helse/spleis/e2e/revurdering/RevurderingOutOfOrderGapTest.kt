@@ -711,22 +711,6 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Trekker korte perioder som feilaktig har havnet i revurderingsløypa tilbake til AUU`() {
-        nyPeriode(1.mars til 10.mars)
-        håndterUtbetalingshistorikk(1.vedtaksperiode)
-        nyPeriode(11.mars til 16.mars)
-        håndterUtbetalingshistorikk(2.vedtaksperiode)
-
-        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-
-        nyttVedtak(1.januar, 31.januar)
-
-        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-    }
-
-    @Test
     fun `Korte perioder skal ikke revurderes dersom de forblir innenfor AGP`() {
         nyPeriode(1.mars til 10.mars)
         håndterUtbetalingshistorikk(1.vedtaksperiode)
@@ -740,6 +724,20 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
 
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+
+        assertVarsel("Det er behandlet en søknad i Speil for en senere periode enn denne.", 3.vedtaksperiode.filter())
+
+        assertForventetFeil(
+            forklaring = "AUU skal ikke revurderes",
+            nå = {
+                assertVarsel("Saken må revurderes fordi det har blitt behandlet en tidligere periode som kan ha betydning.", 2.vedtaksperiode.filter())
+                assertVarsel("Saken må revurderes fordi det har blitt behandlet en tidligere periode som kan ha betydning.", 1.vedtaksperiode.filter())
+            },
+            ønsket = {
+                assertIngenVarsel("Saken må revurderes fordi det har blitt behandlet en tidligere periode som kan ha betydning.", 2.vedtaksperiode.filter())
+                assertIngenVarsel("Saken må revurderes fordi det har blitt behandlet en tidligere periode som kan ha betydning.", 1.vedtaksperiode.filter())
+            }
+        )
     }
 
     @Test
