@@ -20,6 +20,7 @@ import no.nav.helse.januar
 import no.nav.helse.juni
 import no.nav.helse.mai
 import no.nav.helse.mars
+import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -111,7 +112,6 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
             subset = 5.februar til 10.februar
         )
     }
-
     @Test
     fun `out of order periode trigger revurdering`() {
         nyttVedtak(1.mai, 31.mai)
@@ -709,5 +709,64 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
 
         nyPeriode(1.januar til 25.januar)
         assertSisteTilstand(2.vedtaksperiode, TIL_INFOTRYGD)
+    }
+
+    @Test
+    fun `Trekker korte perioder som feilaktig har havnet i revurderingsløypa tilbake til AUU`() {
+        nyPeriode(1.mars til 10.mars)
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+        nyPeriode(11.mars til 16.mars)
+        håndterUtbetalingshistorikk(2.vedtaksperiode)
+
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+
+        nyttVedtak(1.januar, 31.januar)
+
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING)
+
+        håndterYtelser(2.vedtaksperiode)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+    }
+
+    @Test
+    fun `Out of order gjør at AUU revurderes fordi de ikke lenger er innen AGP - ber om inntektsmelding`() {
+        nyPeriode(1.mars til 10.mars)
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+        nyPeriode(11.mars til 16.mars)
+        håndterUtbetalingshistorikk(2.vedtaksperiode)
+
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+
+        nyttVedtak(1.februar, 25.februar)
+
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_REVURDERING)
+
+        assertForventetFeil(
+            forklaring = "Burde si omgivelsene at vi trenger inntektsmelding",
+            nå = {
+                assertEquals(1, observatør.manglendeInntektsmeldingVedtaksperioder.size) // februar-perioden
+            },
+            ønsket = {
+                assertEquals(2, observatør.manglendeInntektsmeldingVedtaksperioder.size) // først i februar, så i mars
+            }
+        )
+        håndterInntektsmelding(listOf(1.februar til 16.februar), førsteFraværsdag = 1.mars)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING)
+
+        håndterYtelser(2.vedtaksperiode)
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt()
+
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
     }
 }

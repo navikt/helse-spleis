@@ -1149,6 +1149,9 @@ internal class Vedtaksperiode private constructor(
                 hendelse.info("Går til revurdering feilet fordi revurdering er avvist")
                 return vedtaksperiode.tilstand(hendelse, RevurderingFeilet)
             }
+            if (!vedtaksperiode.utbetalinger.harUtbetaling() && !vedtaksperiode.forventerInntekt()) {
+                return vedtaksperiode.tilstand(hendelse, AvsluttetUtenUtbetaling)
+            }
             hendelse.info("Går til avsluttet fordi revurdering er fullført via en annen vedtaksperiode")
             vedtaksperiode.tilstand(hendelse, Avsluttet)
         }
