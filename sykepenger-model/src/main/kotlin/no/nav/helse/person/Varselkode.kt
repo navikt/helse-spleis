@@ -4,7 +4,11 @@ package no.nav.helse.person
 internal const val varselkodeformat = "RV_\\D{2}_\\d{1,3}"
 private val regex = "^$varselkodeformat$".toRegex()
 
-enum class Varselkode(private val melding: String, private val avviklet: Boolean = false) {
+enum class Varselkode(
+    private val varseltekst: String,
+    private val funksjonellFeilTekst: String = varseltekst,
+    private val avviklet: Boolean = false
+) {
 
     // SØ: Søknad
     RV_SØ_1("Søknaden inneholder permittering. Vurder om permittering har konsekvens for rett til sykepenger"),
@@ -53,7 +57,7 @@ enum class Varselkode(private val melding: String, private val avviklet: Boolean
 
     // IV: Inntektsvurdering
     RV_IV_1("Bruker har flere inntektskilder de siste tre månedene enn arbeidsforhold som er oppdaget i Aa-registeret."),
-    RV_IV_2("Har mer enn 25 % avvik. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene."),
+    RV_IV_2("Har mer enn 25 % avvik. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene.", funksjonellFeilTekst = "Har mer enn 25 % avvik"),
 
     // SV: Sykepengegrunnlagsvurdering
     RV_SV_1("Perioden er avslått på grunn av at inntekt er under krav til minste sykepengegrunnlag"),
@@ -90,11 +94,11 @@ enum class Varselkode(private val melding: String, private val avviklet: Boolean
     }
 
     internal fun varsel(kontekster: List<SpesifikkKontekst>): Aktivitetslogg.Aktivitet.Varsel =
-        Aktivitetslogg.Aktivitet.Varsel.opprett(kontekster, this, melding)
+        Aktivitetslogg.Aktivitet.Varsel.opprett(kontekster, this, varseltekst)
     internal fun funksjonellFeil(kontekster: List<SpesifikkKontekst>): Aktivitetslogg.Aktivitet.FunksjonellFeil =
-        Aktivitetslogg.Aktivitet.FunksjonellFeil.opprett(kontekster, melding)
+        Aktivitetslogg.Aktivitet.FunksjonellFeil.opprett(kontekster, funksjonellFeilTekst)
 
-    override fun toString() = "${this.name}: $melding"
+    override fun toString() = "${this.name}: $varseltekst"
 
     internal companion object {
         internal val aktiveVarselkoder = values().filterNot { it.avviklet }

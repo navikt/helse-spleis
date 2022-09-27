@@ -20,13 +20,14 @@ import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.person.Varselkode.RV_IV_2
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
-import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
-import no.nav.helse.spleis.e2e.assertInntektForDato
+import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertIngenVarsel
+import no.nav.helse.spleis.e2e.assertInntektForDato
 import no.nav.helse.spleis.e2e.assertLogiskFeil
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
@@ -194,12 +195,12 @@ internal class OverstyrGhostInntektTest : AbstractEndToEndTest() {
         assertForventetFeil(
             forklaring = "Burde ha enten warning eller error, https://trello.com/c/gk0F7acS",
             nå = {
-                assertVarsel("Har mer enn 25 % avvik. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene.")
+                assertVarsel(RV_IV_2)
                 assertFunksjonellFeil("Har mer enn 25 % avvik")
             },
             ønsket = {
                 // Eller omvendt om det er det vi ønsker å gå for
-                assertIngenVarsel("Har mer enn 25 % avvik. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene.")
+                assertIngenVarsel(RV_IV_2)
                 assertFunksjonellFeil("Har mer enn 25 % avvik")
             }
         )

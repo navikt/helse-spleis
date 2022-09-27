@@ -57,6 +57,7 @@ import no.nav.helse.person.Arbeidsgiver.Companion.startRevurdering
 import no.nav.helse.person.Arbeidsgiver.Companion.validerVilkårsgrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.validerYtelserForSkjæringstidspunkt
 import no.nav.helse.person.Arbeidsgiver.Companion.vedtaksperioder
+import no.nav.helse.person.Varselkode.RV_IV_2
 import no.nav.helse.person.Varselkode.RV_OV_1
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.etterlevelse.MaskinellJurist
@@ -873,14 +874,16 @@ class Person private constructor(
     internal fun vilkårsprøvEtterNyInformasjonFraSaksbehandler(
         hendelse: PersonHendelse,
         skjæringstidspunkt: LocalDate,
-        subsumsjonObserver: SubsumsjonObserver
-    , forklaring: String?, subsumsjon: Subsumsjon?) {
+        subsumsjonObserver: SubsumsjonObserver,
+        forklaring: String?,
+        subsumsjon: Subsumsjon?
+    ) {
 
         val sykepengegrunnlag = beregnSykepengegrunnlag(skjæringstidspunkt, subsumsjonObserver, forklaring, subsumsjon)
         val sammenligningsgrunnlag = beregnSammenligningsgrunnlag(skjæringstidspunkt, subsumsjonObserver)
         val avviksprosent = sammenligningsgrunnlag.avviksprosent(sykepengegrunnlag, subsumsjonObserver)
 
-        val harAkseptabeltAvvik = Inntektsvurdering.sjekkAvvik(avviksprosent, hendelse, IAktivitetslogg::varsel, "Har mer enn 25 % avvik. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene.")
+        val harAkseptabeltAvvik = Inntektsvurdering.sjekkAvvik(avviksprosent, hendelse, IAktivitetslogg::varsel, RV_IV_2)
 
         val opptjening = beregnOpptjening(skjæringstidspunkt, subsumsjonObserver)
         if (!opptjening.erOppfylt()) hendelse.varsel(RV_OV_1)

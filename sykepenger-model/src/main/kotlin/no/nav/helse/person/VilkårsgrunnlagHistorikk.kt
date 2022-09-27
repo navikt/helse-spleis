@@ -10,6 +10,7 @@ import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.OverstyrInntekt
 import no.nav.helse.hendelser.til
 import no.nav.helse.mai
+import no.nav.helse.person.Varselkode.RV_IV_2
 import no.nav.helse.person.Varselkode.RV_VV_3
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
@@ -310,7 +311,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
         override fun sjekkAvviksprosent(aktivitetslogg: IAktivitetslogg): Boolean {
             if (avviksprosent == null) return true
-            return Inntektsvurdering.sjekkAvvik(avviksprosent, aktivitetslogg, IAktivitetslogg::funksjonellFeil, "Har mer enn 25 % avvik")
+            return Inntektsvurdering.sjekkAvvik(avviksprosent, aktivitetslogg, IAktivitetslogg::funksjonellFeil, RV_IV_2)
         }
 
         override fun accept(vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor) {
