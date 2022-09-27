@@ -667,6 +667,17 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
     }
 
     @Test
+    fun `varsel - Utbetaling av revurdert periode ble avvist av saksbehandler - Utbetalingen må annulleres`() {
+        nyttVedtak(1.januar, 31.januar)
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Dagtype.Feriedag)))
+        håndterYtelser()
+        håndterSimulering()
+        håndterUtbetalingsgodkjenning(utbetalingGodkjent = false)
+
+        assertVarsel(RV_UT_1)
+    }
+
+    @Test
     fun `varsel - Utbetaling av revurdert periode ble avvist av saksbehandler, Utbetalingen må annulleres`() {
         nyttVedtak(1.januar, 31.januar)
 

@@ -11,8 +11,6 @@ import no.nav.helse.person.Varselkode.RV_AY_2
 import no.nav.helse.person.Varselkode.RV_OS_1
 import no.nav.helse.person.Varselkode.RV_OS_2
 import no.nav.helse.person.Varselkode.RV_OS_3
-import no.nav.helse.person.Varselkode.RV_RV_1
-import no.nav.helse.person.Varselkode.RV_UT_1
 import no.nav.helse.person.Varselkode.RV_UT_2
 import no.nav.helse.person.Varselkode.RV_VV_3
 import no.nav.helse.person.Varselkode.RV_VV_5
