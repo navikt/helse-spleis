@@ -22,6 +22,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.Varselkode
 import no.nav.helse.person.Varselkode.RV_AY_3
 import no.nav.helse.person.Varselkode.RV_AY_4
+import no.nav.helse.person.Varselkode.RV_AY_5
 import no.nav.helse.person.Varselkode.RV_IM_1
 import no.nav.helse.person.Varselkode.RV_IM_2
 import no.nav.helse.person.Varselkode.RV_IM_3
@@ -566,5 +567,14 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, orgnummer = a1, dagpenger = listOf(1.desember(2017) til 15.desember(2017)))
 
         assertVarsel(RV_AY_4)
+    }
+
+    @Test
+    fun `varsel - Det er mottatt foreldrepenger i samme periode`() {
+        nyttVedtak(1.januar, 31.januar)
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Dagtype.Feriedag)))
+        håndterYtelser(1.vedtaksperiode, foreldrepenger = 1.januar til 31.januar)
+
+        assertVarsel(RV_AY_5)
     }
 }

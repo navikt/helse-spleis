@@ -29,6 +29,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.Varselkode.RV_AY_5
 import no.nav.helse.person.Varselkode.RV_VV_4
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
@@ -815,7 +816,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
             foreldrepenger = 1.januar til 10.januar
         )
 
-        assertVarsel("Det er utbetalt foreldrepenger i samme periode.")
+        assertVarsel(RV_AY_5)
         assertIngenFunksjonelleFeil()
     }
 
@@ -861,7 +862,7 @@ internal class RevurderingV2E2ETest : AbstractEndToEndTest() {
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING)
         assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
-        assertVarsel("Det er utbetalt foreldrepenger i samme periode.", 2.vedtaksperiode.filter())
+        assertVarsel(RV_AY_5, 2.vedtaksperiode.filter())
     }
 
     @Test

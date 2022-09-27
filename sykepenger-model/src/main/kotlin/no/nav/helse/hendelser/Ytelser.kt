@@ -6,6 +6,7 @@ import java.util.UUID
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.Person
+import no.nav.helse.person.Varselkode.RV_AY_5
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 
@@ -44,7 +45,7 @@ class Ytelser(
     internal fun valider(periode: Periode, skjæringstidspunkt: LocalDate): Boolean {
         arbeidsavklaringspenger.valider(this, skjæringstidspunkt)
         dagpenger.valider(this, skjæringstidspunkt)
-        if (foreldrepermisjon.overlapper(this, periode)) funksjonellFeil("Det er utbetalt foreldrepenger i samme periode.")
+        if (foreldrepermisjon.overlapper(this, periode)) funksjonellFeil(RV_AY_5)
         if (pleiepenger.overlapper(this, periode)) funksjonellFeil("Det er utbetalt pleiepenger i samme periode.")
         if (omsorgspenger.overlapper(this, periode)) funksjonellFeil("Det er utbetalt omsorgspenger i samme periode.")
         if (opplæringspenger.overlapper(this, periode)) funksjonellFeil("Det er utbetalt opplæringspenger i samme periode.")

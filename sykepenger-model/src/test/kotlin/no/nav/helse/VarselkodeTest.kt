@@ -8,7 +8,6 @@ import no.nav.helse.person.AktivitetsloggTest
 import no.nav.helse.person.Varselkode
 import no.nav.helse.person.Varselkode.RV_AY_1
 import no.nav.helse.person.Varselkode.RV_AY_2
-import no.nav.helse.person.Varselkode.RV_AY_5
 import no.nav.helse.person.Varselkode.RV_AY_6
 import no.nav.helse.person.Varselkode.RV_AY_7
 import no.nav.helse.person.Varselkode.RV_AY_8
@@ -38,7 +37,7 @@ internal class VarselkodeTest {
 
         val varselkoderSomKjentManglerTest = listOf(
             RV_VV_3, RV_VV_5, RV_AY_1, RV_AY_2,
-            RV_AY_5, RV_AY_6, RV_AY_7, RV_AY_8, RV_AY_9, RV_UT_1, RV_UT_2, RV_OS_1,
+            RV_AY_6, RV_AY_7, RV_AY_8, RV_AY_9, RV_UT_1, RV_UT_2, RV_OS_1,
             RV_OS_2, RV_OS_3
         )
 
