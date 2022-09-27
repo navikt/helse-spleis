@@ -8,6 +8,7 @@ import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsvurdering
+import no.nav.helse.hendelser.Institusjonsopphold
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.OverstyrArbeidsforhold.ArbeidsforholdOverstyrt
@@ -26,6 +27,7 @@ import no.nav.helse.person.Varselkode.RV_AY_5
 import no.nav.helse.person.Varselkode.RV_AY_6
 import no.nav.helse.person.Varselkode.RV_AY_7
 import no.nav.helse.person.Varselkode.RV_AY_8
+import no.nav.helse.person.Varselkode.RV_AY_9
 import no.nav.helse.person.Varselkode.RV_IM_1
 import no.nav.helse.person.Varselkode.RV_IM_2
 import no.nav.helse.person.Varselkode.RV_IM_3
@@ -606,5 +608,14 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, opplæringspenger = listOf(1.januar til 31.januar))
 
         assertVarsel(RV_AY_8)
+    }
+
+    @Test
+    fun `varsel - Det er institusjonsopphold i perioden - Vurder retten til sykepenger`() {
+        nyttVedtak(1.januar, 31.januar)
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Dagtype.Feriedag)))
+        håndterYtelser(1.vedtaksperiode, institusjonsoppholdsperioder = listOf(Institusjonsopphold.Institusjonsoppholdsperiode(1.januar, 31.januar)))
+
+        assertVarsel(RV_AY_9)
     }
 }
