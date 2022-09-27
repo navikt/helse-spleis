@@ -5,6 +5,7 @@ import no.nav.helse.august
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.TestPerson
+import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
 import no.nav.helse.dsl.nyPeriode
 import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.februar
@@ -13,7 +14,7 @@ import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.Søknad
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -86,7 +87,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         }
         a1 {
-            håndterSøknad(Søknad.Søknadsperiode.Sykdom(15.januar, 31.januar, 100.prosent))
+            håndterSøknad(Sykdom(15.januar, 31.januar, 100.prosent))
             håndterInntektsmelding(listOf(1.januar til 16.januar))
             håndterYtelser(2.vedtaksperiode)
             håndterVilkårsgrunnlag(2.vedtaksperiode)
@@ -256,13 +257,13 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         a2 { håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent)) }
 
         a1 {
-            håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent))
+            håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent))
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
             håndterUtbetalingshistorikk(1.vedtaksperiode)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
         }
 
-        a2 { håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent)) }
+        a2 { håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent)) }
         a1 { assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK) }
         a2 { assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK) }
 
@@ -339,20 +340,76 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
     }
 
     @Test
+    fun `bruddstykker hos arbeidsgivere skal ikke medføre at alle perioder må ha inntekt`() {
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar, 100.prosent))
+            håndterSykmelding(Sykmeldingsperiode(25.januar, 10.februar, 100.prosent))
+        }
+        a2 {
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+            håndterSykmelding(Sykmeldingsperiode(5.februar, 15.februar, 100.prosent))
+        }
+
+        a1 {
+            håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent))
+            håndterUtbetalingshistorikk(1.vedtaksperiode)
+        }
+        a2 {
+            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        }
+        a1 {
+            håndterInntektsmelding(
+                arbeidsgiverperioder = listOf(1.januar til 16.januar),
+                beregnetInntekt = INNTEKT
+            )
+            håndterSøknad(Sykdom(25.januar, 10.februar, 100.prosent))
+        }
+        a2 {
+            håndterInntektsmelding(
+                arbeidsgiverperioder = listOf(1.januar til 16.januar),
+                beregnetInntekt = INNTEKT
+            )
+            håndterSøknad(Sykdom(5.februar, 15.februar, 100.prosent))
+        }
+
+        assertForventetFeil(
+            nå = {
+                a1 {
+                    assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
+                    assertTilstander(2.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE)
+                }
+                a2 {
+                    assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+                }
+            },
+            ønsket = {
+                a1 {
+                    assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
+                    assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
+                }
+                a2 {
+                    assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+                    assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
+                }
+            }
+        )
+    }
+
+    @Test
     fun `Tillater førstegangsbehandling av flere arbeidsgivere der inntekt i inntektsmelding ikke er på samme dato - så lenge de er i samme måned`() {
         val periode = 1.januar(2021) til 31.januar(2021)
         a1 { håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent)) }
         a2 { håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent)) }
 
         a1 {
-            håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent))
+            håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent))
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
             håndterUtbetalingshistorikk(1.vedtaksperiode)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
         }
 
         a2 {
-            håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent))
+            håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent))
         }
         a1 { assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK) }
         a2 { assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK) }
@@ -393,12 +450,12 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         a1 { håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent)) }
         a2 { håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent)) }
         a1 {
-            håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent))
+            håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent))
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
             håndterUtbetalingshistorikk(1.vedtaksperiode, inntektshistorikk = emptyList())
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
         }
-        a2 { håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent)) }
+        a2 { håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent)) }
         a1 { assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK) }
         a2 { assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK) }
         a1 {
@@ -444,12 +501,12 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         a1 { håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent)) }
         a2 { håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent)) }
         a1 {
-            håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent))
+            håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent))
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
             håndterUtbetalingshistorikk(1.vedtaksperiode, inntektshistorikk = emptyList())
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
         }
-        a2 { håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent)) }
+        a2 { håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent)) }
         a1 { assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK) }
         a2 { assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK) }
         a1 {
@@ -605,10 +662,10 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         a1 { håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent)) }
         a2 { håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent)) }
         a1 {
-            håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent))
+            håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent))
             håndterUtbetalingshistorikk(1.vedtaksperiode)
         }
-        a2 { håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent)) }
+        a2 { håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent)) }
         a1 { håndterInntektsmelding(listOf(1.januar(2021) til 16.januar(2021))) }
         a2 { håndterInntektsmelding(listOf(1.januar(2021) til 16.januar(2021))) }
         a1 {
@@ -783,7 +840,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         a2 { håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent)) }
         a1 {
             val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar))
-            håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
             håndterInntektsmeldingReplay(inntektsmeldingId, 1.vedtaksperiode)
             assertTilstander(
                 1.vedtaksperiode,
@@ -800,11 +857,11 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         a1 { håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent)) }
         a2 { håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent)) }
         a1 {
-            håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
             håndterInntektsmelding(listOf(1.januar til 16.januar))
         }
         a2 {
-            håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
             håndterInntektsmelding(listOf(1.januar til 16.januar))
         }
         a1 {
@@ -832,8 +889,8 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
     fun `Skal ikke ha noen avviste dager ved ulik startdato selv om arbeidsgiverperiodedag og navdag overlapper og begge har sykdomsgrad på 20 prosent eller høyere`() {
         a1 { håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 20.prosent)) }
         a2 { håndterSykmelding(Sykmeldingsperiode(17.januar, 16.februar, 20.prosent)) }
-        a1 { håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 20.prosent)) }
-        a2 { håndterSøknad(Søknad.Søknadsperiode.Sykdom(17.januar, 16.februar, 20.prosent)) }
+        a1 { håndterSøknad(Sykdom(1.januar, 31.januar, 20.prosent)) }
+        a2 { håndterSøknad(Sykdom(17.januar, 16.februar, 20.prosent)) }
         a1 { håndterInntektsmelding(listOf(1.januar til 16.januar)) }
         a2 { håndterInntektsmelding(listOf(17.januar til 1.februar)) }
         a1 {
@@ -880,8 +937,8 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         nyPeriode(1.januar til 18.januar, a1, a2)
         a1 { håndterSykmelding(Sykmeldingsperiode(20.januar, 31.januar, 100.prosent)) }
         a2 { håndterSykmelding(Sykmeldingsperiode(22.januar, 31.januar, 100.prosent)) }
-        a1 { håndterSøknad(Søknad.Søknadsperiode.Sykdom(20.januar, 31.januar, 100.prosent)) }
-        a2 { håndterSøknad(Søknad.Søknadsperiode.Sykdom(22.januar, 31.januar, 100.prosent)) }
+        a1 { håndterSøknad(Sykdom(20.januar, 31.januar, 100.prosent)) }
+        a2 { håndterSøknad(Sykdom(22.januar, 31.januar, 100.prosent)) }
         a1 { håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 20.januar) }
         // Sender med en annen inntekt enn i forrige IM for å kunne asserte på at det er denne vi bruker
         a2 { håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 32000.månedlig, førsteFraværsdag = 22.januar) }
@@ -927,7 +984,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         a1 { nyPeriode(2.januar til 1.februar) }
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-            håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         }
         a2 {
             nyPeriode(1.januar til 31.januar)
@@ -940,13 +997,13 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         a2 { håndterSykmelding(Sykmeldingsperiode(3.januar, 18.januar, 100.prosent)) }
         a1 { håndterSykmelding(Sykmeldingsperiode(4.januar, 18.januar, 100.prosent)) }
         a2 {
-            håndterSøknad(Søknad.Søknadsperiode.Sykdom(3.januar, 18.januar, 100.prosent))
+            håndterSøknad(Sykdom(3.januar, 18.januar, 100.prosent))
             håndterUtbetalingshistorikk(1.vedtaksperiode)
         }
         a1 {
-            håndterSøknad(Søknad.Søknadsperiode.Sykdom(4.januar, 18.januar, 100.prosent))
+            håndterSøknad(Sykdom(4.januar, 18.januar, 100.prosent))
             håndterSykmelding(Sykmeldingsperiode(19.januar, 22.januar, 100.prosent))
-            håndterSøknad(Søknad.Søknadsperiode.Sykdom(19.januar, 22.januar, 100.prosent))
+            håndterSøknad(Sykdom(19.januar, 22.januar, 100.prosent))
             håndterInntektsmelding(listOf(4.januar til 19.januar))
             håndterYtelser(2.vedtaksperiode)
             håndterVilkårsgrunnlag(2.vedtaksperiode)
@@ -969,8 +1026,8 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         a1 { håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent)) }
         a2 { håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent)) }
         a3 { håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent)) }
-        a1 { håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent)) }
-        a2 { håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent)) }
+        a1 { håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent)) }
+        a2 { håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent)) }
         a1 { håndterInntektsmelding(listOf(1.januar til 16.januar)) }
         a2 { håndterInntektsmelding(listOf(1.januar til 16.januar)) }
 
@@ -995,13 +1052,13 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
     fun `forlengelse av AVSLUTTET_UTEN_UTBETALING skal ikke gå til AVVENTER_HISTORIKK ved flere arbeidsgivere om IM kommer først`() {
         a1 { håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent)) }
         a2 { håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent)) }
-        a1 { håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 16.januar, 100.prosent)) }
-        a2 { håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 16.januar, 100.prosent)) }
+        a1 { håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent)) }
+        a2 { håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent)) }
         a1 { håndterSykmelding(Sykmeldingsperiode(17.januar, 31.januar, 100.prosent)) }
         a2 { håndterSykmelding(Sykmeldingsperiode(17.januar, 31.januar, 100.prosent)) }
         a2 { håndterInntektsmelding(listOf(1.januar til 16.januar)) }
-        a1 { håndterSøknad(Søknad.Søknadsperiode.Sykdom(17.januar, 31.januar, 100.prosent)) }
-        a2 { håndterSøknad(Søknad.Søknadsperiode.Sykdom(17.januar, 31.januar, 100.prosent)) }
+        a1 { håndterSøknad(Sykdom(17.januar, 31.januar, 100.prosent)) }
+        a2 { håndterSøknad(Sykdom(17.januar, 31.januar, 100.prosent)) }
         a1 {
             assertTilstander(1.vedtaksperiode,
                 START,
@@ -1068,10 +1125,10 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         a2 {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar, 100.prosent))
             håndterSykmelding(Sykmeldingsperiode(25.januar, 31.januar, 100.prosent))
-            håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 20.januar, 100.prosent))
-            håndterSøknad(Søknad.Søknadsperiode.Sykdom(25.januar, 31.januar, 100.prosent))
+            håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent))
+            håndterSøknad(Sykdom(25.januar, 31.januar, 100.prosent))
         }
-        a1 { håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent)) }
+        a1 { håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent)) }
         a2 { håndterInntektsmelding(listOf(1.januar til 16.januar)) }
         a1 { assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK) }
         a2 {
