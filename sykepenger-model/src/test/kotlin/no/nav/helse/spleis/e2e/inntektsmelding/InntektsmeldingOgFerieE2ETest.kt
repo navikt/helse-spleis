@@ -22,6 +22,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.Varselkode.RV_IM_5
+import no.nav.helse.person.Varselkode.RV_RV_1
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertIngenVarsel
@@ -62,7 +63,7 @@ internal class InntektsmeldingOgFerieE2ETest : AbstractEndToEndTest() {
                 assertVarsel(RV_IM_5, 1.vedtaksperiode.filter(ORGNUMMER))
             }
         )
-        assertVarsel("Denne perioden var tidligere regnet som innenfor arbeidsgiverperioden", 1.vedtaksperiode.filter(ORGNUMMER))
+        assertVarsel(RV_RV_1, 1.vedtaksperiode.filter(ORGNUMMER))
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
     }
 

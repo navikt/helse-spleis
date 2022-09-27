@@ -40,9 +40,11 @@ import no.nav.helse.person.TilstandType.REVURDERING_FEILET
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
+import no.nav.helse.person.Varselkode
 import no.nav.helse.person.Varselkode.RV_IM_2
 import no.nav.helse.person.Varselkode.RV_IT_1
 import no.nav.helse.person.Varselkode.RV_IT_3
+import no.nav.helse.person.Varselkode.RV_RV_1
 import no.nav.helse.person.Varselkode.RV_IV_2
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
@@ -415,7 +417,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         håndterYtelser(2.vedtaksperiode)
 
         assertVarsel(RV_IM_2, 1.vedtaksperiode.filter(a1))
-        assertVarsel("Denne perioden var tidligere regnet som innenfor arbeidsgiverperioden", 2.vedtaksperiode.filter(a1))
+        assertVarsel(RV_RV_1, 2.vedtaksperiode.filter(a1))
         //assertNoWarnings(2.vedtaksperiode.filter(a1))
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
@@ -461,7 +463,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         håndterYtelser(3.vedtaksperiode)
 
         assertVarsel(RV_IM_2, 1.vedtaksperiode.filter(a1))
-        assertVarsel("Denne perioden var tidligere regnet som innenfor arbeidsgiverperioden", 2.vedtaksperiode.filter(a1))
+        assertVarsel(RV_RV_1, 2.vedtaksperiode.filter(a1))
         //assertNoWarnings(2.vedtaksperiode.filter(a1))
         assertIngenVarsler(3.vedtaksperiode.filter(a1))
 
@@ -520,7 +522,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         håndterYtelser(2.vedtaksperiode)
 
         assertIngenVarsler(1.vedtaksperiode.filter(a1))
-        assertVarsel("Denne perioden var tidligere regnet som innenfor arbeidsgiverperioden", 2.vedtaksperiode.filter(a1))
+        assertVarsel(RV_RV_1, 2.vedtaksperiode.filter(a1))
         // assertNoWarnings(2.vedtaksperiode.filter(a1))
         assertIngenVarsler(3.vedtaksperiode.filter(a1))
 
@@ -1089,8 +1091,8 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         val nyttVilkårsgrunnlag = inspektør.vilkårsgrunnlag(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
 
-        assertVarsler(listOf("Denne perioden var tidligere regnet som innenfor arbeidsgiverperioden"), 1.vedtaksperiode.filter(ORGNUMMER))
-        assertVarsler(listOf("Denne perioden var tidligere regnet som innenfor arbeidsgiverperioden"), 2.vedtaksperiode.filter(ORGNUMMER))
+        assertVarsel(RV_RV_1, 1.vedtaksperiode.filter(ORGNUMMER))
+        assertVarsel(RV_RV_1, 2.vedtaksperiode.filter(ORGNUMMER))
 
         assertNotNull(gammeltVilkårsgrunnlag)
         assertNotNull(nyttVilkårsgrunnlag)

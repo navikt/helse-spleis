@@ -71,6 +71,7 @@ import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.TilstandType.UTBETALING_FEILET
 import no.nav.helse.person.Varselkode.RV_IM_4
+import no.nav.helse.person.Varselkode.RV_RV_1
 import no.nav.helse.person.Varselkode.RV_SI_2
 import no.nav.helse.person.Varselkode.RV_VV_1
 import no.nav.helse.person.Varselkode.RV_VV_2
@@ -2198,7 +2199,7 @@ internal class Vedtaksperiode private constructor(
             if (!vedtaksperiode.forventerInntekt()) {
                 return hendelse.info("Revurderingen påvirker ikke denne perioden i AvsluttetUtenUtbetaling")
             }
-            hendelse.varsel("Denne perioden var tidligere regnet som innenfor arbeidsgiverperioden")
+            hendelse.varsel(RV_RV_1)
             if (!vedtaksperiode.harNødvendigInntektForVilkårsprøving() || !arbeidsgivere.harNødvendigInntekt(vedtaksperiode.skjæringstidspunkt)) return vedtaksperiode.tilstand(hendelse, AvventerRevurdering) {
                 hendelse.info("Avventer inntekt for minst én annen arbeidsgiver")
             }

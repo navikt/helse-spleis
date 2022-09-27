@@ -33,6 +33,7 @@ import no.nav.helse.person.Varselkode.RV_MV_1
 import no.nav.helse.person.Varselkode.RV_MV_2
 import no.nav.helse.person.Varselkode.RV_OV_1
 import no.nav.helse.person.Varselkode.RV_RE_1
+import no.nav.helse.person.Varselkode.RV_RV_1
 import no.nav.helse.person.Varselkode.RV_SI_1
 import no.nav.helse.person.Varselkode.RV_SV_1
 import no.nav.helse.person.Varselkode.RV_SV_2
@@ -532,5 +533,14 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
         håndterYtelser()
         assertIngenFunksjonelleFeil(1.vedtaksperiode.filter())
         assertVarsel(RV_IV_2, 1.vedtaksperiode.filter())
+    }
+
+    @Test
+    fun `varsel - Denne perioden var tidligere regnet som innenfor arbeidsgiverperioden`() {
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 16.februar, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 16.februar, 100.prosent))
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+        håndterInntektsmelding(listOf(31.januar til 15.februar))
+        assertVarsel(RV_RV_1)
     }
 }
