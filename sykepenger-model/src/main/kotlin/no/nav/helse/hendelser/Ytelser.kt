@@ -9,6 +9,7 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.Varselkode.RV_AY_5
 import no.nav.helse.person.Varselkode.RV_AY_6
 import no.nav.helse.person.Varselkode.RV_AY_7
+import no.nav.helse.person.Varselkode.RV_AY_8
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 
@@ -50,7 +51,7 @@ class Ytelser(
         if (foreldrepermisjon.overlapper(this, periode)) funksjonellFeil(RV_AY_5)
         if (pleiepenger.overlapper(this, periode)) funksjonellFeil(RV_AY_6)
         if (omsorgspenger.overlapper(this, periode)) funksjonellFeil(RV_AY_7)
-        if (opplæringspenger.overlapper(this, periode)) funksjonellFeil("Det er utbetalt opplæringspenger i samme periode.")
+        if (opplæringspenger.overlapper(this, periode)) funksjonellFeil(RV_AY_8)
         if (institusjonsopphold.overlapper(this, periode)) funksjonellFeil("Det er institusjonsopphold i perioden. Vurder retten til sykepenger.")
 
         return !harFunksjonelleFeilEllerVerre()

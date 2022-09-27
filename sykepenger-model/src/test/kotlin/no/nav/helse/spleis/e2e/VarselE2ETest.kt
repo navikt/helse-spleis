@@ -25,6 +25,7 @@ import no.nav.helse.person.Varselkode.RV_AY_4
 import no.nav.helse.person.Varselkode.RV_AY_5
 import no.nav.helse.person.Varselkode.RV_AY_6
 import no.nav.helse.person.Varselkode.RV_AY_7
+import no.nav.helse.person.Varselkode.RV_AY_8
 import no.nav.helse.person.Varselkode.RV_IM_1
 import no.nav.helse.person.Varselkode.RV_IM_2
 import no.nav.helse.person.Varselkode.RV_IM_3
@@ -596,5 +597,14 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, omsorgspenger = listOf(1.januar til 31.januar))
 
         assertVarsel(RV_AY_7)
+    }
+
+    @Test
+    fun `varsel - Det er utbetalt opplæringspenger i samme periode`() {
+        nyttVedtak(1.januar, 31.januar)
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Dagtype.Feriedag)))
+        håndterYtelser(1.vedtaksperiode, opplæringspenger = listOf(1.januar til 31.januar))
+
+        assertVarsel(RV_AY_8)
     }
 }
