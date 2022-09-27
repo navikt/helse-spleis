@@ -135,11 +135,13 @@ internal class ArbeidsgiverHendelsefabrikk(
         return inntektsmeldinggenerator()
     }
 
-    internal fun lagInntektsmeldingReplay(inntektsmeldingId: UUID, vedtaksperiodeId: UUID) =
-        InntektsmeldingReplay(
-            wrapped = inntektsmeldinger.getValue(inntektsmeldingId)(),
-            vedtaksperiodeId = vedtaksperiodeId
-        )
+    internal fun lagInntektsmeldingReplay(vedtaksperiodeId: UUID) =
+        inntektsmeldinger.map { (_, gen) ->
+            InntektsmeldingReplay(
+                wrapped = gen(),
+                vedtaksperiodeId = vedtaksperiodeId
+            )
+        }
 
     internal fun lagUtbetalingshistorikk(
         vedtaksperiodeId: UUID,

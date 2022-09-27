@@ -214,10 +214,9 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
     @Test
     fun `ingen historie med inntektsmelding, så søknad til arbeidsgiver`() {
         håndterSykmelding(Sykmeldingsperiode(3.januar, 8.januar, 100.prosent))
-        val inntektsmeldingId = håndterInntektsmelding(listOf(3.januar til 18.januar), INNTEKT)
+        håndterInntektsmelding(listOf(3.januar til 18.januar), INNTEKT)
         assertIngenVarsler()
         håndterSøknad(Sykdom(3.januar, 8.januar, 100.prosent))
-        håndterInntektsmeldingReplay(inntektsmeldingId, 1.vedtaksperiode)
         assertIngenFunksjonelleFeil(1.vedtaksperiode.filter())
         assertActivities()
         inspektør.also {

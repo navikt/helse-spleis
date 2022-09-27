@@ -149,6 +149,9 @@ internal class TestPerson(
         ) =
             vedtaksperiodesamler.fangVedtaksperiode {
                 arbeidsgiverHendelsefabrikk.lagSøknad(*perioder, andreInntektskilder = andreInntektskilder, sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver, sykmeldingSkrevet = sykmeldingSkrevet).håndter(Person::håndter)
+            }?.also { vedtaksperiodeId ->
+                if (!behovsamler.harBedtOmReplay(vedtaksperiodeId)) return@also
+                håndterInntektsmeldingReplay(vedtaksperiodeId)
             }
 
         internal fun håndterInntektsmelding(
@@ -175,10 +178,11 @@ internal class TestPerson(
             return id
         }
 
-        internal fun håndterInntektsmeldingReplay(inntektsmeldingId: UUID, vedtaksperiodeId: UUID) {
+        private fun håndterInntektsmeldingReplay(vedtaksperiodeId: UUID) {
             behovsamler.bekreftOgKvitterReplay(vedtaksperiodeId)
-            arbeidsgiverHendelsefabrikk.lagInntektsmeldingReplay(inntektsmeldingId, vedtaksperiodeId)
-                .håndter(Person::håndter)
+            arbeidsgiverHendelsefabrikk.lagInntektsmeldingReplay(vedtaksperiodeId).forEach { replay ->
+                replay.håndter(Person::håndter)
+            }
         }
 
         internal fun håndterUtbetalingshistorikk(

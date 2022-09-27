@@ -202,8 +202,6 @@ internal abstract class AbstractDslTest {
         id: UUID = UUID.randomUUID()
     ) =
         this { håndterInntektsmelding(arbeidsgiverperioder, beregnetInntekt, førsteFraværsdag, refusjon, harOpphørAvNaturalytelser, arbeidsforholdId, begrunnelseForReduksjonEllerIkkeUtbetalt, id) }
-    protected fun String.håndterInntektsmeldingReplay(inntektsmeldingId: UUID, vedtaksperiodeId: UUID) =
-        this { håndterInntektsmeldingReplay(inntektsmeldingId, vedtaksperiodeId) }
     protected fun String.håndterUtbetalingshistorikk(
         vedtaksperiodeId: UUID,
         utbetalinger: List<Infotrygdperiode> = listOf(),
@@ -312,8 +310,6 @@ internal abstract class AbstractDslTest {
         orgnummer: String = a1
     ) =
         bareÈnArbeidsgiver(a1).håndterInntektsmelding(arbeidsgiverperioder, beregnetInntekt, førsteFraværsdag, refusjon, harOpphørAvNaturalytelser, arbeidsforholdId, begrunnelseForReduksjonEllerIkkeUtbetalt, id)
-    protected fun håndterInntektsmeldingReplay(inntektsmeldingId: UUID, vedtaksperiodeId: UUID) =
-        bareÈnArbeidsgiver(a1).håndterInntektsmeldingReplay(inntektsmeldingId, vedtaksperiodeId)
 
     internal fun håndterUtbetalingshistorikk(
         vedtaksperiodeId: UUID,

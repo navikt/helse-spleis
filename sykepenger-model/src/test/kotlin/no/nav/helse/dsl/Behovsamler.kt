@@ -38,6 +38,8 @@ internal class Behovsamler(private val log: DeferredLog) : PersonObserver {
         log.log("Etter testen er det ${behov.size} behov uten svar: [${behov.joinToString { it.type.toString() }}]")
     }
 
+    internal fun harBedtOmReplay(vedtaksperiodeId: UUID) =
+        replays.contains(vedtaksperiodeId)
     internal fun bekreftOgKvitterReplay(vedtaksperiodeId: UUID) {
         assertTrue(replays.remove(vedtaksperiodeId)) { "Vedtaksperioden har ikke bedt om replay. Den står i ${tilstander.getValue(vedtaksperiodeId)}"}
     }

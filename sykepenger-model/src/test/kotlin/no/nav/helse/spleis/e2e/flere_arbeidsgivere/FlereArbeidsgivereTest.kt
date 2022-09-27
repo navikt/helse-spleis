@@ -4,7 +4,6 @@ import no.nav.helse.assertForventetFeil
 import no.nav.helse.august
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
-import no.nav.helse.dsl.TestPerson
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
 import no.nav.helse.dsl.nyPeriode
 import no.nav.helse.dsl.nyttVedtak
@@ -44,7 +43,6 @@ import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -56,11 +54,11 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         a1 { nyttVedtak(1.januar, 31.januar, 100.prosent) }
         nyPeriode(1.februar til 14.februar, a1, a2)
         a1 {
-            Assertions.assertEquals(1.januar, inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.skjæringstidspunkt)
+            assertEquals(1.januar, inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.skjæringstidspunkt)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK)
         }
         a2 {
-            Assertions.assertEquals(1.januar, inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.skjæringstidspunkt)
+            assertEquals(1.januar, inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.skjæringstidspunkt)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
         }
         a1 {
@@ -111,7 +109,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
                 inntektsvurdering = Inntektsvurdering(
                     inntekter = inntektperioderForSammenligningsgrunnlag {
                         1.januar(2017) til 1.juni(2017) inntekter {
-                            a1 inntekt TestPerson.INNTEKT
+                            a1 inntekt INNTEKT
                             a2 inntekt 5000.månedlig
                         }
                         1.august(2017) til 1.desember(2017) inntekter {
@@ -137,7 +135,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             )
         }
         a1 {
-            Assertions.assertEquals(
+            assertEquals(
                 318500.årlig,
                 inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør?.sammenligningsgrunnlag
             )
@@ -157,7 +155,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
                 inntektsvurdering = Inntektsvurdering(
                     inntekter = inntektperioderForSammenligningsgrunnlag {
                         1.januar(2017) til 1.juni(2017) inntekter {
-                            a1 inntekt TestPerson.INNTEKT
+                            a1 inntekt INNTEKT
                             a2 inntekt 5000.månedlig
                         }
                         1.august(2017) til 1.desember(2017) inntekter {
@@ -180,7 +178,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
                 AVVENTER_VILKÅRSPRØVING,
                 TIL_INFOTRYGD
             )
-            Assertions.assertEquals(
+            assertEquals(
                 282500.årlig,
                 inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør?.sammenligningsgrunnlag
             )
@@ -212,7 +210,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
                 inntektsvurdering = Inntektsvurdering(
                     inntekter = inntektperioderForSammenligningsgrunnlag {
                         1.januar(2017) til 1.juni(2017) inntekter {
-                            a1 inntekt TestPerson.INNTEKT
+                            a1 inntekt INNTEKT
                             a2 inntekt 5000.månedlig
                         }
                         1.august(2017) til 1.desember(2017) inntekter {
@@ -229,7 +227,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         }
 
         a1 {
-            Assertions.assertEquals(
+            assertEquals(
                 318500.årlig,
                 inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør?.sammenligningsgrunnlag
             )
@@ -288,8 +286,8 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
                 inntekter = inntektperioderForSammenligningsgrunnlag {
                     1.januar(2020) til 1.desember(2020) inntekter {
-                        a1 inntekt TestPerson.INNTEKT
-                        a2 inntekt TestPerson.INNTEKT
+                        a1 inntekt INNTEKT
+                        a2 inntekt INNTEKT
                     }
                 }
             ))
@@ -433,7 +431,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
                 inntekter = inntektperioderForSammenligningsgrunnlag {
                     1.januar(2020) til 1.desember(2020) inntekter {
-                        a1 inntekt TestPerson.INNTEKT
+                        a1 inntekt INNTEKT
                         a2 inntekt 1000.månedlig
                     }
                 }
@@ -477,7 +475,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
                 inntekter = inntektperioderForSammenligningsgrunnlag {
                     1.januar(2020) til 1.desember(2020) inntekter {
-                        a1 inntekt TestPerson.INNTEKT
+                        a1 inntekt INNTEKT
                         a2 inntekt 1000.månedlig
                     }
                 }
@@ -530,7 +528,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
                 inntektsvurdering = Inntektsvurdering(
                     inntekter = inntektperioderForSammenligningsgrunnlag {
                         1.januar(2020) til 1.desember(2020) inntekter {
-                            a1 inntekt TestPerson.INNTEKT
+                            a1 inntekt INNTEKT
                             a2 inntekt 1000.månedlig
                         }
                     }
@@ -538,7 +536,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
                 inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
                     inntekter = inntektperioderForSykepengegrunnlag {
                         1.oktober(2020) til 1.desember(2020) inntekter {
-                            a1 inntekt TestPerson.INNTEKT
+                            a1 inntekt INNTEKT
                             a2 inntekt 1000.månedlig
                         }
                     },
@@ -579,8 +577,8 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             håndterVilkårsgrunnlag(2.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
                 inntekter = inntektperioderForSammenligningsgrunnlag {
                     1.januar(2020) til 1.desember(2020) inntekter {
-                        a1 inntekt TestPerson.INNTEKT
-                        a2 inntekt TestPerson.INNTEKT
+                        a1 inntekt INNTEKT
+                        a2 inntekt INNTEKT
                     }
                 }
             ))
@@ -620,10 +618,10 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
                 inntektsvurdering = Inntektsvurdering(
                     inntekter = inntektperioderForSammenligningsgrunnlag {
                         1.januar(2017) til 1.desember(2017) inntekter {
-                            a1 inntekt TestPerson.INNTEKT
+                            a1 inntekt INNTEKT
                         }
                         1.januar(2017) til 1.desember(2017) inntekter {
-                            a2 inntekt TestPerson.INNTEKT
+                            a2 inntekt INNTEKT
                         }
                     },
                 ),
@@ -641,16 +639,16 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         }
         a1 {
             inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.also { tidslinjeInspektør ->
-                Assertions.assertEquals(16, tidslinjeInspektør.arbeidsgiverperiodeDagTeller)
-                Assertions.assertEquals(4, tidslinjeInspektør.navHelgDagTeller)
-                Assertions.assertEquals(11, tidslinjeInspektør.avvistDagTeller)
+                assertEquals(16, tidslinjeInspektør.arbeidsgiverperiodeDagTeller)
+                assertEquals(4, tidslinjeInspektør.navHelgDagTeller)
+                assertEquals(11, tidslinjeInspektør.avvistDagTeller)
             }
         }
         a2 {
             inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.also { tidslinjeInspektør ->
-                Assertions.assertEquals(16, tidslinjeInspektør.arbeidsgiverperiodeDagTeller)
-                Assertions.assertEquals(4, tidslinjeInspektør.navHelgDagTeller)
-                Assertions.assertEquals(11, tidslinjeInspektør.avvistDagTeller)
+                assertEquals(16, tidslinjeInspektør.arbeidsgiverperiodeDagTeller)
+                assertEquals(4, tidslinjeInspektør.navHelgDagTeller)
+                assertEquals(11, tidslinjeInspektør.avvistDagTeller)
             }
         }
 
@@ -673,8 +671,8 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
                 inntekter = inntektperioderForSammenligningsgrunnlag {
                     1.januar(2020) til 1.desember(2020) inntekter {
-                        a1 inntekt TestPerson.INNTEKT
-                        a2 inntekt TestPerson.INNTEKT
+                        a1 inntekt INNTEKT
+                        a2 inntekt INNTEKT
                     }
                 }
             ))
@@ -766,10 +764,10 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
                 AVSLUTTET
             )
             assertIngenFunksjonelleFeil()
-            Assertions.assertEquals(1, inspektør.avsluttedeUtbetalingerForVedtaksperiode(1.vedtaksperiode).size)
-            Assertions.assertEquals(0, inspektør.ikkeUtbetalteUtbetalingerForVedtaksperiode(1.vedtaksperiode).size)
-            Assertions.assertEquals(1, inspektør.avsluttedeUtbetalingerForVedtaksperiode(2.vedtaksperiode).size)
-            Assertions.assertEquals(0, inspektør.ikkeUtbetalteUtbetalingerForVedtaksperiode(2.vedtaksperiode).size)
+            assertEquals(1, inspektør.avsluttedeUtbetalingerForVedtaksperiode(1.vedtaksperiode).size)
+            assertEquals(0, inspektør.ikkeUtbetalteUtbetalingerForVedtaksperiode(1.vedtaksperiode).size)
+            assertEquals(1, inspektør.avsluttedeUtbetalingerForVedtaksperiode(2.vedtaksperiode).size)
+            assertEquals(0, inspektør.ikkeUtbetalteUtbetalingerForVedtaksperiode(2.vedtaksperiode).size)
         }
 
         a2 {
@@ -793,10 +791,10 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
                 AVVENTER_GODKJENNING
             )
             assertIngenFunksjonelleFeil()
-            Assertions.assertEquals(1, inspektør.avsluttedeUtbetalingerForVedtaksperiode(1.vedtaksperiode).size)
-            Assertions.assertEquals(0, inspektør.ikkeUtbetalteUtbetalingerForVedtaksperiode(1.vedtaksperiode).size)
-            Assertions.assertEquals(0, inspektør.avsluttedeUtbetalingerForVedtaksperiode(2.vedtaksperiode).size)
-            Assertions.assertEquals(1, inspektør.ikkeUtbetalteUtbetalingerForVedtaksperiode(2.vedtaksperiode).size)
+            assertEquals(1, inspektør.avsluttedeUtbetalingerForVedtaksperiode(1.vedtaksperiode).size)
+            assertEquals(0, inspektør.ikkeUtbetalteUtbetalingerForVedtaksperiode(1.vedtaksperiode).size)
+            assertEquals(0, inspektør.avsluttedeUtbetalingerForVedtaksperiode(2.vedtaksperiode).size)
+            assertEquals(1, inspektør.ikkeUtbetalteUtbetalingerForVedtaksperiode(2.vedtaksperiode).size)
         }
     }
 
@@ -810,8 +808,8 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(
                 inntekter = inntektperioderForSammenligningsgrunnlag {
                     1.januar(2017) til 1.desember(2017) inntekter {
-                        a1 inntekt TestPerson.INNTEKT
-                        a2 inntekt TestPerson.INNTEKT
+                        a1 inntekt INNTEKT
+                        a2 inntekt INNTEKT
                     }
                 }
             ))
@@ -827,10 +825,10 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             håndterUtbetalt()
         }
         a1.inspektør.utbetalinger.forEach {
-            Assertions.assertEquals(a1, it.inspektør.arbeidsgiverOppdrag.inspektør.mottaker)
+            assertEquals(a1, it.inspektør.arbeidsgiverOppdrag.inspektør.mottaker)
         }
         a2.inspektør.utbetalinger.forEach {
-            Assertions.assertEquals(a2, it.inspektør.arbeidsgiverOppdrag.inspektør.mottaker)
+            assertEquals(a2, it.inspektør.arbeidsgiverOppdrag.inspektør.mottaker)
         }
     }
 
@@ -839,9 +837,8 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         a1 { håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent)) }
         a2 { håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent)) }
         a1 {
-            val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar))
+            håndterInntektsmelding(listOf(1.januar til 16.januar))
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-            håndterInntektsmeldingReplay(inntektsmeldingId, 1.vedtaksperiode)
             assertTilstander(
                 1.vedtaksperiode,
                 START,
@@ -900,16 +897,16 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
                 inntektsvurdering = Inntektsvurdering(
                     inntekter = inntektperioderForSammenligningsgrunnlag {
                         1.januar(2017) til 1.desember(2017) inntekter {
-                            a1 inntekt TestPerson.INNTEKT
-                            a2 inntekt TestPerson.INNTEKT
+                            a1 inntekt INNTEKT
+                            a2 inntekt INNTEKT
                         }
                     }
                 ),
                 inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
                     inntekter = inntektperioderForSykepengegrunnlag {
                         1.oktober(2017) til 1.desember(2017) inntekter {
-                            a1 inntekt TestPerson.INNTEKT
-                            a2 inntekt TestPerson.INNTEKT
+                            a1 inntekt INNTEKT
+                            a2 inntekt INNTEKT
                         }
                     }, arbeidsforhold = emptyList()
                 )
@@ -923,7 +920,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
                     assertTrue(a1.inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.avvistDagTeller > 0)
                 },
                 ønsket = {
-                    Assertions.assertEquals(
+                    assertEquals(
                         0,
                         a1.inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.avvistDagTeller
                     )
@@ -946,14 +943,14 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
         a2 { håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 31000.månedlig) }
         val sammenligningsgrunnlag = Inntektsvurdering(
             listOf(
-                sammenligningsgrunnlag(a1, 20.januar, TestPerson.INNTEKT.repeat(12)),
+                sammenligningsgrunnlag(a1, 20.januar, INNTEKT.repeat(12)),
                 sammenligningsgrunnlag(a2, 20.januar, 32000.månedlig.repeat(12))
             )
         )
         val sykepengegrunnlag = InntektForSykepengegrunnlag(
             inntekter = listOf(
-                grunnlag(a1, 20.januar, TestPerson.INNTEKT.repeat(3)),
-                grunnlag(a2, 20.januar, TestPerson.INNTEKT.repeat(3))
+                grunnlag(a1, 20.januar, INNTEKT.repeat(3)),
+                grunnlag(a2, 20.januar, INNTEKT.repeat(3))
             ), arbeidsforhold = emptyList()
         )
         a1 {
@@ -1009,7 +1006,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
             assertIngenFunksjonelleFeil(2.vedtaksperiode.filter())
-            Assertions.assertEquals(Inntektskilde.EN_ARBEIDSGIVER, a1.inspektør.inntektskilde(2.vedtaksperiode))
+            assertEquals(Inntektskilde.EN_ARBEIDSGIVER, a1.inspektør.inntektskilde(2.vedtaksperiode))
         }
         a2 {
             val vilkårsgrunnlag = a2.inspektør.vilkårsgrunnlag(1.vedtaksperiode)
