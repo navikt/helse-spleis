@@ -20,6 +20,7 @@ import no.nav.helse.mars
 import no.nav.helse.november
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.Varselkode
+import no.nav.helse.person.Varselkode.RV_AY_3
 import no.nav.helse.person.Varselkode.RV_IM_1
 import no.nav.helse.person.Varselkode.RV_IM_2
 import no.nav.helse.person.Varselkode.RV_IM_3
@@ -542,5 +543,16 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
         håndterUtbetalingshistorikk(1.vedtaksperiode)
         håndterInntektsmelding(listOf(31.januar til 15.februar))
         assertVarsel(RV_RV_1)
+    }
+
+    @Test
+    fun `varsel - Bruker har mottatt AAP innenfor 6 måneder før skjæringstidspunktet - Kontroller at brukeren har rett til sykepenger`() {
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterVilkårsgrunnlag(1.vedtaksperiode, orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1, arbeidsavklaringspenger = listOf(1.desember(2017) til 15.desember(2017)))
+
+        assertVarsel(RV_AY_3)
     }
 }
