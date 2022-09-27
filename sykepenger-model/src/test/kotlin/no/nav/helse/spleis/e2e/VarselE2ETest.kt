@@ -60,6 +60,7 @@ import no.nav.helse.person.Varselkode.RV_SØ_7
 import no.nav.helse.person.Varselkode.RV_SØ_8
 import no.nav.helse.person.Varselkode.RV_SØ_9
 import no.nav.helse.person.Varselkode.RV_UT_1
+import no.nav.helse.person.Varselkode.RV_UT_2
 import no.nav.helse.person.Varselkode.RV_VV_1
 import no.nav.helse.person.Varselkode.RV_VV_2
 import no.nav.helse.person.Varselkode.RV_VV_4
@@ -68,6 +69,7 @@ import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
+import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -673,5 +675,13 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, utbetalingGodkjent = false)
         assertVarsel(RV_UT_1, 1.vedtaksperiode.filter())
+    }
+
+    @Test
+    fun `varsel - Utbetalingen ble gjennomført, men med advarsel`() {
+        tilGodkjenning(1.januar, 31.januar, ORGNUMMER)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt(status = Oppdragstatus.AKSEPTERT_MED_FEIL)
+        assertVarsel(RV_UT_2)
     }
 }

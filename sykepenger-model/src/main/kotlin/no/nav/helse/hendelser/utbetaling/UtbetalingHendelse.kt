@@ -5,6 +5,8 @@ import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Oppdragstatus.*
 import java.time.LocalDateTime
 import java.util.*
+import no.nav.helse.person.Varselkode
+import no.nav.helse.person.Varselkode.RV_UT_2
 
 class UtbetalingHendelse(
     meldingsreferanseId: UUID,
@@ -23,7 +25,9 @@ class UtbetalingHendelse(
         if (status == AVVIST || status == FEIL) {
             info("Utbetaling feilet med status $status. Feilmelding fra Oppdragsystemet: $melding")
             funksjonellFeil("Utbetaling feilet med status $status")
-        } else if (status == AKSEPTERT_MED_FEIL) varsel("Utbetalingen ble gjennomført, men med advarsel: $melding")
+        } else if (status == AKSEPTERT_MED_FEIL){
+            varsel(RV_UT_2)
+        }
     }
 
     internal fun skalForsøkesIgjen() = status == FEIL
