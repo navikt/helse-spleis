@@ -13,10 +13,9 @@ import java.time.LocalDate
 import java.time.LocalDate.MIN
 import java.time.LocalDateTime
 import java.util.*
+import no.nav.helse.person.Varselkode.RV_OS_1
 import no.nav.helse.person.Varselkode.RV_OS_2
 import no.nav.helse.person.Varselkode.RV_OS_3
-
-internal const val WARN_FORLENGER_OPPHØRT_OPPDRAG = "Utbetalingen forlenger et tidligere oppdrag som opphørte alle utbetalte dager. Sjekk simuleringen."
 
 internal class Oppdrag private constructor(
     private val mottaker: String,
@@ -238,7 +237,7 @@ internal class Oppdrag private constructor(
             erTomt() -> annulleringsoppdrag(eldre)
             // "fom" kan flytte seg fremover i tid dersom man, eksempelvis, revurderer en utbetalt periode til å starte med ikke-utbetalte dager (f.eks. ferie)
             eldre.ingenUtbetalteDager() -> {
-                aktivitetslogg.varsel(WARN_FORLENGER_OPPHØRT_OPPDRAG)
+                aktivitetslogg.varsel(RV_OS_1)
                 kjørFrem(eldre)
             }
             fomHarFlyttetSegFremover(eldre.kopierUtenOpphørslinjer()) -> {

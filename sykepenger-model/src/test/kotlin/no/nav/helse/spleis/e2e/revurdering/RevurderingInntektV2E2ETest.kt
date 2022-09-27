@@ -28,6 +28,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.TilstandType.UTBETALING_FEILET
 import no.nav.helse.person.Varselkode.RV_IV_2
+import no.nav.helse.person.Varselkode.RV_OS_1
 import no.nav.helse.person.Varselkode.RV_SV_1
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
@@ -65,7 +66,6 @@ import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingslinjer.Utbetaling
-import no.nav.helse.utbetalingslinjer.WARN_FORLENGER_OPPHØRT_OPPDRAG
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
 import no.nav.helse.økonomi.Inntekt
@@ -552,7 +552,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
             }
         }
         assertDiff(2541)
-        assertVarsel(WARN_FORLENGER_OPPHØRT_OPPDRAG, AktivitetsloggFilter.person())
+        assertVarsel(RV_OS_1, AktivitetsloggFilter.person())
     }
 
     @Test

@@ -19,7 +19,6 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.november
-import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.Varselkode
 import no.nav.helse.person.Varselkode.RV_AY_3
@@ -40,6 +39,7 @@ import no.nav.helse.person.Varselkode.RV_IV_1
 import no.nav.helse.person.Varselkode.RV_IV_2
 import no.nav.helse.person.Varselkode.RV_MV_1
 import no.nav.helse.person.Varselkode.RV_MV_2
+import no.nav.helse.person.Varselkode.RV_OS_1
 import no.nav.helse.person.Varselkode.RV_OS_2
 import no.nav.helse.person.Varselkode.RV_OS_3
 import no.nav.helse.person.Varselkode.RV_OV_1
@@ -577,6 +577,21 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
         )
         håndterYtelser(1.vedtaksperiode)
         assertVarsel(RV_OS_2)
+    }
+
+    @Test
+    fun `varsel - Utbetalingen forlenger et tidligere oppdrag som opphørte alle utbetalte dager, Sjekk simuleringen`() {
+        nyttVedtak(1.januar, 31.januar, 100.prosent, beregnetInntekt = 5000.månedlig)
+        nullstillTilstandsendringer()
+        håndterOverstyrInntekt(inntekt = 3000.månedlig, skjæringstidspunkt = 1.januar)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+
+        håndterOverstyrInntekt(5000.månedlig, skjæringstidspunkt = 1.januar)
+        håndterYtelser(1.vedtaksperiode)
+        assertVarsel(RV_OS_1)
     }
 
     @Test
