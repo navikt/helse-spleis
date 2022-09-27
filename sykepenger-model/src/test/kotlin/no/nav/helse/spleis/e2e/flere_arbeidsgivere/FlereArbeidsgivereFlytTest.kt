@@ -39,7 +39,6 @@ import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.forkastAlle
-import no.nav.helse.spleis.e2e.forlengTilGodkjenning
 import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.grunnlag
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
@@ -141,11 +140,15 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
     fun `flere AG - periode har gap på arbeidsgivernivå men er sammenhengende på personnivå - sender feilaktig flere perioder til behandling`() {
         nyeVedtak(1.januar, 31.januar, a1, a2)
         forlengVedtak(1.februar, 28.februar, orgnummer = a1)
-        forlengTilGodkjenning(1.mars, 31.mars, orgnummer = a2)
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent), orgnummer = a2)
+        håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), orgnummer = a2)
+        håndterInntektsmelding(listOf(1.mars til 16.mars), orgnummer = a2)
+        håndterYtelser(2.vedtaksperiode, orgnummer = a2)
+        håndterSimulering(2.vedtaksperiode, orgnummer = a2)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING, orgnummer = a2)
 
-        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 19.prosent), orgnummer = a1)
-        håndterSøknad(Sykdom(1.mars, 31.mars, 19.prosent), orgnummer = a1)
+        håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 38.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(1.mars, 31.mars, 38.prosent), orgnummer = a1)
         håndterYtelser(3.vedtaksperiode, orgnummer = a1)
 
         assertSisteTilstand(3.vedtaksperiode, AVVENTER_SIMULERING, orgnummer = a1)
@@ -533,21 +536,13 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(periode2.start, periode2.endInclusive, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(periode2.start, periode2.endInclusive, 100.prosent), orgnummer = a2)
 
-        assertForventetFeil(
-            forklaring = "https://trello.com/c/M40xy4t3",
-            nå = {
-                assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
-            },
-            ønsket = {
-                assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, orgnummer = a2)
-                håndterInntektsmelding(
-                    listOf(1.februar til 16.februar),
-                    førsteFraværsdag = 1.februar,
-                    orgnummer = a2
-                )
-                assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
-            }
+        assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, orgnummer = a2)
+        håndterInntektsmelding(
+            listOf(1.februar til 16.februar),
+            førsteFraværsdag = 1.februar,
+            orgnummer = a2
         )
+        assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
     }
 
     @Test

@@ -1017,9 +1017,10 @@ internal class Vedtaksperiode private constructor(
                 søknad.varsel("Det er behandlet en søknad i Speil for en senere periode enn denne.")
             }
             vedtaksperiode.håndterSøknad(søknad) {
+                val rettFør = vedtaksperiode.arbeidsgiver.finnVedtaksperiodeRettFør(vedtaksperiode)
                 when {
-                    !vedtaksperiode.harNødvendigOpplysningerFraArbeidsgiver() -> AvventerInntektsmeldingEllerHistorikk
-                    else -> AvventerBlokkerendePeriode
+                    rettFør != null && rettFør.tilstand !in setOf(AvsluttetUtenUtbetaling, AvventerInntektsmeldingEllerHistorikk) -> AvventerBlokkerendePeriode
+                    else -> AvventerInntektsmeldingEllerHistorikk
                 }
             }
             søknad.info("Fullført behandling av søknad")

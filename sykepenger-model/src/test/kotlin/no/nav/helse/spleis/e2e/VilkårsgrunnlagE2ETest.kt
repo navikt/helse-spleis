@@ -353,6 +353,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
         håndterUtbetalt()
         assertVilkårsgrunnlagFraSpleisFor(1.januar)
         håndterAnnullerUtbetaling()
+        assertEquals(1.januar til 16.januar, inspektør.sykdomstidslinje.periode())
         assertForventetFeil(
             forklaring = "Sletter ikke vilkårsgrunnlaget lagret 1.januar pga. AUU-perioden",
             ønsket = { assertIngenVilkårsgrunnlagFraSpleis() },

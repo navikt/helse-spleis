@@ -370,27 +370,14 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             håndterSøknad(Sykdom(5.februar, 15.februar, 100.prosent))
         }
 
-        assertForventetFeil(
-            nå = {
-                a1 {
-                    assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
-                    assertTilstander(2.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE)
-                }
-                a2 {
-                    assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
-                }
-            },
-            ønsket = {
-                a1 {
-                    assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
-                    assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
-                }
-                a2 {
-                    assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
-                    assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
-                }
-            }
-        )
+        a1 {
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
+            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
+        }
+        a2 {
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
+        }
     }
 
     @Test
