@@ -73,6 +73,7 @@ import no.nav.helse.person.TilstandType.UTBETALING_FEILET
 import no.nav.helse.person.Varselkode.RV_IM_4
 import no.nav.helse.person.Varselkode.RV_RV_1
 import no.nav.helse.person.Varselkode.RV_SI_2
+import no.nav.helse.person.Varselkode.RV_UT_1
 import no.nav.helse.person.Varselkode.RV_VV_1
 import no.nav.helse.person.Varselkode.RV_VV_2
 import no.nav.helse.person.Varselkode.RV_VV_8
@@ -2019,7 +2020,7 @@ internal class Vedtaksperiode private constructor(
                 utbetalingsgodkjenning,
                 when {
                     vedtaksperiode.utbetalinger.erAvvist() -> RevurderingFeilet.also {
-                        utbetalingsgodkjenning.varsel("Utbetaling av revurdert periode ble avvist av saksbehandler. Utbetalingen må annulleres")
+                        utbetalingsgodkjenning.varsel(RV_UT_1)
                     }
                     vedtaksperiode.utbetalinger.harUtbetalinger() -> TilUtbetaling
                     else -> Avsluttet

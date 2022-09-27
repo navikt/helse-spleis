@@ -12,6 +12,7 @@ import no.nav.helse.hendelser.Institusjonsopphold
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.OverstyrArbeidsforhold.ArbeidsforholdOverstyrt
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold
@@ -19,6 +20,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.november
+import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.Varselkode
 import no.nav.helse.person.Varselkode.RV_AY_3
@@ -57,6 +59,7 @@ import no.nav.helse.person.Varselkode.RV_SØ_5
 import no.nav.helse.person.Varselkode.RV_SØ_7
 import no.nav.helse.person.Varselkode.RV_SØ_8
 import no.nav.helse.person.Varselkode.RV_SØ_9
+import no.nav.helse.person.Varselkode.RV_UT_1
 import no.nav.helse.person.Varselkode.RV_VV_1
 import no.nav.helse.person.Varselkode.RV_VV_2
 import no.nav.helse.person.Varselkode.RV_VV_4
@@ -659,5 +662,16 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, institusjonsoppholdsperioder = listOf(Institusjonsopphold.Institusjonsoppholdsperiode(1.januar, 31.januar)))
 
         assertVarsel(RV_AY_9)
+    }
+
+    @Test
+    fun `varsel - Utbetaling av revurdert periode ble avvist av saksbehandler, Utbetalingen må annulleres`() {
+        nyttVedtak(1.januar, 31.januar)
+
+        håndterOverstyrTidslinje(listOf(manuellFeriedag(18.januar)))
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, utbetalingGodkjent = false)
+        assertVarsel(RV_UT_1, 1.vedtaksperiode.filter())
     }
 }

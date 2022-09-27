@@ -39,6 +39,7 @@ import no.nav.helse.person.TilstandType.UTBETALING_FEILET
 import no.nav.helse.person.Varselkode.RV_IT_1
 import no.nav.helse.person.Varselkode.RV_IT_3
 import no.nav.helse.person.Varselkode.RV_IT_5
+import no.nav.helse.person.Varselkode.RV_UT_1
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.person.nullstillTilstandsendringer
@@ -681,7 +682,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             AVVENTER_GODKJENNING_REVURDERING,
             REVURDERING_FEILET
         )
-        assertVarsel("Utbetaling av revurdert periode ble avvist av saksbehandler. Utbetalingen må annulleres", 1.vedtaksperiode.filter())
+        assertVarsel(RV_UT_1, 1.vedtaksperiode.filter())
     }
 
     @Test
