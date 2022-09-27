@@ -55,6 +55,7 @@ import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class VarselE2ETest: AbstractEndToEndTest() {
@@ -289,6 +290,7 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
     }
 
     @Test
+    @Disabled
     fun `varsel - Fant ikke refusjonsgrad for perioden - Undersøk oppgitt refusjon før du utbetaler`() {
         val imId = håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 25.februar)
         nyPeriode(1.januar til 10.januar)

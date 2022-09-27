@@ -75,6 +75,7 @@ import no.nav.helse.person.Varselkode.RV_SI_2
 import no.nav.helse.person.Varselkode.RV_VV_1
 import no.nav.helse.person.Varselkode.RV_VV_2
 import no.nav.helse.person.Varselkode.RV_VV_8
+import no.nav.helse.person.VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
@@ -1419,7 +1420,7 @@ internal class Vedtaksperiode private constructor(
                     infotrygdhistorikk.addInntekter(person, this)
                     if (!vedtaksperiode.forventerInntekt()) {
                         vedtaksperiode.tilstand(hendelse, AvsluttetUtenUtbetaling)
-                    } else if (vedtaksperiode.harNødvendigInntektForVilkårsprøving()) {
+                    } else if (person.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt) is InfotrygdVilkårsgrunnlag) {
                         info("Oppdaget at perioden startet i infotrygd")
                         vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode)
                     }
