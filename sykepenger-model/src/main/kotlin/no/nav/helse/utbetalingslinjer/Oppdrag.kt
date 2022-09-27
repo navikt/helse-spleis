@@ -13,10 +13,10 @@ import java.time.LocalDate
 import java.time.LocalDate.MIN
 import java.time.LocalDateTime
 import java.util.*
+import no.nav.helse.person.Varselkode.RV_OS_2
 import no.nav.helse.person.Varselkode.RV_OS_3
 
 internal const val WARN_FORLENGER_OPPHØRT_OPPDRAG = "Utbetalingen forlenger et tidligere oppdrag som opphørte alle utbetalte dager. Sjekk simuleringen."
-internal const val WARN_OPPDRAG_FOM_ENDRET = "Utbetalingens fra og med-dato er endret. Kontroller simuleringen"
 
 internal class Oppdrag private constructor(
     private val mottaker: String,
@@ -242,12 +242,12 @@ internal class Oppdrag private constructor(
                 kjørFrem(eldre)
             }
             fomHarFlyttetSegFremover(eldre.kopierUtenOpphørslinjer()) -> {
-                aktivitetslogg.varsel(WARN_OPPDRAG_FOM_ENDRET)
+                aktivitetslogg.varsel(RV_OS_2)
                 returførOgKjørFrem(eldre.kopierUtenOpphørslinjer())
             }
             // utbetaling kan endres til å starte tidligere, eksempelvis via revurdering der feriedager egentlig er sykedager
             fomHarFlyttetSegBakover(eldre.kopierUtenOpphørslinjer()) -> {
-                aktivitetslogg.varsel(WARN_OPPDRAG_FOM_ENDRET)
+                aktivitetslogg.varsel(RV_OS_2)
                 kjørFrem(eldre.kopierUtenOpphørslinjer())
             }
             // fom er lik, men endring kan oppstå overalt ellers

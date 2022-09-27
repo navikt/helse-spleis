@@ -19,6 +19,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.november
+import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.Varselkode
 import no.nav.helse.person.Varselkode.RV_AY_3
@@ -39,6 +40,7 @@ import no.nav.helse.person.Varselkode.RV_IV_1
 import no.nav.helse.person.Varselkode.RV_IV_2
 import no.nav.helse.person.Varselkode.RV_MV_1
 import no.nav.helse.person.Varselkode.RV_MV_2
+import no.nav.helse.person.Varselkode.RV_OS_2
 import no.nav.helse.person.Varselkode.RV_OS_3
 import no.nav.helse.person.Varselkode.RV_OV_1
 import no.nav.helse.person.Varselkode.RV_RE_1
@@ -564,6 +566,17 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
         håndterOverstyrTidslinje((23.januar til 23.januar).map { manuellFeriedag(it) })
         håndterYtelser(1.vedtaksperiode)
         assertVarsel(RV_OS_3)
+    }
+
+    @Test
+    fun `varsel - Utbetalingens fra og med-dato er endret, Kontroller simuleringen`() {
+        nyttVedtak(1.januar, 31.januar)
+        håndterSøknad(
+            Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent),
+            Søknad.Søknadsperiode.Ferie(17.januar, 18.januar)
+        )
+        håndterYtelser(1.vedtaksperiode)
+        assertVarsel(RV_OS_2)
     }
 
     @Test

@@ -34,7 +34,6 @@ internal class VarselkodeTest {
         val varselkoderSomKjentManglerTest = listOf(
             RV_VV_3, RV_VV_5, RV_AY_1, RV_AY_2,
             RV_UT_1, RV_UT_2, RV_OS_1,
-            RV_OS_2
         )
 
         val varselkoderSomNåManglerTest = ikkeTestedeVarselkoder.minus(varselkoderSomKjentManglerTest.toSet())

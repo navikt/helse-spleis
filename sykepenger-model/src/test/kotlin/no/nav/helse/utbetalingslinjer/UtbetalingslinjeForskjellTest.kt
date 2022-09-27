@@ -12,6 +12,10 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
+import no.nav.helse.person.AktivitetsloggVisitor
+import no.nav.helse.person.SpesifikkKontekst
+import no.nav.helse.person.Varselkode
+import no.nav.helse.person.Varselkode.RV_OS_2
 import kotlin.math.roundToInt
 
 internal class UtbetalingslinjeForskjellTest {
@@ -356,9 +360,8 @@ internal class UtbetalingslinjeForskjellTest {
             14.januar to 20.januar endringskode NY pekerPå actual[0]
         ), actual)
         assertTrue(aktivitetslogg.harVarslerEllerVerre())
-        assertTrue(aktivitetslogg.varsel().map(Aktivitetslogg.Aktivitet::toString).any { it.contains(WARN_OPPDRAG_FOM_ENDRET) })
+        Visitor(aktivitetslogg).assertVarsel(RV_OS_2)
     }
-
     @Test
     fun `endre fom på siste linje`() {
         val original = linjer(24.januar to 29.januar, 30.januar to 3.februar)
@@ -979,6 +982,30 @@ internal class UtbetalingslinjeForskjellTest {
         assertNotNull(actual[0].datoStatusFom)
         assertNotEquals(original[0].hashCode(), actual[0].hashCode())
     }
+
+    private class Visitor(aktivitetslogg: Aktivitetslogg) : AktivitetsloggVisitor {
+        private val varsler = mutableListOf<Varselkode>()
+        init {
+            aktivitetslogg.accept(this)
+        }
+
+        override fun visitVarsel(
+            id: UUID,
+            kontekster: List<SpesifikkKontekst>,
+            aktivitet: Aktivitetslogg.Aktivitet.Varsel,
+            kode: Varselkode?,
+            melding: String,
+            tidsstempel: String
+        ) {
+            if (kode == null) return
+            varsler.add(kode)
+        }
+
+        fun assertVarsel(varselkode: Varselkode) {
+            assertTrue(varsler.contains(varselkode))
+        }
+    }
+
 
     private fun tomtOppdrag(fagsystemId: String = genererUtbetalingsreferanse(UUID.randomUUID()), sisteArbeidsgiverdag: LocalDate? = null) =
         Oppdrag(ORGNUMMER, SykepengerRefusjon, fagsystemId = fagsystemId, sisteArbeidsgiverdag = sisteArbeidsgiverdag)
