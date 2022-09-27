@@ -60,7 +60,6 @@ import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.grunnlag
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterInntektsmeldingMedValidering
-import no.nav.helse.spleis.e2e.håndterInntektsmeldingReplay
 import no.nav.helse.spleis.e2e.håndterOverstyrArbeidsforhold
 import no.nav.helse.spleis.e2e.håndterOverstyrInntekt
 import no.nav.helse.spleis.e2e.håndterSimulering
@@ -666,9 +665,8 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
     @Test
     fun `§8-12 ledd 1 punktum 1 - Blir kun vurdert en gang etter ny periode med ny rett til sykepenger`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar(2019), 100.prosent))
-        val inntektsmeldingId = håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)))
+        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)))
         håndterSøknad(Sykdom(1.januar, 31.januar(2019), 100.prosent), sendtTilNAVEllerArbeidsgiver = 1.januar(2018))
-        håndterInntektsmeldingReplay(inntektsmeldingId, 1.vedtaksperiode.id(ORGNUMMER))
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)
@@ -754,12 +752,11 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
     @Test
     fun `§8-12 ledd 2 - Bruker har ikke vært arbeidsfør i 26 uker`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar(2018), 31.desember(2018), 100.prosent))
-        val inntektsmeldingId = håndterInntektsmelding(listOf(Periode(1.januar(2018), 16.januar(2018))))
+        håndterInntektsmelding(listOf(Periode(1.januar(2018), 16.januar(2018))))
         håndterSøknad(
             Sykdom(1.januar(2018), 31.desember(2018), 100.prosent),
             sendtTilNAVEllerArbeidsgiver = 1.januar(2018)
         )
-        håndterInntektsmeldingReplay(inntektsmeldingId, 1.vedtaksperiode.id(ORGNUMMER))
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, INNTEKT)
         håndterYtelser(1.vedtaksperiode)

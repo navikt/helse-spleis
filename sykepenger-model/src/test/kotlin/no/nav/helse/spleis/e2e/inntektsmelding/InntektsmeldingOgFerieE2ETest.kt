@@ -30,7 +30,6 @@ import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.grunnlag
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
-import no.nav.helse.spleis.e2e.håndterInntektsmeldingReplay
 import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
@@ -141,10 +140,9 @@ internal class InntektsmeldingOgFerieE2ETest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
         håndterSykmelding(Sykmeldingsperiode(1.februar, 20.februar, 100.prosent), orgnummer = a2)
 
-        val im = håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 5.februar, orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 5.februar, orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(5.februar, 20.februar, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(5.februar, 20.februar, 100.prosent), Ferie(5.februar, 20.februar), orgnummer = a1)
-        håndterInntektsmeldingReplay(im, 2.vedtaksperiode.id(a1))
 
         håndterSøknad(Sykdom(1.februar, 20.februar, 100.prosent), orgnummer = a2)
         håndterInntektsmelding(listOf(1.februar til 16.februar), orgnummer = a2)
@@ -158,11 +156,10 @@ internal class InntektsmeldingOgFerieE2ETest : AbstractEndToEndTest() {
     fun `bare ferie (forlengelse) - etter tilbakevennende sykdom`() {
         nyttVedtak(1.januar, 31.januar)
         håndterSykmelding(Sykmeldingsperiode(5.februar, 23.februar, 100.prosent))
-        val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 5.februar)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 5.februar)
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
         håndterSøknad(Sykdom(5.februar, 23.februar, 100.prosent), Ferie(5.februar, 23.februar))
         håndterSøknad(Sykdom(24.februar, 28.februar, 100.prosent), Ferie(24.februar, 28.februar))
-        håndterInntektsmeldingReplay(inntektsmeldingId, 2.vedtaksperiode.id(ORGNUMMER))
 
         assertForventetFeil(
             nå = {
@@ -180,11 +177,10 @@ internal class InntektsmeldingOgFerieE2ETest : AbstractEndToEndTest() {
     fun `bare ferie (sykdomsforlengelse) - etter tilbakevennende sykdom`() {
         nyttVedtak(1.januar, 31.januar)
         håndterSykmelding(Sykmeldingsperiode(5.februar, 23.februar, 100.prosent))
-        val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 5.februar)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 5.februar)
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
         håndterSøknad(Sykdom(5.februar, 23.februar, 100.prosent), Ferie(5.februar, 23.februar))
         håndterSøknad(Sykdom(24.februar, 28.februar, 100.prosent))
-        håndterInntektsmeldingReplay(inntektsmeldingId, 2.vedtaksperiode.id(ORGNUMMER))
 
         assertForventetFeil(
             nå = {

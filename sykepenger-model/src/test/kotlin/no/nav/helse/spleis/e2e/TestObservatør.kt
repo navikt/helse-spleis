@@ -45,6 +45,7 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
     fun sisteVedtaksperiode() = IdInnhenter { orgnummer -> vedtaksperioder.getValue(orgnummer).last() }
 
     fun sisteVedtaksperiodeId(orgnummer: String) = vedtaksperioder.getValue(orgnummer).last()
+    fun sisteVedtaksperiodeIdOrNull(orgnummer: String) = vedtaksperioder[orgnummer]?.last()
     fun vedtaksperiode(orgnummer: String, indeks: Int) = vedtaksperioder.getValue(orgnummer).toList()[indeks]
     fun bedtOmInntektsmeldingReplay(vedtaksperiodeId: UUID) = vedtaksperiodeId in inntektsmeldingReplayEventer
 
@@ -83,6 +84,7 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
         vedtaksperiodeendringer.getOrPut(hendelseskontekst.vedtaksperiodeId()) { mutableListOf(event) }.add(event)
         vedtaksperioder.getOrPut(hendelseskontekst.orgnummer()) { mutableSetOf() }.add(sisteVedtaksperiode)
         tilstandsendringer.getOrPut(hendelseskontekst.vedtaksperiodeId()) { mutableListOf(event.forrigeTilstand) }.add(event.gjeldendeTilstand)
+        inntektsmeldingReplayEventer.remove(sisteVedtaksperiode)
         if (event.gjeldendeTilstand == TilstandType.AVSLUTTET) utbetalteVedtaksperioder.add(hendelseskontekst.vedtaksperiodeId())
     }
 

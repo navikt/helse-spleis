@@ -45,9 +45,8 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
         )
 
         håndterSykmelding(Sykmeldingsperiode(3.mars, 26.mars, 100.prosent))
-        val inntektsmeldingId = håndterInntektsmeldingMedValidering(2.vedtaksperiode, listOf(Periode(3.mars, 18.mars)))
+        håndterInntektsmeldingMedValidering(2.vedtaksperiode, listOf(Periode(3.mars, 18.mars)))
         håndterSøknadMedValidering(2.vedtaksperiode, Sykdom(3.mars, 26.mars, 100.prosent))
-        håndterInntektsmeldingReplay(inntektsmeldingId, 2.vedtaksperiode.id(ORGNUMMER))
         håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode, INNTEKT)
         håndterYtelser(2.vedtaksperiode)
@@ -97,11 +96,11 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
         )
 
         håndterSykmelding(Sykmeldingsperiode(8.mars, 26.mars, 100.prosent))
-        håndterInntektsmeldingMedValidering(3.vedtaksperiode, arbeidsgiverperioder = listOf(Periode(3.mars, 18.mars)))
+        håndterInntektsmelding(listOf(Periode(3.mars, 18.mars)))
 
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
 
-        håndterSøknadMedValidering(3.vedtaksperiode, Sykdom(8.mars, 26.mars, 100.prosent))
+        håndterSøknad(Sykdom(8.mars, 26.mars, 100.prosent))
         håndterYtelser(3.vedtaksperiode)
         håndterVilkårsgrunnlag(3.vedtaksperiode, INNTEKT)
         håndterYtelser(3.vedtaksperiode)
@@ -147,7 +146,6 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
         val imId = håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 23.januar)
         håndterSykmelding(Sykmeldingsperiode(11.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(11.januar, 31.januar, 100.prosent))
-        håndterInntektsmeldingReplay(imId, 2.vedtaksperiode.id(ORGNUMMER))
         håndterUtbetalingshistorikk(2.vedtaksperiode)
         assertVarsel(RV_IM_1, 2.vedtaksperiode.filter())
         assertVarsel(RV_IM_2, 2.vedtaksperiode.filter())

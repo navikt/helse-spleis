@@ -180,9 +180,8 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
     @Test
     fun `Inntektsmelding kommer før søknad - vi kommer oss videre til AvventerHistorikk pga replay`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmeldingReplay(inntektsmeldingId, 1.vedtaksperiode.id(ORGNUMMER))
         assertTilstander(
             1.vedtaksperiode,
             START,
@@ -218,15 +217,13 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
     @Test
     fun `drawio -- Out of order`() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
-        val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
 
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))
-        håndterInntektsmeldingReplay(inntektsmeldingId, 1.vedtaksperiode.id(ORGNUMMER))
         assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
 
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmeldingReplay(inntektsmeldingId, 2.vedtaksperiode.id(ORGNUMMER))
         assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
         assertTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK)
 
@@ -381,8 +378,6 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(11.januar, 26.januar, 100.prosent))
         val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterSøknad(Sykdom(11.januar, 26.januar, 100.prosent))
-        håndterInntektsmeldingReplay(inntektsmeldingId, 1.vedtaksperiode.id(ORGNUMMER))
-
         assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
     }
 
@@ -485,10 +480,9 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         utbetalPeriode(1.vedtaksperiode)
 
-        val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 20.februar)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 20.februar)
         håndterSykmelding(Sykmeldingsperiode(20.februar, 28.februar, 100.prosent))
         håndterSøknad(Sykdom(20.februar, 28.februar, 100.prosent))
-        håndterInntektsmeldingReplay(inntektsmeldingId, 2.vedtaksperiode.id(ORGNUMMER))
         håndterUtbetalingshistorikk(
             2.vedtaksperiode,
             utbetalinger = arrayOf(

@@ -10,7 +10,6 @@ import no.nav.helse.januar
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.forkastAlle
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
-import no.nav.helse.spleis.e2e.håndterInntektsmeldingReplay
 import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
@@ -58,7 +57,6 @@ internal class RutingAvInntektsmeldingOppgaverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar))
         val søknadId = håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), andreInntektskilder = listOf(Søknad.Inntektskilde(true, "FRILANSER")))
-        håndterInntektsmeldingReplay(inntektsmeldingId, 1.vedtaksperiode.id(ORGNUMMER))
         assertEquals(listOf(søknadId, inntektsmeldingId), observatør.opprettOppgaveEvent().flatMap { it.hendelser })
         assertEquals(listOf(1.vedtaksperiode.id(ORGNUMMER)), observatør.inntektsmeldingReplayEventer)
     }
@@ -73,10 +71,8 @@ internal class RutingAvInntektsmeldingOppgaverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         val inntektsmeldingId2 = håndterInntektsmelding(listOf(1.januar til 16.januar))
         val søknadId2 = håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), andreInntektskilder = listOf(Søknad.Inntektskilde(true, "FRILANSER")))
-        håndterInntektsmeldingReplay(inntektsmeldingId1, 2.vedtaksperiode.id(ORGNUMMER))
-        håndterInntektsmeldingReplay(inntektsmeldingId2, 2.vedtaksperiode.id(ORGNUMMER))
         assertEquals(listOf(søknadId1, inntektsmeldingId1, søknadId2, inntektsmeldingId2), observatør.opprettOppgaveEvent().flatMap { it.hendelser })
-        assertEquals(listOf(1.vedtaksperiode.id(ORGNUMMER), 2.vedtaksperiode.id(ORGNUMMER)), observatør.inntektsmeldingReplayEventer)
+        assertEquals(listOf(2.vedtaksperiode.id(ORGNUMMER)), observatør.inntektsmeldingReplayEventer)
     }
 
     @Test
@@ -94,7 +90,6 @@ internal class RutingAvInntektsmeldingOppgaverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(7.februar, 28.februar, 100.prosent))
         val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 7.februar)
         val søknadId = håndterSøknad(Sykdom(7.februar, 28.februar, 100.prosent), andreInntektskilder = listOf(Søknad.Inntektskilde(true, "FRILANSER")))
-        håndterInntektsmeldingReplay(inntektsmeldingId, 2.vedtaksperiode.id(ORGNUMMER))
 
         assertEquals(listOf(søknadId, inntektsmeldingId), observatør.opprettOppgaveForSpeilsaksbehandlereEvent().flatMap { it.hendelser })
     }

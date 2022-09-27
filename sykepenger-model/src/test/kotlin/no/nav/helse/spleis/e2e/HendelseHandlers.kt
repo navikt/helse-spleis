@@ -426,6 +426,7 @@ internal fun AbstractEndToEndTest.håndterSøknad(
     merknaderFraSykmelding: List<Søknad.Merknad> = emptyList(),
     permittert: Boolean = false
 ): UUID {
+    val før = observatør.sisteVedtaksperiodeIdOrNull(orgnummer)
     søknad(
         id,
         *perioder,
@@ -439,7 +440,19 @@ internal fun AbstractEndToEndTest.håndterSøknad(
         merknaderFraSykmelding = merknaderFraSykmelding,
         permittert = permittert
     ).håndter(Person::håndter)
+    val etterpå = observatør.sisteVedtaksperiodeIdOrNull(orgnummer)
     søknader[id] = Triple(sendtTilNAVEllerArbeidsgiver, andreInntektskilder, perioder)
+
+    /* replayer inntektsmeldinger automagisk */
+    if (etterpå != null && før != etterpå && observatør.bedtOmInntektsmeldingReplay(etterpå)) {
+        inntektsmeldinger
+            .mapValues { (it, gen) -> gen() }
+            .filterValues { im -> im.organisasjonsnummer() == orgnummer }
+            .forEach { (id, _) ->
+                håndterInntektsmeldingReplay(id, etterpå)
+            }
+    }
+
     return id
 }
 
@@ -483,7 +496,7 @@ internal fun AbstractEndToEndTest.håndterInntektsmelding(
     return id
 }
 
-internal fun AbstractEndToEndTest.håndterInntektsmeldingReplay(
+private fun AbstractEndToEndTest.håndterInntektsmeldingReplay(
     inntektsmeldingId: UUID,
     vedtaksperiodeId: UUID
 ) {

@@ -182,12 +182,11 @@ internal class DeleGrunnlagsdataTest : AbstractEndToEndTest() {
     fun `vilkårsgrunnlag tilbakestilles når vi ikke er en forlengelse likevel`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 21.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(22.januar, 22.februar, 100.prosent))
-        val inntektsmeldingId = håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)))
+        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)))
         håndterSøknad(
             Sykdom(1.januar, 21.januar, 100.prosent),
             Arbeid(18.januar, 21.januar)
         )
-        håndterInntektsmeldingReplay(inntektsmeldingId, 1.vedtaksperiode.id(ORGNUMMER))
         håndterSøknad(Sykdom(22.januar, 22.februar, 100.prosent))
         håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), 22.januar)
         håndterYtelser(1.vedtaksperiode)

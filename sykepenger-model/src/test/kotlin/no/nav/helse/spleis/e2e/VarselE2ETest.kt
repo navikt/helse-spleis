@@ -152,9 +152,8 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
     @Test
     fun `varsel - Vi har mottatt en inntektsmelding i en løpende sykmeldingsperiode med oppgitt første - bestemmende fraværsdag som er ulik tidligere fastsatt skjæringstidspunkt`() {
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 10.januar, 100.prosent))
-        val imId = håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 23.januar)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 23.januar)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(11.januar, 31.januar, 100.prosent))
-        håndterInntektsmeldingReplay(imId, 2.vedtaksperiode.id(ORGNUMMER))
         assertVarsel(RV_IM_1, 2.vedtaksperiode.filter())
     }
 
@@ -301,13 +300,10 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
     @Test
     @Disabled
     fun `varsel - Fant ikke refusjonsgrad for perioden - Undersøk oppgitt refusjon før du utbetaler`() {
-        val imId = håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 25.februar)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 25.februar)
         nyPeriode(1.januar til 10.januar)
         nyPeriode(11.januar til 31.januar)
         nyPeriode(1.februar til 28.februar)
-        håndterInntektsmeldingReplay(imId, 1.vedtaksperiode.id(ORGNUMMER))
-        håndterInntektsmeldingReplay(imId, 2.vedtaksperiode.id(ORGNUMMER))
-        håndterInntektsmeldingReplay(imId, 3.vedtaksperiode.id(ORGNUMMER))
         håndterUtbetalingshistorikk(2.vedtaksperiode)
         håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode)
