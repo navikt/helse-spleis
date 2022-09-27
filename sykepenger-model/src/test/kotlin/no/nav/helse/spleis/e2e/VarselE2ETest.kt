@@ -39,6 +39,7 @@ import no.nav.helse.person.Varselkode.RV_IV_1
 import no.nav.helse.person.Varselkode.RV_IV_2
 import no.nav.helse.person.Varselkode.RV_MV_1
 import no.nav.helse.person.Varselkode.RV_MV_2
+import no.nav.helse.person.Varselkode.RV_OS_3
 import no.nav.helse.person.Varselkode.RV_OV_1
 import no.nav.helse.person.Varselkode.RV_RE_1
 import no.nav.helse.person.Varselkode.RV_RV_1
@@ -60,6 +61,7 @@ import no.nav.helse.person.Varselkode.RV_VV_4
 import no.nav.helse.person.Varselkode.RV_VV_8
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
+import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -546,6 +548,22 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
         håndterUtbetalingshistorikk(1.vedtaksperiode)
         håndterInntektsmelding(listOf(31.januar til 15.februar))
         assertVarsel(RV_RV_1)
+    }
+
+    @Test
+    fun `varsel - Endrer tidligere oppdrag, Kontroller simuleringen`(){
+        nyttVedtak(3.januar, 26.januar)
+        nullstillTilstandsendringer()
+
+        håndterOverstyrTidslinje((20.januar til 22.januar).map { manuellFeriedag(it) })
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+        håndterUtbetalt()
+
+        håndterOverstyrTidslinje((23.januar til 23.januar).map { manuellFeriedag(it) })
+        håndterYtelser(1.vedtaksperiode)
+        assertVarsel(RV_OS_3)
     }
 
     @Test

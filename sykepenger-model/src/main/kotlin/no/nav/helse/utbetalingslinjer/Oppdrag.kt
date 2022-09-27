@@ -13,6 +13,7 @@ import java.time.LocalDate
 import java.time.LocalDate.MIN
 import java.time.LocalDateTime
 import java.util.*
+import no.nav.helse.person.Varselkode.RV_OS_3
 
 internal const val WARN_FORLENGER_OPPHØRT_OPPDRAG = "Utbetalingen forlenger et tidligere oppdrag som opphørte alle utbetalte dager. Sjekk simuleringen."
 internal const val WARN_OPPDRAG_FOM_ENDRET = "Utbetalingens fra og med-dato er endret. Kontroller simuleringen"
@@ -317,7 +318,7 @@ internal class Oppdrag private constructor(
         add(this.indexOf(nåværende), tidligere.opphørslinje(tidligere.fom))
         nåværende.kobleTil(linkTo)
         tilstand = Ny()
-        aktivitetslogg.varsel("Endrer tidligere oppdrag. Kontroller simuleringen.")
+        aktivitetslogg.varsel(RV_OS_3)
     }
 
     private fun opphørOppdrag(tidligere: Oppdrag) =
