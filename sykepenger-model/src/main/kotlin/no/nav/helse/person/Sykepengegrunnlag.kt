@@ -99,14 +99,16 @@ internal class Sykepengegrunnlag(
         return oppfyllerMinsteinntektskrav && !aktivitetslogg.harFunksjonelleFeilEllerVerre()
     }
 
+    internal fun harNødvendigInntektForVilkårsprøving(organisasjonsnummer: String) =
+        arbeidsgiverInntektsopplysninger.harInntekt(organisasjonsnummer)
+
     internal fun validerInntekt(aktivitetslogg: IAktivitetslogg, organisasjonsnummer: List<String>) {
-        val manglerInntekt = organisasjonsnummer.filterNot { arbeidsgiverInntektsopplysninger.harInntekt(it) }.takeUnless { it.isEmpty() } ?: return
+        val manglerInntekt = organisasjonsnummer.filterNot { harNødvendigInntektForVilkårsprøving(it) }.takeUnless { it.isEmpty() } ?: return
         manglerInntekt.forEach {
             aktivitetslogg.info("Mangler inntekt for $it på skjæringstidspunkt $skjæringstidspunkt")
         }
         aktivitetslogg.funksjonellFeil(RV_SV_2)
     }
-
     internal fun justerGrunnbeløp() =
         Sykepengegrunnlag(
             alder = alder,
@@ -116,6 +118,7 @@ internal class Sykepengegrunnlag(
             vurdertInfotrygd = vurdertInfotrygd,
             skjønnsmessigFastsattBeregningsgrunnlag = skjønnsmessigFastsattBeregningsgrunnlag
         )
+
     internal fun accept(visitor: SykepengegrunnlagVisitor) {
         visitor.preVisitSykepengegrunnlag(
             this,
@@ -163,7 +166,6 @@ internal class Sykepengegrunnlag(
     internal fun erRelevant(organisasjonsnummer: String) = arbeidsgiverInntektsopplysninger.any {
         it.gjelder(organisasjonsnummer)
     }
-
     internal fun medInntekt(organisasjonsnummer: String, dato: LocalDate, økonomi: Økonomi, arbeidsgiverperiode: Arbeidsgiverperiode?, regler: ArbeidsgiverRegler, subsumsjonObserver: SubsumsjonObserver): Økonomi? {
         return arbeidsgiverInntektsopplysninger.medInntekt(organisasjonsnummer, skjæringstidspunkt, dato, økonomi, arbeidsgiverperiode, regler, subsumsjonObserver)
     }
@@ -190,8 +192,8 @@ internal class Sykepengegrunnlag(
         result = 31 * result + deaktiverteArbeidsforhold.hashCode()
         return result
     }
-    override fun compareTo(other: Inntekt) = this.sykepengegrunnlag.compareTo(other)
 
+    override fun compareTo(other: Inntekt) = this.sykepengegrunnlag.compareTo(other)
     internal fun er6GBegrenset() = begrensning == ER_6G_BEGRENSET
 
     enum class Begrensning {

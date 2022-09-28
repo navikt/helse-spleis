@@ -45,7 +45,6 @@ import no.nav.helse.person.Vedtaksperiode.Companion.SKAL_INNGÅ_I_SYKEPENGEGRUNN
 import no.nav.helse.person.Vedtaksperiode.Companion.TIDLIGERE_OG_ETTERGØLGENDE
 import no.nav.helse.person.Vedtaksperiode.Companion.avventerRevurdering
 import no.nav.helse.person.Vedtaksperiode.Companion.feiletRevurdering
-import no.nav.helse.person.Vedtaksperiode.Companion.harNødvendigInntekt
 import no.nav.helse.person.Vedtaksperiode.Companion.harUtbetaling
 import no.nav.helse.person.Vedtaksperiode.Companion.iderMedUtbetaling
 import no.nav.helse.person.Vedtaksperiode.Companion.kanStarteRevurdering
@@ -194,24 +193,15 @@ internal class Arbeidsgiver private constructor(
 
         internal fun List<Arbeidsgiver>.beregnSykepengegrunnlag(skjæringstidspunkt: LocalDate, subsumsjonObserver: SubsumsjonObserver, forklaring: String?, subsumsjon: Subsumsjon?) =
             mapNotNull { arbeidsgiver ->
-                val førsteFraværsdag = arbeidsgiver.finnFørsteFraværsdag(skjæringstidspunkt)
-                val inntektsopplysning = arbeidsgiver.inntektshistorikk.omregnetÅrsinntekt(skjæringstidspunkt, førsteFraværsdag)
-                val startdatoArbeidsforhold = arbeidsgiver.startdatoForArbeidsforhold(skjæringstidspunkt)
-                inntektsopplysning?.subsumerSykepengegrunnlag(
-                    subsumsjonObserver = subsumsjonObserver,
-                    skjæringstidspunkt = skjæringstidspunkt,
-                    organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
-                    startdatoArbeidsforhold = startdatoArbeidsforhold,
-                    forklaring = forklaring,
-                    subsumsjon
-                )
-                when {
-                    arbeidsgiver.harDeaktivertArbeidsforhold(skjæringstidspunkt) -> null
-                    inntektsopplysning == null && arbeidsgiver.arbeidsforholdhistorikk.harIkkeDeaktivertArbeidsforholdNyereEnn(skjæringstidspunkt, MAKS_INNTEKT_GAP) -> {
-                        ArbeidsgiverInntektsopplysning(arbeidsgiver.organisasjonsnummer, IkkeRapportert(UUID.randomUUID(), skjæringstidspunkt))
-                    }
-                    inntektsopplysning != null -> ArbeidsgiverInntektsopplysning(arbeidsgiver.organisasjonsnummer, inntektsopplysning)
-                    else -> null
+                arbeidsgiver.beregnSykepengegrunnlag(skjæringstidspunkt) { inntektsopplysning ->
+                    inntektsopplysning?.subsumerSykepengegrunnlag(
+                        subsumsjonObserver = subsumsjonObserver,
+                        skjæringstidspunkt = skjæringstidspunkt,
+                        organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
+                        startdatoArbeidsforhold = arbeidsgiver.startdatoForArbeidsforhold(skjæringstidspunkt),
+                        forklaring = forklaring,
+                        subsumsjon
+                    )
                 }
             }
 
@@ -270,8 +260,7 @@ internal class Arbeidsgiver private constructor(
             skjæringstidspunkt: LocalDate,
             erForlengelse: Boolean
         ) {
-            val vedtaksperioder = flatMap { it.vedtaksperioder }.filter(SKAL_INNGÅ_I_SYKEPENGEGRUNNLAG(skjæringstidspunkt))
-            val relevanteArbeidsgivere = filter { arbeidsgiver -> arbeidsgiver.vedtaksperioder.any { vedtaksperiode -> vedtaksperiode in vedtaksperioder } }.distinct().map { it.organisasjonsnummer }
+            val relevanteArbeidsgivere = medSkjæringstidspunkt(skjæringstidspunkt).map { it.organisasjonsnummer }
             vilkårsgrunnlag.valider(aktivitetslogg, relevanteArbeidsgivere, erForlengelse)
         }
 
@@ -305,11 +294,18 @@ internal class Arbeidsgiver private constructor(
             ) }
         }
 
+        private fun Iterable<Arbeidsgiver>.medSkjæringstidspunkt(skjæringstidspunkt: LocalDate) = this
+            .filter { arbeidsgiver -> arbeidsgiver.vedtaksperioder.any(SKAL_INNGÅ_I_SYKEPENGEGRUNNLAG(skjæringstidspunkt)) }
+        internal fun Iterable<Arbeidsgiver>.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag(skjæringstidspunkt: LocalDate) = this
+            .medSkjæringstidspunkt(skjæringstidspunkt)
+            .any { arbeidsgiver -> arbeidsgiver.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag(skjæringstidspunkt) }
+
         /* krever inntekt for alle vedtaksperioder som deler skjæringstidspunkt,
             men tillater at det ikke er inntekt for perioder innenfor arbeidsgiverperioden/uten utbetaling
          */
-        internal fun Iterable<Arbeidsgiver>.harNødvendigInntekt(skjæringstidspunkt: LocalDate) =
-                flatMap { it.vedtaksperioder }.harNødvendigInntekt(skjæringstidspunkt)
+        internal fun Iterable<Arbeidsgiver>.harNødvendigInntektForVilkårsprøving(skjæringstidspunkt: LocalDate) = this
+            .medSkjæringstidspunkt(skjæringstidspunkt)
+            .all { arbeidsgiver -> arbeidsgiver.harNødvendigInntektForVilkårsprøving(skjæringstidspunkt) }
 
         internal fun Iterable<Arbeidsgiver>.trengerSøknadISammeMåned(skjæringstidspunkt: LocalDate) = this
             .filter { !it.harSykdomFor(skjæringstidspunkt) }
@@ -341,6 +337,35 @@ internal class Arbeidsgiver private constructor(
 
         internal fun List<Arbeidsgiver>.skjæringstidspunktperiode(skjæringstidspunkt: LocalDate) =
             flatMap { it.vedtaksperioder }.skjæringstidspunktperiode(skjæringstidspunkt)
+    }
+
+    /* hvorvidt arbeidsgiver ikke inngår i sykepengegrunnlaget som er på et vilkårsgrunnlag,
+        for eksempel i saker hvor man var syk på én arbeidsgiver på skjæringstidspunktet, også blir man
+        etterhvert syk fra ny arbeidsgiver (f.eks. jobb-bytte)
+     */
+    internal fun manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag(skjæringstidspunkt: LocalDate) =
+        harNødvendigInntektITidligereBeregnetSykepengegrunnlag(skjæringstidspunkt) == false
+
+    private fun harNødvendigInntektForVilkårsprøving(skjæringstidspunkt: LocalDate) : Boolean {
+        return harNødvendigInntektITidligereBeregnetSykepengegrunnlag(skjæringstidspunkt) ?: kanBeregneSykepengegrunnlag(skjæringstidspunkt)
+    }
+
+    private fun harNødvendigInntektITidligereBeregnetSykepengegrunnlag(skjæringstidspunkt: LocalDate) =
+        person.vilkårsgrunnlagFor(skjæringstidspunkt)?.harNødvendigInntektForVilkårsprøving(organisasjonsnummer)
+
+    private fun kanBeregneSykepengegrunnlag(skjæringstidspunkt: LocalDate) = beregnSykepengegrunnlag(skjæringstidspunkt) != null
+    private fun beregnSykepengegrunnlag(skjæringstidspunkt: LocalDate, block: (inntekstopplysning: Inntektshistorikk.Inntektsopplysning?) -> Unit = {}) : ArbeidsgiverInntektsopplysning? {
+        val førsteFraværsdag = finnFørsteFraværsdag(skjæringstidspunkt)
+        val inntektsopplysning = inntektshistorikk.omregnetÅrsinntekt(skjæringstidspunkt, førsteFraværsdag)
+        block(inntektsopplysning)
+        return when {
+            harDeaktivertArbeidsforhold(skjæringstidspunkt) -> null
+            inntektsopplysning == null && arbeidsforholdhistorikk.harIkkeDeaktivertArbeidsforholdNyereEnn(skjæringstidspunkt, MAKS_INNTEKT_GAP) -> {
+                ArbeidsgiverInntektsopplysning(organisasjonsnummer, IkkeRapportert(UUID.randomUUID(), skjæringstidspunkt))
+            }
+            inntektsopplysning != null -> ArbeidsgiverInntektsopplysning(organisasjonsnummer, inntektsopplysning)
+            else -> null
+        }
     }
 
     private fun startdatoForArbeidsforhold(skjæringstidspunkt: LocalDate): LocalDate? {
@@ -910,8 +935,8 @@ internal class Arbeidsgiver private constructor(
 
     internal fun finnSammenhengendePeriode(skjæringstidspunkt: LocalDate) = vedtaksperioder.medSkjæringstidspunkt(skjæringstidspunkt)
 
-    internal fun harNødvendigInntektForVilkårsprøving(skjæringstidspunkt: LocalDate, periodeStart: LocalDate, ingenUtbetaling: Boolean): Boolean {
-        return inntektshistorikk.harNødvendigInntektForVilkårsprøving(skjæringstidspunkt, periodeStart, finnFørsteFraværsdag(skjæringstidspunkt), !ingenUtbetaling)
+    internal fun harNødvendigOpplysninger(skjæringstidspunkt: LocalDate, periodeStart: LocalDate, ingenUtbetaling: Boolean): Boolean {
+        return inntektshistorikk.harNødvendigOpplysningerFraArbeidsgiver(skjæringstidspunkt, periodeStart, finnFørsteFraværsdag(skjæringstidspunkt), !ingenUtbetaling)
     }
 
     internal fun addInntekt(inntektsmelding: Inntektsmelding, førsteFraværsdag: LocalDate, subsumsjonObserver: SubsumsjonObserver) {

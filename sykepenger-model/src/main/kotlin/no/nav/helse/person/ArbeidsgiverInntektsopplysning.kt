@@ -46,7 +46,7 @@ internal class ArbeidsgiverInntektsopplysning(
         }
 
         internal fun List<ArbeidsgiverInntektsopplysning>.harInntekt(organisasjonsnummer: String) =
-            any { it.orgnummer == organisasjonsnummer }
+            singleOrNull { it.orgnummer == organisasjonsnummer } != null
 
         internal fun List<ArbeidsgiverInntektsopplysning>.omregnetÅrsinntekt() =
             fold(INGEN) { acc, item -> item.omregnetÅrsinntekt(acc)}

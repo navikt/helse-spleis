@@ -244,6 +244,8 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         }
 
         internal fun er6GBegrenset() = sykepengegrunnlag.er6GBegrenset()
+        internal fun harNødvendigInntektForVilkårsprøving(organisasjonsnummer: String) =
+            sykepengegrunnlag.harNødvendigInntektForVilkårsprøving(organisasjonsnummer)
 
         internal companion object {
             internal fun medInntekt(

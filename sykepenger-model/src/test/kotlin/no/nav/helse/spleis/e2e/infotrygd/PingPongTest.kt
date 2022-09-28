@@ -9,7 +9,6 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
-import no.nav.helse.person.Varselkode
 import no.nav.helse.person.Varselkode.RV_OS_2
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning

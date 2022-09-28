@@ -39,7 +39,6 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.medlemskap
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.omsorgspenger
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.opplæringspenger
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.pleiepenger
-import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigInntekt
 import no.nav.helse.person.Arbeidsgiver.Companion.senerePerioderPågående
 import no.nav.helse.person.Arbeidsgiver.Companion.trengerSøknadFør
 import no.nav.helse.person.Arbeidsgiver.Companion.trengerSøknadISammeMåned
@@ -73,6 +72,7 @@ import no.nav.helse.person.TilstandType.UTBETALING_FEILET
 import no.nav.helse.person.Varselkode.RV_IM_4
 import no.nav.helse.person.Varselkode.RV_RV_1
 import no.nav.helse.person.Varselkode.RV_SI_2
+import no.nav.helse.person.Varselkode.RV_SV_2
 import no.nav.helse.person.Varselkode.RV_UT_1
 import no.nav.helse.person.Varselkode.RV_VV_1
 import no.nav.helse.person.Varselkode.RV_VV_2
@@ -380,8 +380,13 @@ internal class Vedtaksperiode private constructor(
         return true
     }
 
+    private fun harNødvendigOpplysningerFraArbeidsgiver() =
+        arbeidsgiver.harNødvendigOpplysninger(skjæringstidspunkt, periode.start, !forventerInntekt())
+
+    private fun manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag() =
+        person.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag(skjæringstidspunkt)
     private fun harNødvendigInntektForVilkårsprøving() =
-        arbeidsgiver.harNødvendigInntektForVilkårsprøving(skjæringstidspunkt, periode.start, !forventerInntekt())
+        person.harNødvendigInntektForVilkårsprøving(skjæringstidspunkt)
 
     private fun låsOpp() = arbeidsgiver.låsOpp(periode)
     private fun lås() = arbeidsgiver.lås(periode)
@@ -1011,7 +1016,7 @@ internal class Vedtaksperiode private constructor(
             }
             vedtaksperiode.håndterSøknad(søknad) {
                 when {
-                    !vedtaksperiode.harNødvendigInntektForVilkårsprøving() -> AvventerInntektsmeldingEllerHistorikk
+                    !vedtaksperiode.harNødvendigOpplysningerFraArbeidsgiver() -> AvventerInntektsmeldingEllerHistorikk
                     else -> AvventerBlokkerendePeriode
                 }
             }
@@ -1469,7 +1474,11 @@ internal class Vedtaksperiode private constructor(
                     "Gjenopptar ikke behandling fordi det finnes pågående revurderinger."
                 )
                 !vedtaksperiode.forventerInntekt() -> vedtaksperiode.tilstand(hendelse, AvsluttetUtenUtbetaling)
-                !arbeidsgivere.harNødvendigInntekt(vedtaksperiode.skjæringstidspunkt) -> return hendelse.info(
+                vedtaksperiode.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag() -> {
+                    hendelse.funksjonellFeil(RV_SV_2)
+                    vedtaksperiode.forkast(hendelse)
+                }
+                !vedtaksperiode.harNødvendigInntektForVilkårsprøving() -> return hendelse.info(
                     "Gjenopptar ikke behandling fordi minst én arbeidsgiver ikke har tilstrekkelig inntekt for skjæringstidspunktet"
                 )
                 else -> vedtaksperiode.tilstand(hendelse, AvventerHistorikk)
@@ -1526,7 +1535,7 @@ internal class Vedtaksperiode private constructor(
             arbeidsgivere: Iterable<Arbeidsgiver>,
             hendelse: IAktivitetslogg
         ) {
-            if (!vedtaksperiode.harNødvendigInntektForVilkårsprøving())
+            if (!vedtaksperiode.harNødvendigOpplysningerFraArbeidsgiver())
                 return vedtaksperiode.tilstand(hendelse, AvventerInntektsmeldingEllerHistorikk)
             vedtaksperiode.tilstand(hendelse, AvventerHistorikk)
         }
@@ -2202,7 +2211,7 @@ internal class Vedtaksperiode private constructor(
                 return hendelse.info("Revurderingen påvirker ikke denne perioden i AvsluttetUtenUtbetaling")
             }
             hendelse.varsel(RV_RV_1)
-            if (!vedtaksperiode.harNødvendigInntektForVilkårsprøving() || !arbeidsgivere.harNødvendigInntekt(vedtaksperiode.skjæringstidspunkt)) return vedtaksperiode.tilstand(hendelse, AvventerRevurdering) {
+            if (!vedtaksperiode.harNødvendigInntektForVilkårsprøving()) return vedtaksperiode.tilstand(hendelse, AvventerRevurdering) {
                 hendelse.info("Avventer inntekt for minst én annen arbeidsgiver")
             }
             return vedtaksperiode.nesteRevurderingstilstand(hendelse, overstyrt, pågående)
@@ -2503,7 +2512,7 @@ internal class Vedtaksperiode private constructor(
 
         internal fun Iterable<Vedtaksperiode>.harNødvendigInntekt(skjæringstidspunkt: LocalDate) = this
             .filter(SKAL_INNGÅ_I_SYKEPENGEGRUNNLAG(skjæringstidspunkt))
-            .all { it.harNødvendigInntektForVilkårsprøving() }
+            .all { it.harNødvendigOpplysningerFraArbeidsgiver() }
 
         internal fun List<Vedtaksperiode>.lagRevurdering(
             vedtaksperiode: Vedtaksperiode,
@@ -2595,7 +2604,7 @@ internal class Vedtaksperiode private constructor(
         // Finner eldste vedtaksperiode, foretrekker eldste arbeidsgiver ved likhet (ag1 før ag2)
         internal fun List<Vedtaksperiode>.kanStarteRevurdering(arbeidsgivere: List<Arbeidsgiver>, vedtaksperiode: Vedtaksperiode): Boolean {
             val pågående = pågående() ?: nesteRevurderingsperiode(arbeidsgivere, vedtaksperiode)
-            return vedtaksperiode == pågående && arbeidsgivere.harNødvendigInntekt(vedtaksperiode.skjæringstidspunkt)
+            return vedtaksperiode == pågående && vedtaksperiode.harNødvendigInntektForVilkårsprøving()
         }
 
         private fun List<Vedtaksperiode>.nesteRevurderingsperiode(arbeidsgivere: List<Arbeidsgiver>, other: Vedtaksperiode) =

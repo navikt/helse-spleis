@@ -47,7 +47,7 @@ internal class Inntektshistorikk {
         it.harInntektsmelding(førsteFraværsdag)
     }
 
-    internal fun harNødvendigInntektForVilkårsprøving(skjæringstidspunkt: LocalDate, periodeStart: LocalDate, førsteFraværsdag: LocalDate?, harUtbetaling: Boolean): Boolean {
+    internal fun harNødvendigOpplysningerFraArbeidsgiver(skjæringstidspunkt: LocalDate, periodeStart: LocalDate, førsteFraværsdag: LocalDate?, harUtbetaling: Boolean): Boolean {
         if (førsteFraværsdag != null && harInntektsmelding(førsteFraværsdag)) return true
         val inntektsopplysning = omregnetÅrsinntekt(skjæringstidspunkt, periodeStart, førsteFraværsdag) ?: return false
         return inntektsopplysning.erNødvendigInntektForVilkårsprøving(harUtbetaling)

@@ -40,6 +40,7 @@ import no.nav.helse.person.Arbeidsgiver.Companion.finn
 import no.nav.helse.person.Arbeidsgiver.Companion.ghostPeriode
 import no.nav.helse.person.Arbeidsgiver.Companion.gjenopptaBehandling
 import no.nav.helse.person.Arbeidsgiver.Companion.harForkastetVedtaksperiodeSomBlokkerBehandling
+import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigInntektForVilkårsprøving
 import no.nav.helse.person.Arbeidsgiver.Companion.harPeriodeSomBlokkererOverstyring
 import no.nav.helse.person.Arbeidsgiver.Companion.harUferdigPeriodeFør
 import no.nav.helse.person.Arbeidsgiver.Companion.harUtbetaltPeriode
@@ -48,6 +49,7 @@ import no.nav.helse.person.Arbeidsgiver.Companion.håndterOverstyringAvGhostInnt
 import no.nav.helse.person.Arbeidsgiver.Companion.inntekterForSammenligningsgrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.kanStarteRevurdering
 import no.nav.helse.person.Arbeidsgiver.Companion.lagRevurdering
+import no.nav.helse.person.Arbeidsgiver.Companion.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.nyPeriode
 import no.nav.helse.person.Arbeidsgiver.Companion.nåværendeVedtaksperioder
 import no.nav.helse.person.Arbeidsgiver.Companion.relevanteArbeidsgivere
@@ -972,4 +974,9 @@ class Person private constructor(
 
     internal fun finnesEnVedtaksperiodeSomOverlapperOgStarterFør(ny: Vedtaksperiode) =
         arbeidsgivere.any { it.finnVedtaksperiodeSomOverlapperOgStarterFør(ny) != null }
+
+    internal fun manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag(skjæringstidspunkt: LocalDate) =
+        arbeidsgivere.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag(skjæringstidspunkt)
+    internal fun harNødvendigInntektForVilkårsprøving(skjæringstidspunkt: LocalDate) =
+        arbeidsgivere.harNødvendigInntektForVilkårsprøving(skjæringstidspunkt)
 }
