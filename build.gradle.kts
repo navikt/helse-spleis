@@ -43,12 +43,12 @@ allprojects {
         implementation("com.github.seratch:kotliquery:$kotliqueryVersion")
         implementation("org.flywaydb:flyway-core:$flywayVersion")
 
-        // Midledertidig løsnings, pga problemer med KGraphQL og ktor 2.0 se: https://github.com/aPureBase/KGraphQL/issues/185
+        // Midledertidig løsnings, pga problemer med KGraphQL og ktor 2.0 se: k
         // Etter evt fix fra apurebase Legg tilbake importerne:
         // implementation("com.apurebase:kgraphql:$kGraphQLVersion")
         // implementation("com.apurebase:kgraphql-ktor:$kGraphQLVersion")
-        implementation("com.github.untoldwind.KGraphQL:kgraphql:0.17.14-fork-5")
-        implementation("com.github.untoldwind.KGraphQL:kgraphql-ktor:0.17.14-fork-6")
+        implementation("com.github.untoldwind.KGraphQL:kgraphql:0.17.14-fork-8")
+        implementation("com.github.untoldwind.KGraphQL:kgraphql-ktor:0.17.14-fork-8")
 
         testImplementation("org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion")
         testImplementation("org.junit.jupiter:junit-jupiter-params:$junitJupiterVersion")
