@@ -1041,7 +1041,14 @@ internal class Vedtaksperiode private constructor(
             LocalDateTime.MAX
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            if(vedtaksperiode.forventerInntekt()) hendelse.info("Revurdering førte til at vedtaksperioden trenger inntektsmelding")
+            if(!vedtaksperiode.harNødvendigInntektForVilkårsprøving()) {
+                if (Toggle.RevurderOutOfOrder.enabled) {
+                    hendelse.info("Revurdering førte til at sykefraværstilfellet trenger inntektsmelding")
+                    vedtaksperiode.trengerInntektsmelding(hendelse.hendelseskontekst())
+                } else {
+                    sikkerlogg.info("Revurdering førte til at sykefraværstilfellet trenger inntektsmelding: id=${vedtaksperiode.id}")
+                }
+            }
         }
 
         override fun gjenopptaBehandling(

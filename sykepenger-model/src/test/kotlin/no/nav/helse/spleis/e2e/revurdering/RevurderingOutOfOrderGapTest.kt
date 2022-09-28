@@ -20,7 +20,6 @@ import no.nav.helse.januar
 import no.nav.helse.juni
 import no.nav.helse.mai
 import no.nav.helse.mars
-import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -112,6 +111,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
             subset = 5.februar til 10.februar
         )
     }
+
     @Test
     fun `out of order periode trigger revurdering`() {
         nyttVedtak(1.mai, 31.mai)
@@ -119,6 +119,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
         nyttVedtak(1.januar, 31.januar)
         assertSisteTilstand(3.vedtaksperiode, AVSLUTTET)
+
         assertTilstander(
             1.vedtaksperiode,
             AVSLUTTET,
@@ -580,7 +581,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         nyPeriode(1.januar til 31.januar)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
 
-        assertIngenInfo("Revurdering førte til at vedtaksperioden trenger inntektsmelding", 1.vedtaksperiode.filter())
+        assertIngenInfo("Revurdering førte til at sykefraværstilfellet trenger inntektsmelding", 1.vedtaksperiode.filter())
 
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterYtelser(2.vedtaksperiode)
@@ -606,7 +607,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         nyPeriode(1.februar til 25.februar)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_REVURDERING)
 
-        assertInfo("Revurdering førte til at vedtaksperioden trenger inntektsmelding", 1.vedtaksperiode.filter())
+        assertInfo("Revurdering førte til at sykefraværstilfellet trenger inntektsmelding", 1.vedtaksperiode.filter())
 
         håndterInntektsmelding(listOf(1.februar til 16.februar))
         håndterYtelser(2.vedtaksperiode)
@@ -767,15 +768,9 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_REVURDERING)
 
-        assertForventetFeil(
-            forklaring = "Burde si omgivelsene at vi trenger inntektsmelding",
-            nå = {
-                assertEquals(1, observatør.manglendeInntektsmeldingVedtaksperioder.size) // februar-perioden
-            },
-            ønsket = {
-                assertEquals(2, observatør.manglendeInntektsmeldingVedtaksperioder.size) // først i februar, så i mars
-            }
-        )
+        assertEquals(2, observatør.manglendeInntektsmeldingVedtaksperioder.size) // For 1. februar og 1.mars
+        assertInfo("Revurdering førte til at sykefraværstilfellet trenger inntektsmelding", 1.vedtaksperiode.filter())
+
         håndterInntektsmelding(listOf(1.februar til 16.februar), førsteFraværsdag = 1.mars)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING)
@@ -789,5 +784,18 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
 
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+    }
+
+    @Test
+    fun `Out of order gjør at senere periode revurderes - ber ikke om ny inntektsmelding`() {
+        nyttVedtak(1.mars, 31.mars)
+
+        nyPeriode(1.februar til 25.februar)
+
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_REVURDERING)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
+
+        assertEquals(2, observatør.manglendeInntektsmeldingVedtaksperioder.size)
+        assertIngenInfo("Revurdering førte til at sykefraværstilfellet trenger inntektsmelding", 1.vedtaksperiode.filter())
     }
 }
