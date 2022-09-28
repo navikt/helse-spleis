@@ -43,7 +43,7 @@ allprojects {
         implementation("com.github.seratch:kotliquery:$kotliqueryVersion")
         implementation("org.flywaydb:flyway-core:$flywayVersion")
 
-        // Midledertidig løsnings, pga problemer med KGraphQL og ktor 2.0 se: k
+        // Midledertidig løsnings, pga problemer med KGraphQL og ktor 2.0 se: https://github.com/aPureBase/KGraphQL/issues/185
         // Etter evt fix fra apurebase Legg tilbake importerne:
         // implementation("com.apurebase:kgraphql:$kGraphQLVersion")
         // implementation("com.apurebase:kgraphql-ktor:$kGraphQLVersion")
