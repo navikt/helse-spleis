@@ -25,7 +25,7 @@ internal class ArbeidsgiverInspektør(arbeidsgiver: Arbeidsgiver): ArbeidsgiverV
         arbeidsgiver.accept(this)
     }
 
-    internal fun aktiveVedtaksperioder() = aktiveVedtaksperioder.map { vedtaksperiode -> vedtaksperioder.entries.single { it.value == vedtaksperiode }.key }
+    internal fun aktiveVedtaksperioder() = aktiveVedtaksperioder
     internal fun sisteVedtaksperiodeTilstander() = sisteVedtaksperiodeTilstander
 
     override fun preVisitVedtaksperiode(

@@ -386,24 +386,6 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `avslutter korteperioder med gap med arbeidsgiversøknad etter IM`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(9.januar, 12.januar, 100.prosent))
-        håndterSykmelding(Sykmeldingsperiode(16.januar, 31.januar, 100.prosent))
-        håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(
-            1.januar til 5.januar,
-            9.januar til 12.januar,
-            16.januar til 22.januar
-        ), førsteFraværsdag = 16.januar)
-        håndterSøknad(Sykdom(1.januar, 5.januar, 100.prosent))
-        håndterSøknad(Sykdom(9.januar, 12.januar, 100.prosent))
-        håndterSøknad(Sykdom(16.januar, 31.januar, 100.prosent))
-        assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(3.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
-    }
-
-    @Test
     fun `avslutter korte perioder med forlengelse med arbeidsgiversøknad før IM`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100.prosent))
         håndterSykmelding(Sykmeldingsperiode(9.januar, 12.januar, 100.prosent))
@@ -458,7 +440,6 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
         assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
     }
 
-
     @Test
     fun `avslutter korte perioder med gap med søknad etter IM`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 5.januar, 100.prosent))
@@ -472,6 +453,9 @@ internal class SøknadArbeidsgiverE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.januar, 5.januar, 100.prosent))
         håndterSøknad(Sykdom(9.januar, 12.januar, 100.prosent))
         håndterSøknad(Sykdom(16.januar, 31.januar, 100.prosent))
+        assertEquals(1.januar til 5.januar, inspektør.periode(1.vedtaksperiode))
+        assertEquals(9.januar til 12.januar, inspektør.periode(2.vedtaksperiode))
+        assertEquals(16.januar til 31.januar, inspektør.periode(3.vedtaksperiode))
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(3.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)

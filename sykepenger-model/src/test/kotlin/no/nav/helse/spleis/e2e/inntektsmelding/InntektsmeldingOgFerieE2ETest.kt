@@ -43,6 +43,7 @@ import no.nav.helse.spleis.e2e.repeat
 import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class InntektsmeldingOgFerieE2ETest : AbstractEndToEndTest() {
@@ -161,6 +162,9 @@ internal class InntektsmeldingOgFerieE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(5.februar, 23.februar, 100.prosent), Ferie(5.februar, 23.februar))
         håndterSøknad(Sykdom(24.februar, 28.februar, 100.prosent), Ferie(24.februar, 28.februar))
 
+        assertEquals(1.januar til 31.januar, inspektør.periode(1.vedtaksperiode))
+        assertEquals(5.februar til 23.februar, inspektør.periode(2.vedtaksperiode))
+        assertEquals(24.februar til 28.februar, inspektør.periode(3.vedtaksperiode))
         assertForventetFeil(
             nå = {
                 assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE)
@@ -181,7 +185,9 @@ internal class InntektsmeldingOgFerieE2ETest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent))
         håndterSøknad(Sykdom(5.februar, 23.februar, 100.prosent), Ferie(5.februar, 23.februar))
         håndterSøknad(Sykdom(24.februar, 28.februar, 100.prosent))
-
+        assertEquals(1.januar til 31.januar, inspektør.periode(1.vedtaksperiode))
+        assertEquals(5.februar til 23.februar, inspektør.periode(2.vedtaksperiode))
+        assertEquals(24.februar til 28.februar, inspektør.periode(3.vedtaksperiode))
         assertForventetFeil(
             nå = {
                 assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)

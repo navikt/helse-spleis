@@ -229,6 +229,7 @@ internal class Vedtaksperiode private constructor(
         return overlapper.also {
             if (erAlleredeHensyntatt(inntektsmelding)) {
                 sikkerlogg.info("Vedtaksperiode med id=$id har allerede hensyntatt inntektsmeldingen med id=${inntektsmelding.meldingsreferanseId()}, replayes det en inntektsmelding unødvendig?")
+                inntektsmelding.trimLeft(periode.endInclusive)
                 return@also
             }
             if (it) inntektsmelding.leggTil(hendelseIder)

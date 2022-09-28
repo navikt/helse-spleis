@@ -21,6 +21,10 @@ internal class VedtaksperiodeInspektør(vedtaksperiode: Vedtaksperiode) : Vedtak
     }
 
     private lateinit var periodetypeGetter: () -> Periodetype
+    internal lateinit var id: UUID
+        private set
+    internal lateinit var periode: Periode
+        private set
     internal val periodetype get() = periodetypeGetter()
     internal lateinit var skjæringstidspunkt: LocalDate
 
@@ -40,6 +44,8 @@ internal class VedtaksperiodeInspektør(vedtaksperiode: Vedtaksperiode) : Vedtak
         inntektsmeldingInfo: InntektsmeldingInfo?,
         inntektskilde: Inntektskilde
     ) {
+        this.id = id
+        this.periode = periode
         this.skjæringstidspunkt = skjæringstidspunkt()
         this.periodetypeGetter = periodetype
     }

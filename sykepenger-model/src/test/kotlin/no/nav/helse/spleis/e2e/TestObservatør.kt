@@ -29,7 +29,10 @@ internal class TestObservatør(person: Person? = null) : PersonObserver {
     private val utsettOppgaveEventer = mutableListOf<PersonObserver.UtsettOppgaveEvent>()
 
     private lateinit var sisteVedtaksperiode: UUID
-    private val vedtaksperioder = person?.inspektør?.vedtaksperioder()?.mapValues { it.value.toMutableSet() }?.toMutableMap() ?: mutableMapOf()
+    private val vedtaksperioder = person?.inspektør?.vedtaksperioder()?.mapValues { (_, perioder) ->
+        perioder.map { it.inspektør.id }.toMutableSet()
+    }?.toMutableMap() ?: mutableMapOf()
+
     private val vedtaksperiodeendringer = mutableMapOf<UUID, MutableList<VedtaksperiodeEndretEvent>>()
 
     private val forkastedeEventer = mutableMapOf<UUID, PersonObserver.VedtaksperiodeForkastetEvent>()

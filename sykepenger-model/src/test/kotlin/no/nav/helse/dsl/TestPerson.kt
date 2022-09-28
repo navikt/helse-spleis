@@ -85,12 +85,13 @@ internal class TestPerson(
     private val behovsamler = Behovsamler(deferredLog)
     private val vedtaksperiodesamler = Vedtaksperiodesamler()
     private val personHendelsefabrikk = PersonHendelsefabrikk(aktørId, personidentifikator)
-
     private val person = Person(aktørId, personidentifikator, fødselsdato.alder, jurist).also {
         it.addObserver(vedtaksperiodesamler)
         it.addObserver(behovsamler)
         it.addObserver(observatør)
     }
+
+    private val ugyldigeSituasjonerObservatør = UgyldigeSituasjonerObservatør(person)
     private val arbeidsgivere = mutableMapOf<String, TestArbeidsgiver>()
 
     internal fun <INSPEKTØR : PersonVisitor> inspiser(inspektør: (Person) -> INSPEKTØR) = inspektør(person)
@@ -117,6 +118,10 @@ internal class TestPerson(
 
     internal fun bekreftBehovOppfylt() {
         behovsamler.bekreftBehovOppfylt()
+    }
+
+    internal fun bekreftIngenOverlappende() {
+        ugyldigeSituasjonerObservatør.bekreftIngenOverlappende()
     }
 
     internal fun håndterOverstyrArbeidsforhold(skjæringstidspunkt: LocalDate, vararg overstyrteArbeidsforhold: ArbeidsforholdOverstyrt) {
