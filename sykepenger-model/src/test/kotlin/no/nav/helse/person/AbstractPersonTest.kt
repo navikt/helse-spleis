@@ -96,6 +96,7 @@ internal abstract class AbstractPersonTest {
     @AfterEach
     fun verify() {
         ugyldigeSituasjonerObservatør.bekreftIngenOverlappende()
+        ugyldigeSituasjonerObservatør.validerInntektshistorikk()
     }
 
     protected fun createTestPerson(personidentifikator: Personidentifikator, fødseldato: LocalDate) = createTestPerson { jurist ->

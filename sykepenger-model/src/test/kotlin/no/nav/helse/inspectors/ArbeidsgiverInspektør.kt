@@ -8,6 +8,7 @@ import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.ArbeidsgiverVisitor
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.ForlengelseFraInfotrygd
+import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.InntektsmeldingInfo
 import no.nav.helse.person.Periodetype
@@ -20,6 +21,7 @@ internal class ArbeidsgiverInspektør(arbeidsgiver: Arbeidsgiver): ArbeidsgiverV
     private val vedtaksperioder: MutableMap<UUID, Vedtaksperiode> = mutableMapOf()
     private var aktiveVedtaksperioder: List<Vedtaksperiode> = emptyList()
     private val sisteVedtaksperiodeTilstander: MutableMap<UUID, TilstandType> = mutableMapOf()
+    private var sisteInntektshistorikk: Inntektshistorikk? = null
 
     init {
         arbeidsgiver.accept(this)
@@ -27,6 +29,7 @@ internal class ArbeidsgiverInspektør(arbeidsgiver: Arbeidsgiver): ArbeidsgiverV
 
     internal fun aktiveVedtaksperioder() = aktiveVedtaksperioder
     internal fun sisteVedtaksperiodeTilstander() = sisteVedtaksperiodeTilstander
+    internal val inntektshistorikk get() = sisteInntektshistorikk!!
 
     override fun preVisitVedtaksperiode(
         vedtaksperiode: Vedtaksperiode,
@@ -50,5 +53,9 @@ internal class ArbeidsgiverInspektør(arbeidsgiver: Arbeidsgiver): ArbeidsgiverV
 
     override fun preVisitPerioder(vedtaksperioder: List<Vedtaksperiode>) {
         aktiveVedtaksperioder = vedtaksperioder
+    }
+
+    override fun preVisitInntekthistorikk(inntektshistorikk: Inntektshistorikk) {
+        this.sisteInntektshistorikk = inntektshistorikk
     }
 }
