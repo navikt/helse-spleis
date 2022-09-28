@@ -64,8 +64,6 @@ enum class Varselkode(
     RV_SV_2("Minst en arbeidsgiver inngår ikke i sykepengegrunnlaget"),
 
     // AY: Andre ytelser
-    RV_AY_1("Arena inneholdt en eller flere AAP-perioder med ugyldig fom/tom"),
-    RV_AY_2("Arena inneholdt en eller flere Dagpengeperioder med ugyldig fom/tom"),
     RV_AY_3("Bruker har mottatt AAP innenfor 6 måneder før skjæringstidspunktet. Kontroller at brukeren har rett til sykepenger"),
     RV_AY_4("Bruker har mottatt dagpenger innenfor 4 uker før skjæringstidspunktet. Kontroller om bruker er dagpengemottaker. Kombinerte ytelser støttes foreløpig ikke av systemet"),
     RV_AY_5("Det er utbetalt foreldrepenger i samme periode."),

@@ -2,6 +2,7 @@ package no.nav.helse.spleis.meldinger.model
 
 import com.fasterxml.jackson.databind.JsonNode
 import java.time.LocalDate
+import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.hendelser.Arbeidsavklaringspenger
 import no.nav.helse.hendelser.Dagpenger
 import no.nav.helse.hendelser.Dødsinfo
@@ -22,9 +23,14 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asOptionalLocalDate
 import no.nav.helse.spleis.IHendelseMediator
+import org.slf4j.LoggerFactory
 
 // Understands a JSON message representing an Ytelserbehov
 internal class YtelserMessage(packet: JsonMessage) : BehovMessage(packet) {
+
+    private companion object {
+        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
+    }
 
     private val vedtaksperiodeId = packet["vedtaksperiodeId"].asText()
     private val organisasjonsnummer = packet["organisasjonsnummer"].asText()
@@ -99,22 +105,12 @@ internal class YtelserMessage(packet: JsonMessage) : BehovMessage(packet) {
             opplæringspenger = opplæringspenger,
             institusjonsopphold = institusjonsopphold,
             dødsinfo = dødsinfo,
-            arbeidsavklaringspenger = Arbeidsavklaringspenger(arbeidsavklaringspenger.map {
-                Periode(
-                    it.first,
-                    it.second
-                )
-            }),
-            dagpenger = Dagpenger(dagpenger.map {
-                Periode(
-                    it.first,
-                    it.second
-                )
-            }),
+            arbeidsavklaringspenger = Arbeidsavklaringspenger(arbeidsavklaringspenger.map { Periode(it.first, it.second) }),
+            dagpenger = Dagpenger(dagpenger.map { Periode(it.first, it.second) }),
             aktivitetslogg = Aktivitetslogg()
         ).also {
-            if (ugyldigeArbeidsavklaringspengeperioder.isNotEmpty()) it.varsel("Arena inneholdt en eller flere AAP-perioder med ugyldig fom/tom")
-            if (ugyldigeDagpengeperioder.isNotEmpty()) it.varsel("Arena inneholdt en eller flere Dagpengeperioder med ugyldig fom/tom")
+            if (ugyldigeArbeidsavklaringspengeperioder.isNotEmpty()) sikkerlogg.warn("Arena inneholdt en eller flere AAP-perioder med ugyldig fom/tom for {}", keyValue("aktørId", aktørId))
+            if (ugyldigeDagpengeperioder.isNotEmpty()) sikkerlogg.warn("Arena inneholdt en eller flere Dagpengeperioder med ugyldig fom/tom for {}", keyValue("aktørId", aktørId))
         }
 
     override fun behandle(mediator: IHendelseMediator, context: MessageContext) {

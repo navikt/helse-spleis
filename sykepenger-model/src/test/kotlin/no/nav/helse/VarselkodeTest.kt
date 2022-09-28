@@ -6,8 +6,6 @@ import java.nio.file.Paths
 import no.nav.helse.person.AktivitetsloggObserverTest
 import no.nav.helse.person.AktivitetsloggTest
 import no.nav.helse.person.Varselkode
-import no.nav.helse.person.Varselkode.RV_AY_1
-import no.nav.helse.person.Varselkode.RV_AY_2
 import no.nav.helse.person.Varselkode.RV_VV_5
 import no.nav.helse.person.varselkodeformat
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -24,7 +22,7 @@ internal class VarselkodeTest {
             removeAll(finnAlleVarselkoderITest().toSet())
         }.toSet()
 
-        val varselkoderSomKjentManglerTest = listOf(RV_VV_5, RV_AY_1, RV_AY_2)
+        val varselkoderSomKjentManglerTest = listOf(RV_VV_5)
 
         val varselkoderSomNåManglerTest = ikkeTestedeVarselkoder.minus(varselkoderSomKjentManglerTest.toSet())
         val (varselkoderSomFortsattBrukes, varselkoderSomIkkeBrukesLenger) = varselkoderSomKjentManglerTest.partition { it in aktiveVarselkoder }
