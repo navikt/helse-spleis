@@ -70,6 +70,8 @@ import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.TilstandType.UTBETALING_FEILET
 import no.nav.helse.person.Varselkode.RV_IM_4
+import no.nav.helse.person.Varselkode.RV_OO_1
+import no.nav.helse.person.Varselkode.RV_OO_2
 import no.nav.helse.person.Varselkode.RV_RV_1
 import no.nav.helse.person.Varselkode.RV_SI_2
 import no.nav.helse.person.Varselkode.RV_SV_2
@@ -818,7 +820,7 @@ internal class Vedtaksperiode private constructor(
         if (Toggle.RevurderOutOfOrderForlengelser.disabled && vedtaksperiode.person.finnesEnVedtaksperiodeRettEtter(ny)) return outOfOrderIkkeStøttet()
         if (!ny.forventerInntekt()) return
 
-        hendelse.varsel("Saken må revurderes fordi det har blitt behandlet en tidligere periode som kan ha betydning.")
+        hendelse.varsel(RV_OO_2)
 
         sikkerlogg.info(
             "Søknaden har trigget en revurdering fordi det er en tidligere eller overlappende periode: {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}",
@@ -1012,7 +1014,7 @@ internal class Vedtaksperiode private constructor(
             val harSenereUtbetalinger = vedtaksperiode.person.vedtaksperioder(NYERE_SKJÆRINGSTIDSPUNKT_MED_UTBETALING(vedtaksperiode)).isNotEmpty()
             val harSenereAUU = vedtaksperiode.person.vedtaksperioder(NYERE_SKJÆRINGSTIDSPUNKT_UTEN_UTBETALING(vedtaksperiode)).isNotEmpty()
             if (Toggle.RevurderOutOfOrder.enabled && (harSenereUtbetalinger || harSenereAUU)) {
-                søknad.varsel("Det er behandlet en søknad i Speil for en senere periode enn denne.")
+                søknad.varsel(RV_OO_1)
             }
             vedtaksperiode.håndterSøknad(søknad) {
                 when {

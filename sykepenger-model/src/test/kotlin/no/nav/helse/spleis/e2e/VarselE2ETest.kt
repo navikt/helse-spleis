@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate
 import java.time.LocalDateTime
+import no.nav.helse.Toggle
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
@@ -12,15 +13,18 @@ import no.nav.helse.hendelser.Institusjonsopphold
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.OverstyrArbeidsforhold.ArbeidsforholdOverstyrt
-import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
+import no.nav.helse.juli
+import no.nav.helse.juni
+import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.november
-import no.nav.helse.person.TilstandType
+import no.nav.helse.person.TilstandType.AVSLUTTET
+import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.Varselkode
 import no.nav.helse.person.Varselkode.RV_AY_3
@@ -41,6 +45,8 @@ import no.nav.helse.person.Varselkode.RV_IV_1
 import no.nav.helse.person.Varselkode.RV_IV_2
 import no.nav.helse.person.Varselkode.RV_MV_1
 import no.nav.helse.person.Varselkode.RV_MV_2
+import no.nav.helse.person.Varselkode.RV_OO_1
+import no.nav.helse.person.Varselkode.RV_OO_2
 import no.nav.helse.person.Varselkode.RV_OS_1
 import no.nav.helse.person.Varselkode.RV_OS_2
 import no.nav.helse.person.Varselkode.RV_OS_3
@@ -678,21 +684,25 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
     }
 
     @Test
-    fun `varsel - Utbetaling av revurdert periode ble avvist av saksbehandler, Utbetalingen må annulleres`() {
-        nyttVedtak(1.januar, 31.januar)
-
-        håndterOverstyrTidslinje(listOf(manuellFeriedag(18.januar)))
-        håndterYtelser(1.vedtaksperiode)
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, utbetalingGodkjent = false)
-        assertVarsel(RV_UT_1, 1.vedtaksperiode.filter())
-    }
-
-    @Test
     fun `varsel - Utbetalingen ble gjennomført, men med advarsel`() {
         tilGodkjenning(1.januar, 31.januar, ORGNUMMER)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt(status = Oppdragstatus.AKSEPTERT_MED_FEIL)
         assertVarsel(RV_UT_2)
     }
+
+    @Test
+    fun `varsel - Det er behandlet en søknad i Speil for en senere periode enn denne`() = Toggle.RevurderOutOfOrder.enable {
+        nyttVedtak(1.mars, 31.mars)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        assertVarsel(RV_OO_1, 2.vedtaksperiode.filter())
+    }
+
+    @Test
+    fun `varsel - Saken må revurderes fordi det har blitt behandlet en tidligere periode som kan ha betydning`() = Toggle.RevurderOutOfOrder.enable {
+        nyttVedtak(1.mars, 31.mars)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        assertVarsel(RV_OO_2, 1.vedtaksperiode.filter())
+    }
+
 }
