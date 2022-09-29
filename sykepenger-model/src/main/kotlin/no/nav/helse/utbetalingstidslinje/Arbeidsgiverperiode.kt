@@ -52,7 +52,7 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
         sykdomstidslinje: Sykdomstidslinje,
         subsumsjonObserver: SubsumsjonObserver
     ): Boolean {
-        if (Toggle.FerieTilAvsluttetUtenUtbetaling.enabled && !sykdomstidslinje.subset(periode).harSykedager()) return false // TODO: Ta stilling til om vi skal forvente inntekt om vi bare har syke helgedager
+        if (Toggle.FerieTilAvsluttetUtenUtbetaling.enabled && sykdomstidslinje.subset(periode).harIngenSykeUkedager()) return false
         if (!dekker(periode)) return erFørsteUtbetalingsdagFørEllerLik(periode.endInclusive) || harForeledeDagerEtterArbeidsgiverperioden(sykdomstidslinje)
         subsumsjonObserver.`§ 8-17 ledd 1 bokstav a - arbeidsgiversøknad`(this, sykdomstidslinje.subsumsjonsformat())
         return false

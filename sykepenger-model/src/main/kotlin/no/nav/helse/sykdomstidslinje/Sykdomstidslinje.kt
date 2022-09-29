@@ -180,6 +180,7 @@ internal class Sykdomstidslinje private constructor(
     private fun erSisteDagArbeidsdag() = this.dager.keys.lastOrNull()?.let(::erArbeidsdag) ?: true
 
     internal fun harSykedager() = any { it is Sykedag || it is SykHelgedag || it is ForeldetSykedag }
+    internal fun harIngenSykeUkedager() = none { it is Sykedag || it is ForeldetSykedag }
 
     internal fun harForeldedeDager() = any { it is ForeldetSykedag }
 
