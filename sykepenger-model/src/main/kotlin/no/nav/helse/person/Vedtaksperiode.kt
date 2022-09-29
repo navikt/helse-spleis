@@ -1715,6 +1715,10 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
+            if (vedtaksperiode.id == UUID.fromString("7baef6b8-c583-42f3-8057-ec5fd99184e7")) {
+                påminnelse.info("Drar stuck perioden tilbake i AvventerHistorikk for å reberegne")
+                return vedtaksperiode.tilstand(påminnelse, AvventerHistorikk)
+            }
             trengerSimulering(vedtaksperiode, påminnelse)
         }
 
