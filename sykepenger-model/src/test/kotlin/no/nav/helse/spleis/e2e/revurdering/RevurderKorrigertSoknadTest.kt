@@ -32,11 +32,13 @@ import no.nav.helse.spleis.e2e.assertTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.forlengVedtak
+import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterOverstyrTidslinje
 import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
 import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
+import no.nav.helse.spleis.e2e.håndterUtbetalingshistorikk
 import no.nav.helse.spleis.e2e.håndterUtbetalt
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
@@ -301,27 +303,32 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
             assertEquals(50.prosent, inspektør.utbetalingstidslinjer(2.vedtaksperiode)[it.mars].økonomi.inspektør.grad)
         }
     }
+
     @Test
-    fun `Korrigerende søknad for periode i AvventerVilkårsprøvingRevurdering - setter i gang en overstyring av revurderingen`() {
-        nyttVedtak(1.januar, 31.januar, 100.prosent)
-        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.desember(2017), Dagtype.Egenmeldingsdag), ManuellOverskrivingDag(1.januar, Dagtype.Egenmeldingsdag)))
+    fun `Korrigerende søknad i AvventerVilkårsprøvingRevurdering - setter i gang en overstyring av revurderingen`() {
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 16.februar, 100.prosent))
+        håndterSøknad(Sykdom(1.februar, 16.februar, 100.prosent))
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+
+        håndterInntektsmelding(listOf(31.januar til 15.februar))
 
         håndterYtelser(1.vedtaksperiode)
         assertTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING_REVURDERING)
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent, 50.prosent))
+
+        håndterSøknad(Sykdom(31.januar, 16.februar, 100.prosent))
         håndterYtelser(1.vedtaksperiode)
+
         håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
-        assertTilstand(1.vedtaksperiode, AVSLUTTET)
-
-        (16..31).forEach {
-            assertEquals(50.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.januar].økonomi.inspektør.grad)
+        (16..16).forEach {
+            assertEquals(100.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.februar].økonomi.inspektør.grad)
         }
     }
+
     @Test
     fun `Korrigerende søknad for førstegangsbehandling med forlengelse i avventerGodkjenning - setter i gang en revurdering`() {
         nyttVedtak(1.januar, 31.januar, 100.prosent)
