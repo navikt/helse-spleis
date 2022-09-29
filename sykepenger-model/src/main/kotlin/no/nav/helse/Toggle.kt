@@ -128,5 +128,6 @@ abstract class Toggle internal constructor(enabled: Boolean = false, private val
     object RevurdereInntektMedFlereArbeidsgivere : Toggle("RevurdereInntektMedFlereArbeidsgivere", false)
     object RevurderKorrigertSoknad : Toggle("RevurderKorrigertSoknad", true)
     object RevurderOutOfOrder : Toggle("RevurderOutOfOrder", false)
+    object FerieTilAvsluttetUtenUtbetaling : Toggle("FerieTilAvsluttetUtenUtbetaling", false)
     object RevurderOutOfOrderForlengelser : Toggle("RevurderOutOfOrderForlengelser", false)
 }

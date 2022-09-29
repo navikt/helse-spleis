@@ -817,6 +817,7 @@ internal class Vedtaksperiode private constructor(
         if (Toggle.RevurderOutOfOrderForlengelser.disabled && vedtaksperiode.person.finnesEnVedtaksperiodeSomOverlapperOgStarterFør(ny)) return outOfOrderIkkeStøttet()
         if (Toggle.RevurderOutOfOrderForlengelser.disabled && vedtaksperiode.person.finnesEnVedtaksperiodeRettEtter(ny)) return outOfOrderIkkeStøttet()
         if (!ny.forventerInntekt()) return
+        if (Toggle.FerieTilAvsluttetUtenUtbetaling.enabled && !vedtaksperiode.forventerInntekt()) return
 
         hendelse.varsel("Saken må revurderes fordi det har blitt behandlet en tidligere periode som kan ha betydning.")
 

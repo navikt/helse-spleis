@@ -742,18 +742,6 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Ferie med tidligere sykdom - ferie revurderes`() {
-        håndterSykmelding(Sykmeldingsperiode(5.februar, 28.februar, 100.prosent))
-        håndterSøknad(Sykdom(5.februar, 28.februar, 100.prosent), Søknad.Søknadsperiode.Ferie(5.februar, 28.februar))
-        håndterInntektsmelding(listOf(5.februar til 21.februar))
-        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-
-        nyttVedtak(1.januar, 31.januar)
-
-        assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
-    }
-
-    @Test
     fun `Out of order gjør at AUU revurderes fordi de ikke lenger er innen AGP - ber om inntektsmelding`() {
         nyPeriode(1.mars til 10.mars)
         håndterUtbetalingshistorikk(1.vedtaksperiode)

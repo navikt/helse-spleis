@@ -65,3 +65,5 @@ spec:
     value: "true"
   - name: RevurderOutOfOrder
     value: "true"
+  - name: FerieTilAvsluttetUtenUtbetaling
+    value: "true"
