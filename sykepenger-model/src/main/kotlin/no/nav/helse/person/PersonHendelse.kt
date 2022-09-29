@@ -7,7 +7,8 @@ import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.utbetalingstidslinje.Alder.Companion.alder
 
 internal class FunksjonelleFeilTilVarsler(private val other: IAktivitetslogg) : IAktivitetslogg by other {
-    override fun funksjonellFeil(melding: String) = varsel(melding)
+    override fun funksjonellFeil(melding: String) =
+        throw IllegalStateException("En tekstlig funksjonellFeil \"${melding}\" kan ikke de-eskaleres til varselkode.")
     override fun funksjonellFeil(kode: Varselkode) = varsel(kode)
 
     internal companion object {
@@ -70,7 +71,6 @@ abstract class PersonHendelse protected constructor(
     fun toLogString() = aktivitetslogg.toString()
 
     override fun info(melding: String, vararg params: Any?) = aktivitetslogg.info(melding, *params)
-    override fun varsel(melding: String) = aktivitetslogg.varsel(melding)
     override fun varsel(kode: Varselkode) = aktivitetslogg.varsel(kode)
     override fun behov(type: Aktivitetslogg.Aktivitet.Behov.Behovtype, melding: String, detaljer: Map<String, Any?>) =
         aktivitetslogg.behov(type, melding, detaljer)

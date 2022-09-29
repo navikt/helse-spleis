@@ -22,7 +22,7 @@ internal class VarselkodeTest {
             removeAll(finnAlleVarselkoderITest().toSet())
         }.toSet()
 
-        val varselkoderSomKjentManglerTest = listOf(RV_VV_5)
+        val varselkoderSomKjentManglerTest = emptyList<Varselkode>()
 
         val varselkoderSomNåManglerTest = ikkeTestedeVarselkoder.minus(varselkoderSomKjentManglerTest.toSet())
         val (varselkoderSomFortsattBrukes, varselkoderSomIkkeBrukesLenger) = varselkoderSomKjentManglerTest.partition { it in aktiveVarselkoder }

@@ -25,7 +25,7 @@ internal class FunksjonelleFeilTilVarslerTest {
     @Test
     fun `error blir warning om det logges på wrapperen`() {
         val funksjonelleFeilTilVarsler = FunksjonelleFeilTilVarsler(aktivitetslogg)
-        funksjonelleFeilTilVarsler.funksjonellFeil("Det er en feil med wrapperen")
+        funksjonelleFeilTilVarsler.funksjonellFeil(Varselkode.RV_SØ_1)
         assertTrue(aktivitetslogg.harVarslerEllerVerre())
         assertFalse(aktivitetslogg.harFunksjonelleFeilEllerVerre())
         assertTrue(funksjonelleFeilTilVarsler.harVarslerEllerVerre())

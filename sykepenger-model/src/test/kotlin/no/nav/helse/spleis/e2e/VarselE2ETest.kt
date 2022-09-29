@@ -18,13 +18,8 @@ import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
-import no.nav.helse.juli
-import no.nav.helse.juni
-import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.november
-import no.nav.helse.person.TilstandType.AVSLUTTET
-import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.Varselkode
 import no.nav.helse.person.Varselkode.RV_AY_3
@@ -46,7 +41,6 @@ import no.nav.helse.person.Varselkode.RV_IV_2
 import no.nav.helse.person.Varselkode.RV_MV_1
 import no.nav.helse.person.Varselkode.RV_MV_2
 import no.nav.helse.person.Varselkode.RV_OO_1
-import no.nav.helse.person.Varselkode.RV_OO_2
 import no.nav.helse.person.Varselkode.RV_OS_1
 import no.nav.helse.person.Varselkode.RV_OS_2
 import no.nav.helse.person.Varselkode.RV_OS_3
@@ -702,7 +696,7 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
     fun `varsel - Saken må revurderes fordi det har blitt behandlet en tidligere periode som kan ha betydning`() = Toggle.RevurderOutOfOrder.enable {
         nyttVedtak(1.mars, 31.mars)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
-        assertVarsel(RV_OO_2, 1.vedtaksperiode.filter())
+        assertVarsel(Varselkode.RV_OO_2, 1.vedtaksperiode.filter())
     }
 
 }

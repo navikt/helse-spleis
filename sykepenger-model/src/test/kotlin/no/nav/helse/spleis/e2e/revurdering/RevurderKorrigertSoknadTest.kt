@@ -24,6 +24,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
 import no.nav.helse.person.Varselkode.RV_SØ_4
+import no.nav.helse.person.Varselkode.RV_VV_5
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
@@ -318,6 +319,7 @@ internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
 
         assertTilstand(1.vedtaksperiode, AVSLUTTET)
 
+        assertVarsel(RV_VV_5)
         (16..31).forEach {
             assertEquals(50.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.januar].økonomi.inspektør.grad)
         }

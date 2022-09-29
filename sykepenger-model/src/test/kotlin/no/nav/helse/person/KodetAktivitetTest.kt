@@ -18,10 +18,9 @@ class KodetAktivitetTest {
 
     @Test
     fun `kodede aktiveter`() {
-        val kodetAktivitet = "info message"
         val hendelse1 = TestHendelse(aktivitetslogg.barn())
         hendelse1.kontekst(person)
-        hendelse1.varsel(kodetAktivitet)
+        hendelse1.varsel(Varselkode.RV_SØ_1)
         Assertions.assertTrue(
             aktivitetslogg.harVarslerEllerVerre()
         ) { "Expected $aktivitetslogg to contain varsel" }

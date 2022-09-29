@@ -22,7 +22,7 @@ enum class Varselkode(
     RV_SØ_9("Det er oppgitt annen inntektskilde i søknaden. Vurder inntekt."),
     RV_SØ_10("Den sykmeldte har oppgitt å ha andre arbeidsforhold med sykmelding i søknaden."),
 
-    // OO: Outut-of-order
+    // OO: Out-of-order
     RV_OO_1("Det er behandlet en søknad i Speil for en senere periode enn denne."),
     RV_OO_2("Saken må revurderes fordi det har blitt behandlet en tidligere periode som kan ha betydning."),
 
