@@ -23,17 +23,16 @@ internal class DataSourceBuilder(env: Map<String, String>) {
         initializationFailTimeout = Duration.ofMinutes(1).toMillis()
     }
 
-    internal fun getDataSource() = HikariDataSource(hikariConfig)
+    internal fun getDataSource() = dataSource
+    private val dataSource by lazy { HikariDataSource(hikariConfig) }
 
     internal fun migrate() {
         logger.info("Migrerer database")
-        getDataSource().use { dataSource ->
-            Flyway.configure()
-                .dataSource(dataSource)
-                .lockRetryCount(-1)
-                .load()
-                .migrate()
-        }
+        Flyway.configure()
+            .dataSource(dataSource)
+            .lockRetryCount(-1)
+            .load()
+            .migrate()
         logger.info("Migrering ferdig!")
     }
 
