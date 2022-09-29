@@ -53,10 +53,10 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
         val forrige = arbeidsgiver.inspektør.inntektshistorikk.inspektør.inntekterForrigeInnslag()
         val siste = arbeidsgiver.inspektør.inntektshistorikk.inspektør.inntekterSisteInnslag()
         if (siste != null) {
-            logCheck(siste.size == siste.toSet().size) {
+            check(siste.size == siste.toSet().size) {
                 "Siste innslag i inntektshistorikken inneholder duplikate opplysninger:\n\t${siste.joinToString {"\n${siste.fremhevDuplikat(it)}\t$it"}}"
             }
-            logCheck(siste.isNotEmpty()) {
+            check(siste.isNotEmpty()) {
                 "Siste innslag i inntektshistorikken er tomt"
             }
         }
@@ -90,12 +90,34 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
         fun inntekterSisteInnslag() =
             innslag.elementAtOrNull(0)?.let { inntekterFor(it) }
 
+
+        private val skatt = mutableListOf<UUID>()
+        private val sisteSkattId get() = skatt.last()
+        private val inntekterPerSkatt = mutableMapOf<UUID, MutableList<String>>()
+        private fun leggTilSkattInntekt(inntekt: String) {
+            check(!inntekterPerSkatt.filterKeys { id -> id != sisteSkattId }.values.flatten().contains(inntekt)) {
+                "Skatteinntekt $inntekt finnes allerede i en annen SkattComposite"
+            }
+            inntekterPerSkatt.getOrPut(sisteSkattId) { mutableListOf() }.add(inntekt)
+        }
+        private fun skattInntekterFor(skatt: UUID) = inntekterPerSkatt.getOrDefault(skatt, emptyList())
+
+
         init {
             inntektshistorikk.accept(this)
         }
 
+
         override fun preVisitInnslag(innslag: Inntektshistorikk.Innslag, id: UUID) {
             this.innslag.add(id)
+        }
+
+        override fun preVisitSkatt(skattComposite: Inntektshistorikk.SkattComposite, id: UUID, dato: LocalDate) {
+            this.skatt.add(id)
+        }
+
+        override fun postVisitSkatt(skattComposite: Inntektshistorikk.SkattComposite, id: UUID, dato: LocalDate) {
+            leggTilInntekt("SkattComposite dato=$dato, inntekter=${skattInntekterFor(id)} ")
         }
 
         override fun visitInntektsmelding(inntektsmelding: Inntektshistorikk.Inntektsmelding, id: UUID, dato: LocalDate, hendelseId: UUID, beløp: Inntekt, tidsstempel: LocalDateTime) =
@@ -107,14 +129,14 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
         override fun visitSaksbehandler(saksbehandler: Inntektshistorikk.Saksbehandler, id: UUID, dato: LocalDate, hendelseId: UUID, beløp: Inntekt, tidsstempel: LocalDateTime) =
             leggTilInntekt("Saksbehandler id=$hendelseId, dato=$dato, beløp=$beløp")
 
-        override fun visitSkattSykepengegrunnlag(sykepengegrunnlag: Inntektshistorikk.Skatt.Sykepengegrunnlag, dato: LocalDate, hendelseId: UUID, beløp: Inntekt, måned: YearMonth, type: Inntektshistorikk.Skatt.Inntekttype, fordel: String, beskrivelse: String, tidsstempel: LocalDateTime) =
-            leggTilInntekt("SkattSykepengegrunnlag id=$hendelseId, dato=$dato, beløp=$beløp, måned=$måned, type=$type, fordel=$fordel, beskrivelse=$beskrivelse")
-
-        override fun visitSkattRapportertInntekt(rapportertInntekt: Inntektshistorikk.Skatt.RapportertInntekt, dato: LocalDate, hendelseId: UUID, beløp: Inntekt, måned: YearMonth, type: Inntektshistorikk.Skatt.Inntekttype, fordel: String, beskrivelse: String, tidsstempel: LocalDateTime) =
-            leggTilInntekt("SkattRapportertInntekt id=$hendelseId, dato=$dato, beløp=$beløp, måned=$måned, type=$type, fordel=$fordel, beskrivelse=$beskrivelse")
-
         override fun visitIkkeRapportert(id: UUID, dato: LocalDate, tidsstempel: LocalDateTime) =
             leggTilInntekt("IkkeRapportert dato=$dato")
+
+        override fun visitSkattSykepengegrunnlag(sykepengegrunnlag: Inntektshistorikk.Skatt.Sykepengegrunnlag, dato: LocalDate, hendelseId: UUID, beløp: Inntekt, måned: YearMonth, type: Inntektshistorikk.Skatt.Inntekttype, fordel: String, beskrivelse: String, tidsstempel: LocalDateTime) =
+            leggTilSkattInntekt("SkattSykepengegrunnlag id=$hendelseId, dato=$dato, beløp=$beløp, måned=$måned, type=$type, fordel=$fordel, beskrivelse=$beskrivelse")
+
+        override fun visitSkattRapportertInntekt(rapportertInntekt: Inntektshistorikk.Skatt.RapportertInntekt, dato: LocalDate, hendelseId: UUID, beløp: Inntekt, måned: YearMonth, type: Inntektshistorikk.Skatt.Inntekttype, fordel: String, beskrivelse: String, tidsstempel: LocalDateTime) =
+            leggTilSkattInntekt("SkattRapportertInntekt id=$hendelseId, dato=$dato, beløp=$beløp, måned=$måned, type=$type, fordel=$fordel, beskrivelse=$beskrivelse")
     }
 
     private companion object {
