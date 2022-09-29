@@ -24,7 +24,7 @@ internal class Sykdomshistorikk private constructor(
     internal fun nyesteId()= elementer.nyesteId()
 
     internal fun håndter(hendelse: SykdomstidslinjeHendelse): Sykdomstidslinje {
-        if (isEmpty() || !elementer.first().harHåndtert(hendelse)) {
+        if (elementer.none { it.harHåndtert(hendelse) }) {
             elementer.add(0, Element.opprett(this, hendelse))
         }
         return sykdomstidslinje()

@@ -26,6 +26,16 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
     ) {
         bekreftIngenOverlappende()
         validerInntektshistorikk()
+        validerSykdomshistorikk()
+    }
+
+    internal fun validerSykdomshistorikk() {
+        arbeidsgivere().forEach { arbeidsgiver ->
+            val hendelseIder = arbeidsgiver.inspektør.sykdomshistorikk.inspektør.hendelseIder()
+            check(hendelseIder.size == hendelseIder.toSet().size) {
+                "Sykdomshistorikken inneholder duplikate hendelseIder"
+            }
+        }
     }
 
     internal fun bekreftIngenOverlappende() {

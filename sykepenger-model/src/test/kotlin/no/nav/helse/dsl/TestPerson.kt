@@ -128,6 +128,10 @@ internal class TestPerson(
         ugyldigeSituasjonerObservatør.validerInntektshistorikk()
     }
 
+    internal fun validerSykdomshistorikk() {
+        ugyldigeSituasjonerObservatør.validerSykdomshistorikk()
+    }
+
     internal fun håndterOverstyrArbeidsforhold(skjæringstidspunkt: LocalDate, vararg overstyrteArbeidsforhold: ArbeidsforholdOverstyrt) {
         personHendelsefabrikk.lagOverstyrArbeidsforhold(skjæringstidspunkt, *overstyrteArbeidsforhold)
             .håndter(Person::håndter)

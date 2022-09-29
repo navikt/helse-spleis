@@ -14,6 +14,7 @@ import no.nav.helse.person.InntektsmeldingInfo
 import no.nav.helse.person.Periodetype
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.Vedtaksperiode
+import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 
 internal val Arbeidsgiver.inspektør get() = ArbeidsgiverInspektør(this)
 
@@ -22,6 +23,8 @@ internal class ArbeidsgiverInspektør(arbeidsgiver: Arbeidsgiver): ArbeidsgiverV
     private var aktiveVedtaksperioder: List<Vedtaksperiode> = emptyList()
     private val sisteVedtaksperiodeTilstander: MutableMap<UUID, TilstandType> = mutableMapOf()
     private var sisteInntektshistorikk: Inntektshistorikk? = null
+    internal lateinit var sykdomshistorikk: Sykdomshistorikk
+        private set
 
     init {
         arbeidsgiver.accept(this)
@@ -57,5 +60,9 @@ internal class ArbeidsgiverInspektør(arbeidsgiver: Arbeidsgiver): ArbeidsgiverV
 
     override fun preVisitInntekthistorikk(inntektshistorikk: Inntektshistorikk) {
         this.sisteInntektshistorikk = inntektshistorikk
+    }
+
+    override fun preVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) {
+        this.sykdomshistorikk = sykdomshistorikk
     }
 }
