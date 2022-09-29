@@ -247,7 +247,7 @@ internal class InfotrygdInntektsopplysningTest {
                 tidsstempel = tidsstempel
             )
         )
-        assertNotEquals(
+        assertEquals(
             inntektsopplysning1,
             Inntektshistorikk.Infotrygd(
                 id = UUID.randomUUID(),
@@ -257,7 +257,7 @@ internal class InfotrygdInntektsopplysningTest {
                 tidsstempel = tidsstempel
             )
         )
-        assertNotEquals(
+        assertEquals(
             inntektsopplysning1,
             Inntektshistorikk.Infotrygd(
                 id = inntektID,

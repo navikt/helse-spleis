@@ -8,21 +8,23 @@ import java.util.UUID
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.hendelser.til
+import no.nav.helse.person.Inntektshistorikk.Inntektsopplysning.Companion.lagre
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.subsumsjonsformat
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.summer
 import org.slf4j.LoggerFactory
-import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning as InfotrygdhistorikkInntektsopplysning
 
-internal class Inntektshistorikk {
+internal class Inntektshistorikk private constructor(private val historikk: MutableList<Innslag>) {
 
-    private val historikk = mutableListOf<Innslag>()
+    internal constructor() : this(mutableListOf())
 
     internal companion object {
         internal val NULLUUID: UUID = UUID.fromString("00000000-0000-0000-0000-000000000000")
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
+
+        internal fun gjenopprett(list: List<Innslag>) = Inntektshistorikk(list.toMutableList())
     }
 
     internal fun accept(visitor: InntekthistorikkVisitor) {
@@ -31,10 +33,10 @@ internal class Inntektshistorikk {
         visitor.postVisitInntekthistorikk(this)
     }
 
-    internal fun nyttInnslag(): Innslag {
-        val innslag = nyesteInnslag()?.clone() ?: Innslag(UUID.randomUUID())
-        historikk.add(0, innslag)
-        return innslag
+    private fun leggTil(nyttInnslag: Innslag) {
+        val gjeldende = nyesteInnslag() ?: return historikk.add(0, nyttInnslag)
+        val oppdatertInnslag = (gjeldende + nyttInnslag) ?: return
+        historikk.add(0, oppdatertInnslag)
     }
 
     internal fun nyesteInnslag() = historikk.firstOrNull()
@@ -64,24 +66,13 @@ internal class Inntektshistorikk {
     internal fun rapportertInntekt(dato: LocalDate): Inntektsopplysning? =
         nyesteInnslag()?.rapportertInntekt(dato)
 
-    internal class Innslag(private val id: UUID) {
-        private val inntekter = mutableListOf<Inntektsopplysning>()
+    internal class Innslag private constructor(private val id: UUID, private val inntekter: List<Inntektsopplysning>) {
+        constructor(inntekter: List<Inntektsopplysning> = emptyList()) : this(UUID.randomUUID(), inntekter)
 
         internal fun accept(visitor: InntekthistorikkVisitor) {
             visitor.preVisitInnslag(this, id)
             inntekter.forEach { it.accept(visitor) }
             visitor.postVisitInnslag(this, id)
-        }
-
-        internal fun clone() = Innslag(UUID.randomUUID()).also {
-            it.inntekter.addAll(this.inntekter)
-        }
-
-        internal fun add(inntektsopplysning: Inntektsopplysning) {
-            if (inntekter.all { it.kanLagres(inntektsopplysning) }) {
-                inntekter.removeIf { it.skalErstattesAv(inntektsopplysning) }
-                inntekter.add(inntektsopplysning)
-            }
         }
 
         internal fun harInntektsmelding(førsteFraværsdag: LocalDate) = inntekter
@@ -106,47 +97,74 @@ internal class Inntektshistorikk {
                 .mapNotNull { it.omregnetÅrsinntekt(periode) }
                 .firstOrNull()
 
-        internal fun erDuplikat(inntektsopplysning: InfotrygdhistorikkInntektsopplysning) =
-            inntekter.filterIsInstance<Infotrygd>().any { it.erDuplikat(inntektsopplysning) }
+        override fun equals(other: Any?): Boolean {
+            return other is Innslag && this.inntekter == other.inntekter
+        }
+
+        operator fun plus(other: Innslag): Innslag? {
+            var inntekter = this.inntekter
+            other.inntekter.forEach { inntektsopplysning ->
+                inntekter = inntektsopplysning.lagre(inntekter)
+            }
+            val nytt = Innslag(inntekter)
+            if (this == nytt) return null
+            return nytt
+        }
 
         internal companion object {
+            internal fun gjenopprett(id: UUID, inntektsopplysninger: List<Inntektsopplysning>) =
+                Innslag(id, inntektsopplysninger)
+
             internal fun nyesteId(inntektshistorikk: Inntektshistorikk) = inntektshistorikk.nyesteInnslag()!!.id
         }
     }
 
-    internal interface Inntektsopplysning : Comparable<Inntektsopplysning> {
-        val dato: LocalDate
-        val prioritet: Int
-        fun accept(visitor: InntekthistorikkVisitor)
-        fun omregnetÅrsinntekt(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?): Inntektsopplysning? = null
-        fun omregnetÅrsinntekt(): Inntekt
-        fun rapportertInntekt(dato: LocalDate): Inntektsopplysning? = null
-        fun rapportertInntekt(): Inntekt
-        fun skalErstattesAv(other: Inntektsopplysning): Boolean
-        fun subsumerSykepengegrunnlag(
+    internal abstract class Inntektsopplysning protected constructor(
+        protected val dato: LocalDate,
+        private val prioritet: Int
+    ): Comparable<Inntektsopplysning> {
+        protected constructor(other: Inntektsopplysning) : this(other.dato, other.prioritet)
+
+        abstract fun accept(visitor: InntekthistorikkVisitor)
+        open fun omregnetÅrsinntekt(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?): Inntektsopplysning? = null
+        abstract fun omregnetÅrsinntekt(): Inntekt
+        open fun rapportertInntekt(dato: LocalDate): Inntektsopplysning? = null
+        abstract fun rapportertInntekt(): Inntekt
+        open fun kanLagres(other: Inntektsopplysning) = this != other
+        open fun skalErstattesAv(other: Inntektsopplysning) = this == other
+
+        final override fun equals(other: Any?) = other is Inntektsopplysning && erSamme(other)
+
+        protected abstract fun erSamme(other: Inntektsopplysning): Boolean
+
+        open fun subsumerSykepengegrunnlag(
             subsumsjonObserver: SubsumsjonObserver,
             skjæringstidspunkt: LocalDate,
             organisasjonsnummer: String,
             startdatoArbeidsforhold: LocalDate?,
             forklaring: String?,
             subsumsjon: Subsumsjon?
-        ) = run {}
-
-        fun subsumerArbeidsforhold(
+        ) { }
+        open fun subsumerArbeidsforhold(
             subsumsjonObserver: SubsumsjonObserver,
             skjæringstidspunkt: LocalDate,
             organisasjonsnummer: String,
             forklaring: String,
             oppfylt: Boolean
-        ) = run {}
-        override fun compareTo(other: Inntektsopplysning) =
+        ) {}
+
+        final override fun compareTo(other: Inntektsopplysning) =
             (-this.dato.compareTo(other.dato)).takeUnless { it == 0 } ?: -this.prioritet.compareTo(other.prioritet)
 
-        fun kanLagres(other: Inntektsopplysning) = true
-        fun harInntektsmelding(førsteFraværsdag: LocalDate) = false
-        fun erNødvendigInntektForVilkårsprøving(harUtbetaling: Boolean) = false
+        open fun harInntektsmelding(førsteFraværsdag: LocalDate) = false
+        open fun erNødvendigInntektForVilkårsprøving(harUtbetaling: Boolean) = false
 
         companion object {
+            internal fun <Opplysning: Inntektsopplysning> Opplysning.lagre(liste: List<Opplysning>): List<Opplysning> {
+                if (liste.any { !it.kanLagres(this) }) return liste
+                return liste.filterNot { it.skalErstattesAv(this) } + this
+            }
+
             internal fun List<Inntektsopplysning>.valider(aktivitetslogg: IAktivitetslogg) {
                 if (all { it is SkattComposite }) {
                     aktivitetslogg.funksjonellFeil("Bruker mangler nødvendig inntekt ved validering av Vilkårsgrunnlag")
@@ -157,12 +175,11 @@ internal class Inntektshistorikk {
 
     internal class Saksbehandler(
         private val id: UUID,
-        override val dato: LocalDate,
+        dato: LocalDate,
         private val hendelseId: UUID,
         private val beløp: Inntekt,
         private val tidsstempel: LocalDateTime = LocalDateTime.now()
-    ) : Inntektsopplysning {
-        override val prioritet = 100
+    ) : Inntektsopplysning(dato, 100) {
 
         override fun accept(visitor: InntekthistorikkVisitor) {
             visitor.visitSaksbehandler(this, id, dato, hendelseId, beløp, tidsstempel)
@@ -175,6 +192,9 @@ internal class Inntektshistorikk {
 
         override fun skalErstattesAv(other: Inntektsopplysning) =
             other is Saksbehandler && this.dato == other.dato
+
+        override fun erSamme(other: Inntektsopplysning) =
+            other is Saksbehandler && this.dato == other.dato && this.beløp == other.beløp
 
         override fun erNødvendigInntektForVilkårsprøving(harUtbetaling: Boolean) = true
 
@@ -245,12 +265,11 @@ internal class Inntektshistorikk {
 
     internal class Infotrygd(
         private val id: UUID,
-        override val dato: LocalDate,
+        dato: LocalDate,
         private val hendelseId: UUID,
         private val beløp: Inntekt,
         private val tidsstempel: LocalDateTime = LocalDateTime.now()
-    ) : Inntektsopplysning {
-        override val prioritet = 80
+    ) : Inntektsopplysning(dato, 80) {
 
         override fun accept(visitor: InntekthistorikkVisitor) {
             visitor.visitInfotrygd(this, id, dato, hendelseId, beløp, tidsstempel)
@@ -269,36 +288,19 @@ internal class Inntektshistorikk {
         override fun skalErstattesAv(other: Inntektsopplysning) =
             other is Infotrygd && this.dato == other.dato
 
-        internal fun erDuplikat(other: InfotrygdhistorikkInntektsopplysning) = other.erDuplikat(dato, beløp)
-
-        // Vi overrider equals for å kunne sjekke om et vilkårsgrunnlag for infotrygd er et duplikat
-        override fun equals(other: Any?): Boolean {
+        override fun erSamme(other: Inntektsopplysning): Boolean {
             if (other !is Infotrygd) return false
-            return id == other.id
-                    && dato == other.dato
-                    && hendelseId == other.hendelseId
-                    && beløp == other.beløp
-                    && prioritet == other.prioritet
-        }
-
-        override fun hashCode(): Int {
-            var result = id.hashCode()
-            result = 31 * result + dato.hashCode()
-            result = 31 * result + hendelseId.hashCode()
-            result = 31 * result + beløp.hashCode()
-            result = 31 * result + prioritet
-            return result
+            return this.dato == other.dato && this.beløp == other.beløp
         }
     }
 
     internal class Inntektsmelding(
         private val id: UUID,
-        override val dato: LocalDate,
+        dato: LocalDate,
         private val hendelseId: UUID,
         private val beløp: Inntekt,
         private val tidsstempel: LocalDateTime = LocalDateTime.now()
-    ) : Inntektsopplysning {
-        override val prioritet = 60
+    ) : Inntektsopplysning(dato, 60) {
 
         override fun accept(visitor: InntekthistorikkVisitor) {
             visitor.visitInntektsmelding(this, id, dato, hendelseId, beløp, tidsstempel)
@@ -320,20 +322,20 @@ internal class Inntektshistorikk {
 
         override fun rapportertInntekt(): Inntekt = error("Inntektsmelding har ikke grunnlag for sammenligningsgrunnlag")
 
+        override fun kanLagres(other: Inntektsopplysning) = !skalErstattesAv(other)
+
         override fun skalErstattesAv(other: Inntektsopplysning) =
             other is Inntektsmelding && this.dato == other.dato
 
-        override fun kanLagres(other: Inntektsopplysning) =
-            other !is Inntektsmelding || this.dato != other.dato
+        override fun erSamme(other: Inntektsopplysning): Boolean {
+            return other is Inntektsmelding && this.dato == other.dato && other.beløp == this.beløp
+        }
     }
 
     internal class SkattComposite(
         private val id: UUID,
         private val inntektsopplysninger: List<Skatt>
-    ) : Inntektsopplysning {
-
-        override val dato = inntektsopplysninger.first().dato
-        override val prioritet = inntektsopplysninger.first().prioritet
+    ) : Inntektsopplysning(inntektsopplysninger.first()) {
 
         private val inntekterSisteTreMåneder = inntektsopplysninger.filter { it.erRelevant(3) }
 
@@ -405,18 +407,24 @@ internal class Inntektshistorikk {
             )
         }
 
-        override fun skalErstattesAv(other: Inntektsopplysning): Boolean =
-            this.inntektsopplysninger.any { it.skalErstattesAv(other) }
-                || (other is SkattComposite && other.inntektsopplysninger.any { this.skalErstattesAv(it) })
+        override fun skalErstattesAv(other: Inntektsopplysning): Boolean {
+            if (other is SkattComposite) return skalErstattesAv(other)
+            return this.inntektsopplysninger.any { it.skalErstattesAv(other) }
+        }
+
+        private fun skalErstattesAv(other: SkattComposite) =
+            other.inntektsopplysninger.any { skalErstattesAv(it) }
+
+        override fun erSamme(other: Inntektsopplysning): Boolean {
+            return other is SkattComposite && this.inntektsopplysninger == other.inntektsopplysninger
+        }
     }
 
     internal class IkkeRapportert(
         private val id: UUID,
-        override val dato: LocalDate,
+        dato: LocalDate,
         private val tidsstempel: LocalDateTime = LocalDateTime.now()
-    ) : Inntektsopplysning {
-
-        override val prioritet = 10
+    ) : Inntektsopplysning(dato, 10) {
 
         override fun accept(visitor: InntekthistorikkVisitor) {
             visitor.visitIkkeRapportert(id, dato, tidsstempel)
@@ -442,11 +450,14 @@ internal class Inntektshistorikk {
             )
         }
 
-        override fun skalErstattesAv(other: Inntektsopplysning) = other is IkkeRapportert && this.dato == other.dato
+        override fun erSamme(other: Inntektsopplysning): Boolean {
+            return other is IkkeRapportert && this.dato == other.dato
+        }
     }
 
     internal sealed class Skatt(
-        override val dato: LocalDate,
+        dato: LocalDate,
+        prioritet: Int,
         protected val hendelseId: UUID,
         protected val beløp: Inntekt,
         protected val måned: YearMonth,
@@ -454,7 +465,7 @@ internal class Inntektshistorikk {
         protected val fordel: String,
         protected val beskrivelse: String,
         protected val tidsstempel: LocalDateTime = LocalDateTime.now()
-    ) : Inntektsopplysning {
+    ) : Inntektsopplysning(dato, prioritet) {
         internal enum class Inntekttype {
             LØNNSINNTEKT,
             NÆRINGSINNTEKT,
@@ -463,6 +474,13 @@ internal class Inntektshistorikk {
         }
 
         internal fun erRelevant(måneder: Long) = måned.isWithinRangeOf(dato, måneder)
+
+        protected fun skalErstattesAv(other: Skatt) =
+            this.dato == other.dato && other.måned == this.måned
+
+        protected fun erSammeSkatteinntekt(other: Skatt) =
+            this.dato == other.dato && this.beløp == other.beløp && this.måned == other.måned
+                    && this.type == other.type && this.fordel == other.fordel && this.beskrivelse == other.beskrivelse
 
         internal class Sykepengegrunnlag(
             dato: LocalDate,
@@ -475,6 +493,7 @@ internal class Inntektshistorikk {
             tidsstempel: LocalDateTime = LocalDateTime.now()
         ) : Skatt(
             dato,
+            40,
             hendelseId,
             beløp,
             måned,
@@ -483,8 +502,6 @@ internal class Inntektshistorikk {
             beskrivelse,
             tidsstempel
         ) {
-            override val prioritet = 40
-
             override fun accept(visitor: InntekthistorikkVisitor) {
                 visitor.visitSkattSykepengegrunnlag(this, dato, hendelseId, beløp, måned, type, fordel, beskrivelse, tidsstempel)
             }
@@ -497,7 +514,11 @@ internal class Inntektshistorikk {
             override fun rapportertInntekt(): Inntekt = error("Sykepengegrunnlag har ikke grunnlag for sammenligningsgrunnlag")
 
             override fun skalErstattesAv(other: Inntektsopplysning) =
-                other is Sykepengegrunnlag && this.dato == other.dato && this.tidsstempel != other.tidsstempel
+                other is Sykepengegrunnlag && skalErstattesAv(other)
+
+            override fun erSamme(other: Inntektsopplysning): Boolean {
+                return other is Sykepengegrunnlag && erSammeSkatteinntekt(other)
+            }
         }
 
         internal class RapportertInntekt(
@@ -510,8 +531,7 @@ internal class Inntektshistorikk {
             beskrivelse: String,
             tidsstempel: LocalDateTime = LocalDateTime.now()
         ) :
-            Skatt(dato, hendelseId, beløp, måned, type, fordel, beskrivelse, tidsstempel) {
-            override val prioritet = 20
+            Skatt(dato, 20, hendelseId, beløp, måned, type, fordel, beskrivelse, tidsstempel) {
 
             override fun accept(visitor: InntekthistorikkVisitor) {
                 visitor.visitSkattRapportertInntekt(
@@ -535,22 +555,26 @@ internal class Inntektshistorikk {
             override fun omregnetÅrsinntekt(): Inntekt = error("Sammenligningsgrunnlag har ikke grunnlag for sykepengegrunnlag")
 
             override fun skalErstattesAv(other: Inntektsopplysning) =
-                other is RapportertInntekt && this.dato == other.dato
+                other is RapportertInntekt && skalErstattesAv(other)
+
+            override fun erSamme(other: Inntektsopplysning) =
+                other is RapportertInntekt && erSammeSkatteinntekt(other)
         }
     }
 
-    internal fun append(block: AppendMode.() -> Unit) {
-        AppendMode(nyttInnslag()).append(block)
+    internal fun append(block: InnslagBuilder.() -> Unit) {
+        leggTil(InnslagBuilder().build(block))
     }
 
-    internal class AppendMode(private val innslag: Innslag) {
-        internal fun append(appender: AppendMode.() -> Unit) {
-            apply(appender)
-            skatt.takeIf { it.isNotEmpty() }?.also { add(SkattComposite(UUID.randomUUID(), it)) }
-        }
-
+    internal class InnslagBuilder() {
         private val tidsstempel = LocalDateTime.now()
         private val skatt = mutableListOf<Skatt>()
+        private var inntektsopplysninger = listOf<Inntektsopplysning>()
+
+        internal fun build(builder: InnslagBuilder.() -> Unit): Innslag {
+            apply(builder)
+            return Innslag(inntektsopplysninger)
+        }
 
         internal fun addSaksbehandler(dato: LocalDate, hendelseId: UUID, beløp: Inntekt) =
             add(Saksbehandler(UUID.randomUUID(), dato, hendelseId, beløp, tidsstempel))
@@ -569,8 +593,10 @@ internal class Inntektshistorikk {
             type: Skatt.Inntekttype,
             fordel: String,
             beskrivelse: String
-        ) =
+        ) {
             skatt.add(Skatt.Sykepengegrunnlag(dato, hendelseId, beløp, måned, type, fordel, beskrivelse, tidsstempel))
+            add(SkattComposite(UUID.randomUUID(), skatt.toList()))
+        }
 
         internal fun addRapportertInntekt(
             dato: LocalDate,
@@ -580,30 +606,13 @@ internal class Inntektshistorikk {
             type: Skatt.Inntekttype,
             fordel: String,
             beskrivelse: String
-        ) =
+        ) {
             skatt.add(Skatt.RapportertInntekt(dato, hendelseId, beløp, måned, type, fordel, beskrivelse, tidsstempel))
+            add(SkattComposite(UUID.randomUUID(), skatt.toList()))
+        }
 
         private fun add(opplysning: Inntektsopplysning) {
-            innslag.add(opplysning)
-        }
-    }
-
-    internal fun restore(block: RestoreJsonMode.() -> Unit) {
-        RestoreJsonMode(this).apply(block)
-    }
-
-    internal fun filtrerBortKjenteInntekter(inntektsopplysninger: List<InfotrygdhistorikkInntektsopplysning>): List<InfotrygdhistorikkInntektsopplysning> {
-        val nyesteInnslag = nyesteInnslag() ?: return inntektsopplysninger
-        return inntektsopplysninger.filter { !nyesteInnslag.erDuplikat(it) }
-    }
-
-    internal class RestoreJsonMode(private val inntektshistorikk: Inntektshistorikk) {
-        internal fun innslag(innslagId: UUID, block: InnslagAppender.() -> Unit) {
-            Innslag(innslagId).also { InnslagAppender(it).apply(block) }.also { inntektshistorikk.historikk.add(0, it) }
-        }
-
-        internal class InnslagAppender(private val innslag: Innslag) {
-            internal fun add(opplysning: Inntektsopplysning) = innslag.add(opplysning)
+            inntektsopplysninger = opplysning.lagre(inntektsopplysninger)
         }
     }
 }

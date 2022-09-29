@@ -792,7 +792,7 @@ internal class InfotrygdhistorikkElementTest {
     }
 
     @Test
-    fun `legger til siste inntekt først i inntektshistorikk`() {
+    fun `siste inntekt blir gjeldende`() {
         val inntektshistorikk = Inntektshistorikk()
         Inntektsopplysning.lagreInntekter(
             listOf(
@@ -800,7 +800,7 @@ internal class InfotrygdhistorikkElementTest {
                 Inntektsopplysning(ORGNUMMER, 1.januar, 4321.månedlig, true),
             ), inntektshistorikk, UUID.randomUUID()
         )
-        assertEquals(1234.månedlig, inntektshistorikk.omregnetÅrsinntekt(1.januar, 1.januar)?.omregnetÅrsinntekt())
+        assertEquals(4321.månedlig, inntektshistorikk.omregnetÅrsinntekt(1.januar, 1.januar)?.omregnetÅrsinntekt())
     }
 
     private fun assertFlereInntekterInfotrygd() {

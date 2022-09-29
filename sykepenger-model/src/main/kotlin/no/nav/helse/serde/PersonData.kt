@@ -332,10 +332,7 @@ internal data class PersonData(
             companion object {
                 internal fun List<ArbeidsgiverInntektsopplysningData>.parseArbeidsgiverInntektsopplysninger(): List<ArbeidsgiverInntektsopplysning> =
                     map {
-                        ArbeidsgiverInntektsopplysning(
-                            it.orgnummer,
-                            ArbeidsgiverData.InntektsopplysningData.parseInntektsopplysningData(it.inntektsopplysning)
-                        )
+                        ArbeidsgiverInntektsopplysning(it.orgnummer, it.inntektsopplysning.tilModellobjekt())
                     }
             }
         }
@@ -438,9 +435,6 @@ internal data class PersonData(
         private val arbeidsforholdhistorikk: List<ArbeidsforholdhistorikkInnslagData> = listOf(),
         private val inntektsmeldingInfo: List<InntektsmeldingInfoHistorikkElementData>
     ) {
-        private val modelInntekthistorikk = Inntektshistorikk().apply {
-            InntektshistorikkInnslagData.parseInntekter(inntektshistorikk, this)
-        }
         private val modelSykdomshistorikk = SykdomshistorikkData.parseSykdomshistorikk(sykdomshistorikk)
         private val vedtaksperiodeliste = mutableListOf<Vedtaksperiode>()
         private val forkastedeliste = mutableListOf<ForkastetVedtaksperiode>()
@@ -459,7 +453,7 @@ internal data class PersonData(
                 person,
                 organisasjonsnummer,
                 id,
-                modelInntekthistorikk,
+                Inntektshistorikk.gjenopprett(InntektshistorikkInnslagData.parseInntekter(inntektshistorikk)),
                 modelSykdomshistorikk,
                 Sykmeldingsperioder(sykmeldingsperioder.map { it.tilPeriode() }),
                 vedtaksperiodeliste,
@@ -562,19 +556,10 @@ internal data class PersonData(
             val id: UUID,
             val inntektsopplysninger: List<InntektsopplysningData>
         ) {
+            internal fun tilModellobjekt() = Inntektshistorikk.Innslag.gjenopprett(id, inntektsopplysninger.map { it.tilModellobjekt() })
             internal companion object {
-                internal fun parseInntekter(
-                    inntekter: List<InntektshistorikkInnslagData>,
-                    inntektshistorikk: Inntektshistorikk
-                ) {
-                    inntektshistorikk.restore {
-                        inntekter.reversed().forEach {
-                            innslag(it.id) {
-                                InntektsopplysningData.parseInntekter(it.inntektsopplysninger, this)
-                            }
-                        }
-                    }
-                }
+                internal fun parseInntekter(inntekter: List<InntektshistorikkInnslagData>) =
+                    inntekter.map { innslag -> innslag.tilModellobjekt() }
             }
         }
 
@@ -594,83 +579,71 @@ internal data class PersonData(
             private val tidsstempel: LocalDateTime?,
             private val skatteopplysninger: List<InntektsopplysningData>?
         ) {
-            internal companion object {
-                internal fun parseInntekter(
-                    inntektsopplysninger: List<InntektsopplysningData>,
-                    innslag: Inntektshistorikk.RestoreJsonMode.InnslagAppender
-                ) {
-                    inntektsopplysninger.forEach { inntektData ->
-                        this.parseInntektsopplysningData(inntektData)
-                            .also(innslag::add)
-                    }
-                }
-
-                internal fun parseInntektsopplysningData(inntektData: InntektsopplysningData) =
-                    when (inntektData.kilde?.let(Inntektsopplysningskilde::valueOf)) {
-                        Inntektsopplysningskilde.INFOTRYGD ->
-                            Inntektshistorikk.Infotrygd(
-                                id = requireNotNull(inntektData.id),
-                                dato = requireNotNull(inntektData.dato),
-                                hendelseId = requireNotNull(inntektData.hendelseId),
-                                beløp = requireNotNull(inntektData.beløp).månedlig,
-                                tidsstempel = requireNotNull(inntektData.tidsstempel)
-                            )
-                        Inntektsopplysningskilde.INNTEKTSMELDING ->
-                            Inntektshistorikk.Inntektsmelding(
-                                id = requireNotNull(inntektData.id),
-                                dato = requireNotNull(inntektData.dato),
-                                hendelseId = requireNotNull(inntektData.hendelseId),
-                                beløp = requireNotNull(inntektData.beløp).månedlig,
-                                tidsstempel = requireNotNull(inntektData.tidsstempel)
-                            )
-                        Inntektsopplysningskilde.IKKE_RAPPORTERT ->
-                            Inntektshistorikk.IkkeRapportert(
-                                id = requireNotNull(inntektData.id),
-                                dato = requireNotNull(inntektData.dato),
-                                tidsstempel = requireNotNull(inntektData.tidsstempel)
-                            )
-                        Inntektsopplysningskilde.SAKSBEHANDLER ->
-                            Inntektshistorikk.Saksbehandler(
-                                id = requireNotNull(inntektData.id),
-                                dato = requireNotNull(inntektData.dato),
-                                hendelseId = requireNotNull(inntektData.hendelseId),
-                                beløp = requireNotNull(inntektData.beløp).månedlig,
-                                tidsstempel = requireNotNull(inntektData.tidsstempel)
-                            )
-                        null -> Inntektshistorikk.SkattComposite(
-                            id = requireNotNull(inntektData.id),
-                            inntektsopplysninger = requireNotNull(inntektData.skatteopplysninger).map { skatteData ->
-                                when (skatteData.kilde?.let(Inntektsopplysningskilde::valueOf)) {
-                                    Inntektsopplysningskilde.SKATT_SAMMENLIGNINGSGRUNNLAG ->
-                                        Inntektshistorikk.Skatt.RapportertInntekt(
-                                            dato = requireNotNull(skatteData.dato),
-                                            hendelseId = requireNotNull(skatteData.hendelseId),
-                                            beløp = requireNotNull(skatteData.beløp).månedlig,
-                                            måned = requireNotNull(skatteData.måned),
-                                            type = enumValueOf(requireNotNull(skatteData.type)),
-                                            fordel = requireNotNull(skatteData.fordel),
-                                            beskrivelse = requireNotNull(skatteData.beskrivelse),
-                                            tidsstempel = requireNotNull(skatteData.tidsstempel)
-                                        )
-                                    Inntektsopplysningskilde.SKATT_SYKEPENGEGRUNNLAG ->
-                                        Inntektshistorikk.Skatt.Sykepengegrunnlag(
-                                            dato = requireNotNull(skatteData.dato),
-                                            hendelseId = requireNotNull(skatteData.hendelseId),
-                                            beløp = requireNotNull(skatteData.beløp).månedlig,
-                                            måned = requireNotNull(skatteData.måned),
-                                            type = enumValueOf(requireNotNull(skatteData.type)),
-                                            fordel = requireNotNull(skatteData.fordel),
-                                            beskrivelse = requireNotNull(skatteData.beskrivelse),
-                                            tidsstempel = requireNotNull(skatteData.tidsstempel)
-                                        )
-                                    else -> error("Kan kun være skatteopplysninger i SkattComposite")
-                                }
-                            }
+            internal fun tilModellobjekt() =
+                when (kilde?.let(Inntektsopplysningskilde::valueOf)) {
+                    Inntektsopplysningskilde.INFOTRYGD ->
+                        Inntektshistorikk.Infotrygd(
+                            id = requireNotNull(id),
+                            dato = requireNotNull(dato),
+                            hendelseId = requireNotNull(hendelseId),
+                            beløp = requireNotNull(beløp).månedlig,
+                            tidsstempel = requireNotNull(tidsstempel)
                         )
-                        Inntektsopplysningskilde.SKATT_SAMMENLIGNINGSGRUNNLAG,
-                        Inntektsopplysningskilde.SKATT_SYKEPENGEGRUNNLAG -> error("Fant ${inntektData.kilde}. Kan kun være i SkattComposite")
-                    }
-            }
+                    Inntektsopplysningskilde.INNTEKTSMELDING ->
+                        Inntektshistorikk.Inntektsmelding(
+                            id = requireNotNull(id),
+                            dato = requireNotNull(dato),
+                            hendelseId = requireNotNull(hendelseId),
+                            beløp = requireNotNull(beløp).månedlig,
+                            tidsstempel = requireNotNull(tidsstempel)
+                        )
+                    Inntektsopplysningskilde.IKKE_RAPPORTERT ->
+                        Inntektshistorikk.IkkeRapportert(
+                            id = requireNotNull(id),
+                            dato = requireNotNull(dato),
+                            tidsstempel = requireNotNull(tidsstempel)
+                        )
+                    Inntektsopplysningskilde.SAKSBEHANDLER ->
+                        Inntektshistorikk.Saksbehandler(
+                            id = requireNotNull(id),
+                            dato = requireNotNull(dato),
+                            hendelseId = requireNotNull(hendelseId),
+                            beløp = requireNotNull(beløp).månedlig,
+                            tidsstempel = requireNotNull(tidsstempel)
+                        )
+                    null -> Inntektshistorikk.SkattComposite(
+                        id = requireNotNull(id),
+                        inntektsopplysninger = requireNotNull(skatteopplysninger).map { skatteData ->
+                            when (skatteData.kilde?.let(Inntektsopplysningskilde::valueOf)) {
+                                Inntektsopplysningskilde.SKATT_SAMMENLIGNINGSGRUNNLAG ->
+                                    Inntektshistorikk.Skatt.RapportertInntekt(
+                                        dato = requireNotNull(skatteData.dato),
+                                        hendelseId = requireNotNull(skatteData.hendelseId),
+                                        beløp = requireNotNull(skatteData.beløp).månedlig,
+                                        måned = requireNotNull(skatteData.måned),
+                                        type = enumValueOf(requireNotNull(skatteData.type)),
+                                        fordel = requireNotNull(skatteData.fordel),
+                                        beskrivelse = requireNotNull(skatteData.beskrivelse),
+                                        tidsstempel = requireNotNull(skatteData.tidsstempel)
+                                    )
+                                Inntektsopplysningskilde.SKATT_SYKEPENGEGRUNNLAG ->
+                                    Inntektshistorikk.Skatt.Sykepengegrunnlag(
+                                        dato = requireNotNull(skatteData.dato),
+                                        hendelseId = requireNotNull(skatteData.hendelseId),
+                                        beløp = requireNotNull(skatteData.beløp).månedlig,
+                                        måned = requireNotNull(skatteData.måned),
+                                        type = enumValueOf(requireNotNull(skatteData.type)),
+                                        fordel = requireNotNull(skatteData.fordel),
+                                        beskrivelse = requireNotNull(skatteData.beskrivelse),
+                                        tidsstempel = requireNotNull(skatteData.tidsstempel)
+                                    )
+                                else -> error("Kan kun være skatteopplysninger i SkattComposite")
+                            }
+                        }
+                    )
+                    Inntektsopplysningskilde.SKATT_SAMMENLIGNINGSGRUNNLAG,
+                    Inntektsopplysningskilde.SKATT_SYKEPENGEGRUNNLAG -> error("Fant ${kilde}. Kan kun være i SkattComposite")
+                }
         }
 
         data class SykdomstidslinjeData(

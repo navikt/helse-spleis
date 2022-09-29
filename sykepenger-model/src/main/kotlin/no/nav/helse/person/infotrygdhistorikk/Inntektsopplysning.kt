@@ -41,9 +41,9 @@ class Inntektsopplysning private constructor(
 
     private fun erRelevant(skjæringstidspunkt: LocalDate) = sykepengerFom >= skjæringstidspunkt
 
-    private fun addInntekt(appendMode: Inntektshistorikk.AppendMode, hendelseId: UUID) {
+    private fun addInntekt(innslagBuilder: Inntektshistorikk.InnslagBuilder, hendelseId: UUID) {
         lagret = LocalDateTime.now()
-        appendMode.addInfotrygd(sykepengerFom, hendelseId, inntekt)
+        innslagBuilder.addInfotrygd(sykepengerFom, hendelseId, inntekt)
     }
 
     override fun hashCode() =
@@ -62,9 +62,6 @@ class Inntektsopplysning private constructor(
         return this.refusjonTilArbeidsgiver == other.refusjonTilArbeidsgiver
     }
 
-    internal fun erDuplikat(dato: LocalDate, beløp: Inntekt) =
-        this.inntekt == beløp && this.sykepengerFom == dato
-
     internal companion object {
         internal fun addInntekter(liste: List<Inntektsopplysning>, person: Person, aktivitetslogg: IAktivitetslogg, hendelseId: UUID, nødnummer: Nødnummer) =
             liste
@@ -74,10 +71,8 @@ class Inntektsopplysning private constructor(
                 .isNotEmpty()
 
         internal fun lagreInntekter(inntektsopplysninger: List<Inntektsopplysning>, inntektshistorikk: Inntektshistorikk, hendelseId: UUID) {
-            val nyeInntekter = inntektshistorikk.filtrerBortKjenteInntekter(inntektsopplysninger)
-            if (nyeInntekter.isEmpty()) return
             inntektshistorikk.append {
-                nyeInntekter.reversed().forEach { it.addInntekt(this, hendelseId) }
+                inntektsopplysninger.forEach { it.addInntekt(this, hendelseId) }
             }
         }
 

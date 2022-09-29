@@ -35,8 +35,8 @@ internal class SykepengegrunnlagTest {
     fun equality() {
         val sykepengegrunnlag = INNTEKT.sykepengegrunnlag
         assertEquals(sykepengegrunnlag, sykepengegrunnlag)
-        assertNotEquals(sykepengegrunnlag, INNTEKT.sykepengegrunnlag)
-        assertNotEquals(INNTEKT.sykepengegrunnlag, INNTEKT.sykepengegrunnlag)
+        assertEquals(sykepengegrunnlag, INNTEKT.sykepengegrunnlag)
+        assertEquals(INNTEKT.sykepengegrunnlag, INNTEKT.sykepengegrunnlag)
         assertNotEquals(INNTEKT.sykepengegrunnlag, INNTEKT.sykepengegrunnlag("annet orgnr"))
         assertNotEquals(INNTEKT.sykepengegrunnlag, INNTEKT.sykepengegrunnlag(31.desember))
     }

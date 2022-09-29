@@ -300,7 +300,7 @@ internal class InntektshistorikkTest {
             }.forEach { it.lagreInntekter(historikk, 1.januar, meldingsreferanseId) }
         }
 
-        assertEquals(3, inspektør.inntektTeller.size)
+        assertEquals(1, inspektør.inntektTeller.size)
         inspektør.inntektTeller.forEach {
             assertEquals(22, it)
         }

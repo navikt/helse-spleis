@@ -69,7 +69,7 @@ class ArbeidsgiverInntekt(
     ) {
 
         internal abstract fun lagreInntekter(
-            inntektshistorikk: Inntektshistorikk.AppendMode,
+            inntektshistorikk: Inntektshistorikk.InnslagBuilder,
             skjæringstidspunkt: LocalDate,
             meldingsreferanseId: UUID
         )
@@ -83,7 +83,7 @@ class ArbeidsgiverInntekt(
         ) : MånedligInntekt(yearMonth, inntekt, type, fordel, beskrivelse) {
 
             override fun lagreInntekter(
-                inntektshistorikk: Inntektshistorikk.AppendMode,
+                inntektshistorikk: Inntektshistorikk.InnslagBuilder,
                 skjæringstidspunkt: LocalDate,
                 meldingsreferanseId: UUID,
             ) {
@@ -108,7 +108,7 @@ class ArbeidsgiverInntekt(
         ) : MånedligInntekt(yearMonth, inntekt, type, fordel, beskrivelse) {
 
             override fun lagreInntekter(
-                inntektshistorikk: Inntektshistorikk.AppendMode,
+                inntektshistorikk: Inntektshistorikk.InnslagBuilder,
                 skjæringstidspunkt: LocalDate,
                 meldingsreferanseId: UUID,
             ) {
