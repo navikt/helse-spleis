@@ -10,7 +10,7 @@ dependencyResolutionManagement {
             version("hikari", "5.0.1")
             version("kotliquery", "1.7.0")
             version("cloudsql", "1.7.0")
-            version("flyway", "9.3.1")
+            version("flyway", "8.5.11")
 
             library("rapids-and-rivers", "com.github.navikt", "rapids-and-rivers").versionRef("rapids-and-rivers")
 
