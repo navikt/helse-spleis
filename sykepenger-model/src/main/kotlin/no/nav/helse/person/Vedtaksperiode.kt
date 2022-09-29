@@ -1078,6 +1078,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
             vedtaksperiode.håndterInntektsmelding(inntektsmelding, this)
+            vedtaksperiode.trengerIkkeInntektsmelding(inntektsmelding.hendelseskontekst())
             vedtaksperiode.person.gjenopptaBehandling(inntektsmelding)
         }
 
