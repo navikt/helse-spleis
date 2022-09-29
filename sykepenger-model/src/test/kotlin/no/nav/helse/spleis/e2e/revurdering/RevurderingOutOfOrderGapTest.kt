@@ -727,18 +727,8 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
 
         assertVarsel("Det er behandlet en søknad i Speil for en senere periode enn denne.", 3.vedtaksperiode.filter())
-
-        assertForventetFeil(
-            forklaring = "AUU skal ikke revurderes",
-            nå = {
-                assertVarsel("Saken må revurderes fordi det har blitt behandlet en tidligere periode som kan ha betydning.", 2.vedtaksperiode.filter())
-                assertVarsel("Saken må revurderes fordi det har blitt behandlet en tidligere periode som kan ha betydning.", 1.vedtaksperiode.filter())
-            },
-            ønsket = {
-                assertIngenVarsel("Saken må revurderes fordi det har blitt behandlet en tidligere periode som kan ha betydning.", 2.vedtaksperiode.filter())
-                assertIngenVarsel("Saken må revurderes fordi det har blitt behandlet en tidligere periode som kan ha betydning.", 1.vedtaksperiode.filter())
-            }
-        )
+        assertIngenVarsel("Saken må revurderes fordi det har blitt behandlet en tidligere periode som kan ha betydning.", 2.vedtaksperiode.filter())
+        assertIngenVarsel("Saken må revurderes fordi det har blitt behandlet en tidligere periode som kan ha betydning.", 1.vedtaksperiode.filter())
     }
 
     @Test
