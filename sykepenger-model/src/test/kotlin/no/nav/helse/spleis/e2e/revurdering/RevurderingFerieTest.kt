@@ -14,6 +14,9 @@ import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
+import no.nav.helse.person.Varselkode
+import no.nav.helse.person.Varselkode.RV_OO_1
+import no.nav.helse.person.Varselkode.RV_OO_2
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertIngenVarsel
 import no.nav.helse.spleis.e2e.assertSisteTilstand
@@ -57,8 +60,8 @@ internal class RevurderingFerieTest : AbstractEndToEndTest() {
         nyttVedtak(1.januar, 31.januar)
 
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        assertIngenVarsel("Saken må revurderes fordi det har blitt behandlet en tidligere periode som kan ha betydning.", 1.vedtaksperiode.filter())
-        assertVarsel("Det er behandlet en søknad i Speil for en senere periode enn denne.", 2.vedtaksperiode.filter())
+        assertIngenVarsel(RV_OO_2, 1.vedtaksperiode.filter())
+        assertVarsel(RV_OO_1, 2.vedtaksperiode.filter())
     }
 
     @Test
@@ -75,9 +78,9 @@ internal class RevurderingFerieTest : AbstractEndToEndTest() {
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertSisteTilstand(3.vedtaksperiode, AVSLUTTET)
 
-        assertVarsel("Saken må revurderes fordi det har blitt behandlet en tidligere periode som kan ha betydning.", 1.vedtaksperiode.filter())
-        assertIngenVarsel("Saken må revurderes fordi det har blitt behandlet en tidligere periode som kan ha betydning.", 2.vedtaksperiode.filter())
-        assertVarsel("Det er behandlet en søknad i Speil for en senere periode enn denne.", 3.vedtaksperiode.filter())
+        assertVarsel(RV_OO_2, 1.vedtaksperiode.filter())
+        assertIngenVarsel(RV_OO_2, 2.vedtaksperiode.filter())
+        assertVarsel(RV_OO_1, 3.vedtaksperiode.filter())
     }
 
     @Test
