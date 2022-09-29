@@ -102,6 +102,7 @@ internal class RestApiTest {
         flyway = Flyway
             .configure()
             .dataSource(dataSource)
+            .cleanDisabled(false)
             .load()
         app = createApp(
             KtorConfig(httpPort = randomPort),

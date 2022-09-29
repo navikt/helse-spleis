@@ -1,9 +1,7 @@
-val micrometerRegistryPrometheusVersion = "1.9.0"
-val ktorVersion = "2.0.1"
+val micrometerRegistryPrometheusVersion = "1.9.4"
+val ktorVersion = "2.1.1"
 val wireMockVersion = "2.31.0"
-val cloudSqlVersion = "1.6.0"
 val awaitilityVersion = "4.1.1"
-val testcontainersPostgresqlVersion = "1.17.1"
 val mockVersion = "1.12.4"
 
 val mainClass = "no.nav.helse.spleis.AppKt"
@@ -11,8 +9,16 @@ val mainClass = "no.nav.helse.spleis.AppKt"
 dependencies {
     implementation(project(":sykepenger-model"))
 
-    implementation("com.google.cloud.sql:postgres-socket-factory:$cloudSqlVersion")
+    implementation(libs.bundles.database)
+    implementation(libs.cloudsql)
     implementation("io.micrometer:micrometer-registry-prometheus:$micrometerRegistryPrometheusVersion")
+
+    // Midledertidig løsnings, pga problemer med KGraphQL og ktor 2.0 se: https://github.com/aPureBase/KGraphQL/issues/185
+    // Etter evt fix fra apurebase Legg tilbake importerne:
+    // implementation("com.apurebase:kgraphql:$kGraphQLVersion")
+    // implementation("com.apurebase:kgraphql-ktor:$kGraphQLVersion")
+    implementation("com.github.untoldwind.KGraphQL:kgraphql:0.17.14-fork-8")
+    implementation("com.github.untoldwind.KGraphQL:kgraphql-ktor:0.17.14-fork-8")
 
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
     implementation("io.ktor:ktor-server-metrics-micrometer:$ktorVersion")
@@ -23,7 +29,8 @@ dependencies {
         exclude(group = "junit")
     }
 
-    testImplementation("org.testcontainers:postgresql:$testcontainersPostgresqlVersion") {
+    testImplementation(libs.flyway)
+    testImplementation(libs.testcontainers) {
         exclude("com.fasterxml.jackson.core")
     }
     testImplementation("io.ktor:ktor-client-cio:$ktorVersion")

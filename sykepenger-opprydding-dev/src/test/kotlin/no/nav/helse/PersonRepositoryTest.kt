@@ -50,10 +50,11 @@ internal class PersonRepositoryTest {
     private fun runMigration(psql: PostgreSQLContainer<Nothing>): DataSource {
         val dataSource = HikariDataSource(createHikariConfig(psql))
         Flyway.configure()
-            .initSql(dropTables)
             .dataSource(dataSource)
+            .cleanDisabled(false)
             .locations("classpath:db/migration")
             .load()
+            .also { it.clean() }
             .migrate()
         return dataSource
     }

@@ -10,7 +10,6 @@ import kotliquery.sessionOf
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.flywaydb.core.Flyway
-import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -114,10 +113,11 @@ internal class AppTest {
     private fun runMigration(psql: PostgreSQLContainer<Nothing>): DataSource {
         val dataSource = HikariDataSource(createHikariConfig(psql))
         Flyway.configure()
-            .initSql(dropTables)
+            .cleanDisabled(false)
             .dataSource(dataSource)
             .locations("classpath:db/migration")
             .load()
+            .also { it.clean() }
             .migrate()
         return dataSource
     }
@@ -135,10 +135,4 @@ internal class AppTest {
             initializationFailTimeout = 5000
             maxLifetime = 30001
         }
-
-    @Language("SQL")
-    private val dropTables = """
-    DROP SCHEMA public CASCADE;
-    CREATE SCHEMA public;
-""".trimIndent()
 }

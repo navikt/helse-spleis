@@ -1,17 +1,20 @@
 val mainClass = "no.nav.helse.AppKt"
 
-val rapidsAndRiversVersion = "2022.05.19-14.18.e3dc97b518d8"
-val testcontainersPostgresqlVersion = "1.17.1"
 val innteksmeldingKontraktVersion = "2020.04.06-ab8f786"
 val syfokafkaVersion = "2022.08.23-10.31-21b5aa2b"
 val mockkVersion = "1.12.4"
+val jsonSchemaValidatorVersion = "1.0.70"
 
 dependencies {
-    implementation("com.github.navikt:rapids-and-rivers:$rapidsAndRiversVersion")
     implementation(project(":sykepenger-model"))
-    testImplementation("org.testcontainers:postgresql:$testcontainersPostgresqlVersion") {
+    implementation(libs.rapids.and.rivers)
+    implementation(libs.bundles.database)
+    implementation(libs.flyway)
+
+    testImplementation(libs.testcontainers) {
         exclude("com.fasterxml.jackson.core")
     }
+    testImplementation("com.networknt:json-schema-validator:$jsonSchemaValidatorVersion")
     testImplementation("com.github.navikt:inntektsmelding-kontrakt:$innteksmeldingKontraktVersion")
     testImplementation("com.github.navikt:sykepengesoknad-kafka:$syfokafkaVersion")
     testImplementation("io.mockk:mockk:$mockkVersion")

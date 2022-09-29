@@ -5,17 +5,27 @@ import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
-import io.ktor.http.*
+import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpMethod
+import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
-import io.ktor.server.engine.*
+import io.ktor.server.engine.ApplicationEngine
 import io.mockk.every
 import io.mockk.mockkStatic
+import java.net.Socket
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicInteger
+import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.person.Person
 import no.nav.helse.serde.serialize
 import no.nav.helse.spleis.JwtStub
 import no.nav.helse.spleis.config.AzureAdAppConfig
+import no.nav.helse.spleis.config.DataSourceConfiguration
 import no.nav.helse.spleis.config.KtorConfig
 import no.nav.helse.spleis.createApp
 import no.nav.helse.spleis.dao.HendelseDao
@@ -29,14 +39,6 @@ import org.awaitility.Awaitility
 import org.flywaydb.core.Flyway
 import org.junit.jupiter.api.Assertions
 import org.testcontainers.containers.PostgreSQLContainer
-import java.net.Socket
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
-import java.util.concurrent.TimeUnit
-import java.util.concurrent.atomic.AtomicInteger
-import javax.sql.DataSource
-import no.nav.helse.spleis.config.DataSourceConfiguration
 
 internal class ApiTestServer(private val port: Int = randomPort()) {
 
@@ -107,6 +109,7 @@ internal class ApiTestServer(private val port: Int = randomPort()) {
         flyway = Flyway
             .configure()
             .dataSource(dataSource)
+            .cleanDisabled(false)
             .load()
         app = createApp(
             KtorConfig(httpPort = port),

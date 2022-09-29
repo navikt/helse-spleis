@@ -1,8 +1,3 @@
-val testcontainersVersion = "1.17.1"
-val cloudSqlVersion = "1.6.0"
-val rapidsAndRiversVersion = "2022.05.19-14.18.e3dc97b518d8"
-val postgresqlVersion = "42.3.4"
-
 val mainClass = "no.nav.helse.AppKt"
 
 repositories {
@@ -10,13 +5,13 @@ repositories {
 }
 
 dependencies {
-    implementation(kotlin("stdlib"))
-    implementation("com.github.navikt:rapids-and-rivers:$rapidsAndRiversVersion")
-    implementation("com.google.cloud.sql:postgres-socket-factory:$cloudSqlVersion")
-    implementation("org.postgresql:postgresql:$postgresqlVersion")
+    implementation(libs.rapids.and.rivers)
+    implementation(libs.bundles.database)
+    implementation(libs.cloudsql)
 
-    testImplementation(project(":sykepenger-mediators"))
-    testImplementation("org.testcontainers:postgresql:$testcontainersVersion") {
+    testImplementation(project(":sykepenger-mediators")) // for å få  tilgang på db/migrations-filene
+    testImplementation(libs.flyway)
+    testImplementation(libs.testcontainers) {
         exclude("com.fasterxml.jackson.core")
     }
 }

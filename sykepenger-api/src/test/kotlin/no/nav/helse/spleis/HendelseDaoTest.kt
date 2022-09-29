@@ -2,15 +2,19 @@ package no.nav.helse.spleis
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
+import java.util.UUID
+import javax.sql.DataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.spleis.dao.HendelseDao
 import org.flywaydb.core.Flyway
-import org.junit.jupiter.api.*
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.TestInstance.Lifecycle
 import org.testcontainers.containers.PostgreSQLContainer
-import java.util.*
-import javax.sql.DataSource
 
 @TestInstance(Lifecycle.PER_CLASS)
 class HendelseDaoTest {
@@ -44,6 +48,7 @@ class HendelseDaoTest {
         })
         flyway = Flyway
             .configure()
+            .cleanDisabled(false)
             .dataSource(dataSource)
             .load()
 
