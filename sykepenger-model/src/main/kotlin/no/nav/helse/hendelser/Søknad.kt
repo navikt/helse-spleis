@@ -165,9 +165,6 @@ class Søknad(
 
         internal open fun valider(søknad: Søknad) {}
 
-        internal fun valider(søknad: Søknad, beskjed: String) {
-            if (periode.utenfor(søknad.sykdomsperiode)) søknad.varsel(beskjed)
-        }
         internal fun valider(søknad: Søknad, varselkode: Varselkode) {
             if (periode.utenfor(søknad.sykdomsperiode)) søknad.varsel(varselkode)
         }
