@@ -118,6 +118,10 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         assertDiff(-5588)
 
         håndterOverstyrInntekt(inntekt = 25000.månedlig, skjæringstidspunkt = 1.januar)
+        inspektør.utbetalinger(1.vedtaksperiode).also { utbetalinger ->
+            assertEquals(2, utbetalinger.size)
+            assertEquals(Utbetaling.Forkastet, utbetalinger.last().inspektør.tilstand)
+        }
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
@@ -152,6 +156,10 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         assertDiff(-15748)
 
         håndterOverstyrInntekt(inntekt = 25000.månedlig, skjæringstidspunkt = 1.januar)
+        inspektør.utbetalinger(2.vedtaksperiode).also { utbetalinger ->
+            assertEquals(2, utbetalinger.size)
+            assertEquals(Utbetaling.Forkastet, utbetalinger.last().inspektør.tilstand)
+        }
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
 

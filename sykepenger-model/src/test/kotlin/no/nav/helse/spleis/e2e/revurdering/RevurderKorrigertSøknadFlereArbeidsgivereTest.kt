@@ -32,6 +32,7 @@ import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
 import no.nav.helse.sykdomstidslinje.Dag.Feriedag
 import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.Sykedag
+import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -618,6 +619,10 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
                 Sykdom(1.januar, 31.januar, 100.prosent, 50.prosent),
                 Ferie(30.januar, 31.januar)
             )
+            inspektør.utbetalinger(1.vedtaksperiode).also { utbetalinger ->
+                assertEquals(2, utbetalinger.size)
+                assertEquals(Utbetaling.Forkastet, utbetalinger.last().inspektør.tilstand)
+            }
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -652,6 +657,10 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
                 Sykdom(1.januar, 31.januar, 100.prosent, 50.prosent),
                 Ferie(30.januar, 31.januar)
             )
+            inspektør.utbetalinger(1.vedtaksperiode).also { utbetalinger ->
+                assertEquals(2, utbetalinger.size)
+                assertEquals(Utbetaling.Forkastet, utbetalinger.last().inspektør.tilstand)
+            }
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)

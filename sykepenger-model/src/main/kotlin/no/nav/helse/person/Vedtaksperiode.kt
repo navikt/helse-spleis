@@ -1745,6 +1745,13 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.utbetalinger.simuler(hendelse)
         }
 
+        override fun leaving(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
+            if (vedtaksperiode.utbetalinger.erKlarForGodkjenning()) return
+            aktivitetslogg.info("Forkaster utbetalingen fordi utbetalingen er ikke simulert, " +
+                    "og perioden endrer tilstand")
+            vedtaksperiode.utbetalinger.forkast(aktivitetslogg)
+        }
+
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
             if (vedtaksperiode.person.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt) == null) return vedtaksperiode.tilstand(påminnelse, AvventerHistorikkRevurdering) {
                 påminnelse.info("Reberegner perioden ettersom skjæringstidspunktet har flyttet seg")
@@ -1983,6 +1990,10 @@ internal class Vedtaksperiode private constructor(
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.trengerGodkjenning(hendelse)
+        }
+
+        override fun leaving(vedtaksperiode: Vedtaksperiode, aktivitetslogg: IAktivitetslogg) {
+            vedtaksperiode.utbetalinger.forkast(aktivitetslogg)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
