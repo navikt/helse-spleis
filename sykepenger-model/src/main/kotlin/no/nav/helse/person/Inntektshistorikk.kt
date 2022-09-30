@@ -45,16 +45,6 @@ internal class Inntektshistorikk private constructor(private val historikk: Muta
 
     internal fun isNotEmpty() = historikk.isNotEmpty()
 
-    internal fun harInntektsmelding(førsteFraværsdag: LocalDate) = historikk.any {
-        it.harInntektsmelding(førsteFraværsdag)
-    }
-
-    internal fun harNødvendigOpplysningerFraArbeidsgiver(skjæringstidspunkt: LocalDate, periodeStart: LocalDate, førsteFraværsdag: LocalDate?, harUtbetaling: Boolean): Boolean {
-        if (førsteFraværsdag != null && harInntektsmelding(førsteFraværsdag)) return true
-        val inntektsopplysning = omregnetÅrsinntekt(skjæringstidspunkt, periodeStart, førsteFraværsdag) ?: return false
-        return inntektsopplysning.erNødvendigInntektForVilkårsprøving(harUtbetaling)
-    }
-
     internal fun omregnetÅrsinntekt(skjæringstidspunkt: LocalDate, dato: LocalDate, førsteFraværsdag: LocalDate?): Inntektsopplysning? =
         omregnetÅrsinntekt(skjæringstidspunkt, førsteFraværsdag) ?: skjæringstidspunkt
             .takeIf { it <= dato }
@@ -74,10 +64,6 @@ internal class Inntektshistorikk private constructor(private val historikk: Muta
             inntekter.forEach { it.accept(visitor) }
             visitor.postVisitInnslag(this, id)
         }
-
-        internal fun harInntektsmelding(førsteFraværsdag: LocalDate) = inntekter
-            .sorted()
-            .any { it.harInntektsmelding(førsteFraværsdag) }
 
         internal fun omregnetÅrsinntekt(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?) =
             inntekter
@@ -156,9 +142,6 @@ internal class Inntektshistorikk private constructor(private val historikk: Muta
         final override fun compareTo(other: Inntektsopplysning) =
             (-this.dato.compareTo(other.dato)).takeUnless { it == 0 } ?: -this.prioritet.compareTo(other.prioritet)
 
-        open fun harInntektsmelding(førsteFraværsdag: LocalDate) = false
-        open fun erNødvendigInntektForVilkårsprøving(harUtbetaling: Boolean) = false
-
         companion object {
             internal fun <Opplysning: Inntektsopplysning> Opplysning.lagre(liste: List<Opplysning>): List<Opplysning> {
                 if (liste.any { !it.kanLagres(this) }) return liste
@@ -195,8 +178,6 @@ internal class Inntektshistorikk private constructor(private val historikk: Muta
 
         override fun erSamme(other: Inntektsopplysning) =
             other is Saksbehandler && this.dato == other.dato && this.beløp == other.beløp
-
-        override fun erNødvendigInntektForVilkårsprøving(harUtbetaling: Boolean) = true
 
         override fun subsumerSykepengegrunnlag(
             subsumsjonObserver: SubsumsjonObserver,
@@ -283,8 +264,6 @@ internal class Inntektshistorikk private constructor(private val historikk: Muta
 
         override fun rapportertInntekt(): Inntekt = error("Infotrygd har ikke grunnlag for sammenligningsgrunnlag")
 
-        override fun erNødvendigInntektForVilkårsprøving(harUtbetaling: Boolean) = harUtbetaling
-
         override fun skalErstattesAv(other: Inntektsopplysning) =
             other is Infotrygd && this.dato == other.dato
 
@@ -305,11 +284,6 @@ internal class Inntektshistorikk private constructor(private val historikk: Muta
         override fun accept(visitor: InntekthistorikkVisitor) {
             visitor.visitInntektsmelding(this, id, dato, hendelseId, beløp, tidsstempel)
         }
-
-        override fun erNødvendigInntektForVilkårsprøving(harUtbetaling: Boolean) = harUtbetaling
-
-        override fun harInntektsmelding(førsteFraværsdag: LocalDate) =
-            førsteFraværsdag == dato
 
         override fun omregnetÅrsinntekt(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?): Inntektsopplysning? {
             if (dato == skjæringstidspunkt) return this
@@ -338,9 +312,6 @@ internal class Inntektshistorikk private constructor(private val historikk: Muta
     ) : Inntektsopplysning(inntektsopplysninger.first()) {
 
         private val inntekterSisteTreMåneder = inntektsopplysninger.filter { it.erRelevant(3) }
-
-        // a-inntekt er bare brukandes dersom vedtaksperioden ikke har utbetaling/er innenfor agp
-        override fun erNødvendigInntektForVilkårsprøving(harUtbetaling: Boolean) = !harUtbetaling
 
         override fun accept(visitor: InntekthistorikkVisitor) {
             visitor.preVisitSkatt(this, id, dato)

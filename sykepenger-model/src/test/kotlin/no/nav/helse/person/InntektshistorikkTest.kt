@@ -23,7 +23,6 @@ import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -52,15 +51,6 @@ internal class InntektshistorikkTest {
     @BeforeEach
     fun setup() {
         historikk = Inntektshistorikk()
-    }
-
-    @Test
-    fun `Inntekt fra inntektsmelding blir lagt til i inntektshistorikk`() {
-        inntektsmelding().addInntekt(historikk, 1.januar, MaskinellJurist())
-        assertEquals(1, inspektør.inntektTeller.size)
-        assertEquals(1, inspektør.inntektTeller.first())
-        assertTrue(historikk.harInntektsmelding(1.januar))
-        assertFalse(historikk.harInntektsmelding(2.januar))
     }
 
     @Test

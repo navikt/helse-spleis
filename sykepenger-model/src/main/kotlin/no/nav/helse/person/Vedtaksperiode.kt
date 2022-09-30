@@ -380,9 +380,6 @@ internal class Vedtaksperiode private constructor(
         return true
     }
 
-    private fun harNødvendigOpplysningerFraArbeidsgiver() =
-        arbeidsgiver.harNødvendigOpplysninger(skjæringstidspunkt, periode.start, !forventerInntekt())
-
     private fun manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag() =
         person.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag(skjæringstidspunkt)
     private fun harNødvendigInntektForVilkårsprøving() =
@@ -1536,26 +1533,6 @@ internal class Vedtaksperiode private constructor(
     // TODO: slett tilstand
     internal object AvventerUferdig : Vedtaksperiodetilstand {
         override val type = AVVENTER_UFERDIG
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
-            vedtaksperiode.håndterOverlappendeSøknad(søknad)
-        }
-
-        override fun gjenopptaBehandling(
-            vedtaksperiode: Vedtaksperiode,
-            arbeidsgivere: Iterable<Arbeidsgiver>,
-            hendelse: IAktivitetslogg
-        ) {
-            if (!vedtaksperiode.harNødvendigOpplysningerFraArbeidsgiver())
-                return vedtaksperiode.tilstand(hendelse, AvventerInntektsmeldingEllerHistorikk)
-            vedtaksperiode.tilstand(hendelse, AvventerHistorikk)
-        }
-
-        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            vedtaksperiode.tilstand(påminnelse, AvventerBlokkerendePeriode) {
-                påminnelse.info("Bytter til Avventer blokkerende periode for å migrere oss bort fra AvventerUferdig")
-            }
-        }
     }
 
     internal object AvventerHistorikk : Vedtaksperiodetilstand {
@@ -2529,12 +2506,6 @@ internal class Vedtaksperiode private constructor(
                 vedtaksperiode.tilstand == AvsluttetUtenUtbetaling && vedtaksperiode.skjæringstidspunkt > skjæringstidspunkt && vedtaksperiode.skjæringstidspunkt > segSelv.periode.endInclusive
             }
         }
-
-        internal val ALLE: VedtaksperiodeFilter = { true }
-
-        internal fun Iterable<Vedtaksperiode>.harNødvendigInntekt(skjæringstidspunkt: LocalDate) = this
-            .filter(SKAL_INNGÅ_I_SYKEPENGEGRUNNLAG(skjæringstidspunkt))
-            .all { it.harNødvendigOpplysningerFraArbeidsgiver() }
 
         internal fun List<Vedtaksperiode>.lagRevurdering(
             vedtaksperiode: Vedtaksperiode,

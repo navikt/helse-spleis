@@ -935,10 +935,6 @@ internal class Arbeidsgiver private constructor(
 
     internal fun finnSammenhengendePeriode(skjæringstidspunkt: LocalDate) = vedtaksperioder.medSkjæringstidspunkt(skjæringstidspunkt)
 
-    internal fun harNødvendigOpplysninger(skjæringstidspunkt: LocalDate, periodeStart: LocalDate, ingenUtbetaling: Boolean): Boolean {
-        return inntektshistorikk.harNødvendigOpplysningerFraArbeidsgiver(skjæringstidspunkt, periodeStart, finnFørsteFraværsdag(skjæringstidspunkt), !ingenUtbetaling)
-    }
-
     internal fun addInntekt(inntektsmelding: Inntektsmelding, førsteFraværsdag: LocalDate, subsumsjonObserver: SubsumsjonObserver) {
         inntektsmelding.addInntekt(inntektshistorikk, førsteFraværsdag, subsumsjonObserver)
     }
