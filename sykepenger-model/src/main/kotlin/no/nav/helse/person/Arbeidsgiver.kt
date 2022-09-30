@@ -328,7 +328,7 @@ internal class Arbeidsgiver private constructor(
             hendelse: IAktivitetslogg,
             filter: VedtaksperiodeFilter
         ) {
-            arbeidsgivere.forEach { it.søppelbøtte(hendelse, filter, ForkastetÅrsak.IKKE_STØTTET) }
+            arbeidsgivere.forEach { it.søppelbøtte(hendelse, filter) }
         }
 
         internal fun List<Arbeidsgiver>.validerYtelserForSkjæringstidspunkt(ytelser: Ytelser, skjæringstidspunkt: LocalDate, infotrygdhistorikk: Infotrygdhistorikk) {
@@ -982,17 +982,13 @@ internal class Arbeidsgiver private constructor(
         arbeidsgiverInntekt.lagreInntekter(inntektshistorikk, skjæringstidspunkt, hendelse.meldingsreferanseId())
     }
 
-    private fun søppelbøtte(
-        hendelse: IAktivitetslogg,
-        filter: VedtaksperiodeFilter,
-        årsak: ForkastetÅrsak
-    ) {
+    private fun søppelbøtte(hendelse: IAktivitetslogg, filter: VedtaksperiodeFilter) {
         hendelse.kontekst(this)
         val perioder = vedtaksperioder
             .filter(filter)
             .filter { it.forkast(hendelse, utbetalinger) }
         vedtaksperioder.removeAll(perioder)
-        forkastede.addAll(perioder.map { ForkastetVedtaksperiode(it, årsak) })
+        forkastede.addAll(perioder.map { ForkastetVedtaksperiode(it, ForkastetÅrsak.IKKE_STØTTET) })
         sykdomshistorikk.fjernDager(perioder.map { it.periode() })
     }
 
@@ -1036,9 +1032,6 @@ internal class Arbeidsgiver private constructor(
         }
         return perioderFør
     }
-
-    internal fun finnForkastetSykeperiodeRettFør(vedtaksperiode: Vedtaksperiode) =
-        ForkastetVedtaksperiode.finnForkastetSykeperiodeRettFør(forkastede, vedtaksperiode)
 
     internal fun harNærliggendeUtbetaling(periode: Periode) =
         utbetalinger.harNærliggendeUtbetaling(periode)
