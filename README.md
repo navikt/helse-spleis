@@ -7,7 +7,10 @@
 Tar inn søknader og inntektsmeldinger for en person og foreslår utbetalinger.
 
 ## Regler
-Dagturnering: https://github.com/navikt/helse-spleis/blob/master/sykepenger-model/src/main/resources/dagturnering.csv
+
+Dagturnering: 
+
+https://github.com/navikt/helse-spleis/blob/master/sykepenger-model/src/main/resources/dagturnering.csv
 
 ## Oppgradering av gradle wrapper
 Finn nyeste versjon av gradle her: https://gradle.org/releases/
