@@ -256,8 +256,6 @@ internal class Inntektshistorikk private constructor(private val historikk: Muta
             visitor.visitInfotrygd(this, id, dato, hendelseId, beløp, tidsstempel)
         }
 
-        // TODO: egen test for å bruke førstefraværsdag her: https://trello.com/c/QFYSoFOs
-        override fun omregnetÅrsinntekt(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?) = takeIf { it.dato == skjæringstidspunkt }
         override fun omregnetÅrsinntekt(): Inntekt = beløp
 
         internal fun omregnetÅrsinntekt(periode: Periode) = takeIf { it.dato in periode }

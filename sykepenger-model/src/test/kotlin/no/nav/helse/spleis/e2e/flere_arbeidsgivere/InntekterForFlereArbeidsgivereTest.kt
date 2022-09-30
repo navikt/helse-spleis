@@ -56,6 +56,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 
 internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
@@ -196,8 +197,8 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
         assertEquals(4, a1Inspektør.inntektInspektør.antallInnslag)
         assertEquals(2, a2Inspektør.inntektInspektør.antallInnslag)
 
-        assertEquals(5000.månedlig, a2Inspektør.inntektInspektør.sisteInnslag?.opplysninger?.first { it.kilde == Kilde.INFOTRYGD }?.sykepengegrunnlag)
-        assertEquals(24500.månedlig, a1Inspektør.inntektInspektør.sisteInnslag?.opplysninger?.first { it.kilde == Kilde.INFOTRYGD }?.sykepengegrunnlag)
+        assertNull(a2Inspektør.inntektInspektør.sisteInnslag?.opplysninger?.first { it.kilde == Kilde.INFOTRYGD }?.sykepengegrunnlag)
+        assertNull(a1Inspektør.inntektInspektør.sisteInnslag?.opplysninger?.first { it.kilde == Kilde.INFOTRYGD }?.sykepengegrunnlag)
         assertEquals(
             24000.månedlig,
             a1Inspektør.inntektInspektør.sisteInnslag?.opplysninger?.first { it.kilde == Kilde.SKATT && it.sammenligningsgrunnlag != null }?.sammenligningsgrunnlag

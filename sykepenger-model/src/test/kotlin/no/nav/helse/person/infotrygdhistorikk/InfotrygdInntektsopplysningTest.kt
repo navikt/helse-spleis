@@ -83,7 +83,7 @@ internal class InfotrygdInntektsopplysningTest {
     }
 
     @Test
-    fun `Inntekt fra infotrygd brukes til å beregne sykepengegrunnlaget`() {
+    fun `Inntekt fra infotrygd brukes ikke til å beregne sykepengegrunnlaget`() {
         Inntektsopplysning.lagreInntekter(
             listOf(Inntektsopplysning(ORGNR, 1.januar, INNTEKT, true)),
             historikk,
@@ -91,11 +91,11 @@ internal class InfotrygdInntektsopplysningTest {
         )
         assertEquals(1, inspektør.inntektTeller.size)
         assertEquals(1, inspektør.inntektTeller.first())
-        assertEquals(INNTEKT, historikk.omregnetÅrsinntekt(1.januar, 1.januar)?.omregnetÅrsinntekt())
+        assertNull(historikk.omregnetÅrsinntekt(1.januar, 1.januar)?.omregnetÅrsinntekt())
     }
 
     @Test
-    fun `Bruker inntekt fra infotrygd fremfor inntekt fra inntektsmelding for å beregne sykepengegrunnlaget`() {
+    fun `Bruker inntekt fra inntektsmelding fremfor inntekt fra infotrygd for å beregne sykepengegrunnlaget`() {
         inntektsmelding(beregnetInntekt = 20000.månedlig).addInntekt(historikk, 1.januar, MaskinellJurist())
         Inntektsopplysning.lagreInntekter(
             listOf(Inntektsopplysning(ORGNR, 1.januar, 25000.månedlig, true)),
@@ -105,11 +105,11 @@ internal class InfotrygdInntektsopplysningTest {
         assertEquals(2, inspektør.inntektTeller.size)
         assertEquals(2, inspektør.inntektTeller.first())
         assertEquals(1, inspektør.inntektTeller.last())
-        assertEquals(25000.månedlig, historikk.omregnetÅrsinntekt(1.januar, 1.januar)?.omregnetÅrsinntekt())
+        assertEquals(20000.månedlig, historikk.omregnetÅrsinntekt(1.januar, 1.januar)?.omregnetÅrsinntekt())
     }
 
     @Test
-    fun `Bruker inntekt fra infotrygd fremfor inntekt fra skatt for å beregne sykepengegrunnlaget - skatt kommer først`() {
+    fun `Bruker skatt fremfor infotrygd for å beregne sykepengegrunnlaget - skatt kommer først`() {
         inntektperioderForSykepengegrunnlag {
             1.desember(2016) til 1.desember(2017) inntekter {
                 ORGNR inntekt INNTEKT
@@ -126,7 +126,7 @@ internal class InfotrygdInntektsopplysningTest {
         assertEquals(2, inspektør.inntektTeller.size)
         assertEquals(24, inspektør.inntektTeller.first())
         assertEquals(23, inspektør.inntektTeller.last())
-        assertEquals(25000.månedlig, historikk.omregnetÅrsinntekt(1.januar, 1.januar)?.omregnetÅrsinntekt())
+        assertEquals(INNTEKT, historikk.omregnetÅrsinntekt(1.januar, 1.januar)?.omregnetÅrsinntekt())
     }
 
     @Test
@@ -157,7 +157,7 @@ internal class InfotrygdInntektsopplysningTest {
     }
 
     @Test
-    fun `Bruker inntekt fra infotrygd fremfor inntekt fra skatt for å beregne sykepengegrunnlaget - skatt kommer sist`() {
+    fun `Bruker skatt fremfor infotrygd for å beregne sykepengegrunnlaget - skatt kommer sist`() {
         Inntektsopplysning.lagreInntekter(
             listOf(Inntektsopplysning(ORGNR, 1.januar, 25000.månedlig, true)),
             historikk,
@@ -174,7 +174,7 @@ internal class InfotrygdInntektsopplysningTest {
         assertEquals(2, inspektør.inntektTeller.size)
         assertEquals(24, inspektør.inntektTeller.first())
         assertEquals(1, inspektør.inntektTeller.last())
-        assertEquals(25000.månedlig, historikk.omregnetÅrsinntekt(1.januar, 1.januar)?.omregnetÅrsinntekt())
+        assertEquals(INNTEKT, historikk.omregnetÅrsinntekt(1.januar, 1.januar)?.omregnetÅrsinntekt())
     }
 
     @Test

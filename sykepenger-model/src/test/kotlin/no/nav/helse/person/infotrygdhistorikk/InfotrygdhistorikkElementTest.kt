@@ -44,6 +44,7 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -792,7 +793,7 @@ internal class InfotrygdhistorikkElementTest {
     }
 
     @Test
-    fun `siste inntekt blir gjeldende`() {
+    fun `hensyntar ikke inntekter fra Infotrygd`() {
         val inntektshistorikk = Inntektshistorikk()
         Inntektsopplysning.lagreInntekter(
             listOf(
@@ -800,7 +801,7 @@ internal class InfotrygdhistorikkElementTest {
                 Inntektsopplysning(ORGNUMMER, 1.januar, 4321.månedlig, true),
             ), inntektshistorikk, UUID.randomUUID()
         )
-        assertEquals(4321.månedlig, inntektshistorikk.omregnetÅrsinntekt(1.januar, 1.januar)?.omregnetÅrsinntekt())
+        assertNull(inntektshistorikk.omregnetÅrsinntekt(1.januar, 1.januar)?.omregnetÅrsinntekt())
     }
 
     private fun assertFlereInntekterInfotrygd() {
