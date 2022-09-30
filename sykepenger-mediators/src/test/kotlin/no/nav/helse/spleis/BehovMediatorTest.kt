@@ -151,6 +151,27 @@ class BehovMediatorTest {
     }
 
     @Test
+    fun `kan produsere samme behov flere ganger så lenge detaljer er likt`() {
+        val hendelse = TestHendelse(aktivitetslogg.barn())
+        val arbeidsgiver1 = TestKontekst("Arbeidsgiver", "Arbeidsgiver 1")
+        hendelse.kontekst(arbeidsgiver1)
+        val vedtaksperiode1 = TestKontekst("Vedtaksperiode", "Vedtaksperiode 1")
+        hendelse.kontekst(vedtaksperiode1)
+        hendelse.behov(
+            Sykepengehistorikk, "Trenger sykepengehistorikk", mapOf(
+                "historikkFom" to LocalDate.now().minusDays(1)
+            )
+        )
+        hendelse.behov(
+            Sykepengehistorikk, "Trenger sykepengehistorikk", mapOf(
+                "historikkFom" to LocalDate.now().minusDays(1)
+            )
+        )
+
+        assertDoesNotThrow { behovMediator.håndter(testRapid, hendelse) }
+    }
+
+    @Test
     fun `kan ikke produsere samme behov flere ganger`() {
         val hendelse = TestHendelse(aktivitetslogg.barn())
         val arbeidsgiver1 = TestKontekst("Arbeidsgiver", "Arbeidsgiver 1")
@@ -164,7 +185,7 @@ class BehovMediatorTest {
         )
         hendelse.behov(
             Sykepengehistorikk, "Trenger sykepengehistorikk", mapOf(
-                "historikkFom" to LocalDate.now().minusDays(1)
+                "historikkFom" to LocalDate.now().minusDays(2)
             )
         )
 
@@ -172,7 +193,7 @@ class BehovMediatorTest {
     }
 
     @Test
-    fun `kan ikke produsere samme behov`() {
+    fun `kan produsere samme behov med like detaljer`() {
         val hendelse = TestHendelse(aktivitetslogg.barn())
         val arbeidsgiver1 = TestKontekst("Arbeidsgiver", "Arbeidsgiver 1")
         hendelse.kontekst(arbeidsgiver1)
@@ -180,6 +201,19 @@ class BehovMediatorTest {
         hendelse.kontekst(vedtaksperiode1)
         hendelse.behov(Sykepengehistorikk, "Trenger sykepengehistorikk")
         hendelse.behov(Sykepengehistorikk, "Trenger sykepengehistorikk")
+
+        assertDoesNotThrow { behovMediator.håndter(testRapid, hendelse) }
+    }
+
+    @Test
+    fun `kan ikke produsere samme behov med ulike detaljer`() {
+        val hendelse = TestHendelse(aktivitetslogg.barn())
+        val arbeidsgiver1 = TestKontekst("Arbeidsgiver", "Arbeidsgiver 1")
+        hendelse.kontekst(arbeidsgiver1)
+        val vedtaksperiode1 = TestKontekst("Vedtaksperiode", "Vedtaksperiode 1")
+        hendelse.kontekst(vedtaksperiode1)
+        hendelse.behov(Sykepengehistorikk, "Trenger sykepengehistorikk", mapOf("a" to 1))
+        hendelse.behov(Sykepengehistorikk, "Trenger sykepengehistorikk", mapOf("a" to 2))
 
         assertThrows<IllegalArgumentException> { behovMediator.håndter(testRapid, hendelse) }
     }

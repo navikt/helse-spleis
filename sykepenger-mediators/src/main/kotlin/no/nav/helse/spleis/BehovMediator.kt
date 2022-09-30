@@ -18,14 +18,8 @@ internal class BehovMediator(private val sikkerLogg: Logger) {
     private fun håndter(context: MessageContext, hendelse: PersonHendelse, behov: List<Aktivitetslogg.Aktivitet.Behov>) {
         behov
             .groupBy { it.kontekst() }
-            .onEach { (kontekst, behovMap) ->
-                require(behovMap.size == behovMap.map { it.type.name }.toSet().size) {
-                    sikkerLogg.error("Forsøkte å sende duplikate behov på kontekst ${kontekst.entries.joinToString { "${it.key}=${it.value}" }}")
-                    "Kan ikke produsere samme behov på samme kontekst. Forsøkte å be om ${behovMap.joinToString { it.type.name }}"
-                }
-            }
-            .forEach { (kontekst, liste) ->
-                val behovMap = liste.associate { behov -> behov.type.name to behov.detaljer() }
+            .grupperBehovTilDetaljer()
+            .forEach { (kontekst, behovMap) ->
                 mutableMapOf<String, Any>()
                     .apply {
                         putAll(kontekst)
@@ -39,4 +33,24 @@ internal class BehovMediator(private val sikkerLogg: Logger) {
             }
     }
 
+    private fun Map<Map<String, String>, List<Aktivitetslogg.Aktivitet.Behov>>.grupperBehovTilDetaljer() =
+        mapValues { (kontekst, behovliste) ->
+            behovliste
+                .groupBy({ it.type.name }, { it.detaljer() })
+                .ikkeTillatUnikeDetaljerPåSammeBehov(kontekst, behovliste)
+        }
+
+    private fun <K: Any> Map<K, List<Map<String, Any?>>>.ikkeTillatUnikeDetaljerPåSammeBehov(kontekst: Map<String, String>, behovliste: List<Aktivitetslogg.Aktivitet.Behov>) =
+        mapValues { (_, detaljerList) ->
+            // tillater duplikate detaljer-maps, så lenge de er like
+            detaljerList
+                .distinct()
+                .also { detaljer ->
+                    require(detaljer.size == 1) {
+                        sikkerLogg.error("Forsøkte å sende duplikate behov på kontekst ${kontekst.entries.joinToString { "${it.key}=${it.value}" }}")
+                        "Kan ikke produsere samme behov på samme kontekst med ulike detaljer. Forsøkte å be om ${behovliste.joinToString { it.type.name }}"
+                    }
+                }
+                .single()
+        }
 }

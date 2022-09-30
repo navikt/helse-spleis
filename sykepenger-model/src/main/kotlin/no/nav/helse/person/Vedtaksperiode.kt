@@ -2240,13 +2240,6 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
             val revurderingIkkeStøttet = vedtaksperiode.person.vedtaksperioder(NYERE_SKJÆRINGSTIDSPUNKT_MED_UTBETALING(vedtaksperiode)).isNotEmpty()
-            vedtaksperiode.håndterInntektsmelding(inntektsmelding, this) // håndterInntektsmelding krever tilstandsendring, men vi må avvente til vi starter revurdering
-
-            if (inntektsmelding.harFunksjonelleFeilEllerVerre()) return
-            if (!vedtaksperiode.forventerInntekt()) {
-                vedtaksperiode.emitVedtaksperiodeEndret(inntektsmelding) // på stedet hvil!
-                return inntektsmelding.info("Revurdering medfører ingen utbetaling, blir stående i avsluttet uten utbetaling")
-            }
             // støttes ikke før vi støtter revurdering av eldre skjæringstidspunkt
             if (revurderingIkkeStøttet) {
                 sikkerlogg.info(
@@ -2257,6 +2250,13 @@ internal class Vedtaksperiode private constructor(
                 )
                 inntektsmelding.info("Revurdering blokkeres fordi det finnes nyere skjæringstidspunkt, og det mangler funksjonalitet for å håndtere dette.")
                 return vedtaksperiode.emitVedtaksperiodeEndret(inntektsmelding) // på stedet hvil!
+            }
+
+            vedtaksperiode.håndterInntektsmelding(inntektsmelding, this) // håndterInntektsmelding krever tilstandsendring, men vi må avvente til vi starter revurdering
+            if (inntektsmelding.harFunksjonelleFeilEllerVerre()) return
+
+            if (!vedtaksperiode.forventerInntekt()) {
+                vedtaksperiode.emitVedtaksperiodeEndret(inntektsmelding) // på stedet hvil!
             }
             inntektsmelding.info("Igangsetter revurdering ettersom det skal utbetales noe i perioden likevel")
             vedtaksperiode.person.startRevurdering(vedtaksperiode, inntektsmelding)

@@ -3,13 +3,12 @@ package no.nav.helse.spleis.e2e
 import ch.qos.logback.classic.Logger
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.AppenderBase
-import no.nav.helse.ForventetFeil
 import no.nav.helse.februar
+import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.inntektsmeldingkontrakt.Periode
-import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -40,6 +39,8 @@ internal class RevurderingAvsluttetUtenUtbetalingTest : AbstractEndToEndMediator
             "AVSLUTTET_UTEN_UTBETALING",
             "AVVENTER_GJENNOMFØRT_REVURDERING",
             "AVVENTER_HISTORIKK_REVURDERING",
+            "AVVENTER_GJENNOMFØRT_REVURDERING",
+            "AVVENTER_HISTORIKK_REVURDERING",
             "AVVENTER_VILKÅRSPRØVING_REVURDERING",
             "AVVENTER_HISTORIKK_REVURDERING",
             "AVVENTER_SIMULERING_REVURDERING",
@@ -66,11 +67,12 @@ internal class RevurderingAvsluttetUtenUtbetalingTest : AbstractEndToEndMediator
         sendSimulering(2, SimuleringMessage.Simuleringstatus.OK)
 
         assertTilstander(0, "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK", "AVSLUTTET_UTEN_UTBETALING", "AVSLUTTET_UTEN_UTBETALING")
-        assertTilstander(1, "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK", "AVSLUTTET_UTEN_UTBETALING", "AVVENTER_GJENNOMFØRT_REVURDERING")
+        assertTilstander(1, "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK", "AVSLUTTET_UTEN_UTBETALING", "AVVENTER_REVURDERING", "AVVENTER_GJENNOMFØRT_REVURDERING")
         assertTilstander(
             2,
             "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK",
             "AVSLUTTET_UTEN_UTBETALING",
+            "AVVENTER_REVURDERING",
             "AVVENTER_GJENNOMFØRT_REVURDERING",
             "AVVENTER_HISTORIKK_REVURDERING",
             "AVVENTER_VILKÅRSPRØVING_REVURDERING",
@@ -81,7 +83,6 @@ internal class RevurderingAvsluttetUtenUtbetalingTest : AbstractEndToEndMediator
     }
 
     @Test
-    @ForventetFeil("perioden går inn i Avventer historikk revurdering flere ganger")
     fun `revurdering ved inntektsmelding etter utbetaling`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 22.januar, sykmeldingsgrad = 100))
         sendSøknad(listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 22.januar, sykmeldingsgrad = 100)))
