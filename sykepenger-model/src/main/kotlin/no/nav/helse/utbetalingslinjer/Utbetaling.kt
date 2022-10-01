@@ -16,7 +16,6 @@ import no.nav.helse.hendelser.utbetaling.UtbetalingOverført
 import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.Aktivitetskontekst
-import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.godkjenning
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.IAktivitetslogg
@@ -222,8 +221,7 @@ internal class Utbetaling private constructor(
         førstegangsbehandling: Boolean,
         inntektskilde: Inntektskilde,
         orgnummereMedRelevanteArbeidsforhold: List<String>,
-        arbeidsforholdId: String?,
-        aktivitetslogg: Aktivitetslogg
+        arbeidsforholdId: String?
     ) {
         hendelse.kontekst(this)
         tilstand.godkjenning(
@@ -235,7 +233,6 @@ internal class Utbetaling private constructor(
             inntektskilde,
             orgnummereMedRelevanteArbeidsforhold,
             arbeidsforholdId,
-            aktivitetslogg,
             hendelse
         )
     }
@@ -697,7 +694,6 @@ internal class Utbetaling private constructor(
             inntektskilde: Inntektskilde,
             orgnummereMedRelevanteArbeidsforhold: List<String>,
             arbeidsforholdId: String?,
-            aktivitetslogg: Aktivitetslogg,
             hendelse: IAktivitetslogg
         ) {
             hendelse.funksjonellFeil("Forventet ikke å lage godkjenning på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
@@ -737,7 +733,6 @@ internal class Utbetaling private constructor(
             inntektskilde: Inntektskilde,
             orgnummereMedRelevanteArbeidsforhold: List<String>,
             arbeidsforholdId: String?,
-            aktivitetslogg: Aktivitetslogg,
             hendelse: IAktivitetslogg
         ) {
             godkjenning(
@@ -745,7 +740,6 @@ internal class Utbetaling private constructor(
                 periodeFom = periode.start,
                 periodeTom = periode.endInclusive,
                 skjæringstidspunkt = skjæringstidspunkt,
-                vedtaksperiodeaktivitetslogg = aktivitetslogg,
                 periodetype = periodetype,
                 førstegangsbehandling = førstegangsbehandling,
                 utbetalingtype = utbetaling.type,

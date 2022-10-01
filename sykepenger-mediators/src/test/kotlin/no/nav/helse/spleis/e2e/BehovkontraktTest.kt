@@ -5,12 +5,12 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
+import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.januar
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype.*
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.inntektsmeldingkontrakt.Periode
-import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
@@ -226,8 +226,6 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         assertTrue(godkjenning.path("periodetype").asText().isNotEmpty())
         assertTrue(godkjenning.path("utbetalingtype").asText().isNotEmpty())
         assertTrue(godkjenning.path("førstegangsbehandling").isBoolean)
-        assertTrue(godkjenning.path("warnings").path("aktiviteter").isArray)
-        assertTrue(godkjenning.path("warnings").path("kontekster").isArray)
     }
 
     private fun assertUtbetalingdetaljer(behov: JsonNode, erAnnullering: Boolean = false) {

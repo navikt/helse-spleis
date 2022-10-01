@@ -145,8 +145,7 @@ internal class VedtaksperiodeUtbetalinger(private val arbeidsgiver: Arbeidsgiver
         førstegangsbehandling: Boolean,
         inntektskilde: Inntektskilde,
         arbeidsforholdId: String?,
-        orgnummereMedRelevanteArbeidsforhold: List<String>,
-        aktivitetslogg: Aktivitetslogg
+        orgnummereMedRelevanteArbeidsforhold: List<String>
     ) {
         siste!!.godkjenning(
             hendelse = hendelse,
@@ -156,8 +155,7 @@ internal class VedtaksperiodeUtbetalinger(private val arbeidsgiver: Arbeidsgiver
             førstegangsbehandling = førstegangsbehandling,
             inntektskilde = inntektskilde,
             orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold,
-            arbeidsforholdId = arbeidsforholdId,
-            aktivitetslogg = aktivitetslogg
+            arbeidsforholdId = arbeidsforholdId
         )
     }
 }

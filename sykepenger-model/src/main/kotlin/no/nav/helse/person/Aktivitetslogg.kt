@@ -389,7 +389,6 @@ class Aktivitetslogg(
                     periodeFom: LocalDate,
                     periodeTom: LocalDate,
                     skjæringstidspunkt: LocalDate,
-                    vedtaksperiodeaktivitetslogg: Aktivitetslogg,
                     periodetype: Periodetype,
                     førstegangsbehandling: Boolean,
                     utbetalingtype: Utbetalingtype,
@@ -406,10 +405,6 @@ class Aktivitetslogg(
                             "førstegangsbehandling" to førstegangsbehandling,
                             "utbetalingtype" to utbetalingtype.name,
                             "inntektskilde" to inntektskilde.name,
-                            "warnings" to Aktivitetslogg().apply {
-                                aktiviteter.addAll(vedtaksperiodeaktivitetslogg.varsel())
-
-                            }.toMap(),
                             "orgnummereMedRelevanteArbeidsforhold" to orgnummereMedRelevanteArbeidsforhold,
                             "arbeidsforholdId" to arbeidsforholdId
                         )
