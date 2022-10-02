@@ -1,16 +1,12 @@
 package no.nav.helse.spleis.e2e
 
 
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode
 import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.Arbeidsforholdhistorikk
-import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.IdInnhenter
-import no.nav.helse.person.PersonVisitor
 import no.nav.helse.person.TilstandType
 import no.nav.helse.serde.api.dto.HendelseDTO
 import no.nav.helse.serde.api.dto.InntektsmeldingDTO
@@ -64,48 +60,6 @@ internal class EtterspurtBehov(
     }
 
     override fun toString() = "$type ($tilstand)"
-}
-
-internal fun AbstractEndToEndTest.tellArbeidsforholdhistorikkinnslag(orgnummer: String? = null): MutableList<UUID> {
-    val arbeidsforholdIder = mutableListOf<UUID>()
-    var erIRiktigArbeidsgiver = true
-    person.accept(object : PersonVisitor {
-
-        override fun preVisitArbeidsgiver(arbeidsgiver: Arbeidsgiver, id: UUID, organisasjonsnummer: String) {
-            erIRiktigArbeidsgiver = orgnummer == null || orgnummer == organisasjonsnummer
-        }
-
-        override fun preVisitArbeidsforholdinnslag(arbeidsforholdinnslag: Arbeidsforholdhistorikk.Innslag, id: UUID, skjæringstidspunkt: LocalDate) {
-            if (erIRiktigArbeidsgiver) {
-                arbeidsforholdIder.add(id)
-            }
-        }
-    })
-
-    return arbeidsforholdIder
-}
-
-internal fun AbstractEndToEndTest.tellArbeidsforholdINyesteHistorikkInnslag(orgnummer: String): Int {
-    var antall = 0
-    var erIRiktigArbeidsgiver = true
-    var erIFørsteHistorikkinnslag = true
-
-    person.accept(object : PersonVisitor {
-
-        override fun preVisitArbeidsgiver(arbeidsgiver: Arbeidsgiver, id: UUID, organisasjonsnummer: String) {
-            erIRiktigArbeidsgiver = orgnummer == organisasjonsnummer
-        }
-
-        override fun visitArbeidsforhold(ansattFom: LocalDate, ansattTom: LocalDate?, deaktivert: Boolean) {
-            if (erIRiktigArbeidsgiver && erIFørsteHistorikkinnslag) antall += 1
-        }
-
-        override fun postVisitArbeidsforholdinnslag(arbeidsforholdinnslag: Arbeidsforholdhistorikk.Innslag, id: UUID, skjæringstidspunkt: LocalDate) {
-            if (erIRiktigArbeidsgiver) erIFørsteHistorikkinnslag = false
-        }
-    })
-
-    return antall
 }
 
 internal fun AbstractEndToEndTest.finnSkjæringstidspunkt(orgnummer: String, vedtaksperiodeIdInnhenter: IdInnhenter) =

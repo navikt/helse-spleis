@@ -1,8 +1,8 @@
 package no.nav.helse.person
 
+import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.inspectors.SubsumsjonInspektør
-import no.nav.helse.april
 import no.nav.helse.januar
 import no.nav.helse.juni
 import no.nav.helse.mai
@@ -18,7 +18,7 @@ internal class OpptjeningTest {
     @Test
     fun `Tom liste med arbeidsforhold betyr at du ikke oppfyller opptjeningskrav`() {
         val arbeidsforhold = emptyList<Opptjening.ArbeidsgiverOpptjeningsgrunnlag>()
-        val opptjening = Opptjening.opptjening(arbeidsforhold, 1.januar, MaskinellJurist())
+        val opptjening = Opptjening(arbeidsforhold, 1.januar, MaskinellJurist())
 
         assertFalse(opptjening.erOppfylt())
     }
@@ -28,10 +28,16 @@ internal class OpptjeningTest {
         val arbeidsforhold = listOf(
             Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
                 "orgnummer",
-                listOf(Arbeidsforholdhistorikk.Arbeidsforhold(ansattFom = 1.januar, ansattTom = null, deaktivert = false))
+                listOf(
+                    Arbeidsforholdhistorikk.Arbeidsforhold(
+                        ansattFom = 1.januar,
+                        ansattTom = null,
+                        deaktivert = false
+                    )
+                )
             )
         )
-        val opptjening = Opptjening.opptjening(arbeidsforhold, 2.januar, MaskinellJurist())
+        val opptjening = Opptjening(arbeidsforhold, 2.januar, MaskinellJurist())
 
         assertFalse(opptjening.erOppfylt())
     }
@@ -41,10 +47,16 @@ internal class OpptjeningTest {
         val arbeidsforhold = listOf(
             Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
                 "orgnummer",
-                listOf(Arbeidsforholdhistorikk.Arbeidsforhold(ansattFom = 1.januar, ansattTom = null, deaktivert = false))
+                listOf(
+                    Arbeidsforholdhistorikk.Arbeidsforhold(
+                        ansattFom = 1.januar,
+                        ansattTom = null,
+                        deaktivert = false
+                    )
+                )
             )
         )
-        val opptjening = Opptjening.opptjening(arbeidsforhold, 1.januar.plusDays(27), MaskinellJurist())
+        val opptjening = Opptjening(arbeidsforhold, 1.januar.plusDays(27), MaskinellJurist())
 
         assertFalse(opptjening.erOppfylt())
     }
@@ -54,10 +66,16 @@ internal class OpptjeningTest {
         val arbeidsforhold = listOf(
             Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
                 "orgnummer",
-                listOf(Arbeidsforholdhistorikk.Arbeidsforhold(ansattFom = 1.januar, ansattTom = null, deaktivert = false))
+                listOf(
+                    Arbeidsforholdhistorikk.Arbeidsforhold(
+                        ansattFom = 1.januar,
+                        ansattTom = null,
+                        deaktivert = false
+                    )
+                )
             )
         )
-        val opptjening = Opptjening.opptjening(arbeidsforhold, 1.januar.plusDays(28), MaskinellJurist())
+        val opptjening = Opptjening(arbeidsforhold, 1.januar.plusDays(28), MaskinellJurist())
 
         assertTrue(opptjening.erOppfylt())
     }
@@ -67,10 +85,16 @@ internal class OpptjeningTest {
         val arbeidsforhold = listOf(
             Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
                 "orgnummer",
-                listOf(Arbeidsforholdhistorikk.Arbeidsforhold(ansattFom = 1.januar, ansattTom = null, deaktivert = true))
+                listOf(
+                    Arbeidsforholdhistorikk.Arbeidsforhold(
+                        ansattFom = 1.januar,
+                        ansattTom = null,
+                        deaktivert = true
+                    )
+                )
             )
         )
-        val opptjening = Opptjening.opptjening(arbeidsforhold, 1.januar.plusDays(28), MaskinellJurist())
+        val opptjening = Opptjening(arbeidsforhold, 1.januar.plusDays(28), MaskinellJurist())
 
         assertFalse(opptjening.erOppfylt())
     }
@@ -81,14 +105,22 @@ internal class OpptjeningTest {
             Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
                 "orgnummer",
                 listOf(
-                    Arbeidsforholdhistorikk.Arbeidsforhold(ansattFom = 1.januar, ansattTom = 10.januar, deaktivert = false),
-                    Arbeidsforholdhistorikk.Arbeidsforhold(ansattFom = 11.januar, ansattTom = 14.januar, deaktivert = true),
+                    Arbeidsforholdhistorikk.Arbeidsforhold(
+                        ansattFom = 1.januar,
+                        ansattTom = 10.januar,
+                        deaktivert = false
+                    ),
+                    Arbeidsforholdhistorikk.Arbeidsforhold(
+                        ansattFom = 11.januar,
+                        ansattTom = 14.januar,
+                        deaktivert = true
+                    ),
                     Arbeidsforholdhistorikk.Arbeidsforhold(ansattFom = 15.januar, ansattTom = null, deaktivert = false)
                 )
             )
         )
 
-        val opptjening = Opptjening.opptjening(arbeidsforhold, 1.januar.plusDays(28), MaskinellJurist())
+        val opptjening = Opptjening(arbeidsforhold, 1.januar.plusDays(28), MaskinellJurist())
 
         assertFalse(opptjening.erOppfylt())
     }
@@ -99,13 +131,17 @@ internal class OpptjeningTest {
             Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
                 "orgnummer",
                 listOf(
-                    Arbeidsforholdhistorikk.Arbeidsforhold(ansattFom = 1.januar, ansattTom = 10.januar, deaktivert = false),
+                    Arbeidsforholdhistorikk.Arbeidsforhold(
+                        ansattFom = 1.januar,
+                        ansattTom = 10.januar,
+                        deaktivert = false
+                    ),
                     Arbeidsforholdhistorikk.Arbeidsforhold(ansattFom = 11.januar, ansattTom = null, deaktivert = false)
                 )
             )
         )
 
-        val opptjening = Opptjening.opptjening(arbeidsforhold, 1.januar.plusDays(28), MaskinellJurist())
+        val opptjening = Opptjening(arbeidsforhold, 1.januar.plusDays(28), MaskinellJurist())
 
         assertTrue(opptjening.erOppfylt())
     }
@@ -116,14 +152,22 @@ internal class OpptjeningTest {
             Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
                 "orgnummer",
                 listOf(
-                    Arbeidsforholdhistorikk.Arbeidsforhold(ansattFom = 1.januar, ansattTom = 10.januar, deaktivert = false),
+                    Arbeidsforholdhistorikk.Arbeidsforhold(
+                        ansattFom = 1.januar,
+                        ansattTom = 10.januar,
+                        deaktivert = false
+                    ),
                     Arbeidsforholdhistorikk.Arbeidsforhold(ansattFom = 15.januar, ansattTom = null, deaktivert = false),
-                    Arbeidsforholdhistorikk.Arbeidsforhold(ansattFom = 11.januar, ansattTom = 14.januar, deaktivert = false)
+                    Arbeidsforholdhistorikk.Arbeidsforhold(
+                        ansattFom = 11.januar,
+                        ansattTom = 14.januar,
+                        deaktivert = false
+                    )
                 )
             )
         )
 
-        val opptjening = Opptjening.opptjening(arbeidsforhold, 1.januar.plusDays(28), MaskinellJurist())
+        val opptjening = Opptjening(arbeidsforhold, 1.januar.plusDays(28), MaskinellJurist())
 
         assertTrue(opptjening.erOppfylt())
     }
@@ -154,7 +198,7 @@ internal class OpptjeningTest {
             )
         )
 
-        val opptjening = Opptjening.opptjening(arbeidsforhold, 2.mai(2022), MaskinellJurist())
+        val opptjening = Opptjening(arbeidsforhold, 2.mai(2022), MaskinellJurist())
 
         assertTrue(opptjening.erOppfylt())
         assertEquals(1.oktober(2017), opptjening.opptjeningFom())
@@ -186,7 +230,7 @@ internal class OpptjeningTest {
             )
         )
 
-        val opptjening = Opptjening.opptjening(arbeidsforhold, 2.mai(2022), MaskinellJurist())
+        val opptjening = Opptjening(arbeidsforhold, 2.mai(2022), MaskinellJurist())
 
         assertTrue(opptjening.erOppfylt())
         assertEquals(1.oktober(2017), opptjening.opptjeningFom())
@@ -218,7 +262,7 @@ internal class OpptjeningTest {
             )
         )
 
-        val opptjening = Opptjening.opptjening(arbeidsforhold, 2.mai(2022), MaskinellJurist())
+        val opptjening = Opptjening(arbeidsforhold, 2.mai(2022), MaskinellJurist())
 
         assertFalse(opptjening.erOppfylt())
         assertEquals(2.mai(2022), opptjening.opptjeningFom())
@@ -233,7 +277,7 @@ internal class OpptjeningTest {
                 listOf(Arbeidsforholdhistorikk.Arbeidsforhold(4.desember(2017), 31.januar, deaktivert = false))
             )
         )
-        Opptjening.opptjening(arbeidsforhold, 1.januar, jurist)
+        Opptjening(arbeidsforhold, 1.januar, jurist)
 
         SubsumsjonInspektør(jurist).assertOppfylt(
             paragraf = Paragraf.PARAGRAF_8_2,
@@ -263,7 +307,7 @@ internal class OpptjeningTest {
                 listOf(Arbeidsforholdhistorikk.Arbeidsforhold(5.desember(2017), 31.januar, deaktivert = false))
             )
         )
-        Opptjening.opptjening(arbeidsforhold, 1.januar, jurist)
+        Opptjening(arbeidsforhold, 1.januar, jurist)
 
         SubsumsjonInspektør(jurist).assertIkkeOppfylt(
             paragraf = Paragraf.PARAGRAF_8_2,

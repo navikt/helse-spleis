@@ -27,7 +27,6 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.PersonVisitor
 import no.nav.helse.person.Sammenligningsgrunnlag
 import no.nav.helse.person.TilstandType
-import no.nav.helse.person.Varselkode
 import no.nav.helse.person.Varselkode.RV_VV_1
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.Vedtaksperiode.Vedtaksperiodetilstand
@@ -148,10 +147,16 @@ internal class VilkårsgrunnlagTest : AbstractPersonTest() {
             grunnlagForSykepengegrunnlag = INNTEKT.sykepengegrunnlag,
             sammenligningsgrunnlag = sammenligningsgrunnlag(skjæringstidspunkt = 31.januar),
             skjæringstidspunkt = 31.januar,
-            opptjening = Opptjening.opptjening(
+            opptjening = Opptjening(
                 arbeidsforhold = listOf(
-                    Opptjening.ArbeidsgiverOpptjeningsgrunnlag(a1, listOf(Arbeidsforholdhistorikk.Arbeidsforhold(1.januar, 14.januar, false))),
-                    Opptjening.ArbeidsgiverOpptjeningsgrunnlag(a2, listOf(Arbeidsforholdhistorikk.Arbeidsforhold(15.januar, null, false)))
+                    Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
+                        a1,
+                        listOf(Arbeidsforholdhistorikk.Arbeidsforhold(1.januar, 14.januar, false))
+                    ),
+                    Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
+                        a2,
+                        listOf(Arbeidsforholdhistorikk.Arbeidsforhold(15.januar, null, false))
+                    )
                 ),
                 skjæringstidspunkt = 31.januar,
                 subsumsjonObserver = MaskinellJurist()

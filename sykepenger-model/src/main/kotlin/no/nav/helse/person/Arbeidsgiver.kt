@@ -205,11 +205,15 @@ internal class Arbeidsgiver private constructor(
                 }
             }
 
-        internal fun List<Arbeidsgiver>.beregnOpptjening(skjæringstidspunkt: LocalDate, subsumsjonObserver: SubsumsjonObserver): Opptjening {
-            val arbeidsforhold = map { it.organisasjonsnummer to it.arbeidsforholdhistorikk.arbeidsforhold(skjæringstidspunkt) }
-                .filter { (_, arbeidsforhold) -> arbeidsforhold.isNotEmpty() }
-                .map { Opptjening.ArbeidsgiverOpptjeningsgrunnlag(it.first, it.second) }
-            return Opptjening.opptjening(arbeidsforhold, skjæringstidspunkt, subsumsjonObserver)
+        internal fun List<Arbeidsgiver>.beregnOpptjening(
+            skjæringstidspunkt: LocalDate,
+            subsumsjonObserver: SubsumsjonObserver
+        ): Opptjening {
+            val arbeidsforhold =
+                map { it.organisasjonsnummer to it.arbeidsforholdhistorikk.arbeidsforhold(skjæringstidspunkt) }
+                    .filter { (_, arbeidsforhold) -> arbeidsforhold.isNotEmpty() }
+                    .map { Opptjening.ArbeidsgiverOpptjeningsgrunnlag(it.first, it.second) }
+            return Opptjening(arbeidsforhold, skjæringstidspunkt, subsumsjonObserver)
         }
 
         internal fun List<Arbeidsgiver>.inntekterForSammenligningsgrunnlag(skjæringstidspunkt: LocalDate) =

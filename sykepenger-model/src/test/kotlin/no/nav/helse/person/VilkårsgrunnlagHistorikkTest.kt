@@ -11,7 +11,6 @@ import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Vilkårsgrunnlag
-import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.GrunnlagsdataInspektør
 import no.nav.helse.inspectors.SubsumsjonInspektør
 import no.nav.helse.inspectors.Vilkårgrunnlagsinspektør
@@ -79,7 +78,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             sykepengegrunnlag = inntekt.sykepengegrunnlag(ORGNR),
             sammenligningsgrunnlag = Sammenligningsgrunnlag(inntekt, emptyList()),
             avviksprosent = 0.prosent,
-            opptjening = Opptjening(arbeidsforholdFraHistorikk, 1.januar til 31.januar),
+            opptjening = Opptjening(arbeidsforholdFraHistorikk, gammeltSkjæringstidspunkt, NullObserver),
             medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
             vurdertOk = true,
             meldingsreferanseId = UUID.randomUUID(),
@@ -108,7 +107,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             sykepengegrunnlag = inntekt.sykepengegrunnlag(ORGNR),
             sammenligningsgrunnlag = Sammenligningsgrunnlag(inntekt, emptyList()),
             avviksprosent = 0.prosent,
-            opptjening = Opptjening(arbeidsforholdFraHistorikk, 1.januar til 31.januar),
+            opptjening = Opptjening(arbeidsforholdFraHistorikk, 1.januar, NullObserver),
             medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
             vurdertOk = true,
             meldingsreferanseId = UUID.randomUUID(),
@@ -126,7 +125,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             sykepengegrunnlag = inntekt.sykepengegrunnlag(ORGNR),
             sammenligningsgrunnlag = Sammenligningsgrunnlag(inntekt, emptyList()),
             avviksprosent = 0.prosent,
-            opptjening = Opptjening(arbeidsforholdFraHistorikk, 1.januar til 31.januar),
+            opptjening = Opptjening(arbeidsforholdFraHistorikk, 1.januar, NullObserver),
             medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
             vurdertOk = true,
             meldingsreferanseId = UUID.randomUUID(),
@@ -146,7 +145,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             sykepengegrunnlag = inntekt.sykepengegrunnlag(ORGNR, skjæringstidspunkt, skjæringstidspunkt),
             sammenligningsgrunnlag = Sammenligningsgrunnlag(inntekt, emptyList()),
             avviksprosent = 0.prosent,
-            opptjening = Opptjening(arbeidsforholdFraHistorikk, 1.januar til 31.januar),
+            opptjening = Opptjening(arbeidsforholdFraHistorikk, 1.januar, NullObserver),
             medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
             vurdertOk = true,
             meldingsreferanseId = UUID.randomUUID(),
@@ -169,7 +168,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             sykepengegrunnlag = inntekt.sykepengegrunnlag(ORGNR),
             sammenligningsgrunnlag = Sammenligningsgrunnlag(inntekt, emptyList()),
             avviksprosent = 0.prosent,
-            opptjening = Opptjening(arbeidsforholdFraHistorikk, 1.januar til 31.januar),
+            opptjening = Opptjening(arbeidsforholdFraHistorikk, 1.januar, NullObserver),
             medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
             vurdertOk = true,
             meldingsreferanseId = UUID.randomUUID(),
@@ -180,7 +179,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             sykepengegrunnlag = inntekt2.sykepengegrunnlag(ORGNR),
             sammenligningsgrunnlag = Sammenligningsgrunnlag(inntekt, emptyList()),
             avviksprosent = 0.prosent,
-            opptjening = Opptjening(arbeidsforholdFraHistorikk, 1.januar til 31.januar),
+            opptjening = Opptjening(arbeidsforholdFraHistorikk, 3.januar, NullObserver),
             medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
             vurdertOk = true,
             meldingsreferanseId = UUID.randomUUID(),
@@ -198,7 +197,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             sykepengegrunnlag = inntekt.sykepengegrunnlag(ORGNR),
             sammenligningsgrunnlag = Sammenligningsgrunnlag(inntekt * 1.3, emptyList()),
             avviksprosent = 30.prosent,
-            opptjening = Opptjening(arbeidsforholdFraHistorikk, 1.januar til 31.januar),
+            opptjening = Opptjening(arbeidsforholdFraHistorikk, 1.januar, NullObserver),
             medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
             vurdertOk = false,
             meldingsreferanseId = UUID.randomUUID(),
@@ -220,7 +219,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             sykepengegrunnlag = inntekt.sykepengegrunnlag(ORGNR),
             sammenligningsgrunnlag = Sammenligningsgrunnlag(inntekt, emptyList()),
             avviksprosent = 0.prosent,
-            opptjening = Opptjening(arbeidsforholdFraHistorikk, 1.januar til 31.januar),
+            opptjening = Opptjening(arbeidsforholdFraHistorikk, 1.januar, NullObserver),
             medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
             vurdertOk = true,
             meldingsreferanseId = UUID.randomUUID(),
@@ -237,7 +236,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             sykepengegrunnlag = inntekt.sykepengegrunnlag("et annet orgnr"),
             sammenligningsgrunnlag = Sammenligningsgrunnlag(inntekt, emptyList()),
             avviksprosent = 0.prosent,
-            opptjening = Opptjening(arbeidsforholdFraHistorikk, 1.januar til 31.januar),
+            opptjening = Opptjening(arbeidsforholdFraHistorikk, 1.januar, NullObserver),
             medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
             vurdertOk = true,
             meldingsreferanseId = UUID.randomUUID(),
@@ -268,7 +267,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             10000.månedlig.sykepengegrunnlag,
             sammenligningsgrunnlag(10000.månedlig, 1.januar),
             1.januar,
-            Opptjening.opptjening(arbeidsforholdFraHistorikk, 1.januar, MaskinellJurist()),
+            Opptjening(arbeidsforholdFraHistorikk, 1.januar, MaskinellJurist()),
             1,
             MaskinellJurist()
         )
@@ -298,7 +297,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             10000.månedlig.sykepengegrunnlag,
             sammenligningsgrunnlag(10000.månedlig, 1.januar),
             1.januar,
-            Opptjening.opptjening(arbeidsforholdFraHistorikk, 1.januar, jurist),
+            Opptjening(arbeidsforholdFraHistorikk, 1.januar, jurist),
             1,
             jurist
         )
@@ -334,7 +333,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             10000.månedlig.sykepengegrunnlag,
             sammenligningsgrunnlag(10000.månedlig, 1.januar),
             1.januar,
-            Opptjening.opptjening(arbeidsforholdFraHistorikk, 1.januar, MaskinellJurist()),
+            Opptjening(arbeidsforholdFraHistorikk, 1.januar, MaskinellJurist()),
             1,
             MaskinellJurist()
         )
@@ -342,7 +341,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             10000.månedlig.sykepengegrunnlag,
             sammenligningsgrunnlag(10000.månedlig, 1.januar),
             1.januar,
-            Opptjening.opptjening(arbeidsforholdFraHistorikk, 1.januar, MaskinellJurist()),
+            Opptjening(arbeidsforholdFraHistorikk, 1.januar, MaskinellJurist()),
             1,
             MaskinellJurist()
         )
@@ -378,7 +377,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             10000.månedlig.sykepengegrunnlag,
             sammenligningsgrunnlag(10000.månedlig, 1.januar),
             1.januar,
-            Opptjening.opptjening(arbeidsforholdFraHistorikk, 1.januar, MaskinellJurist()),
+            Opptjening(arbeidsforholdFraHistorikk, 1.januar, MaskinellJurist()),
             1,
             MaskinellJurist()
         )
@@ -387,7 +386,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             10000.månedlig.sykepengegrunnlag,
             sammenligningsgrunnlag(10000.månedlig, 1.januar),
             4.januar,
-            Opptjening.opptjening(arbeidsforholdFraHistorikk, 1.januar, MaskinellJurist()),
+            Opptjening(arbeidsforholdFraHistorikk, 1.januar, MaskinellJurist()),
             1,
             MaskinellJurist()
         )
@@ -428,7 +427,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             10000.månedlig.sykepengegrunnlag,
             sammenligningsgrunnlag(10000.månedlig, 1.januar),
             1.januar,
-            Opptjening.opptjening(arbeidsforholdFraHistorikk, 1.januar, MaskinellJurist()),
+            Opptjening(arbeidsforholdFraHistorikk, 1.januar, MaskinellJurist()),
             1,
             MaskinellJurist()
         )
@@ -462,7 +461,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             10000.månedlig.sykepengegrunnlag,
             sammenligningsgrunnlag(10000.månedlig, 1.januar),
             1.januar,
-            Opptjening.opptjening(arbeidsforholdFraHistorikk, 1.januar, MaskinellJurist()),
+            Opptjening(arbeidsforholdFraHistorikk, 1.januar, MaskinellJurist()),
             1,
             MaskinellJurist()
         )
@@ -490,7 +489,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             10000.månedlig.sykepengegrunnlag,
             sammenligningsgrunnlag(10000.månedlig, 1.januar),
             1.januar,
-            Opptjening.opptjening(arbeidsforholdFraHistorikk, 1.januar, MaskinellJurist()),
+            Opptjening(arbeidsforholdFraHistorikk, 1.januar, MaskinellJurist()),
             1,
             MaskinellJurist()
         )
@@ -618,7 +617,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             10000.månedlig.sykepengegrunnlag,
             sammenligningsgrunnlag(10000.månedlig, 1.januar),
             1.januar,
-            Opptjening.opptjening(arbeidsforholdFraHistorikk, 1.januar, MaskinellJurist()),
+            Opptjening(arbeidsforholdFraHistorikk, 1.januar, MaskinellJurist()),
             1,
             MaskinellJurist()
         )
@@ -637,7 +636,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             10000.månedlig.sykepengegrunnlag,
             sammenligningsgrunnlag(10000.månedlig, 1.januar),
             1.januar,
-            Opptjening.opptjening(arbeidsforholdFraHistorikk, 1.januar, MaskinellJurist()),
+            Opptjening(arbeidsforholdFraHistorikk, 1.januar, MaskinellJurist()),
             1,
             MaskinellJurist()
         )
@@ -666,7 +665,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             10000.månedlig.sykepengegrunnlag,
             sammenligningsgrunnlag(10000.månedlig, 1.januar),
             1.januar,
-            Opptjening.opptjening(arbeidsforholdFraHistorikk, 1.januar, MaskinellJurist()),
+            Opptjening(arbeidsforholdFraHistorikk, 1.januar, MaskinellJurist()),
             1,
             MaskinellJurist()
         )
@@ -685,7 +684,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             10000.månedlig.sykepengegrunnlag,
             sammenligningsgrunnlag(10000.månedlig, 1.januar),
             1.januar,
-            Opptjening.opptjening(arbeidsforholdFraHistorikk, 1.januar, MaskinellJurist()),
+            Opptjening(arbeidsforholdFraHistorikk, 1.januar, MaskinellJurist()),
             1,
             MaskinellJurist()
         )
@@ -714,7 +713,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             10.månedlig.sykepengegrunnlag,
             sammenligningsgrunnlag(10.månedlig, 1.januar),
             1.januar,
-            Opptjening.opptjening(arbeidsforholdFraHistorikk, 1.januar, MaskinellJurist()),
+            Opptjening(arbeidsforholdFraHistorikk, 1.januar, MaskinellJurist()),
             1,
             MaskinellJurist()
         )
@@ -753,7 +752,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             10.månedlig.sykepengegrunnlag(fødselsdato.alder),
             sammenligningsgrunnlag(10.månedlig, 1.januar),
             1.januar,
-            Opptjening.opptjening(arbeidsforholdFraHistorikk, 1.januar, MaskinellJurist()),
+            Opptjening(arbeidsforholdFraHistorikk, 1.januar, MaskinellJurist()),
             1,
             MaskinellJurist()
         )
@@ -825,7 +824,7 @@ internal class VilkårsgrunnlagHistorikkTest {
             10000.månedlig.sykepengegrunnlag,
             sammenligningsgrunnlag(10000.månedlig, 1.januar),
             1.januar,
-            Opptjening.opptjening(arbeidsforholdFraHistorikk, 1.januar, MaskinellJurist()),
+            Opptjening(arbeidsforholdFraHistorikk, 1.januar, MaskinellJurist()),
             1,
             MaskinellJurist()
         )

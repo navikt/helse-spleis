@@ -40,8 +40,6 @@ import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.repeat
 import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
-import no.nav.helse.spleis.e2e.tellArbeidsforholdINyesteHistorikkInnslag
-import no.nav.helse.spleis.e2e.tellArbeidsforholdhistorikkinnslag
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -119,8 +117,8 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
             arbeidsforhold = arbeidsforhold,
             orgnummer = a1
         )
-        Assertions.assertEquals(1, tellArbeidsforholdhistorikkinnslag(a1).size)
-        Assertions.assertEquals(1, tellArbeidsforholdhistorikkinnslag(a2).size)
+        Assertions.assertEquals(1, inspektør(a1).arbeidsgiver.inspektør.arbeidsforholdhistorikk.inspektør.antallInnslag())
+        Assertions.assertEquals(1, inspektør(a2).arbeidsgiver.inspektør.arbeidsforholdhistorikk.inspektør.antallInnslag())
     }
 
     @Test
@@ -369,7 +367,7 @@ internal class FlereArbeidsgivereArbeidsforholdTest : AbstractEndToEndTest() {
             ),
             arbeidsforhold = arbeidsforhold1
         )
-        Assertions.assertEquals(5, tellArbeidsforholdINyesteHistorikkInnslag(a1))
+        Assertions.assertEquals(5, inspektør(a1).arbeidsgiver.inspektør.arbeidsforholdhistorikk.inspektør.arbeidsforholdSisteInnslag())
     }
 
     @Test

@@ -102,7 +102,7 @@ internal class ArbeidsgiverUtbetalingerTest {
             sykepengegrunnlag = 1000.månedlig.sykepengegrunnlag,
             sammenligningsgrunnlag = sammenligningsgrunnlag(1000.månedlig),
             avviksprosent = Prosent.prosent(0.0),
-            opptjening = Opptjening.opptjening(emptyList(), 1.januar, SubsumsjonObserver.NullObserver),
+            opptjening = Opptjening(emptyList(), 1.januar, SubsumsjonObserver.NullObserver),
             medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
             vurdertOk = false,
             meldingsreferanseId = UUID.randomUUID(),
@@ -335,11 +335,15 @@ internal class ArbeidsgiverUtbetalingerTest {
                 sykepengegrunnlag = 30000.månedlig.sykepengegrunnlag(fødselsdato.alder),
                 sammenligningsgrunnlag = sammenligningsgrunnlag(30000.månedlig),
                 avviksprosent = Prosent.prosent(0.0),
-                opptjening = Opptjening.opptjening(listOf(
-                    Opptjening.ArbeidsgiverOpptjeningsgrunnlag(ORGNUMMER, listOf(
-                        Arbeidsforholdhistorikk.Arbeidsforhold(1.januar.minusYears(1), null, false)
-                    ))
-                ), 1.januar, SubsumsjonObserver.NullObserver),
+                opptjening = Opptjening(
+                    listOf(
+                        Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
+                            ORGNUMMER, listOf(
+                                Arbeidsforholdhistorikk.Arbeidsforhold(1.januar.minusYears(1), null, false)
+                            )
+                        )
+                    ), 1.januar, SubsumsjonObserver.NullObserver
+                ),
                 medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
                 vurdertOk = true,
                 meldingsreferanseId = UUID.randomUUID(),

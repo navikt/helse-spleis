@@ -19,7 +19,7 @@ internal fun Map<LocalDate, Inntektshistorikk.Inntektsopplysning>.somVilkårsgru
             sykepengegrunnlag = inntektsopplysning.omregnetÅrsinntekt().sykepengegrunnlag(orgnr = organisasjonsnummer, skjæringstidspunkt = skjæringstidspunkt, virkningstidspunkt = skjæringstidspunkt),
             sammenligningsgrunnlag = Sammenligningsgrunnlag(inntektsopplysning.omregnetÅrsinntekt(), emptyList()),
             avviksprosent = Prosent.prosent(0.0),
-            opptjening = Opptjening(emptyList(), 1.januar til 31.januar),
+            opptjening = Opptjening.gjenopprett(emptyList(), 1.januar til 31.januar),
             medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
             vurdertOk = true,
             meldingsreferanseId = UUID.randomUUID(),

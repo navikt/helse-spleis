@@ -119,12 +119,22 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
         val inntekt = if (!harMinimumInntekt) 2000.månedlig else 25000.månedlig
         return VilkårsgrunnlagHistorikk.Grunnlagsdata(
             skjæringstidspunkt = skjæringstidspunkt,
-            sykepengegrunnlag = Sykepengegrunnlag.opprett(ALDER, listOf(
-                ArbeidsgiverInntektsopplysning("orgnr", Inntektshistorikk.Saksbehandler(UUID.randomUUID(), skjæringstidspunkt, UUID.randomUUID(), inntekt))
-            ), skjæringstidspunkt, MaskinellJurist(), emptyList()),
+            sykepengegrunnlag = Sykepengegrunnlag.opprett(
+                ALDER, listOf(
+                    ArbeidsgiverInntektsopplysning(
+                        "orgnr",
+                        Inntektshistorikk.Saksbehandler(
+                            UUID.randomUUID(),
+                            skjæringstidspunkt,
+                            UUID.randomUUID(),
+                            inntekt
+                        )
+                    )
+                ), skjæringstidspunkt, MaskinellJurist(), emptyList()
+            ),
             sammenligningsgrunnlag = Sammenligningsgrunnlag(emptyList()),
             avviksprosent = 0.0.prosent,
-            opptjening = Opptjening.opptjening(opptjening, 1.januar, MaskinellJurist()),
+            opptjening = Opptjening(opptjening, 1.januar, MaskinellJurist()),
             medlemskapstatus = when (erMedlem) {
                 true -> Medlemskapsvurdering.Medlemskapstatus.Ja
                 false -> Medlemskapsvurdering.Medlemskapstatus.Nei

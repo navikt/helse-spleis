@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.person.Arbeidsforholdhistorikk
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.ArbeidsgiverVisitor
 import no.nav.helse.person.Dokumentsporing
@@ -23,7 +24,11 @@ internal class ArbeidsgiverInspektør(arbeidsgiver: Arbeidsgiver): ArbeidsgiverV
     private var aktiveVedtaksperioder: List<Vedtaksperiode> = emptyList()
     private val sisteVedtaksperiodeTilstander: MutableMap<UUID, TilstandType> = mutableMapOf()
     private var sisteInntektshistorikk: Inntektshistorikk? = null
+
     internal lateinit var sykdomshistorikk: Sykdomshistorikk
+        private set
+
+    internal lateinit var arbeidsforholdhistorikk: Arbeidsforholdhistorikk
         private set
 
     init {
@@ -33,6 +38,10 @@ internal class ArbeidsgiverInspektør(arbeidsgiver: Arbeidsgiver): ArbeidsgiverV
     internal fun aktiveVedtaksperioder() = aktiveVedtaksperioder
     internal fun sisteVedtaksperiodeTilstander() = sisteVedtaksperiodeTilstander
     internal val inntektshistorikk get() = sisteInntektshistorikk!!
+
+    override fun preVisitArbeidsforholdhistorikk(arbeidsforholdhistorikk: Arbeidsforholdhistorikk) {
+        this.arbeidsforholdhistorikk = arbeidsforholdhistorikk
+    }
 
     override fun preVisitVedtaksperiode(
         vedtaksperiode: Vedtaksperiode,

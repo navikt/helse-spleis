@@ -53,7 +53,7 @@ internal class VilkårsgrunnlagElementTest {
             sykepengegrunnlag = 1000.daglig.sykepengegrunnlag,
             sammenligningsgrunnlag = sammenligningsgrunnlag(1000.daglig),
             avviksprosent = avviksprosent,
-            opptjening = Opptjening.opptjening(emptyList(), 1.januar, MaskinellJurist()),
+            opptjening = Opptjening(emptyList(), 1.januar, MaskinellJurist()),
             medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
             vurdertOk = true,
             meldingsreferanseId = UUID.randomUUID(),

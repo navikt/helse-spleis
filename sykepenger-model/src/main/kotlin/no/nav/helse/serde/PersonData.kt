@@ -342,9 +342,9 @@ internal data class PersonData(
             private val opptjeningTom: LocalDate,
             private val arbeidsforhold: List<ArbeidsgiverOpptjeningsgrunnlagData>
         ) {
-            fun tilOpptjening() = Opptjening(
-                opptjeningsperiode = opptjeningFom til opptjeningTom,
-                arbeidsforhold = arbeidsforhold.tilArbeidsgiverOpptjeningsgrunnlag()
+            fun tilOpptjening() = Opptjening.gjenopprett(
+                arbeidsforhold = arbeidsforhold.tilArbeidsgiverOpptjeningsgrunnlag(),
+                opptjeningsperiode = opptjeningFom til opptjeningTom
             )
 
             data class ArbeidsgiverOpptjeningsgrunnlagData(
