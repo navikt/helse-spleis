@@ -20,6 +20,9 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
+import no.nav.helse.person.Inntektshistorikk
+import no.nav.helse.person.Inntektskilde.EN_ARBEIDSGIVER
+import no.nav.helse.person.Inntektskilde.FLERE_ARBEIDSGIVERE
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
@@ -39,8 +42,10 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
 
 internal class RevurderArbeidsforholdTest: AbstractDslTest() {
@@ -57,7 +62,33 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
-            assertArbeidsgivereISykepengegrunnlag(1.januar, a1, a2)
+            (inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }).also { vilkårsgrunnlag ->
+                val sykepengegrunnlagInspektør = vilkårsgrunnlag.sykepengegrunnlag.inspektør
+                val sammenligningsgrunnlagInspektør = vilkårsgrunnlag.sammenligningsgrunnlag1.inspektør
+
+                assertEquals(744000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
+                assertEquals(561804.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
+                assertEquals(744000.årlig, sammenligningsgrunnlagInspektør.sammenligningsgrunnlag)
+                assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
+                assertEquals(FLERE_ARBEIDSGIVERE, inspektør.inntektskilde(1.vedtaksperiode))
+                assertEquals(0, vilkårsgrunnlag.avviksprosent?.roundToInt())
+                assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
+                sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
+                    assertEquals(31000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
+                    assertEquals(Inntektshistorikk.Inntektsmelding::class, it.inntektsopplysning::class)
+                }
+                sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
+                    assertEquals(31000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
+                    assertEquals(Inntektshistorikk.SkattComposite::class, it.inntektsopplysning::class)
+                }
+                assertEquals(2, sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
+                sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
+                    assertEquals(Inntektshistorikk.SkattComposite::class, it.inntektsopplysning::class)
+                }
+                sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
+                    assertEquals(Inntektshistorikk.SkattComposite::class, it.inntektsopplysning::class)
+                }
+            }
             nullstillTilstandsendringer()
             håndterOverstyrArbeidsforhold(1.januar, ArbeidsforholdOverstyrt(a2, true, "test"))
             håndterYtelser(1.vedtaksperiode)
@@ -65,7 +96,29 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
             assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVSLUTTET)
-            assertArbeidsgivereISykepengegrunnlag(1.januar, a1)
+            (inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }).also { vilkårsgrunnlag ->
+                val sykepengegrunnlagInspektør = vilkårsgrunnlag.sykepengegrunnlag.inspektør
+                val sammenligningsgrunnlagInspektør = vilkårsgrunnlag.sammenligningsgrunnlag1.inspektør
+
+                assertEquals(372000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
+                assertEquals(372000.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
+                assertEquals(744000.årlig, sammenligningsgrunnlagInspektør.sammenligningsgrunnlag)
+                assertEquals(EN_ARBEIDSGIVER, sykepengegrunnlagInspektør.inntektskilde)
+                assertEquals(EN_ARBEIDSGIVER, inspektør.inntektskilde(1.vedtaksperiode))
+                assertEquals(50, vilkårsgrunnlag.avviksprosent?.roundToInt())
+                assertEquals(1, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
+                sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
+                    assertEquals(31000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
+                    assertEquals(Inntektshistorikk.Inntektsmelding::class, it.inntektsopplysning::class)
+                }
+                assertEquals(2, sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
+                sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
+                    assertEquals(Inntektshistorikk.SkattComposite::class, it.inntektsopplysning::class)
+                }
+                sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
+                    assertEquals(Inntektshistorikk.SkattComposite::class, it.inntektsopplysning::class)
+                }
+            }
         }
     }
     @Test
@@ -87,7 +140,33 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
             håndterSimulering(2.vedtaksperiode)
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING)
-            assertArbeidsgivereISykepengegrunnlag(1.januar, a1, a2)
+            (inspektør.vilkårsgrunnlag(2.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }).also { vilkårsgrunnlag ->
+                val sykepengegrunnlagInspektør = vilkårsgrunnlag.sykepengegrunnlag.inspektør
+                val sammenligningsgrunnlagInspektør = vilkårsgrunnlag.sammenligningsgrunnlag1.inspektør
+
+                assertEquals(744000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
+                assertEquals(561804.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
+                assertEquals(744000.årlig, sammenligningsgrunnlagInspektør.sammenligningsgrunnlag)
+                assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
+                assertEquals(FLERE_ARBEIDSGIVERE, inspektør.inntektskilde(1.vedtaksperiode))
+                assertEquals(0, vilkårsgrunnlag.avviksprosent?.roundToInt())
+                assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
+                sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
+                    assertEquals(31000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
+                    assertEquals(Inntektshistorikk.Inntektsmelding::class, it.inntektsopplysning::class)
+                }
+                sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
+                    assertEquals(31000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
+                    assertEquals(Inntektshistorikk.SkattComposite::class, it.inntektsopplysning::class)
+                }
+                assertEquals(2, sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
+                sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
+                    assertEquals(Inntektshistorikk.SkattComposite::class, it.inntektsopplysning::class)
+                }
+                sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
+                    assertEquals(Inntektshistorikk.SkattComposite::class, it.inntektsopplysning::class)
+                }
+            }
             nullstillTilstandsendringer()
             håndterOverstyrArbeidsforhold(1.januar, ArbeidsforholdOverstyrt(a2, true, "test"))
             håndterYtelser(1.vedtaksperiode)
@@ -105,7 +184,29 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
                 AVSLUTTET
             )
             assertTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
-            assertArbeidsgivereISykepengegrunnlag(1.januar, a1)
+            (inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }).also { vilkårsgrunnlag ->
+                val sykepengegrunnlagInspektør = vilkårsgrunnlag.sykepengegrunnlag.inspektør
+                val sammenligningsgrunnlagInspektør = vilkårsgrunnlag.sammenligningsgrunnlag1.inspektør
+
+                assertEquals(372000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
+                assertEquals(372000.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
+                assertEquals(744000.årlig, sammenligningsgrunnlagInspektør.sammenligningsgrunnlag)
+                assertEquals(EN_ARBEIDSGIVER, sykepengegrunnlagInspektør.inntektskilde)
+                assertEquals(EN_ARBEIDSGIVER, inspektør.inntektskilde(1.vedtaksperiode))
+                assertEquals(50, vilkårsgrunnlag.avviksprosent?.roundToInt())
+                assertEquals(1, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
+                sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
+                    assertEquals(31000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
+                    assertEquals(Inntektshistorikk.Inntektsmelding::class, it.inntektsopplysning::class)
+                }
+                assertEquals(2, sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
+                sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
+                    assertEquals(Inntektshistorikk.SkattComposite::class, it.inntektsopplysning::class)
+                }
+                sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
+                    assertEquals(Inntektshistorikk.SkattComposite::class, it.inntektsopplysning::class)
+                }
+            }
         }
     }
     @Test
@@ -127,12 +228,60 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
             håndterSimulering(2.vedtaksperiode)
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING)
-            assertArbeidsgivereISykepengegrunnlag(1.januar, a1, a2)
+            (inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }).also { vilkårsgrunnlag ->
+                val sykepengegrunnlagInspektør = vilkårsgrunnlag.sykepengegrunnlag.inspektør
+                val sammenligningsgrunnlagInspektør = vilkårsgrunnlag.sammenligningsgrunnlag1.inspektør
+
+                assertEquals(744000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
+                assertEquals(561804.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
+                assertEquals(744000.årlig, sammenligningsgrunnlagInspektør.sammenligningsgrunnlag)
+                assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
+                assertEquals(FLERE_ARBEIDSGIVERE, inspektør.inntektskilde(1.vedtaksperiode))
+                assertEquals(0, vilkårsgrunnlag.avviksprosent?.roundToInt())
+                assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
+                sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
+                    assertEquals(31000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
+                    assertEquals(Inntektshistorikk.Inntektsmelding::class, it.inntektsopplysning::class)
+                }
+                sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
+                    assertEquals(31000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
+                    assertEquals(Inntektshistorikk.SkattComposite::class, it.inntektsopplysning::class)
+                }
+                assertEquals(2, sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
+                sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
+                    assertEquals(Inntektshistorikk.SkattComposite::class, it.inntektsopplysning::class)
+                }
+                sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
+                    assertEquals(Inntektshistorikk.SkattComposite::class, it.inntektsopplysning::class)
+                }
+            }
             nullstillTilstandsendringer()
             håndterOverstyrArbeidsforhold(1.januar, ArbeidsforholdOverstyrt(a2, true, "test"))
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
-            assertArbeidsgivereISykepengegrunnlag(1.januar, a1)
+            (inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }).also { vilkårsgrunnlag ->
+                val sykepengegrunnlagInspektør = vilkårsgrunnlag.sykepengegrunnlag.inspektør
+                val sammenligningsgrunnlagInspektør = vilkårsgrunnlag.sammenligningsgrunnlag1.inspektør
+
+                assertEquals(372000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
+                assertEquals(372000.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
+                assertEquals(744000.årlig, sammenligningsgrunnlagInspektør.sammenligningsgrunnlag)
+                assertEquals(EN_ARBEIDSGIVER, sykepengegrunnlagInspektør.inntektskilde)
+                assertEquals(EN_ARBEIDSGIVER, inspektør.inntektskilde(1.vedtaksperiode))
+                assertEquals(50, vilkårsgrunnlag.avviksprosent?.roundToInt())
+                assertEquals(1, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
+                sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
+                    assertEquals(31000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
+                    assertEquals(Inntektshistorikk.Inntektsmelding::class, it.inntektsopplysning::class)
+                }
+                assertEquals(2, sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
+                sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
+                    assertEquals(Inntektshistorikk.SkattComposite::class, it.inntektsopplysning::class)
+                }
+                sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
+                    assertEquals(Inntektshistorikk.SkattComposite::class, it.inntektsopplysning::class)
+                }
+            }
             håndterOverstyrArbeidsforhold(1.januar, ArbeidsforholdOverstyrt(a2, false, "test"))
             inspektør.utbetalinger(1.vedtaksperiode).also { utbetalinger ->
                 assertEquals(2, utbetalinger.size)
@@ -153,7 +302,33 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
                 AVSLUTTET
             )
             assertTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
-            assertArbeidsgivereISykepengegrunnlag(1.januar, a1, a2)
+            (inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }).also { vilkårsgrunnlag ->
+                val sykepengegrunnlagInspektør = vilkårsgrunnlag.sykepengegrunnlag.inspektør
+                val sammenligningsgrunnlagInspektør = vilkårsgrunnlag.sammenligningsgrunnlag1.inspektør
+
+                assertEquals(744000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
+                assertEquals(561804.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
+                assertEquals(744000.årlig, sammenligningsgrunnlagInspektør.sammenligningsgrunnlag)
+                assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
+                assertEquals(FLERE_ARBEIDSGIVERE, inspektør.inntektskilde(1.vedtaksperiode))
+                assertEquals(0, vilkårsgrunnlag.avviksprosent?.roundToInt())
+                assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
+                sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
+                    assertEquals(31000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
+                    assertEquals(Inntektshistorikk.Inntektsmelding::class, it.inntektsopplysning::class)
+                }
+                sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
+                    assertEquals(31000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
+                    assertEquals(Inntektshistorikk.SkattComposite::class, it.inntektsopplysning::class)
+                }
+                assertEquals(2, sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
+                sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
+                    assertEquals(Inntektshistorikk.SkattComposite::class, it.inntektsopplysning::class)
+                }
+                sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
+                    assertEquals(Inntektshistorikk.SkattComposite::class, it.inntektsopplysning::class)
+                }
+            }
         }
     }
 
@@ -169,12 +344,86 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
-            assertArbeidsgivereISykepengegrunnlag(1.januar, a1, a2)
+            (inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }).also { vilkårsgrunnlag ->
+                val sykepengegrunnlagInspektør = vilkårsgrunnlag.sykepengegrunnlag.inspektør
+                val sammenligningsgrunnlagInspektør = vilkårsgrunnlag.sammenligningsgrunnlag1.inspektør
+
+                assertEquals(744000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
+                assertEquals(561804.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
+                assertEquals(744000.årlig, sammenligningsgrunnlagInspektør.sammenligningsgrunnlag)
+                assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
+                assertEquals(FLERE_ARBEIDSGIVERE, inspektør.inntektskilde(1.vedtaksperiode))
+                assertEquals(0, vilkårsgrunnlag.avviksprosent?.roundToInt())
+                assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
+                sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
+                    assertEquals(31000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
+                    assertEquals(Inntektshistorikk.Inntektsmelding::class, it.inntektsopplysning::class)
+                }
+                sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
+                    assertEquals(31000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
+                    assertEquals(Inntektshistorikk.SkattComposite::class, it.inntektsopplysning::class)
+                }
+                assertEquals(2, sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
+                sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
+                    assertEquals(Inntektshistorikk.SkattComposite::class, it.inntektsopplysning::class)
+                }
+                sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
+                    assertEquals(Inntektshistorikk.SkattComposite::class, it.inntektsopplysning::class)
+                }
+            }
             nullstillTilstandsendringer()
             håndterOverstyrArbeidsforhold(1.januar, ArbeidsforholdOverstyrt(a2, true, "test"))
-            assertArbeidsgivereISykepengegrunnlag(1.januar, a1)
+            (inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }).also { vilkårsgrunnlag ->
+                val sykepengegrunnlagInspektør = vilkårsgrunnlag.sykepengegrunnlag.inspektør
+                val sammenligningsgrunnlagInspektør = vilkårsgrunnlag.sammenligningsgrunnlag1.inspektør
+
+                assertEquals(372000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
+                assertEquals(372000.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
+                assertEquals(744000.årlig, sammenligningsgrunnlagInspektør.sammenligningsgrunnlag)
+                assertEquals(EN_ARBEIDSGIVER, sykepengegrunnlagInspektør.inntektskilde)
+                assertEquals(EN_ARBEIDSGIVER, inspektør.inntektskilde(1.vedtaksperiode))
+                assertEquals(50, vilkårsgrunnlag.avviksprosent?.roundToInt())
+                assertEquals(1, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
+                sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
+                    assertEquals(31000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
+                    assertEquals(Inntektshistorikk.Inntektsmelding::class, it.inntektsopplysning::class)
+                }
+                assertEquals(2, sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
+                sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
+                    assertEquals(Inntektshistorikk.SkattComposite::class, it.inntektsopplysning::class)
+                }
+                sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
+                    assertEquals(Inntektshistorikk.SkattComposite::class, it.inntektsopplysning::class)
+                }
+            }
             håndterOverstyrArbeidsforhold(1.januar, ArbeidsforholdOverstyrt(a2, false, "test"))
-            assertArbeidsgivereISykepengegrunnlag(1.januar, a1, a2)
+            (inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }).also { vilkårsgrunnlag ->
+                val sykepengegrunnlagInspektør = vilkårsgrunnlag.sykepengegrunnlag.inspektør
+                val sammenligningsgrunnlagInspektør = vilkårsgrunnlag.sammenligningsgrunnlag1.inspektør
+
+                assertEquals(744000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
+                assertEquals(561804.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
+                assertEquals(744000.årlig, sammenligningsgrunnlagInspektør.sammenligningsgrunnlag)
+                assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
+                assertEquals(FLERE_ARBEIDSGIVERE, inspektør.inntektskilde(1.vedtaksperiode))
+                assertEquals(0, vilkårsgrunnlag.avviksprosent?.roundToInt())
+                assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
+                sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
+                    assertEquals(31000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
+                    assertEquals(Inntektshistorikk.Inntektsmelding::class, it.inntektsopplysning::class)
+                }
+                sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
+                    assertEquals(31000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
+                    assertEquals(Inntektshistorikk.SkattComposite::class, it.inntektsopplysning::class)
+                }
+                assertEquals(2, sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
+                sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
+                    assertEquals(Inntektshistorikk.SkattComposite::class, it.inntektsopplysning::class)
+                }
+                sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
+                    assertEquals(Inntektshistorikk.SkattComposite::class, it.inntektsopplysning::class)
+                }
+            }
             håndterYtelser(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             assertTilstander(
@@ -202,13 +451,87 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
-            assertArbeidsgivereISykepengegrunnlag(1.januar, a1, a2)
+            (inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }).also { vilkårsgrunnlag ->
+                val sykepengegrunnlagInspektør = vilkårsgrunnlag.sykepengegrunnlag.inspektør
+                val sammenligningsgrunnlagInspektør = vilkårsgrunnlag.sammenligningsgrunnlag1.inspektør
+
+                assertEquals(744000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
+                assertEquals(561804.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
+                assertEquals(744000.årlig, sammenligningsgrunnlagInspektør.sammenligningsgrunnlag)
+                assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
+                assertEquals(FLERE_ARBEIDSGIVERE, inspektør.inntektskilde(1.vedtaksperiode))
+                assertEquals(0, vilkårsgrunnlag.avviksprosent?.roundToInt())
+                assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
+                sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
+                    assertEquals(31000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
+                    assertEquals(Inntektshistorikk.Inntektsmelding::class, it.inntektsopplysning::class)
+                }
+                sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
+                    assertEquals(31000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
+                    assertEquals(Inntektshistorikk.SkattComposite::class, it.inntektsopplysning::class)
+                }
+                assertEquals(2, sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
+                sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
+                    assertEquals(Inntektshistorikk.SkattComposite::class, it.inntektsopplysning::class)
+                }
+                sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
+                    assertEquals(Inntektshistorikk.SkattComposite::class, it.inntektsopplysning::class)
+                }
+            }
             nullstillTilstandsendringer()
             håndterOverstyrArbeidsforhold(1.januar, ArbeidsforholdOverstyrt(a2, true, "test"))
-            assertArbeidsgivereISykepengegrunnlag(1.januar, a1)
+            (inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }).also { vilkårsgrunnlag ->
+                val sykepengegrunnlagInspektør = vilkårsgrunnlag.sykepengegrunnlag.inspektør
+                val sammenligningsgrunnlagInspektør = vilkårsgrunnlag.sammenligningsgrunnlag1.inspektør
+
+                assertEquals(372000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
+                assertEquals(372000.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
+                assertEquals(744000.årlig, sammenligningsgrunnlagInspektør.sammenligningsgrunnlag)
+                assertEquals(EN_ARBEIDSGIVER, sykepengegrunnlagInspektør.inntektskilde)
+                assertEquals(EN_ARBEIDSGIVER, inspektør.inntektskilde(1.vedtaksperiode))
+                assertEquals(50, vilkårsgrunnlag.avviksprosent?.roundToInt())
+                assertEquals(1, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
+                sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
+                    assertEquals(31000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
+                    assertEquals(Inntektshistorikk.Inntektsmelding::class, it.inntektsopplysning::class)
+                }
+                assertEquals(2, sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
+                sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
+                    assertEquals(Inntektshistorikk.SkattComposite::class, it.inntektsopplysning::class)
+                }
+                sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
+                    assertEquals(Inntektshistorikk.SkattComposite::class, it.inntektsopplysning::class)
+                }
+            }
             håndterYtelser(1.vedtaksperiode)
             håndterOverstyrArbeidsforhold(1.januar, ArbeidsforholdOverstyrt(a2, false, "test"))
-            assertArbeidsgivereISykepengegrunnlag(1.januar, a1, a2)
+            (inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }).also { vilkårsgrunnlag ->
+                val sykepengegrunnlagInspektør = vilkårsgrunnlag.sykepengegrunnlag.inspektør
+                val sammenligningsgrunnlagInspektør = vilkårsgrunnlag.sammenligningsgrunnlag1.inspektør
+
+                assertEquals(744000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
+                assertEquals(561804.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
+                assertEquals(744000.årlig, sammenligningsgrunnlagInspektør.sammenligningsgrunnlag)
+                assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
+                assertEquals(FLERE_ARBEIDSGIVERE, inspektør.inntektskilde(1.vedtaksperiode))
+                assertEquals(0, vilkårsgrunnlag.avviksprosent?.roundToInt())
+                assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
+                sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
+                    assertEquals(31000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
+                    assertEquals(Inntektshistorikk.Inntektsmelding::class, it.inntektsopplysning::class)
+                }
+                sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
+                    assertEquals(31000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
+                    assertEquals(Inntektshistorikk.SkattComposite::class, it.inntektsopplysning::class)
+                }
+                assertEquals(2, sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
+                sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
+                    assertEquals(Inntektshistorikk.SkattComposite::class, it.inntektsopplysning::class)
+                }
+                sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
+                    assertEquals(Inntektshistorikk.SkattComposite::class, it.inntektsopplysning::class)
+                }
+            }
             håndterYtelser(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             assertTilstander(
@@ -310,8 +633,56 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
             håndterSimulering(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
             håndterUtbetalt()
-            assertArbeidsgivereISykepengegrunnlag(1.januar, a1, a2)
-            assertArbeidsgivereISykepengegrunnlag(1.mars, a1)
+            (inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }).also { vilkårsgrunnlag ->
+                val sykepengegrunnlagInspektør = vilkårsgrunnlag.sykepengegrunnlag.inspektør
+                val sammenligningsgrunnlagInspektør = vilkårsgrunnlag.sammenligningsgrunnlag1.inspektør
+
+                assertEquals(744000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
+                assertEquals(561804.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
+                assertEquals(744000.årlig, sammenligningsgrunnlagInspektør.sammenligningsgrunnlag)
+                assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
+                assertEquals(FLERE_ARBEIDSGIVERE, inspektør.inntektskilde(1.vedtaksperiode))
+                assertEquals(0, vilkårsgrunnlag.avviksprosent?.roundToInt())
+                assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
+                sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
+                    assertEquals(31000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
+                    assertEquals(Inntektshistorikk.Inntektsmelding::class, it.inntektsopplysning::class)
+                }
+                sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
+                    assertEquals(31000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
+                    assertEquals(Inntektshistorikk.SkattComposite::class, it.inntektsopplysning::class)
+                }
+                assertEquals(2, sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
+                sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
+                    assertEquals(Inntektshistorikk.SkattComposite::class, it.inntektsopplysning::class)
+                }
+                sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
+                    assertEquals(Inntektshistorikk.SkattComposite::class, it.inntektsopplysning::class)
+                }
+            }
+            (inspektør.vilkårsgrunnlag(2.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }).also { vilkårsgrunnlag ->
+                val sykepengegrunnlagInspektør = vilkårsgrunnlag.sykepengegrunnlag.inspektør
+                val sammenligningsgrunnlagInspektør = vilkårsgrunnlag.sammenligningsgrunnlag1.inspektør
+
+                assertEquals(372000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
+                assertEquals(372000.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
+                assertEquals(744000.årlig, sammenligningsgrunnlagInspektør.sammenligningsgrunnlag)
+                assertEquals(EN_ARBEIDSGIVER, sykepengegrunnlagInspektør.inntektskilde)
+                assertEquals(EN_ARBEIDSGIVER, inspektør.inntektskilde(2.vedtaksperiode))
+                assertEquals(50, vilkårsgrunnlag.avviksprosent?.roundToInt())
+                assertEquals(1, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
+                sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
+                    assertEquals(31000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
+                    assertEquals(Inntektshistorikk.Inntektsmelding::class, it.inntektsopplysning::class)
+                }
+                assertEquals(2, sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
+                sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
+                    assertEquals(Inntektshistorikk.SkattComposite::class, it.inntektsopplysning::class)
+                }
+                sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
+                    assertEquals(Inntektshistorikk.SkattComposite::class, it.inntektsopplysning::class)
+                }
+            }
             assertTilstander(
                 1.vedtaksperiode,
                 AVVENTER_HISTORIKK_REVURDERING,
@@ -384,7 +755,41 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
         }
-        assertArbeidsgivereISykepengegrunnlag(1.januar, a1, a2, a3)
+        (inspiser(personInspektør).vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }).also { vilkårsgrunnlag ->
+            val sykepengegrunnlagInspektør = vilkårsgrunnlag.sykepengegrunnlag.inspektør
+            val sammenligningsgrunnlagInspektør = vilkårsgrunnlag.sammenligningsgrunnlag1.inspektør
+
+            assertEquals(1116000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
+            assertEquals(561804.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
+            assertEquals(1116000.årlig, sammenligningsgrunnlagInspektør.sammenligningsgrunnlag)
+            assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
+            a1 { assertEquals(FLERE_ARBEIDSGIVERE, inspektør.inntektskilde(1.vedtaksperiode)) }
+            a2 { assertEquals(FLERE_ARBEIDSGIVERE, inspektør.inntektskilde(1.vedtaksperiode)) }
+            assertEquals(0, vilkårsgrunnlag.avviksprosent?.roundToInt())
+            assertEquals(3, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
+            sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
+                assertEquals(31000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
+                assertEquals(Inntektshistorikk.Inntektsmelding::class, it.inntektsopplysning::class)
+            }
+            sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
+                assertEquals(31000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
+                assertEquals(Inntektshistorikk.Inntektsmelding::class, it.inntektsopplysning::class)
+            }
+            sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a3).inspektør.also {
+                assertEquals(31000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
+                assertEquals(Inntektshistorikk.SkattComposite::class, it.inntektsopplysning::class)
+            }
+            assertEquals(3, sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
+            sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
+                assertEquals(Inntektshistorikk.SkattComposite::class, it.inntektsopplysning::class)
+            }
+            sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
+                assertEquals(Inntektshistorikk.SkattComposite::class, it.inntektsopplysning::class)
+            }
+            sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a3).inspektør.also {
+                assertEquals(Inntektshistorikk.SkattComposite::class, it.inntektsopplysning::class)
+            }
+        }
         nullstillTilstandsendringer()
         håndterOverstyrArbeidsforhold(1.januar, ArbeidsforholdOverstyrt(a3, true, "test"))
         a1 {
@@ -424,7 +829,37 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
                 AVSLUTTET
             )
         }
-        assertArbeidsgivereISykepengegrunnlag(1.januar, a1, a2)
+        (inspiser(personInspektør).vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }).also { vilkårsgrunnlag ->
+            val sykepengegrunnlagInspektør = vilkårsgrunnlag.sykepengegrunnlag.inspektør
+            val sammenligningsgrunnlagInspektør = vilkårsgrunnlag.sammenligningsgrunnlag1.inspektør
+
+            assertEquals(744000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
+            assertEquals(561804.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
+            assertEquals(1116000.årlig, sammenligningsgrunnlagInspektør.sammenligningsgrunnlag)
+            assertEquals(FLERE_ARBEIDSGIVERE, sykepengegrunnlagInspektør.inntektskilde)
+            a1 { assertEquals(FLERE_ARBEIDSGIVERE, inspektør.inntektskilde(1.vedtaksperiode)) }
+            a2 { assertEquals(FLERE_ARBEIDSGIVERE, inspektør.inntektskilde(1.vedtaksperiode)) }
+            assertEquals(33, vilkårsgrunnlag.avviksprosent?.roundToInt())
+            assertEquals(2, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
+            sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
+                assertEquals(31000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
+                assertEquals(Inntektshistorikk.Inntektsmelding::class, it.inntektsopplysning::class)
+            }
+            sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
+                assertEquals(31000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
+                assertEquals(Inntektshistorikk.Inntektsmelding::class, it.inntektsopplysning::class)
+            }
+            assertEquals(3, sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
+            sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
+                assertEquals(Inntektshistorikk.SkattComposite::class, it.inntektsopplysning::class)
+            }
+            sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
+                assertEquals(Inntektshistorikk.SkattComposite::class, it.inntektsopplysning::class)
+            }
+            sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a3).inspektør.also {
+                assertEquals(Inntektshistorikk.SkattComposite::class, it.inntektsopplysning::class)
+            }
+        }
     }
 
     @Test

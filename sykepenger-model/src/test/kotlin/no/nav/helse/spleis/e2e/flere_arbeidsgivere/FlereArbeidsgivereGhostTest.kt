@@ -863,6 +863,71 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `overstyrer inntekt dersom det ikke er rapportert inn inntekt enda`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), orgnummer = a1)
+
+        håndterInntektsmelding(
+            listOf(1.januar til 16.januar),
+            førsteFraværsdag = 1.januar,
+            beregnetInntekt = 30000.månedlig,
+            orgnummer = a1
+        )
+
+        val inntekter = listOf(
+            grunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 30000.månedlig.repeat(3))
+        )
+
+        val arbeidsforhold = listOf(
+            Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a1, ansattFom = LocalDate.EPOCH, ansattTom = null),
+            Vilkårsgrunnlag.Arbeidsforhold(orgnummer = a2, ansattFom = 1.november(2017), ansattTom = null)
+        )
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode,
+            inntektsvurdering = Inntektsvurdering(
+                listOf(
+                    sammenligningsgrunnlag(a1, finnSkjæringstidspunkt(a1, 1.vedtaksperiode), 30000.månedlig.repeat(12))
+                )
+            ),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
+                inntekter = inntekter,
+                arbeidsforhold = emptyList()
+            ),
+            arbeidsforhold = arbeidsforhold,
+            orgnummer = a1
+        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterOverstyrArbeidsforhold(1.januar, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, true, "Jeg, en saksbehandler, overstyrte pga 8-15")))
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+
+        val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }
+        val sykepengegrunnlagInspektør = vilkårsgrunnlag.sykepengegrunnlag.inspektør
+        val sammenligningsgrunnlagInspektør = vilkårsgrunnlag.sammenligningsgrunnlag1.inspektør
+
+        assertEquals(360000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
+        assertEquals(360000.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
+        assertEquals(360000.årlig, sammenligningsgrunnlagInspektør.sammenligningsgrunnlag)
+        assertEquals(0, vilkårsgrunnlag.avviksprosent?.roundToInt())
+        assertEquals(EN_ARBEIDSGIVER, sykepengegrunnlagInspektør.inntektskilde)
+        assertEquals(EN_ARBEIDSGIVER, inspektør(a1).inntektskilde(1.vedtaksperiode))
+        assertEquals(1, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
+        sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
+            assertEquals(Inntektshistorikk.Inntektsmelding::class, it.inntektsopplysning::class)
+        }
+
+        assertEquals(1, sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
+        sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
+            assertEquals(Inntektshistorikk.SkattComposite::class, it.inntektsopplysning::class)
+        }
+
+        assertVarsel(RV_VV_2, 1.vedtaksperiode.filter(a1))
+    }
+
+    @Test
     fun `skal ikke gå til AvventerHistorikk uten IM fra alle arbeidsgivere om vi ikke overlapper med første vedtaksperiode`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 17.januar, 100.prosent), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 17.januar, 100.prosent), orgnummer = a1)
