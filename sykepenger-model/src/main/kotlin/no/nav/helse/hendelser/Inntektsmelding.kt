@@ -19,6 +19,7 @@ import no.nav.helse.person.Refusjonshistorikk
 import no.nav.helse.person.Varselkode.RV_IM_1
 import no.nav.helse.person.Varselkode.RV_IM_2
 import no.nav.helse.person.Varselkode.RV_IM_3
+import no.nav.helse.person.Varselkode.RV_IM_6
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
@@ -224,7 +225,7 @@ class Inntektsmelding(
             beregnetInntekt: Inntekt
         ): IAktivitetslogg {
             when {
-                beregnetInntekt <= Inntekt.INGEN -> aktivitetslogg.funksjonellFeil("Inntektsmelding inneholder ikke beregnet inntekt")
+                beregnetInntekt <= Inntekt.INGEN -> aktivitetslogg.funksjonellFeil(RV_IM_6)
                 (beløp == null || beløp <= Inntekt.INGEN) -> aktivitetslogg.info("Arbeidsgiver forskutterer ikke (krever ikke refusjon)")
                 beløp != beregnetInntekt -> aktivitetslogg.info("Inntektsmelding inneholder beregnet inntekt og refusjon som avviker med hverandre")
                 opphørerRefusjon(periode) -> aktivitetslogg.info("Arbeidsgiver opphører refusjon i perioden")

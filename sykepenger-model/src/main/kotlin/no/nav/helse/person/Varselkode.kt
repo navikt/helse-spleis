@@ -32,6 +32,7 @@ enum class Varselkode(
     RV_IM_3("Inntektsmeldingen og vedtaksløsningen er uenige om beregningen av arbeidsgiverperioden. Undersøk hva som er riktig arbeidsgiverperiode."),
     RV_IM_4("Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt."),
     RV_IM_5("Sykmeldte har oppgitt ferie første dag i arbeidsgiverperioden."),
+    RV_IM_6("Inntektsmelding inneholder ikke beregnet inntekt"),
 
     // RE: Refusjon
     RV_RE_1("Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler."),

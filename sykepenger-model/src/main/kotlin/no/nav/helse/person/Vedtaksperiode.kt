@@ -1253,7 +1253,9 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
-            vedtaksperiode.håndterInntektsmelding(inntektsmelding, this)
+            FunksjonelleFeilTilVarsler.wrap(inntektsmelding) {
+                vedtaksperiode.håndterInntektsmelding(inntektsmelding, this)
+            }
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {
