@@ -6,6 +6,7 @@ import no.nav.helse.person.Aktivitetskontekst
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.PersonHendelse
 import no.nav.helse.person.SpesifikkKontekst
+import no.nav.helse.person.Varselkode
 import no.nav.helse.spleis.DatadelingMediator
 import no.nav.helse.spleis.meldinger.TestRapid
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
@@ -28,7 +29,7 @@ internal class DatadelingMediatorTest {
 
     @Test
     fun `datadelingMediator fanger opp nye aktiviteter på hendelsen`() {
-        testhendelse.varsel("Dette er et varsel")
+        testhendelse.varsel(Varselkode.RV_SØ_1)
         datadelingMediator.finalize(testRapid)
         assertEquals(1, testRapid.inspektør.antall())
         assertNotNull(testRapid.inspektør.siste("aktivitetslogg_ny_aktivitet"))
@@ -55,7 +56,7 @@ internal class DatadelingMediatorTest {
     @Test
     fun nivåer() {
         testhendelse.info("Dette er en infomelding")
-        testhendelse.varsel("Dette er et varsel")
+        testhendelse.varsel(Varselkode.RV_SØ_1)
         testhendelse.funksjonellFeil("Dette er en error")
         try {
             testhendelse.logiskFeil("Dette er en severe")
@@ -78,7 +79,7 @@ internal class DatadelingMediatorTest {
     fun mapping() {
         testhendelse.kontekst(TestKontekst("Person", "Person 1"))
         testhendelse.info("Dette er en infomelding")
-        testhendelse.varsel("Dette er en infomelding")
+        testhendelse.varsel(Varselkode.RV_SØ_1)
         testhendelse.funksjonellFeil("Dette er en infomelding")
         try { testhendelse.logiskFeil("Dette er en infomelding") } catch (_: Exception) {}
         datadelingMediator.finalize(testRapid)
