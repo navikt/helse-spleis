@@ -1,7 +1,6 @@
 package no.nav.helse.person
 
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.Toggle
@@ -21,9 +20,6 @@ import no.nav.helse.person.Ledd.Companion.ledd
 import no.nav.helse.person.Paragraf.PARAGRAF_8_2
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.NullObserver
-import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
-import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
-import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.sykepengegrunnlag
 import no.nav.helse.testhelpers.AP
@@ -43,7 +39,6 @@ import no.nav.helse.økonomi.Prosent.Companion.prosent
 import no.nav.helse.økonomi.Økonomi
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertInstanceOf
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -396,54 +391,6 @@ internal class VilkårsgrunnlagHistorikkTest {
     }
 
     @Test
-    fun `to ulike skjæringstidspunker, der det ene er i infotrygd, medfører to innslag der siste innslag har vilkårsprøving for begge skjæringstidspunktene`() {
-        val vilkårsgrunnlag = Vilkårsgrunnlag(
-                meldingsreferanseId = UUID.randomUUID(),
-                vedtaksperiodeId = UUID.randomUUID().toString(),
-                aktørId = "AKTØR_ID",
-                personidentifikator = "20043769969".somPersonidentifikator(),
-                orgnummer = "ORGNUMMER",
-                inntektsvurdering = Inntektsvurdering(emptyList()),
-                medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
-                inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
-                arbeidsforhold = arbeidsforhold
-        )
-        val infotrygdhistorikk = Infotrygdhistorikk().apply {
-            oppdaterHistorikk(
-                InfotrygdhistorikkElement.opprett(
-                    oppdatert = LocalDateTime.now(),
-                    hendelseId = UUID.randomUUID(),
-                    perioder = emptyList(),
-                    inntekter = listOf(
-                        Inntektsopplysning("ORGNUMMER", 4.januar, 31000.månedlig, true)
-                    ),
-                    arbeidskategorikoder = emptyMap(),
-                    ugyldigePerioder = emptyList(),
-                    harStatslønn = false
-                )
-            )
-        }
-        vilkårsgrunnlag.valider(
-            10000.månedlig.sykepengegrunnlag,
-            sammenligningsgrunnlag(10000.månedlig, 1.januar),
-            1.januar,
-            Opptjening(arbeidsforholdFraHistorikk, 1.januar, MaskinellJurist()),
-            1,
-            MaskinellJurist()
-        )
-
-        historikk.lagre(vilkårsgrunnlag.grunnlagsdata())
-        infotrygdhistorikk.lagreVilkårsgrunnlag(
-            skjæringstidspunkt = 4.januar,
-            vilkårsgrunnlagHistorikk = historikk,
-            kanOverskriveVilkårsgrunnlag = { false },
-            sykepengegrunnlagFor = INGEN::sykepengegrunnlag
-        )
-        assertEquals(1, inspektør.vilkårsgrunnlagTeller[1])
-        assertEquals(2, inspektør.vilkårsgrunnlagTeller[0])
-    }
-
-    @Test
     fun `Finner vilkårsgrunnlag for skjæringstidspunkt - ok`() {
         val vilkårsgrunnlagHistorikk = VilkårsgrunnlagHistorikk()
         val vilkårsgrunnlag = Vilkårsgrunnlag(
@@ -499,105 +446,6 @@ internal class VilkårsgrunnlagHistorikkTest {
         assertFalse(grunnlagsdataInspektør.vurdertOk)
     }
 
-    @Test
-    fun `lagrer grunnlagsdata fra Infotrygd ved overgang fra IT`() {
-        val vilkårsgrunnlagHistorikk = VilkårsgrunnlagHistorikk()
-        val historikk = Infotrygdhistorikk().apply {
-            oppdaterHistorikk(
-                InfotrygdhistorikkElement.opprett(
-                    oppdatert = LocalDateTime.now(),
-                    hendelseId = UUID.randomUUID(),
-                    perioder = emptyList(),
-                    inntekter = listOf(Inntektsopplysning("987654321", 1.januar, 31000.månedlig, true)),
-                    arbeidskategorikoder = emptyMap(),
-                    ugyldigePerioder = emptyList(),
-                    harStatslønn = false
-                )
-            )
-        }
-        historikk.lagreVilkårsgrunnlag(
-            skjæringstidspunkt = 1.januar,
-            vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk,
-            kanOverskriveVilkårsgrunnlag = { false },
-            sykepengegrunnlagFor = 31000.månedlig::sykepengegrunnlag
-        )
-        assertNotNull(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar))
-    }
-
-    @Test
-    fun `lagrer grunnlagsdata fra Infotrygd ved infotrygdforlengelse`() {
-        val vilkårsgrunnlagHistorikk = VilkårsgrunnlagHistorikk()
-        val historikk = Infotrygdhistorikk().apply {
-            oppdaterHistorikk(
-                InfotrygdhistorikkElement.opprett(
-                    oppdatert = LocalDateTime.now(),
-                    hendelseId = UUID.randomUUID(),
-                    perioder = emptyList(),
-                    inntekter = listOf(Inntektsopplysning("987654321", 1.januar, 31000.månedlig, true)),
-                    arbeidskategorikoder = emptyMap(),
-                    ugyldigePerioder = emptyList(),
-                    harStatslønn = false
-                )
-            )
-        }
-        historikk.lagreVilkårsgrunnlag(
-            skjæringstidspunkt = 1.januar,
-            vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk,
-            kanOverskriveVilkårsgrunnlag = { false },
-            sykepengegrunnlagFor = 31000.månedlig::sykepengegrunnlag
-        )
-        assertNotNull(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar))
-    }
-
-    @Test
-    fun `lagrer ikke grunnlagsdata ved førstegangsbehandling`() {
-        val vilkårsgrunnlagHistorikk = VilkårsgrunnlagHistorikk()
-        val historikk = Infotrygdhistorikk().apply {
-            oppdaterHistorikk(
-                InfotrygdhistorikkElement.opprett(
-                    oppdatert = LocalDateTime.now(),
-                    hendelseId = UUID.randomUUID(),
-                    perioder = emptyList(),
-                    inntekter = emptyList(),
-                    arbeidskategorikoder = emptyMap(),
-                    ugyldigePerioder = emptyList(),
-                    harStatslønn = false
-                )
-            )
-        }
-        historikk.lagreVilkårsgrunnlag(
-            skjæringstidspunkt = 1.januar,
-            vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk,
-            kanOverskriveVilkårsgrunnlag = { false },
-            sykepengegrunnlagFor = INGEN::sykepengegrunnlag
-        )
-        assertNull(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar))
-    }
-
-    @Test
-    fun `lagrer ikke grunnlagsdata ved forlengelse`() {
-        val vilkårsgrunnlagHistorikk = VilkårsgrunnlagHistorikk()
-        val historikk = Infotrygdhistorikk().apply {
-            oppdaterHistorikk(
-                InfotrygdhistorikkElement.opprett(
-                    oppdatert = LocalDateTime.now(),
-                    hendelseId = UUID.randomUUID(),
-                    perioder = emptyList(),
-                    inntekter = emptyList(),
-                    arbeidskategorikoder = emptyMap(),
-                    ugyldigePerioder = emptyList(),
-                    harStatslønn = false
-                )
-            )
-        }
-        historikk.lagreVilkårsgrunnlag(
-            skjæringstidspunkt = 1.januar,
-            vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk,
-            kanOverskriveVilkårsgrunnlag = { false },
-            sykepengegrunnlagFor = INGEN::sykepengegrunnlag
-        )
-        assertNull(vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar))
-    }
 
     @Test
     fun `Avviser kun utbetalingsdager som har likt skjæringstidspunkt som et vilkårsgrunnlag som ikke er ok`() {
@@ -642,54 +490,6 @@ internal class VilkårsgrunnlagHistorikkTest {
         )
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag1.grunnlagsdata())
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag2.grunnlagsdata())
-        val utbetalingstidslinjeMedNavDager = tidslinjeOf(16.AP, 10.NAV)
-        vilkårsgrunnlagHistorikk.avvisInngangsvilkår(listOf(utbetalingstidslinjeMedNavDager))
-        assertEquals(8, utbetalingstidslinjeMedNavDager.filterIsInstance<Utbetalingstidslinje.Utbetalingsdag.NavDag>().size)
-    }
-
-    @Test
-    fun `Avviser kun utbetalingsdager som har likt skjæringstidspunkt som et vilkårsgrunnlag som ikke er ok - vilkårsgrunnlag fra IT`() {
-        val vilkårsgrunnlagHistorikk = VilkårsgrunnlagHistorikk()
-        val vilkårsgrunnlag1 = Vilkårsgrunnlag(
-                meldingsreferanseId = UUID.randomUUID(),
-                vedtaksperiodeId = UUID.randomUUID().toString(),
-                aktørId = "AKTØR_ID",
-                personidentifikator = "20043769969".somPersonidentifikator(),
-                orgnummer = "ORGNUMMER",
-                inntektsvurdering = Inntektsvurdering(emptyList()),
-                medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Nei),
-                inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
-                arbeidsforhold = arbeidsforhold
-        )
-        vilkårsgrunnlag1.valider(
-            10000.månedlig.sykepengegrunnlag,
-            sammenligningsgrunnlag(10000.månedlig, 1.januar),
-            1.januar,
-            Opptjening(arbeidsforholdFraHistorikk, 1.januar, MaskinellJurist()),
-            1,
-            MaskinellJurist()
-        )
-        val vilkårsgrunnlag2 = Vilkårsgrunnlag(
-                meldingsreferanseId = UUID.randomUUID(),
-                vedtaksperiodeId = UUID.randomUUID().toString(),
-                aktørId = "AKTØR_ID",
-                personidentifikator = "20043769969".somPersonidentifikator(),
-                orgnummer = "ORGNUMMER",
-                inntektsvurdering = Inntektsvurdering(emptyList()),
-                medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
-                inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
-                arbeidsforhold = arbeidsforhold
-        )
-        vilkårsgrunnlag2.valider(
-            10000.månedlig.sykepengegrunnlag,
-            sammenligningsgrunnlag(10000.månedlig, 1.januar),
-            1.januar,
-            Opptjening(arbeidsforholdFraHistorikk, 1.januar, MaskinellJurist()),
-            1,
-            MaskinellJurist()
-        )
-        vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag1.grunnlagsdata())
-        vilkårsgrunnlagHistorikk.lagre(VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag(1.januar, 10000.månedlig.sykepengegrunnlag))
         val utbetalingstidslinjeMedNavDager = tidslinjeOf(16.AP, 10.NAV)
         vilkårsgrunnlagHistorikk.avvisInngangsvilkår(listOf(utbetalingstidslinjeMedNavDager))
         assertEquals(8, utbetalingstidslinjeMedNavDager.filterIsInstance<Utbetalingstidslinje.Utbetalingsdag.NavDag>().size)
@@ -804,66 +604,6 @@ internal class VilkårsgrunnlagHistorikkTest {
                 sykepengegrunnlag = 30900.månedlig.sykepengegrunnlag
             )
         )
-    }
-
-    @Test
-    fun `kan overskrive vilkårsgrunnlag`() {
-        val vilkårsgrunnlagHistorikk = VilkårsgrunnlagHistorikk()
-        val vilkårsgrunnlag = Vilkårsgrunnlag(
-                meldingsreferanseId = UUID.randomUUID(),
-                vedtaksperiodeId = UUID.randomUUID().toString(),
-                aktørId = "AKTØR_ID",
-                personidentifikator = "20043769969".somPersonidentifikator(),
-                orgnummer = "ORGNUMMER",
-                inntektsvurdering = Inntektsvurdering(emptyList()),
-                medlemskapsvurdering = Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja),
-                inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = emptyList(), arbeidsforhold = emptyList()),
-                arbeidsforhold = arbeidsforhold
-        )
-        vilkårsgrunnlag.valider(
-            10000.månedlig.sykepengegrunnlag,
-            sammenligningsgrunnlag(10000.månedlig, 1.januar),
-            1.januar,
-            Opptjening(arbeidsforholdFraHistorikk, 1.januar, MaskinellJurist()),
-            1,
-            MaskinellJurist()
-        )
-        vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag.grunnlagsdata())
-
-        val historikk = Infotrygdhistorikk().apply {
-            oppdaterHistorikk(
-                InfotrygdhistorikkElement.opprett(
-                    oppdatert = LocalDateTime.now(),
-                    hendelseId = UUID.randomUUID(),
-                    perioder = emptyList(),
-                    inntekter = listOf(Inntektsopplysning("987654321", 1.januar, 31000.månedlig, true)),
-                    arbeidskategorikoder = emptyMap(),
-                    ugyldigePerioder = emptyList(),
-                    harStatslønn = false
-                )
-            )
-        }
-        historikk.lagreVilkårsgrunnlag(
-            skjæringstidspunkt = 1.januar,
-            vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk,
-            kanOverskriveVilkårsgrunnlag = { true },
-            sykepengegrunnlagFor = 31000.månedlig::sykepengegrunnlag
-        )
-        assertInstanceOf(VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag::class.java, vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar))
-    }
-
-    @Test
-    fun `lagrer ikke duplikater`() {
-        val skjæringstidspunkt = 1.januar
-        val sykepengegrunnlag = 1000.månedlig.sykepengegrunnlag(skjæringstidspunkt)
-        val grunnlag1 = VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag(skjæringstidspunkt, sykepengegrunnlag)
-        val grunnlag2 = VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag(skjæringstidspunkt, sykepengegrunnlag)
-        historikk.lagre(grunnlag1)
-        val før = historikk.inspektør.vilkårsgrunnlagTeller.size
-        historikk.lagre(grunnlag2)
-        val etter = historikk.inspektør.vilkårsgrunnlagTeller.size
-        assertEquals(grunnlag1, grunnlag2)
-        assertEquals(0, etter - før)
     }
 
     private fun sammenligningsgrunnlag(inntekt: Inntekt, skjæringstidspunkt: LocalDate) = Sammenligningsgrunnlag(

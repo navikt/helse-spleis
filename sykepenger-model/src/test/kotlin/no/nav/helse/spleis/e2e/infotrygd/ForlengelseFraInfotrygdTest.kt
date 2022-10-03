@@ -5,7 +5,6 @@ import java.time.LocalDateTime
 import no.nav.helse.desember
 import no.nav.helse.dsl.TestPerson
 import no.nav.helse.februar
-import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
@@ -53,7 +52,6 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.Arb
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavHelgDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.UkjentDag
-import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -71,7 +69,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, inntektshistorikk = listOf(
             Inntektsopplysning(ORGNUMMER, 17.januar, INNTEKT, true)
         ))
-        assertTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
+        assertTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
     }
 
     @Test
@@ -147,18 +145,7 @@ internal class ForlengelseFraInfotrygdTest : AbstractEndToEndTest() {
         håndterUtbetalingshistorikk(1.vedtaksperiode, inntektshistorikk = inntektshistorikk)
         håndterInntektsmelding(listOf(1.januar til 31.januar))
         håndterYtelser(1.vedtaksperiode, inntektshistorikk = inntektshistorikk)
-        assertTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
-    }
-
-    @Test
-    fun `tillater ikke å overta brukerutbetaling-saker fra Infotrygd`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar), refusjon = Inntektsmelding.Refusjon(INGEN, null))
-        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterYtelser(1.vedtaksperiode, inntektshistorikk = listOf(
-            Inntektsopplysning(ORGNUMMER, 17.januar, INNTEKT, false)
-        ), statslønn = true)
-        assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
+        assertTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
     }
 
     @Test

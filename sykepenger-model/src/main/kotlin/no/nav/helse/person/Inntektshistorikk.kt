@@ -5,9 +5,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
-import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Subsumsjon
-import no.nav.helse.hendelser.til
 import no.nav.helse.person.Inntektshistorikk.Inntektsopplysning.Companion.lagre
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.subsumsjonsformat
@@ -45,11 +43,6 @@ internal class Inntektshistorikk private constructor(private val historikk: Muta
 
     internal fun isNotEmpty() = historikk.isNotEmpty()
 
-    internal fun omregnetÅrsinntekt(skjæringstidspunkt: LocalDate, dato: LocalDate, førsteFraværsdag: LocalDate?): Inntektsopplysning? =
-        omregnetÅrsinntekt(skjæringstidspunkt, førsteFraværsdag) ?: skjæringstidspunkt
-            .takeIf { it <= dato }
-            ?.let { nyesteInnslag()?.omregnetÅrsinntektInfotrygd(it til dato) }
-
     internal fun omregnetÅrsinntekt(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?): Inntektsopplysning? =
         nyesteInnslag()?.omregnetÅrsinntekt(skjæringstidspunkt, førsteFraværsdag)
 
@@ -74,13 +67,6 @@ internal class Inntektshistorikk private constructor(private val historikk: Muta
             inntekter
                 .sorted()
                 .mapNotNull { it.rapportertInntekt(dato) }
-                .firstOrNull()
-
-        internal fun omregnetÅrsinntektInfotrygd(periode: Periode) =
-            inntekter
-                .filterIsInstance<Infotrygd>()
-                .sorted()
-                .mapNotNull { it.omregnetÅrsinntekt(periode) }
                 .firstOrNull()
 
         override fun equals(other: Any?): Boolean {
@@ -257,8 +243,6 @@ internal class Inntektshistorikk private constructor(private val historikk: Muta
         }
 
         override fun omregnetÅrsinntekt(): Inntekt = beløp
-
-        internal fun omregnetÅrsinntekt(periode: Periode) = takeIf { it.dato in periode }
 
         override fun rapportertInntekt(): Inntekt = error("Infotrygd har ikke grunnlag for sammenligningsgrunnlag")
 

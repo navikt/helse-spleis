@@ -45,7 +45,6 @@ import no.nav.helse.person.Vedtaksperiode.Companion.SKAL_INNGÅ_I_SYKEPENGEGRUNN
 import no.nav.helse.person.Vedtaksperiode.Companion.TIDLIGERE_OG_ETTERGØLGENDE
 import no.nav.helse.person.Vedtaksperiode.Companion.avventerRevurdering
 import no.nav.helse.person.Vedtaksperiode.Companion.feiletRevurdering
-import no.nav.helse.person.Vedtaksperiode.Companion.harUtbetaling
 import no.nav.helse.person.Vedtaksperiode.Companion.iderMedUtbetaling
 import no.nav.helse.person.Vedtaksperiode.Companion.kanStarteRevurdering
 import no.nav.helse.person.Vedtaksperiode.Companion.lagRevurdering
@@ -179,18 +178,6 @@ internal class Arbeidsgiver private constructor(
             flatMap { it.vedtaksperioder }.lagRevurdering(vedtaksperiode, arbeidsgiverUtbetalinger, hendelse)
         }
 
-        internal fun List<Arbeidsgiver>.beregnSykepengegrunnlag(skjæringstidspunkt: LocalDate, periodeStart: LocalDate) =
-            fold(emptyList<ArbeidsgiverInntektsopplysning>()) { inntektsopplysninger, arbeidsgiver ->
-                val inntektsopplysning = arbeidsgiver.inntektshistorikk.omregnetÅrsinntekt(
-                    skjæringstidspunkt,
-                    maxOf(skjæringstidspunkt, periodeStart),
-                    arbeidsgiver.finnFørsteFraværsdag(skjæringstidspunkt)
-
-                )
-                if (inntektsopplysning == null || inntektsopplysning !is Inntektshistorikk.Infotrygd) inntektsopplysninger
-                else inntektsopplysninger + ArbeidsgiverInntektsopplysning(arbeidsgiver.organisasjonsnummer, inntektsopplysning)
-            }
-
         internal fun List<Arbeidsgiver>.beregnSykepengegrunnlag(skjæringstidspunkt: LocalDate, subsumsjonObserver: SubsumsjonObserver, forklaring: String?, subsumsjon: Subsumsjon?) =
             mapNotNull { arbeidsgiver ->
                 arbeidsgiver.beregnSykepengegrunnlag(skjæringstidspunkt) { inntektsopplysning ->
@@ -254,9 +241,6 @@ internal class Arbeidsgiver private constructor(
 
         internal fun skjæringstidspunkter(arbeidsgivere: List<Arbeidsgiver>, infotrygdhistorikk: Infotrygdhistorikk) =
             infotrygdhistorikk.skjæringstidspunkter(arbeidsgivere.map(Arbeidsgiver::sykdomstidslinje))
-
-        internal fun Iterable<Arbeidsgiver>.harUtbetaltPeriode(skjæringstidspunkt: LocalDate) =
-            flatMap { it.vedtaksperioder }.medSkjæringstidspunkt(skjæringstidspunkt).harUtbetaling()
 
         internal fun Iterable<Arbeidsgiver>.validerVilkårsgrunnlag(
             aktivitetslogg: IAktivitetslogg,
@@ -1074,9 +1058,6 @@ internal class Arbeidsgiver private constructor(
 
     internal fun erFørstegangsbehandling(periode: Periode) = periodetype(periode) == Periodetype.FØRSTEGANGSBEHANDLING
     private fun skjæringstidspunkt(periode: Periode) = person.skjæringstidspunkt(organisasjonsnummer, sykdomstidslinje(), periode)
-
-    internal fun avgrensetPeriode(periode: Periode) =
-        Periode(maxOf(periode.start, skjæringstidspunkt(periode)), periode.endInclusive)
 
     internal fun builder(
         regler: ArbeidsgiverRegler,

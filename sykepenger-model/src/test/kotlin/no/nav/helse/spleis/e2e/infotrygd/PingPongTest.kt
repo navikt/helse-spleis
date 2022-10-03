@@ -1,29 +1,24 @@
 package no.nav.helse.spleis.e2e.infotrygd
 
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
-import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
-import no.nav.helse.person.Varselkode.RV_OS_2
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertSisteForkastetPeriodeTilstand
-import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
 import no.nav.helse.spleis.e2e.håndterUtbetalingshistorikk
+import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Test
 
 internal class PingPongTest : AbstractEndToEndTest() {
@@ -38,24 +33,9 @@ internal class PingPongTest : AbstractEndToEndTest() {
             Inntektsopplysning(ORGNUMMER, 5.februar, INNTEKT, true)
         ))
         håndterYtelser(3.vedtaksperiode)
+        håndterVilkårsgrunnlag(3.vedtaksperiode)
 
-        assertForventetFeil(
-            forklaring = "Fordi OppdragBuilder stopper ved første ukjente dag (les Infotrygd-dag), vil vi for perioden 1.mars - 31.mars lage et oppdrag som starter 10. februar." +
-                "Dette oppdraget matches så mot det forrige vi har utbetalt og vi kommer frem til at vi skal opphøre perioden 1.januar - 31.januar først.",
-            nå = {
-                assertVarsel(RV_OS_2, 3.vedtaksperiode.filter(ORGNUMMER))
-                val første = inspektør.utbetaling(0)
-                val utbetaling = inspektør.utbetaling(2)
-                val utbetalingInspektør = utbetaling.inspektør
-                assertEquals(første.inspektør.korrelasjonsId, utbetalingInspektør.korrelasjonsId)
-                assertEquals(17.januar, utbetalingInspektør.arbeidsgiverOppdrag[0].datoStatusFom())
-                assertEquals(10.februar til 30.mars, utbetalingInspektør.arbeidsgiverOppdrag[1].let { it.fom til it.tom })
-            },
-            ønsket = {
-                /* vet ikke helt hva som er best her, men vi burde nok la saksbehandlere likevel få se perioden slik at de kan annullere personen */
-                assertFalse(true)
-            }
-        )
+        assertSisteForkastetPeriodeTilstand(ORGNUMMER, 3.vedtaksperiode, TIL_INFOTRYGD)
     }
 
     @Test

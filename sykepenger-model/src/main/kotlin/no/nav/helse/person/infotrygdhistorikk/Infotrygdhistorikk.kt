@@ -10,8 +10,6 @@ import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.InfotrygdhistorikkVisitor
 import no.nav.helse.person.Periodetype
 import no.nav.helse.person.Person
-import no.nav.helse.person.Sykepengegrunnlag
-import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling
@@ -104,17 +102,6 @@ internal class Infotrygdhistorikk private constructor(
     private fun sykdomstidslinje(): Sykdomstidslinje {
         if (!harHistorikk()) return Sykdomstidslinje()
         return siste.sykdomstidslinje()
-    }
-
-    internal fun lagreVilkårsgrunnlag(
-        skjæringstidspunkt: LocalDate,
-        vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk,
-        kanOverskriveVilkårsgrunnlag: (LocalDate) -> Boolean,
-        sykepengegrunnlagFor: (skjæringstidspunkt: LocalDate) -> Sykepengegrunnlag
-    ) {
-        if (!harHistorikk()) return
-        if (vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) != null && !kanOverskriveVilkårsgrunnlag(skjæringstidspunkt)) return
-        siste.lagreVilkårsgrunnlag(vilkårsgrunnlagHistorikk, sykepengegrunnlagFor)
     }
 
     internal fun oppdaterHistorikk(element: InfotrygdhistorikkElement): Boolean {

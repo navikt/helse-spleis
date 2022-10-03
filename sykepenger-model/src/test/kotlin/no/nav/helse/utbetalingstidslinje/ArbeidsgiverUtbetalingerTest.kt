@@ -108,7 +108,7 @@ internal class ArbeidsgiverUtbetalingerTest {
             meldingsreferanseId = UUID.randomUUID(),
             vilkårsgrunnlagId = UUID.randomUUID()
         )
-        undersøke(UNG_PERSON_FNR_2018, 5.NAV(12), 7.NAV, vilkårsgrunnlagElement = vilkårsgrunnlagElement, fødselsdato = UNG_PERSON_2018_FØDSELSDATO)
+        undersøke(UNG_PERSON_FNR_2018, 5.NAV(12), 7.NAV, grunnlagsdata = vilkårsgrunnlagElement, fødselsdato = UNG_PERSON_2018_FØDSELSDATO)
 
         assertEquals(12, inspektør.size)
         assertEquals(0, inspektør.navDagTeller)
@@ -293,19 +293,19 @@ internal class ArbeidsgiverUtbetalingerTest {
     private fun undersøke(
         fnr: Personidentifikator,
         vararg utbetalingsdager: Utbetalingsdager,
-        vilkårsgrunnlagElement: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement? = null,
+        grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata? = null,
         startdato: LocalDate = 1.januar,
         fødselsdato: LocalDate
     ) {
         val tidslinje = tidslinjeOf(*utbetalingsdager, startDato = startdato)
-        undersøke(fnr, tidslinje, tidslinjeOf(), vilkårsgrunnlagElement, fødselsdato)
+        undersøke(fnr, tidslinje, tidslinjeOf(), grunnlagsdata, fødselsdato)
     }
 
     private fun undersøke(
         fnr: Personidentifikator,
         arbeidsgiverTidslinje: Utbetalingstidslinje,
         historiskTidslinje: Utbetalingstidslinje,
-        vilkårsgrunnlagElement: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement? = null,
+        grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata? = null,
         fødselsdato: LocalDate
     ) {
         val person = Person("aktørid", fnr, fødselsdato.alder, MaskinellJurist())
@@ -330,7 +330,7 @@ internal class ArbeidsgiverUtbetalingerTest {
         val vilkårsgrunnlagHistorikk = VilkårsgrunnlagHistorikk()
 
         vilkårsgrunnlagHistorikk.lagre(
-            vilkårsgrunnlagElement ?: VilkårsgrunnlagHistorikk.Grunnlagsdata(
+            grunnlagsdata ?: VilkårsgrunnlagHistorikk.Grunnlagsdata(
                 skjæringstidspunkt = 1.januar,
                 sykepengegrunnlag = 30000.månedlig.sykepengegrunnlag(fødselsdato.alder),
                 sammenligningsgrunnlag = sammenligningsgrunnlag(30000.månedlig),

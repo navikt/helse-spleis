@@ -15,7 +15,6 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
-import no.nav.helse.mars
 import no.nav.helse.november
 import no.nav.helse.oktober
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
@@ -289,54 +288,6 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
                 assertEquals(inntektFraIT, grunnlagsdataInspektør.sykepengegrunnlag.inspektør.sykepengegrunnlag)
             }
         )
-    }
-
-    @Test
-    fun `flere kall til håndterYtelser burde ikke duplisere vilkårsgrunnlag fra infotrygd`() {
-        val gammelSykdom = arrayOf(
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.januar(2016), 31.januar(2016), 100.prosent, INNTEKT),
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.mars(2016), 31.mars(2016), 100.prosent, INNTEKT)
-        )
-        val gammelInntekt = listOf(
-            Inntektsopplysning(ORGNUMMER, 1.januar(2016), INNTEKT, false),
-            Inntektsopplysning(ORGNUMMER, 1.mars(2016), INNTEKT, false)
-        )
-        /*
-            Vi må ha gap for å lagre nye vilkårsgrunnlag. håndterYtelser lagrer kun vilkårsgrunnlag fra IT dersom
-            vi ikke har en utbetalt periode som gjelder skjæringstidspunktet
-         */
-        repeat(3) {
-            val fom = LocalDate.of(2018, it + 1, 1)
-            val tom = fom.plusDays(17)
-            håndterSykmelding(Sykmeldingsperiode(fom, tom, 100.prosent))
-            håndterSøknad(Sykdom(fom, tom, 100.prosent))
-            håndterUtbetalingshistorikk(
-                (it+1).vedtaksperiode,
-                utbetalinger = gammelSykdom,
-                inntektshistorikk = gammelInntekt,
-                besvart = LocalDate.EPOCH.atStartOfDay()
-            )
-            håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = fom)
-
-            håndterYtelser(
-                (it+1).vedtaksperiode,
-                utbetalinger = gammelSykdom,
-                inntektshistorikk = gammelInntekt,
-                besvart = LocalDate.EPOCH.atStartOfDay()
-            )
-            håndterVilkårsgrunnlag((it+1).vedtaksperiode)
-            håndterYtelser(
-                (it+1).vedtaksperiode,
-                utbetalinger = gammelSykdom,
-                inntektshistorikk = gammelInntekt,
-                besvart = LocalDate.EPOCH.atStartOfDay()
-            )
-            håndterSimulering((it+1).vedtaksperiode)
-            håndterUtbetalingsgodkjenning((it+1).vedtaksperiode)
-            håndterUtbetalt()
-        }
-
-        assertEquals(4, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
     }
     
     @Test

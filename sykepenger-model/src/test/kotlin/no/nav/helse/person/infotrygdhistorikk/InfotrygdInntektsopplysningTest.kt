@@ -191,21 +191,6 @@ internal class InfotrygdInntektsopplysningTest {
     }
 
     @Test
-    fun `Finner nærmeste inntekt fra Infotrygd, hvis det ikke finnes inntekt for skjæringstidspunkt`() {
-        Inntektsopplysning.lagreInntekter(
-            listOf(
-                Inntektsopplysning(ORGNR, 10.januar, 30000.månedlig, true),
-                Inntektsopplysning(ORGNR, 5.januar, 25000.månedlig, true)
-            ),
-            historikk,
-            UUID.randomUUID()
-        )
-        assertEquals(30000.månedlig, historikk.omregnetÅrsinntekt(1.januar, 11.januar, 1.januar)?.omregnetÅrsinntekt())
-        assertEquals(25000.månedlig, historikk.omregnetÅrsinntekt(1.januar, 9.januar, 1.januar)?.omregnetÅrsinntekt())
-        assertNull(historikk.omregnetÅrsinntekt(1.januar, 4.januar, 1.januar))
-    }
-
-    @Test
     fun equals() {
         val inntektID = UUID.randomUUID()
         val hendelseId = UUID.randomUUID()

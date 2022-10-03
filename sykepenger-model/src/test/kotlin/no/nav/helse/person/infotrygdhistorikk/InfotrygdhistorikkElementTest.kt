@@ -17,11 +17,9 @@ import no.nav.helse.mars
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.Person
-import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.sykdomstidslinje.Dag
-import no.nav.helse.sykepengegrunnlag
 import no.nav.helse.testhelpers.A
 import no.nav.helse.testhelpers.FRI
 import no.nav.helse.testhelpers.NAV
@@ -36,7 +34,6 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.Fri
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavHelgDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.UkjentDag
-import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -748,13 +745,6 @@ internal class InfotrygdhistorikkElementTest {
     fun `nytt element er ikke låst`() {
         val element = historikkelement()
         assertTrue(element.kanSlettes())
-    }
-
-    @Test
-    fun `lagring av vilkårsgrunnlag låser elementet`() {
-        val element = historikkelement()
-        element.lagreVilkårsgrunnlag(VilkårsgrunnlagHistorikk(), INGEN::sykepengegrunnlag)
-        assertFalse(element.kanSlettes())
     }
 
     @Test

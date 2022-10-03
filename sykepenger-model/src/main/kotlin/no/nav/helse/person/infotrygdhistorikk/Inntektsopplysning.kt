@@ -8,8 +8,6 @@ import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.InfotrygdhistorikkVisitor
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.Person
-import no.nav.helse.person.Sykepengegrunnlag
-import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.økonomi.Inntekt
 
 class Inntektsopplysning private constructor(
@@ -109,20 +107,6 @@ class Inntektsopplysning private constructor(
                 .any { (_, inntekter) -> inntekter.size > 1 }
             if (harFlereInntekterPåSammeAGogDato)
                 aktivitetslogg.info("Det er lagt inn flere inntekter i Infotrygd med samme fom-dato.")
-        }
-
-        internal fun List<Inntektsopplysning>.lagreVilkårsgrunnlag(
-            vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk,
-            sykepengegrunnlagFor: (skjæringstidspunkt: LocalDate) -> Sykepengegrunnlag
-        ) {
-            vilkårsgrunnlagHistorikk.lagre(
-                *map {
-                    VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag(
-                        skjæringstidspunkt = it.sykepengerFom,
-                        sykepengegrunnlag = sykepengegrunnlagFor(it.sykepengerFom)
-                    )
-                }.toTypedArray()
-            )
         }
 
         internal fun List<Inntektsopplysning>.fjern(nødnummer: Nødnummer) = filterNot { it.orgnummer in nødnummer }

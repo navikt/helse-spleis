@@ -423,8 +423,6 @@ internal class Vedtaksperiode private constructor(
         person.søppelbøtte(hendelse, TIDLIGERE_OG_ETTERGØLGENDE(this))
     }
 
-    private fun erUtbetalt() = tilstand == Avsluttet && utbetalinger.erAvsluttet()
-
     private fun revurderInntekt(hendelse: OverstyrInntekt) {
         person.nyInntekt(hendelse)
         person.vilkårsprøvEtterNyInformasjonFraSaksbehandler(hendelse, skjæringstidspunkt, jurist(), null, null)
@@ -1602,13 +1600,6 @@ internal class Vedtaksperiode private constructor(
                 }
                 onSuccess { infotrygdhistorikk.addInntekter(person, this) }
                 onSuccess {
-                    person.lagreVilkårsgrunnlagFraInfotrygd(
-                        vedtaksperiode.skjæringstidspunkt,
-                        vedtaksperiode.periode(),
-                        vedtaksperiode.jurist()
-                    )
-                }
-                onSuccess {
                     if (person.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt) == null) {
                         return@håndter vedtaksperiode.tilstand(ytelser, AvventerVilkårsprøving) {
                             // TODO: Mangler ofte vilkårsgrunnlag for perioder (https://logs.adeo.no/goto/844ac8a834ecd9c7ee5022ba0f89e569).
@@ -2529,8 +2520,6 @@ internal class Vedtaksperiode private constructor(
 
         internal fun List<Vedtaksperiode>.medSkjæringstidspunkt(skjæringstidspunkt: LocalDate) =
             this.filter { it.skjæringstidspunkt == skjæringstidspunkt }
-
-        internal fun List<Vedtaksperiode>.harUtbetaling() = any { it.erUtbetalt() }
 
         internal fun harNyereForkastetPeriode(forkastede: Iterable<Vedtaksperiode>, hendelse: SykdomstidslinjeHendelse) {
             forkastede

@@ -32,7 +32,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         visitor.postVisitVilkårsgrunnlagHistorikk()
     }
 
-    internal fun lagre(vararg grunnlagselement: VilkårsgrunnlagElement) {
+    internal fun lagre(vararg grunnlagselement: Grunnlagsdata) {
         if (grunnlagselement.isEmpty()) return
         val siste = sisteInnlag()
         val nytt = Innslag(siste, grunnlagselement.toList())

@@ -43,7 +43,6 @@ import no.nav.helse.person.Arbeidsgiver.Companion.harForkastetVedtaksperiodeSomB
 import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigInntektForVilkårsprøving
 import no.nav.helse.person.Arbeidsgiver.Companion.harPeriodeSomBlokkererOverstyring
 import no.nav.helse.person.Arbeidsgiver.Companion.harUferdigPeriodeFør
-import no.nav.helse.person.Arbeidsgiver.Companion.harUtbetaltPeriode
 import no.nav.helse.person.Arbeidsgiver.Companion.håndter
 import no.nav.helse.person.Arbeidsgiver.Companion.håndterOverstyringAvGhostInntekt
 import no.nav.helse.person.Arbeidsgiver.Companion.inntekterForSammenligningsgrunnlag
@@ -510,9 +509,6 @@ class Person private constructor(
 
     internal fun skjæringstidspunkterFraSpleis() = vilkårsgrunnlagHistorikk.skjæringstidspunkterFraSpleis()
 
-    private fun kanOverskriveVilkårsgrunnlag(skjæringstidspunkt: LocalDate) =
-        !arbeidsgivere.harUtbetaltPeriode(skjæringstidspunkt)
-
     internal fun trengerHistorikkFraInfotrygd(hendelse: IAktivitetslogg, cutoff: LocalDateTime? = null): Boolean {
         val tidligsteDato = arbeidsgivereMedSykdom().minOf { it.tidligsteDato() }
         return infotrygdhistorikk.oppfriskNødvendig(hendelse, tidligsteDato, cutoff)
@@ -635,20 +631,6 @@ class Person private constructor(
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag)
     }
 
-    internal fun lagreVilkårsgrunnlagFraInfotrygd(
-        skjæringstidspunkt: LocalDate,
-        periode: Periode,
-        subsumsjonObserver: SubsumsjonObserver
-    ) {
-        infotrygdhistorikk.lagreVilkårsgrunnlag(
-            skjæringstidspunkt,
-            vilkårsgrunnlagHistorikk,
-            ::kanOverskriveVilkårsgrunnlag
-        ) {
-            beregnSykepengegrunnlagForInfotrygd(it, periode.start, subsumsjonObserver)
-        }
-    }
-
     internal fun lagreOverstyrArbeidsforhold(overstyrArbeidsforhold: OverstyrArbeidsforhold, subsumsjonObserver: SubsumsjonObserver) {
         arbeidsgivere.forEach { arbeidsgiver ->
             overstyrArbeidsforhold.lagre(arbeidsgiver, subsumsjonObserver)
@@ -713,19 +695,6 @@ class Person private constructor(
             arbeidsgivere.deaktiverteArbeidsforhold(skjæringstidspunkt).map { it.organisasjonsnummer() }
         )
     }
-
-    private fun beregnSykepengegrunnlagForInfotrygd(
-        skjæringstidspunkt: LocalDate,
-        personensSisteKjenteSykedagIDenSammenhengdendeSykeperioden: LocalDate,
-        subsumsjonObserver: SubsumsjonObserver
-    ) =
-        Sykepengegrunnlag.opprettForInfotrygd(
-            alder,
-            arbeidsgivere.beregnSykepengegrunnlag(
-                skjæringstidspunkt,
-                personensSisteKjenteSykedagIDenSammenhengdendeSykeperioden
-            ), skjæringstidspunkt, subsumsjonObserver
-        )
 
     internal fun beregnSammenligningsgrunnlag(
         skjæringstidspunkt: LocalDate,
