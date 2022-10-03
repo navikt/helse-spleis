@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Sammenligningsgrunnlag
 import no.nav.helse.person.Sykepengegrunnlag
@@ -121,6 +122,9 @@ internal class GrunnlagsdataInspektør(grunnlagsdata: VilkårsgrunnlagHistorikk.
         private set
     internal var vurdertOk by Delegates.notNull<Boolean>()
         private set
+    internal lateinit var inntektskilde: Inntektskilde
+        private set
+
     init {
         grunnlagsdata.accept(this)
     }
@@ -143,6 +147,7 @@ internal class GrunnlagsdataInspektør(grunnlagsdata: VilkårsgrunnlagHistorikk.
         this.meldingsreferanseId = meldingsreferanseId
         this.harMinimumInntekt = harMinimumInntekt
         this.vurdertOk = vurdertOk
+        this.inntektskilde = sykepengegrunnlag.inntektskilde()
     }
 
     override fun postVisitInfotrygdVilkårsgrunnlag(

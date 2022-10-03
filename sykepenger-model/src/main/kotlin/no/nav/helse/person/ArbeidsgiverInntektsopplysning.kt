@@ -58,9 +58,6 @@ internal class ArbeidsgiverInntektsopplysning(
             return map { it.inntektsopplysning.rapportertInntekt() }.summer()
         }
 
-        internal fun List<ArbeidsgiverInntektsopplysning>.inntektsopplysningPerArbeidsgiver() =
-            associate { it.orgnummer to it.inntektsopplysning }
-
         internal fun List<ArbeidsgiverInntektsopplysning>.medInntekt(organisasjonsnummer: String, skjæringstidspunkt: LocalDate, dato: LocalDate, økonomi: Økonomi, arbeidsgiverperiode: Arbeidsgiverperiode?, regler: ArbeidsgiverRegler, subsumsjonObserver: SubsumsjonObserver): Økonomi? {
             return singleOrNull { it.orgnummer == organisasjonsnummer }?.inntektsopplysning?.omregnetÅrsinntekt()?.let { inntekt ->
                 økonomi.inntekt(

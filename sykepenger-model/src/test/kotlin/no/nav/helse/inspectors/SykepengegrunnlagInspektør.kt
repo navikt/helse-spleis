@@ -2,6 +2,7 @@ package no.nav.helse.inspectors
 
 import java.time.LocalDate
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning
+import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.Sykepengegrunnlag
 import no.nav.helse.person.VilkårsgrunnlagHistorikkVisitor
 import no.nav.helse.økonomi.Inntekt
@@ -17,6 +18,9 @@ internal class SykepengegrunnlagInspektør(sykepengegrunnlag: Sykepengegrunnlag)
     var skjønnsmessigFastsattÅrsinntekt: Inntekt? = null
     lateinit var `6G`: Inntekt
     lateinit var deaktiverteArbeidsforhold: List<String>
+    internal val arbeidsgiverInntektsopplysningerPerArbeidsgiver: MutableMap<String, ArbeidsgiverInntektsopplysning> = mutableMapOf()
+    internal lateinit var inntektskilde: Inntektskilde
+        private set
     internal var arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning> = listOf()
         private set
     init {
@@ -43,9 +47,17 @@ internal class SykepengegrunnlagInspektør(sykepengegrunnlag: Sykepengegrunnlag)
         this.skjønnsmessigFastsattÅrsinntekt = skjønnsmessigFastsattÅrsinntekt
         this.beregningsgrunnlag = beregningsgrunnlag
         this.deaktiverteArbeidsforhold = deaktiverteArbeidsforhold
+        this.inntektskilde = sykepengegrunnlag1.inntektskilde()
     }
 
     override fun preVisitArbeidsgiverInntektsopplysninger(arbeidsgiverInntektopplysninger: List<ArbeidsgiverInntektsopplysning>) {
         this.arbeidsgiverInntektsopplysninger = arbeidsgiverInntektopplysninger
+    }
+
+    override fun preVisitArbeidsgiverInntektsopplysning(
+        arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning,
+        orgnummer: String
+    ) {
+        arbeidsgiverInntektsopplysningerPerArbeidsgiver[orgnummer] = arbeidsgiverInntektsopplysning
     }
 }

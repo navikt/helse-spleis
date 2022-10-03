@@ -11,6 +11,10 @@ internal class Sammenligningsgrunnlag(sammenligningsgrunnlag: Sammenligningsgrun
     internal var arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning> = listOf()
         private set
 
+    internal lateinit var sammenligningsgrunnlag: Inntekt
+        private set
+    internal val arbeidsgiverInntektsopplysningerPerArbeidsgiver: MutableMap<String, ArbeidsgiverInntektsopplysning> = mutableMapOf()
+
     init {
         sammenligningsgrunnlag.accept(this)
     }
@@ -19,10 +23,17 @@ internal class Sammenligningsgrunnlag(sammenligningsgrunnlag: Sammenligningsgrun
         sammenligningsgrunnlag1: Sammenligningsgrunnlag,
         sammenligningsgrunnlag: Inntekt
     ) {
-
+        this.sammenligningsgrunnlag = sammenligningsgrunnlag
     }
 
     override fun preVisitArbeidsgiverInntektsopplysninger(arbeidsgiverInntektopplysninger: List<ArbeidsgiverInntektsopplysning>) {
         this.arbeidsgiverInntektsopplysninger = arbeidsgiverInntektopplysninger
+    }
+
+    override fun preVisitArbeidsgiverInntektsopplysning(
+        arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning,
+        orgnummer: String
+    ) {
+        arbeidsgiverInntektsopplysningerPerArbeidsgiver[orgnummer] = arbeidsgiverInntektsopplysning
     }
 }
