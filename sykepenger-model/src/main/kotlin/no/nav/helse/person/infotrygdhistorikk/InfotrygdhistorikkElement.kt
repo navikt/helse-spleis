@@ -178,23 +178,30 @@ class InfotrygdhistorikkElement private constructor(
         inntekter.fjern(nødnummer).lagreVilkårsgrunnlag(vilkårsgrunnlagHistorikk, sykepengegrunnlagFor)
     }
 
-    internal fun valider(aktivitetslogg: IAktivitetslogg, periodetype: Periodetype, periode: Periode, skjæringstidspunkt: LocalDate, organisasjonsnummer: String, avgrensetPeriode: Periode = periode): Boolean {
+    internal fun valider(
+        aktivitetslogg: IAktivitetslogg,
+        periode: Periode,
+        skjæringstidspunkt: LocalDate,
+        organisasjonsnummer: String
+    ): Boolean {
         validerUgyldigePerioder(aktivitetslogg)
         validerBetaltRettFør(periode, aktivitetslogg)
-        validerPeriodetype(periodetype, aktivitetslogg)
-        validerStatslønn(aktivitetslogg, periodetype)
-        validerNyereOpplysninger(organisasjonsnummer, avgrensetPeriode, aktivitetslogg)
-        return valider(aktivitetslogg, perioder, avgrensetPeriode, skjæringstidspunkt)
+        validerNyereOpplysninger(organisasjonsnummer, periode, aktivitetslogg)
+        aktivitetslogg.info("Sjekker utbetalte perioder")
+        perioder.filterIsInstance<Utbetalingsperiode>()
+            .forEach { it.valider(aktivitetslogg, periode, skjæringstidspunkt, nødnummer) }
+        aktivitetslogg.info("Sjekker inntektsopplysninger")
+        Inntektsopplysning.valider(inntekter, aktivitetslogg, skjæringstidspunkt, nødnummer)
+        aktivitetslogg.info("Sjekker at alle utbetalte perioder har inntektsopplysninger")
+        perioder.validerInntektForPerioder(aktivitetslogg, inntekter, nødnummer)
+        aktivitetslogg.info("Sjekker arbeidskategorikoder")
+        if (!erNormalArbeidstaker(skjæringstidspunkt)) aktivitetslogg.funksjonellFeil("Personen er ikke registrert som normal arbeidstaker i Infotrygd")
+        return !aktivitetslogg.harFunksjonelleFeilEllerVerre()
     }
 
     private fun validerNyereOpplysninger(organisasjonsnummer: String, periode: Periode, aktivitetslogg: IAktivitetslogg){
         if (!harNyereOpplysninger(organisasjonsnummer, periode)) return
         aktivitetslogg.varsel(RV_IT_1)
-    }
-
-    private fun validerPeriodetype(periodetype: Periodetype, aktivitetslogg: IAktivitetslogg){
-        if (periodetype != Periodetype.OVERGANG_FRA_IT) return
-        aktivitetslogg.info("Perioden er en direkte overgang fra periode med opphav i Infotrygd")
     }
 
     private fun validerBetaltRettFør(periode: Periode, aktivitetslogg: IAktivitetslogg){
@@ -204,29 +211,6 @@ class InfotrygdhistorikkElement private constructor(
 
     private fun validerUgyldigePerioder(aktivitetslogg: IAktivitetslogg) {
         ugyldigePerioder.forEach { ugyldigPeriode -> ugyldigPeriode.valider(aktivitetslogg) }
-    }
-
-    private fun validerStatslønn(aktivitetslogg: IAktivitetslogg, periodetype: Periodetype) {
-        if (harStatslønn && periodetype in arrayOf(Periodetype.OVERGANG_FRA_IT, Periodetype.INFOTRYGDFORLENGELSE)) {
-            aktivitetslogg.funksjonellFeil("Det er lagt inn statslønn i Infotrygd, undersøk at utbetalingen blir riktig.")
-        }
-    }
-
-    private fun valider(aktivitetslogg: IAktivitetslogg, perioder: List<Infotrygdperiode>, periode: Periode, skjæringstidspunkt: LocalDate): Boolean {
-        aktivitetslogg.info("Sjekker utbetalte perioder")
-        perioder.filterIsInstance<Utbetalingsperiode>()
-            .forEach { it.valider(aktivitetslogg, periode, skjæringstidspunkt, nødnummer) }
-
-        aktivitetslogg.info("Sjekker inntektsopplysninger")
-        Inntektsopplysning.valider(inntekter, aktivitetslogg, skjæringstidspunkt, nødnummer)
-
-        aktivitetslogg.info("Sjekker at alle utbetalte perioder har inntektsopplysninger")
-        perioder.validerInntektForPerioder(aktivitetslogg, inntekter, nødnummer)
-
-        aktivitetslogg.info("Sjekker arbeidskategorikoder")
-        if (!erNormalArbeidstaker(skjæringstidspunkt)) aktivitetslogg.funksjonellFeil("Personen er ikke registrert som normal arbeidstaker i Infotrygd")
-
-        return !aktivitetslogg.harFunksjonelleFeilEllerVerre()
     }
 
     internal fun utbetalingstidslinje() =

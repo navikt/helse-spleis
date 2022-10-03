@@ -40,12 +40,17 @@ internal class Infotrygdhistorikk private constructor(
     }
 
     internal fun valider(aktivitetslogg: IAktivitetslogg, arbeidsgiver: Arbeidsgiver, periode: Periode, skjæringstidspunkt: LocalDate): Boolean {
-        return valider(aktivitetslogg, arbeidsgiver.periodetype(periode), periode, skjæringstidspunkt, arbeidsgiver.organisasjonsnummer(), arbeidsgiver.avgrensetPeriode(periode))
+        return valider(aktivitetslogg, periode, skjæringstidspunkt, arbeidsgiver.organisasjonsnummer())
     }
 
-    internal fun valider(aktivitetslogg: IAktivitetslogg, periodetype: Periodetype, periode: Periode, skjæringstidspunkt: LocalDate, orgnummer: String, avgrensetPeriode: Periode = periode): Boolean {
+    internal fun valider(
+        aktivitetslogg: IAktivitetslogg,
+        periode: Periode,
+        skjæringstidspunkt: LocalDate,
+        orgnummer: String
+    ): Boolean {
         if (!harHistorikk()) return true
-        return siste.valider(aktivitetslogg, periodetype, periode, skjæringstidspunkt, orgnummer, avgrensetPeriode)
+        return siste.valider(aktivitetslogg, periode, skjæringstidspunkt, orgnummer)
     }
 
     internal fun oppfriskNødvendig(aktivitetslogg: IAktivitetslogg, tidligsteDato: LocalDate, cutoff: LocalDateTime? = null): Boolean {
