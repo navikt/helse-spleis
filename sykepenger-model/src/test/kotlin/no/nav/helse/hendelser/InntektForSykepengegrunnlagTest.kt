@@ -1,14 +1,17 @@
 package no.nav.helse.hendelser
 
+import java.time.YearMonth
+import no.nav.helse.april
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.Companion.antallMåneder
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.MånedligInntekt.Sykepengegrunnlag
 import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.april
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import java.time.YearMonth
+import org.junit.jupiter.api.assertThrows
 
 internal class InntektForSykepengegrunnlagTest {
 
@@ -64,7 +67,6 @@ internal class InntektForSykepengegrunnlagTest {
 
     @Test
     fun `Gir error hvis inntekter for sykepengegrunnlag har mer enn 3 inntektsmåneder`() {
-        val aktivitetslogg = Aktivitetslogg()
         val inntekter = listOf(
             ArbeidsgiverInntekt(
                 "orgnummer",
@@ -76,8 +78,12 @@ internal class InntektForSykepengegrunnlagTest {
                 }
             ),
         )
-        val inntektForSykepengegrunnlag = InntektForSykepengegrunnlag(inntekter = inntekter, arbeidsforhold = emptyList())
-        assertTrue(inntektForSykepengegrunnlag.valider(aktivitetslogg).harFunksjonelleFeilEllerVerre())
+        assertThrows<IllegalArgumentException> {
+            InntektForSykepengegrunnlag(
+                inntekter = inntekter,
+                arbeidsforhold = emptyList()
+            )
+        }
     }
 
     @Test

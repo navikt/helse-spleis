@@ -18,10 +18,13 @@ class InntektForSykepengegrunnlag(
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
     }
 
+    init {
+        require(inntekter.antallMåneder() <= 3L) { "Forventer maks 3 inntektsmåneder" }
+    }
+
     internal fun valider(
         aktivitetslogg: IAktivitetslogg,
     ): IAktivitetslogg {
-        if (inntekter.antallMåneder() > 3L) aktivitetslogg.funksjonellFeil("Forventer maks 3 inntektsmåneder")
         if (finnerFrilansinntektDeSiste3Månedene())
             aktivitetslogg.funksjonellFeil(RV_IV_3)
         return aktivitetslogg
