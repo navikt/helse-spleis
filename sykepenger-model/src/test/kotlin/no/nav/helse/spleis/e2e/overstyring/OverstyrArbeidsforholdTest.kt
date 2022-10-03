@@ -40,6 +40,7 @@ import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.spleis.e2e.repeat
 import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -87,9 +88,19 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         val skjæringstidspunkt = inspektør.skjæringstidspunkt(1.vedtaksperiode)
+        inspektør(a1).sisteUtbetalingUtbetalingstidslinje()[17.januar].also { it ->
+            assertEquals(1431.daglig, it.økonomi.inspektør.arbeidsgiverbeløp)
+            assertEquals(0.daglig, it.økonomi.inspektør.personbeløp)
+            assertEquals(31000.månedlig, it.økonomi.inspektør.aktuellDagsinntekt)
+        }
         håndterOverstyrArbeidsforhold(skjæringstidspunkt, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, true, "forklaring")))
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
+        inspektør(a1).sisteUtbetalingUtbetalingstidslinje()[17.januar].also { it ->
+            assertEquals(1431.daglig, it.økonomi.inspektør.arbeidsgiverbeløp)
+            assertEquals(0.daglig, it.økonomi.inspektør.personbeløp)
+            assertEquals(31000.månedlig, it.økonomi.inspektør.aktuellDagsinntekt)
+        }
 
         val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: Assertions.fail { "finner ikke vilkårsgrunnlag" }
         val sykepengegrunnlagInspektør = vilkårsgrunnlag.sykepengegrunnlag.inspektør
@@ -145,7 +156,20 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a2)
         håndterSimulering(1.vedtaksperiode, orgnummer = a2)
+        inspektør(a2).sisteUtbetalingUtbetalingstidslinje()[17.januar].also { it ->
+            assertEquals(1080.daglig, it.økonomi.inspektør.arbeidsgiverbeløp)
+            assertEquals(0.daglig, it.økonomi.inspektør.personbeløp)
+            assertEquals(31000.månedlig, it.økonomi.inspektør.aktuellDagsinntekt)
+        }
         håndterOverstyrArbeidsforhold(1.januar, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a3, true, "forklaring")))
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+
+        inspektør(a2).sisteUtbetalingUtbetalingstidslinje()[17.januar].also { it ->
+            assertEquals(1080.daglig, it.økonomi.inspektør.arbeidsgiverbeløp)
+            assertEquals(0.daglig, it.økonomi.inspektør.personbeløp)
+            assertEquals(31000.månedlig, it.økonomi.inspektør.aktuellDagsinntekt)
+        }
+
         val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: Assertions.fail { "finner ikke vilkårsgrunnlag" }
         val sykepengegrunnlagInspektør = vilkårsgrunnlag.sykepengegrunnlag.inspektør
         val sammenligningsgrunnlagInspektør = vilkårsgrunnlag.sammenligningsgrunnlag1.inspektør
@@ -281,8 +305,18 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        inspektør(a1).sisteUtbetalingUtbetalingstidslinje()[17.januar].also { it ->
+            assertEquals(1075.daglig, it.økonomi.inspektør.arbeidsgiverbeløp)
+            assertEquals(0.daglig, it.økonomi.inspektør.personbeløp)
+            assertEquals(31000.månedlig, it.økonomi.inspektør.aktuellDagsinntekt)
+        }
         håndterOverstyrArbeidsforhold(1.januar, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a3, true, "forklaring")))
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        inspektør(a1).sisteUtbetalingUtbetalingstidslinje()[17.januar].also { it ->
+            assertEquals(1080.daglig, it.økonomi.inspektør.arbeidsgiverbeløp)
+            assertEquals(0.daglig, it.økonomi.inspektør.personbeløp)
+            assertEquals(31000.månedlig, it.økonomi.inspektør.aktuellDagsinntekt)
+        }
 
         val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: Assertions.fail { "finner ikke vilkårsgrunnlag" }
         val sykepengegrunnlagInspektør = vilkårsgrunnlag.sykepengegrunnlag.inspektør
@@ -596,8 +630,19 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
         )
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        inspektør(a1).sisteUtbetalingUtbetalingstidslinje()[17.januar].also { it ->
+            assertEquals(1431.daglig, it.økonomi.inspektør.arbeidsgiverbeløp)
+            assertEquals(0.daglig, it.økonomi.inspektør.personbeløp)
+            assertEquals(31000.månedlig, it.økonomi.inspektør.aktuellDagsinntekt)
+        }
         håndterOverstyrArbeidsforhold(1.januar, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, true, "forklaring")))
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+
+        inspektør(a1).sisteUtbetalingUtbetalingstidslinje()[17.januar].also { it ->
+            assertEquals(0.daglig, it.økonomi.inspektør.arbeidsgiverbeløp)
+            assertEquals(0.daglig, it.økonomi.inspektør.personbeløp)
+            assertEquals(31000.månedlig, it.økonomi.inspektør.aktuellDagsinntekt)
+        }
 
         val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }
         val sykepengegrunnlagInspektør = vilkårsgrunnlag.sykepengegrunnlag.inspektør
