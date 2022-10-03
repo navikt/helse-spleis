@@ -39,8 +39,10 @@ import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
+import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.vedtaksperiode
 import no.nav.helse.spleis.e2e.assertActivities
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
+import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
@@ -551,12 +553,17 @@ internal class E2EEpic3Test : AbstractEndToEndTest() {
             AVSLUTTET
         )
 
-        assertTilstander(
+        assertForkastetPeriodeTilstander(
             2.vedtaksperiode,
             START,
             AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING
+            TIL_INFOTRYGD
+        )
+
+        assertFunksjonellFeil(
+            "Forlenger en Infotrygdperiode på tvers av arbeidsgivere",
+            vedtaksperiode(2.vedtaksperiode, ORGNUMMER)
         )
     }
 

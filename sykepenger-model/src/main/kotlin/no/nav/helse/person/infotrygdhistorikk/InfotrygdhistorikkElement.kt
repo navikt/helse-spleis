@@ -193,15 +193,28 @@ class InfotrygdhistorikkElement private constructor(
         inntekter.fjern(nødnummer).lagreVilkårsgrunnlag(vilkårsgrunnlagHistorikk, sykepengegrunnlagFor)
     }
 
-    internal fun valider(aktivitetslogg: IAktivitetslogg, periodetype: Periodetype, periode: Periode, skjæringstidspunkt: LocalDate, organisasjonsnummer: String): Boolean {
+    internal fun valider(aktivitetslogg: IAktivitetslogg, periodetype: Periodetype, periode: Periode, skjæringstidspunkt: LocalDate, organisasjonsnummer: String, avgrensetPeriode: Periode = periode): Boolean {
         validerUgyldigePerioder(aktivitetslogg)
-        if (periodetype == Periodetype.OVERGANG_FRA_IT) {
-            aktivitetslogg.info("Perioden er en direkte overgang fra periode med opphav i Infotrygd")
-        }
+        validerBetaltRettFør(periode, aktivitetslogg)
+        validerPeriodetype(periodetype, aktivitetslogg)
         validerStatslønn(aktivitetslogg, periodetype)
-        if (harNyereOpplysninger(organisasjonsnummer, periode))
-            aktivitetslogg.varsel(RV_IT_1)
-        return valider(aktivitetslogg, perioder, periode, skjæringstidspunkt)
+        validerNyereOpplysninger(organisasjonsnummer, avgrensetPeriode, aktivitetslogg)
+        return valider(aktivitetslogg, perioder, avgrensetPeriode, skjæringstidspunkt)
+    }
+
+    private fun validerNyereOpplysninger(organisasjonsnummer: String, periode: Periode, aktivitetslogg: IAktivitetslogg){
+        if (!harNyereOpplysninger(organisasjonsnummer, periode)) return
+        aktivitetslogg.varsel(RV_IT_1)
+    }
+
+    private fun validerPeriodetype(periodetype: Periodetype, aktivitetslogg: IAktivitetslogg){
+        if (periodetype != Periodetype.OVERGANG_FRA_IT) return
+        aktivitetslogg.info("Perioden er en direkte overgang fra periode med opphav i Infotrygd")
+    }
+
+    private fun validerBetaltRettFør(periode: Periode, aktivitetslogg: IAktivitetslogg){
+        if (!harBetaltRettFør(periode)) return
+        aktivitetslogg.funksjonellFeil("Forlenger en Infotrygdperiode på tvers av arbeidsgivere")
     }
 
     internal fun validerOverlappende(aktivitetslogg: IAktivitetslogg, periode: Periode, skjæringstidspunkt: LocalDate): Boolean {

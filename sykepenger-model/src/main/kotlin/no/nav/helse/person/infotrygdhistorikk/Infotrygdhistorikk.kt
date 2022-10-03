@@ -1,16 +1,27 @@
 package no.nav.helse.person.infotrygdhistorikk
 
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
-import no.nav.helse.person.*
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.utbetalingshistorikk
+import no.nav.helse.person.Arbeidsgiver
+import no.nav.helse.person.IAktivitetslogg
+import no.nav.helse.person.InfotrygdhistorikkVisitor
+import no.nav.helse.person.Periodetype
+import no.nav.helse.person.Person
+import no.nav.helse.person.Sykepengegrunnlag
+import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling
-import no.nav.helse.utbetalingstidslinje.*
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
+import no.nav.helse.utbetalingstidslinje.ArbeidsgiverperiodeBuilder
+import no.nav.helse.utbetalingstidslinje.ArbeidsgiverperiodeMediator
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiodeteller
+import no.nav.helse.utbetalingstidslinje.IUtbetalingstidslinjeBuilder
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 
 internal class Infotrygdhistorikk private constructor(
     private val elementer: MutableList<InfotrygdhistorikkElement>
@@ -29,13 +40,12 @@ internal class Infotrygdhistorikk private constructor(
     }
 
     internal fun valider(aktivitetslogg: IAktivitetslogg, arbeidsgiver: Arbeidsgiver, periode: Periode, skjæringstidspunkt: LocalDate): Boolean {
-        val avgrensetPeriode = arbeidsgiver.avgrensetPeriode(periode)
-        return valider(aktivitetslogg, arbeidsgiver.periodetype(periode), avgrensetPeriode, skjæringstidspunkt, arbeidsgiver.organisasjonsnummer())
+        return valider(aktivitetslogg, arbeidsgiver.periodetype(periode), periode, skjæringstidspunkt, arbeidsgiver.organisasjonsnummer(), arbeidsgiver.avgrensetPeriode(periode))
     }
 
-    internal fun valider(aktivitetslogg: IAktivitetslogg, periodetype: Periodetype, periode: Periode, skjæringstidspunkt: LocalDate, orgnummer: String): Boolean {
+    internal fun valider(aktivitetslogg: IAktivitetslogg, periodetype: Periodetype, periode: Periode, skjæringstidspunkt: LocalDate, orgnummer: String, avgrensetPeriode: Periode = periode): Boolean {
         if (!harHistorikk()) return true
-        return siste.valider(aktivitetslogg, periodetype, periode, skjæringstidspunkt, orgnummer)
+        return siste.valider(aktivitetslogg, periodetype, periode, skjæringstidspunkt, orgnummer, avgrensetPeriode)
     }
 
     internal fun validerOverlappende(aktivitetslogg: IAktivitetslogg, periode: Periode, skjæringstidspunkt: LocalDate): Boolean {
