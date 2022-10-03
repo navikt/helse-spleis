@@ -303,13 +303,6 @@ internal class InfotrygdhistorikkElementTest {
     }
 
     @Test
-    fun `hensyntar ikke statslønn i overlapp-validering`() {
-        val element = historikkelement(harStatslønn = true)
-        assertTrue(element.validerOverlappende(aktivitetslogg, 1.januar til 31.januar, 1.januar))
-        assertFalse(aktivitetslogg.harVarslerEllerVerre())
-    }
-
-    @Test
     fun `statslønn lager error`() {
         val element = historikkelement(harStatslønn = true)
         aktivitetslogg.barn().also {

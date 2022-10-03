@@ -77,21 +77,6 @@ class InfotrygdhistorikkElement private constructor(
                 lagretVilkårsgrunnlag = false
             )
 
-        internal fun opprettTom() =
-            InfotrygdhistorikkElement(
-                id = UUID.randomUUID(),
-                tidsstempel = LocalDateTime.now(),
-                hendelseId = null,
-                perioder = emptyList(),
-                inntekter = emptyList(),
-                arbeidskategorikoder = emptyMap(),
-                ugyldigePerioder = emptyList(),
-                harStatslønn = false,
-                oppdatert = LocalDateTime.MIN,
-                lagretInntekter = false,
-                lagretVilkårsgrunnlag = false
-            )
-
         internal fun ferdigElement(
             id: UUID,
             tidsstempel: LocalDateTime,
@@ -215,11 +200,6 @@ class InfotrygdhistorikkElement private constructor(
     private fun validerBetaltRettFør(periode: Periode, aktivitetslogg: IAktivitetslogg){
         if (!harBetaltRettFør(periode)) return
         aktivitetslogg.funksjonellFeil("Forlenger en Infotrygdperiode på tvers av arbeidsgivere")
-    }
-
-    internal fun validerOverlappende(aktivitetslogg: IAktivitetslogg, periode: Periode, skjæringstidspunkt: LocalDate): Boolean {
-        aktivitetslogg.info("Sjekker utbetalte perioder for overlapp mot %s", periode)
-        return valider(aktivitetslogg, perioder, periode, skjæringstidspunkt)
     }
 
     private fun validerUgyldigePerioder(aktivitetslogg: IAktivitetslogg) {

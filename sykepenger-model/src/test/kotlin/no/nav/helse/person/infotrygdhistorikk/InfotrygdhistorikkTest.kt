@@ -300,58 +300,6 @@ internal class InfotrygdhistorikkTest {
     }
 
     @Test
-    fun `overlapper ikke med tom historikk`() {
-        assertTrue(historikk.validerOverlappende(aktivitetslogg, 1.januar til 31.januar, 1.januar))
-        assertFalse(aktivitetslogg.harFunksjonelleFeilEllerVerre())
-    }
-
-    @Test
-    fun `overlappende utbetalinger`() {
-        historikk.oppdaterHistorikk(historikkelement(
-            perioder = listOf(ArbeidsgiverUtbetalingsperiode("orgnr", 5.januar,  10.januar, 100.prosent, 25000.månedlig)),
-            inntekter = listOf(Inntektsopplysning("orgnr", 5.januar, 25000.månedlig, true))
-        ))
-        aktivitetslogg.barn().also {
-            assertFalse(historikk.validerOverlappende(it, 10.januar til 31.januar, 10.januar))
-            assertTrue(it.harFunksjonelleFeilEllerVerre())
-        }
-        aktivitetslogg.barn().also {
-            assertFalse(historikk.validerOverlappende(it, 1.januar til 5.januar, 1.januar))
-            assertTrue(it.harFunksjonelleFeilEllerVerre())
-        }
-        aktivitetslogg.barn().also {
-            assertTrue(historikk.validerOverlappende(it, 1.januar til 4.januar, 1.januar))
-            assertFalse(it.harFunksjonelleFeilEllerVerre())
-        }
-        aktivitetslogg.barn().also {
-            assertTrue(historikk.validerOverlappende(it, 11.januar til 31.januar, 11.januar))
-            assertFalse(it.harFunksjonelleFeilEllerVerre())
-        }
-    }
-
-    @Test
-    fun `overlapper ikke med ferie eller ukjent`() {
-        historikk.oppdaterHistorikk(historikkelement(listOf(
-            Friperiode(5.januar,  10.januar),
-            UkjentInfotrygdperiode(15.januar,  20.januar)
-        )))
-        assertTrue(historikk.validerOverlappende(aktivitetslogg, 1.januar til 31.januar, 1.januar))
-    }
-
-    @Test
-    fun `hensyntar ikke ugyldige perioder i overlapp-validering`() {
-        historikk.oppdaterHistorikk(historikkelement(ugyldigePerioder = listOf(UgyldigPeriode(1.januar, null, 100))))
-        assertTrue(historikk.validerOverlappende(aktivitetslogg, 1.januar til 31.januar, 1.januar))
-    }
-
-    @Test
-    fun `hensyntar ikke statslønn i overlapp-validering`() {
-        historikk.oppdaterHistorikk(historikkelement(harStatslønn = true))
-        assertTrue(historikk.validerOverlappende(aktivitetslogg, 1.januar til 31.januar, 1.januar))
-        assertFalse(aktivitetslogg.harVarslerEllerVerre())
-    }
-
-    @Test
     fun `statslønn lager error ved Overgang fra IT`() {
         historikk.oppdaterHistorikk(historikkelement(harStatslønn = true))
         aktivitetslogg.barn().also {

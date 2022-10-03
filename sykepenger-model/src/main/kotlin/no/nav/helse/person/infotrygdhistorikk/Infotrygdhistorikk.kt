@@ -48,11 +48,6 @@ internal class Infotrygdhistorikk private constructor(
         return siste.valider(aktivitetslogg, periodetype, periode, skjæringstidspunkt, orgnummer, avgrensetPeriode)
     }
 
-    internal fun validerOverlappende(aktivitetslogg: IAktivitetslogg, periode: Periode, skjæringstidspunkt: LocalDate): Boolean {
-        if (!harHistorikk()) return true
-        return siste.validerOverlappende(aktivitetslogg, periode, skjæringstidspunkt)
-    }
-
     internal fun oppfriskNødvendig(aktivitetslogg: IAktivitetslogg, tidligsteDato: LocalDate, cutoff: LocalDateTime? = null): Boolean {
         if (oppfrisket(cutoff ?: gammel)) return false
         oppfrisk(aktivitetslogg, tidligsteDato)
