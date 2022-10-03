@@ -2,10 +2,12 @@ package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.YearMonth
 import no.nav.helse.Toggle
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
+import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsvurdering
@@ -18,13 +20,8 @@ import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
-import no.nav.helse.juli
-import no.nav.helse.juni
-import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.november
-import no.nav.helse.person.TilstandType.AVSLUTTET
-import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.Varselkode
 import no.nav.helse.person.Varselkode.RV_AY_3
@@ -43,6 +40,7 @@ import no.nav.helse.person.Varselkode.RV_IT_1
 import no.nav.helse.person.Varselkode.RV_IT_4
 import no.nav.helse.person.Varselkode.RV_IV_1
 import no.nav.helse.person.Varselkode.RV_IV_2
+import no.nav.helse.person.Varselkode.RV_IV_3
 import no.nav.helse.person.Varselkode.RV_MV_1
 import no.nav.helse.person.Varselkode.RV_MV_2
 import no.nav.helse.person.Varselkode.RV_OO_1
@@ -129,7 +127,7 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
     }
 
     @Test
-    fun `søknad med arbeidsdager mellom to perioder bridger ikke de to periodene`(){
+    fun `varsel - Søknaden inneholder Arbeidsdager utenfor sykdomsvindu`(){
         håndterSøknad(
             Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent),
             Søknad.Søknadsperiode.Arbeid(20.januar, 31.januar)
@@ -138,7 +136,7 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Søknad med utenlandsopphold og studieopphold gir warning`() {
+    fun `varsel - Utenlandsopphold oppgitt i perioden i søknaden`() {
         håndterSøknad(
             Søknad.Søknadsperiode.Sykdom(3.januar, 26.januar, 100.prosent),
             Søknad.Søknadsperiode.Utlandsopphold(11.januar, 15.januar)
@@ -703,6 +701,43 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
         nyttVedtak(1.mars, 31.mars)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
         assertVarsel(RV_OO_2, 1.vedtaksperiode.filter())
+    }
+
+    @Test
+    fun `varsel - Fant frilanserinntekt på en arbeidsgiver de siste 3 månedene`() {
+        håndterSykmelding(Sykmeldingsperiode(1.februar, 16.februar, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 16.februar, 100.prosent))
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+
+        håndterInntektsmelding(listOf(31.januar til 15.februar))
+
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode, inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
+                inntekter = listOf(
+                    ArbeidsgiverInntekt(ORGNUMMER, (10..12).map {
+                        ArbeidsgiverInntekt.MånedligInntekt.Sykepengegrunnlag(
+                            yearMonth = YearMonth.of(2017, it),
+                            type = ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT,
+                            inntekt = INNTEKT,
+                            fordel = "fordel",
+                            beskrivelse = "beskrivelse"
+                        )
+                    })
+                ),
+                arbeidsforhold = listOf(
+                    InntektForSykepengegrunnlag.Arbeidsforhold(
+                        ORGNUMMER, listOf(
+                            InntektForSykepengegrunnlag.MånedligArbeidsforhold(
+                                yearMonth = YearMonth.of(2017, 10),
+                                erFrilanser = true
+                            )
+                        )
+                    )
+                )
+            )
+        )
+        assertVarsel(RV_IV_3, 1.vedtaksperiode.filter())
     }
 
 }

@@ -7,6 +7,7 @@ import no.nav.helse.hendelser.ArbeidsgiverInntekt.Companion.harInntektFor
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonHendelse
+import no.nav.helse.person.Varselkode.RV_IV_3
 import org.slf4j.LoggerFactory
 
 class InntektForSykepengegrunnlag(
@@ -22,7 +23,7 @@ class InntektForSykepengegrunnlag(
     ): IAktivitetslogg {
         if (inntekter.antallMåneder() > 3L) aktivitetslogg.funksjonellFeil("Forventer maks 3 inntektsmåneder")
         if (finnerFrilansinntektDeSiste3Månedene())
-            aktivitetslogg.funksjonellFeil("Fant frilanserinntekt på en arbeidsgiver de siste 3 månedene")
+            aktivitetslogg.funksjonellFeil(RV_IV_3)
         return aktivitetslogg
     }
 

@@ -22,7 +22,7 @@ enum class Varselkode(
     RV_SØ_9("Det er oppgitt annen inntektskilde i søknaden. Vurder inntekt."),
     RV_SØ_10("Den sykmeldte har oppgitt å ha andre arbeidsforhold med sykmelding i søknaden."),
 
-    // OO: Outut-of-order
+    // OO: Out-of-order
     RV_OO_1("Det er behandlet en søknad i Speil for en senere periode enn denne."),
     RV_OO_2("Saken må revurderes fordi det har blitt behandlet en tidligere periode som kan ha betydning."),
 
@@ -62,6 +62,7 @@ enum class Varselkode(
     // IV: Inntektsvurdering
     RV_IV_1("Bruker har flere inntektskilder de siste tre månedene enn arbeidsforhold som er oppdaget i Aa-registeret."),
     RV_IV_2("Har mer enn 25 % avvik. Dette støttes foreløpig ikke i Speil. Du må derfor annullere periodene.", funksjonellFeilTekst = "Har mer enn 25 % avvik"),
+    RV_IV_3("Fant frilanserinntekt på en arbeidsgiver de siste 3 månedene"),
 
     // SV: Sykepengegrunnlagsvurdering
     RV_SV_1("Perioden er avslått på grunn av at inntekt er under krav til minste sykepengegrunnlag"),
@@ -88,6 +89,7 @@ enum class Varselkode(
     RV_OS_1("Utbetalingen forlenger et tidligere oppdrag som opphørte alle utbetalte dager. Sjekk simuleringen."),
     RV_OS_2("Utbetalingens fra og med-dato er endret. Kontroller simuleringen"),
     RV_OS_3("Endrer tidligere oppdrag. Kontroller simuleringen."),
+
     // RV: Revurdering
     RV_RV_1("Denne perioden var tidligere regnet som innenfor arbeidsgiverperioden");
 
