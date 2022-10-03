@@ -33,6 +33,7 @@ enum class Varselkode(
     RV_IM_4("Mottatt flere inntektsmeldinger - den første inntektsmeldingen som ble mottatt er lagt til grunn. Utbetal kun hvis det blir korrekt."),
     RV_IM_5("Sykmeldte har oppgitt ferie første dag i arbeidsgiverperioden."),
     RV_IM_6("Inntektsmelding inneholder ikke beregnet inntekt"),
+    RV_IM_7("Brukeren har opphold i naturalytelser"),
 
     // RE: Refusjon
     RV_RE_1("Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler."),

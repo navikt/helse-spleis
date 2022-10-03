@@ -36,6 +36,7 @@ import no.nav.helse.person.Varselkode.RV_IM_3
 import no.nav.helse.person.Varselkode.RV_IM_4
 import no.nav.helse.person.Varselkode.RV_IM_5
 import no.nav.helse.person.Varselkode.RV_IM_6
+import no.nav.helse.person.Varselkode.RV_IM_7
 import no.nav.helse.person.Varselkode.RV_IT_1
 import no.nav.helse.person.Varselkode.RV_IT_4
 import no.nav.helse.person.Varselkode.RV_IV_1
@@ -721,6 +722,16 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
 
         håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = Inntekt.INGEN)
         assertVarsel(RV_IM_6, 1.vedtaksperiode.filter())
+    }
+
+
+    @Test
+    fun `varsel - Brukeren har opphold i naturalytelser`() {
+        nyttVedtak(1.januar, 31.januar)
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
+
+        håndterInntektsmelding(listOf(1.januar til 16.januar), harOpphørAvNaturalytelser = true)
+        assertVarsel(RV_IM_7, 1.vedtaksperiode.filter())
     }
 
 }

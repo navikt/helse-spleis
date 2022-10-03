@@ -20,6 +20,7 @@ import no.nav.helse.person.Varselkode.RV_IM_1
 import no.nav.helse.person.Varselkode.RV_IM_2
 import no.nav.helse.person.Varselkode.RV_IM_3
 import no.nav.helse.person.Varselkode.RV_IM_6
+import no.nav.helse.person.Varselkode.RV_IM_7
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
@@ -130,7 +131,7 @@ class Inntektsmelding(
                 "Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden på grunn av: %s".format(it)
             )
         }
-        if (harOpphørAvNaturalytelser) funksjonellFeil("Brukeren har opphold i naturalytelser")
+        if (harOpphørAvNaturalytelser) funksjonellFeil(RV_IM_7)
         return this
     }
 
