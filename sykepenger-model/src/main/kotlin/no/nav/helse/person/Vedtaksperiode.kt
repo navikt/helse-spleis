@@ -912,9 +912,9 @@ internal class Vedtaksperiode private constructor(
                 valider {
                     infotrygdhistorikk.valider(
                         this,
-                        arbeidsgiver,
                         vedtaksperiode.periode,
-                        vedtaksperiode.skjæringstidspunkt
+                        vedtaksperiode.skjæringstidspunkt,
+                        arbeidsgiver.organisasjonsnummer()
                     )
                 }
                 onSuccess { info("Utbetalingshistorikk sjekket; fant ingen feil.") }
@@ -1109,7 +1109,7 @@ internal class Vedtaksperiode private constructor(
             ytelser: Ytelser,
             infotrygdhistorikk: Infotrygdhistorikk
         ) {
-            infotrygdhistorikk.valider(ytelser, arbeidsgiver, periode, skjæringstidspunkt)
+            infotrygdhistorikk.valider(ytelser, periode, skjæringstidspunkt, arbeidsgiver.organisasjonsnummer())
             ytelser.valider(periode, skjæringstidspunkt)
         }
 
@@ -1206,7 +1206,7 @@ internal class Vedtaksperiode private constructor(
             ytelser: Ytelser,
             infotrygdhistorikk: Infotrygdhistorikk
         ) {
-            infotrygdhistorikk.valider(ytelser, arbeidsgiver, periode, skjæringstidspunkt)
+            infotrygdhistorikk.valider(ytelser, periode, skjæringstidspunkt, arbeidsgiver.organisasjonsnummer())
             ytelser.valider(periode, skjæringstidspunkt)
         }
 
@@ -1313,7 +1313,7 @@ internal class Vedtaksperiode private constructor(
             ytelser: Ytelser,
             infotrygdhistorikk: Infotrygdhistorikk
         ) {
-            infotrygdhistorikk.valider(ytelser, arbeidsgiver, periode, skjæringstidspunkt)
+            infotrygdhistorikk.valider(ytelser, periode, skjæringstidspunkt, arbeidsgiver.organisasjonsnummer())
             ytelser.valider(periode, skjæringstidspunkt)
         }
 
@@ -1428,9 +1428,9 @@ internal class Vedtaksperiode private constructor(
                 valider {
                     infotrygdhistorikk.valider(
                         this,
-                        arbeidsgiver,
                         vedtaksperiode.periode,
-                        vedtaksperiode.skjæringstidspunkt
+                        vedtaksperiode.skjæringstidspunkt,
+                        arbeidsgiver.organisasjonsnummer()
                     )
                 }
                 onSuccess {
@@ -1583,9 +1583,9 @@ internal class Vedtaksperiode private constructor(
                 valider {
                     infotrygdhistorikk.valider(
                         this,
-                        arbeidsgiver,
                         vedtaksperiode.periode,
-                        vedtaksperiode.skjæringstidspunkt
+                        vedtaksperiode.skjæringstidspunkt,
+                        arbeidsgiver.organisasjonsnummer()
                     )
                 }
                 valider { ytelser.valider(vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt) }
