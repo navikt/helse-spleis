@@ -19,6 +19,10 @@ import no.nav.helse.økonomi.Prosent.Companion.MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSI
 class Inntektsvurdering(private val inntekter: List<ArbeidsgiverInntekt>) {
     private lateinit var avviksprosent: Prosent
 
+    init {
+        require(inntekter.antallMåneder() <= 12) { "Forventer 12 eller færre inntektsmåneder" }
+    }
+
     internal fun avviksprosent() = avviksprosent
 
     internal fun valider(
@@ -28,7 +32,6 @@ class Inntektsvurdering(private val inntekter: List<ArbeidsgiverInntekt>) {
         antallArbeidsgivereFraAareg: Int,
         subsumsjonObserver: SubsumsjonObserver
     ): Boolean {
-        if (inntekter.antallMåneder() > 12) aktivitetslogg.funksjonellFeil("Forventer 12 eller færre inntektsmåneder")
         if (inntekter.utenOffentligeYtelser().kilder(3) > antallArbeidsgivereFraAareg) aktivitetslogg.varsel(RV_IV_1)
         avviksprosent = grunnlagForSykepengegrunnlag.avviksprosent(sammenligningsgrunnlag, subsumsjonObserver)
         return sjekkAvvik(avviksprosent, aktivitetslogg, IAktivitetslogg::funksjonellFeil, RV_IV_2)
