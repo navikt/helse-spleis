@@ -10,6 +10,7 @@ import no.nav.helse.person.Varselkode.RV_IM_6
 import no.nav.helse.person.Varselkode.RV_IM_7
 import no.nav.helse.person.Varselkode.RV_UT_3
 import no.nav.helse.person.Varselkode.RV_VV_5
+import no.nav.helse.person.Varselkode.RV_VV_9
 import no.nav.helse.person.varselkodeformat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -25,7 +26,7 @@ internal class VarselkodeTest {
             removeAll(finnAlleVarselkoderITest().toSet())
         }.toSet()
 
-        val varselkoderSomKjentManglerTest = listOf(RV_VV_5, RV_IM_6, RV_IM_7, RV_UT_3)
+        val varselkoderSomKjentManglerTest = listOf(RV_VV_5, RV_IM_6, RV_IM_7, RV_UT_3, RV_VV_9)
 
         val varselkoderSomNåManglerTest = ikkeTestedeVarselkoder.minus(varselkoderSomKjentManglerTest.toSet())
         val (varselkoderSomFortsattBrukes, varselkoderSomIkkeBrukesLenger) = varselkoderSomKjentManglerTest.partition { it in aktiveVarselkoder }

@@ -52,6 +52,7 @@ enum class Varselkode(
     RV_VV_4("Minst én dag uten utbetaling på grunn av sykdomsgrad under 20 %. Vurder å sende vedtaksbrev fra Infotrygd"),
     RV_VV_5("Bruker mangler nødvendig inntekt ved validering av Vilkårsgrunnlag"),
     RV_VV_8("Den sykmeldte har skiftet arbeidsgiver, og det er beregnet at den nye arbeidsgiveren mottar refusjon lik forrige. Kontroller at dagsatsen blir riktig."),
+    RV_VV_9("Bruker er fortsatt syk 26 uker etter maksdato"),
 
     // VV: Opptjeningsvurdering
     RV_OV_1("Perioden er avslått på grunn av manglende opptjening"),

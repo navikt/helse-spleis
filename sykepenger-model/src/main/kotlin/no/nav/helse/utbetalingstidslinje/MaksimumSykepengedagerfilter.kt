@@ -5,6 +5,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.UtbetalingsdagVisitor
+import no.nav.helse.person.Varselkode.RV_VV_9
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.NullObserver
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.subsumsjonsformat
@@ -116,7 +117,7 @@ internal class MaksimumSykepengedagerfilter(
             alder.etterlevelse70år(aktivitetslogg, beregnetTidslinje.periode(), avvisteDager, subsumsjonObserver)
 
             if (begrunnelserForAvvisteDager[Begrunnelse.NyVilkårsprøvingNødvendig]?.any { it in periode } == true) {
-                aktivitetslogg.funksjonellFeil("Bruker er fortsatt syk 26 uker etter maksdato")
+                aktivitetslogg.funksjonellFeil(RV_VV_9)
             }
             if (avvisteDager in periode)
                 aktivitetslogg.info("Maks antall sykepengedager er nådd i perioden")
