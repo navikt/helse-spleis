@@ -2,7 +2,6 @@ package no.nav.helse.person
 
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.etterspurtBehov
 import no.nav.helse.hendelser.Arbeidsavklaringspenger
@@ -25,21 +24,16 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.til
-import no.nav.helse.inspectors.GrunnlagsdataInspektør
 import no.nav.helse.januar
-import no.nav.helse.mai
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
-import no.nav.helse.september
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
-import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
 
 internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
@@ -76,26 +70,6 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TIL_INFOTRYGD, inspektør.sisteTilstand(1.vedtaksperiode))
         assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
-    }
-
-    @Test
-    fun `9 måneder med inntekt gir riktig sammenligningsgrunnlag`() {
-        håndterVilkårsgrunnlag(
-            inntekter = inntektperioderForSammenligningsgrunnlag {
-                1.januar(2017) til 1.april(2017) inntekter {
-                    ORGNUMMER inntekt 12000.månedlig
-                }
-                1.mai(2017) til 1.september(2017) inntekter {
-                    ORGNUMMER inntekt 20000.månedlig
-                }
-            },
-            arbeidsforhold = ansattSidenStart2017()
-        )
-
-        val vilkårsgrunnlag = inspektør.vilkårsgrunnlag(1.vedtaksperiode) ?: fail("Forventet at vilkårsgrunnlag er satt")
-        val grunnlagsdataInspektør = GrunnlagsdataInspektør(vilkårsgrunnlag)
-        assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(148000.årlig, grunnlagsdataInspektør.sammenligningsgrunnlag)
     }
 
     @Test

@@ -1082,7 +1082,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
     }
 
     @Test
-    fun `endrer arbeidsgiverperiode etter igangsatt revurdering`() {
+    fun `endrer arbeidsgiverperiode etter igangsatt revurdering`() = Toggle.ForkasteVilkårsgrunnlag.enable {
         val forMyeInntekt = INNTEKT * 1.2
         val riktigInntekt = INNTEKT
 
@@ -1122,11 +1122,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         val utbetalingInspektør = utbetaling.inspektør
 
         val førsteUtbetalingsdag = utbetalingInspektør.utbetalingstidslinje[7.februar]
-        assertForventetFeil(
-            forklaring = "gammelt vilkårsgrunnlag, som ikke lenger er gjeldende, brukes for å sette inntekt på utbetalingen",
-            nå = { assertEquals(forMyeInntekt, førsteUtbetalingsdag.økonomi.inspektør.aktuellDagsinntekt) },
-            ønsket = { assertEquals(riktigInntekt, førsteUtbetalingsdag.økonomi.inspektør.aktuellDagsinntekt) }
-        )
+        assertEquals(riktigInntekt, førsteUtbetalingsdag.økonomi.inspektør.aktuellDagsinntekt)
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_GJENNOMFØRT_REVURDERING)
         assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_VILKÅRSPRØVING_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_VILKÅRSPRØVING_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING)

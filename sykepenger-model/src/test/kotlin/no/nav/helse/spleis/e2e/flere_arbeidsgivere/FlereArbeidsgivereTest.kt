@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
 import no.nav.helse.assertForventetFeil
-import no.nav.helse.august
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
@@ -17,7 +16,6 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
-import no.nav.helse.juni
 import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.oktober
@@ -41,7 +39,6 @@ import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
-import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -91,146 +88,6 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_SIMULERING)
-        }
-    }
-
-    @Test
-    fun `Sammenligningsgrunnlag for flere arbeidsgivere`() {
-        val periodeA1 = 1.januar til 31.januar
-        nyPeriode(1.januar til 31.januar, a1)
-        a1 {
-            håndterInntektsmelding(
-                arbeidsgiverperioder = listOf(periodeA1.start til periodeA1.start.plusDays(15)),
-                beregnetInntekt = 30000.månedlig
-            )
-            håndterYtelser(1.vedtaksperiode)
-            håndterVilkårsgrunnlag(
-                1.vedtaksperiode,
-                inntektsvurdering = Inntektsvurdering(
-                    inntekter = inntektperioderForSammenligningsgrunnlag {
-                        1.januar(2017) til 1.juni(2017) inntekter {
-                            a1 inntekt INNTEKT
-                            a2 inntekt 5000.månedlig
-                        }
-                        1.august(2017) til 1.desember(2017) inntekter {
-                            a1 inntekt 17000.månedlig
-                            a2 inntekt 3500.månedlig
-                        }
-                    }
-                ),
-                inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                    inntekter = emptyList(),
-                    arbeidsforhold = emptyList()
-                )
-            )
-        }
-
-        val periodeA2 = 15.januar til 15.februar
-        a2 {
-            nyPeriode(periodeA2)
-            håndterInntektsmelding(
-                arbeidsgiverperioder = listOf(periodeA2.start til periodeA2.start.plusDays(15)),
-                beregnetInntekt = 10000.månedlig
-
-            )
-        }
-        a1 {
-            assertEquals(
-                318500.årlig,
-                inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør?.sammenligningsgrunnlag
-            )
-        }
-    }
-
-    @Test
-    fun `Sammenligningsgrunnlag for flere arbeidsgivere med flere sykeperioder`() {
-        a1 {
-            nyPeriode(15.januar til 5.februar)
-            håndterInntektsmelding(
-                arbeidsgiverperioder = listOf(15.januar til 28.januar, 2.februar til 3.februar),
-                beregnetInntekt = 30000.månedlig
-            )
-            håndterYtelser(1.vedtaksperiode)
-            håndterVilkårsgrunnlag(1.vedtaksperiode,
-                inntektsvurdering = Inntektsvurdering(
-                    inntekter = inntektperioderForSammenligningsgrunnlag {
-                        1.januar(2017) til 1.juni(2017) inntekter {
-                            a1 inntekt INNTEKT
-                            a2 inntekt 5000.månedlig
-                        }
-                        1.august(2017) til 1.desember(2017) inntekter {
-                            a1 inntekt 17000.månedlig
-                            a2 inntekt 3500.månedlig
-                        }
-                    }
-                ),
-                inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                    inntekter = emptyList(),
-                    arbeidsforhold = emptyList()
-                )
-            )
-            assertForkastetPeriodeTilstander(
-                1.vedtaksperiode,
-                START,
-                AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-                AVVENTER_BLOKKERENDE_PERIODE,
-                AVVENTER_HISTORIKK,
-                AVVENTER_VILKÅRSPRØVING,
-                TIL_INFOTRYGD
-            )
-            assertEquals(
-                282500.årlig,
-                inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør?.sammenligningsgrunnlag
-            )
-        }
-    }
-
-    @Test
-    fun `Sammenligningsgrunnlag for flere arbeidsgivere som overlapper hverandres sykeperioder`() {
-        a1 {
-            nyPeriode(15.januar til 5.februar)
-            håndterInntektsmelding(
-                arbeidsgiverperioder = listOf(15.januar til 28.januar),
-                beregnetInntekt = 30000.månedlig
-            )
-        }
-        a2 {
-            nyPeriode(15.januar til 15.februar)
-            håndterInntektsmelding(
-                arbeidsgiverperioder = listOf(15.januar til 15.januar.plusDays(15)),
-                beregnetInntekt = 10000.månedlig
-            )
-            assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE)
-        }
-        a1 {
-            assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
-            håndterYtelser(1.vedtaksperiode)
-            håndterVilkårsgrunnlag(
-                vedtaksperiodeId = 1.vedtaksperiode,
-                inntektsvurdering = Inntektsvurdering(
-                    inntekter = inntektperioderForSammenligningsgrunnlag {
-                        1.januar(2017) til 1.juni(2017) inntekter {
-                            a1 inntekt INNTEKT
-                            a2 inntekt 5000.månedlig
-                        }
-                        1.august(2017) til 1.desember(2017) inntekter {
-                            a1 inntekt 17000.månedlig
-                            a2 inntekt 3500.månedlig
-                        }
-                    }
-                ),
-                inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
-                    inntekter = emptyList(),
-                    arbeidsforhold = emptyList()
-                )
-            )
-        }
-
-        a1 {
-            assertEquals(
-                318500.årlig,
-                inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør?.sammenligningsgrunnlag
-            )
         }
     }
 

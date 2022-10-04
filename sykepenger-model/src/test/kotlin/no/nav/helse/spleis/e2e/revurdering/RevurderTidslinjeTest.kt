@@ -3,7 +3,9 @@ package no.nav.helse.spleis.e2e.revurdering
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.Toggle
 import no.nav.helse.antallEtterspurteBehov
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
@@ -32,6 +34,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
+import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
 import no.nav.helse.person.TilstandType.REVURDERING_FEILET
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
@@ -82,6 +85,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
 
@@ -620,11 +624,13 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `revurderer siste utbetalte periode med bare ferie og permisjon`() {
+    fun `revurderer siste utbetalte periode med bare ferie og permisjon`() = Toggle.ForkasteVilkårsgrunnlag.enable {
         nyttVedtak(3.januar, 26.januar)
         nullstillTilstandsendringer()
 
         håndterOverstyrTidslinje((3.januar til 20.januar).map { manuellFeriedag(it) } + (21.januar til 26.januar).map { manuellPermisjonsdag(it) })
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
@@ -634,6 +640,8 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             1.vedtaksperiode,
             AVSLUTTET,
             AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_VILKÅRSPRØVING_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING,
             AVVENTER_GODKJENNING_REVURDERING,
@@ -1000,29 +1008,38 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 30.januar)
         håndterSøknad(Sykdom(30.januar, 5.februar, 100.prosent))
 
-        håndterSimulering(1.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-        håndterUtbetalt()
+        assertForventetFeil(
+            forklaring = "Inntektsmeldingen endrer skjæringstidspunktet til 1.januar for 1.vedtaksperiode" +
+                    " som gjør at vilkårsgrunnlaget for 3.januar forkastes uten at vedtaksperioden vet om det",
+            nå = {
+                assertThrows<RuntimeException> { håndterSimulering(1.vedtaksperiode) }
+            },
+            ønsket = {
+                håndterSimulering(1.vedtaksperiode)
+                håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+                håndterUtbetalt()
 
-        håndterYtelser(2.vedtaksperiode)
-        håndterVilkårsgrunnlag(2.vedtaksperiode)
-        håndterYtelser(2.vedtaksperiode)
-        håndterSimulering(2.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-        håndterUtbetalt()
+                håndterYtelser(2.vedtaksperiode)
+                håndterVilkårsgrunnlag(2.vedtaksperiode)
+                håndterYtelser(2.vedtaksperiode)
+                håndterSimulering(2.vedtaksperiode)
+                håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+                håndterUtbetalt()
 
-        assertTilstander(
-            2.vedtaksperiode,
-            START,
-            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK,
-            AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK,
-            AVVENTER_SIMULERING,
-            AVVENTER_GODKJENNING,
-            TIL_UTBETALING,
-            AVSLUTTET
+                assertTilstander(
+                    2.vedtaksperiode,
+                    START,
+                    AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+                    AVVENTER_BLOKKERENDE_PERIODE,
+                    AVVENTER_HISTORIKK,
+                    AVVENTER_VILKÅRSPRØVING,
+                    AVVENTER_HISTORIKK,
+                    AVVENTER_SIMULERING,
+                    AVVENTER_GODKJENNING,
+                    TIL_UTBETALING,
+                    AVSLUTTET
+                )
+            }
         )
     }
 

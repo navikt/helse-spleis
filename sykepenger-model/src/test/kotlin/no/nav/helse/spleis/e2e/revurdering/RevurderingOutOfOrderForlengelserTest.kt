@@ -2,6 +2,7 @@ package no.nav.helse.spleis.e2e.revurdering
 
 import no.nav.helse.EnableToggle
 import no.nav.helse.Toggle
+import no.nav.helse.Toggle.Companion.enable
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
@@ -140,7 +141,7 @@ internal class RevurderingOutOfOrderForlengelserTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `out-of-order søknad medfører revurdering -- Avsluttet`() = Toggle.RevurderOutOfOrderForlengelser.enable {
+    fun `out-of-order søknad medfører revurdering -- Avsluttet`() = listOf(Toggle.RevurderOutOfOrderForlengelser, Toggle.ForkasteVilkårsgrunnlag).enable {
         nyttVedtak(1.februar, 28.februar)
         nyPeriode(1.januar til 31.januar)
 
@@ -161,44 +162,21 @@ internal class RevurderingOutOfOrderForlengelserTest : AbstractEndToEndTest() {
         assertSisteTilstand(februarId, AVVENTER_HISTORIKK_REVURDERING)
         assertSisteTilstand(januarId, AVSLUTTET)
         håndterYtelser(februarId)
-        assertForventetFeil(
-            forklaring = "Februar-perioden beregner ikke utbetaling utifra det nye vilkårsgrunnlaget på skjæringstidspunkt 1.januar",
-            nå = {
-                håndterSimulering(februarId)
-                håndterUtbetalingsgodkjenning(februarId)
-                håndterUtbetalt()
-                assertEquals(1.januar, inspektør.skjæringstidspunkt(februarId))
-                assertUtbetalingsbeløp(
-                    januarId,
-                    forventetArbeidsgiverbeløp = 1615,
-                    forventetArbeidsgiverRefusjonsbeløp = 1615,
-                    subset = 17.januar til 31.januar
-                )
-                assertUtbetalingsbeløp(
-                    februarId,
-                    forventetArbeidsgiverbeløp = 1431,
-                    forventetArbeidsgiverRefusjonsbeløp = 1615,
-                    subset = 1.februar til 28.februar
-                )
-            },
-            ønsket = {
-                håndterSimulering(februarId)
-                håndterUtbetalingsgodkjenning(februarId)
-                håndterUtbetalt()
-                assertEquals(1.januar, inspektør.skjæringstidspunkt(februarId))
-                assertUtbetalingsbeløp(
-                    januarId,
-                    forventetArbeidsgiverbeløp = 1615,
-                    forventetArbeidsgiverRefusjonsbeløp = 1615,
-                    subset = 17.januar til 31.januar
-                )
-                assertUtbetalingsbeløp(
-                    februarId,
-                    forventetArbeidsgiverbeløp = 1615,
-                    forventetArbeidsgiverRefusjonsbeløp = 1615,
-                    subset = 1.februar til 28.februar
-                )
-            }
+        håndterSimulering(februarId)
+        håndterUtbetalingsgodkjenning(februarId)
+        håndterUtbetalt()
+        assertEquals(1.januar, inspektør.skjæringstidspunkt(februarId))
+        assertUtbetalingsbeløp(
+            januarId,
+            forventetArbeidsgiverbeløp = 1615,
+            forventetArbeidsgiverRefusjonsbeløp = 1615,
+            subset = 17.januar til 31.januar
+        )
+        assertUtbetalingsbeløp(
+            februarId,
+            forventetArbeidsgiverbeløp = 1615,
+            forventetArbeidsgiverRefusjonsbeløp = 1615,
+            subset = 1.februar til 28.februar
         )
     }
 
