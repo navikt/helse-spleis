@@ -4,18 +4,18 @@ import java.time.LocalDate
 import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.person.IAktivitetslogg
+import no.nav.helse.person.Varselkode.RV_UT_3
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.økonomi.Økonomi
 
-internal sealed class UtbetalingstidslinjeBuilderException(private val kort: String, message: String) : RuntimeException(message) {
+internal sealed class UtbetalingstidslinjeBuilderException(message: String) : RuntimeException(message) {
     internal fun logg(aktivitetslogg: IAktivitetslogg) {
         aktivitetslogg.info("Feilmelding: $message")
-        aktivitetslogg.funksjonellFeil("Feil ved utbetalingstidslinjebygging: $kort")
+        aktivitetslogg.funksjonellFeil(RV_UT_3)
     }
 
     internal class UforventetDagException(dag: Dag, melding: String) : UtbetalingstidslinjeBuilderException(
-        "Forventet ikke ${dag::class.simpleName}",
         "Forventet ikke ${dag::class.simpleName} i utbetalingstidslinjen. Melding: $melding"
     )
 
