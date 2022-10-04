@@ -6,6 +6,7 @@ import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.InfotrygdhistorikkVisitor
+import no.nav.helse.person.Varselkode.RV_IT_1
 import no.nav.helse.person.Varselkode.RV_IT_3
 import no.nav.helse.person.Varselkode.RV_IT_4
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -38,20 +39,33 @@ abstract class Utbetalingsperiode(
         builder.addNAVdag(dato, økonomi.inntekt(inntekt, skjæringstidspunkt = dato).arbeidsgiverRefusjon(INGEN))
     }
 
-    override fun valider(aktivitetslogg: IAktivitetslogg, periode: Periode, skjæringstidspunkt: LocalDate, nødnummer: Nødnummer) {
+    internal fun valider(
+        aktivitetslogg: IAktivitetslogg,
+        organisasjonsnummer: String,
+        periode: Periode,
+        skjæringstidspunkt: LocalDate,
+        nødnummer: Nødnummer
+    ) {
         validerOverlapp(aktivitetslogg, periode)
-        if (aktivitetslogg.harFunksjonelleFeilEllerVerre() || this.endInclusive < skjæringstidspunkt) return
-        validerRelevant(aktivitetslogg, nødnummer)
+        validerNødnummerbruk(aktivitetslogg, skjæringstidspunkt, nødnummer)
+        validerNyereOpplysninger(aktivitetslogg, organisasjonsnummer, periode)
     }
 
-    private fun validerRelevant(aktivitetslogg: IAktivitetslogg, nødnummer: Nødnummer) {
-        if (orgnr in nødnummer) aktivitetslogg.funksjonellFeil(RV_IT_4)
+    private fun validerNødnummerbruk(aktivitetslogg: IAktivitetslogg, skjæringstidspunkt: LocalDate, nødnummer: Nødnummer) {
+        if (this.endInclusive < skjæringstidspunkt) return
+        if (orgnr !in nødnummer) return
+        aktivitetslogg.funksjonellFeil(RV_IT_4)
     }
-
-    override fun validerOverlapp(aktivitetslogg: IAktivitetslogg, periode: Periode) {
+    private fun validerOverlapp(aktivitetslogg: IAktivitetslogg, periode: Periode) {
         if (!overlapperMed(periode)) return
         aktivitetslogg.info("Utbetaling i Infotrygd %s til %s overlapper med vedtaksperioden", start, endInclusive)
         aktivitetslogg.funksjonellFeil(RV_IT_3)
+    }
+
+    private fun validerNyereOpplysninger(aktivitetslogg: IAktivitetslogg, organisasjonsnummer: String, periode: Periode) {
+        if (!gjelder(organisasjonsnummer)) return
+        if (this.start <= periode.endInclusive) return
+        aktivitetslogg.funksjonellFeil(RV_IT_1)
     }
 
     override fun gjelder(nødnummer: Nødnummer) = this.orgnr in nødnummer

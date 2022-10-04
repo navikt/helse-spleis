@@ -332,7 +332,7 @@ internal class InfotrygdhistorikkElementTest {
         val element = historikkelement(perioder = utbetalinger, inntekter = inntekter)
 
         aktivitetslogg.barn().also {
-            assertFalse(element.valider(it, 1.februar til 28.februar, 1.februar, "ag1"))
+            assertTrue(element.valider(it, 1.februar til 28.februar, 1.februar, "ag1"))
         }
     }
 

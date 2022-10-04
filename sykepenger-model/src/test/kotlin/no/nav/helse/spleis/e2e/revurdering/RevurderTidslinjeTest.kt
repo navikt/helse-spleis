@@ -38,7 +38,6 @@ import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.TilstandType.UTBETALING_FEILET
 import no.nav.helse.person.Varselkode.RV_IT_1
 import no.nav.helse.person.Varselkode.RV_IT_3
-import no.nav.helse.person.Varselkode.RV_IT_5
 import no.nav.helse.person.Varselkode.RV_UT_1
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
@@ -49,6 +48,7 @@ import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
 import no.nav.helse.spleis.e2e.assertHarHendelseIder
 import no.nav.helse.spleis.e2e.assertHarIkkeHendelseIder
 import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
+import no.nav.helse.spleis.e2e.assertIngenVarsler
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
@@ -1215,9 +1215,6 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
 
     @Test
     fun `oppdager nye utbetalte dager fra infotrygd i revurderingen`() {
-        /* Hvis vi oppdager nye betalte sykedager når vi slår opp i infotrygdhistorikk vil vi i dag feile fordi vi ikke lagerer nye inntekter i samme slengen.
-           Dette skjer typisk hvis saksbehandler manuelt har utbetalt eldre perioder på et tidspunkt etter siste utbetaling i vårt system. Løsningen er å også
-           lagre inntekter fra infotrygd når vi går igjennom revurderingstilstandene. */
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterInntektsmeldingMedValidering(1.vedtaksperiode, listOf(Periode(1.januar, 16.januar)))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
@@ -1240,7 +1237,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
             )
         )
 
-        assertVarsel(RV_IT_5, 1.vedtaksperiode.filter())
+        assertIngenVarsler(1.vedtaksperiode.filter())
         assertTilstander(
             1.vedtaksperiode,
             START,

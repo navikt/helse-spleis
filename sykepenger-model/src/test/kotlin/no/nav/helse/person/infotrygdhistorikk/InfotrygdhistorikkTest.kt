@@ -36,7 +36,6 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -267,7 +266,6 @@ internal class InfotrygdhistorikkTest {
             Friperiode(1.mars,  31.mars)
         )
         val nå = LocalDateTime.now()
-        historikk.oppdaterHistorikk(historikkelement(perioder))
         historikk = listOf(PersonData.InfotrygdhistorikkElementData(
             id = UUID.randomUUID(),
             tidsstempel = nå,
@@ -305,8 +303,8 @@ internal class InfotrygdhistorikkTest {
             Friperiode(15.mars,  20.mars)
         ), inntekter = listOf(Inntektsopplysning("ag1", 1.februar, 1000.daglig, true))))
         aktivitetslogg.barn().also {
-            assertTrue(historikk.valider(it, 1.januar til 31.januar, 1.januar, "ag1"))
-            assertTrue(it.harVarslerEllerVerre())
+            assertFalse(historikk.valider(it, 1.januar til 31.januar, 1.januar, "ag1"))
+            assertTrue(it.harFunksjonelleFeilEllerVerre())
         }
         aktivitetslogg.barn().also {
             assertTrue(historikk.valider(it, 20.februar til 28.februar, 20.februar, "ag1"))
@@ -316,31 +314,6 @@ internal class InfotrygdhistorikkTest {
             assertTrue(historikk.valider(it, 1.april til 5.april, 1.april, "ag1"))
             assertFalse(it.harVarslerEllerVerre())
         }
-    }
-
-    @Test
-    fun `siste sykepengedag - tom historikk`() {
-        historikk.oppdaterHistorikk(historikkelement())
-        assertNull(historikk.sisteSykepengedag("ag1"))
-    }
-
-    @Test
-    fun `siste sykepengedag - tom historikk for ag`() {
-        historikk.oppdaterHistorikk(historikkelement(listOf(
-            ArbeidsgiverUtbetalingsperiode("ag1", 1.januar,  10.januar, 100.prosent, 1500.daglig)
-        )))
-        assertNull(historikk.sisteSykepengedag("ag2"))
-    }
-
-    @Test
-    fun `siste sykepengedag - ekskluderer ferie`() {
-        historikk.oppdaterHistorikk(historikkelement(listOf(
-            ArbeidsgiverUtbetalingsperiode("ag1", 1.januar,  10.januar, 100.prosent, 1500.daglig),
-            ArbeidsgiverUtbetalingsperiode("ag2", 10.januar,  20.januar, 100.prosent, 1500.daglig),
-            Friperiode(20.januar,  31.januar)
-        )))
-        assertEquals(10.januar, historikk.sisteSykepengedag("ag1"))
-        assertEquals(20.januar, historikk.sisteSykepengedag("ag2"))
     }
 
     @Test

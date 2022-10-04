@@ -12,9 +12,7 @@ import no.nav.helse.person.Periodetype
 import no.nav.helse.person.Person
 import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.person.Sykepengegrunnlag
-import no.nav.helse.person.Varselkode.RV_IT_1
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
-import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode.Companion.validerInntektForPerioder
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning.Companion.fjern
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning.Companion.lagreVilkårsgrunnlag
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
@@ -185,22 +183,14 @@ class InfotrygdhistorikkElement private constructor(
     ): Boolean {
         validerUgyldigePerioder(aktivitetslogg)
         validerBetaltRettFør(periode, aktivitetslogg)
-        validerNyereOpplysninger(organisasjonsnummer, periode, aktivitetslogg)
         aktivitetslogg.info("Sjekker utbetalte perioder")
         perioder.filterIsInstance<Utbetalingsperiode>()
-            .forEach { it.valider(aktivitetslogg, periode, skjæringstidspunkt, nødnummer) }
+            .forEach { it.valider(aktivitetslogg, organisasjonsnummer, periode, skjæringstidspunkt, nødnummer) }
         aktivitetslogg.info("Sjekker inntektsopplysninger")
         Inntektsopplysning.valider(inntekter, aktivitetslogg, skjæringstidspunkt, nødnummer)
-        aktivitetslogg.info("Sjekker at alle utbetalte perioder har inntektsopplysninger")
-        perioder.validerInntektForPerioder(aktivitetslogg, inntekter, nødnummer)
         aktivitetslogg.info("Sjekker arbeidskategorikoder")
         if (!erNormalArbeidstaker(skjæringstidspunkt)) aktivitetslogg.funksjonellFeil("Personen er ikke registrert som normal arbeidstaker i Infotrygd")
         return !aktivitetslogg.harFunksjonelleFeilEllerVerre()
-    }
-
-    private fun validerNyereOpplysninger(organisasjonsnummer: String, periode: Periode, aktivitetslogg: IAktivitetslogg){
-        if (!harNyereOpplysninger(organisasjonsnummer, periode)) return
-        aktivitetslogg.varsel(RV_IT_1)
     }
 
     private fun validerBetaltRettFør(periode: Periode, aktivitetslogg: IAktivitetslogg){
@@ -242,16 +232,6 @@ class InfotrygdhistorikkElement private constructor(
     internal fun harBetaltRettFør(periode: Periode): Boolean {
         return perioder.any {
             it !is UkjentInfotrygdperiode && it.erRettFør(periode)
-        }
-    }
-
-    internal fun sisteSykepengedag(orgnummer: String): LocalDate? {
-        return utbetalinger(orgnummer).maxOfOrNull { it.endInclusive }
-    }
-
-    private fun harNyereOpplysninger(orgnummer: String, periode: Periode): Boolean {
-        return utbetalinger(orgnummer).any { utbetalingsperiode ->
-            utbetalingsperiode.endInclusive > periode.endInclusive
         }
     }
 

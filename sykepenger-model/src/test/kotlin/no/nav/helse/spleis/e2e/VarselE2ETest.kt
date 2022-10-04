@@ -21,7 +21,6 @@ import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
-import no.nav.helse.november
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.Varselkode
 import no.nav.helse.person.Varselkode.RV_AY_3
@@ -454,33 +453,6 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
 
         håndterYtelser(1.vedtaksperiode, ArbeidsgiverUtbetalingsperiode(nødnummer, 1.februar, 15.februar, 100.prosent, INNTEKT))
         assertVarsel(RV_IT_4, 1.vedtaksperiode.filter())
-    }
-
-    @Test
-    fun `varsel - Mangler inntekt for første utbetalingsdag i en av infotrygdperiodene`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
-        håndterInntektsmelding(listOf(1.januar til 16.januar))
-        håndterYtelser(besvart = 31.januar.atStartOfDay())
-        håndterVilkårsgrunnlag()
-        håndterYtelser(besvart = 31.januar.atStartOfDay())
-        håndterSimulering()
-        håndterUtbetalingsgodkjenning()
-        håndterUtbetalt()
-
-        håndterOverstyrTidslinje(overstyringsdager = listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
-
-        håndterYtelser(
-            1.vedtaksperiode,
-            ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.november(2017), 30.november(2017), 100.prosent, 32000.månedlig),
-            inntektshistorikk = listOf(
-                Inntektsopplysning(
-                    orgnummer = ORGNUMMER, sykepengerFom = 1.november, 32000.månedlig, refusjonTilArbeidsgiver = true
-                )
-            )
-        )
-
-        assertVarsel(Varselkode.RV_IT_5, 1.vedtaksperiode.filter())
     }
 
     @Test
