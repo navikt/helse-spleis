@@ -161,7 +161,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Inntekter fra flere arbeidsgivere fra infotrygd`() {
+    fun `Lagrer ikke inntekter fra infotrygd`() {
         val inntekterForSykepengegrunnlag = inntektperioderForSykepengegrunnlag {
             1.oktober(2017) til 1.desember(2017) inntekter {
                 a1 inntekt 23500.månedlig
@@ -194,11 +194,11 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
             )
         ).håndter(Person::håndter)
 
-        assertEquals(4, a1Inspektør.inntektInspektør.antallInnslag)
-        assertEquals(2, a2Inspektør.inntektInspektør.antallInnslag)
+        assertEquals(3, a1Inspektør.inntektInspektør.antallInnslag)
+        assertEquals(1, a2Inspektør.inntektInspektør.antallInnslag)
 
-        assertNull(a2Inspektør.inntektInspektør.sisteInnslag?.opplysninger?.first { it.kilde == Kilde.INFOTRYGD }?.sykepengegrunnlag)
-        assertNull(a1Inspektør.inntektInspektør.sisteInnslag?.opplysninger?.first { it.kilde == Kilde.INFOTRYGD }?.sykepengegrunnlag)
+        assertNull(a2Inspektør.inntektInspektør.sisteInnslag?.opplysninger?.firstOrNull { it.kilde == Kilde.INFOTRYGD })
+        assertNull(a1Inspektør.inntektInspektør.sisteInnslag?.opplysninger?.firstOrNull { it.kilde == Kilde.INFOTRYGD })
         assertEquals(
             24000.månedlig,
             a1Inspektør.inntektInspektør.sisteInnslag?.opplysninger?.first { it.kilde == Kilde.SKATT && it.sammenligningsgrunnlag != null }?.sammenligningsgrunnlag

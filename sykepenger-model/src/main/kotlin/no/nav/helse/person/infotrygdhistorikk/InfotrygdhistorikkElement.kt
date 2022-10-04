@@ -9,11 +9,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.InfotrygdhistorikkVisitor
 import no.nav.helse.person.Periodetype
-import no.nav.helse.person.Person
 import no.nav.helse.person.SykdomstidslinjeVisitor
-import no.nav.helse.person.Sykepengegrunnlag
-import no.nav.helse.person.VilkårsgrunnlagHistorikk
-import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning.Companion.fjern
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Dag.Companion.sammenhengendeSykdom
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -161,10 +157,6 @@ class InfotrygdhistorikkElement private constructor(
 
     private fun erTom() =
         perioder.isEmpty() && inntekter.isEmpty() && arbeidskategorikoder.isEmpty()
-
-    internal fun addInntekter(person: Person, aktivitetslogg: IAktivitetslogg) {
-        lagretInntekter = Inntektsopplysning.addInntekter(inntekter, person, aktivitetslogg, id, nødnummer)
-    }
 
     internal fun valider(
         aktivitetslogg: IAktivitetslogg,

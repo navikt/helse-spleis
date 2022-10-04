@@ -3,11 +3,8 @@ package no.nav.helse.person.infotrygdhistorikk
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.Objects
-import java.util.UUID
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.InfotrygdhistorikkVisitor
-import no.nav.helse.person.Inntektshistorikk
-import no.nav.helse.person.Person
 import no.nav.helse.økonomi.Inntekt
 
 class Inntektsopplysning private constructor(
@@ -39,11 +36,6 @@ class Inntektsopplysning private constructor(
 
     private fun erRelevant(skjæringstidspunkt: LocalDate) = sykepengerFom >= skjæringstidspunkt
 
-    private fun addInntekt(innslagBuilder: Inntektshistorikk.InnslagBuilder, hendelseId: UUID) {
-        lagret = LocalDateTime.now()
-        innslagBuilder.addInfotrygd(sykepengerFom, hendelseId, inntekt)
-    }
-
     override fun hashCode() =
         Objects.hash(orgnummer, sykepengerFom, inntekt, refusjonTilArbeidsgiver, refusjonTom)
 
@@ -61,18 +53,6 @@ class Inntektsopplysning private constructor(
     }
 
     internal companion object {
-        internal fun addInntekter(liste: List<Inntektsopplysning>, person: Person, aktivitetslogg: IAktivitetslogg, hendelseId: UUID, nødnummer: Nødnummer) =
-            liste
-                .filterNot { it.orgnummer in nødnummer }
-                .groupBy { it.orgnummer }
-                .onEach { (orgnummer, opplysninger) -> person.lagreSykepengegrunnlagFraInfotrygd(orgnummer, opplysninger, aktivitetslogg, hendelseId) }
-                .isNotEmpty()
-
-        internal fun lagreInntekter(inntektsopplysninger: List<Inntektsopplysning>, inntektshistorikk: Inntektshistorikk, hendelseId: UUID) {
-            inntektshistorikk.append {
-                inntektsopplysninger.forEach { it.addInntekt(this, hendelseId) }
-            }
-        }
 
         internal fun valider(
             liste: List<Inntektsopplysning>,
@@ -84,8 +64,6 @@ class Inntektsopplysning private constructor(
             liste.fjern(nødnummer).validerAlleInntekterForSammenhengendePeriode(skjæringstidspunkt, aktivitetslogg)
             liste.fjern(nødnummer).validerAntallInntekterPerArbeidsgiverPerDato(skjæringstidspunkt, aktivitetslogg)
         }
-
-        internal fun Iterable<Inntektsopplysning>.harInntekterFor(datoer: List<LocalDate>) = map { it.sykepengerFom }.containsAll(datoer)
 
         private fun List<Inntektsopplysning>.validerAlleInntekterForSammenhengendePeriode(
             skjæringstidspunkt: LocalDate,

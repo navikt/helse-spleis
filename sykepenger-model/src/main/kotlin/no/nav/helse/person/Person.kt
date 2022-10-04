@@ -65,7 +65,6 @@ import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.subsumsjonsformat
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
-import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingstidslinje.Alder
@@ -666,18 +665,6 @@ class Person private constructor(
             arbeidsgiverInntekt,
             skjæringstidspunkt,
             hendelse
-        )
-    }
-
-    internal fun lagreSykepengegrunnlagFraInfotrygd(
-        orgnummer: String,
-        inntektsopplysninger: List<Inntektsopplysning>,
-        aktivitetslogg: IAktivitetslogg,
-        hendelseId: UUID
-    ) {
-        finnArbeidsgiverForInntekter(orgnummer, aktivitetslogg).lagreSykepengegrunnlagFraInfotrygd(
-            inntektsopplysninger,
-            hendelseId
         )
     }
 

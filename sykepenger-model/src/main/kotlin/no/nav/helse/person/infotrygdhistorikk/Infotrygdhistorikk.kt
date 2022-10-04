@@ -9,7 +9,6 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.utbetalingsh
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.InfotrygdhistorikkVisitor
 import no.nav.helse.person.Periodetype
-import no.nav.helse.person.Person
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling
@@ -50,11 +49,6 @@ internal class Infotrygdhistorikk private constructor(
         if (oppfrisket(cutoff ?: gammel)) return false
         oppfrisk(aktivitetslogg, tidligsteDato)
         return true
-    }
-
-    internal fun addInntekter(person: Person, aktivitetslogg: IAktivitetslogg) {
-        if (!harHistorikk()) return
-        siste.addInntekter(person, aktivitetslogg)
     }
 
     internal fun utbetalingstidslinje(): Utbetalingstidslinje {

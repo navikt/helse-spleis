@@ -11,12 +11,10 @@ import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Inntektshistorikk
-import no.nav.helse.person.Person
-import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
+import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElementTest.Companion.eksisterendeInfotrygdHistorikkelement
 import no.nav.helse.serde.PersonData
 import no.nav.helse.serde.PersonData.InfotrygdhistorikkElementData.Companion.tilModellObjekt
-import no.nav.helse.somPersonidentifikator
 import no.nav.helse.testhelpers.A
 import no.nav.helse.testhelpers.S
 import no.nav.helse.testhelpers.opphold
@@ -24,7 +22,6 @@ import no.nav.helse.testhelpers.resetSeed
 import no.nav.helse.testhelpers.somVilkårsgrunnlagHistorikk
 import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.utbetalingslinjer.Utbetaling
-import no.nav.helse.utbetalingstidslinje.Alder.Companion.alder
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.Inntekter
 import no.nav.helse.utbetalingstidslinje.UtbetalingstidslinjeBuilder
@@ -125,12 +122,10 @@ internal class InfotrygdhistorikkTest {
 
     @Test
     fun `tømme historikk - etter lagring av tom inntektliste`() {
-        val tidsstempel = LocalDateTime.now()
-        historikk.oppdaterHistorikk(historikkelement(
-            oppdatert = tidsstempel,
-            inntekter = emptyList()
+        val historikk = Infotrygdhistorikk.ferdigInfotrygdhistorikk(listOf(
+            eksisterendeInfotrygdHistorikkelement(lagretInntekter = false, lagretVilkårsgrunnlag = false),
+            eksisterendeInfotrygdHistorikkelement(lagretInntekter = false, lagretVilkårsgrunnlag = false)
         ))
-        historikk.addInntekter(Person("", "01010112345".somPersonidentifikator(), 1.januar(1950).alder, MaskinellJurist()), aktivitetslogg)
         historikk.tøm()
         assertFalse(historikk.oppfriskNødvendig(aktivitetslogg, tidligsteDato))
         assertFalse(aktivitetslogg.behov().isNotEmpty()) { aktivitetslogg.toString() }
@@ -140,16 +135,16 @@ internal class InfotrygdhistorikkTest {
     @Test
     fun `tømme historikk - med lagret inntekter`() {
         val tidsstempel = LocalDateTime.now()
-        historikk.oppdaterHistorikk(historikkelement(
-            oppdatert = tidsstempel,
-            inntekter = listOf(Inntektsopplysning("orgnr", 1.januar, 1000.daglig, true))
+        val historikk = Infotrygdhistorikk.ferdigInfotrygdhistorikk(listOf(
+            eksisterendeInfotrygdHistorikkelement(oppdatert = tidsstempel, lagretInntekter = true, lagretVilkårsgrunnlag = true),
+            eksisterendeInfotrygdHistorikkelement(oppdatert = tidsstempel, lagretInntekter = true, lagretVilkårsgrunnlag = true)
         ))
-        historikk.addInntekter(Person("", "10101012345".somPersonidentifikator(), 1.januar(1950).alder, MaskinellJurist()), aktivitetslogg)
         historikk.tøm()
         assertFalse(historikk.oppfriskNødvendig(aktivitetslogg, tidligsteDato))
         assertFalse(aktivitetslogg.behov().isNotEmpty()) { aktivitetslogg.toString() }
-        assertEquals(1, historikk.inspektør.elementer())
+        assertEquals(2, historikk.inspektør.elementer())
         assertEquals(tidsstempel, historikk.inspektør.oppdatert(0))
+        assertEquals(tidsstempel, historikk.inspektør.oppdatert(1))
     }
 
     @Test

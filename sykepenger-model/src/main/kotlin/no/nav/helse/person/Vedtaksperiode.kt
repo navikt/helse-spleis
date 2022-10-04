@@ -1434,7 +1434,6 @@ internal class Vedtaksperiode private constructor(
                     )
                 }
                 onSuccess {
-                    infotrygdhistorikk.addInntekter(person, this)
                     if (!vedtaksperiode.forventerInntekt()) {
                         vedtaksperiode.tilstand(hendelse, AvsluttetUtenUtbetaling)
                     } else if (person.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt) is InfotrygdVilkårsgrunnlag) {
@@ -1598,7 +1597,6 @@ internal class Vedtaksperiode private constructor(
                 ) {
                     person.ingenUkjenteArbeidsgivere(vedtaksperiode, vedtaksperiode.skjæringstidspunkt)
                 }
-                onSuccess { infotrygdhistorikk.addInntekter(person, this) }
                 onSuccess {
                     if (person.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt) == null) {
                         return@håndter vedtaksperiode.tilstand(ytelser, AvventerVilkårsprøving) {

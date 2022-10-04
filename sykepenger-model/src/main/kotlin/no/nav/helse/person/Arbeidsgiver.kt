@@ -59,7 +59,6 @@ import no.nav.helse.person.builders.UtbetalingsdagerBuilder
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
-import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -952,10 +951,6 @@ internal class Arbeidsgiver private constructor(
         if (arbeidsforholdhistorikk.harArbeidsforholdNyereEnn(skjæringstidspunkt, 3))
             IkkeRapportert(UUID.randomUUID(), skjæringstidspunkt)
         else null
-
-    internal fun lagreSykepengegrunnlagFraInfotrygd(inntektsopplysninger: List<Inntektsopplysning>, hendelseId: UUID) {
-        Inntektsopplysning.lagreInntekter(inntektsopplysninger, inntektshistorikk, hendelseId)
-    }
 
     internal fun lagreOmregnetÅrsinntekt(arbeidsgiverInntekt: ArbeidsgiverInntekt, skjæringstidspunkt: LocalDate, hendelse: PersonHendelse) {
         if (!harRelevantArbeidsforhold(skjæringstidspunkt)) return

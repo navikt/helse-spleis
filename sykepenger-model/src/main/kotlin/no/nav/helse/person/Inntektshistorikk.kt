@@ -535,9 +535,6 @@ internal class Inntektshistorikk private constructor(private val historikk: Muta
         internal fun addInntektsmelding(dato: LocalDate, hendelseId: UUID, beløp: Inntekt) =
             add(Inntektsmelding(UUID.randomUUID(), dato, hendelseId, beløp, tidsstempel))
 
-        internal fun addInfotrygd(dato: LocalDate, hendelseId: UUID, beløp: Inntekt) =
-            add(Infotrygd(UUID.randomUUID(), dato, hendelseId, beløp, tidsstempel))
-
         internal fun addSkattSykepengegrunnlag(
             dato: LocalDate,
             hendelseId: UUID,
