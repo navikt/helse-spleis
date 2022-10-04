@@ -189,9 +189,4 @@ internal class Infotrygdhistorikk private constructor(
     }
 
     private fun harHistorikk() = elementer.isNotEmpty()
-
-    internal fun harBrukerutbetalingerFor(organisasjonsnummer: String, periode: Periode): Boolean {
-        if(!harHistorikk()) return false
-        return siste.harBrukerutbetalingerFor(organisasjonsnummer, periode)
-    }
 }

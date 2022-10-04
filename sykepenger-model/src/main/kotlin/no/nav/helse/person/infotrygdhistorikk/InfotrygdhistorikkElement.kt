@@ -14,7 +14,6 @@ import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.person.Sykepengegrunnlag
 import no.nav.helse.person.Varselkode.RV_IT_1
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
-import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode.Companion.harBrukerutbetalingFor
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode.Companion.validerInntektForPerioder
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning.Companion.fjern
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning.Companion.lagreVilkårsgrunnlag
@@ -312,5 +311,4 @@ class InfotrygdhistorikkElement private constructor(
     internal fun harEndretHistorikk(utbetaling: Utbetaling): Boolean {
         return utbetaling.erEldreEnn(tidsstempel)
     }
-    internal fun harBrukerutbetalingerFor(organisasjonsnummer: String, periode: Periode) = perioder.harBrukerutbetalingFor(organisasjonsnummer, periode)
 }

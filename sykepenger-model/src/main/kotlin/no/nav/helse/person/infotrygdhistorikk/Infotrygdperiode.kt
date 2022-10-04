@@ -62,15 +62,8 @@ abstract class Infotrygdperiode(fom: LocalDate, tom: LocalDate) : Periode(fom, t
             aktivitetslogg.funksjonellFeil(RV_IT_5)
         }
 
-        internal fun Iterable<Infotrygdperiode>.harBrukerutbetalingFor(organisasjonsnummer: String, periode: Periode) = this
-            .filter { it.gjelder(organisasjonsnummer) }
-            .filter { it.overlapperMed(periode) }
-            .any(Infotrygdperiode::harBrukerutbetaling)
-
         internal fun sorter(perioder: List<Infotrygdperiode>) =
             perioder.sortedWith(compareBy( { it.start }, { it.hashCode() }))
 
     }
-
-    protected open fun harBrukerutbetaling() = false
 }

@@ -425,41 +425,6 @@ internal class InfotrygdhistorikkTest {
     }
 
     @Test
-    fun `har brukerutbetaling for arbeidsgiveren i perioden`() {
-        historikk.oppdaterHistorikk(historikkelement(listOf(
-            PersonUtbetalingsperiode("ag1", 10.januar,  20.januar, 100.prosent, 25000.månedlig)
-        )))
-        assertTrue(historikk.harBrukerutbetalingerFor("ag1", 5.januar til 15.januar))
-    }
-
-    @Test
-    fun `har ikke brukerutbetaling i perioden`() {
-        historikk.oppdaterHistorikk(historikkelement(listOf(
-            PersonUtbetalingsperiode("ag1", 10.januar,  20.januar, 100.prosent, 25000.månedlig)
-        )))
-        assertFalse(historikk.harBrukerutbetalingerFor("ag1", 5.januar til 9.januar))
-        assertFalse(historikk.harBrukerutbetalingerFor("ag1", 21.januar til 31.januar))
-    }
-
-    @Test
-    fun `har ikke brukerutbetaling for arbeidsgiveren`() {
-        historikk.oppdaterHistorikk(historikkelement(listOf(
-            PersonUtbetalingsperiode("ag1", 10.januar,  20.januar, 100.prosent, 25000.månedlig)
-        )))
-        assertFalse(historikk.harBrukerutbetalingerFor("ag2", 10.januar til 20.januar))
-    }
-
-    @Test
-    fun `har ikke brukerutbetaling i historikken`() {
-        historikk.oppdaterHistorikk(historikkelement(listOf(
-            ArbeidsgiverUtbetalingsperiode("ag1", 10.januar,  12.januar, 100.prosent, 25000.månedlig),
-            Friperiode(13.januar,  15.januar),
-            UkjentInfotrygdperiode(16.januar, 18.januar)
-        )))
-        assertFalse(historikk.harBrukerutbetalingerFor("ag1", 10.januar til 18.januar))
-    }
-
-    @Test
     fun `tar ikke med nyere historikk i beregning av utbetalingstidslinje`() {
         historikk.oppdaterHistorikk(historikkelement(listOf(
             ArbeidsgiverUtbetalingsperiode("ag1", 1.februar, 10.februar, 100.prosent, 25000.månedlig),

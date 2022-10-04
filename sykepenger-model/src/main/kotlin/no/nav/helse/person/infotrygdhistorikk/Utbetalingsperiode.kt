@@ -12,6 +12,7 @@ import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Økonomi
 
@@ -33,9 +34,8 @@ abstract class Utbetalingsperiode(
 
     private fun nyDag(builder: Utbetalingstidslinje.Builder, dato: LocalDate) {
         val økonomi = Økonomi.sykdomsgrad(grad)
-        if (dato.erHelg()) return builder.addHelg(dato, økonomi.inntekt(Inntekt.INGEN, skjæringstidspunkt = dato))
-        val refusjon = if (!harBrukerutbetaling()) inntekt else Inntekt.INGEN
-        builder.addNAVdag(dato, økonomi.inntekt(inntekt, skjæringstidspunkt = dato).arbeidsgiverRefusjon(refusjon))
+        if (dato.erHelg()) return builder.addHelg(dato, økonomi.inntekt(INGEN, skjæringstidspunkt = dato))
+        builder.addNAVdag(dato, økonomi.inntekt(inntekt, skjæringstidspunkt = dato).arbeidsgiverRefusjon(INGEN))
     }
 
     override fun valider(aktivitetslogg: IAktivitetslogg, periode: Periode, skjæringstidspunkt: LocalDate, nødnummer: Nødnummer) {
@@ -82,8 +82,6 @@ class PersonUtbetalingsperiode(orgnr: String, fom: LocalDate, tom: LocalDate, gr
     override fun accept(visitor: InfotrygdhistorikkVisitor) {
         visitor.visitInfotrygdhistorikkPersonUtbetalingsperiode(orgnr, this, grad, inntekt)
     }
-
-    override fun harBrukerutbetaling() = true
 }
 
 data class UgyldigPeriode(
