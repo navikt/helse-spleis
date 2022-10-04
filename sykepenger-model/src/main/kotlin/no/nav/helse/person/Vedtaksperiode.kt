@@ -848,7 +848,10 @@ internal class Vedtaksperiode private constructor(
             SubsumsjonObserver.NullObserver
         ) // TODO: skal vi logge ved beregning av agp?
 
-    private fun forventerInntekt() = Arbeidsgiverperiode.forventerInntekt(finnArbeidsgiverperiode(), periode, sykdomstidslinje, jurist())
+    private fun forventerInntekt(): Boolean {
+        if (Toggle.RevurderOutOfOrder.enabled && arbeidsgiver.harIngenSykeUkedagerFor(skjæringstidspunkt til periode.endInclusive)) return false
+        return Arbeidsgiverperiode.forventerInntekt(finnArbeidsgiverperiode(), periode, sykdomstidslinje, jurist())
+    }
 
     // Gang of four State pattern
     internal sealed interface Vedtaksperiodetilstand : Aktivitetskontekst {

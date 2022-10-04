@@ -1,17 +1,12 @@
 package no.nav.helse.utbetalingstidslinje
 
-import no.nav.helse.Toggle
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
-import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.testhelpers.F
-import no.nav.helse.testhelpers.H
-import no.nav.helse.testhelpers.resetSeed
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode.Companion.finn
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -72,9 +67,21 @@ internal class ArbeidsgiverperiodeTest {
     @Test
     fun `ingen utbetaling dersom perioden er innenfor arbeidsgiverperioden eller før det utbetales noe`() {
         agp(1.januar til 16.januar).utbetalingsdag(23.januar).also { agp ->
-            assertFalse(agp.forventerInntekt(31.desember(2017) til 5.januar, Sykdomstidslinje(), SubsumsjonObserver.NullObserver))
-            assertFalse(agp.forventerInntekt(15.januar til 22.januar, Sykdomstidslinje(), SubsumsjonObserver.NullObserver))
-            assertTrue(agp.forventerInntekt(15.januar til 23.januar, Sykdomstidslinje(), SubsumsjonObserver.NullObserver))
+            assertFalse(agp.forventerInntekt(
+                31.desember(2017) til 5.januar,
+                Sykdomstidslinje(),
+                SubsumsjonObserver.NullObserver,
+            ))
+            assertFalse(agp.forventerInntekt(
+                15.januar til 22.januar,
+                Sykdomstidslinje(),
+                SubsumsjonObserver.NullObserver,
+            ))
+            assertTrue(agp.forventerInntekt(
+                15.januar til 23.januar,
+                Sykdomstidslinje(),
+                SubsumsjonObserver.NullObserver,
+            ))
         }
     }
 
@@ -164,28 +171,6 @@ internal class ArbeidsgiverperiodeTest {
         assertNull(perioder.finn(18.januar til 31.januar))
         assertEquals(andre, perioder.finn(1.februar til 18.februar))
         assertNull(perioder.finn(2.februar til 18.februar))
-    }
-
-    @Test
-    fun `periode med bare ferie - skal ikke forvente inntekt`() = Toggle.FerieTilAvsluttetUtenUtbetaling.enable {
-        val arbeidsgiverperiode = Arbeidsgiverperiode(listOf(1.januar til 16.januar))
-        resetSeed(1.februar)
-        val sykdomstidslinje = 28.F
-        (17..31).forEach { dag ->
-            arbeidsgiverperiode.utbetalingsdag(dag.januar)
-        }
-        assertFalse(arbeidsgiverperiode.forventerInntekt(1.februar til 28.februar, sykdomstidslinje, MaskinellJurist()))
-    }
-
-    @Test
-    fun `periode med bare sykhelg og ferie - skal ikke forvente inntekt`() = Toggle.FerieTilAvsluttetUtenUtbetaling.enable{
-        val arbeidsgiverperiode = Arbeidsgiverperiode(listOf(1.januar til 16.januar))
-        resetSeed(1.februar)
-        val sykdomstidslinje = 2.F + 2.H + 24.F
-        (17..31).forEach { dag ->
-            arbeidsgiverperiode.utbetalingsdag(dag.januar)
-        }
-        assertFalse(arbeidsgiverperiode.forventerInntekt(1.februar til 28.februar, sykdomstidslinje, MaskinellJurist()))
     }
 
     private fun agp(vararg periode: Periode) = Arbeidsgiverperiode(periode.toList())
