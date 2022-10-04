@@ -9,7 +9,6 @@ import no.nav.helse.person.Varselkode.RV_VV_9
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.NullObserver
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.subsumsjonsformat
-import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.UkjentDag
 import no.nav.helse.økonomi.Økonomi
@@ -38,14 +37,6 @@ internal class MaksimumSykepengedagerfilter(
     private val beregnetTidslinjesubsumsjon by lazy { beregnetTidslinje.subsumsjonsformat() }
 
     internal fun maksimumSykepenger() = maksimumSykepenger
-
-    internal fun maksimumSykepenger(builder: Utbetaling.Builder) {
-        builder.maksimumSykepenger(
-            sisteDag = maksimumSykepenger.sisteDag(),
-            gjenståendeSykedager = maksimumSykepenger.gjenståendeDager(),
-            forbrukteSykedager = maksimumSykepenger.forbrukteDager()
-        )
-    }
 
     private fun avvisDag(dag: LocalDate, begrunnelse: Begrunnelse) {
         begrunnelserForAvvisteDager.getOrPut(begrunnelse) {

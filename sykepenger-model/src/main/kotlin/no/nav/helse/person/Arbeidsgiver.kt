@@ -335,13 +335,6 @@ internal class Arbeidsgiver private constructor(
         return arbeidsforholdhistorikk.startdatoFor(skjæringstidspunkt)
     }
 
-    internal fun lagUtbetaling(
-        builder: Utbetaling.Builder,
-        vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk
-    ) {
-        builder.arbeidsgiver(organisasjonsnummer, sykdomstidslinje(), vilkårsgrunnlagHistorikk, utbetalinger, refusjonshistorikk)
-    }
-
     internal fun avventerRevurdering() = vedtaksperioder.avventerRevurdering()
     internal fun feiletRevurdering(vedtaksperiode: Vedtaksperiode) = vedtaksperioder.feiletRevurdering(vedtaksperiode)
 
