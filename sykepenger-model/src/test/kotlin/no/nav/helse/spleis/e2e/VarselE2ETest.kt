@@ -35,8 +35,6 @@ import no.nav.helse.person.Varselkode.RV_IM_2
 import no.nav.helse.person.Varselkode.RV_IM_3
 import no.nav.helse.person.Varselkode.RV_IM_4
 import no.nav.helse.person.Varselkode.RV_IM_5
-import no.nav.helse.person.Varselkode.RV_IM_6
-import no.nav.helse.person.Varselkode.RV_IM_7
 import no.nav.helse.person.Varselkode.RV_IT_1
 import no.nav.helse.person.Varselkode.RV_IT_4
 import no.nav.helse.person.Varselkode.RV_IV_1
@@ -75,7 +73,6 @@ import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
-import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -713,25 +710,6 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
             )
         )
         assertVarsel(RV_IV_3, 1.vedtaksperiode.filter())
-    }
-
-    @Test
-    fun `varsel - inntektsmelding inneholder ikke beregnet inntekt`() {
-        nyttVedtak(1.januar, 31.januar)
-        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
-
-        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = Inntekt.INGEN)
-        assertVarsel(RV_IM_6, 1.vedtaksperiode.filter())
-    }
-
-
-    @Test
-    fun `varsel - Brukeren har opphold i naturalytelser`() {
-        nyttVedtak(1.januar, 31.januar)
-        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
-
-        håndterInntektsmelding(listOf(1.januar til 16.januar), harOpphørAvNaturalytelser = true)
-        assertVarsel(RV_IM_7, 1.vedtaksperiode.filter())
     }
 
 }

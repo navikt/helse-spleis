@@ -513,9 +513,8 @@ internal class Vedtaksperiode private constructor(
         oppdaterHistorikk(hendelse)
         inntektsmeldingInfo = arbeidsgiver.addInntektsmelding(skjæringstidspunkt, hendelse, jurist())
         hendelse.valider(periode, skjæringstidspunkt, finnArbeidsgiverperiode(), jurist())
-        if (hendelse.harFunksjonelleFeilEllerVerre()) return forkast(hendelse)
         hendelse.info("Fullført behandling av inntektsmelding")
-        if (hendelse.harFunksjonelleFeilEllerVerre()) return
+        if (hendelse.harFunksjonelleFeilEllerVerre()) return forkast(hendelse)
         tilstand(hendelse, nesteTilstand)
     }
 
@@ -1253,9 +1252,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
-            FunksjonelleFeilTilVarsler.wrap(inntektsmelding) {
-                vedtaksperiode.håndterInntektsmelding(inntektsmelding, this)
-            }
+            vedtaksperiode.håndterInntektsmelding(inntektsmelding, this)
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {
