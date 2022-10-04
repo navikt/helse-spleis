@@ -35,7 +35,6 @@ import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
-import no.nav.helse.person.Varselkode
 import no.nav.helse.person.Varselkode.RV_OO_1
 import no.nav.helse.person.Varselkode.RV_OO_2
 import no.nav.helse.person.nullstillTilstandsendringer
@@ -56,6 +55,7 @@ import no.nav.helse.spleis.e2e.forlengelseTilGodkjenning
 import no.nav.helse.spleis.e2e.grunnlag
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterOverstyrTidslinje
+import no.nav.helse.spleis.e2e.håndterPåminnelse
 import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
@@ -778,5 +778,32 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
 
         assertEquals(2, observatør.manglendeInntektsmeldingVedtaksperioder.size)
         assertIngenInfo("Revurdering førte til at sykefraværstilfellet trenger inntektsmelding", 1.vedtaksperiode.filter())
+    }
+
+    @Test
+    fun `Ber om inntektsmelding ved påminnelse i AvventerRevurdering ved manglende IM`() {
+        nyPeriode(1.mars til 15.mars)
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+
+        nyttVedtak(1.februar, 20.februar)
+        assertEquals(2, observatør.manglendeInntektsmeldingVedtaksperioder.size)
+        assertEquals(2, observatør.trengerIkkeInntektsmeldingVedtaksperioder.size)
+
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_REVURDERING)
+        håndterPåminnelse(1.vedtaksperiode, AVVENTER_REVURDERING)
+        assertEquals(3, observatør.manglendeInntektsmeldingVedtaksperioder.size)
+    }
+
+    @Test
+    fun `Ber ikke om inntektsmelding ved påminnelse i AvventerRevurdering når vi har nødvendig IM`() {
+        nyttVedtak(1.mars, 31.mars)
+
+        nyPeriode(1.januar til 31.januar)
+        assertEquals(2, observatør.manglendeInntektsmeldingVedtaksperioder.size)
+        assertEquals(1, observatør.trengerIkkeInntektsmeldingVedtaksperioder.size)
+
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_REVURDERING)
+        håndterPåminnelse(1.vedtaksperiode, AVVENTER_REVURDERING)
+        assertEquals(2, observatør.manglendeInntektsmeldingVedtaksperioder.size)
     }
 }

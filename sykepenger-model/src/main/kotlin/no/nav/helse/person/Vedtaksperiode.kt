@@ -1088,6 +1088,13 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode.håndterOverlappendeSøknadRevurdering(søknad)
         }
 
+        override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
+            super.håndter(vedtaksperiode, påminnelse)
+            if(Toggle.RevurderOutOfOrder.enabled && !vedtaksperiode.harNødvendigInntektForVilkårsprøving()) {
+                vedtaksperiode.trengerInntektsmelding(påminnelse.hendelseskontekst())
+            }
+        }
+
         override fun håndterRevurdertUtbetaling(
             vedtaksperiode: Vedtaksperiode,
             utbetaling: Utbetaling,
