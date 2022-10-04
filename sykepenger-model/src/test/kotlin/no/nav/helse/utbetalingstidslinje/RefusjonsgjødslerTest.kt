@@ -1,9 +1,7 @@
 package no.nav.helse.utbetalingstidslinje
 
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
@@ -17,10 +15,6 @@ import no.nav.helse.person.SpesifikkKontekst
 import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.person.Varselkode
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
-import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
-import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
-import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
-import no.nav.helse.person.infotrygdhistorikk.PersonUtbetalingsperiode
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.testhelpers.A
 import no.nav.helse.testhelpers.S
@@ -30,8 +24,6 @@ import no.nav.helse.testhelpers.resetSeed
 import no.nav.helse.testhelpers.somVilkårsgrunnlagHistorikk
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
-import no.nav.helse.økonomi.Inntekt.Companion.månedlig
-import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.Økonomi
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -73,7 +65,10 @@ internal class RefusjonsgjødslerTest {
     fun `Gjødsler utbetalingslinje med full refusjon i februar`() {
         resetSeed(1.februar)
         val utbetalingstidslinje = (16.U + 10.S).utbetalingstidslinje(inntektsopplysning(1.februar, 2308.daglig))
-        val refusjonsgjødsler = refusjonsgjødsler(utbetalingstidslinje, refusjonshistorikk(refusjon(1.februar, 1154.daglig)))
+        val refusjonsgjødsler = refusjonsgjødsler(
+            utbetalingstidslinje,
+            refusjonshistorikk(refusjon(1.februar, 1154.daglig))
+        )
         val aktivitetslogg = Aktivitetslogg()
         refusjonsgjødsler.gjødsle(aktivitetslogg, 1.februar til 26.februar)
         assertRefusjonArbeidsgiver(utbetalingstidslinje, 1154.0)
@@ -102,7 +97,10 @@ internal class RefusjonsgjødslerTest {
         val utbetalingstidslinje = (16.U + 10.S + 2.A + 10.S).utbetalingstidslinje(
             inntektsopplysning(1.februar, 2308.daglig) + inntektsopplysning(1.mars, 2500.daglig)
         )
-        val refusjonsgjødsler = refusjonsgjødsler(utbetalingstidslinje, refusjonshistorikk(refusjon(1.februar, 2308.daglig), refusjon(1.mars, 2500.daglig)))
+        val refusjonsgjødsler = refusjonsgjødsler(
+            utbetalingstidslinje,
+            refusjonshistorikk(refusjon(1.februar, 2308.daglig), refusjon(1.mars, 2500.daglig))
+        )
         val aktivitetslogg = Aktivitetslogg()
         refusjonsgjødsler.gjødsle(aktivitetslogg, 1.mars til 10.mars)
         assertRefusjonArbeidsgiver(utbetalingstidslinje[1.februar til 26.februar], 2308.0)
@@ -208,121 +206,15 @@ internal class RefusjonsgjødslerTest {
         assertFalse(aktivitetslogg.harVarslerEllerVerre())
     }
 
-    @Test
-    fun `Utbetalingsperiode inneholder dager før første dag i arbeidsgiverperioden fører til infomelding`() {
-        val gjødsler = refusjonsgjødsler(
-            (31.S).utbetalingstidslinje(
-                inntektsopplysning(1.januar, 690.daglig)
-            ), refusjonshistorikk(
-                refusjon(
-                    arbeidsgiverperioder = emptyList(),
-                    førsteFraværsdag = 17.januar,
-                    beløp = 690.daglig
-                )
-            )
-        )
-        val aktivitetslogg = Aktivitetslogg()
-        gjødsler.gjødsle(aktivitetslogg, 1.januar til 31.januar)
-        assertEquals(1, aktivitetslogg.infoMeldinger().count { it == "Refusjon gjelder ikke for hele utbetalingsperioden" })
-    }
-
-    @Test
-    fun `Legger ikke til ny infomelding ved nye førstegangsbehandlinger`() {
-        val gjødsler = refusjonsgjødsler(
-            (31.S + 28.opphold + 31.S).utbetalingstidslinje(
-                inntektsopplysning(1.januar, 690.daglig) + inntektsopplysning(1.mars, 690.daglig)
-            ), refusjonshistorikk(
-                refusjon(
-                    arbeidsgiverperioder = emptyList(),
-                    førsteFraværsdag = 17.januar,
-                    beløp = 690.daglig
-                ),
-                refusjon(
-                    arbeidsgiverperioder = emptyList(),
-                    førsteFraværsdag = 1.mars,
-                    beløp = 690.daglig
-                )
-            )
-        )
-        val aktivitetslogg = Aktivitetslogg()
-        gjødsler.gjødsle(aktivitetslogg, 1.mars til 31.mars)
-        assertEquals(0, aktivitetslogg.infoMeldinger().count { it == "Refusjon gjelder ikke for hele utbetalingsperioden" })
-    }
-
-    @Test
-    fun `legger ikke på error når brukerutbetalinger i infotrygd ikke overlapper med perioden`() {
-        val gjødsler = refusjonsgjødsler(
-            utbetalingstidslinje = (31.S).utbetalingstidslinje(inntektsopplysning(1.januar, 690.daglig)),
-            refusjonshistorikk = refusjonshistorikk(),
-            infotrygdhistorikk = infotrygdhistorikk(listOf(PersonUtbetalingsperiode(ORGNUMMER, 1.desember(2017), 31.desember(2017), 100.prosent, 10000.månedlig))),
-            organisasjonsnummer = ORGNUMMER
-        )
-        val aktivitetslogg = Aktivitetslogg()
-        gjødsler.gjødsle(aktivitetslogg, 1.januar til 31.januar)
-        assertEquals(
-            0,
-            aktivitetslogg.errorMeldinger().count { it == "Finner ikke informasjon om refusjon i inntektsmelding og personen har brukerutbetaling" })
-    }
-
-    @Test
-    fun `legger ikke på error når brukerutbetalinger i infotrygd ikke er for samme arbeidsgiver`() {
-        val gjødsler = refusjonsgjødsler(
-            utbetalingstidslinje = (31.S).utbetalingstidslinje(inntektsopplysning(1.januar, 690.daglig)),
-            refusjonshistorikk = refusjonshistorikk(),
-            infotrygdhistorikk = infotrygdhistorikk(listOf(PersonUtbetalingsperiode("987654321", 1.januar, 10.januar, 100.prosent, 10000.månedlig))),
-            organisasjonsnummer = ORGNUMMER
-        )
-        val aktivitetslogg = Aktivitetslogg()
-        gjødsler.gjødsle(aktivitetslogg, 1.januar til 31.januar)
-        assertEquals(
-            0,
-            aktivitetslogg.errorMeldinger().count { it == "Finner ikke informasjon om refusjon i inntektsmelding og personen har brukerutbetaling" })
-    }
-
-    @Test
-    fun `legger på error når brukerutbetalinger i infotrygd overlapper med perioden`() {
-        val gjødsler = refusjonsgjødsler(
-            utbetalingstidslinje = (31.S).utbetalingstidslinje(inntektsopplysning(1.januar, 690.daglig)),
-            refusjonshistorikk = refusjonshistorikk(),
-            infotrygdhistorikk = infotrygdhistorikk(listOf(PersonUtbetalingsperiode(ORGNUMMER, 1.januar, 10.januar, 100.prosent, 10000.månedlig))),
-            organisasjonsnummer = ORGNUMMER
-        )
-        val aktivitetslogg = Aktivitetslogg()
-        gjødsler.gjødsle(aktivitetslogg, 1.januar til 31.januar)
-        assertEquals(
-            1,
-            aktivitetslogg.errorMeldinger().count { it == "Finner ikke informasjon om refusjon i inntektsmelding og personen har brukerutbetaling" })
-    }
-
-    private fun infotrygdhistorikk(utbetalingsperioder: List<Infotrygdperiode>) = Infotrygdhistorikk().apply {
-        this.oppdaterHistorikk(
-            InfotrygdhistorikkElement.opprett(
-                oppdatert = LocalDateTime.now(),
-                hendelseId = UUID.randomUUID(),
-                perioder = utbetalingsperioder,
-                inntekter = emptyList(),
-                arbeidskategorikoder = emptyMap(),
-                ugyldigePerioder = emptyList(),
-                harStatslønn = false
-            )
-        )
-    }
-
     private fun refusjonsgjødsler(
         utbetalingstidslinje: Utbetalingstidslinje,
-        refusjonshistorikk: Refusjonshistorikk,
-        infotrygdhistorikk: Infotrygdhistorikk = Infotrygdhistorikk(),
-        organisasjonsnummer: String = ORGNUMMER
+        refusjonshistorikk: Refusjonshistorikk
     ) = Refusjonsgjødsler(
         tidslinje = utbetalingstidslinje,
-        refusjonshistorikk = refusjonshistorikk,
-        infotrygdhistorikk = infotrygdhistorikk,
-        organisasjonsnummer = organisasjonsnummer
+        refusjonshistorikk = refusjonshistorikk
     )
 
     private companion object {
-
-        private const val ORGNUMMER = "123456789"
 
         operator fun Iterable<Utbetalingstidslinje.Utbetalingsdag>.get(periode: Periode) = filter { it.dato in periode }
 

@@ -4,38 +4,16 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.Refusjonshistorikk
 import no.nav.helse.person.Varselkode.RV_RE_1
-import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
-import org.slf4j.LoggerFactory
 
 internal class Refusjonsgjødsler(
     private val tidslinje: Utbetalingstidslinje,
-    private val refusjonshistorikk: Refusjonshistorikk,
-    private val infotrygdhistorikk: Infotrygdhistorikk,
-    private val organisasjonsnummer: String
+    private val refusjonshistorikk: Refusjonshistorikk
 ) {
     internal fun gjødsle(aktivitetslogg: IAktivitetslogg, periode: Periode) {
         tidslinje.sammenhengendeUtbetalingsperioder().forEach { utbetalingsperiode ->
             val refusjon = refusjonshistorikk.finnRefusjon(utbetalingsperiode.periode(), aktivitetslogg)
-            if (utbetalingsperiode.periode().overlapperMed(periode)) {
-                if (refusjon == null) håndterManglendeRefusjon(utbetalingsperiode, aktivitetslogg)
-                else if (refusjon.erFørFørsteDagIArbeidsgiverperioden(utbetalingsperiode.periode().start)) {
-                    aktivitetslogg.info("Refusjon gjelder ikke for hele utbetalingsperioden")
-                    sikkerLogg.info("Refusjon gjelder ikke for hele utbetalingsperioden. Meldingsreferanse:${refusjon.meldingsreferanseId}, Utbetalingsperiode:${utbetalingsperiode.periode()}")
-                }
-            }
+            if (refusjon == null && utbetalingsperiode.periode().overlapperMed(periode)) aktivitetslogg.varsel(RV_RE_1)
             utbetalingsperiode.forEach { utbetalingsdag -> utbetalingsdag.gjødsle(refusjon) }
         }
-    }
-
-    private fun håndterManglendeRefusjon(utbetalingsperiode: Utbetalingstidslinje, aktivitetslogg: IAktivitetslogg) {
-        if (infotrygdhistorikk.harBrukerutbetalingerFor(organisasjonsnummer, utbetalingsperiode.periode())) {
-            aktivitetslogg.funksjonellFeil("Finner ikke informasjon om refusjon i inntektsmelding og personen har brukerutbetaling")
-        } else {
-            aktivitetslogg.varsel(RV_RE_1)
-        }
-    }
-
-    private companion object {
-        private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
     }
 }

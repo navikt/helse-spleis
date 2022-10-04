@@ -2727,9 +2727,7 @@ internal class Vedtaksperiode private constructor(
                 tidslinjer.forEach { (arbeidsgiver, tidslinje) ->
                     Refusjonsgjødsler(
                         tidslinje = tidslinje + arbeidsgiver.utbetalingstidslinje(infotrygdhistorikk),
-                        refusjonshistorikk = arbeidsgiver.refusjonshistorikk,
-                        infotrygdhistorikk = infotrygdhistorikk,
-                        organisasjonsnummer = arbeidsgiver.organisasjonsnummer()
+                        refusjonshistorikk = arbeidsgiver.refusjonshistorikk
                     ).gjødsle(beregningsperioder.firstOrNull { it.arbeidsgiver == arbeidsgiver }?.aktivitetsloggkopi() ?: hendelse, period)
                 }
             }

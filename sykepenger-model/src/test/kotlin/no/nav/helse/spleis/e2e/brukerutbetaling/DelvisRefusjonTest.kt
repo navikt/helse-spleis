@@ -24,7 +24,6 @@ import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.Varselkode.RV_IM_2
 import no.nav.helse.person.Varselkode.RV_IM_4
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
-import no.nav.helse.spleis.e2e.assertInfo
 import no.nav.helse.spleis.e2e.assertIngenVarsler
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
@@ -699,7 +698,6 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
-        assertInfo("Refusjon gjelder ikke for hele utbetalingsperioden", 1.vedtaksperiode.filter())
         assertVarsel(RV_IM_2, 1.vedtaksperiode.filter())
     }
 
@@ -717,14 +715,11 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
-        assertInfo("Refusjon gjelder ikke for hele utbetalingsperioden", 1.vedtaksperiode.filter())
         assertVarsel(RV_IM_4, 1.vedtaksperiode.filter())
     }
 
     @Test
     fun `arbeidsgiver sender unødvendig inntektsmelding ved forlengelse før sykmelding`() {
-        // Etter diskusjon med Morten ble vi enige om at vi ikke trenger warning på en forlengelse hvor inntektsmelding kom før sykmelding.
-        // Om ny inntektsmelding fører til brukerutbetalinger vil dette bli oppdaget og sendt til Infotrygd senere
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
@@ -742,7 +737,6 @@ internal class DelvisRefusjonTest : AbstractEndToEndTest() {
 
         assertIngenVarsler(1.vedtaksperiode.filter())
         assertIngenVarsler(2.vedtaksperiode.filter())
-        assertInfo("Refusjon gjelder ikke for hele utbetalingsperioden", 2.vedtaksperiode.filter())
     }
 
     @Test

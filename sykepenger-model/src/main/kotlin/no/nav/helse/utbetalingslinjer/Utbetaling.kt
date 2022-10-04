@@ -1074,7 +1074,7 @@ internal class Utbetaling private constructor(
                 val sykdomstidslinje = sykdomstidslinje.fremTilOgMed(periode.endInclusive)
                 val utbetalingstidslinjeBuilder = UtbetalingstidslinjeBuilder(inntekter)
                 utbetalingstidslinje = infotrygdhistorikk.build(organisasjonsnummer, sykdomstidslinje, utbetalingstidslinjeBuilder, subsumsjonObserver)
-                Refusjonsgjødsler(utbetalingstidslinje, refusjonshistorikk, infotrygdhistorikk, organisasjonsnummer).gjødsle(aktivitetslogg, periode)
+                Refusjonsgjødsler(utbetalingstidslinje, refusjonshistorikk).gjødsle(aktivitetslogg, periode)
                 return utbetalingstidslinje
             }
 
