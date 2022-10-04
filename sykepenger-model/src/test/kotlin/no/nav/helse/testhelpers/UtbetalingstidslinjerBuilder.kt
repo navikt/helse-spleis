@@ -93,9 +93,9 @@ internal fun Int.FOR(dekningsgrunnlag: Int) = Utbetalingsdager(
 )
 
 internal val Int.AVV get() = this.AVV(1200)
-internal fun Int.AVV(dekningsgrunnlag: Int, grad: Number = 0) = Utbetalingsdager(
+internal fun Int.AVV(dekningsgrunnlag: Int, grad: Number = 0, begrunnelse: Begrunnelse = Begrunnelse.SykepengedagerOppbrukt) = Utbetalingsdager(
     antallDager = { this },
-    addDagFun = Utbetalingstidslinje.Builder::addAvvistDag,
+    addDagFun = { dato, økonomi -> addAvvistDag(dato, økonomi, begrunnelse) },
     dekningsgrunnlag = dekningsgrunnlag.daglig,
     grad = grad
 )
@@ -107,8 +107,8 @@ internal val Int.UTELATE
         dekningsgrunnlag = INGEN
     )
 
-private fun Utbetalingstidslinje.Builder.addAvvistDag(dato: LocalDate, økonomi: Økonomi) =
-    this.addAvvistDag(dato, økonomi, listOf(Begrunnelse.SykepengedagerOppbrukt))
+private fun Utbetalingstidslinje.Builder.addAvvistDag(dato: LocalDate, økonomi: Økonomi, begrunnelse: Begrunnelse) =
+    this.addAvvistDag(dato, økonomi, listOf(begrunnelse))
 
 internal data class Utbetalingsdager(
     val antallDager: (LocalDate) -> Int,
