@@ -88,6 +88,7 @@ enum class Varselkode(
     RV_UT_1("Utbetaling av revurdert periode ble avvist av saksbehandler. Utbetalingen må annulleres"),
     RV_UT_2("Utbetalingen ble gjennomført, men med advarsel"),
     RV_UT_3("Feil ved utbetalingstidslinjebygging"),
+    RV_UT_4("Finner ingen utbetaling å annullere"),
 
     // OS: Oppdragsystemet
     RV_OS_1("Utbetalingen forlenger et tidligere oppdrag som opphørte alle utbetalte dager. Sjekk simuleringen."),

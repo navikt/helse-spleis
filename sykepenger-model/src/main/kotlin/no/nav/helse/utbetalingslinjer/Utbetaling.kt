@@ -24,6 +24,7 @@ import no.nav.helse.person.Periodetype
 import no.nav.helse.person.Refusjonshistorikk
 import no.nav.helse.person.SpesifikkKontekst
 import no.nav.helse.person.UtbetalingVisitor
+import no.nav.helse.person.Varselkode.RV_UT_4
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.builders.VedtakFattetBuilder
@@ -169,8 +170,6 @@ internal class Utbetaling private constructor(
         arbeidsgiverOppdrag.harUtbetalinger() || personOppdrag.harUtbetalinger()
 
     internal fun harDelvisRefusjon() = arbeidsgiverOppdrag.harUtbetalinger () && personOppdrag.harUtbetalinger()
-
-    internal fun harBrukerutbetaling() = personOppdrag.harUtbetalinger()
 
     internal fun erKlarForGodkjenning() = personOppdrag.erKlarForGodkjenning() && arbeidsgiverOppdrag.erKlarForGodkjenning()
 
@@ -420,7 +419,7 @@ internal class Utbetaling private constructor(
 
         internal fun finnUtbetalingForAnnullering(utbetalinger: List<Utbetaling>, hendelse: AnnullerUtbetaling): Utbetaling? {
             return utbetalinger.utbetalte().lastOrNull() ?: run {
-                hendelse.funksjonellFeil("Finner ingen utbetaling å annullere")
+                hendelse.funksjonellFeil(RV_UT_4)
                 return null
             }
         }
