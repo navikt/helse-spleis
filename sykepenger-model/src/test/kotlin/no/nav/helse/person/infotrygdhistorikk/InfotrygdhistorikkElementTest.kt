@@ -15,6 +15,7 @@ import no.nav.helse.juni
 import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.Arbeidsforholdhistorikk
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.testhelpers.A
@@ -777,7 +778,7 @@ internal class InfotrygdhistorikkElementTest {
                 )
             )
         )
-        assertNull(inntektshistorikk.omregnetÅrsinntekt(1.januar, 1.januar)?.omregnetÅrsinntekt())
+        assertNull(inntektshistorikk.omregnetÅrsinntekt(1.januar, 1.januar, Arbeidsforholdhistorikk())?.omregnetÅrsinntekt())
     }
 
     private fun assertFlereInntekterInfotrygd() {

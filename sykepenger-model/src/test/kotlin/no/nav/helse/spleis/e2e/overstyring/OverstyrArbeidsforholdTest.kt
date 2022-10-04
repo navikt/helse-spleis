@@ -70,7 +70,7 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
         val skjæringstidspunkt = inspektør.skjæringstidspunkt(1.vedtaksperiode)
         assertEquals(listOf(a1, a2).toList(), person.relevanteArbeidsgivere(skjæringstidspunkt).toList())
         håndterOverstyrArbeidsforhold(skjæringstidspunkt, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, true, "forklaring")))
-        assertEquals(listOf(a1), person.relevanteArbeidsgivere(skjæringstidspunkt))
+        assertEquals(listOf(a1, a2), person.relevanteArbeidsgivere(skjæringstidspunkt))
     }
 
     @Test
@@ -117,9 +117,12 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
             assertEquals(31000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
             assertEquals(Inntektshistorikk.Inntektsmelding::class, it.inntektsopplysning::class)
         }
-        assertEquals(1, sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
+        assertEquals(2, sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
         sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
             assertEquals(Inntektshistorikk.SkattComposite::class, it.inntektsopplysning::class)
+        }
+        sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
+            assertEquals(Inntektshistorikk.IkkeRapportert::class, it.inntektsopplysning::class)
         }
     }
 

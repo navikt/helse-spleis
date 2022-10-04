@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
+import no.nav.helse.person.Arbeidsforholdhistorikk
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.ArbeidsgiverVisitor
 import no.nav.helse.person.Inntektshistorikk
@@ -42,7 +43,7 @@ internal class InntektshistorikkInspektør(arbeidsgiver: Arbeidsgiver) : Arbeids
     ) = element(innslag.reversed()).opplysninger.filter { it.kilde in kilder }.size
     internal val sisteInnslag get() = innslag.firstOrNull()
 
-    internal fun omregnetÅrsinntekt(dato: LocalDate, førsteFraværsdag: LocalDate) = inntektshistorikk.omregnetÅrsinntekt(dato, førsteFraværsdag)
+    internal fun omregnetÅrsinntekt(dato: LocalDate, førsteFraværsdag: LocalDate) = inntektshistorikk.omregnetÅrsinntekt(dato, førsteFraværsdag, Arbeidsforholdhistorikk())
 
     override fun preVisitInntekthistorikk(inntektshistorikk: Inntektshistorikk) {
         this.inntektshistorikk = inntektshistorikk

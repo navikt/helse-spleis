@@ -7,6 +7,7 @@ import no.nav.helse.februar
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.Arbeidsforholdhistorikk
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals

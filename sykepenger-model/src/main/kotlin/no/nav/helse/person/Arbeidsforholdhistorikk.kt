@@ -7,6 +7,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.person.Arbeidsforholdhistorikk.Arbeidsforhold.Companion.ansattVedSkjæringstidspunkt
 import no.nav.helse.person.Arbeidsforholdhistorikk.Arbeidsforhold.Companion.create
 import no.nav.helse.person.Arbeidsforholdhistorikk.Arbeidsforhold.Companion.erDeaktivert
+import no.nav.helse.person.Arbeidsforholdhistorikk.Arbeidsforhold.Companion.harArbeidsforholdNyereEnn
 import no.nav.helse.person.Arbeidsforholdhistorikk.Arbeidsforhold.Companion.harDeaktivertArbeidsforholdSomErNyereEnn
 import no.nav.helse.person.Arbeidsforholdhistorikk.Arbeidsforhold.Companion.harIkkeDeaktivertArbeidsforholdSomErNyereEnn
 import no.nav.helse.person.Arbeidsforholdhistorikk.Arbeidsforhold.Companion.ikkeDeaktiverteArbeidsforhold
@@ -43,8 +44,7 @@ internal class Arbeidsforholdhistorikk private constructor(
         sisteInnslag(skjæringstidspunkt)?.harDeaktivertArbeidsforholdSomErNyereEnn(skjæringstidspunkt, antallMåneder) ?: false
 
     internal fun harArbeidsforholdNyereEnn(skjæringstidspunkt: LocalDate, antallMåneder: Long) =
-        harIkkeDeaktivertArbeidsforholdNyereEnn(skjæringstidspunkt, antallMåneder)
-            || harDeaktivertArbeidsforholdNyereEnn(skjæringstidspunkt, antallMåneder)
+        sisteInnslag(skjæringstidspunkt)?.harArbeidsforholdNyereEnn(skjæringstidspunkt, antallMåneder) ?: false
 
     internal fun aktiverArbeidsforhold(skjæringstidspunkt: LocalDate) {
         val nåværendeInnslag = requireNotNull(sisteInnslag(skjæringstidspunkt))
@@ -90,6 +90,9 @@ internal class Arbeidsforholdhistorikk private constructor(
         internal fun harDeaktivertArbeidsforholdSomErNyereEnn(skjæringstidspunkt: LocalDate, antallMåneder: Long) =
             arbeidsforhold.harDeaktivertArbeidsforholdSomErNyereEnn(skjæringstidspunkt, antallMåneder)
 
+        internal fun harArbeidsforholdNyereEnn(skjæringstidspunkt: LocalDate, antallMåneder: Long) =
+            arbeidsforhold.harArbeidsforholdNyereEnn(skjæringstidspunkt, antallMåneder)
+
         internal fun deaktiverArbeidsforhold() = arbeidsforhold.map { it.deaktiver() }
 
         internal fun aktiverArbeidsforhold() = arbeidsforhold.map { it.aktiver() }
@@ -130,11 +133,18 @@ internal class Arbeidsforholdhistorikk private constructor(
         companion object {
             const val MAKS_INNTEKT_GAP = 2L
 
+            private fun List<Arbeidsforhold>.harArbeidetMindreEnn(skjæringstidspunkt: LocalDate, antallMåneder: Long) = this
+                .filter { it.harArbeidetMindreEnn(skjæringstidspunkt, antallMåneder) }
+                .filter { it.gjelder(skjæringstidspunkt) }
+
+            internal fun List<Arbeidsforhold>.harArbeidsforholdNyereEnn(skjæringstidspunkt: LocalDate, antallMåneder: Long) =
+                harArbeidetMindreEnn(skjæringstidspunkt, antallMåneder).isNotEmpty()
+
             internal fun List<Arbeidsforhold>.harIkkeDeaktivertArbeidsforholdSomErNyereEnn(skjæringstidspunkt: LocalDate, antallMåneder: Long) =
-                any { it.harArbeidetMindreEnn(skjæringstidspunkt, antallMåneder) && it.gjelder(skjæringstidspunkt) && !it.deaktivert }
+                harArbeidetMindreEnn(skjæringstidspunkt, antallMåneder).any { !it.deaktivert }
 
             internal fun List<Arbeidsforhold>.harDeaktivertArbeidsforholdSomErNyereEnn(skjæringstidspunkt: LocalDate, antallMåneder: Long) =
-                any { it.harArbeidetMindreEnn(skjæringstidspunkt, antallMåneder) && it.gjelder(skjæringstidspunkt) && it.deaktivert }
+                harArbeidetMindreEnn(skjæringstidspunkt, antallMåneder).any { it.deaktivert }
 
             internal fun Collection<Arbeidsforhold>.erDeaktivert() = any { it.deaktivert }
             internal fun Collection<Arbeidsforhold>.opptjeningsperiode(skjæringstidspunkt: LocalDate) = filter { !it.deaktivert }

@@ -30,7 +30,6 @@ import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.UtbetalingOverført
 import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
-import no.nav.helse.person.Arbeidsforholdhistorikk.Arbeidsforhold.Companion.MAKS_INNTEKT_GAP
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.harAvsluttedePerioder
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.håndterInntektsmeldingReplay
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.iderMedUtbetaling
@@ -204,11 +203,8 @@ internal class Arbeidsgiver private constructor(
 
         internal fun List<Arbeidsgiver>.inntekterForSammenligningsgrunnlag(skjæringstidspunkt: LocalDate) =
             this.mapNotNull { arbeidsgiver ->
-                val inntektsopplysning = arbeidsgiver.inntektshistorikk.rapportertInntekt(skjæringstidspunkt)
+                val inntektsopplysning = arbeidsgiver.inntektshistorikk.rapportertInntekt(skjæringstidspunkt, arbeidsgiver.arbeidsforholdhistorikk)
                 when {
-                    inntektsopplysning == null && arbeidsgiver.arbeidsforholdhistorikk.harIkkeDeaktivertArbeidsforholdNyereEnn(skjæringstidspunkt, MAKS_INNTEKT_GAP) -> {
-                        ArbeidsgiverInntektsopplysning(arbeidsgiver.organisasjonsnummer, IkkeRapportert(UUID.randomUUID(), skjæringstidspunkt))
-                    }
                     inntektsopplysning != null -> ArbeidsgiverInntektsopplysning(arbeidsgiver.organisasjonsnummer, inntektsopplysning)
                     else -> null
                 }
@@ -326,13 +322,10 @@ internal class Arbeidsgiver private constructor(
     private fun kanBeregneSykepengegrunnlag(skjæringstidspunkt: LocalDate) = beregnSykepengegrunnlag(skjæringstidspunkt) != null
     private fun beregnSykepengegrunnlag(skjæringstidspunkt: LocalDate, block: (inntekstopplysning: Inntektshistorikk.Inntektsopplysning?) -> Unit = {}) : ArbeidsgiverInntektsopplysning? {
         val førsteFraværsdag = finnFørsteFraværsdag(skjæringstidspunkt)
-        val inntektsopplysning = inntektshistorikk.omregnetÅrsinntekt(skjæringstidspunkt, førsteFraværsdag)
+        val inntektsopplysning = inntektshistorikk.omregnetÅrsinntekt(skjæringstidspunkt, førsteFraværsdag, arbeidsforholdhistorikk)
         block(inntektsopplysning)
         return when {
             harDeaktivertArbeidsforhold(skjæringstidspunkt) -> null
-            inntektsopplysning == null && arbeidsforholdhistorikk.harIkkeDeaktivertArbeidsforholdNyereEnn(skjæringstidspunkt, MAKS_INNTEKT_GAP) -> {
-                ArbeidsgiverInntektsopplysning(organisasjonsnummer, IkkeRapportert(UUID.randomUUID(), skjæringstidspunkt))
-            }
             inntektsopplysning != null -> ArbeidsgiverInntektsopplysning(organisasjonsnummer, inntektsopplysning)
             else -> null
         }
@@ -873,9 +866,8 @@ internal class Arbeidsgiver private constructor(
 
     private fun erGhost(skjæringstidspunkt: LocalDate): Boolean {
         val førsteFraværsdag = finnFørsteFraværsdag(skjæringstidspunkt)
-        val inntektsopplysning = inntektshistorikk.omregnetÅrsinntekt(skjæringstidspunkt, førsteFraværsdag)
-        val harArbeidsforholdNyereEnnToMåneder = arbeidsforholdhistorikk.harArbeidsforholdNyereEnn(skjæringstidspunkt, MAKS_INNTEKT_GAP)
-        return inntektsopplysning is Inntektshistorikk.SkattComposite || inntektsopplysning is Inntektshistorikk.Saksbehandler || harArbeidsforholdNyereEnnToMåneder
+        val inntektsopplysning = inntektshistorikk.omregnetÅrsinntekt(skjæringstidspunkt, førsteFraværsdag, arbeidsforholdhistorikk)
+        return inntektsopplysning is Inntektshistorikk.SkattComposite || inntektsopplysning is Inntektshistorikk.Saksbehandler || inntektsopplysning is IkkeRapportert
     }
 
     internal fun utbetalingstidslinje(infotrygdhistorikk: Infotrygdhistorikk) = infotrygdhistorikk.utbetalingstidslinje(organisasjonsnummer)

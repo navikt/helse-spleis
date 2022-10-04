@@ -8,9 +8,9 @@ import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon
 import no.nav.helse.hentErrors
 import no.nav.helse.hentInfo
 import no.nav.helse.hentVarselkoder
-import no.nav.helse.hentWarnings
 import no.nav.helse.januar
 import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.Arbeidsforholdhistorikk
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.Varselkode.RV_IM_3
 import no.nav.helse.person.etterlevelse.MaskinellJurist
@@ -595,8 +595,8 @@ internal class InntektsmeldingTest {
         inntektsmelding(listOf(Periode(1.januar, 16.januar)), refusjonBeløp = 2000.månedlig, beregnetInntekt = 2000.månedlig, førsteFraværsdag = 3.februar)
         val inntektshistorikk = Inntektshistorikk()
         inntektsmelding.addInntekt(inntektshistorikk, 1.februar, MaskinellJurist())
-        assertEquals(2000.månedlig, inntektshistorikk.omregnetÅrsinntekt(1.februar, 1.februar)?.omregnetÅrsinntekt())
-        assertNull(inntektshistorikk.omregnetÅrsinntekt(3.februar, 3.februar))
+        assertEquals(2000.månedlig, inntektshistorikk.omregnetÅrsinntekt(1.februar, 1.februar, Arbeidsforholdhistorikk())?.omregnetÅrsinntekt())
+        assertNull(inntektshistorikk.omregnetÅrsinntekt(3.februar, 3.februar, Arbeidsforholdhistorikk()))
     }
 
     private fun inntektsmelding(

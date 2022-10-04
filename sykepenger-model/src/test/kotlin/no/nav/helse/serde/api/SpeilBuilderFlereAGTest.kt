@@ -4,7 +4,6 @@ import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
@@ -12,13 +11,14 @@ import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.november
 import no.nav.helse.oktober
-import no.nav.helse.person.TilstandType.*
+import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.arbeidsgiver
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
@@ -31,8 +31,6 @@ import no.nav.helse.serde.api.dto.Inntektkilde
 import no.nav.helse.serde.api.dto.OmregnetÅrsinntekt
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertTilstand
-import no.nav.helse.spleis.e2e.assertTilstander
-import no.nav.helse.spleis.e2e.forlengTilGodkjenning
 import no.nav.helse.spleis.e2e.grunnlag
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterOverstyrArbeidsforhold
@@ -524,8 +522,7 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
 
         val personDto = serializePersonForSpeil(person)
-        val vilkårsgrunnlag =
-            personDto.vilkårsgrunnlagHistorikk[person.nyesteIdForVilkårsgrunnlagHistorikk()]?.get(1.januar)
+        val vilkårsgrunnlag = personDto.vilkårsgrunnlagHistorikk[person.nyesteIdForVilkårsgrunnlagHistorikk()]?.get(1.januar)
         assertEquals(listOf(a1, a2), vilkårsgrunnlag?.inntekter?.map { it.organisasjonsnummer })
         assertEquals(
             Arbeidsgiverinntekt(
@@ -537,6 +534,55 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
             vilkårsgrunnlag?.inntekter?.find { it.organisasjonsnummer == a2 }
         )
         assertEquals(listOf(a1, a2), personDto.arbeidsgivere.map { it.organisasjonsnummer })
+    }
+
+    @Test
+    fun `deaktivert arbeidsforhold blir med i vilkårsgrunnlag`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode, arbeidsforhold = listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null),
+                Vilkårsgrunnlag.Arbeidsforhold(a2, 1.desember(2017), null)
+            )
+        )
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        val skjæringstidspunkt = inspektør.skjæringstidspunkt(1.vedtaksperiode)
+        assertEquals(listOf(a1, a2).toList(), person.relevanteArbeidsgivere(skjæringstidspunkt).toList())
+        håndterOverstyrArbeidsforhold(skjæringstidspunkt, listOf(
+            OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(
+                a2,
+                true,
+                "forklaring"
+            )
+        ))
+
+        val personDto = serializePersonForSpeil(person)
+        val vilkårsgrunnlag = personDto.vilkårsgrunnlagHistorikk[person.nyesteIdForVilkårsgrunnlagHistorikk()]?.get(1.januar)
+
+        val forventet = listOf(
+            Arbeidsgiverinntekt(
+                organisasjonsnummer = a1,
+                omregnetÅrsinntekt = OmregnetÅrsinntekt(
+                    kilde = Inntektkilde.Inntektsmelding,
+                    beløp = 372000.0,
+                    månedsbeløp = 31000.0,
+                    inntekterFraAOrdningen = null
+                ),
+                sammenligningsgrunnlag = 372000.0,
+                deaktivert = false
+            ),
+            Arbeidsgiverinntekt(
+                organisasjonsnummer = a2,
+                omregnetÅrsinntekt = null,
+                sammenligningsgrunnlag = null,
+                deaktivert = true
+            )
+        )
+        assertEquals(forventet, vilkårsgrunnlag?.inntekter)
     }
 
     @Test

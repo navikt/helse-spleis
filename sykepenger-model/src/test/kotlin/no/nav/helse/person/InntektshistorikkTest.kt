@@ -15,6 +15,7 @@ import no.nav.helse.november
 import no.nav.helse.oktober
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.somPersonidentifikator
+import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.økonomi.Inntekt
@@ -54,11 +55,35 @@ internal class InntektshistorikkTest {
     }
 
     @Test
+    fun `sykepengegrunnlag for arbeidsgiver med nytt arbeidsforhold`() {
+        val arbeidsforholdhistorikk = Arbeidsforholdhistorikk()
+        arbeidsforholdhistorikk.lagre(listOf(
+            Arbeidsforholdhistorikk.Arbeidsforhold(1.januar, null, false)
+        ), 1.februar)
+        val opplysning = historikk.omregnetÅrsinntekt(1.februar, 1.februar, arbeidsforholdhistorikk)
+        assertNotNull(opplysning)
+        assertEquals(Inntektshistorikk.IkkeRapportert::class, opplysning::class)
+        assertEquals(INGEN, opplysning.omregnetÅrsinntekt())
+    }
+
+    @Test
+    fun `sykepengegrunnlag for arbeidsgiver med nytt deaktivert arbeidsforhold`() {
+        val arbeidsforholdhistorikk = Arbeidsforholdhistorikk()
+        arbeidsforholdhistorikk.lagre(listOf(
+            Arbeidsforholdhistorikk.Arbeidsforhold(1.januar, null, true)
+        ), 1.februar)
+        val opplysning = historikk.omregnetÅrsinntekt(1.februar, 1.februar, arbeidsforholdhistorikk)
+        assertNotNull(opplysning)
+        assertEquals(Inntektshistorikk.IkkeRapportert::class, opplysning::class)
+        assertEquals(INGEN, opplysning.omregnetÅrsinntekt())
+    }
+
+    @Test
     fun `Inntekt fra inntektsmelding brukes til å beregne sykepengegrunnlaget`() {
         inntektsmelding(førsteFraværsdag = 1.januar).addInntekt(historikk, 1.januar, MaskinellJurist())
         assertEquals(1, inspektør.inntektTeller.size)
         assertEquals(1, inspektør.inntektTeller.first())
-        assertEquals(INNTEKT, historikk.omregnetÅrsinntekt(1.januar, 1.januar)?.omregnetÅrsinntekt())
+        assertEquals(INNTEKT, historikk.omregnetÅrsinntekt(1.januar, 1.januar, Arbeidsforholdhistorikk())?.omregnetÅrsinntekt())
     }
 
     @Test
@@ -66,8 +91,8 @@ internal class InntektshistorikkTest {
         inntektsmelding(førsteFraværsdag = 1.januar, beregnetInntekt = 30000.månedlig).addInntekt(historikk, 1.januar, MaskinellJurist())
         inntektsmelding(førsteFraværsdag = 1.januar, beregnetInntekt = 29000.månedlig).addInntekt(historikk, 1.januar, MaskinellJurist())
         inntektsmelding(førsteFraværsdag = 1.februar, beregnetInntekt = 31000.månedlig).addInntekt(historikk, 1.februar, MaskinellJurist())
-        assertEquals(30000.månedlig, historikk.omregnetÅrsinntekt(1.januar, 1.januar)?.omregnetÅrsinntekt())
-        assertEquals(31000.månedlig, historikk.omregnetÅrsinntekt(1.februar, 1.februar)?.omregnetÅrsinntekt())
+        assertEquals(30000.månedlig, historikk.omregnetÅrsinntekt(1.januar, 1.januar, Arbeidsforholdhistorikk())?.omregnetÅrsinntekt())
+        assertEquals(31000.månedlig, historikk.omregnetÅrsinntekt(1.februar, 1.februar, Arbeidsforholdhistorikk())?.omregnetÅrsinntekt())
     }
 
     @Test
@@ -75,7 +100,31 @@ internal class InntektshistorikkTest {
         inntektsmelding(førsteFraværsdag = 1.januar).addInntekt(historikk, 1.januar, MaskinellJurist())
         assertEquals(1, inspektør.inntektTeller.size)
         assertEquals(1, inspektør.inntektTeller.first())
-        assertNull(historikk.omregnetÅrsinntekt(2.januar, 2.januar))
+        assertNull(historikk.omregnetÅrsinntekt(2.januar, 2.januar, Arbeidsforholdhistorikk()))
+    }
+
+    @Test
+    fun `sammenligningsgrunnlag for arbeidsgiver med nytt arbeidsforhold`() {
+        val arbeidsforholdhistorikk = Arbeidsforholdhistorikk()
+        arbeidsforholdhistorikk.lagre(listOf(
+            Arbeidsforholdhistorikk.Arbeidsforhold(1.januar, null, false)
+        ), 1.februar)
+        val opplysning = historikk.rapportertInntekt(1.februar, arbeidsforholdhistorikk)
+        assertNotNull(opplysning)
+        assertEquals(Inntektshistorikk.IkkeRapportert::class, opplysning::class)
+        assertEquals(INGEN, opplysning.rapportertInntekt())
+    }
+
+    @Test
+    fun `sammenligningsgrunnlag for arbeidsgiver med nytt deaktivert arbeidsforhold`() {
+        val arbeidsforholdhistorikk = Arbeidsforholdhistorikk()
+        arbeidsforholdhistorikk.lagre(listOf(
+            Arbeidsforholdhistorikk.Arbeidsforhold(1.januar, null, true)
+        ), 1.februar)
+        val opplysning = historikk.rapportertInntekt(1.februar, arbeidsforholdhistorikk)
+        assertNotNull(opplysning)
+        assertEquals(Inntektshistorikk.IkkeRapportert::class, opplysning::class)
+        assertEquals(INGEN, opplysning.rapportertInntekt())
     }
 
     @Test
@@ -104,7 +153,7 @@ internal class InntektshistorikkTest {
         assertEquals(2, inspektør.inntektTeller.size)
         assertEquals(30, inspektør.inntektTeller.first())
         assertEquals(17, inspektør.inntektTeller.last())
-        assertEquals(254000.årlig, historikk.rapportertInntekt(31.desember(2017))?.rapportertInntekt())
+        assertEquals(254000.årlig, historikk.rapportertInntekt(31.desember(2017), Arbeidsforholdhistorikk())?.rapportertInntekt())
     }
 
     @Test
@@ -133,7 +182,7 @@ internal class InntektshistorikkTest {
         assertEquals(2, inspektør.inntektTeller.size)
         assertEquals(30, inspektør.inntektTeller.first())
         assertEquals(17, inspektør.inntektTeller.last())
-        assertEquals(258000.årlig, historikk.rapportertInntekt(1.januar)?.rapportertInntekt())
+        assertEquals(258000.årlig, historikk.rapportertInntekt(1.januar, Arbeidsforholdhistorikk())?.rapportertInntekt())
     }
 
     @Test
@@ -162,7 +211,7 @@ internal class InntektshistorikkTest {
         assertEquals(2, inspektør.inntektTeller.size)
         assertEquals(30, inspektør.inntektTeller.first())
         assertEquals(17, inspektør.inntektTeller.last())
-        assertEquals(256000.årlig, historikk.omregnetÅrsinntekt(31.desember(2017), 31.desember(2017))?.omregnetÅrsinntekt())
+        assertEquals(256000.årlig, historikk.omregnetÅrsinntekt(31.desember(2017), 31.desember(2017), Arbeidsforholdhistorikk())?.omregnetÅrsinntekt())
     }
 
     @Test
@@ -191,7 +240,7 @@ internal class InntektshistorikkTest {
         assertEquals(2, inspektør.inntektTeller.size)
         assertEquals(30, inspektør.inntektTeller.first())
         assertEquals(17, inspektør.inntektTeller.last())
-        assertEquals(392000.årlig, historikk.omregnetÅrsinntekt(1.januar, 1.januar)?.omregnetÅrsinntekt())
+        assertEquals(392000.årlig, historikk.omregnetÅrsinntekt(1.januar, 1.januar, Arbeidsforholdhistorikk())?.omregnetÅrsinntekt())
     }
 
     @Test
@@ -206,7 +255,7 @@ internal class InntektshistorikkTest {
         }.forEach { it.lagreInntekter(historikk, 1.januar, UUID.randomUUID()) }
         assertEquals(1, inspektør.inntektTeller.size)
         assertEquals(22, inspektør.inntektTeller.first())
-        assertEquals(INNTEKT, historikk.omregnetÅrsinntekt(1.januar, 1.januar)?.omregnetÅrsinntekt())
+        assertEquals(INNTEKT, historikk.omregnetÅrsinntekt(1.januar, 1.januar, Arbeidsforholdhistorikk())?.omregnetÅrsinntekt())
     }
 
     @Test
@@ -216,7 +265,7 @@ internal class InntektshistorikkTest {
                 ORGNUMMER inntekt INNTEKT * -1
             }
         }.forEach { it.lagreInntekter(historikk, 1.januar, UUID.randomUUID()) }
-        val inntektsopplysning = historikk.omregnetÅrsinntekt(1.januar, 1.januar)
+        val inntektsopplysning = historikk.omregnetÅrsinntekt(1.januar, 1.januar, Arbeidsforholdhistorikk())
         assertTrue(inntektsopplysning is Inntektshistorikk.SkattComposite)
         assertEquals(INGEN, inntektsopplysning?.omregnetÅrsinntekt())
     }
@@ -254,8 +303,8 @@ internal class InntektshistorikkTest {
         assertEquals(2, inspektør.inntektTeller.size)
         assertEquals(22, inspektør.inntektTeller.first())
         assertEquals(13, inspektør.inntektTeller.last())
-        assertEquals(INNTEKT, historikk.omregnetÅrsinntekt(1.januar, 1.januar)?.omregnetÅrsinntekt())
-        assertNull(historikk.omregnetÅrsinntekt(15.januar, 15.januar))
+        assertEquals(INNTEKT, historikk.omregnetÅrsinntekt(1.januar, 1.januar, Arbeidsforholdhistorikk())?.omregnetÅrsinntekt())
+        assertNull(historikk.omregnetÅrsinntekt(15.januar, 15.januar, Arbeidsforholdhistorikk()))
     }
 
     @Test
@@ -273,7 +322,7 @@ internal class InntektshistorikkTest {
         assertEquals(2, inspektør.inntektTeller.size)
         assertEquals(9, inspektør.inntektTeller.first())
         assertEquals(13, inspektør.inntektTeller.last())
-        assertNull(historikk.omregnetÅrsinntekt(1.januar, 1.januar))
+        assertNull(historikk.omregnetÅrsinntekt(1.januar, 1.januar, Arbeidsforholdhistorikk()))
     }
 
     @Test
@@ -294,7 +343,7 @@ internal class InntektshistorikkTest {
         inspektør.inntektTeller.forEach {
             assertEquals(22, it)
         }
-        assertEquals(INNTEKT, historikk.omregnetÅrsinntekt(1.januar, 1.januar)?.omregnetÅrsinntekt())
+        assertEquals(INNTEKT, historikk.omregnetÅrsinntekt(1.januar, 1.januar, Arbeidsforholdhistorikk())?.omregnetÅrsinntekt())
     }
 
     @Test
@@ -308,7 +357,7 @@ internal class InntektshistorikkTest {
             }.forEach { it.lagreInntekter(historikk, 1.januar, meldingsreferanseId) }
         }
         assertEquals(13, inspektør.inntektTeller.first())
-        assertEquals(INNTEKT, historikk.rapportertInntekt(1.januar)?.rapportertInntekt())
+        assertEquals(INNTEKT, historikk.rapportertInntekt(1.januar, Arbeidsforholdhistorikk())?.rapportertInntekt())
     }
 
     @Test

@@ -43,11 +43,18 @@ internal class Inntektshistorikk private constructor(private val historikk: Muta
 
     internal fun isNotEmpty() = historikk.isNotEmpty()
 
-    internal fun omregnetÅrsinntekt(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?): Inntektsopplysning? =
-        nyesteInnslag()?.omregnetÅrsinntekt(skjæringstidspunkt, førsteFraværsdag)
+    internal fun omregnetÅrsinntekt(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?, arbeidsforholdhistorikk: Arbeidsforholdhistorikk): Inntektsopplysning? =
+        nyesteInnslag()?.omregnetÅrsinntekt(skjæringstidspunkt, førsteFraværsdag) ?: nyoppstartetArbeidsforhold(skjæringstidspunkt, arbeidsforholdhistorikk)
 
-    internal fun rapportertInntekt(dato: LocalDate): Inntektsopplysning? =
-        nyesteInnslag()?.rapportertInntekt(dato)
+    internal fun rapportertInntekt(dato: LocalDate, arbeidsforholdhistorikk: Arbeidsforholdhistorikk): Inntektsopplysning? =
+        nyesteInnslag()?.rapportertInntekt(dato) ?: nyoppstartetArbeidsforhold(dato,  arbeidsforholdhistorikk)
+
+    private fun nyoppstartetArbeidsforhold(skjæringstidspunkt: LocalDate, arbeidsforholdhistorikk: Arbeidsforholdhistorikk) =
+        IkkeRapportert(UUID.randomUUID(), skjæringstidspunkt).takeIf {
+            arbeidsforholdhistorikk.harArbeidsforholdNyereEnn(skjæringstidspunkt,
+                Arbeidsforholdhistorikk.Arbeidsforhold.MAKS_INNTEKT_GAP
+            )
+        }
 
     internal class Innslag private constructor(private val id: UUID, private val inntekter: List<Inntektsopplysning>) {
         constructor(inntekter: List<Inntektsopplysning> = emptyList()) : this(UUID.randomUUID(), inntekter)
