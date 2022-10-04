@@ -182,12 +182,12 @@ internal fun AbstractPersonTest.assertVarsel(varsel: Varselkode, vararg filtre: 
 
 internal fun AbstractPersonTest.assertIngenVarsel(warning: String, vararg filtre: AktivitetsloggFilter) {
     val warnings = collectVarsler(*filtre)
-    assertFalse(warnings.contains(warning), "\nFant ikke-forventet warning:\n\t$warning\nWarnings funnet:\n\t${warnings.joinToString("\n\t")}\n")
+    assertFalse(warnings.contains(warning), "\nFant et varsel vi ikke forventet:\n\t$warning\nWarnings funnet:\n\t${warnings.joinToString("\n\t")}\n")
 }
 
 internal fun AbstractPersonTest.assertIngenVarsel(varselkode: Varselkode, vararg filtre: AktivitetsloggFilter) {
     val varselkoder = collectVarselkoder(*filtre)
-    assertFalse(varselkoder.contains(varselkode), "\nFant ikke-forventet varselkode:\n\t$varselkode\nVarselkoder funnet:\n\t${varselkoder.joinToString("\n\t")}\n")
+    assertFalse(varselkoder.contains(varselkode), "\nFant en varselkode vi ikke forventet:\n\t$varselkode\nVarselkoder funnet:\n\t${varselkoder.joinToString("\n\t")}\n")
 }
 
 internal fun AbstractEndToEndTest.assertFunksjonellFeil(error: String, vararg filtre: AktivitetsloggFilter) {
