@@ -708,12 +708,6 @@ class Person private constructor(
 
     private fun arbeidsgivereMedSykdom() = arbeidsgivere.filter(Arbeidsgiver::harSykdom)
 
-    internal fun kunOvergangFraInfotrygd(vedtaksperiode: Vedtaksperiode) =
-        Arbeidsgiver.kunOvergangFraInfotrygd(arbeidsgivere, vedtaksperiode)
-
-    internal fun ingenUkjenteArbeidsgivere(vedtaksperiode: Vedtaksperiode, skjæringstidspunkt: LocalDate) =
-        Arbeidsgiver.ingenUkjenteArbeidsgivere(arbeidsgivere, vedtaksperiode, infotrygdhistorikk, skjæringstidspunkt)
-
     internal fun sykdomshistorikkEndret(aktivitetslogg: IAktivitetslogg) {
         vilkårsgrunnlagHistorikk.oppdaterHistorikk(aktivitetslogg, skjæringstidspunkter())
     }

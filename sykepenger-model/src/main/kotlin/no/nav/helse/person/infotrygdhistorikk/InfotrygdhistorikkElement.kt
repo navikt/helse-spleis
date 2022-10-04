@@ -136,9 +136,6 @@ class InfotrygdhistorikkElement private constructor(
         return Periodetype.INFOTRYGDFORLENGELSE
     }
 
-    internal fun ingenUkjenteArbeidsgivere(organisasjonsnumre: List<String>, dato: LocalDate): Boolean {
-        return perioder.none { it.utbetalingEtter(organisasjonsnumre, dato) }
-    }
 
     internal fun sykdomstidslinje(orgnummer: String, sykdomstidslinje: Sykdomstidslinje = Sykdomstidslinje()): Sykdomstidslinje {
         return perioder.fold(sykdomstidslinje) { result, periode ->

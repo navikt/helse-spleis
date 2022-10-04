@@ -22,7 +22,6 @@ abstract class Infotrygdperiode(fom: LocalDate, tom: LocalDate) : Periode(fom, t
 
     internal open fun gjelder(nødnummer: Nødnummer) = false
     internal open fun gjelder(orgnummer: String) = true
-    internal open fun utbetalingEtter(orgnumre: List<String>, dato: LocalDate) = false
 
     override fun hashCode() = Objects.hash(this::class, start, endInclusive)
     override fun equals(other: Any?): Boolean {

@@ -47,7 +47,6 @@ import no.nav.helse.person.Dokumentsporing.Companion.søknadIder
 import no.nav.helse.person.ForlengelseFraInfotrygd.IKKE_ETTERSPURT
 import no.nav.helse.person.InntektsmeldingInfo.Companion.ider
 import no.nav.helse.person.Periodetype.FØRSTEGANGSBEHANDLING
-import no.nav.helse.person.Periodetype.OVERGANG_FRA_IT
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_ARBEIDSGIVERE_REVURDERING
@@ -1570,7 +1569,6 @@ internal class Vedtaksperiode private constructor(
             infotrygdhistorikk: Infotrygdhistorikk,
             arbeidsgiverUtbetalingerFun: (SubsumsjonObserver) -> ArbeidsgiverUtbetalinger
         ) {
-            val periodetype = vedtaksperiode.periodetype
             validation(ytelser) {
                 onValidationFailed {
                     if (!ytelser.harFunksjonelleFeilEllerVerre()) funksjonellFeil("Behandling av Ytelser feilet, årsak ukjent")
@@ -1588,15 +1586,7 @@ internal class Vedtaksperiode private constructor(
                     )
                 }
                 valider { ytelser.valider(vedtaksperiode.periode, vedtaksperiode.skjæringstidspunkt) }
-                validerHvis("Har ikke overgang for alle arbeidsgivere i Infotrygd", periodetype == OVERGANG_FRA_IT) {
-                    person.kunOvergangFraInfotrygd(vedtaksperiode)
-                }
-                validerHvis(
-                    "Har utbetalinger fra andre arbeidsgivere etter skjæringstidspunktet",
-                    periodetype == OVERGANG_FRA_IT
-                ) {
-                    person.ingenUkjenteArbeidsgivere(vedtaksperiode, vedtaksperiode.skjæringstidspunkt)
-                }
+
                 onSuccess {
                     if (person.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt) == null) {
                         return@håndter vedtaksperiode.tilstand(ytelser, AvventerVilkårsprøving) {
@@ -1605,6 +1595,7 @@ internal class Vedtaksperiode private constructor(
                         }
                     }
                 }
+
                 lateinit var vilkårsgrunnlag: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement
                 onSuccess {
                     vilkårsgrunnlag = requireNotNull(person.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt))
@@ -2551,11 +2542,6 @@ internal class Vedtaksperiode private constructor(
             val tom = maxOf { it.periode.endInclusive }
             return Periode(fom, tom)
         }
-
-        internal fun kunOvergangFraInfotrygd(vedtaksperiode: Vedtaksperiode, vedtaksperioder: List<Vedtaksperiode>) =
-            vedtaksperioder
-                .filter { it.periode().overlapperMed(vedtaksperiode.periode()) }
-                .all { it.periodetype == OVERGANG_FRA_IT }
 
         internal fun arbeidsgiverperiodeFor(
             person: Person,

@@ -217,23 +217,6 @@ internal class Arbeidsgiver private constructor(
         internal fun List<Arbeidsgiver>.deaktiverteArbeidsforhold(skjæringstidspunkt: LocalDate) =
             this.filter { it.arbeidsforholdhistorikk.harDeaktivertArbeidsforhold(skjæringstidspunkt) }
 
-        internal fun kunOvergangFraInfotrygd(
-            arbeidsgivere: Iterable<Arbeidsgiver>,
-            vedtaksperiode: Vedtaksperiode
-        ) = Vedtaksperiode.kunOvergangFraInfotrygd(vedtaksperiode, arbeidsgivere.flatMap { it.vedtaksperioder })
-
-        internal fun ingenUkjenteArbeidsgivere(
-            arbeidsgivere: Iterable<Arbeidsgiver>,
-            vedtaksperiode: Vedtaksperiode,
-            infotrygdhistorikk: Infotrygdhistorikk,
-            skjæringstidspunkt: LocalDate
-        ): Boolean {
-            val orgnumre = arbeidsgivere
-                .filter { arbeidsgiver -> arbeidsgiver.vedtaksperioder.any { it.periode().overlapperMed(vedtaksperiode.periode()) } }
-                .map { it.organisasjonsnummer }
-                .distinct()
-            return infotrygdhistorikk.ingenUkjenteArbeidsgivere(orgnumre, skjæringstidspunkt)
-        }
 
         internal fun skjæringstidspunkt(arbeidsgivere: List<Arbeidsgiver>, periode: Periode, infotrygdhistorikk: Infotrygdhistorikk) =
             infotrygdhistorikk.skjæringstidspunkt(periode, arbeidsgivere.map(Arbeidsgiver::sykdomstidslinje))

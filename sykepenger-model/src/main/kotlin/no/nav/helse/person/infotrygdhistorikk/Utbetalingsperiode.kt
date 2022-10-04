@@ -70,8 +70,6 @@ abstract class Utbetalingsperiode(
 
     override fun gjelder(nødnummer: Nødnummer) = this.orgnr in nødnummer
     override fun gjelder(orgnummer: String) = orgnummer == this.orgnr
-    override fun utbetalingEtter(orgnumre: List<String>, dato: LocalDate) =
-        start >= dato && this.orgnr !in orgnumre
 
     override fun equals(other: Any?): Boolean {
         if (!super.equals(other)) return false
