@@ -27,6 +27,8 @@ enum class Varselkode(
     RV_SØ_14("Mottatt flere søknader for annen periode enn siste skjæringstidspunkt"),
     RV_SØ_15("Mottatt flere søknader for perioden - siste søknad inneholder arbeidsdag"),
     RV_SØ_16("Mottatt flere søknader for perioden - det støttes ikke før replay av hendelser er på plass"),
+    RV_SØ_17("Søker er ikke gammel nok på søknadstidspunktet til å søke sykepenger uten fullmakt fra verge"),
+    RV_SØ_18("Søknaden inneholder andre inntektskilder enn ANDRE_ARBEIDSFORHOLD"),
 
     // OO: Out-of-order
     RV_OO_1("Det er behandlet en søknad i Speil for en senere periode enn denne."),

@@ -48,7 +48,6 @@ class Søknad(
 
     internal companion object {
         internal const val tidslinjegrense = 40L
-        internal const val ERRORTEKST_PERSON_UNDER_18_ÅR = "Søker er ikke gammel nok på søknadstidspunktet til å søke sykepenger uten fullmakt fra verge"
     }
 
     init {
@@ -88,7 +87,7 @@ class Søknad(
     }
 
     internal fun forUng(alder: Alder) = alder.forUngForÅSøke(sendtTilNAVEllerArbeidsgiver.toLocalDate()).also {
-        if (it) funksjonellFeil(ERRORTEKST_PERSON_UNDER_18_ÅR)
+        if (it) funksjonellFeil(RV_SØ_17)
     }
     private fun avskjæringsdato(): LocalDate = when (korrigerer) {
         null -> sendtTilNAVEllerArbeidsgiver.toLocalDate().minusMonths(3).withDayOfMonth(1)
@@ -253,7 +252,7 @@ class Søknad(
             if (type == "ANNET") {
                 aktivitetslogg.varsel(RV_SØ_9)
             } else if (type != "ANDRE_ARBEIDSFORHOLD") {
-                aktivitetslogg.funksjonellFeil("Søknaden inneholder andre inntektskilder enn ANDRE_ARBEIDSFORHOLD")
+                aktivitetslogg.funksjonellFeil(RV_SØ_18)
             }
         }
 
