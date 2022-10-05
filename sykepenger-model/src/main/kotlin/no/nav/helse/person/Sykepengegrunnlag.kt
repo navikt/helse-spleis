@@ -29,6 +29,7 @@ import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Prosent
@@ -93,6 +94,10 @@ internal class Sykepengegrunnlag(
     internal fun begrunnelse(begrunnelser: MutableList<Begrunnelse>) {
         if (oppfyllerMinsteinntektskrav) return
         begrunnelser.add(if (forhøyetInntektskrav) Begrunnelse.MinimumInntektOver67 else Begrunnelse.MinimumInntekt)
+    }
+
+    internal fun avvis(tidslinjer: List<Utbetalingstidslinje>) {
+
     }
 
     internal fun valider(aktivitetslogg: IAktivitetslogg): Boolean {

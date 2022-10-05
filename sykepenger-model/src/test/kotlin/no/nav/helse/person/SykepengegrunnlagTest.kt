@@ -11,8 +11,11 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
+import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.NullObserver
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest.Companion.INNTEKT
 import no.nav.helse.sykepengegrunnlag
+import no.nav.helse.testhelpers.NAV
+import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.utbetalingstidslinje.Alder.Companion.alder
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.økonomi.Inntekt
@@ -93,6 +96,20 @@ internal class SykepengegrunnlagTest {
         assertFalse(validert)
         assertTrue(aktivitetslogg.harVarslerEllerVerre())
         assertFalse(observer.`§ 8-51 ledd 2`)
+    }
+
+    @Test
+    fun `minimum inntekt ved overgang til 67 år - var innenfor før fylte 67 år`() {
+        val alder = fødseldato67år.alder
+        val skjæringstidspunkt = 1.januar(2021)
+        val `1G` = Grunnbeløp.`1G`.beløp(skjæringstidspunkt)
+
+        val sykepengegrunnlag = (`1G`).sykepengegrunnlag(alder, "orgnr", skjæringstidspunkt, NullObserver)
+
+        val tidslinje = tidslinjeOf(31.NAV, 28.NAV, startDato = skjæringstidspunkt, skjæringstidspunkter = listOf(skjæringstidspunkt))
+        sykepengegrunnlag.avvis(listOf(tidslinje))
+
+        assertEquals(28, tidslinje.inspektør.avvistDagTeller)
     }
 
     @Test
