@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import java.time.LocalDate
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
+import no.nav.helse.erRettFør
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.serde.migration.Sykefraværstilfeller.Sykefraværstilfelle
@@ -31,7 +32,9 @@ internal object BrukteVilkårsgrunnlag {
         any { it.overlapperMed(periode) || it.erRettFør(periode) }
 
     private fun List<JsonNode>.finnInfotrygdVilkårsgrunnlag(sykefraværstilfelle: Periode): JsonNode? {
-        val infotrygdVilkårsgrunnlag = filter { it.fraInfotrygd }.filter { it.skjæringstidspunkt in sykefraværstilfelle }
+        val infotrygdVilkårsgrunnlag = this
+            .filter { it.fraInfotrygd }
+            .filter { it.skjæringstidspunkt in sykefraværstilfelle || sykefraværstilfelle.endInclusive.erRettFør(it.skjæringstidspunkt) }
         return infotrygdVilkårsgrunnlag.lastOrNull { it.gyldigSykepengegrunnlag } ?: infotrygdVilkårsgrunnlag.lastOrNull()
     }
 

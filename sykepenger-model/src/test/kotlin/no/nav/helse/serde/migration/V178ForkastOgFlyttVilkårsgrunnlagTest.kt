@@ -162,6 +162,13 @@ internal class V178ForkastOgFlyttVilkårsgrunnlagTest : MigrationTest(V178Forkas
             expectedJson = "/migrations/178/duplikate_skjæringstidspunkt_expected.json"
         )
     }
+    @Test
+    fun `velger vilkårsgrunnlag fra Infotrygd også om det ligger første ukedag etter sykefraværstilfellet opphører`() {
+        assertForkastetVilkårsgrunnlag(
+            originalJson = "/migrations/178/vilkårsgrunnlag-fra-infotrygd-dagen-etter-sykefraværstilfellet_original.json",
+            expectedJson = "/migrations/178/vilkårsgrunnlag-fra-infotrygd-dagen-etter-sykefraværstilfellet_expected.json"
+        )
+    }
 
     private fun assertForkastetVilkårsgrunnlag(originalJson: String, expectedJson: String) {
         val migrert = migrer(originalJson.readResource())
