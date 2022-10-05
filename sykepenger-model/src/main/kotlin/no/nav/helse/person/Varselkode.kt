@@ -21,6 +21,8 @@ enum class Varselkode(
     RV_SØ_8("Utenlandsopphold oppgitt i perioden i søknaden."),
     RV_SØ_9("Det er oppgitt annen inntektskilde i søknaden. Vurder inntekt."),
     RV_SØ_10("Den sykmeldte har oppgitt å ha andre arbeidsforhold med sykmelding i søknaden."),
+    RV_SØ_11("Mottatt søknad out of order"),
+    RV_SØ_12("Mottatt overlappende søknad"),
 
     // OO: Out-of-order
     RV_OO_1("Det er behandlet en søknad i Speil for en senere periode enn denne."),

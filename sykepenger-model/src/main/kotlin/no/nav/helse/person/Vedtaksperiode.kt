@@ -74,6 +74,8 @@ import no.nav.helse.person.Varselkode.RV_OO_2
 import no.nav.helse.person.Varselkode.RV_RV_1
 import no.nav.helse.person.Varselkode.RV_SI_2
 import no.nav.helse.person.Varselkode.RV_SV_2
+import no.nav.helse.person.Varselkode.RV_SØ_11
+import no.nav.helse.person.Varselkode.RV_SØ_12
 import no.nav.helse.person.Varselkode.RV_UT_1
 import no.nav.helse.person.Varselkode.RV_VV_1
 import no.nav.helse.person.Varselkode.RV_VV_2
@@ -881,8 +883,8 @@ internal class Vedtaksperiode private constructor(
         }
 
         fun nyPeriodeTidligereEllerOverlappende(vedtaksperiode: Vedtaksperiode, ny: Vedtaksperiode, hendelse: Søknad) {
-            if (ny før vedtaksperiode) hendelse.funksjonellFeil("Mottatt søknad out of order")
-            if (ny.periode().overlapperMed(vedtaksperiode.periode())) hendelse.funksjonellFeil("Mottatt overlappende søknad")
+            if (ny før vedtaksperiode) hendelse.funksjonellFeil(RV_SØ_11)
+            if (ny.periode().overlapperMed(vedtaksperiode.periode())) hendelse.funksjonellFeil(RV_SØ_12)
             vedtaksperiode.forkast(hendelse)
         }
 
