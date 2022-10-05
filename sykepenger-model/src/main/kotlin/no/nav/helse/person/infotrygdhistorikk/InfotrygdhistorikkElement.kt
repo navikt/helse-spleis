@@ -10,6 +10,7 @@ import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.InfotrygdhistorikkVisitor
 import no.nav.helse.person.Periodetype
 import no.nav.helse.person.SykdomstidslinjeVisitor
+import no.nav.helse.person.Varselkode.RV_IT_14
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Dag.Companion.sammenhengendeSykdom
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -175,7 +176,7 @@ class InfotrygdhistorikkElement private constructor(
 
     private fun validerBetaltRettFør(periode: Periode, aktivitetslogg: IAktivitetslogg){
         if (!harBetaltRettFør(periode)) return
-        aktivitetslogg.funksjonellFeil("Forlenger en Infotrygdperiode på tvers av arbeidsgivere")
+        aktivitetslogg.funksjonellFeil(RV_IT_14)
     }
 
     private fun validerUgyldigePerioder(aktivitetslogg: IAktivitetslogg) {
