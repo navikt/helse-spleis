@@ -38,19 +38,22 @@ internal object BrukteVilkårsgrunnlag {
         return infotrygdVilkårsgrunnlag.lastOrNull { it.gyldigSykepengegrunnlag } ?: infotrygdVilkårsgrunnlag.lastOrNull()
     }
 
-    private fun List<JsonNode>.finnSpleisVilkårsgrunnlag(skjæringtidspunkter: Set<LocalDate>): JsonNode? {
-        return filter { it.fraSpleis }.lastOrNull { it.skjæringstidspunkt in skjæringtidspunkter }
-    }
+    private fun List<JsonNode>.finnSpleisVilkårsgrunnlag(skjæringtidspunkter: Set<LocalDate>) =
+        filter { it.fraSpleis }.lastOrNull { it.skjæringstidspunkt in skjæringtidspunkter }
+
+    private fun List<JsonNode>.finnSpleisVilkårsgrunnlag(sykefraværstilfelle: Periode) =
+        filter { it.fraSpleis }.lastOrNull { it.skjæringstidspunkt in sykefraværstilfelle }
 
     private fun List<JsonNode>.finnRiktigVilkårsgrunnlag(
         sykefraværstilfelle: Sykefraværstilfelle,
         perioderUtbetaltIInfotrygd: List<Periode>,
-        periode: (sykefraværstilfelle: Sykefraværstilfelle) -> Periode): JsonNode? {
+        periode: (sykefraværstilfelle: Sykefraværstilfelle) -> Periode,
+        ingenVilkårsgrunnlag: (sorterteVilkårgrunnlag: List<JsonNode>) -> JsonNode? = { null }): JsonNode? {
         val benyttetPeriode = periode(sykefraværstilfelle)
         val fraInfotrygd = finnInfotrygdVilkårsgrunnlag(benyttetPeriode)
         val fraSpleis = finnSpleisVilkårsgrunnlag(sykefraværstilfelle.skjæringstidspunkter)
         return when {
-            fraInfotrygd == null && fraSpleis == null -> null
+            fraInfotrygd == null && fraSpleis == null -> ingenVilkårsgrunnlag(this)
             fraInfotrygd != null && fraSpleis != null -> {
                 if (!fraInfotrygd.gyldigSykepengegrunnlag) fraSpleis
                 else if (perioderUtbetaltIInfotrygd.rettFørEllerOverlapperMed(benyttetPeriode)) fraInfotrygd
@@ -96,8 +99,9 @@ internal object BrukteVilkårsgrunnlag {
         val brukteVilkårsgrunnlag = serdeObjectMapper.createArrayNode().apply {
             sykefraværstilfeller.forEach { sykefraværstilfelle ->
                 val vilkårgrunnlag =
-                    sorterteVilkårsgrunnlag.finnRiktigVilkårsgrunnlag(sykefraværstilfelle, perioderUtbetaltIInfotrygd) { it.periodeFremTilSisteDagISpleis }
-                    ?:sorterteVilkårsgrunnlag.finnRiktigVilkårsgrunnlag(sykefraværstilfelle, perioderUtbetaltIInfotrygd) { it.periode }
+                    sorterteVilkårsgrunnlag.finnRiktigVilkårsgrunnlag(sykefraværstilfelle, perioderUtbetaltIInfotrygd, { it.periodeFremTilSisteDagISpleis })
+                    ?:sorterteVilkårsgrunnlag.finnRiktigVilkårsgrunnlag(sykefraværstilfelle, perioderUtbetaltIInfotrygd, { it.periode })
+                    ?:sorterteVilkårsgrunnlag.finnRiktigVilkårsgrunnlag(sykefraværstilfelle, perioderUtbetaltIInfotrygd, { it.periodeFremTilSisteDagISpleis }) { it.finnSpleisVilkårsgrunnlag(sykefraværstilfelle.periode)}
 
                 if (vilkårgrunnlag == null) {
                     sikkerlogg.info("Fant ikke vilkårsgrunnlag for sykefraværstilfellet ${sykefraværstilfelle.periode} med tilstander ${tilstanderPerSkjæringstidspunkt[sykefraværstilfelle.tidligsteSkjæringstidspunkt]}")
