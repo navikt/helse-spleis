@@ -120,6 +120,7 @@ enum class Varselkode(
     // RV: Revurdering
     RV_RV_1("Denne perioden var tidligere regnet som innenfor arbeidsgiverperioden"),
     RV_RV_2("Forkaster avvist revurdering ettersom vedtaksperioden ikke har tidligere utbetalte utbetalinger."),
+    RV_RV_3("Forespurt revurdering av inntekt hvor personen har flere arbeidsgivere (inkl. ghosts)"),
     ;
 
     init {

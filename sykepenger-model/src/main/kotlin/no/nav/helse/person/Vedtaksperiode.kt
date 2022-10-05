@@ -73,6 +73,7 @@ import no.nav.helse.person.Varselkode.RV_OO_1
 import no.nav.helse.person.Varselkode.RV_OO_2
 import no.nav.helse.person.Varselkode.RV_RV_1
 import no.nav.helse.person.Varselkode.RV_RV_2
+import no.nav.helse.person.Varselkode.RV_RV_3
 import no.nav.helse.person.Varselkode.RV_SI_2
 import no.nav.helse.person.Varselkode.RV_SV_2
 import no.nav.helse.person.Varselkode.RV_SØ_11
@@ -383,7 +384,7 @@ internal class Vedtaksperiode private constructor(
 
     private fun kanRevurdereInntektForFlereArbeidsgivere(hendelse: OverstyrInntekt): Boolean {
         if (Toggle.RevurdereInntektMedFlereArbeidsgivere.disabled && inntektskilde == Inntektskilde.FLERE_ARBEIDSGIVERE) {
-            hendelse.funksjonellFeil("Forespurt revurdering av inntekt hvor personen har flere arbeidsgivere (inkl. ghosts)")
+            hendelse.funksjonellFeil(RV_RV_3)
             return false
         }
         return true

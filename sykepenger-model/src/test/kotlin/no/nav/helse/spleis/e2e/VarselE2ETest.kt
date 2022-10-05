@@ -56,6 +56,7 @@ import no.nav.helse.person.Varselkode.RV_OV_1
 import no.nav.helse.person.Varselkode.RV_RE_1
 import no.nav.helse.person.Varselkode.RV_RV_1
 import no.nav.helse.person.Varselkode.RV_RV_2
+import no.nav.helse.person.Varselkode.RV_RV_3
 import no.nav.helse.person.Varselkode.RV_SI_1
 import no.nav.helse.person.Varselkode.RV_SV_1
 import no.nav.helse.person.Varselkode.RV_SV_2
@@ -813,5 +814,14 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
 
         assertIngenVarsel(RV_RV_2, 1.vedtaksperiode.filter())
         assertFunksjonellFeil("Forkaster avvist revurdering ettersom vedtaksperioden ikke har tidligere utbetalte utbetalinger.", 1.vedtaksperiode.filter())
+    }
+
+    @Test
+    fun `varsel revurdering - Forespurt revurdering av inntekt hvor personen har flere arbeidsgivere (inkl ghosts)`() {
+        nyeVedtak(1.januar, 31.januar, a1, a2)
+        håndterOverstyrInntekt(inntekt = INNTEKT * 1.1, orgnummer = a1, skjæringstidspunkt = 1.januar)
+
+        assertIngenVarsel(RV_RV_3, 1.vedtaksperiode.filter())
+        assertFunksjonellFeil("Forespurt revurdering av inntekt hvor personen har flere arbeidsgivere (inkl. ghosts)", 1.vedtaksperiode.filter())
     }
 }
