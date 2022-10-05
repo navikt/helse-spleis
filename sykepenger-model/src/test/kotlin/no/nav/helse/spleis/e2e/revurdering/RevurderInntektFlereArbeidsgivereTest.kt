@@ -64,6 +64,7 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
             assertTilstander(
                 1.vedtaksperiode,
                 AVSLUTTET,
+                AVVENTER_REVURDERING,
                 AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_SIMULERING_REVURDERING,
@@ -218,6 +219,7 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
             assertTilstander(
                 1.vedtaksperiode,
                 AVSLUTTET,
+                AVVENTER_REVURDERING,
                 AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_SIMULERING_REVURDERING,
@@ -297,6 +299,7 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
             assertTilstander(
                 1.vedtaksperiode,
                 AVSLUTTET,
+                AVVENTER_REVURDERING,
                 AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING,
@@ -345,6 +348,7 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
             assertTilstander(
                 1.vedtaksperiode,
                 AVSLUTTET,
+                AVVENTER_REVURDERING,
                 AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING,
@@ -448,6 +452,7 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
             assertTilstander(
                 2.vedtaksperiode,
                 AVSLUTTET,
+                AVVENTER_REVURDERING,
                 AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_SIMULERING_REVURDERING,
@@ -458,6 +463,7 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
             assertTilstander(
                 1.vedtaksperiode,
                 AVSLUTTET,
+                AVVENTER_REVURDERING,
                 AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVSLUTTET
             )
@@ -497,8 +503,10 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
             assertTilstander(
                 1.vedtaksperiode,
                 AVSLUTTET,
+                AVVENTER_REVURDERING,
                 AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_REVURDERING,
                 AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_SIMULERING_REVURDERING
@@ -523,9 +531,11 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
             assertTilstander(
                 1.vedtaksperiode,
                 AVSLUTTET,
+                AVVENTER_REVURDERING,
                 AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_SIMULERING_REVURDERING,
+                AVVENTER_REVURDERING,
                 AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_SIMULERING_REVURDERING
@@ -551,10 +561,12 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
             assertTilstander(
                 1.vedtaksperiode,
                 AVSLUTTET,
+                AVVENTER_REVURDERING,
                 AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_SIMULERING_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING,
+                AVVENTER_REVURDERING,
                 AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_SIMULERING_REVURDERING

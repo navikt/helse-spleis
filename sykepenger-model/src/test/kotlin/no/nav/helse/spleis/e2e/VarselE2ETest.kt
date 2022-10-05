@@ -22,6 +22,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
+import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.Varselkode
 import no.nav.helse.person.Varselkode.RV_AY_3
 import no.nav.helse.person.Varselkode.RV_AY_4
@@ -488,8 +489,18 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, orgnummer = a2)
 
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)), orgnummer = a1)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        assertVarsel(RV_SV_2)
+        assertForventetFeil(
+            forklaring = "perioden sitter fast fordi vi ikke har nødvendig inntekt for vilkårsprøving." +
+                    "litt usikker på hvordan vi vil håndtere dette. Vedtaksperioden hos a2 vil kastes ut i AvventerBlokkerende," +
+                    "med RV_SV_2 som funksjonell feil.",
+            nå = {
+                assertSisteTilstand(1.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = a1)
+            },
+            ønsket = {
+                håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+                assertVarsel(RV_SV_2)
+            }
+        )
     }
 
     @Test

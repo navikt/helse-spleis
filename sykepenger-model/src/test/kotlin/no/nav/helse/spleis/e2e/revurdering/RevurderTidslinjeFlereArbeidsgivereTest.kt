@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e.revurdering
 
 import java.time.LocalDate
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype.Feriedag
@@ -114,20 +113,10 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
 
         assertIngenFunksjonelleFeil()
 
-        assertForventetFeil(
-            nå = {
-                assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = haandtverkerne)
-                assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = haandtverkerne)
-                assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = aadvokatene)
-                assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, orgnummer = aadvokatene)
-            },
-            ønsket = {
-                assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = haandtverkerne)
-                assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = haandtverkerne)
-                assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = aadvokatene)
-                assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = aadvokatene)
-            }
-        )
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = haandtverkerne)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = haandtverkerne)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = aadvokatene)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = aadvokatene)
     }
 
     @Test
@@ -244,6 +233,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
             assertTilstander(
                 1.vedtaksperiode,
                 AVSLUTTET,
+                AVVENTER_REVURDERING,
                 AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_SIMULERING_REVURDERING,
@@ -291,6 +281,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
             assertTilstander(
                 1.vedtaksperiode,
                 AVSLUTTET,
+                AVVENTER_REVURDERING,
                 AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_SIMULERING_REVURDERING,
@@ -342,12 +333,14 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
             assertTilstander(
                 1.vedtaksperiode,
                 AVSLUTTET,
+                AVVENTER_REVURDERING,
                 AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVSLUTTET
             )
             assertTilstander(
                 2.vedtaksperiode,
                 AVSLUTTET,
+                AVVENTER_REVURDERING,
                 AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_SIMULERING_REVURDERING,
@@ -398,6 +391,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
         assertTilstander(
             1.vedtaksperiode,
             AVSLUTTET,
+            AVVENTER_REVURDERING,
             AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             orgnummer = aadvokatene
@@ -417,21 +411,21 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
         nullstillTilstandsendringer()
 
         håndterOverstyrTidslinje((20.januar til 22.januar).map { manuellFeriedag(it) }, orgnummer = aadvokatene)
-        håndterYtelser(2.vedtaksperiode, orgnummer = aadvokatene)
-        håndterSimulering(2.vedtaksperiode, orgnummer = aadvokatene)
+        håndterYtelser(2.vedtaksperiode, orgnummer = haandtverkerne)
 
-        inspektør(aadvokatene) {
+        inspektør(haandtverkerne) {
             assertTilstander(
                 1.vedtaksperiode,
                 AVSLUTTET,
+                AVVENTER_REVURDERING,
                 AVVENTER_GJENNOMFØRT_REVURDERING
             )
             assertTilstander(
                 2.vedtaksperiode,
                 AVSLUTTET,
+                AVVENTER_REVURDERING,
                 AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
-                AVVENTER_SIMULERING_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING
             )
             assertIngenFunksjonelleFeil()
@@ -441,7 +435,7 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
             assertEquals(1, ikkeUtbetalteUtbetalingerForVedtaksperiode(2.vedtaksperiode).size)
         }
 
-        inspektør(haandtverkerne) {
+        inspektør(aadvokatene) {
             assertTilstander(
                 1.vedtaksperiode,
                 AVSLUTTET,

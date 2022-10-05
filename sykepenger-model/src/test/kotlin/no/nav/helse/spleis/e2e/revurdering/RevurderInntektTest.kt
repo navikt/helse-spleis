@@ -114,6 +114,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
             AVSLUTTET,
+            AVVENTER_REVURDERING,
             AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING,
@@ -212,6 +213,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
             AVSLUTTET,
+            AVVENTER_REVURDERING,
             AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING
         )
@@ -268,6 +270,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
             AVSLUTTET,
+            AVVENTER_REVURDERING,
             AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING,
@@ -313,6 +316,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
             AVSLUTTET,
+            AVVENTER_REVURDERING,
             AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING
         )
@@ -338,6 +342,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
             AVSLUTTET,
+            AVVENTER_REVURDERING,
             AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING
         )
@@ -365,6 +370,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
             AVSLUTTET,
+            AVVENTER_REVURDERING,
             AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING,
@@ -614,6 +620,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
             AVSLUTTET,
+            AVVENTER_REVURDERING,
             AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_GODKJENNING_REVURDERING,
@@ -666,6 +673,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
             AVSLUTTET,
+            AVVENTER_REVURDERING,
             AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_GODKJENNING_REVURDERING,

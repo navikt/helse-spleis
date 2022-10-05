@@ -17,6 +17,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
+import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
@@ -285,7 +286,7 @@ internal class ForkastingTest : AbstractEndToEndTest() {
         person.søppelbøtte(hendelselogg) { true }
         assertEquals(Utbetaling.Utbetalt, inspektør.utbetalingtilstand(0))
         assertEquals(Utbetaling.Ubetalt, inspektør.utbetalingtilstand(1))
-        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING)
     }
 
     @Test
@@ -300,7 +301,7 @@ internal class ForkastingTest : AbstractEndToEndTest() {
         person.søppelbøtte(hendelselogg) { true }
         assertEquals(Utbetaling.Utbetalt, inspektør.utbetalingtilstand(0))
         assertEquals(Utbetaling.Ubetalt, inspektør.utbetalingtilstand(1))
-        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
     }
 
     @Test
@@ -316,7 +317,7 @@ internal class ForkastingTest : AbstractEndToEndTest() {
         person.søppelbøtte(hendelselogg) { true }
         assertEquals(Utbetaling.Utbetalt, inspektør.utbetalingtilstand(0))
         assertEquals(Utbetaling.Sendt, inspektør.utbetalingtilstand(1))
-        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING)
     }
 
     @Test
@@ -332,6 +333,6 @@ internal class ForkastingTest : AbstractEndToEndTest() {
         person.søppelbøtte(hendelselogg) { true }
         assertEquals(Utbetaling.Utbetalt, inspektør.utbetalingtilstand(0))
         assertEquals(Utbetaling.IkkeGodkjent, inspektør.utbetalingtilstand(1))
-        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, REVURDERING_FEILET)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, REVURDERING_FEILET)
     }
 }

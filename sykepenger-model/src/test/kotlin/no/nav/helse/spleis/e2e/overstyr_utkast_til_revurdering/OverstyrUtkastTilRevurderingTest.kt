@@ -17,6 +17,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
+import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
@@ -47,7 +48,7 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.Nav
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -80,10 +81,12 @@ internal class OverstyrUtkastTilRevurderingTest: AbstractEndToEndTest() {
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
             AVSLUTTET,
+            AVVENTER_REVURDERING,
             AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING,
             AVVENTER_GODKJENNING_REVURDERING,
+            AVVENTER_REVURDERING,
             AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING
@@ -104,12 +107,12 @@ internal class OverstyrUtkastTilRevurderingTest: AbstractEndToEndTest() {
         håndterSimulering(2.vedtaksperiode)
 
         // 23075 = round((20000 * 12) / 260) * 25 (25 nav-dager i januar + februar 2018)
-        Assertions.assertEquals(23075, inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.totalbeløp())
-        Assertions.assertEquals(
+        assertEquals(23075, inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.totalbeløp())
+        assertEquals(
             "SSSSSHH SSSSSHH SSSSSFF FFFFFFF FSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS",
             inspektør.sykdomshistorikk.sykdomstidslinje().toShortString().trim()
         )
-        Assertions.assertEquals(
+        assertEquals(
             "PPPPPPP PPPPPPP PPNNNFF FFFFFFF FNNNNHH NNNNNHH NNNNNHH NNNNNHH NNN",
             inspektør.sisteUtbetalingUtbetalingstidslinje().toString().trim()
         )
@@ -125,7 +128,10 @@ internal class OverstyrUtkastTilRevurderingTest: AbstractEndToEndTest() {
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
             AVSLUTTET,
+            AVVENTER_REVURDERING,
             AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_REVURDERING,
             AVVENTER_GJENNOMFØRT_REVURDERING
         )
 
@@ -137,10 +143,12 @@ internal class OverstyrUtkastTilRevurderingTest: AbstractEndToEndTest() {
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
             AVSLUTTET,
+            AVVENTER_REVURDERING,
             AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING,
             AVVENTER_GODKJENNING_REVURDERING,
+            AVVENTER_REVURDERING,
             AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING,
@@ -157,14 +165,14 @@ internal class OverstyrUtkastTilRevurderingTest: AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode)
 
         // 10153 = round((20000 * 12) / 260) * 11 (11 nav-dager i januar 2018)
-        Assertions.assertEquals(10153, inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.totalbeløp())
+        assertEquals(10153, inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.totalbeløp())
 
         håndterOverstyrInntekt(inntekt = 25000.månedlig, skjæringstidspunkt = 1.januar)
         håndterYtelser(1.vedtaksperiode)
         håndterSimulering(1.vedtaksperiode)
 
         // 12694 = round((25000 * 12) / 260) * 11 (11 nav-dager i januar)
-        Assertions.assertEquals(12694, inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.totalbeløp())
+        assertEquals(12694, inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.totalbeløp())
 
         assertTilstander(1.vedtaksperiode,
             START,
@@ -177,10 +185,12 @@ internal class OverstyrUtkastTilRevurderingTest: AbstractEndToEndTest() {
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
             AVSLUTTET,
+            AVVENTER_REVURDERING,
             AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING,
             AVVENTER_GODKJENNING_REVURDERING,
+            AVVENTER_REVURDERING,
             AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING,
@@ -222,11 +232,11 @@ internal class OverstyrUtkastTilRevurderingTest: AbstractEndToEndTest() {
         assertTrue(utbetalinger[0].inspektør.erUtbetalt)
         assertTrue(utbetalinger[1].inspektør.erForkastet)
         assertTrue(utbetalinger[2].inspektør.erUtbetalt)
-        Assertions.assertEquals(
+        assertEquals(
             utbetalinger.first().inspektør.arbeidsgiverOppdrag.nettoBeløp(),
             -1 * utbetalinger.last().inspektør.arbeidsgiverOppdrag.nettoBeløp()
         )
-        Assertions.assertEquals(1, utbetalinger.map { it.inspektør.arbeidsgiverOppdrag.fagsystemId() }.toSet().size)
+        assertEquals(1, utbetalinger.map { it.inspektør.arbeidsgiverOppdrag.fagsystemId() }.toSet().size)
     }
 
 
@@ -240,14 +250,14 @@ internal class OverstyrUtkastTilRevurderingTest: AbstractEndToEndTest() {
         håndterSimulering(2.vedtaksperiode)
 
         // 28613 = round((20000 * 12) / 260) * 31 (31 nav-dager i januar + februar 2018)
-        Assertions.assertEquals(28613, inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.totalbeløp())
+        assertEquals(28613, inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.totalbeløp())
 
         håndterOverstyrInntekt(inntekt = 25000.månedlig, skjæringstidspunkt = 1.januar)
         håndterYtelser(2.vedtaksperiode)
         håndterSimulering(2.vedtaksperiode)
 
         // 35774 = round((25000 * 12) / 260) * 31 (31 nav-dager i januar + februar)
-        Assertions.assertEquals(35774, inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.totalbeløp())
+        assertEquals(35774, inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.totalbeløp())
 
         assertTilstander(1.vedtaksperiode,
             START,
@@ -260,7 +270,10 @@ internal class OverstyrUtkastTilRevurderingTest: AbstractEndToEndTest() {
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
             AVSLUTTET,
+            AVVENTER_REVURDERING,
             AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_REVURDERING,
             AVVENTER_GJENNOMFØRT_REVURDERING
         )
 
@@ -272,10 +285,12 @@ internal class OverstyrUtkastTilRevurderingTest: AbstractEndToEndTest() {
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
             AVSLUTTET,
+            AVVENTER_REVURDERING,
             AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING,
             AVVENTER_GODKJENNING_REVURDERING,
+            AVVENTER_REVURDERING,
             AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING,
@@ -318,6 +333,9 @@ internal class OverstyrUtkastTilRevurderingTest: AbstractEndToEndTest() {
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
             AVSLUTTET,
+            AVVENTER_REVURDERING,
+            AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_REVURDERING,
             AVVENTER_GJENNOMFØRT_REVURDERING,
             AVSLUTTET
         )
@@ -331,10 +349,12 @@ internal class OverstyrUtkastTilRevurderingTest: AbstractEndToEndTest() {
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
             AVSLUTTET,
+            AVVENTER_REVURDERING,
             AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING,
             AVVENTER_GODKJENNING_REVURDERING,
+            AVVENTER_REVURDERING,
             AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING,
@@ -382,6 +402,9 @@ internal class OverstyrUtkastTilRevurderingTest: AbstractEndToEndTest() {
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
             AVSLUTTET,
+            AVVENTER_REVURDERING,
+            AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_REVURDERING,
             AVVENTER_GJENNOMFØRT_REVURDERING,
             AVSLUTTET
         )
@@ -395,7 +418,10 @@ internal class OverstyrUtkastTilRevurderingTest: AbstractEndToEndTest() {
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
             AVSLUTTET,
+            AVVENTER_REVURDERING,
             AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_GJENNOMFØRT_REVURDERING,
+            AVVENTER_REVURDERING,
             AVVENTER_GJENNOMFØRT_REVURDERING,
             AVSLUTTET
         )
@@ -409,10 +435,12 @@ internal class OverstyrUtkastTilRevurderingTest: AbstractEndToEndTest() {
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
             AVSLUTTET,
+            AVVENTER_REVURDERING,
             AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING,
             AVVENTER_GODKJENNING_REVURDERING,
+            AVVENTER_REVURDERING,
             AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING,
@@ -457,6 +485,7 @@ internal class OverstyrUtkastTilRevurderingTest: AbstractEndToEndTest() {
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
             AVSLUTTET,
+            AVVENTER_REVURDERING,
             AVVENTER_GJENNOMFØRT_REVURDERING,
             AVSLUTTET
         )
@@ -470,10 +499,12 @@ internal class OverstyrUtkastTilRevurderingTest: AbstractEndToEndTest() {
             AVVENTER_GODKJENNING,
             TIL_UTBETALING,
             AVSLUTTET,
+            AVVENTER_REVURDERING,
             AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING,
             AVVENTER_GODKJENNING_REVURDERING,
+            AVVENTER_REVURDERING,
             AVVENTER_GJENNOMFØRT_REVURDERING,
             AVVENTER_HISTORIKK_REVURDERING,
             AVVENTER_SIMULERING_REVURDERING,

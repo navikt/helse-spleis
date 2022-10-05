@@ -873,14 +873,6 @@ class Person private constructor(
         }
     }
 
-    internal fun gjenopptaRevurdering(
-        arbeidsgiver: Arbeidsgiver,
-        vedtaksperiode: Vedtaksperiode,
-        hendelse: IAktivitetslogg
-    ) {
-        arbeidsgiver.gjenopptaRevurdering(arbeidsgivere, vedtaksperiode, hendelse)
-    }
-
     internal fun startRevurdering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
         arbeidsgivere.startRevurdering(vedtaksperiode, hendelse)
     }

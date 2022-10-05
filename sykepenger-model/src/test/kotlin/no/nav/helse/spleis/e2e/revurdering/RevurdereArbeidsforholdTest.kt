@@ -95,7 +95,7 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
-            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVSLUTTET)
+            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVSLUTTET)
             (inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }).also { vilkårsgrunnlag ->
                 val sykepengegrunnlagInspektør = vilkårsgrunnlag.sykepengegrunnlag.inspektør
                 val sammenligningsgrunnlagInspektør = vilkårsgrunnlag.sammenligningsgrunnlag1.inspektør
@@ -176,6 +176,7 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
             assertTilstander(
                 1.vedtaksperiode,
                 AVSLUTTET,
+                AVVENTER_REVURDERING,
                 AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_SIMULERING_REVURDERING,
@@ -209,6 +210,7 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
             }
         }
     }
+
     @Test
     fun `deaktiverer arbeidsforhold frem & tilbake, førstegangsbehandling revurderes`() {
         a1 {
@@ -292,10 +294,12 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
             assertTilstander(
                 1.vedtaksperiode,
                 AVSLUTTET,
+                AVVENTER_REVURDERING,
                 AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_SIMULERING_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING,
+                AVVENTER_REVURDERING,
                 AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING,
@@ -429,8 +433,10 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
             assertTilstander(
                 1.vedtaksperiode,
                 AVSLUTTET,
+                AVVENTER_REVURDERING,
                 AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_REVURDERING,
                 AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING,
@@ -537,9 +543,11 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
             assertTilstander(
                 1.vedtaksperiode,
                 AVSLUTTET,
+                AVVENTER_REVURDERING,
                 AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_SIMULERING_REVURDERING,
+                AVVENTER_REVURDERING,
                 AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_GODKJENNING_REVURDERING,
@@ -574,16 +582,17 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
             nullstillTilstandsendringer()
             håndterOverstyrArbeidsforhold(1.januar, ArbeidsforholdOverstyrt(a2, true, "test"))
-            assertTilstander(1.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING)
-            assertTilstander(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+            assertTilstander(1.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING)
+            assertTilstander(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
             håndterUtbetalt()
-            assertTilstander(1.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING, AVSLUTTET)
+            assertTilstander(1.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVSLUTTET)
             assertTilstander(
                 2.vedtaksperiode,
                 AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_REVURDERING,
                 AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_SIMULERING_REVURDERING,
@@ -623,7 +632,7 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
             nullstillTilstandsendringer()
             håndterOverstyrArbeidsforhold(1.mars, ArbeidsforholdOverstyrt(a2, true, "test"))
-            assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+            assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
             assertTilstander(2.vedtaksperiode, AVVENTER_REVURDERING)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -686,6 +695,7 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
             assertTilstander(
                 1.vedtaksperiode,
                 AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_REVURDERING,
                 AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_SIMULERING_REVURDERING,
@@ -808,6 +818,7 @@ internal class RevurderArbeidsforholdTest: AbstractDslTest() {
             assertTilstander(
                 1.vedtaksperiode,
                 AVSLUTTET,
+                AVVENTER_REVURDERING,
                 AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_SIMULERING_REVURDERING,

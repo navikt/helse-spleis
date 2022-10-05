@@ -36,6 +36,7 @@ import no.nav.helse.person.ForkastetVedtaksperiode.Companion.iderMedUtbetaling
 import no.nav.helse.person.Inntektshistorikk.IkkeRapportert
 import no.nav.helse.person.Vedtaksperiode.Companion.ER_ELLER_HAR_VÆRT_AVSLUTTET
 import no.nav.helse.person.Vedtaksperiode.Companion.FØR_AVSLUTTET
+import no.nav.helse.person.Vedtaksperiode.Companion.HAR_PÅGÅENDE_UTBETALINGER
 import no.nav.helse.person.Vedtaksperiode.Companion.IKKE_FERDIG_BEHANDLET
 import no.nav.helse.person.Vedtaksperiode.Companion.IKKE_FERDIG_REVURDERT
 import no.nav.helse.person.Vedtaksperiode.Companion.KLAR_TIL_BEHANDLING
@@ -280,6 +281,7 @@ internal class Arbeidsgiver private constructor(
             .any { !it.sykmeldingsperioder.kanFortsetteBehandling(periode) }
 
         internal fun Iterable<Arbeidsgiver>.gjenopptaBehandling(aktivitetslogg: IAktivitetslogg) {
+            if (nåværendeVedtaksperioder(HAR_PÅGÅENDE_UTBETALINGER).isNotEmpty()) return aktivitetslogg.info("Stopper gjenoppta behandling pga. pågående utbetaling")
             val førstePeriode = (nåværendeVedtaksperioder(IKKE_FERDIG_REVURDERT).takeUnless { it.isEmpty() } ?: nåværendeVedtaksperioder(IKKE_FERDIG_BEHANDLET))
                 .minOrNull() ?: return
             førstePeriode.gjenopptaBehandling(aktivitetslogg, this)
@@ -338,8 +340,9 @@ internal class Arbeidsgiver private constructor(
     internal fun avventerRevurdering() = vedtaksperioder.avventerRevurdering()
     internal fun feiletRevurdering(vedtaksperiode: Vedtaksperiode) = vedtaksperioder.feiletRevurdering(vedtaksperiode)
 
-    internal fun gjenopptaRevurdering(arbeidsgivere: List<Arbeidsgiver>, første: Vedtaksperiode, hendelse: IAktivitetslogg) {
-        Vedtaksperiode.gjenopptaRevurdering(arbeidsgivere, hendelse, vedtaksperioder, første, this)
+    internal fun gjenopptaRevurdering(første: Vedtaksperiode, hendelse: IAktivitetslogg) {
+        håndter(hendelse) { gjenopptaRevurdering(hendelse, første) }
+        vedtaksperioder.last(IKKE_FERDIG_REVURDERT).igangsettRevurdering(hendelse)
     }
 
     internal fun accept(visitor: ArbeidsgiverVisitor) {

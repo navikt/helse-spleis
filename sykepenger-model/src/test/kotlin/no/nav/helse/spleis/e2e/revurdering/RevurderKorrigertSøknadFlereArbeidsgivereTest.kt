@@ -250,10 +250,20 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
                 8,
                 inspektør.sykdomstidslinje.subset(1.januar til 31.januar).inspektør.dagteller[SykHelgedag::class]
             )
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
         }
 
         a2 {
-            assertTilstand(1.vedtaksperiode, AVVENTER_REVURDERING)
+            assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+            håndterYtelser(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        }
+        a1 {
+            assertTilstand(1.vedtaksperiode, AVSLUTTET)
+            assertTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
         }
     }
 
@@ -451,11 +461,18 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
 
         a2 {
             håndterSøknad(Sykdom(25.januar, 25.februar, 50.prosent))
-            assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+            assertTilstand(1.vedtaksperiode, AVVENTER_REVURDERING)
         }
 
         a1 {
-            assertTilstand(1.vedtaksperiode, AVVENTER_REVURDERING)
+            assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+            assertTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
+        }
+
+        a1 {
+            håndterYtelser(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            assertTilstand(1.vedtaksperiode, AVSLUTTET)
             assertTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
         }
 
@@ -472,10 +489,6 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
         }
 
         a1 {
-            håndterYtelser(1.vedtaksperiode)
-            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-            assertTilstand(1.vedtaksperiode, AVSLUTTET)
-            assertTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
             håndterYtelser(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
             assertTilstand(2.vedtaksperiode, AVSLUTTET)
@@ -544,12 +557,18 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
 
         a2 {
             håndterSøknad(Sykdom(25.januar, 25.februar, 50.prosent))
-            assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+            assertTilstand(1.vedtaksperiode, AVVENTER_REVURDERING)
         }
 
         a1 {
-            assertTilstand(1.vedtaksperiode, AVVENTER_REVURDERING)
-            assertTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
+            assertTilstand(1.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING)
+            assertTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+
+            håndterYtelser(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+
+            assertTilstand(1.vedtaksperiode, AVSLUTTET)
+            assertTilstand(2.vedtaksperiode, AVSLUTTET)
         }
 
         a2 {
@@ -557,7 +576,6 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
-
             assertTilstand(1.vedtaksperiode, AVSLUTTET)
             (10..25).forEach {
                 assertEquals(50.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.februar].økonomi.inspektør.grad)
@@ -565,13 +583,6 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
         }
 
         a1 {
-            assertTilstand(1.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING)
-            assertTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
-            håndterYtelser(2.vedtaksperiode)
-            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-            assertTilstand(1.vedtaksperiode, AVSLUTTET)
-            assertTilstand(2.vedtaksperiode, AVSLUTTET)
-
             håndterSøknad(Sykdom(1.januar, 31.januar, 50.prosent))
             assertTilstand(1.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING)
             assertTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
@@ -722,6 +733,8 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
         a2 {
             assertTilstand(1.vedtaksperiode, AVVENTER_REVURDERING)
             håndterSøknad(Sykdom(1.januar, 31.januar, 50.prosent))
+        }
+        a1 {
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -730,7 +743,8 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
                 assertEquals(50.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode)[it.januar].økonomi.inspektør.grad)
             }
         }
-        a1 {
+
+        a2 {
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -748,8 +762,8 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
         nullstillTilstandsendringer()
         a1 {
             håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Dagtype.Feriedag)))
-            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING)
-            assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING)
+            assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
         }
         a2 {
             assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
@@ -757,11 +771,18 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
         }
         a1 {
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(17.januar, 18.januar))
-            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_GJENNOMFØRT_REVURDERING)
+            assertTilstander(1.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_GJENNOMFØRT_REVURDERING,
+                AVVENTER_REVURDERING,
+                AVVENTER_GJENNOMFØRT_REVURDERING)
             assertTilstander(2.vedtaksperiode,
                 AVSLUTTET,
+                AVVENTER_REVURDERING,
                 AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_REVURDERING,
                 AVVENTER_GJENNOMFØRT_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING
             )
