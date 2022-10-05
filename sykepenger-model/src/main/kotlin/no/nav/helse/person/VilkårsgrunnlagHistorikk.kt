@@ -7,6 +7,7 @@ import no.nav.helse.Toggle
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.OverstyrInntekt
+import no.nav.helse.person.Varselkode.RV_IT_16
 import no.nav.helse.person.Varselkode.RV_IV_2
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
@@ -395,7 +396,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                 aktivitetslogg.info("Perioden har opphav i Infotrygd, men saken beholdes i Spleis fordi det er utbetalt i Spleis tidligere.")
                 return
             }
-            aktivitetslogg.funksjonellFeil("Støtter ikke saker med vilkårsgrunnlag i Infotrygd")
+            aktivitetslogg.funksjonellFeil(RV_IT_16)
         }
 
         override fun accept(vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor) {

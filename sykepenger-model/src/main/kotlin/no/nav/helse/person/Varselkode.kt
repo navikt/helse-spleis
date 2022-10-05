@@ -57,6 +57,7 @@ enum class Varselkode(
     RV_IT_13("Støtter ikke overgang fra infotrygd for flere arbeidsgivere"),
     RV_IT_14("Forlenger en Infotrygdperiode på tvers av arbeidsgivere"),
     RV_IT_15("Personen er ikke registrert som normal arbeidstaker i Infotrygd"),
+    RV_IT_16("Støtter ikke saker med vilkårsgrunnlag i Infotrygd"),
 
     // VV: Vilkårsvurdering
     RV_VV_1("Arbeidsgiver er ikke registrert i Aa-registeret."),
