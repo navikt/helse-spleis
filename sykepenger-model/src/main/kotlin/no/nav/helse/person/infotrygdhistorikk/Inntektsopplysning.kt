@@ -7,6 +7,7 @@ import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.InfotrygdhistorikkVisitor
 import no.nav.helse.person.Varselkode.RV_IT_11
 import no.nav.helse.person.Varselkode.RV_IT_12
+import no.nav.helse.person.Varselkode.RV_IT_13
 import no.nav.helse.økonomi.Inntekt
 
 class Inntektsopplysning private constructor(
@@ -73,7 +74,7 @@ class Inntektsopplysning private constructor(
         ) {
             val relevanteInntektsopplysninger = filter { it.erRelevant(skjæringstidspunkt) }
             if (relevanteInntektsopplysninger.distinctBy { it.orgnummer }.size > 1) {
-                return aktivitetslogg.funksjonellFeil("Støtter ikke overgang fra infotrygd for flere arbeidsgivere")
+                return aktivitetslogg.funksjonellFeil(RV_IT_13)
             }
         }
 
