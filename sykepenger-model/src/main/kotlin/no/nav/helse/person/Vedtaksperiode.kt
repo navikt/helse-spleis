@@ -81,6 +81,7 @@ import no.nav.helse.person.Varselkode.RV_SØ_14
 import no.nav.helse.person.Varselkode.RV_SØ_15
 import no.nav.helse.person.Varselkode.RV_SØ_16
 import no.nav.helse.person.Varselkode.RV_UT_1
+import no.nav.helse.person.Varselkode.RV_UT_5
 import no.nav.helse.person.Varselkode.RV_VV_1
 import no.nav.helse.person.Varselkode.RV_VV_2
 import no.nav.helse.person.Varselkode.RV_VV_8
@@ -2083,7 +2084,7 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: UtbetalingHendelse) {
             when {
                 vedtaksperiode.utbetalinger.harFeilet() -> vedtaksperiode.tilstand(hendelse, UtbetalingFeilet) {
-                    hendelse.funksjonellFeil("Utbetaling ble ikke gjennomført")
+                    hendelse.funksjonellFeil(RV_UT_5)
                 }
                 vedtaksperiode.utbetalinger.erUtbetalt() -> vedtaksperiode.tilstand(hendelse, Avsluttet) {
                     hendelse.info("OK fra Oppdragssystemet")
