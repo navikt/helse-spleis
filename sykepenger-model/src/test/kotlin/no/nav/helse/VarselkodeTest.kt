@@ -8,6 +8,7 @@ import no.nav.helse.person.AktivitetsloggTest
 import no.nav.helse.person.Varselkode
 import no.nav.helse.person.Varselkode.RV_IM_6
 import no.nav.helse.person.Varselkode.RV_IM_7
+import no.nav.helse.person.Varselkode.RV_ST_1
 import no.nav.helse.person.Varselkode.RV_UT_3
 import no.nav.helse.person.Varselkode.RV_UT_4
 import no.nav.helse.person.Varselkode.RV_VV_5
@@ -27,7 +28,7 @@ internal class VarselkodeTest {
             removeAll(finnAlleVarselkoderITest().toSet())
         }.toSet()
 
-        val varselkoderSomKjentManglerTest = listOf(RV_VV_5, RV_IM_6, RV_IM_7, RV_UT_3, RV_UT_4, RV_VV_9)
+        val varselkoderSomKjentManglerTest = listOf(RV_VV_5, RV_VV_9, RV_IM_6, RV_IM_7, RV_UT_3, RV_UT_4, RV_ST_1)
 
         val varselkoderSomNåManglerTest = ikkeTestedeVarselkoder.minus(varselkoderSomKjentManglerTest.toSet())
         val (varselkoderSomFortsattBrukes, varselkoderSomIkkeBrukesLenger) = varselkoderSomKjentManglerTest.partition { it in aktiveVarselkoder }

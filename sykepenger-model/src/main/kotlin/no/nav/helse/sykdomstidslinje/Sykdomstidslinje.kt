@@ -13,6 +13,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.nesteDag
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.SykdomstidslinjeVisitor
+import no.nav.helse.person.Varselkode.RV_ST_1
 import no.nav.helse.sykdomstidslinje.Dag.Arbeidsdag
 import no.nav.helse.sykdomstidslinje.Dag.ArbeidsgiverHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.Arbeidsgiverdag
@@ -88,7 +89,7 @@ internal class Sykdomstidslinje private constructor(
             .distinct()
             .onEach {
                 aktivitetslogg.info("Sykdomstidslinjen inneholder ustøttet dag. Problem oppstått fordi: %s", it)
-                aktivitetslogg.funksjonellFeil("Sykdomstidslinjen inneholder ustøttet dag.")
+                aktivitetslogg.funksjonellFeil(RV_ST_1)
             }
             .isEmpty()
     }

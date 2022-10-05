@@ -35,6 +35,9 @@ enum class Varselkode(
     RV_IM_6("Inntektsmelding inneholder ikke beregnet inntekt"),
     RV_IM_7("Brukeren har opphold i naturalytelser"),
 
+    // ST: Sykdomstidslinje
+    RV_ST_1("Sykdomstidslinjen inneholder ustøttet dag."),
+
     // RE: Refusjon
     RV_RE_1("Fant ikke refusjonsgrad for perioden. Undersøk oppgitt refusjon før du utbetaler."),
 
