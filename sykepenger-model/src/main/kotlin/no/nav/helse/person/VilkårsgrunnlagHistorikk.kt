@@ -8,6 +8,7 @@ import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.OverstyrInntekt
 import no.nav.helse.person.Varselkode.RV_IT_16
+import no.nav.helse.person.Varselkode.RV_IT_17
 import no.nav.helse.person.Varselkode.RV_IV_2
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
@@ -388,7 +389,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         vilkårsgrunnlagId: UUID = UUID.randomUUID()
     ) : VilkårsgrunnlagElement(vilkårsgrunnlagId, skjæringstidspunkt, sykepengegrunnlag) {
         override fun validerOverstyrInntekt(overstyrInntekt: OverstyrInntekt) {
-            overstyrInntekt.funksjonellFeil("Forespurt overstyring av inntekt hvor skjæringstidspunktet ligger i infotrygd")
+            overstyrInntekt.funksjonellFeil(RV_IT_17)
         }
 
         override fun valider(aktivitetslogg: IAktivitetslogg, erForlengelse: Boolean) {
