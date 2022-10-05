@@ -76,6 +76,10 @@ import no.nav.helse.person.Varselkode.RV_SI_2
 import no.nav.helse.person.Varselkode.RV_SV_2
 import no.nav.helse.person.Varselkode.RV_SØ_11
 import no.nav.helse.person.Varselkode.RV_SØ_12
+import no.nav.helse.person.Varselkode.RV_SØ_13
+import no.nav.helse.person.Varselkode.RV_SØ_14
+import no.nav.helse.person.Varselkode.RV_SØ_15
+import no.nav.helse.person.Varselkode.RV_SØ_16
 import no.nav.helse.person.Varselkode.RV_UT_1
 import no.nav.helse.person.Varselkode.RV_VV_1
 import no.nav.helse.person.Varselkode.RV_VV_2
@@ -533,23 +537,14 @@ internal class Vedtaksperiode private constructor(
         nesteTilstand()?.also { tilstand(hendelse, it) }
     }
 
-    private fun overlappendeSøknadIkkeStøttet(søknad: Søknad, egendefinertFeiltekst: String? = null) {
-        søknad.funksjonellFeil(
-            egendefinertFeiltekst
-                ?: "Mottatt flere søknader for perioden - det støttes ikke før replay av hendelser er på plass"
-        )
+    private fun overlappendeSøknadIkkeStøttet(søknad: Søknad, egendefinertFeiltekst: Varselkode? = null) {
+        søknad.funksjonellFeil(egendefinertFeiltekst ?: RV_SØ_16)
         forkast(søknad)
     }
 
     private fun håndterOverlappendeSøknad(søknad: Søknad, nesteTilstand: Vedtaksperiodetilstand? = null) {
-        if (søknad.periode().utenfor(periode)) return overlappendeSøknadIkkeStøttet(
-            søknad,
-            "Overlappende søknad starter før, eller slutter etter, opprinnelig periode"
-        )
-        if (søknad.harArbeidsdager()) return overlappendeSøknadIkkeStøttet(
-            søknad,
-            "Mottatt flere søknader for perioden - siste søknad inneholder arbeidsdag"
-        )
+        if (søknad.periode().utenfor(periode)) return overlappendeSøknadIkkeStøttet(søknad, RV_SØ_13)
+        if (søknad.harArbeidsdager()) return overlappendeSøknadIkkeStøttet(søknad, RV_SØ_15)
         håndterSøknad(søknad) { nesteTilstand }
     }
 
@@ -566,9 +561,9 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun validerOverlappendeSøknadRevurdering(søknad: Søknad){
-        if (!søknad.omsluttesAv(periode())) return søknad.funksjonellFeil("Overlappende søknad starter før, eller slutter etter, opprinnelig periode")
-        if (person.harSkjæringstidspunktSenereEnn(skjæringstidspunkt)) return søknad.funksjonellFeil("Mottatt flere søknader for annen periode enn siste skjæringstidspunkt")
-        if (søknad.harArbeidsdager()) return søknad.funksjonellFeil("Mottatt flere søknader for perioden - siste søknad inneholder arbeidsdag")
+        if (!søknad.omsluttesAv(periode())) return søknad.funksjonellFeil(RV_SØ_13)
+        if (person.harSkjæringstidspunktSenereEnn(skjæringstidspunkt)) return søknad.funksjonellFeil(RV_SØ_14)
+        if (søknad.harArbeidsdager()) return søknad.funksjonellFeil(RV_SØ_15)
         søknad.valider(periode, jurist())
     }
 

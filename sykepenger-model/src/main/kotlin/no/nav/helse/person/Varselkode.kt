@@ -23,6 +23,10 @@ enum class Varselkode(
     RV_SØ_10("Den sykmeldte har oppgitt å ha andre arbeidsforhold med sykmelding i søknaden."),
     RV_SØ_11("Mottatt søknad out of order"),
     RV_SØ_12("Mottatt overlappende søknad"),
+    RV_SØ_13("Overlappende søknad starter før, eller slutter etter, opprinnelig periode"),
+    RV_SØ_14("Mottatt flere søknader for annen periode enn siste skjæringstidspunkt"),
+    RV_SØ_15("Mottatt flere søknader for perioden - siste søknad inneholder arbeidsdag"),
+    RV_SØ_16("Mottatt flere søknader for perioden - det støttes ikke før replay av hendelser er på plass"),
 
     // OO: Out-of-order
     RV_OO_1("Det er behandlet en søknad i Speil for en senere periode enn denne."),
