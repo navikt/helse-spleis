@@ -11,6 +11,7 @@ import no.nav.helse.person.InfotrygdhistorikkVisitor
 import no.nav.helse.person.Periodetype
 import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.person.Varselkode.RV_IT_14
+import no.nav.helse.person.Varselkode.RV_IT_15
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Dag.Companion.sammenhengendeSykdom
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -170,7 +171,7 @@ class InfotrygdhistorikkElement private constructor(
         aktivitetslogg.info("Sjekker inntektsopplysninger")
         Inntektsopplysning.valider(inntekter, aktivitetslogg, skjæringstidspunkt, nødnummer)
         aktivitetslogg.info("Sjekker arbeidskategorikoder")
-        if (!erNormalArbeidstaker(skjæringstidspunkt)) aktivitetslogg.funksjonellFeil("Personen er ikke registrert som normal arbeidstaker i Infotrygd")
+        if (!erNormalArbeidstaker(skjæringstidspunkt)) aktivitetslogg.funksjonellFeil(RV_IT_15)
         return !aktivitetslogg.harFunksjonelleFeilEllerVerre()
     }
 

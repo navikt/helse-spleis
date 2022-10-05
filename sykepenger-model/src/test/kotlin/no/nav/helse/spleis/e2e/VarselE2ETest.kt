@@ -40,6 +40,7 @@ import no.nav.helse.person.Varselkode.RV_IT_11
 import no.nav.helse.person.Varselkode.RV_IT_12
 import no.nav.helse.person.Varselkode.RV_IT_13
 import no.nav.helse.person.Varselkode.RV_IT_14
+import no.nav.helse.person.Varselkode.RV_IT_15
 import no.nav.helse.person.Varselkode.RV_IT_4
 import no.nav.helse.person.Varselkode.RV_IV_1
 import no.nav.helse.person.Varselkode.RV_IV_2
@@ -765,8 +766,8 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
                 Inntektsopplysning.ferdigInntektsopplysning(a3, 1.januar, inntekt = INNTEKT, true, null, null)
             )
         )
-        assertFunksjonellFeil("Støtter ikke overgang fra infotrygd for flere arbeidsgivere", 1.vedtaksperiode.filter())
-        assertIngenVarsel(RV_IT_13, 1.vedtaksperiode.filter())
+        assertVarsel(RV_IT_13, 1.vedtaksperiode.filter())
+        assertIngenFunksjonelleFeil(1.vedtaksperiode.filter())
     }
 
     @Test
@@ -784,4 +785,16 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
         assertIngenFunksjonelleFeil(2.vedtaksperiode.filter())
     }
 
+    @Test
+    fun `varsel revurdering - Personen er ikke registrert som normal arbeidstaker i Infotrygd`() {
+        nyttVedtak(1.januar, 31.januar)
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Dagtype.Feriedag)))
+
+        håndterYtelser(
+            arbeidskategorikoder = mapOf("05" to 1.januar)
+        )
+
+        assertVarsel(RV_IT_15, 1.vedtaksperiode.filter())
+        assertIngenFunksjonelleFeil(1.vedtaksperiode.filter())
+    }
 }
