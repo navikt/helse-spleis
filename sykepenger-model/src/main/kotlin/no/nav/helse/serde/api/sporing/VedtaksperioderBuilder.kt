@@ -1,11 +1,17 @@
 package no.nav.helse.serde.api.sporing
 
-import no.nav.helse.hendelser.Periode
-import no.nav.helse.person.*
-import no.nav.helse.serde.api.BuilderState
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
+import no.nav.helse.hendelser.Periode
+import no.nav.helse.person.Dokumentsporing
+import no.nav.helse.person.ForkastetVedtaksperiode
+import no.nav.helse.person.ForlengelseFraInfotrygd
+import no.nav.helse.person.Inntektskilde
+import no.nav.helse.person.InntektsmeldingInfo
+import no.nav.helse.person.Periodetype
+import no.nav.helse.person.Vedtaksperiode
+import no.nav.helse.serde.api.BuilderState
 
 internal class VedtaksperioderBuilder(private val byggerForkastedePerioder: Boolean = false) : BuilderState() {
     private val perioder = mutableListOf<VedtaksperiodeDTO>()
@@ -26,7 +32,7 @@ internal class VedtaksperioderBuilder(private val byggerForkastedePerioder: Bool
         forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
         hendelseIder: Set<Dokumentsporing>,
         inntektsmeldingInfo: InntektsmeldingInfo?,
-        inntektskilde: Inntektskilde
+        inntektskilde: () -> Inntektskilde
     ) {
         perioder.add(VedtaksperiodeDTO(
             id = id,

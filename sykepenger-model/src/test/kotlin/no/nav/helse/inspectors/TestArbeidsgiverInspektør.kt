@@ -88,7 +88,7 @@ internal class TestArbeidsgiverInspektør(
     private var inFeriepengeutbetaling = false
     private val forlengelserFraInfotrygd = mutableMapOf<Int, ForlengelseFraInfotrygd>()
     private val hendelseIder = mutableMapOf<Int, Set<Dokumentsporing>>()
-    private val inntektskilder = mutableMapOf<Int, Inntektskilde>()
+    private val inntektskilder = mutableMapOf<Int, () -> Inntektskilde>()
     private val periodetyper = mutableMapOf<Int, () -> Periodetype>()
     private val sykmeldingsperioder = mutableListOf<Periode>()
 
@@ -172,7 +172,7 @@ internal class TestArbeidsgiverInspektør(
         forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
         hendelseIder: Set<Dokumentsporing>,
         inntektsmeldingInfo: InntektsmeldingInfo?,
-        inntektskilde: Inntektskilde
+        inntektskilde: () -> Inntektskilde
     ) {
         inVedtaksperiode = true
         vedtaksperiodeTeller += 1
@@ -208,7 +208,7 @@ internal class TestArbeidsgiverInspektør(
         forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
         hendelseIder: Set<Dokumentsporing>,
         inntektsmeldingInfo: InntektsmeldingInfo?,
-        inntektskilde: Inntektskilde
+        inntektskilde: () -> Inntektskilde
     ) {
         vedtaksperiodeindeks += 1
         inVedtaksperiode = false
@@ -406,7 +406,7 @@ internal class TestArbeidsgiverInspektør(
             forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
             hendelseIder: Set<Dokumentsporing>,
             inntektsmeldingInfo: InntektsmeldingInfo?,
-            inntektskilde: Inntektskilde
+            inntektskilde: () -> Inntektskilde
         ) {
             vedtaksperiodeId = id
         }
@@ -492,8 +492,8 @@ internal class TestArbeidsgiverInspektør(
 
     internal fun fagsystemId(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperiodeIdInnhenter.finn(fagsystemIder)
 
-    internal fun inntektskilde(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperiodeIdInnhenter.finn(inntektskilder)
-    internal fun inntektskilde(vedtaksperiodeId: UUID) = vedtaksperiodeId.finn(inntektskilder)
+    internal fun inntektskilde(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperiodeIdInnhenter.finn(inntektskilder)()
+    internal fun inntektskilde(vedtaksperiodeId: UUID) = vedtaksperiodeId.finn(inntektskilder)()
 
     internal fun periodetype(vedtaksperiodeIdInnhenter: IdInnhenter) = vedtaksperiodeIdInnhenter.finn(periodetyper)()
 

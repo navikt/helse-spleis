@@ -167,6 +167,7 @@ internal class Vedtaksperiode private constructor(
     internal fun accept(visitor: VedtaksperiodeVisitor) {
         val periodetypeMemoized = this::periodetype.memoized()
         val skjæringstidspunktMemoized = this::skjæringstidspunkt.memoized()
+        val inntektskildeMemoized = this::inntektskilde.memoized()
         visitor.preVisitVedtaksperiode(
             this,
             id,
@@ -181,7 +182,7 @@ internal class Vedtaksperiode private constructor(
             forlengelseFraInfotrygd,
             hendelseIder,
             inntektsmeldingInfo,
-            inntektskilde
+            inntektskildeMemoized
         )
         inntektsmeldingInfo?.accept(visitor)
         sykdomstidslinje.accept(visitor)
@@ -201,7 +202,7 @@ internal class Vedtaksperiode private constructor(
             forlengelseFraInfotrygd,
             hendelseIder,
             inntektsmeldingInfo,
-            inntektskilde
+            inntektskildeMemoized
         )
     }
 

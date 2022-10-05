@@ -630,7 +630,7 @@ class JsonBuilderTest {
                 forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
                 hendelseIder: Set<Dokumentsporing>,
                 inntektsmeldingInfo: InntektsmeldingInfo?,
-                inntektskilde: Inntektskilde
+                inntektskilde: () -> Inntektskilde
             ) {
                 vedtaksperiodeId = id.toString()
                 this@JsonBuilderTest.tilstand = tilstand.type

@@ -241,7 +241,7 @@ internal class JsonBuilder : AbstractBuilder() {
             forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
             hendelseIder: Set<Dokumentsporing>,
             inntektsmeldingInfo: InntektsmeldingInfo?,
-            inntektskilde: Inntektskilde
+            inntektskilde: () -> Inntektskilde
         ) {
             val vedtaksperiodeMap = mutableMapOf<String, Any?>()
             vedtaksperiodeListe.add(vedtaksperiodeMap)
@@ -1097,7 +1097,7 @@ internal class JsonBuilder : AbstractBuilder() {
             forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
             hendelseIder: Set<Dokumentsporing>,
             inntektsmeldingInfo: InntektsmeldingInfo?,
-            inntektskilde: Inntektskilde
+            inntektskilde: () -> Inntektskilde
         ) {
             pushState(VedtaksperiodeState(
                 vedtaksperiodeMap = vedtaksperiodeMap
@@ -1456,7 +1456,7 @@ internal class JsonBuilder : AbstractBuilder() {
             forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
             hendelseIder: Set<Dokumentsporing>,
             inntektsmeldingInfo: InntektsmeldingInfo?,
-            inntektskilde: Inntektskilde
+            inntektskilde: () -> Inntektskilde
         ) {
             vedtaksperiodeMap.putAll(mutableMapOf(
                 "id" to id,
@@ -1466,7 +1466,7 @@ internal class JsonBuilder : AbstractBuilder() {
                 "sykmeldingTom" to opprinneligPeriode.endInclusive,
                 "hendelseIder" to hendelseIder.toMap(),
                 "periodetype" to periodetype(),
-                "inntektskilde" to inntektskilde,
+                "inntektskilde" to inntektskilde(),
                 "tilstand" to tilstand.type.name,
                 "skjæringstidspunktFraInfotrygd" to skjæringstidspunktFraInfotrygd,
                 "skjæringstidspunkt" to skjæringstidspunkt(),

@@ -57,7 +57,7 @@ internal class ArbeidsgiverInspektør(arbeidsgiver: Arbeidsgiver): ArbeidsgiverV
         forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
         hendelseIder: Set<Dokumentsporing>,
         inntektsmeldingInfo: InntektsmeldingInfo?,
-        inntektskilde: Inntektskilde
+        inntektskilde: () -> Inntektskilde
     ) {
         vedtaksperioder[id] = vedtaksperiode
         sisteVedtaksperiodeTilstander[id] = tilstand.type

@@ -357,7 +357,7 @@ internal interface VedtaksperiodeVisitor : UtbetalingVisitor, SykdomstidslinjeVi
         forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
         hendelseIder: Set<Dokumentsporing>,
         inntektsmeldingInfo: InntektsmeldingInfo?,
-        inntektskilde: Inntektskilde
+        inntektskilde: () -> Inntektskilde
     ) {
     }
 
@@ -378,7 +378,7 @@ internal interface VedtaksperiodeVisitor : UtbetalingVisitor, SykdomstidslinjeVi
         forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
         hendelseIder: Set<Dokumentsporing>,
         inntektsmeldingInfo: InntektsmeldingInfo?,
-        inntektskilde: Inntektskilde
+        inntektskilde: () -> Inntektskilde
     ) {
     }
 }

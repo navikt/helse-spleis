@@ -200,7 +200,7 @@ internal class VilkårsgrunnlagTest : AbstractPersonTest() {
                 forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
                 hendelseIder: Set<Dokumentsporing>,
                 inntektsmeldingInfo: InntektsmeldingInfo?,
-                inntektskilde: Inntektskilde
+                inntektskilde: () -> Inntektskilde
             ) {
                 _tilstand = tilstand
             }
@@ -225,7 +225,7 @@ internal class VilkårsgrunnlagTest : AbstractPersonTest() {
                 forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
                 hendelseIder: Set<Dokumentsporing>,
                 inntektsmeldingInfo: InntektsmeldingInfo?,
-                inntektskilde: Inntektskilde
+                inntektskilde: () -> Inntektskilde
             ) {
                 _id = id
             }

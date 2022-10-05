@@ -1,18 +1,24 @@
 package no.nav.helse.serde.api.speil
 
-import no.nav.helse.hendelser.Periode
-import no.nav.helse.person.*
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
-import no.nav.helse.serde.api.speil.builders.BeregningId
-import no.nav.helse.serde.api.speil.builders.KorrelasjonsId
-import no.nav.helse.serde.api.speil.builders.GenerasjonIder
-import no.nav.helse.serde.api.speil.builders.InntektsmeldingId
-import no.nav.helse.serde.api.speil.builders.SykdomshistorikkId
+import java.util.UUID
+import no.nav.helse.hendelser.Periode
+import no.nav.helse.person.Dokumentsporing
+import no.nav.helse.person.ForlengelseFraInfotrygd
+import no.nav.helse.person.Inntektskilde
+import no.nav.helse.person.InntektsmeldingInfo
+import no.nav.helse.person.Periodetype
+import no.nav.helse.person.Vedtaksperiode
+import no.nav.helse.person.VedtaksperiodeVisitor
 import no.nav.helse.serde.api.dto.Refusjon
 import no.nav.helse.serde.api.dto.Sykdomstidslinjedag
 import no.nav.helse.serde.api.speil.IUtbetaling.Companion.leggTil
+import no.nav.helse.serde.api.speil.builders.BeregningId
+import no.nav.helse.serde.api.speil.builders.GenerasjonIder
+import no.nav.helse.serde.api.speil.builders.InntektsmeldingId
+import no.nav.helse.serde.api.speil.builders.KorrelasjonsId
+import no.nav.helse.serde.api.speil.builders.SykdomshistorikkId
 
 internal class ForkastetVedtaksperiodeAkkumulator : VedtaksperiodeVisitor {
     private val forkastedeVedtaksperioderIder = mutableListOf<UUID>()
@@ -37,7 +43,7 @@ internal class ForkastetVedtaksperiodeAkkumulator : VedtaksperiodeVisitor {
         forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
         hendelseIder: Set<Dokumentsporing>,
         inntektsmeldingInfo: InntektsmeldingInfo?,
-        inntektskilde: Inntektskilde
+        inntektskilde: () -> Inntektskilde
     ) {
         forkastedeVedtaksperioderIder.add(id)
     }

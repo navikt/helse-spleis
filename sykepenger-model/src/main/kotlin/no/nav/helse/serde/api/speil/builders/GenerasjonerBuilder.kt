@@ -91,7 +91,7 @@ internal class GenerasjonerBuilder(
         forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
         hendelseIder: Set<Dokumentsporing>,
         inntektsmeldingInfo: InntektsmeldingInfo?,
-        inntektskilde: Inntektskilde
+        inntektskilde: () -> Inntektskilde
     ) {
         if (tilstand == Vedtaksperiode.TilInfotrygd) return
         val sykdomstidslinje = VedtaksperiodeSykdomstidslinjeBuilder(vedtaksperiode).build()
@@ -102,7 +102,7 @@ internal class GenerasjonerBuilder(
                 id,
                 periode.start,
                 periode.endInclusive,
-                inntektskilde = inntektskilde,
+                inntektskilde = inntektskilde(),
                 hendelser = hendelser.filter { it.id in hendelseIder.ider().map(UUID::toString) },
                 utbetalinger = utbetalinger,
                 periodetype = periodetype(),
