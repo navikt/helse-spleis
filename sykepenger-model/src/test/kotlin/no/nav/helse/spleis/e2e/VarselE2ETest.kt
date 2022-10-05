@@ -37,6 +37,7 @@ import no.nav.helse.person.Varselkode.RV_IM_4
 import no.nav.helse.person.Varselkode.RV_IM_5
 import no.nav.helse.person.Varselkode.RV_IT_1
 import no.nav.helse.person.Varselkode.RV_IT_11
+import no.nav.helse.person.Varselkode.RV_IT_12
 import no.nav.helse.person.Varselkode.RV_IT_4
 import no.nav.helse.person.Varselkode.RV_IV_1
 import no.nav.helse.person.Varselkode.RV_IV_2
@@ -730,6 +731,25 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
 
         håndterYtelser(inntektshistorikk = listOf(Inntektsopplysning.ferdigInntektsopplysning("973626108", 1.januar, inntekt = INNTEKT, true, null, null)))
         assertVarsel(RV_IT_11, 1.vedtaksperiode.filter())
+    }
+
+    @Test
+    fun `varsel - Organisasjonsnummer for inntektsopplysning fra Infotrygd mangler`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+
+        håndterYtelser(inntektshistorikk = listOf(Inntektsopplysning.ferdigInntektsopplysning("", 1.januar, inntekt = INNTEKT, true, null, null)))
+        assertIngenVarsel(RV_IT_12, 1.vedtaksperiode.filter())
+    }
+
+    @Test
+    fun `varsel revurdering - Organisasjonsnummer for inntektsopplysning fra Infotrygd mangler`() {
+        nyttVedtak(1.januar, 31.januar)
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Dagtype.Feriedag)))
+
+        håndterYtelser(inntektshistorikk = listOf(Inntektsopplysning.ferdigInntektsopplysning("", 1.januar, inntekt = INNTEKT, true, null, null)))
+        assertVarsel(RV_IT_12, 1.vedtaksperiode.filter())
     }
 
 }
