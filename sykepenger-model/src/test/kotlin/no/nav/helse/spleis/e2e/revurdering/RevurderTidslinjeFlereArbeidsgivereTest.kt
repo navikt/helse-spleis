@@ -1,18 +1,23 @@
 package no.nav.helse.spleis.e2e.revurdering
 
 import java.time.LocalDate
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype.Feriedag
+import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
+import no.nav.helse.oktober
 import no.nav.helse.person.TilstandType.AVSLUTTET
+import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
@@ -28,6 +33,7 @@ import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
+import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
@@ -36,6 +42,7 @@ import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
 import no.nav.helse.spleis.e2e.håndterUtbetalingsgodkjenning
+import no.nav.helse.spleis.e2e.håndterUtbetalingshistorikk
 import no.nav.helse.spleis.e2e.håndterUtbetalt
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
@@ -43,6 +50,7 @@ import no.nav.helse.spleis.e2e.manuellFeriedag
 import no.nav.helse.spleis.e2e.nyeVedtak
 import no.nav.helse.spleis.e2e.tilGodkjenning
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
+import no.nav.helse.testhelpers.inntektperioderForSykepengegrunnlag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavHelgDag
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
@@ -57,6 +65,69 @@ internal class RevurderTidslinjeFlereArbeidsgivereTest : AbstractEndToEndTest() 
     private companion object {
         private val aadvokatene = "123456789"
         private val haandtverkerne = "987612345"
+    }
+
+    @Test
+    fun `revurdering for periode som start samme dag som en førstegangsvurdering`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 16.januar, 100.prosent), orgnummer = haandtverkerne)
+        håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent), orgnummer = haandtverkerne)
+        håndterUtbetalingshistorikk(1.vedtaksperiode, orgnummer = haandtverkerne)
+
+        håndterSykmelding(Sykmeldingsperiode(17.januar, 25.januar, 100.prosent), orgnummer = haandtverkerne)
+        håndterSøknad(Sykdom(17.januar, 25.januar, 100.prosent), orgnummer = haandtverkerne)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), beregnetInntekt = 20000.månedlig, orgnummer = haandtverkerne)
+        håndterYtelser(2.vedtaksperiode, orgnummer = haandtverkerne)
+        håndterVilkårsgrunnlag(
+            vedtaksperiodeIdInnhenter = 2.vedtaksperiode,
+            orgnummer = haandtverkerne,
+            inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
+                1.januar(2017) til 1.desember(2017) inntekter {
+                    aadvokatene inntekt 20000.månedlig
+                    haandtverkerne inntekt 20000.månedlig
+                }
+            }),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntektperioderForSykepengegrunnlag {
+                1.oktober(2017) til 1.desember(2017) inntekter {
+                    aadvokatene inntekt 20000.månedlig
+                    haandtverkerne inntekt 20000.månedlig
+                }
+            }, arbeidsforhold = listOf()),
+            arbeidsforhold = listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(haandtverkerne, 1.januar(2017)),
+                Vilkårsgrunnlag.Arbeidsforhold(aadvokatene, 1.januar(2017))
+            )
+        )
+        håndterYtelser(2.vedtaksperiode, orgnummer = haandtverkerne)
+        håndterSimulering(2.vedtaksperiode, orgnummer = haandtverkerne)
+
+        håndterSykmelding(Sykmeldingsperiode(10.januar, 16.januar, 100.prosent), orgnummer = aadvokatene)
+        håndterSøknad(Sykdom(10.januar, 16.januar, 100.prosent), orgnummer = aadvokatene)
+
+        håndterSykmelding(Sykmeldingsperiode(17.januar, 25.januar, 100.prosent), orgnummer = aadvokatene)
+        håndterSøknad(Sykdom(17.januar, 25.januar, 100.prosent), orgnummer = aadvokatene)
+        håndterUtbetalingshistorikk(2.vedtaksperiode, orgnummer = aadvokatene)
+
+        håndterYtelser(2.vedtaksperiode, orgnummer = haandtverkerne)
+        håndterSimulering(2.vedtaksperiode, orgnummer = haandtverkerne)
+
+        håndterInntektsmelding(listOf(2.januar til 17.januar), beregnetInntekt = 20000.månedlig, orgnummer = aadvokatene)
+
+        assertIngenFunksjonelleFeil()
+
+        assertForventetFeil(
+            nå = {
+                assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = haandtverkerne)
+                assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = haandtverkerne)
+                assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = aadvokatene)
+                assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, orgnummer = aadvokatene)
+            },
+            ønsket = {
+                assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = haandtverkerne)
+                assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = haandtverkerne)
+                assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = aadvokatene)
+                assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = aadvokatene)
+            }
+        )
     }
 
     @Test
