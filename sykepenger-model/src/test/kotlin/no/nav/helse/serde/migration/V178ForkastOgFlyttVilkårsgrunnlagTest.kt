@@ -178,6 +178,14 @@ internal class V178ForkastOgFlyttVilkårsgrunnlagTest : MigrationTest(V178Forkas
         )
     }
 
+    @Test
+    fun `ikke velge vilkårsgrunnlag fra Spleis lagret på forkastede skjæringstidspunkt`() {
+        assertForkastetVilkårsgrunnlag(
+            originalJson = "/migrations/178/vilkårsgrunnlag-fra-spleis-på-forkastet-skjæringstidspunkt_original.json",
+            expectedJson = "/migrations/178/vilkårsgrunnlag-fra-spleis-på-forkastet-skjæringstidspunkt_expected.json"
+        )
+    }
+
     private fun assertForkastetVilkårsgrunnlag(originalJson: String, expectedJson: String) {
         val migrert = migrer(originalJson.readResource())
         val sisteInnslag = migrert.path("vilkårsgrunnlagHistorikk")[0]

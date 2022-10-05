@@ -31,8 +31,9 @@ internal class SykefraværstilfellerTest {
             AktivVedtaksperiode(skjæringstidspunkt = 1.januar, periode = 1.mars til 31.mars, "AVSLUTTET")
         )
         val forventet = setOf(Sykefraværstilfelle(
-            skjæringstidspunkter = setOf(15.desember(2017), 1.januar),
-            periode = 15.desember(2017) til 31.mars,
+            tidligsteSkjæringstidspunkt = 15.desember(2017),
+            aktiveSkjæringstidspunkter = setOf(15.desember(2017), 1.januar),
+            sisteDag = 31.mars,
             sisteDagISpleis = 31.mars
         ))
         assertEquals(forventet, sykefraværstilfeller(vedtaksperioder))
@@ -45,8 +46,9 @@ internal class SykefraværstilfellerTest {
             AktivVedtaksperiode(skjæringstidspunkt = 1.januar, periode = 8.januar til 31.januar, "AVSLUTTET"),
         )
         val forventet = setOf(Sykefraværstilfelle(
-            skjæringstidspunkter = setOf(1.januar),
-            periode = 1.januar til 31.januar,
+            tidligsteSkjæringstidspunkt = 1.januar,
+            aktiveSkjæringstidspunkter = setOf(1.januar),
+            sisteDag = 31.januar,
             sisteDagISpleis = 31.januar
         ))
         assertEquals(forventet, sykefraværstilfeller(vedtaksperioder))
@@ -60,8 +62,9 @@ internal class SykefraværstilfellerTest {
             AktivVedtaksperiode(skjæringstidspunkt = 1.januar, periode = 15.januar til 19.januar, "AVSLUTTET"),
         )
         val forventet = setOf(Sykefraværstilfelle(
-            skjæringstidspunkter = setOf(1.januar),
-            periode = 1.januar til 19.januar,
+            tidligsteSkjæringstidspunkt = 1.januar,
+            aktiveSkjæringstidspunkter = setOf(1.januar),
+            sisteDag = 19.januar,
             sisteDagISpleis = 19.januar
         ))
         assertEquals(forventet, sykefraværstilfeller(vedtaksperioder))
@@ -70,8 +73,9 @@ internal class SykefraværstilfellerTest {
     @Test
     fun `finner sykefraværstilfeller fra aktive vedtaksperioder i person-json`() {
         val forventet = setOf(Sykefraværstilfelle(
-            skjæringstidspunkter = setOf(1.januar),
-            periode = 1.januar til 31.mars,
+            tidligsteSkjæringstidspunkt = 1.januar,
+            aktiveSkjæringstidspunkter = setOf(1.januar),
+            sisteDag = 31.mars,
             sisteDagISpleis = 29.mars
         ))
         val vedtaksperioder = vedtaksperioder(serdeObjectMapper.readTree(vedtaksperioderPåTversAvArbeidsgivere))
@@ -96,8 +100,9 @@ internal class SykefraværstilfellerTest {
             ForkastetVedtaksperiode(skjæringstidspunkt = 1.februar, periode = 1.februar til 28.februar, "TIL_INFOTRYGD")
         )
         val forventet = setOf(Sykefraværstilfelle(
-            skjæringstidspunkter = setOf(1.januar, 2.januar),
-            periode = 1.januar til 20.januar,
+            tidligsteSkjæringstidspunkt = 1.januar,
+            aktiveSkjæringstidspunkter = setOf(2.januar),
+            sisteDag = 20.januar,
             sisteDagISpleis = 10.januar
         ))
         assertEquals(forventet, sykefraværstilfeller(vedtaksperioder))
@@ -112,8 +117,9 @@ internal class SykefraværstilfellerTest {
             ForkastetVedtaksperiode(skjæringstidspunkt = 1.februar, periode = 1.februar til 28.februar, "TIL_INFOTRYGD")
         )
         val forventet = setOf(Sykefraværstilfelle(
-            skjæringstidspunkter = setOf(1.januar, 2.januar),
-            periode = 1.januar til 20.januar,
+            tidligsteSkjæringstidspunkt = 1.januar,
+            aktiveSkjæringstidspunkter = setOf(2.januar),
+            sisteDag = 20.januar,
             sisteDagISpleis = 20.januar
         ))
         assertEquals(forventet, sykefraværstilfeller(vedtaksperioder))
@@ -135,16 +141,38 @@ internal class SykefraværstilfellerTest {
 
         val forventet = setOf(
             Sykefraværstilfelle(
-                skjæringstidspunkter = setOf(11.januar),
-                periode = 11.januar til 25.februar,
+                aktiveSkjæringstidspunkter = setOf(11.januar),
+                tidligsteSkjæringstidspunkt = 11.januar,
+                sisteDag = 25.februar,
                 sisteDagISpleis = 28.januar
             ),
             Sykefraværstilfelle(
-                skjæringstidspunkter = setOf(14.februar, 11.januar),
-                periode = 11.januar til 4.september,
+                aktiveSkjæringstidspunkter = setOf(14.februar, 11.januar),
+                tidligsteSkjæringstidspunkt = 11.januar,
+                sisteDag = 4.september,
                 sisteDagISpleis = 8.mai
             )
         )
+        assertEquals(forventet, sykefraværstilfeller(vedtaksperioder))
+    }
+
+    @Test
+    fun `mange forkastede perioder`() {
+        val vedtaksperioder = listOf(
+            ForkastetVedtaksperiode(skjæringstidspunkt = 17.januar, periode = 1.januar til 31.januar, "TIL_INFOTRYGD"),
+            ForkastetVedtaksperiode(skjæringstidspunkt = 1.februar, periode = 1.februar til 28.februar, "TIL_INFOTRYGD"),
+            ForkastetVedtaksperiode(skjæringstidspunkt = 1.mars, periode = 1.mars til 31.mars, "TIL_INFOTRYGD"),
+            ForkastetVedtaksperiode(skjæringstidspunkt = 1.april, periode = 1.april til 30.april, "TIL_INFOTRYGD"),
+            AktivVedtaksperiode(skjæringstidspunkt = 1.mai, periode = 1.mai til 31.mai, "AVSLUTTET"),
+        )
+
+        val forventet = setOf(Sykefraværstilfelle(
+            tidligsteSkjæringstidspunkt = 17.januar,
+            aktiveSkjæringstidspunkter = setOf(1.mai),
+            sisteDag = 31.mai,
+            sisteDagISpleis = 31.mai
+        ))
+
         assertEquals(forventet, sykefraværstilfeller(vedtaksperioder))
     }
 }

@@ -10,7 +10,6 @@ import no.nav.helse.erRettFør
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.serde.migration.Sykefraværstilfeller.Sykefraværstilfelle
-import no.nav.helse.serde.migration.Sykefraværstilfeller.Vedtaksperiode.Companion.aktiveSkjæringstidspunkter
 import no.nav.helse.serde.migration.Sykefraværstilfeller.sykefraværstilfeller
 import no.nav.helse.serde.migration.Sykefraværstilfeller.vedtaksperioder
 import no.nav.helse.serde.serdeObjectMapper
@@ -51,7 +50,7 @@ internal object BrukteVilkårsgrunnlag {
         ingenVilkårsgrunnlag: (sorterteVilkårgrunnlag: List<JsonNode>) -> JsonNode? = { null }): JsonNode? {
         val benyttetPeriode = periode(sykefraværstilfelle)
         val fraInfotrygd = finnInfotrygdVilkårsgrunnlag(benyttetPeriode)
-        val fraSpleis = finnSpleisVilkårsgrunnlag(sykefraværstilfelle.skjæringstidspunkter)
+        val fraSpleis = finnSpleisVilkårsgrunnlag(sykefraværstilfelle.aktiveSkjæringstidspunkter)
         return when {
             fraInfotrygd == null && fraSpleis == null -> ingenVilkårsgrunnlag(this)
             fraInfotrygd != null && fraSpleis != null -> {
@@ -69,7 +68,6 @@ internal object BrukteVilkårsgrunnlag {
         val sisteInnslag = vilkårsgrunnlagHistorikk.firstOrNull() ?: return sikkerlogg.info("Har ingen innslag i vilkårsgrunnlaghistorikken").let { null }
 
         val vedtaksperioder = vedtaksperioder(jsonNode)
-        val aktiveSkjæringstidspunkter = vedtaksperioder.aktiveSkjæringstidspunkter()
         val sykefraværstilfeller = sykefraværstilfeller(vedtaksperioder)
         sikkerlogg.info("Fant ${sykefraværstilfeller.size} sykefraværstilfeller ${sykefraværstilfeller.map { it.periode }}")
         val tilstanderPerSkjæringstidspunkt = vedtaksperioder
@@ -107,7 +105,7 @@ internal object BrukteVilkårsgrunnlag {
                     sikkerlogg.info("Fant ikke vilkårsgrunnlag for sykefraværstilfellet ${sykefraværstilfelle.periode} med tilstander ${tilstanderPerSkjæringstidspunkt[sykefraværstilfelle.tidligsteSkjæringstidspunkt]}")
                     return@forEach
                 }
-                sykefraværstilfelle.skjæringstidspunkter.filter { it in aktiveSkjæringstidspunkter }.forEachIndexed { index, skjæringstidspunkt ->
+                sykefraværstilfelle.aktiveSkjæringstidspunkter.forEachIndexed { index, skjæringstidspunkt ->
                     if (skjæringstidspunkt in skjæringstidspunktLagtTil) return@forEachIndexed
 
                     if (vilkårgrunnlag.skjæringstidspunkt != skjæringstidspunkt) {

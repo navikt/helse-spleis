@@ -38,23 +38,30 @@ internal object Sykefraværstilfeller {
             .map { it.periode }
             .grupperSammenhengendePerioderMedHensynTilHelg()
 
-        val sammenhengendeAktivePerioder = vedtaksperioder
-            .filterIsInstance<AktivVedtaksperiode>()
+        val aktivePerioder = vedtaksperioder.filterIsInstance<AktivVedtaksperiode>()
+        val aktiveSkjæringstidspunkter = aktivePerioder.map { it.skjæringstidspunkt }.toSet()
+
+        val dagerISpleis = aktivePerioder
             .map { it.periode }
             .grupperSammenhengendePerioderMedHensynTilHelg()
-
-        val dagerISpleis = sammenhengendeAktivePerioder.flatten().sorted()
+            .flatten()
+            .sorted()
 
         return sammenhengendePerioder
-            .filter { sammenhengendePeriode -> sammenhengendeAktivePerioder.any { it.overlapperMed(sammenhengendePeriode) } }
-            .map { sammenhengendePeriode ->
-                val skjæringstidspunkter = vedtaksperioder.skjæringstidspunkterFor(sammenhengendePeriode)
-                val tidligsteSkjæringstidspunkt = skjæringstidspunkter.min()
-                Sykefraværstilfelle(
-                    skjæringstidspunkter = skjæringstidspunkter,
-                    periode = tidligsteSkjæringstidspunkt til sammenhengendePeriode.endInclusive,
-                    sisteDagISpleis = dagerISpleis.last { it in sammenhengendePeriode }
-                )
+            .mapNotNull { sammenhengendePeriode ->
+                when (val sisteDagISpleis = dagerISpleis.lastOrNull { it in sammenhengendePeriode }) {
+                    null -> null
+                    else -> {
+                        val skjæringstidspunkter = vedtaksperioder.skjæringstidspunkterFor(sammenhengendePeriode)
+                        val tidligsteSkjæringstidspunkt = skjæringstidspunkter.min()
+                        Sykefraværstilfelle(
+                            tidligsteSkjæringstidspunkt = tidligsteSkjæringstidspunkt,
+                            aktiveSkjæringstidspunkter = skjæringstidspunkter.filter { it in aktiveSkjæringstidspunkter }.toSet(),
+                            sisteDag = sammenhengendePeriode.endInclusive,
+                            sisteDagISpleis = sisteDagISpleis
+                        )
+                    }
+                }
             }.toSet()
     }
 
@@ -64,9 +71,6 @@ internal object Sykefraværstilfeller {
     internal sealed class Vedtaksperiode(val skjæringstidspunkt: LocalDate, val periode: Periode, protected val tilstand: String) {
         open fun tilstand() = tilstand
         override fun toString() = "$periode med skjæringstidspunkt $skjæringstidspunkt"
-        internal companion object {
-            internal fun Iterable<Vedtaksperiode>.aktiveSkjæringstidspunkter() = filterIsInstance<AktivVedtaksperiode>().map { it.skjæringstidspunkt }.toSet()
-        }
     }
     internal class AktivVedtaksperiode(skjæringstidspunkt: LocalDate, periode: Periode, tilstand: String) : Vedtaksperiode(skjæringstidspunkt, periode, tilstand)
     internal class ForkastetVedtaksperiode(skjæringstidspunkt: LocalDate, periode: Periode, tilstand: String) : Vedtaksperiode(skjæringstidspunkt, periode, tilstand) {
@@ -74,10 +78,11 @@ internal object Sykefraværstilfeller {
     }
 
     internal data class Sykefraværstilfelle(
-        val skjæringstidspunkter: Set<LocalDate>,
-        val periode: Periode,
+        val tidligsteSkjæringstidspunkt: LocalDate,
+        val aktiveSkjæringstidspunkter: Set<LocalDate>,
+        private val sisteDag: LocalDate,
         private val sisteDagISpleis: LocalDate) {
-        internal val tidligsteSkjæringstidspunkt = skjæringstidspunkter.min()
-        internal val periodeFremTilSisteDagISpleis = periode.start til sisteDagISpleis
+        internal val periode = tidligsteSkjæringstidspunkt til sisteDag
+        internal val periodeFremTilSisteDagISpleis = tidligsteSkjæringstidspunkt til sisteDagISpleis
     }
 }
