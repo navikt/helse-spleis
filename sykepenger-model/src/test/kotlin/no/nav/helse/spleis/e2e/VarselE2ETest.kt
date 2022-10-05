@@ -55,6 +55,7 @@ import no.nav.helse.person.Varselkode.RV_OS_3
 import no.nav.helse.person.Varselkode.RV_OV_1
 import no.nav.helse.person.Varselkode.RV_RE_1
 import no.nav.helse.person.Varselkode.RV_RV_1
+import no.nav.helse.person.Varselkode.RV_RV_2
 import no.nav.helse.person.Varselkode.RV_SI_1
 import no.nav.helse.person.Varselkode.RV_SV_1
 import no.nav.helse.person.Varselkode.RV_SV_2
@@ -304,7 +305,7 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
     }
 
     @Test
-    fun `varsel - Minst én dag uten utbetaling på grunn av sykdomsgrad under 20 %, Vurder å sende vedtaksbrev fra Infotrygd`() {
+    fun `varsel - Minst én dag uten utbetaling på grunn av sykdomsgrad under 20 prosent, Vurder å sende vedtaksbrev fra Infotrygd`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 19.prosent), orgnummer = a1)
         håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 19.prosent), orgnummer = a1)
         håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
@@ -796,5 +797,21 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
 
         assertVarsel(RV_IT_15, 1.vedtaksperiode.filter())
         assertIngenFunksjonelleFeil(1.vedtaksperiode.filter())
+    }
+
+    @Test
+    fun `varsel revurdering - Forkaster avvist revurdering ettersom vedtaksperioden ikke har tidligere utbetalte utbetalinger`() {
+        nyPeriode(2.januar til 17.januar)
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterYtelser()
+        håndterVilkårsgrunnlag()
+        håndterYtelser()
+        håndterSimulering()
+        håndterUtbetalingsgodkjenning(utbetalingGodkjent = false)
+
+        assertIngenVarsel(RV_RV_2, 1.vedtaksperiode.filter())
+        assertFunksjonellFeil("Forkaster avvist revurdering ettersom vedtaksperioden ikke har tidligere utbetalte utbetalinger.", 1.vedtaksperiode.filter())
     }
 }

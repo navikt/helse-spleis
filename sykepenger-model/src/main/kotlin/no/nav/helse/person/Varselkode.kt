@@ -118,7 +118,9 @@ enum class Varselkode(
     RV_OS_3("Endrer tidligere oppdrag. Kontroller simuleringen."),
 
     // RV: Revurdering
-    RV_RV_1("Denne perioden var tidligere regnet som innenfor arbeidsgiverperioden");
+    RV_RV_1("Denne perioden var tidligere regnet som innenfor arbeidsgiverperioden"),
+    RV_RV_2("Forkaster avvist revurdering ettersom vedtaksperioden ikke har tidligere utbetalte utbetalinger."),
+    ;
 
     init {
         require(this.name.matches(regex)) {"Ugyldig varselkode-format: ${this.name}"}

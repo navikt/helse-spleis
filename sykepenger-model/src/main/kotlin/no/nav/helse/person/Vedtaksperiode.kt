@@ -72,6 +72,7 @@ import no.nav.helse.person.Varselkode.RV_IM_4
 import no.nav.helse.person.Varselkode.RV_OO_1
 import no.nav.helse.person.Varselkode.RV_OO_2
 import no.nav.helse.person.Varselkode.RV_RV_1
+import no.nav.helse.person.Varselkode.RV_RV_2
 import no.nav.helse.person.Varselkode.RV_SI_2
 import no.nav.helse.person.Varselkode.RV_SV_2
 import no.nav.helse.person.Varselkode.RV_SØ_11
@@ -693,14 +694,14 @@ internal class Vedtaksperiode private constructor(
         vedtaksperioder
             .filter { this.periode.overlapperMed(it.periode) }
             .forEach { it.lagUtbetaling(maksimumSykepenger, hendelse) }
-        høstingsresultater(hendelse, vedtaksperioder.drop(1))
+        høstingsresultater(hendelse)
     }
 
     private fun lagUtbetaling(maksimumSykepenger: Alder.MaksimumSykepenger, hendelse: ArbeidstakerHendelse) {
         utbetalingstidslinje = utbetalinger.lagUtbetaling(fødselsnummer, periode, maksimumSykepenger, hendelse)
     }
 
-    private fun høstingsresultater(hendelse: ArbeidstakerHendelse, andreVedtaksperioder: List<Vedtaksperiode>) {
+    private fun høstingsresultater(hendelse: ArbeidstakerHendelse) {
         val ingenUtbetaling = !utbetalinger.harUtbetalinger()
         val kunArbeidsgiverdager = utbetalingstidslinje.kunArbeidsgiverdager()
 
@@ -720,9 +721,6 @@ internal class Vedtaksperiode private constructor(
             }
         }
     }
-
-    private fun harBrukerutbetaling(andreVedtaksperioder: List<Vedtaksperiode>) =
-        utbetalingstidslinje.harBrukerutbetalinger() || andreVedtaksperioder.any { it.utbetalingstidslinje.harBrukerutbetalinger() }
 
     private fun forsøkRevurdering(
         arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger,
@@ -2360,7 +2358,7 @@ internal class Vedtaksperiode private constructor(
             hendelse: IAktivitetslogg
         ) {
             if (!vedtaksperiode.arbeidsgiver.kanForkastes(vedtaksperiode.utbetalinger)) return hendelse.info("Gjenopptar ikke revurdering feilet fordi perioden har tidligere avsluttede utbetalinger. Må behandles manuelt vha annullering.")
-            hendelse.funksjonellFeil("Forkaster avvist revurdering ettersom vedtaksperioden ikke har tidligere utbetalte utbetalinger.")
+            hendelse.funksjonellFeil(RV_RV_2)
             vedtaksperiode.forkast(hendelse)
         }
 
