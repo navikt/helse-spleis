@@ -52,6 +52,7 @@ enum class Varselkode(
     RV_IT_8("Det er en ugyldig utbetalingsperiode i Infotrygd (utbetalingsgrad mangler)"),
     RV_IT_9("Det er en ugyldig utbetalingsperiode i Infotrygd (utbetalingsgrad er mindre eller lik 0)"),
     RV_IT_10("Det er en ugyldig utbetalingsperiode i Infotrygd"),
+    RV_IT_11("Det er registrert bruk av på nødnummer"),
 
     // VV: Vilkårsvurdering
     RV_VV_1("Arbeidsgiver er ikke registrert i Aa-registeret."),

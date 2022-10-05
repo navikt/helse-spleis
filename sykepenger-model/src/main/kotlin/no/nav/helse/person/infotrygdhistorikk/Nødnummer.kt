@@ -1,7 +1,5 @@
 package no.nav.helse.person.infotrygdhistorikk
 
-import no.nav.helse.person.IAktivitetslogg
-
 internal class Nødnummer private constructor(private val nødnumre: Set<String>) {
     internal companion object {
         val Sykepenger = Nødnummer(setOf(
@@ -30,9 +28,4 @@ internal class Nødnummer private constructor(private val nødnumre: Set<String>
     }
 
     internal operator fun contains(orgnr: String) = orgnr in nødnumre
-
-    internal fun valider(aktivitetslogg: IAktivitetslogg, orgnummer: String) {
-        if (orgnummer !in nødnumre) return
-        aktivitetslogg.funksjonellFeil("Det er registrert bruk av på nødnummer")
-    }
 }

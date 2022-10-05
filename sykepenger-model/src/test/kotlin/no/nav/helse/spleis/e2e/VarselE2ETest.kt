@@ -36,6 +36,7 @@ import no.nav.helse.person.Varselkode.RV_IM_3
 import no.nav.helse.person.Varselkode.RV_IM_4
 import no.nav.helse.person.Varselkode.RV_IM_5
 import no.nav.helse.person.Varselkode.RV_IT_1
+import no.nav.helse.person.Varselkode.RV_IT_11
 import no.nav.helse.person.Varselkode.RV_IT_4
 import no.nav.helse.person.Varselkode.RV_IV_1
 import no.nav.helse.person.Varselkode.RV_IV_2
@@ -710,6 +711,25 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
             )
         )
         assertVarsel(RV_IV_3, 1.vedtaksperiode.filter())
+    }
+
+    @Test
+    fun `varsel - Det er registrert bruk av på nødnummer`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+
+        håndterYtelser(inntektshistorikk = listOf(Inntektsopplysning.ferdigInntektsopplysning("973626108", 1.januar, inntekt = INNTEKT, true, null, null)))
+        assertIngenVarsel(RV_IT_11, 1.vedtaksperiode.filter())
+    }
+
+    @Test
+    fun `varsel revurdering - Det er registrert bruk av på nødnummer`() {
+        nyttVedtak(1.januar, 31.januar)
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Dagtype.Feriedag)))
+
+        håndterYtelser(inntektshistorikk = listOf(Inntektsopplysning.ferdigInntektsopplysning("973626108", 1.januar, inntekt = INNTEKT, true, null, null)))
+        assertVarsel(RV_IT_11, 1.vedtaksperiode.filter())
     }
 
 }

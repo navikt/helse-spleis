@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 import java.util.Objects
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.InfotrygdhistorikkVisitor
+import no.nav.helse.person.Varselkode.RV_IT_11
 import no.nav.helse.økonomi.Inntekt
 
 class Inntektsopplysning private constructor(
@@ -26,7 +27,7 @@ class Inntektsopplysning private constructor(
     internal fun valider(aktivitetslogg: IAktivitetslogg, skjæringstidspunkt: LocalDate, nødnummer: Nødnummer): Boolean {
         if (!erRelevant(skjæringstidspunkt)) return true
         if (orgnummer.isBlank()) aktivitetslogg.funksjonellFeil("Organisasjonsnummer for inntektsopplysning fra Infotrygd mangler")
-        else if (orgnummer in nødnummer) aktivitetslogg.funksjonellFeil("Det er registrert bruk av på nødnummer")
+        else if (orgnummer in nødnummer) aktivitetslogg.funksjonellFeil(RV_IT_11)
         return !aktivitetslogg.harFunksjonelleFeilEllerVerre()
     }
 
