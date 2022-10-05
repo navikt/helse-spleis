@@ -47,6 +47,11 @@ enum class Varselkode(
     RV_IT_3("Utbetaling i Infotrygd overlapper med vedtaksperioden"), // funksjonellFeil
     RV_IT_4("Det er registrert utbetaling på nødnummer"), // funksjonellFeil
     RV_IT_5("Mangler inntekt for første utbetalingsdag i en av infotrygdperiodene", avviklet = true), // funksjonellFeil
+    RV_IT_6("Det er en ugyldig utbetalingsperiode i Infotrygd (mangler fom- eller tomdato)"),
+    RV_IT_7("Det er en ugyldig utbetalingsperiode i Infotrygd (fom er nyere enn tom)"),
+    RV_IT_8("Det er en ugyldig utbetalingsperiode i Infotrygd (utbetalingsgrad mangler)"),
+    RV_IT_9("Det er en ugyldig utbetalingsperiode i Infotrygd (utbetalingsgrad er mindre eller lik 0)"),
+    RV_IT_10("Det er en ugyldig utbetalingsperiode i Infotrygd"),
 
     // VV: Vilkårsvurdering
     RV_VV_1("Arbeidsgiver er ikke registrert i Aa-registeret."),

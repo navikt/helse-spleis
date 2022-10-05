@@ -6,9 +6,15 @@ import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.InfotrygdhistorikkVisitor
+import no.nav.helse.person.Varselkode
 import no.nav.helse.person.Varselkode.RV_IT_1
+import no.nav.helse.person.Varselkode.RV_IT_10
 import no.nav.helse.person.Varselkode.RV_IT_3
 import no.nav.helse.person.Varselkode.RV_IT_4
+import no.nav.helse.person.Varselkode.RV_IT_6
+import no.nav.helse.person.Varselkode.RV_IT_7
+import no.nav.helse.person.Varselkode.RV_IT_8
+import no.nav.helse.person.Varselkode.RV_IT_9
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -105,12 +111,12 @@ data class UgyldigPeriode(
         aktivitetslogg.funksjonellFeil(feiltekst())
     }
 
-    private fun feiltekst() = when {
-        fom == null || tom == null -> "Det er en ugyldig utbetalingsperiode i Infotrygd (mangler fom- eller tomdato)"
-        fom > tom -> "Det er en ugyldig utbetalingsperiode i Infotrygd (fom er nyere enn tom)"
-        utbetalingsgrad == null -> "Det er en ugyldig utbetalingsperiode i Infotrygd (utbetalingsgrad mangler)"
-        utbetalingsgrad <= 0 -> "Det er en ugyldig utbetalingsperiode i Infotrygd (utbetalingsgrad er mindre eller lik 0)"
-        else -> "Det er en ugyldig utbetalingsperiode i Infotrygd"
+    private fun feiltekst(): Varselkode = when {
+        fom == null || tom == null -> RV_IT_6
+        fom > tom -> RV_IT_7
+        utbetalingsgrad == null -> RV_IT_8
+        utbetalingsgrad <= 0 -> RV_IT_9
+        else -> RV_IT_10
     }
 
     internal fun toMap() = mapOf<String, Any?>(
