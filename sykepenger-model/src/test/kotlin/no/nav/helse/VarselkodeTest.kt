@@ -52,6 +52,7 @@ import no.nav.helse.person.Varselkode.RV_VT_6
 import no.nav.helse.person.Varselkode.RV_VT_7
 import no.nav.helse.person.Varselkode.RV_VV_10
 import no.nav.helse.person.Varselkode.RV_VV_11
+import no.nav.helse.person.Varselkode.RV_VV_12
 import no.nav.helse.person.Varselkode.RV_VV_5
 import no.nav.helse.person.Varselkode.RV_VV_9
 import no.nav.helse.person.varselkodeformat
@@ -70,7 +71,7 @@ internal class VarselkodeTest {
         }.toSet()
 
         val varselkoderSomKjentManglerTest = listOf(
-            RV_VV_5, RV_VV_9, RV_IM_6, RV_IM_7, RV_IM_8, RV_UT_3, RV_UT_4,
+            RV_VV_5, RV_VV_9, RV_VV_12, RV_IM_6, RV_IM_7, RV_IM_8, RV_UT_3, RV_UT_4,
             RV_ST_1, RV_IT_6, RV_IT_7, RV_IT_8, RV_IT_9, RV_IT_10,
             RV_IT_16, RV_IT_17, RV_SØ_11, RV_SØ_12, RV_SØ_13, RV_SØ_14,
             RV_SØ_15, RV_SØ_16, RV_UT_5, RV_SØ_17, RV_SØ_18, RV_SØ_19,

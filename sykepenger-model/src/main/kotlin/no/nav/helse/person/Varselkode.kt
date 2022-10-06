@@ -81,6 +81,7 @@ enum class Varselkode(
     RV_VV_9("Bruker er fortsatt syk 26 uker etter maksdato"),
     RV_VV_10("Fant ikke vilkårsgrunnlag. Kan ikke vilkårsprøve på nytt etter ny informasjon fra saksbehandler."),
     RV_VV_11("Vilkårsgrunnlaget ligger i infotrygd. Det er ikke støttet i revurdering eller overstyring."),
+    RV_VV_12("Kan ikke overstyre inntekt uten at det foreligger et vilkårsgrunnlag"),
 
     // VV: Opptjeningsvurdering
     RV_OV_1("Perioden er avslått på grunn av manglende opptjening"),

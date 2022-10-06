@@ -7,6 +7,7 @@ import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.person.Inntektshistorikk.Inntektsopplysning.Companion.lagre
+import no.nav.helse.person.Varselkode.RV_VV_5
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.subsumsjonsformat
 import no.nav.helse.økonomi.Inntekt
@@ -143,7 +144,7 @@ internal class Inntektshistorikk private constructor(private val historikk: Muta
 
             internal fun List<Inntektsopplysning>.valider(aktivitetslogg: IAktivitetslogg) {
                 if (all { it is SkattComposite }) {
-                    aktivitetslogg.funksjonellFeil("Bruker mangler nødvendig inntekt ved validering av Vilkårsgrunnlag")
+                    aktivitetslogg.funksjonellFeil(RV_VV_5)
                 }
             }
         }

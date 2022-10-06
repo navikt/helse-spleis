@@ -62,6 +62,7 @@ import no.nav.helse.person.Varselkode.RV_IV_2
 import no.nav.helse.person.Varselkode.RV_OV_1
 import no.nav.helse.person.Varselkode.RV_VV_10
 import no.nav.helse.person.Varselkode.RV_VV_11
+import no.nav.helse.person.Varselkode.RV_VV_12
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
@@ -320,7 +321,7 @@ class Person private constructor(
                 finnArbeidsgiver(hendelse).håndter(hendelse)
             }
         } else {
-            hendelse.funksjonellFeil("Kan ikke overstyre inntekt uten at det foreligger et vilkårsgrunnlag")
+            hendelse.funksjonellFeil(RV_VV_12)
         }
 
         if (hendelse.harFunksjonelleFeilEllerVerre()) {
