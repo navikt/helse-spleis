@@ -60,6 +60,8 @@ import no.nav.helse.person.Arbeidsgiver.Companion.validerYtelserForSkjæringstid
 import no.nav.helse.person.Arbeidsgiver.Companion.vedtaksperioder
 import no.nav.helse.person.Varselkode.RV_IV_2
 import no.nav.helse.person.Varselkode.RV_OV_1
+import no.nav.helse.person.Varselkode.RV_VV_10
+import no.nav.helse.person.Varselkode.RV_VV_11
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
@@ -855,8 +857,8 @@ class Person private constructor(
                 vilkårsgrunnlagHistorikk.lagre(grunnlagselement)
             }
 
-            is VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag -> hendelse.funksjonellFeil("Vilkårsgrunnlaget ligger i infotrygd. Det er ikke støttet i revurdering eller overstyring.")
-            else -> hendelse.funksjonellFeil("Fant ikke vilkårsgrunnlag. Kan ikke vilkårsprøve på nytt etter ny informasjon fra saksbehandler.")
+            is VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag -> hendelse.funksjonellFeil(RV_VV_11)
+            else -> hendelse.funksjonellFeil(RV_VV_10)
         }
     }
 
