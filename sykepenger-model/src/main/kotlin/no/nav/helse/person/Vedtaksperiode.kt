@@ -84,6 +84,7 @@ import no.nav.helse.person.Varselkode.RV_SØ_15
 import no.nav.helse.person.Varselkode.RV_SØ_16
 import no.nav.helse.person.Varselkode.RV_UT_1
 import no.nav.helse.person.Varselkode.RV_UT_5
+import no.nav.helse.person.Varselkode.RV_VT_1
 import no.nav.helse.person.Varselkode.RV_VV_1
 import no.nav.helse.person.Varselkode.RV_VV_2
 import no.nav.helse.person.Varselkode.RV_VV_8
@@ -866,7 +867,7 @@ internal class Vedtaksperiode private constructor(
             .plusDays(110)
 
         fun håndterMakstid(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            påminnelse.funksjonellFeil("Gir opp fordi tilstanden er nådd makstid")
+            påminnelse.funksjonellFeil(RV_VT_1)
             vedtaksperiode.forkast(påminnelse)
         }
 
