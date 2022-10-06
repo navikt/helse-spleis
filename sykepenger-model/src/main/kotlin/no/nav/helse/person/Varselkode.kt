@@ -29,6 +29,8 @@ enum class Varselkode(
     RV_SØ_16("Mottatt flere søknader for perioden - det støttes ikke før replay av hendelser er på plass"),
     RV_SØ_17("Søker er ikke gammel nok på søknadstidspunktet til å søke sykepenger uten fullmakt fra verge"),
     RV_SØ_18("Søknaden inneholder andre inntektskilder enn ANDRE_ARBEIDSFORHOLD"),
+    RV_SØ_19("Søknad forlenger en forkastet periode"),
+    RV_SØ_20("Søknad overlapper med, eller er før, en forkastet vedtaksperiode"),
 
     // OO: Out-of-order
     RV_OO_1("Det er behandlet en søknad i Speil for en senere periode enn denne."),

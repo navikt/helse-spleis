@@ -82,6 +82,8 @@ import no.nav.helse.person.Varselkode.RV_SØ_13
 import no.nav.helse.person.Varselkode.RV_SØ_14
 import no.nav.helse.person.Varselkode.RV_SØ_15
 import no.nav.helse.person.Varselkode.RV_SØ_16
+import no.nav.helse.person.Varselkode.RV_SØ_19
+import no.nav.helse.person.Varselkode.RV_SØ_20
 import no.nav.helse.person.Varselkode.RV_UT_1
 import no.nav.helse.person.Varselkode.RV_UT_5
 import no.nav.helse.person.Varselkode.RV_VT_1
@@ -2498,7 +2500,7 @@ internal class Vedtaksperiode private constructor(
             forkastede
                 .filter { it.periode().endInclusive >= hendelse.periode().start }
                 .forEach {
-                    hendelse.funksjonellFeil("Søknad overlapper med, eller er før, en forkastet vedtaksperiode")
+                    hendelse.funksjonellFeil(RV_SØ_20)
                     hendelse.info("Søknad overlapper med, eller er før, en forkastet vedtaksperiode ${it.id}, hendelse periode: ${hendelse.periode()}, vedtaksperiode periode: ${it.periode}")
                 }
         }
@@ -2507,7 +2509,7 @@ internal class Vedtaksperiode private constructor(
             forkastede
                 .filter { it.sykdomstidslinje.erRettFør(hendelse.sykdomstidslinje()) }
                 .forEach {
-                    hendelse.funksjonellFeil("Søknad forlenger en forkastet periode")
+                    hendelse.funksjonellFeil(RV_SØ_19)
                     hendelse.info("Søknad forlenger forkastet vedtaksperiode ${it.id}, hendelse periode: ${hendelse.periode()}, vedtaksperiode periode: ${it.periode}")
                 }
         }
