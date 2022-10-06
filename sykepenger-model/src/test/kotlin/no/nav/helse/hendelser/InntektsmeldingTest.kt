@@ -327,7 +327,8 @@ internal class InntektsmeldingTest {
         val nyTidslinje = inntektsmelding.sykdomstidslinje()
         val aktivitetslogg = inntektsmelding.valider(Periode(1.januar, 31.januar), MaskinellJurist())
         assertTrue(aktivitetslogg.hentInfo().contains("Inntektsmeldingen mangler arbeidsgiverperiode. Vurder om vilkårene for sykepenger er oppfylt, og om det skal være arbeidsgiverperiode"))
-        assertTrue(aktivitetslogg.hentErrors().contains("Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden på grunn av: begrunnelse"))
+        assertTrue(aktivitetslogg.hentInfo().contains("Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden på grunn av: begrunnelse"))
+        assertTrue(aktivitetslogg.hentErrors().contains("Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden"))
         assertNull(nyTidslinje.periode()?.start)
         assertNull(nyTidslinje.periode()?.endInclusive)
     }
@@ -414,7 +415,10 @@ internal class InntektsmeldingTest {
             listOf(Periode(1.januar, 10.januar)),
             begrunnelseForReduksjonEllerIkkeUtbetalt = "begrunnelse"
         )
-        assertTrue(inntektsmelding.valider(Periode(1.januar, 31.januar), MaskinellJurist()).hentErrors().contains("Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden på grunn av: begrunnelse"))
+        inntektsmelding.valider(Periode(1.januar, 31.januar), MaskinellJurist()).also {
+            assertTrue(it.hentErrors().contains("Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden"))
+            assertTrue(it.hentInfo().contains("Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden på grunn av: begrunnelse"))
+        }
     }
 
     @Test

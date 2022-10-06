@@ -21,6 +21,7 @@ import no.nav.helse.person.Varselkode.RV_IM_2
 import no.nav.helse.person.Varselkode.RV_IM_3
 import no.nav.helse.person.Varselkode.RV_IM_6
 import no.nav.helse.person.Varselkode.RV_IM_7
+import no.nav.helse.person.Varselkode.RV_IM_8
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
@@ -127,9 +128,8 @@ class Inntektsmelding(
         refusjon.valider(this, periode, beregnetInntekt)
         if (arbeidsgiverperioder.isEmpty()) info("Inntektsmeldingen mangler arbeidsgiverperiode. Vurder om vilkårene for sykepenger er oppfylt, og om det skal være arbeidsgiverperiode")
         begrunnelseForReduksjonEllerIkkeUtbetalt?.takeIf(String::isNotBlank)?.also {
-            funksjonellFeil(
-                "Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden på grunn av: %s".format(it)
-            )
+            info("Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden på grunn av: %s".format(it))
+            funksjonellFeil(RV_IM_8)
         }
         if (harOpphørAvNaturalytelser) funksjonellFeil(RV_IM_7)
         return this

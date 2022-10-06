@@ -44,6 +44,7 @@ enum class Varselkode(
     RV_IM_5("Sykmeldte har oppgitt ferie første dag i arbeidsgiverperioden."),
     RV_IM_6("Inntektsmelding inneholder ikke beregnet inntekt"),
     RV_IM_7("Brukeren har opphold i naturalytelser"),
+    RV_IM_8("Arbeidsgiver har redusert utbetaling av arbeidsgiverperioden"),
 
     // ST: Sykdomstidslinje
     RV_ST_1("Sykdomstidslinjen inneholder ustøttet dag."),
