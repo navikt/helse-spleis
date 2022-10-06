@@ -68,6 +68,7 @@ import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
 import no.nav.helse.person.TilstandType.UTBETALING_FEILET
+import no.nav.helse.person.Varselkode.RV_AY_10
 import no.nav.helse.person.Varselkode.RV_IM_4
 import no.nav.helse.person.Varselkode.RV_OO_1
 import no.nav.helse.person.Varselkode.RV_OO_2
@@ -1558,7 +1559,7 @@ internal class Vedtaksperiode private constructor(
         ) {
             validation(ytelser) {
                 onValidationFailed {
-                    if (!ytelser.harFunksjonelleFeilEllerVerre()) funksjonellFeil("Behandling av Ytelser feilet, årsak ukjent")
+                    if (!ytelser.harFunksjonelleFeilEllerVerre()) funksjonellFeil(RV_AY_10)
                     vedtaksperiode.forkast(ytelser)
                 }
                 onSuccess {

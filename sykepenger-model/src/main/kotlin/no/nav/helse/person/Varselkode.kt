@@ -104,6 +104,7 @@ enum class Varselkode(
     RV_AY_7("Det er utbetalt omsorgspenger i samme periode."),
     RV_AY_8("Det er utbetalt opplæringspenger i samme periode."),
     RV_AY_9("Det er institusjonsopphold i perioden. Vurder retten til sykepenger."),
+    RV_AY_10("Behandling av Ytelser feilet, årsak ukjent"),
 
     // SI: Simulering
     RV_SI_1("Feil under simulering"),
