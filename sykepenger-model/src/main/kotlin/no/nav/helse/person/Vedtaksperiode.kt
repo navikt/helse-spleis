@@ -88,6 +88,11 @@ import no.nav.helse.person.Varselkode.RV_SØ_20
 import no.nav.helse.person.Varselkode.RV_UT_1
 import no.nav.helse.person.Varselkode.RV_UT_5
 import no.nav.helse.person.Varselkode.RV_VT_1
+import no.nav.helse.person.Varselkode.RV_VT_2
+import no.nav.helse.person.Varselkode.RV_VT_4
+import no.nav.helse.person.Varselkode.RV_VT_5
+import no.nav.helse.person.Varselkode.RV_VT_6
+import no.nav.helse.person.Varselkode.RV_VT_7
 import no.nav.helse.person.Varselkode.RV_VV_1
 import no.nav.helse.person.Varselkode.RV_VV_2
 import no.nav.helse.person.Varselkode.RV_VV_8
@@ -898,7 +903,8 @@ internal class Vedtaksperiode private constructor(
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, vilkårsgrunnlag: Vilkårsgrunnlag) {
-            vilkårsgrunnlag.funksjonellFeil("Forventet ikke vilkårsgrunnlag i %s".format(type.name))
+            vilkårsgrunnlag.info("Forventet ikke vilkårsgrunnlag i %s".format(type.name))
+            vilkårsgrunnlag.funksjonellFeil(RV_VT_2)
         }
 
         fun håndter(
@@ -930,7 +936,8 @@ internal class Vedtaksperiode private constructor(
             infotrygdhistorikk: Infotrygdhistorikk,
             arbeidsgiverUtbetalingerFun: (SubsumsjonObserver) -> ArbeidsgiverUtbetalinger
         ) {
-            ytelser.funksjonellFeil("Forventet ikke ytelsehistorikk i %s".format(type.name))
+            ytelser.info("Forventet ikke ytelsehistorikk i %s".format(type.name))
+            ytelser.funksjonellFeil(RV_VT_7)
         }
 
         fun håndter(
@@ -939,7 +946,8 @@ internal class Vedtaksperiode private constructor(
             vedtaksperiode: Vedtaksperiode,
             utbetalingsgodkjenning: Utbetalingsgodkjenning
         ) {
-            utbetalingsgodkjenning.funksjonellFeil("Forventet ikke utbetalingsgodkjenning i %s".format(type.name))
+            utbetalingsgodkjenning.info("Forventet ikke utbetalingsgodkjenning i %s".format(type.name))
+            utbetalingsgodkjenning.funksjonellFeil(RV_VT_2)
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
@@ -947,18 +955,18 @@ internal class Vedtaksperiode private constructor(
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, simulering: Simulering) {
-            simulering.funksjonellFeil("Forventet ikke simulering i %s".format(type.name))
+            simulering.info("Forventet ikke simulering i %s".format(type.name))
+            simulering.funksjonellFeil(RV_VT_4)
         }
 
         fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: UtbetalingHendelse) {
-            hendelse.funksjonellFeil("Forventet ikke utbetaling i %s".format(type.name))
+            hendelse.info("Forventet ikke utbetaling i %s".format(type.name))
+            hendelse.funksjonellFeil(RV_VT_5)
         }
 
-        fun håndter(
-            vedtaksperiode: Vedtaksperiode,
-            hendelse: OverstyrTidslinje
-        ) {
-            hendelse.funksjonellFeil("Forventet ikke overstyring fra saksbehandler i %s".format(type.name))
+        fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrTidslinje) {
+            hendelse.info("Forventet ikke overstyring fra saksbehandler i %s".format(type.name))
+            hendelse.funksjonellFeil(RV_VT_6)
         }
 
         fun håndter(
