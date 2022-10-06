@@ -119,12 +119,24 @@ internal class InntektsmeldingOgFerieE2ETest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
         håndterUtbetalt(orgnummer = a1)
+        nullstillTilstandsendringer()
 
         håndterSykmelding(Sykmeldingsperiode(1.februar, 20.februar, 100.prosent), orgnummer = a2)
 
         håndterSykmelding(Sykmeldingsperiode(5.februar, 20.februar, 100.prosent), orgnummer = a1)
         håndterSøknad(Sykdom(5.februar, 20.februar, 100.prosent), Ferie(5.februar, 20.februar), orgnummer = a1)
         håndterUtbetalingshistorikk(2.vedtaksperiode, orgnummer = a1)
+
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+        assertForventetFeil(
+            forklaring = "Skal ikke trenge inntektsmelding for ferieperioden da det starter en ny arbeidsgiverperiode i ferieperioden",
+            nå = {
+                assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, orgnummer = a1)
+            },
+            ønsket = {
+                assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING, orgnummer = a1)
+            }
+        )
 
         håndterSøknad(Sykdom(1.februar, 20.februar, 100.prosent), orgnummer = a2)
         håndterInntektsmelding(listOf(1.februar til 16.februar), orgnummer = a2)
@@ -135,16 +147,7 @@ internal class InntektsmeldingOgFerieE2ETest : AbstractEndToEndTest() {
         håndterUtbetalt(orgnummer = a2)
         assertTilstander(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
         assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVSLUTTET, orgnummer = a2)
-
-        assertForventetFeil(
-            forklaring = "Skal ikke trenge inntektsmelding for ferieperioden da det starter en ny arbeidsgiverperiode i ferieperioden",
-            nå = {
-                assertTilstander(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, orgnummer = a1)
-            },
-            ønsket = {
-                assertTilstander(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING, orgnummer = a1)
-            }
-        )
+        assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, orgnummer = a1)
     }
 
     @Test
@@ -163,7 +166,7 @@ internal class InntektsmeldingOgFerieE2ETest : AbstractEndToEndTest() {
         assertFunksjonellFeil("Minst en arbeidsgiver inngår ikke i sykepengegrunnlaget", 1.vedtaksperiode.filter(a2))
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
-        assertForkastetPeriodeTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, TIL_INFOTRYGD, orgnummer = a1)
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING, orgnummer = a1)
         assertForkastetPeriodeTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, TIL_INFOTRYGD, orgnummer = a2)
     }
 
@@ -179,16 +182,8 @@ internal class InntektsmeldingOgFerieE2ETest : AbstractEndToEndTest() {
         assertEquals(1.januar til 31.januar, inspektør.periode(1.vedtaksperiode))
         assertEquals(5.februar til 23.februar, inspektør.periode(2.vedtaksperiode))
         assertEquals(24.februar til 28.februar, inspektør.periode(3.vedtaksperiode))
-        assertForventetFeil(
-            nå = {
-                assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE)
-                assertTilstander(3.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE)
-            },
-            ønsket = {
-                assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
-                assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
-            }
-        )
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING)
     }
 
     @Test
@@ -202,16 +197,8 @@ internal class InntektsmeldingOgFerieE2ETest : AbstractEndToEndTest() {
         assertEquals(1.januar til 31.januar, inspektør.periode(1.vedtaksperiode))
         assertEquals(5.februar til 23.februar, inspektør.periode(2.vedtaksperiode))
         assertEquals(24.februar til 28.februar, inspektør.periode(3.vedtaksperiode))
-        assertForventetFeil(
-            nå = {
-                assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE)
-                assertTilstander(3.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE)
-            },
-            ønsket = {
-                assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
-                assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVSLUTTET_UTEN_UTBETALING)
-            }
-        )
+        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING)
     }
 
 }

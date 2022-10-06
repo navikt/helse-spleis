@@ -51,6 +51,7 @@ import no.nav.helse.person.Vedtaksperiode.Companion.lagRevurdering
 import no.nav.helse.person.Vedtaksperiode.Companion.medSkjæringstidspunkt
 import no.nav.helse.person.Vedtaksperiode.Companion.nåværendeVedtaksperiode
 import no.nav.helse.person.Vedtaksperiode.Companion.periode
+import no.nav.helse.person.Vedtaksperiode.Companion.sammenhengendeVedtaksperioder
 import no.nav.helse.person.Vedtaksperiode.Companion.senerePerioderPågående
 import no.nav.helse.person.Vedtaksperiode.Companion.skjæringstidspunktperiode
 import no.nav.helse.person.Vedtaksperiode.Companion.startRevurdering
@@ -273,6 +274,10 @@ internal class Arbeidsgiver private constructor(
         internal fun Iterable<Arbeidsgiver>.harNødvendigInntektForVilkårsprøving(skjæringstidspunkt: LocalDate) = this
             .medSkjæringstidspunkt(skjæringstidspunkt)
             .all { arbeidsgiver -> arbeidsgiver.harNødvendigInntektForVilkårsprøving(skjæringstidspunkt) }
+        internal fun Iterable<Arbeidsgiver>.harNødvendigOpplysningerFraArbeidsgiver(periode: Periode) = this
+            .flatMap { it.vedtaksperioder }
+            .filter { it.periode().overlapperMed(periode) }
+            .all { vedtaksperiode -> vedtaksperiode.harNødvendigOpplysningerFraArbeidsgiver() }
 
         internal fun Iterable<Arbeidsgiver>.trengerSøknadISammeMåned(skjæringstidspunkt: LocalDate) = this
             .filter { !it.harSykdomFor(skjæringstidspunkt) }
@@ -321,7 +326,7 @@ internal class Arbeidsgiver private constructor(
     private fun harNødvendigInntektITidligereBeregnetSykepengegrunnlag(skjæringstidspunkt: LocalDate) =
         person.vilkårsgrunnlagFor(skjæringstidspunkt)?.harNødvendigInntektForVilkårsprøving(organisasjonsnummer)
 
-    private fun kanBeregneSykepengegrunnlag(skjæringstidspunkt: LocalDate) = beregnSykepengegrunnlag(skjæringstidspunkt) != null
+    internal fun kanBeregneSykepengegrunnlag(skjæringstidspunkt: LocalDate) = beregnSykepengegrunnlag(skjæringstidspunkt) != null
     private fun beregnSykepengegrunnlag(skjæringstidspunkt: LocalDate, block: (inntekstopplysning: Inntektshistorikk.Inntektsopplysning?) -> Unit = {}) : ArbeidsgiverInntektsopplysning? {
         val førsteFraværsdag = finnFørsteFraværsdag(skjæringstidspunkt)
         val inntektsopplysning = inntektshistorikk.omregnetÅrsinntekt(skjæringstidspunkt, førsteFraværsdag, arbeidsforholdhistorikk)
@@ -878,17 +883,7 @@ internal class Arbeidsgiver private constructor(
      * tilstøter både foran og bak.
      */
     internal fun finnSammehengendeVedtaksperioder(vedtaksperiode: Vedtaksperiode): List<Vedtaksperiode> {
-        val (perioderFør, perioderEtter) = vedtaksperioder.sorted().partition { it før vedtaksperiode }
-        val sammenhengendePerioder = mutableListOf(vedtaksperiode)
-        perioderFør.reversed().forEach {
-            if (it.erVedtaksperiodeRettFør(sammenhengendePerioder.first()))
-                sammenhengendePerioder.add(0, it)
-        }
-        perioderEtter.forEach {
-            if (sammenhengendePerioder.last().erVedtaksperiodeRettFør(it))
-                sammenhengendePerioder.add(it)
-        }
-        return sammenhengendePerioder
+        return vedtaksperioder.sammenhengendeVedtaksperioder(vedtaksperiode)
     }
 
     internal fun finnSammenhengendePeriode(skjæringstidspunkt: LocalDate) = vedtaksperioder.medSkjæringstidspunkt(skjæringstidspunkt)
@@ -1014,8 +1009,10 @@ internal class Arbeidsgiver private constructor(
         vedtaksperioder.any(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt))
 
     internal fun finnFørsteFraværsdag(skjæringstidspunkt: LocalDate): LocalDate? {
-        if (!harSykdomFor(skjæringstidspunkt)) return null
-        return sykdomstidslinje().subset(finnSammenhengendePeriode(skjæringstidspunkt).periode()).sisteSkjæringstidspunkt()
+        val sammenhengendePerioder = finnSammenhengendePeriode(skjæringstidspunkt)
+        if (sammenhengendePerioder.isEmpty()) return null
+        val kandidater = sykdomstidslinje().subset(sammenhengendePerioder.periode()).skjæringstidspunkter()
+        return kandidater.minOrNull()
     }
 
     internal fun periodetype(periode: Periode): Periodetype {

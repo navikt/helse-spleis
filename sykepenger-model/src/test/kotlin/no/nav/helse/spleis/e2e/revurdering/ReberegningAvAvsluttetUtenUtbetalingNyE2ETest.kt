@@ -1162,7 +1162,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
     }
 
     @Test
-    fun `revvurdering etter periode til godkjenning`() {
+    fun `revurdering etter periode til godkjenning`() {
         håndterSykmelding(Sykmeldingsperiode(1.juni, 16.juni, 100.prosent))
         håndterSøknad(Sykdom(1.juni, 16.juni, 100.prosent))
 
@@ -1175,9 +1175,6 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
         håndterSimulering(2.vedtaksperiode)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode, utbetalingGodkjent = false)
 
-        // todo: vi mener arbeidsgiverperioden avbrytes 17. juli pga. 16 dager opphold siden 30. juni (hele perioden 13. juli-20.juli er ferie).
-        //      syk+opphold+ferie => ferie regnes som opphold, ikke sykdom
-        // Pga. mottatt inntektsmelding så ser dette rart ut
         håndterSykmelding(Sykmeldingsperiode(13.juli, 20.juli, 100.prosent))
         håndterSøknad(Sykdom(13.juli, 20.juli, 100.prosent), Ferie(13.juli, 20.juli))
 
@@ -1186,21 +1183,20 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
 
         nullstillTilstandsendringer()
 
-        // todo: første fraværsdag-dagen vinner over feriedagen 13.juli og blir en "arbeidsgiverdag".
-        // denne dagen blir en AvvistDag på utbetalingstidslinjen fordi egenmeldingsdager etter arbeidsgiverpereioden avvises. Dette medfører warning, som igjen medfører
-        // at perioden går til godkjenning.
         håndterInntektsmelding(listOf(1.juni til 16.juni), førsteFraværsdag = 13.juli)
+
+        assertEquals(Dag.Feriedag::class, inspektør.sykdomstidslinje[13.juli]::class)
 
         nullstillTilstandsendringer()
         håndterInntektsmelding(listOf(1.juni til 16.juni), førsteFraværsdag = 25.juli)
 
         assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
-        assertTilstander(4.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE)
+        assertTilstander(3.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        assertTilstander(4.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
     }
 
     @Test
-    fun `revvurdering med ghost`() {
+    fun `revurdering med ghost`() {
         val beregnetInntektA1 = 31000.månedlig
 
         håndterSykmelding(Sykmeldingsperiode(10.januar, 25.januar, 100.prosent), orgnummer = a1)

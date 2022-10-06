@@ -322,7 +322,6 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
         assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
         assertTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
 
-
         utbetalPeriodeEtterVilkårsprøving(1.vedtaksperiode, orgnummer = a2)
         assertTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
         assertTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
