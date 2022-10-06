@@ -81,6 +81,12 @@ internal class Inntektshistorikk private constructor(private val historikk: Muta
             return other is Innslag && this.inntekter == other.inntekter
         }
 
+        override fun hashCode(): Int {
+            var result = id.hashCode()
+            result = 31 * result + inntekter.hashCode()
+            return result
+        }
+
         operator fun plus(other: Innslag): Innslag? {
             var inntekter = this.inntekter
             other.inntekter.forEach { inntektsopplysning ->
@@ -115,6 +121,12 @@ internal class Inntektshistorikk private constructor(private val historikk: Muta
 
         final override fun equals(other: Any?) = other is Inntektsopplysning && erSamme(other)
 
+        final override fun hashCode(): Int {
+            var result = dato.hashCode()
+            result = 31 * result + prioritet
+            return result
+        }
+
         protected abstract fun erSamme(other: Inntektsopplysning): Boolean
 
         open fun subsumerSykepengegrunnlag(
@@ -125,6 +137,7 @@ internal class Inntektshistorikk private constructor(private val historikk: Muta
             forklaring: String?,
             subsumsjon: Subsumsjon?
         ) { }
+
         open fun subsumerArbeidsforhold(
             subsumsjonObserver: SubsumsjonObserver,
             skjæringstidspunkt: LocalDate,
