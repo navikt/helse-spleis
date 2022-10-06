@@ -57,6 +57,7 @@ internal object Sykefraværstilfeller {
                         Sykefraværstilfelle(
                             tidligsteSkjæringstidspunkt = tidligsteSkjæringstidspunkt,
                             aktiveSkjæringstidspunkter = skjæringstidspunkter.filter { it in aktiveSkjæringstidspunkter }.toSet(),
+                            førsteDag = sammenhengendePeriode.start,
                             sisteDag = sammenhengendePeriode.endInclusive,
                             sisteDagISpleis = sisteDagISpleis
                         )
@@ -80,9 +81,11 @@ internal object Sykefraværstilfeller {
     internal data class Sykefraværstilfelle(
         val tidligsteSkjæringstidspunkt: LocalDate,
         val aktiveSkjæringstidspunkter: Set<LocalDate>,
+        private val førsteDag: LocalDate,
         private val sisteDag: LocalDate,
         private val sisteDagISpleis: LocalDate) {
-        internal val periode = tidligsteSkjæringstidspunkt til sisteDag
-        internal val periodeFremTilSisteDagISpleis = tidligsteSkjæringstidspunkt til sisteDagISpleis
+        private val fom = minOf(tidligsteSkjæringstidspunkt, førsteDag)
+        internal val periode = fom til sisteDag
+        internal val periodeFremTilSisteDagISpleis = fom til sisteDagISpleis
     }
 }

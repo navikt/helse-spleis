@@ -33,6 +33,7 @@ internal class SykefraværstilfellerTest {
         val forventet = setOf(Sykefraværstilfelle(
             tidligsteSkjæringstidspunkt = 15.desember(2017),
             aktiveSkjæringstidspunkter = setOf(15.desember(2017), 1.januar),
+            førsteDag = 1.januar,
             sisteDag = 31.mars,
             sisteDagISpleis = 31.mars
         ))
@@ -48,6 +49,7 @@ internal class SykefraværstilfellerTest {
         val forventet = setOf(Sykefraværstilfelle(
             tidligsteSkjæringstidspunkt = 1.januar,
             aktiveSkjæringstidspunkter = setOf(1.januar),
+            førsteDag = 1.januar,
             sisteDag = 31.januar,
             sisteDagISpleis = 31.januar
         ))
@@ -64,6 +66,7 @@ internal class SykefraværstilfellerTest {
         val forventet = setOf(Sykefraværstilfelle(
             tidligsteSkjæringstidspunkt = 1.januar,
             aktiveSkjæringstidspunkter = setOf(1.januar),
+            førsteDag = 1.januar,
             sisteDag = 19.januar,
             sisteDagISpleis = 19.januar
         ))
@@ -75,6 +78,7 @@ internal class SykefraværstilfellerTest {
         val forventet = setOf(Sykefraværstilfelle(
             tidligsteSkjæringstidspunkt = 1.januar,
             aktiveSkjæringstidspunkter = setOf(1.januar),
+            førsteDag = 1.januar,
             sisteDag = 31.mars,
             sisteDagISpleis = 29.mars
         ))
@@ -102,6 +106,7 @@ internal class SykefraværstilfellerTest {
         val forventet = setOf(Sykefraværstilfelle(
             tidligsteSkjæringstidspunkt = 1.januar,
             aktiveSkjæringstidspunkter = setOf(2.januar),
+            førsteDag = 1.januar,
             sisteDag = 20.januar,
             sisteDagISpleis = 10.januar
         ))
@@ -119,6 +124,7 @@ internal class SykefraværstilfellerTest {
         val forventet = setOf(Sykefraværstilfelle(
             tidligsteSkjæringstidspunkt = 1.januar,
             aktiveSkjæringstidspunkter = setOf(2.januar),
+            førsteDag = 1.januar,
             sisteDag = 20.januar,
             sisteDagISpleis = 20.januar
         ))
@@ -143,17 +149,21 @@ internal class SykefraværstilfellerTest {
             Sykefraværstilfelle(
                 aktiveSkjæringstidspunkter = setOf(11.januar),
                 tidligsteSkjæringstidspunkt = 11.januar,
+                førsteDag = 11.januar,
                 sisteDag = 25.februar,
                 sisteDagISpleis = 28.januar
             ),
             Sykefraværstilfelle(
                 aktiveSkjæringstidspunkter = setOf(14.februar, 11.januar),
                 tidligsteSkjæringstidspunkt = 11.januar,
+                førsteDag = 21.mars,
                 sisteDag = 4.september,
                 sisteDagISpleis = 8.mai
             )
         )
         assertEquals(forventet, sykefraværstilfeller(vedtaksperioder))
+        assertEquals(forventet.first().periode, 11.januar til 25.februar)
+        assertEquals(forventet.last().periode, 11.januar til 4.september)
     }
 
     @Test
@@ -169,11 +179,30 @@ internal class SykefraværstilfellerTest {
         val forventet = setOf(Sykefraværstilfelle(
             tidligsteSkjæringstidspunkt = 17.januar,
             aktiveSkjæringstidspunkter = setOf(1.mai),
+            førsteDag = 1.januar,
             sisteDag = 31.mai,
             sisteDagISpleis = 31.mai
         ))
 
         assertEquals(forventet, sykefraværstilfeller(vedtaksperioder))
+    }
+
+    @Test
+    fun `sykefraværsperioden strekker seg tilbake til tidligste fom om det er før tidligste skjæringstidspunkt`() {
+        val vedtaksperioder = listOf(
+            ForkastetVedtaksperiode(skjæringstidspunkt = 17.januar, 1.januar til 31.januar, "TIL_INFOTRYGD"),
+            AktivVedtaksperiode(skjæringstidspunkt = 20.januar, 1.februar til 28.februar, "AVSLUTTET")
+        )
+        val forventet = setOf(Sykefraværstilfelle(
+            tidligsteSkjæringstidspunkt = 17.januar,
+            aktiveSkjæringstidspunkter = setOf(20.januar),
+            førsteDag = 1.januar,
+            sisteDag = 28.februar,
+            sisteDagISpleis = 28.februar
+        ))
+
+        assertEquals(forventet, sykefraværstilfeller(vedtaksperioder))
+        assertEquals(forventet.first().periode, 1.januar til 28.februar)
     }
 }
 
