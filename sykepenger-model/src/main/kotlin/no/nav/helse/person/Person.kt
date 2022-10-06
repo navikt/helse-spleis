@@ -42,7 +42,6 @@ import no.nav.helse.person.Arbeidsgiver.Companion.gjenopptaBehandling
 import no.nav.helse.person.Arbeidsgiver.Companion.harForkastetVedtaksperiodeSomBlokkerBehandling
 import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigInntektForVilkårsprøving
 import no.nav.helse.person.Arbeidsgiver.Companion.harPeriodeSomBlokkererOverstyring
-import no.nav.helse.person.Arbeidsgiver.Companion.harUferdigPeriodeFør
 import no.nav.helse.person.Arbeidsgiver.Companion.håndter
 import no.nav.helse.person.Arbeidsgiver.Companion.håndterOverstyringAvGhostInntekt
 import no.nav.helse.person.Arbeidsgiver.Companion.inntekterForSammenligningsgrunnlag
@@ -58,6 +57,7 @@ import no.nav.helse.person.Arbeidsgiver.Companion.startRevurdering
 import no.nav.helse.person.Arbeidsgiver.Companion.validerVilkårsgrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.validerYtelserForSkjæringstidspunkt
 import no.nav.helse.person.Arbeidsgiver.Companion.vedtaksperioder
+import no.nav.helse.person.Varselkode.RV_AG_1
 import no.nav.helse.person.Varselkode.RV_IV_2
 import no.nav.helse.person.Varselkode.RV_OV_1
 import no.nav.helse.person.Varselkode.RV_VV_10
@@ -286,7 +286,7 @@ class Person private constructor(
             påminnelse.kontekst(this)
             if (finnArbeidsgiver(påminnelse).håndter(påminnelse)) return håndterGjenoppta(påminnelse)
         } catch (err: Aktivitetslogg.AktivitetException) {
-            påminnelse.funksjonellFeil("Fikk påminnelse uten at vi fant arbeidsgiver eller vedtaksperiode")
+            påminnelse.funksjonellFeil(RV_AG_1)
         }
         observers.forEach { påminnelse.vedtaksperiodeIkkeFunnet(it) }
         håndterGjenoppta(påminnelse)
@@ -356,14 +356,14 @@ class Person private constructor(
     fun håndter(hendelse: AnnullerUtbetaling) {
         hendelse.kontekst(this)
         arbeidsgivere.finn(hendelse.organisasjonsnummer())?.håndter(hendelse)
-            ?: hendelse.funksjonellFeil("Finner ikke arbeidsgiver")
+            ?: hendelse.funksjonellFeil(RV_AG_1)
         håndterGjenoppta(hendelse)
     }
 
     fun håndter(hendelse: Grunnbeløpsregulering) {
         hendelse.kontekst(this)
         arbeidsgivere.finn(hendelse.organisasjonsnummer())?.håndter(arbeidsgivere, hendelse, vilkårsgrunnlagHistorikk)
-            ?: hendelse.funksjonellFeil("Finner ikke arbeidsgiver")
+            ?: hendelse.funksjonellFeil(RV_AG_1)
         håndterGjenoppta(hendelse)
     }
 
@@ -905,8 +905,6 @@ class Person private constructor(
 
     internal fun harPeriodeSomBlokkererOverstyring(skjæringstidspunkt: LocalDate) =
         arbeidsgivere.harPeriodeSomBlokkererOverstyring(skjæringstidspunkt)
-
-    internal fun harUferdigPeriodeFør(periode: Periode) = arbeidsgivere.harUferdigPeriodeFør(periode)
 
     internal fun nyPeriode(vedtaksperiode: Vedtaksperiode, søknad: Søknad) =
         arbeidsgivere.nyPeriode(vedtaksperiode, søknad)

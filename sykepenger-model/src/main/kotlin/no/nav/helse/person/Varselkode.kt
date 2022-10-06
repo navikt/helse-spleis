@@ -149,6 +149,8 @@ enum class Varselkode(
     RV_VT_5("Forventet ikke utbetaling"),
     RV_VT_6("Forventet ikke overstyring fra saksbehandler"),
     RV_VT_7("Forventet ikke ytelsehistorikk"),
+
+    RV_AG_1("Finner ikke arbeidsgiver"),
     ;
 
     init {
