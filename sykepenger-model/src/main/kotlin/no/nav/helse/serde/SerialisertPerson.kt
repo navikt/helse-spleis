@@ -98,6 +98,7 @@ import no.nav.helse.serde.migration.V175IdPåAktiviteter
 import no.nav.helse.serde.migration.V176LoggingAvForkastOgFlyttVilkårsgrunnlag
 import no.nav.helse.serde.migration.V177LoggingAvForkastOgFlyttVilkårsgrunnlag
 import no.nav.helse.serde.migration.V178ForkastOgFlyttVilkårsgrunnlag
+import no.nav.helse.serde.migration.V179TildelingUtbetaling
 import no.nav.helse.serde.migration.V17ForkastedePerioder
 import no.nav.helse.serde.migration.V18UtbetalingstidslinjeØkonomi
 import no.nav.helse.serde.migration.V19KlippOverlappendeVedtaksperioder
@@ -379,7 +380,8 @@ class SerialisertPerson(val json: String) {
             V175IdPåAktiviteter(),
             V176LoggingAvForkastOgFlyttVilkårsgrunnlag(),
             V177LoggingAvForkastOgFlyttVilkårsgrunnlag(),
-            V178ForkastOgFlyttVilkårsgrunnlag()
+            V178ForkastOgFlyttVilkårsgrunnlag(),
+            V179TildelingUtbetaling()
         )
 
         fun gjeldendeVersjon() = JsonMigration.gjeldendeVersjon(migrations)
