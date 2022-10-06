@@ -180,7 +180,7 @@ class Søknad(
             private val sykdomsgrad = søknadsgrad ?: sykmeldingsgrad
 
             override fun valider(søknad: Søknad) {
-                if (søknadsgrad != null && søknadsgrad > sykmeldingsgrad) søknad.funksjonellFeil("Bruker har oppgitt at de har jobbet mindre enn sykmelding tilsier")
+                if (søknadsgrad != null && søknadsgrad > sykmeldingsgrad) søknad.funksjonellFeil(RV_SØ_21)
             }
 
             override fun sykdomstidslinje(sykdomsperiode: Periode, avskjæringsdato: LocalDate, kilde: Hendelseskilde) =

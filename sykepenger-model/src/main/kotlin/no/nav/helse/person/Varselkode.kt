@@ -31,6 +31,7 @@ enum class Varselkode(
     RV_SØ_18("Søknaden inneholder andre inntektskilder enn ANDRE_ARBEIDSFORHOLD"),
     RV_SØ_19("Søknad forlenger en forkastet periode"),
     RV_SØ_20("Søknad overlapper med, eller er før, en forkastet vedtaksperiode"),
+    RV_SØ_21("Bruker har oppgitt at de har jobbet mindre enn sykmelding tilsier"),
 
     // OO: Out-of-order
     RV_OO_1("Det er behandlet en søknad i Speil for en senere periode enn denne."),
