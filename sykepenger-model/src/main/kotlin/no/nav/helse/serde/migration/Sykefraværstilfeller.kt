@@ -5,6 +5,10 @@ import java.time.LocalDate
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioderMedHensynTilHelg
 import no.nav.helse.hendelser.til
+import no.nav.helse.serde.migration.Sykefraværstilfeller.Vedtaksperiode.Companion.aktiveSkjæringstidspunkter
+import no.nav.helse.serde.migration.Sykefraværstilfeller.Vedtaksperiode.Companion.kunForkastetEllerAvsluttetUtenUtbetaling
+import no.nav.helse.serde.migration.Sykefraværstilfeller.Vedtaksperiode.Companion.overlappendeVedtaksperioder
+import no.nav.helse.serde.migration.Sykefraværstilfeller.Vedtaksperiode.Companion.skjæringstidspunkter
 
 /*
 * Av uante årsaker hender det at vi finner ulike skjæringstidspunkt på vedtaksperiodene i samme sykefravøærstilfellet.
@@ -22,7 +26,6 @@ internal object Sykefraværstilfeller {
     internal fun vedtaksperioder(person: JsonNode): List<Vedtaksperiode> {
         val aktiveVedtaksperioder = person.path("arbeidsgivere")
             .flatMap { it.path("vedtaksperioder") }
-            .filterNot { it.tilstand == "AVSLUTTET_UTEN_UTBETALING" }
             .map { AktivVedtaksperiode(it.skjæringstidspunkt, it.fom til it.tom, it.tilstand) }
 
         val forkastedeVedtaksperioder = person.path("arbeidsgivere")
@@ -33,15 +36,15 @@ internal object Sykefraværstilfeller {
         return aktiveVedtaksperioder + forkastedeVedtaksperioder
     }
 
-    internal fun sykefraværstilfeller(vedtaksperioder: List<Vedtaksperiode>): Set<Sykefraværstilfelle>{
+    internal fun sykefraværstilfeller(vedtaksperioder: List<Vedtaksperiode>): Set<Sykefraværstilfelle> {
         val sammenhengendePerioder = vedtaksperioder
             .map { it.periode }
             .grupperSammenhengendePerioderMedHensynTilHelg()
 
-        val aktivePerioder = vedtaksperioder.filterIsInstance<AktivVedtaksperiode>()
-        val aktiveSkjæringstidspunkter = aktivePerioder.map { it.skjæringstidspunkt }.toSet()
+        val aktivePerioderForPerson = vedtaksperioder.filterIsInstance<AktivVedtaksperiode>()
+        val aktiveSkjæringstidspunkterForPerson = aktivePerioderForPerson.aktiveSkjæringstidspunkter()
 
-        val dagerISpleis = aktivePerioder
+        val dagerISpleisForPerson = aktivePerioderForPerson
             .map { it.periode }
             .grupperSammenhengendePerioderMedHensynTilHelg()
             .flatten()
@@ -49,29 +52,41 @@ internal object Sykefraværstilfeller {
 
         return sammenhengendePerioder
             .mapNotNull { sammenhengendePeriode ->
-                when (val sisteDagISpleis = dagerISpleis.lastOrNull { it in sammenhengendePeriode }) {
-                    null -> null
-                    else -> {
-                        val skjæringstidspunkter = vedtaksperioder.skjæringstidspunkterFor(sammenhengendePeriode)
-                        val tidligsteSkjæringstidspunkt = skjæringstidspunkter.min()
-                        Sykefraværstilfelle(
-                            tidligsteSkjæringstidspunkt = tidligsteSkjæringstidspunkt,
-                            aktiveSkjæringstidspunkter = skjæringstidspunkter.filter { it in aktiveSkjæringstidspunkter }.toSet(),
-                            førsteDag = sammenhengendePeriode.start,
-                            sisteDag = sammenhengendePeriode.endInclusive,
-                            sisteDagISpleis = sisteDagISpleis
-                        )
-                    }
+                val overlappendeVedtaksperioder = vedtaksperioder.overlappendeVedtaksperioder(sammenhengendePeriode)
+                val skjæringstidspunkter = overlappendeVedtaksperioder.skjæringstidspunkter()
+                val aktiveSkjæringstidspunkter = skjæringstidspunkter.filter { it in aktiveSkjæringstidspunkterForPerson }.toSet()
+                val sisteDagISpleis = dagerISpleisForPerson.lastOrNull { it in sammenhengendePeriode }
+
+                if (overlappendeVedtaksperioder.kunForkastetEllerAvsluttetUtenUtbetaling()) null // Om AUU har samme skjæringstidspunkt som en annen aktiv vedtaksperiode
+                else if (aktiveSkjæringstidspunkter.isEmpty() || sisteDagISpleis == null) null // Uansett ikke aktuell å lete frem vilkårsgrunnlag for
+                else {
+                    Sykefraværstilfelle(
+                        tidligsteSkjæringstidspunkt = skjæringstidspunkter.min(),
+                        aktiveSkjæringstidspunkter = aktiveSkjæringstidspunkter,
+                        førsteDag = sammenhengendePeriode.start,
+                        sisteDag = sammenhengendePeriode.endInclusive,
+                        sisteDagISpleis = sisteDagISpleis
+                    )
                 }
             }.toSet()
     }
 
-    private fun List<Vedtaksperiode>.skjæringstidspunkterFor(periode: Periode) =
-        filter { periode.overlapperMed(it.periode) }.map { it.skjæringstidspunkt }.toSet()
-
     internal sealed class Vedtaksperiode(val skjæringstidspunkt: LocalDate, val periode: Periode, protected val tilstand: String) {
         open fun tilstand() = tilstand
         override fun toString() = "$periode med skjæringstidspunkt $skjæringstidspunkt"
+        protected fun erAvsluttetUtenUtbetaling() = tilstand() == "AVSLUTTET_UTEN_UTBETALING"
+
+        internal companion object {
+            internal fun List<AktivVedtaksperiode>.aktiveSkjæringstidspunkter() =
+                filterNot { it.erAvsluttetUtenUtbetaling() }.skjæringstidspunkter()
+            internal fun List<Vedtaksperiode>.overlappendeVedtaksperioder(periode: Periode) =
+                filter { periode.overlapperMed(it.periode) }
+            internal fun List<Vedtaksperiode>.kunForkastetEllerAvsluttetUtenUtbetaling() =
+                all { it is ForkastetVedtaksperiode || it.erAvsluttetUtenUtbetaling() }
+            internal fun List<Vedtaksperiode>.skjæringstidspunkter() =
+                map { it.skjæringstidspunkt }.toSet()
+
+        }
     }
     internal class AktivVedtaksperiode(skjæringstidspunkt: LocalDate, periode: Periode, tilstand: String) : Vedtaksperiode(skjæringstidspunkt, periode, tilstand)
     internal class ForkastetVedtaksperiode(skjæringstidspunkt: LocalDate, periode: Periode, tilstand: String) : Vedtaksperiode(skjæringstidspunkt, periode, tilstand) {

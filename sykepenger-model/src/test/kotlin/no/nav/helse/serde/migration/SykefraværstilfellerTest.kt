@@ -76,9 +76,9 @@ internal class SykefraværstilfellerTest {
     @Test
     fun `finner sykefraværstilfeller fra aktive vedtaksperioder i person-json`() {
         val forventet = setOf(Sykefraværstilfelle(
-            tidligsteSkjæringstidspunkt = 1.januar,
+            tidligsteSkjæringstidspunkt = 15.desember(2017),
             aktiveSkjæringstidspunkter = setOf(1.januar),
-            førsteDag = 1.januar,
+            førsteDag = 15.desember(2017),
             sisteDag = 31.mars,
             sisteDagISpleis = 29.mars
         ))
@@ -203,6 +203,75 @@ internal class SykefraværstilfellerTest {
 
         assertEquals(forventet, sykefraværstilfeller(vedtaksperioder))
         assertEquals(forventet.first().periode, 1.januar til 28.februar)
+    }
+
+    @Test
+    fun `sykefraværstilfelle som kun består av avsluttet uten utbetaling skal ignoreres`() {
+        val vedtaksperioder = listOf(
+            AktivVedtaksperiode(skjæringstidspunkt = 1.januar, 1.januar til 31.januar, "AVSLUTTET_UTEN_UTBETALING"),
+            AktivVedtaksperiode(skjæringstidspunkt = 2.januar, 1.februar til 28.februar, "AVSLUTTET_UTEN_UTBETALING")
+        )
+        assertEquals(emptySet<Sykefraværstilfelle>(), sykefraværstilfeller(vedtaksperioder))
+    }
+
+    @Test
+    fun `avsluttet uten utbetaling skal hensyntas i sykefraværstilfellet om det hører sammen med en annen aktiv vedtaksperiode`() {
+        val vedtaksperioder = listOf(
+            AktivVedtaksperiode(skjæringstidspunkt = 1.januar, 1.januar til 31.januar, "AVSLUTTET_UTEN_UTBETALING"),
+            AktivVedtaksperiode(skjæringstidspunkt = 2.januar, 1.februar til 28.februar, "AVSLUTTET")
+        )
+
+        val forventet = setOf(Sykefraværstilfelle(
+            tidligsteSkjæringstidspunkt = 1.januar,
+            aktiveSkjæringstidspunkter = setOf(2.januar),
+            førsteDag = 1.januar,
+            sisteDag = 28.februar,
+            sisteDagISpleis = 28.februar
+        ))
+        assertEquals(forventet, sykefraværstilfeller(vedtaksperioder))
+    }
+
+    @Test
+    fun `avsluttet uten utbetaling skal ikke hensyntas om det kun hører sammen med forkastede vedtaksperioder`() {
+        val vedtaksperioder = listOf(
+            AktivVedtaksperiode(skjæringstidspunkt = 1.januar, 1.januar til 31.januar, "AVSLUTTET_UTEN_UTBETALING"),
+            ForkastetVedtaksperiode(skjæringstidspunkt = 2.januar, 1.februar til 28.februar, "TIL_INFOTRYGD")
+        )
+        assertEquals(emptySet<Sykefraværstilfelle>(), sykefraværstilfeller(vedtaksperioder))
+    }
+
+    @Test
+    fun `frittstående avsluttet uten utbetaling skal ikke hensyntas selv om det har samme skjæringstidspunkt som en annen aktiv vedtaksperiode`() {
+        val vedtaksperioder = listOf(
+            AktivVedtaksperiode(skjæringstidspunkt = 1.januar, 1.januar til 16.januar, "AVSLUTTET_UTEN_UTBETALING"),
+            AktivVedtaksperiode(skjæringstidspunkt = 1.januar, 1.februar til 28.februar, "AVSLUTTET"),
+        )
+        val forventet = setOf(Sykefraværstilfelle(
+            tidligsteSkjæringstidspunkt = 1.januar,
+            aktiveSkjæringstidspunkter = setOf(1.januar),
+            førsteDag = 1.februar,
+            sisteDag = 28.februar,
+            sisteDagISpleis = 28.februar
+        ))
+        assertEquals(forventet, sykefraværstilfeller(vedtaksperioder))
+    }
+    @Test
+    fun `AUU - IT - Spleis - IT`() {
+        val vedtaksperioder = listOf(
+            AktivVedtaksperiode(skjæringstidspunkt = 1.januar, 31.desember(2017) til 16.januar, "AVSLUTTET_UTEN_UTBETALING"),
+            ForkastetVedtaksperiode(skjæringstidspunkt = 2.januar, 17.januar til 31.januar, "TIL_INFOTRYGD"),
+            AktivVedtaksperiode(skjæringstidspunkt = 3.januar, 1.februar til 28.februar, "AVSLUTTET"),
+            ForkastetVedtaksperiode(skjæringstidspunkt = 4.januar, 1.mars til 31.mars, "TIL_INFOTRYGD")
+        )
+        val forventet = setOf(Sykefraværstilfelle(
+            tidligsteSkjæringstidspunkt = 1.januar, // AUU Skjæringstidspunkt
+            aktiveSkjæringstidspunkter = setOf(3.januar), // != AUU sitt skjæringstidspunkt
+            førsteDag = 31.desember(2017), // AUU fom
+            sisteDag = 31.mars, // Forkastet tom
+            sisteDagISpleis = 28.februar // Avsluttet vedtaksperiode tom
+        ))
+        assertEquals(forventet, sykefraværstilfeller(vedtaksperioder))
+        assertEquals(forventet.first().periode, 31.desember(2017) til 31.mars)
     }
 }
 
