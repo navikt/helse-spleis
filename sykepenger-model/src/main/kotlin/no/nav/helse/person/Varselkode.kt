@@ -118,6 +118,16 @@ enum class Varselkode(
     RV_UT_3("Feil ved utbetalingstidslinjebygging"),
     RV_UT_4("Finner ingen utbetaling å annullere"),
     RV_UT_5("Utbetaling ble ikke gjennomført"),
+    RV_UT_6("Forventet ikke å opprette utbetaling"),
+    RV_UT_7("Forventet ikke godkjenning på utbetaling"),
+    RV_UT_8("Forventet ikke å etterutbetale på utbetaling"),
+    RV_UT_9("Forventet ikke å annullere på utbetaling"),
+    RV_UT_10("Forventet ikke overførtkvittering på utbetaling"),
+    RV_UT_11("Forventet ikke kvittering på utbetaling"),
+    RV_UT_12("Forventet ikke simulering på utbetaling"),
+    RV_UT_13("Forventet ikke å lage godkjenning på utbetaling"),
+    RV_UT_14("Gir opp å prøve utbetaling på nytt"),
+    RV_UT_15("Kan ikke annullere: hendelsen er ikke relevant"),
 
     // OS: Oppdragsystemet
     RV_OS_1("Utbetalingen forlenger et tidligere oppdrag som opphørte alle utbetalte dager. Sjekk simuleringen."),

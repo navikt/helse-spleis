@@ -22,7 +22,17 @@ import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.Periodetype
 import no.nav.helse.person.SpesifikkKontekst
 import no.nav.helse.person.UtbetalingVisitor
+import no.nav.helse.person.Varselkode.RV_UT_10
+import no.nav.helse.person.Varselkode.RV_UT_11
+import no.nav.helse.person.Varselkode.RV_UT_12
+import no.nav.helse.person.Varselkode.RV_UT_13
+import no.nav.helse.person.Varselkode.RV_UT_14
+import no.nav.helse.person.Varselkode.RV_UT_15
 import no.nav.helse.person.Varselkode.RV_UT_4
+import no.nav.helse.person.Varselkode.RV_UT_6
+import no.nav.helse.person.Varselkode.RV_UT_7
+import no.nav.helse.person.Varselkode.RV_UT_8
+import no.nav.helse.person.Varselkode.RV_UT_9
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.serde.reflection.Utbetalingstatus
@@ -250,7 +260,8 @@ internal class Utbetaling private constructor(
 
     internal fun annuller(hendelse: AnnullerUtbetaling): Utbetaling? {
         if (!hendelse.erRelevant(arbeidsgiverOppdrag.fagsystemId())) {
-            hendelse.funksjonellFeil("Kan ikke annullere: hendelsen er ikke relevant for ${arbeidsgiverOppdrag.fagsystemId()}.")
+            hendelse.info("Kan ikke annullere: hendelsen er ikke relevant for ${arbeidsgiverOppdrag.fagsystemId()}.")
+            hendelse.funksjonellFeil(RV_UT_15)
             return null
         }
         return tilstand.annuller(this, hendelse)
@@ -631,7 +642,8 @@ internal class Utbetaling private constructor(
         fun forkast(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {}
 
         fun opprett(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {
-            hendelse.funksjonellFeil("Forventet ikke å opprette utbetaling i tilstand=${this::class.simpleName}")
+            hendelse.info("Forventet ikke å opprette utbetaling i tilstand=${this::class.simpleName}")
+            hendelse.funksjonellFeil(RV_UT_6)
         }
 
         fun godkjenn(
@@ -639,25 +651,30 @@ internal class Utbetaling private constructor(
             hendelse: IAktivitetslogg,
             vurdering: Vurdering
         ) {
-            hendelse.funksjonellFeil("Forventet ikke godkjenning på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
+            hendelse.info("Forventet ikke godkjenning på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
+            hendelse.funksjonellFeil(RV_UT_7)
         }
 
         fun etterutbetale(utbetaling: Utbetaling, hendelse: Grunnbeløpsregulering, utbetalingstidslinje: Utbetalingstidslinje): Utbetaling? {
-            hendelse.funksjonellFeil("Forventet ikke å etterutbetale på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
+            hendelse.info("Forventet ikke å etterutbetale på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
+            hendelse.funksjonellFeil(RV_UT_8)
             return null
         }
 
         fun annuller(utbetaling: Utbetaling, hendelse: AnnullerUtbetaling): Utbetaling? {
-            hendelse.funksjonellFeil("Forventet ikke å annullere på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
+            hendelse.info("Forventet ikke å annullere på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
+            hendelse.funksjonellFeil(RV_UT_9)
             return null
         }
 
         fun overført(utbetaling: Utbetaling, hendelse: UtbetalingOverført) {
-            hendelse.funksjonellFeil("Forventet ikke overførtkvittering på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
+            hendelse.info("Forventet ikke overførtkvittering på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
+            hendelse.funksjonellFeil(RV_UT_10)
         }
 
         fun kvittér(utbetaling: Utbetaling, hendelse: UtbetalingHendelse) {
-            hendelse.funksjonellFeil("Forventet ikke kvittering på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
+            hendelse.info("Forventet ikke kvittering på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
+            hendelse.funksjonellFeil(RV_UT_11)
         }
 
         fun håndter(utbetaling: Utbetaling, påminnelse: Utbetalingpåminnelse) {
@@ -665,7 +682,8 @@ internal class Utbetaling private constructor(
         }
 
         fun simuler(utbetaling: Utbetaling, aktivitetslogg: IAktivitetslogg) {
-            aktivitetslogg.funksjonellFeil("Forventet ikke simulering på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
+            aktivitetslogg.info("Forventet ikke simulering på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
+            aktivitetslogg.funksjonellFeil(RV_UT_12)
         }
 
         fun godkjenning(
@@ -679,7 +697,8 @@ internal class Utbetaling private constructor(
             arbeidsforholdId: String?,
             hendelse: IAktivitetslogg
         ) {
-            hendelse.funksjonellFeil("Forventet ikke å lage godkjenning på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
+            hendelse.info("Forventet ikke å lage godkjenning på utbetaling=${utbetaling.id} i tilstand=${this::class.simpleName}")
+            hendelse.funksjonellFeil(RV_UT_13)
         }
 
         fun entering(utbetaling: Utbetaling, hendelse: IAktivitetslogg) {}
@@ -757,7 +776,8 @@ internal class Utbetaling private constructor(
 
         override fun håndter(utbetaling: Utbetaling, påminnelse: Utbetalingpåminnelse) {
             if (påminnelse.harOversteget(makstid)) {
-                påminnelse.funksjonellFeil("Gir opp å prøve utbetaling på nytt etter ${makstid.toHours()} timer")
+                påminnelse.info("Gir opp å prøve utbetaling på nytt etter ${makstid.toHours()} timer")
+                påminnelse.funksjonellFeil(RV_UT_14)
                 return utbetaling.tilstand(UtbetalingFeilet, påminnelse)
             }
             utbetaling.overfør(påminnelse)
