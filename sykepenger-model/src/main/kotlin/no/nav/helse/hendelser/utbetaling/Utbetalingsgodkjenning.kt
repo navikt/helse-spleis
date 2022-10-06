@@ -1,10 +1,12 @@
 package no.nav.helse.hendelser.utbetaling
 
+import java.time.LocalDateTime
+import java.util.UUID
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.IAktivitetslogg
+import no.nav.helse.person.Varselkode.RV_UT_18
+import no.nav.helse.person.Varselkode.RV_UT_19
 import no.nav.helse.utbetalingslinjer.Utbetaling
-import java.time.LocalDateTime
-import java.util.*
 
 class Utbetalingsgodkjenning(
     meldingsreferanseId: UUID,
@@ -34,11 +36,11 @@ class Utbetalingsgodkjenning(
     internal fun valider(): IAktivitetslogg {
         when {
             !utbetalingGodkjent && !automatiskBehandling -> {
-                funksjonellFeil("Utbetaling markert som ikke godkjent av saksbehandler")
+                funksjonellFeil(RV_UT_19)
                 info("Utbetaling markert som ikke godkjent av saksbehandler $saksbehandler $godkjenttidspunkt")
             }
             !utbetalingGodkjent && automatiskBehandling -> {
-                funksjonellFeil("Utbetaling markert som ikke godkjent automatisk")
+                funksjonellFeil(RV_UT_18)
                 info("Utbetaling markert som ikke godkjent automatisk $godkjenttidspunkt")
             }
             utbetalingGodkjent && !automatiskBehandling ->

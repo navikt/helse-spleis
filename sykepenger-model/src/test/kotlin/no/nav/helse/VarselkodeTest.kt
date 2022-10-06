@@ -37,6 +37,8 @@ import no.nav.helse.person.Varselkode.RV_UT_14
 import no.nav.helse.person.Varselkode.RV_UT_15
 import no.nav.helse.person.Varselkode.RV_UT_16
 import no.nav.helse.person.Varselkode.RV_UT_17
+import no.nav.helse.person.Varselkode.RV_UT_18
+import no.nav.helse.person.Varselkode.RV_UT_19
 import no.nav.helse.person.Varselkode.RV_UT_3
 import no.nav.helse.person.Varselkode.RV_UT_4
 import no.nav.helse.person.Varselkode.RV_UT_5
@@ -79,7 +81,8 @@ internal class VarselkodeTest {
             RV_VT_1, RV_VT_2, RV_VT_3, RV_VT_4, RV_VT_5, RV_VT_6, RV_VT_7,
             RV_SØ_20, RV_AY_10, RV_VV_10, RV_VV_11, RV_UT_6, RV_UT_7,
             RV_UT_8, RV_UT_9, RV_UT_10, RV_UT_11, RV_UT_12, RV_UT_13,
-            RV_UT_14, RV_UT_15, RV_UT_16, RV_UT_17, RV_AG_1
+            RV_UT_14, RV_UT_15, RV_UT_16, RV_UT_17, RV_UT_18, RV_UT_19,
+            RV_AG_1
         )
 
         val varselkoderSomNåManglerTest = ikkeTestedeVarselkoder.minus(varselkoderSomKjentManglerTest.toSet())
