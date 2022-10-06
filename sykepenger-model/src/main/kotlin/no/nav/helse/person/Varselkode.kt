@@ -131,6 +131,7 @@ enum class Varselkode(
     RV_UT_14("Gir opp å prøve utbetaling på nytt"),
     RV_UT_15("Kan ikke annullere: hendelsen er ikke relevant"),
     RV_UT_16("Feil ved kalkulering av utbetalingstidslinjer"),
+    RV_UT_17("Utbetaling feilet"),
 
     // OS: Oppdragsystemet
     RV_OS_1("Utbetalingen forlenger et tidligere oppdrag som opphørte alle utbetalte dager. Sjekk simuleringen."),
