@@ -35,7 +35,8 @@ internal class SykefraværstilfellerTest {
             aktiveSkjæringstidspunkter = setOf(15.desember(2017), 1.januar),
             førsteDag = 1.januar,
             sisteDag = 31.mars,
-            sisteDagISpleis = 31.mars
+            sisteDagISpleis = 31.mars,
+            tiltander = listOf("AVSLUTTET")
         ))
         assertEquals(forventet, sykefraværstilfeller(vedtaksperioder))
     }
@@ -51,7 +52,8 @@ internal class SykefraværstilfellerTest {
             aktiveSkjæringstidspunkter = setOf(1.januar),
             førsteDag = 1.januar,
             sisteDag = 31.januar,
-            sisteDagISpleis = 31.januar
+            sisteDagISpleis = 31.januar,
+            tiltander = listOf("AVSLUTTET")
         ))
         assertEquals(forventet, sykefraværstilfeller(vedtaksperioder))
     }
@@ -68,7 +70,8 @@ internal class SykefraværstilfellerTest {
             aktiveSkjæringstidspunkter = setOf(1.januar),
             førsteDag = 1.januar,
             sisteDag = 19.januar,
-            sisteDagISpleis = 19.januar
+            sisteDagISpleis = 19.januar,
+            tiltander = listOf("AVSLUTTET")
         ))
         assertEquals(forventet, sykefraværstilfeller(vedtaksperioder))
     }
@@ -80,7 +83,8 @@ internal class SykefraværstilfellerTest {
             aktiveSkjæringstidspunkter = setOf(1.januar),
             førsteDag = 15.desember(2017),
             sisteDag = 31.mars,
-            sisteDagISpleis = 29.mars
+            sisteDagISpleis = 29.mars,
+            tiltander = listOf("AVSLUTTET")
         ))
         val vedtaksperioder = vedtaksperioder(serdeObjectMapper.readTree(vedtaksperioderPåTversAvArbeidsgivere))
         assertEquals(forventet, sykefraværstilfeller(vedtaksperioder))
@@ -108,7 +112,8 @@ internal class SykefraværstilfellerTest {
             aktiveSkjæringstidspunkter = setOf(2.januar),
             førsteDag = 1.januar,
             sisteDag = 20.januar,
-            sisteDagISpleis = 10.januar
+            sisteDagISpleis = 10.januar,
+            tiltander = listOf("AVSLUTTET")
         ))
         assertEquals(forventet, sykefraværstilfeller(vedtaksperioder))
     }
@@ -126,7 +131,8 @@ internal class SykefraværstilfellerTest {
             aktiveSkjæringstidspunkter = setOf(2.januar),
             førsteDag = 1.januar,
             sisteDag = 20.januar,
-            sisteDagISpleis = 20.januar
+            sisteDagISpleis = 20.januar,
+            tiltander = listOf("AVSLUTTET")
         ))
         assertEquals(forventet, sykefraværstilfeller(vedtaksperioder))
     }
@@ -151,14 +157,16 @@ internal class SykefraværstilfellerTest {
                 tidligsteSkjæringstidspunkt = 11.januar,
                 førsteDag = 11.januar,
                 sisteDag = 25.februar,
-                sisteDagISpleis = 28.januar
+                sisteDagISpleis = 28.januar,
+                tiltander = listOf("AVSLUTTET")
             ),
             Sykefraværstilfelle(
                 aktiveSkjæringstidspunkter = setOf(14.februar, 11.januar),
                 tidligsteSkjæringstidspunkt = 11.januar,
                 førsteDag = 21.mars,
                 sisteDag = 4.september,
-                sisteDagISpleis = 8.mai
+                sisteDagISpleis = 8.mai,
+                tiltander = listOf("AVSLUTTET")
             )
         )
         assertEquals(forventet, sykefraværstilfeller(vedtaksperioder))
@@ -181,7 +189,8 @@ internal class SykefraværstilfellerTest {
             aktiveSkjæringstidspunkter = setOf(1.mai),
             førsteDag = 1.januar,
             sisteDag = 31.mai,
-            sisteDagISpleis = 31.mai
+            sisteDagISpleis = 31.mai,
+            tiltander = listOf("AVSLUTTET")
         ))
 
         assertEquals(forventet, sykefraværstilfeller(vedtaksperioder))
@@ -198,7 +207,8 @@ internal class SykefraværstilfellerTest {
             aktiveSkjæringstidspunkter = setOf(20.januar),
             førsteDag = 1.januar,
             sisteDag = 28.februar,
-            sisteDagISpleis = 28.februar
+            sisteDagISpleis = 28.februar,
+            tiltander = listOf("AVSLUTTET")
         ))
 
         assertEquals(forventet, sykefraværstilfeller(vedtaksperioder))
@@ -226,7 +236,8 @@ internal class SykefraværstilfellerTest {
             aktiveSkjæringstidspunkter = setOf(2.januar),
             førsteDag = 1.januar,
             sisteDag = 28.februar,
-            sisteDagISpleis = 28.februar
+            sisteDagISpleis = 28.februar,
+            tiltander = listOf("AVSLUTTET")
         ))
         assertEquals(forventet, sykefraværstilfeller(vedtaksperioder))
     }
@@ -251,7 +262,8 @@ internal class SykefraværstilfellerTest {
             aktiveSkjæringstidspunkter = setOf(1.januar),
             førsteDag = 1.februar,
             sisteDag = 28.februar,
-            sisteDagISpleis = 28.februar
+            sisteDagISpleis = 28.februar,
+            tiltander = listOf("AVSLUTTET")
         ))
         assertEquals(forventet, sykefraværstilfeller(vedtaksperioder))
     }
@@ -268,10 +280,28 @@ internal class SykefraværstilfellerTest {
             aktiveSkjæringstidspunkter = setOf(3.januar), // != AUU sitt skjæringstidspunkt
             førsteDag = 31.desember(2017), // AUU fom
             sisteDag = 31.mars, // Forkastet tom
-            sisteDagISpleis = 28.februar // Avsluttet vedtaksperiode tom
+            sisteDagISpleis = 28.februar, // Avsluttet vedtaksperiode tom,
+            tiltander = listOf("AVSLUTTET")
         ))
         assertEquals(forventet, sykefraværstilfeller(vedtaksperioder))
         assertEquals(forventet.first().periode, 31.desember(2017) til 31.mars)
+    }
+
+    @Test
+    fun `første aktive tilstander`() {
+        val vedtaksperioder = listOf(
+            AktivVedtaksperiode(skjæringstidspunkt = 1.januar, 1.januar til 31.januar, "AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK"),
+            AktivVedtaksperiode(skjæringstidspunkt = 1.januar, 1.januar til 20.januar, "AVVENTER_BLOKKERENDE_PERIODE"),
+        )
+        val forventet = setOf(Sykefraværstilfelle(
+            tidligsteSkjæringstidspunkt = 1.januar,
+            aktiveSkjæringstidspunkter = setOf(1.januar),
+            førsteDag = 1.januar,
+            sisteDag = 31.januar,
+            sisteDagISpleis = 31.januar,
+            tiltander = listOf("AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK", "AVVENTER_BLOKKERENDE_PERIODE")
+        ))
+        assertEquals(forventet, sykefraværstilfeller(vedtaksperioder))
     }
 }
 

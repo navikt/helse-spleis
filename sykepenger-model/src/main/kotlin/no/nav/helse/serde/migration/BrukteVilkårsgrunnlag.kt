@@ -10,7 +10,6 @@ import no.nav.helse.erRettFør
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.serde.migration.Sykefraværstilfeller.Sykefraværstilfelle
-import no.nav.helse.serde.migration.Sykefraværstilfeller.Vedtaksperiode.Companion.fjernAvsluttetUtenUtbetaling
 import no.nav.helse.serde.migration.Sykefraværstilfeller.sykefraværstilfeller
 import no.nav.helse.serde.migration.Sykefraværstilfeller.vedtaksperioder
 import no.nav.helse.serde.serdeObjectMapper
@@ -71,16 +70,6 @@ internal object BrukteVilkårsgrunnlag {
         val vedtaksperioderForPerson = vedtaksperioder(jsonNode)
         val sykefraværstilfeller = sykefraværstilfeller(vedtaksperioderForPerson)
         sikkerlogg.info("Fant ${sykefraværstilfeller.size} sykefraværstilfeller ${sykefraværstilfeller.map { it.periode }}")
-        val tilstanderPerSkjæringstidspunkt = vedtaksperioderForPerson
-            .groupBy { it.skjæringstidspunkt }
-            .mapValues { (_, vedtaksperioder) ->
-                vedtaksperioder.fjernAvsluttetUtenUtbetaling().takeUnless { it.isEmpty() } ?: vedtaksperioder
-            }
-            .mapValues { (_, vedtaksperioder) ->
-                val førsteFom = vedtaksperioder.minOf { it.periode.start }
-                vedtaksperioder.filter { it.periode.start == førsteFom }
-            }
-            .mapValues { (_, vedtaksperioder) -> vedtaksperioder.map { it.tilstand() } }
 
         val perioderUtbetaltIInfotrygd = jsonNode.path("infotrygdhistorikk")
             .firstOrNull()?.let { sisteInfotrygdInnslag ->
@@ -106,7 +95,9 @@ internal object BrukteVilkårsgrunnlag {
                     ?:sorterteVilkårsgrunnlag.finnRiktigVilkårsgrunnlag(sykefraværstilfelle, perioderUtbetaltIInfotrygd, { it.periodeFremTilSisteDagISpleis }) { it.finnSpleisVilkårsgrunnlag(sykefraværstilfelle.periode)}
 
                 if (vilkårgrunnlag == null) {
-                    sikkerlogg.info("Fant ikke vilkårsgrunnlag for sykefraværstilfellet ${sykefraværstilfelle.periode} med tilstander ${tilstanderPerSkjæringstidspunkt[sykefraværstilfelle.tidligsteSkjæringstidspunkt]}")
+                    if (sykefraværstilfelle.tiltander.isEmpty()) sikkerlogg.warn("Fant ikke vilkårsgrunnlag for sykefraværstilfellet ${sykefraværstilfelle.periode} uten tilstand")
+                    else if (sykefraværstilfelle.tiltander.size == 1) sikkerlogg.info("Fant ikke vilkårsgrunnlag for sykefraværstilfellet ${sykefraværstilfelle.periode} med tilstand ${sykefraværstilfelle.tiltander.first()}")
+                    else sikkerlogg.info("Fant ikke vilkårsgrunnlag for sykefraværstilfellet ${sykefraværstilfelle.periode} med tilstander ${sykefraværstilfelle.tiltander} på tvers av arbeidsgivere")
                     return@forEach
                 }
                 sykefraværstilfelle.aktiveSkjæringstidspunkter.forEachIndexed { index, skjæringstidspunkt ->
@@ -150,6 +141,7 @@ internal object BrukteVilkårsgrunnlag {
 
     private class Sikkerlogg(private val aktørId: String, private val id: String) {
         fun info(melding: String) = sikkerlogg.info("$melding for {}", keyValue("aktørId", aktørId), keyValue("module", id))
+        fun warn(melding: String) = sikkerlogg.warn("$melding for {}", keyValue("aktørId", aktørId), keyValue("module", id))
 
         private companion object {
             private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")

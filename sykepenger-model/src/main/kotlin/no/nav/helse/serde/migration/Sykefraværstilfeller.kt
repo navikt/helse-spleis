@@ -6,6 +6,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioderMedHensynTilHelg
 import no.nav.helse.hendelser.til
 import no.nav.helse.serde.migration.Sykefraværstilfeller.Vedtaksperiode.Companion.aktiveSkjæringstidspunkter
+import no.nav.helse.serde.migration.Sykefraværstilfeller.Vedtaksperiode.Companion.førsteAktiveIkkeAvsluttetUtenUtbetalingTilstander
 import no.nav.helse.serde.migration.Sykefraværstilfeller.Vedtaksperiode.Companion.kunForkastetEllerAvsluttetUtenUtbetaling
 import no.nav.helse.serde.migration.Sykefraværstilfeller.Vedtaksperiode.Companion.overlappendeVedtaksperioder
 import no.nav.helse.serde.migration.Sykefraværstilfeller.Vedtaksperiode.Companion.skjæringstidspunkter
@@ -65,7 +66,8 @@ internal object Sykefraværstilfeller {
                         aktiveSkjæringstidspunkter = aktiveSkjæringstidspunkter,
                         førsteDag = sammenhengendePeriode.start,
                         sisteDag = sammenhengendePeriode.endInclusive,
-                        sisteDagISpleis = sisteDagISpleis
+                        sisteDagISpleis = sisteDagISpleis,
+                        tiltander = overlappendeVedtaksperioder.førsteAktiveIkkeAvsluttetUtenUtbetalingTilstander()
                     )
                 }
             }.toSet()
@@ -85,9 +87,18 @@ internal object Sykefraværstilfeller {
                 all { it is ForkastetVedtaksperiode || it.erAvsluttetUtenUtbetaling() }
             internal fun List<Vedtaksperiode>.skjæringstidspunkter() =
                 map { it.skjæringstidspunkt }.toSet()
-            internal fun List<Vedtaksperiode>.fjernAvsluttetUtenUtbetaling() =
+            private fun List<Vedtaksperiode>.fjernAvsluttetUtenUtbetaling() =
                 filterNot { it.erAvsluttetUtenUtbetaling() }
-
+            private fun Vedtaksperiode.førsteFom() = minOf(periode.start, skjæringstidspunkt)
+            internal fun List<Vedtaksperiode>.førsteAktiveIkkeAvsluttetUtenUtbetalingTilstander(): List<String> {
+                val aktuelle = filterIsInstance<AktivVedtaksperiode>().filterNot { it.erAvsluttetUtenUtbetaling() }
+                val førsteFom = aktuelle.minOfOrNull { it.førsteFom() } ?: return emptyList()
+                val førstePeriodeStart = aktuelle.filter { it.førsteFom() == førsteFom }.minOfOrNull { it.periode.start } ?: return emptyList()
+                return aktuelle
+                    .filter { it.førsteFom() == førsteFom }
+                    .filter { it.periode.start == førstePeriodeStart }
+                    .map { it.tilstand() }
+            }
         }
     }
     internal class AktivVedtaksperiode(skjæringstidspunkt: LocalDate, periode: Periode, tilstand: String) : Vedtaksperiode(skjæringstidspunkt, periode, tilstand)
@@ -96,11 +107,12 @@ internal object Sykefraværstilfeller {
     }
 
     internal data class Sykefraværstilfelle(
-        val tidligsteSkjæringstidspunkt: LocalDate,
+        private val tidligsteSkjæringstidspunkt: LocalDate,
         val aktiveSkjæringstidspunkter: Set<LocalDate>,
         private val førsteDag: LocalDate,
         private val sisteDag: LocalDate,
-        private val sisteDagISpleis: LocalDate) {
+        private val sisteDagISpleis: LocalDate,
+        internal val tiltander: List<String>) {
         private val fom = minOf(tidligsteSkjæringstidspunkt, førsteDag)
         internal val periode = fom til sisteDag
         internal val periodeFremTilSisteDagISpleis = fom til sisteDagISpleis
