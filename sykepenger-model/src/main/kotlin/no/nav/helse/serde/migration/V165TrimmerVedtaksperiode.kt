@@ -44,7 +44,6 @@ internal class V165TrimmerVedtaksperiode: JsonMigration(version = 165) {
             }
 
             if (sykdomstidslinjeperiode != periode) {
-                vedtaksperiode as ObjectNode
                 vedtaksperiode.put("fom", sykdomstidslinjeperiode.start.toString())
                 vedtaksperiode.put("tom", sykdomstidslinjeperiode.endInclusive.toString())
 

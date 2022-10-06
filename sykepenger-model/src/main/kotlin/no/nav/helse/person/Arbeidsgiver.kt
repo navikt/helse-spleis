@@ -935,7 +935,7 @@ internal class Arbeidsgiver private constructor(
             .filter(filter)
             .filter { it.forkast(hendelse, utbetalinger) }
         vedtaksperioder.removeAll(perioder)
-        forkastede.addAll(perioder.map { ForkastetVedtaksperiode(it, ForkastetÅrsak.IKKE_STØTTET) })
+        forkastede.addAll(perioder.map { ForkastetVedtaksperiode(it) })
         sykdomshistorikk.fjernDager(perioder.map { it.periode() })
     }
 
@@ -949,7 +949,7 @@ internal class Arbeidsgiver private constructor(
     private fun registrerForkastetVedtaksperiode(vedtaksperiode: Vedtaksperiode, hendelse: SykdomstidslinjeHendelse) {
         hendelse.info("Oppretter forkastet vedtaksperiode ettersom Søknad inneholder errors")
         vedtaksperiode.forkast(hendelse, utbetalinger)
-        forkastede.add(ForkastetVedtaksperiode(vedtaksperiode, ForkastetÅrsak.IKKE_STØTTET))
+        forkastede.add(ForkastetVedtaksperiode(vedtaksperiode))
     }
 
     internal fun finnVedtaksperiodeRettFør(vedtaksperiode: Vedtaksperiode) =
@@ -1156,11 +1156,4 @@ internal class Arbeidsgiver private constructor(
             )
         }
     }
-}
-
-internal enum class ForkastetÅrsak {
-    IKKE_STØTTET,
-    UKJENT,
-    ERSTATTES,
-    ANNULLERING
 }

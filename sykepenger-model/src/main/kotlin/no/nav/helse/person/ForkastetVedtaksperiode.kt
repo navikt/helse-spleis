@@ -10,13 +10,12 @@ import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 
 internal class ForkastetVedtaksperiode(
-    private val vedtaksperiode: Vedtaksperiode,
-    private val forkastetÅrsak: ForkastetÅrsak
+    private val vedtaksperiode: Vedtaksperiode
 ) {
     internal fun accept(visitor: ArbeidsgiverVisitor) {
-        visitor.preVisitForkastetPeriode(vedtaksperiode, forkastetÅrsak)
+        visitor.preVisitForkastetPeriode(vedtaksperiode)
         vedtaksperiode.accept(visitor)
-        visitor.postVisitForkastetPeriode(vedtaksperiode, forkastetÅrsak)
+        visitor.postVisitForkastetPeriode(vedtaksperiode)
     }
 
     private fun håndterInnteksmeldingReplay(
@@ -62,9 +61,6 @@ internal class ForkastetVedtaksperiode(
 
         internal fun sjekkOmOverlapperMedForkastet(forkastede: Iterable<ForkastetVedtaksperiode>, inntektsmelding: Inntektsmelding) =
             Vedtaksperiode.sjekkOmOverlapperMedForkastet(forkastede.perioder(), inntektsmelding)
-
-        internal fun finnForkastetSykeperiodeRettFør(forkastede: Iterable<ForkastetVedtaksperiode>, other: Vedtaksperiode) =
-            forkastede.perioder().firstOrNull { vedtaksperiode -> vedtaksperiode.erVedtaksperiodeRettFør(other) }
 
         internal fun List<ForkastetVedtaksperiode>.iderMedUtbetaling(utbetalingId: UUID) =
             map { it.vedtaksperiode }.iderMedUtbetaling(utbetalingId)

@@ -446,7 +446,7 @@ internal fun AbstractEndToEndTest.håndterSøknad(
     /* replayer inntektsmeldinger automagisk */
     if (etterpå != null && før != etterpå && observatør.bedtOmInntektsmeldingReplay(etterpå)) {
         inntektsmeldinger
-            .mapValues { (it, gen) -> gen() }
+            .mapValues { (_, gen) -> gen() }
             .filterValues { im -> im.organisasjonsnummer() == orgnummer }
             .forEach { (id, _) ->
                 håndterInntektsmeldingReplay(id, etterpå)

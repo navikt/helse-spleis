@@ -434,12 +434,12 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         delegatee.preVisitForkastedePerioder(vedtaksperioder)
     }
 
-    override fun preVisitForkastetPeriode(vedtaksperiode: Vedtaksperiode, forkastetÅrsak: ForkastetÅrsak) {
-        delegatee.preVisitForkastetPeriode(vedtaksperiode, forkastetÅrsak)
+    override fun preVisitForkastetPeriode(vedtaksperiode: Vedtaksperiode) {
+        delegatee.preVisitForkastetPeriode(vedtaksperiode)
     }
 
-    override fun postVisitForkastetPeriode(vedtaksperiode: Vedtaksperiode, forkastetÅrsak: ForkastetÅrsak) {
-        delegatee.postVisitForkastetPeriode(vedtaksperiode, forkastetÅrsak)
+    override fun postVisitForkastetPeriode(vedtaksperiode: Vedtaksperiode) {
+        delegatee.postVisitForkastetPeriode(vedtaksperiode)
     }
 
     override fun postVisitForkastedePerioder(vedtaksperioder: List<ForkastetVedtaksperiode>) {

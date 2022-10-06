@@ -862,6 +862,7 @@ class Person private constructor(
 
     private var gjenopptaBehandlingNy = false
     internal fun gjenopptaBehandling(hendelse: IAktivitetslogg) {
+        hendelse.info("Forbereder gjenoppta behandling")
         gjenopptaBehandlingNy = true
     }
 

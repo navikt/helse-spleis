@@ -17,7 +17,6 @@ import no.nav.helse.person.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Dokumentsporing.Companion.toMap
 import no.nav.helse.person.ForkastetVedtaksperiode
-import no.nav.helse.person.ForkastetÅrsak
 import no.nav.helse.person.ForlengelseFraInfotrygd
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.Inntektskilde
@@ -214,12 +213,11 @@ internal class JsonBuilder : AbstractBuilder() {
             arbeidsgiverMap["vedtaksperioder"] = vedtaksperiodeListe
         }
 
-        override fun preVisitForkastetPeriode(vedtaksperiode: Vedtaksperiode, forkastetÅrsak: ForkastetÅrsak) {
+        override fun preVisitForkastetPeriode(vedtaksperiode: Vedtaksperiode) {
             val vedtaksperiodeMap = mutableMapOf<String, Any?>()
             forkastedeVedtaksperiodeListe.add(
                 mutableMapOf(
-                    "vedtaksperiode" to vedtaksperiodeMap,
-                    "årsak" to forkastetÅrsak
+                    "vedtaksperiode" to vedtaksperiodeMap
                 )
             )
             pushState(ForkastetVedtaksperiodeState(vedtaksperiodeMap))
@@ -1106,7 +1104,7 @@ internal class JsonBuilder : AbstractBuilder() {
             ))
         }
 
-        override fun postVisitForkastetPeriode(vedtaksperiode: Vedtaksperiode, forkastetÅrsak: ForkastetÅrsak) {
+        override fun postVisitForkastetPeriode(vedtaksperiode: Vedtaksperiode) {
             popState()
         }
     }

@@ -34,7 +34,10 @@ internal class MessageMediatorTest {
 
     @Test
     fun inntektsmeldinger() {
-        testRapid.sendTestMessage(meldingsfabrikk.lagInnteksmelding(listOf(Periode(LocalDate.now(), LocalDate.now())), LocalDate.now()))
+        testRapid.sendTestMessage(meldingsfabrikk.lagInnteksmelding(
+            listOf(Periode(LocalDate.now(), LocalDate.now())),
+            LocalDate.now()
+        ))
         assertTrue(hendelseMediator.lestInntektsmelding)
     }
 

@@ -8,7 +8,6 @@ import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.ArbeidsgiverVisitor
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Dokumentsporing.Companion.ider
-import no.nav.helse.person.ForkastetÅrsak
 import no.nav.helse.person.ForlengelseFraInfotrygd
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.InntektsmeldingInfo
@@ -74,7 +73,7 @@ internal class GenerasjonerBuilder(
         return Generasjoner(tidslinjeperioder).build()
     }
 
-    override fun preVisitForkastetPeriode(vedtaksperiode: Vedtaksperiode, forkastetÅrsak: ForkastetÅrsak) {
+    override fun preVisitForkastetPeriode(vedtaksperiode: Vedtaksperiode) {
         forkastetVedtaksperiodeAkkumulator.leggTil(vedtaksperiode)
     }
 

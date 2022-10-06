@@ -311,9 +311,6 @@ internal class UtbetalingTest {
 
     @Test
     fun `kan forkaste uten utbetalinger`() {
-        val tidslinje = tidslinjeOf(16.AP, 15.NAV)
-        beregnUtbetalinger(tidslinje)
-        val utbetaling = opprettUbetaltUtbetaling(tidslinje)
         assertTrue(Utbetaling.kanForkastes(emptyList(), emptyList()))
     }
 

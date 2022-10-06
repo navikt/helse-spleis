@@ -1,6 +1,8 @@
 package no.nav.helse.spleis.e2e
 
 import ch.qos.logback.classic.Logger
+import ch.qos.logback.classic.spi.ILoggingEvent
+import ch.qos.logback.core.AppenderBase
 import java.time.Year
 import no.nav.helse.EnableToggle
 import no.nav.helse.Toggle
@@ -28,31 +30,56 @@ import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.september
 import no.nav.helse.serde.reflection.castAsList
 import no.nav.helse.sisteBehov
-import no.nav.helse.testhelpers.LogCollector
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.utbetalingslinjer.Klassekode
 import no.nav.helse.utbetalingslinjer.Satstype
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.parallel.Isolated
 import org.slf4j.LoggerFactory
 import kotlin.math.roundToInt
 
 @EnableToggle(Toggle.SendFeriepengeOppdrag::class)
-@Isolated
 internal class FeriepengeE2ETest : AbstractEndToEndTest() {
-    private val logCollector = LogCollector()
+    private fun fangLoggmeldinger(vararg filter: String, block: () -> Any): List<ILoggingEvent> {
+        val logCollector = LogCollector()
 
-    init {
-        (LoggerFactory.getLogger("tjenestekall") as Logger).addAppender(logCollector)
+        val logger = (LoggerFactory.getLogger("tjenestekall") as Logger)
+        logger.addAppender(logCollector)
         logCollector.start()
+        block()
+        logger.detachAppender(logCollector)
+        logCollector.stop()
+
+        val bareMeldingerSomMatcher = { event: ILoggingEvent ->
+            filter.isEmpty() || filter.any { filtertekst -> event.formattedMessage.contains(filtertekst) }
+        }
+        return logCollector
+            .iterator()
+            .asSequence()
+            .filter(bareMeldingerSomMatcher)
+            .toList()
+    }
+
+    @AfterEach
+    fun after() {
+        val logger = (LoggerFactory.getLogger("tjenestekall") as Logger)
+        logger.detachAndStopAllAppenders()
+    }
+
+    private class LogCollector private constructor(private val messages: MutableList<ILoggingEvent>): AppenderBase<ILoggingEvent>(), Iterable<ILoggingEvent> by (messages) {
+        constructor() : this(mutableListOf())
+
+        override fun append(eventObject: ILoggingEvent) {
+            messages.add(eventObject)
+        }
     }
 
     @Test
@@ -377,25 +404,27 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
-        håndterUtbetalingshistorikkForFeriepenger(
-            opptjeningsår = Year.of(2020),
-            utbetalinger = listOf(
-                Arbeidsgiverutbetalingsperiode(
-                    ORGNUMMER,
-                    1.januar(2020),
-                    31.januar(2020),
-                    1431,
-                    31.januar(2020)
+        fangLoggmeldinger("Beregnet feriepengebeløp til arbeidsgiver i IT samsvarer ikke med faktisk utbetalt beløp") {
+            håndterUtbetalingshistorikkForFeriepenger(
+                opptjeningsår = Year.of(2020),
+                utbetalinger = listOf(
+                    Arbeidsgiverutbetalingsperiode(
+                        ORGNUMMER,
+                        1.januar(2020),
+                        31.januar(2020),
+                        1431,
+                        31.januar(2020)
+                    )
+                ),
+                feriepengehistorikk = listOf(
+                    UtbetalingshistorikkForFeriepenger.Feriepenger(ORGNUMMER, 3357, 1.mai(2021), 31.mai(2021)),
+                    UtbetalingshistorikkForFeriepenger.Feriepenger(ORGNUMMER, 4000, 1.mai(2021), 31.mai(2021))
                 )
-            ),
-            feriepengehistorikk = listOf(
-                UtbetalingshistorikkForFeriepenger.Feriepenger(ORGNUMMER, 3357, 1.mai(2021), 31.mai(2021)),
-                UtbetalingshistorikkForFeriepenger.Feriepenger(ORGNUMMER, 4000, 1.mai(2021), 31.mai(2021))
             )
-        )
-
+        }.also { loggmeldinger ->
+            assertTrue(loggmeldinger.isEmpty())
+        }
         assertEquals(2, inspektør.feriepengeoppdrag.size)
-        assertFalse(logCollector.any { it.message.startsWith("Beregnet feriepengebeløp til arbeidsgiver i IT samsvarer ikke med faktisk utbetalt beløp") })
     }
 
     @Test
@@ -417,25 +446,27 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
-        håndterUtbetalingshistorikkForFeriepenger(
-            opptjeningsår = Year.of(2020),
-            utbetalinger = listOf(
-                Arbeidsgiverutbetalingsperiode(
-                    ORGNUMMER,
-                    1.januar(2020),
-                    31.januar(2020),
-                    1431,
-                    31.januar(2020)
+        fangLoggmeldinger("Beregnet feriepengebeløp til arbeidsgiver i IT samsvarer ikke med faktisk utbetalt beløp") {
+            håndterUtbetalingshistorikkForFeriepenger(
+                opptjeningsår = Year.of(2020),
+                utbetalinger = listOf(
+                    Arbeidsgiverutbetalingsperiode(
+                        ORGNUMMER,
+                        1.januar(2020),
+                        31.januar(2020),
+                        1431,
+                        31.januar(2020)
+                    )
+                ),
+                feriepengehistorikk = listOf(
+                    UtbetalingshistorikkForFeriepenger.Feriepenger(ORGNUMMER, 3356, 1.mai(2021), 31.mai(2021)),
+                    UtbetalingshistorikkForFeriepenger.Feriepenger(ORGNUMMER, 4000, 1.mai(2021), 31.mai(2021))
                 )
-            ),
-            feriepengehistorikk = listOf(
-                UtbetalingshistorikkForFeriepenger.Feriepenger(ORGNUMMER, 3356, 1.mai(2021), 31.mai(2021)),
-                UtbetalingshistorikkForFeriepenger.Feriepenger(ORGNUMMER, 4000, 1.mai(2021), 31.mai(2021))
             )
-        )
-
+        }.also { loggmeldinger ->
+            assertTrue(loggmeldinger.isNotEmpty())
+        }
         assertEquals(2, inspektør.feriepengeoppdrag.size)
-        assertTrue(logCollector.any { it.message.startsWith("Beregnet feriepengebeløp til arbeidsgiver i IT samsvarer ikke med faktisk utbetalt beløp") })
     }
 
     @Test
@@ -457,15 +488,18 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
-        håndterUtbetalingshistorikkForFeriepenger(
-            opptjeningsår = Year.of(2020),
-            feriepengehistorikk = listOf(
-                UtbetalingshistorikkForFeriepenger.Feriepenger(ORGNUMMER, 4000, 1.mai(2021), 31.mai(2021))
+        fangLoggmeldinger("Beregnet feriepengebeløp til arbeidsgiver i IT samsvarer ikke med faktisk utbetalt beløp") {
+            håndterUtbetalingshistorikkForFeriepenger(
+                opptjeningsår = Year.of(2020),
+                feriepengehistorikk = listOf(
+                    UtbetalingshistorikkForFeriepenger.Feriepenger(ORGNUMMER, 4000, 1.mai(2021), 31.mai(2021))
+                )
             )
-        )
+        }.also { loggmeldinger ->
+            assertTrue(loggmeldinger.isEmpty())
+        }
 
         assertEquals(2, inspektør.feriepengeoppdrag.size)
-        assertFalse(logCollector.any { it.message.startsWith("Beregnet feriepengebeløp til arbeidsgiver i IT samsvarer ikke med faktisk utbetalt beløp") })
     }
 
     @Test
@@ -494,6 +528,7 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         assertTrue(person.personLogg.toString().contains("Trenger å sende utbetaling til Oppdrag"))
         assertEquals(person.personLogg.behov().last().detaljer()["saksbehandler"], "SPLEIS")
 
+        @Suppress("unchecked_cast")
         val linje = (person.personLogg.behov().last().detaljer()["linjer"] as ArrayList<LinkedHashMap<String, String>>).first()
         assertEquals(linje["satstype"], "ENG")
         assertEquals(linje["klassekode"], "SPREFAGFER-IOP")
@@ -530,10 +565,11 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         assertTrue(person.personLogg.toString().contains("utbetalt ok: ja"))
         observatør.feriepengerUtbetaltEventer.first().let { event ->
             assertEquals(fagsystemIdFeriepenger, event.arbeidsgiverOppdrag["fagsystemId"])
+            @Suppress("unchecked_cast")
             val linje = (event.arbeidsgiverOppdrag["linjer"] as ArrayList<LinkedHashMap<String, String>>).first()
             assertEquals("2021-05-01", linje["fom"])
             assertEquals("2021-05-31", linje["tom"])
-            assertEquals(1460, linje["totalbeløp"])
+            assertEquals("1460", "${linje["totalbeløp"]}")
         }
         assertTrue(observatør.utbetaltEndretEventer.any {
             it.event.arbeidsgiverOppdrag["linjer"].castAsList<Map<String, Any>>().single()["satstype"] == "ENG"
@@ -586,17 +622,19 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
 
         observatør.feriepengerUtbetaltEventer.first().let { event ->
             assertEquals(fagsystemIdFeriepenger, event.arbeidsgiverOppdrag["fagsystemId"])
+            @Suppress("unchecked_cast")
             val linje = (event.arbeidsgiverOppdrag["linjer"] as ArrayList<LinkedHashMap<String, String>>).first()
             assertEquals("2021-05-01", linje["fom"])
             assertEquals("2021-05-31", linje["tom"])
-            assertEquals(1460, linje["totalbeløp"])
+            assertEquals("1460", "${linje["totalbeløp"]}")
         }
         observatør.feriepengerUtbetaltEventer.last().let { event ->
             assertEquals(fagsystemIdFeriepenger, event.arbeidsgiverOppdrag["fagsystemId"])
+            @Suppress("unchecked_cast")
             val linje = (event.arbeidsgiverOppdrag["linjer"] as ArrayList<LinkedHashMap<String, String>>).first()
             assertEquals("2021-05-01", linje["fom"])
             assertEquals("2021-05-31", linje["tom"])
-            assertEquals(2627, linje["totalbeløp"])
+            assertEquals("2627", "${linje["totalbeløp"]}")
         }
 
         val feriepengerUtbetaltEndretEventer = observatør.utbetaltEndretEventer.filter { it.event.type == Utbetalingtype.FERIEPENGER.name }
@@ -645,10 +683,11 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
                 opptjeningsår = Year.of(2020)
             )
 
+            @Suppress("unchecked_cast")
             val linje = (person.personLogg.behov().last().detaljer()["linjer"] as ArrayList<LinkedHashMap<String, String>>).first()
 
-            assertEquals(1460, linje["sats"])
-            assertEquals(1460, linje["totalbeløp"])
+            assertEquals("1460", "${linje["sats"]}")
+            assertEquals("1460", "${linje["totalbeløp"]}")
         }
     }
 
@@ -1066,15 +1105,17 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
-        håndterUtbetalingshistorikkForFeriepenger(
-            opptjeningsår = Year.of(2020),
-            utbetalinger = listOf(
-                Personutbetalingsperiode(ORGNUMMER, 1.september(2020), 15.september(2020), 1172, 20.september(2020)),
-            ),
-            feriepengehistorikk = listOf(UtbetalingshistorikkForFeriepenger.Feriepenger(ORGNUMMER, 3211, 1.mai(2021), 31.mai(2021)))
-        )
-
-        assertTrue(logCollector.any { it.message.startsWith("Differanse mellom det IT har utbetalt og det spleis har beregnet at IT skulle betale") })
+        fangLoggmeldinger("Differanse mellom det IT har utbetalt og det spleis har beregnet at IT skulle betale") {
+            håndterUtbetalingshistorikkForFeriepenger(
+                opptjeningsår = Year.of(2020),
+                utbetalinger = listOf(
+                    Personutbetalingsperiode(ORGNUMMER, 1.september(2020), 15.september(2020), 1172, 20.september(2020)),
+                ),
+                feriepengehistorikk = listOf(UtbetalingshistorikkForFeriepenger.Feriepenger(ORGNUMMER, 3211, 1.mai(2021), 31.mai(2021)))
+            )
+        }.also { loggmeldinger ->
+            assertTrue(loggmeldinger.isNotEmpty())
+        }
         assertEquals(2, engangsutbetalinger().size)
         val utbetaling = engangsutbetalinger().last()
         assertEquals(0 - (6 * 1172 * 0.102).roundToInt(), utbetaling.linje()["sats"])
@@ -1102,15 +1143,17 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
-        håndterUtbetalingshistorikkForFeriepenger(
-            opptjeningsår = Year.of(2020),
-            utbetalinger = listOf(
-                Personutbetalingsperiode(ORGNUMMER, 1.januar(2020), 6.mars(2020), 1172, 20.mars(2020)),
-            ),
-            feriepengehistorikk = listOf(UtbetalingshistorikkForFeriepenger.Feriepenger(ORGNUMMER, 5738, 1.mai(2021), 31.mai(2021)))
-        )
-
-        assertTrue(logCollector.none { it.message.startsWith("Differanse mellom det IT har utbetalt og det spleis har beregnet at IT skulle betale") })
+        fangLoggmeldinger("Differanse mellom det IT har utbetalt og det spleis har beregnet at IT skulle betale") {
+            håndterUtbetalingshistorikkForFeriepenger(
+                opptjeningsår = Year.of(2020),
+                utbetalinger = listOf(
+                    Personutbetalingsperiode(ORGNUMMER, 1.januar(2020), 6.mars(2020), 1172, 20.mars(2020)),
+                ),
+                feriepengehistorikk = listOf(UtbetalingshistorikkForFeriepenger.Feriepenger(ORGNUMMER, 5738, 1.mai(2021), 31.mai(2021)))
+            )
+        }.also { loggmeldinger ->
+            assertTrue(loggmeldinger.isEmpty())
+        }
         assertEquals(0, engangsutbetalinger().size)
     }
 
@@ -1133,15 +1176,17 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
-        håndterUtbetalingshistorikkForFeriepenger(
-            opptjeningsår = Year.of(2020),
-            utbetalinger = listOf(
-                Personutbetalingsperiode("0", 1.september(2020), 15.september(2020), 1172, 20.september(2020)),
-            ),
-            feriepengehistorikk = listOf(UtbetalingshistorikkForFeriepenger.Feriepenger("0", 3211, 1.mai(2021), 31.mai(2021)))
-        )
-
-        assertTrue(logCollector.any { it.message.startsWith("Differanse mellom det IT har utbetalt og det spleis har beregnet at IT skulle betale") })
+        fangLoggmeldinger("Differanse mellom det IT har utbetalt og det spleis har beregnet at IT skulle betale") {
+            håndterUtbetalingshistorikkForFeriepenger(
+                opptjeningsår = Year.of(2020),
+                utbetalinger = listOf(
+                    Personutbetalingsperiode("0", 1.september(2020), 15.september(2020), 1172, 20.september(2020)),
+                ),
+                feriepengehistorikk = listOf(UtbetalingshistorikkForFeriepenger.Feriepenger("0", 3211, 1.mai(2021), 31.mai(2021)))
+            )
+        }.also { loggmeldinger ->
+            assertTrue(loggmeldinger.isNotEmpty())
+        }
         assertEquals(2, engangsutbetalinger().size)
         val utbetaling = engangsutbetalinger().last()
         assertEquals(0 - (6 * 1172 * 0.102).roundToInt(), utbetaling.linje()["sats"])
@@ -1169,16 +1214,18 @@ internal class FeriepengeE2ETest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(1.vedtaksperiode)
         håndterUtbetalt()
 
-        håndterUtbetalingshistorikkForFeriepenger(
-            opptjeningsår = Year.of(2020),
-            utbetalinger = listOf(
-                // Ikke funksjonelt gyldig med refusjon til orgnr 0
-                Arbeidsgiverutbetalingsperiode("0", 1.september(2020), 15.september(2020), 1172, 20.september(2020)),
-            ),
-            feriepengehistorikk = listOf(UtbetalingshistorikkForFeriepenger.Feriepenger("0", 3211, 1.mai(2021), 31.mai(2021)))
-        )
-
-        assertTrue(logCollector.any { it.message.startsWith("Forventer ikke arbeidsgiveroppdrag til orgnummer \"0\"") })
+        fangLoggmeldinger("Forventer ikke arbeidsgiveroppdrag til orgnummer \"0\"") {
+            håndterUtbetalingshistorikkForFeriepenger(
+                opptjeningsår = Year.of(2020),
+                utbetalinger = listOf(
+                    // Ikke funksjonelt gyldig med refusjon til orgnr 0
+                    Arbeidsgiverutbetalingsperiode("0", 1.september(2020), 15.september(2020), 1172, 20.september(2020)),
+                ),
+                feriepengehistorikk = listOf(UtbetalingshistorikkForFeriepenger.Feriepenger("0", 3211, 1.mai(2021), 31.mai(2021)))
+            )
+        }.also { loggmeldinger ->
+            assertTrue(loggmeldinger.isNotEmpty())
+        }
         assertEquals(2, engangsutbetalinger().size)
         val ugyldigOppdrag = engangsutbetalinger().last()
         assertEquals(0 - (6 * 1172 * 0.102).roundToInt(), ugyldigOppdrag.linje()["sats"])

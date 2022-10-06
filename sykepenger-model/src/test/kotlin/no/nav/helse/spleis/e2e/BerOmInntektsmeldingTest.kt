@@ -23,7 +23,7 @@ internal class BerOmInntektsmeldingTest : AbstractEndToEndTest() {
     @Test
     fun `Ber ikke om inntektsmelding på korte perioder`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 15.januar, 100.prosent))
-        val søknadId = håndterSøknad(Sykdom(1.januar, 15.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 15.januar, 100.prosent))
         assertIngenFunksjonelleFeil()
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK)
         assertEquals(0, observatør.manglendeInntektsmeldingVedtaksperioder.size)

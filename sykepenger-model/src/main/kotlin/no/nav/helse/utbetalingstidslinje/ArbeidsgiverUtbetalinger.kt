@@ -61,7 +61,7 @@ internal class ArbeidsgiverUtbetalinger(
         }
         tidslinjerPerArbeidsgiver
             .filterValues { utbetalingstidslinje -> utbetalingstidslinje.isNotEmpty() }
-            .forEach { (arbeidsgiver, utbetalingstidslinje) ->
+            .forEach { (arbeidsgiver, _) ->
                 // TODO: kan sende med utbetalingstidslinje for å unngå 'utbetalingstidslinjeberegning'
                 utbetalingsperioder[arbeidsgiver]?.lagRevurdering(hendelse.barn(), orgnummer, maksimumSykepenger)
             }

@@ -183,7 +183,6 @@ internal class TestMessageFactory(
         opphørAvNaturalytelser: List<OpphoerAvNaturalytelse> = emptyList(),
         beregnetInntekt: Double = inntekt,
         opphørsdatoForRefusjon: LocalDate? = null,
-        meldingId: String = UUID.randomUUID().toString(),
         orgnummer: String = organisasjonsnummer
     ) = nyHendelse(
         "inntektsmelding", lagInntektsmelding(
@@ -201,7 +200,7 @@ internal class TestMessageFactory(
         inntektsmelding: String
     ) = objectMapper.readTree(inntektsmelding).also {
         (it as ObjectNode).put("@event_name", "inntektsmelding_replay")
-        (it as ObjectNode).put("vedtaksperiodeId", "$vedtaksperiodeId")
+        it.put("vedtaksperiodeId", "$vedtaksperiodeId")
     }.let { node ->
         UUID.fromString(node.path("@id").asText()) to node.toString()
     }

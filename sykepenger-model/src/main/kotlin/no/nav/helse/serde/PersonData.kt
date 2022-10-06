@@ -21,7 +21,6 @@ import no.nav.helse.person.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Dokumentsporing.Companion.tilSporing
 import no.nav.helse.person.ForkastetVedtaksperiode
-import no.nav.helse.person.ForkastetÅrsak
 import no.nav.helse.person.ForlengelseFraInfotrygd
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.InntektsmeldingInfo
@@ -244,9 +243,10 @@ internal data class PersonData(
         internal companion object {
             private fun List<VilkårsgrunnlagInnslagData>.parseVilkårsgrunnlag(alder: Alder) =
                 this.map { innslagData ->
-                    VilkårsgrunnlagHistorikk.Innslag.gjenopprett(innslagData.id, innslagData.opprettet, innslagData.vilkårsgrunnlag.map {
-                        it.parseDataForVilkårsvurdering(alder)
-                    }.toMap())
+                    VilkårsgrunnlagHistorikk.Innslag.gjenopprett(innslagData.id, innslagData.opprettet,
+                        innslagData.vilkårsgrunnlag.associate {
+                            it.parseDataForVilkårsvurdering(alder)
+                        })
                 }
 
             internal fun List<VilkårsgrunnlagInnslagData>.tilModellObjekt(alder: Alder) = VilkårsgrunnlagHistorikk.ferdigVilkårsgrunnlagHistorikk(parseVilkårsgrunnlag(alder))
@@ -480,9 +480,9 @@ internal data class PersonData(
                 )
             })
 
-            forkastedeliste.addAll(this.forkastede.map { (periode, årsak) ->
+            forkastedeliste.addAll(this.forkastede.map { periode ->
                 ForkastetVedtaksperiode(
-                    periode.createVedtaksperiode(
+                    periode.vedtaksperiode.createVedtaksperiode(
                         person,
                         arbeidsgiver,
                         aktørId,
@@ -491,7 +491,7 @@ internal data class PersonData(
                         utbetalingMap,
                         inntektsmeldingInfo,
                         arbeidsgiverJurist
-                    ), årsak
+                    )
                 )
             })
             vedtaksperiodeliste.sort()
@@ -757,8 +757,7 @@ internal data class PersonData(
         }
 
         data class ForkastetVedtaksperiodeData(
-            val vedtaksperiode: VedtaksperiodeData,
-            val årsak: ForkastetÅrsak
+            val vedtaksperiode: VedtaksperiodeData
         )
 
         data class FeriepengeutbetalingData(

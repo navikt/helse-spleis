@@ -57,10 +57,12 @@ internal class RevurderingAvsluttetUtenUtbetalingTest : AbstractEndToEndMediator
         sendSøknad(listOf(SoknadsperiodeDTO(fom = 11.januar, tom = 22.januar, sykmeldingsgrad = 100)))
         sendNySøknad(SoknadsperiodeDTO(fom = 23.januar, tom = 23.januar, sykmeldingsgrad = 100))
         sendSøknad(listOf(SoknadsperiodeDTO(fom = 23.januar, tom = 23.januar, sykmeldingsgrad = 100)))
-        sendInntektsmelding(listOf(
-            Periode(fom = 1.januar, tom = 6.januar),
-            Periode(fom = 11.januar, tom = 21.januar),
-        ), førsteFraværsdag = 11.januar)
+        sendInntektsmelding(
+            listOf(
+                Periode(fom = 1.januar, tom = 6.januar),
+                Periode(fom = 11.januar, tom = 21.januar),
+            ), førsteFraværsdag = 11.januar
+        )
         sendYtelserUtenSykepengehistorikk(2)
         sendVilkårsgrunnlag(2)
         sendYtelserUtenSykepengehistorikk(2)
@@ -91,9 +93,11 @@ internal class RevurderingAvsluttetUtenUtbetalingTest : AbstractEndToEndMediator
         sendNySøknad(SoknadsperiodeDTO(fom = 23.januar, tom = 28.februar, sykmeldingsgrad = 100))
         sendSøknad(listOf(SoknadsperiodeDTO(fom = 23.januar, tom = 28.februar, sykmeldingsgrad = 100)))
 
-        sendInntektsmelding(listOf(
-            Periode(fom = 9.januar, tom = 24.januar)
-        ), førsteFraværsdag = 9.januar)
+        sendInntektsmelding(
+            listOf(
+                Periode(fom = 9.januar, tom = 24.januar)
+            ), førsteFraværsdag = 9.januar
+        )
 
         sendYtelserUtenSykepengehistorikk(1)
         sendVilkårsgrunnlag(1)

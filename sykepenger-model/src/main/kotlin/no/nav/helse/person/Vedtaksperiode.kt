@@ -245,7 +245,7 @@ internal class Vedtaksperiode private constructor(
             if (it) inntektsmelding.leggTil(hendelseIder)
             if (!it) return@also inntektsmelding.trimLeft(periode.endInclusive)
             kontekst(inntektsmelding)
-            if (!inntektsmelding.erRelevant(periode, sammenhengendePerioder.map { it.periode })) return@also
+            if (!inntektsmelding.erRelevant(periode, sammenhengendePerioder.map { periode -> periode.periode })) return@also
             tilstand.håndter(this, inntektsmelding)
         }
     }
@@ -767,8 +767,8 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
-    private fun mottaUtbetalingTilRevurdering(aktivitetslogg: IAktivitetslogg, utbetaling: Utbetaling) {
-        utbetalingstidslinje = utbetalinger.mottaRevurdering(aktivitetslogg, utbetaling, periode)
+    private fun mottaUtbetalingTilRevurdering(utbetaling: Utbetaling) {
+        utbetalingstidslinje = utbetalinger.mottaRevurdering(utbetaling, periode)
     }
 
     private fun Vedtaksperiodetilstand.påminnelse(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
@@ -1101,7 +1101,7 @@ internal class Vedtaksperiode private constructor(
             if (vedtaksperiode.skjæringstidspunkt != other.skjæringstidspunkt) return // vi deler ikke skjæringstidspunkt; revurderingen gjelder en eldre vedtaksperiode
             if (vedtaksperiode.utbetalinger.hørerIkkeSammenMed(utbetaling)) return // vi deler skjæringstidspunkt, men ikke utbetaling (Infotrygdperiode mellom)
             aktivitetslogg.info("Mottatt revurdert utbetaling fra en annen vedtaksperiode")
-            vedtaksperiode.mottaUtbetalingTilRevurdering(aktivitetslogg, utbetaling)
+            vedtaksperiode.mottaUtbetalingTilRevurdering(utbetaling)
         }
 
         override fun valider(
@@ -1160,7 +1160,7 @@ internal class Vedtaksperiode private constructor(
             other: Vedtaksperiode
         ) {
             aktivitetslogg.info("Mottatt revurdert utbetaling fra en annen vedtaksperiode")
-            vedtaksperiode.mottaUtbetalingTilRevurdering(aktivitetslogg, utbetaling)
+            vedtaksperiode.mottaUtbetalingTilRevurdering(utbetaling)
         }
 
         override fun gjenopptaBehandling(
@@ -1305,7 +1305,7 @@ internal class Vedtaksperiode private constructor(
             other: Vedtaksperiode
         ) {
             aktivitetslogg.info("Mottatt revurdert utbetaling")
-            vedtaksperiode.mottaUtbetalingTilRevurdering(aktivitetslogg, utbetaling)
+            vedtaksperiode.mottaUtbetalingTilRevurdering(utbetaling)
         }
 
         override fun valider(
@@ -1509,7 +1509,7 @@ internal class Vedtaksperiode private constructor(
 
     internal object AvventerVilkårsprøving : Vedtaksperiodetilstand {
         override val type = AVVENTER_VILKÅRSPRØVING
-        override fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime) =
+        override fun makstid(vedtaksperiode: Vedtaksperiode, tilstandsendringstidspunkt: LocalDateTime): LocalDateTime =
             tilstandsendringstidspunkt.plusDays(5)
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
