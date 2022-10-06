@@ -1,5 +1,6 @@
 package no.nav.helse.hendelser
 
+import java.util.UUID
 import no.nav.helse.hendelser.Validation.Companion.validation
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.ArbeidstakerHendelse
@@ -7,7 +8,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.fail
-import java.util.*
 
 internal class ValidationTest {
 
@@ -40,8 +40,8 @@ internal class ValidationTest {
         assertTrue(failure)
     }
 
-    private fun Validation.successBlock() = valider("feilmelding") { true }
-    private fun Validation.failureBlock() = valider("feilmelding") { false }
+    private fun Validation.successBlock() = valider { true }
+    private fun Validation.failureBlock() = valider { false }
 
     private inner class TestHendelse(aktivitetslogg: Aktivitetslogg) : ArbeidstakerHendelse(UUID.randomUUID(), "fnr", "aktørId", "orgnr", aktivitetslogg)
 }

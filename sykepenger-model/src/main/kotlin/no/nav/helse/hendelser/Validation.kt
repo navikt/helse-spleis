@@ -1,6 +1,7 @@
 package no.nav.helse.hendelser
 
 import no.nav.helse.person.IAktivitetslogg
+import no.nav.helse.person.Varselkode
 
 internal class Validation private constructor(private val hendelse: IAktivitetslogg) : IAktivitetslogg by(hendelse) {
     private var hasErrors = false
@@ -16,19 +17,10 @@ internal class Validation private constructor(private val hendelse: IAktivitetsl
         errorBlock = block
     }
 
-    internal fun validerHvis(feilmelding: String? = null, hvis: Boolean, isValid: Validation.() -> Boolean) {
-        validerHvis(feilmelding, { hvis }, isValid)
-    }
-
-    internal fun validerHvis(feilmelding: String? = null, hvis: () -> Boolean, isValid: Validation.() -> Boolean) {
-        if (!hvis()) return
-        valider(feilmelding, isValid)
-    }
-
-    internal inline fun valider(feilmelding: String? = null, isValid: Validation.() -> Boolean) {
+    internal inline fun valider(kode: Varselkode? = null, isValid: Validation.() -> Boolean) {
         if (harFunksjonelleFeilEllerVerre()) return
         if (isValid(this)) return
-        onValidationFailed(feilmelding)
+        onValidationFailed(kode)
     }
 
     internal inline fun onSuccess(successBlock: Validation.() -> Unit) {
@@ -37,9 +29,9 @@ internal class Validation private constructor(private val hendelse: IAktivitetsl
 
     override fun harFunksjonelleFeilEllerVerre() = hasErrors || hendelse.harFunksjonelleFeilEllerVerre()
 
-    private fun onValidationFailed(feilmelding: String?) {
+    private fun onValidationFailed(kode: Varselkode?) {
         hasErrors = true
-        feilmelding?.also { funksjonellFeil(it) }
+        kode?.also { funksjonellFeil(it) }
         errorBlock(this)
     }
 }

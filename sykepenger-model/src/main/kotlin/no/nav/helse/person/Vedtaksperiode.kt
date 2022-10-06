@@ -86,6 +86,7 @@ import no.nav.helse.person.Varselkode.RV_SØ_16
 import no.nav.helse.person.Varselkode.RV_SØ_19
 import no.nav.helse.person.Varselkode.RV_SØ_20
 import no.nav.helse.person.Varselkode.RV_UT_1
+import no.nav.helse.person.Varselkode.RV_UT_16
 import no.nav.helse.person.Varselkode.RV_UT_5
 import no.nav.helse.person.Varselkode.RV_VT_1
 import no.nav.helse.person.Varselkode.RV_VT_2
@@ -1606,7 +1607,7 @@ internal class Vedtaksperiode private constructor(
                     }
                 }
                 lateinit var arbeidsgiverUtbetalinger: ArbeidsgiverUtbetalinger
-                valider("Feil ved kalkulering av utbetalingstidslinjer") {
+                valider(RV_UT_16) {
                     person.fyllUtPeriodeMedForventedeDager(
                         ytelser,
                         vedtaksperiode.periode,
