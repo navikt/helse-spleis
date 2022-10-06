@@ -197,7 +197,7 @@ class Søknad(
                 Sykdomstidslinje.problemdager(periode.start, periode.endInclusive, kilde, "Papirdager ikke støttet")
 
             override fun valider(søknad: Søknad) =
-                søknad.funksjonellFeil("Søknaden inneholder en Papirsykmeldingsperiode")
+                søknad.funksjonellFeil(RV_SØ_22)
         }
 
         class Utdanning(fom: LocalDate, tom: LocalDate) : Søknadsperiode(fom, tom, "utdanning") {
