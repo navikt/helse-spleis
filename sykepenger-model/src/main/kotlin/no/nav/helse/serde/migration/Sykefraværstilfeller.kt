@@ -78,13 +78,15 @@ internal object Sykefraværstilfeller {
 
         internal companion object {
             internal fun List<AktivVedtaksperiode>.aktiveSkjæringstidspunkter() =
-                filterNot { it.erAvsluttetUtenUtbetaling() }.skjæringstidspunkter()
+                fjernAvsluttetUtenUtbetaling().skjæringstidspunkter()
             internal fun List<Vedtaksperiode>.overlappendeVedtaksperioder(periode: Periode) =
                 filter { periode.overlapperMed(it.periode) }
             internal fun List<Vedtaksperiode>.kunForkastetEllerAvsluttetUtenUtbetaling() =
                 all { it is ForkastetVedtaksperiode || it.erAvsluttetUtenUtbetaling() }
             internal fun List<Vedtaksperiode>.skjæringstidspunkter() =
                 map { it.skjæringstidspunkt }.toSet()
+            internal fun List<Vedtaksperiode>.fjernAvsluttetUtenUtbetaling() =
+                filterNot { it.erAvsluttetUtenUtbetaling() }
 
         }
     }

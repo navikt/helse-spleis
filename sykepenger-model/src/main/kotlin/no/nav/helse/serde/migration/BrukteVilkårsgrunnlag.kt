@@ -10,6 +10,7 @@ import no.nav.helse.erRettFør
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.serde.migration.Sykefraværstilfeller.Sykefraværstilfelle
+import no.nav.helse.serde.migration.Sykefraværstilfeller.Vedtaksperiode.Companion.fjernAvsluttetUtenUtbetaling
 import no.nav.helse.serde.migration.Sykefraværstilfeller.sykefraværstilfeller
 import no.nav.helse.serde.migration.Sykefraværstilfeller.vedtaksperioder
 import no.nav.helse.serde.serdeObjectMapper
@@ -67,11 +68,14 @@ internal object BrukteVilkårsgrunnlag {
         val vilkårsgrunnlagHistorikk = jsonNode.path("vilkårsgrunnlagHistorikk") as ArrayNode
         val sisteInnslag = vilkårsgrunnlagHistorikk.firstOrNull() ?: return sikkerlogg.info("Har ingen innslag i vilkårsgrunnlaghistorikken").let { null }
 
-        val vedtaksperioder = vedtaksperioder(jsonNode)
-        val sykefraværstilfeller = sykefraværstilfeller(vedtaksperioder)
+        val vedtaksperioderForPerson = vedtaksperioder(jsonNode)
+        val sykefraværstilfeller = sykefraværstilfeller(vedtaksperioderForPerson)
         sikkerlogg.info("Fant ${sykefraværstilfeller.size} sykefraværstilfeller ${sykefraværstilfeller.map { it.periode }}")
-        val tilstanderPerSkjæringstidspunkt = vedtaksperioder
+        val tilstanderPerSkjæringstidspunkt = vedtaksperioderForPerson
             .groupBy { it.skjæringstidspunkt }
+            .mapValues { (_, vedtaksperioder) ->
+                vedtaksperioder.fjernAvsluttetUtenUtbetaling().takeUnless { it.isEmpty() } ?: vedtaksperioder
+            }
             .mapValues { (_, vedtaksperioder) ->
                 val førsteFom = vedtaksperioder.minOf { it.periode.start }
                 vedtaksperioder.filter { it.periode.start == førsteFom }
