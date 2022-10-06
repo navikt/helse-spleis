@@ -122,7 +122,6 @@ abstract class Toggle internal constructor(enabled: Boolean = false, private val
         }
     }
 
-    object ForkasteVilkårsgrunnlag : Toggle("ForkasteVilkarsgrunnlag", false)
     object GraphQLPlayground : Toggle("GraphQLPlayground", false)
     object SendFeriepengeOppdrag : Toggle(false)
     object RevurdereInntektMedFlereArbeidsgivere : Toggle("RevurdereInntektMedFlereArbeidsgivere", false)

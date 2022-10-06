@@ -3,7 +3,6 @@ package no.nav.helse.person
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
-import no.nav.helse.Toggle
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
@@ -63,7 +62,7 @@ internal class VilkårsgrunnlagHistorikkTest {
     }
 
     @Test
-    fun `fjerner vilkårsgrunnlag som ikke gjelder lengre`() = Toggle.ForkasteVilkårsgrunnlag.enable {
+    fun `fjerner vilkårsgrunnlag som ikke gjelder lengre`() {
         val inntekt = 21000.månedlig
         val gammeltSkjæringstidspunkt = 10.januar
         val nyttSkjæringstidspunkt = 1.januar

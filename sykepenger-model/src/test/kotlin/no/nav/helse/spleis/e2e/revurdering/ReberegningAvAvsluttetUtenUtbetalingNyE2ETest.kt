@@ -1085,7 +1085,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
     }
 
     @Test
-    fun `endrer arbeidsgiverperiode etter igangsatt revurdering`() = Toggle.ForkasteVilkårsgrunnlag.enable {
+    fun `endrer arbeidsgiverperiode etter igangsatt revurdering`() {
         val forMyeInntekt = INNTEKT * 1.2
         val riktigInntekt = INNTEKT
 

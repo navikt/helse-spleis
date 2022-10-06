@@ -3,7 +3,6 @@ package no.nav.helse.spleis.e2e.revurdering
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.Toggle
 import no.nav.helse.antallEtterspurteBehov
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
@@ -638,7 +637,7 @@ internal class RevurderTidslinjeTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `revurderer siste utbetalte periode med bare ferie og permisjon`() = Toggle.ForkasteVilkårsgrunnlag.enable {
+    fun `revurderer siste utbetalte periode med bare ferie og permisjon`() {
         nyttVedtak(3.januar, 26.januar)
         nullstillTilstandsendringer()
 

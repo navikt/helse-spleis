@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e
 
 import java.time.LocalDate
-import no.nav.helse.Toggle
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
@@ -291,7 +290,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
     }
     
     @Test
-    fun `Forkaster ikke vilkårsgrunnlag om det er en periode i AUU med samme skjæringstidspunkt som den som blir annullert`() = Toggle.ForkasteVilkårsgrunnlag.enable {
+    fun `Forkaster ikke vilkårsgrunnlag om det er en periode i AUU med samme skjæringstidspunkt som den som blir annullert`() {
         nyPeriode(1.januar til 16.januar)
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
@@ -313,7 +312,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Forkaster vilkårsgrunnlag når periode annulleres`() = Toggle.ForkasteVilkårsgrunnlag.enable {
+    fun `Forkaster vilkårsgrunnlag når periode annulleres`() {
         nyttVedtak(1.januar, 31.januar)
         assertVilkårsgrunnlagFraSpleisFor(1.januar)
         håndterAnnullerUtbetaling()

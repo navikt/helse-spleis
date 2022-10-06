@@ -3,7 +3,6 @@ package no.nav.helse.person
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.Toggle
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.OverstyrInntekt
@@ -49,7 +48,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
     }
 
     internal fun oppdaterHistorikk(aktivitetslogg: IAktivitetslogg, skjæringstidspunkter: List<LocalDate>) {
-        if (Toggle.ForkasteVilkårsgrunnlag.disabled) return
         val nyttInnslag = sisteInnlag()?.oppdaterHistorikk(aktivitetslogg, skjæringstidspunkter) ?: return
         if (nyttInnslag == sisteInnlag()) return
         historikk.add(0, nyttInnslag)
@@ -106,11 +104,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         }
 
         internal fun vilkårsgrunnlagFor(skjæringstidspunkt: LocalDate) =
-            vilkårsgrunnlag[skjæringstidspunkt] ?: vilkårsgrunnlag.keys.sorted()
-                .firstOrNull { it > skjæringstidspunkt }
-                ?.let { vilkårsgrunnlag[it] }
-                ?.takeIf { it is InfotrygdVilkårsgrunnlag }
-
+            vilkårsgrunnlag[skjæringstidspunkt]
 
         internal fun skjæringstidspunkterFraSpleis() = vilkårsgrunnlag
             .filterValues { it is Grunnlagsdata }

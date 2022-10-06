@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e.revurdering
 
 import no.nav.helse.EnableToggle
 import no.nav.helse.Toggle
-import no.nav.helse.Toggle.Companion.enable
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
@@ -141,7 +140,7 @@ internal class RevurderingOutOfOrderForlengelserTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `out-of-order søknad medfører revurdering -- Avsluttet`() = listOf(Toggle.RevurderOutOfOrderForlengelser, Toggle.ForkasteVilkårsgrunnlag).enable {
+    fun `out-of-order søknad medfører revurdering -- Avsluttet`() = Toggle.RevurderOutOfOrderForlengelser.enable {
         nyttVedtak(1.februar, 28.februar)
         nyPeriode(1.januar til 31.januar)
 
