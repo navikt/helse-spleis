@@ -30,14 +30,14 @@ internal class AktivitetsloggObserverTest {
 
         aktivitetslogg.info("Dette er en info-melding")
         aktivitetslogg.varsel(RV_SØ_1)
-        aktivitetslogg.funksjonellFeil("Dette er en error")
+        aktivitetslogg.funksjonellFeil(RV_SØ_1)
         try {
             aktivitetslogg.logiskFeil("Dette er en severe")
         } catch (_: Exception) {}
 
         testObserver.assertAktivitet('I', melding = "Dette er en info-melding", kontekster = listOf(personkontekst, arbeidsgiverkontekst, vedtaksperiodekontekst))
         testObserver.assertAktivitet('W', kode = RV_SØ_1, melding = "Søknaden inneholder permittering. Vurder om permittering har konsekvens for rett til sykepenger", kontekster = listOf(personkontekst, arbeidsgiverkontekst, vedtaksperiodekontekst))
-        testObserver.assertAktivitet('E', melding = "Dette er en error", kontekster = listOf(personkontekst, arbeidsgiverkontekst, vedtaksperiodekontekst))
+        testObserver.assertAktivitet('E', melding = "Søknaden inneholder permittering. Vurder om permittering har konsekvens for rett til sykepenger", kontekster = listOf(personkontekst, arbeidsgiverkontekst, vedtaksperiodekontekst))
         testObserver.assertAktivitet('S', melding = "Dette er en severe", kontekster = listOf(personkontekst, arbeidsgiverkontekst, vedtaksperiodekontekst))
     }
 

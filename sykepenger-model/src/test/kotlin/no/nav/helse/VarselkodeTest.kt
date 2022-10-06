@@ -3,8 +3,6 @@ package no.nav.helse
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
-import no.nav.helse.person.AktivitetsloggObserverTest
-import no.nav.helse.person.AktivitetsloggTest
 import no.nav.helse.person.Varselkode
 import no.nav.helse.person.Varselkode.RV_AG_1
 import no.nav.helse.person.Varselkode.RV_AY_10
@@ -63,7 +61,7 @@ import no.nav.helse.person.Varselkode.RV_VV_9
 import no.nav.helse.person.varselkodeformat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import kotlin.io.path.extension
+import kotlin.io.path.name
 import kotlin.io.path.pathString
 
 internal class VarselkodeTest {
@@ -114,29 +112,21 @@ internal class VarselkodeTest {
 
         private fun Path.slutterPåEnAv(vararg suffix: String) = let { path -> suffix.firstOrNull { path.endsWith(it) } != null }
 
-        private fun finn(
-            scope: String,
-            regex: Regex,
-            ignorePath: (path: Path) -> Boolean = { false },
-            ignoreLinje: (linje: String) -> Boolean = { false }) =
+        private fun finn(regex: Regex) =
             Files.walk(Paths.get("../")).use { paths ->
                 paths
                     .filter(Files::isRegularFile)
-                    .filter { it.pathString.contains("/src/$scope/") }
-                    .filter { it.fileName.extension == "kt" }
-                    .filter { !ignorePath(it) }
+                    .filter { it.pathString.contains("/src/test/") }
+                    .filter { it.fileName.name == "VarselE2ETest.kt" }
                     .map { Files.readAllLines(it) }
                     .toList()
                     .asSequence()
                     .flatten()
-                    .filterNot(ignoreLinje)
                     .map { linje -> regex.findAll(linje).toList().map { it.groupValues[1] } }
                     .flatten()
                     .toSet()
             }
 
-        private fun finnAlleVarselkoderITest() = finn("test", "($varselkodeformat)".toRegex(), ignorePath = { path ->
-            path.slutterPåEnAv("${VarselkodeTest::class.simpleName}.kt", "${this::class.simpleName}.kt", "${AktivitetsloggTest::class.simpleName}.kt", "${AktivitetsloggObserverTest::class.simpleName}.kt")
-        }).map { enumValueOf<Varselkode>(it) }.distinct()
+        private fun finnAlleVarselkoderITest() = finn("($varselkodeformat)".toRegex()).map { enumValueOf<Varselkode>(it) }.distinct()
     }
 }

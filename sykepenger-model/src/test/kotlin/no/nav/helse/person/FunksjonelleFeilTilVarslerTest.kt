@@ -1,5 +1,6 @@
 package no.nav.helse.person
 
+import no.nav.helse.person.Varselkode.RV_VT_1
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -17,7 +18,7 @@ internal class FunksjonelleFeilTilVarslerTest {
     @Test
     fun `error blir error om det logges på kilden`() {
         val funksjonelleFeilTilVarsler = FunksjonelleFeilTilVarsler(aktivitetslogg)
-        aktivitetslogg.funksjonellFeil("Det er en feil")
+        aktivitetslogg.funksjonellFeil(RV_VT_1)
         assertTrue(aktivitetslogg.harFunksjonelleFeilEllerVerre())
         assertTrue(funksjonelleFeilTilVarsler.harFunksjonelleFeilEllerVerre())
     }
@@ -25,7 +26,7 @@ internal class FunksjonelleFeilTilVarslerTest {
     @Test
     fun `error blir warning om det logges på wrapperen`() {
         val funksjonelleFeilTilVarsler = FunksjonelleFeilTilVarsler(aktivitetslogg)
-        funksjonelleFeilTilVarsler.funksjonellFeil("Det er en feil med wrapperen")
+        funksjonelleFeilTilVarsler.funksjonellFeil(RV_VT_1)
         assertTrue(aktivitetslogg.harVarslerEllerVerre())
         assertFalse(aktivitetslogg.harFunksjonelleFeilEllerVerre())
         assertTrue(funksjonelleFeilTilVarsler.harVarslerEllerVerre())

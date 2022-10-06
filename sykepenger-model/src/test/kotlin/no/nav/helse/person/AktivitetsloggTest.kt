@@ -3,6 +3,7 @@ package no.nav.helse.person
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.person.Varselkode.RV_SØ_1
+import no.nav.helse.person.Varselkode.RV_VT_1
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -114,11 +115,10 @@ internal class AktivitetsloggTest {
 
     @Test
     fun `error oppdaget`() {
-        val melding = "Error"
-        aktivitetslogg.funksjonellFeil(melding)
+        aktivitetslogg.funksjonellFeil(RV_VT_1)
         assertTrue(aktivitetslogg.harFunksjonelleFeilEllerVerre())
-        assertTrue(aktivitetslogg.toString().contains(melding))
-        assertFunksjonellFeil(melding)
+        assertTrue(aktivitetslogg.toString().contains("Gir opp fordi tilstanden er nådd makstid"))
+        assertFunksjonellFeil("Gir opp fordi tilstanden er nådd makstid")
     }
 
     @Test
@@ -136,11 +136,9 @@ internal class AktivitetsloggTest {
             assertInfo(it, hendelse.logg)
             assertInfo(it, aktivitetslogg)
         }
-        "error message".also {
-            hendelse.funksjonellFeil(it)
-            assertFunksjonellFeil(it, hendelse.logg)
-            assertFunksjonellFeil(it, aktivitetslogg)
-        }
+        hendelse.funksjonellFeil(RV_VT_1)
+        assertFunksjonellFeil("Gir opp fordi tilstanden er nådd makstid", hendelse.logg)
+        assertFunksjonellFeil("Gir opp fordi tilstanden er nådd makstid", aktivitetslogg)
     }
 
     @Test
@@ -156,15 +154,13 @@ internal class AktivitetsloggTest {
             assertInfo(it, hendelse.logg)
             assertInfo(it, aktivitetslogg)
         }
-        "error message".also {
-            hendelse.funksjonellFeil(it)
-            assertFunksjonellFeil(it, hendelse.logg)
-            assertFunksjonellFeil(it, aktivitetslogg)
-            assertFunksjonellFeil("Hendelse", aktivitetslogg)
-            assertFunksjonellFeil("Vedtaksperiode", aktivitetslogg)
-            assertFunksjonellFeil("Arbeidsgiver", aktivitetslogg)
-            assertFunksjonellFeil("Person", aktivitetslogg)
-        }
+        hendelse.funksjonellFeil(RV_VT_1)
+        assertFunksjonellFeil("Gir opp fordi tilstanden er nådd makstid", hendelse.logg)
+        assertFunksjonellFeil("Gir opp fordi tilstanden er nådd makstid", aktivitetslogg)
+        assertFunksjonellFeil("Hendelse", aktivitetslogg)
+        assertFunksjonellFeil("Vedtaksperiode", aktivitetslogg)
+        assertFunksjonellFeil("Arbeidsgiver", aktivitetslogg)
+        assertFunksjonellFeil("Person", aktivitetslogg)
     }
 
     @Test
@@ -177,7 +173,7 @@ internal class AktivitetsloggTest {
         hendelse1.kontekst(vedtaksperiode1)
         hendelse1.info("info message")
         hendelse1.varsel(RV_SØ_1)
-        hendelse1.funksjonellFeil("error message")
+        hendelse1.funksjonellFeil(RV_VT_1)
         val hendelse2 = TestHendelse(aktivitetslogg.barn())
         hendelse2.kontekst(person)
         val arbeidsgiver2 = TestKontekst("Arbeidsgiver", "Arbeidsgiver 2")
@@ -185,7 +181,7 @@ internal class AktivitetsloggTest {
         val vedtaksperiode2 = TestKontekst("Vedtaksperiode", "Vedtaksperiode 2")
         hendelse2.kontekst(vedtaksperiode2)
         hendelse2.info("info message")
-        hendelse2.funksjonellFeil("error message")
+        hendelse2.funksjonellFeil(RV_VT_1)
         assertEquals(5, aktivitetslogg.aktivitetsteller())
         assertEquals(3, aktivitetslogg.logg(vedtaksperiode1).aktivitetsteller())
         assertEquals(2, aktivitetslogg.logg(arbeidsgiver2).aktivitetsteller())
