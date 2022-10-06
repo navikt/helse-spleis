@@ -128,21 +128,24 @@ internal class InntektsmeldingOgFerieE2ETest : AbstractEndToEndTest() {
 
         håndterSøknad(Sykdom(1.februar, 20.februar, 100.prosent), orgnummer = a2)
         håndterInntektsmelding(listOf(1.februar til 16.februar), orgnummer = a2)
-        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
-        håndterSimulering(1.vedtaksperiode, orgnummer = a2)
-        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
-        nullstillTilstandsendringer()
-        håndterUtbetalt(orgnummer = a2)
-        assertTilstander(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
-        assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVSLUTTET, orgnummer = a2)
 
         assertForventetFeil(
             forklaring = "Skal ikke trenge inntektsmelding for ferieperioden da det starter en ny arbeidsgiverperiode i ferieperioden",
             nå = {
-                assertTilstander(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, orgnummer = a1)
+                assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, orgnummer = a1)
+                assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
             },
             ønsket = {
-                assertTilstander(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING, orgnummer = a1)
+                assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING, orgnummer = a1)
+                assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, orgnummer = a2)
+
+                håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+                håndterSimulering(1.vedtaksperiode, orgnummer = a2)
+                håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
+                nullstillTilstandsendringer()
+                håndterUtbetalt(orgnummer = a2)
+                assertTilstander(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+                assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVSLUTTET, orgnummer = a2)
             }
         )
     }
