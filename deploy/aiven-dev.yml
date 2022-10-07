@@ -195,7 +195,7 @@ spec:
           access: readwrite
         - team: tbd
           application: sparkel-arbeidsgiver
-          access: read
+          access: readwrite
         - team: tbd
           application: sparsom
           access: readwrite
