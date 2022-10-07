@@ -29,6 +29,7 @@ import no.nav.helse.memoized
 import no.nav.helse.oktober
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.arbeidsavklaringspenger
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.arbeidsforhold
+import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.arbeidsgiveropplysninger
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.dagpenger
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.dødsinformasjon
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.foreldrepenger
@@ -614,6 +615,10 @@ internal class Vedtaksperiode private constructor(
         }
         vilkårsgrunnlag.info("Vilkårsgrunnlag vurdert")
         tilstand(vilkårsgrunnlag, nesteTilstand)
+    }
+
+    private fun trengerArbeidsgiveropplysninger(hendelse: IAktivitetslogg) {
+        arbeidsgiveropplysninger(hendelse)
     }
 
     private fun trengerYtelser(hendelse: IAktivitetslogg, periode: Periode = periode()) {
@@ -1370,6 +1375,7 @@ internal class Vedtaksperiode private constructor(
         override val type: TilstandType = AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
+            if(Toggle.Splarbeidsbros.enabled) vedtaksperiode.trengerArbeidsgiveropplysninger(hendelse)
             vedtaksperiode.trengerInntektsmeldingReplay()
             vedtaksperiode.trengerInntektsmelding(hendelse.hendelseskontekst())
             vedtaksperiode.person.gjenopptaBehandling(hendelse)
