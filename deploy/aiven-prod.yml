@@ -173,6 +173,9 @@ spec:
           application: sparkel-skjermet-endret
           access: readwrite
         - team: tbd
+          application: sparkel-arbeidsgiver
+          access: readwrite
+        - team: tbd
           application: sparsom
           access: readwrite
         - team: tbd
