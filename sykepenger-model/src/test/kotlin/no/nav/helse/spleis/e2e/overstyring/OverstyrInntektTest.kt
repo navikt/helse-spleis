@@ -15,12 +15,13 @@ import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
-import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.person.Varselkode
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
-import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
+import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.assertInntektForDato
 import no.nav.helse.spleis.e2e.assertTilstander
+import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.grunnlag
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterOverstyrInntekt
@@ -112,7 +113,7 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `overstyrt inntekt til mer enn 25 prosent avvik skal sendes til infotrygd`() {
+    fun `overstyrt inntekt til mer enn 25 prosent avvik skal få warning`() {
         val fom = 1.januar(2021)
         val overstyrtInntekt = INNTEKT *1.40
         tilGodkjenning(fom, 31.januar(2021), 100.prosent, fom)
@@ -120,7 +121,9 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
         håndterOverstyrInntekt(inntekt = overstyrtInntekt, orgnummer = ORGNUMMER, skjæringstidspunkt = fom)
         håndterYtelser(1.vedtaksperiode)
 
-        assertForkastetPeriodeTilstander(1.vedtaksperiode,
+        assertVarsel(Varselkode.RV_IV_2, AktivitetsloggFilter.person())
+
+        assertTilstander(1.vedtaksperiode,
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
@@ -130,7 +133,7 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
             AVVENTER_HISTORIKK,
-            TIL_INFOTRYGD)
+            AVVENTER_SIMULERING)
     }
 
     @Test

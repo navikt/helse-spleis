@@ -33,7 +33,6 @@ class Vilkårsgrunnlag(
     private var grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata? = null
     private val arbeidsforhold = arbeidsforhold.filter { it.orgnummer.isNotBlank() }
 
-
     internal fun erRelevant(other: UUID) = other.toString() == vedtaksperiodeId
 
     internal fun valider(
@@ -48,20 +47,14 @@ class Vilkårsgrunnlag(
         inntektsvurderingForSykepengegrunnlag.valider(this)
         inntektsvurderingForSykepengegrunnlag.loggInteressantFrilanserInformasjon(skjæringstidspunkt)
 
-        val inntektsvurderingOk = inntektsvurdering.valider(
-            this,
-            grunnlagForSykepengegrunnlag,
-            sammenligningsgrunnlag.sammenligningsgrunnlag,
-            antallArbeidsgivereFraAareg,
-            subsumsjonObserver
-        )
+        val inntektsvurderingOk = inntektsvurdering.valider(this, antallArbeidsgivereFraAareg)
         val opptjeningvurderingOk = opptjening.valider(this)
         val medlemskapsvurderingOk = medlemskapsvurdering.valider(this)
         grunnlagsdata = VilkårsgrunnlagHistorikk.Grunnlagsdata(
             skjæringstidspunkt = skjæringstidspunkt,
             sykepengegrunnlag = grunnlagForSykepengegrunnlag,
             sammenligningsgrunnlag = sammenligningsgrunnlag,
-            avviksprosent = inntektsvurdering.avviksprosent(),
+            avviksprosent = grunnlagForSykepengegrunnlag.avviksprosent(sammenligningsgrunnlag.sammenligningsgrunnlag, subsumsjonObserver),
             opptjening = opptjening,
             medlemskapstatus = medlemskapsvurdering.medlemskapstatus,
             vurdertOk = sykepengegrunnlagOk && inntektsvurderingOk && opptjeningvurderingOk && medlemskapsvurderingOk,

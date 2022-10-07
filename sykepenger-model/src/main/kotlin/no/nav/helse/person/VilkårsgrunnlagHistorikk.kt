@@ -3,12 +3,10 @@ package no.nav.helse.person
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.OverstyrInntekt
 import no.nav.helse.person.Varselkode.RV_IT_16
 import no.nav.helse.person.Varselkode.RV_IT_17
-import no.nav.helse.person.Varselkode.RV_IV_2
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
@@ -206,8 +204,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         }
         internal fun inntektskilde() = sykepengegrunnlag.inntektskilde()
 
-        internal open fun sjekkAvviksprosent(aktivitetslogg: IAktivitetslogg): Boolean = true
-
         internal open fun avvis(tidslinjer: List<Utbetalingstidslinje>, skjæringstidspunkt: LocalDate) {}
 
         final override fun toSpesifikkKontekst() = SpesifikkKontekst(
@@ -300,12 +296,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         vilkårsgrunnlagId: UUID
     ) : VilkårsgrunnlagElement(vilkårsgrunnlagId, skjæringstidspunkt, sykepengegrunnlag) {
         override fun valider(aktivitetslogg: IAktivitetslogg, erForlengelse: Boolean) {
-            sjekkAvviksprosent(aktivitetslogg)
-        }
-
-        override fun sjekkAvviksprosent(aktivitetslogg: IAktivitetslogg): Boolean {
-            if (avviksprosent == null) return true
-            return Inntektsvurdering.sjekkAvvik(avviksprosent, aktivitetslogg, IAktivitetslogg::funksjonellFeil, RV_IV_2)
+            sykepengegrunnlag.validerAvvik(aktivitetslogg, sammenligningsgrunnlag)
         }
 
         override fun accept(vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor) {
@@ -355,20 +346,19 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             hendelse: PersonHendelse,
             sykepengegrunnlag: Sykepengegrunnlag,
             sammenligningsgrunnlag: Sammenligningsgrunnlag,
-            sammenligningsgrunnlagVurdering: Boolean,
-            avviksprosent: Prosent,
             nyOpptjening: Opptjening,
-            meldingsreferanseId: UUID
+            meldingsreferanseId: UUID,
+            subsumsjonObserver: SubsumsjonObserver
         ): Grunnlagsdata {
             val sykepengegrunnlagOk = sykepengegrunnlag.valider(hendelse)
             return Grunnlagsdata(
                 skjæringstidspunkt = skjæringstidspunkt,
                 sykepengegrunnlag = sykepengegrunnlag,
                 sammenligningsgrunnlag = sammenligningsgrunnlag,
-                avviksprosent = avviksprosent,
+                avviksprosent = sykepengegrunnlag.avviksprosent(sammenligningsgrunnlag.sammenligningsgrunnlag, subsumsjonObserver),
                 opptjening = nyOpptjening,
                 medlemskapstatus = medlemskapstatus,
-                vurdertOk = nyOpptjening.erOppfylt() && sykepengegrunnlagOk && sammenligningsgrunnlagVurdering,
+                vurdertOk = nyOpptjening.erOppfylt() && sykepengegrunnlagOk,
                 meldingsreferanseId = meldingsreferanseId,
                 vilkårsgrunnlagId = UUID.randomUUID()
             )

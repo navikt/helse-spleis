@@ -216,7 +216,9 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
 
         håndterYtelser(2.vedtaksperiode)
         håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
 
+        assertTrue(inspektør.periodeErForkastet(2.vedtaksperiode))
         assertTrue(observatør.opprettOppgaveEvent().any { inntektsmeldingId in it.hendelser })
     }
 

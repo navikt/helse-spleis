@@ -3,6 +3,8 @@ package no.nav.helse.person
 import java.time.LocalDate
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.Grunnbeløp.Companion.halvG
+import no.nav.helse.hendelser.Inntektsvurdering
+import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.erOverstyrt
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.harInntekt
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.medInntekt
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.omregnetÅrsinntekt
@@ -11,6 +13,7 @@ import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.valider
 import no.nav.helse.person.Sykepengegrunnlag.Begrensning.ER_6G_BEGRENSET
 import no.nav.helse.person.Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
 import no.nav.helse.person.Sykepengegrunnlag.Begrensning.VURDERT_I_INFOTRYGD
+import no.nav.helse.person.Varselkode.RV_IV_2
 import no.nav.helse.person.Varselkode.RV_SV_1
 import no.nav.helse.person.Varselkode.RV_SV_2
 import no.nav.helse.person.builders.VedtakFattetBuilder
@@ -65,6 +68,9 @@ internal class Sykepengegrunnlag(
     }
 
     internal companion object {
+        private val varsel: IAktivitetslogg.(Varselkode) -> Unit = IAktivitetslogg::varsel
+        private val funksjonellFeil: IAktivitetslogg.(Varselkode) -> Unit = IAktivitetslogg::funksjonellFeil
+
         fun opprett(
             alder: Alder,
             arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
@@ -102,13 +108,34 @@ internal class Sykepengegrunnlag(
     internal fun harNødvendigInntektForVilkårsprøving(organisasjonsnummer: String) =
         arbeidsgiverInntektsopplysninger.harInntekt(organisasjonsnummer)
 
-    internal fun validerInntekt(aktivitetslogg: IAktivitetslogg, organisasjonsnummer: List<String>) {
+    internal fun validerInntekt(
+        aktivitetslogg: IAktivitetslogg,
+        organisasjonsnummer: List<String>
+    ) {
         val manglerInntekt = organisasjonsnummer.filterNot { harNødvendigInntektForVilkårsprøving(it) }.takeUnless { it.isEmpty() } ?: return
         manglerInntekt.forEach {
             aktivitetslogg.info("Mangler inntekt for $it på skjæringstidspunkt $skjæringstidspunkt")
         }
-        aktivitetslogg.funksjonellFeil(RV_SV_2)
+        valideringstrategi()(aktivitetslogg, RV_SV_2)
     }
+
+    internal fun validerAvvik(aktivitetslogg: IAktivitetslogg, sammenligningsgrunnlag: Sammenligningsgrunnlag) {
+        val avvik = avviksprosent(sammenligningsgrunnlag.sammenligningsgrunnlag, SubsumsjonObserver.NullObserver)
+        if (harAkseptabeltAvvik(avvik)) aktivitetslogg.info("Har %.0f %% eller mindre avvik i inntekt (%.2f %%)", Prosent.MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT.prosent(), avvik.prosent())
+        else valideringstrategi()(aktivitetslogg, RV_IV_2)
+    }
+
+    private fun harAkseptabeltAvvik(avvik: Prosent) = avvik <= Prosent.MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT
+
+    private fun valideringstrategi(): IAktivitetslogg.(Varselkode) -> Unit {
+        return when {
+            erOverstyrt() -> varsel
+            else -> funksjonellFeil
+        }
+    }
+
+    private fun erOverstyrt() = deaktiverteArbeidsforhold.isNotEmpty() || arbeidsgiverInntektsopplysninger.erOverstyrt()
+
     internal fun justerGrunnbeløp() =
         Sykepengegrunnlag(
             alder = alder,
@@ -184,6 +211,7 @@ internal class Sykepengegrunnlag(
                  && begrensning == other.begrensning
                  && deaktiverteArbeidsforhold == other.deaktiverteArbeidsforhold
     }
+
     override fun hashCode(): Int {
         var result = sykepengegrunnlag.hashCode()
         result = 31 * result + arbeidsgiverInntektsopplysninger.hashCode()
@@ -192,7 +220,6 @@ internal class Sykepengegrunnlag(
         result = 31 * result + deaktiverteArbeidsforhold.hashCode()
         return result
     }
-
     override fun compareTo(other: Inntekt) = this.sykepengegrunnlag.compareTo(other)
     internal fun er6GBegrenset() = begrensning == ER_6G_BEGRENSET
 

@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e.overstyring
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
@@ -603,17 +602,9 @@ internal class OverstyrArbeidsforholdTest : AbstractEndToEndTest() {
         sammenligningsgrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a2).inspektør.also {
             assertEquals(Inntektshistorikk.SkattComposite::class, it.inntektsopplysning::class)
         }
-        assertVarsel(RV_IV_2, 1.vedtaksperiode.filter(a1)) // takk dent. (fredet kommentar)
         håndterYtelser(1.vedtaksperiode)
-        assertForventetFeil(
-            forklaring = "vi ønsker å gi en tilbakemelding på overstyringen til saksbehandler istedenfor at vi kaster ut perioden",
-            nå = {
-                 assertSisteForkastetPeriodeTilstand(ORGNUMMER, 1.vedtaksperiode, TIL_INFOTRYGD)
-            },
-            ønsket = {
-                assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING)
-            }
-        )
+        assertVarsel(RV_IV_2, 1.vedtaksperiode.filter(a1)) // takk dent. (fredet kommentar)
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING)
     }
 
     @Test

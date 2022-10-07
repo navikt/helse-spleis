@@ -26,7 +26,7 @@ import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
-import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
+import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.økonomi.Inntekt
@@ -82,7 +82,7 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
         )
 
         assertEquals(1, inspektør.vedtaksperiodeTeller)
-        assertEquals(AVVENTER_HISTORIKK, inspektør.sisteTilstand(1.vedtaksperiode))
+        assertEquals(AVVENTER_GODKJENNING, inspektør.sisteTilstand(1.vedtaksperiode))
     }
 
     @Test
@@ -136,7 +136,6 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
             inntekter = tolvMånederMedInntekt(månedslønn),
             arbeidsforhold = ansattSidenStart2017(),
         )
-
         assertEquals(1, inspektør.vedtaksperiodeTeller)
         assertEquals(TIL_INFOTRYGD, inspektør.sisteTilstand(1.vedtaksperiode))
         assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode))
@@ -163,6 +162,7 @@ internal class VilkårsgrunnlagHendelseTest : AbstractPersonTest() {
         person.håndter(inntektsmelding(beregnetInntekt = beregnetInntekt))
         person.håndter(ytelser())
         person.håndter(vilkårsgrunnlag(inntekter = inntekter, inntekterForSykepengegrunnlag = inntekterForSykepengegrunnlag, arbeidsforhold = arbeidsforhold))
+        person.håndter(ytelser())
     }
 
     private fun sykmelding(

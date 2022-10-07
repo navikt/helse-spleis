@@ -41,6 +41,8 @@ internal class ArbeidsgiverInntektsopplysning(
     }
 
     internal companion object {
+        internal fun List<ArbeidsgiverInntektsopplysning>.erOverstyrt() = any { it.inntektsopplysning is Inntektshistorikk.Saksbehandler }
+
         internal fun List<ArbeidsgiverInntektsopplysning>.valider(aktivitetslogg: IAktivitetslogg) {
             map { it.inntektsopplysning }.valider(aktivitetslogg)
         }

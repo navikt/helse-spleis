@@ -303,7 +303,7 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
     fun `revurder inntekt avvik over 25 prosent reduksjon`() {
         nyttVedtak(1.januar, 31.januar, 100.prosent)
         håndterOverstyrInntekt(inntekt = 7000.månedlig, skjæringstidspunkt = 1.januar)
-
+        håndterYtelser(1.vedtaksperiode)
         assertTilstander(
             0,
             START,
@@ -318,18 +318,19 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
             AVSLUTTET,
             AVVENTER_REVURDERING,
             AVVENTER_GJENNOMFØRT_REVURDERING,
-            AVVENTER_HISTORIKK_REVURDERING
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_SIMULERING_REVURDERING
         )
 
         assertVarsel(RV_IV_2, AktivitetsloggFilter.person())
-        assertEquals(1, inspektør.utbetalinger.size)
+        assertEquals(2, inspektør.utbetalinger.size)
     }
 
     @Test
     fun `revurder inntekt avvik over 25 prosent økning`() {
         nyttVedtak(1.januar, 31.januar, 100.prosent)
         håndterOverstyrInntekt(inntekt = 70000.månedlig, skjæringstidspunkt = 1.januar)
-
+        håndterYtelser(1.vedtaksperiode)
         assertTilstander(
             0,
             START,
@@ -344,11 +345,12 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
             AVSLUTTET,
             AVVENTER_REVURDERING,
             AVVENTER_GJENNOMFØRT_REVURDERING,
-            AVVENTER_HISTORIKK_REVURDERING
+            AVVENTER_HISTORIKK_REVURDERING,
+            AVVENTER_SIMULERING_REVURDERING
         )
 
         assertVarsel(RV_IV_2, AktivitetsloggFilter.person())
-        assertEquals(1, inspektør.utbetalinger.size)
+        assertEquals(2, inspektør.utbetalinger.size)
     }
 
     @Test

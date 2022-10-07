@@ -465,11 +465,11 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         nyttVedtak(1.januar, 31.januar, 100.prosent)
         nullstillTilstandsendringer()
         håndterOverstyrInntekt(inntekt = 7000.månedlig, skjæringstidspunkt = 1.januar)
-
-        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+        håndterYtelser(1.vedtaksperiode)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING)
 
         assertVarsel(RV_IV_2, AktivitetsloggFilter.person())
-        assertEquals(1, inspektør.utbetalinger.size)
+        assertEquals(2, inspektør.utbetalinger.size)
     }
 
     @Test
@@ -478,11 +478,12 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
 
         håndterOverstyrInntekt(inntekt = 70000.månedlig, skjæringstidspunkt = 1.januar)
+        håndterYtelser(1.vedtaksperiode)
 
-        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+        assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_GJENNOMFØRT_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING)
 
         assertVarsel(RV_IV_2, AktivitetsloggFilter.person())
-        assertEquals(1, inspektør.utbetalinger.size)
+        assertEquals(2, inspektør.utbetalinger.size)
     }
 
     @Test

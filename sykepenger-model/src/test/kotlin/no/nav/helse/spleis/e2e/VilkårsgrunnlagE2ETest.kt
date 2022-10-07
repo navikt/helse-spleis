@@ -132,6 +132,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
                 }
             }
         ))
+        håndterYtelser(1.vedtaksperiode)
 
         assertFunksjonellFeil("Har mer enn 25 % avvik", 1.vedtaksperiode.filter())
     }
@@ -144,6 +145,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
 
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(1.vedtaksperiode, inntektsvurdering = Inntektsvurdering(emptyList()))
+        håndterYtelser(1.vedtaksperiode)
 
         assertFunksjonellFeil("Har mer enn 25 % avvik", 1.vedtaksperiode.filter())
     }
@@ -167,6 +169,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
                 }
             }
         ))
+        håndterYtelser(1.vedtaksperiode)
 
         assertForkastetPeriodeTilstander(
             1.vedtaksperiode,
@@ -175,6 +178,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
             AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
             TIL_INFOTRYGD
         )
 
@@ -248,6 +252,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
                 }
             }
         ))
+        håndterYtelser(1.vedtaksperiode)
 
         assertFunksjonellFeil("Har mer enn 25 % avvik")
     }
@@ -268,6 +273,7 @@ internal class VilkårsgrunnlagE2ETest : AbstractEndToEndTest() {
                 }
             }
         ))
+        håndterYtelser(2.vedtaksperiode)
         assertTrue(inspektør.periodeErForkastet(2.vedtaksperiode))
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent))

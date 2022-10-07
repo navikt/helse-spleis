@@ -11,7 +11,6 @@ import no.nav.helse.hendelser.Hendelseskontekst
 import no.nav.helse.hendelser.Infotrygdendring
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingReplay
-import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrInntekt
 import no.nav.helse.hendelser.OverstyrTidslinje
@@ -58,7 +57,6 @@ import no.nav.helse.person.Arbeidsgiver.Companion.validerVilkårsgrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.validerYtelserForSkjæringstidspunkt
 import no.nav.helse.person.Arbeidsgiver.Companion.vedtaksperioder
 import no.nav.helse.person.Varselkode.RV_AG_1
-import no.nav.helse.person.Varselkode.RV_IV_2
 import no.nav.helse.person.Varselkode.RV_OV_1
 import no.nav.helse.person.Varselkode.RV_VV_10
 import no.nav.helse.person.Varselkode.RV_VV_11
@@ -836,9 +834,6 @@ class Person private constructor(
 
         val sykepengegrunnlag = beregnSykepengegrunnlag(skjæringstidspunkt, subsumsjonObserver, forklaring, subsumsjon)
         val sammenligningsgrunnlag = beregnSammenligningsgrunnlag(skjæringstidspunkt, subsumsjonObserver)
-        val avviksprosent = sammenligningsgrunnlag.avviksprosent(sykepengegrunnlag, subsumsjonObserver)
-
-        val harAkseptabeltAvvik = Inntektsvurdering.sjekkAvvik(avviksprosent, hendelse, IAktivitetslogg::varsel, RV_IV_2)
 
         val opptjening = beregnOpptjening(skjæringstidspunkt, subsumsjonObserver)
         if (!opptjening.erOppfylt()) hendelse.varsel(RV_OV_1)
@@ -849,10 +844,9 @@ class Person private constructor(
                     hendelse = hendelse,
                     sykepengegrunnlag = sykepengegrunnlag,
                     sammenligningsgrunnlag = sammenligningsgrunnlag,
-                    sammenligningsgrunnlagVurdering = harAkseptabeltAvvik,
-                    avviksprosent = avviksprosent,
                     nyOpptjening = opptjening,
-                    meldingsreferanseId = hendelse.meldingsreferanseId()
+                    meldingsreferanseId = hendelse.meldingsreferanseId(),
+                    subsumsjonObserver = subsumsjonObserver
                 )
                 hendelse.kontekst(grunnlagselement)
                 vilkårsgrunnlagHistorikk.lagre(grunnlagselement)

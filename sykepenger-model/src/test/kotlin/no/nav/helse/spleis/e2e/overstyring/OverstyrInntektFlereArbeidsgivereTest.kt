@@ -20,11 +20,10 @@ import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
-import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
+import no.nav.helse.person.Varselkode.RV_IV_2
 import no.nav.helse.person.Varselkode.RV_SV_1
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
-import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
 import no.nav.helse.spleis.e2e.assertInntektForDato
@@ -321,13 +320,8 @@ internal class OverstyrInntektFlereArbeidsgivereTest: AbstractEndToEndTest() {
 
         nullstillTilstandsendringer()
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        assertFunksjonellFeil("Har mer enn 25 % avvik", 1.vedtaksperiode.filter())
-        assertForkastetPeriodeTilstander(
-            1.vedtaksperiode,
-            AVVENTER_HISTORIKK,
-            TIL_INFOTRYGD,
-            orgnummer = a1
-        )
+        assertVarsel(RV_IV_2, 1.vedtaksperiode.filter())
+        assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, orgnummer = a1)
     }
 
     @Test
@@ -367,19 +361,9 @@ internal class OverstyrInntektFlereArbeidsgivereTest: AbstractEndToEndTest() {
 
         nullstillTilstandsendringer()
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        assertFunksjonellFeil("Har mer enn 25 % avvik", 1.vedtaksperiode.filter())
-        assertForkastetPeriodeTilstander(
-            1.vedtaksperiode,
-            AVVENTER_HISTORIKK,
-            TIL_INFOTRYGD,
-            orgnummer = a1
-        )
-        assertForkastetPeriodeTilstander(
-            1.vedtaksperiode,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            TIL_INFOTRYGD,
-            orgnummer = a2
-        )
+        assertVarsel(RV_IV_2, 1.vedtaksperiode.filter())
+        assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, orgnummer = a1)
+        assertTilstander(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
     }
 
     @Test

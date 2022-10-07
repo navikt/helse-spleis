@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e.overstyring
 
 import java.time.LocalDate
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
@@ -20,14 +19,11 @@ import no.nav.helse.person.Inntektskilde.FLERE_ARBEIDSGIVERE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
-import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.Varselkode.RV_IV_2
 import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
-import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
-import no.nav.helse.spleis.e2e.assertFunksjonellFeil
-import no.nav.helse.spleis.e2e.assertIngenVarsel
+import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
 import no.nav.helse.spleis.e2e.assertInntektForDato
 import no.nav.helse.spleis.e2e.assertLogiskFeil
 import no.nav.helse.spleis.e2e.assertTilstander
@@ -258,20 +254,10 @@ internal class OverstyrGhostInntektTest : AbstractEndToEndTest() {
 
         nullstillTilstandsendringer()
         håndterYtelser(1.vedtaksperiode, orgnummer = a1)
-        assertForkastetPeriodeTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK, TIL_INFOTRYGD, orgnummer = a1)
+        assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, orgnummer = a1)
 
-        assertForventetFeil(
-            forklaring = "Burde ha enten warning eller error, https://trello.com/c/gk0F7acS",
-            nå = {
-                assertVarsel(RV_IV_2)
-                assertFunksjonellFeil("Har mer enn 25 % avvik")
-            },
-            ønsket = {
-                // Eller omvendt om det er det vi ønsker å gå for
-                assertIngenVarsel(RV_IV_2)
-                assertFunksjonellFeil("Har mer enn 25 % avvik")
-            }
-        )
+        assertVarsel(RV_IV_2)
+        assertIngenFunksjonelleFeil()
     }
 
     private fun tilOverstyring(

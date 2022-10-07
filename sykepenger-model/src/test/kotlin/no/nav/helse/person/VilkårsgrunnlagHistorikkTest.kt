@@ -189,7 +189,7 @@ internal class VilkårsgrunnlagHistorikkTest {
         historikk.lagre(VilkårsgrunnlagHistorikk.Grunnlagsdata(
             skjæringstidspunkt = 1.januar,
             sykepengegrunnlag = inntekt.sykepengegrunnlag(ORGNR),
-            sammenligningsgrunnlag = Sammenligningsgrunnlag(inntekt * 1.3, emptyList()),
+            sammenligningsgrunnlag = Sammenligningsgrunnlag(inntekt * 1.35, emptyList()),
             avviksprosent = 30.prosent,
             opptjening = Opptjening(arbeidsforholdFraHistorikk, 1.januar, NullObserver),
             medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
