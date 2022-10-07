@@ -79,6 +79,7 @@ import no.nav.helse.person.Varselkode.RV_RV_2
 import no.nav.helse.person.Varselkode.RV_RV_3
 import no.nav.helse.person.Varselkode.RV_SI_2
 import no.nav.helse.person.Varselkode.RV_SV_2
+import no.nav.helse.person.Varselkode.RV_SV_3
 import no.nav.helse.person.Varselkode.RV_SØ_11
 import no.nav.helse.person.Varselkode.RV_SØ_12
 import no.nav.helse.person.Varselkode.RV_SØ_13
@@ -528,15 +529,14 @@ internal class Vedtaksperiode private constructor(
         tilstand.entering(this, event)
     }
 
-    private fun håndterInntektsmelding(hendelse: Inntektsmelding, nesteTilstand: Vedtaksperiodetilstand
-    ) {
+    private fun håndterInntektsmelding(hendelse: Inntektsmelding, nesteTilstand: () -> Vedtaksperiodetilstand) {
         periode = hendelse.oppdaterFom(periode)
         oppdaterHistorikk(hendelse)
         inntektsmeldingInfo = arbeidsgiver.addInntektsmelding(skjæringstidspunkt, hendelse, jurist())
         hendelse.valider(periode, skjæringstidspunkt, finnArbeidsgiverperiode(), jurist())
         hendelse.info("Fullført behandling av inntektsmelding")
         if (hendelse.harFunksjonelleFeilEllerVerre()) return forkast(hendelse)
-        tilstand(hendelse, nesteTilstand)
+        tilstand(hendelse, nesteTilstand())
     }
 
     private fun oppdaterHistorikk(hendelse: SykdomstidslinjeHendelse) {
@@ -1095,7 +1095,7 @@ internal class Vedtaksperiode private constructor(
         ) = vedtaksperiode.revurderArbeidsforhold(overstyrArbeidsforhold, subsumsjon)
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
-            vedtaksperiode.håndterInntektsmelding(inntektsmelding, this)
+            vedtaksperiode.håndterInntektsmelding(inntektsmelding) {this}
             vedtaksperiode.trengerIkkeInntektsmelding(inntektsmelding.hendelseskontekst())
             vedtaksperiode.person.gjenopptaBehandling(inntektsmelding)
         }
@@ -1145,7 +1145,7 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
             sikkerlogg.info("Vedtaksperiode {} i tilstand {} overlappet med inntektsmelding {}",
                 keyValue("vedtaksperiodeId", vedtaksperiode.id), keyValue("tilstand", type), keyValue("meldingsreferanseId", inntektsmelding.meldingsreferanseId()))
-            vedtaksperiode.håndterInntektsmelding(inntektsmelding, this)
+            vedtaksperiode.håndterInntektsmelding(inntektsmelding) {this}
             vedtaksperiode.person.startRevurdering(vedtaksperiode, inntektsmelding)
         }
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
@@ -1252,7 +1252,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
-            vedtaksperiode.håndterInntektsmelding(inntektsmelding, this)
+            vedtaksperiode.håndterInntektsmelding(inntektsmelding) {this}
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, hendelse: OverstyrInntekt) {
@@ -1381,7 +1381,12 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
-            vedtaksperiode.håndterInntektsmelding(inntektsmelding, AvventerBlokkerendePeriode)
+            vedtaksperiode.håndterInntektsmelding(inntektsmelding) {
+                when {
+                    !vedtaksperiode.arbeidsgiver.kanBeregneSykepengegrunnlag(vedtaksperiode.skjæringstidspunkt) -> AvsluttetUtenUtbetaling
+                    else -> AvventerBlokkerendePeriode
+                }
+            }
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
@@ -1466,6 +1471,10 @@ internal class Vedtaksperiode private constructor(
                 !vedtaksperiode.forventerInntekt() -> vedtaksperiode.tilstand(hendelse, AvsluttetUtenUtbetaling)
                 vedtaksperiode.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag() -> {
                     hendelse.funksjonellFeil(RV_SV_2)
+                    vedtaksperiode.forkast(hendelse)
+                }
+                !vedtaksperiode.arbeidsgiver.kanBeregneSykepengegrunnlag(vedtaksperiode.skjæringstidspunkt) -> {
+                    hendelse.funksjonellFeil(RV_SV_3)
                     vedtaksperiode.forkast(hendelse)
                 }
                 !arbeidsgivere.harNødvendigInntektForVilkårsprøving(vedtaksperiode.skjæringstidspunkt) -> return hendelse.info(
@@ -1880,6 +1889,9 @@ internal class Vedtaksperiode private constructor(
             hendelse: IAktivitetslogg,
             infotrygdhistorikk: Infotrygdhistorikk
         ) {
+            if (person.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt) == null) return vedtaksperiode.tilstand(hendelse, AvventerBlokkerendePeriode) {
+                hendelse.info("Mangler vilkårsgrunnlag for ${vedtaksperiode.skjæringstidspunkt}")
+            }
             if (vedtaksperiode.utbetalinger.erHistorikkEndretSidenBeregning(infotrygdhistorikk)) return vedtaksperiode.tilstand(
                 hendelse,
                 AvventerHistorikk
@@ -2207,7 +2219,7 @@ internal class Vedtaksperiode private constructor(
                 return vedtaksperiode.emitVedtaksperiodeEndret(inntektsmelding) // på stedet hvil!
             }
 
-            vedtaksperiode.håndterInntektsmelding(inntektsmelding, this) // håndterInntektsmelding krever tilstandsendring, men vi må avvente til vi starter revurdering
+            vedtaksperiode.håndterInntektsmelding(inntektsmelding) {this} // håndterInntektsmelding krever tilstandsendring, men vi må avvente til vi starter revurdering
             if (inntektsmelding.harFunksjonelleFeilEllerVerre()) return
 
             if (!vedtaksperiode.forventerInntekt()) {

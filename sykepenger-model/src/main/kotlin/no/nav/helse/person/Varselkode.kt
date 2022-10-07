@@ -101,6 +101,7 @@ enum class Varselkode(
     // SV: Sykepengegrunnlagsvurdering
     RV_SV_1("Perioden er avslått på grunn av at inntekt er under krav til minste sykepengegrunnlag"),
     RV_SV_2("Minst en arbeidsgiver inngår ikke i sykepengegrunnlaget"),
+    RV_SV_3("Mangler inntekt for sykepengegrunnlag som følge av at skjæringstidspunktet har endret seg"),
 
     // AY: Andre ytelser
     RV_AY_3("Bruker har mottatt AAP innenfor 6 måneder før skjæringstidspunktet. Kontroller at brukeren har rett til sykepenger"),

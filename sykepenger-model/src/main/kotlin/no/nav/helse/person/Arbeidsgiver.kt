@@ -50,7 +50,6 @@ import no.nav.helse.person.Vedtaksperiode.Companion.kanStarteRevurdering
 import no.nav.helse.person.Vedtaksperiode.Companion.lagRevurdering
 import no.nav.helse.person.Vedtaksperiode.Companion.medSkjæringstidspunkt
 import no.nav.helse.person.Vedtaksperiode.Companion.nåværendeVedtaksperiode
-import no.nav.helse.person.Vedtaksperiode.Companion.periode
 import no.nav.helse.person.Vedtaksperiode.Companion.senerePerioderPågående
 import no.nav.helse.person.Vedtaksperiode.Companion.skjæringstidspunktperiode
 import no.nav.helse.person.Vedtaksperiode.Companion.startRevurdering
@@ -324,7 +323,7 @@ internal class Arbeidsgiver private constructor(
     private fun harNødvendigInntektITidligereBeregnetSykepengegrunnlag(skjæringstidspunkt: LocalDate) =
         person.vilkårsgrunnlagFor(skjæringstidspunkt)?.harNødvendigInntektForVilkårsprøving(organisasjonsnummer)
 
-    private fun kanBeregneSykepengegrunnlag(skjæringstidspunkt: LocalDate) = beregnSykepengegrunnlag(skjæringstidspunkt) != null
+    internal fun kanBeregneSykepengegrunnlag(skjæringstidspunkt: LocalDate) = beregnSykepengegrunnlag(skjæringstidspunkt) != null
     private fun beregnSykepengegrunnlag(skjæringstidspunkt: LocalDate, block: (inntekstopplysning: Inntektshistorikk.Inntektsopplysning?) -> Unit = {}) : ArbeidsgiverInntektsopplysning? {
         val førsteFraværsdag = finnFørsteFraværsdag(skjæringstidspunkt)
         val inntektsopplysning = inntektshistorikk.omregnetÅrsinntekt(skjæringstidspunkt, førsteFraværsdag, arbeidsforholdhistorikk)
@@ -1017,8 +1016,10 @@ internal class Arbeidsgiver private constructor(
         vedtaksperioder.any(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt))
 
     internal fun finnFørsteFraværsdag(skjæringstidspunkt: LocalDate): LocalDate? {
-        if (!harSykdomFor(skjæringstidspunkt)) return null
-        return sykdomstidslinje().subset(finnSammenhengendePeriode(skjæringstidspunkt).periode()).sisteSkjæringstidspunkt()
+        val førstePeriodeMedUtbetaling = vedtaksperioder.firstOrNull(SKAL_INNGÅ_I_SYKEPENGEGRUNNLAG(skjæringstidspunkt))
+            ?: vedtaksperioder.firstOrNull(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt))
+            ?: return null
+        return sykdomstidslinje().subset(førstePeriodeMedUtbetaling.periode().oppdaterFom(skjæringstidspunkt)).sisteSkjæringstidspunkt()
     }
 
     internal fun periodetype(periode: Periode): Periodetype {
