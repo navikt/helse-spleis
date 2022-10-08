@@ -57,9 +57,7 @@ import no.nav.helse.person.Arbeidsgiver.Companion.validerVilkårsgrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.validerYtelserForSkjæringstidspunkt
 import no.nav.helse.person.Arbeidsgiver.Companion.vedtaksperioder
 import no.nav.helse.person.Varselkode.RV_AG_1
-import no.nav.helse.person.Varselkode.RV_OV_1
 import no.nav.helse.person.Varselkode.RV_VV_10
-import no.nav.helse.person.Varselkode.RV_VV_11
 import no.nav.helse.person.Varselkode.RV_VV_12
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.etterlevelse.MaskinellJurist
@@ -411,8 +409,6 @@ class Person private constructor(
         observers.forEach { it.annullering(hendelseskontekst, event) }
     }
 
-    internal fun nyInntekt(hendelse: OverstyrInntekt) = finnArbeidsgiver(hendelse).addInntekt(hendelse)
-
     internal fun vedtaksperiodePåminnet(påminnelse: Påminnelse) {
         observers.forEach { it.vedtaksperiodePåminnet(påminnelse.hendelseskontekst(), påminnelse) }
     }
@@ -631,13 +627,13 @@ class Person private constructor(
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag)
     }
 
-    internal fun lagreOverstyrArbeidsforhold(overstyrArbeidsforhold: OverstyrArbeidsforhold, subsumsjonObserver: SubsumsjonObserver) {
+    private fun lagreOverstyrArbeidsforhold(overstyrArbeidsforhold: OverstyrArbeidsforhold, subsumsjonObserver: SubsumsjonObserver) {
         arbeidsgivere.forEach { arbeidsgiver ->
             overstyrArbeidsforhold.lagre(arbeidsgiver, subsumsjonObserver)
         }
     }
 
-    internal fun lagreInntekt(hendelse: OverstyrInntekt) {
+    private fun lagreInntekt(hendelse: OverstyrInntekt) {
         val arbeidsgiver = finnArbeidsgiver(hendelse)
         arbeidsgiver.addInntekt(hendelse)
     }
@@ -825,36 +821,32 @@ class Person private constructor(
     }
 
     internal fun vilkårsprøvEtterNyInformasjonFraSaksbehandler(
-        hendelse: PersonHendelse,
+        hendelse: OverstyrArbeidsforhold,
         skjæringstidspunkt: LocalDate,
-        subsumsjonObserver: SubsumsjonObserver,
-        forklaring: String?,
-        subsumsjon: Subsumsjon?
+        subsumsjonObserver: SubsumsjonObserver
     ) {
-
-        val sykepengegrunnlag = beregnSykepengegrunnlag(skjæringstidspunkt, subsumsjonObserver, forklaring, subsumsjon)
-        val sammenligningsgrunnlag = beregnSammenligningsgrunnlag(skjæringstidspunkt, subsumsjonObserver)
-
+        val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) ?: return hendelse.funksjonellFeil(RV_VV_10)
+        lagreOverstyrArbeidsforhold(hendelse, subsumsjonObserver)
         val opptjening = beregnOpptjening(skjæringstidspunkt, subsumsjonObserver)
-        if (!opptjening.erOppfylt()) hendelse.varsel(RV_OV_1)
+        val sykepengegrunnlag = beregnSykepengegrunnlag(skjæringstidspunkt, subsumsjonObserver, null, null)
+        nyttVilkårsgrunnlag(hendelse, grunnlag.overstyrArbeidsforhold(hendelse, sykepengegrunnlag, opptjening, subsumsjonObserver))
+    }
 
-        when (val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt)) {
-            is VilkårsgrunnlagHistorikk.Grunnlagsdata -> {
-                val grunnlagselement = grunnlag.kopierGrunnlagsdataMed(
-                    hendelse = hendelse,
-                    sykepengegrunnlag = sykepengegrunnlag,
-                    sammenligningsgrunnlag = sammenligningsgrunnlag,
-                    nyOpptjening = opptjening,
-                    meldingsreferanseId = hendelse.meldingsreferanseId(),
-                    subsumsjonObserver = subsumsjonObserver
-                )
-                hendelse.kontekst(grunnlagselement)
-                vilkårsgrunnlagHistorikk.lagre(grunnlagselement)
-            }
+    internal fun vilkårsprøvEtterNyInformasjonFraSaksbehandler(
+        hendelse: OverstyrInntekt,
+        skjæringstidspunkt: LocalDate,
+        subsumsjonObserver: SubsumsjonObserver
+    ) {
+        val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) ?: return hendelse.funksjonellFeil(RV_VV_10)
+        lagreInntekt(hendelse)
+        val sykepengegrunnlag = beregnSykepengegrunnlag(skjæringstidspunkt, subsumsjonObserver, hendelse.forklaring, hendelse.subsumsjon)
+        nyttVilkårsgrunnlag(hendelse, grunnlag.overstyrInntekt(hendelse, sykepengegrunnlag, subsumsjonObserver))
+    }
 
-            is VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag -> hendelse.funksjonellFeil(RV_VV_11)
-            else -> hendelse.funksjonellFeil(RV_VV_10)
-        }
+    private fun nyttVilkårsgrunnlag(hendelse: IAktivitetslogg, grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata?) {
+        if (grunnlagsdata == null) return
+        hendelse.kontekst(grunnlagsdata)
+        vilkårsgrunnlagHistorikk.lagre(grunnlagsdata)
     }
 
     private var gjenopptaBehandlingNy = false

@@ -822,7 +822,7 @@ internal class Arbeidsgiver private constructor(
     internal fun håndter(overstyrArbeidsforhold: OverstyrArbeidsforhold): Boolean {
         overstyrArbeidsforhold.kontekst(this)
         vedtaksperioder.forEach { vedtaksperiode ->
-            if (vedtaksperiode.håndter(overstyrArbeidsforhold, null)) {
+            if (vedtaksperiode.håndter(overstyrArbeidsforhold)) {
                 return true
             }
         }
