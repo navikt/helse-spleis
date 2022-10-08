@@ -1,4 +1,4 @@
-package no.nav.helse
+package no.nav.helse.opprydding
 
 import javax.sql.DataSource
 import kotliquery.TransactionalSession

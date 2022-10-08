@@ -1,4 +1,4 @@
-package no.nav.helse
+package no.nav.helse.opprydding
 
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext

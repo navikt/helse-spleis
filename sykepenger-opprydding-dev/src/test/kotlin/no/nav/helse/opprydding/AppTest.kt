@@ -1,4 +1,4 @@
-package no.nav.helse
+package no.nav.helse.opprydding
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource

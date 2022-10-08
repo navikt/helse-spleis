@@ -1,4 +1,4 @@
-val mainClass = "no.nav.helse.AppKt"
+val mainClass = "no.nav.helse.opprydding.AppKt"
 
 repositories {
     mavenCentral()
