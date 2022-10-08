@@ -10,7 +10,21 @@
   },
   "arbeidsgivere": [
     {
-      "inntektshistorikk": [],
+      "inntektshistorikk": [
+        {
+          "id": "ca0f9224-5d35-4d0a-9065-2f3ff061a6fe",
+          "inntektsopplysninger": [
+            {
+              "id": "cbf33451-6fda-4364-a1a8-d808d37f30fb",
+              "dato": "2018-01-01",
+              "hendelseId": "7d228eea-34b8-45f5-823f-cb8d63b27268",
+              "beløp": 31000.0,
+              "kilde": "INNTEKTSMELDING",
+              "tidsstempel": "2022-08-31T10:10:43.425835"
+            }
+          ]
+        }
+      ],
       "sykdomshistorikk": [
         {
           "id": "7e8a66e8-8d94-4ef8-a5ab-7d53b639c7a4",

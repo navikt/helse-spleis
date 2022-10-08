@@ -1479,7 +1479,7 @@ internal class Vedtaksperiode private constructor(
                     hendelse.funksjonellFeil(RV_SV_2)
                     vedtaksperiode.forkast(hendelse)
                 }
-                !vedtaksperiode.arbeidsgiver.kanBeregneSykepengegrunnlag(vedtaksperiode.skjæringstidspunkt) -> {
+                !vedtaksperiode.arbeidsgiver.harNødvendigInntektForVilkårsprøving(vedtaksperiode.skjæringstidspunkt) -> {
                     hendelse.funksjonellFeil(RV_SV_3)
                     vedtaksperiode.forkast(hendelse)
                 }
