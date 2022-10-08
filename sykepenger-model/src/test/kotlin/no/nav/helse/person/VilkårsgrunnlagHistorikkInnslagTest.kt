@@ -4,9 +4,12 @@ import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Medlemskapsvurdering
+import no.nav.helse.hendelser.OverstyrArbeidsforhold
+import no.nav.helse.hendelser.OverstyrInntekt
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.person.etterlevelse.MaskinellJurist
+import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.sykepengegrunnlag
 import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.assertNotNull
@@ -153,5 +156,17 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
         get() = object : VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement(UUID.randomUUID(), 1.januar, Inntekt.INGEN.sykepengegrunnlag) {
             override fun accept(vilkårsgrunnlagHistorikkVisitor: VilkårsgrunnlagHistorikkVisitor) {}
             override fun vilkårsgrunnlagtype() = "testgrunnlag"
+            override fun overstyrInntekt(
+                hendelse: OverstyrInntekt,
+                sykepengegrunnlag: Sykepengegrunnlag,
+                subsumsjonObserver: SubsumsjonObserver
+            ): VilkårsgrunnlagHistorikk.Grunnlagsdata? = null
+
+            override fun overstyrArbeidsforhold(
+                hendelse: OverstyrArbeidsforhold,
+                sykepengegrunnlag: Sykepengegrunnlag,
+                opptjening: Opptjening,
+                subsumsjonObserver: SubsumsjonObserver
+            ): VilkårsgrunnlagHistorikk.Grunnlagsdata? = null
         }
 }
