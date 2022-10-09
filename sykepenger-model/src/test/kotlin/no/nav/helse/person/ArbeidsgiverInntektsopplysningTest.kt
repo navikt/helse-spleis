@@ -9,6 +9,8 @@ import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.inspectors.SubsumsjonInspektør
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
+import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.aktiver
+import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.deaktiver
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.medInntekt
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.overstyrInntekter
 import no.nav.helse.person.Inntektshistorikk.Skatt.Inntekttype.LØNNSINNTEKT
@@ -25,6 +27,7 @@ import no.nav.helse.økonomi.Økonomi
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 internal class ArbeidsgiverInntektsopplysningTest {
 
@@ -88,6 +91,81 @@ internal class ArbeidsgiverInntektsopplysningTest {
                 "beregnetGrunnlagForSykepengegrunnlagPrÅr" to overstyrtBeløp.reflection { årlig, _, _, _ -> årlig},
                 "beregnetGrunnlagForSykepengegrunnlagPrMåned" to overstyrtBeløp.reflection { _, månedlig, _, _ -> månedlig }
             )
+        )
+    }
+
+    @Test
+    fun `deaktiverer en inntekt`() {
+        val skjæringstidspunkt = 1.januar
+        val a1Opplysning = ArbeidsgiverInntektsopplysning("a1", Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), skjæringstidspunkt, UUID.randomUUID(), 1000.månedlig))
+        val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", Inntektshistorikk.IkkeRapportert(UUID.randomUUID(), skjæringstidspunkt))
+
+        val opprinnelig = listOf(a1Opplysning, a2Opplysning)
+        val (aktive, deaktiverte) = opprinnelig.deaktiver(emptyList(), "a2", "Denne må bort", NullObserver)
+        assertEquals(a1Opplysning, aktive.single())
+        assertEquals(a2Opplysning, deaktiverte.single())
+
+        val (nyDeaktivert, nyAktivert) = deaktiverte.aktiver(aktive, "a2", "Jeg gjorde en feil, jeg angrer!", NullObserver)
+        assertEquals(0, nyDeaktivert.size)
+        assertEquals(opprinnelig, nyAktivert)
+
+        assertThrows<RuntimeException> { opprinnelig.deaktiver(emptyList(), "a3", "jeg vil deaktivere noe som ikke finnes", NullObserver) }
+        assertThrows<RuntimeException> { emptyList<ArbeidsgiverInntektsopplysning>().aktiver(opprinnelig, "a3", "jeg vil aktivere noe som ikke finnes", NullObserver) }
+    }
+
+    @Test
+    fun `subsummerer deaktivering`() {
+        val skjæringstidspunkt = 1.januar
+        val a1Opplysning = ArbeidsgiverInntektsopplysning("a1", Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), skjæringstidspunkt, UUID.randomUUID(), 1000.månedlig))
+        val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", Inntektshistorikk.IkkeRapportert(UUID.randomUUID(), skjæringstidspunkt))
+
+        val jurist = MaskinellJurist()
+        val opprinnelig = listOf(a1Opplysning, a2Opplysning)
+        val (aktive, deaktiverte) = opprinnelig.deaktiver(emptyList(), "a2", "Denne må bort", jurist)
+        assertEquals(a1Opplysning, aktive.single())
+        assertEquals(a2Opplysning, deaktiverte.single())
+        SubsumsjonInspektør(jurist).assertOppfylt(
+            paragraf = Paragraf.PARAGRAF_8_15,
+            versjon = LocalDate.of(1998, 12, 18),
+            ledd = null,
+            punktum = null,
+            bokstav = null,
+            input = mapOf(
+                "organisasjonsnummer" to "a2",
+                "skjæringstidspunkt" to skjæringstidspunkt,
+                "inntekterSisteTreMåneder" to emptyList<Any>(),
+                "forklaring" to "Denne må bort"
+            ),
+            output = mapOf("arbeidsforholdAvbrutt" to "a2")
+        )
+    }
+
+    @Test
+    fun `subsummerer aktivering`() {
+        val skjæringstidspunkt = 1.januar
+        val a1Opplysning = ArbeidsgiverInntektsopplysning("a1", Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), skjæringstidspunkt, UUID.randomUUID(), 1000.månedlig))
+        val a2Opplysning = ArbeidsgiverInntektsopplysning("a2", Inntektshistorikk.IkkeRapportert(UUID.randomUUID(), skjæringstidspunkt))
+
+        val jurist = MaskinellJurist()
+        val opprinneligAktive = listOf(a1Opplysning)
+        val opprinneligDeaktiverte = listOf(a2Opplysning)
+
+        val (deaktiverte, aktive) = opprinneligDeaktiverte.aktiver(opprinneligAktive, "a2", "Denne må tilbake", jurist)
+        assertEquals(listOf(a1Opplysning, a2Opplysning), aktive)
+        assertEquals(0, deaktiverte.size)
+        SubsumsjonInspektør(jurist).assertIkkeOppfylt(
+            paragraf = Paragraf.PARAGRAF_8_15,
+            versjon = LocalDate.of(1998, 12, 18),
+            ledd = null,
+            punktum = null,
+            bokstav = null,
+            input = mapOf(
+                "organisasjonsnummer" to "a2",
+                "skjæringstidspunkt" to skjæringstidspunkt,
+                "inntekterSisteTreMåneder" to emptyList<Any>(),
+                "forklaring" to "Denne må tilbake"
+            ),
+            output = mapOf("aktivtArbeidsforhold" to "a2")
         )
     }
 

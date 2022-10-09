@@ -34,6 +34,10 @@ internal class ArbeidsgiverInntektsopplysning(
         inntektsopplysning.subsumerSykepengegrunnlag(subsumsjonObserver, orgnummer, startdato)
     }
 
+    private fun subsummerArbeidsforhold(forklaring: String, oppfylt: Boolean, subsumsjonObserver: SubsumsjonObserver) {
+        inntektsopplysning.subsumerArbeidsforhold(subsumsjonObserver, orgnummer, forklaring, oppfylt)
+    }
+
     override fun equals(other: Any?): Boolean {
         if (other !is ArbeidsgiverInntektsopplysning) return false
         return orgnummer == other.orgnummer && inntektsopplysning == other.inntektsopplysning
@@ -46,6 +50,21 @@ internal class ArbeidsgiverInntektsopplysning(
     }
 
     internal companion object {
+        internal fun List<ArbeidsgiverInntektsopplysning>.deaktiver(deaktiverte: List<ArbeidsgiverInntektsopplysning>, orgnummer: String, forklaring: String, subsumsjonObserver: SubsumsjonObserver) =
+            this.fjernInntekt(deaktiverte, orgnummer, forklaring, true, subsumsjonObserver)
+
+        internal fun List<ArbeidsgiverInntektsopplysning>.aktiver(aktiverte: List<ArbeidsgiverInntektsopplysning>, orgnummer: String, forklaring: String, subsumsjonObserver: SubsumsjonObserver) =
+            this.fjernInntekt(aktiverte, orgnummer, forklaring, false, subsumsjonObserver)
+
+        // flytter inntekt for *orgnummer* fra *this* til *deaktiverte*
+        // aktive.deaktiver(deaktiverte, orgnummer) er direkte motsetning til deaktiverte.deaktiver(aktive, orgnummer)
+        private fun List<ArbeidsgiverInntektsopplysning>.fjernInntekt(deaktiverte: List<ArbeidsgiverInntektsopplysning>, orgnummer: String, forklaring: String, oppfylt: Boolean, subsumsjonObserver: SubsumsjonObserver): Pair<List<ArbeidsgiverInntektsopplysning>, List<ArbeidsgiverInntektsopplysning>> {
+            val fjernet = this.single { it.orgnummer == orgnummer }
+            val aktive = this.filterNot { it.orgnummer == orgnummer }
+            fjernet.subsummerArbeidsforhold(forklaring, oppfylt, subsumsjonObserver)
+            return aktive to (deaktiverte + fjernet)
+        }
+
         // overskriver eksisterende verdier i *this* med verdier fra *other*,
         // og ignorerer ting i *other* som ikke finnes i *this*
         internal fun List<ArbeidsgiverInntektsopplysning>.overstyrInntekter(opptjening: Opptjening, other: List<ArbeidsgiverInntektsopplysning>, subsumsjonObserver: SubsumsjonObserver) = this
