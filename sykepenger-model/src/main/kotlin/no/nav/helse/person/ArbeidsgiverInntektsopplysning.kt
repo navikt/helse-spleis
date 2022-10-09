@@ -29,6 +29,11 @@ internal class ArbeidsgiverInntektsopplysning(
         visitor.postVisitArbeidsgiverInntektsopplysning(this, orgnummer)
     }
 
+    private fun subsummer(opptjening: Opptjening, subsumsjonObserver: SubsumsjonObserver) {
+        val startdato = opptjening.startdatoFor(orgnummer)
+        inntektsopplysning.subsumerSykepengegrunnlag(subsumsjonObserver, orgnummer, startdato)
+    }
+
     override fun equals(other: Any?): Boolean {
         if (other !is ArbeidsgiverInntektsopplysning) return false
         return orgnummer == other.orgnummer && inntektsopplysning == other.inntektsopplysning
@@ -41,6 +46,11 @@ internal class ArbeidsgiverInntektsopplysning(
     }
 
     internal companion object {
+        // overskriver eksisterende verdier i *this* med verdier fra *other*,
+        // og ignorerer ting i *other* som ikke finnes i *this*
+        internal fun List<ArbeidsgiverInntektsopplysning>.overstyrInntekter(opptjening: Opptjening, other: List<ArbeidsgiverInntektsopplysning>, subsumsjonObserver: SubsumsjonObserver) = this
+            .map { inntekt -> other.singleOrNull { it.orgnummer == inntekt.orgnummer } ?: inntekt }
+            .onEach { it.subsummer(opptjening, subsumsjonObserver) }
         internal fun List<ArbeidsgiverInntektsopplysning>.erOverstyrt() = any { it.inntektsopplysning is Inntektshistorikk.Saksbehandler }
 
         internal fun List<ArbeidsgiverInntektsopplysning>.valider(aktivitetslogg: IAktivitetslogg) {
