@@ -2,18 +2,49 @@ package no.nav.helse.person
 
 import no.nav.helse.april
 import no.nav.helse.desember
+import no.nav.helse.februar
 import no.nav.helse.inspectors.SubsumsjonInspektør
 import no.nav.helse.januar
 import no.nav.helse.juni
 import no.nav.helse.mai
+import no.nav.helse.mars
 import no.nav.helse.oktober
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class OpptjeningTest {
+
+    @Test
+    fun `startdato for manglende arbeidsforhold`() {
+        val arbeidsforhold = listOf(Opptjening.ArbeidsgiverOpptjeningsgrunnlag("a1", listOf(
+            Arbeidsforholdhistorikk.Arbeidsforhold(1.januar, null, false)
+        )))
+        val opptjening = Opptjening(arbeidsforhold, 1.mars, MaskinellJurist())
+        assertNull(opptjening.startdatoFor("a2"))
+    }
+
+    @Test
+    fun `startdato for deaktivert arbeidsforhold`() {
+        val arbeidsforhold = listOf(Opptjening.ArbeidsgiverOpptjeningsgrunnlag("a1", listOf(
+            Arbeidsforholdhistorikk.Arbeidsforhold(1.januar, null, true)
+        )))
+        val opptjening = Opptjening(arbeidsforhold, 1.mars, MaskinellJurist())
+        assertEquals(1.mars, opptjening.startdatoFor("a1"))
+    }
+
+    @Test
+    fun `startdato for aktivt arbeidsforhold`() {
+        val arbeidsforhold = listOf(Opptjening.ArbeidsgiverOpptjeningsgrunnlag("a1", listOf(
+            Arbeidsforholdhistorikk.Arbeidsforhold(1.februar, null, false),
+            Arbeidsforholdhistorikk.Arbeidsforhold(1.januar, 31.januar, false),
+        )))
+        val opptjening = Opptjening(arbeidsforhold, 1.mars, MaskinellJurist())
+        assertEquals(1.januar, opptjening.startdatoFor("a1"))
+    }
 
     @Test
     fun `Tom liste med arbeidsforhold betyr at du ikke oppfyller opptjeningskrav`() {

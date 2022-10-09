@@ -272,7 +272,7 @@ internal data class PersonData(
                 sykepengegrunnlag = sykepengegrunnlag.parseSykepengegrunnlag(alder, skjæringstidspunkt),
                 sammenligningsgrunnlag = sammenligningsgrunnlag!!.parseSammenligningsgrunnlag(),
                 avviksprosent = avviksprosent?.ratio,
-                opptjening = opptjening!!.tilOpptjening(),
+                opptjening = opptjening!!.tilOpptjening(skjæringstidspunkt),
                 medlemskapstatus = when (medlemskapstatus!!) {
                     JsonMedlemskapstatus.JA -> Medlemskapsvurdering.Medlemskapstatus.Ja
                     JsonMedlemskapstatus.NEI -> Medlemskapsvurdering.Medlemskapstatus.Nei
@@ -343,7 +343,8 @@ internal data class PersonData(
             private val opptjeningTom: LocalDate,
             private val arbeidsforhold: List<ArbeidsgiverOpptjeningsgrunnlagData>
         ) {
-            fun tilOpptjening() = Opptjening.gjenopprett(
+            fun tilOpptjening(skjæringstidspunkt: LocalDate) = Opptjening.gjenopprett(
+                skjæringstidspunkt = skjæringstidspunkt,
                 arbeidsforhold = arbeidsforhold.tilArbeidsgiverOpptjeningsgrunnlag(),
                 opptjeningsperiode = opptjeningFom til opptjeningTom
             )

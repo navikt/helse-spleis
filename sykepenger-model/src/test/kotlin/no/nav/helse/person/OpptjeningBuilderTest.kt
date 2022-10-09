@@ -22,7 +22,7 @@ internal class OpptjeningBuilderTest {
             )
         )
 
-        val opptjening = Opptjening.gjenopprett(arbeidsgiverOpptjeningsgrunnlag, 1.januar til 1.mai)
+        val opptjening = Opptjening.gjenopprett(1.januar, arbeidsgiverOpptjeningsgrunnlag, 1.januar til 1.mai)
         val opptjeningMap = mutableMapOf<String, Any>()
         val opptjeningState = JsonBuilder.OpptjeningState(opptjeningMap)
 
@@ -67,7 +67,7 @@ internal class OpptjeningBuilderTest {
             )
         )
 
-        val opptjening = Opptjening.gjenopprett(arbeidsgiverOpptjeningsgrunnlag, 1.januar til 1.mai)
+        val opptjening = Opptjening.gjenopprett(1.januar, arbeidsgiverOpptjeningsgrunnlag, 1.januar til 1.mai)
         val opptjeningMap = mutableMapOf<String, Any>()
         val opptjeningState = JsonBuilder.OpptjeningState(opptjeningMap)
 
