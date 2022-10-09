@@ -133,7 +133,6 @@ internal class Inntektshistorikk private constructor(private val historikk: Muta
 
         open fun subsumerArbeidsforhold(
             subsumsjonObserver: SubsumsjonObserver,
-            skjæringstidspunkt: LocalDate,
             organisasjonsnummer: String,
             forklaring: String,
             oppfylt: Boolean
@@ -224,13 +223,12 @@ internal class Inntektshistorikk private constructor(private val historikk: Muta
 
         override fun subsumerArbeidsforhold(
             subsumsjonObserver: SubsumsjonObserver,
-            skjæringstidspunkt: LocalDate,
             organisasjonsnummer: String,
             forklaring: String,
             oppfylt: Boolean
         ) {
             subsumsjonObserver.`§ 8-15`(
-                skjæringstidspunkt,
+                dato,
                 organisasjonsnummer,
                 emptyList(),
                 forklaring,
@@ -348,13 +346,12 @@ internal class Inntektshistorikk private constructor(private val historikk: Muta
 
         override fun subsumerArbeidsforhold(
             subsumsjonObserver: SubsumsjonObserver,
-            skjæringstidspunkt: LocalDate,
             organisasjonsnummer: String,
             forklaring: String,
             oppfylt: Boolean
         ) {
             subsumsjonObserver.`§ 8-15`(
-                skjæringstidspunkt = skjæringstidspunkt,
+                skjæringstidspunkt = dato,
                 organisasjonsnummer = organisasjonsnummer,
                 inntekterSisteTreMåneder = inntekterSisteTreMåneder.subsumsjonsformat(),
                 forklaring = forklaring,
@@ -391,13 +388,12 @@ internal class Inntektshistorikk private constructor(private val historikk: Muta
 
         override fun subsumerArbeidsforhold(
             subsumsjonObserver: SubsumsjonObserver,
-            skjæringstidspunkt: LocalDate,
             organisasjonsnummer: String,
             forklaring: String,
             oppfylt: Boolean
         ) {
             subsumsjonObserver.`§ 8-15`(
-                skjæringstidspunkt = skjæringstidspunkt,
+                skjæringstidspunkt = dato,
                 organisasjonsnummer = organisasjonsnummer,
                 inntekterSisteTreMåneder = emptyList(),
                 forklaring = forklaring,
