@@ -18,7 +18,6 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.PersonPåminnelse
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Simulering
-import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Utbetalingshistorikk
@@ -665,15 +664,10 @@ class Person private constructor(
         )
     }
 
-    internal fun beregnSykepengegrunnlag(
-        skjæringstidspunkt: LocalDate,
-        subsumsjonObserver: SubsumsjonObserver,
-        forklaring: String?,
-        subsumsjon: Subsumsjon?
-    ): Sykepengegrunnlag {
+    internal fun beregnSykepengegrunnlag(skjæringstidspunkt: LocalDate, subsumsjonObserver: SubsumsjonObserver): Sykepengegrunnlag {
         return Sykepengegrunnlag.opprett(
             alder,
-            arbeidsgivere.beregnSykepengegrunnlag(skjæringstidspunkt, subsumsjonObserver, forklaring, subsumsjon),
+            arbeidsgivere.beregnSykepengegrunnlag(skjæringstidspunkt, subsumsjonObserver),
             skjæringstidspunkt,
             subsumsjonObserver,
             arbeidsgivere.deaktiverteArbeidsforhold(skjæringstidspunkt).map { it.organisasjonsnummer() }
@@ -828,7 +822,7 @@ class Person private constructor(
         val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) ?: return hendelse.funksjonellFeil(RV_VV_10)
         lagreOverstyrArbeidsforhold(hendelse, subsumsjonObserver)
         val opptjening = beregnOpptjening(skjæringstidspunkt, subsumsjonObserver)
-        val sykepengegrunnlag = beregnSykepengegrunnlag(skjæringstidspunkt, subsumsjonObserver, null, null)
+        val sykepengegrunnlag = beregnSykepengegrunnlag(skjæringstidspunkt, subsumsjonObserver)
         nyttVilkårsgrunnlag(hendelse, grunnlag.overstyrArbeidsforhold(hendelse, sykepengegrunnlag, opptjening, subsumsjonObserver))
     }
 
@@ -839,7 +833,7 @@ class Person private constructor(
     ) {
         val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) ?: return hendelse.funksjonellFeil(RV_VV_10)
         lagreInntekt(hendelse)
-        val sykepengegrunnlag = beregnSykepengegrunnlag(skjæringstidspunkt, subsumsjonObserver, hendelse.forklaring, hendelse.subsumsjon)
+        val sykepengegrunnlag = beregnSykepengegrunnlag(skjæringstidspunkt, subsumsjonObserver)
         nyttVilkårsgrunnlag(hendelse, grunnlag.overstyrInntekt(hendelse, sykepengegrunnlag, subsumsjonObserver))
     }
 

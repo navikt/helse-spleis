@@ -9,6 +9,7 @@ import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
+import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.person.Vedtaksperiode.Vedtaksperiodetilstand
 import no.nav.helse.person.infotrygdhistorikk.Friperiode
 import no.nav.helse.person.infotrygdhistorikk.UgyldigPeriode
@@ -599,6 +600,8 @@ internal interface InntekthistorikkVisitor {
         dato: LocalDate,
         hendelseId: UUID,
         beløp: Inntekt,
+        forklaring: String?,
+        subsumsjon: Subsumsjon?,
         tidsstempel: LocalDateTime
     ) {
     }

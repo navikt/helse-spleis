@@ -41,12 +41,10 @@ import no.nav.helse.januar
 import no.nav.helse.person.AbstractPersonTest
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
-import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.Person
-import no.nav.helse.person.PersonVisitor
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
@@ -629,16 +627,7 @@ internal fun AbstractEndToEndTest.håndterUtbetalingshistorikk(
 
 internal fun Inntekt.repeat(antall: Int) = (0.until(antall)).map { this }
 
-private fun AbstractPersonTest.finnArbeidsgivere(): List<String> {
-    val arbeidsgivere = mutableListOf<String>()
-    person.accept(object : PersonVisitor {
-        override fun preVisitArbeidsgiver(arbeidsgiver: Arbeidsgiver, id: UUID, organisasjonsnummer: String) {
-            arbeidsgivere.add(organisasjonsnummer)
-        }
-    })
-
-    return arbeidsgivere
-}
+private fun AbstractPersonTest.finnArbeidsgivere() = person.inspektør.arbeidsgivere()
 
 internal fun AbstractEndToEndTest.håndterYtelser(
     vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode,

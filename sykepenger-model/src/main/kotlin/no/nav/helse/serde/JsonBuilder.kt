@@ -10,6 +10,7 @@ import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Simulering
+import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsforholdhistorikk
 import no.nav.helse.person.Arbeidsgiver
@@ -1000,6 +1001,8 @@ internal class JsonBuilder : AbstractBuilder() {
             dato: LocalDate,
             hendelseId: UUID,
             beløp: Inntekt,
+            forklaring: String?,
+            subsumsjon: Subsumsjon?,
             tidsstempel: LocalDateTime
         ) {
             inntektsopplysninger = mapOf(
@@ -1008,6 +1011,14 @@ internal class JsonBuilder : AbstractBuilder() {
                 "hendelseId" to hendelseId,
                 "beløp" to beløp.reflection { _, månedlig, _, _ -> månedlig },
                 "kilde" to Inntektsopplysningskilde.SAKSBEHANDLER,
+                "forklaring" to forklaring,
+                "subsumsjon" to subsumsjon?.let {
+                    mapOf(
+                        "paragraf" to subsumsjon.paragraf,
+                        "ledd" to subsumsjon.ledd,
+                        "bokstav" to subsumsjon.bokstav
+                    )
+                },
                 "tidsstempel" to tidsstempel
             )
         }
@@ -1259,6 +1270,8 @@ internal class JsonBuilder : AbstractBuilder() {
             dato: LocalDate,
             hendelseId: UUID,
             beløp: Inntekt,
+            forklaring: String?,
+            subsumsjon: Subsumsjon?,
             tidsstempel: LocalDateTime
         ) {
             inntektsopplysninger.add(mapOf(

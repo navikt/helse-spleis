@@ -6,6 +6,7 @@ import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.hendelser.Medlemskapsvurdering
+import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.InntekthistorikkVisitor
 import no.nav.helse.person.Inntektshistorikk.Infotrygd
@@ -346,6 +347,8 @@ internal class VilkårsgrunnlagBuilder(
                 dato: LocalDate,
                 hendelseId: UUID,
                 beløp: Inntekt,
+                forklaring: String?,
+                subsumsjon: Subsumsjon?,
                 tidsstempel: LocalDateTime
             ) {
                 val inntekt = InntektBuilder(beløp).build()

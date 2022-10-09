@@ -23,7 +23,7 @@ class OverstyrInntekt(
     internal fun erRelevant(skjæringstidspunkt: LocalDate) = this.skjæringstidspunkt == skjæringstidspunkt
 
     internal fun addInntekt(inntektshistorikk: Inntektshistorikk) {
-        inntektshistorikk.append { addSaksbehandler(skjæringstidspunkt, meldingsreferanseId(), inntekt) }
+        inntektshistorikk.append { addSaksbehandler(skjæringstidspunkt, meldingsreferanseId(), inntekt, forklaring, subsumsjon) }
     }
 
     internal fun tilRevurderingAvvistEvent(): PersonObserver.RevurderingAvvistEvent =

@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
+import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.person.InntekthistorikkVisitor
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.økonomi.Inntekt
@@ -55,6 +56,8 @@ internal class Inntektsinspektør(historikk: Inntektshistorikk) : Inntekthistori
         dato: LocalDate,
         hendelseId: UUID,
         beløp: Inntekt,
+        forklaring: String?,
+        subsumsjon: Subsumsjon?,
         tidsstempel: LocalDateTime
     ) {
         inntektTeller.add(inntektTeller.removeLast() + 1)

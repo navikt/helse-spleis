@@ -83,8 +83,8 @@ internal class InntektsopplysningTest {
 
     @Test
     fun `saksbehandler-likhet`() {
-        val saksbehandler1 = Inntektshistorikk.Saksbehandler(UUID.randomUUID(), 20.januar, UUID.randomUUID(), 20000.månedlig)
-        val saksbehandler2 = Inntektshistorikk.Saksbehandler(UUID.randomUUID(), 20.januar, UUID.randomUUID(), 25000.månedlig)
+        val saksbehandler1 = Inntektshistorikk.Saksbehandler(UUID.randomUUID(), 20.januar, UUID.randomUUID(), 20000.månedlig, "", null)
+        val saksbehandler2 = Inntektshistorikk.Saksbehandler(UUID.randomUUID(), 20.januar, UUID.randomUUID(), 25000.månedlig, "", null)
 
         assertNotEquals(saksbehandler1, saksbehandler2)
         assertTrue(saksbehandler1.skalErstattesAv(saksbehandler2))

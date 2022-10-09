@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.hendelser.Hendelseskontekst
+import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.InntekthistorikkVisitor
@@ -136,7 +137,16 @@ internal class UgyldigeSituasjonerObservatør(private val person: Person): Perso
         override fun visitInfotrygd(infotrygd: Inntektshistorikk.Infotrygd, id: UUID, dato: LocalDate, hendelseId: UUID, beløp: Inntekt, tidsstempel: LocalDateTime) =
             leggTilInntekt("Infotrygd id=$hendelseId, dato=$dato, beløp=$beløp")
 
-        override fun visitSaksbehandler(saksbehandler: Inntektshistorikk.Saksbehandler, id: UUID, dato: LocalDate, hendelseId: UUID, beløp: Inntekt, tidsstempel: LocalDateTime) =
+        override fun visitSaksbehandler(
+            saksbehandler: Inntektshistorikk.Saksbehandler,
+            id: UUID,
+            dato: LocalDate,
+            hendelseId: UUID,
+            beløp: Inntekt,
+            forklaring: String?,
+            subsumsjon: Subsumsjon?,
+            tidsstempel: LocalDateTime
+        ) =
             leggTilInntekt("Saksbehandler id=$hendelseId, dato=$dato, beløp=$beløp")
 
         override fun visitIkkeRapportert(id: UUID, dato: LocalDate, tidsstempel: LocalDateTime) =

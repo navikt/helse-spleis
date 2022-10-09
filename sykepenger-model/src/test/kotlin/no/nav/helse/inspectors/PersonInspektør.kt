@@ -52,6 +52,7 @@ internal class PersonInspektør(person: Person): PersonVisitor {
             putAll(arbeidsgiver.inspektør.sisteVedtaksperiodeTilstander())
         }
     }
+    internal fun arbeidsgivere() = arbeidsgivere.keys.toList()
     internal fun arbeidsgiver(orgnummer: String) = arbeidsgivere[orgnummer]
     internal fun harLagretInntekt(indeks: Int) = infotrygdelementerLagretInntekt[indeks]
     internal fun harArbeidsgiver(organisasjonsnummer: String) = organisasjonsnummer in arbeidsgivere.keys

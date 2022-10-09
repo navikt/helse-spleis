@@ -3,6 +3,7 @@ package no.nav.helse.inspectors
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.ArbeidsgiverInntektsopplysningVisitor
 import no.nav.helse.person.Inntektshistorikk
@@ -24,6 +25,8 @@ internal class ArbeidsgiverInntektsopplysningInspektør(arbeidsgiverInntektsoppl
         dato: LocalDate,
         hendelseId: UUID,
         beløp: Inntekt,
+        forklaring: String?,
+        subsumsjon: Subsumsjon?,
         tidsstempel: LocalDateTime
     ) {
         this.inntektsopplysning = saksbehandler

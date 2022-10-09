@@ -16,7 +16,6 @@ import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Simulering
-import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Utbetalingshistorikk
@@ -176,16 +175,13 @@ internal class Arbeidsgiver private constructor(
             flatMap { it.vedtaksperioder }.lagRevurdering(vedtaksperiode, arbeidsgiverUtbetalinger, hendelse)
         }
 
-        internal fun List<Arbeidsgiver>.beregnSykepengegrunnlag(skjæringstidspunkt: LocalDate, subsumsjonObserver: SubsumsjonObserver, forklaring: String?, subsumsjon: Subsumsjon?) =
+        internal fun List<Arbeidsgiver>.beregnSykepengegrunnlag(skjæringstidspunkt: LocalDate, subsumsjonObserver: SubsumsjonObserver) =
             mapNotNull { arbeidsgiver ->
                 arbeidsgiver.beregnSykepengegrunnlag(skjæringstidspunkt) { inntektsopplysning ->
                     inntektsopplysning?.subsumerSykepengegrunnlag(
                         subsumsjonObserver = subsumsjonObserver,
-                        skjæringstidspunkt = skjæringstidspunkt,
                         organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
-                        startdatoArbeidsforhold = arbeidsgiver.startdatoForArbeidsforhold(skjæringstidspunkt),
-                        forklaring = forklaring,
-                        subsumsjon
+                        startdatoArbeidsforhold = arbeidsgiver.startdatoForArbeidsforhold(skjæringstidspunkt)
                     )
                 }
             }

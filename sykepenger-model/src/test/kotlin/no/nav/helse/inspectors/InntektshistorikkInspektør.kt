@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
+import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.person.Arbeidsforholdhistorikk
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.ArbeidsgiverVisitor
@@ -140,6 +141,8 @@ internal class InntektshistorikkInspektør(arbeidsgiver: Arbeidsgiver) : Arbeids
         dato: LocalDate,
         hendelseId: UUID,
         beløp: Inntekt,
+        forklaring: String?,
+        subsumsjon: Subsumsjon?,
         tidsstempel: LocalDateTime
     ) {
         inntektsopplysninger.add(

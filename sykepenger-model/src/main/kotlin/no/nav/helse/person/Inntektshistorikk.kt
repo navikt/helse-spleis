@@ -129,14 +129,7 @@ internal class Inntektshistorikk private constructor(private val historikk: Muta
 
         protected abstract fun erSamme(other: Inntektsopplysning): Boolean
 
-        open fun subsumerSykepengegrunnlag(
-            subsumsjonObserver: SubsumsjonObserver,
-            skjæringstidspunkt: LocalDate,
-            organisasjonsnummer: String,
-            startdatoArbeidsforhold: LocalDate?,
-            forklaring: String?,
-            subsumsjon: Subsumsjon?
-        ) { }
+        open fun subsumerSykepengegrunnlag(subsumsjonObserver: SubsumsjonObserver, organisasjonsnummer: String, startdatoArbeidsforhold: LocalDate?) { }
 
         open fun subsumerArbeidsforhold(
             subsumsjonObserver: SubsumsjonObserver,
@@ -168,11 +161,13 @@ internal class Inntektshistorikk private constructor(private val historikk: Muta
         dato: LocalDate,
         private val hendelseId: UUID,
         private val beløp: Inntekt,
+        private val forklaring: String?,
+        private val subsumsjon: Subsumsjon?,
         private val tidsstempel: LocalDateTime = LocalDateTime.now()
     ) : Inntektsopplysning(dato, 100) {
 
         override fun accept(visitor: InntekthistorikkVisitor) {
-            visitor.visitSaksbehandler(this, id, dato, hendelseId, beløp, tidsstempel)
+            visitor.visitSaksbehandler(this, id, dato, hendelseId, beløp, forklaring, subsumsjon, tidsstempel)
         }
 
         override fun omregnetÅrsinntekt(skjæringstidspunkt: LocalDate, førsteFraværsdag: LocalDate?) = takeIf { it.dato == skjæringstidspunkt }
@@ -186,14 +181,7 @@ internal class Inntektshistorikk private constructor(private val historikk: Muta
         override fun erSamme(other: Inntektsopplysning) =
             other is Saksbehandler && this.dato == other.dato && this.beløp == other.beløp
 
-        override fun subsumerSykepengegrunnlag(
-            subsumsjonObserver: SubsumsjonObserver,
-            skjæringstidspunkt: LocalDate,
-            organisasjonsnummer: String,
-            startdatoArbeidsforhold: LocalDate?,
-            forklaring: String?,
-            subsumsjon: Subsumsjon?
-        ) {
+        override fun subsumerSykepengegrunnlag(subsumsjonObserver: SubsumsjonObserver, organisasjonsnummer: String, startdatoArbeidsforhold: LocalDate?) {
             if(subsumsjon == null) return
             requireNotNull(forklaring) { "Det skal være en forklaring fra saksbehandler ved overstyring av inntekt" }
             if (subsumsjon.paragraf == Paragraf.PARAGRAF_8_28.ref
@@ -205,7 +193,7 @@ internal class Inntektshistorikk private constructor(private val historikk: Muta
                     organisasjonsnummer = organisasjonsnummer,
                     startdatoArbeidsforhold = startdatoArbeidsforhold,
                     overstyrtInntektFraSaksbehandler = mapOf("dato" to dato, "beløp" to beløp.reflection { _, månedlig, _, _ -> månedlig }),
-                    skjæringstidspunkt = skjæringstidspunkt,
+                    skjæringstidspunkt = dato,
                     forklaring = forklaring,
                     grunnlagForSykepengegrunnlag = omregnetÅrsinntekt()
                 )
@@ -216,7 +204,7 @@ internal class Inntektshistorikk private constructor(private val historikk: Muta
                 subsumsjonObserver.`§ 8-28 ledd 3 bokstav c`(
                     organisasjonsnummer = organisasjonsnummer,
                     overstyrtInntektFraSaksbehandler = mapOf("dato" to dato, "beløp" to beløp.reflection { _, månedlig, _, _ -> månedlig }),
-                    skjæringstidspunkt = skjæringstidspunkt,
+                    skjæringstidspunkt = dato,
                     forklaring = forklaring,
                     grunnlagForSykepengegrunnlag = omregnetÅrsinntekt()
                 )
@@ -224,7 +212,7 @@ internal class Inntektshistorikk private constructor(private val historikk: Muta
                 subsumsjonObserver.`§ 8-28 ledd 5`(
                     organisasjonsnummer = organisasjonsnummer,
                     overstyrtInntektFraSaksbehandler = mapOf("dato" to dato, "beløp" to beløp.reflection { _, månedlig, _, _ -> månedlig }),
-                    skjæringstidspunkt = skjæringstidspunkt,
+                    skjæringstidspunkt = dato,
                     forklaring = forklaring,
                     grunnlagForSykepengegrunnlag = omregnetÅrsinntekt()
                 )
@@ -348,21 +336,14 @@ internal class Inntektshistorikk private constructor(private val historikk: Muta
                 .summer()
                 .div(12)
 
-        override fun subsumerSykepengegrunnlag(
-            subsumsjonObserver: SubsumsjonObserver,
-            skjæringstidspunkt: LocalDate,
-            organisasjonsnummer: String,
-            startdatoArbeidsforhold: LocalDate?,
-            forklaring: String?,
-            subsumsjon: Subsumsjon?
-        ) {
+        override fun subsumerSykepengegrunnlag(subsumsjonObserver: SubsumsjonObserver, organisasjonsnummer: String, startdatoArbeidsforhold: LocalDate?) {
             subsumsjonObserver.`§ 8-28 ledd 3 bokstav a`(
                 organisasjonsnummer = organisasjonsnummer,
-                skjæringstidspunkt = skjæringstidspunkt,
+                skjæringstidspunkt = dato,
                 inntekterSisteTreMåneder = inntekterSisteTreMåneder.subsumsjonsformat(),
                 grunnlagForSykepengegrunnlag = omregnetÅrsinntekt()
             )
-            subsumsjonObserver.`§ 8-29`(skjæringstidspunkt, omregnetÅrsinntekt(), inntektsopplysninger.subsumsjonsformat(), organisasjonsnummer)
+            subsumsjonObserver.`§ 8-29`(dato, omregnetÅrsinntekt(), inntektsopplysninger.subsumsjonsformat(), organisasjonsnummer)
         }
 
         override fun subsumerArbeidsforhold(
@@ -550,8 +531,8 @@ internal class Inntektshistorikk private constructor(private val historikk: Muta
             return Innslag(inntektsopplysninger)
         }
 
-        internal fun addSaksbehandler(dato: LocalDate, hendelseId: UUID, beløp: Inntekt) =
-            add(Saksbehandler(UUID.randomUUID(), dato, hendelseId, beløp, tidsstempel))
+        internal fun addSaksbehandler(dato: LocalDate, hendelseId: UUID, beløp: Inntekt, forklaring: String, subsumsjon: Subsumsjon?) =
+            add(Saksbehandler(UUID.randomUUID(), dato, hendelseId, beløp, forklaring, subsumsjon, tidsstempel))
 
         internal fun addInntektsmelding(dato: LocalDate, hendelseId: UUID, beløp: Inntekt) =
             add(Inntektsmelding(UUID.randomUUID(), dato, hendelseId, beløp, tidsstempel))

@@ -11,6 +11,7 @@ import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
+import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogg.Aktivitet
@@ -571,6 +572,8 @@ internal data class PersonData(
             private val hendelseId: UUID?,
             private val beløp: Double?,
             private val kilde: String?,
+            private val forklaring: String?,
+            private val subsumsjon: SubsumsjonData?,
             private val måned: YearMonth?,
             private val type: String?,
             private val fordel: String?,
@@ -579,6 +582,13 @@ internal data class PersonData(
             private val tidsstempel: LocalDateTime?,
             private val skatteopplysninger: List<InntektsopplysningData>?
         ) {
+            data class SubsumsjonData(
+                private val paragraf: String,
+                private val ledd: Int?,
+                private val bokstav: String?
+            ) {
+                internal fun tilModellobjekt() = Subsumsjon(paragraf, ledd, bokstav)
+            }
             internal fun tilModellobjekt() =
                 when (kilde?.let(Inntektsopplysningskilde::valueOf)) {
                     Inntektsopplysningskilde.INFOTRYGD ->
@@ -609,6 +619,8 @@ internal data class PersonData(
                             dato = requireNotNull(dato),
                             hendelseId = requireNotNull(hendelseId),
                             beløp = requireNotNull(beløp).månedlig,
+                            forklaring = forklaring,
+                            subsumsjon = subsumsjon?.tilModellobjekt(),
                             tidsstempel = requireNotNull(tidsstempel)
                         )
                     null -> Inntektshistorikk.SkattComposite(

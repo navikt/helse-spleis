@@ -130,7 +130,9 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
                             UUID.randomUUID(),
                             skjæringstidspunkt,
                             UUID.randomUUID(),
-                            inntekt
+                            inntekt,
+                            "",
+                            null
                         )
                     )
                 ), skjæringstidspunkt, MaskinellJurist(), emptyList()
