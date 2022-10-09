@@ -1137,11 +1137,52 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             listOf(
                 OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(
                     a2,
-                    false,
+                    true,
                     "Jeg, en saksbehandler, overstyrte pga 8-15"
                 )
             )
         )
+        SubsumsjonInspektør(jurist).assertOppfylt(
+            versjon = 18.desember(1998),
+            paragraf = PARAGRAF_8_15,
+            input = mapOf(
+                "organisasjonsnummer" to a2,
+                "skjæringstidspunkt" to 1.januar,
+                "inntekterSisteTreMåneder" to listOf(
+                    mapOf(
+                        "beløp" to 1000.0,
+                        "årMåned" to YearMonth.of(2017, 11),
+                        "type" to "LØNNSINNTEKT",
+                        "fordel" to "Juidy inntekt",
+                        "beskrivelse" to "Juidy fordel"
+                    ),
+                    mapOf(
+                        "beløp" to 1000.0,
+                        "årMåned" to YearMonth.of(2017, 12),
+                        "type" to "LØNNSINNTEKT",
+                        "fordel" to "Juidy inntekt",
+                        "beskrivelse" to "Juidy fordel"
+                    )
+                ),
+                "forklaring" to "Jeg, en saksbehandler, overstyrte pga 8-15"
+            ),
+            output = mapOf(
+                "arbeidsforholdAvbrutt" to a2
+            )
+        )
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterOverstyrArbeidsforhold(
+            1.januar,
+            listOf(
+                OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(
+                    a2,
+                    false,
+                    "Jeg, en saksbehandler, aktiverte pga 8-15"
+                )
+            )
+        )
+
         SubsumsjonInspektør(jurist).assertIkkeOppfylt(
             versjon = 18.desember(1998),
             paragraf = PARAGRAF_8_15,
@@ -1166,7 +1207,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                             )
                         ),
 
-                "forklaring" to "Jeg, en saksbehandler, overstyrte pga 8-15"
+                "forklaring" to "Jeg, en saksbehandler, aktiverte pga 8-15"
             ),
             output = mapOf(
                 "aktivtArbeidsforhold" to a2
@@ -1223,12 +1264,12 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
             listOf(
                 OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(
                     a2,
-                    false,
+                    true,
                     "Jeg, en saksbehandler, overstyrte pga 8-15"
                 )
             )
         )
-        SubsumsjonInspektør(jurist).assertIkkeOppfylt(
+        SubsumsjonInspektør(jurist).assertOppfylt(
             versjon = 18.desember(1998),
             paragraf = PARAGRAF_8_15,
             input = mapOf(
@@ -1238,7 +1279,7 @@ internal class SubsumsjonE2ETest : AbstractEndToEndTest() {
                 "forklaring" to "Jeg, en saksbehandler, overstyrte pga 8-15"
             ),
             output = mapOf(
-                "aktivtArbeidsforhold" to a2
+                "arbeidsforholdAvbrutt" to a2
             )
         )
     }
