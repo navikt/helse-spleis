@@ -8,7 +8,6 @@ import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrInntekt
 import no.nav.helse.person.Varselkode.RV_IT_16
 import no.nav.helse.person.Varselkode.RV_IT_17
-import no.nav.helse.person.Varselkode.RV_OV_1
 import no.nav.helse.person.Varselkode.RV_VV_11
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
@@ -373,7 +372,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
         private fun overstyr(hendelse: IAktivitetslogg, sykepengegrunnlag: Sykepengegrunnlag, opptjening: Opptjening = this.opptjening, subsumsjonObserver: SubsumsjonObserver): Grunnlagsdata {
             val sykepengegrunnlagOk = sykepengegrunnlag.valider(hendelse)
-            if (!opptjening.erOppfylt()) hendelse.varsel(RV_OV_1)
+            val opptjeningOk = opptjening.valider(hendelse)
             return Grunnlagsdata(
                 skjæringstidspunkt = this.skjæringstidspunkt,
                 sykepengegrunnlag = sykepengegrunnlag,
@@ -381,7 +380,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                 avviksprosent = sykepengegrunnlag.avviksprosent(this.sammenligningsgrunnlag.sammenligningsgrunnlag, subsumsjonObserver),
                 opptjening = opptjening,
                 medlemskapstatus = medlemskapstatus,
-                vurdertOk = vurdertOk && sykepengegrunnlagOk,
+                vurdertOk = vurdertOk && sykepengegrunnlagOk && opptjeningOk,
                 meldingsreferanseId = meldingsreferanseId,
                 vilkårsgrunnlagId = UUID.randomUUID()
             )
