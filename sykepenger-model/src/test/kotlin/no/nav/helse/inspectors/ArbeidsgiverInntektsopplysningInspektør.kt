@@ -12,11 +12,20 @@ import no.nav.helse.økonomi.Inntekt
 internal val ArbeidsgiverInntektsopplysning.inspektør get() = ArbeidsgiverInntektsopplysningInspektør(this)
 
 internal class ArbeidsgiverInntektsopplysningInspektør(arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning) : ArbeidsgiverInntektsopplysningVisitor {
+    internal lateinit var orgnummer: String
+        private set
     internal lateinit var inntektsopplysning: Inntektshistorikk.Inntektsopplysning
         private set
 
     init {
         arbeidsgiverInntektsopplysning.accept(this)
+    }
+
+    override fun preVisitArbeidsgiverInntektsopplysning(
+        arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning,
+        orgnummer: String
+    ) {
+        this.orgnummer = orgnummer
     }
 
     override fun visitSaksbehandler(

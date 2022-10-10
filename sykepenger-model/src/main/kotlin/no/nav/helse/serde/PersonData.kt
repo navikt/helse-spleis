@@ -300,7 +300,7 @@ internal data class PersonData(
             private val arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysningData>,
             private val skjønnsmessigFastsattBeregningsgrunnlag: Double?,
             private val begrensning: Sykepengegrunnlag.Begrensning,
-            private val deaktiverteArbeidsforhold: List<String>,
+            private val deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysningData>,
             private val vurdertInfotrygd: Boolean?, // TODO: migrere denne i json
         ) {
 
@@ -308,7 +308,7 @@ internal data class PersonData(
                 alder = alder,
                 skjæringstidspunkt = skjæringstidspunkt,
                 arbeidsgiverInntektsopplysninger = arbeidsgiverInntektsopplysninger.parseArbeidsgiverInntektsopplysninger(),
-                deaktiverteArbeidsforhold = deaktiverteArbeidsforhold,
+                deaktiverteArbeidsforhold = deaktiverteArbeidsforhold.parseArbeidsgiverInntektsopplysninger(),
                 vurdertInfotrygd = this.vurdertInfotrygd ?: (begrensning == Sykepengegrunnlag.Begrensning.VURDERT_I_INFOTRYGD), // TODO: migrere denne til boolean i json
                 skjønnsmessigFastsattBeregningsgrunnlag = skjønnsmessigFastsattBeregningsgrunnlag?.årlig,
                 `6G` = grunnbeløp?.årlig ?: Grunnbeløp.`6G`.beløp(skjæringstidspunkt, LocalDate.now()) // TODO: jsonmigrering

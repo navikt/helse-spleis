@@ -11,7 +11,6 @@ import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.Sykmeldingsperiode
-import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.til
@@ -539,7 +538,7 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
     @Test
     fun `deaktivert arbeidsforhold blir med i vilkårsgrunnlag`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
-        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
         håndterInntektsmelding(listOf(1.januar til 16.januar))
         håndterYtelser(1.vedtaksperiode)
         håndterVilkårsgrunnlag(
@@ -577,7 +576,12 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
             ),
             Arbeidsgiverinntekt(
                 organisasjonsnummer = a2,
-                omregnetÅrsinntekt = null,
+                omregnetÅrsinntekt = OmregnetÅrsinntekt(
+                    kilde = Inntektkilde.IkkeRapportert,
+                    beløp = 0.0,
+                    månedsbeløp = 0.0,
+                    inntekterFraAOrdningen = null
+                ),
                 sammenligningsgrunnlag = null,
                 deaktivert = true
             )

@@ -225,8 +225,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
         abstract fun overstyrArbeidsforhold(
             hendelse: OverstyrArbeidsforhold,
-            sykepengegrunnlag: Sykepengegrunnlag,
-            opptjening: Opptjening,
             subsumsjonObserver: SubsumsjonObserver
         ): Grunnlagsdata?
 
@@ -359,11 +357,9 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
         override fun overstyrArbeidsforhold(
             hendelse: OverstyrArbeidsforhold,
-            sykepengegrunnlag: Sykepengegrunnlag,
-            opptjening: Opptjening,
             subsumsjonObserver: SubsumsjonObserver
         ): Grunnlagsdata {
-            return overstyr(hendelse, sykepengegrunnlag, opptjening, subsumsjonObserver)
+            return overstyr(hendelse, sykepengegrunnlag.overstyrArbeidsforhold(hendelse, subsumsjonObserver), opptjening.overstyrArbeidsforhold(hendelse, subsumsjonObserver), subsumsjonObserver)
         }
 
         override fun overstyrInntekt(hendelse: OverstyrInntekt, sykepengegrunnlag: Sykepengegrunnlag, subsumsjonObserver: SubsumsjonObserver): Grunnlagsdata {
@@ -408,8 +404,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
         override fun overstyrArbeidsforhold(
             hendelse: OverstyrArbeidsforhold,
-            sykepengegrunnlag: Sykepengegrunnlag,
-            opptjening: Opptjening,
             subsumsjonObserver: SubsumsjonObserver
         ): Grunnlagsdata? {
             hendelse.funksjonellFeil(RV_VV_11)

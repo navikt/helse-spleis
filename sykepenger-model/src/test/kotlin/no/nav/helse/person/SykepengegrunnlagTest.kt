@@ -102,7 +102,7 @@ internal class SykepengegrunnlagTest {
         val `2G_2021` = Grunnbeløp.`2G`.beløp(skjæringstidspunkt)
         val `2G_2020` = Grunnbeløp.`2G`.beløp(30.april(2021))
 
-        var observer = MinsteinntektSubsumsjonObservatør()
+        val observer = MinsteinntektSubsumsjonObservatør()
         var aktivitetslogg = Aktivitetslogg()
         val sykepengegrunnlag = (`2G_2021`).sykepengegrunnlag(alder, "orgnr", skjæringstidspunkt, observer)
         var validert = sykepengegrunnlag.valider(aktivitetslogg)
@@ -343,7 +343,18 @@ internal class SykepengegrunnlagTest {
                         )
                     )
                 ),
-                deaktiverteArbeidsforhold = listOf("orgnummer"),
+                deaktiverteArbeidsforhold = listOf(
+                    ArbeidsgiverInntektsopplysning(
+                        orgnummer = "orgnummer",
+                        inntektsopplysning = Inntektshistorikk.Infotrygd(
+                            id = inntektID,
+                            dato = 1.januar,
+                            hendelseId = hendelseId,
+                            beløp = 25000.månedlig,
+                            tidsstempel = tidsstempel
+                        )
+                    )
+                ),
                 vurdertInfotrygd = false
             )
         )

@@ -101,7 +101,6 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         beregningsgrunnlag: Inntekt,
         `6G`: Inntekt,
         begrensning: Sykepengegrunnlag.Begrensning,
-        deaktiverteArbeidsforhold: List<String>,
         vurdertInfotrygd: Boolean,
         minsteinntekt: Inntekt,
         oppfyllerMinsteinntektskrav: Boolean
@@ -114,7 +113,6 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
             beregningsgrunnlag,
             `6G`,
             begrensning,
-            deaktiverteArbeidsforhold,
             vurdertInfotrygd,
             minsteinntekt,
             oppfyllerMinsteinntektskrav
@@ -129,7 +127,6 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         inntektsgrunnlag: Inntekt,
         `6G`: Inntekt,
         begrensning: Sykepengegrunnlag.Begrensning,
-        deaktiverteArbeidsforhold: List<String>,
         vurdertInfotrygd: Boolean,
         minsteinntekt: Inntekt,
         oppfyllerMinsteinntektskrav: Boolean
@@ -142,7 +139,6 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
             inntektsgrunnlag,
             `6G`,
             begrensning,
-            deaktiverteArbeidsforhold,
             vurdertInfotrygd,
             minsteinntekt,
             oppfyllerMinsteinntektskrav
@@ -191,6 +187,14 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
 
     override fun postVisitArbeidsgiverInntektsopplysninger(arbeidsgiverInntektopplysninger: List<ArbeidsgiverInntektsopplysning>) {
         delegatee.postVisitArbeidsgiverInntektsopplysninger(arbeidsgiverInntektopplysninger)
+    }
+
+    override fun preVisitDeaktiverteArbeidsgiverInntektsopplysninger(arbeidsgiverInntektopplysninger: List<ArbeidsgiverInntektsopplysning>) {
+        delegatee.preVisitDeaktiverteArbeidsgiverInntektsopplysninger(arbeidsgiverInntektopplysninger)
+    }
+
+    override fun postVisitDeaktiverteArbeidsgiverInntektsopplysninger(arbeidsgiverInntektopplysninger: List<ArbeidsgiverInntektsopplysning>) {
+        delegatee.postVisitDeaktiverteArbeidsgiverInntektsopplysninger(arbeidsgiverInntektopplysninger)
     }
 
     override fun preVisitUtbetalingstidslinjeberegning(

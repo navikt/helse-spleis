@@ -880,7 +880,6 @@ internal class JsonBuilder : AbstractBuilder() {
             beregningsgrunnlag: Inntekt,
             `6G`: Inntekt,
             begrensning: Sykepengegrunnlag.Begrensning,
-            deaktiverteArbeidsforhold: List<String>,
             vurdertInfotrygd: Boolean,
             minsteinntekt: Inntekt,
             oppfyllerMinsteinntektskrav: Boolean
@@ -931,7 +930,8 @@ internal class JsonBuilder : AbstractBuilder() {
 
 
     class SykepengegrunnlagState(private val sykepengegrunnlag: MutableMap<String, Any>) : BuilderState() {
-        val arbeidsgiverInntektsopplysninger = mutableListOf<Map<String, Any>>()
+        private val arbeidsgiverInntektsopplysninger = mutableListOf<Map<String, Any>>()
+        private val deaktiverteArbeidsgiverInntektsopplysninger = mutableListOf<Map<String, Any>>()
 
         override fun postVisitSykepengegrunnlag(
             sykepengegrunnlag1: Sykepengegrunnlag,
@@ -941,7 +941,6 @@ internal class JsonBuilder : AbstractBuilder() {
             inntektsgrunnlag: Inntekt,
             `6G`: Inntekt,
             begrensning: Sykepengegrunnlag.Begrensning,
-            deaktiverteArbeidsforhold: List<String>,
             vurdertInfotrygd: Boolean,
             minsteinntekt: Inntekt,
             oppfyllerMinsteinntektskrav: Boolean
@@ -953,7 +952,7 @@ internal class JsonBuilder : AbstractBuilder() {
                     "grunnbeløp" to `6G`.reflection { årlig, _, _, _ -> årlig },
                     "arbeidsgiverInntektsopplysninger" to arbeidsgiverInntektsopplysninger,
                     "begrensning" to begrensning,
-                    "deaktiverteArbeidsforhold" to deaktiverteArbeidsforhold,
+                    "deaktiverteArbeidsforhold" to deaktiverteArbeidsgiverInntektsopplysninger,
                     "vurdertInfotrygd" to vurdertInfotrygd,
                     "minsteinntekt" to minsteinntekt.reflection { årlig, _, _, _ -> årlig },
                     "oppfyllerMinsteinntektskrav" to oppfyllerMinsteinntektskrav
@@ -966,6 +965,10 @@ internal class JsonBuilder : AbstractBuilder() {
 
         override fun preVisitArbeidsgiverInntektsopplysninger(arbeidsgiverInntektopplysninger: List<ArbeidsgiverInntektsopplysning>) {
             pushState(ArbeidsgiverInntektsopplysningerState(arbeidsgiverInntektsopplysninger))
+        }
+
+        override fun preVisitDeaktiverteArbeidsgiverInntektsopplysninger(arbeidsgiverInntektopplysninger: List<ArbeidsgiverInntektsopplysning>) {
+            pushState(ArbeidsgiverInntektsopplysningerState(deaktiverteArbeidsgiverInntektsopplysninger))
         }
     }
 
@@ -1078,6 +1081,10 @@ internal class JsonBuilder : AbstractBuilder() {
         }
 
         override fun postVisitArbeidsgiverInntektsopplysninger(arbeidsgiverInntektopplysninger: List<ArbeidsgiverInntektsopplysning>) {
+            popState()
+        }
+
+        override fun postVisitDeaktiverteArbeidsgiverInntektsopplysninger(arbeidsgiverInntektopplysninger: List<ArbeidsgiverInntektsopplysning>) {
             popState()
         }
 

@@ -135,7 +135,7 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
                             null
                         )
                     )
-                ), skjæringstidspunkt, MaskinellJurist(), emptyList()
+                ), skjæringstidspunkt, MaskinellJurist()
             ),
             sammenligningsgrunnlag = Sammenligningsgrunnlag(emptyList()),
             avviksprosent = 0.0.prosent,
@@ -166,8 +166,6 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
 
             override fun overstyrArbeidsforhold(
                 hendelse: OverstyrArbeidsforhold,
-                sykepengegrunnlag: Sykepengegrunnlag,
-                opptjening: Opptjening,
                 subsumsjonObserver: SubsumsjonObserver
             ): VilkårsgrunnlagHistorikk.Grunnlagsdata? = null
         }

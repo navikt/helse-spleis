@@ -23,6 +23,8 @@ internal class SykepengegrunnlagInspektør(sykepengegrunnlag: Sykepengegrunnlag)
         private set
     internal var arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning> = listOf()
         private set
+    internal var deaktiverteArbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning> = listOf()
+        private set
     init {
         sykepengegrunnlag.accept(this)
     }
@@ -35,7 +37,6 @@ internal class SykepengegrunnlagInspektør(sykepengegrunnlag: Sykepengegrunnlag)
         beregningsgrunnlag: Inntekt,
         `6G`: Inntekt,
         begrensning: Sykepengegrunnlag.Begrensning,
-        deaktiverteArbeidsforhold: List<String>,
         vurdertInfotrygd: Boolean,
         minsteinntekt: Inntekt,
         oppfyllerMinsteinntektskrav: Boolean
@@ -46,8 +47,12 @@ internal class SykepengegrunnlagInspektør(sykepengegrunnlag: Sykepengegrunnlag)
         this.sykepengegrunnlag = sykepengegrunnlag
         this.skjønnsmessigFastsattÅrsinntekt = skjønnsmessigFastsattÅrsinntekt
         this.beregningsgrunnlag = beregningsgrunnlag
-        this.deaktiverteArbeidsforhold = deaktiverteArbeidsforhold
         this.inntektskilde = sykepengegrunnlag1.inntektskilde()
+    }
+
+    override fun preVisitDeaktiverteArbeidsgiverInntektsopplysninger(arbeidsgiverInntektopplysninger: List<ArbeidsgiverInntektsopplysning>) {
+        this.deaktiverteArbeidsgiverInntektsopplysninger = arbeidsgiverInntektopplysninger
+        this.deaktiverteArbeidsforhold = arbeidsgiverInntektopplysninger.map { it.inspektør.orgnummer }
     }
 
     override fun preVisitArbeidsgiverInntektsopplysninger(arbeidsgiverInntektopplysninger: List<ArbeidsgiverInntektsopplysning>) {

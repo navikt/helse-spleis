@@ -6,7 +6,7 @@ import java.time.LocalDate
 import no.nav.helse.serde.serdeObjectMapper
 import org.slf4j.LoggerFactory
 
-internal class V181OverstyrteVilkårsgrunnlag: JsonMigration(181) {
+internal class V182OverstyrteVilkårsgrunnlag: JsonMigration(182) {
     private companion object {
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
     }
@@ -38,7 +38,11 @@ internal class V181OverstyrteVilkårsgrunnlag: JsonMigration(181) {
                             .map { it.asText() }
 
                         val deaktiverteInntekter = deaktiverteOrgnr
-                            .associateWith { orgnr -> inntekter[skjæringstidspunkt]?.inntekter?.get(orgnr) }
+                            .associateWith { orgnr -> inntekter[skjæringstidspunkt]?.inntekter?.get(orgnr).also {
+                                if (it == null) {
+                                    sikkerlogg.info("Finner ikke orginalinntekt for $skjæringstidspunkt for $orgnr i innslag $innslagIndex for $aktørId")
+                                }
+                            }}
 
                         val sp = grunnlag.path("sykepengegrunnlag") as ObjectNode
                         sp.replace("deaktiverteArbeidsforhold", serdeObjectMapper.createArrayNode().addAll(deaktiverteInntekter.mapNotNull {

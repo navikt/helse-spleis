@@ -9,7 +9,9 @@ import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Arbeidsgiver.Companion.finn
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Inntektshistorikk
+import no.nav.helse.person.Opptjening
 import no.nav.helse.person.PersonHendelse
+import no.nav.helse.person.Sykepengegrunnlag
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 
 class OverstyrArbeidsforhold(
@@ -44,6 +46,18 @@ class OverstyrArbeidsforhold(
         hendelseIder.add(Dokumentsporing.overstyrArbeidsforhold(meldingsreferanseId()))
     }
 
+    internal fun overstyr(sykepengegrunnlag: Sykepengegrunnlag, subsumsjonObserver: SubsumsjonObserver): Sykepengegrunnlag {
+        return overstyrteArbeidsforhold.fold(sykepengegrunnlag, ) { acc, overstyring ->
+            overstyring.overstyr(acc, subsumsjonObserver)
+        }
+    }
+
+    internal fun overstyr(opptjening: Opptjening, subsumsjonObserver: SubsumsjonObserver): Opptjening {
+        return overstyrteArbeidsforhold.fold(opptjening, ) { acc, overstyring ->
+            overstyring.overstyr(acc, subsumsjonObserver)
+        }
+    }
+
     class ArbeidsforholdOverstyrt(
         internal val orgnummer: String,
         private val deaktivert: Boolean,
@@ -69,6 +83,16 @@ class OverstyrArbeidsforhold(
                 arbeidsforholdhistorikk.aktiverArbeidsforhold(skjæringstidspunkt)
                 inntekterSisteTreMåneder.subsumerArbeidsforhold(subsumsjonObserver, orgnummer, forklaring, false)
             }
+        }
+
+        internal fun overstyr(sykepengegrunnlag: Sykepengegrunnlag, subsumsjonObserver: SubsumsjonObserver) = when (deaktivert){
+            true -> sykepengegrunnlag.deaktiver(orgnummer, forklaring, subsumsjonObserver)
+            else -> sykepengegrunnlag.aktiver(orgnummer, forklaring, subsumsjonObserver)
+        }
+
+        internal fun overstyr(opptjening: Opptjening, subsumsjonObserver: SubsumsjonObserver) = when (deaktivert){
+            true -> opptjening.deaktiver(orgnummer, subsumsjonObserver)
+            else -> opptjening.aktiver(orgnummer, subsumsjonObserver)
         }
     }
 }

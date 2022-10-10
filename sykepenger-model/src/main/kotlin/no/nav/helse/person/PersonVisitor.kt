@@ -139,7 +139,6 @@ internal interface SykepengegrunnlagVisitor : ArbeidsgiverInntektsopplysningVisi
         beregningsgrunnlag: Inntekt,
         `6G`: Inntekt,
         begrensning: Sykepengegrunnlag.Begrensning,
-        deaktiverteArbeidsforhold: List<String>,
         vurdertInfotrygd: Boolean,
         minsteinntekt: Inntekt,
         oppfyllerMinsteinntektskrav: Boolean
@@ -147,6 +146,10 @@ internal interface SykepengegrunnlagVisitor : ArbeidsgiverInntektsopplysningVisi
     fun preVisitArbeidsgiverInntektsopplysninger(arbeidsgiverInntektopplysninger: List<ArbeidsgiverInntektsopplysning>) {}
 
     fun postVisitArbeidsgiverInntektsopplysninger(arbeidsgiverInntektopplysninger: List<ArbeidsgiverInntektsopplysning>) {}
+
+    fun preVisitDeaktiverteArbeidsgiverInntektsopplysninger(arbeidsgiverInntektopplysninger: List<ArbeidsgiverInntektsopplysning>) {}
+
+    fun postVisitDeaktiverteArbeidsgiverInntektsopplysninger(arbeidsgiverInntektopplysninger: List<ArbeidsgiverInntektsopplysning>) {}
 
     fun postVisitSykepengegrunnlag(
         sykepengegrunnlag1: Sykepengegrunnlag,
@@ -156,7 +159,6 @@ internal interface SykepengegrunnlagVisitor : ArbeidsgiverInntektsopplysningVisi
         inntektsgrunnlag: Inntekt,
         `6G`: Inntekt,
         begrensning: Sykepengegrunnlag.Begrensning,
-        deaktiverteArbeidsforhold: List<String>,
         vurdertInfotrygd: Boolean,
         minsteinntekt: Inntekt,
         oppfyllerMinsteinntektskrav: Boolean

@@ -3,15 +3,15 @@ package no.nav.helse.spleis.etterlevelse
 import java.time.LocalDate
 import java.time.YearMonth
 import no.nav.helse.desember
+import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.januar
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.asYearMonth
 import no.nav.helse.spleis.TestMessageFactory
 import no.nav.helse.spleis.TestMessageFactory.Subsumsjon
 import no.nav.helse.spleis.e2e.AbstractEndToEndMediatorTest
-import no.nav.helse.spleis.meldinger.model.SimuleringMessage
+import no.nav.helse.spleis.meldinger.model.SimuleringMessage.Simuleringstatus.OK
 import no.nav.inntektsmeldingkontrakt.Periode
-import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -59,13 +59,20 @@ internal class SubsumsjonTest : AbstractEndToEndMediatorTest() {
         tilGodkjenningMedGhost(a2 = a2)
         sendOverstyringArbeidsforhold(1.januar, listOf(TestMessageFactory.ArbeidsforholdOverstyrt(
             a2,
+            true,
+            "Jeg, en saksbehandler, deaktiverer pga 8-15"
+        )))
+        sendYtelser(0, orgnummer = "ag1")
+        sendSimulering(0, orgnummer = "ag1", status = OK)
+        sendOverstyringArbeidsforhold(1.januar, listOf(TestMessageFactory.ArbeidsforholdOverstyrt(
+            a2,
             false,
             "Jeg, en saksbehandler, overstyrte pga 8-15"
         )))
 
         val subsumsjon = testRapid.inspektør.meldinger("subsumsjon")
             .map { it["subsumsjon"] }
-            .first { it["paragraf"].asText() == "8-15" }
+            .last { it["paragraf"].asText() == "8-15" }
 
         assertEquals("ag2", subsumsjon["input"]["organisasjonsnummer"].asText())
         assertEquals(1.januar, subsumsjon["input"]["skjæringstidspunkt"].asLocalDate())
@@ -196,6 +203,6 @@ internal class SubsumsjonTest : AbstractEndToEndMediatorTest() {
             )
         )
         sendYtelser(0, orgnummer = a1)
-        sendSimulering(0, orgnummer = a1, status = SimuleringMessage.Simuleringstatus.OK)
+        sendSimulering(0, orgnummer = a1, status = OK)
     }
 }

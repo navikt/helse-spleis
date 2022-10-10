@@ -27,7 +27,6 @@ internal fun Inntekt.sykepengegrunnlag(alder: Alder, orgnr: String, skjæringsti
                 Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), skjæringstidspunkt, UUID.randomUUID(), this)
             )
         ),
-        deaktiverteArbeidsforhold = emptyList(),
         skjæringstidspunkt = skjæringstidspunkt,
         subsumsjonObserver = subsumsjonObserver
     )
