@@ -28,7 +28,7 @@ class Simulering(
     init {
         simuleringResultat?.totalbeløp?.let {
             if (it < 0) {
-                sikkerlogg.info("Negativt totalbeløp på simulering: ${simuleringResultat.toMap()}")
+                sikkerlogg.info("Negativt totalbeløp på simulering: ${simuleringResultat.toMap()} for aktørId: ${aktørId}")
             }
         }
     }
