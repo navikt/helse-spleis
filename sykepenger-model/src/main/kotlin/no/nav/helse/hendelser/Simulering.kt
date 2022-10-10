@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.Varselkode.RV_SI_1
+import no.nav.helse.serde.serdeObjectMapper
 import no.nav.helse.utbetalingslinjer.Fagområde
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import org.slf4j.LoggerFactory
@@ -28,7 +29,7 @@ class Simulering(
     init {
         simuleringResultat?.totalbeløp?.let {
             if (it < 0) {
-                sikkerlogg.info("Negativt totalbeløp på simulering: ${simuleringResultat.toMap()} for aktørId: ${aktørId}")
+                sikkerlogg.info("Negativt totalbeløp på simulering: ${serdeObjectMapper.writeValueAsString(simuleringResultat.toMap())} for aktørId: ${aktørId}")
             }
         }
     }
