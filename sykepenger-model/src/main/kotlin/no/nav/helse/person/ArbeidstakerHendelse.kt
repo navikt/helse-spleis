@@ -24,6 +24,12 @@ abstract class ArbeidstakerHendelse protected constructor(
         return meldingsoppsamler.meldinger()
     }
 
+    fun varselkoder(): List<Varselkode> {
+        val meldingsoppsamler = Varselkoder()
+        aktivitetslogg.accept(meldingsoppsamler)
+        return meldingsoppsamler.varselkoder()
+    }
+
     internal class FunksjonelleFeilOgVerre: AktivitetsloggVisitor {
         private val meldinger = mutableListOf<String>()
         fun meldinger() = meldinger.toList()
@@ -33,6 +39,22 @@ abstract class ArbeidstakerHendelse protected constructor(
 
         override fun visitLogiskFeil(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.LogiskFeil, melding: String, tidsstempel: String) {
             meldinger.add(melding)
+        }
+    }
+    internal class Varselkoder: AktivitetsloggVisitor {
+        private val varselkoder = mutableListOf<Varselkode>()
+
+        fun varselkoder() = varselkoder.toList()
+
+        override fun visitVarsel(
+            id: UUID,
+            kontekster: List<SpesifikkKontekst>,
+            aktivitet: Aktivitetslogg.Aktivitet.Varsel,
+            kode: Varselkode?,
+            melding: String,
+            tidsstempel: String
+        ) {
+            if (kode != null) varselkoder.add(kode)
         }
     }
 }
