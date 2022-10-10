@@ -1171,16 +1171,6 @@ internal class Vedtaksperiode private constructor(
             arbeidsgivere: Iterable<Arbeidsgiver>,
             hendelse: IAktivitetslogg
         ) {
-            if (vedtaksperiode.id.toString() in setOf(
-                    "cabc6b07-7a9a-464e-8e49-fec97f1ad45a",
-                    "36aff5d0-e911-44c2-a75e-c60946164449",
-                    "afe08581-b3f5-4998-979a-c40b5674ba97",
-                    "6a3b53bf-f094-40b9-9ca8-97e70313c49f",
-                    "eb2f0bd3-1230-4301-9188-614d3c79fddf",
-                    "ae3e94d0-b76e-4580-96a9-9cb2d26ceb1e",
-                    "ac5277ed-6bb7-4eea-87ea-82e3e79b6959",
-                    "bf2ea9dc-f870-4657-9107-27946f475fa5"
-            )) return vedtaksperiode.tilstand(hendelse, Avsluttet)
             if (vedtaksperiode.arbeidsgiver.avventerRevurdering()) return
             if (feiletRevurdering(vedtaksperiode)) {
                 hendelse.info("Går til revurdering feilet fordi revurdering er avvist")
