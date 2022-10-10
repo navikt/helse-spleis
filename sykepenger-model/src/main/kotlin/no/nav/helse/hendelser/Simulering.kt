@@ -4,9 +4,10 @@ import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.Varselkode.RV_SI_1
-import no.nav.helse.person.Varselkode.RV_SI_3
+import no.nav.helse.serde.serdeObjectMapper
 import no.nav.helse.utbetalingslinjer.Fagområde
 import no.nav.helse.utbetalingslinjer.Oppdrag
+import org.slf4j.LoggerFactory
 
 class Simulering(
     meldingsreferanseId: UUID,
@@ -22,10 +23,13 @@ class Simulering(
     private val utbetalingId: UUID
 ) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer, aktørId, orgnummer) {
 
+    companion object {
+        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
+    }
     init {
         simuleringResultat?.totalbeløp?.let {
             if (it < 0) {
-                varsel(RV_SI_3)
+                sikkerlogg.info("Negativt totalbeløp på simulering: ${serdeObjectMapper.writeValueAsString(simuleringResultat.toMap())} for aktørId: ${aktørId}")
             }
         }
     }

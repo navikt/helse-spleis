@@ -116,7 +116,6 @@ enum class Varselkode(
     // SI: Simulering
     RV_SI_1("Feil under simulering"),
     RV_SI_2("Simulering av revurdert utbetaling feilet. Utbetalingen må annulleres"),
-    RV_SI_3("Det er simulert et negativt beløp."),
 
     // UT: Utbetaling
     RV_UT_1("Utbetaling av revurdert periode ble avvist av saksbehandler. Utbetalingen må annulleres"),
