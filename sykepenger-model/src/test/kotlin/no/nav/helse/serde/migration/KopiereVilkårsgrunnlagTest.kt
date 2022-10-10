@@ -9,20 +9,20 @@ internal class KopiereVilkårsgrunnlagTest: MigrationTest(TestMigration) {
 
     @Test
     fun `ikke relevant person uten vilkårsgrunnlag`() = assertKopierteVilkårgrunnlag(
-        originalJson = "/migrations/182/ikke-relevant-uten-vilkårsgrunnlag_original.json",
-        expectedJson = "/migrations/182/ikke-relevant-uten-vilkårsgrunnlag_expected.json",
+        originalJson = "/migrations/kopierevilkårsgrunnlag/ikke-relevant-uten-vilkårsgrunnlag_original.json",
+        expectedJson = "/migrations/kopierevilkårsgrunnlag/ikke-relevant-uten-vilkårsgrunnlag_expected.json",
     )
 
     @Test
     fun `relevant person som skal få kopiert ett vilkårsgrunnlag`() = assertKopierteVilkårgrunnlag(
-        originalJson = "/migrations/182/relevant-person_original.json",
-        expectedJson = "/migrations/182/relevant-person_expected.json",
+        originalJson = "/migrations/kopierevilkårsgrunnlag/relevant-person_original.json",
+        expectedJson = "/migrations/kopierevilkårsgrunnlag/relevant-person_expected.json",
     )
 
     @Test
     fun `relevant person med flere vilkårsgrunnlag som skal kopieres`() = assertKopierteVilkårgrunnlag(
-        originalJson = "/migrations/182/relevant-person-flere-skjæringstidspunkt_original.json",
-        expectedJson = "/migrations/182/relevant-person-flere-skjæringstidspunkt_expected.json",
+        originalJson = "/migrations/kopierevilkårsgrunnlag/relevant-person-flere-skjæringstidspunkt_original.json",
+        expectedJson = "/migrations/kopierevilkårsgrunnlag/relevant-person-flere-skjæringstidspunkt_expected.json",
     )
 
     private fun assertKopierteVilkårgrunnlag(originalJson: String, expectedJson: String) {
