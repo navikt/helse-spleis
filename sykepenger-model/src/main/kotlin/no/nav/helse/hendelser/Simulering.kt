@@ -1,13 +1,12 @@
 package no.nav.helse.hendelser
 
+import java.time.LocalDate
+import java.util.UUID
 import no.nav.helse.person.ArbeidstakerHendelse
+import no.nav.helse.person.Varselkode.RV_SI_1
 import no.nav.helse.utbetalingslinjer.Fagområde
 import no.nav.helse.utbetalingslinjer.Oppdrag
-import java.time.LocalDate
-import java.util.*
-import no.nav.helse.person.Varselkode
-import no.nav.helse.person.Varselkode.RV_SI_1
-import no.nav.helse.person.Varselkode.RV_SI_2
+import org.slf4j.LoggerFactory
 
 class Simulering(
     meldingsreferanseId: UUID,
@@ -22,6 +21,17 @@ class Simulering(
     internal val simuleringResultat: SimuleringResultat?,
     private val utbetalingId: UUID
 ) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer, aktørId, orgnummer) {
+
+    companion object {
+        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
+    }
+    init {
+        simuleringResultat?.totalbeløp?.let {
+            if (it < 0) {
+                sikkerlogg.info("Negativt totalbeløp på simulering: ${simuleringResultat.toMap()}")
+            }
+        }
+    }
 
     private val fagområde = Fagområde.from(fagområde)
 
