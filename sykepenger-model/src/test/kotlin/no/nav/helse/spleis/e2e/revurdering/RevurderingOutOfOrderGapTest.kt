@@ -254,8 +254,8 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
             subset = 17.januar til 31.januar
         )
 
-        Assertions.assertEquals(1, inspektør(a1).arbeidsgiverOppdrag.size)
-        Assertions.assertEquals(0, inspektør(a2).arbeidsgiverOppdrag.size)
+        assertEquals(1, inspektør(a1).arbeidsgiverOppdrag.size)
+        assertEquals(0, inspektør(a2).arbeidsgiverOppdrag.size)
 
         nullstillTilstandsendringer()
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a2)
@@ -300,8 +300,8 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
             orgnummer = a2,
             subset = 17.januar til 31.januar
         )
-        Assertions.assertEquals(2, inspektør(a1).utbetalinger.size)
-        Assertions.assertEquals(1, inspektør(a2).utbetalinger.size)
+        assertEquals(2, inspektør(a1).utbetalinger.size)
+        assertEquals(1, inspektør(a2).utbetalinger.size)
     }
 
     @Test
@@ -653,23 +653,21 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
 
     @Test
     fun `out-of-order som fører til nådd maksdato skal avslå riktige dager`() {
-        (1..12).forEach {
-            nyttVedtak(fom = LocalDate.of(2017, it, 1), tom = LocalDate.of(2017, it, 27))
-        }
+        createKorttidsPerson(UNG_PERSON_FNR_2018, 1.januar(1992), maksSykedager = 16)
 
         nyttVedtak(1.januar, 30.januar)
-        assertEquals(6, inspektør.gjenståendeSykedager(13.vedtaksperiode))
+        assertEquals(6, inspektør.gjenståendeSykedager(1.vedtaksperiode))
 
         nyttVedtak(1.mai, 24.mai)
-        assertEquals(0, inspektør.gjenståendeSykedager(14.vedtaksperiode))
+        assertEquals(0, inspektør.gjenståendeSykedager(2.vedtaksperiode))
 
         nyttVedtak(1.mars, 26.mars)
-        håndterYtelser(14.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
 
         //Når out-of-order perioden for mars kommer inn, så er det dager i mai som skal bli avvist pga maksdato
-        assertEquals(0, inspektør.gjenståendeSykedager(15.vedtaksperiode))
-        assertEquals(0, inspektør.utbetalingstidslinjer(15.vedtaksperiode).inspektør.avvistDagTeller)
-        assertEquals(6, inspektør.utbetalingstidslinjer(14.vedtaksperiode).inspektør.avvistDagTeller)
+        assertEquals(0, inspektør.gjenståendeSykedager(3.vedtaksperiode))
+        assertEquals(0, inspektør.utbetalingstidslinjer(3.vedtaksperiode).inspektør.avvistDagTeller)
+        assertEquals(6, inspektør.utbetalingstidslinjer(2.vedtaksperiode).inspektør.avvistDagTeller)
     }
 
     @Test

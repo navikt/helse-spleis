@@ -84,7 +84,8 @@ class Person private constructor(
     private val infotrygdhistorikk: Infotrygdhistorikk,
     private val vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk,
     private var dødsdato: LocalDate?,
-    private val jurist: MaskinellJurist
+    private val jurist: MaskinellJurist,
+    private val regler: ArbeidsgiverRegler = NormalArbeidstaker
 ) : Aktivitetskontekst {
     internal companion object {
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
@@ -117,7 +118,8 @@ class Person private constructor(
         aktørId: String,
         personidentifikator: Personidentifikator,
         alder: Alder,
-        jurist: MaskinellJurist
+        jurist: MaskinellJurist,
+        regler: ArbeidsgiverRegler = NormalArbeidstaker
     ) : this(
         aktørId,
         personidentifikator,
@@ -128,7 +130,8 @@ class Person private constructor(
         Infotrygdhistorikk(),
         VilkårsgrunnlagHistorikk(),
         null,
-        jurist.medFødselsnummer(personidentifikator)
+        jurist.medFødselsnummer(personidentifikator),
+        regler = regler
     )
 
     private val observers = mutableListOf<PersonObserver>()
@@ -387,7 +390,6 @@ class Person private constructor(
     }
 
     private fun arbeidsgiverUtbetalinger(
-        regler: ArbeidsgiverRegler = NormalArbeidstaker,
         subsumsjonObserver: SubsumsjonObserver
     ): ArbeidsgiverUtbetalinger {
         return ArbeidsgiverUtbetalinger(

@@ -21,6 +21,7 @@ import no.nav.helse.somPersonidentifikator
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.TestObservatør
 import no.nav.helse.utbetalingstidslinje.Alder.Companion.alder
+import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -100,6 +101,16 @@ internal abstract class AbstractPersonTest {
         ugyldigeSituasjonerObservatør.validerSykdomshistorikk()
     }
 
+    private fun regler(maksSykedager: Int): ArbeidsgiverRegler = object: ArbeidsgiverRegler {
+        override fun burdeStarteNyArbeidsgiverperiode(oppholdsdagerBrukt: Int) = oppholdsdagerBrukt >= 16
+        override fun arbeidsgiverperiodenGjennomført(arbeidsgiverperiodedagerBrukt: Int) = arbeidsgiverperiodedagerBrukt >= 16
+        override fun dekningsgrad() = 1.0
+        override fun maksSykepengedager() = maksSykedager
+        override fun maksSykepengedagerOver67() = maksSykedager
+    }
+    protected fun createKorttidsPerson(personidentifikator: Personidentifikator, fødseldato: LocalDate, maksSykedager: Int) = createTestPerson { jurist ->
+        Person(AKTØRID, personidentifikator, fødseldato.alder, jurist, regler(maksSykedager))
+    }
     protected fun createTestPerson(personidentifikator: Personidentifikator, fødseldato: LocalDate) = createTestPerson { jurist ->
         Person(AKTØRID, personidentifikator, fødseldato.alder, jurist)
     }
