@@ -68,7 +68,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
 
         assertTrue(errors.isEmpty())
         assertEquals(warnings.size, 1)
-        assertTrue(warnings.map { it.melding }.contains("Det er simulert et negativt beløp"))
+        assertTrue(warnings.map { it.melding }.contains("Det er simulert et negativt beløp."))
     }
 
     @Test
