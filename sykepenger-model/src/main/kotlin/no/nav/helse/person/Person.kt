@@ -625,9 +625,9 @@ class Person private constructor(
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag)
     }
 
-    private fun lagreOverstyrArbeidsforhold(overstyrArbeidsforhold: OverstyrArbeidsforhold, subsumsjonObserver: SubsumsjonObserver) {
+    private fun lagreOverstyrArbeidsforhold(overstyrArbeidsforhold: OverstyrArbeidsforhold) {
         arbeidsgivere.forEach { arbeidsgiver ->
-            overstyrArbeidsforhold.lagre(arbeidsgiver, subsumsjonObserver)
+            overstyrArbeidsforhold.lagre(arbeidsgiver)
         }
     }
 
@@ -818,7 +818,7 @@ class Person private constructor(
         subsumsjonObserver: SubsumsjonObserver
     ) {
         val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) ?: return hendelse.funksjonellFeil(RV_VV_10)
-        lagreOverstyrArbeidsforhold(hendelse, subsumsjonObserver)
+        lagreOverstyrArbeidsforhold(hendelse)
         nyttVilkårsgrunnlag(hendelse, grunnlag.overstyrArbeidsforhold(hendelse, subsumsjonObserver))
     }
 

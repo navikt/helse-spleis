@@ -8,7 +8,6 @@ import no.nav.helse.person.Arbeidsforholdhistorikk
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Arbeidsgiver.Companion.finn
 import no.nav.helse.person.Dokumentsporing
-import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.PersonHendelse
 import no.nav.helse.person.Sykepengegrunnlag
@@ -35,11 +34,9 @@ class OverstyrArbeidsforhold(
         }
     }
 
-    internal fun lagre(arbeidsgiver: Arbeidsgiver, subsumsjonObserver: SubsumsjonObserver) {
-        val overstyring = overstyrteArbeidsforhold.overstyringFor(arbeidsgiver.organisasjonsnummer())
-        if (overstyring != null) {
-            arbeidsgiver.lagreOverstyrArbeidsforhold(skjæringstidspunkt, overstyring, subsumsjonObserver)
-        }
+    internal fun lagre(arbeidsgiver: Arbeidsgiver) {
+        val overstyring = overstyrteArbeidsforhold.overstyringFor(arbeidsgiver.organisasjonsnummer()) ?: return
+        arbeidsgiver.lagreOverstyrArbeidsforhold(skjæringstidspunkt, overstyring)
     }
 
     internal fun leggTil(hendelseIder: MutableSet<Dokumentsporing>) {
@@ -69,19 +66,11 @@ class OverstyrArbeidsforhold(
                 firstOrNull { it.orgnummer == orgnummer }
         }
 
-        internal fun lagre(
-            skjæringstidspunkt: LocalDate,
-            arbeidsforholdhistorikk: Arbeidsforholdhistorikk,
-            subsumsjonObserver: SubsumsjonObserver,
-            inntekterSisteTreMåneder: Inntektshistorikk.Inntektsopplysning?
-        ) {
-            requireNotNull(inntekterSisteTreMåneder) {"En ghost skal ha inntekt fra A-ordningen dersom arbeidsforholdet er eldre enn 3 måneder"}
+        internal fun lagre(skjæringstidspunkt: LocalDate, arbeidsforholdhistorikk: Arbeidsforholdhistorikk) {
             if (deaktivert) {
                 arbeidsforholdhistorikk.deaktiverArbeidsforhold(skjæringstidspunkt)
-                inntekterSisteTreMåneder.subsumerArbeidsforhold(subsumsjonObserver, orgnummer, forklaring, true)
             } else {
                 arbeidsforholdhistorikk.aktiverArbeidsforhold(skjæringstidspunkt)
-                inntekterSisteTreMåneder.subsumerArbeidsforhold(subsumsjonObserver, orgnummer, forklaring, false)
             }
         }
 
