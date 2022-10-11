@@ -6,8 +6,8 @@ import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Arbeidsgiver.Companion.harPeriodeSomBlokkererOverstyring
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.Dokumentsporing
-import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.PersonObserver
+import no.nav.helse.person.Sykepengegrunnlag
 import no.nav.helse.økonomi.Inntekt
 
 class OverstyrInntekt(
@@ -21,10 +21,6 @@ class OverstyrInntekt(
     internal val subsumsjon: Subsumsjon?
 ) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer, aktørId, organisasjonsnummer) {
     internal fun erRelevant(skjæringstidspunkt: LocalDate) = this.skjæringstidspunkt == skjæringstidspunkt
-
-    internal fun addInntekt(inntektshistorikk: Inntektshistorikk) {
-        inntektshistorikk.append { addSaksbehandler(skjæringstidspunkt, meldingsreferanseId(), inntekt, forklaring, subsumsjon) }
-    }
 
     internal fun tilRevurderingAvvistEvent(): PersonObserver.RevurderingAvvistEvent =
         PersonObserver.RevurderingAvvistEvent(
@@ -44,5 +40,9 @@ class OverstyrInntekt(
         if (arbeidsgivere.harPeriodeSomBlokkererOverstyring(skjæringstidspunkt)) {
             logiskFeil("Kan ikke overstyre inntekt for ghost for en pågående behandling der én eller flere perioder er behandlet ferdig")
         }
+    }
+
+    internal fun overstyr(builder: Sykepengegrunnlag.SaksbehandlerOverstyringer) {
+        builder.leggTilInntekt(organisasjonsnummer, meldingsreferanseId(), inntekt, forklaring, subsumsjon)
     }
 }

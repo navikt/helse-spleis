@@ -8,6 +8,7 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
+import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
@@ -93,7 +94,13 @@ internal class OverstyrInntektTest : AbstractEndToEndTest() {
             AVVENTER_GODKJENNING) // <-- og her skal den nye, overstyrte inntekten vært benyttet
 
         // assert at vi bruker den nye inntekten i beregning av penger til sjuk.
-        assertInntektForDato(overstyrtInntekt, fom, inspektør = inspektør)
+        val vilkårsgrunnlagInspektør = inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør
+        val sykepengegrunnlagInspektør = vilkårsgrunnlagInspektør?.sykepengegrunnlag?.inspektør
+        sykepengegrunnlagInspektør?.arbeidsgiverInntektsopplysningerPerArbeidsgiver?.get(ORGNUMMER)?.inspektør
+            ?.also {
+                assertEquals(overstyrtInntekt, it.inntektsopplysning.omregnetÅrsinntekt())
+                assertEquals(Inntektshistorikk.Saksbehandler::class, it.inntektsopplysning::class)
+        }
     }
 
     @Test

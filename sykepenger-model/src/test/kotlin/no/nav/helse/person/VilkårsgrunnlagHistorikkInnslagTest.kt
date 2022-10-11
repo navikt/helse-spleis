@@ -160,7 +160,6 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
             override fun vilkårsgrunnlagtype() = "testgrunnlag"
             override fun overstyrInntekt(
                 hendelse: OverstyrInntekt,
-                sykepengegrunnlag: Sykepengegrunnlag,
                 subsumsjonObserver: SubsumsjonObserver
             ): VilkårsgrunnlagHistorikk.Grunnlagsdata? = null
 

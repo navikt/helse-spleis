@@ -17,10 +17,10 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.til
-import no.nav.helse.inspectors.Kilde.SAKSBEHANDLER
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
+import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
@@ -41,7 +41,9 @@ import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -635,10 +637,21 @@ internal class RevurderInntektFlereArbeidsgivereTest: AbstractDslTest() {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
             håndterOverstyrInntekt(skjæringstidspunkt = 1.januar, inntekt = 25000.månedlig)
-            assertAntallInntektsopplysninger(1, SAKSBEHANDLER)
         }
-        a2 {
-            assertAntallInntektsopplysninger(0, SAKSBEHANDLER)
+
+        (inspiser(personInspektør).vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(1.januar)?.inspektør ?: Assertions.fail { "finner ikke vilkårsgrunnlag" }).also { vilkårsgrunnlag ->
+            val sykepengegrunnlagInspektør = vilkårsgrunnlag.sykepengegrunnlag.inspektør
+            val sammenligningsgrunnlagInspektør = vilkårsgrunnlag.sammenligningsgrunnlag1.inspektør
+
+            assertEquals(300000.årlig, sykepengegrunnlagInspektør.beregningsgrunnlag)
+            assertEquals(300000.årlig, sykepengegrunnlagInspektør.sykepengegrunnlag)
+            assertEquals(372000.årlig, sammenligningsgrunnlagInspektør.sammenligningsgrunnlag)
+            assertEquals(19, vilkårsgrunnlag.avviksprosent?.roundToInt())
+            assertEquals(1, sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysninger.size)
+            sykepengegrunnlagInspektør.arbeidsgiverInntektsopplysningerPerArbeidsgiver.getValue(a1).inspektør.also {
+                assertEquals(25000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
+                assertEquals(Inntektshistorikk.Saksbehandler::class, it.inntektsopplysning::class)
+            }
         }
     }
 

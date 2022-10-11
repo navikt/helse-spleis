@@ -16,11 +16,11 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.til
-import no.nav.helse.inspectors.Kilde
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.Aktivitetslogg
+import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.OppdragVisitor
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
@@ -137,7 +137,13 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
 
         assertEquals(beregning.vilkårsgrunnlagHistorikkInnslagId, person.nyesteIdForVilkårsgrunnlagHistorikk())
 
-        assertTrue(inspektør.inntektInspektør.sisteInnslag?.opplysninger?.any { it.kilde == Kilde.SAKSBEHANDLER } ?: false)
+        val vilkårsgrunnlagInspektør = inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør
+        val sykepengegrunnlagInspektør = vilkårsgrunnlagInspektør?.sykepengegrunnlag?.inspektør
+        sykepengegrunnlagInspektør?.arbeidsgiverInntektsopplysningerPerArbeidsgiver?.get(ORGNUMMER)?.inspektør
+            ?.also {
+                assertEquals(32000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
+                assertEquals(Inntektshistorikk.Saksbehandler::class, it.inntektsopplysning::class)
+            }
     }
 
     @Test
@@ -162,9 +168,13 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         assertEquals(506, inspektør.utbetalinger[1].inspektør.arbeidsgiverOppdrag.nettoBeløp())
         assertEquals(-506, inspektør.utbetalinger[2].inspektør.arbeidsgiverOppdrag.nettoBeløp())
 
-        val inntektFraSaksbehandler = inspektør.inntektInspektør.sisteInnslag?.opplysninger?.filter { it.kilde == Kilde.SAKSBEHANDLER }!!
-        assertEquals(1, inntektFraSaksbehandler.size)
-        assertEquals(31000.månedlig, inntektFraSaksbehandler.first().sykepengegrunnlag)
+        val vilkårsgrunnlagInspektør = inspektør.vilkårsgrunnlag(1.vedtaksperiode)?.inspektør
+        val sykepengegrunnlagInspektør = vilkårsgrunnlagInspektør?.sykepengegrunnlag?.inspektør
+        sykepengegrunnlagInspektør?.arbeidsgiverInntektsopplysningerPerArbeidsgiver?.get(ORGNUMMER)?.inspektør
+            ?.also {
+                assertEquals(31000.månedlig, it.inntektsopplysning.omregnetÅrsinntekt())
+                assertEquals(Inntektshistorikk.Saksbehandler::class, it.inntektsopplysning::class)
+            }
     }
 
     @Test

@@ -8,7 +8,6 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.til
-import no.nav.helse.inspectors.GrunnlagsdataInspektør
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.november
@@ -55,8 +54,6 @@ import org.junit.jupiter.api.Test
 
 internal class OverstyrInntektFlereArbeidsgivereTest: AbstractEndToEndTest() {
 
-    val grunnlagsdataInspektør get() = GrunnlagsdataInspektør(inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!)
-
     @Test
     fun `overstyr inntekt med flere AG -- happy case`() {
         tilGodkjenning(1.januar, 31.januar, a1, a2)
@@ -102,8 +99,6 @@ internal class OverstyrInntektFlereArbeidsgivereTest: AbstractEndToEndTest() {
         assertTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING, orgnummer = a1)
         assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
 
-        assertInntektForDato(19000.månedlig, 1.januar, inspektør = inspektør(a1))
-        assertInntektForDato(20000.månedlig, 1.januar, inspektør = inspektør(a2))
         (inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }).also { vilkårsgrunnlag ->
             val sykepengegrunnlagInspektør = vilkårsgrunnlag.sykepengegrunnlag.inspektør
             val sammenligningsgrunnlagInspektør = vilkårsgrunnlag.sammenligningsgrunnlag1.inspektør
@@ -236,7 +231,6 @@ internal class OverstyrInntektFlereArbeidsgivereTest: AbstractEndToEndTest() {
         )
         håndterOverstyrInntekt(29000.månedlig, a1, 1.januar)
 
-        assertInntektForDato(29000.månedlig, 1.januar, inspektør = inspektør(a1))
         val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }
         val sykepengegrunnlagInspektør = vilkårsgrunnlag.sykepengegrunnlag.inspektør
         val sammenligningsgrunnlagInspektør = vilkårsgrunnlag.sammenligningsgrunnlag1.inspektør
@@ -289,7 +283,6 @@ internal class OverstyrInntektFlereArbeidsgivereTest: AbstractEndToEndTest() {
         )
         håndterOverstyrInntekt(10000.månedlig, a1, 1.januar)
 
-        assertInntektForDato(10000.månedlig, 1.januar, inspektør = inspektør(a1))
         val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }
         val sykepengegrunnlagInspektør = vilkårsgrunnlag.sykepengegrunnlag.inspektør
         val sammenligningsgrunnlagInspektør = vilkårsgrunnlag.sammenligningsgrunnlag1.inspektør
@@ -329,7 +322,6 @@ internal class OverstyrInntektFlereArbeidsgivereTest: AbstractEndToEndTest() {
         tilGodkjenning(1.januar, 31.januar, a1, a2)
         håndterOverstyrInntekt(9999.månedlig, a1, 1.januar)
 
-        assertInntektForDato(9999.månedlig, 1.januar, inspektør = inspektør(a1))
         val vilkårsgrunnlag = inspektør(a1).vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }
         val sykepengegrunnlagInspektør = vilkårsgrunnlag.sykepengegrunnlag.inspektør
         val sammenligningsgrunnlagInspektør = vilkårsgrunnlag.sammenligningsgrunnlag1.inspektør

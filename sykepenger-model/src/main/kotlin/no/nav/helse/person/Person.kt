@@ -640,12 +640,6 @@ class Person private constructor(
         }
     }
 
-    private fun lagreInntekt(hendelse: OverstyrInntekt) {
-        val arbeidsgiver = finnArbeidsgiver(hendelse)
-        arbeidsgiver.addInntekt(hendelse)
-    }
-
-
     internal fun lagreOmregnetÅrsinntekt(
         orgnummer: String,
         arbeidsgiverInntekt: ArbeidsgiverInntekt,
@@ -837,9 +831,7 @@ class Person private constructor(
         subsumsjonObserver: SubsumsjonObserver
     ) {
         val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) ?: return hendelse.funksjonellFeil(RV_VV_10)
-        lagreInntekt(hendelse)
-        val sykepengegrunnlag = beregnSykepengegrunnlag(skjæringstidspunkt, subsumsjonObserver)
-        nyttVilkårsgrunnlag(hendelse, grunnlag.overstyrInntekt(hendelse, sykepengegrunnlag, subsumsjonObserver))
+        nyttVilkårsgrunnlag(hendelse, grunnlag.overstyrInntekt(hendelse, subsumsjonObserver))
     }
 
     private fun nyttVilkårsgrunnlag(hendelse: IAktivitetslogg, grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata?) {

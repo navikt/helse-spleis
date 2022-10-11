@@ -1,9 +1,12 @@
 package no.nav.helse.person
 
 import java.time.LocalDate
+import java.util.UUID
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.Grunnbeløp.Companion.halvG
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
+import no.nav.helse.hendelser.OverstyrInntekt
+import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.aktiver
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.deaktiver
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.erOverstyrt
@@ -11,6 +14,7 @@ import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.harInntekt
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.medInntekt
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.omregnetÅrsinntekt
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.omregnetÅrsinntektPerArbeidsgiver
+import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.overstyrInntekter
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.valider
 import no.nav.helse.person.Sykepengegrunnlag.Begrensning.ER_6G_BEGRENSET
 import no.nav.helse.person.Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
@@ -141,6 +145,16 @@ internal class Sykepengegrunnlag(
         return hendelse.overstyr(this, subsumsjonObserver)
     }
 
+    internal fun overstyrInntekter(
+        hendelse: OverstyrInntekt,
+        subsumsjonObserver: SubsumsjonObserver,
+        opptjening: Opptjening
+    ): Sykepengegrunnlag {
+        val builder = SaksbehandlerOverstyringer(opptjening, subsumsjonObserver)
+        hendelse.overstyr(builder)
+        return kopierSykepengegrunnlag(builder.resultat(), deaktiverteArbeidsforhold)
+    }
+
     private fun kopierSykepengegrunnlag(
         arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
         deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysning>
@@ -193,7 +207,6 @@ internal class Sykepengegrunnlag(
     internal fun avviksprosent(sammenligningsgrunnlag: Inntekt, subsumsjonObserver: SubsumsjonObserver) = beregningsgrunnlag.avviksprosent(sammenligningsgrunnlag).also { avvik ->
         subsumsjonObserver.`§ 8-30 ledd 2 punktum 1`(Prosent.MAKSIMALT_TILLATT_AVVIK_PÅ_ÅRSINNTEKT, beregningsgrunnlag, sammenligningsgrunnlag, avvik)
     }
-
     internal fun inntektskilde() = when {
         arbeidsgiverInntektsopplysninger.size > 1 -> Inntektskilde.FLERE_ARBEIDSGIVERE
         else -> Inntektskilde.EN_ARBEIDSGIVER
@@ -203,10 +216,10 @@ internal class Sykepengegrunnlag(
     internal fun erRelevant(organisasjonsnummer: String) = arbeidsgiverInntektsopplysninger.any {
         it.gjelder(organisasjonsnummer)
     }
+
     internal fun medInntekt(organisasjonsnummer: String, dato: LocalDate, økonomi: Økonomi, arbeidsgiverperiode: Arbeidsgiverperiode?, regler: ArbeidsgiverRegler, subsumsjonObserver: SubsumsjonObserver): Økonomi? {
         return arbeidsgiverInntektsopplysninger.medInntekt(organisasjonsnummer, skjæringstidspunkt, dato, økonomi, arbeidsgiverperiode, regler, subsumsjonObserver)
     }
-
     internal fun build(builder: VedtakFattetBuilder) {
         builder
             .sykepengegrunnlag(this.sykepengegrunnlag)
@@ -222,6 +235,7 @@ internal class Sykepengegrunnlag(
                  && begrensning == other.begrensning
                  && deaktiverteArbeidsforhold == other.deaktiverteArbeidsforhold
     }
+
     override fun hashCode(): Int {
         var result = sykepengegrunnlag.hashCode()
         result = 31 * result + arbeidsgiverInntektsopplysninger.hashCode()
@@ -230,7 +244,6 @@ internal class Sykepengegrunnlag(
         result = 31 * result + deaktiverteArbeidsforhold.hashCode()
         return result
     }
-
     override fun compareTo(other: Inntekt) = this.sykepengegrunnlag.compareTo(other)
     internal fun er6GBegrenset() = begrensning == ER_6G_BEGRENSET
 
@@ -238,4 +251,14 @@ internal class Sykepengegrunnlag(
         ER_6G_BEGRENSET, ER_IKKE_6G_BEGRENSET, VURDERT_I_INFOTRYGD
     }
 
+    inner class SaksbehandlerOverstyringer(private val opptjening: Opptjening, private val subsumsjonObserver: SubsumsjonObserver) {
+        private val nyeInntektsopplysninger = mutableListOf<ArbeidsgiverInntektsopplysning>()
+
+        internal fun leggTilInntekt(organisasjonsnummer: String, meldingsreferanseId: UUID, inntekt: Inntekt, forklaring: String, subsumsjon: Subsumsjon?) {
+            val saksbehandler = Inntektshistorikk.Saksbehandler(UUID.randomUUID(), skjæringstidspunkt, meldingsreferanseId, inntekt, forklaring, subsumsjon)
+            nyeInntektsopplysninger.add(ArbeidsgiverInntektsopplysning(organisasjonsnummer, saksbehandler))
+        }
+
+        internal fun resultat() = arbeidsgiverInntektsopplysninger.overstyrInntekter(opptjening, nyeInntektsopplysninger, subsumsjonObserver)
+    }
 }

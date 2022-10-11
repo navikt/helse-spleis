@@ -34,7 +34,6 @@ import no.nav.helse.person.ForkastetVedtaksperiode.Companion.håndterInntektsmel
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.iderMedUtbetaling
 import no.nav.helse.person.Inntektshistorikk.IkkeRapportert
 import no.nav.helse.person.Vedtaksperiode.Companion.ER_ELLER_HAR_VÆRT_AVSLUTTET
-import no.nav.helse.person.Vedtaksperiode.Companion.FØR_AVSLUTTET
 import no.nav.helse.person.Vedtaksperiode.Companion.HAR_PÅGÅENDE_UTBETALINGER
 import no.nav.helse.person.Vedtaksperiode.Companion.IKKE_FERDIG_BEHANDLET
 import no.nav.helse.person.Vedtaksperiode.Companion.IKKE_FERDIG_REVURDERT
@@ -143,9 +142,6 @@ internal class Arbeidsgiver private constructor(
         internal fun List<Arbeidsgiver>.harPeriodeSomBlokkererOverstyring(skjæringstidspunkt: LocalDate) =
             flatMap { it.vedtaksperioder }.any { vedtaksperiode -> vedtaksperiode.blokkererOverstyring(skjæringstidspunkt) }
 
-        internal fun List<Arbeidsgiver>.harUferdigPeriodeFør(periode: Periode) =
-            nåværendeVedtaksperioder(FØR_AVSLUTTET).any { it.periode().start < periode.start }
-
         internal fun List<Arbeidsgiver>.nyPeriode(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
             flatMap { it.vedtaksperioder }.forEach {
                 it.nyPeriode(vedtaksperiode, søknad)
@@ -181,7 +177,7 @@ internal class Arbeidsgiver private constructor(
                     inntektsopplysning?.subsumerSykepengegrunnlag(
                         subsumsjonObserver = subsumsjonObserver,
                         organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
-                        startdatoArbeidsforhold = arbeidsgiver.startdatoForArbeidsforhold(skjæringstidspunkt)
+                        startdatoArbeidsforhold = null
                     )
                 }
             }
@@ -205,10 +201,6 @@ internal class Arbeidsgiver private constructor(
                     else -> null
                 }
             }
-
-        internal fun List<Arbeidsgiver>.deaktiverteArbeidsforhold(skjæringstidspunkt: LocalDate) =
-            this.filter { it.arbeidsforholdhistorikk.harDeaktivertArbeidsforhold(skjæringstidspunkt) }
-
 
         internal fun skjæringstidspunkt(arbeidsgivere: List<Arbeidsgiver>, periode: Periode, infotrygdhistorikk: Infotrygdhistorikk) =
             infotrygdhistorikk.skjæringstidspunkt(periode, arbeidsgivere.map(Arbeidsgiver::sykdomstidslinje))
@@ -326,14 +318,9 @@ internal class Arbeidsgiver private constructor(
         val inntektsopplysning = inntektshistorikk.omregnetÅrsinntekt(skjæringstidspunkt, førsteFraværsdag, arbeidsforholdhistorikk)
         block(inntektsopplysning)
         return when {
-            harDeaktivertArbeidsforhold(skjæringstidspunkt) -> null
             inntektsopplysning != null -> ArbeidsgiverInntektsopplysning(organisasjonsnummer, inntektsopplysning)
             else -> null
         }
-    }
-
-    private fun startdatoForArbeidsforhold(skjæringstidspunkt: LocalDate): LocalDate? {
-        return arbeidsforholdhistorikk.startdatoFor(skjæringstidspunkt)
     }
 
     internal fun avventerRevurdering() = vedtaksperioder.avventerRevurdering()
@@ -908,18 +895,9 @@ internal class Arbeidsgiver private constructor(
         return inntektsmeldingInfo.opprett(skjæringstidspunkt, inntektsmelding)
     }
 
-    internal fun addInntekt(hendelse: OverstyrInntekt) {
-        hendelse.addInntekt(inntektshistorikk)
-    }
-
     internal fun lagreOverstyrArbeidsforhold(skjæringstidspunkt: LocalDate, overstyring: OverstyrArbeidsforhold.ArbeidsforholdOverstyrt) {
         overstyring.lagre(skjæringstidspunkt, arbeidsforholdhistorikk)
     }
-
-    private fun lagIkkeRapportertInntekt(skjæringstidspunkt: LocalDate) =
-        if (arbeidsforholdhistorikk.harArbeidsforholdNyereEnn(skjæringstidspunkt, 3))
-            IkkeRapportert(UUID.randomUUID(), skjæringstidspunkt)
-        else null
 
     internal fun lagreOmregnetÅrsinntekt(arbeidsgiverInntekt: ArbeidsgiverInntekt, skjæringstidspunkt: LocalDate, hendelse: PersonHendelse) {
         if (!harRelevantArbeidsforhold(skjæringstidspunkt)) return
@@ -939,8 +917,6 @@ internal class Arbeidsgiver private constructor(
         forkastede.addAll(perioder.map { ForkastetVedtaksperiode(it) })
         sykdomshistorikk.fjernDager(perioder.map { it.periode() })
     }
-
-    private fun harDeaktivertArbeidsforhold(skjæringstidspunkt: LocalDate) = arbeidsforholdhistorikk.harDeaktivertArbeidsforhold(skjæringstidspunkt)
 
     private fun registrerNyVedtaksperiode(vedtaksperiode: Vedtaksperiode) {
         vedtaksperioder.add(vedtaksperiode)

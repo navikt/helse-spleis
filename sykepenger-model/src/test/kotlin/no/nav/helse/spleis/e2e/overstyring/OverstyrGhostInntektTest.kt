@@ -24,7 +24,6 @@ import no.nav.helse.person.nullstillTilstandsendringer
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
-import no.nav.helse.spleis.e2e.assertInntektForDato
 import no.nav.helse.spleis.e2e.assertLogiskFeil
 import no.nav.helse.spleis.e2e.assertTilstander
 import no.nav.helse.spleis.e2e.assertVarsel
@@ -69,8 +68,6 @@ internal class OverstyrGhostInntektTest : AbstractEndToEndTest() {
             )
         )
         håndterOverstyrInntekt(500.månedlig, a2, 1.januar)
-
-        assertInntektForDato(500.månedlig, 1.januar, inspektør = inspektør(a2))
 
         val vilkårsgrunnlag = inspektør(AbstractPersonTest.a1).vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }
         val sykepengegrunnlagInspektør = vilkårsgrunnlag.sykepengegrunnlag.inspektør
@@ -142,7 +139,6 @@ internal class OverstyrGhostInntektTest : AbstractEndToEndTest() {
         )
         håndterOverstyrInntekt(500.månedlig, a2, 1.januar)
 
-        assertInntektForDato(500.månedlig, 1.januar, inspektør = inspektør(a2))
         val vilkårsgrunnlag = inspektør(AbstractPersonTest.a1).vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }
         val sykepengegrunnlagInspektør = vilkårsgrunnlag.sykepengegrunnlag.inspektør
         val sammenligningsgrunnlagInspektør = vilkårsgrunnlag.sammenligningsgrunnlag1.inspektør
@@ -222,8 +218,7 @@ internal class OverstyrGhostInntektTest : AbstractEndToEndTest() {
         )
         håndterOverstyrInntekt(500.månedlig, a2, 1.januar)
 
-        assertInntektForDato(500.månedlig, 1.januar, inspektør = inspektør(a2))
-        val vilkårsgrunnlag = inspektør(AbstractPersonTest.a1).vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: Assertions.fail { "finner ikke vilkårsgrunnlag" }
+        val vilkårsgrunnlag = inspektør(AbstractPersonTest.a1).vilkårsgrunnlag(1.vedtaksperiode)?.inspektør ?: fail { "finner ikke vilkårsgrunnlag" }
         val sykepengegrunnlagInspektør = vilkårsgrunnlag.sykepengegrunnlag.inspektør
         val sammenligningsgrunnlagInspektør = vilkårsgrunnlag.sammenligningsgrunnlag1.inspektør
 
