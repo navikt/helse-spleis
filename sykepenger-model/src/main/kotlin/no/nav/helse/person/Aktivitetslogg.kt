@@ -265,13 +265,6 @@ class Aktivitetslogg(
                     )
                 }
 
-                internal fun arbeidsgiveropplysninger(aktivitetslogg: IAktivitetslogg) {
-                    aktivitetslogg.behov(
-                        Behovtype.Arbeidsgiveropplysninger,
-                        "Trenger opplysninger fra arbeidsgiver"
-                    )
-                }
-
                 internal fun foreldrepenger(aktivitetslogg: IAktivitetslogg) {
                     aktivitetslogg.behov(
                         Behovtype.Foreldrepenger,
@@ -423,7 +416,6 @@ class Aktivitetslogg(
 
             enum class Behovtype {
                 Sykepengehistorikk,
-                Arbeidsgiveropplysninger,
                 SykepengehistorikkForFeriepenger,
                 Foreldrepenger,
                 Pleiepenger,

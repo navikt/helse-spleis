@@ -67,6 +67,11 @@ interface PersonObserver {
         val søknadIder: Set<UUID>
     )
 
+    data class TrengerArbeidsgiveropplysningerEvent(
+        val fom: LocalDate,
+        val tom: LocalDate
+    )
+
     data class UtbetalingAnnullertEvent(
         val utbetalingId: UUID,
         val korrelasjonsId: UUID,
@@ -175,6 +180,7 @@ interface PersonObserver {
     fun vedtaksperiodeIkkeFunnet(hendelseskontekst: Hendelseskontekst, vedtaksperiodeEvent: VedtaksperiodeIkkeFunnetEvent) {}
     fun manglerInntektsmelding(hendelseskontekst: Hendelseskontekst, orgnr: String, event: ManglendeInntektsmeldingEvent) {}
     fun trengerIkkeInntektsmelding(hendelseskontekst: Hendelseskontekst, event: TrengerIkkeInntektsmeldingEvent) {}
+    fun trengerArbeidsgiveropplysninger(hendelseskontekst: Hendelseskontekst, event: TrengerArbeidsgiveropplysningerEvent) {}
     fun utbetalingEndret(hendelseskontekst: Hendelseskontekst, event: UtbetalingEndretEvent) {}
     fun utbetalingUtbetalt(hendelseskontekst: Hendelseskontekst, event: UtbetalingUtbetaltEvent) {}
     fun utbetalingUtenUtbetaling(hendelseskontekst: Hendelseskontekst, event: UtbetalingUtbetaltEvent) {}
