@@ -634,12 +634,6 @@ class Person private constructor(
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag)
     }
 
-    private fun lagreOverstyrArbeidsforhold(overstyrArbeidsforhold: OverstyrArbeidsforhold) {
-        arbeidsgivere.forEach { arbeidsgiver ->
-            overstyrArbeidsforhold.lagre(arbeidsgiver)
-        }
-    }
-
     internal fun lagreOmregnetÅrsinntekt(
         orgnummer: String,
         arbeidsgiverInntekt: ArbeidsgiverInntekt,
@@ -821,7 +815,6 @@ class Person private constructor(
         subsumsjonObserver: SubsumsjonObserver
     ) {
         val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) ?: return hendelse.funksjonellFeil(RV_VV_10)
-        lagreOverstyrArbeidsforhold(hendelse)
         nyttVilkårsgrunnlag(hendelse, grunnlag.overstyrArbeidsforhold(hendelse, subsumsjonObserver))
     }
 
