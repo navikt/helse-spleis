@@ -122,6 +122,9 @@ spec:
           application: spleis-avstemming
           access: readwrite
         - team: tbd
+          application: spleis-migrate
+          access: readwrite
+        - team: tbd
           application: spock
           access: readwrite
         - team: tbd
