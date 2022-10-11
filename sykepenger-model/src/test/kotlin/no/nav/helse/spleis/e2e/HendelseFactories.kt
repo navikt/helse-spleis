@@ -434,8 +434,8 @@ internal fun AbstractEndToEndTest.simulering(
     }
 }
 
-internal fun standardSimuleringsresultat(orgnummer: String) = Simulering.SimuleringResultat(
-    totalbeløp = 2000,
+internal fun standardSimuleringsresultat(orgnummer: String, totalbeløp: Int = 2000) = Simulering.SimuleringResultat(
+    totalbeløp = totalbeløp,
     perioder = listOf(
         Simulering.SimulertPeriode(
             periode = Periode(17.januar, 20.januar),

@@ -11,9 +11,11 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.november
+import no.nav.helse.person.Varselkode.RV_SI_3
 import no.nav.helse.serde.api.dto.BeregnetPeriode
 import no.nav.helse.serde.api.dto.Inntektkilde
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
+import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.finnSkjæringstidspunkt
 import no.nav.helse.spleis.e2e.grunnlag
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
@@ -28,6 +30,7 @@ import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.spleis.e2e.repeat
 import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
 import no.nav.helse.spleis.e2e.speilApi
+import no.nav.helse.spleis.e2e.standardSimuleringsresultat
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -45,6 +48,27 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         håndterYtelser(1.vedtaksperiode, dødsdato = 1.januar)
 
         assertEquals(1.januar, serializePersonForSpeil(person).dødsdato)
+    }
+
+    @Test
+    fun `Negativt nettobeløp på simulering skal gi warning`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode, simuleringsresultat = standardSimuleringsresultat(ORGNUMMER, totalbeløp = -1))
+        assertVarsel(RV_SI_3)
+
+        val personDto = speilApi()
+        val periode: BeregnetPeriode = personDto.arbeidsgivere.first().generasjoner.first().perioder.first() as BeregnetPeriode
+        val warnings = periode.aktivitetslogg.filter { it.alvorlighetsgrad ==  "W" }
+        val errors = periode.aktivitetslogg.filter { it.alvorlighetsgrad ==  "E" }
+
+        assertTrue(errors.isEmpty())
+        assertEquals(warnings.size, 1)
+        assertTrue(warnings.map { it.melding }.contains("Det er simulert et negativt beløp"))
     }
 
     @Test

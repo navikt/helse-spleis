@@ -524,6 +524,18 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
     }
 
     @Test
+    fun `varsel - Det er simulert et negativt beløp`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterYtelser(1.vedtaksperiode)
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode, simuleringsresultat = standardSimuleringsresultat(ORGNUMMER, totalbeløp = -1))
+        assertVarsel(Varselkode.RV_SI_3)
+    }
+
+    @Test
     fun `varsel - Har mer enn 25 prosent avvik`() {
         nyPeriode(1.januar til 31.januar)
         håndterInntektsmelding(listOf(1.januar til 16.januar))

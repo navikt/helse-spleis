@@ -49,6 +49,8 @@ class Simulering(
         if (simuleringResultat == null) info("Ingenting ble simulert")
     }
 
+    internal fun harNegativtTotalbeløp() = simuleringResultat?.let { it.totalbeløp < 0  } ?: false
+
     class SimuleringResultat(
         internal val totalbeløp: Int,
         internal val perioder: List<SimulertPeriode>

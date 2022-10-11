@@ -1706,9 +1706,10 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, simulering: Simulering) {
             if (vedtaksperiode.utbetalinger.valider(simulering).harFunksjonelleFeilEllerVerre())
                 return vedtaksperiode.forkast(simulering)
-
+            if (simulering.harNegativtTotalbeløp()) {
+                simulering.varsel(Varselkode.RV_SI_3)
+            }
             if (!vedtaksperiode.utbetalinger.erKlarForGodkjenning()) return
-
             vedtaksperiode.tilstand(simulering, AvventerGodkjenning)
         }
 
@@ -1755,6 +1756,9 @@ internal class Vedtaksperiode private constructor(
                 if (vedtaksperiode.utbetalinger.valider(simulering).harVarslerEllerVerre()) {
                     simulering.varsel(RV_SI_2)
                 }
+            }
+            if (simulering.harNegativtTotalbeløp()) {
+                simulering.varsel(Varselkode.RV_SI_3)
             }
             if (!vedtaksperiode.utbetalinger.erKlarForGodkjenning()) return simulering.info("Kan ikke gå videre da begge oppdragene ikke er simulert.")
             vedtaksperiode.tilstand(simulering, AvventerGodkjenningRevurdering)
