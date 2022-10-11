@@ -1,0 +1,11 @@
+---
+apiVersion: aiven.nais.io/v1
+kind: AivenApplication
+metadata:
+    name: spleis-migrate
+    namespace: tbd
+spec:
+    kafka:
+        pool: nav-prod
+    secretName: kafka-spleis-migrate-nav-prod-8290c943
+    protected: true

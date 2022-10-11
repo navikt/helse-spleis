@@ -38,6 +38,7 @@ fun main(args: Array<String>) {
     when (val task = args[0].trim().lowercase()) {
         "vacuum" -> vacuumTask()
         "avstemming" -> avstemmingTask(ConsumerProducerFactory(AivenConfig.default), args.getOrNull(1)?.toIntOrNull())
+        "migrate" -> migrateTask(ConsumerProducerFactory(AivenConfig.default))
         else -> log.error("Unknown task $task")
     }
 }
@@ -55,6 +56,30 @@ private fun vacuumTask() {
         duration.toInt(DurationUnit.MINUTES) % 60,
         duration.toInt(DurationUnit.SECONDS) % 60
     )
+}
+
+private fun migrateTask(factory: ConsumerProducerFactory) {
+    DataSourceConfiguration(DbUser.AVSTEMMING).dataSource().use { ds ->
+        var count = 0L
+        factory.createProducer().use { producer ->
+            sessionOf(ds).use { session ->
+                session.run(queryOf("SELECT fnr,aktor_id FROM unike_person").map { row ->
+                    val fnr = row.string("fnr").padStart(11, '0')
+                    fnr to row.string("aktor_id")
+                }.asList)
+            }.forEach { (fnr, aktørId) ->
+                count += 1
+                producer.send(ProducerRecord("tbd.rapid.v1", fnr, lagMigrate(fnr, aktørId)))
+            }
+            producer.flush()
+        }
+        println()
+        println("==============================")
+        println("Sendte ut $count migreringer")
+        println("==============================")
+        println()
+    }
+
 }
 
 @ExperimentalTime
@@ -88,6 +113,16 @@ private fun avstemmingTask(factory: ConsumerProducerFactory, customDayOfMonth: I
         duration.toInt(DurationUnit.SECONDS) % 60
     )
 }
+
+private fun lagMigrate(fnr: String, aktørId: String) = """
+{
+  "@id": "${UUID.randomUUID()}",
+  "@event_name": "json_migrate",
+  "@opprettet": "${LocalDateTime.now()}",
+  "aktørId": "$aktørId",
+  "fødselsnummer": "$fnr"
+}
+"""
 
 private fun lagAvstemming(fnr: String, aktørId: String) = """
 {

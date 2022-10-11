@@ -1,0 +1,29 @@
+apiVersion: nais.io/v1
+kind: Naisjob
+metadata:
+  labels:
+    team: tbd
+  name: spleis-migrate
+  namespace: tbd
+spec:
+  image: {{image}}
+  kafka:
+    pool: nav-prod
+  secureLogs:
+    enabled: true
+  envFrom:
+    - secret: google-sql-spleis-spleis-spleis-avstemming-c09f6283
+  gcp:
+    permissions:
+      - resource:
+          apiVersion: resourcemanager.cnrm.cloud.google.com/v1beta1
+          kind: Project
+          name: tbd-prod-eacd
+        role: roles/cloudsql.client
+  env:
+    - name: DATABASE_REGION
+      value: "europe-north1"
+    - name: DATABASE_INSTANCE
+      value: "helse-spleis"
+    - name: RUNTIME_OPTS
+      value: "migrate"
