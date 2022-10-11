@@ -1,0 +1,210 @@
+{
+  "aktørId": "42",
+  "vilkårsgrunnlagHistorikk": [
+    {
+      "id": "3c81848f-eb02-4890-8028-1514b6997dd2",
+      "opprettet": "2022-10-11T08:44:43.036134",
+      "vilkårsgrunnlag": []
+    },
+    {
+      "id": "ffe97ab2-6924-49ef-8ad0-6ded9f6de8d8",
+      "opprettet": "2022-10-11T08:44:42.91423",
+      "vilkårsgrunnlag": [
+        {
+          "skjæringstidspunkt": "2018-01-01",
+          "type": "Vilkårsprøving",
+          "avviksprosent": 0.0,
+          "sykepengegrunnlag": {
+            "sykepengegrunnlag": 372000.0,
+            "inntektsgrunnlag": 372000.0,
+            "grunnbeløp": 561804.0,
+            "arbeidsgiverInntektsopplysninger": [
+              {
+                "orgnummer": "987654321",
+                "inntektsopplysning": {
+                  "id": "83128ab9-f96a-46ae-befe-ec81c84afbe0",
+                  "dato": "2018-01-01",
+                  "hendelseId": "de70a688-fb33-45f8-9e03-b771426e0011",
+                  "beløp": 31000.0,
+                  "kilde": "INNTEKTSMELDING",
+                  "tidsstempel": "2022-10-11T08:44:42.874797"
+                }
+              }
+            ],
+            "begrensning": "ER_IKKE_6G_BEGRENSET",
+            "deaktiverteArbeidsforhold": [],
+            "vurdertInfotrygd": false,
+            "minsteinntekt": 46817.0,
+            "oppfyllerMinsteinntektskrav": true
+          },
+          "sammenligningsgrunnlag": {
+            "sammenligningsgrunnlag": 372000.0,
+            "arbeidsgiverInntektsopplysninger": [
+              {
+                "orgnummer": "987654321",
+                "inntektsopplysning": {
+                  "id": "816ea452-0ae1-45fc-a45d-0a9c9b107bd6",
+                  "skatteopplysninger": [
+                    {
+                      "dato": "2018-01-01",
+                      "hendelseId": "14041d62-2ad4-4358-bb04-104ab5232fa9",
+                      "beløp": 31000.0,
+                      "kilde": "SKATT_SAMMENLIGNINGSGRUNNLAG",
+                      "tidsstempel": "2022-10-11T08:44:42.903352",
+                      "måned": "2017-01",
+                      "type": "LØNNSINNTEKT",
+                      "fordel": "kontantytelse",
+                      "beskrivelse": "fastloenn"
+                    },
+                    {
+                      "dato": "2018-01-01",
+                      "hendelseId": "14041d62-2ad4-4358-bb04-104ab5232fa9",
+                      "beløp": 31000.0,
+                      "kilde": "SKATT_SAMMENLIGNINGSGRUNNLAG",
+                      "tidsstempel": "2022-10-11T08:44:42.903352",
+                      "måned": "2017-02",
+                      "type": "LØNNSINNTEKT",
+                      "fordel": "kontantytelse",
+                      "beskrivelse": "fastloenn"
+                    },
+                    {
+                      "dato": "2018-01-01",
+                      "hendelseId": "14041d62-2ad4-4358-bb04-104ab5232fa9",
+                      "beløp": 31000.0,
+                      "kilde": "SKATT_SAMMENLIGNINGSGRUNNLAG",
+                      "tidsstempel": "2022-10-11T08:44:42.903352",
+                      "måned": "2017-03",
+                      "type": "LØNNSINNTEKT",
+                      "fordel": "kontantytelse",
+                      "beskrivelse": "fastloenn"
+                    },
+                    {
+                      "dato": "2018-01-01",
+                      "hendelseId": "14041d62-2ad4-4358-bb04-104ab5232fa9",
+                      "beløp": 31000.0,
+                      "kilde": "SKATT_SAMMENLIGNINGSGRUNNLAG",
+                      "tidsstempel": "2022-10-11T08:44:42.903352",
+                      "måned": "2017-04",
+                      "type": "LØNNSINNTEKT",
+                      "fordel": "kontantytelse",
+                      "beskrivelse": "fastloenn"
+                    },
+                    {
+                      "dato": "2018-01-01",
+                      "hendelseId": "14041d62-2ad4-4358-bb04-104ab5232fa9",
+                      "beløp": 31000.0,
+                      "kilde": "SKATT_SAMMENLIGNINGSGRUNNLAG",
+                      "tidsstempel": "2022-10-11T08:44:42.903352",
+                      "måned": "2017-05",
+                      "type": "LØNNSINNTEKT",
+                      "fordel": "kontantytelse",
+                      "beskrivelse": "fastloenn"
+                    },
+                    {
+                      "dato": "2018-01-01",
+                      "hendelseId": "14041d62-2ad4-4358-bb04-104ab5232fa9",
+                      "beløp": 31000.0,
+                      "kilde": "SKATT_SAMMENLIGNINGSGRUNNLAG",
+                      "tidsstempel": "2022-10-11T08:44:42.903352",
+                      "måned": "2017-06",
+                      "type": "LØNNSINNTEKT",
+                      "fordel": "kontantytelse",
+                      "beskrivelse": "fastloenn"
+                    },
+                    {
+                      "dato": "2018-01-01",
+                      "hendelseId": "14041d62-2ad4-4358-bb04-104ab5232fa9",
+                      "beløp": 31000.0,
+                      "kilde": "SKATT_SAMMENLIGNINGSGRUNNLAG",
+                      "tidsstempel": "2022-10-11T08:44:42.903352",
+                      "måned": "2017-07",
+                      "type": "LØNNSINNTEKT",
+                      "fordel": "kontantytelse",
+                      "beskrivelse": "fastloenn"
+                    },
+                    {
+                      "dato": "2018-01-01",
+                      "hendelseId": "14041d62-2ad4-4358-bb04-104ab5232fa9",
+                      "beløp": 31000.0,
+                      "kilde": "SKATT_SAMMENLIGNINGSGRUNNLAG",
+                      "tidsstempel": "2022-10-11T08:44:42.903352",
+                      "måned": "2017-08",
+                      "type": "LØNNSINNTEKT",
+                      "fordel": "kontantytelse",
+                      "beskrivelse": "fastloenn"
+                    },
+                    {
+                      "dato": "2018-01-01",
+                      "hendelseId": "14041d62-2ad4-4358-bb04-104ab5232fa9",
+                      "beløp": 31000.0,
+                      "kilde": "SKATT_SAMMENLIGNINGSGRUNNLAG",
+                      "tidsstempel": "2022-10-11T08:44:42.903352",
+                      "måned": "2017-09",
+                      "type": "LØNNSINNTEKT",
+                      "fordel": "kontantytelse",
+                      "beskrivelse": "fastloenn"
+                    },
+                    {
+                      "dato": "2018-01-01",
+                      "hendelseId": "14041d62-2ad4-4358-bb04-104ab5232fa9",
+                      "beløp": 31000.0,
+                      "kilde": "SKATT_SAMMENLIGNINGSGRUNNLAG",
+                      "tidsstempel": "2022-10-11T08:44:42.903352",
+                      "måned": "2017-10",
+                      "type": "LØNNSINNTEKT",
+                      "fordel": "kontantytelse",
+                      "beskrivelse": "fastloenn"
+                    },
+                    {
+                      "dato": "2018-01-01",
+                      "hendelseId": "14041d62-2ad4-4358-bb04-104ab5232fa9",
+                      "beløp": 31000.0,
+                      "kilde": "SKATT_SAMMENLIGNINGSGRUNNLAG",
+                      "tidsstempel": "2022-10-11T08:44:42.903352",
+                      "måned": "2017-11",
+                      "type": "LØNNSINNTEKT",
+                      "fordel": "kontantytelse",
+                      "beskrivelse": "fastloenn"
+                    },
+                    {
+                      "dato": "2018-01-01",
+                      "hendelseId": "14041d62-2ad4-4358-bb04-104ab5232fa9",
+                      "beløp": 31000.0,
+                      "kilde": "SKATT_SAMMENLIGNINGSGRUNNLAG",
+                      "tidsstempel": "2022-10-11T08:44:42.903352",
+                      "måned": "2017-12",
+                      "type": "LØNNSINNTEKT",
+                      "fordel": "kontantytelse",
+                      "beskrivelse": "fastloenn"
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          "opptjening": {
+            "arbeidsforhold": [
+              {
+                "orgnummer": "987654321",
+                "ansattPerioder": [
+                  {
+                    "ansattFom": "1970-01-01",
+                    "ansattTom": null,
+                    "deaktivert": false
+                  }
+                ]
+              }
+            ],
+            "opptjeningFom": "1970-01-01",
+            "opptjeningTom": "2018-01-01"
+          },
+          "medlemskapstatus": "JA",
+          "vurdertOk": true,
+          "meldingsreferanseId": "14041d62-2ad4-4358-bb04-104ab5232fa9",
+          "vilkårsgrunnlagId": "4284fe36-78ed-4191-b12e-caccaabe5962"
+        }
+      ]
+    }
+  ],
+  "skjemaVersjon": 181
+}

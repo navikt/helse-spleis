@@ -23,16 +23,20 @@ internal abstract class KopiereVilkårsgrunnlag(
             .groupBy { it.vilkårsgrunnlagId }
             .mapValues { (_, vilkårsgrunnlag) -> vilkårsgrunnlag.first() }
 
-        val skjæringstidspunktMedVilkårsgrunnlag = vilkårsgrunnlag.values.map { it.skjæringstidspunkt }
+        val aktiveVilkårsgrunnlag = vilkårsgrunnlagHistorikk
+            .firstOrNull()
+            ?.vilkårsgrunnlag
+            ?: serdeObjectMapper.createArrayNode()
+
+        val aktiveSkjæringstidspunkt = aktiveVilkårsgrunnlag.map { it.skjæringstidspunkt }
 
         val skalKopieresPåPerson = vilkårsgrunnlagSomSkalKopieres
             .filter { (vilkårsgrunnlagId, _) -> vilkårsgrunnlagId in vilkårsgrunnlag.keys }
-            .filterNot { (_, skjæringstidspunkt) ->  skjæringstidspunkt in skjæringstidspunktMedVilkårsgrunnlag }
+            .filterNot { (_, skjæringstidspunkt) -> skjæringstidspunkt in aktiveSkjæringstidspunkt }
 
         if (skalKopieresPåPerson.isEmpty()) return
 
-        val oppdaterteVilkårsgrunnlag = vilkårsgrunnlagHistorikk.firstOrNull()?.vilkårsgrunnlag?.deepCopy()
-            ?: serdeObjectMapper.createArrayNode()
+        val oppdaterteVilkårsgrunnlag = aktiveVilkårsgrunnlag.deepCopy()
 
         skalKopieresPåPerson.forEach { (vilkårsgrunnlagId, skjæringstidspunkt) ->
             val vilkårsgrunnlagKopi = vilkårsgrunnlag.getValue(vilkårsgrunnlagId).deepCopy<ObjectNode>().apply {
