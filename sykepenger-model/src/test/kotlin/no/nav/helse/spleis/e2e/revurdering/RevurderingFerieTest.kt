@@ -44,7 +44,7 @@ internal class RevurderingFerieTest : AbstractEndToEndTest() {
         håndterInntektsmelding(listOf(5.februar til 21.februar))
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
 
-        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(1.januar, 17.januar)
 
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
         assertIngenVarsel(RV_OO_2, 1.vedtaksperiode.filter())
@@ -61,7 +61,7 @@ internal class RevurderingFerieTest : AbstractEndToEndTest() {
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
 
-        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(1.januar, 17.januar)
 
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING)
         assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)

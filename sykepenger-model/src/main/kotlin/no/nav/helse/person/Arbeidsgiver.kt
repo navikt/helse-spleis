@@ -1085,6 +1085,9 @@ internal class Arbeidsgiver private constructor(
     internal fun kanForkastes(vedtaksperiodeUtbetalinger: VedtaksperiodeUtbetalinger) =
         vedtaksperiodeUtbetalinger.kanForkastes(utbetalinger)
 
+    internal fun harEnVedtaksperiodeMedMindreEnn16DagersGapEtter(ny: Vedtaksperiode) =
+        vedtaksperioder.filter { it etter ny }.any { it.erMindreEnn16DagerEtter(ny) }
+
     internal class JsonRestorer private constructor() {
         internal companion object {
             internal fun restore(

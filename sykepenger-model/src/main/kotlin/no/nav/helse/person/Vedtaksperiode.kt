@@ -813,6 +813,7 @@ internal class Vedtaksperiode private constructor(
         )
         if (Toggle.RevurderOutOfOrder.disabled) return outOfOrderIkkeStøttet()
         if (Toggle.RevurderOutOfOrderForlengelser.disabled && vedtaksperiode.person.finnesEnVedtaksperiodeSomOverlapperOgStarterFør(ny)) return outOfOrderIkkeStøttet()
+        if (Toggle.RevurderOutOfOrderForlengelser.disabled && vedtaksperiode.arbeidsgiver.harEnVedtaksperiodeMedMindreEnn16DagersGapEtter(ny)) return outOfOrderIkkeStøttet()
         if (Toggle.RevurderOutOfOrderForlengelser.disabled && vedtaksperiode.person.finnesEnVedtaksperiodeRettEtter(ny)) return outOfOrderIkkeStøttet()
         if (!ny.forventerInntekt()) return
         // AUU revurderes ikke som følge av out-of-order
@@ -1947,6 +1948,12 @@ internal class Vedtaksperiode private constructor(
     private fun validerYtelser(ytelser: Ytelser, skjæringstidspunkt: LocalDate, infotrygdhistorikk: Infotrygdhistorikk) {
         kontekst(ytelser)
         tilstand.valider(this, periode, skjæringstidspunkt, arbeidsgiver, ytelser, infotrygdhistorikk)
+    }
+
+    internal fun erMindreEnn16DagerEtter(ny: Vedtaksperiode): Boolean {
+        val dagenEtterNy = ny.sykdomstidslinje.sisteDag().plusDays(1)
+        val førsteDagPåDenne = this.sykdomstidslinje.førsteDag()
+        return (dagenEtterNy til førsteDagPåDenne).dagerMellom().toInt() < 16
     }
 
     internal object AvventerGodkjenningRevurdering : Vedtaksperiodetilstand {
