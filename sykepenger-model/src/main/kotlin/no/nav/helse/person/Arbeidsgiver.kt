@@ -171,16 +171,8 @@ internal class Arbeidsgiver private constructor(
             flatMap { it.vedtaksperioder }.lagRevurdering(vedtaksperiode, arbeidsgiverUtbetalinger, hendelse)
         }
 
-        internal fun List<Arbeidsgiver>.beregnSykepengegrunnlag(skjæringstidspunkt: LocalDate, subsumsjonObserver: SubsumsjonObserver) =
-            mapNotNull { arbeidsgiver ->
-                arbeidsgiver.beregnSykepengegrunnlag(skjæringstidspunkt) { inntektsopplysning ->
-                    inntektsopplysning?.subsumerSykepengegrunnlag(
-                        subsumsjonObserver = subsumsjonObserver,
-                        organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
-                        startdatoArbeidsforhold = null
-                    )
-                }
-            }
+        internal fun List<Arbeidsgiver>.beregnSykepengegrunnlag(skjæringstidspunkt: LocalDate) =
+            mapNotNull { arbeidsgiver -> arbeidsgiver.beregnSykepengegrunnlag(skjæringstidspunkt) }
 
         internal fun List<Arbeidsgiver>.beregnOpptjening(
             skjæringstidspunkt: LocalDate,
@@ -313,10 +305,9 @@ internal class Arbeidsgiver private constructor(
 
     internal fun kanBeregneSykepengegrunnlag(skjæringstidspunkt: LocalDate) = beregnSykepengegrunnlag(skjæringstidspunkt) != null
 
-    private fun beregnSykepengegrunnlag(skjæringstidspunkt: LocalDate, block: (inntekstopplysning: Inntektshistorikk.Inntektsopplysning?) -> Unit = {}) : ArbeidsgiverInntektsopplysning? {
+    private fun beregnSykepengegrunnlag(skjæringstidspunkt: LocalDate) : ArbeidsgiverInntektsopplysning? {
         val førsteFraværsdag = finnFørsteFraværsdag(skjæringstidspunkt)
         val inntektsopplysning = inntektshistorikk.omregnetÅrsinntekt(skjæringstidspunkt, førsteFraværsdag, arbeidsforholdhistorikk)
-        block(inntektsopplysning)
         return when {
             inntektsopplysning != null -> ArbeidsgiverInntektsopplysning(organisasjonsnummer, inntektsopplysning)
             else -> null
@@ -879,10 +870,6 @@ internal class Arbeidsgiver private constructor(
 
     internal fun finnSammenhengendePeriode(skjæringstidspunkt: LocalDate) = vedtaksperioder.medSkjæringstidspunkt(skjæringstidspunkt)
 
-    internal fun addInntekt(inntektsmelding: Inntektsmelding, førsteFraværsdag: LocalDate, subsumsjonObserver: SubsumsjonObserver) {
-        inntektsmelding.addInntekt(inntektshistorikk, førsteFraværsdag, subsumsjonObserver)
-    }
-
     internal fun finnTidligereInntektsmeldinginfo(skjæringstidspunkt: LocalDate) = inntektsmeldingInfo.finn(skjæringstidspunkt)
 
     internal fun addInntektsmelding(
@@ -891,7 +878,7 @@ internal class Arbeidsgiver private constructor(
         subsumsjonObserver: SubsumsjonObserver
     ): InntektsmeldingInfo {
         val førsteFraværsdag = finnFørsteFraværsdag(skjæringstidspunkt)
-        if (førsteFraværsdag != null) addInntekt(inntektsmelding, førsteFraværsdag, subsumsjonObserver)
+        if (førsteFraværsdag != null) inntektsmelding.addInntekt(inntektshistorikk, førsteFraværsdag, subsumsjonObserver)
         return inntektsmeldingInfo.opprett(skjæringstidspunkt, inntektsmelding)
     }
 

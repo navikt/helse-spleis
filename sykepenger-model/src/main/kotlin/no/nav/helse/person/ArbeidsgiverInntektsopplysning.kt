@@ -2,6 +2,7 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import no.nav.helse.person.Inntektshistorikk.Inntektsopplysning.Companion.valider
+import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
@@ -29,9 +30,14 @@ internal class ArbeidsgiverInntektsopplysning(
         visitor.postVisitArbeidsgiverInntektsopplysning(this, orgnummer)
     }
 
-    private fun subsummer(opptjening: Opptjening, subsumsjonObserver: SubsumsjonObserver) {
-        val startdato = opptjening.startdatoFor(orgnummer)
-        inntektsopplysning.subsumerSykepengegrunnlag(subsumsjonObserver, orgnummer, startdato)
+    private fun overstyr(overstyringer: List<ArbeidsgiverInntektsopplysning>): ArbeidsgiverInntektsopplysning {
+        val overstyring = overstyringer.singleOrNull { it.orgnummer == this.orgnummer } ?: return this
+        // todo: merke at *overstyring* overstyres *this*, eller noe?
+        return overstyring
+    }
+
+    private fun subsummer(subsumsjonObserver: SubsumsjonObserver, opptjening: Opptjening?) {
+        inntektsopplysning.subsumerSykepengegrunnlag(subsumsjonObserver, orgnummer, opptjening?.startdatoFor(orgnummer))
     }
 
     private fun subsummerArbeidsforhold(forklaring: String, oppfylt: Boolean, subsumsjonObserver: SubsumsjonObserver) {
@@ -68,9 +74,21 @@ internal class ArbeidsgiverInntektsopplysning(
         // overskriver eksisterende verdier i *this* med verdier fra *other*,
         // og ignorerer ting i *other* som ikke finnes i *this*
         internal fun List<ArbeidsgiverInntektsopplysning>.overstyrInntekter(opptjening: Opptjening, other: List<ArbeidsgiverInntektsopplysning>, subsumsjonObserver: SubsumsjonObserver) = this
-            .map { inntekt -> other.singleOrNull { it.orgnummer == inntekt.orgnummer } ?: inntekt }
-            .onEach { it.subsummer(opptjening, subsumsjonObserver) }
+            .map { inntekt -> inntekt.overstyr(other) }
+            .also { it.subsummer(subsumsjonObserver, opptjening) }
         internal fun List<ArbeidsgiverInntektsopplysning>.erOverstyrt() = any { it.inntektsopplysning is Inntektshistorikk.Saksbehandler }
+
+        internal fun List<ArbeidsgiverInntektsopplysning>.subsummer(subsumsjonObserver: SubsumsjonObserver, opptjening: Opptjening? = null) {
+            subsumsjonObserver.`§ 8-30 ledd 1`(omregnetÅrsinntektPerArbeidsgiver(), omregnetÅrsinntekt())
+            forEach { it.subsummer(subsumsjonObserver, opptjening) }
+        }
+
+        internal fun List<ArbeidsgiverInntektsopplysning>.build(builder: VedtakFattetBuilder) {
+            builder.omregnetÅrsinntektPerArbeidsgiver(omregnetÅrsinntektPerArbeidsgiver())
+        }
+
+        private fun List<ArbeidsgiverInntektsopplysning>.omregnetÅrsinntektPerArbeidsgiver() =
+            associate { it.orgnummer to it.inntektsopplysning.omregnetÅrsinntekt() }
 
         internal fun List<ArbeidsgiverInntektsopplysning>.valider(aktivitetslogg: IAktivitetslogg) {
             map { it.inntektsopplysning }.valider(aktivitetslogg)
@@ -81,9 +99,6 @@ internal class ArbeidsgiverInntektsopplysning(
 
         internal fun List<ArbeidsgiverInntektsopplysning>.omregnetÅrsinntekt() =
             fold(INGEN) { acc, item -> item.omregnetÅrsinntekt(acc)}
-
-        internal fun List<ArbeidsgiverInntektsopplysning>.omregnetÅrsinntektPerArbeidsgiver() =
-            associate { it.orgnummer to it.inntektsopplysning.omregnetÅrsinntekt() }
 
         internal fun List<ArbeidsgiverInntektsopplysning>.sammenligningsgrunnlag(): Inntekt {
             return map { it.inntektsopplysning.rapportertInntekt() }.summer()

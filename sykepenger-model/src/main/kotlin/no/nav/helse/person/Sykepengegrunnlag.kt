@@ -8,13 +8,14 @@ import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrInntekt
 import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.aktiver
+import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.build
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.deaktiver
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.erOverstyrt
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.harInntekt
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.medInntekt
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.omregnetÅrsinntekt
-import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.omregnetÅrsinntektPerArbeidsgiver
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.overstyrInntekter
+import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.subsummer
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.valider
 import no.nav.helse.person.Sykepengegrunnlag.Begrensning.ER_6G_BEGRENSET
 import no.nav.helse.person.Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
@@ -58,7 +59,7 @@ internal class Sykepengegrunnlag(
         vurdertInfotrygd: Boolean = false
     ) : this(alder, skjæringstidspunkt, arbeidsgiverInntektsopplysninger, emptyList(), vurdertInfotrygd) {
         subsumsjonObserver.apply {
-            `§ 8-30 ledd 1`(arbeidsgiverInntektsopplysninger.omregnetÅrsinntektPerArbeidsgiver(), beregningsgrunnlag)
+            arbeidsgiverInntektsopplysninger.subsummer(this)
             `§ 8-10 ledd 2 punktum 1`(
                 erBegrenset = begrensning == ER_6G_BEGRENSET,
                 maksimaltSykepengegrunnlag = `6G`,
@@ -225,7 +226,7 @@ internal class Sykepengegrunnlag(
             .sykepengegrunnlag(this.sykepengegrunnlag)
             .beregningsgrunnlag(this.beregningsgrunnlag)
             .begrensning(this.begrensning)
-            .omregnetÅrsinntektPerArbeidsgiver(arbeidsgiverInntektsopplysninger.omregnetÅrsinntektPerArbeidsgiver())
+        arbeidsgiverInntektsopplysninger.build(builder)
     }
     override fun equals(other: Any?): Boolean {
         if (other !is Sykepengegrunnlag) return false

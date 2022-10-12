@@ -663,7 +663,7 @@ class Person private constructor(
     internal fun beregnSykepengegrunnlag(skjæringstidspunkt: LocalDate, subsumsjonObserver: SubsumsjonObserver): Sykepengegrunnlag {
         return Sykepengegrunnlag.opprett(
             alder,
-            arbeidsgivere.beregnSykepengegrunnlag(skjæringstidspunkt, subsumsjonObserver),
+            arbeidsgivere.beregnSykepengegrunnlag(skjæringstidspunkt),
             skjæringstidspunkt,
             subsumsjonObserver
         )
