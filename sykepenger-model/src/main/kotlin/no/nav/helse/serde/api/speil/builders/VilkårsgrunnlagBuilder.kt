@@ -44,7 +44,8 @@ internal class ISykepengegrunnlag(
     val inntekterPerArbeidsgiver: List<IArbeidsgiverinntekt>,
     val sykepengegrunnlag: Double,
     val oppfyllerMinsteinntektskrav: Boolean,
-    val omregnetÅrsinntekt: Double
+    val omregnetÅrsinntekt: Double,
+    val begrensning: SykepengegrunnlagsgrenseDTO
 )
 
 internal class IInntekt(
@@ -102,12 +103,12 @@ class SykepengegrunnlagsgrenseDTO(
     val virkningstidspunkt: LocalDate,
 ) {
     companion object {
-        fun fra6GBegrensning(grunnbeløpgrense: Inntekt): SykepengegrunnlagsgrenseDTO {
-            val virkningstidspunkt = Grunnbeløp.virkningstidspunktFor(grunnbeløpgrense / 6)
+        fun fra6GBegrensning(`6G`: Inntekt): SykepengegrunnlagsgrenseDTO {
+            val `1G` = `6G` / 6
             return SykepengegrunnlagsgrenseDTO(
-                Grunnbeløp.`1G`.beløp(virkningstidspunkt).reflection { årlig, _, _, _ -> årlig.toInt() },
-                grunnbeløpgrense.reflection { årlig, _, _, _ -> årlig }.toInt(),
-                virkningstidspunkt
+                grunnbeløp = InntektBuilder(`1G`).build().årlig.toInt(),
+                grense = InntektBuilder(`6G`).build().årlig.toInt(),
+                virkningstidspunkt = Grunnbeløp.virkningstidspunktFor(`1G`)
             )
         }
     }
@@ -186,7 +187,6 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
             val sammenligningsgrunnlagBuilder = SammenligningsgrunnlagBuilder(sammenligningsgrunnlag)
 
             val compositeSykepengegrunnlag = SykepengegrunnlagBuilder(sykepengegrunnlag, sammenligningsgrunnlagBuilder).build()
-            val grunnbeløp = InntektBuilder(Grunnbeløp.`1G`.beløp(skjæringstidspunkt)).build()
             val oppfyllerKravOmMedlemskap = when (medlemskapstatus) {
                 Medlemskapsvurdering.Medlemskapstatus.Ja -> true
                 Medlemskapsvurdering.Medlemskapstatus.Nei -> false
@@ -200,8 +200,8 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
                 inntekter = compositeSykepengegrunnlag.inntekterPerArbeidsgiver,
                 sykepengegrunnlag = compositeSykepengegrunnlag.sykepengegrunnlag,
                 avviksprosent = avviksprosent?.prosent(),
-                grunnbeløp = grunnbeløp.årlig.toInt(),
-                sykepengegrunnlagsgrense = SykepengegrunnlagsgrenseDTO.fra6GBegrensning(Grunnbeløp.`6G`.beløp(skjæringstidspunkt)),
+                grunnbeløp = compositeSykepengegrunnlag.begrensning.grunnbeløp,
+                sykepengegrunnlagsgrense = compositeSykepengegrunnlag.begrensning,
                 meldingsreferanseId = meldingsreferanseId,
                 antallOpptjeningsdagerErMinst = opptjening.opptjeningsdager(),
                 oppfyllerKravOmMinstelønn = compositeSykepengegrunnlag.oppfyllerMinsteinntektskrav,
@@ -271,6 +271,7 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
             sykepengegrunnlag: Sykepengegrunnlag,
             private val sammenligningsgrunnlagBuilder: SammenligningsgrunnlagBuilder?
         ) : VilkårsgrunnlagHistorikkVisitor {
+            private lateinit var `6G`: Inntekt
             private val inntekterPerArbeidsgiver = mutableListOf<IArbeidsgiverinntekt>()
             private lateinit var sykepengegrunnlag: IInntekt
             private var omregnetÅrsinntekt by Delegates.notNull<Double>()
@@ -280,12 +281,15 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
                 sykepengegrunnlag.accept(this)
             }
 
-            fun build() = ISykepengegrunnlag(
-                inntekterPerArbeidsgiver = inntekterPerArbeidsgiver.toList() + arbeidsgivereUtenSykepengegrunnlag(),
-                sykepengegrunnlag = sykepengegrunnlag.årlig,
-                oppfyllerMinsteinntektskrav = oppfyllerMinsteinntektskrav,
-                omregnetÅrsinntekt = omregnetÅrsinntekt
-            )
+            fun build(): ISykepengegrunnlag {
+                return ISykepengegrunnlag(
+                    inntekterPerArbeidsgiver = inntekterPerArbeidsgiver.toList() + arbeidsgivereUtenSykepengegrunnlag(),
+                    sykepengegrunnlag = sykepengegrunnlag.årlig,
+                    oppfyllerMinsteinntektskrav = oppfyllerMinsteinntektskrav,
+                    omregnetÅrsinntekt = omregnetÅrsinntekt,
+                    begrensning = SykepengegrunnlagsgrenseDTO.fra6GBegrensning(this.`6G`)
+                )
+            }
 
             private fun arbeidsgivereUtenSykepengegrunnlag() = sammenligningsgrunnlagBuilder?.inntekter()?.filterNot { inntekt ->
                 inntekterPerArbeidsgiver.any { other -> other.arbeidsgiver == inntekt.arbeidsgiver }
@@ -303,10 +307,10 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
                 minsteinntekt: Inntekt,
                 oppfyllerMinsteinntektskrav: Boolean
             ) {
-
                 this.sykepengegrunnlag = InntektBuilder(sykepengegrunnlag).build()
                 this.oppfyllerMinsteinntektskrav = oppfyllerMinsteinntektskrav
                 this.omregnetÅrsinntekt = InntektBuilder(beregningsgrunnlag).build().årlig
+                this.`6G` = `6G`
             }
 
             private var deaktivert = false
