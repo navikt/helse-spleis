@@ -26,9 +26,7 @@ internal class PersonBuilder(
     private val arbeidsgivere = mutableListOf<ArbeidsgiverBuilder>()
 
     internal fun build(hendelser: List<HendelseDTO>): PersonDTO {
-
-        val sammenligningsgrunnlagBuilder = OppsamletSammenligningsgrunnlagBuilder(person)
-        val vilkårsgrunnlagHistorikk = VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk, sammenligningsgrunnlagBuilder).build()
+        val vilkårsgrunnlagHistorikk = VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk).build()
 
         return PersonDTO(
             fødselsnummer = personidentifikator.toString(),

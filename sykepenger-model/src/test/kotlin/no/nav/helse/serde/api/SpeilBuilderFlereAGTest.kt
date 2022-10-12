@@ -582,7 +582,7 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
                     månedsbeløp = 0.0,
                     inntekterFraAOrdningen = null
                 ),
-                sammenligningsgrunnlag = null,
+                sammenligningsgrunnlag = 0.0,
                 deaktivert = true
             )
         )
