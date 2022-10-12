@@ -74,7 +74,6 @@ import no.nav.helse.serde.api.dto.Utbetalingtype.REVURDERING
 import no.nav.helse.serde.api.dto.Utbetalingtype.UTBETALING
 import no.nav.helse.serde.api.dto.Vilkårsgrunnlag
 import no.nav.helse.serde.api.speil.builders.GenerasjonerBuilder
-import no.nav.helse.serde.api.speil.builders.OppsamletSammenligningsgrunnlagBuilder
 import no.nav.helse.serde.api.speil.builders.VilkårsgrunnlagBuilder
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
@@ -1951,8 +1950,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
     private lateinit var vilkårsgrunnlag: Map<UUID, Map<LocalDate, Vilkårsgrunnlag>>
 
     private fun generasjoner(organisasjonsnummer: String): List<Generasjon> {
-        val sammenligningsgrunnlagBuilder = OppsamletSammenligningsgrunnlagBuilder(person)
-        val vilkårsgrunnlagHistorikk = VilkårsgrunnlagBuilder(person.inspektør.vilkårsgrunnlagHistorikk, sammenligningsgrunnlagBuilder).build()
+        val vilkårsgrunnlagHistorikk = VilkårsgrunnlagBuilder(person.inspektør.vilkårsgrunnlagHistorikk).build()
         vilkårsgrunnlag = vilkårsgrunnlagHistorikk.toDTO()
 
         val generasjonerBuilder = GenerasjonerBuilder(
