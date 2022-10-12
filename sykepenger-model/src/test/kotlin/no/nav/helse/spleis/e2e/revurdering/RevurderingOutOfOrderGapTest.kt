@@ -30,6 +30,7 @@ import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
+import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
 import no.nav.helse.person.TilstandType.START
@@ -73,7 +74,6 @@ import no.nav.helse.spleis.e2e.tilGodkjenning
 import no.nav.helse.spleis.e2e.tilGodkjent
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -112,6 +112,32 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
             forventetArbeidsgiverbeløp = 1431,
             forventetArbeidsgiverRefusjonsbeløp = 1431,
             subset = 5.februar til 10.februar
+        )
+    }
+
+    @Test
+    fun `out of order periode med kort gap - utbetalingen på revurderingen får korrekt beløp`() {
+        nyttVedtak(1.februar, 28.februar)
+        nyttVedtak(1.januar, 25.januar)
+        håndterYtelser(1.vedtaksperiode)
+
+        assertSisteTilstand(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
+        assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
+
+        assertEquals(3, inspektør.utbetalinger.size)
+        val nettoBeløpForFebruarMedStandardInntektOgAgp = inspektør.utbetalinger.first().inspektør.nettobeløp
+        val nettoBeløpForJanuarMedStandardInntektOgAgp = inspektør.utbetalinger[1].inspektør.nettobeløp
+        val antallSykedagerIFebruar2018 = 20
+        val nettoBeløpForFebruarMedStandardInntektUtenAgp = 1431 * antallSykedagerIFebruar2018
+        val revurdering = inspektør.utbetalinger.last()
+        assertForventetFeil(
+            forklaring = "Betaler for januar dobbelt opp fordi også revurderingen hensyntar denne perioden",
+            nå = {
+                assertEquals(nettoBeløpForFebruarMedStandardInntektUtenAgp -nettoBeløpForFebruarMedStandardInntektOgAgp + nettoBeløpForJanuarMedStandardInntektOgAgp, revurdering.inspektør.nettobeløp)
+            },
+            ønsket = {
+                assertEquals(nettoBeløpForFebruarMedStandardInntektUtenAgp -nettoBeløpForFebruarMedStandardInntektOgAgp, revurdering.inspektør.nettobeløp)
+            }
         )
     }
 
