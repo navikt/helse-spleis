@@ -24,12 +24,11 @@ internal class PersonBuilder(
 ) : BuilderState(builder) {
     private lateinit var alder: Alder
     private val arbeidsgivere = mutableListOf<ArbeidsgiverBuilder>()
-    private val inntektshistorikkForAordningenBuilder = InntektshistorikkForAOrdningenBuilder(person)
 
     internal fun build(hendelser: List<HendelseDTO>): PersonDTO {
 
         val sammenligningsgrunnlagBuilder = OppsamletSammenligningsgrunnlagBuilder(person)
-        val vilkårsgrunnlagHistorikk = VilkårsgrunnlagBuilder(person, sammenligningsgrunnlagBuilder, inntektshistorikkForAordningenBuilder).build()
+        val vilkårsgrunnlagHistorikk = VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk, sammenligningsgrunnlagBuilder).build()
 
         return PersonDTO(
             fødselsnummer = personidentifikator.toString(),

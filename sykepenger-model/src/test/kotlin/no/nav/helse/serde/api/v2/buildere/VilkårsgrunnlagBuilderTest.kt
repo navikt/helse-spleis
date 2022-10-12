@@ -23,7 +23,6 @@ import no.nav.helse.serde.api.dto.Inntektkilde
 import no.nav.helse.serde.api.dto.SpleisVilkårsgrunnlag
 import no.nav.helse.serde.api.dto.Vilkårsgrunnlag
 import no.nav.helse.serde.api.dto.Vilkårsgrunnlagtype
-import no.nav.helse.serde.api.speil.builders.InntektshistorikkForAOrdningenBuilder
 import no.nav.helse.serde.api.speil.builders.OppsamletSammenligningsgrunnlagBuilder
 import no.nav.helse.serde.api.speil.builders.VilkårsgrunnlagBuilder
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
@@ -53,8 +52,7 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
         private val AG2 = "123456789"
     }
 
-    private val inntektshistorikkForAordningenBuilder get() = InntektshistorikkForAOrdningenBuilder(person)
-    private val vilkårsgrunnlag get() = VilkårsgrunnlagBuilder(person, OppsamletSammenligningsgrunnlagBuilder(person), inntektshistorikkForAordningenBuilder)
+    private val vilkårsgrunnlag get() = VilkårsgrunnlagBuilder(person.inspektør.vilkårsgrunnlagHistorikk, OppsamletSammenligningsgrunnlagBuilder(person))
 
     private val primitivInntekt = 40000.0
     private val inntekt = primitivInntekt.månedlig

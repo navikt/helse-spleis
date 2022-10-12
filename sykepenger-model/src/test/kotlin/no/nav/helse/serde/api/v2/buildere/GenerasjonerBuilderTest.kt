@@ -74,7 +74,6 @@ import no.nav.helse.serde.api.dto.Utbetalingtype.REVURDERING
 import no.nav.helse.serde.api.dto.Utbetalingtype.UTBETALING
 import no.nav.helse.serde.api.dto.Vilkårsgrunnlag
 import no.nav.helse.serde.api.speil.builders.GenerasjonerBuilder
-import no.nav.helse.serde.api.speil.builders.InntektshistorikkForAOrdningenBuilder
 import no.nav.helse.serde.api.speil.builders.OppsamletSammenligningsgrunnlagBuilder
 import no.nav.helse.serde.api.speil.builders.VilkårsgrunnlagBuilder
 import no.nav.helse.somPersonidentifikator
@@ -1953,9 +1952,7 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
 
     private fun generasjoner(organisasjonsnummer: String): List<Generasjon> {
         val sammenligningsgrunnlagBuilder = OppsamletSammenligningsgrunnlagBuilder(person)
-        val inntektshistorikkForAordningenBuilder = InntektshistorikkForAOrdningenBuilder(person)
-        val vilkårsgrunnlagHistorikk =
-            VilkårsgrunnlagBuilder(person, sammenligningsgrunnlagBuilder, inntektshistorikkForAordningenBuilder).build()
+        val vilkårsgrunnlagHistorikk = VilkårsgrunnlagBuilder(person.inspektør.vilkårsgrunnlagHistorikk, sammenligningsgrunnlagBuilder).build()
         vilkårsgrunnlag = vilkårsgrunnlagHistorikk.toDTO()
 
         val generasjonerBuilder = GenerasjonerBuilder(
