@@ -78,6 +78,8 @@ internal abstract class AbstractPersonTest {
                 ),
             )
         }
+
+        private fun dobbelutbetalingPerson(jurist: MaskinellJurist) = SerialisertPerson("/personer/dobbelutbetaling.json".readResource()).deserialize(jurist)
     }
 
     lateinit var person: Person
@@ -116,6 +118,7 @@ internal abstract class AbstractPersonTest {
     }
     protected fun createPingPongPerson() = createTestPerson { jurist -> pingPongPerson(jurist) }
     protected fun createOvergangFraInfotrygdPerson() = createTestPerson { jurist -> overgangFraInfotrygdPerson(jurist) }
+    protected fun createDobbelutbetalingPerson() = createTestPerson { jurist -> dobbelutbetalingPerson(jurist) }
 
     protected fun createTestPerson(block: (jurist: MaskinellJurist) -> Person) : Person {
         jurist = MaskinellJurist()

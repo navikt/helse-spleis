@@ -19,6 +19,7 @@ internal val Oppdrag.inspektør get() = OppdragInspektør(this)
 
 internal class OppdragInspektør(oppdrag: Oppdrag) : UtbetalingVisitor {
     private var linjeteller = 0
+    private val endringskoder = mutableListOf<Endringskode>()
     private lateinit var fagsystemId: String
     internal lateinit var fagområde: Fagområde
         private set
@@ -97,6 +98,7 @@ internal class OppdragInspektør(oppdrag: Oppdrag) : UtbetalingVisitor {
         klassekode: Klassekode
     ) {
         linjeteller += 1
+        endringskoder.add(endringskode)
         delytelseIder.add(delytelseId)
         refDelytelseIder.add(refDelytelseId)
         refFagsystemIder.add(refFagsystemId)
@@ -106,6 +108,7 @@ internal class OppdragInspektør(oppdrag: Oppdrag) : UtbetalingVisitor {
     }
 
     fun antallLinjer() = linjeteller
+    fun endringskoder() = endringskoder.toList()
     fun fagsystemId() = fagsystemId
     fun delytelseId(indeks: Int) = delytelseIder.elementAt(indeks)
     fun refDelytelseId(indeks: Int) = refDelytelseIder.elementAt(indeks)
