@@ -31,7 +31,7 @@ internal class PersonBuilder(
         return PersonDTO(
             fødselsnummer = personidentifikator.toString(),
             aktørId = aktørId,
-            arbeidsgivere = arbeidsgivere.map { it.build(hendelser, alder) },
+            arbeidsgivere = arbeidsgivere.map { it.build(hendelser, alder, vilkårsgrunnlagHistorikk) },
             vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk.toDTO(),
             dødsdato = dødsdato,
             versjon = versjon

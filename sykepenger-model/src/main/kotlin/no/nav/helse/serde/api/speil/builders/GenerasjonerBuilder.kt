@@ -47,7 +47,8 @@ internal typealias InntektsmeldingId = UUID
 internal class GenerasjonerBuilder(
     private val hendelser: List<HendelseDTO>,
     private val alder: Alder,
-    arbeidsgiver: Arbeidsgiver
+    arbeidsgiver: Arbeidsgiver,
+    private val vilkårsgrunnlaghistorikk: IVilkårsgrunnlagHistorikk
 ) : ArbeidsgiverVisitor {
     private val vedtaksperiodeAkkumulator = VedtaksperiodeAkkumulator()
     private val forkastetVedtaksperiodeAkkumulator = ForkastetVedtaksperiodeAkkumulator()
@@ -68,7 +69,8 @@ internal class GenerasjonerBuilder(
             forkastetVedtaksperiodeIder = forkastetVedtaksperiodeAkkumulator.toList(),
             refusjoner = refusjonerAkkumulator.getRefusjoner(),
             vedtaksperioder = vedtaksperiodeAkkumulator.toList(),
-            tidslinjeberegninger = tidslinjeberegninger
+            tidslinjeberegninger = tidslinjeberegninger,
+            vilkårsgrunnlaghistorikk = vilkårsgrunnlaghistorikk
         )
         return Generasjoner(tidslinjeperioder).build()
     }

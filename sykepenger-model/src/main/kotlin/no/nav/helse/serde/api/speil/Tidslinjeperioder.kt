@@ -49,6 +49,7 @@ import no.nav.helse.serde.api.speil.Generasjoner.Generasjon.Companion.toDTO
 import no.nav.helse.serde.api.speil.IVedtaksperiode.Companion.tilGodkjenning
 import no.nav.helse.serde.api.speil.Tidslinjeberegninger.ITidslinjeberegning
 import no.nav.helse.serde.api.speil.builders.BeregningId
+import no.nav.helse.serde.api.speil.builders.IVilkårsgrunnlagHistorikk
 import no.nav.helse.serde.api.speil.builders.InntektsmeldingId
 import no.nav.helse.serde.api.speil.builders.PeriodeVarslerBuilder
 import no.nav.helse.utbetalingstidslinje.Alder
@@ -157,7 +158,8 @@ internal class Tidslinjeperioder(
     private val forkastetVedtaksperiodeIder: List<UUID>,
     private val refusjoner: Map<InntektsmeldingId, Refusjon>,
     vedtaksperioder: List<IVedtaksperiode>,
-    tidslinjeberegninger: Tidslinjeberegninger
+    tidslinjeberegninger: Tidslinjeberegninger,
+    vilkårsgrunnlaghistorikk: IVilkårsgrunnlagHistorikk
 ) {
     private var perioder: List<Tidslinjeperiode>
 
@@ -182,7 +184,8 @@ internal class Tidslinjeperioder(
                         utbetalinger = periode.utbetalinger,
                         tidslinjeberegning = tidslinjeberegning,
                         erForkastet = erForkastet(periode.vedtaksperiodeId),
-                        refusjon = refusjon
+                        refusjon = refusjon,
+                        vilkårsgrunnlaghistorikk = vilkårsgrunnlaghistorikk
                     )
                 }
             }
@@ -224,7 +227,8 @@ internal class Tidslinjeperioder(
         utbetalinger: List<IUtbetaling>,
         tidslinjeberegning: ITidslinjeberegning,
         erForkastet: Boolean,
-        refusjon: Refusjon?
+        refusjon: Refusjon?,
+        vilkårsgrunnlaghistorikk: IVilkårsgrunnlagHistorikk
     ): BeregnetPeriode {
         val sammenslåttTidslinje =
             tidslinjeberegning.sammenslåttTidslinje(utbetaling.utbetalingstidslinje, periode.fom, periode.tom)
@@ -232,6 +236,12 @@ internal class Tidslinjeperioder(
             periode.aktivitetsloggForPeriode
         ).build(periode.hendelser)
         val utbetalingDTO = utbetaling.toDTO()
+        val vilkårsgrunnlagId = vilkårsgrunnlaghistorikk.finnVilkårsgrunnlag(
+            tidslinjeberegning.vilkårsgrunnlagshistorikkId,
+            periode.skjæringstidspunkt,
+            periode.tom,
+            periode.vedtaksperiodeId
+        )
         return BeregnetPeriode(
             vedtaksperiodeId = periode.vedtaksperiodeId,
             beregningId = utbetaling.beregningId,
@@ -250,6 +260,7 @@ internal class Tidslinjeperioder(
             forbrukteSykedager = utbetaling.forbrukteSykedager,
             utbetaling = utbetalingDTO,
             vilkårsgrunnlagshistorikkId = tidslinjeberegning.vilkårsgrunnlagshistorikkId,
+            vilkårsgrunnlagId = vilkårsgrunnlagId,
             aktivitetslogg = varsler,
             refusjon = refusjon,
             periodetilstand = when {

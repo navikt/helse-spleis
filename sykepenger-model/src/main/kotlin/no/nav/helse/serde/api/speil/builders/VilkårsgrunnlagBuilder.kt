@@ -7,6 +7,7 @@ import java.util.UUID
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Subsumsjon
+import no.nav.helse.hendelser.til
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.ArbeidsgiverInntektsopplysningVisitor
 import no.nav.helse.person.InntekthistorikkVisitor
@@ -27,6 +28,7 @@ import no.nav.helse.serde.api.dto.Vilkårsgrunnlag
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Prosent
+import org.slf4j.LoggerFactory
 import kotlin.properties.Delegates
 
 private typealias VilkårsgrunnlagHistorikkId = UUID
@@ -35,8 +37,11 @@ internal class IInnslag(
     private val innslag: Map<LocalDate, IVilkårsgrunnlag>
 ) {
 
-    fun vilkårsgrunnlag(skjæringstidspunkt: LocalDate) = innslag[skjæringstidspunkt]
-
+    fun vilkårsgrunnlag(skjæringstidspunkt: LocalDate, tom: LocalDate): IVilkårsgrunnlag? {
+        return innslag[skjæringstidspunkt] ?: innslag.firstNotNullOfOrNull { (dato, vilkårsgrunnlag) ->
+            vilkårsgrunnlag.takeIf { dato in skjæringstidspunkt til tom }
+        }
+    }
     internal fun toDTO() = innslag.mapValues { (_, vilkårsgrunnlag) -> vilkårsgrunnlag.toDTO() }
 }
 
@@ -60,6 +65,7 @@ internal interface IVilkårsgrunnlag {
     val sammenligningsgrunnlag: Double?
     val sykepengegrunnlag: Double
     val inntekter: List<IArbeidsgiverinntekt>
+    val id: UUID
     fun toDTO(): Vilkårsgrunnlag
 }
 
@@ -69,6 +75,7 @@ internal class ISpleisGrunnlag(
     override val sammenligningsgrunnlag: Double,
     override val inntekter: List<IArbeidsgiverinntekt>,
     override val sykepengegrunnlag: Double,
+    override val id: UUID,
     val avviksprosent: Double?,
     val grunnbeløp: Int,
     val sykepengegrunnlagsgrense: SykepengegrunnlagsgrenseDTO,
@@ -119,7 +126,8 @@ internal class IInfotrygdGrunnlag(
     override val omregnetÅrsinntekt: Double,
     override val sammenligningsgrunnlag: Double?,
     override val inntekter: List<IArbeidsgiverinntekt>,
-    override val sykepengegrunnlag: Double
+    override val sykepengegrunnlag: Double,
+    override val id: UUID
 ) : IVilkårsgrunnlag {
     override fun toDTO(): Vilkårsgrunnlag {
         return no.nav.helse.serde.api.dto.InfotrygdVilkårsgrunnlag(
@@ -142,12 +150,31 @@ internal class InntektBuilder(private val inntekt: Inntekt) {
 
 internal class IVilkårsgrunnlagHistorikk {
     private val historikk = mutableMapOf<VilkårsgrunnlagHistorikkId, IInnslag>()
+    private val pekesPåAvEnBeregnetPeriode = mutableMapOf<UUID, Vilkårsgrunnlag>()
+    private companion object {
+        private val sikkerlog = LoggerFactory.getLogger("tjenestekall")
+    }
 
     internal fun leggTil(vilkårsgrunnlagHistorikkId: UUID, innslag: IInnslag) {
         historikk.putIfAbsent(vilkårsgrunnlagHistorikkId, innslag)
     }
 
     internal fun toDTO() = historikk.mapValues { (_, innslag) -> innslag.toDTO() }.toMap()
+    fun finnVilkårsgrunnlag(
+        vilkårsgrunnlagshistorikkId: VilkårsgrunnlagshistorikkId,
+        skjæringstidspunkt: LocalDate,
+        tom: LocalDate,
+        vedtaksperiodeId: UUID
+    ): UUID? {
+        val vilkårsgrunnlag = historikk.getValue(vilkårsgrunnlagshistorikkId).vilkårsgrunnlag(skjæringstidspunkt, tom)
+        if (vilkårsgrunnlag == null) {
+            sikkerlog.info("fant ikke vilkårsgrunnlag på $skjæringstidspunkt med vilkårsgrunnlaghistorikkId $vilkårsgrunnlagshistorikkId og vedtaksperiodeId $vedtaksperiodeId")
+            return null
+        }
+        return vilkårsgrunnlag.also {
+            pekesPåAvEnBeregnetPeriode.getOrPut(it.id) { it.toDTO() }
+        }.id
+    }
 }
 
 internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk) : VilkårsgrunnlagHistorikkVisitor {
@@ -206,7 +233,8 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
                 antallOpptjeningsdagerErMinst = opptjening.opptjeningsdager(),
                 oppfyllerKravOmMinstelønn = compositeSykepengegrunnlag.oppfyllerMinsteinntektskrav,
                 oppfyllerKravOmOpptjening = opptjening.erOppfylt(),
-                oppfyllerKravOmMedlemskap = oppfyllerKravOmMedlemskap
+                oppfyllerKravOmMedlemskap = oppfyllerKravOmMedlemskap,
+                id = vilkårsgrunnlagId
             )
         }
 
@@ -223,7 +251,8 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
                 omregnetÅrsinntekt = byggetSykepengegrunnlag.omregnetÅrsinntekt,
                 sammenligningsgrunnlag = null,
                 inntekter = byggetSykepengegrunnlag.inntekterPerArbeidsgiver,
-                sykepengegrunnlag = byggetSykepengegrunnlag.sykepengegrunnlag
+                sykepengegrunnlag = byggetSykepengegrunnlag.sykepengegrunnlag,
+                id = vilkårsgrunnlagId
             )
         }
 

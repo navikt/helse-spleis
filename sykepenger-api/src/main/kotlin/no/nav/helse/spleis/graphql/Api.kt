@@ -31,6 +31,7 @@ import no.nav.helse.spleis.graphql.dto.personTypes
 import no.nav.helse.spleis.graphql.dto.simuleringTypes
 import no.nav.helse.spleis.graphql.dto.tidslinjeperiodeTypes
 import no.nav.helse.spleis.graphql.dto.vilkarsgrunnlagTypes
+import org.slf4j.MDC
 
 private object ApiMetrikker {
     private val responstid = Histogram
@@ -54,38 +55,40 @@ internal fun SchemaBuilder.personSchema(personDao: PersonDao, hendelseDao: Hende
                 }?.let {
                     ApiMetrikker.målByggSnapshot { håndterPerson(it, hendelseDao) } }
                 ?.let { person ->
-                    GraphQLPerson(
-                        aktorId = person.aktørId,
-                        fodselsnummer = person.fødselsnummer,
-                        arbeidsgivere = person.arbeidsgivere.map { arbeidsgiver ->
-                            GraphQLArbeidsgiver(
-                                organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
-                                id = arbeidsgiver.id,
-                                generasjoner = arbeidsgiver.generasjoner.map { generasjon ->
-                                    GraphQLGenerasjon(
-                                        id = generasjon.id,
-                                        perioder = generasjon.perioder.map { periode -> mapTidslinjeperiode(periode) }
-                                    )
-                                },
-                                ghostPerioder = arbeidsgiver.ghostPerioder.map { periode ->
-                                    GraphQLGhostPeriode(
-                                        id = periode.id,
-                                        fom = periode.fom,
-                                        tom = periode.tom,
-                                        skjaeringstidspunkt = periode.skjæringstidspunkt,
-                                        vilkarsgrunnlaghistorikkId = periode.vilkårsgrunnlagHistorikkInnslagId,
-                                        deaktivert = periode.deaktivert,
-                                        organisasjonsnummer = arbeidsgiver.organisasjonsnummer
-                                    )
-                                }
-                            )
-                        },
-                        vilkarsgrunnlaghistorikk = person.vilkårsgrunnlagHistorikk.entries.map { (id, dateMap) ->
-                            mapVilkårsgrunnlag(id, dateMap.values.toList())
-                        },
-                        dodsdato = person.dødsdato,
-                        versjon = person.versjon
-                    )
+                    withMDC(mapOf("aktørId" to person.aktørId)) {
+                        GraphQLPerson(
+                            aktorId = person.aktørId,
+                            fodselsnummer = person.fødselsnummer,
+                            arbeidsgivere = person.arbeidsgivere.map { arbeidsgiver ->
+                                GraphQLArbeidsgiver(
+                                    organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
+                                    id = arbeidsgiver.id,
+                                    generasjoner = arbeidsgiver.generasjoner.map { generasjon ->
+                                        GraphQLGenerasjon(
+                                            id = generasjon.id,
+                                            perioder = generasjon.perioder.map { periode -> mapTidslinjeperiode(periode) }
+                                        )
+                                    },
+                                    ghostPerioder = arbeidsgiver.ghostPerioder.map { periode ->
+                                        GraphQLGhostPeriode(
+                                            id = periode.id,
+                                            fom = periode.fom,
+                                            tom = periode.tom,
+                                            skjaeringstidspunkt = periode.skjæringstidspunkt,
+                                            vilkarsgrunnlaghistorikkId = periode.vilkårsgrunnlagHistorikkInnslagId,
+                                            deaktivert = periode.deaktivert,
+                                            organisasjonsnummer = arbeidsgiver.organisasjonsnummer
+                                        )
+                                    }
+                                )
+                            },
+                            vilkarsgrunnlaghistorikk = person.vilkårsgrunnlagHistorikk.entries.map { (id, dateMap) ->
+                                mapVilkårsgrunnlag(id, dateMap.values.toList())
+                            },
+                            dodsdato = person.dødsdato,
+                            versjon = person.versjon
+                        )
+                    }
                 }
         }
     }
@@ -137,5 +140,15 @@ fun Application.installGraphQLApi(dataSource: DataSource, authProviderName: Stri
         schema {
             personSchema(personDao, hendelseDao)
         }
+    }
+}
+
+internal fun <T> withMDC(context: Map<String, String>, block: () -> T): T {
+    val contextMap = MDC.getCopyOfContextMap() ?: emptyMap()
+    try {
+        MDC.setContextMap(contextMap + context)
+        return block()
+    } finally {
+        MDC.setContextMap(contextMap)
     }
 }
