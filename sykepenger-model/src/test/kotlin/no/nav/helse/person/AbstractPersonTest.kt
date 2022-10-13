@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.Personidentifikator
+import no.nav.helse.april
 import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.dsl.TestPerson
 import no.nav.helse.dsl.UgyldigeSituasjonerObservatør
@@ -11,6 +12,7 @@ import no.nav.helse.februar
 import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.januar
+import no.nav.helse.mars
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
@@ -79,6 +81,23 @@ internal abstract class AbstractPersonTest {
             )
         }
 
+        private fun overlappendePeriode(jurist: MaskinellJurist) = SerialisertPerson("/personer/infotrygd-overlappende-utbetaling.json".readResource()).deserialize(jurist).also { person ->
+            person.håndter(
+                Utbetalingshistorikk(
+                    UUID.randomUUID(), "", "", ORGNUMMER, UUID.randomUUID().toString(),
+                    InfotrygdhistorikkElement.opprett(
+                        LocalDateTime.now(),
+                        UUID.randomUUID(),
+                        listOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.mars, 30.april, 100.prosent, TestPerson.INNTEKT)),
+                        listOf(Inntektsopplysning(ORGNUMMER, 1.januar, TestPerson.INNTEKT, true)),
+                        emptyMap(),
+                        emptyList(),
+                        false
+                    ),
+                ),
+            )
+        }
+
         private fun dobbelutbetalingPerson(jurist: MaskinellJurist) = SerialisertPerson("/personer/dobbelutbetaling.json".readResource()).deserialize(jurist)
     }
 
@@ -118,6 +137,7 @@ internal abstract class AbstractPersonTest {
     }
     protected fun createPingPongPerson() = createTestPerson { jurist -> pingPongPerson(jurist) }
     protected fun createOvergangFraInfotrygdPerson() = createTestPerson { jurist -> overgangFraInfotrygdPerson(jurist) }
+    protected fun createOverlappendeFraInfotrygdPerson() = createTestPerson { jurist -> overlappendePeriode(jurist) }
     protected fun createDobbelutbetalingPerson() = createTestPerson { jurist -> dobbelutbetalingPerson(jurist) }
 
     protected fun createTestPerson(block: (jurist: MaskinellJurist) -> Person) : Person {

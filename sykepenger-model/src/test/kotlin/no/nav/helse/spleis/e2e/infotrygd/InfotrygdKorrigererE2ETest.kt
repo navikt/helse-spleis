@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
+import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
@@ -12,12 +13,16 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
+import no.nav.helse.mai
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
+import no.nav.helse.person.TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
+import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
+import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Friperiode
@@ -47,6 +52,38 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
+
+    @Test
+    fun `infotrygd har betalt ut auu-periode - inntektsmelding trigger revurdering`() {
+        createOverlappendeFraInfotrygdPerson()
+
+        håndterInntektsmelding(listOf(1.januar til 16.januar), refusjon = Inntektsmelding.Refusjon(INNTEKT, 31.mai))
+
+        assertForventetFeil(
+            forklaring = "Det ligger en AUU periode 1.april-10.april, hvor Infotrygd senere har utbetalt perioden 1.mars - 30.april," +
+                    "og gjort at det er ett sammenhengede sykefraværstilfelle." +
+                    "Da inntektsmeldingen som skal opphøre refusjon sendes inn, fanges dette opp av den første AUU-perioden som sender ut startRevurdering." +
+                    "Revurderingen fanges bl.a. opp av april-perioden, fordi den skal egentlig utbetales." +
+                    "Kanskje april-perioden aldri skulle blitt med i revurderingen?",
+            nå = {
+                assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+                assertSisteTilstand(2.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING)
+                assertSisteTilstand(3.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING)
+                assertSisteTilstand(4.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+                assertSisteTilstand(5.vedtaksperiode, AVVENTER_REVURDERING)
+            },
+            ønsket = {
+                assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+                assertSisteTilstand(2.vedtaksperiode, AVVENTER_GJENNOMFØRT_REVURDERING)
+                assertSisteTilstand(3.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+                // enten bør denne perioden stå helt i ro;
+                // eller så bør den I ALLE FALL IKKE være den som driver revurderingen av 1., 2. og 3. vedtaksperiode frem;
+                // de burde revurderes isolert sett fra 4. og 5. vedtaksperiode.
+                assertSisteTilstand(4.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+                assertSisteTilstand(5.vedtaksperiode, AVVENTER_REVURDERING)
+            }
+        )
+    }
 
     @Test
     fun `infotrygd korrigerer arbeid gjenopptatt`() {
