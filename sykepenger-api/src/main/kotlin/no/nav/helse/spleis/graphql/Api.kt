@@ -49,47 +49,11 @@ private object ApiMetrikker {
 internal fun SchemaBuilder.personSchema(personDao: PersonDao, hendelseDao: HendelseDao) {
     query("person") {
         resolver { fnr: String ->
-            ApiMetrikker.målDatabase { personDao.hentPersonFraFnr(fnr.toLong()) }
-                ?.let {
-                    ApiMetrikker.målDeserialisering { it.deserialize(MaskinellJurist()) { hendelseDao.hentAlleHendelser(fnr.toLong()) } }
-                }?.let {
-                    ApiMetrikker.målByggSnapshot { håndterPerson(it, hendelseDao) } }
-                ?.let { person ->
-                    withMDC(mapOf("aktørId" to person.aktørId)) {
-                        GraphQLPerson(
-                            aktorId = person.aktørId,
-                            fodselsnummer = person.fødselsnummer,
-                            arbeidsgivere = person.arbeidsgivere.map { arbeidsgiver ->
-                                GraphQLArbeidsgiver(
-                                    organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
-                                    id = arbeidsgiver.id,
-                                    generasjoner = arbeidsgiver.generasjoner.map { generasjon ->
-                                        GraphQLGenerasjon(
-                                            id = generasjon.id,
-                                            perioder = generasjon.perioder.map { periode -> mapTidslinjeperiode(periode) }
-                                        )
-                                    },
-                                    ghostPerioder = arbeidsgiver.ghostPerioder.map { periode ->
-                                        GraphQLGhostPeriode(
-                                            id = periode.id,
-                                            fom = periode.fom,
-                                            tom = periode.tom,
-                                            skjaeringstidspunkt = periode.skjæringstidspunkt,
-                                            vilkarsgrunnlaghistorikkId = periode.vilkårsgrunnlagHistorikkInnslagId,
-                                            deaktivert = periode.deaktivert,
-                                            organisasjonsnummer = arbeidsgiver.organisasjonsnummer
-                                        )
-                                    }
-                                )
-                            },
-                            vilkarsgrunnlaghistorikk = person.vilkårsgrunnlagHistorikk.entries.map { (id, dateMap) ->
-                                mapVilkårsgrunnlag(id, dateMap.values.toList())
-                            },
-                            dodsdato = person.dødsdato,
-                            versjon = person.versjon
-                        )
-                    }
-                }
+            ApiMetrikker.målDatabase { personDao.hentPersonFraFnr(fnr.toLong()) }?.let { serialisertPerson ->
+                ApiMetrikker.målDeserialisering { serialisertPerson.deserialize(MaskinellJurist()) { hendelseDao.hentAlleHendelser(fnr.toLong()) } }
+                    .let { ApiMetrikker.målByggSnapshot { håndterPerson(it, hendelseDao) } }
+                    .let { person -> mapTilDto(person) }
+            }
         }
     }
 
@@ -121,6 +85,40 @@ internal fun SchemaBuilder.personSchema(personDao: PersonDao, hendelseDao: Hende
         serialize = { date: YearMonth -> date.format(formatter) }
     }
 }
+
+private fun mapTilDto(person: PersonDTO) =
+    GraphQLPerson(
+        aktorId = person.aktørId,
+        fodselsnummer = person.fødselsnummer,
+        arbeidsgivere = person.arbeidsgivere.map { arbeidsgiver ->
+            GraphQLArbeidsgiver(
+                organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
+                id = arbeidsgiver.id,
+                generasjoner = arbeidsgiver.generasjoner.map { generasjon ->
+                    GraphQLGenerasjon(
+                        id = generasjon.id,
+                        perioder = generasjon.perioder.map { periode -> mapTidslinjeperiode(periode) }
+                    )
+                },
+                ghostPerioder = arbeidsgiver.ghostPerioder.map { periode ->
+                    GraphQLGhostPeriode(
+                        id = periode.id,
+                        fom = periode.fom,
+                        tom = periode.tom,
+                        skjaeringstidspunkt = periode.skjæringstidspunkt,
+                        vilkarsgrunnlaghistorikkId = periode.vilkårsgrunnlagHistorikkInnslagId,
+                        deaktivert = periode.deaktivert,
+                        organisasjonsnummer = arbeidsgiver.organisasjonsnummer
+                    )
+                }
+            )
+        },
+        vilkarsgrunnlaghistorikk = person.vilkårsgrunnlagHistorikk.entries.map { (id, dateMap) ->
+            mapVilkårsgrunnlag(id, dateMap.values.toList())
+        },
+        dodsdato = person.dødsdato,
+        versjon = person.versjon
+    )
 
 fun Application.installGraphQLApi(dataSource: DataSource, authProviderName: String) {
     val personDao = PersonDao(dataSource)
