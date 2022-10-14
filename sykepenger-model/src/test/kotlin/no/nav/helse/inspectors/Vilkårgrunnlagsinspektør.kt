@@ -13,6 +13,7 @@ import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.VilkårsgrunnlagHistorikkVisitor
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosent
+import org.junit.jupiter.api.fail
 import kotlin.properties.Delegates
 
 internal val VilkårsgrunnlagHistorikk.inspektør get() = Vilkårgrunnlagsinspektør(this)
@@ -22,10 +23,17 @@ internal class Vilkårgrunnlagsinspektør(historikk: VilkårsgrunnlagHistorikk) 
     val vilkårsgrunnlagTeller = mutableMapOf<Int, Int>()
     private var innslag = -1
     internal val aktiveSpleisSkjæringstidspunkt = mutableSetOf<LocalDate>()
+    private val grunnlagsdata = mutableListOf<Pair<LocalDate,VilkårsgrunnlagHistorikk.Grunnlagsdata>>()
 
     init {
         historikk.accept(this)
     }
+
+    internal fun antallGrunnlagsdata() = vilkårsgrunnlagTeller.map(Map.Entry<*, Int>::value).sum()
+
+    internal fun grunnlagsdata(indeks: Int) = grunnlagsdata[indeks].second
+    internal fun grunnlagsdata(skjæringstidspunkt: LocalDate) = grunnlagsdata.firstOrNull { it.first == skjæringstidspunkt }?.second ?: fail("Fant ikke grunnlagsdata på skjæringstidspunkt $skjæringstidspunkt")
+
 
     override fun preVisitVilkårsgrunnlagHistorikk() {
         vilkårsgrunnlagTeller.clear()
@@ -51,6 +59,7 @@ internal class Vilkårgrunnlagsinspektør(historikk: VilkårsgrunnlagHistorikk) 
         val teller = vilkårsgrunnlagTeller.getValue(innslag)
         if (innslag == 0) aktiveSpleisSkjæringstidspunkt.add(skjæringstidspunkt)
         vilkårsgrunnlagTeller[innslag] = teller.inc()
+        this.grunnlagsdata.add(skjæringstidspunkt to grunnlagsdata)
     }
 
     override fun preVisitInfotrygdVilkårsgrunnlag(

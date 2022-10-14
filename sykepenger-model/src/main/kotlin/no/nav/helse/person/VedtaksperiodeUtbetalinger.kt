@@ -6,6 +6,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.utbetaling.UtbetalingHendelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
+import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.utbetalingslinjer.Utbetaling
@@ -14,19 +15,25 @@ import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.harId
 import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 
-internal class VedtaksperiodeUtbetalinger(private val arbeidsgiver: Arbeidsgiver, utbetalinger: List<Utbetaling>) {
+internal class VedtaksperiodeUtbetalinger(private val arbeidsgiver: Arbeidsgiver, utbetalinger: List<Pair<VilkårsgrunnlagElement?, Utbetaling>>) {
     internal constructor(arbeidsgiver: Arbeidsgiver) : this(arbeidsgiver, mutableListOf())
 
+    private val utbetalingene get() = utbetalinger.map(Pair<*, Utbetaling>::second)
     private val utbetalinger = utbetalinger.toMutableList()
-    private val siste get() = utbetalinger.lastOrNull()
+    private val siste get() = utbetalinger.lastOrNull()?.second
 
-    internal fun accept(visitor: VedtaksperiodeVisitor) {
+    internal fun accept(visitor: VedtaksperiodeUtbetalingVisitor) {
         visitor.preVisitVedtakserperiodeUtbetalinger(utbetalinger)
-        utbetalinger.forEach { it.accept(visitor) }
+        utbetalinger.forEach { (grunnlagsdata, utbetaling) ->
+            visitor.preVisitVedtaksperiodeUtbetaling(grunnlagsdata, utbetaling)
+            grunnlagsdata?.accept(visitor)
+            utbetaling.accept(visitor)
+            visitor.postVisitVedtaksperiodeUtbetaling(grunnlagsdata, utbetaling)
+        }
         visitor.postVisitVedtakserperiodeUtbetalinger(utbetalinger)
     }
 
-    private fun forrigeUtbetalte() = utbetalinger.aktive().lastOrNull()
+    private fun forrigeUtbetalte() = utbetalingene.aktive().lastOrNull()
 
     internal fun harUtbetaling() = siste != null && siste!!.gyldig()
     internal fun trekkerTilbakePenger() = siste?.trekkerTilbakePenger() == true
@@ -40,10 +47,10 @@ internal class VedtaksperiodeUtbetalinger(private val arbeidsgiver: Arbeidsgiver
     internal fun kanIkkeForsøkesPåNy() = siste?.kanIkkeForsøkesPåNy() == true
 
     internal fun kanForkastes(arbeidsgiverUtbetalinger: List<Utbetaling>) =
-        Utbetaling.kanForkastes(utbetalinger, arbeidsgiverUtbetalinger)
-    internal fun harAvsluttede() = utbetalinger.any { it.erAvsluttet() }
-    internal fun harId(utbetalingId: UUID) = utbetalinger.harId(utbetalingId)
-    internal fun hørerIkkeSammenMed(other: Utbetaling) = utbetalinger.lastOrNull { it.gyldig() }?.hørerSammen(other) == false
+        Utbetaling.kanForkastes(utbetalingene, arbeidsgiverUtbetalinger)
+    internal fun harAvsluttede() = utbetalinger.any { (_, utbetaling) -> utbetaling.erAvsluttet() }
+    internal fun harId(utbetalingId: UUID) = utbetalingene.harId(utbetalingId)
+    internal fun hørerIkkeSammenMed(other: Utbetaling) = utbetalinger.lastOrNull { (_, utbetaling) -> utbetaling.gyldig() }?.second?.hørerSammen(other) == false
     internal fun hørerIkkeSammenMed(other: VedtaksperiodeUtbetalinger) = other.siste != null && hørerIkkeSammenMed(other.siste!!)
     internal fun gjelderIkkeFor(hendelse: UtbetalingHendelse) = siste?.gjelderFor(hendelse) != true
     internal fun gjelderIkkeFor(hendelse: Utbetalingsgodkjenning) = siste?.gjelderFor(hendelse) != true
@@ -59,19 +66,21 @@ internal class VedtaksperiodeUtbetalinger(private val arbeidsgiver: Arbeidsgiver
     }
 
     internal fun mottaRevurdering(
+        grunnlagsdata: VilkårsgrunnlagElement,
         utbetaling: Utbetaling,
         periode: Periode
     ): Utbetalingstidslinje {
-        return nyUtbetaling(periode) { utbetaling }
+        return nyUtbetaling(grunnlagsdata, periode) { utbetaling }
     }
 
     internal fun lagUtbetaling(
         fødselsnummer: String,
         periode: Periode,
+        grunnlagsdata: VilkårsgrunnlagElement,
         maksimumSykepenger: Alder.MaksimumSykepenger,
         hendelse: ArbeidstakerHendelse
     ): Utbetalingstidslinje {
-        return nyUtbetaling(periode) {
+        return nyUtbetaling(grunnlagsdata, periode) {
             arbeidsgiver.lagUtbetaling(
                 aktivitetslogg = hendelse,
                 fødselsnummer = fødselsnummer,
@@ -85,10 +94,11 @@ internal class VedtaksperiodeUtbetalinger(private val arbeidsgiver: Arbeidsgiver
     }
 
     private fun nyUtbetaling(
+        grunnlagsdata: VilkårsgrunnlagElement,
         periode: Periode,
         generator: () -> Utbetaling
     ): Utbetalingstidslinje {
-        return generator().also { utbetalinger.add(it) }.utbetalingstidslinje(periode)
+        return generator().also { utbetalinger.add(grunnlagsdata to it) }.utbetalingstidslinje(periode)
     }
 
     fun lagRevurdering(

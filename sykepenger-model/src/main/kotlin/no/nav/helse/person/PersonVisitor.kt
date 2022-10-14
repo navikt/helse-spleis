@@ -345,7 +345,14 @@ internal interface UtbetalingstidslinjeberegningVisitor : UtbetalingsdagVisitor 
     }
 }
 
-internal interface VedtaksperiodeVisitor : UtbetalingVisitor, SykdomstidslinjeVisitor, UtbetalingsdagVisitor, InntektsmeldingInfoVisitor {
+internal interface VedtaksperiodeUtbetalingVisitor : UtbetalingVisitor, VilkårsgrunnlagHistorikkVisitor {
+    fun preVisitVedtakserperiodeUtbetalinger(utbetalinger: List<Pair<VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?, Utbetaling>>) {}
+    fun preVisitVedtaksperiodeUtbetaling(grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?, utbetaling: Utbetaling) {}
+    fun postVisitVedtaksperiodeUtbetaling(grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?, utbetaling: Utbetaling) {}
+    fun postVisitVedtakserperiodeUtbetalinger(utbetalinger: List<Pair<VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?, Utbetaling>>) {}
+}
+
+internal interface VedtaksperiodeVisitor : VedtaksperiodeUtbetalingVisitor, SykdomstidslinjeVisitor, UtbetalingsdagVisitor, InntektsmeldingInfoVisitor {
     fun preVisitVedtaksperiode(
         vedtaksperiode: Vedtaksperiode,
         id: UUID,
@@ -361,12 +368,8 @@ internal interface VedtaksperiodeVisitor : UtbetalingVisitor, SykdomstidslinjeVi
         hendelseIder: Set<Dokumentsporing>,
         inntektsmeldingInfo: InntektsmeldingInfo?,
         inntektskilde: () -> Inntektskilde
-    ) {
-    }
+    ) {}
 
-    fun preVisitVedtakserperiodeUtbetalinger(utbetalinger: List<Utbetaling>) {}
-    fun postVisitVedtakserperiodeUtbetalinger(utbetalinger: List<Utbetaling>) {}
-    fun visitDataForVilkårsvurdering(dataForVilkårsvurdering: VilkårsgrunnlagHistorikk.Grunnlagsdata?) {}
     fun postVisitVedtaksperiode(
         vedtaksperiode: Vedtaksperiode,
         id: UUID,

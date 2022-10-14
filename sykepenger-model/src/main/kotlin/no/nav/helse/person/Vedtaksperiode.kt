@@ -141,7 +141,8 @@ internal class Vedtaksperiode private constructor(
     private val jurist = jurist.medVedtaksperiode(id, hendelseIder, sykmeldingsperiode)
     private val skjæringstidspunkt get() = person.skjæringstidspunkt(sykdomstidslinje.sykdomsperiode() ?: periode)
     private val periodetype get() = arbeidsgiver.periodetype(periode)
-    private val inntektskilde get() = person.vilkårsgrunnlagFor(skjæringstidspunkt)?.inntektskilde() ?: Inntektskilde.EN_ARBEIDSGIVER
+    private val vilkårsgrunnlag get() = person.vilkårsgrunnlagFor(skjæringstidspunkt)
+    private val inntektskilde get() = vilkårsgrunnlag?.inntektskilde() ?: Inntektskilde.EN_ARBEIDSGIVER
 
     internal constructor(
         søknad: Søknad,
@@ -699,13 +700,17 @@ internal class Vedtaksperiode private constructor(
     ) {
         val vedtaksperioder = person.nåværendeVedtaksperioder(IKKE_FERDIG_BEHANDLET)
         vedtaksperioder
-            .filter { this.periode.overlapperMed(it.periode) }
+            .filter { this.periode.overlapperMed(it.periode) && this.skjæringstidspunkt == it.skjæringstidspunkt }
             .forEach { it.lagUtbetaling(maksimumSykepenger, hendelse) }
         høstingsresultater(hendelse)
     }
 
     private fun lagUtbetaling(maksimumSykepenger: Alder.MaksimumSykepenger, hendelse: ArbeidstakerHendelse) {
-        utbetalingstidslinje = utbetalinger.lagUtbetaling(fødselsnummer, periode, maksimumSykepenger, hendelse)
+        val grunnlagsdata = requireNotNull(vilkårsgrunnlag) {
+            "krever vilkårsgrunnlag for $skjæringstidspunkt, men har ikke. Lages det utbetaling for en periode som " +
+                    "ikke skal lage utbetaling?"
+        }
+        utbetalingstidslinje = utbetalinger.lagUtbetaling(fødselsnummer, periode, grunnlagsdata, maksimumSykepenger, hendelse)
     }
 
     private fun høstingsresultater(hendelse: ArbeidstakerHendelse) {
@@ -774,7 +779,11 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun mottaUtbetalingTilRevurdering(utbetaling: Utbetaling) {
-        utbetalingstidslinje = utbetalinger.mottaRevurdering(utbetaling, periode)
+        val grunnlagsdata = requireNotNull(vilkårsgrunnlag) {
+            "krever vilkårsgrunnlag for $skjæringstidspunkt, men har ikke. Tildeles det utbetaling til " +
+                    "en vedtaksperiode som ikke skal ha utbetaling?"
+        }
+        utbetalingstidslinje = utbetalinger.mottaRevurdering(grunnlagsdata, utbetaling, periode)
     }
 
     private fun Vedtaksperiodetilstand.påminnelse(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {

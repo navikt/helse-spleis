@@ -1,0 +1,65 @@
+{
+  "arbeidsgivere": [
+    {
+      "vedtaksperioder": [
+        {
+          "utbetalinger": [
+            {
+              "vilkårsgrunnlagId": null,
+              "utbetalingId": "a"
+            },
+            {
+              "vilkårsgrunnlagId": null,
+              "utbetalingId": "b"
+            }
+          ]
+        },
+        {
+          "utbetalinger": [
+            {
+              "vilkårsgrunnlagId": null,
+              "utbetalingId": "c"
+            },
+            {
+              "vilkårsgrunnlagId": null,
+              "utbetalingId": "d"
+            }
+          ]
+        }
+      ],
+      "forkastede": [
+        {
+          "vedtaksperiode": {
+            "utbetalinger": [
+              {
+                "vilkårsgrunnlagId": null,
+                "utbetalingId": "c"
+              },
+              {
+                "vilkårsgrunnlagId": null,
+                "utbetalingId": "d"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "vedtaksperioder": [
+        {
+          "utbetalinger": [
+            {
+              "vilkårsgrunnlagId": null,
+              "utbetalingId": "e"
+            },
+            {
+              "vilkårsgrunnlagId": null,
+              "utbetalingId": "f"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "skjemaVersjon": 183
+}

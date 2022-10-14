@@ -52,9 +52,12 @@ import no.nav.helse.serde.PersonData.ArbeidsgiverData.InntektsmeldingInfoHistori
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.InntektsmeldingInfoHistorikkElementData.Companion.tilInntektsmeldingInfoHistorikk
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.RefusjonData.Companion.parseRefusjon
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.RefusjonData.EndringIRefusjonData.Companion.parseEndringerIRefusjon
+import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.VedtaksperiodeUtbetalingData.Companion.tilModellobjekt
 import no.nav.helse.serde.PersonData.InfotrygdhistorikkElementData.Companion.tilModellObjekt
 import no.nav.helse.serde.PersonData.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.Companion.parseArbeidsgiverInntektsopplysninger
+import no.nav.helse.serde.PersonData.VilkårsgrunnlagElementData.Companion.grunnlagMap
 import no.nav.helse.serde.PersonData.VilkårsgrunnlagElementData.OpptjeningData.ArbeidsgiverOpptjeningsgrunnlagData.Companion.tilArbeidsgiverOpptjeningsgrunnlag
+import no.nav.helse.serde.PersonData.VilkårsgrunnlagInnslagData.Companion.grunnlagMap
 import no.nav.helse.serde.PersonData.VilkårsgrunnlagInnslagData.Companion.tilModellObjekt
 import no.nav.helse.serde.mapping.JsonMedlemskapstatus
 import no.nav.helse.serde.reflection.Inntektsopplysningskilde
@@ -127,6 +130,7 @@ internal data class PersonData(
                 this.aktørId,
                 this.fødselsnummer,
                 this.alder,
+                vilkårsgrunnlagHistorikk.grunnlagMap(alder),
                 personJurist
             )
         })
@@ -237,20 +241,24 @@ internal data class PersonData(
     }
 
     data class VilkårsgrunnlagInnslagData(
-        val id: UUID,
-        val opprettet: LocalDateTime,
-        val vilkårsgrunnlag: List<VilkårsgrunnlagElementData>
+        private val id: UUID,
+        private val opprettet: LocalDateTime,
+        private val vilkårsgrunnlag: List<VilkårsgrunnlagElementData>
     ) {
+        private fun tilModellobjekt(alder: Alder) = VilkårsgrunnlagHistorikk.Innslag.gjenopprett(
+            id = id,
+            opprettet = opprettet,
+            elementer = vilkårsgrunnlag.associate { it.parseDataForVilkårsvurdering(alder) }
+        )
+
         internal companion object {
             private fun List<VilkårsgrunnlagInnslagData>.parseVilkårsgrunnlag(alder: Alder) =
-                this.map { innslagData ->
-                    VilkårsgrunnlagHistorikk.Innslag.gjenopprett(innslagData.id, innslagData.opprettet,
-                        innslagData.vilkårsgrunnlag.associate {
-                            it.parseDataForVilkårsvurdering(alder)
-                        })
-                }
+                this.map { innslagData -> innslagData.tilModellobjekt(alder) }
 
             internal fun List<VilkårsgrunnlagInnslagData>.tilModellObjekt(alder: Alder) = VilkårsgrunnlagHistorikk.ferdigVilkårsgrunnlagHistorikk(parseVilkårsgrunnlag(alder))
+            internal fun List<VilkårsgrunnlagInnslagData>.grunnlagMap(alder: Alder) = this
+                .flatMap { it.vilkårsgrunnlag }
+                .grunnlagMap(alder)
         }
     }
 
@@ -266,6 +274,11 @@ internal data class PersonData(
         private val meldingsreferanseId: UUID?,
         private val vilkårsgrunnlagId: UUID
     ) {
+        companion object {
+            fun List<VilkårsgrunnlagElementData>.grunnlagMap(alder: Alder) = this
+                .associateBy({ it.vilkårsgrunnlagId }) { it.parseDataForVilkårsvurdering(alder).second }
+
+        }
         internal fun parseDataForVilkårsvurdering(alder: Alder): Pair<LocalDate, VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement> = skjæringstidspunkt to when (type) {
             GrunnlagsdataType.Vilkårsprøving -> VilkårsgrunnlagHistorikk.Grunnlagsdata(
                 skjæringstidspunkt = skjæringstidspunkt,
@@ -448,6 +461,7 @@ internal data class PersonData(
             aktørId: String,
             fødselsnummer: String,
             alder: Alder,
+            grunnlagMap: Map<UUID, VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement>,
             jurist: MaskinellJurist
         ): Arbeidsgiver {
             val arbeidsgiverJurist = jurist.medOrganisasjonsnummer(organisasjonsnummer)
@@ -476,6 +490,7 @@ internal data class PersonData(
                     aktørId,
                     fødselsnummer,
                     this.organisasjonsnummer,
+                    grunnlagMap,
                     utbetalingMap,
                     inntektsmeldingInfo,
                     arbeidsgiverJurist
@@ -490,6 +505,7 @@ internal data class PersonData(
                         aktørId,
                         fødselsnummer,
                         this.organisasjonsnummer,
+                        grunnlagMap,
                         utbetalingMap,
                         inntektsmeldingInfo,
                         arbeidsgiverJurist
@@ -845,18 +861,30 @@ internal data class PersonData(
             private val sykmeldingFom: LocalDate,
             private val sykmeldingTom: LocalDate,
             private val tilstand: TilstandType,
-            private val utbetalinger: List<UUID>,
+            private val utbetalinger: List<VedtaksperiodeUtbetalingData>,
             private val utbetalingstidslinje: UtbetalingstidslinjeData,
             private val forlengelseFraInfotrygd: ForlengelseFraInfotrygd,
             private val opprettet: LocalDateTime,
             private val oppdatert: LocalDateTime
         ) {
+            data class VedtaksperiodeUtbetalingData(
+                private val vilkårsgrunnlagId: UUID?,
+                private val utbetalingId: UUID
+            ) {
+                companion object {
+                    fun List<VedtaksperiodeUtbetalingData>.tilModellobjekt(grunnlag: Map<UUID, VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement>, utbetalinger: Map<UUID, Utbetaling>) =
+                        this.map { (grunnlagId, utbetalingId) ->
+                            grunnlag[grunnlagId] to utbetalinger.getValue(utbetalingId)
+                        }
+                }
+            }
             internal fun createVedtaksperiode(
                 person: Person,
                 arbeidsgiver: Arbeidsgiver,
                 aktørId: String,
                 fødselsnummer: String,
                 organisasjonsnummer: String,
+                grunnlag: Map<UUID, VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement>,
                 utbetalinger: Map<UUID, Utbetaling>,
                 inntektsmeldingInfoHistorikk: List<InntektsmeldingInfoHistorikkElementData>,
                 jurist: MaskinellJurist
@@ -883,8 +911,9 @@ internal data class PersonData(
                     periode = Periode(fom, tom),
                     sykmeldingsperiode = sykmeldingsperiode,
                     utbetalinger = VedtaksperiodeUtbetalinger(
-                        arbeidsgiver,
-                        this.utbetalinger.map { utbetalinger.getValue(it) }),
+                        arbeidsgiver = arbeidsgiver,
+                        utbetalinger = this.utbetalinger.tilModellobjekt(grunnlag, utbetalinger)
+                    ),
                     utbetalingstidslinje = this.utbetalingstidslinje.konverterTilUtbetalingstidslinje(),
                     forlengelseFraInfotrygd = forlengelseFraInfotrygd,
                     opprettet = opprettet,
