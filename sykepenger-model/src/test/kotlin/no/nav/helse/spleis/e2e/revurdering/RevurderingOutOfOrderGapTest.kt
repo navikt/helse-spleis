@@ -13,6 +13,7 @@ import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
@@ -73,6 +74,7 @@ import no.nav.helse.spleis.e2e.repeat
 import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
 import no.nav.helse.spleis.e2e.tilGodkjenning
 import no.nav.helse.spleis.e2e.tilGodkjent
+import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -904,5 +906,56 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_REVURDERING)
         håndterPåminnelse(1.vedtaksperiode, AVVENTER_REVURDERING)
         assertEquals(2, observatør.manglendeInntektsmeldingVedtaksperioder.size)
+    }
+
+    @Test
+    fun `Out of order som overlapper med annen AG og flytter skjæringstidspunktet skal forkastes`() {
+        nyPeriode(1.mars til 31.mars, a1)
+        nyPeriode(20.mars til 20.april, a2)
+
+        håndterInntektsmelding(listOf(1.mars til 16.mars), orgnummer = a1)
+        håndterInntektsmelding(listOf(20.mars til 4.april), orgnummer = a2)
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterVilkårsgrunnlag(
+            1.vedtaksperiode,
+            orgnummer = a1,
+            inntektsvurdering = Inntektsvurdering(
+                inntekter = inntektperioderForSammenligningsgrunnlag {
+                    1.mars(2017) til 1.februar inntekter {
+                        a1 inntekt INNTEKT
+                        a2 inntekt INNTEKT
+                    }
+                }
+            ),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(
+                listOf(
+                    grunnlag(a1, 1.mars, INNTEKT.repeat(3)),
+                    grunnlag(a2, 1.mars, INNTEKT.repeat(3))
+                ), arbeidsforhold = emptyList()
+            ),
+            arbeidsforhold = listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null),
+                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null)
+            )
+        )
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a1)
+        håndterUtbetalt(orgnummer = a1)
+
+        håndterYtelser(1.vedtaksperiode, orgnummer = a2)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode, orgnummer = a2)
+        håndterUtbetalt(orgnummer = a2)
+
+        nyPeriode(10.februar til 2.mars, a2)
+
+        assertSisteTilstand(2.vedtaksperiode, TIL_INFOTRYGD, a2)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, a2)
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET, a1)
+        assertFunksjonellFeil("Mottatt søknad out of order")
+        assertFunksjonellFeil("Mottatt overlappende søknad")
     }
 }
