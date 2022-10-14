@@ -56,7 +56,6 @@ import no.nav.helse.spleis.e2e.nyPeriode
 import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
 
 internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
@@ -142,7 +141,7 @@ internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `dobbelutbetaling når to sykefraværstilfeller blir til en`() {
+    fun `to sykefraværstilfeller blir til en, starter med AUU`() {
         createDobbelutbetalingPerson()
 
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(19.januar, Dagtype.Feriedag)))
@@ -159,29 +158,51 @@ internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
         val forrigeUtbetaling = inspektør.utbetaling(1)
         val nyUtbetaling = inspektør.utbetaling(2)
 
-        assertForventetFeil(
-            forklaring = "Lager en helt ny utbetaling som fører til dobbelutbetaling av første periode",
-            nå = {
-                assertNotEquals(
-                    forrigeUtbetaling.inspektør.korrelasjonsId,
-                    nyUtbetaling.inspektør.korrelasjonsId
-                )
-                assertEquals(
-                    listOf(Endringskode.NY, Endringskode.NY, Endringskode.NY),
-                    nyUtbetaling.inspektør.arbeidsgiverOppdrag.inspektør.endringskoder()
-                )
-            },
-            ønsket = {
-                assertEquals(
-                    forrigeUtbetaling.inspektør.korrelasjonsId,
-                    nyUtbetaling.inspektør.korrelasjonsId
-                )
-                assertEquals(
-                    listOf(Endringskode.UEND, Endringskode.UEND, Endringskode.NY),
-                    nyUtbetaling.inspektør.arbeidsgiverOppdrag.inspektør.endringskoder()
-                )
-            }
+        assertEquals(
+            forrigeUtbetaling.inspektør.korrelasjonsId,
+            nyUtbetaling.inspektør.korrelasjonsId
         )
+        assertEquals(
+            listOf(Endringskode.UEND, Endringskode.UEND, Endringskode.NY),
+            nyUtbetaling.inspektør.arbeidsgiverOppdrag.inspektør.endringskoder()
+        )
+    }
+
+    @Test
+    fun `to sykefraværstilfeller blir til en, starter med Avsluttet`() {
+        createAuuBlirMedIRevureringPerson()
+
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(19.januar, Dagtype.Feriedag)))
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt()
+
+        håndterYtelser(3.vedtaksperiode)
+
+        inspektør.utbetaling(2).inspektør.also {
+            assertEquals(it.korrelasjonsId, inspektør.utbetaling(0).inspektør.korrelasjonsId)
+            assertEquals(it.arbeidsgiverOppdrag.inspektør.fagsystemId(), inspektør.utbetaling(0).inspektør.arbeidsgiverOppdrag.fagsystemId())
+            assertEquals(3, it.arbeidsgiverOppdrag.size)
+            assertEquals(Endringskode.ENDR, it.arbeidsgiverOppdrag[0].inspektør.endringskode)
+            assertEquals(17.januar, it.arbeidsgiverOppdrag[0].inspektør.fom)
+            assertEquals(18.januar, it.arbeidsgiverOppdrag[0].inspektør.tom)
+            assertEquals(Endringskode.NY, it.arbeidsgiverOppdrag[1].inspektør.endringskode)
+            assertEquals(20.januar, it.arbeidsgiverOppdrag[1].inspektør.fom)
+            assertEquals(31.januar, it.arbeidsgiverOppdrag[1].inspektør.tom)
+            assertEquals(Endringskode.NY, it.arbeidsgiverOppdrag[2].inspektør.endringskode)
+            assertEquals(1.mars, it.arbeidsgiverOppdrag[2].inspektør.fom)
+            assertEquals(19.mars, it.arbeidsgiverOppdrag[2].inspektør.tom)
+        }
+
+        inspektør.utbetaling(3).inspektør.also {
+            assertEquals(it.korrelasjonsId, inspektør.utbetaling(1).inspektør.korrelasjonsId)
+            assertEquals(it.arbeidsgiverOppdrag.inspektør.fagsystemId(), inspektør.utbetaling(1).inspektør.arbeidsgiverOppdrag.fagsystemId())
+            assertEquals(1, it.arbeidsgiverOppdrag.size)
+            assertEquals(Endringskode.UEND, it.arbeidsgiverOppdrag[0].inspektør.endringskode)
+            assertEquals(17.mai, it.arbeidsgiverOppdrag[0].inspektør.fom)
+            assertEquals(31.mai, it.arbeidsgiverOppdrag[0].inspektør.tom)
+        }
     }
 
 
@@ -202,6 +223,27 @@ internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
                         emptyMap(),
                         emptyList(),
                         false
+                    ),
+                ),
+            )
+        }
+    }
+
+    private fun createAuuBlirMedIRevureringPerson() = createTestPerson { jurist ->
+        SerialisertPerson("/personer/auu-blir-med-i-revurdering.json".readResource()).deserialize(jurist).also { person ->
+            person.håndter(
+                Utbetalingshistorikk(
+                    UUID.randomUUID(), "", "", ORGNUMMER, UUID.randomUUID().toString(),
+                    InfotrygdhistorikkElement.opprett(
+                        oppdatert = LocalDateTime.now(),
+                        hendelseId = UUID.randomUUID(),
+                        perioder = listOf(
+                            Friperiode(fom = 1.februar, tom = 28.februar)
+                        ),
+                        inntekter = listOf(Inntektsopplysning(ORGNUMMER, 1.januar, TestPerson.INNTEKT, true)),
+                        arbeidskategorikoder = emptyMap(),
+                        ugyldigePerioder = emptyList(),
+                        harStatslønn = false
                     ),
                 ),
             )

@@ -319,24 +319,31 @@ internal class Utbetaling private constructor(
             gjenståendeSykedager: Int,
             forrige: Utbetaling?
         ): Utbetaling {
-            val sisteUtbetaling = forrige?.let { utbetalinger.aktive().lastOrNull { it.korrelasjonsId == forrige.korrelasjonsId } } ?: forrige
+            val sisteUtbetaling = utbetalinger.sisteAktiveMedSammeKorrelasjonsId(forrige) ?: utbetalinger.sisteAktiveFør(sisteDato)
             val revurdertTidslinje = sisteUtbetaling?.lagRevurdertTidslinje(utbetalingstidslinje, sisteDato) ?: utbetalingstidslinje
 
             return Utbetaling(
-                sisteUtbetaling?.takeIf { it.erAktiv() },
-                fødselsnummer,
-                beregningId,
-                organisasjonsnummer,
-                revurdertTidslinje,
-                Utbetalingtype.REVURDERING.takeUnless { forrige == null } ?: Utbetalingtype.UTBETALING,
-                sisteUtbetaling?.let { maxOf(sisteUtbetaling.periode.endInclusive, sisteDato) } ?: sisteDato,
-                aktivitetslogg,
-                maksdato,
-                forbrukteSykedager,
-                gjenståendeSykedager,
-                sisteUtbetaling?.takeIf { it.erAktiv() }
+                // Siste aktive utbetaling på arbeidsgiveren
+                sisteAktive = sisteUtbetaling,
+                fødselsnummer = fødselsnummer,
+                beregningId = beregningId,
+                organisasjonsnummer = organisasjonsnummer,
+                utbetalingstidslinje = revurdertTidslinje,
+                type = Utbetalingtype.REVURDERING.takeUnless { forrige == null } ?: Utbetalingtype.UTBETALING,
+                sisteDato = sisteUtbetaling?.let { maxOf(sisteUtbetaling.periode.endInclusive, sisteDato) } ?: sisteDato,
+                aktivitetslogg = aktivitetslogg,
+                maksdato = maksdato,
+                forbrukteSykedager = forbrukteSykedager,
+                gjenståendeSykedager = gjenståendeSykedager,
+                // Forrige utbetaling på vedtaksperioden
+                forrige = sisteUtbetaling
             )
         }
+
+        private fun List<Utbetaling>.sisteAktiveMedSammeKorrelasjonsId(forrige: Utbetaling?) =
+            forrige?.let { aktive().lastOrNull { it.korrelasjonsId == forrige.korrelasjonsId } }
+        private fun List<Utbetaling>.sisteAktiveFør(sisteDato: LocalDate) =
+            aktive().lastOrNull { it.periode.endInclusive < sisteDato }
 
         internal fun lagUtbetaling(
             utbetalinger: List<Utbetaling>,
@@ -380,18 +387,20 @@ internal class Utbetaling private constructor(
             type: Utbetalingtype
         ): Utbetaling {
             return Utbetaling(
-                utbetalinger.aktive().lastOrNull(),
-                fødselsnummer,
-                beregningId,
-                organisasjonsnummer,
-                utbetalingstidslinje,
-                type,
-                sisteDato,
-                aktivitetslogg,
-                maksdato,
-                forbrukteSykedager,
-                gjenståendeSykedager,
-                forrige?.takeIf { it.erAktiv() || it.kanIkkeForsøkesPåNy() }
+                // Siste aktive utbetaling på arbeidsgiveren
+                sisteAktive = utbetalinger.aktive().lastOrNull(),
+                fødselsnummer = fødselsnummer,
+                beregningId = beregningId,
+                organisasjonsnummer = organisasjonsnummer,
+                utbetalingstidslinje = utbetalingstidslinje,
+                type = type,
+                sisteDato = sisteDato,
+                aktivitetslogg = aktivitetslogg,
+                maksdato = maksdato,
+                forbrukteSykedager = forbrukteSykedager,
+                gjenståendeSykedager = gjenståendeSykedager,
+                // Forrige utbetaling på vedtaksperioden
+                forrige = forrige?.takeIf { it.erAktiv() || it.kanIkkeForsøkesPåNy() }
             )
         }
 
