@@ -4,21 +4,15 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.Personidentifikator
-import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.IAktivitetslogg
-import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonVisitor
-import no.nav.helse.person.Sammenligningsgrunnlag
-import no.nav.helse.person.Sykepengegrunnlag
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.utbetalingstidslinje.Alder
-import no.nav.helse.økonomi.Prosent
-import org.junit.jupiter.api.fail
 
 internal val Person.inspektør get() = PersonInspektør(this)
 internal val Person.personLogg get() = inspektør.aktivitetslogg
@@ -39,7 +33,6 @@ internal class PersonInspektør(person: Person): PersonVisitor {
     internal lateinit var alder: Alder
     private val arbeidsgivere = mutableMapOf<String, Arbeidsgiver>()
     private val infotrygdelementerLagretInntekt = mutableListOf<Boolean>()
-    private val grunnlagsdata = mutableListOf<Pair<LocalDate,VilkårsgrunnlagHistorikk.Grunnlagsdata>>()
     private val vilkårsgrunnlagHistorikkInnslag: MutableList<VilkårsgrunnlagHistorikk.Innslag> = mutableListOf()
 
     init {
@@ -56,11 +49,7 @@ internal class PersonInspektør(person: Person): PersonVisitor {
     internal fun arbeidsgiver(orgnummer: String) = arbeidsgivere[orgnummer]
     internal fun harLagretInntekt(indeks: Int) = infotrygdelementerLagretInntekt[indeks]
     internal fun harArbeidsgiver(organisasjonsnummer: String) = organisasjonsnummer in arbeidsgivere.keys
-    internal fun grunnlagsdata(indeks: Int) = grunnlagsdata[indeks].second
-    internal fun grunnlagsdata(skjæringstidspunkt: LocalDate) = grunnlagsdata.firstOrNull { it.first == skjæringstidspunkt }?.second ?: fail("Fant ikke grunnlagsdata på skjæringstidspunkt $skjæringstidspunkt")
     internal fun vilkårsgrunnlagHistorikkInnslag() = vilkårsgrunnlagHistorikkInnslag.toList()
-
-    internal fun antallGrunnlagsdata() = grunnlagsdata.size
 
     override fun preVisitPerson(
         person: Person,
@@ -83,21 +72,6 @@ internal class PersonInspektør(person: Person): PersonVisitor {
 
     override fun visitPersonAktivitetslogg(aktivitetslogg: Aktivitetslogg) {
         this.aktivitetslogg = aktivitetslogg
-    }
-
-    override fun preVisitGrunnlagsdata(
-        skjæringstidspunkt: LocalDate,
-        grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata,
-        sykepengegrunnlag: Sykepengegrunnlag,
-        sammenligningsgrunnlag: Sammenligningsgrunnlag,
-        avviksprosent: Prosent?,
-        opptjening: Opptjening,
-        vurdertOk: Boolean,
-        meldingsreferanseId: UUID?,
-        vilkårsgrunnlagId: UUID,
-        medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus
-    ) {
-        this.grunnlagsdata.add(skjæringstidspunkt to grunnlagsdata)
     }
 
     override fun preVisitInnslag(innslag: VilkårsgrunnlagHistorikk.Innslag, id: UUID, opprettet: LocalDateTime) {

@@ -125,8 +125,9 @@ internal class RevurderInntektTest : AbstractEndToEndTest() {
         assertEquals(15741, inspektør.utbetalinger.first().inspektør.arbeidsgiverOppdrag.nettoBeløp())
         assertEquals(506, inspektør.utbetalinger.last().inspektør.arbeidsgiverOppdrag.nettoBeløp())
 
-        val grunnlagsdataInspektør = person.inspektør.grunnlagsdata(0).inspektør
-        assertEquals(2, person.inspektør.antallGrunnlagsdata())
+        val vilkårgrunnlagsinspektør = person.inspektør.vilkårsgrunnlagHistorikk.inspektør
+        val grunnlagsdataInspektør = vilkårgrunnlagsinspektør.grunnlagsdata(0).inspektør
+        assertEquals(2, vilkårgrunnlagsinspektør.antallGrunnlagsdata())
         assertEquals(3, grunnlagsdataInspektør.avviksprosent?.roundToInt())
 
         val tidligereBeregning = inspektør.utbetalingstidslinjeberegningData.first()

@@ -96,7 +96,7 @@ internal class JsonBuilder : AbstractBuilder() {
 
     private lateinit var personBuilder: PersonState
 
-    internal fun toJson() = personBuilder.build().toString()
+    internal fun toJson() = personBuilder.build().toPrettyString()
     override fun toString() = toJson()
 
     override fun preVisitPerson(
@@ -1415,7 +1415,7 @@ internal class JsonBuilder : AbstractBuilder() {
     }
 
     private class VedtaksperiodeState(private val vedtaksperiodeMap: MutableMap<String, Any?>) : BuilderState() {
-        private val utbetalinger = mutableListOf<UUID>()
+        private val utbetalinger = mutableListOf<Map<String, String?>>()
 
         override fun preVisitSykdomstidslinje(tidslinje: Sykdomstidslinje, låstePerioder: List<Periode>) {
             val sykdomstidslinje = mutableMapOf<String, Any?>()
@@ -1424,38 +1424,14 @@ internal class JsonBuilder : AbstractBuilder() {
             pushState(SykdomstidslinjeState(sykdomstidslinje))
         }
 
-        override fun preVisitUtbetaling(
-            utbetaling: Utbetaling,
-            id: UUID,
-            korrelasjonsId: UUID,
-            type: Utbetalingtype,
-            tilstand: Utbetaling.Tilstand,
-            periode: Periode,
-            tidsstempel: LocalDateTime,
-            oppdatert: LocalDateTime,
-            arbeidsgiverNettoBeløp: Int,
-            personNettoBeløp: Int,
-            maksdato: LocalDate,
-            forbrukteSykedager: Int?,
-            gjenståendeSykedager: Int?,
-            stønadsdager: Int,
-            beregningId: UUID,
-            overføringstidspunkt: LocalDateTime?,
-            avsluttet: LocalDateTime?,
-            avstemmingsnøkkel: Long?
-        ) {
-            utbetalinger.add(id)
-            pushState(UtbetalingState(mutableMapOf()))
+        override fun preVisitVedtakserperiodeUtbetalinger(utbetalinger: List<Pair<VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?, Utbetaling>>) {
+            pushState(VedtaksperiodeUtbetalingerState(this.utbetalinger))
         }
 
         override fun preVisitUtbetalingstidslinje(tidslinje: Utbetalingstidslinje) {
             val utbetalingstidslinjeMap = mutableMapOf<String, Any>()
             vedtaksperiodeMap["utbetalingstidslinje"] = utbetalingstidslinjeMap
             pushState(UtbetalingstidslinjeState(utbetalingstidslinjeMap))
-        }
-
-        override fun postVisitVedtakserperiodeUtbetalinger(utbetalinger: List<Utbetaling>) {
-            vedtaksperiodeMap["utbetalinger"] = this.utbetalinger
         }
 
         override fun visitInntektsmeldinginfo(id: UUID, arbeidsforholdId: String?) {
@@ -1488,6 +1464,7 @@ internal class JsonBuilder : AbstractBuilder() {
                 "periodetype" to periodetype(),
                 "inntektskilde" to inntektskilde(),
                 "tilstand" to tilstand.type.name,
+                "utbetalinger" to this.utbetalinger,
                 "skjæringstidspunktFraInfotrygd" to skjæringstidspunktFraInfotrygd,
                 "skjæringstidspunkt" to skjæringstidspunkt(),
                 "forlengelseFraInfotrygd" to forlengelseFraInfotrygd,
@@ -1496,6 +1473,82 @@ internal class JsonBuilder : AbstractBuilder() {
             ))
 
             popState()
+        }
+    }
+
+    private class VedtaksperiodeUtbetalingerState(private val utbetalinger: MutableList<Map<String, String?>>) : BuilderState() {
+        override fun preVisitVedtaksperiodeUtbetaling(
+            grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?,
+            utbetaling: Utbetaling
+        ) {
+            pushState(VedtaksperiodeUtbetalingState(utbetalinger))
+        }
+
+        override fun postVisitVedtakserperiodeUtbetalinger(utbetalinger: List<Pair<VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?, Utbetaling>>) {
+            popState()
+        }
+
+        private class VedtaksperiodeUtbetalingState(private val utbetalinger: MutableList<Map<String, String?>>) : BuilderState() {
+            private var grunnlagId: UUID? = null
+            private lateinit var utbetalingId: UUID
+
+            override fun preVisitGrunnlagsdata(
+                skjæringstidspunkt: LocalDate,
+                grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata,
+                sykepengegrunnlag: Sykepengegrunnlag,
+                sammenligningsgrunnlag: Sammenligningsgrunnlag,
+                avviksprosent: Prosent?,
+                opptjening: Opptjening,
+                vurdertOk: Boolean,
+                meldingsreferanseId: UUID?,
+                vilkårsgrunnlagId: UUID,
+                medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus
+            ) {
+                this.grunnlagId = vilkårsgrunnlagId
+            }
+
+            override fun preVisitInfotrygdVilkårsgrunnlag(
+                infotrygdVilkårsgrunnlag: VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag,
+                skjæringstidspunkt: LocalDate,
+                sykepengegrunnlag: Sykepengegrunnlag,
+                vilkårsgrunnlagId: UUID
+            ) {
+                this.grunnlagId = vilkårsgrunnlagId
+            }
+
+            override fun preVisitUtbetaling(
+                utbetaling: Utbetaling,
+                id: UUID,
+                korrelasjonsId: UUID,
+                type: Utbetalingtype,
+                tilstand: Utbetaling.Tilstand,
+                periode: Periode,
+                tidsstempel: LocalDateTime,
+                oppdatert: LocalDateTime,
+                arbeidsgiverNettoBeløp: Int,
+                personNettoBeløp: Int,
+                maksdato: LocalDate,
+                forbrukteSykedager: Int?,
+                gjenståendeSykedager: Int?,
+                stønadsdager: Int,
+                beregningId: UUID,
+                overføringstidspunkt: LocalDateTime?,
+                avsluttet: LocalDateTime?,
+                avstemmingsnøkkel: Long?
+            ) {
+                utbetalingId = id
+            }
+
+            override fun postVisitVedtaksperiodeUtbetaling(
+                grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?,
+                utbetaling: Utbetaling
+            ) {
+                this.utbetalinger.add(mapOf(
+                    "utbetalingId" to this.utbetalingId.toString(),
+                    "vilkårsgrunnlagId" to this.grunnlagId?.toString()
+                ))
+                popState()
+            }
         }
     }
 

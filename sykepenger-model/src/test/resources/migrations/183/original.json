@@ -1,0 +1,28 @@
+{
+  "arbeidsgivere": [
+    {
+      "vedtaksperioder": [
+        {
+          "utbetalinger": ["a", "b"]
+        },
+        {
+          "utbetalinger": ["c", "d"]
+        }
+      ],
+      "forkastede": [
+        {
+          "vedtaksperiode": {
+            "utbetalinger": ["c", "d"]
+          }
+        }
+      ]
+    },
+    {
+      "vedtaksperioder": [
+        {
+          "utbetalinger": ["e", "f"]
+        }
+      ]
+    }
+  ]
+}
