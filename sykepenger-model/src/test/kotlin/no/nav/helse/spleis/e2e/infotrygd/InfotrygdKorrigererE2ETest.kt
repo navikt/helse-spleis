@@ -2,7 +2,10 @@ package no.nav.helse.spleis.e2e.infotrygd
 
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.util.UUID
+import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
+import no.nav.helse.dsl.TestPerson
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.Inntektsmelding
@@ -10,24 +13,29 @@ import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mai
-import no.nav.helse.person.TilstandType
+import no.nav.helse.mars
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GJENNOMFØRT_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
+import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK_REVURDERING
 import no.nav.helse.person.TilstandType.AVVENTER_REVURDERING
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Friperiode
+import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.person.nullstillTilstandsendringer
+import no.nav.helse.readResource
+import no.nav.helse.serde.SerialisertPerson
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
 import no.nav.helse.spleis.e2e.assertSisteForkastetPeriodeTilstand
@@ -47,8 +55,8 @@ import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.nyPeriode
 import no.nav.helse.utbetalingslinjer.Endringskode
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
 
 internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
@@ -140,7 +148,7 @@ internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
         håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(19.januar, Dagtype.Feriedag)))
         håndterYtelser(2.vedtaksperiode, besvart = LocalDate.EPOCH.atStartOfDay())
         håndterSimulering(2.vedtaksperiode)
-        håndterPåminnelse(2.vedtaksperiode, TilstandType.AVVENTER_GODKJENNING_REVURDERING)
+        håndterPåminnelse(2.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
         håndterUtbetalingsgodkjenning(2.vedtaksperiode)
         håndterUtbetalingshistorikk(2.vedtaksperiode, Friperiode(1.februar, 28.februar))
         håndterUtbetalt()
@@ -154,7 +162,7 @@ internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
         assertForventetFeil(
             forklaring = "Lager en helt ny utbetaling som fører til dobbelutbetaling av første periode",
             nå = {
-                Assertions.assertNotEquals(
+                assertNotEquals(
                     forrigeUtbetaling.inspektør.korrelasjonsId,
                     nyUtbetaling.inspektør.korrelasjonsId
                 )
@@ -174,5 +182,29 @@ internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
                 )
             }
         )
+    }
+
+
+    private fun createDobbelutbetalingPerson() = createTestPerson { jurist ->
+        SerialisertPerson("/personer/dobbelutbetaling.json".readResource()).deserialize(jurist)
+    }
+
+    private fun createOverlappendeFraInfotrygdPerson() = createTestPerson { jurist ->
+        SerialisertPerson("/personer/infotrygd-overlappende-utbetaling.json".readResource()).deserialize(jurist).also { person ->
+            person.håndter(
+                Utbetalingshistorikk(
+                    UUID.randomUUID(), "", "", ORGNUMMER, UUID.randomUUID().toString(),
+                    InfotrygdhistorikkElement.opprett(
+                        LocalDateTime.now(),
+                        UUID.randomUUID(),
+                        listOf(ArbeidsgiverUtbetalingsperiode(ORGNUMMER, 1.mars, 30.april, 100.prosent, TestPerson.INNTEKT)),
+                        listOf(Inntektsopplysning(ORGNUMMER, 1.januar, TestPerson.INNTEKT, true)),
+                        emptyMap(),
+                        emptyList(),
+                        false
+                    ),
+                ),
+            )
+        }
     }
 }
