@@ -17,7 +17,7 @@ private typealias BeregningId = UUID
 private typealias UtbetalingId = UUID
 private typealias VedtaksperiodeId = UUID
 
-internal class V189UtbetalingerOgVilkårsgrunnlag: JsonMigration(189) {
+internal class V190UtbetalingerOgVilkårsgrunnlag: JsonMigration(190) {
     private companion object {
         private val ingenInnslagId = UUID.fromString("00000000-0000-0000-0000-000000000000") as InnslagId
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
@@ -64,6 +64,10 @@ internal class V189UtbetalingerOgVilkårsgrunnlag: JsonMigration(189) {
                 }
             }
 
+        val sammenhengendePerioder = jsonNode.path("arbeidsgivere")
+            .flatMap { sammenhengendePerioder(it) }
+            .grupperSammenhengendePerioderMedHensynTilHelg()
+
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
             val beregningTilInnslagId = arbeidsgiver
                 .path("beregnetUtbetalingstidslinjer")
@@ -81,12 +85,10 @@ internal class V189UtbetalingerOgVilkårsgrunnlag: JsonMigration(189) {
                     val beregningId = UUID.fromString(utbetaling.path("beregningId").asText()) as BeregningId
                     beregningTilInnslagId[beregningId].also {
                         if (it == null) {
-                            sikkerlogg.info("[V189] finner ikke vilkårsgrunnlagInnslagId for utbetaling=${utbetaling.path("id").asText()} for aktørId=$aktørId")
+                            sikkerlogg.info("[V190] finner ikke vilkårsgrunnlagInnslagId for utbetaling=${utbetaling.path("id").asText()} for aktørId=$aktørId")
                         }
                     }
                 }
-
-            val sammenhengendePerioder = sammenhengendePerioder(arbeidsgiver)
 
             arbeidsgiver.path("vedtaksperioder").forEach {
                 migrerVedtaksperiode(sykefraværstilfeller, sammenhengendePerioder, vilkårsgrunnlag, utbetalingTilInnslag, it)
@@ -139,9 +141,13 @@ internal class V189UtbetalingerOgVilkårsgrunnlag: JsonMigration(189) {
             tilfelle.periode.overlapperMed(søkeperiodeVedtaksperiode)
         }?.periode ?: søkeperiodeVedtaksperiode
 
-        val søkeperiode = søkeperiodeVedtaksperiode.oppdaterFom(sykefraværstilfelle)
+        val søkeperiode = søkeperiodeVedtaksperiode.oppdaterFom(sykefraværstilfelle).let {
+            it.oppdaterFom(it.start.minusDays(1))
+        }
         val overlappendeSammenhengendePeriode = sammenhengendePerioder.first { it.overlapperMed(søkeperiode) }.let {
             it.oppdaterFom(søkeperiode).oppdaterTom(søkeperiode)
+        }.let {
+            it.oppdaterFom(it.start.minusDays(1))
         }
 
         vedtaksperiode
@@ -157,7 +163,7 @@ internal class V189UtbetalingerOgVilkårsgrunnlag: JsonMigration(189) {
                             ?: finnVilkårsgrunnlagForUtbetaling(vilkårsgrunnlag, innslagId, skjæringstidspunktVedtaksperiode, overlappendeSammenhengendePeriode)
                         match?.log(utbetalingId, vedtaksperiodeId, skjæringstidspunktVedtaksperiode)
                         if (match == null) {
-                            sikkerlogg.info("[V189] fant ikke match søkeperioder=[$søkeperiode,$sykefraværstilfelle,$overlappendeSammenhengendePeriode] for utbetaling=$utbetalingId for vedtaksperiode=$vedtaksperiodeId med vedtaksperiodeSkjæringstidspunkt=$skjæringstidspunktVedtaksperiode")
+                            sikkerlogg.info("[V190] fant ikke match søkeperioder=[$søkeperiode,$sykefraværstilfelle,$overlappendeSammenhengendePeriode] for utbetaling=$utbetalingId for vedtaksperiode=$vedtaksperiodeId med vedtaksperiodeSkjæringstidspunkt=$skjæringstidspunktVedtaksperiode")
                         } else {
                             // når ikke dry-run:
                             // (utbetaling as ObjectNode).put("vilkårsgrunnlagId", match.grunnlag.vilkårsgrunnlagId.toString())
@@ -203,7 +209,7 @@ internal class V189UtbetalingerOgVilkårsgrunnlag: JsonMigration(189) {
             vedtaksperiodeId: VedtaksperiodeId,
             skjæringstidspunktVedtaksperiode: LocalDate
         ) {
-            sikkerlogg.info("[V189] $tekst vilkårsgrunnlag=${grunnlag.vilkårsgrunnlagId} skjæringstidspunkt=${grunnlag.skjæringstidspunkt} for utbetaling=$utbetalingId for vedtaksperiode=$vedtaksperiodeId med vedtaksperiodeSkjæringstidspunkt=$skjæringstidspunktVedtaksperiode")
+            sikkerlogg.info("[V190] $tekst vilkårsgrunnlag=${grunnlag.vilkårsgrunnlagId} skjæringstidspunkt=${grunnlag.skjæringstidspunkt} for utbetaling=$utbetalingId for vedtaksperiode=$vedtaksperiodeId med vedtaksperiodeSkjæringstidspunkt=$skjæringstidspunktVedtaksperiode")
         }
 
         class Direkte(grunnlag: Vilkårsgrunnlag) : Match(grunnlag) {
