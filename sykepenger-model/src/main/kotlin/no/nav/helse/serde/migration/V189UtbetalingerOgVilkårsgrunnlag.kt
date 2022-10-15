@@ -6,6 +6,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioderMedHensynTilHelg
 import no.nav.helse.hendelser.til
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
@@ -16,7 +17,7 @@ private typealias BeregningId = UUID
 private typealias UtbetalingId = UUID
 private typealias VedtaksperiodeId = UUID
 
-internal class V188UtbetalingerOgVilkårsgrunnlag: JsonMigration(188) {
+internal class V189UtbetalingerOgVilkårsgrunnlag: JsonMigration(189) {
     private companion object {
         private val ingenInnslagId = UUID.fromString("00000000-0000-0000-0000-000000000000") as InnslagId
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
@@ -80,17 +81,20 @@ internal class V188UtbetalingerOgVilkårsgrunnlag: JsonMigration(188) {
                     val beregningId = UUID.fromString(utbetaling.path("beregningId").asText()) as BeregningId
                     beregningTilInnslagId[beregningId].also {
                         if (it == null) {
-                            sikkerlogg.info("[V188] finner ikke vilkårsgrunnlagInnslagId for utbetaling=${utbetaling.path("id").asText()} for aktørId=$aktørId")
+                            sikkerlogg.info("[V189] finner ikke vilkårsgrunnlagInnslagId for utbetaling=${utbetaling.path("id").asText()} for aktørId=$aktørId")
                         }
                     }
                 }
 
+            val sammenhengendePerioder = sammenhengendePerioder(arbeidsgiver)
+
             arbeidsgiver.path("vedtaksperioder").forEach {
-                migrerVedtaksperiode(sykefraværstilfeller, vilkårsgrunnlag, utbetalingTilInnslag, it)
+                migrerVedtaksperiode(sykefraværstilfeller, sammenhengendePerioder, vilkårsgrunnlag, utbetalingTilInnslag, it)
             }
             arbeidsgiver.path("forkastede").forEach { forkastet ->
                 migrerVedtaksperiode(
                     sykefraværstilfeller,
+                    sammenhengendePerioder,
                     vilkårsgrunnlag,
                     utbetalingTilInnslag,
                     forkastet.path("vedtaksperiode")
@@ -99,8 +103,25 @@ internal class V188UtbetalingerOgVilkårsgrunnlag: JsonMigration(188) {
         }
     }
 
+    private fun sammenhengendePerioder(arbeidsgiver: JsonNode): List<Periode> {
+        val aktive = arbeidsgiver
+            .path("vedtaksperioder")
+            .mapNotNull { sykdomsperiode(it) }
+        val forkastede = arbeidsgiver
+                    .path("forkastede")
+                    .mapNotNull { sykdomsperiode(it.path("vedtaksperiode")) }
+        return (aktive + forkastede).grupperSammenhengendePerioderMedHensynTilHelg()
+    }
+
+    private fun sykdomsperiode(vedtaksperiode: JsonNode): Periode? {
+        val fom = LocalDate.parse(vedtaksperiode.path("fom").asText())
+        val tom = LocalDate.parse(vedtaksperiode.path("tom").asText())
+        return fom til tom
+    }
+
     private fun migrerVedtaksperiode(
         sykefraværstilfeller: Set<Sykefraværstilfeller.Sykefraværstilfelle>,
+        sammenhengendePerioder: List<Periode>,
         vilkårsgrunnlag: Map<InnslagId, Map<VilkårsgrunnlagId, Vilkårsgrunnlag>>,
         utbetalingTilInnslag: Map<UtbetalingId, InnslagId?>,
         vedtaksperiode: JsonNode
@@ -119,6 +140,9 @@ internal class V188UtbetalingerOgVilkårsgrunnlag: JsonMigration(188) {
         }?.periode ?: søkeperiodeVedtaksperiode
 
         val søkeperiode = søkeperiodeVedtaksperiode.oppdaterFom(sykefraværstilfelle)
+        val overlappendeSammenhengendePeriode = sammenhengendePerioder.first { it.overlapperMed(søkeperiode) }.let {
+            it.oppdaterFom(søkeperiode).oppdaterTom(søkeperiode)
+        }
 
         vedtaksperiode
             .path("utbetalinger")
@@ -130,9 +154,10 @@ internal class V188UtbetalingerOgVilkårsgrunnlag: JsonMigration(188) {
                     if (innslagId != null) {
                         val match = finnVilkårsgrunnlagForUtbetaling(vilkårsgrunnlag, innslagId, skjæringstidspunktVedtaksperiode, søkeperiode)
                             ?: finnVilkårsgrunnlagForUtbetaling(vilkårsgrunnlag, innslagId, skjæringstidspunktVedtaksperiode, sykefraværstilfelle)
+                            ?: finnVilkårsgrunnlagForUtbetaling(vilkårsgrunnlag, innslagId, skjæringstidspunktVedtaksperiode, overlappendeSammenhengendePeriode)
                         match?.log(utbetalingId, vedtaksperiodeId, skjæringstidspunktVedtaksperiode)
                         if (match == null) {
-                            sikkerlogg.info("[V188] fant ikke match søkeperiode=$søkeperiode for utbetaling=$utbetalingId for vedtaksperiode=$vedtaksperiodeId med vedtaksperiodeSkjæringstidspunkt=$skjæringstidspunktVedtaksperiode")
+                            sikkerlogg.info("[V189] fant ikke match søkeperioder=[$søkeperiode,$sykefraværstilfelle,$overlappendeSammenhengendePeriode] for utbetaling=$utbetalingId for vedtaksperiode=$vedtaksperiodeId med vedtaksperiodeSkjæringstidspunkt=$skjæringstidspunktVedtaksperiode")
                         } else {
                             // når ikke dry-run:
                             // (utbetaling as ObjectNode).put("vilkårsgrunnlagId", match.grunnlag.vilkårsgrunnlagId.toString())
@@ -178,7 +203,7 @@ internal class V188UtbetalingerOgVilkårsgrunnlag: JsonMigration(188) {
             vedtaksperiodeId: VedtaksperiodeId,
             skjæringstidspunktVedtaksperiode: LocalDate
         ) {
-            sikkerlogg.info("[V188] $tekst vilkårsgrunnlag=${grunnlag.vilkårsgrunnlagId} skjæringstidspunkt=${grunnlag.skjæringstidspunkt} for utbetaling=$utbetalingId for vedtaksperiode=$vedtaksperiodeId med vedtaksperiodeSkjæringstidspunkt=$skjæringstidspunktVedtaksperiode")
+            sikkerlogg.info("[V189] $tekst vilkårsgrunnlag=${grunnlag.vilkårsgrunnlagId} skjæringstidspunkt=${grunnlag.skjæringstidspunkt} for utbetaling=$utbetalingId for vedtaksperiode=$vedtaksperiodeId med vedtaksperiodeSkjæringstidspunkt=$skjæringstidspunktVedtaksperiode")
         }
 
         class Direkte(grunnlag: Vilkårsgrunnlag) : Match(grunnlag) {
