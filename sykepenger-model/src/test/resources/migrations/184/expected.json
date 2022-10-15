@@ -1,0 +1,45 @@
+{
+  "vilkårsgrunnlagHistorikk": [
+    {
+      "vilkårsgrunnlag": [
+        {
+          "skjæringstidspunkt": "2018-04-10",
+          "vilkårsgrunnlagId": "b9848591-6bbd-4613-93cc-2d8c35459a3b"
+        },
+        {
+          "skjæringstidspunkt": "2018-05-01",
+          "vilkårsgrunnlagId": "20f2eeec-b531-410e-b606-27afaa297c1e"
+        }
+      ]
+    },
+    {
+      "vilkårsgrunnlag": [
+        {
+          "skjæringstidspunkt": "2018-04-10",
+          "vilkårsgrunnlagId": "793ee4ef-643c-4d7f-9394-5882a304b8fe"
+        },
+        {
+          "skjæringstidspunkt": "2018-05-01",
+          "vilkårsgrunnlagId": "20f2eeec-b531-410e-b606-27afaa297c1e"
+        },
+        {
+          "skjæringstidspunkt": "2018-06-10",
+          "vilkårsgrunnlagId": "cf02e3e9-c48c-461d-9cf3-dee568248cc7"
+        }
+      ]
+    },
+    {
+      "vilkårsgrunnlag": [
+        {
+          "skjæringstidspunkt": "2018-04-10",
+          "vilkårsgrunnlagId": "793ee4ef-643c-4d7f-9394-5882a304b8fe"
+        },
+        {
+          "skjæringstidspunkt": "2018-05-01",
+          "vilkårsgrunnlagId": "20f2eeec-b531-410e-b606-27afaa297c1e"
+        }
+      ]
+    }
+  ],
+  "skjemaVersjon": 184
+}
