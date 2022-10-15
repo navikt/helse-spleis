@@ -3,6 +3,7 @@ package no.nav.helse.serde.migration
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
@@ -17,6 +18,7 @@ private typealias VedtaksperiodeId = UUID
 
 internal class V188UtbetalingerOgVilkårsgrunnlag: JsonMigration(188) {
     private companion object {
+        private val ingenInnslagId = UUID.fromString("00000000-0000-0000-0000-000000000000") as InnslagId
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
         private fun withMDC(context: Map<String, String>, block: () -> Unit) {
             val contextMap = MDC.getCopyOfContextMap() ?: emptyMap()
@@ -41,6 +43,13 @@ internal class V188UtbetalingerOgVilkårsgrunnlag: JsonMigration(188) {
     private fun utførMigrering(aktørId: String, jsonNode: ObjectNode) {
         val vedtaksperioderForPerson = Sykefraværstilfeller.vedtaksperioder(jsonNode)
         val sykefraværstilfeller = Sykefraværstilfeller.sykefraværstilfeller(vedtaksperioderForPerson)
+        val innslagTidsstempel = jsonNode
+            .path("vilkårsgrunnlagHistorikk")
+            .map {
+                val id = UUID.fromString(it.path("id").asText()) as InnslagId
+                val tidsstempel = LocalDateTime.parse(it.path("opprettet").asText())
+                id to tidsstempel
+            }
         val vilkårsgrunnlag = jsonNode
             .path("vilkårsgrunnlagHistorikk")
             .associateBy({ UUID.fromString(it.path("id").asText()) as InnslagId }) { innslag ->
@@ -57,8 +66,13 @@ internal class V188UtbetalingerOgVilkårsgrunnlag: JsonMigration(188) {
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
             val beregningTilInnslagId = arbeidsgiver
                 .path("beregnetUtbetalingstidslinjer")
-                .associateBy({ UUID.fromString(it.path("id").asText()) as BeregningId }) {
-                    UUID.fromString(it.path("vilkårsgrunnlagHistorikkInnslagId").asText()) as InnslagId
+                .associateBy({ UUID.fromString(it.path("id").asText()) as BeregningId }) { beregning ->
+                    val opprettet = LocalDateTime.parse(beregning.path("tidsstempel").asText())
+                    (UUID.fromString(beregning.path("vilkårsgrunnlagHistorikkInnslagId").asText()) as InnslagId)
+                        .takeUnless { id -> id == ingenInnslagId }
+                        ?: innslagTidsstempel.first { (_, tidsstempel) ->
+                            tidsstempel < opprettet
+                        }.first
                 }
             val utbetalingTilInnslag = arbeidsgiver
                 .path("utbetalinger")
