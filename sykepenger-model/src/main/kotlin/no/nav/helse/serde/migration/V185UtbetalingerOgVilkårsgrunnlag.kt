@@ -7,6 +7,7 @@ import java.util.UUID
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import org.slf4j.LoggerFactory
+import org.slf4j.MDC
 
 private typealias InnslagId = UUID
 private typealias VilkårsgrunnlagId = UUID
@@ -17,11 +18,27 @@ private typealias VedtaksperiodeId = UUID
 internal class V185UtbetalingerOgVilkårsgrunnlag: JsonMigration(185) {
     private companion object {
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
+        private fun withMDC(context: Map<String, String>, block: () -> Unit) {
+            val contextMap = MDC.getCopyOfContextMap() ?: emptyMap()
+            try {
+                MDC.setContextMap(contextMap + context)
+                block()
+            } finally {
+                MDC.setContextMap(contextMap)
+            }
+        }
+
     }
     override val description = "DRY RUN - Migrerer vedtaksperiodeutbetalinger til å ha vilkårsgrunnlagId"
 
     override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         val aktørId = jsonNode.path("aktørId").asText()
+        withMDC(mapOf("aktørId" to aktørId)) {
+            utførMigrering(aktørId, jsonNode)
+        }
+    }
+
+    private fun utførMigrering(aktørId: String, jsonNode: ObjectNode) {
         val innslagRekkefølge = jsonNode
             .path("vilkårsgrunnlagHistorikk")
             .mapIndexed { index, innslag ->
