@@ -124,11 +124,13 @@ internal class V186UtbetalingerOgVilkårsgrunnlag: JsonMigration(186) {
                 if (vilkårsgrunnlagId == null) {
                     val innslagId = utbetalingTilInnslag.getValue(utbetalingId)
                     if (innslagId != null) {
-                        val match = finnVilkårsgrunnlagForUtbetaling(vilkårsgrunnlag, innslagId, utbetalingId, vedtaksperiodeId, vilkårsgrunnlagVedtaksperiode, skjæringstidspunktVedtaksperiode, søkeperiode)
-
-                        if (match != null) {
+                        val match = finnVilkårsgrunnlagForUtbetaling(vilkårsgrunnlag, innslagId, vilkårsgrunnlagVedtaksperiode, skjæringstidspunktVedtaksperiode, søkeperiode)
+                        match?.log(utbetalingId, vedtaksperiodeId, skjæringstidspunktVedtaksperiode)
+                        if (match == null) {
+                            sikkerlogg.info("[V186] fant ikke match for utbetaling=$utbetalingId for vedtaksperiode=$vedtaksperiodeId med vedtaksperiodeSkjæringstidspunkt=$skjæringstidspunktVedtaksperiode")
+                        } else {
                             // når ikke dry-run:
-                            // (utbetaling as ObjectNode).put("vilkårsgrunnlagId", match.vilkårsgrunnlagId.toString())
+                            // (utbetaling as ObjectNode).put("vilkårsgrunnlagId", match.grunnlag.vilkårsgrunnlagId.toString())
                         }
                     }
                 }
@@ -138,12 +140,10 @@ internal class V186UtbetalingerOgVilkårsgrunnlag: JsonMigration(186) {
     private fun finnVilkårsgrunnlagForUtbetaling(
         vilkårsgrunnlag: Map<InnslagId, Map<VilkårsgrunnlagId, Vilkårsgrunnlag>>,
         innslagId: InnslagId,
-        utbetalingId: UtbetalingId,
-        vedtaksperiodeId: VedtaksperiodeId,
         vilkårsgrunnlagVedtaksperiode: Vilkårsgrunnlag?,
         skjæringstidspunktVedtaksperiode: LocalDate,
         søkeperiode: Periode
-    ): Vilkårsgrunnlag? {
+    ): Match? {
         val ufiltrertListe = vilkårsgrunnlag[innslagId]?.values
         val filtrertListe = ufiltrertListe?.filter { grunnlag ->
             // om vedtaksperioden stammer fra Infotrygd (eller ikke stammer fra Infotrygd), så skal alle
@@ -151,29 +151,65 @@ internal class V186UtbetalingerOgVilkårsgrunnlag: JsonMigration(186) {
             vilkårsgrunnlagVedtaksperiode == null || grunnlag.fraInfotrygd == vilkårsgrunnlagVedtaksperiode.fraInfotrygd
         } ?: return null
 
-        val direkteMatch = filtrertListe.firstOrNull { grunnlag -> grunnlag.skjæringstidspunkt == skjæringstidspunktVedtaksperiode }
-        if (direkteMatch != null) {
-            loggMatch("fant direkte match vilkårsgrunnlag=${direkteMatch.vilkårsgrunnlagId} skjæringstidspunkt=${direkteMatch.skjæringstidspunkt} for", utbetalingId, vedtaksperiodeId, skjæringstidspunktVedtaksperiode)
-            return direkteMatch
-        }
+        val direkteMatch = matchDirekte(filtrertListe, skjæringstidspunktVedtaksperiode)
+        if (direkteMatch != null) return direkteMatch
 
-        val direkteMatchUfiltrert = ufiltrertListe.firstOrNull { grunnlag -> grunnlag.skjæringstidspunkt == skjæringstidspunktVedtaksperiode }
-        val indirekteMatchUfiltrert = ufiltrertListe.firstOrNull { grunnlag -> grunnlag.skjæringstidspunkt in søkeperiode }
+        val direkteMatchUfiltrert = matchDirekte(ufiltrertListe, skjæringstidspunktVedtaksperiode)
+        val indirekteMatchUfiltrert = matchIndirekte(ufiltrertListe, søkeperiode)
 
-        val indirekteMatch = filtrertListe.firstOrNull { grunnlag -> grunnlag.skjæringstidspunkt in søkeperiode }
-        if (indirekteMatch != null) loggMatch("fant indirekte match i søkeperiode=$søkeperiode direkteMatchUfiltrert=${direkteMatchUfiltrert != null} vilkårsgrunnlag=${indirekteMatch.vilkårsgrunnlagId} skjæringstidspunkt=${indirekteMatch.skjæringstidspunkt} for", utbetalingId, vedtaksperiodeId, skjæringstidspunktVedtaksperiode)
-        else loggMatch("fant ikke match direkteMatchUfiltrert=${direkteMatchUfiltrert != null} indirekteMatchUfiltrert=${indirekteMatchUfiltrert != null}  for", utbetalingId, vedtaksperiodeId, skjæringstidspunktVedtaksperiode)
-
-        return indirekteMatch
+        return matchIndirekte(filtrertListe, søkeperiode, direkteMatchUfiltrert, indirekteMatchUfiltrert)
     }
 
-    private fun loggMatch(
-        tekst: String,
-        utbetalingId: UtbetalingId,
-        vedtaksperiodeId: VedtaksperiodeId,
-        skjæringstidspunktVedtaksperiode: LocalDate
-    ) {
-        sikkerlogg.info("[V186] $tekst utbetaling=$utbetalingId for vedtaksperiode=$vedtaksperiodeId med vedtaksperiodeSkjæringstidspunkt=$skjæringstidspunktVedtaksperiode")
+    private fun matchDirekte(liste: Collection<Vilkårsgrunnlag>, skjæringstidspunkt: LocalDate): Match? {
+        return liste.firstOrNull { grunnlag -> grunnlag.skjæringstidspunkt == skjæringstidspunkt }?.let {
+            Match.Direkte(it)
+        }
+    }
+    private fun matchIndirekte(liste: Collection<Vilkårsgrunnlag>, søkeperiode: Periode, direkteOther: Match? = null, indirekteOther: Match? = null): Match? {
+        return liste.firstOrNull { grunnlag -> grunnlag.skjæringstidspunkt in søkeperiode }?.let {
+            Match.Indirekte(søkeperiode, direkteOther, indirekteOther, it)
+        }
+    }
+
+    private sealed class Match(val grunnlag: Vilkårsgrunnlag) {
+        abstract fun log(
+            utbetalingId: UtbetalingId,
+            vedtaksperiodeId: VedtaksperiodeId,
+            skjæringstidspunktVedtaksperiode: LocalDate
+        )
+
+        protected fun loggMatch(
+            tekst: String,
+            utbetalingId: UtbetalingId,
+            vedtaksperiodeId: VedtaksperiodeId,
+            skjæringstidspunktVedtaksperiode: LocalDate
+        ) {
+            sikkerlogg.info("[V186] $tekst vilkårsgrunnlag=${grunnlag.vilkårsgrunnlagId} skjæringstidspunkt=${grunnlag.skjæringstidspunkt} for utbetaling=$utbetalingId for vedtaksperiode=$vedtaksperiodeId med vedtaksperiodeSkjæringstidspunkt=$skjæringstidspunktVedtaksperiode")
+        }
+
+        class Direkte(grunnlag: Vilkårsgrunnlag) : Match(grunnlag) {
+            override fun log(
+                utbetalingId: UtbetalingId,
+                vedtaksperiodeId: VedtaksperiodeId,
+                skjæringstidspunktVedtaksperiode: LocalDate
+            ) {
+                loggMatch("fant direkte match", utbetalingId, vedtaksperiodeId, skjæringstidspunktVedtaksperiode)
+            }
+        }
+        class Indirekte(
+            private val søkeperiode: Periode,
+            private val direkteOther: Match?,
+            private val indirekteOther: Match?,
+            grunnlag: Vilkårsgrunnlag
+        ) : Match(grunnlag) {
+            override fun log(
+                utbetalingId: UtbetalingId,
+                vedtaksperiodeId: VedtaksperiodeId,
+                skjæringstidspunktVedtaksperiode: LocalDate
+            ) {
+                loggMatch("fant indirekte match i søkeperiode=$søkeperiode direkteMatchUfiltrert=${direkteOther != null} indirekteMatchUfiltrert=${indirekteOther != null}", utbetalingId, vedtaksperiodeId, skjæringstidspunktVedtaksperiode)
+            }
+        }
     }
 
     private class Vilkårsgrunnlag(
