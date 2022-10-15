@@ -127,7 +127,7 @@ internal class V186UtbetalingerOgVilkårsgrunnlag: JsonMigration(186) {
                         val match = finnVilkårsgrunnlagForUtbetaling(vilkårsgrunnlag, innslagId, vilkårsgrunnlagVedtaksperiode, skjæringstidspunktVedtaksperiode, søkeperiode)
                         match?.log(utbetalingId, vedtaksperiodeId, skjæringstidspunktVedtaksperiode)
                         if (match == null) {
-                            sikkerlogg.info("[V186] fant ikke match for utbetaling=$utbetalingId for vedtaksperiode=$vedtaksperiodeId med vedtaksperiodeSkjæringstidspunkt=$skjæringstidspunktVedtaksperiode")
+                            sikkerlogg.info("[V186] fant ikke match søkeperiode=$søkeperiode for utbetaling=$utbetalingId for vedtaksperiode=$vedtaksperiodeId med vedtaksperiodeSkjæringstidspunkt=$skjæringstidspunktVedtaksperiode")
                         } else {
                             // når ikke dry-run:
                             // (utbetaling as ObjectNode).put("vilkårsgrunnlagId", match.grunnlag.vilkårsgrunnlagId.toString())
