@@ -15,7 +15,7 @@ private typealias BeregningId = UUID
 private typealias UtbetalingId = UUID
 private typealias VedtaksperiodeId = UUID
 
-internal class V185UtbetalingerOgVilkårsgrunnlag: JsonMigration(185) {
+internal class V186UtbetalingerOgVilkårsgrunnlag: JsonMigration(186) {
     private companion object {
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
         private fun withMDC(context: Map<String, String>, block: () -> Unit) {
@@ -39,6 +39,9 @@ internal class V185UtbetalingerOgVilkårsgrunnlag: JsonMigration(185) {
     }
 
     private fun utførMigrering(aktørId: String, jsonNode: ObjectNode) {
+        val vedtaksperioderForPerson = Sykefraværstilfeller.vedtaksperioder(jsonNode)
+        val sykefraværstilfeller = Sykefraværstilfeller.sykefraværstilfeller(vedtaksperioderForPerson)
+
         val innslagRekkefølge = jsonNode
             .path("vilkårsgrunnlagHistorikk")
             .mapIndexed { index, innslag ->
@@ -76,15 +79,16 @@ internal class V185UtbetalingerOgVilkårsgrunnlag: JsonMigration(185) {
                 }
 
             arbeidsgiver.path("vedtaksperioder").forEach {
-                migrerVedtaksperiode(innslagRekkefølge, vilkårsgrunnlag, utbetalingTilInnslag, it)
+                migrerVedtaksperiode(sykefraværstilfeller, innslagRekkefølge, vilkårsgrunnlag, utbetalingTilInnslag, it)
             }
             arbeidsgiver.path("forkastede").forEach { forkastet ->
-                migrerVedtaksperiode(innslagRekkefølge, vilkårsgrunnlag, utbetalingTilInnslag, forkastet.path("vedtaksperiode"))
+                migrerVedtaksperiode(sykefraværstilfeller, innslagRekkefølge, vilkårsgrunnlag, utbetalingTilInnslag, forkastet.path("vedtaksperiode"))
             }
         }
     }
 
     private fun migrerVedtaksperiode(
+        sykefraværstilfeller: Set<Sykefraværstilfeller.Sykefraværstilfelle>,
         innslagRekkefølge: Map<Int, InnslagId>,
         vilkårsgrunnlag: Map<InnslagId, Map<VilkårsgrunnlagId, Vilkårsgrunnlag>>,
         utbetalingTilInnslag: Map<UtbetalingId, InnslagId?>,
@@ -92,9 +96,19 @@ internal class V185UtbetalingerOgVilkårsgrunnlag: JsonMigration(185) {
     ) {
         val vedtaksperiodeId = UUID.fromString(vedtaksperiode.path("id").asText()) as VedtaksperiodeId
         val skjæringstidspunktVedtaksperiode = LocalDate.parse(vedtaksperiode.path("skjæringstidspunkt").asText())
+        val skjæringstidspunktFraInfotrygd = vedtaksperiode.path("skjæringstidspunktFraInfotrygd").takeIf { it.isTextual }?.asText()?.let {
+            LocalDate.parse(it)
+        }
         val førstedatoVedtaksperiode = LocalDate.parse(vedtaksperiode.path("fom").asText())
         val sistedatoVedtaksperiode = LocalDate.parse(vedtaksperiode.path("tom").asText())
-        val søkeperiode = minOf(skjæringstidspunktVedtaksperiode, førstedatoVedtaksperiode) til sistedatoVedtaksperiode
+        val søkeperiodeVedtaksperiode = minOf(skjæringstidspunktVedtaksperiode, førstedatoVedtaksperiode, skjæringstidspunktFraInfotrygd ?: førstedatoVedtaksperiode) til sistedatoVedtaksperiode
+
+        val sykefraværstilfelle = sykefraværstilfeller.firstOrNull { tilfelle ->
+            tilfelle.periode.overlapperMed(søkeperiodeVedtaksperiode)
+        }?.periode ?: søkeperiodeVedtaksperiode
+
+        val søkeperiode = søkeperiodeVedtaksperiode.oppdaterFom(sykefraværstilfelle)
+
         val vilkårsgrunnlagVedtaksperiode = innslagRekkefølge.keys.sorted().firstNotNullOfOrNull { index ->
             val innslagId = innslagRekkefølge.getValue(index)
             vilkårsgrunnlag.getValue(innslagId).values.firstOrNull { vilkårsgrunnlag ->
@@ -147,8 +161,8 @@ internal class V185UtbetalingerOgVilkårsgrunnlag: JsonMigration(185) {
         val indirekteMatchUfiltrert = ufiltrertListe.firstOrNull { grunnlag -> grunnlag.skjæringstidspunkt in søkeperiode }
 
         val indirekteMatch = filtrertListe.firstOrNull { grunnlag -> grunnlag.skjæringstidspunkt in søkeperiode }
-        if (indirekteMatch != null) loggMatch("fant match i søkeperiode direkteMatchUfiltrert=${direkteMatchUfiltrert != null} vilkårsgrunnlag=${indirekteMatch.vilkårsgrunnlagId} skjæringstidspunkt=${indirekteMatch.skjæringstidspunkt} for", utbetalingId, vedtaksperiodeId, skjæringstidspunktVedtaksperiode)
-        else loggMatch("fant ikke vilkårsgrunnlag direkteMatchUfiltrert=${direkteMatchUfiltrert != null} indirekteMatchUfiltrert=${indirekteMatchUfiltrert != null}  for", utbetalingId, vedtaksperiodeId, skjæringstidspunktVedtaksperiode)
+        if (indirekteMatch != null) loggMatch("fant indirekte match i søkeperiode=$søkeperiode direkteMatchUfiltrert=${direkteMatchUfiltrert != null} vilkårsgrunnlag=${indirekteMatch.vilkårsgrunnlagId} skjæringstidspunkt=${indirekteMatch.skjæringstidspunkt} for", utbetalingId, vedtaksperiodeId, skjæringstidspunktVedtaksperiode)
+        else loggMatch("fant ikke match direkteMatchUfiltrert=${direkteMatchUfiltrert != null} indirekteMatchUfiltrert=${indirekteMatchUfiltrert != null}  for", utbetalingId, vedtaksperiodeId, skjæringstidspunktVedtaksperiode)
 
         return indirekteMatch
     }
@@ -159,7 +173,7 @@ internal class V185UtbetalingerOgVilkårsgrunnlag: JsonMigration(185) {
         vedtaksperiodeId: VedtaksperiodeId,
         skjæringstidspunktVedtaksperiode: LocalDate
     ) {
-        sikkerlogg.info("$tekst utbetaling=$utbetalingId for vedtaksperiode=$vedtaksperiodeId med vedtaksperiodeSkjæringstidspunkt=$skjæringstidspunktVedtaksperiode")
+        sikkerlogg.info("[V186] $tekst utbetaling=$utbetalingId for vedtaksperiode=$vedtaksperiodeId med vedtaksperiodeSkjæringstidspunkt=$skjæringstidspunktVedtaksperiode")
     }
 
     private class Vilkårsgrunnlag(
