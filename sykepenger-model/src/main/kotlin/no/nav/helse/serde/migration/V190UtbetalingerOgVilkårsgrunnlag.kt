@@ -75,9 +75,9 @@ internal class V190UtbetalingerOgVilkårsgrunnlag: JsonMigration(190) {
                     val opprettet = LocalDateTime.parse(beregning.path("tidsstempel").asText())
                     (UUID.fromString(beregning.path("vilkårsgrunnlagHistorikkInnslagId").asText()) as InnslagId)
                         .takeUnless { id -> id == ingenInnslagId }
-                        ?: innslagTidsstempel.first { (_, tidsstempel) ->
+                        ?: innslagTidsstempel.firstOrNull { (_, tidsstempel) ->
                             tidsstempel < opprettet
-                        }.first
+                        }?.first
                 }
             val utbetalingTilInnslag = arbeidsgiver
                 .path("utbetalinger")
