@@ -83,11 +83,7 @@ internal class V190UtbetalingerOgVilkårsgrunnlag: JsonMigration(190) {
                 .path("utbetalinger")
                 .associateBy({ UUID.fromString(it.path("id").asText()) as UtbetalingId }) { utbetaling ->
                     val beregningId = UUID.fromString(utbetaling.path("beregningId").asText()) as BeregningId
-                    beregningTilInnslagId[beregningId].also {
-                        if (it == null) {
-                            sikkerlogg.info("[V190] finner ikke vilkårsgrunnlagInnslagId for utbetaling=${utbetaling.path("id").asText()} for aktørId=$aktørId")
-                        }
-                    }
+                    beregningTilInnslagId[beregningId]
                 }
 
             arbeidsgiver.path("vedtaksperioder").forEach {
@@ -150,14 +146,23 @@ internal class V190UtbetalingerOgVilkårsgrunnlag: JsonMigration(190) {
             it.oppdaterFom(it.start.minusDays(1))
         }
 
-        vedtaksperiode
+        val erForkastet = vedtaksperiode.path("tilstand").asText() == "TIL_INFOTRYGD"
+
+        val utbetalinger = vedtaksperiode
             .path("utbetalinger")
-            .forEach { utbetaling ->
+            .mapNotNull { utbetaling ->
                 val vilkårsgrunnlagId = utbetaling.path("vilkårsgrunnlagId").takeUnless { it.isNull || it.isMissingNode }?.asText()
                 val utbetalingId = UUID.fromString(utbetaling.path("utbetalingId").asText()) as UtbetalingId
-                if (vilkårsgrunnlagId == null) {
+                if (vilkårsgrunnlagId != null) {
+                    utbetaling
+                } else {
                     val innslagId = utbetalingTilInnslag.getValue(utbetalingId)
-                    if (innslagId != null) {
+                    if (innslagId == null) {
+                        // hvis erForkastet er true så kan vi kanskje bare droppe utbetalingen fra listen
+                        sikkerlogg.info("[V190] finner ikke vilkårsgrunnlagInnslagId for vedtaksperiodeId=$vedtaksperiodeId erForkastet=$erForkastet utbetaling=${utbetaling.path("id").asText()}")
+                        if (erForkastet) null
+                        else utbetaling
+                    } else {
                         val match = finnVilkårsgrunnlagForUtbetaling(vilkårsgrunnlag, innslagId, skjæringstidspunktVedtaksperiode, søkeperiode)
                             ?: finnVilkårsgrunnlagForUtbetaling(vilkårsgrunnlag, innslagId, skjæringstidspunktVedtaksperiode, sykefraværstilfelle)
                             ?: finnVilkårsgrunnlagForUtbetaling(vilkårsgrunnlag, innslagId, skjæringstidspunktVedtaksperiode, overlappendeSammenhengendePeriode)
@@ -165,12 +170,17 @@ internal class V190UtbetalingerOgVilkårsgrunnlag: JsonMigration(190) {
                         if (match == null) {
                             sikkerlogg.info("[V190] fant ikke match søkeperioder=[$søkeperiode,$sykefraværstilfelle,$overlappendeSammenhengendePeriode] for utbetaling=$utbetalingId for vedtaksperiode=$vedtaksperiodeId med vedtaksperiodeSkjæringstidspunkt=$skjæringstidspunktVedtaksperiode")
                         } else {
-                            // når ikke dry-run:
-                            // (utbetaling as ObjectNode).put("vilkårsgrunnlagId", match.grunnlag.vilkårsgrunnlagId.toString())
+                            (utbetaling as ObjectNode).put("vilkårsgrunnlagId", match.grunnlag.vilkårsgrunnlagId.toString())
                         }
+                        utbetaling
                     }
                 }
             }
+
+        /* når ikke dry run
+        (vedtaksperiode as ObjectNode).replace("utbetalinger", serdeObjectMapper.createArrayNode().apply {
+            addAll(utbetalinger)
+        })*/
     }
 
     private fun finnVilkårsgrunnlagForUtbetaling(
