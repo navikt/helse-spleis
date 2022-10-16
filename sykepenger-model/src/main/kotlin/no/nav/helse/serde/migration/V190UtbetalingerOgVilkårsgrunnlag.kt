@@ -64,6 +64,18 @@ internal class V190UtbetalingerOgVilkårsgrunnlag: JsonMigration(190) {
                 }
             }
 
+        val infotrygdinntekter = jsonNode
+            .path("infotrygdhistorikk")
+            .map { element ->
+                val opprettet = LocalDateTime.parse(element.path("tidsstempel").asText())
+                Infotrygdhistorikk(
+                    tidsstempel = opprettet,
+                    inntekter = element.path("inntekter").map { inntekt ->
+                        LocalDate.parse(inntekt.path("sykepengerFom").asText())
+                    }
+                )
+            }
+
         val sammenhengendePerioder = jsonNode.path("arbeidsgivere")
             .flatMap { sammenhengendePerioder(it) }
             .grupperSammenhengendePerioderMedHensynTilHelg()
@@ -78,24 +90,37 @@ internal class V190UtbetalingerOgVilkårsgrunnlag: JsonMigration(190) {
                         ?: innslagTidsstempel.firstOrNull { (_, tidsstempel) ->
                             tidsstempel < opprettet
                         }?.first
+                        ?: innslagTidsstempel.lastOrNull()?.first // se i eldste innslag som siste utvei
                 }
             val utbetalingTilInnslag = arbeidsgiver
                 .path("utbetalinger")
                 .associateBy({ UUID.fromString(it.path("id").asText()) as UtbetalingId }) { utbetaling ->
                     val beregningId = UUID.fromString(utbetaling.path("beregningId").asText()) as BeregningId
-                    beregningTilInnslagId[beregningId]
+                    val opprettet = LocalDateTime.parse(utbetaling.path("tidsstempel").asText())
+                    beregningTilInnslagId[beregningId] to opprettet
                 }
 
             arbeidsgiver.path("vedtaksperioder").forEach {
-                migrerVedtaksperiode(sykefraværstilfeller, sammenhengendePerioder, vilkårsgrunnlag, utbetalingTilInnslag, it)
+                migrerVedtaksperiode(
+                    sykefraværstilfeller,
+                    sammenhengendePerioder,
+                    vilkårsgrunnlag,
+                    innslagTidsstempel,
+                    utbetalingTilInnslag,
+                    infotrygdinntekter,
+                    it
+                )
             }
             arbeidsgiver.path("forkastede").forEach { forkastet ->
                 migrerVedtaksperiode(
                     sykefraværstilfeller,
                     sammenhengendePerioder,
                     vilkårsgrunnlag,
+                    innslagTidsstempel,
                     utbetalingTilInnslag,
-                    forkastet.path("vedtaksperiode")
+                    infotrygdinntekter,
+                    forkastet.path("vedtaksperiode"),
+                    true
                 )
             }
         }
@@ -121,8 +146,11 @@ internal class V190UtbetalingerOgVilkårsgrunnlag: JsonMigration(190) {
         sykefraværstilfeller: Set<Sykefraværstilfeller.Sykefraværstilfelle>,
         sammenhengendePerioder: List<Periode>,
         vilkårsgrunnlag: Map<InnslagId, Map<VilkårsgrunnlagId, Vilkårsgrunnlag>>,
-        utbetalingTilInnslag: Map<UtbetalingId, InnslagId?>,
-        vedtaksperiode: JsonNode
+        innslagTidsstempel: List<Pair<InnslagId, LocalDateTime>>,
+        utbetalingTilInnslag: Map<UtbetalingId, Pair<InnslagId?, LocalDateTime>>,
+        infotrygdinntekter: List<Infotrygdhistorikk>,
+        vedtaksperiode: JsonNode,
+        erForkastet: Boolean = false
     ) {
         val vedtaksperiodeId = UUID.fromString(vedtaksperiode.path("id").asText()) as VedtaksperiodeId
         val skjæringstidspunktVedtaksperiode = LocalDate.parse(vedtaksperiode.path("skjæringstidspunkt").asText())
@@ -146,7 +174,9 @@ internal class V190UtbetalingerOgVilkårsgrunnlag: JsonMigration(190) {
             it.oppdaterFom(it.start.minusDays(1))
         }
 
-        val erForkastet = vedtaksperiode.path("tilstand").asText() == "TIL_INFOTRYGD"
+        val totalperiode = søkeperiode.merge(sykefraværstilfelle).merge(overlappendeSammenhengendePeriode)
+
+        val tilInfotrygd = vedtaksperiode.path("tilstand").asText() == "TIL_INFOTRYGD"
 
         val utbetalinger = vedtaksperiode
             .path("utbetalinger")
@@ -156,16 +186,35 @@ internal class V190UtbetalingerOgVilkårsgrunnlag: JsonMigration(190) {
                 if (vilkårsgrunnlagId != null) {
                     utbetaling
                 } else {
-                    val innslagId = utbetalingTilInnslag.getValue(utbetalingId)
+                    var (innslagId, utbetalingOpprettet) = utbetalingTilInnslag.getValue(utbetalingId)
+
+                    if (innslagId == null) {
+                        val infotrygdhistorikk = infotrygdinntekter.reversed().firstOrNull { element ->
+                            element.tidsstempel <= utbetalingOpprettet && element.inntekter.any { it in totalperiode }
+                        }
+                        if (infotrygdhistorikk != null) {
+                            //
+                            innslagId = innslagTidsstempel.lastOrNull { (_, tidsstempel) ->
+                                tidsstempel >= infotrygdhistorikk.tidsstempel
+                            }?.first
+                        }
+                    }
                     if (innslagId == null) {
                         // hvis erForkastet er true så kan vi kanskje bare droppe utbetalingen fra listen
-                        sikkerlogg.info("[V190] finner ikke vilkårsgrunnlagInnslagId for vedtaksperiodeId=$vedtaksperiodeId erForkastet=$erForkastet utbetaling=${utbetaling.path("id").asText()}")
-                        if (erForkastet) null
+                        sikkerlogg.info("[V190] finner ikke vilkårsgrunnlagInnslagId for vedtaksperiodeId=$vedtaksperiodeId erForkastet=$erForkastet, tilInfotrygd=$tilInfotrygd utbetaling=$utbetalingId")
+                        if (tilInfotrygd) null
                         else utbetaling
                     } else {
+                        val nesteNyeInnslag = innslagTidsstempel.takeWhile { (id, _) ->
+                            id != innslagId
+                        }.lastOrNull()?.first
+
                         val match = finnVilkårsgrunnlagForUtbetaling(vilkårsgrunnlag, innslagId, skjæringstidspunktVedtaksperiode, søkeperiode)
                             ?: finnVilkårsgrunnlagForUtbetaling(vilkårsgrunnlag, innslagId, skjæringstidspunktVedtaksperiode, sykefraværstilfelle)
-                            ?: finnVilkårsgrunnlagForUtbetaling(vilkårsgrunnlag, innslagId, skjæringstidspunktVedtaksperiode, overlappendeSammenhengendePeriode)
+                            ?: finnVilkårsgrunnlagForUtbetaling(vilkårsgrunnlag, innslagId, skjæringstidspunktVedtaksperiode, totalperiode)
+                            ?: finnVilkårsgrunnlagForUtbetaling(vilkårsgrunnlag, nesteNyeInnslag, skjæringstidspunktVedtaksperiode, totalperiode)?.also {
+                                sikkerlogg.info("[V190] fant match ved å se i neste nye innslag for vedtaksperiode=$vedtaksperiodeId")
+                            }
                         match?.log(utbetalingId, vedtaksperiodeId, skjæringstidspunktVedtaksperiode)
                         if (match == null) {
                             sikkerlogg.info("[V190] fant ikke match søkeperioder=[$søkeperiode,$sykefraværstilfelle,$overlappendeSammenhengendePeriode] for utbetaling=$utbetalingId for vedtaksperiode=$vedtaksperiodeId med vedtaksperiodeSkjæringstidspunkt=$skjæringstidspunktVedtaksperiode")
@@ -185,10 +234,11 @@ internal class V190UtbetalingerOgVilkårsgrunnlag: JsonMigration(190) {
 
     private fun finnVilkårsgrunnlagForUtbetaling(
         vilkårsgrunnlag: Map<InnslagId, Map<VilkårsgrunnlagId, Vilkårsgrunnlag>>,
-        innslagId: InnslagId,
+        innslagId: InnslagId?,
         skjæringstidspunktVedtaksperiode: LocalDate,
         søkeperiode: Periode
     ): Match? {
+        if (innslagId == null) return null
         val ufiltrertListe = vilkårsgrunnlag[innslagId]?.values ?: return null
         val direkteMatch = matchDirekte(ufiltrertListe, skjæringstidspunktVedtaksperiode)
         if (direkteMatch != null) return direkteMatch
@@ -248,4 +298,6 @@ internal class V190UtbetalingerOgVilkårsgrunnlag: JsonMigration(190) {
         val skjæringstidspunkt: LocalDate,
         val fraInfotrygd: Boolean
     )
+
+    private class Infotrygdhistorikk(val tidsstempel: LocalDateTime, val inntekter: List<LocalDate>)
 }
