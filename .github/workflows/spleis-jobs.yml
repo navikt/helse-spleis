@@ -65,7 +65,6 @@ jobs:
             env:
                 APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
                 CLUSTER: dev-gcp
-#                RESOURCE: deploy/dev-gc-job.yml,deploy/dev-avstemming-aiven.yml,deploy/dev-avstemming-job.yml
                 RESOURCE: deploy/dev-gc-job.yml,deploy/dev-avstemming-job.yml
                 IMAGE: ${{ needs.set_version.outputs.image }}
 
@@ -79,6 +78,5 @@ jobs:
             env:
                 APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
                 CLUSTER: prod-gcp
-#                RESOURCE: deploy/prod-gc-job.yml,deploy/prod-avstemming-aiven.yml,deploy/prod-avstemming-job.yml
                 RESOURCE: deploy/prod-gc-job.yml,deploy/prod-avstemming-job.yml
                 IMAGE: ${{ needs.set_version.outputs.image }}
