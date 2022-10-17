@@ -217,7 +217,7 @@ internal class V190UtbetalingerOgVilkårsgrunnlag: JsonMigration(190) {
                             }
                         match?.log(utbetalingId, vedtaksperiodeId, skjæringstidspunktVedtaksperiode)
                         if (match == null) {
-                            sikkerlogg.info("[V190] fant ikke match søkeperioder=[$søkeperiode,$sykefraværstilfelle,$overlappendeSammenhengendePeriode] for utbetaling=$utbetalingId for vedtaksperiode=$vedtaksperiodeId med vedtaksperiodeSkjæringstidspunkt=$skjæringstidspunktVedtaksperiode")
+                            sikkerlogg.info("[V190] fant ikke match søkeperioder=$totalperiode erForkastet=$erForkastet, tilInfotrygd=$tilInfotrygd for utbetaling=$utbetalingId for vedtaksperiode=$vedtaksperiodeId med vedtaksperiodeSkjæringstidspunkt=$skjæringstidspunktVedtaksperiode")
                         } else {
                             (utbetaling as ObjectNode).put("vilkårsgrunnlagId", match.grunnlag.vilkårsgrunnlagId.toString())
                         }
