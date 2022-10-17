@@ -215,6 +215,7 @@ internal class V190UtbetalingerOgVilkårsgrunnlag: JsonMigration(190) {
                             ?: finnVilkårsgrunnlagForUtbetaling(vilkårsgrunnlag, nesteNyeInnslag, skjæringstidspunktVedtaksperiode, totalperiode)?.also {
                                 sikkerlogg.info("[V190] fant match ved å se i neste nye innslag for vedtaksperiode=$vedtaksperiodeId")
                             }
+                            ?: matchFuzzy(vilkårsgrunnlag[innslagId]?.values ?: emptyList(), skjæringstidspunktVedtaksperiode)
                         match?.log(utbetalingId, vedtaksperiodeId, skjæringstidspunktVedtaksperiode)
                         if (match == null) {
                             sikkerlogg.info("[V190] fant ikke match søkeperioder=$totalperiode erForkastet=$erForkastet, tilInfotrygd=$tilInfotrygd for utbetaling=$utbetalingId for vedtaksperiode=$vedtaksperiodeId med vedtaksperiodeSkjæringstidspunkt=$skjæringstidspunktVedtaksperiode")
@@ -255,6 +256,11 @@ internal class V190UtbetalingerOgVilkårsgrunnlag: JsonMigration(190) {
             Match.Indirekte(søkeperiode, it)
         }
     }
+    private fun matchFuzzy(liste: Collection<Vilkårsgrunnlag>, skjæringstidspunktVedtaksperiode: LocalDate): Match? {
+        return liste.firstOrNull { grunnlag -> grunnlag.skjæringstidspunkt > skjæringstidspunktVedtaksperiode }?.let {
+            Match.Fuzzy(it)
+        }
+    }
 
     private sealed class Match(val grunnlag: Vilkårsgrunnlag) {
         abstract fun log(
@@ -279,6 +285,15 @@ internal class V190UtbetalingerOgVilkårsgrunnlag: JsonMigration(190) {
                 skjæringstidspunktVedtaksperiode: LocalDate
             ) {
                 loggMatch("fant direkte match", utbetalingId, vedtaksperiodeId, skjæringstidspunktVedtaksperiode)
+            }
+        }
+        class Fuzzy(grunnlag: Vilkårsgrunnlag) : Match(grunnlag) {
+            override fun log(
+                utbetalingId: UtbetalingId,
+                vedtaksperiodeId: VedtaksperiodeId,
+                skjæringstidspunktVedtaksperiode: LocalDate
+            ) {
+                loggMatch("fant fuzzy match på skjæringstidspunkt=${grunnlag.skjæringstidspunkt}", utbetalingId, vedtaksperiodeId, skjæringstidspunktVedtaksperiode)
             }
         }
         class Indirekte(private val søkeperiode: Periode, grunnlag: Vilkårsgrunnlag) : Match(grunnlag) {
