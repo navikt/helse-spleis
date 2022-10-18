@@ -32,6 +32,10 @@ internal class Inntektshistorikk private constructor(private val historikk: Muta
         visitor.postVisitInntekthistorikk(this)
     }
 
+    internal fun leggTil(inntekter: List<Inntektsopplysning>) {
+        leggTil(Innslag(inntekter))
+    }
+
     private fun leggTil(nyttInnslag: Innslag) {
         val gjeldende = nyesteInnslag() ?: return historikk.add(0, nyttInnslag)
         val oppdatertInnslag = (gjeldende + nyttInnslag) ?: return
@@ -527,39 +531,10 @@ internal class Inntektshistorikk private constructor(private val historikk: Muta
             return Innslag(inntektsopplysninger)
         }
 
-        internal fun addSaksbehandler(dato: LocalDate, hendelseId: UUID, beløp: Inntekt, forklaring: String, subsumsjon: Subsumsjon?) =
-            add(Saksbehandler(UUID.randomUUID(), dato, hendelseId, beløp, forklaring, subsumsjon, tidsstempel))
-
         internal fun addInntektsmelding(dato: LocalDate, hendelseId: UUID, beløp: Inntekt) =
             add(Inntektsmelding(UUID.randomUUID(), dato, hendelseId, beløp, tidsstempel))
 
-        internal fun addSkattSykepengegrunnlag(
-            dato: LocalDate,
-            hendelseId: UUID,
-            beløp: Inntekt,
-            måned: YearMonth,
-            type: Skatt.Inntekttype,
-            fordel: String,
-            beskrivelse: String
-        ) {
-            skatt.add(Skatt.Sykepengegrunnlag(dato, hendelseId, beløp, måned, type, fordel, beskrivelse, tidsstempel))
-            add(SkattComposite(UUID.randomUUID(), skatt.toList()))
-        }
-
-        internal fun addRapportertInntekt(
-            dato: LocalDate,
-            hendelseId: UUID,
-            beløp: Inntekt,
-            måned: YearMonth,
-            type: Skatt.Inntekttype,
-            fordel: String,
-            beskrivelse: String
-        ) {
-            skatt.add(Skatt.RapportertInntekt(dato, hendelseId, beløp, måned, type, fordel, beskrivelse, tidsstempel))
-            add(SkattComposite(UUID.randomUUID(), skatt.toList()))
-        }
-
-        private fun add(opplysning: Inntektsopplysning) {
+        internal fun add(opplysning: Inntektsopplysning) {
             inntektsopplysninger = opplysning.lagre(inntektsopplysninger)
         }
     }

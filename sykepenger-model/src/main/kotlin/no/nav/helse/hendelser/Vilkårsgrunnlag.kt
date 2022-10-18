@@ -53,7 +53,10 @@ class Vilkårsgrunnlag(
             skjæringstidspunkt = skjæringstidspunkt,
             sykepengegrunnlag = grunnlagForSykepengegrunnlag,
             sammenligningsgrunnlag = sammenligningsgrunnlag,
-            avviksprosent = grunnlagForSykepengegrunnlag.avviksprosent(sammenligningsgrunnlag.sammenligningsgrunnlag, subsumsjonObserver),
+            avviksprosent = grunnlagForSykepengegrunnlag.avviksprosent(
+                sammenligningsgrunnlag.sammenligningsgrunnlag,
+                subsumsjonObserver
+            ),
             opptjening = opptjening,
             medlemskapstatus = medlemskapsvurdering.medlemskapstatus,
             vurdertOk = sykepengegrunnlagOk && inntektsvurderingOk && opptjeningvurderingOk && medlemskapsvurderingOk,
@@ -67,20 +70,13 @@ class Vilkårsgrunnlag(
     internal fun grunnlagsdata() = requireNotNull(grunnlagsdata) { "Må kalle valider() først" }
 
     internal fun lagre(person: Person, skjæringstidspunkt: LocalDate) {
-        arbeidsforhold.beregnOpptjening(skjæringstidspunkt, NullObserver)
-            .lagreArbeidsforhold(person, this)
-        lagreSkatteinntekter(person, skjæringstidspunkt)
-        lagreRapporterteInntekter(person, skjæringstidspunkt)
+        val opptjening = arbeidsforhold.beregnOpptjening(skjæringstidspunkt, NullObserver)
+        opptjening.lagreArbeidsforhold(person, this)
+         inntektsvurderingForSykepengegrunnlag
+            .lagreInntekter(this, person, opptjening, skjæringstidspunkt, meldingsreferanseId(), inntektsvurdering)
         if (person.harVedtaksperiodeForArbeidsgiverMedUkjentArbeidsforhold(skjæringstidspunkt)) {
             varsel(RV_VV_1)
         }
-    }
-    private fun lagreRapporterteInntekter(person: Person, skjæringstidspunkt: LocalDate) {
-        inntektsvurdering.lagreRapporterteInntekter(person, skjæringstidspunkt, this)
-    }
-
-    private fun lagreSkatteinntekter(person: Person, skjæringstidspunkt: LocalDate) {
-        inntektsvurderingForSykepengegrunnlag.lagreOmregnetÅrsinntekter(person, skjæringstidspunkt, this)
     }
 
     class Arbeidsforhold(
@@ -112,7 +108,10 @@ class Vilkårsgrunnlag(
                 .mapNotNull { it.periode(skjæringstidspunkt) }
                 .sammenhengende(skjæringstidspunkt)
 
-            internal fun List<Arbeidsforhold>.beregnOpptjening(skjæringstidspunkt: LocalDate, subsumsjonObserver: SubsumsjonObserver): Opptjening {
+            internal fun List<Arbeidsforhold>.beregnOpptjening(
+                skjæringstidspunkt: LocalDate,
+                subsumsjonObserver: SubsumsjonObserver
+            ): Opptjening {
                 val opptjeningsperiode = this.opptjeningsperiode(skjæringstidspunkt)
                 return this
                     .filter { it.erDelAvOpptjeningsperiode(opptjeningsperiode) }

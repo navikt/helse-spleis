@@ -5,7 +5,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.Personidentifikator
 import no.nav.helse.Toggle
-import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.Avstemming
 import no.nav.helse.hendelser.Hendelseskontekst
 import no.nav.helse.hendelser.Infotrygdendring
@@ -633,30 +632,8 @@ class Person private constructor(
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag)
     }
 
-    internal fun lagreOmregnetÅrsinntekt(
-        orgnummer: String,
-        arbeidsgiverInntekt: ArbeidsgiverInntekt,
-        skjæringstidspunkt: LocalDate,
-        hendelse: PersonHendelse
-    ) {
-        finnArbeidsgiverForInntekter(orgnummer, hendelse).lagreOmregnetÅrsinntekt(
-            arbeidsgiverInntekt,
-            skjæringstidspunkt,
-            hendelse
-        )
-    }
-
-    internal fun lagreRapporterteInntekter(
-        orgnummer: String,
-        arbeidsgiverInntekt: ArbeidsgiverInntekt,
-        skjæringstidspunkt: LocalDate,
-        hendelse: PersonHendelse
-    ) {
-        finnArbeidsgiverForInntekter(orgnummer, hendelse).lagreRapporterteInntekter(
-            arbeidsgiverInntekt,
-            skjæringstidspunkt,
-            hendelse
-        )
+    internal fun lagreInntekter(hendelse: IAktivitetslogg, orgnummer: String, inntekter: List<Inntektshistorikk.SkattComposite>) {
+        finnEllerOpprettArbeidsgiver(orgnummer, hendelse).lagreInntekter(inntekter)
     }
 
     internal fun beregnSykepengegrunnlag(skjæringstidspunkt: LocalDate, subsumsjonObserver: SubsumsjonObserver): Sykepengegrunnlag {

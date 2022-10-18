@@ -2,11 +2,12 @@ package no.nav.helse.hendelser
 
 import java.time.LocalDate
 import java.time.YearMonth
+import java.util.UUID
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.Companion.antallMåneder
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.Companion.harInntektFor
 import no.nav.helse.person.IAktivitetslogg
+import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Person
-import no.nav.helse.person.PersonHendelse
 import no.nav.helse.person.Varselkode.RV_IV_3
 import org.slf4j.LoggerFactory
 
@@ -50,8 +51,15 @@ class InntektForSykepengegrunnlag(
         }
     }
 
-    internal fun lagreOmregnetÅrsinntekter(person: Person, skjæringstidspunkt: LocalDate, hendelse: PersonHendelse) =
-        ArbeidsgiverInntekt.lagreOmregnetÅrsinntekter(inntekter, person, skjæringstidspunkt, hendelse)
+    internal fun lagreInntekter(hendelse: IAktivitetslogg, person: Person, opptjening: Opptjening, skjæringstidspunkt: LocalDate, meldingsreferanseId: UUID, inntektsvurdering: Inntektsvurdering) {
+        inntektsvurdering.lagreInntekter(
+            hendelse,
+            person,
+            skjæringstidspunkt,
+            meldingsreferanseId,
+            this.inntekter.filter { it.ansattVedSkjæringstidspunkt(opptjening) }
+        )
+    }
 
     class Arbeidsforhold(
         val orgnummer: String,

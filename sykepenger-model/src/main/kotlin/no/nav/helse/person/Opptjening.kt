@@ -3,6 +3,7 @@ package no.nav.helse.person
 import java.time.LocalDate
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.person.Arbeidsforholdhistorikk.Arbeidsforhold.Companion.ansattVedSkjæringstidspunkt
 import no.nav.helse.person.Arbeidsforholdhistorikk.Arbeidsforhold.Companion.opptjeningsperiode
 import no.nav.helse.person.Arbeidsforholdhistorikk.Arbeidsforhold.Companion.toEtterlevelseMap
 import no.nav.helse.person.Opptjening.ArbeidsgiverOpptjeningsgrunnlag.Companion.aktiver
@@ -28,6 +29,9 @@ internal class Opptjening private constructor(
             antallOpptjeningsdager = opptjeningsperiode.dagerMellom().toInt()
         )
     }
+
+    internal fun ansattVedSkjæringstidspunkt(orgnummer: String) =
+        arbeidsforhold.any { it.ansattVedSkjæringstidspunkt(orgnummer, skjæringstidspunkt) }
 
     internal fun opptjeningsdager() = opptjeningsperiode.dagerMellom().toInt()
     internal fun erOppfylt(): Boolean = opptjeningsperiode.dagerMellom() >= TILSTREKKELIG_ANTALL_OPPTJENINGSDAGER
@@ -63,6 +67,9 @@ internal class Opptjening private constructor(
     }
 
     internal class ArbeidsgiverOpptjeningsgrunnlag(private val orgnummer: String, private val ansattPerioder: List<Arbeidsforholdhistorikk.Arbeidsforhold>) {
+        internal fun ansattVedSkjæringstidspunkt(orgnummer: String, skjæringstidspunkt: LocalDate) =
+            this.orgnummer == orgnummer && ansattPerioder.ansattVedSkjæringstidspunkt(skjæringstidspunkt)
+
         private fun aktiver(orgnummer: String): ArbeidsgiverOpptjeningsgrunnlag {
             if (orgnummer != this.orgnummer) return this
             return ArbeidsgiverOpptjeningsgrunnlag(orgnummer, ansattPerioder.map { it.aktiver() })

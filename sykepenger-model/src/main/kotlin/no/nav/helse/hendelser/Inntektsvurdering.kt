@@ -1,12 +1,13 @@
 package no.nav.helse.hendelser
 
 import java.time.LocalDate
+import java.util.UUID
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.Companion.antallMåneder
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.Companion.kilder
+import no.nav.helse.hendelser.ArbeidsgiverInntekt.Companion.lagreInntekter
 import no.nav.helse.hendelser.ArbeidsgiverInntekt.Companion.utenOffentligeYtelser
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.Person
-import no.nav.helse.person.PersonHendelse
 import no.nav.helse.person.Varselkode.RV_IV_1
 
 class Inntektsvurdering(private val inntekter: List<ArbeidsgiverInntekt>) {
@@ -19,6 +20,6 @@ class Inntektsvurdering(private val inntekter: List<ArbeidsgiverInntekt>) {
         return true
     }
 
-    internal fun lagreRapporterteInntekter(person: Person, skjæringstidspunkt: LocalDate, hendelse: PersonHendelse) =
-        ArbeidsgiverInntekt.lagreRapporterteInntekter(inntekter, person, skjæringstidspunkt, hendelse)
+    internal fun lagreInntekter(hendelse: IAktivitetslogg, person: Person, skjæringstidspunkt: LocalDate, meldingsreferanseId: UUID, other: List<ArbeidsgiverInntekt>) =
+        (this.inntekter + other).lagreInntekter(hendelse, person, skjæringstidspunkt, meldingsreferanseId)
 }

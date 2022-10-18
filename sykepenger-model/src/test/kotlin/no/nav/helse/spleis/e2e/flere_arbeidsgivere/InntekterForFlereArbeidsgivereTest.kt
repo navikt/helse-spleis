@@ -192,7 +192,7 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
             )
         ).håndter(Person::håndter)
 
-        assertEquals(3, a1Inspektør.inntektInspektør.antallInnslag)
+        assertEquals(2, a1Inspektør.inntektInspektør.antallInnslag)
         assertEquals(1, a2Inspektør.inntektInspektør.antallInnslag)
 
         assertNull(a2Inspektør.inntektInspektør.sisteInnslag?.opplysninger?.firstOrNull { it.kilde == Kilde.INFOTRYGD })
@@ -235,10 +235,10 @@ internal class InntekterForFlereArbeidsgivereTest : AbstractEndToEndTest() {
         ).håndter(Person::håndter)
 
         assertEquals(3, a1Inspektør.inntektInspektør.sisteInnslag?.opplysninger?.size)
-        assertEquals(3, a1Inspektør.inntektInspektør.antallInnslag)
+        assertEquals(2, a1Inspektør.inntektInspektør.antallInnslag)
         assertEquals(25000.månedlig, a1Inspektør.inntektInspektør.sisteInnslag?.opplysninger?.get(0)?.sykepengegrunnlag)
-        assertEquals(15000.månedlig, a1Inspektør.inntektInspektør.sisteInnslag?.opplysninger?.get(1)?.sykepengegrunnlag)
-        assertEquals(24000.månedlig, a1Inspektør.inntektInspektør.sisteInnslag?.opplysninger?.get(2)?.sammenligningsgrunnlag)
+        assertEquals(24000.månedlig, a1Inspektør.inntektInspektør.sisteInnslag?.opplysninger?.get(1)?.sammenligningsgrunnlag)
+        assertEquals(15000.månedlig, a1Inspektør.inntektInspektør.sisteInnslag?.opplysninger?.get(2)?.sykepengegrunnlag)
 
     }
 

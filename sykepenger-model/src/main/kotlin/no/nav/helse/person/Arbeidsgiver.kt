@@ -6,7 +6,6 @@ import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.Personidentifikator
 import no.nav.helse.Toggle
-import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.Hendelseskontekst
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingReplay
@@ -875,13 +874,8 @@ internal class Arbeidsgiver private constructor(
         overstyring.lagre(skjæringstidspunkt, arbeidsforholdhistorikk)
     }
 
-    internal fun lagreOmregnetÅrsinntekt(arbeidsgiverInntekt: ArbeidsgiverInntekt, skjæringstidspunkt: LocalDate, hendelse: PersonHendelse) {
-        if (!harRelevantArbeidsforhold(skjæringstidspunkt)) return
-        arbeidsgiverInntekt.lagreInntekter(inntektshistorikk, skjæringstidspunkt, hendelse.meldingsreferanseId())
-    }
-
-    internal fun lagreRapporterteInntekter(arbeidsgiverInntekt: ArbeidsgiverInntekt, skjæringstidspunkt: LocalDate, hendelse: PersonHendelse) {
-        arbeidsgiverInntekt.lagreInntekter(inntektshistorikk, skjæringstidspunkt, hendelse.meldingsreferanseId())
+    internal fun lagreInntekter(inntekter: List<Inntektshistorikk.SkattComposite>) {
+        inntektshistorikk.leggTil(inntekter)
     }
 
     private fun søppelbøtte(hendelse: IAktivitetslogg, filter: VedtaksperiodeFilter) {
