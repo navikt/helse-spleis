@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
 import java.time.LocalDate
-import no.nav.helse.Toggle
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.desember
 import no.nav.helse.februar
@@ -122,7 +121,10 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.mars, 10.mars, 100.prosent), orgnummer = a1)
         håndterYtelser(3.vedtaksperiode, orgnummer = a1)
 
-        assertEquals(1080.daglig, inspektør(a1).utbetalingstidslinjer(3.vedtaksperiode)[1.mars].økonomi.inspektør.arbeidsgiverbeløp)
+        assertEquals(
+            1080.daglig,
+            inspektør(a1).utbetalingstidslinjer(3.vedtaksperiode)[1.mars].økonomi.inspektør.arbeidsgiverbeløp
+        )
     }
 
 
@@ -241,22 +243,13 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a1)
         assertForventetFeil(
             forklaring = "Må revurdere fordi søknad overlapper med utbetalt periode hos annen arbeidsgiver" +
-                        "Er det rart at ag2 blir trukket ut til gå gjennom revurdering før ag1?",
+                    "Er det rart at ag2 blir trukket ut til gå gjennom revurdering før ag1?",
             nå = {
-                if (Toggle.RevurderOutOfOrder.enabled) {
-                    assertTilstand(1.vedtaksperiode, AVVENTER_REVURDERING, orgnummer = a1)
-                    assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a2)
+                assertTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
+                assertTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
 
-                    assertTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
-                    assertTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a2)
-                } else {
-                    assertTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a1)
-                    assertTilstand(1.vedtaksperiode, AVSLUTTET, orgnummer = a2)
-
-                    assertTilstand(2.vedtaksperiode, TIL_INFOTRYGD, orgnummer = a1)
-                    assertTilstand(2.vedtaksperiode, TIL_INFOTRYGD, orgnummer = a2)
-                }
-
+                assertTilstand(2.vedtaksperiode, TIL_INFOTRYGD, orgnummer = a1)
+                assertTilstand(2.vedtaksperiode, TIL_INFOTRYGD, orgnummer = a2)
             },
             ønsket = {
                 assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, orgnummer = a1)
@@ -725,14 +718,14 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Gammel sykemeldingsperiode skal ikke blokkere videre behandling av en senere søknad`(){
+    fun `Gammel sykemeldingsperiode skal ikke blokkere videre behandling av en senere søknad`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
 
         håndterSykmelding(Sykmeldingsperiode(5.februar, 28.februar, 100.prosent), orgnummer = a2)
         håndterSøknad(Sykdom(5.februar, 28.februar, 100.prosent), orgnummer = a2)
         håndterInntektsmelding(listOf(5.februar til 20.februar), orgnummer = a2)
 
-        assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer=a2)
+        assertTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
     }
 
     @Test
@@ -781,8 +774,8 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), orgnummer = a2)
 
         // arbeidsgiveren spleis hører om først er den som blir valgt først til å gå videre i gjenopptaBehandling dersom periodenes tom er lik
-        assertTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer=a2)
-        assertTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer=a1)
+        assertTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK, orgnummer = a2)
+        assertTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, orgnummer = a1)
     }
 
     private fun utbetalPeriodeEtterVilkårsprøving(vedtaksperiode: IdInnhenter, orgnummer: String) {

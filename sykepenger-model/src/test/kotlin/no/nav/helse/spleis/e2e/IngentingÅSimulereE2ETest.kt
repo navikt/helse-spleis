@@ -6,6 +6,7 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.januar
 import no.nav.helse.person.TilstandType.AVSLUTTET
+import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.TilstandType.AVVENTER_HISTORIKK
@@ -36,23 +37,13 @@ internal class IngentingÅSimulereE2ETest : AbstractEndToEndTest() {
         nyttVedtak(1.januar, 18.januar)
         håndterSykmelding(Sykmeldingsperiode(20.januar, 21.januar, 100.prosent))
         håndterSøknad(Sykdom(20.januar, 21.januar, 100.prosent))
-        håndterInntektsmelding(listOf(Periode(1.januar, 16.januar)), førsteFraværsdag = 20.januar)
-        håndterYtelser(2.vedtaksperiode)
-        håndterVilkårsgrunnlag(2.vedtaksperiode)
-        håndterYtelser(2.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalingshistorikk(2.vedtaksperiode)
         assertTilstander(
             2.vedtaksperiode,
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK,
-            AVVENTER_VILKÅRSPRØVING,
-            AVVENTER_HISTORIKK,
-            AVVENTER_GODKJENNING,
-            AVSLUTTET
+            AVSLUTTET_UTEN_UTBETALING
         )
-        assertEquals(Utbetaling.GodkjentUtenUtbetaling, inspektør.utbetalingtilstand(1))
     }
 
 
