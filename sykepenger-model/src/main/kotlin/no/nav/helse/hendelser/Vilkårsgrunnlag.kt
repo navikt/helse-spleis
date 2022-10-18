@@ -5,7 +5,6 @@ import java.util.UUID
 import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.Periode.Companion.sammenhengende
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Companion.beregnOpptjening
-import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Companion.grupperArbeidsforholdPerOrgnummer
 import no.nav.helse.person.Arbeidsforholdhistorikk
 import no.nav.helse.person.Arbeidsforholdhistorikk.Companion.opptjening
 import no.nav.helse.person.ArbeidstakerHendelse
@@ -18,7 +17,6 @@ import no.nav.helse.person.Varselkode.RV_VV_1
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.NullObserver
-import org.slf4j.LoggerFactory
 
 class Vilkårsgrunnlag(
     meldingsreferanseId: UUID,
@@ -31,7 +29,6 @@ class Vilkårsgrunnlag(
     private val inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag,
     arbeidsforhold: List<Arbeidsforhold>
 ) : ArbeidstakerHendelse(meldingsreferanseId, personidentifikator.toString(), aktørId, orgnummer) {
-    private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
     private var grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata? = null
     private val arbeidsforhold = arbeidsforhold.filter { it.orgnummer.isNotBlank() }
 
@@ -69,12 +66,11 @@ class Vilkårsgrunnlag(
 
     internal fun grunnlagsdata() = requireNotNull(grunnlagsdata) { "Må kalle valider() først" }
 
-    internal fun lagre(person: Person, skjæringstidspunkt: LocalDate, subsumsjonObserver: SubsumsjonObserver) {
+    internal fun lagre(person: Person, skjæringstidspunkt: LocalDate) {
         arbeidsforhold.beregnOpptjening(skjæringstidspunkt, NullObserver)
             .lagreArbeidsforhold(person, this)
         lagreSkatteinntekter(person, skjæringstidspunkt)
         lagreRapporterteInntekter(person, skjæringstidspunkt)
-        loggUkjenteArbeidsforhold(person, skjæringstidspunkt)
         if (person.harVedtaksperiodeForArbeidsgiverMedUkjentArbeidsforhold(skjæringstidspunkt)) {
             varsel(RV_VV_1)
         }
@@ -85,16 +81,6 @@ class Vilkårsgrunnlag(
 
     private fun lagreSkatteinntekter(person: Person, skjæringstidspunkt: LocalDate) {
         inntektsvurderingForSykepengegrunnlag.lagreOmregnetÅrsinntekter(person, skjæringstidspunkt, this)
-    }
-
-    private fun loggUkjenteArbeidsforhold(person: Person, skjæringstidspunkt: LocalDate) {
-        val arbeidsforholdForSkjæringstidspunkt = arbeidsforhold.filter { it.gjelder(skjæringstidspunkt) }
-        val harFlereRelevanteArbeidsforhold = arbeidsforholdForSkjæringstidspunkt.grupperArbeidsforholdPerOrgnummer().keys.size > 1
-        if (harFlereRelevanteArbeidsforhold && arbeidsforholdForSkjæringstidspunkt.any { it.harArbeidetMindreEnnTreMåneder(skjæringstidspunkt) }) {
-            sikkerlogg.info("Person har flere arbeidsgivere og et relevant arbeidsforhold som har vart mindre enn 3 måneder (8-28b) - fødselsnummer: $fødselsnummer")
-        }
-        person.brukOuijaBrettForÅKommunisereMedPotensielleSpøkelser(arbeidsforholdForSkjæringstidspunkt.map(Arbeidsforhold::orgnummer), skjæringstidspunkt)
-        person.loggUkjenteOrgnummere(arbeidsforhold.map { it.orgnummer })
     }
 
     class Arbeidsforhold(
@@ -121,13 +107,7 @@ class Vilkårsgrunnlag(
             return ansattFom til (ansattTom ?: skjæringstidspunkt)
         }
 
-        internal fun gjelder(skjæringstidspunkt: LocalDate) = ansattFom <= skjæringstidspunkt && (ansattTom == null || ansattTom >= skjæringstidspunkt)
-
-        internal fun harArbeidetMindreEnnTreMåneder(skjæringstidspunkt: LocalDate) = ansattFom > skjæringstidspunkt.withDayOfMonth(1).minusMonths(3)
-
         internal companion object {
-            internal fun List<Arbeidsforhold>.grupperArbeidsforholdPerOrgnummer() = this
-                .groupBy { it.orgnummer }
             internal fun Iterable<Arbeidsforhold>.opptjeningsperiode(skjæringstidspunkt: LocalDate) = this
                 .mapNotNull { it.periode(skjæringstidspunkt) }
                 .sammenhengende(skjæringstidspunkt)

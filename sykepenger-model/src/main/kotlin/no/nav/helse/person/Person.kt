@@ -742,36 +742,6 @@ class Person private constructor(
         finnEllerOpprettArbeidsgiver(orgnummer, aktivitetslogg).lagreArbeidsforhold(arbeidsforhold, skjæringstidspunkt)
     }
 
-    internal fun brukOuijaBrettForÅKommunisereMedPotensielleSpøkelser(
-        orgnummerFraAAreg: List<String>,
-        skjæringstidspunkt: LocalDate
-    ) {
-        val arbeidsgivereMedSykdom =
-            arbeidsgivere.filter { it.harSykdomFor(skjæringstidspunkt) }.map(Arbeidsgiver::organisasjonsnummer)
-        if (arbeidsgivereMedSykdom.containsAll(orgnummerFraAAreg)) {
-            sikkerLogg.info("Ingen spøkelser, har sykdom hos alle kjente arbeidsgivere antall=${arbeidsgivereMedSykdom.size}")
-        } else {
-            sikkerLogg.info("Vi har kontakt med spøkelser, fnr=$personidentifikator, antall=${orgnummerFraAAreg.size}")
-        }
-    }
-
-    internal fun loggUkjenteOrgnummere(orgnummerFraAAreg: List<String>) {
-        val kjenteOrgnummer = arbeidsgivereMedSykdom().map { it.organisasjonsnummer() }
-            .filter { it != "0" }
-        val orgnummerMedSpleisSykdom = arbeidsgivere.filter { it.harSpleisSykdom() }.map { it.organisasjonsnummer() }
-
-        val manglerIAAReg = kjenteOrgnummer.filter { !orgnummerFraAAreg.contains(it) }
-        val spleisOrgnummerManglerIAAreg = kjenteOrgnummer.filter { !orgnummerMedSpleisSykdom.contains(it) }
-        val nyeOrgnummer = orgnummerFraAAreg.filter { !kjenteOrgnummer.contains(it) }
-        if (spleisOrgnummerManglerIAAreg.isNotEmpty()) {
-            sikkerLogg.info("Fant arbeidsgivere i spleis som ikke er i AAReg(${manglerIAAReg}), opprettet(${nyeOrgnummer}) for $personidentifikator")
-        } else if (manglerIAAReg.isNotEmpty()) {
-            sikkerLogg.info("Fant arbeidsgivere i IT som ikke er i AAReg(${manglerIAAReg}), opprettet(${nyeOrgnummer}) for $personidentifikator")
-        } else {
-            sikkerLogg.info("AAReg kjenner til alle arbeidsgivere i spleis, opprettet (${nyeOrgnummer}) for $personidentifikator")
-        }
-    }
-
     internal fun fyllUtPeriodeMedForventedeDager(
         hendelse: PersonHendelse,
         periode: Periode,
