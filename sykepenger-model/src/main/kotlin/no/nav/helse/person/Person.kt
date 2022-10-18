@@ -31,7 +31,6 @@ import no.nav.helse.hendelser.utbetaling.UtbetalingOverført
 import no.nav.helse.hendelser.utbetaling.Utbetalingpåminnelse
 import no.nav.helse.hendelser.utbetaling.Utbetalingsgodkjenning
 import no.nav.helse.person.Arbeidsgiver.Companion.beregnFeriepengerForAlleArbeidsgivere
-import no.nav.helse.person.Arbeidsgiver.Companion.beregnOpptjening
 import no.nav.helse.person.Arbeidsgiver.Companion.beregnSykepengegrunnlag
 import no.nav.helse.person.Arbeidsgiver.Companion.finn
 import no.nav.helse.person.Arbeidsgiver.Companion.ghostPeriode
@@ -679,10 +678,6 @@ class Person private constructor(
         return sammenligningsgrunnlag
     }
 
-    internal fun beregnOpptjening(skjæringstidspunkt: LocalDate, subsumsjonObserver: SubsumsjonObserver): Opptjening {
-        return arbeidsgivere.beregnOpptjening(skjæringstidspunkt, subsumsjonObserver)
-    }
-
     private fun finnArbeidsgiverForInntekter(arbeidsgiver: String, aktivitetslogg: IAktivitetslogg): Arbeidsgiver {
         return arbeidsgivere.finnEllerOpprett(arbeidsgiver) {
             aktivitetslogg.info("Ny arbeidsgiver med organisasjonsnummer %s for denne personen", arbeidsgiver)
@@ -740,7 +735,7 @@ class Person private constructor(
 
     internal fun lagreArbeidsforhold(
         orgnummer: String,
-        arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold>,
+        arbeidsforhold: List<Arbeidsforholdhistorikk.Arbeidsforhold>,
         aktivitetslogg: IAktivitetslogg,
         skjæringstidspunkt: LocalDate
     ) {

@@ -9,6 +9,7 @@ import no.nav.helse.person.Arbeidsforholdhistorikk.Arbeidsforhold.Companion.crea
 import no.nav.helse.person.Arbeidsforholdhistorikk.Arbeidsforhold.Companion.erDeaktivert
 import no.nav.helse.person.Arbeidsforholdhistorikk.Arbeidsforhold.Companion.harArbeidsforholdNyereEnn
 import no.nav.helse.person.Arbeidsforholdhistorikk.Arbeidsforhold.Companion.ikkeDeaktiverteArbeidsforhold
+import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 
 internal class Arbeidsforholdhistorikk private constructor(
     private val historikk: MutableList<Innslag>
@@ -146,6 +147,12 @@ internal class Arbeidsforholdhistorikk private constructor(
     }
 
     internal companion object {
+        internal fun Map<String, List<Arbeidsforhold>>.opptjening(skjæringstidspunkt: LocalDate, subsumsjonObserver: SubsumsjonObserver): Opptjening {
+            val arbeidsforhold = this
+                .filterValues { it.isNotEmpty() }
+                .map { (orgnr, arbeidsforhold) -> Opptjening.ArbeidsgiverOpptjeningsgrunnlag(orgnr, arbeidsforhold) }
+            return Opptjening(arbeidsforhold, skjæringstidspunkt, subsumsjonObserver)
+        }
         internal fun ferdigArbeidsforholdhistorikk(historikk: List<Innslag>): Arbeidsforholdhistorikk =
             Arbeidsforholdhistorikk(historikk.map{it}.toMutableList())
     }

@@ -9,11 +9,13 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.IdInnhenter
+import no.nav.helse.person.Varselkode.RV_IM_2
 import no.nav.helse.person.Varselkode.RV_MV_1
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.serde.api.dto.AktivitetDTO
 import no.nav.helse.serde.api.speil.builders.PeriodeVarslerBuilder
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
+import no.nav.helse.spleis.e2e.assertIngenVarsler
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
@@ -56,7 +58,7 @@ internal class PeriodeVarslerBuilderTest: AbstractEndToEndTest() {
         håndterYtelser()
         håndterSimulering()
 
-        assertEquals(1, aktiviteter(1.vedtaksperiode).size)
+        assertVarsel(RV_IM_2, 1.vedtaksperiode.filter())
     }
 
     @Test
@@ -88,6 +90,8 @@ internal class PeriodeVarslerBuilderTest: AbstractEndToEndTest() {
         nyttVedtak(4.mars, 31.mars)
 
         assertVarsel(RV_MV_1, 1.vedtaksperiode.filter())
+        assertIngenVarsler(2.vedtaksperiode.filter())
+        assertIngenVarsler(3.vedtaksperiode.filter())
         assertEquals(0, aktiviteter(2.vedtaksperiode).size)
         assertEquals(0, aktiviteter(3.vedtaksperiode).size)
     }

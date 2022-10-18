@@ -174,17 +174,6 @@ internal class Arbeidsgiver private constructor(
         internal fun List<Arbeidsgiver>.beregnSykepengegrunnlag(skjæringstidspunkt: LocalDate) =
             mapNotNull { arbeidsgiver -> arbeidsgiver.beregnSykepengegrunnlag(skjæringstidspunkt) }
 
-        internal fun List<Arbeidsgiver>.beregnOpptjening(
-            skjæringstidspunkt: LocalDate,
-            subsumsjonObserver: SubsumsjonObserver
-        ): Opptjening {
-            val arbeidsforhold =
-                map { it.organisasjonsnummer to it.arbeidsforholdhistorikk.arbeidsforhold(skjæringstidspunkt) }
-                    .filter { (_, arbeidsforhold) -> arbeidsforhold.isNotEmpty() }
-                    .map { Opptjening.ArbeidsgiverOpptjeningsgrunnlag(it.first, it.second) }
-            return Opptjening(arbeidsforhold, skjæringstidspunkt, subsumsjonObserver)
-        }
-
         internal fun List<Arbeidsgiver>.inntekterForSammenligningsgrunnlag(skjæringstidspunkt: LocalDate) =
             this.mapNotNull { arbeidsgiver ->
                 val inntektsopplysning = arbeidsgiver.inntektshistorikk.rapportertInntekt(skjæringstidspunkt, arbeidsgiver.arbeidsforholdhistorikk)
@@ -1002,13 +991,8 @@ internal class Arbeidsgiver private constructor(
         return UtbetalingstidslinjeBuilder(inntekter)
     }
 
-    internal fun lagreArbeidsforhold(arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold>, skjæringstidspunkt: LocalDate) {
-        arbeidsforholdhistorikk.lagre(
-            arbeidsforhold
-                .filter { it.erRelevant(this) }
-                .map { it.tilDomeneobjekt() },
-            skjæringstidspunkt
-        )
+    internal fun lagreArbeidsforhold(arbeidsforhold: List<Arbeidsforholdhistorikk.Arbeidsforhold>, skjæringstidspunkt: LocalDate) {
+        arbeidsforholdhistorikk.lagre(arbeidsforhold, skjæringstidspunkt)
     }
 
     internal fun build(

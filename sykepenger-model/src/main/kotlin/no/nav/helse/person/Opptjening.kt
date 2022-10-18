@@ -58,6 +58,10 @@ internal class Opptjening private constructor(
         return Opptjening(arbeidsforhold.aktiver(orgnummer), skjæringstidspunkt, subsumsjonObserver)
     }
 
+    internal fun lagreArbeidsforhold(person: Person, hendelse: IAktivitetslogg) {
+        arbeidsforhold.forEach { it.lagreArbeidsforhold(person, skjæringstidspunkt, hendelse) }
+    }
+
     internal class ArbeidsgiverOpptjeningsgrunnlag(private val orgnummer: String, private val ansattPerioder: List<Arbeidsforholdhistorikk.Arbeidsforhold>) {
         private fun aktiver(orgnummer: String): ArbeidsgiverOpptjeningsgrunnlag {
             if (orgnummer != this.orgnummer) return this
@@ -89,6 +93,10 @@ internal class Opptjening private constructor(
             visitor.preVisitArbeidsgiverOpptjeningsgrunnlag(orgnummer, ansattPerioder)
             ansattPerioder.forEach { it.accept(visitor) }
             visitor.postVisitArbeidsgiverOpptjeningsgrunnlag(orgnummer, ansattPerioder)
+        }
+
+        internal fun lagreArbeidsforhold(person: Person, skjæringstidspunkt: LocalDate, hendelse: IAktivitetslogg) {
+            person.lagreArbeidsforhold(this.orgnummer, this.ansattPerioder, hendelse, skjæringstidspunkt)
         }
     }
 

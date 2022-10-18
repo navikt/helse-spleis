@@ -13,7 +13,6 @@ import no.nav.helse.januar
 import no.nav.helse.oktober
 import no.nav.helse.person.AbstractPersonTest
 import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.person.Arbeidsforholdhistorikk
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.ForlengelseFraInfotrygd
@@ -21,7 +20,6 @@ import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.InntektsmeldingInfo
-import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Periodetype
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonVisitor
@@ -147,20 +145,6 @@ internal class VilkårsgrunnlagTest : AbstractPersonTest() {
             grunnlagForSykepengegrunnlag = INNTEKT.sykepengegrunnlag,
             sammenligningsgrunnlag = sammenligningsgrunnlag(skjæringstidspunkt = 31.januar),
             skjæringstidspunkt = 31.januar,
-            opptjening = Opptjening(
-                arbeidsforhold = listOf(
-                    Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
-                        a1,
-                        listOf(Arbeidsforholdhistorikk.Arbeidsforhold(1.januar, 14.januar, false))
-                    ),
-                    Opptjening.ArbeidsgiverOpptjeningsgrunnlag(
-                        a2,
-                        listOf(Arbeidsforholdhistorikk.Arbeidsforhold(15.januar, null, false))
-                    )
-                ),
-                skjæringstidspunkt = 31.januar,
-                subsumsjonObserver = MaskinellJurist()
-            ),
             antallArbeidsgivereFraAareg = 1,
             subsumsjonObserver = MaskinellJurist()
         )

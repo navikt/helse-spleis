@@ -96,7 +96,6 @@ import no.nav.helse.person.Varselkode.RV_VT_4
 import no.nav.helse.person.Varselkode.RV_VT_5
 import no.nav.helse.person.Varselkode.RV_VT_6
 import no.nav.helse.person.Varselkode.RV_VT_7
-import no.nav.helse.person.Varselkode.RV_VV_1
 import no.nav.helse.person.Varselkode.RV_VV_2
 import no.nav.helse.person.Varselkode.RV_VV_8
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag
@@ -578,25 +577,15 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun håndterVilkårsgrunnlag(vilkårsgrunnlag: Vilkårsgrunnlag, nesteTilstand: Vedtaksperiodetilstand) {
-        vilkårsgrunnlag.lagreArbeidsforhold(person, skjæringstidspunkt)
-        vilkårsgrunnlag.lagreSkatteinntekter(person, skjæringstidspunkt)
-        vilkårsgrunnlag.loggUkjenteArbeidsforhold(person, skjæringstidspunkt)
-
-        if (person.harVedtaksperiodeForArbeidsgiverMedUkjentArbeidsforhold(skjæringstidspunkt)) {
-            vilkårsgrunnlag.varsel(RV_VV_1)
-        }
-
-        vilkårsgrunnlag.lagreRapporterteInntekter(person, skjæringstidspunkt)
+        vilkårsgrunnlag.lagre(person, skjæringstidspunkt, jurist())
 
         val grunnlagForSykepengegrunnlag = person.beregnSykepengegrunnlag(skjæringstidspunkt, jurist())
         val sammenligningsgrunnlag = person.beregnSammenligningsgrunnlag(skjæringstidspunkt, jurist())
-        val opptjening = person.beregnOpptjening(skjæringstidspunkt, jurist())
 
         vilkårsgrunnlag.valider(
             grunnlagForSykepengegrunnlag,
             sammenligningsgrunnlag,
             skjæringstidspunkt,
-            opptjening,
             person.antallArbeidsgivereMedRelevantArbeidsforhold(skjæringstidspunkt),
             jurist()
         )

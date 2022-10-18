@@ -4,18 +4,20 @@ import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.Periode.Companion.sammenhengende
+import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Companion.beregnOpptjening
 import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Companion.grupperArbeidsforholdPerOrgnummer
-import no.nav.helse.hendelser.Vilkårsgrunnlag.Arbeidsforhold.Companion.opptjeningsperiode
 import no.nav.helse.person.Arbeidsforholdhistorikk
-import no.nav.helse.person.Arbeidsgiver
+import no.nav.helse.person.Arbeidsforholdhistorikk.Companion.opptjening
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Person
 import no.nav.helse.person.Sammenligningsgrunnlag
 import no.nav.helse.person.Sykepengegrunnlag
+import no.nav.helse.person.Varselkode.RV_VV_1
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
+import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.NullObserver
 import org.slf4j.LoggerFactory
 
 class Vilkårsgrunnlag(
@@ -39,7 +41,6 @@ class Vilkårsgrunnlag(
         grunnlagForSykepengegrunnlag: Sykepengegrunnlag,
         sammenligningsgrunnlag: Sammenligningsgrunnlag,
         skjæringstidspunkt: LocalDate,
-        opptjening: Opptjening,
         antallArbeidsgivereFraAareg: Int,
         subsumsjonObserver: SubsumsjonObserver
     ): IAktivitetslogg {
@@ -47,6 +48,7 @@ class Vilkårsgrunnlag(
         inntektsvurderingForSykepengegrunnlag.valider(this)
         inntektsvurderingForSykepengegrunnlag.loggInteressantFrilanserInformasjon(skjæringstidspunkt)
 
+        val opptjening = arbeidsforhold.beregnOpptjening(skjæringstidspunkt, subsumsjonObserver)
         val inntektsvurderingOk = inntektsvurdering.valider(this, antallArbeidsgivereFraAareg)
         val opptjeningvurderingOk = opptjening.valider(this)
         val medlemskapsvurderingOk = medlemskapsvurdering.valider(this)
@@ -65,17 +67,27 @@ class Vilkårsgrunnlag(
     }
 
 
-    internal fun lagreRapporterteInntekter(person: Person, skjæringstidspunkt: LocalDate) {
+    internal fun grunnlagsdata() = requireNotNull(grunnlagsdata) { "Må kalle valider() først" }
+
+    internal fun lagre(person: Person, skjæringstidspunkt: LocalDate, subsumsjonObserver: SubsumsjonObserver) {
+        arbeidsforhold.beregnOpptjening(skjæringstidspunkt, NullObserver)
+            .lagreArbeidsforhold(person, this)
+        lagreSkatteinntekter(person, skjæringstidspunkt)
+        lagreRapporterteInntekter(person, skjæringstidspunkt)
+        loggUkjenteArbeidsforhold(person, skjæringstidspunkt)
+        if (person.harVedtaksperiodeForArbeidsgiverMedUkjentArbeidsforhold(skjæringstidspunkt)) {
+            varsel(RV_VV_1)
+        }
+    }
+    private fun lagreRapporterteInntekter(person: Person, skjæringstidspunkt: LocalDate) {
         inntektsvurdering.lagreRapporterteInntekter(person, skjæringstidspunkt, this)
     }
 
-    internal fun grunnlagsdata() = requireNotNull(grunnlagsdata) { "Må kalle valider() først" }
-
-    internal fun lagreSkatteinntekter(person: Person, skjæringstidspunkt: LocalDate) {
+    private fun lagreSkatteinntekter(person: Person, skjæringstidspunkt: LocalDate) {
         inntektsvurderingForSykepengegrunnlag.lagreOmregnetÅrsinntekter(person, skjæringstidspunkt, this)
     }
 
-    internal fun loggUkjenteArbeidsforhold(person: Person, skjæringstidspunkt: LocalDate) {
+    private fun loggUkjenteArbeidsforhold(person: Person, skjæringstidspunkt: LocalDate) {
         val arbeidsforholdForSkjæringstidspunkt = arbeidsforhold.filter { it.gjelder(skjæringstidspunkt) }
         val harFlereRelevanteArbeidsforhold = arbeidsforholdForSkjæringstidspunkt.grupperArbeidsforholdPerOrgnummer().keys.size > 1
         if (harFlereRelevanteArbeidsforhold && arbeidsforholdForSkjæringstidspunkt.any { it.harArbeidetMindreEnnTreMåneder(skjæringstidspunkt) }) {
@@ -83,15 +95,6 @@ class Vilkårsgrunnlag(
         }
         person.brukOuijaBrettForÅKommunisereMedPotensielleSpøkelser(arbeidsforholdForSkjæringstidspunkt.map(Arbeidsforhold::orgnummer), skjæringstidspunkt)
         person.loggUkjenteOrgnummere(arbeidsforhold.map { it.orgnummer })
-    }
-
-    internal fun lagreArbeidsforhold(person: Person, skjæringstidspunkt: LocalDate) {
-        val opptjeningsperiode = arbeidsforhold.opptjeningsperiode(skjæringstidspunkt)
-        arbeidsforhold
-            .filter { it.erDelAvOpptjeningsperiode(opptjeningsperiode) }
-            .grupperArbeidsforholdPerOrgnummer().forEach { (orgnummer, arbeidsforhold) ->
-                person.lagreArbeidsforhold(orgnummer, arbeidsforhold, this, skjæringstidspunkt)
-            }
     }
 
     class Arbeidsforhold(
@@ -105,7 +108,7 @@ class Vilkårsgrunnlag(
             deaktivert = false
         )
 
-        fun erSøppel() =
+        private fun erSøppel() =
             ansattTom != null && ansattTom < ansattFom
 
         internal fun erDelAvOpptjeningsperiode(opptjeningsperiode: Periode) = ansattFom in opptjeningsperiode
@@ -120,14 +123,22 @@ class Vilkårsgrunnlag(
 
         internal fun gjelder(skjæringstidspunkt: LocalDate) = ansattFom <= skjæringstidspunkt && (ansattTom == null || ansattTom >= skjæringstidspunkt)
 
-        internal fun erRelevant(arbeidsgiver: Arbeidsgiver) = orgnummer == arbeidsgiver.organisasjonsnummer()
-
         internal fun harArbeidetMindreEnnTreMåneder(skjæringstidspunkt: LocalDate) = ansattFom > skjæringstidspunkt.withDayOfMonth(1).minusMonths(3)
 
         internal companion object {
-            internal fun List<Arbeidsforhold>.grupperArbeidsforholdPerOrgnummer() = groupBy { it.orgnummer }
-            internal fun Iterable<Arbeidsforhold>.opptjeningsperiode(skjæringstidspunkt: LocalDate) = mapNotNull { it.periode(skjæringstidspunkt) }
+            internal fun List<Arbeidsforhold>.grupperArbeidsforholdPerOrgnummer() = this
+                .groupBy { it.orgnummer }
+            internal fun Iterable<Arbeidsforhold>.opptjeningsperiode(skjæringstidspunkt: LocalDate) = this
+                .mapNotNull { it.periode(skjæringstidspunkt) }
                 .sammenhengende(skjæringstidspunkt)
+
+            internal fun List<Arbeidsforhold>.beregnOpptjening(skjæringstidspunkt: LocalDate, subsumsjonObserver: SubsumsjonObserver): Opptjening {
+                val opptjeningsperiode = this.opptjeningsperiode(skjæringstidspunkt)
+                return this
+                    .filter { it.erDelAvOpptjeningsperiode(opptjeningsperiode) }
+                    .groupBy({ it.orgnummer }) { it.tilDomeneobjekt() }
+                    .opptjening(skjæringstidspunkt, subsumsjonObserver)
+            }
         }
     }
 }
