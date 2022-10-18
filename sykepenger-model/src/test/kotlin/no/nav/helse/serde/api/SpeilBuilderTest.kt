@@ -8,6 +8,7 @@ import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.til
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.november
@@ -156,5 +157,21 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         assertEquals(19.januar, refusjon.endringer.first().dato)
         assertEquals(33000.0, refusjon.endringer.last().beløp)
         assertEquals(23.januar, refusjon.endringer.last().dato)
+    }
+
+
+
+    @Test
+    fun `beregnet periode peker på vilkårsgrunnlagid`() {
+        nyttVedtak(1.januar, 31.januar)
+        val personDto = speilApi()
+        val speilVilkårsgrunnlagId = (personDto.arbeidsgivere.first().generasjoner.first().perioder.first() as BeregnetPeriode).vilkårsgrunnlagId
+        val spleisVilkårsgrunnlagId = inspektør.vilkårsgrunnlagHistorikkInnslag().single().vilkårsgrunnlagFor(1.januar)?.inspektør?.vilkårsgrunnlagId
+        assertEquals(speilVilkårsgrunnlagId, spleisVilkårsgrunnlagId)
+    }
+
+    @Test
+    fun `vilkårsgrunnlagId ligger i bøtta`() {
+
     }
 }

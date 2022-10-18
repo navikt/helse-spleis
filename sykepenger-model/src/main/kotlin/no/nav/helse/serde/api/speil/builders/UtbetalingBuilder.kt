@@ -1,20 +1,33 @@
 package no.nav.helse.serde.api.speil.builders
 
-import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Simulering
-import no.nav.helse.person.UtbetalingVisitor
-import no.nav.helse.person.Vedtaksperiode
-import no.nav.helse.person.VedtaksperiodeVisitor
-import no.nav.helse.serde.api.speil.IUtbetaling
-import no.nav.helse.serde.api.dto.SpeilOppdrag
-import no.nav.helse.serde.api.dto.Utbetaling
-import no.nav.helse.utbetalingslinjer.*
-import no.nav.helse.utbetalingslinjer.Utbetaling.Forkastet
-import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
+import no.nav.helse.hendelser.Medlemskapsvurdering
+import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Simulering
+import no.nav.helse.person.Opptjening
+import no.nav.helse.person.Sammenligningsgrunnlag
+import no.nav.helse.person.Sykepengegrunnlag
+import no.nav.helse.person.UtbetalingVisitor
+import no.nav.helse.person.Vedtaksperiode
+import no.nav.helse.person.VedtaksperiodeUtbetalingVisitor
+import no.nav.helse.person.VedtaksperiodeVisitor
+import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.serde.api.dto.EndringskodeDTO.Companion.dto
+import no.nav.helse.serde.api.dto.SpeilOppdrag
+import no.nav.helse.serde.api.dto.Utbetaling
+import no.nav.helse.serde.api.speil.IUtbetaling
+import no.nav.helse.utbetalingslinjer.Endringskode
+import no.nav.helse.utbetalingslinjer.Fagområde
+import no.nav.helse.utbetalingslinjer.Klassekode
+import no.nav.helse.utbetalingslinjer.Oppdrag
+import no.nav.helse.utbetalingslinjer.Oppdragstatus
+import no.nav.helse.utbetalingslinjer.Satstype
+import no.nav.helse.utbetalingslinjer.Utbetaling.Forkastet
+import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
+import no.nav.helse.utbetalingslinjer.Utbetalingslinje
+import no.nav.helse.økonomi.Prosent
 import no.nav.helse.utbetalingslinjer.Utbetaling as InternUtbetaling
 
 // Besøker hele vedtaksperiode-treet
@@ -23,12 +36,106 @@ internal class UtbetalingerBuilder(
     private val vedtaksperiodetilstand: Vedtaksperiode.Vedtaksperiodetilstand
 ) : VedtaksperiodeVisitor {
     val utbetalinger = mutableMapOf<UUID, IUtbetaling>()
+    val vilkårsgrunnlag = mutableMapOf<UUID, IVilkårsgrunnlag>()
 
     init {
         vedtaksperiode.accept(this)
     }
 
-    internal fun build() = utbetalinger.values.toList()
+    internal fun build(): List<Pair<IVilkårsgrunnlag, IUtbetaling>>{
+        val vilkårsgrunnlagTilUtbetaling = mutableListOf<Pair<IVilkårsgrunnlag, IUtbetaling>>()
+        utbetalinger.forEach {
+            if (it.key in vilkårsgrunnlag.keys) vilkårsgrunnlagTilUtbetaling.add(vilkårsgrunnlag[it.key]!! to it.value)
+        }
+        return vilkårsgrunnlagTilUtbetaling
+    }
+
+    override fun preVisitVedtaksperiodeUtbetaling(
+        grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?,
+        utbetaling: no.nav.helse.utbetalingslinjer.Utbetaling
+    ) {
+        if (grunnlagsdata == null) return
+        val utbetalingIDTilVilkårsgrunnlag = VedtaksperiodeUtbetalingVilkårsgrunnlagBuilder(grunnlagsdata, utbetaling).build()
+
+        vilkårsgrunnlag.put(utbetalingIDTilVilkårsgrunnlag.first, utbetalingIDTilVilkårsgrunnlag.second)
+    }
+
+    internal class VedtaksperiodeUtbetalingVilkårsgrunnlagBuilder(grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement, utbetaling: InternUtbetaling): VedtaksperiodeUtbetalingVisitor {
+        private lateinit var utbetalingId: UUID
+        private lateinit var vilkårsgrunnlag: IVilkårsgrunnlag
+        init {
+            grunnlagsdata.accept(this)
+            utbetaling.accept(this)
+        }
+        internal fun build() = utbetalingId to vilkårsgrunnlag
+
+        override fun preVisitUtbetaling(
+            utbetaling: no.nav.helse.utbetalingslinjer.Utbetaling,
+            id: UUID,
+            korrelasjonsId: UUID,
+            type: Utbetalingtype,
+            tilstand: no.nav.helse.utbetalingslinjer.Utbetaling.Tilstand,
+            periode: Periode,
+            tidsstempel: LocalDateTime,
+            oppdatert: LocalDateTime,
+            arbeidsgiverNettoBeløp: Int,
+            personNettoBeløp: Int,
+            maksdato: LocalDate,
+            forbrukteSykedager: Int?,
+            gjenståendeSykedager: Int?,
+            stønadsdager: Int,
+            beregningId: UUID,
+            overføringstidspunkt: LocalDateTime?,
+            avsluttet: LocalDateTime?,
+            avstemmingsnøkkel: Long?
+        ) {
+            utbetalingId = id
+
+        }
+
+        override fun preVisitGrunnlagsdata(
+            skjæringstidspunkt: LocalDate,
+            grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata,
+            sykepengegrunnlag: Sykepengegrunnlag,
+            sammenligningsgrunnlag: Sammenligningsgrunnlag,
+            avviksprosent: Prosent?,
+            opptjening: Opptjening,
+            vurdertOk: Boolean,
+            meldingsreferanseId: UUID?,
+            vilkårsgrunnlagId: UUID,
+            medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus
+        ) {
+            val sammenligningsgrunnlagBuilder =
+                VilkårsgrunnlagBuilder.InnslagBuilder.SammenligningsgrunnlagBuilder(sammenligningsgrunnlag)
+
+            val compositeSykepengegrunnlag = VilkårsgrunnlagBuilder.InnslagBuilder.SykepengegrunnlagBuilder(
+                sykepengegrunnlag,
+                sammenligningsgrunnlagBuilder
+            ).build()
+            val oppfyllerKravOmMedlemskap = when (medlemskapstatus) {
+                Medlemskapsvurdering.Medlemskapstatus.Ja -> true
+                Medlemskapsvurdering.Medlemskapstatus.Nei -> false
+                else -> null
+            }
+
+            vilkårsgrunnlag = ISpleisGrunnlag(
+                skjæringstidspunkt = skjæringstidspunkt,
+                omregnetÅrsinntekt = compositeSykepengegrunnlag.omregnetÅrsinntekt,
+                sammenligningsgrunnlag = InntektBuilder(sammenligningsgrunnlag.sammenligningsgrunnlag).build().årlig,
+                inntekter = compositeSykepengegrunnlag.inntekterPerArbeidsgiver,
+                sykepengegrunnlag = compositeSykepengegrunnlag.sykepengegrunnlag,
+                avviksprosent = avviksprosent?.prosent(),
+                grunnbeløp = compositeSykepengegrunnlag.begrensning.grunnbeløp,
+                sykepengegrunnlagsgrense = compositeSykepengegrunnlag.begrensning,
+                meldingsreferanseId = meldingsreferanseId,
+                antallOpptjeningsdagerErMinst = opptjening.opptjeningsdager(),
+                oppfyllerKravOmMinstelønn = compositeSykepengegrunnlag.oppfyllerMinsteinntektskrav,
+                oppfyllerKravOmOpptjening = opptjening.erOppfylt(),
+                oppfyllerKravOmMedlemskap = oppfyllerKravOmMedlemskap,
+                id = vilkårsgrunnlagId
+            )
+        }
+    }
 
     override fun preVisitUtbetaling(
         utbetaling: no.nav.helse.utbetalingslinjer.Utbetaling,
@@ -52,7 +159,7 @@ internal class UtbetalingerBuilder(
     ) {
         if (tilstand == Forkastet && vedtaksperiodetilstand != Vedtaksperiode.RevurderingFeilet) return
         utbetalinger.entries.find { it.value.forkastet() }?.let { utbetalinger.remove(it.key) }
-        utbetalinger.putIfAbsent(beregningId, UtbetalingBuilder(utbetaling).build())
+        utbetalinger.putIfAbsent(id, UtbetalingBuilder(utbetaling).build())
     }
 }
 

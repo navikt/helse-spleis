@@ -1915,15 +1915,6 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         }
     }
 
-    @Test
-    fun `beregnet periode peker på vilkårsgrunnlag`(){
-        nyttVedtak(1.januar, 31.januar)
-        val vilkårsgrunnlagHistorikk = VilkårsgrunnlagBuilder(person.inspektør.vilkårsgrunnlagHistorikk).build()
-        val vilkårsgrunnlag = vilkårsgrunnlagHistorikk.toDTO()
-        val abc = null
-
-    }
-
     private fun BeregnetPeriode.assertAldersvilkår(expectedOppfylt: Boolean, expectedAlderSisteSykedag: Int) {
         assertEquals(expectedOppfylt, periodevilkår.alder.oppfylt)
         assertEquals(expectedAlderSisteSykedag, periodevilkår.alder.alderSisteSykedag)

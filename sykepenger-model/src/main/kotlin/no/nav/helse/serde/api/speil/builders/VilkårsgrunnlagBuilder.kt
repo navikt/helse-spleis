@@ -165,15 +165,20 @@ internal class IVilkårsgrunnlagHistorikk {
         skjæringstidspunkt: LocalDate,
         tom: LocalDate,
         vedtaksperiodeId: UUID
-    ): UUID? {
+    ): IVilkårsgrunnlag? {
         val vilkårsgrunnlag = historikk.getValue(vilkårsgrunnlagshistorikkId).vilkårsgrunnlag(skjæringstidspunkt, tom)
         if (vilkårsgrunnlag == null) {
             sikkerlog.info("fant ikke vilkårsgrunnlag på $skjæringstidspunkt med vilkårsgrunnlaghistorikkId $vilkårsgrunnlagshistorikkId og vedtaksperiodeId $vedtaksperiodeId")
             return null
         }
-        return vilkårsgrunnlag.also {
+        return vilkårsgrunnlag/*.also {
             pekesPåAvEnBeregnetPeriode.getOrPut(it.id) { it.toDTO() }
-        }.id
+        }.id*/
+    }
+
+    fun leggIBøtta(vilkårsgrunnlag: IVilkårsgrunnlag?) {
+        if (vilkårsgrunnlag == null) return
+        pekesPåAvEnBeregnetPeriode.put(vilkårsgrunnlag.id, vilkårsgrunnlag.toDTO())
     }
 }
 
@@ -213,7 +218,8 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
         ) {
             val sammenligningsgrunnlagBuilder = SammenligningsgrunnlagBuilder(sammenligningsgrunnlag)
 
-            val compositeSykepengegrunnlag = SykepengegrunnlagBuilder(sykepengegrunnlag, sammenligningsgrunnlagBuilder).build()
+            val compositeSykepengegrunnlag =
+                SykepengegrunnlagBuilder(sykepengegrunnlag, sammenligningsgrunnlagBuilder).build()
             val oppfyllerKravOmMedlemskap = when (medlemskapstatus) {
                 Medlemskapsvurdering.Medlemskapstatus.Ja -> true
                 Medlemskapsvurdering.Medlemskapstatus.Nei -> false
@@ -296,7 +302,7 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
             }
         }
 
-        private class SykepengegrunnlagBuilder(
+        internal class SykepengegrunnlagBuilder(
             sykepengegrunnlag: Sykepengegrunnlag,
             private val sammenligningsgrunnlagBuilder: SammenligningsgrunnlagBuilder?
         ) : VilkårsgrunnlagHistorikkVisitor {

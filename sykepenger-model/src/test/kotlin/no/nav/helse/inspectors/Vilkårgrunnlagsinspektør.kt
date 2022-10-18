@@ -133,6 +133,8 @@ internal class GrunnlagsdataInspektør(grunnlagsdata: VilkårsgrunnlagHistorikk.
         private set
     internal lateinit var inntektskilde: Inntektskilde
         private set
+    internal lateinit var vilkårsgrunnlagId: UUID
+        private set
 
     init {
         grunnlagsdata.accept(this)
@@ -157,6 +159,7 @@ internal class GrunnlagsdataInspektør(grunnlagsdata: VilkårsgrunnlagHistorikk.
         this.harMinimumInntekt = harMinimumInntekt
         this.vurdertOk = vurdertOk
         this.inntektskilde = sykepengegrunnlag.inntektskilde()
+        this.vilkårsgrunnlagId = vilkårsgrunnlagId
     }
 
     override fun postVisitInfotrygdVilkårsgrunnlag(
