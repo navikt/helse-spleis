@@ -8,7 +8,6 @@ import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -50,24 +49,6 @@ internal class InntektsopplysningTest {
         assertTrue(skattComposite1.kanLagres(skattComposite2))
         assertTrue(sykepengegrunnlag1.skalErstattesAv(sykepengegrunnlag1))
         assertTrue(skattComposite1.skalErstattesAv(skattComposite2))
-    }
-
-    @Test
-    fun `kan ha samme skatteinntekt i en skattcomposite`() {
-        val innslag = Inntektshistorikk.InnslagBuilder().build {
-            addSkattSykepengegrunnlag(1.januar, UUID.randomUUID(), INNTEKT, januar(2018), Inntektshistorikk.Skatt.Inntekttype.LØNNSINNTEKT, "fordel", "beskrivelse")
-            addSkattSykepengegrunnlag(1.januar, UUID.randomUUID(), INNTEKT, januar(2018), Inntektshistorikk.Skatt.Inntekttype.LØNNSINNTEKT, "fordel", "beskrivelse")
-        }
-
-        val forventet = Inntektshistorikk.Innslag(listOf(
-            Inntektshistorikk.SkattComposite(UUID.randomUUID(), listOf(
-                Inntektshistorikk.Skatt.Sykepengegrunnlag(1.januar, UUID.randomUUID(), INNTEKT, januar(2018), Inntektshistorikk.Skatt.Inntekttype.LØNNSINNTEKT, "fordel", "beskrivelse"),
-                Inntektshistorikk.Skatt.Sykepengegrunnlag(1.januar, UUID.randomUUID(), INNTEKT, januar(2018), Inntektshistorikk.Skatt.Inntekttype.LØNNSINNTEKT, "fordel", "beskrivelse"),
-            )
-        )))
-
-        assertEquals(innslag, forventet)
-        assertNull(innslag + forventet) { "skal gi null når innslagene er identiske" }
     }
 
     @Test
