@@ -1864,11 +1864,6 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            if (vedtaksperiode.id == UUID.fromString("c99949a7-9300-4a71-b85c-5e54ede2d439")) {
-                return vedtaksperiode.tilstand(påminnelse, AvventerBlokkerendePeriode) {
-                    påminnelse.info("Flytter vedtaksperiode tilbake til AvventerBlokkerePeriode. Personen har fler perioder til godkjenning.")
-                }
-            }
             vedtaksperiode.trengerHistorikkFraInfotrygd(påminnelse)
         }
 
