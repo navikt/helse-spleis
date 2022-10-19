@@ -16,6 +16,7 @@ import no.nav.helse.person.Varselkode.RV_SI_3
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.serde.api.dto.BeregnetPeriode
 import no.nav.helse.serde.api.dto.Inntektkilde
+import no.nav.helse.serde.api.dto.SpleisVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.finnSkjæringstidspunkt
@@ -207,6 +208,11 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
 
     @Test
     fun `vilkårsgrunnlagId ligger i bøtta`() {
+        nyttVedtak(1.januar, 31.januar, 100.prosent)
+        val personDto = speilApi()
+        val speilVilkårsgrunnlagId = (personDto.arbeidsgivere.first().generasjoner.first().perioder.first() as BeregnetPeriode).vilkårsgrunnlagId
+        val bøtteVilkårsgrunnlag = personDto.vilkårsgrunnlag[speilVilkårsgrunnlagId]
+        assertTrue(bøtteVilkårsgrunnlag is SpleisVilkårsgrunnlag)
 
     }
 }

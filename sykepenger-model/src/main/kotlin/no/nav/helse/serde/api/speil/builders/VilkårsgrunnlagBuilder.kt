@@ -7,7 +7,6 @@ import java.util.UUID
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Subsumsjon
-import no.nav.helse.hendelser.til
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.ArbeidsgiverInntektsopplysningVisitor
 import no.nav.helse.person.InntekthistorikkVisitor
@@ -28,7 +27,6 @@ import no.nav.helse.serde.api.dto.Vilkårsgrunnlag
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Prosent
-import org.slf4j.LoggerFactory
 import kotlin.properties.Delegates
 
 private typealias VilkårsgrunnlagHistorikkId = UUID
@@ -36,12 +34,6 @@ private typealias VilkårsgrunnlagHistorikkId = UUID
 internal class IInnslag(
     private val innslag: Map<LocalDate, IVilkårsgrunnlag>
 ) {
-
-    fun vilkårsgrunnlag(skjæringstidspunkt: LocalDate, tom: LocalDate): IVilkårsgrunnlag? {
-        return innslag[skjæringstidspunkt] ?: innslag.firstNotNullOfOrNull { (dato, vilkårsgrunnlag) ->
-            vilkårsgrunnlag.takeIf { dato in skjæringstidspunkt til tom }
-        }
-    }
     internal fun toDTO() = innslag.mapValues { (_, vilkårsgrunnlag) -> vilkårsgrunnlag.toDTO() }
 }
 
@@ -151,34 +143,19 @@ internal class InntektBuilder(private val inntekt: Inntekt) {
 internal class IVilkårsgrunnlagHistorikk {
     private val historikk = mutableMapOf<VilkårsgrunnlagHistorikkId, IInnslag>()
     private val pekesPåAvEnBeregnetPeriode = mutableMapOf<UUID, Vilkårsgrunnlag>()
-    private companion object {
-        private val sikkerlog = LoggerFactory.getLogger("tjenestekall")
-    }
 
     internal fun leggTil(vilkårsgrunnlagHistorikkId: UUID, innslag: IInnslag) {
         historikk.putIfAbsent(vilkårsgrunnlagHistorikkId, innslag)
     }
 
     internal fun toDTO() = historikk.mapValues { (_, innslag) -> innslag.toDTO() }.toMap()
-    fun finnVilkårsgrunnlag(
-        vilkårsgrunnlagshistorikkId: VilkårsgrunnlagshistorikkId,
-        skjæringstidspunkt: LocalDate,
-        tom: LocalDate,
-        vedtaksperiodeId: UUID
-    ): IVilkårsgrunnlag? {
-        val vilkårsgrunnlag = historikk.getValue(vilkårsgrunnlagshistorikkId).vilkårsgrunnlag(skjæringstidspunkt, tom)
-        if (vilkårsgrunnlag == null) {
-            sikkerlog.info("fant ikke vilkårsgrunnlag på $skjæringstidspunkt med vilkårsgrunnlaghistorikkId $vilkårsgrunnlagshistorikkId og vedtaksperiodeId $vedtaksperiodeId")
-            return null
-        }
-        return vilkårsgrunnlag/*.also {
-            pekesPåAvEnBeregnetPeriode.getOrPut(it.id) { it.toDTO() }
-        }.id*/
+    internal fun vilkårsgrunnlagSomPekesPåAvBeregnedePerioder(): Map<UUID, Vilkårsgrunnlag> {
+        return pekesPåAvEnBeregnetPeriode.toMap()
     }
 
     fun leggIBøtta(vilkårsgrunnlag: IVilkårsgrunnlag?) {
         if (vilkårsgrunnlag == null) return
-        pekesPåAvEnBeregnetPeriode.put(vilkårsgrunnlag.id, vilkårsgrunnlag.toDTO())
+        pekesPåAvEnBeregnetPeriode[vilkårsgrunnlag.id] = vilkårsgrunnlag.toDTO()
     }
 }
 

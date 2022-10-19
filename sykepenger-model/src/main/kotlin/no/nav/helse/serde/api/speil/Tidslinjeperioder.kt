@@ -16,7 +16,6 @@ import no.nav.helse.person.Vedtaksperiode.AvventerRevurdering
 import no.nav.helse.person.Vedtaksperiode.AvventerUferdig
 import no.nav.helse.person.Vedtaksperiode.AvventerVilkårsprøving
 import no.nav.helse.person.Vedtaksperiode.Vedtaksperiodetilstand
-import no.nav.helse.person.VedtaksperiodeUtbetalingVisitor
 import no.nav.helse.serde.api.dto.BeregnetPeriode
 import no.nav.helse.serde.api.dto.Generasjon
 import no.nav.helse.serde.api.dto.HendelseDTO
@@ -192,11 +191,6 @@ internal class Tidslinjeperioder(
                 }
             }
         }.sortedBy { it.opprettet }
-    }
-
-    internal class VilkårsgrunnlagTilUtbetalingBuilder(utbetaling: IUtbetaling): VedtaksperiodeUtbetalingVisitor {
-
-
     }
 
     internal fun toGenerasjoner() = perioder.map {

@@ -10,7 +10,8 @@ data class PersonDTO(
     val arbeidsgivere: List<ArbeidsgiverDTO>,
     val vilkårsgrunnlagHistorikk: Map<UUID, Map<LocalDate, Vilkårsgrunnlag>>,
     val dødsdato: LocalDate?,
-    val versjon: Int
+    val versjon: Int,
+    val vilkårsgrunnlag: Map<UUID, Vilkårsgrunnlag>
 )
 
 data class AktivitetDTO(

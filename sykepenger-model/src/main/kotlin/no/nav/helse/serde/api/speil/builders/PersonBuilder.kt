@@ -34,7 +34,8 @@ internal class PersonBuilder(
             arbeidsgivere = arbeidsgivere.map { it.build(hendelser, alder, vilkårsgrunnlagHistorikk) },
             vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk.toDTO(),
             dødsdato = dødsdato,
-            versjon = versjon
+            versjon = versjon,
+            vilkårsgrunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagSomPekesPåAvBeregnedePerioder()
         )
     }
 
