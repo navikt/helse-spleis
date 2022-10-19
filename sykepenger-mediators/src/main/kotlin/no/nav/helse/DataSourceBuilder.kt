@@ -17,7 +17,7 @@ internal class DataSourceBuilder(env: Map<String, String>) {
             requireNotNull(env["DATABASE_DATABASE"]) { "database name must be set if jdbc url is not provided" })
         username = requireNotNull(env["DATABASE_USERNAME"]) { "databasebrukernavn må settes" }
         password = requireNotNull(env["DATABASE_PASSWORD"]) { "databasepassord må settes" }
-        maximumPoolSize = 1
+        maximumPoolSize = 3
         connectionTimeout = Duration.ofSeconds(30).toMillis()
         maxLifetime = Duration.ofMinutes(30).toMillis()
         initializationFailTimeout = Duration.ofMinutes(1).toMillis()
