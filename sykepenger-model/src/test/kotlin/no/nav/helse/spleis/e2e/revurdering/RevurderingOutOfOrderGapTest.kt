@@ -79,7 +79,6 @@ import no.nav.helse.utbetalingslinjer.Endringskode.*
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
 
 @EnableToggle(Toggle.RevurderOutOfOrder::class)
@@ -104,34 +103,17 @@ internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
 
         val utbetaling1 = inspektør.utbetaling(0).inspektør
 
-        assertForventetFeil(
-            nå = {
-                inspektør.utbetaling(2).inspektør.also { inspektør ->
-                    assertNotEquals(inspektør.korrelasjonsId, utbetaling1.korrelasjonsId)
-                    assertNotEquals(inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), utbetaling1.arbeidsgiverOppdrag.inspektør.fagsystemId())
-                    assertEquals(2, inspektør.arbeidsgiverOppdrag.size)
-                    assertEquals(NY, inspektør.arbeidsgiverOppdrag[0].inspektør.endringskode)
-                    assertEquals(17.januar, inspektør.arbeidsgiverOppdrag[0].inspektør.fom)
-                    assertEquals(31.januar, inspektør.arbeidsgiverOppdrag[0].inspektør.tom)
-                    assertEquals(NY, inspektør.arbeidsgiverOppdrag[1].inspektør.endringskode)
-                    assertEquals(10.februar, inspektør.arbeidsgiverOppdrag[1].inspektør.fom)
-                    assertEquals(28.februar, inspektør.arbeidsgiverOppdrag[1].inspektør.tom)
-                }
-            },
-            ønsket = {
-                inspektør.utbetaling(2).inspektør.also { inspektør ->
-                    assertEquals(inspektør.korrelasjonsId, utbetaling1.korrelasjonsId)
-                    assertEquals(inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), utbetaling1.arbeidsgiverOppdrag.inspektør.fagsystemId())
-                    assertEquals(2, inspektør.arbeidsgiverOppdrag.size)
-                    assertEquals(UEND, inspektør.arbeidsgiverOppdrag[0].inspektør.endringskode)
-                    assertEquals(17.januar, inspektør.arbeidsgiverOppdrag[0].inspektør.fom)
-                    assertEquals(31.januar, inspektør.arbeidsgiverOppdrag[0].inspektør.tom)
-                    assertEquals(NY, inspektør.arbeidsgiverOppdrag[1].inspektør.endringskode)
-                    assertEquals(10.februar, inspektør.arbeidsgiverOppdrag[1].inspektør.fom)
-                    assertEquals(28.februar, inspektør.arbeidsgiverOppdrag[1].inspektør.tom)
-                }
-            }
-        )
+        inspektør.utbetaling(2).inspektør.also { inspektør ->
+            assertEquals(inspektør.korrelasjonsId, utbetaling1.korrelasjonsId)
+            assertEquals(inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), utbetaling1.arbeidsgiverOppdrag.inspektør.fagsystemId())
+            assertEquals(2, inspektør.arbeidsgiverOppdrag.size)
+            assertEquals(UEND, inspektør.arbeidsgiverOppdrag[0].inspektør.endringskode)
+            assertEquals(17.januar, inspektør.arbeidsgiverOppdrag[0].inspektør.fom)
+            assertEquals(31.januar, inspektør.arbeidsgiverOppdrag[0].inspektør.tom)
+            assertEquals(NY, inspektør.arbeidsgiverOppdrag[1].inspektør.endringskode)
+            assertEquals(10.februar, inspektør.arbeidsgiverOppdrag[1].inspektør.fom)
+            assertEquals(28.februar, inspektør.arbeidsgiverOppdrag[1].inspektør.tom)
+        }
     }
 
     @Test

@@ -343,7 +343,7 @@ internal class Utbetaling private constructor(
         private fun List<Utbetaling>.sisteAktiveMedSammeKorrelasjonsId(forrige: Utbetaling?) =
             forrige?.let { aktive().lastOrNull { it.korrelasjonsId == forrige.korrelasjonsId } }
         private fun List<Utbetaling>.sisteAktiveFør(sisteDato: LocalDate) =
-            aktive().lastOrNull { it.periode.endInclusive < sisteDato }
+            aktive().lastOrNull { it.periode.endInclusive <= sisteDato }
 
         internal fun lagUtbetaling(
             utbetalinger: List<Utbetaling>,
@@ -388,7 +388,7 @@ internal class Utbetaling private constructor(
         ): Utbetaling {
             return Utbetaling(
                 // Siste aktive utbetaling på arbeidsgiveren
-                sisteAktive = utbetalinger.aktive().lastOrNull(),
+                sisteAktive = utbetalinger.sisteAktiveFør(sisteDato),
                 fødselsnummer = fødselsnummer,
                 beregningId = beregningId,
                 organisasjonsnummer = organisasjonsnummer,
