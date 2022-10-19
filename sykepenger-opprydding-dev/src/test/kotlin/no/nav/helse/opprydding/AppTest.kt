@@ -102,9 +102,9 @@ internal class AppTest {
                 )
 
                 val opprettPerson =
-                    "INSERT INTO person(skjema_versjon, fnr, aktor_id, data, melding_id, rullet_tilbake) VALUES(?, ?, ?, ?::json, ?, ?)"
+                    "INSERT INTO person(skjema_versjon, fnr, aktor_id, data) VALUES(?, ?, ?, ?::json)"
                 it.run(
-                    queryOf(opprettPerson, 0, fødselsnummer.toLong(), fødselsnummer.reversed().toLong(), "{}", UUID.randomUUID(), LocalDateTime.now()).asUpdate
+                    queryOf(opprettPerson, 0, fødselsnummer.toLong(), fødselsnummer.reversed().toLong(), "{}").asUpdate
                 )
             }
         }
