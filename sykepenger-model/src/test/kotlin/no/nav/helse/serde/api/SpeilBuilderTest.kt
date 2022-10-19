@@ -13,11 +13,13 @@ import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.november
 import no.nav.helse.person.Varselkode.RV_SI_3
+import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.serde.api.dto.BeregnetPeriode
 import no.nav.helse.serde.api.dto.Inntektkilde
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.finnSkjæringstidspunkt
+import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.grunnlag
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterSimulering
@@ -159,15 +161,33 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         assertEquals(23.januar, refusjon.endringer.last().dato)
     }
 
-
-
     @Test
     fun `beregnet periode peker på vilkårsgrunnlagid`() {
         nyttVedtak(1.januar, 31.januar)
         val personDto = speilApi()
         val speilVilkårsgrunnlagId = (personDto.arbeidsgivere.first().generasjoner.first().perioder.first() as BeregnetPeriode).vilkårsgrunnlagId
         val spleisVilkårsgrunnlagId = inspektør.vilkårsgrunnlagHistorikkInnslag().single().vilkårsgrunnlagFor(1.januar)?.inspektør?.vilkårsgrunnlagId
+        val spleisVilkårsgrunnlagIdFraVedtaksperiodeUtbetaling = inspektør.arbeidsgiver.inspektør.aktiveVedtaksperioder().single().inspektør.utbetalingIdTilVilkårsgrunnlagId.second!!
+
         assertEquals(speilVilkårsgrunnlagId, spleisVilkårsgrunnlagId)
+        assertEquals(speilVilkårsgrunnlagId, spleisVilkårsgrunnlagIdFraVedtaksperiodeUtbetaling)
+    }
+
+    @Test
+    fun `beregnet periode peker på vilkårsgrunnlagid for infotrygdvilkårsgrunnlag`() {
+        createOvergangFraInfotrygdPerson()
+        forlengVedtak(1.mars, 31.mars, 100.prosent)
+
+        val infotrygdVilkårsgrunnlag = inspektør.vilkårsgrunnlagHistorikkInnslag().single().vilkårsgrunnlagFor(1.januar)
+        assertTrue(infotrygdVilkårsgrunnlag is VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag)
+
+        val personDto = speilApi()
+        val infotrygdVilkårsgrunnlagId = infotrygdVilkårsgrunnlag?.inspektør?.vilkårsgrunnlagId
+        val speilVilkårsgrunnlagId = (personDto.arbeidsgivere.first().generasjoner.first().perioder.first() as BeregnetPeriode).vilkårsgrunnlagId
+        val infotrygdVilkårsgrunnlagIdFraVedtaksperiodeUtbetaling = inspektør.arbeidsgiver.inspektør.aktiveVedtaksperioder().last().inspektør.utbetalingIdTilVilkårsgrunnlagId.second!!
+
+        assertEquals(speilVilkårsgrunnlagId, infotrygdVilkårsgrunnlagId)
+        assertEquals(speilVilkårsgrunnlagId, infotrygdVilkårsgrunnlagIdFraVedtaksperiodeUtbetaling)
     }
 
     @Test

@@ -135,6 +135,27 @@ internal class UtbetalingerBuilder(
                 id = vilkårsgrunnlagId
             )
         }
+
+        override fun preVisitInfotrygdVilkårsgrunnlag(
+            infotrygdVilkårsgrunnlag: VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag,
+            skjæringstidspunkt: LocalDate,
+            sykepengegrunnlag: Sykepengegrunnlag,
+            vilkårsgrunnlagId: UUID
+        ) {
+            val byggetSykepengegrunnlag = VilkårsgrunnlagBuilder.InnslagBuilder.SykepengegrunnlagBuilder(
+                sykepengegrunnlag,
+                null /* vi har ikke noe sammenligningsgrunnlag for Infotrygd-saker */
+            )
+                .build()
+            vilkårsgrunnlag = IInfotrygdGrunnlag(
+                skjæringstidspunkt = skjæringstidspunkt,
+                omregnetÅrsinntekt = byggetSykepengegrunnlag.omregnetÅrsinntekt,
+                sammenligningsgrunnlag = null,
+                inntekter = byggetSykepengegrunnlag.inntekterPerArbeidsgiver,
+                sykepengegrunnlag = byggetSykepengegrunnlag.sykepengegrunnlag,
+                id = vilkårsgrunnlagId
+            )
+        }
     }
 
     override fun preVisitUtbetaling(

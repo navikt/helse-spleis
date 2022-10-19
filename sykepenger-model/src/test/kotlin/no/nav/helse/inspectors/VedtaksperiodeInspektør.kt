@@ -11,6 +11,8 @@ import no.nav.helse.person.InntektsmeldingInfo
 import no.nav.helse.person.Periodetype
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.VedtaksperiodeVisitor
+import no.nav.helse.person.VilkårsgrunnlagHistorikk
+import no.nav.helse.utbetalingslinjer.Utbetaling
 
 internal val Vedtaksperiode.inspektør get() = VedtaksperiodeInspektør(this)
 
@@ -27,6 +29,7 @@ internal class VedtaksperiodeInspektør(vedtaksperiode: Vedtaksperiode) : Vedtak
         private set
     internal val periodetype get() = periodetypeGetter()
     internal lateinit var skjæringstidspunkt: LocalDate
+    internal lateinit var utbetalingIdTilVilkårsgrunnlagId: Pair<UUID, UUID?>
 
     override fun preVisitVedtaksperiode(
         vedtaksperiode: Vedtaksperiode,
@@ -48,5 +51,14 @@ internal class VedtaksperiodeInspektør(vedtaksperiode: Vedtaksperiode) : Vedtak
         this.periode = periode
         this.skjæringstidspunkt = skjæringstidspunkt()
         this.periodetypeGetter = periodetype
+    }
+
+    override fun preVisitVedtaksperiodeUtbetaling(
+        grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?,
+        utbetaling: Utbetaling
+    ) {
+        val vilkårsgrunnlagId = grunnlagsdata?.inspektør?.vilkårsgrunnlagId
+        val utbetalingId = utbetaling.inspektør.utbetalingId
+        utbetalingIdTilVilkårsgrunnlagId = utbetalingId to vilkårsgrunnlagId
     }
 }

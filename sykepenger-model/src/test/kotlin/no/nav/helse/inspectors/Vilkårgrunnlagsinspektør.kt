@@ -169,6 +169,7 @@ internal class GrunnlagsdataInspektør(grunnlagsdata: VilkårsgrunnlagHistorikk.
         vilkårsgrunnlagId: UUID
     ) {
         this.sykepengegrunnlag = sykepengegrunnlag
+        this.vilkårsgrunnlagId = vilkårsgrunnlagId
     }
 
     override fun preVisitOpptjening(opptjening: Opptjening, arbeidsforhold: List<Opptjening.ArbeidsgiverOpptjeningsgrunnlag>, opptjeningsperiode: Periode) {
