@@ -6,67 +6,36 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import io.prometheus.client.Summary
 import java.util.UUID
 import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.Hendelseskontekst
 import no.nav.helse.hendelser.Påminnelse
-import no.nav.helse.person.Person
 import no.nav.helse.person.PersonHendelse
 import no.nav.helse.person.PersonObserver
 import no.nav.helse.person.TilstandType
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.serde.serialize
 import no.nav.helse.spleis.db.HendelseRepository
-import no.nav.helse.spleis.db.LagrePersonDao
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import org.slf4j.LoggerFactory
 
 internal class PersonMediator(
-    private val person: Person,
     private val message: HendelseMessage,
     private val hendelse: PersonHendelse,
     private val hendelseRepository: HendelseRepository
 ) : PersonObserver {
     private val meldinger = mutableListOf<Pakke>()
     private val replays = mutableListOf<String>()
-    private var vedtak = false
-
     private companion object {
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
         private val logg = LoggerFactory.getLogger(PersonMediator::class.java)
         private val objectMapper = jacksonObjectMapper()
             .registerModule(JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-        private val jsonSizeSummary = Summary.build("json_size", "size of entire json")
-            .quantile(.05, .01)
-            .quantile(.01, .001)
-            .register()
-        private val jsonSubsizeSummary = Summary.build("json_path_size", "sizes of various paths in json(number of characters)")
-            .labelNames("path")
-            .quantile(.05, .01)
-            .quantile(.01, .001)
-            .register()
     }
 
-
-    init {
-        person.addObserver(this)
-    }
-
-    fun finalize(rapidsConnection: RapidsConnection, context: MessageContext, lagrePersonDao: LagrePersonDao) {
-        val serialisertPerson = person.serialize()
-        try {
-            jsonSizeSummary.observe(serialisertPerson.json.length.toDouble())
-            serialisertPerson.metrikker().forEach { metrikk ->
-                jsonSubsizeSummary.labels(metrikk.path.joinToString(".")).observe(metrikk.størrelse().toDouble())
-            }
-        } catch (e: Exception) {
-            sikkerLogg.error("Kunne ikke lage metrikker for person ${hendelse.fødselsnummer()}", e)
-        }
-        lagrePersonDao.lagrePerson(message, serialisertPerson, hendelse, vedtak)
+    fun finalize(rapidsConnection: RapidsConnection, context: MessageContext) {
         sendUtgåendeMeldinger(context)
         sendReplays(rapidsConnection)
     }
@@ -232,7 +201,6 @@ internal class PersonMediator(
         hendelseskontekst: Hendelseskontekst,
         event: PersonObserver.VedtakFattetEvent
     ) {
-        vedtak = true
         queueMessage(hendelseskontekst, JsonMessage.newMessage("vedtak_fattet", mutableMapOf(
             "fom" to event.periode.start,
             "tom" to event.periode.endInclusive,

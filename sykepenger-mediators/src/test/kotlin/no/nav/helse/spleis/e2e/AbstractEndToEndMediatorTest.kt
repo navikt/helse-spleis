@@ -49,8 +49,7 @@ import no.nav.helse.spleis.TestMessageFactory.Subsumsjon
 import no.nav.helse.spleis.TestMessageFactory.UtbetalingshistorikkForFeriepengerTestdata
 import no.nav.helse.spleis.TestMessageFactory.UtbetalingshistorikkTestdata
 import no.nav.helse.spleis.db.HendelseRepository
-import no.nav.helse.spleis.db.LagrePersonDao
-import no.nav.helse.spleis.db.PersonPostgresRepository
+import no.nav.helse.spleis.db.PersonDao
 import no.nav.helse.spleis.e2e.SpleisDataSource.migratedDb
 import no.nav.helse.spleis.meldinger.TestRapid
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
@@ -85,9 +84,8 @@ internal abstract class AbstractEndToEndMediatorTest {
 
         hendelseMediator = HendelseMediator(
             rapidsConnection = testRapid,
-            personRepository = PersonPostgresRepository(dataSource),
             hendelseRepository = HendelseRepository(dataSource),
-            lagrePersonDao = LagrePersonDao(dataSource),
+            personDao = PersonDao(dataSource),
             versjonAvKode = "test-versjon"
         )
 

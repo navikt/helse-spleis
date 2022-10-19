@@ -28,10 +28,10 @@ import no.nav.helse.person.PersonHendelse
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.serde.serialize
 import no.nav.helse.somPersonidentifikator
 import no.nav.helse.spleis.db.HendelseRepository
-import no.nav.helse.spleis.db.LagrePersonDao
-import no.nav.helse.spleis.db.PersonRepository
+import no.nav.helse.spleis.db.PersonDao
 import no.nav.helse.spleis.meldinger.model.AnnulleringMessage
 import no.nav.helse.spleis.meldinger.model.AvstemmingMessage
 import no.nav.helse.spleis.meldinger.model.EtterbetalingMessage
@@ -63,9 +63,8 @@ import org.slf4j.LoggerFactory
 // Uses GoF Observer pattern to notify events
 internal class HendelseMediator(
     private val rapidsConnection: RapidsConnection,
-    private val personRepository: PersonRepository,
     private val hendelseRepository: HendelseRepository,
-    private val lagrePersonDao: LagrePersonDao,
+    private val personDao: PersonDao,
     private val versjonAvKode: String
 ) : IHendelseMediator {
     private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
@@ -200,7 +199,6 @@ internal class HendelseMediator(
     override fun behandle(message: AvstemmingMessage, avstemming: Avstemming, context: MessageContext) {
         håndter(message, avstemming, context) { person ->
             person.håndter(avstemming)
-            lagrePersonDao.personAvstemt(avstemming)
         }
     }
 
@@ -242,21 +240,24 @@ internal class HendelseMediator(
         handler: (Person) -> Unit
     ) {
         val jurist = MaskinellJurist()
-        val person = person(hendelse, jurist)
-        val personMediator = PersonMediator(person, message, hendelse, hendelseRepository)
+        val personMediator = PersonMediator(message, hendelse, hendelseRepository)
         val datadelingMediator = DatadelingMediator(hendelse)
         val subsumsjonMediator = SubsumsjonMediator(jurist, hendelse.fødselsnummer(), message, versjonAvKode)
-        person.addObserver(VedtaksperiodeProbe)
-        handler(person)
+        person(message, hendelse, jurist) { person  ->
+            person.addObserver(personMediator)
+            person.addObserver(VedtaksperiodeProbe)
+            handler(person)
+        }
         finalize(context, personMediator, subsumsjonMediator, datadelingMediator, hendelse)
     }
 
-    private fun person(hendelse: PersonHendelse, jurist: MaskinellJurist): Person {
-        return personRepository.hentPerson(hendelse.fødselsnummer().somPersonidentifikator())
-            ?.deserialize(
-                jurist = jurist
-            ) { hendelseRepository.hentAlleHendelser(hendelse.fødselsnummer().somPersonidentifikator()) }
-            ?: hendelse.person(jurist)
+    private fun person(message: HendelseMessage, hendelse: PersonHendelse, jurist: MaskinellJurist, block: (Person) -> Unit) {
+        val personidentifikator = hendelse.fødselsnummer().somPersonidentifikator()
+        personDao.hentEllerOpprettPerson(personidentifikator, hendelse.aktørId(), message, {
+            hendelse.person(jurist).serialize()
+        }) { serialisertPerson ->
+            serialisertPerson.deserialize(jurist) { hendelseRepository.hentAlleHendelser(personidentifikator) }.also(block).serialize()
+        }
     }
 
     private fun finalize(
@@ -267,7 +268,7 @@ internal class HendelseMediator(
         hendelse: PersonHendelse
     ) {
         datadelingMediator.finalize(context)
-        personMediator.finalize(rapidsConnection, context, lagrePersonDao)
+        personMediator.finalize(rapidsConnection, context)
         subsumsjonMediator.finalize(context)
         if (!hendelse.harAktiviteter()) return
         if (hendelse.harFunksjonelleFeilEllerVerre()) sikkerLogg.info("aktivitetslogg inneholder errors:\n${hendelse.toLogString()}")
