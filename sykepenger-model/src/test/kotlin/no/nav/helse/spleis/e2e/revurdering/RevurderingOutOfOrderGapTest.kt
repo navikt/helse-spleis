@@ -75,13 +75,64 @@ import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
 import no.nav.helse.spleis.e2e.tilGodkjenning
 import no.nav.helse.spleis.e2e.tilGodkjent
 import no.nav.helse.testhelpers.inntektperioderForSammenligningsgrunnlag
+import no.nav.helse.utbetalingslinjer.Endringskode.*
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
 
 @EnableToggle(Toggle.RevurderOutOfOrder::class)
 internal class RevurderingOutOfOrderGapTest : AbstractEndToEndTest() {
+
+    @Test
+    fun `hører til samme arbeidsgiverperiode som forrige - har en fremtidig utbetaling`() {
+        nyttVedtak(1.januar, 31.januar)
+        nyttVedtak(1.april, 30.april)
+
+        nyPeriode(10.februar til 28.februar)
+        håndterUtbetalingshistorikk(3.vedtaksperiode)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), 10.februar)
+        håndterYtelser(3.vedtaksperiode)
+        håndterVilkårsgrunnlag(3.vedtaksperiode)
+        håndterYtelser(3.vedtaksperiode)
+        håndterSimulering(3.vedtaksperiode)
+
+        assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+        assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
+        assertSisteTilstand(3.vedtaksperiode, AVVENTER_GODKJENNING)
+
+        val utbetaling1 = inspektør.utbetaling(0).inspektør
+
+        assertForventetFeil(
+            nå = {
+                inspektør.utbetaling(2).inspektør.also { inspektør ->
+                    assertNotEquals(inspektør.korrelasjonsId, utbetaling1.korrelasjonsId)
+                    assertNotEquals(inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), utbetaling1.arbeidsgiverOppdrag.inspektør.fagsystemId())
+                    assertEquals(2, inspektør.arbeidsgiverOppdrag.size)
+                    assertEquals(NY, inspektør.arbeidsgiverOppdrag[0].inspektør.endringskode)
+                    assertEquals(17.januar, inspektør.arbeidsgiverOppdrag[0].inspektør.fom)
+                    assertEquals(31.januar, inspektør.arbeidsgiverOppdrag[0].inspektør.tom)
+                    assertEquals(NY, inspektør.arbeidsgiverOppdrag[1].inspektør.endringskode)
+                    assertEquals(10.februar, inspektør.arbeidsgiverOppdrag[1].inspektør.fom)
+                    assertEquals(28.februar, inspektør.arbeidsgiverOppdrag[1].inspektør.tom)
+                }
+            },
+            ønsket = {
+                inspektør.utbetaling(2).inspektør.also { inspektør ->
+                    assertEquals(inspektør.korrelasjonsId, utbetaling1.korrelasjonsId)
+                    assertEquals(inspektør.arbeidsgiverOppdrag.inspektør.fagsystemId(), utbetaling1.arbeidsgiverOppdrag.inspektør.fagsystemId())
+                    assertEquals(2, inspektør.arbeidsgiverOppdrag.size)
+                    assertEquals(UEND, inspektør.arbeidsgiverOppdrag[0].inspektør.endringskode)
+                    assertEquals(17.januar, inspektør.arbeidsgiverOppdrag[0].inspektør.fom)
+                    assertEquals(31.januar, inspektør.arbeidsgiverOppdrag[0].inspektør.tom)
+                    assertEquals(NY, inspektør.arbeidsgiverOppdrag[1].inspektør.endringskode)
+                    assertEquals(10.februar, inspektør.arbeidsgiverOppdrag[1].inspektør.fom)
+                    assertEquals(28.februar, inspektør.arbeidsgiverOppdrag[1].inspektør.tom)
+                }
+            }
+        )
+    }
 
     @Test
     fun `out-of-order søknad medfører revurdering -- AvventerVilksprøvingRevurdering`() {
