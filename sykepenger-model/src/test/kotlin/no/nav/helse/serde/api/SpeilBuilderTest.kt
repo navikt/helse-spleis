@@ -21,6 +21,7 @@ import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.finnSkjæringstidspunkt
 import no.nav.helse.spleis.e2e.forlengVedtak
 import no.nav.helse.spleis.e2e.grunnlag
+import no.nav.helse.spleis.e2e.håndterAnnullerUtbetaling
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
 import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSykmelding
@@ -34,9 +35,11 @@ import no.nav.helse.spleis.e2e.repeat
 import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
 import no.nav.helse.spleis.e2e.speilApi
 import no.nav.helse.spleis.e2e.standardSimuleringsresultat
+import no.nav.helse.testhelpers.assertNotNull
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -188,6 +191,18 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
 
         assertEquals(speilVilkårsgrunnlagId, infotrygdVilkårsgrunnlagId)
         assertEquals(speilVilkårsgrunnlagId, infotrygdVilkårsgrunnlagIdFraVedtaksperiodeUtbetaling)
+    }
+
+    @Test
+    fun `annullert periode skal ikke ha vilkårsgrunnlagsId`() {
+        nyttVedtak(1.januar, 31.januar, 100.prosent)
+        håndterAnnullerUtbetaling()
+        val personDto = speilApi()
+        val utbetaltPeriode = (personDto.arbeidsgivere.first().generasjoner.last().perioder.first() as BeregnetPeriode).vilkårsgrunnlagId
+        val annullertPeriode = (personDto.arbeidsgivere.first().generasjoner.first().perioder.first() as BeregnetPeriode).vilkårsgrunnlagId
+
+        assertNotNull(utbetaltPeriode)
+        assertNull(annullertPeriode)
     }
 
     @Test
