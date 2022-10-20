@@ -28,6 +28,7 @@ import no.nav.helse.utbetalingslinjer.Utbetaling.Forkastet
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
 import no.nav.helse.utbetalingslinjer.Utbetalingslinje
 import no.nav.helse.økonomi.Prosent
+import org.slf4j.LoggerFactory
 import no.nav.helse.utbetalingslinjer.Utbetaling as InternUtbetaling
 
 // Besøker hele vedtaksperiode-treet
@@ -38,16 +39,25 @@ internal class UtbetalingerBuilder(
     val utbetalinger = mutableMapOf<UUID, IUtbetaling>()
     val vilkårsgrunnlag = mutableMapOf<UUID, IVilkårsgrunnlag>()
 
+    private companion object {
+        private val sikkerlog = LoggerFactory.getLogger("tjenestekall")
+    }
+
     init {
         vedtaksperiode.accept(this)
     }
 
-    internal fun build(): List<Pair<IVilkårsgrunnlag, IUtbetaling>>{
-        val vilkårsgrunnlagTilUtbetaling = mutableListOf<Pair<IVilkårsgrunnlag, IUtbetaling>>()
-        utbetalinger.forEach {
-            if (it.key in vilkårsgrunnlag.keys) vilkårsgrunnlagTilUtbetaling.add(vilkårsgrunnlag[it.key]!! to it.value)
+    internal fun build(vedtaksperiodeId: UUID): List<Pair<IVilkårsgrunnlag?, IUtbetaling>>{
+        val vilkårsgrunnlagTilUtbetaling = mutableListOf<Pair<IVilkårsgrunnlag?, IUtbetaling>>()
+        utbetalinger.forEach { (utbetalingId, utbetaling) ->
+            if (utbetalingId in vilkårsgrunnlag.keys) {
+                vilkårsgrunnlagTilUtbetaling.add(vilkårsgrunnlag[utbetalingId] to utbetaling)
+            } else {
+                sikkerlog.info("Fant ikke vilkårsgrunnlag for utbetaling med utbetalingId=$utbetalingId for vedtaksperiodeId=$vedtaksperiodeId")
+                vilkårsgrunnlagTilUtbetaling.add(null to utbetaling)
+            }
         }
-        return vilkårsgrunnlagTilUtbetaling
+        return vilkårsgrunnlagTilUtbetaling.toList()
     }
 
     override fun preVisitVedtaksperiodeUtbetaling(

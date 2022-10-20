@@ -97,7 +97,7 @@ internal class GenerasjonerBuilder(
     ) {
         if (tilstand == Vedtaksperiode.TilInfotrygd) return
         val sykdomstidslinje = VedtaksperiodeSykdomstidslinjeBuilder(vedtaksperiode).build()
-        val utbetalinger = UtbetalingerBuilder(vedtaksperiode, tilstand).build()
+        val utbetalinger = UtbetalingerBuilder(vedtaksperiode, tilstand).build(id)
         val aktivetsloggForPeriode = Vedtaksperiode.aktivitetsloggMedForegåendeUtenUtbetaling(vedtaksperiode)
         vedtaksperiodeAkkumulator.leggTil(
             IVedtaksperiode(
