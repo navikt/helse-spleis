@@ -1,5 +1,6 @@
 package no.nav.helse.serde
 
+import com.fasterxml.jackson.databind.node.ObjectNode
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Year
@@ -96,7 +97,16 @@ internal class JsonBuilder : AbstractBuilder() {
 
     private lateinit var personBuilder: PersonState
 
-    internal fun toJson() = personBuilder.build().toPrettyString()
+    private var jsonNode: ObjectNode? = null
+
+    private fun build(): ObjectNode {
+        return jsonNode ?: personBuilder.build().also {
+            jsonNode = it
+        }
+    }
+    
+    internal fun toJson() = build().toString()
+    internal fun toPretty() = build().toPrettyString()
     override fun toString() = toJson()
 
     override fun preVisitPerson(
