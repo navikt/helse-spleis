@@ -55,7 +55,7 @@ spec:
           - name: maintenance_work_mem
             value: "41943040"
           - name: max_connections
-            value: "150"
+            value: "200"
           - name: work_mem
             value: "5242880"
           - name: effective_cache_size
