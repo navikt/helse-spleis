@@ -6,7 +6,6 @@ import java.time.LocalDateTime
 import java.time.Year
 import java.time.YearMonth
 import java.util.UUID
-import no.nav.helse.Grunnbeløp
 import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
@@ -309,7 +308,7 @@ internal data class PersonData(
 
         data class SykepengegrunnlagData(
             private val sykepengegrunnlag: Double,
-            private val grunnbeløp: Double?, // TODO: migrere denne i json
+            private val grunnbeløp: Double?,
             private val arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysningData>,
             private val skjønnsmessigFastsattBeregningsgrunnlag: Double?,
             private val begrensning: Sykepengegrunnlag.Begrensning,
@@ -324,7 +323,7 @@ internal data class PersonData(
                 deaktiverteArbeidsforhold = deaktiverteArbeidsforhold.parseArbeidsgiverInntektsopplysninger(),
                 vurdertInfotrygd = this.vurdertInfotrygd ?: (begrensning == Sykepengegrunnlag.Begrensning.VURDERT_I_INFOTRYGD), // TODO: migrere denne til boolean i json
                 skjønnsmessigFastsattBeregningsgrunnlag = skjønnsmessigFastsattBeregningsgrunnlag?.årlig,
-                `6G` = grunnbeløp?.årlig ?: Grunnbeløp.`6G`.beløp(skjæringstidspunkt, LocalDate.now()) // TODO: jsonmigrering
+                `6G` = grunnbeløp?.årlig
             )
         }
 
