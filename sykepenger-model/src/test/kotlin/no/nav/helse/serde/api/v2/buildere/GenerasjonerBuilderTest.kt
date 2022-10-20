@@ -334,8 +334,15 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
 
         0.generasjon(a1) {
             val periode = beregnetPeriode(0)
+            val vilkårsgrunnlagFraVilkårsgrunnlagHistorikk = periode.vilkårsgrunnlagFraVilkårsgrunnlaghistorikk()
             val vilkårsgrunnlag = periode.vilkårsgrunnlag()
-            val omregnetÅrsinntekt = vilkårsgrunnlag.inntekter.first { it.organisasjonsnummer == a2 }.omregnetÅrsinntekt
+
+            var omregnetÅrsinntekt = vilkårsgrunnlagFraVilkårsgrunnlagHistorikk.inntekter.first { it.organisasjonsnummer == a2 }.omregnetÅrsinntekt
+            assertEquals(3, omregnetÅrsinntekt?.inntekterFraAOrdningen?.size)
+            assertTrue(omregnetÅrsinntekt?.inntekterFraAOrdningen?.all { it.sum == 1000.0 } ?: false)
+
+            // tester dobbelt opp frem til speil er over på "den nye bøtta" med vilkårsgrunnlag
+            omregnetÅrsinntekt = vilkårsgrunnlag.inntekter.first { it.organisasjonsnummer == a2 }.omregnetÅrsinntekt
             assertEquals(3, omregnetÅrsinntekt?.inntekterFraAOrdningen?.size)
             assertTrue(omregnetÅrsinntekt?.inntekterFraAOrdningen?.all { it.sum == 1000.0 } ?: false)
         }
@@ -374,8 +381,21 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
 
         0.generasjon(a1) {
-            val vilkårsgrunnlag = beregnetPeriode(0).vilkårsgrunnlag()
-            val inntektsgrunnlag = vilkårsgrunnlag.inntekter.firstOrNull { it.organisasjonsnummer == a2 }
+            val vilkårsgrunnlagFraVilkårsgrunnlagHistorikk = beregnetPeriode(0).vilkårsgrunnlagFraVilkårsgrunnlaghistorikk()
+            var inntektsgrunnlag = vilkårsgrunnlagFraVilkårsgrunnlagHistorikk.inntekter.firstOrNull { it.organisasjonsnummer == a2 }
+            assertEquals(
+                OmregnetÅrsinntekt(
+                    Inntektkilde.IkkeRapportert,
+                    0.0,
+                    0.0,
+                    null
+                ),
+                inntektsgrunnlag?.omregnetÅrsinntekt
+            )
+
+            // tester dobbelt opp frem til speil er over på "den nye bøtta" med vilkårsgrunnlag
+            val vilkårsgrunnlag = beregnetPeriode(0).vilkårsgrunnlagFraVilkårsgrunnlaghistorikk()
+            inntektsgrunnlag = vilkårsgrunnlag.inntekter.firstOrNull { it.organisasjonsnummer == a2 }
             assertEquals(
                 OmregnetÅrsinntekt(
                     Inntektkilde.IkkeRapportert,
@@ -1947,19 +1967,24 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
     }
 
     private val generasjoner get() = generasjoner(ORGNUMMER)
-    private lateinit var vilkårsgrunnlag: Map<UUID, Map<LocalDate, Vilkårsgrunnlag>>
+    private lateinit var vilkårsgrunnlagHistorikk: Map<UUID, Map<LocalDate, Vilkårsgrunnlag>>
+
+    // dette er vilkårsgrunnlag som pekes på av beregnede perioder
+    private lateinit var vilkårsgrunnlag: Map<UUID, Vilkårsgrunnlag>
 
     private fun generasjoner(organisasjonsnummer: String): List<Generasjon> {
-        val vilkårsgrunnlagHistorikk = VilkårsgrunnlagBuilder(person.inspektør.vilkårsgrunnlagHistorikk).build()
-        vilkårsgrunnlag = vilkårsgrunnlagHistorikk.toDTO()
+        val vilkårsgrunnlagHistorikkBuilderResult = VilkårsgrunnlagBuilder(person.inspektør.vilkårsgrunnlagHistorikk).build()
+        vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikkBuilderResult.toDTO()
 
         val generasjonerBuilder = GenerasjonerBuilder(
             søknadDTOer,
             UNG_PERSON_FØDSELSDATO.alder,
             person.arbeidsgiver(organisasjonsnummer),
-            vilkårsgrunnlagHistorikk
+            vilkårsgrunnlagHistorikkBuilderResult
         )
-        return generasjonerBuilder.build()
+        val generasjoner = generasjonerBuilder.build()
+        vilkårsgrunnlag = vilkårsgrunnlagHistorikkBuilderResult.vilkårsgrunnlagSomPekesPåAvBeregnedePerioder()
+        return generasjoner
     }
 
     private fun Int.generasjon(organisasjonsnummer: String = ORGNUMMER, assertBlock: Generasjon.() -> Unit) {
@@ -1980,8 +2005,12 @@ internal class GenerasjonerBuilderTest : AbstractEndToEndTest() {
         return this
     }
 
+    private fun BeregnetPeriode.vilkårsgrunnlagFraVilkårsgrunnlaghistorikk(): Vilkårsgrunnlag {
+        return requireNotNull(vilkårsgrunnlagHistorikk[this.vilkårsgrunnlagshistorikkId]?.get(this.skjæringstidspunkt)) { "Forventet å finne vilkårsgrunnlag for periode" }
+    }
+
     private fun BeregnetPeriode.vilkårsgrunnlag(): Vilkårsgrunnlag {
-        return requireNotNull(vilkårsgrunnlag[this.vilkårsgrunnlagshistorikkId]?.get(this.skjæringstidspunkt)) { "Forventet å finne vilkårsgrunnlag for periode" }
+        return requireNotNull(vilkårsgrunnlag[this.vilkårsgrunnlagId]) { "Forventet å finne vilkårsgrunnlag for periode" }
     }
 
     private infix fun <T : Tidslinjeperiode> T.forkastet(forkastet: Boolean): T {
