@@ -24,6 +24,7 @@ import no.nav.helse.spleis.graphql.dto.GraphQLArbeidsgiver
 import no.nav.helse.spleis.graphql.dto.GraphQLGenerasjon
 import no.nav.helse.spleis.graphql.dto.GraphQLGhostPeriode
 import no.nav.helse.spleis.graphql.dto.GraphQLPerson
+import no.nav.helse.spleis.graphql.dto.GraphQLVilkarsgrunnlagElement
 import no.nav.helse.spleis.graphql.dto.arbeidsgiverTypes
 import no.nav.helse.spleis.graphql.dto.hendelseTypes
 import no.nav.helse.spleis.graphql.dto.inntektsgrunnlagTypes
@@ -31,7 +32,6 @@ import no.nav.helse.spleis.graphql.dto.personTypes
 import no.nav.helse.spleis.graphql.dto.simuleringTypes
 import no.nav.helse.spleis.graphql.dto.tidslinjeperiodeTypes
 import no.nav.helse.spleis.graphql.dto.vilkarsgrunnlagTypes
-import org.slf4j.MDC
 
 private object ApiMetrikker {
     private val responstid = Histogram
@@ -114,10 +114,13 @@ private fun mapTilDto(person: PersonDTO) =
             )
         },
         vilkarsgrunnlaghistorikk = person.vilkårsgrunnlagHistorikk.entries.map { (id, dateMap) ->
-            mapVilkårsgrunnlag(id, dateMap.values.toList())
+            mapVilkårsgrunnlagHistorikk(id, dateMap.values.toList())
         },
         dodsdato = person.dødsdato,
-        versjon = person.versjon
+        versjon = person.versjon,
+        vilkårsgrunnlag = person.vilkårsgrunnlag.mapValues { (_, vilkårsgrunnlag) ->
+            mapVilkårsgrunnlag(vilkårsgrunnlag)
+        }.toList().map { GraphQLVilkarsgrunnlagElement(it.first, it.second) }
     )
 
 fun Application.installGraphQLApi(dataSource: DataSource, authProviderName: String) {
@@ -141,12 +144,3 @@ fun Application.installGraphQLApi(dataSource: DataSource, authProviderName: Stri
     }
 }
 
-internal fun <T> withMDC(context: Map<String, String>, block: () -> T): T {
-    val contextMap = MDC.getCopyOfContextMap() ?: emptyMap()
-    try {
-        MDC.setContextMap(contextMap + context)
-        return block()
-    } finally {
-        MDC.setContextMap(contextMap)
-    }
-}

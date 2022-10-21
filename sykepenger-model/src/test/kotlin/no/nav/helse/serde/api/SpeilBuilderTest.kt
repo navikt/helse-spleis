@@ -211,7 +211,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         nyttVedtak(1.januar, 31.januar, 100.prosent)
         val personDto = speilApi()
         val speilVilkårsgrunnlagId = (personDto.arbeidsgivere.first().generasjoner.first().perioder.first() as BeregnetPeriode).vilkårsgrunnlagId
-        val bøtteVilkårsgrunnlag = personDto.vilkårsgrunnlag[speilVilkårsgrunnlagId]
+        val bøtteVilkårsgrunnlag = personDto.vilkårsgrunnlag.get(speilVilkårsgrunnlagId)
         assertTrue(bøtteVilkårsgrunnlag is SpleisVilkårsgrunnlag)
 
     }

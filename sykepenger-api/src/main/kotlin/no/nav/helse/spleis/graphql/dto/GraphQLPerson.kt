@@ -2,7 +2,7 @@ package no.nav.helse.spleis.graphql.dto
 
 import com.apurebase.kgraphql.schema.dsl.SchemaBuilder
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 
 internal fun SchemaBuilder.personTypes() {
     type<GraphQLPerson> {
@@ -25,5 +25,7 @@ data class GraphQLPerson(
     val arbeidsgivere: List<GraphQLArbeidsgiver>,
     val vilkarsgrunnlaghistorikk: List<GraphQLVilkarsgrunnlaghistorikk>,
     val dodsdato: LocalDate?,
-    val versjon: Int
+    val versjon: Int,
+    val vilkårsgrunnlag: List<GraphQLVilkarsgrunnlagElement>
 )
+

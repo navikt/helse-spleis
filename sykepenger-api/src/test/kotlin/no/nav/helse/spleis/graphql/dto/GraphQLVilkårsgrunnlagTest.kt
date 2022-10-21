@@ -5,7 +5,7 @@ import java.util.UUID
 import no.nav.helse.januar
 import no.nav.helse.serde.api.dto.SpleisVilkårsgrunnlag
 import no.nav.helse.serde.api.speil.builders.SykepengegrunnlagsgrenseDTO
-import no.nav.helse.spleis.graphql.mapVilkårsgrunnlag
+import no.nav.helse.spleis.graphql.mapVilkårsgrunnlagHistorikk
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import kotlin.Double.Companion.NEGATIVE_INFINITY
@@ -16,7 +16,7 @@ internal class GraphQLVilkårsgrunnlagTest {
 
     @Test
     fun `mapper vilkårsgrunnlag med normal avviksprosent`() {
-        val graphQlGrunnlag = mapVilkårsgrunnlag(UUID.randomUUID(), listOf(spleisVilkårsgrunnlag(
+        val graphQlGrunnlag = mapVilkårsgrunnlagHistorikk(UUID.randomUUID(), listOf(spleisVilkårsgrunnlag(
             avviksprosent = 25.0
         )))
         assertAvviksprosent(25.0, graphQlGrunnlag)
@@ -24,7 +24,7 @@ internal class GraphQLVilkårsgrunnlagTest {
 
     @Test
     fun `mapper vilkårsgrunnlag med Infinity avviksprosent til 100`() {
-        val graphQlGrunnlag = mapVilkårsgrunnlag(UUID.randomUUID(), listOf(spleisVilkårsgrunnlag(
+        val graphQlGrunnlag = mapVilkårsgrunnlagHistorikk(UUID.randomUUID(), listOf(spleisVilkårsgrunnlag(
             avviksprosent = POSITIVE_INFINITY
         )))
         assertAvviksprosent(100.0, graphQlGrunnlag)
@@ -32,7 +32,7 @@ internal class GraphQLVilkårsgrunnlagTest {
 
     @Test
     fun `mapper vilkårsgrunnlag med -Infinity avviksprosent til 100`() {
-        val graphQlGrunnlag = mapVilkårsgrunnlag(UUID.randomUUID(), listOf(spleisVilkårsgrunnlag(
+        val graphQlGrunnlag = mapVilkårsgrunnlagHistorikk(UUID.randomUUID(), listOf(spleisVilkårsgrunnlag(
             avviksprosent = NEGATIVE_INFINITY
         )))
         assertAvviksprosent(100.0, graphQlGrunnlag)
@@ -40,7 +40,7 @@ internal class GraphQLVilkårsgrunnlagTest {
 
     @Test
     fun `mapper vilkårsgrunnlag med NaN avviksprosent til 100`() {
-        val graphQlGrunnlag = mapVilkårsgrunnlag(UUID.randomUUID(), listOf(spleisVilkårsgrunnlag(
+        val graphQlGrunnlag = mapVilkårsgrunnlagHistorikk(UUID.randomUUID(), listOf(spleisVilkårsgrunnlag(
             avviksprosent = NaN
         )))
         assertAvviksprosent(100.0, graphQlGrunnlag)
@@ -48,7 +48,7 @@ internal class GraphQLVilkårsgrunnlagTest {
 
     @Test
     fun `mapper vilkårsgrunnlag med avviksprosent null`() {
-        val graphQlGrunnlag = mapVilkårsgrunnlag(UUID.randomUUID(), listOf(spleisVilkårsgrunnlag(
+        val graphQlGrunnlag = mapVilkårsgrunnlagHistorikk(UUID.randomUUID(), listOf(spleisVilkårsgrunnlag(
             avviksprosent = null
         )))
         assertAvviksprosent(null, graphQlGrunnlag)

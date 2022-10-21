@@ -3,7 +3,7 @@ package no.nav.helse.spleis.graphql.dto
 import com.apurebase.kgraphql.schema.dsl.SchemaBuilder
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 import no.nav.helse.serde.api.dto.Utbetalingtype
 
 internal fun SchemaBuilder.tidslinjeperiodeTypes() {
@@ -308,7 +308,8 @@ data class GraphQLBeregnetPeriode(
     val vilkarsgrunnlaghistorikkId: UUID,
     val periodevilkar: GraphQLPeriodevilkar,
     val aktivitetslogg: List<GraphQLAktivitet>,
-    val refusjon: GraphQLRefusjon?
+    val refusjon: GraphQLRefusjon?,
+    val vilkårsgrunnlagId: UUID?
 ) : GraphQLTidslinjeperiode {
     override val id: UUID = UUID.randomUUID()
 }

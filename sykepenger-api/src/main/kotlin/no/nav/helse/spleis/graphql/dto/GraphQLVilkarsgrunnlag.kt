@@ -2,7 +2,7 @@ package no.nav.helse.spleis.graphql.dto
 
 import com.apurebase.kgraphql.schema.dsl.SchemaBuilder
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 
 internal fun SchemaBuilder.vilkarsgrunnlagTypes() {
     enum<GraphQLVilkarsgrunnlagtype>()
@@ -65,4 +65,9 @@ data class GraphQLSykepengegrunnlagsgrense(
     val grunnbelop: Int,
     val grense: Int,
     val virkningstidspunkt: LocalDate,
+)
+
+data class GraphQLVilkarsgrunnlagElement(
+    val id: UUID,
+    val grunnlag: GraphQLVilkarsgrunnlag
 )

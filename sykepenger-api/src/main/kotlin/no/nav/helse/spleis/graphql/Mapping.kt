@@ -324,6 +324,7 @@ internal fun mapTidslinjeperiode(periode: Tidslinjeperiode) =
                 )
             },
             periodetilstand = mapTilstand(periode.periodetilstand),
+            vilkårsgrunnlagId = periode.vilkårsgrunnlagId
         )
         else -> GraphQLUberegnetPeriode(
             fom = periode.fom,
@@ -389,44 +390,48 @@ private fun mapInntekt(inntekt: Arbeidsgiverinntekt) = GraphQLArbeidsgiverinntek
 private fun Double?.mapAvviksprosent() =
     if (this in setOf(POSITIVE_INFINITY, NEGATIVE_INFINITY, NaN)) 100.0 else this
 
-internal fun mapVilkårsgrunnlag(id: UUID, vilkårsgrunnlag: List<Vilkårsgrunnlag>) =
+internal fun mapVilkårsgrunnlagHistorikk(id: UUID, vilkårsgrunnlag: List<Vilkårsgrunnlag>) =
     GraphQLVilkarsgrunnlaghistorikk(
         id = id,
         grunnlag = vilkårsgrunnlag.map { grunnlag ->
-            when (grunnlag) {
-                is SpleisVilkårsgrunnlag -> GraphQLSpleisVilkarsgrunnlag(
-                    skjaeringstidspunkt = grunnlag.skjæringstidspunkt,
-                    omregnetArsinntekt = grunnlag.omregnetÅrsinntekt,
-                    sammenligningsgrunnlag = grunnlag.sammenligningsgrunnlag,
-                    sykepengegrunnlag = grunnlag.sykepengegrunnlag,
-                    inntekter = grunnlag.inntekter.map { inntekt -> mapInntekt(inntekt) },
-                    avviksprosent = grunnlag.avviksprosent.mapAvviksprosent(),
-                    grunnbelop = grunnlag.grunnbeløp,
-                    sykepengegrunnlagsgrense = mapSykepengergrunnlagsgrense(grunnlag.sykepengegrunnlagsgrense),
-                    antallOpptjeningsdagerErMinst = grunnlag.antallOpptjeningsdagerErMinst,
-                    opptjeningFra = grunnlag.opptjeningFra,
-                    oppfyllerKravOmMinstelonn = grunnlag.oppfyllerKravOmMinstelønn,
-                    oppfyllerKravOmOpptjening = grunnlag.oppfyllerKravOmOpptjening,
-                    oppfyllerKravOmMedlemskap = grunnlag.oppfyllerKravOmMedlemskap
-                )
-                is InfotrygdVilkårsgrunnlag -> GraphQLInfotrygdVilkarsgrunnlag(
-                    skjaeringstidspunkt = grunnlag.skjæringstidspunkt,
-                    omregnetArsinntekt = grunnlag.omregnetÅrsinntekt,
-                    sammenligningsgrunnlag = grunnlag.sammenligningsgrunnlag,
-                    sykepengegrunnlag = grunnlag.sykepengegrunnlag,
-                    inntekter = grunnlag.inntekter.map { inntekt -> mapInntekt(inntekt) }
-                )
-                else -> object : GraphQLVilkarsgrunnlag {
-                    override val skjaeringstidspunkt = grunnlag.skjæringstidspunkt
-                    override val omregnetArsinntekt = grunnlag.omregnetÅrsinntekt
-                    override val sammenligningsgrunnlag = grunnlag.sammenligningsgrunnlag
-                    override val sykepengegrunnlag = grunnlag.sykepengegrunnlag
-                    override val inntekter = grunnlag.inntekter.map { inntekt -> mapInntekt(inntekt) }
-                    override val vilkarsgrunnlagtype = GraphQLVilkarsgrunnlagtype.Ukjent
-                }
-            }
+            mapVilkårsgrunnlag(grunnlag)
         }
     )
+
+internal fun mapVilkårsgrunnlag(vilkårsgrunnlag: Vilkårsgrunnlag) =
+        when (vilkårsgrunnlag) {
+            is SpleisVilkårsgrunnlag -> GraphQLSpleisVilkarsgrunnlag(
+                skjaeringstidspunkt = vilkårsgrunnlag.skjæringstidspunkt,
+                omregnetArsinntekt = vilkårsgrunnlag.omregnetÅrsinntekt,
+                sammenligningsgrunnlag = vilkårsgrunnlag.sammenligningsgrunnlag,
+                sykepengegrunnlag = vilkårsgrunnlag.sykepengegrunnlag,
+                inntekter = vilkårsgrunnlag.inntekter.map { inntekt -> mapInntekt(inntekt) },
+                avviksprosent = vilkårsgrunnlag.avviksprosent.mapAvviksprosent(),
+                grunnbelop = vilkårsgrunnlag.grunnbeløp,
+                sykepengegrunnlagsgrense = mapSykepengergrunnlagsgrense(vilkårsgrunnlag.sykepengegrunnlagsgrense),
+                antallOpptjeningsdagerErMinst = vilkårsgrunnlag.antallOpptjeningsdagerErMinst,
+                opptjeningFra = vilkårsgrunnlag.opptjeningFra,
+                oppfyllerKravOmMinstelonn = vilkårsgrunnlag.oppfyllerKravOmMinstelønn,
+                oppfyllerKravOmOpptjening = vilkårsgrunnlag.oppfyllerKravOmOpptjening,
+                oppfyllerKravOmMedlemskap = vilkårsgrunnlag.oppfyllerKravOmMedlemskap
+            )
+            is InfotrygdVilkårsgrunnlag -> GraphQLInfotrygdVilkarsgrunnlag(
+                skjaeringstidspunkt = vilkårsgrunnlag.skjæringstidspunkt,
+                omregnetArsinntekt = vilkårsgrunnlag.omregnetÅrsinntekt,
+                sammenligningsgrunnlag = vilkårsgrunnlag.sammenligningsgrunnlag,
+                sykepengegrunnlag = vilkårsgrunnlag.sykepengegrunnlag,
+                inntekter = vilkårsgrunnlag.inntekter.map { inntekt -> mapInntekt(inntekt) }
+            )
+            else -> object : GraphQLVilkarsgrunnlag {
+                override val skjaeringstidspunkt = vilkårsgrunnlag.skjæringstidspunkt
+                override val omregnetArsinntekt = vilkårsgrunnlag.omregnetÅrsinntekt
+                override val sammenligningsgrunnlag = vilkårsgrunnlag.sammenligningsgrunnlag
+                override val sykepengegrunnlag = vilkårsgrunnlag.sykepengegrunnlag
+                override val inntekter = vilkårsgrunnlag.inntekter.map { inntekt -> mapInntekt(inntekt) }
+                override val vilkarsgrunnlagtype = GraphQLVilkarsgrunnlagtype.Ukjent
+            }
+        }
+
 
 private fun mapSykepengergrunnlagsgrense(sykepengegrunnlagsgrenseDTO: SykepengegrunnlagsgrenseDTO) =
     GraphQLSykepengegrunnlagsgrense(sykepengegrunnlagsgrenseDTO.grunnbeløp, sykepengegrunnlagsgrenseDTO.grense, sykepengegrunnlagsgrenseDTO.virkningstidspunkt)
