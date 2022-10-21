@@ -73,6 +73,7 @@ import no.nav.helse.spleis.e2e.håndterUtbetalingshistorikk
 import no.nav.helse.spleis.e2e.håndterUtbetalt
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
+import no.nav.helse.spleis.e2e.nyPeriode
 import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.spleis.e2e.repeat
 import no.nav.helse.spleis.e2e.sammenligningsgrunnlag
@@ -88,6 +89,27 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndTest() {
+
+    @Test
+    fun `omgjøre kort periode etter mottatt im - med eldre utbetalt periode`() {
+        nyttVedtak(1.januar, 31.januar)
+
+        nyPeriode(10.august til 20.august)
+        håndterUtbetalingshistorikk(2.vedtaksperiode)
+        håndterInntektsmelding(listOf(1.august til 16.august))
+        håndterYtelser(2.vedtaksperiode)
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+
+        val førsteUtbetaling = inspektør.utbetaling(0).inspektør
+        inspektør.utbetaling(1).inspektør.also { utbetalingInspektør ->
+            assertNotEquals(førsteUtbetaling.korrelasjonsId, utbetalingInspektør.korrelasjonsId)
+            assertNotEquals(førsteUtbetaling.arbeidsgiverOppdrag.inspektør.fagsystemId(), utbetalingInspektør.arbeidsgiverOppdrag.inspektør.fagsystemId())
+            assertNotEquals(førsteUtbetaling.personOppdrag.inspektør.fagsystemId(), utbetalingInspektør.personOppdrag.inspektør.fagsystemId())
+            assertEquals(17.august til 20.august, utbetalingInspektør.periode)
+        }
+    }
 
     @Test
     fun `inntektsmelding på kort periode gjør at en nyere kort periode skal utbetales`() = Toggle.RevurderOutOfOrder.enable {

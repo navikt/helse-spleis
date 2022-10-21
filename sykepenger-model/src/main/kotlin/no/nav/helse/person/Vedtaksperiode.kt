@@ -1970,7 +1970,7 @@ internal class Vedtaksperiode private constructor(
         }
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {
-            if (vedtaksperiode.person.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt) == null) return vedtaksperiode.tilstand(påminnelse, AvventerHistorikkRevurdering) {
+            if (vedtaksperiode.id == UUID.fromString("9a14d6a1-e4fc-4322-8f9e-4c9d537da566")) return vedtaksperiode.tilstand(påminnelse, AvventerHistorikkRevurdering) {
                 påminnelse.info("Reberegner perioden ettersom skjæringstidspunktet har flyttet seg")
             }
             vedtaksperiode.trengerHistorikkFraInfotrygd(påminnelse)

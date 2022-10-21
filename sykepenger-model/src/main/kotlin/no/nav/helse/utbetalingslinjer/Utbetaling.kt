@@ -319,12 +319,12 @@ internal class Utbetaling private constructor(
             gjenståendeSykedager: Int,
             forrige: Utbetaling?
         ): Utbetaling {
-            val sisteUtbetaling = utbetalinger.sisteAktiveMedSammeKorrelasjonsId(forrige) ?: utbetalinger.sisteAktiveFør(sisteDato)
+            val sisteUtbetaling = utbetalinger.sisteAktiveMedSammeKorrelasjonsId(forrige)
             val revurdertTidslinje = sisteUtbetaling?.lagRevurdertTidslinje(utbetalingstidslinje, sisteDato) ?: utbetalingstidslinje
 
             return Utbetaling(
                 // Siste aktive utbetaling på arbeidsgiveren
-                sisteAktive = sisteUtbetaling,
+                sisteAktive = utbetalinger.sisteAktiveFør(sisteDato),
                 fødselsnummer = fødselsnummer,
                 beregningId = beregningId,
                 organisasjonsnummer = organisasjonsnummer,
