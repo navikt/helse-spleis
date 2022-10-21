@@ -2,7 +2,6 @@ package no.nav.helse.spleis.db
 
 import javax.sql.DataSource
 import kotliquery.Session
-import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.Personidentifikator
@@ -28,48 +27,39 @@ internal class PersonDao(private val dataSource: DataSource) {
          */
         sessionOf(dataSource).use {
             it.transaction { txSession ->
-                låsPersonForBehandling(txSession, personidentifikator)
-                val serialisertPerson = finnSistePersonJson(txSession, personidentifikator)?.second
-                    ?: opprettNyPerson(txSession, personidentifikator, aktørId, message, lagNyPerson)
+                val serialisertPerson = hentPersonOgLåsPersonForBehandling(txSession, personidentifikator)
+                    ?: opprettNyPerson(txSession, personidentifikator, aktørId, lagNyPerson)
                 val oppdatertPerson = håndterPerson(serialisertPerson)
                 oppdaterAvstemmingtidspunkt(txSession, message, personidentifikator)
-                oppdaterPerson(
-                    txSession,
-                    personidentifikator,
-                    oppdatertPerson.skjemaVersjon,
-                    oppdatertPerson.json
-                )
+                oppdaterPersonversjon(txSession, personidentifikator, oppdatertPerson.skjemaVersjon, oppdatertPerson.json)
             }
         }
     }
 
-    private fun låsPersonForBehandling(session: TransactionalSession, personidentifikator: Personidentifikator) {
+    private fun hentPersonOgLåsPersonForBehandling(session: Session, personidentifikator: Personidentifikator): SerialisertPerson? {
         @Language("PostgreSQL")
-        val statement = "SELECT * FROM unike_person WHERE fnr = ? FOR UPDATE" // 'FOR UPDATE' låser personen
-        session.run(queryOf(statement, personidentifikator.toLong()).asExecute)
+        val statement = "SELECT data FROM person WHERE fnr = ? FOR UPDATE"
+        return session.run(queryOf(statement, personidentifikator.toLong()).map {
+            SerialisertPerson(it.string("data"))
+        }.asList).singleOrNullOrThrow()
     }
 
-    private fun finnSistePersonJson(session: Session, personidentifikator: Personidentifikator) =
-        session.run(queryOf("SELECT id, data FROM person WHERE fnr = ? ORDER BY id DESC LIMIT 1", personidentifikator.toLong()).map {
-            it.long("id") to SerialisertPerson(it.string("data"))
-        }.asSingle)
+    private fun <R> Collection<R>.singleOrNullOrThrow() =
+        if (size < 2) this.firstOrNull()
+        else throw IllegalStateException("Listen inneholder mer enn to elementer!")
 
     // TODO: gjøre fnr som primary key i person-tabellen, og fjerne behov for unike_person
-    private fun opprettNyPerson(session: Session, personidentifikator: Personidentifikator, aktørId: String, message: HendelseMessage, lagNyPerson: () -> SerialisertPerson): SerialisertPerson {
+    private fun opprettNyPerson(session: Session, personidentifikator: Personidentifikator, aktørId: String, lagNyPerson: () -> SerialisertPerson): SerialisertPerson {
         return lagNyPerson().also {
             opprettNyPersonRad(session, personidentifikator, aktørId)
-            opprettNyPersonversjon(session, personidentifikator, aktørId, it.skjemaVersjon, it.json)
+            opprettNyPersonversjon(session, personidentifikator, it.skjemaVersjon, it.json)
         }
     }
 
-    private fun opprettNyPersonversjon(session: Session, personidentifikator: Personidentifikator, aktørId: String, skjemaVersjon: Int, personJson: String) {
+    private fun opprettNyPersonversjon(session: Session, personidentifikator: Personidentifikator, skjemaVersjon: Int, personJson: String) {
         @Language("PostgreSQL")
-        val statement = """
-            INSERT INTO person (aktor_id, fnr, skjema_versjon, data)
-            VALUES (:aktor, :fnr, :skjemaversjon, :data)
-        """
+        val statement = """ INSERT INTO person (fnr, skjema_versjon, data) VALUES (:fnr, :skjemaversjon, :data) """
         session.run(queryOf(statement, mapOf(
-            "aktor" to aktørId.toLong(),
             "fnr" to personidentifikator.toLong(),
             "skjemaversjon" to skjemaVersjon,
             "data" to personJson
@@ -93,31 +83,15 @@ internal class PersonDao(private val dataSource: DataSource) {
         session.run(queryOf(statement, mapOf("fnr" to personidentifikator.toLong())).asExecute)
     }
 
-    private fun oppdaterPerson(session: TransactionalSession, personidentifikator: Personidentifikator, skjemaVersjon: Int, personJson: String) {
-        val sisteId = checkNotNull(finnSistePersonJson(session, personidentifikator)).first
-        // TODO: fjerne sletting når det bare finnes én rad per person
-        slettEldrePersonversjon(session, personidentifikator, sisteId)
-        oppdaterPersonversjon(session, sisteId, skjemaVersjon, personJson)
-    }
-
-    private fun oppdaterPersonversjon(session: Session, id: Long, skjemaVersjon: Int, personJson: String) {
+    private fun oppdaterPersonversjon(session: Session, personidentifikator: Personidentifikator, skjemaVersjon: Int, personJson: String) {
         @Language("PostgreSQL")
-        val statement = """ UPDATE person SET skjema_versjon=:skjemaversjon, data=:data WHERE id=:id; """
+        val statement = """ UPDATE person SET skjema_versjon=:skjemaversjon, data=:data WHERE fnr=:ident; """
         check(1 == session.run(queryOf(statement, mapOf(
             "skjemaversjon" to skjemaVersjon,
             "data" to personJson,
-            "id" to id
+            "ident" to personidentifikator.toLong()
         )).asUpdate)) {
             "Forventet å påvirke én og bare én rad!"
         }
-    }
-
-    private fun slettEldrePersonversjon(session: Session, personidentifikator: Personidentifikator, sisteId: Long) {
-        @Language("PostgreSQL")
-        val statement = """ DELETE FROM person WHERE fnr = :fnr AND id != :sisteId; """
-        session.run(queryOf(statement, mapOf(
-            "fnr" to personidentifikator.toLong(),
-            "sisteId" to sisteId
-        )).asExecute)
     }
 }
