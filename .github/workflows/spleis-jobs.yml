@@ -6,6 +6,8 @@ on:
     - master
     paths:
     - 'jobs/**'
+    - 'sykepenger-model/**'
+    - 'Dockerfile-jobs'
     - 'build.gradle.kts'
     - '.github/workflows/**'
     - 'deploy/dev-gc-job.yml'

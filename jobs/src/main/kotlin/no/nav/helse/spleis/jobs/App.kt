@@ -65,7 +65,7 @@ private fun vacuumTask() {
 }
 
 private fun migrateV2Task(targetVersjon: Int) {
-    DataSourceConfiguration(DbUser.AVSTEMMING).dataSource().use { ds ->
+    DataSourceConfiguration(DbUser.MIGRATE).dataSource().use { ds ->
         sessionOf(ds).use { session ->
             val finnArbeid = { txSession: TransactionalSession, utførArbeid: (String, String) -> Unit ->
                 txSession.run(queryOf("SELECT fnr,data FROM person WHERE skjema_versjon < $targetVersjon LIMIT 1 FOR UPDATE SKIP LOCKED;").map {
@@ -97,7 +97,7 @@ private fun migrateV2Task(targetVersjon: Int) {
 }
 
 private fun migrateTask(factory: ConsumerProducerFactory) {
-    DataSourceConfiguration(DbUser.AVSTEMMING).dataSource().use { ds ->
+    DataSourceConfiguration(DbUser.MIGRATE).dataSource().use { ds ->
         var count = 0L
         factory.createProducer().use { producer ->
             sessionOf(ds).use { session ->
@@ -234,7 +234,7 @@ private class DataSourceConfiguration(dbUsername: DbUser) {
 }
 
 private enum class DbUser(private val dbUserPrefix: String) {
-    SPLEIS("DATABASE"), AVSTEMMING("DATABASE_SPLEIS_AVSTEMMING");
+    SPLEIS("DATABASE"), AVSTEMMING("DATABASE_SPLEIS_AVSTEMMING"), MIGRATE("DATABASE_SPLEIS_MIGRATE");
 
     override fun toString() = dbUserPrefix
 }
