@@ -9,14 +9,19 @@ import java.util.UUID
 import javax.sql.DataSource
 import kotliquery.Row
 import kotliquery.Session
+import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.person.etterlevelse.MaskinellJurist
+import no.nav.helse.serde.SerialisertPerson
+import no.nav.helse.serde.serialize
 import no.nav.rapids_and_rivers.cli.AivenConfig
 import no.nav.rapids_and_rivers.cli.ConsumerProducerFactory
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.slf4j.LoggerFactory
 import kotlin.math.ceil
 import kotlin.properties.Delegates
+import kotlin.system.measureTimeMillis
 import kotlin.time.DurationUnit
 import kotlin.time.ExperimentalTime
 import kotlin.time.measureTime
@@ -39,6 +44,7 @@ fun main(args: Array<String>) {
         "vacuum" -> vacuumTask()
         "avstemming" -> avstemmingTask(ConsumerProducerFactory(AivenConfig.default), args.getOrNull(1)?.toIntOrNull())
         "migrate" -> migrateTask(ConsumerProducerFactory(AivenConfig.default))
+        "migrate_v2" -> migrateV2Task(args[1].trim().toInt())
         else -> log.error("Unknown task $task")
     }
 }
@@ -56,6 +62,38 @@ private fun vacuumTask() {
         duration.toInt(DurationUnit.MINUTES) % 60,
         duration.toInt(DurationUnit.SECONDS) % 60
     )
+}
+
+private fun migrateV2Task(targetVersjon: Int) {
+    DataSourceConfiguration(DbUser.AVSTEMMING).dataSource().use { ds ->
+        sessionOf(ds).use { session ->
+            val finnArbeid = { txSession: TransactionalSession, utførArbeid: (String, String) -> Unit ->
+                txSession.run(queryOf("SELECT fnr,data FROM person WHERE skjema_versjon < $targetVersjon LIMIT 1 FOR UPDATE SKIP LOCKED;").map {
+                    it.string("fnr") to it.string("data")
+                }.asSingle)?.also { (ident, arbeid) -> utførArbeid(ident, arbeid) } != null
+
+            }
+            var arbeidUtført: Boolean
+            var migreringCounter = 0
+            do {
+                arbeidUtført = session.transaction { txSession ->
+                    finnArbeid(txSession) { ident, data ->
+                        migreringCounter += 1
+                        log.info("[$migreringCounter] Utfører migrering")
+                        val time = measureTimeMillis {
+                            val resultat = SerialisertPerson(data).deserialize(MaskinellJurist()).serialize()
+                            check(1 == txSession.run(queryOf("UPDATE person SET skjema_versjon=:skjemaversjon, data=:data WHERE fnr=:ident", mapOf(
+                                "skjemaversjon" to resultat.skjemaVersjon,
+                                "data" to resultat.json,
+                                "ident" to ident
+                            )).asUpdate))
+                        }
+                        log.info("[$migreringCounter] Utført på $time ms")
+                    }
+                }
+            } while (arbeidUtført)
+        }
+    }
 }
 
 private fun migrateTask(factory: ConsumerProducerFactory) {

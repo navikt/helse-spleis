@@ -7,6 +7,7 @@ metadata:
   namespace: tbd
 spec:
   image: {{image}}
+  parallelism: 1
   resources:
     limits:
       cpu: 500m
@@ -30,4 +31,7 @@ spec:
     - name: DATABASE_INSTANCE
       value: "helse-spleis"
     - name: RUNTIME_OPTS
-      value: "migrate"
+      value: "migrate"    # gjør migrering ved å pushe events på kafka, og lar spleis gjøre jobben (lager nedetid)
+    #- name: RUNTIME_OPTS
+    #  value: "migrate_v2 192"   # gjør migrering direkte mot databasen ved at alle personer løftes opp til versjon angitt som argument nr 2
+                                 # NB! NB! Da er det lurt å sette opp 'parallelism' til endel høyere, kanskje 30?
