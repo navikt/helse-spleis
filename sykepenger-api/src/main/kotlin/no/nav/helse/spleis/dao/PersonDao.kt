@@ -8,22 +8,25 @@ import no.nav.helse.serde.SerialisertPerson
 
 internal class PersonDao(private val dataSource: DataSource) {
     fun hentPersonFraFnr(fødselsnummer: Long) =
-        hentPerson(queryOf("SELECT data FROM person WHERE fnr = ? ORDER BY id DESC LIMIT 1", fødselsnummer))
+        hentPerson(queryOf("SELECT data FROM person WHERE fnr = ?;", fødselsnummer))
 
     fun hentFødselsnummer(aktørId: Long) =
         sessionOf(dataSource).use { session ->
-            session.run(queryOf("SELECT fnr FROM unike_person WHERE aktor_id = ? LIMIT 1;", aktørId)
-                .map { it.long("fnr") }
-                .asSingle)
-        }
+            session.run(queryOf("SELECT fnr FROM unike_person WHERE aktor_id = ?;", aktørId).map {
+                it.long("fnr")
+            }.asList)
+        }.singleOrNullOrThrow()
 
     private fun hentPerson(query: Query) =
-        sessionOf(dataSource).use { session ->
-            session.run(query.map {
-                SerialisertPerson(it.string("data"))
-            }.asSingle)
-        }?.also {
-            PostgresProbe.personLestFraDb()
-        }
+        sessionOf(dataSource)
+            .use { session ->
+                session.run(query.map { SerialisertPerson(it.string("data")) }.asList)
+            }
+            .singleOrNullOrThrow()
+            ?.also { PostgresProbe.personLestFraDb() }
+
+    private fun <R> Collection<R>.singleOrNullOrThrow() =
+        if (size < 2) this.firstOrNull()
+        else throw IllegalStateException("Listen inneholder mer enn to elementer!")
 
 }

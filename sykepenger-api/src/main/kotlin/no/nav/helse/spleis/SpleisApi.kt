@@ -73,7 +73,7 @@ internal fun Application.sporingApi(dataSource: DataSource, authProviderName: St
         authenticate(authProviderName) {
             get("/api/vedtaksperioder") {
                 withContext(Dispatchers.IO) {
-                    val fnr = fnr(personDao)
+                    val fnr =  fnr(personDao)
                     val person = personDao.hentPersonFraFnr(fnr) ?: throw NotFoundException("Kunne ikke finne person for fødselsnummer")
                     call.respond(
                         serializePersonForSporing(
