@@ -17,7 +17,8 @@ class Påminnelse(
     private val tilstand: TilstandType,
     private val tilstandsendringstidspunkt: LocalDateTime,
     private val påminnelsestidspunkt: LocalDateTime,
-    private val nestePåminnelsestidspunkt: LocalDateTime
+    private val nestePåminnelsestidspunkt: LocalDateTime,
+    private val ønskerReberegning: Boolean = false
 ) : ArbeidstakerHendelse(meldingsreferanseId, fødselsnummer, aktørId, organisasjonsnummer, Aktivitetslogg()) {
     fun antallGangerPåminnet() = antallGangerPåminnet
     fun tilstand() = tilstand
@@ -26,6 +27,8 @@ class Påminnelse(
     fun nestePåminnelsestidspunkt() = nestePåminnelsestidspunkt
 
     internal fun erRelevant(vedtaksperiodeId: UUID) = vedtaksperiodeId.toString() == this.vedtaksperiodeId
+
+    internal fun skalReberegnes() = ønskerReberegning
 
     internal fun gjelderTilstand(tilstandType: TilstandType) = (tilstandType == tilstand).also {
         if (!it) {

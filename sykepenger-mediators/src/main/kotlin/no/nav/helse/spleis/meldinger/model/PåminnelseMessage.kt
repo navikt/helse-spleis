@@ -19,6 +19,7 @@ internal class PåminnelseMessage(packet: JsonMessage) : HendelseMessage(packet)
     private val tilstandsendringstidspunkt = packet["tilstandsendringstidspunkt"].asLocalDateTime()
     private val påminnelsestidspunkt = packet["påminnelsestidspunkt"].asLocalDateTime()
     private val nestePåminnelsestidspunkt = packet["nestePåminnelsestidspunkt"].asLocalDateTime()
+    private val ønskerReberegning = packet["ønskerReberegning"].takeIf { it.isBoolean }?.booleanValue() ?: false
 
     private val påminnelse
         get() = Påminnelse(
@@ -31,7 +32,8 @@ internal class PåminnelseMessage(packet: JsonMessage) : HendelseMessage(packet)
             tilstand = tilstand,
             tilstandsendringstidspunkt = tilstandsendringstidspunkt,
             påminnelsestidspunkt = påminnelsestidspunkt,
-            nestePåminnelsestidspunkt = nestePåminnelsestidspunkt
+            nestePåminnelsestidspunkt = nestePåminnelsestidspunkt,
+            ønskerReberegning = ønskerReberegning
         )
 
     override fun behandle(mediator: IHendelseMediator, context: MessageContext) {
