@@ -14,15 +14,17 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Permisjon
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Utdanning
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Utlandsopphold
-import no.nav.helse.hentErrors
-import no.nav.helse.hentVarselkoder
 import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.november
+import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogg.AktivitetException
 import no.nav.helse.person.Varselkode.RV_SØ_9
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.somPersonidentifikator
+import no.nav.helse.spleis.e2e.assertFunksjonellFeil
+import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
+import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.Arbeidsdag
 import no.nav.helse.sykdomstidslinje.Dag.FriskHelgedag
@@ -59,6 +61,7 @@ internal class SøknadTest {
         )
     }
 
+    private lateinit var aktivitetslogg: Aktivitetslogg
     private lateinit var søknad: Søknad
 
     @Test
@@ -297,15 +300,15 @@ internal class SøknadTest {
     fun `inntektskilde med type ANNET skal gi warning istedenfor error`() {
         søknad(Sykdom(1.januar, 31.januar, 100.prosent), andreInntektskilder = listOf(Inntektskilde(true, "ANNET")))
         søknad.valider(EN_PERIODE, MaskinellJurist())
-        assertTrue(søknad.hentVarselkoder().contains(RV_SØ_9))
-        assertTrue(søknad.hentErrors().isEmpty())
+        aktivitetslogg.assertVarsel(RV_SØ_9)
+        aktivitetslogg.assertIngenFunksjonelleFeil()
     }
 
     @Test
     fun `inntektskilde med type FRILANSER skal gi error`() {
         søknad(Sykdom(1.januar, 31.januar, 100.prosent), andreInntektskilder = listOf(Inntektskilde(true, "FRILANSER")))
         søknad.valider(EN_PERIODE, MaskinellJurist())
-        assertTrue(søknad.hentErrors().contains("Søknaden inneholder andre inntektskilder enn ANDRE_ARBEIDSFORHOLD"))
+        aktivitetslogg.assertFunksjonellFeil("Søknaden inneholder andre inntektskilder enn ANDRE_ARBEIDSFORHOLD")
     }
 
     private fun søknad(
@@ -316,13 +319,15 @@ internal class SøknadTest {
         hendelsefabrikk: ArbeidsgiverHendelsefabrikk = ungPersonFnr2018Hendelsefabrikk,
         sendtTilNAVEllerArbeidsgiver: LocalDate? = null
     ) {
+        aktivitetslogg = Aktivitetslogg()
         søknad = hendelsefabrikk.lagSøknad(
             perioder = perioder,
             andreInntektskilder = andreInntektskilder,
             sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver ?: Søknadsperiode.søknadsperiode(perioder.toList())?.endInclusive ?: LocalDate.now(),
             permittert = permittert,
             merknaderFraSykmelding = merknaderFraSykmelding,
-            sykmeldingSkrevet = LocalDateTime.now()
+            sykmeldingSkrevet = LocalDateTime.now(),
+            aktivitetslogg = aktivitetslogg
         )
     }
 }

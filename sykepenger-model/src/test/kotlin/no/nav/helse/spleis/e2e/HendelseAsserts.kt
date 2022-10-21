@@ -145,75 +145,89 @@ internal fun AbstractEndToEndTest.assertSisteForkastetPeriodeTilstand(orgnummer:
     assertFalse(inspektør(orgnummer).periodeErIkkeForkastet(vedtaksperiodeIdInnhenter)) { "Perioden er ikke forkastet" }
 }
 
-internal fun AbstractEndToEndTest.assertInfo(forventet: String, vararg filtre: AktivitetsloggFilter) {
+internal fun AbstractPersonTest.assertInfo(forventet: String, vararg filtre: AktivitetsloggFilter) = person.aktivitetslogg.assertInfo(forventet, *filtre)
+internal fun AbstractPersonTest.assertIngenInfo(forventet: String, vararg filtre: AktivitetsloggFilter) = person.aktivitetslogg.assertIngenInfo(forventet, *filtre)
+internal fun AbstractPersonTest.assertIngenVarsler(vararg filtre: AktivitetsloggFilter) = person.aktivitetslogg.assertIngenVarsler(*filtre)
+internal fun AbstractPersonTest.assertVarsler(vararg filtre: AktivitetsloggFilter) = person.aktivitetslogg.assertVarsler(*filtre)
+internal fun AbstractPersonTest.assertVarsler(warnings: List<String>, vararg filtre: AktivitetsloggFilter) = person.aktivitetslogg.assertVarsler(warnings, *filtre)
+internal fun AbstractPersonTest.assertVarsel(warning: String, vararg filtre: AktivitetsloggFilter) = person.aktivitetslogg.assertVarsel(warning, *filtre)
+internal fun AbstractPersonTest.assertVarsel(varsel: Varselkode, vararg filtre: AktivitetsloggFilter) = person.aktivitetslogg.assertVarsel(varsel, *filtre)
+internal fun AbstractPersonTest.assertIngenVarsel(warning: String, vararg filtre: AktivitetsloggFilter) = person.aktivitetslogg.assertIngenVarsel(warning, *filtre)
+internal fun AbstractPersonTest.assertIngenVarsel(varselkode: Varselkode, vararg filtre: AktivitetsloggFilter) = person.aktivitetslogg.assertIngenVarsel(varselkode, *filtre)
+internal fun AbstractPersonTest.assertFunksjonellFeil(error: String, vararg filtre: AktivitetsloggFilter) = person.aktivitetslogg.assertFunksjonellFeil(error, *filtre)
+internal fun AbstractPersonTest.assertFunksjonelleFeil(vararg filtre: AktivitetsloggFilter) = person.aktivitetslogg.assertFunksjonelleFeil(*filtre)
+internal fun AbstractPersonTest.assertIngenFunksjonelleFeil(vararg filtre: AktivitetsloggFilter) = person.aktivitetslogg.assertIngenFunksjonelleFeil(*filtre)
+internal fun AbstractPersonTest.assertLogiskFeil(severe: String, vararg filtre: AktivitetsloggFilter) = person.aktivitetslogg.assertLogiskFeil(severe, *filtre)
+
+internal fun Aktivitetslogg.assertInfo(forventet: String, vararg filtre: AktivitetsloggFilter) {
     val info = collectInfo(*filtre)
     assertEquals(1, info.count { it == forventet }, "fant ikke ett tilfelle av info. Info:\n${info.joinToString("\n")}")
 }
 
-internal fun AbstractEndToEndTest.assertIngenInfo(forventet: String, vararg filtre: AktivitetsloggFilter) {
+internal fun Aktivitetslogg.assertIngenInfo(forventet: String, vararg filtre: AktivitetsloggFilter) {
     val info = collectInfo(*filtre)
     assertEquals(0, info.count { it == forventet }, "fant uventet info. Info:\n${info.joinToString("\n")}")
 }
 
-internal fun AbstractPersonTest.assertIngenVarsler(vararg filtre: AktivitetsloggFilter) {
+internal fun Aktivitetslogg.assertIngenVarsler(vararg filtre: AktivitetsloggFilter) {
     val warnings = collectVarsler(*filtre)
     assertTrue(warnings.isEmpty(), "Forventet ingen warnings. Warnings:\n${warnings.joinToString("\n")}")
 }
 
-internal fun AbstractPersonTest.assertVarsler(vararg filtre: AktivitetsloggFilter) {
+internal fun Aktivitetslogg.assertVarsler(vararg filtre: AktivitetsloggFilter) {
     assertTrue(collectVarsler(*filtre).isNotEmpty(), "Forventet warnings, fant ingen")
 }
 
-internal fun AbstractPersonTest.assertVarsler(warnings: List<String>, vararg filtre: AktivitetsloggFilter) {
+internal fun Aktivitetslogg.assertVarsler(warnings: List<String>, vararg filtre: AktivitetsloggFilter) {
     assertVarsler(*filtre)
     val ekteWarnings = collectVarsler(*filtre)
     assertTrue(warnings.containsAll(ekteWarnings)) { "Forventet ikke warnings: ${ekteWarnings.filterNot { it in warnings }}"}
 }
 
-internal fun AbstractPersonTest.assertVarsel(warning: String, vararg filtre: AktivitetsloggFilter) {
+internal fun Aktivitetslogg.assertVarsel(warning: String, vararg filtre: AktivitetsloggFilter) {
     val warnings = collectVarsler(*filtre)
     assertTrue(warnings.contains(warning), "\nFant ikke forventet warning:\n\t$warning\nWarnings funnet:\n\t${warnings.joinToString("\n\t")}\n")
 }
 
-internal fun AbstractPersonTest.assertVarsel(varsel: Varselkode, vararg filtre: AktivitetsloggFilter) {
+internal fun Aktivitetslogg.assertVarsel(varsel: Varselkode, vararg filtre: AktivitetsloggFilter) {
     val varselkoder = collectVarselkoder(*filtre)
     assertTrue(varselkoder.contains(varsel), "\nFant ikke forventet varselkode:\n\t$varsel\nVarselkoder funnet:\n\t${varselkoder.joinToString("\n\t")}\n")
 }
 
-internal fun AbstractPersonTest.assertIngenVarsel(warning: String, vararg filtre: AktivitetsloggFilter) {
+internal fun Aktivitetslogg.assertIngenVarsel(warning: String, vararg filtre: AktivitetsloggFilter) {
     val warnings = collectVarsler(*filtre)
     assertFalse(warnings.contains(warning), "\nFant et varsel vi ikke forventet:\n\t$warning\nWarnings funnet:\n\t${warnings.joinToString("\n\t")}\n")
 }
 
-internal fun AbstractPersonTest.assertIngenVarsel(varselkode: Varselkode, vararg filtre: AktivitetsloggFilter) {
+internal fun Aktivitetslogg.assertIngenVarsel(varselkode: Varselkode, vararg filtre: AktivitetsloggFilter) {
     val varselkoder = collectVarselkoder(*filtre)
     assertFalse(varselkoder.contains(varselkode), "\nFant en varselkode vi ikke forventet:\n\t$varselkode\nVarselkoder funnet:\n\t${varselkoder.joinToString("\n\t")}\n")
 }
 
-internal fun AbstractEndToEndTest.assertFunksjonellFeil(error: String, vararg filtre: AktivitetsloggFilter) {
+internal fun Aktivitetslogg.assertFunksjonellFeil(error: String, vararg filtre: AktivitetsloggFilter) {
     val errors = collectFunksjonelleFeil(*filtre)
     assertTrue(errors.contains(error), "fant ikke forventet error. Errors:\n${errors.joinToString("\n")}")
 }
 
-internal fun AbstractPersonTest.assertFunksjonelleFeil(vararg filtre: AktivitetsloggFilter) {
+internal fun Aktivitetslogg.assertFunksjonelleFeil(vararg filtre: AktivitetsloggFilter) {
     val errors = collectFunksjonelleFeil(*filtre)
     assertTrue(errors.isNotEmpty(), "forventet errors, fant ingen.")
 }
 
 
-internal fun AbstractPersonTest.assertIngenFunksjonelleFeil(vararg filtre: AktivitetsloggFilter) {
+internal fun Aktivitetslogg.assertIngenFunksjonelleFeil(vararg filtre: AktivitetsloggFilter) {
     val errors = collectFunksjonelleFeil(*filtre)
     assertTrue(errors.isEmpty(), "forventet ingen errors. Errors: \n${errors.joinToString("\n")}")
 }
 
-internal fun AbstractEndToEndTest.assertLogiskFeil(severe: String, vararg filtre: AktivitetsloggFilter) {
+internal fun Aktivitetslogg.assertLogiskFeil(severe: String, vararg filtre: AktivitetsloggFilter) {
     val severes = collectLogiskeFeil(*filtre)
     assertTrue(severes.contains(severe), "fant ikke forventet severe. Severes:\n${severes.joinToString("\n")}")
 }
 
-private fun AbstractEndToEndTest.collectInfo(vararg filtre: AktivitetsloggFilter): MutableList<String> {
+internal fun Aktivitetslogg.collectInfo(vararg filtre: AktivitetsloggFilter): MutableList<String> {
     val info = mutableListOf<String>()
-    person.personLogg.accept(object : AktivitetsloggVisitor {
+    this.accept(object : AktivitetsloggVisitor {
         override fun visitInfo(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Info, melding: String, tidsstempel: String) {
             if (filtre.all { filter -> kontekster.any { filter.filtrer(it) } }) {
                 info.add(melding)
@@ -223,9 +237,9 @@ private fun AbstractEndToEndTest.collectInfo(vararg filtre: AktivitetsloggFilter
     return info
 }
 
-private fun AbstractPersonTest.collectVarsler(vararg filtre: AktivitetsloggFilter): MutableList<String> {
+internal fun Aktivitetslogg.collectVarsler(vararg filtre: AktivitetsloggFilter): MutableList<String> {
     val warnings = mutableListOf<String>()
-    person.personLogg.accept(object : AktivitetsloggVisitor {
+    this.accept(object : AktivitetsloggVisitor {
         override fun visitVarsel(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Varsel, kode: Varselkode?, melding: String, tidsstempel: String) {
             if (filtre.all { filter -> kontekster.any { filter.filtrer(it) } }) {
                 warnings.add(melding)
@@ -234,9 +248,9 @@ private fun AbstractPersonTest.collectVarsler(vararg filtre: AktivitetsloggFilte
     })
     return warnings
 }
-private fun AbstractPersonTest.collectVarselkoder(vararg filtre: AktivitetsloggFilter): List<Varselkode> {
+internal fun Aktivitetslogg.collectVarselkoder(vararg filtre: AktivitetsloggFilter): List<Varselkode> {
     val varselkoder = mutableListOf<Varselkode>()
-    person.personLogg.accept(object : AktivitetsloggVisitor {
+    accept(object : AktivitetsloggVisitor {
         override fun visitVarsel(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.Varsel, kode: Varselkode?, melding: String, tidsstempel: String) {
             if (filtre.all { filter -> kontekster.any { filter.filtrer(it) } } && kode != null) {
                 varselkoder.add(kode)
@@ -246,9 +260,9 @@ private fun AbstractPersonTest.collectVarselkoder(vararg filtre: AktivitetsloggF
     return varselkoder
 }
 
-internal fun AbstractPersonTest.collectFunksjonelleFeil(vararg filtre: AktivitetsloggFilter): MutableList<String> {
+internal fun Aktivitetslogg.collectFunksjonelleFeil(vararg filtre: AktivitetsloggFilter): MutableList<String> {
     val errors = mutableListOf<String>()
-    person.personLogg.accept(object : AktivitetsloggVisitor {
+    accept(object : AktivitetsloggVisitor {
         override fun visitFunksjonellFeil(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.FunksjonellFeil, melding: String, tidsstempel: String) {
             if (filtre.all { filter -> kontekster.any { filter.filtrer(it) } }) {
                 errors.add(melding)
@@ -258,9 +272,9 @@ internal fun AbstractPersonTest.collectFunksjonelleFeil(vararg filtre: Aktivitet
     return errors
 }
 
-internal fun AbstractEndToEndTest.collectLogiskeFeil(vararg filtre: AktivitetsloggFilter): MutableList<String> {
+internal fun Aktivitetslogg.collectLogiskeFeil(vararg filtre: AktivitetsloggFilter): MutableList<String> {
     val severes = mutableListOf<String>()
-    person.personLogg.accept(object : AktivitetsloggVisitor {
+    accept(object : AktivitetsloggVisitor {
         override fun visitLogiskFeil(id: UUID, kontekster: List<SpesifikkKontekst>, aktivitet: Aktivitetslogg.Aktivitet.LogiskFeil, melding: String, tidsstempel: String) {
             if (filtre.all { filter -> kontekster.any { filter.filtrer(it) } }) {
                 severes.add(melding)

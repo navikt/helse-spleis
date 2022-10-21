@@ -7,6 +7,7 @@ import java.time.temporal.ChronoUnit
 import java.util.*
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Companion.inneholderDagerEtter
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Companion.subsumsjonsFormat
+import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.IAktivitetslogg
@@ -40,8 +41,9 @@ class Søknad(
     private val merknaderFraSykmelding: List<Merknad>,
     private val sykmeldingSkrevet: LocalDateTime,
     private val korrigerer: UUID?,
-    private val opprinneligSendt: LocalDateTime?
-) : SykdomstidslinjeHendelse(meldingsreferanseId, fnr, aktørId, orgnummer, sykmeldingSkrevet, Søknad::class) {
+    private val opprinneligSendt: LocalDateTime?,
+    aktivitetslogg: Aktivitetslogg = Aktivitetslogg()
+) : SykdomstidslinjeHendelse(meldingsreferanseId, fnr, aktørId, orgnummer, sykmeldingSkrevet, Søknad::class, aktivitetslogg) {
 
     private val sykdomsperiode: Periode
     private val sykdomstidslinje: Sykdomstidslinje

@@ -82,7 +82,8 @@ internal class ArbeidsgiverHendelsefabrikk(
         merknaderFraSykmelding: List<Søknad.Merknad> = emptyList(),
         permittert: Boolean = false,
         korrigerer: UUID? = null,
-        opprinneligSendt: LocalDate? = null
+        opprinneligSendt: LocalDate? = null,
+        aktivitetslogg: Aktivitetslogg = Aktivitetslogg()
     ): Søknad {
         val innsendt = sendtTilNAVEllerArbeidsgiver ?: Søknad.Søknadsperiode.søknadsperiode(perioder.toList())!!.endInclusive
         return Søknad(
@@ -98,7 +99,8 @@ internal class ArbeidsgiverHendelsefabrikk(
             sykmeldingSkrevet = sykmeldingSkrevet ?: Søknad.Søknadsperiode.søknadsperiode(perioder.toList())!!.start.atStartOfDay(),
             fødselsdato = fødselsdato,
             korrigerer = korrigerer,
-            opprinneligSendt = opprinneligSendt?.atStartOfDay()
+            opprinneligSendt = opprinneligSendt?.atStartOfDay(),
+            aktivitetslogg = aktivitetslogg
         ).apply {
             søknader.add(this)
         }
@@ -112,7 +114,8 @@ internal class ArbeidsgiverHendelsefabrikk(
         harOpphørAvNaturalytelser: Boolean = false,
         arbeidsforholdId: String? = null,
         begrunnelseForReduksjonEllerIkkeUtbetalt: String? = null,
-        id: UUID = UUID.randomUUID()
+        id: UUID = UUID.randomUUID(),
+        aktivitetslogg: Aktivitetslogg = Aktivitetslogg()
     ): Inntektsmelding {
         val inntektsmeldinggenerator = {
             Inntektsmelding(
@@ -128,7 +131,8 @@ internal class ArbeidsgiverHendelsefabrikk(
                 begrunnelseForReduksjonEllerIkkeUtbetalt = begrunnelseForReduksjonEllerIkkeUtbetalt,
                 harOpphørAvNaturalytelser = harOpphørAvNaturalytelser,
                 mottatt = LocalDateTime.now(),
-                fødselsdato = fødselsdato
+                fødselsdato = fødselsdato,
+                aktivitetslogg = aktivitetslogg
             )
         }
         inntektsmeldinger[id] = inntektsmeldinggenerator

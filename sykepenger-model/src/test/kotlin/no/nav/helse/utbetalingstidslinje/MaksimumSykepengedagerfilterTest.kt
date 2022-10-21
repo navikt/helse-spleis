@@ -7,8 +7,6 @@ import no.nav.helse.erHelg
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
-import no.nav.helse.hentErrors
-import no.nav.helse.hentInfo
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.juli
@@ -17,6 +15,8 @@ import no.nav.helse.mars
 import no.nav.helse.oktober
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.NullObserver
+import no.nav.helse.spleis.e2e.assertFunksjonellFeil
+import no.nav.helse.spleis.e2e.assertInfo
 import no.nav.helse.testhelpers.AP
 import no.nav.helse.testhelpers.ARB
 import no.nav.helse.testhelpers.AVV
@@ -121,7 +121,7 @@ internal class MaksimumSykepengedagerfilterTest {
         val tidslinje = tidslinjeOf(16.AP, 249.NAVDAGER)
         assertEquals(listOf(31.desember), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018))
         assertEquals(28.desember, maksimumSykepenger.sisteDag())
-        assertTrue(aktivitetslogg.hentInfo().contains("Maks antall sykepengedager er nådd i perioden"))
+        aktivitetslogg.assertInfo("Maks antall sykepengedager er nådd i perioden")
     }
 
     @Test
@@ -129,7 +129,7 @@ internal class MaksimumSykepengedagerfilterTest {
         val persontidslinje = tidslinjeOf(16.AP, 247.NAVDAGER)
         val tidslinje = tidslinjeOf(2.NAVDAGER, startDato = persontidslinje.periode().endInclusive.plusDays(1))
         assertEquals(listOf(31.desember), tidslinje.utbetalingsavgrenser(UNG_PERSON_FNR_2018, personTidslinje = persontidslinje))
-        assertTrue(aktivitetslogg.hentInfo().contains("Maks antall sykepengedager er nådd i perioden"))
+        aktivitetslogg.assertInfo("Maks antall sykepengedager er nådd i perioden")
     }
 
     @Test
@@ -524,7 +524,7 @@ internal class MaksimumSykepengedagerfilterTest {
         tidslinje.inspektør.avvistedatoer.dropLast(1).forEach { dato ->
             assertEquals(listOf(SykepengedagerOppbrukt), tidslinje.inspektør.begrunnelse(dato))
         }
-        assertTrue(aktivitetslogg.hentErrors().contains("Bruker er fortsatt syk 26 uker etter maksdato"))
+        aktivitetslogg.assertFunksjonellFeil("Bruker er fortsatt syk 26 uker etter maksdato")
         assertEquals(listOf(NyVilkårsprøvingNødvendig), tidslinje.inspektør.begrunnelse(tidslinje.inspektør.avvistedatoer.last()))
     }
 

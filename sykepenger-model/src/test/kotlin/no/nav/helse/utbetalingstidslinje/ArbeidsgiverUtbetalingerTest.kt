@@ -14,7 +14,6 @@ import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
-import no.nav.helse.hentInfo
 import no.nav.helse.inspectors.UtbetalingstidslinjeInspektør
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
@@ -35,6 +34,7 @@ import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.somPersonidentifikator
+import no.nav.helse.spleis.e2e.assertInfo
 import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.sykepengegrunnlag
 import no.nav.helse.testhelpers.AP
@@ -156,7 +156,7 @@ internal class ArbeidsgiverUtbetalingerTest {
         assertEquals(60 * 1200.0, inspektør.totalUtbetaling())
         assertEquals(30.mars, maksdato)
         assertEquals(0, gjenståendeSykedager)
-        assertTrue(aktivitetslogg.hentInfo().contains("Maks antall sykepengedager er nådd i perioden"))
+        aktivitetslogg.assertInfo("Maks antall sykepengedager er nådd i perioden")
         assertFalse(aktivitetslogg.harFunksjonelleFeilEllerVerre())
     }
 
@@ -171,7 +171,7 @@ internal class ArbeidsgiverUtbetalingerTest {
         assertEquals((60 * 1200.0), inspektør.totalUtbetaling())
         assertEquals(30.mars, maksdato)
         assertEquals(0, gjenståendeSykedager)
-        assertTrue(aktivitetslogg.hentInfo().contains("Maks antall sykepengedager er nådd i perioden"))
+        aktivitetslogg.assertInfo("Maks antall sykepengedager er nådd i perioden")
         assertFalse(aktivitetslogg.harFunksjonelleFeilEllerVerre())
     }
 
@@ -190,7 +190,7 @@ internal class ArbeidsgiverUtbetalingerTest {
         assertEquals(40 * 1200.0, inspektør.totalUtbetaling())
         assertEquals(30.mars, maksdato)
         assertEquals(0, gjenståendeSykedager)
-        assertTrue(aktivitetslogg.hentInfo().contains("Maks antall sykepengedager er nådd i perioden"))
+        aktivitetslogg.assertInfo("Maks antall sykepengedager er nådd i perioden")
         assertFalse(aktivitetslogg.harFunksjonelleFeilEllerVerre())
     }
 
@@ -259,7 +259,7 @@ internal class ArbeidsgiverUtbetalingerTest {
         assertEquals(28.desember, maksdato)
         assertEquals(0, gjenståendeSykedager)
         assertEquals(248, inspektør.navDagTeller)
-        assertTrue(aktivitetslogg.hentInfo().contains("Maks antall sykepengedager er nådd i perioden"))
+        aktivitetslogg.assertInfo("Maks antall sykepengedager er nådd i perioden")
         assertFalse(aktivitetslogg.harVarslerEllerVerre())
     }
 
@@ -269,7 +269,7 @@ internal class ArbeidsgiverUtbetalingerTest {
         assertEquals(10.april, maksdato)
         assertEquals(0, gjenståendeSykedager)
         assertEquals(60, inspektør.navDagTeller)
-        assertTrue(aktivitetslogg.hentInfo().contains("Maks antall sykepengedager er nådd i perioden"))
+        aktivitetslogg.assertInfo("Maks antall sykepengedager er nådd i perioden")
         assertFalse(aktivitetslogg.harVarslerEllerVerre())
     }
 
@@ -278,7 +278,7 @@ internal class ArbeidsgiverUtbetalingerTest {
         undersøke(PERSON_68_ÅR_1_DESEMBER_2018, 16.AP, 366.NAV, fødselsdato = PERSON_68_ÅR_1_DESEMBER_2018_FØDSELDATO)
         assertEquals(28.desember, maksdato)
         assertEquals(0, gjenståendeSykedager)
-        assertTrue(aktivitetslogg.hentInfo().contains("Maks antall sykepengedager er nådd i perioden"))
+        aktivitetslogg.assertInfo("Maks antall sykepengedager er nådd i perioden")
         assertFalse(aktivitetslogg.harVarslerEllerVerre())
     }
 

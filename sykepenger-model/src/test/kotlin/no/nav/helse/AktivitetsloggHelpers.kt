@@ -5,8 +5,6 @@ import no.nav.helse.person.AbstractPersonTest
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.IdInnhenter
-import no.nav.helse.person.Varselkode
-import no.nav.helse.serde.reflection.castAsList
 
 internal fun IAktivitetslogg.antallEtterspurteBehov(vedtaksperiodeIdInnhenter: IdInnhenter, behovtype: Aktivitetslogg.Aktivitet.Behov.Behovtype, orgnummer: String = AbstractPersonTest.ORGNUMMER) =
     antallEtterspurteBehov(vedtaksperiodeIdInnhenter.id(orgnummer), behovtype)
@@ -54,19 +52,3 @@ inline fun <reified T> IAktivitetslogg.etterspurtBehov(vedtaksperiodeId: UUID, b
         .filter { it.kontekst()["vedtaksperiodeId"] == vedtaksperiodeId.toString() }
         .first { it.type == behov }.detaljer()[felt] as T?
 }
-
-private fun IAktivitetslogg.hent(alvorlighetsgrad: String) = toMap()["aktiviteter"]
-    .castAsList<Map<String, Any>>()
-    .filter { it["alvorlighetsgrad"] == alvorlighetsgrad }
-    .map { it["melding"] }
-    .mapNotNull { it.toString() }
-
-internal fun IAktivitetslogg.hentVarselkoder() = toMap()["aktiviteter"]
-    .castAsList<Map<String, Any>>()
-    .filter { it["alvorlighetsgrad"] == "WARN" }
-    .map { it["kode"] }
-    .mapNotNull { enumValueOf<Varselkode>(it.toString()) }
-
-internal fun IAktivitetslogg.hentErrors() = hent("ERROR")
-internal fun IAktivitetslogg.hentWarnings() = hent("WARN")
-internal fun IAktivitetslogg.hentInfo() = hent("INFO")

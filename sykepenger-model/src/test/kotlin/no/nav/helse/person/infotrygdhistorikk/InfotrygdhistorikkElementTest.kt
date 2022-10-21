@@ -8,7 +8,6 @@ import no.nav.helse.august
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
-import no.nav.helse.hentInfo
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.juni
@@ -17,6 +16,8 @@ import no.nav.helse.mars
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsforholdhistorikk
 import no.nav.helse.person.Inntektshistorikk
+import no.nav.helse.spleis.e2e.assertInfo
+import no.nav.helse.spleis.e2e.assertIngenInfo
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.testhelpers.A
 import no.nav.helse.testhelpers.FRI
@@ -782,12 +783,12 @@ internal class InfotrygdhistorikkElementTest {
     }
 
     private fun assertFlereInntekterInfotrygd() {
-        assertTrue(aktivitetslogg.hentInfo().contains("Det er lagt inn flere inntekter i Infotrygd med samme fom-dato."))
+        aktivitetslogg.assertInfo("Det er lagt inn flere inntekter i Infotrygd med samme fom-dato.")
         assertFalse(aktivitetslogg.harVarslerEllerVerre())
     }
 
     private fun assertEnInntektInfotrygd() {
-        assertFalse(aktivitetslogg.hentInfo().contains("Det er lagt inn flere inntekter i Infotrygd med samme fom-dato."))
+        aktivitetslogg.assertIngenInfo("Det er lagt inn flere inntekter i Infotrygd med samme fom-dato.")
         assertFalse(aktivitetslogg.harVarslerEllerVerre())
     }
 

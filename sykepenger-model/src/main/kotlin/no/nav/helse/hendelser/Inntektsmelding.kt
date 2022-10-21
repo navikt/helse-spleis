@@ -9,6 +9,7 @@ import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon.Companio
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.nesteDag
+import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.IAktivitetslogg
@@ -47,8 +48,9 @@ class Inntektsmelding(
     private val arbeidsforholdId: String?,
     private val begrunnelseForReduksjonEllerIkkeUtbetalt: String?,
     private val harOpphørAvNaturalytelser: Boolean = false,
-    mottatt: LocalDateTime
-) : SykdomstidslinjeHendelse(meldingsreferanseId, fødselsnummer, aktørId, orgnummer, mottatt) {
+    mottatt: LocalDateTime,
+    aktivitetslogg: Aktivitetslogg = Aktivitetslogg()
+) : SykdomstidslinjeHendelse(meldingsreferanseId, fødselsnummer, aktørId, orgnummer, mottatt, aktivitetslogg = aktivitetslogg) {
 
     private val arbeidsgiverperioder = arbeidsgiverperioder.grupperSammenhengendePerioder()
     private val arbeidsgiverperiode = this.arbeidsgiverperioder.periode()
