@@ -1,22 +1,19 @@
 CREATE TABLE unike_person
 (
-    fnr          BIGINT PRIMARY KEY,
-    aktor_id     BIGINT    NOT NULL
+    fnr      BIGINT PRIMARY KEY,
+    aktor_id BIGINT NOT NULL
 );
-create index "index_aktor_id" on unike_person(aktor_id);
+create index "index_aktor_id" on unike_person (aktor_id);
 
 CREATE TABLE person
 (
     id             BIGSERIAL,
-    skjema_versjon INT                      NOT NULL,
-    fnr            BIGINT                   NOT NULL,
-    aktor_id       BIGINT                   NOT NULL,
-    data           JSON                     NOT NULL,
-    opprettet      TIMESTAMP WITH TIME ZONE NOT NULL default (now() at time zone 'utc'),
+    skjema_versjon INT           NOT NULL,
+    fnr            BIGINT UNIQUE NOT NULL,
+    data           JSON          NOT NULL,
+    oppdatert      TIMESTAMP WITH TIME ZONE,
     PRIMARY KEY (id)
 );
-
-create index "index_person_fnr" on person(fnr, id desc);
 
 CREATE TABLE melding
 (
@@ -29,4 +26,4 @@ CREATE TABLE melding
     PRIMARY KEY (id)
 );
 
-CREATE INDEX "index_melding_fnr" ON melding(fnr);
+CREATE INDEX "index_melding_fnr" ON melding (fnr);

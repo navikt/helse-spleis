@@ -174,18 +174,10 @@ internal class RestApiTest {
     private fun DataSource.lagrePerson(aktørId: String, fødselsnummer: String, person: Person) {
         val serialisertPerson = person.serialize()
         sessionOf(this).use {
-            it.run(
-                queryOf(
-                    "INSERT INTO unike_person (aktor_id, fnr) VALUES (?, ?)",
-                    aktørId.toLong(), fødselsnummer.toLong()
-                ).asExecute
-            )
-            it.run(
-                queryOf(
-                    "INSERT INTO person (aktor_id, fnr, skjema_versjon, data) VALUES (?, ?, ?, (to_json(?::json)))",
-                    aktørId.toLong(), fødselsnummer.toLong(), serialisertPerson.skjemaVersjon, serialisertPerson.json
-                ).asExecute
-            )
+            it.run(queryOf("INSERT INTO unike_person (aktor_id, fnr) VALUES (?, ?)",
+                aktørId.toLong(), fødselsnummer.toLong()).asExecute)
+            it.run(queryOf("INSERT INTO person (fnr, skjema_versjon, data) VALUES (?, ?, (to_json(?::json)))",
+                fødselsnummer.toLong(), serialisertPerson.skjemaVersjon, serialisertPerson.json).asExecute)
         }
     }
 
