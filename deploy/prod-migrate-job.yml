@@ -7,6 +7,10 @@ metadata:
   namespace: tbd
 spec:
   image: {{image}}
+  resources:
+    limits:
+      cpu: 500m
+      memory: 4096Mi
   kafka:
     pool: nav-prod
   secureLogs:
