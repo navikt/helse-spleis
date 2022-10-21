@@ -17,7 +17,7 @@ private typealias BeregningId = UUID
 private typealias UtbetalingId = UUID
 private typealias VedtaksperiodeId = UUID
 
-internal class V191UtbetalingerOgVilkårsgrunnlag: JsonMigration(191) {
+internal class V193UtbetalingerOgVilkårsgrunnlag: JsonMigration(193) {
     private companion object {
         private val ingenInnslagId = UUID.fromString("00000000-0000-0000-0000-000000000000") as InnslagId
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
@@ -201,7 +201,7 @@ internal class V191UtbetalingerOgVilkårsgrunnlag: JsonMigration(191) {
                     }
                     if (innslagId == null) {
                         // hvis erForkastet er true så kan vi kanskje bare droppe utbetalingen fra listen
-                        sikkerlogg.info("[V191] finner ikke vilkårsgrunnlagInnslagId for vedtaksperiodeId=$vedtaksperiodeId erForkastet=$erForkastet, tilInfotrygd=$tilInfotrygd utbetaling=$utbetalingId")
+                        sikkerlogg.info("[V193] finner ikke vilkårsgrunnlagInnslagId for vedtaksperiodeId=$vedtaksperiodeId erForkastet=$erForkastet, tilInfotrygd=$tilInfotrygd utbetaling=$utbetalingId")
                         if (tilInfotrygd) null
                         else utbetaling
                     } else {
@@ -213,12 +213,12 @@ internal class V191UtbetalingerOgVilkårsgrunnlag: JsonMigration(191) {
                             ?: finnVilkårsgrunnlagForUtbetaling(vilkårsgrunnlag, innslagId, skjæringstidspunktVedtaksperiode, sykefraværstilfelle)
                             ?: finnVilkårsgrunnlagForUtbetaling(vilkårsgrunnlag, innslagId, skjæringstidspunktVedtaksperiode, totalperiode)
                             ?: finnVilkårsgrunnlagForUtbetaling(vilkårsgrunnlag, nesteNyeInnslag, skjæringstidspunktVedtaksperiode, totalperiode)?.also {
-                                sikkerlogg.info("[V191] fant match ved å se i neste nye innslag for vedtaksperiode=$vedtaksperiodeId")
+                                sikkerlogg.info("[V193] fant match ved å se i neste nye innslag for vedtaksperiode=$vedtaksperiodeId")
                             }
                             ?: matchFuzzy(vilkårsgrunnlag[innslagId]?.values ?: emptyList(), skjæringstidspunktVedtaksperiode)
                         match?.log(utbetalingId, vedtaksperiodeId, skjæringstidspunktVedtaksperiode)
                         if (match == null) {
-                            sikkerlogg.info("[V191] fant ikke match søkeperioder=$totalperiode erForkastet=$erForkastet, tilInfotrygd=$tilInfotrygd for utbetaling=$utbetalingId for vedtaksperiode=$vedtaksperiodeId med vedtaksperiodeSkjæringstidspunkt=$skjæringstidspunktVedtaksperiode")
+                            sikkerlogg.info("[V193] fant ikke match søkeperioder=$totalperiode erForkastet=$erForkastet, tilInfotrygd=$tilInfotrygd for utbetaling=$utbetalingId for vedtaksperiode=$vedtaksperiodeId med vedtaksperiodeSkjæringstidspunkt=$skjæringstidspunktVedtaksperiode")
                         } else {
                             (utbetaling as ObjectNode).put("vilkårsgrunnlagId", match.grunnlag.vilkårsgrunnlagId.toString())
                         }
@@ -275,7 +275,7 @@ internal class V191UtbetalingerOgVilkårsgrunnlag: JsonMigration(191) {
             vedtaksperiodeId: VedtaksperiodeId,
             skjæringstidspunktVedtaksperiode: LocalDate
         ) {
-            sikkerlogg.info("[V191] $tekst vilkårsgrunnlag=${grunnlag.vilkårsgrunnlagId} skjæringstidspunkt=${grunnlag.skjæringstidspunkt} for utbetaling=$utbetalingId for vedtaksperiode=$vedtaksperiodeId med vedtaksperiodeSkjæringstidspunkt=$skjæringstidspunktVedtaksperiode")
+            sikkerlogg.info("[V193] $tekst vilkårsgrunnlag=${grunnlag.vilkårsgrunnlagId} skjæringstidspunkt=${grunnlag.skjæringstidspunkt} for utbetaling=$utbetalingId for vedtaksperiode=$vedtaksperiodeId med vedtaksperiodeSkjæringstidspunkt=$skjæringstidspunktVedtaksperiode")
         }
 
         class Direkte(grunnlag: Vilkårsgrunnlag) : Match(grunnlag) {
