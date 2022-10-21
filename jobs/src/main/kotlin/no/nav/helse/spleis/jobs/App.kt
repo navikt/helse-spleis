@@ -67,9 +67,9 @@ private fun vacuumTask() {
 private fun migrateV2Task(targetVersjon: Int) {
     DataSourceConfiguration(DbUser.MIGRATE).dataSource().use { ds ->
         sessionOf(ds).use { session ->
-            val finnArbeid = { txSession: TransactionalSession, utførArbeid: (String, String) -> Unit ->
+            val finnArbeid = { txSession: TransactionalSession, utførArbeid: (Long, String) -> Unit ->
                 txSession.run(queryOf("SELECT fnr,data FROM person WHERE skjema_versjon < $targetVersjon LIMIT 1 FOR UPDATE SKIP LOCKED;").map {
-                    it.string("fnr") to it.string("data")
+                    it.long("fnr") to it.string("data")
                 }.asSingle)?.also { (ident, arbeid) -> utførArbeid(ident, arbeid) } != null
 
             }
