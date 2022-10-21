@@ -14,7 +14,6 @@ import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogg.Aktivitet
-import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.Arbeidsforholdhistorikk
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning
@@ -385,33 +384,24 @@ internal data class PersonData(
             val aktivitetslogg = Aktivitetslogg()
             val modellkontekst = kontekster.map { it.parseKontekst() }
             aktivitetslogg.aktiviteter.apply {
-                addAll(aktiviteter.map {
-                    it.parseAktivitet(modellkontekst)
-                })
+                addAll(aktiviteter.mapNotNull { it.parseAktivitet(modellkontekst) })
             }
-
             return aktivitetslogg
         }
 
         data class AktivitetData(
-            private val alvorlighetsgrad: Alvorlighetsgrad,
-            private val label: Char,
-            private val behovtype: String?,
+            private val alvorlighetsgrad: AlvorlighetsgradData,
             private val kode: Varselkode?,
             private val melding: String,
             private val id: UUID,
             private val tidsstempel: String,
-            private val kontekster: List<Int>,
-            private val detaljer: Map<String, Any>
+            private val kontekster: List<Int>
         ) {
-            internal fun parseAktivitet(spesifikkKontekster: List<SpesifikkKontekst>): Aktivitet {
+            internal fun parseAktivitet(spesifikkKontekster: List<SpesifikkKontekst>): Aktivitet? {
                 val kontekster = kontekster.map { index -> spesifikkKontekster[index] }
                 return when (alvorlighetsgrad) {
-                    Alvorlighetsgrad.INFO -> Aktivitet.Info.gjennopprett(id, kontekster, melding, tidsstempel)
-                    Alvorlighetsgrad.WARN -> Aktivitet.Varsel.gjennopprett(id, kontekster, kode, melding, tidsstempel)
-                    Alvorlighetsgrad.BEHOV -> Aktivitet.Behov.gjennopprett(id, Behovtype.valueOf(behovtype!!), kontekster, melding, detaljer, tidsstempel)
-                    Alvorlighetsgrad.ERROR -> Aktivitet.FunksjonellFeil.gjennopprett(id, kontekster, melding, tidsstempel)
-                    Alvorlighetsgrad.SEVERE -> Aktivitet.LogiskFeil.gjennopprett(id, kontekster, melding, tidsstempel)
+                    AlvorlighetsgradData.WARN -> Aktivitet.Varsel.gjennopprett(id, kontekster, kode, melding, tidsstempel)
+                    else -> null
                 }
             }
 
@@ -425,7 +415,7 @@ internal data class PersonData(
                 SpesifikkKontekst(kontekstType, kontekstMap)
         }
 
-        enum class Alvorlighetsgrad {
+        enum class AlvorlighetsgradData {
             INFO,
             WARN,
             BEHOV,
