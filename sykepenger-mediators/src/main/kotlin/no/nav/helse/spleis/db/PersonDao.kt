@@ -48,7 +48,6 @@ internal class PersonDao(private val dataSource: DataSource) {
         if (size < 2) this.firstOrNull()
         else throw IllegalStateException("Listen inneholder mer enn to elementer!")
 
-    // TODO: gjøre fnr som primary key i person-tabellen, og fjerne behov for unike_person
     private fun opprettNyPerson(session: Session, personidentifikator: Personidentifikator, aktørId: String, lagNyPerson: () -> SerialisertPerson): SerialisertPerson {
         return lagNyPerson().also {
             opprettNyPersonRad(session, personidentifikator, aktørId)
