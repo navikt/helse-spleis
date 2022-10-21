@@ -15,7 +15,7 @@ import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.harId
 import no.nav.helse.utbetalingstidslinje.Alder
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 
-internal class VedtaksperiodeUtbetalinger(private val arbeidsgiver: Arbeidsgiver, utbetalinger: List<Pair<VilkårsgrunnlagElement?, Utbetaling>>) {
+internal class VedtaksperiodeUtbetalinger(private val arbeidsgiver: Arbeidsgiver, utbetalinger: List<Pair<VilkårsgrunnlagElement, Utbetaling>>) {
     internal constructor(arbeidsgiver: Arbeidsgiver) : this(arbeidsgiver, mutableListOf())
 
     private val utbetalingene get() = utbetalinger.map(Pair<*, Utbetaling>::second)
@@ -26,7 +26,7 @@ internal class VedtaksperiodeUtbetalinger(private val arbeidsgiver: Arbeidsgiver
         visitor.preVisitVedtakserperiodeUtbetalinger(utbetalinger)
         utbetalinger.forEach { (grunnlagsdata, utbetaling) ->
             visitor.preVisitVedtaksperiodeUtbetaling(grunnlagsdata, utbetaling)
-            grunnlagsdata?.accept(visitor)
+            grunnlagsdata.accept(visitor)
             utbetaling.accept(visitor)
             visitor.postVisitVedtaksperiodeUtbetaling(grunnlagsdata, utbetaling)
         }

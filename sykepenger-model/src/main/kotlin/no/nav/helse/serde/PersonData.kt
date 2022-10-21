@@ -857,13 +857,13 @@ internal data class PersonData(
             private val oppdatert: LocalDateTime
         ) {
             data class VedtaksperiodeUtbetalingData(
-                private val vilkårsgrunnlagId: UUID?,
+                private val vilkårsgrunnlagId: UUID,
                 private val utbetalingId: UUID
             ) {
                 companion object {
                     fun List<VedtaksperiodeUtbetalingData>.tilModellobjekt(grunnlag: Map<UUID, VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement>, utbetalinger: Map<UUID, Utbetaling>) =
                         this.map { (grunnlagId, utbetalingId) ->
-                            grunnlag[grunnlagId] to utbetalinger.getValue(utbetalingId)
+                            grunnlag.getValue(grunnlagId) to utbetalinger.getValue(utbetalingId)
                         }
                 }
             }

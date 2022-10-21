@@ -1488,7 +1488,7 @@ internal class JsonBuilder : AbstractBuilder() {
 
     private class VedtaksperiodeUtbetalingerState(private val utbetalinger: MutableList<Map<String, String?>>) : BuilderState() {
         override fun preVisitVedtaksperiodeUtbetaling(
-            grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?,
+            grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement,
             utbetaling: Utbetaling
         ) {
             pushState(VedtaksperiodeUtbetalingState(utbetalinger))
@@ -1499,7 +1499,7 @@ internal class JsonBuilder : AbstractBuilder() {
         }
 
         private class VedtaksperiodeUtbetalingState(private val utbetalinger: MutableList<Map<String, String?>>) : BuilderState() {
-            private var grunnlagId: UUID? = null
+            private lateinit var grunnlagId: UUID
             private lateinit var utbetalingId: UUID
 
             override fun preVisitGrunnlagsdata(
@@ -1550,12 +1550,12 @@ internal class JsonBuilder : AbstractBuilder() {
             }
 
             override fun postVisitVedtaksperiodeUtbetaling(
-                grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?,
+                grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement,
                 utbetaling: Utbetaling
             ) {
                 this.utbetalinger.add(mapOf(
                     "utbetalingId" to this.utbetalingId.toString(),
-                    "vilkårsgrunnlagId" to this.grunnlagId?.toString()
+                    "vilkårsgrunnlagId" to this.grunnlagId.toString()
                 ))
                 popState()
             }

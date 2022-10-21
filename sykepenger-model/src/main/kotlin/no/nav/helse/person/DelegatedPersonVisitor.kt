@@ -983,14 +983,14 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
     }
 
     override fun preVisitVedtaksperiodeUtbetaling(
-        grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?,
+        grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement,
         utbetaling: Utbetaling
     ) {
         delegatee.preVisitVedtaksperiodeUtbetaling(grunnlagsdata, utbetaling)
     }
 
     override fun postVisitVedtaksperiodeUtbetaling(
-        grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?,
+        grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement,
         utbetaling: Utbetaling
     ) {
         delegatee.postVisitVedtaksperiodeUtbetaling(grunnlagsdata, utbetaling)

@@ -2124,7 +2124,10 @@
             ]
           },
           "utbetalinger": [
-            "4bd9cfb6-334e-4247-94a1-336bc525898c"
+            {
+              "vilkårsgrunnlagId": "326b0405-765f-4871-962c-06cf763c7cfa",
+              "utbetalingId": "4bd9cfb6-334e-4247-94a1-336bc525898c"
+            }
           ],
           "id": "1a95e24a-f987-4251-99f3-2ad52da3c8fd",
           "fom": "2018-01-01",
@@ -2383,7 +2386,10 @@
             ]
           },
           "utbetalinger": [
-            "7fdf8af5-5faf-40e6-b018-0960ab0d4ce3"
+            {
+              "vilkårsgrunnlagId": "326b0405-765f-4871-962c-06cf763c7cfa",
+              "utbetalingId": "7fdf8af5-5faf-40e6-b018-0960ab0d4ce3"
+            }
           ],
           "id": "84beef00-8428-4924-af5d-101323409e70",
           "fom": "2018-03-01",
@@ -2653,5 +2659,5 @@
       ]
     }
   ],
-  "skjemaVersjon": 171
+  "skjemaVersjon": 192
 }

@@ -61,13 +61,11 @@ internal class UtbetalingerBuilder(
     }
 
     override fun preVisitVedtaksperiodeUtbetaling(
-        grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?,
+        grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement,
         utbetaling: no.nav.helse.utbetalingslinjer.Utbetaling
     ) {
-        if (grunnlagsdata == null) return
         val utbetalingIDTilVilkårsgrunnlag = VedtaksperiodeUtbetalingVilkårsgrunnlagBuilder(grunnlagsdata, utbetaling).build()
-
-        vilkårsgrunnlag.put(utbetalingIDTilVilkårsgrunnlag.first, utbetalingIDTilVilkårsgrunnlag.second)
+        vilkårsgrunnlag[utbetalingIDTilVilkårsgrunnlag.first] = utbetalingIDTilVilkårsgrunnlag.second
     }
 
     internal class VedtaksperiodeUtbetalingVilkårsgrunnlagBuilder(grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement, utbetaling: InternUtbetaling): VedtaksperiodeUtbetalingVisitor {

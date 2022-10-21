@@ -347,8 +347,8 @@ internal interface UtbetalingstidslinjeberegningVisitor : UtbetalingsdagVisitor 
 
 internal interface VedtaksperiodeUtbetalingVisitor : UtbetalingVisitor, VilkårsgrunnlagHistorikkVisitor {
     fun preVisitVedtakserperiodeUtbetalinger(utbetalinger: List<Pair<VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?, Utbetaling>>) {}
-    fun preVisitVedtaksperiodeUtbetaling(grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?, utbetaling: Utbetaling) {}
-    fun postVisitVedtaksperiodeUtbetaling(grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?, utbetaling: Utbetaling) {}
+    fun preVisitVedtaksperiodeUtbetaling(grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement, utbetaling: Utbetaling) {}
+    fun postVisitVedtaksperiodeUtbetaling(grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement, utbetaling: Utbetaling) {}
     fun postVisitVedtakserperiodeUtbetalinger(utbetalinger: List<Pair<VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?, Utbetaling>>) {}
 }
 

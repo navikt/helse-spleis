@@ -54,7 +54,7 @@ internal class VedtaksperiodeInspektør(vedtaksperiode: Vedtaksperiode) : Vedtak
     }
 
     override fun preVisitVedtaksperiodeUtbetaling(
-        grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement?,
+        grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement,
         utbetaling: Utbetaling
     ) {
         val vilkårsgrunnlagId = grunnlagsdata?.inspektør?.vilkårsgrunnlagId
