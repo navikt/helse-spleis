@@ -304,6 +304,7 @@ internal class Utbetaling private constructor(
     internal companion object {
 
         val log: Logger = LoggerFactory.getLogger("Utbetaling")
+        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 
         private const val systemident = "SPLEIS"
 
@@ -475,21 +476,23 @@ internal class Utbetaling private constructor(
         }
 
         internal fun List<Utbetaling>.ingenOverlappende(other: Utbetaling): Boolean {
-            if (other.oppdragsperiode == null) return true
-            return aktive()
-                .filterNot { it.hørerSammen(other) }
-                .none { it.oppdragsperiode?.overlapperMed(other.oppdragsperiode) == true }
+            val overlappendeUtbetalinger = harOverlappendeUtbetaling(other)
+            if (overlappendeUtbetalinger.isNotEmpty()) {
+                sikkerlogg.warn("Vi har opprettet en utbetaling med oppdragsperiode ${other.oppdragsperiode} med korrelasjonsId ${other.korrelasjonsId} som overlapper med eksisterende utbetalinger $overlappendeUtbetalinger ")
+            }
+            return overlappendeUtbetalinger.isEmpty()
         }
 
         internal fun List<Utbetaling>.harOverlappendeUtbetaling(): Boolean {
-            return any { harOverlappendeUtbetaling(it) }
+            return any { harOverlappendeUtbetaling(it).isNotEmpty() }
         }
 
-        private fun List<Utbetaling>.harOverlappendeUtbetaling(other: Utbetaling): Boolean {
-            if (other.oppdragsperiode == null) return false
+        private fun List<Utbetaling>.harOverlappendeUtbetaling(other: Utbetaling): List<Periode> {
+            if (other.oppdragsperiode == null) return emptyList()
             return aktive()
                 .filterNot { it.hørerSammen(other) }
-                .any { it.oppdragsperiode?.overlapperMed(other.oppdragsperiode) == true }
+                .filter { it.oppdragsperiode?.overlapperMed(other.oppdragsperiode) == true }
+                .map { it.oppdragsperiode!! }
         }
 
         internal fun List<Utbetaling>.harNærliggendeUtbetaling(periode: Periode) =
