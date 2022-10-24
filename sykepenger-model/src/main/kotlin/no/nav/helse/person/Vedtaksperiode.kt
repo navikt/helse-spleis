@@ -810,9 +810,9 @@ internal class Vedtaksperiode private constructor(
             keyValue("dagerMellomPeriodenVarFerdigOgSykmeldingenSkrevet", dagerMellomPeriodenVarFerdigOgSykmeldingenSkrevet)
         )
         if (Toggle.RevurderOutOfOrder.disabled) return outOfOrderIkkeStøttet()
-        if (Toggle.RevurderOutOfOrderForlengelser.disabled && vedtaksperiode.person.finnesEnVedtaksperiodeSomOverlapperOgStarterFør(ny)) return outOfOrderIkkeStøttet()
-        if (Toggle.RevurderOutOfOrderForlengelser.disabled && vedtaksperiode.arbeidsgiver.harEnVedtaksperiodeMedMindreEnn16DagersGapEtter(ny)) return outOfOrderIkkeStøttet()
-        if (Toggle.RevurderOutOfOrderForlengelser.disabled && vedtaksperiode.person.finnesEnVedtaksperiodeRettEtter(ny)) return outOfOrderIkkeStøttet()
+        if (vedtaksperiode.person.finnesEnVedtaksperiodeSomOverlapperOgStarterFør(ny)) return outOfOrderIkkeStøttet()
+        if (vedtaksperiode.arbeidsgiver.harEnVedtaksperiodeMedMindreEnn16DagersGapEtter(ny)) return outOfOrderIkkeStøttet()
+        if (vedtaksperiode.person.finnesEnVedtaksperiodeRettEtter(ny)) return outOfOrderIkkeStøttet()
         if (!ny.forventerInntekt()) return
         // AUU revurderes ikke som følge av out-of-order
         if (Toggle.RevurderOutOfOrder.enabled && !vedtaksperiode.forventerInntekt()) return
