@@ -460,6 +460,7 @@ internal class Utbetaling private constructor(
             return byggOppdrag(sisteAktive, fødselsnummer, tidslinje, sisteDato, aktivitetslogg, forrige, Sykepenger)
         }
         internal fun List<Utbetaling>.aktive() = grupperUtbetalinger(Utbetaling::erAktiv)
+        internal fun List<Utbetaling>.aktiveMedUtbetaling() = grupperUtbetalinger(Utbetaling::erAktiv).filterNot { it.tilstand == GodkjentUtenUtbetaling}
         private fun List<Utbetaling>.utbetalte() = grupperUtbetalinger { it.erUtbetalt() || it.erInFlight() }
 
         private fun List<Utbetaling>.grupperUtbetalinger(filter: (Utbetaling) -> Boolean) =
@@ -484,12 +485,13 @@ internal class Utbetaling private constructor(
         }
 
         internal fun List<Utbetaling>.harOverlappendeUtbetaling(): Boolean {
-            return any { harOverlappendeUtbetaling(it).isNotEmpty() }
+            return aktiveMedUtbetaling()
+                .any { harOverlappendeUtbetaling(it).isNotEmpty() }
         }
 
         private fun List<Utbetaling>.harOverlappendeUtbetaling(other: Utbetaling): List<Periode> {
             if (other.oppdragsperiode == null) return emptyList()
-            return aktive()
+            return aktiveMedUtbetaling()
                 .filterNot { it.hørerSammen(other) }
                 .filter { it.oppdragsperiode?.overlapperMed(other.oppdragsperiode) == true }
                 .map { it.oppdragsperiode!! }
