@@ -3,6 +3,7 @@ package no.nav.helse.person
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.Personidentifikator
 import no.nav.helse.Toggle
 import no.nav.helse.hendelser.Avstemming
@@ -274,6 +275,12 @@ class Person private constructor(
     fun håndter(påminnelse: PersonPåminnelse) {
         påminnelse.kontekst(this)
         påminnelse.info("Håndterer påminnelse for person")
+        // Midleritidig kode: Sjekke for overlappende utbetalinger ("skal ikke skje")
+        arbeidsgivere.forEach { arbeidsgiver ->
+            if (arbeidsgiver.harOverlappendeUtbetalinger()) {
+                sikkerLogg.warn("Fant overlappende utbetalinger på {} {}", keyValue("aktørId", aktørId), keyValue("orgnummer", arbeidsgiver.organisasjonsnummer()))
+            }
+        }
         håndterGjenoppta(påminnelse)
     }
 

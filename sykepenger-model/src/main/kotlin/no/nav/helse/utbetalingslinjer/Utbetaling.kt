@@ -481,6 +481,17 @@ internal class Utbetaling private constructor(
                 .none { it.oppdragsperiode?.overlapperMed(other.oppdragsperiode) == true }
         }
 
+        internal fun List<Utbetaling>.harOverlappendeUtbetaling(): Boolean {
+            return any { harOverlappendeUtbetaling(it) }
+        }
+
+        private fun List<Utbetaling>.harOverlappendeUtbetaling(other: Utbetaling): Boolean {
+            if (other.oppdragsperiode == null) return false
+            return aktive()
+                .filterNot { it.hørerSammen(other) }
+                .any { it.oppdragsperiode?.overlapperMed(other.oppdragsperiode) == true }
+        }
+
         internal fun List<Utbetaling>.harNærliggendeUtbetaling(periode: Periode) =
             aktive().any { it.harNærliggendeUtbetaling(periode) }
 
