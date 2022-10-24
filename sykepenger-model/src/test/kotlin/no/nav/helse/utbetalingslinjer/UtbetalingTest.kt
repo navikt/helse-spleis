@@ -30,6 +30,7 @@ import no.nav.helse.utbetalingslinjer.Oppdragstatus.AKSEPTERT
 import no.nav.helse.utbetalingslinjer.Oppdragstatus.AVVIST
 import no.nav.helse.utbetalingslinjer.Oppdragstatus.OVERFØRT
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.aktive
+import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.ingenOverlappende
 import no.nav.helse.utbetalingstidslinje.MaksimumUtbetalingFilter
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -74,6 +75,25 @@ internal class UtbetalingTest {
         beregnUtbetalinger(tidslinje)
         val utbetaling = opprettUtbetaling(tidslinje)
         assertTrue(utbetaling.harNærliggendeUtbetaling(1.februar til 15.februar))
+    }
+
+    @Test
+    fun `utbetalinger med ulik korrelasjonsId kan ikke overlappe`() {
+        val tidslinje = tidslinjeOf(16.AP, 15.NAV)
+        beregnUtbetalinger(tidslinje)
+        val utbetaling = opprettUtbetaling(tidslinje)
+        val utbetaling2 = opprettUtbetaling(tidslinje)
+        assertFalse(listOf(utbetaling).ingenOverlappende(utbetaling2))
+    }
+    @Test
+    fun `utbetalinger med samme korrelasjonsId kan overlappe`() {
+        val tidslinje = tidslinjeOf(16.AP, 15.NAV)
+        beregnUtbetalinger(tidslinje)
+        val utbetaling = opprettUtbetaling(tidslinje)
+        val tidslinje2 = tidslinjeOf(16.AP, 30.NAV)
+        beregnUtbetalinger(tidslinje2)
+        val utbetaling2 = opprettUtbetaling(tidslinje2, tidligere = utbetaling)
+        assertTrue(listOf(utbetaling).ingenOverlappende(utbetaling2))
     }
 
     @Test

@@ -160,6 +160,7 @@ internal class Utbetaling private constructor(
     // og at this er lik den siste aktive utbetalingen for fagsystemIden
     internal fun hørerSammen(other: Utbetaling) =
         this.korrelasjonsId == other.korrelasjonsId
+
     internal fun harUtbetalinger() =
         arbeidsgiverOppdrag.harUtbetalinger() || personOppdrag.harUtbetalinger()
 
@@ -471,6 +472,13 @@ internal class Utbetaling private constructor(
             return utbetalinger.utbetalte().fold(sykdomstidslinje) { result, utbetaling ->
                 utbetaling.sykdomstidslinje(result)
             }
+        }
+
+        internal fun List<Utbetaling>.ingenOverlappende(other: Utbetaling): Boolean {
+            if (other.oppdragsperiode == null) return true
+            return aktive()
+                .filterNot { it.hørerSammen(other) }
+                .none { it.oppdragsperiode?.overlapperMed(other.oppdragsperiode) == true }
         }
 
         internal fun List<Utbetaling>.harNærliggendeUtbetaling(periode: Periode) =

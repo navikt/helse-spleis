@@ -43,8 +43,10 @@ import no.nav.helse.spleis.e2e.nyPeriode
 import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
+@Disabled
 @EnableToggle(Toggle.RevurderOutOfOrder::class)
 internal class RevurderingOutOfOrderForlengelserTest : AbstractEndToEndTest() {
 
