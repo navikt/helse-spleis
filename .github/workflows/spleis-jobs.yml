@@ -10,9 +10,7 @@ on:
     - 'Dockerfile-jobs'
     - 'build.gradle.kts'
     - '.github/workflows/**'
-    - 'deploy/dev-gc-job.yml'
     - 'deploy/dev-avstemming-job.yml'
-    - 'deploy/prod-gc-job.yml'
     - 'deploy/prod-avstemming-job.yml'
 
 jobs:
@@ -67,7 +65,7 @@ jobs:
             env:
                 APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
                 CLUSTER: dev-gcp
-                RESOURCE: deploy/dev-gc-job.yml,deploy/dev-avstemming-job.yml
+                RESOURCE: deploy/dev-avstemming-job.yml
                 IMAGE: ${{ needs.set_version.outputs.image }}
 
   deployProd:
@@ -80,5 +78,5 @@ jobs:
             env:
                 APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
                 CLUSTER: prod-gcp
-                RESOURCE: deploy/prod-gc-job.yml,deploy/prod-avstemming-job.yml
+                RESOURCE: deploy/prod-avstemming-job.yml
                 IMAGE: ${{ needs.set_version.outputs.image }}
