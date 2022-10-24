@@ -64,7 +64,7 @@ import no.nav.helse.utbetalingslinjer.Feriepengeutbetaling.Companion.gjelderFeri
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.harNærliggendeUtbetaling
-import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.harOverlappendeUtbetaling
+import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.harOverlappendeUtbetalinger
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.ingenOverlappende
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.utbetaltTidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
@@ -1069,7 +1069,7 @@ internal class Arbeidsgiver private constructor(
     internal fun harEnVedtaksperiodeMedMindreEnn16DagersGapEtter(ny: Vedtaksperiode) =
         vedtaksperioder.filter { it etter ny }.any { it.erMindreEnn16DagerEtter(ny) }
 
-    internal fun harOverlappendeUtbetalinger() = utbetalinger.harOverlappendeUtbetaling()
+    internal fun harOverlappendeUtbetalinger() = utbetalinger.harOverlappendeUtbetalinger()
 
     internal class JsonRestorer private constructor() {
         internal companion object {

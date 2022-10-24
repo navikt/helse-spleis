@@ -30,7 +30,7 @@ import no.nav.helse.utbetalingslinjer.Oppdragstatus.AKSEPTERT
 import no.nav.helse.utbetalingslinjer.Oppdragstatus.AVVIST
 import no.nav.helse.utbetalingslinjer.Oppdragstatus.OVERFØRT
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.aktive
-import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.harOverlappendeUtbetaling
+import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.harOverlappendeUtbetalinger
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.ingenOverlappende
 import no.nav.helse.utbetalingstidslinje.MaksimumUtbetalingFilter
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
@@ -102,7 +102,7 @@ internal class UtbetalingTest {
         beregnUtbetalinger(tidslinje)
         val utbetaling = opprettUtbetaling(tidslinje)
         val utbetaling2 = opprettUtbetaling(tidslinje)
-        assertTrue(listOf(utbetaling, utbetaling2).harOverlappendeUtbetaling())
+        assertTrue(listOf(utbetaling, utbetaling2).harOverlappendeUtbetalinger())
     }
     @Test
     fun `utbetalinger med samme korrelasjonsId og overlapp`() {
@@ -112,7 +112,7 @@ internal class UtbetalingTest {
         val tidslinje2 = tidslinjeOf(16.AP, 30.NAV)
         beregnUtbetalinger(tidslinje2)
         val utbetaling2 = opprettUtbetaling(tidslinje2, tidligere = utbetaling)
-        assertFalse(listOf(utbetaling, utbetaling2).harOverlappendeUtbetaling())
+        assertFalse(listOf(utbetaling, utbetaling2).harOverlappendeUtbetalinger())
     }
 
     @Test

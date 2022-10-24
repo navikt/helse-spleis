@@ -477,19 +477,22 @@ internal class Utbetaling private constructor(
         }
 
         internal fun List<Utbetaling>.ingenOverlappende(other: Utbetaling): Boolean {
-            val overlappendeUtbetalinger = harOverlappendeUtbetaling(other)
-            if (overlappendeUtbetalinger.isNotEmpty()) {
-                sikkerlogg.warn("Vi har opprettet en utbetaling med oppdragsperiode ${other.oppdragsperiode} med korrelasjonsId ${other.korrelasjonsId} som overlapper med eksisterende utbetalinger $overlappendeUtbetalinger ")
+            val overlappendeUtbetalingsperioder = overlappendeUtbetalingsperioder(other)
+            if (overlappendeUtbetalingsperioder.isNotEmpty()) {
+                sikkerlogg.warn("Vi har opprettet en utbetaling med oppdragsperiode ${other.oppdragsperiode} & korrelasjonsId ${other.korrelasjonsId} som overlapper med eksisterende utbetalinger $overlappendeUtbetalingsperioder")
             }
-            return overlappendeUtbetalinger.isEmpty()
+            return overlappendeUtbetalingsperioder.isEmpty()
         }
 
-        internal fun List<Utbetaling>.harOverlappendeUtbetaling(): Boolean {
-            return aktiveMedUtbetaling()
-                .any { harOverlappendeUtbetaling(it).isNotEmpty() }
+        internal fun List<Utbetaling>.harOverlappendeUtbetalinger(): Boolean {
+            val perioder = aktiveMedUtbetaling().flatMap { overlappendeUtbetalingsperioder(it) }.toSet()
+            if (perioder.isNotEmpty()) {
+                sikkerlogg.warn("Fant overlappende utbetalinger innenfor periodene $perioder")
+            }
+            return perioder.isNotEmpty()
         }
 
-        private fun List<Utbetaling>.harOverlappendeUtbetaling(other: Utbetaling): List<Periode> {
+        private fun List<Utbetaling>.overlappendeUtbetalingsperioder(other: Utbetaling): List<Periode> {
             if (other.oppdragsperiode == null) return emptyList()
             return aktiveMedUtbetaling()
                 .filterNot { it.hørerSammen(other) }
