@@ -83,6 +83,32 @@ internal class RefusjonsopplysningTest {
     }
 
     @Test
+    fun `ny refusjonsopplysning uten tom som starter tidligere enn forrige`() {
+        val meldingsreferanseId1 = UUID.randomUUID()
+        val refusjonsopplysninger = listOf(Refusjonsopplysning(meldingsreferanseId1, 1.mars, null, 2000.daglig))
+        val meldingsreferanseId2 = UUID.randomUUID()
+        val nyeRefusjonsopplysninger = listOf(Refusjonsopplysning(meldingsreferanseId2, 1.januar, null, 1000.daglig))
+
+        assertEquals(
+            nyeRefusjonsopplysninger,
+            refusjonsopplysninger.merge(nyeRefusjonsopplysninger)
+        )
+    }
+
+    @Test
+    fun `perfekt overlapp - bruker nye opplysninger`() {
+        val meldingsreferanseId1 = UUID.randomUUID()
+        val refusjonsopplysninger = listOf(Refusjonsopplysning(meldingsreferanseId1, 1.januar, 1.mars, 2000.daglig))
+        val meldingsreferanseId2 = UUID.randomUUID()
+        val nyeRefusjonsopplysninger = listOf(Refusjonsopplysning(meldingsreferanseId2, 1.januar, 1.mars, 1000.daglig))
+
+        assertEquals(
+            nyeRefusjonsopplysninger,
+            refusjonsopplysninger.merge(nyeRefusjonsopplysninger)
+        )
+    }
+
+    @Test
     fun `nye opplysninger erstatter deler av eksisterende opplysninger`() {
         val meldingsreferanseId1 = UUID.randomUUID()
         val meldingsreferanseId2 = UUID.randomUUID()
