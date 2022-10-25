@@ -2,6 +2,7 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import no.nav.helse.person.Inntektshistorikk.Inntektsopplysning.Companion.valider
+import no.nav.helse.person.Refusjonsopplysning.Companion.merge
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
@@ -13,8 +14,10 @@ import no.nav.helse.økonomi.Økonomi
 
 internal class ArbeidsgiverInntektsopplysning(
     private val orgnummer: String,
-    private val inntektsopplysning: Inntektshistorikk.Inntektsopplysning
+    private val inntektsopplysning: Inntektshistorikk.Inntektsopplysning,
+    private val refusjonsopplysninger: List<Refusjonsopplysning>
 ) {
+    internal constructor(orgnummer: String, inntektsopplysning: Inntektshistorikk.Inntektsopplysning): this(orgnummer, inntektsopplysning, emptyList<Refusjonsopplysning>())
     private fun omregnetÅrsinntekt(acc: Inntekt): Inntekt {
         return acc + inntektsopplysning.omregnetÅrsinntekt()
     }
@@ -32,8 +35,11 @@ internal class ArbeidsgiverInntektsopplysning(
 
     private fun overstyr(overstyringer: List<ArbeidsgiverInntektsopplysning>): ArbeidsgiverInntektsopplysning {
         val overstyring = overstyringer.singleOrNull { it.orgnummer == this.orgnummer } ?: return this
-        // todo: merke at *overstyring* overstyres *this*, eller noe?
-        return overstyring
+        return overstyring.overstyrer(this)
+    }
+
+    private fun overstyrer(overstyrt: ArbeidsgiverInntektsopplysning): ArbeidsgiverInntektsopplysning {
+        return ArbeidsgiverInntektsopplysning(orgnummer = this.orgnummer, inntektsopplysning = this.inntektsopplysning, refusjonsopplysninger = overstyrt.refusjonsopplysninger.merge(this.refusjonsopplysninger))
     }
 
     private fun subsummer(subsumsjonObserver: SubsumsjonObserver, opptjening: Opptjening?) {
