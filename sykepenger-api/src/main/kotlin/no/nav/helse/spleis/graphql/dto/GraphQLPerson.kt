@@ -26,6 +26,6 @@ data class GraphQLPerson(
     val vilkarsgrunnlaghistorikk: List<GraphQLVilkarsgrunnlaghistorikk>,
     val dodsdato: LocalDate?,
     val versjon: Int,
-    val vilkårsgrunnlag: List<GraphQLVilkarsgrunnlagElement>
+    val vilkarsgrunnlag: List<GraphQLVilkarsgrunnlagElement>
 )
 
