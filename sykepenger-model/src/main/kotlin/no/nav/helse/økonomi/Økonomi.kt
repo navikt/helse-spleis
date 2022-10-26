@@ -108,6 +108,9 @@ internal class Økonomi private constructor(
             val er6GBegrenset = grunnlagForSykepengegrunnlag > `6G`
             økonomiList.forEach { økonomi -> økonomi.er6GBegrenset = er6GBegrenset }
 
+            // dette er det eneste beløpet som bør ta utgangspunkt i opprinnelig inntekt, ellers kan vi lage personbeløp
+            // i en situasjon hvor det er 6g-begrenset, og hvor refusjonen da utgjør en mindre del enn sykepengegrunnlaget enn
+            // hva det ville gjort viss vi beregnet refusjonen fra opprinnelig beløp
             val totalØnsketRefusjon = økonomiList.map { it.aktuellDagsinntekt * it.refusjonsgrad * it.grad() }.summer()
 
             val refusjonbudsjett = minOf(totalØnsketRefusjon, sykepengegrunnlag)
@@ -115,11 +118,12 @@ internal class Økonomi private constructor(
 
             økonomiList.map { Beregningsresultat(it, refusjonbudsjett * it.vektetRefusjonsgrad) }
                 .onEach { it.oppdater { økonomi, beløp -> økonomi.arbeidsgiverbeløp = beløp } }
-                .also { resultat -> Beregningsresultat.fordel(resultat, { økonomi, inntekt -> økonomi.arbeidsgiverbeløp = inntekt }, arbeidsgiverBeløp) }
+                .also { resultat -> Beregningsresultat.fordel(resultat, refusjonbudsjett, { økonomi, inntekt -> økonomi.arbeidsgiverbeløp = inntekt }, arbeidsgiverBeløp) }
 
+            val totalArbeidsgiver = totalArbeidsgiver(økonomiList)
             økonomiList.map { Beregningsresultat(it, personbudsjett * it.vektetPersongrad) }
                 .onEach { it.oppdater { økonomi, beløp -> økonomi.personbeløp = beløp } }
-                .also { resultat -> Beregningsresultat.fordel(resultat, { økonomi, inntekt -> økonomi.personbeløp = inntekt }, personBeløp) }
+                .also { resultat -> Beregningsresultat.fordel(resultat, sykepengegrunnlag - totalArbeidsgiver, { økonomi, inntekt -> økonomi.personbeløp = inntekt }, personBeløp) }
         }
 
         private fun fordel(økonomiList: List<Økonomi>, total: Inntekt, grense: Inntekt, setter: (Økonomi, Inntekt?) -> Unit, getter: (Økonomi) -> Inntekt?) {
@@ -149,8 +153,8 @@ internal class Økonomi private constructor(
             }
 
             companion object {
-                fun fordel(liste: List<Beregningsresultat>, setter: (Økonomi, Inntekt?) -> Unit, getter: (Økonomi) -> Inntekt?) {
-                    val rest = (liste.map { it.utbetalingFørAvrunding }.summer() - liste.map { it.utbetalingEtterAvrunding }.summer())
+                fun fordel(liste: List<Beregningsresultat>, total: Inntekt, setter: (Økonomi, Inntekt?) -> Unit, getter: (Økonomi) -> Inntekt?) {
+                    val rest = (total - liste.map { it.utbetalingEtterAvrunding }.summer())
                         .reflection { _, _, _, dagligInt -> dagligInt }
                     liste
                         .sortedByDescending { it.differanse }
