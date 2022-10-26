@@ -6,79 +6,85 @@ import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.nesteDag
-import no.nav.helse.person.Refusjonsopplysninger.Refusjonsopplysning.Companion.merge
 import no.nav.helse.økonomi.Inntekt
 
-internal class Refusjonsopplysninger(
-     refusjonsopplysninger: List<Refusjonsopplysning>, // TODO: Kan vi anta at refusjonsopplysnigene sendes inn i rekkefølgen som de skal tolkes?
+internal class Refusjonsopplysning(
+    private val meldingsreferanseId: UUID,
+    private val fom: LocalDate,
+    private val tom: LocalDate?,
+    private val beløp: Inntekt
 ) {
-    private val validerteRefusjonsopplysninger = validerteRefusjonsopplysninger(refusjonsopplysninger)
-    internal constructor(): this(emptyList())
+    private val periode get() = fom til tom!!
+    private fun oppdatertFom(nyFom: LocalDate) = if (tom != null && nyFom > tom) null else Refusjonsopplysning(meldingsreferanseId, nyFom, tom, beløp)
+    private fun oppdatertTom(nyTom: LocalDate) = if (nyTom < fom) null else Refusjonsopplysning(meldingsreferanseId, fom, nyTom, beløp)
+    private fun minus(nyOpplysning: Refusjonsopplysning): List<Refusjonsopplysning> {
+        // Håndterer først om denne eller den nye opplysningen ikke har tom
+        if (nyOpplysning.tom == null) return listOfNotNull(oppdatertTom(nyOpplysning.fom.forrigeDag))
+        if (tom == null) return listOfNotNull(oppdatertFom(nyOpplysning.tom.nesteDag))
 
-    private fun validerteRefusjonsopplysninger(refusjonsopplysninger: List<Refusjonsopplysning>): List<Refusjonsopplysning> {
-        if (refusjonsopplysninger.isEmpty()) return refusjonsopplysninger
-        val (første, resten) = refusjonsopplysninger.first() to refusjonsopplysninger.drop(1)
-        return listOf(første).merge(resten)
+        // Finner den overlappende perioden som den nye opplysningen skal erstatte. Om det ikke noe overlapp returnerer vi oss selv
+        val overlapp = periode.overlappendePeriode(nyOpplysning.periode)?: return listOf(this)
+
+        // Finner den eventuelle delen foran & bak den nye opplysningen som fortsatt er gjeldende
+        val snute = oppdatertTom(overlapp.start.forrigeDag)
+        val hale = oppdatertFom(overlapp.endInclusive.nesteDag)
+        return listOfNotNull(snute, hale)
     }
+    internal companion object {
+        private fun Periode.overlappendePeriode(other: Periode) =
+            intersect(other).takeUnless { it.isEmpty() }?.let { Periode(it.min(), it.max()) }
 
-    internal fun merge(nyeRefusjonsopplysninger: Refusjonsopplysninger): Refusjonsopplysninger {
-        return Refusjonsopplysninger(validerteRefusjonsopplysninger.merge(nyeRefusjonsopplysninger.validerteRefusjonsopplysninger))
-    }
-
-
-    internal class Refusjonsopplysning(
-        private val meldingsreferanseId: UUID,
-        private val fom: LocalDate,
-        private val tom: LocalDate?,
-        private val beløp: Inntekt
-    ) {
-        private val periode get() = fom til tom!!
-        private fun oppdatertFom(nyFom: LocalDate) = if (tom != null && nyFom > tom) null else Refusjonsopplysning(meldingsreferanseId, nyFom, tom, beløp)
-        private fun oppdatertTom(nyTom: LocalDate) = if (nyTom < fom) null else Refusjonsopplysning(meldingsreferanseId, fom, nyTom, beløp)
-        private fun minus(nyOpplysning: Refusjonsopplysning): List<Refusjonsopplysning> {
-            // Håndterer først om denne eller den nye opplysningen ikke har tom
-            if (nyOpplysning.tom == null) return listOfNotNull(oppdatertTom(nyOpplysning.fom.forrigeDag))
-            if (tom == null) return listOfNotNull(oppdatertFom(nyOpplysning.tom.nesteDag))
-
-            // Finner den overlappende perioden som den nye opplysningen skal erstatte. Om det ikke noe overlapp returnerer vi oss selv
-            val overlapp = periode.overlappendePeriode(nyOpplysning.periode)?: return listOf(this)
-
-            // Finner den eventuelle delen foran & bak den nye opplysningen som fortsatt er gjeldende
-            val snute = oppdatertTom(overlapp.start.forrigeDag)
-            val hale = oppdatertFom(overlapp.endInclusive.nesteDag)
-            return listOfNotNull(snute, hale)
+        private fun List<Refusjonsopplysning>.merge(nyeOpplysninger: List<Refusjonsopplysning>): List<Refusjonsopplysning> {
+            return nyeOpplysninger.fold(this, ::mergeNyOpplysning).sortedBy { it.fom }
         }
-        internal companion object {
-            private fun Periode.overlappendePeriode(other: Periode) =
-                intersect(other).takeUnless { it.isEmpty() }?.let { Periode(it.min(), it.max()) }
 
-            internal fun List<Refusjonsopplysning>.merge(nyeOpplysninger: List<Refusjonsopplysning>): List<Refusjonsopplysning> {
-                val merged = nyeOpplysninger.fold(this, ::mergeNyOpplysning).sortedBy { it.fom }
-                return merged
+        private fun mergeNyOpplysning(eksisterendeOpplysninger: List<Refusjonsopplysning>, nyOpplysning: Refusjonsopplysning) : List<Refusjonsopplysning> {
+            val eksisterendeSomIkkeHarBlittErstattet = mutableListOf<Refusjonsopplysning>()
+            eksisterendeOpplysninger.forEach { eksisterendeRefusjonsopplysning ->
+                eksisterendeSomIkkeHarBlittErstattet.addAll(eksisterendeRefusjonsopplysning.minus(nyOpplysning))
             }
+            return eksisterendeSomIkkeHarBlittErstattet + nyOpplysning
+        }
+    }
 
-            private fun mergeNyOpplysning(eksisterendeOpplysninger: List<Refusjonsopplysning>, nyOpplysning: Refusjonsopplysning) : List<Refusjonsopplysning> {
-                val eksisterendeSomIkkeHarBlittErstattet = mutableListOf<Refusjonsopplysning>()
-                eksisterendeOpplysninger.forEach { eksisterendeRefusjonsopplysning ->
-                    eksisterendeSomIkkeHarBlittErstattet.addAll(eksisterendeRefusjonsopplysning.minus(nyOpplysning))
-                }
-                return eksisterendeSomIkkeHarBlittErstattet + nyOpplysning
-            }
+    override fun equals(other: Any?): Boolean {
+        if (other !is Refusjonsopplysning) return false
+        return meldingsreferanseId == other.meldingsreferanseId && fom == other.fom && tom == other.tom && beløp == other.beløp
+    }
+
+    override fun toString() = "$fom - $tom, ${beløp.reflection { årlig, _, _, _ -> årlig }} ($meldingsreferanseId)"
+    override fun hashCode(): Int {
+        var result = meldingsreferanseId.hashCode()
+        result = 31 * result + fom.hashCode()
+        result = 31 * result + (tom?.hashCode() ?: 0)
+        result = 31 * result + beløp.hashCode()
+        result = 31 * result + periode.hashCode()
+        return result
+    }
+
+    internal class Refusjonsopplysninger(
+        refusjonsopplysninger: List<Refusjonsopplysning>, // TODO: Kan vi anta at refusjonsopplysnigene sendes inn i rekkefølgen som de skal tolkes?
+    ) {
+        private val validerteRefusjonsopplysninger = validerteRefusjonsopplysninger(refusjonsopplysninger)
+        internal constructor(): this(emptyList())
+
+        private fun validerteRefusjonsopplysninger(refusjonsopplysninger: List<Refusjonsopplysning>): List<Refusjonsopplysning> {
+            if (refusjonsopplysninger.isEmpty()) return refusjonsopplysninger
+            val (første, resten) = refusjonsopplysninger.first() to refusjonsopplysninger.drop(1)
+            return listOf(første).merge(resten)
+        }
+
+        internal fun merge(nyeRefusjonsopplysninger: Refusjonsopplysninger): Refusjonsopplysninger {
+            return Refusjonsopplysninger(validerteRefusjonsopplysninger.merge(nyeRefusjonsopplysninger.validerteRefusjonsopplysninger))
         }
 
         override fun equals(other: Any?): Boolean {
-            if (other !is Refusjonsopplysning) return false
-            return meldingsreferanseId == other.meldingsreferanseId && fom == other.fom && tom == other.tom && beløp == other.beløp
+            if (other !is Refusjonsopplysninger) return false
+            return validerteRefusjonsopplysninger == other.validerteRefusjonsopplysninger
         }
 
-        override fun toString() = "$fom - $tom, $beløp ($meldingsreferanseId)"
-        override fun hashCode(): Int {
-            var result = meldingsreferanseId.hashCode()
-            result = 31 * result + fom.hashCode()
-            result = 31 * result + (tom?.hashCode() ?: 0)
-            result = 31 * result + beløp.hashCode()
-            result = 31 * result + periode.hashCode()
-            return result
-        }
+        override fun hashCode() = validerteRefusjonsopplysninger.hashCode()
+
+        override fun toString() = validerteRefusjonsopplysninger.toString()
     }
 }

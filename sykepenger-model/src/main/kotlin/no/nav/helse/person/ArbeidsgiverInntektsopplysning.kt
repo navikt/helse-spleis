@@ -2,6 +2,7 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import no.nav.helse.person.Inntektshistorikk.Inntektsopplysning.Companion.valider
+import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
