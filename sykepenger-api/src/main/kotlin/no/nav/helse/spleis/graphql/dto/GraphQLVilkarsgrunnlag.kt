@@ -20,6 +20,7 @@ enum class GraphQLVilkarsgrunnlagtype {
 }
 
 interface GraphQLVilkarsgrunnlag {
+    val id: UUID
     val skjaeringstidspunkt: LocalDate
     val omregnetArsinntekt: Double
     val sammenligningsgrunnlag: Double?
@@ -29,6 +30,7 @@ interface GraphQLVilkarsgrunnlag {
 }
 
 data class GraphQLSpleisVilkarsgrunnlag(
+    override val id: UUID,
     override val skjaeringstidspunkt: LocalDate,
     override val omregnetArsinntekt: Double,
     override val sammenligningsgrunnlag: Double?,
@@ -47,6 +49,7 @@ data class GraphQLSpleisVilkarsgrunnlag(
 }
 
 data class GraphQLInfotrygdVilkarsgrunnlag(
+    override val id: UUID,
     override val skjaeringstidspunkt: LocalDate,
     override val omregnetArsinntekt: Double,
     override val sammenligningsgrunnlag: Double?,
@@ -65,9 +68,4 @@ data class GraphQLSykepengegrunnlagsgrense(
     val grunnbelop: Int,
     val grense: Int,
     val virkningstidspunkt: LocalDate,
-)
-
-data class GraphQLVilkarsgrunnlagElement(
-    val id: UUID,
-    val grunnlag: GraphQLVilkarsgrunnlag
 )

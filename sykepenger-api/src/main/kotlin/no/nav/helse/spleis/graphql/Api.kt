@@ -24,7 +24,6 @@ import no.nav.helse.spleis.graphql.dto.GraphQLArbeidsgiver
 import no.nav.helse.spleis.graphql.dto.GraphQLGenerasjon
 import no.nav.helse.spleis.graphql.dto.GraphQLGhostPeriode
 import no.nav.helse.spleis.graphql.dto.GraphQLPerson
-import no.nav.helse.spleis.graphql.dto.GraphQLVilkarsgrunnlagElement
 import no.nav.helse.spleis.graphql.dto.arbeidsgiverTypes
 import no.nav.helse.spleis.graphql.dto.hendelseTypes
 import no.nav.helse.spleis.graphql.dto.inntektsgrunnlagTypes
@@ -118,9 +117,7 @@ private fun mapTilDto(person: PersonDTO) =
         },
         dodsdato = person.dødsdato,
         versjon = person.versjon,
-        vilkarsgrunnlag = person.vilkårsgrunnlag.mapValues { (_, vilkårsgrunnlag) ->
-            mapVilkårsgrunnlag(vilkårsgrunnlag)
-        }.toList().map { GraphQLVilkarsgrunnlagElement(it.first, it.second) }
+        vilkarsgrunnlag = person.vilkårsgrunnlag.map { (id, vilkårsgrunnlag) -> mapVilkårsgrunnlag(id, vilkårsgrunnlag) }
     )
 
 fun Application.installGraphQLApi(dataSource: DataSource, authProviderName: String) {

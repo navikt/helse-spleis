@@ -324,7 +324,7 @@ internal fun mapTidslinjeperiode(periode: Tidslinjeperiode) =
                 )
             },
             periodetilstand = mapTilstand(periode.periodetilstand),
-            vilkårsgrunnlagId = periode.vilkårsgrunnlagId
+            vilkarsgrunnlagId = periode.vilkårsgrunnlagId
         )
         else -> GraphQLUberegnetPeriode(
             fom = periode.fom,
@@ -394,13 +394,14 @@ internal fun mapVilkårsgrunnlagHistorikk(id: UUID, vilkårsgrunnlag: List<Vilk�
     GraphQLVilkarsgrunnlaghistorikk(
         id = id,
         grunnlag = vilkårsgrunnlag.map { grunnlag ->
-            mapVilkårsgrunnlag(grunnlag)
+            mapVilkårsgrunnlag(id, grunnlag)
         }
     )
 
-internal fun mapVilkårsgrunnlag(vilkårsgrunnlag: Vilkårsgrunnlag) =
+internal fun mapVilkårsgrunnlag(id: UUID, vilkårsgrunnlag: Vilkårsgrunnlag) =
         when (vilkårsgrunnlag) {
             is SpleisVilkårsgrunnlag -> GraphQLSpleisVilkarsgrunnlag(
+                id = id,
                 skjaeringstidspunkt = vilkårsgrunnlag.skjæringstidspunkt,
                 omregnetArsinntekt = vilkårsgrunnlag.omregnetÅrsinntekt,
                 sammenligningsgrunnlag = vilkårsgrunnlag.sammenligningsgrunnlag,
@@ -416,6 +417,7 @@ internal fun mapVilkårsgrunnlag(vilkårsgrunnlag: Vilkårsgrunnlag) =
                 oppfyllerKravOmMedlemskap = vilkårsgrunnlag.oppfyllerKravOmMedlemskap
             )
             is InfotrygdVilkårsgrunnlag -> GraphQLInfotrygdVilkarsgrunnlag(
+                id = id,
                 skjaeringstidspunkt = vilkårsgrunnlag.skjæringstidspunkt,
                 omregnetArsinntekt = vilkårsgrunnlag.omregnetÅrsinntekt,
                 sammenligningsgrunnlag = vilkårsgrunnlag.sammenligningsgrunnlag,
@@ -423,6 +425,7 @@ internal fun mapVilkårsgrunnlag(vilkårsgrunnlag: Vilkårsgrunnlag) =
                 inntekter = vilkårsgrunnlag.inntekter.map { inntekt -> mapInntekt(inntekt) }
             )
             else -> object : GraphQLVilkarsgrunnlag {
+                override val id = id
                 override val skjaeringstidspunkt = vilkårsgrunnlag.skjæringstidspunkt
                 override val omregnetArsinntekt = vilkårsgrunnlag.omregnetÅrsinntekt
                 override val sammenligningsgrunnlag = vilkårsgrunnlag.sammenligningsgrunnlag
