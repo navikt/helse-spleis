@@ -4,19 +4,34 @@ import java.util.UUID
 import no.nav.helse.februar
 import no.nav.helse.januar
 import no.nav.helse.mars
-import no.nav.helse.person.Refusjonsopplysning.Companion.merge
+import no.nav.helse.person.Refusjonsopplysninger.Refusjonsopplysning
+import no.nav.helse.person.Refusjonsopplysninger.Refusjonsopplysning.Companion.merge
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-internal class RefusjonsopplysningTest {
+internal class RefusjonsopplysningerTest {
 
     @Test
     fun `ny refusjonsopplysning i midten av eksisterende`() {
         val meldingsreferanseId1 = UUID.randomUUID()
-        val refusjonsopplysninger = listOf(Refusjonsopplysning(meldingsreferanseId1, 1.januar, 31.januar, 2000.daglig))
+        val refusjonsopplysninger = listOf(
+            Refusjonsopplysning(
+                meldingsreferanseId1,
+                1.januar,
+                31.januar,
+                2000.daglig
+            )
+        )
         val meldingsreferanseId2 = UUID.randomUUID()
-        val nyeRefusjonsopplysninger = listOf(Refusjonsopplysning(meldingsreferanseId2, 15.januar, 20.januar, 1000.daglig))
+        val nyeRefusjonsopplysninger = listOf(
+            Refusjonsopplysning(
+                meldingsreferanseId2,
+                15.januar,
+                20.januar,
+                1000.daglig
+            )
+        )
         assertEquals(
             listOf(
                 Refusjonsopplysning(meldingsreferanseId1, 1.januar, 14.januar, 2000.daglig),
