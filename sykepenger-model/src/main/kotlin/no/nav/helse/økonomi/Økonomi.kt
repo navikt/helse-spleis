@@ -19,6 +19,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.summer
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.fraRatio
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import no.nav.helse.økonomi.Prosentdel.Companion.sum
 import kotlin.math.roundToInt
 import kotlin.properties.Delegates
 
@@ -36,6 +37,11 @@ internal class Økonomi private constructor(
     private var er6GBegrenset: Boolean? = null,
     private var tilstand: Tilstand = Tilstand.KunGrad,
 ) {
+    private var refusjonsgrad = 0.prosent
+    private val persongrad get() = !refusjonsgrad
+    private var vektetRefusjonsgrad = 0.prosent
+    private var vektetPersongrad = 0.prosent
+
     companion object {
         private val arbeidsgiverBeløp = { økonomi: Økonomi -> økonomi.arbeidsgiverbeløp!! }
         private val personBeløp = { økonomi: Økonomi -> økonomi.personbeløp!! }
@@ -59,36 +65,61 @@ internal class Økonomi private constructor(
         }
 
         internal fun betal(økonomiList: List<Økonomi>, virkningsdato: LocalDate): List<Økonomi> = økonomiList.also {
-            delteUtbetalinger(it)
             totalSykdomsgrad(økonomiList).also { totalSykdomsgrad ->
                 økonomiList.forEach { økonomi -> økonomi.totalGrad = totalSykdomsgrad }
             }
+            delteUtbetalinger(it)
             fordelBeløp(it, virkningsdato)
         }
 
         private fun delteUtbetalinger(økonomiList: List<Økonomi>) = økonomiList.forEach { it.betal() }
 
         private fun fordelBeløp(økonomiList: List<Økonomi>, virkningsdato: LocalDate) {
-            val totalArbeidsgiver = totalArbeidsgiver(økonomiList)
-            val totalPerson = totalPerson(økonomiList)
-            val total = totalArbeidsgiver + totalPerson
-            if (total == INGEN) return økonomiList.forEach { økonomi -> økonomi.er6GBegrenset = false }
+            val totalRefusjon = økonomiList.map { it.aktuellDagsinntekt * it.refusjonsgrad }.summer()
+            val totalPersonbeløp = økonomiList.map { it.aktuellDagsinntekt * it.persongrad }.summer()
+
+            økonomiList.forEach { økonomi ->
+                val ønsketRefusjon = økonomi.aktuellDagsinntekt * økonomi.refusjonsgrad
+                økonomi.vektetRefusjonsgrad = if (totalRefusjon == INGEN) 0.prosent else fraRatio(ønsketRefusjon ratio totalRefusjon)
+                val ønsketPersonbeløp = økonomi.aktuellDagsinntekt * økonomi.persongrad
+                økonomi.vektetPersongrad = if (totalPersonbeløp == INGEN) 0.prosent else fraRatio(ønsketPersonbeløp ratio totalPersonbeløp)
+            }
+
+            val totalRefusjonsgrad =  økonomiList.map { it.vektetRefusjonsgrad * it.grad() }.sum()
+            val totalPersongrad = økonomiList.map { it.vektetPersongrad * it.grad() }.sum()
+            økonomiList.forEach { økonomi ->
+                økonomi.vektetRefusjonsgrad = if (totalRefusjonsgrad == 0.prosent) 0.prosent else økonomi.vektetRefusjonsgrad * økonomi.grad() / totalRefusjonsgrad
+                økonomi.vektetPersongrad = if (totalPersongrad == 0.prosent) 0.prosent else økonomi.vektetPersongrad * økonomi.grad() / totalPersongrad
+            }
+
+            if (totalRefusjon == INGEN && totalPersonbeløp == INGEN) return økonomiList.forEach { it.er6GBegrenset = false }
 
             check(økonomiList.any { it.skjæringstidspunkt != null }) { "ingen økonomiobjekt har skjæringstidspunkt" }
             check(økonomiList.filter { it.skjæringstidspunkt != null }.distinctBy { it.skjæringstidspunkt }.count() == 1) { "det finnes flere unike skjæringstidspunkt for økonomiobjekt på samme dag" }
 
             val skjæringstidspunkt = økonomiList.firstNotNullOf { it.skjæringstidspunkt }
-            val grunnbeløp = Grunnbeløp.`6G`.beløp(skjæringstidspunkt, virkningsdato)
-            økonomiList.forEach { it.grunnbeløpgrense = grunnbeløp }
+            val `6G` = Grunnbeløp.`6G`.beløp(skjæringstidspunkt, virkningsdato)
+            økonomiList.forEach { it.grunnbeløpgrense = `6G` }
 
             val grunnlagForSykepengegrunnlag = økonomiList.map { it.aktuellDagsinntekt }.summer()
-            val sykepengegrunnlagBegrenset6G = minOf(grunnlagForSykepengegrunnlag, grunnbeløp) // TODO: få sykepengegrunnlaget (etter 6g) fra Sykepengegrunnlag
-            val er6GBegrenset = grunnlagForSykepengegrunnlag > grunnbeløp
+            val sykepengegrunnlagBegrenset6G = minOf(grunnlagForSykepengegrunnlag, `6G`)
             val sykepengegrunnlag = (sykepengegrunnlagBegrenset6G * økonomiList.first().totalGrad).rundTilDaglig()
-            fordel(økonomiList, totalArbeidsgiver, sykepengegrunnlag, { økonomi, inntekt -> økonomi.arbeidsgiverbeløp = inntekt }, arbeidsgiverBeløp)
-            val totalArbeidsgiverrefusjon = totalArbeidsgiver(økonomiList)
-            fordel(økonomiList, total - totalArbeidsgiverrefusjon, sykepengegrunnlag - totalArbeidsgiverrefusjon, { økonomi, inntekt -> økonomi.personbeløp = inntekt }, personBeløp)
+
+            val er6GBegrenset = grunnlagForSykepengegrunnlag > `6G`
             økonomiList.forEach { økonomi -> økonomi.er6GBegrenset = er6GBegrenset }
+
+            val totalØnsketRefusjon = økonomiList.map { it.aktuellDagsinntekt * it.refusjonsgrad * it.grad() }.summer()
+
+            val refusjonbudsjett = minOf(totalØnsketRefusjon, sykepengegrunnlag)
+            val personbudsjett = sykepengegrunnlag - refusjonbudsjett
+
+            økonomiList.map { Beregningsresultat(it, refusjonbudsjett * it.vektetRefusjonsgrad) }
+                .onEach { it.oppdater { økonomi, beløp -> økonomi.arbeidsgiverbeløp = beløp } }
+                .also { resultat -> Beregningsresultat.fordel(resultat, { økonomi, inntekt -> økonomi.arbeidsgiverbeløp = inntekt }, arbeidsgiverBeløp) }
+
+            økonomiList.map { Beregningsresultat(it, personbudsjett * it.vektetPersongrad) }
+                .onEach { it.oppdater { økonomi, beløp -> økonomi.personbeløp = beløp } }
+                .also { resultat -> Beregningsresultat.fordel(resultat, { økonomi, inntekt -> økonomi.personbeløp = inntekt }, personBeløp) }
         }
 
         private fun fordel(økonomiList: List<Økonomi>, total: Inntekt, grense: Inntekt, setter: (Økonomi, Inntekt?) -> Unit, getter: (Økonomi) -> Inntekt?) {
@@ -118,6 +149,14 @@ internal class Økonomi private constructor(
             }
 
             companion object {
+                fun fordel(liste: List<Beregningsresultat>, setter: (Økonomi, Inntekt?) -> Unit, getter: (Økonomi) -> Inntekt?) {
+                    val rest = (liste.map { it.utbetalingFørAvrunding }.summer() - liste.map { it.utbetalingEtterAvrunding }.summer())
+                        .reflection { _, _, _, dagligInt -> dagligInt }
+                    liste
+                        .sortedByDescending { it.differanse }
+                        .take(rest)
+                        .forEach { setter(it.økonomi, getter(it.økonomi)?.plus(1.daglig)) }
+                }
                 fun fordel(liste: List<Beregningsresultat>, rest: Int, setter: (Økonomi, Inntekt?) -> Unit, getter: (Økonomi) -> Inntekt?) {
                     liste
                         .sortedByDescending { it.differanse }
@@ -269,8 +308,6 @@ internal class Økonomi private constructor(
     private fun betal() = this.also { tilstand.betal(this) }
 
     internal fun er6GBegrenset() = tilstand.er6GBegrenset(this)
-
-    internal fun harPersonbeløp() = personbeløp!! > INGEN
 
     private fun _betal() {
         val total = (dekningsgrunnlag * grad()).rundTilDaglig()
@@ -432,6 +469,9 @@ internal class Økonomi private constructor(
 
             override fun arbeidsgiverRefusjon(økonomi: Økonomi, refusjonsbeløp: Inntekt?) = økonomi.apply {
                 økonomi.arbeidsgiverRefusjonsbeløp = refusjonsbeløp ?: økonomi.aktuellDagsinntekt
+                if (økonomi.aktuellDagsinntekt > INGEN) {
+                    økonomi.refusjonsgrad = fraRatio((økonomi.arbeidsgiverRefusjonsbeløp ratio økonomi.aktuellDagsinntekt).coerceAtMost(1.0))
+                }
             }
 
             override fun betal(økonomi: Økonomi) {

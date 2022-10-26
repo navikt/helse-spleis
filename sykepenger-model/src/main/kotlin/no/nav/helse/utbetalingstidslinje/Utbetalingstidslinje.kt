@@ -143,8 +143,6 @@ internal class Utbetalingstidslinje(utbetalingsdager: List<Utbetalingsdag>) : Co
 
     internal fun harUtbetalinger() = sykepengeperiode() != null
 
-    internal fun harBrukerutbetalinger() = any { it.økonomi.harPersonbeløp() }
-
     override fun iterator() = this.utbetalingsdager.iterator()
 
     internal fun plus(

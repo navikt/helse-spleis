@@ -31,7 +31,6 @@ internal abstract class MigrationTest(private val migration: () -> JsonMigration
     ): JsonNode {
         val expected = toNode(expectedJson)
         val migrert = migrer(originalJson)
-        println(migrert.toString())
         assertJson(migrert.toString(), expected.toString(), jsonCompareMode)
         return migrert
     }

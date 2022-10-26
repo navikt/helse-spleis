@@ -31,12 +31,14 @@ class Prosentdel private constructor(private val brøkdel: BigDecimal): Comparab
             return Prosentdel(this.sumOf { it.first.brøkdel.multiply(it.second, mc) }.divide(total, mc))
         }
 
+        internal fun Collection<Prosentdel>.sum() = Prosentdel(this.sumOf { it.brøkdel })
+
         val Number.prosent get() = Prosentdel(this.toDouble().toBigDecimal(mc).divide(HUNDRE_PROSENT, mc))
     }
 
     override fun equals(other: Any?) = other is Prosentdel && this.equals(other)
 
-    private fun equals(other: Prosentdel) = this.brøkdel == other.brøkdel
+    private fun equals(other: Prosentdel) = this.brøkdel.compareTo(other.brøkdel) == 0
 
     override fun hashCode() = brøkdel.hashCode()
 
@@ -55,6 +57,8 @@ class Prosentdel private constructor(private val brøkdel: BigDecimal): Comparab
     private fun inverse(): BigDecimal = SIKKER_BRØK.divide(this.brøkdel, mc)
 
     internal fun times(other: Inntekt) = other.times(brøkdel)
+
+    internal operator fun times(other: Prosentdel) = Prosentdel(this.brøkdel * other.brøkdel)
 
     internal fun toDouble() = brøkdel.multiply(HUNDRE_PROSENT, mc).toDouble()
 

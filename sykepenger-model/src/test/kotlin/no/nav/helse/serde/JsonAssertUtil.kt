@@ -21,7 +21,9 @@ import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.økonomi.Prosentdel
-import org.junit.jupiter.api.Assertions
+import no.nav.helse.økonomi.Økonomi
+import org.skyscreamer.jsonassert.JSONAssert
+import org.skyscreamer.jsonassert.JSONCompareMode
 
 @JsonIgnoreProperties("jurist")
 private class PersonMixin
@@ -46,6 +48,9 @@ private class InfotrygdhistorikkElementMixin
 
 @JsonSerialize(using = AktivitetsloggSerializer::class)
 private class AktivitetsloggMixin
+
+@JsonIgnoreProperties("refusjonsgrad", "persongrad", "vektetRefusjonsgrad", "vektetPersongrad")
+private class ØkonomiMixIn
 
 internal class AktivitetsloggSerializer : JsonSerializer<Aktivitetslogg>() {
     override fun serialize(value: Aktivitetslogg?, gen: JsonGenerator, serializers: SerializerProvider?) {
@@ -79,7 +84,8 @@ private val objectMapper = jacksonObjectMapper()
             Begrunnelse::class.java to BegrunnelseMixin::class.java,
             InfotrygdhistorikkElement::class.java to InfotrygdhistorikkElementMixin::class.java,
             Prosentdel::class.java to ProsentdelMixin::class.java,
-            Aktivitetslogg::class.java to AktivitetsloggMixin::class.java
+            Aktivitetslogg::class.java to AktivitetsloggMixin::class.java,
+            Økonomi::class.java to ØkonomiMixIn::class.java
         )
     )
     .setVisibility(PropertyAccessor.GETTER, JsonAutoDetect.Visibility.NONE)
@@ -88,5 +94,5 @@ private val objectMapper = jacksonObjectMapper()
 internal fun assertJsonEquals(expected: Any, actual: Any) {
     val expectedJson = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(expected)
     val actualJson = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(actual)
-    Assertions.assertEquals(expectedJson, actualJson)
+    JSONAssert.assertEquals("\n$expected\n$actual\n", expectedJson, actualJson, JSONCompareMode.STRICT)
 }
