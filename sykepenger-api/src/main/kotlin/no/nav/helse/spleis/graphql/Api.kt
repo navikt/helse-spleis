@@ -118,7 +118,7 @@ private fun mapTilDto(person: PersonDTO) =
         },
         dodsdato = person.dødsdato,
         versjon = person.versjon,
-        vilkårsgrunnlag = person.vilkårsgrunnlag.mapValues { (_, vilkårsgrunnlag) ->
+        vilkarsgrunnlag = person.vilkårsgrunnlag.mapValues { (_, vilkårsgrunnlag) ->
             mapVilkårsgrunnlag(vilkårsgrunnlag)
         }.toList().map { GraphQLVilkarsgrunnlagElement(it.first, it.second) }
     )
