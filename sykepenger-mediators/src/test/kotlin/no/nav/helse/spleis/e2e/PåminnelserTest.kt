@@ -1,11 +1,11 @@
 package no.nav.helse.spleis.e2e
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.januar
 import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.inntektsmeldingkontrakt.Periode
+import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -33,8 +33,8 @@ internal class PåminnelserTest : AbstractEndToEndMediatorTest() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
         sendNyPåminnelse(0)
-        assertEquals("vedtaksperiode_ikke_påminnet", testRapid.inspektør.melding(6).path("@event_name").asText())
-        assertEquals("AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK", testRapid.inspektør.melding(6).path("tilstand").asText())
+        assertEquals("vedtaksperiode_ikke_påminnet", testRapid.inspektør.melding(5).path("@event_name").asText())
+        assertEquals("AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK", testRapid.inspektør.melding(5).path("tilstand").asText())
     }
 
     @Test
