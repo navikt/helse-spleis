@@ -248,16 +248,16 @@ internal class InntektsmeldingTest {
         inntektsmelding.valider(1.februar til 28.februar, 1.januar, Arbeidsgiverperiode(listOf(1.januar til 16.januar)), SubsumsjonObserver.NullObserver)
         aktivitetslogg.assertVarsel(RV_IM_3)
 
+        inntektsmelding(listOf(1.januar til 10.januar, 12.januar til 17.januar), førsteFraværsdag = 20.januar)
+        inntektsmelding.valider(1.februar til 28.februar, 1.januar, Arbeidsgiverperiode(listOf(1.januar til 16.januar)), SubsumsjonObserver.NullObserver)
+        aktivitetslogg.assertVarsel(RV_IM_3)
+
         inntektsmelding(listOf(12.januar til 27.januar))
         inntektsmelding.valider(1.februar til 28.februar, 11.januar, Arbeidsgiverperiode(listOf(11.januar til 27.januar)), SubsumsjonObserver.NullObserver)
         aktivitetslogg.assertIngenVarsel(RV_IM_3)
 
         inntektsmelding(listOf(12.januar til 27.januar))
         inntektsmelding.valider(1.februar til 28.februar, 13.januar, Arbeidsgiverperiode(listOf(13.januar til 28.januar)), SubsumsjonObserver.NullObserver)
-        aktivitetslogg.assertIngenVarsel(RV_IM_3)
-
-        inntektsmelding(emptyList())
-        inntektsmelding.valider(1.februar til 28.februar, 1.januar, Arbeidsgiverperiode(listOf(1.januar til 16.januar)), SubsumsjonObserver.NullObserver)
         aktivitetslogg.assertIngenVarsel(RV_IM_3)
     }
 

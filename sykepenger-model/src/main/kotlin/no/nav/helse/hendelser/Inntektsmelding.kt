@@ -143,7 +143,12 @@ class Inntektsmelding(
     }
 
     private fun validerArbeidsgiverperiode(arbeidsgiverperiode: Arbeidsgiverperiode) {
-        if (førsteFraværsdagErEtterArbeidsgiverperioden(førsteFraværsdag) || arbeidsgiverperiode.sammenlign(arbeidsgiverperioder)) return
+        if (arbeidsgiverperiode.sammenlign(arbeidsgiverperioder)) {
+            return
+        }
+        if (førsteFraværsdagErEtterArbeidsgiverperioden(førsteFraværsdag)) {
+            info("Første fraværsdag på inntektsmeldingen er etter arbeidsgiverperiden") // ville tidligere ikke gitt varsel
+        }
         varsel(RV_IM_3)
     }
 
