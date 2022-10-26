@@ -34,7 +34,7 @@ internal class Økonomi private constructor(
     private var grunnbeløpgrense: Inntekt? = null,
     private var arbeidsgiverbeløp: Inntekt? = null,
     private var personbeløp: Inntekt? = null,
-    private var er6GBegrenset: Boolean? = null,
+    private val er6GBegrenset: Boolean = false,
     private var tilstand: Tilstand = Tilstand.KunGrad,
 ) {
     private var refusjonsgrad = 0.prosent
@@ -92,7 +92,7 @@ internal class Økonomi private constructor(
                 økonomi.vektetPersongrad = if (totalPersongrad == 0.prosent) 0.prosent else økonomi.vektetPersongrad * økonomi.grad() / totalPersongrad
             }
 
-            if (totalRefusjon == INGEN && totalPersonbeløp == INGEN) return økonomiList.forEach { it.er6GBegrenset = false }
+            if (totalRefusjon == INGEN && totalPersonbeløp == INGEN) return
 
             check(økonomiList.any { it.skjæringstidspunkt != null }) { "ingen økonomiobjekt har skjæringstidspunkt" }
             check(økonomiList.filter { it.skjæringstidspunkt != null }.distinctBy { it.skjæringstidspunkt }.count() == 1) { "det finnes flere unike skjæringstidspunkt for økonomiobjekt på samme dag" }
@@ -105,13 +105,10 @@ internal class Økonomi private constructor(
             val sykepengegrunnlagBegrenset6G = minOf(grunnlagForSykepengegrunnlag, `6G`)
             val sykepengegrunnlag = (sykepengegrunnlagBegrenset6G * økonomiList.first().totalGrad).rundTilDaglig()
 
-            val er6GBegrenset = grunnlagForSykepengegrunnlag > `6G`
-            økonomiList.forEach { økonomi -> økonomi.er6GBegrenset = er6GBegrenset }
-
             // dette er det eneste beløpet som bør ta utgangspunkt i opprinnelig inntekt, ellers kan vi lage personbeløp
             // i en situasjon hvor det er 6g-begrenset, og hvor refusjonen da utgjør en mindre del enn sykepengegrunnlaget enn
             // hva det ville gjort viss vi beregnet refusjonen fra opprinnelig beløp
-            val totalØnsketRefusjon = økonomiList.map { it.aktuellDagsinntekt * it.refusjonsgrad * it.grad() }.summer()
+            val totalØnsketRefusjon = økonomiList.map { it.dekningsgrunnlag * it.refusjonsgrad * it.grad() }.summer()
 
             val refusjonbudsjett = minOf(totalØnsketRefusjon, sykepengegrunnlag)
             val personbudsjett = sykepengegrunnlag - refusjonbudsjett
@@ -186,7 +183,7 @@ internal class Økonomi private constructor(
     }
 
     internal fun inntekt(aktuellDagsinntekt: Inntekt, dekningsgrunnlag: Inntekt = aktuellDagsinntekt, skjæringstidspunkt: LocalDate, arbeidsgiverperiode: Arbeidsgiverperiode? = null): Økonomi =
-        tilstand.inntekt(this, aktuellDagsinntekt, dekningsgrunnlag, skjæringstidspunkt, arbeidsgiverperiode)
+        tilstand.inntekt(this, aktuellDagsinntekt, dekningsgrunnlag, skjæringstidspunkt, arbeidsgiverperiode, aktuellDagsinntekt < dekningsgrunnlag)
 
     internal fun arbeidsgiverRefusjon(refusjonsbeløp: Inntekt?) =
         tilstand.arbeidsgiverRefusjon(this, refusjonsbeløp)
@@ -390,7 +387,8 @@ internal class Økonomi private constructor(
             aktuellDagsinntekt: Inntekt,
             dekningsgrunnlag: Inntekt,
             skjæringstidspunkt: LocalDate,
-            arbeidsgiverperiode: Arbeidsgiverperiode?
+            arbeidsgiverperiode: Arbeidsgiverperiode?,
+            er6GBegrenset: Boolean
         ): Økonomi {
             throw IllegalStateException("Kan ikke sette inntekt i tilstand ${this::class.simpleName}")
         }
@@ -430,7 +428,8 @@ internal class Økonomi private constructor(
                 aktuellDagsinntekt: Inntekt,
                 dekningsgrunnlag: Inntekt,
                 skjæringstidspunkt: LocalDate,
-                arbeidsgiverperiode: Arbeidsgiverperiode?
+                arbeidsgiverperiode: Arbeidsgiverperiode?,
+                er6GBegrenset: Boolean
             ) = Økonomi(
                 grad = økonomi.grad,
                 totalGrad = økonomi.totalGrad,
@@ -440,6 +439,7 @@ internal class Økonomi private constructor(
                 dekningsgrunnlag = dekningsgrunnlag,
                 skjæringstidspunkt = skjæringstidspunkt,
                 grunnbeløpgrense = Grunnbeløp.`6G`.beløp(skjæringstidspunkt),
+                er6GBegrenset = er6GBegrenset,
                 tilstand = HarInntekt
             )
 
@@ -473,8 +473,8 @@ internal class Økonomi private constructor(
 
             override fun arbeidsgiverRefusjon(økonomi: Økonomi, refusjonsbeløp: Inntekt?) = økonomi.apply {
                 økonomi.arbeidsgiverRefusjonsbeløp = refusjonsbeløp ?: økonomi.aktuellDagsinntekt
-                if (økonomi.aktuellDagsinntekt > INGEN) {
-                    økonomi.refusjonsgrad = fraRatio((økonomi.arbeidsgiverRefusjonsbeløp ratio økonomi.aktuellDagsinntekt).coerceAtMost(1.0))
+                if (økonomi.dekningsgrunnlag > INGEN) {
+                    økonomi.refusjonsgrad = fraRatio((økonomi.arbeidsgiverRefusjonsbeløp ratio økonomi.dekningsgrunnlag).coerceAtMost(1.0))
                 }
             }
 
@@ -486,7 +486,7 @@ internal class Økonomi private constructor(
 
         internal object HarBeløp : Tilstand() {
 
-            override fun er6GBegrenset(økonomi: Økonomi) = økonomi.er6GBegrenset!!
+            override fun er6GBegrenset(økonomi: Økonomi) = økonomi.er6GBegrenset
 
             override fun betal(økonomi: Økonomi) {
                 økonomi._betal()
@@ -562,7 +562,7 @@ internal abstract class ØkonomiBuilder {
     protected var aktuellDagsinntekt: Double? = null
     protected var arbeidsgiverbeløp: Double? = null
     protected var personbeløp: Double? = null
-    protected var er6GBegrenset: Boolean? = null
+    protected var er6GBegrenset: Boolean = false
     protected var arbeidsgiverperiode: Arbeidsgiverperiode? = null
     protected var grunnbeløpgrense: Double? = null
     protected var tilstand: Økonomi.Tilstand? = null
@@ -613,7 +613,7 @@ internal abstract class ØkonomiBuilder {
     }
 
     internal fun er6GBegrenset(er6GBegrenset: Boolean?) = apply {
-        this.er6GBegrenset = er6GBegrenset
+        if (er6GBegrenset != null) this.er6GBegrenset = er6GBegrenset
     }
 }
 

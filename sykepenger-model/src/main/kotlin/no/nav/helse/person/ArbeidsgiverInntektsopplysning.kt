@@ -9,6 +9,8 @@ import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.summer
+import no.nav.helse.økonomi.Prosentdel
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.Økonomi
 
 internal class ArbeidsgiverInntektsopplysning(
@@ -104,11 +106,14 @@ internal class ArbeidsgiverInntektsopplysning(
             return map { it.inntektsopplysning.rapportertInntekt() }.summer()
         }
 
-        internal fun List<ArbeidsgiverInntektsopplysning>.medInntekt(organisasjonsnummer: String, skjæringstidspunkt: LocalDate, dato: LocalDate, økonomi: Økonomi, arbeidsgiverperiode: Arbeidsgiverperiode?, regler: ArbeidsgiverRegler, subsumsjonObserver: SubsumsjonObserver): Økonomi? {
+        internal fun List<ArbeidsgiverInntektsopplysning>.medInntekt(sykepengegrunnlag: Inntekt, organisasjonsnummer: String, skjæringstidspunkt: LocalDate, dato: LocalDate, økonomi: Økonomi, arbeidsgiverperiode: Arbeidsgiverperiode?, regler: ArbeidsgiverRegler, subsumsjonObserver: SubsumsjonObserver): Økonomi? {
+            val total = map { it.inntektsopplysning.omregnetÅrsinntekt() }.summer()
             return singleOrNull { it.orgnummer == organisasjonsnummer }?.inntektsopplysning?.omregnetÅrsinntekt()?.let { inntekt ->
+                val andel = if (total == INGEN) 0.prosent else Prosentdel.fraRatio(inntekt ratio total)
+                val redusertInntekt = sykepengegrunnlag * andel
                 økonomi.inntekt(
-                    aktuellDagsinntekt = inntekt,
-                    dekningsgrunnlag = inntekt.dekningsgrunnlag(dato, regler, subsumsjonObserver),
+                    aktuellDagsinntekt = redusertInntekt, // TODO: sende redusertInntekt, slik at økonomi slipper å tenke på Grunnbeløp
+                    dekningsgrunnlag = inntekt,
                     skjæringstidspunkt = skjæringstidspunkt,
                     arbeidsgiverperiode = arbeidsgiverperiode
                 )

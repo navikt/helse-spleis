@@ -245,6 +245,7 @@ internal class ArbeidsgiverInntektsopplysningTest {
         )
 
         val økonomi = listOf(arbeidsgiverInntektsopplysning).medInntekt(
+            sykepengegrunnlag = 2500.daglig,
             organisasjonsnummer = "orgnummer",
             skjæringstidspunkt = 1.januar,
             dato = 1.januar,
