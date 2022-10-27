@@ -2,7 +2,6 @@ package no.nav.helse.person
 
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
 import no.nav.helse.januar
 import no.nav.helse.mars
@@ -181,27 +180,10 @@ internal class RefusjonsopplysningerTest {
             Refusjonsopplysning(meldingsreferanseId, 20.mars, 24.mars, 99.månedlig),
             Refusjonsopplysning(meldingsreferanseId, 25.mars, null, 9.månedlig)
         )
-        assertForventetFeil(
-            forklaring = "Feil i merging av refusjonsopplysninger",
-            nå = {
-                assertEquals(
-                    listOf(
-                        Refusjonsopplysning(meldingsreferanseId, 1.januar, 24.mars, 1000.månedlig),
-                        Refusjonsopplysning(meldingsreferanseId, 20.januar, 24.mars, 500.månedlig),
-                        Refusjonsopplysning(meldingsreferanseId, 25.januar, 24.mars, 2000.månedlig),
-                        Refusjonsopplysning(meldingsreferanseId, 1.mars, 24.mars, 999.månedlig),
-                        Refusjonsopplysning(meldingsreferanseId, 20.mars, 24.mars, 99.månedlig),
-                        Refusjonsopplysning(meldingsreferanseId, 25.mars, null, 9.månedlig)
-                    ),
-                    Refusjonsopplysninger(originaleRefusjonsopplysninger).inspektør.refusjonsopplysninger
-                )
-            },
-            ønsket = {
-                assertEquals(
-                    originaleRefusjonsopplysninger,
-                    Refusjonsopplysninger(originaleRefusjonsopplysninger).inspektør.refusjonsopplysninger
-                )
-            }
+
+        assertEquals(
+            originaleRefusjonsopplysninger,
+            Refusjonsopplysninger(originaleRefusjonsopplysninger).inspektør.refusjonsopplysninger
         )
     }
 
@@ -214,18 +196,22 @@ internal class RefusjonsopplysningerTest {
             Refusjonsopplysning(meldingsreferanseId2, 1.mars, null, 2000.daglig)
         )
 
-        assertForventetFeil(
-            forklaring = "Feil i merging av refusjonsopplysninger",
-            nå = {
-                assertEquals(listOf(
-                    Refusjonsopplysning(meldingsreferanseId1, 1.januar, 28.februar, 2000.daglig),
-                    Refusjonsopplysning(meldingsreferanseId2, 1.mars, null, 2000.daglig)
-                ), Refusjonsopplysninger(refusjonsopplysninger).inspektør.refusjonsopplysninger)
-            },
-            ønsket = {
-                assertEquals(refusjonsopplysninger, Refusjonsopplysninger(refusjonsopplysninger).inspektør.refusjonsopplysninger)
-            }
-        )
+        assertEquals(refusjonsopplysninger, Refusjonsopplysninger(refusjonsopplysninger).inspektør.refusjonsopplysninger)
+    }
+
+    @Test
+    fun `ny opplysning før oss`() {
+        val eksisterende = Refusjonsopplysning(UUID.randomUUID(), 1.mars, 31.mars, 2000.daglig)
+        val ny = Refusjonsopplysning(UUID.randomUUID(), 1.januar, 15.februar, 2000.daglig)
+        assertEquals(listOf(ny, eksisterende), Refusjonsopplysninger(listOf(eksisterende, ny)).inspektør.refusjonsopplysninger)
+    }
+
+    @Test
+    fun `ny opplysning før med overlapp`() {
+        val eksisterendeId = UUID.randomUUID()
+        val eksisterende = Refusjonsopplysning(eksisterendeId, 1.mars, 31.mars, 2000.daglig)
+        val ny = Refusjonsopplysning(UUID.randomUUID(), 1.januar, 1.mars, 2000.daglig)
+        assertEquals(listOf(ny, Refusjonsopplysning(eksisterendeId, 2.mars, 31.mars, 2000.daglig)), Refusjonsopplysninger(listOf(eksisterende, ny)).inspektør.refusjonsopplysninger)
     }
 
     private companion object {

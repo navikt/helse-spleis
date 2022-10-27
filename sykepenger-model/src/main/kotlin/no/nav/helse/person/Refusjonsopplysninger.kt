@@ -17,9 +17,14 @@ internal class Refusjonsopplysning(
     private val periode get() = fom til tom!!
     private fun oppdatertFom(nyFom: LocalDate) = if (tom != null && nyFom > tom) null else Refusjonsopplysning(meldingsreferanseId, nyFom, tom, beløp)
     private fun oppdatertTom(nyTom: LocalDate) = if (nyTom < fom) null else Refusjonsopplysning(meldingsreferanseId, fom, nyTom, beløp)
+    private fun erEtter(other: Refusjonsopplysning) = other.tom != null && fom > other.tom
+
     private fun minus(nyOpplysning: Refusjonsopplysning): List<Refusjonsopplysning> {
-        // Håndterer først om denne eller den nye opplysningen ikke har tom
+        // Om den nye opplysningen ligger etter oss er vi fortsatt gjeldende i vår helhet
+        if (nyOpplysning.erEtter(this)) return listOf(this)
+        // Om den nye opplysningen ikke har tom er det kun en eventuell snute som fortsatt er gjeldende
         if (nyOpplysning.tom == null) return listOfNotNull(oppdatertTom(nyOpplysning.fom.forrigeDag))
+        // Om vi ikke har tom er det eventuelt en del av snuten vår som blir kortere, ellers fortsatt gjeldende
         if (tom == null) return listOfNotNull(oppdatertFom(nyOpplysning.tom.nesteDag))
 
         // Finner den overlappende perioden som den nye opplysningen skal erstatte. Om det ikke noe overlapp returnerer vi oss selv
