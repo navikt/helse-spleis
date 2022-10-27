@@ -47,6 +47,10 @@ internal class Refusjonsopplysning(
         }
     }
 
+    internal fun accept(visitor: RefusjonsopplysningerVisitor) {
+        visitor.visitRefusjonsopplysning(meldingsreferanseId, fom, tom, beløp)
+    }
+
     override fun equals(other: Any?): Boolean {
         if (other !is Refusjonsopplysning) return false
         return meldingsreferanseId == other.meldingsreferanseId && fom == other.fom && tom == other.tom && beløp == other.beløp
@@ -68,6 +72,10 @@ internal class Refusjonsopplysning(
         private val validerteRefusjonsopplysninger = validerteRefusjonsopplysninger(refusjonsopplysninger)
         internal constructor(): this(emptyList())
 
+        internal fun accept(visitor: RefusjonsopplysningerVisitor) {
+            validerteRefusjonsopplysninger.forEach { it.accept(visitor) }
+        }
+
         private fun validerteRefusjonsopplysninger(refusjonsopplysninger: List<Refusjonsopplysning>): List<Refusjonsopplysning> {
             if (refusjonsopplysninger.isEmpty()) return refusjonsopplysninger
             val (første, resten) = refusjonsopplysninger.first() to refusjonsopplysninger.drop(1)
@@ -87,4 +95,8 @@ internal class Refusjonsopplysning(
 
         override fun toString() = validerteRefusjonsopplysninger.toString()
     }
+}
+
+interface RefusjonsopplysningerVisitor {
+    fun visitRefusjonsopplysning(meldingsreferanseId: UUID, fom: LocalDate, tom: LocalDate?, beløp: Inntekt)
 }

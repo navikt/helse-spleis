@@ -1,19 +1,19 @@
 package no.nav.helse.person
 
+import java.time.LocalDate
 import java.util.UUID
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger
+import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class RefusjonsopplysningerTest {
-
-    companion object {
-        private fun List<Refusjonsopplysning>.refusjonsopplysninger() = Refusjonsopplysninger(this)
-    }
 
     @Test
     fun `ny refusjonsopplysning i midten av eksisterende`() {
@@ -165,5 +165,80 @@ internal class RefusjonsopplysningerTest {
     @Test
     fun `merging av to tomme refusjonsopplysninger blir en tom refusjonsopplysning`() {
         assertEquals(Refusjonsopplysninger(), Refusjonsopplysninger().merge(Refusjonsopplysninger()))
+    }
+
+    @Test
+    fun `perioder kant i kant hvor siste periode har tom null`() {
+        val meldingsreferanseId = UUID.randomUUID()
+        val originaleRefusjonsopplysninger = listOf(
+            Refusjonsopplysning(meldingsreferanseId, 1.januar, 19.januar, 1000.månedlig),
+            Refusjonsopplysning(meldingsreferanseId, 20.januar, 24.januar, 500.månedlig),
+            Refusjonsopplysning(meldingsreferanseId, 25.januar, 28.februar, 2000.månedlig),
+            Refusjonsopplysning(meldingsreferanseId, 1.mars, 19.mars, 999.månedlig),
+            Refusjonsopplysning(meldingsreferanseId, 20.mars, 24.mars, 99.månedlig),
+            Refusjonsopplysning(meldingsreferanseId, 25.mars, null, 9.månedlig)
+        )
+        assertForventetFeil(
+            forklaring = "Feil i merging av refusjonsopplysninger",
+            nå = {
+                assertEquals(
+                    listOf(
+                        Refusjonsopplysning(meldingsreferanseId, 1.januar, 24.mars, 1000.månedlig),
+                        Refusjonsopplysning(meldingsreferanseId, 20.januar, 24.mars, 500.månedlig),
+                        Refusjonsopplysning(meldingsreferanseId, 25.januar, 24.mars, 2000.månedlig),
+                        Refusjonsopplysning(meldingsreferanseId, 1.mars, 24.mars, 999.månedlig),
+                        Refusjonsopplysning(meldingsreferanseId, 20.mars, 24.mars, 99.månedlig),
+                        Refusjonsopplysning(meldingsreferanseId, 25.mars, null, 9.månedlig)
+                    ),
+                    Refusjonsopplysninger(originaleRefusjonsopplysninger).inspektør.refusjonsopplysninger
+                )
+            },
+            ønsket = {
+                assertEquals(
+                    originaleRefusjonsopplysninger,
+                    Refusjonsopplysninger(originaleRefusjonsopplysninger).inspektør.refusjonsopplysninger
+                )
+            }
+        )
+    }
+
+    @Test
+    fun `senere periode uten tom`() {
+        val meldingsreferanseId1 = UUID.randomUUID()
+        val meldingsreferanseId2 = UUID.randomUUID()
+        val refusjonsopplysninger = listOf(
+            Refusjonsopplysning(meldingsreferanseId1, 1.januar, 31.januar, 2000.daglig),
+            Refusjonsopplysning(meldingsreferanseId2, 1.mars, null, 2000.daglig)
+        )
+
+        assertForventetFeil(
+            forklaring = "Feil i merging av refusjonsopplysninger",
+            nå = {
+                assertEquals(listOf(
+                    Refusjonsopplysning(meldingsreferanseId1, 1.januar, 28.februar, 2000.daglig),
+                    Refusjonsopplysning(meldingsreferanseId2, 1.mars, null, 2000.daglig)
+                ), Refusjonsopplysninger(refusjonsopplysninger).inspektør.refusjonsopplysninger)
+            },
+            ønsket = {
+                assertEquals(refusjonsopplysninger, Refusjonsopplysninger(refusjonsopplysninger).inspektør.refusjonsopplysninger)
+            }
+        )
+    }
+
+    private companion object {
+        private fun List<Refusjonsopplysning>.refusjonsopplysninger() = Refusjonsopplysninger(this)
+
+        private val Refusjonsopplysninger.inspektør get() = RefusjonsopplysningerInspektør(this)
+        private class RefusjonsopplysningerInspektør(refusjonsopplysninger: Refusjonsopplysninger): RefusjonsopplysningerVisitor {
+            private val visitedRefusjonsopplysninger = mutableListOf<Refusjonsopplysning>()
+            val refusjonsopplysninger get() = visitedRefusjonsopplysninger.toList()
+            init {
+                refusjonsopplysninger.accept(this)
+            }
+            override fun visitRefusjonsopplysning(meldingsreferanseId: UUID, fom: LocalDate, tom: LocalDate?, beløp: Inntekt) {
+                visitedRefusjonsopplysninger.add(Refusjonsopplysning(meldingsreferanseId, fom, tom, beløp))
+            }
+        }
+
     }
 }
