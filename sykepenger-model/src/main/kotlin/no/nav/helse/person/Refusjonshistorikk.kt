@@ -11,6 +11,7 @@ import no.nav.helse.person.Refusjonshistorikk.Refusjon.Companion.somTilstøterAr
 import no.nav.helse.person.Refusjonshistorikk.Refusjon.Companion.somTrefferFørsteFraværsdag
 import no.nav.helse.person.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.beløp
 import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 
 internal class Refusjonshistorikk {
     private val refusjoner = mutableListOf<Refusjon>()
@@ -46,7 +47,6 @@ internal class Refusjonshistorikk {
             }
 
             private fun Refusjon.utledetFørsteFraværsdag() = førsteFraværsdag ?: arbeidsgiverperioder.maxOf { it.start }
-            internal fun Refusjon.førsteDagIArbeidsgiverperioden() = arbeidsgiverperioder.minOfOrNull { it.start } ?: førsteFraværsdag!!
 
             private fun Iterable<Refusjon>.nyesteMedFørsteFraværsdagFørFørsteUtbetalingsdag(førsteUtbetalingsdag: LocalDate) =
                 filter { it.utledetFørsteFraværsdag() < førsteUtbetalingsdag }.maxByOrNull { it.tidsstempel }
@@ -69,11 +69,9 @@ internal class Refusjonshistorikk {
                 ?.also { aktivitetslogg.info("Fant refusjon ved å finne tilstøtende arbeidsgiverperiode for første utbetalingsdag i sammenhengende utbetaling") }
         }
 
-        internal fun erFørFørsteDagIArbeidsgiverperioden(dag: LocalDate) = dag < førsteDagIArbeidsgiverperioden()
-
         internal fun beløp(dag: LocalDate): Inntekt {
-            if (sisteRefusjonsdag != null && dag > sisteRefusjonsdag) return Inntekt.INGEN
-            return endringerIRefusjon.beløp(dag) ?: beløp ?: Inntekt.INGEN
+            if (sisteRefusjonsdag != null && dag > sisteRefusjonsdag) return INGEN
+            return endringerIRefusjon.beløp(dag) ?: beløp ?: INGEN
         }
 
         internal fun accept(visitor: RefusjonshistorikkVisitor) {
@@ -104,11 +102,46 @@ internal class Refusjonshistorikk {
         ) {
             internal companion object {
                 internal fun List<EndringIRefusjon>.beløp(dag: LocalDate) = sortedBy { it.endringsdato }.lastOrNull { dag >= it.endringsdato }?.beløp
+
+                private fun Refusjon.førsteDato(): LocalDate {
+                    val arbeidsgiverperioderListe = arbeidsgiverperioder.map {it.start}
+                    if (førsteFraværsdag == null) return arbeidsgiverperioderListe.min()
+                    return (arbeidsgiverperioderListe + førsteFraværsdag).min()
+                }
+
+                internal fun Refusjonshistorikk.refusjonsopplysninger(skjæringstidspunkt: LocalDate): Refusjonsopplysning.Refusjonsopplysninger {
+                    val refusjoner = refusjoner.filter { it.førsteDato() >= skjæringstidspunkt }
+                    val refusjonsopplysninger = refusjoner.tilRefusjonsopplysninger()
+
+                    return Refusjonsopplysning.Refusjonsopplysninger(refusjonsopplysninger)
+                }
+
+                private fun List<Refusjon>.tilRefusjonsopplysninger(): List<Refusjonsopplysning> {
+                    val refusjoner = map { refusjon ->
+                        Refusjonsopplysning(
+                            refusjon.meldingsreferanseId, refusjon.førsteDato(), refusjon.sisteRefusjonsdag,
+                            refusjon.beløp ?: INGEN
+                        )
+                    }
+
+                    val endringIRefusjoner = flatMap { refusjon ->
+                        refusjon.endringerIRefusjon.sortedBy { it.endringsdato }
+                            .map { endring ->
+                                Refusjonsopplysning(
+                                    refusjon.meldingsreferanseId, endring.endringsdato, refusjon.sisteRefusjonsdag,
+                                    endring.beløp
+                                )
+                            }
+                    }
+                    return refusjoner + endringIRefusjoner
+                }
             }
 
             internal fun accept(visitor: RefusjonshistorikkVisitor) {
                 visitor.visitEndringIRefusjon(beløp, endringsdato)
             }
+
         }
     }
 }
+
