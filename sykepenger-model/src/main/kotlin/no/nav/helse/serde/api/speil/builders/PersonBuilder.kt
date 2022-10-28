@@ -9,9 +9,13 @@ import no.nav.helse.person.Person
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.serde.AbstractBuilder
 import no.nav.helse.serde.api.BuilderState
+import no.nav.helse.serde.api.dto.ArbeidsgiverDTO
 import no.nav.helse.serde.api.dto.HendelseDTO
 import no.nav.helse.serde.api.dto.PersonDTO
+import no.nav.helse.serde.api.dto.Vilkårsgrunnlag
+import no.nav.helse.serde.api.speil.builders.ArbeidsgiverBuilder.Companion.vilkårsgrunnlagIderSomPekesPåAvGhostPerioder
 import no.nav.helse.utbetalingstidslinje.Alder
+import org.slf4j.LoggerFactory
 
 internal class PersonBuilder(
     builder: AbstractBuilder,
@@ -27,16 +31,34 @@ internal class PersonBuilder(
 
     internal fun build(hendelser: List<HendelseDTO>): PersonDTO {
         val vilkårsgrunnlagHistorikk = VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk).build()
+        val arbeidsgivere = arbeidsgivere.map { it.build(hendelser, alder, vilkårsgrunnlagHistorikk) }
+        val vilkårsgrunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagSomPekesPåAvBeregnedePerioder()
+        sjekkVilkårsgrunnlag(vilkårsgrunnlag, arbeidsgivere, vilkårsgrunnlagHistorikk)
 
         return PersonDTO(
             fødselsnummer = personidentifikator.toString(),
             aktørId = aktørId,
-            arbeidsgivere = arbeidsgivere.map { it.build(hendelser, alder, vilkårsgrunnlagHistorikk) },
+            arbeidsgivere = arbeidsgivere,
             vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk.toDTO(),
             dødsdato = dødsdato,
             versjon = versjon,
-            vilkårsgrunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagSomPekesPåAvBeregnedePerioder()
+            vilkårsgrunnlag = vilkårsgrunnlag
         )
+    }
+
+    private fun sjekkVilkårsgrunnlag(
+        vilkårsgrunnlag: Map<UUID, Vilkårsgrunnlag>,
+        arbeidsgivere: List<ArbeidsgiverDTO>,
+        vilkårsgrunnlagHistorikk: IVilkårsgrunnlagHistorikk
+    ) {
+        if (vilkårsgrunnlag.isNotEmpty() && arbeidsgivere.vilkårsgrunnlagIderSomPekesPåAvGhostPerioder()
+                .any { ghostVilkårsgrunnlagId ->
+                    !vilkårsgrunnlagHistorikk.vilkårsgrunnlagSomPekesPåAvBeregnedePerioder()
+                        .containsKey(ghostVilkårsgrunnlagId)
+                }
+        ) {
+            sikkerlog.warn("$aktørId har en arbeidsgiver med en ghostperiode som peker på et vilkårsgrunnlag som ingen av beregnedee periodene peker på, hvordan kan dette skje?")
+        }
     }
 
     override fun visitAlder(alder: Alder, fødselsdato: LocalDate) {
@@ -64,5 +86,9 @@ internal class PersonBuilder(
         vilkårsgrunnlagHistorikk: VilkårsgrunnlagHistorikk
     ) {
         popState()
+    }
+
+    private companion object {
+        private val sikkerlog = LoggerFactory.getLogger("tjenestekall")
     }
 }

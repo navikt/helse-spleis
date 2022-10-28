@@ -14,6 +14,12 @@ internal class ArbeidsgiverBuilder(
     private val organisasjonsnummer: String
 ) : BuilderState() {
 
+    companion object {
+        internal fun List<ArbeidsgiverDTO>.vilkårsgrunnlagIderSomPekesPåAvGhostPerioder(): List<UUID> {
+            return flatMap { it.ghostPerioder }.mapNotNull { it.vilkårsgrunnlagId }
+        }
+    }
+
     internal fun build(hendelser: List<HendelseDTO>, alder: Alder, vilkårsgrunnlagHistorikk: IVilkårsgrunnlagHistorikk): ArbeidsgiverDTO {
         return ArbeidsgiverDTO(
             organisasjonsnummer = organisasjonsnummer,
@@ -25,6 +31,7 @@ internal class ArbeidsgiverBuilder(
                     tom = it.tom,
                     skjæringstidspunkt = it.skjæringstidspunkt,
                     vilkårsgrunnlagHistorikkInnslagId = it.vilkårsgrunnlagHistorikkInnslagId,
+                    vilkårsgrunnlagId = it.vilkårsgrunnlagId,
                     deaktivert = it.deaktivert
                 )
             },

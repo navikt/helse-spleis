@@ -203,6 +203,7 @@ internal class Arbeidsgiver private constructor(
         internal fun Iterable<Arbeidsgiver>.ghostPeriode(
             skjæringstidspunkt: LocalDate,
             vilkårsgrunnlagHistorikkInnslagId: UUID?,
+            vilkårsgrunnlagId: UUID?,
             deaktivert: Boolean
         ): GhostPeriode? {
             val relevanteVedtaksperioder = flatMap { it.vedtaksperioder.medSkjæringstidspunkt(skjæringstidspunkt) }
@@ -212,6 +213,7 @@ internal class Arbeidsgiver private constructor(
                 tom = relevanteVedtaksperioder.maxOf { it.periode().endInclusive },
                 skjæringstidspunkt = skjæringstidspunkt,
                 vilkårsgrunnlagHistorikkInnslagId = vilkårsgrunnlagHistorikkInnslagId,
+                vilkårsgrunnlagId = vilkårsgrunnlagId,
                 deaktivert = deaktivert
             )
         }

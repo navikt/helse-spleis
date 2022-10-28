@@ -56,6 +56,9 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
     internal fun vilkårsgrunnlagFor(skjæringstidspunkt: LocalDate) =
         sisteInnlag()?.vilkårsgrunnlagFor(skjæringstidspunkt)
 
+    internal fun vilkårsgrunnlagIdFor(skjæringstidspunkt: LocalDate) =
+        sisteInnlag()?.vilkårsgrunnlagIdFor(skjæringstidspunkt)
+
     internal fun avvisInngangsvilkår(tidslinjer: List<Utbetalingstidslinje>) {
         sisteInnlag()?.avvis(tidslinjer)
     }
@@ -105,6 +108,9 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
 
         internal fun vilkårsgrunnlagFor(skjæringstidspunkt: LocalDate) =
             vilkårsgrunnlag[skjæringstidspunkt]
+
+        internal fun vilkårsgrunnlagIdFor(skjæringstidspunkt: LocalDate) =
+            vilkårsgrunnlag[skjæringstidspunkt]?.id()
 
         internal fun skjæringstidspunkterFraSpleis() = vilkårsgrunnlag
             .filterValues { it is Grunnlagsdata }
@@ -205,6 +211,8 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             return sykepengegrunnlag.erRelevant(organisasjonsnummer) || inngårISammenligningsgrunnlaget(organisasjonsnummer)
         }
         internal fun inntektskilde() = sykepengegrunnlag.inntektskilde()
+
+        internal fun id() = vilkårsgrunnlagId
 
         internal open fun avvis(tidslinjer: List<Utbetalingstidslinje>, skjæringstidspunkt: LocalDate) {}
 

@@ -106,6 +106,7 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
                 tom = 20.januar,
                 skjæringstidspunkt = inspektør.skjæringstidspunkt(1.vedtaksperiode),
                 vilkårsgrunnlagHistorikkInnslagId = person.nyesteIdForVilkårsgrunnlagHistorikk(),
+                vilkårsgrunnlagId = person.vilkårsgrunnlagIdFor(inspektør.skjæringstidspunkt(1.vedtaksperiode)),
                 deaktivert = false
             )
 
@@ -169,6 +170,7 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
                 tom = 31.januar,
                 skjæringstidspunkt = inspektør.skjæringstidspunkt(1.vedtaksperiode),
                 vilkårsgrunnlagHistorikkInnslagId = person.nyesteIdForVilkårsgrunnlagHistorikk(),
+                vilkårsgrunnlagId = person.vilkårsgrunnlagIdFor(inspektør.skjæringstidspunkt(1.vedtaksperiode)),
                 deaktivert = false
             )
 
@@ -229,6 +231,7 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
                 tom = 20.februar,
                 skjæringstidspunkt = inspektør.skjæringstidspunkt(1.vedtaksperiode),
                 vilkårsgrunnlagHistorikkInnslagId = person.nyesteIdForVilkårsgrunnlagHistorikk(),
+                vilkårsgrunnlagId = person.vilkårsgrunnlagIdFor(inspektør.skjæringstidspunkt(1.vedtaksperiode)),
                 deaktivert = false
             )
 
@@ -292,6 +295,7 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
                 tom = 20.januar,
                 skjæringstidspunkt = inspektør.skjæringstidspunkt(1.vedtaksperiode),
                 vilkårsgrunnlagHistorikkInnslagId = person.nyesteIdForVilkårsgrunnlagHistorikk(),
+                vilkårsgrunnlagId = person.vilkårsgrunnlagIdFor(inspektør.skjæringstidspunkt(1.vedtaksperiode)),
                 deaktivert = false
             )
 
@@ -348,6 +352,7 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
                 tom = 31.januar,
                 skjæringstidspunkt = inspektør.skjæringstidspunkt(1.vedtaksperiode),
                 vilkårsgrunnlagHistorikkInnslagId = person.nyesteIdForVilkårsgrunnlagHistorikk(),
+                vilkårsgrunnlagId = person.vilkårsgrunnlagIdFor(inspektør.skjæringstidspunkt(1.vedtaksperiode)),
                 deaktivert = false
             )
 
@@ -428,6 +433,8 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
 
         håndterOverstyrArbeidsforhold(1.januar, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, true, "forklaring")))
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
 
         val personDto = serializePersonForSpeil(person)
         val vilkårsgrunnlag =
@@ -482,6 +489,8 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
         håndterSimulering(1.vedtaksperiode, orgnummer = a1)
 
         håndterOverstyrArbeidsforhold(1.januar, listOf(OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, true, "forklaring")))
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
 
         val personDto = serializePersonForSpeil(person)
         val vilkårsgrunnlag =
@@ -558,6 +567,8 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
                 "forklaring"
             )
         ))
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterSimulering(1.vedtaksperiode, orgnummer = a1)
 
         val personDto = serializePersonForSpeil(person)
         val vilkårsgrunnlag = personDto.vilkårsgrunnlagHistorikk[person.nyesteIdForVilkårsgrunnlagHistorikk()]?.get(1.januar)
@@ -754,9 +765,57 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
                 tom = 20.januar,
                 skjæringstidspunkt = inspektør.skjæringstidspunkt(1.vedtaksperiode),
                 vilkårsgrunnlagHistorikkInnslagId = person.nyesteIdForVilkårsgrunnlagHistorikk(),
+                vilkårsgrunnlagId = person.vilkårsgrunnlagIdFor(inspektør.skjæringstidspunkt(1.vedtaksperiode)),
                 deaktivert = false
             )
         assertTrue(areEquals(expected, actual))
+    }
+
+    @Test
+    fun `Ghosten finnes i vilkårsgrunnlaget, men vi har ingen beregning enda`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 20.januar, 100.prosent), orgnummer = a1)
+        håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), orgnummer = a1)
+        håndterInntektsmelding(listOf(1.januar til 16.januar), orgnummer = a1)
+        håndterYtelser(1.vedtaksperiode, orgnummer = a1)
+        håndterVilkårsgrunnlag(
+            vedtaksperiodeIdInnhenter = 1.vedtaksperiode,
+            inntektsvurdering = Inntektsvurdering(inntektperioderForSammenligningsgrunnlag {
+                1.januar(2017) til 1.desember(2017) inntekter {
+                    a1 inntekt INNTEKT
+                    a2 inntekt 10000.månedlig
+                }
+            }),
+            inntektsvurderingForSykepengegrunnlag = InntektForSykepengegrunnlag(inntektperioderForSykepengegrunnlag {
+                1.oktober(2017) til 1.desember(2017) inntekter {
+                    a1 inntekt INNTEKT
+                    a2 inntekt 10000.månedlig
+                }
+            }, emptyList()),
+            arbeidsforhold = listOf(
+                Vilkårsgrunnlag.Arbeidsforhold(a1, LocalDate.EPOCH, null),
+                Vilkårsgrunnlag.Arbeidsforhold(a2, LocalDate.EPOCH, null)
+            )
+        )
+
+        val speilJson = serializePersonForSpeil(person)
+        val perioder = speilJson.arbeidsgivere.single { it.organisasjonsnummer == a2 }.ghostPerioder
+
+        assertEquals(1, perioder.size)
+        val actual = perioder.first()
+        val expected =
+            GhostPeriodeDTO(
+                id = UUID.randomUUID(),
+                fom = 1.januar,
+                tom = 20.januar,
+                skjæringstidspunkt = inspektør.skjæringstidspunkt(1.vedtaksperiode),
+                vilkårsgrunnlagHistorikkInnslagId = person.nyesteIdForVilkårsgrunnlagHistorikk(),
+                vilkårsgrunnlagId = person.vilkårsgrunnlagIdFor(inspektør.skjæringstidspunkt(1.vedtaksperiode)),
+                deaktivert = false
+            )
+        assertTrue(areEquals(expected, actual))
+
+        val vilkårsgrunnlag = speilJson.vilkårsgrunnlag
+        assertEquals(0, vilkårsgrunnlag.size) // vi har ingen beregning enda
     }
 
     @Test
@@ -806,12 +865,13 @@ internal class SpeilBuilderFlereAGTest : AbstractEndToEndTest() {
                 tom = 20.januar,
                 skjæringstidspunkt = inspektør.skjæringstidspunkt(1.vedtaksperiode),
                 vilkårsgrunnlagHistorikkInnslagId = person.nyesteIdForVilkårsgrunnlagHistorikk(),
+                vilkårsgrunnlagId = person.vilkårsgrunnlagIdFor(inspektør.skjæringstidspunkt(1.vedtaksperiode)),
                 deaktivert = false
             )
         assertTrue(areEquals(expected, actual))
     }
 
     private fun areEquals(a: GhostPeriodeDTO, b: GhostPeriodeDTO): Boolean =
-        a.fom == b.fom && a.tom == b.tom && a.skjæringstidspunkt == b.skjæringstidspunkt && a.vilkårsgrunnlagHistorikkInnslagId == b.vilkårsgrunnlagHistorikkInnslagId && a.deaktivert == b.deaktivert
+        a.fom == b.fom && a.tom == b.tom && a.skjæringstidspunkt == b.skjæringstidspunkt && a.vilkårsgrunnlagId == b.vilkårsgrunnlagId && a.deaktivert == b.deaktivert
 }
 

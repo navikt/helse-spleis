@@ -597,7 +597,12 @@ class Person private constructor(
     }
 
     internal fun ghostPeriode(skjæringstidspunkt: LocalDate, deaktivert: Boolean) =
-        arbeidsgivere.ghostPeriode(skjæringstidspunkt, vilkårsgrunnlagHistorikk.sisteId(), deaktivert)
+        arbeidsgivere.ghostPeriode(
+            skjæringstidspunkt = skjæringstidspunkt,
+            vilkårsgrunnlagHistorikkInnslagId = vilkårsgrunnlagHistorikk.sisteId(),
+            vilkårsgrunnlagId = vilkårsgrunnlagHistorikk.vilkårsgrunnlagIdFor(skjæringstidspunkt),
+            deaktivert = deaktivert
+        )
 
     private fun harNærliggendeUtbetaling(periode: Periode): Boolean {
         if (infotrygdhistorikk.harBetaltRettFør(periode)) return false
@@ -631,6 +636,9 @@ class Person private constructor(
 
     internal fun vilkårsgrunnlagFor(skjæringstidspunkt: LocalDate) =
         vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt)
+
+    internal fun vilkårsgrunnlagIdFor(skjæringstidspunkt: LocalDate) =
+        vilkårsgrunnlagHistorikk.vilkårsgrunnlagIdFor(skjæringstidspunkt)
 
     internal fun blitt6GBegrensetSidenSist(skjæringstidspunkt: LocalDate) =
         vilkårsgrunnlagHistorikk.blitt6GBegrensetSidenSist(skjæringstidspunkt)

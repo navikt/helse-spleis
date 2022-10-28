@@ -34,6 +34,7 @@ data class GhostPeriodeDTO(
     val tom: LocalDate,
     val skjæringstidspunkt: LocalDate,
     val vilkårsgrunnlagHistorikkInnslagId: UUID?,
+    val vilkårsgrunnlagId: UUID?,
     val deaktivert: Boolean
 )
 
