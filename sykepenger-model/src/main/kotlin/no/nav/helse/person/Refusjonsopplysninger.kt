@@ -61,7 +61,7 @@ internal class Refusjonsopplysning(
         return meldingsreferanseId == other.meldingsreferanseId && fom == other.fom && tom == other.tom && beløp == other.beløp
     }
 
-    override fun toString() = "$fom - $tom, ${beløp.reflection { årlig, _, _, _ -> årlig }} ($meldingsreferanseId)"
+    override fun toString() = "$fom - $tom, ${beløp.reflection { _, _, dagligDouble, _ -> dagligDouble }} ($meldingsreferanseId)"
     override fun hashCode(): Int {
         var result = meldingsreferanseId.hashCode()
         result = 31 * result + fom.hashCode()

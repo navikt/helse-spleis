@@ -10,6 +10,7 @@ import no.nav.helse.person.Refusjonshistorikk.Refusjon.Companion.somOverlapperMe
 import no.nav.helse.person.Refusjonshistorikk.Refusjon.Companion.somTilstøterArbeidsgiverperiode
 import no.nav.helse.person.Refusjonshistorikk.Refusjon.Companion.somTrefferFørsteFraværsdag
 import no.nav.helse.person.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.beløp
+import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 
@@ -109,31 +110,26 @@ internal class Refusjonshistorikk {
                     return (arbeidsgiverperioderListe + førsteFraværsdag).min()
                 }
 
-                internal fun Refusjonshistorikk.refusjonsopplysninger(skjæringstidspunkt: LocalDate): Refusjonsopplysning.Refusjonsopplysninger {
-                    val refusjoner = refusjoner.filter { it.førsteDato() >= skjæringstidspunkt }
-                    val refusjonsopplysninger = refusjoner.tilRefusjonsopplysninger()
+                internal fun Refusjonshistorikk.refusjonsopplysninger(skjæringstidspunkt: LocalDate): Refusjonsopplysninger {
+                    val refusjonsopplysninger =
+                        this.refusjoner.filter { it.førsteDato() >= skjæringstidspunkt }.sortedBy { it.førsteDato() }
+                            .tilRefusjonsopplysninger()
 
-                    return Refusjonsopplysning.Refusjonsopplysninger(refusjonsopplysninger)
+                    return Refusjonsopplysninger(refusjonsopplysninger)
                 }
 
-                private fun List<Refusjon>.tilRefusjonsopplysninger(): List<Refusjonsopplysning> {
-                    val refusjoner = map { refusjon ->
-                        Refusjonsopplysning(
-                            refusjon.meldingsreferanseId, refusjon.førsteDato(), refusjon.sisteRefusjonsdag,
-                            refusjon.beløp ?: INGEN
-                        )
-                    }
+                private fun List<Refusjon>.tilRefusjonsopplysninger() =
+                    flatMap { it.tilRefusjoneropplysninger() }
 
-                    val endringIRefusjoner = flatMap { refusjon ->
-                        refusjon.endringerIRefusjon.sortedBy { it.endringsdato }
-                            .map { endring ->
-                                Refusjonsopplysning(
-                                    refusjon.meldingsreferanseId, endring.endringsdato, refusjon.sisteRefusjonsdag,
-                                    endring.beløp
-                                )
-                            }
-                    }
-                    return refusjoner + endringIRefusjoner
+                private fun Refusjon.tilRefusjoneropplysninger(): List<Refusjonsopplysning> {
+                    val hovedRefusjonsopplysning = EndringIRefusjon(
+                        beløp ?: INGEN, førsteDato()
+                    )
+                    return (endringerIRefusjon + hovedRefusjonsopplysning)
+                        .sortedBy { it.endringsdato }
+                        .map { endring ->
+                            Refusjonsopplysning(meldingsreferanseId, endring.endringsdato, sisteRefusjonsdag, endring.beløp)
+                        }
                 }
             }
 
