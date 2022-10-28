@@ -18,7 +18,6 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.Nav
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavHelgDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.UkjentDag
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -47,21 +46,6 @@ internal class UtbetalingstidslinjeTest {
             tidslinjeOf(7.NAV, startDato = 1.desember(2017)),
         )))
     }
-
-    @Test
-    fun `betalte dager`() {
-        tidslinjeOf(4.AP, 1.FRI, 6.NAV, 1.AVV, 2.FRI, 5.ARB).also {
-            assertTrue(it.harBetalt(1.januar))
-            assertFalse(it.harBetalt(5.januar))
-            assertTrue(it.harBetalt(6.januar))
-            assertTrue(it.harBetalt(7.januar))
-            assertTrue(it.harBetalt(12.januar))
-            assertFalse(it.harBetalt(15.januar))
-            assertTrue(it.harBetalt(1.januar til 7.januar))
-            assertFalse(it.harBetalt(13.januar til 20.januar))
-        }
-    }
-
 
     @Test
     fun `fri i helg mappes til ukjentdag`() {

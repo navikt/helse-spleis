@@ -270,8 +270,6 @@ internal class Økonomi private constructor(
 
     internal fun er6GBegrenset() = tilstand.er6GBegrenset(this)
 
-    internal fun harPersonbeløp() = personbeløp!! > INGEN
-
     private fun _betal() {
         val total = (dekningsgrunnlag * grad()).rundTilDaglig()
         val gradertArbeidsgiverRefusjonsbeløp = (arbeidsgiverRefusjonsbeløp * grad()).rundTilDaglig()

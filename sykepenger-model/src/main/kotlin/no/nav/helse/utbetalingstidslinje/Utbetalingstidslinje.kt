@@ -106,24 +106,7 @@ internal class Utbetalingstidslinje(utbetalingsdager: List<Utbetalingsdag>) : Co
         return Utbetalingstidslinje(utbetalingsdager.asReversed())
     }
 
-    internal fun harBetalt(dato: LocalDate): Boolean {
-        return this[dato].erSykedag()
-    }
-
-    internal fun harBetalt(periode: Periode) =
-        periode.any { harBetalt(it) }
-
-    internal fun kunArbeidsgiverdager() =
-        this.utbetalingsdager.all {
-            it is ArbeidsgiverperiodeDag ||
-                it is Arbeidsdag ||
-                it is NavHelgDag ||
-                it is Fridag
-        }
-
     internal fun harUtbetalinger() = sykepengeperiode() != null
-
-    internal fun harBrukerutbetalinger() = any { it.økonomi.harPersonbeløp() }
 
     override fun iterator() = this.utbetalingsdager.iterator()
 
@@ -169,8 +152,6 @@ internal class Utbetalingstidslinje(utbetalingsdager: List<Utbetalingsdag>) : Co
 
     private fun sisteDato(other: Utbetalingstidslinje) =
         maxOf(this.sisteDato, other.sisteDato)
-
-    internal fun sisteUkedag() = utbetalingsdager.last { it !is NavHelgDag }.dato
 
     internal fun periode() = Periode(førsteDato, sisteDato)
 

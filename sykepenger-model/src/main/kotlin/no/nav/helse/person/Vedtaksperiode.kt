@@ -704,15 +704,10 @@ internal class Vedtaksperiode private constructor(
 
     private fun høstingsresultater(hendelse: ArbeidstakerHendelse) {
         val ingenUtbetaling = !utbetalinger.harUtbetalinger()
-        val kunArbeidsgiverdager = utbetalingstidslinje.kunArbeidsgiverdager()
-
         when {
             ingenUtbetaling -> {
                 tilstand(hendelse, AvventerGodkjenning) {
-                    if (kunArbeidsgiverdager)
-                        hendelse.info("""Saken inneholder ingen utbetalingsdager for Nav, men inneholder andre warnings""")
-                    else
-                        hendelse.info("""Saken oppfyller krav for behandling, settes til "Avventer godkjenning" fordi ingenting skal utbetales""")
+                    hendelse.info("""Saken oppfyller krav for behandling, settes til "Avventer godkjenning" fordi ingenting skal utbetales""")
                 }
             }
             else -> {
