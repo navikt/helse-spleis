@@ -105,7 +105,7 @@ private fun mapTilDto(person: PersonDTO) =
                         fom = periode.fom,
                         tom = periode.tom,
                         skjaeringstidspunkt = periode.skjæringstidspunkt,
-                        vilkarsgrunnlaghistorikkId = periode.vilkårsgrunnlagId,
+                        vilkarsgrunnlaghistorikkId = periode.vilkårsgrunnlagHistorikkInnslagId,
                         deaktivert = periode.deaktivert,
                         organisasjonsnummer = arbeidsgiver.organisasjonsnummer
                     )

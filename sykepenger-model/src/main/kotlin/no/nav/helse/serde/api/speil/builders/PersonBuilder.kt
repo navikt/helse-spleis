@@ -57,7 +57,7 @@ internal class PersonBuilder(
                         .containsKey(ghostVilkårsgrunnlagId)
                 }
         ) {
-            sikkerlog.warn("$aktørId har en arbeidsgiver med en ghostperiode som peker på et vilkårsgrunnlag som ingen av beregnedee periodene peker på, hvordan kan dette skje?")
+            sikkerlog.warn("$aktørId har en arbeidsgiver med en ghostperiode som peker på et vilkårsgrunnlag som ingen av beregnede periodene peker på, hvordan kan dette skje?")
         }
     }
 
