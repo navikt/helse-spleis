@@ -2,6 +2,7 @@ package no.nav.helse.testhelpers
 
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
+import no.nav.helse.Grunnbeløp
 import no.nav.helse.erHelg
 import no.nav.helse.plus
 import no.nav.helse.ukedager
@@ -22,13 +23,14 @@ internal fun tidslinjeOf(
     startDato: LocalDate = LocalDate.of(2018, 1, 1),
     skjæringstidspunkter: List<LocalDate> = listOf(startDato)
 ) = Utbetalingstidslinje.Builder().apply {
-    val skjæringstidspunkt = { dato: LocalDate -> skjæringstidspunkter.filter { dato >= it }.maxOrNull() ?: dato }
+    val finnSkjæringstidspunktFor = { dato: LocalDate -> skjæringstidspunkter.filter { dato >= it }.maxOrNull() ?: dato }
     utbetalingsdager.fold(startDato) { startDato, (antallDagerFun, utbetalingsdag, helgedag, dekningsgrunnlag, grad, arbeidsgiverbeløp) ->
         var dato = startDato
         val antallDager = antallDagerFun(startDato)
         repeat(antallDager) {
+            val skjæringstidspunkt = finnSkjæringstidspunktFor(dato)
             val økonomi = Økonomi.sykdomsgrad(grad.prosent)
-                .inntekt(dekningsgrunnlag, skjæringstidspunkt = skjæringstidspunkt(dato))
+                .inntekt(dekningsgrunnlag, skjæringstidspunkt = skjæringstidspunkt, `6G` = Grunnbeløp.`6G`.beløp(skjæringstidspunkt))
                 .arbeidsgiverRefusjon(arbeidsgiverbeløp)
             if (helgedag != null && dato.erHelg()) this.helgedag(dato, økonomi)
             else this.utbetalingsdag(dato, økonomi)

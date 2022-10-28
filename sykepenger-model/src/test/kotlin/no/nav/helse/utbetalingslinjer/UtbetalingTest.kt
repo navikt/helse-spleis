@@ -864,7 +864,7 @@ internal class UtbetalingTest {
                 else -> spleisdag
             }
         }
-    }.also { MaksimumUtbetalingFilter { 1.januar }.betal(listOf(tidslinje), tidslinje.periode(), aktivitetslogg, MaskinellJurist()) }
+    }.also { MaksimumUtbetalingFilter().betal(listOf(tidslinje), tidslinje.periode(), aktivitetslogg, MaskinellJurist()) }
 
     private fun opprettGodkjentUtbetaling(
         tidslinje: Utbetalingstidslinje = tidslinjeOf(16.AP, 5.NAV(3000)),

@@ -2,7 +2,7 @@ package no.nav.helse.økonomi
 
 import java.time.LocalDate
 import java.util.UUID
-import no.nav.helse.Grunnbeløp
+import no.nav.helse.Grunnbeløp.Companion.`6G`
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
@@ -30,7 +30,7 @@ internal class CreateØkonomiTest {
     fun `betale uten inntekt gir 0 i beløp`() {
         val data = sykdomstidslinjedag(79.5)
         createØkonomi(data).also { økonomi ->
-            listOf(økonomi).betal(1.januar)
+            listOf(økonomi).betal()
             økonomi.medData { grad, arbeidsgiverRefusjonsbeløp, dekningsgrunnlag, _, _, aktuellDagsinntekt, arbeidsgiverbeløp, personbeløp, begrenset ->
                 assertEquals(79.5, grad)
                 assertEquals(0.0, arbeidsgiverRefusjonsbeløp)
@@ -58,7 +58,7 @@ internal class CreateØkonomiTest {
                 assertNull(begrenset)
             }
             økonomi
-                .inntekt(1200.daglig, skjæringstidspunkt = 1.januar)
+                .inntekt(1200.daglig, skjæringstidspunkt = 1.januar, `6G` = `6G`.beløp(1.januar))
                 .medData { grad, arbeidsgiverRefusjonsbeløp, dekningsgrunnlag, skjæringstidspunkt, _, aktuellDagsinntekt, arbeidsgiverbeløp, personbeløp, begrenset ->
                     assertEquals(79.5, grad)
                     assertEquals(0.0, arbeidsgiverRefusjonsbeløp)
@@ -77,7 +77,7 @@ internal class CreateØkonomiTest {
         val data = sykdomstidslinjedag(79.5)
         createØkonomi(data).also { økonomi ->
             assertDoesNotThrow { økonomi
-                .inntekt(1200.daglig, skjæringstidspunkt = 1.januar, arbeidsgiverperiode = Arbeidsgiverperiode(listOf(1.januar til 16.januar)))
+                .inntekt(1200.daglig, skjæringstidspunkt = 1.januar, `6G` = `6G`.beløp(1.januar), arbeidsgiverperiode = Arbeidsgiverperiode(listOf(1.januar til 16.januar)))
             }
         }
     }
@@ -104,8 +104,8 @@ internal class CreateØkonomiTest {
                 assertNull(er6GBegrenset)
             }
             // Indirect test of Økonomi state is HarLønn
-            assertThrows<IllegalStateException> { økonomi.inntekt(1200.daglig, skjæringstidspunkt = 1.januar) }
-            assertDoesNotThrow { listOf(økonomi).betal(1.januar) }
+            assertThrows<IllegalStateException> { økonomi.inntekt(1200.daglig, skjæringstidspunkt = 1.januar, `6G` = `6G`.beløp(1.januar)) }
+            assertDoesNotThrow { listOf(økonomi).betal() }
         }
     }
 
@@ -132,8 +132,8 @@ internal class CreateØkonomiTest {
                 assertTrue(er6GBegrenset as Boolean)
             }
             // Indirect test of Økonomi state
-            assertThrows<IllegalStateException> { økonomi.inntekt(1200.daglig, skjæringstidspunkt = 1.januar) }
-            assertDoesNotThrow { listOf(økonomi).betal(1.januar) }
+            assertThrows<IllegalStateException> { økonomi.inntekt(1200.daglig, skjæringstidspunkt = 1.januar, `6G` = `6G`.beløp(1.januar)) }
+            assertDoesNotThrow { listOf(økonomi).betal() }
         }
     }
 
@@ -153,7 +153,7 @@ internal class CreateØkonomiTest {
         aktuellDagsinntekt,
         dekningsgrunnlag,
         1.januar,
-        Grunnbeløp.`6G`.beløp(1.januar).reflection { årlig, _, _, _ -> årlig },
+        `6G`.beløp(1.januar).reflection { årlig, _, _, _ -> årlig },
         null,
         null,
         grad,

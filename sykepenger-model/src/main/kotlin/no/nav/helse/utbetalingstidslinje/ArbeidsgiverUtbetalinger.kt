@@ -90,5 +90,5 @@ internal class ArbeidsgiverUtbetalinger(
         AvvisDagerEtterDødsdatofilter(dødsdato).filter(tidslinjer, periode, aktivitetslogg, subsumsjonObserver)
         AvvisInngangsvilkårfilter(vilkårsgrunnlagHistorikk).filter(tidslinjer, periode, aktivitetslogg, subsumsjonObserver)
         maksimumSykepengedagerfilter.filter(tidslinjer, periode, aktivitetslogg, subsumsjonObserver)
-        MaksimumUtbetalingFilter { periode.endInclusive }.betal(tidslinjer, periode, aktivitetslogg, subsumsjonObserver) }
+        MaksimumUtbetalingFilter().betal(tidslinjer, periode, aktivitetslogg, subsumsjonObserver) }
 }

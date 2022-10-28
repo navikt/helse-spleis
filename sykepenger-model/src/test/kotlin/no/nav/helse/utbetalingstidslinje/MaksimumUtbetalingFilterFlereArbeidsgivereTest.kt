@@ -1,11 +1,11 @@
 package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.Grunnbeløp
+import no.nav.helse.april
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.person.Aktivitetslogg
-import no.nav.helse.testhelpers.NAV
-import no.nav.helse.april
 import no.nav.helse.person.etterlevelse.MaskinellJurist
+import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje.Utbetalingsdag.NavDag.Companion.reflectedArbeidsgiverBeløp
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
@@ -34,7 +34,7 @@ internal class MaksimumUtbetalingFilterFlereArbeidsgivereTest {
         val periode = Utbetalingstidslinje.periode(listOf(ag1.first, ag2.first))
         val dato = periode.start
         val maksDagsats = Grunnbeløp.`6G`.dagsats(dato)
-        MaksimumUtbetalingFilter { dato }.betal(listOf(ag2.first, ag1.first), periode, aktivitetslogg, MaskinellJurist())
+        MaksimumUtbetalingFilter().betal(listOf(ag2.first, ag1.first), periode, aktivitetslogg, MaskinellJurist())
         assertTrue(ag1.first.inspektør.økonomi(reflectedArbeidsgiverBeløp).all { it.daglig == maksDagsats }) {
             "noen dager har fått nytt grunnbeløp"
         }

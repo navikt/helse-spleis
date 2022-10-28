@@ -30,6 +30,7 @@ import no.nav.helse.utbetalingstidslinje.ArbeidsgiverRegler
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Prosent
 import no.nav.helse.økonomi.Økonomi
 
@@ -218,9 +219,19 @@ internal class Sykepengegrunnlag(
         it.gjelder(organisasjonsnummer)
     }
 
-    internal fun medInntekt(organisasjonsnummer: String, dato: LocalDate, økonomi: Økonomi, arbeidsgiverperiode: Arbeidsgiverperiode?, regler: ArbeidsgiverRegler, subsumsjonObserver: SubsumsjonObserver): Økonomi? {
-        return arbeidsgiverInntektsopplysninger.medInntekt(organisasjonsnummer, skjæringstidspunkt, dato, økonomi, arbeidsgiverperiode, regler, subsumsjonObserver)
+    internal fun utenInntekt(økonomi: Økonomi, arbeidsgiverperiode: Arbeidsgiverperiode?): Økonomi {
+        return økonomi.inntekt(
+            aktuellDagsinntekt = INGEN,
+            dekningsgrunnlag = INGEN,
+            skjæringstidspunkt = skjæringstidspunkt,
+            `6G` = `6G`,
+            arbeidsgiverperiode = arbeidsgiverperiode
+        )
     }
+    internal fun medInntekt(organisasjonsnummer: String, dato: LocalDate, økonomi: Økonomi, arbeidsgiverperiode: Arbeidsgiverperiode?, regler: ArbeidsgiverRegler, subsumsjonObserver: SubsumsjonObserver): Økonomi {
+        return arbeidsgiverInntektsopplysninger.medInntekt(organisasjonsnummer, `6G`, skjæringstidspunkt, dato, økonomi, arbeidsgiverperiode, regler, subsumsjonObserver) ?: utenInntekt(økonomi, arbeidsgiverperiode)
+    }
+
     internal fun build(builder: VedtakFattetBuilder) {
         builder
             .sykepengegrunnlag(this.sykepengegrunnlag)
