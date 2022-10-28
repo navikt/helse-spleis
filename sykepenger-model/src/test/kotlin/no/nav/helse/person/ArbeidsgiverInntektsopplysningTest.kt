@@ -3,6 +3,7 @@ package no.nav.helse.person
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.Grunnbeløp.Companion.`6G`
 import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.hendelser.Subsumsjon
@@ -246,6 +247,7 @@ internal class ArbeidsgiverInntektsopplysningTest {
 
         val økonomi = listOf(arbeidsgiverInntektsopplysning).medInntekt(
             organisasjonsnummer = "orgnummer",
+            `6G` = `6G`.beløp(1.januar),
             skjæringstidspunkt = 1.januar,
             dato = 1.januar,
             økonomi = Økonomi.sykdomsgrad(100.prosent),

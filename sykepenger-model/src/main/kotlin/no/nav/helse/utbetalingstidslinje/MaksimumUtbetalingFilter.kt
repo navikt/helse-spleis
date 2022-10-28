@@ -1,28 +1,22 @@
 package no.nav.helse.utbetalingstidslinje
 
-import java.time.LocalDate
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.økonomi.betal
 import no.nav.helse.økonomi.er6GBegrenset
 
-internal class MaksimumUtbetalingFilter(
-    private val virkningsdato: (periode: Periode) -> LocalDate = { it.endInclusive }
-): UtbetalingstidslinjerFilter {
+internal class MaksimumUtbetalingFilter : UtbetalingstidslinjerFilter {
     private var harRedusertUtbetaling = false
 
     override fun filter(
         tidslinjer: List<Utbetalingstidslinje>,
         perioder: List<Triple<Periode, IAktivitetslogg, SubsumsjonObserver>>
     ): List<Utbetalingstidslinje> {
-        val virkningsdato = virkningsdato(perioder.map { it.first }.periode()!!)
-
         Utbetalingstidslinje.periode(tidslinjer).forEach { dato ->
             tidslinjer.map { it[dato].økonomi }.also { økonomiList ->
                 try {
-                    økonomiList.betal(virkningsdato)
+                    økonomiList.betal()
                     harRedusertUtbetaling = harRedusertUtbetaling || økonomiList.er6GBegrenset()
                 } catch (err: Exception) {
                     throw IllegalArgumentException("Klarte ikke å utbetale for dag=$dato, fordi: ${err.message}", err)

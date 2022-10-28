@@ -384,7 +384,7 @@ internal class LagUtbetalingForRevurderingTest {
                 else -> spleisdag
             }
         }
-    }.also { MaksimumUtbetalingFilter { 1.januar }.betal(listOf(tidslinje), tidslinje.periode(), aktivitetslogg, MaskinellJurist()) }
+    }.also { MaksimumUtbetalingFilter().betal(listOf(tidslinje), tidslinje.periode(), aktivitetslogg, MaskinellJurist()) }
 
     private fun vedtaksperiode(periode: Periode = 1.januar til 31.januar, organisasjonsnummer: String = ORGNUMMER): Vedtaksperiode {
         val søknad = søknad(periode)

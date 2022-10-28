@@ -73,7 +73,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         sisteInnlag()?.erRelevant(organisasjonsnummer, skjæringstidspunkter) ?: false
 
     internal fun medInntekt(organisasjonsnummer: String, dato: LocalDate, økonomi: Økonomi, arbeidsgiverperiode: Arbeidsgiverperiode?, regler: ArbeidsgiverRegler, subsumsjonObserver: SubsumsjonObserver) =
-        sisteInnlag()?.medInntekt(organisasjonsnummer, dato, økonomi, arbeidsgiverperiode, regler, subsumsjonObserver)
+        sisteInnlag()!!.medInntekt(organisasjonsnummer, dato, økonomi, arbeidsgiverperiode, regler, subsumsjonObserver)
 
     internal fun utenInntekt(dato: LocalDate, økonomi: Økonomi, arbeidsgiverperiode: Arbeidsgiverperiode?) =
         sisteInnlag()!!.utenInntekt(dato, økonomi, arbeidsgiverperiode)
@@ -139,7 +139,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             arbeidsgiverperiode: Arbeidsgiverperiode?,
             regler: ArbeidsgiverRegler,
             subsumsjonObserver: SubsumsjonObserver
-        ): Økonomi? {
+        ): Økonomi {
             return VilkårsgrunnlagElement.medInntekt(
                 vilkårsgrunnlag.values,
                 organisasjonsnummer,
@@ -249,7 +249,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             arbeidsgiverperiode: Arbeidsgiverperiode?,
             regler: ArbeidsgiverRegler,
             subsumsjonObserver: SubsumsjonObserver
-        ): Økonomi? {
+        ): Økonomi {
             return sykepengegrunnlag.medInntekt(
                 organisasjonsnummer,
                 dato,
@@ -258,6 +258,9 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                 regler,
                 subsumsjonObserver
             )
+        }
+        private fun utenInntekt(økonomi: Økonomi, arbeidsgiverperiode: Arbeidsgiverperiode?): Økonomi {
+            return sykepengegrunnlag.utenInntekt(økonomi, arbeidsgiverperiode)
         }
 
         internal fun er6GBegrenset() = sykepengegrunnlag.er6GBegrenset()
@@ -285,7 +288,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                 arbeidsgiverperiode: Arbeidsgiverperiode?,
                 regler: ArbeidsgiverRegler,
                 subsumsjonObserver: SubsumsjonObserver
-            ): Økonomi? {
+            ): Økonomi {
                 return finnVilkårsgrunnlag(elementer, dato)?.medInntekt(
                     organisasjonsnummer,
                     dato,
@@ -293,25 +296,26 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                     arbeidsgiverperiode,
                     regler,
                     subsumsjonObserver
-                )
+                ) ?: utenInntekt(elementer, dato, økonomi, arbeidsgiverperiode)
             }
 
             internal fun utenInntekt(
-                elementer: MutableCollection<VilkårsgrunnlagElement>,
+                elementer: Collection<VilkårsgrunnlagElement>,
                 dato: LocalDate,
                 økonomi: Økonomi,
                 arbeidsgiverperiode: Arbeidsgiverperiode?
             ): Økonomi {
-                return økonomi.inntekt(
+                return finnVilkårsgrunnlag(elementer, dato)?.utenInntekt(økonomi, arbeidsgiverperiode) ?: økonomi.inntekt(
                     aktuellDagsinntekt = INGEN,
                     dekningsgrunnlag = INGEN,
-                    skjæringstidspunkt = finnVilkårsgrunnlag(elementer, dato)?.skjæringstidspunkt ?: dato,
+                    skjæringstidspunkt = dato,
+                    `6G` = INGEN,
                     arbeidsgiverperiode = arbeidsgiverperiode
                 )
             }
 
             private fun finnVilkårsgrunnlag(
-                elementer: MutableCollection<VilkårsgrunnlagElement>,
+                elementer: Collection<VilkårsgrunnlagElement>,
                 dato: LocalDate
             ): VilkårsgrunnlagElement? {
                 return elementer

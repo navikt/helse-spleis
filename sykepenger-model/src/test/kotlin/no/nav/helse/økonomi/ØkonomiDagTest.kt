@@ -1,14 +1,12 @@
 package no.nav.helse.økonomi
 
 import java.time.LocalDate
-import no.nav.helse.Grunnbeløp
 import no.nav.helse.april
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.etterlevelse.MaskinellJurist
-import no.nav.helse.september
 import no.nav.helse.testhelpers.ARB
 import no.nav.helse.testhelpers.AVV
 import no.nav.helse.testhelpers.NAV
@@ -93,20 +91,6 @@ internal class ØkonomiDagTest {
     }
 
     @Test
-    fun `bruker virkningsdato for å finne aktuell G-verdi ved begrensning`() {
-        val skjæringstidspunkt = 1.mai(2020)
-        val virkningsdatoForNyttGrunnbeløp = 21.september(2020)
-        tidslinjeOf(2.NAV(3000), startDato = skjæringstidspunkt).let { tidslinje ->
-            listOf(tidslinje).betal(skjæringstidspunkt)
-            assertØkonomi(tidslinje, Grunnbeløp.`6G`.beløp(skjæringstidspunkt).rundTilDaglig().reflection { _, _, daglig, _ -> daglig}) // 2019-grunnbeløp
-        }
-        tidslinjeOf(2.NAV(3000), startDato = skjæringstidspunkt).let { tidslinje ->
-            listOf(tidslinje).betal(virkningsdatoForNyttGrunnbeløp)
-            assertØkonomi(tidslinje, Grunnbeløp.`6G`.beløp(skjæringstidspunkt, virkningsdatoForNyttGrunnbeløp).rundTilDaglig().reflection { _, _, daglig, _ -> daglig}) // 2020-grunnbeløp fordi virkningsdato er passert
-        }
-    }
-
-    @Test
     fun `Beløp med arbeidsdag`() {
         val a = tidslinjeOf(2.NAV(1200))
         val b = tidslinjeOf(2.NAV(1200))
@@ -172,6 +156,6 @@ internal class ØkonomiDagTest {
 
     private fun List<Utbetalingstidslinje>.betal(virkningsdato: LocalDate = 1.januar) {
         val periode = virkningsdato til virkningsdato // Brukes ikke når vi eksplisitt setter virkningsdato
-        MaksimumUtbetalingFilter { virkningsdato }.betal(this, periode, Aktivitetslogg(), MaskinellJurist())
+        MaksimumUtbetalingFilter().betal(this, periode, Aktivitetslogg(), MaskinellJurist())
     }
 }

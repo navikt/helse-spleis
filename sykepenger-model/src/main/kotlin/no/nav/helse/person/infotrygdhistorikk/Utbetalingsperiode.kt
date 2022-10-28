@@ -41,8 +41,8 @@ abstract class Utbetalingsperiode(
 
     private fun nyDag(builder: Utbetalingstidslinje.Builder, dato: LocalDate) {
         val økonomi = Økonomi.sykdomsgrad(grad)
-        if (dato.erHelg()) return builder.addHelg(dato, økonomi.inntekt(INGEN, skjæringstidspunkt = dato))
-        builder.addNAVdag(dato, økonomi.inntekt(inntekt, skjæringstidspunkt = dato).arbeidsgiverRefusjon(INGEN))
+        if (dato.erHelg()) return builder.addHelg(dato, økonomi.inntekt(INGEN, skjæringstidspunkt = dato, `6G` = INGEN))
+        builder.addNAVdag(dato, økonomi.inntekt(inntekt, skjæringstidspunkt = dato, `6G` = INGEN).arbeidsgiverRefusjon(INGEN))
     }
 
     internal fun valider(

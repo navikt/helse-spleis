@@ -1,7 +1,6 @@
 package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.inspectors.inspektør
-import no.nav.helse.januar
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.testhelpers.NAV
@@ -60,6 +59,6 @@ internal class MaksimumUtbetalingFilterHendelseTest {
     }
 
     private fun Utbetalingstidslinje.betal() {
-        MaksimumUtbetalingFilter { 1.januar }.betal(listOf(this), this.periode(), aktivitetslogg, MaskinellJurist())
+        MaksimumUtbetalingFilter().betal(listOf(this), this.periode(), aktivitetslogg, MaskinellJurist())
     }
 }

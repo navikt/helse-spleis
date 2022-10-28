@@ -110,12 +110,13 @@ internal class ArbeidsgiverInntektsopplysning(
             return map { it.inntektsopplysning.rapportertInntekt() }.summer()
         }
 
-        internal fun List<ArbeidsgiverInntektsopplysning>.medInntekt(organisasjonsnummer: String, skjæringstidspunkt: LocalDate, dato: LocalDate, økonomi: Økonomi, arbeidsgiverperiode: Arbeidsgiverperiode?, regler: ArbeidsgiverRegler, subsumsjonObserver: SubsumsjonObserver): Økonomi? {
+        internal fun List<ArbeidsgiverInntektsopplysning>.medInntekt(organisasjonsnummer: String, `6G`: Inntekt, skjæringstidspunkt: LocalDate, dato: LocalDate, økonomi: Økonomi, arbeidsgiverperiode: Arbeidsgiverperiode?, regler: ArbeidsgiverRegler, subsumsjonObserver: SubsumsjonObserver): Økonomi? {
             return singleOrNull { it.orgnummer == organisasjonsnummer }?.inntektsopplysning?.omregnetÅrsinntekt()?.let { inntekt ->
                 økonomi.inntekt(
                     aktuellDagsinntekt = inntekt,
                     dekningsgrunnlag = inntekt.dekningsgrunnlag(dato, regler, subsumsjonObserver),
                     skjæringstidspunkt = skjæringstidspunkt,
+                    `6G` = `6G`,
                     arbeidsgiverperiode = arbeidsgiverperiode
                 )
             }

@@ -1,7 +1,6 @@
 package no.nav.helse.økonomi
 
 import java.time.LocalDate
-import no.nav.helse.Grunnbeløp
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.person.UtbetalingsdagVisitor
@@ -58,32 +57,28 @@ internal class Økonomi private constructor(
             }?.takeUnless { it == periode }
         }
 
-        internal fun betal(økonomiList: List<Økonomi>, virkningsdato: LocalDate): List<Økonomi> = økonomiList.also {
+        internal fun betal(økonomiList: List<Økonomi>): List<Økonomi> = økonomiList.also {
             delteUtbetalinger(it)
             totalSykdomsgrad(økonomiList).also { totalSykdomsgrad ->
                 økonomiList.forEach { økonomi -> økonomi.totalGrad = totalSykdomsgrad }
             }
-            fordelBeløp(it, virkningsdato)
+            fordelBeløp(it)
         }
 
         private fun delteUtbetalinger(økonomiList: List<Økonomi>) = økonomiList.forEach { it.betal() }
 
-        private fun fordelBeløp(økonomiList: List<Økonomi>, virkningsdato: LocalDate) {
+        private fun fordelBeløp(økonomiList: List<Økonomi>) {
             val totalArbeidsgiver = totalArbeidsgiver(økonomiList)
             val totalPerson = totalPerson(økonomiList)
             val total = totalArbeidsgiver + totalPerson
             if (total == INGEN) return økonomiList.forEach { økonomi -> økonomi.er6GBegrenset = false }
 
-            check(økonomiList.any { it.skjæringstidspunkt != null }) { "ingen økonomiobjekt har skjæringstidspunkt" }
-            check(økonomiList.filter { it.skjæringstidspunkt != null }.distinctBy { it.skjæringstidspunkt }.count() == 1) { "det finnes flere unike skjæringstidspunkt for økonomiobjekt på samme dag" }
-
-            val skjæringstidspunkt = økonomiList.firstNotNullOf { it.skjæringstidspunkt }
-            val grunnbeløp = Grunnbeløp.`6G`.beløp(skjæringstidspunkt, virkningsdato)
-            økonomiList.forEach { it.grunnbeløpgrense = grunnbeløp }
-
+            // todo: trenger ikke vite 6G hvis inntektene er redusert ihht. 6G når de settes på Økonomi
+            val grunnbeløp = økonomiList.firstNotNullOf { it.grunnbeløpgrense }
             val grunnlagForSykepengegrunnlag = økonomiList.map { it.aktuellDagsinntekt }.summer()
-            val sykepengegrunnlagBegrenset6G = minOf(grunnlagForSykepengegrunnlag, grunnbeløp) // TODO: få sykepengegrunnlaget (etter 6g) fra Sykepengegrunnlag
+            val sykepengegrunnlagBegrenset6G = minOf(grunnlagForSykepengegrunnlag, grunnbeløp)
             val er6GBegrenset = grunnlagForSykepengegrunnlag > grunnbeløp
+
             val sykepengegrunnlag = (sykepengegrunnlagBegrenset6G * økonomiList.first().totalGrad).rundTilDaglig()
             fordel(økonomiList, totalArbeidsgiver, sykepengegrunnlag, { økonomi, inntekt -> økonomi.arbeidsgiverbeløp = inntekt }, arbeidsgiverBeløp)
             val totalArbeidsgiverrefusjon = totalArbeidsgiver(økonomiList)
@@ -142,8 +137,8 @@ internal class Økonomi private constructor(
         require(dekningsgrunnlag >= INGEN) { "dekningsgrunnlag kan ikke være negativ." }
     }
 
-    internal fun inntekt(aktuellDagsinntekt: Inntekt, dekningsgrunnlag: Inntekt = aktuellDagsinntekt, skjæringstidspunkt: LocalDate, arbeidsgiverperiode: Arbeidsgiverperiode? = null): Økonomi =
-        tilstand.inntekt(this, aktuellDagsinntekt, dekningsgrunnlag, skjæringstidspunkt, arbeidsgiverperiode)
+    internal fun inntekt(aktuellDagsinntekt: Inntekt, dekningsgrunnlag: Inntekt = aktuellDagsinntekt, skjæringstidspunkt: LocalDate, `6G`: Inntekt, arbeidsgiverperiode: Arbeidsgiverperiode? = null): Økonomi =
+        tilstand.inntekt(this, aktuellDagsinntekt, dekningsgrunnlag, skjæringstidspunkt, arbeidsgiverperiode, `6G`)
 
     internal fun arbeidsgiverRefusjon(refusjonsbeløp: Inntekt?) =
         tilstand.arbeidsgiverRefusjon(this, refusjonsbeløp)
@@ -347,7 +342,8 @@ internal class Økonomi private constructor(
             aktuellDagsinntekt: Inntekt,
             dekningsgrunnlag: Inntekt,
             skjæringstidspunkt: LocalDate,
-            arbeidsgiverperiode: Arbeidsgiverperiode?
+            arbeidsgiverperiode: Arbeidsgiverperiode?,
+            `6G`: Inntekt
         ): Økonomi {
             throw IllegalStateException("Kan ikke sette inntekt i tilstand ${this::class.simpleName}")
         }
@@ -387,7 +383,8 @@ internal class Økonomi private constructor(
                 aktuellDagsinntekt: Inntekt,
                 dekningsgrunnlag: Inntekt,
                 skjæringstidspunkt: LocalDate,
-                arbeidsgiverperiode: Arbeidsgiverperiode?
+                arbeidsgiverperiode: Arbeidsgiverperiode?,
+                `6G`: Inntekt
             ) = Økonomi(
                 grad = økonomi.grad,
                 totalGrad = økonomi.totalGrad,
@@ -396,7 +393,7 @@ internal class Økonomi private constructor(
                 aktuellDagsinntekt = aktuellDagsinntekt,
                 dekningsgrunnlag = dekningsgrunnlag,
                 skjæringstidspunkt = skjæringstidspunkt,
-                grunnbeløpgrense = Grunnbeløp.`6G`.beløp(skjæringstidspunkt),
+                grunnbeløpgrense = `6G`,
                 tilstand = HarInntekt
             )
 
@@ -573,7 +570,7 @@ internal abstract class ØkonomiBuilder {
 
 internal fun List<Økonomi>.totalSykdomsgrad(): Prosentdel = Økonomi.totalSykdomsgrad(this)
 
-internal fun List<Økonomi>.betal(virkningsdato: LocalDate) = Økonomi.betal(this, virkningsdato)
+internal fun List<Økonomi>.betal() = Økonomi.betal(this)
 
 internal fun List<Økonomi>.er6GBegrenset() = Økonomi.er6GBegrenset(this)
 

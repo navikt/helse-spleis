@@ -45,6 +45,7 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 internal class VilkårsgrunnlagHistorikkTest {
     private lateinit var historikk: VilkårsgrunnlagHistorikk
@@ -175,7 +176,11 @@ internal class VilkårsgrunnlagHistorikkTest {
             meldingsreferanseId = UUID.randomUUID(),
             vilkårsgrunnlagId = UUID.randomUUID()
         ))
-        assertNull(historikk.medInntekt(ORGNR, 1.januar, Økonomi.ikkeBetalt(), null, NormalArbeidstaker, NullObserver))
+        historikk.medInntekt(ORGNR, 1.januar, Økonomi.ikkeBetalt(), null, NormalArbeidstaker, NullObserver).also { økonomi ->
+            assertEquals(INGEN, økonomi.inspektør.aktuellDagsinntekt)
+            assertEquals(INGEN, økonomi.inspektør.dekningsgrunnlag)
+            assertEquals(1.januar, økonomi.inspektør.skjæringstidspunkt)
+        }
         historikk.medInntekt(ORGNR, 3.januar, Økonomi.ikkeBetalt(), null, NormalArbeidstaker, NullObserver).also { økonomi ->
             assertNotNull(økonomi)
             assertEquals(inntekt, økonomi.inspektør.aktuellDagsinntekt)
@@ -249,7 +254,9 @@ internal class VilkårsgrunnlagHistorikkTest {
             meldingsreferanseId = UUID.randomUUID(),
             vilkårsgrunnlagId = UUID.randomUUID()
         ))
-        assertNull(historikk.medInntekt(ORGNR, 31.desember(2017), Økonomi.ikkeBetalt(), null, NormalArbeidstaker, NullObserver))
+        val resultat = historikk.medInntekt(ORGNR, 31.desember(2017), Økonomi.ikkeBetalt(), null, NormalArbeidstaker, NullObserver)
+        assertEquals(INGEN, resultat.inspektør.aktuellDagsinntekt)
+        assertEquals(INGEN, resultat.inspektør.dekningsgrunnlag)
     }
 
     @Test
@@ -266,12 +273,14 @@ internal class VilkårsgrunnlagHistorikkTest {
             meldingsreferanseId = UUID.randomUUID(),
             vilkårsgrunnlagId = UUID.randomUUID()
         ))
-        assertNull(historikk.medInntekt(ORGNR, 31.desember(2017), Økonomi.ikkeBetalt(), null, NormalArbeidstaker, NullObserver))
+        val resultat = historikk.medInntekt(ORGNR, 31.desember(2017), Økonomi.ikkeBetalt(), null, NormalArbeidstaker, NullObserver)
+        assertEquals(INGEN, resultat.inspektør.aktuellDagsinntekt)
+        assertEquals(INGEN, resultat.inspektør.dekningsgrunnlag)
     }
 
     @Test
-    fun `feiler dersom det ikke finnes noen innslag`() {
-        assertNull(historikk.medInntekt(ORGNR, 31.desember(2017), Økonomi.ikkeBetalt(), null, NormalArbeidstaker, NullObserver))
+    fun `ugyldige å be om inntekt uten vilkårsgrunnlag`() {
+        assertThrows<RuntimeException> { historikk.medInntekt(ORGNR, 31.desember(2017), Økonomi.ikkeBetalt(), null, NormalArbeidstaker, NullObserver) }
     }
 
     @Test
