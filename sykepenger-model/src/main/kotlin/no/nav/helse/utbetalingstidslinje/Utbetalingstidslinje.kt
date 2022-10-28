@@ -64,12 +64,6 @@ internal class Utbetalingstidslinje(utbetalingsdager: List<Utbetalingsdag>) : Co
 
         internal fun avvis(
             tidslinjer: List<Utbetalingstidslinje>,
-            avvisteSkjæringstidspunkt: Set<LocalDate>,
-            begrunnelser: List<Begrunnelse>
-        ) = tidslinjer.forEach { it.avvis(avvisteSkjæringstidspunkt, begrunnelser) }
-
-        internal fun avvis(
-            tidslinjer: List<Utbetalingstidslinje>,
             avvistePerioder: List<Periode>,
             begrunnelser: List<Begrunnelse>
         ) = tidslinjer.forEach { it.avvis(avvistePerioder, begrunnelser) }
@@ -96,23 +90,9 @@ internal class Utbetalingstidslinje(utbetalingsdager: List<Utbetalingsdag>) : Co
     }
 
     private fun avvis(avvistePerioder: List<Periode>, begrunnelser: List<Begrunnelse>) {
-        avvis(begrunnelser) { utbetalingsdag ->
-            utbetalingsdag.dato in avvistePerioder
-        }
-    }
-
-    private fun avvis(avvisteSkjæringstidspunkt: Set<LocalDate>, begrunnelser: List<Begrunnelse>) {
-        avvis(begrunnelser) { utbetalingsdag ->
-            utbetalingsdag.økonomi.medAvrundetData { _, _, _, skjæringstidspunkt, _, _, _, _, _ ->
-                skjæringstidspunkt in avvisteSkjæringstidspunkt
-            }
-        }
-    }
-
-    private fun avvis(begrunnelser: List<Begrunnelse>, strategi: (dag: Utbetalingsdag) -> Boolean) {
         if (begrunnelser.isEmpty()) return
         utbetalingsdager.forEachIndexed { index, utbetalingsdag ->
-            if (strategi(utbetalingsdag)) {
+            if (utbetalingsdag.dato in avvistePerioder) {
                 utbetalingsdag.avvis(begrunnelser)?.also { utbetalingsdager[index] = it }
             }
         }

@@ -9,6 +9,7 @@ import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Vilkårsgrunnlag
+import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.GrunnlagsdataInspektør
 import no.nav.helse.inspectors.SubsumsjonInspektør
 import no.nav.helse.inspectors.Vilkårgrunnlagsinspektør
@@ -17,6 +18,7 @@ import no.nav.helse.januar
 import no.nav.helse.juni
 import no.nav.helse.person.Ledd.Companion.ledd
 import no.nav.helse.person.Paragraf.PARAGRAF_8_2
+import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement.Companion.skjæringstidspunktperioder
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.NullObserver
 import no.nav.helse.somPersonidentifikator
@@ -59,6 +61,34 @@ internal class VilkårsgrunnlagHistorikkTest {
     @BeforeEach
     fun setup() {
         historikk = VilkårsgrunnlagHistorikk()
+    }
+
+    @Test
+    fun `lager perioder for vilkårsgrunnlagene`() {
+        val grunnlagMedSkjæringstidspunkt = { skjæringstidspunkt: LocalDate ->
+            val inntekt = 31000.månedlig
+            VilkårsgrunnlagHistorikk.Grunnlagsdata(
+                skjæringstidspunkt = skjæringstidspunkt,
+                sykepengegrunnlag = inntekt.sykepengegrunnlag(ORGNR),
+                sammenligningsgrunnlag = Sammenligningsgrunnlag(inntekt, emptyList()),
+                avviksprosent = 0.prosent,
+                opptjening = Opptjening(arbeidsforholdFraHistorikk, skjæringstidspunkt, NullObserver),
+                medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
+                vurdertOk = true,
+                meldingsreferanseId = UUID.randomUUID(),
+                vilkårsgrunnlagId = UUID.randomUUID()
+            )
+        }
+        val grunnlag1Januar = grunnlagMedSkjæringstidspunkt(1.januar)
+        val grunnlag1Februar = grunnlagMedSkjæringstidspunkt(1.februar)
+
+        assertEquals(1.januar til LocalDate.MAX, skjæringstidspunktperioder(listOf(grunnlag1Januar)).single())
+        skjæringstidspunktperioder(listOf(grunnlag1Januar, grunnlag1Februar)).also { resultat ->
+            assertEquals(listOf(1.januar til 31.januar, 1.februar til LocalDate.MAX), resultat)
+        }
+        skjæringstidspunktperioder(listOf(grunnlag1Februar, grunnlag1Januar)).also { resultat ->
+            assertEquals(listOf(1.januar til 31.januar, 1.februar til LocalDate.MAX), resultat)
+        }
     }
 
     @Test
