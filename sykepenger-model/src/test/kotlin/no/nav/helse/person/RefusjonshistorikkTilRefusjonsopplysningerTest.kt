@@ -1,9 +1,11 @@
 package no.nav.helse.person
 
 import java.util.UUID
+import no.nav.helse.april
 import no.nav.helse.februar
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
+import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.person.Refusjonshistorikk.Refusjon.EndringIRefusjon
 import no.nav.helse.person.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.refusjonsopplysninger
@@ -375,29 +377,138 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
     }
 
     @Test
-    fun `IM med endring i refusjon før første dag i inntektsmeldingen`() {
+    fun `overgang til brukerutbetaling`() {
         val refusjonshistorikk = Refusjonshistorikk()
-        val inntektsmeldingJanuar = UUID.randomUUID()
+        val inntektsmelding = UUID.randomUUID()
         refusjonshistorikk.leggTilRefusjon(
             Refusjonshistorikk.Refusjon(
-                meldingsreferanseId = inntektsmeldingJanuar,
+                meldingsreferanseId = inntektsmelding,
                 førsteFraværsdag = 1.februar,
                 arbeidsgiverperioder = listOf(1.februar til 16.februar),
                 beløp = 1000.daglig,
                 sisteRefusjonsdag = null,
+                endringerIRefusjon = emptyList()
+            ))
+
+        val korrigerendeInntektsmelding = UUID.randomUUID()
+        refusjonshistorikk.leggTilRefusjon(
+            Refusjonshistorikk.Refusjon(
+                meldingsreferanseId = korrigerendeInntektsmelding,
+                førsteFraværsdag = 1.mai,
+                arbeidsgiverperioder = listOf(1.februar til 16.februar),
+                beløp = 0.daglig,
+                sisteRefusjonsdag = null,
+                endringerIRefusjon = emptyList()
+            ))
+
+        assertEquals(
+            Refusjonsopplysninger(
+                listOf(
+                    Refusjonsopplysning(inntektsmelding, 1.februar, 30.april, 1000.daglig),
+                    Refusjonsopplysning(korrigerendeInntektsmelding, 1.mai, null, 0.daglig)
+                )
+            ),
+            refusjonshistorikk.refusjonsopplysninger(1.februar)
+        )
+    }
+
+    @Test
+    fun `første fraværsdag satt til før første dag i siste del av agp`() {
+        val refusjonshistorikk = Refusjonshistorikk()
+        val inntektsmelding = UUID.randomUUID()
+        refusjonshistorikk.leggTilRefusjon(
+            Refusjonshistorikk.Refusjon(
+                meldingsreferanseId = inntektsmelding,
+                førsteFraværsdag = 1.februar,
+                arbeidsgiverperioder = listOf(1.februar til 8.februar, 10.februar til 17.februar),
+                beløp = 1000.daglig,
+                sisteRefusjonsdag = null,
+                endringerIRefusjon = emptyList()
+            ))
+
+        assertEquals(
+            Refusjonsopplysninger(
+                listOf(
+                    Refusjonsopplysning(inntektsmelding, 10.februar, null, 1000.daglig),
+                )
+            ),
+            refusjonshistorikk.refusjonsopplysninger(1.februar)
+        )
+    }
+
+    @Test
+    fun `første fraværsdag satt til etter første dag i siste del av agp`() {
+        val refusjonshistorikk = Refusjonshistorikk()
+        val inntektsmelding = UUID.randomUUID()
+        refusjonshistorikk.leggTilRefusjon(
+            Refusjonshistorikk.Refusjon(
+                meldingsreferanseId = inntektsmelding,
+                førsteFraværsdag = 11.februar,
+                arbeidsgiverperioder = listOf(1.februar til 8.februar, 10.februar til 17.februar),
+                beløp = 1000.daglig,
+                sisteRefusjonsdag = null,
+                endringerIRefusjon = emptyList()
+            ))
+
+        assertEquals(
+            Refusjonsopplysninger(
+                listOf(
+                    Refusjonsopplysning(inntektsmelding, 11.februar, null, 1000.daglig),
+                )
+            ),
+            refusjonshistorikk.refusjonsopplysninger(1.februar)
+        )
+    }
+
+    @Test
+    fun `første fraværsdag satt til etter agp`() {
+        val refusjonshistorikk = Refusjonshistorikk()
+        val inntektsmelding = UUID.randomUUID()
+        refusjonshistorikk.leggTilRefusjon(
+            Refusjonshistorikk.Refusjon(
+                meldingsreferanseId = inntektsmelding,
+                førsteFraværsdag = 20.februar,
+                arbeidsgiverperioder = listOf(1.februar til 8.februar, 10.februar til 17.februar),
+                beløp = 1000.daglig,
+                sisteRefusjonsdag = null,
+                endringerIRefusjon = emptyList()
+            ))
+
+        assertEquals(
+            Refusjonsopplysninger(
+                listOf(
+                    Refusjonsopplysning(inntektsmelding, 20.februar, null, 1000.daglig),
+                )
+            ),
+            refusjonshistorikk.refusjonsopplysninger(1.februar)
+        )
+    }
+
+    @Test
+    fun `ignorerer endringer før startskuddet`() {
+        val refusjonshistorikk = Refusjonshistorikk()
+        val inntektsmelding = UUID.randomUUID()
+        refusjonshistorikk.leggTilRefusjon(
+            Refusjonshistorikk.Refusjon(
+                meldingsreferanseId = inntektsmelding,
+                førsteFraværsdag = 9.februar,
+                arbeidsgiverperioder = listOf(1.februar til 8.februar, 10.februar til 17.februar),
+                beløp = 1000.daglig,
+                sisteRefusjonsdag = null,
                 endringerIRefusjon = listOf(
-                    EndringIRefusjon(2000.daglig, 25.januar),
+                    EndringIRefusjon(2000.daglig, 11.februar),
+                    EndringIRefusjon(99.daglig, 9.februar)
                 )
             ))
 
         assertEquals(
             Refusjonsopplysninger(
                 listOf(
-                    Refusjonsopplysning(inntektsmeldingJanuar, 25.januar, 31.januar, 2000.daglig),
-                    Refusjonsopplysning(inntektsmeldingJanuar, 1.februar, null, 1000.daglig),
+                    Refusjonsopplysning(inntektsmelding, 10.februar, 10.februar, 1000.daglig),
+                    Refusjonsopplysning(inntektsmelding, 11.februar, null, 2000.daglig)
                 )
             ),
-            refusjonshistorikk.refusjonsopplysninger(1.januar)
+            refusjonshistorikk.refusjonsopplysninger(1.februar)
         )
     }
 

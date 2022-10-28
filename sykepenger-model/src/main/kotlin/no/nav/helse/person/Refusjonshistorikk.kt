@@ -105,15 +105,13 @@ internal class Refusjonshistorikk {
             internal companion object {
                 internal fun List<EndringIRefusjon>.beløp(dag: LocalDate) = sortedBy { it.endringsdato }.lastOrNull { dag >= it.endringsdato }?.beløp
 
-                private fun Refusjon.førsteDato(): LocalDate {
-                    val arbeidsgiverperioderListe = arbeidsgiverperioder.map {it.start}
-                    if (førsteFraværsdag == null) return arbeidsgiverperioderListe.min()
-                    return (arbeidsgiverperioderListe + førsteFraværsdag).min()
+                private fun Refusjon.startskuddet(): LocalDate {
+                    if (førsteFraværsdag == null) return arbeidsgiverperioder.maxOf { it.start }
+                    return arbeidsgiverperioder.map { it.start }.plus(førsteFraværsdag).max()
                 }
-
                 internal fun Refusjonshistorikk.refusjonsopplysninger(skjæringstidspunkt: LocalDate): Refusjonsopplysninger {
                     val refusjonsopplysninger =
-                        this.refusjoner.filter { it.førsteDato() >= skjæringstidspunkt }.sortedBy { it.førsteDato() }
+                        this.refusjoner.filter { it.startskuddet() >= skjæringstidspunkt }.sortedBy { it.startskuddet() }
                             .tilRefusjonsopplysninger()
 
                     return Refusjonsopplysninger(refusjonsopplysninger)
@@ -124,12 +122,13 @@ internal class Refusjonshistorikk {
 
                 private fun Refusjon.tilRefusjoneropplysninger(): List<Refusjonsopplysning> {
                     val hovedRefusjonsopplysning = EndringIRefusjon(
-                        beløp ?: INGEN, førsteDato()
+                        beløp ?: INGEN, startskuddet()
                     )
                     val alleRefusjonsopplysninger = (endringerIRefusjon + hovedRefusjonsopplysning)
                         .sortedBy { it.endringsdato }
                         .mapNotNull { endring ->
                             if (sisteRefusjonsdag != null && endring.endringsdato > sisteRefusjonsdag) null
+                            else if (endring.endringsdato < startskuddet()) null
                             else Refusjonsopplysning(meldingsreferanseId, endring.endringsdato, sisteRefusjonsdag, endring.beløp)
                         }
 
