@@ -3,10 +3,14 @@ package no.nav.helse.person
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.Grunnbeløp
+import no.nav.helse.Grunnbeløp.Companion.`2G`
 import no.nav.helse.Grunnbeløp.Companion.halvG
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrInntekt
+import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Subsumsjon
+import no.nav.helse.hendelser.til
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.aktiver
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.build
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.deaktiver
@@ -89,15 +93,19 @@ internal class Sykepengegrunnlag(
         }
     }
 
-    // TODO: la Sykepengegrunnlag _avvise_ dager selv, ikke returnere begrunnelse
-    // TODO: Sykepengegrunnlag må avvise dager under 2G etter at bruker har fylt 67 år, selv om skjæringstidspunktet er satt før 67 års-dagen: https://trello.com/c/0ld9Q4qD
-    internal fun begrunnelse(begrunnelser: MutableList<Begrunnelse>) {
-        if (oppfyllerMinsteinntektskrav) return
-        begrunnelser.add(if (forhøyetInntektskrav) Begrunnelse.MinimumInntektOver67 else Begrunnelse.MinimumInntekt)
-    }
+    internal fun avvis(tidslinjer: List<Utbetalingstidslinje>, skjæringstidspunktperiode: Periode) {
+        val tidslinjeperiode = Utbetalingstidslinje.periode(tidslinjer)
+        if (skjæringstidspunktperiode.endInclusive < tidslinjeperiode.start || tidslinjeperiode.endInclusive < skjæringstidspunkt) return
 
-    internal fun avvis(tidslinjer: List<Utbetalingstidslinje>) {
-
+        val avvisningsperiode = skjæringstidspunktperiode.start til minOf(tidslinjeperiode.endInclusive, skjæringstidspunktperiode.endInclusive)
+        val avvisteDager = avvisningsperiode.filter { dato ->
+            val faktor = if (alder.forhøyetInntektskrav(dato)) `2G` else halvG
+            beregningsgrunnlag < faktor.minsteinntekt(skjæringstidspunkt)
+        }
+        if (avvisteDager.isEmpty()) return
+        val (avvisteDagerOver67, avvisteDagerTil67) = avvisteDager.partition { alder.forhøyetInntektskrav(it) }
+        if (avvisteDagerOver67.isNotEmpty()) Utbetalingstidslinje.avvis(tidslinjer, avvisteDagerOver67.grupperSammenhengendePerioder(), listOf(Begrunnelse.MinimumInntektOver67))
+        if (avvisteDagerTil67.isNotEmpty()) Utbetalingstidslinje.avvis(tidslinjer, avvisteDagerTil67.grupperSammenhengendePerioder(), listOf(Begrunnelse.MinimumInntekt))
     }
 
     internal fun valider(aktivitetslogg: IAktivitetslogg): Boolean {

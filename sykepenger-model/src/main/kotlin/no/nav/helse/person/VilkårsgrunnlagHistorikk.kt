@@ -373,9 +373,9 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             sammenligningsgrunnlag.erRelevant(organisasjonsnummer)
 
         override fun avvis(tidslinjer: List<Utbetalingstidslinje>, skjæringstidspunktperiode: Periode) {
+            sykepengegrunnlag.avvis(tidslinjer, skjæringstidspunktperiode)
             val begrunnelser = mutableListOf<Begrunnelse>()
             if (medlemskapstatus == Medlemskapsvurdering.Medlemskapstatus.Nei) begrunnelser.add(Begrunnelse.ManglerMedlemskap)
-            sykepengegrunnlag.begrunnelse(begrunnelser)
             if (!opptjening.erOppfylt()) begrunnelser.add(Begrunnelse.ManglerOpptjening)
             if (begrunnelser.isEmpty()) return
             Utbetalingstidslinje.avvis(tidslinjer, listOf(skjæringstidspunktperiode), begrunnelser)
