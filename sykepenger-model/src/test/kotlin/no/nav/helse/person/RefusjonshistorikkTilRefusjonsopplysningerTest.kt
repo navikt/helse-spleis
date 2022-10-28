@@ -46,6 +46,31 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
     }
 
     @Test
+    fun `siste refusjonsdag satt på inntektsmeldingen`() {
+        val refusjonshistorikk = Refusjonshistorikk()
+        val inntektsmeldingJanuar = UUID.randomUUID()
+        refusjonshistorikk.leggTilRefusjon(
+            Refusjonshistorikk.Refusjon(
+                meldingsreferanseId = inntektsmeldingJanuar,
+                førsteFraværsdag = 1.januar,
+                arbeidsgiverperioder = listOf(1.januar til 16.januar),
+                beløp = 1000.daglig,
+                sisteRefusjonsdag = 31.januar,
+                endringerIRefusjon = emptyList()
+        ))
+
+        assertEquals(
+            Refusjonsopplysninger(
+                listOf(
+                    Refusjonsopplysning(inntektsmeldingJanuar, 1.januar, 31.januar, 1000.daglig),
+                    Refusjonsopplysning(inntektsmeldingJanuar, 1.februar, null, INGEN)
+                )
+            ),
+            refusjonshistorikk.refusjonsopplysninger(1.januar)
+        )
+    }
+
+    @Test
     fun `To inntektsmeldinger på ulike skjæringstidspunkt uten sisteRefusjonsdag`() {
         val refusjonshistorikk = Refusjonshistorikk()
         val inntektsmeldingJanuar = UUID.randomUUID()
@@ -261,6 +286,88 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
                     Refusjonsopplysning(inntektsmeldingMars, 1.mars, 19.mars, 999.daglig),
                     Refusjonsopplysning(inntektsmeldingMars, 20.mars, 24.mars, 9.daglig),
                     Refusjonsopplysning(inntektsmeldingMars, 25.mars, null, 99.daglig)
+                )
+            ),
+            refusjonshistorikk.refusjonsopplysninger(1.januar)
+        )
+    }
+
+    @Test
+    fun `IM flere endringer i refusjon - og med siste refusjonsdag satt`() {
+        val refusjonshistorikk = Refusjonshistorikk()
+        val inntektsmeldingJanuar = UUID.randomUUID()
+        refusjonshistorikk.leggTilRefusjon(
+            Refusjonshistorikk.Refusjon(
+                meldingsreferanseId = inntektsmeldingJanuar,
+                førsteFraværsdag = 1.januar,
+                arbeidsgiverperioder = listOf(1.januar til 16.januar),
+                beløp = 1000.daglig,
+                sisteRefusjonsdag = 19.januar,
+                endringerIRefusjon = listOf(
+                    EndringIRefusjon(500.daglig, 20.januar)
+                )
+        ))
+
+        assertEquals(
+            Refusjonsopplysninger(
+                listOf(
+                    Refusjonsopplysning(inntektsmeldingJanuar, 1.januar, 19.januar, 1000.daglig),
+                    Refusjonsopplysning(inntektsmeldingJanuar, 20.januar, null, INGEN)
+                )
+            ),
+            refusjonshistorikk.refusjonsopplysninger(1.januar)
+        )
+    }
+    @Test
+    fun `IM flere endringer i refusjon - endring i refusjon samme dag som siste refusjonsdag`() {
+        val refusjonshistorikk = Refusjonshistorikk()
+        val inntektsmeldingJanuar = UUID.randomUUID()
+        refusjonshistorikk.leggTilRefusjon(
+            Refusjonshistorikk.Refusjon(
+                meldingsreferanseId = inntektsmeldingJanuar,
+                førsteFraværsdag = 1.januar,
+                arbeidsgiverperioder = listOf(1.januar til 16.januar),
+                beløp = 1000.daglig,
+                sisteRefusjonsdag = 19.januar,
+                endringerIRefusjon = listOf(
+                    EndringIRefusjon(500.daglig, 19.januar),
+                    EndringIRefusjon(1000.daglig, 20.januar)
+                )
+        ))
+
+        assertEquals(
+            Refusjonsopplysninger(
+                listOf(
+                    Refusjonsopplysning(inntektsmeldingJanuar, 1.januar, 18.januar, 1000.daglig),
+                    Refusjonsopplysning(inntektsmeldingJanuar, 19.januar, 19.januar, 500.daglig),
+                    Refusjonsopplysning(inntektsmeldingJanuar, 20.januar, null, INGEN),
+                )
+            ),
+            refusjonshistorikk.refusjonsopplysninger(1.januar)
+        )
+    }
+    @Test
+    fun `IM flere endringer i refusjon - og med siste refusjonsdag satt - gap mellom siste refusjonsdag og første endring`() {
+        val refusjonshistorikk = Refusjonshistorikk()
+        val inntektsmeldingJanuar = UUID.randomUUID()
+        refusjonshistorikk.leggTilRefusjon(
+            Refusjonshistorikk.Refusjon(
+                meldingsreferanseId = inntektsmeldingJanuar,
+                førsteFraværsdag = 1.januar,
+                arbeidsgiverperioder = listOf(1.januar til 16.januar),
+                beløp = 1000.daglig,
+                sisteRefusjonsdag = 19.januar,
+                endringerIRefusjon = listOf(
+                    EndringIRefusjon(2000.daglig, 25.januar),
+                    EndringIRefusjon(500.daglig, 21.januar)
+                )
+        ))
+
+        assertEquals(
+            Refusjonsopplysninger(
+                listOf(
+                    Refusjonsopplysning(inntektsmeldingJanuar, 1.januar, 19.januar, 1000.daglig),
+                    Refusjonsopplysning(inntektsmeldingJanuar, 20.januar, null, INGEN)
                 )
             ),
             refusjonshistorikk.refusjonsopplysninger(1.januar)

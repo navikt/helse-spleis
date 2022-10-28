@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
+import no.nav.helse.nesteDag
 import no.nav.helse.person.Refusjonshistorikk.Refusjon.Companion.leggTilRefusjon
 import no.nav.helse.person.Refusjonshistorikk.Refusjon.Companion.somOverlapperMedArbeidsgiverperiode
 import no.nav.helse.person.Refusjonshistorikk.Refusjon.Companion.somTilstøterArbeidsgiverperiode
@@ -125,11 +126,17 @@ internal class Refusjonshistorikk {
                     val hovedRefusjonsopplysning = EndringIRefusjon(
                         beløp ?: INGEN, førsteDato()
                     )
-                    return (endringerIRefusjon + hovedRefusjonsopplysning)
+                    val alleRefusjonsopplysninger = (endringerIRefusjon + hovedRefusjonsopplysning)
                         .sortedBy { it.endringsdato }
-                        .map { endring ->
-                            Refusjonsopplysning(meldingsreferanseId, endring.endringsdato, sisteRefusjonsdag, endring.beløp)
+                        .mapNotNull { endring ->
+                            if (sisteRefusjonsdag != null && endring.endringsdato > sisteRefusjonsdag) null
+                            else Refusjonsopplysning(meldingsreferanseId, endring.endringsdato, sisteRefusjonsdag, endring.beløp)
                         }
+
+                    return when(sisteRefusjonsdag) {
+                        null -> alleRefusjonsopplysninger
+                        else -> alleRefusjonsopplysninger + Refusjonsopplysning(meldingsreferanseId, sisteRefusjonsdag.nesteDag, null, INGEN)
+                    }
                 }
             }
 
