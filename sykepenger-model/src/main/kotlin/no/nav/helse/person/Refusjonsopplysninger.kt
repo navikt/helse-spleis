@@ -1,6 +1,7 @@
 package no.nav.helse.person
 
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Periode
@@ -110,6 +111,17 @@ internal class Refusjonsopplysning(
         override fun hashCode() = validerteRefusjonsopplysninger.hashCode()
 
         override fun toString() = validerteRefusjonsopplysninger.toString()
+
+        internal class RefusjonsopplysningerBuilder {
+            private val refusjonsopplysninger = mutableListOf<Pair<LocalDateTime, Refusjonsopplysning>>()
+            internal fun leggTil(refusjonsopplysning: Refusjonsopplysning, tidspunkt: LocalDateTime) = apply{
+                refusjonsopplysninger.add(Pair(tidspunkt, refusjonsopplysning))
+            }
+
+            internal fun build(): Refusjonsopplysninger{
+                return Refusjonsopplysninger(refusjonsopplysninger.sortedWith(compareBy({it.first}, {it.second.fom})).map{it.second})
+            }
+        }
     }
 }
 
