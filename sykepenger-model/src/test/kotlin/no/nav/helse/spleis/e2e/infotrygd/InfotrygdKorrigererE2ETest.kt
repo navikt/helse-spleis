@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e.infotrygd
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.dsl.TestPerson
@@ -61,7 +62,7 @@ import org.junit.jupiter.api.Test
 internal class InfotrygdKorrigererE2ETest : AbstractEndToEndTest() {
 
     @Test
-    fun `infotrygd har betalt ut auu-periode - inntektsmelding trigger revurdering`() {
+    fun `infotrygd har betalt ut auu-periode - inntektsmelding trigger revurdering`() = Toggle.InntektsmeldingKanTriggeRevurdering.enable {
         createOverlappendeFraInfotrygdPerson()
 
         håndterInntektsmelding(listOf(1.januar til 16.januar), refusjon = Inntektsmelding.Refusjon(INNTEKT, 31.mai))

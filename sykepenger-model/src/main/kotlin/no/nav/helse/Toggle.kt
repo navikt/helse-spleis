@@ -128,4 +128,5 @@ abstract class Toggle internal constructor(enabled: Boolean = false, private val
     object RevurderKorrigertSoknad : Toggle("RevurderKorrigertSoknad", true)
     object RevurderOutOfOrder : Toggle("RevurderOutOfOrder", true)
     object Splarbeidsbros : Toggle("Splarbeidsbros", false)
+    object InntektsmeldingKanTriggeRevurdering: Toggle("InntektsmeldingKanTriggeRevurdering", false)
 }

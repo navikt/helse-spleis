@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e
 import ch.qos.logback.classic.Logger
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.AppenderBase
+import no.nav.helse.Toggle
 import no.nav.helse.februar
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.januar
@@ -84,7 +85,7 @@ internal class RevurderingAvsluttetUtenUtbetalingTest : AbstractEndToEndMediator
     }
 
     @Test
-    fun `revurdering ved inntektsmelding etter utbetaling`() {
+    fun `revurdering ved inntektsmelding etter utbetaling`() = Toggle.InntektsmeldingKanTriggeRevurdering.enable {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 22.januar, sykmeldingsgrad = 100))
         sendSøknad(listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 22.januar, sykmeldingsgrad = 100)))
         sendUtbetalingshistorikk(0)

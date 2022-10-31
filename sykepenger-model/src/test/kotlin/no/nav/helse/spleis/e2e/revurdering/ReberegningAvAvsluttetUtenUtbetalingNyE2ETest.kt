@@ -461,7 +461,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
     }
 
     @Test
-    fun `inntektsmelding gjør om kort periode til arbeidsdager etter utbetalt`() {
+    fun `inntektsmelding gjør om kort periode til arbeidsdager etter utbetalt`() = Toggle.InntektsmeldingKanTriggeRevurdering.enable {
         håndterSykmelding(Sykmeldingsperiode(19.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(18.januar, 20.januar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
@@ -598,7 +598,7 @@ internal class ReberegningAvAvsluttetUtenUtbetalingNyE2ETest : AbstractEndToEndT
     }
 
     @Test
-    fun `inntektsmelding gjør at kort periode faller utenfor agp - etter utbetalt`() {
+    fun `inntektsmelding gjør at kort periode faller utenfor agp - etter utbetalt`() = Toggle.InntektsmeldingKanTriggeRevurdering.enable {
         håndterSykmelding(Sykmeldingsperiode(12.januar, 20.januar, 100.prosent))
         håndterSøknad(Sykdom(12.januar, 20.januar, 100.prosent))
         håndterUtbetalingshistorikk(1.vedtaksperiode)
