@@ -2,12 +2,15 @@ package no.nav.helse.økonomi
 
 import java.math.MathContext
 import no.nav.helse.Grunnbeløp.Companion.`6G`
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.hendelser.til
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverperiode
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import no.nav.helse.økonomi.Inntekt.Companion.summer
 import no.nav.helse.økonomi.Prosentdel.Companion.fraRatio
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.Økonomi.Companion.avgrensTilArbeidsgiverperiode
@@ -464,6 +467,93 @@ internal class ØkonomiTest {
         val økonomi = 50.prosent.sykdomsgrad.inntekt(1000.daglig, 1000.daglig, skjæringstidspunkt = 1.januar, `6G` = `6G`.beløp(1.januar)).arbeidsgiverRefusjon(500.daglig)
         listOf(økonomi).betal()
         assertUtbetaling(økonomi, 250.0, 250.0)
+    }
+
+    @Test
+    fun `fordeling mellom arbeidsgivere med lik inntekt og refusjon 1`() {
+        val a = 100.prosent.sykdomsgrad.inntekt(15000.månedlig, skjæringstidspunkt = 1.januar, `6G` = `6G`.beløp(1.januar)).arbeidsgiverRefusjon(15000.månedlig)
+        val b = 100.prosent.sykdomsgrad.inntekt(15000.månedlig, skjæringstidspunkt = 1.januar, `6G` = `6G`.beløp(1.januar)).arbeidsgiverRefusjon(15000.månedlig)
+        listOf(a, b).betal().also {
+            assertEquals(100.prosent, it.totalSykdomsgrad())
+        }
+        listOf(a, b).forEach {
+            assertFalse(it.er6GBegrenset())
+        }
+        assertForventetFeil(
+            forklaring = "det utbetales 1 kr mindre per dag totalt sett",
+            nå = {
+                assertEquals(1384, listOf(a, b).mapNotNull { it.inspektør.arbeidsgiverbeløp }.summer().reflection { _, _, _, dagligInt -> dagligInt })
+                assertUtbetaling(a, 692.0, 0.0)
+                assertUtbetaling(b, 692.0, 0.0)
+            },
+            ønsket = {
+                assertEquals(1385, listOf(a, b).mapNotNull { it.inspektør.arbeidsgiverbeløp }.summer().reflection { _, _, _, dagligInt -> dagligInt })
+                assertUtbetaling(a, 693.0, 0.0)
+                assertUtbetaling(b, 692.0, 0.0)
+            }
+        )
+    }
+
+    @Test
+    fun `fordeling mellom arbeidsgivere med lik inntekt og refusjon 2`() {
+        val a = 100.prosent.sykdomsgrad.inntekt(7750.månedlig, skjæringstidspunkt = 1.januar, `6G` = `6G`.beløp(1.januar)).arbeidsgiverRefusjon(7750.månedlig)
+        val b = 100.prosent.sykdomsgrad.inntekt(7750.månedlig, skjæringstidspunkt = 1.januar, `6G` = `6G`.beløp(1.januar)).arbeidsgiverRefusjon(7750.månedlig)
+        listOf(a, b).betal().also {
+            assertEquals(100.prosent, it.totalSykdomsgrad())
+        }
+        listOf(a, b).forEach {
+            assertFalse(it.er6GBegrenset())
+        }
+        assertUtbetaling(a, 358.0, 0.0)
+        assertUtbetaling(b, 357.0, 0.0)
+    }
+
+    @Test
+    fun `fordeling mellom arbeidsgivere med lik refusjon, men ulik inntekt`() {
+        val a = 100.prosent.sykdomsgrad.inntekt(8000.månedlig, skjæringstidspunkt = 1.januar, `6G` = `6G`.beløp(1.januar)).arbeidsgiverRefusjon(7750.månedlig)
+        val b = 100.prosent.sykdomsgrad.inntekt(7750.månedlig, skjæringstidspunkt = 1.januar, `6G` = `6G`.beløp(1.januar)).arbeidsgiverRefusjon(7750.månedlig)
+        listOf(a, b).betal().also {
+            assertEquals(100.prosent, it.totalSykdomsgrad())
+        }
+        listOf(a, b).forEach {
+            assertFalse(it.er6GBegrenset())
+        }
+        assertForventetFeil(
+            nå = {
+                assertUtbetaling(a, 358.0, 11.0)
+                assertUtbetaling(b, 358.0, 0.0)
+            },
+            ønsket = {
+                assertUtbetaling(a, 358.0, 12.0)
+                assertUtbetaling(b, 357.0, 0.0)
+            }
+        )
+    }
+
+    @Test
+    fun `fordeling mellom arbeidsgivere mde ulik inntekt og refusjon`() {
+        val a = 100.prosent.sykdomsgrad.inntekt(30000.månedlig, skjæringstidspunkt = 1.januar, `6G` = `6G`.beløp(1.januar)).arbeidsgiverRefusjon(30000.månedlig)
+        val b = 100.prosent.sykdomsgrad.inntekt(35000.månedlig, skjæringstidspunkt = 1.januar, `6G` = `6G`.beløp(1.januar)).arbeidsgiverRefusjon(35000.månedlig)
+        listOf(a, b).betal().also {
+            assertEquals(100.prosent, it.totalSykdomsgrad())
+        }
+        listOf(a, b).forEach {
+            assertTrue(it.er6GBegrenset())
+        }
+        assertEquals(2161, listOf(a, b).mapNotNull { it.inspektør.arbeidsgiverbeløp }.summer().reflection { _, _, _, dagligInt -> dagligInt })
+        assertForventetFeil(
+            forklaring = "arbeidsgiver 2 har høyere avrundingsdifferanse enn arbeidsgiver 1, og bør få den 1 kr diffen." +
+                    "sykepengegrunnlaget er 561 860 kr (6G). Arbeidsgiver 1 sin andel utgjør (30,000 / (30,000 + 35,000 kr)) * 561 860 kr = 997,38 kr daglig." +
+                    "Arbeidsgiver 2 sin andel utgjør  (35,000 / (30,000 + 35,000 kr)) * 561 860 kr = 1163,62 kr daglig, og har med dette en større avrundingsdifferanse.",
+            nå = {
+                assertUtbetaling(a, 998.0, 0.0)
+                assertUtbetaling(b, 1163.0, 0.0)
+            },
+            ønsket = {
+                assertUtbetaling(a, 997.0, 0.0)
+                assertUtbetaling(b, 1164.0, 0.0)
+            }
+        )
     }
 
     private fun assertUtbetaling(økonomi: Økonomi, expectedArbeidsgiver: Double, expectedPerson: Double) {
