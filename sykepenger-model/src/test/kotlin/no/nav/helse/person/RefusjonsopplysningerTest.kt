@@ -1,14 +1,13 @@
 package no.nav.helse.person
 
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.februar
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger.RefusjonsopplysningerBuilder
-import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -185,7 +184,7 @@ internal class RefusjonsopplysningerTest {
 
         assertEquals(
             originaleRefusjonsopplysninger,
-            Refusjonsopplysninger(originaleRefusjonsopplysninger).inspektør.refusjonsopplysninger
+            Refusjonsopplysninger(originaleRefusjonsopplysninger, LocalDateTime.now()).inspektør.refusjonsopplysninger
         )
     }
 
@@ -198,64 +197,56 @@ internal class RefusjonsopplysningerTest {
             Refusjonsopplysning(meldingsreferanseId2, 1.mars, null, 2000.daglig)
         )
 
-        assertEquals(refusjonsopplysninger, Refusjonsopplysninger(refusjonsopplysninger).inspektør.refusjonsopplysninger)
+        assertEquals(refusjonsopplysninger, Refusjonsopplysninger(refusjonsopplysninger, LocalDateTime.now()).inspektør.refusjonsopplysninger)
     }
 
     @Test
     fun `ny opplysning før oss`() {
         val eksisterende = Refusjonsopplysning(UUID.randomUUID(), 1.mars, 31.mars, 2000.daglig)
         val ny = Refusjonsopplysning(UUID.randomUUID(), 1.januar, 15.februar, 2000.daglig)
-        assertEquals(listOf(ny, eksisterende), Refusjonsopplysninger(listOf(eksisterende, ny)).inspektør.refusjonsopplysninger)
+        assertEquals(listOf(ny, eksisterende), Refusjonsopplysninger(listOf(eksisterende, ny), LocalDateTime.now()).inspektør.refusjonsopplysninger)
     }
 
     @Test
     fun `ny opplysning før med overlapp`() {
         val eksisterendeId = UUID.randomUUID()
+        val eksisterendeTidspunkt = LocalDateTime.now()
+        val nyttTidspunkt = eksisterendeTidspunkt.plusSeconds(1)
         val eksisterende = Refusjonsopplysning(eksisterendeId, 1.mars, 31.mars, 2000.daglig)
-        val ny = Refusjonsopplysning(UUID.randomUUID(), 1.januar, 1.mars, 2000.daglig)
-        assertEquals(listOf(ny, Refusjonsopplysning(eksisterendeId, 2.mars, 31.mars, 2000.daglig)), Refusjonsopplysninger(listOf(eksisterende, ny)).inspektør.refusjonsopplysninger)
+        val ny = Refusjonsopplysning(UUID.randomUUID(), 1.januar, 1.mars, 1000.daglig)
+        val refusjonsopplysning = RefusjonsopplysningerBuilder().leggTil(eksisterende, eksisterendeTidspunkt).leggTil(ny, nyttTidspunkt).build()
+        assertEquals(listOf(ny, Refusjonsopplysning(eksisterendeId, 2.mars, 31.mars, 2000.daglig)), refusjonsopplysning.inspektør.refusjonsopplysninger)
+
     }
 
     @Test
     fun `håndterer å ta inn refusjonsopplysninger hulter til bulter`() {
         val eksisterendeTidspunkt = LocalDateTime.now()
         val nyttTidspunkt = eksisterendeTidspunkt.plusSeconds(1)
-        val ny = Refusjonsopplysning(UUID.randomUUID(), 1.januar, 1.mars, 2000.daglig, nyttTidspunkt)
-        val eksisterende = Refusjonsopplysning(UUID.randomUUID(), 1.mars, 31.mars, 2000.daglig, eksisterendeTidspunkt)
-        val eksisterendeFørst = RefusjonsopplysningerBuilder().leggTil(eksisterende).leggTil(ny).build()
-        val nyFørst = RefusjonsopplysningerBuilder().leggTil(ny).leggTil(eksisterende).build()
+        val ny = Refusjonsopplysning(UUID.randomUUID(), 1.januar, 1.mars, 2000.daglig)
+        val eksisterende = Refusjonsopplysning(UUID.randomUUID(), 1.mars, 31.mars, 2000.daglig)
+        val eksisterendeFørst = RefusjonsopplysningerBuilder().leggTil(eksisterende, eksisterendeTidspunkt).leggTil(ny, nyttTidspunkt).build()
+        val nyFørst = RefusjonsopplysningerBuilder().leggTil(ny, nyttTidspunkt).leggTil(eksisterende, eksisterendeTidspunkt).build()
         assertEquals(eksisterendeFørst, nyFørst)
     }
 
     @Test
     fun `refusjonsopplysninger med samme tidspunkt sorteres på fom`() {
         val tidspunkt = LocalDateTime.now()
-        val januar = Refusjonsopplysning(UUID.randomUUID(), 1.januar, 1.mars, 2000.daglig, tidspunkt)
-        val mars = Refusjonsopplysning(UUID.randomUUID(), 1.mars, 31.mars, 2000.daglig, tidspunkt)
-        val marsFørst = RefusjonsopplysningerBuilder().leggTil(mars).leggTil(januar).build()
-        val januarFørst = RefusjonsopplysningerBuilder().leggTil(januar).leggTil(mars).build()
+        val januar = Refusjonsopplysning(UUID.randomUUID(), 1.januar, 1.mars, 2000.daglig)
+        val mars = Refusjonsopplysning(UUID.randomUUID(), 1.mars, 31.mars, 2000.daglig)
+        val marsFørst = RefusjonsopplysningerBuilder().leggTil(mars, tidspunkt).leggTil(januar,tidspunkt).build()
+        val januarFørst = RefusjonsopplysningerBuilder().leggTil(januar, tidspunkt).leggTil(mars, tidspunkt).build()
         assertEquals(marsFørst, januarFørst)
     }
 
 
     private companion object {
-        private fun List<Refusjonsopplysning>.refusjonsopplysninger() = Refusjonsopplysninger(this)
+        private fun List<Refusjonsopplysning>.refusjonsopplysninger() = Refusjonsopplysninger(this, LocalDateTime.now())
 
-        private val Refusjonsopplysninger.inspektør get() = RefusjonsopplysningerInspektør(this)
-        private class RefusjonsopplysningerInspektør(refusjonsopplysninger: Refusjonsopplysninger): RefusjonsopplysningerVisitor {
-            private val visitedRefusjonsopplysninger = mutableListOf<Refusjonsopplysning>()
-            val refusjonsopplysninger get() = visitedRefusjonsopplysninger.toList()
-            init {
-                refusjonsopplysninger.accept(this)
-            }
-            override fun visitRefusjonsopplysning(meldingsreferanseId: UUID, fom: LocalDate, tom: LocalDate?, beløp: Inntekt) {
-                visitedRefusjonsopplysninger.add(Refusjonsopplysning(meldingsreferanseId, fom, tom, beløp))
-            }
-        }
-
-        private fun Refusjonsopplysninger(refusjonsopplysninger: List<Refusjonsopplysning>): Refusjonsopplysninger{
+        private fun Refusjonsopplysninger(refusjonsopplysninger: List<Refusjonsopplysning>, tidsstempel: LocalDateTime): Refusjonsopplysninger{
             val refusjonsopplysningerBuilder = RefusjonsopplysningerBuilder()
-            refusjonsopplysninger.forEach { refusjonsopplysningerBuilder.leggTil(it) }
+            refusjonsopplysninger.forEach { refusjonsopplysningerBuilder.leggTil(it, tidsstempel) }
             return refusjonsopplysningerBuilder.build()
         }
     }

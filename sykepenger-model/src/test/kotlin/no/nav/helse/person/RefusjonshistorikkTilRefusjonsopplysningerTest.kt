@@ -4,28 +4,19 @@ import java.util.UUID
 import no.nav.helse.april
 import no.nav.helse.februar
 import no.nav.helse.hendelser.til
+import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.person.Refusjonshistorikk.Refusjon.EndringIRefusjon
 import no.nav.helse.person.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.refusjonsopplysninger
 import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger
-import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger.RefusjonsopplysningerBuilder
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
-
-
-    companion object {
-        private fun Refusjonsopplysninger(refusjonsopplysninger: List<Refusjonsopplysning>): Refusjonsopplysninger{
-            val refusjonsopplysningerBuilder = RefusjonsopplysningerBuilder()
-            refusjonsopplysninger.forEach { refusjonsopplysningerBuilder.leggTil(it) }
-            return refusjonsopplysningerBuilder.build()
-        }
-    }
 
     @Test
     fun `tom refusjonshistorikk medfører ingen refusjonsopplysninger`() {
@@ -48,12 +39,10 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
         ))
 
         assertEquals(
-            Refusjonsopplysninger(
-                listOf(
-                    Refusjonsopplysning(inntektsmeldingJanuar, 1.januar, null, 1000.daglig)
-                )
+            listOf(
+                Refusjonsopplysning(inntektsmeldingJanuar, 1.januar, null, 1000.daglig),
             ),
-            refusjonshistorikk.refusjonsopplysninger(1.januar)
+            refusjonshistorikk.refusjonsopplysninger(1.januar).inspektør.refusjonsopplysninger
         )
     }
 
@@ -72,13 +61,11 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
         ))
 
         assertEquals(
-            Refusjonsopplysninger(
-                listOf(
-                    Refusjonsopplysning(inntektsmeldingJanuar, 1.januar, 31.januar, 1000.daglig),
-                    Refusjonsopplysning(inntektsmeldingJanuar, 1.februar, null, INGEN)
-                )
+            listOf(
+                Refusjonsopplysning(inntektsmeldingJanuar, 1.januar, 31.januar, 1000.daglig),
+                Refusjonsopplysning(inntektsmeldingJanuar, 1.februar, null, INGEN)
             ),
-            refusjonshistorikk.refusjonsopplysninger(1.januar)
+            refusjonshistorikk.refusjonsopplysninger(1.januar).inspektør.refusjonsopplysninger
         )
     }
 
@@ -108,13 +95,11 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
         ))
 
         assertEquals(
-            Refusjonsopplysninger(
-                listOf(
-                    Refusjonsopplysning(inntektsmeldingJanuar, 1.januar, 28.februar, 1000.daglig),
-                    Refusjonsopplysning(inntektsmeldingMars, 1.mars, null, 2000.daglig)
-                )
+            listOf(
+                Refusjonsopplysning(inntektsmeldingJanuar, 1.januar, 28.februar, 1000.daglig),
+                Refusjonsopplysning(inntektsmeldingMars, 1.mars, null, 2000.daglig)
             ),
-            refusjonshistorikk.refusjonsopplysninger(1.januar)
+            refusjonshistorikk.refusjonsopplysninger(1.januar).inspektør.refusjonsopplysninger
         )
     }
 
@@ -134,12 +119,10 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
         ))
 
         assertEquals(
-            Refusjonsopplysninger(
-                listOf(
-                    Refusjonsopplysning(inntektsmeldingJanuar, 1.januar, null, 1000.daglig),
-                )
+            listOf(
+                Refusjonsopplysning(inntektsmeldingJanuar, 1.januar, null, 1000.daglig)
             ),
-            refusjonshistorikk.refusjonsopplysninger(1.januar)
+            refusjonshistorikk.refusjonsopplysninger(1.januar).inspektør.refusjonsopplysninger
         )
     }
 
@@ -158,12 +141,10 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
         ))
 
         assertEquals(
-            Refusjonsopplysninger(
-                listOf(
-                    Refusjonsopplysning(inntektsmeldingJanuar, 1.januar, null, INGEN),
-                )
+            listOf(
+                Refusjonsopplysning(inntektsmeldingJanuar, 1.januar, null, INGEN)
             ),
-            refusjonshistorikk.refusjonsopplysninger(1.januar)
+            refusjonshistorikk.refusjonsopplysninger(1.januar).inspektør.refusjonsopplysninger
         )
     }
 
@@ -193,12 +174,10 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
         ))
 
         assertEquals(
-            Refusjonsopplysninger(
-                listOf(
-                    Refusjonsopplysning(inntektsmeldingMars, 1.mars, null, 2000.daglig)
-                )
+            listOf(
+                Refusjonsopplysning(inntektsmeldingMars, 1.mars, null, 2000.daglig)
             ),
-            refusjonshistorikk.refusjonsopplysninger(1.mars)
+            refusjonshistorikk.refusjonsopplysninger(1.mars).inspektør.refusjonsopplysninger
         )
     }
 
@@ -217,13 +196,11 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
         ))
 
         assertEquals(
-            Refusjonsopplysninger(
-                listOf(
-                    Refusjonsopplysning(inntektsmeldingJanuar, 1.januar, 19.januar, 1000.daglig),
-                    Refusjonsopplysning(inntektsmeldingJanuar, 20.januar, null, 500.daglig)
-                )
+            listOf(
+                Refusjonsopplysning(inntektsmeldingJanuar, 1.januar, 19.januar, 1000.daglig),
+                Refusjonsopplysning(inntektsmeldingJanuar, 20.januar, null, 500.daglig)
             ),
-            refusjonshistorikk.refusjonsopplysninger(1.januar)
+            refusjonshistorikk.refusjonsopplysninger(1.januar).inspektør.refusjonsopplysninger
         )
     }
 
@@ -246,14 +223,12 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
         ))
 
         assertEquals(
-            Refusjonsopplysninger(
-                listOf(
-                    Refusjonsopplysning(inntektsmeldingJanuar, 1.januar, 19.januar, 1000.daglig),
-                    Refusjonsopplysning(inntektsmeldingJanuar, 20.januar, 24.januar, 500.daglig),
-                    Refusjonsopplysning(inntektsmeldingJanuar, 25.januar, null, 2000.daglig)
-                )
+            listOf(
+                Refusjonsopplysning(inntektsmeldingJanuar, 1.januar, 19.januar, 1000.daglig),
+                Refusjonsopplysning(inntektsmeldingJanuar, 20.januar, 24.januar, 500.daglig),
+                Refusjonsopplysning(inntektsmeldingJanuar, 25.januar, null, 2000.daglig)
             ),
-            refusjonshistorikk.refusjonsopplysninger(1.januar)
+            refusjonshistorikk.refusjonsopplysninger(1.januar).inspektør.refusjonsopplysninger
         )
     }
 
@@ -289,18 +264,16 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
         ))
 
         assertEquals(
-            Refusjonsopplysninger(
-                listOf(
-                    Refusjonsopplysning(inntektsmeldingJanuar, 1.januar, 19.januar, 1000.daglig),
-                    Refusjonsopplysning(inntektsmeldingJanuar, 20.januar, 24.januar, 500.daglig),
-                    Refusjonsopplysning(inntektsmeldingJanuar, 25.januar, 28.februar, 2000.daglig),
+            listOf(
+                Refusjonsopplysning(inntektsmeldingJanuar, 1.januar, 19.januar, 1000.daglig),
+                Refusjonsopplysning(inntektsmeldingJanuar, 20.januar, 24.januar, 500.daglig),
+                Refusjonsopplysning(inntektsmeldingJanuar, 25.januar, 28.februar, 2000.daglig),
 
-                    Refusjonsopplysning(inntektsmeldingMars, 1.mars, 19.mars, 999.daglig),
-                    Refusjonsopplysning(inntektsmeldingMars, 20.mars, 24.mars, 9.daglig),
-                    Refusjonsopplysning(inntektsmeldingMars, 25.mars, null, 99.daglig)
-                )
+                Refusjonsopplysning(inntektsmeldingMars, 1.mars, 19.mars, 999.daglig),
+                Refusjonsopplysning(inntektsmeldingMars, 20.mars, 24.mars, 9.daglig),
+                Refusjonsopplysning(inntektsmeldingMars, 25.mars, null, 99.daglig)
             ),
-            refusjonshistorikk.refusjonsopplysninger(1.januar)
+            refusjonshistorikk.refusjonsopplysninger(1.januar).inspektør.refusjonsopplysninger
         )
     }
 
@@ -319,15 +292,12 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
                     EndringIRefusjon(500.daglig, 20.januar)
                 )
         ))
-
         assertEquals(
-            Refusjonsopplysninger(
-                listOf(
-                    Refusjonsopplysning(inntektsmeldingJanuar, 1.januar, 19.januar, 1000.daglig),
-                    Refusjonsopplysning(inntektsmeldingJanuar, 20.januar, null, INGEN)
-                )
+            listOf(
+                Refusjonsopplysning(inntektsmeldingJanuar, 1.januar, 19.januar, 1000.daglig),
+                Refusjonsopplysning(inntektsmeldingJanuar, 20.januar, null, INGEN)
             ),
-            refusjonshistorikk.refusjonsopplysninger(1.januar)
+            refusjonshistorikk.refusjonsopplysninger(1.januar).inspektør.refusjonsopplysninger
         )
     }
     @Test
@@ -348,14 +318,12 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
         ))
 
         assertEquals(
-            Refusjonsopplysninger(
-                listOf(
-                    Refusjonsopplysning(inntektsmeldingJanuar, 1.januar, 18.januar, 1000.daglig),
-                    Refusjonsopplysning(inntektsmeldingJanuar, 19.januar, 19.januar, 500.daglig),
-                    Refusjonsopplysning(inntektsmeldingJanuar, 20.januar, null, INGEN),
-                )
+            listOf(
+                Refusjonsopplysning(inntektsmeldingJanuar, 1.januar, 18.januar, 1000.daglig),
+                Refusjonsopplysning(inntektsmeldingJanuar, 19.januar, 19.januar, 500.daglig),
+                Refusjonsopplysning(inntektsmeldingJanuar, 20.januar, null, INGEN),
             ),
-            refusjonshistorikk.refusjonsopplysninger(1.januar)
+            refusjonshistorikk.refusjonsopplysninger(1.januar).inspektør.refusjonsopplysninger
         )
     }
     @Test
@@ -376,13 +344,11 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
         ))
 
         assertEquals(
-            Refusjonsopplysninger(
-                listOf(
-                    Refusjonsopplysning(inntektsmeldingJanuar, 1.januar, 19.januar, 1000.daglig),
-                    Refusjonsopplysning(inntektsmeldingJanuar, 20.januar, null, INGEN)
-                )
+            listOf(
+                Refusjonsopplysning(inntektsmeldingJanuar, 1.januar, 19.januar, 1000.daglig),
+                Refusjonsopplysning(inntektsmeldingJanuar, 20.januar, null, INGEN)
             ),
-            refusjonshistorikk.refusjonsopplysninger(1.januar)
+            refusjonshistorikk.refusjonsopplysninger(1.januar).inspektør.refusjonsopplysninger
         )
     }
 
@@ -412,13 +378,11 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
             ))
 
         assertEquals(
-            Refusjonsopplysninger(
-                listOf(
-                    Refusjonsopplysning(inntektsmelding, 1.februar, 30.april, 1000.daglig),
-                    Refusjonsopplysning(korrigerendeInntektsmelding, 1.mai, null, 0.daglig)
-                )
+            listOf(
+                Refusjonsopplysning(inntektsmelding, 1.februar, 30.april, 1000.daglig),
+                Refusjonsopplysning(korrigerendeInntektsmelding, 1.mai, null, 0.daglig)
             ),
-            refusjonshistorikk.refusjonsopplysninger(1.februar)
+            refusjonshistorikk.refusjonsopplysninger(1.februar).inspektør.refusjonsopplysninger
         )
     }
 
@@ -437,12 +401,10 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
             ))
 
         assertEquals(
-            Refusjonsopplysninger(
-                listOf(
-                    Refusjonsopplysning(inntektsmelding, 10.februar, null, 1000.daglig),
-                )
+            listOf(
+                Refusjonsopplysning(inntektsmelding, 10.februar, null, 1000.daglig)
             ),
-            refusjonshistorikk.refusjonsopplysninger(1.februar)
+            refusjonshistorikk.refusjonsopplysninger(1.februar).inspektør.refusjonsopplysninger
         )
     }
 
@@ -460,13 +422,12 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
                 endringerIRefusjon = emptyList()
             ))
 
+
         assertEquals(
-            Refusjonsopplysninger(
-                listOf(
-                    Refusjonsopplysning(inntektsmelding, 11.februar, null, 1000.daglig),
-                )
+            listOf(
+                Refusjonsopplysning(inntektsmelding, 11.februar, null, 1000.daglig)
             ),
-            refusjonshistorikk.refusjonsopplysninger(1.februar)
+            refusjonshistorikk.refusjonsopplysninger(1.februar).inspektør.refusjonsopplysninger
         )
     }
 
@@ -485,12 +446,10 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
             ))
 
         assertEquals(
-            Refusjonsopplysninger(
-                listOf(
-                    Refusjonsopplysning(inntektsmelding, 20.februar, null, 1000.daglig),
-                )
+            listOf(
+                Refusjonsopplysning(inntektsmelding, 20.februar, null, 1000.daglig)
             ),
-            refusjonshistorikk.refusjonsopplysninger(1.februar)
+            refusjonshistorikk.refusjonsopplysninger(1.februar).inspektør.refusjonsopplysninger
         )
     }
 
@@ -512,15 +471,12 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
             ))
 
         assertEquals(
-            Refusjonsopplysninger(
-                listOf(
-                    Refusjonsopplysning(inntektsmelding, 10.februar, 10.februar, 1000.daglig),
-                    Refusjonsopplysning(inntektsmelding, 11.februar, null, 2000.daglig)
-                )
+            listOf(
+                Refusjonsopplysning(inntektsmelding, 10.februar, 10.februar, 1000.daglig),
+                Refusjonsopplysning(inntektsmelding, 11.februar, null, 2000.daglig)
             ),
-            refusjonshistorikk.refusjonsopplysninger(1.februar)
+            refusjonshistorikk.refusjonsopplysninger(1.februar).inspektør.refusjonsopplysninger
         )
     }
-
 
 }

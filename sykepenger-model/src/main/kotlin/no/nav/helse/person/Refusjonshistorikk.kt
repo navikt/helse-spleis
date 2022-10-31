@@ -111,34 +111,30 @@ internal class Refusjonshistorikk {
                     return arbeidsgiverperioder.map { it.start }.plus(førsteFraværsdag).max()
                 }
                 internal fun Refusjonshistorikk.refusjonsopplysninger(skjæringstidspunkt: LocalDate): Refusjonsopplysninger {
-                    val refusjonsopplysninger =
-                        this.refusjoner.filter { it.startskuddet() >= skjæringstidspunkt }.sortedBy { it.startskuddet() }
-                            .tilRefusjonsopplysninger()
                     val refusjonsopplysningBuilder = RefusjonsopplysningerBuilder()
-                    refusjonsopplysninger.forEach { refusjonsopplysningBuilder.leggTil(it) }
+                    this.refusjoner.filter { it.startskuddet() >= skjæringstidspunkt }.sortedBy { it.startskuddet() }
+                        .tilRefusjonsopplysninger(refusjonsopplysningBuilder)
 
                     return refusjonsopplysningBuilder.build()
                 }
 
-                private fun List<Refusjon>.tilRefusjonsopplysninger() =
-                    flatMap { it.tilRefusjoneropplysninger() }
+                private fun List<Refusjon>.tilRefusjonsopplysninger(refusjonsopplysningerBuilder: RefusjonsopplysningerBuilder) =
+                    forEach { it.tilRefusjoneropplysninger(refusjonsopplysningerBuilder) }
 
-                private fun Refusjon.tilRefusjoneropplysninger(): List<Refusjonsopplysning> {
+                private fun Refusjon.tilRefusjoneropplysninger(refusjonsopplysningerBuilder: RefusjonsopplysningerBuilder) {
                     val hovedRefusjonsopplysning = EndringIRefusjon(
                         beløp ?: INGEN, startskuddet()
                     )
-                    val alleRefusjonsopplysninger = (endringerIRefusjon + hovedRefusjonsopplysning)
+                    (endringerIRefusjon + hovedRefusjonsopplysning)
                         .sortedBy { it.endringsdato }
-                        .mapNotNull { endring ->
-                            if (sisteRefusjonsdag != null && endring.endringsdato > sisteRefusjonsdag) null
-                            else if (endring.endringsdato < startskuddet()) null
-                            else Refusjonsopplysning(meldingsreferanseId, endring.endringsdato, sisteRefusjonsdag, endring.beløp, tidsstempel)
+                        .forEach { endring ->
+                            if (sisteRefusjonsdag != null && endring.endringsdato > sisteRefusjonsdag) return@forEach
+                            else if (endring.endringsdato < startskuddet()) return@forEach
+                            else refusjonsopplysningerBuilder.leggTil(Refusjonsopplysning(meldingsreferanseId, endring.endringsdato, sisteRefusjonsdag, endring.beløp), tidsstempel)
                         }
 
-                    return when(sisteRefusjonsdag) {
-                        null -> alleRefusjonsopplysninger
-                        else -> alleRefusjonsopplysninger + Refusjonsopplysning(meldingsreferanseId, sisteRefusjonsdag.nesteDag, null, INGEN, tidsstempel)
-                    }
+                    if (sisteRefusjonsdag == null) return
+                    refusjonsopplysningerBuilder.leggTil(Refusjonsopplysning(meldingsreferanseId, sisteRefusjonsdag.nesteDag, null, INGEN), tidsstempel)
                 }
             }
 

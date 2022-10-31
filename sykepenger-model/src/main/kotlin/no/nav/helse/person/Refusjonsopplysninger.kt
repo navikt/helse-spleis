@@ -13,8 +13,7 @@ internal class Refusjonsopplysning(
     private val meldingsreferanseId: UUID,
     private val fom: LocalDate,
     private val tom: LocalDate?,
-    private val beløp: Inntekt,
-    private val tidsstempel: LocalDateTime = LocalDateTime.now()
+    private val beløp: Inntekt
 ) {
 
     init {
@@ -28,8 +27,8 @@ internal class Refusjonsopplysning(
     }
 
     private val periode get() = fom til tom!!
-    private fun oppdatertFom(nyFom: LocalDate) = if (tom != null && nyFom > tom) null else Refusjonsopplysning(meldingsreferanseId, nyFom, tom, beløp, tidsstempel)
-    private fun oppdatertTom(nyTom: LocalDate) = if (nyTom < fom) null else Refusjonsopplysning(meldingsreferanseId, fom, nyTom, beløp, tidsstempel)
+    private fun oppdatertFom(nyFom: LocalDate) = if (tom != null && nyFom > tom) null else Refusjonsopplysning(meldingsreferanseId, nyFom, tom, beløp)
+    private fun oppdatertTom(nyTom: LocalDate) = if (nyTom < fom) null else Refusjonsopplysning(meldingsreferanseId, fom, nyTom, beløp)
     private fun erEtter(other: Refusjonsopplysning) = other.tom != null && fom > other.tom
 
     private fun minus(nyOpplysning: Refusjonsopplysning): List<Refusjonsopplysning> {
@@ -115,8 +114,8 @@ internal class Refusjonsopplysning(
 
         internal class RefusjonsopplysningerBuilder {
             private val refusjonsopplysninger = mutableListOf<Pair<LocalDateTime, Refusjonsopplysning>>()
-            internal fun leggTil(refusjonsopplysning: Refusjonsopplysning) = apply{
-                refusjonsopplysninger.add(Pair(refusjonsopplysning.tidsstempel, refusjonsopplysning))
+            internal fun leggTil(refusjonsopplysning: Refusjonsopplysning, tidsstempel: LocalDateTime) = apply{
+                refusjonsopplysninger.add(Pair(tidsstempel, refusjonsopplysning))
             }
 
             internal fun build(): Refusjonsopplysninger{
