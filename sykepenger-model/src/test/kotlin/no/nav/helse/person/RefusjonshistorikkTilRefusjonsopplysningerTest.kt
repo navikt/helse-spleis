@@ -10,12 +10,22 @@ import no.nav.helse.mars
 import no.nav.helse.person.Refusjonshistorikk.Refusjon.EndringIRefusjon
 import no.nav.helse.person.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.refusjonsopplysninger
 import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger
+import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger.RefusjonsopplysningerBuilder
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
+
+
+    companion object {
+        private fun Refusjonsopplysninger(refusjonsopplysninger: List<Refusjonsopplysning>): Refusjonsopplysninger{
+            val refusjonsopplysningerBuilder = RefusjonsopplysningerBuilder()
+            refusjonsopplysninger.forEach { refusjonsopplysningerBuilder.leggTil(it) }
+            return refusjonsopplysningerBuilder.build()
+        }
+    }
 
     @Test
     fun `tom refusjonshistorikk medfører ingen refusjonsopplysninger`() {

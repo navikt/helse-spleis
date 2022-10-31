@@ -12,6 +12,7 @@ import no.nav.helse.person.Refusjonshistorikk.Refusjon.Companion.somTilstøterAr
 import no.nav.helse.person.Refusjonshistorikk.Refusjon.Companion.somTrefferFørsteFraværsdag
 import no.nav.helse.person.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.beløp
 import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger
+import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger.RefusjonsopplysningerBuilder
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 
@@ -113,8 +114,10 @@ internal class Refusjonshistorikk {
                     val refusjonsopplysninger =
                         this.refusjoner.filter { it.startskuddet() >= skjæringstidspunkt }.sortedBy { it.startskuddet() }
                             .tilRefusjonsopplysninger()
+                    val refusjonsopplysningBuilder = RefusjonsopplysningerBuilder()
+                    refusjonsopplysninger.forEach { refusjonsopplysningBuilder.leggTil(it) }
 
-                    return Refusjonsopplysninger(refusjonsopplysninger)
+                    return refusjonsopplysningBuilder.build()
                 }
 
                 private fun List<Refusjon>.tilRefusjonsopplysninger() =
@@ -129,12 +132,12 @@ internal class Refusjonshistorikk {
                         .mapNotNull { endring ->
                             if (sisteRefusjonsdag != null && endring.endringsdato > sisteRefusjonsdag) null
                             else if (endring.endringsdato < startskuddet()) null
-                            else Refusjonsopplysning(meldingsreferanseId, endring.endringsdato, sisteRefusjonsdag, endring.beløp)
+                            else Refusjonsopplysning(meldingsreferanseId, endring.endringsdato, sisteRefusjonsdag, endring.beløp, tidsstempel)
                         }
 
                     return when(sisteRefusjonsdag) {
                         null -> alleRefusjonsopplysninger
-                        else -> alleRefusjonsopplysninger + Refusjonsopplysning(meldingsreferanseId, sisteRefusjonsdag.nesteDag, null, INGEN)
+                        else -> alleRefusjonsopplysninger + Refusjonsopplysning(meldingsreferanseId, sisteRefusjonsdag.nesteDag, null, INGEN, tidsstempel)
                     }
                 }
             }
