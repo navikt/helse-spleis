@@ -47,6 +47,11 @@ internal class Refusjonsopplysning(
         val hale = oppdatertFom(overlapp.endInclusive.nesteDag)
         return listOfNotNull(snute, hale)
     }
+
+    private fun dekker(dag: LocalDate): Boolean {
+        if (tom == null) return dag >= fom
+        return dag in periode
+    }
     internal companion object {
         private fun Periode.overlappendePeriode(other: Periode) =
             intersect(other).takeUnless { it.isEmpty() }?.let { Periode(it.min(), it.max()) }
@@ -84,7 +89,7 @@ internal class Refusjonsopplysning(
     }
 
     internal class Refusjonsopplysninger private constructor(
-        refusjonsopplysninger: List<Refusjonsopplysning>, // TODO: Kan vi anta at refusjonsopplysnigene sendes inn i rekkefølgen som de skal tolkes?
+        refusjonsopplysninger: List<Refusjonsopplysning>,
     ) {
         private val validerteRefusjonsopplysninger = validerteRefusjonsopplysninger(refusjonsopplysninger)
         internal constructor(): this(emptyList())
@@ -111,6 +116,11 @@ internal class Refusjonsopplysning(
         override fun hashCode() = validerteRefusjonsopplysninger.hashCode()
 
         override fun toString() = validerteRefusjonsopplysninger.toString()
+
+        internal fun harNødvendigRefusjonsopplysninger(periode: Periode): Boolean {
+            periode.forEach { dag -> if (validerteRefusjonsopplysninger.none { it.dekker(dag) }) return false }
+            return true
+        }
 
         internal class RefusjonsopplysningerBuilder {
             private val refusjonsopplysninger = mutableListOf<Pair<LocalDateTime, Refusjonsopplysning>>()
