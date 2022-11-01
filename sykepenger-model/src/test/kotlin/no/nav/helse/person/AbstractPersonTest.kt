@@ -8,7 +8,9 @@ import no.nav.helse.dsl.ArbeidsgiverHendelsefabrikk
 import no.nav.helse.dsl.TestPerson
 import no.nav.helse.dsl.UgyldigeSituasjonerObservatør
 import no.nav.helse.februar
+import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Utbetalingshistorikk
+import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
 import no.nav.helse.januar
 import no.nav.helse.person.etterlevelse.MaskinellJurist
@@ -47,6 +49,22 @@ internal abstract class AbstractPersonTest {
         val a4: String = "456789123"
 
         private fun overgangFraInfotrygdPerson(jurist: MaskinellJurist) = SerialisertPerson("/personer/infotrygdforlengelse.json".readResource()).deserialize(jurist).also { person ->
+            person.håndter(
+                Inntektsmelding(
+                    meldingsreferanseId = UUID.randomUUID(),
+                    refusjon = Inntektsmelding.Refusjon(TestPerson.INNTEKT, null),
+                    orgnummer = ORGNUMMER,
+                    fødselsnummer = "",
+                    aktørId = "",
+                    fødselsdato = 1.januar(1990),
+                    førsteFraværsdag = null,
+                    beregnetInntekt = TestPerson.INNTEKT,
+                    arbeidsgiverperioder = listOf(1.januar til 16.januar),
+                    arbeidsforholdId = null,
+                    begrunnelseForReduksjonEllerIkkeUtbetalt = null,
+                    mottatt = LocalDateTime.now()
+                )
+            )
             person.håndter(
                 Utbetalingshistorikk(
                     UUID.randomUUID(), "", "", ORGNUMMER, UUID.randomUUID().toString(),

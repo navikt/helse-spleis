@@ -1470,6 +1470,9 @@ internal class Vedtaksperiode private constructor(
                 !arbeidsgivere.harNødvendigOpplysningerFraArbeidsgiver(vedtaksperiode.periode) -> return hendelse.info(
                     "Gjenopptar ikke behandling fordi minst én overlappende periode venter på nødvendig opplysninger fra arbeidsgiver"
                 )
+             /*   !arbeidsgivere.harNødvendigRefusjonsopplysninger(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode) -> return hendelse.info(
+                    "Gjenopptar ikke behandling fordi minst én arbeidsgiver ikke har tilstrekkelig refusjon for skjæringstidspunktet"
+                )*/
                 else -> vedtaksperiode.tilstand(hendelse, AvventerHistorikk)
             }
         }
@@ -2476,6 +2479,12 @@ internal class Vedtaksperiode private constructor(
         internal val SKAL_INNGÅ_I_SYKEPENGEGRUNNLAG = { skjæringstidspunkt: LocalDate ->
             { vedtaksperiode: Vedtaksperiode ->
                 MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt)(vedtaksperiode) && vedtaksperiode.forventerInntekt()
+            }
+        }
+
+        internal val TRENGER_REFUSJONSOPPLYSNINGER = { skjæringstidspunkt: LocalDate, periode: Periode ->
+            { vedtaksperiode: Vedtaksperiode ->
+                SKAL_INNGÅ_I_SYKEPENGEGRUNNLAG(skjæringstidspunkt)(vedtaksperiode) && vedtaksperiode.periode.overlapperMed(periode)
             }
         }
 

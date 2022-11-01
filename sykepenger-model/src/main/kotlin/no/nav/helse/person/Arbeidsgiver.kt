@@ -41,6 +41,7 @@ import no.nav.helse.person.Vedtaksperiode.Companion.KLAR_TIL_BEHANDLING
 import no.nav.helse.person.Vedtaksperiode.Companion.MED_SKJÆRINGSTIDSPUNKT
 import no.nav.helse.person.Vedtaksperiode.Companion.SKAL_INNGÅ_I_SYKEPENGEGRUNNLAG
 import no.nav.helse.person.Vedtaksperiode.Companion.TIDLIGERE_OG_ETTERGØLGENDE
+import no.nav.helse.person.Vedtaksperiode.Companion.TRENGER_REFUSJONSOPPLYSNINGER
 import no.nav.helse.person.Vedtaksperiode.Companion.avventerRevurdering
 import no.nav.helse.person.Vedtaksperiode.Companion.feiletRevurdering
 import no.nav.helse.person.Vedtaksperiode.Companion.iderMedUtbetaling
@@ -235,6 +236,9 @@ internal class Arbeidsgiver private constructor(
 
         private fun Iterable<Arbeidsgiver>.medSkjæringstidspunkt(skjæringstidspunkt: LocalDate) = this
             .filter { arbeidsgiver -> arbeidsgiver.vedtaksperioder.any(SKAL_INNGÅ_I_SYKEPENGEGRUNNLAG(skjæringstidspunkt)) }
+
+        private fun Iterable<Arbeidsgiver>.somTrengerRefusjonsopplysninger(skjæringstidspunkt: LocalDate, periode: Periode) = this
+            .filter { arbeidsgiver -> arbeidsgiver.vedtaksperioder.any(TRENGER_REFUSJONSOPPLYSNINGER(skjæringstidspunkt, periode)) }
         internal fun Iterable<Arbeidsgiver>.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag(skjæringstidspunkt: LocalDate) = this
             .medSkjæringstidspunkt(skjæringstidspunkt)
             .any { arbeidsgiver -> arbeidsgiver.manglerNødvendigInntektVedTidligereBeregnetSykepengegrunnlag(skjæringstidspunkt) }
@@ -247,7 +251,7 @@ internal class Arbeidsgiver private constructor(
             .all { arbeidsgiver -> arbeidsgiver.harNødvendigInntektForVilkårsprøving(skjæringstidspunkt) }
 
         internal fun Iterable<Arbeidsgiver>.harNødvendigRefusjonsopplysninger(skjæringstidspunkt: LocalDate, periode: Periode) = this
-            .medSkjæringstidspunkt(skjæringstidspunkt)
+            .somTrengerRefusjonsopplysninger(skjæringstidspunkt, periode)
             .all { arbeidsgiver -> arbeidsgiver.harNødvendigRefusjonsopplysninger(skjæringstidspunkt, periode) }
 
         internal fun Iterable<Arbeidsgiver>.harNødvendigOpplysningerFraArbeidsgiver(periode: Periode) = this
@@ -299,7 +303,7 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun harNødvendigRefusjonsopplysninger(skjæringstidspunkt: LocalDate, periode: Periode) : Boolean {
-        return refusjonshistorikk.refusjonsopplysninger(skjæringstidspunkt).harNødvendigRefusjonsopplysninger(periode)
+        return Arbeidsgiverperiode.harNødvendigeRefusjonsopplysninger(periode, refusjonshistorikk.refusjonsopplysninger(skjæringstidspunkt), arbeidsgiverperiode(periode, SubsumsjonObserver.NullObserver))
     }
 
     private fun harNødvendigInntektITidligereBeregnetSykepengegrunnlag(skjæringstidspunkt: LocalDate) =

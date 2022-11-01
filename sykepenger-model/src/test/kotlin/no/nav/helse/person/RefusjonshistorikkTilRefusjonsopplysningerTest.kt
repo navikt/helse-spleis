@@ -2,6 +2,7 @@ package no.nav.helse.person
 
 import java.util.UUID
 import no.nav.helse.april
+import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
@@ -505,6 +506,37 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
                 Refusjonsopplysning(inntektsmelding, 15.januar, null, 4000.daglig)
             ),
             refusjonshistorikk.refusjonsopplysninger(1.januar).inspektør.refusjonsopplysninger
+        )
+    }
+
+    @Test
+    fun `ny inntektsmelding med første fraværsdag etter arbeidsgiverperioden`() {
+        val refusjonshistorikk = Refusjonshistorikk()
+        val inntektsmelding = UUID.randomUUID()
+        refusjonshistorikk.leggTilRefusjon(
+            Refusjonshistorikk.Refusjon(
+                meldingsreferanseId = inntektsmelding,
+                førsteFraværsdag = 23.januar,
+                arbeidsgiverperioder = listOf(1.januar til 16.januar),
+                beløp = 1000.daglig,
+                sisteRefusjonsdag = null,
+                endringerIRefusjon = emptyList()
+            ))
+
+        assertForventetFeil(
+            forklaring = "mangler refusjonsopplysnigner for 17 - 23 januar ettersom dette medfører utbetalingsdager",
+            nå = {assertEquals(
+                listOf(
+                    Refusjonsopplysning(inntektsmelding, 23.januar, null, 1000.daglig)
+                ),
+                refusjonshistorikk.refusjonsopplysninger(1.januar).inspektør.refusjonsopplysninger
+            )},
+            ønsket = {assertEquals(
+                listOf(
+                    Refusjonsopplysning(inntektsmelding, 1.januar, null, 1000.daglig)
+                ),
+                refusjonshistorikk.refusjonsopplysninger(1.januar).inspektør.refusjonsopplysninger
+            )}
         )
     }
 }

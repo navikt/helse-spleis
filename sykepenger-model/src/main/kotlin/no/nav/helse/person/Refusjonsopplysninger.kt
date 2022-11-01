@@ -119,8 +119,8 @@ internal class Refusjonsopplysning(
 
         override fun toString() = validerteRefusjonsopplysninger.toString()
 
-        internal fun harNødvendigRefusjonsopplysninger(periode: Periode): Boolean {
-            periode.forEach { dag -> if (validerteRefusjonsopplysninger.none { it.dekker(dag) }) return false }
+        internal fun harNødvendigRefusjonsopplysninger(dager: List<LocalDate>): Boolean {
+            dager.forEach { dag -> if (validerteRefusjonsopplysninger.none { it.dekker(dag) }) return false }
             return true
         }
 
