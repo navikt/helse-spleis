@@ -52,6 +52,27 @@ internal class Refusjonsopplysning(
         if (tom == null) return dag >= fom
         return dag in periode
     }
+
+    internal fun accept(visitor: RefusjonsopplysningerVisitor) {
+        visitor.visitRefusjonsopplysning(meldingsreferanseId, fom, tom, beløp)
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (other !is Refusjonsopplysning) return false
+        return meldingsreferanseId == other.meldingsreferanseId && fom == other.fom && tom == other.tom && beløp == other.beløp
+    }
+
+    override fun toString() = "$fom - $tom, ${beløp.reflection { _, _, dagligDouble, _ -> dagligDouble }} ($meldingsreferanseId)"
+
+    override fun hashCode(): Int {
+        var result = meldingsreferanseId.hashCode()
+        result = 31 * result + fom.hashCode()
+        result = 31 * result + (tom?.hashCode() ?: 0)
+        result = 31 * result + beløp.hashCode()
+        result = 31 * result + periode.hashCode()
+        return result
+    }
+
     internal companion object {
         private fun Periode.overlappendePeriode(other: Periode) =
             intersect(other).takeUnless { it.isEmpty() }?.let { Periode(it.min(), it.max()) }
@@ -69,27 +90,8 @@ internal class Refusjonsopplysning(
         }
     }
 
-    internal fun accept(visitor: RefusjonsopplysningerVisitor) {
-        visitor.visitRefusjonsopplysning(meldingsreferanseId, fom, tom, beløp)
-    }
-
-    override fun equals(other: Any?): Boolean {
-        if (other !is Refusjonsopplysning) return false
-        return meldingsreferanseId == other.meldingsreferanseId && fom == other.fom && tom == other.tom && beløp == other.beløp
-    }
-
-    override fun toString() = "$fom - $tom, ${beløp.reflection { _, _, dagligDouble, _ -> dagligDouble }} ($meldingsreferanseId)"
-    override fun hashCode(): Int {
-        var result = meldingsreferanseId.hashCode()
-        result = 31 * result + fom.hashCode()
-        result = 31 * result + (tom?.hashCode() ?: 0)
-        result = 31 * result + beløp.hashCode()
-        result = 31 * result + periode.hashCode()
-        return result
-    }
-
     internal class Refusjonsopplysninger private constructor(
-        refusjonsopplysninger: List<Refusjonsopplysning>,
+        refusjonsopplysninger: List<Refusjonsopplysning>
     ) {
         private val validerteRefusjonsopplysninger = validerteRefusjonsopplysninger(refusjonsopplysninger)
         internal constructor(): this(emptyList())
@@ -124,12 +126,12 @@ internal class Refusjonsopplysning(
 
         internal class RefusjonsopplysningerBuilder {
             private val refusjonsopplysninger = mutableListOf<Pair<LocalDateTime, Refusjonsopplysning>>()
-            internal fun leggTil(refusjonsopplysning: Refusjonsopplysning, tidsstempel: LocalDateTime) = apply{
-                refusjonsopplysninger.add(Pair(tidsstempel, refusjonsopplysning))
+            internal fun leggTil(refusjonsopplysning: Refusjonsopplysning, tidsstempel: LocalDateTime) = apply {
+                refusjonsopplysninger.add(tidsstempel to refusjonsopplysning)
             }
 
             internal fun build(): Refusjonsopplysninger{
-                return Refusjonsopplysninger(refusjonsopplysninger.sortedWith(compareBy({it.first}, {it.second.fom})).map{it.second})
+                return Refusjonsopplysninger(refusjonsopplysninger.sortedWith(compareBy({ it.first }, { it.second.fom })).map { it.second })
             }
         }
     }

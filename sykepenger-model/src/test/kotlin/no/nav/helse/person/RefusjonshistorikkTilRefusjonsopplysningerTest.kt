@@ -479,4 +479,32 @@ internal class RefusjonshistorikkTilRefusjonsopplysningerTest {
         )
     }
 
+    @Test
+    fun `endringer i refusjon hulter til bulter`() {
+        val refusjonshistorikk = Refusjonshistorikk()
+        val inntektsmelding = UUID.randomUUID()
+        refusjonshistorikk.leggTilRefusjon(
+            Refusjonshistorikk.Refusjon(
+                meldingsreferanseId = inntektsmelding,
+                førsteFraværsdag = 1.januar,
+                arbeidsgiverperioder = listOf(1.januar til 16.januar),
+                beløp = 1000.daglig,
+                sisteRefusjonsdag = null,
+                endringerIRefusjon = listOf(
+                    EndringIRefusjon(4000.daglig, 15.januar),
+                    EndringIRefusjon(2000.daglig, 10.januar),
+                    EndringIRefusjon(3000.daglig, 12.januar)
+                )
+            ))
+
+        assertEquals(
+            listOf(
+                Refusjonsopplysning(inntektsmelding, 1.januar, 9.januar, 1000.daglig),
+                Refusjonsopplysning(inntektsmelding, 10.januar, 11.januar, 2000.daglig),
+                Refusjonsopplysning(inntektsmelding, 12.januar, 14.januar, 3000.daglig),
+                Refusjonsopplysning(inntektsmelding, 15.januar, null, 4000.daglig)
+            ),
+            refusjonshistorikk.refusjonsopplysninger(1.januar).inspektør.refusjonsopplysninger
+        )
+    }
 }

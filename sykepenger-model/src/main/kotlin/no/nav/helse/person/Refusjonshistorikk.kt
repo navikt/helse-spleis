@@ -112,21 +112,17 @@ internal class Refusjonshistorikk {
                 }
                 internal fun Refusjonshistorikk.refusjonsopplysninger(skjæringstidspunkt: LocalDate): Refusjonsopplysninger {
                     val refusjonsopplysningBuilder = RefusjonsopplysningerBuilder()
-                    this.refusjoner.filter { it.startskuddet() >= skjæringstidspunkt }.sortedBy { it.startskuddet() }
-                        .tilRefusjonsopplysninger(refusjonsopplysningBuilder)
-
+                    refusjoner.filter { it.startskuddet() >= skjæringstidspunkt }.leggTilRefusjonsopplysninger(refusjonsopplysningBuilder)
                     return refusjonsopplysningBuilder.build()
                 }
 
-                private fun List<Refusjon>.tilRefusjonsopplysninger(refusjonsopplysningerBuilder: RefusjonsopplysningerBuilder) =
-                    forEach { it.tilRefusjoneropplysninger(refusjonsopplysningerBuilder) }
+                private fun List<Refusjon>.leggTilRefusjonsopplysninger(refusjonsopplysningerBuilder: RefusjonsopplysningerBuilder) =
+                    forEach { it.leggTilRefusjoneropplysninger(refusjonsopplysningerBuilder) }
 
-                private fun Refusjon.tilRefusjoneropplysninger(refusjonsopplysningerBuilder: RefusjonsopplysningerBuilder) {
-                    val hovedRefusjonsopplysning = EndringIRefusjon(
-                        beløp ?: INGEN, startskuddet()
-                    )
+                private fun Refusjon.leggTilRefusjoneropplysninger(refusjonsopplysningerBuilder: RefusjonsopplysningerBuilder) {
+                    val hovedRefusjonsopplysning = EndringIRefusjon(beløp ?: INGEN, startskuddet())
+
                     (endringerIRefusjon + hovedRefusjonsopplysning)
-                        .sortedBy { it.endringsdato }
                         .forEach { endring ->
                             if (sisteRefusjonsdag != null && endring.endringsdato > sisteRefusjonsdag) return@forEach
                             else if (endring.endringsdato < startskuddet()) return@forEach
@@ -141,7 +137,6 @@ internal class Refusjonshistorikk {
             internal fun accept(visitor: RefusjonshistorikkVisitor) {
                 visitor.visitEndringIRefusjon(beløp, endringsdato)
             }
-
         }
     }
 }
