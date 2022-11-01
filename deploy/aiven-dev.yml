@@ -95,6 +95,9 @@ spec:
           application: spenn
           access: readwrite
         - team: tbd
+          application: spenn-simulering
+          access: readwrite
+        - team: tbd
           application: spenn-avstemming
           access: readwrite
         - team: tbd
