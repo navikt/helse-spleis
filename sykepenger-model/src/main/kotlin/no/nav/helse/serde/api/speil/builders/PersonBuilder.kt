@@ -13,7 +13,7 @@ import no.nav.helse.serde.api.dto.ArbeidsgiverDTO
 import no.nav.helse.serde.api.dto.HendelseDTO
 import no.nav.helse.serde.api.dto.PersonDTO
 import no.nav.helse.serde.api.dto.Vilkårsgrunnlag
-import no.nav.helse.serde.api.speil.builders.ArbeidsgiverBuilder.Companion.vilkårsgrunnlagIderSomPekesPåAvGhostPerioder
+import no.nav.helse.serde.api.speil.builders.ArbeidsgiverBuilder.Companion.vilkårsgrunnlagSomPekesPåAvGhostPerioder
 import no.nav.helse.utbetalingstidslinje.Alder
 import org.slf4j.LoggerFactory
 
@@ -32,7 +32,8 @@ internal class PersonBuilder(
     internal fun build(hendelser: List<HendelseDTO>): PersonDTO {
         val vilkårsgrunnlagHistorikk = VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk).build()
         val arbeidsgivere = arbeidsgivere.map { it.build(hendelser, alder, vilkårsgrunnlagHistorikk) }
-        val vilkårsgrunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagSomPekesPåAvBeregnedePerioder()
+        val vilkårsgrunnlag = arbeidsgivere.vilkårsgrunnlagSomPekesPåAvGhostPerioder() + vilkårsgrunnlagHistorikk.vilkårsgrunnlagSomPekesPåAvBeregnedePerioder()
+
         sjekkVilkårsgrunnlag(vilkårsgrunnlag, arbeidsgivere, vilkårsgrunnlagHistorikk)
 
         return PersonDTO(
@@ -51,7 +52,7 @@ internal class PersonBuilder(
         arbeidsgivere: List<ArbeidsgiverDTO>,
         vilkårsgrunnlagHistorikk: IVilkårsgrunnlagHistorikk
     ) {
-        arbeidsgivere.vilkårsgrunnlagIderSomPekesPåAvGhostPerioder()
+        arbeidsgivere.vilkårsgrunnlagSomPekesPåAvGhostPerioder().keys
             .forEach { ghostVilkårsgrunnlagId ->
                 if (vilkårsgrunnlag.isNotEmpty() && !vilkårsgrunnlagHistorikk.vilkårsgrunnlagSomPekesPåAvBeregnedePerioder().containsKey(ghostVilkårsgrunnlagId)) {
                     sikkerlog.info("$aktørId har en arbeidsgiver med en ghostperiode med vilkårsgrunnlag $ghostVilkårsgrunnlagId som ingen av de beregnede periodene peker på, hvordan kan dette skje?")

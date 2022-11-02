@@ -6,6 +6,7 @@ import no.nav.helse.serde.api.BuilderState
 import no.nav.helse.serde.api.dto.ArbeidsgiverDTO
 import no.nav.helse.serde.api.dto.GhostPeriodeDTO
 import no.nav.helse.serde.api.dto.HendelseDTO
+import no.nav.helse.serde.api.dto.Vilkårsgrunnlag
 import no.nav.helse.utbetalingstidslinje.Alder
 
 internal class ArbeidsgiverBuilder(
@@ -15,8 +16,10 @@ internal class ArbeidsgiverBuilder(
 ) : BuilderState() {
 
     companion object {
-        internal fun List<ArbeidsgiverDTO>.vilkårsgrunnlagIderSomPekesPåAvGhostPerioder(): List<UUID> {
-            return flatMap { it.ghostPerioder }.mapNotNull { it.vilkårsgrunnlagId }
+        internal fun List<ArbeidsgiverDTO>.vilkårsgrunnlagSomPekesPåAvGhostPerioder(): Map<UUID, Vilkårsgrunnlag> {
+            return flatMap { it.ghostPerioder }
+                .filter { it.vilkårsgrunnlagId != null && it.vilkårsgrunnlag != null }
+                .associate { it.vilkårsgrunnlagId!! to it.vilkårsgrunnlag!! }
         }
     }
 
@@ -32,6 +35,7 @@ internal class ArbeidsgiverBuilder(
                     skjæringstidspunkt = it.skjæringstidspunkt,
                     vilkårsgrunnlagHistorikkInnslagId = it.vilkårsgrunnlagHistorikkInnslagId,
                     vilkårsgrunnlagId = it.vilkårsgrunnlagId,
+                    vilkårsgrunnlag = vilkårsgrunnlagHistorikk.finn(it.vilkårsgrunnlagHistorikkInnslagId, it.vilkårsgrunnlagId, it.skjæringstidspunkt),
                     deaktivert = it.deaktivert
                 )
             },

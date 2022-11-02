@@ -35,6 +35,7 @@ internal class IInnslag(
     private val innslag: Map<LocalDate, IVilkårsgrunnlag>
 ) {
     internal fun toDTO() = innslag.mapValues { (_, vilkårsgrunnlag) -> vilkårsgrunnlag.toDTO() }
+    internal fun finn(skjæringstidspunkt: LocalDate) = innslag[skjæringstidspunkt]?.toDTO()
 }
 
 internal class ISykepengegrunnlag(
@@ -153,9 +154,14 @@ internal class IVilkårsgrunnlagHistorikk {
         return pekesPåAvEnBeregnetPeriode.toMap()
     }
 
-    fun leggIBøtta(vilkårsgrunnlag: IVilkårsgrunnlag?) {
+    internal fun leggIBøtta(vilkårsgrunnlag: IVilkårsgrunnlag?) {
         if (vilkårsgrunnlag == null) return
         pekesPåAvEnBeregnetPeriode[vilkårsgrunnlag.id] = vilkårsgrunnlag.toDTO()
+    }
+
+    internal fun finn(vilkårsgrunnlagHistorikkInnslagId: UUID?, vilkårsgrunnlagId: UUID?, skjæringstidspunkt: LocalDate,): Vilkårsgrunnlag? {
+        if (vilkårsgrunnlagHistorikkInnslagId == null || vilkårsgrunnlagId == null) return null
+        return historikk[vilkårsgrunnlagHistorikkInnslagId]?.finn(skjæringstidspunkt)
     }
 }
 
