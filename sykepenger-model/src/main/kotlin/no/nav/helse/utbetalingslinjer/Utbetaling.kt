@@ -136,6 +136,7 @@ internal class Utbetaling private constructor(
     internal fun erUbetalt() = tilstand == Ubetalt
     internal fun erUtbetalt() = tilstand == Utbetalt || tilstand == Annullert
     private fun erAktiv() = erAvsluttet() || erInFlight()
+    private fun erAktivEllerUbetalt() = erAktiv() || erUbetalt()
     internal fun erInFlight() = tilstand in listOf(Godkjent, Sendt, Overført, UtbetalingFeilet)
     internal fun erAvsluttet() = erUtbetalt() || tilstand == GodkjentUtenUtbetaling
     internal fun erAvvist() = tilstand == IkkeGodkjent
@@ -460,6 +461,7 @@ internal class Utbetaling private constructor(
             return byggOppdrag(sisteAktive, fødselsnummer, tidslinje, sisteDato, aktivitetslogg, forrige, Sykepenger)
         }
         internal fun List<Utbetaling>.aktive() = grupperUtbetalinger(Utbetaling::erAktiv)
+        internal fun List<Utbetaling>.aktiveMedUbetalte() = grupperUtbetalinger(Utbetaling::erAktivEllerUbetalt)
         internal fun List<Utbetaling>.aktiveMedUtbetaling() = grupperUtbetalinger(Utbetaling::erAktiv).filterNot { it.tilstand == GodkjentUtenUtbetaling}
         private fun List<Utbetaling>.utbetalte() = grupperUtbetalinger { it.erUtbetalt() || it.erInFlight() }
 
@@ -501,7 +503,7 @@ internal class Utbetaling private constructor(
         }
 
         internal fun List<Utbetaling>.harNærliggendeUtbetaling(periode: Periode) =
-            aktive().any { it.harNærliggendeUtbetaling(periode) }
+            aktiveMedUbetalte().any { it.harNærliggendeUtbetaling(periode) }
 
         internal fun List<Utbetaling>.utbetaltTidslinje() =
             utbetalte()

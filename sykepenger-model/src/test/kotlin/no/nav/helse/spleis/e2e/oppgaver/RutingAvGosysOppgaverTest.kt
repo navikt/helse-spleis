@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.e2e.oppgaver
 
+import java.util.UUID
 import no.nav.helse.april
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
@@ -56,6 +57,21 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
 
         assertTrue(observatør.opprettOppgaveEvent().isEmpty())
         assertTrue(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().any { søknadHendelseId in it.hendelser })
+    }
+
+    @Test
+    fun `søknad som er nær perioden til godkjenning skal også til ny kø`() {
+        tilGodkjenning(1.januar, 31.januar, ORGNUMMER)
+        var søknadHendelseId: UUID?
+        (1.februar til 28.februar).let { periode ->
+            håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive, 100.prosent))
+            søknadHendelseId = håndterSøknad(Sykdom(periode.start, periode.endInclusive, 100.prosent))
+            person.søppelbøtte(hendelselogg) { it.periode() == periode }
+        }
+
+        assertTrue(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().isNotEmpty())
+        assertTrue(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().any { søknadHendelseId in it.hendelser })
+
     }
 
     @Test
