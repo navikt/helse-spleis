@@ -53,6 +53,7 @@ import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.assertActivities
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
+import no.nav.helse.spleis.e2e.assertFullRefusjonVedManglendeRefusjonsopplysninger
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertInfo
 import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
@@ -1502,6 +1503,13 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
             AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK
         )
+        håndterYtelser(2.vedtaksperiode)
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt()
+        assertFullRefusjonVedManglendeRefusjonsopplysninger(17.januar til 31.januar)
     }
 
     @Test

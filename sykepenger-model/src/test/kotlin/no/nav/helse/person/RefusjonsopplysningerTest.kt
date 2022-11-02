@@ -260,9 +260,10 @@ internal class RefusjonsopplysningerTest {
         assertFalse(refusjonsopplysninger.harNødvendigRefusjonsopplysninger(31.januar til 28.februar))
     }
 
-    private companion object {
+    internal companion object {
         private fun Refusjonsopplysninger.harNødvendigRefusjonsopplysninger(dager: List<LocalDate>) = harNødvendigRefusjonsopplysninger(dager, Aktivitetslogg(), "")
         private fun Refusjonsopplysninger.harNødvendigRefusjonsopplysninger(periode: Periode) = harNødvendigRefusjonsopplysninger(periode.toList(), Aktivitetslogg(), "")
+        internal fun Refusjonsopplysninger.harNødvendigRefusjonsopplysninger(dag: LocalDate) = harNødvendigRefusjonsopplysninger(listOf(dag), Aktivitetslogg(), "")
         private fun List<Refusjonsopplysning>.refusjonsopplysninger() = Refusjonsopplysninger(this, LocalDateTime.now())
 
         private fun Refusjonsopplysninger(refusjonsopplysninger: List<Refusjonsopplysning>, tidsstempel: LocalDateTime): Refusjonsopplysninger{

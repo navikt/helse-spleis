@@ -13,6 +13,7 @@ import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.Inntektskilde
 import no.nav.helse.person.InntektsmeldingInfo
 import no.nav.helse.person.Periodetype
+import no.nav.helse.person.Refusjonshistorikk
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
@@ -24,6 +25,9 @@ internal class ArbeidsgiverInspektør(arbeidsgiver: Arbeidsgiver): ArbeidsgiverV
     private var aktiveVedtaksperioder: List<Vedtaksperiode> = emptyList()
     private val sisteVedtaksperiodeTilstander: MutableMap<UUID, TilstandType> = mutableMapOf()
     private var sisteInntektshistorikk: Inntektshistorikk? = null
+
+    internal lateinit var refusjonshistorikk: Refusjonshistorikk
+        private set
 
     internal lateinit var sykdomshistorikk: Sykdomshistorikk
         private set
@@ -69,6 +73,10 @@ internal class ArbeidsgiverInspektør(arbeidsgiver: Arbeidsgiver): ArbeidsgiverV
 
     override fun preVisitInntekthistorikk(inntektshistorikk: Inntektshistorikk) {
         this.sisteInntektshistorikk = inntektshistorikk
+    }
+
+    override fun preVisitRefusjonshistorikk(refusjonshistorikk: Refusjonshistorikk) {
+        this.refusjonshistorikk = refusjonshistorikk
     }
 
     override fun preVisitSykdomshistorikk(sykdomshistorikk: Sykdomshistorikk) {

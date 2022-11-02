@@ -156,6 +156,13 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
         assertEquals(1.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
         val tidslinje = inspektør.sykdomstidslinje
         assertTrue((1.januar til 31.januar).all { tidslinje[it] is Dag.Sykedag || tidslinje[it] is Dag.SykHelgedag })
+        håndterYtelser(2.vedtaksperiode)
+        håndterVilkårsgrunnlag(2.vedtaksperiode)
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+        håndterUtbetalt()
+        assertFullRefusjonVedManglendeRefusjonsopplysninger(17.januar til 22.januar)
     }
 
     @Test
