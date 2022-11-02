@@ -48,6 +48,13 @@ open class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Ite
             }
 
         private fun List<Periode>.oppdaterSiste(periode: Periode) = this.dropLast(1).plusElement(periode)
+
+        internal fun Iterable<Periode>.overlapper(): Boolean {
+            sortedBy { it.start }.zipWithNext { nåværende, neste ->
+                if (nåværende.overlapperMed(neste)) return true
+            }
+            return false
+        }
     }
 
     fun overlapperMed(other: Periode) =

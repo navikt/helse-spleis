@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
+import no.nav.helse.hendelser.Periode.Companion.overlapper
 
 internal class PeriodeTest {
     private val periode = Periode(1.juli, 10.juli)
@@ -217,6 +218,19 @@ internal class PeriodeTest {
         assertEquals(28.februar til 28.februar, periode.beholdDagerEtter(27.februar))
         assertEquals(16.februar til 28.februar, periode.beholdDagerEtter(15.februar))
         assertEquals(periode, periode.beholdDagerEtter(31.januar))
+    }
+
+    @Test
+    fun `perioder som overlapper`() {
+        assertFalse(listOf<Periode>().overlapper())
+        assertFalse(listOf(1.januar til 31.januar).overlapper())
+        assertFalse(listOf(1.desember(2017) til 31.desember(2017), 1.januar til 31.januar, 1.februar til 28.februar).overlapper())
+        assertTrue(listOf(1.desember(2017) til 1.januar, 1.januar til 31.januar).overlapper())
+        assertTrue(listOf(1.januar til 31.januar, 31.januar til 28.februar).overlapper())
+        assertTrue(listOf(1.januar til LocalDate.MAX, 1.februar til LocalDate.MAX).overlapper())
+        assertFalse(listOf(1.januar til 31.januar, 1.februar til LocalDate.MAX).overlapper())
+        assertTrue(listOf(1.januar til 31.januar, 1.januar til 31.januar).overlapper())
+        assertTrue(listOf(1.januar til 31.januar, 1.januar til 1.januar).overlapper())
     }
 
     private fun assertSize(expected: Int, periode: Periode) {
