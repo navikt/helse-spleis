@@ -3,6 +3,7 @@ package no.nav.helse.person
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.helse.april
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
@@ -10,6 +11,7 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger
+import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger.Companion.gjennopprett
 import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger.RefusjonsopplysningerBuilder
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -17,6 +19,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 internal class RefusjonsopplysningerTest {
 
@@ -260,7 +263,36 @@ internal class RefusjonsopplysningerTest {
         assertFalse(refusjonsopplysninger.harNødvendigRefusjonsopplysninger(31.januar til 28.februar))
     }
 
+    @Test
+    fun `kan gjenopprette refusjonsopplysninger som ikke overlapper`() {
+        assertGjenopprettetRefusjonsopplysninger(emptyList())
+        assertGjenopprettetRefusjonsopplysninger(listOf(Refusjonsopplysning(UUID.randomUUID(), 1.januar, 31.januar, 1000.daglig)))
+        assertGjenopprettetRefusjonsopplysninger(listOf(Refusjonsopplysning(UUID.randomUUID(), 1.januar, null, 1000.daglig)))
+        assertGjenopprettetRefusjonsopplysninger(listOf(
+            Refusjonsopplysning(UUID.randomUUID(), 1.januar, 31.januar, 1000.daglig),
+            Refusjonsopplysning(UUID.randomUUID(), 1.mars, 31.mars, 2000.daglig),
+            Refusjonsopplysning(UUID.randomUUID(), 1.april, null, 3000.daglig),
+        ))
+    }
+
+    @Test
+    fun `kan ikke gjenopprette refusjonsopplysningr som overlapper`() {
+        assertThrows<IllegalStateException> { listOf(
+            Refusjonsopplysning(UUID.randomUUID(), 1.januar, 31.januar, 1000.daglig),
+            Refusjonsopplysning(UUID.randomUUID(), 1.mars, null, 2000.daglig),
+            Refusjonsopplysning(UUID.randomUUID(), 1.april, 30.april, 3000.daglig),
+        ).gjennopprett() }
+
+        assertThrows<IllegalStateException> { listOf(
+            Refusjonsopplysning(UUID.randomUUID(), 1.januar, 31.januar, 1000.daglig),
+            Refusjonsopplysning(UUID.randomUUID(), 1.januar, 28.februar, 2000.daglig)
+        ).gjennopprett() }
+    }
+
     internal companion object {
+        private fun assertGjenopprettetRefusjonsopplysninger(refusjonsopplysninger: List<Refusjonsopplysning>) {
+            assertEquals(refusjonsopplysninger, refusjonsopplysninger.gjennopprett().inspektør.refusjonsopplysninger)
+        }
         private fun Refusjonsopplysninger.harNødvendigRefusjonsopplysninger(dager: List<LocalDate>) = harNødvendigRefusjonsopplysninger(dager, Aktivitetslogg(), "")
         private fun Refusjonsopplysninger.harNødvendigRefusjonsopplysninger(periode: Periode) = harNødvendigRefusjonsopplysninger(periode.toList(), Aktivitetslogg(), "")
         internal fun Refusjonsopplysninger.harNødvendigRefusjonsopplysninger(dag: LocalDate) = harNødvendigRefusjonsopplysninger(listOf(dag), Aktivitetslogg(), "")

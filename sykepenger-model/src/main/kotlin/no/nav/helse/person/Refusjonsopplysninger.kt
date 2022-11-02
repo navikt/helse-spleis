@@ -6,6 +6,7 @@ import java.util.UUID
 import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
+import no.nav.helse.hendelser.Periode.Companion.overlapper
 import no.nav.helse.hendelser.til
 import no.nav.helse.nesteDag
 import no.nav.helse.økonomi.Inntekt
@@ -102,9 +103,11 @@ internal class Refusjonsopplysning(
         }
 
         private fun validerteRefusjonsopplysninger(refusjonsopplysninger: List<Refusjonsopplysning>): List<Refusjonsopplysning> {
-            if (refusjonsopplysninger.isEmpty()) return refusjonsopplysninger
+            if (!refusjonsopplysninger.overlapper()) return refusjonsopplysninger
             val (første, resten) = refusjonsopplysninger.first() to refusjonsopplysninger.drop(1)
-            return listOf(første).merge(resten)
+            val merged = listOf(første).merge(resten)
+            check(!merged.overlapper()) { "Refusjonsopplysninger skal ikke kunne inneholde overlappende informasjon etter merge. $merged" }
+            return merged
         }
 
         internal fun merge(nyeRefusjonsopplysninger: Refusjonsopplysninger): Refusjonsopplysninger {
@@ -131,6 +134,14 @@ internal class Refusjonsopplysning(
         }
 
         private fun dekker(dag: LocalDate) = validerteRefusjonsopplysninger.any { it.dekker(dag) }
+
+        internal companion object {
+            private fun List<Refusjonsopplysning>.overlapper() = map { it.fom til (it.tom ?: LocalDate.MAX) }.overlapper()
+            internal fun List<Refusjonsopplysning>.gjennopprett(): Refusjonsopplysninger {
+                check(!overlapper()) { "Kan ikke gjennopprette refusjonsopplysningr med overlapp. For dette formålet må RefusjonsopplysningerBuilder benyttes." }
+                return Refusjonsopplysninger(this)
+            }
+        }
 
         internal class RefusjonsopplysningerBuilder {
             private val refusjonsopplysninger = mutableListOf<Pair<LocalDateTime, Refusjonsopplysning>>()
