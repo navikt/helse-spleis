@@ -56,6 +56,7 @@ import no.nav.helse.person.Vedtaksperiode.Companion.validerYtelser
 import no.nav.helse.person.builders.UtbetalingsdagerBuilder
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
+import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.NullObserver
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.serde.reflection.Utbetalingstatus
 import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
@@ -250,9 +251,9 @@ internal class Arbeidsgiver private constructor(
             .medSkjæringstidspunkt(skjæringstidspunkt)
             .all { arbeidsgiver -> arbeidsgiver.harNødvendigInntektForVilkårsprøving(skjæringstidspunkt) }
 
-        internal fun Iterable<Arbeidsgiver>.harNødvendigRefusjonsopplysninger(skjæringstidspunkt: LocalDate, periode: Periode) = this
+        internal fun Iterable<Arbeidsgiver>.harNødvendigRefusjonsopplysninger(skjæringstidspunkt: LocalDate, periode: Periode, hendelse: IAktivitetslogg) = this
             .somTrengerRefusjonsopplysninger(skjæringstidspunkt, periode)
-            .all { arbeidsgiver -> arbeidsgiver.harNødvendigRefusjonsopplysninger(skjæringstidspunkt, periode) }
+            .all { arbeidsgiver -> arbeidsgiver.harNødvendigRefusjonsopplysninger(skjæringstidspunkt, periode, hendelse) }
 
         internal fun Iterable<Arbeidsgiver>.harNødvendigOpplysningerFraArbeidsgiver(periode: Periode) = this
             .flatMap { it.vedtaksperioder }
@@ -302,8 +303,8 @@ internal class Arbeidsgiver private constructor(
         return harNødvendigInntektITidligereBeregnetSykepengegrunnlag(skjæringstidspunkt) ?: kanBeregneSykepengegrunnlag(skjæringstidspunkt)
     }
 
-    internal fun harNødvendigRefusjonsopplysninger(skjæringstidspunkt: LocalDate, periode: Periode) : Boolean {
-        return Arbeidsgiverperiode.harNødvendigeRefusjonsopplysninger(periode, refusjonshistorikk.refusjonsopplysninger(skjæringstidspunkt), arbeidsgiverperiode(periode, SubsumsjonObserver.NullObserver))
+    internal fun harNødvendigRefusjonsopplysninger(skjæringstidspunkt: LocalDate, periode: Periode, hendelse: IAktivitetslogg) : Boolean {
+        return Arbeidsgiverperiode.harNødvendigeRefusjonsopplysninger(periode, refusjonshistorikk.refusjonsopplysninger(skjæringstidspunkt), arbeidsgiverperiode(periode, NullObserver), hendelse, organisasjonsnummer)
     }
 
     private fun harNødvendigInntektITidligereBeregnetSykepengegrunnlag(skjæringstidspunkt: LocalDate) =
@@ -984,7 +985,7 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun periodetype(periode: Periode): Periodetype {
-        return arbeidsgiverperiode(periode, SubsumsjonObserver.NullObserver)?.let { person.periodetype(organisasjonsnummer, it, periode, skjæringstidspunkt(periode)) } ?: Periodetype.FØRSTEGANGSBEHANDLING
+        return arbeidsgiverperiode(periode, NullObserver)?.let { person.periodetype(organisasjonsnummer, it, periode, skjæringstidspunkt(periode)) } ?: Periodetype.FØRSTEGANGSBEHANDLING
     }
 
     internal fun erFørstegangsbehandling(periode: Periode) = periodetype(periode) == Periodetype.FØRSTEGANGSBEHANDLING

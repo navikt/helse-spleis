@@ -11,6 +11,7 @@ import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger.Refusjonsop
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Test
 
 internal class RefusjonsopplysningerTest {
@@ -238,6 +239,14 @@ internal class RefusjonsopplysningerTest {
         val marsFørst = RefusjonsopplysningerBuilder().leggTil(mars, tidspunkt).leggTil(januar,tidspunkt).build()
         val januarFørst = RefusjonsopplysningerBuilder().leggTil(januar, tidspunkt).leggTil(mars, tidspunkt).build()
         assertEquals(marsFørst, januarFørst)
+    }
+
+    @Test
+    fun `har refusjonsopplysninger for forventet periode`() {
+        val januar = Refusjonsopplysning(UUID.randomUUID(), 2.januar, 31.januar, 2000.daglig)
+        val refusjonsopplysninger = RefusjonsopplysningerBuilder().leggTil(januar, LocalDateTime.now()).build()
+        assertFalse(refusjonsopplysninger.harNødvendigRefusjonsopplysninger(listOf(1.januar), Aktivitetslogg(), ""))
+        assertFalse(refusjonsopplysninger.harNødvendigRefusjonsopplysninger(listOf(1.februar), Aktivitetslogg(), ""))
     }
 
 
