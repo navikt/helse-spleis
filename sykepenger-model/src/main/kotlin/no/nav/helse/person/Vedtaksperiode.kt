@@ -1472,7 +1472,9 @@ internal class Vedtaksperiode private constructor(
                     "Gjenopptar ikke behandling fordi minst én overlappende periode venter på nødvendig opplysninger fra arbeidsgiver"
                 )
                 else -> {
-                    arbeidsgivere.harNødvendigRefusjonsopplysninger(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode, hendelse)
+                    if (vedtaksperiode.person.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt) !is InfotrygdVilkårsgrunnlag) {
+                        arbeidsgivere.harNødvendigRefusjonsopplysninger(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode, hendelse)
+                    }
                     vedtaksperiode.tilstand(hendelse, AvventerHistorikk)
                 }
             }
