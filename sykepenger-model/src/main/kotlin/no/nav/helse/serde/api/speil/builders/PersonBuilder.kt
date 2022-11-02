@@ -34,7 +34,7 @@ internal class PersonBuilder(
         val arbeidsgivere = arbeidsgivere.map { it.build(hendelser, alder, vilkårsgrunnlagHistorikk) }
         val vilkårsgrunnlag = arbeidsgivere.vilkårsgrunnlagSomPekesPåAvGhostPerioder() + vilkårsgrunnlagHistorikk.vilkårsgrunnlagSomPekesPåAvBeregnedePerioder()
 
-        sjekkVilkårsgrunnlag(vilkårsgrunnlag, arbeidsgivere, vilkårsgrunnlagHistorikk)
+        sjekkVilkårsgrunnlag(vilkårsgrunnlag, arbeidsgivere)
 
         return PersonDTO(
             fødselsnummer = personidentifikator.toString(),
@@ -49,13 +49,12 @@ internal class PersonBuilder(
 
     private fun sjekkVilkårsgrunnlag(
         vilkårsgrunnlag: Map<UUID, Vilkårsgrunnlag>,
-        arbeidsgivere: List<ArbeidsgiverDTO>,
-        vilkårsgrunnlagHistorikk: IVilkårsgrunnlagHistorikk
+        arbeidsgivere: List<ArbeidsgiverDTO>
     ) {
         arbeidsgivere.vilkårsgrunnlagSomPekesPåAvGhostPerioder().keys
             .forEach { ghostVilkårsgrunnlagId ->
-                if (vilkårsgrunnlag.isNotEmpty() && !vilkårsgrunnlagHistorikk.vilkårsgrunnlagSomPekesPåAvBeregnedePerioder().containsKey(ghostVilkårsgrunnlagId)) {
-                    sikkerlog.info("$aktørId har en arbeidsgiver med en ghostperiode med vilkårsgrunnlag $ghostVilkårsgrunnlagId som ingen av de beregnede periodene peker på, hvordan kan dette skje?")
+                if (!vilkårsgrunnlag.containsKey(ghostVilkårsgrunnlagId)) {
+                    sikkerlog.info("$aktørId har en arbeidsgiver med en ghostperiode med vilkårsgrunnlag $ghostVilkårsgrunnlagId som ikke ligger i vilkårsgrunnlag-lista, hvordan kan dette skje?")
                 }
             }
     }
