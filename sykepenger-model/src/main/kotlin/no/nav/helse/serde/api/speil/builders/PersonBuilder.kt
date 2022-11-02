@@ -51,14 +51,12 @@ internal class PersonBuilder(
         arbeidsgivere: List<ArbeidsgiverDTO>,
         vilkårsgrunnlagHistorikk: IVilkårsgrunnlagHistorikk
     ) {
-        if (vilkårsgrunnlag.isNotEmpty() && arbeidsgivere.vilkårsgrunnlagIderSomPekesPåAvGhostPerioder()
-                .any { ghostVilkårsgrunnlagId ->
-                    !vilkårsgrunnlagHistorikk.vilkårsgrunnlagSomPekesPåAvBeregnedePerioder()
-                        .containsKey(ghostVilkårsgrunnlagId)
+        arbeidsgivere.vilkårsgrunnlagIderSomPekesPåAvGhostPerioder()
+            .forEach { ghostVilkårsgrunnlagId ->
+                if (vilkårsgrunnlag.isNotEmpty() && !vilkårsgrunnlagHistorikk.vilkårsgrunnlagSomPekesPåAvBeregnedePerioder().containsKey(ghostVilkårsgrunnlagId)) {
+                    sikkerlog.info("$aktørId har en arbeidsgiver med en ghostperiode med vilkårsgrunnlag $ghostVilkårsgrunnlagId som ingen av de beregnede periodene peker på, hvordan kan dette skje?")
                 }
-        ) {
-            sikkerlog.warn("$aktørId har en arbeidsgiver med en ghostperiode som peker på et vilkårsgrunnlag som ingen av beregnede periodene peker på, hvordan kan dette skje?")
-        }
+            }
     }
 
     override fun visitAlder(alder: Alder, fødselsdato: LocalDate) {
