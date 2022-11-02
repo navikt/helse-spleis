@@ -1,8 +1,11 @@
 package no.nav.helse.person
 
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.februar
+import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
@@ -11,6 +14,8 @@ import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger.Refusjonsop
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class RefusjonsopplysningerTest {
@@ -240,8 +245,24 @@ internal class RefusjonsopplysningerTest {
         assertEquals(marsFørst, januarFørst)
     }
 
+    @Test
+    fun `har refusjonsopplysninger for forventede dager`() {
+        val januar = Refusjonsopplysning(UUID.randomUUID(), 2.januar, 31.januar, 2000.daglig)
+        val refusjonsopplysninger = RefusjonsopplysningerBuilder().leggTil(januar, LocalDateTime.now()).build()
+        assertFalse(refusjonsopplysninger.harNødvendigRefusjonsopplysninger(listOf(1.januar)))
+        assertTrue(refusjonsopplysninger.harNødvendigRefusjonsopplysninger(listOf(2.januar)))
+        assertTrue(refusjonsopplysninger.harNødvendigRefusjonsopplysninger(listOf(31.januar)))
+        assertFalse(refusjonsopplysninger.harNødvendigRefusjonsopplysninger(listOf(1.februar)))
+        assertTrue(refusjonsopplysninger.harNødvendigRefusjonsopplysninger(2.januar til 31.januar))
+        assertTrue(refusjonsopplysninger.harNødvendigRefusjonsopplysninger(3.januar til 30.januar))
+        assertFalse(refusjonsopplysninger.harNødvendigRefusjonsopplysninger(1.januar til 31.januar))
+        assertFalse(refusjonsopplysninger.harNødvendigRefusjonsopplysninger(2.januar til 1.februar))
+        assertFalse(refusjonsopplysninger.harNødvendigRefusjonsopplysninger(31.januar til 28.februar))
+    }
 
     private companion object {
+        private fun Refusjonsopplysninger.harNødvendigRefusjonsopplysninger(dager: List<LocalDate>) = harNødvendigRefusjonsopplysninger(dager, Aktivitetslogg(), "")
+        private fun Refusjonsopplysninger.harNødvendigRefusjonsopplysninger(periode: Periode) = harNødvendigRefusjonsopplysninger(periode.toList(), Aktivitetslogg(), "")
         private fun List<Refusjonsopplysning>.refusjonsopplysninger() = Refusjonsopplysninger(this, LocalDateTime.now())
 
         private fun Refusjonsopplysninger(refusjonsopplysninger: List<Refusjonsopplysning>, tidsstempel: LocalDateTime): Refusjonsopplysninger{

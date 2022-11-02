@@ -7,13 +7,13 @@ import no.nav.helse.erRettFør
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
+import no.nav.helse.person.IAktivitetslogg
 import no.nav.helse.person.Periodetype
 import no.nav.helse.person.Refusjonsopplysning
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.subsumsjonsformat
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import org.slf4j.LoggerFactory
 
 internal class Arbeidsgiverperiode private constructor(private val perioder: List<Periode>, førsteUtbetalingsdag: LocalDate?) : Iterable<LocalDate>, Comparable<LocalDate> {
     constructor(perioder: List<Periode>) : this(perioder, null)
@@ -116,7 +116,6 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
 
     internal companion object {
 
-        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
         internal fun fiktiv(førsteUtbetalingsdag: LocalDate) = Arbeidsgiverperiode(emptyList(), førsteUtbetalingsdag)
 
         internal fun forventerInntekt(
@@ -145,13 +144,13 @@ internal class Arbeidsgiverperiode private constructor(private val perioder: Lis
             }
         }
 
-        internal fun harNødvendigeRefusjonsopplysninger(periode: Periode, refusjonsopplysninger: Refusjonsopplysning.Refusjonsopplysninger, arbeidsgiverperiode: Arbeidsgiverperiode?): Boolean {
+        internal fun harNødvendigeRefusjonsopplysninger(periode: Periode, refusjonsopplysninger: Refusjonsopplysning.Refusjonsopplysninger, arbeidsgiverperiode: Arbeidsgiverperiode?, hendelse: IAktivitetslogg, organisasjonsnummer: String): Boolean {
             if (arbeidsgiverperiode == null) {
-                sikkerlogg.warn("Fant ikke arbeidsgiverperiode for $periode")
+                hendelse.info("Fant ikke arbeidsgiverperiode på orgnummer $organisasjonsnummer for vedtaksperiode $periode")
                 return false
             }
             val utbetalingsdager = periode.filter { dag -> arbeidsgiverperiode.utbetalingsdager.any { utbetalingsperiode -> dag in utbetalingsperiode }}
-            return refusjonsopplysninger.harNødvendigRefusjonsopplysninger(utbetalingsdager)
+            return refusjonsopplysninger.harNødvendigRefusjonsopplysninger(utbetalingsdager, hendelse, organisasjonsnummer)
         }
     }
 }

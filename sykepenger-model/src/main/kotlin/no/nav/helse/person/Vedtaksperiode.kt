@@ -40,6 +40,7 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.opplæringsp
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Companion.pleiepenger
 import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigInntektForVilkårsprøving
 import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigOpplysningerFraArbeidsgiver
+import no.nav.helse.person.Arbeidsgiver.Companion.harNødvendigRefusjonsopplysninger
 import no.nav.helse.person.Arbeidsgiver.Companion.senerePerioderPågående
 import no.nav.helse.person.Arbeidsgiver.Companion.trengerSøknadFør
 import no.nav.helse.person.Arbeidsgiver.Companion.trengerSøknadISammeMåned
@@ -1470,10 +1471,10 @@ internal class Vedtaksperiode private constructor(
                 !arbeidsgivere.harNødvendigOpplysningerFraArbeidsgiver(vedtaksperiode.periode) -> return hendelse.info(
                     "Gjenopptar ikke behandling fordi minst én overlappende periode venter på nødvendig opplysninger fra arbeidsgiver"
                 )
-             /*   !arbeidsgivere.harNødvendigRefusjonsopplysninger(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode) -> return hendelse.info(
-                    "Gjenopptar ikke behandling fordi minst én arbeidsgiver ikke har tilstrekkelig refusjon for skjæringstidspunktet"
-                )*/
-                else -> vedtaksperiode.tilstand(hendelse, AvventerHistorikk)
+                else -> {
+                    arbeidsgivere.harNødvendigRefusjonsopplysninger(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode, hendelse)
+                    vedtaksperiode.tilstand(hendelse, AvventerHistorikk)
+                }
             }
         }
 

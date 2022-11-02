@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.til
 import no.nav.helse.nesteDag
 import no.nav.helse.økonomi.Inntekt
@@ -119,10 +120,17 @@ internal class Refusjonsopplysning(
 
         override fun toString() = validerteRefusjonsopplysninger.toString()
 
-        internal fun harNødvendigRefusjonsopplysninger(dager: List<LocalDate>): Boolean {
-            dager.forEach { dag -> if (validerteRefusjonsopplysninger.none { it.dekker(dag) }) return false }
-            return true
+        internal fun harNødvendigRefusjonsopplysninger(
+            dager: List<LocalDate>,
+            hendelse: IAktivitetslogg,
+            organisasjonsnummer: String
+        ): Boolean {
+            val dekkesIkke = dager.toMutableList().filterNot(::dekker).takeUnless { it.isEmpty() } ?: return true
+            hendelse.info("Mangler refusjonsopplysninger på orgnummer $organisasjonsnummer for periodene ${dekkesIkke.grupperSammenhengendePerioder()}")
+            return false
         }
+
+        private fun dekker(dag: LocalDate) = validerteRefusjonsopplysninger.any { it.dekker(dag) }
 
         internal class RefusjonsopplysningerBuilder {
             private val refusjonsopplysninger = mutableListOf<Pair<LocalDateTime, Refusjonsopplysning>>()
