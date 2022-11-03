@@ -52,6 +52,11 @@ internal class TestArbeidsgiverAssertions(private val observat√∏r: TestObservat√
         assertEquals(0, info.count { it == forventet }, "fant uventet info. Info:\n${info.joinToString("\n")}")
     }
 
+    internal fun assertIngenInfoSomInneholder(forventet: String, vararg filtre: AktivitetsloggFilter) {
+        val info = collectInfo(*filtre)
+        assertEquals(0, info.count { it.contains(forventet) }, "fant uventet info. Info:\n${info.joinToString("\n")}")
+    }
+
     internal fun assertIngenVarsler(vararg filtre: AktivitetsloggFilter) {
         val warnings = collectVarsler(*filtre)
         assertTrue(warnings.isEmpty(), "Forventet ingen warnings. Warnings:\n${warnings.joinToString("\n")}")

@@ -176,6 +176,8 @@ internal abstract class AbstractDslTest {
         testArbeidsgiverAsserter.assertInfo(forventet, *filtre)
     protected fun TestPerson.TestArbeidsgiver.assertIngenInfo(forventet: String, vararg filtre: AktivitetsloggFilter) =
         testArbeidsgiverAsserter.assertIngenInfo(forventet, *filtre)
+    protected fun TestPerson.TestArbeidsgiver.assertIngenInfoSomInneholder(forventet: String, vararg filtre: AktivitetsloggFilter) =
+        testArbeidsgiverAsserter.assertIngenInfoSomInneholder(forventet, *filtre)
 
     protected fun nyPeriode(periode: Periode, vararg orgnummer: String, grad: Prosentdel = 100.prosent) {
         testperson.nyPeriode(periode, *orgnummer, grad = grad)
