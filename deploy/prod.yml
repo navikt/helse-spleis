@@ -80,3 +80,7 @@ spec:
     value: tbd-spleis-v1
   - name: KAFKA_RESET_POLICY
     value: none
+  - name: KAFKA_MAX_RECORDS
+    value: "100"
+  - name: KAFKA_MAX_POLL_INTERVAL_MS
+    value: "1500000" # 1,500,000 millisekunder er 25 minutter
