@@ -7,6 +7,7 @@ import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.Hendelseskontekst
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Påminnelse
+import no.nav.helse.person.PersonObserver.Inntekt.toJsonMap
 import no.nav.helse.serde.api.dto.BegrunnelseDTO
 
 interface PersonObserver {
@@ -67,10 +68,42 @@ interface PersonObserver {
         val søknadIder: Set<UUID>
     )
 
-    data class TrengerArbeidsgiveropplysningerEvent(
+    class TrengerArbeidsgiveropplysningerEvent(
         val fom: LocalDate,
-        val tom: LocalDate
-    )
+        val tom: LocalDate,
+        val vedtaksperiodeId: UUID,
+        val forespurteOpplysninger: List<ForespurtOpplysning>
+    ) {
+        fun toJsonMap(): Map<String, Any> =
+            mapOf(
+                "fom" to fom,
+                "tom" to tom,
+                "vedtaksperiodeId" to vedtaksperiodeId,
+                "forespurteOpplysninger" to forespurteOpplysninger.toJsonMap()
+
+            )
+    }
+    sealed class ForespurtOpplysning {
+        fun List<ForespurtOpplysning>.toJsonMap() = map { forespurteOpplysning ->
+            when (forespurteOpplysning) {
+                is Arbeidsgiverperiode -> mapOf(
+                    "opplysningstype" to "Arbeidsgiverperiode",
+                    "forslag" to forespurteOpplysning.forslag.map { forslag ->
+                        mapOf(
+                            "fom" to forslag.start,
+                            "tom" to forslag.endInclusive
+                        )
+                    }
+                )
+                Inntekt -> mapOf("opplysningstype" to "Inntekt")
+                Refusjon -> mapOf("opplysningstype" to "Refusjon")
+            }
+        }
+    }
+
+    object Inntekt : ForespurtOpplysning()
+    object Refusjon : ForespurtOpplysning()
+    data class Arbeidsgiverperiode(val forslag: List<Periode>) : ForespurtOpplysning()
 
     data class UtbetalingAnnullertEvent(
         val utbetalingId: UUID,

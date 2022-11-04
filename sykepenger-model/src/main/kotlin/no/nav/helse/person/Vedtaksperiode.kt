@@ -1350,11 +1350,18 @@ internal class Vedtaksperiode private constructor(
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             if(Toggle.Splarbeidsbros.enabled) {
+                val arbeidsgiverperiode = vedtaksperiode.finnArbeidsgiverperiode()?.perioder.orEmpty()
                 vedtaksperiode.person.trengerArbeidsgiveropplysninger(
                     hendelse.hendelseskontekst(),
                     PersonObserver.TrengerArbeidsgiveropplysningerEvent(
                         fom = vedtaksperiode.periode.start,
-                        tom = vedtaksperiode.periode.endInclusive
+                        tom = vedtaksperiode.periode.endInclusive,
+                        vedtaksperiodeId = vedtaksperiode.id,
+                        forespurteOpplysninger = listOf(
+                            PersonObserver.Inntekt,
+                            PersonObserver.Refusjon,
+                            PersonObserver.Arbeidsgiverperiode(arbeidsgiverperiode)
+                        )
                     )
                 )
             }
