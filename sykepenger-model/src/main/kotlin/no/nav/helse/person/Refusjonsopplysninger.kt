@@ -102,6 +102,8 @@ internal class Refusjonsopplysning(
             validerteRefusjonsopplysninger.forEach { it.accept(visitor) }
         }
 
+        internal fun isNotEmpty() = validerteRefusjonsopplysninger.isNotEmpty()
+
         private fun validerteRefusjonsopplysninger(refusjonsopplysninger: List<Refusjonsopplysning>): List<Refusjonsopplysning> {
             if (!refusjonsopplysninger.overlapper()) return refusjonsopplysninger
             val (første, resten) = refusjonsopplysninger.first() to refusjonsopplysninger.drop(1)

@@ -6,6 +6,8 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import net.logstash.logback.argument.StructuredArguments.keyValue
+import no.nav.helse.person.Refusjonshistorikk
 import no.nav.helse.person.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.refusjonsopplysninger
 import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.person.RefusjonsopplysningerVisitor
@@ -13,6 +15,7 @@ import no.nav.helse.serde.PersonData.ArbeidsgiverData.RefusjonData
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.RefusjonData.Companion.parseRefusjon
 import no.nav.helse.serde.serdeObjectMapper
 import no.nav.helse.økonomi.Inntekt
+import org.slf4j.LoggerFactory
 
 internal class V194RefusjonsopplysningerIVilkårsgrunnlag: JsonMigration(version = 194) {
 
@@ -20,6 +23,7 @@ internal class V194RefusjonsopplysningerIVilkårsgrunnlag: JsonMigration(version
         "Legger til refusjonsopplysninger i eksisterende vilkårsgrunnlag basert på det som finnes i refusjonshistorikken for arbeidsgiverne i sykepengegrunnlaget"
 
     override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
+        val aktørId = jsonNode.path("aktørId").asText()
         val vilkårsgrunnlagHistorikk = jsonNode.path("vilkårsgrunnlagHistorikk") as ArrayNode
         val gjeldendeVilkårsgrunnlagInnslag = vilkårsgrunnlagHistorikk.firstOrNull() ?: return
         val kopiAvGjeldendeVilkårsgrunnlag = gjeldendeVilkårsgrunnlagInnslag.path("vilkårsgrunnlag").takeUnless { it.isEmpty }?.deepCopy<ArrayNode>() ?: return
@@ -33,15 +37,20 @@ internal class V194RefusjonsopplysningerIVilkårsgrunnlag: JsonMigration(version
         kopiAvGjeldendeVilkårsgrunnlag.forEach { vilkårsgrunnlag ->
             vilkårsgrunnlag as ObjectNode
             val skjæringstidspunkt = LocalDate.parse(vilkårsgrunnlag.path("skjæringstidspunkt").asText())
-            val type = vilkårsgrunnlag.path("type").asText()
-            check(type == "Vilkårsprøving") { "Avklare hvordan vi skal grave frem info for Infotrygd-vilkårsgrunnlag" }
+            val vilkårsgrunnlagType = vilkårsgrunnlag.path("type").asText()
 
             vilkårsgrunnlag.path("sykepengegrunnlag")
                 .path("arbeidsgiverInntektsopplysninger")
                 .forEach { arbeidsgiverInntektsopplysning ->
                     arbeidsgiverInntektsopplysning as ObjectNode
                     val organisasjonsnummer = arbeidsgiverInntektsopplysning.path("orgnummer").asText()
-                    val refusjonsopplysninger = refusjonshistorikkPerArbeidsgiver[organisasjonsnummer]?.refusjonsopplysninger(skjæringstidspunkt) ?: Refusjonsopplysninger()
+                    val refusjonsopplysninger = finnRefusjonsopplysninger(
+                        aktørId = aktørId,
+                        organisasjonsnummer = organisasjonsnummer,
+                        refusjonshistorikk = refusjonshistorikkPerArbeidsgiver[organisasjonsnummer],
+                        skjæringstidspunkt = skjæringstidspunkt,
+                        vilkårsgrunnlagType = vilkårsgrunnlagType
+                    )
                     arbeidsgiverInntektsopplysning.putArray("refusjonsopplysninger").addAll(refusjonsopplysninger.arrayNode)
                 }
         }
@@ -55,8 +64,44 @@ internal class V194RefusjonsopplysningerIVilkårsgrunnlag: JsonMigration(version
         vilkårsgrunnlagHistorikk.insert(0, nyttInnslag)
     }
 
+    private fun finnRefusjonsopplysninger(
+        aktørId: String,
+        organisasjonsnummer: String,
+        refusjonshistorikk: Refusjonshistorikk?,
+        skjæringstidspunkt: LocalDate,
+        vilkårsgrunnlagType: String
+    ): Refusjonsopplysninger {
+        if (refusjonshistorikk == null) return Refusjonsopplysninger().also {
+            sikkerlogg.info("Fant ikke refusjonsopplysninger for vilkårsgrunnlag. Ingen refusjonshistorikk for arbeidsgiver. {}, {}, skjæringstidspunkt=$skjæringstidspunkt, vilkårsgrunnlagType=$vilkårsgrunnlagType",
+                keyValue("aktørId", aktørId), keyValue("organisasjonsnummer", organisasjonsnummer)
+            )
+        }
+        val refusjonsopplysningerPåSkjæringstidspunkt = refusjonshistorikk.refusjonsopplysninger(skjæringstidspunkt)
+        if (refusjonsopplysningerPåSkjæringstidspunkt.isNotEmpty()) return refusjonsopplysningerPåSkjæringstidspunkt.also {
+            sikkerlogg.info("Fant refusjonsopplysninger på skjæringstidspunkt for vilkårsgrunnlag. {}, {}, skjæringstidspunkt=$skjæringstidspunkt, vilkårsgrunnlagType=$vilkårsgrunnlagType",
+                keyValue("aktørId", aktørId), keyValue("organisasjonsnummer", organisasjonsnummer)
+            )
+        }
+
+        (1..16).forEach { i ->
+            val refusjonsopplysninger = refusjonshistorikk.refusjonsopplysninger(skjæringstidspunkt.minusDays(i.toLong()))
+            if (refusjonsopplysninger.isNotEmpty()) return refusjonsopplysninger.also {
+                sikkerlogg.info("Fant refusjonsopplysninger for vilkårsgrunnlag ved å gå $i dager tilbake fra skjæringstidspunktet. {}, {}, skjæringstidspunkt=$skjæringstidspunkt, vilkårsgrunnlagType=$vilkårsgrunnlagType",
+                    keyValue("aktørId", aktørId), keyValue("organisasjonsnummer", organisasjonsnummer)
+                )
+            }
+        }
+
+        return Refusjonsopplysninger().also {
+            sikkerlogg.info("Fant ikke refusjonsopplysninger for vilkårsgrunnlag. {}, {}, skjæringstidspunkt=$skjæringstidspunkt, vilkårsgrunnlagType=$vilkårsgrunnlagType",
+                keyValue("aktørId", aktørId), keyValue("organisasjonsnummer", organisasjonsnummer)
+            )
+        }
+    }
 
     private companion object {
+        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
+
         data class Arbeidsgiver(
             val refusjonshistorikk: List<RefusjonData>
         )
