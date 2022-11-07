@@ -18,6 +18,7 @@ import no.nav.helse.person.Periodetype
 import no.nav.helse.person.Person
 import no.nav.helse.person.PersonVisitor
 import no.nav.helse.person.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.refusjonsopplysninger
+import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.VedtaksperiodeVisitor
@@ -502,7 +503,10 @@ internal class TestArbeidsgiverInspektør(
 
     internal fun sykmeldingsperioder() = sykmeldingsperioder.toList()
 
-    internal fun refusjonsopplysninger(skjæringstidspunkt: LocalDate = skjæringstidspunkter.maxBy { it.key }.value()) = arbeidsgiver.inspektør.refusjonshistorikk.refusjonsopplysninger(skjæringstidspunkt)
+    internal fun refusjonsopplysningerFraVilkårsgrunnlag(skjæringstidspunkt: LocalDate = skjæringstidspunkter.maxBy { it.key }.value()) =
+        personInspektør.vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt)?.inspektør?.sykepengegrunnlag?.inspektør?.arbeidsgiverInntektsopplysningerPerArbeidsgiver?.get(orgnummer)?.inspektør?.refusjonsopplysninger ?: Refusjonsopplysninger()
+    internal fun refusjonsopplysningerFraRefusjonshistorikk(skjæringstidspunkt: LocalDate = skjæringstidspunkter.maxBy { it.key }.value()) =
+        arbeidsgiver.inspektør.refusjonshistorikk.refusjonsopplysninger(skjæringstidspunkt)
 
     internal data class UtbetalingstidslinjeberegningData(
         val id: UUID,

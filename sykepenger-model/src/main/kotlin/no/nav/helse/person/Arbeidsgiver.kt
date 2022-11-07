@@ -316,7 +316,7 @@ internal class Arbeidsgiver private constructor(
         val førsteFraværsdag = finnFørsteFraværsdag(skjæringstidspunkt)
         val inntektsopplysning = inntektshistorikk.omregnetÅrsinntekt(skjæringstidspunkt, førsteFraværsdag, arbeidsforholdhistorikk)
         return when {
-            inntektsopplysning != null -> ArbeidsgiverInntektsopplysning(organisasjonsnummer, inntektsopplysning)
+            inntektsopplysning != null -> ArbeidsgiverInntektsopplysning(organisasjonsnummer, inntektsopplysning, refusjonshistorikk.refusjonsopplysninger(skjæringstidspunkt))
             else -> null
         }
     }

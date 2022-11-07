@@ -7,6 +7,7 @@ import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.ArbeidsgiverInntektsopplysningVisitor
 import no.nav.helse.person.Inntektshistorikk
+import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.økonomi.Inntekt
 
 internal val ArbeidsgiverInntektsopplysning.inspektør get() = ArbeidsgiverInntektsopplysningInspektør(this)
@@ -15,6 +16,9 @@ internal class ArbeidsgiverInntektsopplysningInspektør(arbeidsgiverInntektsoppl
     internal lateinit var orgnummer: String
         private set
     internal lateinit var inntektsopplysning: Inntektshistorikk.Inntektsopplysning
+        private set
+
+    internal lateinit var refusjonsopplysninger: Refusjonsopplysninger
         private set
 
     init {
@@ -69,5 +73,9 @@ internal class ArbeidsgiverInntektsopplysningInspektør(arbeidsgiverInntektsoppl
 
     override fun preVisitSkatt(skattComposite: Inntektshistorikk.SkattComposite, id: UUID, dato: LocalDate) {
         this.inntektsopplysning = skattComposite
+    }
+
+    override fun preVisitRefusjonsopplysninger(refusjonsopplysninger: Refusjonsopplysninger) {
+        this.refusjonsopplysninger = refusjonsopplysninger
     }
 }

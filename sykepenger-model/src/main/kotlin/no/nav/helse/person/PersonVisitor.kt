@@ -126,7 +126,7 @@ internal interface FeriepengeutbetalingsperiodeVisitor {
     fun visitArbeidsgiverutbetalingsperiode(orgnr: String, periode: Periode, beløp: Int, utbetalt: LocalDate) {}
 }
 
-internal interface ArbeidsgiverInntektsopplysningVisitor : InntekthistorikkVisitor {
+internal interface ArbeidsgiverInntektsopplysningVisitor : InntekthistorikkVisitor, RefusjonsopplysningerVisitor {
     fun preVisitArbeidsgiverInntektsopplysning(arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning, orgnummer: String) {}
     fun postVisitArbeidsgiverInntektsopplysning(arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning, orgnummer: String) {}
 }

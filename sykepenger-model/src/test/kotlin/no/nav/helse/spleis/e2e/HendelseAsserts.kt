@@ -34,9 +34,9 @@ internal fun assertInntektForDato(forventetInntekt: Inntekt?, dato: LocalDate, f
 
 internal fun AbstractEndToEndTest.assertFullRefusjonVedManglendeRefusjonsopplysninger(periode: Periode) {
     periode.forEach { dag ->
-        assertFalse(inspektør.refusjonsopplysninger().harNødvendigRefusjonsopplysninger(dag)) { "Forventet at vi IKKE skulle finne refusjonsopplysningr for $dag" }
+        assertFalse(inspektør.refusjonsopplysningerFraRefusjonshistorikk().harNødvendigRefusjonsopplysninger(dag)) { "Forventet at vi IKKE skulle finne refusjonsopplysningr for $dag" }
     }
-    assertTrue(inspektør.refusjonsopplysninger().harNødvendigRefusjonsopplysninger(periode.endInclusive.nesteDag)) { "Forventet at vi skulle finne refusjonsopplysning for ${periode.endInclusive.nesteDag}"}
+    assertTrue(inspektør.refusjonsopplysningerFraRefusjonshistorikk().harNødvendigRefusjonsopplysninger(periode.endInclusive.nesteDag)) { "Forventet at vi skulle finne refusjonsopplysning for ${periode.endInclusive.nesteDag}"}
 
     inspektør.utbetalinger.aktiveMedUtbetaling().last { it.inspektør.periode.overlapperMed(periode) }.inspektør.let { utbetalingInspektør ->
         assertTrue(utbetalingInspektør.arbeidsgiverOppdrag.nettoBeløp() > 0) { "Forventet full refusjon, men nettobeløp på arbeidsgiveroppdrag er 0" }

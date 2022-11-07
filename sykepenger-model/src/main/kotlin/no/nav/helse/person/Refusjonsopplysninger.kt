@@ -9,9 +9,10 @@ import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Periode.Companion.overlapper
 import no.nav.helse.hendelser.til
 import no.nav.helse.nesteDag
+import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.økonomi.Inntekt
 
-internal class Refusjonsopplysning(
+class Refusjonsopplysning(
     private val meldingsreferanseId: UUID,
     private val fom: LocalDate,
     private val tom: LocalDate?,
@@ -92,7 +93,7 @@ internal class Refusjonsopplysning(
         }
     }
 
-    internal class Refusjonsopplysninger private constructor(
+    class Refusjonsopplysninger private constructor(
         refusjonsopplysninger: List<Refusjonsopplysning>
     ) {
         private val validerteRefusjonsopplysninger = validerteRefusjonsopplysninger(refusjonsopplysninger)
@@ -135,6 +136,8 @@ internal class Refusjonsopplysning(
             return false
         }
 
+        internal fun refusjonsbeløp(dag: LocalDate) = validerteRefusjonsopplysninger.single { it.dekker(dag) }.beløp
+
         private fun dekker(dag: LocalDate) = validerteRefusjonsopplysninger.any { it.dekker(dag) }
 
         internal companion object {
@@ -159,5 +162,7 @@ internal class Refusjonsopplysning(
 }
 
 interface RefusjonsopplysningerVisitor {
-    fun visitRefusjonsopplysning(meldingsreferanseId: UUID, fom: LocalDate, tom: LocalDate?, beløp: Inntekt)
+    fun preVisitRefusjonsopplysninger(refusjonsopplysninger: Refusjonsopplysninger) {}
+    fun visitRefusjonsopplysning(meldingsreferanseId: UUID, fom: LocalDate, tom: LocalDate?, beløp: Inntekt) {}
+    fun postVisitRefusjonsopplysninger(refusjonsopplysninger: Refusjonsopplysninger) {}
 }
