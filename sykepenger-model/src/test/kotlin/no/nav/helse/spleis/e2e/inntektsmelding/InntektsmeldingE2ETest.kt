@@ -5,6 +5,7 @@ import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
+import no.nav.helse.august
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
@@ -48,6 +49,7 @@ import no.nav.helse.person.Varselkode.RV_IM_4
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.person.nullstillTilstandsendringer
+import no.nav.helse.september
 import no.nav.helse.sisteBehov
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
@@ -106,6 +108,33 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(emptyList(), 17.januar, begrunnelseForReduksjonEllerIkkeUtbetalt = "BetvilerArbeidsufoerhet")
         assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
         assertSisteTilstand(2.vedtaksperiode, TIL_INFOTRYGD)
+    }
+
+
+    @Test
+    fun `to korte perioder og en lang rett etter foreldrepenger - ag sier med rette at det ikke er noen AGP`() {
+        håndterSykmelding(Sykmeldingsperiode(29.august(2022), 5.september(2022), 100.prosent))
+        håndterSykmelding(Sykmeldingsperiode(6.september(2022), 9.september(2022), 100.prosent))
+        håndterSøknad(Sykdom(29.august(2022), 5.september(2022), 100.prosent))
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+        håndterSykmelding(Sykmeldingsperiode(10.september(2022), 24.september(2022), 100.prosent))
+        håndterSøknad(Sykdom(6.september(2022), 9.september(2022), 100.prosent))
+        håndterUtbetalingshistorikk(2.vedtaksperiode)
+
+        håndterInntektsmelding(emptyList(), 29.august(2022), begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening")
+
+        assertForventetFeil("""
+            Sykmeldt etter f.eks foreldrepenger eller i ny stilling betyr at arbeidsgiver ikke er pliktiget til å betale AGP,
+             men at NAV dekker sykepenger allerede fra første sykedag
+             
+             I dag risikerer vi at bruker ikke får utbetalt penger, siden vi sender de korte periodene til AUU,
+             og det er ikke sikkert at en saksbehandler ser sakene i det hele tatt""".trimIndent(), nå = {
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+        }, ønsket = {
+            assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
+            assertSisteTilstand(2.vedtaksperiode, TIL_INFOTRYGD)
+        })
     }
 
     @Test
