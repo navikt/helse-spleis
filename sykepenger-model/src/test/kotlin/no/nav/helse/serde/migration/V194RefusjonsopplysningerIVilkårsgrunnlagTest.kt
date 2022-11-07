@@ -14,10 +14,10 @@ internal class V194RefusjonsopplysningerIVilkårsgrunnlagTest : MigrationTest(V1
     }
 
     @Test
-    fun `en arbeidsgiver, en refusjonsopplysning & ett vilkårsgrunnlag fra Spleis - men startskudd 16 dager før skjæringstidspunkt`() {
+    fun `en arbeidsgiver, en refusjonsopplysning & ett vilkårsgrunnlag fra Infotrygd - men startskudd 19 dager før skjæringstidspunkt`() {
         assertVilkårsgrunnlagMedRefusjonsopplysninger(
-            originalJson = "/migrations/194/finner-16-dager-før-skjæringstidspunkt_original.json",
-            expectedJson = "/migrations/194/finner-16-dager-før-skjæringstidspunkt_expected.json",
+            originalJson = "/migrations/194/finner-19-dager-før-skjæringstidspunkt_original.json",
+            expectedJson = "/migrations/194/finner-19-dager-før-skjæringstidspunkt_expected.json",
         )
     }
 

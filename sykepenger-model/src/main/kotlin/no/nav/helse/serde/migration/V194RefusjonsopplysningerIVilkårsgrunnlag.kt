@@ -77,13 +77,13 @@ internal class V194RefusjonsopplysningerIVilkårsgrunnlag: JsonMigration(version
             )
         }
         val refusjonsopplysningerPåSkjæringstidspunkt = refusjonshistorikk.refusjonsopplysninger(skjæringstidspunkt)
-        if (refusjonsopplysningerPåSkjæringstidspunkt.isNotEmpty()) return refusjonsopplysningerPåSkjæringstidspunkt.also {
+        if (refusjonsopplysningerPåSkjæringstidspunkt.isNotEmpty() || vilkårsgrunnlagType == SPLEIS) return refusjonsopplysningerPåSkjæringstidspunkt.also {
             sikkerlogg.info("Fant refusjonsopplysninger på skjæringstidspunkt for vilkårsgrunnlag. {}, {}, skjæringstidspunkt=$skjæringstidspunkt, vilkårsgrunnlagType=$vilkårsgrunnlagType",
                 keyValue("aktørId", aktørId), keyValue("organisasjonsnummer", organisasjonsnummer)
             )
         }
 
-        (1..16).forEach { i ->
+        (1..19).forEach { i ->
             val refusjonsopplysninger = refusjonshistorikk.refusjonsopplysninger(skjæringstidspunkt.minusDays(i.toLong()))
             if (refusjonsopplysninger.isNotEmpty()) return refusjonsopplysninger.also {
                 sikkerlogg.info("Fant refusjonsopplysninger for vilkårsgrunnlag ved å gå $i dager tilbake fra skjæringstidspunktet. {}, {}, skjæringstidspunkt=$skjæringstidspunkt, vilkårsgrunnlagType=$vilkårsgrunnlagType",
@@ -100,6 +100,7 @@ internal class V194RefusjonsopplysningerIVilkårsgrunnlag: JsonMigration(version
     }
 
     private companion object {
+        private val SPLEIS = "Vilkårsprøving"
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 
         data class Arbeidsgiver(
