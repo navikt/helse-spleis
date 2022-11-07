@@ -9,12 +9,15 @@ import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.person.Refusjonshistorikk
 import no.nav.helse.person.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.refusjonsopplysninger
+import no.nav.helse.person.Refusjonsopplysning
 import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger
+import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger.RefusjonsopplysningerBuilder
 import no.nav.helse.person.RefusjonsopplysningerVisitor
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.RefusjonData
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.RefusjonData.Companion.parseRefusjon
 import no.nav.helse.serde.serdeObjectMapper
 import no.nav.helse.økonomi.Inntekt
+import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.slf4j.LoggerFactory
 
 internal class V194RefusjonsopplysningerIVilkårsgrunnlag: JsonMigration(version = 194) {
@@ -44,12 +47,19 @@ internal class V194RefusjonsopplysningerIVilkårsgrunnlag: JsonMigration(version
                 .forEach { arbeidsgiverInntektsopplysning ->
                     arbeidsgiverInntektsopplysning as ObjectNode
                     val organisasjonsnummer = arbeidsgiverInntektsopplysning.path("orgnummer").asText()
+                    val inntekt = arbeidsgiverInntektsopplysning.path("inntektsopplysning")
                     val refusjonsopplysninger = finnRefusjonsopplysninger(
                         aktørId = aktørId,
                         organisasjonsnummer = organisasjonsnummer,
                         refusjonshistorikk = refusjonshistorikkPerArbeidsgiver[organisasjonsnummer],
                         skjæringstidspunkt = skjæringstidspunkt,
-                        vilkårsgrunnlagType = vilkårsgrunnlagType
+                        vilkårsgrunnlagType = vilkårsgrunnlagType,
+                        fallback = RefusjonsopplysningerBuilder().leggTil(Refusjonsopplysning(
+                            meldingsreferanseId = UUID.fromString(inntekt.path("hendelseId").asText()),
+                            fom = LocalDate.parse(inntekt.path("dato").asText()),
+                            tom = null,
+                            beløp = inntekt.path("beløp").asDouble().månedlig
+                        ), LocalDateTime.now()).build()
                     )
                     arbeidsgiverInntektsopplysning.putArray("refusjonsopplysninger").addAll(refusjonsopplysninger.arrayNode)
                 }
@@ -69,16 +79,23 @@ internal class V194RefusjonsopplysningerIVilkårsgrunnlag: JsonMigration(version
         organisasjonsnummer: String,
         refusjonshistorikk: Refusjonshistorikk?,
         skjæringstidspunkt: LocalDate,
-        vilkårsgrunnlagType: String
+        vilkårsgrunnlagType: String,
+        fallback: Refusjonsopplysninger
     ): Refusjonsopplysninger {
-        if (refusjonshistorikk == null) return Refusjonsopplysninger().also {
+        if (refusjonshistorikk == null) return fallback.also {
             sikkerlogg.info("Fant ikke refusjonsopplysninger for vilkårsgrunnlag. Ingen refusjonshistorikk for arbeidsgiver. {}, {}, skjæringstidspunkt=$skjæringstidspunkt, vilkårsgrunnlagType=$vilkårsgrunnlagType",
                 keyValue("aktørId", aktørId), keyValue("organisasjonsnummer", organisasjonsnummer)
             )
         }
         val refusjonsopplysningerPåSkjæringstidspunkt = refusjonshistorikk.refusjonsopplysninger(skjæringstidspunkt)
-        if (refusjonsopplysningerPåSkjæringstidspunkt.isNotEmpty() || vilkårsgrunnlagType == SPLEIS) return refusjonsopplysningerPåSkjæringstidspunkt.also {
+        if (refusjonsopplysningerPåSkjæringstidspunkt.isNotEmpty()) return refusjonsopplysningerPåSkjæringstidspunkt.also {
             sikkerlogg.info("Fant refusjonsopplysninger på skjæringstidspunkt for vilkårsgrunnlag. {}, {}, skjæringstidspunkt=$skjæringstidspunkt, vilkårsgrunnlagType=$vilkårsgrunnlagType",
+                keyValue("aktørId", aktørId), keyValue("organisasjonsnummer", organisasjonsnummer)
+            )
+        }
+
+        if (vilkårsgrunnlagType == SPLEIS) return fallback.also {
+            sikkerlogg.info("Fant ikke refusjonsopplysninger for vilkårsgrunnlag. {}, {}, skjæringstidspunkt=$skjæringstidspunkt, vilkårsgrunnlagType=$vilkårsgrunnlagType",
                 keyValue("aktørId", aktørId), keyValue("organisasjonsnummer", organisasjonsnummer)
             )
         }
@@ -92,7 +109,7 @@ internal class V194RefusjonsopplysningerIVilkårsgrunnlag: JsonMigration(version
             }
         }
 
-        return Refusjonsopplysninger().also {
+        return fallback.also {
             sikkerlogg.info("Fant ikke refusjonsopplysninger for vilkårsgrunnlag. {}, {}, skjæringstidspunkt=$skjæringstidspunkt, vilkårsgrunnlagType=$vilkårsgrunnlagType",
                 keyValue("aktørId", aktørId), keyValue("organisasjonsnummer", organisasjonsnummer)
             )

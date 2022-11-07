@@ -21,6 +21,14 @@ internal class V194RefusjonsopplysningerIVilkårsgrunnlagTest : MigrationTest(V1
         )
     }
 
+    @Test
+    fun `Defaulter til inntekt om vi ikke finner refusjonsopplysninger i refusjonshistorikken`() {
+        assertVilkårsgrunnlagMedRefusjonsopplysninger(
+            originalJson = "/migrations/194/tom-refusjonshistorikk_original.json",
+            expectedJson = "/migrations/194/tom-refusjonshistorikk_expected.json",
+        )
+    }
+
     private fun assertVilkårsgrunnlagMedRefusjonsopplysninger(originalJson: String, expectedJson: String) {
         val migrert = migrer(originalJson.readResource())
         val sisteInnslag = migrert.path("vilkårsgrunnlagHistorikk")[0]
