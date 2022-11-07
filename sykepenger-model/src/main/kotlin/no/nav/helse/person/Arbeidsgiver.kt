@@ -68,7 +68,7 @@ import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.harNærliggendeUtbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.harOverlappendeUtbetalinger
-import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.ingenOverlappende
+import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.tillaterOpprettelseAvUtbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.utbetaltTidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling.Utbetalingtype
 import no.nav.helse.utbetalingslinjer.UtbetalingObserver
@@ -411,7 +411,7 @@ internal class Arbeidsgiver private constructor(
 
     private fun nyUtbetaling(aktivitetslogg: IAktivitetslogg, utbetaling: Utbetaling) {
         utbetalinger.lastOrNull()?.forkast(aktivitetslogg)
-        check(utbetalinger.ingenOverlappende(utbetaling)) { "Har laget en overlappende utbetaling" }
+        check(utbetalinger.tillaterOpprettelseAvUtbetaling(utbetaling)) { "Har laget en overlappende utbetaling" }
         utbetalinger.add(utbetaling)
         utbetaling.registrer(this)
         utbetaling.opprett(aktivitetslogg)

@@ -478,7 +478,8 @@ internal class Utbetaling private constructor(
             }
         }
 
-        internal fun List<Utbetaling>.ingenOverlappende(other: Utbetaling): Boolean {
+        internal fun List<Utbetaling>.tillaterOpprettelseAvUtbetaling(other: Utbetaling): Boolean {
+            if (other.erAnnullering()) return true // må godta annulleringer ettersom de vil rydde opp i nettopp overlappende utbetalinger
             val overlappendeUtbetalingsperioder = overlappendeUtbetalingsperioder(other)
             if (overlappendeUtbetalingsperioder.isNotEmpty()) {
                 sikkerlogg.warn("Vi har opprettet en utbetaling med oppdragsperiode ${other.oppdragsperiode} & korrelasjonsId ${other.korrelasjonsId} som overlapper med eksisterende utbetalinger $overlappendeUtbetalingsperioder")
