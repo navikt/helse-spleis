@@ -6,6 +6,7 @@ import java.util.UUID
 import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon.Companion.cacheRefusjon
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon.Companion.endrerRefusjon
+import no.nav.helse.hendelser.Inntektsmelding.Refusjon.EndringIRefusjon.Companion.refusjonshistorikkRefusjon
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.nesteDag
@@ -17,6 +18,9 @@ import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.InntektsmeldingInfo
 import no.nav.helse.person.Personopplysninger
 import no.nav.helse.person.Refusjonshistorikk
+import no.nav.helse.person.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.refusjonsopplysninger
+import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger
+import no.nav.helse.person.Sykepengegrunnlag.NyeRefusjonsopplysninger
 import no.nav.helse.person.Varselkode.RV_IM_1
 import no.nav.helse.person.Varselkode.RV_IM_2
 import no.nav.helse.person.Varselkode.RV_IM_3
@@ -185,11 +189,20 @@ class Inntektsmelding(
         hendelseIder.add(Dokumentsporing.inntektsmelding(meldingsreferanseId()))
     }
 
+    internal fun nyeRefusjonsopplysninger(builder: NyeRefusjonsopplysninger) {
+        builder.leggTilRefusjonsopplysninger(organisasjonsnummer, refusjon.refusjonsopplysninger(meldingsreferanseId(), førsteFraværsdag, arbeidsgiverperioder))
+    }
+
     class Refusjon(
         private val beløp: Inntekt?,
         private val opphørsdato: LocalDate?,
         private val endringerIRefusjon: List<EndringIRefusjon> = emptyList()
     ) {
+
+        internal fun refusjonsopplysninger(meldingsreferanseId: UUID, førsteFraværsdag: LocalDate?, arbeidsgiverperioder: List<Periode>): Refusjonsopplysninger {
+            return endringerIRefusjon.refusjonshistorikkRefusjon(meldingsreferanseId, førsteFraværsdag, arbeidsgiverperioder, beløp, opphørsdato).refusjonsopplysninger()
+        }
+
         class EndringIRefusjon(
             private val beløp: Inntekt,
             private val endringsdato: LocalDate
@@ -201,6 +214,25 @@ class Inntektsmelding(
                 internal fun List<EndringIRefusjon>.minOf(opphørsdato: LocalDate?) =
                     (map { it.endringsdato } + opphørsdato).filterNotNull().minOrNull()
 
+                internal fun List<EndringIRefusjon>.refusjonshistorikkRefusjon(
+                    meldingsreferanseId: UUID,
+                    førsteFraværsdag: LocalDate?,
+                    arbeidsgiverperioder: List<Periode>,
+                    beløp: Inntekt?,
+                    sisteRefusjonsdag: LocalDate?
+                ) = Refusjonshistorikk.Refusjon(
+                    meldingsreferanseId = meldingsreferanseId,
+                    førsteFraværsdag = førsteFraværsdag,
+                    arbeidsgiverperioder = arbeidsgiverperioder,
+                    beløp = beløp,
+                    sisteRefusjonsdag = sisteRefusjonsdag,
+                    endringerIRefusjon = map {
+                        Refusjonshistorikk.Refusjon.EndringIRefusjon(
+                            it.beløp, it.endringsdato
+                        )
+                    }
+                )
+
                 internal fun List<EndringIRefusjon>.cacheRefusjon(
                     refusjonshistorikk: Refusjonshistorikk,
                     meldingsreferanseId: UUID,
@@ -210,17 +242,8 @@ class Inntektsmelding(
                     sisteRefusjonsdag: LocalDate?
                 ) {
                     refusjonshistorikk.leggTilRefusjon(
-                        Refusjonshistorikk.Refusjon(
-                            meldingsreferanseId = meldingsreferanseId,
-                            førsteFraværsdag = førsteFraværsdag,
-                            arbeidsgiverperioder = arbeidsgiverperioder,
-                            beløp = beløp,
-                            sisteRefusjonsdag = sisteRefusjonsdag,
-                            endringerIRefusjon = map {
-                                Refusjonshistorikk.Refusjon.EndringIRefusjon(
-                                    it.beløp, it.endringsdato
-                                )
-                            }
+                        refusjonshistorikkRefusjon(
+                            meldingsreferanseId, førsteFraværsdag, arbeidsgiverperioder, beløp, sisteRefusjonsdag
                         )
                     )
                 }

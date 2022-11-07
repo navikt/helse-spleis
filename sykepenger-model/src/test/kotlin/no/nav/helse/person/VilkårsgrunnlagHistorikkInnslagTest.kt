@@ -167,5 +167,7 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
                 hendelse: OverstyrArbeidsforhold,
                 subsumsjonObserver: SubsumsjonObserver
             ): VilkårsgrunnlagHistorikk.Grunnlagsdata? = null
+
+            override fun overstyrSykepengegrunnlag(sykepengegrunnlag: Sykepengegrunnlag) = this
         }
 }

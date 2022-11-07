@@ -56,6 +56,7 @@ import no.nav.helse.person.Arbeidsgiver.Companion.vedtaksperioder
 import no.nav.helse.person.Varselkode.RV_AG_1
 import no.nav.helse.person.Varselkode.RV_VV_10
 import no.nav.helse.person.Varselkode.RV_VV_12
+import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement
 import no.nav.helse.person.builders.VedtakFattetBuilder
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
@@ -775,6 +776,14 @@ class Person private constructor(
         nyttVilkårsgrunnlag(hendelse, grunnlag.overstyrArbeidsforhold(hendelse, subsumsjonObserver))
     }
 
+    internal fun nyeRefusjonsopplysninger(skjæringstidspunkt: LocalDate, inntektsmelding: Inntektsmelding) {
+        if (Toggle.LagreRefusjonsopplysningerIVilkårsgrunnlag.disabled) return
+        val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) ?: return
+        grunnlag.nyeRefusjonsopplysninger(inntektsmelding)?.let { oppdatertVilkårsgrunnlag ->
+            nyttVilkårsgrunnlag(inntektsmelding, oppdatertVilkårsgrunnlag)
+        }
+    }
+
     internal fun vilkårsprøvEtterNyInformasjonFraSaksbehandler(
         hendelse: OverstyrInntekt,
         skjæringstidspunkt: LocalDate,
@@ -784,10 +793,10 @@ class Person private constructor(
         nyttVilkårsgrunnlag(hendelse, grunnlag.overstyrInntekt(hendelse, subsumsjonObserver))
     }
 
-    private fun nyttVilkårsgrunnlag(hendelse: IAktivitetslogg, grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata?) {
-        if (grunnlagsdata == null) return
-        hendelse.kontekst(grunnlagsdata)
-        vilkårsgrunnlagHistorikk.lagre(grunnlagsdata)
+    private fun nyttVilkårsgrunnlag(hendelse: IAktivitetslogg, vilkårsgrunnlag: VilkårsgrunnlagElement?) {
+        if (vilkårsgrunnlag == null) return
+        hendelse.kontekst(vilkårsgrunnlag)
+        vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag)
     }
 
     private var gjenopptaBehandlingNy = false
@@ -816,7 +825,7 @@ class Person private constructor(
 
     internal fun valider(
         aktivitetslogg: IAktivitetslogg,
-        vilkårsgrunnlag: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement,
+        vilkårsgrunnlag: VilkårsgrunnlagElement,
         skjæringstidspunkt: LocalDate,
         erForlengelse: Boolean
     ): Boolean {

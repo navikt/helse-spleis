@@ -38,6 +38,12 @@ internal class ArbeidsgiverInntektsopplysning(
         return overstyring.overstyrer(this)
     }
 
+    private fun nyeRefusjonsopplysninger(orgnummer: String, refusjonsopplysninger: Refusjonsopplysninger): ArbeidsgiverInntektsopplysning {
+        if (this.orgnummer != orgnummer) return this
+        val nyInntektsopplysning = ArbeidsgiverInntektsopplysning(orgnummer = this.orgnummer, inntektsopplysning = this.inntektsopplysning, refusjonsopplysninger = refusjonsopplysninger)
+        return nyInntektsopplysning.overstyrer(this)
+    }
+
     private fun overstyrer(overstyrt: ArbeidsgiverInntektsopplysning): ArbeidsgiverInntektsopplysning {
         return ArbeidsgiverInntektsopplysning(orgnummer = this.orgnummer, inntektsopplysning = this.inntektsopplysning, refusjonsopplysninger = overstyrt.refusjonsopplysninger.merge(this.refusjonsopplysninger))
     }
@@ -83,6 +89,9 @@ internal class ArbeidsgiverInntektsopplysning(
             .map { inntekt -> inntekt.overstyr(other) }
             .also { it.subsummer(subsumsjonObserver, opptjening) }
         internal fun List<ArbeidsgiverInntektsopplysning>.erOverstyrt() = any { it.inntektsopplysning is Inntektshistorikk.Saksbehandler }
+
+        internal fun List<ArbeidsgiverInntektsopplysning>.nyeRefusjonsopplysninger(orgnummer: String, refusjonsopplysninger: Refusjonsopplysninger) = this
+            .map { inntekt -> inntekt.nyeRefusjonsopplysninger(orgnummer, refusjonsopplysninger) }
 
         internal fun List<ArbeidsgiverInntektsopplysning>.subsummer(subsumsjonObserver: SubsumsjonObserver, opptjening: Opptjening? = null) {
             subsumsjonObserver.`§ 8-30 ledd 1`(omregnetÅrsinntektPerArbeidsgiver(), omregnetÅrsinntekt())

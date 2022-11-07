@@ -116,6 +116,12 @@ internal class Refusjonshistorikk {
                     return refusjonsopplysningBuilder.build()
                 }
 
+                internal fun Refusjon.refusjonsopplysninger(): Refusjonsopplysninger {
+                    val refusjonsopplysningBuilder = RefusjonsopplysningerBuilder()
+                    leggTilRefusjoneropplysninger(refusjonsopplysningBuilder)
+                    return refusjonsopplysningBuilder.build()
+                }
+
                 private fun List<Refusjon>.leggTilRefusjonsopplysninger(refusjonsopplysningerBuilder: RefusjonsopplysningerBuilder) =
                     forEach { it.leggTilRefusjoneropplysninger(refusjonsopplysningerBuilder) }
 

@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.forrigeDag
+import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrInntekt
@@ -37,10 +38,10 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         visitor.postVisitVilkårsgrunnlagHistorikk()
     }
 
-    internal fun lagre(vararg grunnlagselement: Grunnlagsdata) {
-        if (grunnlagselement.isEmpty()) return
+    internal fun lagre(vararg vilkårsgrunnlag: VilkårsgrunnlagElement) {
+        if (vilkårsgrunnlag.isEmpty()) return
         val siste = sisteInnlag()
-        val nytt = Innslag(siste, grunnlagselement.toList())
+        val nytt = Innslag(siste, vilkårsgrunnlag.toList())
         if (nytt == siste) return
         historikk.add(0, nytt)
     }
@@ -241,6 +242,15 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             subsumsjonObserver: SubsumsjonObserver
         ): Grunnlagsdata?
 
+        abstract fun overstyrSykepengegrunnlag(
+            sykepengegrunnlag: Sykepengegrunnlag
+        ): VilkårsgrunnlagElement
+
+        internal fun nyeRefusjonsopplysninger(inntektsmelding: Inntektsmelding): VilkårsgrunnlagElement? {
+            if (!sykepengegrunnlag.erRelevant(inntektsmelding.organisasjonsnummer())) return null
+            return overstyrSykepengegrunnlag(sykepengegrunnlag.nyeRefusjonsopplysninger(inntektsmelding))
+        }
+
         protected abstract fun vilkårsgrunnlagtype(): String
         private fun medInntekt(
             organisasjonsnummer: String,
@@ -390,6 +400,20 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             return overstyr(hendelse, sykepengegrunnlag.overstyrArbeidsforhold(hendelse, subsumsjonObserver), opptjening.overstyrArbeidsforhold(hendelse, subsumsjonObserver), subsumsjonObserver)
         }
 
+        override fun overstyrSykepengegrunnlag(sykepengegrunnlag: Sykepengegrunnlag): VilkårsgrunnlagElement {
+            return Grunnlagsdata(
+                skjæringstidspunkt = this.skjæringstidspunkt,
+                sykepengegrunnlag = sykepengegrunnlag,
+                sammenligningsgrunnlag = this.sammenligningsgrunnlag,
+                avviksprosent = this.avviksprosent,
+                opptjening = this.opptjening,
+                medlemskapstatus = this.medlemskapstatus,
+                vurdertOk = this.vurdertOk,
+                meldingsreferanseId = this.meldingsreferanseId,
+                vilkårsgrunnlagId = UUID.randomUUID()
+            )
+        }
+
         override fun overstyrInntekt(hendelse: OverstyrInntekt, subsumsjonObserver: SubsumsjonObserver): Grunnlagsdata {
             return overstyr(hendelse, sykepengegrunnlag.overstyrInntekter(hendelse, subsumsjonObserver, opptjening), subsumsjonObserver = subsumsjonObserver)
         }
@@ -436,6 +460,14 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         ): Grunnlagsdata? {
             hendelse.funksjonellFeil(RV_VV_11)
             return null
+        }
+
+        override fun overstyrSykepengegrunnlag(sykepengegrunnlag: Sykepengegrunnlag): VilkårsgrunnlagElement {
+            return InfotrygdVilkårsgrunnlag(
+                skjæringstidspunkt = skjæringstidspunkt,
+                sykepengegrunnlag = sykepengegrunnlag,
+                vilkårsgrunnlagId = UUID.randomUUID()
+            )
         }
 
         override fun overstyrInntekt(

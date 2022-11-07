@@ -5,6 +5,7 @@ import java.util.UUID
 import no.nav.helse.Grunnbeløp
 import no.nav.helse.Grunnbeløp.Companion.`2G`
 import no.nav.helse.Grunnbeløp.Companion.halvG
+import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrInntekt
 import no.nav.helse.hendelser.Periode
@@ -17,10 +18,12 @@ import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.deaktiver
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.erOverstyrt
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.harInntekt
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.medInntekt
+import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.nyeRefusjonsopplysninger
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.omregnetÅrsinntekt
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.overstyrInntekter
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.subsummer
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.valider
+import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.person.Sykepengegrunnlag.Begrensning.ER_6G_BEGRENSET
 import no.nav.helse.person.Sykepengegrunnlag.Begrensning.ER_IKKE_6G_BEGRENSET
 import no.nav.helse.person.Sykepengegrunnlag.Begrensning.VURDERT_I_INFOTRYGD
@@ -170,6 +173,12 @@ internal class Sykepengegrunnlag(
         return kopierSykepengegrunnlag(builder.resultat(), deaktiverteArbeidsforhold)
     }
 
+    internal fun nyeRefusjonsopplysninger(inntektsmelding: Inntektsmelding): Sykepengegrunnlag {
+        val builder = NyeRefusjonsopplysninger()
+        inntektsmelding.nyeRefusjonsopplysninger(builder)
+        return kopierSykepengegrunnlag(builder.resultat(), deaktiverteArbeidsforhold)
+    }
+
     private fun kopierSykepengegrunnlag(
         arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
         deaktiverteArbeidsforhold: List<ArbeidsgiverInntektsopplysning>
@@ -285,5 +294,17 @@ internal class Sykepengegrunnlag(
         }
 
         internal fun resultat() = arbeidsgiverInntektsopplysninger.overstyrInntekter(opptjening, nyeInntektsopplysninger, subsumsjonObserver)
+    }
+
+    inner class NyeRefusjonsopplysninger() {
+        private lateinit var organisasjonsnummer: String
+        private lateinit var refusjonsopplysninger: Refusjonsopplysninger
+
+        internal fun leggTilRefusjonsopplysninger(organisasjonsnummer: String, refusjonsopplysninger: Refusjonsopplysninger) {
+            this.organisasjonsnummer = organisasjonsnummer
+            this.refusjonsopplysninger = refusjonsopplysninger
+        }
+
+        internal fun resultat() = arbeidsgiverInntektsopplysninger.nyeRefusjonsopplysninger(organisasjonsnummer, refusjonsopplysninger)
     }
 }
