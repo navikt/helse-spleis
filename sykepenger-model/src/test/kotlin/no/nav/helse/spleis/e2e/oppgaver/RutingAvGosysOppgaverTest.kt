@@ -3,7 +3,9 @@ package no.nav.helse.spleis.e2e.oppgaver
 import java.util.UUID
 import no.nav.helse.april
 import no.nav.helse.februar
+import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.Inntektsmelding.Refusjon
+import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Ferie
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Papirsykmelding
@@ -15,17 +17,21 @@ import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.person.TilstandType.AVSLUTTET
 import no.nav.helse.person.TilstandType.AVSLUTTET_UTEN_UTBETALING
+import no.nav.helse.person.TilstandType.REVURDERING_FEILET
 import no.nav.helse.person.TilstandType.TIL_INFOTRYGD
 import no.nav.helse.person.Varselkode.RV_IM_4
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.infotrygdhistorikk.Inntektsopplysning
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
+import no.nav.helse.spleis.e2e.assertFunksjonellFeil
+import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
 import no.nav.helse.spleis.e2e.assertIngenVarsel
 import no.nav.helse.spleis.e2e.assertSisteTilstand
 import no.nav.helse.spleis.e2e.assertVarsel
 import no.nav.helse.spleis.e2e.forkastAlle
 import no.nav.helse.spleis.e2e.håndterAnnullerUtbetaling
 import no.nav.helse.spleis.e2e.håndterInntektsmelding
+import no.nav.helse.spleis.e2e.håndterOverstyrTidslinje
 import no.nav.helse.spleis.e2e.håndterSimulering
 import no.nav.helse.spleis.e2e.håndterSykmelding
 import no.nav.helse.spleis.e2e.håndterSøknad
@@ -34,12 +40,14 @@ import no.nav.helse.spleis.e2e.håndterUtbetalingshistorikk
 import no.nav.helse.spleis.e2e.håndterUtbetalt
 import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
+import no.nav.helse.spleis.e2e.nyPeriode
 import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.spleis.e2e.tilGodkjenning
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -407,5 +415,38 @@ internal class RutingAvGosysOppgaverTest : AbstractEndToEndTest() {
         person.søppelbøtte(hendelselogg, 1.februar til 28.februar)
         assertTrue(observatør.opprettOppgaveEvent().any { søknadId in it.hendelser })
         assertFalse(observatør.opprettOppgaveForSpeilsaksbehandlereEvent().any { søknadId in it.hendelser })
+    }
+
+    @Test
+    fun `revurdering feilet medfører oppgaveopprettelse`() {
+        nyPeriode(2.januar til 17.januar)
+        håndterUtbetalingshistorikk(1.vedtaksperiode)
+
+        val inntektsmeldingId = håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterYtelser()
+        håndterVilkårsgrunnlag()
+        håndterYtelser()
+        håndterSimulering()
+        håndterUtbetalingsgodkjenning(utbetalingGodkjent = false)
+
+        assertSisteTilstand(1.vedtaksperiode, REVURDERING_FEILET)
+        assertFunksjonellFeil("Forkaster avvist revurdering ettersom vedtaksperioden ikke har tidligere utbetalte utbetalinger.", 1.vedtaksperiode.filter())
+        assertTrue(observatør.opprettOppgaveEvent().any { inntektsmeldingId in it.hendelser })
+    }
+
+    @Test
+    fun `revurdering feilet med nærliggende utbetaling`() {
+        nyttVedtak(1.januar, 20.januar)
+        nyttVedtak(1.februar, 28.februar)
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(28.februar, Dagtype.Feriedag)))
+        håndterYtelser(2.vedtaksperiode)
+        håndterSimulering(2.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(utbetalingGodkjent = false, vedtaksperiodeIdInnhenter = 2.vedtaksperiode)
+
+        assertSisteTilstand(2.vedtaksperiode, REVURDERING_FEILET)
+        assertIngenFunksjonelleFeil(2.vedtaksperiode.filter())
+
+        val event = observatør.opprettOppgaveForSpeilsaksbehandlereEvent().single()
+        assertEquals(observatør.hendelseider(2.vedtaksperiode.id(ORGNUMMER)), event.hendelser)
     }
 }

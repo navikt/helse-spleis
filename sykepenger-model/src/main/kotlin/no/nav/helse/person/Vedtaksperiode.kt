@@ -847,6 +847,25 @@ internal class Vedtaksperiode private constructor(
         return Arbeidsgiverperiode.forventerInntekt(finnArbeidsgiverperiode(), periode, sykdomstidslinje, jurist())
     }
 
+    private fun sendOppgaveEvent(hendelse: IAktivitetslogg) {
+        if (!skalOppretteOppgave()) return
+        val inntektsmeldingIds =
+            arbeidsgiver.finnSammenhengendePeriode(skjæringstidspunkt)
+                .mapNotNull { it.inntektsmeldingInfo }.ider()
+        person.sendOppgaveEvent(
+            hendelse = hendelse,
+            periode = periode(),
+            hendelseIder = hendelseIder() + inntektsmeldingIds
+        )
+    }
+
+    private fun skalOppretteOppgave() =
+        inntektsmeldingInfo != null ||
+                arbeidsgiver.finnSammenhengendePeriode(skjæringstidspunkt)
+                    .any { it.inntektsmeldingInfo != null } ||
+                sykdomstidslinje.any { it.kommerFra(Søknad::class) }
+
+
     // Gang of four State pattern
     internal sealed interface Vedtaksperiodetilstand : Aktivitetskontekst {
         val type: TilstandType
@@ -2344,6 +2363,7 @@ internal class Vedtaksperiode private constructor(
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             vedtaksperiode.person.gjenopptaBehandling(hendelse)
+            vedtaksperiode.sendOppgaveEvent(hendelse)
         }
 
         override fun gjenopptaBehandling(
@@ -2383,26 +2403,8 @@ internal class Vedtaksperiode private constructor(
 
         override fun entering(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
             hendelse.info("Sykdom for denne personen kan ikke behandles automatisk.")
-            sendOppgaveEvent(vedtaksperiode, hendelse)
+            vedtaksperiode.sendOppgaveEvent(hendelse)
         }
-
-        private fun sendOppgaveEvent(vedtaksperiode: Vedtaksperiode, hendelse: IAktivitetslogg) {
-            if (!skalOppretteOppgave(vedtaksperiode)) return
-            val inntektsmeldingIds =
-                vedtaksperiode.arbeidsgiver.finnSammenhengendePeriode(vedtaksperiode.skjæringstidspunkt)
-                    .mapNotNull { it.inntektsmeldingInfo }.ider()
-            vedtaksperiode.person.sendOppgaveEvent(
-                hendelse = hendelse,
-                periode = vedtaksperiode.periode(),
-                hendelseIder = vedtaksperiode.hendelseIder() + inntektsmeldingIds
-            )
-        }
-
-        private fun skalOppretteOppgave(vedtaksperiode: Vedtaksperiode) =
-            vedtaksperiode.inntektsmeldingInfo != null ||
-                    vedtaksperiode.arbeidsgiver.finnSammenhengendePeriode(vedtaksperiode.skjæringstidspunkt)
-                        .any { it.inntektsmeldingInfo != null } ||
-                    vedtaksperiode.sykdomstidslinje.any { it.kommerFra(Søknad::class) }
 
         override fun håndter(
             person: Person,
