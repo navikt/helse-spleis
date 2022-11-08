@@ -1,7 +1,6 @@
 package no.nav.helse.person
 
 import java.time.LocalDate
-import no.nav.helse.Toggle
 import no.nav.helse.person.Inntektshistorikk.Inntektsopplysning.Companion.valider
 import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.person.builders.VedtakFattetBuilder
@@ -16,9 +15,8 @@ import no.nav.helse.økonomi.Økonomi
 internal class ArbeidsgiverInntektsopplysning(
     private val orgnummer: String,
     private val inntektsopplysning: Inntektshistorikk.Inntektsopplysning,
-    refusjonsopplysninger: Refusjonsopplysninger
+    private val refusjonsopplysninger: Refusjonsopplysninger
 ) {
-    private val refusjonsopplysninger = if (Toggle.LagreRefusjonsopplysningerIVilkårsgrunnlag.enabled) refusjonsopplysninger else Refusjonsopplysninger()
     internal constructor(orgnummer: String, inntektsopplysning: Inntektshistorikk.Inntektsopplysning): this(orgnummer, inntektsopplysning, Refusjonsopplysninger())
     private fun omregnetÅrsinntekt(acc: Inntekt): Inntekt {
         return acc + inntektsopplysning.omregnetÅrsinntekt()
