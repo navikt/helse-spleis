@@ -304,7 +304,11 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun harNødvendigRefusjonsopplysninger(skjæringstidspunkt: LocalDate, periode: Periode, hendelse: IAktivitetslogg) : Boolean {
-        return Arbeidsgiverperiode.harNødvendigeRefusjonsopplysninger(periode, refusjonshistorikk.refusjonsopplysninger(skjæringstidspunkt), arbeidsgiverperiode(periode, NullObserver), hendelse, organisasjonsnummer)
+        val arbeidsgiverperiode = requireNotNull(arbeidsgiverperiode(periode, NullObserver)) {
+            "Fant ikke arbeidsgiverperiode for $periode og orgnummer $organisasjonsnummer"
+        }
+        return Arbeidsgiverperiode.harNødvendigeRefusjonsopplysninger(periode, refusjonshistorikk.refusjonsopplysninger(skjæringstidspunkt),
+            arbeidsgiverperiode, hendelse, organisasjonsnummer)
     }
 
     private fun harNødvendigInntektITidligereBeregnetSykepengegrunnlag(skjæringstidspunkt: LocalDate) =

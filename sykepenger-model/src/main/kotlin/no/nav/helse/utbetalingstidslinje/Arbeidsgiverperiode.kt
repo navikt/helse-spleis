@@ -144,11 +144,7 @@ internal class Arbeidsgiverperiode private constructor(internal val perioder: Li
             }
         }
 
-        internal fun harNødvendigeRefusjonsopplysninger(periode: Periode, refusjonsopplysninger: Refusjonsopplysning.Refusjonsopplysninger, arbeidsgiverperiode: Arbeidsgiverperiode?, hendelse: IAktivitetslogg, organisasjonsnummer: String): Boolean {
-            if (arbeidsgiverperiode == null) {
-                hendelse.info("Fant ikke arbeidsgiverperiode på orgnummer $organisasjonsnummer for vedtaksperiode $periode")
-                return false
-            }
+        internal fun harNødvendigeRefusjonsopplysninger(periode: Periode, refusjonsopplysninger: Refusjonsopplysning.Refusjonsopplysninger, arbeidsgiverperiode: Arbeidsgiverperiode, hendelse: IAktivitetslogg, organisasjonsnummer: String): Boolean {
             val utbetalingsdager = periode.filter { dag -> arbeidsgiverperiode.utbetalingsdager.any { utbetalingsperiode -> dag in utbetalingsperiode }}
             return refusjonsopplysninger.harNødvendigRefusjonsopplysninger(utbetalingsdager, hendelse, organisasjonsnummer)
         }
