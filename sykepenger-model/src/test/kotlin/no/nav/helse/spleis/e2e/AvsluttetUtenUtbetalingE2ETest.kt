@@ -18,9 +18,6 @@ import no.nav.helse.person.TilstandType.AVVENTER_SIMULERING
 import no.nav.helse.person.TilstandType.AVVENTER_VILKÅRSPRØVING
 import no.nav.helse.person.TilstandType.START
 import no.nav.helse.person.TilstandType.TIL_UTBETALING
-import no.nav.helse.person.Varselkode.RV_IM_1
-import no.nav.helse.person.Varselkode.RV_IM_2
-import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -137,32 +134,6 @@ internal class AvsluttetUtenUtbetalingE2ETest: AbstractEndToEndTest() {
         assertTrue(hendelseId in observatør.hendelseider(1.vedtaksperiode.id(ORGNUMMER)))
 
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
-    }
-
-    @Test
-    fun `ny inntektsmelding med første fraværsdag i en sammenhengende periode`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 10.januar, 100.prosent))
-        håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent))
-        håndterUtbetalingshistorikk(1.vedtaksperiode)
-        håndterInntektsmelding(listOf(1.januar til 16.januar), førsteFraværsdag = 23.januar)
-        håndterSykmelding(Sykmeldingsperiode(11.januar, 31.januar, 100.prosent))
-        håndterSøknad(Sykdom(11.januar, 31.januar, 100.prosent))
-        håndterUtbetalingshistorikk(2.vedtaksperiode)
-        assertVarsel(RV_IM_1, 2.vedtaksperiode.filter())
-        assertVarsel(RV_IM_2, 2.vedtaksperiode.filter())
-        assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
-        assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
-        assertEquals(1.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
-        val tidslinje = inspektør.sykdomstidslinje
-        assertTrue((1.januar til 31.januar).all { tidslinje[it] is Dag.Sykedag || tidslinje[it] is Dag.SykHelgedag })
-        håndterYtelser(2.vedtaksperiode)
-        håndterVilkårsgrunnlag(2.vedtaksperiode)
-        håndterYtelser(2.vedtaksperiode)
-        håndterSimulering(2.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-        håndterUtbetalt()
-        assertFullRefusjonVedManglendeRefusjonsopplysninger(17.januar til 22.januar)
     }
 
     @Test

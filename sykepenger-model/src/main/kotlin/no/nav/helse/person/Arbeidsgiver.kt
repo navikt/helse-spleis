@@ -304,9 +304,7 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun harNødvendigRefusjonsopplysninger(skjæringstidspunkt: LocalDate, periode: Periode, hendelse: IAktivitetslogg) : Boolean {
-        val arbeidsgiverperiode = requireNotNull(arbeidsgiverperiode(periode, NullObserver)) {
-            "Fant ikke arbeidsgiverperiode for $periode og orgnummer $organisasjonsnummer"
-        }
+        val arbeidsgiverperiode = arbeidsgiverperiode(periode, NullObserver) ?: return false
         return Arbeidsgiverperiode.harNødvendigeRefusjonsopplysninger(periode, refusjonshistorikk.refusjonsopplysninger(skjæringstidspunkt),
             arbeidsgiverperiode, hendelse, organisasjonsnummer)
     }

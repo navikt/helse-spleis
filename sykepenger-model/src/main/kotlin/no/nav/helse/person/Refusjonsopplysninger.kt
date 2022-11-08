@@ -10,6 +10,7 @@ import no.nav.helse.hendelser.Periode.Companion.overlapper
 import no.nav.helse.hendelser.til
 import no.nav.helse.nesteDag
 import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger
+import no.nav.helse.person.Varselkode.RV_RE_2
 import no.nav.helse.økonomi.Inntekt
 
 class Refusjonsopplysning(
@@ -133,6 +134,7 @@ class Refusjonsopplysning(
         ): Boolean {
             val dekkesIkke = dager.toMutableList().filterNot(::dekker).takeUnless { it.isEmpty() } ?: return true
             hendelse.info("Mangler refusjonsopplysninger på orgnummer $organisasjonsnummer for periodene ${dekkesIkke.grupperSammenhengendePerioder()}")
+            hendelse.funksjonellFeil(RV_RE_2)
             return false
         }
 

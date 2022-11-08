@@ -528,8 +528,9 @@ internal class Vedtaksperiode private constructor(
         inntektsmeldingInfo = arbeidsgiver.addInntektsmelding(skjæringstidspunkt, hendelse, jurist())
         hendelse.valider(periode, skjæringstidspunkt, finnArbeidsgiverperiode(), jurist())
         hendelse.info("Fullført behandling av inntektsmelding")
+        val nesteTilstand = nesteTilstand()
         if (hendelse.harFunksjonelleFeilEllerVerre()) return forkast(hendelse)
-        tilstand(hendelse, nesteTilstand())
+        tilstand(hendelse, nesteTilstand)
     }
 
     private fun oppdaterHistorikk(hendelse: SykdomstidslinjeHendelse) {
@@ -1397,6 +1398,9 @@ internal class Vedtaksperiode private constructor(
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, inntektsmelding: Inntektsmelding) {
             vedtaksperiode.håndterInntektsmelding(inntektsmelding) {
+                if (vedtaksperiode.person.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt) !is InfotrygdVilkårsgrunnlag){
+                    vedtaksperiode.arbeidsgiver.harNødvendigRefusjonsopplysninger(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode, inntektsmelding)
+                }
                 when {
                     !vedtaksperiode.arbeidsgiver.kanBeregneSykepengegrunnlag(vedtaksperiode.skjæringstidspunkt) -> AvsluttetUtenUtbetaling
                     else -> AvventerBlokkerendePeriode
@@ -1498,10 +1502,10 @@ internal class Vedtaksperiode private constructor(
                 !arbeidsgivere.harNødvendigOpplysningerFraArbeidsgiver(vedtaksperiode.periode) -> return hendelse.info(
                     "Gjenopptar ikke behandling fordi minst én overlappende periode venter på nødvendig opplysninger fra arbeidsgiver"
                 )
+                !arbeidsgivere.harNødvendigRefusjonsopplysninger(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode, hendelse) -> {
+                    vedtaksperiode.forkast(hendelse)
+                }
                 else -> {
-                    if (vedtaksperiode.person.vilkårsgrunnlagFor(vedtaksperiode.skjæringstidspunkt) !is InfotrygdVilkårsgrunnlag) {
-                        arbeidsgivere.harNødvendigRefusjonsopplysninger(vedtaksperiode.skjæringstidspunkt, vedtaksperiode.periode, hendelse)
-                    }
                     vedtaksperiode.tilstand(hendelse, AvventerHistorikk)
                 }
             }

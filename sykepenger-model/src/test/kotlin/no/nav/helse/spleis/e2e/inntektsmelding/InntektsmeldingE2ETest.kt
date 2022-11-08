@@ -55,7 +55,6 @@ import no.nav.helse.spleis.e2e.AbstractEndToEndTest
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter
 import no.nav.helse.spleis.e2e.assertActivities
 import no.nav.helse.spleis.e2e.assertForkastetPeriodeTilstander
-import no.nav.helse.spleis.e2e.assertFullRefusjonVedManglendeRefusjonsopplysninger
 import no.nav.helse.spleis.e2e.assertFunksjonellFeil
 import no.nav.helse.spleis.e2e.assertInfo
 import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
@@ -238,33 +237,6 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `Periode uten inntekt går ikke videre ved replay av inntektsmelding`() {
-        håndterSykmelding(Sykmeldingsperiode(1.januar, 6.januar, 100.prosent))
-        håndterSøknad(Sykdom(1.januar, 6.januar, 100.prosent))
-
-        håndterUtbetalingshistorikk(1.vedtaksperiode)
-
-        håndterSykmelding(Sykmeldingsperiode(9.januar, 19.januar, 100.prosent))
-        håndterInntektsmelding(listOf(9.januar til 19.januar, 23.januar til 27.januar))
-        håndterSøknad(Sykdom(9.januar, 19.januar, 100.prosent))
-
-        assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING)
-        assertForventetFeil(
-            forklaring = "Inntektsmelding forteller _implisitt_ at 1.jan-6.jan er arbeidsdager. Dagene henger igjen som sykedager i modellen." +
-                    "Egentlig skal 2.vedtaksperiode ikke bli stående i AvventerInntektsmeldingEllerHistorikk, men samtidig er det kanskje også feil" +
-                    "å anta at den skal i AUU siden vi baserer svaret vårt på et feilaktig grunnlag uansett...",
-            nå = {
-                assertEquals(Dag.Sykedag::class, inspektør.sykdomstidslinje[1.januar]::class)
-                assertEquals(Dag.SykHelgedag::class, inspektør.sykdomstidslinje[6.januar]::class)
-            },
-            ønsket = {
-                fail("""\_(ツ)_/¯""")
-            }
-        )
-    }
-
-    @Test
     fun `Periode uten inntekt går ikke videre ved mottatt inntektsmelding`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 6.januar, 100.prosent))
         håndterSøknad(Sykdom(1.januar, 6.januar, 100.prosent))
@@ -275,11 +247,9 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         håndterSøknad(Sykdom(9.januar, 19.januar, 100.prosent))
         håndterInntektsmelding(listOf(9.januar til 19.januar, 23.januar til 27.januar))
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING)
+        assertForkastetPeriodeTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, TIL_INFOTRYGD)
         assertForventetFeil(
-            forklaring = "Inntektsmelding forteller _implisitt_ at 1.jan-6.jan er arbeidsdager. Dagene henger igjen som sykedager i modellen." +
-                    "Egentlig skal 2.vedtaksperiode ikke bli stående i AvventerInntektsmeldingEllerHistorikk, men samtidig er det kanskje også feil" +
-                    "å anta at den skal i AUU siden vi baserer svaret vårt på et feilaktig grunnlag uansett...",
+            forklaring = "Inntektsmelding forteller _implisitt_ at 1.jan-6.jan er arbeidsdager. Dagene henger igjen som sykedager i modellen",
             nå = {
                 assertEquals(Dag.Sykedag::class, inspektør.sykdomstidslinje[1.januar]::class)
                 assertEquals(Dag.SykHelgedag::class, inspektør.sykdomstidslinje[6.januar]::class)
@@ -1525,20 +1495,12 @@ internal class InntektsmeldingE2ETest : AbstractEndToEndTest() {
         assertFalse(inspektør.sykdomstidslinje[30.januar] is Dag.Arbeidsdag)
         assertFalse(inspektør.sykdomstidslinje[31.januar] is Dag.Arbeidsdag)
         assertInntektForDato(INNTEKT, 30.januar, inspektør = inspektør)
-        assertTilstander(
+        assertForkastetPeriodeTilstander(
             2.vedtaksperiode,
             START,
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
-            AVVENTER_BLOKKERENDE_PERIODE,
-            AVVENTER_HISTORIKK
+            TIL_INFOTRYGD
         )
-        håndterYtelser(2.vedtaksperiode)
-        håndterVilkårsgrunnlag(2.vedtaksperiode)
-        håndterYtelser(2.vedtaksperiode)
-        håndterSimulering(2.vedtaksperiode)
-        håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-        håndterUtbetalt()
-        assertFullRefusjonVedManglendeRefusjonsopplysninger(17.januar til 31.januar)
     }
 
     @Test
