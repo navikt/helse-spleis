@@ -242,14 +242,9 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             subsumsjonObserver: SubsumsjonObserver
         ): Grunnlagsdata?
 
-        abstract fun overstyrSykepengegrunnlag(
-            sykepengegrunnlag: Sykepengegrunnlag
-        ): VilkårsgrunnlagElement
-
-        internal fun nyeRefusjonsopplysninger(inntektsmelding: Inntektsmelding): VilkårsgrunnlagElement? {
-            if (!sykepengegrunnlag.erRelevant(inntektsmelding.organisasjonsnummer())) return null
-            return overstyrSykepengegrunnlag(sykepengegrunnlag.nyeRefusjonsopplysninger(inntektsmelding))
-        }
+        abstract fun nyeRefusjonsopplysninger(
+            inntektsmelding: Inntektsmelding
+        ): VilkårsgrunnlagElement?
 
         protected abstract fun vilkårsgrunnlagtype(): String
         private fun medInntekt(
@@ -400,16 +395,17 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             return overstyr(hendelse, sykepengegrunnlag.overstyrArbeidsforhold(hendelse, subsumsjonObserver), opptjening.overstyrArbeidsforhold(hendelse, subsumsjonObserver), subsumsjonObserver)
         }
 
-        override fun overstyrSykepengegrunnlag(sykepengegrunnlag: Sykepengegrunnlag): VilkårsgrunnlagElement {
+        override fun nyeRefusjonsopplysninger(inntektsmelding: Inntektsmelding): VilkårsgrunnlagElement? {
+            if (!sykepengegrunnlag.erRelevant(inntektsmelding.organisasjonsnummer())) return null
             return Grunnlagsdata(
-                skjæringstidspunkt = this.skjæringstidspunkt,
-                sykepengegrunnlag = sykepengegrunnlag,
-                sammenligningsgrunnlag = this.sammenligningsgrunnlag,
-                avviksprosent = this.avviksprosent,
-                opptjening = this.opptjening,
-                medlemskapstatus = this.medlemskapstatus,
-                vurdertOk = this.vurdertOk,
-                meldingsreferanseId = this.meldingsreferanseId,
+                skjæringstidspunkt = skjæringstidspunkt,
+                sykepengegrunnlag = sykepengegrunnlag.nyeRefusjonsopplysninger(inntektsmelding),
+                sammenligningsgrunnlag = sammenligningsgrunnlag,
+                avviksprosent = avviksprosent,
+                opptjening = opptjening,
+                medlemskapstatus = medlemskapstatus,
+                vurdertOk = vurdertOk,
+                meldingsreferanseId = meldingsreferanseId,
                 vilkårsgrunnlagId = UUID.randomUUID()
             )
         }
@@ -462,10 +458,11 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             return null
         }
 
-        override fun overstyrSykepengegrunnlag(sykepengegrunnlag: Sykepengegrunnlag): VilkårsgrunnlagElement {
+        override fun nyeRefusjonsopplysninger(inntektsmelding: Inntektsmelding): VilkårsgrunnlagElement? {
+            if (!sykepengegrunnlag.erRelevant(inntektsmelding.organisasjonsnummer())) return null
             return InfotrygdVilkårsgrunnlag(
                 skjæringstidspunkt = skjæringstidspunkt,
-                sykepengegrunnlag = sykepengegrunnlag,
+                sykepengegrunnlag = sykepengegrunnlag.nyeRefusjonsopplysninger(inntektsmelding),
                 vilkårsgrunnlagId = UUID.randomUUID()
             )
         }
