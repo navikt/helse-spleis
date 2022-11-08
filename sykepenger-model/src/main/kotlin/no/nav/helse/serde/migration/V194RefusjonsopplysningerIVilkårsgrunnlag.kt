@@ -7,6 +7,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import net.logstash.logback.argument.StructuredArguments.keyValue
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Refusjonshistorikk
 import no.nav.helse.person.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.refusjonsopplysninger
 import no.nav.helse.person.Refusjonsopplysning
@@ -14,7 +15,8 @@ import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger.RefusjonsopplysningerBuilder
 import no.nav.helse.person.RefusjonsopplysningerVisitor
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.RefusjonData
-import no.nav.helse.serde.PersonData.ArbeidsgiverData.RefusjonData.Companion.parseRefusjon
+import no.nav.helse.serde.migration.V194RefusjonsopplysningerIVilkårsgrunnlag.RefusjonData.Companion.parseRefusjon
+import no.nav.helse.serde.migration.V194RefusjonsopplysningerIVilkårsgrunnlag.RefusjonData.EndringIRefusjonData.Companion.parseEndringerIRefusjon
 import no.nav.helse.serde.serdeObjectMapper
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -120,10 +122,6 @@ internal class V194RefusjonsopplysningerIVilkårsgrunnlag: JsonMigration(version
         private val SPLEIS = "Vilkårsprøving"
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 
-        data class Arbeidsgiver(
-            val refusjonshistorikk: List<RefusjonData>
-        )
-
         val Refusjonsopplysninger.arrayNode get() = RefusjonsopplysningerToArrayNode(this).arrayNode
         class RefusjonsopplysningerToArrayNode(refusjonsopplysninger: Refusjonsopplysninger): RefusjonsopplysningerVisitor {
             val arrayNode = serdeObjectMapper.createArrayNode()
@@ -148,4 +146,50 @@ internal class V194RefusjonsopplysningerIVilkårsgrunnlag: JsonMigration(version
             }
         }
     }
+
+    data class RefusjonData(
+        private val meldingsreferanseId: UUID,
+        private val førsteFraværsdag: LocalDate?,
+        private val arbeidsgiverperioder: List<Periode>,
+        private val beløp: Double?,
+        private val sisteRefusjonsdag: LocalDate?,
+        private val endringerIRefusjon: List<EndringIRefusjonData>,
+        private val tidsstempel: LocalDateTime
+    ) {
+        internal companion object {
+            internal fun List<RefusjonData>.parseRefusjon() = Refusjonshistorikk().apply {
+                forEach {
+                    leggTilRefusjon(
+                        Refusjonshistorikk.Refusjon(
+                            meldingsreferanseId = it.meldingsreferanseId,
+                            førsteFraværsdag = it.førsteFraværsdag,
+                            arbeidsgiverperioder = it.arbeidsgiverperioder,
+                            beløp = it.beløp?.månedlig,
+                            sisteRefusjonsdag = it.sisteRefusjonsdag,
+                            endringerIRefusjon = it.endringerIRefusjon.parseEndringerIRefusjon(),
+                            tidsstempel = it.tidsstempel
+                        )
+                    )
+                }
+            }
+        }
+
+        data class EndringIRefusjonData(
+            private val beløp: Double,
+            private val endringsdato: LocalDate
+        ) {
+            internal companion object {
+                internal fun List<EndringIRefusjonData>.parseEndringerIRefusjon() = map {
+                    Refusjonshistorikk.Refusjon.EndringIRefusjon(
+                        beløp = it.beløp.månedlig,
+                        endringsdato = it.endringsdato
+                    )
+                }
+            }
+        }
+    }
+
+    data class Arbeidsgiver(
+        val refusjonshistorikk: List<RefusjonData>
+    )
 }
