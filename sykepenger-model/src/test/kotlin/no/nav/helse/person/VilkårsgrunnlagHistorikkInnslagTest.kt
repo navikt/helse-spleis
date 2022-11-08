@@ -3,6 +3,7 @@ package no.nav.helse.person
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.februar
+import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrInntekt
@@ -168,6 +169,6 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
                 subsumsjonObserver: SubsumsjonObserver
             ): VilkårsgrunnlagHistorikk.Grunnlagsdata? = null
 
-            override fun overstyrSykepengegrunnlag(sykepengegrunnlag: Sykepengegrunnlag) = this
+            override fun nyeRefusjonsopplysninger(inntektsmelding: Inntektsmelding): VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement? = null
         }
 }
