@@ -13,9 +13,11 @@ import no.nav.helse.januar
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.aktiver
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.deaktiver
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.medInntekt
+import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.nyeRefusjonsopplysninger
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.overstyrInntekter
 import no.nav.helse.person.Inntektshistorikk.Skatt.Inntekttype.LØNNSINNTEKT
 import no.nav.helse.person.Inntektshistorikk.Skatt.Sykepengegrunnlag
+import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger.RefusjonsopplysningerBuilder
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.NullObserver
 import no.nav.helse.testhelpers.assertNotNull
@@ -27,6 +29,7 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.Økonomi
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
@@ -51,6 +54,20 @@ internal class ArbeidsgiverInntektsopplysningTest {
         assertEquals(listOf(a1Overstyrt, a2Opplysning), original.overstyrInntekter(opptjening, new, NullObserver))
         val forMange = listOf(a1Overstyrt, a3Overstyrt)
         assertEquals(listOf(a1Overstyrt, a2Opplysning), original.overstyrInntekter(opptjening, forMange, NullObserver)) { "skal ikke kunne legge til inntekter som ikke finnes fra før" }
+    }
+
+    @Test
+    fun `To like refusjonsopplysninger?`() {
+        val inntektsmeldingId = UUID.randomUUID()
+        val refusjonsopplysningBuilder = RefusjonsopplysningerBuilder().leggTil(Refusjonsopplysning(inntektsmeldingId, 1.januar, null, 1000.månedlig), LocalDateTime.now())
+        val refusjonsopplysninger = refusjonsopplysningBuilder.build()
+        val arbeidsgiverInntektsopplysning = ArbeidsgiverInntektsopplysning(
+            orgnummer = "a1",
+            inntektsopplysning = Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 1000.månedlig),
+            refusjonsopplysninger = refusjonsopplysninger
+        )
+        assertTrue(arbeidsgiverInntektsopplysning == listOf(arbeidsgiverInntektsopplysning).nyeRefusjonsopplysninger("a1", refusjonsopplysninger).single())
+        assertTrue(arbeidsgiverInntektsopplysning === listOf(arbeidsgiverInntektsopplysning).nyeRefusjonsopplysninger("a1", refusjonsopplysninger).single())
     }
 
     @Test

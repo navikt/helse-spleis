@@ -396,10 +396,10 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         }
 
         override fun nyeRefusjonsopplysninger(inntektsmelding: Inntektsmelding): VilkårsgrunnlagElement? {
-            if (!sykepengegrunnlag.erRelevant(inntektsmelding.organisasjonsnummer())) return null
+            val sykepengegrunnlag = sykepengegrunnlag.nyeRefusjonsopplysninger(inntektsmelding) ?: return null
             return Grunnlagsdata(
                 skjæringstidspunkt = skjæringstidspunkt,
-                sykepengegrunnlag = sykepengegrunnlag.nyeRefusjonsopplysninger(inntektsmelding),
+                sykepengegrunnlag = sykepengegrunnlag,
                 sammenligningsgrunnlag = sammenligningsgrunnlag,
                 avviksprosent = avviksprosent,
                 opptjening = opptjening,
@@ -459,10 +459,10 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         }
 
         override fun nyeRefusjonsopplysninger(inntektsmelding: Inntektsmelding): VilkårsgrunnlagElement? {
-            if (!sykepengegrunnlag.erRelevant(inntektsmelding.organisasjonsnummer())) return null
+            val sykepengegrunnlag = sykepengegrunnlag.nyeRefusjonsopplysninger(inntektsmelding) ?: return null
             return InfotrygdVilkårsgrunnlag(
                 skjæringstidspunkt = skjæringstidspunkt,
-                sykepengegrunnlag = sykepengegrunnlag.nyeRefusjonsopplysninger(inntektsmelding),
+                sykepengegrunnlag = sykepengegrunnlag,
                 vilkårsgrunnlagId = UUID.randomUUID()
             )
         }

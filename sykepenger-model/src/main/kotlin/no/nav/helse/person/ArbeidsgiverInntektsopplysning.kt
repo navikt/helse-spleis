@@ -43,7 +43,9 @@ internal class ArbeidsgiverInntektsopplysning(
     private fun nyeRefusjonsopplysninger(orgnummer: String, refusjonsopplysninger: Refusjonsopplysninger): ArbeidsgiverInntektsopplysning {
         if (this.orgnummer != orgnummer) return this
         val nyInntektsopplysning = ArbeidsgiverInntektsopplysning(orgnummer = this.orgnummer, inntektsopplysning = this.inntektsopplysning, refusjonsopplysninger = refusjonsopplysninger)
-        return nyInntektsopplysning.overstyrer(this)
+        val overstyrtInntektsopplysning = nyInntektsopplysning.overstyrer(this)
+        if (overstyrtInntektsopplysning.refusjonsopplysninger == this.refusjonsopplysninger) return this
+        return overstyrtInntektsopplysning
     }
 
     private fun overstyrer(overstyrt: ArbeidsgiverInntektsopplysning): ArbeidsgiverInntektsopplysning {
@@ -59,13 +61,18 @@ internal class ArbeidsgiverInntektsopplysning(
     }
 
     override fun equals(other: Any?): Boolean {
+        if (this === other) return true
         if (other !is ArbeidsgiverInntektsopplysning) return false
-        return orgnummer == other.orgnummer && inntektsopplysning == other.inntektsopplysning
+        if (orgnummer != other.orgnummer) return false
+        if (inntektsopplysning != other.inntektsopplysning) return false
+        if (refusjonsopplysninger != other.refusjonsopplysninger) return false
+        return true
     }
 
     override fun hashCode(): Int {
         var result = orgnummer.hashCode()
         result = 31 * result + inntektsopplysning.hashCode()
+        result = 31 * result + refusjonsopplysninger.hashCode()
         return result
     }
 

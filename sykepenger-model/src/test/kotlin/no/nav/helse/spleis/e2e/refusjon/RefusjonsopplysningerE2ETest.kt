@@ -1,18 +1,24 @@
 package no.nav.helse.spleis.e2e.refusjon
 
+import no.nav.helse.EnableToggle
 import no.nav.helse.Toggle
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
+import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Sykmeldingsperiode
+import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
+import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
+@EnableToggle(Toggle.LagreRefusjonsopplysningerIVilkårsgrunnlag::class)
 internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
 
     @Test
@@ -48,7 +54,7 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
     }
 
     @Test
-    fun `lager nytt innslag i vilkårsgrunnlaghistorikken med oppdaterte refusjonsopplysninger ved ny inntektsmelding`() = Toggle.LagreRefusjonsopplysningerIVilkårsgrunnlag.enable {
+    fun `lager nytt innslag i vilkårsgrunnlaghistorikken med oppdaterte refusjonsopplysninger ved ny inntektsmelding`() {
         a1 {
             val arbeidsgiverperiode = listOf(1.januar til 16.januar)
             nyttVedtak(1.januar, 31.januar, arbeidsgiverperiode = arbeidsgiverperiode, førsteFraværsdag = 1.januar, refusjon = Inntektsmelding.Refusjon(INNTEKT, opphørsdato = null))
@@ -60,6 +66,45 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
                 refusjonsopplysninger.assertRefusjonsbeløp(1.januar til 21.januar, INNTEKT)
                 refusjonsopplysninger.assertRefusjonsbeløp(22.januar til 31.januar, INGEN)
             }
+        }
+    }
+
+    @Test
+    fun `Duplikat innhold i ny inntektsmelding`() {
+        a1 {
+            val arbeidsgiverperiode = listOf(1.januar til 16.januar)
+            nyttVedtak(1.januar, 31.januar, arbeidsgiverperiode = arbeidsgiverperiode, førsteFraværsdag = 1.januar, refusjon = Inntektsmelding.Refusjon(INNTEKT, opphørsdato = null))
+            inspektør.refusjonsopplysningerFraVilkårsgrunnlag().assertRefusjonsbeløp(1.januar til 31.januar, INNTEKT)
+            assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+            håndterInntektsmelding(arbeidsgiverperioder = arbeidsgiverperiode, førsteFraværsdag = 1.januar, refusjon = Inntektsmelding.Refusjon(beløp = INNTEKT, opphørsdato = null))
+            assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+            inspektør.refusjonsopplysningerFraVilkårsgrunnlag().assertRefusjonsbeløp(1.januar til 31.januar, INNTEKT)
+        }
+    }
+    @Test
+    fun `Duplikat inntektsmelding`() {
+        a1 {
+            val arbeidsgiverperiode = listOf(1.januar til 16.januar)
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+            val inntektsmeldingId = håndterInntektsmelding(arbeidsgiverperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+            inspektør.refusjonsopplysningerFraVilkårsgrunnlag().assertRefusjonsbeløp(1.januar til 31.januar, INNTEKT)
+            assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+
+            håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent))
+            håndterInntektsmelding(
+                id = inntektsmeldingId,
+                arbeidsgiverperioder = arbeidsgiverperiode,
+            )
+            assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+            inspektør.refusjonsopplysningerFraVilkårsgrunnlag().assertRefusjonsbeløp(1.januar til 31.januar, INNTEKT)
         }
     }
 

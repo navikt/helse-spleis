@@ -173,10 +173,12 @@ internal class Sykepengegrunnlag(
         return kopierSykepengegrunnlag(builder.resultat(), deaktiverteArbeidsforhold)
     }
 
-    internal fun nyeRefusjonsopplysninger(inntektsmelding: Inntektsmelding): Sykepengegrunnlag {
+    internal fun nyeRefusjonsopplysninger(inntektsmelding: Inntektsmelding): Sykepengegrunnlag? {
         val builder = NyeRefusjonsopplysninger()
         inntektsmelding.nyeRefusjonsopplysninger(builder)
-        return kopierSykepengegrunnlag(builder.resultat(), deaktiverteArbeidsforhold)
+        val resultat = builder.resultat()
+        if (resultat == arbeidsgiverInntektsopplysninger) return null // ingen endring
+        return kopierSykepengegrunnlag(resultat, deaktiverteArbeidsforhold)
     }
 
     private fun kopierSykepengegrunnlag(
