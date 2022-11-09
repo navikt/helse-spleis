@@ -24,6 +24,14 @@ internal class V195RefusjonsopplysningerIVilkårsgrunnlagTest : MigrationTest(V1
     @Test
     fun `Defaulter til inntekt om vi ikke finner refusjonsopplysninger i refusjonshistorikken`() {
         assertVilkårsgrunnlagMedRefusjonsopplysninger(
+            originalJson = "/migrations/195/ingen-match-i-refusjonshistorikk_original.json",
+            expectedJson = "/migrations/195/ingen-match-i-refusjonshistorikk_expected.json",
+        )
+    }
+
+    @Test
+    fun `Defaulter til ingen refusjonsopplysninger om refusjonshistorikken er tom`() {
+        assertVilkårsgrunnlagMedRefusjonsopplysninger(
             originalJson = "/migrations/195/tom-refusjonshistorikk_original.json",
             expectedJson = "/migrations/195/tom-refusjonshistorikk_expected.json",
         )

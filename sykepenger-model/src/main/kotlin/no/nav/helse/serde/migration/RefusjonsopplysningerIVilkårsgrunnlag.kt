@@ -7,11 +7,13 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import net.logstash.logback.argument.StructuredArguments
+import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Refusjonshistorikk
+import no.nav.helse.person.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.erTom
 import no.nav.helse.person.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.refusjonsopplysninger
 import no.nav.helse.person.Refusjonsopplysning
+import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.person.RefusjonsopplysningerVisitor
 import no.nav.helse.serde.migration.RefusjonData.Companion.parseRefusjon
 import no.nav.helse.serde.migration.RefusjonData.EndringIRefusjonData.Companion.parseEndringerIRefusjon
@@ -51,7 +53,7 @@ internal object RefusjonsopplysningerIVilkårsgrunnlag {
                         refusjonshistorikk = refusjonshistorikkPerArbeidsgiver[organisasjonsnummer],
                         skjæringstidspunkt = skjæringstidspunkt,
                         vilkårsgrunnlagType = vilkårsgrunnlagType,
-                        fallback = Refusjonsopplysning.Refusjonsopplysninger.RefusjonsopplysningerBuilder().leggTil(
+                        fallback = Refusjonsopplysninger.RefusjonsopplysningerBuilder().leggTil(
                             Refusjonsopplysning(
                             meldingsreferanseId = UUID.fromString(inntekt.path("hendelseId").asText()),
                             fom = LocalDate.parse(inntekt.path("dato").asText()),
@@ -70,26 +72,26 @@ internal object RefusjonsopplysningerIVilkårsgrunnlag {
         refusjonshistorikk: Refusjonshistorikk?,
         skjæringstidspunkt: LocalDate,
         vilkårsgrunnlagType: String,
-        fallback: Refusjonsopplysning.Refusjonsopplysninger
-    ): Refusjonsopplysning.Refusjonsopplysninger {
-        if (refusjonshistorikk == null) return fallback.also {
+        fallback: Refusjonsopplysninger
+    ): Refusjonsopplysninger {
+        if (refusjonshistorikk == null || refusjonshistorikk.erTom()) return Refusjonsopplysninger().also {
             sikkerlogg.info("Fant ikke refusjonsopplysninger for vilkårsgrunnlag. Ingen refusjonshistorikk for arbeidsgiver. {}, {}, skjæringstidspunkt=$skjæringstidspunkt, vilkårsgrunnlagType=$vilkårsgrunnlagType",
-                StructuredArguments.keyValue("aktørId", aktørId),
-                StructuredArguments.keyValue("organisasjonsnummer", organisasjonsnummer)
+                keyValue("aktørId", aktørId),
+                keyValue("organisasjonsnummer", organisasjonsnummer)
             )
         }
         val refusjonsopplysningerPåSkjæringstidspunkt = refusjonshistorikk.refusjonsopplysninger(skjæringstidspunkt)
         if (refusjonsopplysningerPåSkjæringstidspunkt.isNotEmpty()) return refusjonsopplysningerPåSkjæringstidspunkt.also {
             sikkerlogg.info("Fant refusjonsopplysninger på skjæringstidspunkt for vilkårsgrunnlag. {}, {}, skjæringstidspunkt=$skjæringstidspunkt, vilkårsgrunnlagType=$vilkårsgrunnlagType",
-                StructuredArguments.keyValue("aktørId", aktørId),
-                StructuredArguments.keyValue("organisasjonsnummer", organisasjonsnummer)
+                keyValue("aktørId", aktørId),
+                keyValue("organisasjonsnummer", organisasjonsnummer)
             )
         }
 
         if (vilkårsgrunnlagType == SPLEIS) return fallback.also {
             sikkerlogg.info("Fant ikke refusjonsopplysninger for vilkårsgrunnlag. {}, {}, skjæringstidspunkt=$skjæringstidspunkt, vilkårsgrunnlagType=$vilkårsgrunnlagType",
-                StructuredArguments.keyValue("aktørId", aktørId),
-                StructuredArguments.keyValue("organisasjonsnummer", organisasjonsnummer)
+                keyValue("aktørId", aktørId),
+                keyValue("organisasjonsnummer", organisasjonsnummer)
             )
         }
 
@@ -97,16 +99,16 @@ internal object RefusjonsopplysningerIVilkårsgrunnlag {
             val refusjonsopplysninger = refusjonshistorikk.refusjonsopplysninger(skjæringstidspunkt.minusDays(i.toLong()))
             if (refusjonsopplysninger.isNotEmpty()) return refusjonsopplysninger.also {
                 sikkerlogg.info("Fant refusjonsopplysninger for vilkårsgrunnlag ved å gå $i dager tilbake fra skjæringstidspunktet. {}, {}, skjæringstidspunkt=$skjæringstidspunkt, vilkårsgrunnlagType=$vilkårsgrunnlagType",
-                    StructuredArguments.keyValue("aktørId", aktørId),
-                    StructuredArguments.keyValue("organisasjonsnummer", organisasjonsnummer)
+                    keyValue("aktørId", aktørId),
+                    keyValue("organisasjonsnummer", organisasjonsnummer)
                 )
             }
         }
 
         return fallback.also {
             sikkerlogg.info("Fant ikke refusjonsopplysninger for vilkårsgrunnlag. {}, {}, skjæringstidspunkt=$skjæringstidspunkt, vilkårsgrunnlagType=$vilkårsgrunnlagType",
-                StructuredArguments.keyValue("aktørId", aktørId),
-                StructuredArguments.keyValue("organisasjonsnummer", organisasjonsnummer)
+                keyValue("aktørId", aktørId),
+                keyValue("organisasjonsnummer", organisasjonsnummer)
             )
         }
     }
@@ -114,8 +116,8 @@ internal object RefusjonsopplysningerIVilkårsgrunnlag {
     private val SPLEIS = "Vilkårsprøving"
     private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 
-    val Refusjonsopplysning.Refusjonsopplysninger.arrayNode get() = RefusjonsopplysningerToArrayNode(this).arrayNode
-    class RefusjonsopplysningerToArrayNode(refusjonsopplysninger: Refusjonsopplysning.Refusjonsopplysninger):
+    val Refusjonsopplysninger.arrayNode get() = RefusjonsopplysningerToArrayNode(this).arrayNode
+    class RefusjonsopplysningerToArrayNode(refusjonsopplysninger: Refusjonsopplysninger):
         RefusjonsopplysningerVisitor {
         val arrayNode = serdeObjectMapper.createArrayNode()
 

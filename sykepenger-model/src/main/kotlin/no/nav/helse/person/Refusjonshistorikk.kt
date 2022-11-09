@@ -116,6 +116,8 @@ internal class Refusjonshistorikk {
                     return refusjonsopplysningBuilder.build()
                 }
 
+                internal fun Refusjonshistorikk.erTom() = refusjoner.isEmpty()
+
                 internal fun Refusjon.refusjonsopplysninger(): Refusjonsopplysninger {
                     val refusjonsopplysningBuilder = RefusjonsopplysningerBuilder()
                     leggTilRefusjoneropplysninger(refusjonsopplysningBuilder)
