@@ -27,6 +27,6 @@ internal class PersonDao(private val dataSource: DataSource) {
 
     private fun <R> Collection<R>.singleOrNullOrThrow() =
         if (size < 2) this.firstOrNull()
-        else throw IllegalStateException("Listen inneholder mer enn to elementer!")
+        else throw IllegalStateException("Listen inneholder mer enn et element!")
 
 }
