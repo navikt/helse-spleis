@@ -634,7 +634,7 @@ internal class VilkårsgrunnlagHistorikkTest {
 
     private fun sammenligningsgrunnlag(inntekt: Inntekt, skjæringstidspunkt: LocalDate) = Sammenligningsgrunnlag(
         arbeidsgiverInntektsopplysninger = listOf(
-            ArbeidsgiverInntektsopplysning(
+            ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag(
                 "ORGNR1",
                 Inntektshistorikk.SkattComposite(UUID.randomUUID(), (0 until 12).map {
                     Inntektshistorikk.Skatt.RapportertInntekt(

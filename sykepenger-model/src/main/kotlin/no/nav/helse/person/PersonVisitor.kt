@@ -130,6 +130,11 @@ internal interface ArbeidsgiverInntektsopplysningVisitor : InntekthistorikkVisit
     fun preVisitArbeidsgiverInntektsopplysning(arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning, orgnummer: String) {}
     fun postVisitArbeidsgiverInntektsopplysning(arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning, orgnummer: String) {}
 }
+
+internal interface ArbeidsgiverInntektsopplysningForSammenligningsgrunnlagVisitor : InntekthistorikkVisitor {
+    fun preVisitArbeidsgiverInntektsopplysningForSammenligningsgrunnlag(arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag, orgnummer: String) {}
+    fun postVisitArbeidsgiverInntektsopplysningForSammenligningsgrunnlag(arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag, orgnummer: String) {}
+}
 internal interface SykepengegrunnlagVisitor : ArbeidsgiverInntektsopplysningVisitor {
     fun preVisitSykepengegrunnlag(
         sykepengegrunnlag1: Sykepengegrunnlag,
@@ -165,7 +170,23 @@ internal interface SykepengegrunnlagVisitor : ArbeidsgiverInntektsopplysningVisi
     ) {}
 }
 
-internal interface VilkårsgrunnlagHistorikkVisitor : SykepengegrunnlagVisitor, ArbeidsforholdVisitor {
+internal interface SammenligningsgrunnlagVisitor : ArbeidsgiverInntektsopplysningForSammenligningsgrunnlagVisitor {
+    fun preVisitSammenligningsgrunnlag(
+        sammenligningsgrunnlag1: Sammenligningsgrunnlag,
+        sammenligningsgrunnlag: Inntekt
+    ) {}
+
+    fun preVisitArbeidsgiverInntektsopplysningerForSammenligningsgrunnlag(arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag>) {}
+
+    fun postVisitArbeidsgiverInntektsopplysningerForSammenligningsgrunnlag(arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag>) {}
+
+    fun postVisitSammenligningsgrunnlag(
+        sammenligningsgrunnlag1: Sammenligningsgrunnlag,
+        sammenligningsgrunnlag: Inntekt
+    ) {}
+}
+
+internal interface VilkårsgrunnlagHistorikkVisitor : SykepengegrunnlagVisitor, SammenligningsgrunnlagVisitor, ArbeidsforholdVisitor {
     fun preVisitVilkårsgrunnlagHistorikk() {}
     fun preVisitInnslag(innslag: VilkårsgrunnlagHistorikk.Innslag, id: UUID, opprettet: LocalDateTime) {}
     fun postVisitInnslag(innslag: VilkårsgrunnlagHistorikk.Innslag, id: UUID, opprettet: LocalDateTime) {}
@@ -206,14 +227,6 @@ internal interface VilkårsgrunnlagHistorikkVisitor : SykepengegrunnlagVisitor, 
         skjæringstidspunkt: LocalDate,
         sykepengegrunnlag: Sykepengegrunnlag,
         vilkårsgrunnlagId: UUID
-    ) {}
-    fun preVisitSammenligningsgrunnlag(
-        sammenligningsgrunnlag1: Sammenligningsgrunnlag,
-        sammenligningsgrunnlag: Inntekt
-    ) {}
-    fun postVisitSammenligningsgrunnlag(
-        sammenligningsgrunnlag1: Sammenligningsgrunnlag,
-        sammenligningsgrunnlag: Inntekt
     ) {}
     fun preVisitOpptjening(opptjening: Opptjening, arbeidsforhold: List<Opptjening.ArbeidsgiverOpptjeningsgrunnlag>, opptjeningsperiode: Periode) {}
     fun postVisitOpptjening(opptjening: Opptjening, arbeidsforhold: List<Opptjening.ArbeidsgiverOpptjeningsgrunnlag>, opptjeningsperiode: Periode) {}

@@ -5,7 +5,7 @@ import java.util.UUID
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.januar
-import no.nav.helse.person.ArbeidsgiverInntektsopplysning
+import no.nav.helse.person.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag
 import no.nav.helse.person.Inntektshistorikk.Skatt
 import no.nav.helse.person.Inntektshistorikk.SkattComposite
 import no.nav.helse.person.Sammenligningsgrunnlag
@@ -122,7 +122,7 @@ internal class SubsumsjonObserverTest {
         val sammenligningsgrunnlag = Sammenligningsgrunnlag(
             sammenligningsgrunnlag = 40000.årlig,
             arbeidsgiverInntektsopplysninger = listOf(
-                ArbeidsgiverInntektsopplysning(
+                ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag(
                     AG1,
                     SkattComposite(
                         UUID.randomUUID(),
@@ -148,7 +148,7 @@ internal class SubsumsjonObserverTest {
                         )
                     )
                 ),
-                ArbeidsgiverInntektsopplysning(
+                ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag(
                     AG2,
                     SkattComposite(
                         UUID.randomUUID(),

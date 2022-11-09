@@ -153,6 +153,21 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         delegatee.postVisitSammenligningsgrunnlag(sammenligningsgrunnlag1, sammenligningsgrunnlag)
     }
 
+    override fun preVisitArbeidsgiverInntektsopplysningForSammenligningsgrunnlag(arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag, orgnummer: String) {
+        delegatee.preVisitArbeidsgiverInntektsopplysningForSammenligningsgrunnlag(arbeidsgiverInntektsopplysning, orgnummer)
+    }
+    override fun postVisitArbeidsgiverInntektsopplysningForSammenligningsgrunnlag(arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag, orgnummer: String) {
+        delegatee.postVisitArbeidsgiverInntektsopplysningForSammenligningsgrunnlag(arbeidsgiverInntektsopplysning, orgnummer)
+    }
+
+    override fun preVisitArbeidsgiverInntektsopplysningerForSammenligningsgrunnlag(arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag>) {
+        delegatee.preVisitArbeidsgiverInntektsopplysningerForSammenligningsgrunnlag(arbeidsgiverInntektsopplysninger)
+    }
+
+    override fun postVisitArbeidsgiverInntektsopplysningerForSammenligningsgrunnlag(arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag>) {
+        delegatee.postVisitArbeidsgiverInntektsopplysningerForSammenligningsgrunnlag(arbeidsgiverInntektsopplysninger)
+    }
+
     override fun preVisitOpptjening(
         opptjening: Opptjening,
         arbeidsforhold: List<Opptjening.ArbeidsgiverOpptjeningsgrunnlag>,
