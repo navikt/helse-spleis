@@ -14,6 +14,7 @@ import no.nav.helse.person.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companio
 import no.nav.helse.person.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.refusjonsopplysninger
 import no.nav.helse.person.Refusjonsopplysning
 import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger
+import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger.RefusjonsopplysningerBuilder
 import no.nav.helse.person.RefusjonsopplysningerVisitor
 import no.nav.helse.serde.migration.RefusjonData.Companion.parseRefusjon
 import no.nav.helse.serde.migration.RefusjonData.EndringIRefusjonData.Companion.parseEndringerIRefusjon
@@ -53,26 +54,31 @@ internal object RefusjonsopplysningerIVilkårsgrunnlag {
                         refusjonshistorikk = refusjonshistorikkPerArbeidsgiver[organisasjonsnummer],
                         skjæringstidspunkt = skjæringstidspunkt,
                         vilkårsgrunnlagType = vilkårsgrunnlagType,
-                        fallback = Refusjonsopplysninger.RefusjonsopplysningerBuilder().leggTil(
+                        fallback = {
                             Refusjonsopplysning(
-                            meldingsreferanseId = UUID.fromString(inntekt.path("hendelseId").asText()),
-                            fom = LocalDate.parse(inntekt.path("dato").asText()),
-                            tom = null,
-                            beløp = inntekt.path("beløp").asDouble().månedlig
-                        ), LocalDateTime.now()).build()
+                                meldingsreferanseId = UUID.fromString(inntekt.path("hendelseId").asText()),
+                                fom = LocalDate.parse(inntekt.path("dato").asText()),
+                                tom = null,
+                                beløp = inntekt.path("beløp").asDouble().månedlig
+                            ).somRefusjonsopplysninger()
+                        }
                     )
                     arbeidsgiverInntektsopplysning.putArray("refusjonsopplysninger").addAll(refusjonsopplysninger.arrayNode)
                 }
         }
         return kopiAvGjeldendeVilkårsgrunnlag
     }
+
+    private fun Refusjonsopplysning.somRefusjonsopplysninger() =
+        RefusjonsopplysningerBuilder().leggTil(this, LocalDateTime.now()).build()
+
     private fun finnRefusjonsopplysninger(
         aktørId: String,
         organisasjonsnummer: String,
         refusjonshistorikk: Refusjonshistorikk?,
         skjæringstidspunkt: LocalDate,
         vilkårsgrunnlagType: String,
-        fallback: Refusjonsopplysninger
+        fallback: () -> Refusjonsopplysninger
     ): Refusjonsopplysninger {
         if (refusjonshistorikk == null || refusjonshistorikk.erTom()) return Refusjonsopplysninger().also {
             sikkerlogg.info("Fant ikke refusjonsopplysninger for vilkårsgrunnlag. Ingen refusjonshistorikk for arbeidsgiver. {}, {}, skjæringstidspunkt=$skjæringstidspunkt, vilkårsgrunnlagType=$vilkårsgrunnlagType",
@@ -88,7 +94,7 @@ internal object RefusjonsopplysningerIVilkårsgrunnlag {
             )
         }
 
-        if (vilkårsgrunnlagType == SPLEIS) return fallback.also {
+        if (vilkårsgrunnlagType == SPLEIS) return fallback().also {
             sikkerlogg.info("Fant ikke refusjonsopplysninger for vilkårsgrunnlag. {}, {}, skjæringstidspunkt=$skjæringstidspunkt, vilkårsgrunnlagType=$vilkårsgrunnlagType",
                 keyValue("aktørId", aktørId),
                 keyValue("organisasjonsnummer", organisasjonsnummer)
@@ -105,7 +111,7 @@ internal object RefusjonsopplysningerIVilkårsgrunnlag {
             }
         }
 
-        return fallback.also {
+        return fallback().also {
             sikkerlogg.info("Fant ikke refusjonsopplysninger for vilkårsgrunnlag. {}, {}, skjæringstidspunkt=$skjæringstidspunkt, vilkårsgrunnlagType=$vilkårsgrunnlagType",
                 keyValue("aktørId", aktørId),
                 keyValue("organisasjonsnummer", organisasjonsnummer)
@@ -116,8 +122,8 @@ internal object RefusjonsopplysningerIVilkårsgrunnlag {
     private val SPLEIS = "Vilkårsprøving"
     private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 
-    val Refusjonsopplysninger.arrayNode get() = RefusjonsopplysningerToArrayNode(this).arrayNode
-    class RefusjonsopplysningerToArrayNode(refusjonsopplysninger: Refusjonsopplysninger):
+    private val Refusjonsopplysninger.arrayNode get() = RefusjonsopplysningerToArrayNode(this).arrayNode
+    private class RefusjonsopplysningerToArrayNode(refusjonsopplysninger: Refusjonsopplysninger):
         RefusjonsopplysningerVisitor {
         val arrayNode = serdeObjectMapper.createArrayNode()
 
