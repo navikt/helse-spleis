@@ -14,11 +14,19 @@ internal class V194RefusjonsopplysningerIVilkårsgrunnlagDryRun: JsonMigration(v
 
     override fun doMigration(jsonNode: ObjectNode, meldingerSupplier: MeldingerSupplier) {
         val aktørId = jsonNode.path("aktørId").asText()
-        val vilkårsgrunnlagHistorikk = jsonNode.path("vilkårsgrunnlagHistorikk") as ArrayNode
-        val gjeldendeVilkårsgrunnlagInnslag = vilkårsgrunnlagHistorikk.firstOrNull() ?: return
-        val vilkårsgrunnlagFør = gjeldendeVilkårsgrunnlagInnslag.path("vilkårsgrunnlag").takeUnless { it.isEmpty } ?: return
-        val vilkårsgrunnlagEtter = RefusjonsopplysningerIVilkårsgrunnlag.vilkårsgrunnlagMedRefusjonsopplysninger(jsonNode) ?: return
+        try {
+            val vilkårsgrunnlagHistorikk = jsonNode.path("vilkårsgrunnlagHistorikk") as ArrayNode
+            val gjeldendeVilkårsgrunnlagInnslag = vilkårsgrunnlagHistorikk.firstOrNull() ?: return
+            val vilkårsgrunnlagFør = gjeldendeVilkårsgrunnlagInnslag.path("vilkårsgrunnlag").takeUnless { it.isEmpty } ?: return
+            val vilkårsgrunnlagEtter = RefusjonsopplysningerIVilkårsgrunnlag.vilkårsgrunnlagMedRefusjonsopplysninger(jsonNode) ?: return
 
-        sikkerlogg.info("Hadde oppdatert vilkårsgrunnlag for {}:\nfra\n\t$vilkårsgrunnlagFør\ntil\n\t$vilkårsgrunnlagEtter", keyValue("aktørId", aktørId))
+            sikkerlogg.info("Hadde oppdatert vilkårsgrunnlag for {}:\nfra\n\t$vilkårsgrunnlagFør\ntil\n\t$vilkårsgrunnlagEtter", keyValue("aktørId", aktørId))
+
+            if ("${vilkårsgrunnlagFør.map { it.path("sykepengegrunnlag")}}".contains("IKKE_RAPPORTERT")){
+                sikkerlogg.info("Sykepengegrunnlag med ikke rapportert inntekt for {}", keyValue("aktørId", aktørId))
+            }
+        } catch (e: Exception) {
+            sikkerlogg.error("Feil ved migrering 194 for {}", keyValue("aktørId", aktørId), e)
+        }
     }
 }
