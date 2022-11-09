@@ -182,7 +182,7 @@ internal class Arbeidsgiver private constructor(
             this.mapNotNull { arbeidsgiver ->
                 val inntektsopplysning = arbeidsgiver.inntektshistorikk.rapportertInntekt(skjæringstidspunkt, arbeidsgiver.arbeidsforholdhistorikk)
                 when {
-                    inntektsopplysning != null -> ArbeidsgiverInntektsopplysning(arbeidsgiver.organisasjonsnummer, inntektsopplysning)
+                    inntektsopplysning != null -> ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag(arbeidsgiver.organisasjonsnummer, inntektsopplysning)
                     else -> null
                 }
             }

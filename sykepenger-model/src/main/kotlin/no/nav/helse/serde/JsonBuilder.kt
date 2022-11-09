@@ -16,6 +16,7 @@ import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsforholdhistorikk
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning
+import no.nav.helse.person.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Dokumentsporing.Companion.toMap
 import no.nav.helse.person.ForkastetVedtaksperiode
@@ -995,18 +996,63 @@ internal class JsonBuilder : AbstractBuilder() {
             popState()
         }
 
-        override fun preVisitArbeidsgiverInntektsopplysninger(arbeidsgiverInntektopplysninger: List<ArbeidsgiverInntektsopplysning>) {
-            pushState(ArbeidsgiverInntektsopplysningerState(arbeidsgiverInntektsopplysninger))
+        override fun preVisitArbeidsgiverInntektsopplysningerForSammenligningsgrunnlag(arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag>) {
+            pushState(ArbeidsgiverInntektsopplysningerForSammenligningsgrunnlagState(this.arbeidsgiverInntektsopplysninger))
         }
     }
 
-    class ArbeidsgiverInntektsopplysningerState(private val arbeidsgiverInntektsopplysninger: MutableList<Map<String, Any>>) : BuilderState() {
-
-        private var inntektsopplysninger: Map<String, Any?>? = null
+    class ArbeidsgiverInntektsopplysningerState(private val arbeidsgiverInntektsopplysninger: MutableList<Map<String, Any>>) : AbstractArbeidsgiverInntektsopplysningerState() {
 
         override fun preVisitArbeidsgiverInntektsopplysning(arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning, orgnummer: String) {
             inntektsopplysninger = null
         }
+
+        override fun postVisitArbeidsgiverInntektsopplysninger(arbeidsgiverInntektopplysninger: List<ArbeidsgiverInntektsopplysning>) {
+            popState()
+        }
+
+        override fun postVisitDeaktiverteArbeidsgiverInntektsopplysninger(arbeidsgiverInntektopplysninger: List<ArbeidsgiverInntektsopplysning>) {
+            popState()
+        }
+
+        override fun postVisitArbeidsgiverInntektsopplysning(arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning, orgnummer: String) {
+            this.arbeidsgiverInntektsopplysninger.add(
+                mapOf(
+                    "orgnummer" to orgnummer,
+                    "inntektsopplysning" to inntektsopplysninger!!
+                )
+            )
+        }
+    }
+    class ArbeidsgiverInntektsopplysningerForSammenligningsgrunnlagState(private val arbeidsgiverInntektsopplysninger: MutableList<Map<String, Any>>) : AbstractArbeidsgiverInntektsopplysningerState() {
+
+        override fun preVisitArbeidsgiverInntektsopplysningForSammenligningsgrunnlag(
+            arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag,
+            orgnummer: String
+        ) {
+            inntektsopplysninger = null
+
+        }
+
+        override fun postVisitArbeidsgiverInntektsopplysningerForSammenligningsgrunnlag(arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag>) {
+            popState()
+        }
+
+        override fun postVisitArbeidsgiverInntektsopplysningForSammenligningsgrunnlag(
+            arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag,
+            orgnummer: String
+        ) {
+            this.arbeidsgiverInntektsopplysninger.add(
+                mapOf(
+                    "orgnummer" to orgnummer,
+                    "inntektsopplysning" to inntektsopplysninger!!
+                )
+            )
+        }
+    }
+    abstract class AbstractArbeidsgiverInntektsopplysningerState : BuilderState() {
+
+        protected var inntektsopplysninger: Map<String, Any?>? = null
 
         override fun visitSaksbehandler(
             saksbehandler: Inntektshistorikk.Saksbehandler,
@@ -1089,24 +1135,6 @@ internal class JsonBuilder : AbstractBuilder() {
             )
             pushState(InntektsendringState(skatteopplysninger))
         }
-
-        override fun postVisitArbeidsgiverInntektsopplysninger(arbeidsgiverInntektopplysninger: List<ArbeidsgiverInntektsopplysning>) {
-            popState()
-        }
-
-        override fun postVisitDeaktiverteArbeidsgiverInntektsopplysninger(arbeidsgiverInntektopplysninger: List<ArbeidsgiverInntektsopplysning>) {
-            popState()
-        }
-
-        override fun postVisitArbeidsgiverInntektsopplysning(arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning, orgnummer: String) {
-            this.arbeidsgiverInntektsopplysninger.add(
-                mapOf(
-                    "orgnummer" to orgnummer,
-                    "inntektsopplysning" to inntektsopplysninger!!
-                )
-            )
-        }
-
     }
 
     private class ForkastetVedtaksperiodeState(private val vedtaksperiodeMap: MutableMap<String, Any?>) : BuilderState() {

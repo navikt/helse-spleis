@@ -7,7 +7,7 @@ import java.time.Year
 import java.time.YearMonth
 import java.util.UUID
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.person.ArbeidsgiverInntektsopplysning
+import no.nav.helse.person.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag
 import no.nav.helse.person.InntekthistorikkVisitor
 import no.nav.helse.person.Inntektshistorikk.Skatt
 import no.nav.helse.person.Inntektshistorikk.Skatt.Inntekttype.LØNNSINNTEKT
@@ -15,9 +15,9 @@ import no.nav.helse.person.Inntektshistorikk.Skatt.Inntekttype.NÆRINGSINNTEKT
 import no.nav.helse.person.Inntektshistorikk.Skatt.Inntekttype.PENSJON_ELLER_TRYGD
 import no.nav.helse.person.Inntektshistorikk.Skatt.Inntekttype.YTELSE_FRA_OFFENTLIGE
 import no.nav.helse.person.Sammenligningsgrunnlag
+import no.nav.helse.person.SammenligningsgrunnlagVisitor
 import no.nav.helse.person.SykdomstidslinjeVisitor
 import no.nav.helse.person.UtbetalingsdagVisitor
-import no.nav.helse.person.VilkårsgrunnlagHistorikkVisitor
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Tidslinjedag.Tidslinjeperiode.Companion.dager
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
@@ -639,7 +639,7 @@ interface SubsumsjonObserver {
         }
     }
 
-    private class SammenligningsgrunnlagBuilder(sammenligningsgrunnlag: Sammenligningsgrunnlag) : VilkårsgrunnlagHistorikkVisitor {
+    private class SammenligningsgrunnlagBuilder(sammenligningsgrunnlag: Sammenligningsgrunnlag) : SammenligningsgrunnlagVisitor {
         private var sammenligningsgrunnlag by Delegates.notNull<Double>()
         private val inntekter = mutableMapOf<String, List<Map<String, Any>>>()
         private lateinit var inntektliste: MutableList<Map<String, Any>>
@@ -653,8 +653,7 @@ interface SubsumsjonObserver {
         override fun preVisitSammenligningsgrunnlag(sammenligningsgrunnlag1: Sammenligningsgrunnlag, sammenligningsgrunnlag: Inntekt) {
             this.sammenligningsgrunnlag = sammenligningsgrunnlag.reflection { årlig, _, _, _ -> årlig }
         }
-
-        override fun preVisitArbeidsgiverInntektsopplysning(arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning, orgnummer: String) {
+        override fun preVisitArbeidsgiverInntektsopplysningForSammenligningsgrunnlag(arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag, orgnummer: String) {
             inntektliste = mutableListOf()
             inntekter[orgnummer] = inntektliste
         }

@@ -17,6 +17,7 @@ import no.nav.helse.person.Aktivitetslogg.Aktivitet
 import no.nav.helse.person.Arbeidsforholdhistorikk
 import no.nav.helse.person.Arbeidsgiver
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning
+import no.nav.helse.person.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag
 import no.nav.helse.person.Dokumentsporing
 import no.nav.helse.person.Dokumentsporing.Companion.tilSporing
 import no.nav.helse.person.ForkastetVedtaksperiode
@@ -53,6 +54,7 @@ import no.nav.helse.serde.PersonData.ArbeidsgiverData.RefusjonData.EndringIRefus
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.VedtaksperiodeUtbetalingData.Companion.tilModellobjekt
 import no.nav.helse.serde.PersonData.InfotrygdhistorikkElementData.Companion.tilModellObjekt
 import no.nav.helse.serde.PersonData.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData.Companion.parseArbeidsgiverInntektsopplysninger
+import no.nav.helse.serde.PersonData.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlagData.Companion.parseArbeidsgiverInntektsopplysninger
 import no.nav.helse.serde.PersonData.VilkårsgrunnlagElementData.Companion.grunnlagMap
 import no.nav.helse.serde.PersonData.VilkårsgrunnlagElementData.OpptjeningData.ArbeidsgiverOpptjeningsgrunnlagData.Companion.tilArbeidsgiverOpptjeningsgrunnlag
 import no.nav.helse.serde.PersonData.VilkårsgrunnlagInnslagData.Companion.grunnlagMap
@@ -328,7 +330,7 @@ internal data class PersonData(
 
         data class SammenligningsgrunnlagData(
             private val sammenligningsgrunnlag: Double,
-            private val arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysningData>,
+            private val arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysningForSammenligningsgrunnlagData>,
         ) {
 
             internal fun parseSammenligningsgrunnlag(): Sammenligningsgrunnlag = Sammenligningsgrunnlag(
@@ -345,6 +347,18 @@ internal data class PersonData(
                 internal fun List<ArbeidsgiverInntektsopplysningData>.parseArbeidsgiverInntektsopplysninger(): List<ArbeidsgiverInntektsopplysning> =
                     map {
                         ArbeidsgiverInntektsopplysning(it.orgnummer, it.inntektsopplysning.tilModellobjekt())
+                    }
+            }
+        }
+
+        data class ArbeidsgiverInntektsopplysningForSammenligningsgrunnlagData(
+            private val orgnummer: String,
+            private val inntektsopplysning: ArbeidsgiverData.InntektsopplysningData
+        ) {
+            companion object {
+                internal fun List<ArbeidsgiverInntektsopplysningForSammenligningsgrunnlagData>.parseArbeidsgiverInntektsopplysninger(): List<ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag> =
+                    map {
+                        ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag(it.orgnummer, it.inntektsopplysning.tilModellobjekt())
                     }
             }
         }

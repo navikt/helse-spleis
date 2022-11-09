@@ -1,18 +1,18 @@
 package no.nav.helse.person
 
-import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.sammenligningsgrunnlag
+import no.nav.helse.person.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag.Companion.sammenligningsgrunnlag
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.økonomi.Inntekt
 
 internal class Sammenligningsgrunnlag(
     internal val sammenligningsgrunnlag: Inntekt,
-    private val arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>,
+    private val arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag>,
 ) {
 
     internal fun avviksprosent(sykepengegrunnlag: Sykepengegrunnlag, subsumsjonObserver: SubsumsjonObserver) =
         sykepengegrunnlag.avviksprosent(sammenligningsgrunnlag, subsumsjonObserver)
 
-    internal constructor(arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysning>) : this(
+    internal constructor(arbeidsgiverInntektsopplysninger: List<ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag>) : this(
         arbeidsgiverInntektsopplysninger.sammenligningsgrunnlag(),
         arbeidsgiverInntektsopplysninger
     )
@@ -20,11 +20,11 @@ internal class Sammenligningsgrunnlag(
     internal fun erRelevant(organisasjonsnummer: String) =
         arbeidsgiverInntektsopplysninger.any { it.gjelder(organisasjonsnummer) }
 
-    internal fun accept(visitor: VilkårsgrunnlagHistorikkVisitor) {
+    internal fun accept(visitor: SammenligningsgrunnlagVisitor) {
         visitor.preVisitSammenligningsgrunnlag(this, sammenligningsgrunnlag)
-        visitor.preVisitArbeidsgiverInntektsopplysninger(arbeidsgiverInntektsopplysninger)
+        visitor.preVisitArbeidsgiverInntektsopplysningerForSammenligningsgrunnlag(arbeidsgiverInntektsopplysninger)
         arbeidsgiverInntektsopplysninger.forEach { it.accept(visitor) }
-        visitor.postVisitArbeidsgiverInntektsopplysninger(arbeidsgiverInntektsopplysninger)
+        visitor.postVisitArbeidsgiverInntektsopplysningerForSammenligningsgrunnlag(arbeidsgiverInntektsopplysninger)
         visitor.postVisitSammenligningsgrunnlag(this, sammenligningsgrunnlag)
     }
 

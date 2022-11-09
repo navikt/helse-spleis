@@ -20,7 +20,7 @@ import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsforholdhistorikk
-import no.nav.helse.person.ArbeidsgiverInntektsopplysning
+import no.nav.helse.person.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag
 import no.nav.helse.person.InfotrygdhistorikkVisitor
 import no.nav.helse.person.Inntektshistorikk
 import no.nav.helse.person.Opptjening
@@ -419,7 +419,7 @@ internal class ArbeidsgiverUtbetalingerTest {
 
     private fun sammenligningsgrunnlag(inntekt: Inntekt) = Sammenligningsgrunnlag(
         arbeidsgiverInntektsopplysninger = listOf(
-            ArbeidsgiverInntektsopplysning("orgnummer",
+            ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag("orgnummer",
                 Inntektshistorikk.SkattComposite(UUID.randomUUID(), (0 until 12).map {
                     Inntektshistorikk.Skatt.RapportertInntekt(
                         dato = LocalDate.now(),
@@ -431,7 +431,8 @@ internal class ArbeidsgiverUtbetalingerTest {
                         beskrivelse = "beskrivelse"
                     )
                 })
-            )),
+            )
+        ),
     )
 
 }

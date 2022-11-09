@@ -8,7 +8,8 @@ import no.nav.helse.Grunnbeløp
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.hendelser.Subsumsjon
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning
-import no.nav.helse.person.ArbeidsgiverInntektsopplysningVisitor
+import no.nav.helse.person.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag
+import no.nav.helse.person.ArbeidsgiverInntektsopplysningForSammenligningsgrunnlagVisitor
 import no.nav.helse.person.InntekthistorikkVisitor
 import no.nav.helse.person.Inntektshistorikk.Infotrygd
 import no.nav.helse.person.Inntektshistorikk.Inntektsmelding
@@ -17,6 +18,7 @@ import no.nav.helse.person.Inntektshistorikk.Skatt
 import no.nav.helse.person.Inntektshistorikk.SkattComposite
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Sammenligningsgrunnlag
+import no.nav.helse.person.SammenligningsgrunnlagVisitor
 import no.nav.helse.person.Sykepengegrunnlag
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.Grunnlagsdata
@@ -245,7 +247,7 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
             )
         }
 
-        internal class SammenligningsgrunnlagBuilder(sammenligningsgrunnlag: Sammenligningsgrunnlag) : VilkårsgrunnlagHistorikkVisitor {
+        internal class SammenligningsgrunnlagBuilder(sammenligningsgrunnlag: Sammenligningsgrunnlag) : SammenligningsgrunnlagVisitor {
             private val beløp = mutableMapOf<String, Double>()
             init {
                 sammenligningsgrunnlag.accept(this)
@@ -262,14 +264,14 @@ internal class VilkårsgrunnlagBuilder(vilkårsgrunnlagHistorikk: Vilkårsgrunnl
                 )
             }
 
-            override fun preVisitArbeidsgiverInntektsopplysning(
-                arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning,
+            override fun preVisitArbeidsgiverInntektsopplysningForSammenligningsgrunnlag(
+                arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag,
                 orgnummer: String
             ) {
                 beløp[orgnummer] = SkattBuilder(arbeidsgiverInntektsopplysning).total()
             }
 
-            private class SkattBuilder(inntektsopplysning: ArbeidsgiverInntektsopplysning) : ArbeidsgiverInntektsopplysningVisitor {
+            private class SkattBuilder(inntektsopplysning: ArbeidsgiverInntektsopplysningForSammenligningsgrunnlag) : ArbeidsgiverInntektsopplysningForSammenligningsgrunnlagVisitor {
                 private var inntekter = INGEN
 
                 init {
