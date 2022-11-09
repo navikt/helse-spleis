@@ -6,7 +6,7 @@ import no.nav.helse.april
 import no.nav.helse.assertForventetFeil
 import no.nav.helse.februar
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
-import no.nav.helse.hendelser.Inntektsmelding
+import no.nav.helse.hendelser.Inntektsmelding.Refusjon
 import no.nav.helse.hendelser.Inntektsvurdering
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Sykmeldingsperiode
@@ -600,7 +600,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         håndterInntektsmelding(
             listOf(1.januar til 16.januar),
             førsteFraværsdag = 1.januar,
-            refusjon = Inntektsmelding.Refusjon(31000.månedlig, null, emptyList()),
+            refusjon = Refusjon(31000.månedlig, null, emptyList()),
             orgnummer = a1
         )
 
@@ -740,7 +740,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
     fun `revurdere inntekt slik at det blir brukerutbetaling`() {
         nyttVedtak(1.januar, 31.januar)
         håndterInntektsmelding(
-            listOf(Periode(1.januar, 16.januar)), refusjon = Inntektsmelding.Refusjon(
+            listOf(Periode(1.januar, 16.januar)), refusjon = Refusjon(
                 INGEN,
                 null,
                 emptyList()
@@ -763,7 +763,7 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
     fun `revurdere inntekt slik at det blir delvis refusjon`() {
         nyttVedtak(1.januar, 31.januar)
         håndterInntektsmelding(
-            listOf(Periode(1.januar, 16.januar)), refusjon = Inntektsmelding.Refusjon(
+            listOf(Periode(1.januar, 16.januar)), refusjon = Refusjon(
                 25000.månedlig,
                 null,
                 emptyList()
@@ -810,6 +810,16 @@ internal class RevurderingInntektV2E2ETest : AbstractEndToEndTest() {
         håndterOverstyrInntekt(30000.månedlig, skjæringstidspunkt = 1.januar)
         assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
         assertTilstander(2.vedtaksperiode, TIL_UTBETALING, UTBETALING_FEILET)
+    }
+
+
+    @Test
+    fun `refusjonsopplysninger er uendret etter revurdert inntekt`() {
+        nyttVedtak(1.januar, 31.januar)
+        val refusjonsopplysningerFørRevurdering = inspektør.refusjonsopplysningerFraVilkårsgrunnlag(1.januar).inspektør.refusjonsopplysninger
+        håndterOverstyrInntekt(inntekt = 25000.månedlig, skjæringstidspunkt = 1.januar)
+        val refusjonsopplysningerEtterRevurdering = inspektør.refusjonsopplysningerFraVilkårsgrunnlag(1.januar).inspektør.refusjonsopplysninger
+        assertEquals(refusjonsopplysningerFørRevurdering, refusjonsopplysningerEtterRevurdering)
     }
 
 

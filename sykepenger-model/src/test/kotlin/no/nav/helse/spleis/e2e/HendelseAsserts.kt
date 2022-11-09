@@ -6,20 +6,16 @@ import no.nav.helse.Personidentifikator
 import no.nav.helse.erHelg
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.inspectors.TestArbeidsgiverInspektør
-import no.nav.helse.inspectors.inspektør
 import no.nav.helse.inspectors.personLogg
-import no.nav.helse.nesteDag
 import no.nav.helse.person.AbstractPersonTest
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.AktivitetsloggVisitor
 import no.nav.helse.person.ArbeidstakerHendelse
 import no.nav.helse.person.IdInnhenter
 import no.nav.helse.person.Person
-import no.nav.helse.person.RefusjonsopplysningerTest.Companion.harNødvendigRefusjonsopplysninger
 import no.nav.helse.person.SpesifikkKontekst
 import no.nav.helse.person.TilstandType
 import no.nav.helse.person.Varselkode
-import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.aktiveMedUtbetaling
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -30,18 +26,6 @@ import kotlin.reflect.KClass
 
 internal fun assertInntektForDato(forventetInntekt: Inntekt?, dato: LocalDate, førsteFraværsdag: LocalDate = dato, inspektør: TestArbeidsgiverInspektør) {
     assertEquals(forventetInntekt, inspektør.inntektInspektør.omregnetÅrsinntekt(dato, førsteFraværsdag)?.omregnetÅrsinntekt())
-}
-
-internal fun AbstractEndToEndTest.assertFullRefusjonVedManglendeRefusjonsopplysninger(periode: Periode) {
-    periode.forEach { dag ->
-        assertFalse(inspektør.refusjonsopplysningerFraRefusjonshistorikk().harNødvendigRefusjonsopplysninger(dag)) { "Forventet at vi IKKE skulle finne refusjonsopplysningr for $dag" }
-    }
-    assertTrue(inspektør.refusjonsopplysningerFraRefusjonshistorikk().harNødvendigRefusjonsopplysninger(periode.endInclusive.nesteDag)) { "Forventet at vi skulle finne refusjonsopplysning for ${periode.endInclusive.nesteDag}"}
-
-    inspektør.utbetalinger.aktiveMedUtbetaling().last { it.inspektør.periode.overlapperMed(periode) }.inspektør.let { utbetalingInspektør ->
-        assertTrue(utbetalingInspektør.arbeidsgiverOppdrag.nettoBeløp() > 0) { "Forventet full refusjon, men nettobeløp på arbeidsgiveroppdrag er 0" }
-        assertTrue(utbetalingInspektør.personOppdrag.inspektør.antallLinjer() == 0) { "Forventet full refusjon, men var linjer på personoppdraget" }
-    }
 }
 
 internal fun AbstractEndToEndTest.erEtterspurt(type: Aktivitetslogg.Aktivitet.Behov.Behovtype, vedtaksperiodeIdInnhenter: IdInnhenter, orgnummer: String, tilstand: TilstandType): Boolean {

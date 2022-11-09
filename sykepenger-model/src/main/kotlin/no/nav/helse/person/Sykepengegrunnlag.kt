@@ -292,7 +292,7 @@ internal class Sykepengegrunnlag(
 
         internal fun leggTilInntekt(organisasjonsnummer: String, meldingsreferanseId: UUID, inntekt: Inntekt, forklaring: String, subsumsjon: Subsumsjon?) {
             val saksbehandler = Inntektshistorikk.Saksbehandler(UUID.randomUUID(), skjæringstidspunkt, meldingsreferanseId, inntekt, forklaring, subsumsjon)
-            nyeInntektsopplysninger.add(ArbeidsgiverInntektsopplysning(organisasjonsnummer, saksbehandler))
+            nyeInntektsopplysninger.add(ArbeidsgiverInntektsopplysning(organisasjonsnummer, saksbehandler, Refusjonsopplysninger()))
         }
 
         internal fun resultat() = arbeidsgiverInntektsopplysninger.overstyrInntekter(opptjening, nyeInntektsopplysninger, subsumsjonObserver)
