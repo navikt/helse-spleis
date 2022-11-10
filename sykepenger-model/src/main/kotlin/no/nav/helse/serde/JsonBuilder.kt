@@ -29,6 +29,7 @@ import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Periodetype
 import no.nav.helse.person.Person
 import no.nav.helse.person.Refusjonshistorikk
+import no.nav.helse.person.Refusjonsopplysning
 import no.nav.helse.person.Sammenligningsgrunnlag
 import no.nav.helse.person.Sykepengegrunnlag
 import no.nav.helse.person.Sykmeldingsperioder
@@ -1003,8 +1004,40 @@ internal class JsonBuilder : AbstractBuilder() {
 
     class ArbeidsgiverInntektsopplysningerState(private val arbeidsgiverInntektsopplysninger: MutableList<Map<String, Any>>) : AbstractArbeidsgiverInntektsopplysningerState() {
 
+        private var refusjonsopplysninger: MutableList<Map<String, Any?>> = mutableListOf()
+
+        override fun preVisitRefusjonsopplysninger(refusjonsopplysninger: Refusjonsopplysning.Refusjonsopplysninger) {
+            this.refusjonsopplysninger.clear()
+        }
+
         override fun preVisitArbeidsgiverInntektsopplysning(arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning, orgnummer: String) {
             inntektsopplysninger = null
+        }
+
+        override fun postVisitArbeidsgiverInntektsopplysning(arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning, orgnummer: String) {
+            this.arbeidsgiverInntektsopplysninger.add(
+                mapOf(
+                    "orgnummer" to orgnummer,
+                    "inntektsopplysning" to inntektsopplysninger!!,
+                    "refusjonsopplysninger" to refusjonsopplysninger.toList()
+                )
+            )
+        }
+
+        override fun visitRefusjonsopplysning(
+            meldingsreferanseId: UUID,
+            fom: LocalDate,
+            tom: LocalDate?,
+            beløp: Inntekt
+        ) {
+            this.refusjonsopplysninger.add(
+                mapOf(
+                    "meldingsreferanseId" to meldingsreferanseId,
+                    "fom" to fom,
+                    "tom" to tom,
+                    "beløp" to beløp.reflection { _, månedlig, _, _ -> månedlig },
+                )
+            )
         }
 
         override fun postVisitArbeidsgiverInntektsopplysninger(arbeidsgiverInntektopplysninger: List<ArbeidsgiverInntektsopplysning>) {
@@ -1015,14 +1048,6 @@ internal class JsonBuilder : AbstractBuilder() {
             popState()
         }
 
-        override fun postVisitArbeidsgiverInntektsopplysning(arbeidsgiverInntektsopplysning: ArbeidsgiverInntektsopplysning, orgnummer: String) {
-            this.arbeidsgiverInntektsopplysninger.add(
-                mapOf(
-                    "orgnummer" to orgnummer,
-                    "inntektsopplysning" to inntektsopplysninger!!
-                )
-            )
-        }
     }
     class ArbeidsgiverInntektsopplysningerForSammenligningsgrunnlagState(private val arbeidsgiverInntektsopplysninger: MutableList<Map<String, Any>>) : AbstractArbeidsgiverInntektsopplysningerState() {
 

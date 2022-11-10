@@ -14,7 +14,6 @@ import java.math.BigDecimal
 import java.math.RoundingMode
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Arbeidsgiver
-import no.nav.helse.person.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.Person
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.VedtaksperiodeUtbetalinger
@@ -48,9 +47,6 @@ private class InfotrygdhistorikkElementMixin
 @JsonSerialize(using = AktivitetsloggSerializer::class)
 private class AktivitetsloggMixin
 
-@JsonIgnoreProperties("refusjonsopplysninger")
-private class ArbeidsgiverInntektsopplysningMixin
-
 internal class AktivitetsloggSerializer : JsonSerializer<Aktivitetslogg>() {
     override fun serialize(value: Aktivitetslogg?, gen: JsonGenerator, serializers: SerializerProvider?) {
         gen.writeObject(value?.toMap().toString())
@@ -83,8 +79,7 @@ private val objectMapper = jacksonObjectMapper()
             Begrunnelse::class.java to BegrunnelseMixin::class.java,
             InfotrygdhistorikkElement::class.java to InfotrygdhistorikkElementMixin::class.java,
             Prosentdel::class.java to ProsentdelMixin::class.java,
-            Aktivitetslogg::class.java to AktivitetsloggMixin::class.java,
-            ArbeidsgiverInntektsopplysning::class.java to ArbeidsgiverInntektsopplysningMixin::class.java
+            Aktivitetslogg::class.java to AktivitetsloggMixin::class.java
         )
     )
     .setVisibility(PropertyAccessor.GETTER, JsonAutoDetect.Visibility.NONE)

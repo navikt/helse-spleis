@@ -304,11 +304,13 @@ internal class Arbeidsgiver private constructor(
     }
 
     internal fun harNødvendigRefusjonsopplysninger(skjæringstidspunkt: LocalDate, periode: Periode, hendelse: IAktivitetslogg) : Boolean {
-        //TODO vi må vente på å kjøre migrering V194 før vi kan sjekke refusjonsopplysninger for infotrygdperioder
-        if (person.vilkårsgrunnlagFor(skjæringstidspunkt) is VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag) return true
         val arbeidsgiverperiode = arbeidsgiverperiode(periode, NullObserver) ?: return false
-        return Arbeidsgiverperiode.harNødvendigeRefusjonsopplysninger(periode, refusjonshistorikk.refusjonsopplysninger(skjæringstidspunkt),
-            arbeidsgiverperiode, hendelse, organisasjonsnummer)
+        val vilkårsgrunnlag = person.vilkårsgrunnlagFor(skjæringstidspunkt)
+        val refusjonsopplysninger = when (vilkårsgrunnlag) {
+            null -> refusjonshistorikk.refusjonsopplysninger(skjæringstidspunkt)
+            else -> vilkårsgrunnlag.refusjonsopplysninger(organisasjonsnummer)
+        }
+        return Arbeidsgiverperiode.harNødvendigeRefusjonsopplysninger(periode, refusjonsopplysninger, arbeidsgiverperiode, hendelse, organisasjonsnummer)
     }
 
     private fun harNødvendigInntektITidligereBeregnetSykepengegrunnlag(skjæringstidspunkt: LocalDate) =
