@@ -30,6 +30,7 @@ internal class ArbeidsgiverInntektsopplysning(
         visitor.preVisitArbeidsgiverInntektsopplysning(this, orgnummer)
         visitor.preVisitRefusjonsopplysninger(refusjonsopplysninger)
         inntektsopplysning.accept(visitor)
+        refusjonsopplysninger.accept(visitor)
         visitor.postVisitRefusjonsopplysninger(refusjonsopplysninger)
         visitor.postVisitArbeidsgiverInntektsopplysning(this, orgnummer)
     }

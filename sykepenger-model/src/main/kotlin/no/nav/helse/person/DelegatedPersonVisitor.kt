@@ -208,6 +208,10 @@ internal class DelegatedPersonVisitor(private val delegateeFun: () -> PersonVisi
         delegatee.postVisitRefusjonsopplysninger(refusjonsopplysninger)
     }
 
+    override fun visitRefusjonsopplysning(meldingsreferanseId: UUID, fom: LocalDate, tom: LocalDate?, beløp: Inntekt) {
+        delegatee.visitRefusjonsopplysning(meldingsreferanseId, fom, tom, beløp)
+    }
+
     override fun postVisitArbeidsgiverInntektsopplysninger(arbeidsgiverInntektopplysninger: List<ArbeidsgiverInntektsopplysning>) {
         delegatee.postVisitArbeidsgiverInntektsopplysninger(arbeidsgiverInntektopplysninger)
     }
