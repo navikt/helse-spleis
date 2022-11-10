@@ -1,7 +1,5 @@
 package no.nav.helse.spleis.e2e.refusjon
 
-import no.nav.helse.EnableToggle
-import no.nav.helse.Toggle
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.TestPerson.Companion.INNTEKT
 import no.nav.helse.februar
@@ -22,7 +20,6 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-@EnableToggle(Toggle.LagreRefusjonsopplysningerIVilkårsgrunnlag::class)
 internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
 
     @Test

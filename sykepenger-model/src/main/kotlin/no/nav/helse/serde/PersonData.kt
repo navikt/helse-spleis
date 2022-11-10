@@ -28,6 +28,8 @@ import no.nav.helse.person.InntektsmeldingInfoHistorikk
 import no.nav.helse.person.Opptjening
 import no.nav.helse.person.Person
 import no.nav.helse.person.Refusjonshistorikk
+import no.nav.helse.person.Refusjonsopplysning
+import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger.Companion.gjennopprett
 import no.nav.helse.person.Sammenligningsgrunnlag
 import no.nav.helse.person.SpesifikkKontekst
 import no.nav.helse.person.Sykepengegrunnlag
@@ -341,12 +343,16 @@ internal data class PersonData(
 
         data class ArbeidsgiverInntektsopplysningData(
             private val orgnummer: String,
-            private val inntektsopplysning: ArbeidsgiverData.InntektsopplysningData
+            private val inntektsopplysning: ArbeidsgiverData.InntektsopplysningData,
+            private val refusjonsopplysninger: List<ArbeidsgiverData.RefusjonsopplysningData>
         ) {
             companion object {
+                private fun List<ArbeidsgiverData.RefusjonsopplysningData>.tilModellobjekt() =
+                    map { it.tilModellobjekt() }
+
                 internal fun List<ArbeidsgiverInntektsopplysningData>.parseArbeidsgiverInntektsopplysninger(): List<ArbeidsgiverInntektsopplysning> =
                     map {
-                        ArbeidsgiverInntektsopplysning(it.orgnummer, it.inntektsopplysning.tilModellobjekt())
+                        ArbeidsgiverInntektsopplysning(it.orgnummer, it.inntektsopplysning.tilModellobjekt(), it.refusjonsopplysninger.tilModellobjekt().gjennopprett())
                     }
             }
         }
@@ -676,6 +682,15 @@ internal data class PersonData(
                     Inntektsopplysningskilde.SKATT_SAMMENLIGNINGSGRUNNLAG,
                     Inntektsopplysningskilde.SKATT_SYKEPENGEGRUNNLAG -> error("Fant ${kilde}. Kan kun være i SkattComposite")
                 }
+        }
+
+        data class RefusjonsopplysningData(
+            private val meldingsreferanseId: UUID,
+            private val fom: LocalDate,
+            private val tom: LocalDate?,
+            private val beløp: Double
+        ) {
+            internal fun tilModellobjekt() = Refusjonsopplysning(meldingsreferanseId, fom, tom, beløp.månedlig)
         }
 
         data class SykdomstidslinjeData(

@@ -126,7 +126,7 @@ internal class VilkårsgrunnlagBuilderTest : AbstractEndToEndTest() {
         val innslag = inspektør.vilkårsgrunnlagHistorikkInnslag()
 
         val generasjoner = vilkårsgrunnlag.build().toDTO()
-        assertEquals(2, generasjoner.size)
+        assertEquals(3, generasjoner.size)
 
         val førsteGenerasjon = requireNotNull(generasjoner[innslag.last().inspektør.id]?.vilkårsgrunnlagSpleis(1.januar))
         assertSpleisVilkårsprøving(

@@ -182,7 +182,7 @@ internal class SpeilBuilderTest : AbstractEndToEndTest() {
         createOvergangFraInfotrygdPerson()
         forlengVedtak(1.mars, 31.mars, 100.prosent)
 
-        val infotrygdVilkårsgrunnlag = inspektør.vilkårsgrunnlagHistorikkInnslag().single().vilkårsgrunnlagFor(1.januar)
+        val infotrygdVilkårsgrunnlag = inspektør.vilkårsgrunnlagHistorikkInnslag().first().vilkårsgrunnlagFor(1.januar)
         assertTrue(infotrygdVilkårsgrunnlag is VilkårsgrunnlagHistorikk.InfotrygdVilkårsgrunnlag)
 
         val personDto = speilApi()

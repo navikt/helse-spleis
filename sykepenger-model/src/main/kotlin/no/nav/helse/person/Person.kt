@@ -777,7 +777,6 @@ class Person private constructor(
     }
 
     internal fun nyeRefusjonsopplysninger(skjæringstidspunkt: LocalDate, inntektsmelding: Inntektsmelding) {
-        if (Toggle.LagreRefusjonsopplysningerIVilkårsgrunnlag.disabled) return
         val grunnlag = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt) ?: return
         nyttVilkårsgrunnlag(inntektsmelding, grunnlag.nyeRefusjonsopplysninger(inntektsmelding))
     }
