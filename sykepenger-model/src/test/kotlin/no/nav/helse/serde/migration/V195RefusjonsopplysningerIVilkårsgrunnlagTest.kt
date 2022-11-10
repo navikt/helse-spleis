@@ -61,6 +61,14 @@ internal class V195RefusjonsopplysningerIVilkårsgrunnlagTest : MigrationTest(V1
         )
     }
 
+    @Test
+    fun `Setter ingen refusjonsopplysninger for alle deaktiverte arbeidsforhold`() {
+        assertVilkårsgrunnlagMedRefusjonsopplysninger(
+            originalJson = "/migrations/195/deaktivert-arbeidsforhold_original.json",
+            expectedJson = "/migrations/195/deaktivert-arbeidsforhold_expected.json",
+        )
+    }
+
     private fun assertVilkårsgrunnlagMedRefusjonsopplysninger(originalJson: String, expectedJson: String) {
         val migrert = migrer(originalJson.readResource())
         val sisteInnslag = migrert.path("vilkårsgrunnlagHistorikk")[0]

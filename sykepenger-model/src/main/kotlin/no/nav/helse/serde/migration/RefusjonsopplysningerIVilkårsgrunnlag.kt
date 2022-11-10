@@ -58,6 +58,13 @@ internal object RefusjonsopplysningerIVilkårsgrunnlag {
                     )
                     arbeidsgiverInntektsopplysning.putArray("refusjonsopplysninger").addAll(refusjonsopplysninger.arrayNode)
                 }
+
+            vilkårsgrunnlag.path("sykepengegrunnlag")
+                .path("deaktiverteArbeidsforhold")
+                .forEach { deaktivertArbeidsforhold ->
+                    deaktivertArbeidsforhold as ObjectNode
+                    deaktivertArbeidsforhold.putArray("refusjonsopplysninger")
+                }
         }
         return kopiAvGjeldendeVilkårsgrunnlag
     }
