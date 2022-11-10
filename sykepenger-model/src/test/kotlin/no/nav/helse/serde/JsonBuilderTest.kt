@@ -216,21 +216,16 @@ class JsonBuilderTest {
     fun `Serialisering av ugyldig periode i infotrygdhistorikk`() = testSerialiseringAvPerson(personMedUgyldigPeriodeIHistorikken())
 
     private fun testSerialiseringAvPerson(person: Person) {
-        val jsonBuilder = JsonBuilder()
-        person.accept(jsonBuilder)
-        val json = jsonBuilder.toString()
+        val serialisert = person.serialize().json
+        val gjenskaptPerson = SerialisertPerson(serialisert).deserialize(MaskinellJurist())
+        val reserialisert = gjenskaptPerson.serialize().json
 
-        val result = SerialisertPerson(json).deserialize(MaskinellJurist())
-        val jsonBuilder2 = JsonBuilder()
-        result.accept(jsonBuilder2)
-        val json2 = jsonBuilder2.toString()
-
-        serdeObjectMapper.readTree(json).also {
+        serdeObjectMapper.readTree(serialisert).also {
             assertTrue(it.hasNonNull("skjemaVersjon"))
             assertEquals(SerialisertPerson.gjeldendeVersjon(), it["skjemaVersjon"].intValue())
         }
-        assertEquals(json, json2)
-        assertJsonEquals(person, result)
+        assertEquals(serialisert, reserialisert)
+        assertJsonEquals(person, gjenskaptPerson)
     }
 
     @Test
