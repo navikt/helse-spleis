@@ -62,8 +62,11 @@ internal object RefusjonsopplysningerIVilkårsgrunnlag {
         return kopiAvGjeldendeVilkårsgrunnlag
     }
 
+    private fun JsonNode.erSkatt() = path("skatteopplysninger").isArray
+    private fun JsonNode.erIkkeRapportert() = path("kilde").asText() == "IKKE_RAPPORTERT"
     private fun JsonNode.fallbackRefusjonsopplysninger(): Refusjonsopplysninger {
-        if (path("skatteopplysninger").isArray) return Refusjonsopplysninger()
+        // Ghosts hvor vi ikke har noe refusjonshistorikk på skjæringstidspunktet. Skal ha tomme refusjonsopplysninger
+        if (erSkatt() || erIkkeRapportert()) return Refusjonsopplysninger()
         val refusjonsopplysning = Refusjonsopplysning(
             meldingsreferanseId = UUID.fromString(path("hendelseId").asText()),
             fom = LocalDate.parse(path("dato").asText()),
