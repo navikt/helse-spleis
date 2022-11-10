@@ -229,7 +229,8 @@
                   "beløp": 31000.0,
                   "kilde": "INNTEKTSMELDING",
                   "tidsstempel": "2022-11-04T14:19:56.743839"
-                }
+                },
+                "refusjonsopplysninger": []
               }
             ],
             "begrensning": "ER_IKKE_6G_BEGRENSET",
@@ -407,5 +408,5 @@
       ]
     }
   ],
-  "skjemaVersjon": 195
+  "skjemaVersjon": 196
 }

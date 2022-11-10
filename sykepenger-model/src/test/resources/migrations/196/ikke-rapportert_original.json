@@ -2,7 +2,22 @@
   "aktørId": "42",
   "arbeidsgivere": [
     {
-      "refusjonshistorikk": [],
+      "refusjonshistorikk": [
+        {
+          "meldingsreferanseId": "8708e23f-0106-4dda-a170-25a8fbdc60ff",
+          "førsteFraværsdag": "2017-01-01",
+          "arbeidsgiverperioder": [
+            {
+              "fom": "2017-01-01",
+              "tom": "2017-01-16"
+            }
+          ],
+          "beløp": 31000.0,
+          "sisteRefusjonsdag": null,
+          "endringerIRefusjon": [],
+          "tidsstempel": "2022-11-04T14:19:56.738962"
+        }
+      ],
       "organisasjonsnummer": "987654321"
     }
   ],
@@ -25,11 +40,10 @@
                 "inntektsopplysning": {
                   "id": "762b5277-c0ae-4315-8514-2b9fd665fa04",
                   "dato": "2018-01-01",
-                  "hendelseId": "8708e23f-0106-4dda-a170-25a8fbdc60ff",
-                  "beløp": 31000.0,
-                  "kilde": "INNTEKTSMELDING",
-                  "tidsstempel": "2022-11-04T14:19:56.743839"
-                }
+                  "kilde": "IKKE_RAPPORTERT",
+                  "tidsstempel": "2022-11-01T18:57:31.100218519"
+                },
+                "refusjonsopplysninger": []
               }
             ],
             "begrensning": "ER_IKKE_6G_BEGRENSET",

@@ -7,7 +7,7 @@ import java.util.UUID
 import no.nav.helse.serde.migration.RefusjonsopplysningerIVilkårsgrunnlag.vilkårsgrunnlagMedRefusjonsopplysninger
 import no.nav.helse.serde.serdeObjectMapper
 
-internal class V195RefusjonsopplysningerIVilkårsgrunnlag: JsonMigration(version = 195) {
+internal class V196RefusjonsopplysningerIVilkårsgrunnlag: JsonMigration(version = 196) {
 
     override val description =
         "Legger til refusjonsopplysninger i eksisterende vilkårsgrunnlag basert på det som finnes i refusjonshistorikken for arbeidsgiverne i sykepengegrunnlaget"

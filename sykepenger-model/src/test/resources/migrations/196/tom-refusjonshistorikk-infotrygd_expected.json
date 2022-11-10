@@ -2,22 +2,7 @@
   "aktørId": "42",
   "arbeidsgivere": [
     {
-      "refusjonshistorikk": [
-        {
-          "meldingsreferanseId": "8708e23f-0106-4dda-a170-25a8fbdc60ff",
-          "førsteFraværsdag": "2017-12-13",
-          "arbeidsgiverperioder": [
-            {
-              "fom": "2017-12-13",
-              "tom": "2018-01-16"
-            }
-          ],
-          "beløp": 31000.0,
-          "sisteRefusjonsdag": null,
-          "endringerIRefusjon": [],
-          "tidsstempel": "2022-11-04T14:19:56.738962"
-        }
-      ],
+      "refusjonshistorikk": [],
       "organisasjonsnummer": "987654321"
     }
   ],
@@ -37,16 +22,16 @@
               {
                 "orgnummer": "987654321",
                 "inntektsopplysning": {
-                  "id": "0222f5db-1f3a-4e9e-a466-ec8091bef966",
+                  "id": "9847034a-3a93-409f-ae4a-abd4266b3148",
                   "dato": "2018-01-01",
-                  "hendelseId": "e0c09966-c208-4442-a247-04011371c341",
+                  "hendelseId": "38b07028-2da3-4d82-8e56-54ca69505642",
                   "beløp": 31000.0,
                   "kilde": "INFOTRYGD",
-                  "tidsstempel": "2022-09-14T15:23:18.065518"
+                  "tidsstempel": "2022-08-31T09:52:08.472441"
                 },
                 "refusjonsopplysninger": [{
-                  "meldingsreferanseId": "8708e23f-0106-4dda-a170-25a8fbdc60ff",
-                  "fom": "2017-12-13",
+                  "meldingsreferanseId": "38b07028-2da3-4d82-8e56-54ca69505642",
+                  "fom": "2018-01-01",
                   "tom": null,
                   "beløp": 31000.0
                 }]
@@ -58,13 +43,13 @@
             "minsteinntekt": 46817.0,
             "oppfyllerMinsteinntektskrav": true
           },
-          "vilkårsgrunnlagId": "240fc688-478a-4da2-92e1-24ee7754b8b1"
+          "vilkårsgrunnlagId": "83d1fbd3-5e75-4489-ab24-a04b043bd8f1"
         }
       ]
     },
     {
-      "id": "ac4eb4b0-5adf-49ae-9aab-ab43ba8f2255",
-      "opprettet": "2022-11-04T14:19:56.79035",
+      "id": "6062e4a3-11de-431a-aaf1-c298e45d748d",
+      "opprettet": "2022-08-31T09:52:08.49402",
       "vilkårsgrunnlag": [
         {
           "skjæringstidspunkt": "2018-01-01",
@@ -77,13 +62,14 @@
               {
                 "orgnummer": "987654321",
                 "inntektsopplysning": {
-                  "id": "0222f5db-1f3a-4e9e-a466-ec8091bef966",
+                  "id": "9847034a-3a93-409f-ae4a-abd4266b3148",
                   "dato": "2018-01-01",
-                  "hendelseId": "e0c09966-c208-4442-a247-04011371c341",
+                  "hendelseId": "38b07028-2da3-4d82-8e56-54ca69505642",
                   "beløp": 31000.0,
                   "kilde": "INFOTRYGD",
-                  "tidsstempel": "2022-09-14T15:23:18.065518"
-                }
+                  "tidsstempel": "2022-08-31T09:52:08.472441"
+                },
+                "refusjonsopplysninger": []
               }
             ],
             "begrensning": "VURDERT_I_INFOTRYGD",
@@ -92,10 +78,10 @@
             "minsteinntekt": 46817.0,
             "oppfyllerMinsteinntektskrav": true
           },
-          "vilkårsgrunnlagId": "240fc688-478a-4da2-92e1-24ee7754b8b1"
+          "vilkårsgrunnlagId": "83d1fbd3-5e75-4489-ab24-a04b043bd8f1"
         }
       ]
     }
   ],
-  "skjemaVersjon": 195
+  "skjemaVersjon": 196
 }

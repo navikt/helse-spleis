@@ -9,7 +9,7 @@ internal class V194RefusjonsopplysningerIVilkårsgrunnlagDryRunTest: MigrationTe
 
     @Test
     fun `ingen endringer ved kjøring av dry run`() {
-        val original = "/migrations/195/original.json".readResource()
+        val original = "/migrations/196/original.json".readResource()
         val expected = (serdeObjectMapper.readTree(original) as ObjectNode).put("skjemaVersjon", 194)
         assertMigrationRaw("$expected", original)
     }

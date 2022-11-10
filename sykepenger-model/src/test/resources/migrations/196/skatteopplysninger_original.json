@@ -40,7 +40,8 @@
                 "inntektsopplysning": {
                   "id": "762b5277-c0ae-4315-8514-2b9fd665fa04",
                   "skatteopplysninger": []
-                }
+                },
+                "refusjonsopplysninger": []
               }
             ],
             "begrensning": "ER_IKKE_6G_BEGRENSET",
