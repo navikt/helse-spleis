@@ -273,6 +273,9 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
         internal fun harNødvendigInntektForVilkårsprøving(organisasjonsnummer: String) =
             sykepengegrunnlag.harNødvendigInntektForVilkårsprøving(organisasjonsnummer)
 
+        internal fun refusjonsopplysninger(organisasjonsnummer: String) =
+            sykepengegrunnlag.refusjonsopplysninger(organisasjonsnummer)
+
         internal companion object {
             internal fun skjæringstidspunktperioder(elementer: Collection<VilkårsgrunnlagElement>): List<Periode> {
                 val skjæringstidspunkter = elementer

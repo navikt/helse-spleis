@@ -21,6 +21,7 @@ import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.medInntekt
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.nyeRefusjonsopplysninger
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.omregnetÅrsinntekt
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.overstyrInntekter
+import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.refusjonsopplysninger
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.subsummer
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.valider
 import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger
@@ -172,6 +173,9 @@ internal class Sykepengegrunnlag(
         hendelse.overstyr(builder)
         return kopierSykepengegrunnlag(builder.resultat(), deaktiverteArbeidsforhold)
     }
+
+    internal fun refusjonsopplysninger(organisasjonsnummer: String): Refusjonsopplysninger =
+        arbeidsgiverInntektsopplysninger.refusjonsopplysninger(organisasjonsnummer)
 
     internal fun nyeRefusjonsopplysninger(inntektsmelding: Inntektsmelding): Sykepengegrunnlag? {
         val builder = NyeRefusjonsopplysninger()

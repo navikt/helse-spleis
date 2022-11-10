@@ -98,6 +98,9 @@ internal class ArbeidsgiverInntektsopplysning(
             .also { it.subsummer(subsumsjonObserver, opptjening) }
         internal fun List<ArbeidsgiverInntektsopplysning>.erOverstyrt() = any { it.inntektsopplysning is Inntektshistorikk.Saksbehandler }
 
+        internal fun List<ArbeidsgiverInntektsopplysning>.refusjonsopplysninger(organisasjonsnummer: String) =
+            singleOrNull{it.gjelder(organisasjonsnummer)}?.refusjonsopplysninger ?: Refusjonsopplysninger()
+
         internal fun List<ArbeidsgiverInntektsopplysning>.nyeRefusjonsopplysninger(orgnummer: String, refusjonsopplysninger: Refusjonsopplysninger) = this
             .map { inntekt -> inntekt.nyeRefusjonsopplysninger(orgnummer, refusjonsopplysninger) }
 
