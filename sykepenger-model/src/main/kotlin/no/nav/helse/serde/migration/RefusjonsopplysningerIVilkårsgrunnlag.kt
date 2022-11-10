@@ -54,14 +54,7 @@ internal object RefusjonsopplysningerIVilkårsgrunnlag {
                         refusjonshistorikk = refusjonshistorikkPerArbeidsgiver[organisasjonsnummer],
                         skjæringstidspunkt = skjæringstidspunkt,
                         vilkårsgrunnlagType = vilkårsgrunnlagType,
-                        fallback = {
-                            Refusjonsopplysning(
-                                meldingsreferanseId = UUID.fromString(inntekt.path("hendelseId").asText()),
-                                fom = LocalDate.parse(inntekt.path("dato").asText()),
-                                tom = null,
-                                beløp = inntekt.path("beløp").asDouble().månedlig
-                            ).somRefusjonsopplysninger()
-                        }
+                        fallback = { inntekt.fallbackRefusjonsopplysninger() }
                     )
                     arbeidsgiverInntektsopplysning.putArray("refusjonsopplysninger").addAll(refusjonsopplysninger.arrayNode)
                 }
@@ -69,8 +62,16 @@ internal object RefusjonsopplysningerIVilkårsgrunnlag {
         return kopiAvGjeldendeVilkårsgrunnlag
     }
 
-    private fun Refusjonsopplysning.somRefusjonsopplysninger() =
-        RefusjonsopplysningerBuilder().leggTil(this, LocalDateTime.now()).build()
+    private fun JsonNode.fallbackRefusjonsopplysninger(): Refusjonsopplysninger {
+        if (path("skatteopplysninger").isArray) return Refusjonsopplysninger()
+        val refusjonsopplysning = Refusjonsopplysning(
+            meldingsreferanseId = UUID.fromString(path("hendelseId").asText()),
+            fom = LocalDate.parse(path("dato").asText()),
+            tom = null,
+            beløp = path("beløp").asDouble().månedlig
+        )
+        return RefusjonsopplysningerBuilder().leggTil(refusjonsopplysning, LocalDateTime.now()).build()
+    }
 
     private fun finnRefusjonsopplysninger(
         aktørId: String,

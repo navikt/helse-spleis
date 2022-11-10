@@ -45,6 +45,14 @@ internal class V195RefusjonsopplysningerIVilkårsgrunnlagTest : MigrationTest(V1
         )
     }
 
+    @Test
+    fun `Defaulter til ingen refusjonsopplysninger om inntektsopplysningen er skatt`() {
+        assertVilkårsgrunnlagMedRefusjonsopplysninger(
+            originalJson = "/migrations/195/skatteopplysninger_original.json",
+            expectedJson = "/migrations/195/skatteopplysninger_expected.json",
+        )
+    }
+
     private fun assertVilkårsgrunnlagMedRefusjonsopplysninger(originalJson: String, expectedJson: String) {
         val migrert = migrer(originalJson.readResource())
         val sisteInnslag = migrert.path("vilkårsgrunnlagHistorikk")[0]
