@@ -39,6 +39,7 @@ import no.nav.helse.spleis.e2e.håndterVilkårsgrunnlag
 import no.nav.helse.spleis.e2e.håndterYtelser
 import no.nav.helse.spleis.e2e.nyttVedtak
 import no.nav.helse.spleis.e2e.tilSimulering
+import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.Feriedag
 import no.nav.helse.sykdomstidslinje.Dag.Permisjonsdag
 import no.nav.helse.sykdomstidslinje.Dag.Sykedag
@@ -47,6 +48,7 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
 
 internal class KorrigertSøknadTest : AbstractEndToEndTest() {
 
@@ -56,7 +58,7 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
         nullstillTilstandsendringer()
         håndterSøknad(Sykdom(3.januar, 26.januar, 80.prosent))
         assertEquals(Utbetaling.Forkastet, inspektør.utbetalinger(1.vedtaksperiode).single().inspektør.tilstand)
-        assertTilstander(1.vedtaksperiode, AVVENTER_SIMULERING, AVVENTER_HISTORIKK)
+        assertTilstander(1.vedtaksperiode, AVVENTER_SIMULERING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
     }
 
     @Test
@@ -146,7 +148,12 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
         }
         assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
         assertTilstander(
-            2.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK
+            2.vedtaksperiode,
+            START,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_HISTORIKK
         )
         assertIngenVarsler(1.vedtaksperiode.filter())
         assertIngenVarsler(2.vedtaksperiode.filter())
@@ -239,7 +246,7 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
         }
         assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING)
         assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
-        assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
+        assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
         assertIngenVarsler(1.vedtaksperiode.filter())
         assertIngenVarsler(2.vedtaksperiode.filter())
         assertIngenVarsler(3.vedtaksperiode.filter())
@@ -260,6 +267,64 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
     }
 
     @Test
+    fun `avslutter periode med friskmelding -- avventer vilkårsprøving`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        val søknadId = håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterYtelser(1.vedtaksperiode)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Arbeid(17.januar, 31.januar), korrigerer = søknadId, opprinneligSendt = 1.februar)
+
+        assertForventetFeil(
+            nå = { assertTrue(inspektør.periodeErForkastet(1.vedtaksperiode)) },
+            ønsket = {
+                inspektør.sykdomstidslinje.inspektør.also { inspektør ->
+                    assertDoesNotThrow { inspektør[17.januar] }
+                    (17.januar til 31.januar).forEach {
+                        assertTrue(inspektør[it] is Dag.Arbeidsdag || inspektør[it] is Dag.FriskHelgedag)
+                    }
+                }
+                assertTilstander(
+                    1.vedtaksperiode,
+                    START,
+                    AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+                    AVVENTER_BLOKKERENDE_PERIODE,
+                    AVVENTER_HISTORIKK,
+                    AVVENTER_VILKÅRSPRØVING,
+                    AVVENTER_BLOKKERENDE_PERIODE,
+                    AVSLUTTET_UTEN_UTBETALING
+                )
+                assertIngenVarsler(1.vedtaksperiode.filter())
+            }
+        )
+    }
+
+    @Test
+    fun `avslutter periode med 100 % ferie og ingen utbetaling -- avventer vilkårsprøving`() {
+        håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
+        val søknadId = håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+        håndterInntektsmelding(listOf(1.januar til 16.januar))
+        håndterYtelser(1.vedtaksperiode)
+        håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(17.januar, 31.januar), korrigerer = søknadId, opprinneligSendt = 1.februar)
+
+        inspektør.sykdomstidslinje.inspektør.also { inspektør ->
+            (17.januar til 31.januar).forEach {
+                assertTrue(inspektør[it] is Feriedag)
+            }
+        }
+        assertTilstander(
+            1.vedtaksperiode,
+            START,
+            AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_HISTORIKK,
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVSLUTTET_UTEN_UTBETALING
+        )
+        assertIngenVarsler(1.vedtaksperiode.filter())
+    }
+
+    @Test
     fun `Blir værende i nåværende tilstand dersom søknad kommer inn i AVVENTER_VILKÅRSPRØVING`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent))
         val søknadId = håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
@@ -276,7 +341,9 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
             AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK,
             AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK,
-            AVVENTER_VILKÅRSPRØVING
+            AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_BLOKKERENDE_PERIODE,
+            AVVENTER_HISTORIKK
         )
         assertIngenVarsler(1.vedtaksperiode.filter())
     }
@@ -300,6 +367,8 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
             AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK,
             AVVENTER_VILKÅRSPRØVING,
+            AVVENTER_HISTORIKK,
+            AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK
         )
         assertIngenVarsler(1.vedtaksperiode.filter())
@@ -327,6 +396,7 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
             AVVENTER_VILKÅRSPRØVING,
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
+            AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK
         )
         assertIngenVarsler(1.vedtaksperiode.filter())
@@ -356,6 +426,7 @@ internal class KorrigertSøknadTest : AbstractEndToEndTest() {
             AVVENTER_HISTORIKK,
             AVVENTER_SIMULERING,
             AVVENTER_GODKJENNING,
+            AVVENTER_BLOKKERENDE_PERIODE,
             AVVENTER_HISTORIKK
         )
         assertIngenVarsler(1.vedtaksperiode.filter())
