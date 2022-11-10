@@ -559,15 +559,11 @@ internal class Vedtaksperiode private constructor(
     }
 
     private fun håndterOverlappendeSøknadRevurdering(søknad: Søknad) {
-        if (Toggle.RevurderKorrigertSoknad.enabled){
-            validerOverlappendeSøknadRevurdering(søknad)
-            if (søknad.harFunksjonelleFeilEllerVerre()) return forkast(søknad)
-            søknad.info("Søknad har trigget en revurdering")
-            oppdaterHistorikk(søknad)
-            person.startRevurdering(this, søknad)
-        } else {
-            return overlappendeSøknadIkkeStøttet(søknad)
-        }
+        validerOverlappendeSøknadRevurdering(søknad)
+        if (søknad.harFunksjonelleFeilEllerVerre()) return forkast(søknad)
+        søknad.info("Søknad har trigget en revurdering")
+        oppdaterHistorikk(søknad)
+        person.startRevurdering(this, søknad)
     }
 
     private fun validerOverlappendeSøknadRevurdering(søknad: Søknad){
@@ -2343,17 +2339,13 @@ internal class Vedtaksperiode private constructor(
         override fun håndter(vedtaksperiode: Vedtaksperiode, påminnelse: Påminnelse) {}
 
         override fun håndter(vedtaksperiode: Vedtaksperiode, søknad: Søknad) {
-            if (Toggle.RevurderKorrigertSoknad.enabled){
-                vedtaksperiode.validerOverlappendeSøknadRevurdering(søknad)
-                if (søknad.harFunksjonelleFeilEllerVerre()) return vedtaksperiode.forkast(søknad)
-                søknad.info("Søknad har trigget en revurdering")
-                vedtaksperiode.låsOpp()
-                vedtaksperiode.oppdaterHistorikk(søknad)
-                vedtaksperiode.lås()
-                vedtaksperiode.person.startRevurdering(vedtaksperiode, søknad)
-            } else {
-                super.håndter(vedtaksperiode, søknad)
-            }
+            vedtaksperiode.validerOverlappendeSøknadRevurdering(søknad)
+            if (søknad.harFunksjonelleFeilEllerVerre()) return vedtaksperiode.forkast(søknad)
+            søknad.info("Søknad har trigget en revurdering")
+            vedtaksperiode.låsOpp()
+            vedtaksperiode.oppdaterHistorikk(søknad)
+            vedtaksperiode.lås()
+            vedtaksperiode.person.startRevurdering(vedtaksperiode, søknad)
         }
     }
 

@@ -1,7 +1,5 @@
 package no.nav.helse.spleis.e2e.revurdering
 
-import no.nav.helse.EnableToggle
-import no.nav.helse.Toggle
 import no.nav.helse.desember
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Dagtype
@@ -54,7 +52,6 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-@EnableToggle(Toggle.RevurderKorrigertSoknad::class)
 internal class RevurderKorrigertSoknadTest : AbstractEndToEndTest() {
 
     @Test
