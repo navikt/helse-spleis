@@ -555,7 +555,6 @@ internal class Vedtaksperiode private constructor(
 
     private fun håndterOverlappendeSøknad(søknad: Søknad, nesteTilstand: Vedtaksperiodetilstand? = null) {
         if (søknad.periode().utenfor(periode)) return overlappendeSøknadIkkeStøttet(søknad, RV_SØ_13)
-        if (søknad.harArbeidsdager()) return overlappendeSøknadIkkeStøttet(søknad, RV_SØ_15)
         håndterSøknad(søknad) { nesteTilstand }
     }
 

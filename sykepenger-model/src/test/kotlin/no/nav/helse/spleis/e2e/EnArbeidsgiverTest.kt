@@ -431,14 +431,11 @@ internal class EnArbeidsgiverTest : AbstractEndToEndTest() {
         håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar, 100.prosent))
         håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Arbeid(20.februar, 28.februar))
 
-        assertFunksjonellFeil(
-            "Mottatt flere søknader for perioden - siste søknad inneholder arbeidsdag",
-            2.vedtaksperiode.filter()
-        )
+        assertIngenFunksjonelleFeil(2.vedtaksperiode.filter())
 
-        assertTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
-        assertTilstand(2.vedtaksperiode, TIL_INFOTRYGD)
-        assertTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
+        assertTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
+        assertTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+        assertTilstand(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
     }
 
     @Test
