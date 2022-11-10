@@ -1,0 +1,46 @@
+{
+  "aktørId": "42",
+  "arbeidsgivere": [
+    {
+      "refusjonshistorikk": [],
+      "organisasjonsnummer": "987654321"
+    }
+  ],
+  "vilkårsgrunnlagHistorikk": [
+    {
+      "id": "6062e4a3-11de-431a-aaf1-c298e45d748d",
+      "opprettet": "2022-08-31T09:52:08.49402",
+      "vilkårsgrunnlag": [
+        {
+          "skjæringstidspunkt": "2018-01-01",
+          "type": "Infotrygd",
+          "sykepengegrunnlag": {
+            "sykepengegrunnlag": 372000.0,
+            "inntektsgrunnlag": 372000.0,
+            "grunnbeløp": 561804.0,
+            "arbeidsgiverInntektsopplysninger": [
+              {
+                "orgnummer": "987654321",
+                "inntektsopplysning": {
+                  "id": "9847034a-3a93-409f-ae4a-abd4266b3148",
+                  "dato": "2018-01-01",
+                  "hendelseId": "38b07028-2da3-4d82-8e56-54ca69505642",
+                  "beløp": 31000.0,
+                  "kilde": "INFOTRYGD",
+                  "tidsstempel": "2022-08-31T09:52:08.472441"
+                }
+              }
+            ],
+            "begrensning": "VURDERT_I_INFOTRYGD",
+            "deaktiverteArbeidsforhold": [],
+            "vurdertInfotrygd": true,
+            "minsteinntekt": 46817.0,
+            "oppfyllerMinsteinntektskrav": true
+          },
+          "vilkårsgrunnlagId": "83d1fbd3-5e75-4489-ab24-a04b043bd8f1"
+        }
+      ]
+    }
+  ],
+  "skjemaVersjon": 193
+}

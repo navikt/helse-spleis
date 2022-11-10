@@ -80,11 +80,14 @@ internal object RefusjonsopplysningerIVilkårsgrunnlag {
         vilkårsgrunnlagType: String,
         fallback: () -> Refusjonsopplysninger
     ): Refusjonsopplysninger {
-        if (refusjonshistorikk == null || refusjonshistorikk.erTom()) return Refusjonsopplysninger().also {
-            sikkerlogg.info("Fant ikke refusjonsopplysninger for vilkårsgrunnlag. Ingen refusjonshistorikk for arbeidsgiver. {}, {}, skjæringstidspunkt=$skjæringstidspunkt, vilkårsgrunnlagType=$vilkårsgrunnlagType",
-                keyValue("aktørId", aktørId),
-                keyValue("organisasjonsnummer", organisasjonsnummer)
-            )
+        if (refusjonshistorikk == null || refusjonshistorikk.erTom()) {
+            val refusjonsopplysninger = if (vilkårsgrunnlagType == SPLEIS) Refusjonsopplysninger() else fallback()
+            return refusjonsopplysninger.also {
+                sikkerlogg.info("Fant ikke refusjonsopplysninger for vilkårsgrunnlag. Ingen refusjonshistorikk for arbeidsgiver. {}, {}, skjæringstidspunkt=$skjæringstidspunkt, vilkårsgrunnlagType=$vilkårsgrunnlagType",
+                    keyValue("aktørId", aktørId),
+                    keyValue("organisasjonsnummer", organisasjonsnummer)
+                )
+            }
         }
         val refusjonsopplysningerPåSkjæringstidspunkt = refusjonshistorikk.refusjonsopplysninger(skjæringstidspunkt)
         if (refusjonsopplysningerPåSkjæringstidspunkt.isNotEmpty()) return refusjonsopplysningerPåSkjæringstidspunkt.also {

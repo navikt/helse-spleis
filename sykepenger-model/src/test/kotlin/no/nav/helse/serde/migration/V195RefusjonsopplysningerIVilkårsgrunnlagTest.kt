@@ -30,10 +30,18 @@ internal class V195RefusjonsopplysningerIVilkårsgrunnlagTest : MigrationTest(V1
     }
 
     @Test
-    fun `Defaulter til ingen refusjonsopplysninger om refusjonshistorikken er tom`() {
+    fun `Defaulter til ingen refusjonsopplysninger om refusjonshistorikken er tom for Spleis-vilkårsgrunnlag`() {
         assertVilkårsgrunnlagMedRefusjonsopplysninger(
-            originalJson = "/migrations/195/tom-refusjonshistorikk_original.json",
-            expectedJson = "/migrations/195/tom-refusjonshistorikk_expected.json",
+            originalJson = "/migrations/195/tom-refusjonshistorikk-spleis_original.json",
+            expectedJson = "/migrations/195/tom-refusjonshistorikk-spleis_expected.json",
+        )
+    }
+
+    @Test
+    fun `Defaulter til inntekt om refusjonshistorikken er tom for Infotrygd-vilkårsgrunnlag`() {
+        assertVilkårsgrunnlagMedRefusjonsopplysninger(
+            originalJson = "/migrations/195/tom-refusjonshistorikk-infotrygd_original.json",
+            expectedJson = "/migrations/195/tom-refusjonshistorikk-infotrygd_expected.json",
         )
     }
 
