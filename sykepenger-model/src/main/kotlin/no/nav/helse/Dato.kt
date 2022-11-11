@@ -2,12 +2,8 @@ package no.nav.helse
 
 import java.time.DayOfWeek
 import java.time.DayOfWeek.FRIDAY
-import java.time.DayOfWeek.MONDAY
 import java.time.DayOfWeek.SATURDAY
 import java.time.DayOfWeek.SUNDAY
-import java.time.DayOfWeek.THURSDAY
-import java.time.DayOfWeek.TUESDAY
-import java.time.DayOfWeek.WEDNESDAY
 import java.time.LocalDate
 
 fun Int.januar(year: Int): LocalDate = LocalDate.of(year, 1, this)
@@ -48,13 +44,15 @@ internal fun LocalDate.nesteArbeidsdag(): LocalDate = this + 1.ukedager
 private val helgedager = listOf(SATURDAY, SUNDAY)
 internal fun LocalDate.erHelg() = this.dayOfWeek in helgedager
 
-internal fun LocalDate.erRettFør(other: LocalDate): Boolean =
-    this < other && when (this.dayOfWeek) {
-        MONDAY, TUESDAY, WEDNESDAY, THURSDAY, SUNDAY -> this.plusDays(1) == other
-        FRIDAY -> other in this.plusDays(1)..this.plusDays(3)
-        SATURDAY -> other in this.plusDays(1)..this.plusDays(2)
+internal fun LocalDate.erRettFør(other: LocalDate): Boolean {
+    if (this >= other) return false
+    if (this.nesteDag == other) return true
+    return when (this.dayOfWeek) {
+        FRIDAY -> other in this.plusDays(2)..this.plusDays(3)
+        SATURDAY -> other == this.plusDays(2)
         else -> false
     }
+}
 
 // antall ukedager mellom start og endInclusive, ikke medregnet endInclusive i seg selv
 internal fun ClosedRange<LocalDate>.ukedager(): Int {

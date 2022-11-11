@@ -5,6 +5,7 @@ import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import no.nav.helse.erRettFør
 import no.nav.helse.nesteArbeidsdag
+import no.nav.helse.nesteDag
 
 // Understands beginning and end of a time interval
 open class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Iterable<LocalDate> {
@@ -24,30 +25,30 @@ open class Periode(fom: LocalDate, tom: LocalDate) : ClosedRange<LocalDate>, Ite
         fun List<Periode>.slutterEtter(grense: LocalDate) = any { it.slutterEtter(grense) }
 
         fun Iterable<LocalDate>.grupperSammenhengendePerioder() = this
-            .grupperSammenhengendePerioder { periode, dato -> periode.endInclusive.plusDays(1) != dato }
+            .grupperSammenhengendePerioder { forrigeDag, dato -> forrigeDag.nesteDag != dato }
         internal fun Iterable<Iterable<LocalDate>>.grupperSammenhengendePerioder() = flatten().grupperSammenhengendePerioder()
         internal fun Iterable<Periode>.periode() = if (!iterator().hasNext()) null else minOf { it.start } til maxOf { it.endInclusive }
         fun List<Periode>.grupperSammenhengendePerioderMedHensynTilHelg() = this
             .flatMap { periode -> periode.map { it } }
-            .grupperSammenhengendePerioder { periode, dato -> !periode.endInclusive.erRettFør(dato) }
+            .grupperSammenhengendePerioder { forrigeDag, dato -> !forrigeDag.erRettFør(dato) }
 
-        private fun Iterable<LocalDate>.grupperSammenhengendePerioder(erNyPeriode: (Periode, LocalDate) -> Boolean) =
-            this.sorted()
-                .distinct()
-                .fold(listOf()) { perioder: List<Periode>, dato: LocalDate ->
-                    when {
-                        perioder.isEmpty() || erNyPeriode(perioder.last(), dato) -> perioder.plusElement(dato.somPeriode())
-                        else -> perioder.oppdaterSiste(perioder.last().oppdaterTom(dato))
-                    }
+        private fun Iterable<LocalDate>.grupperSammenhengendePerioder(erNyPeriode: (forrigeDag: LocalDate, nesteDag: LocalDate) -> Boolean): List<Periode> {
+            val perioder = mutableListOf<Periode>()
+            toSortedSet().forEach { dato ->
+                val sistePeriode = perioder.lastOrNull()
+                when {
+                    sistePeriode == null || erNyPeriode(sistePeriode.endInclusive, dato) -> perioder.add(dato.somPeriode())
+                    else -> perioder[perioder.lastIndex] = sistePeriode.oppdaterTom(dato)
                 }
+            }
+            return perioder
+        }
 
         internal fun Collection<Periode>.sammenhengende(skjæringstidspunkt: LocalDate) = sortedByDescending { it.start }
             .fold(skjæringstidspunkt til skjæringstidspunkt) { acc, periode ->
                 if (periode.rettFørEllerOverlapper(acc.start)) periode.start til acc.endInclusive
                 else acc
             }
-
-        private fun List<Periode>.oppdaterSiste(periode: Periode) = this.dropLast(1).plusElement(periode)
 
         internal fun Iterable<Periode>.overlapper(): Boolean {
             sortedBy { it.start }.zipWithNext { nåværende, neste ->
