@@ -83,7 +83,6 @@ internal abstract class HistorieTest {
 
     protected fun addTidligereUtbetaling(orgnr: String, utbetalingstidslinje: Utbetalingstidslinje) {
         tidligereUtbetalinger[orgnr] = tidligereUtbetalinger.getOrDefault(orgnr, Utbetalingstidslinje()) + utbetalingstidslinje
-        addSykdomshistorikk(orgnr, Utbetalingstidslinje.konverter(tidligereUtbetalinger.getValue(orgnr)))
     }
 
     protected fun addSykdomshistorikk(orgnr: String, sykdomstidslinje: Sykdomstidslinje) {

@@ -829,8 +829,8 @@ internal class Arbeidsgiver private constructor(
     }
 
     private fun sykdomstidslinje(): Sykdomstidslinje {
-        val sykdomstidslinje = if (sykdomshistorikk.harSykdom()) sykdomshistorikk.sykdomstidslinje() else Sykdomstidslinje()
-        return Utbetaling.sykdomstidslinje(utbetalinger, sykdomstidslinje)
+        if (!sykdomshistorikk.harSykdom()) return Sykdomstidslinje()
+        return sykdomshistorikk.sykdomstidslinje()
     }
 
     internal fun arbeidsgiverperiode(periode: Periode, subsumsjonObserver: SubsumsjonObserver): Arbeidsgiverperiode? {

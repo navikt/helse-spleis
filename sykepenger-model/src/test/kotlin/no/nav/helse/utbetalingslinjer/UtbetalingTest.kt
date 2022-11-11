@@ -18,9 +18,6 @@ import no.nav.helse.mars
 import no.nav.helse.person.Aktivitetslogg
 import no.nav.helse.person.Aktivitetslogg.Aktivitet.Behov.Behovtype
 import no.nav.helse.person.etterlevelse.MaskinellJurist
-import no.nav.helse.sykdomstidslinje.Dag
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.sykdomstidslinje.SykdomstidslinjeHendelse
 import no.nav.helse.testhelpers.AP
 import no.nav.helse.testhelpers.ARB
 import no.nav.helse.testhelpers.FRI
@@ -134,28 +131,6 @@ internal class UtbetalingTest {
         assertFalse(utbetaling.harNærliggendeUtbetaling(1.desember(2017) til 20.januar))
         assertFalse(utbetaling.harNærliggendeUtbetaling(1.februar til 15.februar))
         assertFalse(utbetaling.harNærliggendeUtbetaling(1.januar til 15.januar))
-    }
-
-    @Test
-    fun `utbetalinger kan konverters til sykdomstidslinje`() {
-        val tidslinje = tidslinjeOf(16.AP, 17.NAV)
-        beregnUtbetalinger(tidslinje)
-        val utbetaling = opprettUtbetaling(tidslinje, sisteDato = 21.januar)
-
-        val inspektør = Utbetaling.sykdomstidslinje(listOf(utbetaling), Sykdomstidslinje()).inspektør
-        assertEquals(21, inspektør.dager.size)
-        assertTrue(inspektør.dager.values.all { it is Dag.Sykedag || it is Dag.SykHelgedag })
-    }
-
-    @Test
-    fun `konvertert tidslinje overskriver ikke ny`() {
-        val tidslinje = tidslinjeOf(10.NAV)
-        beregnUtbetalinger(tidslinje)
-        val utbetaling = opprettUtbetaling(tidslinje, sisteDato = 10.januar)
-        val sykdomstidslinje = Sykdomstidslinje.arbeidsdager(1.januar til 10.januar, SykdomstidslinjeHendelse.Hendelseskilde.INGEN)
-        val inspektør = Utbetaling.sykdomstidslinje(listOf(utbetaling), sykdomstidslinje).inspektør
-        assertEquals(10, inspektør.dager.size)
-        assertTrue(inspektør.dager.values.all { it is Dag.Arbeidsdag || it is Dag.FriskHelgedag })
     }
 
     @Test

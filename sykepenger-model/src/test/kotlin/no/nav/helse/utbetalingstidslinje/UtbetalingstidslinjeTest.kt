@@ -1,14 +1,10 @@
 package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.desember
-import no.nav.helse.februar
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
-import no.nav.helse.sykdomstidslinje.Dag
-import no.nav.helse.testhelpers.AP
 import no.nav.helse.testhelpers.ARB
-import no.nav.helse.testhelpers.AVV
 import no.nav.helse.testhelpers.FOR
 import no.nav.helse.testhelpers.FRI
 import no.nav.helse.testhelpers.NAV
@@ -45,44 +41,6 @@ internal class UtbetalingstidslinjeTest {
             tidslinjeOf(7.NAV, startDato = 1.mars),
             tidslinjeOf(7.NAV, startDato = 1.desember(2017)),
         )))
-    }
-
-    @Test
-    fun `fri i helg mappes til ukjentdag`() {
-        val tidslinje = tidslinjeOf(4.NAV, 3.FRI, 7.NAV)
-        Utbetalingstidslinje.konverter(tidslinje).also {
-            assertTrue(it[1.januar] is Dag.Sykedag)
-            assertTrue(it[5.januar] is Dag.Feriedag)
-            assertTrue(it[6.januar] is Dag.UkjentDag)
-            assertTrue(it[8.januar] is Dag.Sykedag)
-            assertTrue(it[13.januar] is Dag.SykHelgedag)
-        }
-    }
-
-    @Test
-    fun `mapper utbetalingstidslinje til sykdomstidslinje`() {
-        val tidslinje = tidslinjeOf(16.AP, 15.NAV, 4.ARB)
-        Utbetalingstidslinje.konverter(tidslinje).also {
-            assertTrue(it[1.januar] is Dag.Sykedag)
-            assertTrue(it[6.januar] is Dag.SykHelgedag)
-            assertTrue(it[31.januar] is Dag.Sykedag)
-            assertTrue(it[1.februar] is Dag.Arbeidsdag)
-            assertTrue(it[2.februar] is Dag.Arbeidsdag)
-            assertTrue(it[3.februar] is Dag.Arbeidsdag)
-            assertTrue(it[4.februar] is Dag.Arbeidsdag)
-        }
-    }
-
-    @Test
-    fun `konverterer feriedager, avviste dager og foreldet dager`() {
-        val tidslinje = tidslinjeOf(7.NAV, 5.FOR, 2.FRI, 5.AVV, 7.FRI)
-        Utbetalingstidslinje.konverter(tidslinje).also {
-            assertTrue(it[1.januar] is Dag.Sykedag)
-            assertTrue(it[6.januar] is Dag.SykHelgedag)
-            assertTrue(it[8.januar] is Dag.ForeldetSykedag)
-            assertTrue(it[15.januar] is Dag.Sykedag)
-            assertTrue(it[22.januar] is Dag.Feriedag)
-        }
     }
 
     @Test
