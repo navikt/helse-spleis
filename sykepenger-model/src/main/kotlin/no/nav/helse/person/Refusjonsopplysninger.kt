@@ -138,7 +138,8 @@ class Refusjonsopplysning(
             return false
         }
 
-        internal fun refusjonsbeløp(dag: LocalDate) = validerteRefusjonsopplysninger.single { it.dekker(dag) }.beløp
+        internal fun refusjonsbeløp(dag: LocalDate) = validerteRefusjonsopplysninger.singleOrNull { it.dekker(dag) }?.beløp
+            ?: throw IllegalStateException("Fant ikke refusjonsbeløp for $dag. Har refusjonsopplysninger for ${validerteRefusjonsopplysninger.map { "${it.fom}-${it.tom}" }}")
 
         private fun dekker(dag: LocalDate) = validerteRefusjonsopplysninger.any { it.dekker(dag) }
 
