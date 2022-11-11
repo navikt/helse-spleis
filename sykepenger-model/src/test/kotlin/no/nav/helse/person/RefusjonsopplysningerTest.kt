@@ -12,6 +12,7 @@ import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger.Companion.gjennopprett
+import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger.Companion.refusjonsopplysninger
 import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger.RefusjonsopplysningerBuilder
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -251,7 +252,7 @@ internal class RefusjonsopplysningerTest {
     @Test
     fun `har refusjonsopplysninger for forventede dager`() {
         val januar = Refusjonsopplysning(UUID.randomUUID(), 2.januar, 31.januar, 2000.daglig)
-        val refusjonsopplysninger = RefusjonsopplysningerBuilder().leggTil(januar, LocalDateTime.now()).build()
+        val refusjonsopplysninger = januar.refusjonsopplysninger
         assertFalse(refusjonsopplysninger.harNødvendigRefusjonsopplysninger(listOf(1.januar)))
         assertTrue(refusjonsopplysninger.harNødvendigRefusjonsopplysninger(listOf(2.januar)))
         assertTrue(refusjonsopplysninger.harNødvendigRefusjonsopplysninger(listOf(31.januar)))
@@ -295,7 +296,6 @@ internal class RefusjonsopplysningerTest {
         }
         private fun Refusjonsopplysninger.harNødvendigRefusjonsopplysninger(dager: List<LocalDate>) = harNødvendigRefusjonsopplysninger(dager, Aktivitetslogg(), "")
         private fun Refusjonsopplysninger.harNødvendigRefusjonsopplysninger(periode: Periode) = harNødvendigRefusjonsopplysninger(periode.toList(), Aktivitetslogg(), "")
-        internal fun Refusjonsopplysninger.harNødvendigRefusjonsopplysninger(dag: LocalDate) = harNødvendigRefusjonsopplysninger(listOf(dag), Aktivitetslogg(), "")
         private fun List<Refusjonsopplysning>.refusjonsopplysninger() = Refusjonsopplysninger(this, LocalDateTime.now())
 
         private fun Refusjonsopplysninger(refusjonsopplysninger: List<Refusjonsopplysning>, tidsstempel: LocalDateTime): Refusjonsopplysninger{

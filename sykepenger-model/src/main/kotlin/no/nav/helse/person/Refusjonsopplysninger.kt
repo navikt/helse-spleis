@@ -148,6 +148,7 @@ class Refusjonsopplysning(
                 check(!overlapper()) { "Kan ikke gjennopprette refusjonsopplysningr med overlapp. For dette formålet må RefusjonsopplysningerBuilder benyttes." }
                 return Refusjonsopplysninger(this)
             }
+            internal val Refusjonsopplysning.refusjonsopplysninger get() = Refusjonsopplysninger(listOf(this))
         }
 
         internal class RefusjonsopplysningerBuilder {

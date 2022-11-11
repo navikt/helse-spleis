@@ -14,7 +14,7 @@ import no.nav.helse.person.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companio
 import no.nav.helse.person.Refusjonshistorikk.Refusjon.EndringIRefusjon.Companion.refusjonsopplysninger
 import no.nav.helse.person.Refusjonsopplysning
 import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger
-import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger.RefusjonsopplysningerBuilder
+import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger.Companion.refusjonsopplysninger
 import no.nav.helse.person.RefusjonsopplysningerVisitor
 import no.nav.helse.serde.migration.RefusjonData.Companion.parseRefusjon
 import no.nav.helse.serde.migration.RefusjonData.EndringIRefusjonData.Companion.parseEndringerIRefusjon
@@ -74,13 +74,12 @@ internal object RefusjonsopplysningerIVilkårsgrunnlag {
     private fun JsonNode.fallbackRefusjonsopplysninger(): Refusjonsopplysninger {
         // Ghosts hvor vi ikke har noe refusjonshistorikk på skjæringstidspunktet. Skal ha tomme refusjonsopplysninger
         if (erSkatt() || erIkkeRapportert()) return Refusjonsopplysninger()
-        val refusjonsopplysning = Refusjonsopplysning(
+        return Refusjonsopplysning(
             meldingsreferanseId = UUID.fromString(path("hendelseId").asText()),
             fom = LocalDate.parse(path("dato").asText()),
             tom = null,
             beløp = path("beløp").asDouble().månedlig
-        )
-        return RefusjonsopplysningerBuilder().leggTil(refusjonsopplysning, LocalDateTime.now()).build()
+        ).refusjonsopplysninger
     }
 
     private fun finnRefusjonsopplysninger(

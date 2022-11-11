@@ -1,10 +1,9 @@
 package no.nav.helse.serde.migration
 
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.person.Refusjonsopplysning
-import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger.RefusjonsopplysningerBuilder
+import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger.Companion.refusjonsopplysninger
 import no.nav.helse.readResource
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Test
@@ -84,9 +83,7 @@ internal class KopiereVilkårsgrunnlagTest: MigrationTest(TestMigration) {
         Triple(UUID.fromString("826f09da-f8e2-459b-8326-5ee8d10aa9e3"), LocalDate.parse("2018-01-01"), null),
         Triple(UUID.fromString("0473f5e9-092e-4ff5-a321-23cd5e9330aa"), LocalDate.parse("2018-03-01"), null),
         Triple(UUID.fromString("893e57bf-6377-47bf-b029-3fb0c625f877"), LocalDate.parse("2018-05-01"),
-            Refusjonsopplysning(UUID.fromString("88a37f64-947c-4e33-8e22-5162989c390c"), LocalDate.parse("2018-05-01"), null, 31000.månedlig).let {
-                RefusjonsopplysningerBuilder().leggTil(it, LocalDateTime.now()).build()
-            }
+            Refusjonsopplysning(UUID.fromString("88a37f64-947c-4e33-8e22-5162989c390c"), LocalDate.parse("2018-05-01"), null, 31000.månedlig).refusjonsopplysninger
         )
     )
 }

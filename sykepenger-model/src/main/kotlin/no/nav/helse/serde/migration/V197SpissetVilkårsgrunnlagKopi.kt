@@ -1,10 +1,9 @@
 package no.nav.helse.serde.migration
 
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.person.Refusjonsopplysning
-import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger.RefusjonsopplysningerBuilder
+import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger.Companion.refusjonsopplysninger
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 
 internal class V197SpissetVilkårsgrunnlagKopi: KopiereVilkårsgrunnlag(
@@ -19,6 +18,6 @@ internal class V197SpissetVilkårsgrunnlagKopi: KopiereVilkårsgrunnlag(
             fom = LocalDate.parse("2021-09-21"),
             tom = null,
             beløp = 43591.67.månedlig
-        ).let { RefusjonsopplysningerBuilder().leggTil(it, LocalDateTime.now()).build() }
+        ).refusjonsopplysninger
     }
 }

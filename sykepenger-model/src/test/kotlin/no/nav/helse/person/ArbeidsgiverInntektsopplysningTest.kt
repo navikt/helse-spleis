@@ -17,7 +17,7 @@ import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.nyeRefusjons
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.overstyrInntekter
 import no.nav.helse.person.Inntektshistorikk.Skatt.Inntekttype.LØNNSINNTEKT
 import no.nav.helse.person.Inntektshistorikk.Skatt.Sykepengegrunnlag
-import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger.RefusjonsopplysningerBuilder
+import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger.Companion.refusjonsopplysninger
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.NullObserver
 import no.nav.helse.testhelpers.assertNotNull
@@ -57,10 +57,9 @@ internal class ArbeidsgiverInntektsopplysningTest {
     }
 
     @Test
-    fun `To like refusjonsopplysninger?`() {
+    fun `To like refusjonsopplysninger`() {
         val inntektsmeldingId = UUID.randomUUID()
-        val refusjonsopplysningBuilder = RefusjonsopplysningerBuilder().leggTil(Refusjonsopplysning(inntektsmeldingId, 1.januar, null, 1000.månedlig), LocalDateTime.now())
-        val refusjonsopplysninger = refusjonsopplysningBuilder.build()
+        val refusjonsopplysninger = Refusjonsopplysning(inntektsmeldingId, 1.januar, null, 1000.månedlig).refusjonsopplysninger
         val arbeidsgiverInntektsopplysning = ArbeidsgiverInntektsopplysning(
             orgnummer = "a1",
             inntektsopplysning = Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), 1000.månedlig),
