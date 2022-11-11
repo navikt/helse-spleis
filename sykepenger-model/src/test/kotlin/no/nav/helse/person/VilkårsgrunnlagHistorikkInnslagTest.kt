@@ -9,6 +9,7 @@ import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.hendelser.OverstyrInntekt
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
+import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.person.etterlevelse.MaskinellJurist
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.sykepengegrunnlag
@@ -134,7 +135,8 @@ internal class VilkårsgrunnlagHistorikkInnslagTest {
                             inntekt,
                             "",
                             null
-                        )
+                        ),
+                        Refusjonsopplysninger()
                     )
                 ), skjæringstidspunkt, MaskinellJurist()
             ),

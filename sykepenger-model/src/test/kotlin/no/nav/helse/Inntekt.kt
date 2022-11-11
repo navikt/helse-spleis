@@ -5,6 +5,7 @@ import java.util.UUID
 import no.nav.helse.person.AbstractPersonTest
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning
 import no.nav.helse.person.Inntektshistorikk
+import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.person.Sykepengegrunnlag
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.utbetalingstidslinje.Alder
@@ -24,7 +25,8 @@ internal fun Inntekt.sykepengegrunnlag(alder: Alder, orgnr: String, skjæringsti
         arbeidsgiverInntektsopplysninger = listOf(
             ArbeidsgiverInntektsopplysning(
                 orgnr,
-                Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), skjæringstidspunkt, UUID.randomUUID(), this)
+                Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), skjæringstidspunkt, UUID.randomUUID(), this),
+                Refusjonsopplysninger()
             )
         ),
         skjæringstidspunkt = skjæringstidspunkt,
@@ -37,7 +39,8 @@ internal fun Inntekt.sykepengegrunnlag(orgnr: String, skjæringstidspunkt: Local
         arbeidsgiverInntektsopplysninger = listOf(
             ArbeidsgiverInntektsopplysning(
                 orgnr,
-                Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), skjæringstidspunkt, UUID.randomUUID(), this)
+                Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), skjæringstidspunkt, UUID.randomUUID(), this),
+                Refusjonsopplysninger()
             )
         ),
         deaktiverteArbeidsforhold = emptyList(),

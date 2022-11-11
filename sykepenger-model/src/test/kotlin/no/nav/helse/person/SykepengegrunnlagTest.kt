@@ -13,6 +13,7 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mai
 import no.nav.helse.mars
+import no.nav.helse.person.Refusjonsopplysning.Refusjonsopplysninger
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver
 import no.nav.helse.person.etterlevelse.SubsumsjonObserver.Companion.NullObserver
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest.Companion.INNTEKT
@@ -322,7 +323,7 @@ internal class SykepengegrunnlagTest {
             alder = AbstractPersonTest.UNG_PERSON_FØDSELSDATO.alder,
             skjæringstidspunkt = 1.januar,
             arbeidsgiverInntektsopplysninger = listOf(
-                ArbeidsgiverInntektsopplysning("orgnr", Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), inntekt))
+                ArbeidsgiverInntektsopplysning("orgnr", Inntektshistorikk.Inntektsmelding(UUID.randomUUID(), 1.januar, UUID.randomUUID(), inntekt), Refusjonsopplysninger())
             ),
             deaktiverteArbeidsforhold = emptyList(),
             vurdertInfotrygd = false,
@@ -350,7 +351,8 @@ internal class SykepengegrunnlagTest {
                         hendelseId = hendelseId,
                         beløp = 25000.månedlig,
                         tidsstempel = tidsstempel
-                    )
+                    ),
+                    refusjonsopplysninger = Refusjonsopplysninger()
                 )
             ),
             deaktiverteArbeidsforhold = emptyList(),
@@ -371,7 +373,8 @@ internal class SykepengegrunnlagTest {
                             hendelseId = hendelseId,
                             beløp = 25000.månedlig,
                             tidsstempel = tidsstempel
-                        )
+                        ),
+                        refusjonsopplysninger = Refusjonsopplysninger()
                     )
                 ),
                 deaktiverteArbeidsforhold = emptyList(),
@@ -405,7 +408,8 @@ internal class SykepengegrunnlagTest {
                             hendelseId = hendelseId,
                             beløp = 25000.månedlig,
                             tidsstempel = tidsstempel
-                        )
+                        ),
+                        refusjonsopplysninger = Refusjonsopplysninger()
                     )
                 ),
                 deaktiverteArbeidsforhold = emptyList(),
@@ -427,7 +431,8 @@ internal class SykepengegrunnlagTest {
                             hendelseId = hendelseId,
                             beløp = 25000.månedlig,
                             tidsstempel = tidsstempel
-                        )
+                        ),
+                        refusjonsopplysninger = Refusjonsopplysninger()
                     )
                 ),
                 deaktiverteArbeidsforhold = emptyList(),
@@ -449,7 +454,8 @@ internal class SykepengegrunnlagTest {
                             hendelseId = hendelseId,
                             beløp = 25000.månedlig,
                             tidsstempel = tidsstempel
-                        )
+                        ),
+                        refusjonsopplysninger = Refusjonsopplysninger()
                     )
                 ),
                 deaktiverteArbeidsforhold = listOf(
@@ -461,7 +467,8 @@ internal class SykepengegrunnlagTest {
                             hendelseId = hendelseId,
                             beløp = 25000.månedlig,
                             tidsstempel = tidsstempel
-                        )
+                        ),
+                        refusjonsopplysninger = Refusjonsopplysninger()
                     )
                 ),
                 vurdertInfotrygd = false

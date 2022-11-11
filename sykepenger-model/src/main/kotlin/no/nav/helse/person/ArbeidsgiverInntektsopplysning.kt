@@ -16,7 +16,6 @@ internal class ArbeidsgiverInntektsopplysning(
     private val inntektsopplysning: Inntektshistorikk.Inntektsopplysning,
     private val refusjonsopplysninger: Refusjonsopplysninger
 ) {
-    internal constructor(orgnummer: String, inntektsopplysning: Inntektshistorikk.Inntektsopplysning): this(orgnummer, inntektsopplysning, Refusjonsopplysninger())
     private fun omregnetÅrsinntekt(acc: Inntekt): Inntekt {
         return acc + inntektsopplysning.omregnetÅrsinntekt()
     }
