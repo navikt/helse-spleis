@@ -18,6 +18,7 @@ import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.deaktiver
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.erOverstyrt
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.harInntekt
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.medInntekt
+import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.medUtbetalingsopplysninger
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.nyeRefusjonsopplysninger
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.omregnetÅrsinntekt
 import no.nav.helse.person.ArbeidsgiverInntektsopplysning.Companion.overstyrInntekter
@@ -258,6 +259,10 @@ internal class Sykepengegrunnlag(
     }
     internal fun medInntekt(organisasjonsnummer: String, dato: LocalDate, økonomi: Økonomi, arbeidsgiverperiode: Arbeidsgiverperiode?, regler: ArbeidsgiverRegler, subsumsjonObserver: SubsumsjonObserver): Økonomi {
         return arbeidsgiverInntektsopplysninger.medInntekt(organisasjonsnummer, `6G`, skjæringstidspunkt, dato, økonomi, arbeidsgiverperiode, regler, subsumsjonObserver) ?: utenInntekt(økonomi, arbeidsgiverperiode)
+    }
+
+    internal fun medUtbetalingsopplysninger(organisasjonsnummer: String, dato: LocalDate, økonomi: Økonomi, arbeidsgiverperiode: Arbeidsgiverperiode?, regler: ArbeidsgiverRegler, subsumsjonObserver: SubsumsjonObserver): Økonomi {
+        return arbeidsgiverInntektsopplysninger.medUtbetalingsopplysninger(organisasjonsnummer, `6G`, skjæringstidspunkt, dato, økonomi, arbeidsgiverperiode, regler, subsumsjonObserver)
     }
 
     internal fun build(builder: VedtakFattetBuilder) {

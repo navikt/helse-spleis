@@ -14,6 +14,9 @@ internal class Inntekter(
     internal fun medInntekt(dato: LocalDate, arbeidsgiverperiode: Arbeidsgiverperiode?, økonomi: Økonomi = Økonomi.ikkeBetalt(arbeidsgiverperiode)) =
         vilkårsgrunnlagHistorikk.medInntekt(organisasjonsnummer, dato, økonomi, arbeidsgiverperiode, regler, subsumsjonObserver)
 
+    internal fun medUtbetalingsopplysninger(dato: LocalDate, arbeidsgiverperiode: Arbeidsgiverperiode?, økonomi: Økonomi = Økonomi.ikkeBetalt(arbeidsgiverperiode)) =
+        vilkårsgrunnlagHistorikk.medUtbetalingsopplysninger(organisasjonsnummer, dato, økonomi, arbeidsgiverperiode, regler, subsumsjonObserver)
+
     internal fun utenInntekt(dato: LocalDate, økonomi: Økonomi, arbeidsgiverperiode: Arbeidsgiverperiode?) =
         vilkårsgrunnlagHistorikk.utenInntekt(dato, økonomi, arbeidsgiverperiode)
 }

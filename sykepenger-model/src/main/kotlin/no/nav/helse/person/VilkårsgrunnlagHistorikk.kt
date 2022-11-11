@@ -76,6 +76,9 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
     internal fun medInntekt(organisasjonsnummer: String, dato: LocalDate, økonomi: Økonomi, arbeidsgiverperiode: Arbeidsgiverperiode?, regler: ArbeidsgiverRegler, subsumsjonObserver: SubsumsjonObserver) =
         sisteInnlag()!!.medInntekt(organisasjonsnummer, dato, økonomi, arbeidsgiverperiode, regler, subsumsjonObserver)
 
+    internal fun medUtbetalingsopplysninger(organisasjonsnummer: String, dato: LocalDate, økonomi: Økonomi, arbeidsgiverperiode: Arbeidsgiverperiode?, regler: ArbeidsgiverRegler, subsumsjonObserver: SubsumsjonObserver) =
+        sisteInnlag()!!.medUtbetalingsopplysninger(organisasjonsnummer, dato, økonomi, arbeidsgiverperiode, regler, subsumsjonObserver)
+
     internal fun utenInntekt(dato: LocalDate, økonomi: Økonomi, arbeidsgiverperiode: Arbeidsgiverperiode?) =
         sisteInnlag()!!.utenInntekt(dato, økonomi, arbeidsgiverperiode)
 
@@ -140,17 +143,16 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             arbeidsgiverperiode: Arbeidsgiverperiode?,
             regler: ArbeidsgiverRegler,
             subsumsjonObserver: SubsumsjonObserver
-        ): Økonomi {
-            return VilkårsgrunnlagElement.medInntekt(
-                vilkårsgrunnlag.values,
-                organisasjonsnummer,
-                dato,
-                økonomi,
-                arbeidsgiverperiode,
-                regler,
-                subsumsjonObserver
-            )
-        }
+        ) = VilkårsgrunnlagElement.medInntekt(vilkårsgrunnlag.values, organisasjonsnummer, dato, økonomi, arbeidsgiverperiode, regler, subsumsjonObserver)
+
+        internal fun medUtbetalingsopplysninger(
+            organisasjonsnummer: String,
+            dato: LocalDate,
+            økonomi: Økonomi,
+            arbeidsgiverperiode: Arbeidsgiverperiode?,
+            regler: ArbeidsgiverRegler,
+            subsumsjonObserver: SubsumsjonObserver
+        ) = VilkårsgrunnlagElement.medUtbetalingsopplysninger(vilkårsgrunnlag.values, organisasjonsnummer, dato, økonomi, arbeidsgiverperiode, regler, subsumsjonObserver)
 
         internal fun utenInntekt(
             dato: LocalDate,
@@ -254,16 +256,17 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             arbeidsgiverperiode: Arbeidsgiverperiode?,
             regler: ArbeidsgiverRegler,
             subsumsjonObserver: SubsumsjonObserver
-        ): Økonomi {
-            return sykepengegrunnlag.medInntekt(
-                organisasjonsnummer,
-                dato,
-                økonomi,
-                arbeidsgiverperiode,
-                regler,
-                subsumsjonObserver
-            )
-        }
+        ) = sykepengegrunnlag.medInntekt(organisasjonsnummer, dato, økonomi, arbeidsgiverperiode, regler, subsumsjonObserver)
+
+        private fun medUtbetalingsopplysninger(
+            organisasjonsnummer: String,
+            dato: LocalDate,
+            økonomi: Økonomi,
+            arbeidsgiverperiode: Arbeidsgiverperiode?,
+            regler: ArbeidsgiverRegler,
+            subsumsjonObserver: SubsumsjonObserver
+        ) = sykepengegrunnlag.medUtbetalingsopplysninger(organisasjonsnummer, dato, økonomi, arbeidsgiverperiode, regler, subsumsjonObserver)
+
         private fun utenInntekt(økonomi: Økonomi, arbeidsgiverperiode: Arbeidsgiverperiode?): Økonomi {
             return sykepengegrunnlag.utenInntekt(økonomi, arbeidsgiverperiode)
         }
@@ -289,7 +292,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
             }
 
             internal fun medInntekt(
-                elementer: MutableCollection<VilkårsgrunnlagElement>,
+                elementer: Collection<VilkårsgrunnlagElement>,
                 organisasjonsnummer: String,
                 dato: LocalDate,
                 økonomi: Økonomi,
@@ -305,6 +308,21 @@ internal class VilkårsgrunnlagHistorikk private constructor(private val histori
                     regler,
                     subsumsjonObserver
                 ) ?: utenInntekt(elementer, dato, økonomi, arbeidsgiverperiode)
+            }
+
+            internal fun medUtbetalingsopplysninger(
+                elementer: Collection<VilkårsgrunnlagElement>,
+                organisasjonsnummer: String,
+                dato: LocalDate,
+                økonomi: Økonomi,
+                arbeidsgiverperiode: Arbeidsgiverperiode?,
+                regler: ArbeidsgiverRegler,
+                subsumsjonObserver: SubsumsjonObserver
+            ): Økonomi {
+                val vilkårsgrunnlag = requireNotNull(finnVilkårsgrunnlag(elementer, dato)) {
+                    "Fant ikke vilkårsgrunnlag for $dato. Må ha et vilkårsgrunnlag for å legge til utbetalingsopplysninger. Har vilkårsgrunnlag på skjæringstidspunktene ${elementer.map { it.skjæringstidspunkt }}"
+                }
+                return vilkårsgrunnlag.medUtbetalingsopplysninger(organisasjonsnummer, dato, økonomi, arbeidsgiverperiode, regler, subsumsjonObserver)
             }
 
             internal fun utenInntekt(

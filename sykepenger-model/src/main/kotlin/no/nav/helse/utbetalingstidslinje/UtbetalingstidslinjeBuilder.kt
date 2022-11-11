@@ -61,7 +61,7 @@ internal class UtbetalingstidslinjeBuilder(private val inntekter: Inntekter) : I
     override fun utbetalingsdag(dato: LocalDate, økonomi: Økonomi, kilde: SykdomstidslinjeHendelse.Hendelseskilde) {
         check(!kilde.erAvType(Sykmelding::class)) { "Kan ikke opprette utbetalingsdag for $dato med kilde Sykmelding" }
         if (dato.erHelg()) return builder.addHelg(dato, inntekter.utenInntekt(dato, økonomi, nåværendeArbeidsgiverperiode))
-        builder.addNAVdag(dato, inntekter.medInntekt(dato, nåværendeArbeidsgiverperiode, økonomi))
+        builder.addNAVdag(dato, inntekter.medUtbetalingsopplysninger(dato, nåværendeArbeidsgiverperiode, økonomi))
     }
 
     override fun foreldetDag(dato: LocalDate, økonomi: Økonomi) {
