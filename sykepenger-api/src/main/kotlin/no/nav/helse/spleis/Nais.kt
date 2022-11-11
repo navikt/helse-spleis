@@ -38,7 +38,6 @@ internal fun Application.nais(teller: AtomicInteger) {
             JvmGcMetrics(),
             ProcessorMetrics(),
             JvmThreadMetrics(),
-            LogbackMetrics()
         )
     }
 
