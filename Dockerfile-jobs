@@ -1,3 +1,0 @@
-FROM navikt/java:17
-
-COPY jobs/build/libs/*.jar ./

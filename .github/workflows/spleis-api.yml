@@ -36,7 +36,7 @@ jobs:
       - name: test and build
         run: ./gradlew :sykepenger-api:test :sykepenger-api:build
       - name: build docker image
-        run: docker build -f Dockerfile-api . --pull -t ${{ needs.set_version.outputs.image }}
+        run: docker build -f Dockerfile sykepenger-api --pull -t ${{ needs.set_version.outputs.image }}
       - name: push docker image
         run: |
           docker login ghcr.io --username "$GITHUB_REPOSITORY" -p ${{ secrets.GITHUB_TOKEN }}

@@ -35,7 +35,7 @@ jobs:
       - name: test and build
         run: ./gradlew :sykepenger-opprydding-dev:test :sykepenger-opprydding-dev:build
       - name: build docker image
-        run: docker build -f Dockerfile-opprydding-dev . --pull -t ${{ needs.set_version.outputs.image }}
+        run: docker build -f Dockerfile sykepenger-opprydding-dev --pull -t ${{ needs.set_version.outputs.image }}
       - name: push docker image
         run: |
           docker login ghcr.io --username "$GITHUB_REPOSITORY" -p ${{ secrets.GITHUB_TOKEN }}
