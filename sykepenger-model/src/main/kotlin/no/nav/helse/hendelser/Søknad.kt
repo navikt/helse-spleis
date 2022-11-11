@@ -81,6 +81,8 @@ class Søknad(
     override fun valider(periode: Periode, subsumsjonObserver: SubsumsjonObserver): IAktivitetslogg {
         perioder.forEach { it.subsumsjon(this.perioder.subsumsjonsFormat(), subsumsjonObserver) }
         perioder.forEach { it.valider(this) }
+        // finne ut om det er førstegangsbehandling - vanskelig å si på søknadsnivå?
+        // if (periode.start == sykdomsperiode.start) , men hva hvis vi har fått en søknad som er en forlengelse ??
         andreInntektskilder.forEach { it.valider(this) }
         if (permittert) varsel(RV_SØ_1)
         merknaderFraSykmelding.forEach { it.valider(this) }
@@ -250,6 +252,19 @@ class Søknad(
         private val sykmeldt: Boolean,
         private val type: String
     ) {
+        companion object {
+            internal fun List<Inntektskilde>.valider(førstegangsbehandling: Boolean, aktivitetslogg: IAktivitetslogg){
+                // error hvis førstegangsbehandling og varsel ved forlengelser
+                if(isNotEmpty()){
+                    if(førstegangsbehandling){
+                        aktivitetslogg.funksjonellFeil(RV_SØ_10)
+                    } else {
+                        aktivitetslogg.varsel(RV_SØ_10)
+                    }
+                }
+
+            }
+        }
         fun valider(aktivitetslogg: IAktivitetslogg) {
             if (type == "ANNET") {
                 aktivitetslogg.varsel(RV_SØ_9)
@@ -259,7 +274,6 @@ class Søknad(
         }
 
         fun validerIkkeSykmeldt(aktivitetslogg: IAktivitetslogg) {
-            if (!sykmeldt) return
             aktivitetslogg.varsel(RV_SØ_10)
         }
     }
