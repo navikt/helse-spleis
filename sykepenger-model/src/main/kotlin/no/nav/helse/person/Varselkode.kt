@@ -5,7 +5,7 @@ internal const val varselkodeformat = "RV_\\D{2}_\\d{1,3}"
 private val regex = "^$varselkodeformat$".toRegex()
 
 enum class Varselkode(
-    private val varseltekst: String,
+    val varseltekst: String,
     private val funksjonellFeilTekst: String = varseltekst,
     private val avviklet: Boolean = false
 ) {
@@ -24,7 +24,7 @@ enum class Varselkode(
     RV_SØ_7("Søknaden inneholder Arbeidsdager utenfor sykdomsvindu"),
     RV_SØ_8("Utenlandsopphold oppgitt i perioden i søknaden."),
     RV_SØ_9("Det er oppgitt annen inntektskilde i søknaden. Vurder inntekt."),
-    RV_SØ_10("Den sykmeldte har oppgitt å ha andre arbeidsforhold med sykmelding i søknaden."),
+    RV_SØ_10("Den sykmeldte har fått et nytt inntektsforhold."),
     RV_SØ_11("Mottatt søknad out of order"),
     RV_SØ_12("Mottatt overlappende søknad"),
     RV_SØ_13("Overlappende søknad starter før, eller slutter etter, opprinnelig periode"),

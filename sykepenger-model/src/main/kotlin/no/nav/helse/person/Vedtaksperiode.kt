@@ -535,15 +535,18 @@ internal class Vedtaksperiode private constructor(
         sykdomstidslinje = arbeidsgiver.oppdaterSykdom(hendelse).subset(periode)
     }
 
-    private fun håndterSøknad(hendelse: Søknad, nesteTilstand: () -> Vedtaksperiodetilstand? = { null }) {
-        periode = periode.oppdaterFom(hendelse.periode())
-        oppdaterHistorikk(hendelse)
-        if (!person.harFlereArbeidsgivereMedSykdom()) hendelse.validerIkkeOppgittFlereArbeidsforholdMedSykmelding()
-        hendelse.valider(periode, jurist())
-        if (hendelse.harFunksjonelleFeilEllerVerre()) {
-            return forkast(hendelse)
+    private fun håndterSøknad(søknad: Søknad, nesteTilstand: () -> Vedtaksperiodetilstand? = { null }) {
+        periode = periode.oppdaterFom(søknad.periode())
+        oppdaterHistorikk(søknad)
+        if (!person.harFlereArbeidsgivereMedSykdom()) søknad.validerIkkeOppgittFlereArbeidsforholdMedSykmelding()
+        if (!søknad.harProblemdager()){
+            søknad.validerInntektskilder(arbeidsgiver.erFørstegangsbehandling(periode))
         }
-        nesteTilstand()?.also { tilstand(hendelse, it) }
+        søknad.valider(periode, jurist())
+        if (søknad.harFunksjonelleFeilEllerVerre()) {
+            return forkast(søknad)
+        }
+        nesteTilstand()?.also { tilstand(søknad, it) }
     }
 
     private fun overlappendeSøknadIkkeStøttet(søknad: Søknad, egendefinertFeiltekst: Varselkode? = null) {

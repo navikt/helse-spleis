@@ -24,7 +24,8 @@ import no.nav.helse.person.Varselkode.RV_SØ_10
 import no.nav.helse.person.Varselkode.RV_VV_2
 import no.nav.helse.person.Varselkode.RV_VV_8
 import no.nav.helse.spleis.e2e.AbstractEndToEndTest
-import no.nav.helse.spleis.e2e.assertIngenFunksjonelleFeil
+import no.nav.helse.spleis.e2e.assertFunksjonellFeil
+import no.nav.helse.spleis.e2e.assertFunksjonelleFeil
 import no.nav.helse.spleis.e2e.assertIngenVarsel
 import no.nav.helse.spleis.e2e.assertIngenVarsler
 import no.nav.helse.spleis.e2e.assertSisteTilstand
@@ -664,16 +665,17 @@ internal class FlereArbeidsgivereGhostTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `bruker har fyllt inn ANDRE_ARBEIDSFORHOLD uten sykmelding i søknad`() {
+    fun `bruker har fyllt inn andre inntektskilder i søknad`() {
         håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars, 100.prosent), orgnummer = a1)
 
         håndterSøknad(
             Søknad.Søknadsperiode.Sykdom(1.mars, 31.mars, 100.prosent),
-            andreInntektskilder = listOf(Søknad.Inntektskilde(false, "ANDRE_ARBEIDSFORHOLD")),
+            andreInntektskilder = listOf(Søknad.Inntektskilde(false, "Annen inntekt")),
             orgnummer = a1
         )
-
-        assertIngenFunksjonelleFeil()
+        assertFunksjonelleFeil()
+        assertVarsel(RV_SØ_10)
+        assertFunksjonellFeil("Den sykmeldte har oppgitt å ha andre arbeidsforhold med sykmelding i søknaden.")
     }
 
     @Test

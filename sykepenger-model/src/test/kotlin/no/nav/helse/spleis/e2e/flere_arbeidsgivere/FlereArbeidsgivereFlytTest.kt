@@ -685,35 +685,35 @@ internal class FlereArbeidsgivereFlytTest : AbstractEndToEndTest() {
     }
 
     @Test
-    fun `bruker har satt inntektskilde til ANDRE_ARBEIDSFORHOLD hvor vi har sykmeldingsperioder for begge arbeidsgivere`() {
+    fun `bruker har fyllt inn andre inntektskilder i søknad hvor vi har sykmeldingsperioder for begge arbeidsgivere`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a2)
         håndterSøknad(
             Sykdom(1.januar, 31.januar, 100.prosent),
-            andreInntektskilder = listOf(Søknad.Inntektskilde(true, "ANDRE_ARBEIDSFORHOLD")),
+            andreInntektskilder = listOf(Søknad.Inntektskilde(true, "Annen inntekt")),
             orgnummer = a1
         )
         håndterSøknad(
             Sykdom(1.januar, 31.januar, 100.prosent),
-            andreInntektskilder = listOf(Søknad.Inntektskilde(true, "ANDRE_ARBEIDSFORHOLD")),
+            andreInntektskilder = listOf(Søknad.Inntektskilde(true, "Annen inntekt")),
             orgnummer = a2
         )
 
-        assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, orgnummer = a1)
-        assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, orgnummer = a2)
+        assertTilstand(1.vedtaksperiode, TIL_INFOTRYGD, orgnummer = a1)
+        assertTilstand(1.vedtaksperiode, TIL_INFOTRYGD, orgnummer = a2)
         assertIngenVarsel(RV_SØ_10)
     }
 
     @Test
-    fun `bruker har satt inntektskilde til ANDRE_ARBEIDSFORHOLD men vi kjenner ikke til sykdom for mer enn en arbeidsgiver`() {
+    fun `bruker har satt andre inntektskilder men vi kjenner ikke til sykdom for mer enn en arbeidsgiver`() {
         håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar, 100.prosent), orgnummer = a1)
         håndterSøknad(
             Sykdom(1.januar, 31.januar, 100.prosent),
-            andreInntektskilder = listOf(Søknad.Inntektskilde(true, "ANDRE_ARBEIDSFORHOLD")),
+            andreInntektskilder = listOf(Søknad.Inntektskilde(true, "Annen inntekt")),
             orgnummer = a1
         )
 
-        assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING_ELLER_HISTORIKK, orgnummer = a1)
+        assertTilstand(1.vedtaksperiode, TIL_INFOTRYGD, orgnummer = a1)
         assertVarsel(RV_SØ_10)
     }
 

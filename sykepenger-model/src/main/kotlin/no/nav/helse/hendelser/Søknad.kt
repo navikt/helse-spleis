@@ -5,6 +5,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import java.util.*
+import no.nav.helse.hendelser.Søknad.Inntektskilde.Companion.valider
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Companion.inneholderDagerEtter
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Companion.subsumsjonsFormat
 import no.nav.helse.person.Aktivitetslogg
@@ -81,12 +82,14 @@ class Søknad(
     override fun valider(periode: Periode, subsumsjonObserver: SubsumsjonObserver): IAktivitetslogg {
         perioder.forEach { it.subsumsjon(this.perioder.subsumsjonsFormat(), subsumsjonObserver) }
         perioder.forEach { it.valider(this) }
-        // finne ut om det er førstegangsbehandling - vanskelig å si på søknadsnivå?
-        // if (periode.start == sykdomsperiode.start) , men hva hvis vi har fått en søknad som er en forlengelse ??
-        andreInntektskilder.forEach { it.valider(this) }
         if (permittert) varsel(RV_SØ_1)
         merknaderFraSykmelding.forEach { it.valider(this) }
         if (sykdomstidslinje.any { it is Dag.ForeldetSykedag }) varsel(RV_SØ_2)
+        return this
+    }
+
+    internal fun validerInntektskilder(førstegangsbehandling: Boolean): IAktivitetslogg{
+        andreInntektskilder.valider(førstegangsbehandling, this)
         return this
     }
 
@@ -127,6 +130,9 @@ class Søknad(
 
     internal fun dagerMellomPeriodenVarFerdigOgSøknadenVarSendt() = ChronoUnit.DAYS.between(sendtTilNAVEllerArbeidsgiver, sykdomsperiode.endInclusive.plusDays(1).atStartOfDay())
     internal fun dagerMellomPeriodenVarFerdigOgSykmeldingenSkrevet() = ChronoUnit.DAYS.between(sykmeldingSkrevet, sykdomsperiode.endInclusive.plusDays(1).atStartOfDay())
+    internal fun harProblemdager(): Boolean {
+        return sykdomstidslinje.harProblemdager()
+    }
 
     class Merknad(private val type: String) {
         internal fun valider(aktivitetslogg: IAktivitetslogg) {
@@ -262,9 +268,10 @@ class Søknad(
                         aktivitetslogg.varsel(RV_SØ_10)
                     }
                 }
-
             }
         }
+
+        // fjerne
         fun valider(aktivitetslogg: IAktivitetslogg) {
             if (type == "ANNET") {
                 aktivitetslogg.varsel(RV_SØ_9)

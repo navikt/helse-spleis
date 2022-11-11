@@ -69,7 +69,6 @@ import no.nav.helse.person.Varselkode.RV_SØ_4
 import no.nav.helse.person.Varselkode.RV_SØ_5
 import no.nav.helse.person.Varselkode.RV_SØ_7
 import no.nav.helse.person.Varselkode.RV_SØ_8
-import no.nav.helse.person.Varselkode.RV_SØ_9
 import no.nav.helse.person.Varselkode.RV_UT_1
 import no.nav.helse.person.Varselkode.RV_UT_2
 import no.nav.helse.person.Varselkode.RV_VV_1
@@ -149,15 +148,6 @@ internal class VarselE2ETest: AbstractEndToEndTest() {
             Søknad.Søknadsperiode.Utlandsopphold(11.januar, 15.januar)
         )
         assertVarsel(RV_SØ_8, 1.vedtaksperiode.filter())
-    }
-
-    @Test
-    fun `varsel - Det er oppgitt annen inntektskilde i søknaden, Vurder inntekt`() {
-        håndterSøknad(
-            Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent),
-            andreInntektskilder = listOf(Søknad.Inntektskilde(true, "ANNET")),
-        )
-        assertVarsel(RV_SØ_9, 1.vedtaksperiode.filter())
     }
 
     @Test
